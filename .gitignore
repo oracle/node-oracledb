@@ -1,0 +1,15 @@
+# General Ignores
+*~
+*.o
+\#*#
+core
+build
+
+# Other Ignores
+npm-debug.log
+
+# Oracle Ignores
+sqlnet.log
+sqlnet.ora
+tnsnames.ora
+oraaccess.xml

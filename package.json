@@ -1,0 +1,32 @@
+{
+    "name" : "oracledb",
+    "version" : "0.2.4",
+    "description" : "Node.js Driver for Oracle Database",
+    "license" : "Apache 2.0",
+    "homepage": "http://www.oracle.com/technetwork/database/database-technologies/node_js/index.html",
+    "private" : true,
+    "keywords" : [
+	"nodejs", "Oracle", "Database"
+    ],
+    "repository" : {
+	"type" : "git",
+	"url" : "git://github.com/oracle/node-oracledb.git"
+    },
+    "dependencies" : {
+    },
+    "engines" : {
+	"node" : ">=0.10"
+    },
+    "maintainers" : [
+	{
+	    "name" : "Oracle Corp."
+	}
+    ],
+    "bugs" : {
+	"url" : "https://github.com/oracle/node-oracledb/issues"
+    },
+    "scripts" : {
+	"install" : "node-gyp rebuild"
+    },
+    "main" : "./index.js"
+}
