@@ -7,7 +7,9 @@ Pull requests can be made under
 (OCA).
 
 We have a list of great things we want to implement.  If you have
-ideas, get in touch so we don't duplicate efforts.
+ideas, get in touch directly or via the Oracle Technology Network
+[Node.js discussion forum](https://community.oracle.com/community/database/developer-tools/node_js/content)
+so we don't duplicate efforts.
 
 For pull requests to be accepted into node-oracledb, the bottom of
 your commit message must have the following line using your name and

@@ -27,10 +27,10 @@ fetching / streaming of large query result sets, and
 [DRCP](#http://docs.oracle.com/database/121/ADFNS/adfns_perf_scale.htm#ADFNS228)
 support.
 
-Send us your feedback so we can incorporate any fixes and "must-haves"
-into a 1.0 release soon.
-
-Issues with node-oracledb can be reported
+Share your feedback at the Oracle Technology Network
+[Node.js discussion forum](https://community.oracle.com/community/database/developer-tools/node_js/content)
+so we can incorporate any fixes and "must-haves" into a 1.0 release
+soon.  Issues with node-oracledb can also be reported
 [here](https://github.com/oracle/node-oracledb/issues).
 
 The driver is maintained by Oracle Corp.
