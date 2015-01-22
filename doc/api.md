@@ -332,7 +332,7 @@ readonly Number version
 ```
 
 The `version` property gives a numeric representation of the driver's version.
-For driver version *x.y.z*, this property gives the number: *(10000 \* x) + (100 \* y) + z*
+For driver version *x.y.z*, this property gives the number: `(10000 * x) + (100 * y) + z`
 
 ### <a name="oracledbmethods"></a> 3.3 Oracledb Methods
 
