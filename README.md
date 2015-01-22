@@ -63,7 +63,7 @@ oracledb.getConnection(
       function(err, result)
       {
         if (err) {
-          console.log('%s', err.message);
+          console.error(err.message);
           return;
         }
         console.log(result.rows);
