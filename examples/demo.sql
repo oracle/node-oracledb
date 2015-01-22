@@ -32,4 +32,9 @@ BEGIN
   p_out := 101;
 END;
 /
-show errors
+SHOW ERRORS
+
+-- JSON with Oracle Database 12.1.0.2
+DROP TABLE j_purchaseorder;
+CREATE TABLE j_purchaseorder
+    (po_document VARCHAR2(4000) CONSTRAINT ensure_json CHECK (po_document IS JSON));
