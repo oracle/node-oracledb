@@ -60,6 +60,8 @@ Linux or Solaris, with the full Oracle client (installed via runInstaller) on th
 Mac OS X. | [Installation with Instant Client ZIP files](#instzip)
 Another OS with Oracle 11.2 or 12.1 libraries available | Update binding.gyp and make any code changes required, sign the [OCA](https://www.oracle.com/technetwork/community/oca-486395.html), and submit a pull request with your patch (Windows support is already being worked on).  
 
+### Other Resources Useful for node-oracledb
+
 Node-oracledb can be installed on the pre-built
 [*Database App Development VM*](http://www.oracle.com/technetwork/community/developer-vm/index.html#dbapp) for [VirtualBox](https://www.virtualbox.org),
 which has Oracle Database 12c pre-installed on Oracle Linux.   If you want to install your
@@ -69,6 +71,15 @@ is quick and easy.  Other database editions may be downloaded
 [here](http://www.oracle.com/technetwork/database/enterprise-edition/downloads/index-092322.html).  If you want to
 install Oracle Linux yourself, it is free from
 [here](http://public-yum.oracle.com/). 
+
+### <a name="linuxinstsearchpath"></a> Oracle Client Location Heuristic on Linux
+
+On Linux, the node-oracledb installer looks for Oracle client libraries and headers in the following search order:
+
+1. Using install-time environment variables `$OCI_LIB_DIR` and `$OCI_INC_DIR`
+2. In the highest version Instant Client RPMs installed
+3. In `$ORACLE_HOME`
+4. In `/opt/oracle/instantclient`
 
 ## <a name="instrpm"></a> 2. Installation with Instant Client RPMs
 
@@ -124,9 +135,10 @@ as the root user.
 
 ### 2.4 Install the driver
 
-If you use a version of the RPMs other than 12.1.0.2, you need to
-set `OCI_LIB_DIR` and `OCI_INC_DIR` during installation, as shown in
-the [ZIP instructions](#instzip).
+The installer uses the highest version Instant Client RPMs installed.
+To use a different version, for example version 11.2, execute `export
+OCI_LIB_DIR=/usr/lib/oracle/11.2/client64/lib` and `export
+OCI_INC_DIR=/usr/include/oracle/11.2/client64/`.
 
 Run the installer:
 
@@ -264,7 +276,6 @@ node examples/select1.js
 ## <a name="instoh"></a> 4. Installation with a local database
 
 The ORACLE_HOME can be either a database home or a full Oracle client installation.
-Make sure Node.js has permissions to read the libraries and other Oracle files.
 
 For easy development, the free
 [Oracle XE](http://www.oracle.com/technetwork/database/database-technologies/express-edition/overview/index.html)
@@ -300,9 +311,14 @@ export PATH=$HOME/Desktop/node-v0.10.35-linux-x64/bin:$PATH
 Tell the installer where to find the Oracle client:
 
 ```
-export OCI_LIB_DIR=$ORACLE_HOME/lib
-export OCI_INC_DIR=$ORACLE_HOME/rdbms/public
+export ORACLE_HOME=/wherever/it/is/see/etc/oratab
 ```
+
+*Warning*: By default, the installer will look first for Oracle
+libraries in the highest version Instant Client RPMs installed.  If
+you have Instant Client, override it by setting `export
+OCI_LIB_DIR=$ORACLE_HOME/lib` and `export
+OCI_INC_DIR=$ORACLE_HOME/rdbms/public`.
 
 Run the installer:
 
@@ -328,6 +344,9 @@ source /usr/local/bin/oraenv
 
 If you are using Oracle XE, execute `source
 /u01/app/oracle/product/11.2.0/xe/bin/oracle_env.sh`.
+
+Ensure the Node.js process can access the Oracle libraries and
+other files.
 
 Edit `dbconfig.js` in the `examples` directory and set the database
 credentials to your environment.

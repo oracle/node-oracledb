@@ -67,6 +67,9 @@
 The Oracle Database Node.js driver *node-oracledb* powers high
 performance Node.js applications.
 
+This document shows how to use node-oracledb.  For how to install
+node-oracledb, see [INSTALL](#../INSTALL.md).
+
 ### Example:  Simple SELECT statement implementation in Node.js
 
 ```javascript
