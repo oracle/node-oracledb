@@ -45,6 +45,39 @@
           "oci_lib_dir%" : "<!(if [ -z $OCI_LIB_DIR ]; then echo \"/opt/oracle/instantclient_12_1/\"; else echo $OCI_LIB_DIR; fi)",
         }
       }
+    ],
+    [ 
+     'OS!="win"', {
+      "libraries"     : ["-lclntsh"],
+      "link_settings" : {
+         "libraries"  : ['-L<(oci_lib_dir)'] 
+       }
+     }
+    ],
+    [
+      'OS=="win"', {
+        "configurations": {
+          "Release": {
+            "msvs_settings": {
+              "VCCLCompilerTool": {
+                "RuntimeLibrary": "2"
+              }
+            },
+          },
+          "Debug": {
+            "msvs_settings": {
+              "VCCLCompilerTool": {
+                "RuntimeLibrary": "3"
+              }
+            },
+          }
+        },
+        "variables" : {
+          "oci_inc_dir%": "<!(IF DEFINED OCI_INC_DIR (echo %OCI_INC_DIR%) ELSE (echo C:\oracle\instantclient\sdk\include))",
+          "oci_lib_dir%": "<!(IF DEFINED OCI_LIB_DIR (echo %OCI_LIB_DIR%) ELSE (echo C:\oracle\instantclient\sdk\lib\msvc))",
+        },
+        "link_settings": {"libraries": [ '<(oci_lib_dir)\oci.lib'] }
+      }
     ]
     ],
   "cflags"        : ['-fexceptions'],
@@ -53,10 +86,6 @@
                       "src/dpi/src/",
                       "src/dpi/include/"
   ],
-  "libraries"     : ["-lclntsh"],
-  "link_settings" : {
-     "libraries"  : ['-L<(oci_lib_dir)'] 
-    }
   }
   ]
 }
