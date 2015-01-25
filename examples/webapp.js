@@ -139,8 +139,8 @@ oracledb.createPool (
           });
       });
 
-    process.on('SIGTERM', function () {
-      console.log('Received SIGTERM');
+	var cleanup = function(type) {
+	  console.log('Received ' + type);
       pool.terminate(
         function(err)
         {
@@ -151,7 +151,18 @@ oracledb.createPool (
           console.log('Closed Oracle connection pool');
           process.exit(0);
         });
-    });
+	};
+	
+    process
+		.on('SIGTERM', function() {
+				cleanup('SIGTERM');
+		})
+		
+		.on('SIGINT', function() {
+			if(process.platform == 'win32') {
+				cleanup('SIGINT');
+			}
+		});
     
     hs.listen(portid, "localhost");
     
