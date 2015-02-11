@@ -21,8 +21,9 @@ limitations under the License.
 2. [Node-oracledb Installation on Linux with Instant Client RPMs](#instrpm)
 3. [Node-oracledb Installation on Linux with Instant Client ZIP files](#instzip)
 4. [Node-oracledb Installation on Linux with a Local Database](#instoh)
-5. [Node-oracledb Installation on OS X with Instant Client ZIP files](#instosx)
-6. [Advanced installation on Linux](#linuxadv)
+5. [Node-oracledb Installation on OS X with Instant Client](#instosx)
+6. [Node-oracledb Installation on Windows with Instant Client](#instwin)
+7. [Advanced installation on Linux](#linuxadv)
 
 ## <a name="overview"></a> 1. Overview
 
@@ -59,7 +60,7 @@ Linux.  My database is on another machine.  | [Node-oracledb Installation on Lin
 Solaris.  My database is on another machine. | [Node-oracledb Installation on Linux with Instant Client ZIP files](#instzip)
 Linux or Solaris, with a database on the same machine. |  [Node-oracledb Installation on Linux with a Local Database](#instoh)
 Linux or Solaris, with the full Oracle client (installed via runInstaller) on the same machine. |  [Node-oracledb Installation on Linux with a Local Database](#instoh)
-Mac OS X. | [Node-oracledb Installation on OS X with Instant Client ZIP files](#instosx)
+Mac OS X. | [Node-oracledb Installation on OS X with Instant Client](#instosx)
 Another OS with Oracle 11.2 or 12.1 libraries available | Update binding.gyp and make any code changes required, sign the [OCA](https://www.oracle.com/technetwork/community/oca-486395.html), and submit a pull request with your patch (Windows support is already being worked on).  
 
 ### Other Resources Useful for node-oracledb
@@ -353,7 +354,7 @@ Run one of the examples:
 node examples/select1.js
 ```
   
-## <a name="instosx"></a> 5. Node-oracledb Installation on OS X with Instant Client ZIP files
+## <a name="instosx"></a> 5. Node-oracledb Installation on OS X with Instant Client
 
 ### 5.1 Install Xcode
 
@@ -450,7 +451,94 @@ To run a database on OS X, one option is to use VirtualBox,
 see
 [The Easiest Way to Enable Oracle Database Application Development on Mac OS X](https://blogs.oracle.com/opal/entry/the_easiest_way_to_enable).
 
-## <a name="linuxadv"></a> 6. Advanced installation on Linux
+## <a name="instwin"></a> 6. Node-oracledb Installation on Windows with Instant Client
+
+### 6.1 Install required tools
+
+Install a Microsoft C/C++ compiler.
+
+Install Git 1.9 from [git-scm.com](http://git-scm.com/download/win).
+While installing, select the 'Use Git from the Windows Command Prompt'
+in the 'Adjusting your PATH environment' dialog.  Select the option to
+"Checkout Windows-style, commit UNIX-style line endings" in the
+"Configuring the line ending conversions" dialog.
+
+Install the Python 2.7 MSI from
+[www.python.org](https://www.python.org/downloads).  Select the option
+to add the Python directories to the path.
+
+### 6.2 Clone [this repository](https://github.com/oracle/node-oracledb)
+
+```
+git clone https://github.com/oracle/node-oracledb.git
+```
+
+### 6.3 Install Node.js
+
+Install the 64 bit Node.js MSI from [nodejs.org](http://nodejs.org/download/)
+
+Add the *node* and *node-gyp* directories to the path:
+
+```
+set PATH=%PATH%;"C:\Program Files\nodejs
+set PATH=%PATH%;"C:\Program Files\nodejs\node_modules\npm\bin\node-gyp-bin
+```
+
+### 6.4 Install the free Oracle Instant Client ZIPs
+
+Download the free 'Basic' and 'SDK' RPMs from
+[Oracle Technology Network](http://www.oracle.com/technetwork/topics/winx64soft-089540.html).
+
+Extract `instantclient_basic-windows.x64-12.1.0.2.0.zip` and
+`instantclient_sdk-windows.x64-12.1.0.2.0.zip` to
+`C:\instantclient_12_1`.
+
+Update the path:
+
+```
+set PATH=C:\instantclient_12_1\;%PATH%
+```
+
+### 6.5 Install the driver
+
+
+Tell the installer where to find the Oracle libraries and headers:
+
+```
+set OCI_INC_DIR=C:\instantclient_12_1\sdk\include
+set OCI_LIB_DIR=C:\instantclient_12_1\sdk\lib\msvc
+```
+
+Run the installer:
+
+```
+cd node-oracledb
+node-gyp rebuild
+```
+
+### 6.6 Run an example program
+
+
+Set `NODE_PATH` to include the newly installed node-oracledb driver.
+
+Edit `dbconfig.js` in the `examples` directory and set the database
+credentials to your environment.
+
+```
+module.exports = {
+  user          : "hr",
+  password      : "welcome",
+  connectString : "myothermachine/orcl"
+};
+```
+
+Run one of the examples:
+
+```
+node examples/select1.js
+```
+
+## <a name="linuxadv"></a> 7. Advanced installation on Linux
 
 ### Instant Client RPMs and RPATH
 
@@ -464,7 +552,8 @@ require the node-oracledb installation variables `OCI_LIB_DIR` or
 `ldconfig` configuration for run time.  Installation is simply:
 
 ```
-rpm -i ...
+rpm -ivh oracle-instantclient12.1-basic-12.1.0.2.0-1.x86_64.rpm
+rpm -ivh oracle-instantclient12.1-devel-12.1.0.2.0-1.x86_64.rpm
 npm install -g
 node examples/select1.js
 ```
