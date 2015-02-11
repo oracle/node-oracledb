@@ -510,6 +510,13 @@ set OCI_INC_DIR=C:\instantclient_12_1\sdk\include
 set OCI_LIB_DIR=C:\instantclient_12_1\sdk\lib\msvc
 ```
 
+If you are installing with a local database, try:
+
+```
+OCI_INC_DIR=C:\oracle\product\12.1.0\dbhome_1\oci\include
+OCI_LIB_DIR=C:\oracle\product\12.1.0\dbhome_1\oci\lib\msvc
+```
+
 Run the installer:
 
 ```

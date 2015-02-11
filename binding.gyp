@@ -67,8 +67,8 @@
     ],
     ["OS=='win'", {
       "variables" : {
-        "oci_inc_dir%" : "C:/instantclient/sdk/include",
-        "oci_lib_dir%" : "C:/instantclient/sdk/lib/msvc",
+        "oci_lib_dir%": "<!(IF DEFINED OCI_LIB_DIR (echo %OCI_LIB_DIR%) ELSE (echo C:\oracle\instantclient\sdk\lib\msvc))", 
+        "oci_inc_dir%": "<!(IF DEFINED OCI_INC_DIR (echo %OCI_INC_DIR%) ELSE (echo C:\oracle\instantclient\sdk\include))", 
       },
       "configurations" : {
         "Release" : {
