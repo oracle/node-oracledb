@@ -232,8 +232,11 @@ typedef enum
 #define NJS_GET_BOOL_FROM_JSON( val, err, ind, obj, key, index, exitCode )    \
 {                                                                             \
   Local<Value> v8value = obj->Get(String::New(key));                          \
-  val = v8value->ToBoolean()->Value();                                        \
-  ind = VALIDVALUE;                                                           \
+  if ( !v8value->IsUndefined () )                                             \
+  {                                                                           \
+    val = v8value->ToBoolean()->Value();                                      \
+    ind = VALIDVALUE;                                                         \
+  }                                                                           \
 } 
 
 /*
