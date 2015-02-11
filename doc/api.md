@@ -1375,13 +1375,15 @@ allowing reuse of the pooled server process and session memory, giving
 maximum benefit from DRCP.  See the Oracle documentation on
 [benefiting from scalability](http://docs.oracle.com/database/121/ADFNS/adfns_perf_scale.htm#ADFNS506).
 
-Refer to the
+The
 [Oracle DRCP documentation](http://docs.oracle.com/database/121/ADFNS/adfns_perf_scale.htm#ADFNS228)
-for more details, including on when to use, and when not to use DRCP.
-The Oracle white paper
-[PHP Scalability and High Availability](http://www.oracle.com/technetwork/topics/php/php-scalability-ha-twp-128842.pdf)
-has more information on DRCP including how to configure and monitor
-it.
+has more details, including when to use, and when not to use DRCP.
+
+There are a number of Oracle Database `V$` views that can be used to
+monitor DRCP.  These are discussed in the documentation and in the
+Oracle white paper
+[PHP Scalability and High Availability](http://www.oracle.com/technetwork/topics/php/php-scalability-ha-twp-128842.pdf).
+This paper also gives more detail on configuring DRCP.
 
 ## <a name="oraaccess"></a> 8. External Configuration
 
