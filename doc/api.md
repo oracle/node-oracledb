@@ -17,6 +17,7 @@
      - BIND_INOUT
      - BIND_OUT
   - 3.2 [Oracledb Properties](#oracledbproperties)
+     - [connectionClass](#propdbconclass)
      - [isAutoCommit](#propdbisautocommit)
      - [maxRows](#propdbmaxrows)
      - [outFormat](#propdboutformat)
@@ -59,8 +60,9 @@
      - 5.3.3 [SELECT Statements](#select)
          - [Result Type Mapping](#typemap)
          - [Statement Caching](#stmtcache)
-  - 5.4 [Miscellaneous Operations](#miscellaneousops)
-6. [External Configuration](#oraaccess)
+6. [Transaction Management](#transactionmgt)
+7. [Database Resident Connection Pooling](#drcp)
+8. [External Configuration](#oraaccess)
 
 ## <a name="intro"></a> 1. Introduction
 
@@ -227,6 +229,26 @@ parameters can result in the error *ORA-24413: Invalid number of
 sessions specified*.
 
 Each of the configuration properties is described below.
+
+<a name="propdbconclass"></a>
+```
+String connectionClass
+```
+
+The Connection class value defines a logical name for connections.
+When a pooled session has a connection class, Oracle ensures that the
+session is not shared outside of that connection class.
+
+The connection class value is similarly used by
+[Database Resident Connection Pooling](#drcp) (DRCP) to allow or
+disallow sharing of sessions.
+
+For example, where two different kinds of users share one pool, you
+might set ```connectionClass``` to 'HR' for connections that access a
+Human Resources system, and it might be set to 'OE' for users of an
+Order Entry system.  Users will only be given sessions of the
+appropriate class, allowing maximal reuse of resources in each case,
+and preventing any session information leaking between the two systems.
 
 <a name="propdbisautocommit"></a>
 ```
@@ -985,12 +1007,19 @@ returned as an array. If `bindParams` is passed as an object, then
 Releases a connection.  If the connection was obtained from the pool,
 the connection is returned to the pool.
 
+
+
 ##### Description
 
 This is an asynchronous call.
 
 When a connection is released, any ongoing transaction on the
 connection is rolled back.
+
+Note that after releasing a connection to a pool, there is no
+guarantee a subsequent `getConnection()` call gets back the same
+database connection.  The application must redo any ALTER SESSION
+statements on the new connection object, as required.
 
 ##### Prototype
 
@@ -1295,11 +1324,10 @@ statements being executed by the application.
 The statement cache can be automatically tuned with the
 [oraaccess.xml file](#oraaccess).
 
-### <a name="miscellaneousops"></a> 5.4 Miscellaneous Operations
+## <a name="transactionmgt"></a> 6. Transaction Management
 
-Transaction management implements [`commit()`](#commit) and
-[`rollback()`](#rollback) methods. A long-running database operation
-may be interrupted by the [`break()`](#break) call.
+Node-oraclebd implements [`commit()`](#commit) and
+[`rollback()`](#rollback) methods.
 
 After all database calls on the connection complete, the application
 should use the [`release()`](#release) call to release the connection.
@@ -1311,15 +1339,51 @@ a subsequent [`pool.getConnection()`](#getconnection2) call, then any
 statements performed on the obtained connection are always in a new
 transaction.
 
-Note that after releasing a connection to the pool, there is no
-guarantee a subsequent `getConnection()` call gets back the same
-database connection.  The application must redo any ALTER SESSION
-statements on the new connection object, as required.
-
 When an application ends, any uncommitted transaction on a connection
 will be rolled back if there is no explicit commit.
 
-## <a name="oraaccess"></a> 6. External Configuration
+## <a name="drcp"></a> 7. Database Resident Connection Pooling
+
+[Database Resident Connection Pooling](http://docs.oracle.com/database/121/ADFNS/adfns_perf_scale.htm#ADFNS228)
+enables database resource sharing for applications that run in
+multiple client processes or run on multiple middle-tier application
+servers.  DRCP reduces the overall number of connections that a
+database must handle.
+
+DRCP is distinct from node-oracledb's local
+[connection pool](#poolclass).  The two pools can be used separately,
+or together. 
+
+DRCP is useful for applications which share the same credentials, have
+similar session settings (for example date format settings and PL/SQL
+package state), and where the application gets a database connection,
+works on it for a relatively short duration, and then releases it.
+
+To use DRCP in node-oracledb:
+
+1. The DRCP pool must be started in the database: `execute dbms_connection_pool.start_pool();`
+2. The `getConnection()` property `connectString` must specify to use a pooled server, either by the Easy Connect syntax like `myhost/sales:POOLED`, or by using a `tnsnames.ora` alias for a connection that contains `(SERVER=POOLED)`.
+3. The [`connectionClass`](#propdbconclass) should be set by the node-oracledb application.  If it is not set, the pooled server session memory will not be reused optimally.
+
+The DRCP 'Purity' value is NEW for
+[`oracledb.getConnection()`](#getconnection1) connections that do not
+use a local connection pool.  These connections reuse a DRCP pooled
+server process (thus avoiding the costs of process creation and
+destruction) but do not reuse its session memory.  The 'Purity' is
+SELF for [`pool.getConnection()`](#getconnection2) connections,
+allowing reuse of the pooled server process and session memory, giving
+maximum benefit from DRCP.  See the Oracle documentation on
+[benefiting from scalability](http://docs.oracle.com/database/121/ADFNS/adfns_perf_scale.htm#ADFNS506).
+
+Refer to the
+[Oracle DRCP documentation](http://docs.oracle.com/database/121/ADFNS/adfns_perf_scale.htm#ADFNS228)
+for more details, including on when to use, and when not to use DRCP.
+The Oracle white paper
+[PHP Scalability and High Availability](http://www.oracle.com/technetwork/topics/php/php-scalability-ha-twp-128842.pdf)
+has more information on DRCP including how to configure and monitor
+it.
+
+## <a name="oraaccess"></a> 8. External Configuration
 
 When node-oracledb is linked with Oracle 12c client libraries, the Oracle
 client-side configuration file

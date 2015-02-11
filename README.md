@@ -13,6 +13,7 @@ Node-oracledb 0.2 supports basic and advanced Oracle features, including:
 - Conversion between JavaScript and Oracle types
 - Transaction Management
 - Connection Pooling
+- [Database Resident Connection Pooling](#http://docs.oracle.com/database/121/ADFNS/adfns_perf_scale.htm#ADFNS228) (DRCP)
 - [Statement Caching](http://docs.oracle.com/database/121/LNOCI/oci09adv.htm#i471377)
 - [Client Result Caching](http://docs.oracle.com/database/121/ADFNS/adfns_perf_scale.htm#ADFNS464)
 - [End-to-end tracing](http://docs.oracle.com/database/121/TGSQL/tgsql_trace.htm#CHDBDGIJ)
@@ -22,10 +23,8 @@ Node-oracledb 0.2 supports basic and advanced Oracle features, including:
   - [Transparent Application Failover](http://docs.oracle.com/database/121/ADFNS/adfns_avail.htm#ADFNS534) (TAF)
 
 Node-oracledb 0.2 is a preview release.  We are actively working on
-adding features including Windows platform support, LOB support, batch
-fetching / streaming of large query result sets, and
-[DRCP](#http://docs.oracle.com/database/121/ADFNS/adfns_perf_scale.htm#ADFNS228)
-support.
+adding features including Windows platform support, LOB support, and
+batch fetching / streaming of large query result sets.
 
 Share your feedback at the Oracle Technology Network
 [Node.js discussion forum](https://community.oracle.com/community/database/developer-tools/node_js/content)
