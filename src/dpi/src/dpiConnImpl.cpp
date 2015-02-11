@@ -77,10 +77,9 @@ ConnImpl::ConnImpl(EnvImpl *env, OCIEnv *envh, bool isExternalAuth,
                    const string &connString, const string &connClass)
 
 try :  env_(env), pool_(NULL), 
-       envh_(envh), errh_(NULL), auth_(NULL), svch_(NULL), sessh_(NULL)
+       envh_(envh), errh_(NULL), auth_(NULL), svch_(NULL), sessh_(NULL),
+       hasTxn_(false)
 {
-  char drvname [DPI_DRIVER_NAME_LEN ];  
-  
   ub4 mode = isExternalAuth ? OCI_SESSGET_CREDEXT : OCI_DEFAULT;
   
   ociCallEnv(OCIHandleAlloc((void *)envh_, (dvoid **)&errh_,
@@ -108,44 +107,10 @@ try :  env_(env), pool_(NULL),
                          OCI_ATTR_CONNECTION_CLASS, errh_), errh_);
   }
 
-  // Get the driver name with version details
-  getDriverName (drvname, DPI_DRIVER_NAME_LEN );
-  
-  // Set the driver name on Auth handle
-  ociCall(OCIAttrSet ((void*)auth_, OCI_HTYPE_AUTHINFO,
-                      (void *)drvname, DPI_DRIVER_NAME_LEN,
-                      OCI_ATTR_DRIVER_NAME, errh_ ), errh_);
-                        
-
-  // It is possible Sessionget can fail
-  try
-  {
-    ociCall(OCISessionGet(envh_, errh_, &svch_, auth_,
-                          (OraText *)connString.data(),
-                          (ub4) connString.length(), NULL, 0, NULL, NULL, NULL,
-                          mode), errh_);
-  }
-  catch (dpi::Exception& e )
-  {
-    // Due to an error in Oracle code, in case of DRCP server and no 
-    // session-pool-connections, setting Driver-Name has no value, only 
-    // connection class should be used.  Clear it and retry.
-    if ( e.errnum () == 56609 )
-    {
-      ociCall(OCIAttrSet ( (void*)auth_, OCI_HTYPE_AUTHINFO,
-                           (void *)"", 0,
-                           OCI_ATTR_DRIVER_NAME, errh_ ), errh_ ) ;
-                           
-      ociCall(OCISessionGet(envh_, errh_, &svch_, auth_,
-                            (OraText *)connString.data(),
-                            (ub4) connString.length(), NULL, 0, NULL, NULL,  
-                             NULL, mode), errh_);
-    }
-    else
-    {
-      throw ;
-    }
-  }
+  ociCall(OCISessionGet(envh_, errh_, &svch_, auth_,
+                        (OraText *)connString.data(),
+                        (ub4) connString.length(), NULL, 0, NULL, NULL, NULL,
+                        mode), errh_);
   
   ociCall(OCIAttrGet(svch_, OCI_HTYPE_SVCCTX, &sessh_,  0,
                      OCI_ATTR_SESSION, errh_),errh_);
@@ -187,7 +152,7 @@ ConnImpl::ConnImpl(PoolImpl *pool, OCIEnv *envh, bool isExternalAuth,
 
 try :  env_(NULL), pool_(pool), 
        envh_(envh), errh_(NULL), auth_(NULL),
-       svch_(NULL), sessh_(NULL)
+       svch_(NULL), sessh_(NULL), hasTxn_(false)
 {
   ub4 mode = isExternalAuth ? (OCI_SESSGET_CREDEXT | OCI_SESSGET_SPOOL) :
                               OCI_SESSGET_SPOOL;
@@ -259,6 +224,12 @@ ConnImpl::~ConnImpl()
 
 void ConnImpl::release()
 {
+  #if OCI_MAJOR_VERSION >= 12
+    ociCall(OCIAttrGet(sessh_, OCI_HTYPE_SESSION, &hasTxn_, NULL,
+                       OCI_ATTR_TRANSACTION_IN_PROGRESS, errh_), errh_);
+  #endif
+  if(hasTxn_)
+    rollback(); 
   if (pool_)
     pool_->releaseConnection(this);
   else if (env_)
@@ -285,8 +256,6 @@ void ConnImpl::releaseStmt ( Stmt *stmt )
     delete stmt;
   }
 }
-
-
 
 /*****************************************************************************/
 /*

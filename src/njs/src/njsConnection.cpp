@@ -398,15 +398,14 @@ void Connection::ProcessOptions (const Arguments& args, unsigned int index,
                                  eBaton* executeBaton)
 {
   Local<Object> options;
-  JSONValueIndicator ind;
   if(args[index]->IsObject() && !args[index]->IsArray())
   {
     options = args[index]->ToObject();
-    NJS_GET_UINT_FROM_JSON   ( executeBaton->maxRows, executeBaton->error, ind,
+    NJS_GET_UINT_FROM_JSON   ( executeBaton->maxRows, executeBaton->error,
                                options, "maxRows", 2, exitProcessOptions );
-    NJS_GET_UINT_FROM_JSON   ( executeBaton->outFormat, executeBaton->error, ind,
+    NJS_GET_UINT_FROM_JSON   ( executeBaton->outFormat, executeBaton->error,
                                options, "outFormat", 2, exitProcessOptions );
-    NJS_GET_BOOL_FROM_JSON   ( executeBaton->isAutoCommit, executeBaton->error, ind,
+    NJS_GET_BOOL_FROM_JSON   ( executeBaton->isAutoCommit, executeBaton->error,
                                options, "isAutoCommit", 2, exitProcessOptions );
   }
   else 
@@ -489,18 +488,17 @@ void Connection::GetBindUnit (Handle<Value> val, Bind* bind,
                                        eBaton* executeBaton)
 {
   HandleScope scope;
-  JSONValueIndicator jvind;
   unsigned int dir   = BIND_IN;
 
   if(val->IsObject() && !val->IsDate())
   {
     Local<Object> bind_unit = val->ToObject();
-    NJS_GET_UINT_FROM_JSON   ( dir, executeBaton->error, jvind,
+    NJS_GET_UINT_FROM_JSON   ( dir, executeBaton->error, 
                                bind_unit, "dir", 1, exitGetBindUnit );
-    NJS_GET_UINT_FROM_JSON   ( bind->type, executeBaton->error, jvind,
+    NJS_GET_UINT_FROM_JSON   ( bind->type, executeBaton->error, 
                                bind_unit, "type", 1, exitGetBindUnit );
     bind->maxSize = NJS_MAX_OUT_BIND_SIZE;
-    NJS_GET_UINT_FROM_JSON   ( bind->maxSize, executeBaton->error, jvind,
+    NJS_GET_UINT_FROM_JSON   ( bind->maxSize, executeBaton->error, 
                                bind_unit, "maxSize", 1, exitGetBindUnit );
     if(!bind->maxSize && dir != BIND_IN)
     {

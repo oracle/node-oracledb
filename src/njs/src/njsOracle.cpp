@@ -374,7 +374,7 @@ Handle<Value> Oracledb::GetVersion ( Local<String> property,
                                      const AccessorInfo& info ) 
 {
   HandleScope scope;
-  int version = DPI_DRIVER_VERSION;
+  int version = NJS_ORACLE_VERSION;
   Local<Integer> value = v8::Integer::New(version);
   return scope.Close(value);
 }
@@ -441,7 +441,6 @@ Handle<Value>  Oracledb::GetConnection(const Arguments& args)
 {
   HandleScope scope;
  
-  JSONValueIndicator ind; 
   Local<Function> callback;
   Local<Object> connProps;
   NJS_GET_CALLBACK ( callback, args );
@@ -454,17 +453,17 @@ Handle<Value>  Oracledb::GetConnection(const Arguments& args)
   NJS_GET_ARG_V8OBJECT ( connProps, connBaton->error, args, 0,
                          exitGetConnection ); 
   NJS_GET_STRING_FROM_JSON ( connBaton->user, connBaton->error, 
-                             ind, connProps, "user", 0, exitGetConnection );
+                             connProps, "user", 0, exitGetConnection );
   NJS_GET_STRING_FROM_JSON ( connBaton->pswrd, connBaton->error,
-                             ind, connProps, "password", 0, exitGetConnection );
+                             connProps, "password", 0, exitGetConnection );
   NJS_GET_STRING_FROM_JSON ( connBaton->connStr, connBaton->error,
-                             ind, connProps, "connectString", 0, exitGetConnection );
+                             connProps, "connectString", 0, exitGetConnection );
 
   connBaton->stmtCacheSize =  oracledb->stmtCacheSize_; 
   connBaton->connClass     = oracledb->connClass_;
   
   NJS_GET_UINT_FROM_JSON   ( connBaton->stmtCacheSize, connBaton->error,
-                             ind, connProps, "stmtCacheSize", 0, exitGetConnection );
+                             connProps, "stmtCacheSize", 0, exitGetConnection );
   connBaton->oracledb   =  oracledb; 
   connBaton->dpienv     =  oracledb->dpienv_; 
 
@@ -567,7 +566,6 @@ Handle<Value> Oracledb::CreatePool (const Arguments &args)
 {
   HandleScope scope ;
  
-  JSONValueIndicator ind; 
   Local<Function> callback;
   Local<Object> poolProps;
   NJS_GET_CALLBACK ( callback, args );
@@ -580,11 +578,11 @@ Handle<Value> Oracledb::CreatePool (const Arguments &args)
   NJS_GET_ARG_V8OBJECT ( poolProps, poolBaton->error, args, 0,
                          exitCreatePool ); 
   NJS_GET_STRING_FROM_JSON ( poolBaton->user, poolBaton->error, 
-                             ind, poolProps, "user", 0, exitCreatePool );
+                             poolProps, "user", 0, exitCreatePool );
   NJS_GET_STRING_FROM_JSON ( poolBaton->pswrd, poolBaton->error,
-                             ind, poolProps, "password", 0, exitCreatePool );
+                             poolProps, "password", 0, exitCreatePool );
   NJS_GET_STRING_FROM_JSON ( poolBaton->connStr, poolBaton->error,
-                             ind, poolProps, "connectString", 0, exitCreatePool );
+                             poolProps, "connectString", 0, exitCreatePool );
 
   poolBaton->poolMax       =  oracledb->poolMax_; 
   poolBaton->poolMin       =  oracledb->poolMin_; 
@@ -593,15 +591,15 @@ Handle<Value> Oracledb::CreatePool (const Arguments &args)
   poolBaton->stmtCacheSize =  oracledb->stmtCacheSize_; 
 
   NJS_GET_UINT_FROM_JSON   ( poolBaton->poolMax, poolBaton->error,
-                             ind, poolProps, "poolMax", 0, exitCreatePool );
+                             poolProps, "poolMax", 0, exitCreatePool );
   NJS_GET_UINT_FROM_JSON   ( poolBaton->poolMin, poolBaton->error,
-                             ind, poolProps, "poolMin", 0, exitCreatePool );
+                             poolProps, "poolMin", 0, exitCreatePool );
   NJS_GET_UINT_FROM_JSON   ( poolBaton->poolIncrement, poolBaton->error,
-                             ind, poolProps, "poolIncrement", 0, exitCreatePool );
+                             poolProps, "poolIncrement", 0, exitCreatePool );
   NJS_GET_UINT_FROM_JSON   ( poolBaton->poolTimeout, poolBaton->error,
-                             ind, poolProps, "poolTimeout", 0, exitCreatePool );
+                             poolProps, "poolTimeout", 0, exitCreatePool );
   NJS_GET_UINT_FROM_JSON   ( poolBaton->stmtCacheSize, poolBaton->error,
-                             ind, poolProps, "stmtCacheSize", 0, exitCreatePool );
+                             poolProps, "stmtCacheSize", 0, exitCreatePool );
   
   poolBaton->oracledb  =  oracledb;
   poolBaton->dpienv    =  oracledb->dpienv_; 

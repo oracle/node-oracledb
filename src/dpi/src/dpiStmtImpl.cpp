@@ -58,7 +58,7 @@ using namespace std;
 /*---------------------------------------------------------------------------
                            PUBLIC METHODS
   ---------------------------------------------------------------------------*/
- 
+
  
 /*****************************************************************************/
 /*
@@ -284,6 +284,11 @@ void StmtImpl::executeMany (int numIterations, bool isAutoCommit )
   ociCall (OCIStmtExecute (svch_, stmth_, errh_, (ub4)numIterations, (ub4)0, 
                            (OCISnapshot *)NULL, (OCISnapshot *)NULL, mode),
            errh_);
+  #if OCI_MAJOR_VERSION < 12
+    if(!conn_->hasTxn())
+      conn_->hasTxn(true); /* Not to be reset, till thread safety is ensured in 
+                              NJS  */
+  #endif
 }
 
 

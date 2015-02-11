@@ -56,9 +56,6 @@
 #endif
 
 
-#ifndef DPIUTILS_ORACLE
-# include <dpiUtils.h>
-#endif
 
 /*---------------------------------------------------------------------------
                      COMMON PUBLIC CONSTANTS

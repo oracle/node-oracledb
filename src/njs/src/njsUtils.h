@@ -64,16 +64,6 @@ typedef enum
   ARGS_FOUR = 4
 }ArgsType;
 
-
-// To be used by NJS_GET_JSON_* macros. 
-typedef enum 
-{
-  VALIDVALUE = 0 ,  // Valid value found for the given key.
-  UNDEFINEDVALUE ,  // key is missing or value is undefined.
-  NULLVALUE ,       // Null value provided.
-  INVALIDTYPE       // Invalid type 
-}JSONValueIndicator;
-
 /*
  *  Get the callback from the last argument.
  *  If no args or last arg is not callback, throw exception 
@@ -99,7 +89,7 @@ typedef enum
  * for the exception to be thrown.
  */
 #define NJS_SET_EXCEPTION( str, len )                                         \
-  ThrowException(v8::Exception::Error(String::New( str, (int) len )));                     
+  ThrowException(v8::Exception::Error(String::New( str, (int) len )));        
 
 /*
  * If arguments are not in given range, set the error. 
@@ -162,31 +152,23 @@ typedef enum
 
 /*
  * Get the std string value from JSON for the given key. 
- * If val is undefined or null or key is missing, return ind. 
  * index is the argument index in the caller. 
- * ind will have the state based on the value 
  * DO NOT SET ANY VALUE to val IF NULL OR UNDEFINED
  */ 
-#define NJS_GET_STRING_FROM_JSON( val, err, ind, obj, key, index, exitCode )  \
+#define NJS_GET_STRING_FROM_JSON( val, err, obj, key, index, exitCode )       \
 {                                                                             \
   Local<Value> v8value = obj->Get(String::New(key));                          \
   err.clear();                                                                \
   if( v8value->IsString() )                                                   \
   {                                                                           \
     NJSString( val, v8value );                                                \
-    ind = VALIDVALUE;                                                         \
   }                                                                           \
-  else if( v8value->IsNull() )                                                \
+  else if(v8value->IsUndefined() || v8value->IsNull())                        \
   {                                                                           \
-    ind = NULLVALUE;                                                          \
-  }                                                                           \
-  else if( v8value->IsUndefined() )                                           \
-  {                                                                           \
-    ind = UNDEFINEDVALUE;                                                     \
+    ;                                                                         \
   }                                                                           \
   else                                                                        \
   {                                                                           \
-    ind = INVALIDTYPE;                                                        \
     err = NJSMessages::getErrorMsg ( errInvalidPropertyTypeInParam,           \
                                      key, index+1 );                          \
     goto exitCode;                                                            \
@@ -195,27 +177,20 @@ typedef enum
 
 /*
  * Get the uint value from JSON for the given key. 
- * If val is undefined or null or key is missing, return ind. 
  * index is the argument index in the caller. 
- * ind will have the state based on the value 
  * DO NOT SET ANY VALUE to val IF NULL OR UNDEFINED
  */ 
-#define NJS_GET_UINT_FROM_JSON( val, err, ind, obj, key, index, exitCode )    \
+#define NJS_GET_UINT_FROM_JSON( val, err, obj, key, index, exitCode )         \
 {                                                                             \
   Local<Value> v8value = obj->Get(String::New(key));                          \
   err.clear();                                                                \
   if( v8value->IsUint32() )                                                   \
   {                                                                           \
     val = v8value->ToUint32()->Value();                                       \
-    ind = VALIDVALUE;                                                         \
   }                                                                           \
-  else if( v8value->IsNull() )                                                \
+  else if(v8value->IsUndefined() || v8value->IsNull())                        \
   {                                                                           \
-    ind = NULLVALUE;                                                          \
-  }                                                                           \
-  else if( v8value->IsUndefined() )                                           \
-  {                                                                           \
-    ind = UNDEFINEDVALUE;                                                     \
+    ;                                                                         \
   }                                                                           \
   else                                                                        \
   {                                                                           \
@@ -229,13 +204,12 @@ typedef enum
  * Get the boolean value from JSON for the given key. 
  * index is the argument index in the caller. 
  */ 
-#define NJS_GET_BOOL_FROM_JSON( val, err, ind, obj, key, index, exitCode )    \
+#define NJS_GET_BOOL_FROM_JSON( val, err, obj, key, index, exitCode )         \
 {                                                                             \
   Local<Value> v8value = obj->Get(String::New(key));                          \
   if ( !v8value->IsUndefined () )                                             \
   {                                                                           \
     val = v8value->ToBoolean()->Value();                                      \
-    ind = VALIDVALUE;                                                         \
   }                                                                           \
 } 
 

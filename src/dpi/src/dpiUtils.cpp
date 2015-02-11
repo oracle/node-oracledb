@@ -121,36 +121,6 @@ void ociCallEnv(sword rc, OCIEnv *envh)
   }
 }
 
-/*****************************************************************************/
-/*
-  DESCRIPTION
-    This routine composes the driver name with version number to register with
-    Database server.
-    
-  PARAMETERS
-    name     - name of the driver (node-oracledb).
-    namelen  - buffer length for name.
-  
-  RETURNS
-    NONE
-  
-  NOTES:
-    This function expects a buffer of size DPI_DRIVER_NAME_LEN, composed
-    name will be filled in this buffer and returned.
-*/
-void getDriverName (char *name, unsigned int namelen)
-{
-  // Clear the buffer
-  memset ( name, 0, namelen ) ;
-  
-  // Compose the driver name+version
-  snprintf ( name, namelen, "%s %d.%d.%d",
-             DPI_DRIVER_NAME, 
-             (DPI_DRIVER_VERSION / 10000 ),
-             (DPI_DRIVER_VERSION / 100 ),
-             (DPI_DRIVER_VERSION % 100 )
-             );  
-}
 
 
 

@@ -707,7 +707,7 @@ This is an asynchronous call.
 All open connections in a connection pool are closed when a connection
 pool terminates.
 
-Any ongoing transaction in a connection will be committed.
+Any ongoing transaction in a connection will be released.
 
 ##### Prototype
 
@@ -928,7 +928,7 @@ Option Property | Description
 ----------------|-------------
 *Number maxRows*  | Number of rows to fetch for `SELECT` statements. To improve database efficiency, SQL queries should use a row limiting clause like [OFFSET / FETCH](https://docs.oracle.com/database/121/SQLRF/statements_10002.htm#BABEAACC) or equivalent. The `maxRows` attribute can be used to stop badly coded queries from returning unexpectedly large numbers of rows.
 *String outFormat* |  The format of rows fetched for `SELECT` statements. This can be either `ARRAY` or `OBJECT`. If specified as `ARRAY`, then each row is fetched as an array of column values. If specified as `OBJECT`, then each row is fetched as a JavaScript object.
-*Boolean isAutoCommit* | If it is true, then each [DML](https://docs.oracle.com/database/121/CNCPT/glossary.htm#CNCPT2042) is automatically committed. Note: Oracle Database will implicitly commit when a [DDL](https://docs.oracle.com/database/121/CNCPT/glossary.htm#CHDJJGGF) statement is executed.  Any ongoing transaction will also be committed when [`release()`](#release) or [`terminate()`](#terminate) are called.
+*Boolean isAutoCommit* | If it is true, then each [DML](https://docs.oracle.com/database/121/CNCPT/glossary.htm#CNCPT2042) is automatically committed. Note: Oracle Database will implicitly commit when a [DDL](https://docs.oracle.com/database/121/CNCPT/glossary.htm#CHDJJGGF) statement is executed.
 
 ```
 function(Error error, [Object result])
@@ -990,7 +990,7 @@ the connection is returned to the pool.
 This is an asynchronous call.
 
 When a connection is released, any ongoing transaction on the
-connection is implicitly committed.
+connection is rolled back.
 
 ##### Prototype
 
@@ -1016,7 +1016,7 @@ Callback function parameter | Description
 
 #### <a name="rollback"></a> 5.2.5 rollback()
 
-This call rolls-back the current transaction in progress on the
+This call rolls back the current transaction in progress on the
 connection.
 
 ##### Description
@@ -1050,13 +1050,13 @@ Callback function parameter | Description
 A SQL or PL/SQL statement may be executed using the *Connection*
 [`execute()`](#execute) method.
 
-By default,
+
 [DML](https://docs.oracle.com/database/121/CNCPT/glossary.htm#CNCPT2042)
-statements are not committed unless the `commit()` call is issued.
-However, if the `isAutoCommit` property is *true* for the connection,
-then all DML operations are committed as they are executed. The
-`isAutoCommit` property can be overridden for the duration of an
-`execute()` call to automatically commit a DML statement.
+statements are not committed unless the `commit()` call is issued or
+the `isAutoCommit` property is *true* at the time of execution.  Any
+ongoing transaction will be rolled back when [`release()`](#release)
+or [`terminate()`](#terminate) are called, or when the application
+ends.
 
 Using bind variables in SQL statements is recommended in preference to
 constructing SQL statements by string concatenation.  This is for
@@ -1304,8 +1304,8 @@ may be interrupted by the [`break()`](#break) call.
 After all database calls on the connection complete, the application
 should use the [`release()`](#release) call to release the connection.
 
-When a connection is released, it implicitly commits any ongoing
-transactions.  Therefore if a released, pooled connection is used by
+When a connection is released, it rolls back any ongoing
+transaction.  Therefore if a released, pooled connection is used by
 a subsequent [`pool.getConnection()`](#getconnection2) call, then any
 [DML](https://docs.oracle.com/database/121/CNCPT/glossary.htm#CNCPT2042)
 statements performed on the obtained connection are always in a new
@@ -1317,8 +1317,7 @@ database connection.  The application must redo any ALTER SESSION
 statements on the new connection object, as required.
 
 When an application ends, any uncommitted transaction on a connection
-will be rolled back if there is no explicit commit, or
-[`release()`](#release) or [`terminate()`](#terminate) are not called.
+will be rolled back if there is no explicit commit.
 
 ## <a name="oraaccess"></a> 6. External Configuration
 

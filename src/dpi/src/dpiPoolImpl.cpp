@@ -89,10 +89,9 @@ PoolImpl::PoolImpl(EnvImpl *env, OCIEnv *envh,
                    int poolMin, int poolIncrement,
                    int poolTimeout, bool isExternalAuth, int stmtCacheSize)
   try : env_(env), isExternalAuth_(isExternalAuth), envh_(envh), errh_(NULL),
-        poolauth_(NULL), spoolh_(NULL), poolName_(NULL)
+        spoolh_(NULL), poolName_(NULL)
 {
   unsigned int spoolMode = OCI_SPOOL_ATTRVAL_NOWAIT;
-  char         drvname[DPI_DRIVER_NAME_LEN];
   
   ociCallEnv(OCIHandleAlloc((void *)envh_, (dvoid **)&errh_, 
                             OCI_HTYPE_ERROR, 0, (dvoid **)0), envh_);
@@ -100,19 +99,6 @@ PoolImpl::PoolImpl(EnvImpl *env, OCIEnv *envh,
   ociCall(OCIHandleAlloc((void *)envh_, (dvoid **)&spoolh_,
                          OCI_HTYPE_SPOOL, 0, (dvoid **)0), errh_);
                          
-  ociCall(OCIHandleAlloc((void *)envh_, (dvoid **)&poolauth_,
-                         OCI_HTYPE_AUTHINFO, 0, (dvoid **)0 ), errh_);
-
-  // Get the driver name with version details.
-  getDriverName ( drvname, DPI_DRIVER_NAME_LEN );
-  
-  ociCall (OCIAttrSet ((void *)poolauth_, OCI_HTYPE_AUTHINFO,
-                       (void *)drvname, DPI_DRIVER_NAME_LEN,
-                       OCI_ATTR_DRIVER_NAME, errh_ ), errh_ );
-
-  ociCall (OCIAttrSet (spoolh_, OCI_HTYPE_SPOOL, poolauth_, 0, 
-                       OCI_ATTR_SPOOL_AUTH, errh_ ), errh_ );
-  
   ociCall(OCISessionPoolCreate(envh_, errh_, spoolh_, 
                                &poolName_, &poolNameLen_,
                                (OraText *)connString.data (), 
@@ -355,13 +341,6 @@ void PoolImpl::releaseConnection(ConnImpl *conn)
 
 void PoolImpl::cleanup()
 {
-
-  if ( poolauth_ )
-  {
-    OCIHandleFree (poolauth_, OCI_HTYPE_AUTHINFO );
-    poolauth_ = NULL;
-  }
-  
   if (poolName_)
   {
     ociCall( OCISessionPoolDestroy( spoolh_, errh_, OCI_DEFAULT), errh_);

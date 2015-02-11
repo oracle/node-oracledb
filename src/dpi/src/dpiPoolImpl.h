@@ -88,7 +88,6 @@ class PoolImpl : public SPool
   bool         isExternalAuth_; // doing external authentication
   OCIEnv      *envh_;           // OCI enviornment handle
   OCIError    *errh_;           // OCI error handle
-  OCIAuthInfo *poolauth_;       // OCI auth handle
   OCISPool    *spoolh_;         // OCI session pool handle
   OraText     *poolName_;       // pool name
   ub4          poolNameLen_;    // pool name length
