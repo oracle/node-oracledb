@@ -40,9 +40,9 @@
           "GCC_ENABLE_CPP_RTTI": "YES"
         },
         "variables" : {
-          "oci_inc_dir%" : "<!(if [ -z $OCI_INC_DIR ]; then echo \"/opt/oracle/instantclient_11_2/sdk/include/\"; else echo $OCI_INC_DIR; fi)",
-          "oci_lib_dir%" : "<!(if [ -z $OCI_LIB_DIR ]; then echo \"/opt/oracle/instantclient_11_2/\"; else echo $OCI_LIB_DIR; fi)",
-	  },
+          "oci_inc_dir%" : "<!(if [ -z $OCI_INC_DIR ]; then echo \"/opt/oracle/instantclient/sdk/include/\"; else echo $OCI_INC_DIR; fi)",
+          "oci_lib_dir%" : "<!(if [ -z $OCI_LIB_DIR ]; then echo \"/opt/oracle/instantclient/\"; else echo $OCI_LIB_DIR; fi)",
+          },
           "cflags"        : ['-fexceptions'],
           "cflags_cc"     : ['-fexceptions'],
           "libraries"     : ["-lclntsh"],
@@ -54,9 +54,9 @@
     [
       'OS=="solaris"', {
         "variables" : {
-          "oci_inc_dir%" : "<!(if [ -z $OCI_INC_DIR ]; then echo \"/opt/oracle/instantclient_12_1/sdk/include/\"; else echo $OCI_INC_DIR; fi)",
-          "oci_lib_dir%" : "<!(if [ -z $OCI_LIB_DIR ]; then echo \"/opt/oracle/instantclient_12_1/\"; else echo $OCI_LIB_DIR; fi)",
-	  },
+          "oci_inc_dir%" : "<!(if [ -z $OCI_INC_DIR ]; then echo \"/opt/oracle/instantclient/sdk/include/\"; else echo $OCI_INC_DIR; fi)",
+          "oci_lib_dir%" : "<!(if [ -z $OCI_LIB_DIR ]; then echo \"/opt/oracle/instantclient/\"; else echo $OCI_LIB_DIR; fi)",
+          },
           "libraries"     : ["-lclntsh"],
           "cflags"        : ['-fexceptions'],
           "cflags_cc"     : ['-fexceptions'],
@@ -67,8 +67,8 @@
     ],
     ["OS=='win'", {
       "variables" : {
-        "oci_inc_dir%" : "C:/instantclient_12_1/sdk/include",
-        "oci_lib_dir%" : "C:/instantclient_12_1/sdk/lib/msvc",
+        "oci_inc_dir%" : "C:/instantclient/sdk/include",
+        "oci_lib_dir%" : "C:/instantclient/sdk/lib/msvc",
       },
       "configurations" : {
         "Release" : {
@@ -92,8 +92,6 @@
     }
     ],
   ],
-    
-
   "include_dirs"  : [ "<(oci_inc_dir)",
                       "src/dpi/src/",
                       "src/dpi/include/"

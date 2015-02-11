@@ -199,7 +199,8 @@ and
 cd /opt/oracle
 unzip instantclient-basic-linux.x64-12.1.0.2.0.zip
 unzip instantclient-sdk-linux.x64-12.1.0.2.0.zip
-cd instantclient_12_1
+mv instantclient_12_1 instantclient
+cd instantclient
 ln -s libclntsh.so.12.1 libclntsh.so
 ln -s libocci.so.12.1 libocci.so
 ```
@@ -209,14 +210,14 @@ Make sure that `libaio` is installed.
 To run applications, you will need to set the link path:
 
 ```
-export LD_LIBRARY_PATH=/opt/oracle/instantclient_12_1
+export LD_LIBRARY_PATH=/opt/oracle/instantclient
 ```
 
 Alternatively, if there is no other Oracle software on the machine
 that will be impacted, permanently add Instant Client to the run-time
 link path.  Do this on Linux by creating a file
 `/etc/ld.so.conf.d/oracle-instantclient.conf` that contains the library
-location `/opt/oracle/instantclient_12_1`, and then run `ldconfig` as
+location `/opt/oracle/instantclient`, and then run `ldconfig` as
 the root user.
 
 ### 3.4 Install the driver
@@ -224,8 +225,8 @@ the root user.
 Tell the installer where you installed Instant Client:
 
 ```
-export OCI_LIB_DIR=/opt/oracle/instantclient_12_1
-export OCI_INC_DIR=/opt/oracle/instantclient_12_1/sdk/include
+export OCI_LIB_DIR=/opt/oracle/instantclient
+export OCI_INC_DIR=/opt/oracle/instantclient/sdk/include
 ```
 
 Run the installer:
@@ -405,12 +406,12 @@ export DYLD_LIBRARY_PATH=/opt/oracle/instantclient
 ### 5.5 Install the driver
 
 The installer will automatically locate Instant Client in
-`/opt/oracle/instantclient`.  If it elsewhere, tell the installer
+`/opt/oracle/instantclient`.  If it is elsewhere, tell the installer
 where to find it:
 
 ```
-export OCI_LIB_DIR=/whereever/instantclient_11_2
-export OCI_INC_DIR=/whereever/instantclient_11_2/sdk/include
+export OCI_LIB_DIR=/whereever/instantclient
+export OCI_INC_DIR=/whereever/instantclient/sdk/include
 ```
 
 Run the installer:
