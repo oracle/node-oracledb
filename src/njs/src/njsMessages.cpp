@@ -44,7 +44,7 @@ static const char *errMsg[] =
   "NJS-007: invalid value for \"%s\" in parameter %d",
   "NJS-008: invalid type for \"%s\" in parameter %d",
   "NJS-009: invalid number of parameters",
-  "NJS-010: specified datatype is not supported",
+  "NJS-010: unsupported data type in select list",
   "NJS-011: encountered bind value and type mismatch in parameter %d",
   "NJS-012: encountered invalid bind datatype in parameter %d",
   "NJS-013: invalid bind direction",
