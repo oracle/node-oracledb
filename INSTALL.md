@@ -21,7 +21,8 @@ limitations under the License.
 2. [Node-oracledb Installation on Linux with Instant Client RPMs](#instrpm)
 3. [Node-oracledb Installation on Linux with Instant Client ZIP files](#instzip)
 4. [Node-oracledb Installation on Linux with a Local Database](#instoh)
-5. [Advanced installation on Linux](#linuxadv)
+5. [Node-oracledb Installation on OS X with Instant Client ZIP files](#instosx)
+6. [Advanced installation on Linux](#linuxadv)
 
 ## <a name="overview"></a> 1. Overview
 
@@ -58,7 +59,7 @@ Linux.  My database is on another machine.  | [Node-oracledb Installation on Lin
 Solaris.  My database is on another machine. | [Node-oracledb Installation on Linux with Instant Client ZIP files](#instzip)
 Linux or Solaris, with a database on the same machine. |  [Node-oracledb Installation on Linux with a Local Database](#instoh)
 Linux or Solaris, with the full Oracle client (installed via runInstaller) on the same machine. |  [Node-oracledb Installation on Linux with a Local Database](#instoh)
-Mac OS X. | [Node-oracledb Installation on Linux with Instant Client ZIP files](#instzip)
+Mac OS X. | [Node-oracledb Installation on OS X with Instant Client ZIP files](#instosx)
 Another OS with Oracle 11.2 or 12.1 libraries available | Update binding.gyp and make any code changes required, sign the [OCA](https://www.oracle.com/technetwork/community/oca-486395.html), and submit a pull request with your patch (Windows support is already being worked on).  
 
 ### Other Resources Useful for node-oracledb
@@ -351,8 +352,105 @@ Run one of the examples:
 ```
 node examples/select1.js
 ```
+  
+## <a name="instosx"></a> 5. Node-oracledb Installation on OS X with Instant Client ZIP files
 
-## <a name="linuxadv"></a> 5. Advanced installation on Linux
+### 5.1 Install Xcode
+
+Building node-oracledb requires Xcode from the Mac App store.
+
+### 5.2 Clone [this repository](https://github.com/oracle/node-oracledb)
+
+```
+git clone https://github.com/oracle/node-oracledb.git
+```
+
+### 5.3 Install Node.js
+
+Node can be installed from various sources, such as via *brew*.
+
+```
+brew install node
+```
+
+Set your PATH to include the *node* and *npm* binaries:
+
+```
+export PATH=/usr/local/bin:$PATH
+```
+
+### 5.4 Install the free Oracle Instant Client ZIPs
+
+Download the free 'Basic' and 'SDK' ZIPs from
+[Oracle Technology Network](http://www.oracle.com/technetwork/topics/intel-macsoft-096467.html)
+and
+[install them](http://www.oracle.com/technetwork/topics/intel-macsoft-096467.html#ic_osx_inst):
+
+```
+cd /opt/oracle
+unzip instantclient-basic-macos.x64-11.2.0.4.0.zip
+unzip instantclient-sdk-macos.x64-11.2.0.4.0.zip
+mv instantclient_11_2 instantclient
+cd instantclient
+ln -s libclntsh.dylib.11.1 libclntsh.dylib
+```
+
+To run applications, you will need to set the link path:
+
+```
+export DYLD_LIBRARY_PATH=/opt/oracle/instantclient
+```
+
+### 5.5 Install the driver
+
+The installer will automatically locate Instant Client in
+`/opt/oracle/instantclient`.  If it elsewhere, tell the installer
+where to find it:
+
+```
+export OCI_LIB_DIR=/whereever/instantclient_11_2
+export OCI_INC_DIR=/whereever/instantclient_11_2/sdk/include
+```
+
+Run the installer:
+
+```
+cd node-oracledb
+npm install -g
+```
+
+### 5.6 Run an example program
+
+Set `NODE_PATH` to include the newly installed node-oracledb driver:
+
+```
+export NODE_PATH=/usr/local/lib/node_modules
+```
+
+Edit `dbconfig.js` in the `examples` directory and set the database
+credentials to your environment.
+
+```
+module.exports = {
+  user          : "hr",
+  password      : "welcome",
+  connectString : "localhost/XE"
+};
+```
+
+Run one of the examples:
+
+```
+node examples/select1.js
+```
+
+*Note:* Remember to set `DYLD_LIBRARY_PATH` first.
+
+To run a database on OS X, one option is to use VirtualBox,
+see
+[The Easiest Way to Enable Oracle Database Application Development on Mac OS X](https://blogs.oracle.com/opal/entry/the_easiest_way_to_enable).
+
+## <a name="linuxadv"></a> 6. Advanced installation on Linux
 
 ### Instant Client RPMs and RPATH
 
