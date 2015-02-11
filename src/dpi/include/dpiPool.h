@@ -59,7 +59,7 @@ class SPool
 
 
                                 // methods
-  virtual Conn * getConnection() = 0;
+  virtual Conn * getConnection( const std::string &connClass = "" ) = 0;
   
   
 protected:

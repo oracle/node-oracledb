@@ -37,8 +37,12 @@
                      PUBLIC CONSTANTS AND MACROS
   ---------------------------------------------------------------------------*/
 
-#define TBSIZE(textBuffer)  (sizeof(textBuffer) - 1)
+#define DPI_DRIVER_NAME_LEN   (30)       // Max lenght for driver name 
+#define DPI_DRIVER_NAME       ("node-oracledb")
 
+/* Formula: 10000 x majorversion + 100 x minorversion + patchreleasenumber */
+/* 0.2.4 Keep the version in sync with package.json                        */
+#define DPI_DRIVER_VERSION    (204)
 
 
 
@@ -54,6 +58,9 @@
 void ociCall(sword rc, OCIError *errh);
 
 void ociCallEnv(sword rc, OCIEnv *envh);
+
+void getDriverName ( char *name, unsigned int namelen );
+
 
 
 

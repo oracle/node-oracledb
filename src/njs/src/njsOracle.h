@@ -39,9 +39,6 @@
 using namespace node;
 using namespace v8; 
 
-#define NJSORACLE_VERSION 204; /* 0.2.4.  Keep the version in sync with package.json */
-                               /* Formula: 10000 x majorversion + 100 x minorversion + 
-                                  patchreleasenumber */
 
 class Oracledb: public ObjectWrap 
 {
@@ -58,7 +55,10 @@ class Oracledb: public ObjectWrap
    unsigned int getPoolMin () const  { return poolMin_; }   
    unsigned int getPoolMax () const  { return poolMax_; }   
    unsigned int getPoolIncrement () const  { return poolIncrement_; }   
-   unsigned int getPoolTimeout () const  { return poolTimeout_; }   
+   unsigned int getPoolTimeout () const  { return poolTimeout_; }
+   const std::string& getConnectionClass () const { return connClass_; }
+   
+   
  
 private:
    // Define Oracledb Constructor
@@ -95,6 +95,9 @@ private:
                                      const AccessorInfo& info);
    static Handle<Value> GetVersion(Local<String> property,
                                         const AccessorInfo& info);
+   static Handle<Value> GetConnectionClass (Local<String> property,
+                                            const AccessorInfo& info );
+   
    // Define Setter Accessors to Properties
    static void SetPoolMin(Local<String> property,Local<Value> value,
                           const AccessorInfo& info);
@@ -114,19 +117,26 @@ private:
                             const AccessorInfo& info);
    static void SetVersion(Local<String> property,Local<Value> value,
                                const AccessorInfo& info);
+   static void SetConnectionClass (Local<String> property, Local<Value> value,
+                                   const AccessorInfo& info );
+   
    
    Oracledb();
    ~Oracledb();
    
    dpi::Env* dpienv_;
    unsigned int outFormat_;
-   bool isAutoCommit_;
+   bool         isAutoCommit_;
    unsigned int maxRows_;
+   
    unsigned int stmtCacheSize_;
+   
    unsigned int poolMin_;
    unsigned int poolMax_;
    unsigned int poolIncrement_;
    unsigned int poolTimeout_;
+
+   std::string  connClass_;
 };
 
 /**
@@ -158,7 +168,9 @@ typedef struct connectionBaton
 
   Oracledb *oracledb;
 
-  connectionBaton() : poolMax(0), poolMin(0), poolIncrement(0),
+  connectionBaton() : user(""), pswrd(""), connStr(""), connClass(""),
+                      error("" ),
+                      poolMax(0), poolMin(0), poolIncrement(0),
                       poolTimeout(0), stmtCacheSize(0), maxRows(0),
                       outFormat(0), dpienv(NULL), 
                       dpiconn(NULL), dpipool(NULL)

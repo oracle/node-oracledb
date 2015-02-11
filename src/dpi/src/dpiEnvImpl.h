@@ -98,7 +98,8 @@ class EnvImpl : public Env
                              int stmtCacheSize = -1);
 
   virtual Conn * getConnection(const string &user, const string &password,
-                               const string &connString, int stmtCacheSize);
+                               const string &connString, int stmtCacheSize,
+                               const string &connClass);
 
                                 // internal methods
   virtual void terminatePool(PoolImpl *pool);

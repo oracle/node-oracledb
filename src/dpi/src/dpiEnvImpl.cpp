@@ -502,13 +502,13 @@ SPool * EnvImpl::createPool(const string &user, const string &password,
 
 Conn * EnvImpl::getConnection(const string &user, const string &password,
                               const string &connString,
-                              int stmtCacheSize)
+                              int stmtCacheSize, const string &connClass)
 {
   return (Conn *)new ConnImpl(this, envh_, isExternalAuth_,
                               (stmtCacheSize == -1) ? stmtCacheSize_ :
                                                       stmtCacheSize,
                               user, password,
-                              connString);
+                              connString, connClass);
 }
 
 

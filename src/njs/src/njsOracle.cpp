@@ -123,6 +123,11 @@ void Oracledb::Init(Handle<Object> target)
                                             String::New("version"),
                                             Oracledb::GetVersion,
                                             Oracledb::SetVersion ); 
+  oracledbTemplate_s->InstanceTemplate()->SetAccessor(
+                                            String::New("connectionClass"),
+                                            Oracledb::GetConnectionClass,
+                                            Oracledb::SetConnectionClass );
+  
 
   target->Set(String::New("Oracledb"),oracledbTemplate_s->GetFunction());
 }
@@ -369,7 +374,7 @@ Handle<Value> Oracledb::GetVersion ( Local<String> property,
                                      const AccessorInfo& info ) 
 {
   HandleScope scope;
-  int version = NJSORACLE_VERSION;
+  int version = DPI_DRIVER_VERSION;
   Local<Integer> value = v8::Integer::New(version);
   return scope.Close(value);
 }
@@ -387,6 +392,41 @@ void Oracledb::SetVersion ( Local<String> property, Local<Value> value,
   msg = NJSMessages::getErrorMsg(errReadOnly, "version");
   NJS_SET_EXCEPTION(msg.c_str(), msg.length()); 
 }
+
+
+/*****************************************************************************/
+/*
+  DESCRIPTION
+    Get Accessor of connectionClass property
+*/
+Handle<Value> Oracledb::GetConnectionClass ( Local<String> property,
+                                             const AccessorInfo& info)
+{
+  HandleScope scope;
+  
+  Oracledb *oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
+  Handle<String> value = v8::String::New (oracledb->connClass_.c_str(), 
+                                          oracledb->connClass_.length ());
+  return scope.Close(value);
+}
+
+
+/*****************************************************************************/
+/*
+  DESCRIPTION
+    Set Accessor of connectionClass property
+*/
+void Oracledb::SetConnectionClass (Local<String> property, Local<Value> value,
+                                   const AccessorInfo& info)
+{
+  HandleScope scope;
+  
+  Oracledb *oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
+  v8::String::Utf8Value utfstr ( value->ToString () );
+  
+  oracledb->connClass_ = std::string ( *utfstr, utfstr.length() );
+}
+
 
 /*****************************************************************************/
 /*
@@ -421,6 +461,8 @@ Handle<Value>  Oracledb::GetConnection(const Arguments& args)
                              ind, connProps, "connectString", 0, exitGetConnection );
 
   connBaton->stmtCacheSize =  oracledb->stmtCacheSize_; 
+  connBaton->connClass     = oracledb->connClass_;
+  
   NJS_GET_UINT_FROM_JSON   ( connBaton->stmtCacheSize, connBaton->error,
                              ind, connProps, "stmtCacheSize", 0, exitGetConnection );
   connBaton->oracledb   =  oracledb; 
@@ -458,7 +500,8 @@ void Oracledb::Async_GetConnection (uv_work_t *req)
                                getConnection( connBaton->user, 
                                               connBaton->pswrd, 
                                               connBaton->connStr, 
-                                              connBaton->stmtCacheSize );
+                                              connBaton->stmtCacheSize,
+                                              connBaton->connClass );
 
   }
   catch (dpi::Exception& e)

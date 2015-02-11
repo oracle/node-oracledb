@@ -74,11 +74,13 @@ using namespace std;
 ConnImpl::ConnImpl(EnvImpl *env, OCIEnv *envh, bool isExternalAuth,
                    unsigned int stmtCacheSize, 
                    const string &user, const string &password,
-                   const string &connString)
+                   const string &connString, const string &connClass)
 
 try :  env_(env), pool_(NULL), 
        envh_(envh), errh_(NULL), auth_(NULL), svch_(NULL), sessh_(NULL)
 {
+  char drvname [DPI_DRIVER_NAME_LEN ];  
+  
   ub4 mode = isExternalAuth ? OCI_SESSGET_CREDEXT : OCI_DEFAULT;
   
   ociCallEnv(OCIHandleAlloc((void *)envh_, (dvoid **)&errh_,
@@ -97,15 +99,57 @@ try :  env_(env), pool_(NULL),
                        (void *)password.data(), password.length(),
                        OCI_ATTR_PASSWORD, errh_), errh_);
   }
-  
-  ociCall(OCISessionGet(envh_, errh_, &svch_, auth_,
-                        (OraText *)connString.data(),
-                        connString.length(), NULL, 0, NULL, NULL, NULL,
-                        mode), errh_);
+                            
+  // If connection class provided, set it on auth handle
+  if (connClass.length() )
+  {
+    ociCall (OCIAttrSet ((void*)auth_, OCI_HTYPE_AUTHINFO, 
+                         (void *)connClass.data(), connClass.length(),
+                         OCI_ATTR_CONNECTION_CLASS, errh_), errh_);
+  }
 
+  // Get the driver name with version details
+  getDriverName (drvname, DPI_DRIVER_NAME_LEN );
+  
+  // Set the driver name on Auth handle
+  ociCall(OCIAttrSet ((void*)auth_, OCI_HTYPE_AUTHINFO,
+                      (void *)drvname, DPI_DRIVER_NAME_LEN,
+                      OCI_ATTR_DRIVER_NAME, errh_ ), errh_);
+                        
+
+  // It is possible Sessionget can fail
+  try
+  {
+    ociCall(OCISessionGet(envh_, errh_, &svch_, auth_,
+                          (OraText *)connString.data(),
+                          connString.length(), NULL, 0, NULL, NULL, NULL,
+                          mode), errh_);
+  }
+  catch (dpi::Exception& e )
+  {
+    // Due to an error in Oracle code, in case of DRCP server and no 
+    // session-pool-connections, setting Driver-Name has no value, only 
+    // connection class should be used.  Clear it and retry.
+    if ( e.errno () == 56609 )
+    {
+      ociCall(OCIAttrSet ( (void*)auth_, OCI_HTYPE_AUTHINFO,
+                           (void *)"", 0,
+                           OCI_ATTR_DRIVER_NAME, errh_ ), errh_ ) ;
+                           
+      ociCall(OCISessionGet(envh_, errh_, &svch_, auth_,
+                            (OraText *)connString.data(),
+                            connString.length(), NULL, 0, NULL, NULL, NULL,
+                            mode), errh_);
+    }
+    else
+    {
+      throw ;
+    }
+  }
+  
   ociCall(OCIAttrGet(svch_, OCI_HTYPE_SVCCTX, &sessh_,  0,
                      OCI_ATTR_SESSION, errh_),errh_);
-
+                     
   this->stmtCacheSize(stmtCacheSize);
 }
 
@@ -138,7 +182,7 @@ catch (...)
  */
  
 ConnImpl::ConnImpl(PoolImpl *pool, OCIEnv *envh, bool isExternalAuth,
-                   OraText *poolName, ub4 poolNameLen
+                   OraText *poolName, ub4 poolNameLen, const string& connClass
                    )
 
 try :  env_(NULL), pool_(pool), 
@@ -149,9 +193,17 @@ try :  env_(NULL), pool_(pool),
                               OCI_SESSGET_SPOOL;
   ociCallEnv(OCIHandleAlloc((void *)envh_, (dvoid **)&errh_,
                             OCI_HTYPE_ERROR, 0, (dvoid **)0), envh_);
-
   ociCallEnv(OCIHandleAlloc((void *)envh_, (dvoid **)&auth_,
                             OCI_HTYPE_AUTHINFO, 0, (dvoid **)0), envh_);
+                            
+  // If connection class provided, set it on auth handle
+  if (connClass.length() )
+  {
+    ociCall (OCIAttrSet ((void*)auth_, OCI_HTYPE_AUTHINFO, 
+                         (void *)connClass.data(), connClass.length(),
+                         OCI_ATTR_CONNECTION_CLASS, errh_), errh_);
+  }
+    
   ociCall(OCISessionGet(envh_, errh_, &svch_, auth_,
                         poolName, poolNameLen,
                         NULL, 0, NULL, NULL, NULL,

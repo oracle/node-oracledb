@@ -90,7 +90,8 @@ class Env
 
   virtual Conn * getConnection(const string &user, const string &password,
                                const string &connString,
-                               int stmtCacheSize) = 0;
+                               int stmtCacheSize,
+                               const string &connClass = "") = 0;
   
   // DateTime array.
   virtual DateTimeArray* getDateTimeArray( OCIError *errh ) const = 0;

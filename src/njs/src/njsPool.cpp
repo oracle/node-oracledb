@@ -457,6 +457,8 @@ Handle<Value> Pool::GetConnection(const Arguments& args)
   }
   connBaton->dpipool  = njsPool->dpipool_;
   connBaton->oracledb = njsPool->oracledb_;
+  connBaton->connClass = njsPool->oracledb_->getConnectionClass ();  
+  
 exitGetConnection:
   connBaton->req.data = (void *)connBaton;
   
@@ -484,7 +486,8 @@ void Pool::Async_GetConnection(uv_work_t *req)
 
   try
   {
-    connBaton->dpiconn = connBaton-> dpipool -> getConnection ();
+    connBaton->dpiconn = connBaton-> dpipool -> getConnection ( 
+                                              connBaton-> connClass);
   }
   catch (dpi::Exception &e)
   {

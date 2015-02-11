@@ -66,10 +66,11 @@ class ConnImpl : public Conn
   ConnImpl(EnvImpl *env, OCIEnv *envh, bool isExternalAuth,
            unsigned int stmtCacheSize, 
            const string &user, const string &password,
-           const string &connString);
+           const string &connString,
+           const string &connClass);
 
   ConnImpl(PoolImpl *pool, OCIEnv *envh, bool isExternalAuth,
-           OraText *poolName, ub4 poolNameLen
+           OraText *poolName, ub4 poolNameLen, const string &connClass
            );
   
   virtual ~ConnImpl();
