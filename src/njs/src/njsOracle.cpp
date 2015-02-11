@@ -23,6 +23,8 @@
  *
  *****************************************************************************/
 
+#include "node.h"
+
 #include "njsOracle.h"
 #include "njsConnection.h"
 #include "njsPool.h"
@@ -53,6 +55,7 @@ Oracledb::Oracledb()
   poolMin_       = POOL_MIN;
   poolIncrement_ = POOL_INCR;
   poolTimeout_   = POOL_TIMEOUT;
+  connClass_     = "";
 } 
 
 /*****************************************************************************/

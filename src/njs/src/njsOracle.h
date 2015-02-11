@@ -79,7 +79,7 @@ private:
    // Create Pool Methods
    static Handle<Value>  CreatePool (const Arguments& args);
    static void Async_CreatePool (uv_work_t *req );
-   static void Async_AfterCreatePool (uv_work_t *req );
+   static void Async_AfterCreatePool (uv_work_t *req);
    
    // Define Getter Accessors to Properties
    static Handle<Value> GetPoolMin(Local<String> property,

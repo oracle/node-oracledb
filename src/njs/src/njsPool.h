@@ -53,7 +53,7 @@ private:
    // Get Connection Methods 
    static Handle<Value> GetConnection(const Arguments& args);
    static void Async_GetConnection(uv_work_t* req);
-   static Handle<Value> Async_AfterGetConnection(uv_work_t* req);
+   static void Async_AfterGetConnection(uv_work_t* req);
    
   // Terminate Methods
    static Handle<Value> Terminate(const Arguments& args);

@@ -23,6 +23,10 @@
  *
  *****************************************************************************/
 
+#include "node.h"
+
+#include <string>
+
 #include "njsOracle.h"
 #include "njsPool.h"
 #include "njsConnection.h"
@@ -504,11 +508,12 @@ void Pool::Async_GetConnection(uv_work_t *req)
   
    PARAMETERS:
      UV queue work block 
+     status - expected to be non-zero.
 
    NOTES:
      Connection handle is formed and handed over to JS.
 */
-Handle<Value> Pool::Async_AfterGetConnection(uv_work_t *req)
+void Pool::Async_AfterGetConnection(uv_work_t *req)
 {
   HandleScope scope;
   connectionBaton *connBaton = (connectionBaton*)req->data;
@@ -536,7 +541,6 @@ Handle<Value> Pool::Async_AfterGetConnection(uv_work_t *req)
     node::FatalException(tc);
   }
   delete connBaton;
-  return Undefined();
 }
 
 /*****************************************************************************/
