@@ -18,9 +18,10 @@ limitations under the License.
 ## Contents
 
 1. [Overview](#installation)
-2. [Installation with Instant Client RPMs](#instrpm)
-3. [Installation with Instant Client ZIP files](#instzip)
-4. [Installation with a local database](#instoh)
+2. [Node-oracledb Installation on Linux with Instant Client RPMs](#instrpm)
+3. [Node-oracledb Installation on Linux with Instant Client ZIP files](#instzip)
+4. [Node-oracledb Installation on Linux with a Local Database](#instoh)
+5. [Advanced installation on Linux](#linuxadv)
 
 ## <a name="overview"></a> 1. Overview
 
@@ -53,11 +54,11 @@ Instructions may need to be adjusted for your platform and environment.
 
 I have ... | Follow this ...
 ----------|-----------------
-Linux.  My database is on another machine.  | [Installation with Instant Client RPMs](#instrpm)
-Solaris.  My database is on another machine. | [Installation with Instant Client ZIP files](#instzip)
-Linux or Solaris, with a database on the same machine. |  [Installation with a local database](#instoh)
-Linux or Solaris, with the full Oracle client (installed via runInstaller) on the same machine. |  [Installation with a local database](#instoh)
-Mac OS X. | [Installation with Instant Client ZIP files](#instzip)
+Linux.  My database is on another machine.  | [Node-oracledb Installation on Linux with Instant Client RPMs](#instrpm)
+Solaris.  My database is on another machine. | [Node-oracledb Installation on Linux with Instant Client ZIP files](#instzip)
+Linux or Solaris, with a database on the same machine. |  [Node-oracledb Installation on Linux with a Local Database](#instoh)
+Linux or Solaris, with the full Oracle client (installed via runInstaller) on the same machine. |  [Node-oracledb Installation on Linux with a Local Database](#instoh)
+Mac OS X. | [Node-oracledb Installation on Linux with Instant Client ZIP files](#instzip)
 Another OS with Oracle 11.2 or 12.1 libraries available | Update binding.gyp and make any code changes required, sign the [OCA](https://www.oracle.com/technetwork/community/oca-486395.html), and submit a pull request with your patch (Windows support is already being worked on).  
 
 ### Other Resources Useful for node-oracledb
@@ -81,7 +82,7 @@ On Linux, the node-oracledb installer looks for Oracle client libraries and head
 3. In `$ORACLE_HOME`
 4. In `/opt/oracle/instantclient`
 
-## <a name="instrpm"></a> 2. Installation with Instant Client RPMs
+## <a name="instrpm"></a> 2. Node-oracledb Installation on Linux with Instant Client RPMs
 
 ### 2.1 Clone [this repository](https://github.com/oracle/node-oracledb)
 
@@ -117,28 +118,16 @@ rpm -ivh oracle-instantclient12.1-devel-12.1.0.2.0-1.x86_64.rpm
 ```
 
 If you have a [ULN](https://linux.oracle.com) subscription, you can
-alternatively use `yum` to install these packages from the appropriate
-*Oracle Software for Oracle Linux* channel.
-
-To run applications, you will need to set the link path:
-
-```
-export LD_LIBRARY_PATH=/usr/lib/oracle/12.1/client64/lib
-```
-
-Alternatively, if there is no other Oracle software on the machine
-that will be impacted, permanently add Instant Client to the run-time
-link path.  Do this by creating a file
-`/etc/ld.so.conf.d/oracle-instantclient.conf` that contains the library
-location `/usr/lib/oracle/12.1/client64/lib`, and then run `ldconfig`
-as the root user.
+alternatively use `yum` to install these packages from the 
+*Oracle Software for Oracle Linux* channel for your version of Linux.
 
 ### 2.4 Install the driver
 
 The installer uses the highest version Instant Client RPMs installed.
-To use a different version, for example version 11.2, execute `export
-OCI_LIB_DIR=/usr/lib/oracle/11.2/client64/lib` and `export
-OCI_INC_DIR=/usr/include/oracle/11.2/client64/`.
+
+To use a different version, jump to the instructions to
+[install on Linux with Instant Client ZIP files](#instzip) and set
+`OCI_LIB_DIR` and `OCI_INC_DIR` to the appropriate directories.
 
 Run the installer:
 
@@ -172,9 +161,7 @@ Run one of the examples:
 node examples/select1.js
 ```
 
-Remember to set `LD_LIBRARY_PATH` or equivalent first.
-
-## <a name="instzip"></a> 3. Installation with Instant Client ZIP files
+## <a name="instzip"></a> 3. Node-oracledb Installation on Linux with Instant Client ZIP files
 
 ### 3.1 Clone [this repository](https://github.com/oracle/node-oracledb)
 
@@ -273,7 +260,7 @@ node examples/select1.js
 
 *Note:* Remember to set `LD_LIBRARY_PATH` or equivalent first.
 
-## <a name="instoh"></a> 4. Installation with a local database
+## <a name="instoh"></a> 4. Node-oracledb installation on Linux with a Local Database
 
 The ORACLE_HOME can be either a database home or a full Oracle client installation.
 
@@ -365,3 +352,51 @@ Run one of the examples:
 node examples/select1.js
 ```
 
+## <a name="linuxadv"></a> 5. Advanced installation on Linux
+
+### Instant Client RPMs and RPATH
+
+On Linux, if Instant Client RPMs are auto-detected and used during
+installation, then the Instant Client library directory is added to
+the run time library search path via the rpath linker option.
+
+This means that using node-oracledb with Instant Client RPMs does not
+require the node-oracledb installation variables `OCI_LIB_DIR` or
+`OCI_INC_DIR` to be set, and does not require `LD_LIBRARY_PATH` or
+`ldconfig` configuration for run time.  Installation is simply:
+
+```
+rpm -i ...
+npm install -g
+node examples/select1.js
+```
+
+### Using Instant Client RPMs without RPATH
+
+If you want to use Instant Client RPMs without using rpath, then set
+`OCI_LIB_DIR` and `OCI_INC_DIR` prior to installation, for example:
+
+```
+export OCI_LIB_DIR=/usr/lib/oracle/12.1/client64/lib
+export OCI_INC_DIR=/usr/include/oracle/12.1/client64
+npm install -g
+export LD_LIBRARY_PATH=/usr/lib/oracle/12.1/client64/lib
+node examples/select1.js
+```
+
+This is useful if you will need to upgrade Oracle Instant Client RPMS
+to a new major or minor version (for example from 11.2 to 12.1)
+without re-installing node-oracledb.
+
+### Forcing RPATH
+
+If you want to force using rpath when installing node-oracledb on
+Linux, then set the node-oracledb installation variable `FORCE_RPATH`
+to any value.  For example:
+
+```
+export OCI_LIB_DIR=/opt/oracle/instantclient
+export OCI_INC_DIR=/opt/oracle/instantclient/sdk/include
+FORCE_RPATH=1 npm install -g
+node examples/select1.js
+```
