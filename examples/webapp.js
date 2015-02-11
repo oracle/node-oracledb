@@ -29,8 +29,6 @@
  *
  *   Uses Oracle's sample HR schema.
  *
- *   The connection pool should not be terminated as long as the server is up.
- *
  *****************************************************************************/
 
 var sys      = require('sys');
@@ -139,20 +137,6 @@ oracledb.createPool (
           });
       });
 
-    process.on('SIGTERM', function () {
-      console.log('Received SIGTERM');
-      pool.terminate(
-        function(err)
-        {
-          if (err) {
-            console.error('terminate() callback: ' + err.message);
-            process.exit(0);
-          }
-          console.log('Closed Oracle connection pool');
-          process.exit(0);
-        });
-    });
-    
     hs.listen(portid, "localhost");
     
     sys.puts("Server running at http://localhost:" + portid);

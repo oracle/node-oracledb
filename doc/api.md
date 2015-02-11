@@ -610,8 +610,8 @@ The Pool object obtains connections to the Oracle database using the
 is created for each Pool object.
 
 After the application finishes using a connection pool, it should
-terminate the connection pool by calling the `terminate()` method on the
-Pool object.
+release all connections and terminate the connection pool by calling
+the `terminate()` method on the Pool object.
 
 ### <a name="poolproperties"></a> 4.1 Pool Properties
 
@@ -726,10 +726,9 @@ This call terminates the connection pool.
 
 This is an asynchronous call.
 
-All open connections in a connection pool are closed when a connection
-pool terminates.
-
-Any ongoing transaction in a connection will be released.
+Any open connections should be released with [`release()`](#release)
+before `terminate()` is called, otherwise an error will be returned
+and the pool will be unusable.
 
 ##### Prototype
 
@@ -1007,16 +1006,18 @@ returned as an array. If `bindParams` is passed as an object, then
 Releases a connection.  If the connection was obtained from the pool,
 the connection is returned to the pool.
 
-
-
 ##### Description
 
 This is an asynchronous call.
 
+Note: calling `release()` when connections are no longer required is
+strongly encouraged.  Releasing helps avoid resource leakage and can
+improve system efficiency.
+
 When a connection is released, any ongoing transaction on the
 connection is rolled back.
 
-Note that after releasing a connection to a pool, there is no
+After releasing a connection to a pool, there is no
 guarantee a subsequent `getConnection()` call gets back the same
 database connection.  The application must redo any ALTER SESSION
 statements on the new connection object, as required.
@@ -1084,8 +1085,7 @@ A SQL or PL/SQL statement may be executed using the *Connection*
 statements are not committed unless the `commit()` call is issued or
 the `isAutoCommit` property is *true* at the time of execution.  Any
 ongoing transaction will be rolled back when [`release()`](#release)
-or [`terminate()`](#terminate) are called, or when the application
-ends.
+is called, or when the application ends.
 
 Using bind variables in SQL statements is recommended in preference to
 constructing SQL statements by string concatenation.  This is for
