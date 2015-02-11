@@ -48,21 +48,21 @@ class ExceptionImpl : public Exception
 {
  public:
                                 // creation/termination
-  ExceptionImpl(DpiError errno);
+  ExceptionImpl(DpiError errnum);
 
-  ExceptionImpl(const char *origin, int errno, const char *message);
+  ExceptionImpl(const char *origin, int errnum, const char *message);
 
   virtual ~ExceptionImpl() throw();
 
   virtual const char * what() const throw();
   
-  virtual int          errno() const throw();
+  virtual int          errnum() const throw();
   
   virtual const char * origin() const throw();
   
 private:
   string origin_;
-  int    errno_;
+  int    errnum_;
   string message_;
   
 };

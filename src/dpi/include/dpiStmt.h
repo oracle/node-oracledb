@@ -141,7 +141,7 @@ public:
                                 // properties
   virtual DpiStmtType stmtType() const = 0;
 
-  virtual unsigned long rowsAffected() const = 0;
+  virtual DPI_SZ_TYPE  rowsAffected() const = 0;
 
   virtual unsigned int numCols() = 0;
 

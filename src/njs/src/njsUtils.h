@@ -84,7 +84,7 @@ typedef enum
   if( !args.Length() || !args[(args.Length()-1)]->IsFunction() )              \
   {                                                                           \
     msg = NJSMessages::getErrorMsg ( errMissingCallback );                    \
-    NJS_SET_EXCEPTION( msg.c_str(), msg.length() );                           \
+    NJS_SET_EXCEPTION( msg.c_str(), msg.length() );		              \
     return Undefined();                                                       \
   }                                                                           \
   else                                                                        \
@@ -99,7 +99,7 @@ typedef enum
  * for the exception to be thrown.
  */
 #define NJS_SET_EXCEPTION( str, len )                                         \
-  ThrowException(v8::Exception::Error(String::New( str, len )));                     
+  ThrowException(v8::Exception::Error(String::New( str, (int) len )));                     
 
 /*
  * If arguments are not in given range, set the error. 
@@ -275,7 +275,7 @@ typedef enum
   {                                                                           \
     msg = NJSMessages::getErrorMsg ( errInvalidParameterType,                 \
                                      prop );                                  \
-    NJS_SET_EXCEPTION( msg.c_str(), msg.length() );                           \
+    NJS_SET_EXCEPTION( msg.c_str(), msg.length() );		              \
   }                                                                           \
 }
 

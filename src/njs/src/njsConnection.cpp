@@ -168,7 +168,7 @@ void Connection::SetStmtCacheSize(Local<String> property, Local<Value> value,
     msg = NJSMessages::getErrorMsg(errInvalidConnection);
   else
     msg = NJSMessages::getErrorMsg(errReadOnly, "stmtCacheSize");
-  NJS_SET_EXCEPTION(msg.c_str(), msg.length());
+  NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
 }
 
 /*****************************************************************************/
@@ -186,7 +186,7 @@ Handle<Value> Connection::GetClientId(Local<String> property,
     msg = NJSMessages::getErrorMsg(errInvalidConnection);
   else
     msg = NJSMessages::getErrorMsg(errWriteOnly, "clientId");
-  NJS_SET_EXCEPTION(msg.c_str(), msg.length());
+  NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
   return Undefined();
 }
 
@@ -203,7 +203,7 @@ void Connection::SetClientId(Local<String> property, Local<Value> value,
   if(!njsConn->isValid_)
   {
     string msg = NJSMessages::getErrorMsg(errInvalidConnection);
-    NJS_SET_EXCEPTION(msg.c_str(), msg.length());
+    NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
     return;
   }
   else
@@ -229,7 +229,7 @@ Handle<Value> Connection::GetModule (Local<String> property,
     msg = NJSMessages::getErrorMsg(errInvalidConnection);
   else
     msg = NJSMessages::getErrorMsg(errWriteOnly, "module");
-  NJS_SET_EXCEPTION(msg.c_str(), msg.length());
+  NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
   return Undefined();
 }
 
@@ -246,7 +246,7 @@ void Connection::SetModule (Local<String> property, Local<Value> value,
   if(!njsConn->isValid_)
   {
     string msg = NJSMessages::getErrorMsg(errInvalidConnection);
-    NJS_SET_EXCEPTION(msg.c_str(), msg.length());
+    NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
     return;
   }
   else
@@ -272,7 +272,7 @@ Handle<Value> Connection::GetAction (Local<String> property,
     msg = NJSMessages::getErrorMsg(errInvalidConnection);
   else
     msg = NJSMessages::getErrorMsg(errWriteOnly, "action");
-  NJS_SET_EXCEPTION(msg.c_str(), msg.length());
+  NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
   return Undefined();
 }
 
@@ -289,7 +289,7 @@ void Connection::SetAction(Local<String> property,Local<Value> value,
   if(!njsConn->isValid_)
   {
     string msg = NJSMessages::getErrorMsg(errInvalidConnection);
-    NJS_SET_EXCEPTION(msg.c_str(), msg.length());
+    NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
     return;
   }
   else
@@ -442,7 +442,7 @@ void Connection::GetBinds (Handle<Object> bindobj, eBaton* executeBaton)
     NJSString(str, temp);
     bind->key = ":"+std::string(str);
     Handle<Value> val__ = bindobj->Get(String::New((char*)str.c_str(),
-                                                    str.length()));
+						   (int) str.length()));
     Connection::GetBindUnit(val__, bind, executeBaton);
     if(!executeBaton->error.empty())
       goto exitGetBinds;
@@ -779,7 +779,7 @@ void Connection::PrepareAndBind (eBaton* executeBaton)
           }
           // Bind by name 
           executeBaton->dpistmt->bind((const unsigned char*)executeBaton->binds[index]->key.c_str(),
-                             executeBaton->binds[index]->key.length(),
+                             (int) executeBaton->binds[index]->key.length(),
                              executeBaton->binds[index]->type,
                              executeBaton->binds[index]->value,
                              executeBaton->binds[index]->maxSize,
@@ -945,7 +945,8 @@ void Connection::Async_AfterExecute(uv_work_t *req)
         break;
       default :
         result->Set(String::New("rowsAffected"),
-                    Integer::New(executeBaton->rowsAffected),v8::ReadOnly);
+                    Integer::New((unsigned int) executeBaton->rowsAffected),
+		                 v8::ReadOnly);
         result->Set(String::New("outBinds"),Undefined());
         result->Set(String::New("rows"), Undefined()); 
         break;
@@ -1010,7 +1011,7 @@ Handle<Value> Connection::GetRows (eBaton* executeBaton)
         {
           long double *dblArr = (long double * )executeBaton->defines[j].buf;
           row->Set(String::New(executeBaton->columnNames[j].c_str(),
-                               executeBaton->columnNames[j].length()),
+                               (int) executeBaton->columnNames[j].length()),
                    Connection::GetValue(
                       executeBaton->defines[j].ind[i],
                       executeBaton->defines[j].fetchType,
@@ -1173,7 +1174,7 @@ Handle<Value> Connection::GetOutBindObject ( std::vector<Bind*> binds )
     {
       binds[index]->key.erase(binds[index]->key.begin());
       objectBinds->Set( String::New ( binds[index]->key.c_str(),
-                                      binds[index]->key.length() ),
+                                      (int) binds[index]->key.length() ),
                         Connection::GetValue( 
                              binds[index]->ind,
                              binds[index]->type,

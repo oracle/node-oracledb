@@ -24,6 +24,12 @@
         "oci_inc_dir%" : "<!(if [ -z $OCI_INC_DIR ]; then OCI_LIB_DIR=`ls -d /usr/lib/oracle/*/client*/lib/libclntsh.* 2> /dev/null | tail -1 | sed -e 's#/libclntsh[^/]*##'`; if [ -z $OCI_LIB_DIR ]; then if [ -d \"$ORACLE_HOME\" ]; then echo $ORACLE_HOME/rdbms/public; else echo \"/opt/oracle/instantclient/sdk/include/\"; fi; else OCI_INC_DIR=`echo $OCI_LIB_DIR | sed -e 's!^/usr/lib/oracle/\(.*\)/client\([64]*\)*/lib[/]*$!/usr/include/oracle/\\1/client\\2!'`; if [ -z $OCI_INC_DIR ]; then echo \"/opt/oracle/instantclient/sdk/include/\"; else echo $OCI_INC_DIR; fi; fi; else echo $OCI_INC_DIR; fi;)",
         "oci_lib_dir%" : "<!(if [ -z $OCI_LIB_DIR ]; then OCI_LIB_DIR=`ls -d /usr/lib/oracle/*/client*/lib/libclntsh.* 2> /dev/null | tail -1 | sed -e 's#/libclntsh[^/]*##'`; if [ -z $OCI_LIB_DIR ]; then if [ -d \"$ORACLE_HOME\" ]; then echo $ORACLE_HOME/lib; else echo \"/opt/oracle/instantclient/\"; fi; else echo $OCI_LIB_DIR; fi; else echo $OCI_LIB_DIR; fi;)",
         "oci_rpath%" : "<!(if [ -z $OCI_LIB_DIR ]; then OCI_LIB_DIR=`ls -d /usr/lib/oracle/*/client*/lib/libclntsh.* 2> /dev/null | tail -1 | sed -e 's#/libclntsh[^/]*##'`; if [ -z $OCI_LIB_DIR ]; then if [ -d \"$ORACLE_HOME\" ]; then if [ -z \"${FORCE_RPATH+x}\" ]; then echo \"\"; else echo \"-Wl,-rpath,$ORACLE_HOME/lib\"; fi; else if [ -z \"${FORCE_RPATH+x}\" ]; then echo \"\"; else echo \"-Wl,-rpath,/opt/oracle/instantclient\"; fi; fi; else echo \"-Wl,-rpath,$OCI_LIB_DIR\"; fi; else if [ -z \"${FORCE_RPATH+x}\" ]; then echo \"\"; else echo \"-Wl,-rpath,$OCI_LIB_DIR\"; fi; fi;)",
+        },
+        "cflags"        : ['-fexceptions'],
+        "cflags_cc"     : ['-fexceptions'],
+        "libraries"     : ["-lclntsh"],
+        "link_settings" : {
+           "libraries"  : ['-L<(oci_lib_dir) <(oci_rpath)']
         }
       }
     ],
@@ -36,7 +42,12 @@
         "variables" : {
           "oci_inc_dir%" : "<!(if [ -z $OCI_INC_DIR ]; then echo \"/opt/oracle/instantclient_11_2/sdk/include/\"; else echo $OCI_INC_DIR; fi)",
           "oci_lib_dir%" : "<!(if [ -z $OCI_LIB_DIR ]; then echo \"/opt/oracle/instantclient_11_2/\"; else echo $OCI_LIB_DIR; fi)",
-          "oci_rpath%" : "<!(echo \"\")",
+	  },
+          "cflags"        : ['-fexceptions'],
+          "cflags_cc"     : ['-fexceptions'],
+          "libraries"     : ["-lclntsh"],
+          "link_settings" : {
+             "libraries"  : ['-L<(oci_lib_dir)']
         }
       }
     ],
@@ -45,21 +56,48 @@
         "variables" : {
           "oci_inc_dir%" : "<!(if [ -z $OCI_INC_DIR ]; then echo \"/opt/oracle/instantclient_12_1/sdk/include/\"; else echo $OCI_INC_DIR; fi)",
           "oci_lib_dir%" : "<!(if [ -z $OCI_LIB_DIR ]; then echo \"/opt/oracle/instantclient_12_1/\"; else echo $OCI_LIB_DIR; fi)",
-          "oci_rpath%" : "<!(echo \"\")",
+	  },
+          "libraries"     : ["-lclntsh"],
+          "cflags"        : ['-fexceptions'],
+          "cflags_cc"     : ['-fexceptions'],
+          "link_settings" : {
+             "libraries"  : ['-L<(oci_lib_dir)']
         }
       }
-    ]
     ],
-  "cflags"        : ['-fexceptions'],
-  "cflags_cc"     : ['-fexceptions'],
+    ["OS=='win'", {
+      "variables" : {
+        "oci_inc_dir%" : "C:/instantclient_12_1/sdk/include",
+        "oci_lib_dir%" : "C:/instantclient_12_1/sdk/lib/msvc",
+      },
+      "configurations" : {
+        "Release" : {
+          "msvs_settings": {
+            "VCCLCompilerTool" : {
+              "RuntimeLibrary" : "2"
+            }
+          }
+        },
+        "Debug" : {
+          "msvs_settings": {
+            "VCCLCompilerTool" : {
+              "RuntimeLibrary" : "3"
+            }
+          }
+        }
+      },
+      "cflags"        : ['-fexceptions -EHsc'],
+      "cflags_cc"     : ['-fexceptions -EHsc'],
+      "link_settings" : { "libraries" : ['<(oci_lib_dir)\oci.lib'] }
+    }
+    ],
+  ],
+    
+
   "include_dirs"  : [ "<(oci_inc_dir)",
                       "src/dpi/src/",
                       "src/dpi/include/"
-  ],
-  "libraries"     : ["-lclntsh"],
-  "link_settings" : {
-     "libraries"  : ['-L<(oci_lib_dir) <(oci_rpath)']
-    }
+    ],
   }
   ]
 }

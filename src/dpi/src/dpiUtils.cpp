@@ -34,6 +34,9 @@
 # include <dpiExceptionImpl.h>
 #endif
 
+#ifdef WIN32
+  #define  snprintf  _snprintf
+#endif
 
 
 

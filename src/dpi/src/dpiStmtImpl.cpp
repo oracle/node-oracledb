@@ -95,7 +95,8 @@ StmtImpl::StmtImpl (EnvImpl *env, OCIEnv *envh, ConnImpl *conn,
   
   // Prepare OCIStmt object with given sql statement.
   ociCall (OCIStmtPrepare2 (svch_, &stmth_, errh_, (oratext *)sql.data(),
-                            sql.length(), NULL, 0, OCI_NTV_SYNTAX, OCI_DEFAULT),
+                            (ub4)sql.length(), NULL, 0, OCI_NTV_SYNTAX,
+                            OCI_DEFAULT),
            errh_);
 }
 catch (...)
@@ -157,7 +158,7 @@ DpiStmtType StmtImpl::stmtType () const
       number of rows affected by the DML operation
       
 */
-unsigned long StmtImpl::rowsAffected () const
+DPI_SZ_TYPE StmtImpl::rowsAffected () const
 {
   DPI_SZ_TYPE  rowsAffected = 0;
   

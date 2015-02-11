@@ -68,7 +68,7 @@ static const char *dpiErrors[] =
      Constructor for the ExceptionImpl class for DPI errors only.
 
    PARAMETERS:
-     errno   - DPI error number
+     errnum - DPI error number
 
    RETURNS:
      nothing
@@ -77,13 +77,13 @@ static const char *dpiErrors[] =
      
  */
 
-ExceptionImpl::ExceptionImpl(DpiError errno):
-  origin_("DPI"), errno_(errno)
+ExceptionImpl::ExceptionImpl(DpiError errnum):
+  origin_("DPI"), errnum_(errnum)
 {
   stringstream strstream;
   
-  strstream << origin_ << "-" <<setfill('0')<<setw(3)<<errno_ <<": ";
-  strstream << dpiErrors[errno - DpiErrNoError];
+  strstream << origin_ << "-" <<setfill('0')<<setw(3)<<errnum_ <<": ";
+  strstream << dpiErrors[errnum - DpiErrNoError];
   
   message_ = strstream.str();
 }
@@ -97,7 +97,7 @@ ExceptionImpl::ExceptionImpl(DpiError errno):
 
    PARAMETERS:
      origin  - error origin
-     errno   - error number
+     errnum  - error number
      message - error message
 
    RETURNS:
@@ -107,9 +107,9 @@ ExceptionImpl::ExceptionImpl(DpiError errno):
      
  */
 
-ExceptionImpl::ExceptionImpl(const char *origin, int errno,
+ExceptionImpl::ExceptionImpl(const char *origin, int errnum,
                              const char *message):
-  origin_(origin), errno_(errno), message_(message)
+  origin_(origin), errnum_(errnum), message_(message)
 {
   
 }
@@ -175,9 +175,9 @@ const char * ExceptionImpl::what() const throw()
      
  */
 
-int ExceptionImpl::errno() const throw()
+int ExceptionImpl::errnum() const throw()
 {
-  return errno_;
+  return errnum_;
 }
 
 

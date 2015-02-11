@@ -86,7 +86,7 @@ typedef struct eBaton
   std::string   error;
   dpi::Env*     dpienv;
   dpi::Conn*    dpiconn;     
-  unsigned int  rowsAffected;
+  DPI_SZ_TYPE   rowsAffected;
   unsigned int  maxRows;
   bool          isAutoCommit;
   unsigned int  rowsFetched;

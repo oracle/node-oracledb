@@ -55,7 +55,7 @@ public:
 
   // Attributes
   virtual DpiStmtType stmtType () const;
-  virtual unsigned long rowsAffected () const;
+  virtual DPI_SZ_TYPE  rowsAffected () const;
   virtual unsigned int numCols() ;
   virtual unsigned int rowsFetched () const ;
 

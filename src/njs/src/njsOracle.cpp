@@ -390,7 +390,7 @@ void Oracledb::SetVersion ( Local<String> property, Local<Value> value,
   HandleScope scope;
   std::string msg;
   msg = NJSMessages::getErrorMsg(errReadOnly, "version");
-  NJS_SET_EXCEPTION(msg.c_str(), msg.length()); 
+  NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length()); 
 }
 
 
@@ -406,7 +406,7 @@ Handle<Value> Oracledb::GetConnectionClass ( Local<String> property,
   
   Oracledb *oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
   Handle<String> value = v8::String::New (oracledb->connClass_.c_str(), 
-                                          oracledb->connClass_.length ());
+                                          (int)oracledb->connClass_.length ());
   return scope.Close(value);
 }
 

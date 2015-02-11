@@ -67,7 +67,7 @@ class Exception : public exception
 
   virtual const char * what() const throw() = 0;
   
-  virtual int    errno() const throw() = 0;
+  virtual int    errnum() const throw() = 0;
   
   virtual const char * origin() const throw() = 0;
   

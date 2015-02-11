@@ -92,11 +92,11 @@ try :  env_(env), pool_(NULL),
   if (!isExternalAuth)
   {
     ociCall(OCIAttrSet((void *)auth_, OCI_HTYPE_AUTHINFO,
-                       (void *)user.data(), user.length(),
+                       (void *)user.data(), (ub4) user.length(),
                        OCI_ATTR_USERNAME, errh_), errh_);
     
     ociCall(OCIAttrSet((void *)auth_, OCI_HTYPE_AUTHINFO,
-                       (void *)password.data(), password.length(),
+                       (void *)password.data(), (ub4) password.length(),
                        OCI_ATTR_PASSWORD, errh_), errh_);
   }
                             
@@ -104,7 +104,7 @@ try :  env_(env), pool_(NULL),
   if (connClass.length() )
   {
     ociCall (OCIAttrSet ((void*)auth_, OCI_HTYPE_AUTHINFO, 
-                         (void *)connClass.data(), connClass.length(),
+                         (void *)connClass.data(), (ub4) connClass.length(),
                          OCI_ATTR_CONNECTION_CLASS, errh_), errh_);
   }
 
@@ -122,7 +122,7 @@ try :  env_(env), pool_(NULL),
   {
     ociCall(OCISessionGet(envh_, errh_, &svch_, auth_,
                           (OraText *)connString.data(),
-                          connString.length(), NULL, 0, NULL, NULL, NULL,
+                          (ub4) connString.length(), NULL, 0, NULL, NULL, NULL,
                           mode), errh_);
   }
   catch (dpi::Exception& e )
@@ -130,7 +130,7 @@ try :  env_(env), pool_(NULL),
     // Due to an error in Oracle code, in case of DRCP server and no 
     // session-pool-connections, setting Driver-Name has no value, only 
     // connection class should be used.  Clear it and retry.
-    if ( e.errno () == 56609 )
+    if ( e.errnum () == 56609 )
     {
       ociCall(OCIAttrSet ( (void*)auth_, OCI_HTYPE_AUTHINFO,
                            (void *)"", 0,
@@ -138,8 +138,8 @@ try :  env_(env), pool_(NULL),
                            
       ociCall(OCISessionGet(envh_, errh_, &svch_, auth_,
                             (OraText *)connString.data(),
-                            connString.length(), NULL, 0, NULL, NULL, NULL,
-                            mode), errh_);
+                            (ub4) connString.length(), NULL, 0, NULL, NULL,  
+                             NULL, mode), errh_);
     }
     else
     {
@@ -200,7 +200,7 @@ try :  env_(NULL), pool_(pool),
   if (connClass.length() )
   {
     ociCall (OCIAttrSet ((void*)auth_, OCI_HTYPE_AUTHINFO, 
-                         (void *)connClass.data(), connClass.length(),
+                         (void *)connClass.data(), (ub4) connClass.length(),
                          OCI_ATTR_CONNECTION_CLASS, errh_), errh_);
   }
     
@@ -356,7 +356,7 @@ unsigned int ConnImpl::stmtCacheSize() const
 void ConnImpl::clientId(const string &clientId)
 {
   ociCall(OCIAttrSet(sessh_, OCI_HTYPE_SESSION, (void *)clientId.data(),
-                     clientId.length(), OCI_ATTR_CLIENT_IDENTIFIER, errh_),
+                     (ub4)clientId.length(), OCI_ATTR_CLIENT_IDENTIFIER, errh_),
           errh_);
 }
 
@@ -380,7 +380,7 @@ void ConnImpl::clientId(const string &clientId)
 void ConnImpl::module(const string &module)
 {
   ociCall(OCIAttrSet(sessh_, OCI_HTYPE_SESSION, (void *)module.data(),
-                     module.length(), OCI_ATTR_MODULE, errh_), errh_);
+                     (ub4) module.length(), OCI_ATTR_MODULE, errh_), errh_);
 }
 
 
@@ -403,7 +403,7 @@ void ConnImpl::module(const string &module)
 void ConnImpl::action(const string &action)
 {
   ociCall(OCIAttrSet(sessh_, OCI_HTYPE_SESSION, (void *)action.data(),
-                     action.length(), OCI_ATTR_ACTION, errh_), errh_);
+                     (ub4) action.length(), OCI_ATTR_ACTION, errh_), errh_);
 }
 
 

@@ -116,12 +116,12 @@ PoolImpl::PoolImpl(EnvImpl *env, OCIEnv *envh,
   ociCall(OCISessionPoolCreate(envh_, errh_, spoolh_, 
                                &poolName_, &poolNameLen_,
                                (OraText *)connString.data (), 
-                               connString.length(),
+                               (ub4) connString.length(),
                                poolMin, poolMax,
                                poolIncrement, 
-                               (OraText *)user.data (), user.length(),
+                               (OraText *)user.data (), (ub4) user.length(),
                                (OraText *)password.data (),
-                               password.length(), 
+                               (ub4) password.length(), 
                                OCI_SPC_HOMOGENEOUS), errh_ );
 
   this->poolTimeout(poolTimeout);
