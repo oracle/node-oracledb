@@ -3,10 +3,11 @@
 *.o
 \#*#
 core
-build
 
-# Other Ignores
+# Node Ignores
 npm-debug.log
+node_modules
+/build/*
 
 # Oracle Ignores
 sqlnet.log
