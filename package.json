@@ -15,8 +15,9 @@
     "dependencies" : {
     },
     "engines" : {
-	"node" : ">=0.10"
+	"node" : "=0.10"
     },
+    "engineStrict": true,
     "maintainers" : [
 	{
 	    "name" : "Oracle Corp."
