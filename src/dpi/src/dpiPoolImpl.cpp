@@ -166,6 +166,11 @@ PoolImpl::~PoolImpl()
 
 void PoolImpl::terminate()
 {
+  if (poolName_)
+  {
+    ociCall( OCISessionPoolDestroy( spoolh_, errh_, OCI_DEFAULT), errh_);
+    poolName_ = NULL;
+  }
   env_->terminatePool(this);
 }
 
@@ -343,7 +348,8 @@ void PoolImpl::cleanup()
 {
   if (poolName_)
   {
-    ociCall( OCISessionPoolDestroy( spoolh_, errh_, OCI_DEFAULT), errh_);
+    // Ignore errors thrown.
+    OCISessionPoolDestroy( spoolh_, errh_, OCI_DEFAULT);
     poolName_ = NULL;
   }
   
