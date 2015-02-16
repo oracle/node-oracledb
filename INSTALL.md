@@ -30,7 +30,7 @@ limitations under the License.
 The steps below create a standalone Node.js installation for testing.
 Adjust the steps for your environment.
 
-The node-oracledb 0.2 release has been tested with Node.js 0.10.35 on
+The node-oracledb release has been tested with Node.js 0.10.35 on
 64-bit Oracle Linux.  The driver can also build in some 32-bit Linux,
 Solaris and Mac OS X environments, but these architectures have not
 been fully tested.  Installation on those platforms is similar to the
