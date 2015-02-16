@@ -22,7 +22,7 @@ limitations under the License.
 3. [Node-oracledb Installation on Linux with Instant Client ZIP files](#instzip)
 4. [Node-oracledb Installation on Linux with a Local Database](#instoh)
 5. [Node-oracledb Installation on OS X with Instant Client](#instosx)
-6. [Node-oracledb Installation on Windows with Instant Client](#instwin)
+6. [Node-oracledb Installation on Windows](#instwin)
 7. [Advanced installation on Linux](#linuxadv)
 
 ## <a name="overview"></a> 1. Overview
@@ -452,17 +452,20 @@ To run a database on OS X, one option is to use VirtualBox,
 see
 [The Easiest Way to Enable Oracle Database Application Development on Mac OS X](https://blogs.oracle.com/opal/entry/the_easiest_way_to_enable).
 
-## <a name="instwin"></a> 6. Node-oracledb Installation on Windows with Instant Client
+## <a name="instwin"></a> 6. Node-oracledb Installation on Windows
 
 ### 6.1 Install required tools
 
-Install a Microsoft C/C++ compiler.
+Install a C/C++ build environment such as Microsoft Visual
+Studio 2013.  Compilers supported by Oracle libraries are found in
+Oracle documentation for each version, for example
+[Oracle Database Client Quick Installation Guide 12c Release 1 (12.1) for Microsoft Windows x64 (64-Bit)](https://docs.oracle.com/database/121/NXCQI/toc.htm#NXCQI108).
 
 Install Git 1.9 from [git-scm.com](http://git-scm.com/download/win).
-While installing, select the 'Use Git from the Windows Command Prompt'
-in the 'Adjusting your PATH environment' dialog.  Select the option to
-"Checkout Windows-style, commit UNIX-style line endings" in the
-"Configuring the line ending conversions" dialog.
+While installing, select the "*Use Git from the Windows Command
+Prompt*" in the "*Adjusting your PATH environment*" dialog.  Also
+select the option to "*Checkout Windows-style, commit UNIX-style line
+endings*" in the "*Configuring the line ending conversions*" dialog.
 
 Install the Python 2.7 MSI from
 [www.python.org](https://www.python.org/downloads).  Select the option
@@ -478,65 +481,71 @@ git clone https://github.com/oracle/node-oracledb.git
 
 Install the 64 bit Node.js MSI from [nodejs.org](http://nodejs.org/download/)
 
-Add the *node* and *node-gyp* directories to the path:
+Add the Node.js directory to the path:
 
 ```
-set PATH=%PATH%;"C:\Program Files\nodejs
-set PATH=%PATH%;"C:\Program Files\nodejs\node_modules\npm\bin\node-gyp-bin
+set PATH=%PATH%;C:\Program Files\nodejs
 ```
 
 ### 6.4 Install the free Oracle Instant Client ZIPs
 
-Download the free 'Basic' and 'SDK' RPMs from
+Skip this step if you already have Oracle Database on your machine.
+
+Download the free 'Basic' and 'SDK' ZIP files from
 [Oracle Technology Network](http://www.oracle.com/technetwork/topics/winx64soft-089540.html).
 
 Extract `instantclient_basic-windows.x64-12.1.0.2.0.zip` and
-`instantclient_sdk-windows.x64-12.1.0.2.0.zip` to
-`C:\instantclient_12_1`.
+`instantclient_sdk-windows.x64-12.1.0.2.0.zip` to the same location.
+
+Optionally rename the resulting directory to `C:\oracle\instantclient`
 
 Update the path:
 
 ```
-set PATH=C:\instantclient_12_1\;%PATH%
+set PATH=C:\oracle\instantclient\;%PATH%
 ```
 
 ### 6.5 Install the driver
 
-
-Tell the installer where to find the Oracle libraries and headers:
-
-```
-set OCI_INC_DIR=C:\instantclient_12_1\sdk\include
-set OCI_LIB_DIR=C:\instantclient_12_1\sdk\lib\msvc
-```
-
-If you are installing with a local database, try:
+If you have Instant Client in a location that is *not*
+`C:\oracle\instantclient`, then tell the installer where to find the
+Oracle libraries and headers:
 
 ```
-OCI_INC_DIR=C:\oracle\product\12.1.0\dbhome_1\oci\include
-OCI_LIB_DIR=C:\oracle\product\12.1.0\dbhome_1\oci\lib\msvc
+set OCI_LIB_DIR=D:\instantclient_12_1\sdk\lib\msvc
+set OCI_INC_DIR=D:\instantclient_12_1\sdk\include
+```
+
+If you are installing with a local database, use:
+
+```
+set OCI_LIB_DIR=C:\oracle\product\12.1.0\dbhome_1\oci\lib\msvc
+set OCI_INC_DIR=C:\oracle\product\12.1.0\dbhome_1\oci\include
 ```
 
 Run the installer:
 
 ```
 cd node-oracledb
-node-gyp rebuild
+npm install -g
 ```
 
 ### 6.6 Run an example program
 
+Set `NODE_PATH` to include the newly installed node-oracledb driver:
 
-Set `NODE_PATH` to include the newly installed node-oracledb driver.
+```
+set NODE_PATH=%USERPROFILE%\AppData\Roaming\npm\node_modules
+```
 
 Edit `dbconfig.js` in the `examples` directory and set the database
-credentials to your environment.
+credentials to your environment:
 
 ```
 module.exports = {
   user          : "hr",
   password      : "welcome",
-  connectString : "myothermachine/orcl"
+  connectString : "localhost/XE"
 };
 ```
 
