@@ -268,7 +268,7 @@ void Connection::SetModule (Local<String> property, Local<Value> value,
 Handle<Value> Connection::GetAction (Local<String> property,
                                      const AccessorInfo& info)
 {
-  return Connection::GetProperty(property, info, "clientId");
+  return Connection::GetProperty(property, info, "action");
 }
 
 /*****************************************************************************/
