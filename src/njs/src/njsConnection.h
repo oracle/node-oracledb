@@ -180,6 +180,9 @@ private:
   static void Async_AfterBreak (uv_work_t *req);
 
   // Define Getter Accessors to properties
+  Connection::GetProperty(Local<String> property,
+                                      const AccessorInfo& info,
+                                      string errorMsg);
   static Handle<Value> GetStmtCacheSize (Local<String> property,
                                     const AccessorInfo& info);
   static Handle<Value> GetClientId (Local<String> property,
