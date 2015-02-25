@@ -129,10 +129,11 @@ Handle<Value> Pool::New(const Arguments& args)
 /*****************************************************************************/
 /*
    DESCRIPTION
-     Get Accessor of poolMin Property
+     Get Accessor of pool common Property
 */
-Handle<Value> Pool::GetPoolMin (Local<String> property,
-                                const AccessorInfo& info)
+Handle<Value> Pool::GetPoolCommon (Local<String> property,
+                                const AccessorInfo& info,
+                                unsigned int property)
 {
   HandleScope scope;
   Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
@@ -144,10 +145,19 @@ Handle<Value> Pool::GetPoolMin (Local<String> property,
   }
   else
   {
-    Local<Integer> value = v8::Integer::New(njsPool->poolMin_);
+    Local<Integer> value = v8::Integer::New(property);
     return scope.Close(value);
   }
   return Undefined();
+}
+/*
+   DESCRIPTION
+     Get Accessor of poolMin Property
+*/
+Handle<Value> Pool::GetPoolMin (Local<String> property,
+                                const AccessorInfo& info)
+{
+  return Pool::GetPoolCommon (property, info, njsPool->poolMin_);
 }
 
 /*****************************************************************************/
@@ -158,20 +168,7 @@ Handle<Value> Pool::GetPoolMin (Local<String> property,
 Handle<Value> Pool::GetPoolMax (Local<String> property,
                                 const AccessorInfo& info)
 {
-  HandleScope scope;
-  Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
-  if(!njsPool->isValid_)
-  {
-    string msg = NJSMessages::getErrorMsg(errInvalidPool);
-    NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
-    return Undefined();
-  }
-  else
-  {
-    Local<Integer> value = v8::Integer::New(njsPool->poolMax_);
-    return scope.Close(value);
-  }
-  return Undefined();
+  return Pool::GetPoolCommon (property, info, njsPool->poolMax_);
 }
 
 /*****************************************************************************/
@@ -182,20 +179,7 @@ Handle<Value> Pool::GetPoolMax (Local<String> property,
 Handle<Value> Pool::GetPoolIncrement (Local<String> property,
                                       const AccessorInfo& info)
 {
-  HandleScope scope;
-  Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
-  if(!njsPool->isValid_)
-  {
-    string msg = NJSMessages::getErrorMsg(errInvalidPool);
-    NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
-    return Undefined();
-  }
-  else
-  {
-    Local<Integer> value = v8::Integer::New(njsPool->poolIncrement_);
-    return scope.Close(value);
-  }
-  return Undefined();
+  return Pool::GetPoolCommon (property, info, njsPool->poolIncrement_);
 }
 
 /*****************************************************************************/
@@ -206,20 +190,7 @@ Handle<Value> Pool::GetPoolIncrement (Local<String> property,
 Handle<Value> Pool::GetPoolTimeout (Local<String> property,
                                 const AccessorInfo& info)
 {
-  HandleScope scope;
-  Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
-  if(!njsPool->isValid_)
-  {
-    string msg = NJSMessages::getErrorMsg(errInvalidPool);
-    NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
-    return Undefined();
-  }
-  else
-  {
-    Local<Integer> value = v8::Integer::New(njsPool->poolTimeout_);
-    return scope.Close(value);
-  }
-  return Undefined();
+  return Pool::GetPoolCommon (property, info, njsPool->poolTimeout_);
 }
 
 /*****************************************************************************/
@@ -291,20 +262,7 @@ Handle<Value> Pool::GetConnectionsInUse (Local<String> property,
 Handle<Value> Pool::GetStmtCacheSize (Local<String> property,
                                       const AccessorInfo& info)
 {
-  HandleScope scope;
-  Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
-  if(!njsPool->isValid_)
-  {
-    string msg = NJSMessages::getErrorMsg(errInvalidPool);
-    NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
-    return Undefined();
-  }
-  else 
-  {
-    Local<Integer> value = v8::Integer::New(njsPool->stmtCacheSize_);  
-    return scope.Close(value);
-  }
-  return Undefined();
+  return Pool::GetPoolCommon (property, info, njsPool->stmtCacheSize_);
 }
 
 /*****************************************************************************/

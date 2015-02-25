@@ -174,10 +174,11 @@ void Connection::SetStmtCacheSize(Local<String> property, Local<Value> value,
 /*****************************************************************************/
 /*
    DESCRIPTION
-     Get Accessor of clientId property - throws error
+   Get Accessor of properties common - throws error
 */
-Handle<Value> Connection::GetClientId(Local<String> property,
-                                      const AccessorInfo& info)
+Handle<Value> Connection::GetProperty(Local<String> property,
+                                      const AccessorInfo& info,
+                                      string errorMsg)
 {
   HandleScope scope;
   Connection* njsConn = ObjectWrap::Unwrap<Connection>(info.Holder()); 
@@ -185,9 +186,19 @@ Handle<Value> Connection::GetClientId(Local<String> property,
   if(!njsConn->isValid_)
     msg = NJSMessages::getErrorMsg(errInvalidConnection);
   else
-    msg = NJSMessages::getErrorMsg(errWriteOnly, "clientId");
+    msg = NJSMessages::getErrorMsg(errWriteOnly, errorMsg);
   NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
   return Undefined();
+}
+
+/*
+   DESCRIPTION
+     Get Accessor of clientId property - throws error
+*/
+Handle<Value> Connection::GetClientId(Local<String> property,
+                                      const AccessorInfo& info)
+{
+  return Connection::GetProperty(property, info, "clientId");
 }
 
 /*****************************************************************************/
@@ -222,15 +233,7 @@ void Connection::SetClientId(Local<String> property, Local<Value> value,
 Handle<Value> Connection::GetModule (Local<String> property,
                                      const AccessorInfo& info)
 {
-  HandleScope scope;
-  Connection* njsConn = ObjectWrap::Unwrap<Connection>(info.Holder()); 
-  string msg;
-  if(!njsConn->isValid_)
-    msg = NJSMessages::getErrorMsg(errInvalidConnection);
-  else
-    msg = NJSMessages::getErrorMsg(errWriteOnly, "module");
-  NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
-  return Undefined();
+  return Connection::GetProperty(property, info, "module");
 }
 
 /*****************************************************************************/
@@ -265,15 +268,7 @@ void Connection::SetModule (Local<String> property, Local<Value> value,
 Handle<Value> Connection::GetAction (Local<String> property,
                                      const AccessorInfo& info)
 {
-  HandleScope scope;
-  Connection* njsConn = ObjectWrap::Unwrap<Connection>(info.Holder()); 
-  string msg;
-  if(!njsConn->isValid_)
-    msg = NJSMessages::getErrorMsg(errInvalidConnection);
-  else
-    msg = NJSMessages::getErrorMsg(errWriteOnly, "action");
-  NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
-  return Undefined();
+  return Connection::GetProperty(property, info, "action");
 }
 
 /*****************************************************************************/

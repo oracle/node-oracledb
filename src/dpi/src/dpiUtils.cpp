@@ -44,6 +44,32 @@
                      PUBLIC FUNCTIONS
   ---------------------------------------------------------------------------*/
 
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     This routine is a wrapper for the ociCall and ociCallEnv. Exists only as
+     as abstraction for the redundant common functionality.
+*/
+void ociCall(sword rc, OCIError *errh, ub4 errType)
+{
+  if (!rc)
+    return;
+  
+  OraText ociErrorMsg[OCI_ERROR_MAXMSG_SIZE];
+  sb4     ociErrorNo = 0;
+  memset(ociErrorMsg, 0, OCI_ERROR_MAXMSG_SIZE);
+  
+  rc = OCIErrorGet(errh, 1, NULL, &ociErrorNo, ociErrorMsg,
+                   OCI_ERROR_MAXMSG_SIZE-1, errType);
+  if (rc)
+    throw ExceptionImpl(DpiErrUnkOciError);
+  else
+  {
+    ociErrorMsg[strlen((char*)ociErrorMsg)-1]=0; //strip off newline
+    throw ExceptionImpl("ORA", ociErrorNo, (const char *)ociErrorMsg);
+  }
+}
+
 
 /*****************************************************************************/
 /*
@@ -63,22 +89,7 @@
 
 void ociCall(sword rc, OCIError *errh)
 {
-  if (!rc)
-    return;
-  
-  OraText ociErrorMsg[OCI_ERROR_MAXMSG_SIZE];
-  sb4     ociErrorNo = 0;
-  memset(ociErrorMsg, 0, OCI_ERROR_MAXMSG_SIZE);
-  
-  rc = OCIErrorGet(errh, 1, NULL, &ociErrorNo, ociErrorMsg,
-                   OCI_ERROR_MAXMSG_SIZE-1, OCI_HTYPE_ERROR);
-  if (rc)
-    throw ExceptionImpl(DpiErrUnkOciError);
-  else
-  {
-    ociErrorMsg[strlen((char*)ociErrorMsg)-1]=0; //strip off newline
-    throw ExceptionImpl("ORA", ociErrorNo, (const char *)ociErrorMsg);
-  }
+  ociCallCommon(rc, errH, OCI_HTYPE_ERROR);
 }
 
 
@@ -103,22 +114,7 @@ void ociCall(sword rc, OCIError *errh)
 
 void ociCallEnv(sword rc, OCIEnv *envh)
 {
-  if (!rc)
-    return;
-  
-  OraText ociErrorMsg[OCI_ERROR_MAXMSG_SIZE];
-  sb4     ociErrorNo = 0;
-  memset(ociErrorMsg, 0, OCI_ERROR_MAXMSG_SIZE);
-  
-  rc = OCIErrorGet(envh, 1, NULL, &ociErrorNo, ociErrorMsg,
-                   OCI_ERROR_MAXMSG_SIZE-1, OCI_HTYPE_ENV);
-  if (rc)
-    throw ExceptionImpl(DpiErrUnkOciError);
-  else
-  {
-    ociErrorMsg[strlen((char*)ociErrorMsg)-1]=0; //strip off newline
-    throw ExceptionImpl("ORA", ociErrorNo, (const char *)ociErrorMsg);
-  }
+  ociCallCommon(rc, errH, OCI_HTYPE_ENV);
 }
 
 
