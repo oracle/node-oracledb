@@ -61,7 +61,7 @@ private:
    static void Async_AfterTerminate(uv_work_t* req);
  
   // Define Getter Accessors to properties
-  Pool::GetPoolCommon (Local<String> property,
+  static Handle<Value> Pool::GetPoolCommon (Local<String> property,
                                 const AccessorInfo& info,
                                 unsigned int property); 
   static Handle<Value> GetPoolMax (Local<String> property,
