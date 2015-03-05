@@ -152,7 +152,7 @@ public:
   static void Init (Handle<Object> target);
  
 private:
-   static v8::Handle<v8::Value> New(_NAN_METHOD_ARGS);
+  static NAN_METHOD(New);
   // Execute Method on Connection class
   static NAN_METHOD(Execute);
   static void Async_Execute (uv_work_t *req);
@@ -160,22 +160,22 @@ private:
  
   // Release Method on Connection class
   static NAN_METHOD(Release);
-  static void Connection::Async_Release(uv_work_t *req);
+  static void Async_Release(uv_work_t *req);
   static void Async_AfterRelease (uv_work_t *req);
  
   // Commit Method on Connection class
   static NAN_METHOD(Commit);
-  static void Connection::Async_Commit (uv_work_t *req);
+  static void Async_Commit (uv_work_t *req);
   static void Async_AfterCommit (uv_work_t *req);
  
   // Rollback Method on Connection class
   static NAN_METHOD(Rollback);
-  static void Connection::Async_Rollback (uv_work_t *req);
+  static void Async_Rollback (uv_work_t *req);
   static void Async_AfterRollback (uv_work_t *req);
  
   // BreakMethod on Connection class
   static NAN_METHOD(Break);
-  static void Connection::Async_Break(uv_work_t *req);
+  static void Async_Break(uv_work_t *req);
   static void Async_AfterBreak (uv_work_t *req);
 
   // Define Getter Accessors to properties
