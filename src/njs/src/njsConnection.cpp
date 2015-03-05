@@ -114,14 +114,12 @@ void Connection::Init(Handle<Object> target)
    DESCRIPTION
      Invoked when new of connection is called from JS
 */
-v8::Handle<v8::Value>  Connection::New(_NAN_METHOD_ARGS)
+NAN_METHOD(Connection::New)
 {
   NanScope();
 
   Connection *connection = new Connection();
   connection->Wrap(args.This());
-
-  return args.This();
 }
 
 /*****************************************************************************/
