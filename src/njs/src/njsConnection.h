@@ -152,7 +152,7 @@ public:
   static void Init (Handle<Object> target);
  
 private:
-   static v8::Handle<v8::Value> New(_NAN_METHOD_ARGS);
+  static NAN_METHOD(New);
   // Execute Method on Connection class
   static NAN_METHOD(Execute);
   static void Async_Execute (uv_work_t *req);
