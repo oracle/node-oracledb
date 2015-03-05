@@ -70,7 +70,7 @@ void Pool::Init(Handle<Object> target)
 {
   NanScope();
 
-  Local<FunctionTemplate> temp = FunctionTemplate::New(New);
+  Local<FunctionTemplate> temp = NanNew<FunctionTemplate>(New);
   temp->InstanceTemplate()->SetInternalFieldCount(1);
   temp->SetClassName(NanNew<v8::String>("Pool"));
 
@@ -116,14 +116,14 @@ void Pool::Init(Handle<Object> target)
      Invoked when new of pool is called from JS
      
 */
-v8::Handle<v8::Value> Pool::New(_NAN_METHOD_ARGS) 
+NAN_METHOD(Pool::New)
 {
   NanScope();
 
   Pool *njsPool = new Pool();
   njsPool->Wrap(args.This());
 
-  return args.This();
+  NanReturnValue(args.This());
 }
 
 /*****************************************************************************/

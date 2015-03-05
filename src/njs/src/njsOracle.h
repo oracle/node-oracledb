@@ -71,7 +71,7 @@ private:
    // Define Oracledb Constructor
    static Persistent<FunctionTemplate> oracledbTemplate_s;
 
-   static v8::Handle<v8::Value> New(_NAN_METHOD_ARGS);
+   static NAN_METHOD(New);
 
    // Get Connection Methods
    static NAN_METHOD(GetConnection);
