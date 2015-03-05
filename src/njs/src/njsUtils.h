@@ -26,6 +26,8 @@
 #ifndef __NJSUTILS_H__
 #define __NJSUTILS_H__
 
+#include <node.h>
+#include "nan.h"
 #include "njsMessages.h"
 
 // User specified data types for binds and defines.
@@ -75,7 +77,7 @@ typedef enum
   {                                                                           \
     msg = NJSMessages::getErrorMsg ( errMissingCallback );                    \
     NJS_SET_EXCEPTION( msg.c_str(), msg.length() );		              \
-    return Undefined();                                                       \
+    NanReturnUndefined();                                                       \
   }                                                                           \
   else                                                                        \
   {                                                                           \
@@ -89,7 +91,7 @@ typedef enum
  * for the exception to be thrown.
  */
 #define NJS_SET_EXCEPTION( str, len )                                         \
-  ThrowException(v8::Exception::Error(String::New( str, (int) len )));        
+  NanThrowError(str);        
 
 /*
  * If arguments are not in given range, set the error. 
@@ -157,7 +159,7 @@ typedef enum
  */ 
 #define NJS_GET_STRING_FROM_JSON( val, err, obj, key, index, exitCode )       \
 {                                                                             \
-  Local<Value> v8value = obj->Get(String::New(key));                          \
+  Local<Value> v8value = obj->Get(NanNew<v8::String>(key));                          \
   err.clear();                                                                \
   if( v8value->IsString() )                                                   \
   {                                                                           \
@@ -182,7 +184,7 @@ typedef enum
  */ 
 #define NJS_GET_UINT_FROM_JSON( val, err, obj, key, index, exitCode )         \
 {                                                                             \
-  Local<Value> v8value = obj->Get(String::New(key));                          \
+  Local<Value> v8value = obj->Get(NanNew<v8::String>(key));                          \
   err.clear();                                                                \
   if( v8value->IsUint32() )                                                   \
   {                                                                           \
@@ -206,7 +208,7 @@ typedef enum
  */ 
 #define NJS_GET_BOOL_FROM_JSON( val, err, obj, key, index, exitCode )         \
 {                                                                             \
-  Local<Value> v8value = obj->Get(String::New(key));                          \
+  Local<Value> v8value = obj->Get(NanNew<v8::String>(key));                          \
   if ( !v8value->IsUndefined () )                                             \
   {                                                                           \
     val = v8value->ToBoolean()->Value();                                      \

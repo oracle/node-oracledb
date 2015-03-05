@@ -94,7 +94,8 @@
   ],
   "include_dirs"  : [ "<(oci_inc_dir)",
                       "src/dpi/src/",
-                      "src/dpi/include/"
+                      "src/dpi/include/",
+                      "<!(node -e \"require('nan')\")"
     ],
   }
   ]

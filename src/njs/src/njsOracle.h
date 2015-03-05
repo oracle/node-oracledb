@@ -28,6 +28,8 @@
 
 #include <v8.h>
 #include <node.h>
+#include "nan.h"
+
 #include <string>
 #include <cstring>
 #include <stdlib.h>
@@ -69,61 +71,41 @@ private:
    // Define Oracledb Constructor
    static Persistent<FunctionTemplate> oracledbTemplate_s;
 
-   static Handle<Value>  New(const Arguments& args);
+   static v8::Handle<v8::Value> New(_NAN_METHOD_ARGS);
 
    // Get Connection Methods
-   static Handle<Value>  GetConnection(const Arguments& args);
+   static NAN_METHOD(GetConnection);
    static void Async_GetConnection(uv_work_t *req);
    static void Async_AfterGetConnection(uv_work_t  *req);
 
    // Create Pool Methods
-   static Handle<Value>  CreatePool (const Arguments& args);
+   static NAN_METHOD(CreatePool);
    static void Async_CreatePool (uv_work_t *req );
    static void Async_AfterCreatePool (uv_work_t *req);
    
    // Define Getter Accessors to Properties
-   static Handle<Value> GetPoolMin(Local<String> property,
-                                   const AccessorInfo& info);
-   static Handle<Value> GetPoolMax(Local<String> property,
-                                   const AccessorInfo& info);
-   static Handle<Value> GetPoolIncrement(Local<String> property,
-                                         const AccessorInfo& info);
-   static Handle<Value> GetPoolTimeout(Local<String> property,
-                                       const AccessorInfo& info);
-   static Handle<Value> GetStmtCacheSize(Local<String> property,
-                                         const AccessorInfo& info);
-   static Handle<Value> GetIsAutoCommit(Local<String> property,
-                                        const AccessorInfo& info);
-   static Handle<Value> GetMaxRows(Local<String> property,
-                                   const AccessorInfo& info);
-   static Handle<Value> GetOutFormat(Local<String> property,
-                                     const AccessorInfo& info);
-   static Handle<Value> GetVersion(Local<String> property,
-                                        const AccessorInfo& info);
-   static Handle<Value> GetConnectionClass (Local<String> property,
-                                            const AccessorInfo& info );
+   static NAN_GETTER(GetPoolMin);
+   static NAN_GETTER(GetPoolMax);
+   static NAN_GETTER(GetPoolIncrement);
+   static NAN_GETTER(GetPoolTimeout);
+   static NAN_GETTER(GetStmtCacheSize);
+   static NAN_GETTER(GetIsAutoCommit);
+   static NAN_GETTER(GetMaxRows);
+   static NAN_GETTER(GetOutFormat);
+   static NAN_GETTER(GetVersion);
+   static NAN_GETTER(GetConnectionClass);
    
    // Define Setter Accessors to Properties
-   static void SetPoolMin(Local<String> property,Local<Value> value,
-                          const AccessorInfo& info);
-   static void SetPoolMax(Local<String> property,Local<Value> value,
-                          const AccessorInfo& info);
-   static void SetPoolIncrement(Local<String> property,Local<Value> value,
-                                const AccessorInfo& info);
-   static void SetPoolTimeout(Local<String> property,Local<Value> value,
-                              const AccessorInfo& info);
-   static void SetStmtCacheSize(Local<String> property,Local<Value> value,
-                                const AccessorInfo& info);
-   static void SetIsAutoCommit(Local<String> property,Local<Value> value,
-                               const AccessorInfo& info);
-   static void SetMaxRows(Local<String> property,Local<Value> value,
-                          const AccessorInfo& info);
-   static void SetOutFormat(Local<String> property,Local<Value> value,
-                            const AccessorInfo& info);
-   static void SetVersion(Local<String> property,Local<Value> value,
-                               const AccessorInfo& info);
-   static void SetConnectionClass (Local<String> property, Local<Value> value,
-                                   const AccessorInfo& info );
+   static NAN_SETTER(SetPoolMin);
+   static NAN_SETTER(SetPoolMax);
+   static NAN_SETTER(SetPoolIncrement);
+   static NAN_SETTER(SetPoolTimeout);
+   static NAN_SETTER(SetStmtCacheSize);
+   static NAN_SETTER(SetIsAutoCommit);
+   static NAN_SETTER(SetMaxRows);
+   static NAN_SETTER(SetOutFormat);
+   static NAN_SETTER(SetVersion);
+   static NAN_SETTER(SetConnectionClass);
    
    
    Oracledb();
@@ -183,7 +165,7 @@ typedef struct connectionBaton
 
   ~connectionBaton()
    {
-     cb.Dispose();
+     NanDisposePersistent(cb);
    }
 
 }connectionBaton;
