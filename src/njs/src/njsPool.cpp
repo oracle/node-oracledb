@@ -68,46 +68,46 @@ void Pool::setPool( dpi::SPool *dpipool, Oracledb* oracledb, unsigned int poolMa
 */     
 void Pool::Init(Handle<Object> target) 
 {
-  HandleScope scope;
+  NanScope();
 
   Local<FunctionTemplate> temp = FunctionTemplate::New(New);
-  poolTemplate_s = Persistent<FunctionTemplate>::New(temp);
-  poolTemplate_s->InstanceTemplate()->SetInternalFieldCount(1);
-  poolTemplate_s->SetClassName(String::New("Pool"));
+  temp->InstanceTemplate()->SetInternalFieldCount(1);
+  temp->SetClassName(NanNew<v8::String>("Pool"));
 
-  NODE_SET_PROTOTYPE_METHOD(poolTemplate_s, "terminate", Terminate);
-  NODE_SET_PROTOTYPE_METHOD(poolTemplate_s, "getConnection", GetConnection);
+  NODE_SET_PROTOTYPE_METHOD(temp, "terminate", Terminate);
+  NODE_SET_PROTOTYPE_METHOD(temp, "getConnection", GetConnection);
 
-  poolTemplate_s->InstanceTemplate()->SetAccessor(
-                                        String::New("poolMax"),
+  temp->InstanceTemplate()->SetAccessor(
+                                        NanNew<v8::String>("poolMax"),
                                         Pool::GetPoolMax,
                                         Pool::SetPoolMax );
-  poolTemplate_s->InstanceTemplate()->SetAccessor(
-                                        String::New("poolMin"),
+  temp->InstanceTemplate()->SetAccessor(
+                                        NanNew<v8::String>("poolMin"),
                                         Pool::GetPoolMin,
                                         Pool::SetPoolMin );
-  poolTemplate_s->InstanceTemplate()->SetAccessor(
-                                        String::New("poolIncrement"),
+  temp->InstanceTemplate()->SetAccessor(
+                                        NanNew<v8::String>("poolIncrement"),
                                         Pool::GetPoolIncrement,
                                         Pool::SetPoolIncrement );
-  poolTemplate_s->InstanceTemplate()->SetAccessor(
-                                        String::New("poolTimeout"),
+  temp->InstanceTemplate()->SetAccessor(
+                                        NanNew<v8::String>("poolTimeout"),
                                         Pool::GetPoolTimeout,
                                         Pool::SetPoolTimeout );
-  poolTemplate_s->InstanceTemplate()->SetAccessor(
-                                        String::New("connectionsOpen"),
+  temp->InstanceTemplate()->SetAccessor(
+                                        NanNew<v8::String>("connectionsOpen"),
                                         Pool::GetConnectionsOpen,
                                         Pool::SetConnectionsOpen );
-  poolTemplate_s->InstanceTemplate()->SetAccessor(
-                                        String::New("connectionsInUse"),
+  temp->InstanceTemplate()->SetAccessor(
+                                        NanNew<v8::String>("connectionsInUse"),
                                         Pool::GetConnectionsInUse,
                                         Pool::SetConnectionsInUse );
-  poolTemplate_s->InstanceTemplate()->SetAccessor(
-                                        String::New("stmtCacheSize"),
+  temp->InstanceTemplate()->SetAccessor(
+                                        NanNew<v8::String>("stmtCacheSize"),
                                         Pool::GetStmtCacheSize,
                                         Pool::SetStmtCacheSize );
 
-  target->Set(String::New("Pool"),poolTemplate_s->GetFunction());
+  NanAssignPersistent( poolTemplate_s, temp );
+  target->Set(NanNew<v8::String>("Pool"),temp->GetFunction());
 }
 
 /*****************************************************************************/
@@ -116,9 +116,9 @@ void Pool::Init(Handle<Object> target)
      Invoked when new of pool is called from JS
      
 */
-Handle<Value> Pool::New(const Arguments& args) 
+v8::Handle<v8::Value> Pool::New(_NAN_METHOD_ARGS) 
 {
-  HandleScope scope;
+  NanScope();
 
   Pool *njsPool = new Pool();
   njsPool->Wrap(args.This());
@@ -131,23 +131,22 @@ Handle<Value> Pool::New(const Arguments& args)
    DESCRIPTION
      Get Accessor of poolMin Property
 */
-Handle<Value> Pool::GetPoolMin (Local<String> property,
-                                const AccessorInfo& info)
+NAN_GETTER(Pool::GetPoolMin)
 {
-  HandleScope scope;
-  Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
+  NanScope();
+  Pool* njsPool = ObjectWrap::Unwrap<Pool>(args.Holder());
   if(!njsPool->isValid_)
   {
     string msg = NJSMessages::getErrorMsg(errInvalidPool);
     NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
-    return Undefined();
+    NanReturnUndefined();
   }
   else
   {
-    Local<Integer> value = v8::Integer::New(njsPool->poolMin_);
-    return scope.Close(value);
+    Local<Integer> value = NanNew<v8::Integer>(njsPool->poolMin_);
+     NanReturnValue(value);
   }
-  return Undefined();
+  NanReturnUndefined();
 }
 
 /*****************************************************************************/
@@ -155,23 +154,22 @@ Handle<Value> Pool::GetPoolMin (Local<String> property,
    DESCRIPTION
      Get Accessor of poolMax Property
 */
-Handle<Value> Pool::GetPoolMax (Local<String> property,
-                                const AccessorInfo& info)
+NAN_GETTER(Pool::GetPoolMax)
 {
-  HandleScope scope;
-  Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
+  NanScope();
+  Pool* njsPool = ObjectWrap::Unwrap<Pool>(args.Holder());
   if(!njsPool->isValid_)
   {
     string msg = NJSMessages::getErrorMsg(errInvalidPool);
     NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
-    return Undefined();
+    NanReturnUndefined();
   }
   else
   {
-    Local<Integer> value = v8::Integer::New(njsPool->poolMax_);
-    return scope.Close(value);
+    Local<Integer> value = NanNew<v8::Integer>(njsPool->poolMax_);
+     NanReturnValue(value);
   }
-  return Undefined();
+  NanReturnUndefined();
 }
 
 /*****************************************************************************/
@@ -179,23 +177,22 @@ Handle<Value> Pool::GetPoolMax (Local<String> property,
    DESCRIPTION
      Get Accessor of poolIncrement Property
 */
-Handle<Value> Pool::GetPoolIncrement (Local<String> property,
-                                      const AccessorInfo& info)
+NAN_GETTER(Pool::GetPoolIncrement)
 {
-  HandleScope scope;
-  Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
+  NanScope();
+  Pool* njsPool = ObjectWrap::Unwrap<Pool>(args.Holder());
   if(!njsPool->isValid_)
   {
     string msg = NJSMessages::getErrorMsg(errInvalidPool);
     NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
-    return Undefined();
+    NanReturnUndefined();
   }
   else
   {
-    Local<Integer> value = v8::Integer::New(njsPool->poolIncrement_);
-    return scope.Close(value);
+    Local<Integer> value = NanNew<v8::Integer>(njsPool->poolIncrement_);
+     NanReturnValue(value);
   }
-  return Undefined();
+  NanReturnUndefined();
 }
 
 /*****************************************************************************/
@@ -203,23 +200,22 @@ Handle<Value> Pool::GetPoolIncrement (Local<String> property,
    DESCRIPTION
      Get Accessor of poolTimeout Property
 */
-Handle<Value> Pool::GetPoolTimeout (Local<String> property,
-                                const AccessorInfo& info)
+NAN_GETTER(Pool::GetPoolTimeout)
 {
-  HandleScope scope;
-  Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
+  NanScope();
+  Pool* njsPool = ObjectWrap::Unwrap<Pool>(args.Holder());
   if(!njsPool->isValid_)
   {
     string msg = NJSMessages::getErrorMsg(errInvalidPool);
     NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
-    return Undefined();
+    NanReturnUndefined();
   }
   else
   {
-    Local<Integer> value = v8::Integer::New(njsPool->poolTimeout_);
-    return scope.Close(value);
+    Local<Integer> value = NanNew<v8::Integer>(njsPool->poolTimeout_);
+     NanReturnValue(value);
   }
-  return Undefined();
+  NanReturnUndefined();
 }
 
 /*****************************************************************************/
@@ -227,29 +223,28 @@ Handle<Value> Pool::GetPoolTimeout (Local<String> property,
    DESCRIPTION
      Get Accessor of connectionsOpen Property
 */
-Handle<Value> Pool::GetConnectionsOpen (Local<String> property,
-                                        const AccessorInfo& info)
+NAN_GETTER(Pool::GetConnectionsOpen)
 {
-  HandleScope scope;
-  Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
+  NanScope();
+  Pool* njsPool = ObjectWrap::Unwrap<Pool>(args.Holder());
   if(!njsPool->isValid_)
   {
     string error = NJSMessages::getErrorMsg ( errInvalidPool );
     NJS_SET_EXCEPTION(error.c_str(), (int) error.length());
-    return scope.Close(Undefined());
+     NanReturnUndefined();
   }
   try
   {
-    Local<Integer> value = v8::Integer::New(njsPool->dpipool_->
+    Local<Integer> value = NanNew<v8::Integer>(njsPool->dpipool_->
                                             connectionsOpen());
-    return scope.Close(value);
+     NanReturnValue(value);
   }
   catch(dpi::Exception &e)
   {
     NJS_SET_EXCEPTION(e.what(), (int) strlen(e.what()));
-    return Undefined();
+    NanReturnUndefined();
   }
-  return Undefined();
+  NanReturnUndefined();
 }
 
 /*****************************************************************************/
@@ -257,30 +252,29 @@ Handle<Value> Pool::GetConnectionsOpen (Local<String> property,
    DESCRIPTION
      Get Accessor of connectionsInUse Property
 */
-Handle<Value> Pool::GetConnectionsInUse (Local<String> property,
-                              const AccessorInfo& info)
+NAN_GETTER(Pool::GetConnectionsInUse)
 {
-  HandleScope scope;
-  Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
+  NanScope();
+  Pool* njsPool = ObjectWrap::Unwrap<Pool>(args.Holder());
   Local<Integer> value;
   if(!njsPool->isValid_)
   {
     string error = NJSMessages::getErrorMsg ( errInvalidPool );
     NJS_SET_EXCEPTION(error.c_str(), (int) error.length());
-    return scope.Close(Undefined());
+     NanReturnUndefined();
   }
   try
   {
-    Local<Integer> value = v8::Integer::New(njsPool->dpipool_->
+    Local<Integer> value = NanNew<v8::Integer>(njsPool->dpipool_->
                                             connectionsInUse());
-    return scope.Close(value);
+     NanReturnValue(value);
   }
   catch(dpi::Exception &e)
   {
     NJS_SET_EXCEPTION(e.what(), (int) strlen(e.what()));
-    return Undefined();
+    NanReturnUndefined();
   }
-  return Undefined();
+  NanReturnUndefined();
 }
 
 /*****************************************************************************/
@@ -288,23 +282,22 @@ Handle<Value> Pool::GetConnectionsInUse (Local<String> property,
    DESCRIPTION
      Get Accessor of stmtCacheSize Property
 */
-Handle<Value> Pool::GetStmtCacheSize (Local<String> property,
-                                      const AccessorInfo& info)
+NAN_GETTER(Pool::GetStmtCacheSize)
 {
-  HandleScope scope;
-  Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
+  NanScope();
+  Pool* njsPool = ObjectWrap::Unwrap<Pool>(args.Holder());
   if(!njsPool->isValid_)
   {
     string msg = NJSMessages::getErrorMsg(errInvalidPool);
     NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
-    return Undefined();
+    NanReturnUndefined();
   }
   else 
   {
-    Local<Integer> value = v8::Integer::New(njsPool->stmtCacheSize_);  
-    return scope.Close(value);
+    Local<Integer> value = NanNew<v8::Integer>(njsPool->stmtCacheSize_);  
+     NanReturnValue(value);
   }
-  return Undefined();
+  NanReturnUndefined();
 }
 
 /*****************************************************************************/
@@ -312,11 +305,10 @@ Handle<Value> Pool::GetStmtCacheSize (Local<String> property,
    DESCRIPTION
      Set Accessor of poolMin Property - throws error
 */
-void Pool::SetPoolMin (Local<String> property, Local<Value> value,
-                            const AccessorInfo& info)
+NAN_SETTER(Pool::SetPoolMin)
 {
-  HandleScope scope;
-  Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
+  NanScope();
+  Pool* njsPool = ObjectWrap::Unwrap<Pool>(args.Holder());
   string msg;
   if(!njsPool->isValid_)
     msg = NJSMessages::getErrorMsg(errInvalidPool);
@@ -330,11 +322,10 @@ void Pool::SetPoolMin (Local<String> property, Local<Value> value,
    DESCRIPTION
      Set Accessor of poolMax Property - throws error
 */
-void Pool::SetPoolMax (Local<String> property, Local<Value> value,
-                            const AccessorInfo& info)
+NAN_SETTER(Pool::SetPoolMax)
 {
-  HandleScope scope;
-  Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
+  NanScope();
+  Pool* njsPool = ObjectWrap::Unwrap<Pool>(args.Holder());
   string msg;
   if(!njsPool->isValid_)
     msg = NJSMessages::getErrorMsg(errInvalidPool);
@@ -348,11 +339,10 @@ void Pool::SetPoolMax (Local<String> property, Local<Value> value,
    DESCRIPTION
      Set Accessor of poolIncrement Property - throws error
 */
-void Pool::SetPoolIncrement (Local<String> property, Local<Value> value,
-                            const AccessorInfo& info)
+NAN_SETTER(Pool::SetPoolIncrement)
 {
-  HandleScope scope;
-  Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
+  NanScope();
+  Pool* njsPool = ObjectWrap::Unwrap<Pool>(args.Holder());
   string msg;
   if(!njsPool->isValid_)
     msg = NJSMessages::getErrorMsg(errInvalidPool);
@@ -366,11 +356,10 @@ void Pool::SetPoolIncrement (Local<String> property, Local<Value> value,
    DESCRIPTION
      Set Accessor of poolTimeout Property - throws error
 */
-void Pool::SetPoolTimeout (Local<String> property, Local<Value> value,
-                            const AccessorInfo& info)
+NAN_SETTER(Pool::SetPoolTimeout)
 {
-  HandleScope scope;
-  Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
+  NanScope();
+  Pool* njsPool = ObjectWrap::Unwrap<Pool>(args.Holder());
   string msg;
   if(!njsPool->isValid_)
     msg = NJSMessages::getErrorMsg(errInvalidPool);
@@ -384,11 +373,10 @@ void Pool::SetPoolTimeout (Local<String> property, Local<Value> value,
    DESCRIPTION
      Set Accessor of connectionsOpen Property - throws error
 */
-void Pool::SetConnectionsOpen (Local<String> property, Local<Value> value,
-                            const AccessorInfo& info)
+NAN_SETTER(Pool::SetConnectionsOpen)
 {
-  HandleScope scope;
-  Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
+  NanScope();
+  Pool* njsPool = ObjectWrap::Unwrap<Pool>(args.Holder());
   string msg;
   if(!njsPool->isValid_)
     msg = NJSMessages::getErrorMsg(errInvalidPool);
@@ -402,11 +390,10 @@ void Pool::SetConnectionsOpen (Local<String> property, Local<Value> value,
    DESCRIPTION
      Set Accessor of connectionsInUse Property - throws error
 */
-void Pool::SetConnectionsInUse (Local<String> property, Local<Value> value,
-                            const AccessorInfo& info)
+NAN_SETTER(Pool::SetConnectionsInUse)
 {
-  HandleScope scope;
-  Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
+  NanScope();
+  Pool* njsPool = ObjectWrap::Unwrap<Pool>(args.Holder());
   string msg;
   if(!njsPool->isValid_)
     msg = NJSMessages::getErrorMsg(errInvalidPool);
@@ -420,11 +407,10 @@ void Pool::SetConnectionsInUse (Local<String> property, Local<Value> value,
    DESCRIPTION
      Set Accessor of stmtCacheSize Property - throws error
 */
-void Pool::SetStmtCacheSize(Local<String> property, Local<Value> value,
-                            const AccessorInfo& info)
+NAN_SETTER(Pool::SetStmtCacheSize)
 {
-  HandleScope scope;
-  Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
+  NanScope();
+  Pool* njsPool = ObjectWrap::Unwrap<Pool>(args.Holder());
   string msg;
   if(!njsPool->isValid_)
     msg = NJSMessages::getErrorMsg(errInvalidPool);
@@ -441,16 +427,17 @@ void Pool::SetStmtCacheSize(Local<String> property, Local<Value> value,
    PARAMETERS:
      Arguments - Callback 
 */
-Handle<Value> Pool::GetConnection(const Arguments& args)
+NAN_METHOD(Pool::GetConnection)
 {
-  HandleScope scope;
+  NanScope();
 
   Local<Function> callback;
   NJS_GET_CALLBACK ( callback, args );
 
   Pool *njsPool = ObjectWrap::Unwrap<Pool>(args.This());
   connectionBaton *connBaton = new connectionBaton ();
-  connBaton->cb = Persistent<Function>::New( callback );
+
+  NanAssignPersistent( connBaton->cb, callback );
 
   NJS_CHECK_NUMBER_OF_ARGS ( connBaton->error, args, 1, 1, exitGetConnection );
 
@@ -469,7 +456,7 @@ exitGetConnection:
   uv_queue_work(uv_default_loop(), &connBaton->req, Async_GetConnection, 
                 (uv_after_work_cb)Async_AfterGetConnection);
   
-  return Undefined();
+  NanReturnUndefined();
 } 
 
 /*****************************************************************************/
@@ -515,27 +502,27 @@ void Pool::Async_GetConnection(uv_work_t *req)
 */
 void Pool::Async_AfterGetConnection(uv_work_t *req)
 {
-  HandleScope scope;
+  NanScope();
   connectionBaton *connBaton = (connectionBaton*)req->data;
   v8::TryCatch tc;
   Handle<Value> argv[2];
   if(!(connBaton->error).empty()) 
   {
-    argv[0] = v8::Exception::Error(String::New((connBaton->error).c_str()));
-    argv[1] = Undefined();
+    argv[0] = v8::Exception::Error(NanNew<v8::String>((connBaton->error).c_str()));
+    argv[1] = NanUndefined();
   } 
   else
   {
-    argv[0] = Undefined();
-    Handle<Object> connection = Connection::connectionTemplate_s->
-                                GetFunction()-> NewInstance();
+    argv[0] = NanUndefined();
+    Local<FunctionTemplate> lft = NanNew(Connection::connectionTemplate_s);
+    Handle<Object> connection = lft->GetFunction()-> NewInstance();
     (ObjectWrap::Unwrap<Connection> (connection))->
                                      setConnection( connBaton->dpiconn,
                                                     connBaton->oracledb );
     argv[1] = connection;
   }
-  node::MakeCallback(Context::GetCurrent()->Global(), 
-                     connBaton->cb, 2, argv); 
+  NanMakeCallback(NanGetCurrentContext()->Global(), 
+                     NanNew(connBaton->cb), 2, argv); 
   if(tc.HasCaught())
   {
     node::FatalException(tc);
@@ -551,16 +538,16 @@ void Pool::Async_AfterGetConnection(uv_work_t *req)
    PARAMETERS:
      Arguments - Callback 
 */
-Handle<Value> Pool::Terminate(const Arguments& args )
+NAN_METHOD(Pool::Terminate)
 {
-  HandleScope scope;
+  NanScope();
 
   Local<Function> callback;
   NJS_GET_CALLBACK ( callback, args );
 
   Pool *njsPool = ObjectWrap::Unwrap<Pool>(args.This());
   connectionBaton *terminateBaton = new connectionBaton ();
-  terminateBaton->cb = Persistent<Function>::New( callback );
+  NanAssignPersistent( terminateBaton->cb, callback );
 
   NJS_CHECK_NUMBER_OF_ARGS ( terminateBaton->error, args, 1, 1, exitTerminate );
 
@@ -578,7 +565,7 @@ exitTerminate:
   uv_queue_work(uv_default_loop(), &terminateBaton->req, Async_Terminate, 
                 (uv_after_work_cb)Async_AfterTerminate);
   
- return scope.Close(Undefined());
+  NanReturnUndefined();
 }
 
 /*****************************************************************************/
@@ -619,7 +606,7 @@ void Pool::Async_Terminate(uv_work_t *req)
 */
 void Pool::Async_AfterTerminate(uv_work_t *req)
 {
-  HandleScope scope;
+  NanScope();
   connectionBaton *terminateBaton = (connectionBaton*)req->data;
 
   v8::TryCatch tc;
@@ -627,12 +614,12 @@ void Pool::Async_AfterTerminate(uv_work_t *req)
   Handle<Value> argv[1];
 
   if(!(terminateBaton->error).empty())
-    argv[0] = v8::Exception::Error(String::New((terminateBaton->error).c_str()));
+    argv[0] = v8::Exception::Error(NanNew<v8::String>((terminateBaton->error).c_str()));
   else
-    argv[0] = Undefined();
+    argv[0] = NanUndefined();
 
-  node::MakeCallback( Context::GetCurrent()->Global(),
-                      terminateBaton->cb, 1, argv );
+  NanMakeCallback( NanGetCurrentContext()->Global(),
+                      NanNew(terminateBaton->cb), 1, argv );
   if(tc.HasCaught())
   {
     node::FatalException(tc);

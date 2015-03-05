@@ -107,7 +107,7 @@ typedef struct eBaton
 
   ~eBaton ()
    {
-     cb.Dispose();
+     NanDisposePersistent(cb);
      if( !binds.empty() )
      {
        for( unsigned int index = 0 ;index < binds.size(); index++ )
@@ -152,52 +152,43 @@ public:
   static void Init (Handle<Object> target);
  
 private:
-  static Handle<Value>  New (const Arguments& args);
-
+   static v8::Handle<v8::Value> New(_NAN_METHOD_ARGS);
   // Execute Method on Connection class
-  static Handle<Value>  Execute (const Arguments& args);
+  static NAN_METHOD(Execute);
   static void Async_Execute (uv_work_t *req);
   static void Async_AfterExecute (uv_work_t *req);
  
   // Release Method on Connection class
-  static Handle<Value>  Release (const Arguments& args);
-  static void Async_Release (uv_work_t *req);
+  static NAN_METHOD(Release);
+  static void Connection::Async_Release(uv_work_t *req);
   static void Async_AfterRelease (uv_work_t *req);
  
   // Commit Method on Connection class
-  static Handle<Value>  Commit (const Arguments& args);
-  static void Async_Commit (uv_work_t *req);
+  static NAN_METHOD(Commit);
+  static void Connection::Async_Commit (uv_work_t *req);
   static void Async_AfterCommit (uv_work_t *req);
  
   // Rollback Method on Connection class
-  static Handle<Value>  Rollback (const Arguments& args);
-  static void Async_Rollback (uv_work_t *req);
+  static NAN_METHOD(Rollback);
+  static void Connection::Async_Rollback (uv_work_t *req);
   static void Async_AfterRollback (uv_work_t *req);
  
   // BreakMethod on Connection class
-  static Handle<Value>  Break (const Arguments& args);
-  static void Async_Break (uv_work_t *req);
+  static NAN_METHOD(Break);
+  static void Connection::Async_Break(uv_work_t *req);
   static void Async_AfterBreak (uv_work_t *req);
 
   // Define Getter Accessors to properties
-  static Handle<Value> GetStmtCacheSize (Local<String> property,
-                                    const AccessorInfo& info);
-  static Handle<Value> GetClientId (Local<String> property,
-                                     const AccessorInfo& info);
-  static Handle<Value> GetModule (Local<String> property,
-                                   const AccessorInfo& info);
-  static Handle<Value> GetAction (Local<String> property,
-                                   const AccessorInfo& info);
+  static NAN_GETTER(GetStmtCacheSize);
+  static NAN_GETTER(GetClientId);
+  static NAN_GETTER(GetModule);
+  static NAN_GETTER(GetAction);
      
   // Define Setter Accessors to properties
-  static void SetStmtCacheSize (Local<String> property,Local<Value> value,
-                                 const AccessorInfo& info);
-  static void SetClientId (Local<String> property,Local<Value> value,
-                            const AccessorInfo& info);
-  static void SetModule (Local<String> property,Local<Value> value,
-                          const AccessorInfo& info);
-  static void SetAction (Local<String> property,Local<Value> value,
-                          const AccessorInfo& info);
+  static NAN_SETTER(SetStmtCacheSize);
+  static NAN_SETTER(SetClientId);
+  static NAN_SETTER(SetModule);
+  static NAN_SETTER(SetAction);
     
   Connection ();
   ~Connection ();
@@ -205,13 +196,13 @@ private:
   
   static void PrepareAndBind (eBaton* executeBaton);
   static void GetDefines (eBaton* executeBaton);
-  static void ProcessBinds (const Arguments& args, unsigned int index,
+  static void ProcessBinds (_NAN_METHOD_ARGS, unsigned int index,
                             eBaton* executeBaton);
-  static void ProcessOptions (const Arguments& args, unsigned int index,
+  static void ProcessOptions (_NAN_METHOD_ARGS, unsigned int index,
                               eBaton* executeBaton);
-  static void ProcessCallback (const Arguments& args, unsigned int index,
+  static void ProcessCallback (_NAN_METHOD_ARGS, unsigned int index,
                                eBaton* executeBaton);
-  static void GetExecuteBaton (const Arguments& args, eBaton* executeBaton);
+  static void GetExecuteBaton (_NAN_METHOD_ARGS, eBaton* executeBaton);
   static void GetOptions (Handle<Object> options, eBaton* executeBaton);
   static void GetBinds (Handle<Object> bindobj, eBaton* executeBaton);
   static void GetBinds (Handle<Array> bindarray, eBaton* executeBaton);
@@ -221,11 +212,11 @@ private:
                                      eBaton* executeBaton, BindType bindType);
   static void GetOutBindParams (unsigned short dataType, Bind* bind, 
                                 eBaton* executeBaton);
-  static Handle<Value> GetOutBinds (eBaton* executeBaton);
-  static Handle<Value> GetOutBindArray ( std::vector<Bind*> binds, unsigned int outCount);
-  static Handle<Value> GetOutBindObject (std::vector<Bind*> binds);  
-  static Handle<Value> GetRows (eBaton* executeBaton);
-  static Handle<Value> GetValue (short ind, unsigned short type, void* val,
+  static v8::Handle<v8::Value> GetOutBinds (eBaton* executeBaton);
+  static v8::Handle<v8::Value> GetOutBindArray ( std::vector<Bind*> binds, unsigned int outCount);
+  static v8::Handle<v8::Value> GetOutBindObject (std::vector<Bind*> binds);  
+  static v8::Handle<v8::Value> GetRows (eBaton* executeBaton);
+  static v8::Handle<v8::Value> GetValue (short ind, unsigned short type, void* val,
                                  DPI_BUFLEN_TYPE len);
   static void UpdateDateValue ( eBaton *executeBaton );
   static void v8Date2OraDate ( v8::Handle<v8::Value>, Bind *bind);
