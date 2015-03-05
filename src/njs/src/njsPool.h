@@ -49,7 +49,7 @@ public:
    
 private:
 
-   static NAN_METHOD(New);
+   static v8::Handle<v8::Value> New(_NAN_METHOD_ARGS);
   
    // Get Connection Methods 
    static NAN_METHOD(GetConnection);
