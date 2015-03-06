@@ -569,8 +569,8 @@ Handle<Value> Pool::Terminate(const Arguments& args )
     terminateBaton->error = NJSMessages::getErrorMsg( errInvalidPool );
     goto exitTerminate;
   }
-  terminateBaton->dpipool  = njsPool->dpipool_;
-  njsPool->isValid_        = false;
+  terminateBaton->dpipool      = njsPool->dpipool_;
+  terminateBaton->isPoolValid  = &(njsPool->isValid_);
 
 exitTerminate:
   terminateBaton->req.data = (void *)terminateBaton;
@@ -627,9 +627,14 @@ void Pool::Async_AfterTerminate(uv_work_t *req)
   Handle<Value> argv[1];
 
   if(!(terminateBaton->error).empty())
+  {
     argv[0] = v8::Exception::Error(String::New((terminateBaton->error).c_str()));
+  }
   else
+  {
     argv[0] = Undefined();
+    *(terminateBaton->isPoolValid) = false;
+  }
 
   node::MakeCallback( Context::GetCurrent()->Global(),
                       terminateBaton->cb, 1, argv );

@@ -167,9 +167,10 @@ typedef struct connectionBaton
   unsigned int maxRows;
   unsigned int outFormat;
   Persistent<Function> cb;
-  dpi::Env* dpienv;
-  dpi::Conn* dpiconn;
+  dpi::Env*   dpienv;
+  dpi::Conn*  dpiconn;
   dpi::SPool* dpipool;
+  bool*       isPoolValid;
 
   Oracledb *oracledb;
 
