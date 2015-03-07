@@ -42,7 +42,7 @@ limitations under the License.
      - [version](#propdbversion)
   - 3.3 [Oracledb Methods](#oracledbmethods)
      - 3.3.1 [createPool()](#createpool)
-     - 3.3.2 [getConnection()](#getconnection1)
+     - 3.3.2 [getConnection()](#getconnectiondb)
 4. [Pool Class](#poolclass)
   - 4.1 [Pool Properties](#poolproperties)
      - [connectionsInUse](#proppoolconnectionsinuse)
@@ -53,7 +53,7 @@ limitations under the License.
      - [poolTimeout](#proppoolpooltimeout)
      - [stmtCacheSize](#proppoolstmtcachesize)
   - 4.2 [Pool Methods](#poolmethods)
-     - 4.2.1 [getConnection()](#getconnection2)
+     - 4.2.1 [getConnection()](#getconnectionpool)
      - 4.2.2 [terminate()](#terminate)
 5. [Connection Class](#connectionclass)
   - 5.1 [Connection Properties](#connectionproperties)
@@ -67,15 +67,19 @@ limitations under the License.
      - 5.2.3 [execute()](#execute)
      - 5.2.4 [release()](#release)
      - 5.2.5 [rollback()](#rollback)
-6. [SQL Execution](#sqlexecution)
-  - 6.1 [SELECT Statements](#select)
-     - 6.1.1 [Result Type Mapping](#typemap)
-     - 6.1.2 [Statement Caching](#stmtcache)
-  - 6.2 [Bind Parameters for Prepared Statements](#bind)
-     - 6.2.1 [IN Bind Parameters](#inbind)
-     - 6.2.2 [OUT and IN OUT Bind Parameters](#outbind)
-7. [Transaction Management](#transactionmgt)
-8. [Database Resident Connection Pooling](#drcp)
+6. [Connection Handling](#connectionhandling)
+  - 6.1 [Connection Strings](#connectionstrings)
+  - 6.2 [Database Resident Connection Pooling](#drcp)
+  - 6.3 [External Authentication](#extauth)
+7. [SQL Execution](#sqlexecution)
+  - 7.1 [SELECT Statements](#select)
+     - 7.1.1 [Query Output Formats](#queryoutputformats)
+     - 7.1.2 [Result Type Mapping](#typemap)
+     - 7.1.3 [Statement Caching](#stmtcache)
+  - 7.2 [Bind Parameters for Prepared Statements](#bind)
+     - 7.2.1 [IN Bind Parameters](#inbind)
+     - 7.2.2 [OUT and IN OUT Bind Parameters](#outbind)
+8. [Transaction Management](#transactionmgt)
 9. [External Configuration](#oraaccess)
 
 ## <a name="intro"></a> 1. Introduction
@@ -83,8 +87,11 @@ limitations under the License.
 The Oracle Database Node.js driver *node-oracledb* powers high
 performance Node.js applications.
 
-This document shows how to use node-oracledb.  For how to install
-node-oracledb, see [INSTALL](../INSTALL.md).
+This document shows how to use node-oracledb.  This document contains
+the API reference in sections 2 - 5 and the user guide in subsequent
+sections.
+
+For how to install node-oracledb, see [INSTALL](../INSTALL.md).
 
 ### Example:  Simple SELECT statement implementation in Node.js
 
@@ -435,19 +442,10 @@ The properties of the `poolAttrs` object are described below.
 String connectString
 ```
 
-The Oracle database instance to connect to.  The string can be an Easy Connect string, or a
-Connect Name from a `tnsnames.ora` file, or the name of a local
-Oracle database instance.
-
-The [Easy Connect](https://docs.oracle.com/database/121/NETAG/naming.htm#i498306) syntax is:
-*[//]host_name[:port][/service_name][:server_type][/instance_name]*
-
-For example, use *"localhost/XE"* to connect to the database *XE* on the the local machine.
-
-If a Connect Name from a `tnsnames.ora` file is used, set the
-`TNS_ADMIN` environment variable such that `$TNS_ADMIN/tnsnames.ora`
-is read.  Alternatively make sure the name is in
-`$ORACLE_HOME/network/admin/tnsnames.ora` or `/etc/tnsnames.ora`.
+The Oracle database instance to connect to.  The string can be an Easy
+Connect string, or a Connect Name from a `tnsnames.ora` file, or the
+name of a local Oracle database instance.  See
+[Connection Strings](#connectionstrings) for examples.
 
 If `connectString` is not specified, the empty string "" is used which
 indicates to connect to the local, default database.
@@ -472,9 +470,11 @@ proxy user is specified.
 Number stmtCacheSize
 ```
 
-The number of statements that are cached in the [statement cache](#stmtcache) of
-each connection. This optional property may be used to override the
-corresponding property in the *Oracledb* object.
+The number of statements to be cached in the
+[statement cache](#stmtcache) of each connection.  This optional
+property may be used to override the
+[stmtCacheSize](#propdbstmtcachesize) property of the *Oracledb*
+object.
 
 ```
 Number poolMax
@@ -524,7 +524,7 @@ Callback function parameter | Description
 *Error error* | If `createPool()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 *Pool pool*   | The newly created connection pool. If `createPool()` fails, `pool` will be NULL.  See [Pool class](#poolclass) for more information.
 
-#### <a name="getconnection1"></a> 3.3.2 getConnection()
+#### <a name="getconnectiondb"></a> 3.3.2 getConnection()
 
 Gets a connection to a database instance.
 
@@ -532,17 +532,16 @@ Gets a connection to a database instance.
 
 This is an asynchronous call.
 
-Obtains a connection directly from an *Oracledb* object.  These
-connections are not pooled. Such connections are released and
-terminated, and all connections created on the *Oracledb* object are
-new and cannot be recycled. Therefore, the `getConnection()` call on
-the *Oracledb* object incurs more overhead if it is compared to the
-`getConnection()` call on the Pool object. However, for situations
-where connections are used infrequently, this approach is more
-efficient than creating and managing a connection pool.
+Obtains a connection directly from an *Oracledb* object.
 
-Note: In most cases, Oracle recommends getting new connections via a
-[connection pool](#createpool) instead.
+These connections are not pooled.  For situations where connections
+are used infrequently, this call may be more efficient than creating
+and managing a connection pool.  However, in most cases, Oracle
+recommends getting new connections from a
+[connection pool](#createpool).
+
+See [Connection Handling](#connectionhandling) for more information on
+connections.
 
 ##### Prototype
 
@@ -575,17 +574,8 @@ String connectString
 
 The Oracle database instance to connect to.  The string can be an Easy Connect string, or a
 Connect Name from a `tnsnames.ora` file, or the name of a local
-Oracle database instance.
-
-The [Easy Connect](https://docs.oracle.com/database/121/NETAG/naming.htm#i498306) syntax is:
-*[//]host_name[:port][/service_name][:server_type][/instance_name]*
-
-For example, use *"localhost/XE"* to connect to the database *XE* on the the local machine.
-
-If a Connect Name from a `tnsnames.ora` file is used, set the
-`TNS_ADMIN` environment variable such that `$TNS_ADMIN/tnsnames.ora`
-is read.  Alternatively make sure the name is in
-`$ORACLE_HOME/network/admin/tnsnames.ora` or `/etc/tnsnames.ora`.
+Oracle database instance.  See
+[Connection Strings](#connectionstrings) for examples.
 
 If `connectString` is not specified, the empty string "" is used which
 indicates to connect to the local, default database.
@@ -610,9 +600,11 @@ proxy user is specified.
 Number stmtCacheSize
 ```
 
-The number of statements that must be cached in the [statement cache](#stmtcache) of
-each connection.  This optional property may be used to override the corresponding
-property in the *Oracledb* object.
+The number of statements to be cached in the
+[statement cache](#stmtcache) of each connection.  This optional
+property may be used to override the
+[stmtCacheSize](#propdbstmtcachesize) property of the *Oracledb*
+object.
 
 ```
 function(Error error, Connection conn)
@@ -699,8 +691,8 @@ below poolMin.
 readonly Number stmtCacheSize
 ```
 
-The number of statements that must be cached in the [statement cache](#stmtcache) of
-each connection.
+The number of statements to be cached in the
+[statement cache](#stmtcache) of each connection.
 
 The default is the `stmtCacheSize` property of the *Oracledb* object
 when the pool is created.
@@ -709,7 +701,7 @@ This property may be overridden for a specific Connection object.
 
 ### <a name="poolmethods"></a> 4.2 Pool Methods
 
-#### <a name="getconnection2"></a> 4.2.1 getConnection()
+#### <a name="getconnectionpool"></a> 4.2.1 getConnection()
 
 This method obtains a connection from the connection pool.
 
@@ -723,6 +715,9 @@ new connection is created and returned to the caller, as long as the
 number of connections does not exceed the specified maximum for the
 pool. If the pool is at its maximum limit, the `getConnection()` call
 results in an error, such as *ORA-24418: Cannot open further sessions*.
+
+See [Connection Handling](#connectionhandling) for more information on
+connections.
 
 ##### Prototype
 
@@ -784,8 +779,8 @@ Callback function parameter | Description
 ## <a name="connectionclass"></a> 5. Connection Class
 
 The Connection object is obtained by a Pool Class
-[`getConnection()`](#getconnection2) or
-Oracledb Class [`getConnection()`](#getconnection1)
+[`getConnection()`](#getconnectionpool) or
+Oracledb Class [`getConnection()`](#getconnectiondb)
 call.
 
 The connection is used to access an Oracle database.
@@ -825,9 +820,10 @@ attribute for end-to-end application tracing. This is a write-only property.
 readonly Number stmtCacheSize
 ```
 
-The number of statements that must be cached in the [statement cache](#stmtcache) of
-the connection. The default value is the `stmtCacheSize` property in effect in the *Pool*
-object when the connection is created in the pool.
+The number of statements to be cached in the
+[statement cache](#stmtcache) of the connection.  The default value is
+the `stmtCacheSize` property in effect in the *Pool* object when the
+connection is created in the pool.
 
 ### <a name="connectionmethods"></a> 5.2 Connection Methods
 
@@ -1101,7 +1097,116 @@ Callback function parameter | Description
 ----------------------------|-------------
 *Error error* | If `rollback()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
-## <a name="sqlexecution"></a> 6. SQL Execution
+## <a name="connectionhandling"></a> 6. Connection Handling
+
+Connections can be created directly by *Oracledb*
+[getConnection()](#getconnectiondb):
+
+```javascript
+var oracledb = require('oracledb');
+
+oracledb.getConnection(
+  {
+    user          : "hr",
+    password      : "welcome",
+    connectString : "localhost/XE"
+  },
+  . . .
+);
+```
+  
+Alternatively connections can be obtained from *Pool*
+[getConnection()](#getconnectionpool):
+
+
+```javascript
+var oracledb = require('oracledb');
+
+oracledb.createPool (
+  {
+    user          : "hr"
+    password      : "welcome"
+    connectString : "localhost/XE"
+  },
+  function(err, pool)
+  {
+    pool.getConnection (
+      function(err, connection)
+      {
+      . . .
+      });
+  });
+```
+		
+In most cases, Oracle recommends using a connection pool because all
+connections created on the *Oracledb* object are new and cannot be
+recycled.  However, in situations where connections are used
+infrequently, direct connections may be more efficient than using a
+connection pool.
+
+### <a name="connectionstrings"></a> 6.1 Connection Strings
+
+The *Oracledb* [getConnection()](#getconnectiondb) and *Pool*
+[getConnection()](#getconnectionpool) `connectString` can be an
+Easy Connect string, or a Connect Name from a `tnsnames.ora` file, or
+the name of a local Oracle database instance.
+
+The [Easy Connect](https://docs.oracle.com/database/121/NETAG/naming.htm#i498306) syntax is:
+*[//]host_name[:port][/service_name][:server_type][/instance_name]*
+
+For example, use *"localhost/XE"* to connect to the database *XE* on the the local machine.
+
+If a Connect Name from a `tnsnames.ora` file is used, set the
+`TNS_ADMIN` environment variable such that `$TNS_ADMIN/tnsnames.ora`
+is read.  Alternatively make sure the name is in
+`$ORACLE_HOME/network/admin/tnsnames.ora` or `/etc/tnsnames.ora`.
+
+### <a name="drcp"></a> 6.2 Database Resident Connection Pooling
+
+[Database Resident Connection Pooling](http://docs.oracle.com/database/121/ADFNS/adfns_perf_scale.htm#ADFNS228)
+enables database resource sharing for applications that run in
+multiple client processes or run on multiple middle-tier application
+servers.  DRCP reduces the overall number of connections that a
+database must handle.
+
+DRCP is distinct from node-oracledb's local
+[connection pool](#poolclass).  The two pools can be used separately,
+or together. 
+
+DRCP is useful for applications which share the same credentials, have
+similar session settings (for example date format settings and PL/SQL
+package state), and where the application gets a database connection,
+works on it for a relatively short duration, and then releases it.
+
+To use DRCP in node-oracledb:
+
+1. The DRCP pool must be started in the database: `execute dbms_connection_pool.start_pool();`
+2. The `getConnection()` property `connectString` must specify to use a pooled server, either by the Easy Connect syntax like `myhost/sales:POOLED`, or by using a `tnsnames.ora` alias for a connection that contains `(SERVER=POOLED)`.
+3. The [`connectionClass`](#propdbconclass) should be set by the node-oracledb application.  If it is not set, the pooled server session memory will not be reused optimally.
+
+The DRCP 'Purity' value is NEW for
+[`oracledb.getConnection()`](#getconnectiondb) connections that do not
+use a local connection pool.  These connections reuse a DRCP pooled
+server process (thus avoiding the costs of process creation and
+destruction) but do not reuse its session memory.  The 'Purity' is
+SELF for [`pool.getConnection()`](#getconnectionpool) connections,
+allowing reuse of the pooled server process and session memory, giving
+maximum benefit from DRCP.  See the Oracle documentation on
+[benefiting from scalability](http://docs.oracle.com/database/121/ADFNS/adfns_perf_scale.htm#ADFNS506).
+
+The
+[Oracle DRCP documentation](http://docs.oracle.com/database/121/ADFNS/adfns_perf_scale.htm#ADFNS228)
+has more details, including when to use, and when not to use DRCP.
+
+There are a number of Oracle Database `V$` views that can be used to
+monitor DRCP.  These are discussed in the documentation and in the
+Oracle white paper
+[PHP Scalability and High Availability](http://www.oracle.com/technetwork/topics/php/php-scalability-ha-twp-128842.pdf).
+This paper also gives more detail on configuring DRCP.
+
+### <a name="extauth"></a> 6.3 External Authentication
+
+## <a name="sqlexecution"></a> 7. SQL Execution
 
 A SQL or PL/SQL statement may be executed using the *Connection*
 [`execute()`](#execute) method.
@@ -1109,20 +1214,21 @@ A SQL or PL/SQL statement may be executed using the *Connection*
 After all database calls on the connection complete, the application
 should use the [`release()`](#release) call to release the connection.
 
-### <a name="select"></a> 6.1 SELECT Statements
+### <a name="select"></a> 7.1 SELECT Statements
 
-If the `execute()` method contains a SQL `SELECT` statement, it returns
-an array of rows. Each row, by default, is an array of column values.
-The rows array holds up to `maxRows` number of rows.
+SQL `SELECT` statements return an array of rows.  The rows array holds up to
+[`maxRows`](#propdbmaxrows) number of rows.  
 
-The following example shows how to obtain rows returned a `SELECT`
-statement.
+### <a name="queryoutputformats"></a> 7.1.1 Query Output Formats
+
+The default format for each row returned is an array of column values.
+For example:
 
 ```javascript
 connection.execute("SELECT first_name, salary, hire_date "
-                  + "FROM   employees, departments "
-                  + "WHERE  employees.department_id = departments.department_id "
-                  + "AND    departments.department_name = 'Accounting'",
+                 + "FROM   employees, departments "
+                 + "WHERE  employees.department_id = departments.department_id "
+                 + "AND    departments.department_name = 'Accounting'",
                    function(err, result) {
                      if (err) { console.error(err.message); return; }
                      var rows = result.rows;
@@ -1145,9 +1251,9 @@ specify the `outFormat` option to be `OBJECT`:
 
 ```javascript
 connection.execute("SELECT first_name, salary, hire_date "
-                  + "FROM employees, departments "
-                  + "WHERE employees.department_id = departments.department_id "
-                  + "AND departments.department_name = 'Accounting'",
+                 + "FROM employees, departments "
+                 + "WHERE employees.department_id = departments.department_id "
+                 + "AND departments.department_name = 'Accounting'",
                    [],  // No bind variables
                    {outFormat: oracledb.OBJECT},
                    function(err, result) {
@@ -1173,7 +1279,7 @@ property names are uppercase.  This is the default casing behavior for
 Oracle client programs when a database table is created with
 case-insensitive column names.
 
-### <a name="typemap"></a> 6.1.1 Result Type Mapping
+### <a name="typemap"></a> 7.1.2 Result Type Mapping
 
 Oracle character, number and date columns can be selected.  Data types
 that are currently unsupported give a "datatype is not supported"
@@ -1196,7 +1302,7 @@ Query result type mappings for Oracle Database types to JavaScript types are:
     LOCAL TIMEZONE` using
     [OCIDateTime](https://docs.oracle.com/database/121/LNOCI/oci12oty.htm#LNOCI16840).
 
-### <a name="stmtcache"></a> 6.1.2 Statement Caching
+### <a name="stmtcache"></a> 7.1.3 Statement Caching
 
 Node-oracledb uses the
 [Oracle OCI statement cache](https://docs.oracle.com/database/121/LNOCI/oci09adv.htm#i471377)
@@ -1213,7 +1319,7 @@ The statement cache can be automatically tuned with the
 [oraaccess.xml file](#oraaccess).
 
 
-### <a name="bind"></a> 6.2 Bind Parameters for Prepared Statements
+### <a name="bind"></a> 7.2 Bind Parameters for Prepared Statements
 
 Using bind variables in SQL statements is recommended in preference to
 constructing SQL statements by string concatenation.  This is for
@@ -1222,7 +1328,7 @@ database.  OUT binds are used to retrieve data.  IN OUT binds are
 passed in, and may return a different value after the statement
 executes.
 
-#### <a name="inbind"></a> 6.2.1 IN Bind Parameters
+#### <a name="inbind"></a> 7.2.1 IN Bind Parameters
 
 SQL and PL/SQL statements may contain bind parameters, indicated by
 colon-prefixed identifiers or numerals.  For example, this SQL
@@ -1268,7 +1374,7 @@ variables are used for the SQL execution.
 With PL/SQL statements, only scalar parameters can be passed.  An
 array of values cannot be passed to a PL/SQL bind parameter.
 
-#### <a name="outbind"></a> 6.2.2 OUT and IN OUT Bind Parameters
+#### <a name="outbind"></a> 7.2.2 OUT and IN OUT Bind Parameters
 
 For OUT and IN OUT binds, the bind value is an object containing
 `val`, `dir`, `type` and `maxSize` properties.  The `results`
@@ -1346,7 +1452,7 @@ The output would be:
 { io: 'ChrisJones', o: 101 }
 ```
 
-## <a name="transactionmgt"></a> 7. Transaction Management
+## <a name="transactionmgt"></a> 8. Transaction Management
 
 By default,
 [DML](https://docs.oracle.com/database/121/CNCPT/glossary.htm#CNCPT2042)
@@ -1365,7 +1471,7 @@ additional, explicit `commit()` call.
 
 When a connection is released, any ongoing transaction will be rolled
 back.  Therefore if a released, pooled connection is used by a
-subsequent [`pool.getConnection()`](#getconnection2) call, then any
+subsequent [`pool.getConnection()`](#getconnectionpool) call, then any
 DML statements performed on the obtained connection are always in a
 new transaction.
 
@@ -1375,49 +1481,6 @@ will be rolled back.
 Note: Oracle Database will implicitly commit when a
 [DDL](https://docs.oracle.com/database/121/CNCPT/glossary.htm#CHDJJGGF)
 statement is executed irrespective of the value of `isAutoCommit`.
-
-## <a name="drcp"></a> 8. Database Resident Connection Pooling
-
-[Database Resident Connection Pooling](http://docs.oracle.com/database/121/ADFNS/adfns_perf_scale.htm#ADFNS228)
-enables database resource sharing for applications that run in
-multiple client processes or run on multiple middle-tier application
-servers.  DRCP reduces the overall number of connections that a
-database must handle.
-
-DRCP is distinct from node-oracledb's local
-[connection pool](#poolclass).  The two pools can be used separately,
-or together. 
-
-DRCP is useful for applications which share the same credentials, have
-similar session settings (for example date format settings and PL/SQL
-package state), and where the application gets a database connection,
-works on it for a relatively short duration, and then releases it.
-
-To use DRCP in node-oracledb:
-
-1. The DRCP pool must be started in the database: `execute dbms_connection_pool.start_pool();`
-2. The `getConnection()` property `connectString` must specify to use a pooled server, either by the Easy Connect syntax like `myhost/sales:POOLED`, or by using a `tnsnames.ora` alias for a connection that contains `(SERVER=POOLED)`.
-3. The [`connectionClass`](#propdbconclass) should be set by the node-oracledb application.  If it is not set, the pooled server session memory will not be reused optimally.
-
-The DRCP 'Purity' value is NEW for
-[`oracledb.getConnection()`](#getconnection1) connections that do not
-use a local connection pool.  These connections reuse a DRCP pooled
-server process (thus avoiding the costs of process creation and
-destruction) but do not reuse its session memory.  The 'Purity' is
-SELF for [`pool.getConnection()`](#getconnection2) connections,
-allowing reuse of the pooled server process and session memory, giving
-maximum benefit from DRCP.  See the Oracle documentation on
-[benefiting from scalability](http://docs.oracle.com/database/121/ADFNS/adfns_perf_scale.htm#ADFNS506).
-
-The
-[Oracle DRCP documentation](http://docs.oracle.com/database/121/ADFNS/adfns_perf_scale.htm#ADFNS228)
-has more details, including when to use, and when not to use DRCP.
-
-There are a number of Oracle Database `V$` views that can be used to
-monitor DRCP.  These are discussed in the documentation and in the
-Oracle white paper
-[PHP Scalability and High Availability](http://www.oracle.com/technetwork/topics/php/php-scalability-ha-twp-128842.pdf).
-This paper also gives more detail on configuring DRCP.
 
 ## <a name="oraaccess"></a> 9. External Configuration
 
