@@ -1,6 +1,19 @@
-# node-oracledb: API Documentation for the Oracle Database Node.js Driver
+# node-oracledb: Documentation for the Oracle Database Node.js Driver
 
 *Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved.*
+
+You may not use the identified files except in compliance with the Apache
+License, Version 2.0 (the "License.")
+
+You may obtain a copy of the License at
+http://www.apache.org/licenses/LICENSE-2.0.
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+
+See the License for the specific language governing permissions and
+limitations under the License.
 
 ## Contents
 
@@ -164,7 +177,6 @@ driver specific error prefixed with NJS or DPI.
 ## <a name="oracledbclass"></a> 3. Oracledb Class
 
 The *Oracledb* object is the factory class for *Pool* and *Connection* objects.
-It loads the driver and overrides default configuration parameters.
 
 The *Oracledb* object is instantiated by loading the driver:
 
@@ -226,7 +238,7 @@ methods will be affected. Objects that exist before a property is
 modified are not altered.
 
 Invalid values, or combinations of values, for pool configuration
-parameters can result in the error *ORA-24413: Invalid number of
+properties can result in the error *ORA-24413: Invalid number of
 sessions specified*.
 
 Each of the configuration properties is described below.
@@ -256,15 +268,13 @@ and preventing any session information leaking between the two systems.
 Boolean isAutoCommit
 ```
 
-If this parameter is true, then the transaction in the current
+If this property is *true*, then the transaction in the current
 connection is automatically committed at the the end of statement
 execution.
 
 The default value is false.
 
-This parameter may be overridden in an `execute()` call.
-
-Note: Oracle Database will implicitly commit when a [DDL](https://docs.oracle.com/database/121/CNCPT/glossary.htm#CHDJJGGF) statement is executed irrespective of the value of this property.
+This property may be overridden in an `execute()` call.
 
 <a name="propdbmaxrows"></a>
 ```
@@ -276,12 +286,12 @@ object.
 
 The default value is 100.
 
-This parameter may be overridden in an `execute()` call.
+This property may be overridden in an `execute()` call.
 
 To improve database efficiency, SQL queries should use a row
 limiting clause like [OFFSET /
 FETCH](https://docs.oracle.com/database/121/SQLRF/statements_10002.htm#BABEAACC)
-or equivalent. The `maxRows` attribute can be used to stop badly coded
+or equivalent. The `maxRows` property can be used to stop badly coded
 queries from returning unexpectedly large numbers of rows.
 
 <a name="propdboutformat"></a>
@@ -311,7 +321,7 @@ request exceeds the number of currently open connections.
 
 The default value is 1.
 
-This parameter may be overridden when creating a connection pool.
+This property may be overridden when creating a connection pool.
 
 <a name="propdbpoolmax"></a>
 ```
@@ -322,7 +332,7 @@ The maximum number of connections to which a connection pool can grow.
 
 The default value is 4.
 
-This parameter may be overridden when creating the connection pool.
+This property may be overridden when creating the connection pool.
 
 <a name="propdbpoolmin"></a>
 ```
@@ -334,7 +344,7 @@ there is no activity to the target database of the pool.
 
 The default value is 0.
 
-This parameter may be overridden when creating a connection pool.
+This property may be overridden when creating a connection pool.
 
 <a name="propdbpooltimeout"></a>
 ```
@@ -347,7 +357,7 @@ connections are never terminated.
 
 The default value is 60.
 
-This parameter may be overridden when creating a connection pool.
+This property may be overridden when creating a connection pool.
 
 <a name="propdbstmtcachesize"></a>
 ```
@@ -359,7 +369,7 @@ each connection.
 
 The default value is 30.
 
-This parameter may be overridden for specific *Pool* or *Connection*
+This property may be overridden for specific *Pool* or *Connection*
 objects.
 
 In general, set the statement cache to the size of the working set of
@@ -410,7 +420,7 @@ Object poolAttrs
 ```
 
 The `poolAttrs` parameter provides connection credentials and
-pool-specific configuration parameters, such as maximum or minimum
+pool-specific configuration properties, such as maximum or minimum
 number of connections for the pool or `stmtCacheSize` for the connections.
 The properties provided in the `poolAttrs` parameter override the default
 pooling properties in effect in the *Oracledb* object.
@@ -463,7 +473,7 @@ Number stmtCacheSize
 ```
 
 The number of statements that are cached in the [statement cache](#stmtcache) of
-each connection. This optional attribute may be used to override the
+each connection. This optional property may be used to override the
 corresponding property in the *Oracledb* object.
 
 ```
@@ -472,7 +482,7 @@ Number poolMax
 
 The maximum number of connections to which a connection pool can grow.
 
-This optional attribute may be used to override the corresponding
+This optional property may be used to override the corresponding
 property in the *Oracledb* object.
 
 ```
@@ -481,7 +491,7 @@ Number poolMin
 
 The minimum number of connections a connection pool maintains, even if
 there is no activity to the target database of the pool. This optional
-attribute may be used to override the corresponding property in the
+property may be used to override the corresponding property in the
 *Oracledb* object.
 
 ```
@@ -490,7 +500,7 @@ Number poolIncrement
 
 The number of connections that are opened whenever a connection
 request exceeds the number of currently open connections. This
-optional attribute may be used to override the corresponding property
+optional property may be used to override the corresponding property
 in the *Oracledb* object.
 
 ```
@@ -500,7 +510,7 @@ Number poolTimeout
 The time (in seconds) after which idle connections (unchecked out from
 the pool) are terminated.
 
-This optional attribute may be used to override the corresponding
+This optional property may be used to override the corresponding
 property in the *Oracledb* object.
 
 ```
@@ -511,7 +521,7 @@ The parameters of the callback function are:
 
 Callback function parameter | Description
 ----------------------------|-------------
-*Error error* | If `createPool()` succeeds `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+*Error error* | If `createPool()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 *Pool pool*   | The newly created connection pool. If `createPool()` fails, `pool` will be NULL.  See [Pool class](#poolclass) for more information.
 
 #### <a name="getconnection1"></a> 3.3.2 getConnection()
@@ -551,7 +561,7 @@ Object connAttrs
 ```
 
 The `connAttrs` parameter provides connection credentials and
-connection-specific configuration parameters, such as `stmtCacheSize`.
+connection-specific configuration properties, such as `stmtCacheSize`.
 
 Note that the `connAttrs` object may have configuration
 properties that are not used by the `getConnection()` method.  These
@@ -601,7 +611,7 @@ Number stmtCacheSize
 ```
 
 The number of statements that must be cached in the [statement cache](#stmtcache) of
-each connection.  This optional attribute may be used to override the corresponding
+each connection.  This optional property may be used to override the corresponding
 property in the *Oracledb* object.
 
 ```
@@ -612,7 +622,7 @@ The parameters of the callback function are:
 
 Callback function parameter | Description
 ----------------------------|-------------
-*Error error* | If `getConnection()` succeeds `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+*Error error* | If `getConnection()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 *Connection connection* | The newly created connection.  If `getConnection()` fails, `connection` will be NULL.  See [Connection class](#connectionclass) for more details.
 
 ## <a name="poolclass"></a> 4. Pool Class
@@ -695,7 +705,7 @@ each connection.
 The default is the `stmtCacheSize` property of the *Oracledb* object
 when the pool is created.
 
-This parameter may be overridden for a specific Connection object.
+This property may be overridden for a specific Connection object.
 
 ### <a name="poolmethods"></a> 4.2 Pool Methods
 
@@ -734,7 +744,7 @@ The parameters of the callback function are:
 
 Callback function parameter | Description
 ----------------------------|-------------
-*Error error* | If `getConnection()` succeeds `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+*Error error* | If `getConnection()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 *Connection connection* | The newly created connection.   If `getConnection()` fails, `connection` will be NULL.  See [Connection class](#connectionclass) for more details.
 
 #### <a name="terminate"></a> 4.2.2 terminate()
@@ -769,7 +779,7 @@ The parameters of the callback function are:
 
 Callback function parameter | Description
 ----------------------------|-------------
-*Error error* | If `terminate()` succeeds `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+*Error error* | If `terminate()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
 ## <a name="connectionclass"></a> 5. Connection Class
 
@@ -790,7 +800,7 @@ writeonly String action
 ```
 
 The [action](https://docs.oracle.com/database/121/LNOCI/oci08sca.htm#sthref1434)
-for attribute for end-to-end application tracing. This is a write-only property.
+attribute for end-to-end application tracing. This is a write-only property.
 
 <a name="propconnclientid"></a>
 ```
@@ -854,7 +864,7 @@ The parameters of the callback function are:
 
 Callback function parameter | Description
 ----------------------------|-------------
-*Error error* | If `break()` succeeds `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+*Error error* | If `break()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
 ####  <a name="commit"></a> 5.2.2 commit()
 
@@ -884,7 +894,7 @@ The parameters of the callback function are:
 
 Callback function parameter | Description
 ----------------------------|-------------
-*Error error* | If `commit()` succeeds `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+*Error error* | If `commit()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
 #### <a name="execute"></a> 5.2.3 execute()
 
@@ -928,24 +938,14 @@ parameters.
 Object bindParams
 ```
 
-This parameter only needs to be specified if there are bind
-parameters in the SQL statement.  If the `execute()` parameter
-`options` is needed and there are no bind variables, then a null
-bind parameter must be specified, for example: *{}*, otherwise you
-will get error *ORA-01036: Illegal variable name/number*.
+This function parameter is needed if there are bind parameters in the
+SQL statement.  It can be either an object that specifies bind values
+or variables by name, or an array that specifies bind values or
+variables by position.  See
+[Bind Parameters for Prepared Statements](#bind) for more details on
+binding.
 
-See [SQL Execution](#sqlexecution) for more details on binding.
-
-The bind parameter can be either an object that specifies bind
-values or variables by name, or an array that specifies bind values
-or variable by position. For example, the bind parameters
-*:country\_id* and *:country\_name* can be bound using an object
-that names each bind value: *{country_id: 90, country_name: "Tonga"}*
-
-Alternatively, the bind parameters can also be specified by position
-using an array: *[90, "Tonga"]*
-
-A bind value may be an object with the following attributes:
+If a bind value is an object, it may have the following properties:
 
 Bind Property | Description
 ---------------|------------
@@ -961,14 +961,21 @@ Object options
 ```
 
 This is an optional parameter to `execute()` that may be used to override the
-default SQL execution properties of the *Oracledb* object. The
-following properties can be overridden.
+default SQL execution properties of the *Oracledb* object.
 
-Option Property | Description
+If there are no bind variables in the SQL statement, then a null
+`bindParams`, for example *{}*, must be specified before `options`
+otherwise you will get the error *ORA-01036: Illegal variable
+name/number*.
+
+
+The following properties can be overridden for the execution of a statement:
+
+Options Property | Description
 ----------------|-------------
-*Number maxRows*  | Number of rows to fetch for `SELECT` statements. To improve database efficiency, SQL queries should use a row limiting clause like [OFFSET / FETCH](https://docs.oracle.com/database/121/SQLRF/statements_10002.htm#BABEAACC) or equivalent. The `maxRows` attribute can be used to stop badly coded queries from returning unexpectedly large numbers of rows.
-*String outFormat* |  The format of rows fetched for `SELECT` statements. This can be either `ARRAY` or `OBJECT`. If specified as `ARRAY`, then each row is fetched as an array of column values. If specified as `OBJECT`, then each row is fetched as a JavaScript object.
-*Boolean isAutoCommit* |  This overrides the `oracledb.isAutoCommit` property for this statement execution.
+*Boolean isAutoCommit* | Overrides *Oracledb* [`isAutoCommit`](#propdbisautocommit)
+*Number maxRows* | Overrides *Oracledb* [`maxRows`](#propdbmaxrows)
+*String outFormat* | Overrides *Oracledb* [`outFormat`](#propdboutformat)
 
 ```
 function(Error error, [Object result])
@@ -978,7 +985,7 @@ The parameters of the callback function are:
 
 Callback function parameter | Description
 ----------------------------|-------------
-*Error error* | If `execute()` succeeds `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+*Error error* | If `execute()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 *Object result* | The [`result`](#resultobject) object, described below. For DDL statements and DML where the application only checks `error` for success or failure, the `result` parameter can be omitted.
 
 
@@ -1061,7 +1068,7 @@ The parameters of the callback function are:
 
 Callback function parameter | Description
 ----------------------------|-------------
-*Error error* | If `release()` succeeds `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+*Error error* | If `release()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
 #### <a name="rollback"></a> 5.2.5 rollback()
 
@@ -1092,7 +1099,7 @@ The parameters of the callback function are:
 
 Callback function parameter | Description
 ----------------------------|-------------
-*Error error* | If `rollback()` succeeds `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+*Error error* | If `rollback()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
 ## <a name="sqlexecution"></a> 6. SQL Execution
 
@@ -1101,13 +1108,6 @@ A SQL or PL/SQL statement may be executed using the *Connection*
 
 After all database calls on the connection complete, the application
 should use the [`release()`](#release) call to release the connection.
-
-
-[DML](https://docs.oracle.com/database/121/CNCPT/glossary.htm#CNCPT2042)
-statements are not committed unless the `commit()` call is issued or
-the `isAutoCommit` property is *true* at the time of execution.  Any
-ongoing transaction will be rolled back when [`release()`](#release)
-is called, or when the application ends.
 
 ### <a name="select"></a> 6.1 SELECT Statements
 
@@ -1326,7 +1326,7 @@ oracledb.getConnection(
   });
 ```
 
-Given the creation of `TESTPROC` as:
+Given the creation of `TESTPROC` using:
 
 ```sql
 CREATE OR REPLACE PROCEDURE testproc (
@@ -1348,26 +1348,33 @@ The output would be:
 
 ## <a name="transactionmgt"></a> 7. Transaction Management
 
-Node-oraclebd implements [`commit()`](#commit) and
+By default,
+[DML](https://docs.oracle.com/database/121/CNCPT/glossary.htm#CNCPT2042)
+statements are not committed in node-oracledb.
+
+The driver implements [`commit()`](#commit) and
 [`rollback()`](#rollback) methods that can be used to explicitly
 control transactions.
 
-If the [`isAutoCommit`](#propdbisautocommit) flag is set, then a
-commit occurs at the end of each `execute()` call.  This does not
-require a round-trip to the database, unlike an explicit `commit()`.
-For maximum efficiency, if a transaction consists of a number of
-`execute()` calls, then set `isAutoCommit` to true for the last call
-in preference to using an additional, explicit `commit()` call.
+If the [`isAutoCommit`](#propdbisautocommit) flag is set to *true*,
+then a commit occurs at the end of each `execute()` call.  Unlike an
+explicit `commit()`, this does not require a round-trip to the
+database.  For maximum efficiency, set `isAutoCommit` to true for the
+last `execute()` call of a transaction in preference to using an
+additional, explicit `commit()` call.
 
-When a connection is released, it rolls back any ongoing
-transaction.  Therefore if a released, pooled connection is used by
-a subsequent [`pool.getConnection()`](#getconnection2) call, then any
-[DML](https://docs.oracle.com/database/121/CNCPT/glossary.htm#CNCPT2042)
-statements performed on the obtained connection are always in a new
-transaction.
+When a connection is released, any ongoing transaction will be rolled
+back.  Therefore if a released, pooled connection is used by a
+subsequent [`pool.getConnection()`](#getconnection2) call, then any
+DML statements performed on the obtained connection are always in a
+new transaction.
 
 When an application ends, any uncommitted transaction on a connection
-will be rolled back if there is no explicit commit.
+will be rolled back.
+
+Note: Oracle Database will implicitly commit when a
+[DDL](https://docs.oracle.com/database/121/CNCPT/glossary.htm#CHDJJGGF)
+statement is executed irrespective of the value of `isAutoCommit`.
 
 ## <a name="drcp"></a> 8. Database Resident Connection Pooling
 
