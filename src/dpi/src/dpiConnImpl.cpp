@@ -94,8 +94,8 @@ try :  env_(env), pool_(NULL),
 
   if (isExternalAuth)
   {
-    if (password.length())
-      throw ExceptionImpl(DpiErrPasswdExtAuth);
+    if (password.length() || user.length())
+      throw ExceptionImpl(DpiErrExtAuth);
   }
   else
   {

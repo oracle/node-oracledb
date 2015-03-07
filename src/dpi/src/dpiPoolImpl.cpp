@@ -95,8 +95,8 @@ PoolImpl::PoolImpl(EnvImpl *env, OCIEnv *envh,
 
   unsigned char spoolMode = OCI_SPOOL_ATTRVAL_NOWAIT; // spoolMode is a ub1
   
-  if (isExternalAuth && password.length())
-      throw ExceptionImpl(DpiErrPasswdExtAuth);
+  if (isExternalAuth && (password.length() || user.length()))
+      throw ExceptionImpl(DpiErrExtAuth);
 
   ociCallEnv(OCIHandleAlloc((void *)envh_, (dvoid **)&errh_, 
                             OCI_HTYPE_ERROR, 0, (dvoid **)0), envh_);

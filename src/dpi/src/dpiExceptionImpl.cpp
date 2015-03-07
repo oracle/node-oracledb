@@ -55,7 +55,7 @@ static const char *dpiErrors[] =
   "no OCI environment handle created",                // DpiErrNoEnv
   "invalid state while working with timestamp",       // DpiErrInvalidState
   "uninitialized state while working with timestamp", // DpiErrUninitialized
-  "password specified with external authentication"   // DpiErrPasswdExtAuth
+  "user and password should not be set when using external authentication", // DpiErrExtAuth
 };
 
   
