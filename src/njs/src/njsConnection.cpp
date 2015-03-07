@@ -713,7 +713,7 @@ void Connection::Async_Execute (uv_work_t *req)
     executeBaton->st = executeBaton->dpistmt->stmtType();
     if (executeBaton->st == DpiStmtSelect)
     {
-      executeBaton->dpistmt->execute(executeBaton->isAutoCommit);
+      executeBaton->dpistmt->execute(0, executeBaton->isAutoCommit);
       Connection::GetDefines(executeBaton);
     }
     else
