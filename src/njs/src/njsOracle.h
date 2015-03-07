@@ -103,7 +103,7 @@ private:
    static Handle<Value> GetConnectionClass (Local<String> property,
                                             const AccessorInfo& info );
    static Handle<Value> GetIsExternalAuth(Local<String> property,
-                                        const AccessorInfo& info);
+                                          const AccessorInfo& info);
    
    // Define Setter Accessors to Properties
    static void SetPoolMin(Local<String> property,Local<Value> value,
@@ -127,7 +127,7 @@ private:
    static void SetConnectionClass (Local<String> property, Local<Value> value,
                                    const AccessorInfo& info );
    static void SetIsExternalAuth(Local<String> property,Local<Value> value,
-                               const AccessorInfo& info);
+                                 const AccessorInfo& info);
    
    
    Oracledb();
@@ -180,7 +180,7 @@ typedef struct connectionBaton
   Oracledb *oracledb;
 
   connectionBaton() : user(""), pswrd(""), connStr(""), connClass(""),
-                      isExternalAuth(false), error("" ),
+                      isExternalAuth(false), error(""),
                       poolMax(0), poolMin(0), poolIncrement(0),
                       poolTimeout(0), stmtCacheSize(0), maxRows(0),
                       outFormat(0), dpienv(NULL), 

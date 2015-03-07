@@ -42,6 +42,10 @@
 # include <dpiUtils.h>
 #endif
 
+#ifndef DPIEXCEPTIONIMPL_ORACLE
+# include <dpiExceptionImpl.h>
+#endif
+
 #include <iostream>
 
 using namespace std;
@@ -88,7 +92,12 @@ try :  env_(env), pool_(NULL),
   ociCallEnv(OCIHandleAlloc((void *)envh_, (dvoid **)&auth_,
                             OCI_HTYPE_AUTHINFO, 0, (dvoid **)0), envh_);
 
-  if (!isExternalAuth)
+  if (isExternalAuth)
+  {
+    if (password.length())
+      throw ExceptionImpl(DpiErrPasswdExtAuth);
+  }
+  else
   {
     ociCall(OCIAttrSet((void *)auth_, OCI_HTYPE_AUTHINFO,
                        (void *)user.data(), (ub4) user.length(),
@@ -228,8 +237,10 @@ void ConnImpl::release()
     ociCall(OCIAttrGet(sessh_, OCI_HTYPE_SESSION, &hasTxn_, NULL,
                        OCI_ATTR_TRANSACTION_IN_PROGRESS, errh_), errh_);
   #endif
+
   if(hasTxn_)
     rollback(); 
+
   if (pool_)
     pool_->releaseConnection(this);
   else if (env_)

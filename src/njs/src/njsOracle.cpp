@@ -441,7 +441,7 @@ void Oracledb::SetConnectionClass (Local<String> property, Local<Value> value,
    DESCRIPTION
      Get Accessor of isExternalAuth property
 */
-Handle<Value> Oracledb::GetIsExternalAuth ( Local<String> property,
+Handle<Value> Oracledb::GetIsExternalAuth(Local<String> property,
                                           const AccessorInfo& info )
 {
   HandleScope scope;
@@ -451,12 +451,13 @@ Handle<Value> Oracledb::GetIsExternalAuth ( Local<String> property,
   return scope.Close(value);
 }
 
+
 /*****************************************************************************/
 /*
    DESCRIPTION
      Set Accessor of isExternalAuth property
 */
-void Oracledb::SetIsExternalAuth ( Local<String> property, Local<Value> value,
+void Oracledb::SetIsExternalAuth(Local<String> property, Local<Value> value,
                                  const AccessorInfo& info )
 {
   HandleScope scope;
@@ -496,16 +497,17 @@ Handle<Value>  Oracledb::GetConnection(const Arguments& args)
   NJS_GET_STRING_FROM_JSON ( connBaton->connStr, connBaton->error,
                              connProps, "connectString", 0, exitGetConnection );
 
-  connBaton->stmtCacheSize  = oracledb->stmtCacheSize_; 
   connBaton->connClass      = oracledb->connClass_;
-  connBaton->isExternalAuth = oracledb->isExternalAuth_; 
 
-  // the above properties may be overriden if provided as call parameters
+  // the following properties will be overriden if provided as call parameters
+
+  connBaton->stmtCacheSize  = oracledb->stmtCacheSize_; 
+  connBaton->isExternalAuth = oracledb->isExternalAuth_; 
 
   NJS_GET_UINT_FROM_JSON   ( connBaton->stmtCacheSize, connBaton->error,
                              connProps, "stmtCacheSize", 0, exitGetConnection );
-  NJS_GET_BOOL_FROM_JSON ( connBaton->isExternalAuth, connBaton->error,
-                           connProps, "isExternalAuth", 0, exitGetConnection );
+  NJS_GET_BOOL_FROM_JSON   ( connBaton->isExternalAuth, connBaton->error,
+                             connProps, "isExternalAuth", 0, exitGetConnection );
 
   connBaton->oracledb   =  oracledb; 
   connBaton->dpienv     =  oracledb->dpienv_; 
