@@ -32,6 +32,7 @@ limitations under the License.
   - 3.2 [Oracledb Properties](#oracledbproperties)
      - [connectionClass](#propdbconclass)
      - [isAutoCommit](#propdbisautocommit)
+     - [isExternalAuth](#propdbisexternalauth)
      - [maxRows](#propdbmaxrows)
      - [outFormat](#propdboutformat)
      - [poolIncrement](#propdbpoolincrement)
@@ -279,9 +280,23 @@ If this property is *true*, then the transaction in the current
 connection is automatically committed at the the end of statement
 execution.
 
-The default value is false.
+The default value is *false*.
 
 This property may be overridden in an `execute()` call.
+
+<a name="propdbisexternalauth"></a>
+```
+Boolean isExternalAuth
+```
+
+If this property is *true* then connections are established using
+external authentication.  See [External Authentication](#extauth) for
+more information.
+
+The default value is *false*.
+
+The `user` and `password` properties for connecting or creating a pool
+should not be set when `isExternalAuth` is *true*.
 
 <a name="propdbmaxrows"></a>
 ```
@@ -439,18 +454,6 @@ ignored.
 The properties of the `poolAttrs` object are described below.
 
 ```
-String connectString
-```
-
-The Oracle database instance to connect to.  The string can be an Easy
-Connect string, or a Connect Name from a `tnsnames.ora` file, or the
-name of a local Oracle database instance.  See
-[Connection Strings](#connectionstrings) for examples.
-
-If `connectString` is not specified, the empty string "" is used which
-indicates to connect to the local, default database.
-
-```
 String user
 ```
 
@@ -465,6 +468,28 @@ String password
 
 The password of the database user. A password is also necessary if a
 proxy user is specified.
+
+```
+String connectString
+```
+
+The Oracle database instance to connect to.  The string can be an Easy
+Connect string, or a Connect Name from a `tnsnames.ora` file, or the
+name of a local Oracle database instance.  See
+[Connection Strings](#connectionstrings) for examples.
+
+```
+Boolean isExternalAuth
+```
+
+If this optional property is *true* then the pool's connections will
+be established using [External Authentication](#extauth).
+
+This property overrides the *Oracledb*
+[`isExternalAuth`](#propdbisexternalauth) property.
+
+The `user` and `password` properties should not be set when
+`isExternalAuth` is *true*.
 
 ```
 Number stmtCacheSize
@@ -569,18 +594,6 @@ are ignored.
 The properties of the `connAttrs` object are described below.
 
 ```
-String connectString
-```
-
-The Oracle database instance to connect to.  The string can be an Easy Connect string, or a
-Connect Name from a `tnsnames.ora` file, or the name of a local
-Oracle database instance.  See
-[Connection Strings](#connectionstrings) for examples.
-
-If `connectString` is not specified, the empty string "" is used which
-indicates to connect to the local, default database.
-
-```
 String user
 ```
 
@@ -595,6 +608,28 @@ String password
 
 The password of the database user. A password is also necessary if a
 proxy user is specified.
+
+```
+String connectString
+```
+
+The Oracle database instance to connect to.  The string can be an Easy Connect string, or a
+Connect Name from a `tnsnames.ora` file, or the name of a local
+Oracle database instance.  See
+[Connection Strings](#connectionstrings) for examples.
+
+```
+Boolean isExternalAuth
+```
+
+If this optional property is *true* then the connection will be
+established using [External Authentication](#extauth).
+
+This optional property overrides the *Oracledb*
+[`isExternalAuth`](#propdbisexternalauth) property.
+
+The `user` and `password` properties should not be set when
+`isExternalAuth` is *true*.
 
 ```
 Number stmtCacheSize
@@ -1161,6 +1196,9 @@ If a Connect Name from a `tnsnames.ora` file is used, set the
 is read.  Alternatively make sure the name is in
 `$ORACLE_HOME/network/admin/tnsnames.ora` or `/etc/tnsnames.ora`.
 
+If `connectString` is not specified, the empty string "" is used which
+indicates to connect to the local, default database.
+
 ### <a name="drcp"></a> 6.2 Database Resident Connection Pooling
 
 [Database Resident Connection Pooling](http://docs.oracle.com/database/121/ADFNS/adfns_perf_scale.htm#ADFNS228)
@@ -1205,6 +1243,43 @@ Oracle white paper
 This paper also gives more detail on configuring DRCP.
 
 ### <a name="extauth"></a> 6.3 External Authentication
+
+Instead of specifying a user and password at connection, Oracle
+Database allows applications to use an external password store (such
+as 
+[Oracle Wallet](http://docs.oracle.com/database/121/DBIMI/to_dbimi10236_d209.htm#DBIMI10236)),
+the [Secure Socket Layer](http://docs.oracle.com/database/121/DBSEG/asossl.htm#DBSEG070)
+(SSL), or the
+[operating system](http://docs.oracle.com/database/121/DBSEG/authentication.htm#DBSEG30035)
+to validate user access.  This mode of authentication is called
+*external authentication*.  One of the benefits is that database
+credentials do not need to be hard coded in the application.
+
+To use external authentication, set the *Oracledb*
+[`isExternalAuth`](propdbextauth) property to *true*.  Once this is
+set, any subsequent connections obtained using the *Oracledb*
+[`getConnection()`](#getconnectiondb) or *Pool*
+[`getConnection()`](#getconnectionpool) calls will use external
+authentication.  Setting this property does not affect the operation
+of existing connections or pools.
+
+When `isExternalAuth` is *true*, the `user` and `password` properties
+should not be set, or should be empty strings.
+
+The `isExternalAuth` property can be overridden in the `connAttrs` or
+`poolAttrs` parameters of the *Oracledb*
+[`getConnection()`](#getconnectiondb) or [`createPool()`](#createpool)
+calls, respectively.  Overriding `isExternalAuth` is not possible for
+a *Pool* `getConnection()` call.  The connections from a *Pool* object
+are always obtained in the manner in which the pool was initially
+created.
+
+For pools created with external authentication, the number of
+connections initially created is zero even if a non-zero value is
+specified for the [`poolMin`](#propdbpoolmin).  However, once the
+number of open connections exceeds `poolMin` and connections are idle
+for more than the [`poolTimeout`](#propdbpooltimeout) seconds, then
+the number of open connections does not fall below `poolMin`.
 
 ## <a name="sqlexecution"></a> 7. SQL Execution
 
@@ -1307,7 +1382,7 @@ Query result type mappings for Oracle Database types to JavaScript types are:
 Node-oracledb uses the
 [Oracle OCI statement cache](https://docs.oracle.com/database/121/LNOCI/oci09adv.htm#i471377)
 which manages a cache of statements for each session.  In the database
-server, statement caching lets cursors be used without reparsing the
+server, statement caching lets cursors be used without re-parsing the
 statement.  This eliminates repetitive statement parsing and reduces
 meta data transfer costs between the driver and the database.  This
 improve performance and scalability.
