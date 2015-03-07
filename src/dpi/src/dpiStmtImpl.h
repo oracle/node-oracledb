@@ -79,7 +79,7 @@ public:
   virtual OCIError *     getError () { return errh_;  }
 
   // Is the SQL statement DML or not ?
-  virtual inline bool IsDML ()  
+  virtual inline bool isDML ()  
   {
     return ( ( stmtType_ == DpiStmtInsert ) ||
              ( stmtType_ == DpiStmtUpdate ) ||

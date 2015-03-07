@@ -271,7 +271,7 @@ void StmtImpl::execute (int numIterations,  bool isAutoCommit)
            errh_ );
   
 #if OCI_MAJOR_VERSION < 12 
-  if ( IsDML () && !conn_->hasTxn () )
+  if ( isDML () && !conn_->hasTxn () )
   {
     /* Not to be reset, till thread safety is ensured in NJS */
     conn_->hasTxn (true );
