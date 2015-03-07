@@ -449,7 +449,7 @@ Handle<Value> Pool::GetConnection(const Arguments& args)
   NJS_GET_CALLBACK ( callback, args );
 
   Pool *njsPool = ObjectWrap::Unwrap<Pool>(args.This());
-  connectionBaton *connBaton = new connectionBaton ();
+  poolBaton *connBaton = new poolBaton ();
   connBaton->cb = Persistent<Function>::New( callback );
 
   NJS_CHECK_NUMBER_OF_ARGS ( connBaton->error, args, 1, 1, exitGetConnection );
@@ -459,8 +459,7 @@ Handle<Value> Pool::GetConnection(const Arguments& args)
     connBaton->error = NJSMessages::getErrorMsg ( errInvalidPool );
     goto exitGetConnection;
   }
-  connBaton->dpipool  = njsPool->dpipool_;
-  connBaton->oracledb = njsPool->oracledb_;
+  connBaton->njspool   = njsPool;
   connBaton->connClass = njsPool->oracledb_->getConnectionClass ();  
   
 exitGetConnection:
@@ -485,13 +484,13 @@ exitGetConnection:
 */
 void Pool::Async_GetConnection(uv_work_t *req)
 {
-  connectionBaton *connBaton = (connectionBaton *)req->data;
+  poolBaton *connBaton = (poolBaton *)req->data;
   if(!(connBaton->error).empty()) goto exitAsyncGetConnection;
 
   try
   {
-    connBaton->dpiconn = connBaton-> dpipool -> getConnection ( 
-                                              connBaton-> connClass);
+    connBaton->dpiconn = connBaton-> njspool -> dpipool_ ->
+                                  getConnection ( connBaton-> connClass);
   }
   catch (dpi::Exception &e)
   {
@@ -516,7 +515,7 @@ void Pool::Async_GetConnection(uv_work_t *req)
 void Pool::Async_AfterGetConnection(uv_work_t *req)
 {
   HandleScope scope;
-  connectionBaton *connBaton = (connectionBaton*)req->data;
+  poolBaton *connBaton = (poolBaton*)req->data;
   v8::TryCatch tc;
   Handle<Value> argv[2];
   if(!(connBaton->error).empty()) 
@@ -530,8 +529,8 @@ void Pool::Async_AfterGetConnection(uv_work_t *req)
     Handle<Object> connection = Connection::connectionTemplate_s->
                                 GetFunction()-> NewInstance();
     (ObjectWrap::Unwrap<Connection> (connection))->
-                                     setConnection( connBaton->dpiconn,
-                                                    connBaton->oracledb );
+                                 setConnection( connBaton->dpiconn,
+                                                connBaton->njspool->oracledb_ );
     argv[1] = connection;
   }
   node::MakeCallback(Context::GetCurrent()->Global(), 
@@ -559,7 +558,7 @@ Handle<Value> Pool::Terminate(const Arguments& args )
   NJS_GET_CALLBACK ( callback, args );
 
   Pool *njsPool = ObjectWrap::Unwrap<Pool>(args.This());
-  connectionBaton *terminateBaton = new connectionBaton ();
+  poolBaton *terminateBaton = new poolBaton ();
   terminateBaton->cb = Persistent<Function>::New( callback );
 
   NJS_CHECK_NUMBER_OF_ARGS ( terminateBaton->error, args, 1, 1, exitTerminate );
@@ -569,8 +568,7 @@ Handle<Value> Pool::Terminate(const Arguments& args )
     terminateBaton->error = NJSMessages::getErrorMsg( errInvalidPool );
     goto exitTerminate;
   }
-  terminateBaton->dpipool      = njsPool->dpipool_;
-  terminateBaton->isPoolValid  = &(njsPool->isValid_);
+  terminateBaton->njspool      = njsPool;
 
 exitTerminate:
   terminateBaton->req.data = (void *)terminateBaton;
@@ -594,12 +592,12 @@ exitTerminate:
 */
 void Pool::Async_Terminate(uv_work_t *req)
 {
-  connectionBaton *terminateBaton = (connectionBaton*)req->data;
+  poolBaton *terminateBaton = (poolBaton*)req->data;
   if(!terminateBaton->error.empty()) goto exitAsyncTerminate;
 
   try
   {
-    terminateBaton-> dpipool-> terminate ();
+    terminateBaton-> njspool-> dpipool_-> terminate ();
   }
   catch(dpi::Exception& e)
   {
@@ -620,7 +618,7 @@ void Pool::Async_Terminate(uv_work_t *req)
 void Pool::Async_AfterTerminate(uv_work_t *req)
 {
   HandleScope scope;
-  connectionBaton *terminateBaton = (connectionBaton*)req->data;
+  poolBaton *terminateBaton = (poolBaton*)req->data;
 
   v8::TryCatch tc;
 
@@ -633,7 +631,8 @@ void Pool::Async_AfterTerminate(uv_work_t *req)
   else
   {
     argv[0] = Undefined();
-    *(terminateBaton->isPoolValid) = false;
+    // pool is not valid after terminate succeeds.
+    terminateBaton-> njspool-> isValid_ = false; 
   }
 
   node::MakeCallback( Context::GetCurrent()->Global(),

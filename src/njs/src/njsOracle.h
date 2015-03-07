@@ -170,7 +170,6 @@ typedef struct connectionBaton
   dpi::Env*   dpienv;
   dpi::Conn*  dpiconn;
   dpi::SPool* dpipool;
-  bool*       isPoolValid;
 
   Oracledb *oracledb;
 

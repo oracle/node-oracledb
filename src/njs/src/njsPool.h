@@ -107,4 +107,25 @@ private:
    unsigned int stmtCacheSize_;
 };
 
+typedef struct poolBaton
+{
+  uv_work_t req;
+  std::string error;
+  std::string connClass;  
+  Persistent<Function> cb;
+  dpi::Conn*  dpiconn;
+  Pool*       njspool;
+
+  poolBaton() :  error(""), connClass(""),
+                 dpiconn(NULL), njspool(NULL)
+  {}
+
+  ~poolBaton()
+   {
+     cb.Dispose();
+   }
+
+}poolBaton;
+
+
 #endif                                          /* __NJSPOOL_H__ */
