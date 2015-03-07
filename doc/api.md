@@ -54,15 +54,16 @@
      - 5.2.3 [execute()](#execute)
      - 5.2.4 [release()](#release)
      - 5.2.5 [rollback()](#rollback)
-  - 5.3 [SQL Execution](#sqlexecution)
-     - 5.3.1 [IN Bind  Parameters](#inbind)
-     - 5.3.2 [OUT and IN OUT Bind Parameters](#outbind)
-     - 5.3.3 [SELECT Statements](#select)
-         - [Result Type Mapping](#typemap)
-         - [Statement Caching](#stmtcache)
-6. [Transaction Management](#transactionmgt)
-7. [Database Resident Connection Pooling](#drcp)
-8. [External Configuration](#oraaccess)
+6. [SQL Execution](#sqlexecution)
+  - 6.1 [SELECT Statements](#select)
+     - 6.1.1 [Result Type Mapping](#typemap)
+     - 6.1.2 [Statement Caching](#stmtcache)
+  - 6.2 [Bind Parameters for Prepared Statements](#bind)
+     - 6.2.1 [IN Bind Parameters](#inbind)
+     - 6.2.2 [OUT and IN OUT Bind Parameters](#outbind)
+7. [Transaction Management](#transactionmgt)
+8. [Database Resident Connection Pooling](#drcp)
+9. [External Configuration](#oraaccess)
 
 ## <a name="intro"></a> 1. Introduction
 
@@ -70,7 +71,7 @@ The Oracle Database Node.js driver *node-oracledb* powers high
 performance Node.js applications.
 
 This document shows how to use node-oracledb.  For how to install
-node-oracledb, see [INSTALL](#../INSTALL.md).
+node-oracledb, see [INSTALL](../INSTALL.md).
 
 ### Example:  Simple SELECT statement implementation in Node.js
 
@@ -1093,10 +1094,13 @@ Callback function parameter | Description
 ----------------------------|-------------
 *Error error* | If `rollback()` succeeds `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
-### <a name="sqlexecution"></a> 5.3 SQL Execution
+## <a name="sqlexecution"></a> 6. SQL Execution
 
 A SQL or PL/SQL statement may be executed using the *Connection*
 [`execute()`](#execute) method.
+
+After all database calls on the connection complete, the application
+should use the [`release()`](#release) call to release the connection.
 
 
 [DML](https://docs.oracle.com/database/121/CNCPT/glossary.htm#CNCPT2042)
@@ -1105,6 +1109,112 @@ the `isAutoCommit` property is *true* at the time of execution.  Any
 ongoing transaction will be rolled back when [`release()`](#release)
 is called, or when the application ends.
 
+### <a name="select"></a> 6.1 SELECT Statements
+
+If the `execute()` method contains a SQL `SELECT` statement, it returns
+an array of rows. Each row, by default, is an array of column values.
+The rows array holds up to `maxRows` number of rows.
+
+The following example shows how to obtain rows returned a `SELECT`
+statement.
+
+```javascript
+connection.execute("SELECT first_name, salary, hire_date "
+                  + "FROM   employees, departments "
+                  + "WHERE  employees.department_id = departments.department_id "
+                  + "AND    departments.department_name = 'Accounting'",
+                   function(err, result) {
+                     if (err) { console.error(err.message); return; }
+                     var rows = result.rows;
+                     for (var i = 0; i < rows.length; i++)
+                       console.log("Row " + i + " : " + rows[i]);
+                   });
+```
+
+If run with Oracle's sample HR schema, the output is:
+
+```
+Row 0 : Shelley,12000,Tue Jun 07 1994 01:00:00 GMT-0700 (PDT)
+Row 1 : William,8300,Tue Jun 07 1994 01:00:00 GMT-0700 (PDT)
+```
+
+Using this format is recommended for efficiency.
+
+Alternatively, rows may be fetched as JavaScript objects. To do so,
+specify the `outFormat` option to be `OBJECT`:
+
+```javascript
+connection.execute("SELECT first_name, salary, hire_date "
+                  + "FROM employees, departments "
+                  + "WHERE employees.department_id = departments.department_id "
+                  + "AND departments.department_name = 'Accounting'",
+                   [],  // No bind variables
+                   {outFormat: oracledb.OBJECT},
+                   function(err, result) {
+                     if (err) { console.error(err.message); return; }
+                     var rows = result.rows;
+                     for (var i = 0; i < rows.length; i++)
+                       console.log("Row " + i + " : " +
+                                   rows[i].FIRST_NAME + ", ",
+                                   rows[i].SALARY + ", ", rows[i].HIRE_DATE);
+                   });
+```
+
+If run with Oracle's sample HR schema, the output is:
+
+```
+Row 0 : Shelley,  12000,  Tue Jun 07 1994 01:00:00 GMT-0700 (PDT)
+Row 1 : William,  8300,  Tue Jun 07 1994 01:00:00 GMT-0700 (PDT)
+```
+
+In the preceding example, each row is a JavaScript object that
+specifies column names and their respective values.  Note that the
+property names are uppercase.  This is the default casing behavior for
+Oracle client programs when a database table is created with
+case-insensitive column names.
+
+### <a name="typemap"></a> 6.1.1 Result Type Mapping
+
+Oracle character, number and date columns can be selected.  Data types
+that are currently unsupported give a "datatype is not supported"
+error.
+
+Query result type mappings for Oracle Database types to JavaScript types are:
+
+-   Variable and fixed length character columns are mapped to JavaScript strings.
+
+-   All numeric columns are mapped to JavaScript numbers.
+
+-   Date and Timestamp columns are mapped to JavaScript dates.
+    Note that JavaScript Date has millisecond precision.
+    Therefore, timestamps having greater
+    precision lose their sub-millisecond fractional part
+    when fetched. Internally, `TIMESTAMP` and `DATE`
+    columns are fetched as `TIMESTAMP WITH LOCAL TIMEZONE` using
+    [OCIDateTime](https://docs.oracle.com/database/121/LNOCI/oci12oty.htm#LNOCI16840).
+    When binding a JavaScript Date value in an `INSERT` statement, the date is also inserted as `TIMESTAMP WITH
+    LOCAL TIMEZONE` using
+    [OCIDateTime](https://docs.oracle.com/database/121/LNOCI/oci12oty.htm#LNOCI16840).
+
+### <a name="stmtcache"></a> 6.1.2 Statement Caching
+
+Node-oracledb uses the
+[Oracle OCI statement cache](https://docs.oracle.com/database/121/LNOCI/oci09adv.htm#i471377)
+which manages a cache of statements for each session.  In the database
+server, statement caching lets cursors be used without reparsing the
+statement.  This eliminates repetitive statement parsing and reduces
+meta data transfer costs between the driver and the database.  This
+improve performance and scalability.
+
+In general, set the statement cache to the size of the working set of
+statements being executed by the application.
+
+The statement cache can be automatically tuned with the
+[oraaccess.xml file](#oraaccess).
+
+
+### <a name="bind"></a> 6.2 Bind Parameters for Prepared Statements
+
 Using bind variables in SQL statements is recommended in preference to
 constructing SQL statements by string concatenation.  This is for
 performance and security.  IN binds are values passed into the
@@ -1112,7 +1222,7 @@ database.  OUT binds are used to retrieve data.  IN OUT binds are
 passed in, and may return a different value after the statement
 executes.
 
-#### <a name="inbind"></a> 5.3.1 IN Bind Parameters
+#### <a name="inbind"></a> 6.2.1 IN Bind Parameters
 
 SQL and PL/SQL statements may contain bind parameters, indicated by
 colon-prefixed identifiers or numerals.  For example, this SQL
@@ -1158,7 +1268,7 @@ variables are used for the SQL execution.
 With PL/SQL statements, only scalar parameters can be passed.  An
 array of values cannot be passed to a PL/SQL bind parameter.
 
-#### <a name="outbind"></a> 5.3.2 OUT and IN OUT Bind Parameters
+#### <a name="outbind"></a> 6.2.2 OUT and IN OUT Bind Parameters
 
 For OUT and IN OUT binds, the bind value is an object containing
 `val`, `dir`, `type` and `maxSize` properties.  The `results`
@@ -1236,117 +1346,11 @@ The output would be:
 { io: 'ChrisJones', o: 101 }
 ```
 
-#### <a name="select"></a> 5.3.3 SELECT Statements
-
-If the the `execute()` method contains a SQL `SELECT` statement, it returns
-an array of rows. Each row, by default, is an array of column values.
-The rows array holds up to `maxRows` number of rows.
-
-The following example shows how to obtain rows returned a `SELECT`
-statement.
-
-```javascript
-connection.execute("SELECT first_name, salary, hire_date "
-                 + "FROM   employees, departments "
-                 + "WHERE  employees.department_id = departments.department_id "
-                 + "AND    departments.department_name = :1",
-                   ["Accounting"],
-                   function(err, result) {
-                     if (err) { console.error(err.message); return; }
-                     var rows = result.rows;
-                     for (var i = 0; i < rows.length; i++)
-                       console.log("Row " + i + " : " + rows[i]);
-                   });
-
-```
-
-If run with Oracle's sample HR schema, the output is:
-
-```
-Row 0 : Shelley,12000,Tue Jun 07 1994 01:00:00 GMT-0700 (PDT)
-Row 1 : William,8300,Tue Jun 07 1994 01:00:00 GMT-0700 (PDT)
-```
-
-Using this format is recommended for efficiency.
-
-Alternatively, rows may be fetched as JavaScript objects. To do so,
-specify the `outFormat` option to be `OBJECT`:
-
-```javascript
-connection.execute("SELECT first_name, salary, hire_date "
-                  + "FROM employees, departments "
-                  + "WHERE employees.department_id = departments.department_id "
-                  + "AND departments.department_name = :1",
-                   ["Accounting"],
-                   {outFormat: oracledb.OBJECT},
-                   function(err, result) {
-                     if (err) { console.error(err.message); return; }
-                     var rows = result.rows;
-                     for (var i = 0; i < rows.length; i++)
-                       console.log("Row " + i + " : " +
-                                   rows[i].FIRST_NAME + ", ",
-                                   rows[i].SALARY + ", ", rows[i].HIRE_DATE);
-                   });
-
-```
-
-If run with Oracle's sample HR schema, the output is:
-
-```
-Row 0 : Shelley,  12000,  Tue Jun 07 1994 01:00:00 GMT-0700 (PDT)
-Row 1 : William,  8300,  Tue Jun 07 1994 01:00:00 GMT-0700 (PDT)
-```
-
-In the preceding example, each row is a JavaScript object that
-specifies column names and their respective values.  Note that the
-property names are uppercase.  This is the default casing behavior for
-Oracle client programs when a database table is created with
-case-insensitive column names.
-
-#### <a name="typemap"></a> Result Type Mapping
-
-Oracle character, number and date columns can be selected.  Data types
-that are currently unsupported give a "datatype is not supported"
-error.
-
-Query result type mappings for Oracle Database types to JavaScript types are:
-
--   Variable and fixed length character columns are mapped to JavaScript strings.
-
--   All numeric columns are mapped to JavaScript numbers.
-
--   Date and Timestamp columns are mapped to JavaScript dates.
-    Note that JavaScript Date has millisecond precision.
-    Therefore, timestamps having greater
-    precision lose their sub-millisecond fractional part
-    when fetched. Internally, `TIMESTAMP` and `DATE`
-    columns are fetched as `TIMESTAMP WITH LOCAL TIMEZONE` using
-    [OCIDateTime](https://docs.oracle.com/database/121/LNOCI/oci12oty.htm#LNOCI16840).
-    When binding a JavaScript Date value in an `INSERT` statement, the date is also inserted as `TIMESTAMP WITH
-    LOCAL TIMEZONE` using
-    [OCIDateTime](https://docs.oracle.com/database/121/LNOCI/oci12oty.htm#LNOCI16840).
-
-#### <a name="stmtcache"></a> Statement Caching
-
-Node-oracledb uses the
-[Oracle OCI statement cache](https://docs.oracle.com/database/121/LNOCI/oci09adv.htm#i471377)
-which manages a cache of statements for each session.  In the database
-server, statement caching lets cursors be used without reparsing the
-statement.  This eliminates repetitive statement parsing and reduces
-meta data transfer costs between the driver and the database.  This
-improve performance and scalability.
-
-In general, set the statement cache to the size of the working set of
-statements being executed by the application.
-
-The statement cache can be automatically tuned with the
-[oraaccess.xml file](#oraaccess).
-
-## <a name="transactionmgt"></a> 6. Transaction Management
+## <a name="transactionmgt"></a> 7. Transaction Management
 
 Node-oraclebd implements [`commit()`](#commit) and
-[`rollback()`](#rollback) methods that can be used to control
-transactions.
+[`rollback()`](#rollback) methods that can be used to explicitly
+control transactions.
 
 If the [`isAutoCommit`](#propdbisautocommit) flag is set, then a
 commit occurs at the end of each `execute()` call.  This does not
@@ -1354,9 +1358,6 @@ require a round-trip to the database, unlike an explicit `commit()`.
 For maximum efficiency, if a transaction consists of a number of
 `execute()` calls, then set `isAutoCommit` to true for the last call
 in preference to using an additional, explicit `commit()` call.
-
-After all database calls on the connection complete, the application
-should use the [`release()`](#release) call to release the connection.
 
 When a connection is released, it rolls back any ongoing
 transaction.  Therefore if a released, pooled connection is used by
@@ -1368,7 +1369,7 @@ transaction.
 When an application ends, any uncommitted transaction on a connection
 will be rolled back if there is no explicit commit.
 
-## <a name="drcp"></a> 7. Database Resident Connection Pooling
+## <a name="drcp"></a> 8. Database Resident Connection Pooling
 
 [Database Resident Connection Pooling](http://docs.oracle.com/database/121/ADFNS/adfns_perf_scale.htm#ADFNS228)
 enables database resource sharing for applications that run in
@@ -1411,7 +1412,7 @@ Oracle white paper
 [PHP Scalability and High Availability](http://www.oracle.com/technetwork/topics/php/php-scalability-ha-twp-128842.pdf).
 This paper also gives more detail on configuring DRCP.
 
-## <a name="oraaccess"></a> 8. External Configuration
+## <a name="oraaccess"></a> 9. External Configuration
 
 When node-oracledb is linked with Oracle 12c client libraries, the Oracle
 client-side configuration file
