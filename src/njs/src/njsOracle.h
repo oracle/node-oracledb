@@ -40,9 +40,15 @@ using namespace node;
 using namespace v8; 
 
 
-/*0.3.1.  Keep the version in sync with package.json */
+/*0.4.1.  Keep the version in sync with package.json */
+#define NJS_NODE_ORACLEDB_MAJOR       0
+#define NJS_NODE_ORACLEDB_MINOR       4
+#define NJS_NODE_ORACLEDB_PATCH       1
+
 /* Formula: 10000 x majorversion + 100 * minorversion + patchrelease number */
-#define NJS_ORACLE_VERSION 301
+#define NJS_NODE_ORACLEDB_VERSION   ( (NJS_NODE_ORACLEDB_MAJOR * 10000) + \
+                                      (NJS_NODE_ORACLEDB_MINOR * 100) +   \
+                                      (NJS_NODE_ORACLEDB_PATCH) )
 
 
 class Oracledb: public ObjectWrap 

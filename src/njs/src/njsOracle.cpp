@@ -382,7 +382,7 @@ Handle<Value> Oracledb::GetVersion ( Local<String> property,
                                      const AccessorInfo& info ) 
 {
   HandleScope scope;
-  int version = NJS_ORACLE_VERSION;
+  int version = NJS_NODE_ORACLEDB_VERSION;
   Local<Integer> value = v8::Integer::New(version);
   return scope.Close(value);
 }
