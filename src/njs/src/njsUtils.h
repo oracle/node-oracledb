@@ -192,6 +192,12 @@ typedef enum
   {                                                                           \
     ;                                                                         \
   }                                                                           \
+  else if(v8value->IsNumber())                                                \
+  {                                                                           \
+    err = NJSMessages::getErrorMsg ( errInvalidPropertyValueInParam,          \
+                                     key, index+1 );                          \
+    goto exitCode;                                                            \
+  }                                                                           \
   else                                                                        \
   {                                                                           \
     err = NJSMessages::getErrorMsg ( errInvalidPropertyTypeInParam,           \
