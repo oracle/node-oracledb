@@ -648,7 +648,7 @@ Handle<Value> Oracledb::CreatePool (const Arguments &args)
   NJS_GET_UINT_FROM_JSON   ( poolBaton->stmtCacheSize, poolBaton->error,
                              poolProps, "stmtCacheSize", 0, exitCreatePool );
   NJS_GET_BOOL_FROM_JSON   ( poolBaton->isExternalAuth, poolBaton->error,
-                             poolProps, "isExternalAuth", 0, exitGetConnection );
+                             poolProps, "isExternalAuth", 0, exitCreatePool );
   
   poolBaton->oracledb  =  oracledb;
   poolBaton->dpienv    =  oracledb->dpienv_; 

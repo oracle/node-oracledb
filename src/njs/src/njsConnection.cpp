@@ -718,7 +718,7 @@ void Connection::Async_Execute (uv_work_t *req)
     }
     else
     {
-      executeBaton->dpistmt->execute(executeBaton->isAutoCommit);
+      executeBaton->dpistmt->execute(1, executeBaton->isAutoCommit);
       executeBaton->rowsAffected = executeBaton->dpistmt->rowsAffected();
 
      /* Process date/timestamp INOUT/OUT bind values */
