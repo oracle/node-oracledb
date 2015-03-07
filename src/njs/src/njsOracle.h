@@ -102,6 +102,8 @@ private:
                                         const AccessorInfo& info);
    static Handle<Value> GetConnectionClass (Local<String> property,
                                             const AccessorInfo& info );
+   static Handle<Value> GetIsExternalAuth(Local<String> property,
+                                        const AccessorInfo& info);
    
    // Define Setter Accessors to Properties
    static void SetPoolMin(Local<String> property,Local<Value> value,
@@ -124,6 +126,8 @@ private:
                                const AccessorInfo& info);
    static void SetConnectionClass (Local<String> property, Local<Value> value,
                                    const AccessorInfo& info );
+   static void SetIsExternalAuth(Local<String> property,Local<Value> value,
+                               const AccessorInfo& info);
    
    
    Oracledb();
@@ -142,6 +146,7 @@ private:
    unsigned int poolTimeout_;
 
    std::string  connClass_;
+   bool         isExternalAuth_;
 };
 
 /**
@@ -156,6 +161,7 @@ typedef struct connectionBaton
   std::string pswrd;
   std::string connStr;
   std::string connClass;  
+  bool isExternalAuth;
   std::string error;
  
   int poolMax;
@@ -174,7 +180,7 @@ typedef struct connectionBaton
   Oracledb *oracledb;
 
   connectionBaton() : user(""), pswrd(""), connStr(""), connClass(""),
-                      error("" ),
+                      isExternalAuth(false), error("" ),
                       poolMax(0), poolMin(0), poolIncrement(0),
                       poolTimeout(0), stmtCacheSize(0), maxRows(0),
                       outFormat(0), dpienv(NULL), 

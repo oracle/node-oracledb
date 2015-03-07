@@ -46,16 +46,17 @@ Persistent<FunctionTemplate> Oracledb::oracledbTemplate_s;
  */
 Oracledb::Oracledb()
 {
-  dpienv_        = dpi::Env::createEnv();
-  outFormat_     = ROWS_ARRAY;
-  maxRows_       = MAX_ROWS;
-  isAutoCommit_  = false;
-  stmtCacheSize_ = STMT_CACHE_SIZE;
-  poolMax_       = POOL_MAX;
-  poolMin_       = POOL_MIN;
-  poolIncrement_ = POOL_INCR;
-  poolTimeout_   = POOL_TIMEOUT;
-  connClass_     = "";
+  dpienv_         = dpi::Env::createEnv();
+  outFormat_      = ROWS_ARRAY;
+  maxRows_        = MAX_ROWS;
+  isAutoCommit_   = false;
+  stmtCacheSize_  = STMT_CACHE_SIZE;
+  poolMax_        = POOL_MAX;
+  poolMin_        = POOL_MIN;
+  poolIncrement_  = POOL_INCR;
+  poolTimeout_    = POOL_TIMEOUT;
+  connClass_      = "";
+  isExternalAuth_ = false;
 } 
 
 /*****************************************************************************/
@@ -130,6 +131,10 @@ void Oracledb::Init(Handle<Object> target)
                                             String::New("connectionClass"),
                                             Oracledb::GetConnectionClass,
                                             Oracledb::SetConnectionClass );
+  oracledbTemplate_s->InstanceTemplate()->SetAccessor(
+                                            String::New("isExternalAuth"),
+                                            Oracledb::GetIsExternalAuth,
+                                            Oracledb::SetIsExternalAuth ); 
   
 
   target->Set(String::New("Oracledb"),oracledbTemplate_s->GetFunction());
@@ -434,6 +439,35 @@ void Oracledb::SetConnectionClass (Local<String> property, Local<Value> value,
 /*****************************************************************************/
 /*
    DESCRIPTION
+     Get Accessor of isExternalAuth property
+*/
+Handle<Value> Oracledb::GetIsExternalAuth ( Local<String> property,
+                                          const AccessorInfo& info )
+{
+  HandleScope scope;
+ 
+  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder()); 
+  Handle<Boolean> value = v8::Boolean::New(oracledb->isExternalAuth_);
+  return scope.Close(value);
+}
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Set Accessor of isExternalAuth property
+*/
+void Oracledb::SetIsExternalAuth ( Local<String> property, Local<Value> value,
+                                 const AccessorInfo& info )
+{
+  HandleScope scope;
+  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder()); 
+  oracledb->isExternalAuth_ = value->ToBoolean()->Value();
+}
+
+
+/*****************************************************************************/
+                                                                             /*
+   DESCRIPTION
      Get Connection method on Oracledb class.
   
    PARAMETERS:
@@ -462,11 +496,17 @@ Handle<Value>  Oracledb::GetConnection(const Arguments& args)
   NJS_GET_STRING_FROM_JSON ( connBaton->connStr, connBaton->error,
                              connProps, "connectString", 0, exitGetConnection );
 
-  connBaton->stmtCacheSize =  oracledb->stmtCacheSize_; 
-  connBaton->connClass     = oracledb->connClass_;
-  
+  connBaton->stmtCacheSize  = oracledb->stmtCacheSize_; 
+  connBaton->connClass      = oracledb->connClass_;
+  connBaton->isExternalAuth = oracledb->isExternalAuth_; 
+
+  // the above properties may be overriden if provided as call parameters
+
   NJS_GET_UINT_FROM_JSON   ( connBaton->stmtCacheSize, connBaton->error,
                              connProps, "stmtCacheSize", 0, exitGetConnection );
+  NJS_GET_BOOL_FROM_JSON ( connBaton->isExternalAuth, connBaton->error,
+                           connProps, "isExternalAuth", 0, exitGetConnection );
+
   connBaton->oracledb   =  oracledb; 
   connBaton->dpienv     =  oracledb->dpienv_; 
 
@@ -503,7 +543,8 @@ void Oracledb::Async_GetConnection (uv_work_t *req)
                                               connBaton->pswrd, 
                                               connBaton->connStr, 
                                               connBaton->stmtCacheSize,
-                                              connBaton->connClass );
+                                              connBaton->connClass,
+                                              connBaton->isExternalAuth );
 
   }
   catch (dpi::Exception& e)
@@ -592,6 +633,7 @@ Handle<Value> Oracledb::CreatePool (const Arguments &args)
   poolBaton->poolIncrement =  oracledb->poolIncrement_; 
   poolBaton->poolTimeout   =  oracledb->poolTimeout_; 
   poolBaton->stmtCacheSize =  oracledb->stmtCacheSize_; 
+  poolBaton->isExternalAuth = oracledb->isExternalAuth_; 
 
   NJS_GET_UINT_FROM_JSON   ( poolBaton->poolMax, poolBaton->error,
                              poolProps, "poolMax", 0, exitCreatePool );
@@ -603,6 +645,8 @@ Handle<Value> Oracledb::CreatePool (const Arguments &args)
                              poolProps, "poolTimeout", 0, exitCreatePool );
   NJS_GET_UINT_FROM_JSON   ( poolBaton->stmtCacheSize, poolBaton->error,
                              poolProps, "stmtCacheSize", 0, exitCreatePool );
+  NJS_GET_BOOL_FROM_JSON   ( poolBaton->isExternalAuth, poolBaton->error,
+                             poolProps, "isExternalAuth", 0, exitGetConnection );
   
   poolBaton->oracledb  =  oracledb;
   poolBaton->dpienv    =  oracledb->dpienv_; 
@@ -645,7 +689,8 @@ void Oracledb::Async_CreatePool (uv_work_t *req)
                                                   poolBaton->poolMin,
                                                   poolBaton->poolIncrement,
                                                   poolBaton->poolTimeout,
-                                                  poolBaton->stmtCacheSize );
+                                                  poolBaton->stmtCacheSize,
+                                                  poolBaton->isExternalAuth );
   }
   catch (dpi::Exception &e)
   {
