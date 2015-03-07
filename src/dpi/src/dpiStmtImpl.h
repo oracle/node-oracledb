@@ -67,10 +67,8 @@ public:
   virtual void bind (const unsigned char *name, int nameLen,
                      unsigned short type, void *buf, DPI_SZ_TYPE bufSize, short *ind,
                      DPI_BUFLEN_TYPE *bufLen);
-  
-  virtual void executeDML ( bool isAutoCommit );
-  virtual void executeMany (int numIterations, bool isAutoCommit );
-  virtual void executeQuery ();
+
+  virtual void execute ( int numIterations, bool isAutoCommit );
 
   virtual void define (unsigned int pos, unsigned short type, void *buf,
                        DPI_SZ_TYPE bufSize, short *ind, DPI_BUFLEN_TYPE *bufLen);
@@ -79,6 +77,15 @@ public:
   virtual const MetaData *getMetaData ();
 
   virtual OCIError *     getError () { return errh_;  }
+
+  // Is the SQL statement DML or not ?
+  virtual inline bool IsDML ()  
+  {
+    return ( ( stmtType_ == DpiStmtInsert ) ||
+             ( stmtType_ == DpiStmtUpdate ) ||
+             ( stmtType_ == DpiStmtDelete ) );
+  }
+  
   
 private:
   void cleanup ();
@@ -95,6 +102,7 @@ private:
   
   unsigned int   numCols_;         // # of cols this stmt execution will return
   MetaData       *meta_;           // Meta data array
+  DpiStmtType    stmtType_;        // Statement Type (Query, DML, ... )
 };
 
 

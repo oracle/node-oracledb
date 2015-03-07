@@ -86,7 +86,7 @@ StmtImpl::StmtImpl (EnvImpl *env, OCIEnv *envh, ConnImpl *conn,
                     OCISvcCtx *svch, const string &sql)
                     
   try : conn_(conn), errh_(NULL), svch_(svch),
-        stmth_(NULL), numCols_ (0),meta_(NULL)
+        stmth_(NULL), numCols_ (0),meta_(NULL), stmtType_ (DpiStmtUnknown)
         
 {
   // create an OCIError object for this execution 
@@ -137,12 +137,14 @@ StmtImpl::~StmtImpl ()
 */
 DpiStmtType StmtImpl::stmtType () const
 {
-  ub2 stmtType ;
+  // Try to query the statement type only once.
+  if ( stmtType_ == DpiStmtUnknown )
+  {    
+    ociCall (OCIAttrGet (stmth_, OCI_HTYPE_STMT, (ub2 * )&stmtType_, NULL, 
+                         OCI_ATTR_STMT_TYPE, errh_), errh_);
+  }
   
-  ociCall (OCIAttrGet (stmth_, OCI_HTYPE_STMT, &stmtType, NULL, 
-                       OCI_ATTR_STMT_TYPE, errh_), errh_);
-  
-  return (DpiStmtType)stmtType;
+  return stmtType_;
 }
 
 
@@ -251,65 +253,34 @@ void StmtImpl::bind (const unsigned char *name, int nameLen,
 /****************************************************************************/
 /*
     DESCRIPTION
-      Execute the DML statement.
+      Execute the SQL statement.
       
     PARAMETERS
       isAutoCommit   - true/false - autocommit enabled or not
+      numIterations  - iterations to repeat
     
     RETURNS:
       -None-
 */
-void StmtImpl::executeDML (bool isAutoCommit )
+void StmtImpl::execute (int numIterations,  bool isAutoCommit)
 {
-  executeMany ( 1 , isAutoCommit );  // Use execute Many special case only one iteration.
-}
-
-
-/*****************************************************************************/
-/* 
-  DESCRIPTION
-    Execute the DML statement multiple times.
+  ub4 mode = isAutoCommit ? OCI_COMMIT_ON_SUCCESS : OCI_DEFAULT;
   
-  PARAMETERS:
-    numIterations  - number of times to execute
-    isAutoCommit   - true/false - autocommit enabled or not
+  ociCall (OCIStmtExecute ( svch_, stmth_, errh_, (ub4)numIterations, (ub4)0,
+                            (OCISnapshot *)NULL, (OCISnapshot *)NULL, mode),
+           errh_ );
   
-  RETURNS
-    -None-
-*/
-void StmtImpl::executeMany (int numIterations, bool isAutoCommit )
-{
-  ub4 mode = isAutoCommit ? OCI_COMMIT_ON_SUCCESS : OCI_DEFAULT ;
-  
-  ociCall (OCIStmtExecute (svch_, stmth_, errh_, (ub4)numIterations, (ub4)0, 
-                           (OCISnapshot *)NULL, (OCISnapshot *)NULL, mode),
-           errh_);
-  #if OCI_MAJOR_VERSION < 12
-    if(!conn_->hasTxn())
-      conn_->hasTxn(true); /* Not to be reset, till thread safety is ensured in 
-                              NJS  */
-  #endif
+#if OCI_MAJOR_VERSION < 12 
+  if ( IsDML () && !conn_->hasTxn () )
+  {
+    /* Not to be reset, till thread safety is ensured in NJS */
+    conn_->hasTxn (true );
+  }
+#endif
 }
 
 
 
-/*****************************************************************************/
-/*
-  DESCRIPTION
-    Execute the SELECT statement
-  
-  PARAMETERS
-    -None-
-  
-  RETURNS:
-    -None-
-*/
-void StmtImpl::executeQuery ()
-{
-  ociCall (OCIStmtExecute (svch_, stmth_, errh_, 0, (ub4)0,
-                           (OCISnapshot *)NULL, (OCISnapshot *)NULL,
-                           OCI_DEFAULT), errh_);
-}
 
 
 /****************************************************************************/

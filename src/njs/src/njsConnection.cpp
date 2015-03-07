@@ -713,12 +713,12 @@ void Connection::Async_Execute (uv_work_t *req)
     executeBaton->st = executeBaton->dpistmt->stmtType();
     if (executeBaton->st == DpiStmtSelect)
     {
-      executeBaton->dpistmt->executeQuery();
+      executeBaton->dpistmt->execute(executeBaton->isAutoCommit);
       Connection::GetDefines(executeBaton);
     }
     else
     {
-      executeBaton->dpistmt->executeDML(executeBaton->isAutoCommit);
+      executeBaton->dpistmt->execute(executeBaton->isAutoCommit);
       executeBaton->rowsAffected = executeBaton->dpistmt->rowsAffected();
 
      /* Process date/timestamp INOUT/OUT bind values */
