@@ -182,19 +182,19 @@ Usage of these constants is described later in this document.
 #### Query result [outFormat](#propdboutformat) option constants:
 
 ```
-Number ARRAY                = 1     // rows as array of column values
+Oracledb.ARRAY                      // rows as array of column values
 
-Number OBJECT               = 2     // row as objects
+Oracledb.OBJECT                     // row as objects
 ```
 
 #### Constants for [bind parameter](#executebindParams) `type` properties:
 
 ```
-Number STRING               = 2001  // JavaScript string type
+Oracledb.STRING                    // JavaScript string type
 
-Number NUMBER               = 2002  // JavaScript number type
+Oracledb.NUMBER                    // JavaScript number type
 
-Number DATE                 = 2003  // JavaScript date type
+Oracledb.DATE                      // JavaScript date type
 ```
 
 #### Constants for [bind parameter](#executebindParams) `dir` properties
@@ -203,11 +203,11 @@ These specify whether bound values are passed into or out from the
 database:
 
 ```
-Number BIND_IN              = 1     // for IN binds
+Oracledb.BIND_IN                      // for IN binds
 
-Number BIND_INOUT           = 2     // for IN OUT binds
+Oracledb.BIND_INOUT                   // for IN OUT binds
 
-Number BIND_OUT             = 3     // or OUT binds
+Oracledb.BIND_OUT                     // or OUT binds
 
 ```
 
