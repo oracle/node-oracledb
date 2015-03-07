@@ -255,10 +255,15 @@ and preventing any session information leaking between the two systems.
 Boolean isAutoCommit
 ```
 
-If this parameter is true, each [DML](https://docs.oracle.com/database/121/CNCPT/glossary.htm#CNCPT2042) statement is
-automatically committed.
+If this parameter is true, then the transaction in the current
+connection is automatically committed at the the end of statement
+execution.
 
-By default, this property is false.
+The default value is false.
+
+This parameter may be overridden in an `execute()` call.
+
+Note: Oracle Database will implicitly commit when a [DDL](https://docs.oracle.com/database/121/CNCPT/glossary.htm#CHDJJGGF) statement is executed irrespective of the value of this property.
 
 <a name="propdbmaxrows"></a>
 ```
@@ -266,9 +271,11 @@ Number maxRows
 ```
 
 The maximum number of rows that are fetched by the `execute()` call of the *Connection*
-object. This parameter may be overridden during the `execute()` call.
+object.
 
 The default value is 100.
+
+This parameter may be overridden in an `execute()` call.
 
 To improve database efficiency, SQL queries should use a row
 limiting clause like [OFFSET /
@@ -299,10 +306,11 @@ Number poolIncrement
 ```
 
 The number of connections that are opened whenever a connection
-request exceeds the number of currently open connections. This
-parameter may be overridden when creating a connection pool.
+request exceeds the number of currently open connections. 
 
 The default value is 1.
+
+This parameter may be overridden when creating a connection pool.
 
 <a name="propdbpoolmax"></a>
 ```
@@ -310,9 +318,10 @@ Number poolMax
 ```
 
 The maximum number of connections to which a connection pool can grow.
-This parameter may be overridden when creating the connection pool.
 
 The default value is 4.
+
+This parameter may be overridden when creating the connection pool.
 
 <a name="propdbpoolmin"></a>
 ```
@@ -320,10 +329,11 @@ Number poolMin
 ```
 
 The minimum number of connections a connection pool maintains, even if
-there is no activity to the target database of the pool. This
-parameter may be overridden when creating a connection pool.
+there is no activity to the target database of the pool.
 
 The default value is 0.
+
+This parameter may be overridden when creating a connection pool.
 
 <a name="propdbpooltimeout"></a>
 ```
@@ -331,11 +341,12 @@ Number poolTimeout
 ```
 
 The time (in seconds) after which idle connections (unchecked out from
-the pool) are terminated. This parameter may be overridden when
-creating a connection pool. If the `poolTimeout` is set to 0, then idle
+the pool) are terminated. If the `poolTimeout` is set to 0, then idle
 connections are never terminated.
 
 The default value is 60.
+
+This parameter may be overridden when creating a connection pool.
 
 <a name="propdbstmtcachesize"></a>
 ```
@@ -343,10 +354,12 @@ Number stmtCacheSize
 ```
 
 The number of statements that are cached in the [statement cache](#stmtcache) of
-each connection. This parameter may be overridden for specific *Pool* or
-*Connection* objects.
+each connection. 
 
 The default value is 30.
+
+This parameter may be overridden for specific *Pool* or *Connection*
+objects.
 
 In general, set the statement cache to the size of the working set of
 statements being executed by the application.
@@ -372,8 +385,10 @@ This is an asynchronous call.
 
 Internally, `createPool()` creates an [OCI Session
 Pool](https://docs.oracle.com/database/121/LNOCI/oci09adv.htm#LNOCI16617)
-for each Pool object. The default properties may be overridden by
-specifying new properties in the `poolAttrs` parameter.
+for each Pool object.
+
+The default properties may be overridden by specifying new properties
+in the `poolAttrs` parameter.
 
 A pool should be terminated with the `pool.terminate()` call.
 
@@ -620,7 +635,7 @@ values.
 
 <a name="proppoolconnectionsinuse"></a>
 ```
-readonly Boolean connectionsInUse
+readonly Number connectionsInUse
 ```
 
 The number of currently active connections in the connection pool
@@ -674,9 +689,12 @@ readonly Number stmtCacheSize
 ```
 
 The number of statements that must be cached in the [statement cache](#stmtcache) of
-each connection.  This parameter may be overridden for a specific
-Connection object.  The default is the `stmtCacheSize` property of the
-*Oracledb* object when the pool is created.
+each connection.
+
+The default is the `stmtCacheSize` property of the *Oracledb* object
+when the pool is created.
+
+This parameter may be overridden for a specific Connection object.
 
 ### <a name="poolmethods"></a> 4.2 Pool Methods
 
@@ -949,7 +967,7 @@ Option Property | Description
 ----------------|-------------
 *Number maxRows*  | Number of rows to fetch for `SELECT` statements. To improve database efficiency, SQL queries should use a row limiting clause like [OFFSET / FETCH](https://docs.oracle.com/database/121/SQLRF/statements_10002.htm#BABEAACC) or equivalent. The `maxRows` attribute can be used to stop badly coded queries from returning unexpectedly large numbers of rows.
 *String outFormat* |  The format of rows fetched for `SELECT` statements. This can be either `ARRAY` or `OBJECT`. If specified as `ARRAY`, then each row is fetched as an array of column values. If specified as `OBJECT`, then each row is fetched as a JavaScript object.
-*Boolean isAutoCommit* | If it is true, then each [DML](https://docs.oracle.com/database/121/CNCPT/glossary.htm#CNCPT2042) is automatically committed. Note: Oracle Database will implicitly commit when a [DDL](https://docs.oracle.com/database/121/CNCPT/glossary.htm#CHDJJGGF) statement is executed.
+*Boolean isAutoCommit* |  This overrides the `oracledb.isAutoCommit` property for this statement execution.
 
 ```
 function(Error error, [Object result])
@@ -1327,7 +1345,15 @@ The statement cache can be automatically tuned with the
 ## <a name="transactionmgt"></a> 6. Transaction Management
 
 Node-oraclebd implements [`commit()`](#commit) and
-[`rollback()`](#rollback) methods.
+[`rollback()`](#rollback) methods that can be used to control
+transactions.
+
+If the [`isAutoCommit`](#propdbisautocommit) flag is set, then a
+commit occurs at the end of each `execute()` call.  This does not
+require a round-trip to the database, unlike an explicit `commit()`.
+For maximum efficiency, if a transaction consists of a number of
+`execute()` calls, then set `isAutoCommit` to true for the last call
+in preference to using an additional, explicit `commit()` call.
 
 After all database calls on the connection complete, the application
 should use the [`release()`](#release) call to release the connection.
