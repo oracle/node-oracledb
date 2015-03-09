@@ -27,7 +27,9 @@
 #define __NJSUTILS_H__
 
 #include <node.h>
+
 #include "nan.h"
+
 #include "njsMessages.h"
 
 // User specified data types for binds and defines.
