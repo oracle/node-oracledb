@@ -52,6 +52,20 @@
       }
     ],
     [
+      'OS=="aix"', {
+        "variables" : {
+          "oci_inc_dir%" : '<!(echo ${OCI_INC_DIR:="/opt/oracle/instantclient_12_1/sdk/include/"})',
+          "oci_lib_dir%" : '<!(echo ${OCI_LIB_DIR:="/opt/oracle/instantclient_12_1/"})',
+          },
+          "libraries"     : ["-lclntsh"],
+          "cflags"        : ['-fexceptions'],
+          "cflags_cc"     : ['-fexceptions'],
+          "link_settings" : {
+             "libraries"  : ['-L<(oci_lib_dir)']
+        }
+      }
+    ],
+    [
       'OS=="solaris"', {
         "variables" : {
           "oci_inc_dir%" : "<!(if [ -z $OCI_INC_DIR ]; then echo \"/opt/oracle/instantclient/sdk/include/\"; else echo $OCI_INC_DIR; fi)",
