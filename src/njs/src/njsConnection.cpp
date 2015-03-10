@@ -1038,7 +1038,7 @@ v8::Handle<v8::Value> Connection::GetRows (eBaton* executeBaton)
 v8::Handle<v8::Value> Connection::GetValue ( short ind, unsigned short type, void* val,
                                      DPI_BUFLEN_TYPE len )
 {
-  NanScope();
+  NanEscapableScope();
   Handle<Value> value;
   Local<Date> date;
   if(ind != -1)
@@ -1067,7 +1067,7 @@ v8::Handle<v8::Value> Connection::GetValue ( short ind, unsigned short type, voi
   {
     value = NanNull();
   }
-  return value;
+  return NanEscapeScope(value);
 }
 
 /*****************************************************************************/
