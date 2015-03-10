@@ -31,7 +31,6 @@
  *
  *****************************************************************************/
 
-var sys      = require('sys');
 var http     = require('http');
 var url      = require('url');
 var oracledb = require('oracledb');
@@ -139,7 +138,7 @@ oracledb.createPool (
 
     hs.listen(portid, "localhost");
     
-    sys.puts("Server running at http://localhost:" + portid);
+    console.log("Server running at http://localhost:" + portid);
   });
 
 // To prepare HTML header
