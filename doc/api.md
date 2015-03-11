@@ -112,7 +112,7 @@ With Oracle's sample HR schema, the output is:
 ```
 
 There are more examples in the
-[examples](https://github.com/oracle/node-oracledb/examples)
+[examples](https://github.com/oracle/node-oracledb/tree/master/examples)
 directory.
 
 ## <a name="errorobj"></a> 2. Errors
