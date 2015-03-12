@@ -203,19 +203,19 @@ Usage of these constants is described later in this document.
 #### Query result [outFormat](#propdboutformat) option constants:
 
 ```
-Oracledb.ARRAY                      // rows as array of column values
+Oracledb.ARRAY                     // Fetch each row as array of column values
 
-Oracledb.OBJECT                     // row as objects
+Oracledb.OBJECT                    // Fetch each row as an object
 ```
 
 #### Constants for [bind parameter](#executebindParams) `type` properties:
 
 ```
-Oracledb.STRING                    // JavaScript string type
+Oracledb.STRING                    // Bind as JavaScript string type
 
-Oracledb.NUMBER                    // JavaScript number type
+Oracledb.NUMBER                    // Bind as JavaScript number type
 
-Oracledb.DATE                      // JavaScript date type
+Oracledb.DATE                      // Bind as JavaScript date type
 ```
 
 #### Constants for [bind parameter](#executebindParams) `dir` properties
@@ -224,11 +224,11 @@ These specify whether bound values are passed into or out from the
 database:
 
 ```
-Oracledb.BIND_IN                      // for IN binds
+Oracledb.BIND_IN                   // Direction for IN binds
 
-Oracledb.BIND_INOUT                   // for IN OUT binds
+Oracledb.BIND_INOUT                // Direction for IN OUT binds
 
-Oracledb.BIND_OUT                     // or OUT binds
+Oracledb.BIND_OUT                  // Direction for OUT binds
 
 ```
 
@@ -298,6 +298,10 @@ The default value is *false*.
 The `user` and `password` properties for connecting or creating a pool
 should not be set when `isExternalAuth` is *true*.
 
+This property can be overridden in the *Oracledb*
+[`getConnection()`](#getconnectiondb) or [`createPool()`](#createpool)
+calls.
+
 <a name="propdbmaxrows"></a>
 ```
 Number maxRows
@@ -339,7 +343,7 @@ Number poolIncrement
 ```
 
 The number of connections that are opened whenever a connection
-request exceeds the number of currently open connections. 
+request exceeds the number of currently open connections.
 
 The default value is 1.
 
@@ -387,7 +391,7 @@ Number stmtCacheSize
 ```
 
 The number of statements that are cached in the [statement cache](#stmtcache) of
-each connection. 
+each connection.
 
 The default value is 30.
 
@@ -402,28 +406,12 @@ statements being executed by the application.
 readonly Number version
 ```
 
-The `version` property gives a numeric representation of the driver's version.
+This readonly property gives a numeric representation of the driver's version.
 For driver version *x.y.z*, this property gives the number: `(10000 * x) + (100 * y) + z`
 
 ### <a name="oracledbmethods"></a> 3.3 Oracledb Methods
 
 #### <a name="createpool"></a> 3.3.1 createPool()
-
-This method creates a pool of connections with the specified username,
-password and connection string.
-
-##### Description
-
-This is an asynchronous call.
-
-Internally, `createPool()` creates an [OCI Session
-Pool](https://docs.oracle.com/database/121/LNOCI/oci09adv.htm#LNOCI16617)
-for each Pool object.
-
-The default properties may be overridden by specifying new properties
-in the `poolAttrs` parameter.
-
-A pool should be terminated with the `pool.terminate()` call.
 
 ##### Prototype
 
@@ -435,6 +423,22 @@ void createPool(Object poolAttrs, function(Error error, Pool pool){});
 
 None
 
+##### Description
+
+This method creates a pool of connections with the specified username,
+password and connection string.
+
+This is an asynchronous call.
+
+Internally, `createPool()` creates an [OCI Session
+Pool](https://docs.oracle.com/database/121/LNOCI/oci09adv.htm#LNOCI16617)
+for each Pool object.
+
+The default properties may be overridden by specifying new properties
+in the `poolAttrs` parameter.
+
+A pool should be terminated with the [`terminate()`](#terminate) call.
+
 ##### Parameters
 
 ```
@@ -442,8 +446,8 @@ Object poolAttrs
 ```
 
 The `poolAttrs` parameter provides connection credentials and
-pool-specific configuration properties, such as maximum or minimum
-number of connections for the pool or `stmtCacheSize` for the connections.
+pool-specific configuration properties, such as the maximum or minimum
+number of connections for the pool, or `stmtCacheSize` for the connections.
 The properties provided in the `poolAttrs` parameter override the default
 pooling properties in effect in the *Oracledb* object.
 
@@ -451,7 +455,7 @@ Note that the `poolAttrs` parameter may have configuration
 properties that are not used by the `createPool()` method.  These are
 ignored.
 
-The properties of the `poolAttrs` object are described below.
+The properties of `poolAttrs` are described below.
 
 ```
 String user
@@ -551,23 +555,6 @@ Callback function parameter | Description
 
 #### <a name="getconnectiondb"></a> 3.3.2 getConnection()
 
-Gets a connection to a database instance.
-
-##### Description
-
-This is an asynchronous call.
-
-Obtains a connection directly from an *Oracledb* object.
-
-These connections are not pooled.  For situations where connections
-are used infrequently, this call may be more efficient than creating
-and managing a connection pool.  However, in most cases, Oracle
-recommends getting new connections from a
-[connection pool](#createpool).
-
-See [Connection Handling](#connectionhandling) for more information on
-connections.
-
 ##### Prototype
 
 ```
@@ -577,6 +564,21 @@ void getConnection(Object connAttrs, function(Error error, Connection conn){});
 ##### Return Value
 
 None
+
+##### Description
+
+Obtains a connection directly from an *Oracledb* object.
+
+These connections are not pooled.  For situations where connections
+are used infrequently, this call may be more efficient than creating
+and managing a connection pool.  However, in most cases, Oracle
+recommends getting new connections from a
+[connection pool](#createpool).
+
+This is an asynchronous call.
+
+See [Connection Handling](#connectionhandling) for more information on
+connections.
 
 ##### Parameters
 
@@ -738,22 +740,6 @@ This property may be overridden for a specific Connection object.
 
 #### <a name="getconnectionpool"></a> 4.2.1 getConnection()
 
-This method obtains a connection from the connection pool.
-
-##### Description
-
-This is an asynchronous call.
-
-If a previously opened connection is available in the pool, that
-connection is returned. If all connections in the pool are in use, a
-new connection is created and returned to the caller, as long as the
-number of connections does not exceed the specified maximum for the
-pool. If the pool is at its maximum limit, the `getConnection()` call
-results in an error, such as *ORA-24418: Cannot open further sessions*.
-
-See [Connection Handling](#connectionhandling) for more information on
-connections.
-
 ##### Prototype
 
 ```
@@ -763,6 +749,22 @@ void getConnection(function(Error error, Connection conn){});
 ##### Return Value
 
 None
+
+##### Description
+
+This method obtains a connection from the connection pool.
+
+If a previously opened connection is available in the pool, that
+connection is returned. If all connections in the pool are in use, a
+new connection is created and returned to the caller, as long as the
+number of connections does not exceed the specified maximum for the
+pool. If the pool is at its maximum limit, the `getConnection()` call
+results in an error, such as *ORA-24418: Cannot open further sessions*.
+
+This is an asynchronous call.
+
+See [Connection Handling](#connectionhandling) for more information on
+connections.
 
 ##### Parameters
 
@@ -779,16 +781,6 @@ Callback function parameter | Description
 
 #### <a name="terminate"></a> 4.2.2 terminate()
 
-This call terminates the connection pool.
-
-##### Description
-
-This is an asynchronous call.
-
-Any open connections should be released with [`release()`](#release)
-before `terminate()` is called, otherwise an error will be returned
-and the pool will be unusable.
-
 ##### Prototype
 
 ```
@@ -798,6 +790,15 @@ void terminate(function(Error error){});
 ##### Return Value
 
 None
+
+##### Description
+
+This call terminates the connection pool.
+
+Any open connections should be released with [`release()`](#release)
+before `terminate()` is called.
+
+This is an asynchronous call.
 
 ##### Parameters
 
@@ -813,9 +814,9 @@ Callback function parameter | Description
 
 ## <a name="connectionclass"></a> 5. Connection Class
 
-The Connection object is obtained by a Pool Class
+The Connection object is obtained by a *Pool* class
 [`getConnection()`](#getconnectionpool) or
-Oracledb Class [`getConnection()`](#getconnectiondb)
+*Oracledb* class [`getConnection()`](#getconnectiondb)
 call.
 
 The connection is used to access an Oracle database.
@@ -864,17 +865,6 @@ connection is created in the pool.
 
 #### <a name="break"></a> 5.2.1 break()
 
-This call stops the currently running operation on the connection.
-
-If there is no operation in progress or the operation has completed by
-the time the break is issued, the `break()` is effectively a no-op.
-
-If the running operation is broken, its executing call will return an error.
-
-##### Description
-
-This is an asynchronous call.
-
 ##### Prototype
 
 ```
@@ -884,6 +874,17 @@ void break(function(Error error){});
 ##### Return Value
 
 None
+
+##### Description
+
+This call stops the currently running operation on the connection.
+
+If there is no operation in progress or the operation has completed by
+the time the break is issued, the `break()` is effectively a no-op.
+
+If the running operation is broken, its executing call will return an error.
+
+This is an asynchronous call.
 
 ##### Parameters
 
@@ -899,12 +900,6 @@ Callback function parameter | Description
 
 ####  <a name="commit"></a> 5.2.2 commit()
 
-This call commits the current transaction in progress on the connection.
-
-##### Description
-
-This is an asynchronous call.
-
 ##### Prototype
 
 ```
@@ -914,6 +909,12 @@ void commit(function(Error error){});
 ##### Return Value
 
 None
+
+##### Description
+
+This call commits the current transaction in progress on the connection.
+
+This is an asynchronous call.
 
 ##### Parameters
 
@@ -929,9 +930,19 @@ Callback function parameter | Description
 
 #### <a name="execute"></a> 5.2.3 execute()
 
-This call executes a SQL or PL/SQL statement.  See [SQL Execution](#sqlexecution) for examples.
+##### Prototype
+
+```
+void execute(String sql, [Object bindParams, [Object options,]] function(Error error, [Object result]){});
+```
+
+##### Return Value
+
+None
 
 ##### Description
+
+This call executes a SQL or PL/SQL statement.  See [SQL Execution](#sqlexecution) for examples.
 
 This is an asynchronous call.
 
@@ -944,16 +955,6 @@ rows, the values of any OUT and IN OUT bind variables, and the number
 of rows affected by the execution of
 [DML](https://docs.oracle.com/database/121/CNCPT/glossary.htm#CNCPT2042)
 statements.
-
-##### Prototype
-
-```
-void execute(String sql, [Object bindParams, [Object options,]] function(Error error, [Object result]){});
-```
-
-##### Return Value
-
-None
 
 ##### Parameters
 
@@ -1060,12 +1061,20 @@ returned as an array. If `bindParams` is passed as an object, then
 
 #### <a name="release"></a> 5.2.4 release()
 
-Releases a connection.  If the connection was obtained from the pool,
-the connection is returned to the pool.
+##### Prototype
+
+```
+void release(function(Error error){});
+```
+
+##### Return Value
+
+None
 
 ##### Description
 
-This is an asynchronous call.
+Releases a connection.  If the connection was obtained from the pool,
+the connection is returned to the pool.
 
 Note: calling `release()` when connections are no longer required is
 strongly encouraged.  Releasing helps avoid resource leakage and can
@@ -1079,15 +1088,7 @@ guarantee a subsequent `getConnection()` call gets back the same
 database connection.  The application must redo any ALTER SESSION
 statements on the new connection object, as required.
 
-##### Prototype
-
-```
-void release(function(Error error){});
-```
-
-##### Return Value
-
-None
+This is an asynchronous call.
 
 ##### Parameters
 
@@ -1103,13 +1104,6 @@ Callback function parameter | Description
 
 #### <a name="rollback"></a> 5.2.5 rollback()
 
-This call rolls back the current transaction in progress on the
-connection.
-
-##### Description
-
-This is an asynchronous call.
-
 ##### Prototype
 
 ```
@@ -1119,6 +1113,13 @@ void rollback(function(Error error){});
 ##### Return Value
 
 None
+
+##### Description
+
+This call rolls back the current transaction in progress on the
+connection.
+
+This is an asynchronous call.
 
 ##### Parameters
 
@@ -1149,7 +1150,7 @@ oracledb.getConnection(
   . . .
 );
 ```
-  
+
 Alternatively connections can be obtained from *Pool*
 [getConnection()](#getconnectionpool):
 
@@ -1172,7 +1173,7 @@ oracledb.createPool (
       });
   });
 ```
-		
+
 In most cases, Oracle recommends using a connection pool because all
 connections created on the *Oracledb* object are new and cannot be
 recycled.  However, in situations where connections are used
@@ -1209,7 +1210,7 @@ database must handle.
 
 DRCP is distinct from node-oracledb's local
 [connection pool](#poolclass).  The two pools can be used separately,
-or together. 
+or together.
 
 DRCP is useful for applications which share the same credentials, have
 similar session settings (for example date format settings and PL/SQL
@@ -1246,7 +1247,7 @@ This paper also gives more detail on configuring DRCP.
 
 Instead of specifying a user and password at connection, Oracle
 Database allows applications to use an external password store (such
-as 
+as
 [Oracle Wallet](http://docs.oracle.com/database/121/DBIMI/to_dbimi10236_d209.htm#DBIMI10236)),
 the [Secure Socket Layer](http://docs.oracle.com/database/121/DBSEG/asossl.htm#DBSEG070)
 (SSL), or the
@@ -1292,7 +1293,7 @@ should use the [`release()`](#release) call to release the connection.
 ### <a name="select"></a> 7.1 SELECT Statements
 
 SQL `SELECT` statements return an array of rows.  The rows array holds up to
-[`maxRows`](#propdbmaxrows) number of rows.  
+[`maxRows`](#propdbmaxrows) number of rows.
 
 ### <a name="queryoutputformats"></a> 7.1.1 Query Output Formats
 
