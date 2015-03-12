@@ -310,7 +310,7 @@ export PATH=$HOME/Desktop/node-v0.10.35-linux-x64/bin:$PATH
 Tell the installer where to find the Oracle client:
 
 ```
-export ORACLE_HOME=/wherever/it/is/see/etc/oratab
+export ORACLE_HOME=/wherever/it/is
 ```
 
 *Warning*: By default, the installer will look first for Oracle
