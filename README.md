@@ -83,7 +83,7 @@ There are more examples in the [examples](examples) directory.
 
 The current release of node-oracledb is available only on GitHub.  The basic install steps are:
 
-- Install the small, free [Oracle Instant Client](http://www.oracle.com/technetwork/database/features/instant-client/index-100365.html) libraries, or have a local database such as the free [Oracle XE](http://www.oracle.com/technetwork/database/database-technologies/express-edition/overview/index.html) release.
+- Install the small, free [Oracle Instant Client](http://www.oracle.com/technetwork/database/features/instant-client/index-100365.html) libraries if your database is remote, or have a local database such as the free [Oracle XE](http://www.oracle.com/technetwork/database/database-technologies/express-edition/overview/index.html) release.
 - Clone this repository
 - Run `npm install`
 
@@ -91,7 +91,7 @@ See [INSTALL](INSTALL.md) for details.
 
 ## <a name="doc"></a> 3. Documentation
 
-See [API Documentation](doc/api.md)
+See [Documentation for the Oracle Database Node.js Driver](doc/api.md)
 
 ## <a name="contrib"></a> 4. Contributing
 
