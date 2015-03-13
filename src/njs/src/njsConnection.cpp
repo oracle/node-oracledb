@@ -127,6 +127,25 @@ Handle<Value>  Connection::New(const Arguments& args)
 /*****************************************************************************/
 /*
    DESCRIPTION
+     Abstraction for exception on accessing connection properties 
+*/
+void Connection::connectionPropertyException(const AccessorInfo& info, 
+                                             NJSErrorType errType,
+                                             string property)
+{
+  HandleScope scope;
+  Connection* njsConn = ObjectWrap::Unwrap<Connection>(info.Holder()); 
+  string msg;
+  if(!njsConn->isValid_)
+    msg = NJSMessages::getErrorMsg(errInvalidConnection);
+  else
+    msg = NJSMessages::getErrorMsg(errType, property.c_str());
+  NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
+}
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
      Get Accessor of stmtCacheSize property
 */
 Handle<Value> Connection::GetStmtCacheSize (Local<String> property,
@@ -136,7 +155,7 @@ Handle<Value> Connection::GetStmtCacheSize (Local<String> property,
   Connection* njsConn = ObjectWrap::Unwrap<Connection>(info.Holder()); 
   if(!njsConn->isValid_)
   {
-    string error = NJSMessages::getErrorMsg ( errInvalidPool );
+    string error = NJSMessages::getErrorMsg ( errInvalidConnection );
     NJS_SET_EXCEPTION(error.c_str(), error.length());
     return scope.Close(Undefined());
   }
@@ -161,14 +180,7 @@ Handle<Value> Connection::GetStmtCacheSize (Local<String> property,
 void Connection::SetStmtCacheSize(Local<String> property, Local<Value> value,
                                    const AccessorInfo& info)
 {
-  HandleScope scope;
-  Connection* njsConn = ObjectWrap::Unwrap<Connection>(info.Holder()); 
-  string msg;
-  if(!njsConn->isValid_)
-    msg = NJSMessages::getErrorMsg(errInvalidConnection);
-  else
-    msg = NJSMessages::getErrorMsg(errReadOnly, "stmtCacheSize");
-  NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
+  connectionPropertyException(info, errReadOnly, "stmtCacheSize"); 
 }
 
 /*****************************************************************************/
@@ -179,14 +191,7 @@ void Connection::SetStmtCacheSize(Local<String> property, Local<Value> value,
 Handle<Value> Connection::GetClientId(Local<String> property,
                                       const AccessorInfo& info)
 {
-  HandleScope scope;
-  Connection* njsConn = ObjectWrap::Unwrap<Connection>(info.Holder()); 
-  string msg;
-  if(!njsConn->isValid_)
-    msg = NJSMessages::getErrorMsg(errInvalidConnection);
-  else
-    msg = NJSMessages::getErrorMsg(errWriteOnly, "clientId");
-  NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
+  connectionPropertyException(info, errWriteOnly, "clientId"); 
   return Undefined();
 }
 
@@ -222,14 +227,7 @@ void Connection::SetClientId(Local<String> property, Local<Value> value,
 Handle<Value> Connection::GetModule (Local<String> property,
                                      const AccessorInfo& info)
 {
-  HandleScope scope;
-  Connection* njsConn = ObjectWrap::Unwrap<Connection>(info.Holder()); 
-  string msg;
-  if(!njsConn->isValid_)
-    msg = NJSMessages::getErrorMsg(errInvalidConnection);
-  else
-    msg = NJSMessages::getErrorMsg(errWriteOnly, "module");
-  NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
+  connectionPropertyException(info, errWriteOnly, "module"); 
   return Undefined();
 }
 
@@ -265,14 +263,7 @@ void Connection::SetModule (Local<String> property, Local<Value> value,
 Handle<Value> Connection::GetAction (Local<String> property,
                                      const AccessorInfo& info)
 {
-  HandleScope scope;
-  Connection* njsConn = ObjectWrap::Unwrap<Connection>(info.Holder()); 
-  string msg;
-  if(!njsConn->isValid_)
-    msg = NJSMessages::getErrorMsg(errInvalidConnection);
-  else
-    msg = NJSMessages::getErrorMsg(errWriteOnly, "action");
-  NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
+  connectionPropertyException(info, errWriteOnly, "action"); 
   return Undefined();
 }
 

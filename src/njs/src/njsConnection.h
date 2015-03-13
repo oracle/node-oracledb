@@ -198,6 +198,10 @@ private:
                           const AccessorInfo& info);
   static void SetAction (Local<String> property,Local<Value> value,
                           const AccessorInfo& info);
+
+  static void connectionPropertyException(const AccessorInfo& info, 
+                                          NJSErrorType errType,
+                                          string property);
     
   Connection ();
   ~Connection ();

@@ -75,6 +75,8 @@ private:
                                    const AccessorInfo& info);
   static Handle<Value> GetStmtCacheSize (Local<String> property,
                                    const AccessorInfo& info);
+  static Handle<Value> getPoolProperty(Local<String> property, 
+                                    Pool* njsPool, unsigned int poolProperty);
 
   // Define Setter Accessors to properties
   static void SetPoolMax (Local<String> property,Local<Value> value,
@@ -92,6 +94,7 @@ private:
   static void SetStmtCacheSize (Local<String> property,Local<Value> value,
                                  const AccessorInfo& info);
 
+  static void setPoolProperty(const AccessorInfo& info, string property);
 
    Pool();
    ~Pool();

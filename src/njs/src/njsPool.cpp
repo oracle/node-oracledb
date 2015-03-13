@@ -129,13 +129,12 @@ Handle<Value> Pool::New(const Arguments& args)
 /*****************************************************************************/
 /*
    DESCRIPTION
-     Get Accessor of poolMin Property
+     Abstraction to all getter accessors of properties 
 */
-Handle<Value> Pool::GetPoolMin (Local<String> property,
-                                const AccessorInfo& info)
+Handle<Value> Pool::getPoolProperty(Local<String> property, 
+                                 Pool* njsPool, unsigned int poolProperty)
 {
   HandleScope scope;
-  Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
   if(!njsPool->isValid_)
   {
     string msg = NJSMessages::getErrorMsg(errInvalidPool);
@@ -144,10 +143,21 @@ Handle<Value> Pool::GetPoolMin (Local<String> property,
   }
   else
   {
-    Local<Integer> value = v8::Integer::New(njsPool->poolMin_);
+    Local<Integer> value = v8::Integer::New(poolProperty);
     return scope.Close(value);
   }
   return Undefined();
+}
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Get Accessor of poolMin Property
+*/
+Handle<Value> Pool::GetPoolMin (Local<String> property,
+                                const AccessorInfo& info)
+{
+  Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
+  return getPoolProperty(property, njsPool, njsPool->poolMin_); 
 }
 
 /*****************************************************************************/
@@ -158,20 +168,8 @@ Handle<Value> Pool::GetPoolMin (Local<String> property,
 Handle<Value> Pool::GetPoolMax (Local<String> property,
                                 const AccessorInfo& info)
 {
-  HandleScope scope;
   Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
-  if(!njsPool->isValid_)
-  {
-    string msg = NJSMessages::getErrorMsg(errInvalidPool);
-    NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
-    return Undefined();
-  }
-  else
-  {
-    Local<Integer> value = v8::Integer::New(njsPool->poolMax_);
-    return scope.Close(value);
-  }
-  return Undefined();
+  return getPoolProperty(property, njsPool, njsPool->poolMax_); 
 }
 
 /*****************************************************************************/
@@ -182,20 +180,8 @@ Handle<Value> Pool::GetPoolMax (Local<String> property,
 Handle<Value> Pool::GetPoolIncrement (Local<String> property,
                                       const AccessorInfo& info)
 {
-  HandleScope scope;
   Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
-  if(!njsPool->isValid_)
-  {
-    string msg = NJSMessages::getErrorMsg(errInvalidPool);
-    NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
-    return Undefined();
-  }
-  else
-  {
-    Local<Integer> value = v8::Integer::New(njsPool->poolIncrement_);
-    return scope.Close(value);
-  }
-  return Undefined();
+  return getPoolProperty(property, njsPool, njsPool->poolIncrement_); 
 }
 
 /*****************************************************************************/
@@ -206,20 +192,8 @@ Handle<Value> Pool::GetPoolIncrement (Local<String> property,
 Handle<Value> Pool::GetPoolTimeout (Local<String> property,
                                 const AccessorInfo& info)
 {
-  HandleScope scope;
   Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
-  if(!njsPool->isValid_)
-  {
-    string msg = NJSMessages::getErrorMsg(errInvalidPool);
-    NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
-    return Undefined();
-  }
-  else
-  {
-    Local<Integer> value = v8::Integer::New(njsPool->poolTimeout_);
-    return scope.Close(value);
-  }
-  return Undefined();
+  return getPoolProperty(property, njsPool, njsPool->poolTimeout_); 
 }
 
 /*****************************************************************************/
@@ -234,9 +208,9 @@ Handle<Value> Pool::GetConnectionsOpen (Local<String> property,
   Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
   if(!njsPool->isValid_)
   {
-    string error = NJSMessages::getErrorMsg ( errInvalidPool );
-    NJS_SET_EXCEPTION(error.c_str(), (int) error.length());
-    return scope.Close(Undefined());
+    string msg = NJSMessages::getErrorMsg(errInvalidPool);
+    NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
+    return Undefined();
   }
   try
   {
@@ -262,12 +236,11 @@ Handle<Value> Pool::GetConnectionsInUse (Local<String> property,
 {
   HandleScope scope;
   Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
-  Local<Integer> value;
   if(!njsPool->isValid_)
   {
-    string error = NJSMessages::getErrorMsg ( errInvalidPool );
-    NJS_SET_EXCEPTION(error.c_str(), (int) error.length());
-    return scope.Close(Undefined());
+    string msg = NJSMessages::getErrorMsg(errInvalidPool);
+    NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
+    return Undefined();
   }
   try
   {
@@ -291,20 +264,25 @@ Handle<Value> Pool::GetConnectionsInUse (Local<String> property,
 Handle<Value> Pool::GetStmtCacheSize (Local<String> property,
                                       const AccessorInfo& info)
 {
+  Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
+  return getPoolProperty(property, njsPool, njsPool->stmtCacheSize_); 
+}
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Abstraction to all setter accessors of properties 
+*/
+void Pool::setPoolProperty (const AccessorInfo& info, string property)
+{
   HandleScope scope;
   Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
+  string msg;
   if(!njsPool->isValid_)
-  {
-    string msg = NJSMessages::getErrorMsg(errInvalidPool);
-    NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
-    return Undefined();
-  }
-  else 
-  {
-    Local<Integer> value = v8::Integer::New(njsPool->stmtCacheSize_);  
-    return scope.Close(value);
-  }
-  return Undefined();
+    msg = NJSMessages::getErrorMsg(errInvalidPool);
+  else
+    msg = NJSMessages::getErrorMsg(errReadOnly, property.c_str());
+  NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
 }
 
 /*****************************************************************************/
@@ -315,14 +293,7 @@ Handle<Value> Pool::GetStmtCacheSize (Local<String> property,
 void Pool::SetPoolMin (Local<String> property, Local<Value> value,
                             const AccessorInfo& info)
 {
-  HandleScope scope;
-  Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
-  string msg;
-  if(!njsPool->isValid_)
-    msg = NJSMessages::getErrorMsg(errInvalidPool);
-  else
-    msg = NJSMessages::getErrorMsg(errReadOnly, "poolMin");
-  NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
+  setPoolProperty(info, "poolMin");
 }
 
 /*****************************************************************************/
@@ -333,14 +304,7 @@ void Pool::SetPoolMin (Local<String> property, Local<Value> value,
 void Pool::SetPoolMax (Local<String> property, Local<Value> value,
                             const AccessorInfo& info)
 {
-  HandleScope scope;
-  Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
-  string msg;
-  if(!njsPool->isValid_)
-    msg = NJSMessages::getErrorMsg(errInvalidPool);
-  else
-    msg = NJSMessages::getErrorMsg(errReadOnly, "poolMax");
-  NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
+  setPoolProperty(info, "poolMax");
 }
 
 /*****************************************************************************/
@@ -351,14 +315,7 @@ void Pool::SetPoolMax (Local<String> property, Local<Value> value,
 void Pool::SetPoolIncrement (Local<String> property, Local<Value> value,
                             const AccessorInfo& info)
 {
-  HandleScope scope;
-  Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
-  string msg;
-  if(!njsPool->isValid_)
-    msg = NJSMessages::getErrorMsg(errInvalidPool);
-  else
-    msg = NJSMessages::getErrorMsg(errReadOnly, "poolIncrement");
-  NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
+  setPoolProperty(info, "poolIncrement");
 }
 
 /*****************************************************************************/
@@ -369,14 +326,7 @@ void Pool::SetPoolIncrement (Local<String> property, Local<Value> value,
 void Pool::SetPoolTimeout (Local<String> property, Local<Value> value,
                             const AccessorInfo& info)
 {
-  HandleScope scope;
-  Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
-  string msg;
-  if(!njsPool->isValid_)
-    msg = NJSMessages::getErrorMsg(errInvalidPool);
-  else
-    msg = NJSMessages::getErrorMsg(errReadOnly, "poolTimeout");
-  NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
+  setPoolProperty(info, "poolTimeout");
 }
 
 /*****************************************************************************/
@@ -387,14 +337,7 @@ void Pool::SetPoolTimeout (Local<String> property, Local<Value> value,
 void Pool::SetConnectionsOpen (Local<String> property, Local<Value> value,
                             const AccessorInfo& info)
 {
-  HandleScope scope;
-  Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
-  string msg;
-  if(!njsPool->isValid_)
-    msg = NJSMessages::getErrorMsg(errInvalidPool);
-  else
-    msg = NJSMessages::getErrorMsg(errReadOnly, "connectionsOpen");
-  NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
+  setPoolProperty(info, "connectionsOpen");
 }
 
 /*****************************************************************************/
@@ -405,14 +348,7 @@ void Pool::SetConnectionsOpen (Local<String> property, Local<Value> value,
 void Pool::SetConnectionsInUse (Local<String> property, Local<Value> value,
                             const AccessorInfo& info)
 {
-  HandleScope scope;
-  Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
-  string msg;
-  if(!njsPool->isValid_)
-    msg = NJSMessages::getErrorMsg(errInvalidPool);
-  else
-    msg = NJSMessages::getErrorMsg(errReadOnly, "connectionsInUse");
-  NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
+  setPoolProperty(info, "connectionsInUse");
 }
 
 /*****************************************************************************/
@@ -423,14 +359,7 @@ void Pool::SetConnectionsInUse (Local<String> property, Local<Value> value,
 void Pool::SetStmtCacheSize(Local<String> property, Local<Value> value,
                             const AccessorInfo& info)
 {
-  HandleScope scope;
-  Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
-  string msg;
-  if(!njsPool->isValid_)
-    msg = NJSMessages::getErrorMsg(errInvalidPool);
-  else
-    msg = NJSMessages::getErrorMsg(errReadOnly, "stmtCacheSize");
-  NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
+  setPoolProperty(info, "stmtCacheSize");
 }
 
 /*****************************************************************************/
