@@ -92,7 +92,7 @@ This document shows how to use node-oracledb.  This document contains
 the API reference in sections 2 - 5 and the user guide in subsequent
 sections.
 
-For how to install node-oracledb, see [INSTALL](../INSTALL.md).
+For how to install node-oracledb, see [INSTALL](https://github.com/oracle/node-oracledb/blob/master/INSTALL.md).
 
 ### Example:  Simple SELECT statement implementation in Node.js
 
@@ -134,7 +134,7 @@ With Oracle's sample HR schema, the output is:
 ```
 
 There are more examples in the
-[examples](https://github.com/oracle/node-oracledb/examples)
+[examples](https://github.com/oracle/node-oracledb/tree/master/examples)
 directory.
 
 ## <a name="errorobj"></a> 2. Errors
@@ -1238,7 +1238,7 @@ The
 has more details, including when to use, and when not to use DRCP.
 
 There are a number of Oracle Database `V$` views that can be used to
-monitor DRCP.  These are discussed in the documentation and in the
+monitor DRCP.  These are discussed in the Oracle documentation and in the
 Oracle white paper
 [PHP Scalability and High Availability](http://www.oracle.com/technetwork/topics/php/php-scalability-ha-twp-128842.pdf).
 This paper also gives more detail on configuring DRCP.
@@ -1375,8 +1375,7 @@ Query result type mappings for Oracle Database types to JavaScript types are:
     columns are fetched as `TIMESTAMP WITH LOCAL TIMEZONE` using
     [OCIDateTime](https://docs.oracle.com/database/121/LNOCI/oci12oty.htm#LNOCI16840).
     When binding a JavaScript Date value in an `INSERT` statement, the date is also inserted as `TIMESTAMP WITH
-    LOCAL TIMEZONE` using
-    [OCIDateTime](https://docs.oracle.com/database/121/LNOCI/oci12oty.htm#LNOCI16840).
+    LOCAL TIMEZONE` using OCIDateTime.
 
 ### <a name="stmtcache"></a> 7.1.3 Statement Caching
 
@@ -1392,8 +1391,7 @@ In general, set the statement cache to the size of the working set of
 statements being executed by the application.
 
 The statement cache can be automatically tuned with the
-[oraaccess.xml file](#oraaccess).
-
+[External Configuration](#oraaccess) *oraaccess.xml* file.
 
 ### <a name="bind"></a> 7.2 Bind Parameters for Prepared Statements
 
@@ -1562,14 +1560,14 @@ statement is executed irrespective of the value of `isAutoCommit`.
 
 When node-oracledb is linked with Oracle 12c client libraries, the Oracle
 client-side configuration file
-[oraaccess.xml](http://docs.oracle.com/database/121/LNOCI/oci10new.htm#LNOCI73053)
+[oraaccess.xml](http://docs.oracle.com/database/121/LNOCI/oci10new.htm#LNOCI73052)
 can be used to configure some behaviors of node-oracledb.
 
 For example, oraaccess.xml can be used to:
 
 - turn on [Fast Application Notification](http://docs.oracle.com/database/121/ADFNS/adfns_avail.htm#ADFNS538) (FAN) events to enable FAN notifications and [Runtime Load Balancing](http://docs.oracle.com/database/121/ADFNS/adfns_perf_scale.htm#ADFNS515) (RLB)
 - configure [Client Result Caching](http://docs.oracle.com/database/121/ADFNS/adfns_perf_scale.htm#ADFNS464) parameters
-- turn on client auto-tuning
+- turn on [Client Statement Cache Auto-tuning](http://docs.oracle.com/database/121/LNOCI/oci10new.htm#LNOCI73009)
 
 Other features can also be enabled.  Refer to the
-[oraaccess.xml documentation](http://docs.oracle.com/database/121/LNOCI/oci10new.htm#LNOCI73053)
+[oraaccess.xml documentation](http://docs.oracle.com/database/121/LNOCI/oci10new.htm#LNOCI73052)
