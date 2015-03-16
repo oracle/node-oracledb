@@ -1,19 +1,20 @@
-# node-oracledb version 0.3
+# node-oracledb version 0.4
 
 ## <a name="about"></a> 1. About node-oracledb
 
 The Oracle Database Node.js driver powers high performance
 Node.js applications.
 
-Node-oracledb 0.3 supports basic and advanced Oracle features, including:
+Node-oracledb 0.4 supports basic and advanced Oracle features, including:
 
 - SQL and PL/SQL Execution
-- Binding using JavaScript objects or arrays
 - Query results as JavaScript objects or array 
+- Binding using JavaScript objects or arrays
 - Conversion between JavaScript and Oracle types
 - Transaction Management
 - Connection Pooling
-- [Database Resident Connection Pooling](#http://docs.oracle.com/database/121/ADFNS/adfns_perf_scale.htm#ADFNS228) (DRCP)
+- [Database Resident Connection Pooling](http://docs.oracle.com/database/121/ADFNS/adfns_perf_scale.htm#ADFNS228) (DRCP)
+- [External Authentication](http://docs.oracle.com/database/121/DBSEG/authentication.htm#DBSEG99840)
 - [Statement Caching](http://docs.oracle.com/database/121/LNOCI/oci09adv.htm#i471377)
 - [Client Result Caching](http://docs.oracle.com/database/121/ADFNS/adfns_perf_scale.htm#ADFNS464)
 - [End-to-end tracing](http://docs.oracle.com/database/121/TGSQL/tgsql_trace.htm#CHDBDGIJ)
@@ -22,7 +23,7 @@ Node-oracledb 0.3 supports basic and advanced Oracle features, including:
   - [Runtime Load Balancing](http://docs.oracle.com/database/121/ADFNS/adfns_perf_scale.htm#ADFNS515) (RLB)
   - [Transparent Application Failover](http://docs.oracle.com/database/121/ADFNS/adfns_avail.htm#ADFNS534) (TAF)
 
-Node-oracledb 0.3 is a preview release.  We are actively working on
+Node-oracledb 0.4 is a preview release.  We are actively working on
 adding features including LOB support and batch fetching / streaming
 of large query result sets.
 
@@ -82,7 +83,7 @@ There are more examples in the [examples](examples) directory.
 
 The current release of node-oracledb is available only on GitHub.  The basic install steps are:
 
-- Install the small, free [Oracle Instant Client](http://www.oracle.com/technetwork/database/features/instant-client/index-100365.html) libraries, or have a local database such as the free [Oracle XE](http://www.oracle.com/technetwork/database/database-technologies/express-edition/overview/index.html) release.
+- Install the small, free [Oracle Instant Client](http://www.oracle.com/technetwork/database/features/instant-client/index-100365.html) libraries if your database is remote, or have a local database such as the free [Oracle XE](http://www.oracle.com/technetwork/database/database-technologies/express-edition/overview/index.html) release.
 - Clone this repository
 - Run `npm install`
 
@@ -90,7 +91,7 @@ See [INSTALL](INSTALL.md) for details.
 
 ## <a name="doc"></a> 3. Documentation
 
-See [API Documentation](doc/api.md)
+See [Documentation for the Oracle Database Node.js Driver](doc/api.md)
 
 ## <a name="contrib"></a> 4. Contributing
 

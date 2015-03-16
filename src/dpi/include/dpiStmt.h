@@ -152,12 +152,8 @@ public:
   virtual void bind(const unsigned char *name, int nameLen,
                     unsigned short type,  void *buf, DPI_SZ_TYPE  bufSize,
                     short *ind, DPI_BUFLEN_TYPE *bufLen) = 0;
-  
-  virtual void executeDML(bool isAutoCommit) = 0;
-  
-  virtual void executeMany(int numIterations, bool isAutoCommit ) = 0;
-  
-  virtual void executeQuery() = 0;
+
+  virtual void execute ( int numIterations, bool isAutoCommit = false) = 0;
   
   virtual void define(unsigned int pos, unsigned short type, void *buf,
                       DPI_SZ_TYPE bufSize, short *ind, DPI_BUFLEN_TYPE *bufLen) = 0;

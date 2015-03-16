@@ -30,11 +30,11 @@ limitations under the License.
 The steps below create a standalone Node.js installation for testing.
 Adjust the steps for your environment.
 
-The node-oracledb release has been tested with Node.js 0.10.35 on
-64-bit Oracle Linux.  The driver can also build in some 32-bit Linux,
-Solaris and Mac OS X environments, but these architectures have not
-been fully tested.  Installation on those platforms is similar to the
-steps described in this document.
+This node-oracledb release currently works only with Node.js 0.10.  It
+has been tested with 0.10.35 on 64-bit Oracle Linux and Windows.  The
+driver can also build in some Mac OS X, 32-bit Linux, 32-bit Windows,
+Solaris and AIX environments, but these architectures have not been fully
+tested. 
 
 Node-oracledb is currently only available on GitHub.
 
@@ -53,15 +53,15 @@ install Xcode.
 
 Instructions may need to be adjusted for your platform and environment.
 
-
 I have ... | Follow this ...
 ----------|-----------------
 Linux.  My database is on another machine.  | [Node-oracledb Installation on Linux with Instant Client RPMs](#instrpm)
-Solaris.  My database is on another machine. | [Node-oracledb Installation on Linux with Instant Client ZIP files](#instzip)
-Linux or Solaris, with a database on the same machine. |  [Node-oracledb Installation on Linux with a Local Database](#instoh)
-Linux or Solaris, with the full Oracle client (installed via runInstaller) on the same machine. |  [Node-oracledb Installation on Linux with a Local Database](#instoh)
-Mac OS X. | [Node-oracledb Installation on OS X with Instant Client](#instosx)
-Another OS with Oracle 11.2 or 12.1 libraries available | Update binding.gyp and make any code changes required, sign the [OCA](https://www.oracle.com/technetwork/community/oca-486395.html), and submit a pull request with your patch (Windows support is already being worked on).  
+Solaris or AIX.  My database is on another machine. | [Node-oracledb Installation on Linux with Instant Client ZIP files](#instzip)
+Linux, Solaris or AIX.  My database is on the same machine. |  [Node-oracledb Installation on Linux with a Local Database](#instoh)
+Linux, Solaris or AIX. I have the full Oracle client (installed via runInstaller) on the same machine. |  [Node-oracledb Installation on Linux with a Local Database](#instoh)
+Apple OS X | [Node-oracledb Installation on OS X with Instant Client](#instosx)
+Windows | [Node-oracledb Installation on Windows](#instwin)
+Another OS with Oracle 11.2 or 12.1 libraries available | Update binding.gyp and make any code changes required, sign the [OCA](https://www.oracle.com/technetwork/community/oca-486395.html), and submit a pull request with your patch.
 
 ### Other Resources Useful for node-oracledb
 
@@ -91,6 +91,9 @@ On Linux, the node-oracledb installer looks for Oracle client libraries and head
 ```
 git clone https://github.com/oracle/node-oracledb.git
 ```
+
+Alternatively, download the ZIP file from
+https://github.com/oracle/node-oracledb and extract it.
 
 ### 2.2 Install Node.js
 
@@ -170,6 +173,9 @@ node examples/select1.js
 ```
 git clone https://github.com/oracle/node-oracledb.git
 ```
+
+Alternatively, download the ZIP file from
+https://github.com/oracle/node-oracledb and extract it.
 
 ### 3.2 Install Node.js
 
@@ -279,6 +285,9 @@ Oracle Database.
 git clone https://github.com/oracle/node-oracledb.git
 ```
 
+Alternatively, download the ZIP file from
+https://github.com/oracle/node-oracledb and extract it.
+
 ### 4.2 Install Node.js
 
 Download the
@@ -301,7 +310,7 @@ export PATH=$HOME/Desktop/node-v0.10.35-linux-x64/bin:$PATH
 Tell the installer where to find the Oracle client:
 
 ```
-export ORACLE_HOME=/wherever/it/is/see/etc/oratab
+export ORACLE_HOME=/whereever/it/is
 ```
 
 *Warning*: By default, the installer will look first for Oracle
@@ -366,6 +375,9 @@ Building node-oracledb requires Xcode from the Mac App store.
 ```
 git clone https://github.com/oracle/node-oracledb.git
 ```
+
+Alternatively, download the ZIP file from
+https://github.com/oracle/node-oracledb and extract it.
 
 ### 5.3 Install Node.js
 
@@ -476,6 +488,9 @@ to add the Python directories to the path.
 ```
 git clone https://github.com/oracle/node-oracledb.git
 ```
+
+Alternatively, download the ZIP file from
+https://github.com/oracle/node-oracledb and extract it.
 
 ### 6.3 Install Node.js
 

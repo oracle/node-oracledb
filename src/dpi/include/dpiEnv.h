@@ -86,16 +86,18 @@ class Env
                              int poolMax = -1, int poolMin = -1,
                              int poolIncrement = -1,
                              int poolTimeout = -1,
-                             int stmtCacheSize = -1) = 0;
+                             int stmtCacheSize = -1,
+                             bool isExternalAuth = false) = 0;
 
   virtual Conn * getConnection(const string &user, const string &password,
                                const string &connString,
                                int stmtCacheSize,
-                               const string &connClass = "") = 0;
+                               const string &connClass = "",
+                               bool isExternalAuth = false) = 0;
   
-  // DateTime array.
-  virtual DateTimeArray* getDateTimeArray( OCIError *errh ) const = 0;
-  virtual void           releaseDateTimeArray ( DateTimeArray *arr ) const = 0;
+                                // DateTime array
+  virtual DateTimeArray * getDateTimeArray( OCIError *errh ) const = 0;
+  virtual void            releaseDateTimeArray ( DateTimeArray *arr ) const = 0;
   
 protected:
                                 // clients cannot do new and delete

@@ -469,7 +469,8 @@ bool EnvImpl::isEventEnabled() const
 SPool * EnvImpl::createPool(const string &user, const string &password,
                             const string &connString,
                             int poolMax, int poolMin, int poolIncrement,
-                            int poolTimeout, int stmtCacheSize)
+                            int poolTimeout, int stmtCacheSize,
+                            bool isExternalAuth)
 {
   return new PoolImpl(this, envh_, user, password, connString,
                       (poolMax == -1) ? poolMax_ : poolMax,
@@ -478,9 +479,9 @@ SPool * EnvImpl::createPool(const string &user, const string &password,
                                               poolIncrement,
                       (poolTimeout == -1) ? poolTimeout_ :
                                             poolTimeout,
-                      isExternalAuth_,
+                      isExternalAuth,
                       (stmtCacheSize == -1) ? stmtCacheSize_ :
-                                              stmtCacheSize);
+                      stmtCacheSize);
 }
 
 
@@ -502,9 +503,10 @@ SPool * EnvImpl::createPool(const string &user, const string &password,
 
 Conn * EnvImpl::getConnection(const string &user, const string &password,
                               const string &connString,
-                              int stmtCacheSize, const string &connClass)
+                              int stmtCacheSize, const string &connClass,
+                              bool isExternalAuth)
 {
-  return (Conn *)new ConnImpl(this, envh_, isExternalAuth_,
+  return (Conn *)new ConnImpl(this, envh_, isExternalAuth,
                               (stmtCacheSize == -1) ? stmtCacheSize_ :
                                                       stmtCacheSize,
                               user, password,

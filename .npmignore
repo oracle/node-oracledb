@@ -1,0 +1,10 @@
+INSTALL.md
+CONTRIBUTING.md
+/doc
+/examples
+/build
+/node_modules
+/test
+/oracle_private_test
+oracledb-*.tgz
+.npmignore

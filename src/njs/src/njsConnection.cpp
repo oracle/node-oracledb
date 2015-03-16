@@ -127,15 +127,33 @@ NAN_METHOD(Connection::New)
 /*****************************************************************************/
 /*
    DESCRIPTION
+     Abstraction for exception on accessing connection properties 
+*/
+void Connection::connectionPropertyException(Connection* njsConn, 
+                                             NJSErrorType errType,
+                                             string property)
+{
+  NanScope();
+  string msg;
+  if(!njsConn->isValid_)
+    msg = NJSMessages::getErrorMsg(errInvalidConnection);
+  else
+    msg = NJSMessages::getErrorMsg(errType, property.c_str());
+  NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
+}
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
      Get Accessor of stmtCacheSize property
 */
-NAN_GETTER(Connection::GetStmtCacheSize)
+NAN_PROPERTY_GETTER(Connection::GetStmtCacheSize)
 {
   NanScope();
   Connection* njsConn = ObjectWrap::Unwrap<Connection>(args.Holder()); 
   if(!njsConn->isValid_)
   {
-    string error = NJSMessages::getErrorMsg ( errInvalidPool );
+    string error = NJSMessages::getErrorMsg ( errInvalidConnection );
     NJS_SET_EXCEPTION(error.c_str(), error.length());
     NanReturnUndefined();
   }
@@ -159,14 +177,7 @@ NAN_GETTER(Connection::GetStmtCacheSize)
 */
 NAN_SETTER(Connection::SetStmtCacheSize)
 {
-  NanScope();
-  Connection* njsConn = ObjectWrap::Unwrap<Connection>(args.Holder()); 
-  string msg;
-  if(!njsConn->isValid_)
-    msg = NJSMessages::getErrorMsg(errInvalidConnection);
-  else
-    msg = NJSMessages::getErrorMsg(errReadOnly, "stmtCacheSize");
-  NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
+  connectionPropertyException(ObjectWrap::Unwrap<Connection>(args.Holder()), errReadOnly, "stmtCacheSize"); 
 }
 
 /*****************************************************************************/
@@ -174,16 +185,9 @@ NAN_SETTER(Connection::SetStmtCacheSize)
    DESCRIPTION
      Get Accessor of clientId property - throws error
 */
-NAN_GETTER(Connection::GetClientId)
+NAN_PROPERTY_GETTER(Connection::GetClientId)
 {
-  NanScope();
-  Connection* njsConn = ObjectWrap::Unwrap<Connection>(args.Holder()); 
-  string msg;
-  if(!njsConn->isValid_)
-    msg = NJSMessages::getErrorMsg(errInvalidConnection);
-  else
-    msg = NJSMessages::getErrorMsg(errWriteOnly, "clientId");
-  NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
+  connectionPropertyException(ObjectWrap::Unwrap<Connection>(args.Holder()), errWriteOnly, "clientId"); 
   NanReturnUndefined();
 }
 
@@ -215,16 +219,9 @@ NAN_SETTER(Connection::SetClientId)
    DESCRIPTION
      Get Accessor of module property - throws error
 */
-NAN_GETTER(Connection::GetModule)
+NAN_PROPERTY_GETTER(Connection::GetModule)
 {
-  NanScope();
-  Connection* njsConn = ObjectWrap::Unwrap<Connection>(args.Holder()); 
-  string msg;
-  if(!njsConn->isValid_)
-    msg = NJSMessages::getErrorMsg(errInvalidConnection);
-  else
-    msg = NJSMessages::getErrorMsg(errWriteOnly, "module");
-  NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
+  connectionPropertyException(ObjectWrap::Unwrap<Connection>(args.Holder()), errWriteOnly, "module"); 
   NanReturnUndefined();
 }
 
@@ -256,16 +253,9 @@ NAN_SETTER(Connection::SetModule)
    DESCRIPTION
      Get Accessor of action property - throws error
 */
-NAN_GETTER(Connection::GetAction)
+NAN_PROPERTY_GETTER(Connection::GetAction)
 {
-  NanScope();
-  Connection* njsConn = ObjectWrap::Unwrap<Connection>(args.Holder()); 
-  string msg;
-  if(!njsConn->isValid_)
-    msg = NJSMessages::getErrorMsg(errInvalidConnection);
-  else
-    msg = NJSMessages::getErrorMsg(errWriteOnly, "action");
-  NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
+  connectionPropertyException(ObjectWrap::Unwrap<Connection>(args.Holder()), errWriteOnly, "action"); 
   NanReturnUndefined();
 }
 
@@ -705,12 +695,12 @@ void Connection::Async_Execute (uv_work_t *req)
     executeBaton->st = executeBaton->dpistmt->stmtType();
     if (executeBaton->st == DpiStmtSelect)
     {
-      executeBaton->dpistmt->executeQuery();
+      executeBaton->dpistmt->execute(0, executeBaton->isAutoCommit);
       Connection::GetDefines(executeBaton);
     }
     else
     {
-      executeBaton->dpistmt->executeDML(executeBaton->isAutoCommit);
+      executeBaton->dpistmt->execute(1, executeBaton->isAutoCommit);
       executeBaton->rowsAffected = executeBaton->dpistmt->rowsAffected();
 
      /* Process date/timestamp INOUT/OUT bind values */

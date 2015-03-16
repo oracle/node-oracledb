@@ -92,21 +92,24 @@ class EnvImpl : public Env
                                 // interface  methods
   virtual SPool * createPool(const string &user, const string &password,
                              const string &connString,
-                             int poolMax = -1, int poolMin = -1,
-                             int poolIncrement = -1,
-                             int poolTimeout = -1,
-                             int stmtCacheSize = -1);
+                             int poolMax, int poolMin,
+                             int poolIncrement,
+                             int poolTimeout,
+                             int stmtCacheSize,
+                             bool isExternalAuth);
 
   virtual Conn * getConnection(const string &user, const string &password,
                                const string &connString, int stmtCacheSize,
-                               const string &connClass);
+                               const string &connClass,
+                               bool isExternalAuth);
+  
 
                                 // internal methods
   virtual void terminatePool(PoolImpl *pool);
 
   virtual void releaseConnection(ConnImpl *conn);
 
-  // DateTime array.
+                                // DateTime array
   virtual DateTimeArray* getDateTimeArray ( OCIError *errh ) const ;
   virtual void           releaseDateTimeArray ( DateTimeArray *arr ) const ;
 

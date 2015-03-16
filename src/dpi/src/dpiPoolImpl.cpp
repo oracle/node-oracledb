@@ -91,8 +91,13 @@ PoolImpl::PoolImpl(EnvImpl *env, OCIEnv *envh,
   try : env_(env), isExternalAuth_(isExternalAuth), envh_(envh), errh_(NULL),
         spoolh_(NULL), poolName_(NULL)
 {
-  unsigned int spoolMode = OCI_SPOOL_ATTRVAL_NOWAIT;
+  ub4 mode = isExternalAuth ? OCI_DEFAULT : OCI_SPC_HOMOGENEOUS;
+
+  unsigned char spoolMode = OCI_SPOOL_ATTRVAL_NOWAIT; // spoolMode is a ub1
   
+  if (isExternalAuth && (password.length() || user.length()))
+      throw ExceptionImpl(DpiErrExtAuth);
+
   ociCallEnv(OCIHandleAlloc((void *)envh_, (dvoid **)&errh_, 
                             OCI_HTYPE_ERROR, 0, (dvoid **)0), envh_);
                            
@@ -108,7 +113,7 @@ PoolImpl::PoolImpl(EnvImpl *env, OCIEnv *envh,
                                (OraText *)user.data (), (ub4) user.length(),
                                (OraText *)password.data (),
                                (ub4) password.length(), 
-                               OCI_SPC_HOMOGENEOUS), errh_ );
+                               mode), errh_ );
 
   this->poolTimeout(poolTimeout);
   this->stmtCacheSize(stmtCacheSize);
