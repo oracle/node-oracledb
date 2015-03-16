@@ -49,6 +49,7 @@ enum DpiError                          // error type
   DpiErrNoEnv         = 003, // "No OCI environment handle created"
   DpiErrInvalidState  = 004, // "Invalid state while working with timestamp"
   DpiErrUninitialized = 005, // "Uninitialized state while working with timestamp"
+  DpiErrExtAuth= 006, // "user and password should not be set when using external authentication"
 };
 
 

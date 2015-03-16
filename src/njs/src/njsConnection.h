@@ -145,55 +145,59 @@ typedef struct eBaton
 class Connection: public ObjectWrap
 { 
 public:
- 
+
   void setConnection (dpi::Conn*, Oracledb* oracledb);
   // Define Connection Constructor
   static Persistent<FunctionTemplate> connectionTemplate_s;
   static void Init (Handle<Object> target);
- 
+
 private:
   static NAN_METHOD(New);
   // Execute Method on Connection class
   static NAN_METHOD(Execute);
   static void Async_Execute (uv_work_t *req);
   static void Async_AfterExecute (uv_work_t *req);
- 
+
   // Release Method on Connection class
   static NAN_METHOD(Release);
   static void Async_Release(uv_work_t *req);
   static void Async_AfterRelease (uv_work_t *req);
- 
+
   // Commit Method on Connection class
   static NAN_METHOD(Commit);
   static void Async_Commit (uv_work_t *req);
   static void Async_AfterCommit (uv_work_t *req);
- 
+
   // Rollback Method on Connection class
   static NAN_METHOD(Rollback);
   static void Async_Rollback (uv_work_t *req);
   static void Async_AfterRollback (uv_work_t *req);
- 
+
   // BreakMethod on Connection class
   static NAN_METHOD(Break);
   static void Async_Break(uv_work_t *req);
   static void Async_AfterBreak (uv_work_t *req);
 
   // Define Getter Accessors to properties
-  static NAN_GETTER(GetStmtCacheSize);
-  static NAN_GETTER(GetClientId);
-  static NAN_GETTER(GetModule);
-  static NAN_GETTER(GetAction);
-     
+  static NAN_PROPERTY_GETTER(GetStmtCacheSize);
+  static NAN_PROPERTY_GETTER(GetClientId);
+  static NAN_PROPERTY_GETTER(GetModule);
+  static NAN_PROPERTY_GETTER(GetAction);
+
   // Define Setter Accessors to properties
   static NAN_SETTER(SetStmtCacheSize);
   static NAN_SETTER(SetClientId);
   static NAN_SETTER(SetModule);
   static NAN_SETTER(SetAction);
-    
+
+  static void connectionPropertyException(Connection* njsConn, 
+                                          NJSErrorType errType,
+                                          string property);
+
   Connection ();
   ~Connection ();
-   
-  
+
+
   static void PrepareAndBind (eBaton* executeBaton);
   static void GetDefines (eBaton* executeBaton);
   static void ProcessBinds (_NAN_METHOD_ARGS, unsigned int index,

@@ -62,13 +62,16 @@ private:
    static void Async_AfterTerminate(uv_work_t* req);
  
   // Define Getter Accessors to properties
-  static NAN_GETTER(GetPoolMax);
-  static NAN_GETTER(GetPoolMin);
-  static NAN_GETTER(GetPoolIncrement);
-  static NAN_GETTER(GetPoolTimeout);
-  static NAN_GETTER(GetConnectionsOpen);
-  static NAN_GETTER(GetConnectionsInUse);
-  static NAN_GETTER(GetStmtCacheSize);
+  static NAN_PROPERTY_GETTER(GetPoolMax);
+  static NAN_PROPERTY_GETTER(GetPoolMin);
+  static NAN_PROPERTY_GETTER(GetPoolIncrement);
+  static NAN_PROPERTY_GETTER(GetPoolTimeout);
+  static NAN_PROPERTY_GETTER(GetConnectionsOpen);
+  static NAN_PROPERTY_GETTER(GetConnectionsInUse);
+  static NAN_PROPERTY_GETTER(GetStmtCacheSize);
+
+  static Handle<Value> getPoolProperty(Local<String> property, 
+                                    Pool* njsPool, unsigned int poolProperty);
 
   // Define Setter Accessors to properties
   static NAN_SETTER(SetPoolMax);
@@ -79,6 +82,7 @@ private:
   static NAN_SETTER(SetConnectionsInUse);
   static NAN_SETTER(SetStmtCacheSize);
 
+  static void setPoolProperty(Pool* njsPool, string property);
 
    Pool();
    ~Pool();
@@ -93,5 +97,26 @@ private:
    unsigned int poolTimeout_;
    unsigned int stmtCacheSize_;
 };
+
+typedef struct poolBaton
+{
+  uv_work_t req;
+  std::string error;
+  std::string connClass;  
+  Persistent<Function> cb;
+  dpi::Conn*  dpiconn;
+  Pool*       njspool;
+
+  poolBaton() :  error(""), connClass(""),
+                 dpiconn(NULL), njspool(NULL)
+  {}
+
+  ~poolBaton()
+   {
+     NanDisposePersistent(cb);
+   }
+
+}poolBaton;
+
 
 #endif                                          /* __NJSPOOL_H__ */

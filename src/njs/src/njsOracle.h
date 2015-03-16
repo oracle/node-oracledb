@@ -42,9 +42,15 @@ using namespace node;
 using namespace v8; 
 
 
-/*0.3.1.  Keep the version in sync with package.json */
+/*0.4.1.  Keep the version in sync with package.json */
+#define NJS_NODE_ORACLEDB_MAJOR       0
+#define NJS_NODE_ORACLEDB_MINOR       4
+#define NJS_NODE_ORACLEDB_PATCH       1
+
 /* Formula: 10000 x majorversion + 100 * minorversion + patchrelease number */
-#define NJS_ORACLE_VERSION 301
+#define NJS_NODE_ORACLEDB_VERSION   ( (NJS_NODE_ORACLEDB_MAJOR * 10000) + \
+                                      (NJS_NODE_ORACLEDB_MINOR * 100) +   \
+                                      (NJS_NODE_ORACLEDB_PATCH) )
 
 
 class Oracledb: public ObjectWrap 
@@ -84,16 +90,17 @@ private:
    static void Async_AfterCreatePool (uv_work_t *req);
    
    // Define Getter Accessors to Properties
-   static NAN_GETTER(GetPoolMin);
-   static NAN_GETTER(GetPoolMax);
-   static NAN_GETTER(GetPoolIncrement);
-   static NAN_GETTER(GetPoolTimeout);
-   static NAN_GETTER(GetStmtCacheSize);
-   static NAN_GETTER(GetIsAutoCommit);
-   static NAN_GETTER(GetMaxRows);
-   static NAN_GETTER(GetOutFormat);
-   static NAN_GETTER(GetVersion);
-   static NAN_GETTER(GetConnectionClass);
+   static NAN_PROPERTY_GETTER(GetPoolMin);
+   static NAN_PROPERTY_GETTER(GetPoolMax);
+   static NAN_PROPERTY_GETTER(GetPoolIncrement);
+   static NAN_PROPERTY_GETTER(GetPoolTimeout);
+   static NAN_PROPERTY_GETTER(GetStmtCacheSize);
+   static NAN_PROPERTY_GETTER(GetIsAutoCommit);
+   static NAN_PROPERTY_GETTER(GetMaxRows);
+   static NAN_PROPERTY_GETTER(GetOutFormat);
+   static NAN_PROPERTY_GETTER(GetVersion);
+   static NAN_PROPERTY_GETTER(GetConnectionClass);
+   static NAN_PROPERTY_GETTER(GetIsExternalAuth);
    
    // Define Setter Accessors to Properties
    static NAN_SETTER(SetPoolMin);
@@ -106,7 +113,7 @@ private:
    static NAN_SETTER(SetOutFormat);
    static NAN_SETTER(SetVersion);
    static NAN_SETTER(SetConnectionClass);
-   
+   static NAN_SETTER(SetIsExternalAuth);
    
    Oracledb();
    ~Oracledb();
@@ -124,6 +131,7 @@ private:
    unsigned int poolTimeout_;
 
    std::string  connClass_;
+   bool         isExternalAuth_;
 };
 
 /**
@@ -138,6 +146,7 @@ typedef struct connectionBaton
   std::string pswrd;
   std::string connStr;
   std::string connClass;  
+  bool isExternalAuth;
   std::string error;
  
   int poolMax;
@@ -149,14 +158,14 @@ typedef struct connectionBaton
   unsigned int maxRows;
   unsigned int outFormat;
   Persistent<Function> cb;
-  dpi::Env* dpienv;
-  dpi::Conn* dpiconn;
+  dpi::Env*   dpienv;
+  dpi::Conn*  dpiconn;
   dpi::SPool* dpipool;
 
   Oracledb *oracledb;
 
   connectionBaton() : user(""), pswrd(""), connStr(""), connClass(""),
-                      error("" ),
+                      isExternalAuth(false), error(""),
                       poolMax(0), poolMin(0), poolIncrement(0),
                       poolTimeout(0), stmtCacheSize(0), maxRows(0),
                       outFormat(0), dpienv(NULL), 

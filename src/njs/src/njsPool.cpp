@@ -129,24 +129,36 @@ NAN_METHOD(Pool::New)
 /*****************************************************************************/
 /*
    DESCRIPTION
-     Get Accessor of poolMin Property
+     Abstraction to all getter accessors of properties 
 */
-NAN_GETTER(Pool::GetPoolMin)
+
+Handle<Value> Pool::getPoolProperty(Local<String> property, 
+                                 Pool* njsPool, unsigned int poolProperty)
 {
-  NanScope();
-  Pool* njsPool = ObjectWrap::Unwrap<Pool>(args.Holder());
   if(!njsPool->isValid_)
   {
     string msg = NJSMessages::getErrorMsg(errInvalidPool);
     NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
-    NanReturnUndefined();
+    return NanUndefined();
   }
   else
   {
-    Local<Integer> value = NanNew<v8::Integer>(njsPool->poolMin_);
-     NanReturnValue(value);
+    NanEscapableScope();
+    Local<Integer> value = NanNew<v8::Integer>(poolProperty);
+    return NanEscapeScope(value);
   }
-  NanReturnUndefined();
+  return NanUndefined();
+}
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Get Accessor of poolMin Property
+*/
+NAN_PROPERTY_GETTER(Pool::GetPoolMin)
+{
+  Pool* njsPool = ObjectWrap::Unwrap<Pool>(args.Holder());
+  NanReturnValue(getPoolProperty(property, njsPool, njsPool->poolMin_));
 }
 
 /*****************************************************************************/
@@ -154,22 +166,10 @@ NAN_GETTER(Pool::GetPoolMin)
    DESCRIPTION
      Get Accessor of poolMax Property
 */
-NAN_GETTER(Pool::GetPoolMax)
+NAN_PROPERTY_GETTER(Pool::GetPoolMax)
 {
-  NanScope();
   Pool* njsPool = ObjectWrap::Unwrap<Pool>(args.Holder());
-  if(!njsPool->isValid_)
-  {
-    string msg = NJSMessages::getErrorMsg(errInvalidPool);
-    NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
-    NanReturnUndefined();
-  }
-  else
-  {
-    Local<Integer> value = NanNew<v8::Integer>(njsPool->poolMax_);
-     NanReturnValue(value);
-  }
-  NanReturnUndefined();
+  NanReturnValue( getPoolProperty(property, njsPool, njsPool->poolMax_)); 
 }
 
 /*****************************************************************************/
@@ -177,22 +177,10 @@ NAN_GETTER(Pool::GetPoolMax)
    DESCRIPTION
      Get Accessor of poolIncrement Property
 */
-NAN_GETTER(Pool::GetPoolIncrement)
+NAN_PROPERTY_GETTER(Pool::GetPoolIncrement)
 {
-  NanScope();
   Pool* njsPool = ObjectWrap::Unwrap<Pool>(args.Holder());
-  if(!njsPool->isValid_)
-  {
-    string msg = NJSMessages::getErrorMsg(errInvalidPool);
-    NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
-    NanReturnUndefined();
-  }
-  else
-  {
-    Local<Integer> value = NanNew<v8::Integer>(njsPool->poolIncrement_);
-     NanReturnValue(value);
-  }
-  NanReturnUndefined();
+  NanReturnValue( getPoolProperty(property, njsPool, njsPool->poolIncrement_)); 
 }
 
 /*****************************************************************************/
@@ -200,7 +188,18 @@ NAN_GETTER(Pool::GetPoolIncrement)
    DESCRIPTION
      Get Accessor of poolTimeout Property
 */
-NAN_GETTER(Pool::GetPoolTimeout)
+NAN_PROPERTY_GETTER(Pool::GetPoolTimeout)
+{
+  Pool* njsPool = ObjectWrap::Unwrap<Pool>(args.Holder());
+  NanReturnValue(getPoolProperty(property, njsPool, njsPool->poolTimeout_)); 
+}
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Get Accessor of connectionsOpen Property
+*/
+NAN_PROPERTY_GETTER(Pool::GetConnectionsOpen)
 {
   NanScope();
   Pool* njsPool = ObjectWrap::Unwrap<Pool>(args.Holder());
@@ -210,34 +209,11 @@ NAN_GETTER(Pool::GetPoolTimeout)
     NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
     NanReturnUndefined();
   }
-  else
-  {
-    Local<Integer> value = NanNew<v8::Integer>(njsPool->poolTimeout_);
-     NanReturnValue(value);
-  }
-  NanReturnUndefined();
-}
-
-/*****************************************************************************/
-/*
-   DESCRIPTION
-     Get Accessor of connectionsOpen Property
-*/
-NAN_GETTER(Pool::GetConnectionsOpen)
-{
-  NanScope();
-  Pool* njsPool = ObjectWrap::Unwrap<Pool>(args.Holder());
-  if(!njsPool->isValid_)
-  {
-    string error = NJSMessages::getErrorMsg ( errInvalidPool );
-    NJS_SET_EXCEPTION(error.c_str(), (int) error.length());
-     NanReturnUndefined();
-  }
   try
   {
     Local<Integer> value = NanNew<v8::Integer>(njsPool->dpipool_->
                                             connectionsOpen());
-     NanReturnValue(value);
+    NanReturnValue(value);
   }
   catch(dpi::Exception &e)
   {
@@ -252,11 +228,10 @@ NAN_GETTER(Pool::GetConnectionsOpen)
    DESCRIPTION
      Get Accessor of connectionsInUse Property
 */
-NAN_GETTER(Pool::GetConnectionsInUse)
+NAN_PROPERTY_GETTER(Pool::GetConnectionsInUse)
 {
   NanScope();
   Pool* njsPool = ObjectWrap::Unwrap<Pool>(args.Holder());
-  Local<Integer> value;
   if(!njsPool->isValid_)
   {
     string error = NJSMessages::getErrorMsg ( errInvalidPool );
@@ -282,22 +257,26 @@ NAN_GETTER(Pool::GetConnectionsInUse)
    DESCRIPTION
      Get Accessor of stmtCacheSize Property
 */
-NAN_GETTER(Pool::GetStmtCacheSize)
+NAN_PROPERTY_GETTER(Pool::GetStmtCacheSize)
+{
+  Pool* njsPool = ObjectWrap::Unwrap<Pool>(args.Holder());
+  NanReturnValue(getPoolProperty(property, njsPool, njsPool->stmtCacheSize_));
+}
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Abstraction to all setter accessors of properties 
+*/
+void Pool::setPoolProperty (Pool* njsPool, string property)
 {
   NanScope();
-  Pool* njsPool = ObjectWrap::Unwrap<Pool>(args.Holder());
+  string msg;
   if(!njsPool->isValid_)
-  {
-    string msg = NJSMessages::getErrorMsg(errInvalidPool);
-    NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
-    NanReturnUndefined();
-  }
-  else 
-  {
-    Local<Integer> value = NanNew<v8::Integer>(njsPool->stmtCacheSize_);  
-     NanReturnValue(value);
-  }
-  NanReturnUndefined();
+    msg = NJSMessages::getErrorMsg(errInvalidPool);
+  else
+    msg = NJSMessages::getErrorMsg(errReadOnly, property.c_str());
+  NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
 }
 
 /*****************************************************************************/
@@ -307,14 +286,7 @@ NAN_GETTER(Pool::GetStmtCacheSize)
 */
 NAN_SETTER(Pool::SetPoolMin)
 {
-  NanScope();
-  Pool* njsPool = ObjectWrap::Unwrap<Pool>(args.Holder());
-  string msg;
-  if(!njsPool->isValid_)
-    msg = NJSMessages::getErrorMsg(errInvalidPool);
-  else
-    msg = NJSMessages::getErrorMsg(errReadOnly, "poolMin");
-  NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
+  setPoolProperty(ObjectWrap::Unwrap<Pool>(args.Holder()), "poolMin");
 }
 
 /*****************************************************************************/
@@ -324,14 +296,7 @@ NAN_SETTER(Pool::SetPoolMin)
 */
 NAN_SETTER(Pool::SetPoolMax)
 {
-  NanScope();
-  Pool* njsPool = ObjectWrap::Unwrap<Pool>(args.Holder());
-  string msg;
-  if(!njsPool->isValid_)
-    msg = NJSMessages::getErrorMsg(errInvalidPool);
-  else
-    msg = NJSMessages::getErrorMsg(errReadOnly, "poolMax");
-  NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
+  setPoolProperty(ObjectWrap::Unwrap<Pool>(args.Holder()), "poolMax");
 }
 
 /*****************************************************************************/
@@ -341,14 +306,7 @@ NAN_SETTER(Pool::SetPoolMax)
 */
 NAN_SETTER(Pool::SetPoolIncrement)
 {
-  NanScope();
-  Pool* njsPool = ObjectWrap::Unwrap<Pool>(args.Holder());
-  string msg;
-  if(!njsPool->isValid_)
-    msg = NJSMessages::getErrorMsg(errInvalidPool);
-  else
-    msg = NJSMessages::getErrorMsg(errReadOnly, "poolIncrement");
-  NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
+  setPoolProperty(ObjectWrap::Unwrap<Pool>(args.Holder()), "poolIncrement");
 }
 
 /*****************************************************************************/
@@ -358,14 +316,7 @@ NAN_SETTER(Pool::SetPoolIncrement)
 */
 NAN_SETTER(Pool::SetPoolTimeout)
 {
-  NanScope();
-  Pool* njsPool = ObjectWrap::Unwrap<Pool>(args.Holder());
-  string msg;
-  if(!njsPool->isValid_)
-    msg = NJSMessages::getErrorMsg(errInvalidPool);
-  else
-    msg = NJSMessages::getErrorMsg(errReadOnly, "poolTimeout");
-  NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
+  setPoolProperty(ObjectWrap::Unwrap<Pool>(args.Holder()), "poolTimeout");
 }
 
 /*****************************************************************************/
@@ -375,14 +326,7 @@ NAN_SETTER(Pool::SetPoolTimeout)
 */
 NAN_SETTER(Pool::SetConnectionsOpen)
 {
-  NanScope();
-  Pool* njsPool = ObjectWrap::Unwrap<Pool>(args.Holder());
-  string msg;
-  if(!njsPool->isValid_)
-    msg = NJSMessages::getErrorMsg(errInvalidPool);
-  else
-    msg = NJSMessages::getErrorMsg(errReadOnly, "connectionsOpen");
-  NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
+  setPoolProperty(ObjectWrap::Unwrap<Pool>(args.Holder()), "connectionsOpen");
 }
 
 /*****************************************************************************/
@@ -392,14 +336,7 @@ NAN_SETTER(Pool::SetConnectionsOpen)
 */
 NAN_SETTER(Pool::SetConnectionsInUse)
 {
-  NanScope();
-  Pool* njsPool = ObjectWrap::Unwrap<Pool>(args.Holder());
-  string msg;
-  if(!njsPool->isValid_)
-    msg = NJSMessages::getErrorMsg(errInvalidPool);
-  else
-    msg = NJSMessages::getErrorMsg(errReadOnly, "connectionsInUse");
-  NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
+  setPoolProperty(ObjectWrap::Unwrap<Pool>(args.Holder()), "connectionsInUse");
 }
 
 /*****************************************************************************/
@@ -409,14 +346,7 @@ NAN_SETTER(Pool::SetConnectionsInUse)
 */
 NAN_SETTER(Pool::SetStmtCacheSize)
 {
-  NanScope();
-  Pool* njsPool = ObjectWrap::Unwrap<Pool>(args.Holder());
-  string msg;
-  if(!njsPool->isValid_)
-    msg = NJSMessages::getErrorMsg(errInvalidPool);
-  else
-    msg = NJSMessages::getErrorMsg(errReadOnly, "stmtCacheSize");
-  NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
+  setPoolProperty(ObjectWrap::Unwrap<Pool>(args.Holder()), "stmtCacheSize");
 }
 
 /*****************************************************************************/
@@ -435,8 +365,8 @@ NAN_METHOD(Pool::GetConnection)
   NJS_GET_CALLBACK ( callback, args );
 
   Pool *njsPool = ObjectWrap::Unwrap<Pool>(args.This());
-  connectionBaton *connBaton = new connectionBaton ();
 
+  poolBaton *connBaton = new poolBaton ();
   NanAssignPersistent( connBaton->cb, callback );
 
   NJS_CHECK_NUMBER_OF_ARGS ( connBaton->error, args, 1, 1, exitGetConnection );
@@ -446,8 +376,7 @@ NAN_METHOD(Pool::GetConnection)
     connBaton->error = NJSMessages::getErrorMsg ( errInvalidPool );
     goto exitGetConnection;
   }
-  connBaton->dpipool  = njsPool->dpipool_;
-  connBaton->oracledb = njsPool->oracledb_;
+  connBaton->njspool   = njsPool;
   connBaton->connClass = njsPool->oracledb_->getConnectionClass ();  
   
 exitGetConnection:
@@ -472,13 +401,13 @@ exitGetConnection:
 */
 void Pool::Async_GetConnection(uv_work_t *req)
 {
-  connectionBaton *connBaton = (connectionBaton *)req->data;
+  poolBaton *connBaton = (poolBaton *)req->data;
   if(!(connBaton->error).empty()) goto exitAsyncGetConnection;
 
   try
   {
-    connBaton->dpiconn = connBaton-> dpipool -> getConnection ( 
-                                              connBaton-> connClass);
+    connBaton->dpiconn = connBaton-> njspool -> dpipool_ ->
+                                  getConnection ( connBaton-> connClass);
   }
   catch (dpi::Exception &e)
   {
@@ -503,7 +432,8 @@ void Pool::Async_GetConnection(uv_work_t *req)
 void Pool::Async_AfterGetConnection(uv_work_t *req)
 {
   NanScope();
-  connectionBaton *connBaton = (connectionBaton*)req->data;
+  poolBaton *connBaton = (poolBaton*)req->data;
+
   v8::TryCatch tc;
   Handle<Value> argv[2];
   if(!(connBaton->error).empty()) 
@@ -517,8 +447,8 @@ void Pool::Async_AfterGetConnection(uv_work_t *req)
     Local<FunctionTemplate> lft = NanNew(Connection::connectionTemplate_s);
     Handle<Object> connection = lft->GetFunction()-> NewInstance();
     (ObjectWrap::Unwrap<Connection> (connection))->
-                                     setConnection( connBaton->dpiconn,
-                                                    connBaton->oracledb );
+                                 setConnection( connBaton->dpiconn,
+                                                connBaton->njspool->oracledb_ );
     argv[1] = connection;
   }
   NanMakeCallback(NanGetCurrentContext()->Global(), 
@@ -546,7 +476,8 @@ NAN_METHOD(Pool::Terminate)
   NJS_GET_CALLBACK ( callback, args );
 
   Pool *njsPool = ObjectWrap::Unwrap<Pool>(args.This());
-  connectionBaton *terminateBaton = new connectionBaton ();
+
+  poolBaton *terminateBaton = new poolBaton ();
   NanAssignPersistent( terminateBaton->cb, callback );
 
   NJS_CHECK_NUMBER_OF_ARGS ( terminateBaton->error, args, 1, 1, exitTerminate );
@@ -556,8 +487,7 @@ NAN_METHOD(Pool::Terminate)
     terminateBaton->error = NJSMessages::getErrorMsg( errInvalidPool );
     goto exitTerminate;
   }
-  terminateBaton->dpipool  = njsPool->dpipool_;
-  njsPool->isValid_        = false;
+  terminateBaton->njspool      = njsPool;
 
 exitTerminate:
   terminateBaton->req.data = (void *)terminateBaton;
@@ -581,12 +511,12 @@ exitTerminate:
 */
 void Pool::Async_Terminate(uv_work_t *req)
 {
-  connectionBaton *terminateBaton = (connectionBaton*)req->data;
+  poolBaton *terminateBaton = (poolBaton*)req->data;
   if(!terminateBaton->error.empty()) goto exitAsyncTerminate;
 
   try
   {
-    terminateBaton-> dpipool-> terminate ();
+    terminateBaton-> njspool-> dpipool_-> terminate ();
   }
   catch(dpi::Exception& e)
   {
@@ -607,16 +537,22 @@ void Pool::Async_Terminate(uv_work_t *req)
 void Pool::Async_AfterTerminate(uv_work_t *req)
 {
   NanScope();
-  connectionBaton *terminateBaton = (connectionBaton*)req->data;
+  poolBaton *terminateBaton = (poolBaton*)req->data;
 
   v8::TryCatch tc;
 
   Handle<Value> argv[1];
 
   if(!(terminateBaton->error).empty())
+  {
     argv[0] = v8::Exception::Error(NanNew<v8::String>((terminateBaton->error).c_str()));
+  }
   else
+  {
     argv[0] = NanUndefined();
+    // pool is not valid after terminate succeeds.
+    terminateBaton-> njspool-> isValid_ = false; 
+  }
 
   NanMakeCallback( NanGetCurrentContext()->Global(),
                       NanNew(terminateBaton->cb), 1, argv );

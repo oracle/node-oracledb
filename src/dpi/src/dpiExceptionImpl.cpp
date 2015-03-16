@@ -44,14 +44,18 @@ using namespace std;
                      PRIVATE DATA
   ---------------------------------------------------------------------------*/
 
+// don't forget to add comma for previously last message after you add a new
+// error message
+
 static const char *dpiErrors[] =
 {
   "not an error",                                     // DpiErrNoError
   "internal error",                                   // DpiErrInternal
   "could not get OCI error message",                  // DpiErrUnkOciError
-  "no OCI environment handle created"                 // DpiErrNoEnv
-  "invalid state while working with timestamp"        // DpiErrInvalidState
-  "uninitialized state while working with timestamp"  // DpiErrUninitialized
+  "no OCI environment handle created",                // DpiErrNoEnv
+  "invalid state while working with timestamp",       // DpiErrInvalidState
+  "uninitialized state while working with timestamp", // DpiErrUninitialized
+  "user and password should not be set when using external authentication", // DpiErrExtAuth
 };
 
   
