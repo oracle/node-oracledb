@@ -650,7 +650,6 @@ Handle<Value> Oracledb::Sync_CreatePool (const Arguments &args)
   exitCreatePool:
 
 
-
   if(!(poolBaton->error).empty()) goto exitAsyncCreatePool;
 
   try
