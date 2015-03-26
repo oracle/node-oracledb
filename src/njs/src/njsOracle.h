@@ -84,6 +84,7 @@ private:
 
    // Create Pool Methods
    static Handle<Value>  CreatePool (const Arguments& args);
+    static Handle<Value> Sync_CreatePool (const Arguments& args);
    static void Async_CreatePool (uv_work_t *req );
    static void Async_AfterCreatePool (uv_work_t *req);
    
