@@ -3,6 +3,7 @@
 *.o
 \#*#
 core
+*.tgz
 
 # Node Ignores
 npm-debug.log
