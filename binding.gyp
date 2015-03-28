@@ -54,8 +54,8 @@
     [
       'OS=="aix"', {
         "variables" : {
-          "oci_inc_dir%" : '<!(echo ${OCI_INC_DIR:="/opt/oracle/instantclient_12_1/sdk/include/"})',
-          "oci_lib_dir%" : '<!(echo ${OCI_LIB_DIR:="/opt/oracle/instantclient_12_1/"})',
+          "oci_inc_dir%" : '<!(echo ${OCI_INC_DIR:="/opt/oracle/instantclient/sdk/include/"})',
+          "oci_lib_dir%" : '<!(echo ${OCI_LIB_DIR:="/opt/oracle/instantclient/"})',
           },
           "libraries"     : ["-lclntsh"],
           "cflags"        : ['-fexceptions'],
