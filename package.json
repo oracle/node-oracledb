@@ -14,7 +14,7 @@
     "dependencies" : {
     },
     "engines" : {
-	"node" : "=0.10"
+	"node" : ">=0.10.28 <0.11"
     },
     "engineStrict": true,
     "maintainers" : [
