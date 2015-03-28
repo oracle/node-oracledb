@@ -923,6 +923,9 @@ void Connection::Async_AfterExecute(uv_work_t *req)
         result->Set(String::New("rows"), rowArray, v8::ReadOnly);
         result->Set(String::New("outBinds"),Undefined());
         result->Set(String::New("rowsAffected"), Undefined());
+        result->Set(String::New("metaData"), Connection::GetMetaData(
+                                           executeBaton->columnNames,
+                                           executeBaton->numCols));
         break;
       case DpiStmtBegin :
       case DpiStmtDeclare :
@@ -931,6 +934,7 @@ void Connection::Async_AfterExecute(uv_work_t *req)
         result->Set(String::New("outBinds"),Connection::GetOutBinds(executeBaton),
                    v8::ReadOnly);
         result->Set(String::New("rows"), Undefined());
+        result->Set(String::New("metaData"), Undefined());
         break;
       default :
         result->Set(String::New("rowsAffected"),
@@ -938,6 +942,7 @@ void Connection::Async_AfterExecute(uv_work_t *req)
 		                 v8::ReadOnly);
         result->Set(String::New("outBinds"),Undefined());
         result->Set(String::New("rows"), Undefined());
+        result->Set(String::New("metaData"), Undefined());
         break;
     }
     argv[1] = result;
@@ -951,6 +956,35 @@ void Connection::Async_AfterExecute(uv_work_t *req)
   {
     node::FatalException(tc);
   }
+}
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Method to populate Metadata array
+
+   PARAMETERS:
+     columnNames - Column Names
+     numCols     - number of columns
+
+   RETURNS:
+     MetaData Handle
+*/
+Handle<Value> Connection::GetMetaData (std::string* columnNames,
+                                       unsigned int numCols )
+{
+  HandleScope scope;
+  Handle<Array> metaArray = v8::Array::New(numCols);
+  for(unsigned int i=0; i < numCols ; i++)
+  {
+    Local<Object> column = Object::New();
+    column->Set(String::New("name"),
+                String::New(columnNames[i].c_str(),
+                            (int) columnNames[i].length())
+                );
+    metaArray->Set(i, column);
+  }
+  return scope.Close(metaArray);
 }
 
 /*****************************************************************************/

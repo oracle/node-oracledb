@@ -229,6 +229,8 @@ private:
   static Handle<Value> GetOutBindArray ( std::vector<Bind*> binds, unsigned int outCount);
   static Handle<Value> GetOutBindObject (std::vector<Bind*> binds);
   static Handle<Value> GetRows (eBaton* executeBaton);
+  static Handle<Value> GetMetaData (std::string* columnNames,
+                                    unsigned int numCols);
   static Handle<Value> GetValue (short ind, unsigned short type, void* val,
                                  DPI_BUFLEN_TYPE len);
   static void UpdateDateValue ( eBaton *executeBaton );
