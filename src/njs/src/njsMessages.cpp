@@ -2,17 +2,17 @@
 
 /******************************************************************************
  *
- * You may not use the identified files except in compliance with the Apache 
+ * You may not use the identified files except in compliance with the Apache
  * License, Version 2.0 (the "License.")
  *
- * You may obtain a copy of the License at 
+ * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0.
  *
- * Unless required by applicable law or agreed to in writing, software 
+ * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *
- * See the License for the specific language governing permissions and 
+ * See the License for the specific language governing permissions and
  * limitations under the License.
  *
  * NAME
@@ -33,11 +33,11 @@ using namespace std;
 // Maximum buffer size to compose error message
 #define MAX_ERROR_MSG_LEN 1024
 
-static const char *errMsg[] = 
+static const char *errMsg[] =
 {
-  "NJS-001: expected callback as last parameter",  
-  "NJS-002: invalid pool",  
-  "NJS-003: invalid connection",  
+  "NJS-001: expected callback as last parameter",
+  "NJS-002: invalid pool",
+  "NJS-003: invalid connection",
   "NJS-004: invalid value for property %s",
   "NJS-005: invalid value for parameter %d",
   "NJS-006: invalid type for parameter %d",
@@ -57,15 +57,15 @@ string NJSMessages::getErrorMsg ( NJSErrorType err, ... )
   char msg[MAX_ERROR_MSG_LEN + 1]; // buffer to get formatted/substituted error msg
   va_list vlist;                   // variable argument list
   std::string str;
-  
+
   if ( err > 0 && err < errMaxErrors )
-  {   
+  {
     // print all specified arguments
     va_start (vlist, err);
     vsnprintf (msg, MAX_ERROR_MSG_LEN, errMsg[err-1], vlist);
     va_end (vlist);
- 
-    str = msg; 
+
+    str = msg;
   }
   return str;
 }

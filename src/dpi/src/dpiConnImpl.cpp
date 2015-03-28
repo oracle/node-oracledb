@@ -2,21 +2,21 @@
 
 /******************************************************************************
  *
- * You may not use the identified files except in compliance with the Apache 
+ * You may not use the identified files except in compliance with the Apache
  * License, Version 2.0 (the "License.")
  *
- * You may obtain a copy of the License at 
+ * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0.
  *
- * Unless required by applicable law or agreed to in writing, software 
+ * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *
- * See the License for the specific language governing permissions and 
+ * See the License for the specific language governing permissions and
  * limitations under the License.
  *
  * NAME
- *   dpiConnImpl.cpp - ConnImpl class implementation 
+ *   dpiConnImpl.cpp - ConnImpl class implementation
  *
  * DESCRIPTION
  *   This file implements the ConnImpl class which provides the implemenation of
@@ -56,7 +56,7 @@ using namespace std;
 /*---------------------------------------------------------------------------
                            PUBLIC METHODS
   ---------------------------------------------------------------------------*/
- 
+
 
 /*****************************************************************************/
 /*
@@ -76,16 +76,16 @@ using namespace std;
  */
 
 ConnImpl::ConnImpl(EnvImpl *env, OCIEnv *envh, bool isExternalAuth,
-                   unsigned int stmtCacheSize, 
+                   unsigned int stmtCacheSize,
                    const string &user, const string &password,
                    const string &connString, const string &connClass)
 
-try :  env_(env), pool_(NULL), 
+try :  env_(env), pool_(NULL),
        envh_(envh), errh_(NULL), auth_(NULL), svch_(NULL), sessh_(NULL),
        hasTxn_(false)
 {
   ub4 mode = isExternalAuth ? OCI_SESSGET_CREDEXT : OCI_DEFAULT;
-  
+
   ociCallEnv(OCIHandleAlloc((void *)envh_, (dvoid **)&errh_,
                             OCI_HTYPE_ERROR, 0, (dvoid **)0), envh_);
 
@@ -102,16 +102,16 @@ try :  env_(env), pool_(NULL),
     ociCall(OCIAttrSet((void *)auth_, OCI_HTYPE_AUTHINFO,
                        (void *)user.data(), (ub4) user.length(),
                        OCI_ATTR_USERNAME, errh_), errh_);
-    
+
     ociCall(OCIAttrSet((void *)auth_, OCI_HTYPE_AUTHINFO,
                        (void *)password.data(), (ub4) password.length(),
                        OCI_ATTR_PASSWORD, errh_), errh_);
   }
-                            
+
   // If connection class provided, set it on auth handle
   if (connClass.length() )
   {
-    ociCall (OCIAttrSet ((void*)auth_, OCI_HTYPE_AUTHINFO, 
+    ociCall (OCIAttrSet ((void*)auth_, OCI_HTYPE_AUTHINFO,
                          (void *)connClass.data(), (ub4) connClass.length(),
                          OCI_ATTR_CONNECTION_CLASS, errh_), errh_);
   }
@@ -120,10 +120,10 @@ try :  env_(env), pool_(NULL),
                         (OraText *)connString.data(),
                         (ub4) connString.length(), NULL, 0, NULL, NULL, NULL,
                         mode), errh_);
-  
+
   ociCall(OCIAttrGet(svch_, OCI_HTYPE_SVCCTX, &sessh_,  0,
                      OCI_ATTR_SESSION, errh_),errh_);
-                     
+
   this->stmtCacheSize(stmtCacheSize);
 }
 
@@ -151,15 +151,15 @@ catch (...)
    RETURNS:
      nothing
 
-   NOTES: 
+   NOTES:
      This constructor to be used in session-pool scenarios.
  */
- 
+
 ConnImpl::ConnImpl(PoolImpl *pool, OCIEnv *envh, bool isExternalAuth,
                    OraText *poolName, ub4 poolNameLen, const string& connClass
                    )
 
-try :  env_(NULL), pool_(pool), 
+try :  env_(NULL), pool_(pool),
        envh_(envh), errh_(NULL), auth_(NULL),
        svch_(NULL), sessh_(NULL), hasTxn_(false)
 {
@@ -169,15 +169,15 @@ try :  env_(NULL), pool_(pool),
                             OCI_HTYPE_ERROR, 0, (dvoid **)0), envh_);
   ociCallEnv(OCIHandleAlloc((void *)envh_, (dvoid **)&auth_,
                             OCI_HTYPE_AUTHINFO, 0, (dvoid **)0), envh_);
-                            
+
   // If connection class provided, set it on auth handle
   if (connClass.length() )
   {
-    ociCall (OCIAttrSet ((void*)auth_, OCI_HTYPE_AUTHINFO, 
+    ociCall (OCIAttrSet ((void*)auth_, OCI_HTYPE_AUTHINFO,
                          (void *)connClass.data(), (ub4) connClass.length(),
                          OCI_ATTR_CONNECTION_CLASS, errh_), errh_);
   }
-    
+
   ociCall(OCISessionGet(envh_, errh_, &svch_, auth_,
                         poolName, poolNameLen,
                         NULL, 0, NULL, NULL, NULL,
@@ -206,7 +206,7 @@ catch (...)
      nothing
 
    NOTES:
-     
+
  */
 
 ConnImpl::~ConnImpl()
@@ -228,7 +228,7 @@ ConnImpl::~ConnImpl()
      nothing
 
    NOTES:
-     
+
  */
 
 void ConnImpl::release()
@@ -239,7 +239,7 @@ void ConnImpl::release()
   #endif
 
   if(hasTxn_)
-    rollback(); 
+    rollback();
 
   if (pool_)
     pool_->releaseConnection(this);
@@ -263,7 +263,7 @@ void ConnImpl::release()
 void ConnImpl::releaseStmt ( Stmt *stmt )
 {
   if (stmt )
-  {    
+  {
     delete stmt;
   }
 }
@@ -280,7 +280,7 @@ void ConnImpl::releaseStmt ( Stmt *stmt )
      nothing
 
    NOTES:
-     
+
  */
 
 void ConnImpl::stmtCacheSize(unsigned int stmtCacheSize)
@@ -303,7 +303,7 @@ void ConnImpl::stmtCacheSize(unsigned int stmtCacheSize)
      statement cache size
 
    NOTES:
-     
+
  */
 
 unsigned int ConnImpl::stmtCacheSize() const
@@ -312,7 +312,7 @@ unsigned int ConnImpl::stmtCacheSize() const
 
   ociCall(OCIAttrGet(svch_, OCI_HTYPE_SVCCTX, &stmtCacheSize, NULL,
                      OCI_ATTR_STMTCACHESIZE, errh_), errh_);
-  
+
   return stmtCacheSize;
 }
 
@@ -330,7 +330,7 @@ unsigned int ConnImpl::stmtCacheSize() const
      nothing
 
    NOTES:
-     
+
  */
 
 void ConnImpl::clientId(const string &clientId)
@@ -354,7 +354,7 @@ void ConnImpl::clientId(const string &clientId)
      nothing
 
    NOTES:
-     
+
  */
 
 void ConnImpl::module(const string &module)
@@ -371,13 +371,13 @@ void ConnImpl::module(const string &module)
      Set action.
 
    PARAMETERS:
-     action - action 
+     action - action
 
    RETURNS:
      nothing
 
    NOTES:
-     
+
  */
 
 void ConnImpl::action(const string &action)
@@ -403,7 +403,7 @@ void ConnImpl::action(const string &action)
      nothing
 
    NOTES:
-     
+
  */
 
 Stmt* ConnImpl::getStmt (const string &sql)
@@ -416,13 +416,13 @@ Stmt* ConnImpl::getStmt (const string &sql)
 
 
 /*****************************************************************************/
-/* 
+/*
   DESCRIPTION
     Commit the transaction in progress
-  
+
   PARAMETERS:
     -NONE-
-  
+
   RETURNS
     -NONE_
 */
@@ -437,10 +437,10 @@ void ConnImpl::commit ()
 /*
   DESCRIPTION
     Rollback the transaction in progress
-  
+
   PARAMETERS
     -NONE-
-  
+
   RETUNRS:
     -NONE_
 */
@@ -454,10 +454,10 @@ void ConnImpl::rollback ()
 /*
   DESCRIPTION
     break (interrupt) the currently executing operation
-  
+
   PARAMETERS
     -NONE-
-  
+
   RETURNS:
     -NONE_
 */
@@ -503,8 +503,8 @@ void ConnImpl::cleanup()
   {
     OCIHandleFree (auth_, OCI_HTYPE_AUTHINFO);
     auth_ = NULL;
-  }    
-  
+  }
+
   if (errh_)
   {
     OCIHandleFree(errh_, OCI_HTYPE_ERROR);

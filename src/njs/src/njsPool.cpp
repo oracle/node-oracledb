@@ -2,17 +2,17 @@
 
 /******************************************************************************
  *
- * You may not use the identified files except in compliance with the Apache 
+ * You may not use the identified files except in compliance with the Apache
  * License, Version 2.0 (the "License.")
  *
- * You may obtain a copy of the License at 
+ * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0.
  *
- * Unless required by applicable law or agreed to in writing, software 
+ * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *
- * See the License for the specific language governing permissions and 
+ * See the License for the specific language governing permissions and
  * limitations under the License.
  *
  * NAME
@@ -44,20 +44,20 @@ Pool::~Pool(){}
 /*****************************************************************************/
 /*
    DESCRIPTION
-     Store the config in pool instance. 
+     Store the config in pool instance.
 */
 void Pool::setPool( dpi::SPool *dpipool, Oracledb* oracledb, unsigned int poolMax,
                     unsigned int poolMin, unsigned int poolIncrement,
                     unsigned int poolTimeout, unsigned stmtCacheSize )
 {
-  this->dpipool_       = dpipool;  
-  this->isValid_       = true;  
-  this->oracledb_      = oracledb;  
-  this->poolMax_       = poolMax;  
-  this->poolMin_       = poolMin;  
-  this->poolIncrement_ = poolIncrement;  
-  this->poolTimeout_   = poolTimeout;  
-  this->stmtCacheSize_ = stmtCacheSize;  
+  this->dpipool_       = dpipool;
+  this->isValid_       = true;
+  this->oracledb_      = oracledb;
+  this->poolMax_       = poolMax;
+  this->poolMin_       = poolMin;
+  this->poolIncrement_ = poolIncrement;
+  this->poolTimeout_   = poolTimeout;
+  this->stmtCacheSize_ = stmtCacheSize;
 }
 
 /*****************************************************************************/
@@ -65,8 +65,8 @@ void Pool::setPool( dpi::SPool *dpipool, Oracledb* oracledb, unsigned int poolMa
    DESCRIPTION
      Init function of the Pool class.
      Initiates and maps the functions and properties of Pool class.
-*/     
-void Pool::Init(Handle<Object> target) 
+*/
+void Pool::Init(Handle<Object> target)
 {
   HandleScope scope;
 
@@ -114,9 +114,9 @@ void Pool::Init(Handle<Object> target)
 /*
    DESCRIPTION
      Invoked when new of pool is called from JS
-     
+
 */
-Handle<Value> Pool::New(const Arguments& args) 
+Handle<Value> Pool::New(const Arguments& args)
 {
   HandleScope scope;
 
@@ -129,10 +129,9 @@ Handle<Value> Pool::New(const Arguments& args)
 /*****************************************************************************/
 /*
    DESCRIPTION
-     Abstraction to all getter accessors of properties 
+     Abstraction to all getter accessors of properties
 */
-Handle<Value> Pool::getPoolProperty(Local<String> property, 
-                                 Pool* njsPool, unsigned int poolProperty)
+Handle<Value> Pool::getPoolProperty(Pool* njsPool, unsigned int poolProperty)
 {
   HandleScope scope;
   if(!njsPool->isValid_)
@@ -157,7 +156,7 @@ Handle<Value> Pool::GetPoolMin (Local<String> property,
                                 const AccessorInfo& info)
 {
   Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
-  return getPoolProperty(property, njsPool, njsPool->poolMin_); 
+  return Pool::getPoolProperty(njsPool, njsPool->poolMin_);
 }
 
 /*****************************************************************************/
@@ -169,7 +168,7 @@ Handle<Value> Pool::GetPoolMax (Local<String> property,
                                 const AccessorInfo& info)
 {
   Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
-  return getPoolProperty(property, njsPool, njsPool->poolMax_); 
+  return Pool::getPoolProperty(njsPool, njsPool->poolMax_);
 }
 
 /*****************************************************************************/
@@ -181,7 +180,7 @@ Handle<Value> Pool::GetPoolIncrement (Local<String> property,
                                       const AccessorInfo& info)
 {
   Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
-  return getPoolProperty(property, njsPool, njsPool->poolIncrement_); 
+  return Pool::getPoolProperty(njsPool, njsPool->poolIncrement_);
 }
 
 /*****************************************************************************/
@@ -193,7 +192,7 @@ Handle<Value> Pool::GetPoolTimeout (Local<String> property,
                                 const AccessorInfo& info)
 {
   Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
-  return getPoolProperty(property, njsPool, njsPool->poolTimeout_); 
+  return Pool::getPoolProperty(njsPool, njsPool->poolTimeout_);
 }
 
 /*****************************************************************************/
@@ -265,13 +264,13 @@ Handle<Value> Pool::GetStmtCacheSize (Local<String> property,
                                       const AccessorInfo& info)
 {
   Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
-  return getPoolProperty(property, njsPool, njsPool->stmtCacheSize_); 
+  return Pool::getPoolProperty(njsPool, njsPool->stmtCacheSize_);
 }
 
 /*****************************************************************************/
 /*
    DESCRIPTION
-     Abstraction to all setter accessors of properties 
+     Abstraction to all setter accessors of properties
 */
 void Pool::setPoolProperty (const AccessorInfo& info, string property)
 {
@@ -366,9 +365,9 @@ void Pool::SetStmtCacheSize(Local<String> property, Local<Value> value,
 /*
    DESCRIPTION
      Get Connection method on Pool class.
-  
+
    PARAMETERS:
-     Arguments - Callback 
+     Arguments - Callback
 */
 Handle<Value> Pool::GetConnection(const Arguments& args)
 {
@@ -389,24 +388,24 @@ Handle<Value> Pool::GetConnection(const Arguments& args)
     goto exitGetConnection;
   }
   connBaton->njspool   = njsPool;
-  connBaton->connClass = njsPool->oracledb_->getConnectionClass ();  
-  
+  connBaton->connClass = njsPool->oracledb_->getConnectionClass ();
+
 exitGetConnection:
   connBaton->req.data = (void *)connBaton;
-  
-  uv_queue_work(uv_default_loop(), &connBaton->req, Async_GetConnection, 
+
+  uv_queue_work(uv_default_loop(), &connBaton->req, Async_GetConnection,
                 (uv_after_work_cb)Async_AfterGetConnection);
-  
+
   return Undefined();
-} 
+}
 
 /*****************************************************************************/
 /*
    DESCRIPTION
      Worker function of Get Connection method
-  
+
    PARAMETERS:
-     UV queue work block 
+     UV queue work block
 
    NOTES:
      DPI call execution.
@@ -433,9 +432,9 @@ void Pool::Async_GetConnection(uv_work_t *req)
 /*
    DESCRIPTION
      Callback function of Get Connection method
-  
+
    PARAMETERS:
-     UV queue work block 
+     UV queue work block
      status - expected to be non-zero.
 
    NOTES:
@@ -447,11 +446,11 @@ void Pool::Async_AfterGetConnection(uv_work_t *req)
   poolBaton *connBaton = (poolBaton*)req->data;
   v8::TryCatch tc;
   Handle<Value> argv[2];
-  if(!(connBaton->error).empty()) 
+  if(!(connBaton->error).empty())
   {
     argv[0] = v8::Exception::Error(String::New((connBaton->error).c_str()));
     argv[1] = Undefined();
-  } 
+  }
   else
   {
     argv[0] = Undefined();
@@ -462,8 +461,8 @@ void Pool::Async_AfterGetConnection(uv_work_t *req)
                                                 connBaton->njspool->oracledb_ );
     argv[1] = connection;
   }
-  node::MakeCallback(Context::GetCurrent()->Global(), 
-                     connBaton->cb, 2, argv); 
+  node::MakeCallback(Context::GetCurrent()->Global(),
+                     connBaton->cb, 2, argv);
   if(tc.HasCaught())
   {
     node::FatalException(tc);
@@ -475,9 +474,9 @@ void Pool::Async_AfterGetConnection(uv_work_t *req)
 /*
    DESCRIPTION
      Terminate method
-  
+
    PARAMETERS:
-     Arguments - Callback 
+     Arguments - Callback
 */
 Handle<Value> Pool::Terminate(const Arguments& args )
 {
@@ -501,20 +500,20 @@ Handle<Value> Pool::Terminate(const Arguments& args )
 
 exitTerminate:
   terminateBaton->req.data = (void *)terminateBaton;
-  
-  uv_queue_work(uv_default_loop(), &terminateBaton->req, Async_Terminate, 
+
+  uv_queue_work(uv_default_loop(), &terminateBaton->req, Async_Terminate,
                 (uv_after_work_cb)Async_AfterTerminate);
-  
+
  return scope.Close(Undefined());
 }
 
 /*****************************************************************************/
 /*
    DESCRIPTION
-     Worker function of terminate. 
-  
+     Worker function of terminate.
+
    PARAMETERS:
-     UV queue work block 
+     UV queue work block
 
    NOTES:
      DPI call execution.
@@ -530,7 +529,7 @@ void Pool::Async_Terminate(uv_work_t *req)
   }
   catch(dpi::Exception& e)
   {
-    terminateBaton->error = std::string(e.what()); 
+    terminateBaton->error = std::string(e.what());
   }
   exitAsyncTerminate:
   ;
@@ -539,10 +538,10 @@ void Pool::Async_Terminate(uv_work_t *req)
 /*****************************************************************************/
 /*
    DESCRIPTION
-     Callback function of terminate 
-  
+     Callback function of terminate
+
    PARAMETERS:
-     UV queue work block 
+     UV queue work block
 */
 void Pool::Async_AfterTerminate(uv_work_t *req)
 {
@@ -561,7 +560,7 @@ void Pool::Async_AfterTerminate(uv_work_t *req)
   {
     argv[0] = Undefined();
     // pool is not valid after terminate succeeds.
-    terminateBaton-> njspool-> isValid_ = false; 
+    terminateBaton-> njspool-> isValid_ = false;
   }
 
   node::MakeCallback( Context::GetCurrent()->Global(),

@@ -2,17 +2,17 @@
 
 /******************************************************************************
  *
- * You may not use the identified files except in compliance with the Apache 
+ * You may not use the identified files except in compliance with the Apache
  * License, Version 2.0 (the "License.")
  *
- * You may obtain a copy of the License at 
+ * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0.
  *
- * Unless required by applicable law or agreed to in writing, software 
+ * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *
- * See the License for the specific language governing permissions and 
+ * See the License for the specific language governing permissions and
  * limitations under the License.
  *
  * NAME
@@ -34,32 +34,32 @@ using namespace v8;
 using namespace node;
 
 
-class Pool: public ObjectWrap { 
+class Pool: public ObjectWrap {
 public:
 
    static void Init(Handle<Object> target);
- 
+
    void setPool ( dpi::SPool *, Oracledb* oracledb, unsigned int poolMax,
                   unsigned int poolMin, unsigned int poolIncrement,
-                  unsigned int poolTimeout, unsigned stmtCacheSize ); 
-   
-   // Define Pool Constructor 
+                  unsigned int poolTimeout, unsigned stmtCacheSize );
+
+   // Define Pool Constructor
    static Persistent<FunctionTemplate> poolTemplate_s ;
-   
+
 private:
 
    static Handle<Value> New(const Arguments& args);
-  
-   // Get Connection Methods 
+
+   // Get Connection Methods
    static Handle<Value> GetConnection(const Arguments& args);
    static void Async_GetConnection(uv_work_t* req);
    static void Async_AfterGetConnection(uv_work_t* req);
-   
+
   // Terminate Methods
    static Handle<Value> Terminate(const Arguments& args);
    static void Async_Terminate(uv_work_t* req);
    static void Async_AfterTerminate(uv_work_t* req);
- 
+
   // Define Getter Accessors to properties
   static Handle<Value> GetPoolMax (Local<String> property,
                                     const AccessorInfo& info);
@@ -75,8 +75,7 @@ private:
                                    const AccessorInfo& info);
   static Handle<Value> GetStmtCacheSize (Local<String> property,
                                    const AccessorInfo& info);
-  static Handle<Value> getPoolProperty(Local<String> property, 
-                                    Pool* njsPool, unsigned int poolProperty);
+  static Handle<Value> getPoolProperty(Pool* njsPool, unsigned int poolProperty);
 
   // Define Setter Accessors to properties
   static void SetPoolMax (Local<String> property,Local<Value> value,
@@ -114,7 +113,7 @@ typedef struct poolBaton
 {
   uv_work_t req;
   std::string error;
-  std::string connClass;  
+  std::string connClass;
   Persistent<Function> cb;
   dpi::Conn*  dpiconn;
   Pool*       njspool;

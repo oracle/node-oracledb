@@ -2,17 +2,17 @@
 
 /******************************************************************************
  *
- * You may not use the identified files except in compliance with the Apache 
+ * You may not use the identified files except in compliance with the Apache
  * License, Version 2.0 (the "License.")
  *
- * You may obtain a copy of the License at 
+ * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0.
  *
- * Unless required by applicable law or agreed to in writing, software 
+ * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *
- * See the License for the specific language governing permissions and 
+ * See the License for the specific language governing permissions and
  * limitations under the License.
  *
  * NAME
@@ -38,7 +38,7 @@ using namespace node;
 using namespace dpi;
 
 /**
-* Structure used for binds 
+* Structure used for binds
 **/
 typedef struct Bind
 {
@@ -51,26 +51,26 @@ typedef struct Bind
   short             ind;
   bool              isOut;
   dpi::DateTimeArray *dttmarr;
- 
+
   Bind () : key(""), value(NULL), extvalue (NULL), len(0), maxSize(0),
-            type(0), ind(0), isOut(false), dttmarr ( NULL ) 
+            type(0), ind(0), isOut(false), dttmarr ( NULL )
   {}
 }Bind;
 
 /**
-* Structure used for Query result 
+* Structure used for Query result
 **/
 typedef struct Define
 {
- 
-  unsigned short fetchType;                                    
-  DPI_SZ_TYPE        maxSize;                                 
+
+  unsigned short fetchType;
+  DPI_SZ_TYPE        maxSize;
   void         *buf;             // will have the values from DB
   void         *extbuf;          // this field will be DPI calls
   DPI_BUFLEN_TYPE  *len;
   short        *ind;
   dpi::DateTimeArray *dttmarr;   // DPI Date time array of descriptor
- 
+
   Define () :fetchType(0), maxSize(0), buf(NULL), extbuf(NULL),
              len(0), ind(0), dttmarr(NULL)
   {}
@@ -85,7 +85,7 @@ typedef struct eBaton
   std::string   sql;
   std::string   error;
   dpi::Env*     dpienv;
-  dpi::Conn*    dpiconn;     
+  dpi::Conn*    dpiconn;
   DPI_SZ_TYPE   rowsAffected;
   unsigned int  maxRows;
   bool          isAutoCommit;
@@ -98,11 +98,11 @@ typedef struct eBaton
   std::string          *columnNames;
   Define               *defines;
   Persistent<Function> cb;
- 
-  eBaton() : sql(""), error(""), dpienv(NULL), dpiconn(NULL), 
-             rowsAffected(0), maxRows(0), isAutoCommit(false), 
+
+  eBaton() : sql(""), error(""), dpienv(NULL), dpiconn(NULL),
+             rowsAffected(0), maxRows(0), isAutoCommit(false),
              rowsFetched(0), outFormat(0), numCols(0), dpistmt(NULL),
-             st(DpiStmtUnknown), columnNames(NULL), defines(NULL) 
+             st(DpiStmtUnknown), columnNames(NULL), defines(NULL)
   {}
 
   ~eBaton ()
@@ -113,9 +113,9 @@ typedef struct eBaton
        for( unsigned int index = 0 ;index < binds.size(); index++ )
        {
          // donot free date value here, it is done in DateTimeArray functions
-         if(binds[index]->type != DpiTimestampLTZ ) 
+         if(binds[index]->type != DpiTimestampLTZ )
          {
-           if( binds[index]->value ) 
+           if( binds[index]->value )
            {
              free(binds[index]->value);
            }
@@ -137,20 +137,20 @@ typedef struct eBaton
          free(defines[i].len);
          free(defines[i].ind);
        }
-       delete [] defines;       
+       delete [] defines;
      }
-   } 
+   }
 }eBaton;
 
 class Connection: public ObjectWrap
-{ 
+{
 public:
- 
+
   void setConnection (dpi::Conn*, Oracledb* oracledb);
   // Define Connection Constructor
   static Persistent<FunctionTemplate> connectionTemplate_s;
   static void Init (Handle<Object> target);
- 
+
 private:
   static Handle<Value>  New (const Arguments& args);
 
@@ -158,22 +158,22 @@ private:
   static Handle<Value>  Execute (const Arguments& args);
   static void Async_Execute (uv_work_t *req);
   static void Async_AfterExecute (uv_work_t *req);
- 
+
   // Release Method on Connection class
   static Handle<Value>  Release (const Arguments& args);
   static void Async_Release (uv_work_t *req);
   static void Async_AfterRelease (uv_work_t *req);
- 
+
   // Commit Method on Connection class
   static Handle<Value>  Commit (const Arguments& args);
   static void Async_Commit (uv_work_t *req);
   static void Async_AfterCommit (uv_work_t *req);
- 
+
   // Rollback Method on Connection class
   static Handle<Value>  Rollback (const Arguments& args);
   static void Async_Rollback (uv_work_t *req);
   static void Async_AfterRollback (uv_work_t *req);
- 
+
   // BreakMethod on Connection class
   static Handle<Value>  Break (const Arguments& args);
   static void Async_Break (uv_work_t *req);
@@ -188,7 +188,7 @@ private:
                                    const AccessorInfo& info);
   static Handle<Value> GetAction (Local<String> property,
                                    const AccessorInfo& info);
-     
+
   // Define Setter Accessors to properties
   static void SetStmtCacheSize (Local<String> property,Local<Value> value,
                                  const AccessorInfo& info);
@@ -199,14 +199,14 @@ private:
   static void SetAction (Local<String> property,Local<Value> value,
                           const AccessorInfo& info);
 
-  static void connectionPropertyException(const AccessorInfo& info, 
+  static void connectionPropertyException(const AccessorInfo& info,
                                           NJSErrorType errType,
                                           string property);
-    
+
   Connection ();
   ~Connection ();
-   
-  
+
+
   static void PrepareAndBind (eBaton* executeBaton);
   static void GetDefines (eBaton* executeBaton);
   static void ProcessBinds (const Arguments& args, unsigned int index,
@@ -223,11 +223,11 @@ private:
                            eBaton* executeBaton);
   static void GetInBindParams (Handle<Value> bindtypes, Bind* bind,
                                      eBaton* executeBaton, BindType bindType);
-  static void GetOutBindParams (unsigned short dataType, Bind* bind, 
+  static void GetOutBindParams (unsigned short dataType, Bind* bind,
                                 eBaton* executeBaton);
   static Handle<Value> GetOutBinds (eBaton* executeBaton);
   static Handle<Value> GetOutBindArray ( std::vector<Bind*> binds, unsigned int outCount);
-  static Handle<Value> GetOutBindObject (std::vector<Bind*> binds);  
+  static Handle<Value> GetOutBindObject (std::vector<Bind*> binds);
   static Handle<Value> GetRows (eBaton* executeBaton);
   static Handle<Value> GetValue (short ind, unsigned short type, void* val,
                                  DPI_BUFLEN_TYPE len);

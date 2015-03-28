@@ -2,24 +2,24 @@
 
 /******************************************************************************
  *
- * You may not use the identified files except in compliance with the Apache 
+ * You may not use the identified files except in compliance with the Apache
  * License, Version 2.0 (the "License.")
  *
- * You may obtain a copy of the License at 
+ * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0.
  *
- * Unless required by applicable law or agreed to in writing, software 
+ * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *
- * See the License for the specific language governing permissions and 
+ * See the License for the specific language governing permissions and
  * limitations under the License.
  *
  * NAME
- *   dpiConnImpl.cpp - ConnImpl class implementation 
+ *   dpiConnImpl.cpp - ConnImpl class implementation
  *
  * DESCRIPTION
- *   This file implements the ConnImpl class which provides the implemenation 
+ *   This file implements the ConnImpl class which provides the implemenation
  *   of the Conn abstract class.
  *
  * NOTES
@@ -59,40 +59,40 @@ using namespace std;
                            PUBLIC METHODS
   ---------------------------------------------------------------------------*/
 
- 
+
 /*****************************************************************************/
 /*
     DESCRIPTION
       Constructor for StmtImpl class created by Connection object.
-      
+
     PARAMETERS:
       env          - global env object
       envh         - OCIEnv handle
       conn         - parent connImpl object
       svch         - OCISvcCtx handle
       sql          - sql statement to execute
-      
+
     RETURN
       -NONE-
-      
+
     NOTE:
       wrapper of OCIStmt handle to allow multiple executions to go through
       single connection parent object from multiple thread(s).
       Each StmtImpl creates and uses OCIError handle and this will be destroyed
-      at the end of the execution.  
+      at the end of the execution.
       # of parallel threads can be configured at nodejs level.
 */
-StmtImpl::StmtImpl (EnvImpl *env, OCIEnv *envh, ConnImpl *conn, 
+StmtImpl::StmtImpl (EnvImpl *env, OCIEnv *envh, ConnImpl *conn,
                     OCISvcCtx *svch, const string &sql)
-                    
+
   try : conn_(conn), errh_(NULL), svch_(svch),
         stmth_(NULL), numCols_ (0),meta_(NULL), stmtType_ (DpiStmtUnknown)
-        
+
 {
-  // create an OCIError object for this execution 
-  ociCallEnv (OCIHandleAlloc ((void *)envh, (dvoid **)&errh_, 
+  // create an OCIError object for this execution
+  ociCallEnv (OCIHandleAlloc ((void *)envh, (dvoid **)&errh_,
                                OCI_HTYPE_ERROR, 0, (dvoid **)0), envh);
-  
+
   // Prepare OCIStmt object with given sql statement.
   ociCall (OCIStmtPrepare2 (svch_, &stmth_, errh_, (oratext *)sql.data(),
                             (ub4)sql.length(), NULL, 0, OCI_NTV_SYNTAX,
@@ -107,16 +107,16 @@ catch (...)
 
 
 /*****************************************************************************/
-/* 
+/*
     DESCRIPTION
       Destructor for the StmtImpl class.
-      
+
     PARAMETERS
       -NONE-
-      
+
     RETURNS:
       -NONE_
-    
+
 */
 StmtImpl::~StmtImpl ()
 {
@@ -125,13 +125,13 @@ StmtImpl::~StmtImpl ()
 
 
 /*****************************************************************************/
-/* 
+/*
     DESCRIPTION
       Get Statement type
-    
+
     PARAMETERS
       -NONE_
-    
+
     RETURNS
       DpiStmtType enum
 */
@@ -139,11 +139,11 @@ DpiStmtType StmtImpl::stmtType () const
 {
   // Try to query the statement type only once.
   if ( stmtType_ == DpiStmtUnknown )
-  {    
-    ociCall (OCIAttrGet (stmth_, OCI_HTYPE_STMT, (ub2 * )&stmtType_, NULL, 
+  {
+    ociCall (OCIAttrGet (stmth_, OCI_HTYPE_STMT, (ub2 * )&stmtType_, NULL,
                          OCI_ATTR_STMT_TYPE, errh_), errh_);
   }
-  
+
   return stmtType_;
 }
 
@@ -152,21 +152,21 @@ DpiStmtType StmtImpl::stmtType () const
 /*
     DESCRIPTION
       Get the numbers of rows affected by the DML operation.
-      
+
     PARAMETERS
       -None-
-      
+
     RETURNS:
       number of rows affected by the DML operation
-      
+
 */
 DPI_SZ_TYPE StmtImpl::rowsAffected () const
 {
   DPI_SZ_TYPE  rowsAffected = 0;
-  
-  ociCall (OCIAttrGet (stmth_, OCI_HTYPE_STMT, &rowsAffected, NULL, 
+
+  ociCall (OCIAttrGet (stmth_, OCI_HTYPE_STMT, &rowsAffected, NULL,
                        DPIATTRROWCOUNT, errh_), errh_);
-  
+
   return rowsAffected;
 }
 
@@ -175,22 +175,22 @@ DPI_SZ_TYPE StmtImpl::rowsAffected () const
 /*
   DESCRIPTION
     Number of columns that will be returned by this statement execution
-    
+
   PARAMETERS
     -NONE-
-  
+
   RETURNS
     # of columns
-    
+
 */
 unsigned int StmtImpl::numCols ()
 {
   if (numCols_)
     return numCols_;
-  
-  ociCall (OCIAttrGet (stmth_, OCI_HTYPE_STMT, &numCols_, 0, 
+
+  ociCall (OCIAttrGet (stmth_, OCI_HTYPE_STMT, &numCols_, 0,
                        OCI_ATTR_PARAM_COUNT, errh_), errh_);
-  
+
   return numCols_;
 }
 
@@ -198,10 +198,10 @@ unsigned int StmtImpl::numCols ()
 
 
 /*****************************************************************************/
-/* 
+/*
   DESCRIPTION
     bind the variable(s) by pdpition
-  
+
   PARAMETERS
     pos           - pdpition of the variable 1 based
     type          - Data type
@@ -209,7 +209,7 @@ unsigned int StmtImpl::numCols ()
     bufSize       - size of the buffer
     ind (OUT)     - indicator
     bufLen (OUT)  - size of data reutnred
-  
+
   RETURNS
     -NONE-
 */
@@ -217,18 +217,18 @@ void StmtImpl::bind (unsigned int pos, unsigned short type, void *buf,
                      DPI_SZ_TYPE bufSize, short *ind, DPI_BUFLEN_TYPE *bufLen)
 {
   OCIBind *b = (OCIBind *)0;
-  
+
   ociCall (DPIBINDBYPOS (stmth_, &b, errh_, pos, buf, bufSize, type, ind,
                          bufLen, NULL, 0, NULL, OCI_DEFAULT),
-           errh_);  
+           errh_);
 }
 
 
 /*****************************************************************************/
-/* 
+/*
     DESCRIPTION
       Bind the variable by name
-    
+
     PARAMETERS
       name         - name of the variable
       nameLen      - len of name.
@@ -238,14 +238,14 @@ void StmtImpl::bind (unsigned int pos, unsigned short type, void *buf,
       ind          - indicator
       bufLen       - returned buffer size
 */
-void StmtImpl::bind (const unsigned char *name, int nameLen, 
+void StmtImpl::bind (const unsigned char *name, int nameLen,
                      unsigned short type, void *buf, DPI_SZ_TYPE bufSize,
                      short *ind, DPI_BUFLEN_TYPE *bufLen)
 {
   OCIBind *b = (OCIBind *)0;
-  
-  ociCall (DPIBINDBYNAME (stmth_, &b, errh_, name, nameLen, 
-                          buf, bufSize, type, ind, bufLen, 
+
+  ociCall (DPIBINDBYNAME (stmth_, &b, errh_, name, nameLen,
+                          buf, bufSize, type, ind, bufLen,
                           NULL, 0, NULL, OCI_DEFAULT), errh_);
 }
 
@@ -254,23 +254,23 @@ void StmtImpl::bind (const unsigned char *name, int nameLen,
 /*
     DESCRIPTION
       Execute the SQL statement.
-      
+
     PARAMETERS
       isAutoCommit   - true/false - autocommit enabled or not
       numIterations  - iterations to repeat
-    
+
     RETURNS:
       -None-
 */
 void StmtImpl::execute (int numIterations,  bool isAutoCommit)
 {
   ub4 mode = isAutoCommit ? OCI_COMMIT_ON_SUCCESS : OCI_DEFAULT;
-  
+
   ociCall (OCIStmtExecute ( svch_, stmth_, errh_, (ub4)numIterations, (ub4)0,
                             (OCISnapshot *)NULL, (OCISnapshot *)NULL, mode),
            errh_ );
-  
-#if OCI_MAJOR_VERSION < 12 
+
+#if OCI_MAJOR_VERSION < 12
   if ( isDML () && !conn_->hasTxn () )
   {
     /* Not to be reset, till thread safety is ensured in NJS */
@@ -287,10 +287,10 @@ void StmtImpl::execute (int numIterations,  bool isAutoCommit)
 /*
   DESCRIPTION
     Release the SQL statement
-  
+
   PARAMETERS
     -None-
-  
+
   RETURNS
     -None-
 */
@@ -304,7 +304,7 @@ void StmtImpl::release ()
 /*
   DESCRIPTION
     Define the variable by pdpition
-  
+
   PARAMETERS
     pos         - pdpition of the variable
     type        - data type
@@ -312,7 +312,7 @@ void StmtImpl::release ()
     bufSize     - size of the buffer
     ind         - indicator
     bufLen      - returned buffer size
-    
+
   RETURNS
     -None-
 */
@@ -329,13 +329,13 @@ void StmtImpl::define (unsigned int pos, unsigned short type, void *buf,
 
 
 /****************************************************************************/
-/* 
+/*
   DESCRIPTION
-    Fetch specified number of rows 
-  
+    Fetch specified number of rows
+
   PARAMETERS
     numRows  - number of Rows to fetch
-  
+
   RETURNS
     -None-
 */
@@ -343,43 +343,43 @@ void StmtImpl::fetch (unsigned int numRows)
 {
   sword rc = OCIStmtFetch2 (stmth_, errh_, numRows, OCI_FETCH_NEXT, 0,
                             OCI_DEFAULT);
-  
+
   if ( rc && rc != OCI_NO_DATA )
   {
     ociCall ( rc, errh_);
-  } 
+  }
 }
 
 /*****************************************************************************/
 /*
   DESCRIPTION
     To obtain number of rows fetched in the last fetch call
-    
+
   PARAMETERS
     -NONE-
-  
+
   RETURNS
     unsigned int  - # of rows fetched.
 */
 unsigned int StmtImpl::rowsFetched () const
 {
   unsigned int rowsFetched = 0 ;
-    
+
   ociCall (OCIAttrGet (stmth_, OCI_HTYPE_STMT, &rowsFetched,
                        0, OCI_ATTR_ROWS_FETCHED, errh_), errh_);
-  
+
   return rowsFetched;
 }
 
 
 /*****************************************************************************/
-/* 
+/*
   DESCRIPTION
     obtains column meta data
-  
+
   PARAMETERS
     -None-
-  
+
   RETURNS
     -None-
 */
@@ -390,27 +390,27 @@ const MetaData* StmtImpl::getMetaData ()
   if (!numCols_)
     return NULL;
 
-  ub4       col = 0;  
-  OCIParam *colDesc = (OCIParam *) 0; 
+  ub4       col = 0;
+  OCIParam *colDesc = (OCIParam *) 0;
 
-  meta_ = new MetaData[numCols_];  
+  meta_ = new MetaData[numCols_];
 
   while (col < numCols_)
   {
     ociCall(OCIParamGet((void *)stmth_, OCI_HTYPE_STMT, errh_,
                         (void **)&colDesc, (ub4) (col+1)), errh_ );
     ociCall(OCIAttrGet((void*) colDesc, (ub4) OCI_DTYPE_PARAM,
-                       (void**) &(meta_[col].colName), 
-                       (ub4 *) &(meta_[col].colNameLen), 
+                       (void**) &(meta_[col].colName),
+                       (ub4 *) &(meta_[col].colNameLen),
                        (ub4) OCI_ATTR_NAME,errh_ ), errh_ );
     ociCall(OCIAttrGet((void*) colDesc, (ub4) OCI_DTYPE_PARAM,
-                       (void*) &(meta_[col].dbType),(ub4 *) 0, 
+                       (void*) &(meta_[col].dbType),(ub4 *) 0,
                        (ub4) OCI_ATTR_DATA_TYPE,
                        errh_ ), errh_ );
     ociCall(OCIAttrGet((void*) colDesc, (ub4) OCI_DTYPE_PARAM,
                        (void*) &(meta_[col].dbSize),(ub4 *) 0,
                        (ub4) OCI_ATTR_DATA_SIZE,
-                       errh_ ), errh_ ); 
+                       errh_ ), errh_ );
     ociCall(OCIAttrGet((void*) colDesc, (ub4) OCI_DTYPE_PARAM,
                        (void*) &(meta_[col].isNullable),(ub4*) 0,
                        (ub4) OCI_ATTR_IS_NULL,
@@ -421,21 +421,21 @@ const MetaData* StmtImpl::getMetaData ()
       ociCall(OCIAttrGet((void*) colDesc, (ub4) OCI_DTYPE_PARAM,
                          (void*) &(meta_[col].precision),(ub4* ) 0,
                          (ub4) OCI_ATTR_PRECISION,
-                         errh_ ), errh_ ); 
+                         errh_ ), errh_ );
       ociCall(OCIAttrGet((void*) colDesc, (ub4) OCI_DTYPE_PARAM,
                          (void*) &(meta_[col].scale),(ub4*) 0,
                          (ub4) OCI_ATTR_SCALE,
                          errh_ ), errh_ );
     }
-    OCIDescriptorFree( colDesc, OCI_DTYPE_PARAM);  
-    col++; 
+    OCIDescriptorFree( colDesc, OCI_DTYPE_PARAM);
+    col++;
   }
-  
+
   return meta_;
 }
 
-  
-  
+
+
 
 /*---------------------------------------------------------------------------
                           PRIVATE METHODS
@@ -446,10 +446,10 @@ const MetaData* StmtImpl::getMetaData ()
 /*
   DESCRIPTION
     Cleanup routine for the StmtImpl class.
-    
+
   PARAMETERS
     -NONE_
-  
+
   RETURNS
     void
 */
@@ -473,6 +473,6 @@ void StmtImpl::cleanup ()
 }
 
 
- 
+
 
 /* end of file dpiStmtImpl.cpp */

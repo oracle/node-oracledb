@@ -2,17 +2,17 @@
 
 /******************************************************************************
  *
- * You may not use the identified files except in compliance with the Apache 
+ * You may not use the identified files except in compliance with the Apache
  * License, Version 2.0 (the "License.")
  *
- * You may obtain a copy of the License at 
+ * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0.
  *
- * Unless required by applicable law or agreed to in writing, software 
+ * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *
- * See the License for the specific language governing permissions and 
+ * See the License for the specific language governing permissions and
  * limitations under the License.
  *
  * NAME
@@ -30,8 +30,8 @@
 #endif
 
 #if !defined(OCI_MAJOR_VERSION) || (OCI_MAJOR_VERSION < 11) || \
-((OCI_MAJOR_VERSION == 11) && (OCI_MINOR_VERSION < 2)) 
-#error Oracle 11.2 or later client libraries are required for building 
+((OCI_MAJOR_VERSION == 11) && (OCI_MINOR_VERSION < 2))
+#error Oracle 11.2 or later client libraries are required for building
 #endif
 
 
@@ -47,7 +47,7 @@ namespace dpi
                      PUBLIC TYPES
   ---------------------------------------------------------------------------*/
 
-  
+
 enum DpiStmtType
 {
   DpiStmtUnknown = 0,
@@ -88,7 +88,7 @@ typedef enum
   DpiBfile = 114,
   DpiYearMonth = 182,           /* internal only */
   DpiDaySecond = 183,           /* internal only */
-  DpiTimestamp = 187,           /* internal only */  
+  DpiTimestamp = 187,           /* internal only */
   DpiTimestampTZ = 188,         /* internal only */
   DpiURowid = 208,              /* internal only */
   DpiTimestampLTZ = 232,        /* internal only */
@@ -148,25 +148,25 @@ public:
                                 // methods
   virtual void bind(unsigned int pos, unsigned short type, void  *buf,
                     DPI_SZ_TYPE bufSize, short *ind, DPI_BUFLEN_TYPE *bufLen) = 0;
-  
+
   virtual void bind(const unsigned char *name, int nameLen,
                     unsigned short type,  void *buf, DPI_SZ_TYPE  bufSize,
                     short *ind, DPI_BUFLEN_TYPE *bufLen) = 0;
 
   virtual void execute ( int numIterations, bool isAutoCommit = false) = 0;
-  
+
   virtual void define(unsigned int pos, unsigned short type, void *buf,
                       DPI_SZ_TYPE bufSize, short *ind, DPI_BUFLEN_TYPE *bufLen) = 0;
-  
+
   virtual void fetch(unsigned int numRows = 1) = 0;
-  
+
   virtual const MetaData * getMetaData() = 0;
 
   virtual unsigned int rowsFetched() const = 0;
 
   virtual OCIError *getError () = 0;
-  
-  
+
+
   virtual ~Stmt(){};
 
 protected:
@@ -174,7 +174,7 @@ protected:
   Stmt(){};
 
 private:
-  
+
 };
 
 
