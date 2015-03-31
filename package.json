@@ -1,30 +1,31 @@
 {
-  "name" : "oracledb",
-  "version" : "0.4.1",
-  "description" : "Oracle Database driver by Oracle Corp.",
-  "license" : "Apache 2.0",
-  "homepage": "http://www.oracle.com/technetwork/database/database-technologies/node_js/index.html",
-  "keywords" : [
-    "Oracle", "Database", "official", "oracledb", "nodejs", "db", "binding", "extension", "module", "driver", "library", "plugin", "client", "oci"
-   ],
-  "repository" : {
-    "type" : "git",
-    "url" : "git://github.com/oracle/node-oracledb.git"
-  },
-  "dependencies" : {
-    "nan": "^1.7.0"
-  },
-  "engines" : {
-    "node" : ">=0.10"
-  },
-  "engineStrict": true,
-  "maintainers" : [
-    {
-      "name" : "Oracle Corp."
-    }
-  ],
-  "bugs" : {
-    "url" : "https://github.com/oracle/node-oracledb/issues"
-  },
-  "main" : "./index.js"
+
+    "name" : "oracledb",
+    "version" : "0.4.2",
+    "description" : "Oracle Database driver by Oracle Corp.",
+    "license" : "Apache 2.0",
+    "homepage": "http://www.oracle.com/technetwork/database/database-technologies/node_js/index.html",
+    "keywords" : [
+	"Oracle", "Database", "official", "oracledb", "nodejs", "db", "binding", "extension", "module", "driver", "library", "plugin", "client", "oci"
+    ],
+    "repository" : {
+	"type" : "git",
+	"url" : "git://github.com/oracle/node-oracledb.git"
+    },
+    "dependencies" : {
+      "nan": "^1.7.0"
+    },
+    "engines" : {
+	"node" : ">=0.10.28"
+    },
+    "engineStrict": true,
+    "maintainers" : [
+	{
+	    "name" : "Oracle Corp."
+	}
+    ],
+    "bugs" : {
+	"url" : "https://github.com/oracle/node-oracledb/issues"
+    },
+    "main" : "./index.js"
 }

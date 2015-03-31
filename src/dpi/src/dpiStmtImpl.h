@@ -2,17 +2,17 @@
 
 /******************************************************************************
  *
- * You may not use the identified files except in compliance with the Apache 
+ * You may not use the identified files except in compliance with the Apache
  * License, Version 2.0 (the "License.")
  *
- * You may obtain a copy of the License at 
+ * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0.
  *
- * Unless required by applicable law or agreed to in writing, software 
+ * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *
- * See the License for the specific language governing permissions and 
+ * See the License for the specific language governing permissions and
  * limitations under the License.
  *
  * NAME
@@ -59,9 +59,9 @@ public:
   virtual unsigned int numCols() ;
   virtual unsigned int rowsFetched () const ;
 
-  // Methods  
+  // Methods
   virtual void release ();
-  
+
   virtual void bind (unsigned int pos, unsigned short type, void *buf,
                      DPI_SZ_TYPE bufSize, short *ind, DPI_BUFLEN_TYPE *bufLen ) ;
   virtual void bind (const unsigned char *name, int nameLen,
@@ -73,20 +73,20 @@ public:
   virtual void define (unsigned int pos, unsigned short type, void *buf,
                        DPI_SZ_TYPE bufSize, short *ind, DPI_BUFLEN_TYPE *bufLen);
   virtual void fetch (unsigned int numRows = 1);
-  
+
   virtual const MetaData *getMetaData ();
 
   virtual OCIError *     getError () { return errh_;  }
 
   // Is the SQL statement DML or not ?
-  virtual inline bool isDML ()  
+  virtual inline bool isDML ()
   {
     return ( ( stmtType_ == DpiStmtInsert ) ||
              ( stmtType_ == DpiStmtUpdate ) ||
              ( stmtType_ == DpiStmtDelete ) );
   }
-  
-  
+
+
 private:
   void cleanup ();
 
@@ -99,7 +99,7 @@ private:
   OCIError       *errh_;           // OCI Error object for this stmt execution
   OCISvcCtx      *svch_;           // OCI service handle
   OCIStmt        *stmth_;          // OCI Stmt handle
-  
+
   unsigned int   numCols_;         // # of cols this stmt execution will return
   MetaData       *meta_;           // Meta data array
   DpiStmtType    stmtType_;        // Statement Type (Query, DML, ... )

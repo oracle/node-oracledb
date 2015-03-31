@@ -2,17 +2,17 @@
 
 /******************************************************************************
  *
- * You may not use the identified files except in compliance with the Apache 
+ * You may not use the identified files except in compliance with the Apache
  * License, Version 2.0 (the "License.")
  *
- * You may obtain a copy of the License at 
+ * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0.
  *
- * Unless required by applicable law or agreed to in writing, software 
+ * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *
- * See the License for the specific language governing permissions and 
+ * See the License for the specific language governing permissions and
  * limitations under the License.
  *
  * NAME
@@ -62,9 +62,9 @@ class ConnImpl : public Conn
 {
  public:
                                 // creation/termination
-  
+
   ConnImpl(EnvImpl *env, OCIEnv *envh, bool isExternalAuth,
-           unsigned int stmtCacheSize, 
+           unsigned int stmtCacheSize,
            const string &user, const string &password,
            const string &connString,
            const string &connClass);
@@ -72,9 +72,9 @@ class ConnImpl : public Conn
   ConnImpl(PoolImpl *pool, OCIEnv *envh, bool isExternalAuth,
            OraText *poolName, ub4 poolNameLen, const string &connClass
            );
-  
+
   virtual ~ConnImpl();
- 
+
   virtual void release();
 
                                 // interface properties
@@ -94,26 +94,26 @@ class ConnImpl : public Conn
   virtual void releaseStmt(Stmt *stmt);
 
   virtual void commit();
-  
+
   virtual void rollback();
-  
+
   virtual void breakExecution();
 
   #if OCI_MAJOR_VERSION < 12
-    inline void hasTxn(boolean connHasTxn) 
+    inline void hasTxn(boolean connHasTxn)
     {
       // sets the flag used during connection release.
       hasTxn_ = connHasTxn;
     }
     inline boolean hasTxn()
     {
-      // returns flag to denote active transactions. 
+      // returns flag to denote active transactions.
       return hasTxn_;
     }
-  #endif  
+  #endif
 
 private:
-  
+
   void cleanup();
 
 
@@ -125,7 +125,7 @@ private:
   OCIAuthInfo *auth_;           // OCI auth handle
   OCISvcCtx   *svch_;           // OCI service handle
   OCISession  *sessh_;          // OCI Session handle. Do not free this.
-  boolean     hasTxn_;          // set if transaction is in progress 
+  boolean     hasTxn_;          // set if transaction is in progress
 };
 
 

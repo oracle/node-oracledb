@@ -75,8 +75,9 @@ limitations under the License.
 7. [SQL Execution](#sqlexecution)
   - 7.1 [SELECT Statements](#select)
      - 7.1.1 [Query Output Formats](#queryoutputformats)
-     - 7.1.2 [Result Type Mapping](#typemap)
-     - 7.1.3 [Statement Caching](#stmtcache)
+     - 7.1.2 [Query Column Metadata](#querymeta)
+     - 7.1.3 [Result Type Mapping](#typemap)
+     - 7.1.4 [Statement Caching](#stmtcache)
   - 7.2 [Bind Parameters for Prepared Statements](#bind)
      - 7.2.1 [IN Bind Parameters](#inbind)
      - 7.2.2 [OUT and IN OUT Bind Parameters](#outbind)
@@ -1051,6 +1052,13 @@ one single row.  The number of rows returned is limited to the
 this may be overridden in any `execute()` call.
 
 ```
+array metaData
+```
+
+For `SELECT` statements, this contains an array of column names for
+the select list.  For non queries, this property is undefined.
+
+```
 Array/object outBinds
 ```
 
@@ -1355,7 +1363,38 @@ property names are uppercase.  This is the default casing behavior for
 Oracle client programs when a database table is created with
 case-insensitive column names.
 
-### <a name="typemap"></a> 7.1.2 Result Type Mapping
+### <a name="querymeta"></a> 7.1.2 Query Column Metadata
+
+The column names of a query are returned in the
+[`execute()`](#execute) callback `result` parameter:
+
+```javascript
+connection.execute("SELECT department_id, department_name "
+                 + "FROM departments "
+                 + "WHERE department_id = :did",
+                   [180],
+                   function(err, result)
+                   {
+                     if (err) {
+                       console.error(err.message);
+                       return;
+                     }
+                     console.log(result.metaData);
+                   });
+```
+
+The output is an array of objects, one per column.  Each object has a
+`name` attribute:
+
+```
+[ { name: 'DEPARTMENT_ID' }, { name: 'DEPARTMENT_NAME' } ]
+```
+
+The names are in uppercase.  This is the default casing behavior for
+Oracle client programs when a database table is created with
+case-insensitive column names.
+
+### <a name="typemap"></a> 7.1.3 Result Type Mapping
 
 Oracle character, number and date columns can be selected.  Data types
 that are currently unsupported give a "datatype is not supported"
@@ -1377,7 +1416,7 @@ Query result type mappings for Oracle Database types to JavaScript types are:
     When binding a JavaScript Date value in an `INSERT` statement, the date is also inserted as `TIMESTAMP WITH
     LOCAL TIMEZONE` using OCIDateTime.
 
-### <a name="stmtcache"></a> 7.1.3 Statement Caching
+### <a name="stmtcache"></a> 7.1.4 Statement Caching
 
 Node-oracledb uses the
 [Oracle OCI statement cache](https://docs.oracle.com/database/121/LNOCI/oci09adv.htm#i471377)

@@ -2,17 +2,17 @@
 
 /******************************************************************************
  *
- * You may not use the identified files except in compliance with the Apache 
+ * You may not use the identified files except in compliance with the Apache
  * License, Version 2.0 (the "License.")
  *
- * You may obtain a copy of the License at 
+ * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0.
  *
- * Unless required by applicable law or agreed to in writing, software 
+ * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *
- * See the License for the specific language governing permissions and 
+ * See the License for the specific language governing permissions and
  * limitations under the License.
  *
  * NAME
@@ -50,16 +50,16 @@ Connection::Connection()
    DESCRIPTION
      Destructor for the Connection class.
  */
-Connection::~Connection() 
+Connection::~Connection()
 {}
 
 /*****************************************************************************/
 /*
    DESCRIPTION
      Initialize connection attributes after forming it.
-  
+
    PARAMETERS:
-     DPI Connection, Oracledb reference 
+     DPI Connection, Oracledb reference
 */
 void Connection::setConnection(dpi::Conn* dpiconn, Oracledb* oracledb)
 {
@@ -73,7 +73,7 @@ void Connection::setConnection(dpi::Conn* dpiconn, Oracledb* oracledb)
    DESCRIPTION
      Init function of the Connection class.
      Initiates and maps the functions and properties of Connection class.
-*/     
+*/
 void Connection::Init(Handle<Object> target)
 {
   NanScope();
@@ -91,19 +91,19 @@ void Connection::Init(Handle<Object> target)
   tpl->InstanceTemplate()->SetAccessor(
                                               NanNew<v8::String>("stmtCacheSize"),
                                               Connection::GetStmtCacheSize,
-                                              Connection::SetStmtCacheSize ); 
+                                              Connection::SetStmtCacheSize );
   tpl->InstanceTemplate()->SetAccessor(
                                               NanNew<v8::String>("clientId"),
                                               Connection::GetClientId,
-                                              Connection::SetClientId ); 
+                                              Connection::SetClientId );
   tpl->InstanceTemplate()->SetAccessor(
                                               NanNew<v8::String>("module"),
                                               Connection::GetModule,
-                                              Connection::SetModule ); 
+                                              Connection::SetModule );
   tpl->InstanceTemplate()->SetAccessor(
                                               NanNew<v8::String>("action"),
                                               Connection::GetAction,
-                                              Connection::SetAction ); 
+                                              Connection::SetAction );
 
   NanAssignPersistent( connectionTemplate_s, tpl);
   target->Set(NanNew<v8::String>("Connection"),tpl->GetFunction());
@@ -127,7 +127,7 @@ NAN_METHOD(Connection::New)
 /*****************************************************************************/
 /*
    DESCRIPTION
-     Abstraction for exception on accessing connection properties 
+     Abstraction for exception on accessing connection properties
 */
 void Connection::connectionPropertyException(Connection* njsConn, 
                                              NJSErrorType errType,
@@ -150,7 +150,7 @@ void Connection::connectionPropertyException(Connection* njsConn,
 NAN_PROPERTY_GETTER(Connection::GetStmtCacheSize)
 {
   NanScope();
-  Connection* njsConn = ObjectWrap::Unwrap<Connection>(args.Holder()); 
+  Connection* njsConn = ObjectWrap::Unwrap<Connection>(args.Holder());
   if(!njsConn->isValid_)
   {
     string error = NJSMessages::getErrorMsg ( errInvalidConnection );
@@ -177,7 +177,7 @@ NAN_PROPERTY_GETTER(Connection::GetStmtCacheSize)
 */
 NAN_SETTER(Connection::SetStmtCacheSize)
 {
-  connectionPropertyException(ObjectWrap::Unwrap<Connection>(args.Holder()), errReadOnly, "stmtCacheSize"); 
+  connectionPropertyException(ObjectWrap::Unwrap<Connection>(args.Holder()), errReadOnly, "stmtCacheSize");
 }
 
 /*****************************************************************************/
@@ -187,7 +187,7 @@ NAN_SETTER(Connection::SetStmtCacheSize)
 */
 NAN_PROPERTY_GETTER(Connection::GetClientId)
 {
-  connectionPropertyException(ObjectWrap::Unwrap<Connection>(args.Holder()), errWriteOnly, "clientId"); 
+  connectionPropertyException(ObjectWrap::Unwrap<Connection>(args.Holder()), errWriteOnly, "clientId");
   NanReturnUndefined();
 }
 
@@ -221,7 +221,7 @@ NAN_SETTER(Connection::SetClientId)
 */
 NAN_PROPERTY_GETTER(Connection::GetModule)
 {
-  connectionPropertyException(ObjectWrap::Unwrap<Connection>(args.Holder()), errWriteOnly, "module"); 
+  connectionPropertyException(ObjectWrap::Unwrap<Connection>(args.Holder()), errWriteOnly, "module");
   NanReturnUndefined();
 }
 
@@ -255,7 +255,7 @@ NAN_SETTER(Connection::SetModule)
 */
 NAN_PROPERTY_GETTER(Connection::GetAction)
 {
-  connectionPropertyException(ObjectWrap::Unwrap<Connection>(args.Holder()), errWriteOnly, "action"); 
+  connectionPropertyException(ObjectWrap::Unwrap<Connection>(args.Holder()), errWriteOnly, "action");
   NanReturnUndefined();
 }
 
@@ -285,7 +285,7 @@ NAN_SETTER(Connection::SetAction)
 /*
    DESCRIPTION
      Execute method on Connection class.
-  
+
    PARAMETERS:
      Arguments - SQL Statement,
                  Binds Object/Array (Optional),
@@ -301,7 +301,7 @@ NAN_METHOD(Connection::Execute)
   NJS_GET_CALLBACK ( callback, args );
 
   eBaton *executeBaton = new eBaton;
-  NanAssignPersistent( executeBaton->cb, callback ); 
+  NanAssignPersistent( executeBaton->cb, callback );
   NJS_CHECK_NUMBER_OF_ARGS ( executeBaton->error, args, 2, 4, exitExecute );
   connection = ObjectWrap::Unwrap<Connection>(args.This());
 
@@ -318,7 +318,7 @@ NAN_METHOD(Connection::Execute)
   executeBaton->isAutoCommit = connection->oracledb_->getIsAutoCommit();
   executeBaton->dpienv       = connection->oracledb_->getDpiEnv();
   executeBaton->dpiconn      = connection->dpiconn_;
- 
+
   if(args.Length() > 2)
   {
     Connection::ProcessBinds(args, 1, executeBaton);
@@ -332,7 +332,7 @@ NAN_METHOD(Connection::Execute)
 
   exitExecute:
   executeBaton->req.data  = (void*) executeBaton;
-  uv_queue_work(uv_default_loop(), &executeBaton->req, 
+  uv_queue_work(uv_default_loop(), &executeBaton->req,
                Async_Execute, (uv_after_work_cb)Async_AfterExecute);
 
   NanReturnUndefined();
@@ -341,12 +341,12 @@ NAN_METHOD(Connection::Execute)
 /*****************************************************************************/
 /*
    DESCRIPTION
-     Processing of Binds 
+     Processing of Binds
 
    PARAMETERS:
      args - Arguments to execute call,
-     index- index of binds in args, 
-     executeBaton 
+     index- index of binds in args,
+     executeBaton
  */
 void Connection::ProcessBinds (_NAN_METHOD_ARGS, unsigned int index,
                                eBaton* executeBaton)
@@ -365,7 +365,7 @@ void Connection::ProcessBinds (_NAN_METHOD_ARGS, unsigned int index,
   else
     executeBaton->error = NJSMessages::getErrorMsg(errInvalidParameterType, index);
 }
- 
+
 /*****************************************************************************/
 /*
    DESCRIPTION
@@ -373,8 +373,8 @@ void Connection::ProcessBinds (_NAN_METHOD_ARGS, unsigned int index,
 
    PARAMETERS:
      args - Arguments to execute call,
-     index- index of options in args, 
-     executeBaton 
+     index- index of options in args,
+     executeBaton
  */
 void Connection::ProcessOptions (_NAN_METHOD_ARGS, unsigned int index,
                                  eBaton* executeBaton)
@@ -390,7 +390,7 @@ void Connection::ProcessOptions (_NAN_METHOD_ARGS, unsigned int index,
     NJS_GET_BOOL_FROM_JSON   ( executeBaton->isAutoCommit, executeBaton->error,
                                options, "isAutoCommit", 2, exitProcessOptions );
   }
-  else 
+  else
   {
     executeBaton->error = NJSMessages::getErrorMsg(errInvalidParameterType, index);
     goto exitProcessOptions;
@@ -402,11 +402,11 @@ void Connection::ProcessOptions (_NAN_METHOD_ARGS, unsigned int index,
 /*****************************************************************************/
 /*
    DESCRIPTION
-     Processing of Binds Object 
-  
+     Processing of Binds Object
+
    PARAMETERS:
-     Handle Object, eBaton struct 
-  
+     Handle Object, eBaton struct
+
    NOTES:
      Overloaded function
 */
@@ -436,20 +436,20 @@ void Connection::GetBinds (Handle<Object> bindobj, eBaton* executeBaton)
 /*
    DESCRIPTION
      Processing of Binds Array
-   
+
    PARAMETERS:
-     Handle Array, eBaton struct 
-  
+     Handle Array, eBaton struct
+
    NOTES:
      Overloaded function
 */
 void Connection::GetBinds (Handle<Array> binds, eBaton* executeBaton)
 {
   NanScope();
- 
+
   for(unsigned int index = 0; index < binds->Length(); index++)
   {
-    Bind* bind = new Bind;  
+    Bind* bind = new Bind;
     Local<Value> val__ = binds->Get(index);
     GetBindUnit(val__, bind, executeBaton);
     if(!executeBaton->error.empty()) goto exitGetBinds;
@@ -461,10 +461,10 @@ void Connection::GetBinds (Handle<Array> binds, eBaton* executeBaton)
 /*****************************************************************************/
 /*
    DESCRIPTION
-     Processing each bind varible 
-  
+     Processing each bind varible
+
    PARAMETERS:
-     Handle value, eBaton struct 
+     Handle value, eBaton struct
 */
 void Connection::GetBindUnit (Handle<Value> val, Bind* bind,
                                        eBaton* executeBaton)
@@ -475,12 +475,12 @@ void Connection::GetBindUnit (Handle<Value> val, Bind* bind,
   if(val->IsObject() && !val->IsDate())
   {
     Local<Object> bind_unit = val->ToObject();
-    NJS_GET_UINT_FROM_JSON   ( dir, executeBaton->error, 
+    NJS_GET_UINT_FROM_JSON   ( dir, executeBaton->error,
                                bind_unit, "dir", 1, exitGetBindUnit );
-    NJS_GET_UINT_FROM_JSON   ( bind->type, executeBaton->error, 
+    NJS_GET_UINT_FROM_JSON   ( bind->type, executeBaton->error,
                                bind_unit, "type", 1, exitGetBindUnit );
     bind->maxSize = NJS_MAX_OUT_BIND_SIZE;
-    NJS_GET_UINT_FROM_JSON   ( bind->maxSize, executeBaton->error, 
+    NJS_GET_UINT_FROM_JSON   ( bind->maxSize, executeBaton->error,
                                bind_unit, "maxSize", 1, exitGetBindUnit );
     if(!bind->maxSize && dir != BIND_IN)
     {
@@ -510,7 +510,7 @@ void Connection::GetBindUnit (Handle<Value> val, Bind* bind,
         if(!executeBaton->error.empty()) goto exitGetBindUnit;
         break;
       default         :
-        executeBaton->error = NJSMessages::getErrorMsg (errInvalidBindDirection); 
+        executeBaton->error = NJSMessages::getErrorMsg (errInvalidBindDirection);
         goto exitGetBindUnit;
         break;
     }
@@ -529,10 +529,10 @@ void Connection::GetBindUnit (Handle<Value> val, Bind* bind,
 /*
    DESCRIPTION
      Processing out binds
-  
+
    PARAMETERS:
      dataType - datatype of the bind
-     bind struct, eBaton struct 
+     bind struct, eBaton struct
 */
 void Connection::GetOutBindParams (unsigned short dataType, Bind* bind,
                                    eBaton *executeBaton)
@@ -547,7 +547,7 @@ void Connection::GetOutBindParams (unsigned short dataType, Bind* bind,
     case DATA_NUM :
       bind->type = dpi::DpiDouble;
       bind->maxSize = sizeof(double);
-      bind->value = (double*)malloc(bind->maxSize); 
+      bind->value = (double*)malloc(bind->maxSize);
       break;
     case DATA_DATE :
       bind->extvalue = (long double *) malloc ( sizeof ( long double ) );
@@ -564,10 +564,10 @@ void Connection::GetOutBindParams (unsigned short dataType, Bind* bind,
 /*****************************************************************************/
 /*
    DESCRIPTION
-     Processing in binds 
-  
+     Processing in binds
+
    PARAMETERS:
-     Handle value, bind struct, eBaton struct 
+     Handle value, bind struct, eBaton struct
 */
 void Connection::GetInBindParams (Handle<Value> v8val, Bind* bind,
                                            eBaton* executeBaton, BindType type)
@@ -577,7 +577,7 @@ void Connection::GetInBindParams (Handle<Value> v8val, Bind* bind,
   {
     bind->value = NULL;
     bind->ind   = -1;
-    bind->type        = dpi::DpiVarChar; 
+    bind->type        = dpi::DpiVarChar;
   }
   else if(v8val->IsString())
   {
@@ -589,10 +589,10 @@ void Connection::GetInBindParams (Handle<Value> v8val, Bind* bind,
     }
 
     v8::String::Utf8Value str(v8val->ToString());
-  
+
     bind->type = dpi::DpiVarChar;
     if(type == BIND_INOUT)
-    {  
+    {
       bind->len = str.length();
     }
     else // IN
@@ -602,11 +602,11 @@ void Connection::GetInBindParams (Handle<Value> v8val, Bind* bind,
     DPI_SZ_TYPE size = (bind->maxSize >= bind->len ) ?
                         bind->maxSize : bind->len;
     if(size)
-    {    
+    {
       bind->value = (char*)malloc(size);
       if(str.length())
         memcpy(bind->value, *str, str.length());
-    }    
+    }
   }
   else if(v8val->IsInt32())
   {
@@ -618,7 +618,7 @@ void Connection::GetInBindParams (Handle<Value> v8val, Bind* bind,
     }
     bind->type = dpi::DpiInteger;
     bind->maxSize = bind->len = sizeof(int);
-    bind->value = (int*)malloc(bind->len); 
+    bind->value = (int*)malloc(bind->len);
     *(int*)(bind->value) = v8val->ToInt32()->Value();
   }
   else if(v8val->IsUint32())
@@ -631,7 +631,7 @@ void Connection::GetInBindParams (Handle<Value> v8val, Bind* bind,
     }
     bind->type = dpi::DpiUnsignedInteger;
     bind->maxSize = bind->len = sizeof(unsigned int);
-    bind->value = (unsigned int*)malloc(bind->len); 
+    bind->value = (unsigned int*)malloc(bind->len);
     *(unsigned int*)(bind->value) = v8val->ToUint32()->Value();
   }
   else if(v8val->IsNumber())
@@ -643,7 +643,7 @@ void Connection::GetInBindParams (Handle<Value> v8val, Bind* bind,
     }
     bind->type = dpi::DpiDouble;
     bind->maxSize = bind->len = sizeof(double);
-    bind->value = (double*)malloc(bind->len); 
+    bind->value = (double*)malloc(bind->len);
     *(double*)(bind->value) = v8val->NumberValue();
   }
   else if(v8val->IsDate ())
@@ -677,9 +677,9 @@ void Connection::GetInBindParams (Handle<Value> v8val, Bind* bind,
 /*
    DESCRIPTION
      Worker function of Execute  method
-  
+
    PARAMETERS:
-     UV queue work block 
+     UV queue work block
 
    NOTES:
      DPI call execution
@@ -688,10 +688,10 @@ void Connection::Async_Execute (uv_work_t *req)
 {
   eBaton *executeBaton = (eBaton*)req->data;
   if(!(executeBaton->error).empty()) goto exitAsyncExecute;
-  
-  try 
-  { 
-    Connection::PrepareAndBind(executeBaton); 
+
+  try
+  {
+    Connection::PrepareAndBind(executeBaton);
     executeBaton->st = executeBaton->dpistmt->stmtType();
     if (executeBaton->st == DpiStmtSelect)
     {
@@ -724,7 +724,7 @@ void Connection::Async_Execute (uv_work_t *req)
     if ( executeBaton->dpistmt )
     {
       executeBaton->dpistmt->release ();
-    }   
+    }
   }
   catch (dpi::Exception& e)
   {
@@ -750,14 +750,14 @@ void Connection::PrepareAndBind (eBaton* executeBaton)
       if(!executeBaton->binds[0]->key.empty())
       {
         for(unsigned int index = 0 ;index < executeBaton->binds.size();
-            index++) 
+            index++)
         {
           // Convert v8::Date to Oracle DB Type
           if ( executeBaton->binds[index]->type == DpiTimestampLTZ )
           {
             Connection::UpdateDateValue ( executeBaton ) ;
           }
-          // Bind by name 
+          // Bind by name
           executeBaton->dpistmt->bind((const unsigned char*)executeBaton->binds[index]->key.c_str(),
                              (int) executeBaton->binds[index]->key.length(),
                              executeBaton->binds[index]->type,
@@ -769,13 +769,13 @@ void Connection::PrepareAndBind (eBaton* executeBaton)
       }
       else
       {
-        for(unsigned int index = 0 ;index < executeBaton->binds.size(); index++) 
+        for(unsigned int index = 0 ;index < executeBaton->binds.size(); index++)
         {
           if ( executeBaton->binds[index]->type == DpiTimestampLTZ )
           {
             Connection::UpdateDateValue ( executeBaton ) ;
           }
-          // Bind by position 
+          // Bind by position
           executeBaton->dpistmt->bind(index+1,executeBaton->binds[index]->type,
                              executeBaton->binds[index]->value,
                              executeBaton->binds[index]->maxSize,
@@ -789,7 +789,7 @@ void Connection::PrepareAndBind (eBaton* executeBaton)
 /*****************************************************************************/
 /*
    DESCRIPTION
-     Allocate defines buffer for query output. 
+     Allocate defines buffer for query output.
      Call DPI define and fetch.
 
    PARAMETERS:
@@ -800,7 +800,7 @@ void Connection::GetDefines (eBaton* executeBaton)
   unsigned int     numCols   = executeBaton->dpistmt->numCols();
   Define *defines            = new Define[numCols];
   const dpi::MetaData* meta  = executeBaton->dpistmt->getMetaData();
-  executeBaton->columnNames  = new std::string[numCols];  
+  executeBaton->columnNames  = new std::string[numCols];
 
   for (unsigned int i = 0; i < numCols; i++)
   {
@@ -814,19 +814,19 @@ void Connection::GetDefines (eBaton* executeBaton)
       case dpi::DpiBinaryFloat :
       case dpi::DpiBinaryDouble :
         defines[i].fetchType = dpi::DpiDouble;
-        defines[i].maxSize   = sizeof(double); 
+        defines[i].maxSize   = sizeof(double);
         defines[i].buf = (double *)malloc(defines[i].maxSize*executeBaton->maxRows);
         break;
       case dpi::DpiVarChar :
       case dpi::DpiFixedChar :
         defines[i].fetchType = DpiVarChar;
-        defines[i].maxSize   = meta[i].dbSize; 
+        defines[i].maxSize   = meta[i].dbSize;
         defines[i].buf = (char *)malloc(defines[i].maxSize*executeBaton->maxRows);
         break;
       case dpi::DpiDate :
       case dpi::DpiTimestamp:
       case dpi::DpiTimestampLTZ:
-        defines[i].dttmarr   = executeBaton->dpienv->getDateTimeArray ( 
+        defines[i].dttmarr   = executeBaton->dpienv->getDateTimeArray (
                                      executeBaton->dpistmt->getError () );
         defines[i].fetchType = DpiTimestampLTZ;
         defines[i].maxSize   = meta[i].dbSize;
@@ -834,7 +834,7 @@ void Connection::GetDefines (eBaton* executeBaton)
         break;
       default :
         executeBaton->error = NJSMessages::getErrorMsg(errUnsupportedDatType);
-        return; 
+        return;
         break;
     }
     defines[i].ind = (short*)malloc (sizeof(short)*(executeBaton->maxRows));
@@ -849,15 +849,15 @@ void Connection::GetDefines (eBaton* executeBaton)
   executeBaton->defines = defines;
   executeBaton->numCols = numCols;
   executeBaton->rowsFetched = executeBaton->dpistmt->rowsFetched();
- 
+
   /* Special processing for datetime, as it is obtained as descriptors */
   for (unsigned int col = 0; col < numCols; col ++ )
   {
     if ( defines[col].dttmarr )
     {
       long double *dblArr = NULL;
-      
-      defines[col].buf = 
+
+      defines[col].buf =
       dblArr = (long double *)malloc ( sizeof ( long double ) *
                                                 executeBaton->rowsFetched );
 
@@ -865,9 +865,9 @@ void Connection::GetDefines (eBaton* executeBaton)
       {
         dblArr[row] = defines[col].dttmarr->getDateTime (row) * NJS_DAY2MS;
       }
-      defines[col].buf = (void *) dblArr;      
+      defines[col].buf = (void *) dblArr;
       defines[col].dttmarr->release ();
-      defines[col].extbuf = NULL; 
+      defines[col].extbuf = NULL;
     }
   }
 
@@ -877,21 +877,21 @@ void Connection::GetDefines (eBaton* executeBaton)
 /*
    DESCRIPTION
      Callback function of Execute method
-  
+
    PARAMETERS:
-     UV queue work block 
-  
+     UV queue work block
+
    NOTES:
-     Handle for result is formed and handed over to JS   
+     Handle for result is formed and handed over to JS
 */
 void Connection::Async_AfterExecute(uv_work_t *req)
 {
   NanScope();
-  
+
   eBaton *executeBaton = (eBaton*)req->data;
   v8::TryCatch tc;
   Handle<Value> argv[2];
-  if(!(executeBaton->error).empty()) 
+  if(!(executeBaton->error).empty())
   {
     argv[0] = v8::Exception::Error(NanNew<v8::String>((executeBaton->error).c_str()));
     argv[1] = NanUndefined();
@@ -905,7 +905,7 @@ void Connection::Async_AfterExecute(uv_work_t *req)
     {
       case DpiStmtSelect :
         rowArray = Connection::GetRows(executeBaton);
-        if(!(executeBaton->error).empty()) 
+        if(!(executeBaton->error).empty())
         {
           argv[0] = v8::Exception::Error(NanNew<v8::String>((executeBaton->error).c_str()));
           argv[1] = NanUndefined();
@@ -913,28 +913,33 @@ void Connection::Async_AfterExecute(uv_work_t *req)
         }
         result->Set(NanNew<v8::String>("rows"), rowArray);//, v8::ReadOnly); 
         result->Set(NanNew<v8::String>("outBinds"),NanUndefined());
-        result->Set(NanNew<v8::String>("rowsAffected"), NanUndefined()); 
+        result->Set(NanNew<v8::String>("rowsAffected"), NanUndefined());
+        result->Set(NanNew<v8::String>("metaData"), Connection::GetMetaData(
+                                                    executeBaton->columnNames,
+                                                    executeBaton->numCols));
         break;
       case DpiStmtBegin :
       case DpiStmtDeclare :
       case DpiStmtCall :
         result->Set(NanNew<v8::String>("rowsAffected"), NanUndefined());
         result->Set(NanNew<v8::String>("outBinds"),Connection::GetOutBinds(executeBaton));//, v8::ReadOnly);
-        result->Set(NanNew<v8::String>("rows"), NanUndefined()); 
+        result->Set(NanNew<v8::String>("rows"), NanUndefined());
+        result->Set(NanNew<v8::String>("metaData"), NanUndefined());
         break;
       default :
         result->Set(NanNew<v8::String>("rowsAffected"),
                     NanNew<v8::Integer>((unsigned int) executeBaton->rowsAffected));//, v8::ReadOnly);
         result->Set(NanNew<v8::String>("outBinds"),NanUndefined());
-        result->Set(NanNew<v8::String>("rows"), NanUndefined()); 
+        result->Set(NanNew<v8::String>("rows"), NanUndefined());
+        result->Set(NanNew<v8::String>("metaData"), NanUndefined());
         break;
     }
-    argv[1] = result; 
+    argv[1] = result;
   }
   exitAsyncAfterExecute:
   Local<Function> callback = NanNew(executeBaton->cb);
   delete executeBaton;
-  NanMakeCallback( NanGetCurrentContext()->Global(), callback, 2, argv ); 
+  NanMakeCallback( NanGetCurrentContext()->Global(), callback, 2, argv );
   if(tc.HasCaught())
   {
     node::FatalException(tc);
@@ -944,11 +949,39 @@ void Connection::Async_AfterExecute(uv_work_t *req)
 /*****************************************************************************/
 /*
    DESCRIPTION
-     Method to populate Rows Array
-  
+     Method to populate Metadata array
+
    PARAMETERS:
-     eBaton struct 
-  
+     columnNames - Column Names
+     numCols     - number of columns
+
+   RETURNS:
+     MetaData Handle
+*/
+v8::Handle<v8::Value> Connection::GetMetaData (std::string* columnNames,
+                                       unsigned int numCols )
+{
+  NanEscapableScope();
+  Handle<Array> metaArray = NanNew<v8::Array>(numCols);
+  for(unsigned int i=0; i < numCols ; i++)
+  {
+    Local<Object> column = NanNew<v8::Object>();
+    column->Set(NanNew<v8::String>("name"),
+                NanNew<v8::String>(columnNames[i].c_str())
+                );
+    metaArray->Set(i, column);
+  }
+  return NanEscapeScope(metaArray);
+}
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Method to populate Rows Array
+
+   PARAMETERS:
+     eBaton struct
+
    RETURNS:
      Rows Handle
 */
@@ -983,7 +1016,7 @@ v8::Handle<v8::Value> Connection::GetRows (eBaton* executeBaton)
       for(unsigned int i =0 ; i < executeBaton->rowsFetched; i++)
       {
         Local<Object> row = NanNew<v8::Object>();
-  
+
         for(unsigned int j = 0; j < executeBaton->numCols; j++)
         {
           long double *dblArr = (long double * )executeBaton->defines[j].buf;
@@ -1008,14 +1041,14 @@ v8::Handle<v8::Value> Connection::GetRows (eBaton* executeBaton)
       break;
   }
   exitGetRows:
-  return NanEscapeScope(rowsArray); 
+  return NanEscapeScope(rowsArray);
 }
 
 /*****************************************************************************/
 /*
    DESCRIPTION
-     Method to create handle from C++ value 
-  
+     Method to create handle from C++ value
+
    PARAMETERS:
      ind  - to validate the data,
      type - data type of the value,
@@ -1063,34 +1096,34 @@ v8::Handle<v8::Value> Connection::GetValue ( short ind, unsigned short type, voi
 /*****************************************************************************/
 /*
    DESCRIPTION
-     Method to populate outbinds object/array 
-  
+     Method to populate outbinds object/array
+
    PARAMETERS:
-     eBaton struct 
-  
+     eBaton struct
+
    RETURNS:
-     Outbinds object/array 
+     Outbinds object/array
 */
 v8::Handle<v8::Value> Connection::GetOutBinds (eBaton* executeBaton)
 {
-  NanScope();
+  NanEscapableScope();
   if(!executeBaton->binds.empty())
   {
-    if( executeBaton->binds[0]->key.empty() ) 
+    if( executeBaton->binds[0]->key.empty() )
     {
-      // Binds as JS array 
+      // Binds as JS array
       unsigned int outCount = 0;
       for(unsigned int index = 0; index < executeBaton->binds.size(); index++)
       {
         if(executeBaton->binds[index]->isOut)
           outCount++;
       }
-      return GetOutBindArray( executeBaton->binds, outCount );
+      return NanEscapeScope(GetOutBindArray( executeBaton->binds, outCount ));
     }
     else
     {
       // Binds as JS object 
-      return GetOutBindObject( executeBaton->binds );
+      return NanEscapeScope(GetOutBindObject( executeBaton->binds ));
     }
   }
   return NanUndefined();
@@ -1100,12 +1133,12 @@ v8::Handle<v8::Value> Connection::GetOutBinds (eBaton* executeBaton)
 /*
    DESCRIPTION
      Method to populate outbinds array
-   
+
    PARAMETERS:
-     Binds , out binds count 
-  
+     Binds , out binds count
+
    RETURNS:
-     Outbinds array 
+     Outbinds array
 */
 v8::Handle<v8::Value> Connection::GetOutBindArray ( std::vector<Bind*> binds,
                                             unsigned int outCount )
@@ -1114,18 +1147,18 @@ v8::Handle<v8::Value> Connection::GetOutBindArray ( std::vector<Bind*> binds,
 
   Local<Array> arrayBinds = NanNew<v8::Array>( outCount );
 
-  unsigned int it = 0; 
+  unsigned int it = 0;
   for(unsigned int index = 0; index < binds.size(); index++)
   {
     if(binds[index]->isOut)
-    {    
-      arrayBinds->Set( it, Connection::GetValue( 
+    {
+      arrayBinds->Set( it, Connection::GetValue(
                                 binds[index]->ind,
                                 binds[index]->type,
                             ( binds[index]->type == DpiTimestampLTZ ) ?
                                 binds[index]->extvalue : binds[index]->value,
-                                binds[index]->len ) ); 
-    }    
+                                binds[index]->len ) );
+    }
     it++;
   }
   return NanEscapeScope(arrayBinds);
@@ -1135,12 +1168,12 @@ v8::Handle<v8::Value> Connection::GetOutBindArray ( std::vector<Bind*> binds,
 /*
    DESCRIPTION
      Method to populate outbinds object
-   
+
    PARAMETERS:
-     Binds  
-  
+     Binds
+
    RETURNS:
-     Outbinds object 
+     Outbinds object
 */
 v8::Handle<v8::Value> Connection::GetOutBindObject ( std::vector<Bind*> binds )
 {
@@ -1153,7 +1186,7 @@ v8::Handle<v8::Value> Connection::GetOutBindObject ( std::vector<Bind*> binds )
       binds[index]->key.erase(binds[index]->key.begin());
       objectBinds->Set( NanNew<v8::String> ( binds[index]->key.c_str(),
                                       (int) binds[index]->key.length() ),
-                        Connection::GetValue( 
+                        Connection::GetValue(
                              binds[index]->ind,
                              binds[index]->type,
                          (binds[index]->type == DpiTimestampLTZ ) ?
@@ -1168,7 +1201,7 @@ v8::Handle<v8::Value> Connection::GetOutBindObject ( std::vector<Bind*> binds )
 /*
    DESCRIPTION
      Release method on Connection class.
-  
+
    PARAMETERS:
      Arguments - Callback
 */
@@ -1180,7 +1213,7 @@ NAN_METHOD(Connection::Release)
   NJS_GET_CALLBACK ( callback, args );
 
   eBaton* releaseBaton = new eBaton;
-  NanAssignPersistent( releaseBaton->cb, callback ); 
+  NanAssignPersistent( releaseBaton->cb, callback );
   NJS_CHECK_NUMBER_OF_ARGS ( releaseBaton->error, args, 1, 1, exitRelease );
   connection = ObjectWrap::Unwrap<Connection>(args.This());
 
@@ -1190,11 +1223,11 @@ NAN_METHOD(Connection::Release)
     goto exitRelease;
   }
   connection->isValid_    = false;
-  releaseBaton->dpiconn   = connection->dpiconn_;  
-  exitRelease: 
+  releaseBaton->dpiconn   = connection->dpiconn_;
+  exitRelease:
   releaseBaton->req.data  = (void*) releaseBaton;
 
-  uv_queue_work(uv_default_loop(), &releaseBaton->req, 
+  uv_queue_work(uv_default_loop(), &releaseBaton->req,
                Async_Release, (uv_after_work_cb)Async_AfterRelease);
   NanReturnUndefined();
 }
@@ -1203,9 +1236,9 @@ NAN_METHOD(Connection::Release)
 /*
    DESCRIPTION
      Worker function of Release method
-  
+
    PARAMETERS:
-     UV queue work block 
+     UV queue work block
 
    NOTES:
      DPI call execution
@@ -1231,9 +1264,9 @@ void Connection::Async_Release(uv_work_t *req)
 /*
    DESCRIPTION
      Callback function of Release method
-  
+
    PARAMETERS:
-     UV queue work block 
+     UV queue work block
 */
 void Connection::Async_AfterRelease(uv_work_t *req)
 {
@@ -1242,15 +1275,15 @@ void Connection::Async_AfterRelease(uv_work_t *req)
   v8::TryCatch tc;
 
   Handle<Value> argv[1];
- 
-  if(!(releaseBaton->error).empty()) 
+
+  if(!(releaseBaton->error).empty())
     argv[0] = v8::Exception::Error(NanNew<v8::String>((releaseBaton->error).c_str()));
   else
     argv[0] = NanUndefined();
   Local<Function> callback = NanNew(releaseBaton->cb);
   delete releaseBaton;
-  NanMakeCallback( NanGetCurrentContext()->Global(), 
-                      callback, 1, argv ); 
+  NanMakeCallback( NanGetCurrentContext()->Global(),
+                      callback, 1, argv );
   if(tc.HasCaught())
   {
     node::FatalException(tc);
@@ -1261,7 +1294,7 @@ void Connection::Async_AfterRelease(uv_work_t *req)
 /*
    DESCRIPTION
      Commit method on Connection class.
-  
+
    PARAMETERS:
      Arguments - Callback
 */
@@ -1273,7 +1306,7 @@ NAN_METHOD(Connection::Commit)
   NJS_GET_CALLBACK ( callback, args );
 
   eBaton* commitBaton = new eBaton;
-  NanAssignPersistent( commitBaton->cb, callback ); 
+  NanAssignPersistent( commitBaton->cb, callback );
   NJS_CHECK_NUMBER_OF_ARGS ( commitBaton->error, args, 1, 1, exitCommit );
   connection = ObjectWrap::Unwrap<Connection>(args.This());
 
@@ -1286,7 +1319,7 @@ NAN_METHOD(Connection::Commit)
 exitCommit:
   commitBaton->req.data  = (void*) commitBaton;
 
-  uv_queue_work(uv_default_loop(), &commitBaton->req, 
+  uv_queue_work(uv_default_loop(), &commitBaton->req,
                Async_Commit, (uv_after_work_cb)Async_AfterCommit);
 
   NanReturnUndefined();
@@ -1296,12 +1329,12 @@ exitCommit:
 /*
    DESCRIPTION
      Worker function of Commit method
-  
+
    PARAMETERS:
-     UV queue work block 
+     UV queue work block
 
    NOTES:
-     DPI call execution     
+     DPI call execution
 */
 void Connection::Async_Commit (uv_work_t *req)
 {
@@ -1310,7 +1343,7 @@ void Connection::Async_Commit (uv_work_t *req)
   if(!(commitBaton->error).empty()) goto exitAsyncCommit;
 
   try
-  {  
+  {
     commitBaton->dpiconn->commit();
   }
   catch (dpi::Exception& e)
@@ -1325,9 +1358,9 @@ void Connection::Async_Commit (uv_work_t *req)
 /*
    DESCRIPTION
      Callback function of Commit method
-  
+
    PARAMETERS:
-     UV queue work block 
+     UV queue work block
 */
 void Connection::Async_AfterCommit (uv_work_t *req)
 {
@@ -1336,14 +1369,14 @@ void Connection::Async_AfterCommit (uv_work_t *req)
 
   v8::TryCatch tc;
   Handle<Value> argv[1];
- 
+
   if(!(commitBaton->error).empty())
     argv[0] = v8::Exception::Error(NanNew<v8::String>((commitBaton->error).c_str()));
   else
     argv[0] = NanUndefined();
-   
-  NanMakeCallback( NanGetCurrentContext()->Global(), 
-                      NanNew(commitBaton->cb), 1, argv ); 
+
+  NanMakeCallback( NanGetCurrentContext()->Global(),
+                      NanNew(commitBaton->cb), 1, argv );
   if(tc.HasCaught())
   {
     node::FatalException(tc);
@@ -1355,7 +1388,7 @@ void Connection::Async_AfterCommit (uv_work_t *req)
 /*
    DESCRIPTION
     Rollback method on Connection class.
-  
+
    PARAMETERS:
      Arguments - Callback
 */
@@ -1367,7 +1400,7 @@ NAN_METHOD(Connection::Rollback)
   NJS_GET_CALLBACK ( callback, args );
 
   eBaton* rollbackBaton = new eBaton;
-  NanAssignPersistent( rollbackBaton->cb, callback ); 
+  NanAssignPersistent( rollbackBaton->cb, callback );
   NJS_CHECK_NUMBER_OF_ARGS ( rollbackBaton->error, args, 1, 1, exitRollback );
   connection = ObjectWrap::Unwrap<Connection>(args.This());
 
@@ -1377,9 +1410,9 @@ NAN_METHOD(Connection::Rollback)
     goto exitRollback;
   }
   rollbackBaton->dpiconn   = connection->dpiconn_;
-  exitRollback: 
+  exitRollback:
   rollbackBaton->req.data  = (void*) rollbackBaton;
-  uv_queue_work(uv_default_loop(), &rollbackBaton->req, 
+  uv_queue_work(uv_default_loop(), &rollbackBaton->req,
                 Async_Rollback, (uv_after_work_cb)Async_AfterRollback);
   NanReturnUndefined();
 }
@@ -1388,21 +1421,21 @@ NAN_METHOD(Connection::Rollback)
 /*
    DESCRIPTION
      Worker function of Rollback method
-  
+
    PARAMETERS:
-     UV queue work block 
+     UV queue work block
 
    NOTES:
      DPI call execution
 */
 void Connection::Async_Rollback (uv_work_t *req)
 {
-   
+
   eBaton *rollbackBaton = (eBaton*)req->data;
   if(!(rollbackBaton->error).empty()) goto exitAsyncRollback;
-   
-  try 
-  {  
+
+  try
+  {
     rollbackBaton->dpiconn->rollback();
   }
   catch (dpi::Exception& e)
@@ -1417,9 +1450,9 @@ void Connection::Async_Rollback (uv_work_t *req)
 /*
    DESCRIPTION
      Callback function of Rollback method
-  
+
    PARAMETERS:
-     UV queue work block 
+     UV queue work block
 */
 void Connection::Async_AfterRollback(uv_work_t *req)
 {
@@ -1429,12 +1462,12 @@ void Connection::Async_AfterRollback(uv_work_t *req)
   v8::TryCatch tc;
   Handle<Value> argv[1];
 
-  if(!(rollbackBaton->error).empty()) 
+  if(!(rollbackBaton->error).empty())
     argv[0] = v8::Exception::Error(NanNew<v8::String>((rollbackBaton->error).c_str()));
   else
     argv[0] = NanUndefined();
 
-  NanMakeCallback( NanGetCurrentContext()->Global(), 
+  NanMakeCallback( NanGetCurrentContext()->Global(),
                       NanNew(rollbackBaton->cb), 1, argv );
   if(tc.HasCaught())
   {
@@ -1447,7 +1480,7 @@ void Connection::Async_AfterRollback(uv_work_t *req)
 /*
    DESCRIPTION
      Break method on Connection class.
-  
+
    PARAMETERS:
      Arguments - Callback
 */
@@ -1459,7 +1492,7 @@ NAN_METHOD(Connection::Break)
   NJS_GET_CALLBACK ( callback, args );
 
   eBaton* breakBaton = new eBaton;
-  NanAssignPersistent( breakBaton->cb, callback ); 
+  NanAssignPersistent( breakBaton->cb, callback );
   NJS_CHECK_NUMBER_OF_ARGS ( breakBaton->error, args, 1, 1, exitBreak );
   connection = ObjectWrap::Unwrap<Connection>(args.This());
 
@@ -1469,12 +1502,12 @@ NAN_METHOD(Connection::Break)
     goto exitBreak;
   }
   breakBaton->dpiconn   = connection->dpiconn_;
-  exitBreak: 
+  exitBreak:
   breakBaton->req.data  = (void*) breakBaton;
 
-  uv_queue_work(uv_default_loop(), &breakBaton->req, 
+  uv_queue_work(uv_default_loop(), &breakBaton->req,
                Async_Break, (uv_after_work_cb)Async_AfterBreak);
- 
+
   NanReturnUndefined();
 }
 
@@ -1482,25 +1515,25 @@ NAN_METHOD(Connection::Break)
 /*
    DESCRIPTION
      Worker function of Break method
-  
+
    PARAMETERS:
-     UV queue work block 
+     UV queue work block
 
    NOTES:
-     DPI call execution 
+     DPI call execution
 */
 void Connection::Async_Break(uv_work_t *req)
 {
-   
+
   eBaton *breakBaton = (eBaton*)req->data;
-  
+
   if(!(breakBaton->error).empty()) goto exitAsyncBreak;
 
-  try 
-  {  
+  try
+  {
     breakBaton->dpiconn->breakExecution();
   }
-  catch (dpi::Exception& e) 
+  catch (dpi::Exception& e)
   {
     breakBaton->error = std::string(e.what());
   }
@@ -1512,9 +1545,9 @@ void Connection::Async_Break(uv_work_t *req)
 /*
    DESCRIPTION
      Callback function of Break method
-  
+
    PARAMETERS:
-     UV queue work block 
+     UV queue work block
 */
 void Connection::Async_AfterBreak (uv_work_t *req)
 {
@@ -1528,7 +1561,7 @@ void Connection::Async_AfterBreak (uv_work_t *req)
     argv[0] = v8::Exception::Error(NanNew<v8::String>((breakBaton->error).c_str()));
   else
     argv[0] = NanUndefined();
-  NanMakeCallback( NanGetCurrentContext()->Global(), 
+  NanMakeCallback( NanGetCurrentContext()->Global(),
                       NanNew(breakBaton->cb), 1, argv );
   if(tc.HasCaught())
   {
@@ -1557,11 +1590,11 @@ void Connection::v8Date2OraDate ( Handle<Value> val, Bind *bind)
 {
   NanScope();
   Handle<Date> date = val.As<Date>();    // Expects to be of v8::Date type
-  
+
   // Get the number of seconds from 1970-1-1 0:0:0
   *(long double *)(bind->extvalue) = date->NumberValue ();
 }
- 
+
 /***************************************************************************/
 /* NAME
  *   Connection::UpdateDateValue
@@ -1574,7 +1607,7 @@ void Connection::v8Date2OraDate ( Handle<Value> val, Bind *bind)
  *
  * NOTE:
  *   When execution process starts, base date is not initialized yet,
- *   Once the stmt object is created and datetimeArray object created, 
+ *   Once the stmt object is created and datetimeArray object created,
  *   conversion can happen.  This funciton is used to convert
  *   Used for IN bind to provide the v8::Date value.
  *
@@ -1584,24 +1617,24 @@ void Connection::UpdateDateValue ( eBaton * ebaton )
   for (unsigned int b = 0; b < ebaton->binds.size(); b ++ )
   {
     Bind * bind = ebaton->binds[b];
- 
+
     if ( bind->type == dpi::DpiTimestampLTZ )
     {
-      bind->dttmarr = ebaton->dpienv->getDateTimeArray ( 
+      bind->dttmarr = ebaton->dpienv->getDateTimeArray (
                                           ebaton->dpistmt->getError () );
       bind->value = bind->dttmarr->init (1);
       if (!bind->isOut)
       {
-        bind->dttmarr->setDateTime( 0, 
+        bind->dttmarr->setDateTime( 0,
                                     ((*(long double *)bind->extvalue) /
                                      ( NJS_DAY2MS )));
       }
     }
   }
 }
- 
- 
- 
+
+
+
 
 /* end of file njsConnection.cpp */
 

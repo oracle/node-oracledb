@@ -2,21 +2,21 @@
 
 /******************************************************************************
  *
- * You may not use the identified files except in compliance with the Apache 
+ * You may not use the identified files except in compliance with the Apache
  * License, Version 2.0 (the "License.")
  *
- * You may obtain a copy of the License at 
+ * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0.
  *
- * Unless required by applicable law or agreed to in writing, software 
+ * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *
- * See the License for the specific language governing permissions and 
+ * See the License for the specific language governing permissions and
  * limitations under the License.
  *
  * NAME
- *   dpiUtils.cpp - ConnImpl class implementation 
+ *   dpiUtils.cpp - ConnImpl class implementation
  *
  * DESCRIPTION
  *
@@ -39,18 +39,16 @@
 #endif
 
 
-static void ociCallCommon(sword rc, void *handle, ub4 errType);
-
 /*****************************************************************************/
 /*
    DESCRIPTION
-     Wrapper for ociCall and ociCallEnv. 
-     Abstraction for the redundant common functionality. 
+     Wrapper for ociCall and ociCallEnv.
+     Abstraction for the redundant common functionality.
 
    PARAMETERS:
      rc      - OCI return code
      errh    - OCI error hanlde
-     errType - error type 
+     errType - error type
 
    RETURNS:
      nothing
@@ -58,24 +56,24 @@ static void ociCallCommon(sword rc, void *handle, ub4 errType);
    NOTES:
  */
 
-void ociCallCommon(sword rc, void *handle, ub4 errType)
+static void ociCallCommon(sword rc, void *handle, ub4 errType)
 {
-  if (!rc)                                                                    
-    return;                                                                   
-                                                                              
-  OraText ociErrorMsg[OCI_ERROR_MAXMSG_SIZE];                                 
-  sb4     ociErrorNo = 0;                                                    
-  memset(ociErrorMsg, 0, OCI_ERROR_MAXMSG_SIZE);                           
-                                                                              
-  rc = OCIErrorGet(handle, 1, NULL, &ociErrorNo, ociErrorMsg,                   
-                   OCI_ERROR_MAXMSG_SIZE-1, errType);                         
-  if (rc)                                                                     
-    throw ExceptionImpl(DpiErrUnkOciError);                                   
-  else                                                                        
-  {                                                                           
+  if (!rc)
+    return;
+
+  OraText ociErrorMsg[OCI_ERROR_MAXMSG_SIZE];
+  sb4     ociErrorNo = 0;
+  memset(ociErrorMsg, 0, OCI_ERROR_MAXMSG_SIZE);
+
+  rc = OCIErrorGet(handle, 1, NULL, &ociErrorNo, ociErrorMsg,
+                   OCI_ERROR_MAXMSG_SIZE-1, errType);
+  if (rc)
+    throw ExceptionImpl(DpiErrUnkOciError);
+  else
+  {
     ociErrorMsg[strlen((char*)ociErrorMsg)-1]=0; //strip off newline
-    throw ExceptionImpl("ORA", ociErrorNo, (const char *)ociErrorMsg);        
-  }                                                                          
+    throw ExceptionImpl("ORA", ociErrorNo, (const char *)ociErrorMsg);
+  }
 }
 
 /*---------------------------------------------------------------------------
@@ -121,7 +119,7 @@ void ociCall(sword rc, OCIError *errh)
      nothing
 
    NOTES:
-     
+
  */
 
 void ociCallEnv(sword rc, OCIEnv *envh)

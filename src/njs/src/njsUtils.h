@@ -2,24 +2,24 @@
 
 /******************************************************************************
  *
- * You may not use the identified files except in compliance with the Apache 
+ * You may not use the identified files except in compliance with the Apache
  * License, Version 2.0 (the "License.")
  *
- * You may obtain a copy of the License at 
+ * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0.
  *
- * Unless required by applicable law or agreed to in writing, software 
+ * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *
- * See the License for the specific language governing permissions and 
+ * See the License for the specific language governing permissions and
  * limitations under the License.
  *
  * NAME
  *   njsUtils.h
  *
  * DESCRIPTION
- *   Utilities 
+ *   Utilities
  *
  *****************************************************************************/
 
@@ -42,7 +42,7 @@ typedef enum
 }DataType;
 
 // User specified bind types.
-typedef enum 
+typedef enum
 {
   BIND_UNKNOWN = -1,
   BIND_IN     = 1,
@@ -58,8 +58,8 @@ typedef enum
   ROWS_OBJECT = 2
 }RowsType;
 
-// args 
-typedef enum 
+// args
+typedef enum
 {
   ARGS_ZERO = 0,
   ARGS_ONE  = 1,
@@ -70,7 +70,7 @@ typedef enum
 
 /*
  *  Get the callback from the last argument.
- *  If no args or last arg is not callback, throw exception 
+ *  If no args or last arg is not callback, throw exception
  */
 #define NJS_GET_CALLBACK( cb, args )                                          \
 {                                                                             \
@@ -85,18 +85,18 @@ typedef enum
   {                                                                           \
     cb = Local<Function>::Cast(args[args.Length()-1]);                        \
   }                                                                           \
-}                                                                           
+}
 
 /*
  * Set v8 exception using passed in char*.
- * Caller is expected to return from the function after calling this macro 
+ * Caller is expected to return from the function after calling this macro
  * for the exception to be thrown.
  */
 #define NJS_SET_EXCEPTION( str, len )                                         \
-  NanThrowError(str);        
+  NanThrowError(str);
 
 /*
- * If arguments are not in given range, set the error. 
+ * If arguments are not in given range, set the error.
  */
 #define NJS_CHECK_NUMBER_OF_ARGS( err, args, minargs, maxargs, exitCode )     \
 {                                                                             \
@@ -108,18 +108,18 @@ typedef enum
 }
 
 /*
- * Convert v8 String to std string 
+ * Convert v8 String to std string
  */
 #define NJSString( str, v8value )                                             \
 {                                                                             \
   v8::String::Utf8Value utfstr( v8value->ToString() );                        \
   str = std::string( *utfstr, utfstr.length() );                              \
-} 
+}
 
 /*
- * Get v8 string from provided argument. 
+ * Get v8 string from provided argument.
  * If it is not a v8 string, set the error for the given index &
- * val is nullified. 
+ * val is nullified.
  */
 #define NJS_GET_ARG_V8STRING( v8val, err, args, index, exitCode)              \
 {                                                                             \
@@ -136,9 +136,9 @@ typedef enum
 }
 
 /*
- * Get v8 object from provided argument. 
+ * Get v8 object from provided argument.
  * If it is not a v8 object, set the error for the given index &
- * val is nullified. 
+ * val is nullified.
  */
 #define NJS_GET_ARG_V8OBJECT( v8val, err, args, index, exitCode)              \
 {                                                                             \
@@ -155,10 +155,10 @@ typedef enum
 }
 
 /*
- * Get the std string value from JSON for the given key. 
- * index is the argument index in the caller. 
+ * Get the std string value from JSON for the given key.
+ * index is the argument index in the caller.
  * DO NOT SET ANY VALUE to val IF NULL OR UNDEFINED
- */ 
+ */
 #define NJS_GET_STRING_FROM_JSON( val, err, obj, key, index, exitCode )       \
 {                                                                             \
   Local<Value> v8value = obj->Get(NanNew<v8::String>(key));                          \
@@ -177,13 +177,13 @@ typedef enum
                                      key, index+1 );                          \
     goto exitCode;                                                            \
   }                                                                           \
-} 
+}
 
 /*
- * Get the uint value from JSON for the given key. 
- * index is the argument index in the caller. 
+ * Get the uint value from JSON for the given key.
+ * index is the argument index in the caller.
  * DO NOT SET ANY VALUE to val IF NULL OR UNDEFINED
- */ 
+ */
 #define NJS_GET_UINT_FROM_JSON( val, err, obj, key, index, exitCode )         \
 {                                                                             \
   Local<Value> v8value = obj->Get(NanNew<v8::String>(key));                          \
@@ -208,12 +208,12 @@ typedef enum
                                      key, index+1 );                          \
     goto exitCode;                                                            \
   }                                                                           \
-} 
+}
 
 /*
- * Get the boolean value from JSON for the given key. 
- * index is the argument index in the caller. 
- */ 
+ * Get the boolean value from JSON for the given key.
+ * index is the argument index in the caller.
+ */
 #define NJS_GET_BOOL_FROM_JSON( val, err, obj, key, index, exitCode )         \
 {                                                                             \
   Local<Value> v8value = obj->Get(NanNew<v8::String>(key));                          \
@@ -221,13 +221,13 @@ typedef enum
   {                                                                           \
     val = v8value->ToBoolean()->Value();                                      \
   }                                                                           \
-} 
+}
 
 /*
- * Convert v8value to std string for properties. 
+ * Convert v8value to std string for properties.
  * If it not a v8 string, throw exception.
- * prop is the name of the property 
- */ 
+ * prop is the name of the property
+ */
 #define NJS_SET_PROP_STR( val, v8value, prop )                                \
 {                                                                             \
   string msg;                                                                 \
@@ -244,10 +244,10 @@ typedef enum
 }
 
 /*
- * Convert v8value to unsigned int for properties. 
+ * Convert v8value to unsigned int for properties.
  * If it not a v8 uint, throw exception.
- * prop is the name of the property 
- */ 
+ * prop is the name of the property
+ */
 #define NJS_SET_PROP_UINT( val, v8value, prop )                               \
 {                                                                             \
   string msg;                                                                 \
