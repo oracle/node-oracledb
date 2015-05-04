@@ -323,13 +323,15 @@ queries from returning unexpectedly large numbers of rows.
 
 <a name="propdboutformat"></a>
 ```
-String outFormat
+Number outFormat
 ```
 
 The format of rows fetched by the `execute()` call. This can be either
-`ARRAY` or `OBJECT`. If specified as `ARRAY`, each row is fetched as an
-array of column values.  The default value is `ARRAY`, which is more
-efficient.
+of the [Oracledb constants](#oracledbconstants) `ARRAY` or `OBJECT`.
+The default value is `ARRAY` which is more efficient.
+
+If specified as `ARRAY`, each row is fetched as an array of column
+values.
 
 If specified as `OBJECT`, each row is fetched as a JavaScript object.
 The object has a property for each column name, with the property
@@ -1144,7 +1146,7 @@ Callback function parameter | Description
 ## <a name="connectionhandling"></a> 6. Connection Handling
 
 Connections can be created directly by *Oracledb*
-[getConnection()](#getconnectiondb):
+[`getConnection()`](#getconnectiondb):
 
 ```javascript
 var oracledb = require('oracledb');
@@ -1155,12 +1157,18 @@ oracledb.getConnection(
     password      : "welcome",
     connectString : "localhost/XE"
   },
-  . . .
-);
+  function(err, connection)
+  {
+    if (err) {
+      console.error(err.message);
+      return;
+    }
+    . . .
+  });
 ```
 
 Alternatively connections can be obtained from *Pool*
-[getConnection()](#getconnectionpool):
+[`getConnection()`](#getconnectionpool):
 
 
 ```javascript
@@ -1188,10 +1196,43 @@ recycled.  However, in situations where connections are used
 infrequently, direct connections may be more efficient than using a
 connection pool.
 
+Connections should be released with [`release()`](#release) when no
+longer needed:
+
+```javascript
+var oracledb = require('oracledb');
+
+oracledb.getConnection(
+  {
+    user          : "hr",
+    password      : "welcome",
+    connectString : "localhost/XE"
+  },
+  function(err, connection)
+  {
+    if (err) {
+      console.error(err.message);
+      return;
+    }
+
+    . . .
+
+    connection.release(
+      function(err)
+      {
+        console.error(err.message);
+        return;
+      });
+  });
+```
+
+This is particularly true with connection pools.  Pooled connections
+should also be released before calling [`terminate()`](#terminate).
+
 ### <a name="connectionstrings"></a> 6.1 Connection Strings
 
-The *Oracledb* [getConnection()](#getconnectiondb) and *Pool*
-[getConnection()](#getconnectionpool) `connectString` can be an
+The *Oracledb* [`getConnection()`](#getconnectiondb) and *Pool*
+[`getConnection()`](#getconnectionpool) `connectString` can be an
 Easy Connect string, or a Connect Name from a `tnsnames.ora` file, or
 the name of a local Oracle database instance.
 
