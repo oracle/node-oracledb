@@ -58,8 +58,8 @@ class Oracledb: public ObjectWrap
    // Oracledb class
    static void Init(Handle<Object> target);
 
-   dpi::Env* getDpiEnv () const { return dpienv_; }
-   bool     getIsAutoCommit () const  { return isAutoCommit_; }
+   dpi::Env*    getDpiEnv () const { return dpienv_; }
+   bool         getAutoCommit () const  { return autoCommit_; }
    unsigned int getOutFormat () const { return outFormat_; }
    unsigned int getMaxRows ()  const  { return maxRows_; }
    unsigned int getStmtCacheSize ()  const  { return stmtCacheSize_; }
@@ -98,7 +98,7 @@ private:
                                        const AccessorInfo& info);
    static Handle<Value> GetStmtCacheSize(Local<String> property,
                                          const AccessorInfo& info);
-   static Handle<Value> GetIsAutoCommit(Local<String> property,
+   static Handle<Value> GetAutoCommit(Local<String> property,
                                         const AccessorInfo& info);
    static Handle<Value> GetMaxRows(Local<String> property,
                                    const AccessorInfo& info);
@@ -108,7 +108,7 @@ private:
                                         const AccessorInfo& info);
    static Handle<Value> GetConnectionClass (Local<String> property,
                                             const AccessorInfo& info );
-   static Handle<Value> GetIsExternalAuth(Local<String> property,
+   static Handle<Value> GetExternalAuth(Local<String> property,
                                           const AccessorInfo& info);
 
    // Define Setter Accessors to Properties
@@ -122,7 +122,7 @@ private:
                               const AccessorInfo& info);
    static void SetStmtCacheSize(Local<String> property,Local<Value> value,
                                 const AccessorInfo& info);
-   static void SetIsAutoCommit(Local<String> property,Local<Value> value,
+   static void SetAutoCommit(Local<String> property,Local<Value> value,
                                const AccessorInfo& info);
    static void SetMaxRows(Local<String> property,Local<Value> value,
                           const AccessorInfo& info);
@@ -132,7 +132,7 @@ private:
                                const AccessorInfo& info);
    static void SetConnectionClass (Local<String> property, Local<Value> value,
                                    const AccessorInfo& info );
-   static void SetIsExternalAuth(Local<String> property,Local<Value> value,
+   static void SetExternalAuth(Local<String> property,Local<Value> value,
                                  const AccessorInfo& info);
 
 
@@ -141,7 +141,7 @@ private:
 
    dpi::Env* dpienv_;
    unsigned int outFormat_;
-   bool         isAutoCommit_;
+   bool         autoCommit_;
    unsigned int maxRows_;
 
    unsigned int stmtCacheSize_;
@@ -152,7 +152,7 @@ private:
    unsigned int poolTimeout_;
 
    std::string  connClass_;
-   bool         isExternalAuth_;
+   bool         externalAuth_;
 };
 
 /**
@@ -167,7 +167,7 @@ typedef struct connectionBaton
   std::string pswrd;
   std::string connStr;
   std::string connClass;
-  bool isExternalAuth;
+  bool externalAuth;
   std::string error;
 
   int poolMax;
@@ -186,7 +186,7 @@ typedef struct connectionBaton
   Oracledb *oracledb;
 
   connectionBaton() : user(""), pswrd(""), connStr(""), connClass(""),
-                      isExternalAuth(false), error(""),
+                      externalAuth(false), error(""),
                       poolMax(0), poolMin(0), poolIncrement(0),
                       poolTimeout(0), stmtCacheSize(0), maxRows(0),
                       outFormat(0), dpienv(NULL),

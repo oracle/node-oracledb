@@ -75,7 +75,7 @@ using namespace std;
      nothing
  */
 
-ConnImpl::ConnImpl(EnvImpl *env, OCIEnv *envh, bool isExternalAuth,
+ConnImpl::ConnImpl(EnvImpl *env, OCIEnv *envh, bool externalAuth,
                    unsigned int stmtCacheSize,
                    const string &user, const string &password,
                    const string &connString, const string &connClass)
@@ -84,7 +84,7 @@ try :  env_(env), pool_(NULL),
        envh_(envh), errh_(NULL), auth_(NULL), svch_(NULL), sessh_(NULL),
        hasTxn_(false)
 {
-  ub4 mode = isExternalAuth ? OCI_SESSGET_CREDEXT : OCI_DEFAULT;
+  ub4 mode = externalAuth ? OCI_SESSGET_CREDEXT : OCI_DEFAULT;
 
   ociCallEnv(OCIHandleAlloc((void *)envh_, (dvoid **)&errh_,
                             OCI_HTYPE_ERROR, 0, (dvoid **)0), envh_);
@@ -92,7 +92,7 @@ try :  env_(env), pool_(NULL),
   ociCallEnv(OCIHandleAlloc((void *)envh_, (dvoid **)&auth_,
                             OCI_HTYPE_AUTHINFO, 0, (dvoid **)0), envh_);
 
-  if (isExternalAuth)
+  if (externalAuth)
   {
     if (password.length() || user.length())
       throw ExceptionImpl(DpiErrExtAuth);
@@ -155,7 +155,7 @@ catch (...)
      This constructor to be used in session-pool scenarios.
  */
 
-ConnImpl::ConnImpl(PoolImpl *pool, OCIEnv *envh, bool isExternalAuth,
+ConnImpl::ConnImpl(PoolImpl *pool, OCIEnv *envh, bool externalAuth,
                    OraText *poolName, ub4 poolNameLen, const string& connClass
                    )
 
@@ -163,7 +163,7 @@ try :  env_(NULL), pool_(pool),
        envh_(envh), errh_(NULL), auth_(NULL),
        svch_(NULL), sessh_(NULL), hasTxn_(false)
 {
-  ub4 mode = isExternalAuth ? (OCI_SESSGET_CREDEXT | OCI_SESSGET_SPOOL) :
+  ub4 mode = externalAuth ? (OCI_SESSGET_CREDEXT | OCI_SESSGET_SPOOL) :
                               OCI_SESSGET_SPOOL;
   ociCallEnv(OCIHandleAlloc((void *)envh_, (dvoid **)&errh_,
                             OCI_HTYPE_ERROR, 0, (dvoid **)0), envh_);

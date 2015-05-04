@@ -78,7 +78,7 @@ function insertTestData(err) {
       ts: date,
       td: date
     },
-    {isAutoCommit : false},
+    {autoCommit : false},
     selectData
   );
 }

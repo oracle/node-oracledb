@@ -62,7 +62,7 @@ class PoolImpl : public SPool
            const string &user, const string &password,
            const string &connString,
            int poolMax, int poolMin, int poolIncrement, int poolTimeout,
-           bool isExternalAuth, int stmtCacheSize);
+           bool externalAuth, int stmtCacheSize);
 
   virtual ~PoolImpl();
 
@@ -85,7 +85,7 @@ class PoolImpl : public SPool
   void cleanup();
 
   EnvImpl     *env_;            // parent Env object
-  bool         isExternalAuth_; // doing external authentication
+  bool         externalAuth_;   // doing external authentication
   OCIEnv      *envh_;           // OCI enviornment handle
   OCIError    *errh_;           // OCI error handle
   OCISPool    *spoolh_;         // OCI session pool handle

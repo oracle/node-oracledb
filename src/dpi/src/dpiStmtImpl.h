@@ -80,7 +80,7 @@ public:
                      short *ind, DPI_BUFLEN_TYPE *bufLen,
                      void *data, cbtype cb);
 
-  virtual void execute ( int numIterations, bool isAutoCommit );
+  virtual void execute ( int numIterations, bool autoCommit );
 
   virtual void define (unsigned int pos, unsigned short type, void *buf,
                        DPI_SZ_TYPE bufSize, short *ind, DPI_BUFLEN_TYPE *bufLen);

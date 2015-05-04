@@ -87,15 +87,15 @@ PoolImpl::PoolImpl(EnvImpl *env, OCIEnv *envh,
                    const string &user, const string &password,
                    const string &connString, int poolMax,
                    int poolMin, int poolIncrement,
-                   int poolTimeout, bool isExternalAuth, int stmtCacheSize)
-  try : env_(env), isExternalAuth_(isExternalAuth), envh_(envh), errh_(NULL),
+                   int poolTimeout, bool externalAuth, int stmtCacheSize)
+  try : env_(env), externalAuth_(externalAuth), envh_(envh), errh_(NULL),
         spoolh_(NULL), poolName_(NULL)
 {
-  ub4 mode = isExternalAuth ? OCI_DEFAULT : OCI_SPC_HOMOGENEOUS;
+  ub4 mode = externalAuth ? OCI_DEFAULT : OCI_SPC_HOMOGENEOUS;
 
   unsigned char spoolMode = OCI_SPOOL_ATTRVAL_NOWAIT; // spoolMode is a ub1
 
-  if (isExternalAuth && (password.length() || user.length()))
+  if (externalAuth && (password.length() || user.length()))
       throw ExceptionImpl(DpiErrExtAuth);
 
   ociCallEnv(OCIHandleAlloc((void *)envh_, (dvoid **)&errh_,
@@ -297,7 +297,7 @@ unsigned int PoolImpl::connectionsInUse() const
 
 Conn * PoolImpl::getConnection ( const std::string& connClass)
 {
-  Conn *conn = new ConnImpl(this, envh_, isExternalAuth_,
+  Conn *conn = new ConnImpl(this, envh_, externalAuth_,
                             poolName_, poolNameLen_, connClass
                             );
   return conn;

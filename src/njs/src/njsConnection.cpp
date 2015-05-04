@@ -325,7 +325,7 @@ Handle<Value>  Connection::Execute(const Arguments& args)
 
   executeBaton->maxRows      = connection->oracledb_->getMaxRows();
   executeBaton->outFormat    = connection->oracledb_->getOutFormat();
-  executeBaton->isAutoCommit = connection->oracledb_->getIsAutoCommit();
+  executeBaton->autoCommit = connection->oracledb_->getAutoCommit();
   executeBaton->dpienv       = connection->oracledb_->getDpiEnv();
   executeBaton->dpiconn      = connection->dpiconn_;
 
@@ -397,8 +397,8 @@ void Connection::ProcessOptions (const Arguments& args, unsigned int index,
                                options, "maxRows", 2, exitProcessOptions );
     NJS_GET_UINT_FROM_JSON   ( executeBaton->outFormat, executeBaton->error,
                                options, "outFormat", 2, exitProcessOptions );
-    NJS_GET_BOOL_FROM_JSON   ( executeBaton->isAutoCommit, executeBaton->error,
-                               options, "isAutoCommit", 2, exitProcessOptions );
+    NJS_GET_BOOL_FROM_JSON   ( executeBaton->autoCommit, executeBaton->error,
+                               options, "autoCommit", 2, exitProcessOptions );
   }
   else
   {
@@ -714,12 +714,12 @@ void Connection::Async_Execute (uv_work_t *req)
 
     if (executeBaton->st == DpiStmtSelect)
     {
-      executeBaton->dpistmt->execute(0, executeBaton->isAutoCommit);
+      executeBaton->dpistmt->execute(0, executeBaton->autoCommit);
       Connection::GetDefines(executeBaton);
     }
     else
     {
-      executeBaton->dpistmt->execute(1, executeBaton->isAutoCommit);
+      executeBaton->dpistmt->execute(1, executeBaton->autoCommit);
       executeBaton->rowsAffected = executeBaton->dpistmt->rowsAffected();
 
       /* Check to see if the string buffer size is good in case of

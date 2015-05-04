@@ -56,7 +56,7 @@ oracledb.getConnection(
         connection1.execute(
           "INSERT INTO test VALUES (:id, :nm)",
           [1, 'Chris'],  // Bind values
-          { isAutoCommit: true},  // Override the default non-autocommit behavior
+          { autoCommit: true},  // Override the default non-autocommit behavior
           function(err, result)
           {
             if (err) { console.error(err.message); return; }
@@ -65,7 +65,7 @@ oracledb.getConnection(
             connection1.execute(
               "INSERT INTO test VALUES (:id, :nm)",
               [2, 'Alison'],  // Bind values
-              // { isAutoCommit: true},  // Since this isn't set, operations using a second connection won't see this row
+              // { autoCommit: true},  // Since this isn't set, operations using a second connection won't see this row
               function(err, result)
               {
                 if (err) { console.error(err.message); return; }
@@ -93,7 +93,7 @@ oracledb.getConnection(
                           return;
                         }
                         // This will only show 'Chris' because inserting 'Alison' is not commited by default.
-                        // Uncomment the isAutoCommit option above and you will see both rows
+                        // Uncomment the autoCommit option above and you will see both rows
                         console.log(result.rows);
 
                         connection1.execute(

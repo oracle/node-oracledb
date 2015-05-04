@@ -77,8 +77,8 @@ class Env
   virtual void poolTimeout(unsigned int poolTimeout) = 0;
   virtual unsigned int poolTimeout() const = 0;
 
-  virtual void isExternalAuth(bool isExternalAuth) = 0;
-  virtual bool isExternalAuth() const = 0;
+  virtual void externalAuth(bool externalAuth) = 0;
+  virtual bool externalAuth() const = 0;
 
                                  // methods
   virtual SPool * createPool(const string &user, const string &password,
@@ -87,13 +87,13 @@ class Env
                              int poolIncrement = -1,
                              int poolTimeout = -1,
                              int stmtCacheSize = -1,
-                             bool isExternalAuth = false) = 0;
+                             bool externalAuth = false) = 0;
 
   virtual Conn * getConnection(const string &user, const string &password,
                                const string &connString,
                                int stmtCacheSize,
                                const string &connClass = "",
-                               bool isExternalAuth = false) = 0;
+                               bool externalAuth = false) = 0;
 
                                 // DateTime array
   virtual DateTimeArray * getDateTimeArray( OCIError *errh ) const = 0;

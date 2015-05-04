@@ -89,7 +89,7 @@ typedef struct eBaton
   dpi::Conn*    dpiconn;
   DPI_SZ_TYPE   rowsAffected;
   unsigned int  maxRows;
-  bool          isAutoCommit;
+  bool          autoCommit;
   unsigned int  rowsFetched;
   unsigned int  outFormat;
   unsigned int  numCols;
@@ -103,7 +103,7 @@ typedef struct eBaton
   Persistent<Function> cb;
 
   eBaton() : sql(""), error(""), dpienv(NULL), dpiconn(NULL),
-             rowsAffected(0), maxRows(0), isAutoCommit(false),
+             rowsAffected(0), maxRows(0), autoCommit(false),
              rowsFetched(0), outFormat(0), numCols(0), dpistmt(NULL),
              st(DpiStmtUnknown), stmtIsReturning (false), numOutBinds(0),
              columnNames(NULL), defines(NULL)

@@ -293,15 +293,15 @@ void StmtImpl::bind (const unsigned char *name, int nameLen,
       Execute the SQL statement.
 
     PARAMETERS
-      isAutoCommit   - true/false - autocommit enabled or not
+      autoCommit     - true/false - autocommit enabled or not
       numIterations  - iterations to repeat
 
     RETURNS:
       -None-
 */
-void StmtImpl::execute (int numIterations,  bool isAutoCommit)
+void StmtImpl::execute (int numIterations,  bool autoCommit)
 {
-  ub4 mode = isAutoCommit ? OCI_COMMIT_ON_SUCCESS : OCI_DEFAULT;
+  ub4 mode = autoCommit ? OCI_COMMIT_ON_SUCCESS : OCI_DEFAULT;
 
   ociCall (OCIStmtExecute ( svch_, stmth_, errh_, (ub4)numIterations, (ub4)0,
                             (OCISnapshot *)NULL, (OCISnapshot *)NULL, mode),
