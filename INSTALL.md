@@ -27,6 +27,8 @@ limitations under the License.
 
 ## <a name="overview"></a> 1. Overview
 
+The Oracle Database Node.js driver node-oracledb powers high performance Node.js applications.
+
 The steps below create a Node.js installation for testing.  Adjust the
 steps for your environment.
 
@@ -86,6 +88,8 @@ extract the file, for example into `/opt`:
 cd /opt
 tar -zxf node-v0.10.38-linux-x64.tar.gz
 ```
+
+This node-oracledb release currently works only with Node.js 0.10.
 
 Set PATH to include Node.js:
 
@@ -158,6 +162,8 @@ cd /opt
 tar -zxf node-v0.10.38-linux-x64.tar.gz
 ```
 
+This node-oracledb release currently works only with Node.js 0.10.
+
 Set PATH to include Node.js:
 
 ```
@@ -181,7 +187,8 @@ cd instantclient
 ln -s libclntsh.so.12.1 libclntsh.so
 ```
 
-You will need `libaio` installed.
+You will need `libaio` installed.  On some platforms the package is
+called `libaio1`.
 
 To run applications, you will need to set the link path:
 
@@ -217,6 +224,9 @@ Install node-oracledb from the
 ```
 npm install oracledb
 ```
+
+If you are installing with `sudo`, you may need to use `sudo -E` to
+preserve the environment variable values.
 
 ### 3.4 Run an example program
 
@@ -263,6 +273,8 @@ cd /opt
 tar -zxf node-v0.10.38-linux-x64.tar.gz
 ```
 
+This node-oracledb release currently works only with Node.js 0.10.
+
 Set your PATH variable to include Node.js:
 
 ```
@@ -288,6 +300,9 @@ Install node-oracledb from the
 ```
 npm install oracledb
 ```
+
+If you are installing with `sudo`, you may need to use `sudo -E` to
+preserve the environment variable values.
 
 ### 4.3 Run an example program
 
@@ -332,6 +347,8 @@ Node.js 0.10 can be installed from various sources, such as via *brew*.
 ```
 brew install node010
 ```
+
+This node-oracledb release currently works only with Node.js 0.10.
 
 Set your PATH to include the *node* and *npm* binaries:
 
@@ -380,6 +397,9 @@ Install node-oracledb from the
 ```
 npm install oracledb
 ```
+
+If you are installing with `sudo`, you may need to use `sudo -E` to
+preserve the environment variable values.
 
 ### 5.5 Run an example program
 
@@ -433,11 +453,11 @@ Install the 64-bit Node.js 0.10 MSI (e.g. node-v0.10.38-x64.msi) from
 [nodejs.org](http://nodejs.org/download/).  Make sure the option to
 add the Node and npm directories to the path is selected.
 
-Node-oracledb 0.4 will not build with Node.js 0.12.
+This node-oracledb release currently works only with Node.js 0.10.
 
 ### 6.3 Install the free Oracle Instant Client ZIPs
 
-Skip this step if you already have Oracle Database or full Oracle client on your machine.
+Skip this step if you already have Oracle Database or the full Oracle client on your machine.
 
 Download the free 'Basic' and 'SDK' ZIP files from
 [Oracle Technology Network](http://www.oracle.com/technetwork/topics/winx64soft-089540.html).
@@ -559,6 +579,9 @@ node example.js
 This is useful if you will need to upgrade Oracle Instant Client RPMs
 to a new major or minor version (for example from 11.2 to 12.1)
 without re-installing node-oracledb.
+
+If you are installing with `sudo`, you may need to use `sudo -E` to
+preserve the environment variable values.
 
 ### Forcing RPATH
 
