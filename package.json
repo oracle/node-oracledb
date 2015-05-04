@@ -5,7 +5,7 @@
     "license" : "Apache 2.0",
     "homepage": "http://www.oracle.com/technetwork/database/database-technologies/node_js/index.html",
     "keywords" : [
-	"Oracle", "Database", "official", "oracledb", "nodejs", "db", "binding", "extension", "module", "driver", "library", "plugin", "client", "oci"
+	"oracledb", "dboracle", "Node.js", "SQL", "PL/SQL", "connection", "connectivity", "OCI", "client", "plugin", "library", "driver", "extension", "binding", "interface", "adapter", "module", "DB", "official", "Database", "Oracle"
     ],
     "repository" : {
 	"type" : "git",
