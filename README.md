@@ -92,13 +92,17 @@ See [INSTALL](INSTALL.md) for details.
 
 See [Documentation for the Oracle Database Node.js Driver](doc/api.md)
 
-## <a name="contrib"></a> 4. Contributing
+## <a name="changes"></a> 4. Changes
+
+See [CHANGELOG](CHANGELOG.md)
+
+## <a name="contrib"></a> 5. Contributing
 
 Node-oracledb is an open source project. See 
 [CONTRIBUTING](CONTRIBUTING.md)
 for details.
 
-## <a name="license"></a> 5. Licence
+## <a name="license"></a> 6. Licence
 
 Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved.
 
