@@ -42,8 +42,8 @@ using namespace v8;
 
 /*0.4.1.  Keep the version in sync with package.json */
 #define NJS_NODE_ORACLEDB_MAJOR       0
-#define NJS_NODE_ORACLEDB_MINOR       4
-#define NJS_NODE_ORACLEDB_PATCH       2
+#define NJS_NODE_ORACLEDB_MINOR       5
+#define NJS_NODE_ORACLEDB_PATCH       0
 
 /* Formula: 10000 x majorversion + 100 * minorversion + patchrelease number */
 #define NJS_NODE_ORACLEDB_VERSION   ( (NJS_NODE_ORACLEDB_MAJOR * 10000) + \
