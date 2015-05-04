@@ -41,3 +41,10 @@ SHOW ERRORS
 DROP TABLE j_purchaseorder;
 CREATE TABLE j_purchaseorder
     (po_document VARCHAR2(4000) CONSTRAINT ensure_json CHECK (po_document IS JSON));
+
+-- DML RETURNING
+DROP TABLE dmlrupdtab;
+CREATE TABLE dmlrupdtab (id NUMBER, name VARCHAR2(40));
+INSERT INTO dmlrupdtab VALUES (1001, 'Venkat');
+INSERT INTO dmlrupdtab VALUES (1002, 'Neeharika');
+COMMIT;

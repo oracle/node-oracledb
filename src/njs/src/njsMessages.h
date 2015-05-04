@@ -49,6 +49,7 @@ typedef enum
   errInvalidBindDirection,
   errReadOnly,
   errWriteOnly,
+  errInsufficientBufferForBinds,
 
   // New ones should be added here
 

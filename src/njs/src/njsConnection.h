@@ -33,6 +33,7 @@
 #include "njsUtils.h"
 #include "njsOracle.h"
 
+
 using namespace v8;
 using namespace node;
 using namespace dpi;
@@ -42,18 +43,18 @@ using namespace dpi;
 **/
 typedef struct Bind
 {
-  std::string       key;
-  void*             value;
-  void*             extvalue;
-  DPI_BUFLEN_TYPE       len;
-  DPI_SZ_TYPE           maxSize;
-  unsigned short    type;
-  short             ind;
-  bool              isOut;
-  dpi::DateTimeArray *dttmarr;
+  std::string         key;
+  void*               value;
+  void*               extvalue;
+  DPI_BUFLEN_TYPE     *len;
+  DPI_SZ_TYPE         maxSize;
+  unsigned short      type;
+  short               *ind;
+  bool                isOut;
+  dpi::DateTimeArray* dttmarr;
 
-  Bind () : key(""), value(NULL), extvalue (NULL), len(0), maxSize(0),
-            type(0), ind(0), isOut(false), dttmarr ( NULL )
+  Bind () : key(""), value(NULL), extvalue (NULL), len(NULL), maxSize(0),
+            type(0), ind(NULL), isOut(false), dttmarr ( NULL )
   {}
 }Bind;
 
@@ -94,7 +95,9 @@ typedef struct eBaton
   unsigned int  numCols;
   dpi::Stmt     *dpistmt;
   dpi::DpiStmtType     st;
+  bool                 stmtIsReturning;
   std::vector<Bind*>   binds;
+  unsigned int         numOutBinds;    // # of out binds used for DML return
   std::string          *columnNames;
   Define               *defines;
   Persistent<Function> cb;
@@ -102,7 +105,8 @@ typedef struct eBaton
   eBaton() : sql(""), error(""), dpienv(NULL), dpiconn(NULL),
              rowsAffected(0), maxRows(0), isAutoCommit(false),
              rowsFetched(0), outFormat(0), numCols(0), dpistmt(NULL),
-             st(DpiStmtUnknown), columnNames(NULL), defines(NULL)
+             st(DpiStmtUnknown), stmtIsReturning (false), numOutBinds(0),
+             columnNames(NULL), defines(NULL)
   {}
 
   ~eBaton ()
@@ -122,6 +126,14 @@ typedef struct eBaton
            if ( binds[index]->extvalue )
            {
              free ( binds[index]->value );
+           }
+           if ( binds[index]->ind )
+           {
+             free ( binds[index]->ind );
+           }
+           if ( binds[index]->len )
+           {
+             free ( binds[index]->len );
            }
          }
          delete binds[index];
@@ -226,15 +238,35 @@ private:
   static void GetOutBindParams (unsigned short dataType, Bind* bind,
                                 eBaton* executeBaton);
   static Handle<Value> GetOutBinds (eBaton* executeBaton);
-  static Handle<Value> GetOutBindArray ( std::vector<Bind*> binds, unsigned int outCount);
-  static Handle<Value> GetOutBindObject (std::vector<Bind*> binds);
+  static Handle<Value> GetOutBindArray ( std::vector<Bind*> &binds,
+                                         unsigned int outCount,
+                                         bool bDMLReturn = false,
+                                         unsigned long rowcount = 1);
+  static Handle<Value> GetOutBindObject (std::vector<Bind*> &binds,
+                                         bool bDMLReturn = false,
+                                         unsigned long rowcount = 1);
   static Handle<Value> GetRows (eBaton* executeBaton);
   static Handle<Value> GetMetaData (std::string* columnNames,
                                     unsigned int numCols);
+  static Handle<Value> GetArrayValue ( Bind *bind, unsigned long count );
+
   static Handle<Value> GetValue (short ind, unsigned short type, void* val,
-                                 DPI_BUFLEN_TYPE len);
+                                 DPI_BUFLEN_TYPE len,
+                                 DPI_SZ_TYPE maxSize = -1);
+
   static void UpdateDateValue ( eBaton *executeBaton );
   static void v8Date2OraDate ( v8::Handle<v8::Value>, Bind *bind);
+
+  // Callback/Utility function used to allocate buffer(s) for Bind Structs
+  static void cbDynBufferAllocate ( void *ctx, DPI_SZ_TYPE nRows );
+
+  // Callback used in DML-Return SQL statements to
+  // identify block of memeory for each row.
+  static int  cbDynBufferGet ( void *ctx, DPI_SZ_TYPE nRows,
+
+                               unsigned long iter, unsigned long index,
+                               dvoid **bufpp, void **alenp, void **indp,
+                               unsigned short **rcode, unsigned char *piecep );
 
   dpi::Conn* dpiconn_;
   bool isValid_;

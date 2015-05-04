@@ -131,6 +131,11 @@ typedef struct
 } MetaData;
 
 
+// Application (Driver) level callback function prototype
+typedef int (*cbtype) (void *ctx, DPI_SZ_TYPE nRows, unsigned long iter,
+                       unsigned long index, dvoid **bufpp, void **alenp,
+                       dvoid **indpp, unsigned short **rcodepp,
+                       unsigned char *piecep );
 
 class Stmt
 {
@@ -141,17 +146,23 @@ public:
                                 // properties
   virtual DpiStmtType stmtType() const = 0;
 
+  virtual bool        isDML() const = 0 ;
+
+  virtual bool        isReturning() = 0 ;
+
   virtual DPI_SZ_TYPE  rowsAffected() const = 0;
 
   virtual unsigned int numCols() = 0;
 
                                 // methods
   virtual void bind(unsigned int pos, unsigned short type, void  *buf,
-                    DPI_SZ_TYPE bufSize, short *ind, DPI_BUFLEN_TYPE *bufLen) = 0;
+                    DPI_SZ_TYPE bufSize, short *ind, DPI_BUFLEN_TYPE *bufLen,
+                    void *data, cbtype cb = NULL ) = 0;
 
   virtual void bind(const unsigned char *name, int nameLen,
                     unsigned short type,  void *buf, DPI_SZ_TYPE  bufSize,
-                    short *ind, DPI_BUFLEN_TYPE *bufLen) = 0;
+                    short *ind, DPI_BUFLEN_TYPE *bufLen,
+                    void *data, cbtype cb = NULL ) = 0;
 
   virtual void execute ( int numIterations, bool isAutoCommit = false) = 0;
 

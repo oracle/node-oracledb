@@ -39,11 +39,20 @@ using namespace dpi;
 
 class EnvImpl;
 class ConnImpl;
-
+class StmtImpl;
 
 /*---------------------------------------------------------------------------
                      PUBLIC TYPES
   ---------------------------------------------------------------------------*/
+typedef struct
+{
+  cbtype        callbackfn;   /* Application specific callback */
+  void*         data;         /* Data for application specific callback */
+  unsigned long nrows;        /* number of rows affected by this DML */
+  unsigned long iter;         /* iteration - used in Array Bind */
+  StmtImpl*     dpistmt;      /* DPI Statement Implementation */
+} DpiCallbackCtx;
+
 
 class StmtImpl : public Stmt
 {
@@ -63,10 +72,13 @@ public:
   virtual void release ();
 
   virtual void bind (unsigned int pos, unsigned short type, void *buf,
-                     DPI_SZ_TYPE bufSize, short *ind, DPI_BUFLEN_TYPE *bufLen ) ;
+                     DPI_SZ_TYPE bufSize, short *ind, DPI_BUFLEN_TYPE *bufLen,
+                     void *data, cbtype cb );
+
   virtual void bind (const unsigned char *name, int nameLen,
-                     unsigned short type, void *buf, DPI_SZ_TYPE bufSize, short *ind,
-                     DPI_BUFLEN_TYPE *bufLen);
+                     unsigned short type, void *buf, DPI_SZ_TYPE bufSize,
+                     short *ind, DPI_BUFLEN_TYPE *bufLen,
+                     void *data, cbtype cb);
 
   virtual void execute ( int numIterations, bool isAutoCommit );
 
@@ -79,12 +91,25 @@ public:
   virtual OCIError *     getError () { return errh_;  }
 
   // Is the SQL statement DML or not ?
-  virtual inline bool isDML ()
+  virtual inline bool isDML () const
   {
     return ( ( stmtType_ == DpiStmtInsert ) ||
              ( stmtType_ == DpiStmtUpdate ) ||
              ( stmtType_ == DpiStmtDelete ) );
   }
+
+  virtual bool isReturning ();
+
+
+  // OCI specific Callback to be used for dynamic binding (dummy for IN)
+  static sb4 inbindCallback ( dvoid *ctxp, OCIBind *bindp, ub4 iter, ub4 index,
+                              dvoid **bufpp, ub4 *alenpp, ub1 *piecep,
+                              dvoid **indpp );
+
+  // OCI specific callback to be used for dynamic binding
+  static sb4 outbindCallback (dvoid *ctxp, OCIBind *bindp, ub4 iter, ub4 index,
+                              dvoid **bufpp, ub4 **alenp, ub1 *piecep,
+                              dvoid **indpp, ub2 **rcodepp );
 
 
 private:
@@ -103,6 +128,8 @@ private:
   unsigned int   numCols_;         // # of cols this stmt execution will return
   MetaData       *meta_;           // Meta data array
   DpiStmtType    stmtType_;        // Statement Type (Query, DML, ... )
+  bool           isReturning_;     // Does the stmt has RETURNING INTO clause?
+  bool           isReturningSet_;  // Has isReturning_ flag queried & set.
 };
 
 

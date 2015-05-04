@@ -936,7 +936,7 @@ Callback function parameter | Description
 ##### Prototype
 
 ```
-void execute(String sql, [Object bindParams, [Object options,]] function(Error error, [Object result]){});
+void execute(String sql [, Object bindParams [, Object options]], function(Error error [, Object result]){});
 ```
 
 ##### Return Value
@@ -1013,7 +1013,7 @@ Options Property | Description
 *String outFormat* | Overrides *Oracledb* [`outFormat`](#propdboutformat)
 
 ```
-function(Error error, [Object result])
+function(Error error [, Object result])
 ```
 
 The parameters of the callback function are:
