@@ -20,18 +20,18 @@
  *
  * DESCRIPTION
  *   Shows a web based query using connections from connection pool.
- * 
+ *
  *   This displays a table of employees in the specified department.
- * 
+ *
  *   The script creates an HTTP server listening on port 7000 and
  *   accepts a URL parameter for the department ID, for example:
  *   http://localhost:7000/90
  *
- *   Uses Oracle's sample HR schema.
+ *   Uses Oracle's sample HR schema.  Scripts to create the HR schema
+ *   can be found at: https://github.com/oracle/db-sample-schemas
  *
  *****************************************************************************/
 
-var sys      = require('sys');
 var http     = require('http');
 var url      = require('url');
 var oracledb = require('oracledb');
@@ -55,38 +55,38 @@ oracledb.createPool (
   function(err, pool)
   {
     if (err) {
-      console.error('createPool() callback: ' + err.message);
+      console.error("createPool() callback: " + err.message);
       return;
     }
 
     // Create HTTP server and listen on port - portid
     hs = http.createServer (
-      function(req, res)  // Callback gets HTTP request & response object
+      function(request, response)  // Callback gets HTTP request & response object
       {
-        var urlparts = req.url.split("/");
+        var urlparts = request.url.split("/");
         var deptid   = urlparts[1];
 
-        if (deptid != parseInt(deptid)) {
-          console.error('Argument "' + deptid + '" is not an integer');
-          return;
-        }
-
-        htmlheader(res,
+        htmlHeader(response,
                    "Oracle Database Driver for Node.js" ,
                    "Example using node-oracledb driver");
+
+        if (deptid != parseInt(deptid)) {
+          handleError(response, 'URL path "' + deptid +
+                      '" is not an integer.  Try http://localhost:' + portid + '/30', null);
+          return;
+        }
 
         // Checkout a connection from the pool
         pool.getConnection (
           function(err, connection)
           {
             if (err) {
-              console.error('getConnection() callback: ' + err.message);
-              htmlerror(res, "getConnection() failed ", err);
+              handleError(response, "getConnection() failed ", err);
               return;
             }
 
-            //console.log('Connections open: ' + pool.connectionsOpen);
-            //console.log('Connections in use: ' + pool.connectionsInUse);
+            // console.log("Connections open: " + pool.connectionsOpen);
+            // console.log("Connections in use: " + pool.connectionsInUse);
 
             connection.execute(
               "SELECT employee_id, first_name, last_name "
@@ -96,117 +96,101 @@ oracledb.createPool (
               function(err, result)
               {
                 if (err) {
-                  console.error('execute() callback: ' + err.message);
-                  htmlerror(res, "execute() callback", err);
+                  connection.release(
+                    function(err)
+                    {
+                      if (err) {
+                        handleError(response, "execute() error release() callback", err);
+                        return;
+                      }
+                    });
+                  handleError(response, "execute() callback", err);
                   return;
                 }
-                
-                // Employee table title
-                htmlh2title(res, "Employees in Department " + deptid);
-                
-                // Output as table
-                htmltablestart(res);
-                
-                // Column Title
-                htmlrowstart(res);
-                htmlcell(res, "Employee id");
-                htmlcell(res, "First Name");
-                htmlcell(res, "Last Name");
-                
-                for (i = 0; i < result.rows.length; i ++) {
-                  htmlrowstart(res);
-                  for (j = 0; j < result.rows[i].length; j ++) {
-                    htmlcell(res, result.rows[i][j]);
-                  }
-                  htmlrowend(res);
-                }
-                htmltableend(res);
+
+                displayResults(response, result, deptid);
 
                 /* Release the connection back to the connection pool */
                 connection.release(
                   function(err)
                   {
                     if (err) {
-                      console.error('release() callback: ' + err.message);
-                      htmlerror(res, "release() callback", err);
+                      handleError(response, "normal release() callback", err);
                       return;
                     }
-                    htmlfooter(res);
                   });
+
+                htmlFooter(response);
               });
           });
       });
 
     hs.listen(portid, "localhost");
-    
-    sys.puts("Server running at http://localhost:" + portid);
+
+    console.log("Server running at http://localhost:" + portid);
   });
 
-// To prepare HTML header
-function htmlheader(res, title, caption)
+
+// Report an error
+function handleError(response, text, err)
 {
-  res.writeHead (200, {'Content-Type' : 'text/html' });
-  res.write     ("<!DOCTYPE html>");
-  res.write     ("<html>");
-  res.write     ("<head>");
-  res.write     ("<style>"
-                + "body {background:#FFFFFF;color:#000000;font-family:Arial,sans-serif;margin:40px;padding:10px;font-size:12px;text-align:center;}"
-                + "h1 {margin:0px;margin-bottom:12px;background:#FF0000;text-align:center;color:#FFFFFF;font-size:28px;}"
-                + "table {border-collapse: collapse;   margin-left:auto; margin-right:auto;}"
-                + "td {padding:8px;border-style:solid}"
-                + "</style>\n");
-  res.write     ("<title>" + caption + "</title>");
-  res.write     ("</head>");
-  res.write     ("<body>");
-  res.write     ("<h1>" + title + "</h1>");
+  if (err) {
+    text += err.message
+  }
+  console.error(text);
+  response.write("<p>Error: " + text + "</p>");
+  htmlFooter(response);
 }
 
-// To prepare HTML footer
-function htmlfooter(res)
+
+// Display query results
+function displayResults(response, result, deptid)
 {
-  res.write("</body>\n</html>");
-  res.end();
+  response.write("<h2>" + "Employees in Department " + deptid + "</h2>");
+  response.write("<table>");
+
+  // Column Title
+  response.write("<tr>");
+  for (col = 0; col < result.metaData.length; col++) {
+    response.write("<td>" + result.metaData[col].name + "</td>");
+  }
+  response.write("</tr>");
+
+  // Rows
+  for (row = 0; row < result.rows.length; row++) {
+    response.write("<tr>");
+    for (col = 0; col < result.rows[row].length; col++) {
+      response.write("<td>" + result.rows[row][col] + "</td>");
+    }
+    response.write("</tr>");
+  }
+  response.write("</table>");
 }
 
-// To display error in HTML
-function htmlerror(res, text, err)
+
+// Prepare HTML header
+function htmlHeader(response, title, caption)
 {
-  res.write("<p>ERROR " + text + " " + err.message + "</p>");
-  htmlfooter(res);
+  response.writeHead (200, {"Content-Type" : "text/html" });
+  response.write     ("<!DOCTYPE html>");
+  response.write     ("<html>");
+  response.write     ("<head>");
+  response.write     ("<style>"
+                    + "body {background:#FFFFFF;color:#000000;font-family:Arial,sans-serif;margin:40px;padding:10px;font-size:12px;text-align:center;}"
+                    + "h1 {margin:0px;margin-bottom:12px;background:#FF0000;text-align:center;color:#FFFFFF;font-size:28px;}"
+                    + "table {border-collapse: collapse;   margin-left:auto; margin-right:auto;}"
+                    + "td {padding:8px;border-style:solid}"
+                    + "</style>\n");
+  response.write     ("<title>" + caption + "</title>");
+  response.write     ("</head>");
+  response.write     ("<body>");
+  response.write     ("<h1>" + title + "</h1>");
 }
 
-// To start TABLE tag
-function htmltablestart(res)
-{
-  res.write("<table>");
-}
 
-// To end the TABLE tag
-function htmltableend(res)
+// Prepare HTML footer
+function htmlFooter(response)
 {
-  res.write("</table>");
-}
-
-// To add h2 title
-function htmlh2title(res, title)
-{
-  res.write("<h2>" + title + "</h2>");
-}
-
-// To add row in a table
-function htmlrowstart(res)
-{
-  res.write("<tr>");
-}
-
-// To end row in a table
-function htmlrowend(res)
-{
-  res.write("</tr>");
-}
-
-// To add a cell in the table
-function htmlcell(res, text)
-{
-  res.write("<td>" + text + "</td>");
+  response.write("</body>\n</html>");
+  response.end();
 }

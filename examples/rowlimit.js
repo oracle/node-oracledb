@@ -22,6 +22,9 @@
  *   Shows ways to limit the number of records fetched by queries.
  *   Uses Oracle's sample HR schema.
  *
+ *   Scripts to create the HR schema can be found at:
+ *   https://github.com/oracle/db-sample-schemas
+ *
  *   By default, node-oracledb has a maxRows attribute that limits the
  *   number of records fetched from a query to 100.  Although
  *   adjusting maxRows can be used to control the number of rows

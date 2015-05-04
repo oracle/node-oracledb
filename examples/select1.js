@@ -22,6 +22,9 @@
  *   Executes a basic query.
  *   Uses Oracle's sample HR schema.
  *
+ *   Scripts to create the HR schema can be found at:
+ *   https://github.com/oracle/db-sample-schemas
+ *
  *****************************************************************************/
 
 var oracledb = require('oracledb');
@@ -48,9 +51,21 @@ oracledb.getConnection(
       {
         if (err) {
           console.error(err.message);
+          doRelease(connection);
           return;
         }
-        console.log(result.rows);
         console.log(result.metaData);
+        console.log(result.rows);
+        doRelease(connection);
       });
   });
+
+function doRelease(connection)
+{
+  connection.release(
+    function(err) {
+      if (err) {
+        console.error(err.message);
+      }
+    });
+}

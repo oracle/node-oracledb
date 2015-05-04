@@ -21,6 +21,9 @@
  * DESCRIPTION
  *   Create database objects for the examples
  *
+ *   Scripts to create Oracle Database's traditional sample schemas can
+ *   be found at: https://github.com/oracle/db-sample-schemas
+ *
  *****************************************************************************/
 
 SET ECHO ON

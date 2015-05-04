@@ -22,7 +22,10 @@
  *   Executes queries to show array and object output formats.
  *   Uses Oracle's sample HR schema.
  *
- *****************************************************************************/
+ *   Scripts to create the HR schema can be found at:
+ *   https://github.com/oracle/db-sample-schemas
+ *
+ *  *****************************************************************************/
 
 var oracledb = require('oracledb');
 var dbConfig = require('./dbconfig.js');
@@ -30,7 +33,7 @@ var dbConfig = require('./dbconfig.js');
 // Properties are applicable to all connections and SQL executions.
 // They can also be set or overridden at the individual execute() call level
 //
-// This script sets outFormat in the execute() call but it could be set here instead
+// This script sets outFormat in the execute() call but it could be set here instead:
 // oracledb.outFormat = oracledb.OBJECT;
 
 oracledb.getConnection(
@@ -54,6 +57,7 @@ oracledb.getConnection(
       {
         if (err) {
           console.error(err.message);
+          doRelease(connection);
           return;
         }
         console.log("----- Cities beginning with 'S' (default ARRAY output format) --------");
@@ -66,24 +70,28 @@ oracledb.getConnection(
         + "ORDER BY city",
           {}, // A bind variable parameter is needed to disambiguate the following options parameter
               // otherwise you will get Error: ORA-01036: illegal variable name/number
-          {outFormat: oracledb.OBJECT}, // outFormat can be OBJECT and ARRAY.  The default is ARRAY
+          {outFormat: oracledb.OBJECT}, // outFormat can be OBJECT or ARRAY.  The default is ARRAY
           function(err, result)
           {
             if (err) {
               console.error(err.message);
+              doRelease(connection);
               return;
             }
             console.log("----- Cities beginning with 'S' (OBJECT output format) --------");
             console.log(result.rows);
 
-            connection.release(
-              function(err)
-              {
-                if (err) {
-                  console.error(err.message);
-                  return;
-                }
-              });
+            doRelease(connection);
           });
       });
   });
+
+function doRelease(connection)
+{
+  connection.release(
+    function(err) {
+      if (err) {
+        console.error(err.message);
+      }
+    });
+}
