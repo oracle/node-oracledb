@@ -2,17 +2,19 @@
 
 ## node-oracledb v0.5.0 (5 May 2015)
 
-- isAutoCommit attribute name changed to autoCommit
+- Changed the `isAutoCommit` attribute name to `autoCommit`.
 
-- isExternalAuth attribute name changed to externalAuth
+- Changed the `isExternalAuth` attribute name to `externalAuth`.
 
-- Added support for DML RETURNING bind variables
+- Added support for DML RETURNING bind variables.
+
+- Rectified the error message for invalid type properties.
 
 ## node-oracledb v0.4.2 (28 Mar 2015)
 
 - node-oracledb is now officially installable from https://www.npmjs.com/package/oracledb
 
-- Added metadata support. Query column names are now provided in the execute() callback result object.
+- Added metadata support. Query column names are now provided in the `execute()` callback result object.
 
 - Require a more recent version of Node.js 0.10.
 
@@ -22,13 +24,13 @@
 
 - Added support for External Authentication.
 
-- The isAutoCommit flags now works with query execution. This is useful in cases where multiple DML statements are executed followed by a SELECT statement. This can be used to avoid a round trip to the database that an explicit call to commit() would add.
+- The `isAutoCommit` flags now works with query execution. This is useful in cases where multiple DML statements are executed followed by a SELECT statement. This can be used to avoid a round trip to the database that an explicit call to `commit()` would add.
 
 - Added AIX build support to package.json.
 
 - Improved errors messages when setting out of range property values.
 
-- Fixed a bug: When terminate() of a connection pool fails because connections have not yet been closed, subsequent use of release() to close those connections no longer gives an error "ORA-24550: Signal Received".
+- Fixed a bug: When `terminate()` of a connection pool fails because connections have not yet been closed, subsequent use of `release()` to close those connections no longer gives an error "ORA-24550: Signal Received".
 
 ## node-oracledb v0.3.1 (16 Feb 2015)
 
@@ -36,7 +38,7 @@
 
 - Added Database Resident Connection Pooling (DRCP) support.
 
-- Made an explicit connection release() do a rollback, to be consistent with the implicit release behavior.
+- Made an explicit connection `release()` do a rollback, to be consistent with the implicit release behavior.
 
 - Made install on Linux look for Oracle libraries in a search order.
 
@@ -46,7 +48,7 @@
 
 - Added a compile error message "Oracle 11.2 or later client libraries are required for building" if attempting to build with older Oracle client libraries.
 
-- Fixed setting the isAutoCommit property.
+- Fixed setting the `isAutoCommit` property.
 
 - Fixed a crash using pooled connections on Windows.
 
