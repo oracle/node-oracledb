@@ -96,6 +96,8 @@ See [Documentation for the Oracle Database Node.js Driver](doc/api.md)
 
 See [CHANGELOG](CHANGELOG.md)
 
+*Note* there were two small, backward-compatibility breaking attribute name changes in node-oracledb 0.5.
+
 ## <a name="contrib"></a> 5. Contributing
 
 Node-oracledb is an open source project. See 
