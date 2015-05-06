@@ -19,6 +19,7 @@ limitations under the License.
 
 1. [Introduction](#intro)
 2. [Errors](#errorobj)
+  - 2.1 [Error Properties](#properror)
 3. [Oracledb Class](#oracledbclass)
   - 3.1 [Oracledb Constants](#oracledbconstants)
      - ARRAY
@@ -159,11 +160,19 @@ If an invalid value is set for a property, then the *Error* object is
 thrown by the driver. The same is true for a read operation on a
 write-only property.
 
-The *Error* object contains a message string in the format:
+### <a name="properror"></a> 2.1 Error Properties
+
+The *Error* object contains a message property.
 
 ```
-<origin>-<errno>: <message text>
+String message
 ```
+
+The text of the error message.
+
+The error may be a standard Oracle message with a prefix like ORA or
+PLS.  Alternatively it may be a driver specific error prefixed with
+NJS or DPI.
 
 A single line error message may look like this:
 
@@ -171,7 +180,7 @@ A single line error message may look like this:
 ORA-01017: invalid username/password; logon denied
 ```
 
-An error message may be multi-line, like this:
+A multi-line error message may look like this:
 
 ```
 ORA-06550: line 1, column 7:
@@ -180,15 +189,6 @@ ORA-06550: line 1, column 7:
 PL/SQL: Statement ignored
 ```
 
-### 2.1 Error Properties
-
-```
-String message
-```
-
-The text of the error message.  The error may be a standard Oracle
-message with a prefix like ORA or PLS.  Alternatively it may be a
-driver specific error prefixed with NJS or DPI.
 
 ## <a name="oracledbclass"></a> 3. Oracledb Class
 
