@@ -46,15 +46,16 @@ typedef struct Bind
   std::string         key;
   void*               value;
   void*               extvalue;
-  DPI_BUFLEN_TYPE     *len;
+  DPI_BUFLEN_TYPE     *len;            // actual length IN/OUT  for bind APIs
+  unsigned int        *len2;           // used for DML returning
   DPI_SZ_TYPE         maxSize;
   unsigned short      type;
   short               *ind;
   bool                isOut;
   dpi::DateTimeArray* dttmarr;
 
-  Bind () : key(""), value(NULL), extvalue (NULL), len(NULL), maxSize(0),
-            type(0), ind(NULL), isOut(false), dttmarr ( NULL )
+  Bind () : key(""), value(NULL), extvalue (NULL), len(NULL), len2(NULL),
+            maxSize(0), type(0), ind(NULL), isOut(false), dttmarr ( NULL )
   {}
 }Bind;
 
@@ -134,6 +135,10 @@ typedef struct eBaton
            if ( binds[index]->len )
            {
              free ( binds[index]->len );
+           }
+           if ( binds[index]->len2 )
+           {
+             free ( binds[index]->len2 ) ;
            }
          }
          delete binds[index];
@@ -258,14 +263,15 @@ private:
   static void v8Date2OraDate ( v8::Handle<v8::Value>, Bind *bind);
 
   // Callback/Utility function used to allocate buffer(s) for Bind Structs
-  static void cbDynBufferAllocate ( void *ctx, DPI_SZ_TYPE nRows );
+  static void cbDynBufferAllocate ( void *ctx, bool dmlReturning,
+                                    unsigned int nRows );
 
   // Callback used in DML-Return SQL statements to
   // identify block of memeory for each row.
   static int  cbDynBufferGet ( void *ctx, DPI_SZ_TYPE nRows,
 
                                unsigned long iter, unsigned long index,
-                               dvoid **bufpp, void **alenp, void **indp,
+                               dvoid **bufpp, void **alenpp, void **indpp,
                                unsigned short **rcode, unsigned char *piecep );
 
   dpi::Conn* dpiconn_;

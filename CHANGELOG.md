@@ -6,6 +6,8 @@
 
 - Changed the `isExternalAuth` attribute name to `externalAuth`.
 
+- Fixed outBinds array counting to not give empty array entries for IN binds.
+
 - Added support for DML RETURNING bind variables.
 
 - Rectified the error message for invalid type properties.

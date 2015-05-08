@@ -500,13 +500,6 @@ void Connection::GetBindUnit (Handle<Value> val, Bind* bind,
       goto exitGetBindUnit;
     }
 
-    // For in binds allocate buffer for bind values (scalar).
-    if ( dir != BIND_OUT )
-    {
-      Connection::cbDynBufferAllocate ( bind, 1 ) ;
-    }
-
-
     Local<Value> element = bind_unit->Get(String::New("val"));
     switch(dir)
     {
@@ -535,8 +528,6 @@ void Connection::GetBindUnit (Handle<Value> val, Bind* bind,
   else
   {
     bind->isOut  = false;
-    // This is IN Bind, allocate.
-    Connection::cbDynBufferAllocate ( bind, 1 ) ;
     Connection::GetInBindParams(val, bind, executeBaton, BIND_IN);
     if(!executeBaton->error.empty()) goto exitGetBindUnit;
   }
@@ -585,11 +576,20 @@ void Connection::GetOutBindParams (unsigned short dataType, Bind* bind,
 
    PARAMETERS:
      Handle value, bind struct, eBaton struct
+
+   NOTE:
+     For IN Bind only len field field is used, and for only a scalar value now,
+     allocate for one unit.
 */
 void Connection::GetInBindParams (Handle<Value> v8val, Bind* bind,
                                            eBaton* executeBaton, BindType type)
 {
+  /* Allocate for scalar indicator & length */
+  bind->ind = (short *)malloc ( sizeof ( short ) );
+  bind->len = (DPI_BUFLEN_TYPE *)malloc ( sizeof ( DPI_BUFLEN_TYPE ) );
+
   *(bind->ind)  = 0;
+
   if(v8val->IsUndefined() || v8val->IsNull())
   {
     bind->value = NULL;
@@ -739,7 +739,7 @@ void Connection::Async_Execute (uv_work_t *req)
                   row ++ )
             {
               if (executeBaton->binds[b]->maxSize <
-                  executeBaton->binds[b]->len[row])
+                  (DPI_SZ_TYPE) executeBaton->binds[b]->len2[row])
               {
                 /* Report insufficient buffer for OUT binds */
                 executeBaton->error =
@@ -778,7 +778,19 @@ void Connection::Async_Execute (uv_work_t *req)
   }
   catch (dpi::Exception& e)
   {
-      executeBaton->error = std::string(e.what());
+    // In Case of DML Returning, if the buffer is small, and if the callback
+    // is called multiple times, an ORA error 24343 was reported. Converting
+    // that error to errInsufficientBufferForBinds.
+    if ( !executeBaton->stmtIsReturning && 
+         (e.errnum() != 24343) )
+    {
+      executeBaton->error = std::string(e.what ());
+    }
+    else
+    {
+      executeBaton->error = NJSMessages::getErrorMsg (
+                                     errInsufficientBufferForBinds ) ;
+    }
   }
   exitAsyncExecute:
   ;
@@ -815,21 +827,22 @@ void Connection::PrepareAndBind (eBaton* executeBaton)
                                               errInvalidBindDataType, 2);
             return;
           }
+          
+          // Allocate for OUT Binds
+          // For DML Returning, allocation happens through callback.
+          if ( executeBaton->binds[index]->isOut &&
+               !executeBaton->stmtIsReturning &&
+               !executeBaton->binds[index]->value )
+          {
+            Connection::cbDynBufferAllocate ( executeBaton->binds[index],
+                                              false, 1 );
+          }
+          
 
           // Convert v8::Date to Oracle DB Type
           if ( executeBaton->binds[index]->type == DpiTimestampLTZ )
           {
             Connection::UpdateDateValue ( executeBaton ) ;
-          }
-
-          // For OUT binds (with NO RETURNING INTO clause allocate for
-          // scalar value.  For RETURNING INTO clause, callback will allocate
-          // NOTE: For IN Binds, the allocation & initialization happens
-          // in GetBindUnit itself.
-          if ( !executeBaton->stmtIsReturning &&
-               executeBaton->binds[index]->isOut )
-          {
-            Connection::cbDynBufferAllocate ( executeBaton->binds[index], 1 );
           }
 
           // Bind by name
@@ -865,6 +878,16 @@ void Connection::PrepareAndBind (eBaton* executeBaton)
             executeBaton->error = NJSMessages::getErrorMsg (
                                               errInvalidBindDataType, 2);
             return;
+          }
+
+          // Allocate for OUT Binds
+          // For DML Returning, allocation happens through callback
+          if ( executeBaton->binds[index]->isOut &&
+               !executeBaton->stmtIsReturning &&
+               !executeBaton->binds[index]->value )
+          {
+            Connection::cbDynBufferAllocate ( executeBaton->binds[index],
+                                              false, 1 );
           }
 
           if ( executeBaton->binds[index]->type == DpiTimestampLTZ )
@@ -1243,7 +1266,7 @@ Handle<Value> Connection::GetArrayValue ( Bind *binds, unsigned long count )
                     ( binds->ind[index] == -1 ) ? Null () :
                       String::New ((char *)binds->value +
                                    (index * binds->maxSize ),
-                                   binds->len[index]));
+                                   binds->len2[index]));
       break;
     case dpi::DpiInteger:
       arrVal->Set ( index,
@@ -1296,15 +1319,10 @@ Handle<Value> Connection::GetOutBinds (eBaton* executeBaton)
     if( executeBaton->binds[0]->key.empty() )
     {
       // Binds as JS array
-      unsigned int outCount = 0;
-      for(unsigned int index = 0; index < executeBaton->binds.size(); index++)
-      {
-        if(executeBaton->binds[index]->isOut)
-          outCount++;
-      }
       return scope.Close( GetOutBindArray( executeBaton->binds,
+                                           executeBaton->numOutBinds,
                                            executeBaton->stmtIsReturning,
-                                           outCount ));
+                                           executeBaton->rowsAffected ));
     }
     else
     {
@@ -1358,8 +1376,8 @@ Handle<Value> Connection::GetOutBindArray ( std::vector<Bind*> &binds,
         val = Connection::GetArrayValue ( binds[index], rowcount );
       }
       arrayBinds->Set( it, val );
+      it ++;
     }
-    it++;
   }
   return scope.Close(arrayBinds);
 }
@@ -1856,7 +1874,8 @@ void Connection::UpdateDateValue ( eBaton * ebaton )
     callback/Utility function to allocate for BIND values (IN & OUT).
     This has been consolidated to a callback/utility funciton so that
     allocation happens only once.
-    For IN binds, the allocation and initialization happens in GetBindUnit ()
+    For IN binds, the allocation and initialization happens in 
+    GetInBindParams()
     For OUT binds the allocation happens in PrepareAndBind ().
     For OUT binds using RETURNING INTO clause, this function is used as
     callback.
@@ -1868,30 +1887,59 @@ void Connection::UpdateDateValue ( eBaton * ebaton )
   RETURNS
     -None-
 */
-void Connection::cbDynBufferAllocate ( void *ctx, DPI_SZ_TYPE nRows )
+void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning, 
+                                       unsigned int nRows )
 {
   Bind *bind = (Bind *)ctx;
 
   bind->ind = (short *)malloc ( nRows * sizeof ( short ) ) ;
-  bind->len = (DPI_BUFLEN_TYPE *)malloc ( nRows * sizeof ( DPI_BUFLEN_TYPE ) );
+  if ( dmlReturning )
+  {
+    bind->len2 = ( unsigned int *)malloc ( nRows * sizeof ( unsigned int ) );
+  }
+  else
+  {
+    bind->len = (DPI_BUFLEN_TYPE *)malloc ( nRows * 
+                                            sizeof ( DPI_BUFLEN_TYPE ) );
+  }
 
   switch ( bind->type )
   {
   case dpi::DpiVarChar:
-    /* one extra char for EOS; 1 more to determine insufficient buffer later */
-    bind->value = (char *)malloc ( ( bind->maxSize + 2) * nRows ) ;
+    /* one extra char for EOS */
+    bind->value = (char *)malloc ( ( bind->maxSize + 1) * nRows ) ;
+    if ( dmlReturning )
+    {
+      *(bind->len2) = bind->maxSize ;
+    }
+    else
+    {
+      *(bind->len) = bind->maxSize;
+    }
     break;
 
   case dpi::DpiInteger:
     bind->value = ( int *) malloc ( sizeof (int) * nRows ) ;
+    if ( !dmlReturning )
+    {
+      *(bind->len) = sizeof ( int ) ;
+    }
     break;
 
   case dpi::DpiUnsignedInteger:
     bind->value = ( unsigned int *)malloc ( sizeof ( unsigned int ) * nRows );
+    if ( !dmlReturning )
+    {
+      *(bind->len) = sizeof ( unsigned int ) ;
+    }
     break;
 
   case dpi::DpiDouble:
     bind->value = ( double *)malloc ( sizeof ( double ) * nRows );
+    if ( !dmlReturning )
+    {
+      *(bind->len) = sizeof ( double ) ;
+    }
     break;
 
   case dpi::DpiTimestampLTZ:
@@ -1916,8 +1964,8 @@ void Connection::cbDynBufferAllocate ( void *ctx, DPI_SZ_TYPE nRows )
       nRows (IN)      # of rows (after execution, so knows rows-affected)
       index (IN)      row index
       bufpp (INOUT)   buffer for the cell
-      alenp (INOUT)   buffer for actual length
-      indp  (INOUT)   buffer for the indicator
+      alenpp (INOUT)   buffer for actual length
+      indpp (INOUT)   buffer for the indicator
       rcode (INOUT)   return code - not used
       piecep (INOUT)  for piece wise operations.
 
@@ -1925,12 +1973,13 @@ void Connection::cbDynBufferAllocate ( void *ctx, DPI_SZ_TYPE nRows )
       0.  (Any non zero value to indicate errors).
 
     NOTE:
-      OCI does not support DATE/TIMESTAMP for dynamic Binding.
+      1. DATE/TIMESTAMP not supported
+      2. using bind->len2 for DML returning (not bind->len)
 */
 
 int Connection::cbDynBufferGet ( void *ctx, DPI_SZ_TYPE nRows,
                                  unsigned long iter, unsigned long index,
-                                 dvoid **bufpp, void **alenp, void **indp,
+                                 dvoid **bufpp, void **alenpp, void **indpp,
                                  unsigned short **rcode, unsigned char *piecep)
 {
   Bind *bind = (Bind *)ctx;
@@ -1948,15 +1997,16 @@ int Connection::cbDynBufferGet ( void *ctx, DPI_SZ_TYPE nRows,
     // First time callback, allocate the buffer(s).
     if ( index == 0 )
     {
-      Connection::cbDynBufferAllocate (ctx, nRows );
+      Connection::cbDynBufferAllocate (ctx, true, nRows );
     }
 
+    bind->ind[index] = -1;
 
     // Find block of memory for this index
     switch ( bind->type )
     {
     case dpi::DpiVarChar:
-      bind->len[index] = ( bind->maxSize + 1 );
+      bind->len2[index] = bind->maxSize;
       /* 1 extra char for EOS, 1 extra to determine insufficient buf later */
       *bufpp = (void *)&(((char *)bind->value)[ (bind->maxSize) * index]);
       /* Buffer provided by the application could be small, in this case to
@@ -1966,16 +2016,16 @@ int Connection::cbDynBufferGet ( void *ctx, DPI_SZ_TYPE nRows,
       *piecep = OCI_FIRST_PIECE;
       break;
     case dpi::DpiInteger:
-      bind->len[index] = sizeof ( int ) ;
+      bind->len2[index] = sizeof ( int ) ;
       *bufpp = ( void *)&(((int *)bind->value)[index]);
       break;
     case dpi::DpiUnsignedInteger:
-      bind->len[index] = sizeof ( unsigned int ) ;
+      bind->len2[index] = sizeof ( unsigned int ) ;
       *bufpp = ( void *)&(((unsigned int *)bind->value)[index]);
       break;
 
     case dpi::DpiDouble:
-      bind->len[index] = sizeof ( double ) ;
+      bind->len2[index] = sizeof ( double ) ;
       *bufpp = (void *)&(((double *)bind->value)[index]);
       break;
 
@@ -1984,8 +2034,8 @@ int Connection::cbDynBufferGet ( void *ctx, DPI_SZ_TYPE nRows,
       break;
     }
 
-    *alenp = &(bind->len[index]);
-    *indp  = &(bind->ind[index]);
+    *alenpp = &(bind->len2[index]);
+    *indpp  = &(bind->ind[index]);
   }
   else
   {
