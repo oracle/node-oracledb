@@ -49,7 +49,8 @@ static const char *errMsg[] =
   "NJS-012: encountered invalid bind datatype in parameter %d",
   "NJS-013: invalid bind direction",
   "NJS-014: %s is a read-only property",
-  "NJS-015: %s is a write-only property"
+  "NJS-015: %s is a write-only property",
+  "NJS-016: Buffer is too small for OUT binds"
 };
 
 string NJSMessages::getErrorMsg ( NJSErrorType err, ... )

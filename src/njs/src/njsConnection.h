@@ -33,6 +33,7 @@
 #include "njsUtils.h"
 #include "njsOracle.h"
 
+
 using namespace v8;
 using namespace node;
 using namespace dpi;
@@ -42,18 +43,19 @@ using namespace dpi;
 **/
 typedef struct Bind
 {
-  std::string       key;
-  void*             value;
-  void*             extvalue;
-  DPI_BUFLEN_TYPE       len;
-  DPI_SZ_TYPE           maxSize;
-  unsigned short    type;
-  short             ind;
-  bool              isOut;
-  dpi::DateTimeArray *dttmarr;
+  std::string         key;
+  void*               value;
+  void*               extvalue;
+  DPI_BUFLEN_TYPE     *len;            // actual length IN/OUT  for bind APIs
+  unsigned int        *len2;           // used for DML returning
+  DPI_SZ_TYPE         maxSize;
+  unsigned short      type;
+  short               *ind;
+  bool                isOut;
+  dpi::DateTimeArray* dttmarr;
 
-  Bind () : key(""), value(NULL), extvalue (NULL), len(0), maxSize(0),
-            type(0), ind(0), isOut(false), dttmarr ( NULL )
+  Bind () : key(""), value(NULL), extvalue (NULL), len(NULL), len2(NULL),
+            maxSize(0), type(0), ind(NULL), isOut(false), dttmarr ( NULL )
   {}
 }Bind;
 
@@ -88,21 +90,24 @@ typedef struct eBaton
   dpi::Conn*    dpiconn;
   DPI_SZ_TYPE   rowsAffected;
   unsigned int  maxRows;
-  bool          isAutoCommit;
+  bool          autoCommit;
   unsigned int  rowsFetched;
   unsigned int  outFormat;
   unsigned int  numCols;
   dpi::Stmt     *dpistmt;
   dpi::DpiStmtType     st;
+  bool                 stmtIsReturning;
   std::vector<Bind*>   binds;
+  unsigned int         numOutBinds;    // # of out binds used for DML return
   std::string          *columnNames;
   Define               *defines;
   Persistent<Function> cb;
 
   eBaton() : sql(""), error(""), dpienv(NULL), dpiconn(NULL),
-             rowsAffected(0), maxRows(0), isAutoCommit(false),
+             rowsAffected(0), maxRows(0), autoCommit(false),
              rowsFetched(0), outFormat(0), numCols(0), dpistmt(NULL),
-             st(DpiStmtUnknown), columnNames(NULL), defines(NULL)
+             st(DpiStmtUnknown), stmtIsReturning (false), numOutBinds(0),
+             columnNames(NULL), defines(NULL)
   {}
 
   ~eBaton ()
@@ -122,6 +127,18 @@ typedef struct eBaton
            if ( binds[index]->extvalue )
            {
              free ( binds[index]->value );
+           }
+           if ( binds[index]->ind )
+           {
+             free ( binds[index]->ind );
+           }
+           if ( binds[index]->len )
+           {
+             free ( binds[index]->len );
+           }
+           if ( binds[index]->len2 )
+           {
+             free ( binds[index]->len2 ) ;
            }
          }
          delete binds[index];
@@ -217,15 +234,34 @@ private:
   static void GetOutBindParams (unsigned short dataType, Bind* bind,
                                 eBaton* executeBaton);
   static v8::Handle<v8::Value> GetOutBinds (eBaton* executeBaton);
-  static v8::Handle<v8::Value> GetOutBindArray ( std::vector<Bind*> binds, unsigned int outCount);
-  static v8::Handle<v8::Value> GetOutBindObject (std::vector<Bind*> binds);
+  static v8::Handle<v8::Value> GetOutBindArray ( std::vector<Bind*> &binds,
+                                                 unsigned int outCount,
+                                                 bool bDMLReturn = false,
+                                                 unsigned long rowcount = 1);
+  static v8::Handle<v8::Value> GetOutBindObject (std::vector<Bind*> &binds,
+                                                 bool bDMLReturn = false,
+                                                 unsigned long rowcount = 1);
   static v8::Handle<v8::Value> GetRows (eBaton* executeBaton);
   static v8::Handle<v8::Value> GetMetaData (std::string* columnNames,
-                                    unsigned int numCols);
+                                            unsigned int numCols);
+  static v8::Handle<v8::Value> GetArrayValue (Bind *bind, unsigned long count);
   static v8::Handle<v8::Value> GetValue (short ind, unsigned short type, void* val,
-                                 DPI_BUFLEN_TYPE len);
+                                         DPI_BUFLEN_TYPE len,
+                                         DPI_SZ_TYPE maxSize = -1);
   static void UpdateDateValue ( eBaton *executeBaton );
   static void v8Date2OraDate ( v8::Handle<v8::Value>, Bind *bind);
+
+  // Callback/Utility function used to allocate buffer(s) for Bind Structs
+  static void cbDynBufferAllocate ( void *ctx, bool dmlReturning,
+                                    unsigned int nRows );
+
+  // Callback used in DML-Return SQL statements to
+  // identify block of memeory for each row.
+  static int  cbDynBufferGet ( void *ctx, DPI_SZ_TYPE nRows,
+
+                               unsigned long iter, unsigned long index,
+                               dvoid **bufpp, void **alenpp, void **indpp,
+                               unsigned short **rcode, unsigned char *piecep );
 
   dpi::Conn* dpiconn_;
   bool isValid_;

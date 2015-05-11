@@ -237,7 +237,7 @@ typedef enum
   }                                                                           \
   else                                                                        \
   {                                                                           \
-    msg = NJSMessages::getErrorMsg ( errInvalidParameterType,                 \
+    msg = NJSMessages::getErrorMsg ( errInvalidPropertyValue,                 \
                                      prop );                                  \
     NJS_SET_EXCEPTION( msg.c_str(), msg.length() );                           \
   }                                                                           \
@@ -257,7 +257,7 @@ typedef enum
   }                                                                           \
   else                                                                        \
   {                                                                           \
-    msg = NJSMessages::getErrorMsg ( errInvalidParameterType,                 \
+    msg = NJSMessages::getErrorMsg ( errInvalidPropertyValue,                 \
                                      prop );                                  \
     NJS_SET_EXCEPTION( msg.c_str(), msg.length() );		              \
   }                                                                           \

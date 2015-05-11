@@ -19,6 +19,7 @@ limitations under the License.
 
 1. [Introduction](#intro)
 2. [Errors](#errorobj)
+  - 2.1 [Error Properties](#properror)
 3. [Oracledb Class](#oracledbclass)
   - 3.1 [Oracledb Constants](#oracledbconstants)
      - ARRAY
@@ -31,8 +32,8 @@ limitations under the License.
      - BIND_OUT
   - 3.2 [Oracledb Properties](#oracledbproperties)
      - [connectionClass](#propdbconclass)
-     - [isAutoCommit](#propdbisautocommit)
-     - [isExternalAuth](#propdbisexternalauth)
+     - [autoCommit](#propdbisautocommit)
+     - [externalAuth](#propdbisexternalauth)
      - [maxRows](#propdbmaxrows)
      - [outFormat](#propdboutformat)
      - [poolIncrement](#propdbpoolincrement)
@@ -70,6 +71,9 @@ limitations under the License.
      - 5.2.5 [rollback()](#rollback)
 6. [Connection Handling](#connectionhandling)
   - 6.1 [Connection Strings](#connectionstrings)
+     - 6.1.1 [Easy Connect Syntax for Connection Strings](#easyconnect)
+     - 6.1.2 [Net Service Names for Connection Strings](#tnsnames)
+     - 6.1.3 [JDBC and Node-oracledb Connection Strings Compared](#notjdbc)
   - 6.2 [Database Resident Connection Pooling](#drcp)
   - 6.3 [External Authentication](#extauth)
 7. [SQL Execution](#sqlexecution)
@@ -81,6 +85,7 @@ limitations under the License.
   - 7.2 [Bind Parameters for Prepared Statements](#bind)
      - 7.2.1 [IN Bind Parameters](#inbind)
      - 7.2.2 [OUT and IN OUT Bind Parameters](#outbind)
+     - 7.2.3 [DML RETURNING Bind Parameters](#dmlreturn)
 8. [Transaction Management](#transactionmgt)
 9. [External Configuration](#oraaccess)
 
@@ -134,9 +139,12 @@ With Oracle's sample HR schema, the output is:
 [ [ 180, 'Construction' ] ]
 ```
 
-There are more examples in the
+There are more node-oracledb examples in the
 [examples](https://github.com/oracle/node-oracledb/tree/master/examples)
 directory.
+
+Scripts to create Oracle's sample schemas can be found at
+[github.com/oracle/db-sample-schemas](https://github.com/oracle/db-sample-schemas).
 
 ## <a name="errorobj"></a> 2. Errors
 
@@ -152,11 +160,19 @@ If an invalid value is set for a property, then the *Error* object is
 thrown by the driver. The same is true for a read operation on a
 write-only property.
 
-The *Error* object contains a message string in the format:
+### <a name="properror"></a> 2.1 Error Properties
+
+The *Error* object contains a message property.
 
 ```
-<origin>-<errno>: <message text>
+String message
 ```
+
+The text of the error message.
+
+The error may be a standard Oracle message with a prefix like ORA or
+PLS.  Alternatively it may be a driver specific error prefixed with
+NJS or DPI.
 
 A single line error message may look like this:
 
@@ -164,7 +180,7 @@ A single line error message may look like this:
 ORA-01017: invalid username/password; logon denied
 ```
 
-An error message may be multi-line, like this:
+A multi-line error message may look like this:
 
 ```
 ORA-06550: line 1, column 7:
@@ -173,15 +189,6 @@ ORA-06550: line 1, column 7:
 PL/SQL: Statement ignored
 ```
 
-### 2.1 Error Properties
-
-```
-String message
-```
-
-The text of the error message.  The error may be a standard Oracle
-message with a prefix like ORA or PLS.  Alternatively it may be a
-driver specific error prefixed with NJS or DPI.
 
 ## <a name="oracledbclass"></a> 3. Oracledb Class
 
@@ -258,6 +265,9 @@ String connectionClass
 ```
 
 The Connection class value defines a logical name for connections.
+Most single purpose applications should set `connectionClass` when
+using a connection pool or DRCP.
+
 When a pooled session has a connection class, Oracle ensures that the
 session is not shared outside of that connection class.
 
@@ -265,8 +275,9 @@ The connection class value is similarly used by
 [Database Resident Connection Pooling](#drcp) (DRCP) to allow or
 disallow sharing of sessions.
 
+
 For example, where two different kinds of users share one pool, you
-might set ```connectionClass``` to 'HR' for connections that access a
+might set `connectionClass` to 'HR' for connections that access a
 Human Resources system, and it might be set to 'OE' for users of an
 Order Entry system.  Users will only be given sessions of the
 appropriate class, allowing maximal reuse of resources in each case,
@@ -274,20 +285,23 @@ and preventing any session information leaking between the two systems.
 
 <a name="propdbisautocommit"></a>
 ```
-Boolean isAutoCommit
+Boolean autoCommit
 ```
 
 If this property is *true*, then the transaction in the current
-connection is automatically committed at the the end of statement
+connection is automatically committed at the end of statement
 execution.
 
 The default value is *false*.
 
 This property may be overridden in an `execute()` call.
 
+Note prior to node-oracledb 0.5 this property was called
+`isAutoCommit`.
+
 <a name="propdbisexternalauth"></a>
 ```
-Boolean isExternalAuth
+Boolean externalAuth
 ```
 
 If this property is *true* then connections are established using
@@ -297,11 +311,14 @@ more information.
 The default value is *false*.
 
 The `user` and `password` properties for connecting or creating a pool
-should not be set when `isExternalAuth` is *true*.
+should not be set when `externalAuth` is *true*.
 
 This property can be overridden in the *Oracledb*
 [`getConnection()`](#getconnectiondb) or [`createPool()`](#createpool)
 calls.
+
+Note prior to node-oracledb 0.5 this property was called
+`isExternalAuth`.
 
 <a name="propdbmaxrows"></a>
 ```
@@ -323,17 +340,19 @@ queries from returning unexpectedly large numbers of rows.
 
 <a name="propdboutformat"></a>
 ```
-String outFormat
+Number outFormat
 ```
 
 The format of rows fetched by the `execute()` call. This can be either
-`ARRAY` or `OBJECT`. If specified as `ARRAY`, each row is fetched as an
-array of column values.  The default value is `ARRAY`, which is more
-efficient.
+of the [Oracledb constants](#oracledbconstants) `ARRAY` or `OBJECT`.
+The default value is `ARRAY` which is more efficient.
+
+If specified as `ARRAY`, each row is fetched as an array of column
+values.
 
 If specified as `OBJECT`, each row is fetched as a JavaScript object.
 The object has a property for each column name, with the property
-value set to the the respective column value.  The case of the
+value set to the respective column value.  The case of the
 property name will generally be uppercase, depending whether the table
 column was created with a default, case-insensitive name.  This
 follows Oracle's standard casing rules.
@@ -479,22 +498,25 @@ String connectString
 ```
 
 The Oracle database instance to connect to.  The string can be an Easy
-Connect string, or a Connect Name from a `tnsnames.ora` file, or the
+Connect string, or a Net Service Name from a `tnsnames.ora` file, or the
 name of a local Oracle database instance.  See
 [Connection Strings](#connectionstrings) for examples.
 
 ```
-Boolean isExternalAuth
+Boolean externalAuth
 ```
 
 If this optional property is *true* then the pool's connections will
 be established using [External Authentication](#extauth).
 
 This property overrides the *Oracledb*
-[`isExternalAuth`](#propdbisexternalauth) property.
+[`externalAuth`](#propdbisexternalauth) property.
 
 The `user` and `password` properties should not be set when
-`isExternalAuth` is *true*.
+`externalAuth` is *true*.
+
+Note prior to node-oracledb 0.5 this property was called
+`isExternalAuth`.
 
 ```
 Number stmtCacheSize
@@ -617,22 +639,25 @@ String connectString
 ```
 
 The Oracle database instance to connect to.  The string can be an Easy Connect string, or a
-Connect Name from a `tnsnames.ora` file, or the name of a local
+Net Service Name from a `tnsnames.ora` file, or the name of a local
 Oracle database instance.  See
 [Connection Strings](#connectionstrings) for examples.
 
 ```
-Boolean isExternalAuth
+Boolean externalAuth
 ```
 
 If this optional property is *true* then the connection will be
 established using [External Authentication](#extauth).
 
 This optional property overrides the *Oracledb*
-[`isExternalAuth`](#propdbisexternalauth) property.
+[`externalAuth`](#propdbisexternalauth) property.
 
 The `user` and `password` properties should not be set when
-`isExternalAuth` is *true*.
+`externalAuth` is *true*.
+
+Note prior to node-oracledb 0.5 this property was called
+`isExternalAuth`.
 
 ```
 Number stmtCacheSize
@@ -1006,7 +1031,7 @@ The following properties can be overridden for the execution of a statement:
 
 Options Property | Description
 ----------------|-------------
-*Boolean isAutoCommit* | Overrides *Oracledb* [`isAutoCommit`](#propdbisautocommit)
+*Boolean autoCommit* | Overrides *Oracledb* [`autoCommit`](#propdbisautocommit)
 *Number maxRows* | Overrides *Oracledb* [`maxRows`](#propdbmaxrows)
 *String outFormat* | Overrides *Oracledb* [`outFormat`](#propdboutformat)
 
@@ -1144,7 +1169,7 @@ Callback function parameter | Description
 ## <a name="connectionhandling"></a> 6. Connection Handling
 
 Connections can be created directly by *Oracledb*
-[getConnection()](#getconnectiondb):
+[`getConnection()`](#getconnectiondb):
 
 ```javascript
 var oracledb = require('oracledb');
@@ -1155,12 +1180,18 @@ oracledb.getConnection(
     password      : "welcome",
     connectString : "localhost/XE"
   },
-  . . .
-);
+  function(err, connection)
+  {
+    if (err) {
+      console.error(err.message);
+      return;
+    }
+    . . .
+  });
 ```
 
 Alternatively connections can be obtained from *Pool*
-[getConnection()](#getconnectionpool):
+[`getConnection()`](#getconnectionpool):
 
 
 ```javascript
@@ -1188,25 +1219,162 @@ recycled.  However, in situations where connections are used
 infrequently, direct connections may be more efficient than using a
 connection pool.
 
+Connections should be released with [`release()`](#release) when no
+longer needed:
+
+```javascript
+var oracledb = require('oracledb');
+
+oracledb.getConnection(
+  {
+    user          : "hr",
+    password      : "welcome",
+    connectString : "localhost/XE"
+  },
+  function(err, connection)
+  {
+    if (err) {
+      console.error(err.message);
+      return;
+    }
+
+    . . .
+
+    connection.release(
+      function(err)
+      {
+        console.error(err.message);
+        return;
+      });
+  });
+```
+
+This is particularly true with connection pools.  Pooled connections
+should also be released before calling [`terminate()`](#terminate).
+
 ### <a name="connectionstrings"></a> 6.1 Connection Strings
 
-The *Oracledb* [getConnection()](#getconnectiondb) and *Pool*
-[getConnection()](#getconnectionpool) `connectString` can be an
-Easy Connect string, or a Connect Name from a `tnsnames.ora` file, or
-the name of a local Oracle database instance.
-
-The [Easy Connect](https://docs.oracle.com/database/121/NETAG/naming.htm#i498306) syntax is:
-*[//]host_name[:port][/service_name][:server_type][/instance_name]*
-
-For example, use *"localhost/XE"* to connect to the database *XE* on the the local machine.
-
-If a Connect Name from a `tnsnames.ora` file is used, set the
-`TNS_ADMIN` environment variable such that `$TNS_ADMIN/tnsnames.ora`
-is read.  Alternatively make sure the name is in
-`$ORACLE_HOME/network/admin/tnsnames.ora` or `/etc/tnsnames.ora`.
+The *Oracledb* [`getConnection()`](#getconnectiondb) and *Pool*
+[`getConnection()`](#getconnectionpool) `connectString` can be an Easy
+Connect string, or a Net Service Name from a local `tnsnames.ora` file
+or external naming service, or it can be the SID of a local Oracle
+database instance.
 
 If `connectString` is not specified, the empty string "" is used which
 indicates to connect to the local, default database.
+
+#### <a name="easyconnect"></a> 6.1.1 Easy Connect Syntax for Connection Strings
+
+An Easy Connect string is often the simplest to use.  With Oracle 12c
+the syntax is:
+*[//]host_name[:port][/service_name][:server_type][/instance_name]*
+
+For example, use *"localhost/XE"* to connect to the database *XE* on the local machine:
+
+```javascript
+oracledb.getConnection(
+  {
+    user          : "hr",
+    password      : "welcome",
+    connectString : "localhost/XE"
+  },
+  . . .
+```
+
+For more information see
+[Understanding the Easy Connect Naming Method](https://docs.oracle.com/database/121/NETAG/naming.htm#i498306)
+in the Oracle documentation..
+
+#### <a name="tnsnames"></a> 6.1.2 Net Service Names for Connection Strings
+
+A Net Service Name, such as `sales` in the example below, can be used
+to connect:
+
+```javascript
+oracledb.getConnection(
+  {
+    user          : "hr",
+    password      : "welcome",
+    connectString : "sales"
+  },
+  . . .
+```
+
+This could be defined in a directory server, or in a local
+`tnsnames.ora` file, for example:
+
+```
+sales =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)(HOST = mymachine.example.com)(PORT = 1521))
+    (CONNECT_DATA =
+      (SERVER = DEDICATED)
+      (SERVICE_NAME = orcl)
+    )
+  )
+```
+
+The `tnsnames.ora` file can be in a default location such as
+`$ORACLE_HOME/network/admin/tnsnames.ora` or
+`/etc/tnsnames.ora`. Alternatively set the `TNS_ADMIN` environment
+variable and put the file in `$TNS_ADMIN/tnsnames.ora`.
+
+For more information see
+[General Syntax of tnsnames.ora](https://docs.oracle.com/database/121/NETRF/tnsnames.htm#NETRF260)
+in the Oracle documentation.
+
+#### <a name="notjdbc"></a> 6.1.3 JDBC and Node-oracledb Connection Strings Compared
+
+Developers familar with Java connection strings that reference a
+service name like:
+
+```
+jdbc:oracle:thin:@hostname:port/service_name
+```
+
+can use Oracle's Easy Connect syntax in node-oracledb:
+
+```javascript
+oracledb.getConnection(
+  {
+    user          : "hr",
+    password      : "welcome",
+    connectString : "hostname:port/service_name"
+  },
+  . . .
+```
+
+Alternatively, if a JDBC connection string uses an old-style
+[SID](http://docs.oracle.com/database/121/NETRF/glossary.htm#NETRF1681),
+and there is no service name available:
+
+```
+jdbc:oracle:thin:@hostname:port:sid
+```
+
+then consider creating a `tnsnames.ora` entry, for example:
+
+```
+finance =
+ (DESCRIPTION =
+   (ADDRESS = (PROTOCOL = TCP)(HOST = hostname)(PORT = 1521))
+   (CONNECT_DATA =
+     (SID = ORCL)
+   )
+ )
+```
+
+This can be referenced in node-oracledb:
+
+```javascript
+oracledb.getConnection(
+  {
+    user          : "hr",
+    password      : "welcome",
+    connectString : "finance"
+  },
+  . . .
+```
 
 ### <a name="drcp"></a> 6.2 Database Resident Connection Pooling
 
@@ -1265,20 +1433,20 @@ to validate user access.  This mode of authentication is called
 credentials do not need to be hard coded in the application.
 
 To use external authentication, set the *Oracledb*
-[`isExternalAuth`](propdbextauth) property to *true*.  Once this is
+[`externalAuth`](propdbextauth) property to *true*.  Once this is
 set, any subsequent connections obtained using the *Oracledb*
 [`getConnection()`](#getconnectiondb) or *Pool*
 [`getConnection()`](#getconnectionpool) calls will use external
 authentication.  Setting this property does not affect the operation
 of existing connections or pools.
 
-When `isExternalAuth` is *true*, the `user` and `password` properties
+When `externalAuth` is *true*, the `user` and `password` properties
 should not be set, or should be empty strings.
 
-The `isExternalAuth` property can be overridden in the `connAttrs` or
+The `externalAuth` property can be overridden in the `connAttrs` or
 `poolAttrs` parameters of the *Oracledb*
 [`getConnection()`](#getconnectiondb) or [`createPool()`](#createpool)
-calls, respectively.  Overriding `isExternalAuth` is not possible for
+calls, respectively.  Overriding `externalAuth` is not possible for
 a *Pool* `getConnection()` call.  The connections from a *Pool* object
 are always obtained in the manner in which the pool was initially
 created.
@@ -1303,7 +1471,7 @@ should use the [`release()`](#release) call to release the connection.
 SQL `SELECT` statements return an array of rows.  The rows array holds up to
 [`maxRows`](#propdbmaxrows) number of rows.
 
-### <a name="queryoutputformats"></a> 7.1.1 Query Output Formats
+#### <a name="queryoutputformats"></a> 7.1.1 Query Output Formats
 
 The default format for each row returned is an array of column values.
 For example:
@@ -1363,7 +1531,7 @@ property names are uppercase.  This is the default casing behavior for
 Oracle client programs when a database table is created with
 case-insensitive column names.
 
-### <a name="querymeta"></a> 7.1.2 Query Column Metadata
+#### <a name="querymeta"></a> 7.1.2 Query Column Metadata
 
 The column names of a query are returned in the
 [`execute()`](#execute) callback `result` parameter:
@@ -1394,7 +1562,7 @@ The names are in uppercase.  This is the default casing behavior for
 Oracle client programs when a database table is created with
 case-insensitive column names.
 
-### <a name="typemap"></a> 7.1.3 Result Type Mapping
+#### <a name="typemap"></a> 7.1.3 Result Type Mapping
 
 Oracle character, number and date columns can be selected.  Data types
 that are currently unsupported give a "datatype is not supported"
@@ -1416,7 +1584,7 @@ Query result type mappings for Oracle Database types to JavaScript types are:
     When binding a JavaScript Date value in an `INSERT` statement, the date is also inserted as `TIMESTAMP WITH
     LOCAL TIMEZONE` using OCIDateTime.
 
-### <a name="stmtcache"></a> 7.1.4 Statement Caching
+#### <a name="stmtcache"></a> 7.1.4 Statement Caching
 
 Node-oracledb uses the
 [Oracle OCI statement cache](https://docs.oracle.com/database/121/LNOCI/oci09adv.htm#i471377)
@@ -1517,31 +1685,21 @@ PL/SQL array parameters are currently not supported.
 Here is an example program showing the use of OUT binds.
 
 ```javascript
-var oracledb = require('oracledb');
-
-oracledb.getConnection(
+var bindvars = {
+  i:  'Chris',  // default is type STRING and direction IN
+  io: { val: 'Jones', dir : oracledb.BIND_INOUT },
+  o:  { type: oracledb.NUMBER, dir : oracledb.BIND_OUT },
+}
+connection.execute(
+  "BEGIN testproc(:i, :io, :o); END;",
+  bindvars,
+  function (err, result)
   {
-    user          : "hr",
-    password      : "welcome",
-    connectString : "localhost/XE"
-  },
-  function (err, connection)
-  {
-    if (err) { console.error(err.message); return; }
-
-    var bindvars = {
-      i:  'Chris',  // default is type STRING and direction IN
-      io: { val: 'Jones', dir : oracledb.BIND_INOUT },
-      o:  { type: oracledb.NUMBER, dir : oracledb.BIND_OUT },
-    }
-    connection.execute(
-      "BEGIN testproc(:i, :io, :o); END;",
-      bindvars,
-      function (err, result)
-      {
-        if (err) { console.error(err.message); return; }
-        console.log(result.outBinds);
-      });
+	if (err) {
+      console.error(err.message);
+      return;
+     }
+	console.log(result.outBinds);
   });
 ```
 
@@ -1565,6 +1723,65 @@ The output would be:
 { io: 'ChrisJones', o: 101 }
 ```
 
+#### <a name="dmlreturn"></a> 7.2.3 DML RETURNING Bind Parameters
+
+Bind parameters from "DML RETURNING" statements (such as `INSERT
+... RETURNING ... INTO ...`) can be bound as `STRING` or `NUMBER` OUT
+types.
+
+For `STRING` types, an error occurs if `maxSize` is not large enough
+to hold a returned value.
+
+Note each DML RETURNING bind parameter is returned as an array
+containing zero or more elements.  Application code that is designed
+to expect only one value could be made more robust if it confirms the
+returned array length is not bigger than one.  This will help identify
+invalid data or an incorrect `WHERE` clause that causes more results
+to be returned.
+
+An example of DML RETURNING binds is:
+
+
+```javascript
+connection.execute(
+   "UPDATE mytab SET name = :name "
+ + "WHERE id = :id "
+ + "RETURNING id, name INTO :rid, :rname",
+  {
+	id:    1001,
+	name:  "Krishna",
+	rid:   { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+	rname: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
+  },
+  function(err, result)
+  {
+	if (err)
+	{
+	  console.error(err);
+	  return;
+	}
+	console.log(result.outBinds);
+  });
+```
+
+If the `WHERE` clause matches one record, the output would be like:
+
+```
+{ rid: [ 1001 ], rname: [ 'Krishna' ] }
+```
+
+With multiple matches, the output would be:
+
+```
+{ rid: [ 1001, 1001 ], rname: [ 'Krishna', 'Krishna' ] }
+```
+
+If the `WHERE` clause matches no rows, the output would be:
+
+```
+{ rid: [], rname: [] }
+```
+
 ## <a name="transactionmgt"></a> 8. Transaction Management
 
 By default,
@@ -1575,10 +1792,10 @@ The driver implements [`commit()`](#commit) and
 [`rollback()`](#rollback) methods that can be used to explicitly
 control transactions.
 
-If the [`isAutoCommit`](#propdbisautocommit) flag is set to *true*,
+If the [`autoCommit`](#propdbisautocommit) flag is set to *true*,
 then a commit occurs at the end of each `execute()` call.  Unlike an
 explicit `commit()`, this does not require a round-trip to the
-database.  For maximum efficiency, set `isAutoCommit` to true for the
+database.  For maximum efficiency, set `autoCommit` to true for the
 last `execute()` call of a transaction in preference to using an
 additional, explicit `commit()` call.
 
@@ -1593,7 +1810,7 @@ will be rolled back.
 
 Note: Oracle Database will implicitly commit when a
 [DDL](https://docs.oracle.com/database/121/CNCPT/glossary.htm#CHDJJGGF)
-statement is executed irrespective of the value of `isAutoCommit`.
+statement is executed irrespective of the value of `autoCommit`.
 
 ## <a name="oraaccess"></a> 9. External Configuration
 

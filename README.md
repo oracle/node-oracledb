@@ -1,11 +1,11 @@
-# node-oracledb version 0.4
+# node-oracledb version 0.5
 
 ## <a name="about"></a> 1. About node-oracledb
 
 The Oracle Database Node.js driver powers high performance
 Node.js applications.
 
-Node-oracledb 0.4 supports basic and advanced Oracle features, including:
+Node-oracledb 0.5 supports basic and advanced Oracle features, including:
 
 - SQL and PL/SQL Execution
 - Query results as JavaScript objects or array 
@@ -23,7 +23,7 @@ Node-oracledb 0.4 supports basic and advanced Oracle features, including:
   - [Runtime Load Balancing](http://docs.oracle.com/database/121/ADFNS/adfns_perf_scale.htm#ADFNS515) (RLB)
   - [Transparent Application Failover](http://docs.oracle.com/database/121/ADFNS/adfns_avail.htm#ADFNS534) (TAF)
 
-Node-oracledb 0.4 is a preview release.  We are actively working on
+Node-oracledb 0.5 is a preview release.  We are actively working on
 adding features including LOB support and batch fetching / streaming
 of large query result sets.
 
@@ -92,13 +92,19 @@ See [INSTALL](INSTALL.md) for details.
 
 See [Documentation for the Oracle Database Node.js Driver](doc/api.md)
 
-## <a name="contrib"></a> 4. Contributing
+## <a name="changes"></a> 4. Changes
+
+See [CHANGELOG](CHANGELOG.md)
+
+*Note* there were two small, backward-compatibility breaking attribute name changes in node-oracledb 0.5.
+
+## <a name="contrib"></a> 5. Contributing
 
 Node-oracledb is an open source project. See 
 [CONTRIBUTING](CONTRIBUTING.md)
 for details.
 
-## <a name="license"></a> 5. Licence
+## <a name="license"></a> 6. Licence
 
 Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved.
 

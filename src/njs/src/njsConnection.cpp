@@ -34,6 +34,7 @@ Persistent<FunctionTemplate> Connection::connectionTemplate_s;
 // # of milliseconds in a day.  Used to convert from/to v8::Date to Oracle/Date
 #define NJS_DAY2MS       (24.0 * 60.0 * 60.0 * 1000.0 )
 
+
 /*****************************************************************************/
 /*
    DESCRIPTION
@@ -315,7 +316,7 @@ NAN_METHOD(Connection::Execute)
 
   executeBaton->maxRows      = connection->oracledb_->getMaxRows();
   executeBaton->outFormat    = connection->oracledb_->getOutFormat();
-  executeBaton->isAutoCommit = connection->oracledb_->getIsAutoCommit();
+  executeBaton->autoCommit = connection->oracledb_->getAutoCommit();
   executeBaton->dpienv       = connection->oracledb_->getDpiEnv();
   executeBaton->dpiconn      = connection->dpiconn_;
 
@@ -387,8 +388,8 @@ void Connection::ProcessOptions (_NAN_METHOD_ARGS, unsigned int index,
                                options, "maxRows", 2, exitProcessOptions );
     NJS_GET_UINT_FROM_JSON   ( executeBaton->outFormat, executeBaton->error,
                                options, "outFormat", 2, exitProcessOptions );
-    NJS_GET_BOOL_FROM_JSON   ( executeBaton->isAutoCommit, executeBaton->error,
-                               options, "isAutoCommit", 2, exitProcessOptions );
+    NJS_GET_BOOL_FROM_JSON   ( executeBaton->autoCommit, executeBaton->error,
+                               options, "autoCommit", 2, exitProcessOptions );
   }
   else
   {
@@ -505,7 +506,7 @@ void Connection::GetBindUnit (Handle<Value> val, Bind* bind,
         break;
       case BIND_OUT   :
         bind->isOut  = true;
-        bind->ind  = 0;
+        executeBaton->numOutBinds++;
         Connection::GetOutBindParams(bind->type, bind, executeBaton);
         if(!executeBaton->error.empty()) goto exitGetBindUnit;
         break;
@@ -542,12 +543,10 @@ void Connection::GetOutBindParams (unsigned short dataType, Bind* bind,
   {
     case DATA_STR :
       bind->type =  dpi::DpiVarChar;
-      bind->value = (char*)malloc(bind->maxSize);
       break;
     case DATA_NUM :
       bind->type = dpi::DpiDouble;
       bind->maxSize = sizeof(double);
-      bind->value = (double*)malloc(bind->maxSize);
       break;
     case DATA_DATE :
       bind->extvalue = (long double *) malloc ( sizeof ( long double ) );
@@ -568,15 +567,24 @@ void Connection::GetOutBindParams (unsigned short dataType, Bind* bind,
 
    PARAMETERS:
      Handle value, bind struct, eBaton struct
+
+   NOTE:
+     For IN Bind only len field field is used, and for only a scalar value now,
+     allocate for one unit.
 */
 void Connection::GetInBindParams (Handle<Value> v8val, Bind* bind,
                                            eBaton* executeBaton, BindType type)
 {
-  bind->ind  = 0;
+  /* Allocate for scalar indicator & length */
+  bind->ind = (short *)malloc ( sizeof ( short ) );
+  bind->len = (DPI_BUFLEN_TYPE *)malloc ( sizeof ( DPI_BUFLEN_TYPE ) );
+
+  *(bind->ind)  = 0;
+
   if(v8val->IsUndefined() || v8val->IsNull())
   {
     bind->value = NULL;
-    bind->ind   = -1;
+    *(bind->ind)   = -1;
     bind->type        = dpi::DpiVarChar;
   }
   else if(v8val->IsString())
@@ -593,14 +601,14 @@ void Connection::GetInBindParams (Handle<Value> v8val, Bind* bind,
     bind->type = dpi::DpiVarChar;
     if(type == BIND_INOUT)
     {
-      bind->len = str.length();
+      *(bind->len) = str.length();
     }
     else // IN
     {
-      bind->maxSize = bind->len = str.length();
+      bind->maxSize = *(bind->len) = str.length();
     }
-    DPI_SZ_TYPE size = (bind->maxSize >= bind->len ) ?
-                        bind->maxSize : bind->len;
+    DPI_SZ_TYPE size = (bind->maxSize >= *(bind->len) ) ?
+                       bind->maxSize : *(bind->len);
     if(size)
     {
       bind->value = (char*)malloc(size);
@@ -617,8 +625,8 @@ void Connection::GetInBindParams (Handle<Value> v8val, Bind* bind,
       goto exitGetInBindParams;
     }
     bind->type = dpi::DpiInteger;
-    bind->maxSize = bind->len = sizeof(int);
-    bind->value = (int*)malloc(bind->len);
+    bind->maxSize = *(bind->len) = sizeof(int);
+    bind->value = (int*)malloc(*(bind->len));
     *(int*)(bind->value) = v8val->ToInt32()->Value();
   }
   else if(v8val->IsUint32())
@@ -630,8 +638,8 @@ void Connection::GetInBindParams (Handle<Value> v8val, Bind* bind,
       goto exitGetInBindParams;
     }
     bind->type = dpi::DpiUnsignedInteger;
-    bind->maxSize = bind->len = sizeof(unsigned int);
-    bind->value = (unsigned int*)malloc(bind->len);
+    bind->maxSize = *(bind->len) = sizeof(unsigned int);
+    bind->value = (unsigned int*)malloc(*(bind->len));
     *(unsigned int*)(bind->value) = v8val->ToUint32()->Value();
   }
   else if(v8val->IsNumber())
@@ -642,8 +650,8 @@ void Connection::GetInBindParams (Handle<Value> v8val, Bind* bind,
       goto exitGetInBindParams;
     }
     bind->type = dpi::DpiDouble;
-    bind->maxSize = bind->len = sizeof(double);
-    bind->value = (double*)malloc(bind->len);
+    bind->maxSize = *(bind->len) = sizeof(double);
+    bind->value = (double*)malloc(*(bind->len));
     *(double*)(bind->value) = v8val->NumberValue();
   }
   else if(v8val->IsDate ())
@@ -658,7 +666,7 @@ void Connection::GetInBindParams (Handle<Value> v8val, Bind* bind,
     bind->extvalue = (long double *) malloc (sizeof ( long double ) );
     bind->value = (long double *)malloc (sizeof ( long double ));
     bind->type = dpi::DpiTimestampLTZ;
-    bind->len = 0;
+    *(bind->len) = 0;
     bind->maxSize = 0;
     /* Convert v8::Date value to long double */
     Connection::v8Date2OraDate ( v8val, bind);
@@ -692,16 +700,49 @@ void Connection::Async_Execute (uv_work_t *req)
   try
   {
     Connection::PrepareAndBind(executeBaton);
-    executeBaton->st = executeBaton->dpistmt->stmtType();
+
+    if ( !executeBaton->error.empty() )  goto exitAsyncExecute;
+
     if (executeBaton->st == DpiStmtSelect)
     {
-      executeBaton->dpistmt->execute(0, executeBaton->isAutoCommit);
+      executeBaton->dpistmt->execute(0, executeBaton->autoCommit);
       Connection::GetDefines(executeBaton);
     }
     else
     {
-      executeBaton->dpistmt->execute(1, executeBaton->isAutoCommit);
+      executeBaton->dpistmt->execute(1, executeBaton->autoCommit);
       executeBaton->rowsAffected = executeBaton->dpistmt->rowsAffected();
+
+      /* Check to see if the string buffer size is good in case of
+       * DML Returning.
+       */
+      if ( executeBaton->stmtIsReturning )
+      {
+        for ( unsigned int b = 0; b < executeBaton->binds.size (); b ++ )
+        {
+          /* Interested only OUT binds with VARCHAR columns */
+          if ( executeBaton->binds[b]->isOut &&
+               ( executeBaton->binds[b]->type == dpi::DpiVarChar ))
+          {
+            bool err = false;
+            for ( DPI_SZ_TYPE row = 0 ;
+                  !err && ( row < executeBaton->rowsAffected) ;
+                  row ++ )
+            {
+              if (executeBaton->binds[b]->maxSize <
+                  (DPI_SZ_TYPE) executeBaton->binds[b]->len2[row])
+              {
+                /* Report insufficient buffer for OUT binds */
+                executeBaton->error =
+                  NJSMessages::getErrorMsg (errInsufficientBufferForBinds);
+                err = true;
+              }
+            }
+          }
+        }
+        /* Fall through the code to cleanup other objects */
+      }
+
 
      /* Process date/timestamp INOUT/OUT bind values */
      for ( unsigned int b = 0; b < executeBaton->binds.size (); b++ )
@@ -728,7 +769,19 @@ void Connection::Async_Execute (uv_work_t *req)
   }
   catch (dpi::Exception& e)
   {
-      executeBaton->error = std::string(e.what());
+    // In Case of DML Returning, if the buffer is small, and if the callback
+    // is called multiple times, an ORA error 24343 was reported. Converting
+    // that error to errInsufficientBufferForBinds.
+    if ( !executeBaton->stmtIsReturning && 
+         (e.errnum() != 24343) )
+    {
+      executeBaton->error = std::string(e.what ());
+    }
+    else
+    {
+      executeBaton->error = NJSMessages::getErrorMsg (
+                                     errInsufficientBufferForBinds ) ;
+    }
   }
   exitAsyncExecute:
   ;
@@ -745,6 +798,9 @@ void Connection::Async_Execute (uv_work_t *req)
 void Connection::PrepareAndBind (eBaton* executeBaton)
 {
     executeBaton->dpistmt = executeBaton->dpiconn->getStmt(executeBaton->sql);
+    executeBaton->st = executeBaton->dpistmt->stmtType ();
+    executeBaton->stmtIsReturning = executeBaton->dpistmt->isReturning ();
+
     if(!executeBaton->binds.empty())
     {
       if(!executeBaton->binds[0]->key.empty())
@@ -752,35 +808,98 @@ void Connection::PrepareAndBind (eBaton* executeBaton)
         for(unsigned int index = 0 ;index < executeBaton->binds.size();
             index++)
         {
+          /* DML Returning does not support DATE/TIME database types
+           * return error in that case
+           */
+          if ( executeBaton->stmtIsReturning &&
+               (executeBaton->binds[index]->type == DpiTimestampLTZ ) )
+          {
+            executeBaton->error = NJSMessages::getErrorMsg (
+                                              errInvalidBindDataType, 2);
+            return;
+          }
+          
+          // Allocate for OUT Binds
+          // For DML Returning, allocation happens through callback.
+          if ( executeBaton->binds[index]->isOut &&
+               !executeBaton->stmtIsReturning &&
+               !executeBaton->binds[index]->value )
+          {
+            Connection::cbDynBufferAllocate ( executeBaton->binds[index],
+                                              false, 1 );
+          }
+          
+
           // Convert v8::Date to Oracle DB Type
           if ( executeBaton->binds[index]->type == DpiTimestampLTZ )
           {
             Connection::UpdateDateValue ( executeBaton ) ;
           }
+
           // Bind by name
-          executeBaton->dpistmt->bind((const unsigned char*)executeBaton->binds[index]->key.c_str(),
-                             (int) executeBaton->binds[index]->key.length(),
-                             executeBaton->binds[index]->type,
-                             executeBaton->binds[index]->value,
-                             executeBaton->binds[index]->maxSize,
-                             &executeBaton->binds[index]->ind,
-                             &executeBaton->binds[index]->len);
+          executeBaton->dpistmt->bind(
+                (const unsigned char*)executeBaton->binds[index]->key.c_str(),
+                (int) executeBaton->binds[index]->key.length(),
+                executeBaton->binds[index]->type,
+                executeBaton->binds[index]->value,
+                (executeBaton->binds[index]->type == dpi::DpiVarChar ) ?
+                  (executeBaton->binds[index]->maxSize + 1) :
+                  executeBaton->binds[index]->maxSize,
+                executeBaton->binds[index]->ind,
+                executeBaton->binds[index]->len,
+                (executeBaton->stmtIsReturning &&
+                  executeBaton->binds[index]->isOut) ?
+                    (void *)executeBaton->binds[index] : NULL,
+                (executeBaton->stmtIsReturning &&
+                  executeBaton->binds[index]->isOut) ?
+                    Connection::cbDynBufferGet : NULL );
         }
       }
       else
       {
-        for(unsigned int index = 0 ;index < executeBaton->binds.size(); index++)
+        for(unsigned int index = 0 ;index < executeBaton->binds.size();
+            index++)
         {
+          /* DML Returning does not support DATE/TIME database types
+           * return error in that case
+           */
+          if ( executeBaton->stmtIsReturning &&
+               (executeBaton->binds[index]->type == DpiTimestampLTZ ) )
+          {
+            executeBaton->error = NJSMessages::getErrorMsg (
+                                              errInvalidBindDataType, 2);
+            return;
+          }
+
+          // Allocate for OUT Binds
+          // For DML Returning, allocation happens through callback
+          if ( executeBaton->binds[index]->isOut &&
+               !executeBaton->stmtIsReturning &&
+               !executeBaton->binds[index]->value )
+          {
+            Connection::cbDynBufferAllocate ( executeBaton->binds[index],
+                                              false, 1 );
+          }
+
           if ( executeBaton->binds[index]->type == DpiTimestampLTZ )
           {
             Connection::UpdateDateValue ( executeBaton ) ;
           }
           // Bind by position
-          executeBaton->dpistmt->bind(index+1,executeBaton->binds[index]->type,
-                             executeBaton->binds[index]->value,
-                             executeBaton->binds[index]->maxSize,
-                             &executeBaton->binds[index]->ind,
-                             &executeBaton->binds[index]->len);
+          executeBaton->dpistmt->bind(
+                index+1,executeBaton->binds[index]->type,
+                executeBaton->binds[index]->value,
+                (executeBaton->binds[index]->type == dpi::DpiVarChar ) ?
+                  (executeBaton->binds[index]->maxSize + 1) :
+                   executeBaton->binds[index]->maxSize,
+                executeBaton->binds[index]->ind,
+                executeBaton->binds[index]->len,
+                (executeBaton->stmtIsReturning &&
+                  executeBaton->binds[index]->isOut ) ?
+                    (void *)executeBaton->binds[index] : NULL,
+                (executeBaton->stmtIsReturning &&
+                  executeBaton->binds[index]->isOut) ?
+                    Connection::cbDynBufferGet : NULL );
         }
       }
     }
@@ -929,7 +1048,14 @@ void Connection::Async_AfterExecute(uv_work_t *req)
       default :
         result->Set(NanNew<v8::String>("rowsAffected"),
                     NanNew<v8::Integer>((unsigned int) executeBaton->rowsAffected));//, v8::ReadOnly);
-        result->Set(NanNew<v8::String>("outBinds"),NanUndefined());
+        if( executeBaton->numOutBinds )
+        {
+          result->Set(NanNew<v8::String>("outBinds"), Connection::GetOutBinds(executeBaton));//, v8::ReadOnly);
+        }
+        else
+        {
+          result->Set(NanNew<v8::String>("outBinds"),NanUndefined());
+        }
         result->Set(NanNew<v8::String>("rows"), NanUndefined());
         result->Set(NanNew<v8::String>("metaData"), NanUndefined());
         break;
@@ -1058,12 +1184,14 @@ v8::Handle<v8::Value> Connection::GetRows (eBaton* executeBaton)
    RETURNS:
      Handle
 */
-v8::Handle<v8::Value> Connection::GetValue ( short ind, unsigned short type, void* val,
-                                     DPI_BUFLEN_TYPE len )
+v8::Handle<v8::Value> Connection::GetValue ( short ind, unsigned short type,
+                                             void* val, DPI_BUFLEN_TYPE len,
+                                             DPI_SZ_TYPE maxSize)
 {
   NanEscapableScope();
   Handle<Value> value;
   Local<Date> date;
+
   if(ind != -1)
   {
      switch(type)
@@ -1093,6 +1221,70 @@ v8::Handle<v8::Value> Connection::GetValue ( short ind, unsigned short type, voi
   return NanEscapeScope(value);
 }
 
+
+/*****************************************************************************/
+/*
+  DESCRIPTION
+    To get an array as v8-Value from Bind structure - used in DML Returning
+
+  PARAMETERS
+    bind     - bind structure
+    count    - row count
+
+  Returns
+    v8::Value  - this will be an array (even for 1 row, array or 1).
+*/
+v8::Handle<v8::Value> Connection::GetArrayValue ( Bind *binds, unsigned long count )
+{
+  NanEscapableScope();
+  Local<Date> date;
+  Local<Array> arrVal;
+  unsigned long index = 0;
+  Handle<Value> val;
+
+  /* To return a value of array type, create one of specified size */
+  arrVal = NanNew<v8::Array>( count ) ;
+
+  for ( index = 0 ; index < count ; index ++ )
+  {
+    switch ( binds->type )
+    {
+    case dpi::DpiVarChar:
+      arrVal->Set ( index,
+                    ( binds->ind[index] == -1 ) ? NanNull() :
+                      NanNew<v8::String> ((char *)binds->value +
+                                   (index * binds->maxSize ),
+                                   binds->len2[index]));
+      break;
+    case dpi::DpiInteger:
+      arrVal->Set ( index,
+                    (binds->ind[index] == -1 ) ? NanNull() :
+                      NanNew<v8::Integer> ( *((int *)binds->value + index )));
+      break;
+    case dpi::DpiDouble:
+      arrVal->Set ( index,
+                    (binds->ind[index] == -1 ) ? NanNull() :
+                      NanNew<v8::Number> ( *((double *)binds->value + index )));
+      break;
+    case dpi::DpiTimestampLTZ:
+      if ( binds->ind[index] != -1 )
+      {
+        arrVal->Set ( index, 
+                      NanNew<v8::Date> (*((long double *)binds->value + index )) );
+      }
+      else
+      {
+        arrVal->Set ( index, NanNull () );
+      }
+      break;
+    default:
+      break;
+    }
+  }
+  return NanEscapeScope( arrVal ) ;
+}
+
+
 /*****************************************************************************/
 /*
    DESCRIPTION
@@ -1107,23 +1299,23 @@ v8::Handle<v8::Value> Connection::GetValue ( short ind, unsigned short type, voi
 v8::Handle<v8::Value> Connection::GetOutBinds (eBaton* executeBaton)
 {
   NanEscapableScope();
+
   if(!executeBaton->binds.empty())
   {
     if( executeBaton->binds[0]->key.empty() )
     {
       // Binds as JS array
-      unsigned int outCount = 0;
-      for(unsigned int index = 0; index < executeBaton->binds.size(); index++)
-      {
-        if(executeBaton->binds[index]->isOut)
-          outCount++;
-      }
-      return NanEscapeScope(GetOutBindArray( executeBaton->binds, outCount ));
+      return NanEscapeScope(GetOutBindArray( executeBaton->binds,
+                                             executeBaton->numOutBinds,
+                                             executeBaton->stmtIsReturning,
+                                             executeBaton->rowsAffected ));
     }
     else
     {
       // Binds as JS object 
-      return NanEscapeScope(GetOutBindObject( executeBaton->binds ));
+      return NanEscapeScope(GetOutBindObject( executeBaton->binds,
+                                              executeBaton->stmtIsReturning,
+                                              executeBaton->rowsAffected ));
     }
   }
   return NanUndefined();
@@ -1140,8 +1332,10 @@ v8::Handle<v8::Value> Connection::GetOutBinds (eBaton* executeBaton)
    RETURNS:
      Outbinds array
 */
-v8::Handle<v8::Value> Connection::GetOutBindArray ( std::vector<Bind*> binds,
-                                            unsigned int outCount )
+v8::Handle<v8::Value> Connection::GetOutBindArray ( std::vector<Bind*> &binds,
+                                                    unsigned int outCount,
+                                                    bool isDMLReturning,
+                                                    unsigned long rowcount )
 {
   NanEscapableScope();
 
@@ -1152,14 +1346,24 @@ v8::Handle<v8::Value> Connection::GetOutBindArray ( std::vector<Bind*> binds,
   {
     if(binds[index]->isOut)
     {
-      arrayBinds->Set( it, Connection::GetValue(
-                                binds[index]->ind,
-                                binds[index]->type,
-                            ( binds[index]->type == DpiTimestampLTZ ) ?
-                                binds[index]->extvalue : binds[index]->value,
-                                binds[index]->len ) );
+      Handle<Value> val ;
+      if ( !isDMLReturning )
+      {
+        val = Connection::GetValue (
+                                    binds[index]->ind[0],
+                                    binds[index]->type,
+                                    (binds[index]->type == DpiTimestampLTZ ) ?
+                                    binds[index]->extvalue :
+                                    binds[index]->value,
+                                    binds[index]->len[0] ) ;
+      }
+      else
+      {
+        val = Connection::GetArrayValue ( binds[index], rowcount );
+      }
+      arrayBinds->Set( it, val );
+      it ++;
     }
-    it++;
   }
   return NanEscapeScope(arrayBinds);
 }
@@ -1175,7 +1379,9 @@ v8::Handle<v8::Value> Connection::GetOutBindArray ( std::vector<Bind*> binds,
    RETURNS:
      Outbinds object
 */
-v8::Handle<v8::Value> Connection::GetOutBindObject ( std::vector<Bind*> binds )
+v8::Handle<v8::Value> Connection::GetOutBindObject ( std::vector<Bind*> &binds,
+                                                     bool isDMLReturning,
+                                                     unsigned long rowcount )
 {
   NanEscapableScope();
   Local<Object> objectBinds = NanNew<v8::Object>();
@@ -1183,15 +1389,28 @@ v8::Handle<v8::Value> Connection::GetOutBindObject ( std::vector<Bind*> binds )
   {
     if(binds[index]->isOut)
     {
+      Handle<Value> val;
+
       binds[index]->key.erase(binds[index]->key.begin());
+
+      if ( !isDMLReturning )
+      {
+        val = Connection::GetValue (
+                                    binds[index]->ind[0],
+                                    binds[index]->type,
+                                    (binds[index]->type == DpiTimestampLTZ ) ?
+                                 binds[index]->extvalue : binds[index]->value,
+                                    binds[index]->len[0],
+                                    binds[index]->maxSize );
+      }
+      else
+      {
+        val = Connection::GetArrayValue ( binds[index], rowcount ) ;
+      }
+
       objectBinds->Set( NanNew<v8::String> ( binds[index]->key.c_str(),
-                                      (int) binds[index]->key.length() ),
-                        Connection::GetValue(
-                             binds[index]->ind,
-                             binds[index]->type,
-                         (binds[index]->type == DpiTimestampLTZ ) ?
-                             binds[index]->extvalue : binds[index]->value,
-                             binds[index]->len ) );
+                        (int) binds[index]->key.length() ),
+                        val );
     }
   }
   return NanEscapeScope(objectBinds);
@@ -1634,6 +1853,189 @@ void Connection::UpdateDateValue ( eBaton * ebaton )
 }
 
 
+
+/*****************************************************************************/
+/*
+  DESCRITION
+    callback/Utility function to allocate for BIND values (IN & OUT).
+    This has been consolidated to a callback/utility funciton so that
+    allocation happens only once.
+    For IN binds, the allocation and initialization happens in 
+    GetInBindParams()
+    For OUT binds the allocation happens in PrepareAndBind ().
+    For OUT binds using RETURNING INTO clause, this function is used as
+    callback.
+
+  PARAMETERS
+    ctx    - Pointer to Bind structure
+    nRows  - number of Rows (to allocate).
+
+  RETURNS
+    -None-
+*/
+void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning, 
+                                       unsigned int nRows )
+{
+  Bind *bind = (Bind *)ctx;
+
+  bind->ind = (short *)malloc ( nRows * sizeof ( short ) ) ;
+  if ( dmlReturning )
+  {
+    bind->len2 = ( unsigned int *)malloc ( nRows * sizeof ( unsigned int ) );
+  }
+  else
+  {
+    bind->len = (DPI_BUFLEN_TYPE *)malloc ( nRows * 
+                                            sizeof ( DPI_BUFLEN_TYPE ) );
+  }
+
+  switch ( bind->type )
+  {
+  case dpi::DpiVarChar:
+    /* one extra char for EOS */
+    bind->value = (char *)malloc ( ( bind->maxSize + 1) * nRows ) ;
+    if ( dmlReturning )
+    {
+      *(bind->len2) = bind->maxSize ;
+    }
+    else
+    {
+      *(bind->len) = bind->maxSize;
+    }
+    break;
+
+  case dpi::DpiInteger:
+    bind->value = ( int *) malloc ( sizeof (int) * nRows ) ;
+    if ( !dmlReturning )
+    {
+      *(bind->len) = sizeof ( int ) ;
+    }
+    break;
+
+  case dpi::DpiUnsignedInteger:
+    bind->value = ( unsigned int *)malloc ( sizeof ( unsigned int ) * nRows );
+    if ( !dmlReturning )
+    {
+      *(bind->len) = sizeof ( unsigned int ) ;
+    }
+    break;
+
+  case dpi::DpiDouble:
+    bind->value = ( double *)malloc ( sizeof ( double ) * nRows );
+    if ( !dmlReturning )
+    {
+      *(bind->len) = sizeof ( double ) ;
+    }
+    break;
+
+  case dpi::DpiTimestampLTZ:
+    /* bind->extValue & bind->dttmarr are used to allocate descriptor & double
+     * this is not used.  This requies to be modified
+     */
+    break;
+  }
+}
+
+
+/****************************************************************************/
+/*
+    DESCRIPTION
+      Application (Driver) level callback used for Dynamic Binding, this
+      function idenfies block of memory for each cell.
+      As the driver knows the type, size based on type, buffer allocated, this
+      callback is the best place to provide such data.
+
+    PARAMETERS
+      ctx   (IN)      context
+      nRows (IN)      # of rows (after execution, so knows rows-affected)
+      index (IN)      row index
+      bufpp (INOUT)   buffer for the cell
+      alenpp (INOUT)   buffer for actual length
+      indpp (INOUT)   buffer for the indicator
+      rcode (INOUT)   return code - not used
+      piecep (INOUT)  for piece wise operations.
+
+    RETURN
+      0.  (Any non zero value to indicate errors).
+
+    NOTE:
+      1. DATE/TIMESTAMP not supported
+      2. using bind->len2 for DML returning (not bind->len)
+*/
+
+int Connection::cbDynBufferGet ( void *ctx, DPI_SZ_TYPE nRows,
+                                 unsigned long iter, unsigned long index,
+                                 dvoid **bufpp, void **alenpp, void **indpp,
+                                 unsigned short **rcode, unsigned char *piecep)
+{
+  Bind *bind = (Bind *)ctx;
+  int ret = 0;
+
+  if (*piecep == OCI_ONE_PIECE )
+  {
+    *piecep = OCI_ONE_PIECE ;  /* Use ONE PIECE by default */
+
+    /*
+     * NOTE:  The allocation when index == 0 has to be done for each iter
+     *        when supporting ARRAY binds
+     */
+
+    // First time callback, allocate the buffer(s).
+    if ( index == 0 )
+    {
+      Connection::cbDynBufferAllocate (ctx, true, nRows );
+    }
+
+    bind->ind[index] = -1;
+
+    // Find block of memory for this index
+    switch ( bind->type )
+    {
+    case dpi::DpiVarChar:
+      bind->len2[index] = bind->maxSize;
+      /* 1 extra char for EOS, 1 extra to determine insufficient buf later */
+      *bufpp = (void *)&(((char *)bind->value)[ (bind->maxSize) * index]);
+      /* Buffer provided by the application could be small, in this case to
+       * determine the callback is called again, we need the piecep, update
+       * piece to FIRST PIECE.
+       */
+      *piecep = OCI_FIRST_PIECE;
+      break;
+    case dpi::DpiInteger:
+      bind->len2[index] = sizeof ( int ) ;
+      *bufpp = ( void *)&(((int *)bind->value)[index]);
+      break;
+    case dpi::DpiUnsignedInteger:
+      bind->len2[index] = sizeof ( unsigned int ) ;
+      *bufpp = ( void *)&(((unsigned int *)bind->value)[index]);
+      break;
+
+    case dpi::DpiDouble:
+      bind->len2[index] = sizeof ( double ) ;
+      *bufpp = (void *)&(((double *)bind->value)[index]);
+      break;
+
+    case dpi::DpiTimestampLTZ:
+      /* NOT SUPPORTED - error reported already */
+      break;
+    }
+
+    *alenpp = &(bind->len2[index]);
+    *indpp  = &(bind->ind[index]);
+  }
+  else
+  {
+    /* PIECE wise opearation is not supported for NUMBER/DATE type(s)
+     * only String and in future LOB, etc.
+     * Currently if the user provided a small buffer, we need to stop
+     * the callback being called, and report error
+     */
+    *piecep = OCI_LAST_PIECE ;
+    ret = -1;
+  }
+
+  return ret;
+}
 
 
 /* end of file njsConnection.cpp */

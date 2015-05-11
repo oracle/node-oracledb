@@ -97,7 +97,7 @@ EnvImpl::EnvImpl()
 
 try : envh_(NULL), poolMax_(kPoolMax), poolMin_(kPoolMin),
       poolIncrement_(kPoolIncrement), poolTimeout_(kPoolTimeout),
-      isExternalAuth_(false),  stmtCacheSize_(kStmtCacheSize)
+      externalAuth_(false),  stmtCacheSize_(kStmtCacheSize)
 {
 
   sword rc = OCIEnvCreate (&envh_, OCI_THREADED | OCI_OBJECT, NULL, NULL,
@@ -364,7 +364,7 @@ unsigned int EnvImpl::poolTimeout() const
      Specify external authentication.
 
    PARAMETERS:
-    isExternalAuth  - true if using external authentication
+    externalAuth  - true if using external authentication
                       false if not useing external authentication
 
    RETURNS:
@@ -374,9 +374,9 @@ unsigned int EnvImpl::poolTimeout() const
 
  */
 
-void EnvImpl::isExternalAuth(bool isExternalAuth)
+void EnvImpl::externalAuth(bool externalAuth)
 {
-  isExternalAuth_ = isExternalAuth;
+  externalAuth_ = externalAuth;
 }
 
 
@@ -397,9 +397,9 @@ void EnvImpl::isExternalAuth(bool isExternalAuth)
 
  */
 
-bool EnvImpl::isExternalAuth() const
+bool EnvImpl::externalAuth() const
 {
-  return isExternalAuth_;
+  return externalAuth_;
 }
 
 
@@ -470,7 +470,7 @@ SPool * EnvImpl::createPool(const string &user, const string &password,
                             const string &connString,
                             int poolMax, int poolMin, int poolIncrement,
                             int poolTimeout, int stmtCacheSize,
-                            bool isExternalAuth)
+                            bool externalAuth)
 {
   return new PoolImpl(this, envh_, user, password, connString,
                       (poolMax == -1) ? poolMax_ : poolMax,
@@ -479,7 +479,7 @@ SPool * EnvImpl::createPool(const string &user, const string &password,
                                               poolIncrement,
                       (poolTimeout == -1) ? poolTimeout_ :
                                             poolTimeout,
-                      isExternalAuth,
+                      externalAuth,
                       (stmtCacheSize == -1) ? stmtCacheSize_ :
                       stmtCacheSize);
 }
@@ -504,9 +504,9 @@ SPool * EnvImpl::createPool(const string &user, const string &password,
 Conn * EnvImpl::getConnection(const string &user, const string &password,
                               const string &connString,
                               int stmtCacheSize, const string &connClass,
-                              bool isExternalAuth)
+                              bool externalAuth)
 {
-  return (Conn *)new ConnImpl(this, envh_, isExternalAuth,
+  return (Conn *)new ConnImpl(this, envh_, externalAuth,
                               (stmtCacheSize == -1) ? stmtCacheSize_ :
                                                       stmtCacheSize,
                               user, password,

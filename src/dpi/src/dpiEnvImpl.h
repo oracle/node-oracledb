@@ -83,8 +83,8 @@ class EnvImpl : public Env
   virtual void poolTimeout(unsigned int poolTimeout);
   virtual unsigned int poolTimeout() const;
 
-  virtual void isExternalAuth(bool isExternalAuth);
-  virtual bool isExternalAuth() const;
+  virtual void externalAuth(bool externalAuth);
+  virtual bool externalAuth() const;
 
   virtual void isEventEnabled(bool isEventEnabled);
   virtual bool isEventEnabled() const;
@@ -96,12 +96,12 @@ class EnvImpl : public Env
                              int poolIncrement,
                              int poolTimeout,
                              int stmtCacheSize,
-                             bool isExternalAuth);
+                             bool externalAuth);
 
   virtual Conn * getConnection(const string &user, const string &password,
                                const string &connString, int stmtCacheSize,
                                const string &connClass,
-                               bool isExternalAuth);
+                               bool externalAuth);
 
 
                                 // internal methods
@@ -125,7 +125,7 @@ private:
   unsigned int poolIncrement_;  // pool increment
   unsigned int poolTimeout_;    // pool timeout
 
-  bool         isExternalAuth_; // doing external authentication
+  bool         externalAuth_; // doing external authentication
   bool         isEventEnabled_; // EVENTS are enabled
 
   unsigned int stmtCacheSize_;  // statement cache size

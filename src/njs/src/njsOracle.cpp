@@ -49,14 +49,14 @@ Oracledb::Oracledb()
   dpienv_         = dpi::Env::createEnv();
   outFormat_      = ROWS_ARRAY;
   maxRows_        = MAX_ROWS;
-  isAutoCommit_   = false;
+  autoCommit_   = false;
   stmtCacheSize_  = STMT_CACHE_SIZE;
   poolMax_        = POOL_MAX;
   poolMin_        = POOL_MIN;
   poolIncrement_  = POOL_INCR;
   poolTimeout_    = POOL_TIMEOUT;
   connClass_      = "";
-  isExternalAuth_ = false;
+  externalAuth_ = false;
 }
 
 /*****************************************************************************/
@@ -112,9 +112,9 @@ void Oracledb::Init(Handle<Object> target)
                               Oracledb::GetStmtCacheSize,
                               Oracledb::SetStmtCacheSize );
   temp->InstanceTemplate()->SetAccessor(
-                              NanNew<v8::String>("isAutoCommit"),
-                              Oracledb::GetIsAutoCommit,
-                              Oracledb::SetIsAutoCommit );
+                              NanNew<v8::String>("autoCommit"),
+                              Oracledb::GetAutoCommit,
+                              Oracledb::SetAutoCommit );
   temp->InstanceTemplate()->SetAccessor(
                               NanNew<v8::String>("maxRows"),
                               Oracledb::GetMaxRows,
@@ -132,9 +132,9 @@ void Oracledb::Init(Handle<Object> target)
                               Oracledb::GetConnectionClass,
                               Oracledb::SetConnectionClass );
   temp->InstanceTemplate()->SetAccessor(
-                              NanNew<v8::String>("isExternalAuth"),
-                              Oracledb::GetIsExternalAuth,
-                              Oracledb::SetIsExternalAuth );
+                              NanNew<v8::String>("externalAuth"),
+                              Oracledb::GetExternalAuth,
+                              Oracledb::SetExternalAuth );
 
   NanAssignPersistent( oracledbTemplate_s, temp);
   target->Set(NanNew<v8::String>("Oracledb"),temp->GetFunction());
@@ -334,26 +334,26 @@ NAN_SETTER(Oracledb::SetStmtCacheSize)
 /*****************************************************************************/
 /*
    DESCRIPTION
-     Get Accessor of isAutoCommit property
+     Get Accessor of autoCommit property
 */
-NAN_PROPERTY_GETTER(Oracledb::GetIsAutoCommit)
+NAN_PROPERTY_GETTER(Oracledb::GetAutoCommit)
 {
   NanScope();
   Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(args.Holder());
-  Handle<Boolean> value = NanNew<v8::Boolean>(oracledb->isAutoCommit_);
+  Handle<Boolean> value = NanNew<v8::Boolean>(oracledb->autoCommit_);
   NanReturnValue(value);
 }
 
 /*****************************************************************************/
 /*
    DESCRIPTION
-     Set Accessor of isAutoCommit property
+     Set Accessor of autoCommit property
 */
-NAN_SETTER(Oracledb::SetIsAutoCommit)
+NAN_SETTER(Oracledb::SetAutoCommit)
 {
   NanScope();
   Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(args.Holder());
-  oracledb->isAutoCommit_ = value->ToBoolean()->Value();
+  oracledb->autoCommit_ = value->ToBoolean()->Value();
 }
 
 /*****************************************************************************/
@@ -418,14 +418,14 @@ NAN_SETTER(Oracledb::SetConnectionClass)
 /*****************************************************************************/
 /*
    DESCRIPTION
-     Get Accessor of isExternalAuth property
+     Get Accessor of externalAuth property
 */
-NAN_PROPERTY_GETTER(Oracledb::GetIsExternalAuth)
+NAN_PROPERTY_GETTER(Oracledb::GetExternalAuth)
 {
   NanScope();
 
   Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(args.Holder());
-  Handle<Boolean> value = NanNew<v8::Boolean>(oracledb->isExternalAuth_);
+  Handle<Boolean> value = NanNew<v8::Boolean>(oracledb->externalAuth_);
 
   NanReturnValue(value);
 }
@@ -434,13 +434,13 @@ NAN_PROPERTY_GETTER(Oracledb::GetIsExternalAuth)
 /*****************************************************************************/
 /*
    DESCRIPTION
-     Set Accessor of isExternalAuth property
+     Set Accessor of externalAuth property
 */
-NAN_SETTER(Oracledb::SetIsExternalAuth)
+NAN_SETTER(Oracledb::SetExternalAuth)
 {
   NanScope();
   Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(args.Holder());
-  oracledb->isExternalAuth_ = value->ToBoolean()->Value();
+  oracledb->externalAuth_ = value->ToBoolean()->Value();
 }
 
 
@@ -480,12 +480,12 @@ NAN_METHOD(Oracledb::GetConnection)
   // the following properties will be overriden if provided as call parameters
 
   connBaton->stmtCacheSize  = oracledb->stmtCacheSize_;
-  connBaton->isExternalAuth = oracledb->isExternalAuth_;
+  connBaton->externalAuth = oracledb->externalAuth_;
 
   NJS_GET_UINT_FROM_JSON   ( connBaton->stmtCacheSize, connBaton->error,
                              connProps, "stmtCacheSize", 0, exitGetConnection );
-  NJS_GET_BOOL_FROM_JSON   ( connBaton->isExternalAuth, connBaton->error,
-                             connProps, "isExternalAuth", 0, exitGetConnection );
+  NJS_GET_BOOL_FROM_JSON   ( connBaton->externalAuth, connBaton->error,
+                             connProps, "externalAuth", 0, exitGetConnection );
 
   connBaton->oracledb   =  oracledb;
   connBaton->dpienv     =  oracledb->dpienv_;
@@ -524,7 +524,7 @@ void Oracledb::Async_GetConnection (uv_work_t *req)
                                               connBaton->connStr,
                                               connBaton->stmtCacheSize,
                                               connBaton->connClass,
-                                              connBaton->isExternalAuth );
+                                              connBaton->externalAuth );
 
   }
   catch (dpi::Exception& e)
@@ -614,7 +614,7 @@ NAN_METHOD(Oracledb::CreatePool)
   poolBaton->poolIncrement =  oracledb->poolIncrement_;
   poolBaton->poolTimeout   =  oracledb->poolTimeout_;
   poolBaton->stmtCacheSize =  oracledb->stmtCacheSize_;
-  poolBaton->isExternalAuth = oracledb->isExternalAuth_;
+  poolBaton->externalAuth = oracledb->externalAuth_;
 
   NJS_GET_UINT_FROM_JSON   ( poolBaton->poolMax, poolBaton->error,
                              poolProps, "poolMax", 0, exitCreatePool );
@@ -626,8 +626,8 @@ NAN_METHOD(Oracledb::CreatePool)
                              poolProps, "poolTimeout", 0, exitCreatePool );
   NJS_GET_UINT_FROM_JSON   ( poolBaton->stmtCacheSize, poolBaton->error,
                              poolProps, "stmtCacheSize", 0, exitCreatePool );
-  NJS_GET_BOOL_FROM_JSON   ( poolBaton->isExternalAuth, poolBaton->error,
-                             poolProps, "isExternalAuth", 0, exitCreatePool );
+  NJS_GET_BOOL_FROM_JSON   ( poolBaton->externalAuth, poolBaton->error,
+                             poolProps, "externalAuth", 0, exitCreatePool );
 
   poolBaton->oracledb  =  oracledb;
   poolBaton->dpienv    =  oracledb->dpienv_;
@@ -671,7 +671,7 @@ void Oracledb::Async_CreatePool (uv_work_t *req)
                                                   poolBaton->poolIncrement,
                                                   poolBaton->poolTimeout,
                                                   poolBaton->stmtCacheSize,
-                                                  poolBaton->isExternalAuth );
+                                                  poolBaton->externalAuth );
   }
   catch (dpi::Exception &e)
   {

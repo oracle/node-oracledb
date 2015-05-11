@@ -63,13 +63,13 @@ class ConnImpl : public Conn
  public:
                                 // creation/termination
 
-  ConnImpl(EnvImpl *env, OCIEnv *envh, bool isExternalAuth,
+  ConnImpl(EnvImpl *env, OCIEnv *envh, bool externalAuth,
            unsigned int stmtCacheSize,
            const string &user, const string &password,
            const string &connString,
            const string &connClass);
 
-  ConnImpl(PoolImpl *pool, OCIEnv *envh, bool isExternalAuth,
+  ConnImpl(PoolImpl *pool, OCIEnv *envh, bool externalAuth,
            OraText *poolName, ub4 poolNameLen, const string &connClass
            );
 

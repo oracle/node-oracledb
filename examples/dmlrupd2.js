@@ -16,18 +16,20 @@
  * limitations under the License.
  *
  * NAME
- *   select1.js
+ *   dmlrupd2.js
  *
  * DESCRIPTION
- *   Executes a basic query.
- *   Uses Oracle's sample HR schema.
- *
- *   Scripts to create the HR schema can be found at:
- *   https://github.com/oracle/db-sample-schemas
+ *   Example of 'DML Returning' with multiple rows matched
+ *   Use demo.sql to create the required table or do:
+ *     DROP TABLE dmlrupdtab;
+ *     CREATE TABLE dmlrupdtab (id NUMBER, name VARCHAR2(40));
+ *     INSERT INTO dmlrupdtab VALUES (1001, 'Venkat');
+ *     INSERT INTO dmlrupdtab VALUES (1002, 'Neeharika');
+ *     COMMIT;
  *
  *****************************************************************************/
 
-var oracledb = require('oracledb');
+var oracledb = require( 'oracledb' );
 var dbConfig = require('./dbconfig.js');
 
 oracledb.getConnection(
@@ -38,34 +40,27 @@ oracledb.getConnection(
   },
   function(err, connection)
   {
-    if (err) {
-      console.error(err.message);
+    if (err)
+    {
+      console.error(err);
       return;
     }
+
     connection.execute(
-      "SELECT department_id, department_name "
-    + "FROM departments "
-    + "WHERE department_id = :did",
-      [180],
+      "UPDATE DMLRUPDTAB SET NAME = :name RETURNING ID, NAME INTO :RID, :RNAME",
+      {
+        name:  "Chris",
+        rid:   { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+        rname: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
+      },
+      { isAutoCommit: true },
       function(err, result)
       {
-        if (err) {
-          console.error(err.message);
-          doRelease(connection);
+        if (err)
+        {
+          console.error(err);
           return;
         }
-        console.log(result.metaData);
-        console.log(result.rows);
-        doRelease(connection);
+        console.log(result.outBinds);
       });
   });
-
-function doRelease(connection)
-{
-  connection.release(
-    function(err) {
-      if (err) {
-        console.error(err.message);
-      }
-    });
-}

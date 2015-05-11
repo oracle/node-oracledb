@@ -44,8 +44,8 @@ using namespace v8;
 
 /*0.4.1.  Keep the version in sync with package.json */
 #define NJS_NODE_ORACLEDB_MAJOR       0
-#define NJS_NODE_ORACLEDB_MINOR       4
-#define NJS_NODE_ORACLEDB_PATCH       2
+#define NJS_NODE_ORACLEDB_MINOR       5
+#define NJS_NODE_ORACLEDB_PATCH       0
 
 /* Formula: 10000 x majorversion + 100 * minorversion + patchrelease number */
 #define NJS_NODE_ORACLEDB_VERSION   ( (NJS_NODE_ORACLEDB_MAJOR * 10000) + \
@@ -60,8 +60,8 @@ class Oracledb: public ObjectWrap
    // Oracledb class
    static void Init(Handle<Object> target);
 
-   dpi::Env* getDpiEnv () const { return dpienv_; }
-   bool     getIsAutoCommit () const  { return isAutoCommit_; }
+   dpi::Env*    getDpiEnv () const { return dpienv_; }
+   bool         getAutoCommit () const  { return autoCommit_; }
    unsigned int getOutFormat () const { return outFormat_; }
    unsigned int getMaxRows ()  const  { return maxRows_; }
    unsigned int getStmtCacheSize ()  const  { return stmtCacheSize_; }
@@ -95,12 +95,12 @@ private:
    static NAN_PROPERTY_GETTER(GetPoolIncrement);
    static NAN_PROPERTY_GETTER(GetPoolTimeout);
    static NAN_PROPERTY_GETTER(GetStmtCacheSize);
-   static NAN_PROPERTY_GETTER(GetIsAutoCommit);
+   static NAN_PROPERTY_GETTER(GetAutoCommit);
    static NAN_PROPERTY_GETTER(GetMaxRows);
    static NAN_PROPERTY_GETTER(GetOutFormat);
    static NAN_PROPERTY_GETTER(GetVersion);
    static NAN_PROPERTY_GETTER(GetConnectionClass);
-   static NAN_PROPERTY_GETTER(GetIsExternalAuth);
+   static NAN_PROPERTY_GETTER(GetExternalAuth);
 
    // Define Setter Accessors to Properties
    static NAN_SETTER(SetPoolMin);
@@ -108,19 +108,19 @@ private:
    static NAN_SETTER(SetPoolIncrement);
    static NAN_SETTER(SetPoolTimeout);
    static NAN_SETTER(SetStmtCacheSize);
-   static NAN_SETTER(SetIsAutoCommit);
+   static NAN_SETTER(SetAutoCommit);
    static NAN_SETTER(SetMaxRows);
    static NAN_SETTER(SetOutFormat);
    static NAN_SETTER(SetVersion);
    static NAN_SETTER(SetConnectionClass);
-   static NAN_SETTER(SetIsExternalAuth);
+   static NAN_SETTER(SetExternalAuth);
 
    Oracledb();
    ~Oracledb();
 
    dpi::Env* dpienv_;
    unsigned int outFormat_;
-   bool         isAutoCommit_;
+   bool         autoCommit_;
    unsigned int maxRows_;
 
    unsigned int stmtCacheSize_;
@@ -131,7 +131,7 @@ private:
    unsigned int poolTimeout_;
 
    std::string  connClass_;
-   bool         isExternalAuth_;
+   bool         externalAuth_;
 };
 
 /**
@@ -146,7 +146,7 @@ typedef struct connectionBaton
   std::string pswrd;
   std::string connStr;
   std::string connClass;
-  bool isExternalAuth;
+  bool externalAuth;
   std::string error;
 
   int poolMax;
@@ -165,7 +165,7 @@ typedef struct connectionBaton
   Oracledb *oracledb;
 
   connectionBaton() : user(""), pswrd(""), connStr(""), connClass(""),
-                      isExternalAuth(false), error(""),
+                      externalAuth(false), error(""),
                       poolMax(0), poolMin(0), poolIncrement(0),
                       poolTimeout(0), stmtCacheSize(0), maxRows(0),
                       outFormat(0), dpienv(NULL),

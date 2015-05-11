@@ -20,28 +20,26 @@
  *
  * DESCRIPTION
  *   Holds the credentials used by node-oracledb examples to connect
- *   to the database.
- *
- *   The connectString here uses the Easy Connect syntax
- *   "localhost/XE".  This connects to the database service XE on the
- *   the local machine.
+ *   to the database.  Production applications should instead consider
+ *   using External Authentication to avoid hard coded credentials.
  *
  *   Applications can set the connectString value to an Easy Connect
- *   string, or a Connect Name from a tnsnames.ora file, or the name
- *   of a local Oracle database instance.
+ *   string, or a Net Service Name from a tnsnames.ora file or
+ *   external naming service, or it can be the name of a local Oracle
+ *   database instance.
  *
- *   The full Easy Connect syntax is:
+ *   The Easy Connect syntax is:
  *     [//]host_name[:port][/service_name][:server_type][/instance_name]
- *   see https://docs.oracle.com/database/121/NETAG/naming.htm#i498306
  *
- *   If a tnsnames.ora file is used, set the TNS_ADMIN environment
- *   variable such that $TNS_ADMIN/tnsnames.ora is read.
- *   Alternatively use $ORACLE_HOME/network/admin/tnsnames.ora or
- *   /etc/tnsnames.ora.
+ *   If using a tnsnames.ora file, the file can be in a default
+ *   location such as $ORACLE_HOME/network/admin/tnsnames.ora or
+ *   /etc/tnsnames.ora.  Alternatively set the TNS_ADMIN environment
+ *   variable and put the file in $TNS_ADMIN/tnsnames.ora.
  *
  *   If connectString is not specified, the empty string "" is used
  *   which indicates to connect to the local, default database.
  *
+ * TROUBLESHOOTING
  *   Errors like:
  *     ORA-12541: TNS:no listener
  *   or
@@ -58,5 +56,7 @@
 module.exports = {
   user          : "hr",
   password      : "welcome",
-  connectString : "localhost/XE"
+  // For information on connection strings see:
+  // https://github.com/oracle/node-oracledb/blob/master/doc/api.md#connectionstrings
+  connectString : "localhost/XE"  // Easy Connect syntax
 };

@@ -20,10 +20,10 @@
  *
  * DESCRIPTION
  *   Show the auto commit behavior.
- * 
+ *
  *   By default, node-oracledb does not commit on execute.
  *   The driver also has commit() and rollback() methods to explicitly control transactions.
- * 
+ *
  *   Note: when a connection is closed, any open transaction will be committed.
  *
  *****************************************************************************/
@@ -52,25 +52,25 @@ oracledb.getConnection(
           return;
         }
         console.log("Table created");
-        
+
         connection1.execute(
           "INSERT INTO test VALUES (:id, :nm)",
           [1, 'Chris'],  // Bind values
-          { isAutoCommit: true},  // Override the default non-autocommit behavior
+          { autoCommit: true},  // Override the default non-autocommit behavior
           function(err, result)
           {
             if (err) { console.error(err.message); return; }
             console.log("Rows inserted: " + result.rowsAffected);  // 1
-            
+
             connection1.execute(
               "INSERT INTO test VALUES (:id, :nm)",
               [2, 'Alison'],  // Bind values
-              // { isAutoCommit: true},  // Since this isn't set, operations using a second connection won't see this row
+              // { autoCommit: true},  // Since this isn't set, operations using a second connection won't see this row
               function(err, result)
               {
                 if (err) { console.error(err.message); return; }
                 console.log("Rows inserted: " + result.rowsAffected);  // 1
-                
+
                 // Create a second connection
                 oracledb.getConnection(
                   {
@@ -93,16 +93,16 @@ oracledb.getConnection(
                           return;
                         }
                         // This will only show 'Chris' because inserting 'Alison' is not commited by default.
-                        // Uncomment the isAutoCommit option above and you will see both rows
+                        // Uncomment the autoCommit option above and you will see both rows
                         console.log(result.rows);
-                        
+
                         connection1.execute(
                           "DROP TABLE test",
                           function(err)
                           {
                             if (err) { console.error(err.message); return; }
                             console.log("Table dropped");
-                            
+
                             connection2.release(
                               function(err)
                               {
@@ -112,12 +112,12 @@ oracledb.getConnection(
                                   {
                                     if (err) { console.error(err.message); return; }
                                   });
-                                
+
                               });
                           });
                       });
                   });
               });
-          }); 
+          });
       });
   });
