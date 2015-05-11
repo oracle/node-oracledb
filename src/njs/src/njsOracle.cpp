@@ -90,6 +90,7 @@ void Oracledb::Init(Handle<Object> target)
 
   NODE_SET_PROTOTYPE_METHOD(oracledbTemplate_s, "getConnection", GetConnection);
   NODE_SET_PROTOTYPE_METHOD(oracledbTemplate_s, "createPool", CreatePool);
+  NODE_SET_PROTOTYPE_METHOD(oracledbTemplate_s, "createPoolSync", Sync_CreatePool);
 
   oracledbTemplate_s->InstanceTemplate()->SetAccessor(
                                             String::New("poolMax"),
@@ -662,6 +663,112 @@ exitCreatePool:
                 (uv_after_work_cb) Async_AfterCreatePool);
 
   return Undefined();
+}
+/*****************************************************************************/
+/*
+  DESCRIPTION
+    Sync CreatePool method on Oracledb class.
+  PARAMETERS:
+    Arguments - Pool attributes as JSON object,
+*/
+Handle<Value> Oracledb::Sync_CreatePool (const Arguments &args)
+{
+    HandleScope scope ;
+
+    Local<Object> poolProps;
+
+    Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb> ( args.This() );
+    connectionBaton *poolBaton = new connectionBaton ();
+
+    NJS_CHECK_NUMBER_OF_ARGS ( poolBaton->error, args, 1, 1, exitCreatePool );
+    NJS_GET_ARG_V8OBJECT ( poolProps, poolBaton->error, args, 0,
+            exitCreatePool );
+    NJS_GET_STRING_FROM_JSON ( poolBaton->user, poolBaton->error,
+            poolProps, "user", 0, exitCreatePool );
+    NJS_GET_STRING_FROM_JSON ( poolBaton->pswrd, poolBaton->error,
+            poolProps, "password", 0, exitCreatePool );
+    NJS_GET_STRING_FROM_JSON ( poolBaton->connStr, poolBaton->error,
+            poolProps, "connectString", 0, exitCreatePool );
+
+    poolBaton->poolMax       =  oracledb->poolMax_;
+    poolBaton->poolMin       =  oracledb->poolMin_;
+    poolBaton->poolIncrement =  oracledb->poolIncrement_;
+    poolBaton->poolTimeout   =  oracledb->poolTimeout_;
+    poolBaton->stmtCacheSize =  oracledb->stmtCacheSize_;
+
+    NJS_GET_UINT_FROM_JSON   ( poolBaton->poolMax, poolBaton->error,
+            poolProps, "poolMax", 0, exitCreatePool );
+    NJS_GET_UINT_FROM_JSON   ( poolBaton->poolMin, poolBaton->error,
+            poolProps, "poolMin", 0, exitCreatePool );
+    NJS_GET_UINT_FROM_JSON   ( poolBaton->poolIncrement, poolBaton->error,
+            poolProps, "poolIncrement", 0, exitCreatePool );
+    NJS_GET_UINT_FROM_JSON   ( poolBaton->poolTimeout, poolBaton->error,
+            poolProps, "poolTimeout", 0, exitCreatePool );
+    NJS_GET_UINT_FROM_JSON   ( poolBaton->stmtCacheSize, poolBaton->error,
+            poolProps, "stmtCacheSize", 0, exitCreatePool );
+
+    poolBaton->oracledb  =  oracledb;
+    poolBaton->dpienv    =  oracledb->dpienv_;
+
+    exitCreatePool:
+
+
+
+    if(!(poolBaton->error).empty()) goto exitAsyncCreatePool;
+
+    try
+    {
+        poolBaton->dpipool = poolBaton-> dpienv ->
+                createPool ( poolBaton->user,
+                poolBaton->pswrd,
+                poolBaton->connStr,
+                poolBaton->poolMax,
+                poolBaton->poolMin,
+                poolBaton->poolIncrement,
+                poolBaton->poolTimeout,
+                poolBaton->stmtCacheSize );
+    }
+    catch (dpi::Exception &e)
+    {
+        poolBaton->error = std::string (e.what() );
+    }
+    exitAsyncCreatePool:
+    ;
+
+
+
+    v8::TryCatch tc;
+    Handle<Value> pool;
+
+    if (!poolBaton->error.empty())
+    {
+        ThrowException(v8::Exception::Error(String::New(( poolBaton->error).c_str() )));
+    }
+    else
+    {
+
+        Handle<Object> njsPool = Pool::poolTemplate_s->
+                GetFunction() ->NewInstance();
+        (ObjectWrap::Unwrap<Pool> (njsPool))-> setPool ( poolBaton->dpipool,
+                poolBaton->oracledb,
+                poolBaton->poolMax,
+                poolBaton->poolMin,
+                poolBaton->poolIncrement,
+                poolBaton->poolTimeout,
+                poolBaton->stmtCacheSize );
+        pool = njsPool;
+    }
+
+    delete poolBaton;
+
+    if(tc.HasCaught())
+    {
+        node::FatalException (tc);
+    }
+
+
+
+    return scope.Close(pool);
 }
 
 /*****************************************************************************/
