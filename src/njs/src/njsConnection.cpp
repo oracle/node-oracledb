@@ -1247,35 +1247,39 @@ v8::Handle<v8::Value> Connection::GetArrayValue ( Bind *binds, unsigned long cou
 
   for ( index = 0 ; index < count ; index ++ )
   {
+    if(
+        binds->ind[index] == -1 && 
+        ( 
+          (binds->type == dpi::DpiVarChar) ||
+          (binds->type == dpi::DpiInteger) ||
+          (binds->type == dpi::DpiDouble) ||
+          (binds->type == dpi::DpiTimestampLTZ)
+        )
+      )
+    {
+      arrVal->Set( index, NanNull() );
+      continue;
+    }
+
     switch ( binds->type )
     {
     case dpi::DpiVarChar:
       arrVal->Set ( index,
-                    ( binds->ind[index] == -1 ) ? NanNull() :
-                      NanNew<v8::String> ((char *)binds->value +
-                                   (index * binds->maxSize ),
-                                   binds->len2[index]));
+                    NanNew<v8::String> ((char *)binds->value +
+                                        (index * binds->maxSize ),
+                                        binds->len2[index]));
       break;
     case dpi::DpiInteger:
       arrVal->Set ( index,
-                    (binds->ind[index] == -1 ) ? NanNull() :
-                      NanNew<v8::Integer> ( *((int *)binds->value + index )));
+                    NanNew<v8::Integer> ( *((int *)binds->value + index )));
       break;
     case dpi::DpiDouble:
       arrVal->Set ( index,
-                    (binds->ind[index] == -1 ) ? NanNull() :
-                      NanNew<v8::Number> ( *((double *)binds->value + index )));
+                    NanNew<v8::Number> ( *((double *)binds->value + index )));
       break;
     case dpi::DpiTimestampLTZ:
-      if ( binds->ind[index] != -1 )
-      {
         arrVal->Set ( index, 
                       NanNew<v8::Date> (*((long double *)binds->value + index )) );
-      }
-      else
-      {
-        arrVal->Set ( index, NanNull () );
-      }
       break;
     default:
       break;
