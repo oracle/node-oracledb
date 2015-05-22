@@ -53,7 +53,7 @@ oracledb.getConnection(
         rid:   { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
         rname: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
       },
-      { isAutoCommit: true },
+      { autoCommit: true },
       function(err, result)
       {
         if (err)
