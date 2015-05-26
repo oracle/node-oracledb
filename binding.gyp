@@ -79,36 +79,87 @@
         }
       }
     ],
-    ["OS=='win'", {
-      "variables" : {
-        "oci_lib_dir%": "<!(IF DEFINED OCI_LIB_DIR (echo %OCI_LIB_DIR%) ELSE (echo C:\oracle\instantclient\sdk\lib\msvc))",
-        "oci_inc_dir%": "<!(IF DEFINED OCI_INC_DIR (echo %OCI_INC_DIR%) ELSE (echo C:\oracle\instantclient\sdk\include))",
-      },
-      "configurations" : {
-        "Release" : {
-          "msvs_settings": {
-            "VCCLCompilerTool" : {
-              "RuntimeLibrary" : "2"
+    [
+      "OS=='win'", {
+        "variables" : {
+          "oci_lib_dir%": "<!(IF DEFINED OCI_LIB_DIR (echo %OCI_LIB_DIR%) ELSE (echo C:\oracle\instantclient\sdk\lib\msvc))", 
+          "oci_inc_dir%": "<!(IF DEFINED OCI_INC_DIR (echo %OCI_INC_DIR%) ELSE (echo C:\oracle\instantclient\sdk\include))", 
+        },
+        "link_settings": {
+             "libraries": [
+                 "-loci",
+             ]
+         },
+        "configurations" : {
+          "Release" : {
+            "msvs_settings": {
+              "VCCLCompilerTool": {
+                "RuntimeLibrary": 0,
+                "Optimization": 3,
+                "FavorSizeOrSpeed": 1,
+                "InlineFunctionExpansion": 2,
+                "WholeProgramOptimization": "true",
+                "OmitFramePointers": "true",
+                "EnableFunctionLevelLinking": "true",
+                "EnableIntrinsicFunctions": "true",
+                "RuntimeTypeInfo": "false",
+                "PreprocessorDefinitions": [
+                  "WIN32_LEAN_AND_MEAN"
+                ],
+                "ExceptionHandling": "0",
+                "AdditionalOptions": [
+                  "/EHsc"
+                ]
+              },
+              "VCLibrarianTool": {
+                "AdditionalOptions": [
+                    "/LTCG"
+                ]
+              },
+              "VCLinkerTool": {
+                "LinkTimeCodeGeneration": 1,
+                "OptimizeReferences": 2,
+                "EnableCOMDATFolding": 2,
+                "LinkIncremental": 1,
+                "AdditionalLibraryDirectories": [
+                    "<(oci_lib_dir)"
+                ]
+              }
             }
           }
         },
-        "Debug" : {
-          "msvs_settings": {
-            "VCCLCompilerTool" : {
-              "RuntimeLibrary" : "3"
-            }
+          "Debug": {
+              "msvs_settings": {
+                  "VCCLCompilerTool": {
+                    "PreprocessorDefinitions": [
+                      "WIN32_LEAN_AND_MEAN"
+                    ],
+                    "ExceptionHandling": "0",
+                    "AdditionalOptions": [
+                        "/EHsc"
+                    ]
+                  },
+                  "VCLibrarianTool": {
+                      "AdditionalOptions": [
+                          "/LTCG"
+                      ]
+                  },
+                  "VCLinkerTool": {
+                      "LinkTimeCodeGeneration": 1,
+                      "LinkIncremental": 1,
+                      "AdditionalLibraryDirectories": [
+                          "<(oci_lib_dir)"
+                      ]
+                  }
+              }
           }
-        }
-      },
-      "cflags"        : ['-fexceptions -EHsc'],
-      "cflags_cc"     : ['-fexceptions -EHsc'],
-      "link_settings" : { "libraries" : ['<(oci_lib_dir)\oci.lib'] }
-    }
+      }
     ],
   ],
   "include_dirs"  : [ "<(oci_inc_dir)",
                       "src/dpi/src/",
-                      "src/dpi/include/"
+                      "src/dpi/include/",
+                      "<!(node -e \"require('nan')\")"
     ],
   }
   ]
