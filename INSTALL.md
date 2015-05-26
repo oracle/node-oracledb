@@ -32,11 +32,10 @@ The Oracle Database Node.js driver node-oracledb powers high performance Node.js
 The steps below create a Node.js installation for testing.  Adjust the
 steps for your environment.
 
-This node-oracledb release currently works only with Node.js 0.10.  It
-has been tested with 0.10.35 on 64-bit Oracle Linux and Windows.  The
-driver can also build in some Mac OS X, 32-bit Linux, 32-bit Windows,
-Solaris and AIX environments, but these architectures have not been fully
-tested.
+This node-oracledb release has been tested with Node 0.10 and 0.12 on
+64-bit Oracle Linux and Windows.  The driver can also build in some
+Mac OS X, 32-bit Linux, 32-bit Windows, Solaris and AIX environments,
+but these architectures have not been fully tested.
 
 ### Prerequisites
 
@@ -81,20 +80,18 @@ install Oracle Linux yourself, it is free from
 ### 2.1 Install Node.js
 
 Download the
-[Node.js 0.10 Linux 64-bit binaries](http://nodejs.org/download/) and
+[Node.js Linux 64-bit binaries](http://nodejs.org/download/) and
 extract the file, for example into `/opt`:
 
 ```
 cd /opt
-tar -zxf node-v0.10.38-linux-x64.tar.gz
+tar -zxf node-v0.12.4-linux-x64.tar.gz
 ```
-
-This node-oracledb release currently works only with Node.js 0.10.
 
 Set PATH to include Node.js:
 
 ```
-export PATH=/opt/node-v0.10.38-linux-x64/bin:$PATH
+export PATH=/opt/node-v0.12.4-linux-x64/bin:$PATH
 ```
 
 ### 2.2 Install the free Oracle Instant Client RPMs
@@ -120,12 +117,18 @@ Install node-oracledb from the
 npm install oracledb
 ```
 
-Node-oracledb will automatically configured to use the highest version
+Node-oracledb will automatically be configured to use the highest version
 Instant Client RPMs installed.  To use a different version, follow the
 instructions to
 [install on Linux with Instant Client ZIP files](#instzip) instead,
 setting `OCI_LIB_DIR` and `OCI_INC_DIR` to the appropriate
 directories.
+
+If you have other Oracle software installed on the same machine, and
+the runtime linker is configured to find this other software via
+`LD_LIBRARY_PATH` or `ldconfig`, then update the environment to use
+the Instant Client RPM libraries, for example
+`/usr/lib/oracle/12.1/client64/lib`.
 
 ### 2.4 Run an example program
 
@@ -154,20 +157,18 @@ node select1.js
 ### 3.1 Install Node.js
 
 Download the
-[Node.js 0.10 Linux 64-bit binaries](http://nodejs.org/download/) and
+[Node.js Linux 64-bit binaries](http://nodejs.org/download/) and
 extract the file, for example into `/opt`:
 
 ```
 cd /opt
-tar -zxf node-v0.10.38-linux-x64.tar.gz
+tar -zxf node-v0.12.4-linux-x64.tar.gz
 ```
-
-This node-oracledb release currently works only with Node.js 0.10.
 
 Set PATH to include Node.js:
 
 ```
-export PATH=/opt/node-v0.10.38-linux-x64/bin:$PATH
+export PATH=/opt/node-v0.12.4-linux-x64/bin:$PATH
 ```
 
 ### 3.2 Install the free Oracle Instant Client ZIPs
@@ -265,20 +266,18 @@ Oracle Database.
 ### 4.1 Install Node.js
 
 Download the
-[Node.js Linux 0.10 64-bit binaries](http://nodejs.org/download/) and
+[Node.js Linux 64-bit binaries](http://nodejs.org/download/) and
 extract the file, for example into `/opt`:
 
 ```
 cd /opt
-tar -zxf node-v0.10.38-linux-x64.tar.gz
+tar -zxf node-v0.12.4-linux-x64.tar.gz
 ```
-
-This node-oracledb release currently works only with Node.js 0.10.
 
 Set your PATH variable to include Node.js:
 
 ```
-export PATH=/opt/node-v0.10.38-linux-x64/bin:$PATH
+export PATH=/opt/node-v0.12.4-linux-x64/bin:$PATH
 ```
 
 ### 4.2 Install the driver
@@ -342,13 +341,11 @@ Building node-oracledb requires Xcode from the Mac App store.
 
 ### 5.2 Install Node.js
 
-Node.js 0.10 can be installed from various sources, such as via *brew*.
+Node.js can be installed from various sources, such as via *brew*.
 
 ```
-brew install node010
+brew install node
 ```
-
-This node-oracledb release currently works only with Node.js 0.10.
 
 Set your PATH to include the *node* and *npm* binaries:
 
@@ -449,11 +446,9 @@ use a 32-bit stack during build and run time.
 
 ### 6.2 Install Node.js
 
-Install the 64-bit Node.js 0.10 MSI (e.g. node-v0.10.38-x64.msi) from
+Install the 64-bit Node.js  MSI (e.g. node-v0.12.4-x64.msi) from
 [nodejs.org](http://nodejs.org/download/).  Make sure the option to
 add the Node and npm directories to the path is selected.
-
-This node-oracledb release currently works only with Node.js 0.10.
 
 ### 6.3 Install the free Oracle Instant Client ZIPs
 
@@ -476,9 +471,8 @@ version first in the path.
 ### 6.4 Install the driver
 
 Start Visual Studio and open a Developer Command Prompt within it.
-
-If you instead decide to use command shell outside Visual Studio, then
-run `vcvars64.bat` or `vcvars.bat` (for 32-bit builds).
+(If you instead decide to use a command shell outside Visual Studio, then
+run `vcvars64.bat` for 64-bit builds or `vcvars.bat` for 32-bit builds).
 
 Use `set PATH` in the shell to confirm the Python, Node.js and Oracle
 directories are correctly set.  If they are not, then set PATH

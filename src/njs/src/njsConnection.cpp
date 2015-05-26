@@ -15,6 +15,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
+ * This file uses NAN:
+ *
+ * Copyright (c) 2015 NAN contributors
+ * 
+ * NAN contributors listed at https://github.com/rvagg/nan#contributors
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to
+ * the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
+ * 
  * NAME
  *   njsConnection.cpp
  *
@@ -1312,14 +1337,14 @@ v8::Handle<v8::Value> Connection::GetOutBinds (eBaton* executeBaton)
       return NanEscapeScope(GetOutBindArray( executeBaton->binds,
                                              executeBaton->numOutBinds,
                                              executeBaton->stmtIsReturning,
-                                             executeBaton->rowsAffected ));
+                              (unsigned long)executeBaton->rowsAffected ));
     }
     else
     {
       // Binds as JS object 
       return NanEscapeScope(GetOutBindObject( executeBaton->binds,
                                               executeBaton->stmtIsReturning,
-                                              executeBaton->rowsAffected ));
+                               (unsigned long)executeBaton->rowsAffected ));
     }
   }
   return NanUndefined();
@@ -1900,11 +1925,11 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
     bind->value = (char *)malloc ( ( bind->maxSize + 1) * nRows ) ;
     if ( dmlReturning )
     {
-      *(bind->len2) = bind->maxSize ;
+      *(bind->len2) = (unsigned int)bind->maxSize ;
     }
     else
     {
-      *(bind->len) = bind->maxSize;
+      *(bind->len) = (unsigned int)bind->maxSize;
     }
     break;
 
@@ -1987,7 +2012,7 @@ int Connection::cbDynBufferGet ( void *ctx, DPI_SZ_TYPE nRows,
     // First time callback, allocate the buffer(s).
     if ( index == 0 )
     {
-      Connection::cbDynBufferAllocate (ctx, true, nRows );
+      Connection::cbDynBufferAllocate (ctx, true, (unsigned long)nRows );
     }
 
     bind->ind[index] = -1;
@@ -1996,7 +2021,7 @@ int Connection::cbDynBufferGet ( void *ctx, DPI_SZ_TYPE nRows,
     switch ( bind->type )
     {
     case dpi::DpiVarChar:
-      bind->len2[index] = bind->maxSize;
+      bind->len2[index] = (unsigned int)bind->maxSize;
       /* 1 extra char for EOS, 1 extra to determine insufficient buf later */
       *bufpp = (void *)&(((char *)bind->value)[ (bind->maxSize) * index]);
       /* Buffer provided by the application could be small, in this case to

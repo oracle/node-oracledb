@@ -135,7 +135,7 @@ oracledb.createPool (
 function handleError(response, text, err)
 {
   if (err) {
-    text += err.message;
+    text += err.message
   }
   console.error(text);
   response.write("<p>Error: " + text + "</p>");

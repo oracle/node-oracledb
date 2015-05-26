@@ -1421,35 +1421,42 @@ This paper also gives more detail on configuring DRCP.
 
 ### <a name="extauth"></a> 6.3 External Authentication
 
-Instead of specifying a user and password at connection, Oracle
-Database allows applications to use an external password store (such
-as
+External Authentication allows applications to use an external
+password store (such as
 [Oracle Wallet](http://docs.oracle.com/database/121/DBIMI/to_dbimi10236_d209.htm#DBIMI10236)),
-the [Secure Socket Layer](http://docs.oracle.com/database/121/DBSEG/asossl.htm#DBSEG070)
+the
+[Secure Socket Layer](http://docs.oracle.com/database/121/DBSEG/asossl.htm#DBSEG070)
 (SSL), or the
 [operating system](http://docs.oracle.com/database/121/DBSEG/authentication.htm#DBSEG30035)
-to validate user access.  This mode of authentication is called
-*external authentication*.  One of the benefits is that database
+to validate user access.  One of the benefits is that database
 credentials do not need to be hard coded in the application.
 
 To use external authentication, set the *Oracledb*
-[`externalAuth`](propdbextauth) property to *true*.  Once this is
-set, any subsequent connections obtained using the *Oracledb*
-[`getConnection()`](#getconnectiondb) or *Pool*
+[`externalAuth`](propdbextauth) property to *true*.  This property can
+also be set in the `connAttrs` or `poolAttrs` parameters of the
+*Oracledb* [`getConnection()`](#getconnectiondb) or
+[`createPool()`](#createpool) calls, respectively.  The `user` and
+`password` properties should not be set, or should be empty strings:
+
+```javascript
+oracledb.getConnection(
+  {
+    externalAuth: true,
+    connectString: "localhost/orcl"	
+  },
+  . . .
+```
+
+When `externalAuth` is set, any subsequent connections obtained using
+the *Oracledb* [`getConnection()`](#getconnectiondb) or *Pool*
 [`getConnection()`](#getconnectionpool) calls will use external
 authentication.  Setting this property does not affect the operation
 of existing connections or pools.
 
-When `externalAuth` is *true*, the `user` and `password` properties
-should not be set, or should be empty strings.
-
-The `externalAuth` property can be overridden in the `connAttrs` or
-`poolAttrs` parameters of the *Oracledb*
-[`getConnection()`](#getconnectiondb) or [`createPool()`](#createpool)
-calls, respectively.  Overriding `externalAuth` is not possible for
-a *Pool* `getConnection()` call.  The connections from a *Pool* object
-are always obtained in the manner in which the pool was initially
-created.
+Using `externalAuth` in the `connAttrs` parameter of a *Pool*
+`getConnection()` call is not possible.  The connections from a *Pool*
+object are always obtained in the manner in which the pool was
+initially created.
 
 For pools created with external authentication, the number of
 connections initially created is zero even if a non-zero value is

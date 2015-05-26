@@ -1,5 +1,11 @@
 # Change Log
 
+## node-oracledb v0.6.0 (26 May 2015)
+
+- Node-oracledb now builds with Node.js 0.10, Node.js 0.12 and io.js.
+
+- Fixed naming of `autoCommit` in examples.
+
 ## node-oracledb v0.5.0 (5 May 2015)
 
 - Changed the `isAutoCommit` attribute name to `autoCommit`.
