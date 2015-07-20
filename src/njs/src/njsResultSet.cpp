@@ -60,9 +60,6 @@ using namespace v8;
                                         //peristent ResultSet class handle
 Persistent<FunctionTemplate> ResultSet::resultSetTemplate_s;
 
-ResultSet::ResultSet(){}
-ResultSet::~ResultSet(){}
-
 /*****************************************************************************/
 /*
    DESCRIPTION
@@ -78,9 +75,9 @@ void ResultSet::setResultSet ( dpi::Stmt *stmt, dpi::Env *env,
   this->numCols_       = stmt->numCols();
   this->state_         = INACTIVE;
   this->outFormat_     = outFormat;
-  this->bufferSize_    = 0;
+  this->fetchRowCount_ = 0;
   this->rsEmpty_       = false;
-  this->fetchBuffers_  = NULL;
+  this->defineBuffers_ = NULL;
 }
 
 /*****************************************************************************/
@@ -134,7 +131,7 @@ NAN_PROPERTY_GETTER(ResultSet::GetMetaData)
   NanScope();
   ResultSet* njsResultSet = ObjectWrap::Unwrap<ResultSet>(args.Holder());
   std::string *columnNames = new std::string[njsResultSet->numCols_];
-  Connection::metaData ( columnNames, njsResultSet->meta_, 
+  Connection::CopyMetaData ( columnNames, njsResultSet->meta_, 
                          njsResultSet->numCols_ ); 
   Handle<Value> meta;
   meta = Connection::GetMetaData( columnNames,
@@ -162,7 +159,7 @@ NAN_SETTER(ResultSet::SetMetaData)
 /*****************************************************************************/
 /*
    DESCRIPTION
-     Get Connection method on Result Set class.
+     Get Rows method on Result Set class.
 
    PARAMETERS:
      Arguments - Callback
@@ -183,6 +180,7 @@ NAN_METHOD(ResultSet::GetRows)
   {
     NJS_GET_ARG_V8UINT ( getRowsBaton->numRows, getRowsBaton->error, 
                          args, 0, exitGetRows ); 
+    getRowsBaton->fetchMultiple = true;
   }
   else
   {
@@ -208,12 +206,13 @@ NAN_METHOD(ResultSet::GetRows)
     goto exitGetRows;
   }
 
-  njsResultSet->state_ = ACTIVE;
+  njsResultSet->state_              = ACTIVE;
   getRowsBaton->ebaton->columnNames = new std::string[njsResultSet->numCols_];
-  getRowsBaton->ebaton->maxRows = getRowsBaton->numRows;
-  getRowsBaton->ebaton->dpistmt = njsResultSet->dpistmt_;
-  getRowsBaton->ebaton->dpienv  = njsResultSet->dpienv_;
-  getRowsBaton->ebaton->getRS   = true; 
+  getRowsBaton->ebaton->maxRows     = getRowsBaton->numRows;
+  getRowsBaton->ebaton->dpistmt     = njsResultSet->dpistmt_;
+  getRowsBaton->ebaton->dpienv      = njsResultSet->dpienv_;
+  getRowsBaton->ebaton->getRS       = true; 
+  getRowsBaton->ebaton->outFormat   = njsResultSet->outFormat_;
 
 exitGetRows:
   getRowsBaton->req.data = (void *)getRowsBaton;
@@ -227,7 +226,7 @@ exitGetRows:
 /*****************************************************************************/
 /*
    DESCRIPTION
-     Worker function of Get Rows method
+     Worker function of GetRows method
 
    PARAMETERS:
      UV queue work block
@@ -238,8 +237,8 @@ exitGetRows:
 void ResultSet::Async_GetRows(uv_work_t *req)
 {
   rsBaton *getRowsBaton = (rsBaton*)req->data;
-  ResultSet *njsRS  = getRowsBaton->njsRS;
-  eBaton    *ebaton = getRowsBaton->ebaton;
+  ResultSet *njsRS      = getRowsBaton->njsRS;
+  eBaton    *ebaton     = getRowsBaton->ebaton;
 
   if(!(getRowsBaton->error).empty()) goto exitAsyncGetRows;
 
@@ -251,30 +250,23 @@ void ResultSet::Async_GetRows(uv_work_t *req)
 
   try
   {
-    Connection::metaData( ebaton->columnNames, njsRS->meta_, 
-                           njsRS->numCols_ );
-    if( njsRS->fetchBuffers_ == NULL || 
-        njsRS->bufferSize_  < getRowsBaton->numRows )
+    Connection::CopyMetaData ( ebaton->columnNames, njsRS->meta_, 
+                               njsRS->numCols_ );
+    ebaton->numCols      = njsRS->numCols_;
+    if( njsRS->defineBuffers_ == NULL || 
+        njsRS->fetchRowCount_  < getRowsBaton->numRows )
     {
-      if(njsRS->fetchBuffers_ != NULL)
+      if(njsRS->defineBuffers_ != NULL)
       {
-        ResultSet::nullifyFetchBuffer(njsRS->fetchBuffers_, njsRS->numCols_);
+        ResultSet::clearFetchBuffer(njsRS->defineBuffers_, njsRS->numCols_);
       }
-      Connection::GetDefines(ebaton, njsRS->meta_, njsRS->numCols_);
-      njsRS->bufferSize_   = getRowsBaton->numRows;
-      njsRS->fetchBuffers_ = ebaton->defines;
+      Connection::DoDefines(ebaton, njsRS->meta_, njsRS->numCols_);
+      njsRS->fetchRowCount_ = getRowsBaton->numRows;
+      njsRS->defineBuffers_ = ebaton->defines;
     }
-    else
-    {
-      njsRS->dpistmt_->fetch(getRowsBaton->numRows);
-      ebaton->maxRows      = getRowsBaton->numRows;
-      ebaton->outFormat    = njsRS->outFormat_;
-      ebaton->defines      = njsRS->fetchBuffers_;
-      ebaton->rowsFetched  = njsRS->dpistmt_->rowsFetched();
-      ebaton->numCols      = njsRS->numCols_;
-      Connection::descr2Dbl ( ebaton->defines, ebaton->numCols,
-                              ebaton->rowsFetched, ebaton->getRS );
-    }
+    ebaton->defines      = njsRS->defineBuffers_;
+    Connection::DoFetch(ebaton);
+ 
     if(ebaton->rowsFetched != getRowsBaton->numRows)
       njsRS->rsEmpty_ = true;
   }
@@ -289,21 +281,19 @@ void ResultSet::Async_GetRows(uv_work_t *req)
 /*****************************************************************************/
 /*
    DESCRIPTION
-     Callback function of Get Connection method
+     Callback function of GetRows method
 
    PARAMETERS:
      UV queue work block
-     status - expected to be non-zero.
-
-   NOTES:
-     Connection handle is formed and handed over to JS.
 */
 void ResultSet::Async_AfterGetRows(uv_work_t *req)
 {
   NanScope();
+
   rsBaton *getRowsBaton = (rsBaton*)req->data;
   v8::TryCatch tc;
   Handle<Value> argv[2];
+
   if(!(getRowsBaton->error).empty())
   {
     argv[0] = v8::Exception::Error(NanNew<v8::String>((getRowsBaton->error).c_str()));
@@ -311,12 +301,14 @@ void ResultSet::Async_AfterGetRows(uv_work_t *req)
   }
   else
   {
-    getRowsBaton->njsRS->state_ = INACTIVE;
-    argv[0] = NanUndefined();
-    eBaton* ebaton    = getRowsBaton->ebaton;
-    ebaton->outFormat = getRowsBaton->njsRS->outFormat_;
-    Handle<Value> rowsArray = v8::Array::New(0), 
-                  rowsArrayValue = NanNull();
+    argv[0]           = NanUndefined();
+
+    getRowsBaton->njsRS->state_  = INACTIVE;
+    eBaton* ebaton               = getRowsBaton->ebaton;
+    ebaton->outFormat            = getRowsBaton->njsRS->outFormat_;
+    Handle<Value> rowsArray      = NanNew<v8::Array>(0), 
+                  rowsArrayValue = NanNew(NanNull());
+
     if(ebaton->rowsFetched)
     { 
       rowsArray = Connection::GetRows(ebaton);
@@ -328,7 +320,7 @@ void ResultSet::Async_AfterGetRows(uv_work_t *req)
       }
       rowsArrayValue =  Handle<Array>::Cast(rowsArray)->Get(0);
     }
-    argv[1] = (getRowsBaton->numRows > 1) ? rowsArray : rowsArrayValue; 
+    argv[1] = (getRowsBaton->fetchMultiple) ? rowsArray : rowsArrayValue; 
   }
 
   exitAsyncAfterGetRows:
@@ -358,7 +350,7 @@ NAN_METHOD(ResultSet::Close)
   NJS_GET_CALLBACK ( callback, args );
 
   ResultSet *njsResultSet = ObjectWrap::Unwrap<ResultSet>(args.This());
-  rsBaton *closeBaton = new rsBaton ();
+  rsBaton *closeBaton     = new rsBaton ();
   NanAssignPersistent( closeBaton->cb, callback );
 
   NJS_CHECK_NUMBER_OF_ARGS ( closeBaton->error, args, 1, 1, exitClose );
@@ -379,6 +371,7 @@ NAN_METHOD(ResultSet::Close)
     goto exitClose;
   }
 
+  njsResultSet->state_   = ACTIVE;
   closeBaton->njsRS      = njsResultSet;
 
 exitClose:
@@ -409,9 +402,9 @@ void ResultSet::Async_Close(uv_work_t *req)
   try
   {
     closeBaton-> njsRS-> dpistmt_-> release ();
-    Define* fetchBuffers = closeBaton-> njsRS-> fetchBuffers_;
-    unsigned int numCols = closeBaton-> njsRS-> numCols_;
-    ResultSet::nullifyFetchBuffer(fetchBuffers, numCols);
+    Define* defineBuffers = closeBaton-> njsRS-> defineBuffers_;
+    unsigned int numCols  = closeBaton-> njsRS-> numCols_;
+    ResultSet::clearFetchBuffer(defineBuffers, numCols);
   }
   catch(dpi::Exception& e)
   {
@@ -445,7 +438,7 @@ void ResultSet::Async_AfterClose(uv_work_t *req)
   else
   {
     argv[0] = NanUndefined();
-    // pool is not valid after close succeeds.
+    // resultset is not valid after close succeeds.
     closeBaton-> njsRS-> state_ = INVALID;
   }
   Local<Function> callback = NanNew(closeBaton->cb);
@@ -465,21 +458,21 @@ void ResultSet::Async_AfterClose(uv_work_t *req)
    PARAMETERS:
     Fetch Buffer, numCols 
 */
-void ResultSet::nullifyFetchBuffer( Define* fetchBuffers, unsigned int numCols)
+void ResultSet::clearFetchBuffer( Define* defineBuffers, unsigned int numCols)
 {
    for( unsigned int i=0; i<numCols; i++ )
    {   
-     if ( fetchBuffers[i].dttmarr )
+     if ( defineBuffers[i].dttmarr )
      {   
-       fetchBuffers[i].dttmarr->release (); 
-       fetchBuffers[i].extbuf = NULL;
+       defineBuffers[i].dttmarr->release (); 
+       defineBuffers[i].extbuf = NULL;
      }   
-     free(fetchBuffers[i].buf);
-     free(fetchBuffers[i].len);
-     free(fetchBuffers[i].ind);
+     free(defineBuffers[i].buf);
+     free(defineBuffers[i].len);
+     free(defineBuffers[i].ind);
    }   
-   delete [] fetchBuffers;
-   fetchBuffers = NULL;
+   delete [] defineBuffers;
+   defineBuffers = NULL;
 }
 
 /* end of file njsPool.cpp */

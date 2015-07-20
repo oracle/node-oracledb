@@ -91,6 +91,16 @@ typedef enum
   INACTIVE  = 2,
 }State;
 
+// args
+typedef enum
+{
+  ARGS_ZERO  = 0,
+  ARGS_ONE   = 1,
+  ARGS_TWO   = 2,
+  ARGS_THREE = 3,
+  ARGS_FOUR  = 4
+}ArgsType;
+
 /*
  *  Get the callback from the last argument.
  *  If no args or last arg is not callback, throw exception

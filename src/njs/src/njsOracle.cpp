@@ -58,13 +58,12 @@
                                         //peristent Oracledb class handle
 Persistent<FunctionTemplate> Oracledb::oracledbTemplate_s;
 
-#define MAX_ROWS 100
-#define STMT_CACHE_SIZE 30
-#define POOL_MIN 0
-#define POOL_MAX 4
-#define POOL_INCR 1
-#define POOL_TIMEOUT 60
-#define PREFETCH_ROWS -1
+#define NJS_MAX_ROWS        100
+#define NJS_STMT_CACHE_SIZE  30
+#define NJS_POOL_MIN          0
+#define NJS_POOL_MAX          4
+#define NJS_POOL_INCR         1
+#define NJS_POOL_TIMEOUT     60
 
 /*****************************************************************************/
 /*
@@ -75,16 +74,16 @@ Oracledb::Oracledb()
 {
   dpienv_         = dpi::Env::createEnv();
   outFormat_      = ROWS_ARRAY;
-  maxRows_        = MAX_ROWS;
-  autoCommit_   = false;
-  stmtCacheSize_  = STMT_CACHE_SIZE;
-  poolMax_        = POOL_MAX;
-  poolMin_        = POOL_MIN;
-  poolIncrement_  = POOL_INCR;
-  poolTimeout_    = POOL_TIMEOUT;
-  prefetchRows_   = PREFETCH_ROWS;
+  maxRows_        = NJS_MAX_ROWS;
+  autoCommit_     = false;
+  stmtCacheSize_  = NJS_STMT_CACHE_SIZE;
+  poolMax_        = NJS_POOL_MAX;
+  poolMin_        = NJS_POOL_MIN;
+  poolIncrement_  = NJS_POOL_INCR;
+  poolTimeout_    = NJS_POOL_TIMEOUT;
+  prefetchRows_   = NJS_PREFETCH_ROWS_NOT_SET;
   connClass_      = "";
-  externalAuth_ = false;
+  externalAuth_   = false;
 }
 
 /*****************************************************************************/
@@ -112,7 +111,6 @@ void Oracledb::Init(Handle<Object> target)
   NanScope();
 
   Local<FunctionTemplate> temp = NanNew<FunctionTemplate>(New);
-  //Local<FunctionTemplate> temp = NanNew<FunctionTemplate>(New);
   temp->InstanceTemplate()->SetInternalFieldCount(1);
   temp->SetClassName(NanNew<v8::String>("Oracledb"));
 

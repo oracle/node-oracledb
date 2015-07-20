@@ -343,7 +343,7 @@ NAN_METHOD(Connection::Execute)
   executeBaton->maxRows      = connection->oracledb_->getMaxRows();
   executeBaton->prefetchRows = connection->oracledb_->getPrefetchRows();
   executeBaton->outFormat    = connection->oracledb_->getOutFormat();
-  executeBaton->autoCommit = connection->oracledb_->getAutoCommit();
+  executeBaton->autoCommit   = connection->oracledb_->getAutoCommit();
   executeBaton->dpienv       = connection->oracledb_->getDpiEnv();
   executeBaton->dpiconn      = connection->dpiconn_;
   executeBaton->njsconn      = connection;
@@ -412,16 +412,16 @@ void Connection::ProcessOptions (_NAN_METHOD_ARGS, unsigned int index,
   if(args[index]->IsObject() && !args[index]->IsArray())
   {
     options = args[index]->ToObject();
-    NJS_GET_UINT_FROM_JSON   ( executeBaton->maxRows, executeBaton->error,
-                               options, "maxRows", 2, exitProcessOptions );
-    NJS_GET_UINT_FROM_JSON   ( executeBaton->prefetchRows, executeBaton->error,
-                               options, "prefetchRows", 2, exitProcessOptions );
-    NJS_GET_UINT_FROM_JSON   ( executeBaton->outFormat, executeBaton->error,
-                               options, "outFormat", 2, exitProcessOptions );
-    NJS_GET_BOOL_FROM_JSON   ( executeBaton->getRS, executeBaton->error,
-                               options, "resultSet", 2, exitProcessOptions );
-    NJS_GET_BOOL_FROM_JSON   ( executeBaton->autoCommit, executeBaton->error,
-                               options, "autoCommit", 2, exitProcessOptions );
+    NJS_GET_UINT_FROM_JSON ( executeBaton->maxRows, executeBaton->error,
+                             options, "maxRows", 2, exitProcessOptions );
+    NJS_GET_UINT_FROM_JSON ( executeBaton->prefetchRows, executeBaton->error,
+                             options, "prefetchRows", 2, exitProcessOptions );
+    NJS_GET_UINT_FROM_JSON ( executeBaton->outFormat, executeBaton->error,
+                             options, "outFormat", 2, exitProcessOptions );
+    NJS_GET_BOOL_FROM_JSON ( executeBaton->getRS, executeBaton->error,
+                             options, "resultSet", 2, exitProcessOptions );
+    NJS_GET_BOOL_FROM_JSON ( executeBaton->autoCommit, executeBaton->error,
+                             options, "autoCommit", 2, exitProcessOptions );
   }
   else
   {
@@ -740,11 +740,12 @@ void Connection::Async_Execute (uv_work_t *req)
       executeBaton->dpistmt->execute(0, executeBaton->autoCommit);
       const dpi::MetaData* meta   = executeBaton->dpistmt->getMetaData();
       executeBaton->numCols       = executeBaton->dpistmt->numCols();
-      executeBaton->columnNames = new std::string[executeBaton->numCols];
-      Connection::metaData( executeBaton->columnNames, meta, 
+      executeBaton->columnNames   = new std::string[executeBaton->numCols];
+      Connection::CopyMetaData( executeBaton->columnNames, meta, 
                             executeBaton->numCols );
       if( executeBaton->getRS ) goto exitAsyncExecute;
-      Connection::GetDefines(executeBaton, meta, executeBaton->numCols);
+      Connection::DoDefines(executeBaton, meta, executeBaton->numCols);
+      Connection::DoFetch(executeBaton);
     }
     else
     {
@@ -845,7 +846,9 @@ void Connection::PrepareAndBind (eBaton* executeBaton)
     executeBaton->st = executeBaton->dpistmt->stmtType ();
     executeBaton->stmtIsReturning = executeBaton->dpistmt->isReturning ();
 
-    if(executeBaton->getRS && executeBaton->prefetchRows > -1)
+    // prefetch is set by user, pass it to DPI.
+    if( executeBaton->getRS && 
+        executeBaton->prefetchRows > NJS_PREFETCH_ROWS_NOT_SET )
       executeBaton->dpistmt->prefetchRows(executeBaton->prefetchRows);
 
     if(!executeBaton->binds.empty())
@@ -955,81 +958,97 @@ void Connection::PrepareAndBind (eBaton* executeBaton)
 /*****************************************************************************/
 /*
    DESCRIPTION
-     get meta data into baton 
+     copy column names from meta data to the string array passed as parameter. 
 
    PARAMETERS:
-     string arrat, metaData, numCols 
+     string array  -  column names
+     metaData      -  metaData info from DPI
+     numCols       -  number of columns
  */
-void Connection::metaData ( std::string* names, const dpi::MetaData* meta,
-                            unsigned int numCols )
+void Connection::CopyMetaData ( std::string* names, const dpi::MetaData* meta,
+                                unsigned int numCols )
 {
-  for (unsigned int i = 0; i < numCols; i++)
+  for (unsigned int col = 0; col < numCols; col++)
   {
-    names[i] = std::string( (const char*)meta[i].colName,
-                            meta[i].colNameLen );
+    names[col] = std::string( (const char*)meta[col].colName,
+                            meta[col].colNameLen );
   }
 }
 
 /*****************************************************************************/
 /*
    DESCRIPTION
-     Allocate defines buffer for query output.
-     Call DPI define and fetch.
+     Allocate defines buffer for query output and do fetch.
+     Call DPI define.
 
    PARAMETERS:
      eBaton struct
  */
-void Connection::GetDefines ( eBaton* executeBaton, const dpi::MetaData* meta,
-                              unsigned int numCols )
+void Connection::DoDefines ( eBaton* executeBaton, const dpi::MetaData* meta,
+                             unsigned int numCols )
 {
   Define *defines            = new Define[numCols];
 
-  for (unsigned int i = 0; i < numCols; i++)
+  for (unsigned int col = 0; col < numCols; col++)
   {
-    switch(meta[i].dbType)
+    switch(meta[col].dbType)
     {
       case dpi::DpiNumber :
       case dpi::DpiBinaryFloat :
       case dpi::DpiBinaryDouble :
-        defines[i].fetchType = dpi::DpiDouble;
-        defines[i].maxSize   = sizeof(double);
-        defines[i].buf = (double *)malloc(defines[i].maxSize*executeBaton->maxRows);
+        defines[col].fetchType = dpi::DpiDouble;
+        defines[col].maxSize   = sizeof(double);
+        defines[col].buf = (double *)malloc(defines[col].maxSize*executeBaton->maxRows);
         break;
       case dpi::DpiVarChar :
       case dpi::DpiFixedChar :
-        defines[i].fetchType = DpiVarChar;
-        defines[i].maxSize   = meta[i].dbSize;
-        defines[i].buf = (char *)malloc(defines[i].maxSize*executeBaton->maxRows);
+        defines[col].fetchType = DpiVarChar;
+        defines[col].maxSize   = meta[col].dbSize;
+        defines[col].buf = (char *)malloc(defines[col].maxSize*executeBaton->maxRows);
         break;
       case dpi::DpiDate :
       case dpi::DpiTimestamp:
       case dpi::DpiTimestampLTZ:
-        defines[i].dttmarr   = executeBaton->dpienv->getDateTimeArray (
+        defines[col].dttmarr   = executeBaton->dpienv->getDateTimeArray (
                                      executeBaton->dpistmt->getError () );
-        defines[i].fetchType = DpiTimestampLTZ;
-        defines[i].maxSize   = meta[i].dbSize;
-        defines[i].extbuf    = defines[i].dttmarr->init(executeBaton->maxRows);
+        defines[col].fetchType = DpiTimestampLTZ;
+        defines[col].maxSize   = meta[col].dbSize;
+        defines[col].extbuf    = defines[col].dttmarr->init(executeBaton->maxRows);
         break;
       default :
         executeBaton->error = NJSMessages::getErrorMsg(errUnsupportedDatType);
         return;
         break;
     }
-    defines[i].ind = (short*)malloc (sizeof(short)*(executeBaton->maxRows));
-    defines[i].len = (DPI_BUFLEN_TYPE *)malloc(sizeof(DPI_BUFLEN_TYPE)*
+    defines[col].ind = (short*)malloc (sizeof(short)*(executeBaton->maxRows));
+    defines[col].len = (DPI_BUFLEN_TYPE *)malloc(sizeof(DPI_BUFLEN_TYPE)*
                                            executeBaton->maxRows);
 
-    executeBaton->dpistmt->define(i+1, defines[i].fetchType,
-                 (defines[i].buf) ? defines[i].buf : defines[i].extbuf,
-                 defines[i].maxSize, defines[i].ind, defines[i].len);
+    executeBaton->dpistmt->define(col+1, defines[col].fetchType,
+                 (defines[col].buf) ? defines[col].buf : defines[col].extbuf,
+                 defines[col].maxSize, defines[col].ind, defines[col].len);
   }
+  executeBaton->defines     = defines;
+  executeBaton->numCols     = numCols;
+}
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Fetch rows into defines buffer for query output.
+     Call DPI fetch.
+
+   PARAMETERS:
+     eBaton struct
+ */
+void Connection::DoFetch (eBaton* executeBaton)
+{
   executeBaton->dpistmt->fetch(executeBaton->maxRows);
-  executeBaton->defines = defines;
-  executeBaton->numCols = numCols;
   executeBaton->rowsFetched = executeBaton->dpistmt->rowsFetched();
-  Connection::descr2Dbl (executeBaton->defines, numCols, 
-                         executeBaton->rowsFetched,
-                         executeBaton->getRS);
+  Connection::Descr2Dbl ( executeBaton->defines, 
+                          executeBaton->numCols, 
+                          executeBaton->rowsFetched,
+                          executeBaton->getRS );
 }
 
 /*****************************************************************************/
@@ -1040,7 +1059,7 @@ void Connection::GetDefines ( eBaton* executeBaton, const dpi::MetaData* meta,
    PARAMETERS:
      Define struct, numCols
  */
-void Connection::descr2Dbl( Define* defines, unsigned int numCols, 
+void Connection::Descr2Dbl( Define* defines, unsigned int numCols, 
                             unsigned int rowsFetched, bool getRS )
 {
   for (unsigned int col = 0; col < numCols; col ++ )

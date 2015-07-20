@@ -77,6 +77,7 @@ using namespace v8;
                                       (NJS_NODE_ORACLEDB_MINOR * 100) +   \
                                       (NJS_NODE_ORACLEDB_PATCH) )
 
+#define NJS_PREFETCH_ROWS_NOT_SET    -1  // by default prefetch is not set, so -1
 
 class Oracledb: public ObjectWrap
 {
@@ -94,7 +95,7 @@ class Oracledb: public ObjectWrap
    unsigned int getPoolMax () const  { return poolMax_; }
    unsigned int getPoolIncrement () const  { return poolIncrement_; }
    unsigned int getPoolTimeout () const  { return poolTimeout_; }
-   unsigned int getPrefetchRows () const  { return prefetchRows_; }
+   signed   int getPrefetchRows () const  { return prefetchRows_; }
    const std::string& getConnectionClass () const { return connClass_; }
 
 
@@ -152,7 +153,7 @@ private:
    unsigned int maxRows_;
 
    unsigned int stmtCacheSize_;
-   int prefetchRows_;
+   signed   int prefetchRows_;
 
    unsigned int poolMin_;
    unsigned int poolMax_;

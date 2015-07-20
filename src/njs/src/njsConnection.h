@@ -177,7 +177,7 @@ typedef struct eBaton
      }
      if( columnNames )
        delete [] columnNames;
-     if( defines && !getRS )
+     if( defines && !getRS ) // To reuse fetch Buffers of ResultSet
      {
        for( unsigned int i=0; i<numCols; i++ )
        {
@@ -201,10 +201,11 @@ public:
   static Handle<Value> GetRows (eBaton* executeBaton);
   static Handle<Value> GetMetaData (std::string* columnNames,
                                     unsigned int numCols);
-  static void GetDefines ( eBaton* executeBaton, const dpi::MetaData*,
-                           unsigned int numCols );
-  static void metaData ( std::string*, const dpi::MetaData*, unsigned int ); 
-  static void descr2Dbl ( Define* defines, unsigned int numCols,
+  static void DoDefines ( eBaton* executeBaton, const dpi::MetaData*,
+                          unsigned int numCols );
+  static void DoFetch (eBaton* executeBaton);
+  static void CopyMetaData ( std::string*, const dpi::MetaData*, unsigned int ); 
+  static void Descr2Dbl ( Define* defines, unsigned int numCols,
                           unsigned int rowsFetched, bool getRS );
   bool getIsValid() { return isValid_; }
 

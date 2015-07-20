@@ -146,6 +146,7 @@ public:
                                 // properties
   virtual DpiStmtType stmtType() const = 0;
 
+  // If NJS layer doesn't set any value, default prefetch is done by OCI.
   virtual void prefetchRows ( int prefetchRows ) = 0;
 
   virtual bool        isDML() const = 0 ;

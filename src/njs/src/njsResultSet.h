@@ -62,9 +62,34 @@
 using namespace v8;
 using namespace node;
 
+class ResultSet;
+
+typedef struct rsBaton
+{
+  uv_work_t            req;
+  bool                 fetchMultiple;
+  std::string          error;
+  eBaton               *ebaton;  
+  unsigned int         numRows;
+  Persistent<Function> cb;
+  ResultSet*           njsRS;
+
+  rsBaton() 
+    :  fetchMultiple(false), error(""), ebaton(NULL), numRows(0)
+  {}
+
+  ~rsBaton()
+   {
+     delete ebaton;
+     NanDisposePersistent(cb);
+   }
+
+}rsBaton;
 
 class ResultSet: public ObjectWrap {
 public:
+   ResultSet(){}
+   ~ResultSet(){}
 
    static void Init(Handle<Object> target);
 
@@ -93,44 +118,22 @@ private:
   // Define Setter Accessors to properties
   static NAN_SETTER(SetMetaData);
 
-  static void nullifyFetchBuffer( Define* fetchBuffers,
-                           unsigned int numCols );
+  static void clearFetchBuffer( Define* defineBuffers,
+                                unsigned int numCols );
 
-   ResultSet();
-   ~ResultSet();
 
-   dpi::Stmt *dpistmt_;
-   dpi::Env  *dpienv_;
-   Connection *njsconn_;
-   State state_;
-   bool rsEmpty_;
-
-   Define* fetchBuffers_;
-   const dpi::MetaData *meta_;
+   dpi::Stmt    *dpistmt_;
+   dpi::Env     *dpienv_;
+   Connection   *njsconn_;
+   State        state_;
+   bool         rsEmpty_;
+   Define       *defineBuffers_;
    unsigned int numCols_;
-   unsigned int bufferSize_;
+   unsigned int fetchRowCount_;
    unsigned int outFormat_;
+   const dpi::MetaData *meta_;
 };
 
-typedef struct rsBaton
-{
-  uv_work_t req;
-  std::string error;
-  eBaton      *ebaton;  
-  unsigned int numRows;
-  Persistent<Function> cb;
-  ResultSet*  njsRS;
-
-  rsBaton() :  error(""), ebaton(NULL), numRows(0)
-  {}
-
-  ~rsBaton()
-   {
-     delete ebaton;
-     NanDisposePersistent(cb);
-   }
-
-}rsBaton;
 
 
 #endif                                          /* __NJSRESULTSET_H__ */

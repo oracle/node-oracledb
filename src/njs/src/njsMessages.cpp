@@ -53,7 +53,7 @@ static const char *errMsg[] =
   "NJS-016: buffer is too small for OUT binds",
   "NJS-017: concurrent operations on resultSet are not allowed",
   "NJS-018: invalid result set",
-  "NJS-019: getResultSet set for non-query execution",
+  "NJS-019: resultSet cannot be true for non-queries",
 };
 
 string NJSMessages::getErrorMsg ( NJSErrorType err, ... )
