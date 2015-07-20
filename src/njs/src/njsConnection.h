@@ -205,9 +205,9 @@ public:
                           unsigned int numCols );
   static void DoFetch (eBaton* executeBaton);
   static void CopyMetaData ( std::string*, const dpi::MetaData*, unsigned int ); 
-  static void Descr2Dbl ( Define* defines, unsigned int numCols,
-                          unsigned int rowsFetched, bool getRS );
-  bool getIsValid() { return isValid_; }
+  static void Descr2Double ( Define* defines, unsigned int numCols,
+                             unsigned int rowsFetched, bool getRS );
+  bool isValid() { return isValid_; }
 
 private:
   static NAN_METHOD(New);

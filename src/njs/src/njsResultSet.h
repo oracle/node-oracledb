@@ -64,18 +64,22 @@ using namespace node;
 
 class ResultSet;
 
+/**
+* Baton for Asynchronous ResultSet methods
+**/
 typedef struct rsBaton
 {
   uv_work_t            req;
-  bool                 fetchMultiple;
   std::string          error;
+  bool                 fetchMultiple;   // set for getRows() method.
   eBaton               *ebaton;  
-  unsigned int         numRows;
+  unsigned int         numRows;         // rows to be fetched.
   Persistent<Function> cb;
-  ResultSet*           njsRS;
+  ResultSet*           njsRS;           // resultset object.
 
   rsBaton() 
-    :  fetchMultiple(false), error(""), ebaton(NULL), numRows(0)
+    :  error(""), fetchMultiple(false), ebaton(NULL), numRows(0),
+       njsRS(NULL)
   {}
 
   ~rsBaton()
@@ -86,6 +90,7 @@ typedef struct rsBaton
 
 }rsBaton;
 
+//ResultSet Class
 class ResultSet: public ObjectWrap {
 public:
    ResultSet(){}
@@ -122,16 +127,16 @@ private:
                                 unsigned int numCols );
 
 
-   dpi::Stmt    *dpistmt_;
-   dpi::Env     *dpienv_;
-   Connection   *njsconn_;
-   State        state_;
-   bool         rsEmpty_;
-   Define       *defineBuffers_;
-   unsigned int numCols_;
-   unsigned int fetchRowCount_;
-   unsigned int outFormat_;
-   const dpi::MetaData *meta_;
+   dpi::Stmt            *dpistmt_;
+   dpi::Env             *dpienv_;
+   Connection           *njsconn_;
+   State                state_;
+   bool                 rsEmpty_;
+   Define               *defineBuffers_;
+   unsigned int         numCols_;
+   unsigned int         fetchRowCount_;
+   unsigned int         outFormat_;
+   const dpi::MetaData  *meta_;
 };
 
 

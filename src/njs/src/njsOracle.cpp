@@ -365,7 +365,7 @@ NAN_SETTER(Oracledb::SetStmtCacheSize)
 NAN_PROPERTY_GETTER(Oracledb::GetPrefetchRows)
 {
   NanScope();
-  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(args.Holder());
+  Oracledb* oracledb   = ObjectWrap::Unwrap<Oracledb>(args.Holder());
   Local<Integer> value = NanNew<v8::Integer>(oracledb->prefetchRows_);
   NanReturnValue(value);
 }

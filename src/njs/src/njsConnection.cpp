@@ -742,8 +742,11 @@ void Connection::Async_Execute (uv_work_t *req)
       executeBaton->numCols       = executeBaton->dpistmt->numCols();
       executeBaton->columnNames   = new std::string[executeBaton->numCols];
       Connection::CopyMetaData( executeBaton->columnNames, meta, 
-                            executeBaton->numCols );
-      if( executeBaton->getRS ) goto exitAsyncExecute;
+                                executeBaton->numCols );
+
+      if ( executeBaton->getRS ) 
+        goto exitAsyncExecute;
+
       Connection::DoDefines(executeBaton, meta, executeBaton->numCols);
       Connection::DoFetch(executeBaton);
     }
@@ -1046,22 +1049,22 @@ void Connection::DoFetch (eBaton* executeBaton)
 {
   executeBaton->dpistmt->fetch(executeBaton->maxRows);
   executeBaton->rowsFetched = executeBaton->dpistmt->rowsFetched();
-  Connection::Descr2Dbl ( executeBaton->defines, 
-                          executeBaton->numCols, 
-                          executeBaton->rowsFetched,
-                          executeBaton->getRS );
+  Connection::Descr2Double ( executeBaton->defines, 
+                             executeBaton->numCols, 
+                             executeBaton->rowsFetched,
+                             executeBaton->getRS );
 }
 
 /*****************************************************************************/
 /*
    DESCRIPTION
-     Special processing for datetime, as it is obtained as descriptors
+     Special processing for datetime to convert descriptors to double value.
 
    PARAMETERS:
      Define struct, numCols
  */
-void Connection::Descr2Dbl( Define* defines, unsigned int numCols, 
-                            unsigned int rowsFetched, bool getRS )
+void Connection::Descr2Double( Define* defines, unsigned int numCols, 
+                               unsigned int rowsFetched, bool getRS )
 {
   for (unsigned int col = 0; col < numCols; col ++ )
   {

@@ -129,10 +129,24 @@ NAN_METHOD(ResultSet::New)
 NAN_PROPERTY_GETTER(ResultSet::GetMetaData)
 {
   NanScope();
-  ResultSet* njsResultSet = ObjectWrap::Unwrap<ResultSet>(args.Holder());
+  ResultSet* njsResultSet  = ObjectWrap::Unwrap<ResultSet>(args.Holder());
+  string msg;
+
+  if(!njsResultSet->njsconn_->isValid())
+  {
+    msg = NJSMessages::getErrorMsg ( errInvalidConnection );
+    NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
+    NanReturnUndefined();
+  }
+  else if(njsResultSet->state_ == INVALID)
+  {
+    msg = NJSMessages::getErrorMsg ( errInvalidResultSet );
+    NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
+    NanReturnUndefined();
+  }
   std::string *columnNames = new std::string[njsResultSet->numCols_];
   Connection::CopyMetaData ( columnNames, njsResultSet->meta_, 
-                         njsResultSet->numCols_ ); 
+                             njsResultSet->numCols_ ); 
   Handle<Value> meta;
   meta = Connection::GetMetaData( columnNames,
                                   njsResultSet->numCols_ );
@@ -149,7 +163,10 @@ NAN_SETTER(ResultSet::SetMetaData)
   NanScope();
   ResultSet* njsResultSet = ObjectWrap::Unwrap<ResultSet>(args.Holder());
   string msg;
-  if(njsResultSet->state_ == INVALID)
+
+  if(!njsResultSet->njsconn_->isValid())
+    msg = NJSMessages::getErrorMsg ( errInvalidConnection );
+  else if(njsResultSet->state_ == INVALID)
     msg = NJSMessages::getErrorMsg(errInvalidResultSet);
   else
     msg = NJSMessages::getErrorMsg(errReadOnly, "metaData");
@@ -190,7 +207,7 @@ NAN_METHOD(ResultSet::GetRows)
   getRowsBaton->njsRS  = njsResultSet; 
   getRowsBaton->ebaton = new eBaton; 
 
-  if(!njsResultSet->njsconn_->getIsValid())
+  if(!njsResultSet->njsconn_->isValid())
   {
     getRowsBaton->error = NJSMessages::getErrorMsg ( errInvalidConnection );
     goto exitGetRows;
@@ -253,12 +270,13 @@ void ResultSet::Async_GetRows(uv_work_t *req)
     Connection::CopyMetaData ( ebaton->columnNames, njsRS->meta_, 
                                njsRS->numCols_ );
     ebaton->numCols      = njsRS->numCols_;
-    if( njsRS->defineBuffers_ == NULL || 
+    if( !njsRS->defineBuffers_ || 
         njsRS->fetchRowCount_  < getRowsBaton->numRows )
     {
-      if(njsRS->defineBuffers_ != NULL)
+      if( njsRS->defineBuffers_ )
       {
         ResultSet::clearFetchBuffer(njsRS->defineBuffers_, njsRS->numCols_);
+        getRowsBaton-> njsRS-> defineBuffers_ = NULL;
       }
       Connection::DoDefines(ebaton, njsRS->meta_, njsRS->numCols_);
       njsRS->fetchRowCount_ = getRowsBaton->numRows;
@@ -355,7 +373,7 @@ NAN_METHOD(ResultSet::Close)
 
   NJS_CHECK_NUMBER_OF_ARGS ( closeBaton->error, args, 1, 1, exitClose );
 
-  if(!njsResultSet->njsconn_->getIsValid())
+  if(!njsResultSet->njsconn_->isValid())
   {
     closeBaton->error = NJSMessages::getErrorMsg ( errInvalidConnection );
     goto exitClose;
@@ -402,9 +420,12 @@ void ResultSet::Async_Close(uv_work_t *req)
   try
   {
     closeBaton-> njsRS-> dpistmt_-> release ();
+
     Define* defineBuffers = closeBaton-> njsRS-> defineBuffers_;
     unsigned int numCols  = closeBaton-> njsRS-> numCols_;
+
     ResultSet::clearFetchBuffer(defineBuffers, numCols);
+    closeBaton-> njsRS-> defineBuffers_ = NULL;
   }
   catch(dpi::Exception& e)
   {
