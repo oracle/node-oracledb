@@ -47,7 +47,6 @@ describe('27. dataTypeNumber2.js', function() {
   }
   
   var connection = false;
-  
   var tableName = "oracledb_datatype_number2";
   var sqlCreate = 
         "BEGIN " +
@@ -67,38 +66,7 @@ describe('27. dataTypeNumber2.js', function() {
            "       )" +
            "   '); " +
            "END; ";
-  var sqlDrop = "DROP table " + tableName;
-  before( function(done){
-    oracledb.getConnection(credential, function(err, conn){
-      if(err) { console.error(err.message); return; }
-      connection = conn;
-      connection.execute(
-        sqlCreate,
-        function(err) {
-          if(err) { console.error(err.message); return; }
-          done();
-        }
-      );
-    });
-  })
-  
-  after( function(done){
-    connection.execute(
-      sqlDrop,
-      function(err) {
-        if(err) { console.error(err.message); return; }
-        connection.release( function(err) {
-          if(err) { console.error(err.message); return; }
-          done();
-        });
-      }
-    );
-  })
-  
-  it('supports NUMBER(p, s) data type', function(done) {
-    connection.should.be.ok;
-    
-    var numbers = [
+  var numbers = [
         1,
         0,
         8,
@@ -110,38 +78,89 @@ describe('27. dataTypeNumber2.js', function() {
         0.01234,
         -0.01234,
         0.00000123
-    ];
-    
-    var sqlInsert = "INSERT INTO " + tableName + " VALUES(:no, :bindValue)";
-    
-    async.forEach(numbers, function(num, callback) {
-      connection.execute(
-        sqlInsert,
-        { no: numbers.indexOf(num), bindValue: num },
-        function(err) {
-          should.not.exist(err);
-          callback();
-        }
-      );
-    }, function(err) {
-      should.not.exist(err);
-      connection.execute(
-        "SELECT * FROM " + tableName,
-        [],
-        { outFormat: oracledb.OBJECT },
-        function(err, result) {
-          should.not.exist(err);
-          // console.log(result);
-          for(var j = 0; j < numbers.length; j++) {
-            if(numbers[result.rows[j].NUM] == 0.00000123) 
-              result.rows[j].CONTENT.should.be.exactly(0);
-            else			  
-		      result.rows[j].CONTENT.should.be.exactly(numbers[result.rows[j].NUM]);
-          }
-		  done();
-        }
-      );
+      ];
+  before(function(done) {
+    oracledb.getConnection(credential, function(err, conn) {
+      if(err) { console.error(err.message); return; }
+      connection = conn;
+      assist.setup(connection, tableName, sqlCreate, numbers, done);
     });
   })
   
+  after( function(done){
+    connection.execute(
+      "DROP table " + tableName,
+      function(err) {
+        if(err) { console.error(err.message); return; }
+        connection.release( function(err) {
+          if(err) { console.error(err.message); return; }
+          done();
+        });
+      }
+    );
+  })
+  
+  it('27.1 supports NUMBER(p, s) data type', function(done) {
+    connection.should.be.ok;
+    connection.execute(
+      "SELECT * FROM " + tableName,
+      [],
+      { outFormat: oracledb.OBJECT },
+      function(err, result) {
+        should.not.exist(err);
+        // console.log(result);
+        for(var j = 0; j < numbers.length; j++) {
+          if(numbers[result.rows[j].NUM] == 0.00000123) 
+            result.rows[j].CONTENT.should.be.exactly(0);
+          else            
+           result.rows[j].CONTENT.should.be.exactly(numbers[result.rows[j].NUM]);
+        }
+        done();
+      }
+    );
+  })
+  
+  it('27.2 resultSet stores NUMBER(p, s) data correctly', function(done) {
+    connection.should.be.ok;
+    var numRows = 3; // number of rows to return from each call to getRows()
+    connection.execute(
+      "SELECT * FROM " + tableName,
+      [],
+      { resultSet: true, outFormat: oracledb.OBJECT },
+      function(err, result) {
+        should.not.exist(err);
+        (result.resultSet.metaData[0]).name.should.eql('NUM');
+        (result.resultSet.metaData[1]).name.should.eql('CONTENT');
+        fetchRowsFromRS(result.resultSet);
+      }
+    );
+    
+    function fetchRowsFromRS(rs) {
+      rs.getRows(numRows, function(err, rows) {
+        should.not.exist(err);
+        if(rows.length > 0) {
+          for(var i = 0; i < rows.length; i++) {
+            if(numbers[rows[i].NUM] == 0.00000123) 
+              rows[i].CONTENT.should.be.exactly(0);
+            else              
+             rows[i].CONTENT.should.be.exactly(numbers[rows[i].NUM]);         
+          }
+          return fetchRowsFromRS(rs);
+        } else if(rows.length == 0) {
+          rs.close(function(err) {
+            should.not.exist(err);
+            done();
+          });
+        } else {
+          var lengthLessThanZero = true;
+          should.not.exist(lengthLessThanZero);
+          done();
+        }
+      });
+    }
+  })
+  
+  it('27.3 stores null value correctly', function(done) {
+    assist.nullValueSupport(connection, tableName, done);
+  })  
 })

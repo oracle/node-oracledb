@@ -149,10 +149,10 @@ describe('6. dmlReturning.js', function(){
     it('6.1.3 INSERT statement with small maxSize restriction', function(done) {
       connection.should.be.ok;
       connection.execute(
-        "INSERT INTO oracledb_dmlreturn VALUES (1003, 'Robyn Sands') RETURNING id, name INTO :rid, :rname",
+        "INSERT INTO oracledb_dmlreturn VALUES (1003, 'Robyn Sands Delaware') RETURNING id, name INTO :rid, :rname",
         {
           rid: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
-          rname: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 10 } 
+          rname: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 2 } 
         },
         { autoCommit: true },
         function(err, result) {

@@ -33,8 +33,6 @@
  *****************************************************************************/
  
 var oracledb = require('oracledb');
-var should = require('should');
-var async = require('async');
 var assist = require('./dataTypeAssist.js');
 var dbConfig = require('./dbConfig.js');
 
@@ -47,7 +45,6 @@ describe('34. dataTypeTimestamp2.js', function() {
   }
   
   var connection = false;
-  
   var tableName = "oracledb_datatype_timestamp";
   var sqlCreate = 
         "BEGIN " +
@@ -67,24 +64,24 @@ describe('34. dataTypeTimestamp2.js', function() {
            "       )" +
            "   '); " +
            "END; ";
-  var sqlDrop = "DROP table " + tableName;
-  before( function(done){
-    oracledb.getConnection(credential, function(err, conn){
+  var timestamps = [
+        new Date(-100000000),
+        new Date(0),
+        new Date(10000000000),
+        new Date(100000000000)
+      ];
+    
+  before(function(done) {
+    oracledb.getConnection(credential, function(err, conn) {
       if(err) { console.error(err.message); return; }
       connection = conn;
-      connection.execute(
-        sqlCreate,
-        function(err) {
-          if(err) { console.error(err.message); return; }
-          done();
-        }
-      );
+      assist.setup(connection, tableName, sqlCreate, timestamps, done);
     });
   })
   
   after( function(done){
     connection.execute(
-      sqlDrop,
+      "DROP table " + tableName,
       function(err) {
         if(err) { console.error(err.message); return; }
         connection.release( function(err) {
@@ -94,44 +91,16 @@ describe('34. dataTypeTimestamp2.js', function() {
       }
     );
   })
-
-  it('supports TIMESTAMP data type', function(done) {
-    connection.should.be.ok;
-    
-    var timestamps = [
-        new Date(-100000000),
-        new Date(0),
-        new Date(10000000000),
-        new Date(100000000000)
-    ];
-    
-    var sqlInsert = "INSERT INTO " + tableName + " VALUES(:no, :bindValue)";
-    
-    async.forEach(timestamps, function(timestamp, callback) {
-      connection.execute(
-        sqlInsert,
-        { no: timestamps.indexOf(timestamp), bindValue: timestamp },
-        function(err) {
-          should.not.exist(err);
-          callback();
-        }
-      );
-    }, function(err) {
-      should.not.exist(err);
-      connection.execute(
-        "SELECT * FROM " + tableName,
-        [],
-        { outFormat: oracledb.OBJECT },
-        function(err, result) {
-          should.not.exist(err);
-          // console.log(result);
-          for(var j = 0; j < timestamps.length; j++) 
-            result.rows[j].CONTENT.toUTCString().should.eql(timestamps[result.rows[j].NUM].toUTCString());
-        
-          done();		
-        }
-      );
-    });
+  
+  it('34.1 supports TIMESTAMP(p) data type', function(done) {
+    assist.dataTypeSupport(connection, tableName, timestamps, done);
   })
   
+  it('34.2 resultSet stores TIMESTAMP data correctly', function(done) {
+    assist.resultSetSupport(connection, tableName, timestamps, done);
+  })
+  
+  it('34.3 stores null value correctly', function(done) {
+    assist.nullValueSupport(connection, tableName, done);
+  })  
 })

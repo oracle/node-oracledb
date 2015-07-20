@@ -54,7 +54,7 @@ describe('53. poolValidityAfterFailingTernimate.js', function(){
           pool.terminate( 
             function(err){
               should.exist(err);
-              (err.message).should.eql('ORA-24422: error occurred while trying to destroy the Session Pool');
+              (err.message).should.startWith('ORA-24422:');
               
               // console.log("Before release, Open connections: " + pool.connectionsOpen);
               connection.release( function(err){

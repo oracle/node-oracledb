@@ -28,7 +28,7 @@
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
  *     21 - 50  are reserved for data type supporting tests
- *     51 -     are for other tests 
+ *     51 onwards are for other tests 
  * 
  *****************************************************************************/
 
@@ -60,7 +60,8 @@ describe('3. examples.js', function(){
   
   describe('3.2 version.js', function(){
     it('3.2.1 shows the oracledb version attribute', function(){
-      (oracledb.version).should.be.a.Number.and.above(0);
+      (oracledb.version).should.be.a.Number;
+      (oracledb.version).should.be.greaterThan(0);
       // console.log("Driver version number is " + oracledb.version);
       
       major = Math.floor(oracledb.version/10000);
@@ -768,6 +769,139 @@ describe('3. examples.js', function(){
       ], done);
         
     })
+  })
+  
+  describe('3.10 resultset.js', function() {
+    var connection = false;
+    
+    var createTable = 
+      "BEGIN \
+          DECLARE \
+              e_table_exists EXCEPTION; \
+              PRAGMA EXCEPTION_INIT(e_table_exists, -00942); \
+          BEGIN \
+              EXECUTE IMMEDIATE ('DROP TABLE oracledb_employees'); \
+          EXCEPTION \
+              WHEN e_table_exists \
+              THEN NULL; \
+          END; \
+          EXECUTE IMMEDIATE (' \
+              CREATE TABLE oracledb_employees ( \
+                  employees_id NUMBER,  \
+                  employees_name VARCHAR2(20) \
+              ) \
+          '); \
+      END; ";
+      
+    var insertRows = 
+      "DECLARE \
+          x NUMBER := 0; \
+          n VARCHAR2(20); \
+       BEGIN \
+          FOR i IN 1..207 LOOP \
+             x := x + 1; \
+             n := 'staff ' || x; \
+             INSERT INTO oracledb_employees VALUES (x, n); \
+          END LOOP; \
+       END; ";
+    
+    before(function(done){
+      oracledb.getConnection(credential, function(err, conn){
+        if(err) { console.error(err.message); return; }
+        connection = conn;
+        connection.execute(createTable, function(err){
+          if(err) { console.error(err.message); return; }
+          connection.execute(insertRows, function(err){
+            if(err) { console.error(err.message); return; }
+            done();
+          });
+        });
+      });
+    })
+    
+    after(function(done){
+      connection.execute(
+        'DROP TABLE oracledb_employees',
+        function(err){
+          if(err) { console.error(err.message); return; }
+          connection.release( function(err){
+            if(err) { console.error(err.message); return; }
+            done();
+          });
+        }
+      ); 
+    })
+
+    it('3.10.1 resultset1.js - getRow() function', function(done) {
+      connection.should.be.ok;
+      var rowCount = 1;
+      
+      connection.execute(
+        "SELECT employees_name FROM oracledb_employees",
+        [],
+        { resultSet: true, prefetchRows: 50 },
+        function(err, result) {
+          should.not.exist(err);
+          (result.resultSet.metaData[0]).name.should.eql('EMPLOYEES_NAME');
+          fetchRowFromRS(connection, result.resultSet);
+        }
+      );
+      
+      function fetchRowFromRS(connection, rs) {
+        rs.getRow(function(err, row) {
+          should.not.exist(err);
+          
+          if(row) {
+            // console.log(row);
+            row[0].should.be.exactly('staff ' + rowCount);
+            rowCount++;
+            return fetchRowFromRS(connection, rs);
+          } else {
+            rs.close(function(err) {
+              should.not.exist(err);
+              done();
+            });
+          }
+        });
+      }
+    })
+    
+    it('3.10.2 resultset2.js - getRows() function', function(done) {
+      connection.should.be.ok;
+      var numRows = 10;  // number of rows to return from each call to getRows()
+      
+      connection.execute(
+        "SELECT * FROM oracledb_employees",
+        [],
+        { resultSet: true, prefetchRows: 110 },
+        function(err, result) {
+          should.not.exist(err);
+          (result.resultSet.metaData[0]).name.should.eql('EMPLOYEES_ID');
+          (result.resultSet.metaData[1]).name.should.eql('EMPLOYEES_NAME');
+          fetchRowsFromRS(connection, result.resultSet);
+        }
+      );
+      
+      function fetchRowsFromRS(conn, rs) {
+        rs.getRows(numRows, function(err, rows) {
+          should.not.exist(err);
+          if(rows.length > 0) {
+            //console.log("length of rows " + rows.length);
+            //for(var i = 0; i < rows.length; i++) 
+            //  console.log(rows[i]);
+  
+            return fetchRowsFromRS(conn, rs);
+          } else {
+            rs.close(function(err) {
+              should.not.exist(err);
+              done();
+            });
+          }
+        });
+      }
+    })
+
+      
   })
   
 })

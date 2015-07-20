@@ -15,6 +15,9 @@ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
+The node-oracledb test suite uses 'mocha', 'should' and 'async'. 
+See LICENSE.md for relevant licenses.
+
 ## Running the complete test suite
 
 ### 1. Create a working directory
@@ -27,6 +30,7 @@ cd <some-directory>
 ### 2. Install node-oracledb
 
 See [INSTALL](https://github.com/oracle/node-oracledb/blob/master/INSTALL.md)
+for installation requirements and more details.
 
 Install with:
 
@@ -50,7 +54,7 @@ cd <some-directory>/node_modules/oracledb
 npm install mocha should async
 ```
 
-Note: these are listed in `devDependencies` and `package.json` so `npm
+Note: these are listed in `devDependencies` in `package.json` so `npm
 install` will install them when executed inside a node-oracledb
 package directory.
 
@@ -60,9 +64,22 @@ package directory.
 vi <some-directory>/node_modules/oracledb/test/dbConfig.js
 ```
 
-The user requires privileges to connect and create tables.
+Change the credentials to a user who has privileges to connect and create tables:
 
-If you use external authentication, make sure Oracle Database and the authentication service have been appropriately configured.  Also set the `externalAuth` property to `true` in `test/dbConfig.js`.  See [Documentation for External Authentication](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#extauth) for more details.
+```javascript
+module.exports = {
+  user          : "hr",
+  password      : "welcome",
+  connectString : "localhost/orcl",
+  externalAuth  : false
+};
+```
+
+To use external authentication, set the `externalAuth` property to
+`true`.  Also make sure Oracle Database and the authentication service
+have been appropriately configured.  See
+[Documentation for External Authentication](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#extauth)
+for more details.
 
 ### 5. Run test suite
 

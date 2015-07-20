@@ -33,8 +33,6 @@
  *****************************************************************************/
  
 var oracledb = require('oracledb');
-var should = require('should');
-var async = require('async');
 var assist = require('./dataTypeAssist.js');
 var dbConfig = require('./dbConfig.js');
 
@@ -66,24 +64,23 @@ describe('23. dataTypeNchar.js', function(){
            "       )" +
            "   '); " +
            "END; ";
-  var sqlDrop = "DROP table " + tableName;
-  before( function(done){
-    oracledb.getConnection(credential, function(err, conn){
+
+  var strLen = [10, 100, 500, 1000]; 
+  var strs = [];
+  for(var i = 0; i < strLen.length; i++)
+    strs[i] = assist.createCharString(strLen[i]);
+      
+  before(function(done) {
+    oracledb.getConnection(credential, function(err, conn) {
       if(err) { console.error(err.message); return; }
       connection = conn;
-      connection.execute(
-        sqlCreate,
-        function(err) {
-          if(err) { console.error(err.message); return; }
-          done();
-        }
-      );
+      assist.setup(connection, tableName, sqlCreate, strs, done);
     });
   })
   
-  after( function(done){
+  after(function(done) {
     connection.execute(
-      sqlDrop,
+      "DROP table " + tableName,
       function(err) {
         if(err) { console.error(err.message); return; }
         connection.release( function(err) {
@@ -94,64 +91,15 @@ describe('23. dataTypeNchar.js', function(){
     );
   })
   
-  it('supports NCHAR data type', function(done){
-    connection.should.be.ok;
-    
-    var strLen = [10, 100, 500, 1000]; 
-    var strs = [];
-    for(var i = 0; i < strLen.length; i++)
-      strs[i] = assist.createCharString(strLen[i]);
-      
-    var sqlInsert = "INSERT INTO " + tableName + " VALUES(:no, :bindValue)";
-    async.forEach(strs, function(str, callback) {
-      connection.execute(
-        sqlInsert,
-        { no: strs.indexOf(str), bindValue: str},
-        function(err) {
-          should.not.exist(err);
-          callback();
-        }
-      );
-    }, function(err) {
-      should.not.exist(err);
-      connection.execute(
-        "SELECT * FROM " + tableName,
-        [],
-        { outFormat: oracledb.OBJECT },
-        function(err, result) {
-          should.not.exist(err);
-          
-          for(var j = 0; j < strLen.length; j++) {
-            result.rows[j].CONTENT.trim().should.eql(strs[result.rows[j].NUM]);
-            result.rows[j].CONTENT.trim().length.should.be.exactly(strLen[result.rows[j].NUM]);
-          }
-          done();
-        }
-      );
-    }); 
+  it('23.1 supports NCHAR data type', function(done) {
+    assist.dataTypeSupport(connection, tableName, strs, done);
   })
+  
+  it('23.2 resultSet supports NCHAR data type', function(done) {
+    assist.resultSetSupport(connection, tableName, strs, done);
+  })
+  
+  it('23.3 stores null value correctly', function(done) {
+    assist.nullValueSupport(connection, tableName, done);
+  }) 
 })
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

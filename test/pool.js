@@ -132,7 +132,7 @@ describe('2. pool.js', function(){
         function(err, pool){
           if(!credential.externalAuth){
             should.exist(err);
-            (err.message).should.equal('ORA-24413: Invalid number of sessions specified');
+            (err.message).should.startWith('ORA-24413:');
           }
           done();
         }
@@ -155,7 +155,7 @@ describe('2. pool.js', function(){
         function(err, pool){  
           if(!credential.externalAuth){
             should.exist(err);
-            (err.message).should.equal('ORA-24413: Invalid number of sessions specified');
+            (err.message).should.startWith('ORA-24413:');
           }
           done();
         }
@@ -178,7 +178,7 @@ describe('2. pool.js', function(){
         function(err, pool){
           if(!credential.externalAuth){
             should.exist(err);
-            (err.message).should.equal('ORA-24413: Invalid number of sessions specified');
+            (err.message).should.startWith('ORA-24413:');
           }
           done();
         }
@@ -257,7 +257,7 @@ describe('2. pool.js', function(){
         },
         function(err, pool){
           should.exist(err);
-          (err.message).should.equal('ORA-24413: Invalid number of sessions specified');
+          (err.message).should.startWith('ORA-24413:');
           done();
         }
       );
@@ -322,7 +322,7 @@ describe('2. pool.js', function(){
               // Error occurs
               pool.getConnection( function(err, conn3){
                 should.exist(err);
-                (err.message).should.equal('ORA-24418: Cannot open further sessions.');
+                (err.message).should.startWith('ORA-24418:');
               
                 conn2.release( function(err){
                   should.not.exist(err);
@@ -381,7 +381,7 @@ describe('2. pool.js', function(){
         },
         function(err, pool){
           should.exist(err);  // Bug 20774464 - Occurs on External Authentication
-          (err.message).should.equal('ORA-24413: Invalid number of sessions specified');
+          (err.message).should.startWith('ORA-24413:');
           done();
         }
       );

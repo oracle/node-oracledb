@@ -233,4 +233,54 @@ describe('10. nullColumnValues.js', function() {
     );
   })
   
+  it('10.5 resultSet for null value', function(done) {
+    connection.should.be.ok;
+    
+    async.series([
+      function(callback) {
+        connection.execute(
+          "UPDATE oracledb_departments SET department_name = :dname, \
+          manager_id = :mid WHERE department_id = :did ",
+          {
+            dname: '',
+            mid: null,
+            did: 50
+          },
+          { autoCommit: true },
+          function(err) {
+            should.not.exist(err);
+            callback();
+          }
+        );
+      },
+      function(callback) {
+        connection.execute(
+          "SELECT * FROM oracledb_departments WHERE department_id = :1",
+          [50],
+          { resultSet: true },
+          function(err, result) {
+            should.not.exist(err);
+            fetchRowFromRS(result.resultSet);
+          }
+        );
+        
+        function fetchRowFromRS(rs) {
+          rs.getRow(function(err, row) {
+            should.not.exist(err);
+            if(row) {
+              // console.log(row);
+              row.should.eql([50, null, null, 1500]);
+              return fetchRowFromRS(rs);
+            } else {
+              rs.close(function(err) {
+                should.not.exist(err);
+                callback();
+              });
+            }
+          });
+        }
+      }
+    ], done);
+  })
+  
 })

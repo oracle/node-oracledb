@@ -308,7 +308,7 @@ describe('4. binding.js', function() {
         var proc = "CREATE OR REPLACE PROCEDURE oracledb_testproc (p_out OUT VARCHAR2) \
                     AS \
                     BEGIN \
-                      p_out := 'ABCDEF'; \
+                      p_out := 'ABCDEF GHIJK LMNOP QRSTU'; \
                     END;";
         connection.should.be.ok;
         connection.execute(
@@ -328,7 +328,7 @@ describe('4. binding.js', function() {
           function(err, result) {
             should.exist(err);
             // console.log(err.message);
-            err.message.should.startWith('ORA-06502: PL/SQL: numeric or value error: character string buffer too small');
+            err.message.should.startWith('ORA-06502:');
             // console.log(result);
             callback();
           }
@@ -343,7 +343,7 @@ describe('4. binding.js', function() {
           function(err, result) {
             should.exist(err);
             // console.log(err.message);
-            err.message.should.startWith('ORA-06502: PL/SQL: numeric or value error: character string buffer too small');
+            err.message.should.startWith('ORA-06502:');
             // console.log(result);
             callback();
           }

@@ -33,8 +33,6 @@
  *****************************************************************************/
   
 var oracledb = require('oracledb');
-var should = require('should');
-var async = require('async');
 var assist = require('./dataTypeAssist.js');
 var dbConfig = require('./dbConfig.js');
 
@@ -47,7 +45,6 @@ describe('28. dataTypeFloat.js', function() {
   }  
   
   var connection = false;
-  
   var tableName = "oracledb_datatype_float";
   var sqlCreate = 
         "BEGIN " +
@@ -67,38 +64,7 @@ describe('28. dataTypeFloat.js', function() {
            "       )" +
            "   '); " +
            "END; ";
-  var sqlDrop = "DROP table " + tableName;
-  before( function(done){
-    oracledb.getConnection(credential, function(err, conn){
-      if(err) { console.error(err.message); return; }
-      connection = conn;
-      connection.execute(
-        sqlCreate,
-        function(err) {
-          if(err) { console.error(err.message); return; }
-          done();
-        }
-      );
-    });
-  })
-  
-  after( function(done){
-    connection.execute(
-      sqlDrop,
-      function(err) {
-        if(err) { console.error(err.message); return; }
-        connection.release( function(err) {
-          if(err) { console.error(err.message); return; }
-          done();
-        });
-      }
-    );
-  })
-  
-  it('supports FLOAT data type', function(done) {
-    connection.should.be.ok;
-    
-    var numbers = [
+  var numbers = [
         1,
         0,
         8,
@@ -111,35 +77,38 @@ describe('28. dataTypeFloat.js', function() {
         -0.01234,
         123456789.0123,
         -123456789.0123
-    ];
-    
-    var sqlInsert = "INSERT INTO " + tableName + " VALUES(:no, :bindValue)";
-    
-    async.forEach(numbers, function(num, callback) {
-      connection.execute(
-        sqlInsert,
-        { no: numbers.indexOf(num), bindValue: num },
-        function(err) {
-          should.not.exist(err);
-          callback();
-        }
-      );
-    }, function(err) {
-      should.not.exist(err);
-      connection.execute(
-        "SELECT * FROM " + tableName,
-        [],
-        { outFormat: oracledb.OBJECT },
-        function(err, result) {
-          should.not.exist(err);
-          // console.log(result);
-          for(var j = 0; j < numbers.length; j++) 
-            result.rows[j].CONTENT.should.be.exactly(numbers[result.rows[j].NUM]);
-          
-		  done();
-        }
-      );
+      ];
+      
+  before(function(done) {
+    oracledb.getConnection(credential, function(err, conn) {
+      if(err) { console.error(err.message); return; }
+      connection = conn;
+      assist.setup(connection, tableName, sqlCreate, numbers, done);
     });
   })
   
+  after( function(done){
+    connection.execute(
+      "DROP table " + tableName,
+      function(err) {
+        if(err) { console.error(err.message); return; }
+        connection.release( function(err) {
+          if(err) { console.error(err.message); return; }
+          done();
+        });
+      }
+    );
+  })
+  
+  it('28.1 supports FLOAT data type', function(done) {
+    assist.dataTypeSupport(connection, tableName, numbers, done);
+  })
+  
+  it('28.2 resultSet stores FLOAT data correctly', function(done) {
+    assist.resultSetSupport(connection, tableName, numbers, done);
+  })
+  
+  it('28.3 stores null value correctly', function(done) {
+    assist.nullValueSupport(connection, tableName, done);
+  })
 })

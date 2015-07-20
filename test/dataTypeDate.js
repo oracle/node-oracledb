@@ -33,8 +33,6 @@
  *****************************************************************************/
    
 var oracledb = require('oracledb');
-var should = require('should');
-var async = require('async');
 var assist = require('./dataTypeAssist.js');
 var dbConfig = require('./dbConfig.js');
 
@@ -47,7 +45,6 @@ describe('32. dataTypeDate.js', function() {
   }
   
   var connection = false;
-  
   var tableName = "oracledb_datatype_date";
   var sqlCreate = 
         "BEGIN " +
@@ -67,24 +64,25 @@ describe('32. dataTypeDate.js', function() {
            "       )" +
            "   '); " +
            "END; ";
-  var sqlDrop = "DROP table " + tableName;
-  before( function(done){
-    oracledb.getConnection(credential, function(err, conn){
+  
+  var dates = [
+        new Date(-100000000),
+        new Date(0),
+        new Date(10000000000),
+        new Date(100000000000)
+      ];
+  
+  before(function(done) {
+    oracledb.getConnection(credential, function(err, conn) {
       if(err) { console.error(err.message); return; }
       connection = conn;
-      connection.execute(
-        sqlCreate,
-        function(err) {
-          if(err) { console.error(err.message); return; }
-          done();
-        }
-      );
+      assist.setup(connection, tableName, sqlCreate, dates, done);
     });
   })
   
   after( function(done){
     connection.execute(
-      sqlDrop,
+      "DROP table " + tableName,
       function(err) {
         if(err) { console.error(err.message); return; }
         connection.release( function(err) {
@@ -94,44 +92,16 @@ describe('32. dataTypeDate.js', function() {
       }
     );
   })
-
-  it('supports DATE data type', function(done) {
-    connection.should.be.ok;
-    
-    var dates = [
-        new Date(-100000000),
-        new Date(0),
-        new Date(10000000000),
-        new Date(100000000000)
-    ];
-    
-    var sqlInsert = "INSERT INTO " + tableName + " VALUES(:no, :bindValue)";
-    
-    async.forEach(dates, function(date, callback) {
-      connection.execute(
-        sqlInsert,
-        { no: dates.indexOf(date), bindValue: date },
-        function(err) {
-          should.not.exist(err);
-          callback();
-        }
-      );
-    }, function(err) {
-      should.not.exist(err);
-      connection.execute(
-        "SELECT * FROM " + tableName,
-        [],
-        { outFormat: oracledb.OBJECT },
-        function(err, result) {
-          should.not.exist(err);
-          // console.log(result);
-          for(var j = 0; j < dates.length; j++) 
-            result.rows[j].CONTENT.toUTCString().should.eql(dates[result.rows[j].NUM].toUTCString()); 
-			
-		  done();
-        }
-      );
-    });
+  
+  it('32.1 supports DATE data type', function(done) {
+    assist.dataTypeSupport(connection, tableName, dates, done);
   })
   
+  it('32.2 resultSet stores DATE data correctly', function(done) {
+    assist.resultSetSupport(connection, tableName, dates, done);
+  })
+  
+  it('32.3 stores null value correctly', function(done) {
+    assist.nullValueSupport(connection, tableName, done);
+  })   
 })
