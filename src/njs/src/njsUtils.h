@@ -238,13 +238,13 @@ typedef enum
  */
 #define NJS_GET_UINT_FROM_JSON( val, err, obj, key, index, exitCode )         \
 {                                                                             \
-  Local<Value> v8value = obj->Get(NanNew<v8::String>(key));                          \
+  Local<Value> v8value = obj->Get(NanNew<v8::String>(key));                   \
   err.clear();                                                                \
   if( v8value->IsUint32() )                                                   \
   {                                                                           \
     val = v8value->ToUint32()->Value();                                       \
   }                                                                           \
-  else if(v8value->IsUndefined() || v8value->IsNull())                        \
+  else if(v8value->IsUndefined())                                             \
   {                                                                           \
     ;                                                                         \
   }                                                                           \
@@ -268,7 +268,7 @@ typedef enum
  */
 #define NJS_GET_BOOL_FROM_JSON( val, err, obj, key, index, exitCode )         \
 {                                                                             \
-  Local<Value> v8value = obj->Get(NanNew<v8::String>(key));                          \
+  Local<Value> v8value = obj->Get(NanNew<v8::String>(key));                   \
   if ( !v8value->IsUndefined () )                                             \
   {                                                                           \
     val = v8value->ToBoolean()->Value();                                      \

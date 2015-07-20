@@ -64,6 +64,12 @@ Persistent<FunctionTemplate> ResultSet::resultSetTemplate_s;
 /*
    DESCRIPTION
      Store the config in pool instance.
+   
+   PARAMETERS
+     stmt      -  dpi statement
+     env       -  dpi Env
+     conn      -  njs connection
+     outFormat -  outFormat of the result set
 */
 void ResultSet::setResultSet ( dpi::Stmt *stmt, dpi::Env *env,
                                Connection *conn, unsigned int outFormat )
@@ -179,7 +185,7 @@ NAN_SETTER(ResultSet::SetMetaData)
      Get Row method on Result Set class.
 
    PARAMETERS:
-     Arguments - callback
+     args - callback
 */
 NAN_METHOD(ResultSet::GetRow)
 {
@@ -208,7 +214,7 @@ exitGetRow:
      Get Rows method on Result Set class.
 
    PARAMETERS:
-     Arguments - numRows, callback
+     args - numRows, callback
 */
 NAN_METHOD(ResultSet::GetRows)
 {
@@ -224,6 +230,12 @@ NAN_METHOD(ResultSet::GetRows)
   NJS_CHECK_NUMBER_OF_ARGS ( getRowsBaton->error, args, 2, 2, exitGetRows );
   NJS_GET_ARG_V8UINT ( getRowsBaton->numRows, getRowsBaton->error,
                        args, 0, exitGetRows );
+  if(!getRowsBaton->numRows)
+  {
+    getRowsBaton->error = NJSMessages::getErrorMsg ( 
+                                     errInvalidParameterValue, 1);
+    goto exitGetRows;
+  }
 
   getRowsBaton->fetchMultiple = true;
   getRowsBaton->njsRS         = njsResultSet;
@@ -238,7 +250,7 @@ exitGetRows:
      Common method for GetRow and GetRows method
 
    PARAMETERS:
-     Arguments - resultset baton
+     getRowsBaton - resultset baton
 */
 void ResultSet::GetRowsCommon(rsBaton *getRowsBaton)
 {
@@ -263,8 +275,7 @@ void ResultSet::GetRowsCommon(rsBaton *getRowsBaton)
     goto exitGetRowsCommon;
   }
 
-  getRowsBaton->ebaton    = new eBaton;
-  ebaton                  = getRowsBaton->ebaton;
+  getRowsBaton->ebaton    = ebaton = new eBaton;
   njsRS                   = getRowsBaton->njsRS;
 
   njsRS->state_           = ACTIVE;
@@ -289,7 +300,7 @@ exitGetRowsCommon:
      Worker function of GetRows method
 
    PARAMETERS:
-     UV queue work block
+     req - UV queue work block
 
    NOTES:
      DPI call execution.
@@ -345,7 +356,7 @@ void ResultSet::Async_GetRows(uv_work_t *req)
      Callback function of GetRows method
 
    PARAMETERS:
-     UV queue work block
+     req - UV queue work block
 */
 void ResultSet::Async_AfterGetRows(uv_work_t *req)
 {
@@ -401,7 +412,7 @@ void ResultSet::Async_AfterGetRows(uv_work_t *req)
      Close method
 
    PARAMETERS:
-     Arguments - Callback
+     args - Callback
 */
 NAN_METHOD(ResultSet::Close)
 {
@@ -450,7 +461,7 @@ exitClose:
      Worker function of close.
 
    PARAMETERS:
-     UV queue work block
+     req - UV queue work block
 
    NOTES:
      DPI call execution.
@@ -486,7 +497,7 @@ void ResultSet::Async_Close(uv_work_t *req)
      Callback function of close
 
    PARAMETERS:
-     UV queue work block
+     req - UV queue work block
 */
 void ResultSet::Async_AfterClose(uv_work_t *req)
 {
@@ -522,7 +533,8 @@ void ResultSet::Async_AfterClose(uv_work_t *req)
     Free FetchBuffers
 
    PARAMETERS:
-    Fetch Buffer, numCols
+    defineBuffers    -  Define bufferes from njsResultSet,
+    numCols          -  # of columns
 */
 void ResultSet::clearFetchBuffer( Define* defineBuffers, unsigned int numCols)
 {
