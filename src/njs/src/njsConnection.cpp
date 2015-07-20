@@ -816,7 +816,7 @@ void Connection::Async_Execute (uv_work_t *req)
     // In Case of DML Returning, if the buffer is small, and if the callback
     // is called multiple times, an ORA error 24343 was reported. Converting
     // that error to errInsufficientBufferForBinds.
-    if ( !executeBaton->stmtIsReturning &&
+    if ( !executeBaton->stmtIsReturning ||
          (e.errnum() != 24343) )
     {
       executeBaton->error = std::string(e.what ());
