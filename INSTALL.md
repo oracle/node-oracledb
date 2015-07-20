@@ -110,6 +110,13 @@ alternatively use `yum` to install these packages from the
 
 ### 2.3 Install the driver
 
+If you are behind a firewall, you may need to set your proxy, for
+example:
+
+```
+npm config set https-proxy http://my-proxy.example.com:80
+```
+
 Install node-oracledb from the
 [NPM repository](https://www.npmjs.com/package/oracledb):
 
@@ -219,6 +226,13 @@ other Oracle software installed, then these variables are not
 required.  See
 [Oracle Client Location Heuristic on Linux](#linuxinstsearchpath).
 
+If you are behind a firewall, you may need to set your proxy, for
+example:
+
+```
+npm config set https-proxy http://my-proxy.example.com:80
+```
+
 Install node-oracledb from the
 [NPM repository](https://www.npmjs.com/package/oracledb):
 
@@ -282,15 +296,22 @@ export PATH=/opt/node-v0.12.4-linux-x64/bin:$PATH
 
 ### 4.2 Install the driver
 
-The installer will look for Oracle libraries and headers under
+The installer will automatically look for Oracle libraries and headers under
 `$ORACLE_HOME`, see
 [Oracle Client Location Heuristic on Linux](#linuxinstsearchpath).
 However, if you have Instant Client RPMs installed and don't wish the RPMs
-to be used, you must explicitly set:
+to be used, you must explicitly set two environment variables:
 
 ```
 export OCI_LIB_DIR=$ORACLE_HOME/lib
 export OCI_INC_DIR=$ORACLE_HOME/rdbms/public
+```
+
+If you are behind a firewall, you may need to set your proxy, for
+example:
+
+```
+npm config set https-proxy http://my-proxy.example.com:80
 ```
 
 Install node-oracledb from the
@@ -317,7 +338,7 @@ Download the
 [example programs](https://github.com/oracle/node-oracledb/tree/master/examples) from GitHub.
 
 Edit `dbconfig.js` and set the database credentials to your
-environment.
+environment:
 
 ```
 module.exports = {
@@ -387,6 +408,13 @@ export OCI_INC_DIR=/whereever/instantclient/sdk/include
 
 If Instant Client is in `/opt/oracle/instantclient`, then these
 variables are not needed.
+
+If you are behind a firewall, you may need to set your proxy, for
+example:
+
+```
+npm config set https-proxy http://my-proxy.example.com:80
+```
 
 Install node-oracledb from the
 [NPM repository](https://www.npmjs.com/package/oracledb):
@@ -497,6 +525,13 @@ you must set the variables, for example using:
 ```
 set OCI_LIB_DIR=C:\oracle\product\12.1.0\dbhome_1\oci\lib\msvc
 set OCI_INC_DIR=C:\oracle\product\12.1.0\dbhome_1\oci\include
+```
+
+If you are behind a firewall, you may need to set your proxy, for
+example:
+
+```
+npm config set https-proxy http://my-proxy.example.com:80
 ```
 
 Install node-oracledb from the
