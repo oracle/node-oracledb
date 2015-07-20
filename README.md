@@ -120,3 +120,15 @@ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 
 See the License for the specific language governing permissions and
 limitations under the License.
+
+## <a name="testing"></a> 7. Running tests
+
+The basic steps for running tests are:
+
+- Install the driver `npm install oracledb`
+- Change directory `cd node_modules/oracledb`
+- Run `npm install mocha should async` to install dependent Node.js modules required for testing.
+- Set the correct credential information in `test/dbConfig.js`
+- Run `npm test` to start the test suite.
+
+See [test/README](test/README.md) for details.

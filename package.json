@@ -34,6 +34,14 @@
   "dependencies": {
     "nan": "^1.8.4"
   },
+  "devDependencies": {
+      "mocha": "~2.2.5",
+      "should": "~6.0.1",
+      "async": "~0.9.0"
+  },
+  "scripts": {
+      "test": "node_modules/mocha/bin/mocha -R spec --timeout 10000 test/*.js"
+  },
   "engines": {
     "node": ">=0.10.28"
   },

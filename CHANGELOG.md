@@ -1,5 +1,9 @@
 # Change Log
 
+## node-oracledb v0.x.0 (DD MON YYYY)
+
+- Added a test suite.
+
 ## node-oracledb v0.6.0 (26 May 2015)
 
 - Node-oracledb now builds with Node.js 0.10, Node.js 0.12 and io.js.
