@@ -1,8 +1,20 @@
 # Change Log
 
-## node-oracledb v0.x.0 (DD MON YYYY)
+## node-oracledb v0.7.0 (20 Jul 2015)
+
+- Added result set support for fetching large data sets.
+
+- Added REF CURSOR support for returning query results from PL/SQL.
+
+- Added row prefetching support.
 
 - Added a test suite.
+
+- Fixed error handling for SQL statements using RETURNING INTO.
+
+- Fixed INSERT of a date when the SQL has a RETURNING INTO clause.
+
+- Renumbered the values used by the Oracledb Constants
 
 ## node-oracledb v0.6.0 (26 May 2015)
 
