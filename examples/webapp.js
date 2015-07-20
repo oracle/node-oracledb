@@ -40,17 +40,17 @@ var dbConfig = require('./dbconfig.js');
 var portid = 7000;    // HTTP listening port number
 
 // Main entry point.  Creates a connection pool, on callback creates an
-// HTTP server and executes a query based on the URL parameter given
-// The pool values are arbitrary for the sake of showing how to set the properties.
+// HTTP server and executes a query based on the URL parameter given.
+// The pool values shown are the default values.
 oracledb.createPool (
   {
     user          : dbConfig.user,
     password      : dbConfig.password,
     connectString : dbConfig.connectString,
-    poolMax       : 44,
-    poolMin       : 2,
-    poolIncrement : 5,
-    poolTimeout   : 4
+    poolMax       : 4, // maximum size of the pool
+    poolMin       : 0, // let the pool shrink completely
+    poolIncrement : 1, // only grow the pool by one connection at a time
+    poolTimeout   : 0  // never terminate idle connections
   },
   function(err, pool)
   {
