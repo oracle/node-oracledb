@@ -862,7 +862,8 @@ void Connection::PrepareAndBind (eBaton* executeBaton)
            * return error in that case
            */
           if ( executeBaton->stmtIsReturning &&
-               (executeBaton->binds[index]->type == DpiTimestampLTZ ) )
+               ((executeBaton->binds[index]->type == DpiTimestampLTZ) &&
+                (executeBaton->binds[index]->isOut) ))
           {
             executeBaton->error = NJSMessages::getErrorMsg (
                                               errInvalidBindDataType, 2);
