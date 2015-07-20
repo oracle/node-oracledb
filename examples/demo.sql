@@ -28,6 +28,7 @@
 
 SET ECHO ON
 
+-- For plsql.js example for bind parameters
 CREATE OR REPLACE PROCEDURE testproc (p_in IN VARCHAR2, p_inout IN OUT VARCHAR2, p_out OUT NUMBER)
 AS
 BEGIN
@@ -37,7 +38,19 @@ END;
 /
 SHOW ERRORS
 
--- JSON with Oracle Database 12.1.0.2
+-- For refcursor.js example of REF CURSORS
+CREATE OR REPLACE PROCEDURE get_emp_rs (p_sal IN NUMBER, p_recordset OUT SYS_REFCURSOR)
+AS
+BEGIN
+  OPEN p_recordset FOR
+    SELECT first_name, salary, hire_date
+    FROM   employees
+    WHERE  salary > p_sal;
+END;
+/
+SHOW ERRORS
+
+-- For selectjson.js example of JSON with Oracle Database 12.1.0.2
 DROP TABLE j_purchaseorder;
 CREATE TABLE j_purchaseorder
     (po_document VARCHAR2(4000) CONSTRAINT ensure_json CHECK (po_document IS JSON));
