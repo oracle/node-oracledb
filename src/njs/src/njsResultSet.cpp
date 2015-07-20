@@ -1,0 +1,486 @@
+/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+
+/******************************************************************************
+ *
+ * You may not use the identified files except in compliance with the Apache
+ * License, Version 2.0 (the "License.")
+ *
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0.
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * This file uses NAN:
+ *
+ * Copyright (c) 2015 NAN contributors
+ * 
+ * NAN contributors listed at https://github.com/rvagg/nan#contributors
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to
+ * the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
+ * 
+ * NAME
+ *   njsResultSet.cpp
+ *
+ * DESCRIPTION
+ *   ResultSet class implementation.
+ *
+ *****************************************************************************/
+#include "node.h"
+#include <string>
+#include "njsResultSet.h"
+#include "njsConnection.h"
+
+#include <iostream>
+
+using namespace std;
+using namespace node;
+using namespace v8;
+                                        //peristent ResultSet class handle
+Persistent<FunctionTemplate> ResultSet::resultSetTemplate_s;
+
+ResultSet::ResultSet(){}
+ResultSet::~ResultSet(){}
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Store the config in pool instance.
+*/
+void ResultSet::setResultSet ( dpi::Stmt *stmt, dpi::Env *env,
+                               Connection *conn, unsigned int outFormat )
+{
+  this->dpistmt_       = stmt;
+  this->dpienv_        = env;
+  this->njsconn_       = conn;
+  this->meta_          = stmt->getMetaData();
+  this->numCols_       = stmt->numCols();
+  this->state_         = INACTIVE;
+  this->outFormat_     = outFormat;
+  this->bufferSize_    = 0;
+  this->rsEmpty_       = false;
+  this->fetchBuffers_  = NULL;
+}
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Init function of the ResultSet class.
+     Initiates and maps the functions and properties of ResultSet class.
+*/
+void ResultSet::Init(Handle<Object> target)
+{
+  NanScope(); 
+  Local<FunctionTemplate> temp = NanNew<FunctionTemplate>(New);
+  temp->InstanceTemplate()->SetInternalFieldCount(1);
+  temp->SetClassName(NanNew<v8::String>("ResultSet"));
+
+  NODE_SET_PROTOTYPE_METHOD(temp, "close", Close);
+  NODE_SET_PROTOTYPE_METHOD(temp, "getRow", GetRows);
+  NODE_SET_PROTOTYPE_METHOD(temp, "getRows", GetRows);
+
+  temp->InstanceTemplate()->SetAccessor(
+                                        NanNew<v8::String>("metaData"),
+                                        ResultSet::GetMetaData,
+                                        ResultSet::SetMetaData );
+
+  NanAssignPersistent( resultSetTemplate_s, temp);
+  target->Set(NanNew<v8::String>("ResultSet"),temp->GetFunction());
+}
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Invoked when new of connection is called from JS
+*/
+NAN_METHOD(ResultSet::New)
+{
+  NanScope();
+
+  ResultSet *resultSet = new ResultSet();
+  resultSet->Wrap(args.This());
+
+  NanReturnValue(args.This());
+}
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Get Accessor of metaData Property
+*/
+NAN_PROPERTY_GETTER(ResultSet::GetMetaData)
+{
+  NanScope();
+  ResultSet* njsResultSet = ObjectWrap::Unwrap<ResultSet>(args.Holder());
+  std::string *columnNames = new std::string[njsResultSet->numCols_];
+  Connection::metaData ( columnNames, njsResultSet->meta_, 
+                         njsResultSet->numCols_ ); 
+  Handle<Value> meta;
+  meta = Connection::GetMetaData( columnNames,
+                                  njsResultSet->numCols_ );
+  NanReturnValue(meta);
+}
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Set Accessor of metaData Property - throws error
+*/
+NAN_SETTER(ResultSet::SetMetaData)
+{
+  NanScope();
+  ResultSet* njsResultSet = ObjectWrap::Unwrap<ResultSet>(args.Holder());
+  string msg;
+  if(njsResultSet->state_ == INVALID)
+    msg = NJSMessages::getErrorMsg(errInvalidResultSet);
+  else
+    msg = NJSMessages::getErrorMsg(errReadOnly, "metaData");
+  NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
+}
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Get Connection method on Result Set class.
+
+   PARAMETERS:
+     Arguments - Callback
+*/
+NAN_METHOD(ResultSet::GetRows)
+{
+  NanScope();
+
+  Local<Function> callback;
+  NJS_GET_CALLBACK ( callback, args );
+
+  ResultSet *njsResultSet = ObjectWrap::Unwrap<ResultSet>(args.This());
+  rsBaton  *getRowsBaton = new rsBaton ();
+  NanAssignPersistent(getRowsBaton->cb, callback );
+
+  NJS_CHECK_NUMBER_OF_ARGS ( getRowsBaton->error, args, 1, 2, exitGetRows );
+  if(args.Length() == 2)
+  {
+    NJS_GET_ARG_V8UINT ( getRowsBaton->numRows, getRowsBaton->error, 
+                         args, 0, exitGetRows ); 
+  }
+  else
+  {
+    getRowsBaton->numRows = 1;
+  }
+
+  getRowsBaton->njsRS  = njsResultSet; 
+  getRowsBaton->ebaton = new eBaton; 
+
+  if(!njsResultSet->njsconn_->getIsValid())
+  {
+    getRowsBaton->error = NJSMessages::getErrorMsg ( errInvalidConnection );
+    goto exitGetRows;
+  }
+  if(njsResultSet->state_ == INVALID)
+  {
+    getRowsBaton->error = NJSMessages::getErrorMsg ( errInvalidResultSet );
+    goto exitGetRows;
+  }
+  else if(njsResultSet->state_ == ACTIVE)
+  {
+    getRowsBaton->error = NJSMessages::getErrorMsg ( errBusyResultSet );
+    goto exitGetRows;
+  }
+
+  njsResultSet->state_ = ACTIVE;
+  getRowsBaton->ebaton->columnNames = new std::string[njsResultSet->numCols_];
+  getRowsBaton->ebaton->maxRows = getRowsBaton->numRows;
+  getRowsBaton->ebaton->dpistmt = njsResultSet->dpistmt_;
+  getRowsBaton->ebaton->dpienv  = njsResultSet->dpienv_;
+  getRowsBaton->ebaton->getRS   = true; 
+
+exitGetRows:
+  getRowsBaton->req.data = (void *)getRowsBaton;
+
+  uv_queue_work(uv_default_loop(), &getRowsBaton->req, Async_GetRows,
+                (uv_after_work_cb)Async_AfterGetRows);
+
+  NanReturnUndefined();
+}
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Worker function of Get Rows method
+
+   PARAMETERS:
+     UV queue work block
+
+   NOTES:
+     DPI call execution.
+*/
+void ResultSet::Async_GetRows(uv_work_t *req)
+{
+  rsBaton *getRowsBaton = (rsBaton*)req->data;
+  ResultSet *njsRS  = getRowsBaton->njsRS;
+  eBaton    *ebaton = getRowsBaton->ebaton;
+
+  if(!(getRowsBaton->error).empty()) goto exitAsyncGetRows;
+
+  if(njsRS->rsEmpty_)
+  {
+    ebaton->rowsFetched = 0;  
+    goto exitAsyncGetRows;
+  }
+
+  try
+  {
+    Connection::metaData( ebaton->columnNames, njsRS->meta_, 
+                           njsRS->numCols_ );
+    if( njsRS->fetchBuffers_ == NULL || 
+        njsRS->bufferSize_  < getRowsBaton->numRows )
+    {
+      if(njsRS->fetchBuffers_ != NULL)
+      {
+        ResultSet::nullifyFetchBuffer(njsRS->fetchBuffers_, njsRS->numCols_);
+      }
+      Connection::GetDefines(ebaton, njsRS->meta_, njsRS->numCols_);
+      njsRS->bufferSize_   = getRowsBaton->numRows;
+      njsRS->fetchBuffers_ = ebaton->defines;
+    }
+    else
+    {
+      njsRS->dpistmt_->fetch(getRowsBaton->numRows);
+      ebaton->maxRows      = getRowsBaton->numRows;
+      ebaton->outFormat    = njsRS->outFormat_;
+      ebaton->defines      = njsRS->fetchBuffers_;
+      ebaton->rowsFetched  = njsRS->dpistmt_->rowsFetched();
+      ebaton->numCols      = njsRS->numCols_;
+      Connection::descr2Dbl ( ebaton->defines, ebaton->numCols,
+                              ebaton->rowsFetched, ebaton->getRS );
+    }
+    if(ebaton->rowsFetched != getRowsBaton->numRows)
+      njsRS->rsEmpty_ = true;
+  }
+  catch (dpi::Exception &e)
+  {
+    getRowsBaton->error = std::string (e.what());
+  }
+  exitAsyncGetRows:
+  ;
+}
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Callback function of Get Connection method
+
+   PARAMETERS:
+     UV queue work block
+     status - expected to be non-zero.
+
+   NOTES:
+     Connection handle is formed and handed over to JS.
+*/
+void ResultSet::Async_AfterGetRows(uv_work_t *req)
+{
+  NanScope();
+  rsBaton *getRowsBaton = (rsBaton*)req->data;
+  v8::TryCatch tc;
+  Handle<Value> argv[2];
+  if(!(getRowsBaton->error).empty())
+  {
+    argv[0] = v8::Exception::Error(NanNew<v8::String>((getRowsBaton->error).c_str()));
+    argv[1] = NanUndefined();
+  }
+  else
+  {
+    getRowsBaton->njsRS->state_ = INACTIVE;
+    argv[0] = NanUndefined();
+    eBaton* ebaton    = getRowsBaton->ebaton;
+    ebaton->outFormat = getRowsBaton->njsRS->outFormat_;
+    Handle<Value> rowsArray = v8::Array::New(0), 
+                  rowsArrayValue = NanNull();
+    if(ebaton->rowsFetched)
+    { 
+      rowsArray = Connection::GetRows(ebaton);
+      if(!(ebaton->error).empty())
+      {
+        argv[0] = v8::Exception::Error(NanNew<v8::String>((ebaton->error).c_str()));
+        argv[1] = NanUndefined();
+        goto exitAsyncAfterGetRows;
+      }
+      rowsArrayValue =  Handle<Array>::Cast(rowsArray)->Get(0);
+    }
+    argv[1] = (getRowsBaton->numRows > 1) ? rowsArray : rowsArrayValue; 
+  }
+
+  exitAsyncAfterGetRows:
+  Local<Function> callback = NanNew(getRowsBaton->cb);
+  NanMakeCallback(NanGetCurrentContext()->Global(),
+                  callback, 2, argv);
+  if(tc.HasCaught())
+  {
+    node::FatalException(tc);
+  }
+  delete getRowsBaton;
+}
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Close method
+
+   PARAMETERS:
+     Arguments - Callback
+*/
+NAN_METHOD(ResultSet::Close)
+{
+  NanScope();
+
+  Local<Function> callback;
+  NJS_GET_CALLBACK ( callback, args );
+
+  ResultSet *njsResultSet = ObjectWrap::Unwrap<ResultSet>(args.This());
+  rsBaton *closeBaton = new rsBaton ();
+  NanAssignPersistent( closeBaton->cb, callback );
+
+  NJS_CHECK_NUMBER_OF_ARGS ( closeBaton->error, args, 1, 1, exitClose );
+
+  if(!njsResultSet->njsconn_->getIsValid())
+  {
+    closeBaton->error = NJSMessages::getErrorMsg ( errInvalidConnection );
+    goto exitClose;
+  }
+  else if(njsResultSet->state_ == INVALID)
+  {
+    closeBaton->error = NJSMessages::getErrorMsg ( errInvalidResultSet );
+    goto exitClose;
+  }
+  else if(njsResultSet->state_ == ACTIVE)
+  {
+    closeBaton->error = NJSMessages::getErrorMsg ( errBusyResultSet );
+    goto exitClose;
+  }
+
+  closeBaton->njsRS      = njsResultSet;
+
+exitClose:
+  closeBaton->req.data = (void *)closeBaton;
+
+  uv_queue_work(uv_default_loop(), &closeBaton->req, Async_Close,
+                (uv_after_work_cb)Async_AfterClose);
+
+  NanReturnUndefined();
+}
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Worker function of close.
+
+   PARAMETERS:
+     UV queue work block
+
+   NOTES:
+     DPI call execution.
+*/
+void ResultSet::Async_Close(uv_work_t *req)
+{
+  rsBaton *closeBaton = (rsBaton*)req->data;
+  if(!closeBaton->error.empty()) goto exitAsyncClose;
+
+  try
+  {
+    closeBaton-> njsRS-> dpistmt_-> release ();
+    Define* fetchBuffers = closeBaton-> njsRS-> fetchBuffers_;
+    unsigned int numCols = closeBaton-> njsRS-> numCols_;
+    ResultSet::nullifyFetchBuffer(fetchBuffers, numCols);
+  }
+  catch(dpi::Exception& e)
+  {
+    closeBaton->error = std::string(e.what());
+  }
+  exitAsyncClose:
+  ;
+}
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Callback function of close
+
+   PARAMETERS:
+     UV queue work block
+*/
+void ResultSet::Async_AfterClose(uv_work_t *req)
+{
+  NanScope();
+  rsBaton *closeBaton = (rsBaton*)req->data;
+
+  v8::TryCatch tc;
+
+  Handle<Value> argv[1];
+
+  if(!(closeBaton->error).empty())
+  {
+    argv[0] = v8::Exception::Error(NanNew<v8::String>((closeBaton->error).c_str()));
+  }
+  else
+  {
+    argv[0] = NanUndefined();
+    // pool is not valid after close succeeds.
+    closeBaton-> njsRS-> state_ = INVALID;
+  }
+  Local<Function> callback = NanNew(closeBaton->cb);
+  delete closeBaton;
+  NanMakeCallback( NanGetCurrentContext()->Global(), callback, 1, argv );
+  if(tc.HasCaught())
+  {
+    node::FatalException(tc);
+  }
+}
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+    Free FetchBuffers 
+
+   PARAMETERS:
+    Fetch Buffer, numCols 
+*/
+void ResultSet::nullifyFetchBuffer( Define* fetchBuffers, unsigned int numCols)
+{
+   for( unsigned int i=0; i<numCols; i++ )
+   {   
+     if ( fetchBuffers[i].dttmarr )
+     {   
+       fetchBuffers[i].dttmarr->release (); 
+       fetchBuffers[i].extbuf = NULL;
+     }   
+     free(fetchBuffers[i].buf);
+     free(fetchBuffers[i].len);
+     free(fetchBuffers[i].ind);
+   }   
+   delete [] fetchBuffers;
+   fetchBuffers = NULL;
+}
+
+/* end of file njsPool.cpp */
+

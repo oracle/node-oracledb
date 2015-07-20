@@ -196,15 +196,34 @@ unsigned int StmtImpl::numCols ()
 }
 
 
+/*****************************************************************************/
+/*
+  DESCRIPTION
+    Prefetch Rows set on statement handle 
+
+  PARAMETERS
+    prefetchRows count
+
+  RETURNS
+    NONE
+
+*/
+void StmtImpl::prefetchRows (int prefetchRows)
+{
+  ociCall(OCIAttrSet(stmth_, OCI_HTYPE_STMT,  &prefetchRows,  0,
+                     OCI_ATTR_PREFETCH_ROWS, errh_), errh_);
+}
+
+
 
 
 /*****************************************************************************/
 /*
   DESCRIPTION
-    bind the variable(s) by pdpition
+    bind the variable(s) by position
 
   PARAMETERS
-    pos           - pdpition of the variable 1 based
+    pos           - position of the variable 1 based
     type          - Data type
     buf (IN/OUT)  - data buffer for the variable's value
     bufSize       - size of the buffer

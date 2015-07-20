@@ -83,15 +83,13 @@ typedef enum
   ROWS_OBJECT = 2
 }RowsType;
 
-// args
+// states
 typedef enum
 {
-  ARGS_ZERO = 0,
-  ARGS_ONE  = 1,
-  ARGS_TWO  = 2,
-  ARGS_THREE = 3,
-  ARGS_FOUR = 4
-}ArgsType;
+  INVALID   = 0,
+  ACTIVE    = 1,
+  INACTIVE  = 2,
+}State;
 
 /*
  *  Get the callback from the last argument.
@@ -170,6 +168,25 @@ typedef enum
   if( args[index]->IsObject() )                                               \
   {                                                                           \
     v8val = args[index]->ToObject();                                          \
+    err.clear();                                                              \
+  }                                                                           \
+  else                                                                        \
+  {                                                                           \
+    err = NJSMessages::getErrorMsg ( errInvalidParameterType, index+1 ) ;     \
+    goto exitCode ;                                                           \
+  }                                                                           \
+}
+
+/*
+ * Get v8 uint from provided argument.
+ * If it is not a uint, set the error for the given index &
+ * val is nullified.
+ */
+#define NJS_GET_ARG_V8UINT( val, err, args, index, exitCode)                  \
+{                                                                             \
+  if( args[index]->IsUint32() )                                               \
+  {                                                                           \
+    val = args[index]->ToUint32()->Value();                                   \
     err.clear();                                                              \
   }                                                                           \
   else                                                                        \

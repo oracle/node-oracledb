@@ -50,6 +50,9 @@ typedef enum
   errReadOnly,
   errWriteOnly,
   errInsufficientBufferForBinds,
+  errBusyResultSet,
+  errInvalidResultSet,
+  errInvalidNonQueryExecution,
 
   // New ones should be added here
 

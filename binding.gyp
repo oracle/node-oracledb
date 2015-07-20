@@ -6,6 +6,7 @@
              "src/njs/src/njsOracle.cpp",
              "src/njs/src/njsPool.cpp",
              "src/njs/src/njsConnection.cpp",
+             "src/njs/src/njsResultSet.cpp",
              "src/njs/src/njsMessages.cpp",
              "src/dpi/src/dpiEnv.cpp",
              "src/dpi/src/dpiEnvImpl.cpp",

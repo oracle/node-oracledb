@@ -158,6 +158,8 @@ NAN_METHOD(Pool::New)
 */
 Handle<Value> Pool::getPoolProperty(Pool* njsPool, unsigned int poolProperty)
 {
+  NanScope();
+  
   if(!njsPool->isValid_)
   {
     string msg = NJSMessages::getErrorMsg(errInvalidPool);

@@ -94,6 +94,7 @@ class Oracledb: public ObjectWrap
    unsigned int getPoolMax () const  { return poolMax_; }
    unsigned int getPoolIncrement () const  { return poolIncrement_; }
    unsigned int getPoolTimeout () const  { return poolTimeout_; }
+   unsigned int getPrefetchRows () const  { return prefetchRows_; }
    const std::string& getConnectionClass () const { return connClass_; }
 
 
@@ -126,6 +127,7 @@ private:
    static NAN_PROPERTY_GETTER(GetVersion);
    static NAN_PROPERTY_GETTER(GetConnectionClass);
    static NAN_PROPERTY_GETTER(GetExternalAuth);
+   static NAN_PROPERTY_GETTER(GetPrefetchRows);
 
    // Define Setter Accessors to Properties
    static NAN_SETTER(SetPoolMin);
@@ -139,6 +141,7 @@ private:
    static NAN_SETTER(SetVersion);
    static NAN_SETTER(SetConnectionClass);
    static NAN_SETTER(SetExternalAuth);
+   static NAN_SETTER(SetPrefetchRows);
 
    Oracledb();
    ~Oracledb();
@@ -149,6 +152,7 @@ private:
    unsigned int maxRows_;
 
    unsigned int stmtCacheSize_;
+   int prefetchRows_;
 
    unsigned int poolMin_;
    unsigned int poolMax_;

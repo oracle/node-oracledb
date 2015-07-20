@@ -53,6 +53,7 @@
 #include "njsOracle.h"
 #include "njsConnection.h"
 #include "njsPool.h"
+#include "njsResultSet.h"
 #include "njsMessages.h"
                                         //peristent Oracledb class handle
 Persistent<FunctionTemplate> Oracledb::oracledbTemplate_s;
@@ -63,6 +64,7 @@ Persistent<FunctionTemplate> Oracledb::oracledbTemplate_s;
 #define POOL_MAX 4
 #define POOL_INCR 1
 #define POOL_TIMEOUT 60
+#define PREFETCH_ROWS -1
 
 /*****************************************************************************/
 /*
@@ -80,6 +82,7 @@ Oracledb::Oracledb()
   poolMin_        = POOL_MIN;
   poolIncrement_  = POOL_INCR;
   poolTimeout_    = POOL_TIMEOUT;
+  prefetchRows_   = PREFETCH_ROWS;
   connClass_      = "";
   externalAuth_ = false;
 }
@@ -355,6 +358,32 @@ NAN_SETTER(Oracledb::SetStmtCacheSize)
   Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(args.Holder());
   NJS_SET_PROP_UINT(oracledb->stmtCacheSize_, value, "stmtCacheSize");
 }
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Get Accessor of prefetchRows property
+*/
+NAN_PROPERTY_GETTER(Oracledb::GetPrefetchRows)
+{
+  NanScope();
+  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(args.Holder());
+  Local<Integer> value = NanNew<v8::Integer>(oracledb->prefetchRows_);
+  NanReturnValue(value);
+}
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Set Accessor of prefetchRows property
+*/
+NAN_SETTER(Oracledb::SetPrefetchRows)
+{
+  NanScope();
+  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(args.Holder());
+  NJS_SET_PROP_UINT(oracledb->prefetchRows_, value, "prefetchRows");
+}
+
 
 /*****************************************************************************/
 /*
@@ -769,6 +798,7 @@ extern "C"
       Oracledb::Init(target);
       Connection::Init(target);
       Pool::Init(target);
+      ResultSet::Init(target);
    }
 
    NODE_MODULE(oracledb, init)

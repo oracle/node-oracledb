@@ -146,6 +146,8 @@ public:
                                 // properties
   virtual DpiStmtType stmtType() const = 0;
 
+  virtual void prefetchRows ( int prefetchRows ) = 0;
+
   virtual bool        isDML() const = 0 ;
 
   virtual bool        isReturning() = 0 ;

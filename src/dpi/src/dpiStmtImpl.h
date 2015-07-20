@@ -66,6 +66,7 @@ public:
   virtual DpiStmtType stmtType () const;
   virtual DPI_SZ_TYPE  rowsAffected () const;
   virtual unsigned int numCols() ;
+  virtual void prefetchRows( int prefetchRows ) ;
   virtual unsigned int rowsFetched () const ;
 
   // Methods

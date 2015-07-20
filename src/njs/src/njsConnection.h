@@ -63,6 +63,8 @@ using namespace v8;
 using namespace node;
 using namespace dpi;
 
+
+class Connection;
 /**
 * Structure used for binds
 **/
@@ -113,8 +115,11 @@ typedef struct eBaton
   std::string   error;
   dpi::Env*     dpienv;
   dpi::Conn*    dpiconn;
+  Connection    *njsconn;
   DPI_SZ_TYPE   rowsAffected;
   unsigned int  maxRows;
+  int           prefetchRows;
+  bool          getRS;
   bool          autoCommit;
   unsigned int  rowsFetched;
   unsigned int  outFormat;
@@ -128,9 +133,10 @@ typedef struct eBaton
   Define               *defines;
   Persistent<Function> cb;
 
-  eBaton() : sql(""), error(""), dpienv(NULL), dpiconn(NULL),
-             rowsAffected(0), maxRows(0), autoCommit(false),
-             rowsFetched(0), outFormat(0), numCols(0), dpistmt(NULL),
+  eBaton() : sql(""), error(""), dpienv(NULL), dpiconn(NULL), njsconn(NULL),
+             rowsAffected(0), maxRows(0), prefetchRows(0),
+             getRS(false), autoCommit(false), rowsFetched(0), 
+             outFormat(0), numCols(0), dpistmt(NULL),
              st(DpiStmtUnknown), stmtIsReturning (false), numOutBinds(0),
              columnNames(NULL), defines(NULL)
   {}
@@ -171,7 +177,7 @@ typedef struct eBaton
      }
      if( columnNames )
        delete [] columnNames;
-     if( defines )
+     if( defines && !getRS )
      {
        for( unsigned int i=0; i<numCols; i++ )
        {
@@ -192,6 +198,15 @@ public:
   // Define Connection Constructor
   static Persistent<FunctionTemplate> connectionTemplate_s;
   static void Init (Handle<Object> target);
+  static Handle<Value> GetRows (eBaton* executeBaton);
+  static Handle<Value> GetMetaData (std::string* columnNames,
+                                    unsigned int numCols);
+  static void GetDefines ( eBaton* executeBaton, const dpi::MetaData*,
+                           unsigned int numCols );
+  static void metaData ( std::string*, const dpi::MetaData*, unsigned int ); 
+  static void descr2Dbl ( Define* defines, unsigned int numCols,
+                          unsigned int rowsFetched, bool getRS );
+  bool getIsValid() { return isValid_; }
 
 private:
   static NAN_METHOD(New);
@@ -241,7 +256,6 @@ private:
 
 
   static void PrepareAndBind (eBaton* executeBaton);
-  static void GetDefines (eBaton* executeBaton);
   static void ProcessBinds (_NAN_METHOD_ARGS, unsigned int index,
                             eBaton* executeBaton);
   static void ProcessOptions (_NAN_METHOD_ARGS, unsigned int index,
@@ -266,9 +280,6 @@ private:
   static v8::Handle<v8::Value> GetOutBindObject (std::vector<Bind*> &binds,
                                                  bool bDMLReturn = false,
                                                  unsigned long rowcount = 1);
-  static v8::Handle<v8::Value> GetRows (eBaton* executeBaton);
-  static v8::Handle<v8::Value> GetMetaData (std::string* columnNames,
-                                            unsigned int numCols);
   static v8::Handle<v8::Value> GetArrayValue (Bind *bind, unsigned long count);
   static v8::Handle<v8::Value> GetValue (short ind, unsigned short type, void* val,
                                          DPI_BUFLEN_TYPE len,

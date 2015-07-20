@@ -49,6 +49,7 @@
  *****************************************************************************/
 
 #include "njsConnection.h"
+#include "njsResultSet.h"
 #include <stdlib.h>
 #include <iostream>
 using namespace std;
@@ -340,10 +341,12 @@ NAN_METHOD(Connection::Execute)
   NJSString (executeBaton->sql, sql);
 
   executeBaton->maxRows      = connection->oracledb_->getMaxRows();
+  executeBaton->prefetchRows = connection->oracledb_->getPrefetchRows();
   executeBaton->outFormat    = connection->oracledb_->getOutFormat();
   executeBaton->autoCommit = connection->oracledb_->getAutoCommit();
   executeBaton->dpienv       = connection->oracledb_->getDpiEnv();
   executeBaton->dpiconn      = connection->dpiconn_;
+  executeBaton->njsconn      = connection;
 
   if(args.Length() > 2)
   {
@@ -411,8 +414,12 @@ void Connection::ProcessOptions (_NAN_METHOD_ARGS, unsigned int index,
     options = args[index]->ToObject();
     NJS_GET_UINT_FROM_JSON   ( executeBaton->maxRows, executeBaton->error,
                                options, "maxRows", 2, exitProcessOptions );
+    NJS_GET_UINT_FROM_JSON   ( executeBaton->prefetchRows, executeBaton->error,
+                               options, "prefetchRows", 2, exitProcessOptions );
     NJS_GET_UINT_FROM_JSON   ( executeBaton->outFormat, executeBaton->error,
                                options, "outFormat", 2, exitProcessOptions );
+    NJS_GET_BOOL_FROM_JSON   ( executeBaton->getRS, executeBaton->error,
+                               options, "resultSet", 2, exitProcessOptions );
     NJS_GET_BOOL_FROM_JSON   ( executeBaton->autoCommit, executeBaton->error,
                                options, "autoCommit", 2, exitProcessOptions );
   }
@@ -731,10 +738,22 @@ void Connection::Async_Execute (uv_work_t *req)
     if (executeBaton->st == DpiStmtSelect)
     {
       executeBaton->dpistmt->execute(0, executeBaton->autoCommit);
-      Connection::GetDefines(executeBaton);
+      const dpi::MetaData* meta   = executeBaton->dpistmt->getMetaData();
+      executeBaton->numCols       = executeBaton->dpistmt->numCols();
+      executeBaton->columnNames = new std::string[executeBaton->numCols];
+      Connection::metaData( executeBaton->columnNames, meta, 
+                            executeBaton->numCols );
+      if( executeBaton->getRS ) goto exitAsyncExecute;
+      Connection::GetDefines(executeBaton, meta, executeBaton->numCols);
     }
     else
     {
+      if( executeBaton->getRS )
+      {
+        executeBaton->error = NJSMessages::getErrorMsg(
+                                errInvalidNonQueryExecution );
+        goto exitAsyncExecute;
+      }
       executeBaton->dpistmt->execute(1, executeBaton->autoCommit);
       executeBaton->rowsAffected = executeBaton->dpistmt->rowsAffected();
 
@@ -797,7 +816,7 @@ void Connection::Async_Execute (uv_work_t *req)
     // In Case of DML Returning, if the buffer is small, and if the callback
     // is called multiple times, an ORA error 24343 was reported. Converting
     // that error to errInsufficientBufferForBinds.
-    if ( !executeBaton->stmtIsReturning && 
+    if ( !executeBaton->stmtIsReturning &&
          (e.errnum() != 24343) )
     {
       executeBaton->error = std::string(e.what ());
@@ -825,6 +844,9 @@ void Connection::PrepareAndBind (eBaton* executeBaton)
     executeBaton->dpistmt = executeBaton->dpiconn->getStmt(executeBaton->sql);
     executeBaton->st = executeBaton->dpistmt->stmtType ();
     executeBaton->stmtIsReturning = executeBaton->dpistmt->isReturning ();
+
+    if(executeBaton->getRS && executeBaton->prefetchRows > -1)
+      executeBaton->dpistmt->prefetchRows(executeBaton->prefetchRows);
 
     if(!executeBaton->binds.empty())
     {
@@ -933,25 +955,37 @@ void Connection::PrepareAndBind (eBaton* executeBaton)
 /*****************************************************************************/
 /*
    DESCRIPTION
+     get meta data into baton 
+
+   PARAMETERS:
+     string arrat, metaData, numCols 
+ */
+void Connection::metaData ( std::string* names, const dpi::MetaData* meta,
+                            unsigned int numCols )
+{
+  for (unsigned int i = 0; i < numCols; i++)
+  {
+    names[i] = std::string( (const char*)meta[i].colName,
+                            meta[i].colNameLen );
+  }
+}
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
      Allocate defines buffer for query output.
      Call DPI define and fetch.
 
    PARAMETERS:
      eBaton struct
  */
-void Connection::GetDefines (eBaton* executeBaton)
+void Connection::GetDefines ( eBaton* executeBaton, const dpi::MetaData* meta,
+                              unsigned int numCols )
 {
-  unsigned int     numCols   = executeBaton->dpistmt->numCols();
   Define *defines            = new Define[numCols];
-  const dpi::MetaData* meta  = executeBaton->dpistmt->getMetaData();
-  executeBaton->columnNames  = new std::string[numCols];
 
   for (unsigned int i = 0; i < numCols; i++)
   {
-
-    executeBaton->columnNames[i] = std::string((const char*)meta[i].colName,
-                                               meta[i].colNameLen );
-
     switch(meta[i].dbType)
     {
       case dpi::DpiNumber :
@@ -993,8 +1027,22 @@ void Connection::GetDefines (eBaton* executeBaton)
   executeBaton->defines = defines;
   executeBaton->numCols = numCols;
   executeBaton->rowsFetched = executeBaton->dpistmt->rowsFetched();
+  Connection::descr2Dbl (executeBaton->defines, numCols, 
+                         executeBaton->rowsFetched,
+                         executeBaton->getRS);
+}
 
-  /* Special processing for datetime, as it is obtained as descriptors */
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Special processing for datetime, as it is obtained as descriptors
+
+   PARAMETERS:
+     Define struct, numCols
+ */
+void Connection::descr2Dbl( Define* defines, unsigned int numCols, 
+                            unsigned int rowsFetched, bool getRS )
+{
   for (unsigned int col = 0; col < numCols; col ++ )
   {
     if ( defines[col].dttmarr )
@@ -1003,15 +1051,18 @@ void Connection::GetDefines (eBaton* executeBaton)
 
       defines[col].buf =
       dblArr = (long double *)malloc ( sizeof ( long double ) *
-                                                executeBaton->rowsFetched );
+                                                rowsFetched );
 
-      for ( int row = 0; row < (int) executeBaton->rowsFetched; row ++ )
+      for ( int row = 0; row < (int) rowsFetched; row ++ )
       {
         dblArr[row] = defines[col].dttmarr->getDateTime (row) * NJS_DAY2MS;
       }
       defines[col].buf = (void *) dblArr;
-      defines[col].dttmarr->release ();
-      defines[col].extbuf = NULL;
+      if ( !getRS )
+      {
+        defines[col].dttmarr->release ();
+        defines[col].extbuf = NULL;
+      }
     }
   }
 
@@ -1055,7 +1106,23 @@ void Connection::Async_AfterExecute(uv_work_t *req)
           argv[1] = NanUndefined();
           goto exitAsyncAfterExecute;
         }
-        result->Set(NanNew<v8::String>("rows"), rowArray);//, v8::ReadOnly); 
+        if( executeBaton->getRS )
+        {
+          result->Set(NanNew<v8::String>("rows"), NanUndefined());
+          Handle<Object> resultSet = NanNew(ResultSet::resultSetTemplate_s)->
+                                GetFunction() ->NewInstance();
+         (ObjectWrap::Unwrap<ResultSet> (resultSet))->
+                                  setResultSet( executeBaton->dpistmt,
+                                                executeBaton->dpienv,
+                                                executeBaton->njsconn,
+                                                executeBaton->outFormat );
+          result->Set(NanNew<v8::String>("resultSet"), resultSet );
+        }
+        else
+        {
+          result->Set(NanNew<v8::String>("rows"), rowArray);
+          result->Set(NanNew<v8::String>("resultSet"), NanUndefined());
+        }
         result->Set(NanNew<v8::String>("outBinds"),NanUndefined());
         result->Set(NanNew<v8::String>("rowsAffected"), NanUndefined());
         result->Set(NanNew<v8::String>("metaData"), Connection::GetMetaData(
