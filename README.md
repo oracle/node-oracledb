@@ -1,13 +1,15 @@
-# node-oracledb version 0.6
+# node-oracledb version 0.7
 
 ## <a name="about"></a> 1. About node-oracledb
 
 The Oracle Database Node.js driver powers high performance
 Node.js applications.
 
-Node-oracledb 0.6 supports basic and advanced Oracle features, including:
+Node-oracledb 0.7 supports basic and advanced Oracle features, including:
 
 - SQL and PL/SQL Execution
+- Fetching of large result sets
+- REF CURSOR support
 - Query results as JavaScript objects or array 
 - Binding using JavaScript objects or arrays
 - Conversion between JavaScript and Oracle types
@@ -23,9 +25,8 @@ Node-oracledb 0.6 supports basic and advanced Oracle features, including:
   - [Runtime Load Balancing](http://docs.oracle.com/database/121/ADFNS/adfns_perf_scale.htm#ADFNS515) (RLB)
   - [Transparent Application Failover](http://docs.oracle.com/database/121/ADFNS/adfns_avail.htm#ADFNS534) (TAF)
 
-Node-oracledb 0.6 is a preview release.  We are actively working on
-adding features including LOB support and batch fetching / streaming
-of large query result sets.
+Node-oracledb 0.7 is a preview release.  We are actively working on
+adding features such as LOB support.
 
 Share your feedback at the Oracle Technology Network
 [Node.js discussion forum](https://community.oracle.com/community/database/developer-tools/node_js/content)
