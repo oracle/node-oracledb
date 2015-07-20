@@ -118,7 +118,7 @@ typedef struct eBaton
   Connection    *njsconn;
   DPI_SZ_TYPE   rowsAffected;
   unsigned int  maxRows;
-  int           prefetchRows;
+  unsigned int  prefetchRows;
   bool          getRS;
   bool          autoCommit;
   unsigned int  rowsFetched;

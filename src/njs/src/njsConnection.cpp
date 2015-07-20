@@ -849,10 +849,8 @@ void Connection::PrepareAndBind (eBaton* executeBaton)
     executeBaton->st = executeBaton->dpistmt->stmtType ();
     executeBaton->stmtIsReturning = executeBaton->dpistmt->isReturning ();
 
-    // prefetch is set by user, pass it to DPI.
-    if( executeBaton->getRS && 
-        executeBaton->prefetchRows > NJS_PREFETCH_ROWS_NOT_SET )
-      executeBaton->dpistmt->prefetchRows(executeBaton->prefetchRows);
+    // set prefetch
+    executeBaton->dpistmt->prefetchRows(executeBaton->prefetchRows);
 
     if(!executeBaton->binds.empty())
     {

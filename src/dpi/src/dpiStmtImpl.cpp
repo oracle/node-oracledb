@@ -208,7 +208,7 @@ unsigned int StmtImpl::numCols ()
     NONE
 
 */
-void StmtImpl::prefetchRows (int prefetchRows)
+void StmtImpl::prefetchRows (unsigned int prefetchRows)
 {
   ociCall(OCIAttrSet(stmth_, OCI_HTYPE_STMT,  &prefetchRows,  0,
                      OCI_ATTR_PREFETCH_ROWS, errh_), errh_);

@@ -64,6 +64,7 @@ Persistent<FunctionTemplate> Oracledb::oracledbTemplate_s;
 #define NJS_POOL_MAX          4
 #define NJS_POOL_INCR         1
 #define NJS_POOL_TIMEOUT     60
+#define NJS_PREFETCH_ROWS   100
 
 /*****************************************************************************/
 /*
@@ -81,7 +82,7 @@ Oracledb::Oracledb()
   poolMin_        = NJS_POOL_MIN;
   poolIncrement_  = NJS_POOL_INCR;
   poolTimeout_    = NJS_POOL_TIMEOUT;
-  prefetchRows_   = NJS_PREFETCH_ROWS_NOT_SET;
+  prefetchRows_   = NJS_PREFETCH_ROWS;
   connClass_      = "";
   externalAuth_   = false;
 }
@@ -137,6 +138,10 @@ void Oracledb::Init(Handle<Object> target)
                               NanNew<v8::String>("stmtCacheSize"),
                               Oracledb::GetStmtCacheSize,
                               Oracledb::SetStmtCacheSize );
+  temp->InstanceTemplate()->SetAccessor(
+                              NanNew<v8::String>("prefetchRows"),
+                              Oracledb::GetPrefetchRows,
+                              Oracledb::SetPrefetchRows );
   temp->InstanceTemplate()->SetAccessor(
                               NanNew<v8::String>("autoCommit"),
                               Oracledb::GetAutoCommit,
