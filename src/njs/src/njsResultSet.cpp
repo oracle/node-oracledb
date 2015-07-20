@@ -18,9 +18,9 @@
  * This file uses NAN:
  *
  * Copyright (c) 2015 NAN contributors
- * 
+ *
  * NAN contributors listed at https://github.com/rvagg/nan#contributors
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
  * "Software"), to deal in the Software without restriction, including
@@ -28,10 +28,10 @@
  * distribute, sublicense, and/or sell copies of the Software, and to
  * permit persons to whom the Software is furnished to do so, subject to
  * the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be
  * included in all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -39,7 +39,7 @@
  * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
- * 
+ *
  * NAME
  *   njsResultSet.cpp
  *
@@ -88,13 +88,13 @@ void ResultSet::setResultSet ( dpi::Stmt *stmt, dpi::Env *env,
 */
 void ResultSet::Init(Handle<Object> target)
 {
-  NanScope(); 
+  NanScope();
   Local<FunctionTemplate> temp = NanNew<FunctionTemplate>(New);
   temp->InstanceTemplate()->SetInternalFieldCount(1);
   temp->SetClassName(NanNew<v8::String>("ResultSet"));
 
   NODE_SET_PROTOTYPE_METHOD(temp, "close", Close);
-  NODE_SET_PROTOTYPE_METHOD(temp, "getRow", GetRows);
+  NODE_SET_PROTOTYPE_METHOD(temp, "getRow", GetRow);
   NODE_SET_PROTOTYPE_METHOD(temp, "getRows", GetRows);
 
   temp->InstanceTemplate()->SetAccessor(
@@ -145,8 +145,8 @@ NAN_PROPERTY_GETTER(ResultSet::GetMetaData)
     NanReturnUndefined();
   }
   std::string *columnNames = new std::string[njsResultSet->numCols_];
-  Connection::CopyMetaData ( columnNames, njsResultSet->meta_, 
-                             njsResultSet->numCols_ ); 
+  Connection::CopyMetaData ( columnNames, njsResultSet->meta_,
+                             njsResultSet->numCols_ );
   Handle<Value> meta;
   meta = Connection::GetMetaData( columnNames,
                                   njsResultSet->numCols_ );
@@ -176,10 +176,39 @@ NAN_SETTER(ResultSet::SetMetaData)
 /*****************************************************************************/
 /*
    DESCRIPTION
+     Get Row method on Result Set class.
+
+   PARAMETERS:
+     Arguments - callback
+*/
+NAN_METHOD(ResultSet::GetRow)
+{
+  NanScope();
+
+  Local<Function> callback;
+  NJS_GET_CALLBACK ( callback, args );
+
+  ResultSet *njsResultSet = ObjectWrap::Unwrap<ResultSet>(args.This());
+  rsBaton   *getRowsBaton = new rsBaton ();
+  NanAssignPersistent(getRowsBaton->cb, callback );
+
+  NJS_CHECK_NUMBER_OF_ARGS ( getRowsBaton->error, args, 1, 1, exitGetRow );
+
+  getRowsBaton->numRows = 1;
+  getRowsBaton->njsRS   = njsResultSet;
+
+exitGetRow:
+  ResultSet::GetRowsCommon(getRowsBaton);
+  NanReturnUndefined();
+}
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
      Get Rows method on Result Set class.
 
    PARAMETERS:
-     Arguments - Callback
+     Arguments - numRows, callback
 */
 NAN_METHOD(ResultSet::GetRows)
 {
@@ -189,55 +218,69 @@ NAN_METHOD(ResultSet::GetRows)
   NJS_GET_CALLBACK ( callback, args );
 
   ResultSet *njsResultSet = ObjectWrap::Unwrap<ResultSet>(args.This());
-  rsBaton  *getRowsBaton = new rsBaton ();
+  rsBaton   *getRowsBaton = new rsBaton ();
   NanAssignPersistent(getRowsBaton->cb, callback );
 
-  NJS_CHECK_NUMBER_OF_ARGS ( getRowsBaton->error, args, 1, 2, exitGetRows );
-  if(args.Length() == 2)
-  {
-    NJS_GET_ARG_V8UINT ( getRowsBaton->numRows, getRowsBaton->error, 
-                         args, 0, exitGetRows ); 
-    getRowsBaton->fetchMultiple = true;
-  }
-  else
-  {
-    getRowsBaton->numRows = 1;
-  }
+  NJS_CHECK_NUMBER_OF_ARGS ( getRowsBaton->error, args, 2, 2, exitGetRows );
+  NJS_GET_ARG_V8UINT ( getRowsBaton->numRows, getRowsBaton->error,
+                       args, 0, exitGetRows );
 
-  getRowsBaton->njsRS  = njsResultSet; 
-  getRowsBaton->ebaton = new eBaton; 
+  getRowsBaton->fetchMultiple = true;
+  getRowsBaton->njsRS         = njsResultSet;
+exitGetRows:
+  ResultSet::GetRowsCommon(getRowsBaton);
+  NanReturnUndefined();
+}
 
-  if(!njsResultSet->njsconn_->isValid())
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Common method for GetRow and GetRows method
+
+   PARAMETERS:
+     Arguments - resultset baton
+*/
+void ResultSet::GetRowsCommon(rsBaton *getRowsBaton)
+{
+  ResultSet *njsRS;
+  eBaton    *ebaton;
+
+  if(!(getRowsBaton->error).empty()) goto exitGetRowsCommon;
+
+  if(!getRowsBaton->njsRS->njsconn_->isValid())
   {
     getRowsBaton->error = NJSMessages::getErrorMsg ( errInvalidConnection );
-    goto exitGetRows;
+    goto exitGetRowsCommon;
   }
-  if(njsResultSet->state_ == INVALID)
+  if(getRowsBaton->njsRS->state_ == INVALID)
   {
     getRowsBaton->error = NJSMessages::getErrorMsg ( errInvalidResultSet );
-    goto exitGetRows;
+    goto exitGetRowsCommon;
   }
-  else if(njsResultSet->state_ == ACTIVE)
+  else if(getRowsBaton->njsRS->state_ == ACTIVE)
   {
     getRowsBaton->error = NJSMessages::getErrorMsg ( errBusyResultSet );
-    goto exitGetRows;
+    goto exitGetRowsCommon;
   }
 
-  njsResultSet->state_              = ACTIVE;
-  getRowsBaton->ebaton->columnNames = new std::string[njsResultSet->numCols_];
-  getRowsBaton->ebaton->maxRows     = getRowsBaton->numRows;
-  getRowsBaton->ebaton->dpistmt     = njsResultSet->dpistmt_;
-  getRowsBaton->ebaton->dpienv      = njsResultSet->dpienv_;
-  getRowsBaton->ebaton->getRS       = true; 
-  getRowsBaton->ebaton->outFormat   = njsResultSet->outFormat_;
+  getRowsBaton->ebaton    = new eBaton;
+  ebaton                  = getRowsBaton->ebaton;
+  njsRS                   = getRowsBaton->njsRS;
 
-exitGetRows:
-  getRowsBaton->req.data = (void *)getRowsBaton;
+  njsRS->state_           = ACTIVE;
+  ebaton->columnNames     = new std::string[njsRS->numCols_];
+  ebaton->maxRows         = getRowsBaton->numRows;
+  ebaton->dpistmt         = njsRS->dpistmt_;
+  ebaton->dpienv          = njsRS->dpienv_;
+  ebaton->getRS           = true;
+  ebaton->outFormat       = njsRS->outFormat_;
+
+exitGetRowsCommon:
+  getRowsBaton->req.data  = (void *)getRowsBaton;
 
   uv_queue_work(uv_default_loop(), &getRowsBaton->req, Async_GetRows,
                 (uv_after_work_cb)Async_AfterGetRows);
 
-  NanReturnUndefined();
 }
 
 /*****************************************************************************/
@@ -261,16 +304,16 @@ void ResultSet::Async_GetRows(uv_work_t *req)
 
   if(njsRS->rsEmpty_)
   {
-    ebaton->rowsFetched = 0;  
+    ebaton->rowsFetched = 0;
     goto exitAsyncGetRows;
   }
 
   try
   {
-    Connection::CopyMetaData ( ebaton->columnNames, njsRS->meta_, 
+    Connection::CopyMetaData ( ebaton->columnNames, njsRS->meta_,
                                njsRS->numCols_ );
     ebaton->numCols      = njsRS->numCols_;
-    if( !njsRS->defineBuffers_ || 
+    if( !njsRS->defineBuffers_ ||
         njsRS->fetchRowCount_  < getRowsBaton->numRows )
     {
       if( njsRS->defineBuffers_ )
@@ -284,7 +327,7 @@ void ResultSet::Async_GetRows(uv_work_t *req)
     }
     ebaton->defines      = njsRS->defineBuffers_;
     Connection::DoFetch(ebaton);
- 
+
     if(ebaton->rowsFetched != getRowsBaton->numRows)
       njsRS->rsEmpty_ = true;
   }
@@ -324,11 +367,11 @@ void ResultSet::Async_AfterGetRows(uv_work_t *req)
     getRowsBaton->njsRS->state_  = INACTIVE;
     eBaton* ebaton               = getRowsBaton->ebaton;
     ebaton->outFormat            = getRowsBaton->njsRS->outFormat_;
-    Handle<Value> rowsArray      = NanNew<v8::Array>(0), 
+    Handle<Value> rowsArray      = NanNew<v8::Array>(0),
                   rowsArrayValue = NanNew(NanNull());
 
     if(ebaton->rowsFetched)
-    { 
+    {
       rowsArray = Connection::GetRows(ebaton);
       if(!(ebaton->error).empty())
       {
@@ -338,7 +381,7 @@ void ResultSet::Async_AfterGetRows(uv_work_t *req)
       }
       rowsArrayValue =  Handle<Array>::Cast(rowsArray)->Get(0);
     }
-    argv[1] = (getRowsBaton->fetchMultiple) ? rowsArray : rowsArrayValue; 
+    argv[1] = (getRowsBaton->fetchMultiple) ? rowsArray : rowsArrayValue;
   }
 
   exitAsyncAfterGetRows:
@@ -423,9 +466,11 @@ void ResultSet::Async_Close(uv_work_t *req)
 
     Define* defineBuffers = closeBaton-> njsRS-> defineBuffers_;
     unsigned int numCols  = closeBaton-> njsRS-> numCols_;
-
-    ResultSet::clearFetchBuffer(defineBuffers, numCols);
-    closeBaton-> njsRS-> defineBuffers_ = NULL;
+    if(defineBuffers)
+    {
+      ResultSet::clearFetchBuffer(defineBuffers, numCols);
+      closeBaton-> njsRS-> defineBuffers_ = NULL;
+    }
   }
   catch(dpi::Exception& e)
   {
@@ -474,24 +519,24 @@ void ResultSet::Async_AfterClose(uv_work_t *req)
 /*****************************************************************************/
 /*
    DESCRIPTION
-    Free FetchBuffers 
+    Free FetchBuffers
 
    PARAMETERS:
-    Fetch Buffer, numCols 
+    Fetch Buffer, numCols
 */
 void ResultSet::clearFetchBuffer( Define* defineBuffers, unsigned int numCols)
 {
    for( unsigned int i=0; i<numCols; i++ )
-   {   
+   {
      if ( defineBuffers[i].dttmarr )
-     {   
-       defineBuffers[i].dttmarr->release (); 
+     {
+       defineBuffers[i].dttmarr->release ();
        defineBuffers[i].extbuf = NULL;
-     }   
+     }
      free(defineBuffers[i].buf);
      free(defineBuffers[i].len);
      free(defineBuffers[i].ind);
-   }   
+   }
    delete [] defineBuffers;
    defineBuffers = NULL;
 }

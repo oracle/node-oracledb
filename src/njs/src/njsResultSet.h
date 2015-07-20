@@ -84,7 +84,10 @@ typedef struct rsBaton
 
   ~rsBaton()
    {
-     delete ebaton;
+     if(ebaton)
+     {
+       delete ebaton;
+     }
      NanDisposePersistent(cb);
    }
 
@@ -108,9 +111,11 @@ private:
    static NAN_METHOD(New);
 
    // Get Rows Methods
+   static NAN_METHOD(GetRow);
    static NAN_METHOD(GetRows);
    static void Async_GetRows(uv_work_t *req);
    static void Async_AfterGetRows(uv_work_t  *req);
+   static void GetRowsCommon(rsBaton*);
 
    // Close Methods
    static NAN_METHOD(Close);
