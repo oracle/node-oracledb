@@ -59,7 +59,6 @@ using namespace node;
 using namespace v8;
                                         //peristent ResultSet class handle
 Persistent<FunctionTemplate> ResultSet::resultSetTemplate_s;
-
 /*****************************************************************************/
 /*
    DESCRIPTION
@@ -71,14 +70,14 @@ Persistent<FunctionTemplate> ResultSet::resultSetTemplate_s;
      conn      -  njs connection
      outFormat -  outFormat of the result set
 */
-void ResultSet::setResultSet ( dpi::Stmt *stmt, dpi::Env *env,
+void ResultSet::setResultSet ( dpi::Stmt *stmt, dpi::Env *dpienv,
                                Connection *conn, unsigned int outFormat )
 {
   this->dpistmt_       = stmt;
-  this->dpienv_        = env;
+  this->dpienv_        = dpienv;
   this->njsconn_       = conn;
   this->meta_          = stmt->getMetaData();
-  this->numCols_       = stmt->numCols();
+  this->numCols_       = this->dpistmt_->numCols();
   this->state_         = INACTIVE;
   this->outFormat_     = outFormat;
   this->fetchRowCount_ = 0;
@@ -282,8 +281,8 @@ void ResultSet::GetRowsCommon(rsBaton *getRowsBaton)
   ebaton->columnNames     = new std::string[njsRS->numCols_];
   ebaton->maxRows         = getRowsBaton->numRows;
   ebaton->dpistmt         = njsRS->dpistmt_;
-  ebaton->dpienv          = njsRS->dpienv_;
   ebaton->getRS           = true;
+  ebaton->dpienv          = njsRS->njsconn_->oracledb_->getDpiEnv();
   ebaton->outFormat       = njsRS->outFormat_;
 
 exitGetRowsCommon:

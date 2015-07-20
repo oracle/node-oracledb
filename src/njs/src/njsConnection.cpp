@@ -59,6 +59,7 @@ Persistent<FunctionTemplate> Connection::connectionTemplate_s;
 #define NJS_MAX_OUT_BIND_SIZE 200
 // # of milliseconds in a day.  Used to convert from/to v8::Date to Oracle/Date
 #define NJS_DAY2MS       (24.0 * 60.0 * 60.0 * 1000.0 )
+#define NJS_PREFETCH_NON_RESULTSET 2 
 
 
 /*****************************************************************************/
@@ -574,16 +575,20 @@ void Connection::GetOutBindParams (unsigned short dataType, Bind* bind,
   switch(dataType)
   {
     case DATA_STR :
-      bind->type =  dpi::DpiVarChar;
+      bind->type     =  dpi::DpiVarChar;
       break;
     case DATA_NUM :
-      bind->type = dpi::DpiDouble;
-      bind->maxSize = sizeof(double);
+      bind->type     = dpi::DpiDouble;
+      bind->maxSize  = sizeof(double);
       break;
     case DATA_DATE :
       bind->extvalue = (long double *) malloc ( sizeof ( long double ) );
-      bind->type  = dpi::DpiTimestampLTZ;
-      bind->maxSize = 0;
+      bind->type     = dpi::DpiTimestampLTZ;
+      bind->maxSize  = 0;
+      break;
+    case DATA_CURSOR :
+      bind->type     = dpi::DpiRSet;
+      bind->maxSize  = 0;
       break;
     default :
       executeBaton->error= NJSMessages::getErrorMsg(errInvalidBindDataType,2);
@@ -737,6 +742,20 @@ void Connection::Async_Execute (uv_work_t *req)
 
     if (executeBaton->st == DpiStmtSelect)
     {
+      // set prefetch
+      if(executeBaton->getRS)
+      {
+        // prefetchRows either default or value provided by user
+        executeBaton->dpistmt->prefetchRows(executeBaton->prefetchRows);
+      }
+      else 
+      {
+        // OCI default prefetchRows value is 1.
+        // Set default prefetchRows to 2 to cut down on additional 
+        // fetch round-trip for single row non-resultset cases
+        executeBaton->dpistmt->prefetchRows(NJS_PREFETCH_NON_RESULTSET);
+      }      
+
       executeBaton->dpistmt->execute(0, executeBaton->autoCommit);
       const dpi::MetaData* meta   = executeBaton->dpistmt->getMetaData();
       executeBaton->numCols       = executeBaton->dpistmt->numCols();
@@ -748,6 +767,10 @@ void Connection::Async_Execute (uv_work_t *req)
         goto exitAsyncExecute;
 
       Connection::DoDefines(executeBaton, meta, executeBaton->numCols);
+      /* If any errors while creating define structures, bail out */
+      if ( !executeBaton->error.empty() )
+        goto exitAsyncExecute;
+
       Connection::DoFetch(executeBaton);
     }
     else
@@ -811,9 +834,9 @@ void Connection::Async_Execute (uv_work_t *req)
      }
     }
     if ( executeBaton->dpistmt )
-    {
+    {    
       executeBaton->dpistmt->release ();
-    }
+    }   
   }
   catch (dpi::Exception& e)
   {
@@ -849,9 +872,6 @@ void Connection::PrepareAndBind (eBaton* executeBaton)
     executeBaton->st = executeBaton->dpistmt->stmtType ();
     executeBaton->stmtIsReturning = executeBaton->dpistmt->isReturning ();
 
-    // set prefetch
-    executeBaton->dpistmt->prefetchRows(executeBaton->prefetchRows);
-
     if(!executeBaton->binds.empty())
     {
       if(!executeBaton->binds[0]->key.empty())
@@ -881,6 +901,12 @@ void Connection::PrepareAndBind (eBaton* executeBaton)
                                               false, 1 );
           }
           
+          // Allocate handle for Ref Cursor
+          if ( executeBaton->binds[index]->type == DpiRSet )
+          { 
+             executeBaton->binds[index]->value = executeBaton->dpiconn->
+                                                               getStmt();
+          }
 
           // Convert v8::Date to Oracle DB Type
           if ( executeBaton->binds[index]->type == DpiTimestampLTZ )
@@ -921,6 +947,13 @@ void Connection::PrepareAndBind (eBaton* executeBaton)
             executeBaton->error = NJSMessages::getErrorMsg (
                                               errInvalidBindDataType, 2);
             return;
+          }
+
+          // Allocate handle for Ref Cursor
+          if ( executeBaton->binds[index]->type == DpiRSet )
+          {
+            executeBaton->binds[index]->value = executeBaton->dpiconn->
+                                                              getStmt();
           }
 
           // Allocate for OUT Binds
@@ -1237,15 +1270,7 @@ v8::Handle<v8::Value> Connection::GetRows (eBaton* executeBaton)
         Local<Array> row = NanNew<v8::Array>(executeBaton->numCols);
         for(unsigned int j = 0; j < executeBaton->numCols; j++)
         {
-          long double *dblArr = (long double *)executeBaton->defines[j].buf;
-          row->Set(j, Connection::GetValue(
-                      executeBaton->defines[j].ind[i],
-                      executeBaton->defines[j].fetchType,
-                      (executeBaton->defines[j].fetchType == DpiTimestampLTZ ) ?
-                        (void *) &dblArr[i] :
-                        (void *) ((char *)(executeBaton->defines[j].buf) +
-                                 ( i * (executeBaton->defines[j].maxSize ))),
-                      executeBaton->defines[j].len[i]));
+          row->Set(j, Connection::GetValue(executeBaton, true, j, i));
         }
         rowsArray->Set(i, row);
       }
@@ -1258,24 +1283,17 @@ v8::Handle<v8::Value> Connection::GetRows (eBaton* executeBaton)
 
         for(unsigned int j = 0; j < executeBaton->numCols; j++)
         {
-          long double *dblArr = (long double * )executeBaton->defines[j].buf;
           row->Set(NanNew<v8::String>(executeBaton->columnNames[j].c_str(),
                                (int) executeBaton->columnNames[j].length()),
-                   Connection::GetValue(
-                      executeBaton->defines[j].ind[i],
-                      executeBaton->defines[j].fetchType,
-                      (executeBaton->defines[j].fetchType == DpiTimestampLTZ ) ?
-                        (void *) &dblArr[i] :
-                        (void *) ((char *)(executeBaton->defines[j].buf) +
-                                 ( i * (executeBaton->defines[j].maxSize ))),
-                      executeBaton->defines[j].len[i]));
+                   Connection::GetValue(executeBaton, true, j, i));
 
         }
         rowsArray->Set(i, row);
       }
       break;
     default :
-      executeBaton->error = NJSMessages::getErrorMsg(errInvalidPropertyValue, "outFormat");
+      executeBaton->error = NJSMessages::getErrorMsg(errInvalidPropertyValue, 
+                                                     "outFormat");
       goto exitGetRows;
       break;
   }
@@ -1289,6 +1307,111 @@ v8::Handle<v8::Value> Connection::GetRows (eBaton* executeBaton)
      Method to create handle from C++ value
 
    PARAMETERS:
+     executeBaton - eBaton struct
+     isQuery      - true if define struct is to be processed
+                    false if bind struct is to be processed
+     index        - column index in define array /
+                    index in binds vector
+     row          - row index in define->buf / 
+                    always 0 for bind->value
+
+   RETURNS:
+     Handle
+*/
+
+Handle<Value> Connection::GetValue ( eBaton *executeBaton,
+                                     bool isQuery,
+                                     unsigned int index,
+                                     unsigned int row )
+{
+  NanEscapableScope();
+
+  if(isQuery)
+  {
+    // SELECT queries
+    Define *define = &(executeBaton->defines[index]);
+    long double *dblArr = (long double *)define->buf;
+    return NanEscapeScope( Connection::GetValueCommon(
+                        define->ind[row],
+                        define->fetchType,
+                        (define->fetchType == DpiTimestampLTZ ) ?
+                          (void *) &dblArr[row] :
+                          (void *) ((char *)(define->buf) +
+                                   ( row * (define->maxSize ))),
+                        define->len[row] ));
+  }
+  else
+  {
+    // DML, PL/SQL execution
+    Bind *bind = executeBaton->binds[index];
+    if(executeBaton->stmtIsReturning)
+    {
+      return NanEscapeScope(Connection::GetArrayValue ( 
+                                        executeBaton->binds[index], 
+                         (unsigned long)executeBaton->rowsAffected ) );
+    }
+    else if(bind->type == DpiRSet) 
+    {
+      return NanEscapeScope ( Connection::GetValueRefCursor (
+                                      executeBaton, bind ));
+    }
+    else
+    {
+      return NanEscapeScope ( Connection::GetValueCommon (
+                                      bind->ind[row],
+                                      bind->type,
+                                      (bind->type == DpiTimestampLTZ ) ?
+                                         bind->extvalue : bind->value,
+                                      bind->len[row] ));
+    }
+  }
+}
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Method to create handle for refcursor
+
+   PARAMETERS:
+     executeBaton - struct eBaton
+     bind         - struct bind
+
+   RETURNS:
+     Handle
+*/
+Handle<Value> Connection::GetValueRefCursor ( eBaton *executeBaton, 
+                                              Bind *bind )
+{
+  NanEscapableScope();
+  Handle<Object> resultSet;
+  Handle<Value> value;
+
+  if(bind->ind[0] != -1)
+  {
+    resultSet = NanNew(ResultSet::resultSetTemplate_s)->
+                            GetFunction() ->NewInstance();
+    (ObjectWrap::Unwrap<ResultSet> (resultSet))->
+                       setResultSet( (dpi::Stmt*)(bind->value),
+                                      executeBaton->dpienv,
+                                      executeBaton->njsconn,
+                                      executeBaton->outFormat );
+    // set the prefetch on the cursor object
+    ((dpi::Stmt*)(bind->value))->prefetchRows(executeBaton->prefetchRows);
+    value = resultSet;
+  }
+  else
+  {
+    value = NanNull();
+  }
+  return NanEscapeScope(value);
+}
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Method to create handle from C++ value for primitive types
+
+   PARAMETERS:
      ind  - to validate the data,
      type - data type of the value,
      val  - value,
@@ -1297,9 +1420,9 @@ v8::Handle<v8::Value> Connection::GetRows (eBaton* executeBaton)
    RETURNS:
      Handle
 */
-v8::Handle<v8::Value> Connection::GetValue ( short ind, unsigned short type,
-                                             void* val, DPI_BUFLEN_TYPE len,
-                                             DPI_SZ_TYPE maxSize)
+Handle<Value> Connection::GetValueCommon ( short ind, 
+                                           unsigned short type,
+                                           void* val, DPI_BUFLEN_TYPE len )
 {
   NanEscapableScope();
   Handle<Value> value;
@@ -1422,17 +1545,12 @@ v8::Handle<v8::Value> Connection::GetOutBinds (eBaton* executeBaton)
     if( executeBaton->binds[0]->key.empty() )
     {
       // Binds as JS array
-      return NanEscapeScope(GetOutBindArray( executeBaton->binds,
-                                             executeBaton->numOutBinds,
-                                             executeBaton->stmtIsReturning,
-                              (unsigned long)executeBaton->rowsAffected ));
+      return NanEscapeScope(GetOutBindArray( executeBaton ));
     }
     else
     {
       // Binds as JS object 
-      return NanEscapeScope(GetOutBindObject( executeBaton->binds,
-                                              executeBaton->stmtIsReturning,
-                               (unsigned long)executeBaton->rowsAffected ));
+      return NanEscapeScope(GetOutBindObject( executeBaton ));
     }
   }
   return NanUndefined();
@@ -1449,14 +1567,13 @@ v8::Handle<v8::Value> Connection::GetOutBinds (eBaton* executeBaton)
    RETURNS:
      Outbinds array
 */
-v8::Handle<v8::Value> Connection::GetOutBindArray ( std::vector<Bind*> &binds,
-                                                    unsigned int outCount,
-                                                    bool isDMLReturning,
-                                                    unsigned long rowcount )
+v8::Handle<v8::Value> Connection::GetOutBindArray ( eBaton *executeBaton )
 {
   NanEscapableScope();
 
-  Local<Array> arrayBinds = NanNew<v8::Array>( outCount );
+  std::vector<Bind*>binds = executeBaton->binds;
+
+  Local<Array> arrayBinds = NanNew<v8::Array>( executeBaton->numOutBinds );
 
   unsigned int it = 0;
   for(unsigned int index = 0; index < binds.size(); index++)
@@ -1464,20 +1581,7 @@ v8::Handle<v8::Value> Connection::GetOutBindArray ( std::vector<Bind*> &binds,
     if(binds[index]->isOut)
     {
       Handle<Value> val ;
-      if ( !isDMLReturning )
-      {
-        val = Connection::GetValue (
-                                    binds[index]->ind[0],
-                                    binds[index]->type,
-                                    (binds[index]->type == DpiTimestampLTZ ) ?
-                                    binds[index]->extvalue :
-                                    binds[index]->value,
-                                    binds[index]->len[0] ) ;
-      }
-      else
-      {
-        val = Connection::GetArrayValue ( binds[index], rowcount );
-      }
+      val = Connection::GetValue ( executeBaton, false, index ); 
       arrayBinds->Set( it, val );
       it ++;
     }
@@ -1496,10 +1600,10 @@ v8::Handle<v8::Value> Connection::GetOutBindArray ( std::vector<Bind*> &binds,
    RETURNS:
      Outbinds object
 */
-v8::Handle<v8::Value> Connection::GetOutBindObject ( std::vector<Bind*> &binds,
-                                                     bool isDMLReturning,
-                                                     unsigned long rowcount )
+v8::Handle<v8::Value> Connection::GetOutBindObject ( eBaton *executeBaton )
 {
+  std::vector<Bind*>binds = executeBaton->binds;
+
   NanEscapableScope();
   Local<Object> objectBinds = NanNew<v8::Object>();
   for(unsigned int index = 0; index < binds.size(); index++)
@@ -1510,21 +1614,7 @@ v8::Handle<v8::Value> Connection::GetOutBindObject ( std::vector<Bind*> &binds,
 
       binds[index]->key.erase(binds[index]->key.begin());
 
-      if ( !isDMLReturning )
-      {
-        val = Connection::GetValue (
-                                    binds[index]->ind[0],
-                                    binds[index]->type,
-                                    (binds[index]->type == DpiTimestampLTZ ) ?
-                                 binds[index]->extvalue : binds[index]->value,
-                                    binds[index]->len[0],
-                                    binds[index]->maxSize );
-      }
-      else
-      {
-        val = Connection::GetArrayValue ( binds[index], rowcount ) ;
-      }
-
+      val = Connection::GetValue ( executeBaton, false, index );
       objectBinds->Set( NanNew<v8::String> ( binds[index]->key.c_str(),
                         (int) binds[index]->key.length() ),
                         val );

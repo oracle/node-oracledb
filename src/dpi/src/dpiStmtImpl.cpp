@@ -88,17 +88,27 @@ StmtImpl::StmtImpl (EnvImpl *env, OCIEnv *envh, ConnImpl *conn,
 
   try : conn_(conn), errh_(NULL), svch_(svch),
         stmth_(NULL), numCols_ (0),meta_(NULL), stmtType_ (DpiStmtUnknown),
-        isReturning_(false), isReturningSet_(false)
+        isReturning_(false), isReturningSet_(false), refCursor_(false)
 {
   // create an OCIError object for this execution
   ociCallEnv (OCIHandleAlloc ((void *)envh, (dvoid **)&errh_,
                                OCI_HTYPE_ERROR, 0, (dvoid **)0), envh);
 
-  // Prepare OCIStmt object with given sql statement.
-  ociCall (OCIStmtPrepare2 (svch_, &stmth_, errh_, (oratext *)sql.data(),
-                            (ub4)sql.length(), NULL, 0, OCI_NTV_SYNTAX,
-                            OCI_DEFAULT),
-           errh_);
+  if(!sql.empty())
+  {
+    // Prepare OCIStmt object with given sql statement.
+    ociCall (OCIStmtPrepare2 (svch_, &stmth_, errh_, (oratext *)sql.data(),
+                              (ub4)sql.length(), NULL, 0, OCI_NTV_SYNTAX,
+                              OCI_DEFAULT),
+             errh_);
+  }
+  else
+  {
+    //  to build empty stmt object used for ref cursors.
+    ociCall (OCIHandleAlloc ((void *)envh, (dvoid **)&stmth_,
+                             OCI_HTYPE_STMT,0, (dvoid **)0), errh_);
+    refCursor_ = true;
+  }
 }
 catch (...)
 {
@@ -240,7 +250,9 @@ void StmtImpl::bind (unsigned int pos, unsigned short type, void *buf,
   OCIBind *b = (OCIBind *)0;
 
   ociCall (DPIBINDBYPOS (stmth_, &b, errh_, pos,
-                         (cb ? NULL : buf), bufSize, type,
+                         (cb ? NULL : (type==DpiRSet) ? 
+                           (void *)&(((StmtImpl*)buf)->stmth_) : buf), 
+                         (type == DpiRSet) ? 0 : bufSize, type,
                          (cb ? NULL : ind),
                          (cb ? NULL : bufLen),
                          NULL, 0, NULL,
@@ -285,7 +297,9 @@ void StmtImpl::bind (const unsigned char *name, int nameLen,
   OCIBind *b = (OCIBind *)0;
 
   ociCall (DPIBINDBYNAME (stmth_, &b, errh_, name, nameLen,
-                          (cb ? NULL : buf), bufSize, type,
+                          (cb ? NULL : (type == DpiRSet) ?
+                            (void *)&((StmtImpl*)buf)->stmth_: buf), 
+                          (type == DpiRSet) ? 0 : bufSize, type,
                           (cb ? NULL : ind),
                           (cb ? NULL : bufLen),
                           NULL, 0, NULL,
@@ -518,7 +532,12 @@ void StmtImpl::cleanup ()
   }
   if ( stmth_)
   {
-    ociCall ( OCIStmtRelease (stmth_, errh_, NULL, 0, OCI_DEFAULT), errh_ );
+    // Release not called for ref cursor.
+    if ( refCursor_ )
+      OCIHandleFree ( stmth_, OCI_HTYPE_STMT );
+    else 
+      ociCall ( OCIStmtRelease (stmth_, errh_, NULL, 0, OCI_DEFAULT), errh_ );
+
     stmth_ = NULL;
   }
   if ( errh_)

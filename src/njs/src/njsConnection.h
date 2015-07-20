@@ -149,15 +149,16 @@ typedef struct eBaton
        for( unsigned int index = 0 ;index < binds.size(); index++ )
        {
          // donot free date value here, it is done in DateTimeArray functions
-         if(binds[index]->type != DpiTimestampLTZ )
+         if(binds[index]->type != DpiTimestampLTZ ) 
          {
-           if( binds[index]->value )
+           // do not free refcursor type.  
+           if( binds[index]->value && binds[index]->type != DpiRSet )
            {
              free(binds[index]->value);
            }
            if ( binds[index]->extvalue )
            {
-             free ( binds[index]->value );
+             free ( binds[index]->extvalue );
            }
            if ( binds[index]->ind )
            {
@@ -208,6 +209,7 @@ public:
   static void Descr2Double ( Define* defines, unsigned int numCols,
                              unsigned int rowsFetched, bool getRS );
   bool isValid() { return isValid_; }
+  Oracledb* oracledb_;
 
 private:
   static NAN_METHOD(New);
@@ -274,17 +276,22 @@ private:
   static void GetOutBindParams (unsigned short dataType, Bind* bind,
                                 eBaton* executeBaton);
   static v8::Handle<v8::Value> GetOutBinds (eBaton* executeBaton);
-  static v8::Handle<v8::Value> GetOutBindArray ( std::vector<Bind*> &binds,
-                                                 unsigned int outCount,
-                                                 bool bDMLReturn = false,
-                                                 unsigned long rowcount = 1);
-  static v8::Handle<v8::Value> GetOutBindObject (std::vector<Bind*> &binds,
-                                                 bool bDMLReturn = false,
-                                                 unsigned long rowcount = 1);
+  static v8::Handle<v8::Value> GetOutBindArray (eBaton* executeBaton);
+  static v8::Handle<v8::Value> GetOutBindObject (eBaton* executeBaton);
   static v8::Handle<v8::Value> GetArrayValue (Bind *bind, unsigned long count);
-  static v8::Handle<v8::Value> GetValue (short ind, unsigned short type, void* val,
-                                         DPI_BUFLEN_TYPE len,
-                                         DPI_SZ_TYPE maxSize = -1);
+
+  // to convert DB value to v8::Value
+  static v8::Handle<v8::Value> GetValue (eBaton *executeBaton,
+                                         bool isQuery,
+                                         unsigned int index,
+                                         unsigned int row = 0);
+  // for primitive types (Number, String and Date) 
+  static v8::Handle<v8::Value> GetValueCommon (short ind, 
+                                         unsigned short type, 
+                                         void* val, DPI_BUFLEN_TYPE len);
+  // for refcursor
+  static v8::Handle<v8::Value> GetValueRefCursor (eBaton *executeBaton, 
+                                                  Bind *bind);
   static void UpdateDateValue ( eBaton *executeBaton );
   static void v8Date2OraDate ( v8::Handle<v8::Value>, Bind *bind);
 
@@ -302,7 +309,6 @@ private:
 
   dpi::Conn* dpiconn_;
   bool isValid_;
-  Oracledb* oracledb_;
 
 };
 

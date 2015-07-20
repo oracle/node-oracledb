@@ -112,7 +112,6 @@ public:
                               dvoid **bufpp, ub4 **alenp, ub1 *piecep,
                               dvoid **indpp, ub2 **rcodepp );
 
-
 private:
   void cleanup ();
 
@@ -131,6 +130,7 @@ private:
   DpiStmtType    stmtType_;        // Statement Type (Query, DML, ... )
   bool           isReturning_;     // Does the stmt has RETURNING INTO clause?
   bool           isReturningSet_;  // Has isReturning_ flag queried & set.
+  bool           refCursor_;       // refCursor or not.
 };
 
 

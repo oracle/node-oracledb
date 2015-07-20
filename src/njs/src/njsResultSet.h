@@ -101,8 +101,9 @@ public:
 
    static void Init(Handle<Object> target);
 
-   void setResultSet ( dpi::Stmt *dpistmt, dpi::Env *env, 
+   void setResultSet ( dpi::Stmt *dpistmt, dpi::Env *dpienv,
                        Connection* conn, unsigned int outFormat );
+
    // Define ResultSet Constructor
    static Persistent<FunctionTemplate> resultSetTemplate_s ;
 

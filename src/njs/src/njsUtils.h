@@ -61,26 +61,27 @@
 typedef enum
 {
   DATA_UNKNOWN  = -1,
-  DATA_STR      = 1,
-  DATA_NUM      = 2,
-  DATA_DATE     = 3
+  DATA_STR      = 2001,
+  DATA_NUM      = 2002,
+  DATA_DATE     = 2003,
+  DATA_CURSOR   = 2004
 }DataType;
 
 // User specified bind types.
 typedef enum
 {
   BIND_UNKNOWN = -1,
-  BIND_IN     = 1,
-  BIND_INOUT  = 2,
-  BIND_OUT    = 3
+  BIND_IN     = 3001,
+  BIND_INOUT  = 3002,
+  BIND_OUT    = 3003
 }BindType;
 
 // outFormat types.
 typedef enum
 {
   ROWS_UNKNOWN = -1,
-  ROWS_ARRAY  = 1,
-  ROWS_OBJECT = 2
+  ROWS_ARRAY  = 4001,
+  ROWS_OBJECT = 4002
 }RowsType;
 
 // states

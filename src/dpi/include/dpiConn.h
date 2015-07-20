@@ -67,7 +67,7 @@ public:
   virtual void action(const string &action) = 0;
 
                                 // methods
-  virtual Stmt* getStmt (const string &sql) = 0;
+  virtual Stmt* getStmt (const string &sql="") = 0;
 
   virtual void commit() = 0;
 

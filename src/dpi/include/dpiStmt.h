@@ -86,6 +86,7 @@ typedef enum
   DpiClob = 112,
   DpiBlob = 113,
   DpiBfile = 114,
+  DpiRSet = 116,
   DpiYearMonth = 182,           /* internal only */
   DpiDaySecond = 183,           /* internal only */
   DpiTimestamp = 187,           /* internal only */
