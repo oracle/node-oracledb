@@ -64,7 +64,8 @@ typedef enum
   DATA_STR      = 2001,
   DATA_NUM      = 2002,
   DATA_DATE     = 2003,
-  DATA_CURSOR   = 2004
+  DATA_CURSOR   = 2004,
+  DATA_BUFFER   = 2005
 }DataType;
 
 // User specified bind types.

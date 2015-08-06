@@ -81,6 +81,7 @@ typedef enum
   DpiFixedChar = 96,
   DpiBinaryFloat = 100,         /* internal only */
   DpiBinaryDouble = 101,        /* internal only */
+  DpiRdd = 104,
   DpiUDT = 108,                 /* internal only */
   DpiRef = 111,                 /* internal only */
   DpiClob = 112,

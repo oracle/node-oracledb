@@ -590,6 +590,10 @@ void Connection::GetOutBindParams (unsigned short dataType, Bind* bind,
       bind->type     = dpi::DpiRSet;
       bind->maxSize  = 0;
       break;
+    case DATA_BUFFER :
+      bind->type     = dpi::DpiRaw;
+      bind->maxSize  = 0;
+      break;
     default :
       executeBaton->error= NJSMessages::getErrorMsg(errInvalidBindDataType,2);
       break;
@@ -707,6 +711,33 @@ void Connection::GetInBindParams (Handle<Value> v8val, Bind* bind,
     bind->maxSize = 0;
     /* Convert v8::Date value to long double */
     Connection::v8Date2OraDate ( v8val, bind);
+  }
+  else if(v8val->IsObject ())
+  {
+    Local<Object> obj = v8val->ToObject();
+    if (Buffer::HasInstance(obj)) {
+      size_t bufLen = Buffer::Length(obj);
+      bind->type = dpi::DpiRaw;
+      if(type == BIND_INOUT)
+      {
+        *(bind->len) = bufLen;
+      }
+      else // IN
+      {
+        bind->maxSize = *(bind->len) = bufLen;
+      }
+      DPI_SZ_TYPE size = (bind->maxSize >= *(bind->len) ) ?
+                         bind->maxSize : *(bind->len);
+      if(size)
+      {
+        bind->value = (char*)malloc(size);
+        if(bufLen)
+          memcpy(bind->value, Buffer::Data(obj), bufLen);
+      }
+    } else {
+      executeBaton->error= NJSMessages::getErrorMsg(errInvalidBindDataType,2);
+      goto exitGetInBindParams;
+    }
   }
   else
   {
@@ -1049,6 +1080,16 @@ void Connection::DoDefines ( eBaton* executeBaton, const dpi::MetaData* meta,
         defines[col].fetchType = DpiTimestampLTZ;
         defines[col].maxSize   = meta[col].dbSize;
         defines[col].extbuf    = defines[col].dttmarr->init(executeBaton->maxRows);
+        break;
+      case dpi::DpiRaw :
+        defines[col].fetchType = DpiRaw;
+        defines[col].maxSize   = meta[col].dbSize;
+        defines[col].buf = (char *)malloc(defines[col].maxSize*executeBaton->maxRows);
+        break;
+      case dpi::DpiRdd :
+        defines[col].fetchType = DpiVarChar;
+        defines[col].maxSize   = 18;
+        defines[col].buf = (char *)malloc(defines[col].maxSize*executeBaton->maxRows);
         break;
       default :
         executeBaton->error = NJSMessages::getErrorMsg(errUnsupportedDatType);
@@ -1446,6 +1487,9 @@ Handle<Value> Connection::GetValueCommon ( short ind,
          date = NanNew<v8::Date>( *(long double*)val );
          value = date;
         break;
+       case (dpi::DpiRaw) :
+         value = NanNewBufferHandle((char*)val, len);
+         break;
        default :
          break;
     }
