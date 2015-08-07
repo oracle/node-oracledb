@@ -332,6 +332,8 @@ void ResultSet::Async_GetRows(uv_work_t *req)
         getRowsBaton-> njsRS-> defineBuffers_ = NULL;
       }
       Connection::DoDefines(ebaton, njsRS->meta_, njsRS->numCols_);
+      if ( !ebaton->error.empty() )
+        goto exitAsyncGetRows;
       njsRS->fetchRowCount_ = getRowsBaton->numRows;
       njsRS->defineBuffers_ = ebaton->defines;
     }
