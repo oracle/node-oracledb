@@ -28,6 +28,7 @@ limitations under the License.
      - NUMBER
      - DATE
      - CURSOR
+     - BUFFER
      - BIND_IN
      - BIND_INOUT
      - BIND_OUT
@@ -243,6 +244,8 @@ Oracledb.NUMBER                    // Bind as JavaScript number type
 Oracledb.DATE                      // Bind as JavaScript date type
 
 Oracledb.CURSOR                    // Bind a REF CURSOR to a node-oracledb resultSet class
+
+Oracledb.BUFFER                    // Bind a node.js Buffer
 ```
 
 #### Constants for `execute()` [bind parameter](#executebindParams) `dir` properties
@@ -1177,7 +1180,7 @@ Bind Property | Description
 ---------------|------------
 `val` | The input value or variable to be used for an IN or IN OUT bind variable.
 `dir` | The direction of the bind.  One of the [Oracledb Constants](#oracledbconstants) `BIND_IN`, `BIND_INOUT`, or `BIND_OUT`.
-`type` | The datatype to be bound. One of the [Oracledb Constants](#oracledbconstants) `STRING`, `NUMBER`, `DATE` or `CURSOR`.
+`type` | The datatype to be bound. One of the [Oracledb Constants](#oracledbconstants) `STRING`, `NUMBER`, `DATE`, `CURSOR` or `BUFFER`.
 `maxSize` | The maximum number of bytes that an OUT or IN OUT bind variable can use.  For `STRING` binds, a default value of 200 is used.
 
 With OUT binds, where the type cannot be inferred by node-oracledb
@@ -2202,7 +2205,7 @@ connection.execute("INSERT INTO countries VALUES (:country_id, :country_name)",
 ```
 
 For IN binds the direction must be `BIND_IN`.  The type can be
-`STRING`, `NUMBER` or `DATE`, matching the data.  The type `CURSOR`
+`STRING`, `NUMBER`, `DATE` or `BUFFER`, matching the data.  The type `CURSOR`
 cannot be used with IN binds.
 
 #### <a name="outbind"></a> 8.2.2 OUT and IN OUT Bind Parameters
@@ -2212,7 +2215,7 @@ For each OUT and IN OUT bind parameter, a bind value object containing
 
 The `dir` attribute should be `BIND_OUT` or `BIND_INOUT`.
 
-The `type` attribute should be `STRING`, `NUMBER`, `DATE` or `CURSOR`.
+The `type` attribute should be `STRING`, `NUMBER`, `DATE`, `CURSOR` or `BUFFER`.
 If `type` is not specified then `STRING` is assumed.  Note `CURSOR`
 can only be used for PL/SQL OUT bind parameters.
 
