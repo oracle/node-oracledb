@@ -147,6 +147,15 @@ assist.createCharString = function(size) {
   return buffer.toString();
 }
 
+assist.createBuffer = function(size) {
+  var array = [];
+  for(var i = 0; i < size; i++) {
+    var b = Math.floor(Math.random() * 256); // generate a random integer among 0-255
+    array.push(b);
+  }
+  return new Buffer(array);
+}
+
 assist.setup = function(connection, tableName, sqlCreate, array, done) {
   async.series([
     function(callback) {
@@ -190,6 +199,8 @@ assist.dataTypeSupport = function(connection, tableName, array, done) {
 		  result.rows[i].CONTENT.trim().should.eql(array[result.rows[i].NUM]);
         else if( (typeof result.rows[i].CONTENT) === 'number' )
           result.rows[i].CONTENT.should.eql(array[result.rows[i].NUM]);
+        else if( Buffer.isBuffer(result.rows[i].CONTENT) )   
+          result.rows[i].CONTENT.toString('hex').should.eql(array[result.rows[i].NUM].toString('hex'));
 		else
           result.rows[i].CONTENT.toUTCString().should.eql(array[result.rows[i].NUM].toUTCString());
       }	  
@@ -222,6 +233,8 @@ assist.resultSetSupport = function(connection, tableName, array, done) {
 		    rows[i].CONTENT.trim().should.eql(array[rows[i].NUM]); 
           else if( (typeof rows[i].CONTENT) === 'number' )
             rows[i].CONTENT.should.eql(array[rows[i].NUM]);
+          else if( Buffer.isBuffer(rows[i].CONTENT) )
+            rows[i].CONTENT.toString('hex').should.eql(array[rows[i].NUM].toString('hex'));
           else
             rows[i].CONTENT.toUTCString().should.eql(array[rows[i].NUM].toUTCString()); 		  
         }
