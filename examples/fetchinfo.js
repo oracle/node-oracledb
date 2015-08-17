@@ -16,18 +16,23 @@
  * limitations under the License.
  *
  * NAME
- *   resultset1.js
+ *   fetchinfo.js
  *
  * DESCRIPTION
- *   Executes a query and uses a result set to fetch rows with getRow().
+ *   Show how numbers and dates can be returned as strings using fetchAsString 
+ *   and fetchInfo
  *   Uses Oracle's sample HR schema.
+ *
+ *   Scripts to create the HR schema can be found at:
+ *   https://github.com/oracle/db-sample-schemas
  *
  *****************************************************************************/
 
 var oracledb = require('oracledb');
 var dbConfig = require('./dbconfig.js');
 
-var rowCount = 0;
+oracledb.fetchAsString = [ oracledb.NUMBER ];  // any number queried will be returned as a string
+//oracledb.fetchAsString = [ oracledb.NUMBER, oracledb.DATE ]; // both date and number can be used
 
 oracledb.getConnection(
   {
@@ -37,14 +42,20 @@ oracledb.getConnection(
   },
   function(err, connection)
   {
-    if (err) { console.error(err.message); return; }
+    if (err) {
+      console.error(err.message);
+      return;
+    }
     connection.execute(
-      "SELECT employee_id, last_name " +
-        "FROM   employees " +
-        "WHERE ROWNUM < 11 " +
-        "ORDER BY employee_id",
-      [], // no bind variables
-      { resultSet: true }, // return a result set.  Default is false
+      "SELECT last_name, hire_date, salary, commission_pct FROM employees WHERE employee_id = :id",
+      [178],
+      {
+        fetchInfo :
+        {
+	  "HIRE_DATE":      { type : oracledb.STRING },  // return the date as a string
+	  "COMMISSION_PCT": { type : oracledb.DEFAULT }  // override oracledb.fetchAsString
+        }
+      },
       function(err, result)
       {
         if (err) {
@@ -52,45 +63,17 @@ oracledb.getConnection(
           doRelease(connection);
           return;
         }
-        console.log(result);
-        fetchOneRowFromRS(connection, result.resultSet);
+        console.log(result.rows);
+        doRelease(connection);
       });
   });
-
-function fetchOneRowFromRS(connection, resultSet)
-{
-  resultSet.getRow( // get one row
-    function (err, row)
-    {
-      if (err) {
-        console.error(err.message);
-        doClose(connection, resultSet); // always close the result set
-      } else if (!row) {                // no rows, or no more rows
-        doClose(connection, resultSet); // always close the result set
-      } else {
-        rowCount++;
-        console.log("fetchOneRowFromRS(): row " + rowCount);
-        console.log(row);
-        fetchOneRowFromRS(connection, resultSet);
-      }
-    });
-}
 
 function doRelease(connection)
 {
   connection.release(
-    function(err)
-    {
-      if (err) { console.error(err.message); }
-    });
-}
-
-function doClose(connection, resultSet)
-{
-  resultSet.close(
-    function(err)
-    {
-      if (err) { console.error(err.message); }
-      doRelease(connection);
+    function(err) {
+      if (err) {
+        console.error(err.message);
+      }
     });
 }

@@ -16,14 +16,19 @@
  * limitations under the License.
  *
  * NAME
- *   select1.js
+ *   plsqlproc.js
  *
  * DESCRIPTION
- *   Executes a basic query without using a ResultSet.
- *   Uses Oracle's sample HR schema.
- *
- *   Scripts to create the HR schema can be found at:
- *   https://github.com/oracle/db-sample-schemas
+ *   Show calling a PL/SQL procedure and binding parameters in various ways
+ *   Use demo.sql to create the required procedure or do:
+ * 
+ *   CREATE OR REPLACE PROCEDURE testproc (p_in IN VARCHAR2, p_inout IN OUT VARCHAR2, p_out OUT NUMBER)
+ *     AS
+ *   BEGIN
+ *     p_inout := p_in || p_inout;
+ *     p_out := 101;
+ *   END;
+ *   /
  *
  *****************************************************************************/
 
@@ -36,36 +41,21 @@ oracledb.getConnection(
     password      : dbConfig.password,
     connectString : dbConfig.connectString
   },
-  function(err, connection)
+  function (err, connection)
   {
-    if (err) {
-      console.error(err.message);
-      return;
-    }
+    if (err) { console.error(err.message); return; }
+
+    var bindvars = {
+      i:  'Chris',  // Bind type is determined from the data.  Default direction is BIND_IN
+      io: { val: 'Jones', dir: oracledb.BIND_INOUT },
+      o:  { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
+    };
     connection.execute(
-      "SELECT department_id, department_name " +
-        "FROM departments " +
-        "WHERE department_id = :did",
-      [180],
-      function(err, result)
+      "BEGIN testproc(:i, :io, :o); END;",
+      bindvars,
+      function (err, result)
       {
-        if (err) {
-          console.error(err.message);
-          doRelease(connection);
-          return;
-        }
-        console.log(result.metaData);
-        console.log(result.rows);
-        doRelease(connection);
+        if (err) { console.error(err.message); return; }
+        console.log(result.outBinds);        
       });
   });
-
-function doRelease(connection)
-{
-  connection.release(
-    function(err) {
-      if (err) {
-        console.error(err.message);
-      }
-    });
-}

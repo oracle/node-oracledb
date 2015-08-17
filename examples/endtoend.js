@@ -53,8 +53,8 @@ oracledb.getConnection(
         // Sleep 10 seconds to keep the connection open.  This allows
         // external queries on V$SESSION to show the connection
         // attributes.
-        console.log('Use SQL*Plus as SYSTEM to execute:');
-        console.log('SELECT username, client_identifier, action, module FROM v$session WHERE username IS NOT NULL;');
+        console.log("Use SQL*Plus as SYSTEM to execute:");
+        console.log("SELECT username, client_identifier, action, module FROM v$session WHERE username = UPPER('" + dbConfig.user +"');");
         sleep(10000);
         doRelease(connection);
       });
@@ -64,7 +64,7 @@ oracledb.getConnection(
 function sleep(t) {
   var start = new Date().getTime();
   while(new Date().getTime() < start + t) {
-    ;  // empty
+    // empty
   }
 }
 
