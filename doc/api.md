@@ -1941,8 +1941,8 @@ connection.execute("SELECT first_name, salary, hire_date "
 If run with Oracle's sample HR schema, the output is:
 
 ```
-Row 0 : Shelley,  12000,  Tue Jun 07 1994 01:00:00 GMT-0700 (PDT)
-Row 1 : William,  8300,  Tue Jun 07 1994 01:00:00 GMT-0700 (PDT)
+Row 0 : { FIRST_NAME: 'Shelley', SALARY: 12008, HIRE_DATE: Tue Jun 07 1994 01:00:00 GMT-0700 (PDT) }
+Row 1 : { FIRST_NAME: 'William', SALARY: 8300, HIRE_DATE: Tue Jun 07 1994 01:00:00 GMT-0700 (PDT) } 
 ```
 
 In the preceding example, each row is a JavaScript object that
