@@ -46,8 +46,11 @@ client-server network compatibility applies, which enables connection
 to databases with different versions from the Oracle client library
 version.
 
-Python 2.7 is needed for node-gyp.  Gcc is needed on Linux.  On OS X,
-install Xcode.
+Gcc is needed on Linux.  On OS X, install Xcode.  Python 2.7 is needed
+for node-gyp.  If another version of Python occurs first in your
+binary path then, when you install node-oracledb, use the `--python`
+option to indicate the correct version.  For example `npm install
+--python=/whereever/python-2.7/bin/python oracledb`.
 
 ### Which Instructions to Follow
 
@@ -85,13 +88,13 @@ extract the file, for example into `/opt`:
 
 ```
 cd /opt
-tar -zxf node-v0.12.4-linux-x64.tar.gz
+tar -zxf node-v0.12.7-linux-x64.tar.gz
 ```
 
 Set PATH to include Node.js:
 
 ```
-export PATH=/opt/node-v0.12.4-linux-x64/bin:$PATH
+export PATH=/opt/node-v0.12.7-linux-x64/bin:$PATH
 ```
 
 ### 2.2 Install the free Oracle Instant Client RPMs
@@ -169,13 +172,13 @@ extract the file, for example into `/opt`:
 
 ```
 cd /opt
-tar -zxf node-v0.12.4-linux-x64.tar.gz
+tar -zxf node-v0.12.7-linux-x64.tar.gz
 ```
 
 Set PATH to include Node.js:
 
 ```
-export PATH=/opt/node-v0.12.4-linux-x64/bin:$PATH
+export PATH=/opt/node-v0.12.7-linux-x64/bin:$PATH
 ```
 
 ### 3.2 Install the free Oracle Instant Client ZIPs
@@ -285,13 +288,13 @@ extract the file, for example into `/opt`:
 
 ```
 cd /opt
-tar -zxf node-v0.12.4-linux-x64.tar.gz
+tar -zxf node-v0.12.7-linux-x64.tar.gz
 ```
 
 Set your PATH variable to include Node.js:
 
 ```
-export PATH=/opt/node-v0.12.4-linux-x64/bin:$PATH
+export PATH=/opt/node-v0.12.7-linux-x64/bin:$PATH
 ```
 
 ### 4.2 Install the driver
@@ -452,7 +455,7 @@ node select1.js
 
 To run a database on OS X, one option is to use VirtualBox,
 see
-[The Easiest Way to Enable Oracle Database Application Development on Mac OS X](https://blogs.oracle.com/opal/entry/the_easiest_way_to_enable).
+[The Easiest Way to Install Oracle Database on Mac OS X](https://blogs.oracle.com/opal/entry/the_easiest_way_to_enable).
 
 ## <a name="instwin"></a> 6. Node-oracledb Installation on Windows
 
@@ -474,7 +477,7 @@ use a 32-bit stack during build and run time.
 
 ### 6.2 Install Node.js
 
-Install the 64-bit Node.js  MSI (e.g. node-v0.12.4-x64.msi) from
+Install the 64-bit Node.js  MSI (e.g. node-v0.12.7-x64.msi) from
 [nodejs.org](http://nodejs.org/download/).  Make sure the option to
 add the Node and npm directories to the path is selected.
 
