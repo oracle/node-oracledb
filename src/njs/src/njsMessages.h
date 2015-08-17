@@ -53,6 +53,11 @@ typedef enum
   errBusyResultSet,
   errInvalidResultSet,
   errInvalidNonQueryExecution,
+  errEmptyArrayForFetchAs,
+  errInvalidTypeForConversion,
+  errInvalidLob,
+  errBusyLob,
+  errInsufficientMemory,
 
   // New ones should be added here
 

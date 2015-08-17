@@ -55,16 +55,18 @@
 #include "njsPool.h"
 #include "njsResultSet.h"
 #include "njsMessages.h"
+#include "njsIntLob.h"
                                         //peristent Oracledb class handle
 Persistent<FunctionTemplate> Oracledb::oracledbTemplate_s;
 
-#define NJS_MAX_ROWS        100
-#define NJS_STMT_CACHE_SIZE  30
-#define NJS_POOL_MIN          0
-#define NJS_POOL_MAX          4
-#define NJS_POOL_INCR         1
-#define NJS_POOL_TIMEOUT     60
-#define NJS_PREFETCH_ROWS   100
+#define NJS_MAX_ROWS            100
+#define NJS_STMT_CACHE_SIZE      30
+#define NJS_POOL_MIN              0
+#define NJS_POOL_MAX              4
+#define NJS_POOL_INCR             1
+#define NJS_POOL_TIMEOUT         60
+#define NJS_PREFETCH_ROWS       100
+#define NJS_LOB_PREFETCH_SIZE 16384
 
 /*****************************************************************************/
 /*
@@ -73,18 +75,20 @@ Persistent<FunctionTemplate> Oracledb::oracledbTemplate_s;
  */
 Oracledb::Oracledb()
 {
-  dpienv_         = dpi::Env::createEnv();
-  outFormat_      = ROWS_ARRAY;
-  maxRows_        = NJS_MAX_ROWS;
-  autoCommit_     = false;
-  stmtCacheSize_  = NJS_STMT_CACHE_SIZE;
-  poolMax_        = NJS_POOL_MAX;
-  poolMin_        = NJS_POOL_MIN;
-  poolIncrement_  = NJS_POOL_INCR;
-  poolTimeout_    = NJS_POOL_TIMEOUT;
-  prefetchRows_   = NJS_PREFETCH_ROWS;
-  connClass_      = "";
-  externalAuth_   = false;
+  dpienv_             = dpi::Env::createEnv();
+  outFormat_          = ROWS_ARRAY;
+  maxRows_            = NJS_MAX_ROWS;
+  autoCommit_         = false;
+  stmtCacheSize_      = NJS_STMT_CACHE_SIZE;
+  poolMax_            = NJS_POOL_MAX;
+  poolMin_            = NJS_POOL_MIN;
+  poolIncrement_      = NJS_POOL_INCR;
+  poolTimeout_        = NJS_POOL_TIMEOUT;
+  prefetchRows_       = NJS_PREFETCH_ROWS;
+  connClass_          = "";
+  externalAuth_       = false;
+  fetchAsStringTypes_ = NULL;
+  lobPrefetchSize_ = NJS_LOB_PREFETCH_SIZE;
 }
 
 /*****************************************************************************/
@@ -94,11 +98,17 @@ Oracledb::Oracledb()
  */
 Oracledb::~Oracledb()
 {
+  if ( fetchAsStringTypes_ )
+  {
+    free ( fetchAsStringTypes_ );
+  }
 
   if (this->dpienv_)
   {
     dpienv_->terminate();
   }
+
+  NanDisposePersistent(jsOracledb);
 }
 
 /*****************************************************************************/
@@ -166,6 +176,13 @@ void Oracledb::Init(Handle<Object> target)
                               NanNew<v8::String>("externalAuth"),
                               Oracledb::GetExternalAuth,
                               Oracledb::SetExternalAuth );
+  temp->InstanceTemplate()->SetAccessor( NanNew<v8::String>("fetchAsString"),
+                                         Oracledb::GetFetchAsString,
+                                         Oracledb::SetFetchAsString);
+  temp->InstanceTemplate()->SetAccessor(
+                              NanNew<v8::String>("lobPrefetchSize"),
+                              Oracledb::GetLobPrefetchSize,
+                              Oracledb::SetLobPrefetchSize);
 
   NanAssignPersistent( oracledbTemplate_s, temp);
   target->Set(NanNew<v8::String>("Oracledb"),temp->GetFunction());
@@ -183,7 +200,7 @@ NAN_METHOD(Oracledb::New)
 
   Oracledb *oracledb = new Oracledb();
   oracledb->Wrap(args.This());
-
+  NanAssignPersistent( oracledb->jsOracledb, args.This() );
   NanReturnValue(args.This());
 }
 
@@ -502,6 +519,113 @@ NAN_SETTER(Oracledb::SetExternalAuth)
 
 
 /*****************************************************************************/
+/*
+   DESCRIPTION
+     Get Accessor of lobPrefetchSize property
+*/
+NAN_PROPERTY_GETTER(Oracledb::GetLobPrefetchSize)
+{
+  NanScope();
+  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(args.Holder());
+  Local<Integer> value = NanNew<v8::Integer>(oracledb->lobPrefetchSize_);
+  NanReturnValue(value);
+}
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Set Accessor of lobPrefetchSize property
+*/
+NAN_SETTER(Oracledb::SetLobPrefetchSize)
+{
+  NanScope();
+  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(args.Holder());
+  NJS_SET_PROP_UINT(oracledb->lobPrefetchSize_, value, "lobPrefetchSize");
+}
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Get Accessor of FetchAsString property
+*/
+NAN_PROPERTY_GETTER(Oracledb::GetFetchAsString)
+{
+  NanScope();
+
+  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(args.Holder());
+  Handle<Array> typeArray = NanNew <v8::Array>(0);
+  
+  if ( oracledb->fetchAsStringTypes_ )
+  {
+    unsigned int nCount = sizeof ( oracledb->fetchAsStringTypes_ ) / 
+                   sizeof ( oracledb->fetchAsStringTypes_[0] ) ;
+    
+    typeArray = NanNew<v8::Array>( nCount );
+    for ( unsigned int t = 0; t < nCount ; t ++ )
+    {
+      typeArray->Set (t, NanNew<v8::Integer>(oracledb->fetchAsStringTypes_[t]));
+    }
+  }
+
+  NanReturnValue(typeArray);
+}
+
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Set Accessor of FetchAsString property
+*/
+NAN_SETTER(Oracledb::SetFetchAsString)
+{
+  NanScope();
+  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(args.Holder());
+  Local<Array> array;
+  string msg;
+
+  if ( !value->IsArray () )
+  {
+    msg = NJSMessages::getErrorMsg ( errEmptyArrayForFetchAs );
+    NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length () );
+  }
+      
+  array = value.As<v8::Array> ();
+  if ( array->Length () == 0 )
+  {
+    if ( oracledb->fetchAsStringTypes_ )
+    {
+      free ( oracledb->fetchAsStringTypes_ ) ;
+      oracledb->fetchAsStringTypesCount_ = 0 ;
+      return;
+    }
+  }
+  
+  // If already defined, clear the array.
+  if ( oracledb->fetchAsStringTypes_ )
+  {
+    free ( oracledb->fetchAsStringTypes_ );
+  }
+
+  oracledb->fetchAsStringTypesCount_ = array->Length ();
+  
+  oracledb->fetchAsStringTypes_ = (DataType *)malloc ( 
+                                      array->Length() * sizeof ( DataType ) );
+  for ( unsigned int t = 0 ; t < array->Length () ; t ++ )
+  {
+    DataType type = (DataType) 
+                    array->Get(t).As<v8::Integer>()->ToInt32()->Value ();
+    if ( ( type == DATA_STR  ) || ( type == DATA_DEFAULT ) )
+    {
+      msg = NJSMessages::getErrorMsg ( errInvalidTypeForConversion );
+      NJS_SET_EXCEPTION(msg.c_str(), (int)msg.length () );
+    }
+    oracledb->fetchAsStringTypes_[t] = type;
+  }
+}
+
+
+
+/*****************************************************************************/
                                                                              /*
    DESCRIPTION
      Get Connection method on Oracledb class.
@@ -546,6 +670,7 @@ NAN_METHOD(Oracledb::GetConnection)
 
   connBaton->oracledb   =  oracledb;
   connBaton->dpienv     =  oracledb->dpienv_;
+  connBaton->lobPrefetchSize =  oracledb->lobPrefetchSize_;
 
 exitGetConnection :
   connBaton->req.data  =  (void*) connBaton;
@@ -582,7 +707,8 @@ void Oracledb::Async_GetConnection (uv_work_t *req)
                                               connBaton->stmtCacheSize,
                                               connBaton->connClass,
                                               connBaton->externalAuth );
-
+    
+    connBaton->dpiconn->lobPrefetchSize(connBaton->lobPrefetchSize);
   }
   catch (dpi::Exception& e)
   {
@@ -688,6 +814,7 @@ NAN_METHOD(Oracledb::CreatePool)
 
   poolBaton->oracledb  =  oracledb;
   poolBaton->dpienv    =  oracledb->dpienv_;
+  poolBaton->lobPrefetchSize =  oracledb->lobPrefetchSize_;
 
 exitCreatePool:
   poolBaton->req.data = (void *)poolBaton;
@@ -773,7 +900,8 @@ void Oracledb::Async_AfterCreatePool (uv_work_t *req)
                                                      poolBaton->poolMin,
                                                      poolBaton->poolIncrement,
                                                      poolBaton->poolTimeout,
-                                                     poolBaton->stmtCacheSize );
+                                                     poolBaton->stmtCacheSize,
+                                                     poolBaton->lobPrefetchSize);
     argv[1] = njsPool;
   }
   Local<Function> callback = NanNew(poolBaton->cb);
@@ -802,9 +930,42 @@ extern "C"
       Connection::Init(target);
       Pool::Init(target);
       ResultSet::Init(target);
+      ILob::Init(target);
    }
 
    NODE_MODULE(oracledb, init)
+}
+
+
+/*****************************************************************************/
+/*
+  DESCRIPTION
+    To obtain Fetch-As-String-Types, a new array is allocated and types are
+    copied and retured and expected to be freed at the end of execution
+
+  PARAMETERS
+    -NONE-
+
+  RETURNS
+    array of DataType element to Fetch As String
+*/
+const DataType * Oracledb::getFetchAsStringTypes () const
+{
+  DataType *types = NULL;
+
+  if ( fetchAsStringTypes_ )
+  {
+    unsigned int count = fetchAsStringTypesCount_;
+
+    types = (DataType * )malloc ( sizeof ( DataType ) * count ) ;
+
+    for ( unsigned int i = 0 ; i < count ; i ++ )
+    {
+      types[i] = fetchAsStringTypes_[i];
+    }
+  }
+  
+  return types;
 }
 
 

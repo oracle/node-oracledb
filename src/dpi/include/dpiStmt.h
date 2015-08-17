@@ -77,7 +77,7 @@ typedef enum
   DpiRaw = 23,
   DpiLongRaw = 24,
   DpiUnsignedInteger = 68,
-  DpiRowid = 69,                /* internal only */
+  DpiRowid = 104,                /* internal only */
   DpiFixedChar = 96,
   DpiBinaryFloat = 100,         /* internal only */
   DpiBinaryDouble = 101,        /* internal only */
@@ -110,6 +110,8 @@ typedef enum
   #define  DPIBINDBYNAME   OCIBindByName2
   #define  DPIDEFINEBYPOS  OCIDefineByPos2
   #define  DPIATTRROWCOUNT OCI_ATTR_UB8_ROW_COUNT
+  #define  DPILOBREAD      OCILobRead2
+  #define  DPILOBWRITE     OCILobWrite2
 #else
   #define  DPI_SZ_TYPE         sb4
   #define  DPI_BUFLEN_TYPE     ub2
@@ -117,6 +119,8 @@ typedef enum
   #define  DPIBINDBYNAME   OCIBindByName
   #define  DPIDEFINEBYPOS  OCIDefineByPos
   #define  DPIATTRROWCOUNT OCI_ATTR_ROW_COUNT
+  #define  DPILOBREAD      OCILobRead
+  #define  DPILOBWRITE     OCILobWrite
 #endif
 
 
@@ -133,7 +137,8 @@ typedef struct
 
 
 // Application (Driver) level callback function prototype
-typedef int (*cbtype) (void *ctx, DPI_SZ_TYPE nRows, unsigned long iter,
+typedef int (*cbtype) (void *ctx, DPI_SZ_TYPE nRows, unsigned int bndpos,
+                       unsigned long iter,
                        unsigned long index, dvoid **bufpp, void **alenp,
                        dvoid **indpp, unsigned short **rcodepp,
                        unsigned char *piecep );
@@ -164,6 +169,7 @@ public:
                     void *data, cbtype cb = NULL ) = 0;
 
   virtual void bind(const unsigned char *name, int nameLen,
+                    unsigned int bndpos,
                     unsigned short type,  void *buf, DPI_SZ_TYPE  bufSize,
                     short *ind, DPI_BUFLEN_TYPE *bufLen,
                     void *data, cbtype cb = NULL ) = 0;

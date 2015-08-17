@@ -61,27 +61,31 @@
 typedef enum
 {
   DATA_UNKNOWN  = -1,
+  DATA_DEFAULT  = 0,  // Used in FetchInfo Context only, fetch as DB type
   DATA_STR      = 2001,
   DATA_NUM      = 2002,
   DATA_DATE     = 2003,
-  DATA_CURSOR   = 2004
+  DATA_CURSOR   = 2004,
+  DATA_BUFFER   = 2005,
+  DATA_CLOB     = 2006,
+  DATA_BLOB     = 2007
 }DataType;
 
 // User specified bind types.
 typedef enum
 {
-  BIND_UNKNOWN = -1,
-  BIND_IN     = 3001,
-  BIND_INOUT  = 3002,
-  BIND_OUT    = 3003
+  BIND_UNKNOWN  = -1,
+  BIND_IN       = 3001,
+  BIND_INOUT    = 3002,
+  BIND_OUT      = 3003
 }BindType;
 
 // outFormat types.
 typedef enum
 {
-  ROWS_UNKNOWN = -1,
-  ROWS_ARRAY  = 4001,
-  ROWS_OBJECT = 4002
+  ROWS_UNKNOWN  = -1,
+  ROWS_ARRAY    = 4001,
+  ROWS_OBJECT   = 4002
 }RowsType;
 
 // states
@@ -113,7 +117,7 @@ typedef enum
   {                                                                           \
     msg = NJSMessages::getErrorMsg ( errMissingCallback );                    \
     NJS_SET_EXCEPTION( msg.c_str(), msg.length() );		              \
-    NanReturnUndefined();                                                       \
+    NanReturnUndefined();                                                     \
   }                                                                           \
   else                                                                        \
   {                                                                           \
@@ -316,6 +320,29 @@ typedef enum
   }                                                                           \
 }
 
+
+/*
+ * Convert v8value to double for properties.
+ * If it not a v8 Number, throw exception.
+ * prop is the name of the property
+ */
+#define NJS_SET_PROP_DOUBLE( val, v8value, prop )                               \
+{                                                                             \
+  string msg;                                                                 \
+  if( v8value->IsNUmber() )                                                   \
+  {                                                                           \
+    val = v8value->ToNumber()->Value();                                       \
+  }                                                                           \
+  else                                                                        \
+  {                                                                           \
+    msg = NJSMessages::getErrorMsg ( errInvalidPropertyValue,                 \
+                                     prop );                                  \
+    NJS_SET_EXCEPTION( msg.c_str(), msg.length() );		              \
+  }                                                                           \
+}
+
+#define NJS_MIN (x,y) ((x) < (y) ? (x) : (y))
+#define NJS_MAX (x,y) ((x) > (y) ? (x) : (y))
 
 #endif                     // ifdef__NJSUTILS_H__
 

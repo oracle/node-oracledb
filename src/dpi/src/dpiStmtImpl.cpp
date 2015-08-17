@@ -245,7 +245,7 @@ void StmtImpl::prefetchRows (unsigned int prefetchRows)
 */
 void StmtImpl::bind (unsigned int pos, unsigned short type, void *buf,
                      DPI_SZ_TYPE bufSize, short *ind, DPI_BUFLEN_TYPE *bufLen,
-                     void *data, cbtype cb )
+                     void *data, cbtype cb)
 {
   OCIBind *b = (OCIBind *)0;
 
@@ -264,11 +264,12 @@ void StmtImpl::bind (unsigned int pos, unsigned short type, void *buf,
     DpiCallbackCtx *cbCtx = (DpiCallbackCtx *)malloc(sizeof(DpiCallbackCtx));
     cbCtx->callbackfn = cb;                        /* App specific callback */
     cbCtx->data       = data;             /* Data for app specific callback */
+    cbCtx->bndpos     = pos-1; /* for callback, bind position is zero based */
     cbCtx->nrows      = 0;           /* # of rows - will be filled in later */
     cbCtx->iter       = 0;           /* iteration - will be filled in later */
     cbCtx->dpistmt    = this;        /* DPI Statement implementation object */
 
-    ociCall (OCIBindDynamic ( b, errh_, NULL, StmtImpl::inbindCallback,
+    ociCall (OCIBindDynamic ( b, errh_, (void*)cbCtx,  StmtImpl::inbindCallback,
                               (void*)cbCtx, StmtImpl::outbindCallback ),
              errh_ );
   }
@@ -290,6 +291,7 @@ void StmtImpl::bind (unsigned int pos, unsigned short type, void *buf,
       bufLen       - returned buffer size
 */
 void StmtImpl::bind (const unsigned char *name, int nameLen,
+                     unsigned int bndpos,
                      unsigned short type, void *buf, DPI_SZ_TYPE bufSize,
                      short *ind, DPI_BUFLEN_TYPE *bufLen,
                      void *data, cbtype cb)
@@ -299,7 +301,7 @@ void StmtImpl::bind (const unsigned char *name, int nameLen,
   ociCall (DPIBINDBYNAME (stmth_, &b, errh_, name, nameLen,
                           (cb ? NULL : (type == DpiRSet) ?
                             (void *)&((StmtImpl*)buf)->stmth_: buf), 
-                          (type == DpiRSet) ? 0 : bufSize, type,
+                          (type == DpiRSet) ? 0 : bufSize, type, 
                           (cb ? NULL : ind),
                           (cb ? NULL : bufLen),
                           NULL, 0, NULL,
@@ -311,9 +313,10 @@ void StmtImpl::bind (const unsigned char *name, int nameLen,
     cbCtx->data       = data;             /* Data for app specific callback */
     cbCtx->nrows      = 0;           /* # of rows - will be filled in later */
     cbCtx->iter       = 0;           /* iteration - will be filled in later */
+    cbCtx->bndpos     = bndpos;               /* position in the bind array */
     cbCtx->dpistmt    = this;        /* DPI Statement implementation object */
 
-    ociCall (OCIBindDynamic (b, errh_, NULL, StmtImpl::inbindCallback,
+    ociCall (OCIBindDynamic (b, errh_, (void*)cbCtx, StmtImpl::inbindCallback,
                               (void *)cbCtx, StmtImpl::outbindCallback ),
               errh_ );
   }
@@ -394,6 +397,14 @@ void StmtImpl::define (unsigned int pos, unsigned short type, void *buf,
                            (void *)ind, bufLen, NULL,
                            OCI_DEFAULT),
            errh_);
+
+  if ((type == DpiClob) || (type == DpiBlob) || (type == DpiBfile))
+  {
+    boolean isLobPrefetchLength = true;
+    
+    ociCall(OCIAttrSet(d, OCI_HTYPE_DEFINE, &isLobPrefetchLength, 0,
+                       OCI_ATTR_LOBPREFETCH_LENGTH, errh_), errh_);
+  }
 }
 
 
@@ -497,6 +508,12 @@ const MetaData* StmtImpl::getMetaData ()
                          (ub4) OCI_ATTR_SCALE,
                          errh_ ), errh_ );
     }
+    else
+    {                           // avoid uninitialized variables
+      meta_[col].precision = 0;  
+      meta_[col].scale = 0;
+    }
+      
     OCIDescriptorFree( colDesc, OCI_DTYPE_PARAM);
     col++;
   }
@@ -573,11 +590,14 @@ sb4 StmtImpl::inbindCallback ( dvoid *ctxp, OCIBind *bindp, ub4 iter,
                                ub4 index, dvoid **bufpp, ub4 *alenpp,
                                ub1 *piecep, dvoid **indpp )
 {
+  DpiCallbackCtx *cbCtx = (DpiCallbackCtx *)ctxp;
+
+  cbCtx->nullInd = -1; /* inbind callback for DML RETURNING myst return null */
+
   *bufpp = (dvoid *)0;
   *alenpp = 0;
-  *indpp = (dvoid *)0;
+  *indpp = (dvoid *)&(cbCtx->nullInd);
   *piecep = OCI_ONE_PIECE;
-
   return OCI_CONTINUE;
 }
 
@@ -642,7 +662,8 @@ sb4 StmtImpl::outbindCallback ( dvoid *ctxp, OCIBind *bindp, ub4 iter,
     Call the application specific callback to allocate and identify
     buffer for each row
   */
-  cbret = (cbCtx->callbackfn)(cbCtx->data, cbCtx->nrows, iter, index, bufpp,
+  cbret = (cbCtx->callbackfn)(cbCtx->data, cbCtx->nrows, cbCtx->bndpos,
+                              iter, index, bufpp,
                               (void **)alenp, indpp, rcodepp, piecep );
 
   /* callback Context was allocated for the life time of the callback,

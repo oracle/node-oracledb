@@ -93,6 +93,10 @@ static const int kStmtCacheSize = 60;
 
  */
 
+#ifndef NJS_AL32UTF8
+#define NJS_AL32UTF8         873
+#endif /* NJS_AL32UTF8 */
+
 EnvImpl::EnvImpl()
 
 try : envh_(NULL), poolMax_(kPoolMax), poolMin_(kPoolMin),
@@ -100,8 +104,9 @@ try : envh_(NULL), poolMax_(kPoolMax), poolMin_(kPoolMin),
       externalAuth_(false),  stmtCacheSize_(kStmtCacheSize)
 {
 
-  sword rc = OCIEnvCreate (&envh_, OCI_THREADED | OCI_OBJECT, NULL, NULL,
-                           NULL, NULL, 0, NULL);
+  sword rc = OCIEnvNlsCreate (&envh_, OCI_THREADED | OCI_OBJECT, NULL, NULL,
+                              NULL, NULL, 0, NULL, NJS_AL32UTF8, NJS_AL32UTF8);
+
   if (rc)
   {
     if (envh_)
@@ -633,7 +638,13 @@ void EnvImpl::cleanup()
 */
 DateTimeArray* EnvImpl::getDateTimeArray (OCIError *errh) const
 {
-  return new DateTimeArrayImpl ( envh_, errh, this ) ;
+
+  DateTimeArray *dtmarr = new DateTimeArrayImpl ( envh_, errh, this ) ;
+  if( !dtmarr )
+  {
+    throw ExceptionImpl ( DpiErrMemAllocFail ) ;
+  }
+  return dtmarr; 
 }
 
 
@@ -654,6 +665,108 @@ void EnvImpl::releaseDateTimeArray ( DateTimeArray *arr )  const
     delete arr;
 }
 
+
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Allocate DPI handle.
+
+   PARAMETERS:
+     handleType - Type of DPI handle to be allocated
+
+   RETURNS:
+     allocated DPI handle
+
+   NOTES:
+     
+ */
+
+DpiHandle * EnvImpl::allocHandle(HandleType handleType)
+{
+  DpiHandle *handle = NULL;
+
+  ociCallEnv(OCIHandleAlloc(envh_, (void **)&handle, handleType, 0, NULL),
+             envh_);
+
+  return handle;
+}
+
+
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Allocate DPI descriptor.
+
+   PARAMETERS:
+     descriptorType - Type of DPI descriptor to be allocated
+
+   RETURNS:
+     allocated DPI descriptor
+
+   NOTES:
+     
+ */
+
+Descriptor * EnvImpl::allocDescriptor(DescriptorType descriptorType)
+{
+  Descriptor *descriptor = NULL;
+
+  ociCallEnv(OCIDescriptorAlloc(envh_, (void **)&descriptor, descriptorType,
+                                0, NULL), envh_);
+
+  return descriptor;
+}
+
+
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Allocate DPI descriptor array.
+
+   PARAMETERS:
+     descriptorType - Type of DPI descriptor to be allocated
+     arraySize      - size of descriptor array
+
+   RETURNS:
+     allocated DPI descriptor array
+
+   NOTES:
+     
+ */
+
+void EnvImpl::allocDescriptorArray(DescriptorType descriptorType,
+                                   unsigned int arraySize,
+                                   Descriptor **descriptorArray)
+{
+  ociCallEnv(OCIArrayDescriptorAlloc(envh_, (void **)descriptorArray,
+                                     descriptorType, arraySize,
+                                     0, NULL), envh_);
+}
+
+
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Get the underlying OCI environment handlle.
+
+   PARAMETERS:
+     none
+
+   RETURNS:
+     OCI environment handle
+
+   NOTES:
+     
+ */
+
+DpiHandle * EnvImpl::envHandle() const
+{
+  return (DpiHandle *)envh_;
+}
 
 
 

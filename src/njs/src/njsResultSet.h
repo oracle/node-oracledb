@@ -72,14 +72,17 @@ typedef struct rsBaton
   uv_work_t            req;
   std::string          error;
   bool                 fetchMultiple;   // set for getRows() method.
+  bool                 errOnActiveOrInvalid; 
+                                        // set if going to exit upon already 
+                                        // active or invalid  
   eBaton               *ebaton;  
   unsigned int         numRows;         // rows to be fetched.
   Persistent<Function> cb;
   ResultSet*           njsRS;           // resultset object.
 
   rsBaton() 
-    :  error(""), fetchMultiple(false), ebaton(NULL), numRows(0),
-       njsRS(NULL)
+    :  error(""), fetchMultiple(false), errOnActiveOrInvalid(false),
+       ebaton(NULL), numRows(0), njsRS(NULL)
   {}
 
   ~rsBaton()
@@ -101,8 +104,8 @@ public:
 
    static void Init(Handle<Object> target);
 
-   void setResultSet ( dpi::Stmt *dpistmt, dpi::Env *dpienv,
-                       Connection* conn, unsigned int outFormat );
+   void setResultSet ( dpi::Stmt *dpistmt, eBaton *executebaton );
+
 
    // Define ResultSet Constructor
    static Persistent<FunctionTemplate> resultSetTemplate_s ;
@@ -143,6 +146,10 @@ private:
    unsigned int         fetchRowCount_;
    unsigned int         outFormat_;
    const dpi::MetaData  *meta_;
+   DataType             *fetchAsStringTypes_;
+   unsigned int         fetchAsStringTypesCount_;
+   FetchInfo            *fetchInfo_;
+   unsigned int         fetchInfoCount_;
 };
 
 

@@ -51,6 +51,12 @@
 #define    DPI_BASE_SEC   0
 #define    DPI_BASE_FS    0
 
+#define DPI_MS_DAY        86400000  // 24*60*60*1000
+#define DPI_MS_HOUR       3600000   // 60*60*1000
+#define DPI_MS_NINUTE     60000     // 60*1000
+#define DPI_MS_SECONDS    1000      // ms per sec
+#define DPI_FRAC_SEC_MS   1000000   // 1.0E+06
+
 #include <iostream>
 
 using namespace std;
@@ -115,6 +121,10 @@ void *DateTimeArrayImpl::init (int nCount)
   {
     // allocate space to hold nCount pointers to OCIDateTime structure
     dbdatetime_ = (OCIDateTime**) new OCIDateTime*[nCount];
+    if( !dbdatetime_ )
+    {
+      throw ExceptionImpl ( DpiErrMemAllocFail ) ;
+    }
     sword rc;
 
     rc = OCIArrayDescriptorAlloc ( (dvoid *)envh_, (void **)&dbdatetime_[0],
@@ -173,13 +183,17 @@ void DateTimeArrayImpl::release ()
  ****************************************************************************/
 long double DateTimeArrayImpl::getDateTime ( const int idx )
 {
-  sword rc = 0;
-  long double dbl = 0.0;
+  long double ret = 0;
+  sword rc        = 0;
+  sb4 dy          = 0;
+  sb4 hr          = 0;
+  sb4 mm          = 0;
+  sb4 ss          = 0;
+  sb4 fsec        = 0;
 
   if ( dbdatetime_ )
   {
     OCIInterval *interval = NULL ;
-    OCINumber    ociNumber;
 
     rc = OCIDescriptorAlloc ( (dvoid *) envh_, (dvoid **)&interval,
                               OCI_DTYPE_INTERVAL_DS, 0, (dvoid **)0);
@@ -193,13 +207,10 @@ long double DateTimeArrayImpl::getDateTime ( const int idx )
                                     interval);
     ociCall ( rc, errh_ ) ;
 
-    /* Convert interval to number */
-    ociCall ( OCIIntervalToNumber ( envh_, errh_, interval, &ociNumber ),
-              errh_ ) ;
+    // Get the Days, hours, minutes, seconds and fractional seconds
+    ociCall ( OCIIntervalGetDaySecond ( envh_, errh_, &dy, &hr, &mm,
+                                        &ss, &fsec, interval ), errh_ );
 
-    /* Convert interval number to long-double value */
-    ociCall ( OCINumberToReal ( errh_, &ociNumber, sizeof (long double),
-                                (void *)&dbl), errh_);
     if ( interval )
     {
       OCIDescriptorFree ( interval, OCI_DTYPE_INTERVAL_DS );
@@ -211,7 +222,18 @@ long double DateTimeArrayImpl::getDateTime ( const int idx )
      // if not bail out.
     throw ExceptionImpl ( DpiErrUninitialized );
   }
-  return dbl;
+
+  /*
+   * dy needs type cast as long double since dy*DPI_MS_DAY crosses sb4 range
+   * fsec needs type cast as long double to retain fractional seconds
+   */
+  ret  = ( ( ( long double ) dy * DPI_MS_DAY ) +
+           ( hr * DPI_MS_HOUR ) +
+           ( mm * DPI_MS_NINUTE ) +
+           ( ss * DPI_MS_SECONDS ) +
+           ( ( long double ) fsec / DPI_FRAC_SEC_MS ) ) ;
+
+  return (ret);
 }
 
 
@@ -225,13 +247,28 @@ long double DateTimeArrayImpl::getDateTime ( const int idx )
  *    idx         index value.
  *
  ****************************************************************************/
-void DateTimeArrayImpl::setDateTime ( const int idx, long double days)
+void DateTimeArrayImpl::setDateTime ( const int idx, long double ms)
 {
   if ( dbdatetime_ )
   {
-    OCIInterval *interval= NULL;
-    OCINumber    ociNumber;
-    sword        rc = OCI_SUCCESS ;
+    OCIInterval *interval = NULL;
+    sword       rc        = OCI_SUCCESS ;
+    sb4 dy                = 0;
+    sb4 hr                = 0;
+    sb4 mm                = 0;
+    sb4 ss                = 0;
+    sb4 fs                = 0;
+
+    dy = ( sb4 ) ( ms / DPI_MS_DAY );              // Get the days
+    // dy needs type cast as long double since dy*DPI_MS_DAY crosses sb4 range
+    ms = ms - ( ( long double ) dy * DPI_MS_DAY );
+    hr = ( sb4 ) ( ms / DPI_MS_HOUR );             // Get the hours
+    ms = ms - ( hr * DPI_MS_HOUR );
+    mm = ( sb4 ) ( ms / DPI_MS_NINUTE );           // Get the minutes
+    ms = ms - ( mm * DPI_MS_NINUTE );
+    ss = ( sb4 ) ( ms / DPI_MS_SECONDS );          // Get the seconds
+    ms = ms - (ss * DPI_MS_SECONDS );
+    fs = ( sb4 )( ms * DPI_FRAC_SEC_MS );          // Convert the ms into frac sec
 
     rc = OCIDescriptorAlloc ( (dvoid *) envh_, (dvoid **)&interval,
                               OCI_DTYPE_INTERVAL_DS, 0, (dvoid **)0);
@@ -240,13 +277,9 @@ void DateTimeArrayImpl::setDateTime ( const int idx, long double days)
       throw ExceptionImpl ( DpiErrInternal );
     }
 
-    // Convert the given long-double value to OCINumber
-    ociCall ( OCINumberFromReal ( errh_, &days, sizeof ( long double ),
-                                  &ociNumber ), errh_);
-
-    // Convert the number value to interval
-    ociCall ( OCIIntervalFromNumber ( envh_, errh_, interval, &ociNumber ),
-              errh_);
+    // Convert the given timestamp in ms into interval
+    ociCall ( OCIIntervalSetDaySecond ( envh_, errh_, dy, hr, mm,
+                                        ss, fs, interval), errh_ );
 
     // Add the interval to the basedate.
     ociCall ( OCIDateTimeIntervalAdd ( envh_, errh_, baseDate_, interval,

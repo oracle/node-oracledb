@@ -81,6 +81,9 @@ class ConnImpl : public Conn
   virtual void stmtCacheSize(unsigned int stmtCacheSize);
   virtual unsigned int stmtCacheSize() const;
 
+  virtual void lobPrefetchSize(unsigned int lobPrefetchSize);
+  virtual unsigned int lobPrefetchSize() const;
+
   virtual void clientId(const string &clientId);
 
   virtual void module(const string &module);
@@ -98,6 +101,10 @@ class ConnImpl : public Conn
   virtual void rollback();
 
   virtual void breakExecution();
+
+  virtual DpiHandle *getSvch (){return (DpiHandle *)svch_;};
+
+  virtual DpiHandle *getErrh (){return (DpiHandle *)errh_;};
 
   #if OCI_MAJOR_VERSION < 12
     inline void hasTxn(boolean connHasTxn)

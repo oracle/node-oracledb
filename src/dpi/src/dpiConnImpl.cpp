@@ -268,6 +268,8 @@ void ConnImpl::releaseStmt ( Stmt *stmt )
   }
 }
 
+
+
 /*****************************************************************************/
 /*
    DESCRIPTION
@@ -314,6 +316,56 @@ unsigned int ConnImpl::stmtCacheSize() const
                      OCI_ATTR_STMTCACHESIZE, errh_), errh_);
 
   return stmtCacheSize;
+}
+
+
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Set Lob prefetch size.
+
+   PARAMETERS
+     lobPrefetchSize - lob prefetch size
+
+   RETURNS
+     nothing
+
+   NOTES:
+
+ */
+
+void ConnImpl::lobPrefetchSize(unsigned int lobPrefetchSize)
+{
+  ociCall(OCIAttrSet(sessh_, OCI_HTYPE_SESSION,  &lobPrefetchSize,  0,
+                     OCI_ATTR_DEFAULT_LOBPREFETCH_SIZE, errh_), errh_);
+}
+
+
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Get  Lob prefetch size..
+
+   PARAMETERS
+     none
+
+   RETURNS
+     lob prefetch size
+
+   NOTES:
+
+ */
+
+unsigned int ConnImpl::lobPrefetchSize() const
+{
+  unsigned int  lobPrefetchSize = 0;
+
+  ociCall(OCIAttrGet(sessh_, OCI_HTYPE_SESSION, &lobPrefetchSize, NULL,
+                     OCI_ATTR_DEFAULT_LOBPREFETCH_SIZE, errh_), errh_);
+
+  return lobPrefetchSize;
 }
 
 
@@ -385,9 +437,6 @@ void ConnImpl::action(const string &action)
   ociCall(OCIAttrSet(sessh_, OCI_HTYPE_SESSION, (void *)action.data(),
                      (ub4) action.length(), OCI_ATTR_ACTION, errh_), errh_);
 }
-
-
-
 
 
 

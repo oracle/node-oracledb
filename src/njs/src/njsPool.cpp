@@ -73,7 +73,8 @@ Pool::~Pool(){}
 */
 void Pool::setPool( dpi::SPool *dpipool, Oracledb* oracledb, unsigned int poolMax,
                     unsigned int poolMin, unsigned int poolIncrement,
-                    unsigned int poolTimeout, unsigned stmtCacheSize )
+                    unsigned int poolTimeout, unsigned stmtCacheSize,
+                    unsigned int lobPrefetchSize)
 {
   this->dpipool_       = dpipool;
   this->isValid_       = true;
@@ -83,6 +84,7 @@ void Pool::setPool( dpi::SPool *dpipool, Oracledb* oracledb, unsigned int poolMa
   this->poolIncrement_ = poolIncrement;
   this->poolTimeout_   = poolTimeout;
   this->stmtCacheSize_ = stmtCacheSize;
+  this->lobPrefetchSize_ = lobPrefetchSize;
 }
 
 /*****************************************************************************/
@@ -413,6 +415,7 @@ NAN_METHOD(Pool::GetConnection)
   }
   connBaton->njspool   = njsPool;
   connBaton->connClass = njsPool->oracledb_->getConnectionClass ();
+  connBaton->lobPrefetchSize =  njsPool->lobPrefetchSize_;
 
 exitGetConnection:
   connBaton->req.data = (void *)connBaton;
@@ -443,6 +446,7 @@ void Pool::Async_GetConnection(uv_work_t *req)
   {
     connBaton->dpiconn = connBaton-> njspool -> dpipool_ ->
                                   getConnection ( connBaton-> connClass);
+    connBaton->dpiconn->lobPrefetchSize(connBaton->lobPrefetchSize);
   }
   catch (dpi::Exception &e)
   {

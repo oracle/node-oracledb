@@ -50,6 +50,8 @@ typedef struct
   void*         data;         /* Data for application specific callback */
   unsigned long nrows;        /* number of rows affected by this DML */
   unsigned long iter;         /* iteration - used in Array Bind */
+  unsigned int  bndpos;       /* position in the bind array */
+  short         nullInd;      /* DML RETURNING: to pass null from inbind cbk */
   StmtImpl*     dpistmt;      /* DPI Statement Implementation */
 } DpiCallbackCtx;
 
@@ -74,9 +76,10 @@ public:
 
   virtual void bind (unsigned int pos, unsigned short type, void *buf,
                      DPI_SZ_TYPE bufSize, short *ind, DPI_BUFLEN_TYPE *bufLen,
-                     void *data, cbtype cb );
+                     void *data, cbtype cb);
 
-  virtual void bind (const unsigned char *name, int nameLen,
+  virtual void bind (const unsigned char *name, int nameLen, 
+                     unsigned int bndpos,
                      unsigned short type, void *buf, DPI_SZ_TYPE bufSize,
                      short *ind, DPI_BUFLEN_TYPE *bufLen,
                      void *data, cbtype cb);

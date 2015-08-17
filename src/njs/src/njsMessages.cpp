@@ -54,6 +54,11 @@ static const char *errMsg[] =
   "NJS-017: concurrent operations on resultSet are not allowed",
   "NJS-018: invalid result set",
   "NJS-019: resultSet cannot be returned for non-query statements",
+  "NJS-020: empty array was specified to fetch values as string",
+  "NJS-021: invalid type for conversion specified",
+  "NJS-022: invalid LOB",
+  "NJS-023: concurrent operations on LOB are not allowed",
+  "NJS-024: memory allocation failed", 
 };
 
 string NJSMessages::getErrorMsg ( NJSErrorType err, ... )

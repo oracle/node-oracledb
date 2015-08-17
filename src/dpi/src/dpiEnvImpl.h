@@ -113,6 +113,18 @@ class EnvImpl : public Env
   virtual DateTimeArray* getDateTimeArray ( OCIError *errh ) const ;
   virtual void           releaseDateTimeArray ( DateTimeArray *arr ) const ;
 
+  
+  virtual DpiHandle * allocHandle(HandleType handleType);
+  
+  virtual Descriptor * allocDescriptor(DescriptorType descriptorType);
+    
+  virtual void allocDescriptorArray(DescriptorType descriptorType,
+                                    unsigned int arraySize,
+                                    Descriptor *descriptorArray[]);
+  
+  virtual DpiHandle * envHandle() const;
+
+
 private:
 
   static void terminateEnvImpl(EnvImpl *env);

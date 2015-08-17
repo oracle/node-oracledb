@@ -68,11 +68,11 @@ using namespace v8;
 
 
 /* Keep the version in sync with package.json */
-#define NJS_NODE_ORACLEDB_MAJOR       0
-#define NJS_NODE_ORACLEDB_MINOR       7
+#define NJS_NODE_ORACLEDB_MAJOR       1
+#define NJS_NODE_ORACLEDB_MINOR       0
 #define NJS_NODE_ORACLEDB_PATCH       0
 
-/* Formula: 10000 x majorversion + 100 * minorversion + patchrelease number */
+/* Used for Oracledb.version */
 #define NJS_NODE_ORACLEDB_VERSION   ( (NJS_NODE_ORACLEDB_MAJOR * 10000) + \
                                       (NJS_NODE_ORACLEDB_MINOR * 100) +   \
                                       (NJS_NODE_ORACLEDB_PATCH) )
@@ -80,6 +80,8 @@ using namespace v8;
 class Oracledb: public ObjectWrap
 {
  public:
+
+  Persistent<Object> jsOracledb;
 
    // Oracledb class
    static void Init(Handle<Object> target);
@@ -95,8 +97,9 @@ class Oracledb: public ObjectWrap
    unsigned int getPoolTimeout () const  { return poolTimeout_; }
    unsigned int getPrefetchRows () const  { return prefetchRows_; }
    const std::string& getConnectionClass () const { return connClass_; }
-
-
+   const DataType *getFetchAsStringTypes () const;
+   unsigned int getFetchAsStringTypesCount () const
+     {  return fetchAsStringTypesCount_ ;   }
 
 private:
    // Define Oracledb Constructor
@@ -127,6 +130,8 @@ private:
    static NAN_PROPERTY_GETTER(GetConnectionClass);
    static NAN_PROPERTY_GETTER(GetExternalAuth);
    static NAN_PROPERTY_GETTER(GetPrefetchRows);
+   static NAN_PROPERTY_GETTER(GetFetchAsString);
+   static NAN_PROPERTY_GETTER(GetLobPrefetchSize);
 
    // Define Setter Accessors to Properties
    static NAN_SETTER(SetPoolMin);
@@ -141,6 +146,8 @@ private:
    static NAN_SETTER(SetConnectionClass);
    static NAN_SETTER(SetExternalAuth);
    static NAN_SETTER(SetPrefetchRows);
+   static NAN_SETTER(SetFetchAsString);
+   static NAN_SETTER(SetLobPrefetchSize);
 
    Oracledb();
    ~Oracledb();
@@ -160,6 +167,9 @@ private:
 
    std::string  connClass_;
    bool         externalAuth_;
+   DataType     *fetchAsStringTypes_;   
+   unsigned int fetchAsStringTypesCount_;
+   unsigned int lobPrefetchSize_;
 };
 
 /**
@@ -182,6 +192,7 @@ typedef struct connectionBaton
   int poolIncrement;
   int poolTimeout;
   int stmtCacheSize;
+  unsigned int lobPrefetchSize;
 
   unsigned int maxRows;
   unsigned int outFormat;

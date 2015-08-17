@@ -8,6 +8,7 @@
              "src/njs/src/njsConnection.cpp",
              "src/njs/src/njsResultSet.cpp",
              "src/njs/src/njsMessages.cpp",
+             "src/njs/src/njsIntLob.cpp",
              "src/dpi/src/dpiEnv.cpp",
              "src/dpi/src/dpiEnvImpl.cpp",
              "src/dpi/src/dpiException.cpp",
@@ -16,7 +17,8 @@
              "src/dpi/src/dpiDateTimeArrayImpl.cpp",
              "src/dpi/src/dpiPoolImpl.cpp",
              "src/dpi/src/dpiStmtImpl.cpp",
-             "src/dpi/src/dpiUtils.cpp"
+             "src/dpi/src/dpiUtils.cpp",
+             "src/dpi/src/dpiLob.cpp"
     ],
     "conditions" : [
     [
