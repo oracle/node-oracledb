@@ -1,5 +1,35 @@
 # Change Log
 
+## node-oracledb v1.0.0 (17 Aug 2015)
+
+- Implemented the Stream interface for CLOB and BLOB types, adding support for LOB queries, inserts, and PL/SQL LOB bind variables.
+
+- Added `fetchAsString` and `execute()` option `fetchInfo` properties to allow numbers, dates and ROWIDs to be fetched as strings.
+
+- Added support for binding DATE, TIMESTAMP and TIMESTAMP WITH LOCAL TIME ZONE as `DATE` to DML RETURNING (aka RETURNING INTO) `type`.
+
+- The internal Oracle client character set is now always set to AL32UTF8.
+
+- The test suite and example scripts database credentials can now be set via environment variables.
+
+- Fixed issues with database-to-client character set conversion by allocating extra memory to allow for character expansion.
+
+- Fixed a crash with `ResultSet` and unsupported column data types.
+
+- Fixed a crash allocating memory for large `maxRows` values.
+
+- Fixed a bug preventing closing of a `ResultSet` when `getRow()` or `getRows()` returned an error.
+
+- Fixed date precision issues affecting insert and query.
+
+- Fixed `BIND_OUT` bind `type` not defaulting to `STRING`.
+
+- Fixed INSERT of a date when the SQL has a RETURNING INTO clause and the bind style is array format.
+
+- Improved RETURNING INTO handling of unsupported types and sizes.
+
+- Correctly throw an error when array and named bind syntaxes are mixed together.
+
 ## node-oracledb v0.7.0 (20 Jul 2015)
 
 - Added result set support for fetching large data sets.
@@ -14,7 +44,7 @@
 
 - Fixed INSERT of a date when the SQL has a RETURNING INTO clause.
 
-- Renumbered the values used by the Oracledb Constants
+- Renumbered the values used by the Oracledb Constants.
 
 ## node-oracledb v0.6.0 (26 May 2015)
 
@@ -28,7 +58,7 @@
 
 - Changed the `isExternalAuth` attribute name to `externalAuth`.
 
-- Fixed outBinds array counting to not give empty array entries for IN binds.
+- Fixed `outBinds` array counting to not give empty array entries for IN binds.
 
 - Added support for DML RETURNING bind variables.
 
