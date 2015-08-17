@@ -157,7 +157,7 @@ describe('6. dmlReturning.js', function(){
         { autoCommit: true },
         function(err, result) {
           should.exist(err);
-          err.message.should.eql('NJS-016: buffer is too small for OUT binds');
+          err.message.should.startWith('NJS-016'); // NJS-016: buffer is too small for OUT binds
           //console.log(result);
           done();
         }

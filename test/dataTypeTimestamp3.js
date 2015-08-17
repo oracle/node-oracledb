@@ -98,7 +98,7 @@ describe('35. dataTypeTimestamp3.js', function() {
     );
   })
 
-  it.skip('supports TIMESTAMP WITH TIME ZONE data type', function(done) {
+  it('supports TIMESTAMP WITH TIME ZONE data type', function(done) {
     connection.should.be.ok;
     
     var timestamps = [
@@ -126,12 +126,14 @@ describe('35. dataTypeTimestamp3.js', function() {
         [],
         { outFormat: oracledb.OBJECT },
         function(err, result) {
-          should.not.exist(err);
-          // console.log(result);
+          should.exist(err);
+          err.message.should.startWith('NJS-010:'); // unsupported data type in select list
+          /* 
+          console.log(result);
           for(var j = 0; j < timestamps.length; j++) 
             result.rows[j].CONTENT.toUTCString().should.eql(timestamps[result.rows[j].NUM].toUTCString());
-          
-          done();		  
+          */
+          done();         
         }
       );
     });

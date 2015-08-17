@@ -31,13 +31,14 @@
  *     51 onwards are for other tests 
  * 
  *****************************************************************************/
- 
+ "use strict";
+
 var oracledb = require('oracledb');
 var should = require('should');
 var async = require('async');
 var dbConfig = require('./dbConfig.js');
 
-describe('55 resultSet2.js', function() {
+describe('55. resultSet2.js', function() {
 
   if(dbConfig.externalAuth){
     var credential = { externalAuth: true, connectString: dbConfig.connectString };
@@ -65,6 +66,7 @@ describe('55 resultSet2.js', function() {
           '); \
       END; ";
       
+  var rowsAmount = 300;    
   var insertRows = 
       "DECLARE \
           x NUMBER := 0; \
@@ -76,37 +78,89 @@ describe('55 resultSet2.js', function() {
              INSERT INTO oracledb_employees VALUES (x, n); \
           END LOOP; \
        END; ";
-  var rowsAmount = 300;
-  
+       
+  var proc = 
+      "CREATE OR REPLACE PROCEDURE get_emp_rs (p_in IN NUMBER, p_out OUT SYS_REFCURSOR) \
+         AS \
+         BEGIN \
+           OPEN p_out FOR  \
+             SELECT * FROM oracledb_employees \
+             WHERE employees_id > p_in; \
+         END; "; 
+
   beforeEach(function(done) {
-    oracledb.getConnection(credential, function(err, conn) {
-      if(err) { console.error(err.message); return; }
-      connection = conn;
-      connection.execute(createTable, function(err) {
-        if(err) { console.error(err.message); return; }
+    async.series([
+      function(callback) {
+        oracledb.getConnection(
+          credential,
+          function(err, conn) {
+            connection = conn;
+            callback();
+          }
+        );
+      },
+      function(callback) {
+        connection.should.be.ok;
         connection.execute(
-          insertRows, 
+          createTable,
+          function(err) {
+            should.not.exist(err);
+            callback();
+          }
+        );
+      },
+      function(callback) {
+        connection.execute(
+          insertRows,
           [],
           { autoCommit: true },
           function(err) {
-            if(err) { console.error(err.message); return; }
-            done();
-          });
-      });
-    });
+            should.not.exist(err);
+            callback();
+          }
+        );
+      },
+      function(callback) {
+        connection.execute(
+          proc,
+          [],
+          { autoCommit: true },
+          function(err) {
+            should.not.exist(err);
+            callback();
+          }
+        );
+      }
+    ], done);
   })
   
   afterEach(function(done) {
-    connection.execute(
-      'DROP TABLE oracledb_employees',
-      function(err) {
-        if(err) { console.error(err.message); return; }
-        connection.release(function(err) {
-          if(err) { console.error(err.message); return; }
-          done();
+    async.series([
+      function(callback) {
+        connection.execute(
+          'DROP TABLE oracledb_employees',
+          function(err) {
+            should.not.exist(err);
+            callback();
+          }
+        );
+      },
+      function(callback) {
+        connection.execute(
+          'DROP PROCEDURE get_emp_rs',
+          function(err) {
+            should.not.exist(err);
+            callback();
+          }
+        );
+      },
+      function(callback) {
+        connection.release( function(err) {
+          should.not.exist(err);
+          callback();
         });
       }
-    );
+    ], done);
   })
   
   describe('55.1 query a RDBMS function', function() {
@@ -174,8 +228,8 @@ describe('55 resultSet2.js', function() {
     
   })
   
-  describe('55.3 alternating getRow() & getRows() function', function(done) {
-    it('55.3.1', function(done) {
+  describe('55.3 alternating getRow() & getRows() function', function() {
+    it('55.3.1 result set', function(done) {
       connection.should.be.ok;
       var accessCount = 0;
       var numRows = 4;
@@ -229,11 +283,85 @@ describe('55 resultSet2.js', function() {
         }       
       }
     })
+    
+    it('55.3.2 REF Cursor', function(done) {
+      connection.should.be.ok;
+      var accessCount = 0;
+      var numRows = 4;
+      var flag = 1; // 1 - getRow(); 2 - getRows(); 3 - to close resultSet.
+      
+      connection.execute(
+        "BEGIN get_emp_rs(:in, :out); END;",
+        {
+          in: 200,
+          out: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
+        },
+        function(err, result) {
+          should.not.exist(err);
+          fetchRowFromRS(result.outBinds.out, done);
+        }
+      );
+      
+      function fetchRowFromRS(rs, cb) {
+        if(flag === 1) {
+          rs.getRow(function(err, row) {
+            should.not.exist(err);
+            if(row) {
+              flag = 2;
+              accessCount++;
+              return fetchRowFromRS(rs, cb);
+            } else {
+              flag = 3;
+              return fetchRowFromRS(rs, cb);
+            }
+          });
+        }
+        else if(flag === 2) {
+          rs.getRows(numRows, function(err, rows) {
+            should.not.exist(err);
+            if(rows.length > 0) {
+              flag = 1;
+              accessCount++;
+              return fetchRowFromRS(rs, cb);
+            } else {
+              flag = 3;
+              return fetchRowFromRS(rs, cb);
+            }
+          });
+        }
+        else if(flag === 3) {
+          // console.log("resultSet is empty!");
+          rs.close(function(err) {
+            should.not.exist(err);
+            // console.log("Total access count is " + accessCount);
+            accessCount.should.be.exactly((100/(numRows + 1)) * 2);
+            cb();
+          });
+        }       
+      }
+    })
   })
   
-  describe('55.4 release connetion before close resultSet', function() {
+  describe('55.4 release connection before close resultSet', function() {
     var conn2 = false;
-    before(function(done) {
+    function fetchRowFromRS(rs, cb) {
+      rs.getRow(function(err, row) {
+        if(row) {
+          return fetchRowFromRS(rs, cb);
+        } else {
+          conn2.release(function(err) {
+            should.not.exist(err);
+            rs.close(function(err) {
+              should.exist(err);
+              err.message.should.startWith('NJS-003'); // invalid connection
+              cb();
+            });
+          });
+        }
+      });
+    }
+    
+    beforeEach(function(done) {
       oracledb.getConnection(
         credential, 
         function(err, conn) {
@@ -244,7 +372,7 @@ describe('55 resultSet2.js', function() {
       );
     })
     
-    it('55.4.1 ', function(done) {
+    it('55.4.1 result set', function(done) {
       conn2.should.be.ok;
       conn2.execute(
         "SELECT * FROM oracledb_employees",
@@ -252,28 +380,25 @@ describe('55 resultSet2.js', function() {
         { resultSet: true },
         function(err, result) {
           should.not.exist(err);
-          fetchRowFromRS(result.resultSet);
+          fetchRowFromRS(result.resultSet, done);
         }
       );
+    })
+    
+    it('55.4.2 REF Cursor', function(done) {
+      conn2.should.be.ok;
       
-      function fetchRowFromRS(rs) {
-        rs.getRow(function(err, row) {
+      conn2.execute(
+        "BEGIN get_emp_rs(:in, :out); END;",
+        {
+          in: 200,
+          out: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
+        },
+        function(err, result) {
           should.not.exist(err);
-          if(row) {
-            return fetchRowFromRS(rs);
-          } else {
-            conn2.release(function(err) {
-              should.not.exist(err);
-              rs.close(function(err) {
-                should.exist(err);
-                err.message.should.startWith('NJS-003');
-                done();
-              });
-            });
-          }
-          
-        });
-      }
+          fetchRowFromRS(result.outBinds.out, done);
+        }
+      );
     })
   })
   
@@ -312,13 +437,13 @@ describe('55 resultSet2.js', function() {
       ], done);
       
       function fetchRowFromRS(rset, cb) {
-        rs.getRow(function(err, row) {
+        rset.getRow(function(err, row) {
           should.not.exist(err);
           if(row) {
             rowsCount++;
             return fetchRowFromRS(rset, cb);
           } else {
-            rs.close(function(err) {
+            rset.close(function(err) {
               should.not.exist(err);
               rowsCount.should.eql(rowsAmount);
               cb();
@@ -328,14 +453,45 @@ describe('55 resultSet2.js', function() {
       }
       
     })
+
   })
   
   describe('55.6 access resultSet simultaneously', function() {
+    var numRows = 10;  // number of rows to return from each call to getRows()
+    
+    function fetchRowFromRS(rs, cb) {
+      rs.getRow(function(err, row) {
+        if(err) {
+          cb(err);
+          return;
+        } else {
+          if(row) {
+            return fetchRowFromRS(rs, cb);
+          } else {
+            cb();
+          }
+        } 
+      });
+    }
+      
+    function fetchRowsFromRS(rs, cb) {
+      rs.getRows(numRows, function(err, rows) {
+        if(err) {
+          cb(err);
+          return;
+        } else {
+          if(rows.length > 0) {
+            return fetchRowsFromRS(rs, cb);
+          } else {
+            cb();
+          }
+        } 
+      });
+    }
+    
     it('55.6.1 concurrent operations on resultSet are not allowed', function(done) {
       connection.should.be.ok;
-      var rowCount1 = 0;
-      var rowCount2 = 0;
-      var numRows = 10;  // number of rows to return from each call to getRows()
+      
       connection.execute(
         "SELECT * FROM oracledb_employees",
         [],
@@ -364,49 +520,80 @@ describe('55 resultSet2.js', function() {
             }  
           });
         }
-      );
-      
-      function fetchRowFromRS(rs, cb) {
-        rs.getRow(function(err, row) {
-          if(err) {
-            cb(err);
-            return;
-          } else {
-            if(row) {
-              rowCount1++;
-              return fetchRowFromRS(rs, cb);
-            } else {
-              cb();
-            }
-          } 
-        });
-      }
-      
-      function fetchRowsFromRS(rs, cb) {
-        rs.getRows(numRows, function(err, rows) {
-          //should.not.exist(err);
-          if(err) {
-            cb(err);
-            return;
-          } else {
-            if(rows.length > 0) {
-              rowCount2 += 10;
-              return fetchRowsFromRS(rs, cb);
-            } else {
-              cb();
-            }
-          } 
-        });
-      }
+      );   
     })
+    
+    it('55.6.2 concurrent operation on REF Cursor are not allowed', function(done) {
+      connection.should.be.ok;
+
+      connection.execute(
+        "BEGIN get_emp_rs(:in, :out); END;",
+        {
+          in: 0,
+          out: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
+        }, 
+        function(err, result) {
+          should.not.exist(err);
+          async.parallel([
+            function(callback) {
+              fetchRowFromRS(result.outBinds.out, callback);
+            },
+            function(callback) {
+              fetchRowsFromRS(result.outBinds.out, callback);
+            }
+          ], function(err) {
+            if(err) {
+              // console.log(err);
+              err.message.should.startWith('NJS-017'); 
+              result.outBinds.out.close(function(err) {
+                done();
+              });
+            } else {
+              result.outBinds.out.close(function(error) {
+                should.not.exist(error);
+                done();
+              });
+            }  
+          });
+        }
+      );
+    })
+    
   })
   
   describe('55.7 getting multiple resultSets', function() {
+    var numRows = 10;  // number of rows to return from each call to getRows()
+    
+    function fetchRowFromRS(rs, cb) {
+      rs.getRow(function(err, row) {
+        should.not.exist(err);
+        if(row) {
+          return fetchRowFromRS(rs, cb);
+        } else {
+          rs.close(function(err) {
+            should.not.exist(err);
+            cb();
+          });
+        }
+      });
+    }
+      
+    function fetchRowsFromRS(rs, cb) {
+      rs.getRows(numRows, function(err, rows) {
+        should.not.exist(err);
+        if(rows.length > 0) {
+          return fetchRowsFromRS(rs, cb);
+        } else {
+          rs.close(function(err) {
+            should.not.exist(err);
+            cb();
+          });
+        } 
+      });
+    }
+    
     it('55.7.1 can access multiple resultSet on one connection', function(done) {
       connection.should.be.ok;
-      var rowCount1 = 0;
-      var rowCount2 = 0;
-      var numRows = 10;  // number of rows to return from each call to getRows()
       async.parallel([
         function(callback) {
           connection.execute(
@@ -434,37 +621,42 @@ describe('55 resultSet2.js', function() {
         should.not.exist(err);
         done();
       });
+    })
+    
+    it('55.7.2 can access multiple REF Cursor', function(done) {
+      connection.should.be.ok;
       
-      function fetchRowFromRS(rs, cb) {
-        rs.getRow(function(err, row) {
-          should.not.exist(err);
-          if(row) {
-            rowCount1++;
-            return fetchRowFromRS(rs, cb);
-          } else {
-            rs.close(function(err) {
+      async.parallel([
+        function(callback) {
+          connection.execute(
+            "BEGIN get_emp_rs(:in, :out); END;",
+            {
+              in: 200,
+              out: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
+            }, 
+            function(err, result) {
               should.not.exist(err);
-              cb();
-            });
-          }
-        });
-      }
-      
-      function fetchRowsFromRS(rs, cb) {
-        rs.getRows(numRows, function(err, rows) {
-          should.not.exist(err);
-          if(rows.length > 0) {
-            rowCount2 += numRows;
-            return fetchRowsFromRS(rs, cb);
-          } else {
-            rs.close(function(err) {
+              fetchRowFromRS(result.outBinds.out, callback);
+            }
+          );
+        },
+        function(callback) {
+          connection.execute(
+            "BEGIN get_emp_rs(:in, :out); END;",
+            {
+              in: 100,
+              out: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
+            }, 
+            function(err, result) {
               should.not.exist(err);
-              cb();
-            });
-          }
-          
-        });
-      }
+              fetchRowsFromRS(result.outBinds.out, callback);
+            }
+          );
+        }
+      ], function(err) {
+        should.not.exist(err);
+        done();
+      });
     })
   })
   
@@ -486,23 +678,155 @@ describe('55 resultSet2.js', function() {
     })
   })
   
+  describe('55.9 test querying a PL/SQL function', function() {
+    it('55.9.1 ', function(done) {
+      var proc = 
+        "CREATE OR REPLACE FUNCTION testfunc RETURN VARCHAR2 \
+           IS \
+             emp_name VARCHAR2(20);   \
+           BEGIN \
+             SELECT 'Clark Kent' INTO emp_name FROM dual; \
+             RETURN emp_name;  \
+           END; ";
+      
+      async.series([
+        function(callback) {
+          connection.execute(
+            proc,
+            function(err) {
+              should.not.exist(err);
+              callback();
+            }
+          );
+        },
+        function(callback) {
+          connection.execute(
+            "SELECT testfunc FROM dual",
+            [],
+            { resultSet: true },
+            function(err, result) {
+              should.not.exist(err);
+              (result.resultSet.metaData[0].name).should.eql('TESTFUNC');
+              fetchRowFromRS(result.resultSet, callback);
+            }
+          );
+        },
+        function(callback) {
+          connection.execute(
+            "DROP FUNCTION testfunc",
+            function(err, result) {
+              should.not.exist(err);
+              callback();
+            }
+          );
+        }
+      ], done);
+      
+      function fetchRowFromRS(rs, cb) {
+        rs.getRow(function(err, row) {
+          should.not.exist(err);
+          if(row) {
+            row[0].should.eql('Clark Kent');
+            return fetchRowFromRS(rs, cb);
+          } else {
+            rs.close(function(err) {
+              should.not.exist(err);
+              cb();
+            });
+          }
+        });
+      }
+    })
+  })
+  
+  describe('55.10 calls getRows() once and then close RS before getting more rows', function() {
+    it('55.10.1 ', function(done) {
+      connection.should.be.ok;
+      var numRows = 10;
+      var closeRS = true;
+      connection.execute(
+        "SELECT * FROM oracledb_employees", 
+        [],
+        { resultSet: true },
+        function(err, result) {
+          should.not.exist(err);
+          result.resultSet.getRows(
+            numRows, 
+            function(err, rows) {
+              should.not.exist(err); 
+              result.resultSet.close(function(err) {
+                should.not.exist(err);
+                fetchRowsFromRS(result.resultSet, numRows, done);
+              });
+            }
+          );
+        }
+      );
+      
+      function fetchRowsFromRS(rs, numRows, done) {
+        rs.getRows(numRows, function(err, rows) {
+          should.exist(err);
+          err.message.should.startWith('NJS-018:'); // invalid result set
+          done();
+        });
+      }
+    })
+  })
+
+  describe('55.11 deals with unsupported database with result set', function() {
+    var sql1 = "select dummy, HEXTORAW('0123456789ABCDEF0123456789ABCDEF') from dual";
+    var sql2 = "SELECT dummy, rowid FROM dual";
+    
+    function fetchOneRowFromRS(rs, cb) {
+      rs.getRow(function(err, row) {
+        /* Currently, even if the driver doesn't support certain data type 
+         * the result set can still be created.
+         */ 
+        // Error at accessing RS
+        if(err) {
+          // console.error("Error at accessing RS: " + err.message); 
+          // NJS-010: unsupported data type in select list
+          (err.message).should.startWith('NJS-010');
+          rs.close( function(err) {
+            should.not.exist(err);
+            cb();
+          });
+        } else if(row) {
+          console.log(row);
+          fetchOneRowFromRS(rs, cb);
+        } else {
+          rs.close( function(err) {
+            should.not.exist(err);
+            cb();
+          });
+        }
+      });
+    }
+
+    it('55.11.1 RAW data type', function(done) {
+      connection.should.be.ok;
+      connection.execute(
+        sql1,
+        [],
+        { resultSet: true },
+        function(err, result) {
+          should.not.exist(err);
+          fetchOneRowFromRS(result.resultSet, done);
+        }
+      );       
+    })
+
+    it('55.11.2 ROWID date type', function(done) {
+      connection.execute(
+        sql2,
+        [],
+        { resultSet: true },
+        function(err, result) {
+          should.not.exist(err);
+          fetchOneRowFromRS(result.resultSet, done);
+        }
+      ); 
+    })
+  })
+
 })  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -510,17 +510,7 @@ describe('3. examples.js', function(){
   
   describe('3.7 plsql.js', function(){
     var connection = false;
-    var proc = "CREATE OR REPLACE PROCEDURE testproc (p_in IN VARCHAR2, p_inout IN OUT VARCHAR2, p_out OUT NUMBER) \
-                  AS \
-                BEGIN \
-                  p_inout := p_in || p_inout; \
-                  p_out := 101; \
-                END; ";
-    var bindVars = {
-      i:  'Chris',  // bind type is determined from the data type
-      io: { val: 'Jones', dir : oracledb.BIND_INOUT },
-      o:  { type: oracledb.NUMBER, dir : oracledb.BIND_OUT }
-    }
+    
     before(function(done){
       oracledb.getConnection(credential, function(err, conn){
         if(err) { console.error(err.message); return; }
@@ -537,6 +527,19 @@ describe('3. examples.js', function(){
     })
     
     it('3.7.1 can call PL/SQL procedure and binding parameters in various ways', function(done){
+      var proc = 
+        "CREATE OR REPLACE PROCEDURE testproc (p_in IN VARCHAR2, p_inout IN OUT VARCHAR2, p_out OUT NUMBER) \
+           AS \
+           BEGIN \
+             p_inout := p_in || p_inout; \
+             p_out := 101; \
+           END; ";
+      var bindVars = {
+        i:  'Chris',  // bind type is determined from the data type
+        io: { val: 'Jones', dir : oracledb.BIND_INOUT },
+        o:  { type: oracledb.NUMBER, dir : oracledb.BIND_OUT }
+      }
+      
       async.series([
         function(callback){
           connection.execute(
@@ -562,6 +565,53 @@ describe('3. examples.js', function(){
         function(callback){
           connection.execute(
             "DROP PROCEDURE testproc",
+            function(err, result){
+              should.not.exist(err);
+              callback();
+            }
+          );
+        }
+      ], done);
+    })
+    
+    it('3.7.2 can call PL/SQL function', function(done) {
+      var proc = 
+        "CREATE OR REPLACE FUNCTION testfunc (p1_in IN VARCHAR2, p2_in IN VARCHAR2) RETURN VARCHAR2 \
+           AS \
+           BEGIN \
+             return p1_in || p2_in; \
+           END; ";
+      var bindVars = {
+        p1: 'Chris',
+        p2: 'Jones',
+        ret: { dir: oracledb.BIND_OUT, type: oracledb.STRING, maxSize: 40 }     
+      };
+      
+      async.series([
+        function(callback){
+          connection.execute(
+            proc, 
+            function(err){
+              should.not.exist(err);
+              callback();
+            }
+          );             
+        },
+        function(callback){
+          connection.execute(
+            "BEGIN :ret := testfunc(:p1, :p2); END;",
+            bindVars,
+            function(err, result){
+              should.not.exist(err);
+              // console.log(result);
+              (result.outBinds.ret).should.equal('ChrisJones');
+              callback();
+            }
+          );
+        },
+        function(callback){
+          connection.execute(
+            "DROP FUNCTION testfunc",
             function(err, result){
               should.not.exist(err);
               callback();
@@ -900,8 +950,155 @@ describe('3. examples.js', function(){
         });
       }
     })
-
       
+  })
+  
+  describe('3.11 refcursor.js', function() {
+    var connection = false;
+    var script = 
+        "BEGIN \
+            DECLARE \
+                e_table_exists EXCEPTION; \
+                PRAGMA EXCEPTION_INIT(e_table_exists, -00942); \
+            BEGIN \
+                EXECUTE IMMEDIATE ('DROP TABLE oracledb_employees'); \
+            EXCEPTION \
+                WHEN e_table_exists \
+                THEN NULL; \
+            END; \
+            EXECUTE IMMEDIATE (' \
+                CREATE TABLE oracledb_employees ( \
+                    name VARCHAR2(40),  \
+                    salary NUMBER, \
+                    hire_date DATE \
+                ) \
+            '); \
+            EXECUTE IMMEDIATE (' \
+              INSERT INTO oracledb_employees  \
+                   (name, salary, hire_date) VALUES \
+                   (''Steven'',24000, TO_DATE(''20030617'', ''yyyymmdd'')) \
+            '); \
+            EXECUTE IMMEDIATE (' \
+              INSERT INTO oracledb_employees  \
+                   (name, salary, hire_date) VALUES \
+                   (''Neena'',17000, TO_DATE(''20050921'', ''yyyymmdd'')) \
+            '); \
+            EXECUTE IMMEDIATE (' \
+              INSERT INTO oracledb_employees  \
+                   (name, salary, hire_date) VALUES \
+                   (''Lex'',17000, TO_DATE(''20010112'', ''yyyymmdd'')) \
+            '); \
+            EXECUTE IMMEDIATE (' \
+              INSERT INTO oracledb_employees  \
+                   (name, salary, hire_date) VALUES \
+                   (''Nancy'',12008, TO_DATE(''20020817'', ''yyyymmdd'')) \
+            '); \
+            EXECUTE IMMEDIATE (' \
+              INSERT INTO oracledb_employees  \
+                   (name, salary, hire_date) VALUES \
+                   (''Karen'',14000, TO_DATE(''20050104'', ''yyyymmdd'')) \
+            '); \
+            EXECUTE IMMEDIATE (' \
+              INSERT INTO oracledb_employees  \
+                   (name, salary, hire_date) VALUES \
+                   (''Peter'',9000, TO_DATE(''20100525'', ''yyyymmdd'')) \
+            '); \
+        END; ";
+        
+    var proc = 
+        "CREATE OR REPLACE PROCEDURE get_emp_rs (p_sal IN NUMBER, p_recordset OUT SYS_REFCURSOR) \
+           AS \
+           BEGIN \
+             OPEN p_recordset FOR  \
+               SELECT * FROM oracledb_employees \
+               WHERE salary > p_sal; \
+           END; ";
+           
+    before(function(done){
+      async.series([
+        function(callback) {
+          oracledb.getConnection(
+            credential, 
+            function(err, conn) {
+              should.not.exist(err);
+              connection = conn;
+              callback();      
+            }
+          );
+        },
+        function(callback) {
+          connection.execute(
+            script,
+            function(err) {
+              should.not.exist(err);
+              callback();
+            }
+          );
+        },
+        function(callback) {
+          connection.execute(
+            proc,
+            function(err) {
+              should.not.exist(err);
+              callback();
+            }
+          );
+        }
+      ], done);
+    })
+    
+    after(function(done){
+      connection.execute(
+        'DROP TABLE oracledb_employees',
+        function(err){
+          if(err) { console.error(err.message); return; }
+          connection.release( function(err){
+            if(err) { console.error(err.message); return; }
+            done();
+          });
+        }
+      ); 
+    })
+    
+    it('3.11.1 REF CURSOR', function(done) {
+      connection.should.be.ok;
+      var numRows = 100;  // number of rows to return from each call to getRows()
+      
+      connection.execute(
+        "BEGIN get_emp_rs(:sal, :cursor); END;",
+        {
+          sal: 12000, 
+          cursor: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
+        },
+        function(err, result) {
+          should.not.exist(err);
+          result.outBinds.cursor.metaData[0].name.should.eql('NAME');
+          result.outBinds.cursor.metaData[1].name.should.eql('SALARY');
+          result.outBinds.cursor.metaData[2].name.should.eql('HIRE_DATE');
+          fetchRowsFromRS(result.outBinds.cursor);
+        }
+      );
+      
+      function fetchRowsFromRS(resultSet) {
+        resultSet.getRows(
+          numRows,
+          function(err, rows) {
+            should.not.exist(err);
+            if(rows.length > 0) {
+              // console.log("fetchRowsFromRS(): Got " + rows.length + " rows");
+              // console.log(rows);
+              rows.length.should.be.exactly(5);
+              fetchRowsFromRS(resultSet);
+            } else {
+              resultSet.close( function(err) {
+                should.not.exist(err);
+                done();
+              });
+            }
+          }
+        );
+      }
+    })
   })
   
 })
