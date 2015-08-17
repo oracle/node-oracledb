@@ -77,7 +77,7 @@ typedef struct rsBaton
                                         // active or invalid  
   eBaton               *ebaton;  
   unsigned int         numRows;         // rows to be fetched.
-  Persistent<Function> cb;
+  Nan::Persistent<Function> cb;
   ResultSet*           njsRS;           // resultset object.
 
   rsBaton() 
@@ -91,7 +91,7 @@ typedef struct rsBaton
      {
        delete ebaton;
      }
-     NanDisposePersistent(cb);
+     //NanDisposePersistent(cb);
    }
 
 }rsBaton;
@@ -108,7 +108,7 @@ public:
 
 
    // Define ResultSet Constructor
-   static Persistent<FunctionTemplate> resultSetTemplate_s ;
+   static Nan::Persistent<FunctionTemplate> resultSetTemplate_s ;
 
 private:
 

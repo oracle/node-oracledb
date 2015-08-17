@@ -159,7 +159,7 @@ typedef struct eBaton
   DataType             *fetchAsStringTypes;  // Global by type settings
   unsigned int         fetchInfoCount;   // Conversion requested count
   FetchInfo            *fetchInfo;       // Conversion meta data
-  Persistent<Function> cb;
+  Nan::Persistent<Function> cb;
 
   eBaton() : sql(""), error(""), dpienv(NULL), dpiconn(NULL), njsconn(NULL),
              rowsAffected(0), maxRows(0), prefetchRows(0),
@@ -172,7 +172,7 @@ typedef struct eBaton
 
   ~eBaton ()
    {
-     NanDisposePersistent(cb);
+     //NanDisposePersistent(cb);
      if( !binds.empty() )
      {
        for( unsigned int index = 0 ;index < binds.size(); index++ )
@@ -248,7 +248,7 @@ class Connection: public ObjectWrap
 public:
   void setConnection (dpi::Conn*, Oracledb* oracledb);
   // Define Connection Constructor
-  static Persistent<FunctionTemplate> connectionTemplate_s;
+  static Nan::Persistent<FunctionTemplate> connectionTemplate_s;
   static void Init (Handle<Object> target);
   static Handle<Value> GetRows (eBaton* executeBaton);
   static Handle<Value> GetMetaData (std::string* columnNames,
@@ -322,13 +322,13 @@ private:
                                          std::string &name,
                                         unsigned short defaultType);
 
-  static void ProcessBinds (_NAN_METHOD_ARGS, unsigned int index,
+  static void ProcessBinds (Nan::NAN_METHOD_ARGS_TYPE args, unsigned int index,
                             eBaton* executeBaton);
-  static void ProcessOptions (_NAN_METHOD_ARGS, unsigned int index,
+  static void ProcessOptions (Nan::NAN_METHOD_ARGS_TYPE args, unsigned int index,
                               eBaton* executeBaton);
-  static void ProcessCallback (_NAN_METHOD_ARGS, unsigned int index,
+  static void ProcessCallback (Nan::NAN_METHOD_ARGS_TYPE args, unsigned int index,
                                eBaton* executeBaton);
-  static void GetExecuteBaton (_NAN_METHOD_ARGS, eBaton* executeBaton);
+  static void GetExecuteBaton (Nan::NAN_METHOD_ARGS_TYPE args, eBaton* executeBaton);
   static void GetOptions (Handle<Object> options, eBaton* executeBaton);
   static void GetBinds (Handle<Object> bindobj, eBaton* executeBaton);
   static void GetBinds (Handle<Array> bindarray, eBaton* executeBaton);

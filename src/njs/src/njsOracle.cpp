@@ -57,7 +57,7 @@
 #include "njsMessages.h"
 #include "njsIntLob.h"
                                         //peristent Oracledb class handle
-Persistent<FunctionTemplate> Oracledb::oracledbTemplate_s;
+Nan::Persistent<FunctionTemplate> Oracledb::oracledbTemplate_s;
 
 #define NJS_MAX_ROWS            100
 #define NJS_STMT_CACHE_SIZE      30
@@ -108,7 +108,7 @@ Oracledb::~Oracledb()
     dpienv_->terminate();
   }
 
-  NanDisposePersistent(jsOracledb);
+  //NanDisposePersistent(jsOracledb);
 }
 
 /*****************************************************************************/
@@ -119,73 +119,88 @@ Oracledb::~Oracledb()
 */
 void Oracledb::Init(Handle<Object> target)
 {
-  NanScope();
+  Nan::HandleScope scope;
 
-  Local<FunctionTemplate> temp = NanNew<FunctionTemplate>(New);
+  Local<FunctionTemplate> temp = Nan::New<FunctionTemplate>(New);
   temp->InstanceTemplate()->SetInternalFieldCount(1);
-  temp->SetClassName(NanNew<v8::String>("Oracledb"));
+  temp->SetClassName(Nan::New<v8::String>("Oracledb").ToLocalChecked());
 
-  NODE_SET_PROTOTYPE_METHOD(temp, "getConnection", GetConnection);
-  NODE_SET_PROTOTYPE_METHOD(temp, "createPool", CreatePool);
+  Nan::SetPrototypeMethod(temp, "getConnection", GetConnection);
+  Nan::SetPrototypeMethod(temp, "createPool", CreatePool);
 
-  temp->InstanceTemplate()->SetAccessor(
-                              NanNew<v8::String>("poolMax"),
-                              Oracledb::GetPoolMax,
-                              Oracledb::SetPoolMax );
-  temp->InstanceTemplate()->SetAccessor(
-                              NanNew<v8::String>("poolMin"),
-                              Oracledb::GetPoolMin,
-                              Oracledb::SetPoolMin );
-  temp->InstanceTemplate()->SetAccessor(
-                              NanNew<v8::String>("poolIncrement"),
-                              Oracledb::GetPoolIncrement,
-                              Oracledb::SetPoolIncrement );
-  temp->InstanceTemplate()->SetAccessor(
-                              NanNew<v8::String>("poolTimeout"),
-                              Oracledb::GetPoolTimeout,
-                              Oracledb::SetPoolTimeout );
-  temp->InstanceTemplate()->SetAccessor(
-                              NanNew<v8::String>("stmtCacheSize"),
-                              Oracledb::GetStmtCacheSize,
-                              Oracledb::SetStmtCacheSize );
-  temp->InstanceTemplate()->SetAccessor(
-                              NanNew<v8::String>("prefetchRows"),
-                              Oracledb::GetPrefetchRows,
-                              Oracledb::SetPrefetchRows );
-  temp->InstanceTemplate()->SetAccessor(
-                              NanNew<v8::String>("autoCommit"),
-                              Oracledb::GetAutoCommit,
-                              Oracledb::SetAutoCommit );
-  temp->InstanceTemplate()->SetAccessor(
-                              NanNew<v8::String>("maxRows"),
-                              Oracledb::GetMaxRows,
-                              Oracledb::SetMaxRows );
-  temp->InstanceTemplate()->SetAccessor(
-                              NanNew<v8::String>("outFormat"),
-                              Oracledb::GetOutFormat,
-                              Oracledb::SetOutFormat );
-  temp->InstanceTemplate()->SetAccessor(
-                              NanNew<v8::String>("version"),
-                              Oracledb::GetVersion,
-                              Oracledb::SetVersion );
-  temp->InstanceTemplate()->SetAccessor(
-                              NanNew<v8::String>("connectionClass"),
-                              Oracledb::GetConnectionClass,
-                              Oracledb::SetConnectionClass );
-  temp->InstanceTemplate()->SetAccessor(
-                              NanNew<v8::String>("externalAuth"),
-                              Oracledb::GetExternalAuth,
-                              Oracledb::SetExternalAuth );
-  temp->InstanceTemplate()->SetAccessor( NanNew<v8::String>("fetchAsString"),
-                                         Oracledb::GetFetchAsString,
-                                         Oracledb::SetFetchAsString);
-  temp->InstanceTemplate()->SetAccessor(
-                              NanNew<v8::String>("lobPrefetchSize"),
-                              Oracledb::GetLobPrefetchSize,
-                              Oracledb::SetLobPrefetchSize);
+  Nan::SetAccessor(
+    temp->InstanceTemplate(),
+    Nan::New<v8::String>("poolMax").ToLocalChecked(),
+    Oracledb::GetPoolMax,
+    Oracledb::SetPoolMax );
+  Nan::SetAccessor(
+    temp->InstanceTemplate(),
+    Nan::New<v8::String>("poolMin").ToLocalChecked(),
+    Oracledb::GetPoolMin,
+    Oracledb::SetPoolMin );
+  Nan::SetAccessor(
+    temp->InstanceTemplate(),
+    Nan::New<v8::String>("poolIncrement").ToLocalChecked(),
+    Oracledb::GetPoolIncrement,
+    Oracledb::SetPoolIncrement );
+  Nan::SetAccessor(
+    temp->InstanceTemplate(),
+    Nan::New<v8::String>("poolTimeout").ToLocalChecked(),
+    Oracledb::GetPoolTimeout,
+    Oracledb::SetPoolTimeout );
+  Nan::SetAccessor(
+    temp->InstanceTemplate(),
+    Nan::New<v8::String>("stmtCacheSize").ToLocalChecked(),
+    Oracledb::GetStmtCacheSize,
+    Oracledb::SetStmtCacheSize );
+  Nan::SetAccessor(
+    temp->InstanceTemplate(),
+    Nan::New<v8::String>("prefetchRows").ToLocalChecked(),
+    Oracledb::GetPrefetchRows,
+    Oracledb::SetPrefetchRows );
+  Nan::SetAccessor(
+    temp->InstanceTemplate(),
+    Nan::New<v8::String>("autoCommit").ToLocalChecked(),
+    Oracledb::GetAutoCommit,
+    Oracledb::SetAutoCommit );
+  Nan::SetAccessor(
+    temp->InstanceTemplate(),
+    Nan::New<v8::String>("maxRows").ToLocalChecked(),
+    Oracledb::GetMaxRows,
+    Oracledb::SetMaxRows );
+  Nan::SetAccessor(
+    temp->InstanceTemplate(),
+    Nan::New<v8::String>("outFormat").ToLocalChecked(),
+    Oracledb::GetOutFormat,
+    Oracledb::SetOutFormat );
+  Nan::SetAccessor(
+    temp->InstanceTemplate(),
+    Nan::New<v8::String>("version").ToLocalChecked(),
+    Oracledb::GetVersion,
+    Oracledb::SetVersion );
+  Nan::SetAccessor(
+    temp->InstanceTemplate(),
+    Nan::New<v8::String>("connectionClass").ToLocalChecked(),
+    Oracledb::GetConnectionClass,
+    Oracledb::SetConnectionClass );
+  Nan::SetAccessor(
+    temp->InstanceTemplate(),
+    Nan::New<v8::String>("externalAuth").ToLocalChecked(),
+    Oracledb::GetExternalAuth,
+    Oracledb::SetExternalAuth );
+  Nan::SetAccessor(
+    temp->InstanceTemplate(), 
+    Nan::New<v8::String>("fetchAsString").ToLocalChecked(),
+    Oracledb::GetFetchAsString,
+    Oracledb::SetFetchAsString);
+  Nan::SetAccessor(
+    temp->InstanceTemplate(),
+    Nan::New<v8::String>("lobPrefetchSize").ToLocalChecked(),
+    Oracledb::GetLobPrefetchSize,
+    Oracledb::SetLobPrefetchSize);
 
-  NanAssignPersistent( oracledbTemplate_s, temp);
-  target->Set(NanNew<v8::String>("Oracledb"),temp->GetFunction());
+  oracledbTemplate_s.Reset(temp);
+  Nan::Set(target, Nan::New<v8::String>("Oracledb").ToLocalChecked(),temp->GetFunction());
 }
 
 /*****************************************************************************/
@@ -196,12 +211,11 @@ void Oracledb::Init(Handle<Object> target)
 */
 NAN_METHOD(Oracledb::New)
 {
-  NanScope();
 
   Oracledb *oracledb = new Oracledb();
-  oracledb->Wrap(args.This());
-  NanAssignPersistent( oracledb->jsOracledb, args.This() );
-  NanReturnValue(args.This());
+  oracledb->Wrap(info.This());
+  oracledb->jsOracledb.Reset( info.This() );
+  info.GetReturnValue().Set(info.This());
 }
 
 /*****************************************************************************/
@@ -211,10 +225,9 @@ NAN_METHOD(Oracledb::New)
 */
 NAN_PROPERTY_GETTER(Oracledb::GetPoolMin)
 {
-  NanScope();
-  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(args.Holder());
-  Local<Integer> value = NanNew<v8::Integer>(oracledb->poolMin_);
-  NanReturnValue(value);
+  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
+  Local<Integer> value = Nan::New<v8::Integer>(oracledb->poolMin_);
+  info.GetReturnValue().Set(value);
 }
 
 /*****************************************************************************/
@@ -224,8 +237,7 @@ NAN_PROPERTY_GETTER(Oracledb::GetPoolMin)
 */
 NAN_SETTER(Oracledb::SetPoolMin)
 {
-  NanScope();
-  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(args.Holder());
+  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
   NJS_SET_PROP_UINT(oracledb->poolMin_, value, "poolMin");
 }
 
@@ -236,10 +248,9 @@ NAN_SETTER(Oracledb::SetPoolMin)
 */
 NAN_PROPERTY_GETTER(Oracledb::GetPoolMax)
 {
-  NanScope();
-  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(args.Holder());
-  Local<Integer> value = NanNew<v8::Integer>(oracledb->poolMax_);
-  NanReturnValue(value);
+  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
+  Local<Integer> value = Nan::New<v8::Integer>(oracledb->poolMax_);
+  info.GetReturnValue().Set(value);
 }
 
 /*****************************************************************************/
@@ -249,8 +260,7 @@ NAN_PROPERTY_GETTER(Oracledb::GetPoolMax)
 */
 NAN_SETTER(Oracledb::SetPoolMax)
 {
-  NanScope();
-  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(args.Holder());
+  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
   NJS_SET_PROP_UINT(oracledb->poolMax_, value, "poolMax");
 }
 
@@ -261,10 +271,9 @@ NAN_SETTER(Oracledb::SetPoolMax)
 */
 NAN_PROPERTY_GETTER(Oracledb::GetPoolIncrement)
 {
-  NanScope();
-  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(args.Holder());
-  Local<Integer> value = NanNew<v8::Integer>(oracledb->poolIncrement_);
-  NanReturnValue(value);
+  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
+  Local<Integer> value = Nan::New<v8::Integer>(oracledb->poolIncrement_);
+  info.GetReturnValue().Set(value);
 }
 
 /*****************************************************************************/
@@ -274,8 +283,7 @@ NAN_PROPERTY_GETTER(Oracledb::GetPoolIncrement)
 */
 NAN_SETTER(Oracledb::SetPoolIncrement)
 {
-  NanScope();
-  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(args.Holder());
+  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
   NJS_SET_PROP_UINT(oracledb->poolIncrement_, value, "poolIncrement");
 }
 
@@ -286,10 +294,9 @@ NAN_SETTER(Oracledb::SetPoolIncrement)
 */
 NAN_PROPERTY_GETTER(Oracledb::GetPoolTimeout)
 {
-  NanScope();
-  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(args.Holder());
-  Local<Integer> value = NanNew<v8::Integer>(oracledb->poolTimeout_);
-  NanReturnValue(value);
+  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
+  Local<Integer> value = Nan::New<v8::Integer>(oracledb->poolTimeout_);
+  info.GetReturnValue().Set(value);
 }
 
 /*****************************************************************************/
@@ -299,8 +306,7 @@ NAN_PROPERTY_GETTER(Oracledb::GetPoolTimeout)
 */
 NAN_SETTER(Oracledb::SetPoolTimeout)
 {
-  NanScope();
-  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(args.Holder());
+  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
   NJS_SET_PROP_UINT(oracledb->poolTimeout_ , value, "poolTimeout");
 }
 
@@ -311,10 +317,9 @@ NAN_SETTER(Oracledb::SetPoolTimeout)
 */
 NAN_PROPERTY_GETTER(Oracledb::GetMaxRows)
 {
-  NanScope();
-  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(args.Holder());
-  Local<Integer> value = NanNew<v8::Integer>(oracledb->maxRows_);
-  NanReturnValue(value);
+  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
+  Local<Integer> value = Nan::New<v8::Integer>(oracledb->maxRows_);
+  info.GetReturnValue().Set(value);
 }
 
 /*****************************************************************************/
@@ -324,8 +329,7 @@ NAN_PROPERTY_GETTER(Oracledb::GetMaxRows)
 */
 NAN_SETTER(Oracledb::SetMaxRows)
 {
-  NanScope();
-  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(args.Holder());
+  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
   NJS_SET_PROP_UINT(oracledb->maxRows_, value, "maxRows");
 }
 
@@ -336,10 +340,8 @@ NAN_SETTER(Oracledb::SetMaxRows)
 */
 NAN_PROPERTY_GETTER(Oracledb::GetOutFormat)
 {
-  NanScope();
-  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(args.Holder());
-  Handle<Value> value = NanNew<v8::Integer>(oracledb->outFormat_);
-  NanReturnValue(value);
+  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
+  info.GetReturnValue().Set(Nan::New<v8::Integer>(oracledb->outFormat_));
 }
 
 /*****************************************************************************/
@@ -349,8 +351,7 @@ NAN_PROPERTY_GETTER(Oracledb::GetOutFormat)
 */
 NAN_SETTER(Oracledb::SetOutFormat)
 {
-  NanScope();
-  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(args.Holder());
+  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
   NJS_SET_PROP_UINT(oracledb->outFormat_, value, "outFormat");
 }
 
@@ -361,10 +362,8 @@ NAN_SETTER(Oracledb::SetOutFormat)
 */
 NAN_PROPERTY_GETTER(Oracledb::GetStmtCacheSize)
 {
-  NanScope();
-  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(args.Holder());
-  Local<Integer> value = NanNew<v8::Integer>(oracledb->stmtCacheSize_);
-  NanReturnValue(value);
+  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
+  info.GetReturnValue().Set(Nan::New<v8::Integer>(oracledb->stmtCacheSize_));
 }
 
 /*****************************************************************************/
@@ -374,8 +373,7 @@ NAN_PROPERTY_GETTER(Oracledb::GetStmtCacheSize)
 */
 NAN_SETTER(Oracledb::SetStmtCacheSize)
 {
-  NanScope();
-  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(args.Holder());
+  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
   NJS_SET_PROP_UINT(oracledb->stmtCacheSize_, value, "stmtCacheSize");
 }
 
@@ -386,10 +384,8 @@ NAN_SETTER(Oracledb::SetStmtCacheSize)
 */
 NAN_PROPERTY_GETTER(Oracledb::GetPrefetchRows)
 {
-  NanScope();
-  Oracledb* oracledb   = ObjectWrap::Unwrap<Oracledb>(args.Holder());
-  Local<Integer> value = NanNew<v8::Integer>(oracledb->prefetchRows_);
-  NanReturnValue(value);
+  Oracledb* oracledb   = ObjectWrap::Unwrap<Oracledb>(info.Holder());
+  info.GetReturnValue().Set(Nan::New<v8::Integer>(oracledb->prefetchRows_));
 }
 
 /*****************************************************************************/
@@ -399,8 +395,7 @@ NAN_PROPERTY_GETTER(Oracledb::GetPrefetchRows)
 */
 NAN_SETTER(Oracledb::SetPrefetchRows)
 {
-  NanScope();
-  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(args.Holder());
+  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
   NJS_SET_PROP_UINT(oracledb->prefetchRows_, value, "prefetchRows");
 }
 
@@ -412,10 +407,8 @@ NAN_SETTER(Oracledb::SetPrefetchRows)
 */
 NAN_PROPERTY_GETTER(Oracledb::GetAutoCommit)
 {
-  NanScope();
-  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(args.Holder());
-  Handle<Boolean> value = NanNew<v8::Boolean>(oracledb->autoCommit_);
-  NanReturnValue(value);
+  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
+  info.GetReturnValue().Set(Nan::New<v8::Boolean>(oracledb->autoCommit_));
 }
 
 /*****************************************************************************/
@@ -425,8 +418,7 @@ NAN_PROPERTY_GETTER(Oracledb::GetAutoCommit)
 */
 NAN_SETTER(Oracledb::SetAutoCommit)
 {
-  NanScope();
-  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(args.Holder());
+  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
   oracledb->autoCommit_ = value->ToBoolean()->Value();
 }
 
@@ -437,10 +429,8 @@ NAN_SETTER(Oracledb::SetAutoCommit)
 */
 NAN_PROPERTY_GETTER(Oracledb::GetVersion)
 {
-  NanScope();
   int version = NJS_NODE_ORACLEDB_VERSION;
-  Local<Integer> value =  NanNew<v8::Integer>(version);
-  NanReturnValue(value);
+  info.GetReturnValue().Set(Nan::New<v8::Integer>(version));
 }
 
 /*****************************************************************************/
@@ -450,7 +440,6 @@ NAN_PROPERTY_GETTER(Oracledb::GetVersion)
 */
 NAN_SETTER(Oracledb::SetVersion)
 {
-  NanScope();
   std::string msg;
   msg = NJSMessages::getErrorMsg(errReadOnly, "version");
   NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
@@ -464,12 +453,11 @@ NAN_SETTER(Oracledb::SetVersion)
 */
 NAN_PROPERTY_GETTER(Oracledb::GetConnectionClass)
 {
-  NanScope();
 
-  Oracledb *oracledb = ObjectWrap::Unwrap<Oracledb>(args.Holder());
-  Handle<String> value = NanNew<v8::String>(oracledb->connClass_.c_str(),
-                                          (int)oracledb->connClass_.length ());
-  NanReturnValue(value);
+  Oracledb *oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
+  Local<String> value = Nan::New<v8::String>(oracledb->connClass_.c_str(),
+                                          (int)oracledb->connClass_.length ()).ToLocalChecked();
+  info.GetReturnValue().Set(value);
 }
 
 
@@ -480,9 +468,8 @@ NAN_PROPERTY_GETTER(Oracledb::GetConnectionClass)
 */
 NAN_SETTER(Oracledb::SetConnectionClass)
 {
-  NanScope();
 
-  Oracledb *oracledb = ObjectWrap::Unwrap<Oracledb>(args.Holder());
+  Oracledb *oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
   v8::String::Utf8Value utfstr ( value->ToString () );
 
   oracledb->connClass_ = std::string ( *utfstr, utfstr.length() );
@@ -496,12 +483,11 @@ NAN_SETTER(Oracledb::SetConnectionClass)
 */
 NAN_PROPERTY_GETTER(Oracledb::GetExternalAuth)
 {
-  NanScope();
 
-  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(args.Holder());
-  Handle<Boolean> value = NanNew<v8::Boolean>(oracledb->externalAuth_);
+  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
+  Local<Boolean> value = Nan::New<v8::Boolean>(oracledb->externalAuth_);
 
-  NanReturnValue(value);
+  info.GetReturnValue().Set(value);
 }
 
 
@@ -512,8 +498,7 @@ NAN_PROPERTY_GETTER(Oracledb::GetExternalAuth)
 */
 NAN_SETTER(Oracledb::SetExternalAuth)
 {
-  NanScope();
-  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(args.Holder());
+  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
   oracledb->externalAuth_ = value->ToBoolean()->Value();
 }
 
@@ -525,10 +510,9 @@ NAN_SETTER(Oracledb::SetExternalAuth)
 */
 NAN_PROPERTY_GETTER(Oracledb::GetLobPrefetchSize)
 {
-  NanScope();
-  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(args.Holder());
-  Local<Integer> value = NanNew<v8::Integer>(oracledb->lobPrefetchSize_);
-  NanReturnValue(value);
+  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
+  Local<Integer> value = Nan::New<v8::Integer>(oracledb->lobPrefetchSize_);
+  info.GetReturnValue().Set(value);
 }
 
 /*****************************************************************************/
@@ -538,8 +522,7 @@ NAN_PROPERTY_GETTER(Oracledb::GetLobPrefetchSize)
 */
 NAN_SETTER(Oracledb::SetLobPrefetchSize)
 {
-  NanScope();
-  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(args.Holder());
+  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
   NJS_SET_PROP_UINT(oracledb->lobPrefetchSize_, value, "lobPrefetchSize");
 }
 
@@ -550,24 +533,23 @@ NAN_SETTER(Oracledb::SetLobPrefetchSize)
 */
 NAN_PROPERTY_GETTER(Oracledb::GetFetchAsString)
 {
-  NanScope();
 
-  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(args.Holder());
-  Handle<Array> typeArray = NanNew <v8::Array>(0);
+  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
+  Local<Array> typeArray = Nan::New <v8::Array>(0);
   
   if ( oracledb->fetchAsStringTypes_ )
   {
     unsigned int nCount = sizeof ( oracledb->fetchAsStringTypes_ ) / 
                    sizeof ( oracledb->fetchAsStringTypes_[0] ) ;
     
-    typeArray = NanNew<v8::Array>( nCount );
+    typeArray = Nan::New<v8::Array>( nCount );
     for ( unsigned int t = 0; t < nCount ; t ++ )
     {
-      typeArray->Set (t, NanNew<v8::Integer>(oracledb->fetchAsStringTypes_[t]));
+      typeArray->Set (t, Nan::New<v8::Integer>(oracledb->fetchAsStringTypes_[t]));
     }
   }
 
-  NanReturnValue(typeArray);
+  info.GetReturnValue().Set(typeArray);
 }
 
 
@@ -578,8 +560,7 @@ NAN_PROPERTY_GETTER(Oracledb::GetFetchAsString)
 */
 NAN_SETTER(Oracledb::SetFetchAsString)
 {
-  NanScope();
-  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(args.Holder());
+  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
   Local<Array> array;
   string msg;
 
@@ -636,18 +617,17 @@ NAN_SETTER(Oracledb::SetFetchAsString)
 */
 NAN_METHOD(Oracledb::GetConnection)
 {
-  NanScope();
 
   Local<Function> callback;
   Local<Object> connProps;
-  NJS_GET_CALLBACK ( callback, args );
+  NJS_GET_CALLBACK ( callback, info );
 
-  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb> ( args.This() );
+  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb> ( info.This() );
   connectionBaton *connBaton = new connectionBaton ();
-  NanAssignPersistent(connBaton->cb, callback );
+  connBaton->cb.Reset( callback );
 
-  NJS_CHECK_NUMBER_OF_ARGS ( connBaton->error, args, 2, 2, exitGetConnection );
-  NJS_GET_ARG_V8OBJECT ( connProps, connBaton->error, args, 0,
+  NJS_CHECK_NUMBER_OF_ARGS ( connBaton->error, info, 2, 2, exitGetConnection );
+  NJS_GET_ARG_V8OBJECT ( connProps, connBaton->error, info, 0,
                          exitGetConnection );
   NJS_GET_STRING_FROM_JSON ( connBaton->user, connBaton->error,
                              connProps, "user", 0, exitGetConnection );
@@ -679,7 +659,7 @@ exitGetConnection :
   // baton, the worker thread anyway returns
   uv_queue_work( uv_default_loop(), &connBaton->req, Async_GetConnection,
                  (uv_after_work_cb) Async_AfterGetConnection );
-  NanReturnUndefined();
+  info.GetReturnValue().SetUndefined();
 }
 
 /*****************************************************************************/
@@ -732,30 +712,33 @@ void Oracledb::Async_GetConnection (uv_work_t *req)
 */
 void Oracledb::Async_AfterGetConnection (uv_work_t *req)
 {
-  NanScope();
+  Nan::HandleScope scope;
   connectionBaton *connBaton = (connectionBaton*)req->data;
 
   v8::TryCatch tc;
-  Handle<Value> argv[2];
+  Local<Value> argv[2];
   if( !(connBaton->error).empty() )
   {
-    argv[0] = v8::Exception::Error(NanNew<v8::String>( (connBaton->error).c_str() ));
-    argv[1] = NanNull();
+    argv[0] = v8::Exception::Error(Nan::New<v8::String>( (connBaton->error).c_str() ).ToLocalChecked());
+    argv[1] = Nan::Null();
   } 
   else
   {
-    argv[0] = NanUndefined();
-    Local<FunctionTemplate> lft = NanNew(Connection::connectionTemplate_s);
+    argv[0] = Nan::Undefined();
+    Local<FunctionTemplate> lft = Nan::New(Connection::connectionTemplate_s);
     Handle<Object> connection = lft->GetFunction()-> NewInstance();
     (ObjectWrap::Unwrap<Connection> (connection))->
                                 setConnection( connBaton->dpiconn,
                                                connBaton->oracledb );
     argv[1] = connection;
   }
-  Local<Function> callback = NanNew(connBaton->cb);
+  Local<Function> callback = Nan::New(connBaton->cb);
   delete connBaton;
-  NanMakeCallback( NanGetCurrentContext()->Global(),
-                      callback, 2, argv );
+  Nan::MakeCallback( 
+    Nan::GetCurrentContext()->Global(),
+    callback, 
+    2, 
+    argv );
   if(tc.HasCaught())
     node::FatalException(tc);
 }
@@ -771,19 +754,18 @@ void Oracledb::Async_AfterGetConnection (uv_work_t *req)
 */
 NAN_METHOD(Oracledb::CreatePool)
 {
-  NanScope();
 
   Local<Function> callback;
   Local<Object> poolProps;
-  NJS_GET_CALLBACK ( callback, args );
+  NJS_GET_CALLBACK ( callback, info );
 
-  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb> ( args.This() );
+  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb> ( info.This() );
   connectionBaton *poolBaton = new connectionBaton ();
 
-  NanAssignPersistent( poolBaton->cb, callback );
+  poolBaton->cb.Reset( callback );
 
-  NJS_CHECK_NUMBER_OF_ARGS ( poolBaton->error, args, 2, 2, exitCreatePool );
-  NJS_GET_ARG_V8OBJECT ( poolProps, poolBaton->error, args, 0,
+  NJS_CHECK_NUMBER_OF_ARGS ( poolBaton->error, info, 2, 2, exitCreatePool );
+  NJS_GET_ARG_V8OBJECT ( poolProps, poolBaton->error, info, 0,
                          exitCreatePool );
   NJS_GET_STRING_FROM_JSON ( poolBaton->user, poolBaton->error,
                              poolProps, "user", 0, exitCreatePool );
@@ -824,7 +806,7 @@ exitCreatePool:
                 Async_CreatePool,
                 (uv_after_work_cb) Async_AfterCreatePool);
 
-  NanReturnUndefined();
+  info.GetReturnValue().SetUndefined();
 }
 
 /*****************************************************************************/
@@ -878,21 +860,21 @@ void Oracledb::Async_CreatePool (uv_work_t *req)
 */
 void Oracledb::Async_AfterCreatePool (uv_work_t *req)
 {
-  NanScope() ;
+  Nan::HandleScope scope;
   connectionBaton *poolBaton = (connectionBaton *)req->data;
 
   v8::TryCatch tc;
-  Handle<Value> argv[2];
+  Local<Value> argv[2];
 
   if (!poolBaton->error.empty())
   {
-    argv[0] = v8::Exception::Error(NanNew<v8::String>(( poolBaton->error).c_str() ));
-    argv[1] = NanUndefined();
+    argv[0] = v8::Exception::Error(Nan::New<v8::String>(( poolBaton->error).c_str() ).ToLocalChecked());
+    argv[1] = Nan::Undefined();
   }
   else
   {
-    argv[0] = NanUndefined ();
-    Handle<Object> njsPool = NanNew(Pool::poolTemplate_s)->
+    argv[0] = Nan::Undefined();
+    Handle<Object> njsPool = Nan::New(Pool::poolTemplate_s)->
                              GetFunction() ->NewInstance();
     (ObjectWrap::Unwrap<Pool> (njsPool))-> setPool ( poolBaton->dpipool,
                                                      poolBaton->oracledb,
@@ -904,9 +886,9 @@ void Oracledb::Async_AfterCreatePool (uv_work_t *req)
                                                      poolBaton->lobPrefetchSize);
     argv[1] = njsPool;
   }
-  Local<Function> callback = NanNew(poolBaton->cb);
+  Local<Function> callback = Nan::New(poolBaton->cb);
   delete poolBaton;
-  NanMakeCallback ( NanGetCurrentContext()->Global(),
+  Nan::MakeCallback ( Nan::GetCurrentContext()->Global(),
                        callback, 2, argv);
   if(tc.HasCaught())
   {

@@ -81,7 +81,7 @@ class Oracledb: public ObjectWrap
 {
  public:
 
-  Persistent<Object> jsOracledb;
+  Nan::Persistent<Object> jsOracledb;
 
    // Oracledb class
    static void Init(Handle<Object> target);
@@ -103,7 +103,7 @@ class Oracledb: public ObjectWrap
 
 private:
    // Define Oracledb Constructor
-   static Persistent<FunctionTemplate> oracledbTemplate_s;
+   static Nan::Persistent<FunctionTemplate> oracledbTemplate_s;
 
    static NAN_METHOD(New);
 
@@ -196,7 +196,7 @@ typedef struct connectionBaton
 
   unsigned int maxRows;
   unsigned int outFormat;
-  Persistent<Function> cb;
+  Nan::Persistent<Function> cb;
   dpi::Env*   dpienv;
   dpi::Conn*  dpiconn;
   dpi::SPool* dpipool;
@@ -213,7 +213,7 @@ typedef struct connectionBaton
 
   ~connectionBaton()
    {
-     NanDisposePersistent(cb);
+     //NanDisposePersistent(cb);
    }
 
 }connectionBaton;

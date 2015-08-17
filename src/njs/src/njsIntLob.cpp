@@ -67,7 +67,7 @@ using namespace std;
 
 
                                         //peristent ILob class handle
-Persistent<FunctionTemplate> ILob::iLobTemplate_s;
+Nan::Persistent<FunctionTemplate> ILob::iLobTemplate_s;
 
 
 
@@ -252,36 +252,38 @@ void ILob::setILob(eBaton *executeBaton, ProtoILob *protoILob)
 
 void ILob::Init(Handle<Object> target)
 {
-  NanScope();
+  Nan::HandleScope scope;
 
-  Local<FunctionTemplate> tpl = NanNew<FunctionTemplate>(New);
+  Local<FunctionTemplate> tpl = Nan::New<FunctionTemplate>(New);
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
-  tpl->SetClassName(NanNew<v8::String>("ILob"));
+  tpl->SetClassName(Nan::New<v8::String>("ILob").ToLocalChecked());
 
-  NODE_SET_PROTOTYPE_METHOD(tpl, "release", Release);
+  Nan::SetPrototypeMethod(tpl, "release", Release);
+  Nan::SetPrototypeMethod(tpl, "read", Read);
+  Nan::SetPrototypeMethod(tpl, "write", Write);
 
-  NODE_SET_PROTOTYPE_METHOD(tpl, "read", Read);
+  Nan::SetAccessor(tpl->InstanceTemplate(),
+    Nan::New<v8::String>("chunkSize").ToLocalChecked(),
+    ILob::GetChunkSize,
+    ILob::SetChunkSize);
 
-  NODE_SET_PROTOTYPE_METHOD(tpl, "write", Write);
+  Nan::SetAccessor(tpl->InstanceTemplate(),
+    Nan::New<v8::String>("length").ToLocalChecked(),
+    ILob::GetLength,
+    ILob::SetLength);
 
-  tpl->InstanceTemplate()->SetAccessor(NanNew<v8::String>("chunkSize"),
-                                       ILob::GetChunkSize,
-                                       ILob::SetChunkSize);
+  Nan::SetAccessor(tpl->InstanceTemplate(),
+    Nan::New<v8::String>("pieceSize").ToLocalChecked(),
+    ILob::GetPieceSize,
+    ILob::SetPieceSize);
 
-  tpl->InstanceTemplate()->SetAccessor(NanNew<v8::String>("length"),
-                                       ILob::GetLength,
-                                       ILob::SetLength);
+  Nan::SetAccessor(tpl->InstanceTemplate(),
+    Nan::New<v8::String>("offset").ToLocalChecked(),
+    ILob::GetOffset,
+    ILob::SetOffset);
 
-  tpl->InstanceTemplate()->SetAccessor(NanNew<v8::String>("pieceSize"),
-                                       ILob::GetPieceSize,
-                                       ILob::SetPieceSize);
-
-  tpl->InstanceTemplate()->SetAccessor(NanNew<v8::String>("offset"),
-                                       ILob::GetOffset,
-                                       ILob::SetOffset);
-
-  NanAssignPersistent(iLobTemplate_s, tpl);
-  target->Set(NanNew<v8::String>("ILob"), tpl->GetFunction());
+  iLobTemplate_s.Reset(tpl);
+  Nan::Set(target, Nan::New<v8::String>("ILob").ToLocalChecked(), tpl->GetFunction());
 }
 
 
@@ -292,7 +294,7 @@ void ILob::Init(Handle<Object> target)
     Invoked when a NewInstance() of ILob is called.
 
   PARAMETERS
-    args - ILob template
+    info - ILob template
 
   RETURNS
     ILob object
@@ -303,13 +305,12 @@ void ILob::Init(Handle<Object> target)
 
 NAN_METHOD(ILob::New)
 {
-  NanScope();
 
   ILob *iLob = new ILob();
 
-  iLob->Wrap(args.This());
+  iLob->Wrap(info.This());
 
-  NanReturnValue(args.This());
+  info.GetReturnValue().Set(info.This());
 }
 
 
@@ -320,7 +321,7 @@ NAN_METHOD(ILob::New)
     Release method on ILob class.
 
   PARAMETERS
-    args - ILob object
+    info - ILob object
 
   RETURNS
     undefined
@@ -332,13 +333,12 @@ NAN_METHOD(ILob::New)
 
 NAN_METHOD(ILob::Release)
 { 
-  NanScope();
 
-  ILob *iLob = ObjectWrap::Unwrap<ILob>(args.This());
+  ILob *iLob = ObjectWrap::Unwrap<ILob>(info.This());
 
   iLob->cleanup();
 
-  NanReturnUndefined();
+  info.GetReturnValue().Set(Nan::Undefined());
 }
 
 
@@ -365,7 +365,7 @@ void ILob::lobPropertyException(ILob *iLob,
                                 NJSErrorType err,
                                 string property)
 {
-  NanScope();
+  Nan::HandleScope scope;
   string       msg;
 
   if (iLob->isValid_)
@@ -384,7 +384,7 @@ void ILob::lobPropertyException(ILob *iLob,
      Get Accessor of chunkSize property
 
   PARAMETERS
-    args - ILob object
+    info - ILob object
 
   RETURNS
     chunk size
@@ -395,24 +395,22 @@ void ILob::lobPropertyException(ILob *iLob,
 
 NAN_PROPERTY_GETTER(ILob::GetChunkSize)
 {  
-  NanScope();
 
-  ILob *iLob = ObjectWrap::Unwrap<ILob>(args.Holder());
+  ILob *iLob = ObjectWrap::Unwrap<ILob>(info.Holder());
 
   try
   {
-    Local<Integer> value = NanNew<v8::Integer>(iLob->chunkSize_);
+    Local<Integer> value = Nan::New<v8::Integer>(iLob->chunkSize_);
     
-    NanReturnValue(value);
+    info.GetReturnValue().Set(value);
   }
 
   catch(dpi::Exception &e)
   {
     NJS_SET_EXCEPTION(e.what(), strlen(e.what()));
-    NanReturnUndefined();
   }
 
-  NanReturnUndefined();
+  info.GetReturnValue().Set(Nan::Undefined());
 }
 
 
@@ -423,7 +421,7 @@ NAN_PROPERTY_GETTER(ILob::GetChunkSize)
     read-only property.
 
   PARAMETERS
-    args - ILob object
+    info - ILob object
 
   RETURNS
     throws error
@@ -434,7 +432,7 @@ NAN_PROPERTY_GETTER(ILob::GetChunkSize)
 
 NAN_SETTER(ILob::SetChunkSize)
 {
-  lobPropertyException(ObjectWrap::Unwrap<ILob>(args.Holder()), errReadOnly,
+  lobPropertyException(ObjectWrap::Unwrap<ILob>(info.Holder()), errReadOnly,
                        "chunkSize");
 }
 
@@ -446,7 +444,7 @@ NAN_SETTER(ILob::SetChunkSize)
      Get Accessor of length property
 
   PARAMETERS
-    args - ILob object
+    info - ILob object
 
   RETURNS
     LOB length
@@ -458,24 +456,22 @@ NAN_SETTER(ILob::SetChunkSize)
 
 NAN_PROPERTY_GETTER(ILob::GetLength)
 {  
-  NanScope();
 
-  ILob *iLob = ObjectWrap::Unwrap<ILob>(args.Holder());
+  ILob *iLob = ObjectWrap::Unwrap<ILob>(info.Holder());
 
   try
   {
-    Local<Number> value = NanNew<v8::Number>((double)iLob->length_);
+    Local<Number> value = Nan::New<v8::Number>((double)iLob->length_);
     
-    NanReturnValue(value);
+    info.GetReturnValue().Set(value);
   }
 
   catch(dpi::Exception &e)
   {
     NJS_SET_EXCEPTION(e.what(), strlen(e.what()));
-    NanReturnUndefined();
   }
 
-  NanReturnUndefined();
+  info.GetReturnValue().Set(Nan::Undefined());
 }
 
 
@@ -486,7 +482,7 @@ NAN_PROPERTY_GETTER(ILob::GetLength)
     property.
 
   PARAMETERS
-    args - ILob object
+    info - ILob object
 
   RETURNS
     throws error
@@ -497,7 +493,7 @@ NAN_PROPERTY_GETTER(ILob::GetLength)
 
 NAN_SETTER(ILob::SetLength)
 {
-  lobPropertyException(ObjectWrap::Unwrap<ILob>(args.Holder()), errReadOnly,
+  lobPropertyException(ObjectWrap::Unwrap<ILob>(info.Holder()), errReadOnly,
                        "length");
 }
 
@@ -509,7 +505,7 @@ NAN_SETTER(ILob::SetLength)
     Get Accessor of pieceSize property
 
   PARAMETERS
-    args - ILob object
+    info - ILob object
 
   RETURNS
     the number of bytes that will be read for each read().
@@ -520,23 +516,21 @@ NAN_SETTER(ILob::SetLength)
 
 NAN_PROPERTY_GETTER(ILob::GetPieceSize)
 {  
-  NanScope();
 
-  ILob *iLob = ObjectWrap::Unwrap<ILob>(args.Holder());
+  ILob *iLob = ObjectWrap::Unwrap<ILob>(info.Holder());
 
   try
   {
-    Local<Integer> value = NanNew<v8::Integer>(iLob->bufSize_);
-    NanReturnValue(value);
+    Local<Integer> value = Nan::New<v8::Integer>(iLob->bufSize_);
+    info.GetReturnValue().Set(value);
   }
 
   catch(dpi::Exception &e)
   {
     NJS_SET_EXCEPTION(e.what(), strlen(e.what()));
-    NanReturnUndefined();
   }
 
-  NanReturnUndefined();
+  info.GetReturnValue().Set(Nan::Undefined());
 }
 
 
@@ -546,7 +540,7 @@ NAN_PROPERTY_GETTER(ILob::GetPieceSize)
      Set Accessor of pieceSize property
 
   PARAMETERS
-    args - ILob object and pieceSize property
+    info - ILob object and pieceSize property
 
   RETURNS
     nothing
@@ -557,9 +551,8 @@ NAN_PROPERTY_GETTER(ILob::GetPieceSize)
 
 NAN_SETTER(ILob::SetPieceSize)
 {
-  NanScope();
 
-  ILob *iLob = ObjectWrap::Unwrap<ILob>(args.Holder());
+  ILob *iLob = ObjectWrap::Unwrap<ILob>(info.Holder());
 
   NJS_SET_PROP_UINT(iLob->bufSize_, value, "pieceSize");
 
@@ -587,7 +580,7 @@ NAN_SETTER(ILob::SetPieceSize)
     Get Accessor of offset property
 
   PARAMETERS
-    args - ILob object
+    info - ILob object
 
   RETURNS
     the current offset where read or write will happen.
@@ -598,23 +591,21 @@ NAN_SETTER(ILob::SetPieceSize)
 
 NAN_PROPERTY_GETTER(ILob::GetOffset)
 {  
-  NanScope();
 
-  ILob *iLob = ObjectWrap::Unwrap<ILob>(args.Holder());
+  ILob *iLob = ObjectWrap::Unwrap<ILob>(info.Holder());
 
   try
   {
-    Local<Number> value = NanNew<v8::Number>((unsigned long)iLob->offset_);
-    NanReturnValue(value);
+    Local<Number> value = Nan::New<v8::Number>((unsigned long)iLob->offset_);
+    info.GetReturnValue().Set(value);
   }
 
   catch(dpi::Exception &e)
   {
     NJS_SET_EXCEPTION(e.what(), strlen(e.what()));
-    NanReturnUndefined();
   }
 
-  NanReturnUndefined();
+  info.GetReturnValue().Set(Nan::Undefined());
 }
 
 
@@ -624,7 +615,7 @@ NAN_PROPERTY_GETTER(ILob::GetOffset)
      Set Accessor of offset property
 
   PARAMETERS
-    args - ILob object and offset property
+    info - ILob object and offset property
 
   RETURNS
     nothing
@@ -635,9 +626,8 @@ NAN_PROPERTY_GETTER(ILob::GetOffset)
 
 NAN_SETTER(ILob::SetOffset)
 {
-  NanScope();
 
-  ILob  *iLob = ObjectWrap::Unwrap<ILob>(args.Holder());
+  ILob  *iLob = ObjectWrap::Unwrap<ILob>(info.Holder());
   double offset = 0.0;
 
   NJS_SET_PROP_UINT(offset, value, "offset");
@@ -667,7 +657,7 @@ NAN_SETTER(ILob::SetOffset)
     Read method on ILob class.
 
   PARAMETERS
-    args - ILob object and callback
+    info - ILob object and callback
 
   RETURNS
     undefined
@@ -678,18 +668,17 @@ NAN_SETTER(ILob::SetOffset)
 
 NAN_METHOD(ILob::Read)
 { 
-  NanScope();
 
   Local<Function>  callback;
   ILob            *iLob;
   LobBaton        *lobBaton = new LobBaton;
 
-  NJS_GET_CALLBACK(callback, args);
+  NJS_GET_CALLBACK(callback, info);
 
-  NanAssignPersistent(lobBaton->cb, callback );
+  lobBaton->cb.Reset( callback );
 
-  NJS_CHECK_NUMBER_OF_ARGS (lobBaton->error, args, 1, 1, exitRead);
-  iLob = ObjectWrap::Unwrap<ILob>(args.This());
+  NJS_CHECK_NUMBER_OF_ARGS (lobBaton->error, info, 1, 1, exitRead);
+  iLob = ObjectWrap::Unwrap<ILob>(info.This());
 
   if(!iLob->isValid_)
   {
@@ -709,7 +698,7 @@ NAN_METHOD(ILob::Read)
   uv_queue_work(uv_default_loop(), &lobBaton->req,
                 Async_Read, (uv_after_work_cb)Async_AfterRead);
 
-  NanReturnUndefined();
+  info.GetReturnValue().Set(Nan::Undefined());
 }
 
 
@@ -788,51 +777,51 @@ void ILob::Async_Read(uv_work_t *req)
 
 void ILob::Async_AfterRead(uv_work_t *req)
 { 
-  NanScope();
+  Nan::HandleScope scope;
 
   LobBaton     *lobBaton = (LobBaton *)req->data;
   ILob         *iLob = lobBaton->iLob;
   v8::TryCatch  tc;
-  Handle<Value> argv[2];
+  Local<Value> argv[2];
 
   iLob->state_ = INACTIVE;     // mark Lob as inactive as back in main thread
 
   if(!(lobBaton->error).empty())
   {
-    argv[0] = v8::Exception::Error(NanNew<v8::String>((lobBaton->error).c_str()));
-    argv[1] = NanUndefined();
+    argv[0] = v8::Exception::Error(Nan::New<v8::String>((lobBaton->error).c_str()).ToLocalChecked());
+    argv[1] = Nan::Undefined();
   }
   else
   {
-    argv[0] = NanUndefined();
+    argv[0] = Nan::Undefined();
 
     if (iLob->amountRead_)
     {
       if (iLob->fetchType_ == DpiClob)
       {
-        Local<Value> str = NanNew<v8::String>((char *)iLob->buf_, 
-                                              iLob->amountRead_);
+        Local<Value> str = Nan::New<v8::String>((char *)iLob->buf_, 
+                                              iLob->amountRead_).ToLocalChecked();
         argv[1] = str;
       }
       else
       {
         // Blobs use buffers rather than strings
-        Local<Value> buffer = NanNewBufferHandle((char *)iLob->buf_,
-                                                 iLob->amountRead_);
+        Local<Value> buffer = Nan::NewBuffer((char *)iLob->buf_,
+                                             iLob->amountRead_).ToLocalChecked();
         argv[1] = buffer;
       }
 
 
     }
     else
-      argv[1] = NanNull();
+      argv[1] = Nan::Null();
   }
 
-  Local<Function> callback = NanNew(lobBaton->cb);
+  Local<Function> callback = Nan::New<Function>(lobBaton->cb);
 
   delete lobBaton;
 
-  NanMakeCallback(NanGetCurrentContext()->Global(), callback, 2, argv);
+  Nan::MakeCallback(Nan::GetCurrentContext()->Global(), callback, 2, argv);
 
   if(tc.HasCaught())
   {
@@ -848,7 +837,7 @@ void ILob::Async_AfterRead(uv_work_t *req)
     Write method on ILob class.
 
   PARAMETERS
-    args - ILob object and callback
+    info - ILob object and callback
 
   RETURNS
     undefined
@@ -858,19 +847,18 @@ void ILob::Async_AfterRead(uv_work_t *req)
 
 NAN_METHOD(ILob::Write)
 { 
-  NanScope();
 
   Local<Function>  callback;
   Local<Object> buffer_obj;
   ILob            *iLob;
   LobBaton        *lobBaton = new LobBaton;
 
-  NJS_GET_CALLBACK(callback, args);
+  NJS_GET_CALLBACK(callback, info);
 
-  NanAssignPersistent(lobBaton->cb, callback );
+  lobBaton->cb.Reset( callback );
 
-  NJS_CHECK_NUMBER_OF_ARGS (lobBaton->error, args, 2, 2, exitWrite);
-  iLob = ObjectWrap::Unwrap<ILob>(args.This());
+  NJS_CHECK_NUMBER_OF_ARGS (lobBaton->error, info, 2, 2, exitWrite);
+  iLob = ObjectWrap::Unwrap<ILob>(info.This());
 
   if(!iLob->isValid_)
   {
@@ -880,7 +868,7 @@ NAN_METHOD(ILob::Write)
 
   lobBaton->iLob = iLob;
 
-  buffer_obj = args[0]->ToObject();
+  buffer_obj = info[0]->ToObject();
   lobBaton->writebuf = Buffer::Data(buffer_obj);
   lobBaton->writelen = Buffer::Length(buffer_obj);
 
@@ -894,7 +882,7 @@ NAN_METHOD(ILob::Write)
   uv_queue_work(uv_default_loop(), &lobBaton->req,
                 Async_Write, (uv_after_work_cb)Async_AfterWrite);
 
-  NanReturnUndefined();
+  info.GetReturnValue().Set(Nan::Undefined());
 }
 
 
@@ -967,25 +955,25 @@ void ILob::Async_Write(uv_work_t *req)
 
 void ILob::Async_AfterWrite(uv_work_t *req)
 { 
-  NanScope();
+  Nan::HandleScope scope;
 
   LobBaton     *lobBaton = (LobBaton *)req->data;
   ILob         *iLob = lobBaton->iLob;
   v8::TryCatch  tc;
-  Handle<Value> argv[1];
+  Local<Value> argv[1];
 
   iLob->state_ = INACTIVE;     // mark Lob as inactive as back in main thread
 
   if(!(lobBaton->error).empty())
-    argv[0] = v8::Exception::Error(NanNew<v8::String>((lobBaton->error).c_str()));
+    argv[0] = v8::Exception::Error(Nan::New<v8::String>((lobBaton->error).c_str()).ToLocalChecked());
   else
-    argv[0] = NanUndefined();
+    argv[0] = Nan::Undefined();
 
-  Local<Function> callback = NanNew(lobBaton->cb);
+  Local<Function> callback = Nan::New<Function>(lobBaton->cb);
 
   delete lobBaton;
 
-  NanMakeCallback(NanGetCurrentContext()->Global(), callback, 1, argv);
+  Nan::MakeCallback(Nan::GetCurrentContext()->Global(), callback, 1, argv);
 
   if(tc.HasCaught())
   {

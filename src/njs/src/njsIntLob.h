@@ -38,7 +38,7 @@
  * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
  * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
- * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.� 
+ * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.� 
  * 
  * NAME
  *  njsILob.h
@@ -82,7 +82,7 @@ typedef struct LobBaton
   char              *writebuf;
   unsigned long long writelen;
   
-  Persistent<Function> cb;
+  Nan::Persistent<Function> cb;
 
   LobBaton(): error(""), dpienv(NULL), dpiconn(NULL),
               iLob(NULL), writebuf(NULL), writelen(0)
@@ -90,7 +90,7 @@ typedef struct LobBaton
 
   ~LobBaton ()
    {
-     NanDisposePersistent(cb);
+     //NanDisposePersistent(cb);
    }
   
 } LobBaton;
@@ -145,7 +145,7 @@ class ILob : public ObjectWrap
   void setILob(eBaton *executeBaton,  ProtoILob *protoILob);
   
                                 // Define ILob Constructor
-  static Persistent<FunctionTemplate> iLobTemplate_s;
+  static Nan::Persistent<FunctionTemplate> iLobTemplate_s;
   
   static void Init(Handle<Object> target);
 

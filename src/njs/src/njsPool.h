@@ -71,7 +71,7 @@ public:
                   unsigned int lobPrefetchSize);
    
    // Define Pool Constructor
-   static Persistent<FunctionTemplate> poolTemplate_s ;
+   static Nan::Persistent<FunctionTemplate> poolTemplate_s ;
 
 private:
 
@@ -129,7 +129,7 @@ typedef struct poolBaton
   uv_work_t req;
   std::string error;
   std::string connClass;
-  Persistent<Function> cb;
+  Nan::Persistent<Function> cb;
   dpi::Conn*  dpiconn;
   Pool*       njspool;
   unsigned int lobPrefetchSize;
@@ -140,7 +140,7 @@ typedef struct poolBaton
 
   ~poolBaton()
    {
-     NanDisposePersistent(cb);
+     //NanDisposePersistent(cb);
    }
 
 }poolBaton;
