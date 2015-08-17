@@ -1,45 +1,45 @@
-# node-oracledb version 0.7
+# node-oracledb version 1.0
 
 ## <a name="about"></a> 1. About node-oracledb
 
 The Oracle Database Node.js driver powers high performance
 Node.js applications.
 
-Node-oracledb 0.7 supports basic and advanced Oracle features, including:
+Node-oracledb connects Node.js 0.10, Node.js 0.12, and io.js to
+Oracle Database.
 
-- SQL and PL/SQL Execution
-- Fetching of large result sets
-- REF CURSOR support
-- Query results as JavaScript objects or array 
-- Binding using JavaScript objects or arrays
-- Conversion between JavaScript and Oracle types
-- Transaction Management
-- Connection Pooling
-- [Database Resident Connection Pooling](http://docs.oracle.com/database/121/ADFNS/adfns_perf_scale.htm#ADFNS228) (DRCP)
-- [External Authentication](http://docs.oracle.com/database/121/DBSEG/authentication.htm#DBSEG99840)
-- [Statement Caching](http://docs.oracle.com/database/121/LNOCI/oci09adv.htm#i471377)
-- [Client Result Caching](http://docs.oracle.com/database/121/ADFNS/adfns_perf_scale.htm#ADFNS464)
-- [End-to-end tracing](http://docs.oracle.com/database/121/TGSQL/tgsql_trace.htm#CHDBDGIJ)
-- High Availability Features
-  - [Fast Application Notification](http://docs.oracle.com/database/121/ADFNS/adfns_avail.htm#ADFNS538) (FAN)
-  - [Runtime Load Balancing](http://docs.oracle.com/database/121/ADFNS/adfns_perf_scale.htm#ADFNS515) (RLB)
-  - [Transparent Application Failover](http://docs.oracle.com/database/121/ADFNS/adfns_avail.htm#ADFNS534) (TAF)
-
-Node-oracledb 0.7 is a preview release.  We are actively working on
-adding features such as LOB support.
-
-Share your feedback at the Oracle Technology Network
-[Node.js discussion forum](https://community.oracle.com/community/database/developer-tools/node_js/content)
-so we can incorporate any fixes and "must-haves" into a 1.0 release
-soon.  Issues with node-oracledb can also be reported
-[here](https://github.com/oracle/node-oracledb/issues).
-
-The driver is maintained by Oracle Corp.
+This is an open source project maintained by Oracle Corp.
 
 The node-oracledb home page is on the
 [Oracle Technology Network](http://www.oracle.com/technetwork/database/database-technologies/node_js/index.html).
 
-### Example: Simple SELECT statement implementation in node-oracledb
+### Node-oracledb supports:
+
+- [SQL and PL/SQL execution](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#sqlexecution)
+- [Fetching of large result sets](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#resultsethandling)
+- [REF CURSORs](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#refcursors)
+- [Large Objects: CLOBs and BLOBs](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#lobhandling)
+- [Query results as JavaScript objects or array ](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#queryoutputformats)
+- [Smart mapping between JavaScript and Oracle types with manual override available](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#typemap)
+- [Data binding using JavaScript objects or arrays](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#bind)
+- [Transaction Management](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#transactionmgt)
+- [Inbuilt Connection Pooling](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#connpooling)
+- [Database Resident Connection Pooling (DRCP)](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#drcp)
+- [External Authentication](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#extauth)
+- [Row Prefetching](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#rowprefetching)
+- [Statement Caching](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#stmtcache)
+- [Client Result Caching](http://docs.oracle.com/database/121/ADFNS/adfns_perf_scale.htm#ADFNS464)
+- [End-to-end tracing](http://docs.oracle.com/database/121/TGSQL/tgsql_trace.htm#CHDBDGIJ)
+- High Availability Features
+  - [Fast Application Notification (FAN)](http://docs.oracle.com/database/121/ADFNS/adfns_avail.htm#ADFNS538)
+  - [Runtime Load Balancing (RLB)](http://docs.oracle.com/database/121/ADFNS/adfns_perf_scale.htm#ADFNS515)
+  - [Transparent Application Failover (TAF)](http://docs.oracle.com/database/121/ADFNS/adfns_avail.htm#ADFNS534)
+
+We are actively working on supporting the best Oracle Database
+features, and on functionality requests from
+[users involved in the project](https://github.com/oracle/node-oracledb/issues).
+
+### A simple query example:
 
 ```javascript
 var oracledb = require('oracledb');
@@ -52,21 +52,14 @@ oracledb.getConnection(
   },
   function(err, connection)
   {
-    if (err) {
-      console.error(err.message);
-      return;
-    }
+    if (err) { console.error(err.message); return; }
+
     connection.execute(
-      "SELECT department_id, department_name "
-    + "FROM departments "
-    + "WHERE department_id = :did",
-      [180],
+      "SELECT department_id, department_name FROM departments WHERE department_id = :did",
+      [180],  // bind value for :did
       function(err, result)
       {
-        if (err) {
-          console.error(err.message);
-          return;
-        }
+        if (err) { console.error(err.message); return; }
         console.log(result.rows);
       });
   });
@@ -78,34 +71,40 @@ With Oracle's sample HR schema, the output is:
 [ [ 180, 'Construction' ] ]
 ```
 
-There are more examples in the [examples](examples) directory.
+## <a name="examples"></a> 2. Examples
 
-## <a name="installation"></a> 2. Installation
+There are examples in the [examples](https://github.com/oracle/node-oracledb/tree/master/examples) directory.
+
+## <a name="installation"></a> 3. Installation
 
 The basic install steps are:
 
-- Install the small, free [Oracle Instant Client](http://www.oracle.com/technetwork/database/features/instant-client/index-100365.html) libraries if your database is remote, or have a local database such as the free [Oracle XE](http://www.oracle.com/technetwork/database/database-technologies/express-edition/overview/index.html) release.
+- Install the small, free [Oracle Instant Client](http://www.oracle.com/technetwork/database/features/instant-client/index-100365.html) libraries if your database is remote.  Or use a locally installed database such as the free [Oracle XE](http://www.oracle.com/technetwork/database/database-technologies/express-edition/overview/index.html) release.
 - Run `npm install oracledb` to install from the NPM registry.
 
-See [INSTALL](INSTALL.md) for details.
+See [INSTALL](https://github.com/oracle/node-oracledb/tree/master/INSTALL.md) for details.
 
-## <a name="doc"></a> 3. Documentation
+## <a name="doc"></a> 4. Documentation
 
-See [Documentation for the Oracle Database Node.js Driver](doc/api.md)
+See [Documentation for the Oracle Database Node.js Driver](https://github.com/oracle/node-oracledb/tree/master/doc/api.md).
 
-## <a name="changes"></a> 4. Changes
+## <a name="changes"></a> 5. Changes
 
-See [CHANGELOG](CHANGELOG.md)
+See [CHANGELOG](https://github.com/oracle/node-oracledb/tree/master/CHANGELOG.md)
 
 *Note* there were two small, backward-compatibility breaking attribute name changes in node-oracledb 0.5.
 
-## <a name="contrib"></a> 5. Contributing
+## <a name="testing"></a> 6. Testsuite
+
+To run the included testsuite see [test/README](https://github.com/oracle/node-oracledb/tree/master/test/README.md).
+
+## <a name="contrib"></a> 7. Contributing
 
 Node-oracledb is an open source project. See 
-[CONTRIBUTING](CONTRIBUTING.md)
+[CONTRIBUTING](https://github.com/oracle/node-oracledb/tree/master/CONTRIBUTING.md)
 for details.
 
-## <a name="license"></a> 6. Licence
+## <a name="license"></a> 8. License
 
 Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved.
 
@@ -121,15 +120,3 @@ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 
 See the License for the specific language governing permissions and
 limitations under the License.
-
-## <a name="testing"></a> 7. Running tests
-
-The basic steps for running tests are:
-
-- Install the driver `npm install oracledb`
-- Change directory `cd node_modules/oracledb`
-- Run `npm install mocha should async` to install dependent Node.js modules required for testing.
-- Set the correct credential information in `test/dbConfig.js`
-- Run `npm test` to start the test suite.
-
-See [test/README](test/README.md) for details.
