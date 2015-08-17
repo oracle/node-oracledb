@@ -182,7 +182,7 @@ Handle<Value> Pool::getPoolProperty(Pool* njsPool, unsigned int poolProperty)
 NAN_PROPERTY_GETTER(Pool::GetPoolMin)
 {
   Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
-  Local<Value> value = getPoolProperty( njsPool, njsPool->poolMin_);
+  Local<Value> value = Nan::New(getPoolProperty( njsPool, njsPool->poolMin_));
   info.GetReturnValue().Set(value);
 }
 
@@ -194,7 +194,7 @@ NAN_PROPERTY_GETTER(Pool::GetPoolMin)
 NAN_PROPERTY_GETTER(Pool::GetPoolMax)
 {
   Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
-  Local<Value> value = getPoolProperty( njsPool, njsPool->poolMax_);
+  Local<Value> value = Nan::New(getPoolProperty( njsPool, njsPool->poolMax_));
   info.GetReturnValue().Set(value);
 }
 
@@ -206,7 +206,7 @@ NAN_PROPERTY_GETTER(Pool::GetPoolMax)
 NAN_PROPERTY_GETTER(Pool::GetPoolIncrement)
 {
   Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
-  Local<Value> value = getPoolProperty( njsPool, njsPool->poolIncrement_);
+  Local<Value> value = Nan::New(getPoolProperty( njsPool, njsPool->poolIncrement_));
   info.GetReturnValue().Set(value);
 }
 
@@ -218,7 +218,7 @@ NAN_PROPERTY_GETTER(Pool::GetPoolIncrement)
 NAN_PROPERTY_GETTER(Pool::GetPoolTimeout)
 {
   Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
-  Local<Value> value = getPoolProperty( njsPool, njsPool->poolTimeout_);
+  Local<Value> value = Nan::New(getPoolProperty( njsPool, njsPool->poolTimeout_));
   info.GetReturnValue().Set(value);
 }
 
@@ -288,7 +288,7 @@ NAN_PROPERTY_GETTER(Pool::GetConnectionsInUse)
 NAN_PROPERTY_GETTER(Pool::GetStmtCacheSize)
 {
   Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
-  Local<Value> value = getPoolProperty( njsPool, njsPool->stmtCacheSize_);
+  Local<Value> value = Nan::New<Value>(getPoolProperty( njsPool, njsPool->stmtCacheSize_));
   info.GetReturnValue().Set(value);
 }
 

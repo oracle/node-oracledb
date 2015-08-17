@@ -1884,14 +1884,14 @@ Handle<Value> Connection::GetValue ( eBaton *executeBaton,
     // SELECT queries
     Define *define = &(executeBaton->defines[col]);
     long double *dblArr = (long double *)define->buf;
-    Local<Value> value = Connection::GetValueCommon(
+    Local<Value> value = Nan::New(Connection::GetValueCommon(
                            executeBaton,
                            define->ind[row],
                            define->fetchType,
                            (define->fetchType == DpiTimestampLTZ ) ? 
                              (void *) &dblArr[row] : 
                              (void *) ((char *)(define->buf) + ( row * (define->maxSize ))),
-                           define->len[row] );
+                           define->len[row] ));
     return scope.Escape( value );
   }
   else
@@ -1900,27 +1900,27 @@ Handle<Value> Connection::GetValue ( eBaton *executeBaton,
     Bind *bind = executeBaton->binds[col];
     if(executeBaton->stmtIsReturning)
     {
-      Local<Value> value = Connection::GetArrayValue (
+      Local<Value> value = Nan::New(Connection::GetArrayValue (
                                         executeBaton,
                                         executeBaton->binds[col], 
-                         (unsigned long)executeBaton->rowsAffected );
+                         (unsigned long)executeBaton->rowsAffected ));
       return scope.Escape(value);
     }
     else if(bind->type == DpiRSet) 
     {
-      return scope.Escape ( Local<Value>(Connection::GetValueRefCursor (
+      return scope.Escape ( Nan::New(Connection::GetValueRefCursor (
                                       executeBaton, bind )));
     }
     else if (( bind->type == DpiClob ) ||
              ( bind->type == DpiBlob ) ||
              ( bind->type == DpiBfile))
     {
-      return scope.Escape ( Local<Value>(Connection::GetValueLob (
+      return scope.Escape ( Nan::New<Value>(Connection::GetValueLob (
                                       executeBaton, bind )));
     }
     else
     {
-      return scope.Escape ( Local<Value>(Connection::GetValueCommon (
+      return scope.Escape ( Nan::New(Connection::GetValueCommon (
                                       executeBaton,
                                       bind->ind[row],
                                       bind->type,
@@ -1947,7 +1947,7 @@ Handle<Value> Connection::GetValueRefCursor ( eBaton *executeBaton,
                                               Bind *bind )
 {
   Nan::EscapableHandleScope scope;
-  Handle<Object> resultSet;
+  Local<Object> resultSet;
   Local<Value> value;
 
   if(bind->ind[0] != -1)
@@ -1997,7 +1997,7 @@ Handle<Value> Connection::GetValueLob ( eBaton *executeBaton,
   // ILob object now.  If anything goes wrong, it is the
   // responsibility of the ILob class to free the OCI handles.
 
-  value = NewLob(executeBaton, protoILob);
+  value = Nan::New<Value>(NewLob(executeBaton, protoILob));
 
   // all done with ProtoILob
   delete protoILob;
@@ -2052,7 +2052,7 @@ Handle<Value> Connection::GetValueCommon ( eBaton *executeBaton,
        case (dpi::DpiBfile):
        {
          ProtoILob *protoILob = *(static_cast<ProtoILob **>(val));
-         value = NewLob(executeBaton, protoILob);
+         value = Nan::New(NewLob(executeBaton, protoILob));
          delete protoILob;
          *(ProtoILob **)val = NULL;
        }
@@ -2170,12 +2170,12 @@ v8::Handle<v8::Value> Connection::GetOutBinds (eBaton* executeBaton)
     if( executeBaton->binds[0]->key.empty() )
     {
       // Binds as JS array
-      return scope.Escape(Local<Value>(GetOutBindArray( executeBaton )));
+      return scope.Escape(Nan::New<Value>(GetOutBindArray( executeBaton )));
     }
     else
     {
       // Binds as JS object
-      return scope.Escape(Local<Value>(GetOutBindObject( executeBaton )));
+      return scope.Escape(Nan::New<Value>(GetOutBindObject( executeBaton )));
     }
   }
   return Nan::Undefined();
@@ -2206,7 +2206,7 @@ v8::Handle<v8::Value> Connection::GetOutBindArray ( eBaton *executeBaton )
     if(binds[index]->isOut)
     {
       Local<Value> val ;
-      val = Connection::GetValue ( executeBaton, false, index ); 
+      val = Nan::New<Value>(Connection::GetValue ( executeBaton, false, index ) ); 
       arrayBinds->Set( it, val );
       it ++;
     }

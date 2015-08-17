@@ -730,7 +730,7 @@ void Oracledb::Async_AfterGetConnection (uv_work_t *req)
     (ObjectWrap::Unwrap<Connection> (connection))->
                                 setConnection( connBaton->dpiconn,
                                                connBaton->oracledb );
-    argv[1] = connection;
+    argv[1] = Nan::New<Value>(connection);
   }
   Local<Function> callback = Nan::New(connBaton->cb);
   delete connBaton;
@@ -874,7 +874,7 @@ void Oracledb::Async_AfterCreatePool (uv_work_t *req)
   else
   {
     argv[0] = Nan::Undefined();
-    Handle<Object> njsPool = Nan::New(Pool::poolTemplate_s)->
+    Local<Object> njsPool = Nan::New(Pool::poolTemplate_s)->
                              GetFunction() ->NewInstance();
     (ObjectWrap::Unwrap<Pool> (njsPool))-> setPool ( poolBaton->dpipool,
                                                      poolBaton->oracledb,

@@ -189,8 +189,8 @@ NAN_PROPERTY_GETTER(ResultSet::GetMetaData)
   Connection::CopyMetaData ( columnNames, njsResultSet->meta_,
                              njsResultSet->numCols_ );
   Local<Value> meta;
-  meta = Connection::GetMetaData( columnNames,
-                                  njsResultSet->numCols_ );
+  meta = Nan::New<Value>(Connection::GetMetaData( columnNames,
+                                  njsResultSet->numCols_ ));
   info.GetReturnValue().Set(meta);
 }
 
@@ -458,19 +458,19 @@ void ResultSet::Async_AfterGetRows(uv_work_t *req)
 
     eBaton* ebaton               = getRowsBaton->ebaton;
     ebaton->outFormat            = getRowsBaton->njsRS->outFormat_;
-    Handle<Value> rowsArray      = Nan::New<v8::Array>(0),
-                  rowsArrayValue = Nan::Null();
+    Local<Value> rowsArray       = Nan::New<v8::Array>(0),
+                 rowsArrayValue  = Nan::Null();
 
     if(ebaton->rowsFetched)
     {
-      rowsArray = Connection::GetRows(ebaton);
+      rowsArray = Nan::New<Value>(Connection::GetRows(ebaton));
       if(!(ebaton->error).empty())
       {
         argv[0] = v8::Exception::Error(Nan::New<v8::String>((ebaton->error).c_str()).ToLocalChecked());
         argv[1] = Nan::Undefined();
         goto exitAsyncAfterGetRows;
       }
-      rowsArrayValue =  Handle<Array>::Cast(rowsArray)->Get(0);
+      rowsArrayValue =  Local<Array>::Cast(rowsArray)->Get(0);
     }
     argv[1] = (getRowsBaton->fetchMultiple) ? rowsArray : rowsArrayValue;
   }
