@@ -338,7 +338,7 @@ NAN_METHOD(ILob::Release)
 
   iLob->cleanup();
 
-  info.GetReturnValue().Set(Nan::Undefined());
+  info.GetReturnValue().SetUndefined();
 }
 
 
@@ -400,17 +400,15 @@ NAN_PROPERTY_GETTER(ILob::GetChunkSize)
 
   try
   {
-    Local<Integer> value = Nan::New<v8::Integer>(iLob->chunkSize_);
-    
-    info.GetReturnValue().Set(value);
+    info.GetReturnValue().Set(iLob->chunkSize_);
+    return;
   }
-
   catch(dpi::Exception &e)
   {
     NJS_SET_EXCEPTION(e.what(), strlen(e.what()));
   }
 
-  info.GetReturnValue().Set(Nan::Undefined());
+  info.GetReturnValue().SetUndefined();
 }
 
 
@@ -461,17 +459,15 @@ NAN_PROPERTY_GETTER(ILob::GetLength)
 
   try
   {
-    Local<Number> value = Nan::New<v8::Number>((double)iLob->length_);
-    
-    info.GetReturnValue().Set(value);
+    info.GetReturnValue().Set((double)iLob->length_);
+    return;
   }
-
   catch(dpi::Exception &e)
   {
     NJS_SET_EXCEPTION(e.what(), strlen(e.what()));
   }
 
-  info.GetReturnValue().Set(Nan::Undefined());
+  info.GetReturnValue().SetUndefined();
 }
 
 
@@ -521,16 +517,15 @@ NAN_PROPERTY_GETTER(ILob::GetPieceSize)
 
   try
   {
-    Local<Integer> value = Nan::New<v8::Integer>(iLob->bufSize_);
-    info.GetReturnValue().Set(value);
+    info.GetReturnValue().Set(iLob->bufSize_);
+    return;
   }
-
   catch(dpi::Exception &e)
   {
     NJS_SET_EXCEPTION(e.what(), strlen(e.what()));
   }
 
-  info.GetReturnValue().Set(Nan::Undefined());
+  info.GetReturnValue().SetUndefined();
 }
 
 
@@ -596,16 +591,15 @@ NAN_PROPERTY_GETTER(ILob::GetOffset)
 
   try
   {
-    Local<Number> value = Nan::New<v8::Number>((unsigned long)iLob->offset_);
-    info.GetReturnValue().Set(value);
+    info.GetReturnValue().Set((uint32_t)iLob->offset_);
+    return;
   }
-
   catch(dpi::Exception &e)
   {
     NJS_SET_EXCEPTION(e.what(), strlen(e.what()));
   }
 
-  info.GetReturnValue().Set(Nan::Undefined());
+  info.GetReturnValue().SetUndefined();
 }
 
 
@@ -698,7 +692,7 @@ NAN_METHOD(ILob::Read)
   uv_queue_work(uv_default_loop(), &lobBaton->req,
                 Async_Read, (uv_after_work_cb)Async_AfterRead);
 
-  info.GetReturnValue().Set(Nan::Undefined());
+  info.GetReturnValue().SetUndefined();
 }
 
 
@@ -882,7 +876,7 @@ NAN_METHOD(ILob::Write)
   uv_queue_work(uv_default_loop(), &lobBaton->req,
                 Async_Write, (uv_after_work_cb)Async_AfterWrite);
 
-  info.GetReturnValue().Set(Nan::Undefined());
+  info.GetReturnValue().SetUndefined();
 }
 
 

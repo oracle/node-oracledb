@@ -157,7 +157,7 @@ NAN_METHOD(Pool::New)
    DESCRIPTION
      Abstraction to all getter accessors of properties
 */
-Handle<Value> Pool::getPoolProperty(Pool* njsPool, unsigned int poolProperty)
+Local<Primitive> Pool::getPoolProperty(Pool* njsPool, unsigned int poolProperty)
 {
   Nan::HandleScope scope;
   
@@ -182,8 +182,7 @@ Handle<Value> Pool::getPoolProperty(Pool* njsPool, unsigned int poolProperty)
 NAN_PROPERTY_GETTER(Pool::GetPoolMin)
 {
   Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
-  Local<Value> value = Nan::New(getPoolProperty( njsPool, njsPool->poolMin_));
-  info.GetReturnValue().Set(value);
+  info.GetReturnValue().Set(getPoolProperty( njsPool, njsPool->poolMin_));
 }
 
 /*****************************************************************************/
@@ -194,8 +193,7 @@ NAN_PROPERTY_GETTER(Pool::GetPoolMin)
 NAN_PROPERTY_GETTER(Pool::GetPoolMax)
 {
   Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
-  Local<Value> value = Nan::New(getPoolProperty( njsPool, njsPool->poolMax_));
-  info.GetReturnValue().Set(value);
+  info.GetReturnValue().Set(getPoolProperty( njsPool, njsPool->poolMax_));
 }
 
 /*****************************************************************************/
@@ -206,8 +204,7 @@ NAN_PROPERTY_GETTER(Pool::GetPoolMax)
 NAN_PROPERTY_GETTER(Pool::GetPoolIncrement)
 {
   Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
-  Local<Value> value = Nan::New(getPoolProperty( njsPool, njsPool->poolIncrement_));
-  info.GetReturnValue().Set(value);
+  info.GetReturnValue().Set(getPoolProperty( njsPool, njsPool->poolIncrement_));
 }
 
 /*****************************************************************************/
@@ -218,8 +215,7 @@ NAN_PROPERTY_GETTER(Pool::GetPoolIncrement)
 NAN_PROPERTY_GETTER(Pool::GetPoolTimeout)
 {
   Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
-  Local<Value> value = Nan::New(getPoolProperty( njsPool, njsPool->poolTimeout_));
-  info.GetReturnValue().Set(value);
+  info.GetReturnValue().Set(getPoolProperty( njsPool, njsPool->poolTimeout_));
 }
 
 /*****************************************************************************/
@@ -239,9 +235,7 @@ NAN_PROPERTY_GETTER(Pool::GetConnectionsOpen)
   }
   try
   {
-    Local<Integer> value = Nan::New<v8::Integer>(njsPool->dpipool_->
-                                            connectionsOpen());
-    info.GetReturnValue().Set(value);
+    info.GetReturnValue().Set(njsPool->dpipool_->connectionsOpen());
     return;
   }
   catch(dpi::Exception &e)
@@ -268,9 +262,7 @@ NAN_PROPERTY_GETTER(Pool::GetConnectionsInUse)
   }
   try
   {
-    Local<Integer> value = Nan::New<v8::Integer>(njsPool->dpipool_->
-                                            connectionsInUse());
-    info.GetReturnValue().Set(value); 
+    info.GetReturnValue().Set(njsPool->dpipool_->connectionsInUse()); 
     return;
   }
   catch(dpi::Exception &e)
@@ -288,8 +280,7 @@ NAN_PROPERTY_GETTER(Pool::GetConnectionsInUse)
 NAN_PROPERTY_GETTER(Pool::GetStmtCacheSize)
 {
   Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
-  Local<Value> value = Nan::New<Value>(getPoolProperty( njsPool, njsPool->stmtCacheSize_));
-  info.GetReturnValue().Set(value);
+  info.GetReturnValue().Set(getPoolProperty( njsPool, njsPool->stmtCacheSize_));
 }
 
 /*****************************************************************************/

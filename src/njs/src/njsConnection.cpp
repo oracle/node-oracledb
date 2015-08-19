@@ -189,13 +189,12 @@ NAN_PROPERTY_GETTER(Connection::GetStmtCacheSize)
   {
     string error = NJSMessages::getErrorMsg ( errInvalidConnection );
     NJS_SET_EXCEPTION(error.c_str(), error.length());
-    info.GetReturnValue().Set(Nan::Undefined());
+    info.GetReturnValue().SetUndefined();
     return;
   }
   try
   {
-    Local<Integer> value = Nan::New<v8::Integer>(njsConn->dpiconn_->stmtCacheSize());
-    info.GetReturnValue().Set(value);
+    info.GetReturnValue().Set(njsConn->dpiconn_->stmtCacheSize());
     return;
   }
   catch(dpi::Exception &e)
@@ -223,7 +222,7 @@ NAN_SETTER(Connection::SetStmtCacheSize)
 NAN_PROPERTY_GETTER(Connection::GetClientId)
 {
   connectionPropertyException(ObjectWrap::Unwrap<Connection>(info.Holder()), errWriteOnly, "clientId");
-  info.GetReturnValue().Set(Nan::Undefined());
+  info.GetReturnValue().SetUndefined();
 }
 
 /*****************************************************************************/
@@ -256,7 +255,7 @@ NAN_SETTER(Connection::SetClientId)
 NAN_PROPERTY_GETTER(Connection::GetModule)
 {
   connectionPropertyException(ObjectWrap::Unwrap<Connection>(info.Holder()), errWriteOnly, "module");
-  info.GetReturnValue().Set(Nan::Undefined());
+  info.GetReturnValue().SetUndefined();
 }
 
 /*****************************************************************************/
@@ -289,7 +288,7 @@ NAN_SETTER(Connection::SetModule)
 NAN_PROPERTY_GETTER(Connection::GetAction)
 {
   connectionPropertyException(ObjectWrap::Unwrap<Connection>(info.Holder()), errWriteOnly, "action");
-  info.GetReturnValue().Set(Nan::Undefined());
+  info.GetReturnValue().SetUndefined();
 }
 
 /*****************************************************************************/
@@ -373,7 +372,7 @@ NAN_METHOD(Connection::Execute)
   uv_queue_work(uv_default_loop(), &executeBaton->req,
                Async_Execute, (uv_after_work_cb)Async_AfterExecute);
 
-  info.GetReturnValue().Set(Nan::Undefined());
+  info.GetReturnValue().SetUndefined();
 }
 
 /*****************************************************************************/
@@ -2279,7 +2278,7 @@ NAN_METHOD(Connection::Release)
 
   uv_queue_work(uv_default_loop(), &releaseBaton->req,
                Async_Release, (uv_after_work_cb)Async_AfterRelease);
-  info.GetReturnValue().Set(Nan::Undefined());
+  info.GetReturnValue().SetUndefined();
 }
 
 /*****************************************************************************/
@@ -2371,7 +2370,7 @@ exitCommit:
   uv_queue_work(uv_default_loop(), &commitBaton->req,
                Async_Commit, (uv_after_work_cb)Async_AfterCommit);
 
-  info.GetReturnValue().Set(Nan::Undefined());
+  info.GetReturnValue().SetUndefined();
 }
 
 /*****************************************************************************/
@@ -2462,7 +2461,7 @@ NAN_METHOD(Connection::Rollback)
   rollbackBaton->req.data  = (void*) rollbackBaton;
   uv_queue_work(uv_default_loop(), &rollbackBaton->req,
                 Async_Rollback, (uv_after_work_cb)Async_AfterRollback);
-  info.GetReturnValue().Set(Nan::Undefined());
+  info.GetReturnValue().SetUndefined();
 }
 
 /*****************************************************************************/
@@ -2555,7 +2554,7 @@ NAN_METHOD(Connection::Break)
   uv_queue_work(uv_default_loop(), &breakBaton->req,
                Async_Break, (uv_after_work_cb)Async_AfterBreak);
 
-  info.GetReturnValue().Set(Nan::Undefined());
+  info.GetReturnValue().SetUndefined();
 }
 
 /*****************************************************************************/
@@ -2946,9 +2945,9 @@ v8::Handle<v8::Value> Connection::NewLob(eBaton* executeBaton,
   Connection     *connection = executeBaton->njsconn;
   // Handle<Object>  jsOracledb = connection->oracledb_->jsOracledb;
   Handle<Object>  jsOracledb = Nan::New(connection->oracledb_->jsOracledb);
-  Handle<Value>   argv[1];
+  Local<Value>   argv[1];
   
-  Handle<Object>  iLob = Nan::New(ILob::iLobTemplate_s)->GetFunction()->NewInstance();
+  Local<Object>  iLob = Nan::New<FunctionTemplate>(ILob::iLobTemplate_s)->GetFunction()->NewInstance();
   
       // the ownership of all handles in the ProtoILob are transferred to ILob
       // here.  Any error in initialization of ILob will cleanup the OCI
@@ -2964,6 +2963,12 @@ v8::Handle<v8::Value> Connection::NewLob(eBaton* executeBaton,
   Local<Value>   result =
     Local<Function>::Cast(jsOracledb->Get(Nan::New<v8::String>("newLob").ToLocalChecked()))->Call(
       jsOracledb, 1, argv);
+
+  // Local<Value>   result =
+  //   Nan::MakeCallback(
+  //     jsOracledb,
+  //     Nan::New<v8::String>("newLob").ToLocalChecked(),
+  //     1, argv);
 
   return scope.Escape(result);
 }
@@ -2995,12 +3000,18 @@ NAN_METHOD(Connection::GetLob)
 {
   Connection     *connection = ObjectWrap::Unwrap<Connection>(info.This());
   //Handle<Object>  jsOracledb = connection->oracledb_->jsOracledb;
-  Handle<Object>  jsOracledb = Nan::New(connection->oracledb_->jsOracledb);
-  Handle<Value>   argv[1];
+  Local<Object>  jsOracledb = Nan::New<Object>(connection->oracledb_->jsOracledb);
+  Local<Value>   argv[1];
   
   Local<Value>   result =
     Local<Function>::Cast(jsOracledb->Get(Nan::New<v8::String>("newLob").ToLocalChecked()))->Call(
       jsOracledb, 1, argv);
+
+  // Local<Value>   result =
+  //   Nan::MakeCallback(
+  //     jsOracledb,
+  //     Nan::New<v8::String>("newLob").ToLocalChecked(),
+  //     1, argv);
 
   info.GetReturnValue().Set(result);
 }

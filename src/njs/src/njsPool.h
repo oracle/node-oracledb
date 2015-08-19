@@ -96,7 +96,7 @@ private:
   static NAN_PROPERTY_GETTER(GetConnectionsInUse);
   static NAN_PROPERTY_GETTER(GetStmtCacheSize);
 
-  static Handle<Value> getPoolProperty(Pool* njsPool, unsigned int poolProperty);
+  static Local<Primitive> getPoolProperty(Pool* njsPool, unsigned int poolProperty);
 
   // Define Setter Accessors to properties
   static NAN_SETTER(SetPoolMax);

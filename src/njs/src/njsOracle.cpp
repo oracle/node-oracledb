@@ -226,8 +226,7 @@ NAN_METHOD(Oracledb::New)
 NAN_PROPERTY_GETTER(Oracledb::GetPoolMin)
 {
   Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
-  Local<Integer> value = Nan::New<v8::Integer>(oracledb->poolMin_);
-  info.GetReturnValue().Set(value);
+  info.GetReturnValue().Set(oracledb->poolMin_);
 }
 
 /*****************************************************************************/
@@ -249,8 +248,7 @@ NAN_SETTER(Oracledb::SetPoolMin)
 NAN_PROPERTY_GETTER(Oracledb::GetPoolMax)
 {
   Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
-  Local<Integer> value = Nan::New<v8::Integer>(oracledb->poolMax_);
-  info.GetReturnValue().Set(value);
+  info.GetReturnValue().Set(oracledb->poolMax_);
 }
 
 /*****************************************************************************/
@@ -295,8 +293,7 @@ NAN_SETTER(Oracledb::SetPoolIncrement)
 NAN_PROPERTY_GETTER(Oracledb::GetPoolTimeout)
 {
   Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
-  Local<Integer> value = Nan::New<v8::Integer>(oracledb->poolTimeout_);
-  info.GetReturnValue().Set(value);
+  info.GetReturnValue().Set(oracledb->poolTimeout_);
 }
 
 /*****************************************************************************/
@@ -341,7 +338,7 @@ NAN_SETTER(Oracledb::SetMaxRows)
 NAN_PROPERTY_GETTER(Oracledb::GetOutFormat)
 {
   Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
-  info.GetReturnValue().Set(Nan::New<v8::Integer>(oracledb->outFormat_));
+  info.GetReturnValue().Set(oracledb->outFormat_);
 }
 
 /*****************************************************************************/
@@ -385,7 +382,7 @@ NAN_SETTER(Oracledb::SetStmtCacheSize)
 NAN_PROPERTY_GETTER(Oracledb::GetPrefetchRows)
 {
   Oracledb* oracledb   = ObjectWrap::Unwrap<Oracledb>(info.Holder());
-  info.GetReturnValue().Set(Nan::New<v8::Integer>(oracledb->prefetchRows_));
+  info.GetReturnValue().Set(oracledb->prefetchRows_);
 }
 
 /*****************************************************************************/
@@ -430,7 +427,7 @@ NAN_SETTER(Oracledb::SetAutoCommit)
 NAN_PROPERTY_GETTER(Oracledb::GetVersion)
 {
   int version = NJS_NODE_ORACLEDB_VERSION;
-  info.GetReturnValue().Set(Nan::New<v8::Integer>(version));
+  info.GetReturnValue().Set(version);
 }
 
 /*****************************************************************************/
@@ -485,9 +482,7 @@ NAN_PROPERTY_GETTER(Oracledb::GetExternalAuth)
 {
 
   Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
-  Local<Boolean> value = Nan::New<v8::Boolean>(oracledb->externalAuth_);
-
-  info.GetReturnValue().Set(value);
+  info.GetReturnValue().Set((bool)oracledb->externalAuth_);
 }
 
 
@@ -725,7 +720,7 @@ void Oracledb::Async_AfterGetConnection (uv_work_t *req)
   else
   {
     argv[0] = Nan::Undefined();
-    Local<FunctionTemplate> lft = Nan::New(Connection::connectionTemplate_s);
+    Local<FunctionTemplate> lft = Nan::New<FunctionTemplate>(Connection::connectionTemplate_s);
     Handle<Object> connection = lft->GetFunction()-> NewInstance();
     (ObjectWrap::Unwrap<Connection> (connection))->
                                 setConnection( connBaton->dpiconn,
