@@ -130,7 +130,7 @@ private:
 
   unsigned int   numCols_;         // # of cols this stmt execution will return
   MetaData       *meta_;           // Meta data array
-  DpiStmtType    stmtType_;        // Statement Type (Query, DML, ... )
+  unsigned short stmtType_;        // Statement Type (Query, DML, ... )
   bool           isReturning_;     // Does the stmt has RETURNING INTO clause?
   bool           isReturningSet_;  // Has isReturning_ flag queried & set.
   bool           refCursor_;       // refCursor or not.

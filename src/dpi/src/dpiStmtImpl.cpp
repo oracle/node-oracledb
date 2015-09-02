@@ -155,7 +155,7 @@ DpiStmtType StmtImpl::stmtType () const
                          OCI_ATTR_STMT_TYPE, errh_), errh_);
   }
 
-  return stmtType_;
+  return (DpiStmtType)stmtType_;
 }
 
 
