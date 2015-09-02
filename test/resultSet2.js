@@ -88,6 +88,13 @@ describe('55. resultSet2.js', function() {
              WHERE employees_id > p_in; \
          END; "; 
 
+  var proc2 =
+      "CREATE OR REPLACE PROCEDURE get_invalid_refcur ( p OUT SYS_REFCURSOR) \
+      AS \
+      BEGIN  \
+        NULL; \
+      END; ";
+
   beforeEach(function(done) {
     async.series([
       function(callback) {
@@ -130,6 +137,17 @@ describe('55. resultSet2.js', function() {
             callback();
           }
         );
+      },
+      function(callback) {
+        connection.execute (
+          proc2,
+          [],
+          { autoCommit : true },
+          function (err ) {
+            should.not.exist ( err );
+            callback();
+          }
+        );
       }
     ], done);
   })
@@ -154,6 +172,16 @@ describe('55. resultSet2.js', function() {
           }
         );
       },
+      function(callback) {
+        connection.execute (
+          'DROP PROCEDURE get_invalid_refcur',
+          function ( err ) {
+            should.not.exist ( err ) ;
+            callback ();
+          }
+        );
+      },
+
       function(callback) {
         connection.release( function(err) {
           should.not.exist(err);
@@ -340,11 +368,39 @@ describe('55. resultSet2.js', function() {
         }       
       }
     })
+
+    it ( '55.3.3 Invalid REF Cursor', function (done ) {
+      connection.should.be.ok;
+
+      connection.execute (
+        "BEGIN get_invalid_refcur ( :p ); END; ",
+        {
+          p : { type : oracledb.CURSOR, dir : oracledb.BIND_OUT }
+        },
+        function ( err, result) {
+          should.not.exist ( err );
+          fetchRowFromRS2 (result.outBinds.out, done);
+        });
+
+
+        function fetchRowFromRS2 (rs, cb ) {
+          if ( rs ) {
+            rs.getRow ( function ( err, row ) {
+              should.not.exist ( err ) ;
+              if ( row ) {
+                return fetchRowFromRS (rs, cb );
+              }
+            });
+          }
+          cb();
+        }
+    });
   })
   
   describe('55.4 release connection before close resultSet', function() {
     var conn2 = false;
     function fetchRowFromRS(rs, cb) {
+
       rs.getRow(function(err, row) {
         if(row) {
           return fetchRowFromRS(rs, cb);

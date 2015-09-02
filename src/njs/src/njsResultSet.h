@@ -104,9 +104,7 @@ public:
 
    static void Init(Handle<Object> target);
 
-   void setResultSet ( dpi::Stmt *dpistmt, eBaton *executebaton,
-                       unsigned long flags );
-
+   void setResultSet ( dpi::Stmt *dpistmt, eBaton *executebaton );
 
    // Define ResultSet Constructor
    static Persistent<FunctionTemplate> resultSetTemplate_s ;

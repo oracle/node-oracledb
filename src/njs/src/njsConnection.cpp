@@ -941,14 +941,19 @@ void Connection::Async_Execute (uv_work_t *req)
 
        if ( bind->isOut && bind->type == dpi::DpiRSet )
        {
-         bind->flags =
-           (((Stmt*)bind->value)->getState () == DpiStmtStateExecuted ) ?
-                NJS_BIND_REF_CURSOR_VALID : NJS_BIND_REF_CURSOR_INVALID ;
-         if ( ( bind->flags == NJS_BIND_REF_CURSOR_INVALID ) && 
-              ( bind->value != NULL ) )
+         unsigned long state = ((Stmt*)bind->value)->getState ();
+
+         if ( state == DPI_STMT_STATE_EXECUTED )
+         {
+           // set the prefetch on the valid cursor object
+           ((dpi::Stmt *)(bind->value))->prefetchRows ( 
+                                              executeBaton->prefetchRows ) ;
+         }
+         else
          {
            /* Release the invalid REFCURSOR to avoid any leaks */
            ((Stmt*)bind->value)->release ();
+           bind->value = NULL;
          }
        }
      }
@@ -1825,8 +1830,8 @@ void Connection::Async_AfterExecute(uv_work_t *req)
           /* ResultSet case, the statement object is ready for fetching */
          (ObjectWrap::Unwrap<ResultSet> (resultSet))->
                                   setResultSet( executeBaton->dpistmt,
-                                                executeBaton,
-                                                BIND_FLAGS_STMT_READY );
+                                                executeBaton);
+
           result->Set(NanNew<v8::String>("resultSet"), resultSet );
         }
         else
@@ -2059,11 +2064,7 @@ Handle<Value> Connection::GetValueRefCursor ( eBaton *executeBaton,
                             GetFunction() ->NewInstance();
     (ObjectWrap::Unwrap<ResultSet> (resultSet))->
                        setResultSet( (dpi::Stmt*)(bind->value),
-                                     executeBaton,
-                                     bind->flags );
-
-    // set the prefetch on the cursor object
-    ((dpi::Stmt*)(bind->value))->prefetchRows(executeBaton->prefetchRows);
+                                     executeBaton);
     value = resultSet;
   }
   else

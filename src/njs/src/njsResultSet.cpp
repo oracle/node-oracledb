@@ -68,19 +68,18 @@ Persistent<FunctionTemplate> ResultSet::resultSetTemplate_s;
      stmt         -  dpi statement
      executeBaton - eBaton structure
 */
-void ResultSet::setResultSet ( dpi::Stmt *stmt, eBaton *executeBaton,
-                               unsigned long flags )
+void ResultSet::setResultSet ( dpi::Stmt *stmt, eBaton *executeBaton )
 {
   this->dpistmt_       = stmt;
   this->dpienv_        = executeBaton->dpienv;
   this->njsconn_       = executeBaton->njsconn;
-  if ( flags == NJS_BIND_REF_CURSOR_VALID )
+  if ( stmt )
   {
     this->meta_        = stmt->getMetaData();
     this->numCols_     = this->dpistmt_->numCols();
     this->state_       = INACTIVE;
   }
-  else if ( flags == NJS_BIND_REF_CURSOR_INVALID )
+  else
   {
     /* 
      * This could happen in REFCURSOR case, when the stored procedure
