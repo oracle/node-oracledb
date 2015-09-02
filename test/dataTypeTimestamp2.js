@@ -44,7 +44,7 @@ describe('34. dataTypeTimestamp2.js', function() {
     var credential = dbConfig;
   }
   
-  var connection = false;
+  var connection = null;
   var tableName = "oracledb_datatype_timestamp";
   var sqlCreate = 
         "BEGIN " +
@@ -64,12 +64,8 @@ describe('34. dataTypeTimestamp2.js', function() {
            "       )" +
            "   '); " +
            "END; ";
-  var timestamps = [
-        new Date(-100000000),
-        new Date(0),
-        new Date(10000000000),
-        new Date(100000000000)
-      ];
+  
+  var timestamps = assist.data.dates;
     
   before(function(done) {
     oracledb.getConnection(credential, function(err, conn) {

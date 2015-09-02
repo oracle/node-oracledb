@@ -829,4 +829,53 @@ describe('55. resultSet2.js', function() {
     })
   })
 
+  describe.skip('55.12 bind a cursor BIND_INOUT', function() {
+    it('55.12.1 should work', function(done) {
+      var proc = 
+          "CREATE OR REPLACE PROCEDURE get_emp_rs_inout (p_in IN NUMBER, p_out IN OUT SYS_REFCURSOR) \
+             AS \
+             BEGIN \
+               OPEN p_out FOR  \
+                 SELECT * FROM oracledb_employees \
+                 WHERE employees_id > p_in; \
+             END; "; 
+
+      async.series([
+        function(callback) {
+          connection.execute(
+            proc,
+            function(err) {
+              should.not.exist(err);
+              callback();
+            }
+          );
+        },
+        function(callback) {
+          connection.execute(
+            "BEGIN get_emp_rs_inout(:in, :out); END;",
+            {
+              in: 200,
+              out: { type: oracledb.CURSOR, dir: oracledb.BIND_INOUT }
+            },
+            function(err, result) {
+              should.not.exist(err);
+              console.log(result);
+              callback();
+            }
+          );
+        },
+        function(callback) {
+          connection.execute(
+            "DROP PROCEDURE get_emp_rs_inout",
+            function(err) {
+              should.not.exist(err);
+              callback();
+            }
+          );
+        }
+      ], done);
+    })
+    
+  })
+
 })  

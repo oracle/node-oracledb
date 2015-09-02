@@ -110,6 +110,18 @@ assist.data = {
     'o', 'p', 'q', 'r', 's',
     't', 'u', 'v', 'w', 'x',
     'y', 'z'
+  ],
+  dates: [
+    new Date(-100000000),
+    new Date(0),
+    new Date(10000000000),
+    new Date(100000000000),
+    new Date(1995, 11, 17),
+    new Date('1995-12-17T03:24:00'),
+    new Date('2015-07-23 21:00:00'),
+    new Date('2015-07-23 22:00:00'),
+    new Date('2015-07-23 23:00:00'),
+    new Date('2015-07-24 00:00:00')
   ]
 };
 
@@ -187,10 +199,10 @@ assist.dataTypeSupport = function(connection, tableName, array, done) {
       // console.log(result);
       for(var i = 0; i < array.length; i++) {
         if( (typeof result.rows[i].CONTENT) === 'string' )   
-		  result.rows[i].CONTENT.trim().should.eql(array[result.rows[i].NUM]);
+		      result.rows[i].CONTENT.trim().should.eql(array[result.rows[i].NUM]);
         else if( (typeof result.rows[i].CONTENT) === 'number' )
           result.rows[i].CONTENT.should.eql(array[result.rows[i].NUM]);
-		else
+		    else
           result.rows[i].CONTENT.toUTCString().should.eql(array[result.rows[i].NUM].toUTCString());
       }	  
       done();

@@ -327,6 +327,12 @@
         55.9.1 
     55.10 calls getRows() once and then close RS before getting more rows
         55.10.1 
+    55.11 deals with unsupported database with result set
+        55.11.1 RAW data type
+        55.11.2 ROWID date type
+    55.12 bind a cursor BIND_INOUT
+      - 55.12.1 should work
+
 
 56. fetchAs.js
     56.1 FetchAs - DATE type as STRING
