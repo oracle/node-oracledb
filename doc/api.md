@@ -112,6 +112,7 @@ limitations under the License.
   - 10.1 [PL/SQL Stored Procedures](#plsqlproc)
   - 10.2 [PL/SQL Stored Functions](#plsqlfunc)
   - 10.3 [Anonymous PL/SQL blocks](#plsqlanon)
+  - 10.4 [Using DBMS_OUTPUT](#dbmsoutput)
 11. [Working with CLOB and BLOB Data](#lobhandling)
 12. [Bind Parameters for Prepared Statements](#bind)
   - 12.1 [IN Bind Parameters](#inbind)
@@ -2493,6 +2494,84 @@ The output is:
 ```
 
 See [Bind Parameters for Prepared Statements](#bind) for information on binding.
+
+### <a name="dbmsoutput"></a> 10.4 Using DBMS_OUTPUT
+
+The
+[DBMS_OUTPUT](http://docs.oracle.com/database/121/ARPLS/d_output.htm#ARPLS036)
+package is the standard way to "print" output from PL/SQL.  The way
+DBMS_OUTPUT works is like a buffer.  Your Node.js application code
+must first turn on DBMS_OUTPUT buffering for the current connection by
+calling the PL/SQL procedure `DBMS_OUTPUT.ENABLE(NULL)`.  Then any
+PL/SQL executed by the connection can put text into the buffer using
+`DBMS_OUTPUT.PUT_LINE()`.  Finally `DBMS_OUTPUT.GET_LINE()` is used to
+fetch from that buffer.  Note, any PL/SQL code that uses DBMS_OUTPUT
+runs to completion before any output is available to the user.  Also,
+other database connections cannot access your buffer.
+
+A basic way to fetch DBMS_OUTPUT with node-oracledb is to bind an
+output string when calling the PL/SQL `DBMS_OUTPUT.GET_LINE()`
+procedure, print the string, and then repeat until there is no more
+data.  The following snippet is based on the example
+[dbmsoutputgetline.js](https://github.com/oracle/node-oracledb/tree/master/examples/dbmsoutputgetline.js):
+
+```javascript
+function fetchDbmsOutputLine(connection, cb) {
+  connection.execute(
+    "BEGIN DBMS_OUTPUT.GET_LINE(:ln, :st); END;",
+    { ln: { dir: oracledb.BIND_OUT, type: oracledb.STRING, maxSize: 32767 },
+      st: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER } },
+    function(err, result) {
+      if (err) {
+        return cb(err, connection);
+      } else if (result.outBinds.st == 1) { // no more output
+        return cb(null, connection);
+      } else {
+        console.log(result.outBinds.ln);
+        return fetchDbmsOutputLine(connection, cb);
+      }
+    });
+  }
+```
+
+Another way is to wrap the `DBMS_OUTPUT.GET_LINE()` call into a
+pipelined function and fetch the output using a SQL query.  See
+[dbmsoutputpipe.js](https://github.com/oracle/node-oracledb/tree/master/examples/dbmsoutputpipe.js) for the full example.
+
+The pipelined function could be created like:
+
+```sql
+CREATE OR REPLACE TYPE dorow AS TABLE OF VARCHAR2(32767);
+/
+
+CREATE OR REPLACE FUNCTION mydofetch RETURN dorow PIPELINED IS
+  line VARCHAR2(32767);
+  status INTEGER;
+  BEGIN LOOP
+	DBMS_OUTPUT.GET_LINE(line, status);
+	EXIT WHEN status = 1;
+	PIPE ROW (line);
+  END LOOP;
+END;
+/
+```
+
+To get DBMS_OUTPUT that has been created, simply execute the query
+using the same connection:
+
+```sql
+connection.execute(
+  "SELECT * FROM TABLE(mydofetch())",
+  [],
+  { resultSet: true },
+  function (err, result) {
+  . . . 
+```
+
+The query rows can be handled using a
+[ResultSet](http://localhost:8899/doc/api.md#resultsethandling).
+
+Remember to first enable output using `DBMS_OUTPUT.ENABLE(NULL)`.
 
 ## <a name="lobhandling"></a> 11. Working with CLOB and BLOB Data
 
