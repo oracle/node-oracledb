@@ -1889,7 +1889,7 @@ release all connections and terminate the connection pool by calling
 the [`terminate()`](#terminate) method on the Pool object.
 
 The growth characteristics of a connection pool are determined by the
-Pool attributes[`poolIncrement`](#proppoolpoolincrement),
+Pool attributes [`poolIncrement`](#proppoolpoolincrement),
 [`poolMax`](#proppoolpoolmax), [`poolMin`](#proppoolpoolmin) and
 [`poolTimeout`](#proppoolpooltimeout).  Note that when External
 Authentication is used, the pool behavior is different, see
@@ -1988,11 +1988,13 @@ object are always obtained in the manner in which the pool was
 initially created.
 
 For pools created with external authentication, the number of
-connections initially created is zero even if a non-zero value is
-specified for the [`poolMin`](#propdbpoolmin).  However, once the
-number of open connections exceeds `poolMin` and connections are idle
-for more than the [`poolTimeout`](#propdbpooltimeout) seconds, then
-the number of open connections does not fall below `poolMin`.
+connections initially created is zero even if a larger value is
+specified for [`poolMin`](#propdbpoolmin).  The pool increment is
+always 1, regardless of the value of
+[`poolIncrement`](#proppoolpoolincrement).  Once the number
+of open connections exceeds `poolMin` and connections are idle for
+more than the [`poolTimeout`](#propdbpooltimeout) seconds, then the
+number of open connections does not fall below `poolMin`.
 
 ## <a name="sqlexecution"></a> 9. SQL Execution
 
