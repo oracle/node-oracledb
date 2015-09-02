@@ -97,9 +97,9 @@ Set PATH to include Node.js:
 export PATH=/opt/node-v0.12.7-linux-x64/bin:$PATH
 ```
 
-### 2.2 Install the free Oracle Instant Client RPMs
+### 2.2 Install the free Oracle Instant Client 'Basic' and 'SDK' RPMs
 
-Download the free 'Basic' and 'SDK' RPMs from [Oracle Technology Network](http://www.oracle.com/technetwork/topics/linuxx86-64soft-092277.html) and
+Download the free **Basic** and **SDK** RPMs from [Oracle Technology Network](http://www.oracle.com/technetwork/topics/linuxx86-64soft-092277.html) and
 [install them](http://www.oracle.com/technetwork/topics/linuxx86-64soft-092277.html#ic_x64_inst) as the root user:
 
 ```
@@ -181,9 +181,9 @@ Set PATH to include Node.js:
 export PATH=/opt/node-v0.12.7-linux-x64/bin:$PATH
 ```
 
-### 3.2 Install the free Oracle Instant Client ZIPs
+### 3.2 Install the free Oracle Instant Client 'Basic' and 'SDK' ZIPs
 
-Download the free 'Basic' and 'SDK' ZIPs from
+Download the free **Basic** and **SDK** ZIPs from
 [Oracle Technology Network](http://www.oracle.com/technetwork/topics/linuxx86-64soft-092277.html)
 and
 [install them](http://www.oracle.com/technetwork/topics/linuxx86-64soft-092277.html#ic_x64_inst)
@@ -377,9 +377,9 @@ Set your PATH to include the *node* and *npm* binaries:
 export PATH=/usr/local/bin:$PATH
 ```
 
-### 5.3 Install the free Oracle Instant Client ZIPs
+### 5.3 Install the free Oracle Instant Client 'Basic' and 'SDK' ZIPs
 
-Download the free 'Basic' and 'SDK' ZIPs from
+Download the free **Basic** and **SDK** ZIPs from
 [Oracle Technology Network](http://www.oracle.com/technetwork/topics/intel-macsoft-096467.html)
 and
 [install them](http://www.oracle.com/technetwork/topics/intel-macsoft-096467.html#ic_osx_inst)
@@ -488,7 +488,7 @@ add the Node and npm directories to the path is selected.
 
 Skip this step if you already have Oracle Database or the full Oracle client on your machine.
 
-Download the free 'Basic' and 'SDK' ZIP files from
+Download the free **Basic** and **SDK** ZIP files from
 [Oracle Technology Network](http://www.oracle.com/technetwork/topics/winx64soft-089540.html).
 
 Extract `instantclient_basic-windows.x64-12.1.0.2.0.zip` and
