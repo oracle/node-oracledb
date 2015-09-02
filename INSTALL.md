@@ -400,6 +400,9 @@ To run applications, you will need to set the link path:
 export DYLD_LIBRARY_PATH=/opt/oracle/instantclient:$DYLD_LIBRARY_PATH
 ```
 
+To set the path permanently for future terminal shells, add the export
+command to `$HOME/.bash_profile` and re-login.
+
 ### 5.4 Install the add-on
 
 Tell the installer where to find Instant Client:
