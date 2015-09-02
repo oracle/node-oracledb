@@ -423,6 +423,7 @@ void Connection::ProcessBinds (_NAN_METHOD_ARGS, unsigned int index,
 void Connection::ProcessOptions (_NAN_METHOD_ARGS, unsigned int index,
                                  eBaton* executeBaton)
 {
+  NanScope();
   Local<Object> options;
   if(args[index]->IsObject() && !args[index]->IsArray())
   {
@@ -446,7 +447,8 @@ void Connection::ProcessOptions (_NAN_METHOD_ARGS, unsigned int index,
       Local<Array> keys = fetchInfo->GetOwnPropertyNames ();
       if ( keys->Length () > 0 )
       {
-        FetchInfo *fInfo = new FetchInfo[keys->Length()];
+        FetchInfo *fInfo = executeBaton->fetchInfo = 
+                           new FetchInfo[keys->Length()];
         executeBaton->fetchInfoCount = keys->Length ();
 
         for (unsigned int index = 0 ; index < keys->Length() ; index ++ )
@@ -472,7 +474,6 @@ void Connection::ProcessOptions (_NAN_METHOD_ARGS, unsigned int index,
             goto exitProcessOptions;
           }
         }
-        executeBaton->fetchInfo = fInfo;
       }
       else
       {
