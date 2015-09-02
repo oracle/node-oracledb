@@ -58,7 +58,8 @@ static const char *errMsg[] =
   "NJS-021: invalid type for conversion specified",
   "NJS-022: invalid LOB",
   "NJS-023: concurrent operations on LOB are not allowed",
-  "NJS-024: memory allocation failed", 
+  "NJS-024: memory allocation failed",
+  "NJS-025: results area too large to allocate memory"
 };
 
 string NJSMessages::getErrorMsg ( NJSErrorType err, ... )

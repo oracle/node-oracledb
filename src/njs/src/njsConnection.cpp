@@ -73,7 +73,7 @@ Persistent<FunctionTemplate> Connection::connectionTemplate_s;
 
 #define NJS_SIZE_T_MAX std::numeric_limits<std::size_t>::max()
 
-#define NJS_IS_SIZE_T_OVERFLOW(maxSize,maxRows)                               \
+#define NJS_SIZE_T_OVERFLOW(maxSize,maxRows)                                  \
  ( ( ( maxSize != 0 ) &&                                                      \
      ( ( ( NJS_SIZE_T_MAX ) / ( (size_t)maxSize ) ) < (maxRows) ) ) ? 1 : 0)  \
 
@@ -1397,20 +1397,25 @@ void Connection::DoDefines ( eBaton* executeBaton, const dpi::MetaData* meta,
         
         defines[col].maxSize   = sizeof(double);
 
-        if ( !NJS_IS_SIZE_T_OVERFLOW ( defines[col].maxSize,
+        if ( NJS_SIZE_T_OVERFLOW ( defines[col].maxSize,
                                        executeBaton->maxRows ) )
+        {
+          executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
+          return;
+        }
+        else
         {
           defines[col].buf = (double *)malloc( (size_t)defines[col].maxSize*
                                                executeBaton->maxRows );
-        }
-        else
-          defines[col].buf = 0;
  
-        if(!defines[col].buf)
-        {
-          executeBaton->error = NJSMessages::getErrorMsg(errInsufficientMemory);
-          return;
+          if( !defines[col].buf )
+          {
+            executeBaton->error = NJSMessages::getErrorMsg( 
+                                    errInsufficientMemory );
+            return;
+          }
         }
+
         break;
       case dpi::DpiVarChar :
       case dpi::DpiFixedChar :
@@ -1425,19 +1430,22 @@ void Connection::DoDefines ( eBaton* executeBaton, const dpi::MetaData* meta,
  
         defines[col].maxSize   = (meta[col].dbSize) * NJS_CHAR_CONVERSION_RATIO;
 
-        if ( !NJS_IS_SIZE_T_OVERFLOW ( defines[col].maxSize,
+        if ( NJS_SIZE_T_OVERFLOW ( defines[col].maxSize,
                                        executeBaton->maxRows ) )
+        {
+          executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
+          return;
+        }
+        else
         {
           defines[col].buf = (char *)malloc( (size_t)defines[col].maxSize*
                                              executeBaton->maxRows );
-        }
-        else
-          defines[col].buf = 0;
-
-        if(!defines[col].buf)
-        {
-          executeBaton->error = NJSMessages::getErrorMsg(errInsufficientMemory);
-          return;
+          if( !defines[col].buf )
+          {
+            executeBaton->error = NJSMessages::getErrorMsg( 
+                                    errInsufficientMemory );
+            return;
+          }
         }
         break;
       case dpi::DpiDate :
@@ -1473,21 +1481,25 @@ void Connection::DoDefines ( eBaton* executeBaton, const dpi::MetaData* meta,
           /* Fetching DATE/TIMESTAMP values as VARCHAR */
           defines[col].maxSize = NJS_MAX_FETCH_AS_STRING_SIZE ;
 
-          if ( !NJS_IS_SIZE_T_OVERFLOW ( defines[col].maxSize,
+          if ( NJS_SIZE_T_OVERFLOW ( defines[col].maxSize,
                                          executeBaton->maxRows ) )
+          {
+            executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
+            return;
+          }
+          else
           {
             defines[col].buf = (char *)malloc( (size_t)defines[col].maxSize*
                                                executeBaton->maxRows );
-          }
-          else
-            defines[col].buf = 0;
 
-          if(!defines[col].buf)
-          {
-            executeBaton->error = NJSMessages::getErrorMsg(
-                                     errInsufficientMemory);
-            return;
+            if( !defines[col].buf )
+            {
+              executeBaton->error = NJSMessages::getErrorMsg(
+                                       errInsufficientMemory);
+              return;
+            }
           }
+
         }
         break;
 
@@ -1497,19 +1509,22 @@ void Connection::DoDefines ( eBaton* executeBaton, const dpi::MetaData* meta,
         defines[col].fetchType = meta[col].dbType;
         defines[col].maxSize   = sizeof(Descriptor *);
 
-        if ( !NJS_IS_SIZE_T_OVERFLOW ( defines[col].maxSize,
+        if ( NJS_SIZE_T_OVERFLOW ( defines[col].maxSize,
                                        executeBaton->maxRows ) )
+        {
+          executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
+          return;
+        }
+        else
         {
           defines[col].buf = malloc( (size_t)defines[col].maxSize*
                                      executeBaton->maxRows );
-        }
-        else
-          defines[col].buf = 0;
 
-        if(!defines[col].buf)
-        {
-          executeBaton->error = NJSMessages::getErrorMsg(errInsufficientMemory);
-          return;
+          if( !defines[col].buf )
+          {
+            executeBaton->error = NJSMessages::getErrorMsg( errInsufficientMemory );
+            return;
+          }
         }
 
         for (unsigned int j = 0; j < executeBaton->maxRows; j++)
@@ -1531,20 +1546,23 @@ void Connection::DoDefines ( eBaton* executeBaton, const dpi::MetaData* meta,
         }
         defines[col].maxSize = NJS_MAX_FETCH_AS_STRING_SIZE;
 
-        if ( !NJS_IS_SIZE_T_OVERFLOW ( defines[col].maxSize,
+        if ( NJS_SIZE_T_OVERFLOW ( defines[col].maxSize,
                                        executeBaton->maxRows ) )
+        {
+          executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
+          return;
+        }
+        else
         {
           defines[col].buf = (char *)malloc( (size_t)defines[col].maxSize*
                                              executeBaton->maxRows );
-        }
-        else
-          defines[col].buf = 0;
 
-        if(!defines[col].buf)
-        {
-          executeBaton->error = NJSMessages::getErrorMsg(
-                                  errInsufficientMemory);
-          return;
+          if( !defines[col].buf )
+          {
+            executeBaton->error = NJSMessages::getErrorMsg(
+                                    errInsufficientMemory);
+            return;
+          }
         }
         break;
 
@@ -1557,14 +1575,14 @@ void Connection::DoDefines ( eBaton* executeBaton, const dpi::MetaData* meta,
     defines[col].ind = (short*)malloc (sizeof(short)*(executeBaton->maxRows));
     if(!defines[col].ind)
     {
-      executeBaton->error = NJSMessages::getErrorMsg(errInsufficientMemory);
+      executeBaton->error = NJSMessages::getErrorMsg( errInsufficientMemory );
       return;
     }
     defines[col].len = (DPI_BUFLEN_TYPE *)malloc(sizeof(DPI_BUFLEN_TYPE)*
                                            executeBaton->maxRows);
     if(!defines[col].len)
     {
-      executeBaton->error = NJSMessages::getErrorMsg(errInsufficientMemory);
+      executeBaton->error = NJSMessages::getErrorMsg( errInsufficientMemory );
       return;
     }
 
@@ -2799,10 +2817,36 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
   eBaton *executeBaton = (eBaton *)ctx;
   Bind *bind = (Bind *)executeBaton->binds[bndpos];
 
-  bind->ind = (short *)malloc ( nRows * sizeof ( short ) ) ;
+  if ( NJS_SIZE_T_OVERFLOW ( nRows, sizeof ( short )))
+  {
+    executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
+    return;
+  }
+  else
+  {
+    bind->ind = (short *)malloc ( nRows * sizeof ( short ) ) ;
+    if( !bind->ind )
+    {
+      executeBaton->error = NJSMessages::getErrorMsg( errInsufficientMemory );
+      return;
+    }
+  }
   if ( dmlReturning )
   {
-    bind->len2 = ( unsigned int *)malloc ( nRows * sizeof ( unsigned int ) );
+    if ( NJS_SIZE_T_OVERFLOW ( nRows, sizeof ( unsigned int )))
+    {
+      executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
+      return;
+    }
+    else
+    {
+      bind->len2 = ( unsigned int *)malloc ( nRows * sizeof ( unsigned int ) );
+      if( !bind->len2 )
+      {
+        executeBaton->error = NJSMessages::getErrorMsg( errInsufficientMemory );
+        return;
+      }
+    }
   }
   else
   {
@@ -2815,18 +2859,20 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
   case dpi::DpiVarChar:
     /* one extra char for EOS */
 
-    if ( !NJS_IS_SIZE_T_OVERFLOW ( (bind->maxSize + 1), nRows) )
+    if ( NJS_SIZE_T_OVERFLOW ( (bind->maxSize + 1), nRows) )
     {
-      bind->value = (char *)malloc( (size_t)( bind->maxSize + 1) * nRows );
+      executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
+      return;
     }
     else
-      bind->value = 0;
-
-    if( !bind->value )
     {
-      executeBaton->error = NJSMessages::getErrorMsg(
-                              errInsufficientMemory);
-      return;
+      bind->value = (char *)malloc( (size_t)( bind->maxSize + 1) * nRows );
+      if( !bind->value )
+      {
+        executeBaton->error = NJSMessages::getErrorMsg(
+                                errInsufficientMemory);
+        return;
+      }
     }
 
     if ( dmlReturning )
@@ -2840,7 +2886,21 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
     break;
 
   case dpi::DpiInteger:
-    bind->value = ( int *) malloc ( sizeof (int) * nRows ) ;
+    if ( NJS_SIZE_T_OVERFLOW ( sizeof (int), nRows) )
+    {
+      executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
+      return;
+    }
+    else
+    {
+      bind->value = ( int *) malloc ( sizeof (int) * nRows ) ;
+      if( !bind->value )
+      {
+        executeBaton->error = NJSMessages::getErrorMsg(
+                                errInsufficientMemory);
+        return;
+      }
+    }
     if ( !dmlReturning )
     {
       *(bind->len) = sizeof ( int ) ;
@@ -2848,7 +2908,21 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
     break;
 
   case dpi::DpiUnsignedInteger:
-    bind->value = ( unsigned int *)malloc ( sizeof ( unsigned int ) * nRows );
+    if ( NJS_SIZE_T_OVERFLOW ( sizeof ( unsigned int ), nRows) )
+    {
+      executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
+      return;
+    }
+    else
+    {
+      bind->value = ( unsigned int *)malloc ( sizeof ( unsigned int ) * nRows );
+      if( !bind->value )
+      {
+        executeBaton->error = NJSMessages::getErrorMsg(
+                                errInsufficientMemory);
+        return;
+      }
+    }
     if ( !dmlReturning )
     {
       *(bind->len) = sizeof ( unsigned int ) ;
@@ -2856,7 +2930,25 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
     break;
 
   case dpi::DpiDouble:
-    bind->value = ( double *)malloc ( sizeof ( double ) * nRows );
+    if ( NJS_SIZE_T_OVERFLOW ( sizeof ( double ), nRows) )
+    {
+      executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
+      return;
+    }
+    else
+    {
+      bind->value = ( double *)malloc ( sizeof ( double ) * nRows );
+      if( !bind->value )
+      {
+        executeBaton->error = NJSMessages::getErrorMsg(
+                                errInsufficientMemory);
+        return;
+      }
+    }
+    if ( !dmlReturning )
+    {
+      *(bind->len) = sizeof ( unsigned int ) ;
+    }
     if ( !dmlReturning )
     {
       *(bind->len) = sizeof ( double ) ;
@@ -2872,7 +2964,21 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
     if (nRows > 1)
       bind->rowsReturned = nRows;
     // allocate the array of Descriptor **
-    bind->value = (void *)malloc(sizeof(Descriptor *) * bind->rowsReturned);
+    if ( NJS_SIZE_T_OVERFLOW ( sizeof ( Descriptor * ), nRows) )
+    {
+      executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
+      return;
+    }
+    else
+    {
+      bind->value = (void *)malloc(sizeof(Descriptor *) * bind->rowsReturned);
+      if( !bind->value )
+      {
+        executeBaton->error = NJSMessages::getErrorMsg(
+                                errInsufficientMemory);
+        return;
+      }
+    }
     // and allocate the underlying descriptor(s)
     for (unsigned int rowsidx = 0; rowsidx < bind->rowsReturned; rowsidx++)
     {
@@ -2888,7 +2994,21 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
 
   case dpi::DpiTimestampLTZ:
     {
+    if ( NJS_SIZE_T_OVERFLOW ( sizeof ( long double ), nRows) )
+    {
+      executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
+      return;
+    }
+    else
+    {
       bind->extvalue = (long double *) malloc ( sizeof ( long double ) * nRows );
+      if( !bind->extvalue )
+      {
+        executeBaton->error = NJSMessages::getErrorMsg(
+                                errInsufficientMemory);
+        return;
+      }
+    }
       // needed to post-process DML RETURNING of TimestampLTZ
       // rowsReturns for INSERT will be zero, 
       // but we still need to allocate one descriptor
