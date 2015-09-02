@@ -133,8 +133,6 @@ private:
 
   static void clearFetchBuffer( Define* defineBuffers,
                                 unsigned int numCols );
-
-  static void Init ();
   
 
   dpi::Stmt            *dpistmt_;

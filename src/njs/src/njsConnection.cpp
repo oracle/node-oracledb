@@ -935,12 +935,13 @@ void Connection::Async_Execute (uv_work_t *req)
        }
      }
 
-     /* For each OUT Binds of CURSOR type, get the number of columns */
+     /* For each OUT Binds of CURSOR type, get the dpistmt state */
      for ( unsigned int b = 0; b < executeBaton->binds.size (); b ++ )
      {
        Bind *bind = executeBaton->binds[b];
 
-       if ( bind->isOut && bind->type == dpi::DpiRSet )
+       /* Here bind->isOut is expected to be TRUE, and is checked earlier */
+       if ( bind->type == dpi::DpiRSet )
        {
          unsigned long state = ((Stmt*)bind->value)->getState ();
 
@@ -1424,14 +1425,14 @@ void Connection::DoDefines ( eBaton* executeBaton, const dpi::MetaData* meta,
         defines[col].fetchType = Connection::GetTargetType ( executeBaton,
                                              executeBaton->columnNames[col],
                                              meta[col].dbType );
+
         /*
          * the buffer size is increased to account for possible character
          * size expansion when data is converted from the DB character set
          * to AL32UTF8
          */
  
-		defines[col].maxSize   = (meta[col].dbSize) * csratio;
-
+        defines[col].maxSize   = (meta[col].dbSize) * csratio;
 
         if ( NJS_SIZE_T_OVERFLOW ( defines[col].maxSize,
                                        executeBaton->maxRows ) )
@@ -2064,6 +2065,10 @@ Handle<Value> Connection::GetValueRefCursor ( eBaton *executeBaton,
   {
     resultSet = NanNew(ResultSet::resultSetTemplate_s)->
                             GetFunction() ->NewInstance();
+    /* 
+     * IN case of REFCURSOR, bind->flags will indicate whether we got
+     * a valid handle, based on that numCols, metaData are queried.
+     */
     (ObjectWrap::Unwrap<ResultSet> (resultSet))->
                        setResultSet( (dpi::Stmt*)(bind->value),
                                      executeBaton);
@@ -2827,7 +2832,7 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
   }
   else
   {
-    bind->ind = (short *)malloc ( nRows * sizeof ( short ) ) ;
+    bind->ind = (short *)malloc ( (size_t)nRows * sizeof ( short ) ) ;
     if( !bind->ind )
     {
       executeBaton->error = NJSMessages::getErrorMsg( errInsufficientMemory );

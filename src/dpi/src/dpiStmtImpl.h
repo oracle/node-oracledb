@@ -94,7 +94,7 @@ public:
 
   virtual OCIError *     getError () { return errh_;  }
 
-  virtual DpiStmtState   getState ();
+  virtual unsigned long  getState ();
 
 
   // Is the SQL statement DML or not ?

@@ -87,9 +87,9 @@ void ResultSet::setResultSet ( dpi::Stmt *stmt, eBaton *executeBaton )
      */
     this->numCols_     = 0;
     this->meta_        = NULL;
+    this->state_       = INVALID;
   }
 
-  this->state_         = INACTIVE;
   this->outFormat_     = executeBaton->outFormat;
   this->fetchRowCount_ = 0;
   this->rsEmpty_       = false;

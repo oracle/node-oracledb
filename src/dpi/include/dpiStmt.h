@@ -101,12 +101,13 @@ typedef enum
 
 
 /* OCI Stmt Handle state
- *  For REFCURSORS state should be DpiStmtStateExecuted
+ *  For REFCURSORS state should be DPI_STMT_STATE_EXECUTED
  */
 #define DPI_STMT_STATE_UNDEFINED   (0)           // Undefined
 #define DPI_STMT_STATE_INITIALIZED (1)           // Initialized
 #define DPI_STMT_STATE_EXECUTED    (2)           // Executed
 #define DPI_STMT_STATE_ENDOFFETCH  (3)           // End of Fetch
+
 
 
 /*
@@ -197,7 +198,7 @@ public:
 
   virtual OCIError *getError () = 0;
 
-  virtual DpiStmtState getState () = 0;
+  virtual unsigned long getState () = 0;
 
   virtual ~Stmt(){};
 
