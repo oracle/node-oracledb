@@ -1,8 +1,27 @@
 # Change Log
 
+## node-oracledb v1.1.0 (DD Mon YYYY )
+
+- Enhanced pool.release() to drop the session if it is known to be unusable, allowing a new session to be created.
+
+- Optimized query memory allocation to account for different database-to-client character set expansions.
+
+- Fixed build warnings on Windows with VS 2015.
+
+- Fixed truncation issue while fetching numbers as strings.
+
+- Fixed AIX-specific failures with queries and RETURNING INTO clauses.
+
+- Fixed a crash with NULL or uninitialized REF CURSOR OUT bind variables.
+
+- Fixed potential memory leak when connecting throws an error. 
+
+- Added a check to throw an error sooner when a CURSOR type is used for IN or IN OUT binds. (Support is pending).
+
 ## node-oracledb v1.0.0 (17 Aug 2015)
 
-- Implemented the Stream interface for CLOB and BLOB types, adding support for LOB queries, inserts, and PL/SQL LOB bind variables.
+- Implemented Stream interface for CLOB and BLOB types, adding support for
+  LOB queries, inserts, and PL/SQL LOB bind variables
 
 - Added `fetchAsString` and `execute()` option `fetchInfo` properties to allow numbers, dates and ROWIDs to be fetched as strings.
 
