@@ -198,6 +198,7 @@ class ILob : public ObjectWrap
   Descriptor    *lobLocator_;
   unsigned short fetchType_;
   
+  dpi::Conn     *dpiconn_;
   DpiHandle     *svch_;
   DpiHandle     *errh_;
   bool           isValid_;

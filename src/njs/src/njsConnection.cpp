@@ -205,6 +205,7 @@ NAN_PROPERTY_GETTER(Connection::GetStmtCacheSize)
   }
   catch(dpi::Exception &e)
   {
+    NJS_SET_CONN_ERR_STATUS (  e.errnum(), njsConn->dpiconn_ );
     NJS_SET_EXCEPTION(e.what(), strlen(e.what()));
     NanReturnUndefined();
   }
@@ -968,6 +969,7 @@ void Connection::Async_Execute (uv_work_t *req)
   }
   catch (dpi::Exception& e)
   {
+    NJS_SET_CONN_ERR_STATUS (  e.errnum(), executeBaton->dpiconn );
     // In Case of DML Returning, if the buffer is small, and if the callback
     // is called multiple times, an ORA error 24343 was reported. Converting
     // that error to errInsufficientBufferForBinds.
@@ -2410,6 +2412,7 @@ void Connection::Async_Release(uv_work_t *req)
   }
   catch (dpi::Exception& e)
   {
+    NJS_SET_CONN_ERR_STATUS (  e.errnum(), releaseBaton->dpiconn );
     releaseBaton->error = std::string(e.what());
   }
   exitAsyncRelease:
@@ -2504,6 +2507,7 @@ void Connection::Async_Commit (uv_work_t *req)
   }
   catch (dpi::Exception& e)
   {
+    NJS_SET_CONN_ERR_STATUS (  e.errnum(), commitBaton->dpiconn );
     commitBaton->error = std::string(e.what());
   }
   exitAsyncCommit:
@@ -2596,6 +2600,7 @@ void Connection::Async_Rollback (uv_work_t *req)
   }
   catch (dpi::Exception& e)
   {
+    NJS_SET_CONN_ERR_STATUS (  e.errnum(), rollbackBaton->dpiconn );
     rollbackBaton->error = std::string(e.what());
   }
   exitAsyncRollback:
@@ -2691,6 +2696,7 @@ void Connection::Async_Break(uv_work_t *req)
   }
   catch (dpi::Exception& e)
   {
+    NJS_SET_CONN_ERR_STATUS (  e.errnum(), breakBaton->dpiconn );
     breakBaton->error = std::string(e.what());
   }
   exitAsyncBreak:

@@ -252,6 +252,7 @@ NAN_PROPERTY_GETTER(Pool::GetConnectionsOpen)
   }
   catch(dpi::Exception &e)
   {
+    NJS_SET_CONN_ERR_STATUS ( e.errnum(), NULL );
     NJS_SET_EXCEPTION(e.what(), (int) strlen(e.what()));
     NanReturnUndefined();
   }
@@ -281,6 +282,7 @@ NAN_PROPERTY_GETTER(Pool::GetConnectionsInUse)
   }
   catch(dpi::Exception &e)
   {
+    NJS_SET_CONN_ERR_STATUS ( e.errnum(), NULL );
     NJS_SET_EXCEPTION(e.what(), (int) strlen(e.what()));
     NanReturnUndefined();
   }
@@ -450,6 +452,7 @@ void Pool::Async_GetConnection(uv_work_t *req)
   }
   catch (dpi::Exception &e)
   {
+    NJS_SET_CONN_ERR_STATUS ( e.errnum(), NULL );
     connBaton->error = std::string (e.what());
   }
   exitAsyncGetConnection:
@@ -559,6 +562,7 @@ void Pool::Async_Terminate(uv_work_t *req)
   }
   catch(dpi::Exception& e)
   {
+    NJS_SET_CONN_ERR_STATUS ( e.errnum(), NULL );
     terminateBaton->error = std::string(e.what());
   }
   exitAsyncTerminate:

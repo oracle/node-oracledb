@@ -442,6 +442,7 @@ void ResultSet::Async_GetRows(uv_work_t *req)
   }
   catch (dpi::Exception &e)
   {
+    NJS_SET_CONN_ERR_STATUS ( e.errnum(), njsRS->njsconn_->getDpiConn() );
     getRowsBaton->error = std::string (e.what());
   }
   exitAsyncGetRows:
@@ -603,6 +604,8 @@ void ResultSet::Async_Close(uv_work_t *req)
   }
   catch(dpi::Exception& e)
   {
+    NJS_SET_CONN_ERR_STATUS ( e.errnum(),
+                          closeBaton->njsRS->njsconn_->getDpiConn() );
     closeBaton->error = std::string(e.what());
   }
   exitAsyncClose:

@@ -341,8 +341,17 @@ typedef enum
   }                                                                           \
 }
 
-#define NJS_MIN (x,y) ((x) < (y) ? (x) : (y))
-#define NJS_MAX (x,y) ((x) > (y) ? (x) : (y))
+/*
+ * In case of exception set the flag on connection object based on error number
+ * If the method does not use a connection, pass NULL as connection.
+ */
+#define NJS_SET_CONN_ERR_STATUS( errNum, conn )                               \
+{                                                                             \
+  if ( conn != NULL )                                                         \
+  {                                                                           \
+    ( ( dpi::Conn * ) conn ) -> setErrState ( errNum );                       \
+  }                                                                           \
+}
 
 #endif                     // ifdef__NJSUTILS_H__
 

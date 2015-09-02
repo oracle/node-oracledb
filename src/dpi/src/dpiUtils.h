@@ -50,10 +50,4 @@ void ociCall(sword rc, OCIError *errh);
 
 void ociCallEnv(sword rc, OCIEnv *envh);
 
-void getDriverName ( char *name, unsigned int namelen );
-
-
-
-
-
 #endif                                              /* DPIUTILS_ORACLE */

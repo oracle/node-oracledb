@@ -48,6 +48,14 @@
 
 #include <iostream>
 
+// Error numbers to set the drop_sess flag in sessionRelease()
+#define DPI_CONNERR_INVALID_SESS                  22
+#define DPI_CONNERR_SESS_KILLED                   28
+#define DPI_CONNERR_SESS_MARKED_KILL              31
+#define DPI_CONNERR_SESS_TERM_NO_REPLY            45
+#define DPI_CONNERR_ORA_NOT_LOGGED_ON             1012
+#define DPI_CONNERR_MAX_IDLE_TIMEOUT              2396
+
 using namespace std;
 
 
@@ -80,7 +88,7 @@ ConnImpl::ConnImpl(EnvImpl *env, OCIEnv *envh, bool externalAuth,
 
 try :  env_(env), pool_(NULL),
        envh_(envh), errh_(NULL), auth_(NULL), svch_(NULL), sessh_(NULL),
-       hasTxn_(false)
+       hasTxn_(false), srvh_(NULL), dropConn_(false)
 {
 
   this->initConnImpl ( false, externalAuth, connClass,
@@ -122,7 +130,7 @@ ConnImpl::ConnImpl(PoolImpl *pool, OCIEnv *envh, bool externalAuth,
 
 try :  env_(NULL), pool_(pool),
        envh_(envh), errh_(NULL), auth_(NULL),
-       svch_(NULL), sessh_(NULL), hasTxn_(false)
+       svch_(NULL), sessh_(NULL), hasTxn_(false), srvh_(NULL), dropConn_(false)
 {
   this->initConnImpl ( true, externalAuth, connClass, poolName, poolNameLen,
                        "", "" );
@@ -473,6 +481,46 @@ void ConnImpl::breakExecution()
   }
 }
 
+/*****************************************************************************/
+/*
+  DESCRIPTION
+    set the flag if the non-recoverable error happens to connection
+
+  PARAMETERS
+    errNum  - Error number
+
+  RETURNS:
+    -NONE_
+*/
+void ConnImpl::setErrState ( int errNum )
+{
+  /*
+   * This flag applicable for only Pool, non pooled connection anyway gets
+   * terminated upon release. This code is NOT thread-safe. But, we are only
+   * setting the flag to TRUE - multiple threads can try and only will update
+   * to TRUE only, so it is okay setting this flag.
+   */
+
+  if ( pool_ )
+  {
+    switch ( errNum )
+    {
+      // Error numbers to set drop_sess flag
+      case DPI_CONNERR_INVALID_SESS:
+      case DPI_CONNERR_SESS_KILLED:
+      case DPI_CONNERR_SESS_MARKED_KILL:
+      case DPI_CONNERR_SESS_TERM_NO_REPLY:
+      case DPI_CONNERR_ORA_NOT_LOGGED_ON:
+      case DPI_CONNERR_MAX_IDLE_TIMEOUT:
+        dropConn_ = true;
+        break;
+
+      default:
+        break;
+    }
+  }
+}
+
 
 /*---------------------------------------------------------------------------
                           PRIVATE METHODS
@@ -499,7 +547,6 @@ void ConnImpl::initConnImpl ( bool pool, bool externalAuth,
                    const string& connClass, OraText *poolNmRconnStr,
                    ub4 nameLen, const string &user, const string &password )
 {
-  OCIServer *srvh = NULL;
   ub4 mode        = OCI_DEFAULT;
   ub2 csid        = 0;
 
@@ -551,14 +598,15 @@ void ConnImpl::initConnImpl ( bool pool, bool externalAuth,
                          OCI_ATTR_SESSION, errh_ ), errh_ );
 
   // Initialize the server handle from service handle
-  ociCall ( OCIAttrGet ( svch_, OCI_HTYPE_SVCCTX, ( void * ) &srvh, 0,
+  ociCall ( OCIAttrGet ( svch_, OCI_HTYPE_SVCCTX, ( void * ) &srvh_, 0,
                         ( ub4 ) OCI_ATTR_SERVER, errh_ ), errh_ );
 
   // Get the DBCHARSET from server
-  ociCall ( OCIAttrGet ( srvh, ( ub4 ) OCI_HTYPE_SERVER, ( void * ) &csid,
+  ociCall ( OCIAttrGet ( srvh_, ( ub4 ) OCI_HTYPE_SERVER, ( void * ) &csid,
                          ( ub4 * ) 0, ( ub4 ) OCI_ATTR_CHARSET_ID, errh_ ),
                           errh_ );
-    csratio_ = getCsRatio ( csid );
+
+  csratio_ = getCsRatio ( csid );
 }
 
 /*****************************************************************************/
@@ -579,9 +627,25 @@ void ConnImpl::initConnImpl ( bool pool, bool externalAuth,
 
 void ConnImpl::cleanup()
 {
+  ub4 relMode      = OCI_DEFAULT;
+  ub4 serverStatus = OCI_SERVER_NORMAL;
+
   if (svch_)
   {
-    OCISessionRelease(svch_, errh_, NULL, 0, OCI_DEFAULT);
+    if ( pool_ )
+    {
+      // Get the connection status
+      if ( !dropConn_ )
+        ociCall ( OCIAttrGet ( ( void * ) srvh_, OCI_HTYPE_SERVER,
+                               ( void * ) &serverStatus, ( ub4 * ) 0,
+                               OCI_ATTR_SERVER_STATUS, errh_ ), errh_ );
+
+      // Remove the session from pool in case of unusable
+      if ( dropConn_ || ( serverStatus != OCI_SERVER_NORMAL ) )
+        relMode |= OCI_SESSRLS_DROPSESS;
+    }
+
+    OCISessionRelease(svch_, errh_, NULL, 0, relMode);
     svch_ = NULL;
   }
 

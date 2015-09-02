@@ -115,6 +115,8 @@ class ConnImpl : public Conn
 
   virtual DpiHandle *getErrh (){return (DpiHandle *)errh_;};
 
+  virtual void setErrState ( int errNum );
+
   #if OCI_MAJOR_VERSION < 12
     inline void hasTxn(boolean connHasTxn)
     {
@@ -133,6 +135,7 @@ private:
   void initConnImpl( bool pool, bool externalAuth, const string& connClass,
                      OraText *poolNmRconnStr, ub4 nameLen,
                      const string &user, const string &password );
+
   int getCsRatio ( ub2 csid )
   {
     return ( csid == DPI_AL32UTF8 ) ? DPI_BESTCASE_CHAR_CONVERSION_RATIO :
@@ -152,6 +155,8 @@ private:
   OCISession  *sessh_;          // OCI Session handle. Do not free this.
   boolean     hasTxn_;          // set if transaction is in progress
   int         csratio_;         // character expansion ratio
+  OCIServer   *srvh_;           // OCI server handle
+  bool        dropConn_;        // Set flag in case of unusable connection
 };
 
 
