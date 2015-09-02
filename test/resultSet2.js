@@ -46,56 +46,27 @@ describe('55. resultSet2.js', function() {
     var credential = dbConfig;
   }
  
-  var connection = false;
-  var createTable = 
-      "BEGIN \
-          DECLARE \
-              e_table_exists EXCEPTION; \
-              PRAGMA EXCEPTION_INIT(e_table_exists, -00942); \
-          BEGIN \
-              EXECUTE IMMEDIATE ('DROP TABLE oracledb_employees'); \
-          EXCEPTION \
-              WHEN e_table_exists \
-              THEN NULL; \
-          END; \
-          EXECUTE IMMEDIATE (' \
-              CREATE TABLE oracledb_employees ( \
-                  employees_id NUMBER,  \
-                  employees_name VARCHAR2(20) \
-              ) \
-          '); \
-      END; ";
+  var connection = null;
+  var tableName = "oracledb_employees";
+  var rowsAmount = 300;
+
+  before('get one connection', function(done) {
+    oracledb.getConnection(credential, function(err, conn) {
+      should.not.exist(err);
+      connection = conn;
+      done();
+    });
+  })
+  
+  after('release connection', function(done) {
+    connection.release( function(err) {
+      should.not.exist(err);
+      done();
+    });
+  })
       
-  var rowsAmount = 300;    
-  var insertRows = 
-      "DECLARE \
-          x NUMBER := 0; \
-          n VARCHAR2(20); \
-       BEGIN \
-          FOR i IN 1..300 LOOP \
-             x := x + 1; \
-             n := 'staff ' || x; \
-             INSERT INTO oracledb_employees VALUES (x, n); \
-          END LOOP; \
-       END; ";
-       
-  var proc = 
-      "CREATE OR REPLACE PROCEDURE get_emp_rs (p_in IN NUMBER, p_out OUT SYS_REFCURSOR) \
-         AS \
-         BEGIN \
-           OPEN p_out FOR  \
-             SELECT * FROM oracledb_employees \
-             WHERE employees_id > p_in; \
-         END; "; 
 
-  var proc2 =
-      "CREATE OR REPLACE PROCEDURE get_invalid_refcur ( p OUT SYS_REFCURSOR) \
-      AS \
-      BEGIN  \
-        NULL; \
-      END; ";
-
-  beforeEach(function(done) {
+  /*beforeEach(function(done) {
     async.series([
       function(callback) {
         oracledb.getConnection(
@@ -189,9 +160,10 @@ describe('55. resultSet2.js', function() {
         });
       }
     ], done);
-  })
+  })*/
   
   describe('55.1 query a RDBMS function', function() {
+    
     it('55.1.1 LPAD function', function(done) {
       connection.should.be.ok;
       connection.execute(
@@ -220,9 +192,17 @@ describe('55. resultSet2.js', function() {
         });
       }
     })
-  })
+  }) // 55.1
   
   describe('55.2 binding variables', function() {   
+    before(function(done){
+      setUp(connection, tableName, done);
+    })
+
+    after(function(done) {
+      clearUp(connection, tableName, done);
+    })
+
     it('55.2.1 query with one binding variable', function(done) {
       connection.should.be.ok;
       var rowCount = 0;
@@ -257,6 +237,14 @@ describe('55. resultSet2.js', function() {
   })
   
   describe('55.3 alternating getRow() & getRows() function', function() {
+    before(function(done){
+      setUp(connection, tableName, done);
+    })
+
+    after(function(done) {
+      clearUp(connection, tableName, done);
+    })
+
     it('55.3.1 result set', function(done) {
       connection.should.be.ok;
       var accessCount = 0;
@@ -368,36 +356,28 @@ describe('55. resultSet2.js', function() {
         }       
       }
     })
-
-    it ( '55.3.3 Invalid REF Cursor', function (done ) {
-      connection.should.be.ok;
-
-      connection.execute (
-        "BEGIN get_invalid_refcur ( :p ); END; ",
-        {
-          p : { type : oracledb.CURSOR, dir : oracledb.BIND_OUT }
-        },
-        function ( err, result) {
-          should.not.exist ( err );
-          fetchRowFromRS2 (result.outBinds.out, done);
-        });
-
-
-        function fetchRowFromRS2 (rs, cb ) {
-          if ( rs ) {
-            rs.getRow ( function ( err, row ) {
-              should.not.exist ( err ) ;
-              if ( row ) {
-                return fetchRowFromRS (rs, cb );
-              }
-            });
-          }
-          cb();
-        }
-    });
   })
   
   describe('55.4 release connection before close resultSet', function() {
+    before(function(done){
+      setUp(connection, tableName, done);
+    })
+
+    after(function(done) {
+      clearUp(connection, tableName, done);
+    })
+
+    beforeEach(function(done) {
+      oracledb.getConnection(
+        credential, 
+        function(err, conn) {
+          should.not.exist(err);
+          conn2 = conn;
+          done();
+        }
+      );
+    })
+
     var conn2 = false;
     function fetchRowFromRS(rs, cb) {
 
@@ -416,17 +396,6 @@ describe('55. resultSet2.js', function() {
         }
       });
     }
-    
-    beforeEach(function(done) {
-      oracledb.getConnection(
-        credential, 
-        function(err, conn) {
-          should.not.exist(err);
-          conn2 = conn;
-          done();
-        }
-      );
-    })
     
     it('55.4.1 result set', function(done) {
       conn2.should.be.ok;
@@ -459,6 +428,14 @@ describe('55. resultSet2.js', function() {
   })
   
   describe('55.5 the content of resultSet should be consistent', function() {
+    before(function(done){
+      setUp(connection, tableName, done);
+    })
+
+    after(function(done) {
+      clearUp(connection, tableName, done);
+    })
+
     it('55.5.1 (1) get RS (2) modify data in that table and commit (3) check RS', function(done) {
       connection.should.be.ok;
       var rowsCount = 0;
@@ -513,6 +490,14 @@ describe('55. resultSet2.js', function() {
   })
   
   describe('55.6 access resultSet simultaneously', function() {
+    before(function(done){
+      setUp(connection, tableName, done);
+    })
+
+    after(function(done) {
+      clearUp(connection, tableName, done);
+    })
+
     var numRows = 10;  // number of rows to return from each call to getRows()
     
     function fetchRowFromRS(rs, cb) {
@@ -618,6 +603,14 @@ describe('55. resultSet2.js', function() {
   })
   
   describe('55.7 getting multiple resultSets', function() {
+    before(function(done){
+      setUp(connection, tableName, done);
+    })
+
+    after(function(done) {
+      clearUp(connection, tableName, done);
+    })
+
     var numRows = 10;  // number of rows to return from each call to getRows()
     
     function fetchRowFromRS(rs, cb) {
@@ -717,6 +710,14 @@ describe('55. resultSet2.js', function() {
   })
   
   describe('55.8 Negative - resultSet is only for query statement', function() {
+    before(function(done){
+      setUp(connection, tableName, done);
+    })
+
+    after(function(done) {
+      clearUp(connection, tableName, done);
+    })
+
     it('55.8.1 resultSet cannot be returned for non-query statements', function(done) {
       connection.should.be.ok;
       connection.execute(
@@ -735,6 +736,14 @@ describe('55. resultSet2.js', function() {
   })
   
   describe('55.9 test querying a PL/SQL function', function() {
+    before(function(done){
+      setUp(connection, tableName, done);
+    })
+
+    after(function(done) {
+      clearUp(connection, tableName, done);
+    })
+
     it('55.9.1 ', function(done) {
       var proc = 
         "CREATE OR REPLACE FUNCTION testfunc RETURN VARCHAR2 \
@@ -796,6 +805,14 @@ describe('55. resultSet2.js', function() {
   })
   
   describe('55.10 calls getRows() once and then close RS before getting more rows', function() {
+    before(function(done){
+      setUp(connection, tableName, done);
+    })
+
+    after(function(done) {
+      clearUp(connection, tableName, done);
+    })
+
     it('55.10.1 ', function(done) {
       connection.should.be.ok;
       var numRows = 10;
@@ -932,6 +949,212 @@ describe('55. resultSet2.js', function() {
       ], done);
     })
     
-  })
+  }) // 55.12
+
+  describe('55.13 Invalid Ref Cursor', function() {
+    var proc = 
+      "CREATE OR REPLACE PROCEDURE get_invalid_refcur ( p OUT SYS_REFCURSOR) " + 
+      "  AS " +
+      "  BEGIN " + 
+      "    NULL; " + 
+      "  END;" 
+
+    before(function(done){
+      async.series([
+        function(callback) {
+          setUp(connection, tableName, callback);
+        },
+        function(callback) {
+          connection.execute(
+            proc,
+            function(err) {
+              should.not.exist(err);
+              callback();
+            }
+          );
+        }
+      ], done);
+    })
+
+    after(function(done) {
+      async.series([
+        function(callback) {
+          connection.execute(
+            "DROP PROCEDURE get_invalid_refcur",
+            function(err) {
+              should.not.exist(err);
+              callback();
+            }
+          );
+        },
+        function(callback) {
+          clearUp(connection, tableName, done);
+        }
+      ], done);
+    })
+      
+    it('55.13.1 ', function (done ) {
+      connection.should.be.ok;
+
+      connection.execute (
+        "BEGIN get_invalid_refcur ( :p ); END; ",
+        {
+          p : { type : oracledb.CURSOR, dir : oracledb.BIND_OUT }
+        },
+        function ( err, result) {
+          should.not.exist ( err );
+          fetchRowFromRS2 (result.outBinds.out, done);
+        }
+      );
+
+
+      function fetchRowFromRS2 (rs, cb ) {
+        if ( rs ) {
+          rs.getRow ( function ( err, row ) {
+            should.not.exist ( err ) ;
+            if ( row ) {
+              return fetchRowFromRS (rs, cb );
+            } else {
+              rs.close(function(err) {
+                should.not.exist(err);
+                cb();
+              });
+            }
+          });
+        } else {
+          cb();
+        }
+      }
+
+    }) // 55.13.1
+  }) // 55.13
 
 })  
+
+
+
+/********************* Helper functions *************************/
+function setUp(connection, tableName, done)
+{
+  async.series([
+    function(callback) {
+      createTable(connection, tableName, callback);
+    },
+    function(callback) {
+      insertData(connection, tableName, callback);
+    }, 
+    function(callback) {
+      createProc1(connection, tableName, callback);
+    }
+  ], done);
+}
+
+function clearUp(connection, tableName, done) 
+{
+  async.series([
+    function(callback) {
+      dropProc1(connection, callback);
+    },
+    function(callback) {
+      dropTable(connection, tableName, callback);
+    }
+  ], done);
+}
+
+function createTable(connection, tableName, done)
+{
+  var sqlCreate = 
+    "BEGIN " + 
+    "  DECLARE " +
+    "    e_table_exists EXCEPTION; " +
+    "    PRAGMA EXCEPTION_INIT(e_table_exists, -00942); " +
+    "   BEGIN " +
+    "     EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " '); " +
+    "   EXCEPTION " +
+    "     WHEN e_table_exists " +
+    "     THEN NULL; " +
+    "   END; " +
+    "   EXECUTE IMMEDIATE (' " +
+    "     CREATE TABLE " + tableName +" ( " +
+    "       employees_id NUMBER(10), " + 
+    "       employee_name VARCHAR2(20)  " +
+    "     )" +
+    "   '); " + 
+    "END; ";
+
+  connection.execute(
+    sqlCreate,
+    function(err) {
+      should.not.exist(err);
+      done();
+    }
+  );
+}
+
+function dropTable(connection, tableName, done)
+{
+  connection.execute(
+    'DROP TABLE ' + tableName,
+    function(err) {
+      should.not.exist(err);
+      done();
+    }
+  );
+}
+
+function insertData(connection, tableName, done)
+{    
+  var sqlInsert = 
+    "DECLARE " + 
+    "  x NUMBER := 0; " + 
+    "  n VARCHAR2(20); " + 
+    "BEGIN "  +
+    "  FOR i IN 1..300 LOOP " +
+    "    x := x + 1;  " + 
+    "    n := 'staff ' || x;  " + 
+    "    INSERT INTO " + tableName + " VALUES (x, n); " + 
+    "  END LOOP; " +
+    "END; ";
+  
+  connection.execute(
+    sqlInsert,
+    [], 
+    { autoCommit: true },
+    function(err) {
+      should.not.exist(err);
+      done();
+    }
+  );
+}
+
+function createProc1(connection, tableName, done)
+{
+  var sqlProc = 
+    "CREATE OR REPLACE PROCEDURE get_emp_rs (p_in IN NUMBER, p_out OUT SYS_REFCURSOR) " + 
+    "  AS " + 
+    "  BEGIN " + 
+    "    OPEN p_out FOR " + 
+    "      SELECT * FROM " + tableName + " WHERE employees_id > p_in; " + 
+    "  END; ";
+
+  connection.execute(
+    sqlProc,
+    [], 
+    { autoCommit: true },
+    function(err) {
+      should.not.exist(err);
+      done();
+    }
+  );
+}
+
+function dropProc1(connection, done)
+{
+  connection.execute(
+    'DROP PROCEDURE get_emp_rs',
+    function(err) {
+      should.not.exist(err);
+      done();
+    }
+  );
+}
