@@ -36,7 +36,8 @@
  *     51 onwards are for other tests  
  * 
  *****************************************************************************/
- 
+"use strict" 
+
 var oracledb = require('oracledb');
 var fs       = require('fs');
 var async    = require('async');
@@ -48,8 +49,8 @@ var inFileName = './test/fuzzydinosaur.jpg';  // contains the image to be insert
 var outFileName = './test/blobstreamout.jpg';
 
 describe('41. dataTypeBlob', function() {
-   
   this.timeout(10000);
+
   if(dbConfig.externalAuth){
     var credential = { externalAuth: true, connectString: dbConfig.connectString };
   } else {
@@ -58,187 +59,176 @@ describe('41. dataTypeBlob', function() {
 
   var connection = null;
   var tableName = "oracledb_myblobs";
-  var sqlCreate = 
-        "BEGIN " +
-           "   DECLARE " +
-           "       e_table_exists EXCEPTION; " +
-           "       PRAGMA EXCEPTION_INIT(e_table_exists, -00942); " +
-           "   BEGIN " +
-           "       EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " '); " +
-           "   EXCEPTION " +
-           "       WHEN e_table_exists " +
-           "       THEN NULL; " +
-           "   END; " +
-           "   EXECUTE IMMEDIATE (' " +
-           "       CREATE TABLE " + tableName +" ( " +
-           "           num NUMBER, " + 
-           "           content BLOB "  +
-           "       )" +
-           "   '); " +
-           "END; ";
 
-  before(function(done) {
+  before('get one connection', function(done) {
     oracledb.getConnection(credential, function(err, conn) {
-      if(err) { console.error(err.message); return; }
+      should.not.exist(err);
       connection = conn;
-      conn.execute(
-        sqlCreate,
-        function(err) {
-          if(err) { console.error(err.message); return; }
-          done();
-        }
-      );
+      done();
+    });
+  })
+  
+  after('release connection', function(done) {
+    connection.release( function(err) {
+      should.not.exist(err);
+      done();
     });
   })
 
-  after( function(done){
-    connection.execute(
-      "DROP table " + tableName,
-      function(err) {
-        if(err) { console.error(err.message); return; }
-        connection.release( function(err) {
-          if(err) { console.error(err.message); return; }
+  describe('41.1 testing BLOB data type', function() {
+    before('create table', function(done) {
+      assist.createTable(connection, tableName, done);
+    })
+
+    after(function(done) {
+      connection.execute(
+        "DROP table " + tableName,
+        function(err) {
+          should.not.exist(err);
           done();
-        });
-      }
-    );
-  })
+        }
+      );
+    })
 
-  it('41.1 processes null value correctly', function(done) {
-    assist.nullValueSupport(connection, tableName, done);
-  })
+    it('41.1.1 stores BLOB value correctly', function(done) {
+      connection.should.be.ok;
+      async.series([
+        function blobinsert1(callback) {
+          var streamEndEventFired = false;
+          setTimeout( function() {
+            streamEndEventFired.should.equal(true, "inStream does not call 'end' event!")
+            callback();
+          }, 2000);
 
-  it('41.2 stores BLOB value correctly', function(done) {
-    connection.should.be.ok;
-    async.series([
-      function blobinsert1(callback) {
-        var streamEndEventFired = false;
-        setTimeout( function() {
-          streamEndEventFired.should.equal(true, "inStream does not call 'end' event!")
-          callback();
-        }, 2000);
-
-        connection.execute(
-          "INSERT INTO oracledb_myblobs (num, content) VALUES (:n, EMPTY_BLOB()) RETURNING content INTO :lobbv",
-          { n: 2, lobbv: {type: oracledb.BLOB, dir: oracledb.BIND_OUT} },
-          { autoCommit: false },  // a transaction needs to span the INSERT and pipe()
-          function(err, result) {
-            should.not.exist(err);
-            (result.rowsAffected).should.be.exactly(1);
-            (result.outBinds.lobbv.length).should.be.exactly(1);
-            
-            var inStream = fs.createReadStream(inFileName);
-            inStream.on('error', function(err) {
-              should.not.exist(err, "inStream.on 'end' event");
-            });
-
-            inStream.on('end', function() {
-              streamEndEventFired = true;
-              // now commit updates
-              connection.commit( function(err) {
-                should.not.exist(err);
+          connection.execute(
+            "INSERT INTO oracledb_myblobs (num, content) VALUES (:n, EMPTY_BLOB()) RETURNING content INTO :lobbv",
+            { n: 2, lobbv: {type: oracledb.BLOB, dir: oracledb.BIND_OUT} },
+            { autoCommit: false },  // a transaction needs to span the INSERT and pipe()
+            function(err, result) {
+              should.not.exist(err);
+              (result.rowsAffected).should.be.exactly(1);
+              (result.outBinds.lobbv.length).should.be.exactly(1);
+              
+              var inStream = fs.createReadStream(inFileName);
+              inStream.on('error', function(err) {
+                should.not.exist(err, "inStream.on 'end' event");
               });
-            });
 
-            var lob = result.outBinds.lobbv[0];
-
-            lob.on('error', function(err) {
-              should.not.exist(err, "lob.on 'error' event");
-            });
-
-            inStream.pipe(lob);  // pipes the data to the BLOB
-          }
-        );
-      },
-      function blobstream1(callback) {
-        var streamFinishEventFired = false;
-        setTimeout( function() {
-          streamFinishEventFired.should.equal(true, "stream does not call 'finish' Event!");
-          callback();
-        }, 2000);
-
-        connection.execute(
-          "SELECT content FROM oracledb_myblobs WHERE num = :n",
-          { n: 2 },
-          function(err, result) {
-            should.not.exist(err);
-
-            var lob = result.rows[0][0];
-            should.exist(lob);
-
-            lob.on('error', function(err) {
-              should.not.exist(err, "lob.on 'end' event");
-            });
-
-            var outStream = fs.createWriteStream(outFileName);
-
-            outStream.on('error', function(err) {
-              should.not.exist(err, "outStream.on 'end' event");
-            });
-
-            lob.pipe(outStream);
-            outStream.on('finish', function() {
-              fs.readFile( inFileName, function(err, originalData) {
-                should.not.exist(err);
-                
-                fs.readFile( outFileName, function(err, generatedData) {
+              inStream.on('end', function() {
+                streamEndEventFired = true;
+                // now commit updates
+                connection.commit( function(err) {
                   should.not.exist(err);
-                  originalData.should.eql(generatedData);
-
-                  streamFinishEventFired = true;
                 });
               });
 
-            }); // finish event
-          }
-        );
-      },
-      function blobstream2(callback) {
-        var lobEndEventFired = false;
-        var lobDataEventFired = false;
-        setTimeout( function(){
-          lobDataEventFired.should.equal(true, "lob does not call 'data' event!");
-          lobEndEventFired.should.equal(true, "lob does not call 'end' event!");
-          callback();
-        }, 2000);
+              var lob = result.outBinds.lobbv[0];
 
-        connection.execute(
-          "SELECT content FROM oracledb_myblobs WHERE num = :n",
-          { n: 2 },
-          function(err, result) {
-            should.not.exist(err);
-            
-            var blob = Buffer(0);
-            var blobLength = 0;
-            var lob = result.rows[0][0];
-
-            should.exist(lob);
-
-            lob.on('error', function(err) {
-              should.not.exist(err, "lob.on 'end' event");
-            });
-
-            lob.on('data', function(chunk) {
-              // console.log("lob.on 'data' event");
-              // console.log('  - got %d bytes of data', chunk.length);
-              lobDataEventFired = true;
-              blobLength = blobLength + chunk.length;
-              blob = Buffer.concat([blob, chunk], blobLength);
-            });
-            
-            lob.on('end', function() {
-              fs.readFile( inFileName, function(err, data) {
-                should.not.exist(err);
-                lobEndEventFired = true;
-                
-                data.length.should.be.exactly(blob.length);
-                data.should.eql(blob);
+              lob.on('error', function(err) {
+                should.not.exist(err, "lob.on 'error' event");
               });
-            });  // end event
 
-          }
-        );
-      }
-    ], done);
+              inStream.pipe(lob);  // pipes the data to the BLOB
+            }
+          );
+        },
+        function blobstream1(callback) {
+          var streamFinishEventFired = false;
+          setTimeout( function() {
+            streamFinishEventFired.should.equal(true, "stream does not call 'finish' Event!");
+            callback();
+          }, 2000);
+
+          connection.execute(
+            "SELECT content FROM oracledb_myblobs WHERE num = :n",
+            { n: 2 },
+            function(err, result) {
+              should.not.exist(err);
+
+              var lob = result.rows[0][0];
+              should.exist(lob);
+
+              lob.on('error', function(err) {
+                should.not.exist(err, "lob.on 'end' event");
+              });
+
+              var outStream = fs.createWriteStream(outFileName);
+
+              outStream.on('error', function(err) {
+                should.not.exist(err, "outStream.on 'end' event");
+              });
+
+              lob.pipe(outStream);
+              outStream.on('finish', function() {
+                fs.readFile( inFileName, function(err, originalData) {
+                  should.not.exist(err);
+                  
+                  fs.readFile( outFileName, function(err, generatedData) {
+                    should.not.exist(err);
+                    originalData.should.eql(generatedData);
+
+                    streamFinishEventFired = true;
+                  });
+                });
+
+              }); // finish event
+            }
+          );
+        },
+        function blobstream2(callback) {
+          var lobEndEventFired = false;
+          var lobDataEventFired = false;
+          setTimeout( function(){
+            lobDataEventFired.should.equal(true, "lob does not call 'data' event!");
+            lobEndEventFired.should.equal(true, "lob does not call 'end' event!");
+            callback();
+          }, 2000);
+
+          connection.execute(
+            "SELECT content FROM oracledb_myblobs WHERE num = :n",
+            { n: 2 },
+            function(err, result) {
+              should.not.exist(err);
+              
+              var blob = Buffer(0);
+              var blobLength = 0;
+              var lob = result.rows[0][0];
+
+              should.exist(lob);
+
+              lob.on('error', function(err) {
+                should.not.exist(err, "lob.on 'end' event");
+              });
+
+              lob.on('data', function(chunk) {
+                // console.log("lob.on 'data' event");
+                // console.log('  - got %d bytes of data', chunk.length);
+                lobDataEventFired = true;
+                blobLength = blobLength + chunk.length;
+                blob = Buffer.concat([blob, chunk], blobLength);
+              });
+              
+              lob.on('end', function() {
+                fs.readFile( inFileName, function(err, data) {
+                  should.not.exist(err);
+                  lobEndEventFired = true;
+                  
+                  data.length.should.be.exactly(blob.length);
+                  data.should.eql(blob);
+                });
+              });  // end event
+
+            }
+          );
+        }
+      ], done);
+    }) // 41.1.1
+  }) //41.1
+
+  describe('41.2 stores null value correctly', function() {
+    it('41.2.1 testing Null, Empty string and Undefined', function(done) {
+      assist.verifyNullValues(connection, tableName, done);
+    })
   })
+
 })

@@ -34,7 +34,8 @@
  *     51 -     are for other tests 
  * 
  *****************************************************************************/
- 
+"use strict"; 
+
 var oracledb = require('oracledb');
 var should = require('should');
 var async = require('async');
@@ -92,7 +93,7 @@ describe('38. dataTypeTimestamp6.js', function() {
       assist.verifyResultSet(connection, tableName, dates, done);
     }) 
     
-    it.skip('38.1.3 works well with REF Cursor', function(done) {
+    it('38.1.3 works well with REF Cursor', function(done) {
       assist.verifyRefCursor(connection, tableName, dates, done);
     }) 
     
@@ -126,12 +127,17 @@ describe('38. dataTypeTimestamp6.js', function() {
     })
 
     it('38.3.2 SELECT query - formatted data for comparison', function(done) {
+      var sql = "SELECT num, TO_CHAR(content AT TIME ZONE '-8:00', 'DD-MM-YYYY HH24:MI:SS.FF TZR') AS TS_DATA FROM " 
+                 + tableName + " WHERE num = :no";
+
       async.forEach(timestamps, function(timestamp, cb) {
         var bv = timestamps.indexOf(timestamp);
         connection.execute(
-          "SELECT num, TO_CHAR(content, 'DD-MM-YYYY HH24:MI:SS.FF TZR') AS TS_DATA FROM " + tableName + " WHERE num = :no",
+          sql,
           { no: bv },
-          { outFormat: oracledb.OBJECT },
+          { 
+            outFormat: oracledb.OBJECT 
+          },
           function(err, result) {
             should.not.exist(err);
             // console.log(result.rows);

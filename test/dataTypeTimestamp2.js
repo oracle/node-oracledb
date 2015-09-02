@@ -31,7 +31,8 @@
  *     51 -     are for other tests 
  * 
  *****************************************************************************/
- 
+"use strict"; 
+
 var oracledb = require('oracledb');
 var should = require('should');
 var async = require('async');

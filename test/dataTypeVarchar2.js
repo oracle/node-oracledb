@@ -31,10 +31,10 @@
  *     51 -     are for other tests  
  * 
  *****************************************************************************/
- 
+ "use strict";
+
 var oracledb = require('oracledb');
 var should = require('should');
-var async = require('async');
 var assist = require('./dataTypeAssist.js');
 var dbConfig = require('./dbConfig.js');
 
@@ -68,28 +68,6 @@ describe('24. dataTypeVarchar2.js', function() {
       done();
     });
   })
-
- /* before(function(done) {
-    oracledb.getConnection(credential, function(err, conn) {
-      if(err) { console.error(err.message); return; }
-      connection = conn;
-      //assist.setup(connection, tableName, sqlCreate, strs, done);
-      assist.setUp(connection, tableName, strs, done);
-    });
-  })*/
-  
-  /*after(function(done) {
-    connection.execute(
-      "DROP table " + tableName,
-      function(err) {
-        if(err) { console.error(err.message); return; }
-        connection.release( function(err) {
-          if(err) { console.error(err.message); return; }
-          done();
-        });
-      }
-    );
-  })*/
   
   describe('24.1 testing VARCHAR2 data in various lengths', function() {
     
@@ -114,24 +92,16 @@ describe('24. dataTypeVarchar2.js', function() {
     it('24.1.2 resultSet stores VARCHAR2 data correctly', function(done) {
       assist.verifyResultSet(connection, tableName, strs, done);
     })
-  })
 
-  /*it('24.1 supports VARCHAR2 data in various lengths', function(done) {
-    assist.dataTypeSupport(connection, tableName, strs, done);
+    it('24.1.3 works well with REF Cursor', function(done) {
+      assist.verifyRefCursor(connection, tableName, strs, done);
+    })
   })
   
-  it('24.2 resultSet stores VARCHAR2 data correctly', function(done) {
-    //assist.resultSetSupport(connection, tableName, strs, done);
-    assist.verifyResultSet(connection, tableName, strs, done);
-  })*/
-  
-  describe('24.3 stores null value correctly', function() {
-    it('24.3.1 testing Null, Empty string and Undefined', function(done) {
+  describe('24.2 stores null value correctly', function() {
+    it('24.2.1 testing Null, Empty string and Undefined', function(done) {
       assist.verifyNullValues(connection, tableName, done);
     })
   })
 
-/*  it('24.3 stores null value correctly', function(done) {
-    assist.verifyNullValues(connection, tableName, done);
-  })*/
 })

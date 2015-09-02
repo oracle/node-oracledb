@@ -31,7 +31,8 @@
  *     51 -     are for other tests 
  * 
  *****************************************************************************/
- 
+ "use strict";
+
 var oracledb = require('oracledb');
 var should = require('should');
 var async = require('async');
@@ -89,7 +90,7 @@ describe('37. dataTypeTimestamp5.js', function() {
       assist.verifyResultSet(connection, tableName, dates, done);
     }) 
     
-    it.skip('37.1.3 works well with REF Cursor', function(done) {
+    it('37.1.3 works well with REF Cursor', function(done) {
       assist.verifyRefCursor(connection, tableName, dates, done);
     }) 
     
@@ -122,18 +123,22 @@ describe('37. dataTypeTimestamp5.js', function() {
       assist.selectOriginalData(connection, tableName, timestamps, done);
     })
 
-    it.only('37.3.2 SELECT query - formatted data for comparison', function(done) {
+    it('37.3.2 SELECT query - formatted data for comparison', function(done) {
+      var sql = "SELECT num, TO_CHAR(content AT TIME ZONE '-8:00', 'DD-MM-YYYY HH24:MI:SS.FF TZR') AS TS_DATA FROM " 
+                 + tableName + " WHERE num = :no";
+
       async.forEach(timestamps, function(timestamp, cb) {
         var bv = timestamps.indexOf(timestamp);
         connection.execute(
-          "SELECT num, TO_CHAR(content, 'DD-MM-YYYY HH24:MI:SS.FF TZR') AS TS_DATA FROM " + tableName + " WHERE num = :no",
-          // "SELECT num, CAST(content) at time zone 'UTC' FROM " + tableName + " WHERE num = :no",
+          sql,
           { no: bv },
-          { outFormat: oracledb.OBJECT },
+          { 
+            outFormat: oracledb.OBJECT
+          },
           function(err, result) {
             should.not.exist(err);
-            console.log(result.rows);
-            // (result.rows[0].TS_DATA).should.startWith(assist.content.timestamps5[bv]);
+            // console.log(result.rows);
+            (result.rows[0].TS_DATA).should.equal(assist.content.timestamps5[bv]);
             cb();
           } 
         );

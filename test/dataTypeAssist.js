@@ -37,6 +37,32 @@ var should = require('should');
 var async = require('async');
 
 var assist = exports;
+
+/* Mapping between table names and data types */
+assist.allDataTypeNames = 
+{
+  "oracledb_char"         : "CHAR(2000)",
+  "oracledb_nchar"        : "NCHAR(1000)",
+  "oracledb_varchar2"     : "VARCHAR2(4000)",
+  "oracledb_nvarchar2"    : "NVARCHAR2(2000)",
+  "oracledb_number"       : "NUMBER", 
+  "oracledb_number2"      : "NUMBER(15, 5)",
+  "oracledb_float"        : "FLOAT",
+  "oracledb_float2"       : "FLOAT(90)",
+  "oracledb_binary_float" : "BINARY_FLOAT",
+  "oracledb_double"       : "BINARY_DOUBLE",
+  "oracledb_date"         : "DATE",
+  "oracledb_timestamp1"   : "TIMESTAMP",
+  "oracledb_timestamp2"   : "TIMESTAMP(5)",
+  "oracledb_timestamp3"   : "TIMESTAMP WITH TIME ZONE",
+  "oracledb_timestamp4"   : "TIMESTAMP (2) WITH TIME ZONE",
+  "oracledb_timestamp5"   : "TIMESTAMP WITH LOCAL TIME ZONE",
+  "oracledb_timestamp6"   : "TIMESTAMP (9) WITH LOCAL TIME ZONE",
+  "oracledb_rowid"        : "ROWID",
+  "oracledb_myclobs"      : "CLOB",
+  "oracledb_myblobs"      : "BLOB"
+};
+
 assist.data = {
   specialChars: [
     '\"',
@@ -111,6 +137,22 @@ assist.data = {
     't', 'u', 'v', 'w', 'x',
     'y', 'z'
   ],
+  numbers: [
+    1,
+    0,
+    8,
+    -8,
+    1234,
+    -1234,
+    9876.54321,
+    -9876.54321,
+    0.01234,
+    -0.01234,
+    0.00000123,
+    -0.00000123,
+    1234567890.0123,
+    -1234567890.0123 
+  ],
   dates: [
     new Date(-100000000),
     new Date(0),
@@ -124,18 +166,6 @@ assist.data = {
     new Date('2015-07-24 00:00:00'),
     new Date(2003, 09, 23, 11, 50, 30, 123)
   ]
-};
-
-assist.allDataTypeNames = 
-{
-  "oracledb_varchar2"   : "VARCHAR2(4000)",
-  "oracledb_date"       : "DATE",
-  "oracledb_timestamp1" : "TIMESTAMP",
-  "oracledb_timestamp2" : "TIMESTAMP(5)",
-  "oracledb_timestamp3" : "TIMESTAMP WITH TIME ZONE",
-  "oracledb_timestamp4" : "TIMESTAMP (2) WITH TIME ZONE",
-  "oracledb_timestamp5" : "TIMESTAMP WITH LOCAL TIME ZONE",
-  "oracledb_timestamp6" : "TIMESTAMP (9) WITH LOCAL TIME ZONE"
 };
 
 assist.DATE_STRINGS = 
@@ -253,45 +283,45 @@ assist.content =
   ],
   timestamps5:
   [
-    '01-06-2005 00:00:00.000000 ',
-    '01-09-2005 00:00:00.000000 ',
-    '05-08-2005 00:00:00.000000 ',
-    '05-07-1998 00:00:00.000000 ',
-    '07-05-1998 00:00:00.000000 ',
-    '02-12-1999 03:00:00.100000 ',
-    '02-12-1999 03:00:00.120000 ',
-    '02-12-1999 03:00:00.123000 ',
-    '02-12-1999 03:00:00.012300 ',
-    '02-12-1999 03:00:00.123400 ',
-    '02-12-1999 03:00:00.001230 ',
-    '02-12-1999 03:00:00.123450 ',
-    '02-12-1999 03:00:00.123456 ',
-    '02-12-1999 03:00:00.123457 ',
-    '02-12-1999 03:20:02.000012 ',
-    '02-12-1999 03:00:00.123457 ',
-    '02-12-1999 03:00:00.123457 ',
-    '02-12-1999 03:00:00.000000 '
+    '31-05-2005 23:00:00.000000 -08:00',
+    '31-08-2005 23:00:00.000000 -08:00',
+    '04-08-2005 23:00:00.000000 -08:00',
+    '04-07-1998 23:00:00.000000 -08:00',
+    '06-05-1998 23:00:00.000000 -08:00',
+    '01-12-1999 11:00:00.100000 -08:00',
+    '01-12-1999 11:00:00.120000 -08:00',
+    '01-12-1999 11:00:00.123000 -08:00',
+    '01-12-1999 11:00:00.012300 -08:00',
+    '01-12-1999 11:00:00.123400 -08:00',
+    '01-12-1999 11:00:00.001230 -08:00',
+    '01-12-1999 11:00:00.123450 -08:00',
+    '01-12-1999 11:00:00.123456 -08:00',
+    '01-12-1999 11:00:00.123457 -08:00',
+    '01-12-1999 11:20:02.000012 -08:00',
+    '01-12-1999 11:00:00.123457 -08:00',
+    '01-12-1999 11:00:00.123457 -08:00',
+    '01-12-1999 11:00:00.000000 -08:00'
   ],
   timestamps6:
   [
-    '01-06-2005 00:00:00.000000000 ',
-    '01-09-2005 00:00:00.000000000 ',
-    '05-08-2005 00:00:00.000000000 ',
-    '05-07-1998 00:00:00.000000000 ',
-    '07-05-1998 00:00:00.000000000 ',
-    '02-12-1999 03:00:00.100000000 ',
-    '02-12-1999 03:00:00.120000000 ',
-    '02-12-1999 03:00:00.123000000 ',
-    '02-12-1999 03:00:00.012300000 ',
-    '02-12-1999 03:00:00.123400000 ',
-    '02-12-1999 03:00:00.001230000 ',
-    '02-12-1999 03:00:00.123450000 ',
-    '02-12-1999 03:00:00.123456000 ',
-    '02-12-1999 03:00:00.123456700 ',
-    '02-12-1999 03:20:02.000012300 ',
-    '02-12-1999 03:00:00.123456780 ',
-    '02-12-1999 03:00:00.123456789 ',
-    '02-12-1999 03:00:00.000000000 '
+    '31-05-2005 23:00:00.000000000 -08:00', 
+    '31-08-2005 23:00:00.000000000 -08:00',
+    '04-08-2005 23:00:00.000000000 -08:00',
+    '04-07-1998 23:00:00.000000000 -08:00',
+    '06-05-1998 23:00:00.000000000 -08:00',
+    '01-12-1999 11:00:00.100000000 -08:00',
+    '01-12-1999 11:00:00.120000000 -08:00',
+    '01-12-1999 11:00:00.123000000 -08:00',
+    '01-12-1999 11:00:00.012300000 -08:00',
+    '01-12-1999 11:00:00.123400000 -08:00',
+    '01-12-1999 11:00:00.001230000 -08:00',
+    '01-12-1999 11:00:00.123450000 -08:00',
+    '01-12-1999 11:00:00.123456000 -08:00',
+    '01-12-1999 11:00:00.123456700 -08:00',
+    '01-12-1999 11:20:02.000012300 -08:00',
+    '01-12-1999 11:00:00.123456780 -08:00',
+    '01-12-1999 11:00:00.123456789 -08:00',
+    '01-12-1999 11:00:00.000000000 -08:00'
   ]
 };
 
@@ -331,35 +361,6 @@ assist.createCharString = function(size) {
     }
   }
   return buffer.toString();
-}
-
-assist.setup = function(connection, tableName, sqlCreate, array, done) {
-  async.series([
-    function(callback) {
-      connection.execute(
-        sqlCreate,
-        function(err) {
-          should.not.exist(err);
-          callback();
-        }
-      );
-    },
-    function(callback) {
-      async.forEach(array, function(element, cb) {
-        connection.execute(
-          "INSERT INTO " + tableName + " VALUES(:no, :bindValue)",
-          { no: array.indexOf(element), bindValue: element },
-          function(err) {
-            should.not.exist(err);
-            cb();
-          }
-        );
-      }, function(err) {
-        should.not.exist(err);
-        callback();
-      });
-    }
-  ], done);
 }
 
 assist.setUp = function(connection, tableName, array, done) 
@@ -585,87 +586,6 @@ assist.selectOriginalData = function(connection, tableName, array, done)
   });
 }
 
-assist.resultSetSupport = function(connection, tableName, array, done) {
-  connection.should.be.ok;
-  var numRows = 3;  // number of rows to return from each call to getRows()
-  connection.execute(
-    "SELECT * FROM " + tableName,
-    [],
-    { resultSet: true, outFormat: oracledb.OBJECT },
-    function(err, result) {
-      should.not.exist(err);
-      (result.resultSet.metaData[0]).name.should.eql('NUM');
-      (result.resultSet.metaData[1]).name.should.eql('CONTENT');
-      fetchRowsFromRS(result.resultSet);
-    }
-  );
-  
-  function fetchRowsFromRS(rs) {
-    rs.getRows(numRows, function(err, rows) {
-      should.not.exist(err);
-      if(rows.length > 0) {
-        for(var i = 0; i < rows.length; i++) {
-          if( (typeof rows[i].CONTENT) === 'string' ) 
-        rows[i].CONTENT.trim().should.eql(array[rows[i].NUM]); 
-          else if( (typeof rows[i].CONTENT) === 'number' )
-            rows[i].CONTENT.should.eql(array[rows[i].NUM]);
-          else
-            rows[i].CONTENT.toUTCString().should.eql(array[rows[i].NUM].toUTCString());       
-        }
-        return fetchRowsFromRS(rs);
-      } else if(rows.length == 0) {
-        rs.close(function(err) {
-          should.not.exist(err);
-          done();
-        });
-      } else {
-        var lengthLessThanZero = true;
-        should.not.exist(lengthLessThanZero);
-        done();
-      }
-    });
-  }
-}
-
-assist.nullValueSupport = function(connection, tableName, done) {
-  connection.should.be.ok;
-  var sqlInsert = "INSERT INTO " + tableName + " VALUES(:no, :bindValue)";
-  async.series([
-    function(callback) {
-      connection.execute(
-        sqlInsert,
-        { no: 998, bindValue: '' },
-        function(err) {
-          should.not.exist(err);
-          callback();
-        }
-      );
-    },
-    function(callback) {
-      connection.execute(
-        sqlInsert,
-        { no: 999, bindValue: null },
-        function(err) {
-          should.not.exist(err);
-          callback();
-        }
-      );
-    },
-    function(callback) {
-      connection.execute(
-        "SELECT * FROM " + tableName + " WHERE num > :1 ORDER BY num",
-        [990],
-        function(err, result) {
-          should.not.exist(err);
-          // console.log(result);
-          result.rows.should.eql([ [998, null],  [999, null] ]);
-          callback();
-        }
-      );
-    }
-  ], done);
-}
-
 /* Null value verfication */
 assist.verifyNullValues = function(connection, tableName, done) 
 {  
@@ -732,6 +652,17 @@ assist.verifyNullValues = function(connection, tableName, done)
       var num = 5;
       connection.execute(
         "INSERT INTO " + tableName + " VALUES(:1, '')",
+        [num],
+        function(err) {
+          should.not.exist(err);
+          verifyNull(num, callback);
+        }
+      );
+    },
+    function sqlNullColumn(callback) {
+      var num = 6;
+      connection.execute(
+        "INSERT INTO " + tableName + "(num) VALUES(:1)",
         [num],
         function(err) {
           should.not.exist(err);
