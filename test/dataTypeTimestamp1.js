@@ -48,9 +48,9 @@ describe('33. dataTypeTimestamp1.js', function() {
   
   var connection = null;
   var tableName = "oracledb_timestamp1";
-  var dates = assist.data.dates;
+  // var dates = assist.data.dates;
       
-  before(function(done) {
+  /*before(function(done) {
     oracledb.getConnection(credential, function(err, conn) {
       if(err) { console.error(err.message); return; }
       connection = conn;
@@ -71,9 +71,256 @@ describe('33. dataTypeTimestamp1.js', function() {
         });
       }
     );
+  })*/
+  before('get one connection', function(done) {
+    oracledb.getConnection(credential, function(err, conn) {
+      should.not.exist(err);
+      connection = conn;
+      done();
+    });
   })
+
+  after('release connection', function(done) {
+    connection.release( function(err) {
+      should.not.exist(err);
+      done();
+    });
+  })
+
+  describe('33.1 Insert JavaScript Date data', function() {
+    var dates = assist.data.dates;
+    var numRows = 3;  // number of rows to return from each call to getRows()
+    
+    before(function(done) {
+      async.series([
+        function createTable(callback) {
+          var sqlCreate = assist.sqlCreateTable(tableName);
+          connection.execute(
+            sqlCreate,
+            function(err) {
+              should.not.exist(err);
+              callback();
+            }
+          );
+        }, 
+        function insertDataJS(callback) {
+          async.forEach(dates, function(date, cb) {
+            connection.execute(
+              "INSERT INTO " + tableName + " VALUES(:no, :bindValue)",
+              { no: dates.indexOf(date), bindValue: date },
+              function(err) {
+                should.not.exist(err);
+                cb();
+              }
+            );
+          }, function(err) {
+            should.not.exist(err);
+            callback();
+          });
+        }
+      ], done);
+    }) // before
+
+    after(function(done) {
+      connection.execute(
+        "DROP table " + tableName,
+        function(err) {
+          should.not.exist(err);
+          done();
+        }
+      );
+    }) // after
+    
+    it('33.1.1 works well with SELECT query', function(done) {
+      async.forEach(dates, function(date, cb) {
+        var bv  = dates.indexOf(date);
+
+        connection.execute(
+          "SELECT content FROM " + tableName + " WHERE num = :no",
+          { no: bv },
+          { outFormat: oracledb.OBJECT },
+          function(err, result) {
+            should.not.exist(err);
+            result.rows[0].CONTENT.toUTCString().should.eql(dates[bv].toUTCString());
+            cb();
+          }
+        );
+      }, function(err) {
+        should.not.exist(err);
+        done();
+      });
+    }) // 33.1.1
+
+    it('33.1.2 works well with result set', function(done) {
+      connection.execute(
+        "SELECT * FROM " + tableName,
+        [],
+        { resultSet: true, outFormat: oracledb.OBJECT },
+        function(err, result) {
+          should.not.exist(err);
+          (result.resultSet.metaData[0]).name.should.eql('NUM');
+          (result.resultSet.metaData[1]).name.should.eql('CONTENT');
+          fetchRowsFromRS(result.resultSet, dates, done);
+        }
+      );
+    }) // 33.1.2
+    
+    it.skip('33.1.3 works well with REF Cursor', function(done) {
+      async.series([
+        function createProcedure(callback) {
+          var proc = assist.sqlCreateProcedure(tableName);
+          connection.execute(
+            proc,
+            function(err) {
+              should.not.exist(err);
+              callback();
+            }
+          );
+        },
+        function verifyRefCursor(callback) {
+          connection.execute(
+            "BEGIN testproc(:o); END;",
+            [
+              { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
+            ],
+            function(err, result) {
+              should.not.exist(err);
+              console.log(result.outBinds.o);
+              callback();
+              // fetchRowsFromRS(result.outBinds.o, dates, callback);
+            }
+          );
+        },
+        function dropProcedure(callback) {
+          connection.execute(
+            "DROP PROCEDURE testproc",
+            function(err) {
+              should.not.exist(err);
+              callback();
+            }
+          );
+        }
+      ], done);
+    }) // 33.1.3
+
+    function fetchRowsFromRS(rs, array, cb) 
+    {
+      rs.getRows(numRows, function(err, rows) {
+        should.not.exist(err);
+        if(rows.length > 0) {
+          for(var i = 0; i < rows.length; i++) {
+            (rows[i].CONTENT.toUTCString()).should.eql(array[ (rows[i].NUM) ].toUTCString());
+            return fetchRowsFromRS(rs, array, cb);
+          } 
+        } else {
+          rs.close( function(err) {
+            should.not.exist(err);
+            cb();
+          });
+        } 
+      });
+    }
+  }) // end of 33.1 suite
+
+  describe('33.2 insert SQL TIMESTAMP data', function() {
+    var timestamps = assist.TIMESTAMP_STRINGS;
+
+    before(function(done) {
+      async.series([
+        function createTable(callback) {
+          var sqlCreate = assist.sqlCreateTable(tableName);
+          connection.execute(
+            sqlCreate,
+            function(err) {
+              should.not.exist(err);
+              callback();
+            }
+          );
+        }, 
+        function insertDataSQL(callback) {
+          async.forEach(timestamps, function(timestamp, cb) {
+            var sql = "INSERT INTO " + tableName + " VALUES(:no, " + timestamp + " )";
+            var bv  = timestamps.indexOf(timestamp);
+
+            connection.execute(
+              sql,
+              { no: bv },
+              function(err) {
+                should.not.exist(err);
+                cb();
+              }
+            );
+          }, function(err) {
+            should.not.exist(err);
+            callback();
+          });
+        } 
+      ], done);
+    }) // before
+
+    after(function(done) {
+      connection.execute(
+        "DROP table " + tableName,
+        function(err) {
+          should.not.exist(err);
+          done();
+        }
+      );
+    }) // after
+
+    it('33.2.1 works well with SELECT query', function(done) {
+      async.forEach(timestamps, function(timestamp, cb) {
+        var bv = timestamps.indexOf(timestamp);
+        connection.execute(
+          "SELECT content FROM " + tableName + " WHERE num = :no",
+          { no: bv },
+          { outFormat: oracledb.OBJECT },
+          function(err, result) {
+            should.not.exist(err);
+            (result.rows[0].CONTENT.toUTCString()).should.equal(assist.content.timestamps[bv]);
+            cb();
+          } 
+        );
+      }, function(err) {
+          should.not.exist(err);
+          done();
+      });
+    }) // 33.2.1
+
+    it('33.2.2 works well with result set', function(done) {
+      connection.execute(
+        "SELECT * FROM " + tableName,
+        [],
+        { resultSet: true, outFormat: oracledb.OBJECT },
+        function(err, result) {
+          should.not.exist(err);
+          (result.resultSet.metaData[0]).name.should.eql('NUM');
+          (result.resultSet.metaData[1]).name.should.eql('CONTENT');
+          var array = assist.content.timestamps;
+          fetchOneRowFromRS(result.resultSet, array, done);
+        }
+      );
+    }) // 33.2.2
+
+    function fetchOneRowFromRS(rs, array, cb) 
+    {
+      rs.getRow( function(err, row) {
+        should.not.exist(err);
+        if(row) {
+          (row.CONTENT.toUTCString()).should.eql(array[row.NUM]);
+          return fetchOneRowFromRS(rs, array, cb);     
+        } else {
+          rs.close( function(err) {
+            should.not.exist(err);
+            cb();
+          });
+        } 
+      });
+    }
+
+  }) // end of 33.2 suite
   
-  it('33.1 supports TIMESTAMP data type', function(done) {
+  /*it('33.1 supports TIMESTAMP data type', function(done) {
     assist.dataTypeSupport(connection, tableName, dates, done);
   })
   
@@ -128,5 +375,5 @@ describe('33. dataTypeTimestamp1.js', function() {
         });
       }
     ], done);
-  })
+  })*/
 })
