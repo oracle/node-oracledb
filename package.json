@@ -17,6 +17,7 @@
     "plugin",
     "library",
     "driver",
+    "add-on",
     "extension",
     "binding",
     "interface",

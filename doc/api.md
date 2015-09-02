@@ -1,4 +1,4 @@
-# node-oracledb 1.1: Documentation for the Oracle Database Node.js Driver
+# node-oracledb 1.1: Documentation for the Oracle Database Node.js Add-on
 
 *Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved.*
 
@@ -128,8 +128,7 @@ limitations under the License.
 
 ## <a name="intro"></a> 1. Introduction
 
-The Oracle Database Node.js driver [*node-oracledb*](https://github.com/oracle/node-oracledb)
-powers high performance Node.js applications.
+The [*node-oracledb*](https://github.com/oracle/node-oracledb) add-on for Node.js powers high performance Oracle Database applications.
 
 This document shows how to use node-oracledb.  The API reference is in
 sections 2 - 7 and the user guide in subsequent sections.
@@ -186,14 +185,14 @@ Scripts to create Oracle's sample schemas can be found at
 
 Unless otherwise specified, the last parameter of each method is a
 callback.  If an application does not pass a callback function where
-it is expected, then the driver throws an exception of type *Error*.
+it is expected, then node-oracledb throws an exception of type *Error*.
 
 The first parameter of the callback is an *Error* object that
 contains error information if the call fails.  If the call succeeds,
 then the object is null.
 
 If an invalid value is set for a property, then the *Error* object is
-thrown by the driver.  The same is true for invalid operations on
+thrown.  The same is true for invalid operations on
 read-only or write-only properties.
 
 ### <a name="properror"></a> 2.1 Error Properties
@@ -207,7 +206,7 @@ String message
 The text of the error message.
 
 The error may be a standard Oracle message with a prefix like ORA or
-PLS.  Alternatively it may be a driver specific error prefixed with
+PLS.  Alternatively it may be a node-oracledb specific error prefixed with
 NJS or DPI.
 
 A single line error message may look like this:
@@ -230,13 +229,13 @@ PL/SQL: Statement ignored
 
 The *Oracledb* object is the factory class for *Pool* and *Connection* objects.
 
-The *Oracledb* object is instantiated by loading the driver:
+The *Oracledb* object is instantiated by loading node-oracledb:
 
 ```javascript
 var oracledb = require("oracledb");
 ```
 
-Internally, the driver creates the *Oracledb* object as a singleton.
+Internally, the add-on creates the *Oracledb* object as a singleton.
 Reloading it in the same Node.js process creates a new pointer to the
 same object.
 
@@ -481,7 +480,7 @@ Number lobPrefetchSize
 
 Node-oracledb internally uses Oracle *LOB Locators* to manipulate long
 object (LOB) data.  LOB Prefetching allows LOB data to be returned
-early to node-oracledb when these locators are returned to the driver.
+early to node-oracledb when these locators are first returned.
 This is similar to the way [row prefetching](#rowprefetching) allows
 for efficient use of resources and round-trips between node-oracledb
 and the database.
@@ -3099,7 +3098,7 @@ By default,
 [DML](https://docs.oracle.com/database/121/CNCPT/glossary.htm#CNCPT2042)
 statements are not committed in node-oracledb.
 
-The driver implements [`commit()`](#commit) and
+The node-oracledb add-on implements [`commit()`](#commit) and
 [`rollback()`](#rollback) methods that can be used to explicitly
 control transactions.
 
@@ -3131,7 +3130,7 @@ Each non-pooled connection and each session in the connection pool has
 its own cache of statements with a default size of 30.  Statement
 caching lets cursors be used without re-parsing the statement.
 Statement caching also reduces meta data transfer costs between the
-driver and the database.  Performance and scalability are improved.
+node-oracledb and the database.  Performance and scalability are improved.
 
 In general, set the statement cache to the size of the working set of
 statements being executed by the application.
@@ -3196,8 +3195,8 @@ Node-oracledb can use Oracle's
 [National Language Support (NLS)](https://docs.oracle.com/database/121/NLSPG/toc.htm)
 to assist in globalizing applications.
 
-Node-oracledb always uses Oracle's AL32UTF8 character set internally
-in the driver layer.  Data will be converted between AL32UTF8 and the
+Node-oracledb always uses Oracle's AL32UTF8 character set internally.
+Data will be converted between AL32UTF8 and the
 database character set when it is inserted into, or queried from, the
 database.  The environment variable `NLS_LANG` can be used to
 configure the Oracle client language and territory only.

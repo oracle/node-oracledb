@@ -2,8 +2,7 @@
 
 ## <a name="about"></a> 1. About node-oracledb
 
-The Oracle Database Node.js driver powers high performance
-Node.js applications.
+The node-oracledb add-on for Node.js powers high performance Oracle Database applications.
 
 Node-oracledb connects Node.js 0.10, Node.js 0.12, and io.js to
 Oracle Database.
@@ -88,7 +87,7 @@ See [INSTALL](https://github.com/oracle/node-oracledb/tree/master/INSTALL.md) fo
 
 ## <a name="doc"></a> 4. Documentation
 
-See [Documentation for the Oracle Database Node.js Driver](https://github.com/oracle/node-oracledb/tree/master/doc/api.md).
+See [Documentation for the Oracle Database Node.js Add-on](https://github.com/oracle/node-oracledb/tree/master/doc/api.md).
 
 ## <a name="changes"></a> 5. Changes
 
