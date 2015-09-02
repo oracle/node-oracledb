@@ -103,14 +103,10 @@ typedef enum
 /* OCI Stmt Handle state
  *  For REFCURSORS state should be DpiStmtStateExecuted
  */
-typedef enum
-{
-  DpiStmtStateUndefined   = -1,     /* Undefined */
-  DpiStmtStateInitialized = 0x001,  /* Initialized */
-  DpiStmtStateExecuted,             /* Executed */
-  DpiStmtStateEndOfFetch            /* End-Of-Fetch */
-} DpiStmtState;
-
+#define DPI_STMT_STATE_UNDEFINED   (0)           // Undefined
+#define DPI_STMT_STATE_INITIALIZED (1)           // Initialized
+#define DPI_STMT_STATE_EXECUTED    (2)           // Executed
+#define DPI_STMT_STATE_ENDOFFETCH  (3)           // End of Fetch
 
 
 /*

@@ -67,8 +67,8 @@ class Connection;
 class ProtoILob;
 
 /* Flags Constants */
-#define BIND_FLAGS_STMT_NOT_READY   0    /* REFCURSOR stmt not-fetch-able */
-#define BIND_FLAGS_STMT_READY       1    /* REFCURSOR stmt fetch-able */
+#define NJS_BIND_REF_CURSOR_INVALID  0  /*CURSOR not-fetch-able */
+#define NJS_BIND_REF_CURSOR_VALID    1  /*CURSOR fetch-able */
 
 /**
 * Structure used for binds

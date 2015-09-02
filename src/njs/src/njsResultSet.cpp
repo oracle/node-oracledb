@@ -74,12 +74,13 @@ void ResultSet::setResultSet ( dpi::Stmt *stmt, eBaton *executeBaton,
   this->dpistmt_       = stmt;
   this->dpienv_        = executeBaton->dpienv;
   this->njsconn_       = executeBaton->njsconn;
-  if ( ( flags & BIND_FLAGS_STMT_READY ) == BIND_FLAGS_STMT_READY )
+  if ( flags == NJS_BIND_REF_CURSOR_VALID )
   {
     this->meta_        = stmt->getMetaData();
     this->numCols_     = this->dpistmt_->numCols();
+    this->state_       = INACTIVE;
   }
-  else if ( ( flags & BIND_FLAGS_STMT_READY ) == BIND_FLAGS_STMT_NOT_READY )
+  else if ( flags == NJS_BIND_REF_CURSOR_INVALID )
   {
     /* 
      * This could happen in REFCURSOR case, when the stored procedure

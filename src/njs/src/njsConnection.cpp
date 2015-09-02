@@ -943,7 +943,13 @@ void Connection::Async_Execute (uv_work_t *req)
        {
          bind->flags =
            (((Stmt*)bind->value)->getState () == DpiStmtStateExecuted ) ?
-               BIND_FLAGS_STMT_READY : BIND_FLAGS_STMT_NOT_READY;
+                NJS_BIND_REF_CURSOR_VALID : NJS_BIND_REF_CURSOR_INVALID ;
+         if ( ( bind->flags == NJS_BIND_REF_CURSOR_INVALID ) && 
+              ( bind->value != NULL ) )
+         {
+           /* Release the invalid REFCURSOR to avoid any leaks */
+           ((Stmt*)bind->value)->release ();
+         }
        }
      }
 
