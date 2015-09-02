@@ -2994,21 +2994,22 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
 
   case dpi::DpiTimestampLTZ:
     {
-    if ( NJS_SIZE_T_OVERFLOW ( sizeof ( long double ), nRows) )
-    {
-      executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
-      return;
-    }
-    else
-    {
-      bind->extvalue = (long double *) malloc ( sizeof ( long double ) * nRows );
-      if( !bind->extvalue )
+      if ( NJS_SIZE_T_OVERFLOW ( sizeof ( long double ), nRows) )
       {
-        executeBaton->error = NJSMessages::getErrorMsg(
-                                errInsufficientMemory);
+        executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
         return;
       }
-    }
+      else
+      {
+        bind->extvalue = (long double *) malloc ( sizeof ( long double ) * 
+                                                  nRows );
+        if( !bind->extvalue )
+        {
+          executeBaton->error = NJSMessages::getErrorMsg(
+                                  errInsufficientMemory);
+          return;
+        }
+      }
       // needed to post-process DML RETURNING of TimestampLTZ
       // rowsReturns for INSERT will be zero, 
       // but we still need to allocate one descriptor
