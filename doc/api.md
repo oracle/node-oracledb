@@ -2142,23 +2142,22 @@ For example:
 var oracledb = require('oracledb');
 . . .
 
-connection.execute("SELECT first_name, salary, hire_date "
-                 + "FROM   employees, departments "
-                 + "WHERE  employees.department_id = departments.department_id "
-                 + "AND    departments.department_name = 'Accounting'",
-                   function(err, result) {
-                     if (err) { console.error(err.message); return; }
-                     var rows = result.rows;
-                     for (var i = 0; i < rows.length; i++)
-                       console.log("Row " + i + " : " + rows[i]);
-                   });
+connection.execute(
+  "SELECT department_id, department_name " +
+    "FROM departments " +
+    "WHERE manager_id < :id",
+  [110],  // bind value for :id
+  function(err, result)
+  {
+    if (err) { console.error(err.message); return; }
+    console.log(result.rows);
+  });
 ```
 
 If run with Oracle's sample HR schema, the output is:
 
 ```
-Row 0 : Shelley,12000,Tue Jun 07 1994 01:00:00 GMT-0700 (PDT)
-Row 1 : William,8300,Tue Jun 07 1994 01:00:00 GMT-0700 (PDT)
+[ [ 60, 'IT' ], [ 90, 'Executive' ], [ 100, 'Finance' ] ]
 ```
 
 Using this format is recommended for efficiency.
@@ -2167,31 +2166,31 @@ Alternatively, rows may be fetched as JavaScript objects. To do so,
 specify the `outFormat` option to be `OBJECT`:
 
 ```javascript
-var oracledb = require('oracledb');
-
-. . .
-
-connection.execute("SELECT first_name, salary, hire_date "
-                 + "FROM employees, departments "
-                 + "WHERE employees.department_id = departments.department_id "
-                 + "AND departments.department_name = 'Accounting'",
-                   [],  // No bind variables
-                   {outFormat: oracledb.OBJECT},
-                   function(err, result) {
-                     if (err) { console.error(err.message); return; }
-                     var rows = result.rows;
-                     for (var i = 0; i < rows.length; i++)
-                       console.log("Row " + i + " : " +
-                                   rows[i].FIRST_NAME + ", ",
-                                   rows[i].SALARY + ", ", rows[i].HIRE_DATE);
-                   });
+oracledb.outFormat = oracledb.OBJECT;
 ```
 
-If run with Oracle's sample HR schema, the output is:
+The value can also be set as an `execute()` option:
+
+```javascript
+connection.execute(
+  "SELECT department_id, department_name " +
+    "FROM departments " +
+    "WHERE manager_id < :id",
+  [110],  // bind value for :id
+  { outFormat: oracledb.OBJECT },
+  function(err, result)
+  {
+    if (err) { console.error(err.message); return; }
+    console.log(result.rows);
+  });
+```
+
+The output is:
 
 ```
-Row 0 : Shelley,  12000,  Tue Jun 07 1994 01:00:00 GMT-0700 (PDT)
-Row 1 : William,  8300,  Tue Jun 07 1994 01:00:00 GMT-0700 (PDT)
+[ { DEPARTMENT_ID: 60, DEPARTMENT_NAME: 'IT' },
+  { DEPARTMENT_ID: 90, DEPARTMENT_NAME: 'Executive' },
+  { DEPARTMENT_ID: 100, DEPARTMENT_NAME: 'Finance' } ]
 ```
 
 In the preceding example, each row is a JavaScript object that
@@ -2207,15 +2206,16 @@ The column names of a query are returned in the
 attribute:
 
 ```javascript
-connection.execute("SELECT department_id, department_name "
-                 + "FROM departments "
-                 + "WHERE department_id = :did",
-                   [180],
-                   function(err, result)
-                   {
-                     if (err) { console.error(err.message); return; }
-                     console.log(result.metaData);  // show the metadata
-                   });
+connection.execute(
+  "SELECT department_id, department_name " +
+    "FROM departments " +
+    "WHERE manager_id < :id",
+  [110],  // bind value for :id
+  function(err, result)
+  {
+    if (err) { console.error(err.message); return; }
+    console.log(result.metaData);  // show the metadata
+  });
 ```
 
 When using a [`ResultSet`](#resultsetclass), metadata is also
@@ -2549,9 +2549,9 @@ CREATE OR REPLACE FUNCTION mydofetch RETURN dorow PIPELINED IS
   line VARCHAR2(32767);
   status INTEGER;
   BEGIN LOOP
-	DBMS_OUTPUT.GET_LINE(line, status);
-	EXIT WHEN status = 1;
-	PIPE ROW (line);
+    DBMS_OUTPUT.GET_LINE(line, status);
+    EXIT WHEN status = 1;
+    PIPE ROW (line);
   END LOOP;
 END;
 /
