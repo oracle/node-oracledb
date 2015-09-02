@@ -88,7 +88,8 @@ StmtImpl::StmtImpl (EnvImpl *env, OCIEnv *envh, ConnImpl *conn,
 
   try : conn_(conn), errh_(NULL), svch_(svch),
         stmth_(NULL), numCols_ (0),meta_(NULL), stmtType_ (DpiStmtUnknown),
-        isReturning_(false), isReturningSet_(false), refCursor_(false)
+        isReturning_(false), isReturningSet_(false), refCursor_(false),
+        state_(0)
 {
   // create an OCIError object for this execution
   ociCallEnv (OCIHandleAlloc ((void *)envh, (dvoid **)&errh_,
@@ -714,6 +715,41 @@ bool StmtImpl::isReturning ()
 
 
   return isReturning_;
+}
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     To obtain the OCI statement handle state
+
+   PARAMETERS
+     -None-
+
+   RETURNS
+     One of the possible values DpiStmtState
+       (DpiStmtStateInitialized, DpiStmtStateExecute, DpiStmtEndOfFetch)
+*/
+DpiStmtState StmtImpl::getState ()
+{
+  DpiStmtState ret = DpiStmtStateUndefined ;
+
+  if ( !state_ )
+  {
+    ociCall (OCIAttrGet (stmth_, OCI_HTYPE_STMT, (ub4*)&state_, NULL,
+                         OCI_ATTR_STMT_STATE, errh_ ), errh_ );
+  }
+
+  if ( ( state_ & OCI_STMT_STATE_INITIALIZED ) == OCI_STMT_STATE_INITIALIZED )
+    ret = DpiStmtStateInitialized;
+
+  if ( ( state_ & OCI_STMT_STATE_EXECUTED ) == OCI_STMT_STATE_EXECUTED )
+    ret = DpiStmtStateExecuted;
+
+  if ( ( state_ & OCI_STMT_STATE_END_OF_FETCH ) ==
+       OCI_STMT_STATE_END_OF_FETCH )
+    ret = DpiStmtStateEndOfFetch;
+
+  return ret;
 }
 
 

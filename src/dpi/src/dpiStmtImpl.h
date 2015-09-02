@@ -94,6 +94,9 @@ public:
 
   virtual OCIError *     getError () { return errh_;  }
 
+  virtual DpiStmtState   getState ();
+
+
   // Is the SQL statement DML or not ?
   virtual inline bool isDML () const
   {
@@ -134,6 +137,7 @@ private:
   bool           isReturning_;     // Does the stmt has RETURNING INTO clause?
   bool           isReturningSet_;  // Has isReturning_ flag queried & set.
   bool           refCursor_;       // refCursor or not.
+  unsigned long  state_;           // OCI Stmt State
 };
 
 

@@ -68,13 +68,27 @@ Persistent<FunctionTemplate> ResultSet::resultSetTemplate_s;
      stmt         -  dpi statement
      executeBaton - eBaton structure
 */
-void ResultSet::setResultSet ( dpi::Stmt *stmt, eBaton *executeBaton )
+void ResultSet::setResultSet ( dpi::Stmt *stmt, eBaton *executeBaton,
+                               unsigned long flags )
 {
   this->dpistmt_       = stmt;
   this->dpienv_        = executeBaton->dpienv;
   this->njsconn_       = executeBaton->njsconn;
-  this->meta_          = stmt->getMetaData();
-  this->numCols_       = this->dpistmt_->numCols();
+  if ( ( flags & BIND_FLAGS_STMT_READY ) == BIND_FLAGS_STMT_READY )
+  {
+    this->meta_        = stmt->getMetaData();
+    this->numCols_     = this->dpistmt_->numCols();
+  }
+  else if ( ( flags & BIND_FLAGS_STMT_READY ) == BIND_FLAGS_STMT_NOT_READY )
+  {
+    /* 
+     * This could happen in REFCURSOR case, when the stored procedure
+     * did not return a valid handle
+     */
+    this->numCols_     = 0;
+    this->meta_        = NULL;
+  }
+
   this->state_         = INACTIVE;
   this->outFormat_     = executeBaton->outFormat;
   this->fetchRowCount_ = 0;
@@ -173,6 +187,11 @@ NAN_PROPERTY_GETTER(ResultSet::GetMetaData)
   ResultSet* njsResultSet  = ObjectWrap::Unwrap<ResultSet>(args.Holder());
   string msg;
 
+  if ( njsResultSet->numCols_ == 0 )
+  {
+    njsResultSet->state_ = INVALID;
+  }
+
   if(!njsResultSet->njsconn_->isValid())
   {
     msg = NJSMessages::getErrorMsg ( errInvalidConnection );
@@ -234,6 +253,11 @@ NAN_METHOD(ResultSet::GetRow)
   getRowsBaton->njsRS     = njsResultSet;
   NanAssignPersistent(getRowsBaton->cb, callback );
 
+  if ( njsResultSet->numCols_ == 0 )
+  {
+    njsResultSet->state_ = INVALID ;
+  }
+
   if(njsResultSet->state_ == INVALID)
   {
     getRowsBaton->error = NJSMessages::getErrorMsg ( errInvalidResultSet );
@@ -278,6 +302,11 @@ NAN_METHOD(ResultSet::GetRows)
   rsBaton   *getRowsBaton = new rsBaton ();
   getRowsBaton->njsRS   = njsResultSet;
   NanAssignPersistent(getRowsBaton->cb, callback );
+
+  if ( njsResultSet->numCols_ == 0 )
+  {
+    njsResultSet->state_ = INVALID;
+  }
 
   if(njsResultSet->state_ == INVALID)
   {

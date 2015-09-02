@@ -66,6 +66,9 @@ using namespace dpi;
 class Connection;
 class ProtoILob;
 
+/* Flags Constants */
+#define BIND_FLAGS_STMT_NOT_READY   0    /* REFCURSOR stmt not-fetch-able */
+#define BIND_FLAGS_STMT_READY       1    /* REFCURSOR stmt fetch-able */
 
 /**
 * Structure used for binds
@@ -84,11 +87,12 @@ typedef struct Bind
   bool                isInOut;          // Date/Timestamp needs this info
   unsigned int        rowsReturned;     /* number rows returned for
                                            the bind (DML RETURNING) */
+  unsigned long       flags;            // Flags applicable for this BIND
   dpi::DateTimeArray* dttmarr;
 
   Bind () : key(""), value(NULL), extvalue (NULL), len(NULL), len2(NULL),
             maxSize(0), type(0), ind(NULL), isOut(false), isInOut(false),
-            rowsReturned(0), dttmarr ( NULL )
+            rowsReturned(0), flags(BIND_FLAGS_STMT_NOT_READY), dttmarr ( NULL )
   {}
 }Bind;
 

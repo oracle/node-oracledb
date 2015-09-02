@@ -593,6 +593,16 @@ void Connection::GetBindUnit (Handle<Value> val, Bind* bind,
       goto exitGetBindUnit;
     }
 
+    /* REFCURSOR(s) are supported only as OUT Binds now */
+    if ( bind->type == DATA_CURSOR && dir != BIND_OUT )
+    {
+      executeBaton->error = NJSMessages::getErrorMsg (
+                                            errInvalidPropertyValueInParam,
+                                            "type", 2 ) ;
+      goto exitGetBindUnit;
+    }
+
+
     Local<Value> element = bind_unit->Get(NanNew<v8::String>("val"));
     switch(dir)
     {
@@ -919,6 +929,20 @@ void Connection::Async_Execute (uv_work_t *req)
          bind->dttmarr = NULL;
        }
      }
+
+     /* For each OUT Binds of CURSOR type, get the number of columns */
+     for ( unsigned int b = 0; b < executeBaton->binds.size (); b ++ )
+     {
+       Bind *bind = executeBaton->binds[b];
+
+       if ( bind->isOut && bind->type == dpi::DpiRSet )
+       {
+         bind->flags =
+           (((Stmt*)bind->value)->getState () == DpiStmtStateExecuted ) ?
+               BIND_FLAGS_STMT_READY : BIND_FLAGS_STMT_NOT_READY;
+       }
+     }
+
      // process any lob descriptor out binds
      Connection::Descr2protoILob ( executeBaton, 0, 0);
     }
@@ -969,6 +993,14 @@ void Connection::PrepareAndBind (eBaton* executeBaton)
         for(unsigned int index = 0 ;index < executeBaton->binds.size();
             index++)
         {
+          if ( executeBaton->binds[index]->isOut &&
+               executeBaton->stmtIsReturning &&
+               executeBaton->binds[index]->type == dpi::DpiRSet )
+          {
+            executeBaton->error = NJSMessages::getErrorMsg (
+                                                       errInvalidResultSet ) ;
+          }
+
           // Allocate for OUT Binds
           // For DML Returning, allocation happens through callback.
           if ( executeBaton->binds[index]->isOut &&
@@ -1775,9 +1807,12 @@ void Connection::Async_AfterExecute(uv_work_t *req)
           result->Set(NanNew<v8::String>("rows"), NanUndefined());
           Handle<Object> resultSet = NanNew(ResultSet::resultSetTemplate_s)->
                                 GetFunction() ->NewInstance();
+
+          /* ResultSet case, the statement object is ready for fetching */
          (ObjectWrap::Unwrap<ResultSet> (resultSet))->
                                   setResultSet( executeBaton->dpistmt,
-                                                executeBaton );
+                                                executeBaton,
+                                                BIND_FLAGS_STMT_READY );
           result->Set(NanNew<v8::String>("resultSet"), resultSet );
         }
         else
@@ -2010,7 +2045,8 @@ Handle<Value> Connection::GetValueRefCursor ( eBaton *executeBaton,
                             GetFunction() ->NewInstance();
     (ObjectWrap::Unwrap<ResultSet> (resultSet))->
                        setResultSet( (dpi::Stmt*)(bind->value),
-                                     executeBaton );
+                                     executeBaton,
+                                     bind->flags );
 
     // set the prefetch on the cursor object
     ((dpi::Stmt*)(bind->value))->prefetchRows(executeBaton->prefetchRows);
