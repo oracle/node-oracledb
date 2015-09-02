@@ -64,39 +64,12 @@ describe('32. dataTypeDate.js', function() {
     });
   })
   
-  describe('32.1 Insert JavaScript Date data', function() {
+  describe('32.1 Testing JavaScript Date data', function() {
     var dates = assist.data.dates;
-    var numRows = 3;  // number of rows to return from each call to getRows()
     
-    before(function(done) {
-      async.series([
-        function createTable(callback) {
-          var sqlCreate = assist.sqlCreateTable(tableName);
-          connection.execute(
-            sqlCreate,
-            function(err) {
-              should.not.exist(err);
-              callback();
-            }
-          );
-        }, 
-        function insertDataJS(callback) {
-          async.forEach(dates, function(date, cb) {
-            connection.execute(
-              "INSERT INTO " + tableName + " VALUES(:no, :bindValue)",
-              { no: dates.indexOf(date), bindValue: date },
-              function(err) {
-                should.not.exist(err);
-                cb();
-              }
-            );
-          }, function(err) {
-            should.not.exist(err);
-            callback();
-          });
-        }
-      ], done);
-    }) // before
+    before('create table, insert data',function(done) {
+      assist.setUp(connection, tableName, dates, done);
+    })
 
     after(function(done) {
       connection.execute(
@@ -106,135 +79,34 @@ describe('32. dataTypeDate.js', function() {
           done();
         }
       );
-    }) // after
+    })
 
     it('32.1.1 works well with SELECT query', function(done) {
-      async.forEach(dates, function(date, cb) {
-        var bv  = dates.indexOf(date);
-
-        connection.execute(
-          "SELECT content FROM " + tableName + " WHERE num = :no",
-          { no: bv },
-          { outFormat: oracledb.OBJECT },
-          function(err, result) {
-            should.not.exist(err);
-            result.rows[0].CONTENT.toUTCString().should.eql(dates[bv].toUTCString());
-            cb();
-          }
-        );
-      }, function(err) {
-        should.not.exist(err);
-        done();
-      });
-    }) // 32.1.1
+      assist.dataTypeSupport(connection, tableName, dates, done);
+    }) 
 
     it('32.1.2 works well with result set', function(done) {
-      connection.execute(
-        "SELECT * FROM " + tableName,
-        [],
-        { resultSet: true, outFormat: oracledb.OBJECT },
-        function(err, result) {
-          should.not.exist(err);
-          (result.resultSet.metaData[0]).name.should.eql('NUM');
-          (result.resultSet.metaData[1]).name.should.eql('CONTENT');
-          fetchRowsFromRS(result.resultSet, dates, done);
-        }
-      );
-    }) // 32.1.2
+      assist.verifyResultSet(connection, tableName, dates, done);
+    }) 
     
     it.skip('32.1.3 works well with REF Cursor', function(done) {
-      async.series([
-        function createProcedure(callback) {
-          var proc = assist.sqlCreateProcedure(tableName);
-          connection.execute(
-            proc,
-            function(err) {
-              should.not.exist(err);
-              callback();
-            }
-          );
-        },
-        function verifyRefCursor(callback) {
-          connection.execute(
-            "BEGIN testproc(:o); END;",
-            [
-              { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
-            ],
-            function(err, result) {
-              should.not.exist(err);
-              console.log(result.outBinds.o);
-              callback();
-              // fetchRowsFromRS(result.outBinds.o, dates, callback);
-            }
-          );
-        },
-        function dropProcedure(callback) {
-          connection.execute(
-            "DROP PROCEDURE testproc",
-            function(err) {
-              should.not.exist(err);
-              callback();
-            }
-          );
-        }
-      ], done);
-    }) // 32.1.3
-
-    function fetchRowsFromRS(rs, array, cb) 
-    {
-      rs.getRows(numRows, function(err, rows) {
-        should.not.exist(err);
-        if(rows.length > 0) {
-          for(var i = 0; i < rows.length; i++) {
-            (rows[i].CONTENT.toUTCString()).should.eql(array[ (rows[i].NUM) ].toUTCString());
-            return fetchRowsFromRS(rs, array, cb);
-          } 
-        } else {
-          rs.close( function(err) {
-            should.not.exist(err);
-            cb();
-          });
-        } 
-      });
-    }
+      assist.verifyRefCursor(connection, tableName, dates, done);
+    }) 
 
   }) // 32.1 suite
 
-  describe('32.2 insert SQL Date data', function(done) {
+  describe('32.2 stores null value correctly', function() {
+    it('32.2.1 testing Null, Empty string and Undefined', function(done) {
+      assist.verifyNullValues(connection, tableName, done);
+    })
+  })
+
+  describe('32.3 insert SQL Date data', function(done) {
     var dates = assist.DATE_STRINGS;
 
     before(function(done) {
-      async.series([
-        function createTable(callback) {
-          var sqlCreate = assist.sqlCreateTable(tableName);
-          connection.execute(
-            sqlCreate,
-            function(err) {
-              should.not.exist(err);
-              callback();
-            }
-          );
-        }, 
-        function insertDataSQL(callback) {
-          async.forEach(dates, function(date, cb) {
-            var sql = "INSERT INTO " + tableName + " VALUES(:no, " + date + " )";
-            var bv  = dates.indexOf(date);
-
-            connection.execute(
-              sql,
-              { no: bv },
-              function(err) {
-                should.not.exist(err);
-                cb();
-              }
-            );
-          }, function(err) {
-            should.not.exist(err);
-            callback();
-          });
-        } 
-      ], done);
-    }) // before
+      assist.setUp4sql(connection, tableName, dates, done);
+    }) 
 
     after(function(done) {
       connection.execute(
@@ -244,18 +116,23 @@ describe('32. dataTypeDate.js', function() {
           done();
         }
       );
-    }) // after
+    })
 
-    it('32.2.1 works well with SELECT query', function(done) {
+    it('32.3.1 SELECT query - original data', function(done) {
+      assist.selectOriginalData(connection, tableName, dates, done);
+    })
+
+    it('32.3.2 SELECT query - formatted data for comparison', function(done) {
       async.forEach(dates, function(date, cb) {
         var bv = dates.indexOf(date);
         connection.execute(
-          "SELECT content FROM " + tableName + " WHERE num = :no",
+          "SELECT num, TO_CHAR(content, 'DD-MM-YYYY') AS TS_DATA FROM " + tableName + " WHERE num = :no",
           { no: bv },
           { outFormat: oracledb.OBJECT },
           function(err, result) {
             should.not.exist(err);
-            (result.rows[0].CONTENT.toUTCString()).should.equal(assist.content.dates[bv]);
+            // console.log(result.rows);
+            (result.rows[0].TS_DATA).should.equal(assist.content.dates[bv]);
             cb();
           } 
         );
@@ -263,160 +140,8 @@ describe('32. dataTypeDate.js', function() {
           should.not.exist(err);
           done();
       });
-    }) // 32.2.1
-
-    it('32.2.2 works well with result set', function(done) {
-      connection.execute(
-        "SELECT * FROM " + tableName,
-        [],
-        { resultSet: true, outFormat: oracledb.OBJECT },
-        function(err, result) {
-          should.not.exist(err);
-          (result.resultSet.metaData[0]).name.should.eql('NUM');
-          (result.resultSet.metaData[1]).name.should.eql('CONTENT');
-          var array = assist.content.dates;
-          fetchOneRowFromRS(result.resultSet, array, done);
-        }
-      );
-    }) // 32.2.2
-    
-    it.skip('32.2.3 works well with REF Cursor', function(done) {
-      async.series([
-        function createProcedure(callback) {
-          var proc = assist.sqlCreateProcedure(tableName);
-          connection.execute(
-            proc,
-            function(err) {
-              should.not.exist(err);
-              callback();
-            }
-          );
-        },
-        function verifyRefCursor(callback) {
-          connection.execute(
-            "BEGIN testproc(:o); END;",
-            [
-              { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
-            ],
-            function(err, result) {
-              should.not.exist(err);
-              console.log(result.outBinds.o);
-              callback();
-              // fetchRowsFromRS(result.outBinds.o, dates, callback);
-            }
-          );
-        },
-        function dropProcedure(callback) {
-          connection.execute(
-            "DROP PROCEDURE testproc",
-            function(err) {
-              should.not.exist(err);
-              callback();
-            }
-          );
-        }
-      ], done);
-    }) // 32.2.3
-
-    function fetchOneRowFromRS(rs, array, cb) 
-    {
-      rs.getRow( function(err, row) {
-        should.not.exist(err);
-        if(row) {
-          (row.CONTENT.toUTCString()).should.eql(array[row.NUM]);
-          return fetchOneRowFromRS(rs, array, cb);     
-        } else {
-          rs.close( function(err) {
-            should.not.exist(err);
-            cb();
-          });
-        } 
-      });
-    }
-
-  }) // 32.2 suite 
-
-  describe('32.3 stores null value correctly', function(done) {
-    beforeEach(function(done) {
-      var sqlCreate = assist.sqlCreateTable(tableName);
-      connection.execute(
-        sqlCreate,
-        function(err) {
-          should.not.exist(err);
-          done();
-        }
-      );
-    }) // before
-
-    afterEach(function(done) {
-      connection.execute(
-        "DROP table " + tableName,
-        function(err) {
-          should.not.exist(err);
-          done();
-        }
-      );
-    }) // after
-    
-    var sqlInsert = "INSERT INTO " + tableName + " VALUES(1, :bindValue)";
-
-    it('32.3.1 JS null - empty string', function(done) {
-      connection.execute(
-        sqlInsert,
-        { bindValue: '' },
-        function(err) {
-          should.not.exist(err);
-          verifyNull(done);
-        }
-      );
     }) 
 
-    it('32.3.2 JS null - null keyword', function(done) {
-      connection.execute(
-        sqlInsert,
-        { bindValue: null },
-        function(err) {
-          should.not.exist(err);
-          verifyNull(done);
-        }
-      );
-    })
+  }) // end of 32.3 suite 
 
-    it('32.3.3 JS null - undefined', function(done) {
-      var foobar;  // undefined value
-      connection.execute(
-        sqlInsert,
-        { bindValue: foobar },
-        function(err) {
-          should.not.exist(err);
-          verifyNull(done);
-        }
-      );
-    })
-    
-    it('32.3.4 SQL null keyword', function(done) {
-      connection.execute(
-        "INSERT INTO " + tableName + " VALUES(1, NULL)",
-        function(err) {
-          should.not.exist(err);
-          verifyNull(done);
-        }
-      );
-    })
-
-    function verifyNull(cb) 
-    {
-      connection.execute(
-        "SELECT content FROM " + tableName + " WHERE num = 1",
-        function(err, result) {
-          should.not.exist(err);
-          // console.log(result);
-          result.rows.should.eql([ [null] ]);
-          cb();
-        } 
-      );
-    }
-
-  }) // end of 32.3 suite
-  
 })
