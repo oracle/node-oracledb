@@ -1019,13 +1019,6 @@ void Connection::PrepareAndBind (eBaton* executeBaton)
             }
           }
           
-          // Allocate handle for Ref Cursor
-          if ( executeBaton->binds[index]->type == DpiRSet )
-          { 
-             executeBaton->binds[index]->value = executeBaton->dpiconn->
-                                                               getStmt();
-          }
-
           // Convert v8::Date to Oracle DB Type for IN and IN/OUT binds
           if ( executeBaton->binds[index]->type == DpiTimestampLTZ &&
               // InOut bind
@@ -1074,13 +1067,6 @@ void Connection::PrepareAndBind (eBaton* executeBaton)
         for(unsigned int index = 0 ;index < executeBaton->binds.size();
             index++)
         {
-          // Allocate handle for Ref Cursor
-          if ( executeBaton->binds[index]->type == DpiRSet )
-          {
-            executeBaton->binds[index]->value = executeBaton->dpiconn->
-                                                              getStmt();
-          }
-
           // Allocate for OUT Binds
           // For DML Returning, allocation happens through callback
           if ( executeBaton->binds[index]->isOut &&
@@ -3020,6 +3006,10 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
         executeBaton->dpistmt->getError () );
       bind->value = bind->dttmarr->init(nRows);
     }
+    break;
+
+  case dpi::DpiRSet:
+    bind->value = executeBaton->dpiconn->getStmt ();
     break;
   }
 }

@@ -187,11 +187,6 @@ NAN_PROPERTY_GETTER(ResultSet::GetMetaData)
   ResultSet* njsResultSet  = ObjectWrap::Unwrap<ResultSet>(args.Holder());
   string msg;
 
-  if ( njsResultSet->numCols_ == 0 )
-  {
-    njsResultSet->state_ = INVALID;
-  }
-
   if(!njsResultSet->njsconn_->isValid())
   {
     msg = NJSMessages::getErrorMsg ( errInvalidConnection );
@@ -253,11 +248,6 @@ NAN_METHOD(ResultSet::GetRow)
   getRowsBaton->njsRS     = njsResultSet;
   NanAssignPersistent(getRowsBaton->cb, callback );
 
-  if ( njsResultSet->numCols_ == 0 )
-  {
-    njsResultSet->state_ = INVALID ;
-  }
-
   if(njsResultSet->state_ == INVALID)
   {
     getRowsBaton->error = NJSMessages::getErrorMsg ( errInvalidResultSet );
@@ -302,11 +292,6 @@ NAN_METHOD(ResultSet::GetRows)
   rsBaton   *getRowsBaton = new rsBaton ();
   getRowsBaton->njsRS   = njsResultSet;
   NanAssignPersistent(getRowsBaton->cb, callback );
-
-  if ( njsResultSet->numCols_ == 0 )
-  {
-    njsResultSet->state_ = INVALID;
-  }
 
   if(njsResultSet->state_ == INVALID)
   {
