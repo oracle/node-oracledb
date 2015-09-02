@@ -89,9 +89,9 @@ class ConnImpl : public Conn
   virtual void module(const string &module);
 
   virtual void action(const string &action);
+  virtual int getByteExpansionRation ();
 
-
-                                // interface methods
+                              // interface methods
   virtual Stmt* getStmt(const string &sql);
 
   virtual void releaseStmt(Stmt *stmt);
@@ -121,6 +121,9 @@ class ConnImpl : public Conn
 
 private:
 
+  void initConnImpl( bool pool, bool externalAuth, const string& connClass,
+                     OraText *poolNmRconnStr, ub4 nameLen,
+                     const string &user, const string &password );
   void cleanup();
 
 
@@ -133,6 +136,7 @@ private:
   OCISvcCtx   *svch_;           // OCI service handle
   OCISession  *sessh_;          // OCI Session handle. Do not free this.
   boolean     hasTxn_;          // set if transaction is in progress
+  int         lxgratio_;        // Caches DBCharset ID
 };
 
 

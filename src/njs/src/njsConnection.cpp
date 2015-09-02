@@ -68,9 +68,6 @@ Persistent<FunctionTemplate> Connection::connectionTemplate_s;
 // number of rows prefetched by non-ResultSet queries
 #define NJS_PREFETCH_NON_RESULTSET 2 
 
-// max byte size for a AL32UTF8 char is 4
-#define NJS_CHAR_CONVERSION_RATIO 4
-
 #define NJS_SIZE_T_MAX std::numeric_limits<std::size_t>::max()
 
 #define NJS_SIZE_T_OVERFLOW(maxSize,maxRows)                                  \
@@ -743,6 +740,13 @@ void Connection::GetInBindParams (Handle<Value> v8val, Bind* bind,
     if(size)
     {
       bind->value = (char*)malloc((size_t)size);
+      if( !bind->value )
+      {
+        executeBaton->error = NJSMessages::getErrorMsg(
+                                errInsufficientMemory );
+        return;
+      }
+
       if(str.length())
         memcpy(bind->value, *str, str.length());
     }
@@ -1366,6 +1370,7 @@ void Connection::DoDefines ( eBaton* executeBaton, const dpi::MetaData* meta,
                              unsigned int numCols )
 {
   Define *defines = executeBaton->defines = new Define[numCols];
+  int lxgratio = executeBaton->dpiconn->getByteExpansionRation ();
 
   for (unsigned int col = 0; col < numCols; col++)
   {
@@ -1381,8 +1386,6 @@ void Connection::DoDefines ( eBaton* executeBaton, const dpi::MetaData* meta,
         defines[col].maxSize = ( defines[col].fetchType == dpi::DpiVarChar) ?
                                NJS_MAX_FETCH_AS_STRING_SIZE : sizeof (double);
         
-        defines[col].maxSize   = sizeof(double);
-
         if ( NJS_SIZE_T_OVERFLOW ( defines[col].maxSize,
                                        executeBaton->maxRows ) )
         {
@@ -1409,12 +1412,14 @@ void Connection::DoDefines ( eBaton* executeBaton, const dpi::MetaData* meta,
                                              executeBaton->columnNames[col],
                                              meta[col].dbType );
         /*
-         * For fetching non-ascii/utf8 characters, it may take up to
-         * four times the buffer size on DB 
-         * TODO: optimize ratio when DB character set is already UTF8
+         * While fetching non-ascii characters, each byte on the server
+         * can take upto maximum of 3 bytes when it converted to AL32UTF8
+         * because the client character set is always set to AL32UTF8
+         * in node-oracledb. If server has AL32UTF8 then ratio is 1.
          */
  
-        defines[col].maxSize   = (meta[col].dbSize) * NJS_CHAR_CONVERSION_RATIO;
+		defines[col].maxSize   = (meta[col].dbSize) * lxgratio;
+
 
         if ( NJS_SIZE_T_OVERFLOW ( defines[col].maxSize,
                                        executeBaton->maxRows ) )

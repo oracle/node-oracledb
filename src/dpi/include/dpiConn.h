@@ -63,6 +63,7 @@ public:
                                 // properties
   virtual void stmtCacheSize(unsigned int stmtCacheSize) = 0;
   virtual unsigned int stmtCacheSize() const = 0;
+  virtual int getByteExpansionRation () = 0;
 
   virtual void lobPrefetchSize(unsigned int lobPrefetchSize) = 0;
   virtual unsigned int lobPrefetchSize() const = 0;

@@ -84,45 +84,10 @@ try :  env_(env), pool_(NULL),
        envh_(envh), errh_(NULL), auth_(NULL), svch_(NULL), sessh_(NULL),
        hasTxn_(false)
 {
-  ub4 mode = externalAuth ? OCI_SESSGET_CREDEXT : OCI_DEFAULT;
 
-  ociCallEnv(OCIHandleAlloc((void *)envh_, (dvoid **)&errh_,
-                            OCI_HTYPE_ERROR, 0, (dvoid **)0), envh_);
-
-  ociCallEnv(OCIHandleAlloc((void *)envh_, (dvoid **)&auth_,
-                            OCI_HTYPE_AUTHINFO, 0, (dvoid **)0), envh_);
-
-  if (externalAuth)
-  {
-    if (password.length() || user.length())
-      throw ExceptionImpl(DpiErrExtAuth);
-  }
-  else
-  {
-    ociCall(OCIAttrSet((void *)auth_, OCI_HTYPE_AUTHINFO,
-                       (void *)user.data(), (ub4) user.length(),
-                       OCI_ATTR_USERNAME, errh_), errh_);
-
-    ociCall(OCIAttrSet((void *)auth_, OCI_HTYPE_AUTHINFO,
-                       (void *)password.data(), (ub4) password.length(),
-                       OCI_ATTR_PASSWORD, errh_), errh_);
-  }
-
-  // If connection class provided, set it on auth handle
-  if (connClass.length() )
-  {
-    ociCall (OCIAttrSet ((void*)auth_, OCI_HTYPE_AUTHINFO,
-                         (void *)connClass.data(), (ub4) connClass.length(),
-                         OCI_ATTR_CONNECTION_CLASS, errh_), errh_);
-  }
-
-  ociCall(OCISessionGet(envh_, errh_, &svch_, auth_,
-                        (OraText *)connString.data(),
-                        (ub4) connString.length(), NULL, 0, NULL, NULL, NULL,
-                        mode), errh_);
-
-  ociCall(OCIAttrGet(svch_, OCI_HTYPE_SVCCTX, &sessh_,  0,
-                     OCI_ATTR_SESSION, errh_),errh_);
+  this->initConnImpl ( false, externalAuth, connClass,
+                       ( OraText * ) connString.data (),
+                       ( ub4 ) connString.length (), user, password );
 
   this->stmtCacheSize(stmtCacheSize);
 }
@@ -132,8 +97,6 @@ catch (...)
   cleanup();
   throw;
 }
-
-
 
 /*****************************************************************************/
 /*
@@ -163,28 +126,8 @@ try :  env_(NULL), pool_(pool),
        envh_(envh), errh_(NULL), auth_(NULL),
        svch_(NULL), sessh_(NULL), hasTxn_(false)
 {
-  ub4 mode = externalAuth ? (OCI_SESSGET_CREDEXT | OCI_SESSGET_SPOOL) :
-                              OCI_SESSGET_SPOOL;
-  ociCallEnv(OCIHandleAlloc((void *)envh_, (dvoid **)&errh_,
-                            OCI_HTYPE_ERROR, 0, (dvoid **)0), envh_);
-  ociCallEnv(OCIHandleAlloc((void *)envh_, (dvoid **)&auth_,
-                            OCI_HTYPE_AUTHINFO, 0, (dvoid **)0), envh_);
-
-  // If connection class provided, set it on auth handle
-  if (connClass.length() )
-  {
-    ociCall (OCIAttrSet ((void*)auth_, OCI_HTYPE_AUTHINFO,
-                         (void *)connClass.data(), (ub4) connClass.length(),
-                         OCI_ATTR_CONNECTION_CLASS, errh_), errh_);
-  }
-
-  ociCall(OCISessionGet(envh_, errh_, &svch_, auth_,
-                        poolName, poolNameLen,
-                        NULL, 0, NULL, NULL, NULL,
-                        mode), errh_);
-
-  ociCall(OCIAttrGet(svch_, OCI_HTYPE_SVCCTX, &sessh_, 0, OCI_ATTR_SESSION,
-                     errh_), errh_);
+  this->initConnImpl ( true, externalAuth, connClass, poolName, poolNameLen,
+                       "", "" );
 }
 
 catch (...)
@@ -292,6 +235,21 @@ void ConnImpl::stmtCacheSize(unsigned int stmtCacheSize)
 }
 
 
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Get the DBCHARSET ID
+
+   PARAMETERS:
+     -NONE-
+
+   RETURNS:
+     Byte expansion ratio (int)
+ */
+int ConnImpl::getByteExpansionRation ()
+{
+  return lxgratio_;
+}
 
 /*****************************************************************************/
 /*
@@ -522,6 +480,91 @@ void ConnImpl::breakExecution()
                           PRIVATE METHODS
   ---------------------------------------------------------------------------*/
 
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Constructor for the ConnImpl class created from an Env object.
+
+   PARAMETERS:
+     pool           - This flag says whether pool scenario or not
+     externalAuth   - flag for externalAuth
+     connClass      - connClass name
+     poolNmRconnStr - poolName or connectString
+     user           - userid in case of non-pool scenario
+     password       - password in case of non-pool scenario
+
+   RETURNS:
+     nothing
+ */
+
+void ConnImpl::initConnImpl ( bool pool, bool externalAuth,
+                   const string& connClass, OraText *poolNmRconnStr,
+                   ub4 nameLen, const string &user, const string &password )
+{
+  OCIServer *srvh = NULL;
+  ub4 mode        = 0;
+  ub2 csid_       = 0;
+
+  if ( pool )
+    mode = externalAuth ? ( OCI_SESSGET_CREDEXT | OCI_SESSGET_SPOOL ) :
+                            OCI_SESSGET_SPOOL;
+  else
+    mode = externalAuth ? OCI_SESSGET_CREDEXT : OCI_DEFAULT;
+
+  ociCallEnv ( OCIHandleAlloc ( ( void * ) envh_, ( dvoid ** )&errh_,
+                                OCI_HTYPE_ERROR, 0, ( dvoid ** ) 0 ), envh_ );
+
+  ociCallEnv ( OCIHandleAlloc ( ( void * ) envh_, ( dvoid ** ) &auth_,
+                                OCI_HTYPE_AUTHINFO, 0, ( dvoid ** ) 0 ),
+                                envh_ );
+
+  if ( externalAuth && ( !pool ) )
+  {
+    if ( password.length () || user.length () )
+      throw ExceptionImpl ( DpiErrExtAuth );
+  }
+
+  if ( !pool )
+  {
+    ociCall ( OCIAttrSet ( ( void * ) auth_, OCI_HTYPE_AUTHINFO,
+                           ( void * ) user.data (), ( ub4 ) user.length (),
+                           OCI_ATTR_USERNAME, errh_ ), errh_ );
+
+    ociCall ( OCIAttrSet ( ( void * ) auth_, OCI_HTYPE_AUTHINFO,
+                           ( void * ) password.data (),
+                           ( ub4 ) password.length (),
+                           OCI_ATTR_PASSWORD, errh_ ), errh_ );
+  }
+
+  // If connection class provided, set it on auth handle
+  if ( connClass.length () )
+  {
+    ociCall ( OCIAttrSet ( ( void* ) auth_, OCI_HTYPE_AUTHINFO,
+                           ( void * ) connClass.data (),
+                           ( ub4 ) connClass.length (),
+                           OCI_ATTR_CONNECTION_CLASS, errh_ ), errh_ );
+  }
+
+  ociCall ( OCISessionGet ( envh_, errh_, &svch_, auth_, poolNmRconnStr,
+                          ( ub4 ) nameLen, NULL, 0, NULL, NULL, NULL,
+                          mode ), errh_ );
+
+  ociCall ( OCIAttrGet ( svch_, OCI_HTYPE_SVCCTX, &sessh_,  0,
+                         OCI_ATTR_SESSION, errh_ ), errh_ );
+
+  // Initialize the server handle from service handle
+  ociCall ( OCIAttrGet ( svch_, OCI_HTYPE_SVCCTX, ( void * ) &srvh, 0,
+                        ( ub4 ) OCI_ATTR_SERVER, errh_ ), errh_ );
+
+  // Get the DBCHARSET from server
+  ociCall ( OCIAttrGet ( srvh, ( ub4 ) OCI_HTYPE_SERVER, ( void * ) &csid_,
+                         ( ub4 * ) 0, ( ub4 ) OCI_ATTR_CHARSET_ID, errh_ ),
+                          errh_ );
+  if ( csid_ == DPI_AL32UTF8 )
+    lxgratio_ = 1;
+  else
+    lxgratio_ = 3;
+}
 
 /*****************************************************************************/
 /*

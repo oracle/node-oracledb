@@ -41,6 +41,7 @@
 # include <dpiConn.h>
 #endif
 
+#define DPI_AL32UTF8         873
 
 using std::string;
 
