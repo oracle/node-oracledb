@@ -55,8 +55,10 @@ oracledb.getConnection(
     if (err) { console.error(err.message); return; }
 
     connection.execute(
-      "SELECT department_id, department_name FROM departments WHERE department_id = :did",
-      [180],  // bind value for :did
+      "SELECT department_id, department_name " +
+        "FROM departments " +
+        "WHERE manager_id < :id",
+      [110],  // bind value for :id
       function(err, result)
       {
         if (err) { console.error(err.message); return; }
@@ -68,7 +70,7 @@ oracledb.getConnection(
 With Oracle's sample HR schema, the output is:
 
 ```
-[ [ 180, 'Construction' ] ]
+[ [ 60, 'IT' ], [ 90, 'Executive' ], [ 100, 'Finance' ] ]
 ```
 
 ## <a name="examples"></a> 2. Examples
