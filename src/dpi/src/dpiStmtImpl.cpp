@@ -630,7 +630,7 @@ sb4 StmtImpl::outbindCallback ( dvoid *ctxp, OCIBind *bindp, ub4 iter,
                                 ub1 *piecep, dvoid **indpp, ub2 **rcodepp )
 {
   DpiCallbackCtx *cbCtx = (DpiCallbackCtx *)ctxp;
-  unsigned long rows = 0;
+  ub4 rows  = 0;
   int cbret = 0;
 
   if ( index == 0 )
@@ -654,7 +654,7 @@ sb4 StmtImpl::outbindCallback ( dvoid *ctxp, OCIBind *bindp, ub4 iter,
       ociCall ( rc, errh ) ;
     }
 
-    cbCtx->nrows = rows;
+    cbCtx->nrows = ( unsigned long ) rows;
     cbCtx->iter  = iter;
   }
 
