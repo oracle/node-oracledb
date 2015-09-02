@@ -89,3 +89,20 @@ COMMIT;
 -- For LOB examples
 DROP TABLE mylobs;
 CREATE TABLE mylobs (id NUMBER, c CLOB, b BLOB);
+
+-- For DBMS_OUTPUT example dbmsoutputpipe.js
+CREATE OR REPLACE TYPE dorow AS TABLE OF VARCHAR2(32767);
+/
+SHOW ERRORS
+
+CREATE OR REPLACE FUNCTION mydofetch RETURN dorow PIPELINED IS
+line VARCHAR2(32767);
+status INTEGER;
+BEGIN LOOP
+  DBMS_OUTPUT.GET_LINE(line, status);
+  EXIT WHEN status = 1;
+  PIPE ROW (line);
+END LOOP;
+END;
+/
+SHOW ERRORS

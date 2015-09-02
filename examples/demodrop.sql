@@ -38,3 +38,7 @@ DROP TABLE j_purchaseorder_c;
 DROP TABLE dmlrupdtab;
 
 DROP TABLE mylobs;
+
+DROP TYPE dorow;
+
+DROP FUNCTION mydofetch;
