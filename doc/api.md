@@ -1,4 +1,4 @@
-# node-oracledb 1.0: Documentation for the Oracle Database Node.js Driver
+# node-oracledb 1.1: Documentation for the Oracle Database Node.js Driver
 
 *Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved.*
 
