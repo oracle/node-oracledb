@@ -116,7 +116,7 @@ typedef enum
   if( !args.Length() || !args[(args.Length()-1)]->IsFunction() )              \
   {                                                                           \
     msg = NJSMessages::getErrorMsg ( errMissingCallback );                    \
-    NJS_SET_EXCEPTION( msg.c_str(), msg.length() );		              \
+    NJS_SET_EXCEPTION( msg.c_str(), msg.length() );                           \
     NanReturnUndefined();                                                     \
   }                                                                           \
   else                                                                        \
@@ -218,7 +218,7 @@ typedef enum
  */
 #define NJS_GET_STRING_FROM_JSON( val, err, obj, key, index, exitCode )       \
 {                                                                             \
-  Local<Value> v8value = obj->Get(NanNew<v8::String>(key));                          \
+  Local<Value> v8value = obj->Get(NanNew<v8::String>(key));                   \
   err.clear();                                                                \
   if( v8value->IsString() )                                                   \
   {                                                                           \
@@ -316,7 +316,7 @@ typedef enum
   {                                                                           \
     msg = NJSMessages::getErrorMsg ( errInvalidPropertyValue,                 \
                                      prop );                                  \
-    NJS_SET_EXCEPTION( msg.c_str(), msg.length() );		              \
+    NJS_SET_EXCEPTION( msg.c_str(), msg.length() );                           \
   }                                                                           \
 }
 
@@ -326,7 +326,7 @@ typedef enum
  * If it not a v8 Number, throw exception.
  * prop is the name of the property
  */
-#define NJS_SET_PROP_DOUBLE( val, v8value, prop )                               \
+#define NJS_SET_PROP_DOUBLE( val, v8value, prop )                             \
 {                                                                             \
   string msg;                                                                 \
   if( v8value->IsNUmber() )                                                   \
@@ -337,12 +337,12 @@ typedef enum
   {                                                                           \
     msg = NJSMessages::getErrorMsg ( errInvalidPropertyValue,                 \
                                      prop );                                  \
-    NJS_SET_EXCEPTION( msg.c_str(), msg.length() );		              \
+    NJS_SET_EXCEPTION( msg.c_str(), msg.length() );                           \
   }                                                                           \
 }
 
 /*
- * In case of exception set the flag on connection object based on error number
+ * Check if error code indicates the connection is unusable.
  * If the method does not use a connection, pass NULL as connection.
  */
 #define NJS_SET_CONN_ERR_STATUS( errNum, conn )                               \
