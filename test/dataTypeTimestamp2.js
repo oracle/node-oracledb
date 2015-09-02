@@ -89,7 +89,7 @@ describe('34. dataTypeTimestamp2.js', function() {
       assist.verifyResultSet(connection, tableName, dates, done);
     }) 
     
-    it.skip('34.1.3 works well with REF Cursor', function(done) {
+    it('34.1.3 works well with REF Cursor', function(done) {
       assist.verifyRefCursor(connection, tableName, dates, done);
     }) 
     
