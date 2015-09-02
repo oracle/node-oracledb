@@ -48,7 +48,9 @@ var inFileName = './test/fuzzydinosaur.jpg';  // contains the image to be insert
 var outFileName = './test/blobstreamout.jpg';
 
 describe('41. dataTypeBlob', function() {
-	if(dbConfig.externalAuth){
+   
+  this.timeout(10000);
+  if(dbConfig.externalAuth){
     var credential = { externalAuth: true, connectString: dbConfig.connectString };
   } else {
     var credential = dbConfig;
@@ -114,7 +116,7 @@ describe('41. dataTypeBlob', function() {
         setTimeout( function() {
           streamEndEventFired.should.equal(true, "inStream does not call 'end' event!")
           callback();
-        }, 500);
+        }, 2000);
 
         connection.execute(
           "INSERT INTO oracledb_myblobs (num, content) VALUES (:n, EMPTY_BLOB()) RETURNING content INTO :lobbv",
@@ -153,7 +155,7 @@ describe('41. dataTypeBlob', function() {
         setTimeout( function() {
           streamFinishEventFired.should.equal(true, "stream does not call 'finish' Event!");
           callback();
-        }, 500);
+        }, 2000);
 
         connection.execute(
           "SELECT content FROM oracledb_myblobs WHERE num = :n",
@@ -198,7 +200,7 @@ describe('41. dataTypeBlob', function() {
           lobDataEventFired.should.equal(true, "lob does not call 'data' event!");
           lobEndEventFired.should.equal(true, "lob does not call 'end' event!");
           callback();
-        }, 500);
+        }, 2000);
 
         connection.execute(
           "SELECT content FROM oracledb_myblobs WHERE num = :n",

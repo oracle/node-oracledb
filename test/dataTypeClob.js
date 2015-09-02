@@ -48,7 +48,8 @@ var inFileName = './test/clobexample.txt';  // the file with text to be inserted
 var outFileName = './test/clobstreamout.txt';
 
 describe('40. dataTypeClob.js', function() {
-  
+
+  this.timeout(10000);  
   if(dbConfig.externalAuth){
     var credential = { externalAuth: true, connectString: dbConfig.connectString };
   } else {
@@ -115,7 +116,7 @@ describe('40. dataTypeClob.js', function() {
         setTimeout( function() {
           streamEndEventFired.should.equal(true, "inStream does not call 'end' event!")
           callback();
-        }, 500);
+        }, 2000);
 
         connection.execute(
           "INSERT INTO oracledb_myclobs (num, content) VALUES (:n, EMPTY_CLOB()) RETURNING content INTO :lobbv",
@@ -153,7 +154,7 @@ describe('40. dataTypeClob.js', function() {
         setTimeout( function() {
           streamFinishEventFired.should.equal(true, "stream does not call 'Finish' Event!");
           callback();
-        }, 500);
+        }, 2000);
 
         connection.execute(
           "SELECT content FROM oracledb_myclobs WHERE num = :n",
@@ -199,7 +200,7 @@ describe('40. dataTypeClob.js', function() {
           lobDataEventFired.should.equal(true, "lob does not call 'data' event!");
           lobEndEventFired.should.equal(true, "lob does not call 'end' event!");
           callback();
-        }, 500);
+        }, 2000);
 
         connection.execute(
           "SELECT content FROM oracledb_myclobs WHERE num = :n",
