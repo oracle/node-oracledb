@@ -291,4 +291,139 @@ assist.nullValueSupport = function(connection, tableName, done) {
   ], done);
 }
 
+assist.DATE_STRINGS = 
+[
+  "TO_DATE('2005-01-06','YYYY-DD-MM') ",
+  "TO_DATE('2005-09-01', 'YYYY-MM-DD')",
+  "TO_DATE('2005-08-05', 'YYYY-MM-DD')",
+  "TO_DATE('07-05-1998', 'MM-DD-YYYY')",
+  "TO_DATE('07-05-1998', 'DD-MM-YYYY')",
+  "TO_TIMESTAMP('1999-12-01 11:10:01.00123', 'YYYY-MM-DD HH:MI:SS.FF')"
+];
+
+// for TIMESTAMP WITHOUT TIME ZONE
+assist.TIMESTAMP_STRINGS = 
+[
+  "TO_TIMESTAMP('2005-01-06', 'YYYY-DD-MM') ",
+   "TO_TIMESTAMP('2005-09-01', 'YYYY-MM-DD')",
+   "TO_TIMESTAMP('2005-08-05', 'YYYY-MM-DD')",
+   "TO_TIMESTAMP('07-05-1998', 'MM-DD-YYYY')",
+   "TO_TIMESTAMP('07-05-1998', 'DD-MM-YYYY')",
+   "TO_TIMESTAMP('2005-09-01 07:05:19', 'YYYY-MM-DD HH:MI:SS')",
+   "TO_TIMESTAMP('1999-12-01 11:00:00.1', 'YYYY-MM-DD HH:MI:SS.FF')",
+   "TO_TIMESTAMP('1999-12-01 11:00:00.12', 'YYYY-MM-DD HH:MI:SS.FF')",
+   "TO_TIMESTAMP('1999-12-01 11:00:00.123', 'YYYY-MM-DD HH:MI:SS.FF')",
+   "TO_TIMESTAMP('1999-12-01 11:01:10.0123', 'YYYY-MM-DD HH:MI:SS.FF')",
+   "TO_TIMESTAMP('1999-12-01 11:00:00.1234', 'YYYY-MM-DD HH:MI:SS.FF')",
+   "TO_TIMESTAMP('1999-12-01 11:00:00.00123', 'YYYY-MM-DD HH:MI:SS.FF')",
+   "TO_TIMESTAMP('1999-12-01 11:00:00.12345', 'YYYY-MM-DD HH:MI:SS.FF')",
+   "TO_TIMESTAMP('1999-12-01 11:00:00.123456', 'YYYY-MM-DD HH:MI:SS.FF')",
+   "TO_TIMESTAMP('1999-12-01 11:00:00.1234567', 'YYYY-MM-DD HH:MI:SS.FF')",
+   "TO_TIMESTAMP('1999-12-01 11:02:20.0000123', 'YYYY-MM-DD HH:MI:SS.FF')",
+   "TO_TIMESTAMP('1999-12-01 11:00:00.12345678', 'YYYY-MM-DD HH:MI:SS.FF')",
+   "TO_TIMESTAMP('1999-12-01 11:00:00.123456789', 'YYYY-MM-DD HH:MI:SS.FF')",
+   "TO_TIMESTAMP('10-Sep-02 14:10:10.123000', 'DD-Mon-RR HH24:MI:SS.FF')"
+];
+
+// content serves as reference logs
+assist.content = 
+{
+  dates:
+  [
+    'Wed, 01 Jun 2005 07:00:00 GMT',
+    'Thu, 01 Sep 2005 07:00:00 GMT',
+    'Fri, 05 Aug 2005 07:00:00 GMT',
+    'Sun, 05 Jul 1998 07:00:00 GMT',
+    'Thu, 07 May 1998 07:00:00 GMT',
+    'Wed, 01 Dec 1999 18:10:01 GMT'
+  ],
+  timestamps:
+  [
+    'Wed, 01 Jun 2005 07:00:00 GMT',
+    'Thu, 01 Sep 2005 07:00:00 GMT',
+    'Fri, 05 Aug 2005 07:00:00 GMT',
+    'Sun, 05 Jul 1998 07:00:00 GMT',
+    'Thu, 07 May 1998 07:00:00 GMT',
+    'Thu, 01 Sep 2005 14:05:19 GMT',
+    'Wed, 01 Dec 1999 18:00:00 GMT',
+    'Wed, 01 Dec 1999 18:00:00 GMT',
+    'Wed, 01 Dec 1999 18:00:00 GMT',
+    'Wed, 01 Dec 1999 18:01:10 GMT',
+    'Wed, 01 Dec 1999 18:00:00 GMT',
+    'Wed, 01 Dec 1999 18:00:00 GMT',
+    'Wed, 01 Dec 1999 18:00:00 GMT',
+    'Wed, 01 Dec 1999 18:00:00 GMT',
+    'Wed, 01 Dec 1999 18:00:00 GMT',
+    'Wed, 01 Dec 1999 18:02:20 GMT',
+    'Wed, 01 Dec 1999 18:00:00 GMT',
+    'Wed, 01 Dec 1999 18:00:00 GMT',
+    'Tue, 10 Sep 2002 21:10:10 GMT'  
+  ]
+};
+
+assist.allDataTypeNames = 
+{
+  "oracledb_timestamp1" : "TIMESTAMP",
+  "oracledb_date"       : "DATE"
+};
+
+assist.sqlCreateTable = function(tableName) 
+{
+  var createTab = 
+        "BEGIN " + 
+        "  DECLARE " +
+        "    e_table_exists EXCEPTION; " +
+        "    PRAGMA EXCEPTION_INIT(e_table_exists, -00942); " +
+        "   BEGIN " +
+        "     EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " '); " +
+        "   EXCEPTION " +
+        "     WHEN e_table_exists " +
+        "     THEN NULL; " +
+        "   END; " +
+        "   EXECUTE IMMEDIATE (' " +
+        "     CREATE TABLE " + tableName +" ( " +
+        "       num NUMBER(10), " + 
+        "       content " + assist.allDataTypeNames[tableName] + ", " +
+        "       CONSTRAINT " + tableName + "_pk PRIMARY KEY (num) " + 
+        "     )" +
+        "   '); " + 
+        "END; ";
+
+  return createTab;
+}
+
+assist.sqlCreateProcedure = function(tableName)
+{
+  var createProc = 
+        "CREATE OR REPLACE PROCEDURE testproc (p_out OUT SYS_REFCURSOR) " +
+        "AS " + 
+        "BEGIN " +
+        "  OPEN p_out FOR " +
+        "    SELECT * FROM " + tableName  + "; " +  
+        "END; ";
+
+  return createProc;
+}
+
+/*assist.sqlCreateSequence = function(seqName)
+{
+  var createSeq = 
+        "BEGIN " + 
+        "  DECLARE " +
+        "    e_seq_exists EXCEPTION; " +
+        "    PRAGMA EXCEPTION_INIT(e_seq_exists, -02289); " +
+        "   BEGIN " +
+        "     EXECUTE IMMEDIATE ('DROP SEQUENCE " + seqName + " '); " +
+        "   EXCEPTION " +
+        "     WHEN e_seq_exists " +
+        "     THEN NULL; " +
+        "   END; " +
+        "   EXECUTE IMMEDIATE (' " +
+        "     CREATE SEQUENCE " + seqName + 
+        "   '); " +  
+        "END; ";
+        
+  return createSeq;
+}*/
+
 module.exports = assist;

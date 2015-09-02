@@ -33,49 +33,39 @@
  *****************************************************************************/
    
 var oracledb = require('oracledb');
+var should = require('should');
+var async = require('async');
 var assist = require('./dataTypeAssist.js');
 var dbConfig = require('./dbConfig.js');
 
 describe('32. dataTypeDate.js', function() {
   
-  if(dbConfig.externalAuth){
+  if(dbConfig.externalAuth) {
     var credential = { externalAuth: true, connectString: dbConfig.connectString };
   } else {
     var credential = dbConfig;
   }
   
   var connection = null;
-  var tableName = "oracledb_datatype_date";
-  var sqlCreate = 
-        "BEGIN " +
-           "   DECLARE " +
-           "       e_table_exists EXCEPTION; " +
-           "       PRAGMA EXCEPTION_INIT(e_table_exists, -00942); " +
-           "   BEGIN " +
-           "       EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " '); " +
-           "   EXCEPTION " +
-           "       WHEN e_table_exists " +
-           "       THEN NULL; " +
-           "   END; " +
-           "   EXECUTE IMMEDIATE (' " +
-           "       CREATE TABLE " + tableName +" ( " +
-           "           num NUMBER, " + 
-           "           content DATE "  +
-           "       )" +
-           "   '); " +
-           "END; ";
-  
-  var dates = assist.data.dates;
-  
-  before(function(done) {
+  var tableName = "oracledb_date";
+
+  beforeEach(function(done) {
     oracledb.getConnection(credential, function(err, conn) {
       if(err) { console.error(err.message); return; }
       connection = conn;
-      assist.setup(connection, tableName, sqlCreate, dates, done);
+
+      var sqlCreate = assist.sqlCreateTable(tableName);
+      connection.execute(
+        sqlCreate,
+        function(err) {
+          should.not.exist(err);
+          done();
+        }
+      );
     });
   })
   
-  after( function(done){
+  afterEach( function(done){
     connection.execute(
       "DROP table " + tableName,
       function(err) {
@@ -87,16 +77,189 @@ describe('32. dataTypeDate.js', function() {
       }
     );
   })
-  
-  it('32.1 supports DATE data type', function(done) {
-    assist.dataTypeSupport(connection, tableName, dates, done);
+
+  it('32.1 insert JavaScript Date data. Verify SELECT query, result set', function(done) {
+    var dates = assist.data.dates;
+    var numRows = 3;  // number of rows to return from each call to getRows()
+
+    async.series([
+      function insertDataJS(callback) {
+        async.forEach(dates, function(date, cb) {
+          connection.execute(
+            "INSERT INTO " + tableName + " VALUES(:no, :bindValue)",
+            { no: dates.indexOf(date), bindValue: date },
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        }, function(err) {
+          should.not.exist(err);
+          callback();
+        });
+      },
+      function verifyDataJS(callback) {
+        async.forEach(dates, function(date, cb) {
+          var bv  = dates.indexOf(date);
+
+          connection.execute(
+            "SELECT content FROM " + tableName + " WHERE num = :no",
+            { no: bv },
+            { outFormat: oracledb.OBJECT },
+            function(err, result) {
+              should.not.exist(err);
+              result.rows[0].CONTENT.toUTCString().should.eql(dates[bv].toUTCString());
+              cb();
+            }
+          );
+        }, function(err) {
+          should.not.exist(err);
+          callback();
+        });
+      },
+      function verifyRS(callback) {
+        connection.execute(
+          "SELECT * FROM " + tableName,
+          [],
+          { resultSet: true, outFormat: oracledb.OBJECT },
+          function(err, result) {
+            should.not.exist(err);
+            (result.resultSet.metaData[0]).name.should.eql('NUM');
+            (result.resultSet.metaData[1]).name.should.eql('CONTENT');
+            fetchRowsFromRS(result.resultSet, dates, callback);
+          }
+        );
+      }, 
+      function createProcedure(callback) {
+        var proc = assist.sqlCreateProcedure(tableName);
+        connection.execute(
+          proc,
+          function(err) {
+            should.not.exist(err);
+            callback();
+          }
+        );
+      },
+      function verifyRefCursor(callback) {
+        connection.execute(
+          "BEGIN testproc(:o); END;",
+          [
+            { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
+          ],
+          function(err, result) {
+            should.not.exist(err);
+            console.log(result.outBinds.o);
+            callback();
+            // fetchRowsFromRS()
+          }
+        );
+      },
+      function dropProcedure(callback) {
+        connection.execute(
+          "DROP PROCEDURE testproc",
+          function(err) {
+            should.not.exist(err);
+            callback();
+          }
+        );
+      }
+    ], done);
+   
+    function fetchRowsFromRS(rs, array, cb) 
+    {
+      rs.getRows(numRows, function(err, rows) {
+        should.not.exist(err);
+        if(rows.length > 0) {
+          for(var i = 0; i < rows.length; i++) {
+            (rows[i].CONTENT.toUTCString()).should.eql(array[ (rows[i].NUM) ].toUTCString());
+            return fetchRowsFromRS(rs, array, cb);
+          } 
+        } else {
+          rs.close( function(err) {
+            should.not.exist(err);
+            cb();
+          });
+        } 
+      });
+    }
   })
   
-  it('32.2 resultSet stores DATE data correctly', function(done) {
-    assist.resultSetSupport(connection, tableName, dates, done);
+  it('32.2 insert Date data via SQL. Verify SELECT query, result set', function(done) {
+    var dates = assist.DATE_STRINGS;
+    
+    async.series([
+      function insertDataSQL(callback) {
+        async.forEach(dates, function(date, cb) {
+          var sql = "INSERT INTO " + tableName + " VALUES(:no, " + date + " )";
+          // var bv  = array.indexOf(element) + dates.length;
+          var bv  = dates.indexOf(date);
+          connection.execute(
+            sql,
+            { no: bv },
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        }, function(err) {
+          should.not.exist(err);
+          callback();
+        });
+      },
+      function verifyDataSQL(callback) {
+        async.forEach(dates, function(date, cb) {
+          var bv = dates.indexOf(date);
+          connection.execute(
+            "SELECT content FROM " + tableName + " WHERE num = :no",
+            { no: bv },
+            { outFormat: oracledb.OBJECT },
+            function(err, result) {
+              should.not.exist(err);
+              (result.rows[0].CONTENT.toUTCString()).should.equal(assist.content.dates[bv]);
+              cb();
+            } 
+          );
+        }, function(err) {
+          should.not.exist(err);
+          callback();
+        });
+      },
+      function verifyRS(callback) {
+        connection.execute(
+          "SELECT * FROM " + tableName,
+          [],
+          { resultSet: true, outFormat: oracledb.OBJECT },
+          function(err, result) {
+            should.not.exist(err);
+            (result.resultSet.metaData[0]).name.should.eql('NUM');
+            (result.resultSet.metaData[1]).name.should.eql('CONTENT');
+            var array = assist.content.dates;
+            fetchOneRowFromRS(result.resultSet, array, callback);
+          }
+        );
+      }
+    ], done);
+
+    function fetchOneRowFromRS(rs, array, cb) 
+    {
+      rs.getRow( function(err, row) {
+        should.not.exist(err);
+        if(row) {
+          (row.CONTENT.toUTCString()).should.eql(array[row.NUM]);
+          return fetchOneRowFromRS(rs, array, cb);     
+        } else {
+          rs.close( function(err) {
+            should.not.exist(err);
+            cb();
+          });
+        } 
+      });
+    }
   })
   
-  it('32.3 stores null value correctly', function(done) {
+  it.skip('32.3 stores null value correctly', function(done) {
     assist.nullValueSupport(connection, tableName, done);
   })   
+
+  
 })

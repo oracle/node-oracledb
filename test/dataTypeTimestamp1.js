@@ -47,33 +47,16 @@ describe('33. dataTypeTimestamp1.js', function() {
   }
   
   var connection = null;
-  var tableName = "oracledb_datatype_timestamp";
-  var sqlCreate = 
-        "BEGIN " +
-           "   DECLARE " +
-           "       e_table_exists EXCEPTION; " +
-           "       PRAGMA EXCEPTION_INIT(e_table_exists, -00942); " +
-           "   BEGIN " +
-           "       EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " '); " +
-           "   EXCEPTION " +
-           "       WHEN e_table_exists " +
-           "       THEN NULL; " +
-           "   END; " +
-           "   EXECUTE IMMEDIATE (' " +
-           "       CREATE TABLE " + tableName +" ( " +
-           "           num NUMBER, " + 
-           "           content TIMESTAMP "  +
-           "       )" +
-           "   '); " +
-           "END; ";
-  
-  var timestamps = assist.data.dates;
+  var tableName = "oracledb_timestamp1";
+  var dates = assist.data.dates;
       
   before(function(done) {
     oracledb.getConnection(credential, function(err, conn) {
       if(err) { console.error(err.message); return; }
       connection = conn;
-      assist.setup(connection, tableName, sqlCreate, timestamps, done);
+
+      var sqlCreate = assist.sqlCreateTable(tableName);
+      assist.setup(connection, tableName, sqlCreate, dates, done);
     });
   })
   
@@ -91,14 +74,59 @@ describe('33. dataTypeTimestamp1.js', function() {
   })
   
   it('33.1 supports TIMESTAMP data type', function(done) {
-    assist.dataTypeSupport(connection, tableName, timestamps, done);
+    assist.dataTypeSupport(connection, tableName, dates, done);
   })
   
   it('33.2 resultSet stores TIMESTAMP data correctly', function(done) {
-    assist.resultSetSupport(connection, tableName, timestamps, done);
+    assist.resultSetSupport(connection, tableName, dates, done);
   })
   
   it('33.3 stores null value correctly', function(done) {
     assist.nullValueSupport(connection, tableName, done);
   }) 
+
+  it('33.4 inserts TIMESTAMP data via sql', function(done) {
+    var array = assist.TIMESTAMP_STRINGS;
+
+    async.series([
+      function insertData(callback) {
+        async.forEach(array, function(element, cb) {
+          var sql = "INSERT INTO " + tableName + " VALUES(:no, " + element + " )";
+          var bv  = array.indexOf(element) + dates.length;
+          connection.execute(
+            sql,
+            { no: bv },
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        }, function(err) {
+          should.not.exist(err);
+          callback();
+        });
+      },
+      function verifyData(callback) {
+        async.forEach(array, function(element, cb) {
+          var bv  = array.indexOf(element) + dates.length;
+          connection.execute(
+            "SELECT * FROM " + tableName + " WHERE num = :no",
+            { no: bv },
+            { outFormat: oracledb.OBJECT },
+            function(err, result) {
+              should.not.exist(err);
+              //console.log(bv - dates.length);
+              //console.log(result.rows[0].CONTENT.toUTCString());
+              //console.log(assist.content.timestamps[bv - dates.length]);
+              (result.rows[0].CONTENT.toUTCString()).should.equal(assist.content.timestamps[bv - dates.length]);
+              cb();
+            } 
+          );
+        }, function(err) {
+          should.not.exist(err);
+          callback();
+        });
+      }
+    ], done);
+  })
 })
