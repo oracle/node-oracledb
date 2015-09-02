@@ -1376,7 +1376,7 @@ void Connection::DoDefines ( eBaton* executeBaton, const dpi::MetaData* meta,
                              unsigned int numCols )
 {
   Define *defines = executeBaton->defines = new Define[numCols];
-  int lxgratio = executeBaton->dpiconn->getByteExpansionRation ();
+  int csratio = executeBaton->dpiconn->getByteExpansionRatio ();
 
   for (unsigned int col = 0; col < numCols; col++)
   {
@@ -1418,13 +1418,12 @@ void Connection::DoDefines ( eBaton* executeBaton, const dpi::MetaData* meta,
                                              executeBaton->columnNames[col],
                                              meta[col].dbType );
         /*
-         * While fetching non-ascii characters, each byte on the server
-         * can take upto maximum of 3 bytes when it converted to AL32UTF8
-         * because the client character set is always set to AL32UTF8
-         * in node-oracledb. If server has AL32UTF8 then ratio is 1.
+         * the buffer size is increased to account for possible character
+         * size expansion when data is converted from the DB character set
+         * to AL32UTF8
          */
  
-		defines[col].maxSize   = (meta[col].dbSize) * lxgratio;
+		defines[col].maxSize   = (meta[col].dbSize) * csratio;
 
 
         if ( NJS_SIZE_T_OVERFLOW ( defines[col].maxSize,
@@ -2814,7 +2813,7 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
   eBaton *executeBaton = (eBaton *)ctx;
   Bind *bind = (Bind *)executeBaton->binds[bndpos];
 
-  if ( NJS_SIZE_T_OVERFLOW ( nRows, sizeof ( short )))
+  if ( NJS_SIZE_T_OVERFLOW ( sizeof ( short ), nRows ) )
   {
     executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
     return;
@@ -2830,7 +2829,7 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
   }
   if ( dmlReturning )
   {
-    if ( NJS_SIZE_T_OVERFLOW ( nRows, sizeof ( unsigned int )))
+    if ( NJS_SIZE_T_OVERFLOW ( sizeof ( unsigned int ), nRows ) )
     {
       executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
       return;
@@ -2944,10 +2943,6 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
     }
     if ( !dmlReturning )
     {
-      *(bind->len) = sizeof ( unsigned int ) ;
-    }
-    if ( !dmlReturning )
-    {
       *(bind->len) = sizeof ( double ) ;
     }
     break;
@@ -2968,7 +2963,7 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
     }
     else
     {
-      bind->value = (void *)malloc(sizeof(Descriptor *) * bind->rowsReturned);
+      bind->value = (void *)malloc(sizeof(Descriptor *) * nRows);
       if( !bind->value )
       {
         executeBaton->error = NJSMessages::getErrorMsg(

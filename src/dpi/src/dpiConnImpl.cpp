@@ -51,8 +51,6 @@
 using namespace std;
 
 
-
-
 /*---------------------------------------------------------------------------
                            PUBLIC METHODS
   ---------------------------------------------------------------------------*/
@@ -246,9 +244,9 @@ void ConnImpl::stmtCacheSize(unsigned int stmtCacheSize)
    RETURNS:
      Byte expansion ratio (int)
  */
-int ConnImpl::getByteExpansionRation ()
+int ConnImpl::getByteExpansionRatio ()
 {
-  return lxgratio_;
+  return csratio_;
 }
 
 /*****************************************************************************/
@@ -502,8 +500,8 @@ void ConnImpl::initConnImpl ( bool pool, bool externalAuth,
                    ub4 nameLen, const string &user, const string &password )
 {
   OCIServer *srvh = NULL;
-  ub4 mode        = 0;
-  ub2 csid_       = 0;
+  ub4 mode        = OCI_DEFAULT;
+  ub2 csid        = 0;
 
   if ( pool )
     mode = externalAuth ? ( OCI_SESSGET_CREDEXT | OCI_SESSGET_SPOOL ) :
@@ -557,13 +555,10 @@ void ConnImpl::initConnImpl ( bool pool, bool externalAuth,
                         ( ub4 ) OCI_ATTR_SERVER, errh_ ), errh_ );
 
   // Get the DBCHARSET from server
-  ociCall ( OCIAttrGet ( srvh, ( ub4 ) OCI_HTYPE_SERVER, ( void * ) &csid_,
+  ociCall ( OCIAttrGet ( srvh, ( ub4 ) OCI_HTYPE_SERVER, ( void * ) &csid,
                          ( ub4 * ) 0, ( ub4 ) OCI_ATTR_CHARSET_ID, errh_ ),
                           errh_ );
-  if ( csid_ == DPI_AL32UTF8 )
-    lxgratio_ = 1;
-  else
-    lxgratio_ = 3;
+    csratio_ = getCsRatio ( csid );
 }
 
 /*****************************************************************************/

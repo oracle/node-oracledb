@@ -54,6 +54,15 @@ class PoolImpl;
 
 
 
+/*
+ * The maximum character expansion ratio from any DB character to 
+ * AL32UTF8 is known to be 3-times
+ */
+#define DPI_WORSTCASE_CHAR_CONVERSION_RATIO    3
+
+// No character expansion required if DB has AL32UTF8 charset
+#define DPI_BESTCASE_CHAR_CONVERSION_RATIO     1
+
 /*---------------------------------------------------------------------------
                      PUBLIC TYPES
   ---------------------------------------------------------------------------*/
@@ -89,7 +98,7 @@ class ConnImpl : public Conn
   virtual void module(const string &module);
 
   virtual void action(const string &action);
-  virtual int getByteExpansionRation ();
+  virtual int getByteExpansionRatio ();
 
                               // interface methods
   virtual Stmt* getStmt(const string &sql);
@@ -124,6 +133,12 @@ private:
   void initConnImpl( bool pool, bool externalAuth, const string& connClass,
                      OraText *poolNmRconnStr, ub4 nameLen,
                      const string &user, const string &password );
+  int getCsRatio ( ub2 csid )
+  {
+    return ( csid == DPI_AL32UTF8 ) ? DPI_BESTCASE_CHAR_CONVERSION_RATIO :
+             DPI_WORSTCASE_CHAR_CONVERSION_RATIO;
+  }
+  
   void cleanup();
 
 
@@ -136,7 +151,7 @@ private:
   OCISvcCtx   *svch_;           // OCI service handle
   OCISession  *sessh_;          // OCI Session handle. Do not free this.
   boolean     hasTxn_;          // set if transaction is in progress
-  int         lxgratio_;        // Caches DBCharset ID
+  int         csratio_;         // character expansion ratio
 };
 
 
