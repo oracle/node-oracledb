@@ -34,227 +34,240 @@
  
 var oracledb = require ( 'oracledb' );
 var should = require ( 'should' );
-var async = require ( 'async' );
+var async = require('async');
 var dbConfig = require ( './dbConfig.js' );
 
-describe ('56. fetchAs.js', 
-  function () 
-  {
-    if (dbConfig.externalAuth )
-    {
-      var credential = { externalAuth : true,
-                         connectString : dbConfig.connectString 
-                       };
-    }
-    else
-    {
-      var credential = dbConfig;
-    }
-    
-    var connection = false;
-    
-    
-    /* preparation work before test case(s). */
-    before ( 
-      function ( done ) 
-      {
-        oracledb.getConnection ( credential, 
-          function ( err, conn )
-          {
-            if ( err )
-            {
-              console.error ( err.message );
-              return;
-            }
-            connection = conn;
-            done ();
-          }
-        );
-      }
-    );
-    
+describe('56. fetchAs.js', function() {
 
-    /* clean up after test case(s) */
-    after (
-      function ( done )
-      {
-        connection.release ( 
-          function ( err )
-          {
-            oracledb.fetchAsString = [] ;
-            
-            if ( err )
-            {
-              console.error ( err.message );
-              return;
-            }
-            done ();
-            
-          }
-        );
-      }
-    );
-    
-
-    /* Fetch DATE column values as STRING - by-Column name */    
-    it ('56.1 FetchAs - DATE type as STRING',
-      function ( done ) 
-      {
-        connection.should.be.ok;
-        
-        connection.execute ( 
-          "SELECT FIRST_NAME, LAST_NAME, HIRE_DATE FROM EMPLOYEES",
-          [],
-          { 
-            outFormat : oracledb.OBJECT,
-            fetchInfo : { "HIRE_DATE" : { type : oracledb.STRING } }
-          },
-          function ( err, result )
-          {
-            should.not.exist ( err ) ;
-            done ();
-          }
-        );
-      }
-    );
-
-    /* Fetch DATE, NUMBER column values STRING - by Column-name */
-    it ('56.2 FetchAs NUMBER & DATE type as STRING',
-      function ( done ) 
-      {
-        connection.should.be.ok;
-        
-        connection.execute ( 
-          "SELECT employee_id as SEMPID, employee_id, " +
-          "hire_date as SHDATE, hire_date FROM EMPLOYEES",
-          [],
-          { 
-            outFormat : oracledb.OBJECT,
-            fetchInfo : 
-            { 
-              "SEMPID" : { type : oracledb.STRING },
-              "SHDATE" : { type : oracledb.STRING }
-            }
-          },
-          function ( err, result )
-          {
-            should.not.exist ( err ) ;
-            done ();
-          }
-        );
-      }
-    );
-
-    /* Fetch DATE, NUMBER as STRING by-time configuration and by-name */
-    it ('56.3 FetchAs Oracledb property by-type',
-      function ( done ) 
-      {
-        connection.should.be.ok;
-        
-        oracledb.fetchAsString = [ oracledb.DATE, oracledb.NUMBER ];
-        
-        connection.execute ( 
-          "SELECT employee_id, first_name, last_name, hire_date " +
-          "FROM EMPLOYEES",
-          [],
-          { 
-            outFormat : oracledb.OBJECT,
-            fetchInfo : 
-            { 
-              "HIRE_DATE" : { type : oracledb.STRING }
-            }
-          },
-          function ( err, result )
-          {
-            should.not.exist ( err ) ;
-            done ();
-          }
-        );
-      }
-    );
-
-    
-    /* 
-     * Fetch DATE, NUMBER column as STRING by-type and override 
-     * HIRE_DATE to use default (from metadata type).
-     */
-    it ('56.4 FetchAs override oracledb by-type (for DATE) at execute time',
-      function ( done ) 
-      {
-        connection.should.be.ok;
-        
-        oracledb.fetchAsString = [ oracledb.DATE, oracledb.NUMBER ];
-        
-        connection.execute ( 
-          "SELECT employee_id, first_name, last_name, hire_date " +
-          "FROM EMPLOYEES",
-          [],
-          { 
-            outFormat : oracledb.OBJECT,
-            fetchInfo : 
-            { 
-              "HIRE_DATE" : { type : oracledb.DEFAULT },
-              "EMPLOYEE_ID" : { type : oracledb.STRING }
-            }
-          },
-          function ( err, result )
-          {
-            should.not.exist ( err ) ;
-            done ();
-          }
-        );
-      }
-    );
-
-    /* Fetch ROWID column values STRING - non-ResultSet */
-    it ('56.5 FetchInfo ROWID column values STRING non-ResultSet',
-        function ( done ) 
-        {
-          connection.should.be.ok;
-          
-          connection.execute ( 
-            "SELECT ROWID from DUAL",
-            [],
-            { 
-              outFormat : oracledb.OBJECT,
-              fetchInfo : 
-              { 
-                "ROWID" : { type : oracledb.STRING }
-              }
-            },
-            function ( err, result )
-            {
-              should.not.exist ( err ) ;
-              done ();
-            }
-          );
-        }
-       );
-
-    /* Fetch ROWID column values STRING - ResultSet */
-    it ('56.6 FetchInfo ROWID column values STRING ResultSet',
-        function ( done ) 
-        {
-          connection.should.be.ok;
-          
-          connection.execute ( 
-            "SELECT ROWID from DUAL",
-            [],
-            { 
-              outFormat : oracledb.OBJECT,
-              resultSet : true,
-              fetchInfo : 
-              { 
-                "ROWID" : { type : oracledb.STRING }
-              }
-            },
-            function ( err, result )
-            {
-              should.not.exist ( err ) ;
-              done ();
-            }
-          );
-        }
-       );
+  if(dbConfig.externalAuth){
+    var credential = { externalAuth: true, connectString: dbConfig.connectString };
+  } else {
+    var credential = dbConfig;
   }
-);
+
+  var connection = null;
+  before('get one connection', function(done) {
+    oracledb.getConnection(credential, function(err, conn) {
+      should.not.exist(err);
+      connection = conn;
+      done();
+    });
+  })
+    
+  after('release connection, reset fetchAsString property', function(done) {
+    oracledb.fetchAsString = [];
+    connection.release( function(err) {
+      should.not.exist(err);
+      done();
+    });
+  })
+
+  it('56.1 Fetch DATE column values as STRING - by-Column name', function(done) {
+    connection.execute(
+      "SELECT TO_DATE('2005-01-06', 'YYYY-DD-MM') AS TS_DATE FROM DUAL",
+      [],
+      {
+        outFormat: oracledb.OBJECT,
+        fetchInfo : { "TS_DATE": { type : oracledb.STRING } }
+      },
+      function(err, result) {
+        should.not.exist(err);
+        // console.log(result.rows[0]);
+        result.rows[0].TS_DATE.should.be.a.String;
+        done();
+      }
+    );
+  })
+
+  it('56.2 Fetch DATE, NUMBER column values STRING - by Column-name', function(done) {
+    connection.execute(
+      "SELECT 1234567 AS TS_NUM, TO_TIMESTAMP('1999-12-01 11:10:01.00123', 'YYYY-MM-DD HH:MI:SS.FF') AS TS_DATE FROM DUAL",
+      [],
+      {
+        outFormat: oracledb.OBJECT,
+        fetchInfo : 
+        { 
+          "TS_DATE" : { type : oracledb.STRING },
+          "TS_NUM"  : { type : oracledb.STRING }
+        }
+      },
+      function(err, result) {
+        should.not.exist(err);
+        // console.log(result.rows[0]);
+        result.rows[0].TS_DATE.should.be.a.String;
+        result.rows[0].TS_NUM.should.be.a.String;
+        Number(result.rows[0].TS_NUM).should.equal(1234567);
+        done();
+      }
+    );
+  })
+
+  it('56.3 Fetch DATE, NUMBER as STRING by-time configuration and by-name', function(done) {
+    oracledb.fetchAsString = [ oracledb.DATE, oracledb.NUMBER ];
+
+    connection.execute(
+      "SELECT 1234567 AS TS_NUM, TO_TIMESTAMP('1999-12-01 11:10:01.00123', 'YYYY-MM-DD HH:MI:SS.FF') AS TS_DATE FROM DUAL",
+      [],
+      {
+        outFormat: oracledb.OBJECT,
+        fetchInfo : 
+        { 
+          "TS_DATE" : { type : oracledb.STRING },
+          "TS_NUM"  : { type : oracledb.STRING }
+        }
+      },
+      function(err, result) {
+        should.not.exist(err);
+        // console.log(result.rows[0]);
+        result.rows[0].TS_DATE.should.be.a.String;
+        result.rows[0].TS_NUM.should.be.a.String;
+        Number(result.rows[0].TS_NUM).should.equal(1234567);
+        done();
+      }
+    );
+  })
+
+  it('56.4 Fetch DATE, NUMBER column as STRING by-type and override at execute time', function(done) {
+    oracledb.fetchAsString = [ oracledb.DATE, oracledb.NUMBER ];
+    
+    connection.execute(
+      "SELECT 1234567 AS TS_NUM, TO_TIMESTAMP('1999-12-01 11:10:01.00123', 'YYYY-MM-DD HH:MI:SS.FF') AS TS_DATE FROM DUAL",
+      [],
+      {
+        outFormat: oracledb.OBJECT,
+        fetchInfo : 
+        { 
+          "TS_DATE" : { type : oracledb.DEFAULT },
+          "TS_NUM"  : { type : oracledb.STRING }
+        }
+      },
+      function(err, result) {
+        should.not.exist(err);
+        // console.log(result.rows[0]);
+        result.rows[0].TS_DATE.should.be.an.Object;
+        result.rows[0].TS_NUM.should.be.a.String;
+        Number(result.rows[0].TS_NUM).should.equal(1234567);
+        done();
+      }
+    );
+  })
+  
+  it('56.5 Fetch ROWID column values STRING - non-ResultSet', function(done) {
+    connection.execute(
+      "SELECT ROWID from DUAL",
+      [],
+      { 
+        outFormat : oracledb.OBJECT,
+        fetchInfo : 
+        { 
+          "ROWID" : { type : oracledb.STRING }
+        }
+      },
+      function(err, result) {
+        should.not.exist(err);
+        // console.log(result.rows[0].TS_DATA);
+        result.rows[0].ROWID.should.be.a.String;
+        done();
+      }
+    );
+  })
+
+  it('56.6 Fetch ROWID column values STRING - ResultSet', function(done) {
+    connection.execute(
+      "SELECT ROWID from DUAL",
+      [],
+      { 
+        outFormat : oracledb.OBJECT,
+        resultSet : true,
+        fetchInfo : 
+        { 
+          "ROWID" : { type : oracledb.STRING }
+        }
+      },
+      function(err, result) {
+        should.not.exist(err);
+ 
+        result.resultSet.getRow( function(err, row) {
+          should.not.exist(err);
+          // console.log(row);
+          row.ROWID.should.be.a.String;
+          result.resultSet.close( function(err) {
+            should.not.exist(err);
+            done();
+          });
+        });
+      }
+    );
+  })
+  
+  /*
+  * The maximum safe integer in JavaScript is (2^53 - 1). 
+  * The minimum safe integer in JavaScript is (-(2^53 - 1)).
+  * Numbers out of above range will be rounded. 
+  * The last element is out of Oracle database standard Number range. It will be rounded by database.
+  */
+  var numStrs = 
+  [
+    '17249138680355831',
+    '-17249138680355831',
+    '0.17249138680355831',
+    '-0.17249138680355831',
+    '0.1724913868035583123456789123456789123456'
+  ];
+
+  var numResults = 
+  [
+    '17249138680355831',
+    '-17249138680355831',
+    '.17249138680355831',
+    '-.17249138680355831',
+    '.172491386803558312345678912345678912346'
+  ];
+
+  it('56.7 large numbers with fetchInfo', function(done) {
+    async.forEach(numStrs, function(element, callback) {
+      connection.execute(
+        "SELECT TO_NUMBER( " + element + " ) AS TS_NUM FROM DUAL",
+        [],
+        {
+          outFormat : oracledb.OBJECT,
+          fetchInfo : 
+          { 
+            "TS_NUM"  : { type : oracledb.STRING }
+          }
+        },
+        function(err, result) {
+          should.not.exist(err);
+          result.rows[0].TS_NUM.should.be.a.String;
+          (result.rows[0].TS_NUM).should.eql(numResults[numStrs.indexOf(element)]);
+          callback();
+        }
+      );
+    }, function(err) {
+      should.not.exist(err);
+      done();
+    });
+  })
+
+  it('56.8 large numbers with setting fetchAsString property', function(done) {
+    oracledb.fetchAsString = [ oracledb.NUMBER ];
+
+    async.forEach(numStrs, function(element, callback) {
+      connection.execute(
+        "SELECT TO_NUMBER( " + element + " ) AS TS_NUM FROM DUAL",
+        [],
+        { outFormat : oracledb.OBJECT },
+        function(err, result) {
+          should.not.exist(err);
+          // console.log(result.rows[0].TS_NUM);
+          result.rows[0].TS_NUM.should.be.a.String;
+          (result.rows[0].TS_NUM).should.eql(numResults[numStrs.indexOf(element)]);
+          callback();
+        }
+      );
+    }, function(err) {
+      should.not.exist(err);
+      done();
+    });
+  })
+})
