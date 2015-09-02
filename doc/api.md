@@ -2979,10 +2979,10 @@ Oracle REF CURSORS can be fetched in node-oracledb by binding a
 [`getRow()`](#getrow) or [`getRows()`](getrows).  When all rows have
 been fetched, or the application does not want to continue getting
 more rows, then the result set must be freed using
-[`close()`](#close).  If the REF cursor is not set any value or is set to NULL
-in the PL/SQL procedure, the returned [`ResultSet`](#resultsetclass) object
-is an invalid  one and methods like getRows() returns an error when invoked
-on this object.
+[`close()`](#close).  If the REF cursor is not set to any value, or is
+set to NULL, in the PL/SQL procedure, then the returned `ResultSet` is
+invalid and methods like `getRows()` will return an error when
+invoked.
 
 When using Oracle Database 11gR2 or greater, then
 [`prefetchRows`](#propdbprefetchrows) can be used to tune the
