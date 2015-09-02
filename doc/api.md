@@ -123,6 +123,7 @@ limitations under the License.
 14. [Statement Caching](#stmtcache)
 15. [External Configuration](#oraaccess)
 16. [Globalization and National Language Support (NLS)](#nls)
+17. [End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend)
 
 ## <a name="intro"></a> 1. Introduction
 
@@ -953,6 +954,8 @@ writeonly String action
 The [action](https://docs.oracle.com/database/121/LNOCI/oci08sca.htm#sthref1434)
 attribute for end-to-end application tracing. This is a write-only property.
 
+See [End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend).
+
 #### <a name="propconnclientid"></a> 4.1.2 clientId
 
 ```
@@ -965,6 +968,8 @@ for end-to-end application tracing, use with mid-tier authentication,
 and with [Virtual Private Databases](http://docs.oracle.com/database/121/CNCPT/cmntopc.htm#CNCPT62345).
 This is a write-only property.
 
+See [End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend).
+
 #### <a name="propconnmodule"></a> 4.1.3 module
 
 ```
@@ -973,6 +978,8 @@ writeonly String module
 
 The [module](https://docs.oracle.com/database/121/LNOCI/oci08sca.htm#sthref1433)
 attribute for end-to-end application tracing. This is a write-only property.
+
+See [End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend).
 
 #### <a name="propconnstmtcachesize"></a> 4.1.4 stmtCacheSize
 
@@ -2624,12 +2631,12 @@ connection.execute(
     if (lob === null) { console.log("CLOB was NULL"); return; } 
 
     lob.setEncoding('utf8');  // we want text, not binary output
-	lob.on('error', function(err) { console.error(err); });
+    lob.on('error', function(err) { console.error(err); });
 
-	console.log('Writing to ' + outFileName);
-	var outStream = fs.createWriteStream(outFileName);
-	outStream.on('error', function(err) { console.error(err); });
-	lob.pipe(outStream);
+    console.log('Writing to ' + outFileName);
+    var outStream = fs.createWriteStream(outFileName);
+    outStream.on('error', function(err) { console.error(err); });
+    lob.pipe(outStream);
   });
 ```
 
@@ -3118,3 +3125,75 @@ Oracle NLS environment variables, or statements like `ALTER SESSION`,
 can be used to configure further aspects of node-oracledb data access
 globalization.  Refer to
 [NLS Documentation](https://docs.oracle.com/database/121/NLSPG/ch3globenv.htm#g1028448).
+
+## <a name="endtoend"></a> 17. End-to-end Tracing, Mid-tier Authentication, and Auditing
+
+The Connection properties [action](#propconnaction),
+[module](#propconnmodule), and [clientId](#propconnclientid) set
+metadata for
+[end-to-end tracing](http://docs.oracle.com/database/121/TGSQL/tgsql_trace.htm#CHDBDGIJ).
+The values can be tracked in database views, shown in audit trails,
+and seen in tools such as Enterprise Manager.
+
+The `clientId` property can also be used by applications that do their
+own mid-tier authentication but connect to the database using the one
+database schema.  By setting `clientId` to the application's
+authenticated username, the database is aware of who the actual end
+user is.  This can, for example, be used by Oracle
+[Virtual Private Databases](http://docs.oracle.com/database/121/CNCPT/cmntopc.htm#CNCPT62345)
+policies to automatically restrict data access by that user.
+
+Applications should set the properties because they can greatly help
+to identify and resolve unnecessary database resource usage, or
+improper access.
+
+The attributes are set on a [connection](#propdbconclass) object and
+sent to the database on the next 'round-trip' from node-oracledb, for
+example, with `execute()`:
+
+```javascript
+oracledb.getConnection(
+  {
+    user          : "hr",
+    password      : "welcome",
+    connectString : "localhost/orcl"
+  },
+  function(err, connection)
+  {
+    if (err) { console.error(err.message); return;    }
+
+    connection.clientId = "Chris";
+    connection.module = "End-to-end example";
+    connection.action = "Query departments";
+
+    connection.execute("SELECT . . .",
+      function(err, result)
+      {
+        . . .
+```
+
+While the connection is open the attribute values can be seen, for example with SQL*Plus:
+
+```
+SQL> SELECT username, client_identifier, action, module FROM v$session WHERE username = 'HR';
+
+USERNAME   CLIENT_IDENTIFIER    ACTION               MODULE
+---------- -------------------- -------------------- --------------------
+HR         Chris                Query departments    End-to-end example
+```
+
+The values can also be manually set by calling
+[`DBMS_APPLICATION_INFO`](http://docs.oracle.com/cd/B19306_01/appdev.102/b14258/d_appinf.htm#CHECEIEB)
+procedures or
+[`DBMS_SESSION.SET_IDENTIFIER`](http://docs.oracle.com/cd/B19306_01/appdev.102/b14258/d_sessio.htm#SET_IDENTIFIER),
+however these require explicit round-trips, reducing scalability.
+
+Idle connections released back to a connection pool will retain the
+previous attribute values of that connection. This avoids the
+overhead of a round-trip to reset the values.  After calling
+`pool.getConnection()`, the application should be consistent about
+setting appropriate values to ensure any previous values are updated.
+The Oracle design assumption is that pools are actively used and have
+few idle connections.  However, if desired, the application can set
+the properties to empty strings and force a round-trip prior to
+connection release.  This reduces efficiency.
