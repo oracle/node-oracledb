@@ -64,103 +64,6 @@ describe('55. resultSet2.js', function() {
       done();
     });
   })
-      
-
-  /*beforeEach(function(done) {
-    async.series([
-      function(callback) {
-        oracledb.getConnection(
-          credential,
-          function(err, conn) {
-            connection = conn;
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        connection.should.be.ok;
-        connection.execute(
-          createTable,
-          function(err) {
-            should.not.exist(err);
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        connection.execute(
-          insertRows,
-          [],
-          { autoCommit: true },
-          function(err) {
-            should.not.exist(err);
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        connection.execute(
-          proc,
-          [],
-          { autoCommit: true },
-          function(err) {
-            should.not.exist(err);
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        connection.execute (
-          proc2,
-          [],
-          { autoCommit : true },
-          function (err ) {
-            should.not.exist ( err );
-            callback();
-          }
-        );
-      }
-    ], done);
-  })
-  
-  afterEach(function(done) {
-    async.series([
-      function(callback) {
-        connection.execute(
-          'DROP TABLE oracledb_employees',
-          function(err) {
-            should.not.exist(err);
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        connection.execute(
-          'DROP PROCEDURE get_emp_rs',
-          function(err) {
-            should.not.exist(err);
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        connection.execute (
-          'DROP PROCEDURE get_invalid_refcur',
-          function ( err ) {
-            should.not.exist ( err ) ;
-            callback ();
-          }
-        );
-      },
-
-      function(callback) {
-        connection.release( function(err) {
-          should.not.exist(err);
-          callback();
-        });
-      }
-    ], done);
-  })*/
   
   describe('55.1 query a RDBMS function', function() {
     
@@ -1030,7 +933,6 @@ describe('55. resultSet2.js', function() {
   }) // 55.13
 
 })  
-
 
 
 /********************* Helper functions *************************/
