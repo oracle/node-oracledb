@@ -478,6 +478,8 @@ oracledb.maxRows = 100;
 Number lobPrefetchSize
 ```
 
+This attribute is temporarily disabled.  Setting it has no effect.
+
 Node-oracledb internally uses Oracle *LOB Locators* to manipulate long
 object (LOB) data.  LOB Prefetching allows LOB data to be returned
 early to node-oracledb when these locators are first returned.

@@ -1,6 +1,6 @@
 # Change Log
 
-## node-oracledb v1.1.0 (DD Mon YYYY )
+## node-oracledb v1.1.0 (3 Sep 2015)
 
 - Enhanced pool.release() to drop the session if it is known to be unusable, allowing a new session to be created.
 
@@ -17,6 +17,8 @@
 - Fixed potential memory leak when connecting throws an error. 
 
 - Added a check to throw an error sooner when a CURSOR type is used for IN or IN OUT binds. (Support is pending).
+
+- Temporarily disabling setting lobPrefetchSize
 
 ## node-oracledb v1.0.0 (17 Aug 2015)
 

@@ -301,8 +301,11 @@ unsigned int ConnImpl::stmtCacheSize() const
 
 void ConnImpl::lobPrefetchSize(unsigned int lobPrefetchSize)
 {
+// Temporarily disable this attribute.
+#if 0
   ociCall(OCIAttrSet(sessh_, OCI_HTYPE_SESSION,  &lobPrefetchSize,  0,
                      OCI_ATTR_DEFAULT_LOBPREFETCH_SIZE, errh_), errh_);
+#endif
 }
 
 
