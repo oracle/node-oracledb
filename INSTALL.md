@@ -468,8 +468,7 @@ Install a C/C++ build environment such as Microsoft Visual
 Studio 2012.  Compilers supported by Oracle libraries are found in
 Oracle documentation for each version, for example
 [Oracle Database Client Quick Installation Guide 12c Release 1 (12.1) for Microsoft Windows x64 (64-Bit)](https://docs.oracle.com/database/121/NXCQI/toc.htm#NXCQI108).
-You will also need the matching Visual C++ Redistributable for Visual
-Studio.
+If you are moving an already compiled copy of oracledb to another computer, you will need to have Visual C++ 2010 Redistributable installed.
 
 Install the Python 2.7 MSI from
 [www.python.org](https://www.python.org/downloads).  Select the
