@@ -189,8 +189,8 @@ NAN_PROPERTY_GETTER(ResultSet::GetMetaData)
   Connection::CopyMetaData ( columnNames, njsResultSet->meta_,
                              njsResultSet->numCols_ );
   Local<Value> meta;
-  meta = Nan::New<Value>(Connection::GetMetaData( columnNames,
-                                  njsResultSet->numCols_ ));
+  meta = Connection::GetMetaData( columnNames,
+                                  njsResultSet->numCols_ );
   info.GetReturnValue().Set(meta);
 }
 
@@ -463,7 +463,7 @@ void ResultSet::Async_AfterGetRows(uv_work_t *req)
 
     if(ebaton->rowsFetched)
     {
-      rowsArray = Nan::New<Value>(Connection::GetRows(ebaton));
+      rowsArray = Connection::GetRows(ebaton);
       if(!(ebaton->error).empty())
       {
         argv[0] = v8::Exception::Error(Nan::New<v8::String>((ebaton->error).c_str()).ToLocalChecked());

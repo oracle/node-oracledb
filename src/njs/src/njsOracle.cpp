@@ -721,13 +721,13 @@ void Oracledb::Async_AfterGetConnection (uv_work_t *req)
   {
     argv[0] = Nan::Undefined();
     Local<FunctionTemplate> lft = Nan::New<FunctionTemplate>(Connection::connectionTemplate_s);
-    Handle<Object> connection = lft->GetFunction()-> NewInstance();
+    Local<Object> connection = lft->GetFunction()-> NewInstance();
     (ObjectWrap::Unwrap<Connection> (connection))->
                                 setConnection( connBaton->dpiconn,
                                                connBaton->oracledb );
-    argv[1] = Nan::New<Value>(connection);
+    argv[1] = connection;
   }
-  Local<Function> callback = Nan::New(connBaton->cb);
+  Local<Function> callback = Nan::New<Function>(connBaton->cb);
   delete connBaton;
   Nan::MakeCallback( 
     Nan::GetCurrentContext()->Global(),

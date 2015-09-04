@@ -435,7 +435,7 @@ void Connection::ProcessOptions (Nan::NAN_METHOD_ARGS_TYPE args, unsigned int in
     Local<Value> val = options->Get(Nan::New<v8::String>("fetchInfo").ToLocalChecked());
     if ( !val->IsUndefined () && !val->IsNull () )
     {
-      Handle<Object> fetchInfo = val->ToObject();
+      Local<Object> fetchInfo = val->ToObject();
       Local<Array> keys = fetchInfo->GetOwnPropertyNames ();
       if ( keys->Length () > 0 )
       {
@@ -446,10 +446,10 @@ void Connection::ProcessOptions (Nan::NAN_METHOD_ARGS_TYPE args, unsigned int in
         {
           unsigned int tmptype = 0 ;
 
-          Handle<String> temp = keys->Get (index).As<String>();
+          Local<String> temp = keys->Get (index).As<String>();
           NJSString (fInfo[index].name, temp );
 
-          Handle<Object> colInfo = fetchInfo->Get (Nan::New<v8::String>(
+          Local<Object> colInfo = fetchInfo->Get (Nan::New<v8::String>(
                                      fInfo[index].name ).ToLocalChecked())->ToObject();
 
           NJS_GET_UINT_FROM_JSON (tmptype, executeBaton->error,
@@ -509,7 +509,7 @@ void Connection::GetBinds (Handle<Object> bindobj, eBaton* executeBaton)
     Handle<String> temp = array->Get(index).As<String>();
     NJSString(str, temp);
     bind->key = ":"+std::string(str);
-    Handle<Value> val__ = bindobj->Get(Nan::New<v8::String>((char*)str.c_str(),
+    Local<Value> val__ = bindobj->Get(Nan::New<v8::String>((char*)str.c_str(),
                            (int) str.length()).ToLocalChecked());
     Connection::GetBindUnit(val__, bind, executeBaton);
     if(!executeBaton->error.empty())
@@ -553,7 +553,7 @@ void Connection::GetBinds (Handle<Array> binds, eBaton* executeBaton)
    PARAMETERS:
      Handle value, eBaton struct
 */
-void Connection::GetBindUnit (Handle<Value> val, Bind* bind,
+void Connection::GetBindUnit (Local<Value> val, Bind* bind,
                                        eBaton* executeBaton)
 {
   Nan::HandleScope scope;
@@ -678,7 +678,7 @@ void Connection::GetOutBindParams (unsigned short dataType, Bind* bind,
      For IN Bind only len field field is used, and for only a scalar value now,
      allocate for one unit.
 */
-void Connection::GetInBindParams (Handle<Value> v8val, Bind* bind,
+void Connection::GetInBindParams (Local<Value> v8val, Bind* bind,
                                            eBaton* executeBaton, BindType type)
 {
   /* Allocate for scalar indicator & length */
@@ -1703,7 +1703,7 @@ void Connection::Async_AfterExecute(uv_work_t *req)
   {
     argv[0] = Nan::Undefined();
     Local<Object> result = Nan::New<v8::Object>();
-    Handle<Value> rowArray;
+    Local<Value> rowArray;
     switch(executeBaton->st)
     {
       case DpiStmtSelect :
@@ -1716,52 +1716,52 @@ void Connection::Async_AfterExecute(uv_work_t *req)
         }
         if( executeBaton->getRS )
         {
-          result->Set(Nan::New<v8::String>("rows").ToLocalChecked(), Nan::Undefined());
-          Handle<Object> resultSet = Nan::New(ResultSet::resultSetTemplate_s)->
+          Nan::Set(result, Nan::New<v8::String>("rows").ToLocalChecked(), Nan::Undefined());
+          Local<Object> resultSet = Nan::New<FunctionTemplate>(ResultSet::resultSetTemplate_s)->
                                 GetFunction() ->NewInstance();
          (ObjectWrap::Unwrap<ResultSet> (resultSet))->
                                   setResultSet( executeBaton->dpistmt,
                                                 executeBaton );
-          result->Set(Nan::New<v8::String>("resultSet").ToLocalChecked(), resultSet );
+          Nan::Set(result, Nan::New<v8::String>("resultSet").ToLocalChecked(), resultSet);
         }
         else
         {
-          result->Set(Nan::New<v8::String>("rows").ToLocalChecked(), rowArray);
-          result->Set(Nan::New<v8::String>("resultSet").ToLocalChecked(), Nan::Undefined());
+          Nan::Set(result, Nan::New<v8::String>("rows").ToLocalChecked(), rowArray);
+          Nan::Set(result, Nan::New<v8::String>("resultSet").ToLocalChecked(), Nan::Undefined());
         }
-        result->Set(Nan::New<v8::String>("outBinds").ToLocalChecked(),Nan::Undefined());
-        result->Set(Nan::New<v8::String>("rowsAffected").ToLocalChecked(), Nan::Undefined());
-        result->Set(Nan::New<v8::String>("metaData").ToLocalChecked(), Connection::GetMetaData(
+        Nan::Set(result, Nan::New<v8::String>("outBinds").ToLocalChecked(),Nan::Undefined());
+        Nan::Set(result, Nan::New<v8::String>("rowsAffected").ToLocalChecked(), Nan::Undefined());
+        Nan::Set(result, Nan::New<v8::String>("metaData").ToLocalChecked(), Connection::GetMetaData(
                                                     executeBaton->columnNames,
                                                     executeBaton->numCols));
         break;
       case DpiStmtBegin :
       case DpiStmtDeclare :
       case DpiStmtCall :
-        result->Set(Nan::New<v8::String>("rowsAffected").ToLocalChecked(), Nan::Undefined());
-        result->Set(Nan::New<v8::String>("outBinds").ToLocalChecked(),Connection::GetOutBinds(executeBaton));//, v8::ReadOnly);
-        result->Set(Nan::New<v8::String>("rows").ToLocalChecked(), Nan::Undefined());
-        result->Set(Nan::New<v8::String>("metaData").ToLocalChecked(), Nan::Undefined());
+        Nan::Set(result, Nan::New<v8::String>("rowsAffected").ToLocalChecked(), Nan::Undefined());
+        Nan::ForceSet(result, Nan::New<v8::String>("outBinds").ToLocalChecked(),Connection::GetOutBinds(executeBaton), v8::ReadOnly);
+        Nan::Set(result, Nan::New<v8::String>("rows").ToLocalChecked(), Nan::Undefined());
+        Nan::Set(result, Nan::New<v8::String>("metaData").ToLocalChecked(), Nan::Undefined());
         break;
       default :
-        result->Set(Nan::New<v8::String>("rowsAffected").ToLocalChecked(),
-                    Nan::New<v8::Integer>((unsigned int) executeBaton->rowsAffected));//, v8::ReadOnly);
+        Nan::ForceSet(result, Nan::New<v8::String>("rowsAffected").ToLocalChecked(),
+                    Nan::New<v8::Integer>((unsigned int) executeBaton->rowsAffected), v8::ReadOnly);
         if( executeBaton->numOutBinds )
         {
-          result->Set(Nan::New<v8::String>("outBinds").ToLocalChecked(), Connection::GetOutBinds(executeBaton));//, v8::ReadOnly);
+          Nan::ForceSet(result, Nan::New<v8::String>("outBinds").ToLocalChecked(), Connection::GetOutBinds(executeBaton), v8::ReadOnly);
         }
         else
         {
-          result->Set(Nan::New<v8::String>("outBinds").ToLocalChecked(),Nan::Undefined());
+          Nan::Set(result, Nan::New<v8::String>("outBinds").ToLocalChecked(),Nan::Undefined());
         }
-        result->Set(Nan::New<v8::String>("rows").ToLocalChecked(), Nan::Undefined());
-        result->Set(Nan::New<v8::String>("metaData").ToLocalChecked(), Nan::Undefined());
+        Nan::Set(result, Nan::New<v8::String>("rows").ToLocalChecked(), Nan::Undefined());
+        Nan::Set(result, Nan::New<v8::String>("metaData").ToLocalChecked(), Nan::Undefined());
         break;
     }
     argv[1] = result;
   }
   exitAsyncAfterExecute:
-  Local<Function> callback = Nan::New(executeBaton->cb);
+  Local<Function> callback = Nan::New<Function>(executeBaton->cb);
   delete executeBaton;
   Nan::MakeCallback( Nan::GetCurrentContext()->Global(), callback, 2, argv );
   if(tc.HasCaught())
@@ -1782,7 +1782,7 @@ void Connection::Async_AfterExecute(uv_work_t *req)
    RETURNS:
      MetaData Handle
 */
-v8::Handle<v8::Value> Connection::GetMetaData (std::string* columnNames,
+v8::Local<v8::Value> Connection::GetMetaData (std::string* columnNames,
                                        unsigned int numCols )
 {
   Nan::EscapableHandleScope scope;
@@ -1790,10 +1790,10 @@ v8::Handle<v8::Value> Connection::GetMetaData (std::string* columnNames,
   for(unsigned int i=0; i < numCols ; i++)
   {
     Local<Object> column = Nan::New<v8::Object>();
-    column->Set(Nan::New<v8::String>("name").ToLocalChecked(),
+    Nan::Set(column, Nan::New<v8::String>("name").ToLocalChecked(),
                 Nan::New<v8::String>(columnNames[i].c_str()).ToLocalChecked()
                 );
-    metaArray->Set(i, column);
+    Nan::Set(metaArray, i, column);
   }
   return scope.Escape(metaArray);
 }
@@ -1809,7 +1809,7 @@ v8::Handle<v8::Value> Connection::GetMetaData (std::string* columnNames,
    RETURNS:
      Rows Handle
 */
-v8::Handle<v8::Value> Connection::GetRows (eBaton* executeBaton)
+v8::Local<v8::Value> Connection::GetRows (eBaton* executeBaton)
 {
   Nan::EscapableHandleScope scope;
   Local<Array> rowsArray;
@@ -1822,9 +1822,9 @@ v8::Handle<v8::Value> Connection::GetRows (eBaton* executeBaton)
         Local<Array> row = Nan::New<v8::Array>(executeBaton->numCols);
         for(unsigned int j = 0; j < executeBaton->numCols; j++)
         {
-          row->Set(j, Connection::GetValue(executeBaton, true, j, i));
+          Nan::Set(row, j, Connection::GetValue(executeBaton, true, j, i));
         }
-        rowsArray->Set(i, row);
+        Nan::Set(rowsArray, i, row);
       }
       break;
     case ROWS_OBJECT :
@@ -1835,12 +1835,12 @@ v8::Handle<v8::Value> Connection::GetRows (eBaton* executeBaton)
 
         for(unsigned int j = 0; j < executeBaton->numCols; j++)
         {
-          row->Set(Nan::New<v8::String>(executeBaton->columnNames[j].c_str(),
+          Nan::Set(row, Nan::New<v8::String>(executeBaton->columnNames[j].c_str(),
                                (int) executeBaton->columnNames[j].length()).ToLocalChecked(),
                    Connection::GetValue(executeBaton, true, j, i));
 
         }
-        rowsArray->Set(i, row);
+        Nan::Set(rowsArray, i, row);
       }
       break;
     default :
@@ -1871,7 +1871,7 @@ v8::Handle<v8::Value> Connection::GetRows (eBaton* executeBaton)
      Handle
 */
 
-Handle<Value> Connection::GetValue ( eBaton *executeBaton,
+Local<Value> Connection::GetValue ( eBaton *executeBaton,
                                      bool isQuery,
                                      unsigned int col,
                                      unsigned int row )
@@ -1883,14 +1883,14 @@ Handle<Value> Connection::GetValue ( eBaton *executeBaton,
     // SELECT queries
     Define *define = &(executeBaton->defines[col]);
     long double *dblArr = (long double *)define->buf;
-    Local<Value> value = Nan::New(Connection::GetValueCommon(
+    Local<Value> value = Connection::GetValueCommon(
                            executeBaton,
                            define->ind[row],
                            define->fetchType,
                            (define->fetchType == DpiTimestampLTZ ) ? 
                              (void *) &dblArr[row] : 
                              (void *) ((char *)(define->buf) + ( row * (define->maxSize ))),
-                           define->len[row] ));
+                           define->len[row] );
     return scope.Escape( value );
   }
   else
@@ -1899,33 +1899,33 @@ Handle<Value> Connection::GetValue ( eBaton *executeBaton,
     Bind *bind = executeBaton->binds[col];
     if(executeBaton->stmtIsReturning)
     {
-      Local<Value> value = Nan::New(Connection::GetArrayValue (
+      Local<Value> value = Connection::GetArrayValue (
                                         executeBaton,
                                         executeBaton->binds[col], 
-                         (unsigned long)executeBaton->rowsAffected ));
+                         (unsigned long)executeBaton->rowsAffected );
       return scope.Escape(value);
     }
     else if(bind->type == DpiRSet) 
     {
-      return scope.Escape ( Nan::New(Connection::GetValueRefCursor (
-                                      executeBaton, bind )));
+      return scope.Escape ( Connection::GetValueRefCursor (
+                                      executeBaton, bind ));
     }
     else if (( bind->type == DpiClob ) ||
              ( bind->type == DpiBlob ) ||
              ( bind->type == DpiBfile))
     {
-      return scope.Escape ( Nan::New<Value>(Connection::GetValueLob (
-                                      executeBaton, bind )));
+      return scope.Escape ( Connection::GetValueLob (
+                                      executeBaton, bind ));
     }
     else
     {
-      return scope.Escape ( Nan::New(Connection::GetValueCommon (
+      return scope.Escape ( Connection::GetValueCommon (
                                       executeBaton,
                                       bind->ind[row],
                                       bind->type,
                                       (bind->type == DpiTimestampLTZ ) ?
                                          bind->extvalue : bind->value,
-                                      bind->len[row] )));
+                                      bind->len[row] ));
     }
   }
 }
@@ -1942,7 +1942,7 @@ Handle<Value> Connection::GetValue ( eBaton *executeBaton,
    RETURNS:
      Handle
 */
-Handle<Value> Connection::GetValueRefCursor ( eBaton *executeBaton, 
+Local<Value> Connection::GetValueRefCursor ( eBaton *executeBaton, 
                                               Bind *bind )
 {
   Nan::EscapableHandleScope scope;
@@ -1951,7 +1951,7 @@ Handle<Value> Connection::GetValueRefCursor ( eBaton *executeBaton,
 
   if(bind->ind[0] != -1)
   {
-    resultSet = Nan::New(ResultSet::resultSetTemplate_s)->
+    resultSet = Nan::New<FunctionTemplate>(ResultSet::resultSetTemplate_s)->
                             GetFunction() ->NewInstance();
     (ObjectWrap::Unwrap<ResultSet> (resultSet))->
                        setResultSet( (dpi::Stmt*)(bind->value),
@@ -1980,7 +1980,7 @@ Handle<Value> Connection::GetValueRefCursor ( eBaton *executeBaton,
    RETURNS:
      Handle
 */
-Handle<Value> Connection::GetValueLob ( eBaton *executeBaton, 
+Local<Value> Connection::GetValueLob ( eBaton *executeBaton, 
                                         Bind *bind )
 {
   Nan::EscapableHandleScope scope;
@@ -1996,7 +1996,7 @@ Handle<Value> Connection::GetValueLob ( eBaton *executeBaton,
   // ILob object now.  If anything goes wrong, it is the
   // responsibility of the ILob class to free the OCI handles.
 
-  value = Nan::New<Value>(NewLob(executeBaton, protoILob));
+  value = NewLob(executeBaton, protoILob);
 
   // all done with ProtoILob
   delete protoILob;
@@ -2018,7 +2018,7 @@ Handle<Value> Connection::GetValueLob ( eBaton *executeBaton,
    RETURNS:
      Handle
 */
-Handle<Value> Connection::GetValueCommon ( eBaton *executeBaton,
+Local<Value> Connection::GetValueCommon ( eBaton *executeBaton,
                                            short ind, 
                                            unsigned short type,
                                            void* val, DPI_BUFLEN_TYPE len )
@@ -2051,7 +2051,7 @@ Handle<Value> Connection::GetValueCommon ( eBaton *executeBaton,
        case (dpi::DpiBfile):
        {
          ProtoILob *protoILob = *(static_cast<ProtoILob **>(val));
-         value = Nan::New(NewLob(executeBaton, protoILob));
+         value = NewLob(executeBaton, protoILob);
          delete protoILob;
          *(ProtoILob **)val = NULL;
        }
@@ -2080,14 +2080,14 @@ Handle<Value> Connection::GetValueCommon ( eBaton *executeBaton,
   Returns
     v8::Value  - this will be an array (even for 1 row, array or 1).
 */
-v8::Handle<v8::Value> Connection::GetArrayValue ( eBaton *executeBaton,
+v8::Local<v8::Value> Connection::GetArrayValue ( eBaton *executeBaton,
                                                   Bind *binds, unsigned long count )
 {
   Nan::EscapableHandleScope scope;
   Local<Date> date;
   Local<Array> arrVal;
   unsigned long index = 0;
-  Handle<Value> val;
+  Local<Value> val;
 
   /* To return a value of array type, create one of specified size */
   arrVal = Nan::New<v8::Array>( count ) ;
@@ -2106,28 +2106,28 @@ v8::Handle<v8::Value> Connection::GetArrayValue ( eBaton *executeBaton,
         )
       )
     {
-      arrVal->Set( index, Nan::Null() );
+      Nan::Set(arrVal, index, Nan::Null() );
       continue;
     }
 
     switch ( binds->type )
     {
     case dpi::DpiVarChar:
-      arrVal->Set ( index,
+      Nan::Set(arrVal, index,
                     Nan::New<v8::String> ((char *)binds->value +
                                         (index * binds->maxSize ),
                                         binds->len2[index]).ToLocalChecked());
       break;
     case dpi::DpiInteger:
-      arrVal->Set ( index,
+      Nan::Set(arrVal, index,
                     Nan::New<v8::Integer> ( *((int *)binds->value + index )));
       break;
     case dpi::DpiDouble:
-      arrVal->Set ( index,
+      Nan::Set(arrVal, index,
                     Nan::New<v8::Number> ( *((double *)binds->value + index )));
       break;
     case dpi::DpiTimestampLTZ:
-        arrVal->Set ( index, 
+        Nan::Set(arrVal, index, 
                       Nan::New<v8::Date> (*((long double *)binds->extvalue + index )).ToLocalChecked() );
       break;
     case dpi::DpiClob:
@@ -2135,7 +2135,7 @@ v8::Handle<v8::Value> Connection::GetArrayValue ( eBaton *executeBaton,
     {
       ProtoILob *protoILob = *((ProtoILob **)binds->value + index);
       val = NewLob(executeBaton, protoILob);
-      arrVal->Set ( index, Nan::New<v8::Value>(val));
+      Nan::Set(arrVal, index, Nan::New<v8::Value>(val));
       delete protoILob;
       *(ProtoILob **)binds->value = NULL;
     }
@@ -2160,7 +2160,7 @@ v8::Handle<v8::Value> Connection::GetArrayValue ( eBaton *executeBaton,
    RETURNS:
      Outbinds object/array
 */
-v8::Handle<v8::Value> Connection::GetOutBinds (eBaton* executeBaton)
+v8::Local<v8::Value> Connection::GetOutBinds (eBaton* executeBaton)
 {
   Nan::EscapableHandleScope scope;
 
@@ -2169,12 +2169,12 @@ v8::Handle<v8::Value> Connection::GetOutBinds (eBaton* executeBaton)
     if( executeBaton->binds[0]->key.empty() )
     {
       // Binds as JS array
-      return scope.Escape(Nan::New<Value>(GetOutBindArray( executeBaton )));
+      return scope.Escape(GetOutBindArray( executeBaton ));
     }
     else
     {
       // Binds as JS object
-      return scope.Escape(Nan::New<Value>(GetOutBindObject( executeBaton )));
+      return scope.Escape(GetOutBindObject( executeBaton ));
     }
   }
   return Nan::Undefined();
@@ -2191,7 +2191,7 @@ v8::Handle<v8::Value> Connection::GetOutBinds (eBaton* executeBaton)
    RETURNS:
      Outbinds array
 */
-v8::Handle<v8::Value> Connection::GetOutBindArray ( eBaton *executeBaton )
+v8::Local<v8::Value> Connection::GetOutBindArray ( eBaton *executeBaton )
 {
   Nan::EscapableHandleScope scope;
 
@@ -2205,8 +2205,8 @@ v8::Handle<v8::Value> Connection::GetOutBindArray ( eBaton *executeBaton )
     if(binds[index]->isOut)
     {
       Local<Value> val ;
-      val = Nan::New<Value>(Connection::GetValue ( executeBaton, false, index ) ); 
-      arrayBinds->Set( it, val );
+      val = Connection::GetValue ( executeBaton, false, index ); 
+      Nan::Set(arrayBinds, it, val );
       it ++;
     }
   }
@@ -2224,7 +2224,7 @@ v8::Handle<v8::Value> Connection::GetOutBindArray ( eBaton *executeBaton )
    RETURNS:
      Outbinds object
 */
-v8::Handle<v8::Value> Connection::GetOutBindObject ( eBaton *executeBaton )
+v8::Local<v8::Value> Connection::GetOutBindObject ( eBaton *executeBaton )
 {
   std::vector<Bind*>binds = executeBaton->binds;
 
@@ -2234,12 +2234,12 @@ v8::Handle<v8::Value> Connection::GetOutBindObject ( eBaton *executeBaton )
   {
     if(binds[index]->isOut)
     {
-      Handle<Value> val;
+      Local<Value> val;
 
       binds[index]->key.erase(binds[index]->key.begin());
 
       val = Connection::GetValue ( executeBaton, false, index );
-      objectBinds->Set( Nan::New<v8::String>( binds[index]->key.c_str(),
+      Nan::Set( objectBinds, Nan::New<v8::String>( binds[index]->key.c_str(),
                         (int) binds[index]->key.length() ).ToLocalChecked(),
                         val );
     }
@@ -2329,7 +2329,7 @@ void Connection::Async_AfterRelease(uv_work_t *req)
     argv[0] = v8::Exception::Error(Nan::New<v8::String>((releaseBaton->error).c_str()).ToLocalChecked());
   else
     argv[0] = Nan::Undefined();
-  Local<Function> callback = Nan::New(releaseBaton->cb);
+  Local<Function> callback = Nan::New<Function>(releaseBaton->cb);
   delete releaseBaton;
   Nan::MakeCallback( Nan::GetCurrentContext()->Global(),
                       callback, 1, argv );
@@ -2632,10 +2632,10 @@ void Connection::Async_AfterBreak (uv_work_t *req)
  *   passed, conversion to Oracle-DB Type happens here.
  *
  */
-void Connection::v8Date2OraDate ( Handle<Value> val, Bind *bind)
+void Connection::v8Date2OraDate ( Local<Value> val, Bind *bind)
 {
   Nan::HandleScope scope;
-  Handle<Date> date = val.As<Date>();    // Expects to be of v8::Date type
+  Local<Date> date = val.As<Date>();    // Expects to be of v8::Date type
 
   // Get the number of seconds from 1970-1-1 0:0:0
   *(long double *)(bind->extvalue) = date->NumberValue ();
@@ -2938,13 +2938,13 @@ int Connection::cbDynBufferGet ( void *ctx, DPI_SZ_TYPE nRows,
 
 */
 
-v8::Handle<v8::Value> Connection::NewLob(eBaton* executeBaton,
+v8::Local<v8::Value> Connection::NewLob(eBaton* executeBaton,
                                          ProtoILob *protoILob)
 {
   Nan::EscapableHandleScope scope;
   Connection     *connection = executeBaton->njsconn;
   // Handle<Object>  jsOracledb = connection->oracledb_->jsOracledb;
-  Handle<Object>  jsOracledb = Nan::New(connection->oracledb_->jsOracledb);
+  Local<Object>  jsOracledb = Nan::New<Object>(connection->oracledb_->jsOracledb);
   Local<Value>   argv[1];
   
   Local<Object>  iLob = Nan::New<FunctionTemplate>(ILob::iLobTemplate_s)->GetFunction()->NewInstance();

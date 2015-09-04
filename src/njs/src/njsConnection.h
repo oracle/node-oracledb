@@ -250,8 +250,8 @@ public:
   // Define Connection Constructor
   static Nan::Persistent<FunctionTemplate> connectionTemplate_s;
   static void Init (Handle<Object> target);
-  static Handle<Value> GetRows (eBaton* executeBaton);
-  static Handle<Value> GetMetaData (std::string* columnNames,
+  static Local<Value> GetRows (eBaton* executeBaton);
+  static Local<Value> GetMetaData (std::string* columnNames,
                                     unsigned int numCols);
   static void DoDefines ( eBaton* executeBaton, const dpi::MetaData*,
                           unsigned int numCols );
@@ -332,9 +332,9 @@ private:
   static void GetOptions (Handle<Object> options, eBaton* executeBaton);
   static void GetBinds (Handle<Object> bindobj, eBaton* executeBaton);
   static void GetBinds (Handle<Array> bindarray, eBaton* executeBaton);
-  static void GetBindUnit (Handle<Value> bindtypes, Bind* bind,
+  static void GetBindUnit (Local<Value> bindtypes, Bind* bind,
                            eBaton* executeBaton);
-  static void GetInBindParams (Handle<Value> bindtypes, Bind* bind,
+  static void GetInBindParams (Local<Value> bindtypes, Bind* bind,
                                      eBaton* executeBaton, BindType bindType);
   static void GetOutBindParams (unsigned short dataType, Bind* bind,
                                 eBaton* executeBaton);
@@ -342,30 +342,30 @@ private:
                              unsigned int rowsFetched, bool getRS );
   static void Descr2protoILob ( eBaton *executeBaton, unsigned int numCols,
                                 unsigned int rowsFetched );
-  static v8::Handle<v8::Value> GetOutBinds (eBaton* executeBaton);
-  static v8::Handle<v8::Value> GetOutBindArray (eBaton* executeBaton);
-  static v8::Handle<v8::Value> GetOutBindObject (eBaton* executeBaton);
-  static v8::Handle<v8::Value> GetArrayValue (eBaton *executeBaton,
+  static v8::Local<v8::Value> GetOutBinds (eBaton* executeBaton);
+  static v8::Local<v8::Value> GetOutBindArray (eBaton* executeBaton);
+  static v8::Local<v8::Value> GetOutBindObject (eBaton* executeBaton);
+  static v8::Local<v8::Value> GetArrayValue (eBaton *executeBaton,
                                               Bind *bind, unsigned long count);
   // to convert DB value to v8::Value
-  static v8::Handle<v8::Value> GetValue (eBaton *executeBaton,
+  static v8::Local<v8::Value> GetValue (eBaton *executeBaton,
                                          bool isQuery,
                                          unsigned int index,
                                          unsigned int row = 0);
   // for primitive types (Number, String and Date) 
-  static v8::Handle<v8::Value> GetValueCommon (eBaton *executeBaton, 
+  static v8::Local<v8::Value> GetValueCommon (eBaton *executeBaton, 
                                          short ind, 
                                          unsigned short type, 
                                          void* val, DPI_BUFLEN_TYPE len);
   // for refcursor
-  static v8::Handle<v8::Value> GetValueRefCursor (eBaton *executeBaton, 
+  static v8::Local<v8::Value> GetValueRefCursor (eBaton *executeBaton, 
                                                   Bind *bind);
   // for lobs
-  static v8::Handle<v8::Value> GetValueLob (eBaton *executeBaton, 
+  static v8::Local<v8::Value> GetValueLob (eBaton *executeBaton, 
                                             Bind *bind);
   //static void UpdateDateValue ( eBaton *executeBaton );
   static void UpdateDateValue ( eBaton *executeBaton, unsigned int index );
-  static void v8Date2OraDate ( v8::Handle<v8::Value>, Bind *bind);
+  static void v8Date2OraDate ( v8::Local<v8::Value>, Bind *bind);
 
   // Callback/Utility function used to allocate buffer(s) for Bind Structs
   static void cbDynBufferAllocate ( void *ctx, bool dmlReturning,
@@ -389,7 +389,7 @@ private:
                                unsigned short **rcode, unsigned char *piecep );
 
   // GetLob Method on Connection class
-  static v8::Handle<v8::Value> NewLob(eBaton* executeBaton,
+  static v8::Local<v8::Value> NewLob(eBaton* executeBaton,
                                       ProtoILob *protoILob);
 
   static NAN_METHOD(GetLob);
