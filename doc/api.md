@@ -267,7 +267,6 @@ Oracledb.CURSOR                    // Bind a REF CURSOR to a node-oracledb Resul
 
 Oracledb.DATE                      // Bind as JavaScript date type.  Can also be used for fetchAsString and fetchInfo
 
-=======
 Oracledb.DEFAULT                   // Used with [`fetchInfo`](#propfetchinfo) to reset the fetch type to the database type
 
 Oracledb.NUMBER                    // Bind as JavaScript number type.  Can also be used for fetchAsString and fetchInfo
