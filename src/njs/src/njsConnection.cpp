@@ -1086,11 +1086,6 @@ void Connection::DoDefines ( eBaton* executeBaton, const dpi::MetaData* meta,
         defines[col].maxSize   = meta[col].dbSize;
         defines[col].buf = (char *)malloc(defines[col].maxSize*executeBaton->maxRows);
         break;
-      case dpi::DpiRdd :
-        defines[col].fetchType = DpiVarChar;
-        defines[col].maxSize   = 18;
-        defines[col].buf = (char *)malloc(defines[col].maxSize*executeBaton->maxRows);
-        break;
       default :
         executeBaton->error = NJSMessages::getErrorMsg(errUnsupportedDatType);
         return;
