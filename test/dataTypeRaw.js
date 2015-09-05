@@ -1,0 +1,106 @@
+/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+
+/******************************************************************************
+ *
+ * You may not use the identified files except in compliance with the Apache
+ * License, Version 2.0 (the "License.")
+ *
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0.
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * 
+ * The node-oracledb test suite uses 'mocha', 'should' and 'async'. 
+ * See LICENSE.md for relevant licenses.
+ *
+ * NAME
+ *   26. dataTypeRaw.js
+ *
+ * DESCRIPTION
+ *   Testing Oracle data type support - RAW.
+ *
+ * NUMBERING RULE
+ *   Test numbers follow this numbering rule:
+ *     1  - 20  are reserved for basic functional tests
+ *     21 - 50  are reserved for data type supporting tests
+ *     51 -     are for other tests  
+ * 
+ *****************************************************************************/
+ "use strict";
+
+var oracledb = require('oracledb');
+var should = require('should');
+var assist = require('./dataTypeAssist.js');
+var dbConfig = require('./dbConfig.js');
+
+describe('26. dataTypeRaw.js', function() {
+  
+  if(dbConfig.externalAuth){
+    var credential = { externalAuth: true, connectString: dbConfig.connectString };
+  } else {
+    var credential = dbConfig;
+  }
+  
+  var connection = false;
+  var tableName = "oracledb_raw";
+
+  var bufLen = [10 ,100, 1000, 2000]; // buffer length
+  var bufs = [];
+  for(var i = 0; i < bufLen.length; i++) 
+    bufs[i] = assist.createBuffer(bufLen[i]);
+  
+  before('get one connection', function(done) {
+    oracledb.getConnection(credential, function(err, conn) {
+      should.not.exist(err);
+      connection = conn;
+      done();
+    });
+  })
+  
+  after('release connection', function(done) {
+    connection.release( function(err) {
+      should.not.exist(err);
+      done();
+    });
+  })
+  
+  describe('26.1 testing RAW data in various lengths', function() {
+    
+    before('create table, insert data',function(done) {
+      assist.setUp(connection, tableName, bufs, done);
+    })
+
+    after(function(done) {
+      connection.execute(
+        "DROP table " + tableName,
+        function(err) {
+          should.not.exist(err);
+          done();
+        }
+      );
+    })
+
+    it('26.1.1 SELECT query', function(done) {
+      assist.dataTypeSupport(connection, tableName, bufs, done);
+    })
+
+    it('26.1.2 resultSet stores RAW data correctly', function(done) {
+      assist.verifyResultSet(connection, tableName, bufs, done);
+    })
+
+    it('26.1.3 works well with REF Cursor', function(done) {
+      assist.verifyRefCursor(connection, tableName, bufs, done);
+    })
+  })
+  
+  describe('26.2 stores null value correctly', function() {
+    it('26.2.1 testing Null, Empty string and Undefined', function(done) {
+      assist.verifyNullValues(connection, tableName, done);
+    })
+  })
+})

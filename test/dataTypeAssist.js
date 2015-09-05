@@ -60,7 +60,8 @@ assist.allDataTypeNames =
   "oracledb_timestamp6"   : "TIMESTAMP (9) WITH LOCAL TIME ZONE",
   "oracledb_rowid"        : "ROWID",
   "oracledb_myclobs"      : "CLOB",
-  "oracledb_myblobs"      : "BLOB"
+  "oracledb_myblobs"      : "BLOB",
+  "oracledb_raw"          : "RAW(2000)"
 };
 
 assist.data = {
@@ -348,6 +349,15 @@ assist.createCharString = function(size) {
   return buffer.toString();
 }
 
+assist.createBuffer = function(size) {
+  var array = [];
+  for(var i = 0; i < size; i++) {
+    var b = Math.floor(Math.random() * 256); // generate a random integer among 0-255
+    array.push(b);
+  }
+  return new Buffer(array);
+}
+
 assist.setUp = function(connection, tableName, array, done) 
 {
   async.series([
@@ -463,6 +473,8 @@ assist.dataTypeSupport = function(connection, tableName, array, done) {
           result.rows[i].CONTENT.trim().should.eql(array[result.rows[i].NUM]);
         else if( (typeof result.rows[i].CONTENT) === 'number' )
           result.rows[i].CONTENT.should.eql(array[result.rows[i].NUM]);
+        else if( Buffer.isBuffer(result.rows[i].CONTENT) )   
+          result.rows[i].CONTENT.toString('hex').should.eql(array[result.rows[i].NUM].toString('hex'));
         else
           result.rows[i].CONTENT.toUTCString().should.eql(array[result.rows[i].NUM].toUTCString());
       }   
@@ -540,6 +552,8 @@ function fetchRowsFromRS(rs, array, cb)
           rows[i].CONTENT.trim().should.eql(array[rows[i].NUM]); 
         else if( (typeof rows[i].CONTENT) === 'number' )
           rows[i].CONTENT.should.eql(array[rows[i].NUM]);
+        else if( Buffer.isBuffer(rows[i].CONTENT) )
+          rows[i].CONTENT.toString('hex').should.eql(array[rows[i].NUM].toString('hex'));
         else 
           rows[i].CONTENT.toUTCString().should.eql(array[rows[i].NUM].toUTCString());     
       }

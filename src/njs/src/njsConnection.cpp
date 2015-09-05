@@ -572,7 +572,7 @@ void Connection::GetBindUnit (Handle<Value> val, Bind* bind,
   NanScope();
   unsigned int dir   = BIND_IN;
 
-  if(val->IsObject() && !val->IsDate())
+  if(val->IsObject() && !val->IsDate() && !Buffer::HasInstance(val))
   {
     dir                     = BIND_UNKNOWN;
     Local<Object> bind_unit = val->ToObject();
@@ -672,6 +672,10 @@ void Connection::GetOutBindParams (unsigned short dataType, Bind* bind,
       break;
     case DATA_CURSOR :
       bind->type     = dpi::DpiRSet;
+      bind->maxSize  = 0;
+      break;
+    case DATA_BUFFER :
+      bind->type     = dpi::DpiRaw;
       bind->maxSize  = 0;
       break;
     case DATA_CLOB : 
@@ -806,6 +810,33 @@ void Connection::GetInBindParams (Handle<Value> v8val, Bind* bind,
     bind->maxSize = 0;
     /* Convert v8::Date value to long double */
     Connection::v8Date2OraDate ( v8val, bind);
+  }
+  else if(v8val->IsObject ())
+  {
+    Local<Object> obj = v8val->ToObject();
+    if (Buffer::HasInstance(obj)) {
+      size_t bufLen = Buffer::Length(obj);
+      bind->type = dpi::DpiRaw;
+      if(type == BIND_INOUT)
+      {
+        *(bind->len) = bufLen;
+      }
+      else // IN
+      {
+        bind->maxSize = *(bind->len) = bufLen;
+      }
+      DPI_SZ_TYPE size = (bind->maxSize >= *(bind->len) ) ?
+                         bind->maxSize : *(bind->len);
+      if(size)
+      {
+        bind->value = (char*)malloc(size);
+        if(bufLen)
+          memcpy(bind->value, Buffer::Data(obj), bufLen);
+      }
+    } else {
+      executeBaton->error= NJSMessages::getErrorMsg(errInvalidBindDataType,2);
+      goto exitGetInBindParams;
+    }
   }
   else
   {
@@ -1506,6 +1537,11 @@ void Connection::DoDefines ( eBaton* executeBaton, const dpi::MetaData* meta,
 
         }
         break;
+      case dpi::DpiRaw :
+        defines[col].fetchType = DpiRaw;
+        defines[col].maxSize   = meta[col].dbSize;
+        defines[col].buf = (char *)malloc(defines[col].maxSize*executeBaton->maxRows);
+        break;
 
       case dpi::DpiClob:
       case dpi::DpiBlob:
@@ -2157,6 +2193,9 @@ Handle<Value> Connection::GetValueCommon ( eBaton *executeBaton,
          date = NanNew<v8::Date>( *(long double*)val );
          value = date;
         break;
+       case (dpi::DpiRaw) :
+         value = NanNewBufferHandle((char*)val, len);
+         break;
         // The LOB types are hit only by the define code path
         // The bind code path has its own Connection::GetValueLob method
        case (dpi::DpiClob):
