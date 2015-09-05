@@ -89,9 +89,78 @@ Env::~Env()
 Env * Env::createEnv()
 {
   return EnvImpl::createEnvImpl();
-
 }
 
+
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Free an Dpi handle.
+
+   PARAMETERS:
+     handle - DPI handle to be freed
+     handleType - Type of DPI handle to be freed
+
+   RETURNS:
+     nothing
+
+   NOTES:
+     
+ */
+
+void Env::freeHandle(DpiHandle *handle, HandleType handleType)
+{
+  OCIHandleFree(handle, handleType);
+}
+
+
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Free an Dpi descriptor.
+
+   PARAMETERS:
+     descriptor     - DPI descriptor to be freed
+     descriptorType - Type of DPI descriptr to be freed
+
+   RETURNS:
+     nothing
+
+   NOTES:
+     
+ */
+
+void Env::freeDescriptor(Descriptor *descriptor,
+                         DescriptorType descriptorType)
+{
+  OCIDescriptorFree(descriptor, descriptorType);
+}
+
+
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Free an Dpi descriptor array.
+
+   PARAMETERS:
+     descriptorArray - DPI descriptor to be freed
+     descriptorType  - Type of DPI descriptr array to be freed
+
+   RETURNS:
+     nothing
+
+   NOTES:
+     
+ */
+
+void Env::freeDescriptorArray(Descriptor **descriptorArray,
+                              DescriptorType descriptorType)
+{
+  OCIArrayDescriptorFree((void **)descriptorArray, descriptorType);
+}
 
 
 

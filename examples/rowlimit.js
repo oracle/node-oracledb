@@ -59,9 +59,9 @@ oracledb.getConnection(
 
     // Returns 100 records although the table has 107 rows.  Node-oracledb's default maxRows is 100
     connection.execute(
-      "SELECT employee_id, last_name "
-    + "FROM employees "
-    + "ORDER BY employee_id",
+      "SELECT employee_id, last_name " +
+        "FROM employees " +
+        "ORDER BY employee_id",
       function(err, result)
       {
         if (err) {
@@ -75,9 +75,9 @@ oracledb.getConnection(
 
     // Increasing maxRows from the default returns all 107 rows
     connection.execute(
-      "SELECT employee_id, last_name "
-    + "FROM employees "
-    + "ORDER BY employee_id",
+      "SELECT employee_id, last_name " +
+        "FROM employees " +
+        "ORDER BY employee_id",
       {}, // A bind variable parameter is needed to disambiguate the following options parameter
           // otherwise you will get Error: ORA-01036: illegal variable name/number
       {maxRows: 150},
@@ -94,10 +94,10 @@ oracledb.getConnection(
 
     // Oracle 12c syntax for fetching rows 6-10 from a query (won't work with 11g)
     connection.execute(
-      "SELECT employee_id, last_name "
-    + "FROM employees "
-    + "ORDER BY employee_id "
-    + "OFFSET 5 ROWS FETCH NEXT 5 ROWS ONLY",
+      "SELECT employee_id, last_name " +
+        "FROM employees " +
+        "ORDER BY employee_id " +
+        "OFFSET 5 ROWS FETCH NEXT 5 ROWS ONLY",
       function(err, result)
       {
         if (err) {
@@ -110,11 +110,11 @@ oracledb.getConnection(
 
     // Oracle 11g syntax for fetching rows 6-10 from a query
     connection.execute(
-      "SELECT employee_id, last_name "
-    + "FROM (SELECT a.*, ROWNUM AS rnum "
-    +       "FROM (SELECT employee_id, last_name FROM employees ORDER BY employee_id) a "
-    +       "WHERE ROWNUM <= 10) "
-    + "WHERE rnum > 5",
+      "SELECT employee_id, last_name " +
+        "FROM (SELECT a.*, ROWNUM AS rnum " +
+        "FROM (SELECT employee_id, last_name FROM employees ORDER BY employee_id) a " +
+        "WHERE ROWNUM <= 10) " +
+        "WHERE rnum > 5",
       function(err, result)
       {
         if (err) {

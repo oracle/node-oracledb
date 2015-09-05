@@ -258,7 +258,7 @@ describe('9. columnMetadata.js', function(){
     ], done);
   })
   
-  it('9.8 only works for SELECT statament, does not work for INSERT', function(done){
+  it('9.8 only works for SELECT statement, does not work for INSERT', function(done){
     connection.should.be.ok;
     connection.execute(
       "INSERT INTO oracledb_departments VALUES (99, 'FACILITY', 456, 1700)",

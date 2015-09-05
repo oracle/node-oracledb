@@ -28,12 +28,21 @@
 
 SET ECHO ON
 
--- For plsql.js example for bind parameters
+-- For plsqlproc.js example for bind parameters
 CREATE OR REPLACE PROCEDURE testproc (p_in IN VARCHAR2, p_inout IN OUT VARCHAR2, p_out OUT NUMBER)
 AS
 BEGIN
   p_inout := p_in || p_inout;
   p_out := 101;
+END;
+/
+SHOW ERRORS
+
+-- For plsqlfunc.js example on calling a PL/SQL function
+CREATE OR REPLACE FUNCTION testfunc (p1_in IN VARCHAR2, p2_in IN VARCHAR2) RETURN VARCHAR2
+AS
+BEGIN
+  RETURN p1_in || p2_in;
 END;
 /
 SHOW ERRORS
@@ -50,14 +59,50 @@ END;
 /
 SHOW ERRORS
 
--- For selectjson.js example of JSON with Oracle Database 12.1.0.2
+-- For selectjson.js example of JSON datatype. Requires Oracle Database 12.1.0.2
 DROP TABLE j_purchaseorder;
-CREATE TABLE j_purchaseorder
-    (po_document VARCHAR2(4000) CONSTRAINT ensure_json CHECK (po_document IS JSON));
+-- Note if your applications always insert valid JSON, you may delete
+-- the IS JSON check to remove its additional validation overhead.
+CREATE TABLE j_purchaseorder (po_document VARCHAR2(4000) CHECK (po_document IS JSON));
+INSERT INTO j_purchaseorder (po_document) VALUES ('{"userId":3,"userName":"Alison"}');
+COMMIT;
 
--- DML RETURNING
+-- For selectjsonclob.js example of JSON datatype.  Requires Oracle Database 12.1.0.2
+DROP TABLE j_purchaseorder_c;
+-- The extra CHECK clause 'or length(po_document) = 0' clause allows
+-- EMPTY_CLOB() to be inserted into the table.  The extra clause is
+-- not needed if you have a database patch for bug 21636362.  The
+-- extra 'or' clause will stop the table appearing in
+-- USER_JSON_COLUMNS.  EMPTY_CLOB() is currently needed by
+-- node-oracledb for inserting CLOB data.
+CREATE TABLE j_purchaseorder_c (po_document CLOB CHECK (po_document IS JSON or length(po_document) = 0));
+INSERT INTO j_purchaseorder_c (po_document) VALUES ('{"userId":4,"userName":"Changjie"}');
+COMMIT;
+
+-- For DML RETURNING aka RETURNING INTO examples
 DROP TABLE dmlrupdtab;
 CREATE TABLE dmlrupdtab (id NUMBER, name VARCHAR2(40));
 INSERT INTO dmlrupdtab VALUES (1001, 'Venkat');
 INSERT INTO dmlrupdtab VALUES (1002, 'Neeharika');
 COMMIT;
+
+-- For LOB examples
+DROP TABLE mylobs;
+CREATE TABLE mylobs (id NUMBER, c CLOB, b BLOB);
+
+-- For DBMS_OUTPUT example dbmsoutputpipe.js
+CREATE OR REPLACE TYPE dorow AS TABLE OF VARCHAR2(32767);
+/
+SHOW ERRORS
+
+CREATE OR REPLACE FUNCTION mydofetch RETURN dorow PIPELINED IS
+line VARCHAR2(32767);
+status INTEGER;
+BEGIN LOOP
+  DBMS_OUTPUT.GET_LINE(line, status);
+  EXIT WHEN status = 1;
+  PIPE ROW (line);
+END LOOP;
+END;
+/
+SHOW ERRORS

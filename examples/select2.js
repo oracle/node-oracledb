@@ -20,6 +20,7 @@
  *
  * DESCRIPTION
  *   Executes queries to show array and object output formats.
+ *   Gets results directly without using a ResultSet.
  *   Uses Oracle's sample HR schema.
  *
  *   Scripts to create the HR schema can be found at:
@@ -49,10 +50,10 @@ oracledb.getConnection(
       return;
     }
     connection.execute(
-      "SELECT location_id, city "
-    + "FROM locations "
-    + "WHERE city LIKE 'S%' "
-    + "ORDER BY city",
+      "SELECT location_id, city " +
+        "FROM locations " +
+        "WHERE city LIKE 'S%' " +
+        "ORDER BY city",
       function(err, result)
       {
         if (err) {
@@ -64,10 +65,10 @@ oracledb.getConnection(
         console.log(result.rows);
 
         connection.execute(
-          "SELECT location_id, city "
-        + "FROM locations "
-        + "WHERE city LIKE 'S%' "
-        + "ORDER BY city",
+          "SELECT location_id, city " +
+            "FROM locations " +
+            "WHERE city LIKE 'S%' " +
+            "ORDER BY city",
           {}, // A bind variable parameter is needed to disambiguate the following options parameter
               // otherwise you will get Error: ORA-01036: illegal variable name/number
           {outFormat: oracledb.OBJECT}, // outFormat can be OBJECT or ARRAY.  The default is ARRAY

@@ -39,10 +39,10 @@ oracledb.getConnection(
   {
     if (err) { console.error(err.message); return; }
     connection.execute(
-      "SELECT employee_id, last_name "
-    + "FROM   employees "
-    + "WHERE ROWNUM < 11 "
-    + "ORDER BY employee_id",
+      "SELECT employee_id, last_name " +
+        "FROM   employees " +
+        "WHERE ROWNUM < 11 " +
+        "ORDER BY employee_id",
       [], // no bind variables
       { resultSet: true }, // return a result set.  Default is false
       function(err, result)

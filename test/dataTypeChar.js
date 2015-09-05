@@ -31,76 +31,79 @@
  *     51 -     are for other tests 
  * 
  *****************************************************************************/
+"use strict"
 
 var oracledb = require('oracledb');
+var should = require('should');
 var assist = require('./dataTypeAssist.js');
 var dbConfig = require('./dbConfig.js');
 
 describe('22. dataTypeChar.js', function(){
-  var connection = false;
+  
   if(dbConfig.externalAuth){
     var credential = { externalAuth: true, connectString: dbConfig.connectString };
   } else {
     var credential = dbConfig;
   }
   
-  var tableName = "oracledb_datatype_char";
-  var sqlCreate = 
-        "BEGIN " +
-        "   DECLARE " +
-        "       e_table_exists EXCEPTION; " +
-        "       PRAGMA EXCEPTION_INIT(e_table_exists, -00942); " +
-        "   BEGIN " +
-        "       EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " '); " +
-        "   EXCEPTION " +
-        "       WHEN e_table_exists " +
-        "       THEN NULL; " +
-        "   END; " +
-        "   EXECUTE IMMEDIATE (' " +
-        "       CREATE TABLE " + tableName +" ( " +
-        "           num NUMBER, " + 
-        "           content CHAR(2000) "  +
-        "       )" +
-        "   '); " +
-        "END; ";
+  var connection = null;
+  var tableName = "oracledb_char";
 
   var strLen = [100, 1000, 2000];  // char string length
-  var strs = [
-               assist.createCharString(strLen[0]),
-               assist.createCharString(strLen[1]),
-               assist.createCharString(strLen[2]),
-             ];
-             
-  before(function(done) {
+  var strs = 
+  [
+    assist.createCharString(strLen[0]),
+    assist.createCharString(strLen[1]),
+    assist.createCharString(strLen[2]),
+  ];
+
+  before('get one connection', function(done) {
     oracledb.getConnection(credential, function(err, conn) {
-      if(err) { console.error(err.message); return; }
+      should.not.exist(err);
       connection = conn;
-      assist.setup(connection, tableName, sqlCreate, strs, done);
+      done();
     });
   })
   
-  after(function(done) {
-    connection.execute(
-      "DROP table " + tableName,
-      function(err) {
-        if(err) { console.error(err.message); return; }
-        connection.release( function(err) {
-          if(err) { console.error(err.message); return; }
+  after('release connection', function(done) {
+    connection.release( function(err) {
+      should.not.exist(err);
+      done();
+    });
+  })           
+
+  describe('22.1 testing CHAR data in various lengths', function() {
+    
+    before('create table, insert data',function(done) {
+      assist.setUp(connection, tableName, strs, done);
+    })
+
+    after(function(done) {
+      connection.execute(
+        "DROP table " + tableName,
+        function(err) {
+          should.not.exist(err);
           done();
-        });
-      }
-    );
+        }
+      );
+    })
+
+    it('22.1.1 works well with SELECT query', function(done) {
+      assist.dataTypeSupport(connection, tableName, strs, done);
+    })
+
+    it('22.1.2 works well with result set', function(done) {
+      assist.verifyResultSet(connection, tableName, strs, done);
+    })
+
+    it('22.1.3 works well with REF Cursor', function(done) {
+      assist.verifyRefCursor(connection, tableName, strs, done);
+    })
   })
-  
-  it('22.1 supports CHAR data', function(done) {
-    assist.dataTypeSupport(connection, tableName, strs, done);
+
+  describe('22.2 stores null value correctly', function() {
+    it('22.2.1 testing Null, Empty string and Undefined', function(done) {
+      assist.verifyNullValues(connection, tableName, done);
+    })
   })
-  
-  it('22.2 resultSet stores CHAR data correctly', function(done) {
-    assist.resultSetSupport(connection, tableName, strs, done);
-  })
-  
-  it('22.3 stores null value correctly', function(done) {
-    assist.nullValueSupport(connection, tableName, done);
-  }) 
 })

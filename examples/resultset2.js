@@ -49,10 +49,10 @@ oracledb.getConnection(
   {
     if (err) { console.error(err.message); return; }
     connection.execute(
-      "SELECT employee_id, last_name "
-    + "FROM   employees "
-    + "WHERE ROWNUM < 25 "
-    + "ORDER BY employee_id",
+      "SELECT employee_id, last_name " +
+        "FROM   employees " +
+        "WHERE ROWNUM < 25 " +
+        "ORDER BY employee_id",
       [], // no bind variables
       {
         resultSet: true, // return a result set.  Default is false
@@ -79,7 +79,7 @@ function fetchRowsFromRS(connection, resultSet, numRows)
       if (err) {
         console.log(err);
         doClose(connection, resultSet); // always close the result set
-      } else if (rows.length == 0) {    // no rows, or no more rows
+      } else if (rows.length === 0) {    // no rows, or no more rows
         doClose(connection, resultSet); // always close the result set
       } else if (rows.length > 0) {
         console.log("fetchRowsFromRS(): Got " + rows.length + " rows");

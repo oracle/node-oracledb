@@ -31,142 +31,168 @@
  *     51 -     are for other tests 
  * 
  *****************************************************************************/
+"use strict";
 
 var oracledb = require('oracledb');
 var should   = require('should');
 var async    = require('async');
 var dbConfig = require('./dbConfig.js');
 
-describe('7. autoCommit.js', function(){
-  
+describe('7. autoCommit.js', function() {
+
   if(dbConfig.externalAuth){
     var credential = { externalAuth: true, connectString: dbConfig.connectString };
   } else {
     var credential = dbConfig;
-  }  
+  }
   
-  var connection = false;
-  var anotherConnection = false;
-  var script = 
-      "BEGIN \
-          DECLARE \
-              e_table_exists EXCEPTION; \
-              PRAGMA EXCEPTION_INIT(e_table_exists, -00942); \
-          BEGIN \
-              EXECUTE IMMEDIATE ('DROP TABLE oracledb_departments'); \
-          EXCEPTION \
-              WHEN e_table_exists \
-              THEN NULL; \
-          END; \
-          EXECUTE IMMEDIATE (' \
-              CREATE TABLE oracledb_departments ( \
-                  department_id NUMBER,  \
-                  department_name VARCHAR2(20) \
-              ) \
-          '); \
-      END; ";
-  
-  beforeEach(function(done){
-    oracledb.outFormat = oracledb.OBJECT;
-    oracledb.autoCommit = true;
-    
+  var pool = null;
+  var connection  = null;
+
+  before('create pool, get one connection, create table', function(done) {
+    var script = 
+        "BEGIN \
+            DECLARE \
+                e_table_exists EXCEPTION; \
+                PRAGMA EXCEPTION_INIT(e_table_exists, -00942); \
+            BEGIN \
+                EXECUTE IMMEDIATE ('DROP TABLE oracledb_departments'); \
+            EXCEPTION \
+                WHEN e_table_exists \
+                THEN NULL; \
+            END; \
+            EXECUTE IMMEDIATE (' \
+                CREATE TABLE oracledb_departments ( \
+                    department_id NUMBER,  \
+                    department_name VARCHAR2(20) \
+                ) \
+            '); \
+        END; ";
+
     async.series([
-      function(callback){
-        oracledb.getConnection(credential, function(err, conn){
-          if(err) { console.error(err.message); return; }
-          connection = conn;
-          callback();
-        });
-      },
-      function(callback){
-        oracledb.getConnection(credential, function(err, conn){
-          if(err) { console.error(err.message); return; }
-          anotherConnection = conn;
-          callback();
-        });
-      }, 
-      function(callback){
-        connection.execute(script, function(err){
-          if(err) { console.error(err.message); return; }
-          connection.commit( function(err){
-            if(err) { console.error(err.message); return; }
-            callback();
-          });
-        });
-      }
-    ], done);   
-  
-  
-  })
-  
-  afterEach(function(done){
-    oracledb.outFormat = oracledb.ARRAY;
-    oracledb.autoCommit = false;
-    
-    async.series([
-      function(callback){
-        connection.execute(
-          'DROP TABLE oracledb_departments', 
-          function(err){
-            if(err) { console.error(err.message); return; }
+      function(callback) {
+        oracledb.createPool(
+          {
+            externalAuth  : credential.externalAuth,
+            user          : credential.user,
+            password      : credential.password,
+            connectString : credential.connectString,
+            poolMin       : 3,
+            poolMax       : 7,
+            poolIncrement : 1
+          },
+          function(err, connectionPool) {
+            should.not.exist(err);
+            pool = connectionPool;
             callback();
           }
         );
       },
-      function(callback){
-        connection.release( function(err){
-          if(err) { console.error(err.message); return; }
+      function(callback) {
+        pool.getConnection( function(err, conn) {
+          should.not.exist(err);
+          connection = conn;
+          callback();
+        }); 
+      },
+      function(callback) {
+        connection.execute( 
+          script,
+          function(err) {
+            should.not.exist(err);
+            callback();
+          }
+        );
+      }
+    ], done);
+  })
+  
+  after('drop table, release connection, terminate pool', function(done) {    
+    async.series([
+      function(callback) {
+        connection.execute(
+          "DROP TABLE oracledb_departments",
+          function(err) {
+            should.not.exist(err);
+            callback();
+          }
+        );
+      },
+      function(callback) {
+        connection.release( function(err) {
+          should.not.exist(err);
           callback();
         });
       },
-      function(callback){
-        anotherConnection.release( function(err){
-          if(err) { console.error(err.message); return; }
+      function(callback) {
+        pool.terminate(function(err) {
+          should.not.exist(err);
           callback();
         });
       }
     ], done);
   })
+
+  afterEach('truncate table, reset the oracledb properties', function(done) {
+    oracledb.autoCommit = false;  /* Restore to default value */
+
+    connection.execute(
+      "TRUNCATE TABLE oracledb_departments",
+      function(err) {
+        should.not.exist(err);
+        done();
+      } 
+    );
+  })
   
-  it('7.1 auto commit takes effect for DML - insert', function(done){
+  it('7.1 autoCommit takes effect when setting oracledb.autoCommit before connecting', function(done) {
+    var conn1 = null;
+    var conn2 = null;
+
+    oracledb.autoCommit = true;
+
     async.series([
-      function(callback){
-        connection.execute(
+      function(callback) {
+        pool.getConnection(
+          function(err, conn) {
+            should.not.exist(err);
+            conn1 = conn;
+            callback();
+          }
+        );
+      },
+      function(callback) {
+        conn1.execute(
           "INSERT INTO oracledb_departments VALUES (82, 'Security')",
-          function(err){
+          function(err) {
             should.not.exist(err);
             callback();
           }
         );
       },
-      function(callback){
-        anotherConnection.execute(
-          "SELECT department_id FROM oracledb_departments WHERE department_name = 'Security'",
-          function(err, result){
+      function(callback) {           // get another connection
+        pool.getConnection(
+          function(err, conn) {
             should.not.exist(err);
-            should.exist(result);
-            // console.log(result);
+            conn2 = conn;
+            callback();
+          }
+        );
+      },
+      function(callback) {
+        conn2.execute(
+          "SELECT department_id FROM oracledb_departments WHERE department_name = 'Security'",
+          [],
+          { outFormat: oracledb.OBJECT },
+          function(err, result) {
+            should.not.exist(err);
             result.rows[0].DEPARTMENT_ID.should.eql(82).and.be.a.Number;
             callback();
           }
         );
-      }
-    ], done);
-  })
-  
-  it('7.2 auto commit takes effect for DML - update', function(done){
-    async.series([
-      function(callback){
-        connection.execute(
-          "INSERT INTO oracledb_departments VALUES (82, 'Security')",
-          function(err){
-            should.not.exist(err);
-            callback();
-          }
-        );
       },
-      function(callback){
-        connection.execute(
+      function(callback) {
+        conn1.execute(
           "UPDATE oracledb_departments SET department_id = 101 WHERE department_name = 'Security'",
           function(err){
             should.not.exist(err);
@@ -174,18 +200,206 @@ describe('7. autoCommit.js', function(){
           }
         );
       },
-      function(callback){
-        anotherConnection.execute(
+      function(callback) {
+        conn2.execute(
           "SELECT department_id FROM oracledb_departments WHERE department_name = 'Security'",
-          function(err, result){
+          [],
+          { outFormat: oracledb.OBJECT },
+          function(err, result) {
             should.not.exist(err);
-            should.exist(result);
-            // console.log(result);
             result.rows[0].DEPARTMENT_ID.should.eql(101).and.be.a.Number;
             callback();
           }
         );
+      },
+      function(callback) {
+        conn1.release(function(err) {
+          should.not.exist(err);
+          callback();
+        });
+      },
+      function(callback) {
+        conn2.release(function(err) {
+          should.not.exist(err);
+          callback();
+        });
       }
     ], done);
   })
+
+  it('7.2 autoCommit takes effect when setting oracledb.autoCommit after connecting', function(done) {
+    var conn1 = null;
+    var conn2 = null;
+
+    async.series([
+      function(callback) {
+        pool.getConnection(
+          function(err, conn) {
+            should.not.exist(err);
+            conn1 = conn;
+            callback();
+          }
+        );
+      },
+      function(callback) {
+        oracledb.autoCommit = true;   // change autoCommit after connection
+        conn1.execute(
+          "INSERT INTO oracledb_departments VALUES (82, 'Security')",
+          function(err) {
+            should.not.exist(err);
+            callback();
+          }
+        );
+      },
+      function(callback) {     
+        pool.getConnection(
+          function(err, conn) {
+            should.not.exist(err);
+            conn2 = conn;
+            callback();
+          }
+        );
+      },
+      function(callback) {
+        conn2.execute(
+          "SELECT department_id FROM oracledb_departments WHERE department_name = 'Security'",
+          [],
+          { outFormat: oracledb.OBJECT },
+          function(err, result) {
+            should.not.exist(err);
+            result.rows[0].DEPARTMENT_ID.should.eql(82).and.be.a.Number;
+            callback();
+          }
+        );
+      },
+      function(callback) {
+        conn1.execute(
+          "UPDATE oracledb_departments SET department_id = 101 WHERE department_name = 'Security'",
+          function(err){
+            should.not.exist(err);
+            callback();
+          }
+        );
+      },
+      function(callback) {
+        conn2.execute(
+          "SELECT department_id FROM oracledb_departments WHERE department_name = 'Security'",
+          [],
+          { outFormat: oracledb.OBJECT },
+          function(err, result) {
+            should.not.exist(err);
+            result.rows[0].DEPARTMENT_ID.should.eql(101).and.be.a.Number;
+            callback();
+          }
+        );
+      },
+      function(callback) {
+        conn1.release(function(err) {
+          should.not.exist(err);
+          callback();
+        });
+      },
+      function(callback) {
+        conn2.release(function(err) {
+          should.not.exist(err);
+          callback();
+        });
+      }
+    ], done);
+  })
+
+  it('7.3 autoCommit setting does not affect previous SQL result', function(done) {
+    var conn1 = null;
+    var conn2 = null;
+    
+    async.series([
+      function(callback) {
+        pool.getConnection(
+          function(err, conn) {
+            should.not.exist(err);
+            conn1 = conn;
+            callback();
+          }
+        );
+      },
+      function(callback) {
+        conn1.execute(
+          "INSERT INTO oracledb_departments VALUES (82, 'Security')",
+          function(err) {
+            should.not.exist(err);
+            callback();
+          }
+        );
+      },
+      function(callback) {     
+        pool.getConnection(
+          function(err, conn) {
+            should.not.exist(err);
+            conn2 = conn;
+            callback();
+          }
+        );
+      },
+      function(callback) {
+        oracledb.autoCommit = true;   // change autoCommit after connection
+        conn2.execute(
+          "SELECT department_id FROM oracledb_departments WHERE department_name = 'Security'",
+          [],
+          { outFormat: oracledb.OBJECT },
+          function(err, result) {
+            should.not.exist(err);
+            (result.rows).should.eql([]);
+            callback();
+          }
+        );
+      },
+      function(callback) {
+        conn2.execute(
+          "INSERT INTO oracledb_departments VALUES (99, 'Marketing')",
+          function(err) {
+            should.not.exist(err);
+            callback();
+          }
+        );
+      },
+      function(callback) {
+        conn2.execute(
+          "SELECT COUNT(*) as amount FROM oracledb_departments",
+          [],
+          { outFormat: oracledb.OBJECT },
+          function(err, result) {
+            should.not.exist(err);
+            result.rows[0].AMOUNT.should.eql(1);
+            callback();
+          }
+        );
+      },
+      function(callback) {
+        conn1.execute(
+          "SELECT COUNT(*) as amount FROM oracledb_departments",
+          [],
+          { outFormat: oracledb.OBJECT },
+          function(err, result) {
+            should.not.exist(err);
+            result.rows[0].AMOUNT.should.eql(2);   // autoCommit for SELECT
+            callback();
+          }
+        );
+      },
+      function(callback) {
+        conn1.release(function(err) {
+          should.not.exist(err);
+          callback();
+        });
+      },
+      function(callback) {
+        conn2.release(function(err) {
+          should.not.exist(err);
+          callback();
+        });
+      }
+    ], done);
+  }) 
+  
 })
+

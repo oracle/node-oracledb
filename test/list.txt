@@ -1,0 +1,418 @@
+1. connection.js
+    1.1 can run SQL query with different output formats
+        1.1.1 ARRAY format by default
+        1.1.2 ARRAY format explicitly
+        1.1.3 OBJECT format
+        1.1.4 Negative test - invalid outFormat value
+    1.2 limits the number of rows fetched
+        1.2.1 by default, the number is 100
+        1.2.2 can also specify for each execution
+        1.2.3 can set maxRows to be 0
+        1.2.4 cannot set maxRows to be a negative number
+        1.2.5 sets maxRows to be very large value
+    1.3 can call PL/SQL procedures
+        1.3.1 bind parameters in various ways
+    1.4 statementCacheSize controls statement caching
+        1.4.1 stmtCacheSize = 0, which disable statement caching
+        1.4.2 works well when statement cache enabled (stmtCacheSize > 0) 
+    1.5 Testing commit() & rollback() functions
+        1.5.1 commit() function works well
+        1.5.2 rollback() function works well
+
+2. pool.js
+    2.1 default values
+        2.1.1 set properties to default values if not explicitly specified
+    2.2 poolMin
+        2.2.1 poolMin cannot be a negative number
+        2.2.2 poolMin must be a Number
+        2.2.3 poolMin cannot equal to poolMax
+        2.2.4 poolMin cannot greater than poolMax
+        2.2.5 (poolMin + poolIncrement) cannot greater than poolMax
+        2.2.6 (poolMin + poolIncrement) can equal to poolMax 
+    2.3 poolMax
+        2.3.1 poolMax cannot be a negative value
+        2.3.2 poolMax cannot be 0
+        2.3.3 poolMax must be a number
+        2.3.4 poolMax limits the pool capacity
+    2.4 poolIncrement
+        2.4.1 poolIncrement cannot be a negative value
+        2.4.2 poolIncrement cannot be 0
+        2.4.3 poolIncrement must be a Number
+        2.4.4 the amount of open connections equals to poolMax when (connectionsOpen + poolIncrement) > poolMax
+    2.5 poolTimeout
+        2.5.1 poolTimeout cannot be a negative number
+        2.5.2 poolTimeout can be 0, which disables timeout feature
+        2.5.3 poolTimeout must be a number
+    2.6 stmtCacheSize
+        2.6.1 stmtCacheSize cannot be a negative value
+        2.6.2 stmtCacheSize can be 0
+        2.6.3 stmtCacheSize must be a Number
+
+3. examples.js
+    3.1 connect.js
+        3.1.1 tests a basic connection to the database
+    3.2 version.js
+        3.2.1 shows the oracledb version attribute
+    3.3 select1.js & select2.js
+        3.3.1. execute a basic query
+        3.3.2. execute queries to show array and object formats
+    3.4 selectjson.js - 12.1.0.2 feature
+        3.4.1 executes a query from a JSON table
+    3.5 date.js
+        3.5.1 inserts and query DATE and TIMESTAMP columns
+    3.6 rowlimit.js
+        3.6.1 by default, the number is 100
+        3.6.2 can also specify for each execution
+    3.7 plsql.js
+        3.7.1 can call PL/SQL procedure and binding parameters in various ways
+        3.7.2 can call PL/SQL function
+    3.8 insert1.js
+        3.8.1 creates a table and inserts data
+    3.9 insert2.js
+        3.9.1 tests the auto commit behavior
+    3.10 resultset.js
+        3.10.1 resultset1.js - getRow() function
+        3.10.2 resultset2.js - getRows() function
+    3.11 refcursor.js
+        3.11.1 REF CURSOR
+
+4. binding.js
+    4.1 test STRING, NUMBER, ARRAY & JSON format
+        4.1.1 VARCHAR2 binding, Object & Array formats
+        4.1.2 NUMBER binding, Object & Array formats
+        4.1.3 Multiple binding values, Object & Array formats
+        4.1.4 Multiple binding values, Change binding order
+        4.1.5 default bind type - STRING
+    4.2 mixing named with positional binding
+        4.2.1 array binding is ok
+      - 4.2.2 array binding with mixing JSON should throw an error
+    4.3 insert with DATE column and DML returning
+        4.3.1 passes in object syntax without returning into
+        4.3.2 passes in object syntax with returning into
+        4.3.3 passes in array syntax without returning into
+        4.3.4 should pass but fail in array syntax with returning into
+    4.4 test maxSize option
+        4.4.1 outBind & maxSize restriction
+      - 4.4.2 default value is 200
+      - 4.4.3 maximum value is 32767
+
+5. externalAuthentication.js
+    5.1 connection should succeed when setting externalAuth to be false and providing user/password
+    5.2 error should be thrown when setting externalAuth to be true and providing user/password
+    5.3 can get connection from oracledb
+    5.4 can create pool 
+        
+6. dmlReturning.js
+    6.1 NUMBER & STRING driver data type
+        6.1.1 INSERT statement with Object binding
+        6.1.2 INSERT statement with Array binding
+        6.1.3 INSERT statement with small maxSize restriction
+        6.1.4 UPDATE statement with single row matched
+        6.1.5 UPDATE statement with single row matched & Array binding
+        6.1.6 UPDATE statements with multiple rows matched
+        6.1.7 UPDATE statements with multiple rows matched & Array binding
+        6.1.8 DELETE statement with Object binding
+        6.1.9 DELETE statement with Array binding
+        6.1.10 Stress test - support 4k varchars
+        6.1.11 Negative test - throws correct error message
+
+7. autoCommit.js
+    7.1 autoCommit takes effect when setting oracledb.autoCommit before connecting
+    7.2 autoCommit takes effect when setting oracledb.autoCommit after connecting
+    7.3 autoCommit setting does not affect previous SQL result
+
+8. autoCommitForSelect.js
+    8.1 should return previous value when autoCommit is false
+    8.2 can use explicit commit() to keep data consistent
+    8.3 can also use the autoCommit for SELECTs feature
+    
+9. columnMetadata.js
+    9.1 shows metaData correctly when retrieving 1 column from a 4-column table
+    9.2 shows metaData when retrieving 2 columns. MetaData is correct in content and sequence
+    9.3 shows metaData correctly when retrieve 3 columns
+    9.4 shows metaData correctly when retrieving all columns with [SELECT * FROM table] statement
+    9.5 works for SELECT count(*)
+    9.6 works when a query returns no rows
+    9.7 works for tables whose column names were created case sensitively
+    9.8 only works for SELECT statement, does not work for INSERT
+    9.9 only works for SELECT statement, does not work for UPDATE
+    9.10 works with a large number of columns 
+    9.11 works with column names consisting of single characters
+    9.12 works with a SQL WITH statement
+
+10. nullColumnValues.js
+    10.1 a simple query for null value
+    10.2 in-bind for null column value
+    10.3 out-bind for null column value
+    10.4 DML Returning for null column value
+    10.5 resultSet for null value
+    
+11. poolTimeout.js
+    pool terminates idle connections after specify time
+    
+12. resultSet1.js
+    12.1 Testing resultSet option
+        12.1.1 when resultSet option = false, content of result is correct
+        12.1.2 when resultSet option = true, content of result is correct
+        12.1.3 when resultSet option = 0, it behaves like false
+        12.1.4 when resultSet option = null, it behaves like false
+        12.1.5 when resultSet option = undefined, it behaves like false
+        12.1.6 when resultSet option = NaN, it behaves like false
+        12.1.7 when resultSet option = 1, it behaves like true
+        12.1.8 when resultSet option = -1, it behaves like true
+        12.1.9 when resultSet option is a random string, it behaves like true
+    12.2 Testing prefetchRows option
+        12.2.1 cannot set prefetchRows to be a negative value
+        12.2.2 cannot set prefetchRows to be a random string
+        12.2.3 cannot set prefetchRows to be NaN
+        12.2.4 cannot set prefetchRows to be null
+        12.2.5 prefetchRows can be set to 0
+    12.3 Testing function getRows()
+        12.3.1 retrieved set is exactly the size of result
+        12.3.2 retrieved set is greater than the size of result
+        12.3.3 retrieved set is half of the size of result
+        12.3.4 retrieved set is one tenth of the size of the result
+        12.3.5 data in resultSet is array when setting outFormat ARRAY
+        12.3.6 data in resultSet is object when setting outFormat OBJECT
+        12.3.7 the size of retrieved set can be set to 1
+        12.3.8 query 0 row
+        12.3.9 Negative - To omit the first parameter
+        12.3.10 Negative - set the 1st parameter of getRows() to be 0
+        12.3.11 Negative - set the 1st parameter of getRows() to be -5
+        12.3.12 Negative - set the 1st parameter of getRows() to be null
+    12.4 Testing function getRow()
+        12.4.1 works well with all correct setting
+        12.4.2 data in resultSet is array when setting outFormat ARRAY
+        12.4.3 data in resultSet is object when setting outFormat OBJECT
+        12.4.4 query 0 row
+        12.4.5 Negative - set the first parameter like getRows()
+    12.5 Testing function close()
+        12.5.1 does not call close()
+        12.5.2 invokes close() twice
+        12.5.3 uses getRows after calling close()
+        12.5.4 closes one resultSet and then open another resultSet
+    12.6 Testing metaData
+        12.6.1 the amount and value of metaData should be correct
+        12.6.2 can distinguish lower case and upper case
+        12.6.3 can contain quotes
+        12.6.4 can contain underscore
+    12.7 Testing maxRows
+        12.7.1 maxRows option is ignored when resultSet option is true
+        12.7.2 maxRows option is ignored with REF Cursor
+
+21. datatypeAssist.js
+        
+22. dataTypeChar.js
+    22.1 testing CHAR data in various lengths
+        22.1.1 works well with SELECT query
+        22.1.2 works well with result set
+        22.1.3 works well with REF Cursor
+    22.2 stores null value correctly
+        22.2.1 testing Null, Empty string and Undefined
+
+23. dataTypeNchar.js
+    23.1 testing NCHAR data in various lengths
+        23.1.1 SELECT query
+        23.1.2 resultSet stores NCHAR data correctly
+        23.1.3 works well with REF Cursor
+    23.2 stores null value correctly
+        23.2.1 testing Null, Empty string and Undefined 
+
+24. dataTypeVarchar2.js
+    24.1 supports VARCHAR2 data in various lengths
+    24.2 resultSet stores VARCHAR2 data correctly
+    24.3 stores null value correctly
+
+24. dataTypeVarchar2.js
+    24.1 testing VARCHAR2 data in various lengths
+        24.1.1 SELECT query
+        24.1.2 resultSet stores VARCHAR2 data correctly
+        24.1.3 works well with REF Cursor
+    24.2 stores null value correctly
+        24.2.1 testing Null, Empty string and Undefined
+
+25. dataTypeNvarchar2.js
+    25.1 testing NVARCHAR2 data in various lengths
+        25.1.1 SELECT query
+        25.1.2 resultSet stores NVARCHAR2 data correctly
+        25.1.3 works well with REF Cursor
+    25.2 stores null value correctly
+        25.2.1 testing Null, Empty string and Undefined    
+
+26. dataTypeNumber.js
+    26.1 testing NUMBER data
+        26.1.1 SELECT query
+        26.1.2 resultSet stores NUMBER data correctly
+        26.1.3 works well with REF Cursor
+    26.2 stores null value correctly
+        26.2.1 testing Null, Empty string and Undefined 
+
+27. dataTypeNumber2.js
+    27.1 testing NUMBER(p, s) data
+        27.1.1 SELECT query
+        27.1.2 resultSet stores NUMBER(p, s) data correctly
+    27.2 stores null value correctly
+        27.2.1 testing Null, Empty string and Undefined
+
+28. dataTypeFloat.js
+    28.1 testing FLOAT data type
+        28.1.1 works well with SELECT query
+        28.1.2 works well with result set
+        28.1.3 works well with REF Cursor
+    28.2 stores null value correctly
+        28.2.1 testing Null, Empty string and Undefined
+
+29. dataTypeFloat2.js
+    29.1 testing FLOAT(p) data type
+        29.1.1 works well with SELECT query
+        29.1.2 works well with result set
+        29.1.3 works well with REF Cursor
+    29.2 stores null value correctly
+        29.2.1 testing Null, Empty string and Undefined
+  
+30. dataTypeBinaryFloat.js
+    30.1 testing BINARY_FLOAT data
+      - 30.1.1 works well with SELECT query
+      - 30.1.2 works well with result set
+      - 30.1.3 works well with REF Cursor
+    30.2 stores null value correctly
+        30.2.1 testing Null, Empty string and Undefined   
+  
+31. dataTypeBinaryDouble.js
+    31.1 testing BINARY_DOUBLE data
+      - 31.1.1 works well with SELECT query
+      - 31.1.2 works well with result set
+      - 31.1.3 works well with REF Cursor
+    31.2 stores null value correctly
+        31.2.1 testing Null, Empty string and Undefined
+
+32. dataTypeDate.js
+    32.1 Testing JavaScript Date data
+        32.1.1 works well with SELECT query
+        32.1.2 works well with result set
+        32.1.3 works well with REF Cursor 
+    32.2 stores null value correctly
+        32.2.1 testing Null, Empty string and Undefined
+    32.3 insert SQL Date data
+        32.3.1 SELECT query - original data
+        32.3.2 SELECT query - formatted data for comparison
+    
+33. dataTypeTimestamp1.js
+    33.1 Testing JavaScript Date with database TIMESTAMP
+        33.1.1 works well with SELECT query
+        33.1.2 works well with result set
+        33.1.3 works well with REF Cursor
+    33.2 stores null value correctly
+        33.2.1 testing Null, Empty string and Undefined
+    33.3 testing TIMESTAMP without TIME ZONE
+        32.3.1 SELECT query - original data
+        33.3.2 SELECT query - formatted data for comparison
+
+34. dataTypeTimestamp2.js
+    34.1 Testing JavaScript Date with database TIMESTAMP(p)
+        34.1.1 works well with SELECT query
+        34.1.2 works well with result set
+        34.1.3 works well with REF Cursor 
+    34.2 sotres null value correctly
+        34.2.1 testing Null, Empty string and Undefined 
+    34.3 testing database TIMESTAMP(p)
+        34.3.1 SELECT query - original data
+        34.3.2 SELECT query - formatted data for comparison
+
+35. dataTypeTimestamp3.js
+      supports TIMESTAMP WITH TIME ZONE data type
+
+36. dataTypeTimestamp4.js
+      supports TIMESTAMP WITH TIME ZONE data type
+
+37. dataTypeTimestamp5.js
+    37.1 Testing JavaScript Date with database TIMESTAMP WITH LOCAL TIME ZONE
+        37.1.1 works well with SELECT query
+        37.1.2 works well with result set
+        37.1.3 works well with REF Cursor 
+    37.2 stores null value correctly
+        37.2.1 testing Null, Empty string and Undefined 
+    37.3 testing TIMESTAMP WITH LOCAL TIME ZONE
+        37.3.1 SELECT query - original data
+        37.3.2 SELECT query - formatted data for comparison
+
+38. dataTypeTimestamp6.js
+    38.1 Testing JavaScript Date with database TIMESTAMP(9) WITH LOCAL TIME ZON
+        38.1.1 works well with SELECT query
+        38.1.2 works well with result set
+        38.1.3 works well with REF Cursor 
+    38.2 stores null value correctly
+        38.2.1 testing Null, Empty string and Undefined 
+    38.3 testing TIMESTAMP WITH LOCAL TIME ZONE
+        38.3.1 SELECT query - original data
+        38.3.2 SELECT query - formatted data for comparison
+
+39. dataTypeRowid.js
+    39.1 testing ROWID data type
+       39.1.1 is still unsupported data type        
+
+40. dataTypeClob.js
+    40.1 testing CLOB data type
+        40.1.1 stores CLOB value correctly 
+    40.2 stores null value correctly
+        40.2.1 testing Null, Empty string and Undefined
+
+41. dataTypeBlob
+    41.1 testing BLOB data type
+        41.1.1 stores BLOB value correctly 
+    41.2 stores null value correctly
+        41.2.1 testing Null, Empty string and Undefined
+
+51. accessTerminatedPoolAttributes.js
+    can not access attributes of terminated pool
+    
+52. getConnAfterPoolTerminate.js
+    can not get connections from pool after pool is terminated
+
+53. poolValidityAfterFailingTernimate.js
+    pool should be available after failing terminate
+
+54. releaseAfterFailingTerminate.js
+    can still release connections after failing pool termination
+
+55. resultSet2.js
+    55.1 query a RDBMS function
+        55.1.1 LPAD function
+    55.2 binding variables
+        55.2.1 query with one binding variable
+    55.3 alternating getRow() & getRows() function
+        55.3.1 result set
+        55.3.2 REF Cursor
+    55.4 release connection before close resultSet
+        55.4.1 result set
+        55.4.2 REF Cursor
+    55.5 the content of resultSet should be consistent
+        55.5.1 (1) get RS (2) modify data in that table and commit (3) check RS
+    55.6 access resultSet simultaneously
+        55.6.1 concurrent operations on resultSet are not allowed
+        55.6.2 concurrent operation on REF Cursor are not allowed
+    55.7 getting multiple resultSets
+        55.7.1 can access multiple resultSet on one connection
+        55.7.2 can access multiple REF Cursor
+    55.8 Negative - resultSet is only for query statement
+        55.8.1 resultSet cannot be returned for non-query statements
+    55.9 test querying a PL/SQL function
+        55.9.1 
+    55.10 calls getRows() once and then close RS before getting more rows
+        55.10.1 
+    55.11 deals with unsupported database with result set
+        55.11.1 RAW data type
+        55.11.2 ROWID date type
+    55.12 bind a cursor BIND_INOUT
+      - 55.12.1 should work
+
+
+56. fetchAs.js
+    56.1 FetchAs - DATE type as STRING
+    56.2 FetchAs NUMBER & DATE type as STRING
+    56.3 FetchAs Oracledb property by-type
+    56.4 FetchAs override oracledb by-type (for DATE) at execute time
+
+ 57. nestedCursor.js
+    57.1 testing nested cursor support - result set
+    57.2 testing nested cursor support - REF Cursor 

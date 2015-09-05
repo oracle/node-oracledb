@@ -346,7 +346,7 @@ describe('12. resultSet1.js', function() {
   })
 
   describe('12.3 Testing function getRows()', function() {
-    it('12.3.1 retrived set is exactly the size of result', function(done) {
+    it('12.3.1 retrieved set is exactly the size of result', function(done) {
       connection.should.be.ok;
       var nRows = rowsAmount;
       var accessCount = 0;
@@ -379,7 +379,7 @@ describe('12. resultSet1.js', function() {
       }
     })
     
-    it('12.3.2 retrived set is greater than the size of result', function(done) {
+    it('12.3.2 retrieved set is greater than the size of result', function(done) {
       connection.should.be.ok;
       var nRows = rowsAmount * 2;
       var accessCount = 0;
@@ -412,7 +412,7 @@ describe('12. resultSet1.js', function() {
       }
     })
 
-    it('12.3.3 retrived set is half of the size of result', function(done) {
+    it('12.3.3 retrieved set is half of the size of result', function(done) {
       connection.should.be.ok;
       var nRows = Math.ceil(rowsAmount/2);
       var accessCount = 0;
@@ -445,7 +445,7 @@ describe('12. resultSet1.js', function() {
       }
     })
     
-    it('12.3.4 retrived set is one tenth of the size of the result', function(done) {
+    it('12.3.4 retrieved set is one tenth of the size of the result', function(done) {
       connection.should.be.ok;
       var nRows = Math.ceil(rowsAmount/10);
       var accessCount = 0;
@@ -550,7 +550,7 @@ describe('12. resultSet1.js', function() {
       }
     })
     
-    it('12.3.7 the size of retrived set can be set to 1', function(done) {
+    it('12.3.7 the size of retrieved set can be set to 1', function(done) {
       connection.should.be.ok;
       var nRows = 1;
       var accessCount = 0;
@@ -1313,6 +1313,71 @@ describe('12. resultSet1.js', function() {
             rs.close(function(err) {
               should.not.exist(err);
               done();
+            });
+          }
+        });
+      }
+    })
+    
+    it('12.7.2 maxRows option is ignored with REF Cursor', function(done) {
+      connection.should.be.ok;
+      var rowCount = 0;
+      var queryAmount = 100; 
+      var proc = 
+        "CREATE OR REPLACE PROCEDURE get_emp_rs (p_in IN NUMBER, p_out OUT SYS_REFCURSOR) \
+           AS \
+           BEGIN \
+             OPEN p_out FOR  \
+               SELECT * FROM oracledb_employees \
+               WHERE employees_id <= p_in; \
+           END; ";
+      
+      async.series([
+        function(callback) {
+          connection.execute(
+            proc,
+            function(err) {
+              should.not.exist(err);
+              callback();
+            }
+          );
+        },
+        function(callback) {
+          connection.execute(
+            "BEGIN get_emp_rs(:in, :out); END;",
+            {
+              in: queryAmount,
+              out: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
+            },
+            { maxRows: 10 },
+            function(err, result) {
+              should.not.exist(err);
+              fetchRowFromRS(result.outBinds.out, callback);
+            }
+          );
+        }, 
+        function(callback) {
+          connection.execute(
+            "DROP PROCEDURE get_emp_rs",
+            function(err) {
+              should.not.exist(err);
+              callback();
+            }
+          );
+        }
+      ], done);
+      
+      function fetchRowFromRS(rs, cb) {
+        rs.getRow(function(err, row) {
+          should.not.exist(err);
+          if(row) {
+            rowCount++;
+            return fetchRowFromRS(rs, cb);
+          } else {
+            rs.close( function(err) {
+              should.not.exist(err);
+              rowCount.should.eql(queryAmount);
+              cb();
             });
           }
         });

@@ -50,17 +50,29 @@
 
 #include "njsConnection.h"
 #include "njsResultSet.h"
+#include "njsIntLob.h"
 #include <stdlib.h>
 #include <iostream>
+#include <limits>
 using namespace std;
-                                        //peristent Connection class handle
+
+// persistent Connection class handle
 Persistent<FunctionTemplate> Connection::connectionTemplate_s;
 
+// default value for bind option maxSize
 #define NJS_MAX_OUT_BIND_SIZE 200
-// # of milliseconds in a day.  Used to convert from/to v8::Date to Oracle/Date
-#define NJS_DAY2MS       (24.0 * 60.0 * 60.0 * 1000.0 )
+
+// max number of bytes for data converted to string with fetchAsString or fetchInfo
+#define NJS_MAX_FETCH_AS_STRING_SIZE 200
+
+// number of rows prefetched by non-ResultSet queries
 #define NJS_PREFETCH_NON_RESULTSET 2 
 
+#define NJS_SIZE_T_MAX std::numeric_limits<std::size_t>::max()
+
+#define NJS_SIZE_T_OVERFLOW(maxSize,maxRows)                                  \
+ ( ( ( maxSize != 0 ) &&                                                      \
+     ( ( ( NJS_SIZE_T_MAX ) / ( (size_t)maxSize ) ) < (maxRows) ) ) ? 1 : 0)  \
 
 /*****************************************************************************/
 /*
@@ -115,6 +127,7 @@ void Connection::Init(Handle<Object> target)
   NODE_SET_PROTOTYPE_METHOD(tpl, "commit", Commit);
   NODE_SET_PROTOTYPE_METHOD(tpl, "rollback", Rollback);
   NODE_SET_PROTOTYPE_METHOD(tpl, "break", Break);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "getLob", GetLob);
 
   tpl->InstanceTemplate()->SetAccessor(
                                               NanNew<v8::String>("stmtCacheSize"),
@@ -192,6 +205,7 @@ NAN_PROPERTY_GETTER(Connection::GetStmtCacheSize)
   }
   catch(dpi::Exception &e)
   {
+    NJS_SET_CONN_ERR_STATUS (  e.errnum(), njsConn->dpiconn_ );
     NJS_SET_EXCEPTION(e.what(), strlen(e.what()));
     NanReturnUndefined();
   }
@@ -346,6 +360,11 @@ NAN_METHOD(Connection::Execute)
   executeBaton->outFormat    = connection->oracledb_->getOutFormat();
   executeBaton->autoCommit   = connection->oracledb_->getAutoCommit();
   executeBaton->dpienv       = connection->oracledb_->getDpiEnv();
+  executeBaton->fetchAsStringTypes = 
+    (DataType*) connection->oracledb_->getFetchAsStringTypes ();
+  executeBaton->fetchAsStringTypesCount =
+    connection->oracledb_->getFetchAsStringTypesCount ();
+
   executeBaton->dpiconn      = connection->dpiconn_;
   executeBaton->njsconn      = connection;
 
@@ -409,6 +428,7 @@ void Connection::ProcessBinds (_NAN_METHOD_ARGS, unsigned int index,
 void Connection::ProcessOptions (_NAN_METHOD_ARGS, unsigned int index,
                                  eBaton* executeBaton)
 {
+  NanScope();
   Local<Object> options;
   if(args[index]->IsObject() && !args[index]->IsArray())
   {
@@ -423,10 +443,56 @@ void Connection::ProcessOptions (_NAN_METHOD_ARGS, unsigned int index,
                              options, "resultSet", 2, exitProcessOptions );
     NJS_GET_BOOL_FROM_JSON ( executeBaton->autoCommit, executeBaton->error,
                              options, "autoCommit", 2, exitProcessOptions );
+
+    // Optional fetchAs specifications
+    Local<Value> val = options->Get(NanNew<v8::String>("fetchInfo"));
+    if ( !val->IsUndefined () && !val->IsNull () )
+    {
+      Handle<Object> fetchInfo = val->ToObject();
+      Local<Array> keys = fetchInfo->GetOwnPropertyNames ();
+      if ( keys->Length () > 0 )
+      {
+        FetchInfo *fInfo = executeBaton->fetchInfo = 
+                           new FetchInfo[keys->Length()];
+        executeBaton->fetchInfoCount = keys->Length ();
+
+        for (unsigned int index = 0 ; index < keys->Length() ; index ++ )
+        {
+          unsigned int tmptype = 0 ;
+
+          Handle<String> temp = keys->Get (index).As<String>();
+          NJSString (fInfo[index].name, temp );
+
+          Handle<Object> colInfo = fetchInfo->Get (NanNew<v8::String>(
+                                     fInfo[index].name ))->ToObject();
+
+          NJS_GET_UINT_FROM_JSON (tmptype, executeBaton->error,
+                                  colInfo, "type", 2, exitProcessOptions );
+          fInfo[index].type = (DataType) tmptype;
+
+          // Only Conversion to STRING allowed now. Either STRING or DB type.
+          if ( ( fInfo[index].type != DATA_DEFAULT ) &&
+               ( fInfo[index].type != DATA_STR ) )
+          {
+            executeBaton->error = NJSMessages::getErrorMsg (
+                                               errInvalidTypeForConversion );
+            goto exitProcessOptions;
+          }
+        }
+      }
+      else
+      {
+        executeBaton->error = NJSMessages::getErrorMsg (
+                                                   errEmptyArrayForFetchAs,
+                                                   index );
+        goto exitProcessOptions;
+      }
+    }
   }
   else
   {
-    executeBaton->error = NJSMessages::getErrorMsg(errInvalidParameterType, index);
+    executeBaton->error = NJSMessages::getErrorMsg(errInvalidParameterType,
+                                                   index);
     goto exitProcessOptions;
   }
   exitProcessOptions:
@@ -457,7 +523,7 @@ void Connection::GetBinds (Handle<Object> bindobj, eBaton* executeBaton)
     NJSString(str, temp);
     bind->key = ":"+std::string(str);
     Handle<Value> val__ = bindobj->Get(NanNew<v8::String>((char*)str.c_str(),
-						   (int) str.length()));
+                           (int) str.length()));
     Connection::GetBindUnit(val__, bind, executeBaton);
     if(!executeBaton->error.empty())
       goto exitGetBinds;
@@ -508,6 +574,7 @@ void Connection::GetBindUnit (Handle<Value> val, Bind* bind,
 
   if(val->IsObject() && !val->IsDate() && !Buffer::HasInstance(val))
   {
+    dir                     = BIND_UNKNOWN;
     Local<Object> bind_unit = val->ToObject();
     NJS_GET_UINT_FROM_JSON   ( dir, executeBaton->error,
                                bind_unit, "dir", 1, exitGetBindUnit );
@@ -524,22 +591,40 @@ void Connection::GetBindUnit (Handle<Value> val, Bind* bind,
       goto exitGetBindUnit;
     }
 
+    /* REFCURSOR(s) are supported only as OUT Binds now */
+    if ( bind->type == DATA_CURSOR && dir != BIND_OUT )
+    {
+      executeBaton->error = NJSMessages::getErrorMsg (
+                                            errInvalidPropertyValueInParam,
+                                            "type", 2 ) ;
+      goto exitGetBindUnit;
+    }
+
+
     Local<Value> element = bind_unit->Get(NanNew<v8::String>("val"));
     switch(dir)
     {
       case BIND_IN    :
         bind->isOut  = false;
+        bind->isInOut  = false;
         Connection::GetInBindParams(element, bind, executeBaton, BIND_IN );
         if(!executeBaton->error.empty()) goto exitGetBindUnit;
         break;
       case BIND_INOUT :
         bind->isOut  = true;
+        bind->isInOut  = true;
         Connection::GetInBindParams(element, bind, executeBaton, BIND_INOUT);
         if(!executeBaton->error.empty()) goto exitGetBindUnit;
         break;
       case BIND_OUT   :
         bind->isOut  = true;
+        bind->isInOut  = false;
         executeBaton->numOutBinds++;
+        if ( bind->type == DATA_DEFAULT )
+        {
+          /* For OUT binds, if type is not specified, assume STRING */
+          bind->type = DATA_STR;
+        }
         Connection::GetOutBindParams(bind->type, bind, executeBaton);
         if(!executeBaton->error.empty()) goto exitGetBindUnit;
         break;
@@ -582,7 +667,6 @@ void Connection::GetOutBindParams (unsigned short dataType, Bind* bind,
       bind->maxSize  = sizeof(double);
       break;
     case DATA_DATE :
-      bind->extvalue = (long double *) malloc ( sizeof ( long double ) );
       bind->type     = dpi::DpiTimestampLTZ;
       bind->maxSize  = 0;
       break;
@@ -592,6 +676,14 @@ void Connection::GetOutBindParams (unsigned short dataType, Bind* bind,
       break;
     case DATA_BUFFER :
       bind->type     = dpi::DpiRaw;
+      bind->maxSize  = 0;
+      break;
+    case DATA_CLOB : 
+      bind->type    = dpi::DpiClob;
+      bind->maxSize  = 0;
+      break;
+    case DATA_BLOB : 
+      bind->type    = dpi::DpiBlob;
       bind->maxSize  = 0;
       break;
     default :
@@ -652,7 +744,14 @@ void Connection::GetInBindParams (Handle<Value> v8val, Bind* bind,
                        bind->maxSize : *(bind->len);
     if(size)
     {
-      bind->value = (char*)malloc(size);
+      bind->value = (char*)malloc((size_t)size);
+      if( !bind->value )
+      {
+        executeBaton->error = NJSMessages::getErrorMsg(
+                                errInsufficientMemory );
+        return;
+      }
+
       if(str.length())
         memcpy(bind->value, *str, str.length());
     }
@@ -705,7 +804,7 @@ void Connection::GetInBindParams (Handle<Value> v8val, Bind* bind,
     /* This has to be allocated after stmt is initialized */
     bind->dttmarr = NULL ;
     bind->extvalue = (long double *) malloc (sizeof ( long double ) );
-    bind->value = (long double *)malloc (sizeof ( long double ));
+    bind->value = NULL;
     bind->type = dpi::DpiTimestampLTZ;
     *(bind->len) = 0;
     bind->maxSize = 0;
@@ -849,20 +948,51 @@ void Connection::Async_Execute (uv_work_t *req)
      /* Process date/timestamp INOUT/OUT bind values */
      for ( unsigned int b = 0; b < executeBaton->binds.size (); b++ )
      {
+       Bind *bind = executeBaton->binds[b];
+
        /* Interested only OUT binds of date/timestamp type */
-       if ( executeBaton->binds[b]->isOut && executeBaton->binds[b]->dttmarr)
+       if ( bind->isOut && bind->dttmarr)
        {
-         *(long double *)(executeBaton->binds[b]->extvalue) =
-           executeBaton->binds[b]->dttmarr->getDateTime ( 0 ) * NJS_DAY2MS ;
+          for (unsigned int rowidx = 0; rowidx < bind->rowsReturned; rowidx++)
+            ((long double *)(bind->extvalue))[rowidx] =
+                              bind->dttmarr->getDateTime ( rowidx ) ;
        }
 
        /* DATE/Timestamp could have been allocated for IN/OUT/INOUT binds */
-       if ( executeBaton->binds[b]->dttmarr )
+       if ( bind->dttmarr )
        {
-         executeBaton->binds[b]->dttmarr->release () ;
-         executeBaton->binds[b]->dttmarr = NULL;
+         bind->dttmarr->release () ;
+         bind->dttmarr = NULL;
        }
      }
+
+     /* For each OUT Binds of CURSOR type, get the dpistmt state */
+     for ( unsigned int b = 0; b < executeBaton->binds.size (); b ++ )
+     {
+       Bind *bind = executeBaton->binds[b];
+
+       /* Here bind->isOut is expected to be TRUE, and is checked earlier */
+       if ( bind->type == dpi::DpiRSet )
+       {
+         unsigned long state = ((Stmt*)bind->value)->getState ();
+
+         if ( state == DPI_STMT_STATE_EXECUTED )
+         {
+           // set the prefetch on the valid cursor object
+           ((dpi::Stmt *)(bind->value))->prefetchRows ( 
+                                              executeBaton->prefetchRows ) ;
+         }
+         else
+         {
+           /* Release the invalid REFCURSOR to avoid any leaks */
+           ((Stmt*)bind->value)->release ();
+           bind->value = NULL;
+         }
+       }
+     }
+
+     // process any lob descriptor out binds
+     Connection::Descr2protoILob ( executeBaton, 0, 0);
     }
     if ( executeBaton->dpistmt )
     {    
@@ -871,6 +1001,7 @@ void Connection::Async_Execute (uv_work_t *req)
   }
   catch (dpi::Exception& e)
   {
+    NJS_SET_CONN_ERR_STATUS (  e.errnum(), executeBaton->dpiconn );
     // In Case of DML Returning, if the buffer is small, and if the callback
     // is called multiple times, an ORA error 24343 was reported. Converting
     // that error to errInsufficientBufferForBinds.
@@ -899,6 +1030,7 @@ void Connection::Async_Execute (uv_work_t *req)
  */
 void Connection::PrepareAndBind (eBaton* executeBaton)
 {
+    DPI_SZ_TYPE maxSize = 0; // maxSize for out bind; add 1 for dml returning
     executeBaton->dpistmt = executeBaton->dpiconn->getStmt(executeBaton->sql);
     executeBaton->st = executeBaton->dpistmt->stmtType ();
     executeBaton->stmtIsReturning = executeBaton->dpistmt->isReturning ();
@@ -910,45 +1042,60 @@ void Connection::PrepareAndBind (eBaton* executeBaton)
         for(unsigned int index = 0 ;index < executeBaton->binds.size();
             index++)
         {
-          /* DML Returning does not support DATE/TIME database types
-           * return error in that case
-           */
-          if ( executeBaton->stmtIsReturning &&
-               ((executeBaton->binds[index]->type == DpiTimestampLTZ) &&
-                (executeBaton->binds[index]->isOut) ))
+          if ( executeBaton->binds[index]->isOut &&
+               executeBaton->stmtIsReturning &&
+               executeBaton->binds[index]->type == dpi::DpiRSet )
           {
             executeBaton->error = NJSMessages::getErrorMsg (
-                                              errInvalidBindDataType, 2);
-            return;
+                                                       errInvalidResultSet ) ;
           }
-          
+
           // Allocate for OUT Binds
           // For DML Returning, allocation happens through callback.
           if ( executeBaton->binds[index]->isOut &&
                !executeBaton->stmtIsReturning &&
                !executeBaton->binds[index]->value )
           {
-            Connection::cbDynBufferAllocate ( executeBaton->binds[index],
-                                              false, 1 );
+            Connection::cbDynBufferAllocate ( executeBaton,
+                                              false, 1, index );
+            // LOBs: binds[index]->value is a pointer to a pointer
+            // we need to allocate the underlying LOB descriptor
+            if (executeBaton->binds[index]->type == DpiClob ||
+                executeBaton->binds[index]->type == DpiBlob)
+            {
+              *((void **)executeBaton->binds[index]->value) =
+                executeBaton->dpienv->allocDescriptor(LobDescriptorType);
+            }
           }
           
-          // Allocate handle for Ref Cursor
-          if ( executeBaton->binds[index]->type == DpiRSet )
-          { 
-             executeBaton->binds[index]->value = executeBaton->dpiconn->
-                                                               getStmt();
-          }
-
-          // Convert v8::Date to Oracle DB Type
-          if ( executeBaton->binds[index]->type == DpiTimestampLTZ )
+          // Convert v8::Date to Oracle DB Type for IN and IN/OUT binds
+          if ( executeBaton->binds[index]->type == DpiTimestampLTZ &&
+              // InOut bind
+              (executeBaton->binds[index]->isInOut || 
+              // In bind
+              (!executeBaton->binds[index]->isOut &&
+               !executeBaton->binds[index]->isInOut)))
           {
-            Connection::UpdateDateValue ( executeBaton ) ;
+            Connection::UpdateDateValue ( executeBaton, index ) ;
           }
 
+          /* 
+           * In case of DML Returning, add 1 extra byte, to check for
+           * more data 
+           */
+          if ( ( executeBaton->binds[index]->type == dpi::DpiVarChar) &&
+               ( executeBaton->stmtIsReturning ) )
+          {
+            maxSize = executeBaton->binds[index]->maxSize + 1;
+          }
+          else
+          {
+            maxSize = executeBaton->binds[index]->maxSize;
+          }
           // Bind by name
           executeBaton->dpistmt->bind(
                 (const unsigned char*)executeBaton->binds[index]->key.c_str(),
-                (int) executeBaton->binds[index]->key.length(),
+                (int) executeBaton->binds[index]->key.length(), index,
                 executeBaton->binds[index]->type,
                 executeBaton->binds[index]->value,
                 (executeBaton->binds[index]->type == dpi::DpiVarChar ) ?
@@ -958,10 +1105,10 @@ void Connection::PrepareAndBind (eBaton* executeBaton)
                 executeBaton->binds[index]->len,
                 (executeBaton->stmtIsReturning &&
                   executeBaton->binds[index]->isOut) ?
-                    (void *)executeBaton->binds[index] : NULL,
+                (void *)executeBaton : NULL,
                 (executeBaton->stmtIsReturning &&
                   executeBaton->binds[index]->isOut) ?
-                    Connection::cbDynBufferGet : NULL );
+                Connection::cbDynBufferGet : NULL);
         }
       }
       else
@@ -969,37 +1116,40 @@ void Connection::PrepareAndBind (eBaton* executeBaton)
         for(unsigned int index = 0 ;index < executeBaton->binds.size();
             index++)
         {
-          /* DML Returning does not support DATE/TIME database types
-           * return error in that case
-           */
-          if ( executeBaton->stmtIsReturning &&
-               (executeBaton->binds[index]->type == DpiTimestampLTZ ) )
-          {
-            executeBaton->error = NJSMessages::getErrorMsg (
-                                              errInvalidBindDataType, 2);
-            return;
-          }
-
-          // Allocate handle for Ref Cursor
-          if ( executeBaton->binds[index]->type == DpiRSet )
-          {
-            executeBaton->binds[index]->value = executeBaton->dpiconn->
-                                                              getStmt();
-          }
-
           // Allocate for OUT Binds
           // For DML Returning, allocation happens through callback
           if ( executeBaton->binds[index]->isOut &&
                !executeBaton->stmtIsReturning &&
                !executeBaton->binds[index]->value )
           {
-            Connection::cbDynBufferAllocate ( executeBaton->binds[index],
-                                              false, 1 );
+            Connection::cbDynBufferAllocate ( executeBaton,
+                                              false, 1, index );
           }
 
-          if ( executeBaton->binds[index]->type == DpiTimestampLTZ )
+          // Convert v8::Date to Oracle DB Type for IN and IN/OUT binds
+          if ( executeBaton->binds[index]->type == DpiTimestampLTZ &&
+              // InOut bind
+              (executeBaton->binds[index]->isInOut ||
+              // In bind
+              (!executeBaton->binds[index]->isOut &&
+               !executeBaton->binds[index]->isInOut)))
           {
-            Connection::UpdateDateValue ( executeBaton ) ;
+            Connection::UpdateDateValue ( executeBaton, index ) ;
+          }
+
+          /* 
+           * In case of DML Returning, add 1 extra byte, to check for
+           * more data 
+           */
+
+          if ( ( executeBaton->binds[index]->type == dpi::DpiVarChar) &&
+               ( executeBaton->stmtIsReturning ) )
+          {
+            maxSize = executeBaton->binds[index]->maxSize + 1;
+          }
+          else
+          {
+            maxSize = executeBaton->binds[index]->maxSize;
           }
           // Bind by position
           executeBaton->dpistmt->bind(
@@ -1012,10 +1162,10 @@ void Connection::PrepareAndBind (eBaton* executeBaton)
                 executeBaton->binds[index]->len,
                 (executeBaton->stmtIsReturning &&
                   executeBaton->binds[index]->isOut ) ?
-                    (void *)executeBaton->binds[index] : NULL,
+                    (void *)executeBaton : NULL,
                 (executeBaton->stmtIsReturning &&
                   executeBaton->binds[index]->isOut) ?
-                    Connection::cbDynBufferGet : NULL );
+                Connection::cbDynBufferGet : NULL);
         }
       }
     }
@@ -1043,6 +1193,217 @@ void Connection::CopyMetaData ( std::string* names, const dpi::MetaData* meta,
 
 /*****************************************************************************/
 /*
+  DESCRIPTION
+    To convert various Oracle Database type to the one used by the driver
+
+  PARAMETERS
+    dbType - Dpi enumeration of database type
+    
+  RETURNS
+  targetDB type (DPI enumeration)
+*/
+unsigned short Connection::SourceDBType2TargetDBType ( unsigned dbType )
+{
+  switch ( dbType )
+  {
+    /* Double is used for all numeric types */
+  case dpi::DpiNumber:
+  case dpi::DpiBinaryFloat:
+  case dpi::DpiBinaryDouble:
+  case dpi::DpiDouble:
+    dbType = dpi::DpiDouble;
+    break;
+
+    /* VARCHAR is used for all character types */
+  case dpi::DpiVarChar:
+  case dpi::DpiFixedChar:
+    dbType = dpi::DpiVarChar;
+    break;
+
+    /* TIMESTAMP WITH LOCAL TIME ZONE (LTZ) is used for all DATE/TIMESTAMP */
+  case dpi::DpiDate:
+  case dpi::DpiTimestamp:
+  case dpi::DpiTimestampLTZ:
+    dbType = dpi::DpiTimestampLTZ;
+    break;
+  }
+
+  return dbType;
+}
+
+
+/*****************************************************************************/
+/*
+  DESCRIPTION
+    Apply By-name rules if applicable
+
+  PARAMETERS
+    executeBaton          SQL Execute Baton structure
+    name                  name of the column
+    targetType[IN/OUT]  - db type [IN}, and fetchType [OUT] if a rules was
+                          applied
+    
+  RETURNS
+    true if rules applied and
+    false if no matching column name available.
+*/
+boolean Connection::MapByName ( eBaton *executeBaton, std::string &name,
+                                unsigned short &targetType )
+{
+  boolean modified = false;
+
+  if ( executeBaton->fetchInfo && executeBaton->fetchInfoCount > 0 )
+  {
+    for ( unsigned int f = 0 ;
+          !modified && ( f < executeBaton->fetchInfoCount ) ;
+          f ++ )
+    {
+      /* COLUMN name should match */
+      if ( executeBaton->fetchInfo[f].name.compare ( name ) == 0 )
+      {
+        /* Only DATA_STR & DATA_DEFAULT allowed.  For DATA_DEFAULT,
+         * the type is identified from metadata and is already set.
+         * In case of DATA_STR, set the return value.
+         */
+        if ( executeBaton->fetchInfo[f].type == DATA_STR )
+        {
+          targetType = dpi::DpiVarChar;
+        }
+        else if ( executeBaton->fetchInfo[f].type == DATA_DEFAULT )
+        {
+          targetType = Connection::SourceDBType2TargetDBType ( targetType );
+        }
+        modified = true;
+      }
+    }
+  }
+
+  return modified;
+}
+
+
+
+/*****************************************************************************/
+/*
+  DESCRIPTION
+    Apply by-type conversion rules - rules are set as oracledb property
+
+  PARAMETERS
+    executeBaton  - eBaton structure for this execute call
+    dbType        - database column type from metadata(IN), targetDBtype(OUT)
+
+  RETURNS
+    true if the database type is modified based on by-type rules
+    false if not modified
+*/
+boolean Connection::MapByType ( eBaton *executeBaton, unsigned short &dbType )
+{
+  boolean modified = false;
+  unsigned int count = 0 ;
+
+  /* If oracledb property is set map using that */
+  if ( executeBaton->fetchAsStringTypes )
+  {
+    count = executeBaton->fetchAsStringTypesCount;
+
+    switch ( dbType )
+    {
+    case dpi::DpiNumber:
+    case dpi::DpiBinaryFloat:
+    case dpi::DpiBinaryDouble:
+    case dpi::DpiDouble:
+      /* Numeric Type */
+      for ( unsigned int t = 0 ; !modified && ( t < count ) ; t++)
+      {
+        if ( executeBaton->fetchAsStringTypes[t] == DATA_NUM )
+        {
+          /* 
+           * Convert all Numeric values to STRING
+           */
+          dbType = dpi::DpiVarChar;
+          modified = true;
+          break;
+        }
+      }
+      break;
+
+    case dpi::DpiDate:
+    case dpi::DpiTimestamp:
+    case dpi::DpiTimestampTZ:
+    case dpi::DpiTimestampLTZ:
+      /* DATE/TIMESTAMP */
+      for ( unsigned int t = 0 ; !modified && ( t < count ) ; t ++ )
+      {
+        if ( executeBaton->fetchAsStringTypes[t] == DATA_DATE )
+        {
+          /* Convert all DATE/TIMESTAMP values to STRING */
+          dbType = dpi::DpiVarChar;
+          modified = true;
+          break;
+        }
+      }
+      break;
+
+    default:  /* Other data types no supported and is checked earlier */
+      break;
+    }
+  }
+  
+  return dbType;
+}
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     To map to desired database type if any specified by Column Name or
+     oracledb type
+
+   PARAMETERS
+     eBaton  - executeBaton Structure
+     name    - column name
+     default Type - if no override provided, to return the default DB type
+
+   RETURNS
+     dbType   - As default is provided, always a DB Column type will
+                      be returned.
+*/
+unsigned short Connection::GetTargetType ( eBaton *executeBaton,
+                                            std::string &name,
+                                unsigned short defaultType)
+{
+  unsigned short dbType = defaultType;  // Start with DB Metadata type
+
+  /* If the Database COLUMN type is STRING type already, then nothing to
+   * convert simply return
+   */
+  if ( dbType == dpi::DpiVarChar || dbType == dpi::DpiFixedChar )
+  {
+    dbType = Connection::SourceDBType2TargetDBType ( dbType );
+  }
+  else
+  {
+    if ( !Connection::MapByName ( executeBaton, name, dbType ) )
+    {
+      /* If no specification by-column-name provided, then check 
+       * the by-type specification.
+       * By-name overrides the by-type specification, and so if by-name found
+       * no need to check for by-type specifications.
+       */
+      if ( !MapByType ( executeBaton, dbType ) )
+      {
+        /* No conversion rules applied, convert to target type */
+        dbType = Connection::SourceDBType2TargetDBType ( dbType );
+      }
+    }
+  }
+
+  return dbType;
+}
+
+
+
+/*****************************************************************************/
+/*
    DESCRIPTION
      Allocate defines buffer for query output and do fetch.
      Call DPI define.
@@ -1053,7 +1414,8 @@ void Connection::CopyMetaData ( std::string* names, const dpi::MetaData* meta,
 void Connection::DoDefines ( eBaton* executeBaton, const dpi::MetaData* meta,
                              unsigned int numCols )
 {
-  Define *defines            = new Define[numCols];
+  Define *defines = executeBaton->defines = new Define[numCols];
+  int csratio = executeBaton->dpiconn->getByteExpansionRatio ();
 
   for (unsigned int col = 0; col < numCols; col++)
   {
@@ -1062,44 +1424,212 @@ void Connection::DoDefines ( eBaton* executeBaton, const dpi::MetaData* meta,
       case dpi::DpiNumber :
       case dpi::DpiBinaryFloat :
       case dpi::DpiBinaryDouble :
-        defines[col].fetchType = dpi::DpiDouble;
-        defines[col].maxSize   = sizeof(double);
-        defines[col].buf = (double *)malloc(defines[col].maxSize*executeBaton->maxRows);
+        defines[col].fetchType = Connection::GetTargetType ( executeBaton,
+                                               executeBaton->columnNames[col],
+                                                 dpi::DpiDouble) ;
+        /* For VARCHAR2 type, make sure sufficient buffer is available */
+        defines[col].maxSize = ( defines[col].fetchType == dpi::DpiVarChar) ?
+                               NJS_MAX_FETCH_AS_STRING_SIZE : sizeof (double);
+        
+        if ( NJS_SIZE_T_OVERFLOW ( defines[col].maxSize,
+                                       executeBaton->maxRows ) )
+        {
+          executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
+          return;
+        }
+        else
+        {
+          defines[col].buf = (double *)malloc( (size_t)defines[col].maxSize*
+                                               executeBaton->maxRows );
+ 
+          if( !defines[col].buf )
+          {
+            executeBaton->error = NJSMessages::getErrorMsg( 
+                                    errInsufficientMemory );
+            return;
+          }
+        }
+
         break;
       case dpi::DpiVarChar :
       case dpi::DpiFixedChar :
-        defines[col].fetchType = DpiVarChar;
-        defines[col].maxSize   = meta[col].dbSize;
-        defines[col].buf = (char *)malloc(defines[col].maxSize*executeBaton->maxRows);
+        defines[col].fetchType = Connection::GetTargetType ( executeBaton,
+                                             executeBaton->columnNames[col],
+                                             meta[col].dbType );
+
+        /*
+         * the buffer size is increased to account for possible character
+         * size expansion when data is converted from the DB character set
+         * to AL32UTF8
+         */
+ 
+        defines[col].maxSize   = (meta[col].dbSize) * csratio;
+
+        if ( NJS_SIZE_T_OVERFLOW ( defines[col].maxSize,
+                                       executeBaton->maxRows ) )
+        {
+          executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
+          return;
+        }
+        else
+        {
+          defines[col].buf = (char *)malloc( (size_t)defines[col].maxSize*
+                                             executeBaton->maxRows );
+          if( !defines[col].buf )
+          {
+            executeBaton->error = NJSMessages::getErrorMsg( 
+                                    errInsufficientMemory );
+            return;
+          }
+        }
         break;
       case dpi::DpiDate :
       case dpi::DpiTimestamp:
+      case dpi::DpiTimestampTZ:
       case dpi::DpiTimestampLTZ:
-        defines[col].dttmarr   = executeBaton->dpienv->getDateTimeArray (
+        defines[col].fetchType = Connection::GetTargetType ( executeBaton,
+                                               executeBaton->columnNames[col], 
+                                               dpi::DpiTimestampLTZ );
+
+        if ( ( meta[col].dbType == dpi::DpiTimestampTZ ) && 
+             ( defines[col].fetchType != dpi::DpiVarChar ))
+        {
+          /* 
+           * TIMESTAMP WITH TIMEZONE (TZ) column type supported only as
+           * STRING value.
+           */
+          executeBaton->error = NJSMessages::getErrorMsg ( 
+                                             errUnsupportedDatType ) ;
+          return;
+        }
+
+        if ( defines[col].fetchType != dpi::DpiVarChar )
+        {
+          defines[col].dttmarr   = executeBaton->dpienv->getDateTimeArray (
                                      executeBaton->dpistmt->getError () );
-        defines[col].fetchType = DpiTimestampLTZ;
-        defines[col].maxSize   = meta[col].dbSize;
-        defines[col].extbuf    = defines[col].dttmarr->init(executeBaton->maxRows);
+          defines[col].maxSize   = meta[col].dbSize;
+          defines[col].extbuf    = defines[col].dttmarr->init(
+                                                      executeBaton->maxRows);
+        }
+        else
+        {
+          /* Fetching DATE/TIMESTAMP values as VARCHAR */
+          defines[col].maxSize = NJS_MAX_FETCH_AS_STRING_SIZE ;
+
+          if ( NJS_SIZE_T_OVERFLOW ( defines[col].maxSize,
+                                         executeBaton->maxRows ) )
+          {
+            executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
+            return;
+          }
+          else
+          {
+            defines[col].buf = (char *)malloc( (size_t)defines[col].maxSize*
+                                               executeBaton->maxRows );
+
+            if( !defines[col].buf )
+            {
+              executeBaton->error = NJSMessages::getErrorMsg(
+                                       errInsufficientMemory);
+              return;
+            }
+          }
+
+        }
         break;
       case dpi::DpiRaw :
         defines[col].fetchType = DpiRaw;
         defines[col].maxSize   = meta[col].dbSize;
         defines[col].buf = (char *)malloc(defines[col].maxSize*executeBaton->maxRows);
         break;
+
+      case dpi::DpiClob:
+      case dpi::DpiBlob:
+      case dpi::DpiBfile:
+        defines[col].fetchType = meta[col].dbType;
+        defines[col].maxSize   = sizeof(Descriptor *);
+
+        if ( NJS_SIZE_T_OVERFLOW ( defines[col].maxSize,
+                                       executeBaton->maxRows ) )
+        {
+          executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
+          return;
+        }
+        else
+        {
+          defines[col].buf = malloc( (size_t)defines[col].maxSize*
+                                     executeBaton->maxRows );
+
+          if( !defines[col].buf )
+          {
+            executeBaton->error = NJSMessages::getErrorMsg( errInsufficientMemory );
+            return;
+          }
+        }
+
+        for (unsigned int j = 0; j < executeBaton->maxRows; j++)
+        {
+          ((Descriptor **)(defines[col].buf))[j] = 
+            executeBaton->dpienv->allocDescriptor(LobDescriptorType);
+        }
+        break;
+
+      case dpi::DpiRowid:
+        defines[col].fetchType = Connection::GetTargetType ( executeBaton,
+                                               executeBaton->columnNames[col],
+                                               dpi::DpiRowid );
+        if ( defines[col].fetchType != dpi::DpiVarChar )
+        {
+          executeBaton->error = NJSMessages::getErrorMsg (
+                                                    errUnsupportedDatType);
+          return;
+        }
+        defines[col].maxSize = NJS_MAX_FETCH_AS_STRING_SIZE;
+
+        if ( NJS_SIZE_T_OVERFLOW ( defines[col].maxSize,
+                                       executeBaton->maxRows ) )
+        {
+          executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
+          return;
+        }
+        else
+        {
+          defines[col].buf = (char *)malloc( (size_t)defines[col].maxSize*
+                                             executeBaton->maxRows );
+
+          if( !defines[col].buf )
+          {
+            executeBaton->error = NJSMessages::getErrorMsg(
+                                    errInsufficientMemory);
+            return;
+          }
+        }
+        break;
+
       default :
         executeBaton->error = NJSMessages::getErrorMsg(errUnsupportedDatType);
         return;
         break;
     }
+     
     defines[col].ind = (short*)malloc (sizeof(short)*(executeBaton->maxRows));
+    if(!defines[col].ind)
+    {
+      executeBaton->error = NJSMessages::getErrorMsg( errInsufficientMemory );
+      return;
+    }
     defines[col].len = (DPI_BUFLEN_TYPE *)malloc(sizeof(DPI_BUFLEN_TYPE)*
                                            executeBaton->maxRows);
+    if(!defines[col].len)
+    {
+      executeBaton->error = NJSMessages::getErrorMsg( errInsufficientMemory );
+      return;
+    }
 
     executeBaton->dpistmt->define(col+1, defines[col].fetchType,
                  (defines[col].buf) ? defines[col].buf : defines[col].extbuf,
                  defines[col].maxSize, defines[col].ind, defines[col].len);
   }
-  executeBaton->defines     = defines;
   executeBaton->numCols     = numCols;
 }
 
@@ -1114,12 +1644,15 @@ void Connection::DoDefines ( eBaton* executeBaton, const dpi::MetaData* meta,
  */
 void Connection::DoFetch (eBaton* executeBaton)
 {
-  executeBaton->dpistmt->fetch(executeBaton->maxRows);
+  executeBaton->dpistmt->fetch ( executeBaton->maxRows );
   executeBaton->rowsFetched = executeBaton->dpistmt->rowsFetched();
-  Connection::Descr2Double ( executeBaton->defines, 
+  Connection::Descr2Double ( executeBaton->defines,
                              executeBaton->numCols, 
                              executeBaton->rowsFetched,
                              executeBaton->getRS );
+  Connection::Descr2protoILob ( executeBaton, 
+                                executeBaton->numCols, 
+                                executeBaton->rowsFetched );
 }
 
 /*****************************************************************************/
@@ -1128,13 +1661,20 @@ void Connection::DoFetch (eBaton* executeBaton)
      Special processing for datetime to convert descriptors to double value.
 
    PARAMETERS:
-     Define struct, numCols
+     defines       - Define struct
+     numCols       - # of columns
+     rowsFetched   - rows fetched
+     getRS         - boolean set for resultset
  */
-void Connection::Descr2Double( Define* defines, unsigned int numCols, 
+void Connection::Descr2Double( Define* defines, unsigned int numCols,
                                unsigned int rowsFetched, bool getRS )
 {
+                                /* Special processing for certain data types */
   for (unsigned int col = 0; col < numCols; col ++ )
   {
+
+    /* Special processing for datetime, as it is obtained as descriptors */
+
     if ( defines[col].dttmarr )
     {
       long double *dblArr = NULL;
@@ -1145,7 +1685,7 @@ void Connection::Descr2Double( Define* defines, unsigned int numCols,
 
       for ( int row = 0; row < (int) rowsFetched; row ++ )
       {
-        dblArr[row] = defines[col].dttmarr->getDateTime (row) * NJS_DAY2MS;
+        dblArr[row] = defines[col].dttmarr->getDateTime (row);
       }
       defines[col].buf = (void *) dblArr;
       if ( !getRS )
@@ -1155,7 +1695,131 @@ void Connection::Descr2Double( Define* defines, unsigned int numCols,
       }
     }
   }
+}
 
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Special processing for lob descriptors
+
+   PARAMETERS:
+     executeBato   - eBaton struct
+     numCols       - # of columns
+     rowsFetched   - rows fetched
+ */
+void Connection::Descr2protoILob( eBaton *executeBaton, unsigned int numCols, 
+                                  unsigned int rowsFetched )
+{
+  Define *defines = executeBaton->defines;
+  for (unsigned int col = 0; col < numCols; col ++ )
+  {
+    if ((defines[col].fetchType == DpiClob) || 
+        (defines[col].fetchType == DpiBlob) ||
+        (defines[col].fetchType == DpiBfile))
+    {
+      for (unsigned int row = 0; row < rowsFetched; row++)
+      {
+        if ( (defines[col].ind)[row] == -1 )
+          continue;           // null value, nothing to convert/transfer
+        Descriptor *lobLocator = ((Descriptor **)(defines[col].buf))[row];
+
+            // The ownership of the Lob locator is going to be transferred to
+            // the ProtoILob object now.  If anything goes wrong, it is the
+            // responsibility of the ProtoILob class to free the Lob locator.
+            // Hence, setting the Lob Descriptor in the define buffer to NULL.
+
+        ((Descriptor **)(defines[col].buf))[row] = NULL;
+        
+        
+        ProtoILob *protoILob = new ProtoILob(executeBaton, lobLocator,
+                                             defines[col].fetchType);
+ 
+        if (!executeBaton->error.empty())
+        {
+              // we need to delete all ProtoLobs that have been created so far
+              // else when the executeBaton is deleted, then the defines buf
+              // cleanup will incorrectly interpret the ProtoLob as Lob
+              // Descriptor and try to free it as such.
+
+          for (unsigned int i = 0; i < col; i++)
+          {
+            if ((defines[col].fetchType == DpiClob) ||
+                (defines[col].fetchType == DpiBlob) ||
+                (defines[col].fetchType == DpiBfile))
+            {
+              for (unsigned int j = 0; j <  executeBaton->rowsFetched; j++)
+              {
+                // Skip this block for null values.  The null wasn't 
+                // converted to a protoILob. The define buffer still
+                // points to a descriptor which can be properly
+                // freed when the executeBaton is destroyed.
+                if ( (defines[i].ind)[j] != -1 )
+                {  
+                  protoILob = static_cast<ProtoILob **>(defines[i].buf)[j];
+                  delete protoILob;
+                  ((Descriptor **)(defines[i].buf))[j] = NULL;
+                }
+              }
+            }
+          }
+          
+              // now delete ProtoLob in the current column we were working up
+              // to row that gave the error. We know that this is a Lob column
+              // as the error happenned here.
+
+          for (unsigned int j = 0; j <  row; j++)
+          {
+            // As before, skip this block for null values
+            if ( (defines[col].ind)[j] != -1 )
+            { 
+              protoILob = static_cast<ProtoILob **>(defines[col].buf)[j];
+              delete protoILob;
+              ((Descriptor **)(defines[col].buf))[j] = NULL;
+            }
+          }
+
+          return;
+        } // done with error handling
+
+            // The descriptor is now replaced by the correponding LobProto.
+            // The defines buf contained a Descriptor i.e. a pointer.  We are
+            // replacing that pointer by a pointer to a ProtoILob.
+
+        ((Descriptor **)(defines[col].buf))[row] = 
+          reinterpret_cast<Descriptor *>(protoILob);
+      }
+    }
+  }
+  // Now process all the OUT binds. Just as with the defines,
+  // the descriptor is replaced by a pointer to a ProtoILob
+  if (!executeBaton->rowsAffected)
+    return;  // if no rows inserted or updated, return
+  for(unsigned int obndpos = 0;  obndpos < executeBaton->binds.size(); obndpos++)
+  {
+    Bind *bind = executeBaton->binds[obndpos];
+
+    if ((!bind->isOut && !bind->isInOut) || 
+        ( bind->ind && *(sb2 *)bind->ind == -1))
+      continue;  // we only need to process the non-null OUT binds
+
+    if (bind->type == DpiClob || bind->type == DpiBlob)
+    {
+      // TODO: Update this loop when support for array binds is added.
+      // For UPDATE, loop through all the rows returned for each bind
+      // For INSERT, eventually we will consider the iters.  
+      //             For now only 1 row will be inserted.
+      for (unsigned int rowidx = 0; rowidx < bind->rowsReturned; rowidx++)
+      {
+        Descriptor *lobLocator = 
+          (Descriptor *)((Descriptor **)bind->value)[rowidx];
+        ProtoILob *protoILob = new ProtoILob(executeBaton, lobLocator, 
+                                             bind->type);
+        
+        ((Descriptor **)(bind->value))[rowidx] = 
+          reinterpret_cast<Descriptor *>(protoILob);
+      }
+    }
+  }     
 }
 
 /*****************************************************************************/
@@ -1201,11 +1865,12 @@ void Connection::Async_AfterExecute(uv_work_t *req)
           result->Set(NanNew<v8::String>("rows"), NanUndefined());
           Handle<Object> resultSet = NanNew(ResultSet::resultSetTemplate_s)->
                                 GetFunction() ->NewInstance();
+
+          /* ResultSet case, the statement object is ready for fetching */
          (ObjectWrap::Unwrap<ResultSet> (resultSet))->
                                   setResultSet( executeBaton->dpistmt,
-                                                executeBaton->dpienv,
-                                                executeBaton->njsconn,
-                                                executeBaton->outFormat );
+                                                executeBaton);
+
           result->Set(NanNew<v8::String>("resultSet"), resultSet );
         }
         else
@@ -1357,7 +2022,7 @@ v8::Handle<v8::Value> Connection::GetRows (eBaton* executeBaton)
 
 Handle<Value> Connection::GetValue ( eBaton *executeBaton,
                                      bool isQuery,
-                                     unsigned int index,
+                                     unsigned int col,
                                      unsigned int row )
 {
   NanEscapableScope();
@@ -1365,9 +2030,10 @@ Handle<Value> Connection::GetValue ( eBaton *executeBaton,
   if(isQuery)
   {
     // SELECT queries
-    Define *define = &(executeBaton->defines[index]);
+    Define *define = &(executeBaton->defines[col]);
     long double *dblArr = (long double *)define->buf;
     return NanEscapeScope( Connection::GetValueCommon(
+                        executeBaton,
                         define->ind[row],
                         define->fetchType,
                         (define->fetchType == DpiTimestampLTZ ) ?
@@ -1379,11 +2045,12 @@ Handle<Value> Connection::GetValue ( eBaton *executeBaton,
   else
   {
     // DML, PL/SQL execution
-    Bind *bind = executeBaton->binds[index];
+    Bind *bind = executeBaton->binds[col];
     if(executeBaton->stmtIsReturning)
     {
-      return NanEscapeScope(Connection::GetArrayValue ( 
-                                        executeBaton->binds[index], 
+      return NanEscapeScope(Connection::GetArrayValue (
+                                        executeBaton,
+                                        executeBaton->binds[col], 
                          (unsigned long)executeBaton->rowsAffected ) );
     }
     else if(bind->type == DpiRSet) 
@@ -1391,9 +2058,17 @@ Handle<Value> Connection::GetValue ( eBaton *executeBaton,
       return NanEscapeScope ( Connection::GetValueRefCursor (
                                       executeBaton, bind ));
     }
+    else if (( bind->type == DpiClob ) ||
+             ( bind->type == DpiBlob ) ||
+             ( bind->type == DpiBfile))
+    {
+      return NanEscapeScope ( Connection::GetValueLob (
+                                      executeBaton, bind ));
+    }
     else
     {
       return NanEscapeScope ( Connection::GetValueCommon (
+                                      executeBaton,
                                       bind->ind[row],
                                       bind->type,
                                       (bind->type == DpiTimestampLTZ ) ?
@@ -1426,19 +2101,55 @@ Handle<Value> Connection::GetValueRefCursor ( eBaton *executeBaton,
   {
     resultSet = NanNew(ResultSet::resultSetTemplate_s)->
                             GetFunction() ->NewInstance();
+    /* 
+     * IN case of REFCURSOR, bind->flags will indicate whether we got
+     * a valid handle, based on that numCols, metaData are queried.
+     */
     (ObjectWrap::Unwrap<ResultSet> (resultSet))->
                        setResultSet( (dpi::Stmt*)(bind->value),
-                                      executeBaton->dpienv,
-                                      executeBaton->njsconn,
-                                      executeBaton->outFormat );
-    // set the prefetch on the cursor object
-    ((dpi::Stmt*)(bind->value))->prefetchRows(executeBaton->prefetchRows);
+                                     executeBaton);
     value = resultSet;
   }
   else
   {
     value = NanNull();
   }
+  return NanEscapeScope(value);
+}
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Method to create handle for lobs
+
+   PARAMETERS:
+     executeBaton - struct eBaton
+     bind         - struct bind
+
+   RETURNS:
+     Handle
+*/
+Handle<Value> Connection::GetValueLob ( eBaton *executeBaton, 
+                                        Bind *bind )
+{
+  NanEscapableScope();
+
+  if (bind->ind && *bind->ind == -1)
+    return NanNull();
+
+  Handle<Value> value;
+
+  ProtoILob *protoILob = *(static_cast<ProtoILob **>(bind->value));
+
+  // The ownership of the handles in ProtoILob is transferred to the
+  // ILob object now.  If anything goes wrong, it is the
+  // responsibility of the ILob class to free the OCI handles.
+
+  value = NewLob(executeBaton, protoILob);
+
+  // all done with ProtoILob
+  delete protoILob;
+  *(ProtoILob **)(bind->value) = NULL;
   return NanEscapeScope(value);
 }
 
@@ -1456,7 +2167,8 @@ Handle<Value> Connection::GetValueRefCursor ( eBaton *executeBaton,
    RETURNS:
      Handle
 */
-Handle<Value> Connection::GetValueCommon ( short ind, 
+Handle<Value> Connection::GetValueCommon ( eBaton *executeBaton,
+                                           short ind, 
                                            unsigned short type,
                                            void* val, DPI_BUFLEN_TYPE len )
 {
@@ -1474,17 +2186,28 @@ Handle<Value> Connection::GetValueCommon ( short ind,
        case (dpi::DpiInteger) :
          value = NanNew<v8::Integer>(*(int*)val);
          break;
-      case (dpi::DpiDouble) :
+       case (dpi::DpiDouble) :
          value = NanNew<v8::Number>(*(double*)val);
          break;
        case (dpi::DpiTimestampLTZ) :
-         //date = Date::Cast(*NanNew<v8::Date>( *(long double*)val ));
          date = NanNew<v8::Date>( *(long double*)val );
          value = date;
         break;
        case (dpi::DpiRaw) :
          value = NanNewBufferHandle((char*)val, len);
          break;
+        // The LOB types are hit only by the define code path
+        // The bind code path has its own Connection::GetValueLob method
+       case (dpi::DpiClob):
+       case (dpi::DpiBlob):
+       case (dpi::DpiBfile):
+       {
+         ProtoILob *protoILob = *(static_cast<ProtoILob **>(val));
+         value = NewLob(executeBaton, protoILob);
+         delete protoILob;
+         *(ProtoILob **)val = NULL;
+       }
+       break;
        default :
          break;
     }
@@ -1509,7 +2232,8 @@ Handle<Value> Connection::GetValueCommon ( short ind,
   Returns
     v8::Value  - this will be an array (even for 1 row, array or 1).
 */
-v8::Handle<v8::Value> Connection::GetArrayValue ( Bind *binds, unsigned long count )
+v8::Handle<v8::Value> Connection::GetArrayValue ( eBaton *executeBaton,
+                                                  Bind *binds, unsigned long count )
 {
   NanEscapableScope();
   Local<Date> date;
@@ -1528,7 +2252,9 @@ v8::Handle<v8::Value> Connection::GetArrayValue ( Bind *binds, unsigned long cou
           (binds->type == dpi::DpiVarChar) ||
           (binds->type == dpi::DpiInteger) ||
           (binds->type == dpi::DpiDouble) ||
-          (binds->type == dpi::DpiTimestampLTZ)
+          (binds->type == dpi::DpiTimestampLTZ ||
+           binds->type == dpi::DpiClob ||
+           binds->type == dpi::DpiBlob)
         )
       )
     {
@@ -1554,8 +2280,19 @@ v8::Handle<v8::Value> Connection::GetArrayValue ( Bind *binds, unsigned long cou
       break;
     case dpi::DpiTimestampLTZ:
         arrVal->Set ( index, 
-                      NanNew<v8::Date> (*((long double *)binds->value + index )) );
+                      NanNew<v8::Date> (*((long double *)binds->extvalue + index )) );
       break;
+    case dpi::DpiClob:
+    case dpi::DpiBlob:
+    {
+      ProtoILob *protoILob = *((ProtoILob **)binds->value + index);
+      val = NewLob(executeBaton, protoILob);
+      arrVal->Set ( index, NanNew<v8::Value>(val));
+      delete protoILob;
+      *(ProtoILob **)binds->value = NULL;
+    }
+    break;
+                    
     default:
       break;
     }
@@ -1719,6 +2456,7 @@ void Connection::Async_Release(uv_work_t *req)
   }
   catch (dpi::Exception& e)
   {
+    NJS_SET_CONN_ERR_STATUS (  e.errnum(), releaseBaton->dpiconn );
     releaseBaton->error = std::string(e.what());
   }
   exitAsyncRelease:
@@ -1813,6 +2551,7 @@ void Connection::Async_Commit (uv_work_t *req)
   }
   catch (dpi::Exception& e)
   {
+    NJS_SET_CONN_ERR_STATUS (  e.errnum(), commitBaton->dpiconn );
     commitBaton->error = std::string(e.what());
   }
   exitAsyncCommit:
@@ -1905,6 +2644,7 @@ void Connection::Async_Rollback (uv_work_t *req)
   }
   catch (dpi::Exception& e)
   {
+    NJS_SET_CONN_ERR_STATUS (  e.errnum(), rollbackBaton->dpiconn );
     rollbackBaton->error = std::string(e.what());
   }
   exitAsyncRollback:
@@ -2000,6 +2740,7 @@ void Connection::Async_Break(uv_work_t *req)
   }
   catch (dpi::Exception& e)
   {
+    NJS_SET_CONN_ERR_STATUS (  e.errnum(), breakBaton->dpiconn );
     breakBaton->error = std::string(e.what());
   }
   exitAsyncBreak:
@@ -2040,7 +2781,7 @@ void Connection::Async_AfterBreak (uv_work_t *req)
  *   Connection::v8Date2OraDate
  *
  * DESCRIPTION
- *   To convert v8::Date value (double value in seconds) to Oracle DB Type
+ *   To convert v8::Date value (double value in milli seconds) to Oracle DB Type
  *
  * PARAMETERS
  *   val      - expected to be a v8::Date Value
@@ -2069,6 +2810,7 @@ void Connection::v8Date2OraDate ( Handle<Value> val, Bind *bind)
  *
  * PARAMETERS
  *   ebaton   - execute Baton
+ *   index    - position in the binds array
  *
  * NOTE:
  *   When execution process starts, base date is not initialized yet,
@@ -2077,23 +2819,19 @@ void Connection::v8Date2OraDate ( Handle<Value> val, Bind *bind)
  *   Used for IN bind to provide the v8::Date value.
  *
  */
-void Connection::UpdateDateValue ( eBaton * ebaton )
+void Connection::UpdateDateValue ( eBaton * ebaton, unsigned int index )
 {
-  for (unsigned int b = 0; b < ebaton->binds.size(); b ++ )
-  {
-    Bind * bind = ebaton->binds[b];
+  Bind * bind = ebaton->binds[index];
 
-    if ( bind->type == dpi::DpiTimestampLTZ )
+  if ( bind->type == dpi::DpiTimestampLTZ )
+  {
+    bind->dttmarr = ebaton->dpienv->getDateTimeArray (
+                                        ebaton->dpistmt->getError () );
+    bind->value = bind->dttmarr->init (1);
+    if (!bind->isOut)
     {
-      bind->dttmarr = ebaton->dpienv->getDateTimeArray (
-                                          ebaton->dpistmt->getError () );
-      bind->value = bind->dttmarr->init (1);
-      if (!bind->isOut)
-      {
-        bind->dttmarr->setDateTime( 0,
-                                    ((*(long double *)bind->extvalue) /
-                                     ( NJS_DAY2MS )));
-      }
+      bind->dttmarr->setDateTime( 0,
+                                  (*(long double *)bind->extvalue));
     }
   }
 }
@@ -2120,14 +2858,42 @@ void Connection::UpdateDateValue ( eBaton * ebaton )
     -None-
 */
 void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning, 
-                                       unsigned int nRows )
+                                       unsigned int nRows,
+                                       unsigned int bndpos)
 {
-  Bind *bind = (Bind *)ctx;
+  eBaton *executeBaton = (eBaton *)ctx;
+  Bind *bind = (Bind *)executeBaton->binds[bndpos];
 
-  bind->ind = (short *)malloc ( nRows * sizeof ( short ) ) ;
+  if ( NJS_SIZE_T_OVERFLOW ( sizeof ( short ), nRows ) )
+  {
+    executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
+    return;
+  }
+  else
+  {
+    bind->ind = (short *)malloc ( (size_t)nRows * sizeof ( short ) ) ;
+    if( !bind->ind )
+    {
+      executeBaton->error = NJSMessages::getErrorMsg( errInsufficientMemory );
+      return;
+    }
+  }
   if ( dmlReturning )
   {
-    bind->len2 = ( unsigned int *)malloc ( nRows * sizeof ( unsigned int ) );
+    if ( NJS_SIZE_T_OVERFLOW ( sizeof ( unsigned int ), nRows ) )
+    {
+      executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
+      return;
+    }
+    else
+    {
+      bind->len2 = ( unsigned int *)malloc ( nRows * sizeof ( unsigned int ) );
+      if( !bind->len2 )
+      {
+        executeBaton->error = NJSMessages::getErrorMsg( errInsufficientMemory );
+        return;
+      }
+    }
   }
   else
   {
@@ -2139,7 +2905,23 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
   {
   case dpi::DpiVarChar:
     /* one extra char for EOS */
-    bind->value = (char *)malloc ( ( bind->maxSize + 1) * nRows ) ;
+
+    if ( NJS_SIZE_T_OVERFLOW ( (bind->maxSize + 1), nRows) )
+    {
+      executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
+      return;
+    }
+    else
+    {
+      bind->value = (char *)malloc( (size_t)( bind->maxSize + 1) * nRows );
+      if( !bind->value )
+      {
+        executeBaton->error = NJSMessages::getErrorMsg(
+                                errInsufficientMemory);
+        return;
+      }
+    }
+
     if ( dmlReturning )
     {
       *(bind->len2) = (unsigned int)bind->maxSize ;
@@ -2151,7 +2933,21 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
     break;
 
   case dpi::DpiInteger:
-    bind->value = ( int *) malloc ( sizeof (int) * nRows ) ;
+    if ( NJS_SIZE_T_OVERFLOW ( sizeof (int), nRows) )
+    {
+      executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
+      return;
+    }
+    else
+    {
+      bind->value = ( int *) malloc ( sizeof (int) * nRows ) ;
+      if( !bind->value )
+      {
+        executeBaton->error = NJSMessages::getErrorMsg(
+                                errInsufficientMemory);
+        return;
+      }
+    }
     if ( !dmlReturning )
     {
       *(bind->len) = sizeof ( int ) ;
@@ -2159,7 +2955,21 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
     break;
 
   case dpi::DpiUnsignedInteger:
-    bind->value = ( unsigned int *)malloc ( sizeof ( unsigned int ) * nRows );
+    if ( NJS_SIZE_T_OVERFLOW ( sizeof ( unsigned int ), nRows) )
+    {
+      executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
+      return;
+    }
+    else
+    {
+      bind->value = ( unsigned int *)malloc ( sizeof ( unsigned int ) * nRows );
+      if( !bind->value )
+      {
+        executeBaton->error = NJSMessages::getErrorMsg(
+                                errInsufficientMemory);
+        return;
+      }
+    }
     if ( !dmlReturning )
     {
       *(bind->len) = sizeof ( unsigned int ) ;
@@ -2167,21 +2977,99 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
     break;
 
   case dpi::DpiDouble:
-    bind->value = ( double *)malloc ( sizeof ( double ) * nRows );
+    if ( NJS_SIZE_T_OVERFLOW ( sizeof ( double ), nRows) )
+    {
+      executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
+      return;
+    }
+    else
+    {
+      bind->value = ( double *)malloc ( sizeof ( double ) * nRows );
+      if( !bind->value )
+      {
+        executeBaton->error = NJSMessages::getErrorMsg(
+                                errInsufficientMemory);
+        return;
+      }
+    }
     if ( !dmlReturning )
     {
       *(bind->len) = sizeof ( double ) ;
     }
     break;
 
+  case dpi::DpiClob:
+  case dpi::DpiBlob:
+    // needed to post-process DML RETURNING of LOBs
+    // rowsReturns for INSERT will be zero, 
+    // but we still need to allocate one descriptor
+    bind->rowsReturned = 1;
+    if (nRows > 1)
+      bind->rowsReturned = nRows;
+    // allocate the array of Descriptor **
+    if ( NJS_SIZE_T_OVERFLOW ( sizeof ( Descriptor * ), nRows) )
+    {
+      executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
+      return;
+    }
+    else
+    {
+      bind->value = (void *)malloc(sizeof(Descriptor *) * nRows);
+      if( !bind->value )
+      {
+        executeBaton->error = NJSMessages::getErrorMsg(
+                                errInsufficientMemory);
+        return;
+      }
+    }
+    // and allocate the underlying descriptor(s)
+    for (unsigned int rowsidx = 0; rowsidx < bind->rowsReturned; rowsidx++)
+    {
+      Descriptor **lobpp = ((Descriptor **)bind->value) + rowsidx;
+
+      *lobpp = executeBaton->dpienv->allocDescriptor(LobDescriptorType);
+    }
+    if ( !dmlReturning )
+    {
+      *(bind->len) = sizeof ( Descriptor * ) ;
+    }
+    break;
+
   case dpi::DpiTimestampLTZ:
-    /* bind->extValue & bind->dttmarr are used to allocate descriptor & double
-     * this is not used.  This requies to be modified
-     */
+    {
+      if ( NJS_SIZE_T_OVERFLOW ( sizeof ( long double ), nRows) )
+      {
+        executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
+        return;
+      }
+      else
+      {
+        bind->extvalue = (long double *) malloc ( sizeof ( long double ) * 
+                                                  nRows );
+        if( !bind->extvalue )
+        {
+          executeBaton->error = NJSMessages::getErrorMsg(
+                                  errInsufficientMemory);
+          return;
+        }
+      }
+      // needed to post-process DML RETURNING of TimestampLTZ
+      // rowsReturns for INSERT will be zero, 
+      // but we still need to allocate one descriptor
+      bind->rowsReturned = 1;
+      if (nRows > 1)
+        bind->rowsReturned = nRows;
+      bind->dttmarr = executeBaton->dpienv->getDateTimeArray (
+        executeBaton->dpistmt->getError () );
+      bind->value = bind->dttmarr->init(nRows);
+    }
+    break;
+
+  case dpi::DpiRSet:
+    bind->value = executeBaton->dpiconn->getStmt ();
     break;
   }
 }
-
 
 /****************************************************************************/
 /*
@@ -2210,11 +3098,14 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
 */
 
 int Connection::cbDynBufferGet ( void *ctx, DPI_SZ_TYPE nRows,
+                                 unsigned int bndpos,
                                  unsigned long iter, unsigned long index,
                                  dvoid **bufpp, void **alenpp, void **indpp,
                                  unsigned short **rcode, unsigned char *piecep)
 {
-  Bind *bind = (Bind *)ctx;
+  eBaton *executeBaton = (eBaton *)ctx;
+  Bind *bind = (Bind *)executeBaton->binds[bndpos];
+  
   int ret = 0;
 
   if (*piecep == OCI_ONE_PIECE )
@@ -2229,7 +3120,7 @@ int Connection::cbDynBufferGet ( void *ctx, DPI_SZ_TYPE nRows,
     // First time callback, allocate the buffer(s).
     if ( index == 0 )
     {
-      Connection::cbDynBufferAllocate (ctx, true, (unsigned long)nRows );
+      Connection::cbDynBufferAllocate(ctx, true, (unsigned long)nRows, bndpos);
     }
 
     bind->ind[index] = -1;
@@ -2261,8 +3152,20 @@ int Connection::cbDynBufferGet ( void *ctx, DPI_SZ_TYPE nRows,
       *bufpp = (void *)&(((double *)bind->value)[index]);
       break;
 
+    case dpi::DpiBlob:
+    case dpi::DpiClob:
+
+      // The bind variable is a pointer to a LOB descriptor pointer
+      bind->len2[index] = sizeof(Descriptor *);
+      // allocate the LOB descriptor 
+      // *bufpp = ((void **)bind->value)[index];
+      // *bufpp = (void *)*(((Descriptor **)bind->value) + index);
+      *bufpp = (void *)((Descriptor **)bind->value)[index];
+      break;
+
     case dpi::DpiTimestampLTZ:
-      /* NOT SUPPORTED - error reported already */
+      *bufpp = (void *)((void **)bind->value)[index];
+      bind->len2[index] = sizeof(void *);
       break;
     }
 
@@ -2284,5 +3187,101 @@ int Connection::cbDynBufferGet ( void *ctx, DPI_SZ_TYPE nRows,
 }
 
 
-/* end of file njsConnection.cpp */
 
+/*****************************************************************************/
+/*
+  DESCRIPTION
+    Create a new LOB object.
+
+  PARAMETERS
+    none
+
+  RETURNS
+    a Lob object
+
+   NOTES
+     Note that this method is called from the main thread.  Therefore, it
+     should *NOT* use any blocking (OCI) calls.
+
+     The call stack is Async_AfterExecute()->GetRows()->GetValue()->NewLob().
+
+     The Async_After+() methods are called from the main thread.
+
+     If we want to keep track of the number of unfreed ILobs in a connection,
+     then we can increment a counter in the Connection object here.  Note that
+     decrementing the counter should also happen in the main thread when an
+     ILob is successfully freed (.e.g. on an error in _read(), _write(),
+     etc. or at EOF in _read() or at end() when writing a Lob??
+
+*/
+
+v8::Handle<v8::Value> Connection::NewLob(eBaton* executeBaton,
+                                         ProtoILob *protoILob)
+{
+  NanEscapableScope();
+  Connection     *connection = executeBaton->njsconn;
+  // Handle<Object>  jsOracledb = connection->oracledb_->jsOracledb;
+  Handle<Object>  jsOracledb = NanNew(connection->oracledb_->jsOracledb);
+  Handle<Value>   argv[1];
+  
+  Handle<Object>  iLob = NanNew(ILob::iLobTemplate_s)->GetFunction()->NewInstance();
+  
+      // the ownership of all handles in the ProtoILob are transferred to ILob
+      // here.  Any error in initialization of ILob will cleanup the OCI
+      // handles in the ILob cleanup routine.
+
+  (ObjectWrap::Unwrap<ILob>(iLob))->setILob(executeBaton, protoILob);
+
+  if (!executeBaton->error.empty())
+    return NanNull();
+
+  argv[0] = iLob;
+
+  Handle<Value>   result =
+    Local<Function>::Cast(jsOracledb->Get(NanNew<v8::String>("newLob")))->Call(
+      jsOracledb, 1, argv);
+
+  return NanEscapeScope(result);
+}
+
+
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     GetLob method on Connection class.
+
+   PARAMETERS
+     none
+
+  RETURNS
+    A Lob object
+
+   NOTES
+     Shows example method to call the Oracledb.newLob() method from a
+     Connection class method.  That is, Connection.getLob() calls
+     Oracledb.newLob().
+
+     This method is unused as we call Oracledb.newLob() from the C++
+     Connection::NewLob() method in Connection::GetValue().  This is much more
+     performant than going across language boundries twice to get a Lob.
+*/
+
+NAN_METHOD(Connection::GetLob)
+{
+  NanScope();
+  Connection     *connection = ObjectWrap::Unwrap<Connection>(args.This());
+  //Handle<Object>  jsOracledb = connection->oracledb_->jsOracledb;
+  Handle<Object>  jsOracledb = NanNew(connection->oracledb_->jsOracledb);
+  Handle<Value>   argv[1];
+  
+  Handle<Value>   result =
+    Local<Function>::Cast(jsOracledb->Get(NanNew<v8::String>("newLob")))->Call(
+      jsOracledb, 1, argv);
+
+  NanReturnValue(result);
+}
+
+
+
+/* end of file njsConnection.cpp */

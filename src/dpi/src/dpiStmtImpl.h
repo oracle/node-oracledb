@@ -50,6 +50,8 @@ typedef struct
   void*         data;         /* Data for application specific callback */
   unsigned long nrows;        /* number of rows affected by this DML */
   unsigned long iter;         /* iteration - used in Array Bind */
+  unsigned int  bndpos;       /* position in the bind array */
+  short         nullInd;      /* DML RETURNING: to pass null from inbind cbk */
   StmtImpl*     dpistmt;      /* DPI Statement Implementation */
 } DpiCallbackCtx;
 
@@ -74,9 +76,10 @@ public:
 
   virtual void bind (unsigned int pos, unsigned short type, void *buf,
                      DPI_SZ_TYPE bufSize, short *ind, DPI_BUFLEN_TYPE *bufLen,
-                     void *data, cbtype cb );
+                     void *data, cbtype cb);
 
-  virtual void bind (const unsigned char *name, int nameLen,
+  virtual void bind (const unsigned char *name, int nameLen, 
+                     unsigned int bndpos,
                      unsigned short type, void *buf, DPI_SZ_TYPE bufSize,
                      short *ind, DPI_BUFLEN_TYPE *bufLen,
                      void *data, cbtype cb);
@@ -90,6 +93,9 @@ public:
   virtual const MetaData *getMetaData ();
 
   virtual OCIError *     getError () { return errh_;  }
+
+  virtual unsigned long  getState ();
+
 
   // Is the SQL statement DML or not ?
   virtual inline bool isDML () const
@@ -127,10 +133,11 @@ private:
 
   unsigned int   numCols_;         // # of cols this stmt execution will return
   MetaData       *meta_;           // Meta data array
-  DpiStmtType    stmtType_;        // Statement Type (Query, DML, ... )
+  unsigned short stmtType_;        // Statement Type (Query, DML, ... )
   bool           isReturning_;     // Does the stmt has RETURNING INTO clause?
   bool           isReturningSet_;  // Has isReturning_ flag queried & set.
   bool           refCursor_;       // refCursor or not.
+  unsigned long  state_;           // OCI Stmt State
 };
 
 

@@ -37,26 +37,30 @@ namespace dpi
 {
 
 
-/*---------------------------------------------------------------------------
+/*----------------------------------------------------------------------------
                      PUBLIC CONSTANTS
-  ---------------------------------------------------------------------------*/
+  ----------------------------------------------------------------------------*/
 
 enum DpiError                          // error type
 {
-  DpiErrNoError      =  000, // "DPI not an error"
-  DpiErrInternal      = 001, // "DPI internal error"
-  DpiErrUnkOciError   = 002, // "Could not get OCI Error message"
-  DpiErrNoEnv         = 003, // "No OCI environment handle created"
-  DpiErrInvalidState  = 004, // "Invalid state while working with timestamp"
-  DpiErrUninitialized = 005, // "Uninitialized state while working with timestamp"
-  DpiErrExtAuth= 006, // "user and password should not be set when using external authentication"
+  DpiErrNoError   = 0, // "DPI not an error"
+  DpiErrInternal,      // "DPI internal error"
+  DpiErrUnkOciError,   // "Could not get OCI error message"
+  DpiErrNoEnv,         // "No OCI environment handle created"
+  DpiErrInvalidState,  // "Invalid state while working with timestamp"
+  DpiErrUninitialized, // "Uninitialized state while working with timestamp"
+  DpiErrExtAuth,
+       // "user and password should not be set when using external authentication"
+  DpiOciInvalidHandle,
+    // "Invalid OCI Handle/Descriptor or invalid parameter for OCI handle/descriptor allocation call"
+  DpiErrMemAllocFail,   // "Memory allocatio failed"
 };
 
 
 
-/*---------------------------------------------------------------------------
+/*----------------------------------------------------------------------------
                      PUBLIC TYPES
-  ---------------------------------------------------------------------------*/
+  ----------------------------------------------------------------------------*/
 
 class Exception : public exception
 {

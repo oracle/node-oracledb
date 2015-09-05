@@ -141,7 +141,7 @@ describe('1. connection.js', function(){
       );
     })
     
-    it('1.1.4 Negatve test - invalid outFormat value', function(done){
+    it('1.1.4 Negative test - invalid outFormat value', function(done){
       connection.should.be.ok;
       connection.execute(
         query, {id: 20}, {outFormat:0 },
@@ -186,6 +186,7 @@ describe('1. connection.js', function(){
              INSERT INTO oracledb_employees VALUES (x, n); \
           END LOOP; \
        END; ";
+    var rowsAmount = 107;
 
     before(function(done){
       oracledb.getConnection(credential, function(err, conn) {
@@ -274,6 +275,19 @@ describe('1. connection.js', function(){
         }
       );
     })
+
+    it('1.2.5 sets maxRows to be very large value', function(done) {
+      connection.execute(
+        "SELECT * FROM oracledb_employees", 
+        {}, 
+        {maxRows: 500000},
+        function(err, result){
+          should.not.exist(err);
+          (result.rows.length).should.eql(rowsAmount);
+          done();
+        }  
+      );
+    })
   })
 
   describe('1.3 can call PL/SQL procedures', function(){
@@ -309,7 +323,7 @@ describe('1. connection.js', function(){
       );
     })
     
-    it('bind parameters in various ways', function(done){
+    it('1.3.1 bind parameters in various ways', function(done){
       var bindValues = {
         i: 'Alan', // default is type STRING and direction Infinity
         io: { val: 'Turing', type: oracledb.STRING, dir: oracledb.BIND_INOUT },
@@ -329,9 +343,7 @@ describe('1. connection.js', function(){
     })
   })
   
-  describe('1.4 stmtCacheSize = 0, which disable statement caching', function() {
-    var connection = false;
-    
+  describe('1.4 statementCacheSize controls statement caching', function() {
     var makeTable = 
         "BEGIN \
             DECLARE \
@@ -364,12 +376,12 @@ describe('1. connection.js', function(){
                    VALUES \
                    (2001, ''Karen Morton'') \
             '); \
-          END; ";
+        END; ";
     
+    var connection = false;
     var defaultStmtCache = oracledb.stmtCacheSize; // 30
-
-    before('get connection and prepare table', function(done) {
-      oracledb.stmtCacheSize = 0;
+    
+    beforeEach('get connection and prepare table', function(done) {
       oracledb.getConnection(credential, function(err, conn) {
         if(err) { console.error(err.message); return; }
         connection = conn;
@@ -383,7 +395,7 @@ describe('1. connection.js', function(){
       });
     })
     
-    after('drop table and release connection', function(done) {
+    afterEach('drop table and release connection', function(done) {
       oracledb.stmtCacheSize = defaultStmtCache;
       connection.execute(
         "DROP TABLE oracledb_employees",
@@ -396,10 +408,51 @@ describe('1. connection.js', function(){
         }
       );
     })
-    
-    it('works well when statement cache disabled', function(done) {
+
+    it('1.4.1 stmtCacheSize = 0, which disable statement caching', function(done) {
       connection.should.be.ok;
-      (oracledb.stmtCacheSize).should.be.exactly(0);   
+      oracledb.stmtCacheSize = 0;   
+
+      async.series([
+        function(callback) {
+          connection.execute(
+            "INSERT INTO oracledb_employees VALUES (:num, :str)",
+            { num: 1003, str: 'Robyn Sands' },
+            { autoCommit: true },
+            function(err) {
+              should.not.exist(err);
+              callback();
+            }
+          );
+        },
+        function(callback) {
+          connection.execute(
+            "INSERT INTO oracledb_employees VALUES (:num, :str)",
+            { num: 1004, str: 'Bryant Lin' },
+            { autoCommit: true },
+            function(err) {
+              should.not.exist(err);
+              callback();
+            }
+          );
+        },
+        function(callback) {
+          connection.execute(
+            "INSERT INTO oracledb_employees VALUES (:num, :str)",
+            { num: 1005, str: 'Patrick Engebresson' },
+            { autoCommit: true },
+            function(err) {
+              should.not.exist(err);
+              callback();
+            }
+          );
+        }
+      ], done);
+    })  
+    
+    it('1.4.2 works well when statement cache enabled (stmtCacheSize > 0) ', function(done) {
+      connection.should.be.ok;
+      oracledb.stmtCacheSize = 100;  
 
       async.series([
         function(callback) {
@@ -437,11 +490,10 @@ describe('1. connection.js', function(){
         }
       ], done);
     })
+    
   })
   
-  describe('1.5 stmtCacheSize > 0', function() {
-    var connection = false;
-    
+  describe('1.5 Testing commit() & rollback() functions', function() {
     var makeTable = 
         "BEGIN \
             DECLARE \
@@ -462,89 +514,177 @@ describe('1. connection.js', function(){
             EXECUTE IMMEDIATE (' \
               INSERT INTO oracledb_employees  \
                    VALUES \
-                   (1001,''Chris Jones'') \
+                   (1001,''Tom Kyte'') \
             '); \
             EXECUTE IMMEDIATE (' \
               INSERT INTO oracledb_employees  \
                    VALUES \
-                   (1002,''Tom Kyte'') \
+                   (1002, ''Karen Morton'') \
             '); \
-            EXECUTE IMMEDIATE (' \
-              INSERT INTO oracledb_employees  \
-                   VALUES \
-                   (2001, ''Karen Morton'') \
-            '); \
-          END; ";
+        END; ";
     
-    var defaultStmtCache = oracledb.stmtCacheSize; // 30
-
-    before('get connection and prepare table', function(done) {
-      oracledb.stmtCacheSize = 100;
-      oracledb.getConnection(credential, function(err, conn) {
-        if(err) { console.error(err.message); return; }
-        connection = conn;
-        conn.execute(
-          makeTable,
-          function(err){
-            if(err) { console.error(err.message); return; }
-            done(); 
-          }
-        );
-      });
-    })
-    
-    after('drop table and release connection', function(done) {
-      oracledb.stmtCacheSize = defaultStmtCache;
-      connection.execute(
-        "DROP TABLE oracledb_employees",
-        function(err){
-          if(err) { console.error(err.message); return; }
-          connection.release( function(err){
-            if(err) { console.error(err.message); return; }
-            done();
-          });
-        }
-      );
-    })
-    
-    it('works well when statement cache enabled', function(done) {
-      connection.should.be.ok;
-      (oracledb.stmtCacheSize).should.be.exactly(100);   
-
+    var conn1 = false;
+    var conn2 = false;
+    beforeEach('get 2 connections and create the table', function(done) {
       async.series([
         function(callback) {
-          connection.execute(
-            "INSERT INTO oracledb_employees VALUES (:num, :str)",
-            { num: 1003, str: 'Robyn Sands' },
-            { autoCommit: true },
-            function(err) {
-              should.not.exist(err);
-              callback();
-            }
-          );
+          oracledb.getConnection(credential, function(err, conn) {
+            should.not.exist(err);
+            conn1 = conn;
+            callback();
+          });
         },
         function(callback) {
-          connection.execute(
-            "INSERT INTO oracledb_employees VALUES (:num, :str)",
-            { num: 1004, str: 'Bryant Lin' },
-            { autoCommit: true },
-            function(err) {
-              should.not.exist(err);
-              callback();
-            }
-          );
+          oracledb.getConnection(credential, function(err, conn) {
+            should.not.exist(err);
+            conn2 = conn;
+            callback();
+          });
         },
         function(callback) {
-          connection.execute(
-            "INSERT INTO oracledb_employees VALUES (:num, :str)",
-            { num: 1005, str: 'Patrick Engebresson' },
-            { autoCommit: true },
+          conn1.should.be.ok;
+          conn1.execute(
+            makeTable,
+            [],
+            { autoCommit: true }, 
             function(err) {
               should.not.exist(err);
               callback();
             }
           );
         }
+      ], done);
+    })
+    
+    afterEach('drop table and release connections', function(done) {
+      conn1.should.be.ok;
+      conn2.should.be.ok;
+      async.series([
+        function(callback) {
+          conn2.execute(
+            "DROP TABLE oracledb_employees",
+            function(err) {
+              should.not.exist(err);
+              callback();
+            }
+          );
+        },
+        function(callback) {
+          conn1.release(function(err) {
+            should.not.exist(err);
+            callback();
+          });
+        },
+        function(callback) {
+          conn2.release(function(err) {
+            should.not.exist(err);
+            callback();
+          });
+        }
+      ], done);  
+    })
+    
+  
+    it('1.5.1 commit() function works well', function(done) {
+      async.series([
+        function(callback) {
+          conn2.execute(
+            "INSERT INTO oracledb_employees VALUES (:num, :str)",
+            { num: 1003, str: 'Patrick Engebresson' },
+            function(err) {
+              should.not.exist(err);
+              callback();
+            }
+          );
+        },
+        function(callback) {
+          conn1.execute(
+            "SELECT COUNT(*) FROM oracledb_employees",
+            function(err, result) {
+              should.not.exist(err);
+              result.rows[0][0].should.be.exactly(2);
+              callback();
+            }
+          );
+        },
+        function(callback) {
+          conn2.execute(
+            "SELECT COUNT(*) FROM oracledb_employees",
+            function(err, result) {
+              should.not.exist(err);
+              result.rows[0][0].should.be.exactly(3);
+              callback();
+            }
+          );
+        },
+        function(callback) {
+          conn2.commit(function(err) {
+            should.not.exist(err);
+            callback();
+          });
+        },
+        function(callback) {
+          conn1.execute(
+            "SELECT COUNT(*) FROM oracledb_employees",
+            function(err, result) {
+              should.not.exist(err);
+              result.rows[0][0].should.be.exactly(3);
+              callback();
+            }
+          );
+        },
+      ], done);
+    
+    })
+    
+    it('1.5.2 rollback() function works well', function(done) {
+      async.series([
+        function(callback) {
+          conn2.execute(
+            "INSERT INTO oracledb_employees VALUES (:num, :str)",
+            { num: 1003, str: 'Patrick Engebresson' },
+            function(err) {
+              should.not.exist(err);
+              callback();
+            }
+          );
+        },
+        function(callback) {
+          conn1.execute(
+            "SELECT COUNT(*) FROM oracledb_employees",
+            function(err, result) {
+              should.not.exist(err);
+              result.rows[0][0].should.be.exactly(2);
+              callback();
+            }
+          );
+        },
+        function(callback) {
+          conn2.execute(
+            "SELECT COUNT(*) FROM oracledb_employees",
+            function(err, result) {
+              should.not.exist(err);
+              result.rows[0][0].should.be.exactly(3);
+              callback();
+            }
+          );
+        },
+        function(callback) {
+          conn2.rollback(function(err) {
+            should.not.exist(err);
+            callback();
+          });
+        },
+        function(callback) {
+          conn2.execute(
+            "SELECT COUNT(*) FROM oracledb_employees",
+            function(err, result) {
+              should.not.exist(err);
+              result.rows[0][0].should.be.exactly(2);
+              callback();
+            }
+          );
+        },
       ], done);
     })
   })

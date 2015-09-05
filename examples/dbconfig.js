@@ -20,9 +20,9 @@
  *
  * DESCRIPTION
  *   Holds the credentials used by node-oracledb examples to connect
- *   to the database.  Production applications should instead consider
- *   using External Authentication to avoid hard coded credentials.
- *
+ *   to the database.  Production applications should consider using
+ *   External Authentication to avoid hard coded credentials.
+ * 
  *   Applications can set the connectString value to an Easy Connect
  *   string, or a Net Service Name from a tnsnames.ora file or
  *   external naming service, or it can be the name of a local Oracle
@@ -39,6 +39,13 @@
  *   If connectString is not specified, the empty string "" is used
  *   which indicates to connect to the local, default database.
  *
+ *   External Authentication can be used by setting the optional
+ *   property externalAuth to true.  External Authentication allows
+ *   applications to use an external password store such as Oracle
+ *   Wallet so passwords do not need to be hard coded into the
+ *   application.  The user and password properties for connecting or
+ *   creating a pool should not be set when externalAuth is true.
+ * 
  * TROUBLESHOOTING
  *   Errors like:
  *     ORA-12541: TNS:no listener
@@ -50,13 +57,23 @@
  *     ORA-12514: TNS:listener does not currently know of requested in connect descriptor
  *   indicates connectString is invalid.  You are reaching a computer
  *   with Oracle installed but the service name isn't known.
+ *   Use 'lsnrctl services' on the database server to find available services
  *
  *****************************************************************************/
 
 module.exports = {
-  user          : "hr",
-  password      : "welcome",
+  user          : process.env.NODE_ORACLEDB_USER || "hr",
+
+  // Instead of hard coding the password, consider prompting for it,
+  // passing it in an environment variable via process.env, or using
+  // External Authentication.
+  password      : process.env.NODE_ORACLEDB_PASSWORD || "welcome",
+
   // For information on connection strings see:
   // https://github.com/oracle/node-oracledb/blob/master/doc/api.md#connectionstrings
-  connectString : "localhost/XE"  // Easy Connect syntax
+  connectString : process.env.NODE_ORACLEDB_CONNECTIONSTRING || "localhost/orcl",
+
+  // Setting externalAuth is optional.  It defaults to false.  See:
+  // https://github.com/oracle/node-oracledb/blob/master/doc/api.md#extauth
+  externalAuth  : process.env.NODE_ORACLEDB_EXTERNALAUTH ? true : false
 };

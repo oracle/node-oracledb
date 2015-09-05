@@ -31,6 +31,7 @@
  *     51 -     are for other tests  
  * 
  *****************************************************************************/
+"use strict"
   
 var oracledb = require('oracledb');
 var should = require('should');
@@ -46,121 +47,107 @@ describe('27. dataTypeNumber2.js', function() {
     var credential = dbConfig;
   }
   
-  var connection = false;
-  var tableName = "oracledb_datatype_number2";
-  var sqlCreate = 
-        "BEGIN " +
-           "   DECLARE " +
-           "       e_table_exists EXCEPTION; " +
-           "       PRAGMA EXCEPTION_INIT(e_table_exists, -00942); " +
-           "   BEGIN " +
-           "       EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " '); " +
-           "   EXCEPTION " +
-           "       WHEN e_table_exists " +
-           "       THEN NULL; " +
-           "   END; " +
-           "   EXECUTE IMMEDIATE (' " +
-           "       CREATE TABLE " + tableName +" ( " +
-           "           num NUMBER, " + 
-           "           content NUMBER(9, 5) "  +
-           "       )" +
-           "   '); " +
-           "END; ";
-  var numbers = [
-        1,
-        0,
-        8,
-        -8,
-        1234,
-        -1234,
-        9876.54321,
-        -9876.54321,
-        0.01234,
-        -0.01234,
-        0.00000123
-      ];
-  before(function(done) {
+  var connection = null;
+  var tableName = "oracledb_number2";
+  var numbers = assist.data.numbers;
+
+  before('get one connection', function(done) {
     oracledb.getConnection(credential, function(err, conn) {
-      if(err) { console.error(err.message); return; }
+      should.not.exist(err);
       connection = conn;
-      assist.setup(connection, tableName, sqlCreate, numbers, done);
+      done();
     });
   })
   
-  after( function(done){
-    connection.execute(
-      "DROP table " + tableName,
-      function(err) {
-        if(err) { console.error(err.message); return; }
-        connection.release( function(err) {
-          if(err) { console.error(err.message); return; }
+  after('release connection', function(done) {
+    connection.release( function(err) {
+      should.not.exist(err);
+      done();
+    });
+  })
+
+  describe('27.1 testing NUMBER(p, s) data', function() {
+
+    before('create table, insert data',function(done) {
+      assist.setUp(connection, tableName, numbers, done);
+    })
+
+    after(function(done) {
+      connection.execute(
+        "DROP table " + tableName,
+        function(err) {
+          should.not.exist(err);
           done();
-        });
-      }
-    );
-  })
-  
-  it('27.1 supports NUMBER(p, s) data type', function(done) {
-    connection.should.be.ok;
-    connection.execute(
-      "SELECT * FROM " + tableName,
-      [],
-      { outFormat: oracledb.OBJECT },
-      function(err, result) {
-        should.not.exist(err);
-        // console.log(result);
-        for(var j = 0; j < numbers.length; j++) {
-          if(numbers[result.rows[j].NUM] == 0.00000123) 
-            result.rows[j].CONTENT.should.be.exactly(0);
-          else            
-           result.rows[j].CONTENT.should.be.exactly(numbers[result.rows[j].NUM]);
         }
-        done();
-      }
-    );
-  })
-  
-  it('27.2 resultSet stores NUMBER(p, s) data correctly', function(done) {
-    connection.should.be.ok;
-    var numRows = 3; // number of rows to return from each call to getRows()
-    connection.execute(
-      "SELECT * FROM " + tableName,
-      [],
-      { resultSet: true, outFormat: oracledb.OBJECT },
-      function(err, result) {
-        should.not.exist(err);
-        (result.resultSet.metaData[0]).name.should.eql('NUM');
-        (result.resultSet.metaData[1]).name.should.eql('CONTENT');
-        fetchRowsFromRS(result.resultSet);
-      }
-    );
-    
-    function fetchRowsFromRS(rs) {
-      rs.getRows(numRows, function(err, rows) {
-        should.not.exist(err);
-        if(rows.length > 0) {
-          for(var i = 0; i < rows.length; i++) {
-            if(numbers[rows[i].NUM] == 0.00000123) 
-              rows[i].CONTENT.should.be.exactly(0);
-            else              
-             rows[i].CONTENT.should.be.exactly(numbers[rows[i].NUM]);         
+      );
+    })
+
+    it('27.1.1 SELECT query', function(done) {
+      connection.should.be.ok;
+      connection.execute(
+        "SELECT * FROM " + tableName,
+        [],
+        { outFormat: oracledb.OBJECT },
+        function(err, result) {
+          should.not.exist(err);
+          // console.log(result);
+          for(var j = 0; j < numbers.length; j++) {
+            if(Math.abs( numbers[result.rows[j].NUM] ) == 0.00000123) 
+              result.rows[j].CONTENT.should.be.exactly(0);
+            else            
+              result.rows[j].CONTENT.should.be.exactly(numbers[result.rows[j].NUM]);
           }
-          return fetchRowsFromRS(rs);
-        } else if(rows.length == 0) {
-          rs.close(function(err) {
-            should.not.exist(err);
-            done();
-          });
-        } else {
-          var lengthLessThanZero = true;
-          should.not.exist(lengthLessThanZero);
           done();
         }
-      });
-    }
-  })
+      );
+    }) // 27.1.1
+
+    it('27.1.2 resultSet stores NUMBER(p, s) data correctly', function(done) {
+      connection.should.be.ok;
+      var numRows = 3; // number of rows to return from each call to getRows()
+      connection.execute(
+        "SELECT * FROM " + tableName,
+        [],
+        { resultSet: true, outFormat: oracledb.OBJECT },
+        function(err, result) {
+          should.not.exist(err);
+          (result.resultSet.metaData[0]).name.should.eql('NUM');
+          (result.resultSet.metaData[1]).name.should.eql('CONTENT');
+          fetchRowsFromRS(result.resultSet);
+        }
+      );
+    
+      function fetchRowsFromRS(rs) {
+        rs.getRows(numRows, function(err, rows) {
+          should.not.exist(err);
+          if(rows.length > 0) {
+            for(var i = 0; i < rows.length; i++) {
+              if(Math.abs( numbers[rows[i].NUM] ) == 0.00000123) 
+                rows[i].CONTENT.should.be.exactly(0);
+             else              
+               rows[i].CONTENT.should.be.exactly(numbers[rows[i].NUM]);         
+            }
+            return fetchRowsFromRS(rs);
+          } else if(rows.length == 0) {
+            rs.close(function(err) {
+              should.not.exist(err);
+              done();
+            });
+          } else {
+            var lengthLessThanZero = true;
+            should.not.exist(lengthLessThanZero);
+            done();
+          }
+        });
+      }    
+    })
+
+  }) // 27.1
   
-  it('27.3 stores null value correctly', function(done) {
-    assist.nullValueSupport(connection, tableName, done);
-  })  
+  describe('27.2 stores null value correctly', function() {
+    it('27.2.1 testing Null, Empty string and Undefined', function(done) {
+      assist.verifyNullValues(connection, tableName, done);
+    })
+  })
+
 })

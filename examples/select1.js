@@ -19,7 +19,7 @@
  *   select1.js
  *
  * DESCRIPTION
- *   Executes a basic query.
+ *   Executes a basic query without using a ResultSet.
  *   Uses Oracle's sample HR schema.
  *
  *   Scripts to create the HR schema can be found at:
@@ -43,9 +43,9 @@ oracledb.getConnection(
       return;
     }
     connection.execute(
-      "SELECT department_id, department_name "
-    + "FROM departments "
-    + "WHERE department_id = :did",
+      "SELECT department_id, department_name " +
+        "FROM departments " +
+        "WHERE department_id = :did",
       [180],
       function(err, result)
       {

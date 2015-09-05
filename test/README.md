@@ -58,20 +58,21 @@ Note: these are listed in `devDependencies` in `package.json` so `npm
 install` will install them when executed inside a node-oracledb
 package directory.
 
-### 4. Edit database credentials
+### 4. Database credentials
+
+The database credentials for node-oracledb test suite are defined in dbConfig.js file. You can set the credentials via environment variables or dbConfig.js file.
+Change the credentials to a user who has privileges to connect and create tables. 
 
 ```
 vi <some-directory>/node_modules/oracledb/test/dbConfig.js
 ```
 
-Change the credentials to a user who has privileges to connect and create tables:
-
 ```javascript
 module.exports = {
-  user          : "hr",
-  password      : "welcome",
-  connectString : "localhost/orcl",
-  externalAuth  : false
+  user          : process.env.NODE_ORACLEDB_USER || "hr",
+  password      : process.env.NODE_ORACLEDB_PASSWORD || "welcome",
+  connectString : process.env.NODE_ORACLEDB_CONNECTIONSTRING || "localhost/orcl",
+  externalAuth  : process.env.NODE_ORACLEDB_EXTERNALAUTH ? true : false
 };
 ```
 
@@ -113,3 +114,7 @@ assigned a number.  The following number ranges have been chosen:
 - 1  - 20  are reserved for basic functional tests
 - 21 - 50  are reserved for data type supporting tests
 - 51 onwards are for other tests
+
+## Test List
+
+See test/list.txt file for the list of existing tests.

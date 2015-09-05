@@ -67,8 +67,9 @@ public:
 
    void setPool ( dpi::SPool *, Oracledb* oracledb, unsigned int poolMax,
                   unsigned int poolMin, unsigned int poolIncrement,
-                  unsigned int poolTimeout, unsigned stmtCacheSize );
-
+                  unsigned int poolTimeout, unsigned stmtCacheSize,
+                  unsigned int lobPrefetchSize);
+   
    // Define Pool Constructor
    static Persistent<FunctionTemplate> poolTemplate_s ;
 
@@ -120,6 +121,7 @@ private:
    unsigned int poolIncrement_;
    unsigned int poolTimeout_;
    unsigned int stmtCacheSize_;
+   unsigned int lobPrefetchSize_;
 };
 
 typedef struct poolBaton
@@ -130,9 +132,10 @@ typedef struct poolBaton
   Persistent<Function> cb;
   dpi::Conn*  dpiconn;
   Pool*       njspool;
+  unsigned int lobPrefetchSize;
 
   poolBaton() :  error(""), connClass(""),
-                 dpiconn(NULL), njspool(NULL)
+                 dpiconn(NULL), njspool(NULL), lobPrefetchSize(0)
   {}
 
   ~poolBaton()

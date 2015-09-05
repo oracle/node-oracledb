@@ -63,8 +63,9 @@ using namespace v8;
 using namespace node;
 using namespace dpi;
 
-
 class Connection;
+class ProtoILob;
+
 /**
 * Structure used for binds
 **/
@@ -79,10 +80,14 @@ typedef struct Bind
   unsigned short      type;
   short               *ind;
   bool                isOut;
+  bool                isInOut;          // Date/Timestamp needs this info
+  unsigned int        rowsReturned;     /* number rows returned for
+                                           the bind (DML RETURNING) */
   dpi::DateTimeArray* dttmarr;
 
   Bind () : key(""), value(NULL), extvalue (NULL), len(NULL), len2(NULL),
-            maxSize(0), type(0), ind(NULL), isOut(false), dttmarr ( NULL )
+            maxSize(0), type(0), ind(NULL), isOut(false), isInOut(false),
+            rowsReturned(0), dttmarr ( NULL )
   {}
 }Bind;
 
@@ -92,12 +97,12 @@ typedef struct Bind
 typedef struct Define
 {
 
-  unsigned short fetchType;
+  unsigned short     fetchType;
   DPI_SZ_TYPE        maxSize;
-  void         *buf;             // will have the values from DB
-  void         *extbuf;          // this field will be DPI calls
-  DPI_BUFLEN_TYPE  *len;
-  short        *ind;
+  void               *buf;             // will have the values from DB
+  void               *extbuf;          // this field will be DPI calls
+  DPI_BUFLEN_TYPE    *len;
+  short              *ind;
   dpi::DateTimeArray *dttmarr;   // DPI Date time array of descriptor
 
   Define () :fetchType(0), maxSize(0), buf(NULL), extbuf(NULL),
@@ -105,32 +110,54 @@ typedef struct Define
   {}
 } Define;
 
+
+/**
+ * FetchInfo structure
+ **/
+typedef struct fetchInfo
+{
+  std::string name;                     /* DB Column name or expression name */
+  DataType    type;                   /* Fetch this column as specfieid type */
+
+  // Constructor to initialize member variables.
+  fetchInfo ()
+    : name (""), type ( DATA_DEFAULT )
+  {
+  }
+  
+} FetchInfo;
+
+
 /**
 * Baton for Asynchronous Connection methods
 **/
 typedef struct eBaton
 {
-  uv_work_t     req;
-  std::string   sql;
-  std::string   error;
-  dpi::Env*     dpienv;
-  dpi::Conn*    dpiconn;
-  Connection    *njsconn;
-  DPI_SZ_TYPE   rowsAffected;
-  unsigned int  maxRows;
-  unsigned int  prefetchRows;
-  bool          getRS;
-  bool          autoCommit;
-  unsigned int  rowsFetched;
-  unsigned int  outFormat;
-  unsigned int  numCols;
-  dpi::Stmt     *dpistmt;
+  uv_work_t            req;
+  std::string          sql;
+  std::string          error;
+  dpi::Env*            dpienv;
+  dpi::Conn*           dpiconn;
+  Connection           *njsconn;
+  DPI_SZ_TYPE          rowsAffected;
+  unsigned int         maxRows;
+  unsigned int         prefetchRows;
+  bool                 getRS;
+  bool                 autoCommit;
+  unsigned int         rowsFetched;
+  unsigned int         outFormat;
+  unsigned int         numCols;
+  dpi::Stmt            *dpistmt;
   dpi::DpiStmtType     st;
   bool                 stmtIsReturning;
   std::vector<Bind*>   binds;
   unsigned int         numOutBinds;    // # of out binds used for DML return
   std::string          *columnNames;
   Define               *defines;
+  unsigned int         fetchAsStringTypesCount;
+  DataType             *fetchAsStringTypes;  // Global by type settings
+  unsigned int         fetchInfoCount;   // Conversion requested count
+  FetchInfo            *fetchInfo;       // Conversion meta data
   Persistent<Function> cb;
 
   eBaton() : sql(""), error(""), dpienv(NULL), dpiconn(NULL), njsconn(NULL),
@@ -138,7 +165,8 @@ typedef struct eBaton
              getRS(false), autoCommit(false), rowsFetched(0), 
              outFormat(0), numCols(0), dpistmt(NULL),
              st(DpiStmtUnknown), stmtIsReturning (false), numOutBinds(0),
-             columnNames(NULL), defines(NULL)
+             columnNames(NULL), defines(NULL), fetchAsStringTypesCount (0),
+             fetchAsStringTypes(NULL), fetchInfoCount(0), fetchInfo(NULL)
   {}
 
   ~eBaton ()
@@ -182,11 +210,34 @@ typedef struct eBaton
      {
        for( unsigned int i=0; i<numCols; i++ )
        {
+         if ((defines[i].fetchType == DpiClob) ||
+             (defines[i].fetchType == DpiBlob) ||
+             (defines[i].fetchType == DpiBfile))
+         {
+           for (unsigned int j = 0; j < maxRows; j++)
+           {
+                 // free all those unused descriptors that were never fetched.
+             
+             if (((Descriptor **)(defines[i].buf))[j])
+               Env::freeDescriptor(((Descriptor **)(defines[i].buf))[j],
+                                   LobDescriptorType);  
+           }
+         }
+         
          free(defines[i].buf);
          free(defines[i].len);
          free(defines[i].ind);
        }
        delete [] defines;
+     }
+     if ( fetchInfo && !getRS )
+     {
+       delete [] fetchInfo;
+     }
+
+     if ( fetchAsStringTypes && !getRS )
+     {
+       free (fetchAsStringTypes);
      }
    }
 }eBaton;
@@ -194,7 +245,6 @@ typedef struct eBaton
 class Connection: public ObjectWrap
 {
 public:
-
   void setConnection (dpi::Conn*, Oracledb* oracledb);
   // Define Connection Constructor
   static Persistent<FunctionTemplate> connectionTemplate_s;
@@ -206,9 +256,8 @@ public:
                           unsigned int numCols );
   static void DoFetch (eBaton* executeBaton);
   static void CopyMetaData ( std::string*, const dpi::MetaData*, unsigned int ); 
-  static void Descr2Double ( Define* defines, unsigned int numCols,
-                             unsigned int rowsFetched, bool getRS );
   bool isValid() { return isValid_; }
+  dpi::Conn* getDpiConn() { return dpiconn_; }
   Oracledb* oracledb_;
 
 private:
@@ -259,6 +308,19 @@ private:
 
 
   static void PrepareAndBind (eBaton* executeBaton);
+  
+  static unsigned short SourceDBType2TargetDBType ( unsigned srcType );
+  static boolean MapByName ( eBaton *executeBaton,
+                              std::string &name,
+                              unsigned short &targetType );
+
+
+  static boolean MapByType ( eBaton *executeBaton, unsigned short &targetType);
+  
+  static unsigned short GetTargetType ( eBaton *executeBaton,
+                                         std::string &name,
+                                        unsigned short defaultType);
+
   static void ProcessBinds (_NAN_METHOD_ARGS, unsigned int index,
                             eBaton* executeBaton);
   static void ProcessOptions (_NAN_METHOD_ARGS, unsigned int index,
@@ -275,37 +337,62 @@ private:
                                      eBaton* executeBaton, BindType bindType);
   static void GetOutBindParams (unsigned short dataType, Bind* bind,
                                 eBaton* executeBaton);
+  static void Descr2Double ( Define* defines, unsigned int numCols,
+                             unsigned int rowsFetched, bool getRS );
+  static void Descr2protoILob ( eBaton *executeBaton, unsigned int numCols,
+                                unsigned int rowsFetched );
   static v8::Handle<v8::Value> GetOutBinds (eBaton* executeBaton);
   static v8::Handle<v8::Value> GetOutBindArray (eBaton* executeBaton);
   static v8::Handle<v8::Value> GetOutBindObject (eBaton* executeBaton);
-  static v8::Handle<v8::Value> GetArrayValue (Bind *bind, unsigned long count);
-
+  static v8::Handle<v8::Value> GetArrayValue (eBaton *executeBaton,
+                                              Bind *bind, unsigned long count);
   // to convert DB value to v8::Value
   static v8::Handle<v8::Value> GetValue (eBaton *executeBaton,
                                          bool isQuery,
                                          unsigned int index,
                                          unsigned int row = 0);
   // for primitive types (Number, String and Date) 
-  static v8::Handle<v8::Value> GetValueCommon (short ind, 
+  static v8::Handle<v8::Value> GetValueCommon (eBaton *executeBaton, 
+                                         short ind, 
                                          unsigned short type, 
                                          void* val, DPI_BUFLEN_TYPE len);
   // for refcursor
   static v8::Handle<v8::Value> GetValueRefCursor (eBaton *executeBaton, 
                                                   Bind *bind);
-  static void UpdateDateValue ( eBaton *executeBaton );
+  // for lobs
+  static v8::Handle<v8::Value> GetValueLob (eBaton *executeBaton, 
+                                            Bind *bind);
+  //static void UpdateDateValue ( eBaton *executeBaton );
+  static void UpdateDateValue ( eBaton *executeBaton, unsigned int index );
   static void v8Date2OraDate ( v8::Handle<v8::Value>, Bind *bind);
 
   // Callback/Utility function used to allocate buffer(s) for Bind Structs
   static void cbDynBufferAllocate ( void *ctx, bool dmlReturning,
-                                    unsigned int nRows );
+                                    unsigned int nRows,
+                                    unsigned int bndpos );
 
   // Callback used in DML-Return SQL statements to
   // identify block of memeory for each row.
-  static int  cbDynBufferGet ( void *ctx, DPI_SZ_TYPE nRows,
-
+  static int  cbDynBufferGet ( void *ctx, DPI_SZ_TYPE nRows, 
+                               unsigned int bndpos,
                                unsigned long iter, unsigned long index,
                                dvoid **bufpp, void **alenpp, void **indpp,
                                unsigned short **rcode, unsigned char *piecep );
+
+  // Callback used in DML-Return SQL statements to
+  // identify block of memeory for each row.
+  static int  cbNullInBind ( void *ctx, DPI_SZ_TYPE nRows,
+                               unsigned int bndpos,
+                               unsigned long iter, unsigned long index,
+                               dvoid **bufpp, void **alenpp, void **indpp,
+                               unsigned short **rcode, unsigned char *piecep );
+
+  // GetLob Method on Connection class
+  static v8::Handle<v8::Value> NewLob(eBaton* executeBaton,
+                                      ProtoILob *protoILob);
+
+  static NAN_METHOD(GetLob);
+  
 
   dpi::Conn* dpiconn_;
   bool isValid_;

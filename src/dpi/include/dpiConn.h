@@ -25,6 +25,10 @@
 #ifndef DPICONN_ORACLE
 # define DPICONN_ORACLE
 
+#ifndef DPILOB_ORACLE
+# include <dpiLob.h>
+#endif
+
 #ifndef DPISTMT_ORACLE
 # include <dpiStmt.h>
 #endif
@@ -59,6 +63,11 @@ public:
                                 // properties
   virtual void stmtCacheSize(unsigned int stmtCacheSize) = 0;
   virtual unsigned int stmtCacheSize() const = 0;
+  virtual int getByteExpansionRatio () = 0;
+  virtual void setErrState ( int errNum ) = 0;
+
+  virtual void lobPrefetchSize(unsigned int lobPrefetchSize) = 0;
+  virtual unsigned int lobPrefetchSize() const = 0;
 
   virtual void clientId(const string &clientId) = 0;
 
@@ -74,6 +83,10 @@ public:
   virtual void rollback() = 0;
 
   virtual void breakExecution() = 0;
+
+  virtual DpiHandle *getSvch () = 0;
+
+  virtual DpiHandle *getErrh () = 0;
 
 protected:
                                 // clients cannot do new and delete

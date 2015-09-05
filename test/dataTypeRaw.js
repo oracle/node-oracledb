@@ -19,7 +19,7 @@
  * See LICENSE.md for relevant licenses.
  *
  * NAME
- *   24. dataTypeRaw.js
+ *   26. dataTypeRaw.js
  *
  * DESCRIPTION
  *   Testing Oracle data type support - RAW.
@@ -31,12 +31,14 @@
  *     51 -     are for other tests  
  * 
  *****************************************************************************/
- 
+ "use strict";
+
 var oracledb = require('oracledb');
+var should = require('should');
 var assist = require('./dataTypeAssist.js');
 var dbConfig = require('./dbConfig.js');
 
-describe('24. dataTypeRaw.js', function() {
+describe('26. dataTypeRaw.js', function() {
   
   if(dbConfig.externalAuth){
     var credential = { externalAuth: true, connectString: dbConfig.connectString };
@@ -45,61 +47,60 @@ describe('24. dataTypeRaw.js', function() {
   }
   
   var connection = false;
-  var tableName = "oracledb_datatype_raw";
-  var sqlCreate = 
-        "BEGIN " +
-           "   DECLARE " +
-           "       e_table_exists EXCEPTION; " +
-           "       PRAGMA EXCEPTION_INIT(e_table_exists, -00942); " +
-           "   BEGIN " +
-           "       EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " '); " +
-           "   EXCEPTION " +
-           "       WHEN e_table_exists " +
-           "       THEN NULL; " +
-           "   END; " +
-           "   EXECUTE IMMEDIATE (' " +
-           "       CREATE TABLE " + tableName +" ( " +
-           "           num NUMBER, " + 
-           "           content RAW(2000) "  +
-           "       )" +
-           "   '); " +
-           "END; ";
+  var tableName = "oracledb_raw";
 
   var bufLen = [10 ,100, 1000, 2000]; // buffer length
   var bufs = [];
   for(var i = 0; i < bufLen.length; i++) 
     bufs[i] = assist.createBuffer(bufLen[i]);
   
-  before(function(done) {
+  before('get one connection', function(done) {
     oracledb.getConnection(credential, function(err, conn) {
-      if(err) { console.error(err.message); return; }
+      should.not.exist(err);
       connection = conn;
-      assist.setup(connection, tableName, sqlCreate, bufs, done);
+      done();
     });
   })
   
-  after(function(done) {
-    connection.execute(
-      "DROP table " + tableName,
-      function(err) {
-        if(err) { console.error(err.message); return; }
-        connection.release( function(err) {
-          if(err) { console.error(err.message); return; }
+  after('release connection', function(done) {
+    connection.release( function(err) {
+      should.not.exist(err);
+      done();
+    });
+  })
+  
+  describe('26.1 testing RAW data in various lengths', function() {
+    
+    before('create table, insert data',function(done) {
+      assist.setUp(connection, tableName, bufs, done);
+    })
+
+    after(function(done) {
+      connection.execute(
+        "DROP table " + tableName,
+        function(err) {
+          should.not.exist(err);
           done();
-        });
-      }
-    );
+        }
+      );
+    })
+
+    it('26.1.1 SELECT query', function(done) {
+      assist.dataTypeSupport(connection, tableName, bufs, done);
+    })
+
+    it('26.1.2 resultSet stores RAW data correctly', function(done) {
+      assist.verifyResultSet(connection, tableName, bufs, done);
+    })
+
+    it('26.1.3 works well with REF Cursor', function(done) {
+      assist.verifyRefCursor(connection, tableName, bufs, done);
+    })
   })
   
-  it('40.1 supports RAW data in various lengths', function(done) {
-    assist.dataTypeSupport(connection, tableName, bufs, done);
-  })
-  
-  it('40.2 resultSet stores RAW data correctly', function(done) {
-    assist.resultSetSupport(connection, tableName, bufs, done);
-  })
-  
-  it('40.3 stores null value correctly', function(done) {
-    assist.nullValueSupport(connection, tableName, done);
+  describe('26.2 stores null value correctly', function() {
+    it('26.2.1 testing Null, Empty string and Undefined', function(done) {
+      assist.verifyNullValues(connection, tableName, done);
+    })
   })
 })

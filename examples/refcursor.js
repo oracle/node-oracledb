@@ -61,7 +61,7 @@ oracledb.getConnection(
     var bindvars = {
       sal:  12000,  
       cursor:  { type: oracledb.CURSOR, dir : oracledb.BIND_OUT }
-    }
+    };
     connection.execute(
       "BEGIN get_emp_rs(:sal, :cursor); END;",
       bindvars,
@@ -86,7 +86,7 @@ function fetchRowsFromRS(connection, resultSet, numRows)
       if (err) {
         console.log(err);
         doClose(connection, resultSet); // always close the result set
-      } else if (rows.length == 0) {    // no rows, or no more rows
+      } else if (rows.length === 0) {    // no rows, or no more rows
         doClose(connection, resultSet); // always close the result set
       } else if (rows.length > 0) {
         console.log("fetchRowsFromRS(): Got " + rows.length + " rows");

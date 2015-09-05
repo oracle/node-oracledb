@@ -65,24 +65,74 @@ Persistent<FunctionTemplate> ResultSet::resultSetTemplate_s;
      Store the config in pool instance.
    
    PARAMETERS
-     stmt      -  dpi statement
-     env       -  dpi Env
-     conn      -  njs connection
-     outFormat -  outFormat of the result set
+     stmt         -  dpi statement
+     executeBaton - eBaton structure
 */
-void ResultSet::setResultSet ( dpi::Stmt *stmt, dpi::Env *dpienv,
-                               Connection *conn, unsigned int outFormat )
+void ResultSet::setResultSet ( dpi::Stmt *stmt, eBaton *executeBaton )
 {
   this->dpistmt_       = stmt;
-  this->dpienv_        = dpienv;
-  this->njsconn_       = conn;
-  this->meta_          = stmt->getMetaData();
-  this->numCols_       = this->dpistmt_->numCols();
-  this->state_         = INACTIVE;
-  this->outFormat_     = outFormat;
+  this->dpienv_        = executeBaton->dpienv;
+  this->njsconn_       = executeBaton->njsconn;
+  if ( stmt )
+  {
+    this->meta_        = stmt->getMetaData();
+    this->numCols_     = this->dpistmt_->numCols();
+    this->state_       = INACTIVE;
+  }
+  else
+  {
+    /* 
+     * This could happen in REFCURSOR case, when the stored procedure
+     * did not return a valid handle
+     */
+    this->numCols_     = 0;
+    this->meta_        = NULL;
+    this->state_       = INVALID;
+  }
+
+  this->outFormat_     = executeBaton->outFormat;
   this->fetchRowCount_ = 0;
   this->rsEmpty_       = false;
   this->defineBuffers_ = NULL;
+
+  /* (Deep) Copy by-type conversion rules if available for later use */
+  if ( executeBaton -> fetchAsStringTypes )
+  {
+    unsigned int count = executeBaton->fetchAsStringTypesCount;
+
+    this->fetchAsStringTypes_ = (DataType * ) malloc (
+                                                count * sizeof ( DataType ) );
+    for ( unsigned int i = 0 ; i < count ; i ++ )
+    {
+      this->fetchAsStringTypes_[i] = executeBaton->fetchAsStringTypes[i] ;
+    }
+    this->fetchAsStringTypesCount_ = count;
+  }
+  else
+  {
+    this->fetchAsStringTypes_      = NULL;
+    this->fetchAsStringTypesCount_ = 0;
+  }
+
+  /* (Deep) Copy by-name conversion rules if available for later use
+   * The by-name conversion rules are applicable only for ResultSet
+   * RefCursor require by-cursor definitions
+   */
+  if ( executeBaton->getRS && executeBaton->fetchInfo )
+  {
+    this->fetchInfo_ = new FetchInfo[executeBaton->fetchInfoCount];
+    for ( unsigned int i = 0; i < executeBaton->fetchInfoCount; i ++ )
+    {
+      this->fetchInfo_[i].type = executeBaton->fetchInfo[i].type;
+      this->fetchInfo_[i].name = executeBaton->fetchInfo[i].name;
+    }
+    this->fetchInfoCount_ = executeBaton->fetchInfoCount ;
+  }
+  else
+  {
+    this->fetchInfo_      = NULL;
+    this->fetchInfoCount_ = 0;
+  }
 }
 
 /*****************************************************************************/
@@ -195,12 +245,28 @@ NAN_METHOD(ResultSet::GetRow)
 
   ResultSet *njsResultSet = ObjectWrap::Unwrap<ResultSet>(args.This());
   rsBaton   *getRowsBaton = new rsBaton ();
+  getRowsBaton->njsRS     = njsResultSet;
   NanAssignPersistent(getRowsBaton->cb, callback );
+
+  if(njsResultSet->state_ == INVALID)
+  {
+    getRowsBaton->error = NJSMessages::getErrorMsg ( errInvalidResultSet );
+    // donot alter the state while exiting
+    getRowsBaton->errOnActiveOrInvalid = true;
+    goto exitGetRow;
+  }
+  if(njsResultSet->state_ == ACTIVE)
+  {
+    getRowsBaton->error = NJSMessages::getErrorMsg ( errBusyResultSet );
+    // donot alter the state while exiting
+    getRowsBaton->errOnActiveOrInvalid = true;
+    goto exitGetRow;
+  }
+  njsResultSet->state_  = ACTIVE;
 
   NJS_CHECK_NUMBER_OF_ARGS ( getRowsBaton->error, args, 1, 1, exitGetRow );
 
   getRowsBaton->numRows = 1;
-  getRowsBaton->njsRS   = njsResultSet;
 
 exitGetRow:
   ResultSet::GetRowsCommon(getRowsBaton);
@@ -224,7 +290,24 @@ NAN_METHOD(ResultSet::GetRows)
 
   ResultSet *njsResultSet = ObjectWrap::Unwrap<ResultSet>(args.This());
   rsBaton   *getRowsBaton = new rsBaton ();
+  getRowsBaton->njsRS   = njsResultSet;
   NanAssignPersistent(getRowsBaton->cb, callback );
+
+  if(njsResultSet->state_ == INVALID)
+  {
+    getRowsBaton->error = NJSMessages::getErrorMsg ( errInvalidResultSet );
+    // donot alter the state while exiting
+    getRowsBaton->errOnActiveOrInvalid = true;
+    goto exitGetRows;
+  }
+  else if(njsResultSet->state_ == ACTIVE)
+  {
+    getRowsBaton->error = NJSMessages::getErrorMsg ( errBusyResultSet );
+    // donot alter the state while exiting
+    getRowsBaton->errOnActiveOrInvalid = true;
+    goto exitGetRows;
+  }
+  njsResultSet->state_  = ACTIVE;
 
   NJS_CHECK_NUMBER_OF_ARGS ( getRowsBaton->error, args, 2, 2, exitGetRows );
   NJS_GET_ARG_V8UINT ( getRowsBaton->numRows, getRowsBaton->error,
@@ -237,7 +320,6 @@ NAN_METHOD(ResultSet::GetRows)
   }
 
   getRowsBaton->fetchMultiple = true;
-  getRowsBaton->njsRS         = njsResultSet;
 exitGetRows:
   ResultSet::GetRowsCommon(getRowsBaton);
   NanReturnUndefined();
@@ -263,27 +345,39 @@ void ResultSet::GetRowsCommon(rsBaton *getRowsBaton)
     getRowsBaton->error = NJSMessages::getErrorMsg ( errInvalidConnection );
     goto exitGetRowsCommon;
   }
-  if(getRowsBaton->njsRS->state_ == INVALID)
+
+  getRowsBaton->ebaton       = ebaton = new eBaton;
+  njsRS                      = getRowsBaton->njsRS;
+  ebaton->columnNames        = new std::string[njsRS->numCols_];
+  ebaton->maxRows            = getRowsBaton->numRows;
+  ebaton->dpistmt            = njsRS->dpistmt_;
+  ebaton->getRS              = true;
+  ebaton->dpienv             = njsRS->njsconn_->oracledb_->getDpiEnv();
+  ebaton->outFormat          = njsRS->outFormat_;
+  ebaton->njsconn            = njsRS->njsconn_;
+  ebaton->dpiconn            = njsRS->njsconn_->getDpiConn();
+
+  if ( njsRS->fetchAsStringTypesCount_ )
   {
-    getRowsBaton->error = NJSMessages::getErrorMsg ( errInvalidResultSet );
-    goto exitGetRowsCommon;
+    ebaton->fetchAsStringTypes = njsRS->fetchAsStringTypes_;
+    ebaton->fetchAsStringTypesCount = njsRS->fetchAsStringTypesCount_;
   }
-  else if(getRowsBaton->njsRS->state_ == ACTIVE)
+  else
   {
-    getRowsBaton->error = NJSMessages::getErrorMsg ( errBusyResultSet );
-    goto exitGetRowsCommon;
+    ebaton->fetchAsStringTypes = NULL;
+    ebaton->fetchAsStringTypesCount = 0;
   }
 
-  getRowsBaton->ebaton    = ebaton = new eBaton;
-  njsRS                   = getRowsBaton->njsRS;
-
-  njsRS->state_           = ACTIVE;
-  ebaton->columnNames     = new std::string[njsRS->numCols_];
-  ebaton->maxRows         = getRowsBaton->numRows;
-  ebaton->dpistmt         = njsRS->dpistmt_;
-  ebaton->getRS           = true;
-  ebaton->dpienv          = njsRS->njsconn_->oracledb_->getDpiEnv();
-  ebaton->outFormat       = njsRS->outFormat_;
+  /* Copy by-name conversion rules */
+  ebaton->fetchInfoCount   = njsRS->fetchInfoCount_;
+  if ( ebaton->fetchInfoCount )
+  {
+    ebaton->fetchInfo = njsRS->fetchInfo_;
+  }
+  else
+  {
+    ebaton->fetchInfo = NULL;
+  }
 
 exitGetRowsCommon:
   getRowsBaton->req.data  = (void *)getRowsBaton;
@@ -332,6 +426,11 @@ void ResultSet::Async_GetRows(uv_work_t *req)
         getRowsBaton-> njsRS-> defineBuffers_ = NULL;
       }
       Connection::DoDefines(ebaton, njsRS->meta_, njsRS->numCols_);
+      if ( !ebaton->error.empty () )
+      {
+        getRowsBaton->error = ebaton->error;
+        goto exitAsyncGetRows;
+      }
       njsRS->fetchRowCount_ = getRowsBaton->numRows;
       njsRS->defineBuffers_ = ebaton->defines;
     }
@@ -343,6 +442,7 @@ void ResultSet::Async_GetRows(uv_work_t *req)
   }
   catch (dpi::Exception &e)
   {
+    NJS_SET_CONN_ERR_STATUS ( e.errnum(), njsRS->njsconn_->getDpiConn() );
     getRowsBaton->error = std::string (e.what());
   }
   exitAsyncGetRows:
@@ -374,7 +474,6 @@ void ResultSet::Async_AfterGetRows(uv_work_t *req)
   {
     argv[0]           = NanUndefined();
 
-    getRowsBaton->njsRS->state_  = INACTIVE;
     eBaton* ebaton               = getRowsBaton->ebaton;
     ebaton->outFormat            = getRowsBaton->njsRS->outFormat_;
     Handle<Value> rowsArray      = NanNew<v8::Array>(0),
@@ -395,6 +494,11 @@ void ResultSet::Async_AfterGetRows(uv_work_t *req)
   }
 
   exitAsyncAfterGetRows:
+  if(!getRowsBaton->errOnActiveOrInvalid)
+  {
+    getRowsBaton->njsRS->state_ = INACTIVE;
+  }
+
   Local<Function> callback = NanNew(getRowsBaton->cb);
   NanMakeCallback(NanGetCurrentContext()->Global(),
                   callback, 2, argv);
@@ -422,7 +526,24 @@ NAN_METHOD(ResultSet::Close)
 
   ResultSet *njsResultSet = ObjectWrap::Unwrap<ResultSet>(args.This());
   rsBaton *closeBaton     = new rsBaton ();
+  closeBaton->njsRS       = njsResultSet;
   NanAssignPersistent( closeBaton->cb, callback );
+
+  if(njsResultSet->state_ == INVALID)
+  {
+    closeBaton->error = NJSMessages::getErrorMsg ( errInvalidResultSet );
+    // donot alter the state while exiting
+    closeBaton->errOnActiveOrInvalid = true;
+    goto exitClose;
+  }
+  else if(njsResultSet->state_ == ACTIVE)
+  {
+    closeBaton->error = NJSMessages::getErrorMsg ( errBusyResultSet );
+    // donot alter the state while exiting
+    closeBaton->errOnActiveOrInvalid = true;
+    goto exitClose;
+  }
+  njsResultSet->state_ = ACTIVE;
 
   NJS_CHECK_NUMBER_OF_ARGS ( closeBaton->error, args, 1, 1, exitClose );
 
@@ -431,19 +552,7 @@ NAN_METHOD(ResultSet::Close)
     closeBaton->error = NJSMessages::getErrorMsg ( errInvalidConnection );
     goto exitClose;
   }
-  else if(njsResultSet->state_ == INVALID)
-  {
-    closeBaton->error = NJSMessages::getErrorMsg ( errInvalidResultSet );
-    goto exitClose;
-  }
-  else if(njsResultSet->state_ == ACTIVE)
-  {
-    closeBaton->error = NJSMessages::getErrorMsg ( errBusyResultSet );
-    goto exitClose;
-  }
 
-  njsResultSet->state_   = ACTIVE;
-  closeBaton->njsRS      = njsResultSet;
 
 exitClose:
   closeBaton->req.data = (void *)closeBaton;
@@ -481,9 +590,22 @@ void ResultSet::Async_Close(uv_work_t *req)
       ResultSet::clearFetchBuffer(defineBuffers, numCols);
       closeBaton-> njsRS-> defineBuffers_ = NULL;
     }
+
+    if ( closeBaton->njsRS->fetchAsStringTypes_ )
+    {
+      free ( closeBaton->njsRS->fetchAsStringTypes_ ) ;
+      closeBaton->njsRS->fetchAsStringTypes_ = NULL;
+    }
+    if ( closeBaton->njsRS->fetchInfo_ )
+    {
+      delete [] closeBaton->njsRS->fetchInfo_;
+      closeBaton->njsRS->fetchInfo_ = NULL;
+    }
   }
   catch(dpi::Exception& e)
   {
+    NJS_SET_CONN_ERR_STATUS ( e.errnum(),
+                          closeBaton->njsRS->njsconn_->getDpiConn() );
     closeBaton->error = std::string(e.what());
   }
   exitAsyncClose:
@@ -510,6 +632,10 @@ void ResultSet::Async_AfterClose(uv_work_t *req)
   if(!(closeBaton->error).empty())
   {
     argv[0] = v8::Exception::Error(NanNew<v8::String>((closeBaton->error).c_str()));
+    if(!closeBaton->errOnActiveOrInvalid)
+    {
+      closeBaton->njsRS->state_ = INACTIVE;
+    }
   }
   else
   {

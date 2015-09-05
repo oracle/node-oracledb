@@ -16,24 +16,22 @@
  * limitations under the License.
  *
  * NAME
- *   plsql.js
+ *   blobstream1.js
  *
  * DESCRIPTION
- *   Show calling a PL/SQL procedure and binding parameters in various ways
- *   Use demo.sql to create the required procedure or do:
- * 
- *   CREATE OR REPLACE PROCEDURE testproc (p_in IN VARCHAR2, p_inout IN OUT VARCHAR2, p_out OUT NUMBER)
- *     AS
- *   BEGIN
- *     p_inout := p_in || p_inout;
- *     p_out := 101;
- *   END;
- *   /
+ *   SELECTs an image from a BLOB and streams it to a file, blobstream1out.jpg
+ *   Use demo.sql to create the required table or do:
+ *     DROP TABLE mylobs;
+ *     CREATE TABLE mylobs (id NUMBER, c CLOB, b BLOB);
+ *   Run blobinsert1.js to load an image before running this example.
  *
  *****************************************************************************/
 
+var fs = require('fs');
 var oracledb = require('oracledb');
 var dbConfig = require('./dbconfig.js');
+
+var outFileName = 'blobstream1out.jpg';
 
 oracledb.getConnection(
   {
@@ -41,21 +39,38 @@ oracledb.getConnection(
     password      : dbConfig.password,
     connectString : dbConfig.connectString
   },
-  function (err, connection)
+  function(err, connection)
   {
     if (err) { console.error(err.message); return; }
 
-    var bindvars = {
-      i:  'Chris',  // bind type is determined from the data type
-      io: { val: 'Jones', dir : oracledb.BIND_INOUT },
-      o:  { type: oracledb.NUMBER, dir : oracledb.BIND_OUT },
-    }
     connection.execute(
-      "BEGIN testproc(:i, :io, :o); END;",
-      bindvars,
-      function (err, result)
+      "SELECT b FROM mylobs WHERE id = :id",
+      { id: 2 },
+      function(err, result)
       {
         if (err) { console.error(err.message); return; }
-        console.log(result.outBinds);        
+        if (result.rows.length === 0) { console.log("No results"); return; }
+
+        var lob = result.rows[0][0];
+        if (lob === null) { console.log("BLOB was NULL"); return; }
+
+        lob.on(
+          'error',
+          function(err)
+          {
+            console.log("lob.on 'error' event");
+            console.error(err);
+          });
+
+        console.log('Writing to ' + outFileName);
+        var outStream = fs.createWriteStream(outFileName);
+        outStream.on(
+          'error',
+          function(err)
+          {
+            console.log("outStream.on 'error' event");
+            console.error(err);
+          });
+        lob.pipe(outStream);
       });
   });
