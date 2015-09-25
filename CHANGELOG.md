@@ -2,7 +2,7 @@
 
 ## node-oracledb v1.2.0 (DD Mon YYYY)
 
-- Improved installer messages for Oracle client header and library detection on Linux and OS X.
+- Improved installer messages for Oracle client header and library detection on Linux, OS X and Solaris.
 
 ## node-oracledb v1.1.0 (3 Sep 2015)
 
