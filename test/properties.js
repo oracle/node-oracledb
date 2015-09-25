@@ -301,7 +301,8 @@ describe('58. properties.js', function() {
       should.equal(connection.module, null);
       should.equal(connection.clientId, null);
 
-      (connection.stmtCacheSize).should.be.a.Number.and.be.above(0);
+      (connection.stmtCacheSize).should.be.a.Number;
+      (connection.stmtCacheSize).should.be.greaterThan(0);
     })
 
     it('58.3.2 stmtCacheSize', function() {

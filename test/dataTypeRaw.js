@@ -125,7 +125,20 @@ describe('42. dataTypeRaw.js', function() {
           }
         });
       }
-    })
+    }) // 42.1.4
+
+    it('42.1.5 a negative case which hits NJS-011 error', function(done) {
+      connection.execute(
+        "INSERT INTO " + tableName + " (content ) VALUES (:c)",
+         { c : { val: 1234, type: oracledb.BUFFER, dir:oracledb.BIND_IN } },
+         function(err, result) {
+          should.exist(err);
+          // NJS-011: encountered bind value and type mismatch 
+          (err.message).should.startWith('NJS-011:');
+          done();
+         }
+      );
+    }) 
 
   })
   
@@ -324,22 +337,27 @@ describe('42. dataTypeRaw.js', function() {
       );
     })
    
-    it('42.4.1 value with the maximum size', function(done) {
-      var buf = assist.createBuffer(5000);
+    it('42.4.1 when data length is 200', function(done) {
+      var buf = assist.createBuffer(2);
 
       connection.execute(
         "BEGIN oracledb_testraw(:i, :o); END;",
         {
           i: { type: oracledb.BUFFER, dir: oracledb.BIND_IN, val: buf },
-          o: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 32767 }
+          o: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: 20}
         },
+        /* ORA-06502: PL/SQL: numeric or value error: raw variable length too long */ 
         function(err, result) {
           should.not.exist(err);
           // console.log(result);
+          //(result.outBinds.o.length).should.be.exactly(200);
+          // console.log(result.outBinds.o.length);
+          console.log( Buffer.isBuffer(result.outBinds.o) );
           done();
         }
       );
     })
 
   }) // 42.4
+
 })
