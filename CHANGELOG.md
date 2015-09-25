@@ -6,7 +6,7 @@
 
 - Remove non-portable memory allocation for queries that return NULL.
 
-- Added check to make sure maxRows is greater than zero for non-ResultSet queries.
+- Added check to make sure `maxRows` is greater than zero for non-ResultSet queries.
 
 - Fixed AIX-specific REF CURSOR related failures.
 
@@ -19,6 +19,8 @@
 - Fixed encoding issues with several files that caused compilation warnings in some Windows environments.
 
 - Added a `type` property to the Lob class to distinguish CLOB and BLOB types.
+
+- Made installation halt sooner for Node.js versions currently known to be unusable.
 
 ## node-oracledb v1.1.0 (3 Sep 2015)
 
