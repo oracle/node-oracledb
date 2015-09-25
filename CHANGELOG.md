@@ -1,5 +1,9 @@
 # Change Log
 
+## node-oracledb v1.2.0 (DD Mon YYYY)
+
+- Improved installer messages for Oracle client header and library detection on Linux and OS X.
+
 ## node-oracledb v1.1.0 (3 Sep 2015)
 
 - Enhanced pool.release() to drop the session if it is known to be unusable, allowing a new session to be created.
