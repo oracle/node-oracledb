@@ -28,6 +28,8 @@
 
 - Made installation halt sooner for Node.js versions currently known to be unusable.
 
+- Fixed typo in `examples/dbmsoutputgetline.js`
+
 ## node-oracledb v1.1.0 (3 Sep 2015)
 
 - Enhanced pool.release() to drop the session if it is known to be unusable, allowing a new session to be created.
