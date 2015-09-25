@@ -931,6 +931,20 @@ void Connection::Async_Execute (uv_work_t *req)
       executeBaton->dpistmt->execute(1, executeBaton->autoCommit);
       executeBaton->rowsAffected = executeBaton->dpistmt->rowsAffected();
 
+      // Check whether indicators were allocated as part of callback
+      if ( executeBaton->stmtIsReturning )
+      {
+        for ( unsigned int b = 0; b < executeBaton->binds.size (); b++ )
+        {
+          if ( executeBaton->binds[b]->isOut && !executeBaton->binds[b]->ind)
+          {
+            executeBaton->error = NJSMessages::getErrorMsg (
+                                                  errSQLSyntaxError );
+            return;
+          }
+        }
+      }
+
       /* Check to see if the string buffer size is good in case of
        * DML Returning.
        */

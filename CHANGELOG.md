@@ -2,6 +2,9 @@
 
 ## node-oracledb v1.2.0 (DD Mon YYYY)
 
+- Added a check to return an NJS error when an invalid DML RETURN statement
+  does not give an ORA error.
+
 - Added support for RAW data type.
 
 - Fixed intermittent crash while setting `fetchAsString`, and incorrect output while reading the value.
