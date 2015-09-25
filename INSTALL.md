@@ -601,22 +601,31 @@ node select1.js
 
 Node-oracledb binaries can be copied between compatible Windows systems.
 
-Both computers must have the same version and architecture of Node.js.
+Both computers must also have the same version and architecture of Node.js.
 
-Oracle client libraries of the same architecture and the same, or
-higher, version used for building node-oracledb should be in the
-destination computer's `PATH`.
+Oracle client libraries of the same architecture and the same version
+used for building node-oracledb should be in the destination
+computer's `PATH`.
 
 After node-oracle has been built on the source computer, copy the
-`node_modules/oracledb` directory to the destination computer's
+`node_modules\oracledb` directory to the destination computer's
 `node_module` directory.
 
-If node-oracledb was compiled using Visual Studio 2010 or higher, you
-will need to have the Visual C++ 2010 Redistributable installed on the
-destination computer.  For older compilers, you will need the matching
-C++ redistributable version.  For example, if you compiled with Visual
-Studio 2008, you will need the Visual Studio 2008 C++ Redistributable
-installed.
+The destination computer's `PATH` needs to include Visual Studio
+redistributables.  If you used Oracle client 11.2 then the Visual
+Studio 2005 restributable is required.  For Oracle client 12.1, use
+the Visual Studio 2010 redistributable.
+
+You can also find out the version required by locating the library
+`OCI.DLL` on the source computer and running:
+
+```
+dumpbin /dependents oci.dll
+```
+
+The version of `MSVC*.DLL` in the output indicates which
+redistributable is required on the destination computer.  For example,
+if you see `MSVCR100.dll` then you need the VC++ 10 redistributable.
 
 ## <a name="linuxadv"></a> 8. Advanced Installation on Linux
 
