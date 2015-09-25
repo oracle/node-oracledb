@@ -1,6 +1,6 @@
 # Change Log
 
-## node-oracledb v1.2.0 (DD Mon YYYY)
+## node-oracledb v1.2.0 (25 Sep 2015)
 
 - Added support for RAW data type.
 
@@ -8,7 +8,7 @@
 
 - Changed write-only attributes of Connection objects to work with `console.log()`. Note the attribute values will show as `null`.  Refer to the documentation.
 
-- Added check to make sure `maxRows` is greater than zero for non-ResultSet queries.
+- Added a check to make sure `maxRows` is greater than zero for non-ResultSet queries.
 
 - Improved installer messages for Oracle client header and library detection on Linux, OS X and Solaris.
 
@@ -32,7 +32,7 @@
 
 - Made installation halt sooner for Node.js versions currently known to be unusable.
 
-- Fixed typo in `examples/dbmsoutputgetline.js`
+- Fixed a typo in `examples/dbmsoutputgetline.js`
 
 ## node-oracledb v1.1.0 (3 Sep 2015)
 
