@@ -248,7 +248,7 @@ describe('1. connection.js', function(){
       );
     })
     
-    it.only('1.2.3 can not set maxRows to be 0', function(done){
+    it('1.2.3 can not set maxRows to be 0', function(done){
       connection.should.be.ok;
       connection.execute(
         "SELECT * FROM oracledb_employees", 
