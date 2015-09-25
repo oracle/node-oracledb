@@ -31,7 +31,7 @@
  *     51 -     are for other tests  
  * 
  *****************************************************************************/
- "use strict";
+"use strict";
 
 var oracledb = require('oracledb');
 var should = require('should');
@@ -47,7 +47,7 @@ describe('42. dataTypeRaw.js', function() {
     var credential = dbConfig;
   }
   
-  var connection = false;
+  var connection = null;
   var tableName = "oracledb_raw";
 
   var bufLen = [10 ,100, 1000, 2000]; // buffer length
@@ -96,6 +96,35 @@ describe('42. dataTypeRaw.js', function() {
 
     it('42.1.3 works well with REF Cursor', function(done) {
       assist.verifyRefCursor(connection, tableName, bufs, done);
+    })
+
+    it('42.1.4 result set getRow() function works well with RAW', function(done) {
+      
+      var sql1 = "select dummy, HEXTORAW('0123456789ABCDEF0123456789ABCDEF') from dual";
+      connection.execute(
+        sql1,
+        [], 
+        { resultSet: true },
+        function(err, result) {
+          should.not.exist(err);
+          fetchOneRowFromRS(result.resultSet, done);
+        }
+      );
+
+      function fetchOneRowFromRS(rs, cb)
+      {
+        rs.getRow(function(err, row) {
+          should.not.exist(err);
+          if(row) {
+            fetchOneRowFromRS(rs, cb);
+          } else {
+            rs.close( function(err) {
+              should.not.exist(err);
+              cb();
+            });
+          }
+        });
+      }
     })
 
   })

@@ -93,8 +93,11 @@
         4.3.4 should pass but fail in array syntax with returning into
     4.4 test maxSize option
         4.4.1 outBind & maxSize restriction
-      - 4.4.2 default value is 200
-      - 4.4.3 maximum value is 32767
+        4.4.2 default value is 200
+      - 4.4.3 Negative - bind out data exceeds default length
+      - 4.4.4 maximum value is 32767
+    4.5 The default direction for binding is BIND_IN
+      - 4.5.1
 
 5. externalAuthentication.js
     5.1 connection should succeed when setting externalAuth to be false and providing user/password
@@ -404,9 +407,8 @@
         55.9.1 
     55.10 calls getRows() once and then close RS before getting more rows
         55.10.1 
-    55.11 deals with unsupported database with result set
-        55.11.1 RAW data type
-        55.11.2 ROWID date type
+    55.11 result set with unsupported data types
+        55.11.1 ROWID data type
     55.12 bind a cursor BIND_INOUT
       - 55.12.1 should work
 

@@ -749,8 +749,8 @@ describe('55. resultSet2.js', function() {
     })
   })
 
-  describe('55.11 deals with unsupported database with result set', function() {
-    var sql1 = "select dummy, HEXTORAW('0123456789ABCDEF0123456789ABCDEF') from dual";
+  describe('55.11 result set with unsupported data types', function() {
+    
     var sql2 = "SELECT dummy, rowid FROM dual";
     
     function fetchOneRowFromRS(rs, cb) {
@@ -759,6 +759,7 @@ describe('55. resultSet2.js', function() {
          * the result set can still be created.
          */ 
         // Error at accessing RS
+        should.exist(err);
         if(err) {
           // console.error("Error at accessing RS: " + err.message); 
           // NJS-010: unsupported data type in select list
@@ -779,20 +780,7 @@ describe('55. resultSet2.js', function() {
       });
     }
 
-    it('55.11.1 RAW data type', function(done) {
-      connection.should.be.ok;
-      connection.execute(
-        sql1,
-        [],
-        { resultSet: true },
-        function(err, result) {
-          should.not.exist(err);
-          fetchOneRowFromRS(result.resultSet, done);
-        }
-      );       
-    })
-
-    it('55.11.2 ROWID date type', function(done) {
+    it('55.11.1 ROWID date type', function(done) {
       connection.execute(
         sql2,
         [],
