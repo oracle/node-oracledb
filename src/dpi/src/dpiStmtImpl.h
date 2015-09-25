@@ -94,7 +94,7 @@ public:
 
   virtual OCIError *     getError () { return errh_;  }
 
-  virtual unsigned long  getState ();
+  virtual unsigned int  getState ();
 
 
   // Is the SQL statement DML or not ?
@@ -137,7 +137,7 @@ private:
   bool           isReturning_;     // Does the stmt has RETURNING INTO clause?
   bool           isReturningSet_;  // Has isReturning_ flag queried & set.
   bool           refCursor_;       // refCursor or not.
-  unsigned long  state_;           // OCI Stmt State
+  ub4            state_;           // OCI Stmt State
 };
 
 

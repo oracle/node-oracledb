@@ -49,7 +49,6 @@ static const char *errMsg[] =
   "NJS-012: encountered invalid bind datatype in parameter %d",
   "NJS-013: invalid bind direction",
   "NJS-014: %s is a read-only property",
-  "NJS-015: %s is a write-only property",
   "NJS-016: buffer is too small for OUT binds",
   "NJS-017: concurrent operations on resultSet are not allowed",
   "NJS-018: invalid result set",
@@ -60,6 +59,9 @@ static const char *errMsg[] =
   "NJS-023: concurrent operations on LOB are not allowed",
   "NJS-024: memory allocation failed",
   "NJS-025: overflow when calculating results area size",
+  "NJS-026: maxRows must be greater than zero",
+  "NJS-027: unexpected SQL parsing error",
+  "NJS-028: raw database type is not supported with DML Returning statements",
 };
 
 string NJSMessages::getErrorMsg ( NJSErrorType err, ... )
@@ -72,7 +74,11 @@ string NJSMessages::getErrorMsg ( NJSErrorType err, ... )
   {
     // print all specified arguments
     va_start (vlist, err);
-    vsnprintf (msg, MAX_ERROR_MSG_LEN, errMsg[err-1], vlist);
+    if ( vsnprintf (msg, MAX_ERROR_MSG_LEN, errMsg[err-1], vlist) <= 0)
+    {
+      msg[0] = 0;
+    }
+
     va_end (vlist);
 
     str = msg;

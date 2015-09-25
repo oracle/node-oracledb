@@ -149,13 +149,13 @@ describe('41. dataTypeBlob', function() {
               should.exist(lob);
 
               lob.on('error', function(err) {
-                should.not.exist(err, "lob.on 'end' event");
+                should.not.exist(err, "lob.on 'error' event");
               });
 
               var outStream = fs.createWriteStream(outFileName);
 
               outStream.on('error', function(err) {
-                should.not.exist(err, "outStream.on 'end' event");
+                should.not.exist(err, "outStream.on 'error' event");
               });
 
               lob.pipe(outStream);
@@ -197,7 +197,7 @@ describe('41. dataTypeBlob', function() {
               should.exist(lob);
 
               lob.on('error', function(err) {
-                should.not.exist(err, "lob.on 'end' event");
+                should.not.exist(err, "lob.on 'error' event");
               });
 
               lob.on('data', function(chunk) {

@@ -117,7 +117,7 @@ describe('40. dataTypeClob.js', function() {
               });
 
               inStream.on('error', function(err) {
-                should.not.exist(err, "inStream.on 'end' event");
+                should.not.exist(err, "inStream.on 'error' event");
               });
 
               inStream.on('end', function() {
@@ -149,12 +149,12 @@ describe('40. dataTypeClob.js', function() {
               lob.setEncoding('utf8');
 
               lob.on('error', function(err) {
-                should.not.exist(err, "lob.on 'end' event");
+                should.not.exist(err, "lob.on 'error' event");
               });
 
               var outStream = fs.createWriteStream(outFileName);
               outStream.on('error', function(err) {
-                should.not.exist(err, "outStream.on 'end' event");
+                should.not.exist(err, "outStream.on 'error' event");
               });
 
               lob.pipe(outStream);
@@ -213,7 +213,7 @@ describe('40. dataTypeClob.js', function() {
               });
 
               lob.on('error', function(err) {
-                should.not.exist(err, "lob.on 'end' event");
+                should.not.exist(err, "lob.on 'error' event");
               });
             }
           );

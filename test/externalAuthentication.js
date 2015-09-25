@@ -115,7 +115,7 @@ describe('5. externalAuthentication.js', function(){
         }
       );
     } else {
-      console.log("External Authentication Off.");
+      // console.log("External Authentication Off.");
       done();
     } 
   })
@@ -152,7 +152,7 @@ describe('5. externalAuthentication.js', function(){
         }
       );
     } else {
-      console.log("External Authentication off.");
+      // console.log("External Authentication off.");
       done();
     }
   })

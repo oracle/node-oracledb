@@ -38,6 +38,7 @@ var oracledb = require('oracledb');
 var should = require('should');
 var async = require('async');
 var dbConfig = require('./dbConfig.js');
+var assist = require('./dataTypeAssist.js');
 
 describe('4. binding.js', function() {
   
@@ -662,20 +663,32 @@ describe('4. binding.js', function() {
       ], done);
     })
 
-    it.skip('4.4.2 default value is 200', function(done) {
+    it('4.4.2 default value is 200', function(done) {
+      connection.execute(
+        "BEGIN :o := lpad('A', 200, 'x'); END;",
+        { o: { type: oracledb.STRING, dir: oracledb.BIND_OUT } },
+        function(err, result) {
+          should.not.exist(err);
+          (result.outBinds.o.length).should.be.exactly(200);
+          done();
+        }
+      );
+    })
+
+    it.skip('4.4.3 Negative - bind out data exceeds default length', function(done) {
       connection.execute(
         "BEGIN :o := lpad('A',201,'x'); END;", 
          { o: { type: oracledb.STRING, dir : oracledb.BIND_OUT } }, 
          function (err, result) { 
            should.exist(err);
            err.message.should.startWith('ORA-06502:');
-           console.log(result.outBinds.o.length); 
+           // console.log(result.outBinds.o.length); 
            done();
          }
       );
     })
 
-    it.skip('4.4.3 maximum value is 32767', function(done) {
+    it.skip('4.4.4 maximum value is 32767', function(done) {
       connection.execute(
         "BEGIN :o := lpad('A',32767,'x'); END;", 
         { o: { type: oracledb.STRING, dir : oracledb.BIND_OUT, maxSize:50000 } },
@@ -686,5 +699,51 @@ describe('4. binding.js', function() {
         }
       );
     })
-  })  
+  }) // 4.4 
+
+  describe.skip('4.5 The default direction for binding is BIND_IN', function() {
+    var connection = null;
+    var tableName = "oracledb_raw";
+
+    before(function(done) {
+      oracledb.getConnection(credential, function(err, conn) {
+        if(err) { console.error(err.message); return; }
+        connection = conn;
+        assist.createTable(connection, tableName, done);
+      });
+    })
+  
+    after(function(done) {
+      async.series([
+        function(callback) {
+          connection.execute(
+            "DROP TABLE " + tableName,
+            function(err) {
+              should.not.exist(err);
+              callback();
+            }
+          );
+        },
+        function(callback) {
+          connection.release( function(err) {
+            should.not.exist(err);
+            callback();
+          });
+        }
+      ], done);
+    })
+
+    
+    it('4.5.1',function(done) {
+      connection.execute(
+        "insert into oracledb_raw (num) values (:id)",
+        { id: { val: 1, type: oracledb.NUMBER } },  // fails with error  NJS-013: invalid bind direction
+        // { id: { val: 1, type: oracledb.NUMBER, dir: oracledb.BIND_IN } }, // works
+        function(err, result) {
+          should.not.exist(err);
+          done();
+        }
+      );
+    })
+  }) // 4.5
 })

@@ -198,7 +198,7 @@ public:
 
   virtual OCIError *getError () = 0;
 
-  virtual unsigned long getState () = 0;
+  virtual unsigned int getState () = 0;
 
   virtual ~Stmt(){};
 

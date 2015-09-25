@@ -1,6 +1,6 @@
 {
   "name": "oracledb",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Oracle Database driver by Oracle Corp.",
   "license": "Apache-2.0",
   "homepage": "http://www.oracle.com/technetwork/database/database-technologies/node_js/index.html",
@@ -44,8 +44,10 @@
       "test": "node_modules/mocha/bin/mocha -R spec --timeout 10000 test/*.js",
       "testWin": "node node_modules\\mocha\\bin\\mocha -R spec --timeout 10000 test\\*.js"
   },
+  "engineStrict": true,
+  "engine-strict": true,
   "engines": {
-    "node": ">=0.10.28"
+    "node": ">=0.10.28 <3"
   },
   "maintainers": [
     {

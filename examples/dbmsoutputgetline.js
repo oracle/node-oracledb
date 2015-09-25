@@ -66,7 +66,7 @@ var enableDbmsOutput = function (conn, cb) {
 var createDbmsOutput = function (conn, cb) {
   conn.execute(
     "BEGIN " +
-      "DBMS_OUTPUT.PUT_LINE('Hello, Oracle!')`;" +
+      "DBMS_OUTPUT.PUT_LINE('Hello, Oracle!');" +
       "DBMS_OUTPUT.PUT_LINE('Hello, Node!');" +
       "END;",
     function(err) { return cb(err, conn); });

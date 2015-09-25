@@ -38,7 +38,7 @@
  * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
  * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
- * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
+ * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  * NAME
  *   njsResultSet.cpp
@@ -430,6 +430,24 @@ void ResultSet::Async_GetRows(uv_work_t *req)
       }
       njsRS->fetchRowCount_ = getRowsBaton->numRows;
       njsRS->defineBuffers_ = ebaton->defines;
+    }
+    else
+    {
+      for (unsigned int col = 0; col < njsRS->numCols_; col++)
+      {
+        switch(njsRS->meta_[col].dbType)
+        {
+        case dpi::DpiClob:
+        case dpi::DpiBlob:
+        case dpi::DpiBfile:
+          for (unsigned int j = 0; j < ebaton->maxRows; j++)
+          {
+            ((Descriptor **)(njsRS->defineBuffers_[col].buf))[j] =
+              ebaton->dpienv->allocDescriptor(LobDescriptorType);
+          }
+          break;
+        }
+      }
     }
     ebaton->defines      = njsRS->defineBuffers_;
     Connection::DoFetch(ebaton);

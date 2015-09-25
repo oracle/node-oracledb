@@ -237,7 +237,7 @@ describe('1. connection.js', function(){
       connection.should.be.ok;
       connection.execute(
         "SELECT * FROM oracledb_employees", 
-        {}, {maxRows: 25},
+        {}, { maxRows: 25 },
         function(err, result){
           should.not.exist(err);
           should.exist(result);
@@ -248,16 +248,14 @@ describe('1. connection.js', function(){
       );
     })
     
-    it('1.2.3 can set maxRows to be 0', function(done){
+    it('1.2.3 can not set maxRows to be 0', function(done){
       connection.should.be.ok;
       connection.execute(
         "SELECT * FROM oracledb_employees", 
-        {}, {maxRows: 0},
+        {}, { maxRows: 0 },
         function(err, result){
-          should.not.exist(err);
-          should.exist(result);
-          // Return 25 records according to execution setting
-          (result.rows).should.have.length(0);
+          should.exist(err);
+          err.message.should.startWith('NJS-026:');  // NJS-026: maxRows must be greater than zero
           done();
         }
       );

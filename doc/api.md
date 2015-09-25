@@ -1,4 +1,4 @@
-# node-oracledb 1.1: Documentation for the Oracle Database Node.js Add-on
+# node-oracledb 1.2: Documentation for the Oracle Database Node.js Add-on
 
 *Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved.*
 
@@ -27,6 +27,7 @@ limitations under the License.
      - BIND_INOUT
      - BIND_OUT
      - BLOB
+     - BUFFER
      - CLOB
      - CURSOR
      - DATE
@@ -73,6 +74,7 @@ limitations under the License.
      - 5.1.1 [chunkSize](#proplobchunksize)
      - 5.1.2 [length](#proploblength)
      - 5.1.3 [pieceSize](#proplobpiecesize)
+	 - 5.1.4 [type](#proplobtype)
 6. [Pool Class](#poolclass)
   - 6.1 [Pool Properties](#poolproperties)
      - 6.1.1 [connectionsInUse](#proppoolconnectionsinuse)
@@ -253,18 +255,22 @@ Oracledb.ARRAY                     // Fetch each row as array of column values
 Oracledb.OBJECT                    // Fetch each row as an object
 ```
 
-#### Constants for `execute()` [bind parameter](#executebindParams) `type` properties, for [`fetchAsString`](#propdbfetchasstring) and for [`fetchInfo`](#propfetchinfo):
+#### Type constants for `execute()` [bind parameter](#executebindParams) and [Lob](#proplobpiecesize) `type` properties, for [`fetchAsString`](#propdbfetchasstring), and for [`fetchInfo`](#propfetchinfo)
+
+Not all constants can be used in all places:
 
 ```
-Oracledb.BLOB                      // Bind a BLOB to return a Node.js buffer
+Oracledb.BLOB                      // Bind a BLOB to a Node.js Stream
 
-Oracledb.CLOB                      // Bind a CLOB to return a Node.js string
+Oracledb.BUFFER                    // Bind a RAW to a Node.js Buffer
+
+Oracledb.CLOB                      // Bind a CLOB to a Node.js Stream
 
 Oracledb.CURSOR                    // Bind a REF CURSOR to a node-oracledb ResultSet class
 
 Oracledb.DATE                      // Bind as JavaScript date type.  Can also be used for fetchAsString and fetchInfo
 
-Oracledb.DEFAULT                   // Used with [`fetchInfo`](#propfetchinfo) to reset the fetch type to the database type
+Oracledb.DEFAULT                   // Used with fetchInfo to reset the fetch type to the database type
 
 Oracledb.NUMBER                    // Bind as JavaScript number type.  Can also be used for fetchAsString and fetchInfo
 
@@ -954,9 +960,11 @@ writeonly String action
 ```
 
 The [action](https://docs.oracle.com/database/121/LNOCI/oci08sca.htm#sthref1434)
-attribute for end-to-end application tracing. This is a write-only property.
+attribute for end-to-end application tracing.
 
-See [End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend).
+This is a write-only property.  Displaying a Connection object will
+show a value of `null` for this attribute.  See
+[End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend).
 
 #### <a name="propconnclientid"></a> 4.1.2 clientId
 
@@ -968,9 +976,10 @@ The [client
 identifier](https://docs.oracle.com/database/121/LNOCI/oci08sca.htm#sthref1414)
 for end-to-end application tracing, use with mid-tier authentication,
 and with [Virtual Private Databases](http://docs.oracle.com/database/121/CNCPT/cmntopc.htm#CNCPT62345).
-This is a write-only property.
 
-See [End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend).
+This is a write-only property.  Displaying a Connection object will
+show a value of `null` for this attribute.  See
+[End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend).
 
 #### <a name="propconnmodule"></a> 4.1.3 module
 
@@ -979,9 +988,11 @@ writeonly String module
 ```
 
 The [module](https://docs.oracle.com/database/121/LNOCI/oci08sca.htm#sthref1433)
-attribute for end-to-end application tracing. This is a write-only property.
+attribute for end-to-end application tracing.
 
-See [End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend).
+This is a write-only property.  Displaying a Connection object will
+show a value of `null` for this attribute.  See
+[End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend).
 
 #### <a name="propconnstmtcachesize"></a> 4.1.4 stmtCacheSize
 
@@ -1131,8 +1142,13 @@ Bind Property | Description
 ---------------|------------
 `val` | The input value or variable to be used for an IN or IN OUT bind variable.
 `dir` | The direction of the bind.  One of the [Oracledb Constants](#oracledbconstants) `BIND_IN`, `BIND_INOUT`, or `BIND_OUT`.
-`type` | The datatype to be bound. One of the [Oracledb Constants](#oracledbconstants) `STRING`, `NUMBER`, `DATE` or `CURSOR`.
-`maxSize` | The maximum number of bytes that an OUT or IN OUT bind variable of type STRING can use. The default value is 200. The maximum limit is 32767.
+`type` | The datatype to be bound. One of the [Oracledb Constants](#oracledbconstants) `STRING`, `NUMBER`, `DATE`, `CURSOR` or `BUFFER`.
+`maxSize` | The maximum number of bytes that an OUT or IN OUT bind variable of type STRING or BUFFER can use. The default value is 200. The maximum limit is 32767.
+
+The maximum size of a `BUFFER` type is 2000 bytes, unless you are
+using Oracle Database 12c and the database initialization parameter
+`MAX_STRING_SIZE` has a value of `EXTENDED`.  In this case the maximum
+size of a `BUFFER` is 32767.
 
 With OUT binds, where the type cannot be inferred by node-oracledb
 because there is no input data value, the type defaults to `STRING`
@@ -1400,6 +1416,19 @@ For efficiency, it is recommended that `pieceSize` be a multiple of
 `chunkSize`.
 
 The maximum value for `pieceSize` is limited to the value of UINT_MAX.
+
+#### <a name="proplobtype"></a> 5.1.4 type
+
+```
+readonly Number type
+```
+
+This read-only attribute shows the type of Lob being used.  It will
+have the value of one of the constants
+[`Oracledb.BLOB`](#oracledbconstants) or
+[`Oracledb.CLOB`](#oracledbconstants).  The value is derived from the
+bind type when using LOB bind variables, or from the column type when
+a LOB is returned by a query.
 
 ## <a name="poolclass"></a> 6. Pool Class
 
@@ -2256,6 +2285,8 @@ The default query result type mappings for Oracle Database types to JavaScript t
     When binding a JavaScript Date value in an `INSERT` statement, the date is also inserted as `TIMESTAMP WITH
     LOCAL TIMEZONE` using OCIDateTime.
 
+##### Fetching as String
+
 The global [`fetchAsString`](#propdbfetchasstring) property can be
 used to force all number or date columns queried by an application to
 be fetched as strings instead of in native format.  Allowing data to
@@ -2338,6 +2369,70 @@ represented as numbers:
 
 To map columns returned from REF CURSORS, use `fetchAsString`.  The
 `fetchInfo` settings do not apply.
+
+##### Mapping Custom Types
+
+Datatypes such as an Oracle Locator `SDO_GEOMETRY`, or your own custom
+types, cannot be fetched directly in node-oracledb.  Instead, utilize
+techniques such as using an intermediary PL/SQL procedure to map the
+type components to scalar values, or use a pipelined table.
+
+For example, consider a `CUSTOMERS` table having a `CUST_GEO_LOCATION`
+column of type `SDO_GEOMETRY`, as created in this [example
+schema](http://docs.oracle.com/cd/E17781_01/appdev.112/e18750/xe_locator.htm#XELOC560):
+
+```sql
+CREATE TABLE customers (
+  customer_id NUMBER,
+  last_name VARCHAR2(30),
+  cust_geo_location SDO_GEOMETRY);
+
+INSERT INTO customers VALUES
+  (1001, 'Nichols', SDO_GEOMETRY(2001, 8307, SDO_POINT_TYPE (-71.48923,42.72347,NULL), NULL, NULL));
+
+COMMIT;
+```     
+
+Instead of attempting to get `CUST_GEO_LOCATION` by directly calling a
+PL/SQL procedure that returns an `SDO_GEOMETRY` parameter, you could
+instead get the scalar coordinates by using an intermediary PL/SQL
+block that decomposes the geometry:
+
+```javascript
+    . . .
+    var sql =
+      "BEGIN " +
+      "  SELECT t.x, t.y" +
+      "  INTO :x, :y" +
+      "  FROM customers, TABLE(sdo_util.getvertices(customers.cust_geo_location)) t" +
+      "  WHERE customer_id = :id;" +
+      "END; ";
+    var bindvars = {
+      id: 1001,
+      x: { type: oracledb.NUMBER, dir : oracledb.BIND_OUT },
+      y: { type: oracledb.NUMBER, dir : oracledb.BIND_OUT }
+    }
+    connection.execute(
+      sql,
+      bindvars,
+      function (err, result) {
+        if (err) { console.error(err.message); return; }
+        console.log(result.outBinds);
+      });
+```
+
+The output is:
+
+```
+{ x: -71.48922999999999, y: 42.72347 }
+```
+
+Note the JavaScript precision difference.  In this particular example,
+you may want to bind using `type: oracledb.STRING`.  Output would be:
+
+```
+{ x: '-71.48923', y: '42.72347' }
+```
 
 #### <a name="rowprefetching"></a> 9.1.6 Row Prefetching
 
@@ -2568,7 +2663,7 @@ connection.execute(
   [],
   { resultSet: true },
   function (err, result) {
-  . . . 
+  . . .
 ```
 
 The query rows can be handled using a
@@ -2690,11 +2785,10 @@ writing it to a file.  It is similar to the example
 The returned column value is a Lob stream which is piped to an opened
 file stream.
 
-By default the Lob stream is a buffer, so the `setEncoding()` call is
-used to indicate data should be a string.  This CLOB example uses
-'utf8'.  (A buffer would be useful for BLOB data).  Both the Lob
-stream and output data stream have 'error' events to handle unexpected
-issues:
+By default the Lob stream is a Node.js buffer - which is useful for
+BLOB data.  Since this example uses a CLOB, the `setEncoding()` call
+is used to indicate data should be a string.  Both the Lob stream and
+output data stream have 'error' events to handle unexpected issues:
 
 ```javascript
 var oracledb = require('oracledb');
@@ -2710,7 +2804,7 @@ connection.execute(
     if (result.rows.length === 0) { console.log("No results"); return; }
 
     var lob = result.rows[0][0];
-    if (lob === null) { console.log("CLOB was NULL"); return; } 
+    if (lob === null) { console.log("CLOB was NULL"); return; }
 
     lob.setEncoding('utf8');  // we want text, not binary output
     lob.on('error', function(err) { console.error(err); });
@@ -2750,22 +2844,34 @@ variable, is used during execution of the SQL statement.
 
 In this example, the SQL bind parameters *:country\_id* and
 *:country\_name* can be bound to values in node-oracledb using an
-array:
+array.  This is often called "bind by position":
 
 ```javascript
-connection.execute("INSERT INTO countries VALUES (:country_id, :country_name)",
-             [90, "Tonga"],
-             function(err, result)
-             {
-               if (err)
-                 console.error(err.message);
-               else
-                 console.log("Rows inserted " + result.rowsAffected);
-             });
+connection.execute(
+  "INSERT INTO countries VALUES (:country_id, :country_name)",
+  [90, "Tonga"],
+  function(err, result)
+  {
+	if (err)
+	  console.error(err.message);
+	else
+	  console.log("Rows inserted " + result.rowsAffected);
+  });
 ```
 
 The position of the array values corresponds to the position of the
-SQL bind variables.  This is often called "bind by position".
+SQL bind variables as they occur in the statement, regardless of their
+names.  This is still true even if the bind variables are named like
+`:0`, `:1` etc.  The following snippet will fail because the country
+name needs to be the second entry of the array so it becomes the
+second value in the `INSERT` statement
+
+```javascript
+connection.execute(
+  "INSERT INTO countries VALUES (:1, :0)",
+  ["Tonga", 90],  // fail
+  . . .
+```
 
 Instead of binding by array, an object that names each bind value can
 be used.  The attributes can in be any order but their names must
@@ -2773,15 +2879,16 @@ match the SQL bind parameter names.  This is often called "bind by
 name":
 
 ```javascript
-connection.execute("INSERT INTO countries VALUES (:country_id, :country_name)",
-             {country_id: 90, country_name: "Tonga"},
-             function(err, result)
-             {
-               if (err)
-                 console.error(err.message);
-               else
-                 console.log("Rows inserted " + result.rowsAffected);
-             });
+connection.execute(
+  "INSERT INTO countries VALUES (:country_id, :country_name)",
+  {country_id: 90, country_name: "Tonga"},
+  function(err, result)
+  {
+	if (err)
+	  console.error(err.message);
+	else
+	  console.log("Rows inserted " + result.rowsAffected);
+  });
 ```
 
 The default direction for binding is `BIND_IN`.  The datatype used for
@@ -2794,23 +2901,25 @@ explicit attributes for the bind direction (`dir`), the datatype
 ```javascript
 var oracledb = require('oracledb');
 . . .
-connection.execute("INSERT INTO countries VALUES (:country_id, :country_name)",
-             {
-               country_id: { val: 90, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
-               country_name: { val: "Tonga", dir: oracledb.BIND_IN, type:oracledb.STRING }
-             },
-             function(err, result)
-             {
-               if (err)
-                 console.error(err.message);
-               else
-                 console.log("Rows inserted " + result.rowsAffected);
-             });
+connection.execute(
+  "INSERT INTO countries VALUES (:country_id, :country_name)",
+  {
+	country_id: { val: 90, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
+	country_name: { val: "Tonga", dir: oracledb.BIND_IN, type:oracledb.STRING }
+  },
+  function(err, result)
+  {
+	if (err)
+	  console.error(err.message);
+	else
+	  console.log("Rows inserted " + result.rowsAffected);
+  });
 ```
 
 For IN binds the direction must be `BIND_IN`.  The type can be
-`STRING`, `NUMBER` or `DATE`, matching the data.  The type `CURSOR`
-cannot be used with IN binds.
+`STRING`, `NUMBER`, `DATE` matching the data.  The type `BUFFER` can
+bind a Node.js Buffer to an Oracle Database `RAW` type.  The type
+`CURSOR` cannot be used with IN binds.
 
 ### <a name="outbind"></a> 12.2 OUT and IN OUT Bind Parameters
 
@@ -2822,10 +2931,13 @@ properties is used.
 The `dir` attribute should be `BIND_OUT` or `BIND_INOUT`.
 
 For `BIND_INOUT` parameters, the `type` attribute should be `STRING`,
-`NUMBER` or `DATE`.
+`NUMBER`, `DATE` or `BUFFER`.
 
 For `BIND_OUT` parameters the `type` attribute should be `STRING`,
-`NUMBER`, `DATE`, `CURSOR`, `BLOB` or `CLOB`.
+`NUMBER`, `DATE`, `CURSOR`, `BLOB`, `CLOB` or `BUFFER`.
+
+The type `BUFFER` is used to bind an Oracle Database `RAW` to a
+Node.js Buffer.
 
 If `type` is not specified then `STRING` is assumed.
 
@@ -2836,7 +2948,7 @@ output value does not fit in `maxSize` bytes, then an error such
 too small* or *NJS-016: buffer is too small for OUT binds* occurs.
 
 A default value of 200 bytes is used when `maxSize` is not provided
-for OUT binds of type `STRING`.
+for OUT binds of type `STRING` or `BUFFER`.
 
 The `results` parameter of the `execute()` callback contains an
 `outBinds` property that has the returned OUT and IN OUT binds as
@@ -3224,7 +3336,7 @@ own mid-tier authentication but connect to the database using the one
 database schema.  By setting `clientId` to the application's
 authenticated username, the database is aware of who the actual end
 user is.  This can, for example, be used by Oracle
-[Virtual Private Databases](http://docs.oracle.com/database/121/CNCPT/cmntopc.htm#CNCPT62345)
+[Virtual Private Database](http://docs.oracle.com/database/121/CNCPT/cmntopc.htm#CNCPT62345)
 policies to automatically restrict data access by that user.
 
 Applications should set the properties because they can greatly help
@@ -3270,14 +3382,33 @@ The values can also be manually set by calling
 [`DBMS_APPLICATION_INFO`](http://docs.oracle.com/cd/B19306_01/appdev.102/b14258/d_appinf.htm#CHECEIEB)
 procedures or
 [`DBMS_SESSION.SET_IDENTIFIER`](http://docs.oracle.com/cd/B19306_01/appdev.102/b14258/d_sessio.htm#SET_IDENTIFIER),
-however these require explicit round-trips, reducing scalability.
+however these cause explicit round-trips, reducing scalability.
+
+In general, applications should be consistent about how, and when,
+they set the end-to-end tracing attributes so that current values are
+recorded by the database.
 
 Idle connections released back to a connection pool will retain the
-previous attribute values of that connection. This avoids the
-overhead of a round-trip to reset the values.  After calling
-`pool.getConnection()`, the application should be consistent about
-setting appropriate values to ensure any previous values are updated.
-The Oracle design assumption is that pools are actively used and have
-few idle connections.  However, if desired, the application can set
-the properties to empty strings and force a round-trip prior to
-connection release.  This reduces efficiency.
+previous attribute values of that connection. This avoids the overhead
+of a round-trip to reset the values.  The Oracle design assumption is
+that pools are actively used and have few idle connections. After
+getting a connection from a pool, an application that uses end-to-end
+tracing should set new values appropriately.
+
+When a Connection object is displayed, such as with `console.log()`,
+the end-to-end tracing attributes will show as `null` even if values
+have been set and are being sent to the database.  This is for
+architectural, efficiency and consistency reasons.  When an already
+established connection is retrieved from a local pool, node-oracledb
+is not able to efficiently retrieve values previously established in
+the connection.  The same occurs if the values are set by a call to
+PL/SQL code - there is no efficient way for node-oracledb to know the
+values have changed.
+
+The attribute values are commonly useful to DBAs.  However, if knowing
+the current values is useful in an application, the application should
+save the values as part of its application state whenever the
+node-oracledb attributes are set.  Applications can also find the
+current values by querying the Oracle data dictionary or using PL/SQL
+procedures such as `DBMS_APPLICATION_INFO.READ_MODULE()` with the
+understanding that these require round-trips to the database.

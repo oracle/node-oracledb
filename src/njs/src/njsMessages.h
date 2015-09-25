@@ -48,7 +48,6 @@ typedef enum
   errInvalidBindDataType,
   errInvalidBindDirection,
   errReadOnly,
-  errWriteOnly,
   errInsufficientBufferForBinds,
   errBusyResultSet,
   errInvalidResultSet,
@@ -59,6 +58,9 @@ typedef enum
   errBusyLob,
   errInsufficientMemory,
   errResultsTooLarge,
+  errInvalidmaxRows,
+  errSQLSyntaxError,
+  errBufferReturningInvalid,
 
   // New ones should be added here
 

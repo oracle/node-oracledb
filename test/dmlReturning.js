@@ -146,6 +146,7 @@ describe('6. dmlReturning.js', function(){
       );
     })
     
+    // it currently fails on OS X
     it.skip('6.1.3 INSERT statement with small maxSize restriction', function(done) {
       connection.should.be.ok;
       connection.execute(
@@ -290,6 +291,7 @@ describe('6. dmlReturning.js', function(){
       );
     })
     
+    // it currently fails with 11.2 database
     it('6.1.10 Stress test - support 4k varchars', function(done){
       
       /*** Helper functions ***/

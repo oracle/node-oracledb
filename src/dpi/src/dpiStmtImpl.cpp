@@ -729,15 +729,15 @@ bool StmtImpl::isReturning ()
      One of the possible values DpiStmtState
        (DpiStmtStateInitialized, DpiStmtStateExecute, DpiStmtEndOfFetch)
 */
-unsigned long StmtImpl::getState ()
+unsigned int StmtImpl::getState ()
 {
   if ( state_ == DPI_STMT_STATE_UNDEFINED )
   {
-    ociCall (OCIAttrGet (stmth_, OCI_HTYPE_STMT, (ub4*)&state_, NULL,
+    ociCall (OCIAttrGet (stmth_, OCI_HTYPE_STMT, &state_, NULL,
                          OCI_ATTR_STMT_STATE, errh_ ), errh_ );
   }
 
-  return state_;
+  return ( unsigned int ) state_;
 }
 
 

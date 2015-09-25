@@ -24,10 +24,6 @@
  * DESCRIPTION
  *   Testing Oracle data type support - BINARY_FLOAT.
  *
- * NOTE
- *   BINARY_FLOAT support is still under enhancement request. 
- *   There is precision issue. This test is suspended.
- *
  * NUMBERING RULE
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
@@ -53,7 +49,6 @@ describe('30. dataTypeBinaryFloat.js', function() {
   
   var connection = null;
   var tableName = "oracledb_binary_float";
-  var numbers = assist.data.numbers;
 
   before('get one connection', function(done) {
     oracledb.getConnection(credential, function(err, conn) {
@@ -70,7 +65,9 @@ describe('30. dataTypeBinaryFloat.js', function() {
     });
   })
 
-  describe.skip('30.1 testing BINARY_FLOAT data', function() {
+  describe('30.1 testing BINARY_FLOAT data', function() {
+
+    var numbers = assist.data.numbersForBinaryFloat;
 
     before('create table, insert data',function(done) {
       assist.setUp(connection, tableName, numbers, done);
@@ -97,8 +94,8 @@ describe('30. dataTypeBinaryFloat.js', function() {
     it('30.1.3 works well with REF Cursor', function(done) {
       assist.verifyRefCursor(connection, tableName, numbers, done);
     })
-
-  })
+    
+  })  // 30.1
 
   describe('30.2 stores null value correctly', function() {
     it('30.2.1 testing Null, Empty string and Undefined', function(done) {
@@ -106,4 +103,50 @@ describe('30. dataTypeBinaryFloat.js', function() {
     })
   })
   
+  describe('30.3 testing floating-point numbers which cannot be precisely represent', function() {
+    var nums =
+    [
+      2345.67,
+      9876.54321,
+      0.01234,
+      0.00000123
+    ];
+
+    before('create table, insert data',function(done) {
+      assist.setUp(connection, tableName, nums, done);
+    })
+
+    after(function(done) {
+      connection.execute(
+        "DROP table " + tableName,
+        function(err) {
+          should.not.exist(err);
+          done();
+        }
+      );
+    })
+
+    it('30.3.1 rounding numbers', function(done) {
+      connection.execute(
+        "SELECT * FROM " + tableName,
+        [],
+        { outFormat: oracledb.OBJECT },
+        function(err, result) {
+          should.not.exist(err);
+          
+          for(var i = 0; i < nums.length; i++) {
+            result.rows[i].CONTENT.should.not.be.exactly(nums[ result.rows[i].NUM ]);
+            approxeq(result.rows[i].CONTENT, nums[ result.rows[i].NUM ]).should.be.ok;
+          }
+          done();
+        }
+      );
+    })
+
+    function approxeq(v1, v2)
+    {
+      var precision = 0.001;
+      return Math.abs(v1 - v2) < precision;
+    }
+  }) // 30.3
 })

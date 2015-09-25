@@ -38,7 +38,7 @@
  * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
  * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
- * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
+ * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * 
  * NAME
  *   njsConnection.cpp
@@ -222,12 +222,12 @@ NAN_SETTER(Connection::SetStmtCacheSize)
 /*****************************************************************************/
 /*
    DESCRIPTION
-     Get Accessor of clientId property - throws error
+     Get Accessor of clientId property - This is write-only property,
+     returning NULL for debugging purpose in case of read
 */
 NAN_PROPERTY_GETTER(Connection::GetClientId)
 {
-  connectionPropertyException(ObjectWrap::Unwrap<Connection>(info.Holder()), errWriteOnly, "clientId");
-  info.GetReturnValue().SetUndefined();
+  info.GetReturnValue().SetNull();
 }
 
 /*****************************************************************************/
@@ -255,12 +255,12 @@ NAN_SETTER(Connection::SetClientId)
 /*****************************************************************************/
 /*
    DESCRIPTION
-     Get Accessor of module property - throws error
+     Get Accessor of module property - This is write-only property,
+     returning NULL for debugging purpose in case of read
 */
 NAN_PROPERTY_GETTER(Connection::GetModule)
 {
-  connectionPropertyException(ObjectWrap::Unwrap<Connection>(info.Holder()), errWriteOnly, "module");
-  info.GetReturnValue().SetUndefined();
+  info.GetReturnValue().SetNull();
 }
 
 /*****************************************************************************/
@@ -288,12 +288,12 @@ NAN_SETTER(Connection::SetModule)
 /*****************************************************************************/
 /*
    DESCRIPTION
-     Get Accessor of action property - throws error
+     Get Accessor of action property - This is write-only property,
+     returning NULL for debugging purpose in case of read
 */
 NAN_PROPERTY_GETTER(Connection::GetAction)
 {
-  connectionPropertyException(ObjectWrap::Unwrap<Connection>(info.Holder()), errWriteOnly, "action");
-  info.GetReturnValue().SetUndefined();
+  info.GetReturnValue().SetNull();
 }
 
 /*****************************************************************************/
@@ -565,7 +565,7 @@ void Connection::GetBindUnit (Local<Value> val, Bind* bind,
   Nan::HandleScope scope;
   unsigned int dir   = BIND_IN;
 
-  if(val->IsObject() && !val->IsDate())
+  if(val->IsObject() && !val->IsDate() && !Buffer::HasInstance(val))
   {
     dir                     = BIND_UNKNOWN;
     Local<Object> bind_unit = val->ToObject();
@@ -666,6 +666,9 @@ void Connection::GetOutBindParams (unsigned short dataType, Bind* bind,
     case DATA_CURSOR :
       bind->type     = dpi::DpiRSet;
       bind->maxSize  = 0;
+      break;
+    case DATA_BUFFER :
+      bind->type     = dpi::DpiRaw;
       break;
     case DATA_CLOB : 
       bind->type    = dpi::DpiClob;
@@ -800,6 +803,34 @@ void Connection::GetInBindParams (Local<Value> v8val, Bind* bind,
     /* Convert v8::Date value to long double */
     Connection::v8Date2OraDate ( v8val, bind);
   }
+  else if(v8val->IsObject ())
+  {
+    Local<Object> obj = v8val->ToObject();
+    if (Buffer::HasInstance(obj)) {
+      size_t bufLen = Buffer::Length(obj);
+      bind->type = dpi::DpiRaw;
+      if(type == BIND_INOUT)
+      {
+        *(bind->len) = (DPI_BUFLEN_TYPE) bufLen;
+      }
+      else // IN
+      {
+        bind->maxSize =  (DPI_SZ_TYPE ) bufLen;
+        *(bind->len) = (DPI_BUFLEN_TYPE) bufLen;
+      }
+      DPI_SZ_TYPE size = (bind->maxSize >= *(bind->len) ) ?
+                         bind->maxSize : *(bind->len);
+      if(size)
+      {
+        bind->value = (char*)malloc(size);
+        if(bufLen)
+          memcpy(bind->value, Buffer::Data(obj), bufLen);
+      }
+    } else {
+      executeBaton->error= NJSMessages::getErrorMsg(errInvalidBindDataType,2);
+      goto exitGetInBindParams;
+    }
+  }
   else
   {
     executeBaton->error= NJSMessages::getErrorMsg(errInvalidBindDataType,2);
@@ -831,6 +862,23 @@ void Connection::Async_Execute (uv_work_t *req)
     Connection::PrepareAndBind(executeBaton);
 
     if ( !executeBaton->error.empty() )  goto exitAsyncExecute;
+
+    // In DML Returning statements, Buffer type is not allowed temporarily.
+    if ( executeBaton->stmtIsReturning )
+    {
+      for ( unsigned int b = 0; b < executeBaton->binds.size () ; b ++ )
+      {
+        if ( executeBaton->binds[b]->isOut && 
+             executeBaton->binds[b]->type == dpi::DpiRaw )
+        {
+          executeBaton->error = NJSMessages::getErrorMsg ( 
+                                                  errBufferReturningInvalid );
+          return;
+          
+        }
+      }
+    }
+      
 
     if (executeBaton->st == DpiStmtSelect)
     {
@@ -875,6 +923,20 @@ void Connection::Async_Execute (uv_work_t *req)
       }
       executeBaton->dpistmt->execute(1, executeBaton->autoCommit);
       executeBaton->rowsAffected = executeBaton->dpistmt->rowsAffected();
+
+      // Check whether indicators were allocated as part of callback
+      if ( executeBaton->stmtIsReturning )
+      {
+        for ( unsigned int b = 0; b < executeBaton->binds.size (); b++ )
+        {
+          if ( executeBaton->binds[b]->isOut && !executeBaton->binds[b]->ind)
+          {
+            executeBaton->error = NJSMessages::getErrorMsg (
+                                                  errSQLSyntaxError );
+            return;
+          }
+        }
+      }
 
       /* Check to see if the string buffer size is good in case of
        * DML Returning.
@@ -936,7 +998,7 @@ void Connection::Async_Execute (uv_work_t *req)
        /* Here bind->isOut is expected to be TRUE, and is checked earlier */
        if ( bind->type == dpi::DpiRSet )
        {
-         unsigned long state = ((Stmt*)bind->value)->getState ();
+         unsigned int state = ((Stmt*)bind->value)->getState ();
 
          if ( state == DPI_STMT_STATE_EXECUTED )
          {
@@ -1379,6 +1441,13 @@ void Connection::DoDefines ( eBaton* executeBaton, const dpi::MetaData* meta,
   Define *defines = executeBaton->defines = new Define[numCols];
   int csratio = executeBaton->dpiconn->getByteExpansionRatio ();
 
+  // Check for maxRows must be greater than zero in case of non-resultSet
+  if ( executeBaton->maxRows == 0 )
+  {
+    executeBaton->error = NJSMessages::getErrorMsg ( errInvalidmaxRows );
+    return;
+  }
+
   for (unsigned int col = 0; col < numCols; col++)
   {
     switch(meta[col].dbType)
@@ -1424,26 +1493,36 @@ void Connection::DoDefines ( eBaton* executeBaton, const dpi::MetaData* meta,
          * size expansion when data is converted from the DB character set
          * to AL32UTF8
          */
- 
-        defines[col].maxSize   = (meta[col].dbSize) * csratio;
 
-        if ( NJS_SIZE_T_OVERFLOW ( defines[col].maxSize,
-                                       executeBaton->maxRows ) )
+        if ( meta[col].dbSize != 0 )
         {
-          executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
-          return;
-        }
-        else
-        {
-          defines[col].buf = (char *)malloc( (size_t)defines[col].maxSize*
-                                             executeBaton->maxRows );
-          if( !defines[col].buf )
+          /* dbSize will be zero in case of "select null from dual" and
+           * malloc(0) behaves diffrently on different platforms, so avoiding it
+           */
+          defines[col].maxSize   = (meta[col].dbSize) * csratio;
+  
+          if ( NJS_SIZE_T_OVERFLOW ( defines[col].maxSize,
+                                         executeBaton->maxRows ) )
           {
-            executeBaton->error = NJSMessages::getErrorMsg( 
-                                    errInsufficientMemory );
+            executeBaton->error = NJSMessages::getErrorMsg(
+                                               errResultsTooLarge );
             return;
           }
+          else
+          {
+            defines[col].buf = (char *)malloc( (size_t)defines[col].maxSize*
+                                               executeBaton->maxRows );
+            if( !defines[col].buf )
+            {
+              executeBaton->error = NJSMessages::getErrorMsg( 
+                                      errInsufficientMemory );
+              return;
+            }
+          }
         }
+        /* The null scenario will have indicator as -1, so memory allocation
+         * not required.
+         */
         break;
       case dpi::DpiDate :
       case dpi::DpiTimestamp:
@@ -1497,6 +1576,26 @@ void Connection::DoDefines ( eBaton* executeBaton, const dpi::MetaData* meta,
             }
           }
 
+        }
+        break;
+      case dpi::DpiRaw :
+        defines[col].fetchType = DpiRaw;
+        defines[col].maxSize   = meta[col].dbSize;
+
+        if ( NJS_SIZE_T_OVERFLOW ( defines[col].maxSize,
+                                   executeBaton->maxRows ) )
+        {
+          executeBaton->error = NJSMessages::getErrorMsg (
+                                                     errResultsTooLarge ) ;
+          return;
+        }
+        defines[col].buf = (char *)malloc(defines[col].maxSize *
+                                          executeBaton->maxRows) ;
+        if ( !defines[col].buf )
+        {
+          executeBaton->error = NJSMessages::getErrorMsg ( 
+                                         errInsufficientMemory );
+          return;
         }
         break;
 
@@ -2151,6 +2250,9 @@ Local<Value> Connection::GetValueCommon ( eBaton *executeBaton,
          date = Nan::New<v8::Date>( *(long double*)val ).ToLocalChecked();
          value = date;
         break;
+       case (dpi::DpiRaw) :
+         value = Nan::NewBuffer((char*)val, len).ToLocalChecked();
+         break;
         // The LOB types are hit only by the define code path
         // The bind code path has its own Connection::GetValueLob method
        case (dpi::DpiClob):
@@ -3018,6 +3120,19 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
 
   case dpi::DpiRSet:
     bind->value = executeBaton->dpiconn->getStmt ();
+    break;
+
+  case dpi::DpiRaw:
+    if ( NJS_SIZE_T_OVERFLOW ( bind->maxSize, nRows ) )
+    {
+      executeBaton->error = NJSMessages::getErrorMsg ( errResultsTooLarge );
+      return;
+    }
+    else
+    {
+      bind->value = (void *)malloc ( (size_t)(bind->maxSize) * nRows ) ;
+      *(bind->len) = (unsigned int)bind->maxSize;
+    }
     break;
   }
 }

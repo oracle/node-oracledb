@@ -1,4 +1,4 @@
-# node-oracledb version 1.1
+# node-oracledb version 1.2
 
 ## <a name="about"></a> 1. About node-oracledb
 
@@ -81,7 +81,7 @@ There are examples in the [examples](https://github.com/oracle/node-oracledb/tre
 The basic install steps are:
 
 - Install the small, free [Oracle Instant Client](http://www.oracle.com/technetwork/database/features/instant-client/index-100365.html) libraries if your database is remote.  Or use a locally installed database such as the free [Oracle XE](http://www.oracle.com/technetwork/database/database-technologies/express-edition/overview/index.html) release.
-- Run `npm install oracledb` to install from the NPM registry.
+- Run `npm install oracledb` to install from the [NPM registry](https://www.npmjs.com/package/oracledb).
 
 See [INSTALL](https://github.com/oracle/node-oracledb/tree/master/INSTALL.md) for details.
 
@@ -104,6 +104,8 @@ To run the included testsuite see [test/README](https://github.com/oracle/node-o
 Node-oracledb is an open source project. See 
 [CONTRIBUTING](https://github.com/oracle/node-oracledb/tree/master/CONTRIBUTING.md)
 for details.
+
+Oracle gratefully acknowledges the contributions to node-oracledb that have been made by the community.
 
 ## <a name="license"></a> 8. License
 

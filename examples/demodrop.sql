@@ -42,3 +42,5 @@ DROP TABLE mylobs;
 DROP TYPE dorow;
 
 DROP FUNCTION mydofetch;
+
+DROP TABLE myraw;

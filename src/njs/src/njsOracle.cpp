@@ -38,7 +38,7 @@
  * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
  * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
- * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
+ * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * 
  * NAME
  *   njsOracle.cpp
@@ -101,6 +101,8 @@ Oracledb::~Oracledb()
   if ( fetchAsStringTypes_ )
   {
     free ( fetchAsStringTypes_ );
+    fetchAsStringTypes_ = NULL ;
+    fetchAsStringTypesCount_ = 0;
   }
 
   if (this->dpienv_)
@@ -534,11 +536,8 @@ NAN_PROPERTY_GETTER(Oracledb::GetFetchAsString)
   
   if ( oracledb->fetchAsStringTypes_ )
   {
-    unsigned int nCount = sizeof ( oracledb->fetchAsStringTypes_ ) / 
-                   sizeof ( oracledb->fetchAsStringTypes_[0] ) ;
-    
-    typeArray = Nan::New<v8::Array>( nCount );
-    for ( unsigned int t = 0; t < nCount ; t ++ )
+    typeArray = Nan::New<v8::Array>( oracledb->fetchAsStringTypesCount_ );
+    for ( unsigned int t = 0; t < oracledb->fetchAsStringTypesCount_ ; t ++ )
     {
       typeArray->Set (t, Nan::New<v8::Integer>(oracledb->fetchAsStringTypes_[t]));
     }
@@ -572,14 +571,17 @@ NAN_SETTER(Oracledb::SetFetchAsString)
     {
       free ( oracledb->fetchAsStringTypes_ ) ;
       oracledb->fetchAsStringTypesCount_ = 0 ;
-      return;
+      oracledb->fetchAsStringTypes_ = NULL ;
     }
+    return;
   }
   
   // If already defined, clear the array.
   if ( oracledb->fetchAsStringTypes_ )
   {
     free ( oracledb->fetchAsStringTypes_ );
+    oracledb->fetchAsStringTypes_ = NULL ;
+    oracledb->fetchAsStringTypesCount_ = 0 ;
   }
 
   oracledb->fetchAsStringTypesCount_ = array->Length ();
