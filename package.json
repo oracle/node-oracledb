@@ -43,8 +43,9 @@
   "scripts": {
       "test": "node_modules/mocha/bin/mocha -R spec --timeout 10000 test/*.js"
   },
+  "engineStrict": true,
   "engines": {
-    "node": ">=0.10.28"
+    "node": ">=0.10.28 <3"
   },
   "maintainers": [
     {
