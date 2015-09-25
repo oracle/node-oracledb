@@ -317,7 +317,6 @@ describe('58. properties.js', function() {
     })
 
     it('58.3.3 clientId', function() {
-
       try {
         var t = connection.clientId;
       } catch(err) {

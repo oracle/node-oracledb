@@ -60,6 +60,7 @@ static const char *errMsg[] =
   "NJS-024: memory allocation failed",
   "NJS-025: overflow when calculating results area size",
   "NJS-026: maxRows must be greater than zero",
+  "NJS-027: raw database type is not supported with DML Returning statements",
 };
 
 string NJSMessages::getErrorMsg ( NJSErrorType err, ... )

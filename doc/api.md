@@ -27,6 +27,7 @@ limitations under the License.
      - BIND_INOUT
      - BIND_OUT
      - BLOB
+     - BUFFER
      - CLOB
      - CURSOR
      - DATE
@@ -258,6 +259,8 @@ Oracledb.OBJECT                    // Fetch each row as an object
 
 ```
 Oracledb.BLOB                      // Bind a BLOB to return a Node.js buffer
+
+Oracledb.BUFFER                    // Bind a RAW to return  a Node.js Buffer
 
 Oracledb.CLOB                      // Bind a CLOB to return a Node.js string
 
@@ -1137,8 +1140,14 @@ Bind Property | Description
 ---------------|------------
 `val` | The input value or variable to be used for an IN or IN OUT bind variable.
 `dir` | The direction of the bind.  One of the [Oracledb Constants](#oracledbconstants) `BIND_IN`, `BIND_INOUT`, or `BIND_OUT`.
-`type` | The datatype to be bound. One of the [Oracledb Constants](#oracledbconstants) `STRING`, `NUMBER`, `DATE` or `CURSOR`.
-`maxSize` | The maximum number of bytes that an OUT or IN OUT bind variable of type STRING can use. The default value is 200. The maximum limit is 32767.
+`type` | The datatype to be bound. One of the [Oracledb Constants](#oracledbconstants) `STRING`, `NUMBER`, `DATE`, `CURSOR` or `BUFFER`.
+`maxSize` | The maximum number of bytes that an OUT or IN OUT bind variable of type STRING or BUFFER can use. The default value is 200. The maximum limit is 32767.
+
+In case of BUFFER type, when using Oracle Database 12c, in the init.ora file
+if MAX_STRING_SIZE parameter has a value of STANDARD, then the maximum size of
+BUFFER type is 4000.  If MAX_STRING_SIZE parameter has a value of EXTENDED then
+the maximum size of BUFFER type is 32767.  In earlier versions of Oracle
+Database, the maximum size of BUFFER type is 4000.
 
 With OUT binds, where the type cannot be inferred by node-oracledb
 because there is no input data value, the type defaults to `STRING`
@@ -2893,7 +2902,7 @@ connection.execute("INSERT INTO countries VALUES (:country_id, :country_name)",
 ```
 
 For IN binds the direction must be `BIND_IN`.  The type can be
-`STRING`, `NUMBER` or `DATE`, matching the data.  The type `CURSOR`
+`STRING`, `NUMBER`, `DATE` or `BUFFER`, matching the data.  The type `CURSOR`
 cannot be used with IN binds.
 
 ### <a name="outbind"></a> 12.2 OUT and IN OUT Bind Parameters
@@ -2906,10 +2915,10 @@ properties is used.
 The `dir` attribute should be `BIND_OUT` or `BIND_INOUT`.
 
 For `BIND_INOUT` parameters, the `type` attribute should be `STRING`,
-`NUMBER` or `DATE`.
+`NUMBER`, `DATE` or `BUFFER`.
 
 For `BIND_OUT` parameters the `type` attribute should be `STRING`,
-`NUMBER`, `DATE`, `CURSOR`, `BLOB` or `CLOB`.
+`NUMBER`, `DATE`, `CURSOR`, `BLOB`, `CLOB` or `BUFFER`.
 
 If `type` is not specified then `STRING` is assumed.
 

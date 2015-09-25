@@ -59,6 +59,7 @@ typedef enum
   errInsufficientMemory,
   errResultsTooLarge,
   errInvalidmaxRows,
+  errBufferReturningInvalid,
 
   // New ones should be added here
 
