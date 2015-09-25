@@ -819,11 +819,12 @@ void Connection::GetInBindParams (Handle<Value> v8val, Bind* bind,
       bind->type = dpi::DpiRaw;
       if(type == BIND_INOUT)
       {
-        *(bind->len) = bufLen;
+        *(bind->len) = (DPI_BUFLEN_TYPE) bufLen;
       }
       else // IN
       {
-        bind->maxSize = *(bind->len) = bufLen;
+        bind->maxSize =  (DPI_SZ_TYPE ) bufLen;
+        *(bind->len) = (DPI_BUFLEN_TYPE) bufLen;
       }
       DPI_SZ_TYPE size = (bind->maxSize >= *(bind->len) ) ?
                          bind->maxSize : *(bind->len);
