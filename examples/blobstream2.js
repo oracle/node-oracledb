@@ -86,6 +86,11 @@ oracledb.getConnection(
                    }
                  });
                });
+        lob.on('close',
+               function(chunk)
+               {
+                 console.log("lob.on 'close' event");
+               });
         lob.on('error',
                function(err)
                {

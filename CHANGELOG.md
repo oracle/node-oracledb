@@ -8,7 +8,7 @@
 
 - Changed write-only attributes to allow console.log() on Connection objects. Note the attribute values will show as null; refer to the documentation.
 
-- Remove non-portable memory allocation for queries that return NULL.
+- Removed non-portable memory allocation for queries that return NULL.
 
 - Added check to make sure `maxRows` is greater than zero for non-ResultSet queries.
 
@@ -23,6 +23,8 @@
 - Fixed encoding issues with several files that caused compilation warnings in some Windows environments.
 
 - Added a `type` property to the Lob class to distinguish CLOB and BLOB types.
+
+- Corrected the order of Stream 'end' and 'close' events when reading a LOB.
 
 - Made installation halt sooner for Node.js versions currently known to be unusable.
 
