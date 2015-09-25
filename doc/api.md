@@ -255,7 +255,9 @@ Oracledb.ARRAY                     // Fetch each row as array of column values
 Oracledb.OBJECT                    // Fetch each row as an object
 ```
 
-#### Type constants for `execute()` [bind parameter](#executebindParams) and [Lob](#proplobpiecesize) `type` properties, for [`fetchAsString`](#propdbfetchasstring), and for [`fetchInfo`](#propfetchinfo).  Not all constants can be used in all places:
+#### Type constants for `execute()` [bind parameter](#executebindParams) and [Lob](#proplobpiecesize) `type` properties, for [`fetchAsString`](#propdbfetchasstring), and for [`fetchInfo`](#propfetchinfo)
+
+Not all constants can be used in all places:
 
 ```
 Oracledb.BLOB                      // Bind a BLOB to a Node.js Stream
@@ -2842,22 +2844,34 @@ variable, is used during execution of the SQL statement.
 
 In this example, the SQL bind parameters *:country\_id* and
 *:country\_name* can be bound to values in node-oracledb using an
-array:
+array.  This is often called "bind by position":
 
 ```javascript
-connection.execute("INSERT INTO countries VALUES (:country_id, :country_name)",
-             [90, "Tonga"],
-             function(err, result)
-             {
-               if (err)
-                 console.error(err.message);
-               else
-                 console.log("Rows inserted " + result.rowsAffected);
-             });
+connection.execute(
+  "INSERT INTO countries VALUES (:country_id, :country_name)",
+  [90, "Tonga"],
+  function(err, result)
+  {
+	if (err)
+	  console.error(err.message);
+	else
+	  console.log("Rows inserted " + result.rowsAffected);
+  });
 ```
 
 The position of the array values corresponds to the position of the
-SQL bind variables.  This is often called "bind by position".
+SQL bind variables as they occur in the statement, regardless of their
+names.  This is still true even if the bind variables are named like
+`:0`, `:1` etc.  The following snippet will fail because the country
+name needs to be the second entry of the array so it becomes the
+second value in the `INSERT` statement
+
+```javascript
+connection.execute(
+  "INSERT INTO countries VALUES (:1, :0)",
+  ["Tonga", 90],  // fail
+  . . .
+```
 
 Instead of binding by array, an object that names each bind value can
 be used.  The attributes can in be any order but their names must
@@ -2865,15 +2879,16 @@ match the SQL bind parameter names.  This is often called "bind by
 name":
 
 ```javascript
-connection.execute("INSERT INTO countries VALUES (:country_id, :country_name)",
-             {country_id: 90, country_name: "Tonga"},
-             function(err, result)
-             {
-               if (err)
-                 console.error(err.message);
-               else
-                 console.log("Rows inserted " + result.rowsAffected);
-             });
+connection.execute(
+  "INSERT INTO countries VALUES (:country_id, :country_name)",
+  {country_id: 90, country_name: "Tonga"},
+  function(err, result)
+  {
+	if (err)
+	  console.error(err.message);
+	else
+	  console.log("Rows inserted " + result.rowsAffected);
+  });
 ```
 
 The default direction for binding is `BIND_IN`.  The datatype used for
@@ -2886,18 +2901,19 @@ explicit attributes for the bind direction (`dir`), the datatype
 ```javascript
 var oracledb = require('oracledb');
 . . .
-connection.execute("INSERT INTO countries VALUES (:country_id, :country_name)",
-             {
-               country_id: { val: 90, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
-               country_name: { val: "Tonga", dir: oracledb.BIND_IN, type:oracledb.STRING }
-             },
-             function(err, result)
-             {
-               if (err)
-                 console.error(err.message);
-               else
-                 console.log("Rows inserted " + result.rowsAffected);
-             });
+connection.execute(
+  "INSERT INTO countries VALUES (:country_id, :country_name)",
+  {
+	country_id: { val: 90, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
+	country_name: { val: "Tonga", dir: oracledb.BIND_IN, type:oracledb.STRING }
+  },
+  function(err, result)
+  {
+	if (err)
+	  console.error(err.message);
+	else
+	  console.log("Rows inserted " + result.rowsAffected);
+  });
 ```
 
 For IN binds the direction must be `BIND_IN`.  The type can be
