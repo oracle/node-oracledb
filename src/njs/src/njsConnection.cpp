@@ -676,7 +676,6 @@ void Connection::GetOutBindParams (unsigned short dataType, Bind* bind,
       break;
     case DATA_BUFFER :
       bind->type     = dpi::DpiRaw;
-      bind->maxSize  = 0;
       break;
     case DATA_CLOB : 
       bind->type    = dpi::DpiClob;
@@ -3131,6 +3130,10 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
 
   case dpi::DpiRSet:
     bind->value = executeBaton->dpiconn->getStmt ();
+    break;
+
+  case dpi::DpiRaw:
+    bind->value = (void *)malloc ( bind->maxSize ) ;
     break;
   }
 }
