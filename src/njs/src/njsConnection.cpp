@@ -943,7 +943,7 @@ void Connection::Async_Execute (uv_work_t *req)
        /* Here bind->isOut is expected to be TRUE, and is checked earlier */
        if ( bind->type == dpi::DpiRSet )
        {
-         unsigned long state = ((Stmt*)bind->value)->getState ();
+         unsigned int state = ((Stmt*)bind->value)->getState ();
 
          if ( state == DPI_STMT_STATE_EXECUTED )
          {

@@ -2,6 +2,8 @@
 
 ## node-oracledb v1.2.0 (DD Mon YYYY)
 
+- Fixed AIX-specific REF CURSOR related failures.
+
 - Optimized CLOB memory allocation to account for different database-to-client character set expansions.
 
 - Fixed a crash while reading a LOB from a closed connection
