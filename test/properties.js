@@ -39,7 +39,7 @@ var should = require('should');
 var async = require('async');
 var dbConfig = require('./dbConfig.js');
 
-describe('58. properties.js', function() {
+describe.skip('58. properties.js', function() {
 
   if(dbConfig.externalAuth){
     var credential = { externalAuth: true, connectString: dbConfig.connectString };
