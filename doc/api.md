@@ -2256,6 +2256,8 @@ The default query result type mappings for Oracle Database types to JavaScript t
     When binding a JavaScript Date value in an `INSERT` statement, the date is also inserted as `TIMESTAMP WITH
     LOCAL TIMEZONE` using OCIDateTime.
 
+##### Fetching as String
+
 The global [`fetchAsString`](#propdbfetchasstring) property can be
 used to force all number or date columns queried by an application to
 be fetched as strings instead of in native format.  Allowing data to
@@ -2338,6 +2340,70 @@ represented as numbers:
 
 To map columns returned from REF CURSORS, use `fetchAsString`.  The
 `fetchInfo` settings do not apply.
+
+##### Mapping Custom Types
+
+Datatypes such as an Oracle Locator `SDO_GEOMETRY`, or your own custom
+types, cannot be fetched directly in node-oracledb.  Instead, utilize
+techniques such as using an intermediary PL/SQL procedure to map the
+type components to scalar values, or use a pipelined table.
+
+For example, consider a `CUSTOMERS` table having a `CUST_GEO_LOCATION`
+column of type `SDO_GEOMETRY`, as created in this [example
+schema](http://docs.oracle.com/cd/E17781_01/appdev.112/e18750/xe_locator.htm#XELOC560):
+
+```sql
+CREATE TABLE customers (
+  customer_id NUMBER,
+  last_name VARCHAR2(30),
+  cust_geo_location SDO_GEOMETRY);
+
+INSERT INTO customers VALUES
+  (1001, 'Nichols', SDO_GEOMETRY(2001, 8307, SDO_POINT_TYPE (-71.48923,42.72347,NULL), NULL, NULL));
+
+COMMIT;
+```     
+
+Instead of attempting to get `CUST_GEO_LOCATION` by directly calling a
+PL/SQL procedure that returns an `SDO_GEOMETRY` parameter, you could
+instead get the scalar coordinates by using an intermediary PL/SQL
+block that decomposes the geometry:
+
+```javascript
+    . . .
+    var sql =
+      "BEGIN " +
+      "  SELECT t.x, t.y" +
+      "  INTO :x, :y" +
+      "  FROM customers, TABLE(sdo_util.getvertices(customers.cust_geo_location)) t" +
+      "  WHERE customer_id = :id;" +
+      "END; ";
+    var bindvars = {
+      id: 1001,
+      x: { type: oracledb.NUMBER, dir : oracledb.BIND_OUT },
+      y: { type: oracledb.NUMBER, dir : oracledb.BIND_OUT }
+    }
+    connection.execute(
+      sql,
+      bindvars,
+      function (err, result) {
+        if (err) { console.error(err.message); return; }
+        console.log(result.outBinds);
+      });
+```
+
+The output is:
+
+```
+{ x: -71.48922999999999, y: 42.72347 }
+```
+
+Note the JavaScript precision difference.  In this particular example,
+you may want to bind using `type: oracledb.STRING`.  Output would be:
+
+```
+{ x: '-71.48923', y: '42.72347' }
+```
 
 #### <a name="rowprefetching"></a> 9.1.6 Row Prefetching
 
@@ -2568,7 +2634,7 @@ connection.execute(
   [],
   { resultSet: true },
   function (err, result) {
-  . . . 
+  . . .
 ```
 
 The query rows can be handled using a
@@ -2710,7 +2776,7 @@ connection.execute(
     if (result.rows.length === 0) { console.log("No results"); return; }
 
     var lob = result.rows[0][0];
-    if (lob === null) { console.log("CLOB was NULL"); return; } 
+    if (lob === null) { console.log("CLOB was NULL"); return; }
 
     lob.setEncoding('utf8');  // we want text, not binary output
     lob.on('error', function(err) { console.error(err); });
