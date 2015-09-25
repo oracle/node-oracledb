@@ -334,7 +334,7 @@ describe('6. dmlReturning.js', function(){
         { autoCommit: true },
         function(err, result) {
           should.not.exist(err);
-          console.log(result);
+          // console.log(result);
           result.outBinds.rid.should.eql([size]);
           result.outBinds.rname[0].length.should.be.exactly(size);
           done();

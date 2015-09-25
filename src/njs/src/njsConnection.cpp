@@ -225,12 +225,12 @@ NAN_SETTER(Connection::SetStmtCacheSize)
 /*****************************************************************************/
 /*
    DESCRIPTION
-     Get Accessor of clientId property - throws error
+     Get Accessor of clientId property - This is write-only property,
+     returning NULL for debugging purpose in case of read
 */
 NAN_PROPERTY_GETTER(Connection::GetClientId)
 {
-  connectionPropertyException(ObjectWrap::Unwrap<Connection>(args.Holder()), errWriteOnly, "clientId");
-  NanReturnUndefined();
+  NanReturnNull();
 }
 
 /*****************************************************************************/
@@ -259,12 +259,12 @@ NAN_SETTER(Connection::SetClientId)
 /*****************************************************************************/
 /*
    DESCRIPTION
-     Get Accessor of module property - throws error
+     Get Accessor of module property - This is write-only property,
+     returning NULL for debugging purpose in case of read
 */
 NAN_PROPERTY_GETTER(Connection::GetModule)
 {
-  connectionPropertyException(ObjectWrap::Unwrap<Connection>(args.Holder()), errWriteOnly, "module");
-  NanReturnUndefined();
+  NanReturnNull();
 }
 
 /*****************************************************************************/
@@ -293,12 +293,12 @@ NAN_SETTER(Connection::SetModule)
 /*****************************************************************************/
 /*
    DESCRIPTION
-     Get Accessor of action property - throws error
+     Get Accessor of action property - This is write-only property,
+     returning NULL for debugging purpose in case of read
 */
 NAN_PROPERTY_GETTER(Connection::GetAction)
 {
-  connectionPropertyException(ObjectWrap::Unwrap<Connection>(args.Holder()), errWriteOnly, "action");
-  NanReturnUndefined();
+  NanReturnNull();
 }
 
 /*****************************************************************************/

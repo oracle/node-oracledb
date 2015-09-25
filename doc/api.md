@@ -955,9 +955,11 @@ writeonly String action
 ```
 
 The [action](https://docs.oracle.com/database/121/LNOCI/oci08sca.htm#sthref1434)
-attribute for end-to-end application tracing. This is a write-only property.
+attribute for end-to-end application tracing.
 
-See [End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend).
+This is a write-only property.  Displaying a Connection object will
+show a value of `null` for this attribute.  See
+[End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend).
 
 #### <a name="propconnclientid"></a> 4.1.2 clientId
 
@@ -969,9 +971,10 @@ The [client
 identifier](https://docs.oracle.com/database/121/LNOCI/oci08sca.htm#sthref1414)
 for end-to-end application tracing, use with mid-tier authentication,
 and with [Virtual Private Databases](http://docs.oracle.com/database/121/CNCPT/cmntopc.htm#CNCPT62345).
-This is a write-only property.
 
-See [End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend).
+This is a write-only property.  Displaying a Connection object will
+show a value of `null` for this attribute.  See
+[End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend).
 
 #### <a name="propconnmodule"></a> 4.1.3 module
 
@@ -980,9 +983,11 @@ writeonly String module
 ```
 
 The [module](https://docs.oracle.com/database/121/LNOCI/oci08sca.htm#sthref1433)
-attribute for end-to-end application tracing. This is a write-only property.
+attribute for end-to-end application tracing.
 
-See [End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend).
+This is a write-only property.  Displaying a Connection object will
+show a value of `null` for this attribute.  See
+[End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend).
 
 #### <a name="propconnstmtcachesize"></a> 4.1.4 stmtCacheSize
 
@@ -3303,7 +3308,7 @@ own mid-tier authentication but connect to the database using the one
 database schema.  By setting `clientId` to the application's
 authenticated username, the database is aware of who the actual end
 user is.  This can, for example, be used by Oracle
-[Virtual Private Databases](http://docs.oracle.com/database/121/CNCPT/cmntopc.htm#CNCPT62345)
+[Virtual Private Database](http://docs.oracle.com/database/121/CNCPT/cmntopc.htm#CNCPT62345)
 policies to automatically restrict data access by that user.
 
 Applications should set the properties because they can greatly help
@@ -3349,14 +3354,33 @@ The values can also be manually set by calling
 [`DBMS_APPLICATION_INFO`](http://docs.oracle.com/cd/B19306_01/appdev.102/b14258/d_appinf.htm#CHECEIEB)
 procedures or
 [`DBMS_SESSION.SET_IDENTIFIER`](http://docs.oracle.com/cd/B19306_01/appdev.102/b14258/d_sessio.htm#SET_IDENTIFIER),
-however these require explicit round-trips, reducing scalability.
+however these cause explicit round-trips, reducing scalability.
+
+In general, applications should be consistent about how, and when,
+they set the end-to-end tracing attributes so that current values are
+recorded by the database.
 
 Idle connections released back to a connection pool will retain the
-previous attribute values of that connection. This avoids the
-overhead of a round-trip to reset the values.  After calling
-`pool.getConnection()`, the application should be consistent about
-setting appropriate values to ensure any previous values are updated.
-The Oracle design assumption is that pools are actively used and have
-few idle connections.  However, if desired, the application can set
-the properties to empty strings and force a round-trip prior to
-connection release.  This reduces efficiency.
+previous attribute values of that connection. This avoids the overhead
+of a round-trip to reset the values.  The Oracle design assumption is
+that pools are actively used and have few idle connections. After
+getting a connection from a pool, an application that uses end-to-end
+tracing should set new values appropriately.
+
+When a Connection object is displayed, such as with `console.log()`,
+the end-to-end tracing attributes will show as `null` even if values
+have been set and are being sent to the database.  This is for
+architectural, efficiency and consistency reasons.  When an already
+established connection is retrieved from a local pool, node-oracledb
+is not able to efficiently retrieve values previously established in
+the connection.  The same occurs if the values are set by a call to
+PL/SQL code - there is no efficient way for node-oracledb to know the
+values have changed.
+
+The attribute values are commonly useful to DBAs.  However, if knowing
+the current values is useful in an application, the application should
+save the values as part of its application state whenever the
+node-oracledb attributes are set.  Applications can also find the
+current values by querying the Oracle data dictionary or using PL/SQL
+procedures such as `DBMS_APPLICATION_INFO.READ_MODULE()` with the
+understanding that these require round-trips to the database.

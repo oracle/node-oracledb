@@ -48,7 +48,6 @@ typedef enum
   errInvalidBindDataType,
   errInvalidBindDirection,
   errReadOnly,
-  errWriteOnly,
   errInsufficientBufferForBinds,
   errBusyResultSet,
   errInvalidResultSet,

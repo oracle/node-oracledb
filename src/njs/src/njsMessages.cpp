@@ -49,7 +49,6 @@ static const char *errMsg[] =
   "NJS-012: encountered invalid bind datatype in parameter %d",
   "NJS-013: invalid bind direction",
   "NJS-014: %s is a read-only property",
-  "NJS-015: %s is a write-only property",
   "NJS-016: buffer is too small for OUT binds",
   "NJS-017: concurrent operations on resultSet are not allowed",
   "NJS-018: invalid result set",

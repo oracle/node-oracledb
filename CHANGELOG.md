@@ -2,6 +2,8 @@
 
 ## node-oracledb v1.2.0 (DD Mon YYYY)
 
+- Changed write-only attributes to allow console.log() on Connection objects. Note the attribute values will show as null; refer to the documentation.
+
 - Remove non-portable memory allocation for queries that return NULL.
 
 - Added check to make sure maxRows is greater than zero for non-ResultSet queries.
