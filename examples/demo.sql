@@ -106,3 +106,7 @@ END LOOP;
 END;
 /
 SHOW ERRORS
+
+-- For raw1.js
+DROP TABLE myraw;
+CREATE TABLE myraw (r RAW(64));
