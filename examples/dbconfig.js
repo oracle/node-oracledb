@@ -27,9 +27,14 @@
  *   string, or a Net Service Name from a tnsnames.ora file or
  *   external naming service, or it can be the name of a local Oracle
  *   database instance.
- *
- *   The Easy Connect syntax is:
+ * 
+ *   If node-oracledb is linked with Instant Client, then an Easy
+ *   Connect string is generally appropriate.  The syntax is:
+ * 
  *     [//]host_name[:port][/service_name][:server_type][/instance_name]
+ * 
+ *   Commonly just the host_name and service_name are needed
+ *   e.g. "localhost/orcl" or "localhost/XE"
  *
  *   If using a tnsnames.ora file, the file can be in a default
  *   location such as $ORACLE_HOME/network/admin/tnsnames.ora or
