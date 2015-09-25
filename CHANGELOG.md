@@ -16,6 +16,8 @@
 
 - Fixed encoding issues with several files that caused compilation warnings in some Windows environments.
 
+- Added a `type` property to the Lob class to distinguish CLOB and BLOB types.
+
 ## node-oracledb v1.1.0 (3 Sep 2015)
 
 - Enhanced pool.release() to drop the session if it is known to be unusable, allowing a new session to be created.

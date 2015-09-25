@@ -170,6 +170,7 @@ class ILob : public ObjectWrap
   static NAN_PROPERTY_GETTER(GetLength);
   static NAN_PROPERTY_GETTER(GetPieceSize);
   static NAN_PROPERTY_GETTER(GetOffset);
+  static NAN_PROPERTY_GETTER(GetType);
 
   
                                 // Setters for properties
@@ -177,6 +178,7 @@ class ILob : public ObjectWrap
   static NAN_SETTER(SetLength);
   static NAN_SETTER(SetPieceSize);
   static NAN_SETTER(SetOffset);
+  static NAN_SETTER(SetType);
 
   
                                 // Read Method on ILob class
@@ -205,13 +207,14 @@ class ILob : public ObjectWrap
   bool           isValid_;
   State          state_;
 
-  char          *buf_;
-  unsigned int   bufSize_;
-  unsigned int   chunkSize_;
+  char              *buf_;
+  unsigned int       bufSize_;
+  unsigned int       chunkSize_;
   unsigned long long length_;
   unsigned long long offset_;
   unsigned long      amountRead_;
   unsigned long long amountWritten_;
+  unsigned int       type_;
 };
 
 

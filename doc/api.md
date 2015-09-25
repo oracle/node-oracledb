@@ -73,6 +73,7 @@ limitations under the License.
      - 5.1.1 [chunkSize](#proplobchunksize)
      - 5.1.2 [length](#proploblength)
      - 5.1.3 [pieceSize](#proplobpiecesize)
+	 - 5.1.4 [type](#proplobtype)
 6. [Pool Class](#poolclass)
   - 6.1 [Pool Properties](#poolproperties)
      - 6.1.1 [connectionsInUse](#proppoolconnectionsinuse)
@@ -253,7 +254,7 @@ Oracledb.ARRAY                     // Fetch each row as array of column values
 Oracledb.OBJECT                    // Fetch each row as an object
 ```
 
-#### Constants for `execute()` [bind parameter](#executebindParams) `type` properties, for [`fetchAsString`](#propdbfetchasstring) and for [`fetchInfo`](#propfetchinfo):
+#### Type constants for `execute()` [bind parameter](#executebindParams) and [Lob](#proplobpiecesize) `type` properties, for [`fetchAsString`](#propdbfetchasstring), and for [`fetchInfo`](#propfetchinfo):
 
 ```
 Oracledb.BLOB                      // Bind a BLOB to return a Node.js buffer
@@ -264,7 +265,7 @@ Oracledb.CURSOR                    // Bind a REF CURSOR to a node-oracledb Resul
 
 Oracledb.DATE                      // Bind as JavaScript date type.  Can also be used for fetchAsString and fetchInfo
 
-Oracledb.DEFAULT                   // Used with [`fetchInfo`](#propfetchinfo) to reset the fetch type to the database type
+Oracledb.DEFAULT                   // Used with fetchInfo to reset the fetch type to the database type
 
 Oracledb.NUMBER                    // Bind as JavaScript number type.  Can also be used for fetchAsString and fetchInfo
 
@@ -1400,6 +1401,19 @@ For efficiency, it is recommended that `pieceSize` be a multiple of
 `chunkSize`.
 
 The maximum value for `pieceSize` is limited to the value of UINT_MAX.
+
+#### <a name="proplobtype"></a> 5.1.4 type
+
+```
+readonly Number type
+```
+
+This read-only attribute shows the type of Lob being used.  It will
+have the value of one of the constants
+[`Oracledb.BLOB`](#oracledbconstants) or
+[`Oracledb.CLOB`](#oracledbconstants).  The value is derived from the
+bind type when using LOB bind variables, or from the column type when
+a LOB is returned by a query.
 
 ## <a name="poolclass"></a> 6. Pool Class
 
@@ -2756,11 +2770,10 @@ writing it to a file.  It is similar to the example
 The returned column value is a Lob stream which is piped to an opened
 file stream.
 
-By default the Lob stream is a buffer, so the `setEncoding()` call is
-used to indicate data should be a string.  This CLOB example uses
-'utf8'.  (A buffer would be useful for BLOB data).  Both the Lob
-stream and output data stream have 'error' events to handle unexpected
-issues:
+By default the Lob stream is a Node.js buffer - which is useful for
+BLOB data.  Since this example uses a CLOB, the `setEncoding()` call
+is used to indicate data should be a string.  Both the Lob stream and
+output data stream have 'error' events to handle unexpected issues:
 
 ```javascript
 var oracledb = require('oracledb');

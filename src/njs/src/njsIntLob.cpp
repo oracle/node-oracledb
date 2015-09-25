@@ -89,7 +89,7 @@ Persistent<FunctionTemplate> ILob::iLobTemplate_s;
 ILob::ILob():
   lobLocator_(NULL), njsconn_(NULL), dpiconn_(NULL), svch_(NULL), errh_(NULL),
   isValid_(false), state_(INACTIVE), buf_(NULL), bufSize_(0), chunkSize_(0),
-  length_(0), offset_(1), amountRead_(0)
+  length_(0), offset_(1), amountRead_(0), type_(DATA_UNKNOWN)
 {
 
 }
@@ -227,10 +227,12 @@ void ILob::setILob(eBaton *executeBaton, ProtoILob *protoILob)
     {
       // accommodate multi-byte charsets
       buf_ = new char[bufSize_ * dpiconn_->getByteExpansionRatio()];
+      type_ = DATA_CLOB;
     }
-    else
+    else if (fetchType_ == DpiBlob)
     {
       buf_ = new char[bufSize_];
+      type_ = DATA_BLOB;
     }
 
     // Now the ILob object is valid
@@ -292,6 +294,10 @@ void ILob::Init(Handle<Object> target)
   tpl->InstanceTemplate()->SetAccessor(NanNew<v8::String>("offset"),
                                        ILob::GetOffset,
                                        ILob::SetOffset);
+
+  tpl->InstanceTemplate()->SetAccessor(NanNew<v8::String>("type"),
+                                       ILob::GetType,
+                                       ILob::SetType);
 
   NanAssignPersistent(iLobTemplate_s, tpl);
   target->Set(NanNew<v8::String>("ILob"), tpl->GetFunction());
@@ -521,7 +527,7 @@ NAN_PROPERTY_GETTER(ILob::GetLength)
 /*****************************************************************************/
 /*
   DESCRIPTION
-    Set Accessor of length property - throws error as lenght is a read-only
+    Set Accessor of length property - throws error as length is a read-only
     property.
 
   PARAMETERS
@@ -739,6 +745,66 @@ NAN_SETTER(ILob::SetOffset)
 }
 
 
+/*****************************************************************************/
+/*
+  DESCRIPTION
+    Get Accessor of type property
+
+  PARAMETERS
+    args - ILob object
+
+  RETURNS
+    the type of the LOB (either CLOB or BLOB)
+
+  NOTES
+    
+*/
+
+NAN_PROPERTY_GETTER(ILob::GetType)
+{  
+  NanScope();
+
+  ILob *iLob = ObjectWrap::Unwrap<ILob>(args.Holder());
+
+  try
+  {
+    Local<Number> value = NanNew<v8::Number>((unsigned long)iLob->type_);
+    NanReturnValue(value);
+  }
+
+  catch(dpi::Exception &e)
+  {
+    NJS_SET_EXCEPTION(e.what(), strlen(e.what()));
+    NanReturnUndefined();
+  }
+
+  NanReturnUndefined();
+}
+
+
+/*****************************************************************************/
+/*
+  DESCRIPTION
+    Set Accessor of type property - throws error as type is a read-only
+    property.
+
+  PARAMETERS
+    args - ILob object
+
+  RETURNS
+    throws error
+
+  NOTES
+    
+*/
+
+NAN_SETTER(ILob::SetType)
+{
+  lobPropertyException(ObjectWrap::Unwrap<ILob>(args.Holder()), errReadOnly,
+                       "type");
+}
+
+
 
 /*****************************************************************************/
 /*
@@ -825,7 +891,7 @@ void ILob::Async_Read(uv_work_t *req)
   try
   {
     unsigned long long byteAmount = (unsigned long int)iLob->bufSize_;
-    unsigned long long charAmount = 0; 
+    unsigned long long charAmount = 0;
     
     // Clobs read by characters
     if (iLob->fetchType_ == DpiClob)
