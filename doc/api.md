@@ -255,14 +255,14 @@ Oracledb.ARRAY                     // Fetch each row as array of column values
 Oracledb.OBJECT                    // Fetch each row as an object
 ```
 
-#### Type constants for `execute()` [bind parameter](#executebindParams) and [Lob](#proplobpiecesize) `type` properties, for [`fetchAsString`](#propdbfetchasstring), and for [`fetchInfo`](#propfetchinfo):
+#### Type constants for `execute()` [bind parameter](#executebindParams) and [Lob](#proplobpiecesize) `type` properties, for [`fetchAsString`](#propdbfetchasstring), and for [`fetchInfo`](#propfetchinfo).  Not all constants can be used in all places:
 
 ```
-Oracledb.BLOB                      // Bind a BLOB to return a Node.js buffer
+Oracledb.BLOB                      // Bind a BLOB to a Node.js Stream
 
-Oracledb.BUFFER                    // Bind a RAW to return  a Node.js Buffer
+Oracledb.BUFFER                    // Bind a RAW to a Node.js Buffer
 
-Oracledb.CLOB                      // Bind a CLOB to return a Node.js string
+Oracledb.CLOB                      // Bind a CLOB to a Node.js Stream
 
 Oracledb.CURSOR                    // Bind a REF CURSOR to a node-oracledb ResultSet class
 
@@ -1143,11 +1143,10 @@ Bind Property | Description
 `type` | The datatype to be bound. One of the [Oracledb Constants](#oracledbconstants) `STRING`, `NUMBER`, `DATE`, `CURSOR` or `BUFFER`.
 `maxSize` | The maximum number of bytes that an OUT or IN OUT bind variable of type STRING or BUFFER can use. The default value is 200. The maximum limit is 32767.
 
-In case of BUFFER type, when using Oracle Database 12c, in the init.ora file
-if MAX_STRING_SIZE parameter has a value of STANDARD, then the maximum size of
-BUFFER type is 4000.  If MAX_STRING_SIZE parameter has a value of EXTENDED then
-the maximum size of BUFFER type is 32767.  In earlier versions of Oracle
-Database, the maximum size of BUFFER type is 4000.
+The maximum size of a `BUFFER` type is 2000 bytes, unless you are
+using Oracle Database 12c and the database initialization parameter
+`MAX_STRING_SIZE` has a value of `EXTENDED`.  In this case the maximum
+size of a `BUFFER` is 32767.
 
 With OUT binds, where the type cannot be inferred by node-oracledb
 because there is no input data value, the type defaults to `STRING`
@@ -2902,8 +2901,9 @@ connection.execute("INSERT INTO countries VALUES (:country_id, :country_name)",
 ```
 
 For IN binds the direction must be `BIND_IN`.  The type can be
-`STRING`, `NUMBER`, `DATE` or `BUFFER`, matching the data.  The type `CURSOR`
-cannot be used with IN binds.
+`STRING`, `NUMBER`, `DATE` matching the data.  The type `BUFFER` can
+bind a Node.js Buffer to an Oracle Database `RAW` type.  The type
+`CURSOR` cannot be used with IN binds.
 
 ### <a name="outbind"></a> 12.2 OUT and IN OUT Bind Parameters
 
@@ -2920,6 +2920,9 @@ For `BIND_INOUT` parameters, the `type` attribute should be `STRING`,
 For `BIND_OUT` parameters the `type` attribute should be `STRING`,
 `NUMBER`, `DATE`, `CURSOR`, `BLOB`, `CLOB` or `BUFFER`.
 
+The type `BUFFER` is used to bind an Oracle Database `RAW` to a
+Node.js Buffer.
+
 If `type` is not specified then `STRING` is assumed.
 
 A `maxSize` should be set for `STRING` OUT or IN OUT binds.  This is
@@ -2929,7 +2932,7 @@ output value does not fit in `maxSize` bytes, then an error such
 too small* or *NJS-016: buffer is too small for OUT binds* occurs.
 
 A default value of 200 bytes is used when `maxSize` is not provided
-for OUT binds of type `STRING`.
+for OUT binds of type `STRING` or `BUFFER`.
 
 The `results` parameter of the `execute()` callback contains an
 `outBinds` property that has the returned OUT and IN OUT binds as
