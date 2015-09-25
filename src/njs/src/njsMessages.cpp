@@ -72,7 +72,11 @@ string NJSMessages::getErrorMsg ( NJSErrorType err, ... )
   {
     // print all specified arguments
     va_start (vlist, err);
-    vsnprintf (msg, MAX_ERROR_MSG_LEN, errMsg[err-1], vlist);
+    if ( vsnprintf (msg, MAX_ERROR_MSG_LEN, errMsg[err-1], vlist) <= 0)
+    {
+      msg[0] = 0;
+    }
+
     va_end (vlist);
 
     str = msg;
