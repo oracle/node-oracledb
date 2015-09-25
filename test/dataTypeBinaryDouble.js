@@ -53,7 +53,6 @@ describe('31. dataTypeBinaryDouble.js', function() {
   
   var connection = null;  
   var tableName = "oracledb_double";
-  var numbers = assist.data.numbers;
 
   before('get one connection', function(done) {
     oracledb.getConnection(credential, function(err, conn) {
@@ -70,7 +69,9 @@ describe('31. dataTypeBinaryDouble.js', function() {
     });
   })
   
-  describe.skip('31.1 testing BINARY_DOUBLE data', function() {
+  describe('31.1 testing BINARY_DOUBLE data', function() {
+    
+    var numbers = assist.data.numbersForBinaryFloat.concat(assist.data.numbersForBinaryDouble);
 
     before('create table, insert data',function(done) {
       assist.setUp(connection, tableName, numbers, done);
@@ -106,4 +107,49 @@ describe('31. dataTypeBinaryDouble.js', function() {
     })
   })
   
+  describe('31.3 testing floating-point numbers which cannot be precisely represent', function() {
+    var nums =
+    [
+      0.00000123,
+      98.7654321
+    ];
+
+    before('create table, insert data',function(done) {
+      assist.setUp(connection, tableName, nums, done);
+    })
+
+    after(function(done) {
+      connection.execute(
+        "DROP table " + tableName,
+        function(err) {
+          should.not.exist(err);
+          done();
+        }
+      );
+    })
+
+    it('31.3.1 rounding numbers', function(done) {
+      connection.execute(
+        "SELECT * FROM " + tableName,
+        [],
+        { outFormat: oracledb.OBJECT },
+        function(err, result) {
+          should.not.exist(err);
+          
+          for(var i = 0; i < nums.length; i++) {
+            result.rows[i].CONTENT.should.not.be.exactly(nums[ result.rows[i].NUM ]);
+            approxeq(result.rows[i].CONTENT, nums[ result.rows[i].NUM ]).should.be.ok;
+          }
+          done();
+        }
+      );
+    })
+
+    function approxeq(v1, v2)
+    {
+      var precision = 0.001;
+      return Math.abs(v1 - v2) < precision;
+    }
+  }) // 31.3
+
 })
