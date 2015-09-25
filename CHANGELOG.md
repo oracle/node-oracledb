@@ -2,34 +2,33 @@
 
 ## node-oracledb v1.2.0 (DD Mon YYYY)
 
-- Fixed a crash when selecting multiple rows with LOB values.
-
-- Added a check to return an NJS error when an invalid DML RETURN statement
-  does not give an ORA error.
-
 - Added support for RAW data type.
 
-- Fixed intermittent crash while setting `fetchAsString`, and incorrect output while reading the value.
+- Added a `type` property to the Lob class to distinguish CLOB and BLOB types.
 
 - Changed write-only attributes of Connection objects to work with `console.log()`. Note the attribute values will show as `null`.  Refer to the documentation.
 
-- Removed non-portable memory allocation for queries that return NULL.
-
 - Added check to make sure `maxRows` is greater than zero for non-ResultSet queries.
 
-- Fixed AIX-specific REF CURSOR related failures.
+- Improved installer messages for Oracle client header and library detection on Linux, OS X and Solaris.
 
 - Optimized CLOB memory allocation to account for different database-to-client character set expansions.
 
 - Fixed a crash while reading a LOB from a closed connection
 
-- Improved installer messages for Oracle client header and library detection on Linux, OS X and Solaris.
-
-- Fixed encoding issues with several files that caused compilation warnings in some Windows environments.
-
-- Added a `type` property to the Lob class to distinguish CLOB and BLOB types.
+- Fixed a crash when selecting multiple rows with LOB values.
 
 - Corrected the order of Stream 'end' and 'close' events when reading a LOB.
+
+- Fixed AIX-specific REF CURSOR related failures.
+
+- Fixed intermittent crash while setting `fetchAsString`, and incorrect output while reading the value.
+
+- Added a check to return an NJS error when an invalid DML RETURN statement does not give an ORA error.
+
+- Removed non-portable memory allocation for queries that return NULL.
+
+- Fixed encoding issues with several files that caused compilation warnings in some Windows environments.
 
 - Made installation halt sooner for Node.js versions currently known to be unusable.
 
