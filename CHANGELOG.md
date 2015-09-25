@@ -6,7 +6,7 @@
 
 - Fixed intermittent crash while setting `fetchAsString`, and incorrect output while reading the value.
 
-- Changed write-only attributes to allow console.log() on Connection objects. Note the attribute values will show as null; refer to the documentation.
+- Changed write-only attributes of Connection objects to work with `console.log()`. Note the attribute values will show as `null`.  Refer to the documentation.
 
 - Removed non-portable memory allocation for queries that return NULL.
 
