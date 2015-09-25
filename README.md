@@ -105,6 +105,8 @@ Node-oracledb is an open source project. See
 [CONTRIBUTING](https://github.com/oracle/node-oracledb/tree/master/CONTRIBUTING.md)
 for details.
 
+Oracle gratefully acknowledges the contributions to node-oracledb that have been made by the community.
+
 ## <a name="license"></a> 8. License
 
 Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved.
