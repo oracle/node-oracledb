@@ -46,7 +46,7 @@ describe('56. fetchAs.js', function() {
   }
 
   var connection = null;
-  before('get one connection', function(done) {
+  beforeEach('get one connection', function(done) {
     oracledb.getConnection(credential, function(err, conn) {
       should.not.exist(err);
       connection = conn;
@@ -54,7 +54,7 @@ describe('56. fetchAs.js', function() {
     });
   })
     
-  after('release connection, reset fetchAsString property', function(done) {
+  afterEach('release connection, reset fetchAsString property', function(done) {
     oracledb.fetchAsString = [];
     connection.release( function(err) {
       should.not.exist(err);
@@ -62,7 +62,21 @@ describe('56. fetchAs.js', function() {
     });
   })
 
-  it('56.1 Fetch DATE column values as STRING - by-Column name', function(done) {
+  it('56.1 property value check', function() {
+
+    (oracledb.fetchAsString).should.eql([]);
+
+    oracledb.fetchAsString=[oracledb.DATE];
+    (oracledb.fetchAsString).should.eql( [2003] );
+
+    oracledb.fetchAsString = [ oracledb.NUMBER ];
+    (oracledb.fetchAsString).should.eql( [2002] );
+
+    oracledb.fetchAsString = [ oracledb.DATE, oracledb.NUMBER ];
+    (oracledb.fetchAsString).should.eql( [2003, 2002] );
+  })
+
+  it('56.2 Fetch DATE column values as STRING - by-Column name', function(done) {
     connection.execute(
       "SELECT TO_DATE('2005-01-06', 'YYYY-DD-MM') AS TS_DATE FROM DUAL",
       [],
@@ -79,7 +93,7 @@ describe('56. fetchAs.js', function() {
     );
   })
 
-  it('56.2 Fetch DATE, NUMBER column values STRING - by Column-name', function(done) {
+  it('56.3 Fetch DATE, NUMBER column values STRING - by Column-name', function(done) {
     connection.execute(
       "SELECT 1234567 AS TS_NUM, TO_TIMESTAMP('1999-12-01 11:10:01.00123', 'YYYY-MM-DD HH:MI:SS.FF') AS TS_DATE FROM DUAL",
       [],
@@ -102,7 +116,7 @@ describe('56. fetchAs.js', function() {
     );
   })
 
-  it('56.3 Fetch DATE, NUMBER as STRING by-time configuration and by-name', function(done) {
+  it('56.4 Fetch DATE, NUMBER as STRING by-time configuration and by-name', function(done) {
     oracledb.fetchAsString = [ oracledb.DATE, oracledb.NUMBER ];
 
     connection.execute(
@@ -127,7 +141,7 @@ describe('56. fetchAs.js', function() {
     );
   })
 
-  it('56.4 Fetch DATE, NUMBER column as STRING by-type and override at execute time', function(done) {
+  it('56.5 Fetch DATE, NUMBER column as STRING by-type and override at execute time', function(done) {
     oracledb.fetchAsString = [ oracledb.DATE, oracledb.NUMBER ];
     
     connection.execute(
@@ -152,7 +166,7 @@ describe('56. fetchAs.js', function() {
     );
   })
   
-  it('56.5 Fetch ROWID column values STRING - non-ResultSet', function(done) {
+  it('56.6 Fetch ROWID column values STRING - non-ResultSet', function(done) {
     connection.execute(
       "SELECT ROWID from DUAL",
       [],
@@ -172,7 +186,7 @@ describe('56. fetchAs.js', function() {
     );
   })
 
-  it('56.6 Fetch ROWID column values STRING - ResultSet', function(done) {
+  it('56.7 Fetch ROWID column values STRING - ResultSet', function(done) {
     connection.execute(
       "SELECT ROWID from DUAL",
       [],
@@ -224,7 +238,7 @@ describe('56. fetchAs.js', function() {
     '.172491386803558312345678912345678912346'
   ];
 
-  it('56.7 large numbers with fetchInfo', function(done) {
+  it('56.8 large numbers with fetchInfo', function(done) {
     async.forEach(numStrs, function(element, callback) {
       connection.execute(
         "SELECT TO_NUMBER( " + element + " ) AS TS_NUM FROM DUAL",
@@ -249,7 +263,7 @@ describe('56. fetchAs.js', function() {
     });
   })
 
-  it('56.8 large numbers with setting fetchAsString property', function(done) {
+  it('56.9 large numbers with setting fetchAsString property', function(done) {
     oracledb.fetchAsString = [ oracledb.NUMBER ];
 
     async.forEach(numStrs, function(element, callback) {
