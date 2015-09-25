@@ -1,4 +1,4 @@
-# Installing node-oracledb
+ Installing node-oracledb
 
 *Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved.*
 
@@ -131,8 +131,8 @@ Node-oracledb will automatically be configured to use the highest version
 Instant Client RPMs installed.  To use a different version, follow the
 instructions to
 [install on Linux with Instant Client ZIP files](#instzip) instead,
-setting `OCI_LIB_DIR` and `OCI_INC_DIR` to the appropriate
-directories.
+setting the install-time variables `OCI_LIB_DIR` and `OCI_INC_DIR` to
+the appropriate directories.
 
 If you have other Oracle software installed on the same machine, and
 the runtime linker is configured to find this other software via
@@ -224,6 +224,8 @@ export OCI_LIB_DIR=/opt/oracle/instantclient_12_1
 export OCI_INC_DIR=/opt/oracle/instantclient_12_1/sdk/include
 ```
 
+These variables are only needed during installation.
+
 If Instant Client is in `/opt/oracle/instantclient` and you have no
 other Oracle software installed, then these variables are not
 required.  See
@@ -309,6 +311,8 @@ to be used, you must explicitly set two environment variables:
 export OCI_LIB_DIR=$ORACLE_HOME/lib
 export OCI_INC_DIR=$ORACLE_HOME/rdbms/public
 ```
+
+These variables are only needed during installation.
 
 If you are behind a firewall, you may need to set your proxy, for
 example:
@@ -412,8 +416,10 @@ export OCI_LIB_DIR=/whereever/instantclient
 export OCI_INC_DIR=/whereever/instantclient/sdk/include
 ```
 
+These variables are only needed during installation.
+
 If Instant Client is in `/opt/oracle/instantclient`, then these
-variables are not needed.
+variables are not needed at all.
 
 If you are behind a firewall, you may need to set your proxy, for
 example:
@@ -516,9 +522,11 @@ restart the command shell.
 Tell the installer where to locate the Instant Client:
 
 ```
-set OCI_LIB_DIR=C:\oracle\instantclient_12_1\sdk\lib\msvc
-set OCI_INC_DIR=C:\oracle\instantclient_12_1\sdk\include
+set OCI_LIB_DIR=C:\wherever\instantclient_12_1\sdk\lib\msvc
+set OCI_INC_DIR=C:\wherever\instantclient_12_1\sdk\include
 ```
+
+These variables are only needed during installation.
 
 If Instant Client is in `C:\oracle\instantclient` (this should
 contain, amongst others, the file `C:\oracle\instantclient\oci.dll`
@@ -607,6 +615,7 @@ If you want to use Instant Client RPMs without using rpath, then set
 export OCI_LIB_DIR=/usr/lib/oracle/12.1/client64/lib
 export OCI_INC_DIR=/usr/include/oracle/12.1/client64
 npm install oracledb
+unset OCI_LIB_DIR OCI_INC_DIR
 export LD_LIBRARY_PATH=/usr/lib/oracle/12.1/client64/lib:$LD_LIBRARY_PATH
 node example.js
 ```
@@ -628,5 +637,6 @@ to any value.  For example:
 export OCI_LIB_DIR=/opt/oracle/instantclient
 export OCI_INC_DIR=/opt/oracle/instantclient/sdk/include
 FORCE_RPATH=1 npm install oracledb
+unset OCI_LIB_DIR OCI_INC_DIR
 node example.js
 ```
