@@ -1,9 +1,8 @@
-# node-oracledb version 1.0
+# node-oracledb version 1.1
 
 ## <a name="about"></a> 1. About node-oracledb
 
-The Oracle Database Node.js driver powers high performance
-Node.js applications.
+The node-oracledb add-on for Node.js powers high performance Oracle Database applications.
 
 Node-oracledb connects Node.js 0.10, Node.js 0.12, and io.js to
 Oracle Database.
@@ -29,7 +28,7 @@ The node-oracledb home page is on the
 - [Row Prefetching](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#rowprefetching)
 - [Statement Caching](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#stmtcache)
 - [Client Result Caching](http://docs.oracle.com/database/121/ADFNS/adfns_perf_scale.htm#ADFNS464)
-- [End-to-end tracing](http://docs.oracle.com/database/121/TGSQL/tgsql_trace.htm#CHDBDGIJ)
+- [End-to-end Tracing, Mid-tier Authentication, and Auditing](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#endtoend)
 - High Availability Features
   - [Fast Application Notification (FAN)](http://docs.oracle.com/database/121/ADFNS/adfns_avail.htm#ADFNS538)
   - [Runtime Load Balancing (RLB)](http://docs.oracle.com/database/121/ADFNS/adfns_perf_scale.htm#ADFNS515)
@@ -55,8 +54,10 @@ oracledb.getConnection(
     if (err) { console.error(err.message); return; }
 
     connection.execute(
-      "SELECT department_id, department_name FROM departments WHERE department_id = :did",
-      [180],  // bind value for :did
+      "SELECT department_id, department_name " +
+        "FROM departments " +
+        "WHERE manager_id < :id",
+      [110],  // bind value for :id
       function(err, result)
       {
         if (err) { console.error(err.message); return; }
@@ -68,7 +69,7 @@ oracledb.getConnection(
 With Oracle's sample HR schema, the output is:
 
 ```
-[ [ 180, 'Construction' ] ]
+[ [ 60, 'IT' ], [ 90, 'Executive' ], [ 100, 'Finance' ] ]
 ```
 
 ## <a name="examples"></a> 2. Examples
@@ -86,7 +87,7 @@ See [INSTALL](https://github.com/oracle/node-oracledb/tree/master/INSTALL.md) fo
 
 ## <a name="doc"></a> 4. Documentation
 
-See [Documentation for the Oracle Database Node.js Driver](https://github.com/oracle/node-oracledb/tree/master/doc/api.md).
+See [Documentation for the Oracle Database Node.js Add-on](https://github.com/oracle/node-oracledb/tree/master/doc/api.md).
 
 ## <a name="changes"></a> 5. Changes
 

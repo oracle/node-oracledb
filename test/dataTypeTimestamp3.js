@@ -34,6 +34,7 @@
  *     51 -     are for other tests 
  * 
  *****************************************************************************/
+"use strict";
  
 var oracledb = require('oracledb');
 var should = require('should');
@@ -128,11 +129,7 @@ describe('35. dataTypeTimestamp3.js', function() {
         function(err, result) {
           should.exist(err);
           err.message.should.startWith('NJS-010:'); // unsupported data type in select list
-          /* 
-          console.log(result);
-          for(var j = 0; j < timestamps.length; j++) 
-            result.rows[j].CONTENT.toUTCString().should.eql(timestamps[result.rows[j].NUM].toUTCString());
-          */
+    
           done();         
         }
       );

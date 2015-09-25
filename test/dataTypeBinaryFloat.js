@@ -35,7 +35,8 @@
  *     51 -     are for other tests  
  * 
  *****************************************************************************/
-  
+"use strict"
+
 var oracledb = require('oracledb');
 var should = require('should');
 var async = require('async');
@@ -50,100 +51,59 @@ describe('30. dataTypeBinaryFloat.js', function() {
     var credential = dbConfig;
   }
   
-  var connection = false;
-  
-  var tableName = "oracledb_datatype_binary_float";
-  var sqlCreate = 
-        "BEGIN " +
-           "   DECLARE " +
-           "       e_table_exists EXCEPTION; " +
-           "       PRAGMA EXCEPTION_INIT(e_table_exists, -00942); " +
-           "   BEGIN " +
-           "       EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " '); " +
-           "   EXCEPTION " +
-           "       WHEN e_table_exists " +
-           "       THEN NULL; " +
-           "   END; " +
-           "   EXECUTE IMMEDIATE (' " +
-           "       CREATE TABLE " + tableName +" ( " +
-           "           num NUMBER, " + 
-           "           content BINARY_FLOAT "  +
-           "       )" +
-           "   '); " +
-           "END; ";
-  var sqlDrop = "DROP table " + tableName;
-  before( function(done){
-    oracledb.getConnection(credential, function(err, conn){
-      if(err) { console.error(err.message); return; }
-      connection = conn;
-      connection.execute(
-        sqlCreate,
-        function(err) {
-          if(err) { console.error(err.message); return; }
-          done();
-        }
-      );
-    });
-  })
-  
-  after( function(done){
-    connection.execute(
-      sqlDrop,
-      function(err) {
-        if(err) { console.error(err.message); return; }
-        connection.release( function(err) {
-          if(err) { console.error(err.message); return; }
-          done();
-        });
-      }
-    );
-  })
-  
-  it.skip('supports BINARY_FLOAT data type', function(done) {
-    connection.should.be.ok;
-    
-    var numbers = [
-        1,
-        0,
-        8,
-        -8,
-        123456789,
-        -123456789,
-        9876.54321,
-        -9876.54321,
-        0.01234,
-        -0.01234,
-        0.00000123,
-        -0.00000123
-    ];
-    
-    var sqlInsert = "INSERT INTO " + tableName + " VALUES(:no, :bindValue)";
-    
-    async.forEach(numbers, function(num, callback) {
-      connection.execute(
-        sqlInsert,
-        { no: numbers.indexOf(num), bindValue: num },
-        function(err) {
-          should.not.exist(err);
-          callback();
-        }
-      );
-    }, function(err) {
+  var connection = null;
+  var tableName = "oracledb_binary_float";
+  var numbers = assist.data.numbers;
+
+  before('get one connection', function(done) {
+    oracledb.getConnection(credential, function(err, conn) {
       should.not.exist(err);
+      connection = conn;
+      done();
+    });
+  })
+  
+  after('release connection', function(done) {
+    connection.release( function(err) {
+      should.not.exist(err);
+      done();
+    });
+  })
+
+  describe.skip('30.1 testing BINARY_FLOAT data', function() {
+
+    before('create table, insert data',function(done) {
+      assist.setUp(connection, tableName, numbers, done);
+    })
+
+    after(function(done) {
       connection.execute(
-        "SELECT * FROM " + tableName,
-        [],
-        { outFormat: oracledb.OBJECT },
-        function(err, result) {
+        "DROP table " + tableName,
+        function(err) {
           should.not.exist(err);
-          // console.log(result);
-          for(var j = 0; j < numbers.length; j++) 
-            result.rows[j].CONTENT.should.be.exactly(numbers[result.rows[j].NUM]);
-          
-		  done();
+          done();
         }
       );
-    });
+    })
+
+    it('30.1.1 works well with SELECT query', function(done) {
+      assist.dataTypeSupport(connection, tableName, numbers, done);
+    })
+
+    it('30.1.2 works well with result set', function(done) {
+      assist.verifyResultSet(connection, tableName, numbers, done);
+    })
+
+    it('30.1.3 works well with REF Cursor', function(done) {
+      assist.verifyRefCursor(connection, tableName, numbers, done);
+    })
+
+  })
+
+  describe('30.2 stores null value correctly', function() {
+    it('30.2.1 testing Null, Empty string and Undefined', function(done) {
+      assist.verifyNullValues(connection, tableName, done);
+    })
   })
   
 })

@@ -31,6 +31,7 @@
  *     51 -     are for other tests 
  * 
  *****************************************************************************/
+"use strict";
 
 var oracledb = require('oracledb');
 var should = require('should');
@@ -46,63 +47,102 @@ describe('33. dataTypeTimestamp1.js', function() {
     var credential = dbConfig;
   }
   
-  var connection = false;
-  var tableName = "oracledb_datatype_timestamp";
-  var sqlCreate = 
-        "BEGIN " +
-           "   DECLARE " +
-           "       e_table_exists EXCEPTION; " +
-           "       PRAGMA EXCEPTION_INIT(e_table_exists, -00942); " +
-           "   BEGIN " +
-           "       EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " '); " +
-           "   EXCEPTION " +
-           "       WHEN e_table_exists " +
-           "       THEN NULL; " +
-           "   END; " +
-           "   EXECUTE IMMEDIATE (' " +
-           "       CREATE TABLE " + tableName +" ( " +
-           "           num NUMBER, " + 
-           "           content TIMESTAMP "  +
-           "       )" +
-           "   '); " +
-           "END; ";
-  var timestamps = [
-        new Date(-100000000),
-        new Date(0),
-        new Date(10000000000),
-        new Date(100000000000)
-      ];
-      
-  before(function(done) {
+  var connection = null;
+  var tableName = "oracledb_timestamp1";
+  
+  before('get one connection', function(done) {
     oracledb.getConnection(credential, function(err, conn) {
-      if(err) { console.error(err.message); return; }
+      should.not.exist(err);
       connection = conn;
-      assist.setup(connection, tableName, sqlCreate, timestamps, done);
+      done();
     });
   })
-  
-  after( function(done){
-    connection.execute(
-      "DROP table " + tableName,
-      function(err) {
-        if(err) { console.error(err.message); return; }
-        connection.release( function(err) {
-          if(err) { console.error(err.message); return; }
+
+  after('release connection', function(done) {
+    connection.release( function(err) {
+      should.not.exist(err);
+      done();
+    });
+  })
+
+  describe('33.1 Testing JavaScript Date with database TIMESTAMP', function() {
+    var dates = assist.data.dates;
+
+    before('create table, insert data',function(done) {
+      assist.setUp(connection, tableName, dates, done);
+    })
+
+    after(function(done) {
+      connection.execute(
+        "DROP table " + tableName,
+        function(err) {
+          should.not.exist(err);
           done();
-        });
-      }
-    );
+        }
+      );
+    })
+
+    it('33.1.1 works well with SELECT query', function(done) {
+      assist.dataTypeSupport(connection, tableName, dates, done);
+    }) 
+
+    it('33.1.2 works well with result set', function(done) {
+      assist.verifyResultSet(connection, tableName, dates, done);
+    }) 
+    
+    it('33.1.3 works well with REF Cursor', function(done) {
+      assist.verifyRefCursor(connection, tableName, dates, done);
+    }) 
+    
+  }) // end of 33.1 suite
+
+  describe('33.2 stores null value correctly', function() {
+    it('33.2.1 testing Null, Empty string and Undefined', function(done) {
+      assist.verifyNullValues(connection, tableName, done);
+    })
   })
-  
-  it('33.1 supports TIMESTAMP data type', function(done) {
-    assist.dataTypeSupport(connection, tableName, timestamps, done);
-  })
-  
-  it('33.2 resultSet stores TIMESTAMP data correctly', function(done) {
-    assist.resultSetSupport(connection, tableName, timestamps, done);
-  })
-  
-  it('33.3 stores null value correctly', function(done) {
-    assist.nullValueSupport(connection, tableName, done);
-  }) 
+
+  describe('33.3 testing TIMESTAMP without TIME ZONE', function() {
+    var timestamps = assist.TIMESTAMP_STRINGS;
+    
+    before(function(done) {
+      assist.setUp4sql(connection, tableName, timestamps, done);
+    })
+
+    after(function(done) {
+      connection.execute(
+        "DROP table " + tableName,
+        function(err) {
+          should.not.exist(err);
+          done();
+        }
+      );
+    }) // after
+
+    it('32.3.1 SELECT query - original data', function(done) {
+      assist.selectOriginalData(connection, tableName, timestamps, done);
+    })
+
+    it('33.3.2 SELECT query - formatted data for comparison', function(done) {
+      async.forEach(timestamps, function(timestamp, cb) {
+        var bv = timestamps.indexOf(timestamp);
+        connection.execute(
+          "SELECT num, TO_CHAR(content, 'DD-MM-YYYY HH24:MI:SS.FF') AS TS_DATA FROM " + tableName + " WHERE num = :no",
+          { no: bv },
+          { outFormat: oracledb.OBJECT },
+          function(err, result) {
+            should.not.exist(err);
+            // console.log(result.rows);
+            (result.rows[0].TS_DATA).should.equal(assist.content.timestamps1[bv]);
+            cb();
+          } 
+        );
+      }, function(err) {
+          should.not.exist(err);
+          done();
+      });
+    })
+
+  }) // end of 33.3 suite
+
 })

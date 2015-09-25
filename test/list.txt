@@ -203,92 +203,165 @@
 21. datatypeAssist.js
         
 22. dataTypeChar.js
-    22.1 supports CHAR data
-    22.2 resultSet stores CHAR data correctly
-    22.3 stores null value correctly
+    22.1 testing CHAR data in various lengths
+        22.1.1 works well with SELECT query
+        22.1.2 works well with result set
+        22.1.3 works well with REF Cursor
+    22.2 stores null value correctly
+        22.2.1 testing Null, Empty string and Undefined
 
 23. dataTypeNchar.js
-    23.1 supports NCHAR data type
-    23.2 resultSet supports NCHAR data type
-    23.3 stores null value correctly
+    23.1 testing NCHAR data in various lengths
+        23.1.1 SELECT query
+        23.1.2 resultSet stores NCHAR data correctly
+        23.1.3 works well with REF Cursor
+    23.2 stores null value correctly
+        23.2.1 testing Null, Empty string and Undefined 
 
 24. dataTypeVarchar2.js
     24.1 supports VARCHAR2 data in various lengths
     24.2 resultSet stores VARCHAR2 data correctly
     24.3 stores null value correctly
-    
+
+24. dataTypeVarchar2.js
+    24.1 testing VARCHAR2 data in various lengths
+        24.1.1 SELECT query
+        24.1.2 resultSet stores VARCHAR2 data correctly
+        24.1.3 works well with REF Cursor
+    24.2 stores null value correctly
+        24.2.1 testing Null, Empty string and Undefined
+
 25. dataTypeNvarchar2.js
-    25.1 supports NVARCHAR2 data in various lengths
-    25.2 resultSet stores NVARCHAR2 data correctly
-    25.3 stores null value correctly
-    
+    25.1 testing NVARCHAR2 data in various lengths
+        25.1.1 SELECT query
+        25.1.2 resultSet stores NVARCHAR2 data correctly
+        25.1.3 works well with REF Cursor
+    25.2 stores null value correctly
+        25.2.1 testing Null, Empty string and Undefined    
+
 26. dataTypeNumber.js
-    26.1 supports NUMBER data type
-    26.2 resultSet stores NUMBER data correctly
-    26.3 stores null value correctly
+    26.1 testing NUMBER data
+        26.1.1 SELECT query
+        26.1.2 resultSet stores NUMBER data correctly
+        26.1.3 works well with REF Cursor
+    26.2 stores null value correctly
+        26.2.1 testing Null, Empty string and Undefined 
 
 27. dataTypeNumber2.js
-    27.1 supports NUMBER(p, s) data type
-    27.2 resultSet stores NUMBER(p, s) data correctly
-    27.3 stores null value correctly
+    27.1 testing NUMBER(p, s) data
+        27.1.1 SELECT query
+        27.1.2 resultSet stores NUMBER(p, s) data correctly
+    27.2 stores null value correctly
+        27.2.1 testing Null, Empty string and Undefined
 
 28. dataTypeFloat.js
-    28.1 supports FLOAT data type
-    28.2 resultSet stores FLOAT data correctly
-    28.3 stores null value correctly
+    28.1 testing FLOAT data type
+        28.1.1 works well with SELECT query
+        28.1.2 works well with result set
+        28.1.3 works well with REF Cursor
+    28.2 stores null value correctly
+        28.2.1 testing Null, Empty string and Undefined
 
 29. dataTypeFloat2.js
-    29.1 supports FLOAT(p) data type
-    29.2 resultSet stores FLOAT(p) data correctly
-    29.3 stores null value correctly
+    29.1 testing FLOAT(p) data type
+        29.1.1 works well with SELECT query
+        29.1.2 works well with result set
+        29.1.3 works well with REF Cursor
+    29.2 stores null value correctly
+        29.2.1 testing Null, Empty string and Undefined
   
 30. dataTypeBinaryFloat.js
-    - supports BINARY_FLOAT data type   
+    30.1 testing BINARY_FLOAT data
+      - 30.1.1 works well with SELECT query
+      - 30.1.2 works well with result set
+      - 30.1.3 works well with REF Cursor
+    30.2 stores null value correctly
+        30.2.1 testing Null, Empty string and Undefined   
   
 31. dataTypeBinaryDouble.js
-    - supports BINARY_DOUBLE data type
+    31.1 testing BINARY_DOUBLE data
+      - 31.1.1 works well with SELECT query
+      - 31.1.2 works well with result set
+      - 31.1.3 works well with REF Cursor
+    31.2 stores null value correctly
+        31.2.1 testing Null, Empty string and Undefined
 
 32. dataTypeDate.js
-    32.1 supports DATE data type
-    32.2 resultSet stores DATE data correctly
-    32.3 stores null value correctly
+    32.1 Testing JavaScript Date data
+        32.1.1 works well with SELECT query
+        32.1.2 works well with result set
+        32.1.3 works well with REF Cursor 
+    32.2 stores null value correctly
+        32.2.1 testing Null, Empty string and Undefined
+    32.3 insert SQL Date data
+        32.3.1 SELECT query - original data
+        32.3.2 SELECT query - formatted data for comparison
     
 33. dataTypeTimestamp1.js
-    33.1 supports TIMESTAMP data type
-    33.2 resultSet stores TIMESTAMP data correctly
-    33.3 stores null value correctly
-  
+    33.1 Testing JavaScript Date with database TIMESTAMP
+        33.1.1 works well with SELECT query
+        33.1.2 works well with result set
+        33.1.3 works well with REF Cursor
+    33.2 stores null value correctly
+        33.2.1 testing Null, Empty string and Undefined
+    33.3 testing TIMESTAMP without TIME ZONE
+        32.3.1 SELECT query - original data
+        33.3.2 SELECT query - formatted data for comparison
+
 34. dataTypeTimestamp2.js
-    34.1 supports TIMESTAMP(p) data type
-    34.2 resultSet stores TIMESTAMP data correctly
-    34.3 stores null value correctly
+    34.1 Testing JavaScript Date with database TIMESTAMP(p)
+        34.1.1 works well with SELECT query
+        34.1.2 works well with result set
+        34.1.3 works well with REF Cursor 
+    34.2 sotres null value correctly
+        34.2.1 testing Null, Empty string and Undefined 
+    34.3 testing database TIMESTAMP(p)
+        34.3.1 SELECT query - original data
+        34.3.2 SELECT query - formatted data for comparison
 
 35. dataTypeTimestamp3.js
-    supports TIMESTAMP WITH TIME ZONE data type
+      supports TIMESTAMP WITH TIME ZONE data type
 
 36. dataTypeTimestamp4.js
-    supports TIMESTAMP WITH TIME ZONE data type
+      supports TIMESTAMP WITH TIME ZONE data type
 
 37. dataTypeTimestamp5.js
-    37.1 supports TIMESTAMP WITH LOCAL TIME ZONE data type
-    37.2 resultSet stores TIMESTAMP WITH LOCAL TIME ZONE data correctly
-    37.3 stores null value correctly
+    37.1 Testing JavaScript Date with database TIMESTAMP WITH LOCAL TIME ZONE
+        37.1.1 works well with SELECT query
+        37.1.2 works well with result set
+        37.1.3 works well with REF Cursor 
+    37.2 stores null value correctly
+        37.2.1 testing Null, Empty string and Undefined 
+    37.3 testing TIMESTAMP WITH LOCAL TIME ZONE
+        37.3.1 SELECT query - original data
+        37.3.2 SELECT query - formatted data for comparison
 
 38. dataTypeTimestamp6.js
-    38.1 supports TIMESTAMP(9) WITH LOCAL TIME ZONE data type
-    38.2 resultSet stores TIMESTAMP(9) WITH LOCAL TIME ZONE data correctly
-    38.3 stores null value correctly    
-    
+    38.1 Testing JavaScript Date with database TIMESTAMP(9) WITH LOCAL TIME ZON
+        38.1.1 works well with SELECT query
+        38.1.2 works well with result set
+        38.1.3 works well with REF Cursor 
+    38.2 stores null value correctly
+        38.2.1 testing Null, Empty string and Undefined 
+    38.3 testing TIMESTAMP WITH LOCAL TIME ZONE
+        38.3.1 SELECT query - original data
+        38.3.2 SELECT query - formatted data for comparison
+
 39. dataTypeRowid.js
-    39.1 supports ROWID data type
+    39.1 testing ROWID data type
+       39.1.1 is still unsupported data type        
 
 40. dataTypeClob.js
-    40.1 processes null value correctly    
-    40.2 stores CLOB value correctly
+    40.1 testing CLOB data type
+        40.1.1 stores CLOB value correctly 
+    40.2 stores null value correctly
+        40.2.1 testing Null, Empty string and Undefined
 
 41. dataTypeBlob
-    41.1 processes null value correctly
-    41.2 stores BLOB value correctly 
+    41.1 testing BLOB data type
+        41.1.1 stores BLOB value correctly 
+    41.2 stores null value correctly
+        41.2.1 testing Null, Empty string and Undefined
 
 51. accessTerminatedPoolAttributes.js
     can not access attributes of terminated pool
@@ -327,6 +400,12 @@
         55.9.1 
     55.10 calls getRows() once and then close RS before getting more rows
         55.10.1 
+    55.11 deals with unsupported database with result set
+        55.11.1 RAW data type
+        55.11.2 ROWID date type
+    55.12 bind a cursor BIND_INOUT
+      - 55.12.1 should work
+
 
 56. fetchAs.js
     56.1 FetchAs - DATE type as STRING

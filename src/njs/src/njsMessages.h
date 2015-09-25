@@ -58,6 +58,7 @@ typedef enum
   errInvalidLob,
   errBusyLob,
   errInsufficientMemory,
+  errResultsTooLarge,
 
   // New ones should be added here
 

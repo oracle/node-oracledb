@@ -1,6 +1,6 @@
 {
   "name": "oracledb",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Oracle Database driver by Oracle Corp.",
   "license": "Apache-2.0",
   "homepage": "http://www.oracle.com/technetwork/database/database-technologies/node_js/index.html",
@@ -17,6 +17,7 @@
     "plugin",
     "library",
     "driver",
+    "add-on",
     "extension",
     "binding",
     "interface",

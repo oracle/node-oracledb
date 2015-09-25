@@ -27,13 +27,13 @@ limitations under the License.
 
 ## <a name="overview"></a> 1. Overview
 
-The Oracle Database Node.js driver node-oracledb powers high performance Node.js applications.
+The [*node-oracledb*](https://github.com/oracle/node-oracledb) add-on for Node.js powers high performance Oracle Database applications.
 
 The steps below create a Node.js installation for testing.  Adjust the
 steps for your environment.
 
 This node-oracledb release has been tested with Node 0.10 and 0.12 on
-64-bit Oracle Linux and Windows.  The driver can also build in some
+64-bit Oracle Linux and Windows.  The add-on can also build in some
 Mac OS X, 32-bit Linux, 32-bit Windows, Solaris and AIX environments,
 but these architectures have not been fully tested.
 
@@ -97,9 +97,9 @@ Set PATH to include Node.js:
 export PATH=/opt/node-v0.12.7-linux-x64/bin:$PATH
 ```
 
-### 2.2 Install the free Oracle Instant Client RPMs
+### 2.2 Install the free Oracle Instant Client 'Basic' and 'SDK' RPMs
 
-Download the free 'Basic' and 'SDK' RPMs from [Oracle Technology Network](http://www.oracle.com/technetwork/topics/linuxx86-64soft-092277.html) and
+Download the free **Basic** and **SDK** RPMs from [Oracle Technology Network](http://www.oracle.com/technetwork/topics/linuxx86-64soft-092277.html) and
 [install them](http://www.oracle.com/technetwork/topics/linuxx86-64soft-092277.html#ic_x64_inst) as the root user:
 
 ```
@@ -111,7 +111,7 @@ If you have a [ULN](https://linux.oracle.com) subscription, you can
 alternatively use `yum` to install these packages from the
 *Oracle Software for Oracle Linux* channel for your version of Linux.
 
-### 2.3 Install the driver
+### 2.3 Install the add-on
 
 If you are behind a firewall, you may need to set your proxy, for
 example:
@@ -181,9 +181,9 @@ Set PATH to include Node.js:
 export PATH=/opt/node-v0.12.7-linux-x64/bin:$PATH
 ```
 
-### 3.2 Install the free Oracle Instant Client ZIPs
+### 3.2 Install the free Oracle Instant Client 'Basic' and 'SDK' ZIPs
 
-Download the free 'Basic' and 'SDK' ZIPs from
+Download the free **Basic** and **SDK** ZIPs from
 [Oracle Technology Network](http://www.oracle.com/technetwork/topics/linuxx86-64soft-092277.html)
 and
 [install them](http://www.oracle.com/technetwork/topics/linuxx86-64soft-092277.html#ic_x64_inst)
@@ -214,7 +214,7 @@ link path.  Do this on Linux by creating a file
 location `/opt/oracle/instantclient`, and then run `ldconfig` as
 the root user.
 
-### 3.3 Install the driver
+### 3.3 Install the add-on
 
 
 Tell the installer where to find Instant Client:
@@ -297,7 +297,7 @@ Set your PATH variable to include Node.js:
 export PATH=/opt/node-v0.12.7-linux-x64/bin:$PATH
 ```
 
-### 4.2 Install the driver
+### 4.2 Install the add-on
 
 The installer will automatically look for Oracle libraries and headers under
 `$ORACLE_HOME`, see
@@ -377,9 +377,9 @@ Set your PATH to include the *node* and *npm* binaries:
 export PATH=/usr/local/bin:$PATH
 ```
 
-### 5.3 Install the free Oracle Instant Client ZIPs
+### 5.3 Install the free Oracle Instant Client 'Basic' and 'SDK' ZIPs
 
-Download the free 'Basic' and 'SDK' ZIPs from
+Download the free **Basic** and **SDK** ZIPs from
 [Oracle Technology Network](http://www.oracle.com/technetwork/topics/intel-macsoft-096467.html)
 and
 [install them](http://www.oracle.com/technetwork/topics/intel-macsoft-096467.html#ic_osx_inst)
@@ -400,7 +400,10 @@ To run applications, you will need to set the link path:
 export DYLD_LIBRARY_PATH=/opt/oracle/instantclient:$DYLD_LIBRARY_PATH
 ```
 
-### 5.4 Install the driver
+To set the path permanently for future terminal shells, add the export
+command to `$HOME/.bash_profile` and re-login.
+
+### 5.4 Install the add-on
 
 Tell the installer where to find Instant Client:
 
@@ -485,7 +488,7 @@ add the Node and npm directories to the path is selected.
 
 Skip this step if you already have Oracle Database or the full Oracle client on your machine.
 
-Download the free 'Basic' and 'SDK' ZIP files from
+Download the free **Basic** and **SDK** ZIP files from
 [Oracle Technology Network](http://www.oracle.com/technetwork/topics/winx64soft-089540.html).
 
 Extract `instantclient_basic-windows.x64-12.1.0.2.0.zip` and
@@ -499,7 +502,7 @@ Environment Variables -> System variables.  If you have multiple
 versions of Oracle libraries installed, make sure to put the desired
 version first in the path.
 
-### 6.4 Install the driver
+### 6.4 Install the add-on
 
 Start Visual Studio and open a Developer Command Prompt within it.
 (If you instead decide to use a command shell outside Visual Studio, then

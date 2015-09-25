@@ -146,7 +146,7 @@ describe('6. dmlReturning.js', function(){
       );
     })
     
-    it('6.1.3 INSERT statement with small maxSize restriction', function(done) {
+    it.skip('6.1.3 INSERT statement with small maxSize restriction', function(done) {
       connection.should.be.ok;
       connection.execute(
         "INSERT INTO oracledb_dmlreturn VALUES (1003, 'Robyn Sands Delaware') RETURNING id, name INTO :rid, :rname",

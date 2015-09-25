@@ -88,7 +88,8 @@ StmtImpl::StmtImpl (EnvImpl *env, OCIEnv *envh, ConnImpl *conn,
 
   try : conn_(conn), errh_(NULL), svch_(svch),
         stmth_(NULL), numCols_ (0),meta_(NULL), stmtType_ (DpiStmtUnknown),
-        isReturning_(false), isReturningSet_(false), refCursor_(false)
+        isReturning_(false), isReturningSet_(false), refCursor_(false),
+        state_(DPI_STMT_STATE_UNDEFINED)
 {
   // create an OCIError object for this execution
   ociCallEnv (OCIHandleAlloc ((void *)envh, (dvoid **)&errh_,
@@ -155,7 +156,7 @@ DpiStmtType StmtImpl::stmtType () const
                          OCI_ATTR_STMT_TYPE, errh_), errh_);
   }
 
-  return stmtType_;
+  return (DpiStmtType)stmtType_;
 }
 
 
@@ -630,7 +631,7 @@ sb4 StmtImpl::outbindCallback ( dvoid *ctxp, OCIBind *bindp, ub4 iter,
                                 ub1 *piecep, dvoid **indpp, ub2 **rcodepp )
 {
   DpiCallbackCtx *cbCtx = (DpiCallbackCtx *)ctxp;
-  unsigned long rows = 0;
+  ub4 rows  = 0;
   int cbret = 0;
 
   if ( index == 0 )
@@ -654,7 +655,7 @@ sb4 StmtImpl::outbindCallback ( dvoid *ctxp, OCIBind *bindp, ub4 iter,
       ociCall ( rc, errh ) ;
     }
 
-    cbCtx->nrows = rows;
+    cbCtx->nrows = ( unsigned long ) rows;
     cbCtx->iter  = iter;
   }
 
@@ -714,6 +715,29 @@ bool StmtImpl::isReturning ()
 
 
   return isReturning_;
+}
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     To obtain the OCI statement handle state
+
+   PARAMETERS
+     -None-
+
+   RETURNS
+     One of the possible values DpiStmtState
+       (DpiStmtStateInitialized, DpiStmtStateExecute, DpiStmtEndOfFetch)
+*/
+unsigned long StmtImpl::getState ()
+{
+  if ( state_ == DPI_STMT_STATE_UNDEFINED )
+  {
+    ociCall (OCIAttrGet (stmth_, OCI_HTYPE_STMT, (ub4*)&state_, NULL,
+                         OCI_ATTR_STMT_STATE, errh_ ), errh_ );
+  }
+
+  return state_;
 }
 
 

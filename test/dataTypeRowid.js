@@ -34,10 +34,12 @@
  *     51 -     are for other tests 
  * 
  *****************************************************************************/
- 
+"use strict"
+
 var oracledb = require('oracledb');
 var should   = require('should');
 var async    = require('async');
+var assist = require('./dataTypeAssist.js');
 var dbConfig = require('./dbConfig.js');
 
 describe('39. dataTypeRowid.js', function() {
@@ -48,80 +50,71 @@ describe('39. dataTypeRowid.js', function() {
     var credential = dbConfig;
   }
   
-  var connection = false;
-  before(function(done) {
+  var connection = null;
+  var tableName = "oracledb_rowid";
+
+  before('get one connection', function(done) {
     oracledb.getConnection(credential, function(err, conn) {
-      if(err) { console.error(err.message); return; }
+      should.not.exist(err);
       connection = conn;
-      done();  
+      done();
     });
   })
   
-  after(function(done) {
-    connection.release(function(err) {
-      if(err) { console.error(err.message); return; }
-      done(); 
+  after('release connection', function(done) {
+    connection.release( function(err) {
+      should.not.exist(err);
+      done();
     });
   })
-  
-  it('39.1 supports ROWID data type', function(done) {
-    connection.should.be.ok;
-    var createTable = 
-      "BEGIN \
-          DECLARE \
-              e_table_exists EXCEPTION; \
-              PRAGMA EXCEPTION_INIT(e_table_exists, -00942); \
-          BEGIN \
-              EXECUTE IMMEDIATE ('DROP TABLE oracledb_row'); \
-          EXCEPTION \
-              WHEN e_table_exists \
-              THEN NULL; \
-          END; \
-          EXECUTE IMMEDIATE (' \
-              CREATE TABLE oracledb_row ( \
-                  ID NUMBER,  \
-                  RID ROWID \
-              ) \
-          '); \
-          EXECUTE IMMEDIATE (' \
-              INSERT INTO oracledb_row(ID) VALUES(1) \
-          '); \
-          EXECUTE IMMEDIATE (' \
-              UPDATE oracledb_row T SET RID = T.ROWID \
-          '); \
-      END; ";
-      
-    async.series([
-      function(callback) {
-        connection.execute(
-          createTable,
-          function(err) {
-            should.not.exist(err);
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        connection.execute(
-          "SELECT * FROM oracledb_row",
-          [],
-          { outFormat: oracledb.OBJECT },
-          function(err, result) {
-            should.exist(err);
-            err.message.should.startWith('NJS-010:'); // unsupported data type in select list
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        connection.execute(
-          "DROP TABLE oracledb_row",
-          function(err) {
-            should.not.exist(err);
-            callback();
-          }
-        );
-      }
-    ], done);
+
+  describe('39.1 testing ROWID data type', function() {
+    before(function(done) {
+      async.series([
+        function makeTable(callback) {
+          assist.createTable(connection, tableName, done);
+        },
+        function insertOneRow(callback) {
+          connection.execute(
+            "INSERT INTO " + tableName + "(num) VALUES(1)", 
+            function(err) {
+              should.not.exist(err);
+              callback();
+            }
+          );
+        },
+        function fillRowid(callback) {
+          connection.execute(
+            "UPDATE " + tableName + " T SET content = T.ROWID",
+            function(err) {
+              should.not.exist(err);
+              callback();
+            }
+          );
+        }
+      ], done);
+    })
+
+    after(function(done) {
+      connection.execute(
+        "DROP table " + tableName,
+        function(err) {
+          should.not.exist(err);
+          done();
+        }
+      );
+    })
+
+    it('39.1.1 is still unsupported data type', function(done) {
+      connection.execute(
+        "SELECT * FROM " + tableName,
+        function(err, result) {
+          should.exist(err);
+          err.message.should.startWith('NJS-010:'); // unsupported data type in select list
+          done();
+        }
+      );
+    })
   })
+
 }) 

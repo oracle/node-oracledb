@@ -28,11 +28,13 @@
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
  *     21 - 50  are reserved for data type supporting tests
- *     51 -     are for other tests  
+ *     51 onwards are for other tests  
  * 
  *****************************************************************************/
- 
+"use strict"
+
 var oracledb = require('oracledb');
+var should = require('should');
 var assist = require('./dataTypeAssist.js');
 var dbConfig = require('./dbConfig.js');
 
@@ -44,62 +46,62 @@ describe('23. dataTypeNchar.js', function(){
     var credential = dbConfig;
   }
   
-  var connection = false;
-  var tableName = "oracledb_datatype_nchar";
-  var sqlCreate = 
-        "BEGIN " +
-           "   DECLARE " +
-           "       e_table_exists EXCEPTION; " +
-           "       PRAGMA EXCEPTION_INIT(e_table_exists, -00942); " +
-           "   BEGIN " +
-           "       EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " '); " +
-           "   EXCEPTION " +
-           "       WHEN e_table_exists " +
-           "       THEN NULL; " +
-           "   END; " +
-           "   EXECUTE IMMEDIATE (' " +
-           "       CREATE TABLE " + tableName +" ( " +
-           "           num NUMBER, " + 
-           "           content NCHAR(1000) "  +
-           "       )" +
-           "   '); " +
-           "END; ";
+  var connection = null;
+  var tableName = "oracledb_nchar";
 
   var strLen = [10, 100, 500, 1000]; 
   var strs = [];
   for(var i = 0; i < strLen.length; i++)
     strs[i] = assist.createCharString(strLen[i]);
-      
-  before(function(done) {
+  
+  before('get one connection', function(done) {
     oracledb.getConnection(credential, function(err, conn) {
-      if(err) { console.error(err.message); return; }
+      should.not.exist(err);
       connection = conn;
-      assist.setup(connection, tableName, sqlCreate, strs, done);
+      done();
     });
   })
   
-  after(function(done) {
-    connection.execute(
-      "DROP table " + tableName,
-      function(err) {
-        if(err) { console.error(err.message); return; }
-        connection.release( function(err) {
-          if(err) { console.error(err.message); return; }
+  after('release connection', function(done) {
+    connection.release( function(err) {
+      should.not.exist(err);
+      done();
+    });
+  })    
+
+  describe('23.1 testing NCHAR data in various lengths', function() {
+    
+    before('create table, insert data',function(done) {
+      assist.setUp(connection, tableName, strs, done);
+    })
+
+    after(function(done) {
+      connection.execute(
+        "DROP table " + tableName,
+        function(err) {
+          should.not.exist(err);
           done();
-        });
-      }
-    );
+        }
+      );
+    })
+
+    it('23.1.1 SELECT query', function(done) {
+      assist.dataTypeSupport(connection, tableName, strs, done);
+    })
+
+    it('23.1.2 resultSet stores NCHAR data correctly', function(done) {
+      assist.verifyResultSet(connection, tableName, strs, done);
+    })
+
+    it('23.1.3 works well with REF Cursor', function(done) {
+      assist.verifyRefCursor(connection, tableName, strs, done);
+    })
+  })
+
+  describe('23.2 stores null value correctly', function() {
+    it('23.2.1 testing Null, Empty string and Undefined', function(done) {
+      assist.verifyNullValues(connection, tableName, done);
+    })
   })
   
-  it('23.1 supports NCHAR data type', function(done) {
-    assist.dataTypeSupport(connection, tableName, strs, done);
-  })
-  
-  it('23.2 resultSet supports NCHAR data type', function(done) {
-    assist.resultSetSupport(connection, tableName, strs, done);
-  })
-  
-  it('23.3 stores null value correctly', function(done) {
-    assist.nullValueSupport(connection, tableName, done);
-  }) 
 })

@@ -687,6 +687,7 @@ void Oracledb::Async_GetConnection (uv_work_t *req)
   }
   catch (dpi::Exception& e)
   {
+    NJS_SET_CONN_ERR_STATUS ( e.errnum(), NULL );
     connBaton->error = std::string(e.what());
   }
   exitAsync_GetConnection:
@@ -836,6 +837,7 @@ void Oracledb::Async_CreatePool (uv_work_t *req)
   }
   catch (dpi::Exception &e)
   {
+    NJS_SET_CONN_ERR_STATUS ( e.errnum(), NULL );
     poolBaton->error = std::string (e.what() );
   }
   exitAsyncCreatePool:

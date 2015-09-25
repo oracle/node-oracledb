@@ -99,6 +99,17 @@ typedef enum
   DpiIntervalArray              /* external only */
 } DpiDataType;
 
+
+/* OCI Stmt Handle state
+ *  For REFCURSORS state should be DPI_STMT_STATE_EXECUTED
+ */
+#define DPI_STMT_STATE_UNDEFINED   (0)           // Undefined
+#define DPI_STMT_STATE_INITIALIZED (1)           // Initialized
+#define DPI_STMT_STATE_EXECUTED    (2)           // Executed
+#define DPI_STMT_STATE_ENDOFFETCH  (3)           // End of Fetch
+
+
+
 /*
  * For 11g/12c Compatability BIND/DEFINE calls expect ub8 in 12c & ub4 in 11g
  * Using this type makes is compile-time selction of 11g or 12c.
@@ -187,6 +198,7 @@ public:
 
   virtual OCIError *getError () = 0;
 
+  virtual unsigned long getState () = 0;
 
   virtual ~Stmt(){};
 

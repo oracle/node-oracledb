@@ -106,7 +106,6 @@ public:
 
    void setResultSet ( dpi::Stmt *dpistmt, eBaton *executebaton );
 
-
    // Define ResultSet Constructor
    static Nan::Persistent<FunctionTemplate> resultSetTemplate_s ;
 
@@ -134,22 +133,22 @@ private:
 
   static void clearFetchBuffer( Define* defineBuffers,
                                 unsigned int numCols );
+  
 
-
-   dpi::Stmt            *dpistmt_;
-   dpi::Env             *dpienv_;
-   Connection           *njsconn_;
-   State                state_;
-   bool                 rsEmpty_;
-   Define               *defineBuffers_;
-   unsigned int         numCols_;
-   unsigned int         fetchRowCount_;
-   unsigned int         outFormat_;
-   const dpi::MetaData  *meta_;
-   DataType             *fetchAsStringTypes_;
-   unsigned int         fetchAsStringTypesCount_;
-   FetchInfo            *fetchInfo_;
-   unsigned int         fetchInfoCount_;
+  dpi::Stmt            *dpistmt_;
+  dpi::Env             *dpienv_;
+  Connection           *njsconn_;
+  State                state_;
+  bool                 rsEmpty_;
+  Define               *defineBuffers_;
+  unsigned int         numCols_;
+  unsigned int         fetchRowCount_;
+  unsigned int         outFormat_;
+  const dpi::MetaData  *meta_;
+  DataType             *fetchAsStringTypes_;
+  unsigned int         fetchAsStringTypesCount_;
+  FetchInfo            *fetchInfo_;
+  unsigned int         fetchInfoCount_;
 };
 
 

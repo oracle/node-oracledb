@@ -317,7 +317,7 @@ typedef enum
   {                                                                           \
     msg = NJSMessages::getErrorMsg ( errInvalidPropertyValue,                 \
                                      prop );                                  \
-    NJS_SET_EXCEPTION( msg.c_str(), msg.length() );		              \
+    NJS_SET_EXCEPTION( msg.c_str(), msg.length() );                           \
   }                                                                           \
 }
 
@@ -327,7 +327,7 @@ typedef enum
  * If it not a v8 Number, throw exception.
  * prop is the name of the property
  */
-#define NJS_SET_PROP_DOUBLE( val, v8value, prop )                               \
+#define NJS_SET_PROP_DOUBLE( val, v8value, prop )                             \
 {                                                                             \
   string msg;                                                                 \
   if( v8value->IsNUmber() )                                                   \
@@ -338,12 +338,21 @@ typedef enum
   {                                                                           \
     msg = NJSMessages::getErrorMsg ( errInvalidPropertyValue,                 \
                                      prop );                                  \
-    NJS_SET_EXCEPTION( msg.c_str(), msg.length() );		              \
+    NJS_SET_EXCEPTION( msg.c_str(), msg.length() );                           \
   }                                                                           \
 }
 
-#define NJS_MIN (x,y) ((x) < (y) ? (x) : (y))
-#define NJS_MAX (x,y) ((x) > (y) ? (x) : (y))
+/*
+ * Check if error code indicates the connection is unusable.
+ * If the method does not use a connection, pass NULL as connection.
+ */
+#define NJS_SET_CONN_ERR_STATUS( errNum, conn )                               \
+{                                                                             \
+  if ( conn != NULL )                                                         \
+  {                                                                           \
+    ( ( dpi::Conn * ) conn ) -> setErrState ( errNum );                       \
+  }                                                                           \
+}
 
 #endif                     // ifdef__NJSUTILS_H__
 

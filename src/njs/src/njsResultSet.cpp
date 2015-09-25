@@ -73,9 +73,23 @@ void ResultSet::setResultSet ( dpi::Stmt *stmt, eBaton *executeBaton )
   this->dpistmt_       = stmt;
   this->dpienv_        = executeBaton->dpienv;
   this->njsconn_       = executeBaton->njsconn;
-  this->meta_          = stmt->getMetaData();
-  this->numCols_       = this->dpistmt_->numCols();
-  this->state_         = INACTIVE;
+  if ( stmt )
+  {
+    this->meta_        = stmt->getMetaData();
+    this->numCols_     = this->dpistmt_->numCols();
+    this->state_       = INACTIVE;
+  }
+  else
+  {
+    /* 
+     * This could happen in REFCURSOR case, when the stored procedure
+     * did not return a valid handle
+     */
+    this->numCols_     = 0;
+    this->meta_        = NULL;
+    this->state_       = INVALID;
+  }
+
   this->outFormat_     = executeBaton->outFormat;
   this->fetchRowCount_ = 0;
   this->rsEmpty_       = false;
@@ -425,6 +439,7 @@ void ResultSet::Async_GetRows(uv_work_t *req)
   }
   catch (dpi::Exception &e)
   {
+    NJS_SET_CONN_ERR_STATUS ( e.errnum(), njsRS->njsconn_->getDpiConn() );
     getRowsBaton->error = std::string (e.what());
   }
   exitAsyncGetRows:
@@ -585,6 +600,8 @@ void ResultSet::Async_Close(uv_work_t *req)
   }
   catch(dpi::Exception& e)
   {
+    NJS_SET_CONN_ERR_STATUS ( e.errnum(),
+                          closeBaton->njsRS->njsconn_->getDpiConn() );
     closeBaton->error = std::string(e.what());
   }
   exitAsyncClose:

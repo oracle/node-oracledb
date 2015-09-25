@@ -54,6 +54,15 @@ class PoolImpl;
 
 
 
+/*
+ * The maximum character expansion ratio from any DB character to 
+ * AL32UTF8 is known to be 3-times
+ */
+#define DPI_WORSTCASE_CHAR_CONVERSION_RATIO    3
+
+// No character expansion required if DB has AL32UTF8 charset
+#define DPI_BESTCASE_CHAR_CONVERSION_RATIO     1
+
 /*---------------------------------------------------------------------------
                      PUBLIC TYPES
   ---------------------------------------------------------------------------*/
@@ -89,9 +98,9 @@ class ConnImpl : public Conn
   virtual void module(const string &module);
 
   virtual void action(const string &action);
+  virtual int getByteExpansionRatio ();
 
-
-                                // interface methods
+                              // interface methods
   virtual Stmt* getStmt(const string &sql);
 
   virtual void releaseStmt(Stmt *stmt);
@@ -105,6 +114,8 @@ class ConnImpl : public Conn
   virtual DpiHandle *getSvch (){return (DpiHandle *)svch_;};
 
   virtual DpiHandle *getErrh (){return (DpiHandle *)errh_;};
+
+  virtual void setErrState ( int errNum );
 
   #if OCI_MAJOR_VERSION < 12
     inline void hasTxn(boolean connHasTxn)
@@ -121,6 +132,16 @@ class ConnImpl : public Conn
 
 private:
 
+  void initConnImpl( bool pool, bool externalAuth, const string& connClass,
+                     OraText *poolNmRconnStr, ub4 nameLen,
+                     const string &user, const string &password );
+
+  int getCsRatio ( ub2 csid )
+  {
+    return ( csid == DPI_AL32UTF8 ) ? DPI_BESTCASE_CHAR_CONVERSION_RATIO :
+             DPI_WORSTCASE_CHAR_CONVERSION_RATIO;
+  }
+  
   void cleanup();
 
 
@@ -133,6 +154,9 @@ private:
   OCISvcCtx   *svch_;           // OCI service handle
   OCISession  *sessh_;          // OCI Session handle. Do not free this.
   boolean     hasTxn_;          // set if transaction is in progress
+  int         csratio_;         // character expansion ratio
+  OCIServer   *srvh_;           // OCI server handle
+  bool        dropConn_;        // Set flag in case of unusable connection
 };
 
 

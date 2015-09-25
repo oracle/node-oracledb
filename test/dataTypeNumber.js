@@ -31,8 +31,10 @@
  *     51 -     are for other tests  
  * 
  *****************************************************************************/
- 
+"use strict"
+
 var oracledb = require('oracledb');
+var should = require('should');
 var assist = require('./dataTypeAssist.js');
 var dbConfig = require('./dbConfig.js');
 
@@ -44,72 +46,59 @@ describe('26. dataTypeNumber.js', function() {
     var credential = dbConfig;
   }
   
-  var connection = false;
-  var tableName = "oracledb_datatype_number";
-  var sqlCreate = 
-        "BEGIN " +
-           "   DECLARE " +
-           "       e_table_exists EXCEPTION; " +
-           "       PRAGMA EXCEPTION_INIT(e_table_exists, -00942); " +
-           "   BEGIN " +
-           "       EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " '); " +
-           "   EXCEPTION " +
-           "       WHEN e_table_exists " +
-           "       THEN NULL; " +
-           "   END; " +
-           "   EXECUTE IMMEDIATE (' " +
-           "       CREATE TABLE " + tableName +" ( " +
-           "           num NUMBER, " + 
-           "           content NUMBER "  +
-           "       )" +
-           "   '); " +
-           "END; ";
-
-  var numbers = [
-        1,
-        0,
-        8,
-        -8,
-        1234,
-        -1234,
-        9876.54321,
-        -9876.54321,
-        0.01234,
-        -0.01234,
-        0.00000123,
-        -0.00000123
-      ];
+  var connection = null;
+  var tableName = "oracledb_number";
+  var numbers = assist.data.numbers;
   
-  before(function(done) {
+  before('get one connection', function(done) {
     oracledb.getConnection(credential, function(err, conn) {
-      if(err) { console.error(err.message); return; }
+      should.not.exist(err);
       connection = conn;
-      assist.setup(connection, tableName, sqlCreate, numbers, done);
+      done();
     });
   })
   
-  after( function(done){
-    connection.execute(
-      "DROP table " + tableName,
-      function(err) {
-        if(err) { console.error(err.message); return; }
-        connection.release( function(err) {
-          if(err) { console.error(err.message); return; }
-          done();
-        });
-      }
-    );
+  after('release connection', function(done) {
+    connection.release( function(err) {
+      should.not.exist(err);
+      done();
+    });
   })
 
-  it('26.1 supports NUMBER data type', function(done) {
-    assist.dataTypeSupport(connection, tableName, numbers, done);
-  })  
-  
-  it('26.2 resultSet stores NUMBER data correctly', function(done) {
-    assist.resultSetSupport(connection, tableName, numbers, done);
+  describe('26.1 testing NUMBER data', function() {
+
+    before('create table, insert data',function(done) {
+      assist.setUp(connection, tableName, numbers, done);
+    })
+
+    after(function(done) {
+      connection.execute(
+        "DROP table " + tableName,
+        function(err) {
+          should.not.exist(err);
+          done();
+        }
+      );
+    })
+
+    it('26.1.1 SELECT query', function(done) {
+      assist.dataTypeSupport(connection, tableName, numbers, done);
+    })
+
+    it('26.1.2 resultSet stores NUMBER data correctly', function(done) {
+      assist.verifyResultSet(connection, tableName, numbers, done);
+    })
+
+    it('26.1.3 works well with REF Cursor', function(done) {
+      assist.verifyRefCursor(connection, tableName, numbers, done);
+    })
+
   })
-  
-  it('26.3 stores null value correctly', function(done) {
-    assist.nullValueSupport(connection, tableName, done);
+
+  describe('26.2 stores null value correctly', function() {
+    it('26.2.1 testing Null, Empty string and Undefined', function(done) {
+      assist.verifyNullValues(connection, tableName, done);
+    })
   })
+
 })

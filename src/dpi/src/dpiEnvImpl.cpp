@@ -93,10 +93,6 @@ static const int kStmtCacheSize = 60;
 
  */
 
-#ifndef NJS_AL32UTF8
-#define NJS_AL32UTF8         873
-#endif /* NJS_AL32UTF8 */
-
 EnvImpl::EnvImpl()
 
 try : envh_(NULL), poolMax_(kPoolMax), poolMin_(kPoolMin),
@@ -105,7 +101,7 @@ try : envh_(NULL), poolMax_(kPoolMax), poolMin_(kPoolMin),
 {
 
   sword rc = OCIEnvNlsCreate (&envh_, OCI_THREADED | OCI_OBJECT, NULL, NULL,
-                              NULL, NULL, 0, NULL, NJS_AL32UTF8, NJS_AL32UTF8);
+                              NULL, NULL, 0, NULL, DPI_AL32UTF8, DPI_AL32UTF8);
 
   if (rc)
   {

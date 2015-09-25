@@ -1,4 +1,4 @@
-# node-oracledb 1.0: Documentation for the Oracle Database Node.js Driver
+# node-oracledb 1.1: Documentation for the Oracle Database Node.js Add-on
 
 *Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved.*
 
@@ -112,6 +112,7 @@ limitations under the License.
   - 10.1 [PL/SQL Stored Procedures](#plsqlproc)
   - 10.2 [PL/SQL Stored Functions](#plsqlfunc)
   - 10.3 [Anonymous PL/SQL blocks](#plsqlanon)
+  - 10.4 [Using DBMS_OUTPUT](#dbmsoutput)
 11. [Working with CLOB and BLOB Data](#lobhandling)
 12. [Bind Parameters for Prepared Statements](#bind)
   - 12.1 [IN Bind Parameters](#inbind)
@@ -123,11 +124,11 @@ limitations under the License.
 14. [Statement Caching](#stmtcache)
 15. [External Configuration](#oraaccess)
 16. [Globalization and National Language Support (NLS)](#nls)
+17. [End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend)
 
 ## <a name="intro"></a> 1. Introduction
 
-The Oracle Database Node.js driver [*node-oracledb*](https://github.com/oracle/node-oracledb)
-powers high performance Node.js applications.
+The [*node-oracledb*](https://github.com/oracle/node-oracledb) add-on for Node.js powers high performance Oracle Database applications.
 
 This document shows how to use node-oracledb.  The API reference is in
 sections 2 - 7 and the user guide in subsequent sections.
@@ -152,10 +153,10 @@ oracledb.getConnection(
       return;
     }
     connection.execute(
-      "SELECT department_id, department_name "
-    + "FROM departments "
-    + "WHERE department_id = :did",
-      [180],
+      "SELECT department_id, department_name " +
+        "FROM departments " +
+        "WHERE manager_id < :id",
+      [110],  // bind value for :id
       function(err, result)
       {
         if (err) {
@@ -170,7 +171,7 @@ oracledb.getConnection(
 With Oracle's sample HR schema, the output is:
 
 ```
-[ [ 180, 'Construction' ] ]
+[ [ 60, 'IT' ], [ 90, 'Executive' ], [ 100, 'Finance' ] ]
 ```
 
 There are more node-oracledb examples in the
@@ -184,14 +185,14 @@ Scripts to create Oracle's sample schemas can be found at
 
 Unless otherwise specified, the last parameter of each method is a
 callback.  If an application does not pass a callback function where
-it is expected, then the driver throws an exception of type *Error*.
+it is expected, then node-oracledb throws an exception of type *Error*.
 
 The first parameter of the callback is an *Error* object that
 contains error information if the call fails.  If the call succeeds,
 then the object is null.
 
 If an invalid value is set for a property, then the *Error* object is
-thrown by the driver.  The same is true for invalid operations on
+thrown.  The same is true for invalid operations on
 read-only or write-only properties.
 
 ### <a name="properror"></a> 2.1 Error Properties
@@ -205,7 +206,7 @@ String message
 The text of the error message.
 
 The error may be a standard Oracle message with a prefix like ORA or
-PLS.  Alternatively it may be a driver specific error prefixed with
+PLS.  Alternatively it may be a node-oracledb specific error prefixed with
 NJS or DPI.
 
 A single line error message may look like this:
@@ -228,13 +229,13 @@ PL/SQL: Statement ignored
 
 The *Oracledb* object is the factory class for *Pool* and *Connection* objects.
 
-The *Oracledb* object is instantiated by loading the driver:
+The *Oracledb* object is instantiated by loading node-oracledb:
 
 ```javascript
 var oracledb = require("oracledb");
 ```
 
-Internally, the driver creates the *Oracledb* object as a singleton.
+Internally, the add-on creates the *Oracledb* object as a singleton.
 Reloading it in the same Node.js process creates a new pointer to the
 same object.
 
@@ -477,9 +478,11 @@ oracledb.maxRows = 100;
 Number lobPrefetchSize
 ```
 
+This attribute is temporarily disabled.  Setting it has no effect.
+
 Node-oracledb internally uses Oracle *LOB Locators* to manipulate long
 object (LOB) data.  LOB Prefetching allows LOB data to be returned
-early to node-oracledb when these locators are returned to the driver.
+early to node-oracledb when these locators are first returned.
 This is similar to the way [row prefetching](#rowprefetching) allows
 for efficient use of resources and round-trips between node-oracledb
 and the database.
@@ -953,6 +956,8 @@ writeonly String action
 The [action](https://docs.oracle.com/database/121/LNOCI/oci08sca.htm#sthref1434)
 attribute for end-to-end application tracing. This is a write-only property.
 
+See [End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend).
+
 #### <a name="propconnclientid"></a> 4.1.2 clientId
 
 ```
@@ -965,6 +970,8 @@ for end-to-end application tracing, use with mid-tier authentication,
 and with [Virtual Private Databases](http://docs.oracle.com/database/121/CNCPT/cmntopc.htm#CNCPT62345).
 This is a write-only property.
 
+See [End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend).
+
 #### <a name="propconnmodule"></a> 4.1.3 module
 
 ```
@@ -973,6 +980,8 @@ writeonly String module
 
 The [module](https://docs.oracle.com/database/121/LNOCI/oci08sca.htm#sthref1433)
 attribute for end-to-end application tracing. This is a write-only property.
+
+See [End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend).
 
 #### <a name="propconnstmtcachesize"></a> 4.1.4 stmtCacheSize
 
@@ -1882,7 +1891,7 @@ release all connections and terminate the connection pool by calling
 the [`terminate()`](#terminate) method on the Pool object.
 
 The growth characteristics of a connection pool are determined by the
-Pool attributes[`poolIncrement`](#proppoolpoolincrement),
+Pool attributes [`poolIncrement`](#proppoolpoolincrement),
 [`poolMax`](#proppoolpoolmax), [`poolMin`](#proppoolpoolmin) and
 [`poolTimeout`](#proppoolpooltimeout).  Note that when External
 Authentication is used, the pool behavior is different, see
@@ -1981,11 +1990,13 @@ object are always obtained in the manner in which the pool was
 initially created.
 
 For pools created with external authentication, the number of
-connections initially created is zero even if a non-zero value is
-specified for the [`poolMin`](#propdbpoolmin).  However, once the
-number of open connections exceeds `poolMin` and connections are idle
-for more than the [`poolTimeout`](#propdbpooltimeout) seconds, then
-the number of open connections does not fall below `poolMin`.
+connections initially created is zero even if a larger value is
+specified for [`poolMin`](#propdbpoolmin).  The pool increment is
+always 1, regardless of the value of
+[`poolIncrement`](#proppoolpoolincrement).  Once the number
+of open connections exceeds `poolMin` and connections are idle for
+more than the [`poolTimeout`](#propdbpooltimeout) seconds, then the
+number of open connections does not fall below `poolMin`.
 
 ## <a name="sqlexecution"></a> 9. SQL Execution
 
@@ -2133,23 +2144,22 @@ For example:
 var oracledb = require('oracledb');
 . . .
 
-connection.execute("SELECT first_name, salary, hire_date "
-                 + "FROM   employees, departments "
-                 + "WHERE  employees.department_id = departments.department_id "
-                 + "AND    departments.department_name = 'Accounting'",
-                   function(err, result) {
-                     if (err) { console.error(err.message); return; }
-                     var rows = result.rows;
-                     for (var i = 0; i < rows.length; i++)
-                       console.log("Row " + i + " : " + rows[i]);
-                   });
+connection.execute(
+  "SELECT department_id, department_name " +
+    "FROM departments " +
+    "WHERE manager_id < :id",
+  [110],  // bind value for :id
+  function(err, result)
+  {
+    if (err) { console.error(err.message); return; }
+    console.log(result.rows);
+  });
 ```
 
 If run with Oracle's sample HR schema, the output is:
 
 ```
-Row 0 : Shelley,12000,Tue Jun 07 1994 01:00:00 GMT-0700 (PDT)
-Row 1 : William,8300,Tue Jun 07 1994 01:00:00 GMT-0700 (PDT)
+[ [ 60, 'IT' ], [ 90, 'Executive' ], [ 100, 'Finance' ] ]
 ```
 
 Using this format is recommended for efficiency.
@@ -2158,31 +2168,31 @@ Alternatively, rows may be fetched as JavaScript objects. To do so,
 specify the `outFormat` option to be `OBJECT`:
 
 ```javascript
-var oracledb = require('oracledb');
-
-. . .
-
-connection.execute("SELECT first_name, salary, hire_date "
-                 + "FROM employees, departments "
-                 + "WHERE employees.department_id = departments.department_id "
-                 + "AND departments.department_name = 'Accounting'",
-                   [],  // No bind variables
-                   {outFormat: oracledb.OBJECT},
-                   function(err, result) {
-                     if (err) { console.error(err.message); return; }
-                     var rows = result.rows;
-                     for (var i = 0; i < rows.length; i++)
-                       console.log("Row " + i + " : " +
-                                   rows[i].FIRST_NAME + ", ",
-                                   rows[i].SALARY + ", ", rows[i].HIRE_DATE);
-                   });
+oracledb.outFormat = oracledb.OBJECT;
 ```
 
-If run with Oracle's sample HR schema, the output is:
+The value can also be set as an `execute()` option:
+
+```javascript
+connection.execute(
+  "SELECT department_id, department_name " +
+    "FROM departments " +
+    "WHERE manager_id < :id",
+  [110],  // bind value for :id
+  { outFormat: oracledb.OBJECT },
+  function(err, result)
+  {
+    if (err) { console.error(err.message); return; }
+    console.log(result.rows);
+  });
+```
+
+The output is:
 
 ```
-Row 0 : Shelley,  12000,  Tue Jun 07 1994 01:00:00 GMT-0700 (PDT)
-Row 1 : William,  8300,  Tue Jun 07 1994 01:00:00 GMT-0700 (PDT)
+[ { DEPARTMENT_ID: 60, DEPARTMENT_NAME: 'IT' },
+  { DEPARTMENT_ID: 90, DEPARTMENT_NAME: 'Executive' },
+  { DEPARTMENT_ID: 100, DEPARTMENT_NAME: 'Finance' } ]
 ```
 
 In the preceding example, each row is a JavaScript object that
@@ -2198,15 +2208,16 @@ The column names of a query are returned in the
 attribute:
 
 ```javascript
-connection.execute("SELECT department_id, department_name "
-                 + "FROM departments "
-                 + "WHERE department_id = :did",
-                   [180],
-                   function(err, result)
-                   {
-                     if (err) { console.error(err.message); return; }
-                     console.log(result.metaData);  // show the metadata
-                   });
+connection.execute(
+  "SELECT department_id, department_name " +
+    "FROM departments " +
+    "WHERE manager_id < :id",
+  [110],  // bind value for :id
+  function(err, result)
+  {
+    if (err) { console.error(err.message); return; }
+    console.log(result.metaData);  // show the metadata
+  });
 ```
 
 When using a [`ResultSet`](#resultsetclass), metadata is also
@@ -2487,6 +2498,84 @@ The output is:
 
 See [Bind Parameters for Prepared Statements](#bind) for information on binding.
 
+### <a name="dbmsoutput"></a> 10.4 Using DBMS_OUTPUT
+
+The
+[DBMS_OUTPUT](http://docs.oracle.com/database/121/ARPLS/d_output.htm#ARPLS036)
+package is the standard way to "print" output from PL/SQL.  The way
+DBMS_OUTPUT works is like a buffer.  Your Node.js application code
+must first turn on DBMS_OUTPUT buffering for the current connection by
+calling the PL/SQL procedure `DBMS_OUTPUT.ENABLE(NULL)`.  Then any
+PL/SQL executed by the connection can put text into the buffer using
+`DBMS_OUTPUT.PUT_LINE()`.  Finally `DBMS_OUTPUT.GET_LINE()` is used to
+fetch from that buffer.  Note, any PL/SQL code that uses DBMS_OUTPUT
+runs to completion before any output is available to the user.  Also,
+other database connections cannot access your buffer.
+
+A basic way to fetch DBMS_OUTPUT with node-oracledb is to bind an
+output string when calling the PL/SQL `DBMS_OUTPUT.GET_LINE()`
+procedure, print the string, and then repeat until there is no more
+data.  The following snippet is based on the example
+[dbmsoutputgetline.js](https://github.com/oracle/node-oracledb/tree/master/examples/dbmsoutputgetline.js):
+
+```javascript
+function fetchDbmsOutputLine(connection, cb) {
+  connection.execute(
+    "BEGIN DBMS_OUTPUT.GET_LINE(:ln, :st); END;",
+    { ln: { dir: oracledb.BIND_OUT, type: oracledb.STRING, maxSize: 32767 },
+      st: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER } },
+    function(err, result) {
+      if (err) {
+        return cb(err, connection);
+      } else if (result.outBinds.st == 1) { // no more output
+        return cb(null, connection);
+      } else {
+        console.log(result.outBinds.ln);
+        return fetchDbmsOutputLine(connection, cb);
+      }
+    });
+  }
+```
+
+Another way is to wrap the `DBMS_OUTPUT.GET_LINE()` call into a
+pipelined function and fetch the output using a SQL query.  See
+[dbmsoutputpipe.js](https://github.com/oracle/node-oracledb/tree/master/examples/dbmsoutputpipe.js) for the full example.
+
+The pipelined function could be created like:
+
+```sql
+CREATE OR REPLACE TYPE dorow AS TABLE OF VARCHAR2(32767);
+/
+
+CREATE OR REPLACE FUNCTION mydofetch RETURN dorow PIPELINED IS
+  line VARCHAR2(32767);
+  status INTEGER;
+  BEGIN LOOP
+    DBMS_OUTPUT.GET_LINE(line, status);
+    EXIT WHEN status = 1;
+    PIPE ROW (line);
+  END LOOP;
+END;
+/
+```
+
+To get DBMS_OUTPUT that has been created, simply execute the query
+using the same connection:
+
+```sql
+connection.execute(
+  "SELECT * FROM TABLE(mydofetch())",
+  [],
+  { resultSet: true },
+  function (err, result) {
+  . . . 
+```
+
+The query rows can be handled using a
+[ResultSet](http://localhost:8899/doc/api.md#resultsethandling).
+
+Remember to first enable output using `DBMS_OUTPUT.ENABLE(NULL)`.
+
 ## <a name="lobhandling"></a> 11. Working with CLOB and BLOB Data
 
 The [Lob Class](#lobclass) in node-oracledb implements the
@@ -2624,12 +2713,12 @@ connection.execute(
     if (lob === null) { console.log("CLOB was NULL"); return; } 
 
     lob.setEncoding('utf8');  // we want text, not binary output
-	lob.on('error', function(err) { console.error(err); });
+    lob.on('error', function(err) { console.error(err); });
 
-	console.log('Writing to ' + outFileName);
-	var outStream = fs.createWriteStream(outFileName);
-	outStream.on('error', function(err) { console.error(err); });
-	lob.pipe(outStream);
+    console.log('Writing to ' + outFileName);
+    var outStream = fs.createWriteStream(outFileName);
+    outStream.on('error', function(err) { console.error(err); });
+    lob.pipe(outStream);
   });
 ```
 
@@ -2892,7 +2981,10 @@ Oracle REF CURSORS can be fetched in node-oracledb by binding a
 [`getRow()`](#getrow) or [`getRows()`](getrows).  When all rows have
 been fetched, or the application does not want to continue getting
 more rows, then the result set must be freed using
-[`close()`](#close).
+[`close()`](#close).  If the REF cursor is not set to any value, or is
+set to NULL, in the PL/SQL procedure, then the returned `ResultSet` is
+invalid and methods like `getRows()` will return an error when
+invoked.
 
 When using Oracle Database 11gR2 or greater, then
 [`prefetchRows`](#propdbprefetchrows) can be used to tune the
@@ -3010,7 +3102,7 @@ By default,
 [DML](https://docs.oracle.com/database/121/CNCPT/glossary.htm#CNCPT2042)
 statements are not committed in node-oracledb.
 
-The driver implements [`commit()`](#commit) and
+The node-oracledb add-on implements [`commit()`](#commit) and
 [`rollback()`](#rollback) methods that can be used to explicitly
 control transactions.
 
@@ -3042,7 +3134,7 @@ Each non-pooled connection and each session in the connection pool has
 its own cache of statements with a default size of 30.  Statement
 caching lets cursors be used without re-parsing the statement.
 Statement caching also reduces meta data transfer costs between the
-driver and the database.  Performance and scalability are improved.
+node-oracledb and the database.  Performance and scalability are improved.
 
 In general, set the statement cache to the size of the working set of
 statements being executed by the application.
@@ -3107,8 +3199,8 @@ Node-oracledb can use Oracle's
 [National Language Support (NLS)](https://docs.oracle.com/database/121/NLSPG/toc.htm)
 to assist in globalizing applications.
 
-Node-oracledb always uses Oracle's AL32UTF8 character set internally
-in the driver layer.  Data will be converted between AL32UTF8 and the
+Node-oracledb always uses Oracle's AL32UTF8 character set internally.
+Data will be converted between AL32UTF8 and the
 database character set when it is inserted into, or queried from, the
 database.  The environment variable `NLS_LANG` can be used to
 configure the Oracle client language and territory only.
@@ -3117,3 +3209,75 @@ Oracle NLS environment variables, or statements like `ALTER SESSION`,
 can be used to configure further aspects of node-oracledb data access
 globalization.  Refer to
 [NLS Documentation](https://docs.oracle.com/database/121/NLSPG/ch3globenv.htm#g1028448).
+
+## <a name="endtoend"></a> 17. End-to-end Tracing, Mid-tier Authentication, and Auditing
+
+The Connection properties [action](#propconnaction),
+[module](#propconnmodule), and [clientId](#propconnclientid) set
+metadata for
+[end-to-end tracing](http://docs.oracle.com/database/121/TGSQL/tgsql_trace.htm#CHDBDGIJ).
+The values can be tracked in database views, shown in audit trails,
+and seen in tools such as Enterprise Manager.
+
+The `clientId` property can also be used by applications that do their
+own mid-tier authentication but connect to the database using the one
+database schema.  By setting `clientId` to the application's
+authenticated username, the database is aware of who the actual end
+user is.  This can, for example, be used by Oracle
+[Virtual Private Databases](http://docs.oracle.com/database/121/CNCPT/cmntopc.htm#CNCPT62345)
+policies to automatically restrict data access by that user.
+
+Applications should set the properties because they can greatly help
+to identify and resolve unnecessary database resource usage, or
+improper access.
+
+The attributes are set on a [connection](#propdbconclass) object and
+sent to the database on the next 'round-trip' from node-oracledb, for
+example, with `execute()`:
+
+```javascript
+oracledb.getConnection(
+  {
+    user          : "hr",
+    password      : "welcome",
+    connectString : "localhost/orcl"
+  },
+  function(err, connection)
+  {
+    if (err) { console.error(err.message); return;    }
+
+    connection.clientId = "Chris";
+    connection.module = "End-to-end example";
+    connection.action = "Query departments";
+
+    connection.execute("SELECT . . .",
+      function(err, result)
+      {
+        . . .
+```
+
+While the connection is open the attribute values can be seen, for example with SQL*Plus:
+
+```
+SQL> SELECT username, client_identifier, action, module FROM v$session WHERE username = 'HR';
+
+USERNAME   CLIENT_IDENTIFIER    ACTION               MODULE
+---------- -------------------- -------------------- --------------------
+HR         Chris                Query departments    End-to-end example
+```
+
+The values can also be manually set by calling
+[`DBMS_APPLICATION_INFO`](http://docs.oracle.com/cd/B19306_01/appdev.102/b14258/d_appinf.htm#CHECEIEB)
+procedures or
+[`DBMS_SESSION.SET_IDENTIFIER`](http://docs.oracle.com/cd/B19306_01/appdev.102/b14258/d_sessio.htm#SET_IDENTIFIER),
+however these require explicit round-trips, reducing scalability.
+
+Idle connections released back to a connection pool will retain the
+previous attribute values of that connection. This avoids the
+overhead of a round-trip to reset the values.  After calling
+`pool.getConnection()`, the application should be consistent about
+setting appropriate values to ensure any previous values are updated.
+The Oracle design assumption is that pools are actively used and have
+few idle connections.  However, if desired, the application can set
+the properties to empty strings and force a round-trip prior to
+connection release.  This reduces efficiency.

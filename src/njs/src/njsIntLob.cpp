@@ -87,7 +87,7 @@ Nan::Persistent<FunctionTemplate> ILob::iLobTemplate_s;
  */
 
 ILob::ILob():
-  lobLocator_(NULL), svch_(NULL), errh_(NULL),
+  lobLocator_(NULL), dpiconn_(NULL), svch_(NULL), errh_(NULL),
   isValid_(false), state_(INACTIVE), buf_(NULL), bufSize_(0), chunkSize_(0),
   length_(0), offset_(1), amountRead_(0)
 {
@@ -205,6 +205,7 @@ void ILob::setILob(eBaton *executeBaton, ProtoILob *protoILob)
 
     fetchType_ = protoILob->fetchType_;
   
+    dpiconn_ = executeBaton->dpiconn;
     svch_ = executeBaton->dpiconn->getSvch();
 
     errh_ = protoILob->errh_;
@@ -227,6 +228,7 @@ void ILob::setILob(eBaton *executeBaton, ProtoILob *protoILob)
 
   catch (dpi::Exception &e)
   {
+    NJS_SET_CONN_ERR_STATUS ( e.errnum(), executeBaton->dpiconn );
     executeBaton->error = std::string(e.what());
     cleanup();
   }
@@ -405,6 +407,7 @@ NAN_PROPERTY_GETTER(ILob::GetChunkSize)
   }
   catch(dpi::Exception &e)
   {
+    NJS_SET_CONN_ERR_STATUS ( e.errnum(), iLob->dpiconn_ );
     NJS_SET_EXCEPTION(e.what(), strlen(e.what()));
   }
 
@@ -464,6 +467,7 @@ NAN_PROPERTY_GETTER(ILob::GetLength)
   }
   catch(dpi::Exception &e)
   {
+    NJS_SET_CONN_ERR_STATUS ( e.errnum(), iLob->dpiconn_ );
     NJS_SET_EXCEPTION(e.what(), strlen(e.what()));
   }
 
@@ -522,6 +526,7 @@ NAN_PROPERTY_GETTER(ILob::GetPieceSize)
   }
   catch(dpi::Exception &e)
   {
+    NJS_SET_CONN_ERR_STATUS ( e.errnum(), iLob->dpiconn_ );
     NJS_SET_EXCEPTION(e.what(), strlen(e.what()));
   }
 
@@ -596,6 +601,7 @@ NAN_PROPERTY_GETTER(ILob::GetOffset)
   }
   catch(dpi::Exception &e)
   {
+    NJS_SET_CONN_ERR_STATUS ( e.errnum(), iLob->dpiconn_ );
     NJS_SET_EXCEPTION(e.what(), strlen(e.what()));
   }
 
@@ -715,13 +721,13 @@ NAN_METHOD(ILob::Read)
 void ILob::Async_Read(uv_work_t *req)
 {
   LobBaton *lobBaton = (LobBaton *)req->data;
+  ILob *iLob         = lobBaton->iLob;
 
   if(!(lobBaton->error).empty())
     goto exitAsyncRead;
 
   try
   {
-    ILob         *iLob = lobBaton->iLob;
     unsigned long long byteAmount = (unsigned long int)iLob->bufSize_;
     unsigned long long charAmount = 0; 
     
@@ -742,10 +748,10 @@ void ILob::Async_Read(uv_work_t *req)
     else
       iLob->offset_ += byteAmount;
   }
-
   catch (dpi::Exception& e)
   {
-      lobBaton->error = std::string(e.what());
+    NJS_SET_CONN_ERR_STATUS ( e.errnum(), iLob->dpiconn_ );
+    lobBaton->error = std::string(e.what());
   }
 
  exitAsyncRead:
@@ -899,13 +905,13 @@ NAN_METHOD(ILob::Write)
 void ILob::Async_Write(uv_work_t *req)
 {
   LobBaton *lobBaton = (LobBaton *)req->data;
+  ILob         *iLob = lobBaton->iLob;
 
   if(!(lobBaton->error).empty())
     goto exitAsyncWrite;
 
   try
   {
-    ILob         *iLob = lobBaton->iLob;
     unsigned long long byteAmount = lobBaton->writelen;
     unsigned long long charAmount = 0; // interested in byte amount only
     
@@ -920,10 +926,10 @@ void ILob::Async_Write(uv_work_t *req)
     else
       iLob->offset_ += byteAmount;
   }
-
   catch (dpi::Exception& e)
   {
-      lobBaton->error = std::string(e.what());
+    NJS_SET_CONN_ERR_STATUS ( e.errnum(), iLob->dpiconn_ );
+    lobBaton->error = std::string(e.what());
   }
 
  exitAsyncWrite:
@@ -1003,9 +1009,9 @@ try : lobLocator_(lobLocator), fetchType_(fetchType), errh_(NULL),
                               errh_, lobLocator_);
   length_ = Lob::length(executeBaton->dpiconn->getSvch(), errh_, lobLocator_);
 }
-
 catch (dpi::Exception &e)
 {
+  NJS_SET_CONN_ERR_STATUS ( e.errnum(), executeBaton->dpiconn );
   executeBaton->error = std::string(e.what());
   cleanup();
 }

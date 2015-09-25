@@ -66,7 +66,6 @@ using namespace dpi;
 class Connection;
 class ProtoILob;
 
-
 /**
 * Structure used for binds
 **/
