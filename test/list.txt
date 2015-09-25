@@ -417,6 +417,6 @@
     56.3 FetchAs Oracledb property by-type
     56.4 FetchAs override oracledb by-type (for DATE) at execute time
 
- 57. nestedCursor.js
+57. nestedCursor.js
     57.1 testing nested cursor support - result set
     57.2 testing nested cursor support - REF Cursor 
