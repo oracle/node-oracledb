@@ -1,4 +1,4 @@
- Installing node-oracledb
+# Installing node-oracledb
 
 *Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved.*
 
@@ -23,7 +23,8 @@ limitations under the License.
 4. [Node-oracledb Installation on Linux with a Local Database](#instoh)
 5. [Node-oracledb Installation on OS X with Instant Client](#instosx)
 6. [Node-oracledb Installation on Windows](#instwin)
-7. [Advanced Installation on Linux](#linuxadv)
+7. [Copying node-oracledb Binaries on Windows](#winbins)
+8. [Advanced Installation on Linux](#linuxadv)
 
 ## <a name="overview"></a> 1. Overview
 
@@ -39,18 +40,20 @@ but these architectures have not been fully tested.
 
 ### Prerequisites
 
-This installation requires Oracle 11.2 or 12.1 client libraries.
+Installation requires Oracle 11.2 or 12.1 client libraries.
 These are included in Oracle Instant Client RPMs or ZIPs, a full
 Oracle Client, or a database on the same machine.  Oracle's standard
-client-server network compatibility applies, which enables connection
-to databases with different versions from the Oracle client library
-version.
+client-server network compatibility applies.  For example, with Oracle
+client 12.1 you can connect to Oracle Database 10.2 or greater.  Use
+Oracle client 11.2 if you need to connect to Oracle Database 9.2.
 
-Gcc is needed on Linux.  On OS X, install Xcode.  Python 2.7 is needed
-for node-gyp.  If another version of Python occurs first in your
-binary path then, when you install node-oracledb, use the `--python`
-option to indicate the correct version.  For example `npm install
---python=/whereever/python-2.7/bin/python oracledb`.
+A compiler is needed.  Use Visual Studio on Windows, gcc on Linux or
+Xcode on OS X.
+
+Python 2.7 is needed by node-gyp.  If another version of Python occurs
+first in your binary path then, when you install node-oracledb, use
+the `--python` option to indicate the correct version.  For example:
+`npm install --python=/whereever/python-2.7/bin/python oracledb`.
 
 ### Which Instructions to Follow
 
@@ -135,7 +138,7 @@ setting the install-time variables `OCI_LIB_DIR` and `OCI_INC_DIR` to
 the appropriate directories.
 
 If you have other Oracle software installed on the same machine, and
-the runtime linker is configured to find this other software via
+the run time linker is configured to find this other software via
 `LD_LIBRARY_PATH` or `ldconfig`, then update the environment to use
 the Instant Client RPM libraries, for example
 `/usr/lib/oracle/12.1/client64/lib`.
@@ -472,10 +475,8 @@ see
 
 Install a C/C++ build environment such as Microsoft Visual
 Studio 2012.  Compilers supported by Oracle libraries are found in
-Oracle documentation for each version, for example
+[Oracle documentation](https://docs.oracle.com/en/database/) for each version, for example
 [Oracle Database Client Quick Installation Guide 12c Release 1 (12.1) for Microsoft Windows x64 (64-Bit)](https://docs.oracle.com/database/121/NXCQI/toc.htm#NXCQI108).
-You will also need the matching Visual C++ Redistributable for Visual
-Studio.
 
 Install the Python 2.7 MSI from
 [www.python.org](https://www.python.org/downloads).  Select the
@@ -483,7 +484,7 @@ customization option to "Add python.exe to Path".
 
 If you use a 32-bit Node.js, make sure to use a 32-bit Oracle client
 during build and run time.  Otherwise use a 64-bit Node.js with a
-64-bit Oracle client.
+64-bit Oracle client.  The instructions below use a 64-bit stack.
 
 ### 6.2 Install Node.js
 
@@ -493,56 +494,74 @@ add the Node and npm directories to the path is selected.
 
 ### 6.3 Install the free Oracle Instant Client ZIPs
 
-Skip this step if you already have Oracle Database or the full Oracle client on your machine.
+Building and running node-oracledb needs appropriate Oracle client
+libraries installed first.  These libraries:
 
-Download the free **Basic** and **SDK** ZIP files from
+- are included in (i) Oracle database, or (ii) in the full Oracle client, or (iii) in Oracle Instant Client.  You need one of these.
+- must be version 11.2 or greater
+- must match the Node.js 32 or 64-bit architecture
+
+If you need appropriate Oracle client libraries, then download the
+free Instant Client **Basic** and **SDK** ZIP files from
 [Oracle Technology Network](http://www.oracle.com/technetwork/topics/winx64soft-089540.html).
 
 Extract `instantclient_basic-windows.x64-12.1.0.2.0.zip` and
 `instantclient_sdk-windows.x64-12.1.0.2.0.zip` to the same directory.
 
-Optionally rename the resulting directory to `C:\oracle\instantclient`
+Optionally rename the resulting Instant Client directory to the
+default location used by the node-oracledb installer:
 
-Add the directory to PATH.  For example on Windows 7, update PATH in
+```
+ren C:\instantclient_12_1 C:\oracle\instantclient
+```
+
+Add the directory to `PATH`.  For example on Windows 7, update `PATH` in
 Control Panel -> System -> Advanced System Settings -> Advanced ->
-Environment Variables -> System variables.  If you have multiple
-versions of Oracle libraries installed, make sure to put the desired
-version first in the path.
+Environment Variables -> System variables.
+
+If you have multiple versions of Oracle libraries installed, make sure
+the desired version occurs first in the path.
 
 ### 6.4 Install the add-on
 
 Start Visual Studio and open a Developer Command Prompt within it.
-(If you instead decide to use a command shell outside Visual Studio, then
-run `vcvars64.bat` for 64-bit builds or `vcvars.bat` for 32-bit builds).
 
 Use `set PATH` in the shell to confirm the Python, Node.js and Oracle
-directories are correctly set.  If they are not, then set PATH
+directories are correctly set.  If they are not, then set `PATH`
 manually in the shell, or set it in the System Properties panel and
 restart the command shell.
 
-Tell the installer where to locate the Instant Client:
+Make sure the Microsoft Visual Studio environment variables are set
+appropriately.  Use `set PATH` and verify it contains your Visual
+Studio paths.  If they are not set, use vcvars64.bat (or vcvars.bat if
+you building with 32-bit binaries) to set the environment.
+Alternatively you can open the 'Developer Command Prompt for Visual
+Studio' which has environment variables already configured.
+
+Tell the installer where to locate the Oracle client libraries and
+header files by setting the `OCI_LIB_DIR` and `OCI_INC_DIR` variables.
+
+These variables are only needed during installation, not at run time.
+
+For Instant Client use:
 
 ```
-set OCI_LIB_DIR=C:\wherever\instantclient_12_1\sdk\lib\msvc
-set OCI_INC_DIR=C:\wherever\instantclient_12_1\sdk\include
+set OCI_LIB_DIR=C:\oracle\instantclient\sdk\lib\msvc
+set OCI_INC_DIR=C:\oracle\instantclient\sdk\include
 ```
-
-These variables are only needed during installation.
-
-If Instant Client is in `C:\oracle\instantclient` (this should
-contain, amongst others, the file `C:\oracle\instantclient\oci.dll`
-and directory `C:\oracle\instantclient\sdk`), then these variables are
-not needed.
 
 If you are installing with a local database or the full Oracle client,
-you must set the variables, for example using:
+then locate the Oracle directory and set the node-oracle installer
+variables similar to:
 
 ```
 set OCI_LIB_DIR=C:\oracle\product\12.1.0\dbhome_1\oci\lib\msvc
 set OCI_INC_DIR=C:\oracle\product\12.1.0\dbhome_1\oci\include
 ```
 
-If you are behind a firewall, you may need to set your proxy, for
+Also make sure that `PATH` contains `C:\oracle\product\12.1.0\dbhome_1\bin`.
+
+If you are behind a firewall you may need to set your proxy, for
 example:
 
 ```
@@ -573,12 +592,33 @@ module.exports = {
 ```
 
 Run one of the examples:
-
+	
 ```
 node select1.js
 ```
 
-## <a name="linuxadv"></a> 7. Advanced Installation on Linux
+## <a name="winbins"></a> 7. Copying node-oracledb Binaries on Windows
+
+Node-oracledb binaries can be copied between compatible Windows systems.
+
+Both computers must have the same version and architecture of Node.js.
+
+Oracle client libraries of the same architecture and the same, or
+higher, version used for building node-oracledb should be in the
+destination computer's `PATH`.
+
+After node-oracle has been built on the source computer, copy the
+`node_modules/oracledb` directory to the destination computer's
+`node_module` directory.
+
+If node-oracledb was compiled using Visual Studio 2010 or higher, you
+will need to have the Visual C++ 2010 Redistributable installed on the
+destination computer.  For older compilers, you will need the matching
+C++ redistributable version.  For example, if you compiled with Visual
+Studio 2008, you will need the Visual Studio 2008 C++ Redistributable
+installed.
+
+## <a name="linuxadv"></a> 8. Advanced Installation on Linux
 
 ### <a name="linuxinstsearchpath"></a> Oracle Client Location Heuristic on Linux
 
