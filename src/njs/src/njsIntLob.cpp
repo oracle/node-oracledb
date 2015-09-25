@@ -87,7 +87,7 @@ Persistent<FunctionTemplate> ILob::iLobTemplate_s;
  */
 
 ILob::ILob():
-  lobLocator_(NULL), dpiconn_(NULL), svch_(NULL), errh_(NULL),
+  lobLocator_(NULL), njsconn_(NULL), dpiconn_(NULL), svch_(NULL), errh_(NULL),
   isValid_(false), state_(INACTIVE), buf_(NULL), bufSize_(0), chunkSize_(0),
   length_(0), offset_(1), amountRead_(0)
 {
@@ -200,30 +200,41 @@ void ILob::setILob(eBaton *executeBaton, ProtoILob *protoILob)
       //  exceptions.
   try
   {
-    lobLocator_ = protoILob->lobLocator_;
+    // Lob details
+    lobLocator_            = protoILob->lobLocator_;
     protoILob->lobLocator_ = NULL;
-
-    fetchType_ = protoILob->fetchType_;
+    fetchType_             = protoILob->fetchType_;
   
-    dpiconn_ = executeBaton->dpiconn;
-    svch_ = executeBaton->dpiconn->getSvch();
+    // connection
+    njsconn_               = executeBaton->njsconn;
+    dpiconn_               = executeBaton->dpiconn;
+    svch_                  = executeBaton->dpiconn->getSvch();
 
-    errh_ = protoILob->errh_;
-    protoILob->errh_ = NULL;
+    // error
+    errh_                  = protoILob->errh_;
+    protoILob->errh_       = NULL;
 
-    length_ = protoILob->length_;
-    
-    chunkSize_ = protoILob->chunkSize_;
-    bufSize_ = chunkSize_;
-                                // we can move the allocation of buf_ to the
-                                // worker thread also by alloating the buf_ in
-                                // ProtoILob.
+    // LOB meta data
+    length_                = protoILob->length_;
+    chunkSize_             = protoILob->chunkSize_;
+    bufSize_               = chunkSize_;
+
+    /*
+     * we can move the allocation of buf_ to the worker thread also by
+     * allocating the buf_ in ProtoILob.
+     */
     if (fetchType_ == DpiClob)
-      buf_ = new char[bufSize_ * 4]; // accommodate multi-byte charsets
+    {
+      // accommodate multi-byte charsets
+      buf_ = new char[bufSize_ * dpiconn_->getByteExpansionRatio()];
+    }
     else
+    {
       buf_ = new char[bufSize_];
+    }
 
-    isValid_  = true;
+    // Now the ILob object is valid
+    isValid_ = true;
   }
 
   catch (dpi::Exception &e)
@@ -337,6 +348,14 @@ NAN_METHOD(ILob::Release)
   NanScope();
 
   ILob *iLob = ObjectWrap::Unwrap<ILob>(args.This());
+  string msg;
+
+  if( !iLob->njsconn_->isValid() )
+  {
+    msg = NJSMessages::getErrorMsg ( errInvalidConnection );
+    NJS_SET_EXCEPTION( msg.c_str(), (int) msg.length() );
+    NanReturnUndefined ();
+  }
 
   iLob->cleanup();
 
@@ -368,7 +387,7 @@ void ILob::lobPropertyException(ILob *iLob,
                                 string property)
 {
   NanScope();
-  string       msg;
+  string msg;
 
   if (iLob->isValid_)
     msg = NJSMessages::getErrorMsg(err, property.c_str());
@@ -400,6 +419,14 @@ NAN_PROPERTY_GETTER(ILob::GetChunkSize)
   NanScope();
 
   ILob *iLob = ObjectWrap::Unwrap<ILob>(args.Holder());
+  string msg;
+
+  if( !iLob->njsconn_->isValid() )
+  {
+    msg = NJSMessages::getErrorMsg ( errInvalidConnection );
+    NJS_SET_EXCEPTION( msg.c_str(), (int) msg.length() );
+    NanReturnUndefined ();
+  }
 
   try
   {
@@ -464,6 +491,14 @@ NAN_PROPERTY_GETTER(ILob::GetLength)
   NanScope();
 
   ILob *iLob = ObjectWrap::Unwrap<ILob>(args.Holder());
+  string msg;
+
+  if( !iLob->njsconn_->isValid() )
+  {
+    msg = NJSMessages::getErrorMsg ( errInvalidConnection );
+    NJS_SET_EXCEPTION( msg.c_str(), (int) msg.length() );
+    NanReturnUndefined ();
+  }
 
   try
   {
@@ -527,6 +562,14 @@ NAN_PROPERTY_GETTER(ILob::GetPieceSize)
   NanScope();
 
   ILob *iLob = ObjectWrap::Unwrap<ILob>(args.Holder());
+  string msg;
+
+  if( !iLob->njsconn_->isValid() )
+  {
+    msg = NJSMessages::getErrorMsg ( errInvalidConnection );
+    NJS_SET_EXCEPTION( msg.c_str(), (int) msg.length() );
+    NanReturnUndefined ();
+  }
 
   try
   {
@@ -565,21 +608,34 @@ NAN_SETTER(ILob::SetPieceSize)
   NanScope();
 
   ILob *iLob = ObjectWrap::Unwrap<ILob>(args.Holder());
+  string msg;
 
   NJS_SET_PROP_UINT(iLob->bufSize_, value, "pieceSize");
 
   if (iLob->state_ == ACTIVE)
   {
-    string msg = NJSMessages::getErrorMsg(errBusyLob);
+    msg = NJSMessages::getErrorMsg(errBusyLob);
 
     NJS_SET_EXCEPTION(msg.c_str(), (int)msg.length());
+    return;
+  }
+
+  if( !iLob->njsconn_->isValid() )
+  {
+    msg = NJSMessages::getErrorMsg ( errInvalidConnection );
+    NJS_SET_EXCEPTION( msg.c_str(), (int) msg.length() );
+    return;
   }
 
   if (iLob->buf_)
     delete [] iLob->buf_;
   
   if (iLob->fetchType_ == DpiClob)
-    iLob->buf_ = new char[iLob->bufSize_ * 4];// accommodate multi-byte charsets
+  {
+    // accommodate multi-byte charsets
+    iLob->buf_ = new char[iLob->bufSize_ *
+                           iLob->dpiconn_->getByteExpansionRatio()];
+  }
   else
     iLob->buf_ = new char[iLob->bufSize_];
 }
@@ -606,6 +662,14 @@ NAN_PROPERTY_GETTER(ILob::GetOffset)
   NanScope();
 
   ILob *iLob = ObjectWrap::Unwrap<ILob>(args.Holder());
+  string msg;
+
+  if( !iLob->njsconn_->isValid() )
+  {
+    msg = NJSMessages::getErrorMsg ( errInvalidConnection );
+    NJS_SET_EXCEPTION( msg.c_str(), (int) msg.length() );
+    NanReturnUndefined ();
+  }
 
   try
   {
@@ -645,6 +709,7 @@ NAN_SETTER(ILob::SetOffset)
 
   ILob  *iLob = ObjectWrap::Unwrap<ILob>(args.Holder());
   double offset = 0.0;
+  string msg;
 
   NJS_SET_PROP_UINT(offset, value, "offset");
 
@@ -657,9 +722,17 @@ NAN_SETTER(ILob::SetOffset)
   
   if (iLob->state_ == ACTIVE)
   {
-    string msg = NJSMessages::getErrorMsg(errBusyLob);
+    msg = NJSMessages::getErrorMsg(errBusyLob);
 
     NJS_SET_EXCEPTION(msg.c_str(), (int)msg.length());
+    return;
+  }
+
+  if( !iLob->njsconn_->isValid() )
+  {
+    msg = NJSMessages::getErrorMsg ( errInvalidConnection );
+    NJS_SET_EXCEPTION( msg.c_str(), (int) msg.length() );
+    return;
   }
 
   iLob->offset_ = (unsigned long long) offset;
@@ -708,6 +781,12 @@ NAN_METHOD(ILob::Read)
    // mark Lob as active before leaving main thread, but not in
    // case of an error.
   iLob->state_ = ACTIVE;       
+
+  if( !iLob->njsconn_->isValid() )
+  {
+    lobBaton->error = NJSMessages::getErrorMsg ( errInvalidConnection );
+    goto exitRead;
+  }
 
  exitRead:
 
@@ -893,6 +972,12 @@ NAN_METHOD(ILob::Write)
    // mark Lob as active before leaving main thread, but not in
    // case of an error
   iLob->state_ = ACTIVE;       
+
+  if( !iLob->njsconn_->isValid() )
+  {
+    lobBaton->error = NJSMessages::getErrorMsg ( errInvalidConnection );
+    goto exitWrite;
+  }
 
  exitWrite:
 

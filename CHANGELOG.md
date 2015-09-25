@@ -2,6 +2,10 @@
 
 ## node-oracledb v1.2.0 (DD Mon YYYY)
 
+- Optimized CLOB memory allocation to account for different database-to-client character set expansions.
+
+- Fixed a crash while reading a LOB from a closed connection
+
 - Improved installer messages for Oracle client header and library detection on Linux, OS X and Solaris.
 
 ## node-oracledb v1.1.0 (3 Sep 2015)
