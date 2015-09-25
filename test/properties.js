@@ -39,7 +39,7 @@ var should = require('should');
 var async = require('async');
 var dbConfig = require('./dbConfig.js');
 
-describe.skip('58. properties.js', function() {
+describe('58. properties.js', function() {
 
   if(dbConfig.externalAuth){
     var credential = { externalAuth: true, connectString: dbConfig.connectString };
@@ -66,10 +66,6 @@ describe.skip('58. properties.js', function() {
       defaultValues.outFormat       = oracledb.outFormat;
       defaultValues.lobPrefetchSize = oracledb.lobPrefetchSize;    
 
-      console.log("default fetchAsString value: ", defaultValues.fetchAsString);
-      console.log("default type of fetchAsString", typeof (defaultValues.fetchAsString) ) ;  
-      console.log("original value of fetchAsString: ", oracledb.fetchAsString);
-      console.log("original type of fetchAsString: ", typeof (oracledb.fetchAsString) );
       /* 
        * lobPrefetchSize property is currently disabled. 
        * Resetting it to default will lead to uncaught error "NJS-021: invalid type for conversion specified" 
@@ -90,9 +86,6 @@ describe.skip('58. properties.js', function() {
       oracledb.fetchAsString    = defaultValues.fetchAsString;  
       oracledb.outFormat        = defaultValues.outFormat;      
       oracledb.lobPrefetchSize  = defaultValues.lobPrefetchSize;
-
-      console.log("at last, fetchAsString value", oracledb.fetchAsString);
-      console.log("at last, type of fetchAsString", typeof oracledb.fetchAsString);
     })
    
     it('58.1.1 poolMin', function() {
@@ -301,7 +294,17 @@ describe.skip('58. properties.js', function() {
       });
     })
 
-    it('58.3.1 stmtCacheSize', function() {
+    it('58.3.1 Connection object intial toString values', function() {
+      connection.should.be.an.Object;
+
+      should.equal(connection.action, null);
+      should.equal(connection.module, null);
+      should.equal(connection.clientId, null);
+
+      (connection.stmtCacheSize).should.be.a.Number.and.be.above(0);
+    })
+
+    it('58.3.2 stmtCacheSize', function() {
       var t = connection.stmtCacheSize;
       t.should.be.a.Number;
 
@@ -313,7 +316,7 @@ describe.skip('58. properties.js', function() {
       }
     })
 
-    it('58.3.2 clientId', function() {
+    it('58.3.3 clientId', function() {
 
       try {
         var t = connection.clientId;
@@ -332,7 +335,7 @@ describe.skip('58. properties.js', function() {
       connection.clientId = "103.3";
     })
 
-    it('58.3.3 action', function() {
+    it('58.3.4 action', function() {
       
       try {
         var t = connection.action;
@@ -351,7 +354,7 @@ describe.skip('58. properties.js', function() {
       connection.action = "103.3 action";
     })
 
-    it('58.3.4 module', function() {
+    it('58.3.5 module', function() {
    
       try {
         var t = connection.module;
