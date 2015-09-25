@@ -124,7 +124,7 @@ npm config set https-proxy http://my-proxy.example.com:80
 ```
 
 Install node-oracledb from the
-[NPM repository](https://www.npmjs.com/package/oracledb):
+[NPM registry](https://www.npmjs.com/package/oracledb):
 
 ```
 npm install oracledb
@@ -242,7 +242,7 @@ npm config set https-proxy http://my-proxy.example.com:80
 ```
 
 Install node-oracledb from the
-[NPM repository](https://www.npmjs.com/package/oracledb):
+[NPM registry](https://www.npmjs.com/package/oracledb):
 
 ```
 npm install oracledb
@@ -325,7 +325,7 @@ npm config set https-proxy http://my-proxy.example.com:80
 ```
 
 Install node-oracledb from the
-[NPM repository](https://www.npmjs.com/package/oracledb):
+[NPM registry](https://www.npmjs.com/package/oracledb):
 
 ```
 npm install oracledb
@@ -432,7 +432,7 @@ npm config set https-proxy http://my-proxy.example.com:80
 ```
 
 Install node-oracledb from the
-[NPM repository](https://www.npmjs.com/package/oracledb):
+[NPM registry](https://www.npmjs.com/package/oracledb):
 
 ```
 npm install oracledb
@@ -569,7 +569,7 @@ npm config set https-proxy http://my-proxy.example.com:80
 ```
 
 Install node-oracledb from the
-[NPM repository](https://www.npmjs.com/package/oracledb):
+[NPM registry](https://www.npmjs.com/package/oracledb):
 
 ```
 npm install oracledb

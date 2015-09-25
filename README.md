@@ -81,7 +81,7 @@ There are examples in the [examples](https://github.com/oracle/node-oracledb/tre
 The basic install steps are:
 
 - Install the small, free [Oracle Instant Client](http://www.oracle.com/technetwork/database/features/instant-client/index-100365.html) libraries if your database is remote.  Or use a locally installed database such as the free [Oracle XE](http://www.oracle.com/technetwork/database/database-technologies/express-edition/overview/index.html) release.
-- Run `npm install oracledb` to install from the NPM registry.
+- Run `npm install oracledb` to install from the [NPM registry](https://www.npmjs.com/package/oracledb).
 
 See [INSTALL](https://github.com/oracle/node-oracledb/tree/master/INSTALL.md) for details.
 
