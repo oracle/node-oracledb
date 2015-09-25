@@ -481,8 +481,9 @@ Install the Python 2.7 MSI from
 [www.python.org](https://www.python.org/downloads).  Select the
 customization option to "Add python.exe to Path".
 
-If you decide to build a 32-bit executable, make sure to consistently
-use a 32-bit stack during build and run time.
+If you use a 32-bit Node.js, make sure to use a 32-bit Oracle client
+during build and run time.  Otherwise use a 64-bit Node.js with a
+64-bit Oracle client.
 
 ### 6.2 Install Node.js
 
