@@ -254,10 +254,8 @@ describe('1. connection.js', function(){
         "SELECT * FROM oracledb_employees", 
         {}, { maxRows: 0 },
         function(err, result){
-          should.not.exist(err);
-          should.exist(result);
-
-          (result.rows).should.have.length(0);
+          should.exist(err);
+          err.message.should.startWith('NJS-026:');
           done();
         }
       );

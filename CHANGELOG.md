@@ -2,6 +2,10 @@
 
 ## node-oracledb v1.2.0 (DD Mon YYYY)
 
+- Remove non-portable memory allocation for queries that return NULL.
+
+- Added check to make sure maxRows is greater than zero for non-ResultSet queries.
+
 - Fixed AIX-specific REF CURSOR related failures.
 
 - Optimized CLOB memory allocation to account for different database-to-client character set expansions.

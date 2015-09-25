@@ -1386,6 +1386,13 @@ void Connection::DoDefines ( eBaton* executeBaton, const dpi::MetaData* meta,
   Define *defines = executeBaton->defines = new Define[numCols];
   int csratio = executeBaton->dpiconn->getByteExpansionRatio ();
 
+  // Check for maxRows must be greater than zero in case of non-resultSet
+  if ( executeBaton->maxRows == 0 )
+  {
+    executeBaton->error = NJSMessages::getErrorMsg ( errInvalidmaxRows );
+    return;
+  }
+
   for (unsigned int col = 0; col < numCols; col++)
   {
     switch(meta[col].dbType)
@@ -1431,26 +1438,36 @@ void Connection::DoDefines ( eBaton* executeBaton, const dpi::MetaData* meta,
          * size expansion when data is converted from the DB character set
          * to AL32UTF8
          */
- 
-        defines[col].maxSize   = (meta[col].dbSize) * csratio;
 
-        if ( NJS_SIZE_T_OVERFLOW ( defines[col].maxSize,
-                                       executeBaton->maxRows ) )
+        if ( meta[col].dbSize != 0 )
         {
-          executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
-          return;
-        }
-        else
-        {
-          defines[col].buf = (char *)malloc( (size_t)defines[col].maxSize*
-                                             executeBaton->maxRows );
-          if( !defines[col].buf )
+          /* dbSize will be zero in case of "select null from dual" and
+           * malloc(0) behaves diffrently on different platforms, so avoiding it
+           */
+          defines[col].maxSize   = (meta[col].dbSize) * csratio;
+  
+          if ( NJS_SIZE_T_OVERFLOW ( defines[col].maxSize,
+                                         executeBaton->maxRows ) )
           {
-            executeBaton->error = NJSMessages::getErrorMsg( 
-                                    errInsufficientMemory );
+            executeBaton->error = NJSMessages::getErrorMsg(
+                                               errResultsTooLarge );
             return;
           }
+          else
+          {
+            defines[col].buf = (char *)malloc( (size_t)defines[col].maxSize*
+                                               executeBaton->maxRows );
+            if( !defines[col].buf )
+            {
+              executeBaton->error = NJSMessages::getErrorMsg( 
+                                      errInsufficientMemory );
+              return;
+            }
+          }
         }
+        /* The null scenario will have indicator as -1, so memory allocation
+         * not required.
+         */
         break;
       case dpi::DpiDate :
       case dpi::DpiTimestamp:

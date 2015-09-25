@@ -60,6 +60,7 @@ static const char *errMsg[] =
   "NJS-023: concurrent operations on LOB are not allowed",
   "NJS-024: memory allocation failed",
   "NJS-025: overflow when calculating results area size",
+  "NJS-026: maxRows must be greater than zero",
 };
 
 string NJSMessages::getErrorMsg ( NJSErrorType err, ... )
