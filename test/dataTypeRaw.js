@@ -308,7 +308,7 @@ describe('42. dataTypeRaw.js', function() {
 
   }) // 42.3
 
-  describe.skip('42.4 in PL/SQL, the maximum size is 32767', function() {
+  describe('42.4 in PL/SQL, the maximum size is 32767', function() {
     
     var proc = 
       "CREATE OR REPLACE PROCEDURE oracledb_testraw (p_in IN RAW, p_out OUT RAW) " +
@@ -337,27 +337,83 @@ describe('42. dataTypeRaw.js', function() {
       );
     })
    
-    it('42.4.1 when data length is 200', function(done) {
-      var buf = assist.createBuffer(2);
+    it('42.4.1 when data length is less than maxSize', function(done) {
+      var size = 5;
+      var buf = assist.createBuffer(size);
 
       connection.execute(
         "BEGIN oracledb_testraw(:i, :o); END;",
         {
           i: { type: oracledb.BUFFER, dir: oracledb.BIND_IN, val: buf },
-          o: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: 20}
+          o: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: 10}
         },
-        /* ORA-06502: PL/SQL: numeric or value error: raw variable length too long */ 
         function(err, result) {
           should.not.exist(err);
-          // console.log(result);
-          //(result.outBinds.o.length).should.be.exactly(200);
-          // console.log(result.outBinds.o.length);
-          console.log( Buffer.isBuffer(result.outBinds.o) );
+
+          ( Buffer.isBuffer(result.outBinds.o) ).should.equal(true, "Error: the bind out data is not a Buffer");
+          (result.outBinds.o.length).should.be.exactly(size);
           done();
         }
       );
     })
 
+    it('42.4.2 when data length is 32767', function(done) {
+      var size = 32767;
+      var buf = assist.createBuffer(size);
+
+      connection.execute(
+        "BEGIN oracledb_testraw(:i, :o); END;",
+        {
+          i: { type: oracledb.BUFFER, dir: oracledb.BIND_IN, val: buf },
+          o: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: 32767}
+        },
+        function(err, result) {
+          should.not.exist(err);
+
+          ( Buffer.isBuffer(result.outBinds.o) ).should.equal(true, "Error: the bind out data is not a Buffer");
+          (result.outBinds.o.length).should.be.exactly(size);
+          done();
+        }
+      );
+    })
+
+    it('42.4.3 when data length greater than maxSize', function(done) {
+      var size = 32800;
+      var buf = assist.createBuffer(size);
+
+      connection.execute(
+        "BEGIN oracledb_testraw(:i, :o); END;",
+        {
+          i: { type: oracledb.BUFFER, dir: oracledb.BIND_IN, val: buf },
+          o: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: 32767}
+        },
+        function(err, result) {
+          should.exist(err);
+          // ORA-01460: unimplemented or unreasonable conversion requested
+          (err.message).should.startWith('ORA-01460');
+          done();
+        }
+      );
+    })
+
+    it('42.4.4 when maxSize is greater than 32767', function(done) {
+      var size = 32800;
+      var buf = assist.createBuffer(size);
+
+      connection.execute(
+        "BEGIN oracledb_testraw(:i, :o); END;",
+        {
+          i: { type: oracledb.BUFFER, dir: oracledb.BIND_IN, val: buf },
+          o: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: 40000}
+        },
+        function(err, result) {
+          should.exist(err);
+          // ORA-01460: unimplemented or unreasonable conversion requested
+          (err.message).should.startWith('ORA-01460');
+          done();
+        }
+      );
+    })
   }) // 42.4
 
 })

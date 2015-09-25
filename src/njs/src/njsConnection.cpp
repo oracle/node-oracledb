@@ -3133,7 +3133,16 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
     break;
 
   case dpi::DpiRaw:
-    bind->value = (void *)malloc ( bind->maxSize ) ;
+    if ( NJS_SIZE_T_OVERFLOW ( bind->maxSize, nRows ) )
+    {
+      executeBaton->error = NJSMessages::getErrorMsg ( errResultsTooLarge );
+      return;
+    }
+    else
+    {
+      bind->value = (void *)malloc ( (size_t)(bind->maxSize) * nRows ) ;
+      *(bind->len) = (unsigned int)bind->maxSize;
+    }
     break;
   }
 }
