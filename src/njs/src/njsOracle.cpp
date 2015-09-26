@@ -713,7 +713,7 @@ void Oracledb::Async_AfterGetConnection (uv_work_t *req)
   Nan::HandleScope scope;
   connectionBaton *connBaton = (connectionBaton*)req->data;
 
-  v8::TryCatch tc;
+  Nan::TryCatch tc;
   Local<Value> argv[2];
   if( !(connBaton->error).empty() )
   {
@@ -738,7 +738,7 @@ void Oracledb::Async_AfterGetConnection (uv_work_t *req)
     2, 
     argv );
   if(tc.HasCaught())
-    node::FatalException(tc);
+    Nan::FatalException(tc);
 }
 
 /*****************************************************************************/
@@ -862,7 +862,7 @@ void Oracledb::Async_AfterCreatePool (uv_work_t *req)
   Nan::HandleScope scope;
   connectionBaton *poolBaton = (connectionBaton *)req->data;
 
-  v8::TryCatch tc;
+  Nan::TryCatch tc;
   Local<Value> argv[2];
 
   if (!poolBaton->error.empty())
@@ -891,7 +891,7 @@ void Oracledb::Async_AfterCreatePool (uv_work_t *req)
                        callback, 2, argv);
   if(tc.HasCaught())
   {
-    node::FatalException (tc);
+    Nan::FatalException (tc);
   }
 }
 

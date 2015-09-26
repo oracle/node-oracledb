@@ -932,7 +932,7 @@ void ILob::Async_AfterRead(uv_work_t *req)
 
   LobBaton     *lobBaton = (LobBaton *)req->data;
   ILob         *iLob = lobBaton->iLob;
-  v8::TryCatch  tc;
+  Nan::TryCatch  tc;
   Local<Value> argv[2];
 
   iLob->state_ = INACTIVE;     // mark Lob as inactive as back in main thread
@@ -976,7 +976,7 @@ void ILob::Async_AfterRead(uv_work_t *req)
 
   if(tc.HasCaught())
   {
-    node::FatalException(tc);
+    Nan::FatalException(tc);
   }
 }
 
@@ -1116,7 +1116,7 @@ void ILob::Async_AfterWrite(uv_work_t *req)
 
   LobBaton     *lobBaton = (LobBaton *)req->data;
   ILob         *iLob = lobBaton->iLob;
-  v8::TryCatch  tc;
+  Nan::TryCatch  tc;
   Local<Value> argv[1];
 
   iLob->state_ = INACTIVE;     // mark Lob as inactive as back in main thread
@@ -1134,7 +1134,7 @@ void ILob::Async_AfterWrite(uv_work_t *req)
 
   if(tc.HasCaught())
   {
-    node::FatalException(tc);
+    Nan::FatalException(tc);
   }
 }
 

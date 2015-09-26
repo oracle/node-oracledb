@@ -1894,7 +1894,7 @@ void Connection::Async_AfterExecute(uv_work_t *req)
   Nan::HandleScope scope;
 
   eBaton *executeBaton = (eBaton*)req->data;
-  v8::TryCatch tc;
+  Nan::TryCatch tc;
   Local<Value> argv[2];
   if(!(executeBaton->error).empty())
   {
@@ -1971,7 +1971,7 @@ void Connection::Async_AfterExecute(uv_work_t *req)
   Nan::MakeCallback( Nan::GetCurrentContext()->Global(), callback, 2, argv );
   if(tc.HasCaught())
   {
-    node::FatalException(tc);
+    Nan::FatalException(tc);
   }
 }
 
@@ -2344,7 +2344,7 @@ v8::Local<v8::Value> Connection::GetArrayValue ( eBaton *executeBaton,
     {
       ProtoILob *protoILob = *((ProtoILob **)binds->value + index);
       val = NewLob(executeBaton, protoILob);
-      Nan::Set(arrVal, index, Nan::New<v8::Value>(val));
+      Nan::Set(arrVal, index, val);
       delete protoILob;
       *(ProtoILob **)binds->value = NULL;
     }
@@ -2531,7 +2531,7 @@ void Connection::Async_AfterRelease(uv_work_t *req)
 {
   Nan::HandleScope scope;
   eBaton *releaseBaton = (eBaton*)req->data;
-  v8::TryCatch tc;
+  Nan::TryCatch tc;
 
   Local<Value> argv[1];
 
@@ -2545,7 +2545,7 @@ void Connection::Async_AfterRelease(uv_work_t *req)
                       callback, 1, argv );
   if(tc.HasCaught())
   {
-    node::FatalException(tc);
+    Nan::FatalException(tc);
   }
 }
 
@@ -2626,7 +2626,7 @@ void Connection::Async_AfterCommit (uv_work_t *req)
   Nan::HandleScope scope;
   eBaton *commitBaton = (eBaton*)req->data;
 
-  v8::TryCatch tc;
+  Nan::TryCatch tc;
   Local<Value> argv[1];
 
   if(!(commitBaton->error).empty())
@@ -2638,7 +2638,7 @@ void Connection::Async_AfterCommit (uv_work_t *req)
                       Nan::New<Function>(commitBaton->cb), 1, argv );
   if(tc.HasCaught())
   {
-    node::FatalException(tc);
+    Nan::FatalException(tc);
   }
   delete commitBaton;
 }
@@ -2718,7 +2718,7 @@ void Connection::Async_AfterRollback(uv_work_t *req)
   Nan::HandleScope scope;
   eBaton *rollbackBaton = (eBaton*)req->data;
 
-  v8::TryCatch tc;
+  Nan::TryCatch tc;
   Local<Value> argv[1];
 
   if(!(rollbackBaton->error).empty())
@@ -2730,7 +2730,7 @@ void Connection::Async_AfterRollback(uv_work_t *req)
                       Nan::New<Function>(rollbackBaton->cb), 1, argv );
   if(tc.HasCaught())
   {
-    node::FatalException(tc);
+    Nan::FatalException(tc);
   }
   delete rollbackBaton;
 }
@@ -2813,7 +2813,7 @@ void Connection::Async_AfterBreak (uv_work_t *req)
   Nan::HandleScope scope;
   eBaton *breakBaton = (eBaton*)req->data;
 
-  v8::TryCatch tc;
+  Nan::TryCatch tc;
   Local<Value> argv[1];
 
   if(!(breakBaton->error).empty()) 
@@ -2824,7 +2824,7 @@ void Connection::Async_AfterBreak (uv_work_t *req)
                       Nan::New<Function>(breakBaton->cb), 1, argv );
   if(tc.HasCaught())
   {
-    node::FatalException(tc);
+    Nan::FatalException(tc);
   }
   delete breakBaton;
 }

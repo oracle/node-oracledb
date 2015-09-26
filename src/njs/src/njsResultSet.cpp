@@ -477,7 +477,7 @@ void ResultSet::Async_AfterGetRows(uv_work_t *req)
   Nan::HandleScope scope;
 
   rsBaton *getRowsBaton = (rsBaton*)req->data;
-  v8::TryCatch tc;
+  Nan::TryCatch tc;
   Local<Value> argv[2];
 
   if(!(getRowsBaton->error).empty())
@@ -519,7 +519,7 @@ void ResultSet::Async_AfterGetRows(uv_work_t *req)
                   callback, 2, argv);
   if(tc.HasCaught())
   {
-    node::FatalException(tc);
+    Nan::FatalException(tc);
   }
   delete getRowsBaton;
 }
@@ -639,7 +639,7 @@ void ResultSet::Async_AfterClose(uv_work_t *req)
   Nan::HandleScope scope;
   rsBaton *closeBaton = (rsBaton*)req->data;
 
-  v8::TryCatch tc;
+  Nan::TryCatch tc;
 
   Local<Value> argv[1];
 
@@ -662,7 +662,7 @@ void ResultSet::Async_AfterClose(uv_work_t *req)
   Nan::MakeCallback( Nan::GetCurrentContext()->Global(), callback, 1, argv );
   if(tc.HasCaught())
   {
-    node::FatalException(tc);
+    Nan::FatalException(tc);
   }
 }
 

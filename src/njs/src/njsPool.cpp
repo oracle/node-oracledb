@@ -458,7 +458,7 @@ void Pool::Async_AfterGetConnection(uv_work_t *req)
   Nan::HandleScope scope;
   poolBaton *connBaton = (poolBaton*)req->data;
 
-  v8::TryCatch tc;
+  Nan::TryCatch tc;
   Local<Value> argv[2];
   if(!(connBaton->error).empty())
   {
@@ -482,7 +482,7 @@ void Pool::Async_AfterGetConnection(uv_work_t *req)
     argv);
   if(tc.HasCaught())
   {
-    node::FatalException(tc);
+    Nan::FatalException(tc);
   }
   delete connBaton;
 }
@@ -566,7 +566,7 @@ void Pool::Async_AfterTerminate(uv_work_t *req)
   Nan::HandleScope scope;
   poolBaton *terminateBaton = (poolBaton*)req->data;
 
-  v8::TryCatch tc;
+  Nan::TryCatch tc;
 
   Local<Value> argv[1];
 
@@ -588,7 +588,7 @@ void Pool::Async_AfterTerminate(uv_work_t *req)
     argv );
   if(tc.HasCaught())
   {
-    node::FatalException(tc);
+    Nan::FatalException(tc);
   }
   delete terminateBaton;
 }
