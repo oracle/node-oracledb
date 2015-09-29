@@ -55,7 +55,7 @@
     "host": "https://node-oracledb.s3-website-us-east-1.amazonaws.com",
     "remote_path": "./{module_name}/v{version}",
     "package_name": "{node_abi}-{platform}-{arch}.tar.gz"
-  }
+  },
   "engineStrict": true,
   "engines": {
     "node": ">=0.10.28 <3"
