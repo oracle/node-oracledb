@@ -41,8 +41,7 @@
       "async": "~0.9.0"
   },
   "scripts": {
-      "test": "node_modules/mocha/bin/mocha -R spec --timeout 10000 test/*.js",
-      "testWin": "node node_modules\\mocha\\bin\\mocha -R spec --timeout 10000 test\\*.js"
+      "test": "node runMocha.js"
   },
   "engineStrict": true,
   "engine-strict": true,
