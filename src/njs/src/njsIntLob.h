@@ -139,7 +139,7 @@ private:
 
 
 
-class ILob : public ObjectWrap
+class ILob : public Nan::ObjectWrap
 {
  public:
   void setILob(eBaton *executeBaton,  ProtoILob *protoILob);
@@ -166,11 +166,11 @@ class ILob : public ObjectWrap
 
   
                                 // Getters for properties
-  static NAN_PROPERTY_GETTER(GetChunkSize);
-  static NAN_PROPERTY_GETTER(GetLength);
-  static NAN_PROPERTY_GETTER(GetPieceSize);
-  static NAN_PROPERTY_GETTER(GetOffset);
-  static NAN_PROPERTY_GETTER(GetType);
+  static NAN_GETTER(GetChunkSize);
+  static NAN_GETTER(GetLength);
+  static NAN_GETTER(GetPieceSize);
+  static NAN_GETTER(GetOffset);
+  static NAN_GETTER(GetType);
 
   
                                 // Setters for properties

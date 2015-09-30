@@ -60,7 +60,7 @@ using namespace v8;
 using namespace node;
 
 
-class Pool: public ObjectWrap {
+class Pool: public Nan::ObjectWrap {
 public:
 
    static void Init(Handle<Object> target);
@@ -88,13 +88,13 @@ private:
    static void Async_AfterTerminate(uv_work_t* req);
 
   // Define Getter Accessors to properties
-  static NAN_PROPERTY_GETTER(GetPoolMax);
-  static NAN_PROPERTY_GETTER(GetPoolMin);
-  static NAN_PROPERTY_GETTER(GetPoolIncrement);
-  static NAN_PROPERTY_GETTER(GetPoolTimeout);
-  static NAN_PROPERTY_GETTER(GetConnectionsOpen);
-  static NAN_PROPERTY_GETTER(GetConnectionsInUse);
-  static NAN_PROPERTY_GETTER(GetStmtCacheSize);
+  static NAN_GETTER(GetPoolMax);
+  static NAN_GETTER(GetPoolMin);
+  static NAN_GETTER(GetPoolIncrement);
+  static NAN_GETTER(GetPoolTimeout);
+  static NAN_GETTER(GetConnectionsOpen);
+  static NAN_GETTER(GetConnectionsInUse);
+  static NAN_GETTER(GetStmtCacheSize);
 
   static Local<Primitive> getPoolProperty(Pool* njsPool, unsigned int poolProperty);
 

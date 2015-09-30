@@ -179,9 +179,9 @@ Local<Primitive> Pool::getPoolProperty(Pool* njsPool, unsigned int poolProperty)
    DESCRIPTION
      Get Accessor of poolMin Property
 */
-NAN_PROPERTY_GETTER(Pool::GetPoolMin)
+NAN_GETTER(Pool::GetPoolMin)
 {
-  Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
+  Pool* njsPool = Nan::ObjectWrap::Unwrap<Pool>(info.Holder());
   info.GetReturnValue().Set(getPoolProperty( njsPool, njsPool->poolMin_));
 }
 
@@ -190,9 +190,9 @@ NAN_PROPERTY_GETTER(Pool::GetPoolMin)
    DESCRIPTION
      Get Accessor of poolMax Property
 */
-NAN_PROPERTY_GETTER(Pool::GetPoolMax)
+NAN_GETTER(Pool::GetPoolMax)
 {
-  Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
+  Pool* njsPool = Nan::ObjectWrap::Unwrap<Pool>(info.Holder());
   info.GetReturnValue().Set(getPoolProperty( njsPool, njsPool->poolMax_));
 }
 
@@ -201,9 +201,9 @@ NAN_PROPERTY_GETTER(Pool::GetPoolMax)
    DESCRIPTION
      Get Accessor of poolIncrement Property
 */
-NAN_PROPERTY_GETTER(Pool::GetPoolIncrement)
+NAN_GETTER(Pool::GetPoolIncrement)
 {
-  Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
+  Pool* njsPool = Nan::ObjectWrap::Unwrap<Pool>(info.Holder());
   info.GetReturnValue().Set(getPoolProperty( njsPool, njsPool->poolIncrement_));
 }
 
@@ -212,9 +212,9 @@ NAN_PROPERTY_GETTER(Pool::GetPoolIncrement)
    DESCRIPTION
      Get Accessor of poolTimeout Property
 */
-NAN_PROPERTY_GETTER(Pool::GetPoolTimeout)
+NAN_GETTER(Pool::GetPoolTimeout)
 {
-  Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
+  Pool* njsPool = Nan::ObjectWrap::Unwrap<Pool>(info.Holder());
   info.GetReturnValue().Set(getPoolProperty( njsPool, njsPool->poolTimeout_));
 }
 
@@ -223,9 +223,9 @@ NAN_PROPERTY_GETTER(Pool::GetPoolTimeout)
    DESCRIPTION
      Get Accessor of connectionsOpen Property
 */
-NAN_PROPERTY_GETTER(Pool::GetConnectionsOpen)
+NAN_GETTER(Pool::GetConnectionsOpen)
 {
-  Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
+  Pool* njsPool = Nan::ObjectWrap::Unwrap<Pool>(info.Holder());
   if(!njsPool->isValid_)
   {
     string msg = NJSMessages::getErrorMsg(errInvalidPool);
@@ -251,9 +251,9 @@ NAN_PROPERTY_GETTER(Pool::GetConnectionsOpen)
    DESCRIPTION
      Get Accessor of connectionsInUse Property
 */
-NAN_PROPERTY_GETTER(Pool::GetConnectionsInUse)
+NAN_GETTER(Pool::GetConnectionsInUse)
 {
-  Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
+  Pool* njsPool = Nan::ObjectWrap::Unwrap<Pool>(info.Holder());
   if(!njsPool->isValid_)
   {
     string error = NJSMessages::getErrorMsg ( errInvalidPool );
@@ -279,9 +279,9 @@ NAN_PROPERTY_GETTER(Pool::GetConnectionsInUse)
    DESCRIPTION
      Get Accessor of stmtCacheSize Property
 */
-NAN_PROPERTY_GETTER(Pool::GetStmtCacheSize)
+NAN_GETTER(Pool::GetStmtCacheSize)
 {
-  Pool* njsPool = ObjectWrap::Unwrap<Pool>(info.Holder());
+  Pool* njsPool = Nan::ObjectWrap::Unwrap<Pool>(info.Holder());
   info.GetReturnValue().Set(getPoolProperty( njsPool, njsPool->stmtCacheSize_));
 }
 
@@ -308,7 +308,7 @@ void Pool::setPoolProperty (Pool* njsPool, string property)
 */
 NAN_SETTER(Pool::SetPoolMin)
 {
-  setPoolProperty(ObjectWrap::Unwrap<Pool>(info.Holder()), "poolMin");
+  setPoolProperty(Nan::ObjectWrap::Unwrap<Pool>(info.Holder()), "poolMin");
 }
 
 /*****************************************************************************/
@@ -318,7 +318,7 @@ NAN_SETTER(Pool::SetPoolMin)
 */
 NAN_SETTER(Pool::SetPoolMax)
 {
-  setPoolProperty(ObjectWrap::Unwrap<Pool>(info.Holder()), "poolMax");
+  setPoolProperty(Nan::ObjectWrap::Unwrap<Pool>(info.Holder()), "poolMax");
 }
 
 /*****************************************************************************/
@@ -328,7 +328,7 @@ NAN_SETTER(Pool::SetPoolMax)
 */
 NAN_SETTER(Pool::SetPoolIncrement)
 {
-  setPoolProperty(ObjectWrap::Unwrap<Pool>(info.Holder()), "poolIncrement");
+  setPoolProperty(Nan::ObjectWrap::Unwrap<Pool>(info.Holder()), "poolIncrement");
 }
 
 /*****************************************************************************/
@@ -338,7 +338,7 @@ NAN_SETTER(Pool::SetPoolIncrement)
 */
 NAN_SETTER(Pool::SetPoolTimeout)
 {
-  setPoolProperty(ObjectWrap::Unwrap<Pool>(info.Holder()), "poolTimeout");
+  setPoolProperty(Nan::ObjectWrap::Unwrap<Pool>(info.Holder()), "poolTimeout");
 }
 
 /*****************************************************************************/
@@ -348,7 +348,7 @@ NAN_SETTER(Pool::SetPoolTimeout)
 */
 NAN_SETTER(Pool::SetConnectionsOpen)
 {
-  setPoolProperty(ObjectWrap::Unwrap<Pool>(info.Holder()), "connectionsOpen");
+  setPoolProperty(Nan::ObjectWrap::Unwrap<Pool>(info.Holder()), "connectionsOpen");
 }
 
 /*****************************************************************************/
@@ -358,7 +358,7 @@ NAN_SETTER(Pool::SetConnectionsOpen)
 */
 NAN_SETTER(Pool::SetConnectionsInUse)
 {
-  setPoolProperty(ObjectWrap::Unwrap<Pool>(info.Holder()), "connectionsInUse");
+  setPoolProperty(Nan::ObjectWrap::Unwrap<Pool>(info.Holder()), "connectionsInUse");
 }
 
 /*****************************************************************************/
@@ -368,7 +368,7 @@ NAN_SETTER(Pool::SetConnectionsInUse)
 */
 NAN_SETTER(Pool::SetStmtCacheSize)
 {
-  setPoolProperty(ObjectWrap::Unwrap<Pool>(info.Holder()), "stmtCacheSize");
+  setPoolProperty(Nan::ObjectWrap::Unwrap<Pool>(info.Holder()), "stmtCacheSize");
 }
 
 /*****************************************************************************/
@@ -385,7 +385,7 @@ NAN_METHOD(Pool::GetConnection)
   Local<Function> callback;
   NJS_GET_CALLBACK ( callback, info );
 
-  Pool *njsPool = ObjectWrap::Unwrap<Pool>(info.This());
+  Pool *njsPool = Nan::ObjectWrap::Unwrap<Pool>(info.This());
 
   poolBaton *connBaton = new poolBaton ();
   connBaton->cb.Reset( callback );
@@ -470,7 +470,7 @@ void Pool::Async_AfterGetConnection(uv_work_t *req)
     argv[0] = Nan::Undefined();
     Local<FunctionTemplate> lft = Nan::New(Connection::connectionTemplate_s);
     Local<Object> connection = lft->GetFunction()-> NewInstance();
-    (ObjectWrap::Unwrap<Connection> (connection))->
+    (Nan::ObjectWrap::Unwrap<Connection> (connection))->
                                  setConnection( connBaton->dpiconn,
                                                 connBaton->njspool->oracledb_ );
     argv[1] = connection;
@@ -501,7 +501,7 @@ NAN_METHOD(Pool::Terminate)
   Local<Function> callback;
   NJS_GET_CALLBACK ( callback, info );
 
-  Pool *njsPool = ObjectWrap::Unwrap<Pool>(info.This());
+  Pool *njsPool = Nan::ObjectWrap::Unwrap<Pool>(info.This());
 
   poolBaton *terminateBaton = new poolBaton ();
   terminateBaton->cb.Reset( callback );

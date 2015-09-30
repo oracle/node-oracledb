@@ -225,9 +225,9 @@ NAN_METHOD(Oracledb::New)
    DESCRIPTION
      Get Accessor of poolMin Property
 */
-NAN_PROPERTY_GETTER(Oracledb::GetPoolMin)
+NAN_GETTER(Oracledb::GetPoolMin)
 {
-  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
+  Oracledb* oracledb = Nan::ObjectWrap::Unwrap<Oracledb>(info.Holder());
   info.GetReturnValue().Set(oracledb->poolMin_);
 }
 
@@ -238,7 +238,7 @@ NAN_PROPERTY_GETTER(Oracledb::GetPoolMin)
 */
 NAN_SETTER(Oracledb::SetPoolMin)
 {
-  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
+  Oracledb* oracledb = Nan::ObjectWrap::Unwrap<Oracledb>(info.Holder());
   NJS_SET_PROP_UINT(oracledb->poolMin_, value, "poolMin");
 }
 
@@ -247,9 +247,9 @@ NAN_SETTER(Oracledb::SetPoolMin)
    DESCRIPTION
      Get Accessor of poolMax Property
 */
-NAN_PROPERTY_GETTER(Oracledb::GetPoolMax)
+NAN_GETTER(Oracledb::GetPoolMax)
 {
-  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
+  Oracledb* oracledb = Nan::ObjectWrap::Unwrap<Oracledb>(info.Holder());
   info.GetReturnValue().Set(oracledb->poolMax_);
 }
 
@@ -260,7 +260,7 @@ NAN_PROPERTY_GETTER(Oracledb::GetPoolMax)
 */
 NAN_SETTER(Oracledb::SetPoolMax)
 {
-  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
+  Oracledb* oracledb = Nan::ObjectWrap::Unwrap<Oracledb>(info.Holder());
   NJS_SET_PROP_UINT(oracledb->poolMax_, value, "poolMax");
 }
 
@@ -269,9 +269,9 @@ NAN_SETTER(Oracledb::SetPoolMax)
    DESCRIPTION
      Get Accessor of poolIncrement Property
 */
-NAN_PROPERTY_GETTER(Oracledb::GetPoolIncrement)
+NAN_GETTER(Oracledb::GetPoolIncrement)
 {
-  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
+  Oracledb* oracledb = Nan::ObjectWrap::Unwrap<Oracledb>(info.Holder());
   Local<Integer> value = Nan::New<v8::Integer>(oracledb->poolIncrement_);
   info.GetReturnValue().Set(value);
 }
@@ -283,7 +283,7 @@ NAN_PROPERTY_GETTER(Oracledb::GetPoolIncrement)
 */
 NAN_SETTER(Oracledb::SetPoolIncrement)
 {
-  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
+  Oracledb* oracledb = Nan::ObjectWrap::Unwrap<Oracledb>(info.Holder());
   NJS_SET_PROP_UINT(oracledb->poolIncrement_, value, "poolIncrement");
 }
 
@@ -292,9 +292,9 @@ NAN_SETTER(Oracledb::SetPoolIncrement)
    DESCRIPTION
      Get Accessor of poolTimeout Property
 */
-NAN_PROPERTY_GETTER(Oracledb::GetPoolTimeout)
+NAN_GETTER(Oracledb::GetPoolTimeout)
 {
-  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
+  Oracledb* oracledb = Nan::ObjectWrap::Unwrap<Oracledb>(info.Holder());
   info.GetReturnValue().Set(oracledb->poolTimeout_);
 }
 
@@ -305,7 +305,7 @@ NAN_PROPERTY_GETTER(Oracledb::GetPoolTimeout)
 */
 NAN_SETTER(Oracledb::SetPoolTimeout)
 {
-  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
+  Oracledb* oracledb = Nan::ObjectWrap::Unwrap<Oracledb>(info.Holder());
   NJS_SET_PROP_UINT(oracledb->poolTimeout_ , value, "poolTimeout");
 }
 
@@ -314,9 +314,9 @@ NAN_SETTER(Oracledb::SetPoolTimeout)
    DESCRIPTION
      Get Accessor of maxRows property
 */
-NAN_PROPERTY_GETTER(Oracledb::GetMaxRows)
+NAN_GETTER(Oracledb::GetMaxRows)
 {
-  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
+  Oracledb* oracledb = Nan::ObjectWrap::Unwrap<Oracledb>(info.Holder());
   Local<Integer> value = Nan::New<v8::Integer>(oracledb->maxRows_);
   info.GetReturnValue().Set(value);
 }
@@ -328,7 +328,7 @@ NAN_PROPERTY_GETTER(Oracledb::GetMaxRows)
 */
 NAN_SETTER(Oracledb::SetMaxRows)
 {
-  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
+  Oracledb* oracledb = Nan::ObjectWrap::Unwrap<Oracledb>(info.Holder());
   NJS_SET_PROP_UINT(oracledb->maxRows_, value, "maxRows");
 }
 
@@ -337,9 +337,9 @@ NAN_SETTER(Oracledb::SetMaxRows)
    DESCRIPTION
      Get Accessor of outFormat property
 */
-NAN_PROPERTY_GETTER(Oracledb::GetOutFormat)
+NAN_GETTER(Oracledb::GetOutFormat)
 {
-  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
+  Oracledb* oracledb = Nan::ObjectWrap::Unwrap<Oracledb>(info.Holder());
   info.GetReturnValue().Set(oracledb->outFormat_);
 }
 
@@ -350,7 +350,7 @@ NAN_PROPERTY_GETTER(Oracledb::GetOutFormat)
 */
 NAN_SETTER(Oracledb::SetOutFormat)
 {
-  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
+  Oracledb* oracledb = Nan::ObjectWrap::Unwrap<Oracledb>(info.Holder());
   NJS_SET_PROP_UINT(oracledb->outFormat_, value, "outFormat");
 }
 
@@ -359,9 +359,9 @@ NAN_SETTER(Oracledb::SetOutFormat)
    DESCRIPTION
      Get Accessor of stmtCacheSize property
 */
-NAN_PROPERTY_GETTER(Oracledb::GetStmtCacheSize)
+NAN_GETTER(Oracledb::GetStmtCacheSize)
 {
-  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
+  Oracledb* oracledb = Nan::ObjectWrap::Unwrap<Oracledb>(info.Holder());
   info.GetReturnValue().Set(Nan::New<v8::Integer>(oracledb->stmtCacheSize_));
 }
 
@@ -372,7 +372,7 @@ NAN_PROPERTY_GETTER(Oracledb::GetStmtCacheSize)
 */
 NAN_SETTER(Oracledb::SetStmtCacheSize)
 {
-  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
+  Oracledb* oracledb = Nan::ObjectWrap::Unwrap<Oracledb>(info.Holder());
   NJS_SET_PROP_UINT(oracledb->stmtCacheSize_, value, "stmtCacheSize");
 }
 
@@ -381,9 +381,9 @@ NAN_SETTER(Oracledb::SetStmtCacheSize)
    DESCRIPTION
      Get Accessor of prefetchRows property
 */
-NAN_PROPERTY_GETTER(Oracledb::GetPrefetchRows)
+NAN_GETTER(Oracledb::GetPrefetchRows)
 {
-  Oracledb* oracledb   = ObjectWrap::Unwrap<Oracledb>(info.Holder());
+  Oracledb* oracledb   = Nan::ObjectWrap::Unwrap<Oracledb>(info.Holder());
   info.GetReturnValue().Set(oracledb->prefetchRows_);
 }
 
@@ -394,7 +394,7 @@ NAN_PROPERTY_GETTER(Oracledb::GetPrefetchRows)
 */
 NAN_SETTER(Oracledb::SetPrefetchRows)
 {
-  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
+  Oracledb* oracledb = Nan::ObjectWrap::Unwrap<Oracledb>(info.Holder());
   NJS_SET_PROP_UINT(oracledb->prefetchRows_, value, "prefetchRows");
 }
 
@@ -404,9 +404,9 @@ NAN_SETTER(Oracledb::SetPrefetchRows)
    DESCRIPTION
      Get Accessor of autoCommit property
 */
-NAN_PROPERTY_GETTER(Oracledb::GetAutoCommit)
+NAN_GETTER(Oracledb::GetAutoCommit)
 {
-  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
+  Oracledb* oracledb = Nan::ObjectWrap::Unwrap<Oracledb>(info.Holder());
   info.GetReturnValue().Set(Nan::New<v8::Boolean>(oracledb->autoCommit_));
 }
 
@@ -417,7 +417,7 @@ NAN_PROPERTY_GETTER(Oracledb::GetAutoCommit)
 */
 NAN_SETTER(Oracledb::SetAutoCommit)
 {
-  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
+  Oracledb* oracledb = Nan::ObjectWrap::Unwrap<Oracledb>(info.Holder());
   oracledb->autoCommit_ = value->ToBoolean()->Value();
 }
 
@@ -426,7 +426,7 @@ NAN_SETTER(Oracledb::SetAutoCommit)
    DESCRIPTION
      Get Accessor of version property
 */
-NAN_PROPERTY_GETTER(Oracledb::GetVersion)
+NAN_GETTER(Oracledb::GetVersion)
 {
   int version = NJS_NODE_ORACLEDB_VERSION;
   info.GetReturnValue().Set(version);
@@ -450,10 +450,10 @@ NAN_SETTER(Oracledb::SetVersion)
   DESCRIPTION
     Get Accessor of connectionClass property
 */
-NAN_PROPERTY_GETTER(Oracledb::GetConnectionClass)
+NAN_GETTER(Oracledb::GetConnectionClass)
 {
 
-  Oracledb *oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
+  Oracledb *oracledb = Nan::ObjectWrap::Unwrap<Oracledb>(info.Holder());
   Local<String> value = Nan::New<v8::String>(oracledb->connClass_.c_str(),
                                           (int)oracledb->connClass_.length ()).ToLocalChecked();
   info.GetReturnValue().Set(value);
@@ -468,7 +468,7 @@ NAN_PROPERTY_GETTER(Oracledb::GetConnectionClass)
 NAN_SETTER(Oracledb::SetConnectionClass)
 {
 
-  Oracledb *oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
+  Oracledb *oracledb = Nan::ObjectWrap::Unwrap<Oracledb>(info.Holder());
   v8::String::Utf8Value utfstr ( value->ToString () );
 
   oracledb->connClass_ = std::string ( *utfstr, utfstr.length() );
@@ -480,10 +480,10 @@ NAN_SETTER(Oracledb::SetConnectionClass)
    DESCRIPTION
      Get Accessor of externalAuth property
 */
-NAN_PROPERTY_GETTER(Oracledb::GetExternalAuth)
+NAN_GETTER(Oracledb::GetExternalAuth)
 {
 
-  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
+  Oracledb* oracledb = Nan::ObjectWrap::Unwrap<Oracledb>(info.Holder());
   info.GetReturnValue().Set((bool)oracledb->externalAuth_);
 }
 
@@ -495,7 +495,7 @@ NAN_PROPERTY_GETTER(Oracledb::GetExternalAuth)
 */
 NAN_SETTER(Oracledb::SetExternalAuth)
 {
-  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
+  Oracledb* oracledb = Nan::ObjectWrap::Unwrap<Oracledb>(info.Holder());
   oracledb->externalAuth_ = value->ToBoolean()->Value();
 }
 
@@ -505,9 +505,9 @@ NAN_SETTER(Oracledb::SetExternalAuth)
    DESCRIPTION
      Get Accessor of lobPrefetchSize property
 */
-NAN_PROPERTY_GETTER(Oracledb::GetLobPrefetchSize)
+NAN_GETTER(Oracledb::GetLobPrefetchSize)
 {
-  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
+  Oracledb* oracledb = Nan::ObjectWrap::Unwrap<Oracledb>(info.Holder());
   Local<Integer> value = Nan::New<v8::Integer>(oracledb->lobPrefetchSize_);
   info.GetReturnValue().Set(value);
 }
@@ -519,7 +519,7 @@ NAN_PROPERTY_GETTER(Oracledb::GetLobPrefetchSize)
 */
 NAN_SETTER(Oracledb::SetLobPrefetchSize)
 {
-  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
+  Oracledb* oracledb = Nan::ObjectWrap::Unwrap<Oracledb>(info.Holder());
   NJS_SET_PROP_UINT(oracledb->lobPrefetchSize_, value, "lobPrefetchSize");
 }
 
@@ -528,10 +528,10 @@ NAN_SETTER(Oracledb::SetLobPrefetchSize)
    DESCRIPTION
      Get Accessor of FetchAsString property
 */
-NAN_PROPERTY_GETTER(Oracledb::GetFetchAsString)
+NAN_GETTER(Oracledb::GetFetchAsString)
 {
 
-  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
+  Oracledb* oracledb = Nan::ObjectWrap::Unwrap<Oracledb>(info.Holder());
   Local<Array> typeArray = Nan::New <v8::Array>(0);
   
   if ( oracledb->fetchAsStringTypes_ )
@@ -554,7 +554,7 @@ NAN_PROPERTY_GETTER(Oracledb::GetFetchAsString)
 */
 NAN_SETTER(Oracledb::SetFetchAsString)
 {
-  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
+  Oracledb* oracledb = Nan::ObjectWrap::Unwrap<Oracledb>(info.Holder());
   Local<Array> array;
   string msg;
 
@@ -619,7 +619,7 @@ NAN_METHOD(Oracledb::GetConnection)
   Local<Object> connProps;
   NJS_GET_CALLBACK ( callback, info );
 
-  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb> ( info.This() );
+  Oracledb* oracledb = Nan::ObjectWrap::Unwrap<Oracledb> ( info.This() );
   connectionBaton *connBaton = new connectionBaton ();
   connBaton->cb.Reset( callback );
 
@@ -725,7 +725,7 @@ void Oracledb::Async_AfterGetConnection (uv_work_t *req)
     argv[0] = Nan::Undefined();
     Local<FunctionTemplate> lft = Nan::New<FunctionTemplate>(Connection::connectionTemplate_s);
     Local<Object> connection = lft->GetFunction()-> NewInstance();
-    (ObjectWrap::Unwrap<Connection> (connection))->
+    (Nan::ObjectWrap::Unwrap<Connection> (connection))->
                                 setConnection( connBaton->dpiconn,
                                                connBaton->oracledb );
     argv[1] = connection;
@@ -757,7 +757,7 @@ NAN_METHOD(Oracledb::CreatePool)
   Local<Object> poolProps;
   NJS_GET_CALLBACK ( callback, info );
 
-  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb> ( info.This() );
+  Oracledb* oracledb = Nan::ObjectWrap::Unwrap<Oracledb> ( info.This() );
   connectionBaton *poolBaton = new connectionBaton ();
 
   poolBaton->cb.Reset( callback );
@@ -875,7 +875,7 @@ void Oracledb::Async_AfterCreatePool (uv_work_t *req)
     argv[0] = Nan::Undefined();
     Local<Object> njsPool = Nan::New(Pool::poolTemplate_s)->
                              GetFunction() ->NewInstance();
-    (ObjectWrap::Unwrap<Pool> (njsPool))-> setPool ( poolBaton->dpipool,
+    (Nan::ObjectWrap::Unwrap<Pool> (njsPool))-> setPool ( poolBaton->dpipool,
                                                      poolBaton->oracledb,
                                                      poolBaton->poolMax,
                                                      poolBaton->poolMin,

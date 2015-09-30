@@ -97,7 +97,7 @@ typedef struct rsBaton
 }rsBaton;
 
 //ResultSet Class
-class ResultSet: public ObjectWrap {
+class ResultSet: public Nan::ObjectWrap {
 public:
    ResultSet(){}
    ~ResultSet(){}
@@ -126,7 +126,7 @@ private:
    static void Async_AfterClose(uv_work_t  *req);
 
   // Define Getter Accessors to properties
-  static NAN_PROPERTY_GETTER(GetMetaData);
+  static NAN_GETTER(GetMetaData);
 
   // Define Setter Accessors to properties
   static NAN_SETTER(SetMetaData);

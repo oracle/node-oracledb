@@ -242,7 +242,7 @@ typedef struct eBaton
    }
 }eBaton;
 
-class Connection: public ObjectWrap
+class Connection: public Nan::ObjectWrap
 {
 public:
   void setConnection (dpi::Conn*, Oracledb* oracledb);
@@ -288,10 +288,10 @@ private:
   static void Async_AfterBreak (uv_work_t *req);
 
   // Define Getter Accessors to properties
-  static NAN_PROPERTY_GETTER(GetStmtCacheSize);
-  static NAN_PROPERTY_GETTER(GetClientId);
-  static NAN_PROPERTY_GETTER(GetModule);
-  static NAN_PROPERTY_GETTER(GetAction);
+  static NAN_GETTER(GetStmtCacheSize);
+  static NAN_GETTER(GetClientId);
+  static NAN_GETTER(GetModule);
+  static NAN_GETTER(GetAction);
 
   // Define Setter Accessors to properties
   static NAN_SETTER(SetStmtCacheSize);

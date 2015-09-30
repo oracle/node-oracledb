@@ -77,7 +77,7 @@ using namespace v8;
                                       (NJS_NODE_ORACLEDB_MINOR * 100) +   \
                                       (NJS_NODE_ORACLEDB_PATCH) )
 
-class Oracledb: public ObjectWrap
+class Oracledb: public Nan::ObjectWrap
 {
  public:
 
@@ -118,20 +118,20 @@ private:
    static void Async_AfterCreatePool (uv_work_t *req);
 
    // Define Getter Accessors to Properties
-   static NAN_PROPERTY_GETTER(GetPoolMin);
-   static NAN_PROPERTY_GETTER(GetPoolMax);
-   static NAN_PROPERTY_GETTER(GetPoolIncrement);
-   static NAN_PROPERTY_GETTER(GetPoolTimeout);
-   static NAN_PROPERTY_GETTER(GetStmtCacheSize);
-   static NAN_PROPERTY_GETTER(GetAutoCommit);
-   static NAN_PROPERTY_GETTER(GetMaxRows);
-   static NAN_PROPERTY_GETTER(GetOutFormat);
-   static NAN_PROPERTY_GETTER(GetVersion);
-   static NAN_PROPERTY_GETTER(GetConnectionClass);
-   static NAN_PROPERTY_GETTER(GetExternalAuth);
-   static NAN_PROPERTY_GETTER(GetPrefetchRows);
-   static NAN_PROPERTY_GETTER(GetFetchAsString);
-   static NAN_PROPERTY_GETTER(GetLobPrefetchSize);
+   static NAN_GETTER(GetPoolMin);
+   static NAN_GETTER(GetPoolMax);
+   static NAN_GETTER(GetPoolIncrement);
+   static NAN_GETTER(GetPoolTimeout);
+   static NAN_GETTER(GetStmtCacheSize);
+   static NAN_GETTER(GetAutoCommit);
+   static NAN_GETTER(GetMaxRows);
+   static NAN_GETTER(GetOutFormat);
+   static NAN_GETTER(GetVersion);
+   static NAN_GETTER(GetConnectionClass);
+   static NAN_GETTER(GetExternalAuth);
+   static NAN_GETTER(GetPrefetchRows);
+   static NAN_GETTER(GetFetchAsString);
+   static NAN_GETTER(GetLobPrefetchSize);
 
    // Define Setter Accessors to Properties
    static NAN_SETTER(SetPoolMin);

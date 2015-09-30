@@ -186,9 +186,9 @@ void Connection::connectionPropertyException(Connection* njsConn,
    DESCRIPTION
      Get Accessor of stmtCacheSize property
 */
-NAN_PROPERTY_GETTER(Connection::GetStmtCacheSize)
+NAN_GETTER(Connection::GetStmtCacheSize)
 {
-  Connection* njsConn = ObjectWrap::Unwrap<Connection>(info.Holder());
+  Connection* njsConn = Nan::ObjectWrap::Unwrap<Connection>(info.Holder());
   if(!njsConn->isValid_)
   {
     string error = NJSMessages::getErrorMsg ( errInvalidConnection );
@@ -216,7 +216,7 @@ NAN_PROPERTY_GETTER(Connection::GetStmtCacheSize)
 */
 NAN_SETTER(Connection::SetStmtCacheSize)
 {
-  connectionPropertyException(ObjectWrap::Unwrap<Connection>(info.Holder()), errReadOnly, "stmtCacheSize");
+  connectionPropertyException(Nan::ObjectWrap::Unwrap<Connection>(info.Holder()), errReadOnly, "stmtCacheSize");
 }
 
 /*****************************************************************************/
@@ -225,7 +225,7 @@ NAN_SETTER(Connection::SetStmtCacheSize)
      Get Accessor of clientId property - This is write-only property,
      returning NULL for debugging purpose in case of read
 */
-NAN_PROPERTY_GETTER(Connection::GetClientId)
+NAN_GETTER(Connection::GetClientId)
 {
   info.GetReturnValue().SetNull();
 }
@@ -237,7 +237,7 @@ NAN_PROPERTY_GETTER(Connection::GetClientId)
 */
 NAN_SETTER(Connection::SetClientId)
 {
-  Connection* njsConn = ObjectWrap::Unwrap<Connection>(info.Holder());
+  Connection* njsConn = Nan::ObjectWrap::Unwrap<Connection>(info.Holder());
   if(!njsConn->isValid_)
   {
     string msg = NJSMessages::getErrorMsg(errInvalidConnection);
@@ -258,7 +258,7 @@ NAN_SETTER(Connection::SetClientId)
      Get Accessor of module property - This is write-only property,
      returning NULL for debugging purpose in case of read
 */
-NAN_PROPERTY_GETTER(Connection::GetModule)
+NAN_GETTER(Connection::GetModule)
 {
   info.GetReturnValue().SetNull();
 }
@@ -270,7 +270,7 @@ NAN_PROPERTY_GETTER(Connection::GetModule)
 */
 NAN_SETTER(Connection::SetModule)
 {
-  Connection *njsConn = ObjectWrap::Unwrap<Connection>(info.Holder());
+  Connection *njsConn = Nan::ObjectWrap::Unwrap<Connection>(info.Holder());
   if(!njsConn->isValid_)
   {
     string msg = NJSMessages::getErrorMsg(errInvalidConnection);
@@ -291,7 +291,7 @@ NAN_SETTER(Connection::SetModule)
      Get Accessor of action property - This is write-only property,
      returning NULL for debugging purpose in case of read
 */
-NAN_PROPERTY_GETTER(Connection::GetAction)
+NAN_GETTER(Connection::GetAction)
 {
   info.GetReturnValue().SetNull();
 }
@@ -303,7 +303,7 @@ NAN_PROPERTY_GETTER(Connection::GetAction)
 */
 NAN_SETTER(Connection::SetAction)
 {
-  Connection *njsConn = ObjectWrap::Unwrap<Connection>(info.Holder());
+  Connection *njsConn = Nan::ObjectWrap::Unwrap<Connection>(info.Holder());
   if(!njsConn->isValid_)
   {
     string msg = NJSMessages::getErrorMsg(errInvalidConnection);
@@ -338,7 +338,7 @@ NAN_METHOD(Connection::Execute)
   eBaton *executeBaton = new eBaton;
   executeBaton->cb.Reset( callback );
   NJS_CHECK_NUMBER_OF_ARGS ( executeBaton->error, info, 2, 4, exitExecute );
-  connection = ObjectWrap::Unwrap<Connection>(info.This());
+  connection = Nan::ObjectWrap::Unwrap<Connection>(info.This());
 
   if(!connection->isValid_)
   {
@@ -1923,7 +1923,7 @@ void Connection::Async_AfterExecute(uv_work_t *req)
                                 GetFunction() ->NewInstance();
 
           /* ResultSet case, the statement object is ready for fetching */
-         (ObjectWrap::Unwrap<ResultSet> (resultSet))->
+         (Nan::ObjectWrap::Unwrap<ResultSet> (resultSet))->
                                   setResultSet( executeBaton->dpistmt,
                                                 executeBaton);
 
@@ -2162,7 +2162,7 @@ Local<Value> Connection::GetValueRefCursor ( eBaton *executeBaton,
      * IN case of REFCURSOR, bind->flags will indicate whether we got
      * a valid handle, based on that numCols, metaData are queried.
      */
-    (ObjectWrap::Unwrap<ResultSet> (resultSet))->
+    (Nan::ObjectWrap::Unwrap<ResultSet> (resultSet))->
                        setResultSet( (dpi::Stmt*)(bind->value),
                                      executeBaton);
     value = resultSet;
@@ -2473,7 +2473,7 @@ NAN_METHOD(Connection::Release)
   eBaton* releaseBaton = new eBaton;
   releaseBaton->cb.Reset(callback);
   NJS_CHECK_NUMBER_OF_ARGS ( releaseBaton->error, info, 1, 1, exitRelease );
-  connection = ObjectWrap::Unwrap<Connection>(info.This());
+  connection = Nan::ObjectWrap::Unwrap<Connection>(info.This());
 
   if(!connection->isValid_)
   {
@@ -2566,7 +2566,7 @@ NAN_METHOD(Connection::Commit)
   eBaton* commitBaton = new eBaton;
   commitBaton->cb.Reset( callback );
   NJS_CHECK_NUMBER_OF_ARGS ( commitBaton->error, info, 1, 1, exitCommit );
-  connection = ObjectWrap::Unwrap<Connection>(info.This());
+  connection = Nan::ObjectWrap::Unwrap<Connection>(info.This());
 
   if(!connection->isValid_)
   {
@@ -2660,7 +2660,7 @@ NAN_METHOD(Connection::Rollback)
   eBaton* rollbackBaton = new eBaton;
   rollbackBaton->cb.Reset( callback );
   NJS_CHECK_NUMBER_OF_ARGS ( rollbackBaton->error, info, 1, 1, exitRollback );
-  connection = ObjectWrap::Unwrap<Connection>(info.This());
+  connection = Nan::ObjectWrap::Unwrap<Connection>(info.This());
 
   if(!connection->isValid_)
   {
@@ -2752,7 +2752,7 @@ NAN_METHOD(Connection::Break)
   eBaton* breakBaton = new eBaton;
   breakBaton->cb.Reset( callback );
   NJS_CHECK_NUMBER_OF_ARGS ( breakBaton->error, info, 1, 1, exitBreak );
-  connection = ObjectWrap::Unwrap<Connection>(info.This());
+  connection = Nan::ObjectWrap::Unwrap<Connection>(info.This());
 
   if(!connection->isValid_)
   {
@@ -3296,7 +3296,7 @@ v8::Local<v8::Value> Connection::NewLob(eBaton* executeBaton,
       // here.  Any error in initialization of ILob will cleanup the OCI
       // handles in the ILob cleanup routine.
 
-  (ObjectWrap::Unwrap<ILob>(iLob))->setILob(executeBaton, protoILob);
+  (Nan::ObjectWrap::Unwrap<ILob>(iLob))->setILob(executeBaton, protoILob);
 
   if (!executeBaton->error.empty())
     return Nan::Null();
@@ -3341,7 +3341,7 @@ v8::Local<v8::Value> Connection::NewLob(eBaton* executeBaton,
 
 NAN_METHOD(Connection::GetLob)
 {
-  Connection     *connection = ObjectWrap::Unwrap<Connection>(info.This());
+  Connection     *connection = Nan::ObjectWrap::Unwrap<Connection>(info.This());
   //Handle<Object>  jsOracledb = connection->oracledb_->jsOracledb;
   Local<Object>  jsOracledb = Nan::New<Object>(connection->oracledb_->jsOracledb);
   Local<Value>   argv[1];

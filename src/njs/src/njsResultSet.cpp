@@ -180,9 +180,9 @@ NAN_METHOD(ResultSet::New)
    DESCRIPTION
      Get Accessor of metaData Property
 */
-NAN_PROPERTY_GETTER(ResultSet::GetMetaData)
+NAN_GETTER(ResultSet::GetMetaData)
 {
-  ResultSet* njsResultSet  = ObjectWrap::Unwrap<ResultSet>(info.Holder());
+  ResultSet* njsResultSet  = Nan::ObjectWrap::Unwrap<ResultSet>(info.Holder());
   string msg;
 
   if(!njsResultSet->njsconn_->isValid())
@@ -215,7 +215,7 @@ NAN_PROPERTY_GETTER(ResultSet::GetMetaData)
 */
 NAN_SETTER(ResultSet::SetMetaData)
 {
-  ResultSet* njsResultSet = ObjectWrap::Unwrap<ResultSet>(info.Holder());
+  ResultSet* njsResultSet = Nan::ObjectWrap::Unwrap<ResultSet>(info.Holder());
   string msg;
 
   if(!njsResultSet->njsconn_->isValid())
@@ -241,7 +241,7 @@ NAN_METHOD(ResultSet::GetRow)
   Local<Function> callback;
   NJS_GET_CALLBACK ( callback, info );
 
-  ResultSet *njsResultSet = ObjectWrap::Unwrap<ResultSet>(info.This());
+  ResultSet *njsResultSet = Nan::ObjectWrap::Unwrap<ResultSet>(info.This());
   rsBaton   *getRowsBaton = new rsBaton ();
   getRowsBaton->njsRS     = njsResultSet;
   getRowsBaton->cb.Reset( callback );
@@ -285,7 +285,7 @@ NAN_METHOD(ResultSet::GetRows)
   Local<Function> callback;
   NJS_GET_CALLBACK ( callback, info );
 
-  ResultSet *njsResultSet = ObjectWrap::Unwrap<ResultSet>(info.This());
+  ResultSet *njsResultSet = Nan::ObjectWrap::Unwrap<ResultSet>(info.This());
   rsBaton   *getRowsBaton = new rsBaton ();
   getRowsBaton->njsRS   = njsResultSet;
   getRowsBaton->cb.Reset( callback );
@@ -538,7 +538,7 @@ NAN_METHOD(ResultSet::Close)
   Local<Function> callback;
   NJS_GET_CALLBACK ( callback, info );
 
-  ResultSet *njsResultSet = ObjectWrap::Unwrap<ResultSet>(info.This());
+  ResultSet *njsResultSet = Nan::ObjectWrap::Unwrap<ResultSet>(info.This());
   rsBaton *closeBaton     = new rsBaton ();
   closeBaton->njsRS       = njsResultSet;
   closeBaton->cb.Reset( callback );

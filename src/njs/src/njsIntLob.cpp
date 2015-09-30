@@ -356,7 +356,7 @@ NAN_METHOD(ILob::New)
 NAN_METHOD(ILob::Release)
 { 
 
-  ILob *iLob = ObjectWrap::Unwrap<ILob>(info.This());
+  ILob *iLob = Nan::ObjectWrap::Unwrap<ILob>(info.This());
   string msg;
 
   if( !iLob->njsconn_->isValid() )
@@ -424,10 +424,10 @@ void ILob::lobPropertyException(ILob *iLob,
     
 */
 
-NAN_PROPERTY_GETTER(ILob::GetChunkSize)
+NAN_GETTER(ILob::GetChunkSize)
 {  
 
-  ILob *iLob = ObjectWrap::Unwrap<ILob>(info.Holder());
+  ILob *iLob = Nan::ObjectWrap::Unwrap<ILob>(info.Holder());
   string msg;
 
   if( !iLob->njsconn_->isValid() )
@@ -471,7 +471,7 @@ NAN_PROPERTY_GETTER(ILob::GetChunkSize)
 
 NAN_SETTER(ILob::SetChunkSize)
 {
-  lobPropertyException(ObjectWrap::Unwrap<ILob>(info.Holder()), errReadOnly,
+  lobPropertyException(Nan::ObjectWrap::Unwrap<ILob>(info.Holder()), errReadOnly,
                        "chunkSize");
 }
 
@@ -493,10 +493,10 @@ NAN_SETTER(ILob::SetChunkSize)
     object was created.
 */
 
-NAN_PROPERTY_GETTER(ILob::GetLength)
+NAN_GETTER(ILob::GetLength)
 {  
 
-  ILob *iLob = ObjectWrap::Unwrap<ILob>(info.Holder());
+  ILob *iLob = Nan::ObjectWrap::Unwrap<ILob>(info.Holder());
   string msg;
 
   if( !iLob->njsconn_->isValid() )
@@ -540,7 +540,7 @@ NAN_PROPERTY_GETTER(ILob::GetLength)
 
 NAN_SETTER(ILob::SetLength)
 {
-  lobPropertyException(ObjectWrap::Unwrap<ILob>(info.Holder()), errReadOnly,
+  lobPropertyException(Nan::ObjectWrap::Unwrap<ILob>(info.Holder()), errReadOnly,
                        "length");
 }
 
@@ -561,10 +561,10 @@ NAN_SETTER(ILob::SetLength)
     
 */
 
-NAN_PROPERTY_GETTER(ILob::GetPieceSize)
+NAN_GETTER(ILob::GetPieceSize)
 {  
 
-  ILob *iLob = ObjectWrap::Unwrap<ILob>(info.Holder());
+  ILob *iLob = Nan::ObjectWrap::Unwrap<ILob>(info.Holder());
   string msg;
 
   if( !iLob->njsconn_->isValid() )
@@ -608,7 +608,7 @@ NAN_PROPERTY_GETTER(ILob::GetPieceSize)
 NAN_SETTER(ILob::SetPieceSize)
 {
 
-  ILob *iLob = ObjectWrap::Unwrap<ILob>(info.Holder());
+  ILob *iLob = Nan::ObjectWrap::Unwrap<ILob>(info.Holder());
   string msg;
 
   NJS_SET_PROP_UINT(iLob->bufSize_, value, "pieceSize");
@@ -658,10 +658,10 @@ NAN_SETTER(ILob::SetPieceSize)
     
 */
 
-NAN_PROPERTY_GETTER(ILob::GetOffset)
+NAN_GETTER(ILob::GetOffset)
 {  
 
-  ILob *iLob = ObjectWrap::Unwrap<ILob>(info.Holder());
+  ILob *iLob = Nan::ObjectWrap::Unwrap<ILob>(info.Holder());
   string msg;
 
   if( !iLob->njsconn_->isValid() )
@@ -705,7 +705,7 @@ NAN_PROPERTY_GETTER(ILob::GetOffset)
 NAN_SETTER(ILob::SetOffset)
 {
 
-  ILob  *iLob = ObjectWrap::Unwrap<ILob>(info.Holder());
+  ILob  *iLob = Nan::ObjectWrap::Unwrap<ILob>(info.Holder());
   double offset = 0.0;
   string msg;
 
@@ -752,9 +752,9 @@ NAN_SETTER(ILob::SetOffset)
     
 */
 
-NAN_PROPERTY_GETTER(ILob::GetType)
+NAN_GETTER(ILob::GetType)
 {  
-  ILob *iLob = ObjectWrap::Unwrap<ILob>(info.Holder());
+  ILob *iLob = Nan::ObjectWrap::Unwrap<ILob>(info.Holder());
 
   try
   {
@@ -790,7 +790,7 @@ NAN_PROPERTY_GETTER(ILob::GetType)
 
 NAN_SETTER(ILob::SetType)
 {
-  lobPropertyException(ObjectWrap::Unwrap<ILob>(info.Holder()), errReadOnly,
+  lobPropertyException(Nan::ObjectWrap::Unwrap<ILob>(info.Holder()), errReadOnly,
                        "type");
 }
 
@@ -823,7 +823,7 @@ NAN_METHOD(ILob::Read)
   lobBaton->cb.Reset( callback );
 
   NJS_CHECK_NUMBER_OF_ARGS (lobBaton->error, info, 1, 1, exitRead);
-  iLob = ObjectWrap::Unwrap<ILob>(info.This());
+  iLob = Nan::ObjectWrap::Unwrap<ILob>(info.This());
 
   if(!iLob->isValid_)
   {
@@ -1009,7 +1009,7 @@ NAN_METHOD(ILob::Write)
   lobBaton->cb.Reset( callback );
 
   NJS_CHECK_NUMBER_OF_ARGS (lobBaton->error, info, 2, 2, exitWrite);
-  iLob = ObjectWrap::Unwrap<ILob>(info.This());
+  iLob = Nan::ObjectWrap::Unwrap<ILob>(info.This());
 
   if(!iLob->isValid_)
   {
