@@ -2251,7 +2251,8 @@ Local<Value> Connection::GetValueCommon ( eBaton *executeBaton,
          value = date;
         break;
        case (dpi::DpiRaw) :
-         value = Nan::NewBuffer((char*)val, len).ToLocalChecked();
+         // TODO: We could use NewBuffer to save memory and CPU, but it gets the ownership of buffer to itself (behaviour changed in Nan 2.0)
+         value = Nan::CopyBuffer((char*)val, len).ToLocalChecked();
          break;
         // The LOB types are hit only by the define code path
         // The bind code path has its own Connection::GetValueLob method

@@ -33,7 +33,7 @@
     "url": "git://github.com/oracle/node-oracledb.git"
   },
   "dependencies": {
-    "nan": "^2.0.8"
+    "nan": "^2.0.9"
   },
   "devDependencies": {
       "mocha": "~2.2.5",

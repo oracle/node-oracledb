@@ -957,7 +957,8 @@ void ILob::Async_AfterRead(uv_work_t *req)
       else
       {
         // Blobs use buffers rather than strings
-        Local<Value> buffer = Nan::NewBuffer((char *)iLob->buf_,
+        // TODO: We could use NewBuffer to save memory and CPU, but it gets the ownership of buffer to itself (behaviour changed in Nan 2.0)
+        Local<Value> buffer = Nan::CopyBuffer((char *)iLob->buf_,
                                              iLob->amountRead_).ToLocalChecked();
         argv[1] = buffer;
       }
