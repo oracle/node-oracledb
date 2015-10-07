@@ -165,7 +165,7 @@ describe('41. dataTypeBlob', function() {
                   
                   fs.readFile( outFileName, function(err, generatedData) {
                     should.not.exist(err);
-                    //originalData.should.eql(generatedData);
+                    originalData.should.eql(generatedData);
 
                     streamFinishEventFired = true;
                   });
@@ -214,7 +214,7 @@ describe('41. dataTypeBlob', function() {
                   lobEndEventFired = true;
                   
                   data.length.should.be.exactly(blob.length);
-                  //data.should.eql(blob);
+                  data.should.eql(blob);
                 });
               });  // end event
 
