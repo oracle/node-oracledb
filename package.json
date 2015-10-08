@@ -42,8 +42,7 @@
   "devDependencies": {
       "mocha": "~2.2.5",
       "should": "~6.0.1",
-      "async": "~0.9.0",
-      "aws-sdk": "~2.1.26"
+      "async": "~0.9.0"
   },
   "scripts": {
       "install": "node-pre-gyp install --fallback-to-build",
