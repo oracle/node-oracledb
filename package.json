@@ -52,7 +52,7 @@
   "binary": {
     "module_name": "oracledb",
     "module_path": "./build/Release",
-    "host": "https://raw.githubusercontent.com/bchr02/node-oracledb/saveToGithub/bin",
+    "host": "https://raw.githubusercontent.com/bchr02/node-oracledb/master/bin",
     "remote_path": "",
     "package_name": "{module_name}-v{version}-{node_abi}-{platform}-{arch}.tar.gz"
   },
