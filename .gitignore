@@ -9,7 +9,6 @@ core
 npm-debug.log
 node_modules
 /build/*
-/bin/*
 /examples/clobstream1out.txt
 /examples/clobstream2out.txt
 /examples/blobstream1out.jpg
