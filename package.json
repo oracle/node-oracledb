@@ -52,9 +52,9 @@
   "binary": {
     "module_name": "oracledb",
     "module_path": "./build/Release",
-    "host": "https://s3.amazonaws.com/node-oracledb",
-    "remote_path": "./{module_name}/v{version}",
-    "package_name": "{node_abi}-{platform}-{arch}.tar.gz"
+    "host": "https://raw.githubusercontent.com/bchr02/node-oracledb/saveToGithub/bin",
+    "remote_path": "",
+    "package_name": "{module_name}-v{version}-{node_abi}-{platform}-{arch}.tar.gz"
   },
   "engineStrict": true,
   "engines": {
