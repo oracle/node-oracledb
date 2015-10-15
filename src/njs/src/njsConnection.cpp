@@ -2433,7 +2433,7 @@ v8::Handle<v8::Value> Connection::GetOutBinds (eBaton* executeBaton)
       return NanEscapeScope(GetOutBindObject( executeBaton ));
     }
   }
-  return NanUndefined();
+  return NanEscapeScope(NanUndefined());
 }
 
 /*****************************************************************************/

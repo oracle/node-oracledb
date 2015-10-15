@@ -1,6 +1,7 @@
 # Change Log
 
 ## node-oracledb v1.3.0 (DD Mon YYYY)
+- Fixed result.outBinds corruption after PL/SQL execution.
 
 - Added a `oracledb.oracleClientVersion` property giving the version of the Oracle
   client library, and a `connection.oracleServerVersion` property giving the Oracle
