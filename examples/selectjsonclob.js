@@ -41,6 +41,11 @@ oracledb.getConnection(
   {
     if (err) { console.error(err.message); return; }
 
+    if (connection.oracleServerVersion < 1201000200) {
+      console.error('This example only works with Oracle Database 12.1.0.2 or greater');
+      process.exit(1);
+    }
+
     doInsert(
       connection,
       JSON.stringify({ "userId": 2, "userName": "Bob", "location": "USA" }),
@@ -121,7 +126,7 @@ function doQuery(connection, cb)
       if (lob === null) { return cb(new Error('CLOB was NULL')); }
       lob.setEncoding('utf8');      // set the encoding so we get a 'string' not a 'buffer'
       lob.on('data', function(chunk) { clob += chunk; });
-      lob.on('end', function() { return cb(null, JSON.parse(clob)); });
+      lob.on('close', function() { return cb(null, JSON.parse(clob)); });
       lob.on('error', function(err) { return cb(err); });
     });
 }

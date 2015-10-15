@@ -66,9 +66,19 @@ http.createServer(function(req, res){
 
             lob.on(
               'end',
-              function () {
+              function()
+              {
                 console.log("lob.on 'end' event");
                 res.end();
+              });
+            lob.on(
+              'close',
+              function()
+              {
+                console.log("lob.on 'close' event");
+                connection.release(function(err) {
+                  if (err) console.error(err);
+                });
               });
             lob.on(
               'error',
