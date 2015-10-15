@@ -76,7 +76,7 @@ limitations under the License.
      - 5.1.1 [chunkSize](#proplobchunksize)
      - 5.1.2 [length](#proploblength)
      - 5.1.3 [pieceSize](#proplobpiecesize)
-	 - 5.1.4 [type](#proplobtype)
+     - 5.1.4 [type](#proplobtype)
 6. [Pool Class](#poolclass)
   - 6.1 [Pool Properties](#poolproperties)
      - 6.1.1 [connectionsInUse](#proppoolconnectionsinuse)
@@ -2879,10 +2879,10 @@ connection.execute(
   [90, "Tonga"],
   function(err, result)
   {
-	if (err)
-	  console.error(err.message);
-	else
-	  console.log("Rows inserted " + result.rowsAffected);
+    if (err)
+      console.error(err.message);
+    else
+      console.log("Rows inserted " + result.rowsAffected);
   });
 ```
 
@@ -2911,10 +2911,10 @@ connection.execute(
   {country_id: 90, country_name: "Tonga"},
   function(err, result)
   {
-	if (err)
-	  console.error(err.message);
-	else
-	  console.log("Rows inserted " + result.rowsAffected);
+    if (err)
+      console.error(err.message);
+    else
+      console.log("Rows inserted " + result.rowsAffected);
   });
 ```
 
@@ -2931,15 +2931,15 @@ var oracledb = require('oracledb');
 connection.execute(
   "INSERT INTO countries VALUES (:country_id, :country_name)",
   {
-	country_id: { val: 90, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
-	country_name: { val: "Tonga", dir: oracledb.BIND_IN, type:oracledb.STRING }
+    country_id: { val: 90, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
+    country_name: { val: "Tonga", dir: oracledb.BIND_IN, type:oracledb.STRING }
   },
   function(err, result)
   {
-	if (err)
-	  console.error(err.message);
-	else
-	  console.log("Rows inserted " + result.rowsAffected);
+    if (err)
+      console.error(err.message);
+    else
+      console.log("Rows inserted " + result.rowsAffected);
   });
 ```
 
