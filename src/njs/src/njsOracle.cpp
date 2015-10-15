@@ -88,7 +88,7 @@ Oracledb::Oracledb()
   connClass_          = "";
   externalAuth_       = false;
   fetchAsStringTypes_ = NULL;
-  lobPrefetchSize_ = NJS_LOB_PREFETCH_SIZE;
+  lobPrefetchSize_    = NJS_LOB_PREFETCH_SIZE;
 }
 
 /*****************************************************************************/
@@ -186,6 +186,11 @@ void Oracledb::Init(Handle<Object> target)
                               Oracledb::GetLobPrefetchSize,
                               Oracledb::SetLobPrefetchSize);
 
+  temp->InstanceTemplate()->SetAccessor(
+                              NanNew<v8::String>("oracleClientVersion"),
+                              Oracledb::GetOracleClientVersion,
+                              Oracledb::SetOracleClientVersion);
+
   NanAssignPersistent( oracledbTemplate_s, temp);
   target->Set(NanNew<v8::String>("Oracledb"),temp->GetFunction());
 }
@@ -200,9 +205,22 @@ NAN_METHOD(Oracledb::New)
 {
   NanScope();
 
+  sword     majorVer = 0, minorVer = 0, updateVer = 0, portVer = 0,
+            portUpdateVer = 0;
+
   Oracledb *oracledb = new Oracledb();
   oracledb->Wrap(args.This());
   NanAssignPersistent( oracledb->jsOracledb, args.This() );
+
+  dpi::Common::clientVersion ( &majorVer, &minorVer, &updateVer,
+                                  &portVer, &portUpdateVer );
+
+  oracledb->oraClientVer_ = 100000000 * majorVer      +
+                              1000000 * minorVer      +
+                                10000 * updateVer     +
+                                  100 * portVer       +
+                                        portUpdateVer ;
+
   NanReturnValue(args.This());
 }
 
@@ -624,6 +642,39 @@ NAN_SETTER(Oracledb::SetFetchAsString)
     oracledb->fetchAsStringTypes_[t] = type;
   }
 }
+
+
+/*****************************************************************************/
+/*
+  DESCRIPTION
+    Get Accessor of Oracle Client Library Version property
+*/
+NAN_PROPERTY_GETTER(Oracledb::GetOracleClientVersion)
+{
+  NanScope();
+
+  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(args.Holder());
+  Local<Integer> value;
+
+  value = NanNew<v8::Integer>( (unsigned int) oracledb->oraClientVer_ );
+
+  NanReturnValue ( value );
+}
+
+
+/*****************************************************************************/
+/*
+  DESCRIPTION
+    Set Accessor of Oracle Client Version Property
+*/
+NAN_SETTER(Oracledb::SetOracleClientVersion )
+{
+  NanScope ();
+  std::string msg;
+  msg = NJSMessages::getErrorMsg (errReadOnly, "oracleClientVersion");
+  NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
+}
+
 
 
 

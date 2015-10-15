@@ -86,6 +86,7 @@ class Env
   virtual void externalAuth(bool externalAuth) = 0;
   virtual bool externalAuth() const = 0;
 
+
                                  // methods
   virtual SPool * createPool(const string &user, const string &password,
                              const string &connString,

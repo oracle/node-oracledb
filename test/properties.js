@@ -192,6 +192,11 @@ describe('58. properties.js', function() {
       t.should.eql(defaultValues.lobPrefetchSize);
       (oracledb.lobPrefetchSize).should.eql(defaultValues.lobPrefetchSize + 1);
     })
+
+    it('58.1.14 oracleClientVersion', function () {
+       var t = oracledb.oracleClientVersion ;
+    } );
+
   }) // 58.1
 
   describe('58.2 pool properties', function() {
@@ -372,6 +377,15 @@ describe('58. properties.js', function() {
       
       connection.module = "103.3 module";
     })
+
+    it ('58.3.6 oracleServerVersion', function () {
+      try {
+        var t = connection.oracleServerVersion;
+      }
+      catch (err ) {
+        should.exist ( err );
+      }
+    });
 
   }) // 58.3
 })

@@ -81,8 +81,9 @@ Persistent<FunctionTemplate> Connection::connectionTemplate_s;
  */
 Connection::Connection()
 {
-   dpiconn_   = (dpi::Conn *)0;
-   oracledb_  = (Oracledb *)0;
+   dpiconn_             = (dpi::Conn *)0;
+   oracledb_            = (Oracledb *)0;
+   oracleServerVersion_ = 0;
 }
 
 /*****************************************************************************/
@@ -145,6 +146,10 @@ void Connection::Init(Handle<Object> target)
                                               NanNew<v8::String>("action"),
                                               Connection::GetAction,
                                               Connection::SetAction );
+  tpl->InstanceTemplate()->SetAccessor(
+                                     NanNew<v8::String>("oracleServerVersion"),
+                                     Connection::GetOracleServerVersion,
+                                     Connection::SetOracleServerVersion);
 
   NanAssignPersistent( connectionTemplate_s, tpl);
   target->Set(NanNew<v8::String>("Connection"),tpl->GetFunction());
@@ -323,6 +328,67 @@ NAN_SETTER(Connection::SetAction)
     njsConn->dpiconn_->action(action);
   }
 }
+/*****************************************************************************/
+/*
+  DESCRIPTION
+    Get Accessor of OracleServerVersion Property
+*/
+NAN_PROPERTY_GETTER (Connection::GetOracleServerVersion)
+{
+  NanScope();
+  Connection *njsConn = ObjectWrap::Unwrap<Connection>(args.Holder());
+
+  if ( !njsConn->isValid_ )
+  {
+    string error = NJSMessages::getErrorMsg ( errInvalidConnection );
+    NJS_SET_EXCEPTION(error.c_str(), error.length() );
+    NanReturnUndefined();
+  }
+
+  try
+  {
+    if ( !njsConn->oracleServerVersion_ )
+    {
+      /* Updating the member variable is not thread-safe, but all threads
+       * will get same value from DB and update the value which is atomic
+       * and so it is ok.
+       */
+      unsigned int ver = njsConn->dpiconn_->getServerVersion ();
+
+      njsConn-> oracleServerVersion_ =
+                        100000000 * ( ( ver >> 24 ) & 0x000000FF ) +
+                          1000000 * ( ( ver >> 20 ) & 0x0000000F ) +
+                            10000 * ( ( ver >> 12 ) & 0x000000FF ) +
+                              100 * ( ( ver >>  8 ) & 0x0000000F ) +
+                                    ( ( ver >>  0 ) & 0x000000FF ) ;
+    }
+
+    Local<Integer> value = NanNew<v8::Integer>(
+                             (unsigned int ) njsConn-> oracleServerVersion_ );
+    NanReturnValue ( value );
+  }
+  catch ( dpi::Exception &e)
+  {
+    NJS_SET_CONN_ERR_STATUS ( e.errnum(), njsConn->dpiconn_ );
+    NJS_SET_EXCEPTION ( e.what(), strlen (e.what () ) );
+    NanReturnUndefined ();
+  }
+}
+
+
+/*****************************************************************************/
+/*
+  DESCRIPTION
+    Set Accessor of OracleServerVersion Property
+*/
+NAN_SETTER(Connection::SetOracleServerVersion)
+{
+  connectionPropertyException(ObjectWrap::Unwrap<Connection>(args.Holder()),
+                              errReadOnly, "oracleServerVersion" );
+}
+
+
+
 /*****************************************************************************/
 /*
    DESCRIPTION

@@ -39,7 +39,6 @@ oracledb.getConnection(
       console.error(err.message);
       return;
     }
-
     console.log('Connection was successful!');
 
     connection.release(

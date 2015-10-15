@@ -2,6 +2,10 @@
 
 ## node-oracledb v1.3.0 (DD Mon YYYY)
 
+- Added oracledb.oracleClientVersion property giving the version of the Oracle
+  client library, and connection.oracleServerVersion property giving the Oracle
+  Database Server version.
+
 - BIND_IN is default when not specified.
 
 - Fixed 11.2.0.4 DB-specific NULL output with DML RETURNING when string value is of size 4k.

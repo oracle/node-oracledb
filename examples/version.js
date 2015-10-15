@@ -19,15 +19,51 @@
  *   version.js
  *
  * DESCRIPTION
- *   Shows the oracledb version attribute
+ *   Shows the oracledb version attributes
  *
  *****************************************************************************/
 
 var oracledb = require('oracledb');
+var dbConfig = require('./dbconfig.js');
 
-console.log("Driver version number is " + oracledb.version);
+var addonVer, clientVer, serverVer;
+var major, minor, update, port, portUpdate;
 
-major = Math.floor(oracledb.version/10000);
-minor = Math.floor(oracledb.version/100) % 100;
-patch = oracledb.version % 100;
-console.log("Driver version text is " + major + "." + minor + "." + patch);
+addonVer = oracledb.version
+major  = Math.floor(addonVer / 10000);
+minor  = Math.floor(addonVer / 100) % 100;
+update = addonVer % 100;
+console.log("Node-oracledb version: " + addonVer);
+console.log("Node-oracledb text format: " + major + "." + minor + "." + update);
+
+clientVer = oracledb.oracleClientVersion;
+major      = Math.floor (clientVer / 100000000);
+minor      = Math.floor (clientVer / 1000000) % 100 ;
+update     = Math.floor (clientVer / 10000) % 100 ;
+port       = Math.floor (clientVer / 100) % 100 ;
+portUpdate = clientVer % 100 ;
+console.log("Oracle Client library version: " +clientVer);
+console.log("Oracle Client library text format: " + major + "." + minor + "." + update + "." + port + "." + portUpdate);
+
+oracledb.getConnection(
+  {
+    user          : dbConfig.user,
+    password      : dbConfig.password,
+    connectString : dbConfig.connectString
+  },
+  function(err, connection)
+  {
+    if (err) {
+      console.error(err.message);
+      return;
+    }
+
+    serverVer = connection.oracleServerVersion;
+    major      = Math.floor (serverVer / 100000000);
+    minor      = Math.floor (serverVer / 1000000) % 100 ;
+    update     = Math.floor (serverVer / 10000) % 100 ;
+    port       = Math.floor (serverVer / 100) % 100 ;
+    portUpdate = serverVer % 100 ;
+    console.log ("Oracle Database version: " + serverVer);
+    console.log("Oracle Database text format: " + major + "." + minor + "." + update + "." + port + "." + portUpdate);
+});
