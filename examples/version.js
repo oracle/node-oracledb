@@ -29,7 +29,7 @@ var dbConfig = require('./dbconfig.js');
 var addonVer, clientVer, serverVer;
 var major, minor, update, port, portUpdate;
 
-addonVer = oracledb.version
+addonVer = oracledb.version;
 major  = Math.floor(addonVer / 10000);
 minor  = Math.floor(addonVer / 100) % 100;
 update = addonVer % 100;
