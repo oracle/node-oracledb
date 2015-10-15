@@ -247,72 +247,82 @@ describe('3. examples.js', function(){
     })
     
     it('3.4.1 executes a query from a JSON table', function(done){
-      var data = { "userId": 1, "userName": "Chris" };
-      var s = JSON.stringify(data);
-      var script = 
-        "BEGIN " +
-        "   DECLARE " +
-        "       e_table_exists EXCEPTION; " +
-        "       PRAGMA EXCEPTION_INIT(e_table_exists, -00942); " +
-        "   BEGIN " +
-        "       EXECUTE IMMEDIATE ('DROP TABLE j_purchaseorder'); " +
-        "   EXCEPTION " +
-        "       WHEN e_table_exists " +
-        "       THEN NULL; " +
-        "   END; " +
-        "   EXECUTE IMMEDIATE (' " +
-        "       CREATE TABLE j_purchaseorder ( " +
-        "           po_document VARCHAR2(4000) CONSTRAINT ensure_json CHECK (po_document IS JSON) " +
-        "       )" +
-        "   '); " +
-        "END; ";
+      if (connection.oracleServerVersion < 1201000200) 
+      {
+        // This example only works with Oracle Database 12.1.0.2 or greater
+        done();
+      }
+      else  
+      {
+        var data = { "userId": 1, "userName": "Chris" };
+        var s = JSON.stringify(data);
+        var script = 
+          "BEGIN " +
+          "   DECLARE " +
+          "       e_table_exists EXCEPTION; " +
+          "       PRAGMA EXCEPTION_INIT(e_table_exists, -00942); " +
+          "   BEGIN " +
+          "       EXECUTE IMMEDIATE ('DROP TABLE j_purchaseorder'); " +
+          "   EXCEPTION " +
+          "       WHEN e_table_exists " +
+          "       THEN NULL; " +
+          "   END; " +
+          "   EXECUTE IMMEDIATE (' " +
+          "       CREATE TABLE j_purchaseorder ( " +
+          "           po_document VARCHAR2(4000) CONSTRAINT ensure_json CHECK (po_document IS JSON) " +
+          "       )" +
+          "   '); " +
+          "END; ";
+        
+        connection.should.be.ok;
+        async.series([
+          function(callback){
+            connection.execute(
+              script,
+              function(err){
+                should.not.exist(err);
+                callback();
+              }
+            );
+          },
+          function(callback){
+            connection.execute(
+              "INSERT INTO j_purchaseorder (po_document) VALUES (:bv)",
+              [s],
+              function(err, result){
+                should.not.exist(err);
+                (result.rowsAffected).should.be.exactly(1);
+                callback();
+              }
+            );
+          },
+          function(callback){
+            connection.execute(
+              "SELECT po_document FROM j_purchaseorder",
+              function(err, result){
+                should.not.exist(err);
+                
+                var js = JSON.parse(result.rows[0][0]);
+                // console.log(js);
+                js.should.eql(data);
+                
+                callback();
+              }
+            );
+          },
+          function(callback){
+            connection.execute(
+              "DROP TABLE j_purchaseorder",
+              function(err){
+                should.not.exist(err);
+                callback();
+              }
+            );
+          }
+        ], done);
+
+      } // else
       
-      connection.should.be.ok;
-      async.series([
-        function(callback){
-          connection.execute(
-            script,
-            function(err){
-              should.not.exist(err);
-              callback();
-            }
-          );
-        },
-        function(callback){
-          connection.execute(
-            "INSERT INTO j_purchaseorder (po_document) VALUES (:bv)",
-            [s],
-            function(err, result){
-              should.not.exist(err);
-              (result.rowsAffected).should.be.exactly(1);
-              callback();
-            }
-          );
-        },
-        function(callback){
-          connection.execute(
-            "SELECT po_document FROM j_purchaseorder",
-            function(err, result){
-              should.not.exist(err);
-              
-              var js = JSON.parse(result.rows[0][0]);
-              // console.log(js);
-              js.should.eql(data);
-              
-              callback();
-            }
-          );
-        },
-        function(callback){
-          connection.execute(
-            "DROP TABLE j_purchaseorder",
-            function(err){
-              should.not.exist(err);
-              callback();
-            }
-          );
-        }
-      ], done);
     })
     
   })
