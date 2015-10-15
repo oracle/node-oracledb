@@ -1,11 +1,12 @@
 # Change Log
 
-## node-oracledb v1.3.0 (DD Mon YYYY)
-- Fixed result.outBinds corruption after PL/SQL execution.
+## node-oracledb v1.3.0 (15 Oct 2015)
 
 - Added a `oracledb.oracleClientVersion` property giving the version of the Oracle
   client library, and a `connection.oracleServerVersion` property giving the Oracle
   Database version.
+
+- Fixed `result.outBinds` corruption after PL/SQL execution.
 
 - Fixed null output from DML RETURNING with Oracle Database 11.2 when the string is of size 4000.
 
