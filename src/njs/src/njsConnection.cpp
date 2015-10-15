@@ -574,7 +574,6 @@ void Connection::GetBindUnit (Handle<Value> val, Bind* bind,
 
   if(val->IsObject() && !val->IsDate() && !Buffer::HasInstance(val))
   {
-    dir                     = BIND_UNKNOWN;
     Local<Object> bind_unit = val->ToObject();
     NJS_GET_UINT_FROM_JSON   ( dir, executeBaton->error,
                                bind_unit, "dir", 1, exitGetBindUnit );
