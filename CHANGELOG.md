@@ -1,5 +1,17 @@
 # Change Log
 
+## node-oracledb v1.3.0 (15 Oct 2015)
+
+- Added a `oracledb.oracleClientVersion` property giving the version of the Oracle
+  client library, and a `connection.oracleServerVersion` property giving the Oracle
+  Database version.
+
+- Fixed `result.outBinds` corruption after PL/SQL execution.
+
+- Fixed null output from DML RETURNING with Oracle Database 11.2 when the string is of size 4000.
+
+- Fixed default bind direction to be BIND_IN.
+
 ## node-oracledb v1.2.0 (25 Sep 2015)
 
 - Added support for RAW data type.

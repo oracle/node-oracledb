@@ -54,6 +54,7 @@ enum DpiError                          // error type
   DpiOciInvalidHandle,
     // "Invalid OCI Handle/Descriptor or invalid parameter for OCI handle/descriptor allocation call"
   DpiErrMemAllocFail,   // "Memory allocatio failed"
+  DpiErrNullValue,      // "Unexpected NULL value"
 };
 
 

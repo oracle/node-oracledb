@@ -81,8 +81,9 @@ Persistent<FunctionTemplate> Connection::connectionTemplate_s;
  */
 Connection::Connection()
 {
-   dpiconn_   = (dpi::Conn *)0;
-   oracledb_  = (Oracledb *)0;
+   dpiconn_             = (dpi::Conn *)0;
+   oracledb_            = (Oracledb *)0;
+   oracleServerVersion_ = 0;
 }
 
 /*****************************************************************************/
@@ -145,6 +146,10 @@ void Connection::Init(Handle<Object> target)
                                               NanNew<v8::String>("action"),
                                               Connection::GetAction,
                                               Connection::SetAction );
+  tpl->InstanceTemplate()->SetAccessor(
+                                     NanNew<v8::String>("oracleServerVersion"),
+                                     Connection::GetOracleServerVersion,
+                                     Connection::SetOracleServerVersion);
 
   NanAssignPersistent( connectionTemplate_s, tpl);
   target->Set(NanNew<v8::String>("Connection"),tpl->GetFunction());
@@ -323,6 +328,67 @@ NAN_SETTER(Connection::SetAction)
     njsConn->dpiconn_->action(action);
   }
 }
+/*****************************************************************************/
+/*
+  DESCRIPTION
+    Get Accessor of OracleServerVersion Property
+*/
+NAN_PROPERTY_GETTER (Connection::GetOracleServerVersion)
+{
+  NanScope();
+  Connection *njsConn = ObjectWrap::Unwrap<Connection>(args.Holder());
+
+  if ( !njsConn->isValid_ )
+  {
+    string error = NJSMessages::getErrorMsg ( errInvalidConnection );
+    NJS_SET_EXCEPTION(error.c_str(), error.length() );
+    NanReturnUndefined();
+  }
+
+  try
+  {
+    if ( !njsConn->oracleServerVersion_ )
+    {
+      /* Updating the member variable is not thread-safe, but all threads
+       * will get same value from DB and update the value which is atomic
+       * and so it is ok.
+       */
+      unsigned int ver = njsConn->dpiconn_->getServerVersion ();
+
+      njsConn-> oracleServerVersion_ =
+                        100000000 * ( ( ver >> 24 ) & 0x000000FF ) +
+                          1000000 * ( ( ver >> 20 ) & 0x0000000F ) +
+                            10000 * ( ( ver >> 12 ) & 0x000000FF ) +
+                              100 * ( ( ver >>  8 ) & 0x0000000F ) +
+                                    ( ( ver >>  0 ) & 0x000000FF ) ;
+    }
+
+    Local<Integer> value = NanNew<v8::Integer>(
+                             (unsigned int ) njsConn-> oracleServerVersion_ );
+    NanReturnValue ( value );
+  }
+  catch ( dpi::Exception &e)
+  {
+    NJS_SET_CONN_ERR_STATUS ( e.errnum(), njsConn->dpiconn_ );
+    NJS_SET_EXCEPTION ( e.what(), strlen (e.what () ) );
+    NanReturnUndefined ();
+  }
+}
+
+
+/*****************************************************************************/
+/*
+  DESCRIPTION
+    Set Accessor of OracleServerVersion Property
+*/
+NAN_SETTER(Connection::SetOracleServerVersion)
+{
+  connectionPropertyException(ObjectWrap::Unwrap<Connection>(args.Holder()),
+                              errReadOnly, "oracleServerVersion" );
+}
+
+
+
 /*****************************************************************************/
 /*
    DESCRIPTION
@@ -574,7 +640,6 @@ void Connection::GetBindUnit (Handle<Value> val, Bind* bind,
 
   if(val->IsObject() && !val->IsDate() && !Buffer::HasInstance(val))
   {
-    dir                     = BIND_UNKNOWN;
     Local<Object> bind_unit = val->ToObject();
     NJS_GET_UINT_FROM_JSON   ( dir, executeBaton->error,
                                bind_unit, "dir", 1, exitGetBindUnit );
@@ -1061,7 +1126,6 @@ void Connection::Async_Execute (uv_work_t *req)
  */
 void Connection::PrepareAndBind (eBaton* executeBaton)
 {
-    DPI_SZ_TYPE maxSize = 0; // maxSize for out bind; add 1 for dml returning
     executeBaton->dpistmt = executeBaton->dpiconn->getStmt(executeBaton->sql);
     executeBaton->st = executeBaton->dpistmt->stmtType ();
     executeBaton->stmtIsReturning = executeBaton->dpistmt->isReturning ();
@@ -1110,26 +1174,15 @@ void Connection::PrepareAndBind (eBaton* executeBaton)
             Connection::UpdateDateValue ( executeBaton, index ) ;
           }
 
-          /* 
-           * In case of DML Returning, add 1 extra byte, to check for
-           * more data 
-           */
-          if ( ( executeBaton->binds[index]->type == dpi::DpiVarChar) &&
-               ( executeBaton->stmtIsReturning ) )
-          {
-            maxSize = executeBaton->binds[index]->maxSize + 1;
-          }
-          else
-          {
-            maxSize = executeBaton->binds[index]->maxSize;
-          }
           // Bind by name
           executeBaton->dpistmt->bind(
                 (const unsigned char*)executeBaton->binds[index]->key.c_str(),
                 (int) executeBaton->binds[index]->key.length(), index,
                 executeBaton->binds[index]->type,
                 executeBaton->binds[index]->value,
-                (executeBaton->binds[index]->type == dpi::DpiVarChar ) ?
+                (executeBaton->stmtIsReturning &&
+                  executeBaton->binds[index]->isOut &&
+                  (executeBaton->binds[index]->type == dpi::DpiVarChar))?
                   (executeBaton->binds[index]->maxSize + 1) :
                   executeBaton->binds[index]->maxSize,
                 executeBaton->binds[index]->ind,
@@ -1168,25 +1221,13 @@ void Connection::PrepareAndBind (eBaton* executeBaton)
             Connection::UpdateDateValue ( executeBaton, index ) ;
           }
 
-          /* 
-           * In case of DML Returning, add 1 extra byte, to check for
-           * more data 
-           */
-
-          if ( ( executeBaton->binds[index]->type == dpi::DpiVarChar) &&
-               ( executeBaton->stmtIsReturning ) )
-          {
-            maxSize = executeBaton->binds[index]->maxSize + 1;
-          }
-          else
-          {
-            maxSize = executeBaton->binds[index]->maxSize;
-          }
           // Bind by position
           executeBaton->dpistmt->bind(
                 index+1,executeBaton->binds[index]->type,
                 executeBaton->binds[index]->value,
-                (executeBaton->binds[index]->type == dpi::DpiVarChar ) ?
+                (executeBaton->stmtIsReturning &&
+                  executeBaton->binds[index]->isOut &&
+                  (executeBaton->binds[index]->type == dpi::DpiVarChar))?
                   (executeBaton->binds[index]->maxSize + 1) :
                    executeBaton->binds[index]->maxSize,
                 executeBaton->binds[index]->ind,
@@ -2392,7 +2433,7 @@ v8::Handle<v8::Value> Connection::GetOutBinds (eBaton* executeBaton)
       return NanEscapeScope(GetOutBindObject( executeBaton ));
     }
   }
-  return NanUndefined();
+  return NanEscapeScope(NanUndefined());
 }
 
 /*****************************************************************************/

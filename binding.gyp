@@ -18,7 +18,8 @@
              "src/dpi/src/dpiPoolImpl.cpp",
              "src/dpi/src/dpiStmtImpl.cpp",
              "src/dpi/src/dpiUtils.cpp",
-             "src/dpi/src/dpiLob.cpp"
+             "src/dpi/src/dpiLob.cpp",
+             "src/dpi/src/dpiCommon.cpp"
     ],
     "conditions" : [
     [

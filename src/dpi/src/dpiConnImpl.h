@@ -130,6 +130,8 @@ class ConnImpl : public Conn
     }
   #endif
 
+    virtual unsigned int getServerVersion () ;
+
 private:
 
   void initConnImpl( bool pool, bool externalAuth, const string& connClass,

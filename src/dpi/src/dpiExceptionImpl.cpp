@@ -59,6 +59,7 @@ static const char *dpiErrors[] =
                                                       // DpiErrExtAuth
   "invalid OCI handle or descriptor",                 // DpiOciInvalidHandle
   "memory allocation failed",                         // DpiErrMemAllocFail
+  "unexpected NULL value",                            // DpiErrNullValue
 };
 
 

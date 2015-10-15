@@ -1,4 +1,4 @@
-# node-oracledb 1.2: Documentation for the Oracle Database Node.js Add-on
+# node-oracledb 1.3: Documentation for the Oracle Database Node.js Add-on
 
 *Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved.*
 
@@ -42,14 +42,15 @@ limitations under the License.
      - 3.2.4 [fetchAsString](#propdbfetchasstring)
      - 3.2.5 [lobPrefetchSize](#propdblobprefetchsize)
      - 3.2.6 [maxRows](#propdbmaxrows)
-     - 3.2.7 [outFormat](#propdboutformat)
-     - 3.2.8 [poolIncrement](#propdbpoolincrement)
-     - 3.2.9 [poolMax](#propdbpoolmax)
-     - 3.2.10 [poolMin](#propdbpoolmin)
-     - 3.2.11 [poolTimeout](#propdbpooltimeout)
-     - 3.2.12 [prefetchRows](#propdbprefetchrows)
-     - 3.2.13 [stmtCacheSize](#propdbstmtcachesize)
-     - 3.2.14 [version](#propdbversion)
+     - 3.2.7 [oracleClientVersion](#propdboracleClientVersion)
+     - 3.2.8 [outFormat](#propdboutformat)
+     - 3.2.9 [poolIncrement](#propdbpoolincrement)
+     - 3.2.10 [poolMax](#propdbpoolmax)
+     - 3.2.11 [poolMin](#propdbpoolmin)
+     - 3.2.12 [poolTimeout](#propdbpooltimeout)
+     - 3.2.13 [prefetchRows](#propdbprefetchrows)
+     - 3.2.14 [stmtCacheSize](#propdbstmtcachesize)
+     - 3.2.15 [version](#propdbversion)
   - 3.3 [Oracledb Methods](#oracledbmethods)
      - 3.3.1 [createPool()](#createpool)
      - 3.3.2 [getConnection()](#getconnectiondb)
@@ -58,7 +59,8 @@ limitations under the License.
      - 4.1.1 [action](#propconnaction)
      - 4.1.2 [clientId](#propconnclientid)
      - 4.1.3 [module](#propconnmodule)
-     - 4.1.4 [stmtCacheSize](#propconnstmtcachesize)
+     - 4.1.4 [oracleServerVersion](#propconnoracleserverversion)
+     - 4.1.5 [stmtCacheSize](#propconnstmtcachesize)
   - 4.2 [Connection Methods](#connectionmethods)
      - 4.2.1 [break()](#break)
      - 4.2.2 [commit()](#commit)
@@ -74,7 +76,7 @@ limitations under the License.
      - 5.1.1 [chunkSize](#proplobchunksize)
      - 5.1.2 [length](#proploblength)
      - 5.1.3 [pieceSize](#proplobpiecesize)
-	 - 5.1.4 [type](#proplobtype)
+     - 5.1.4 [type](#proplobtype)
 6. [Pool Class](#poolclass)
   - 6.1 [Pool Properties](#poolproperties)
      - 6.1.1 [connectionsInUse](#proppoolconnectionsinuse)
@@ -504,7 +506,23 @@ var oracledb = require('oracledb');
 oracledb.lobPrefetchSize = 16384;
 ```
 
-#### <a name="propdboutformat"></a> 3.2.7 outFormat
+#### <a name="propdboracleClientVersion"></a> 3.2.7 oracleClientVersion
+
+```
+readonly Number oracleClientVersion
+```
+
+This readonly property gives a numeric representation of the Oracle client library version. 
+For version *a.b.c.d.e*, this property gives the number: `(100000000 * a) + (1000000 * b) + (10000 * c) + (100 * d) + e`
+
+##### Example
+
+```javascript
+var oracledb = require('oracledb');
+console.log("Oracle client library version number is " + oracledb.oracleClientVersion);
+```
+
+#### <a name="propdboutformat"></a> 3.2.8 outFormat
 
 ```
 Number outFormat
@@ -534,7 +552,7 @@ var oracledb = require('oracledb');
 oracledb.outFormat = oracledb.ARRAY;
 ```
 
-#### <a name="propdbpoolincrement"></a> 3.2.8 poolIncrement
+#### <a name="propdbpoolincrement"></a> 3.2.9 poolIncrement
 
 ```
 Number poolIncrement
@@ -554,7 +572,7 @@ var oracledb = require('oracledb');
 oracledb.poolIncrement = 1;
 ```
 
-#### <a name="propdbpoolmax"></a> 3.2.9 poolMax
+#### <a name="propdbpoolmax"></a> 3.2.10 poolMax
 
 ```
 Number poolMax
@@ -573,7 +591,7 @@ var oracledb = require('oracledb');
 oracledb.poolMax = 4;
 ```
 
-#### <a name="propdbpoolmin"></a> 3.2.10 poolMin
+#### <a name="propdbpoolmin"></a> 3.2.11 poolMin
 
 ```
 Number poolMin
@@ -593,7 +611,7 @@ var oracledb = require('oracledb');
 oracledb.poolMin = 0;
 ```
 
-#### <a name="propdbpooltimeout"></a> 3.2.11 poolTimeout
+#### <a name="propdbpooltimeout"></a> 3.2.12 poolTimeout
 
 ```
 Number poolTimeout
@@ -615,7 +633,7 @@ var oracledb = require('oracledb');
 oracledb.poolTimeout = 60;
 ```
 
-#### <a name="propdbprefetchrows"></a> 3.2.12 prefetchRows
+#### <a name="propdbprefetchrows"></a> 3.2.13 prefetchRows
 
 ```
 Number prefetchRows
@@ -645,7 +663,7 @@ var oracledb = require('oracledb');
 oracledb.prefetchRows = 100;
 ```
 
-#### <a name="propdbstmtcachesize"></a> 3.2.13 stmtCacheSize
+#### <a name="propdbstmtcachesize"></a> 3.2.14 stmtCacheSize
 
 ```
 Number stmtCacheSize
@@ -672,12 +690,12 @@ var oracledb = require('oracledb');
 oracledb.stmtCacheSize = 30;
 ```
 
-#### <a name="propdbversion"></a> 3.2.14 version
+#### <a name="propdbversion"></a> 3.2.15 version
 ```
 readonly Number version
 ```
 
-This readonly property gives a numeric representation of the node-oracledb's version.
+This readonly property gives a numeric representation of the node-oracledb version.
 For version *x.y.z*, this property gives the number: `(10000 * x) + (100 * y) + z`
 
 ##### Example
@@ -994,7 +1012,16 @@ This is a write-only property.  Displaying a Connection object will
 show a value of `null` for this attribute.  See
 [End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend).
 
-#### <a name="propconnstmtcachesize"></a> 4.1.4 stmtCacheSize
+#### <a name="propconnoracleserverversion"></a> 4.1.4 oracleServerVersion
+
+```
+readonly Number oracleServerVersion
+```
+
+This readonly property gives a numeric representation of the Oracle database version. 
+For version *a.b.c.d.e*, this property gives the number: `(100000000 * a) + (1000000 * b) + (10000 * c) + (100 * d) + e`
+
+#### <a name="propconnstmtcachesize"></a> 4.1.5 stmtCacheSize
 
 ```
 readonly Number stmtCacheSize
@@ -2852,10 +2879,10 @@ connection.execute(
   [90, "Tonga"],
   function(err, result)
   {
-	if (err)
-	  console.error(err.message);
-	else
-	  console.log("Rows inserted " + result.rowsAffected);
+    if (err)
+      console.error(err.message);
+    else
+      console.log("Rows inserted " + result.rowsAffected);
   });
 ```
 
@@ -2884,10 +2911,10 @@ connection.execute(
   {country_id: 90, country_name: "Tonga"},
   function(err, result)
   {
-	if (err)
-	  console.error(err.message);
-	else
-	  console.log("Rows inserted " + result.rowsAffected);
+    if (err)
+      console.error(err.message);
+    else
+      console.log("Rows inserted " + result.rowsAffected);
   });
 ```
 
@@ -2904,15 +2931,15 @@ var oracledb = require('oracledb');
 connection.execute(
   "INSERT INTO countries VALUES (:country_id, :country_name)",
   {
-	country_id: { val: 90, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
-	country_name: { val: "Tonga", dir: oracledb.BIND_IN, type:oracledb.STRING }
+    country_id: { val: 90, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
+    country_name: { val: "Tonga", dir: oracledb.BIND_IN, type:oracledb.STRING }
   },
   function(err, result)
   {
-	if (err)
-	  console.error(err.message);
-	else
-	  console.log("Rows inserted " + result.rowsAffected);
+    if (err)
+      console.error(err.message);
+    else
+      console.log("Rows inserted " + result.rowsAffected);
   });
 ```
 

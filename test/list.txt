@@ -455,12 +455,13 @@
         58.1.5 maxRows
         58.1.6 prefetchRows
         58.1.7 autoCommit
-        58.1.8 version
+        58.1.8 version (read-only)
         58.1.9 connClass
         58.1.10 externalAuth
         58.1.11 fetchAsString
         58.1.12 outFormat
         58.1.13 lobPrefetchSize
+        58.1.14 oracleClientVersion (read-only)
     58.2 pool properties
         58.2.1 poolMin
         58.2.2 poolMax
@@ -468,11 +469,12 @@
         58.2.4 poolTimeout
         58.2.5 stmtCacheSize
     58.3 connection properties
-        58.3.1 Connection object intial toString values
-        58.3.2 stmtCacheSize
-        58.3.3 clientId
-        58.3.4 action
-        58.3.5 module
+        58.3.1 Connection object initial toString values
+        58.3.2 stmtCacheSize (read-only)
+        58.3.3 clientId (write-only)
+        58.3.4 action (write-only)
+        58.3.5 module (write-only)
+        58.3.6 oracleServerVersion (read-only)
 
 59. lob.js
     59.1 CLOB data

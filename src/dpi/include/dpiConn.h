@@ -88,6 +88,8 @@ public:
 
   virtual DpiHandle *getErrh () = 0;
 
+  virtual unsigned int getServerVersion () = 0;
+
 protected:
                                 // clients cannot do new and delete
   Conn(){};
