@@ -2,6 +2,8 @@
 
 ## node-oracledb v1.3.0 (DD Mon YYYY)
 
+- Fixed 11.2.0.4 DB-specific NULL output with DML RETURNING when string value is of size 4k.
+
 ## node-oracledb v1.2.0 (25 Sep 2015)
 
 - Added support for RAW data type.

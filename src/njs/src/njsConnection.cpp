@@ -1061,7 +1061,6 @@ void Connection::Async_Execute (uv_work_t *req)
  */
 void Connection::PrepareAndBind (eBaton* executeBaton)
 {
-    DPI_SZ_TYPE maxSize = 0; // maxSize for out bind; add 1 for dml returning
     executeBaton->dpistmt = executeBaton->dpiconn->getStmt(executeBaton->sql);
     executeBaton->st = executeBaton->dpistmt->stmtType ();
     executeBaton->stmtIsReturning = executeBaton->dpistmt->isReturning ();
@@ -1110,26 +1109,15 @@ void Connection::PrepareAndBind (eBaton* executeBaton)
             Connection::UpdateDateValue ( executeBaton, index ) ;
           }
 
-          /* 
-           * In case of DML Returning, add 1 extra byte, to check for
-           * more data 
-           */
-          if ( ( executeBaton->binds[index]->type == dpi::DpiVarChar) &&
-               ( executeBaton->stmtIsReturning ) )
-          {
-            maxSize = executeBaton->binds[index]->maxSize + 1;
-          }
-          else
-          {
-            maxSize = executeBaton->binds[index]->maxSize;
-          }
           // Bind by name
           executeBaton->dpistmt->bind(
                 (const unsigned char*)executeBaton->binds[index]->key.c_str(),
                 (int) executeBaton->binds[index]->key.length(), index,
                 executeBaton->binds[index]->type,
                 executeBaton->binds[index]->value,
-                (executeBaton->binds[index]->type == dpi::DpiVarChar ) ?
+                (executeBaton->stmtIsReturning &&
+                  executeBaton->binds[index]->isOut &&
+                  (executeBaton->binds[index]->type == dpi::DpiVarChar))?
                   (executeBaton->binds[index]->maxSize + 1) :
                   executeBaton->binds[index]->maxSize,
                 executeBaton->binds[index]->ind,
@@ -1168,25 +1156,13 @@ void Connection::PrepareAndBind (eBaton* executeBaton)
             Connection::UpdateDateValue ( executeBaton, index ) ;
           }
 
-          /* 
-           * In case of DML Returning, add 1 extra byte, to check for
-           * more data 
-           */
-
-          if ( ( executeBaton->binds[index]->type == dpi::DpiVarChar) &&
-               ( executeBaton->stmtIsReturning ) )
-          {
-            maxSize = executeBaton->binds[index]->maxSize + 1;
-          }
-          else
-          {
-            maxSize = executeBaton->binds[index]->maxSize;
-          }
           // Bind by position
           executeBaton->dpistmt->bind(
                 index+1,executeBaton->binds[index]->type,
                 executeBaton->binds[index]->value,
-                (executeBaton->binds[index]->type == dpi::DpiVarChar ) ?
+                (executeBaton->stmtIsReturning &&
+                  executeBaton->binds[index]->isOut &&
+                  (executeBaton->binds[index]->type == dpi::DpiVarChar))?
                   (executeBaton->binds[index]->maxSize + 1) :
                    executeBaton->binds[index]->maxSize,
                 executeBaton->binds[index]->ind,

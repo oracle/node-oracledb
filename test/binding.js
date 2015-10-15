@@ -675,7 +675,7 @@ describe('4. binding.js', function() {
       );
     })
 
-    it.skip('4.4.3 Negative - bind out data exceeds default length', function(done) {
+    it('4.4.3 Negative - bind out data exceeds default length', function(done) {
       connection.execute(
         "BEGIN :o := lpad('A',201,'x'); END;", 
          { o: { type: oracledb.STRING, dir : oracledb.BIND_OUT } }, 
