@@ -148,7 +148,7 @@ describe('42. dataTypeRaw.js', function() {
     })
   })
 
-  describe('42.3 DML Returning', function() {
+  describe('42.3 DML Returning - Currently not support RAW', function() {
     
     before('create table', function(done) {
       assist.createTable(connection, tableName, done);
@@ -176,12 +176,13 @@ describe('42. dataTypeRaw.js', function() {
           n   : seq,
           c   : { type: oracledb.BUFFER, val: bindValue, dir: oracledb.BIND_IN },
           rid : { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
-          rc  : { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 2000 }
+          rc  : { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: 2000 }
         },
         { autoCommit: true },
         function(err, result) {
-          should.not.exist(err);
-          // console.log(result);
+          should.exist(err);
+          (err.message).should.startWith('NJS-028');
+          // NJS-028: raw database type is not supported with DML Returning statements
           // (result.outBinds.rc[0].toString('hex')).should.eql(bindValue.toString('hex'));
           // (result.outBinds.rc[0].length).should.be.exactly(size);
           done();
@@ -200,11 +201,12 @@ describe('42. dataTypeRaw.js', function() {
           seq,
           { type: oracledb.BUFFER, val: bindValue, dir: oracledb.BIND_IN },
           { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
-          { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 2000 }
+          { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: 2000 }
         ],
         { autoCommit: true },
         function(err, result) {
-          should.not.exist(err);
+          should.exist(err);
+          (err.message).should.startWith('NJS-028');
           // console.log(result);
           // (result.outBinds.rc[0].toString('hex')).should.eql(bindValue.toString('hex'));
           // (result.outBinds.rc[0].length).should.be.exactly(size);
@@ -224,11 +226,12 @@ describe('42. dataTypeRaw.js', function() {
           n   : seq,
           c   : { type: oracledb.BUFFER, val: bindValue, dir: oracledb.BIND_IN },
           rid : { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
-          rc  : { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: size * 2 }  // should be size
+          rc  : { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: size * 2 }  // should be size
         },
         { autoCommit: true },
         function(err, result) {
-          should.not.exist(err);
+          should.exist(err);
+          (err.message).should.startWith('NJS-028');
           // console.log(result);
           // (result.outBinds.rc[0].toString('hex')).should.eql(bindValue.toString('hex'));
           // (result.outBinds.rc[0].length).should.be.exactly(size);
@@ -249,11 +252,12 @@ describe('42. dataTypeRaw.js', function() {
           n   : seq,
           c   : { type: oracledb.BUFFER, val: bindValue, dir: oracledb.BIND_IN },
           rid : { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
-          rc  : { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 2000 }
+          rc  : { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: 2000 }
         },
         { autoCommit: true },
         function(err, result) {
-          should.not.exist(err);
+          should.exist(err);
+          (err.message).should.startWith('NJS-028');
           // console.log(result);
           // (result.outBinds.rc[0].toString('hex')).should.eql(bindValue.toString('hex'));
           // (result.outBinds.rc[0].length).should.be.exactly(size);
@@ -271,11 +275,12 @@ describe('42. dataTypeRaw.js', function() {
         [
           seq,
           { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
-          { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 2000 }
+          { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: 2000 }
         ],
         { autoCommit: true },
         function(err, result) {
-          should.not.exist(err);
+          should.exist(err);
+          (err.message).should.startWith('NJS-028');
           // console.log(result);
           // (result.outBinds.rc[0].toString('hex')).should.eql(bindValue.toString('hex'));
           // (result.outBinds.rc[0].length).should.be.exactly(size);
@@ -293,11 +298,12 @@ describe('42. dataTypeRaw.js', function() {
         {
           n   : seq,
           rid : { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
-          rc  : { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 2000 }
+          rc  : { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: 2000 }
         },
         { autoCommit: true },
         function(err, result) {
-          should.not.exist(err);
+          should.exist(err);
+          (err.message).should.startWith('NJS-028');
           // console.log(result);
           // (result.outBinds.rc[0].toString('hex')).should.eql(bindValue.toString('hex'));
           // (result.outBinds.rc[0].length).should.be.exactly(size);
