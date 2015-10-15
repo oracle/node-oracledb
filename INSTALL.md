@@ -366,6 +366,11 @@ node select1.js
 
 ## <a name="instosx"></a> 5. Node-oracledb Installation on OS X with Instant Client
 
+*Note*: Users of OS X 10.11 'El Capitan' should review OS X SIP changes to
+`DYLD_LIBRARY_PATH` behavior discussed in
+[#149](https://github.com/oracle/node-oracledb/issues/149) and
+[#231](https://github.com/oracle/node-oracledb/issues/231).
+
 ### 5.1 Install Xcode
 
 Building node-oracledb requires Xcode from the Mac App store.
