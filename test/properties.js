@@ -144,7 +144,7 @@ describe('58. properties.js', function() {
       (oracledb.autoCommit).should.eql( !defaultValues.autoCommit );
     })
 
-    it('58.1.8 version', function() {
+    it('58.1.8 version (read-only)', function() {
       (oracledb.version).should.be.a.Number;
       
       try {
@@ -193,8 +193,16 @@ describe('58. properties.js', function() {
       (oracledb.lobPrefetchSize).should.eql(defaultValues.lobPrefetchSize + 1);
     })
 
-    it('58.1.14 oracleClientVersion', function () {
-       var t = oracledb.oracleClientVersion ;
+    it('58.1.14 oracleClientVersion (read-only)', function () {
+      var t = oracledb.oracleClientVersion ;
+      t.should.be.a.Number;
+
+      try {
+        oracledb.oracleClientVersion++;
+      } catch(err) {
+        should.exist(err);
+        (err.message).should.startWith('NJS-014');
+      }
     } );
 
   }) // 58.1
@@ -299,7 +307,7 @@ describe('58. properties.js', function() {
       });
     })
 
-    it('58.3.1 Connection object intial toString values', function() {
+    it('58.3.1 Connection object initial toString values', function() {
       connection.should.be.an.Object;
 
       should.equal(connection.action, null);
@@ -310,7 +318,7 @@ describe('58. properties.js', function() {
       (connection.stmtCacheSize).should.be.greaterThan(0);
     })
 
-    it('58.3.2 stmtCacheSize', function() {
+    it('58.3.2 stmtCacheSize (read-only)', function() {
       var t = connection.stmtCacheSize;
       t.should.be.a.Number;
 
@@ -322,7 +330,7 @@ describe('58. properties.js', function() {
       }
     })
 
-    it('58.3.3 clientId', function() {
+    it('58.3.3 clientId (write-only)', function() {
       try {
         var t = connection.clientId;
       } catch(err) {
@@ -340,7 +348,7 @@ describe('58. properties.js', function() {
       connection.clientId = "103.3";
     })
 
-    it('58.3.4 action', function() {
+    it('58.3.4 action (write-only)', function() {
       
       try {
         var t = connection.action;
@@ -359,7 +367,7 @@ describe('58. properties.js', function() {
       connection.action = "103.3 action";
     })
 
-    it('58.3.5 module', function() {
+    it('58.3.5 module (write-only)', function() {
    
       try {
         var t = connection.module;
@@ -378,12 +386,16 @@ describe('58. properties.js', function() {
       connection.module = "103.3 module";
     })
 
-    it ('58.3.6 oracleServerVersion', function () {
+    it('58.3.6 oracleServerVersion (read-only)', function () {
+      var t = connection.oracleServerVersion;
+      t.should.be.a.Number;
+
       try {
-        var t = connection.oracleServerVersion;
+        connection.oracleServerVersion++;
       }
-      catch (err ) {
+      catch (err) {
         should.exist ( err );
+        (err.message).should.startWith('NJS-014');
       }
     });
 
