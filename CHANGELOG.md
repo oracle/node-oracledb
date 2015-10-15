@@ -1,5 +1,7 @@
 # Change Log
 
+## node-oracledb v1.3.0 (DD Mon YYYY)
+
 ## node-oracledb v1.2.0 (25 Sep 2015)
 
 - Added support for RAW data type.
