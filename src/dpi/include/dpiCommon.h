@@ -56,6 +56,18 @@ enum DescriptorType
 struct DpiHandle;
 struct Descriptor;
 
+
+/* Utiltiy class containing common functions */
+class Common
+{
+public:
+  // To obtain the Oracle Client Library Version
+  static void clientVersion (int *majorv, int *minorv, int *patchv,
+                                        int *portv, int *portUpdv );
+};
+
+
+
 /*----------------------------------------------------------------------------
                      PUBLIC METHODS
   ----------------------------------------------------------------------------*/

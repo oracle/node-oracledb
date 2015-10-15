@@ -69,7 +69,7 @@ using namespace v8;
 
 /* Keep the version in sync with package.json */
 #define NJS_NODE_ORACLEDB_MAJOR       1
-#define NJS_NODE_ORACLEDB_MINOR       2
+#define NJS_NODE_ORACLEDB_MINOR       3
 #define NJS_NODE_ORACLEDB_PATCH       0
 
 /* Used for Oracledb.version */
@@ -86,20 +86,22 @@ class Oracledb: public Nan::ObjectWrap
    // Oracledb class
    static void Init(Handle<Object> target);
 
-   dpi::Env*    getDpiEnv () const { return dpienv_; }
-   bool         getAutoCommit () const  { return autoCommit_; }
-   unsigned int getOutFormat () const { return outFormat_; }
-   unsigned int getMaxRows ()  const  { return maxRows_; }
-   unsigned int getStmtCacheSize ()  const  { return stmtCacheSize_; }
-   unsigned int getPoolMin () const  { return poolMin_; }
-   unsigned int getPoolMax () const  { return poolMax_; }
-   unsigned int getPoolIncrement () const  { return poolIncrement_; }
-   unsigned int getPoolTimeout () const  { return poolTimeout_; }
-   unsigned int getPrefetchRows () const  { return prefetchRows_; }
+   dpi::Env*          getDpiEnv () const          { return dpienv_; }
+   bool               getAutoCommit () const      { return autoCommit_; }
+   unsigned int       getOutFormat () const       { return outFormat_; }
+   unsigned int       getMaxRows ()  const        { return maxRows_; }
+   unsigned int       getStmtCacheSize ()  const  { return stmtCacheSize_; }
+   unsigned int       getPoolMin () const         { return poolMin_; }
+   unsigned int       getPoolMax () const         { return poolMax_; }
+   unsigned int       getPoolIncrement () const   { return poolIncrement_; }
+   unsigned int       getPoolTimeout () const     { return poolTimeout_; }
+   unsigned int       getPrefetchRows () const    { return prefetchRows_; }
    const std::string& getConnectionClass () const { return connClass_; }
-   const DataType *getFetchAsStringTypes () const;
-   unsigned int getFetchAsStringTypesCount () const
-     {  return fetchAsStringTypesCount_ ;   }
+
+   const DataType*    getFetchAsStringTypes () const;
+
+   unsigned int       getFetchAsStringTypesCount () const
+   {  return fetchAsStringTypesCount_ ;   }
 
 private:
    // Define Oracledb Constructor
@@ -132,6 +134,7 @@ private:
    static NAN_GETTER(GetPrefetchRows);
    static NAN_GETTER(GetFetchAsString);
    static NAN_GETTER(GetLobPrefetchSize);
+   static NAN_GETTER(GetOracleClientVersion);
 
    // Define Setter Accessors to Properties
    static NAN_SETTER(SetPoolMin);
@@ -148,6 +151,8 @@ private:
    static NAN_SETTER(SetPrefetchRows);
    static NAN_SETTER(SetFetchAsString);
    static NAN_SETTER(SetLobPrefetchSize);
+   static NAN_SETTER(SetOracleClientVersion);
+
 
    Oracledb();
    ~Oracledb();
@@ -170,6 +175,7 @@ private:
    DataType     *fetchAsStringTypes_;   
    unsigned int fetchAsStringTypesCount_;
    unsigned int lobPrefetchSize_;
+   unsigned int oraClientVer_;
 };
 
 /**
@@ -200,6 +206,7 @@ typedef struct connectionBaton
   dpi::Env*   dpienv;
   dpi::Conn*  dpiconn;
   dpi::SPool* dpipool;
+
 
   Oracledb *oracledb;
 

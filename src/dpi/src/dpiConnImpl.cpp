@@ -56,6 +56,8 @@
 #define DPI_CONNERR_ORA_NOT_LOGGED_ON             1012
 #define DPI_CONNERR_MAX_IDLE_TIMEOUT              2396
 
+#define DPI_MAX_VERSION_SIZE                      512
+
 using namespace std;
 
 
@@ -130,7 +132,8 @@ ConnImpl::ConnImpl(PoolImpl *pool, OCIEnv *envh, bool externalAuth,
 
 try :  env_(NULL), pool_(pool),
        envh_(envh), errh_(NULL), auth_(NULL),
-       svch_(NULL), sessh_(NULL), hasTxn_(false), srvh_(NULL), dropConn_(false)
+       svch_(NULL), sessh_(NULL), hasTxn_(false), srvh_(NULL),
+       dropConn_(false)
 {
   this->initConnImpl ( true, externalAuth, connClass, poolName, poolNameLen,
                        "", "" );
@@ -522,6 +525,31 @@ void ConnImpl::setErrState ( int errNum )
         break;
     }
   }
+}
+
+
+/*****************************************************************************/
+/*
+  DESCRIPTION
+    To obtain the Oracle Database Server version
+
+  PARAMETERS
+    -None-
+
+  RETURNS
+    version
+*/
+unsigned int ConnImpl::getServerVersion ()
+{
+  ub4  oraServerVer = 0;
+  char verbuf[ DPI_MAX_VERSION_SIZE ];
+
+  ociCall ( OCIServerRelease ( svch_, errh_, (OraText *)verbuf,
+                               (ub4) sizeof ( verbuf ),
+                               (ub1) OCI_HTYPE_SVCCTX, &oraServerVer ),
+              errh_ ) ;
+
+  return oraServerVer;
 }
 
 

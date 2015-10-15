@@ -88,7 +88,7 @@ Oracledb::Oracledb()
   connClass_          = "";
   externalAuth_       = false;
   fetchAsStringTypes_ = NULL;
-  lobPrefetchSize_ = NJS_LOB_PREFETCH_SIZE;
+  lobPrefetchSize_    = NJS_LOB_PREFETCH_SIZE;
 }
 
 /*****************************************************************************/
@@ -200,6 +200,11 @@ void Oracledb::Init(Handle<Object> target)
     Nan::New<v8::String>("lobPrefetchSize").ToLocalChecked(),
     Oracledb::GetLobPrefetchSize,
     Oracledb::SetLobPrefetchSize);
+  Nan::SetAccessor(
+    temp->InstanceTemplate(),
+    Nan::New<v8::String>("oracleClientVersion").ToLocalChecked(),
+    Oracledb::GetOracleClientVersion,
+    Oracledb::SetOracleClientVersion);
 
   oracledbTemplate_s.Reset(temp);
   Nan::Set(target, Nan::New<v8::String>("Oracledb").ToLocalChecked(),temp->GetFunction());
@@ -214,9 +219,22 @@ void Oracledb::Init(Handle<Object> target)
 NAN_METHOD(Oracledb::New)
 {
 
+  sword     majorVer = 0, minorVer = 0, updateVer = 0, portVer = 0,
+            portUpdateVer = 0;
+
   Oracledb *oracledb = new Oracledb();
   oracledb->Wrap(info.This());
   oracledb->jsOracledb.Reset( info.This() );
+
+  dpi::Common::clientVersion ( &majorVer, &minorVer, &updateVer,
+                                  &portVer, &portUpdateVer );
+
+  oracledb->oraClientVer_ = 100000000 * majorVer      +
+                              1000000 * minorVer      +
+                                10000 * updateVer     +
+                                  100 * portVer       +
+                                        portUpdateVer ;
+
   info.GetReturnValue().Set(info.This());
 }
 
@@ -601,6 +619,34 @@ NAN_SETTER(Oracledb::SetFetchAsString)
   }
 }
 
+
+/*****************************************************************************/
+/*
+  DESCRIPTION
+    Get Accessor of Oracle Client Library Version property
+*/
+NAN_GETTER(Oracledb::GetOracleClientVersion)
+{
+  Oracledb* oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
+  Local<Integer> value;
+
+  value = Nan::New<v8::Integer>( (unsigned int) oracledb->oraClientVer_ );
+
+  info.GetReturnValue().Set( value );
+}
+
+
+/*****************************************************************************/
+/*
+  DESCRIPTION
+    Set Accessor of Oracle Client Version Property
+*/
+NAN_SETTER(Oracledb::SetOracleClientVersion )
+{
+  std::string msg;
+  msg = NJSMessages::getErrorMsg (errReadOnly, "oracleClientVersion");
+  NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
+}
 
 
 /*****************************************************************************/

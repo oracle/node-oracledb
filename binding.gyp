@@ -18,7 +18,8 @@
         "src/dpi/src/dpiPoolImpl.cpp",
         "src/dpi/src/dpiStmtImpl.cpp",
         "src/dpi/src/dpiUtils.cpp",
-        "src/dpi/src/dpiLob.cpp"
+        "src/dpi/src/dpiLob.cpp",
+        "src/dpi/src/dpiCommon.cpp"
       ],
       "conditions" : [
         [
@@ -44,7 +45,7 @@
             },
             "variables" : {
               "oci_inc_dir%" : "<!(INSTURL=\"https://github.com/oracle/node-oracledb/blob/master/INSTALL.md#instosx\"; ERR=\"node-oracledb ERR! Error:\"; if [ -z $OCI_INC_DIR ]; then if [ -f /opt/oracle/instantclient/sdk/include/oci.h ]; then echo \"/opt/oracle/instantclient/sdk/include/\"; else echo \"$ERR Cannot find Oracle client header files.\" >&2; echo \"$ERR See $INSTURL\" >&2; echo \"\" >&2; fi; else if [ -f \"$OCI_INC_DIR/oci.h\" ]; then echo $OCI_INC_DIR; else echo \"$ERR Cannot find \$OCI_INC_DIR/oci.h\" >&2; echo \"$ERR See $INSTURL\" >&2; echo \"\" >&2; fi; fi;)",
-            "oci_lib_dir%" : "<!(INSTURL=\"https://github.com/oracle/node-oracledb/blob/master/INSTALL.md#instosx\"; ERR=\"node-oracledb ERR! Error:\"; if [ -z $OCI_LIB_DIR ]; then if [ -f /opt/oracle/instantclient/libclntsh.dylib ]; then echo \"/opt/oracle/instantclient/\"; else echo \"$ERR Cannot find /opt/oracle/instantclient/libclntsh.dylib\" >&2; echo \"$ERR Do you need to run 'cd /opt/oracle/instantclient && ln -s libclntsh.dylib.* libclntsh.dylib'?\" >&2; echo \"$ERR See $INSTURL\" >&2; echo \"\" >&2; fi; else if [ -f \"$OCI_LIB_DIR/libclntsh.dylib\" ]; then echo $OCI_LIB_DIR; else echo \"$ERR Cannot find \$OCI_LIB_DIR/libclntsh.dylib\" >&2; echo \"$ERR Do you need to run 'cd \$OCI_LIB_DIR && ln -s libclntsh.dylib.* libclntsh.dylib'?\" >&2; echo \"$ERR See $INSTURL\" >&2; echo \"\" >&2; fi; fi;)",
+              "oci_lib_dir%" : "<!(INSTURL=\"https://github.com/oracle/node-oracledb/blob/master/INSTALL.md#instosx\"; ERR=\"node-oracledb ERR! Error:\"; if [ -z $OCI_LIB_DIR ]; then if [ -f /opt/oracle/instantclient/libclntsh.dylib ]; then echo \"/opt/oracle/instantclient/\"; else echo \"$ERR Cannot find /opt/oracle/instantclient/libclntsh.dylib\" >&2; echo \"$ERR Do you need to run 'cd /opt/oracle/instantclient && ln -s libclntsh.dylib.* libclntsh.dylib'?\" >&2; echo \"$ERR See $INSTURL\" >&2; echo \"\" >&2; fi; else if [ -f \"$OCI_LIB_DIR/libclntsh.dylib\" ]; then echo $OCI_LIB_DIR; else echo \"$ERR Cannot find \$OCI_LIB_DIR/libclntsh.dylib\" >&2; echo \"$ERR Do you need to run 'cd \$OCI_LIB_DIR && ln -s libclntsh.dylib.* libclntsh.dylib'?\" >&2; echo \"$ERR See $INSTURL\" >&2; echo \"\" >&2; fi; fi;)",
               },
               "cflags"        : ['-fexceptions'],
               "cflags_cc"     : ['-fexceptions'],
@@ -122,7 +123,7 @@
                     "LinkTimeCodeGeneration": 1,
                     "OptimizeReferences": 2,
                     "EnableCOMDATFolding": 2,
-                    "LinkIncremental": 1,
+                    "LinkIncremental": 0,
                     "AdditionalLibraryDirectories": [
                       "<(oci_lib_dir)"
                     ]

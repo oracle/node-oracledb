@@ -292,12 +292,14 @@ private:
   static NAN_GETTER(GetClientId);
   static NAN_GETTER(GetModule);
   static NAN_GETTER(GetAction);
+  static NAN_GETTER(GetOracleServerVersion);
 
   // Define Setter Accessors to properties
   static NAN_SETTER(SetStmtCacheSize);
   static NAN_SETTER(SetClientId);
   static NAN_SETTER(SetModule);
   static NAN_SETTER(SetAction);
+  static NAN_SETTER(SetOracleServerVersion);
 
   static void connectionPropertyException(Connection* njsConn, 
                                           NJSErrorType errType,
@@ -396,7 +398,7 @@ private:
 
   dpi::Conn* dpiconn_;
   bool isValid_;
-
+  unsigned int oracleServerVersion_;
 };
 
 
