@@ -77,12 +77,11 @@ using namespace v8;
                                       (NJS_NODE_ORACLEDB_MINOR * 100) +   \
                                       (NJS_NODE_ORACLEDB_PATCH) )
 
-
-class Oracledb: public ObjectWrap
+class Oracledb: public Nan::ObjectWrap
 {
  public:
 
-  Persistent<Object> jsOracledb;
+  Nan::Persistent<Object> jsOracledb;
 
    // Oracledb class
    static void Init(Handle<Object> target);
@@ -106,7 +105,7 @@ class Oracledb: public ObjectWrap
 
 private:
    // Define Oracledb Constructor
-   static Persistent<FunctionTemplate> oracledbTemplate_s;
+   static Nan::Persistent<FunctionTemplate> oracledbTemplate_s;
 
    static NAN_METHOD(New);
 
@@ -121,21 +120,21 @@ private:
    static void Async_AfterCreatePool (uv_work_t *req);
 
    // Define Getter Accessors to Properties
-   static NAN_PROPERTY_GETTER(GetPoolMin);
-   static NAN_PROPERTY_GETTER(GetPoolMax);
-   static NAN_PROPERTY_GETTER(GetPoolIncrement);
-   static NAN_PROPERTY_GETTER(GetPoolTimeout);
-   static NAN_PROPERTY_GETTER(GetStmtCacheSize);
-   static NAN_PROPERTY_GETTER(GetAutoCommit);
-   static NAN_PROPERTY_GETTER(GetMaxRows);
-   static NAN_PROPERTY_GETTER(GetOutFormat);
-   static NAN_PROPERTY_GETTER(GetVersion);
-   static NAN_PROPERTY_GETTER(GetConnectionClass);
-   static NAN_PROPERTY_GETTER(GetExternalAuth);
-   static NAN_PROPERTY_GETTER(GetPrefetchRows);
-   static NAN_PROPERTY_GETTER(GetFetchAsString);
-   static NAN_PROPERTY_GETTER(GetLobPrefetchSize);
-   static NAN_PROPERTY_GETTER(GetOracleClientVersion);
+   static NAN_GETTER(GetPoolMin);
+   static NAN_GETTER(GetPoolMax);
+   static NAN_GETTER(GetPoolIncrement);
+   static NAN_GETTER(GetPoolTimeout);
+   static NAN_GETTER(GetStmtCacheSize);
+   static NAN_GETTER(GetAutoCommit);
+   static NAN_GETTER(GetMaxRows);
+   static NAN_GETTER(GetOutFormat);
+   static NAN_GETTER(GetVersion);
+   static NAN_GETTER(GetConnectionClass);
+   static NAN_GETTER(GetExternalAuth);
+   static NAN_GETTER(GetPrefetchRows);
+   static NAN_GETTER(GetFetchAsString);
+   static NAN_GETTER(GetLobPrefetchSize);
+   static NAN_GETTER(GetOracleClientVersion);
 
    // Define Setter Accessors to Properties
    static NAN_SETTER(SetPoolMin);
@@ -203,7 +202,7 @@ typedef struct connectionBaton
 
   unsigned int maxRows;
   unsigned int outFormat;
-  Persistent<Function> cb;
+  Nan::Persistent<Function> cb;
   dpi::Env*   dpienv;
   dpi::Conn*  dpiconn;
   dpi::SPool* dpipool;
@@ -221,7 +220,8 @@ typedef struct connectionBaton
 
   ~connectionBaton()
    {
-     NanDisposePersistent(cb);
+     //NanDisposePersistent(cb);
+    cb.Reset();
    }
 
 }connectionBaton;

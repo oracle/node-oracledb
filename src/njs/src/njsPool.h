@@ -60,7 +60,7 @@ using namespace v8;
 using namespace node;
 
 
-class Pool: public ObjectWrap {
+class Pool: public Nan::ObjectWrap {
 public:
 
    static void Init(Handle<Object> target);
@@ -71,7 +71,7 @@ public:
                   unsigned int lobPrefetchSize);
    
    // Define Pool Constructor
-   static Persistent<FunctionTemplate> poolTemplate_s ;
+   static Nan::Persistent<FunctionTemplate> poolTemplate_s ;
 
 private:
 
@@ -88,15 +88,15 @@ private:
    static void Async_AfterTerminate(uv_work_t* req);
 
   // Define Getter Accessors to properties
-  static NAN_PROPERTY_GETTER(GetPoolMax);
-  static NAN_PROPERTY_GETTER(GetPoolMin);
-  static NAN_PROPERTY_GETTER(GetPoolIncrement);
-  static NAN_PROPERTY_GETTER(GetPoolTimeout);
-  static NAN_PROPERTY_GETTER(GetConnectionsOpen);
-  static NAN_PROPERTY_GETTER(GetConnectionsInUse);
-  static NAN_PROPERTY_GETTER(GetStmtCacheSize);
+  static NAN_GETTER(GetPoolMax);
+  static NAN_GETTER(GetPoolMin);
+  static NAN_GETTER(GetPoolIncrement);
+  static NAN_GETTER(GetPoolTimeout);
+  static NAN_GETTER(GetConnectionsOpen);
+  static NAN_GETTER(GetConnectionsInUse);
+  static NAN_GETTER(GetStmtCacheSize);
 
-  static Handle<Value> getPoolProperty(Pool* njsPool, unsigned int poolProperty);
+  static Local<Primitive> getPoolProperty(Pool* njsPool, unsigned int poolProperty);
 
   // Define Setter Accessors to properties
   static NAN_SETTER(SetPoolMax);
@@ -129,7 +129,7 @@ typedef struct poolBaton
   uv_work_t req;
   std::string error;
   std::string connClass;
-  Persistent<Function> cb;
+  Nan::Persistent<Function> cb;
   dpi::Conn*  dpiconn;
   Pool*       njspool;
   unsigned int lobPrefetchSize;
@@ -140,7 +140,8 @@ typedef struct poolBaton
 
   ~poolBaton()
    {
-     NanDisposePersistent(cb);
+     //NanDisposePersistent(cb);
+    cb.Reset();
    }
 
 }poolBaton;
