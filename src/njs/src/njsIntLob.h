@@ -91,6 +91,7 @@ typedef struct LobBaton
   ~LobBaton ()
    {
      //NanDisposePersistent(cb);
+    cb.Reset();
    }
   
 } LobBaton;

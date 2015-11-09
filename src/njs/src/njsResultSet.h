@@ -92,6 +92,7 @@ typedef struct rsBaton
        delete ebaton;
      }
      //NanDisposePersistent(cb);
+     cb.Reset();
    }
 
 }rsBaton;

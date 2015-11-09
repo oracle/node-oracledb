@@ -141,6 +141,7 @@ typedef struct poolBaton
   ~poolBaton()
    {
      //NanDisposePersistent(cb);
+    cb.Reset();
    }
 
 }poolBaton;

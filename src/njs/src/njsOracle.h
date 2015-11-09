@@ -221,6 +221,7 @@ typedef struct connectionBaton
   ~connectionBaton()
    {
      //NanDisposePersistent(cb);
+    cb.Reset();
    }
 
 }connectionBaton;

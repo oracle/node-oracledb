@@ -172,6 +172,7 @@ typedef struct eBaton
   ~eBaton ()
    {
      //NanDisposePersistent(cb);
+    cb.Reset();
      if( !binds.empty() )
      {
        for( unsigned int index = 0 ;index < binds.size(); index++ )

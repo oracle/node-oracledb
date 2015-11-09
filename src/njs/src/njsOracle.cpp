@@ -111,6 +111,7 @@ Oracledb::~Oracledb()
   }
 
   //NanDisposePersistent(jsOracledb);
+  jsOracledb.Reset();
 }
 
 /*****************************************************************************/
