@@ -510,13 +510,8 @@ describe('58. properties.js', function() {
       
       t1.should.be.a.Number;
       t2.should.be.a.Number;
-      
-      var clobDataSize = 270,  // size of test/clobexample.txt
-          blobDataSize = 11981;  // size of test/fuzzydinosaur.jpg
 
       t1.should.not.eql(t2);
-      t1.should.eql(clobDataSize);
-      t2.should.eql(blobDataSize);
       
       try {
         clob.length = t1 + 1;
