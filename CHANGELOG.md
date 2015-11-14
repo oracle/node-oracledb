@@ -2,6 +2,8 @@
 
 ## node-oracledb v1.4.0 (DD Mon YYYY)
 
+- Fixed cursor leak when statements execution fails.
+
 ## node-oracledb v1.3.0 (15 Oct 2015)
 
 - Added a `oracledb.oracleClientVersion` property giving the version of the Oracle

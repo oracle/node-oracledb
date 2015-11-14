@@ -945,7 +945,7 @@ void Connection::Async_Execute (uv_work_t *req)
         {
           executeBaton->error = NJSMessages::getErrorMsg ( 
                                                   errBufferReturningInvalid );
-          return;
+          goto exitAsyncExecute;
           
         }
       }
@@ -1005,7 +1005,7 @@ void Connection::Async_Execute (uv_work_t *req)
           {
             executeBaton->error = NJSMessages::getErrorMsg (
                                                   errSQLSyntaxError );
-            return;
+            goto exitAsyncExecute;
           }
         }
       }
@@ -1090,10 +1090,7 @@ void Connection::Async_Execute (uv_work_t *req)
      // process any lob descriptor out binds
      Connection::Descr2protoILob ( executeBaton, 0, 0);
     }
-    if ( executeBaton->dpistmt )
-    {    
-      executeBaton->dpistmt->release ();
-    }   
+    //dpistmt will be released in exitAsyncExecute label in case of non-RS
   }
   catch (dpi::Exception& e)
   {
@@ -1113,6 +1110,16 @@ void Connection::Async_Execute (uv_work_t *req)
     }
   }
   exitAsyncExecute:
+    /* Release the statement handle in case of errors or non-ResultSet
+     * In case of ResultSet and no errors, statement handle will be released
+     * while closing it.
+     */
+    if ( ( ( !(executeBaton->error).empty() ) ||
+           ( !executeBaton->getRS ) ) &&
+         executeBaton->dpistmt )
+    {
+        executeBaton->dpistmt->release ();
+    }
   ;
 }
 
