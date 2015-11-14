@@ -10,7 +10,7 @@ Oracle Database.
 This is an open source project maintained by Oracle Corp.
 
 The node-oracledb home page is on the
-[Oracle Technology Network](http://www.oracle.com/technetwork/database/database-technologies/node_js/index.html).
+[Oracle Technology Network](http://www.oracle.com/technetwork/database/database-technologies/scripting-languages/node_js/).
 
 ### Node-oracledb supports:
 

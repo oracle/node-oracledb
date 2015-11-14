@@ -3,7 +3,7 @@
   "version": "1.4.0",
   "description": "Oracle Database driver by Oracle Corp.",
   "license": "Apache-2.0",
-  "homepage": "http://www.oracle.com/technetwork/database/database-technologies/node_js/index.html",
+  "homepage": "http://www.oracle.com/technetwork/database/database-technologies/scripting-languages/node_js/",
   "keywords": [
     "oracledb",
     "dboracle",
