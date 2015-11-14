@@ -35,9 +35,11 @@
 "use strict"
 
 var oracledb = require('oracledb');
+var fs       = require('fs');
 var should = require('should');
 var async = require('async');
 var dbConfig = require('./dbConfig.js');
+var assist   = require('./dataTypeAssist.js');
 
 describe('58. properties.js', function() {
 
@@ -47,7 +49,7 @@ describe('58. properties.js', function() {
     var credential = dbConfig;
   }
 
-  describe('58.1 oracledb properties', function() {
+  describe('58.1 Oracledb Class', function() {
     
     var defaultValues = {};
 
@@ -64,12 +66,7 @@ describe('58. properties.js', function() {
       defaultValues.externalAuth    = oracledb.externalAuth;
       defaultValues.fetchAsString   = oracledb.fetchAsString;
       defaultValues.outFormat       = oracledb.outFormat;
-      defaultValues.lobPrefetchSize = oracledb.lobPrefetchSize;    
-
-      /* 
-       * lobPrefetchSize property is currently disabled. 
-       * Resetting it to default will lead to uncaught error "NJS-021: invalid type for conversion specified" 
-      */
+      defaultValues.lobPrefetchSize = oracledb.lobPrefetchSize;   
     })
 
     after('restore the values', function() {
@@ -80,7 +77,7 @@ describe('58. properties.js', function() {
       oracledb.maxRows          = defaultValues.maxRows;        
       oracledb.prefetchRows     = defaultValues.prefetchRows;   
       oracledb.autoCommit       = defaultValues.autoCommit;     
-      // oracledb.version          = defaultValues.version;         // version is a read-only property
+      // oracledb.version          = defaultValues.version;         // version is a read-only property. it needn't to restore.
       oracledb.connClass        = defaultValues.connClass;      
       oracledb.externalAuth     = defaultValues.externalAuth;   
       oracledb.fetchAsString    = defaultValues.fetchAsString;  
@@ -198,7 +195,7 @@ describe('58. properties.js', function() {
       t.should.be.a.Number;
 
       try {
-        oracledb.oracleClientVersion++;
+        oracledb.oracleClientVersion = t + 1;
       } catch(err) {
         should.exist(err);
         (err.message).should.startWith('NJS-014');
@@ -207,7 +204,7 @@ describe('58. properties.js', function() {
 
   }) // 58.1
 
-  describe('58.2 pool properties', function() {
+  describe('58.2 Pool Class', function() {
     var pool = null;
 
     before(function(done) {
@@ -233,7 +230,7 @@ describe('58. properties.js', function() {
       t.should.be.a.Number;
 
       try {
-        pool.poolMin++;
+        pool.poolMin = t + 1;
       } catch(err) {
         should.exist(err);
         (err.message).should.startWith('NJS-014');
@@ -245,7 +242,7 @@ describe('58. properties.js', function() {
       t.should.be.a.Number;
 
       try {
-        pool.poolMax++;
+        pool.poolMax = t + 1;
       } catch(err) {
         should.exist(err);
         (err.message).should.startWith('NJS-014');
@@ -257,7 +254,7 @@ describe('58. properties.js', function() {
       t.should.be.a.Number;
 
       try {
-        pool.poolIncrement++;
+        pool.poolIncrement = t + 1;
       } catch(err) {
         should.exist(err);
         (err.message).should.startWith('NJS-014');
@@ -269,7 +266,7 @@ describe('58. properties.js', function() {
       t.should.be.a.Number;
 
       try {
-        pool.poolTimeout++;
+        pool.poolTimeout = t + 1;
       } catch(err) {
         should.exist(err);
         (err.message).should.startWith('NJS-014');
@@ -281,7 +278,7 @@ describe('58. properties.js', function() {
       t.should.be.a.Number;
 
       try {
-        pool.stmtCacheSize++;
+        pool.stmtCacheSize = t + 1;
       } catch(err) {
         should.exist(err);
         (err.message).should.startWith('NJS-014');
@@ -289,7 +286,7 @@ describe('58. properties.js', function() {
     })
   }) // 58.2
 
-  describe('58.3 connection properties', function() {
+  describe('58.3 Connection Class', function() {
     var connection = null;
 
     before('get one connection', function(done) {
@@ -323,7 +320,7 @@ describe('58. properties.js', function() {
       t.should.be.a.Number;
 
       try {
-        connection.stmtCacheSize++;
+        connection.stmtCacheSize = t + 1;
       } catch(err) {
         should.exist(err);
         (err.message).should.startWith('NJS-014');
@@ -391,7 +388,7 @@ describe('58. properties.js', function() {
       t.should.be.a.Number;
 
       try {
-        connection.oracleServerVersion++;
+        connection.oracleServerVersion = t + 1;
       }
       catch (err) {
         should.exist ( err );
@@ -400,4 +397,356 @@ describe('58. properties.js', function() {
     });
 
   }) // 58.3
+
+  describe('58.4 Lob Class', function() {
+    
+    var connection = null;
+    var clobTableName = "oracledb_myclobs";
+    var blobTableName = "oracledb_myblobs";
+    var clob = null,
+        blob = null;
+    var defaultValues = {};
+
+    beforeEach('prepare CLOB/BLOB tables', function(done) {
+      async.series([
+        function(cb) {
+          oracledb.getConnection(credential, function(err, conn) {
+            should.not.exist(err);
+            connection = conn;
+            cb();
+          });
+        },
+        function(cb) {
+          assist.createTable(connection, clobTableName, cb);
+        },
+        function(cb) {
+          assist.createTable(connection, blobTableName, cb);
+        },
+        function insertClobData(cb) {
+          
+          var sql = "INSERT INTO " + clobTableName + 
+                 " VALUES (:n, EMPTY_CLOB()) RETURNING content INTO :lobbv";
+          var id = 1;
+          var bindVar = { n: id, lobbv: { type: oracledb.CLOB, dir: oracledb.BIND_OUT } };
+          var inFileName = './test/clobexample.txt';
+          
+          insertLob(sql, bindVar, inFileName, cb);
+        },
+        function insertBlobData(cb) {
+ 
+          var sql = "INSERT INTO " + blobTableName + 
+                " VALUES(:n, EMPTY_BLOB()) RETURNING content INTO :lobbv";
+          var id = 1;
+          var bindVar = { n: id, lobbv: { type: oracledb.BLOB, dir: oracledb.BIND_OUT } };
+          var inFileName = './test/fuzzydinosaur.jpg';
+
+          insertLob(sql, bindVar, inFileName, cb);
+        },
+        function getClobData(cb) {
+          getLob(clobTableName, cb);
+        },
+        function getBlobData(cb) {
+          getLob(blobTableName, cb);
+        },
+        function keepOriginalValue(cb) {
+          defaultValues.clobPieceSize = clob.pieceSize;
+          defaultValues.blobPieceSize = blob.pieceSize; 
+          cb();
+        }
+      ], done);
+    }) // before
+
+    afterEach('drop tables, release connection', function(done) {
+      async.series([
+        function(cb) {
+          clob.pieceSize = defaultValues.clobPieceSize;
+          blob.pieceSize = defaultValues.blobPieceSize;
+          cb();
+        },
+        function(cb) {
+          dropTable(clobTableName, cb);
+        },
+        function(cb) {
+          dropTable(blobTableName, cb);
+        },
+        function(cb) {
+          connection.release( function(err) {
+            should.not.exist(err);
+            cb();
+          });
+        }
+      ], done);
+    }) // after
+
+
+    it('58.4.1 chunkSize (read-only)', function() {
+      var t1 = clob.chunkSize,
+          t2 = blob.chunkSize;
+
+      var defaultChunkSize = 8132;
+
+      t1.should.be.a.Number;
+      t2.should.be.a.Number;
+      t1.should.eql(defaultChunkSize); 
+      t1.should.eql(t2);
+
+      try {
+        clob.chunkSize = t1 + 1;
+      } catch(err) {
+        should.exist(err);
+        // console.log(err.message);
+        // Cannot assign to read only property 'chunkSize' of #<Lob>
+      }
+
+      try {
+        blob.chunkSize = t2 + 1;
+      } catch(err) {
+        should.exist(err);
+        // console.log(err.message);
+        // Cannot assign to read only property 'chunkSize' of #<Lob>
+      }
+    }) // 58.4.1
+
+    it('58.4.2 length (read-only)', function() {
+      var t1 = clob.length,
+          t2 = blob.length;
+      
+      t1.should.be.a.Number;
+      t2.should.be.a.Number;
+      
+      var clobDataSize = 270,
+          blobDataSize = 11981;
+
+      t1.should.not.eql(t2);
+      t1.should.eql(clobDataSize);
+      t2.should.eql(blobDataSize);
+      
+      try {
+        clob.length = t1 + 1;
+      } catch(err) {
+        should.exist(err);
+        //console.log(err.message);
+        // Cannot set property length of #<Lob> which has only a getter
+      }
+
+      try {
+        blob.length = t2 + 1;
+      } catch(err) {
+        should.exist(err);
+        //console.log(err.message);
+        // Cannot set property length of #<Lob> which has only a getter
+      }
+
+    })
+
+    it('58.4.3 pieceSize - default value is chunkSize', function() {
+      var t1 = clob.pieceSize,
+          t2 = blob.pieceSize;
+
+      var defaultChunkSize = 8132;
+
+      t1.should.eql(defaultChunkSize);
+      t2.should.eql(defaultChunkSize);
+    })
+
+    it('58.4.4 pieceSize - can be increased', function() {
+      var defaultChunkSize = 8132;
+      var incresedVal = defaultChunkSize * 5;
+
+      clob.pieceSize *= 5; 
+      blob.pieceSize *= 5;
+      (clob.pieceSize).should.eql(incresedVal);
+      (blob.pieceSize).should.eql(incresedVal);
+    })
+
+    it('58.4.5 pieceSize - can be decreased', function() {
+      var defaultChunkSize = 8132;
+      var decreaseVal = defaultChunkSize - 500;
+
+      clob.pieceSize -= 500;
+      blob.pieceSize -= 500;
+      (clob.pieceSize).should.eql(decreaseVal);
+      (blob.pieceSize).should.eql(decreaseVal);
+    })
+
+    it('58.4.6 pieceSize - can be zero', function() {
+      clob.pieceSize = 0;
+      blob.pieceSize = 0;
+
+      (clob.pieceSize).should.eql(0);
+      (blob.pieceSize).should.eql(0);
+    })
+
+    it('58.4.6 pieceSize - cannot be less than zero', function() {
+      try {
+        clob.pieceSize = -100;
+      } catch(err) {
+        should.exist(err);
+        (err.message).should.startWith('NJS-004');
+        // NJS-004: invalid value for property pieceSize
+      }    
+
+      try {
+        blob.pieceSize = -100;
+      } catch(err) {
+        should.exist(err);
+        (err.message).should.startWith('NJS-004');
+        // NJS-004: invalid value for property pieceSize
+      }   
+    })
+
+    it('58.4.7 type (read-only)', function() {
+      var t1 = clob.type,
+          t2 = blob.type;
+
+      t1.should.eql(oracledb.CLOB);
+      t2.should.eql(oracledb.BLOB);
+
+      try {
+        clob.type = t2;
+      } catch(err) {
+        should.exist(err);
+        // console.log(err);
+        // [TypeError: Cannot set property type of #<Lob> which has only a getter]
+      }
+
+      try {
+        blob.type = t1;
+      } catch(err) {
+        should.exist(err);
+        // console.log(err);
+        // [TypeError: Cannot set property type of #<Lob> which has only a getter]
+      }
+    })
+
+    function getLob(tableName, cb)
+    {
+      connection.execute(
+        "SELECT content FROM " + tableName + " WHERE num = : id",
+        { id: 1 },
+        function(err, result) {
+          should.not.exist(err);
+          var lob = result.rows[0][0];
+          should.exist(lob);
+
+          if (tableName == clobTableName) {
+            clob = lob;
+            // console.log("Get clob data");
+          } else if (tableName == blobTableName) {
+            blob = lob;
+            // console.log("Get blob data");
+          } else {
+            console.log("passing wrong table name.");
+          }
+
+          cb();
+        }
+      );
+    }
+
+    function dropTable(tableName, cb) 
+    {
+      connection.execute(
+        "DROP TABLE " + tableName,
+        function(err) {
+          should.not.exist(err);
+          cb();
+        }
+      );
+    }
+
+    function insertLob(sql, bindVar, inFileName, cb) 
+    { 
+      connection.execute(
+        sql,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          var lob = result.outBinds.lobbv[0];
+          var inStream = fs.createReadStream(inFileName);
+
+          inStream.on('end', function() {
+            connection.commit( function(err) {
+              should.not.exist(err);
+              cb();
+            });
+          });
+
+          inStream.on('error', function(err) {
+            should.not.exist(err);
+          });
+
+          lob.on('error', function(err) {
+            should.not.exist(err);
+          });
+
+          inStream.pipe(lob);
+        }
+      );
+    }
+
+  }) // 58.4
+
+  describe('58.5 ResultSet Class', function() {
+    
+    var tableName = "oracledb_number";
+    var numbers = assist.data.numbers;
+    var connection = null;
+    var resultSet = null;
+
+    before('get resultSet class', function(done) {
+      async.series([
+        function(callback) {
+          oracledb.getConnection(credential, function(err, conn) {
+            should.not.exist(err);
+            connection = conn;
+            callback();
+          });
+        },
+        function(callback) {
+          assist.setUp(connection, tableName, numbers, callback);
+        },
+        function(callback) {
+          connection.execute(
+            "SELECT * FROM " + tableName,
+            [],
+            { resultSet: true, outFormat: oracledb.OBJECT },
+            function(err, result) {
+              should.not.exist(err);
+              resultSet = result.resultSet;
+              callback();
+            }
+          );
+        }
+      ], done);
+    })
+
+    after( function(done) {
+      connection.execute(
+        "DROP TABLE " + tableName,
+        function(err) {
+          should.not.exist(err);
+          
+          connection.release( function(err) {
+            should.not.exist(err);
+            done();
+          });
+        }
+      );
+    })
+
+    it('58.5.1 metaData (read-only)', function() {
+      should.exist(resultSet.metaData);
+      var t = resultSet.metaData;
+      t.should.eql( [ { name: 'NUM' }, { name: 'CONTENT' } ] );
+      
+      try {
+        resultSet.metaData = {"foo": "bar"};
+      } catch(err) {
+        should.exist(err);
+        (err.message).should.startWith('NJS-014');
+      } 
+    })
+
+  }) // 58.5
 })

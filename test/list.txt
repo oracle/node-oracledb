@@ -461,7 +461,7 @@
     57.2 testing nested cursor support - REF Cursor 
 
 58. properties.js
-    58.1 oracledb properties
+    58.1 Oracledb Class
         58.1.1 poolMin
         58.1.2 poolMax
         58.1.3 poolIncrement
@@ -476,19 +476,30 @@
         58.1.12 outFormat
         58.1.13 lobPrefetchSize
         58.1.14 oracleClientVersion (read-only)
-    58.2 pool properties
+    58.2 Pool Class
         58.2.1 poolMin
         58.2.2 poolMax
         58.2.3 poolIncrement
         58.2.4 poolTimeout
         58.2.5 stmtCacheSize
-    58.3 connection properties
+    58.3 Connection Class
         58.3.1 Connection object initial toString values
         58.3.2 stmtCacheSize (read-only)
         58.3.3 clientId (write-only)
         58.3.4 action (write-only)
         58.3.5 module (write-only)
         58.3.6 oracleServerVersion (read-only)
+    58.4 Lob Class
+        58.4.1 chunkSize (read-only)
+        58.4.2 length (read-only)
+        58.4.3 pieceSize - default value is chunkSize
+        58.4.4 pieceSize - can be increased
+        58.4.5 pieceSize - can be decreased
+        58.4.6 pieceSize - can be zero
+        58.4.6 pieceSize - cannot be less than zero
+        58.4.7 type (read-only)
+    58.5 ResultSet Class
+        58.5.1 metaData (read-only)
 
 59. lobResultSet.js
     59.1 CLOB data
@@ -497,3 +508,5 @@
 60. clobPlsqlString.js
     60.1 PL/SQL OUT CLOB parameters can also be bound as STRING
     60.2 The returned length is limited to the maximum size
+
+61. 
