@@ -77,5 +77,33 @@ describe('61. checkClassesTypes.js', function() {
       }
     );
   })
+
+  it('61.3 Lob Class', function(done) {
+    var connection = null,
+        clob = null,
+        blob = null;
+    
+    var clobTableName = "oracledb_myclobs";
+    var blobTableName = "oracledb_myblobs";
+    
+    async.series([
+      function(callback) {
+        oracledb.getConnection(credential, function(err, conn) {
+          should.not.exist(err);
+          connection = conn;
+          callback();
+        });
+      },
+      function(callback) {
+        callback();
+      },
+      function(callback) {
+        connection.release( function(err) {
+          should.not.exist(err);
+          callback();
+        });
+      }
+    ], done);
+  })
 })
 
