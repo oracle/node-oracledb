@@ -108,7 +108,7 @@ npm run-script testWindows
 
 This calls the `testWindows` script defined in `oracledb/package.json`.
 See [npm scripts](https://docs.npmjs.com/misc/scripts) for more infomation 
-about how npm handles "scripts" field of package.json.
+about how npm handles the "scripts" field of `package.json`.
 
 ### 2.2 Run specified test(s)
 
@@ -119,7 +119,7 @@ cd <some-directory>/node_modules/oracledb
 
 See [mochajs.org](http://mochajs.org/) for more information on running tests with mocha.
 
-## Adding Tests
+## 3. Adding Tests
 See [CONTRIBUTING](https://github.com/oracle/node-oracledb/blob/master/CONTRIBUTING.md) 
 for general information on contribution requirements.
 
@@ -130,6 +130,6 @@ assigned a number.  The following number ranges have been chosen:
 - 21 - 50  are reserved for data type supporting tests
 - 51 onwards are for other tests
 
-## Test List
+## 4. Test List
 
-See test/list.txt file for the list of existing tests.
+See `test/list.txt` for the list of existing tests.
