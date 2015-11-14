@@ -221,6 +221,46 @@ describe('40. dataTypeClob.js', function() {
       ], done);  // async
      
     }) // 40.1.1
+
+    it('40.1.2 catches Error event correctly', function(done) {
+      var lobErrorEvent = false;
+      setTimeout( function() {
+        lobErrorEvent.should.equal(true, "LOB should catch the 'error' event!");
+        done();
+      }, 1000);
+
+      connection.execute(
+        "INSERT INTO oracledb_myclobs (num, content) VALUES (:n, EMPTY_CLOB()) RETURNING content INTO :lobbv",
+        { n: 2, lobbv: {type: oracledb.CLOB, dir: oracledb.BIND_OUT} },
+        { autoCommit: true },
+        function(err, result) {
+          should.not.exist(err);
+          (result.rowsAffected).should.be.exactly(1);
+          (result.outBinds.lobbv.length).should.be.exactly(1);
+
+          var inStream = fs.createReadStream(inFileName);
+          var lob = result.outBinds.lobbv[0];
+
+          lob.on('error', function(err) {
+            should.exist(err, "lob.on 'error' event");
+            (err.message).should.startWith('ORA-22990');
+            // ORA-22990: LOB locators cannot span transactions
+            lobErrorEvent = true;
+          });
+
+          inStream.on('error', function(err) {
+            should.not.exist(err, "inStream.on 'error' event");
+          });
+
+          inStream.on('end', function() {
+            connection.commit( function(err) {
+              should.not.exist(err);
+            });
+          });
+          inStream.pipe(lob); 
+        }
+      );
+    })
   }) // 40.1
 
   describe('40.2 stores null value correctly', function() {

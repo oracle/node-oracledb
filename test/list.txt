@@ -374,6 +374,7 @@
 40. dataTypeClob.js
     40.1 testing CLOB data type
         40.1.1 stores CLOB value correctly 
+        40.1.2 catches Error event correctly
     40.2 stores null value correctly
         40.2.1 testing Null, Empty string and Undefined
 
