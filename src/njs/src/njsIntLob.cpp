@@ -359,6 +359,7 @@ NAN_METHOD(ILob::Release)
   ILob *iLob = Nan::ObjectWrap::Unwrap<ILob>(info.This());
   string msg;
 
+  NJS_CHECK_OBJECT_VALID2(iLob, info);
   if( !iLob->njsconn_->isValid() )
   {
     msg = NJSMessages::getErrorMsg ( errInvalidConnection );
@@ -429,6 +430,7 @@ NAN_GETTER(ILob::GetChunkSize)
   ILob *iLob = Nan::ObjectWrap::Unwrap<ILob>(info.Holder());
   string msg;
 
+  NJS_CHECK_OBJECT_VALID2(iLob, info);
   if( !iLob->njsconn_->isValid() )
   {
     msg = NJSMessages::getErrorMsg ( errInvalidConnection );
@@ -470,8 +472,9 @@ NAN_GETTER(ILob::GetChunkSize)
 
 NAN_SETTER(ILob::SetChunkSize)
 {
-  lobPropertyException(Nan::ObjectWrap::Unwrap<ILob>(info.Holder()), errReadOnly,
-                       "chunkSize");
+  ILob *iLob = Nan::ObjectWrap::Unwrap<ILob>(info.Holder());
+  NJS_CHECK_OBJECT_VALID (iLob);
+  lobPropertyException(iLob, errReadOnly, "chunkSize");
 }
 
 
@@ -497,6 +500,7 @@ NAN_GETTER(ILob::GetLength)
   ILob *iLob = Nan::ObjectWrap::Unwrap<ILob>(info.Holder());
   string msg;
 
+  NJS_CHECK_OBJECT_VALID2(iLob, info);
   if( !iLob->njsconn_->isValid() )
   {
     msg = NJSMessages::getErrorMsg ( errInvalidConnection );
@@ -538,8 +542,9 @@ NAN_GETTER(ILob::GetLength)
 
 NAN_SETTER(ILob::SetLength)
 {
-  lobPropertyException(Nan::ObjectWrap::Unwrap<ILob>(info.Holder()), errReadOnly,
-                       "length");
+  ILob *iLob = Nan::ObjectWrap::Unwrap<ILob>(info.Holder());
+  NJS_CHECK_OBJECT_VALID(iLob);
+  lobPropertyException(iLob, errReadOnly, "length");
 }
 
 
@@ -564,6 +569,7 @@ NAN_GETTER(ILob::GetPieceSize)
   ILob *iLob = Nan::ObjectWrap::Unwrap<ILob>(info.Holder());
   string msg;
 
+  NJS_CHECK_OBJECT_VALID2(iLob, info);
   if( !iLob->njsconn_->isValid() )
   {
     msg = NJSMessages::getErrorMsg ( errInvalidConnection );
@@ -607,6 +613,7 @@ NAN_SETTER(ILob::SetPieceSize)
   ILob *iLob = Nan::ObjectWrap::Unwrap<ILob>(info.Holder());
   string msg;
 
+  NJS_CHECK_OBJECT_VALID(iLob);
   NJS_SET_PROP_UINT(iLob->bufSize_, value, "pieceSize");
 
   if (iLob->state_ == ACTIVE)
@@ -659,6 +666,7 @@ NAN_GETTER(ILob::GetOffset)
   ILob *iLob = Nan::ObjectWrap::Unwrap<ILob>(info.Holder());
   string msg;
 
+  NJS_CHECK_OBJECT_VALID2(iLob, info);
   if( !iLob->njsconn_->isValid() )
   {
     msg = NJSMessages::getErrorMsg ( errInvalidConnection );
@@ -703,6 +711,7 @@ NAN_SETTER(ILob::SetOffset)
   double offset = 0.0;
   string msg;
 
+  NJS_CHECK_OBJECT_VALID(iLob);
   NJS_SET_PROP_UINT(offset, value, "offset");
 
   if (offset < 1)
@@ -750,6 +759,7 @@ NAN_GETTER(ILob::GetType)
 {  
   ILob *iLob = Nan::ObjectWrap::Unwrap<ILob>(info.Holder());
 
+  NJS_CHECK_OBJECT_VALID2(iLob, info);
   try
   {
     Local<Number> value = Nan::New<v8::Number>((unsigned long)iLob->type_);
@@ -784,8 +794,9 @@ NAN_GETTER(ILob::GetType)
 
 NAN_SETTER(ILob::SetType)
 {
-  lobPropertyException(Nan::ObjectWrap::Unwrap<ILob>(info.Holder()), errReadOnly,
-                       "type");
+  ILob *iLob = Nan::ObjectWrap::Unwrap<ILob>(info.Holder());
+  NJS_CHECK_OBJECT_VALID(iLob);
+  lobPropertyException(iLob, errReadOnly, "type");
 }
 
 
@@ -818,6 +829,8 @@ NAN_METHOD(ILob::Read)
 
   NJS_CHECK_NUMBER_OF_ARGS (lobBaton->error, info, 1, 1, exitRead);
   iLob = Nan::ObjectWrap::Unwrap<ILob>(info.This());
+
+  NJS_CHECK_OBJECT_VALID3(iLob, lobBaton->error, exitRead);
 
   if(!iLob->isValid_)
   {
@@ -1005,7 +1018,7 @@ NAN_METHOD(ILob::Write)
 
   NJS_CHECK_NUMBER_OF_ARGS (lobBaton->error, info, 2, 2, exitWrite);
   iLob = Nan::ObjectWrap::Unwrap<ILob>(info.This());
-
+  NJS_CHECK_OBJECT_VALID3 ( iLob, lobBaton->error, exitWrite);
   if(!iLob->isValid_)
   {
     lobBaton->error = NJSMessages::getErrorMsg(errInvalidLob);

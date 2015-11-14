@@ -182,6 +182,7 @@ void Connection::connectionPropertyException(Connection* njsConn,
   Nan::HandleScope scope;
 
   string msg;
+
   if(!njsConn->isValid_)
     msg = NJSMessages::getErrorMsg(errInvalidConnection);
   else
@@ -197,6 +198,7 @@ void Connection::connectionPropertyException(Connection* njsConn,
 NAN_GETTER(Connection::GetStmtCacheSize)
 {
   Connection* njsConn = Nan::ObjectWrap::Unwrap<Connection>(info.Holder());
+  NJS_CHECK_OBJECT_VALID2( njsConn, info ) ;
   if(!njsConn->isValid_)
   {
     string error = NJSMessages::getErrorMsg ( errInvalidConnection );
@@ -224,7 +226,11 @@ NAN_GETTER(Connection::GetStmtCacheSize)
 */
 NAN_SETTER(Connection::SetStmtCacheSize)
 {
-  connectionPropertyException(Nan::ObjectWrap::Unwrap<Connection>(info.Holder()), errReadOnly, "stmtCacheSize");
+  Connection *connection = Nan::ObjectWrap::Unwrap<Connection>(info.Holder());
+
+  NJS_CHECK_OBJECT_VALID ( connection );
+
+  connectionPropertyException(connection, errReadOnly, "stmtCacheSize");
 }
 
 /*****************************************************************************/
@@ -246,6 +252,8 @@ NAN_GETTER(Connection::GetClientId)
 NAN_SETTER(Connection::SetClientId)
 {
   Connection* njsConn = Nan::ObjectWrap::Unwrap<Connection>(info.Holder());
+  NJS_CHECK_OBJECT_VALID(njsConn) ;
+
   if(!njsConn->isValid_)
   {
     string msg = NJSMessages::getErrorMsg(errInvalidConnection);
@@ -279,6 +287,7 @@ NAN_GETTER(Connection::GetModule)
 NAN_SETTER(Connection::SetModule)
 {
   Connection *njsConn = Nan::ObjectWrap::Unwrap<Connection>(info.Holder());
+  NJS_CHECK_OBJECT_VALID (njsConn ) ;
   if(!njsConn->isValid_)
   {
     string msg = NJSMessages::getErrorMsg(errInvalidConnection);
@@ -312,6 +321,7 @@ NAN_GETTER(Connection::GetAction)
 NAN_SETTER(Connection::SetAction)
 {
   Connection *njsConn = Nan::ObjectWrap::Unwrap<Connection>(info.Holder());
+  NJS_CHECK_OBJECT_VALID ( njsConn ) ;
   if(!njsConn->isValid_)
   {
     string msg = NJSMessages::getErrorMsg(errInvalidConnection);
@@ -334,6 +344,7 @@ NAN_GETTER (Connection::GetOracleServerVersion)
 {
   Connection *njsConn = ObjectWrap::Unwrap<Connection>(info.Holder());
 
+  NJS_CHECK_OBJECT_VALID2 ( njsConn, info ) ;
   if ( !njsConn->isValid_ )
   {
     string error = NJSMessages::getErrorMsg ( errInvalidConnection );
@@ -379,8 +390,9 @@ NAN_GETTER (Connection::GetOracleServerVersion)
 */
 NAN_SETTER(Connection::SetOracleServerVersion)
 {
-  connectionPropertyException(ObjectWrap::Unwrap<Connection>(info.Holder()),
-                              errReadOnly, "oracleServerVersion" );
+  Connection *connection = Nan::ObjectWrap::Unwrap<Connection>(info.Holder());
+  NJS_CHECK_OBJECT_VALID(connection);
+  connectionPropertyException(connection, errReadOnly, "oracleServerVersion" );
 }
 
 
@@ -407,6 +419,8 @@ NAN_METHOD(Connection::Execute)
   executeBaton->cb.Reset( callback );
   NJS_CHECK_NUMBER_OF_ARGS ( executeBaton->error, info, 2, 4, exitExecute );
   connection = Nan::ObjectWrap::Unwrap<Connection>(info.This());
+
+  NJS_CHECK_OBJECT_VALID3( connection, executeBaton->error, exitExecute );
 
   if(!connection->isValid_)
   {
@@ -2530,6 +2544,7 @@ NAN_METHOD(Connection::Release)
   NJS_CHECK_NUMBER_OF_ARGS ( releaseBaton->error, info, 1, 1, exitRelease );
   connection = Nan::ObjectWrap::Unwrap<Connection>(info.This());
 
+  NJS_CHECK_OBJECT_VALID3(connection, releaseBaton->error, exitRelease);
   if(!connection->isValid_)
   {
     releaseBaton->error = NJSMessages::getErrorMsg ( errInvalidConnection );
@@ -2627,6 +2642,7 @@ NAN_METHOD(Connection::Commit)
   NJS_CHECK_NUMBER_OF_ARGS ( commitBaton->error, info, 1, 1, exitCommit );
   connection = Nan::ObjectWrap::Unwrap<Connection>(info.This());
 
+  NJS_CHECK_OBJECT_VALID3 ( connection, commitBaton->error, exitCommit );
   if(!connection->isValid_)
   {
     commitBaton->error = NJSMessages::getErrorMsg ( errInvalidConnection );
@@ -2721,6 +2737,7 @@ NAN_METHOD(Connection::Rollback)
   rollbackBaton->cb.Reset( callback );
   NJS_CHECK_NUMBER_OF_ARGS ( rollbackBaton->error, info, 1, 1, exitRollback );
   connection = Nan::ObjectWrap::Unwrap<Connection>(info.This());
+  NJS_CHECK_OBJECT_VALID3 ( connection, rollbackBaton->error, exitRollback );
 
   if(!connection->isValid_)
   {
@@ -2814,6 +2831,8 @@ NAN_METHOD(Connection::Break)
   breakBaton->cb.Reset( callback );
   NJS_CHECK_NUMBER_OF_ARGS ( breakBaton->error, info, 1, 1, exitBreak );
   connection = Nan::ObjectWrap::Unwrap<Connection>(info.This());
+
+  NJS_CHECK_OBJECT_VALID3 ( connection, breakBaton->error, exitBreak );
 
   if(!connection->isValid_)
   {
@@ -3348,15 +3367,14 @@ v8::Local<v8::Value> Connection::NewLob(eBaton* executeBaton,
 {
   Nan::EscapableHandleScope scope;
   Connection     *connection = executeBaton->njsconn;
-  // Handle<Object>  jsOracledb = connection->oracledb_->jsOracledb;
   Local<Object>  jsOracledb = Nan::New<Object>(connection->oracledb_->jsOracledb);
   Local<Value>   argv[1];
-  
+
   Local<Object>  iLob = Nan::New<FunctionTemplate>(ILob::iLobTemplate_s)->GetFunction()->NewInstance();
   
-      // the ownership of all handles in the ProtoILob are transferred to ILob
-      // here.  Any error in initialization of ILob will cleanup the OCI
-      // handles in the ILob cleanup routine.
+  // the ownership of all handles in the ProtoILob are transferred to ILob
+  // here.  Any error in initialization of ILob will cleanup the OCI
+  // handles in the ILob cleanup routine.
 
   (Nan::ObjectWrap::Unwrap<ILob>(iLob))->setILob(executeBaton, protoILob);
 
@@ -3368,12 +3386,6 @@ v8::Local<v8::Value> Connection::NewLob(eBaton* executeBaton,
   Local<Value>   result =
     Local<Function>::Cast(jsOracledb->Get(Nan::New<v8::String>("newLob").ToLocalChecked()))->Call(
       jsOracledb, 1, argv);
-
-  // Local<Value>   result =
-  //   Nan::MakeCallback(
-  //     jsOracledb,
-  //     Nan::New<v8::String>("newLob").ToLocalChecked(),
-  //     1, argv);
 
   return scope.Escape(result);
 }
@@ -3387,7 +3399,6 @@ v8::Local<v8::Value> Connection::NewLob(eBaton* executeBaton,
 
    PARAMETERS
      none
-
   RETURNS
     A Lob object
 
@@ -3403,20 +3414,19 @@ v8::Local<v8::Value> Connection::NewLob(eBaton* executeBaton,
 
 NAN_METHOD(Connection::GetLob)
 {
-  Connection     *connection = Nan::ObjectWrap::Unwrap<Connection>(info.This());
-  //Handle<Object>  jsOracledb = connection->oracledb_->jsOracledb;
-  Local<Object>  jsOracledb = Nan::New<Object>(connection->oracledb_->jsOracledb);
-  Local<Value>   argv[1];
+  Connection    *connection = Nan::ObjectWrap::Unwrap<Connection>(info.This());
   
-  Local<Value>   result =
-    Local<Function>::Cast(jsOracledb->Get(Nan::New<v8::String>("newLob").ToLocalChecked()))->Call(
-      jsOracledb, 1, argv);
+  NJS_CHECK_OBJECT_VALID2 ( connection, info );
 
-  // Local<Value>   result =
-  //   Nan::MakeCallback(
-  //     jsOracledb,
-  //     Nan::New<v8::String>("newLob").ToLocalChecked(),
-  //     1, argv);
+  Local<Object> jsOracledb = Nan::New<Object>(
+                               connection->oracledb_->jsOracledb);
+  Local<Value>  argv[1];
+  
+  Local<Value>  result = Local<Function>::Cast(
+                                    jsOracledb->Get(
+                                      Nan::New<v8::String>(
+                                        "newLob").ToLocalChecked()))->Call(
+                                           jsOracledb, 1, argv);
 
   info.GetReturnValue().Set(result);
 }

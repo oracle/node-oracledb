@@ -185,6 +185,7 @@ NAN_GETTER(ResultSet::GetMetaData)
   ResultSet* njsResultSet  = Nan::ObjectWrap::Unwrap<ResultSet>(info.Holder());
   string msg;
 
+  NJS_CHECK_OBJECT_VALID2(njsResultSet, info);
   if(!njsResultSet->njsconn_->isValid())
   {
     msg = NJSMessages::getErrorMsg ( errInvalidConnection );
@@ -218,6 +219,7 @@ NAN_SETTER(ResultSet::SetMetaData)
   ResultSet* njsResultSet = Nan::ObjectWrap::Unwrap<ResultSet>(info.Holder());
   string msg;
 
+  NJS_CHECK_OBJECT_VALID(njsResultSet);
   if(!njsResultSet->njsconn_->isValid())
     msg = NJSMessages::getErrorMsg ( errInvalidConnection );
   else if(njsResultSet->state_ == INVALID)
@@ -246,6 +248,13 @@ NAN_METHOD(ResultSet::GetRow)
   getRowsBaton->njsRS     = njsResultSet;
   getRowsBaton->cb.Reset( callback );
 
+  if ( !njsResultSet )
+  {
+    getRowsBaton->error = NJSMessages::getErrorMsg ( errInvalidJSObject ) ;
+    // donot alter the state while exiting
+    getRowsBaton->errOnActiveOrInvalid = true;
+    goto exitGetRow;
+  }
   if(njsResultSet->state_ == INVALID)
   {
     getRowsBaton->error = NJSMessages::getErrorMsg ( errInvalidResultSet );
@@ -289,6 +298,13 @@ NAN_METHOD(ResultSet::GetRows)
   rsBaton   *getRowsBaton = new rsBaton ();
   getRowsBaton->njsRS   = njsResultSet;
   getRowsBaton->cb.Reset( callback );
+
+  if ( !njsResultSet )
+  {
+    getRowsBaton->error = NJSMessages::getErrorMsg ( errInvalidJSObject );
+    getRowsBaton->errOnActiveOrInvalid = true;
+    goto exitGetRows;
+  }
 
   if(njsResultSet->state_ == INVALID)
   {
@@ -543,6 +559,14 @@ NAN_METHOD(ResultSet::Close)
   rsBaton *closeBaton     = new rsBaton ();
   closeBaton->njsRS       = njsResultSet;
   closeBaton->cb.Reset( callback );
+
+  if ( !njsResultSet )
+  {
+    closeBaton->error = NJSMessages::getErrorMsg ( errInvalidJSObject );
+    // donot alter the state while exiting
+    closeBaton->errOnActiveOrInvalid = true;
+    goto exitClose;
+  }
 
   if(njsResultSet->state_ == INVALID)
   {

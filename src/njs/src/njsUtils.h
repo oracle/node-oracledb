@@ -354,5 +354,53 @@ typedef enum
   }                                                                           \
 }
 
+
+
+/*
+ * Check whether the given object from js is valid, if not report error
+ */
+#define NJS_CHECK_OBJECT_VALID( p )                                           \
+{                                                                             \
+  if ( !p )                                                                 \
+  {                                                                           \
+    string error = NJSMessages::getErrorMsg ( errInvalidJSObject );           \
+    NJS_SET_EXCEPTION(error.c_str(), error.length());                         \
+    return;                                                                   \
+  }                                                                           \
+}
+
+
+/*
+ * Check whether the given object from js is valid, if not report error
+ * If this is part of NJS_METHOD call(s), set the return value as Undefined
+ */
+#define NJS_CHECK_OBJECT_VALID2( p, info )                                    \
+{                                                                             \
+  if ( !p )                                                                 \
+  {                                                                           \
+    string error = NJSMessages::getErrorMsg ( errInvalidJSObject );           \
+    NJS_SET_EXCEPTION(error.c_str(), error.length());                         \
+    info.GetReturnValue ().SetUndefined () ;                                \
+    return;                                                                   \
+  }                                                                           \
+}
+
+
+
+/*
+ * Check whether the given object from js is valid, if not report error
+ * If invalid, set the error and jump to label
+ */
+#define NJS_CHECK_OBJECT_VALID3( p, error, label )                            \
+{                                                                             \
+  if ( !p )                                                                   \
+  {                                                                           \
+    error = NJSMessages::getErrorMsg ( errInvalidJSObject );                  \
+    goto label;                                                               \
+  }                                                                           \
+}
+
+
+
 #endif                     // ifdef__NJSUTILS_H__
 

@@ -61,6 +61,7 @@ typedef enum
   errInvalidmaxRows,
   errSQLSyntaxError,
   errBufferReturningInvalid,
+  errInvalidJSObject,
 
   // New ones should be added here
 

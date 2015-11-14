@@ -181,6 +181,7 @@ Local<Primitive> Pool::getPoolProperty(Pool* njsPool, unsigned int poolProperty)
 NAN_GETTER(Pool::GetPoolMin)
 {
   Pool* njsPool = Nan::ObjectWrap::Unwrap<Pool>(info.Holder());
+  NJS_CHECK_OBJECT_VALID2(njsPool, info);
   info.GetReturnValue().Set(getPoolProperty( njsPool, njsPool->poolMin_));
 }
 
@@ -192,6 +193,7 @@ NAN_GETTER(Pool::GetPoolMin)
 NAN_GETTER(Pool::GetPoolMax)
 {
   Pool* njsPool = Nan::ObjectWrap::Unwrap<Pool>(info.Holder());
+  NJS_CHECK_OBJECT_VALID2(njsPool, info);
   info.GetReturnValue().Set(getPoolProperty( njsPool, njsPool->poolMax_));
 }
 
@@ -203,6 +205,7 @@ NAN_GETTER(Pool::GetPoolMax)
 NAN_GETTER(Pool::GetPoolIncrement)
 {
   Pool* njsPool = Nan::ObjectWrap::Unwrap<Pool>(info.Holder());
+  NJS_CHECK_OBJECT_VALID2(njsPool, info);
   info.GetReturnValue().Set(getPoolProperty( njsPool, njsPool->poolIncrement_));
 }
 
@@ -214,6 +217,7 @@ NAN_GETTER(Pool::GetPoolIncrement)
 NAN_GETTER(Pool::GetPoolTimeout)
 {
   Pool* njsPool = Nan::ObjectWrap::Unwrap<Pool>(info.Holder());
+  NJS_CHECK_OBJECT_VALID2(njsPool, info);
   info.GetReturnValue().Set(getPoolProperty( njsPool, njsPool->poolTimeout_));
 }
 
@@ -225,6 +229,7 @@ NAN_GETTER(Pool::GetPoolTimeout)
 NAN_GETTER(Pool::GetConnectionsOpen)
 {
   Pool* njsPool = Nan::ObjectWrap::Unwrap<Pool>(info.Holder());
+  NJS_CHECK_OBJECT_VALID2(njsPool, info);
   if(!njsPool->isValid_)
   {
     string msg = NJSMessages::getErrorMsg(errInvalidPool);
@@ -253,6 +258,7 @@ NAN_GETTER(Pool::GetConnectionsOpen)
 NAN_GETTER(Pool::GetConnectionsInUse)
 {
   Pool* njsPool = Nan::ObjectWrap::Unwrap<Pool>(info.Holder());
+  NJS_CHECK_OBJECT_VALID2(njsPool, info);
   if(!njsPool->isValid_)
   {
     string error = NJSMessages::getErrorMsg ( errInvalidPool );
@@ -281,6 +287,7 @@ NAN_GETTER(Pool::GetConnectionsInUse)
 NAN_GETTER(Pool::GetStmtCacheSize)
 {
   Pool* njsPool = Nan::ObjectWrap::Unwrap<Pool>(info.Holder());
+  NJS_CHECK_OBJECT_VALID2(njsPool, info);
   info.GetReturnValue().Set(getPoolProperty( njsPool, njsPool->stmtCacheSize_));
 }
 
@@ -292,6 +299,8 @@ NAN_GETTER(Pool::GetStmtCacheSize)
 void Pool::setPoolProperty (Pool* njsPool, string property)
 {
   Nan::HandleScope scope;
+
+  NJS_CHECK_OBJECT_VALID(njsPool);
 
   string msg;
   if(!njsPool->isValid_)
@@ -389,6 +398,7 @@ NAN_METHOD(Pool::GetConnection)
   poolBaton *connBaton = new poolBaton ();
   connBaton->cb.Reset( callback );
 
+  NJS_CHECK_OBJECT_VALID3 ( njsPool, connBaton->error, exitGetConnection);
   NJS_CHECK_NUMBER_OF_ARGS ( connBaton->error, info, 1, 1, exitGetConnection );
 
   if(!njsPool->isValid_)
@@ -508,6 +518,7 @@ NAN_METHOD(Pool::Terminate)
   poolBaton *terminateBaton = new poolBaton ();
   terminateBaton->cb.Reset( callback );
 
+  NJS_CHECK_OBJECT_VALID3 (njsPool, terminateBaton->error, exitTerminate);
   NJS_CHECK_NUMBER_OF_ARGS ( terminateBaton->error, info, 1, 1, exitTerminate );
 
   if(!njsPool->isValid_)
