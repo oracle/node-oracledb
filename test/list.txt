@@ -374,7 +374,6 @@
 40. dataTypeClob.js
     40.1 testing CLOB data type
         40.1.1 stores CLOB value correctly 
-        40.1.2 catches Error event correctly
     40.2 stores null value correctly
         40.2.1 testing Null, Empty string and Undefined
 
@@ -489,17 +488,8 @@
         58.3.4 action (write-only)
         58.3.5 module (write-only)
         58.3.6 oracleServerVersion (read-only)
-    58.4 Lob Class
-        58.4.1 chunkSize (read-only)
-        58.4.2 length (read-only)
-        58.4.3 pieceSize - default value is chunkSize
-        58.4.4 pieceSize - can be increased
-        58.4.5 pieceSize - can be decreased
-        58.4.6 pieceSize - can be zero
-        58.4.6 pieceSize - cannot be less than zero
-        58.4.7 type (read-only)
-    58.5 ResultSet Class
-        58.5.1 metaData (read-only)
+    58.4 ResultSet Class
+        58.4.1 metaData (read-only)
 
 59. lobResultSet.js
     59.1 CLOB data
@@ -509,4 +499,11 @@
     60.1 PL/SQL OUT CLOB parameters can also be bound as STRING
     60.2 The returned length is limited to the maximum size
 
-61. 
+61. checkClassesTypes.js
+     61.1 Oracledb class
+     61.2 Connection class
+     61.3 Lob Class
+
+62. lobProperties.js
+
+63. lobErrorEvent.js
