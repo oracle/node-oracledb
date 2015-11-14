@@ -120,7 +120,13 @@ If you are behind a firewall, you may need to set your proxy, for
 example:
 
 ```
-npm config set https-proxy http://my-proxy.example.com:80
+export http_proxy=http://my-proxy.example.com:80/
+```
+
+or, in `csh`:
+
+```
+setenv http_proxy http://my-proxy.example.com:80/
 ```
 
 Install node-oracledb from the
@@ -238,7 +244,13 @@ If you are behind a firewall, you may need to set your proxy, for
 example:
 
 ```
-npm config set https-proxy http://my-proxy.example.com:80
+export http_proxy=http://my-proxy.example.com:80/
+```
+
+or, in `csh`:
+
+```
+setenv http_proxy http://my-proxy.example.com:80/
 ```
 
 Install node-oracledb from the
@@ -321,7 +333,13 @@ If you are behind a firewall, you may need to set your proxy, for
 example:
 
 ```
-npm config set https-proxy http://my-proxy.example.com:80
+export http_proxy=http://my-proxy.example.com:80/
+```
+
+or, in `csh`:
+
+```
+setenv http_proxy http://my-proxy.example.com:80/
 ```
 
 Install node-oracledb from the
@@ -433,7 +451,13 @@ If you are behind a firewall, you may need to set your proxy, for
 example:
 
 ```
-npm config set https-proxy http://my-proxy.example.com:80
+export http_proxy=http://my-proxy.example.com:80/
+```
+
+or, in `csh`:
+
+```
+setenv http_proxy http://my-proxy.example.com:80/
 ```
 
 Install node-oracledb from the
@@ -570,7 +594,7 @@ If you are behind a firewall you may need to set your proxy, for
 example:
 
 ```
-npm config set https-proxy http://my-proxy.example.com:80
+set http_proxy=http://my-proxy.example.com:80/
 ```
 
 Install node-oracledb from the
