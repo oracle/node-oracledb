@@ -2,6 +2,9 @@
 
 ## node-oracledb v1.4.0 (DD Mon YYYY)
 
+- Upgrade NAN dependency to version 2 allowing node-oracledb to build 
+  with Node 4.
+
 - Fixed cursor leak when statements execution fails.
 
 ## node-oracledb v1.3.0 (15 Oct 2015)

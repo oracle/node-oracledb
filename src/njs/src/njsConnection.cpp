@@ -57,7 +57,7 @@
 using namespace std;
 
 // persistent Connection class handle
-Persistent<FunctionTemplate> Connection::connectionTemplate_s;
+Nan::Persistent<FunctionTemplate> Connection::connectionTemplate_s;
 
 // default value for bind option maxSize
 #define NJS_MAX_OUT_BIND_SIZE 200
@@ -117,42 +117,44 @@ void Connection::setConnection(dpi::Conn* dpiconn, Oracledb* oracledb)
 */
 void Connection::Init(Handle<Object> target)
 {
-  NanScope();
+  Nan::HandleScope scope;
 
-  Local<FunctionTemplate> tpl = NanNew<FunctionTemplate>(New);
+  Local<FunctionTemplate> tpl = Nan::New<FunctionTemplate>(New);
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
-  tpl->SetClassName(NanNew<v8::String>("Connection"));
+  tpl->SetClassName(Nan::New<v8::String>("Connection").ToLocalChecked());
 
-  NODE_SET_PROTOTYPE_METHOD(tpl, "execute", Execute);
-  NODE_SET_PROTOTYPE_METHOD(tpl, "release", Release);
-  NODE_SET_PROTOTYPE_METHOD(tpl, "commit", Commit);
-  NODE_SET_PROTOTYPE_METHOD(tpl, "rollback", Rollback);
-  NODE_SET_PROTOTYPE_METHOD(tpl, "break", Break);
-  NODE_SET_PROTOTYPE_METHOD(tpl, "getLob", GetLob);
+  Nan::SetPrototypeMethod(tpl, "execute", Execute);
+  Nan::SetPrototypeMethod(tpl, "release", Release);
+  Nan::SetPrototypeMethod(tpl, "commit", Commit);
+  Nan::SetPrototypeMethod(tpl, "rollback", Rollback);
+  Nan::SetPrototypeMethod(tpl, "break", Break);
+  Nan::SetPrototypeMethod(tpl, "getLob", GetLob);
 
-  tpl->InstanceTemplate()->SetAccessor(
-                                              NanNew<v8::String>("stmtCacheSize"),
+  Nan::SetAccessor(tpl->InstanceTemplate(),
+                                              Nan::New<v8::String>("stmtCacheSize").ToLocalChecked(),
                                               Connection::GetStmtCacheSize,
                                               Connection::SetStmtCacheSize );
-  tpl->InstanceTemplate()->SetAccessor(
-                                              NanNew<v8::String>("clientId"),
+  Nan::SetAccessor(tpl->InstanceTemplate(),
+                                              Nan::New<v8::String>("clientId").ToLocalChecked(),
                                               Connection::GetClientId,
                                               Connection::SetClientId );
-  tpl->InstanceTemplate()->SetAccessor(
-                                              NanNew<v8::String>("module"),
+  Nan::SetAccessor(tpl->InstanceTemplate(),
+                                              Nan::New<v8::String>("module").ToLocalChecked(),
                                               Connection::GetModule,
                                               Connection::SetModule );
-  tpl->InstanceTemplate()->SetAccessor(
-                                              NanNew<v8::String>("action"),
+  Nan::SetAccessor(tpl->InstanceTemplate(),
+                                              Nan::New<v8::String>("action").ToLocalChecked(),
                                               Connection::GetAction,
                                               Connection::SetAction );
-  tpl->InstanceTemplate()->SetAccessor(
-                                     NanNew<v8::String>("oracleServerVersion"),
-                                     Connection::GetOracleServerVersion,
-                                     Connection::SetOracleServerVersion);
 
-  NanAssignPersistent( connectionTemplate_s, tpl);
-  target->Set(NanNew<v8::String>("Connection"),tpl->GetFunction());
+  Nan::SetAccessor(tpl->InstanceTemplate(),
+                 Nan::New<v8::String>("oracleServerVersion").ToLocalChecked(),
+                 Connection::GetOracleServerVersion,
+                 Connection::SetOracleServerVersion );
+  
+
+  connectionTemplate_s.Reset(tpl);
+  Nan::Set(target, Nan::New<v8::String>("Connection").ToLocalChecked(), tpl->GetFunction());
 }
 
 /*****************************************************************************/
@@ -162,12 +164,10 @@ void Connection::Init(Handle<Object> target)
 */
 NAN_METHOD(Connection::New)
 {
-  NanScope();
-
   Connection *connection = new Connection();
-  connection->Wrap(args.This());
+  connection->Wrap(info.This());
 
-  NanReturnValue(args.This());
+  info.GetReturnValue().Set(info.This());
 }
 
 /*****************************************************************************/
@@ -179,7 +179,8 @@ void Connection::connectionPropertyException(Connection* njsConn,
                                              NJSErrorType errType,
                                              string property)
 {
-  NanScope();
+  Nan::HandleScope scope;
+
   string msg;
   if(!njsConn->isValid_)
     msg = NJSMessages::getErrorMsg(errInvalidConnection);
@@ -193,28 +194,27 @@ void Connection::connectionPropertyException(Connection* njsConn,
    DESCRIPTION
      Get Accessor of stmtCacheSize property
 */
-NAN_PROPERTY_GETTER(Connection::GetStmtCacheSize)
+NAN_GETTER(Connection::GetStmtCacheSize)
 {
-  NanScope();
-  Connection* njsConn = ObjectWrap::Unwrap<Connection>(args.Holder());
+  Connection* njsConn = Nan::ObjectWrap::Unwrap<Connection>(info.Holder());
   if(!njsConn->isValid_)
   {
     string error = NJSMessages::getErrorMsg ( errInvalidConnection );
     NJS_SET_EXCEPTION(error.c_str(), error.length());
-    NanReturnUndefined();
+    info.GetReturnValue().SetUndefined();
+    return;
   }
   try
   {
-    Local<Integer> value = NanNew<v8::Integer>(njsConn->dpiconn_->stmtCacheSize());
-    NanReturnValue(value);
+    info.GetReturnValue().Set(njsConn->dpiconn_->stmtCacheSize());
+    return;
   }
   catch(dpi::Exception &e)
   {
     NJS_SET_CONN_ERR_STATUS (  e.errnum(), njsConn->dpiconn_ );
     NJS_SET_EXCEPTION(e.what(), strlen(e.what()));
-    NanReturnUndefined();
   }
-  NanReturnUndefined();
+  info.GetReturnValue().Set(Nan::Undefined());
 }
 
 /*****************************************************************************/
@@ -224,7 +224,7 @@ NAN_PROPERTY_GETTER(Connection::GetStmtCacheSize)
 */
 NAN_SETTER(Connection::SetStmtCacheSize)
 {
-  connectionPropertyException(ObjectWrap::Unwrap<Connection>(args.Holder()), errReadOnly, "stmtCacheSize");
+  connectionPropertyException(Nan::ObjectWrap::Unwrap<Connection>(info.Holder()), errReadOnly, "stmtCacheSize");
 }
 
 /*****************************************************************************/
@@ -233,9 +233,9 @@ NAN_SETTER(Connection::SetStmtCacheSize)
      Get Accessor of clientId property - This is write-only property,
      returning NULL for debugging purpose in case of read
 */
-NAN_PROPERTY_GETTER(Connection::GetClientId)
+NAN_GETTER(Connection::GetClientId)
 {
-  NanReturnNull();
+  info.GetReturnValue().SetNull();
 }
 
 /*****************************************************************************/
@@ -245,8 +245,7 @@ NAN_PROPERTY_GETTER(Connection::GetClientId)
 */
 NAN_SETTER(Connection::SetClientId)
 {
-  NanScope();
-  Connection* njsConn = ObjectWrap::Unwrap<Connection>(args.Holder());
+  Connection* njsConn = Nan::ObjectWrap::Unwrap<Connection>(info.Holder());
   if(!njsConn->isValid_)
   {
     string msg = NJSMessages::getErrorMsg(errInvalidConnection);
@@ -267,9 +266,9 @@ NAN_SETTER(Connection::SetClientId)
      Get Accessor of module property - This is write-only property,
      returning NULL for debugging purpose in case of read
 */
-NAN_PROPERTY_GETTER(Connection::GetModule)
+NAN_GETTER(Connection::GetModule)
 {
-  NanReturnNull();
+  info.GetReturnValue().SetNull();
 }
 
 /*****************************************************************************/
@@ -279,8 +278,7 @@ NAN_PROPERTY_GETTER(Connection::GetModule)
 */
 NAN_SETTER(Connection::SetModule)
 {
-  NanScope();
-  Connection *njsConn = ObjectWrap::Unwrap<Connection>(args.Holder());
+  Connection *njsConn = Nan::ObjectWrap::Unwrap<Connection>(info.Holder());
   if(!njsConn->isValid_)
   {
     string msg = NJSMessages::getErrorMsg(errInvalidConnection);
@@ -301,9 +299,9 @@ NAN_SETTER(Connection::SetModule)
      Get Accessor of action property - This is write-only property,
      returning NULL for debugging purpose in case of read
 */
-NAN_PROPERTY_GETTER(Connection::GetAction)
+NAN_GETTER(Connection::GetAction)
 {
-  NanReturnNull();
+  info.GetReturnValue().SetNull();
 }
 
 /*****************************************************************************/
@@ -313,8 +311,7 @@ NAN_PROPERTY_GETTER(Connection::GetAction)
 */
 NAN_SETTER(Connection::SetAction)
 {
-  NanScope();
-  Connection *njsConn = ObjectWrap::Unwrap<Connection>(args.Holder());
+  Connection *njsConn = Nan::ObjectWrap::Unwrap<Connection>(info.Holder());
   if(!njsConn->isValid_)
   {
     string msg = NJSMessages::getErrorMsg(errInvalidConnection);
@@ -333,16 +330,15 @@ NAN_SETTER(Connection::SetAction)
   DESCRIPTION
     Get Accessor of OracleServerVersion Property
 */
-NAN_PROPERTY_GETTER (Connection::GetOracleServerVersion)
+NAN_GETTER (Connection::GetOracleServerVersion)
 {
-  NanScope();
-  Connection *njsConn = ObjectWrap::Unwrap<Connection>(args.Holder());
+  Connection *njsConn = ObjectWrap::Unwrap<Connection>(info.Holder());
 
   if ( !njsConn->isValid_ )
   {
     string error = NJSMessages::getErrorMsg ( errInvalidConnection );
     NJS_SET_EXCEPTION(error.c_str(), error.length() );
-    NanReturnUndefined();
+    info.GetReturnValue().SetUndefined();
   }
 
   try
@@ -363,15 +359,15 @@ NAN_PROPERTY_GETTER (Connection::GetOracleServerVersion)
                                     ( ( ver >>  0 ) & 0x000000FF ) ;
     }
 
-    Local<Integer> value = NanNew<v8::Integer>(
+    Local<Integer> value = Nan::New<v8::Integer>(
                              (unsigned int ) njsConn-> oracleServerVersion_ );
-    NanReturnValue ( value );
+    info.GetReturnValue().Set( value );
   }
   catch ( dpi::Exception &e)
   {
     NJS_SET_CONN_ERR_STATUS ( e.errnum(), njsConn->dpiconn_ );
     NJS_SET_EXCEPTION ( e.what(), strlen (e.what () ) );
-    NanReturnUndefined ();
+    info.GetReturnValue().SetUndefined();
   }
 }
 
@@ -383,7 +379,7 @@ NAN_PROPERTY_GETTER (Connection::GetOracleServerVersion)
 */
 NAN_SETTER(Connection::SetOracleServerVersion)
 {
-  connectionPropertyException(ObjectWrap::Unwrap<Connection>(args.Holder()),
+  connectionPropertyException(ObjectWrap::Unwrap<Connection>(info.Holder()),
                               errReadOnly, "oracleServerVersion" );
 }
 
@@ -402,23 +398,22 @@ NAN_SETTER(Connection::SetOracleServerVersion)
 */
 NAN_METHOD(Connection::Execute)
 {
-  NanScope();
   Local<Function> callback;
   Local<String> sql;
   Connection *connection;
-  NJS_GET_CALLBACK ( callback, args );
+  NJS_GET_CALLBACK ( callback, info );
 
   eBaton *executeBaton = new eBaton;
-  NanAssignPersistent( executeBaton->cb, callback );
-  NJS_CHECK_NUMBER_OF_ARGS ( executeBaton->error, args, 2, 4, exitExecute );
-  connection = ObjectWrap::Unwrap<Connection>(args.This());
+  executeBaton->cb.Reset( callback );
+  NJS_CHECK_NUMBER_OF_ARGS ( executeBaton->error, info, 2, 4, exitExecute );
+  connection = Nan::ObjectWrap::Unwrap<Connection>(info.This());
 
   if(!connection->isValid_)
   {
     executeBaton->error = NJSMessages::getErrorMsg ( errInvalidConnection );
     goto exitExecute;
   }
-  NJS_GET_ARG_V8STRING (sql, executeBaton->error, args, 0, exitExecute);
+  NJS_GET_ARG_V8STRING (sql, executeBaton->error, info, 0, exitExecute);
   NJSString (executeBaton->sql, sql);
 
   executeBaton->maxRows      = connection->oracledb_->getMaxRows();
@@ -434,14 +429,14 @@ NAN_METHOD(Connection::Execute)
   executeBaton->dpiconn      = connection->dpiconn_;
   executeBaton->njsconn      = connection;
 
-  if(args.Length() > 2)
+  if(info.Length() > 2)
   {
-    Connection::ProcessBinds(args, 1, executeBaton);
+    Connection::ProcessBinds(info, 1, executeBaton);
     if(!executeBaton->error.empty()) goto exitExecute;
   }
-  if(args.Length() > 3)
+  if(info.Length() > 3)
   {
-    Connection::ProcessOptions(args, 2, executeBaton);
+    Connection::ProcessOptions(info, 2, executeBaton);
      if(!executeBaton->error.empty()) goto exitExecute;
   }
 
@@ -450,7 +445,7 @@ NAN_METHOD(Connection::Execute)
   uv_queue_work(uv_default_loop(), &executeBaton->req,
                Async_Execute, (uv_after_work_cb)Async_AfterExecute);
 
-  NanReturnUndefined();
+  info.GetReturnValue().SetUndefined();
 }
 
 /*****************************************************************************/
@@ -463,10 +458,10 @@ NAN_METHOD(Connection::Execute)
      index- index of binds in args,
      executeBaton
  */
-void Connection::ProcessBinds (_NAN_METHOD_ARGS, unsigned int index,
+void Connection::ProcessBinds (Nan::NAN_METHOD_ARGS_TYPE args, unsigned int index,
                                eBaton* executeBaton)
 {
-  NanScope();
+  Nan::HandleScope scope;
   if(args[index]->IsArray() )
   {
     Local<Array> bindsArray  = Local<Array>::Cast(args[index]);
@@ -491,10 +486,10 @@ void Connection::ProcessBinds (_NAN_METHOD_ARGS, unsigned int index,
      index- index of options in args,
      executeBaton
  */
-void Connection::ProcessOptions (_NAN_METHOD_ARGS, unsigned int index,
+void Connection::ProcessOptions (Nan::NAN_METHOD_ARGS_TYPE args, unsigned int index,
                                  eBaton* executeBaton)
 {
-  NanScope();
+  Nan::HandleScope scope;
   Local<Object> options;
   if(args[index]->IsObject() && !args[index]->IsArray())
   {
@@ -511,10 +506,10 @@ void Connection::ProcessOptions (_NAN_METHOD_ARGS, unsigned int index,
                              options, "autoCommit", 2, exitProcessOptions );
 
     // Optional fetchAs specifications
-    Local<Value> val = options->Get(NanNew<v8::String>("fetchInfo"));
+    Local<Value> val = options->Get(Nan::New<v8::String>("fetchInfo").ToLocalChecked());
     if ( !val->IsUndefined () && !val->IsNull () )
     {
-      Handle<Object> fetchInfo = val->ToObject();
+      Local<Object> fetchInfo = val->ToObject();
       Local<Array> keys = fetchInfo->GetOwnPropertyNames ();
       if ( keys->Length () > 0 )
       {
@@ -526,11 +521,11 @@ void Connection::ProcessOptions (_NAN_METHOD_ARGS, unsigned int index,
         {
           unsigned int tmptype = 0 ;
 
-          Handle<String> temp = keys->Get (index).As<String>();
+          Local<String> temp = keys->Get (index).As<String>();
           NJSString (fInfo[index].name, temp );
 
-          Handle<Object> colInfo = fetchInfo->Get (NanNew<v8::String>(
-                                     fInfo[index].name ))->ToObject();
+          Local<Object> colInfo = fetchInfo->Get (Nan::New<v8::String>(
+                                     fInfo[index].name ).ToLocalChecked())->ToObject();
 
           NJS_GET_UINT_FROM_JSON (tmptype, executeBaton->error,
                                   colInfo, "type", 2, exitProcessOptions );
@@ -578,7 +573,7 @@ void Connection::ProcessOptions (_NAN_METHOD_ARGS, unsigned int index,
 */
 void Connection::GetBinds (Handle<Object> bindobj, eBaton* executeBaton)
 {
-  NanScope();
+  Nan::HandleScope scope;
   std::string str;
   Local<Array> array = bindobj->GetOwnPropertyNames();
 
@@ -588,8 +583,8 @@ void Connection::GetBinds (Handle<Object> bindobj, eBaton* executeBaton)
     Handle<String> temp = array->Get(index).As<String>();
     NJSString(str, temp);
     bind->key = ":"+std::string(str);
-    Handle<Value> val__ = bindobj->Get(NanNew<v8::String>((char*)str.c_str(),
-                           (int) str.length()));
+    Local<Value> val__ = bindobj->Get(Nan::New<v8::String>((char*)str.c_str(),
+                           (int) str.length()).ToLocalChecked());
     Connection::GetBindUnit(val__, bind, executeBaton);
     if(!executeBaton->error.empty())
       goto exitGetBinds;
@@ -611,7 +606,7 @@ void Connection::GetBinds (Handle<Object> bindobj, eBaton* executeBaton)
 */
 void Connection::GetBinds (Handle<Array> binds, eBaton* executeBaton)
 {
-  NanScope();
+  Nan::HandleScope scope;
 
   for(unsigned int index = 0; index < binds->Length(); index++)
   {
@@ -632,10 +627,10 @@ void Connection::GetBinds (Handle<Array> binds, eBaton* executeBaton)
    PARAMETERS:
      Handle value, eBaton struct
 */
-void Connection::GetBindUnit (Handle<Value> val, Bind* bind,
+void Connection::GetBindUnit (Local<Value> val, Bind* bind,
                                        eBaton* executeBaton)
 {
-  NanScope();
+  Nan::HandleScope scope;
   unsigned int dir   = BIND_IN;
 
   if(val->IsObject() && !val->IsDate() && !Buffer::HasInstance(val))
@@ -665,8 +660,8 @@ void Connection::GetBindUnit (Handle<Value> val, Bind* bind,
       goto exitGetBindUnit;
     }
 
+    Local<Value> element = bind_unit->Get(Nan::New<v8::String>("val").ToLocalChecked());
 
-    Local<Value> element = bind_unit->Get(NanNew<v8::String>("val"));
     switch(dir)
     {
       case BIND_IN    :
@@ -721,7 +716,6 @@ void Connection::GetBindUnit (Handle<Value> val, Bind* bind,
 void Connection::GetOutBindParams (unsigned short dataType, Bind* bind,
                                    eBaton *executeBaton)
 {
-  NanScope();
   switch(dataType)
   {
     case DATA_STR :
@@ -769,9 +763,11 @@ void Connection::GetOutBindParams (unsigned short dataType, Bind* bind,
      For IN Bind only len field field is used, and for only a scalar value now,
      allocate for one unit.
 */
-void Connection::GetInBindParams (Handle<Value> v8val, Bind* bind,
+void Connection::GetInBindParams (Local<Value> v8val, Bind* bind,
                                            eBaton* executeBaton, BindType type)
 {
+  Nan::HandleScope scope;
+
   /* Allocate for scalar indicator & length */
   bind->ind = (short *)malloc ( sizeof ( short ) );
   bind->len = (DPI_BUFLEN_TYPE *)malloc ( sizeof ( DPI_BUFLEN_TYPE ) );
@@ -1133,121 +1129,121 @@ void Connection::Async_Execute (uv_work_t *req)
  */
 void Connection::PrepareAndBind (eBaton* executeBaton)
 {
-    executeBaton->dpistmt = executeBaton->dpiconn->getStmt(executeBaton->sql);
-    executeBaton->st = executeBaton->dpistmt->stmtType ();
-    executeBaton->stmtIsReturning = executeBaton->dpistmt->isReturning ();
+  executeBaton->dpistmt = executeBaton->dpiconn->getStmt(executeBaton->sql);
+  executeBaton->st = executeBaton->dpistmt->stmtType ();
+  executeBaton->stmtIsReturning = executeBaton->dpistmt->isReturning ();
 
-    if(!executeBaton->binds.empty())
+  if(!executeBaton->binds.empty())
+  {
+    if(!executeBaton->binds[0]->key.empty())
     {
-      if(!executeBaton->binds[0]->key.empty())
+      for(unsigned int index = 0 ;index < executeBaton->binds.size();
+          index++)
       {
-        for(unsigned int index = 0 ;index < executeBaton->binds.size();
-            index++)
+        if ( executeBaton->binds[index]->isOut &&
+             executeBaton->stmtIsReturning &&
+             executeBaton->binds[index]->type == dpi::DpiRSet )
         {
-          if ( executeBaton->binds[index]->isOut &&
-               executeBaton->stmtIsReturning &&
-               executeBaton->binds[index]->type == dpi::DpiRSet )
-          {
-            executeBaton->error = NJSMessages::getErrorMsg (
-                                                       errInvalidResultSet ) ;
-          }
-
-          // Allocate for OUT Binds
-          // For DML Returning, allocation happens through callback.
-          if ( executeBaton->binds[index]->isOut &&
-               !executeBaton->stmtIsReturning &&
-               !executeBaton->binds[index]->value )
-          {
-            Connection::cbDynBufferAllocate ( executeBaton,
-                                              false, 1, index );
-            // LOBs: binds[index]->value is a pointer to a pointer
-            // we need to allocate the underlying LOB descriptor
-            if (executeBaton->binds[index]->type == DpiClob ||
-                executeBaton->binds[index]->type == DpiBlob)
-            {
-              *((void **)executeBaton->binds[index]->value) =
-                executeBaton->dpienv->allocDescriptor(LobDescriptorType);
-            }
-          }
-          
-          // Convert v8::Date to Oracle DB Type for IN and IN/OUT binds
-          if ( executeBaton->binds[index]->type == DpiTimestampLTZ &&
-              // InOut bind
-              (executeBaton->binds[index]->isInOut || 
-              // In bind
-              (!executeBaton->binds[index]->isOut &&
-               !executeBaton->binds[index]->isInOut)))
-          {
-            Connection::UpdateDateValue ( executeBaton, index ) ;
-          }
-
-          // Bind by name
-          executeBaton->dpistmt->bind(
-                (const unsigned char*)executeBaton->binds[index]->key.c_str(),
-                (int) executeBaton->binds[index]->key.length(), index,
-                executeBaton->binds[index]->type,
-                executeBaton->binds[index]->value,
-                (executeBaton->stmtIsReturning &&
-                  executeBaton->binds[index]->isOut &&
-                  (executeBaton->binds[index]->type == dpi::DpiVarChar))?
-                  (executeBaton->binds[index]->maxSize + 1) :
-                  executeBaton->binds[index]->maxSize,
-                executeBaton->binds[index]->ind,
-                executeBaton->binds[index]->len,
-                (executeBaton->stmtIsReturning &&
-                  executeBaton->binds[index]->isOut) ?
-                (void *)executeBaton : NULL,
-                (executeBaton->stmtIsReturning &&
-                  executeBaton->binds[index]->isOut) ?
-                Connection::cbDynBufferGet : NULL);
+          executeBaton->error = NJSMessages::getErrorMsg (
+                                                     errInvalidResultSet ) ;
         }
-      }
-      else
-      {
-        for(unsigned int index = 0 ;index < executeBaton->binds.size();
-            index++)
+
+        // Allocate for OUT Binds
+        // For DML Returning, allocation happens through callback.
+        if ( executeBaton->binds[index]->isOut &&
+             !executeBaton->stmtIsReturning &&
+             !executeBaton->binds[index]->value )
         {
-          // Allocate for OUT Binds
-          // For DML Returning, allocation happens through callback
-          if ( executeBaton->binds[index]->isOut &&
-               !executeBaton->stmtIsReturning &&
-               !executeBaton->binds[index]->value )
+          Connection::cbDynBufferAllocate ( executeBaton,
+                                            false, 1, index );
+          // LOBs: binds[index]->value is a pointer to a pointer
+          // we need to allocate the underlying LOB descriptor
+          if (executeBaton->binds[index]->type == DpiClob ||
+              executeBaton->binds[index]->type == DpiBlob)
           {
-            Connection::cbDynBufferAllocate ( executeBaton,
-                                              false, 1, index );
+            *((void **)executeBaton->binds[index]->value) =
+              executeBaton->dpienv->allocDescriptor(LobDescriptorType);
           }
-
-          // Convert v8::Date to Oracle DB Type for IN and IN/OUT binds
-          if ( executeBaton->binds[index]->type == DpiTimestampLTZ &&
-              // InOut bind
-              (executeBaton->binds[index]->isInOut ||
-              // In bind
-              (!executeBaton->binds[index]->isOut &&
-               !executeBaton->binds[index]->isInOut)))
-          {
-            Connection::UpdateDateValue ( executeBaton, index ) ;
-          }
-
-          // Bind by position
-          executeBaton->dpistmt->bind(
-                index+1,executeBaton->binds[index]->type,
-                executeBaton->binds[index]->value,
-                (executeBaton->stmtIsReturning &&
-                  executeBaton->binds[index]->isOut &&
-                  (executeBaton->binds[index]->type == dpi::DpiVarChar))?
-                  (executeBaton->binds[index]->maxSize + 1) :
-                   executeBaton->binds[index]->maxSize,
-                executeBaton->binds[index]->ind,
-                executeBaton->binds[index]->len,
-                (executeBaton->stmtIsReturning &&
-                  executeBaton->binds[index]->isOut ) ?
-                    (void *)executeBaton : NULL,
-                (executeBaton->stmtIsReturning &&
-                  executeBaton->binds[index]->isOut) ?
-                Connection::cbDynBufferGet : NULL);
         }
+
+        // Convert v8::Date to Oracle DB Type for IN and IN/OUT binds
+        if ( executeBaton->binds[index]->type == DpiTimestampLTZ &&
+            // InOut bind
+            (executeBaton->binds[index]->isInOut || 
+            // In bind
+            (!executeBaton->binds[index]->isOut &&
+             !executeBaton->binds[index]->isInOut)))
+        {
+          Connection::UpdateDateValue ( executeBaton, index ) ;
+        }
+
+        // Bind by name
+        executeBaton->dpistmt->bind(
+              (const unsigned char*)executeBaton->binds[index]->key.c_str(),
+              (int) executeBaton->binds[index]->key.length(), index,
+              executeBaton->binds[index]->type,
+              executeBaton->binds[index]->value,
+              (executeBaton->stmtIsReturning &&
+                executeBaton->binds[index]->isOut &&
+               (executeBaton->binds[index]->type == dpi::DpiVarChar )) ?
+                (executeBaton->binds[index]->maxSize + 1) :
+                executeBaton->binds[index]->maxSize,
+              executeBaton->binds[index]->ind,
+              executeBaton->binds[index]->len,
+              (executeBaton->stmtIsReturning &&
+                executeBaton->binds[index]->isOut) ?
+              (void *)executeBaton : NULL,
+              (executeBaton->stmtIsReturning &&
+                executeBaton->binds[index]->isOut) ?
+              Connection::cbDynBufferGet : NULL);
       }
     }
+    else
+    {
+      for(unsigned int index = 0 ;index < executeBaton->binds.size();
+          index++)
+      {
+        // Allocate for OUT Binds
+        // For DML Returning, allocation happens through callback
+        if ( executeBaton->binds[index]->isOut &&
+             !executeBaton->stmtIsReturning &&
+             !executeBaton->binds[index]->value )
+        {
+          Connection::cbDynBufferAllocate ( executeBaton,
+                                            false, 1, index );
+        }
+
+        // Convert v8::Date to Oracle DB Type for IN and IN/OUT binds
+        if ( executeBaton->binds[index]->type == DpiTimestampLTZ &&
+            // InOut bind
+            (executeBaton->binds[index]->isInOut ||
+            // In bind
+            (!executeBaton->binds[index]->isOut &&
+             !executeBaton->binds[index]->isInOut)))
+        {
+          Connection::UpdateDateValue ( executeBaton, index ) ;
+        }
+
+        // Bind by position
+        executeBaton->dpistmt->bind(
+              index+1,executeBaton->binds[index]->type,
+              executeBaton->binds[index]->value,
+              (executeBaton->stmtIsReturning &&
+                executeBaton->binds[index]->isOut && 
+               (executeBaton->binds[index]->type == dpi::DpiVarChar )) ?
+                (executeBaton->binds[index]->maxSize + 1) :
+                 executeBaton->binds[index]->maxSize,
+              executeBaton->binds[index]->ind,
+              executeBaton->binds[index]->len,
+              (executeBaton->stmtIsReturning &&
+                executeBaton->binds[index]->isOut ) ?
+                  (void *)executeBaton : NULL,
+              (executeBaton->stmtIsReturning &&
+                executeBaton->binds[index]->isOut) ?
+              Connection::cbDynBufferGet : NULL);
+      }
+    }
+  }
 }
 
 /*****************************************************************************/
@@ -1946,87 +1942,88 @@ void Connection::Descr2protoILob( eBaton *executeBaton, unsigned int numCols,
 */
 void Connection::Async_AfterExecute(uv_work_t *req)
 {
-  NanScope();
+  Nan::HandleScope scope;
 
   eBaton *executeBaton = (eBaton*)req->data;
-  v8::TryCatch tc;
-  Handle<Value> argv[2];
+  Nan::TryCatch tc;
+  Local<Value> argv[2];
   if(!(executeBaton->error).empty())
   {
-    argv[0] = v8::Exception::Error(NanNew<v8::String>((executeBaton->error).c_str()));
-    argv[1] = NanUndefined();
+    argv[0] = v8::Exception::Error(Nan::New<v8::String>((executeBaton->error).c_str()).ToLocalChecked());
+    argv[1] = Nan::Undefined();
   }
   else
   {
-    argv[0] = NanUndefined();
-    Local<Object> result = NanNew<v8::Object>();
-    Handle<Value> rowArray;
+    argv[0] = Nan::Undefined();
+    Local<Object> result = Nan::New<v8::Object>();
+    Local<Value> rowArray;
     switch(executeBaton->st)
     {
       case DpiStmtSelect :
         rowArray = Connection::GetRows(executeBaton);
         if(!(executeBaton->error).empty())
         {
-          argv[0] = v8::Exception::Error(NanNew<v8::String>((executeBaton->error).c_str()));
-          argv[1] = NanUndefined();
+          argv[0] = v8::Exception::Error(Nan::New<v8::String>((executeBaton->error).c_str()).ToLocalChecked());
+          argv[1] = Nan::Undefined();
           goto exitAsyncAfterExecute;
         }
         if( executeBaton->getRS )
         {
-          result->Set(NanNew<v8::String>("rows"), NanUndefined());
-          Handle<Object> resultSet = NanNew(ResultSet::resultSetTemplate_s)->
+          Nan::Set(result, Nan::New<v8::String>("rows").ToLocalChecked(), Nan::Undefined());
+          Local<Object> resultSet = Nan::New<FunctionTemplate>(ResultSet::resultSetTemplate_s)->
                                 GetFunction() ->NewInstance();
 
           /* ResultSet case, the statement object is ready for fetching */
-         (ObjectWrap::Unwrap<ResultSet> (resultSet))->
+         (Nan::ObjectWrap::Unwrap<ResultSet> (resultSet))->
                                   setResultSet( executeBaton->dpistmt,
                                                 executeBaton);
 
-          result->Set(NanNew<v8::String>("resultSet"), resultSet );
+          Nan::Set(result, Nan::New<v8::String>("resultSet").ToLocalChecked(), resultSet);
         }
         else
         {
-          result->Set(NanNew<v8::String>("rows"), rowArray);
-          result->Set(NanNew<v8::String>("resultSet"), NanUndefined());
+          Nan::Set(result, Nan::New<v8::String>("rows").ToLocalChecked(), rowArray);
+          Nan::Set(result, Nan::New<v8::String>("resultSet").ToLocalChecked(), Nan::Undefined());
         }
-        result->Set(NanNew<v8::String>("outBinds"),NanUndefined());
-        result->Set(NanNew<v8::String>("rowsAffected"), NanUndefined());
-        result->Set(NanNew<v8::String>("metaData"), Connection::GetMetaData(
+        Nan::Set(result, Nan::New<v8::String>("outBinds").ToLocalChecked(),Nan::Undefined());
+        Nan::Set(result, Nan::New<v8::String>("rowsAffected").ToLocalChecked(), Nan::Undefined());
+        Nan::Set(result, Nan::New<v8::String>("metaData").ToLocalChecked(), Connection::GetMetaData(
                                                     executeBaton->columnNames,
                                                     executeBaton->numCols));
         break;
       case DpiStmtBegin :
       case DpiStmtDeclare :
       case DpiStmtCall :
-        result->Set(NanNew<v8::String>("rowsAffected"), NanUndefined());
-        result->Set(NanNew<v8::String>("outBinds"),Connection::GetOutBinds(executeBaton));//, v8::ReadOnly);
-        result->Set(NanNew<v8::String>("rows"), NanUndefined());
-        result->Set(NanNew<v8::String>("metaData"), NanUndefined());
+        Nan::Set(result, Nan::New<v8::String>("rowsAffected").ToLocalChecked(), Nan::Undefined());
+        Nan::ForceSet(result, Nan::New<v8::String>("outBinds").ToLocalChecked(),Connection::GetOutBinds(executeBaton), v8::ReadOnly);
+        Nan::Set(result, Nan::New<v8::String>("rows").ToLocalChecked(), Nan::Undefined());
+        Nan::Set(result, Nan::New<v8::String>("metaData").ToLocalChecked(), Nan::Undefined());
         break;
       default :
-        result->Set(NanNew<v8::String>("rowsAffected"),
-                    NanNew<v8::Integer>((unsigned int) executeBaton->rowsAffected));//, v8::ReadOnly);
+        Nan::ForceSet(result, Nan::New<v8::String>("rowsAffected").ToLocalChecked(),
+                    Nan::New<v8::Integer>((unsigned int) executeBaton->rowsAffected), v8::ReadOnly);
         if( executeBaton->numOutBinds )
         {
-          result->Set(NanNew<v8::String>("outBinds"), Connection::GetOutBinds(executeBaton));//, v8::ReadOnly);
+          Nan::ForceSet(result, Nan::New<v8::String>("outBinds").ToLocalChecked(), Connection::GetOutBinds(executeBaton), v8::ReadOnly);
         }
         else
         {
-          result->Set(NanNew<v8::String>("outBinds"),NanUndefined());
+          Nan::Set(result, Nan::New<v8::String>("outBinds").ToLocalChecked(),Nan::Undefined());
         }
-        result->Set(NanNew<v8::String>("rows"), NanUndefined());
-        result->Set(NanNew<v8::String>("metaData"), NanUndefined());
+        Nan::Set(result, Nan::New<v8::String>("rows").ToLocalChecked(), Nan::Undefined());
+        Nan::Set(result, Nan::New<v8::String>("metaData").ToLocalChecked(), Nan::Undefined());
         break;
     }
     argv[1] = result;
   }
   exitAsyncAfterExecute:
-  Local<Function> callback = NanNew(executeBaton->cb);
+  Local<Function> callback = Nan::New<Function>(executeBaton->cb);
+  executeBaton->cb.Reset ();
   delete executeBaton;
-  NanMakeCallback( NanGetCurrentContext()->Global(), callback, 2, argv );
+  Nan::MakeCallback( Nan::GetCurrentContext()->Global(), callback, 2, argv );
   if(tc.HasCaught())
   {
-    node::FatalException(tc);
+    Nan::FatalException(tc);
   }
 }
 
@@ -2042,20 +2039,20 @@ void Connection::Async_AfterExecute(uv_work_t *req)
    RETURNS:
      MetaData Handle
 */
-v8::Handle<v8::Value> Connection::GetMetaData (std::string* columnNames,
+v8::Local<v8::Value> Connection::GetMetaData (std::string* columnNames,
                                        unsigned int numCols )
 {
-  NanEscapableScope();
-  Handle<Array> metaArray = NanNew<v8::Array>(numCols);
+  Nan::EscapableHandleScope scope;
+  Local<Array> metaArray = Nan::New<v8::Array>(numCols);
   for(unsigned int i=0; i < numCols ; i++)
   {
-    Local<Object> column = NanNew<v8::Object>();
-    column->Set(NanNew<v8::String>("name"),
-                NanNew<v8::String>(columnNames[i].c_str())
+    Local<Object> column = Nan::New<v8::Object>();
+    Nan::Set(column, Nan::New<v8::String>("name").ToLocalChecked(),
+                Nan::New<v8::String>(columnNames[i].c_str()).ToLocalChecked()
                 );
-    metaArray->Set(i, column);
+    Nan::Set(metaArray, i, column);
   }
-  return NanEscapeScope(metaArray);
+  return scope.Escape(metaArray);
 }
 
 /*****************************************************************************/
@@ -2069,38 +2066,38 @@ v8::Handle<v8::Value> Connection::GetMetaData (std::string* columnNames,
    RETURNS:
      Rows Handle
 */
-v8::Handle<v8::Value> Connection::GetRows (eBaton* executeBaton)
+v8::Local<v8::Value> Connection::GetRows (eBaton* executeBaton)
 {
-  NanEscapableScope();
-  Handle<Array> rowsArray;
+  Nan::EscapableHandleScope scope;
+  Local<Array> rowsArray;
   switch(executeBaton->outFormat)
   {
     case ROWS_ARRAY :
-      rowsArray = NanNew<v8::Array>(executeBaton->rowsFetched);
+      rowsArray = Nan::New<v8::Array>(executeBaton->rowsFetched);
       for(unsigned int i = 0; i < executeBaton->rowsFetched; i++)
       {
-        Local<Array> row = NanNew<v8::Array>(executeBaton->numCols);
+        Local<Array> row = Nan::New<v8::Array>(executeBaton->numCols);
         for(unsigned int j = 0; j < executeBaton->numCols; j++)
         {
-          row->Set(j, Connection::GetValue(executeBaton, true, j, i));
+          Nan::Set(row, j, Connection::GetValue(executeBaton, true, j, i));
         }
-        rowsArray->Set(i, row);
+        Nan::Set(rowsArray, i, row);
       }
       break;
     case ROWS_OBJECT :
-      rowsArray = NanNew<v8::Array>(executeBaton->rowsFetched);
+      rowsArray = Nan::New<v8::Array>(executeBaton->rowsFetched);
       for(unsigned int i =0 ; i < executeBaton->rowsFetched; i++)
       {
-        Local<Object> row = NanNew<v8::Object>();
+        Local<Object> row = Nan::New<v8::Object>();
 
         for(unsigned int j = 0; j < executeBaton->numCols; j++)
         {
-          row->Set(NanNew<v8::String>(executeBaton->columnNames[j].c_str(),
-                               (int) executeBaton->columnNames[j].length()),
+          Nan::Set(row, Nan::New<v8::String>(executeBaton->columnNames[j].c_str(),
+                               (int) executeBaton->columnNames[j].length()).ToLocalChecked(),
                    Connection::GetValue(executeBaton, true, j, i));
 
         }
-        rowsArray->Set(i, row);
+        Nan::Set(rowsArray, i, row);
       }
       break;
     default :
@@ -2110,7 +2107,7 @@ v8::Handle<v8::Value> Connection::GetRows (eBaton* executeBaton)
       break;
   }
   exitGetRows:
-  return NanEscapeScope(rowsArray);
+  return scope.Escape(rowsArray);
 }
 
 /*****************************************************************************/
@@ -2131,27 +2128,27 @@ v8::Handle<v8::Value> Connection::GetRows (eBaton* executeBaton)
      Handle
 */
 
-Handle<Value> Connection::GetValue ( eBaton *executeBaton,
+Local<Value> Connection::GetValue ( eBaton *executeBaton,
                                      bool isQuery,
                                      unsigned int col,
                                      unsigned int row )
 {
-  NanEscapableScope();
+  Nan::EscapableHandleScope scope;
 
   if(isQuery)
   {
     // SELECT queries
     Define *define = &(executeBaton->defines[col]);
     long double *dblArr = (long double *)define->buf;
-    return NanEscapeScope( Connection::GetValueCommon(
-                        executeBaton,
-                        define->ind[row],
-                        define->fetchType,
-                        (define->fetchType == DpiTimestampLTZ ) ?
-                          (void *) &dblArr[row] :
-                          (void *) ((char *)(define->buf) +
-                                   ( row * (define->maxSize ))),
-                        define->len[row] ));
+    Local<Value> value = Connection::GetValueCommon(
+                           executeBaton,
+                           define->ind[row],
+                           define->fetchType,
+                           (define->fetchType == DpiTimestampLTZ ) ? 
+                             (void *) &dblArr[row] : 
+                             (void *) ((char *)(define->buf) + ( row * (define->maxSize ))),
+                           define->len[row] );
+    return scope.Escape( value );
   }
   else
   {
@@ -2159,26 +2156,27 @@ Handle<Value> Connection::GetValue ( eBaton *executeBaton,
     Bind *bind = executeBaton->binds[col];
     if(executeBaton->stmtIsReturning)
     {
-      return NanEscapeScope(Connection::GetArrayValue (
+      Local<Value> value = Connection::GetArrayValue (
                                         executeBaton,
                                         executeBaton->binds[col], 
-                         (unsigned long)executeBaton->rowsAffected ) );
+                         (unsigned long)executeBaton->rowsAffected );
+      return scope.Escape(value);
     }
     else if(bind->type == DpiRSet) 
     {
-      return NanEscapeScope ( Connection::GetValueRefCursor (
+      return scope.Escape ( Connection::GetValueRefCursor (
                                       executeBaton, bind ));
     }
     else if (( bind->type == DpiClob ) ||
              ( bind->type == DpiBlob ) ||
              ( bind->type == DpiBfile))
     {
-      return NanEscapeScope ( Connection::GetValueLob (
+      return scope.Escape ( Connection::GetValueLob (
                                       executeBaton, bind ));
     }
     else
     {
-      return NanEscapeScope ( Connection::GetValueCommon (
+      return scope.Escape ( Connection::GetValueCommon (
                                       executeBaton,
                                       bind->ind[row],
                                       bind->type,
@@ -2201,31 +2199,31 @@ Handle<Value> Connection::GetValue ( eBaton *executeBaton,
    RETURNS:
      Handle
 */
-Handle<Value> Connection::GetValueRefCursor ( eBaton *executeBaton, 
+Local<Value> Connection::GetValueRefCursor ( eBaton *executeBaton, 
                                               Bind *bind )
 {
-  NanEscapableScope();
-  Handle<Object> resultSet;
-  Handle<Value> value;
+  Nan::EscapableHandleScope scope;
+  Local<Object> resultSet;
+  Local<Value> value;
 
   if(bind->ind[0] != -1)
   {
-    resultSet = NanNew(ResultSet::resultSetTemplate_s)->
+    resultSet = Nan::New<FunctionTemplate>(ResultSet::resultSetTemplate_s)->
                             GetFunction() ->NewInstance();
     /* 
      * IN case of REFCURSOR, bind->flags will indicate whether we got
      * a valid handle, based on that numCols, metaData are queried.
      */
-    (ObjectWrap::Unwrap<ResultSet> (resultSet))->
+    (Nan::ObjectWrap::Unwrap<ResultSet> (resultSet))->
                        setResultSet( (dpi::Stmt*)(bind->value),
                                      executeBaton);
     value = resultSet;
   }
   else
   {
-    value = NanNull();
+    value = Nan::Null();
   }
-  return NanEscapeScope(value);
+  return scope.Escape(value);
 }
 
 /*****************************************************************************/
@@ -2240,15 +2238,15 @@ Handle<Value> Connection::GetValueRefCursor ( eBaton *executeBaton,
    RETURNS:
      Handle
 */
-Handle<Value> Connection::GetValueLob ( eBaton *executeBaton, 
+Local<Value> Connection::GetValueLob ( eBaton *executeBaton, 
                                         Bind *bind )
 {
-  NanEscapableScope();
+  Nan::EscapableHandleScope scope;
 
   if (bind->ind && *bind->ind == -1)
-    return NanNull();
+    return Nan::Null();
 
-  Handle<Value> value;
+  Local<Value> value;
 
   ProtoILob *protoILob = *(static_cast<ProtoILob **>(bind->value));
 
@@ -2261,7 +2259,7 @@ Handle<Value> Connection::GetValueLob ( eBaton *executeBaton,
   // all done with ProtoILob
   delete protoILob;
   *(ProtoILob **)(bind->value) = NULL;
-  return NanEscapeScope(value);
+  return scope.Escape(value);
 }
 
 /*****************************************************************************/
@@ -2278,13 +2276,13 @@ Handle<Value> Connection::GetValueLob ( eBaton *executeBaton,
    RETURNS:
      Handle
 */
-Handle<Value> Connection::GetValueCommon ( eBaton *executeBaton,
+Local<Value> Connection::GetValueCommon ( eBaton *executeBaton,
                                            short ind, 
                                            unsigned short type,
                                            void* val, DPI_BUFLEN_TYPE len )
 {
-  NanEscapableScope();
-  Handle<Value> value;
+  Nan::EscapableHandleScope scope;
+  Local<Value> value;
   Local<Date> date;
 
   if(ind != -1)
@@ -2292,20 +2290,21 @@ Handle<Value> Connection::GetValueCommon ( eBaton *executeBaton,
      switch(type)
      {
        case (dpi::DpiVarChar) :
-          value = NanNew<v8::String>((char*)val, len);
+          value = Nan::New<v8::String>((char*)val, len).ToLocalChecked();
         break;
        case (dpi::DpiInteger) :
-         value = NanNew<v8::Integer>(*(int*)val);
+         value = Nan::New<v8::Integer>(*(int*)val);
          break;
        case (dpi::DpiDouble) :
-         value = NanNew<v8::Number>(*(double*)val);
+         value = Nan::New<v8::Number>(*(double*)val);
          break;
        case (dpi::DpiTimestampLTZ) :
-         date = NanNew<v8::Date>( *(long double*)val );
+         date = Nan::New<v8::Date>( *(long double*)val ).ToLocalChecked();
          value = date;
         break;
        case (dpi::DpiRaw) :
-         value = NanNewBufferHandle((char*)val, len);
+         // TODO: We could use NewBuffer to save memory and CPU, but it gets the ownership of buffer to itself (behaviour changed in Nan 2.0)
+         value = Nan::CopyBuffer((char*)val, len).ToLocalChecked();
          break;
         // The LOB types are hit only by the define code path
         // The bind code path has its own Connection::GetValueLob method
@@ -2325,9 +2324,9 @@ Handle<Value> Connection::GetValueCommon ( eBaton *executeBaton,
   }
   else
   {
-    value = NanNull();
+    value = Nan::Null();
   }
-  return NanEscapeScope(value);
+  return scope.Escape(value);
 }
 
 
@@ -2343,17 +2342,17 @@ Handle<Value> Connection::GetValueCommon ( eBaton *executeBaton,
   Returns
     v8::Value  - this will be an array (even for 1 row, array or 1).
 */
-v8::Handle<v8::Value> Connection::GetArrayValue ( eBaton *executeBaton,
+v8::Local<v8::Value> Connection::GetArrayValue ( eBaton *executeBaton,
                                                   Bind *binds, unsigned long count )
 {
-  NanEscapableScope();
+  Nan::EscapableHandleScope scope;
   Local<Date> date;
   Local<Array> arrVal;
   unsigned long index = 0;
-  Handle<Value> val;
+  Local<Value> val;
 
   /* To return a value of array type, create one of specified size */
-  arrVal = NanNew<v8::Array>( count ) ;
+  arrVal = Nan::New<v8::Array>( count ) ;
 
   for ( index = 0 ; index < count ; index ++ )
   {
@@ -2369,36 +2368,36 @@ v8::Handle<v8::Value> Connection::GetArrayValue ( eBaton *executeBaton,
         )
       )
     {
-      arrVal->Set( index, NanNull() );
+      Nan::Set(arrVal, index, Nan::Null() );
       continue;
     }
 
     switch ( binds->type )
     {
     case dpi::DpiVarChar:
-      arrVal->Set ( index,
-                    NanNew<v8::String> ((char *)binds->value +
+      Nan::Set(arrVal, index,
+                    Nan::New<v8::String> ((char *)binds->value +
                                         (index * binds->maxSize ),
-                                        binds->len2[index]));
+                                        binds->len2[index]).ToLocalChecked());
       break;
     case dpi::DpiInteger:
-      arrVal->Set ( index,
-                    NanNew<v8::Integer> ( *((int *)binds->value + index )));
+      Nan::Set(arrVal, index,
+                    Nan::New<v8::Integer> ( *((int *)binds->value + index )));
       break;
     case dpi::DpiDouble:
-      arrVal->Set ( index,
-                    NanNew<v8::Number> ( *((double *)binds->value + index )));
+      Nan::Set(arrVal, index,
+                    Nan::New<v8::Number> ( *((double *)binds->value + index )));
       break;
     case dpi::DpiTimestampLTZ:
-        arrVal->Set ( index, 
-                      NanNew<v8::Date> (*((long double *)binds->extvalue + index )) );
+        Nan::Set(arrVal, index, 
+                      Nan::New<v8::Date> (*((long double *)binds->extvalue + index )).ToLocalChecked() );
       break;
     case dpi::DpiClob:
     case dpi::DpiBlob:
     {
       ProtoILob *protoILob = *((ProtoILob **)binds->value + index);
       val = NewLob(executeBaton, protoILob);
-      arrVal->Set ( index, NanNew<v8::Value>(val));
+      Nan::Set(arrVal, index, val);
       delete protoILob;
       *(ProtoILob **)binds->value = NULL;
     }
@@ -2408,7 +2407,7 @@ v8::Handle<v8::Value> Connection::GetArrayValue ( eBaton *executeBaton,
       break;
     }
   }
-  return NanEscapeScope( arrVal ) ;
+  return scope.Escape( arrVal ) ;
 }
 
 
@@ -2423,24 +2422,24 @@ v8::Handle<v8::Value> Connection::GetArrayValue ( eBaton *executeBaton,
    RETURNS:
      Outbinds object/array
 */
-v8::Handle<v8::Value> Connection::GetOutBinds (eBaton* executeBaton)
+v8::Local<v8::Value> Connection::GetOutBinds (eBaton* executeBaton)
 {
-  NanEscapableScope();
+  Nan::EscapableHandleScope scope;
 
   if(!executeBaton->binds.empty())
   {
     if( executeBaton->binds[0]->key.empty() )
     {
       // Binds as JS array
-      return NanEscapeScope(GetOutBindArray( executeBaton ));
+      return scope.Escape(GetOutBindArray( executeBaton ));
     }
     else
     {
-      // Binds as JS object 
-      return NanEscapeScope(GetOutBindObject( executeBaton ));
+      // Binds as JS object
+      return scope.Escape(GetOutBindObject( executeBaton ));
     }
   }
-  return NanEscapeScope(NanUndefined());
+  return scope.Escape(Nan::Undefined());
 }
 
 /*****************************************************************************/
@@ -2454,26 +2453,26 @@ v8::Handle<v8::Value> Connection::GetOutBinds (eBaton* executeBaton)
    RETURNS:
      Outbinds array
 */
-v8::Handle<v8::Value> Connection::GetOutBindArray ( eBaton *executeBaton )
+v8::Local<v8::Value> Connection::GetOutBindArray ( eBaton *executeBaton )
 {
-  NanEscapableScope();
+  Nan::EscapableHandleScope scope;
 
   std::vector<Bind*>binds = executeBaton->binds;
 
-  Local<Array> arrayBinds = NanNew<v8::Array>( executeBaton->numOutBinds );
+  Local<Array> arrayBinds = Nan::New<v8::Array>( executeBaton->numOutBinds );
 
   unsigned int it = 0;
   for(unsigned int index = 0; index < binds.size(); index++)
   {
     if(binds[index]->isOut)
     {
-      Handle<Value> val ;
+      Local<Value> val ;
       val = Connection::GetValue ( executeBaton, false, index ); 
-      arrayBinds->Set( it, val );
+      Nan::Set(arrayBinds, it, val );
       it ++;
     }
   }
-  return NanEscapeScope(arrayBinds);
+  return scope.Escape(arrayBinds);
 }
 
 /*****************************************************************************/
@@ -2487,27 +2486,27 @@ v8::Handle<v8::Value> Connection::GetOutBindArray ( eBaton *executeBaton )
    RETURNS:
      Outbinds object
 */
-v8::Handle<v8::Value> Connection::GetOutBindObject ( eBaton *executeBaton )
+v8::Local<v8::Value> Connection::GetOutBindObject ( eBaton *executeBaton )
 {
+  Nan::EscapableHandleScope scope;
   std::vector<Bind*>binds = executeBaton->binds;
-
-  NanEscapableScope();
-  Local<Object> objectBinds = NanNew<v8::Object>();
+  Local<Object> objectBinds = Nan::New<v8::Object>();
+  
   for(unsigned int index = 0; index < binds.size(); index++)
   {
     if(binds[index]->isOut)
     {
-      Handle<Value> val;
+      Local<Value> val;
 
       binds[index]->key.erase(binds[index]->key.begin());
 
       val = Connection::GetValue ( executeBaton, false, index );
-      objectBinds->Set( NanNew<v8::String> ( binds[index]->key.c_str(),
-                        (int) binds[index]->key.length() ),
+      Nan::Set( objectBinds, Nan::New<v8::String>( binds[index]->key.c_str(),
+                        (int) binds[index]->key.length() ).ToLocalChecked(),
                         val );
     }
   }
-  return NanEscapeScope(objectBinds);
+  return scope.Escape(objectBinds);
 }
 
 /*****************************************************************************/
@@ -2520,15 +2519,16 @@ v8::Handle<v8::Value> Connection::GetOutBindObject ( eBaton *executeBaton )
 */
 NAN_METHOD(Connection::Release)
 {
-  NanScope();
+  Nan::EscapableHandleScope scope;
   Local<Function> callback;
   Connection *connection;
-  NJS_GET_CALLBACK ( callback, args );
+  NJS_GET_CALLBACK ( callback, info );
 
   eBaton* releaseBaton = new eBaton;
-  NanAssignPersistent( releaseBaton->cb, callback );
-  NJS_CHECK_NUMBER_OF_ARGS ( releaseBaton->error, args, 1, 1, exitRelease );
-  connection = ObjectWrap::Unwrap<Connection>(args.This());
+  releaseBaton->cb.Reset(callback);
+  
+  NJS_CHECK_NUMBER_OF_ARGS ( releaseBaton->error, info, 1, 1, exitRelease );
+  connection = Nan::ObjectWrap::Unwrap<Connection>(info.This());
 
   if(!connection->isValid_)
   {
@@ -2542,7 +2542,8 @@ NAN_METHOD(Connection::Release)
 
   uv_queue_work(uv_default_loop(), &releaseBaton->req,
                Async_Release, (uv_after_work_cb)Async_AfterRelease);
-  NanReturnUndefined();
+  info.GetReturnValue().SetUndefined();
+  scope.Escape ( Nan::Undefined () );
 }
 
 /*****************************************************************************/
@@ -2584,23 +2585,26 @@ void Connection::Async_Release(uv_work_t *req)
 */
 void Connection::Async_AfterRelease(uv_work_t *req)
 {
-  NanScope();
+  Nan::HandleScope scope;
+  
   eBaton *releaseBaton = (eBaton*)req->data;
-  v8::TryCatch tc;
+  Nan::TryCatch tc;
 
-  Handle<Value> argv[1];
+  Local<Value> argv[1];
 
   if(!(releaseBaton->error).empty())
-    argv[0] = v8::Exception::Error(NanNew<v8::String>((releaseBaton->error).c_str()));
+    argv[0] = v8::Exception::Error(Nan::New<v8::String>((releaseBaton->error).c_str()).ToLocalChecked());
   else
-    argv[0] = NanUndefined();
-  Local<Function> callback = NanNew(releaseBaton->cb);
+    argv[0] = Nan::Undefined();
+  Local<Function> callback = Nan::New<Function>(releaseBaton->cb);
+  releaseBaton->cb.Reset ();
   delete releaseBaton;
-  NanMakeCallback( NanGetCurrentContext()->Global(),
+  Nan::MakeCallback( Nan::GetCurrentContext()->Global(),
                       callback, 1, argv );
+  
   if(tc.HasCaught())
   {
-    node::FatalException(tc);
+    Nan::FatalException(tc);
   }
 }
 
@@ -2614,15 +2618,14 @@ void Connection::Async_AfterRelease(uv_work_t *req)
 */
 NAN_METHOD(Connection::Commit)
 {
-  NanScope();
   Local<Function> callback;
   Connection *connection;
-  NJS_GET_CALLBACK ( callback, args );
+  NJS_GET_CALLBACK ( callback, info );
 
   eBaton* commitBaton = new eBaton;
-  NanAssignPersistent( commitBaton->cb, callback );
-  NJS_CHECK_NUMBER_OF_ARGS ( commitBaton->error, args, 1, 1, exitCommit );
-  connection = ObjectWrap::Unwrap<Connection>(args.This());
+  commitBaton->cb.Reset( callback );
+  NJS_CHECK_NUMBER_OF_ARGS ( commitBaton->error, info, 1, 1, exitCommit );
+  connection = Nan::ObjectWrap::Unwrap<Connection>(info.This());
 
   if(!connection->isValid_)
   {
@@ -2636,7 +2639,7 @@ exitCommit:
   uv_queue_work(uv_default_loop(), &commitBaton->req,
                Async_Commit, (uv_after_work_cb)Async_AfterCommit);
 
-  NanReturnUndefined();
+  info.GetReturnValue().SetUndefined();
 }
 
 /*****************************************************************************/
@@ -2679,23 +2682,24 @@ void Connection::Async_Commit (uv_work_t *req)
 */
 void Connection::Async_AfterCommit (uv_work_t *req)
 {
-  NanScope();
+  Nan::HandleScope scope;
   eBaton *commitBaton = (eBaton*)req->data;
 
-  v8::TryCatch tc;
-  Handle<Value> argv[1];
+  Nan::TryCatch tc;
+  Local<Value> argv[1];
 
   if(!(commitBaton->error).empty())
-    argv[0] = v8::Exception::Error(NanNew<v8::String>((commitBaton->error).c_str()));
+    argv[0] = v8::Exception::Error(Nan::New<v8::String>((commitBaton->error).c_str()).ToLocalChecked());
   else
-    argv[0] = NanUndefined();
+    argv[0] = Nan::Undefined();
 
-  NanMakeCallback( NanGetCurrentContext()->Global(),
-                      NanNew(commitBaton->cb), 1, argv );
+  Nan::MakeCallback( Nan::GetCurrentContext()->Global(),
+                      Nan::New<Function>(commitBaton->cb), 1, argv );
   if(tc.HasCaught())
   {
-    node::FatalException(tc);
+    Nan::FatalException(tc);
   }
+  commitBaton->cb.Reset ();
   delete commitBaton;
 }
 
@@ -2709,15 +2713,14 @@ void Connection::Async_AfterCommit (uv_work_t *req)
 */
 NAN_METHOD(Connection::Rollback)
 {
-  NanScope();
   Local<Function> callback;
   Connection *connection;
-  NJS_GET_CALLBACK ( callback, args );
+  NJS_GET_CALLBACK ( callback, info );
 
   eBaton* rollbackBaton = new eBaton;
-  NanAssignPersistent( rollbackBaton->cb, callback );
-  NJS_CHECK_NUMBER_OF_ARGS ( rollbackBaton->error, args, 1, 1, exitRollback );
-  connection = ObjectWrap::Unwrap<Connection>(args.This());
+  rollbackBaton->cb.Reset( callback );
+  NJS_CHECK_NUMBER_OF_ARGS ( rollbackBaton->error, info, 1, 1, exitRollback );
+  connection = Nan::ObjectWrap::Unwrap<Connection>(info.This());
 
   if(!connection->isValid_)
   {
@@ -2729,7 +2732,7 @@ NAN_METHOD(Connection::Rollback)
   rollbackBaton->req.data  = (void*) rollbackBaton;
   uv_queue_work(uv_default_loop(), &rollbackBaton->req,
                 Async_Rollback, (uv_after_work_cb)Async_AfterRollback);
-  NanReturnUndefined();
+  info.GetReturnValue().SetUndefined();
 }
 
 /*****************************************************************************/
@@ -2772,23 +2775,24 @@ void Connection::Async_Rollback (uv_work_t *req)
 */
 void Connection::Async_AfterRollback(uv_work_t *req)
 {
-  NanScope();
+  Nan::HandleScope scope;
   eBaton *rollbackBaton = (eBaton*)req->data;
 
-  v8::TryCatch tc;
-  Handle<Value> argv[1];
+  Nan::TryCatch tc;
+  Local<Value> argv[1];
 
   if(!(rollbackBaton->error).empty())
-    argv[0] = v8::Exception::Error(NanNew<v8::String>((rollbackBaton->error).c_str()));
+    argv[0] = v8::Exception::Error(Nan::New<v8::String>((rollbackBaton->error).c_str()).ToLocalChecked());
   else
-    argv[0] = NanUndefined();
+    argv[0] = Nan::Undefined();
 
-  NanMakeCallback( NanGetCurrentContext()->Global(),
-                      NanNew(rollbackBaton->cb), 1, argv );
+  Nan::MakeCallback( Nan::GetCurrentContext()->Global(),
+                      Nan::New<Function>(rollbackBaton->cb), 1, argv );
   if(tc.HasCaught())
   {
-    node::FatalException(tc);
+    Nan::FatalException(tc);
   }
+  rollbackBaton->cb.Reset ();
   delete rollbackBaton;
 }
 
@@ -2802,15 +2806,14 @@ void Connection::Async_AfterRollback(uv_work_t *req)
 */
 NAN_METHOD(Connection::Break)
 {
-  NanScope();
   Local<Function> callback;
   Connection *connection;
-  NJS_GET_CALLBACK ( callback, args );
+  NJS_GET_CALLBACK ( callback, info );
 
   eBaton* breakBaton = new eBaton;
-  NanAssignPersistent( breakBaton->cb, callback );
-  NJS_CHECK_NUMBER_OF_ARGS ( breakBaton->error, args, 1, 1, exitBreak );
-  connection = ObjectWrap::Unwrap<Connection>(args.This());
+  breakBaton->cb.Reset( callback );
+  NJS_CHECK_NUMBER_OF_ARGS ( breakBaton->error, info, 1, 1, exitBreak );
+  connection = Nan::ObjectWrap::Unwrap<Connection>(info.This());
 
   if(!connection->isValid_)
   {
@@ -2824,7 +2827,7 @@ NAN_METHOD(Connection::Break)
   uv_queue_work(uv_default_loop(), &breakBaton->req,
                Async_Break, (uv_after_work_cb)Async_AfterBreak);
 
-  NanReturnUndefined();
+  info.GetReturnValue().SetUndefined();
 }
 
 /*****************************************************************************/
@@ -2868,22 +2871,23 @@ void Connection::Async_Break(uv_work_t *req)
 */
 void Connection::Async_AfterBreak (uv_work_t *req)
 {
-  NanScope();
+  Nan::HandleScope scope;
   eBaton *breakBaton = (eBaton*)req->data;
 
-  v8::TryCatch tc;
-  Handle<Value> argv[1];
+  Nan::TryCatch tc;
+  Local<Value> argv[1];
 
   if(!(breakBaton->error).empty()) 
-    argv[0] = v8::Exception::Error(NanNew<v8::String>((breakBaton->error).c_str()));
+    argv[0] = v8::Exception::Error(Nan::New<v8::String>((breakBaton->error).c_str()).ToLocalChecked());
   else
-    argv[0] = NanUndefined();
-  NanMakeCallback( NanGetCurrentContext()->Global(),
-                      NanNew(breakBaton->cb), 1, argv );
+    argv[0] = Nan::Undefined();
+  Nan::MakeCallback( Nan::GetCurrentContext()->Global(),
+                      Nan::New<Function>(breakBaton->cb), 1, argv );
   if(tc.HasCaught())
   {
-    node::FatalException(tc);
+    Nan::FatalException(tc);
   }
+  breakBaton->cb.Reset ();
   delete breakBaton;
 }
 
@@ -2903,10 +2907,10 @@ void Connection::Async_AfterBreak (uv_work_t *req)
  *   passed, conversion to Oracle-DB Type happens here.
  *
  */
-void Connection::v8Date2OraDate ( Handle<Value> val, Bind *bind)
+void Connection::v8Date2OraDate ( Local<Value> val, Bind *bind)
 {
-  NanScope();
-  Handle<Date> date = val.As<Date>();    // Expects to be of v8::Date type
+  Nan::HandleScope scope;
+  Local<Date> date = val.As<Date>();    // Expects to be of v8::Date type
 
   // Get the number of seconds from 1970-1-1 0:0:0
   *(long double *)(bind->extvalue) = date->NumberValue ();
@@ -3339,33 +3343,39 @@ int Connection::cbDynBufferGet ( void *ctx, DPI_SZ_TYPE nRows,
 
 */
 
-v8::Handle<v8::Value> Connection::NewLob(eBaton* executeBaton,
+v8::Local<v8::Value> Connection::NewLob(eBaton* executeBaton,
                                          ProtoILob *protoILob)
 {
-  NanEscapableScope();
+  Nan::EscapableHandleScope scope;
   Connection     *connection = executeBaton->njsconn;
   // Handle<Object>  jsOracledb = connection->oracledb_->jsOracledb;
-  Handle<Object>  jsOracledb = NanNew(connection->oracledb_->jsOracledb);
-  Handle<Value>   argv[1];
+  Local<Object>  jsOracledb = Nan::New<Object>(connection->oracledb_->jsOracledb);
+  Local<Value>   argv[1];
   
-  Handle<Object>  iLob = NanNew(ILob::iLobTemplate_s)->GetFunction()->NewInstance();
+  Local<Object>  iLob = Nan::New<FunctionTemplate>(ILob::iLobTemplate_s)->GetFunction()->NewInstance();
   
       // the ownership of all handles in the ProtoILob are transferred to ILob
       // here.  Any error in initialization of ILob will cleanup the OCI
       // handles in the ILob cleanup routine.
 
-  (ObjectWrap::Unwrap<ILob>(iLob))->setILob(executeBaton, protoILob);
+  (Nan::ObjectWrap::Unwrap<ILob>(iLob))->setILob(executeBaton, protoILob);
 
   if (!executeBaton->error.empty())
-    return NanNull();
+    return Nan::Null();
 
   argv[0] = iLob;
 
-  Handle<Value>   result =
-    Local<Function>::Cast(jsOracledb->Get(NanNew<v8::String>("newLob")))->Call(
+  Local<Value>   result =
+    Local<Function>::Cast(jsOracledb->Get(Nan::New<v8::String>("newLob").ToLocalChecked()))->Call(
       jsOracledb, 1, argv);
 
-  return NanEscapeScope(result);
+  // Local<Value>   result =
+  //   Nan::MakeCallback(
+  //     jsOracledb,
+  //     Nan::New<v8::String>("newLob").ToLocalChecked(),
+  //     1, argv);
+
+  return scope.Escape(result);
 }
 
 
@@ -3393,17 +3403,22 @@ v8::Handle<v8::Value> Connection::NewLob(eBaton* executeBaton,
 
 NAN_METHOD(Connection::GetLob)
 {
-  NanScope();
-  Connection     *connection = ObjectWrap::Unwrap<Connection>(args.This());
+  Connection     *connection = Nan::ObjectWrap::Unwrap<Connection>(info.This());
   //Handle<Object>  jsOracledb = connection->oracledb_->jsOracledb;
-  Handle<Object>  jsOracledb = NanNew(connection->oracledb_->jsOracledb);
-  Handle<Value>   argv[1];
+  Local<Object>  jsOracledb = Nan::New<Object>(connection->oracledb_->jsOracledb);
+  Local<Value>   argv[1];
   
-  Handle<Value>   result =
-    Local<Function>::Cast(jsOracledb->Get(NanNew<v8::String>("newLob")))->Call(
+  Local<Value>   result =
+    Local<Function>::Cast(jsOracledb->Get(Nan::New<v8::String>("newLob").ToLocalChecked()))->Call(
       jsOracledb, 1, argv);
 
-  NanReturnValue(result);
+  // Local<Value>   result =
+  //   Nan::MakeCallback(
+  //     jsOracledb,
+  //     Nan::New<v8::String>("newLob").ToLocalChecked(),
+  //     1, argv);
+
+  info.GetReturnValue().Set(result);
 }
 
 

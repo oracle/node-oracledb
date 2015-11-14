@@ -33,7 +33,7 @@
     "url": "git://github.com/oracle/node-oracledb.git"
   },
   "dependencies": {
-    "nan": "^1.8.4"
+    "nan": "^2.1.0"
   },
   "devDependencies": {
       "mocha": "~2.2.5",
@@ -44,9 +44,8 @@
       "test": "mocha -R spec --timeout 10000 test/*.js",
       "testWindows": "mocha -R spec --timeout 0 test\\*.js"
   },
-  "engineStrict": true,
   "engines": {
-    "node": ">=0.10.28 <3"
+    "node": ">=0.10.28 <6"
   },
   "maintainers": [
     {

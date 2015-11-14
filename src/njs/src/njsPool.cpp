@@ -61,7 +61,7 @@ using namespace std;
 using namespace node;
 using namespace v8;
                                         //peristent Pool class handle
-Persistent<FunctionTemplate> Pool::poolTemplate_s;
+Nan::Persistent<FunctionTemplate> Pool::poolTemplate_s;
 
 Pool::Pool(){}
 Pool::~Pool(){}
@@ -95,46 +95,46 @@ void Pool::setPool( dpi::SPool *dpipool, Oracledb* oracledb, unsigned int poolMa
 */
 void Pool::Init(Handle<Object> target)
 {
-  NanScope();
+  Nan::HandleScope scope;
 
-  Local<FunctionTemplate> temp = NanNew<FunctionTemplate>(New);
+  Local<FunctionTemplate> temp = Nan::New<FunctionTemplate>(New);
   temp->InstanceTemplate()->SetInternalFieldCount(1);
-  temp->SetClassName(NanNew<v8::String>("Pool"));
+  temp->SetClassName(Nan::New<v8::String>("Pool").ToLocalChecked());
 
-  NODE_SET_PROTOTYPE_METHOD(temp, "terminate", Terminate);
-  NODE_SET_PROTOTYPE_METHOD(temp, "getConnection", GetConnection);
+  Nan::SetPrototypeMethod(temp, "terminate", Terminate);
+  Nan::SetPrototypeMethod(temp, "getConnection", GetConnection);
 
-  temp->InstanceTemplate()->SetAccessor(
-                                        NanNew<v8::String>("poolMax"),
-                                        Pool::GetPoolMax,
-                                        Pool::SetPoolMax );
-  temp->InstanceTemplate()->SetAccessor(
-                                        NanNew<v8::String>("poolMin"),
-                                        Pool::GetPoolMin,
-                                        Pool::SetPoolMin );
-  temp->InstanceTemplate()->SetAccessor(
-                                        NanNew<v8::String>("poolIncrement"),
-                                        Pool::GetPoolIncrement,
-                                        Pool::SetPoolIncrement );
-  temp->InstanceTemplate()->SetAccessor(
-                                        NanNew<v8::String>("poolTimeout"),
-                                        Pool::GetPoolTimeout,
-                                        Pool::SetPoolTimeout );
-  temp->InstanceTemplate()->SetAccessor(
-                                        NanNew<v8::String>("connectionsOpen"),
-                                        Pool::GetConnectionsOpen,
-                                        Pool::SetConnectionsOpen );
-  temp->InstanceTemplate()->SetAccessor(
-                                        NanNew<v8::String>("connectionsInUse"),
-                                        Pool::GetConnectionsInUse,
-                                        Pool::SetConnectionsInUse );
-  temp->InstanceTemplate()->SetAccessor(
-                                        NanNew<v8::String>("stmtCacheSize"),
-                                        Pool::GetStmtCacheSize,
-                                        Pool::SetStmtCacheSize );
+  Nan::SetAccessor(temp->InstanceTemplate(),
+    Nan::New<v8::String>("poolMax").ToLocalChecked(),
+    Pool::GetPoolMax,
+    Pool::SetPoolMax );
+  Nan::SetAccessor(temp->InstanceTemplate(),
+    Nan::New<v8::String>("poolMin").ToLocalChecked(),
+    Pool::GetPoolMin,
+    Pool::SetPoolMin );
+  Nan::SetAccessor(temp->InstanceTemplate(),
+    Nan::New<v8::String>("poolIncrement").ToLocalChecked(),
+    Pool::GetPoolIncrement,
+    Pool::SetPoolIncrement );
+  Nan::SetAccessor(temp->InstanceTemplate(),
+    Nan::New<v8::String>("poolTimeout").ToLocalChecked(),
+    Pool::GetPoolTimeout,
+    Pool::SetPoolTimeout );
+  Nan::SetAccessor(temp->InstanceTemplate(),
+    Nan::New<v8::String>("connectionsOpen").ToLocalChecked(),
+    Pool::GetConnectionsOpen,
+    Pool::SetConnectionsOpen );
+  Nan::SetAccessor(temp->InstanceTemplate(),
+    Nan::New<v8::String>("connectionsInUse").ToLocalChecked(),
+    Pool::GetConnectionsInUse,
+    Pool::SetConnectionsInUse );
+  Nan::SetAccessor(temp->InstanceTemplate(),
+    Nan::New<v8::String>("stmtCacheSize").ToLocalChecked(),
+    Pool::GetStmtCacheSize,
+    Pool::SetStmtCacheSize );
 
-  NanAssignPersistent( poolTemplate_s, temp );
-  target->Set(NanNew<v8::String>("Pool"),temp->GetFunction());
+  poolTemplate_s.Reset( temp );
+  Nan::Set(target, Nan::New<v8::String>("Pool").ToLocalChecked(), temp->GetFunction());
 }
 
 /*****************************************************************************/
@@ -145,12 +145,10 @@ void Pool::Init(Handle<Object> target)
 */
 NAN_METHOD(Pool::New)
 {
-  NanScope();
-
   Pool *njsPool = new Pool();
-  njsPool->Wrap(args.This());
+  njsPool->Wrap(info.This());
 
-  NanReturnValue(args.This());
+  info.GetReturnValue().Set(info.This());
 }
 
 /*****************************************************************************/
@@ -158,23 +156,21 @@ NAN_METHOD(Pool::New)
    DESCRIPTION
      Abstraction to all getter accessors of properties
 */
-Handle<Value> Pool::getPoolProperty(Pool* njsPool, unsigned int poolProperty)
+Local<Primitive> Pool::getPoolProperty(Pool* njsPool, unsigned int poolProperty)
 {
-  NanScope();
+  Nan::EscapableHandleScope scope;
   
   if(!njsPool->isValid_)
   {
     string msg = NJSMessages::getErrorMsg(errInvalidPool);
     NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
-    return NanUndefined();
+    return scope.Escape ( Nan::Undefined() ) ;
   }
   else
   {
-    NanEscapableScope();
-    Local<Integer> value = NanNew<v8::Integer>(poolProperty);
-    return NanEscapeScope(value);
+    return scope.Escape ( Nan::New<v8::Integer>(poolProperty) ) ;
   }
-  return NanUndefined();
+  return scope.Escape ( Nan::Undefined() ) ;
 }
 
 /*****************************************************************************/
@@ -182,12 +178,10 @@ Handle<Value> Pool::getPoolProperty(Pool* njsPool, unsigned int poolProperty)
    DESCRIPTION
      Get Accessor of poolMin Property
 */
-NAN_PROPERTY_GETTER(Pool::GetPoolMin)
+NAN_GETTER(Pool::GetPoolMin)
 {
-  NanEscapableScope();
-  Pool* njsPool = ObjectWrap::Unwrap<Pool>(args.Holder());
-  Handle<Value> value = getPoolProperty( njsPool, njsPool->poolMin_);
-  NanReturnValue(value);
+  Pool* njsPool = Nan::ObjectWrap::Unwrap<Pool>(info.Holder());
+  info.GetReturnValue().Set(getPoolProperty( njsPool, njsPool->poolMin_));
 }
 
 /*****************************************************************************/
@@ -195,12 +189,10 @@ NAN_PROPERTY_GETTER(Pool::GetPoolMin)
    DESCRIPTION
      Get Accessor of poolMax Property
 */
-NAN_PROPERTY_GETTER(Pool::GetPoolMax)
+NAN_GETTER(Pool::GetPoolMax)
 {
-  NanEscapableScope();
-  Pool* njsPool = ObjectWrap::Unwrap<Pool>(args.Holder());
-  Handle<Value> value = getPoolProperty( njsPool, njsPool->poolMax_);
-  NanReturnValue(value);
+  Pool* njsPool = Nan::ObjectWrap::Unwrap<Pool>(info.Holder());
+  info.GetReturnValue().Set(getPoolProperty( njsPool, njsPool->poolMax_));
 }
 
 /*****************************************************************************/
@@ -208,12 +200,10 @@ NAN_PROPERTY_GETTER(Pool::GetPoolMax)
    DESCRIPTION
      Get Accessor of poolIncrement Property
 */
-NAN_PROPERTY_GETTER(Pool::GetPoolIncrement)
+NAN_GETTER(Pool::GetPoolIncrement)
 {
-  NanEscapableScope();
-  Pool* njsPool = ObjectWrap::Unwrap<Pool>(args.Holder());
-  Handle<Value> value = getPoolProperty( njsPool, njsPool->poolIncrement_);
-  NanReturnValue(value);
+  Pool* njsPool = Nan::ObjectWrap::Unwrap<Pool>(info.Holder());
+  info.GetReturnValue().Set(getPoolProperty( njsPool, njsPool->poolIncrement_));
 }
 
 /*****************************************************************************/
@@ -221,12 +211,10 @@ NAN_PROPERTY_GETTER(Pool::GetPoolIncrement)
    DESCRIPTION
      Get Accessor of poolTimeout Property
 */
-NAN_PROPERTY_GETTER(Pool::GetPoolTimeout)
+NAN_GETTER(Pool::GetPoolTimeout)
 {
-  NanEscapableScope();
-  Pool* njsPool = ObjectWrap::Unwrap<Pool>(args.Holder());
-  Handle<Value> value = getPoolProperty( njsPool, njsPool->poolTimeout_);
-  NanReturnValue(value);
+  Pool* njsPool = Nan::ObjectWrap::Unwrap<Pool>(info.Holder());
+  info.GetReturnValue().Set(getPoolProperty( njsPool, njsPool->poolTimeout_));
 }
 
 /*****************************************************************************/
@@ -234,29 +222,27 @@ NAN_PROPERTY_GETTER(Pool::GetPoolTimeout)
    DESCRIPTION
      Get Accessor of connectionsOpen Property
 */
-NAN_PROPERTY_GETTER(Pool::GetConnectionsOpen)
+NAN_GETTER(Pool::GetConnectionsOpen)
 {
-  NanScope();
-  Pool* njsPool = ObjectWrap::Unwrap<Pool>(args.Holder());
+  Pool* njsPool = Nan::ObjectWrap::Unwrap<Pool>(info.Holder());
   if(!njsPool->isValid_)
   {
     string msg = NJSMessages::getErrorMsg(errInvalidPool);
     NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
-    NanReturnUndefined();
+    info.GetReturnValue().SetUndefined();
+    return;
   }
   try
   {
-    Local<Integer> value = NanNew<v8::Integer>(njsPool->dpipool_->
-                                            connectionsOpen());
-    NanReturnValue(value);
+    info.GetReturnValue().Set(njsPool->dpipool_->connectionsOpen());
+    return;
   }
   catch(dpi::Exception &e)
   {
     NJS_SET_CONN_ERR_STATUS ( e.errnum(), NULL );
     NJS_SET_EXCEPTION(e.what(), (int) strlen(e.what()));
-    NanReturnUndefined();
   }
-  NanReturnUndefined();
+  info.GetReturnValue().SetUndefined();
 }
 
 /*****************************************************************************/
@@ -264,29 +250,27 @@ NAN_PROPERTY_GETTER(Pool::GetConnectionsOpen)
    DESCRIPTION
      Get Accessor of connectionsInUse Property
 */
-NAN_PROPERTY_GETTER(Pool::GetConnectionsInUse)
+NAN_GETTER(Pool::GetConnectionsInUse)
 {
-  NanScope();
-  Pool* njsPool = ObjectWrap::Unwrap<Pool>(args.Holder());
+  Pool* njsPool = Nan::ObjectWrap::Unwrap<Pool>(info.Holder());
   if(!njsPool->isValid_)
   {
     string error = NJSMessages::getErrorMsg ( errInvalidPool );
     NJS_SET_EXCEPTION(error.c_str(), (int) error.length());
-     NanReturnUndefined();
+    info.GetReturnValue().SetUndefined();
+    return;
   }
   try
   {
-    Local<Integer> value = NanNew<v8::Integer>(njsPool->dpipool_->
-                                            connectionsInUse());
-     NanReturnValue(value);
+    info.GetReturnValue().Set(njsPool->dpipool_->connectionsInUse()); 
+    return;
   }
   catch(dpi::Exception &e)
   {
     NJS_SET_CONN_ERR_STATUS ( e.errnum(), NULL );
     NJS_SET_EXCEPTION(e.what(), (int) strlen(e.what()));
-    NanReturnUndefined();
   }
-  NanReturnUndefined();
+  info.GetReturnValue().SetUndefined();
 }
 
 /*****************************************************************************/
@@ -294,12 +278,10 @@ NAN_PROPERTY_GETTER(Pool::GetConnectionsInUse)
    DESCRIPTION
      Get Accessor of stmtCacheSize Property
 */
-NAN_PROPERTY_GETTER(Pool::GetStmtCacheSize)
+NAN_GETTER(Pool::GetStmtCacheSize)
 {
-  NanEscapableScope();
-  Pool* njsPool = ObjectWrap::Unwrap<Pool>(args.Holder());
-  Handle<Value> value = getPoolProperty( njsPool, njsPool->stmtCacheSize_);
-  NanReturnValue(value);
+  Pool* njsPool = Nan::ObjectWrap::Unwrap<Pool>(info.Holder());
+  info.GetReturnValue().Set(getPoolProperty( njsPool, njsPool->stmtCacheSize_));
 }
 
 /*****************************************************************************/
@@ -309,7 +291,8 @@ NAN_PROPERTY_GETTER(Pool::GetStmtCacheSize)
 */
 void Pool::setPoolProperty (Pool* njsPool, string property)
 {
-  NanScope();
+  Nan::HandleScope scope;
+
   string msg;
   if(!njsPool->isValid_)
     msg = NJSMessages::getErrorMsg(errInvalidPool);
@@ -325,7 +308,7 @@ void Pool::setPoolProperty (Pool* njsPool, string property)
 */
 NAN_SETTER(Pool::SetPoolMin)
 {
-  setPoolProperty(ObjectWrap::Unwrap<Pool>(args.Holder()), "poolMin");
+  setPoolProperty(Nan::ObjectWrap::Unwrap<Pool>(info.Holder()), "poolMin");
 }
 
 /*****************************************************************************/
@@ -335,7 +318,7 @@ NAN_SETTER(Pool::SetPoolMin)
 */
 NAN_SETTER(Pool::SetPoolMax)
 {
-  setPoolProperty(ObjectWrap::Unwrap<Pool>(args.Holder()), "poolMax");
+  setPoolProperty(Nan::ObjectWrap::Unwrap<Pool>(info.Holder()), "poolMax");
 }
 
 /*****************************************************************************/
@@ -345,7 +328,7 @@ NAN_SETTER(Pool::SetPoolMax)
 */
 NAN_SETTER(Pool::SetPoolIncrement)
 {
-  setPoolProperty(ObjectWrap::Unwrap<Pool>(args.Holder()), "poolIncrement");
+  setPoolProperty(Nan::ObjectWrap::Unwrap<Pool>(info.Holder()), "poolIncrement");
 }
 
 /*****************************************************************************/
@@ -355,7 +338,7 @@ NAN_SETTER(Pool::SetPoolIncrement)
 */
 NAN_SETTER(Pool::SetPoolTimeout)
 {
-  setPoolProperty(ObjectWrap::Unwrap<Pool>(args.Holder()), "poolTimeout");
+  setPoolProperty(Nan::ObjectWrap::Unwrap<Pool>(info.Holder()), "poolTimeout");
 }
 
 /*****************************************************************************/
@@ -365,7 +348,7 @@ NAN_SETTER(Pool::SetPoolTimeout)
 */
 NAN_SETTER(Pool::SetConnectionsOpen)
 {
-  setPoolProperty(ObjectWrap::Unwrap<Pool>(args.Holder()), "connectionsOpen");
+  setPoolProperty(Nan::ObjectWrap::Unwrap<Pool>(info.Holder()), "connectionsOpen");
 }
 
 /*****************************************************************************/
@@ -375,7 +358,7 @@ NAN_SETTER(Pool::SetConnectionsOpen)
 */
 NAN_SETTER(Pool::SetConnectionsInUse)
 {
-  setPoolProperty(ObjectWrap::Unwrap<Pool>(args.Holder()), "connectionsInUse");
+  setPoolProperty(Nan::ObjectWrap::Unwrap<Pool>(info.Holder()), "connectionsInUse");
 }
 
 /*****************************************************************************/
@@ -385,7 +368,7 @@ NAN_SETTER(Pool::SetConnectionsInUse)
 */
 NAN_SETTER(Pool::SetStmtCacheSize)
 {
-  setPoolProperty(ObjectWrap::Unwrap<Pool>(args.Holder()), "stmtCacheSize");
+  setPoolProperty(Nan::ObjectWrap::Unwrap<Pool>(info.Holder()), "stmtCacheSize");
 }
 
 /*****************************************************************************/
@@ -398,17 +381,15 @@ NAN_SETTER(Pool::SetStmtCacheSize)
 */
 NAN_METHOD(Pool::GetConnection)
 {
-  NanScope();
-
   Local<Function> callback;
-  NJS_GET_CALLBACK ( callback, args );
+  NJS_GET_CALLBACK ( callback, info );
 
-  Pool *njsPool = ObjectWrap::Unwrap<Pool>(args.This());
+  Pool *njsPool = Nan::ObjectWrap::Unwrap<Pool>(info.This());
 
   poolBaton *connBaton = new poolBaton ();
-  NanAssignPersistent( connBaton->cb, callback );
+  connBaton->cb.Reset( callback );
 
-  NJS_CHECK_NUMBER_OF_ARGS ( connBaton->error, args, 1, 1, exitGetConnection );
+  NJS_CHECK_NUMBER_OF_ARGS ( connBaton->error, info, 1, 1, exitGetConnection );
 
   if(!njsPool->isValid_)
   {
@@ -425,7 +406,7 @@ exitGetConnection:
   uv_queue_work(uv_default_loop(), &connBaton->req, Async_GetConnection,
                 (uv_after_work_cb)Async_AfterGetConnection);
 
-  NanReturnUndefined();
+  info.GetReturnValue().SetUndefined();
 } 
 
 /*****************************************************************************/
@@ -473,32 +454,39 @@ void Pool::Async_GetConnection(uv_work_t *req)
 */
 void Pool::Async_AfterGetConnection(uv_work_t *req)
 {
-  NanScope();
+  Nan::HandleScope scope;
   poolBaton *connBaton = (poolBaton*)req->data;
 
-  v8::TryCatch tc;
-  Handle<Value> argv[2];
+  Nan::TryCatch tc;
+  Local<Value> argv[2];
+
   if(!(connBaton->error).empty())
   {
-    argv[0] = v8::Exception::Error(NanNew<v8::String>((connBaton->error).c_str()));
-    argv[1] = NanUndefined();
+    argv[0] = v8::Exception::Error(Nan::New<v8::String>((connBaton->error).c_str()).ToLocalChecked());
+    argv[1] = Nan::Undefined();
   } 
   else
   {
-    argv[0] = NanUndefined();
-    Local<FunctionTemplate> lft = NanNew(Connection::connectionTemplate_s);
-    Handle<Object> connection = lft->GetFunction()-> NewInstance();
-    (ObjectWrap::Unwrap<Connection> (connection))->
+    argv[0] = Nan::Undefined();
+    Local<FunctionTemplate> lft = Nan::New(Connection::connectionTemplate_s);
+    Local<Object> connection = lft->GetFunction()-> NewInstance();
+    (Nan::ObjectWrap::Unwrap<Connection> (connection))->
                                  setConnection( connBaton->dpiconn,
                                                 connBaton->njspool->oracledb_ );
     argv[1] = connection;
   }
-  NanMakeCallback(NanGetCurrentContext()->Global(),
-                     NanNew(connBaton->cb), 2, argv);
+
+  Nan::MakeCallback(
+    Nan::GetCurrentContext()->Global(),
+    Nan::New<Function>(connBaton->cb), 
+    2, 
+    argv);
+
   if(tc.HasCaught())
   {
-    node::FatalException(tc);
+    Nan::FatalException(tc);
   }
+  connBaton->cb.Reset ();
   delete connBaton;
 }
 
@@ -512,17 +500,15 @@ void Pool::Async_AfterGetConnection(uv_work_t *req)
 */
 NAN_METHOD(Pool::Terminate)
 {
-  NanScope();
-
   Local<Function> callback;
-  NJS_GET_CALLBACK ( callback, args );
+  NJS_GET_CALLBACK ( callback, info );
 
-  Pool *njsPool = ObjectWrap::Unwrap<Pool>(args.This());
+  Pool *njsPool = Nan::ObjectWrap::Unwrap<Pool>(info.This());
 
   poolBaton *terminateBaton = new poolBaton ();
-  NanAssignPersistent( terminateBaton->cb, callback );
+  terminateBaton->cb.Reset( callback );
 
-  NJS_CHECK_NUMBER_OF_ARGS ( terminateBaton->error, args, 1, 1, exitTerminate );
+  NJS_CHECK_NUMBER_OF_ARGS ( terminateBaton->error, info, 1, 1, exitTerminate );
 
   if(!njsPool->isValid_)
   {
@@ -537,7 +523,7 @@ exitTerminate:
   uv_queue_work(uv_default_loop(), &terminateBaton->req, Async_Terminate,
                 (uv_after_work_cb)Async_AfterTerminate);
 
-  NanReturnUndefined();
+  info.GetReturnValue().SetUndefined();
 }
 
 /*****************************************************************************/
@@ -579,30 +565,34 @@ void Pool::Async_Terminate(uv_work_t *req)
 */
 void Pool::Async_AfterTerminate(uv_work_t *req)
 {
-  NanScope();
+  Nan::HandleScope scope;
   poolBaton *terminateBaton = (poolBaton*)req->data;
 
-  v8::TryCatch tc;
+  Nan::TryCatch tc;
 
-  Handle<Value> argv[1];
+  Local<Value> argv[1];
 
   if(!(terminateBaton->error).empty())
   {
-    argv[0] = v8::Exception::Error(NanNew<v8::String>((terminateBaton->error).c_str()));
+    argv[0] = v8::Exception::Error(Nan::New<v8::String>((terminateBaton->error).c_str()).ToLocalChecked());
   }
   else
   {
-    argv[0] = NanUndefined();
+    argv[0] = Nan::Undefined();
     // pool is not valid after terminate succeeds.
     terminateBaton-> njspool-> isValid_ = false;
   }
 
-  NanMakeCallback( NanGetCurrentContext()->Global(),
-                      NanNew(terminateBaton->cb), 1, argv );
+  Nan::MakeCallback( 
+    Nan::GetCurrentContext()->Global(),
+    Nan::New<Function>(terminateBaton->cb), 
+    1, 
+    argv );
   if(tc.HasCaught())
   {
-    node::FatalException(tc);
+    Nan::FatalException(tc);
   }
+  terminateBaton->cb.Reset ();
   delete terminateBaton;
 }
 
