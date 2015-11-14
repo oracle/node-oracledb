@@ -36,6 +36,7 @@ var oracledb = require('oracledb');
 var should = require('should');
 var async = require('async');
 var dbConfig = require('./dbConfig.js');
+var assist = require('./dataTypeAssist.js');
 
 describe('6. dmlReturning.js', function(){
   
@@ -47,7 +48,7 @@ describe('6. dmlReturning.js', function(){
   
   describe('6.1 NUMBER & STRING driver data type', function() {
     
-    var connection = false;
+    var connection = null;
     beforeEach('get connection and prepare table', function(done) {
       var makeTable = 
       "BEGIN \
@@ -362,5 +363,201 @@ describe('6. dmlReturning.js', function(){
       );
     })
    
-  }) 
+  }) // 6.1 
+
+  describe('6.2 DATE and TIMESTAMP data', function() {
+    
+    var connection = null;
+    var tableName = "oracledb_date";
+    var dates = assist.DATE_STRINGS;
+
+    beforeEach('get connection, prepare table', function(done) {
+      async.series([
+        function(callback) {
+          oracledb.getConnection(credential, function(err, conn) {
+            should.not.exist(err);
+            connection = conn;
+            callback();
+          });
+        },
+        function(callback) {
+          assist.setUp4sql(connection, tableName, dates, callback);
+        }
+      ], done);
+    }) // before
+    
+    afterEach('drop table, release connection', function(done) {
+      async.series([
+        function(callback) {
+          connection.execute(
+            "DROP table " + tableName,
+            function(err) {
+              should.not.exist(err);
+              callback();
+            }
+          );
+        },
+        function(callback) {
+          connection.release( function(err) {
+            should.not.exist(err);
+            callback();
+          });
+        }
+      ], done);
+    }) 
+
+    function runSQL(sql, bindVar, isSingleMatch, callback)
+    {
+      var beAffectedRows = (isSingleMatch ? 1 : dates.length);
+
+      connection.execute(
+        sql, 
+        bindVar, 
+        function(err, result) {
+          should.not.exist(err);
+          result.rowsAffected.should.be.exactly(beAffectedRows);
+          // console.log(result);
+          callback();
+        }
+      );
+    } 
+
+    it('6.2.1 INSERT statement, single row matched, Object binding, no bind in data', function(done) {
+      var sql = "INSERT INTO " + tableName + " VALUES (50, TO_DATE('2015-01-11','YYYY-DD-MM')) RETURNING num, content INTO :rnum, :rcontent";
+      var bindVar = 
+        {
+          rnum: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+          rcontent: { type: oracledb.DATE, dir: oracledb.BIND_OUT }
+        };
+      var isSingleMatch = true;
+
+      runSQL(sql, bindVar, isSingleMatch, done);
+
+    })
+    
+    it('6.2.2 INSERT statement with JavaScript date bind in ', function(done) {
+      var sql = "INSERT INTO " + tableName + " VALUES (:no, :c) RETURNING num, content INTO :rnum, :rcontent";
+      var bindVar = 
+        {
+          no: 51,
+          c: new Date(2003, 09, 23, 11, 50, 30, 123),
+          rnum: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+          rcontent: { type: oracledb.DATE, dir: oracledb.BIND_OUT }
+        };
+      var isSingleMatch = true;
+
+      runSQL(sql, bindVar, isSingleMatch, done);
+
+    })
+
+    it('6.2.3 INSERT statement with Array binding', function(done) {
+      var sql = "INSERT INTO " + tableName + " VALUES (50, TO_TIMESTAMP_TZ('1999-12-01 11:00:00.123456 -8:00', 'YYYY-MM-DD HH:MI:SS.FF TZH:TZM')) RETURNING num, content INTO :rnum, :rcontent";
+      var bindVar = 
+        [
+          { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+          { type: oracledb.DATE, dir: oracledb.BIND_OUT }
+        ];
+      var isSingleMatch = true;
+
+      runSQL(sql, bindVar, isSingleMatch, done);
+
+    })
+
+    it('6.2.4 UPDATE statement with single row matched', function(done) {
+      var sql = "UPDATE " + tableName + " SET content = :c WHERE num = :n RETURNING num, content INTO :rnum, :rcontent";
+      var bindVar = 
+        {
+          c: { type: oracledb.DATE, dir: oracledb.BIND_IN, val: new Date(2003, 09, 23, 11, 50, 30, 123) },
+          n: 0,
+          rnum: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+          rcontent: { type: oracledb.DATE, dir: oracledb.BIND_OUT }
+        };
+      var isSingleMatch = true;
+
+      runSQL(sql, bindVar, isSingleMatch, done);
+
+    })
+
+    it('6.2.5 UPDATE statements with multiple rows matched, ARRAY binding format', function(done) {
+      var sql = "UPDATE " + tableName + " SET content = :c WHERE num < :n RETURNING num, content INTO :rnum, :rcontent";
+      var bindVar = 
+        [
+          { type: oracledb.DATE, dir: oracledb.BIND_IN, val: new Date(2003, 09, 23, 11, 50, 30, 123) },
+          100,
+          { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+          { type: oracledb.DATE, dir: oracledb.BIND_OUT }
+        ];
+      var isSingleMatch = false;
+
+      runSQL(sql, bindVar, isSingleMatch, done);
+
+    })
+
+    it('6.2.6 UPDATE statements, multiple rows, TIMESTAMP data', function(done) {
+      var sql = "UPDATE " + tableName + " SET content = TO_TIMESTAMP_TZ('1999-12-01 11:00:00.123456 -8:00', 'YYYY-MM-DD HH:MI:SS.FF TZH:TZM') " + 
+        " WHERE num < :n RETURNING num, content INTO :rnum, :rcontent";
+      var bindVar = 
+        {
+          n: 100,
+          rnum: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+          rcontent: { type: oracledb.DATE, dir: oracledb.BIND_OUT }
+        }
+      var isSingleMatch = false;
+
+      runSQL(sql, bindVar, isSingleMatch, done);
+
+    })
+    
+    it('6.2.7 DELETE statement, single row matched, Object binding format', function(done) {
+      var sql = "DELETE FROM " + tableName + " WHERE num = :n RETURNING num, content INTO :rnum, :rcontent";
+      var bindVar = 
+        {
+          n: 0,
+          rnum: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+          rcontent: { type: oracledb.DATE, dir: oracledb.BIND_OUT }
+        };
+      var isSingleMatch = true;
+
+      runSQL(sql, bindVar, isSingleMatch, done);
+
+    })
+
+    it('6.2.8 DELETE statement, multiple rows matched, Array binding format', function(done) {
+      var sql = "DELETE FROM " + tableName + " WHERE num >= :n RETURNING num, content INTO :rnum, :rcontent";
+      var bindVar = 
+        [
+          0,
+          { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+          { type: oracledb.DATE, dir: oracledb.BIND_OUT }
+        ];
+      var isSingleMatch = false;
+
+      runSQL(sql, bindVar, isSingleMatch, done);
+    })
+
+    it('6.2.9 Negative test - bind value and type mismatch', function(done) {
+      var wrongSQL = "UPDATE " + tableName + " SET content = :c WHERE num = :n RETURNING num, content INTO :rnum, :rcontent";
+      var bindVar = 
+        {
+          n: 0,
+          c: { type: oracledb.STRING, dir: oracledb.BIND_IN, val: new Date(2003, 09, 23, 11, 50, 30, 123) },
+          rnum: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+          rcontent: { type: oracledb.DATE, dir: oracledb.BIND_OUT } 
+        };
+      
+      connection.execute(
+        wrongSQL,
+        bindVar,
+        function(err, result) {
+          should.exist(err);
+          // console.log(err.message);
+          // NJS-011: encountered bind value and type mismatch 
+          (err.message).should.startWith('NJS-011:');
+          done();
+        }
+      );
+
+    })
+
+  }) // 6.2 
 })
