@@ -343,7 +343,7 @@ describe('6. dmlReturning.js', function(){
       );  
     })
     
-    it('6.1.11 Negative test - throws correct error message', function(done) {
+    it('6.1.11 Negative test - wrong SQL got correct error thrown', function(done) {
       connection.should.be.ok;
       var wrongSQL = "UPDATE oracledb_dmlreturn SET doesnotexist = 'X' WHERE id = :id RETURNING name INTO :rn";
       
@@ -361,6 +361,23 @@ describe('6. dmlReturning.js', function(){
           done();
         }
       );
+    })
+
+    it('6.1.12 Negative test - data type is not supported with DML Returning statments', function(done) {
+      var sql = "UPDATE oracledb_dmlreturn SET name = 'Leslie Lin' WHERE id = :id RETURNING name INTO :rn ";
+      var bindVar = 
+        {
+          id: 1002,
+          rn: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT }
+        };
+
+      connection.execute(sql, bindVar, function(err, result) {
+        should.exist(err);
+        // NJS-028: raw database type is not supported with DML Returning statements
+        (err.message).should.startWith('NJS-028: ');
+        done();
+      });
+
     })
    
   }) // 6.1 

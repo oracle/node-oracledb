@@ -118,6 +118,18 @@
         6.1.9 DELETE statement with Array binding
         6.1.10 Stress test - support 4k varchars
         6.1.11 Negative test - throws correct error message
+        6.1.12 6.1.12 Negative test - data type is not supported with DML Returning statments
+    6.2 DATE and TIMESTAMP data
+        6.2.1 INSERT statement, single row matched, Object binding, no bind in data
+        6.2.2 INSERT statement with JavaScript date bind in
+        6.2.3 INSERT statement with Array binding
+        6.2.4 UPDATE statement with single row matched
+        6.2.5 UPDATE statements with multiple rows matched, ARRAY binding format
+        6.2.6 UPDATE statements, multiple rows, TIMESTAMP data
+        6.2.7 DELETE statement, single row matched, Object binding format
+        6.2.8 DELETE statement, multiple rows matched, Array binding format
+        6.2.9 Negative test - bind value and type mismatch
+
 
 7. autoCommit.js
     7.1 autoCommit takes effect when setting oracledb.autoCommit before connecting
