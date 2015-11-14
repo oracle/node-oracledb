@@ -19,10 +19,11 @@
  * See LICENSE.md for relevant licenses.
  *
  * NAME
- *   59. lob.js
+ *   59. lobResultSet.js
  *
  * DESCRIPTION
  *
+ *   Inspired by https://github.com/oracle/node-oracledb/issues/210
  *   Testing Lob data and result set. 
  *   Create a table contains Lob data. Read the Lob to result set. Get 
  *     rows one by one. Read the lob data on each row.
@@ -46,7 +47,7 @@ var assist   = require('./dataTypeAssist.js');
 
 var inFileName = './test/clobexample.txt'; 
 
-describe('59. lob.js', function() {
+describe('59. lobResultSet.js', function() {
 
   if(dbConfig.externalAuth){
     var credential = { externalAuth: true, connectString: dbConfig.connectString };

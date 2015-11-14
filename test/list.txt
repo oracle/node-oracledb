@@ -477,6 +477,10 @@
         58.3.5 module (write-only)
         58.3.6 oracleServerVersion (read-only)
 
-59. lob.js
+59. lobResultSet.js
     59.1 CLOB data
         59.1.1 reads clob data one by one row from result set
+
+60. clobPlsqlString.js
+    60.1 PL/SQL OUT CLOB parameters can also be bound as STRING
+    60.2 The returned length is limited to the maximum size
