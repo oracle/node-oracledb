@@ -449,8 +449,7 @@ describe('58. properties.js', function() {
           getLob(blobTableName, cb);
         },
         function keepOriginalValue(cb) {
-          defaultValues.clobPieceSize = clob.pieceSize;
-          defaultValues.blobPieceSize = blob.pieceSize; 
+          defaultValues.chunkSize = clob.chunkSize;
           cb();
         }
       ], done);
@@ -459,8 +458,8 @@ describe('58. properties.js', function() {
     afterEach('drop tables, release connection', function(done) {
       async.series([
         function(cb) {
-          clob.pieceSize = defaultValues.clobPieceSize;
-          blob.pieceSize = defaultValues.blobPieceSize;
+          clob.pieceSize = defaultValues.chunkSize;
+          blob.pieceSize = defaultValues.chunkSize;
           cb();
         },
         function(cb) {
@@ -483,11 +482,9 @@ describe('58. properties.js', function() {
       var t1 = clob.chunkSize,
           t2 = blob.chunkSize;
 
-      var defaultChunkSize = 8132;
-
       t1.should.be.a.Number;
       t2.should.be.a.Number;
-      t1.should.eql(defaultChunkSize); 
+      t1.should.eql(defaultValues.chunkSize); 
       t1.should.eql(t2);
 
       try {
@@ -514,8 +511,8 @@ describe('58. properties.js', function() {
       t1.should.be.a.Number;
       t2.should.be.a.Number;
       
-      var clobDataSize = 270,
-          blobDataSize = 11981;
+      var clobDataSize = 270,  // size of test/clobexample.txt
+          blobDataSize = 11981;  // size of test/fuzzydinosaur.jpg
 
       t1.should.not.eql(t2);
       t1.should.eql(clobDataSize);
@@ -543,14 +540,12 @@ describe('58. properties.js', function() {
       var t1 = clob.pieceSize,
           t2 = blob.pieceSize;
 
-      var defaultChunkSize = 8132;
-
-      t1.should.eql(defaultChunkSize);
-      t2.should.eql(defaultChunkSize);
+      t1.should.eql(defaultValues.chunkSize);
+      t2.should.eql(defaultValues.chunkSize);
     })
 
     it('58.4.4 pieceSize - can be increased', function() {
-      var defaultChunkSize = 8132;
+      var defaultChunkSize = defaultValues.chunkSize;
       var incresedVal = defaultChunkSize * 5;
 
       clob.pieceSize *= 5; 
@@ -560,7 +555,9 @@ describe('58. properties.js', function() {
     })
 
     it('58.4.5 pieceSize - can be decreased', function() {
-      var defaultChunkSize = 8132;
+      var defaultChunkSize = defaultValues.chunkSize;
+      
+      defaultChunkSize.should.greaterThan(500);
       var decreaseVal = defaultChunkSize - 500;
 
       clob.pieceSize -= 500;
