@@ -33,10 +33,10 @@ The [*node-oracledb*](https://github.com/oracle/node-oracledb) add-on for Node.j
 The steps below create a Node.js installation for testing.  Adjust the
 steps for your environment.
 
-This node-oracledb release has been tested with Node 0.10 and 0.12 on
-64-bit Oracle Linux and Windows.  The add-on can also build in some
-Mac OS X, 32-bit Linux, 32-bit Windows, Solaris and AIX environments,
-but these architectures have not been fully tested.
+This node-oracledb release has been tested with Node 0.10, 0.12, 4.2
+and 5.0 on 64-bit Oracle Linux and Windows.  The add-on can also build
+in some Mac OS X, 32-bit Linux, 32-bit Windows, Solaris and AIX
+environments, but these architectures have not been fully tested.
 
 ### Prerequisites
 
@@ -44,11 +44,13 @@ Installation requires Oracle 11.2 or 12.1 client libraries.
 These are included in Oracle Instant Client RPMs or ZIPs, a full
 Oracle Client, or a database on the same machine.  Oracle's standard
 client-server network compatibility applies.  For example, with Oracle
-client 12.1 you can connect to Oracle Database 10.2 or greater.  Use
-Oracle client 11.2 if you need to connect to Oracle Database 9.2.
+Client 12.1 you can connect to Oracle Database 10.2 or greater.  Use
+Oracle Client 11.2 if you need to connect to Oracle Database 9.2.
 
-A compiler is needed.  Use Visual Studio on Windows, gcc on Linux or
-Xcode on OS X.
+A compiler supporting C++11 is required.  Use Visual Studio on
+Windows, gcc on Linux or Xcode on OS X.  Note the default compiler on
+Oracle Linux 6 and RHEL 6 does not have the required support.  Install
+a newer compiler or upgrade to Oracle Linux 7.
 
 Python 2.7 is needed by node-gyp.  If another version of Python occurs
 first in your binary path then, when you install node-oracledb, use
@@ -148,6 +150,8 @@ the run time linker is configured to find this other software via
 `LD_LIBRARY_PATH` or `ldconfig`, then update the environment to use
 the Instant Client RPM libraries, for example
 `/usr/lib/oracle/12.1/client64/lib`.
+
+Note: A compiler supporting C++11 is required.
 
 ### 2.4 Run an example program
 
@@ -262,6 +266,8 @@ npm install oracledb
 
 If you are installing with `sudo`, you may need to use `sudo -E` to
 preserve the environment variable values.
+
+Note: A compiler supporting C++11 is required.
 
 ### 3.4 Run an example program
 

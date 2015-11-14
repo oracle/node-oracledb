@@ -2,8 +2,8 @@
 
 ## node-oracledb v1.4.0 (DD Mon YYYY)
 
-- Upgrade NAN dependency to version 2 allowing node-oracledb to build 
-  with Node 4 and 5.
+- Upgraded NAN dependency to version 2 allowing node-oracledb to build 
+  with Node 0.10, 0.12, 4 and 5.  Note: a compiler supporting C++11 is now required.
 
 - Fixed a cursor leak when statement execution fails.
 
