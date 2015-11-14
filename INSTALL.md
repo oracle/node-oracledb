@@ -506,6 +506,10 @@ see
 
 ## <a name="instwin"></a> 6. Node-oracledb Installation on Windows
 
+An article
+[Installing node-oracledb on Microsoft Windows](https://community.oracle.com/docs/DOC-931127)
+has step-by-step Windows installation instructions.
+
 ### 6.1 Install required tools
 
 Install a C/C++ build environment such as Microsoft Visual
