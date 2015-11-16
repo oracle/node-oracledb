@@ -389,12 +389,9 @@ private:
                                dvoid **bufpp, void **alenpp, void **indpp,
                                unsigned short **rcode, unsigned char *piecep );
 
-  // GetLob Method on Connection class
+  // NewLob Method on Connection class
   static v8::Local<v8::Value> NewLob(eBaton* executeBaton,
                                       ProtoILob *protoILob);
-
-  static NAN_METHOD(GetLob);
-  
 
   dpi::Conn*     dpiconn_;
   bool           isValid_;

@@ -128,7 +128,6 @@ void Connection::Init(Handle<Object> target)
   Nan::SetPrototypeMethod(tpl, "commit", Commit);
   Nan::SetPrototypeMethod(tpl, "rollback", Rollback);
   Nan::SetPrototypeMethod(tpl, "break", Break);
-  Nan::SetPrototypeMethod(tpl, "getLob", GetLob);
 
   Nan::SetAccessor(tpl->InstanceTemplate(),
                                               Nan::New<v8::String>("stmtCacheSize").ToLocalChecked(),
@@ -3391,45 +3390,6 @@ v8::Local<v8::Value> Connection::NewLob(eBaton* executeBaton,
 }
 
 
-
-/*****************************************************************************/
-/*
-   DESCRIPTION
-     GetLob method on Connection class.
-
-   PARAMETERS
-     none
-  RETURNS
-    A Lob object
-
-   NOTES
-     Shows example method to call the Oracledb.newLob() method from a
-     Connection class method.  That is, Connection.getLob() calls
-     Oracledb.newLob().
-
-     This method is unused as we call Oracledb.newLob() from the C++
-     Connection::NewLob() method in Connection::GetValue().  This is much more
-     performant than going across language boundries twice to get a Lob.
-*/
-
-NAN_METHOD(Connection::GetLob)
-{
-  Connection    *connection = Nan::ObjectWrap::Unwrap<Connection>(info.This());
-  
-  NJS_CHECK_OBJECT_VALID2 ( connection, info );
-
-  Local<Object> jsOracledb = Nan::New<Object>(
-                               connection->oracledb_->jsOracledb);
-  Local<Value>  argv[1];
-  
-  Local<Value>  result = Local<Function>::Cast(
-                                    jsOracledb->Get(
-                                      Nan::New<v8::String>(
-                                        "newLob").ToLocalChecked()))->Call(
-                                           jsOracledb, 1, argv);
-
-  info.GetReturnValue().Set(result);
-}
 
 
 

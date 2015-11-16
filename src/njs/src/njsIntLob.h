@@ -190,12 +190,6 @@ class ILob : public Nan::ObjectWrap
   static void Async_Write (uv_work_t *req);
   static void Async_AfterWrite (uv_work_t *req);
 
-                                // GetLob Method on ILob class
-  static NAN_METHOD(GetLob);
-  static void Async_GetLob (uv_work_t *req);
-  static void Async_AfterGetLob (uv_work_t *req);
-
-
   Descriptor    *lobLocator_;
   unsigned short fetchType_;
   
