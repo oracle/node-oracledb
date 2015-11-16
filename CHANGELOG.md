@@ -11,6 +11,8 @@
 
 - Added a run-script 'testWindows' target for Windows testing. See [test/README.md](test/README.md)
 
+- Fixed compilation warnings with recent compilers.
+
 ## node-oracledb v1.3.0 (15 Oct 2015)
 
 - Added a `oracledb.oracleClientVersion` property giving the version of the Oracle

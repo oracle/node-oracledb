@@ -580,6 +580,8 @@ void ConnImpl::initConnImpl ( bool pool, bool externalAuth,
 {
   ub4 mode        = OCI_DEFAULT;
   ub2 csid        = 0;
+  void *errh      = NULL;
+  void *auth      = NULL;
 
   if ( pool )
     mode = externalAuth ? ( OCI_SESSGET_CREDEXT | OCI_SESSGET_SPOOL ) :
@@ -587,12 +589,14 @@ void ConnImpl::initConnImpl ( bool pool, bool externalAuth,
   else
     mode = externalAuth ? OCI_SESSGET_CREDEXT : OCI_DEFAULT;
 
-  ociCallEnv ( OCIHandleAlloc ( ( void * ) envh_, ( dvoid ** )&errh_,
+  ociCallEnv ( OCIHandleAlloc ( ( void * ) envh_, &errh,
                                 OCI_HTYPE_ERROR, 0, ( dvoid ** ) 0 ), envh_ );
+  errh_ = ( OCIError * ) errh;
 
-  ociCallEnv ( OCIHandleAlloc ( ( void * ) envh_, ( dvoid ** ) &auth_,
+  ociCallEnv ( OCIHandleAlloc ( ( void * ) envh_, &auth,
                                 OCI_HTYPE_AUTHINFO, 0, ( dvoid ** ) 0 ),
                                 envh_ );
+  auth_ = ( OCIAuthInfo * ) auth;
 
   if ( externalAuth && ( !pool ) )
   {
