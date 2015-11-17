@@ -58,7 +58,7 @@
 
 static void ociCallCommon(sword rc, void *handle, ub4 errType)
 {
-  if (!rc)
+    if (rc == OCI_SUCCESS || rc == OCI_SUCCESS_WITH_INFO)
     return;
 
   if (rc == OCI_INVALID_HANDLE)
