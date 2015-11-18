@@ -36,7 +36,7 @@
  *     51 onwards are for other tests  
  * 
  *****************************************************************************/
-"use strict"
+"use strict";
 
 var oracledb = require('oracledb');
 var fs       = require('fs');
@@ -221,6 +221,7 @@ describe('40. dataTypeClob.js', function() {
       ], done);  // async
      
     }) // 40.1.1
+
   }) // 40.1
 
   describe('40.2 stores null value correctly', function() {

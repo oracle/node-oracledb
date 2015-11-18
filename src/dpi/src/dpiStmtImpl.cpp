@@ -91,9 +91,12 @@ StmtImpl::StmtImpl (EnvImpl *env, OCIEnv *envh, ConnImpl *conn,
         isReturning_(false), isReturningSet_(false), refCursor_(false),
         state_(DPI_STMT_STATE_UNDEFINED)
 {
+  void *errh  = NULL;
+  void *stmth = NULL;
   // create an OCIError object for this execution
-  ociCallEnv (OCIHandleAlloc ((void *)envh, (dvoid **)&errh_,
+  ociCallEnv (OCIHandleAlloc ((void *)envh, &errh,
                                OCI_HTYPE_ERROR, 0, (dvoid **)0), envh);
+  errh_ = ( OCIError * ) errh;
 
   if(!sql.empty())
   {
@@ -106,8 +109,9 @@ StmtImpl::StmtImpl (EnvImpl *env, OCIEnv *envh, ConnImpl *conn,
   else
   {
     //  to build empty stmt object used for ref cursors.
-    ociCall (OCIHandleAlloc ((void *)envh, (dvoid **)&stmth_,
+    ociCall (OCIHandleAlloc ((void *)envh, (dvoid **)&stmth,
                              OCI_HTYPE_STMT,0, (dvoid **)0), errh_);
+    stmth_ = ( OCIStmt * ) stmth;
     refCursor_ = true;
   }
 }
@@ -473,38 +477,39 @@ const MetaData* StmtImpl::getMetaData ()
     return NULL;
 
   ub4       col = 0;
-  OCIParam *colDesc = (OCIParam *) 0;
+  void *colDesc = (OCIParam *) 0;
 
   meta_ = new MetaData[numCols_];
+  void *colName = NULL;
 
   while (col < numCols_)
   {
     ociCall(OCIParamGet((void *)stmth_, OCI_HTYPE_STMT, errh_,
-                        (void **)&colDesc, (ub4) (col+1)), errh_ );
-    ociCall(OCIAttrGet((void*) colDesc, (ub4) OCI_DTYPE_PARAM,
-                       (void**) &(meta_[col].colName),
+                        &colDesc, (ub4) (col+1)), errh_ );
+    ociCall(OCIAttrGet(colDesc, (ub4) OCI_DTYPE_PARAM, &colName,
                        (ub4 *) &(meta_[col].colNameLen),
                        (ub4) OCI_ATTR_NAME,errh_ ), errh_ );
-    ociCall(OCIAttrGet((void*) colDesc, (ub4) OCI_DTYPE_PARAM,
+    meta_[col].colName = (unsigned char *) colName;
+    ociCall(OCIAttrGet(colDesc, (ub4) OCI_DTYPE_PARAM,
                        (void*) &(meta_[col].dbType),(ub4 *) 0,
                        (ub4) OCI_ATTR_DATA_TYPE,
                        errh_ ), errh_ );
-    ociCall(OCIAttrGet((void*) colDesc, (ub4) OCI_DTYPE_PARAM,
+    ociCall(OCIAttrGet(colDesc, (ub4) OCI_DTYPE_PARAM,
                        (void*) &(meta_[col].dbSize),(ub4 *) 0,
                        (ub4) OCI_ATTR_DATA_SIZE,
                        errh_ ), errh_ );
-    ociCall(OCIAttrGet((void*) colDesc, (ub4) OCI_DTYPE_PARAM,
+    ociCall(OCIAttrGet(colDesc, (ub4) OCI_DTYPE_PARAM,
                        (void*) &(meta_[col].isNullable),(ub4*) 0,
                        (ub4) OCI_ATTR_IS_NULL,
                        errh_ ), errh_ );
     if (meta_[col].dbType == DpiNumber || meta_[col].dbType == DpiBinaryFloat
            ||meta_[col].dbType == DpiBinaryDouble )
     {
-      ociCall(OCIAttrGet((void*) colDesc, (ub4) OCI_DTYPE_PARAM,
+      ociCall(OCIAttrGet(colDesc, (ub4) OCI_DTYPE_PARAM,
                          (void*) &(meta_[col].precision),(ub4* ) 0,
                          (ub4) OCI_ATTR_PRECISION,
                          errh_ ), errh_ );
-      ociCall(OCIAttrGet((void*) colDesc, (ub4) OCI_DTYPE_PARAM,
+      ociCall(OCIAttrGet(colDesc, (ub4) OCI_DTYPE_PARAM,
                          (void*) &(meta_[col].scale),(ub4*) 0,
                          (ub4) OCI_ATTR_SCALE,
                          errh_ ), errh_ );

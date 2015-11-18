@@ -1,5 +1,18 @@
 # Change Log
 
+## node-oracledb v1.4.0 (17 Nov 2015)
+
+- Upgraded NAN dependency to version 2 allowing node-oracledb to build 
+  with Node 0.10, 0.12, 4 and 5.  Note: a compiler supporting C++11 is now required.
+
+- Fixed a cursor leak when statement execution fails.
+
+- Fixed a crash when accessing Pool properties on Windows.
+
+- Added a run-script 'testWindows' target for Windows testing. See [test/README.md](test/README.md)
+
+- Fixed compilation warnings with recent compilers.
+
 ## node-oracledb v1.3.0 (15 Oct 2015)
 
 - Added a `oracledb.oracleClientVersion` property giving the version of the Oracle
@@ -10,7 +23,7 @@
 
 - Fixed null output from DML RETURNING with Oracle Database 11.2 when the string is of size 4000.
 
-- Fixed default bind direction to be BIND_IN.
+- Fixed default bind direction to be `BIND_IN`.
 
 ## node-oracledb v1.2.0 (25 Sep 2015)
 

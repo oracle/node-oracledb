@@ -35,9 +35,11 @@
 "use strict"
 
 var oracledb = require('oracledb');
+var fs       = require('fs');
 var should = require('should');
 var async = require('async');
 var dbConfig = require('./dbConfig.js');
+var assist   = require('./dataTypeAssist.js');
 
 describe('58. properties.js', function() {
 
@@ -47,7 +49,7 @@ describe('58. properties.js', function() {
     var credential = dbConfig;
   }
 
-  describe('58.1 oracledb properties', function() {
+  describe('58.1 Oracledb Class', function() {
     
     var defaultValues = {};
 
@@ -64,12 +66,7 @@ describe('58. properties.js', function() {
       defaultValues.externalAuth    = oracledb.externalAuth;
       defaultValues.fetchAsString   = oracledb.fetchAsString;
       defaultValues.outFormat       = oracledb.outFormat;
-      defaultValues.lobPrefetchSize = oracledb.lobPrefetchSize;    
-
-      /* 
-       * lobPrefetchSize property is currently disabled. 
-       * Resetting it to default will lead to uncaught error "NJS-021: invalid type for conversion specified" 
-      */
+      defaultValues.lobPrefetchSize = oracledb.lobPrefetchSize;   
     })
 
     after('restore the values', function() {
@@ -80,7 +77,7 @@ describe('58. properties.js', function() {
       oracledb.maxRows          = defaultValues.maxRows;        
       oracledb.prefetchRows     = defaultValues.prefetchRows;   
       oracledb.autoCommit       = defaultValues.autoCommit;     
-      // oracledb.version          = defaultValues.version;         // version is a read-only property
+      // oracledb.version          = defaultValues.version;         // version is a read-only property. it needn't to restore.
       oracledb.connClass        = defaultValues.connClass;      
       oracledb.externalAuth     = defaultValues.externalAuth;   
       oracledb.fetchAsString    = defaultValues.fetchAsString;  
@@ -198,7 +195,7 @@ describe('58. properties.js', function() {
       t.should.be.a.Number;
 
       try {
-        oracledb.oracleClientVersion++;
+        oracledb.oracleClientVersion = t + 1;
       } catch(err) {
         should.exist(err);
         (err.message).should.startWith('NJS-014');
@@ -207,7 +204,7 @@ describe('58. properties.js', function() {
 
   }) // 58.1
 
-  describe('58.2 pool properties', function() {
+  describe('58.2 Pool Class', function() {
     var pool = null;
 
     before(function(done) {
@@ -233,7 +230,7 @@ describe('58. properties.js', function() {
       t.should.be.a.Number;
 
       try {
-        pool.poolMin++;
+        pool.poolMin = t + 1;
       } catch(err) {
         should.exist(err);
         (err.message).should.startWith('NJS-014');
@@ -245,7 +242,7 @@ describe('58. properties.js', function() {
       t.should.be.a.Number;
 
       try {
-        pool.poolMax++;
+        pool.poolMax = t + 1;
       } catch(err) {
         should.exist(err);
         (err.message).should.startWith('NJS-014');
@@ -257,7 +254,7 @@ describe('58. properties.js', function() {
       t.should.be.a.Number;
 
       try {
-        pool.poolIncrement++;
+        pool.poolIncrement = t + 1;
       } catch(err) {
         should.exist(err);
         (err.message).should.startWith('NJS-014');
@@ -269,7 +266,7 @@ describe('58. properties.js', function() {
       t.should.be.a.Number;
 
       try {
-        pool.poolTimeout++;
+        pool.poolTimeout = t + 1;
       } catch(err) {
         should.exist(err);
         (err.message).should.startWith('NJS-014');
@@ -281,7 +278,7 @@ describe('58. properties.js', function() {
       t.should.be.a.Number;
 
       try {
-        pool.stmtCacheSize++;
+        pool.stmtCacheSize = t + 1;
       } catch(err) {
         should.exist(err);
         (err.message).should.startWith('NJS-014');
@@ -289,7 +286,7 @@ describe('58. properties.js', function() {
     })
   }) // 58.2
 
-  describe('58.3 connection properties', function() {
+  describe('58.3 Connection Class', function() {
     var connection = null;
 
     before('get one connection', function(done) {
@@ -323,7 +320,7 @@ describe('58. properties.js', function() {
       t.should.be.a.Number;
 
       try {
-        connection.stmtCacheSize++;
+        connection.stmtCacheSize = t + 1;
       } catch(err) {
         should.exist(err);
         (err.message).should.startWith('NJS-014');
@@ -391,7 +388,7 @@ describe('58. properties.js', function() {
       t.should.be.a.Number;
 
       try {
-        connection.oracleServerVersion++;
+        connection.oracleServerVersion = t + 1;
       }
       catch (err) {
         should.exist ( err );
@@ -400,4 +397,67 @@ describe('58. properties.js', function() {
     });
 
   }) // 58.3
+
+  describe('58.4 ResultSet Class', function() {
+    
+    var tableName = "oracledb_number";
+    var numbers = assist.data.numbers;
+    var connection = null;
+    var resultSet = null;
+
+    before('get resultSet class', function(done) {
+      async.series([
+        function(callback) {
+          oracledb.getConnection(credential, function(err, conn) {
+            should.not.exist(err);
+            connection = conn;
+            callback();
+          });
+        },
+        function(callback) {
+          assist.setUp(connection, tableName, numbers, callback);
+        },
+        function(callback) {
+          connection.execute(
+            "SELECT * FROM " + tableName,
+            [],
+            { resultSet: true, outFormat: oracledb.OBJECT },
+            function(err, result) {
+              should.not.exist(err);
+              resultSet = result.resultSet;
+              callback();
+            }
+          );
+        }
+      ], done);
+    })
+
+    after( function(done) {
+      connection.execute(
+        "DROP TABLE " + tableName,
+        function(err) {
+          should.not.exist(err);
+          
+          connection.release( function(err) {
+            should.not.exist(err);
+            done();
+          });
+        }
+      );
+    })
+
+    it('58.4.1 metaData (read-only)', function() {
+      should.exist(resultSet.metaData);
+      var t = resultSet.metaData;
+      t.should.eql( [ { name: 'NUM' }, { name: 'CONTENT' } ] );
+      
+      try {
+        resultSet.metaData = {"foo": "bar"};
+      } catch(err) {
+        should.exist(err);
+        (err.message).should.startWith('NJS-014');
+      } 
+    })
+
+  }) // 58.5
 })

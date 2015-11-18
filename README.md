@@ -1,16 +1,16 @@
-# node-oracledb version 1.3
+# node-oracledb version 1.4
 
 ## <a name="about"></a> 1. About node-oracledb
 
 The node-oracledb add-on for Node.js powers high performance Oracle Database applications.
 
-Node-oracledb connects Node.js 0.10, Node.js 0.12, and io.js to
-Oracle Database.
+Node-oracledb connects Node.js 0.10, 0.12, 4.2 and 5.0 to Oracle
+Database.
 
 This is an open source project maintained by Oracle Corp.
 
 The node-oracledb home page is on the
-[Oracle Technology Network](http://www.oracle.com/technetwork/database/database-technologies/node_js/index.html).
+[Oracle Technology Network](http://www.oracle.com/technetwork/database/database-technologies/scripting-languages/node_js/).
 
 ### Node-oracledb supports:
 

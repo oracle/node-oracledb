@@ -82,7 +82,7 @@ typedef struct LobBaton
   char              *writebuf;
   unsigned long long writelen;
   
-  Persistent<Function> cb;
+  Nan::Persistent<Function> cb;
 
   LobBaton(): error(""), dpienv(NULL), dpiconn(NULL),
               iLob(NULL), writebuf(NULL), writelen(0)
@@ -90,7 +90,6 @@ typedef struct LobBaton
 
   ~LobBaton ()
    {
-     NanDisposePersistent(cb);
    }
   
 } LobBaton;
@@ -139,13 +138,13 @@ private:
 
 
 
-class ILob : public ObjectWrap
+class ILob : public Nan::ObjectWrap
 {
  public:
   void setILob(eBaton *executeBaton,  ProtoILob *protoILob);
   
                                 // Define ILob Constructor
-  static Persistent<FunctionTemplate> iLobTemplate_s;
+  static Nan::Persistent<FunctionTemplate> iLobTemplate_s;
   
   static void Init(Handle<Object> target);
 
@@ -166,11 +165,11 @@ class ILob : public ObjectWrap
 
   
                                 // Getters for properties
-  static NAN_PROPERTY_GETTER(GetChunkSize);
-  static NAN_PROPERTY_GETTER(GetLength);
-  static NAN_PROPERTY_GETTER(GetPieceSize);
-  static NAN_PROPERTY_GETTER(GetOffset);
-  static NAN_PROPERTY_GETTER(GetType);
+  static NAN_GETTER(GetChunkSize);
+  static NAN_GETTER(GetLength);
+  static NAN_GETTER(GetPieceSize);
+  static NAN_GETTER(GetOffset);
+  static NAN_GETTER(GetType);
 
   
                                 // Setters for properties
@@ -190,12 +189,6 @@ class ILob : public ObjectWrap
   static NAN_METHOD(Write);
   static void Async_Write (uv_work_t *req);
   static void Async_AfterWrite (uv_work_t *req);
-
-                                // GetLob Method on ILob class
-  static NAN_METHOD(GetLob);
-  static void Async_GetLob (uv_work_t *req);
-  static void Async_AfterGetLob (uv_work_t *req);
-
 
   Descriptor    *lobLocator_;
   unsigned short fetchType_;

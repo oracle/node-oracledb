@@ -18,16 +18,16 @@ limitations under the License.
 The node-oracledb test suite uses 'mocha', 'should' and 'async'. 
 See LICENSE.md for relevant licenses.
 
-## Running the complete test suite
+## 1. Preparations for running tests
 
-### 1. Create a working directory
+### 1.1 Create a working directory
 
 ```
-mkdir <some-directory>
+mkdir <some-directory> 
 cd <some-directory>
 ```
 
-### 2. Install node-oracledb
+### 1.2 Install node-oracledb
 
 See [INSTALL](https://github.com/oracle/node-oracledb/blob/master/INSTALL.md)
 for installation requirements and more details.
@@ -45,22 +45,26 @@ git clone https://github.com/oracle/node-oracledb.git
 npm install node-oracledb
 ```
 
-### 3. Install dependent modules
+### 1.3 Install test-dependent modules
 
-The test suite uses [mocha](https://www.npmjs.com/package/mocha), [async](https://www.npmjs.com/package/async) and [should](https://www.npmjs.com/package/should).  These need to be installed separately.
+The test suite uses [mocha](https://www.npmjs.com/package/mocha), 
+[async](https://www.npmjs.com/package/async) and 
+[should](https://www.npmjs.com/package/should). 
 
 ```
-cd <some-directory>/node_modules/oracledb
-npm install mocha should async
+cd <some-directory>/node_modules/oracledb 
+npm install
 ```
 
-Note: these are listed in `devDependencies` in `package.json` so `npm
-install` will install them when executed inside a node-oracledb
-package directory.
+Note: Running `npm install` within oracledb/ directory will recompile
+oracledb module and install all its dependent modules which are listed
+in `devDependencies` field in `package.json` file. So 'mocha', 'async' 
+and 'should' modules are installed by this command.
 
-### 4. Database credentials
+### 1.4 Configure Database credentials
 
-The database credentials for node-oracledb test suite are defined in dbConfig.js file. You can set the credentials via environment variables or dbConfig.js file.
+The database credentials for node-oracledb test suite are defined in dbConfig.js file. 
+You can set the credentials via environment variables or dbConfig.js file.
 Change the credentials to a user who has privileges to connect and create tables. 
 
 ```
@@ -82,31 +86,42 @@ have been appropriately configured.  See
 [Documentation for External Authentication](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#extauth)
 for more details.
 
-### 5. Run test suite
+## 2. Running tests
 
-All tests can be run with:
+### 2.1 Run the complete test suite
+
+#### On Unix-like systems
 
 ```
-cd <some-directory>/node_modules/oracledb
+cd <some-directory>/node_modules/oracledb 
 npm test
 ```
 
-This calls the `test` script defined in `<some-directory>/node_modules/oracledb/package.json`.
-If `mocha` is not in the directory specified in `package.json`, for example if you have installed it globally, then edit `package.json` and change the path.
+This calls the `test` script defined in `oracledb/package.json`.
 
-## Running a single test
-
-Individual tests can be run using:
+#### On Windows
 
 ```
-cd <some-directory>/node_modules/oracledb
-../mocha/bin/mocha test/<test-name>
+cd <some-directory>/node_modules/oracledb 
+npm run-script testWindows
+```
+
+This calls the `testWindows` script defined in `oracledb/package.json`.
+See [npm scripts](https://docs.npmjs.com/misc/scripts) for more infomation 
+about how npm handles the "scripts" field of `package.json`.
+
+### 2.2 Run specified test(s)
+
+```
+cd <some-directory>/node_modules/oracledb 
+<mocha-executable-file-directory>/mocha test/<test-names>
 ```
 
 See [mochajs.org](http://mochajs.org/) for more information on running tests with mocha.
 
-## Adding Tests
-See [CONTRIBUTING](https://github.com/oracle/node-oracledb/blob/master/CONTRIBUTING.md) for general information on contribution requirements.
+## 3. Adding Tests
+See [CONTRIBUTING](https://github.com/oracle/node-oracledb/blob/master/CONTRIBUTING.md) 
+for general information on contribution requirements.
 
 For easy correlation between results and test code, each test is
 assigned a number.  The following number ranges have been chosen:
@@ -115,6 +130,6 @@ assigned a number.  The following number ranges have been chosen:
 - 21 - 50  are reserved for data type supporting tests
 - 51 onwards are for other tests
 
-## Test List
+## 4. Test List
 
-See test/list.txt file for the list of existing tests.
+See `test/list.txt` for the list of existing tests.

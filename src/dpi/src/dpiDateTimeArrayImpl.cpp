@@ -193,10 +193,11 @@ long double DateTimeArrayImpl::getDateTime ( const int idx )
 
   if ( dbdatetime_ )
   {
-    OCIInterval *interval = NULL ;
+    void *interval = NULL ;
 
-    rc = OCIDescriptorAlloc ( (dvoid *) envh_, (dvoid **)&interval,
+    rc = OCIDescriptorAlloc ( (dvoid *) envh_, &interval,
                               OCI_DTYPE_INTERVAL_DS, 0, (dvoid **)0);
+
     if (rc)
     {
       throw ExceptionImpl ( DpiErrInternal );
@@ -204,12 +205,13 @@ long double DateTimeArrayImpl::getDateTime ( const int idx )
 
     /* Get diff of date/timestamp */
     rc = OCIDateTimeSubtract ( envh_, errh_, dbdatetime_[idx], baseDate_,
-                                    interval);
+                               ( OCIInterval * ) interval );
     ociCall ( rc, errh_ ) ;
 
     // Get the Days, hours, minutes, seconds and fractional seconds
     ociCall ( OCIIntervalGetDaySecond ( envh_, errh_, &dy, &hr, &mm,
-                                        &ss, &fsec, interval ), errh_ );
+                                        &ss, &fsec,
+                                       ( OCIInterval * ) interval ), errh_ );
 
     if ( interval )
     {
@@ -251,7 +253,7 @@ void DateTimeArrayImpl::setDateTime ( const int idx, long double ms)
 {
   if ( dbdatetime_ )
   {
-    OCIInterval *interval = NULL;
+    void *interval = NULL;
     sword       rc        = OCI_SUCCESS ;
     sb4 dy                = 0;
     sb4 hr                = 0;
@@ -270,8 +272,9 @@ void DateTimeArrayImpl::setDateTime ( const int idx, long double ms)
     ms = ms - (ss * DPI_MS_SECONDS );
     fs = ( sb4 )( ms * DPI_FRAC_SEC_MS );          // Convert the ms into frac sec
 
-    rc = OCIDescriptorAlloc ( (dvoid *) envh_, (dvoid **)&interval,
+    rc = OCIDescriptorAlloc ( (dvoid *) envh_, &interval,
                               OCI_DTYPE_INTERVAL_DS, 0, (dvoid **)0);
+
     if (rc)
     {
       throw ExceptionImpl ( DpiErrInternal );
@@ -279,10 +282,12 @@ void DateTimeArrayImpl::setDateTime ( const int idx, long double ms)
 
     // Convert the given timestamp in ms into interval
     ociCall ( OCIIntervalSetDaySecond ( envh_, errh_, dy, hr, mm,
-                                        ss, fs, interval), errh_ );
+                                        ss, fs, ( OCIInterval * ) interval),
+              errh_ );
 
     // Add the interval to the basedate.
-    ociCall ( OCIDateTimeIntervalAdd ( envh_, errh_, baseDate_, interval,
+    ociCall ( OCIDateTimeIntervalAdd ( envh_, errh_, baseDate_,
+                                       ( OCIInterval * ) interval,
                                        dbdatetime_[idx] ), errh_ ) ;
 
     if ( interval )
@@ -314,14 +319,16 @@ void DateTimeArrayImpl::setDateTime ( const int idx, long double ms)
 void DateTimeArrayImpl::initBaseDate ( OCIEnv *envh )
 {
   sword    rc = OCI_SUCCESS ;
-  OCIError *errh = (OCIError *)0;
+  void *errh = (OCIError *)0;
+  void *baseDate = NULL;
 
   // If baseDate is not allocated, allocate and init
   if ( !baseDate_ )
   {
-    rc = OCIDescriptorAlloc ( (dvoid *)envh, (dvoid **)&baseDate_,
+    rc = OCIDescriptorAlloc ( (dvoid *)envh, &baseDate,
                                   OCI_DTYPE_TIMESTAMP_LTZ, 0,
                                   (dvoid **)0);
+    baseDate_ = (OCIDateTime *) baseDate;
 
     if ( !rc )  // OCI_SUCCESS case
     {
@@ -331,16 +338,17 @@ void DateTimeArrayImpl::initBaseDate ( OCIEnv *envh )
        *  OCI Env creation(one time).  At this point of time, errh is not yet
        *  created by OCI Env, create a local one, use and destroy
        */
-      ociCallEnv(OCIHandleAlloc((void *)envh, (dvoid **)&errh,
+      ociCallEnv(OCIHandleAlloc((void *)envh, &errh,
                             OCI_HTYPE_ERROR, 0, (dvoid **)0), envh);
+
         // Base date is 1970-1-1 00:00:00
-      ociCall ( OCIDateTimeConstruct (envh, errh, baseDate_,
+      ociCall ( OCIDateTimeConstruct (envh, ( OCIError * ) errh, baseDate_,
                                       DPI_BASE_YEAR, DPI_BASE_MONTH,
                                       DPI_BASE_DATE, DPI_BASE_HOUR,
                                       DPI_BASE_MIN, DPI_BASE_SEC, DPI_BASE_FS,
                                       (OraText * )DPI_UTC_TZ,
                                       strlen ( DPI_UTC_TZ ) ),
-                errh);
+                ( OCIError * ) errh);
 
       // Free the allocated error handle
       if (errh)
