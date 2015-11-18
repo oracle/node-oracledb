@@ -92,17 +92,21 @@ PoolImpl::PoolImpl(EnvImpl *env, OCIEnv *envh,
         spoolh_(NULL), poolName_(NULL)
 {
   ub4 mode = externalAuth ? OCI_DEFAULT : OCI_SPC_HOMOGENEOUS;
+  void *errh   = NULL;
+  void *spoolh = NULL;
 
   unsigned char spoolMode = OCI_SPOOL_ATTRVAL_NOWAIT; // spoolMode is a ub1
 
   if (externalAuth && (password.length() || user.length()))
       throw ExceptionImpl(DpiErrExtAuth);
 
-  ociCallEnv(OCIHandleAlloc((void *)envh_, (dvoid **)&errh_,
+  ociCallEnv(OCIHandleAlloc((void *)envh_, &errh,
                             OCI_HTYPE_ERROR, 0, (dvoid **)0), envh_);
+  errh_ = ( OCIError * ) errh;
 
-  ociCall(OCIHandleAlloc((void *)envh_, (dvoid **)&spoolh_,
+  ociCall(OCIHandleAlloc((void *)envh_, (dvoid **)&spoolh,
                          OCI_HTYPE_SPOOL, 0, (dvoid **)0), errh_);
+  spoolh_ = ( OCISPool * ) spoolh;
 
   ociCall(OCISessionPoolCreate(envh_, errh_, spoolh_,
                                &poolName_, &poolNameLen_,

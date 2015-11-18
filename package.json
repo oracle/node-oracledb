@@ -1,9 +1,9 @@
 {
   "name": "oracledb",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Oracle Database driver by Oracle Corp.",
   "license": "Apache-2.0",
-  "homepage": "http://www.oracle.com/technetwork/database/database-technologies/node_js/index.html",
+  "homepage": "http://www.oracle.com/technetwork/database/database-technologies/scripting-languages/node_js/",
   "keywords": [
     "oracledb",
     "dboracle",
@@ -33,8 +33,8 @@
     "url": "git://github.com/oracle/node-oracledb.git"
   },
   "dependencies": {
-    "nan": "^1.8.4",
-    "node-pre-gyp": "0.6.x"
+    "nan": "~2.1.0",
+	"node-pre-gyp": "0.6.x"
   },
   "bundledDependencies": [
     "node-pre-gyp"
@@ -46,7 +46,8 @@
   },
   "scripts": {
       "install": "node-pre-gyp install --fallback-to-build",
-      "test": "node_modules/mocha/bin/mocha -R spec --timeout 10000 test/*.js"
+      "test": "mocha -R spec --timeout 10000 test/*.js",
+      "testWindows": "mocha -R spec --timeout 0 test\\*.js"
   },
   "binary": {
     "module_name": "oracledb",
@@ -55,9 +56,8 @@
     "remote_path": "",
     "package_name": "{module_name}-v{version}-{node_abi}-{platform}-{arch}.tar.gz"
   },
-  "engineStrict": true,
   "engines": {
-    "node": ">=0.10.28 <3"
+    "node": ">=0.10.28 <6"
   },
   "maintainers": [
     {

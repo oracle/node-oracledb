@@ -735,7 +735,7 @@ describe('4. binding.js', function() {
     })
 
     
-    it('4.5.1',function(done) {
+    it('4.5.1 ',function(done) {
       connection.execute(
         "insert into oracledb_raw (num) values (:id)",
         { id: { val: 1, type: oracledb.NUMBER } },  // fails with error  NJS-013: invalid bind direction
@@ -747,4 +747,43 @@ describe('4. binding.js', function() {
       );
     })
   }) // 4.5
+
+  describe('4.6 PL/SQL block with empty outBinds', function() {
+
+    it('4.6.1 ', function(done) {
+      
+      var sql = "begin execute immediate 'drop table does_not_exist'; " 
+        + "exception when others then " 
+        + "if sqlcode <> -942 then " 
+        + "raise; " 
+        + "end if; end;"; 
+      var binds = []; 
+      var options = {}; 
+
+      oracledb.getConnection(
+        credential,
+        function(err, connection)
+        {
+          should.not.exist(err);
+          connection.execute(
+            sql, 
+            binds, 
+            options,
+            function(err, result) 
+            {
+              should.not.exist(err);
+              result.should.eql(
+                { rowsAffected: undefined,
+                  outBinds: undefined,
+                  rows: undefined,
+                  metaData: undefined }
+              );
+              done();
+            }
+          );
+        }
+      );
+
+    })
+  })
 })

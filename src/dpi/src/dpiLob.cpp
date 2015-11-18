@@ -200,13 +200,13 @@ unsigned int Lob::chunkSize(DpiHandle *svch, DpiHandle *errh,
 unsigned long long Lob::length(DpiHandle *svch, DpiHandle *errh,
                           Descriptor *lobLocator)
 {
-  unsigned long long length = 0;
+  oraub8 length = 0;
   
   ociCall(OCILobGetLength2((OCISvcCtx *)svch, (OCIError *)errh,
                            (OCILobLocator *)lobLocator, (oraub8 *)&length),
           (OCIError *)errh);
 
-  return length;
+  return (unsigned long long)length;
 }
 
 

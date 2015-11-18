@@ -62,6 +62,7 @@ static const char *errMsg[] =
   "NJS-026: maxRows must be greater than zero",
   "NJS-027: unexpected SQL parsing error",
   "NJS-028: raw database type is not supported with DML Returning statements",
+  "NJS-029: Invalid object from javascript",
 };
 
 string NJSMessages::getErrorMsg ( NJSErrorType err, ... )
