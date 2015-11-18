@@ -34,7 +34,7 @@
   },
   "dependencies": {
     "nan": "~2.1.0",
-	"node-pre-gyp": "0.6.x"
+    "node-pre-gyp": "0.6.x"
   },
   "bundledDependencies": [
     "node-pre-gyp"
@@ -45,6 +45,7 @@
       "async": "~0.9.0"
   },
   "scripts": {
+      "preinstall": "npm install node-pre-gyp",
       "install": "node-pre-gyp install --fallback-to-build",
       "test": "mocha -R spec --timeout 10000 test/*.js",
       "testWindows": "mocha -R spec --timeout 0 test\\*.js"
