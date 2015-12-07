@@ -9,6 +9,7 @@
              "src/njs/src/njsResultSet.cpp",
              "src/njs/src/njsMessages.cpp",
              "src/njs/src/njsIntLob.cpp",
+             "src/njs/src/njsDebug.cpp",
              "src/dpi/src/dpiEnv.cpp",
              "src/dpi/src/dpiEnvImpl.cpp",
              "src/dpi/src/dpiException.cpp",

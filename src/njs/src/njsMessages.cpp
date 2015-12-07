@@ -63,6 +63,7 @@ static const char *errMsg[] =
   "NJS-027: unexpected SQL parsing error",
   "NJS-028: raw database type is not supported with DML Returning statements",
   "NJS-029: Invalid object from javascript",
+  "NJS-030: invalid (array) binding of parameter \"%s\": %s"
 };
 
 string NJSMessages::getErrorMsg ( NJSErrorType err, ... )

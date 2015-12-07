@@ -62,6 +62,7 @@ typedef enum
   errSQLSyntaxError,
   errBufferReturningInvalid,
   errInvalidJSObject,
+  errInvalidBindArray,
 
   // New ones should be added here
 

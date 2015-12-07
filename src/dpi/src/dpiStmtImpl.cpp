@@ -299,7 +299,9 @@ void StmtImpl::bind (const unsigned char *name, int nameLen,
                      unsigned int bndpos,
                      unsigned short type, void *buf, DPI_SZ_TYPE bufSize,
                      short *ind, DPI_BUFLEN_TYPE *bufLen,
-                     void *data, cbtype cb)
+                     void *data,
+                     unsigned int maxarr_len, unsigned int *curelen,
+                     cbtype cb)
 {
   OCIBind *b = (OCIBind *)0;
 
@@ -309,7 +311,8 @@ void StmtImpl::bind (const unsigned char *name, int nameLen,
                           (type == DpiRSet) ? 0 : bufSize, type, 
                           (cb ? NULL : ind),
                           (cb ? NULL : bufLen),
-                          NULL, 0, NULL,
+                          NULL,
+                          maxarr_len, curelen,
                           (cb) ? OCI_DATA_AT_EXEC : OCI_DEFAULT), errh_);
   if ( cb )
   {
