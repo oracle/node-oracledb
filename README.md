@@ -38,6 +38,18 @@ We are actively working on supporting the best Oracle Database
 features, and on functionality requests from
 [users involved in the project](https://github.com/oracle/node-oracledb/issues).
 
+## <a name="installation"></a> Installation
+
+Prerequisites:
+
+- [Python 2.7](https://www.python.org/downloads/)
+- C++ Compiler (GCC, Visual Studio or similar)
+- Install the small, free [Oracle Instant Client](http://www.oracle.com/technetwork/database/features/instant-client/index-100365.html) libraries if your database is remote.  Or use a locally installed database such as the free [Oracle XE](http://www.oracle.com/technetwork/database/database-technologies/express-edition/overview/index.html) release.
+
+    `npm install oracledb` to install from the [NPM registry](https://www.npmjs.com/package/oracledb).
+
+See [INSTALL](https://github.com/oracle/node-oracledb/tree/master/INSTALL.md) for details.
+
 ### A simple query example:
 
 ```javascript
@@ -75,15 +87,6 @@ With Oracle's sample HR schema, the output is:
 ## <a name="examples"></a> Examples
 
 There are examples in the [examples](https://github.com/oracle/node-oracledb/tree/master/examples) directory.
-
-## <a name="installation"></a> Installation
-
-The basic install steps are:
-
-- Install the small, free [Oracle Instant Client](http://www.oracle.com/technetwork/database/features/instant-client/index-100365.html) libraries if your database is remote.  Or use a locally installed database such as the free [Oracle XE](http://www.oracle.com/technetwork/database/database-technologies/express-edition/overview/index.html) release.
-- Run `npm install oracledb` to install from the [NPM registry](https://www.npmjs.com/package/oracledb).
-
-See [INSTALL](https://github.com/oracle/node-oracledb/tree/master/INSTALL.md) for details.
 
 ## <a name="doc"></a> Documentation
 
