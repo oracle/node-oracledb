@@ -896,16 +896,19 @@ void ILob::Async_Read(uv_work_t *req)
   {
     unsigned long long byteAmount = (unsigned long int)iLob->bufSize_;
     unsigned long long charAmount = 0;
+    unsigned long long bufl = 0;
     
     // Clobs read by characters
     if (iLob->fetchType_ == DpiClob)
     {
       charAmount = iLob->bufSize_; 
       byteAmount = 0;
+      // for CLOBs, buflen is adjusted to handle multi-byte charsets
+      bufl = charAmount * iLob->dpiconn_->getByteExpansionRatio();
     }
     Lob::read((DpiHandle *)iLob->svch_, (DpiHandle *)iLob->errh_,
               (Descriptor *)iLob->lobLocator_, byteAmount, charAmount,
-              iLob->offset_, (void *)iLob->buf_);
+              iLob->offset_, (void *)iLob->buf_, bufl);
 
     // amountRead_ used in Async_AfterRead to construct string
     iLob->amountRead_ = (unsigned long)byteAmount;
@@ -1087,10 +1090,13 @@ void ILob::Async_Write(uv_work_t *req)
   {
     unsigned long long byteAmount = lobBaton->writelen;
     unsigned long long charAmount = 0; // interested in byte amount only
+    // for CLOBs, buflen is adjusted to handle multi-byte charsets
+    unsigned long long bufl = charAmount * 
+                               iLob->dpiconn_->getByteExpansionRatio();
     
     Lob::write((DpiHandle *)iLob->svch_, (DpiHandle *)iLob->errh_,
               (Descriptor *)iLob->lobLocator_, byteAmount, charAmount,
-              iLob->offset_, lobBaton->writebuf);
+              iLob->offset_, lobBaton->writebuf, bufl);
 
     
     iLob->amountWritten_ = (unsigned long)byteAmount;

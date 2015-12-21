@@ -67,13 +67,15 @@ class Lob
                    unsigned long long &byteAmount, 
                    unsigned long long &charAmount,
                    unsigned long long offset,
-                   void *buf);
+                   void *buf,
+                   unsigned long long bufl);
   
   static void write(DpiHandle *svch, DpiHandle *errh, Descriptor *lobLocator,
                     unsigned long long &byteAmount, 
                     unsigned long long &charAmount,
                     unsigned long long offset,
-                    void *buf);
+                    void *buf,
+                    unsigned long long bufl);
   
   static unsigned int chunkSize(DpiHandle *svch, DpiHandle *errh,
                                 Descriptor *lobLocator);
