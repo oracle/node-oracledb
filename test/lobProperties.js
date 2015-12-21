@@ -451,6 +451,7 @@ describe('62. lobProperties.js', function() {
 
         var t1 = clob.type,
             t2 = blob.type;
+
         t1.should.eql(oracledb.CLOB);
         t2.should.eql(oracledb.BLOB);
 
