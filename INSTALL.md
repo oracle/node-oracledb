@@ -151,7 +151,8 @@ the run time linker is configured to find this other software via
 the Instant Client RPM libraries, for example
 `/usr/lib/oracle/12.1/client64/lib`.
 
-Note: A compiler supporting C++11 is required.
+Note: A compiler supporting C++11 is required when building with
+Node.js 4 or later, otherwise the NAN component will fail to build.
 
 ### 2.4 Run an example program
 
@@ -267,7 +268,8 @@ npm install oracledb
 If you are installing with `sudo`, you may need to use `sudo -E` to
 preserve the environment variable values.
 
-Note: A compiler supporting C++11 is required.
+Note: A compiler supporting C++11 is required when building with
+Node.js 4 or later, otherwise the NAN component will fail to build.
 
 ### 3.4 Run an example program
 
