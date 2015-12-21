@@ -24,11 +24,6 @@
  *
  *****************************************************************************/
 
-#ifndef ORATYPES
-# include <oratypes.h>
-#endif
-
-
 #ifndef DPIENVIMPL_ORACLE
 # include <dpiEnvImpl.h>
 #endif
