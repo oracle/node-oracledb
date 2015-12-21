@@ -143,11 +143,11 @@ private:
  */
 #define NJS_GET_CALLBACK( cb, args )                                          \
 {                                                                             \
-  string msg;                                                                 \
+  string errMsg;                                                              \
   if( !args.Length() || !args[(args.Length()-1)]->IsFunction() )              \
   {                                                                           \
-    msg = NJSMessages::getErrorMsg ( errMissingCallback );                    \
-    NJS_SET_EXCEPTION( msg.c_str(), msg.length() );                           \
+    errMsg = NJSMessages::getErrorMsg ( errMissingCallback );                 \
+    NJS_SET_EXCEPTION( errMsg.c_str(), errMsg.length() );                     \
     args.GetReturnValue().SetUndefined();                                     \
     return;                                                                   \
   }                                                                           \
@@ -319,16 +319,16 @@ private:
  */
 #define NJS_SET_PROP_STR( val, v8value, prop )                                \
 {                                                                             \
-  string msg;                                                                 \
+  string errMsg;                                                              \
   if( v8value->IsString() )                                                   \
   {                                                                           \
     NJSString( val, v8value );                                                \
   }                                                                           \
   else                                                                        \
   {                                                                           \
-    msg = NJSMessages::getErrorMsg ( errInvalidPropertyValue,                 \
+    errMsg = NJSMessages::getErrorMsg ( errInvalidPropertyValue,              \
                                      prop );                                  \
-    NJS_SET_EXCEPTION( msg.c_str(), msg.length() );                           \
+    NJS_SET_EXCEPTION( errMsg.c_str(), errMsg.length() );                     \
   }                                                                           \
 }
 
@@ -339,16 +339,16 @@ private:
  */
 #define NJS_SET_PROP_UINT( val, v8value, prop )                               \
 {                                                                             \
-  string msg;                                                                 \
+  string errMsg;                                                              \
   if( v8value->IsUint32() )                                                   \
   {                                                                           \
     val = v8value->ToUint32()->Value();                                       \
   }                                                                           \
   else                                                                        \
   {                                                                           \
-    msg = NJSMessages::getErrorMsg ( errInvalidPropertyValue,                 \
+    errMsg = NJSMessages::getErrorMsg ( errInvalidPropertyValue,              \
                                      prop );                                  \
-    NJS_SET_EXCEPTION( msg.c_str(), msg.length() );                           \
+    NJS_SET_EXCEPTION( errMsg.c_str(), errMsg.length() );                     \
   }                                                                           \
 }
 
@@ -360,16 +360,16 @@ private:
  */
 #define NJS_SET_PROP_DOUBLE( val, v8value, prop )                             \
 {                                                                             \
-  string msg;                                                                 \
+  string errMsg;                                                              \
   if( v8value->IsNUmber() )                                                   \
   {                                                                           \
     val = v8value->ToNumber()->Value();                                       \
   }                                                                           \
   else                                                                        \
   {                                                                           \
-    msg = NJSMessages::getErrorMsg ( errInvalidPropertyValue,                 \
+    errMsg = NJSMessages::getErrorMsg ( errInvalidPropertyValue,              \
                                      prop );                                  \
-    NJS_SET_EXCEPTION( msg.c_str(), msg.length() );                           \
+    NJS_SET_EXCEPTION( errMsg.c_str(), errMsg.length() );                     \
   }                                                                           \
 }
 
@@ -392,7 +392,7 @@ private:
  */
 #define NJS_CHECK_OBJECT_VALID( p )                                           \
 {                                                                             \
-  if ( !p )                                                                 \
+  if ( !p )                                                                   \
   {                                                                           \
     string error = NJSMessages::getErrorMsg ( errInvalidJSObject );           \
     NJS_SET_EXCEPTION(error.c_str(), error.length());                         \
@@ -407,11 +407,11 @@ private:
  */
 #define NJS_CHECK_OBJECT_VALID2( p, info )                                    \
 {                                                                             \
-  if ( !p )                                                                 \
+  if ( !p )                                                                   \
   {                                                                           \
     string error = NJSMessages::getErrorMsg ( errInvalidJSObject );           \
     NJS_SET_EXCEPTION(error.c_str(), error.length());                         \
-    info.GetReturnValue ().SetUndefined () ;                                \
+    info.GetReturnValue ().SetUndefined () ;                                  \
     return;                                                                   \
   }                                                                           \
 }
