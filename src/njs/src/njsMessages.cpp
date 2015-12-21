@@ -69,7 +69,7 @@ static const char *errMsg[] =
             " in progress",
   "NJS-032: Connection cannot be released because a database call is in"
             " progress",
-  "NJS-033: An internal error occurred.[%s][%s]",
+  "NJS-033: An internal error occurred. [%s][%s]",
 
 };
 

@@ -58,7 +58,10 @@
 
 static void ociCallCommon(sword rc, void *handle, ub4 errType)
 {
-  if (!rc)
+  // OCI_SUCCESS_WITH_INFO - warnings are reported in some cases.
+  // Treat these warnings as success as the OCI call succeeded and
+  // ignore the error message
+  if ( (rc == OCI_SUCCESS) || (rc == OCI_SUCCESS_WITH_INFO ) )
     return;
 
   if (rc == OCI_INVALID_HANDLE)

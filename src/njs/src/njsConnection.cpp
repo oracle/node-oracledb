@@ -2615,24 +2615,21 @@ NAN_METHOD(Connection::Release)
   switch ( connStat )
   {
     case CONN_NOT_BUSY:
-      break;    // Nothing to do in this case
+      connection->isValid_    = false;
+      releaseBaton->dpiconn   = connection->dpiconn_;
+      break;
     case CONN_BUSY_LOB:
       releaseBaton->error = NJSMessages::getErrorMsg( errBusyConnLOB );
-      goto exitRelease;
+      break;
     case CONN_BUSY_RS:
       releaseBaton->error = NJSMessages::getErrorMsg( errBusyConnRS );
-      goto exitRelease;
+      break;
     case CONN_BUSY_DB:
       releaseBaton->error = NJSMessages::getErrorMsg( errBusyConnDB );
-      goto exitRelease;
-  
-    default:
       break;
   }
 
-  connection->isValid_    = false;
-  releaseBaton->dpiconn   = connection->dpiconn_;
-  exitRelease:
+exitRelease:
   releaseBaton->req.data  = (void*) releaseBaton;
 
   int status = uv_queue_work(uv_default_loop(), &releaseBaton->req,
