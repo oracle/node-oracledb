@@ -835,11 +835,13 @@ NAN_METHOD(ILob::Read)
 
   NJS_GET_CALLBACK(callback, info);
   iLob = Nan::ObjectWrap::Unwrap<ILob>(info.This());
+
+  /* If iLob object is invalid from JS, then throw an exception */
+  NJS_CHECK_OBJECT_VALID2 (iLob, info);
+
   LobBaton *lobBaton = new LobBaton ( iLob->njsconn_->LOBCount (), callback );
 
   NJS_CHECK_NUMBER_OF_ARGS (lobBaton->error, info, 1, 1, exitRead);
-
-  NJS_CHECK_OBJECT_VALID3(iLob, lobBaton->error, exitRead);
 
   if(!iLob->isValid_)
   {
@@ -1032,11 +1034,14 @@ NAN_METHOD(ILob::Write)
 
   NJS_GET_CALLBACK(callback, info);
   iLob = Nan::ObjectWrap::Unwrap<ILob>(info.This());
+
+  /* If iLob is invalid from JS, then throw an exception */
+  NJS_CHECK_OBJECT_VALID2 ( iLob, info );
+
   LobBaton *lobBaton = new LobBaton ( iLob->njsconn_->LOBCount (), callback );
 
   NJS_CHECK_NUMBER_OF_ARGS (lobBaton->error, info, 2, 2, exitWrite);
 
-  NJS_CHECK_OBJECT_VALID3 ( iLob, lobBaton->error, exitWrite);
   if(!iLob->isValid_)
   {
     lobBaton->error = NJSMessages::getErrorMsg(errInvalidLob);

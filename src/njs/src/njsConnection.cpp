@@ -442,10 +442,13 @@ NAN_METHOD(Connection::Execute)
   NJS_GET_CALLBACK ( callback, info );
 
   connection = Nan::ObjectWrap::Unwrap<Connection>(info.This());
+
+  /* If connection is invalid from JS, then throw an exception */
+  NJS_CHECK_OBJECT_VALID2 ( connection, info ) ;
+
   eBaton *executeBaton = new eBaton ( connection->DBCount (), callback );
 
   NJS_CHECK_NUMBER_OF_ARGS ( executeBaton->error, info, 2, 4, exitExecute );
-  NJS_CHECK_OBJECT_VALID3( connection, executeBaton->error, exitExecute );
 
   if(!connection->isValid_)
   {
@@ -2599,10 +2602,13 @@ NAN_METHOD(Connection::Release)
   ConnectionBusyStatus connStat;
 
   connection = Nan::ObjectWrap::Unwrap<Connection>(info.This());
+
+  /* If connection is invalide from JS, then throw an exception */
+  NJS_CHECK_OBJECT_VALID2 ( connection, info ) ;
+
   eBaton *releaseBaton = new eBaton ( connection->DBCount (), callback );
 
   NJS_CHECK_NUMBER_OF_ARGS ( releaseBaton->error, info, 1, 1, exitRelease );
-  NJS_CHECK_OBJECT_VALID3(connection, releaseBaton->error, exitRelease);
   if(!connection->isValid_)
   {
     releaseBaton->error = NJSMessages::getErrorMsg ( errInvalidConnection );
@@ -2722,10 +2728,13 @@ NAN_METHOD(Connection::Commit)
   NJS_GET_CALLBACK ( callback, info );
 
   connection = Nan::ObjectWrap::Unwrap<Connection>(info.This());
+
+  /* if connection is invalid from JS, then throw an exception */
+  NJS_CHECK_OBJECT_VALID2 ( connection, info ) ;
+
   eBaton *commitBaton = new eBaton ( connection->DBCount (), callback );
 
   NJS_CHECK_NUMBER_OF_ARGS ( commitBaton->error, info, 1, 1, exitCommit );
-  NJS_CHECK_OBJECT_VALID3 ( connection, commitBaton->error, exitCommit );
   if(!connection->isValid_)
   {
     commitBaton->error = NJSMessages::getErrorMsg ( errInvalidConnection );
@@ -2826,9 +2835,11 @@ NAN_METHOD(Connection::Rollback)
   NJS_GET_CALLBACK ( callback, info );
 
   connection = Nan::ObjectWrap::Unwrap<Connection>(info.This());
+  /* if connection is invalid from JS, then throw an exception */
+  NJS_CHECK_OBJECT_VALID2 ( connection, info );
+
   eBaton *rollbackBaton = new eBaton ( connection->DBCount (), callback );
   NJS_CHECK_NUMBER_OF_ARGS ( rollbackBaton->error, info, 1, 1, exitRollback );
-  NJS_CHECK_OBJECT_VALID3 ( connection, rollbackBaton->error, exitRollback );
 
   if(!connection->isValid_)
   {
@@ -2927,10 +2938,13 @@ NAN_METHOD(Connection::Break)
   NJS_GET_CALLBACK ( callback, info );
 
   connection = Nan::ObjectWrap::Unwrap<Connection>(info.This());
+
+  /* If connection is invalid from JS, then throw an exception */
+  NJS_CHECK_OBJECT_VALID2 ( connection, info );
+
   eBaton *breakBaton = new eBaton ( connection->DBCount (), callback );
 
   NJS_CHECK_NUMBER_OF_ARGS ( breakBaton->error, info, 1, 1, exitBreak );
-  NJS_CHECK_OBJECT_VALID3 ( connection, breakBaton->error, exitBreak );
 
   if(!connection->isValid_)
   {

@@ -244,17 +244,14 @@ NAN_METHOD(ResultSet::GetRow)
   NJS_GET_CALLBACK ( callback, info );
 
   ResultSet *njsResultSet = Nan::ObjectWrap::Unwrap<ResultSet>(info.This());
+
+  /* If njsResultSet is invalid from JS, then throw an exception */
+  NJS_CHECK_OBJECT_VALID2 ( njsResultSet, info );
+
   rsBaton   *getRowsBaton = new rsBaton ( njsResultSet->njsconn_->RSCount (),
                                           callback );
   getRowsBaton->njsRS = njsResultSet;
 
-  if ( !njsResultSet )
-  {
-    getRowsBaton->error = NJSMessages::getErrorMsg ( errInvalidJSObject ) ;
-    // donot alter the state while exiting
-    getRowsBaton->errOnActiveOrInvalid = true;
-    goto exitGetRow;
-  }
   if(njsResultSet->state_ == INVALID)
   {
     getRowsBaton->error = NJSMessages::getErrorMsg ( errInvalidResultSet );
@@ -295,16 +292,13 @@ NAN_METHOD(ResultSet::GetRows)
   NJS_GET_CALLBACK ( callback, info );
 
   ResultSet *njsResultSet = Nan::ObjectWrap::Unwrap<ResultSet>(info.This());
+
+  /* If njsResultSet is invalid from JS, then throw an exception */
+  NJS_CHECK_OBJECT_VALID2 ( njsResultSet, info );
+
   rsBaton   *getRowsBaton = new rsBaton ( njsResultSet->njsconn_->RSCount (),
                                           callback );
   getRowsBaton->njsRS = njsResultSet;
-
-  if ( !njsResultSet )
-  {
-    getRowsBaton->error = NJSMessages::getErrorMsg ( errInvalidJSObject );
-    getRowsBaton->errOnActiveOrInvalid = true;
-    goto exitGetRows;
-  }
 
   if(njsResultSet->state_ == INVALID)
   {
@@ -564,17 +558,13 @@ NAN_METHOD(ResultSet::Close)
   NJS_GET_CALLBACK ( callback, info );
 
   ResultSet *njsResultSet = Nan::ObjectWrap::Unwrap<ResultSet>(info.This());
+
+  /* If njsResultSet is invalid from JS, then throw an exception */
+  NJS_CHECK_OBJECT_VALID2 ( njsResultSet, info );
+
   rsBaton   *closeBaton = new rsBaton ( njsResultSet->njsconn_->RSCount (),
                                         callback );
   closeBaton->njsRS = njsResultSet;
-
-  if ( !njsResultSet )
-  {
-    closeBaton->error = NJSMessages::getErrorMsg ( errInvalidJSObject );
-    // donot alter the state while exiting
-    closeBaton->errOnActiveOrInvalid = true;
-    goto exitClose;
-  }
 
   if(njsResultSet->state_ == INVALID)
   {
