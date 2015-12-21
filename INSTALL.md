@@ -119,7 +119,7 @@ alternatively use `yum` to install these packages from the
 
 ### 2.3 Install the add-on
 
-If you are behind a firewall, you may need to set your proxy, for
+If you are behind a firewall you may need to set your proxy, for
 example:
 
 ```
@@ -246,7 +246,7 @@ other Oracle software installed, then these variables are not
 required.  See
 [Oracle Client Location Heuristic on Linux](#linuxinstsearchpath).
 
-If you are behind a firewall, you may need to set your proxy, for
+If you are behind a firewall you may need to set your proxy, for
 example:
 
 ```
@@ -338,7 +338,7 @@ export OCI_INC_DIR=$ORACLE_HOME/rdbms/public
 
 These variables are only needed during installation.
 
-If you are behind a firewall, you may need to set your proxy, for
+If you are behind a firewall you may need to set your proxy, for
 example:
 
 ```
@@ -393,11 +393,6 @@ node select1.js
 
 ## <a name="instosx"></a> 5. Node-oracledb Installation on OS X with Instant Client
 
-*Note*: Users of OS X 10.11 'El Capitan' should review OS X SIP changes to
-`DYLD_LIBRARY_PATH` behavior discussed in
-[#149](https://github.com/oracle/node-oracledb/issues/149) and
-[#231](https://github.com/oracle/node-oracledb/issues/231).
-
 ### 5.1 Install Xcode
 
 Building node-oracledb requires Xcode from the Mac App store.
@@ -425,38 +420,23 @@ and
 into the same directory:
 
 ```
-cd /opt/oracle
+sudo su -
 unzip instantclient-basic-macos.x64-11.2.0.4.0.zip
 unzip instantclient-sdk-macos.x64-11.2.0.4.0.zip
-mv instantclient_11_2 instantclient
-cd instantclient
-ln -s libclntsh.dylib.11.1 libclntsh.dylib
+mkdir /opt/oracle
+mv instantclient_11_2 /opt/oracle/instantclient
+ln -s /opt/oracle/instantclient/libclntsh.dylib.11.1 /opt/oracle/instantclient/libclntsh.dylib
 ```
 
-To run applications, you will need to set the link path:
+Link the OCI libraries into the default library path:
 
 ```
-export DYLD_LIBRARY_PATH=/opt/oracle/instantclient:$DYLD_LIBRARY_PATH
+ln -s /opt/oracle/instantclient/{libclntsh.dylib.11.1,libnnz11.dylib,libociei.dylib} /usr/local/lib/
 ```
-
-To set the path permanently for future terminal shells, add the export
-command to `$HOME/.bash_profile` and re-login.
 
 ### 5.4 Install the add-on
 
-Tell the installer where to find Instant Client:
-
-```
-export OCI_LIB_DIR=/whereever/instantclient
-export OCI_INC_DIR=/whereever/instantclient/sdk/include
-```
-
-These variables are only needed during installation.
-
-If Instant Client is in `/opt/oracle/instantclient`, then these
-variables are not needed at all.
-
-If you are behind a firewall, you may need to set your proxy, for
+If you are behind a firewall you may need to set your proxy, for
 example:
 
 ```
@@ -469,7 +449,7 @@ or, in `csh`:
 setenv http_proxy http://my-proxy.example.com:80/
 ```
 
-Install node-oracledb from the
+As a normal user, install node-oracledb from the
 [NPM registry](https://www.npmjs.com/package/oracledb):
 
 ```
@@ -500,8 +480,6 @@ Run one of the examples:
 ```
 node select1.js
 ```
-
-*Note:* Remember to set `DYLD_LIBRARY_PATH` first.
 
 To run a database on OS X, one option is to use VirtualBox,
 see
