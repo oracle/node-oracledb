@@ -702,7 +702,7 @@ describe('4. binding.js', function() {
     })
   }) // 4.4 
 
-  describe.skip('4.5 The default direction for binding is BIND_IN', function() {
+  describe('4.5 The default direction for binding is BIND_IN', function() {
     var connection = null;
     var tableName = "oracledb_raw";
 
