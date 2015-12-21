@@ -1,11 +1,23 @@
 # Change Log
 
-## node-oracledb v1.5.0 (DD Mon YYYY)
+## node-oracledb v1.5.0 (21 Dec 2015)
+
+- Treat Oracle Database 'Success With Info' warnings as success.
+
+- Extend rollback-on-connection-release with 11g Oracle Clients to occur for all non-query executions. (Not needed with 12c clients).
+
+- Updated OS X install instructions to work on El Capitan.
+
+- Display an error and prevent connection release while database calls are in progress.
+
+- Fixed intermittent crash while selecting data from CLOB column.
+
+- Fixed crash when trying to set invalid values for connection properties.
 
 ## node-oracledb v1.4.0 (17 Nov 2015)
 
 - Upgraded NAN dependency to version 2 allowing node-oracledb to build 
-  with Node 0.10, 0.12, 4 and 5.  Note: a compiler supporting C++11 is now required.
+  with Node 0.10, 0.12, 4 and 5.  Note: a compiler supporting C++11 is required to build with Node 4.2 and 5.
 
 - Fixed a cursor leak when statement execution fails.
 
