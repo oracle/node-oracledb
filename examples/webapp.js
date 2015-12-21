@@ -33,7 +33,6 @@
  *****************************************************************************/
 
 var http     = require('http');
-var url      = require('url');
 var oracledb = require('oracledb');
 var dbConfig = require('./dbconfig.js');
 
@@ -60,7 +59,7 @@ oracledb.createPool (
     }
 
     // Create HTTP server and listen on port - portid
-    hs = http.createServer (
+    var hs = http.createServer (
       function(request, response)  // Callback gets HTTP request & response object
       {
         var urlparts = request.url.split("/");
@@ -151,13 +150,13 @@ function displayResults(response, result, deptid)
 
   // Column Title
   response.write("<tr>");
-  for (col = 0; col < result.metaData.length; col++) {
+  for (var col = 0; col < result.metaData.length; col++) {
     response.write("<td>" + result.metaData[col].name + "</td>");
   }
   response.write("</tr>");
 
   // Rows
-  for (row = 0; row < result.rows.length; row++) {
+  for (var row = 0; row < result.rows.length; row++) {
     response.write("<tr>");
     for (col = 0; col < result.rows[row].length; col++) {
       response.write("<td>" + result.rows[row][col] + "</td>");

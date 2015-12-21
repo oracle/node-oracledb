@@ -66,4 +66,4 @@ oracledb.getConnection(
     portUpdate = serverVer % 100 ;
     console.log ("Oracle Database version: " + serverVer);
     console.log("Oracle Database text format: " + major + "." + minor + "." + update + "." + port + "." + portUpdate);
-});
+  });
