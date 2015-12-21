@@ -508,9 +508,10 @@ see
 
 ## <a name="instwin"></a> 6. Node-oracledb Installation on Windows
 
-An article
+**Note**: An Oracle Technology Network article
 [Installing node-oracledb on Microsoft Windows](https://community.oracle.com/docs/DOC-931127)
-has step-by-step Windows installation instructions.
+has step-by-step Windows installation instructions that you can
+alternatively refer to.
 
 ### 6.1 Install required tools
 
@@ -556,9 +557,10 @@ default location used by the node-oracledb installer:
 ren C:\instantclient_12_1 C:\oracle\instantclient
 ```
 
-Add the directory to `PATH`.  For example on Windows 7, update `PATH` in
-Control Panel -> System -> Advanced System Settings -> Advanced ->
-Environment Variables -> System variables.
+Add the directory to `PATH`.  For example on Windows 7, update `PATH`
+in Control Panel -> System -> Advanced System Settings -> Advanced ->
+Environment Variables -> System variables -> `PATH` and add your path,
+such as `C:\oracle\instantclient`.
 
 If you have multiple versions of Oracle libraries installed, make sure
 the desired version occurs first in the path.
@@ -581,8 +583,8 @@ Studio' which has environment variables already configured.
 
 Tell the installer where to locate the Oracle client libraries and
 header files by setting the `OCI_LIB_DIR` and `OCI_INC_DIR` variables.
-
 These variables are only needed during installation, not at run time.
+Do *not* add them to `PATH`.
 
 For Instant Client use:
 
@@ -600,7 +602,7 @@ set OCI_LIB_DIR=C:\oracle\product\12.1.0\dbhome_1\oci\lib\msvc
 set OCI_INC_DIR=C:\oracle\product\12.1.0\dbhome_1\oci\include
 ```
 
-Also make sure that `PATH` contains `C:\oracle\product\12.1.0\dbhome_1\bin`.
+In this case, also make sure that `PATH` contains `C:\oracle\product\12.1.0\dbhome_1\bin`.
 
 If you are behind a firewall you may need to set your proxy, for
 example:
