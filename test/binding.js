@@ -689,7 +689,7 @@ describe('4. binding.js', function() {
       );
     })
 
-    it('4.4.4 maximum value is 32767', function(done) {
+    it.skip('4.4.4 maximum value is 32767', function(done) {
       connection.execute(
         "BEGIN :o := lpad('A',32767,'x'); END;", 
         { o: { type: oracledb.STRING, dir : oracledb.BIND_OUT, maxSize:50000 } },
