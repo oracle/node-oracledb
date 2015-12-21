@@ -632,7 +632,10 @@ NAN_SETTER(ILob::SetPieceSize)
   }
 
   if (iLob->buf_)
+  {
     delete [] iLob->buf_;
+    iLob->buf_ = NULL;
+  }
   
   if (iLob->fetchType_ == DpiClob)
   {
@@ -829,14 +832,12 @@ NAN_METHOD(ILob::Read)
 
   Local<Function>  callback;
   ILob            *iLob;
-  LobBaton        *lobBaton = new LobBaton;
 
   NJS_GET_CALLBACK(callback, info);
-
-  lobBaton->cb.Reset( callback );
+  iLob = Nan::ObjectWrap::Unwrap<ILob>(info.This());
+  LobBaton *lobBaton = new LobBaton ( iLob->njsconn_->LOBCount (), callback );
 
   NJS_CHECK_NUMBER_OF_ARGS (lobBaton->error, info, 1, 1, exitRead);
-  iLob = Nan::ObjectWrap::Unwrap<ILob>(info.This());
 
   NJS_CHECK_OBJECT_VALID3(iLob, lobBaton->error, exitRead);
 
@@ -861,8 +862,16 @@ NAN_METHOD(ILob::Read)
  exitRead:
 
   lobBaton->req.data  = (void*)lobBaton;
-  uv_queue_work(uv_default_loop(), &lobBaton->req,
-                Async_Read, (uv_after_work_cb)Async_AfterRead);
+  int status = uv_queue_work(uv_default_loop(), &lobBaton->req,
+               Async_Read, (uv_after_work_cb)Async_AfterRead);
+  // delete the Baton if uv_queue_work fails
+  if ( status )
+  {
+    delete lobBaton;
+    string error = NJSMessages::getErrorMsg ( errInternalError,
+                                              "uv_queue_work", "LobRead" );
+    NJS_SET_EXCEPTION(error.c_str(), error.length());
+  }
 
   info.GetReturnValue().SetUndefined();
 }
@@ -988,7 +997,6 @@ void ILob::Async_AfterRead(uv_work_t *req)
   }
 
   Local<Function> callback = Nan::New<Function>(lobBaton->cb);
-  lobBaton->cb.Reset ();
   delete lobBaton;
 
   Nan::MakeCallback(Nan::GetCurrentContext()->Global(), callback, 2, argv);
@@ -1021,14 +1029,13 @@ NAN_METHOD(ILob::Write)
   Local<Function>  callback;
   Local<Object> buffer_obj;
   ILob            *iLob;
-  LobBaton        *lobBaton = new LobBaton;
 
   NJS_GET_CALLBACK(callback, info);
-
-  lobBaton->cb.Reset( callback );
+  iLob = Nan::ObjectWrap::Unwrap<ILob>(info.This());
+  LobBaton *lobBaton = new LobBaton ( iLob->njsconn_->LOBCount (), callback );
 
   NJS_CHECK_NUMBER_OF_ARGS (lobBaton->error, info, 2, 2, exitWrite);
-  iLob = Nan::ObjectWrap::Unwrap<ILob>(info.This());
+
   NJS_CHECK_OBJECT_VALID3 ( iLob, lobBaton->error, exitWrite);
   if(!iLob->isValid_)
   {
@@ -1055,8 +1062,16 @@ NAN_METHOD(ILob::Write)
  exitWrite:
 
   lobBaton->req.data  = (void*)lobBaton;
-  uv_queue_work(uv_default_loop(), &lobBaton->req,
-                Async_Write, (uv_after_work_cb)Async_AfterWrite);
+  int status = uv_queue_work(uv_default_loop(), &lobBaton->req,
+               Async_Write, (uv_after_work_cb)Async_AfterWrite);
+  // delete the Baton if uv_queue_work fails
+  if ( status )
+  {
+    delete lobBaton;
+    string error = NJSMessages::getErrorMsg ( errInternalError,
+                                              "uv_queue_work", "LobWrite" );
+    NJS_SET_EXCEPTION(error.c_str(), error.length());
+  }
 
   info.GetReturnValue().SetUndefined();
 }
@@ -1149,7 +1164,6 @@ void ILob::Async_AfterWrite(uv_work_t *req)
     argv[0] = Nan::Undefined();
 
   Local<Function> callback = Nan::New<Function>(lobBaton->cb);
-  lobBaton->cb.Reset ();
   delete lobBaton;
 
   Nan::MakeCallback(Nan::GetCurrentContext()->Global(), callback, 1, argv);

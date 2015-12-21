@@ -106,6 +106,37 @@ typedef enum
   ARGS_FOUR  = 4
 }ArgsType;
 
+// ConnectionBusyStatus status
+typedef enum
+{
+  CONN_NOT_BUSY  = 0,      // Connection not busy
+  CONN_BUSY_LOB  = 5001,   // Connection busy with LOB operation
+  CONN_BUSY_RS   = 5002,   // Connection busy with ResultSet operation
+  CONN_BUSY_DB   = 5003,   // Connection busy with DB operation
+}ConnectionBusyStatus;
+
+/*
+ * This class used to increment LOB, ResultSet and connection operation
+ * counts before each operation and decrements after finishing operation
+ */
+class RefCounter
+{
+public:
+  RefCounter(unsigned int& i)
+    : count_(i)
+  {
+    ++count_;
+  }
+
+  ~RefCounter()
+  {
+    --count_;
+  }
+
+private:
+   unsigned int& count_;
+};
+
 /*
  *  Get the callback from the last argument.
  *  If no args or last arg is not callback, throw exception

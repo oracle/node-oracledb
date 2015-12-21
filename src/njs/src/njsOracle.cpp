@@ -685,8 +685,7 @@ NAN_METHOD(Oracledb::GetConnection)
   NJS_GET_CALLBACK ( callback, info );
 
   Oracledb* oracledb = Nan::ObjectWrap::Unwrap<Oracledb> ( info.This() );
-  connectionBaton *connBaton = new connectionBaton ();
-  connBaton->cb.Reset( callback );
+  connectionBaton *connBaton = new connectionBaton ( callback );
 
   NJS_CHECK_OBJECT_VALID3 (oracledb, connBaton->error, exitGetConnection);
 
@@ -721,8 +720,18 @@ exitGetConnection :
   // This needs to be called even in error case to make the control
   // fall through uv_after_work_cb. In case of error being present in
   // baton, the worker thread anyway returns
-  uv_queue_work( uv_default_loop(), &connBaton->req, Async_GetConnection,
-                 (uv_after_work_cb) Async_AfterGetConnection );
+  int status = uv_queue_work( uv_default_loop(), &connBaton->req,
+               Async_GetConnection,
+               (uv_after_work_cb) Async_AfterGetConnection );
+  // delete the Baton if uv_queue_work fails
+  if ( status )
+  {
+    delete connBaton;
+    string error = NJSMessages::getErrorMsg ( errInternalError,
+                                              "uv_queue_work",
+                                              "GetConnection" );
+    NJS_SET_EXCEPTION(error.c_str(), error.length());
+  }
   info.GetReturnValue().SetUndefined();
 }
 
@@ -798,7 +807,6 @@ void Oracledb::Async_AfterGetConnection (uv_work_t *req)
     argv[1] = connection;
   }
   Local<Function> callback = Nan::New<Function>(connBaton->cb);
-  connBaton->cb.Reset();
   delete connBaton;
   Nan::MakeCallback(
     Nan::GetCurrentContext()->Global(),
@@ -827,8 +835,7 @@ NAN_METHOD(Oracledb::CreatePool)
   NJS_GET_CALLBACK ( callback, info );
 
   Oracledb* oracledb = Nan::ObjectWrap::Unwrap<Oracledb> ( info.This() );
-  connectionBaton *poolBaton = new connectionBaton ();
-  poolBaton->cb.Reset( callback );
+  connectionBaton *poolBaton = new connectionBaton ( callback );
 
   NJS_CHECK_OBJECT_VALID3(oracledb, poolBaton->error, exitCreatePool);
 
@@ -869,10 +876,18 @@ NAN_METHOD(Oracledb::CreatePool)
 exitCreatePool:
   poolBaton->req.data = (void *)poolBaton;
 
-  uv_queue_work(uv_default_loop(),
-                &poolBaton->req,
-                Async_CreatePool,
-                (uv_after_work_cb) Async_AfterCreatePool);
+  int status = uv_queue_work(uv_default_loop(),
+               &poolBaton->req,
+               Async_CreatePool,
+               (uv_after_work_cb) Async_AfterCreatePool);
+  // delete the Baton if uv_queue_work fails
+  if ( status )
+  {
+    delete poolBaton;
+    string error = NJSMessages::getErrorMsg ( errInternalError,
+                                              "uv_queue_work", "CreatePool" );
+    NJS_SET_EXCEPTION(error.c_str(), error.length());
+  }
 
   info.GetReturnValue().SetUndefined();
 }
@@ -956,7 +971,6 @@ void Oracledb::Async_AfterCreatePool (uv_work_t *req)
     argv[1] = njsPool;
   }
   Local<Function> callback = Nan::New(poolBaton->cb);
-  poolBaton->cb.Reset ();
   delete poolBaton;
   Nan::MakeCallback ( Nan::GetCurrentContext()->Global(),
                        callback, 2, argv);

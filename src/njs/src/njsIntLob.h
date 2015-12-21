@@ -81,15 +81,20 @@ typedef struct LobBaton
   ILob              *iLob;
   char              *writebuf;
   unsigned long long writelen;
+  RefCounter         counter;
   
   Nan::Persistent<Function> cb;
 
-  LobBaton(): error(""), dpienv(NULL), dpiconn(NULL),
-              iLob(NULL), writebuf(NULL), writelen(0)
-  {}
+  LobBaton( unsigned int& count, Local<Function> callback ):
+    error(""), dpienv(NULL), dpiconn(NULL), iLob(NULL), writebuf(NULL),
+    writelen(0), counter( count )
+  { 
+    cb.Reset( callback );
+  }
 
   ~LobBaton ()
-   {
+   { 
+     cb.Reset();
    }
   
 } LobBaton;
@@ -135,8 +140,6 @@ private:
   unsigned int       chunkSize_;
   unsigned long long length_;
 };
-
-
 
 class ILob : public Nan::ObjectWrap
 {
@@ -209,7 +212,5 @@ class ILob : public Nan::ObjectWrap
   unsigned long long amountWritten_;
   unsigned int       type_;
 };
-
-
 
 #endif                       /** __NJSILOB_H__ **/

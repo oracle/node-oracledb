@@ -208,16 +208,20 @@ typedef struct connectionBaton
 
   Oracledb *oracledb;
 
-  connectionBaton() : user(""), pswrd(""), connStr(""), connClass(""),
+  connectionBaton( Local<Function> callback ) :
+                      user(""), pswrd(""), connStr(""), connClass(""),
                       externalAuth(false), error(""),
                       poolMax(0), poolMin(0), poolIncrement(0),
                       poolTimeout(0), stmtCacheSize(0), maxRows(0),
                       outFormat(0), dpienv(NULL),
                       dpiconn(NULL), dpipool(NULL)
-  {}
+  { 
+    cb.Reset( callback );
+  }
 
   ~connectionBaton()
    {
+     cb.Reset();
    }
 
 }connectionBaton;
