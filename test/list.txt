@@ -500,10 +500,18 @@
     60.2 The returned length is limited to the maximum size
 
 61. checkClassesTypes.js
-     61.1 Oracledb class
-     61.2 Connection class
-     61.3 Lob Class
+    61.1 Oracledb class
+    61.2 Connection class
+    61.3 Lob Class
 
 62. lobProperties.js
-
-63. lobErrorEvent.js
+    62.1 chunkSize (read-only)
+    62.2 length (read-only)
+    62.3 pieceSize -default value is chunkSize
+    62.4 pieceSize - can be increased
+    62.5 pieceSize - can be decreased
+    62.6 pieceSize - can be zero
+    62.7 pieceSize - cannot be less than zero
+    62.8 pieceSize - cannot be null
+    62.9 pieceSize - must be a number
+    62.10 type (read-only)
