@@ -1,5 +1,7 @@
 # Change Log
 
+## node-oracledb v1.5.0 (DD Mon YYYY)
+
 ## node-oracledb v1.4.0 (17 Nov 2015)
 
 - Upgraded NAN dependency to version 2 allowing node-oracledb to build 
