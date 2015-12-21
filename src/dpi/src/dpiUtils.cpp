@@ -74,7 +74,6 @@ static void ociCallCommon(sword rc, void *handle, ub4 errType)
     throw ExceptionImpl(DpiErrUnkOciError);
   else
   {
-    ociErrorMsg[strlen((char*)ociErrorMsg)-1]=0; //strip off newline
     throw ExceptionImpl("ORA", ociErrorNo, (const char *)ociErrorMsg);
   }
 }

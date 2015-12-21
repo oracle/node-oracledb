@@ -636,9 +636,17 @@ NAN_SETTER(ILob::SetPieceSize)
   
   if (iLob->fetchType_ == DpiClob)
   {
-    // accommodate multi-byte charsets
-    iLob->buf_ = new char[iLob->bufSize_ *
-                           iLob->dpiconn_->getByteExpansionRatio()];
+    try
+    {
+      // accommodate multi-byte charsets
+      iLob->buf_ = new char[iLob->bufSize_ *
+                             iLob->dpiconn_->getByteExpansionRatio()];
+    }
+    catch(dpi::Exception &e)
+    {
+      NJS_SET_CONN_ERR_STATUS (  e.errnum(), iLob->dpiconn_ );
+      NJS_SET_EXCEPTION(e.what(), strlen(e.what()));
+    }
   }
   else
     iLob->buf_ = new char[iLob->bufSize_];

@@ -263,7 +263,15 @@ NAN_SETTER(Connection::SetClientId)
   {
     std::string client;
     NJS_SET_PROP_STR(client, value, "clientId");
-    njsConn->dpiconn_->clientId(client);
+    try
+    {
+      njsConn->dpiconn_->clientId(client);
+    }
+    catch(dpi::Exception &e)
+    {
+      NJS_SET_CONN_ERR_STATUS (  e.errnum(), njsConn->dpiconn_ );
+      NJS_SET_EXCEPTION(e.what(), strlen(e.what()));
+    }
   }
 }
 
@@ -297,7 +305,15 @@ NAN_SETTER(Connection::SetModule)
   {
     std::string module;
     NJS_SET_PROP_STR( module, value, "module");
-    njsConn->dpiconn_->module(module);
+    try
+    {
+      njsConn->dpiconn_->module(module);
+    }
+    catch(dpi::Exception &e)
+    {
+      NJS_SET_CONN_ERR_STATUS (  e.errnum(), njsConn->dpiconn_ );
+      NJS_SET_EXCEPTION(e.what(), strlen(e.what()));
+    }
   }
 }
 
@@ -331,7 +347,15 @@ NAN_SETTER(Connection::SetAction)
   {
     std::string action;
     NJS_SET_PROP_STR( action, value, "action");
-    njsConn->dpiconn_->action(action);
+    try
+    {
+      njsConn->dpiconn_->action(action);
+    }
+    catch(dpi::Exception &e)
+    {
+      NJS_SET_CONN_ERR_STATUS (  e.errnum(), njsConn->dpiconn_ );
+      NJS_SET_EXCEPTION(e.what(), strlen(e.what()));
+    }
   }
 }
 /*****************************************************************************/
