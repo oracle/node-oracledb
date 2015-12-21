@@ -503,6 +503,8 @@
     61.1 Oracledb class
     61.2 Connection class
     61.3 Lob Class
+    61.4 Pool Class
+    61.5 ResultSet Class
 
 62. lobProperties.js
     62.1 chunkSize (read-only)
