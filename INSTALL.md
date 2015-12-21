@@ -33,8 +33,8 @@ The [*node-oracledb*](https://github.com/oracle/node-oracledb) add-on for Node.j
 The steps below create a Node.js installation for testing.  Adjust the
 steps for your environment.
 
-This node-oracledb release has been tested with Node 0.10, 0.12, 4.2
-and 5.0 on 64-bit Oracle Linux and Windows.  The add-on can also build
+This node-oracledb release has been tested with Node 0.10, 0.12, 4.2 LTS
+and 5 on 64-bit Oracle Linux and Windows.  The add-on can also build
 in some Mac OS X, 32-bit Linux, 32-bit Windows, Solaris and AIX
 environments, but these architectures have not been fully tested.
 
@@ -48,7 +48,7 @@ Client 12.1 you can connect to Oracle Database 10.2 or greater.  Use
 Oracle Client 11.2 if you need to connect to Oracle Database 9.2.
 
 A compiler is required.  Use Visual Studio on Windows, gcc on Linux or
-Xcode on OS X.  When building with Node 4 onwards, it must support
+Xcode on OS X.  When building with Node 4 onwards, the compiler must support
 C++11.  Note the default compiler on Oracle Linux 6 and RHEL 6 does
 not have the required support.  Install a newer compiler or upgrade to
 Oracle Linux 7.
@@ -80,7 +80,7 @@ which has Oracle Database 12c pre-installed on Oracle Linux.   If you want to in
 own database, installing the free
 [Oracle Database 11.2 'XE' Express Edition](http://www.oracle.com/technetwork/database/database-technologies/express-edition/overview/index.html)
 is quick and easy.  Other database editions may be downloaded
-[here](http://www.oracle.com/technetwork/database/enterprise-edition/downloads/index-092322.html).  If you want to
+[here](http://www.oracle.com/technetwork/database/enterprise-edition/downloads/).  If you want to
 install Oracle Linux yourself, it is free from
 [here](http://public-yum.oracle.com/).
 
@@ -89,18 +89,18 @@ install Oracle Linux yourself, it is free from
 ### 2.1 Install Node.js
 
 Download the
-[Node.js Linux 64-bit binaries](http://nodejs.org/download/) and
+[Node.js Linux 64-bit binaries](http://nodejs.org) and
 extract the file, for example into `/opt`:
 
 ```
 cd /opt
-tar -zxf node-v0.12.7-linux-x64.tar.gz
+tar -Jxf node-v4.2.3-linux-x64.tar.xz
 ```
 
 Set PATH to include Node.js:
 
 ```
-export PATH=/opt/node-v0.12.7-linux-x64/bin:$PATH
+export PATH=/opt/node-v4.2.3-linux-x64/bin:$PATH
 ```
 
 ### 2.2 Install the free Oracle Instant Client 'Basic' and 'SDK' RPMs
@@ -182,18 +182,18 @@ node select1.js
 ### 3.1 Install Node.js
 
 Download the
-[Node.js Linux 64-bit binaries](http://nodejs.org/download/) and
+[Node.js Linux 64-bit binaries](http://nodejs.org/) and
 extract the file, for example into `/opt`:
 
 ```
 cd /opt
-tar -zxf node-v0.12.7-linux-x64.tar.gz
+tar -Jxf node-v4.2.3-linux-x64.tar.xz
 ```
 
 Set PATH to include Node.js:
 
 ```
-export PATH=/opt/node-v0.12.7-linux-x64/bin:$PATH
+export PATH=/opt/node-v4.2.3-linux-x64/bin:$PATH
 ```
 
 ### 3.2 Install the free Oracle Instant Client 'Basic' and 'SDK' ZIPs
@@ -309,18 +309,18 @@ Oracle Database.
 ### 4.1 Install Node.js
 
 Download the
-[Node.js Linux 64-bit binaries](http://nodejs.org/download/) and
+[Node.js Linux 64-bit binaries](http://nodejs.org/) and
 extract the file, for example into `/opt`:
 
 ```
 cd /opt
-tar -zxf node-v0.12.7-linux-x64.tar.gz
+tar -zxf node-v4.2.3-linux-x64.tar.gz
 ```
 
 Set your PATH variable to include Node.js:
 
 ```
-export PATH=/opt/node-v0.12.7-linux-x64/bin:$PATH
+export PATH=/opt/node-v4.2.3-linux-x64/bin:$PATH
 ```
 
 ### 4.2 Install the add-on
@@ -509,8 +509,8 @@ during build and run time.  Otherwise use a 64-bit Node.js with a
 
 ### 6.2 Install Node.js
 
-Install the 64-bit Node.js  MSI (e.g. node-v0.12.7-x64.msi) from
-[nodejs.org](http://nodejs.org/download/).  Make sure the option to
+Install the 64-bit Node.js  MSI (e.g. node-v4.2.3-x64.msi) from
+[nodejs.org](http://nodejs.org/).  Make sure the option to
 add the Node and npm directories to the path is selected.
 
 ### 6.3 Install the free Oracle Instant Client ZIPs
