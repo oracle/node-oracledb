@@ -52,8 +52,8 @@ oracledb.getConnection(
       {
         fetchInfo :
         {
-	  "HIRE_DATE":      { type : oracledb.STRING },  // return the date as a string
-	  "COMMISSION_PCT": { type : oracledb.DEFAULT }  // override oracledb.fetchAsString
+          "HIRE_DATE":      { type : oracledb.STRING },  // return the date as a string
+          "COMMISSION_PCT": { type : oracledb.DEFAULT }  // override oracledb.fetchAsString
         }
       },
       function(err, result)

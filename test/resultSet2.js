@@ -794,7 +794,16 @@ describe('55. resultSet2.js', function() {
   })
 
   describe.skip('55.12 bind a cursor BIND_INOUT', function() {
-    it('55.12.1 should work', function(done) {
+    
+    before('prepare table oracledb_employees', function(done) {
+      setUp(connection, tableName, done);
+    })
+
+    after('drop table', function(done) {
+      clearUp(connection, tableName, done);
+    })
+
+    it('55.12.1 does not work currently due to known bug', function(done) {
       var proc = 
           "CREATE OR REPLACE PROCEDURE get_emp_rs_inout (p_in IN NUMBER, p_out IN OUT SYS_REFCURSOR) \
              AS \
@@ -823,6 +832,7 @@ describe('55. resultSet2.js', function() {
             },
             function(err, result) {
               should.not.exist(err);
+              // Error occurs -  NJS-007: invalid value for "type" in parameter 2
               console.log(result);
               callback();
             }

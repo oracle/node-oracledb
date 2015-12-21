@@ -87,4 +87,4 @@ var fetchDbmsOutputLine = function (conn, cb) {
         return fetchDbmsOutputLine(conn, cb);
       }
     });
-  };
+};

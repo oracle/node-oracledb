@@ -72,7 +72,7 @@ oracledb.getConnection(
             if (err) {
               console.error(err.message);
             } else {
-              js = JSON.parse(result.rows[0][0]);  // just show first record
+              var js = JSON.parse(result.rows[0][0]);  // just show first record
               console.log('Query results: ', js);
             }
             doRelease(connection);

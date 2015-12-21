@@ -37,7 +37,9 @@
 var oracledb = require('oracledb');
 var should   = require('should');
 var async    = require('async');
+var fs       = require('fs');
 var dbConfig = require('./dbConfig.js');
+var assist   = require('./dataTypeAssist.js');
 
 describe('61. checkClassesTypes.js', function() {
 
@@ -79,31 +81,143 @@ describe('61. checkClassesTypes.js', function() {
   })
 
   it('61.3 Lob Class', function(done) {
-    var connection = null,
-        clob = null,
-        blob = null;
-    
+    var connection = null;
     var clobTableName = "oracledb_myclobs";
-    var blobTableName = "oracledb_myblobs";
     
     async.series([
-      function(callback) {
+      function getConn(callback) {
         oracledb.getConnection(credential, function(err, conn) {
           should.not.exist(err);
           connection = conn;
           callback();
         });
       },
-      function(callback) {
-        callback();
+      function createTab(callback) {
+        assist.createTable(connection, clobTableName, callback);
       },
-      function(callback) {
+      function insertLobData(callback) {
+        var sqlInsert = "INSERT INTO " + clobTableName + " VALUES (:n, EMPTY_CLOB()) " 
+                        + " RETURNING content INTO :clob";
+        var bindVar = { n:1, clob: {type: oracledb.CLOB, dir: oracledb.BIND_OUT} };
+        var clobFileName = './test/clobexample.txt';
+
+        connection.execute(
+          sqlInsert,
+          bindVar,
+          function(err, result) {
+            should.not.exist(err);
+
+            var lob = result.outBinds.clob[0];
+            var clobStream = fs.createReadStream(clobFileName);
+
+            clobStream.on('error', function(err) {
+              should.not.exist();
+            });
+
+            lob.on('error', function(err) {
+              should.not.exist(err);
+            });
+
+            clobStream.on('end', function() {
+              connection.commit( function(err) {
+                should.not.exist(err);
+                callback();
+              });
+            });
+
+            clobStream.pipe(lob);
+          }
+        );
+      },
+      function checking(callback) {
+        var sqlSelect = "SELECT * FROM " + clobTableName + " WHERE num = :n";
+        connection.execute(
+          sqlSelect,
+          { n: 1 },
+          function(err, result) {
+            should.not.exist(err);
+            var lob = result.rows[0][1];
+
+            var type = Object.prototype.toString.call(lob);
+            type.should.eql('[object Object]');
+            
+            callback();
+          }
+        );
+      },
+      function dropTab(callback) {
+        connection.execute(
+          "DROP TABLE " + clobTableName,
+          function(err) {
+            should.not.exist(err);
+            callback();
+          }
+        );
+      },
+      function releaseConn(callback) {
         connection.release( function(err) {
           should.not.exist(err);
           callback();
         });
       }
-    ], done);
-  })
+    ], done); 
+  }) // 61.3
+
+  it('61.4 Pool Class', function(done) {
+    async.waterfall(
+      [
+        function(callback) {
+          oracledb.createPool(credential, callback);
+        },
+        function(pool, callback) {
+          var type = Object.prototype.toString.call(pool);
+          type.should.eql('[object Pool]');
+
+          return callback(null, pool);
+        },
+        function(pool, callback) {
+          pool.terminate(callback);
+        }
+      ], 
+      function(err) {
+        should.not.exist(err);
+        done();
+      }
+    );
+  }) // 61.4
+
+  it('61.5 ResultSet Class', function(done) {
+    async.waterfall(
+      [
+        function(callback) {
+          oracledb.getConnection(credential, callback);
+        },
+        function(connection, callback) {
+          connection.execute(
+            "SELECT 'abcde' FROM dual",
+            [],
+            { resultSet: true },
+            function(err, result) {
+              if (err)
+                return callback(err);
+              else {
+                var type = Object.prototype.toString.call(result.resultSet);
+                type.should.eql('[object ResultSet]');
+                return callback(null, connection);
+              }
+            }
+          );
+        },
+        function(connection, callback) {
+          connection.release(callback);
+        }
+      ], 
+      function(err) {
+        should.not.exist(err);
+        done();
+      }
+    );
+  }) // 61.5
+
 })
 

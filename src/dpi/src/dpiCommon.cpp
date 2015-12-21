@@ -24,10 +24,6 @@
  *
  *****************************************************************************/
 
-#ifndef ORATYPES
-# include <oratypes.h>
-#endif
-
 #ifndef OCI_ORACLE
 # include <oci.h>
 #endif

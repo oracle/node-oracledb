@@ -166,8 +166,6 @@ public:
   // If NJS layer doesn't set any value, default prefetch is done by OCI.
   virtual void prefetchRows ( unsigned int prefetchRows ) = 0;
 
-  virtual bool        isDML() const = 0 ;
-
   virtual bool        isReturning() = 0 ;
 
   virtual DPI_SZ_TYPE  rowsAffected() const = 0;

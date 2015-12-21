@@ -134,13 +134,17 @@ typedef struct poolBaton
   Pool*       njspool;
   unsigned int lobPrefetchSize;
 
-  poolBaton() :  error(""), connClass(""),
+  poolBaton( Local<Function> callback ) :
+                 error(""), connClass(""),
                  dpiconn(NULL), njspool(NULL), lobPrefetchSize(0)
-  {}
+  { 
+    cb.Reset( callback );
+  }
 
   ~poolBaton()
    {
-  }
+     cb.Reset();
+   }
 
 }poolBaton;
 

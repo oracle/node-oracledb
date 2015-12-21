@@ -69,7 +69,7 @@ using namespace v8;
 
 /* Keep the version in sync with package.json */
 #define NJS_NODE_ORACLEDB_MAJOR       1
-#define NJS_NODE_ORACLEDB_MINOR       4
+#define NJS_NODE_ORACLEDB_MINOR       5
 #define NJS_NODE_ORACLEDB_PATCH       0
 
 /* Used for Oracledb.version */
@@ -208,16 +208,20 @@ typedef struct connectionBaton
 
   Oracledb *oracledb;
 
-  connectionBaton() : user(""), pswrd(""), connStr(""), connClass(""),
+  connectionBaton( Local<Function> callback ) :
+                      user(""), pswrd(""), connStr(""), connClass(""),
                       externalAuth(false), error(""),
                       poolMax(0), poolMin(0), poolIncrement(0),
                       poolTimeout(0), stmtCacheSize(0), maxRows(0),
                       outFormat(0), dpienv(NULL),
                       dpiconn(NULL), dpipool(NULL)
-  {}
+  { 
+    cb.Reset( callback );
+  }
 
   ~connectionBaton()
    {
+     cb.Reset();
    }
 
 }connectionBaton;

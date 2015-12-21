@@ -395,8 +395,7 @@ NAN_METHOD(Pool::GetConnection)
 
   Pool *njsPool = Nan::ObjectWrap::Unwrap<Pool>(info.This());
 
-  poolBaton *connBaton = new poolBaton ();
-  connBaton->cb.Reset( callback );
+  poolBaton *connBaton = new poolBaton ( callback );
 
   NJS_CHECK_OBJECT_VALID3 ( njsPool, connBaton->error, exitGetConnection);
   NJS_CHECK_NUMBER_OF_ARGS ( connBaton->error, info, 1, 1, exitGetConnection );
@@ -413,8 +412,18 @@ NAN_METHOD(Pool::GetConnection)
 exitGetConnection:
   connBaton->req.data = (void *)connBaton;
 
-  uv_queue_work(uv_default_loop(), &connBaton->req, Async_GetConnection,
-                (uv_after_work_cb)Async_AfterGetConnection);
+  int status = uv_queue_work(uv_default_loop(), &connBaton->req,
+               Async_GetConnection,
+               (uv_after_work_cb)Async_AfterGetConnection);
+  // delete the Baton if uv_queue_work fails
+  if ( status )
+  {
+    delete connBaton;
+    string error = NJSMessages::getErrorMsg ( errInternalError,
+                                              "uv_queue_work",
+                                              "GetConnection" );
+    NJS_SET_EXCEPTION(error.c_str(), error.length());
+  }
 
   info.GetReturnValue().SetUndefined();
 } 
@@ -486,18 +495,15 @@ void Pool::Async_AfterGetConnection(uv_work_t *req)
     argv[1] = connection;
   }
 
-  Nan::MakeCallback(
-    Nan::GetCurrentContext()->Global(),
-    Nan::New<Function>(connBaton->cb), 
-    2, 
-    argv);
+  Local<Function> callback = Nan::New<Function>(connBaton->cb);
+  delete connBaton;
+  Nan::MakeCallback( Nan::GetCurrentContext()->Global(),
+                      callback, 2, argv );
 
   if(tc.HasCaught())
   {
     Nan::FatalException(tc);
   }
-  connBaton->cb.Reset ();
-  delete connBaton;
 }
 
 /*****************************************************************************/
@@ -515,8 +521,7 @@ NAN_METHOD(Pool::Terminate)
 
   Pool *njsPool = Nan::ObjectWrap::Unwrap<Pool>(info.This());
 
-  poolBaton *terminateBaton = new poolBaton ();
-  terminateBaton->cb.Reset( callback );
+  poolBaton *terminateBaton = new poolBaton ( callback );
 
   NJS_CHECK_OBJECT_VALID3 (njsPool, terminateBaton->error, exitTerminate);
   NJS_CHECK_NUMBER_OF_ARGS ( terminateBaton->error, info, 1, 1, exitTerminate );
@@ -531,8 +536,17 @@ NAN_METHOD(Pool::Terminate)
 exitTerminate:
   terminateBaton->req.data = (void *)terminateBaton;
 
-  uv_queue_work(uv_default_loop(), &terminateBaton->req, Async_Terminate,
-                (uv_after_work_cb)Async_AfterTerminate);
+  int status = uv_queue_work(uv_default_loop(), &terminateBaton->req,
+               Async_Terminate,
+               (uv_after_work_cb)Async_AfterTerminate);
+  // delete the Baton if uv_queue_work fails
+  if ( status )
+  {
+    delete terminateBaton;
+    string error = NJSMessages::getErrorMsg ( errInternalError,
+                                              "uv_queue_work", "Terminate" );
+    NJS_SET_EXCEPTION(error.c_str(), error.length());
+  }
 
   info.GetReturnValue().SetUndefined();
 }
@@ -594,17 +608,14 @@ void Pool::Async_AfterTerminate(uv_work_t *req)
     terminateBaton-> njspool-> isValid_ = false;
   }
 
-  Nan::MakeCallback( 
-    Nan::GetCurrentContext()->Global(),
-    Nan::New<Function>(terminateBaton->cb), 
-    1, 
-    argv );
+  Local<Function> callback = Nan::New<Function>(terminateBaton->cb);
+  delete terminateBaton;
+  Nan::MakeCallback( Nan::GetCurrentContext()->Global(),
+                      callback, 1, argv );
   if(tc.HasCaught())
   {
     Nan::FatalException(tc);
   }
-  terminateBaton->cb.Reset ();
-  delete terminateBaton;
 }
 
 
