@@ -47,10 +47,11 @@ client-server network compatibility applies.  For example, with Oracle
 Client 12.1 you can connect to Oracle Database 10.2 or greater.  Use
 Oracle Client 11.2 if you need to connect to Oracle Database 9.2.
 
-A compiler supporting C++11 is required.  Use Visual Studio on
-Windows, gcc on Linux or Xcode on OS X.  Note the default compiler on
-Oracle Linux 6 and RHEL 6 does not have the required support.  Install
-a newer compiler or upgrade to Oracle Linux 7.
+A compiler is required.  Use Visual Studio on Windows, gcc on Linux or
+Xcode on OS X.  When building with Node 4 onwards, it must support
+C++11.  Note the default compiler on Oracle Linux 6 and RHEL 6 does
+not have the required support.  Install a newer compiler or upgrade to
+Oracle Linux 7.
 
 Python 2.7 is needed by node-gyp.  If another version of Python occurs
 first in your binary path then, when you install node-oracledb, use
