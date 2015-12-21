@@ -442,7 +442,7 @@
     55.11 result set with unsupported data types
         55.11.1 ROWID data type
     55.12 bind a cursor BIND_INOUT
-      - 55.12.1 should work
+      - 55.12.1 does not work currently due to known bug
 
 56. fetchAs.js
     56.1 property value check
