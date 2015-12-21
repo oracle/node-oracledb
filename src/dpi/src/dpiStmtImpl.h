@@ -96,15 +96,6 @@ public:
 
   virtual unsigned int  getState ();
 
-
-  // Is the SQL statement DML or not ?
-  virtual inline bool isDML () const
-  {
-    return ( ( stmtType_ == DpiStmtInsert ) ||
-             ( stmtType_ == DpiStmtUpdate ) ||
-             ( stmtType_ == DpiStmtDelete ) );
-  }
-
   virtual bool isReturning ();
 
 

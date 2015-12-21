@@ -349,7 +349,8 @@ void StmtImpl::execute (int numIterations,  bool autoCommit)
            errh_ );
 
 #if OCI_MAJOR_VERSION < 12
-  if ( isDML () && !conn_->hasTxn () )
+  // Rollback on connection release for all non-select transactions.
+  if ( ( stmtType_ != DpiStmtSelect ) && !conn_->hasTxn () )
   {
     /* Not to be reset, till thread safety is ensured in NJS */
     conn_->hasTxn (true );
