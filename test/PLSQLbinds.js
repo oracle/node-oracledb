@@ -296,7 +296,7 @@ describe('43. PL/SQL binds', function() {
             }
           );
         },
-        // EXCEPTION: NJS-030: invalid (array) binding of parameter ":p": the "maxArraySize" property is not allowed when specifying a BIND_IN parameter
+        // EXCEPTION: NJS-034: invalid (array) binding of parameter ":p": the "maxArraySize" property is not allowed when specifying a BIND_IN parameter
         function(callback) {
           var bindvars = {
             p:  {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: [1, 2, 3], maxArraySize: 3}
@@ -306,13 +306,13 @@ describe('43. PL/SQL binds', function() {
             bindvars,
             function(err, result) {
               should.exist(err);
-              (err.message).should.be.exactly('NJS-030: invalid (array) binding of parameter ":p": the "maxArraySize" property is not allowed when specifying a BIND_IN parameter');
+              (err.message).should.be.exactly('NJS-034: invalid (array) binding of parameter ":p": the "maxArraySize" property is not allowed when specifying a BIND_IN parameter');
               should.not.exist(result);
               callback();
             }
           );
         },
-        // EXCEPTION: NJS-030: invalid (array) binding of parameter ":p": the \"maxArraySize\" property is mandatory when specifying a BIND_INOUT parameter
+        // EXCEPTION: NJS-034: invalid (array) binding of parameter ":p": the \"maxArraySize\" property is mandatory when specifying a BIND_INOUT parameter
         function(callback) {
           var bindvars = {
             p:  {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: [1, 2, 3]}
@@ -322,13 +322,13 @@ describe('43. PL/SQL binds', function() {
             bindvars,
             function(err, result) {
               should.exist(err);
-              (err.message).should.be.exactly('NJS-030: invalid (array) binding of parameter ":p": the \"maxArraySize\" property is mandatory when specifying a BIND_INOUT parameter');
+              (err.message).should.be.exactly('NJS-034: invalid (array) binding of parameter ":p": the \"maxArraySize\" property is mandatory when specifying a BIND_INOUT parameter');
               should.not.exist(result);
               callback();
             }
           );
         },
-        // EXCEPTION: NJS-030: invalid (array) binding of parameter ":p": the number of array elements "3" is larger then the "maxArraySize" property "2"
+        // EXCEPTION: NJS-034: invalid (array) binding of parameter ":p": the number of array elements "3" is larger then the "maxArraySize" property "2"
         function(callback) {
           var bindvars = {
             p:  {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: [1, 2, 3], maxArraySize: 2}
@@ -338,13 +338,13 @@ describe('43. PL/SQL binds', function() {
             bindvars,
             function(err, result) {
               should.exist(err);
-              (err.message).should.be.exactly('NJS-030: invalid (array) binding of parameter ":p": the number of array elements "3" is larger then the "maxArraySize" property "2"');
+              (err.message).should.be.exactly('NJS-034: invalid (array) binding of parameter ":p": the number of array elements "3" is larger then the "maxArraySize" property "2"');
               should.not.exist(result);
               callback();
             }
           );
         },
-        // EXCEPTION: NJS-030: invalid (array) binding of parameter ":p": the "type" property must be specified and only STRING and NUMBER are (currently) supported
+        // EXCEPTION: NJS-034: invalid (array) binding of parameter ":p": the "type" property must be specified and only STRING and NUMBER are (currently) supported
         function(callback) {
           var bindvars = {
             p:  {type: oracledb.DATE, dir: oracledb.BIND_IN, val: [new Date(), new Date()]}
@@ -354,13 +354,13 @@ describe('43. PL/SQL binds', function() {
             bindvars,
             function(err, result) {
               should.exist(err);
-              (err.message).should.be.exactly('NJS-030: invalid (array) binding of parameter ":p": the "type" property must be specified and only STRING and NUMBER are (currently) supported');
+              (err.message).should.be.exactly('NJS-034: invalid (array) binding of parameter ":p": the "type" property must be specified and only STRING and NUMBER are (currently) supported');
               should.not.exist(result);
               callback();
             }
           );
         },
-        // EXCEPTION: NJS-030: invalid (array) binding of parameter ":p": the type of the array element "1" of the "val" property is not compatible with the "type" property STRING
+        // EXCEPTION: NJS-034: invalid (array) binding of parameter ":p": the type of the array element "1" of the "val" property is not compatible with the "type" property STRING
         function(callback) {
           var bindvars = {
             p:  {type: oracledb.STRING, dir: oracledb.BIND_IN, val: ['hello', 1]}
@@ -370,13 +370,13 @@ describe('43. PL/SQL binds', function() {
             bindvars,
             function(err, result) {
               should.exist(err);
-              (err.message).should.be.exactly('NJS-030: invalid (array) binding of parameter ":p": the type of the array element "1" of the "val" property is not compatible with the "type" property STRING');
+              (err.message).should.be.exactly('NJS-034: invalid (array) binding of parameter ":p": the type of the array element "1" of the "val" property is not compatible with the "type" property STRING');
               should.not.exist(result);
               callback();
             }
           );
         },
-        // EXCEPTION: NJS-030: invalid (array) binding of parameter ":p": the string length 28 of the array element "0" of the "val" property is larger then the "maxSize" property 10
+        // EXCEPTION: NJS-034: invalid (array) binding of parameter ":p": the string length 28 of the array element "0" of the "val" property is larger then the "maxSize" property 10
         function(callback) {
           var bindvars = {
             p:  {type: oracledb.STRING, dir: oracledb.BIND_IN, val: ['this is a quite longs string'], maxSize: 10}
@@ -386,13 +386,13 @@ describe('43. PL/SQL binds', function() {
             bindvars,
             function(err, result) {
               should.exist(err);
-              (err.message).should.be.exactly('NJS-030: invalid (array) binding of parameter ":p": the string length 28 of the array element "0" of the "val" property is larger then the "maxSize" property 10');
+              (err.message).should.be.exactly('NJS-034: invalid (array) binding of parameter ":p": the string length 28 of the array element "0" of the "val" property is larger then the "maxSize" property 10');
               should.not.exist(result);
               callback();
             }
           );
         },
-        // EXCEPTION: NJS-030: invalid (array) binding of parameter ":p": the type of the array element "1" of the "val" property is not compatible with the "type" property STRING
+        // EXCEPTION: NJS-034: invalid (array) binding of parameter ":p": the type of the array element "1" of the "val" property is not compatible with the "type" property STRING
         function(callback) {
           var bindvars = {
             p:  {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: [1, 'hello']}
@@ -402,7 +402,7 @@ describe('43. PL/SQL binds', function() {
             bindvars,
             function(err, result) {
               should.exist(err);
-              (err.message).should.be.exactly('NJS-030: invalid (array) binding of parameter ":p": the type of the array element "1" of the "val" property is not compatible with the "type" property NUMBER');
+              (err.message).should.be.exactly('NJS-034: invalid (array) binding of parameter ":p": the type of the array element "1" of the "val" property is not compatible with the "type" property NUMBER');
               should.not.exist(result);
               callback();
             }

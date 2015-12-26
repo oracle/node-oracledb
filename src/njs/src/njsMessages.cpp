@@ -71,8 +71,6 @@ static const char *errMsg[] =
             " progress",
   "NJS-033: An internal error occurred. [%s][%s]",
   "NJS-034: invalid (array) binding of parameter \"%s\": %s"
-
->>>>>>> upstream/master
 };
 
 string NJSMessages::getErrorMsg ( NJSErrorType err, ... )
