@@ -27,7 +27,8 @@
  *         clobinsert1.js, clobstream1.js and clobstream2.js
  *    Firstly, reads text from clobexample.txt and INSERTs it into a CLOB column.
  *    Secondly, SELECTs a CLOB and pipes it to a file, clobstreamout.txt 
- *    Thirdly, SELECTs the CLOB and compares it with the content in clobexample.txt 
+ *    Thirdly, SELECTs the CLOB and compares it with the content in clobexample.txt.
+ *    Fourthly, query the CLOB with Object outFormat.
  *
  * NUMBERING RULE
  *   Test numbers follow this numbering rule:
@@ -49,7 +50,7 @@ var inFileName = './test/clobexample.txt';  // the file with text to be inserted
 var outFileName = './test/clobstreamout.txt';
 
 describe('40. dataTypeClob.js', function() {
-  this.timeout(10000);  
+  this.timeout(15000);  
 
   if(dbConfig.externalAuth){
     var credential = { externalAuth: true, connectString: dbConfig.connectString };
@@ -210,6 +211,43 @@ describe('40. dataTypeClob.js', function() {
                   data.length.should.be.exactly(clob.length);
                   data.should.equal(clob);
                 });
+              });
+
+              lob.on('error', function(err) {
+                should.not.exist(err, "lob.on 'error' event");
+              });
+            }
+          );
+        },
+        function objectOutFormat(callback) {
+          var lobEndEventFired = false;
+          var lobDataEventFired = false;
+          setTimeout( function(){
+            lobDataEventFired.should.equal(true, "lob does not call 'data' event!");
+            lobEndEventFired.should.equal(true, "lob does not call 'end' event!");
+            callback();
+          }, 2000);
+
+          connection.execute(
+            "SELECT content FROM oracledb_myclobs WHERE num = :n",
+            { n: 1 },
+            { outFormat: oracledb.OBJECT },
+            function(err, result) {
+              should.not.exist(err);
+
+              var clob = '';
+              var row = result.rows[0];
+              var lob = row['CONTENT'];
+
+              lob.setEncoding('utf8');
+
+              lob.on('data', function(chunk) {
+                lobDataEventFired = true;
+                clob += chunk;
+              });
+
+              lob.on('end', function() {
+                lobEndEventFired = true;
               });
 
               lob.on('error', function(err) {

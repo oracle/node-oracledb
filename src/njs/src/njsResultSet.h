@@ -77,13 +77,14 @@ typedef struct rsBaton
                                         // active or invalid  
   eBaton               *ebaton;  
   unsigned int         numRows;         // rows to be fetched.
-  Nan::Persistent<Function> cb;
   ResultSet*           njsRS;           // resultset object.
 
-  rsBaton() 
+  rsBaton( unsigned int& count, Local<Function> callback )
     :  error(""), fetchMultiple(false), errOnActiveOrInvalid(false),
-       ebaton(NULL), numRows(0), njsRS(NULL)
-  {}
+       numRows(0), njsRS(NULL)
+  {
+    ebaton = new eBaton( count, callback );
+  }
 
   ~rsBaton()
    {

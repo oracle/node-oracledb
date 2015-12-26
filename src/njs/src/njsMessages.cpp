@@ -63,7 +63,16 @@ static const char *errMsg[] =
   "NJS-027: unexpected SQL parsing error",
   "NJS-028: raw database type is not supported with DML Returning statements",
   "NJS-029: Invalid object from javascript",
-  "NJS-030: invalid (array) binding of parameter \"%s\": %s"
+  "NJS-030: Connection cannot be released because Lob operations are in"
+            " progress",
+  "NJS-031: Connection cannot be released because ResultSet operations are"
+            " in progress",
+  "NJS-032: Connection cannot be released because a database call is in"
+            " progress",
+  "NJS-033: An internal error occurred. [%s][%s]",
+  "NJS-034: invalid (array) binding of parameter \"%s\": %s"
+
+>>>>>>> upstream/master
 };
 
 string NJSMessages::getErrorMsg ( NJSErrorType err, ... )

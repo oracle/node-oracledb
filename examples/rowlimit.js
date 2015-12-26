@@ -23,26 +23,29 @@
  *   Uses Oracle's sample HR schema.
  *
  *   Scripts to create the HR schema can be found at:
- *   https://github.com/oracle/db-sample-schemas
+ *   https://github.com/oracle/db-sample-schemas/releases
  *
  *   By default, node-oracledb has a maxRows attribute that limits the
  *   number of records fetched from a query to 100.  Although
  *   adjusting maxRows can be used to control the number of rows
  *   available to the application, it is more efficient for the
  *   database if the SQL query syntax limits the number of rows
- *   queried.  Use maxRows only to prevent badly coded queries from
- *   consuming too many Node.js resources.
+ *   returned from the database.  Use maxRows only to prevent badly
+ *   coded queries from consuming too many Node.js resources.
  *
  *****************************************************************************/
 
 var oracledb = require('oracledb');
 var dbConfig = require('./dbconfig.js');
 
+var myoffset     = 2;  // number of rows to skip
+var mymaxnumrows = 6;  // number of rows to fetch
+
 // Properties are applicable to all connections and SQL executions.
 // They can also be set or overridden at the individual execute() call level
 //
 // This script sets maxRows in the execute() call but it could be set here instead
-// oracledb.maxRows = 200;   // Note the default value is 100
+// oracledb.maxRows = 150;   // Note the default value is 100 and EMPLOYEES has 107 rows
 
 oracledb.getConnection(
   {
@@ -50,78 +53,35 @@ oracledb.getConnection(
     password      : dbConfig.password,
     connectString : dbConfig.connectString
   },
-  function(err, connection)
+  function (err, connection)
   {
     if (err) {
       console.error(err.message);
       return;
     }
 
-    // Returns 100 records although the table has 107 rows.  Node-oracledb's default maxRows is 100
-    connection.execute(
-      "SELECT employee_id, last_name " +
-        "FROM employees " +
-        "ORDER BY employee_id",
-      function(err, result)
-      {
-        if (err) {
-          console.error(err.message);
-          return;
-        }
-        console.log("----- Number of employee rows returned with default maxRow limit of 100 --------");
-        console.log(result.rows.length);
-        //console.log(result.rows);
-      });
+    var sql = "SELECT employee_id, last_name FROM employees ORDER BY employee_id";
+    if (connection.oracleServerVersion >= 1201000000) {
+      // 12c row-limiting syntax
+      sql += " OFFSET :offset ROWS FETCH NEXT :maxnumrows ROWS ONLY";
+    } else {
+      // Pre-12c syntax [could also customize the original query and use row_number()]
+      sql = "SELECT * FROM (SELECT A.*, ROWNUM AS MY_RNUM FROM"
+          + "(" + sql + ") A "
+          + "WHERE ROWNUM <= :maxnumrows + :offset) WHERE MY_RNUM > :offset";
+    }
 
-    // Increasing maxRows from the default returns all 107 rows
     connection.execute(
-      "SELECT employee_id, last_name " +
-        "FROM employees " +
-        "ORDER BY employee_id",
-      {}, // A bind variable parameter is needed to disambiguate the following options parameter
-          // otherwise you will get Error: ORA-01036: illegal variable name/number
+      sql,
+      {offset: myoffset, maxnumrows: mymaxnumrows},
       {maxRows: 150},
-      function(err, result)
-      {
+      function(err, result) {
         if (err) {
           console.error(err.message);
-          return;
+        } else {
+          console.log("Executed: " + sql);
+          console.log("Number of rows returned: " + result.rows.length);
+          console.log(result.rows);
         }
-        console.log("----- Number of employee rows returned with increased maxRow value --------");
-        console.log(result.rows.length);
-        //console.log(result.rows);
-      });
-
-    // Oracle 12c syntax for fetching rows 6-10 from a query (won't work with 11g)
-    connection.execute(
-      "SELECT employee_id, last_name " +
-        "FROM employees " +
-        "ORDER BY employee_id " +
-        "OFFSET 5 ROWS FETCH NEXT 5 ROWS ONLY",
-      function(err, result)
-      {
-        if (err) {
-          console.error(err.message);
-          return;
-        }
-        console.log("----- Five employees (12c query syntax) --------");
-        console.log(result.rows);
-      });
-
-    // Oracle 11g syntax for fetching rows 6-10 from a query
-    connection.execute(
-      "SELECT employee_id, last_name " +
-        "FROM (SELECT a.*, ROWNUM AS rnum " +
-        "FROM (SELECT employee_id, last_name FROM employees ORDER BY employee_id) a " +
-        "WHERE ROWNUM <= 10) " +
-        "WHERE rnum > 5",
-      function(err, result)
-      {
-        if (err) {
-          console.error(err.message);
-          return;
-        }
-        console.log("----- Five employees (pre 12c query syntax) --------");
-        console.log(result.rows);
       });
   });

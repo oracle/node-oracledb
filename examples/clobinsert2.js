@@ -26,11 +26,8 @@
  *
  *****************************************************************************/
 
-var fs = require('fs');
 var oracledb = require('oracledb');
 var dbConfig = require('./dbconfig.js');
-
-var inFileName = 'clobexample.txt';  // the file with text to be inserted into the database
 
 oracledb.getConnection(
   {

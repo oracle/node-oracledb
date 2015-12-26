@@ -244,17 +244,14 @@ NAN_METHOD(ResultSet::GetRow)
   NJS_GET_CALLBACK ( callback, info );
 
   ResultSet *njsResultSet = Nan::ObjectWrap::Unwrap<ResultSet>(info.This());
-  rsBaton   *getRowsBaton = new rsBaton ();
-  getRowsBaton->njsRS     = njsResultSet;
-  getRowsBaton->cb.Reset( callback );
 
-  if ( !njsResultSet )
-  {
-    getRowsBaton->error = NJSMessages::getErrorMsg ( errInvalidJSObject ) ;
-    // donot alter the state while exiting
-    getRowsBaton->errOnActiveOrInvalid = true;
-    goto exitGetRow;
-  }
+  /* If njsResultSet is invalid from JS, then throw an exception */
+  NJS_CHECK_OBJECT_VALID2 ( njsResultSet, info );
+
+  rsBaton   *getRowsBaton = new rsBaton ( njsResultSet->njsconn_->RSCount (),
+                                          callback );
+  getRowsBaton->njsRS = njsResultSet;
+
   if(njsResultSet->state_ == INVALID)
   {
     getRowsBaton->error = NJSMessages::getErrorMsg ( errInvalidResultSet );
@@ -295,16 +292,13 @@ NAN_METHOD(ResultSet::GetRows)
   NJS_GET_CALLBACK ( callback, info );
 
   ResultSet *njsResultSet = Nan::ObjectWrap::Unwrap<ResultSet>(info.This());
-  rsBaton   *getRowsBaton = new rsBaton ();
-  getRowsBaton->njsRS   = njsResultSet;
-  getRowsBaton->cb.Reset( callback );
 
-  if ( !njsResultSet )
-  {
-    getRowsBaton->error = NJSMessages::getErrorMsg ( errInvalidJSObject );
-    getRowsBaton->errOnActiveOrInvalid = true;
-    goto exitGetRows;
-  }
+  /* If njsResultSet is invalid from JS, then throw an exception */
+  NJS_CHECK_OBJECT_VALID2 ( njsResultSet, info );
+
+  rsBaton   *getRowsBaton = new rsBaton ( njsResultSet->njsconn_->RSCount (),
+                                          callback );
+  getRowsBaton->njsRS = njsResultSet;
 
   if(njsResultSet->state_ == INVALID)
   {
@@ -359,7 +353,7 @@ void ResultSet::GetRowsCommon(rsBaton *getRowsBaton)
     goto exitGetRowsCommon;
   }
 
-  getRowsBaton->ebaton       = ebaton = new eBaton;
+  ebaton                     = getRowsBaton->ebaton;
   njsRS                      = getRowsBaton->njsRS;
   ebaton->columnNames        = new std::string[njsRS->numCols_];
   ebaton->maxRows            = getRowsBaton->numRows;
@@ -395,8 +389,17 @@ void ResultSet::GetRowsCommon(rsBaton *getRowsBaton)
 exitGetRowsCommon:
   getRowsBaton->req.data  = (void *)getRowsBaton;
 
-  uv_queue_work(uv_default_loop(), &getRowsBaton->req, Async_GetRows,
-                (uv_after_work_cb)Async_AfterGetRows);
+  int status = uv_queue_work(uv_default_loop(), &getRowsBaton->req,
+               Async_GetRows, (uv_after_work_cb)Async_AfterGetRows);
+  // delete the Baton if uv_queue_work fails
+  if ( status )
+  {
+    delete getRowsBaton;
+    string error = NJSMessages::getErrorMsg ( errInternalError,
+                                              "uv_queue_work",
+                                              "GetRowsCommon" );
+    NJS_SET_EXCEPTION(error.c_str(), error.length());
+  }
 
 }
 
@@ -530,15 +533,14 @@ void ResultSet::Async_AfterGetRows(uv_work_t *req)
     getRowsBaton->njsRS->state_ = INACTIVE;
   }
 
-  Local<Function> callback = Nan::New(getRowsBaton->cb);
+  Local<Function> callback = Nan::New(getRowsBaton->ebaton->cb);
+  delete getRowsBaton;
   Nan::MakeCallback(Nan::GetCurrentContext()->Global(),
                   callback, 2, argv);
   if(tc.HasCaught())
   {
     Nan::FatalException(tc);
   }
-  getRowsBaton->cb.Reset();
-  delete getRowsBaton;
 }
 
 /*****************************************************************************/
@@ -556,17 +558,13 @@ NAN_METHOD(ResultSet::Close)
   NJS_GET_CALLBACK ( callback, info );
 
   ResultSet *njsResultSet = Nan::ObjectWrap::Unwrap<ResultSet>(info.This());
-  rsBaton *closeBaton     = new rsBaton ();
-  closeBaton->njsRS       = njsResultSet;
-  closeBaton->cb.Reset( callback );
 
-  if ( !njsResultSet )
-  {
-    closeBaton->error = NJSMessages::getErrorMsg ( errInvalidJSObject );
-    // donot alter the state while exiting
-    closeBaton->errOnActiveOrInvalid = true;
-    goto exitClose;
-  }
+  /* If njsResultSet is invalid from JS, then throw an exception */
+  NJS_CHECK_OBJECT_VALID2 ( njsResultSet, info );
+
+  rsBaton   *closeBaton = new rsBaton ( njsResultSet->njsconn_->RSCount (),
+                                        callback );
+  closeBaton->njsRS = njsResultSet;
 
   if(njsResultSet->state_ == INVALID)
   {
@@ -596,8 +594,17 @@ NAN_METHOD(ResultSet::Close)
 exitClose:
   closeBaton->req.data = (void *)closeBaton;
 
-  uv_queue_work(uv_default_loop(), &closeBaton->req, Async_Close,
-                (uv_after_work_cb)Async_AfterClose);
+  int status = uv_queue_work(uv_default_loop(), &closeBaton->req,
+               Async_Close, (uv_after_work_cb)Async_AfterClose);
+  // delete the Baton if uv_queue_work fails
+  if ( status )
+  {
+    delete closeBaton;
+    string error = NJSMessages::getErrorMsg ( errInternalError,
+                                              "uv_queue_work",
+                                              "ResultSetClose" );
+    NJS_SET_EXCEPTION(error.c_str(), error.length());
+  }
 
   info.GetReturnValue().SetUndefined();
 }
@@ -682,8 +689,7 @@ void ResultSet::Async_AfterClose(uv_work_t *req)
     // resultset is not valid after close succeeds.
     closeBaton-> njsRS-> state_ = INVALID;
   }
-  Local<Function> callback = Nan::New(closeBaton->cb);
-  closeBaton->cb.Reset ();
+  Local<Function> callback = Nan::New(closeBaton->ebaton->cb);
   delete closeBaton;
   Nan::MakeCallback( Nan::GetCurrentContext()->Global(), callback, 1, argv );
   if(tc.HasCaught())

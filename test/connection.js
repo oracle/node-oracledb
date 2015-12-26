@@ -169,8 +169,8 @@ describe('1. connection.js', function(){
           END; \
           EXECUTE IMMEDIATE (' \
               CREATE TABLE oracledb_employees ( \
-                  employees_id NUMBER,  \
-                  employees_name VARCHAR2(20) \
+                  employee_id NUMBER,  \
+                  employee_name VARCHAR2(20) \
               ) \
           '); \
       END; "; 
@@ -284,6 +284,35 @@ describe('1. connection.js', function(){
           (result.rows.length).should.eql(rowsAmount);
           done();
         }  
+      );
+    })
+
+    it('1.2.6 shows 12c new way to limit the number of records fetched by queries', function(done) {
+      connection.should.be.ok;
+
+      var myoffset     = 2;  // number of rows to skip
+      var mymaxnumrows = 6;  // number of rows to fetch
+      var sql = "SELECT employee_id, employee_name FROM oracledb_employees ORDER BY employee_id";
+
+      if (connection.oracleServerVersion >= 1201000000) {
+        // 12c row-limiting syntax
+        sql += " OFFSET :offset ROWS FETCH NEXT :maxnumrows ROWS ONLY";
+      } else {
+        // Pre-12c syntax [could also customize the original query and use row_number()]
+        sql = "SELECT * FROM (SELECT A.*, ROWNUM AS MY_RNUM FROM"
+            + "(" + sql + ") A "
+            + "WHERE ROWNUM <= :maxnumrows + :offset) WHERE MY_RNUM > :offset";
+      }
+
+      connection.execute(
+        sql, 
+        { offset: myoffset, maxnumrows: mymaxnumrows },
+        { maxRows: 150 },
+        function(err, result) {
+          should.not.exist(err);    
+          (result.rows.length).should.eql(mymaxnumrows); 
+          done();
+        }
       );
     })
   })

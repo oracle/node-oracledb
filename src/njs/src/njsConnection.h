@@ -58,7 +58,6 @@
 #include "njsUtils.h"
 #include "njsOracle.h"
 
-
 using namespace v8;
 using namespace node;
 using namespace dpi;
@@ -163,19 +162,24 @@ typedef struct eBaton
   unsigned int         fetchInfoCount;   // Conversion requested count
   FetchInfo            *fetchInfo;       // Conversion meta data
   Nan::Persistent<Function> cb;
+  RefCounter                counter;
 
-  eBaton() : sql(""), error(""), dpienv(NULL), dpiconn(NULL), njsconn(NULL),
+  eBaton( unsigned int& count, Local<Function> callback ) :
+             sql(""), error(""), dpienv(NULL), dpiconn(NULL), njsconn(NULL),
              rowsAffected(0), maxRows(0), prefetchRows(0),
              getRS(false), autoCommit(false), rowsFetched(0), 
              outFormat(0), numCols(0), dpistmt(NULL),
              st(DpiStmtUnknown), stmtIsReturning (false), numOutBinds(0),
              columnNames(NULL), defines(NULL), fetchAsStringTypesCount (0),
-             fetchAsStringTypes(NULL), fetchInfoCount(0), fetchInfo(NULL)
-  {}
+             fetchAsStringTypes(NULL), fetchInfoCount(0), fetchInfo(NULL),
+             counter ( count )
+  { 
+    cb.Reset( callback );
+  }
 
   ~eBaton ()
    {
-     //NanDisposePersistent(cb);
+     cb.Reset ();
      if( !binds.empty() )
      {
        for( unsigned int index = 0 ;index < binds.size(); index++ )
@@ -262,6 +266,16 @@ public:
   static void CopyMetaData ( std::string*, const dpi::MetaData*, unsigned int ); 
   bool isValid() { return isValid_; }
   dpi::Conn* getDpiConn() { return dpiconn_; }
+
+  /*
+   * Counters to see whether connection is busy or not with LOB, ResultSet or
+   * DB operations. This counters incremented and decremented for each
+   * operation and used to prevent releasing busy connection.
+   */
+  inline unsigned int& LOBCount ()   { return lobCount_; }
+  inline unsigned int& RSCount  ()   { return rsCount_;  }
+  inline unsigned int& DBCount  ()   { return dbCount_;  }
+
   Oracledb* oracledb_;
 
 private:
@@ -378,6 +392,7 @@ private:
   //static void UpdateDateValue ( eBaton *executeBaton );
   static void UpdateDateValue ( eBaton *executeBaton, unsigned int index );
   static long double v8Date2OraDate(v8::Local<v8::Value> val);
+  static ConnectionBusyStatus getConnectionBusyStatus ( Connection *conn );
 
   // Callback/Utility function used to allocate buffer(s) for Bind Structs
   static void cbDynBufferAllocate ( void *ctx, bool dmlReturning,
@@ -407,6 +422,13 @@ private:
   dpi::Conn*     dpiconn_;
   bool           isValid_;
   unsigned int   oracleServerVersion_;
+  /*
+   * Counters to see whether connection is busy or not with LOB, ResultSet or
+   * DB operations. This counters used to prevent releasing busy connection.
+   */
+  unsigned int   lobCount_;    // LOB operations counter
+  unsigned int   rsCount_;     // ResultSet operations counter
+  unsigned int   dbCount_;     // Connection or DB operations counter
 
 };
 

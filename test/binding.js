@@ -695,14 +695,13 @@ describe('4. binding.js', function() {
         { o: { type: oracledb.STRING, dir : oracledb.BIND_OUT, maxSize:50000 } },
         function(err, result) {
           should.exist(err);
-          console.log(result.outBinds.o.length);
           done();
         }
       );
     })
   }) // 4.4 
 
-  describe.skip('4.5 The default direction for binding is BIND_IN', function() {
+  describe('4.5 The default direction for binding is BIND_IN', function() {
     var connection = null;
     var tableName = "oracledb_raw";
 

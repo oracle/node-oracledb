@@ -27,11 +27,6 @@
  *
  *****************************************************************************/
 
-
-#ifndef ORATYPES
-# include <oratypes.h>
-#endif
-
 #ifndef DPIUTILS_ORACLE
 # include <dpiUtils.h>
 #endif
@@ -84,13 +79,12 @@ using namespace dpi;
   
 void Lob::read(DpiHandle *svch, DpiHandle *errh, Descriptor *lobLocator,
                unsigned long long &byteAmount, unsigned long long &charAmount,
-               unsigned long long offset, void *buf)
+               unsigned long long offset, void *buf, unsigned long long bufl)
 {
   ociCall(OCILobRead2((OCISvcCtx *)svch, (OCIError *)errh,
                       (OCILobLocator *)lobLocator, 
                       (oraub8 *)&byteAmount, (oraub8 *)&charAmount,
-                      // for CLOBs, buflen is sized to handle multi-byte charsets
-                      offset, buf, byteAmount ? byteAmount : charAmount*4,
+                      offset, buf, (oraub8)(byteAmount ? byteAmount : bufl),
                       OCI_ONE_PIECE, NULL, NULL, 0, SQLCS_IMPLICIT),
           (OCIError *)errh);
 }
@@ -132,13 +126,12 @@ void Lob::read(DpiHandle *svch, DpiHandle *errh, Descriptor *lobLocator,
   
 void Lob::write(DpiHandle *svch, DpiHandle *errh, Descriptor *lobLocator,
                 unsigned long long &byteAmount, unsigned long long &charAmount,
-                unsigned long long offset, void *buf)
+                unsigned long long offset, void *buf, unsigned long long bufl)
 {
   ociCall(OCILobWrite2((OCISvcCtx *)svch, (OCIError *)errh,
                       (OCILobLocator *)lobLocator, 
                       (oraub8 *)&byteAmount, (oraub8 *)&charAmount,
-                      // for CLOBs, buflen is sized to handle multi-byte charsets
-                      offset, buf, byteAmount ? byteAmount : charAmount*4, 
+                      offset, buf, (oraub8)(byteAmount ? byteAmount : bufl),
                       OCI_ONE_PIECE, NULL, NULL, 0, SQLCS_IMPLICIT),
           (OCIError *)errh);
 }

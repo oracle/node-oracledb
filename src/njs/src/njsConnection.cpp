@@ -150,9 +150,12 @@ Connection::~Connection()
 */
 void Connection::setConnection(dpi::Conn* dpiconn, Oracledb* oracledb)
 {
-   this->dpiconn_  = dpiconn;
-   this->isValid_  = true;
-   this->oracledb_ = oracledb;
+   this->dpiconn_   = dpiconn;
+   this->isValid_   = true;
+   this->oracledb_  = oracledb;
+   this->lobCount_  = 0;
+   this->rsCount_   = 0;
+   this->dbCount_   = 0;
 }
 
 /*****************************************************************************/
@@ -309,7 +312,15 @@ NAN_SETTER(Connection::SetClientId)
   {
     std::string client;
     NJS_SET_PROP_STR(client, value, "clientId");
-    njsConn->dpiconn_->clientId(client);
+    try
+    {
+      njsConn->dpiconn_->clientId(client);
+    }
+    catch(dpi::Exception &e)
+    {
+      NJS_SET_CONN_ERR_STATUS (  e.errnum(), njsConn->dpiconn_ );
+      NJS_SET_EXCEPTION(e.what(), strlen(e.what()));
+    }
   }
 }
 
@@ -343,7 +354,15 @@ NAN_SETTER(Connection::SetModule)
   {
     std::string module;
     NJS_SET_PROP_STR( module, value, "module");
-    njsConn->dpiconn_->module(module);
+    try
+    {
+      njsConn->dpiconn_->module(module);
+    }
+    catch(dpi::Exception &e)
+    {
+      NJS_SET_CONN_ERR_STATUS (  e.errnum(), njsConn->dpiconn_ );
+      NJS_SET_EXCEPTION(e.what(), strlen(e.what()));
+    }
   }
 }
 
@@ -377,7 +396,15 @@ NAN_SETTER(Connection::SetAction)
   {
     std::string action;
     NJS_SET_PROP_STR( action, value, "action");
-    njsConn->dpiconn_->action(action);
+    try
+    {
+      njsConn->dpiconn_->action(action);
+    }
+    catch(dpi::Exception &e)
+    {
+      NJS_SET_CONN_ERR_STATUS (  e.errnum(), njsConn->dpiconn_ );
+      NJS_SET_EXCEPTION(e.what(), strlen(e.what()));
+    }
   }
 }
 /*****************************************************************************/
@@ -460,12 +487,14 @@ NAN_METHOD(Connection::Execute)
   Connection *connection;
   NJS_GET_CALLBACK ( callback, info );
 
-  eBaton *executeBaton = new eBaton;
-  executeBaton->cb.Reset( callback );
-  NJS_CHECK_NUMBER_OF_ARGS ( executeBaton->error, info, 2, 4, exitExecute );
   connection = Nan::ObjectWrap::Unwrap<Connection>(info.This());
 
-  NJS_CHECK_OBJECT_VALID3( connection, executeBaton->error, exitExecute );
+  /* If connection is invalid from JS, then throw an exception */
+  NJS_CHECK_OBJECT_VALID2 ( connection, info ) ;
+
+  eBaton *executeBaton = new eBaton ( connection->DBCount (), callback );
+
+  NJS_CHECK_NUMBER_OF_ARGS ( executeBaton->error, info, 2, 4, exitExecute );
 
   if(!connection->isValid_)
   {
@@ -501,8 +530,16 @@ NAN_METHOD(Connection::Execute)
 
   exitExecute:
   executeBaton->req.data  = (void*) executeBaton;
-  uv_queue_work(uv_default_loop(), &executeBaton->req,
+  int status = uv_queue_work(uv_default_loop(), &executeBaton->req,
                Async_Execute, (uv_after_work_cb)Async_AfterExecute);
+  // delete the Baton if uv_queue_work fails
+  if ( status )
+  {
+    delete executeBaton;
+    string error = NJSMessages::getErrorMsg ( errInternalError,
+                                              "uv_queue_work", "Execute" );
+    NJS_SET_EXCEPTION(error.c_str(), error.length());
+  }
 
   info.GetReturnValue().SetUndefined();
 }
@@ -2577,9 +2614,8 @@ void Connection::Async_AfterExecute(uv_work_t *req)
     }
     argv[1] = result;
   }
-  exitAsyncAfterExecute:
+exitAsyncAfterExecute:
   Local<Function> callback = Nan::New<Function>(executeBaton->cb);
-  executeBaton->cb.Reset ();
   delete executeBaton;
   Nan::MakeCallback( Nan::GetCurrentContext()->Global(), callback, 2, argv );
   if(tc.HasCaught())
@@ -3078,6 +3114,33 @@ v8::Local<v8::Value> Connection::GetOutBindObject ( eBaton *executeBaton )
   return scope.Escape(objectBinds);
 }
 
+
+/****************************************************************************/
+/* NAME
+ *   Connection::getConnectionBusyStatus
+ *
+ * DESCRIPTION
+ *   Checks whther connection is busy with database call or not using counters
+ *
+ * PARAMETERS
+ *   connection      - connection object to check it's counters
+ *
+ * Note: Currently this function can be used only in Release () method
+ */
+ConnectionBusyStatus Connection::getConnectionBusyStatus ( Connection *conn )
+{
+  ConnectionBusyStatus connStatus = CONN_NOT_BUSY;
+
+  if ( conn->lobCount_ != 0 )
+    connStatus = CONN_BUSY_LOB;
+  else if ( conn->rsCount_ != 0 )
+    connStatus = CONN_BUSY_RS;
+  else if ( conn->dbCount_ != 1 ) // 1 for Release operaion itself
+    connStatus = CONN_BUSY_DB;
+
+  return connStatus;
+}
+
 /*****************************************************************************/
 /*
    DESCRIPTION
@@ -3092,26 +3155,55 @@ NAN_METHOD(Connection::Release)
   Local<Function> callback;
   Connection *connection;
   NJS_GET_CALLBACK ( callback, info );
+  ConnectionBusyStatus connStat;
 
-  eBaton* releaseBaton = new eBaton;
-  releaseBaton->cb.Reset(callback);
-  
-  NJS_CHECK_NUMBER_OF_ARGS ( releaseBaton->error, info, 1, 1, exitRelease );
   connection = Nan::ObjectWrap::Unwrap<Connection>(info.This());
 
-  NJS_CHECK_OBJECT_VALID3(connection, releaseBaton->error, exitRelease);
+  /* If connection is invalide from JS, then throw an exception */
+  NJS_CHECK_OBJECT_VALID2 ( connection, info ) ;
+
+  eBaton *releaseBaton = new eBaton ( connection->DBCount (), callback );
+
+  NJS_CHECK_NUMBER_OF_ARGS ( releaseBaton->error, info, 1, 1, exitRelease );
   if(!connection->isValid_)
   {
     releaseBaton->error = NJSMessages::getErrorMsg ( errInvalidConnection );
     goto exitRelease;
   }
-  connection->isValid_    = false;
-  releaseBaton->dpiconn   = connection->dpiconn_;
-  exitRelease:
+
+
+  // Check to see if database call is in progress
+  connStat = getConnectionBusyStatus ( connection );
+  switch ( connStat )
+  {
+    case CONN_NOT_BUSY:
+      connection->isValid_    = false;
+      releaseBaton->dpiconn   = connection->dpiconn_;
+      break;
+    case CONN_BUSY_LOB:
+      releaseBaton->error = NJSMessages::getErrorMsg( errBusyConnLOB );
+      break;
+    case CONN_BUSY_RS:
+      releaseBaton->error = NJSMessages::getErrorMsg( errBusyConnRS );
+      break;
+    case CONN_BUSY_DB:
+      releaseBaton->error = NJSMessages::getErrorMsg( errBusyConnDB );
+      break;
+  }
+
+exitRelease:
   releaseBaton->req.data  = (void*) releaseBaton;
 
-  uv_queue_work(uv_default_loop(), &releaseBaton->req,
+  int status = uv_queue_work(uv_default_loop(), &releaseBaton->req,
                Async_Release, (uv_after_work_cb)Async_AfterRelease);
+  // delete the Baton if uv_queue_work fails
+  if ( status )
+  {
+    delete releaseBaton;
+    string error = NJSMessages::getErrorMsg ( errInternalError,
+                                              "uv_queue_work", "Release" );
+    NJS_SET_EXCEPTION(error.c_str(), error.length());
+  }
   info.GetReturnValue().SetUndefined();
   scope.Escape ( Nan::Undefined () );
 }
@@ -3167,7 +3259,6 @@ void Connection::Async_AfterRelease(uv_work_t *req)
   else
     argv[0] = Nan::Undefined();
   Local<Function> callback = Nan::New<Function>(releaseBaton->cb);
-  releaseBaton->cb.Reset ();
   delete releaseBaton;
   Nan::MakeCallback( Nan::GetCurrentContext()->Global(),
                       callback, 1, argv );
@@ -3192,12 +3283,14 @@ NAN_METHOD(Connection::Commit)
   Connection *connection;
   NJS_GET_CALLBACK ( callback, info );
 
-  eBaton* commitBaton = new eBaton;
-  commitBaton->cb.Reset( callback );
-  NJS_CHECK_NUMBER_OF_ARGS ( commitBaton->error, info, 1, 1, exitCommit );
   connection = Nan::ObjectWrap::Unwrap<Connection>(info.This());
 
-  NJS_CHECK_OBJECT_VALID3 ( connection, commitBaton->error, exitCommit );
+  /* if connection is invalid from JS, then throw an exception */
+  NJS_CHECK_OBJECT_VALID2 ( connection, info ) ;
+
+  eBaton *commitBaton = new eBaton ( connection->DBCount (), callback );
+
+  NJS_CHECK_NUMBER_OF_ARGS ( commitBaton->error, info, 1, 1, exitCommit );
   if(!connection->isValid_)
   {
     commitBaton->error = NJSMessages::getErrorMsg ( errInvalidConnection );
@@ -3207,8 +3300,16 @@ NAN_METHOD(Connection::Commit)
 exitCommit:
   commitBaton->req.data  = (void*) commitBaton;
 
-  uv_queue_work(uv_default_loop(), &commitBaton->req,
+  int status = uv_queue_work(uv_default_loop(), &commitBaton->req,
                Async_Commit, (uv_after_work_cb)Async_AfterCommit);
+  // delete the Baton if uv_queue_work fails
+  if ( status )
+  {
+    delete commitBaton;
+    string error = NJSMessages::getErrorMsg ( errInternalError,
+                                              "uv_queue_work", "Commit" );
+    NJS_SET_EXCEPTION(error.c_str(), error.length());
+  }
 
   info.GetReturnValue().SetUndefined();
 }
@@ -3264,14 +3365,15 @@ void Connection::Async_AfterCommit (uv_work_t *req)
   else
     argv[0] = Nan::Undefined();
 
+  Local<Function> callback = Nan::New<Function>(commitBaton->cb);
+  delete commitBaton;
   Nan::MakeCallback( Nan::GetCurrentContext()->Global(),
-                      Nan::New<Function>(commitBaton->cb), 1, argv );
+                      callback, 1, argv );
+
   if(tc.HasCaught())
   {
     Nan::FatalException(tc);
   }
-  commitBaton->cb.Reset ();
-  delete commitBaton;
 }
 
 /*****************************************************************************/
@@ -3288,11 +3390,12 @@ NAN_METHOD(Connection::Rollback)
   Connection *connection;
   NJS_GET_CALLBACK ( callback, info );
 
-  eBaton* rollbackBaton = new eBaton;
-  rollbackBaton->cb.Reset( callback );
-  NJS_CHECK_NUMBER_OF_ARGS ( rollbackBaton->error, info, 1, 1, exitRollback );
   connection = Nan::ObjectWrap::Unwrap<Connection>(info.This());
-  NJS_CHECK_OBJECT_VALID3 ( connection, rollbackBaton->error, exitRollback );
+  /* if connection is invalid from JS, then throw an exception */
+  NJS_CHECK_OBJECT_VALID2 ( connection, info );
+
+  eBaton *rollbackBaton = new eBaton ( connection->DBCount (), callback );
+  NJS_CHECK_NUMBER_OF_ARGS ( rollbackBaton->error, info, 1, 1, exitRollback );
 
   if(!connection->isValid_)
   {
@@ -3302,8 +3405,16 @@ NAN_METHOD(Connection::Rollback)
   rollbackBaton->dpiconn   = connection->dpiconn_;
   exitRollback:
   rollbackBaton->req.data  = (void*) rollbackBaton;
-  uv_queue_work(uv_default_loop(), &rollbackBaton->req,
-                Async_Rollback, (uv_after_work_cb)Async_AfterRollback);
+  int status = uv_queue_work(uv_default_loop(), &rollbackBaton->req,
+               Async_Rollback, (uv_after_work_cb)Async_AfterRollback);
+  // delete the Baton if uv_queue_work fails
+  if ( status )
+  {
+    delete rollbackBaton;
+    string error = NJSMessages::getErrorMsg ( errInternalError,
+                                              "uv_queue_work", "Rollback" );
+    NJS_SET_EXCEPTION(error.c_str(), error.length());
+  }
   info.GetReturnValue().SetUndefined();
 }
 
@@ -3358,14 +3469,14 @@ void Connection::Async_AfterRollback(uv_work_t *req)
   else
     argv[0] = Nan::Undefined();
 
+  Local<Function> callback = Nan::New<Function>(rollbackBaton->cb);
+  delete rollbackBaton;
   Nan::MakeCallback( Nan::GetCurrentContext()->Global(),
-                      Nan::New<Function>(rollbackBaton->cb), 1, argv );
+                      callback, 1, argv );
   if(tc.HasCaught())
   {
     Nan::FatalException(tc);
   }
-  rollbackBaton->cb.Reset ();
-  delete rollbackBaton;
 }
 
 /*****************************************************************************/
@@ -3382,12 +3493,14 @@ NAN_METHOD(Connection::Break)
   Connection *connection;
   NJS_GET_CALLBACK ( callback, info );
 
-  eBaton* breakBaton = new eBaton;
-  breakBaton->cb.Reset( callback );
-  NJS_CHECK_NUMBER_OF_ARGS ( breakBaton->error, info, 1, 1, exitBreak );
   connection = Nan::ObjectWrap::Unwrap<Connection>(info.This());
 
-  NJS_CHECK_OBJECT_VALID3 ( connection, breakBaton->error, exitBreak );
+  /* If connection is invalid from JS, then throw an exception */
+  NJS_CHECK_OBJECT_VALID2 ( connection, info );
+
+  eBaton *breakBaton = new eBaton ( connection->DBCount (), callback );
+
+  NJS_CHECK_NUMBER_OF_ARGS ( breakBaton->error, info, 1, 1, exitBreak );
 
   if(!connection->isValid_)
   {
@@ -3398,8 +3511,16 @@ NAN_METHOD(Connection::Break)
   exitBreak:
   breakBaton->req.data  = (void*) breakBaton;
 
-  uv_queue_work(uv_default_loop(), &breakBaton->req,
+  int status = uv_queue_work(uv_default_loop(), &breakBaton->req,
                Async_Break, (uv_after_work_cb)Async_AfterBreak);
+  // delete the Baton if uv_queue_work fails
+  if ( status )
+  {
+    delete breakBaton;
+    string error = NJSMessages::getErrorMsg ( errInternalError,
+                                              "uv_queue_work", "Break" );
+    NJS_SET_EXCEPTION(error.c_str(), error.length());
+  }
 
   info.GetReturnValue().SetUndefined();
 }
@@ -3455,14 +3576,14 @@ void Connection::Async_AfterBreak (uv_work_t *req)
     argv[0] = v8::Exception::Error(Nan::New<v8::String>((breakBaton->error).c_str()).ToLocalChecked());
   else
     argv[0] = Nan::Undefined();
+  Local<Function> callback = Nan::New<Function>(breakBaton->cb);
+  delete breakBaton;
   Nan::MakeCallback( Nan::GetCurrentContext()->Global(),
-                      Nan::New<Function>(breakBaton->cb), 1, argv );
+                      callback, 1, argv );
   if(tc.HasCaught())
   {
     Nan::FatalException(tc);
   }
-  breakBaton->cb.Reset ();
-  delete breakBaton;
 }
 
 /****************************************************************************/

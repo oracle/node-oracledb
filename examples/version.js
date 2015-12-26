@@ -29,6 +29,8 @@ var dbConfig = require('./dbconfig.js');
 var addonVer, clientVer, serverVer;
 var major, minor, update, port, portUpdate;
 
+console.log("Node.js version: " + process.version);
+
 addonVer = oracledb.version;
 major  = Math.floor(addonVer / 10000);
 minor  = Math.floor(addonVer / 100) % 100;
@@ -42,7 +44,7 @@ minor      = Math.floor (clientVer / 1000000) % 100 ;
 update     = Math.floor (clientVer / 10000) % 100 ;
 port       = Math.floor (clientVer / 100) % 100 ;
 portUpdate = clientVer % 100 ;
-console.log("Oracle Client library version: " +clientVer);
+console.log("Oracle Client library version: " + clientVer);
 console.log("Oracle Client library text format: " + major + "." + minor + "." + update + "." + port + "." + portUpdate);
 
 oracledb.getConnection(
@@ -64,6 +66,6 @@ oracledb.getConnection(
     update     = Math.floor (serverVer / 10000) % 100 ;
     port       = Math.floor (serverVer / 100) % 100 ;
     portUpdate = serverVer % 100 ;
-    console.log ("Oracle Database version: " + serverVer);
+    console.log("Oracle Database version: " + serverVer);
     console.log("Oracle Database text format: " + major + "." + minor + "." + update + "." + port + "." + portUpdate);
-});
+  });
