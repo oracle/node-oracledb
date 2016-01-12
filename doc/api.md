@@ -108,10 +108,11 @@ limitations under the License.
   - 9.1 [SELECT Statements](#select)
      - 9.1.1 [Fetching Rows](#fetchingrows)
      - 9.1.2 [Result Set Handling](#resultsethandling)
-     - 9.1.3 [Query Output Formats](#queryoutputformats)
-     - 9.1.4 [Query Column Metadata](#querymeta)
-     - 9.1.5 [Result Type Mapping](#typemap)
-     - 9.1.6 [Row Prefetching](#rowprefetching)
+     - 9.1.3 [Streaming Results](#streamingresults)
+     - 9.1.4 [Query Output Formats](#queryoutputformats)
+     - 9.1.5 [Query Column Metadata](#querymeta)
+     - 9.1.6 [Result Type Mapping](#typemap)
+     - 9.1.7 [Row Prefetching](#rowprefetching)
 10. [PL/SQL Execution](#plsqlexecution)
   - 10.1 [PL/SQL Stored Procedures](#plsqlproc)
   - 10.2 [PL/SQL Stored Functions](#plsqlfunc)
@@ -512,7 +513,7 @@ oracledb.lobPrefetchSize = 16384;
 readonly Number oracleClientVersion
 ```
 
-This readonly property gives a numeric representation of the Oracle client library version. 
+This readonly property gives a numeric representation of the Oracle client library version.
 For version *a.b.c.d.e*, this property gives the number: `(100000000 * a) + (1000000 * b) + (10000 * c) + (100 * d) + e`
 
 ##### Example
@@ -1018,7 +1019,7 @@ show a value of `null` for this attribute.  See
 readonly Number oracleServerVersion
 ```
 
-This readonly property gives a numeric representation of the Oracle database version. 
+This readonly property gives a numeric representation of the Oracle database version.
 For version *a.b.c.d.e*, this property gives the number: `(100000000 * a) + (1000000 * b) + (10000 * c) + (100 * d) + e`
 
 #### <a name="propconnstmtcachesize"></a> 4.1.5 stmtCacheSize
@@ -1105,12 +1106,13 @@ Callback function parameter | Description
 ##### Prototype
 
 ```
-void execute(String sql, [Object bindParams, [Object options,]] function(Error error, [Object result]){});
+[stream.Readable] execute(String sql, [Object bindParams, [Object options,]] [function(Error error, [Object result]){}]);
 ```
 
 ##### Return Value
 
-None
+For streaming queries, this function will return a readable stream.<br>
+For any other action, there is no output.
 
 ##### Description
 
@@ -1127,6 +1129,9 @@ rows, the values of any OUT and IN OUT bind variables, and the number
 of rows affected by the execution of
 [DML](https://docs.oracle.com/database/121/CNCPT/glossary.htm#CNCPT2042)
 statements.
+
+In case of a query stream requested (options.stream=true), the callback is not used and instead the execute will return a readable stream.<br>
+See [Streaming Results](#streamingresults) for more information on streams.
 
 ##### Parameters
 
@@ -1209,6 +1214,7 @@ Options Property | Description
 *String outFormat* | Overrides *Oracledb* [`outFormat`](#propdboutformat)
 *Number prefetchRows* | Overrides *Oracledb* [`prefetchRows`](#propdbprefetchrows)
 *Boolean resultSet* | Determines whether query results should be returned as a [`ResultSet`](#resultsetclass) object or directly.  The default is `false`.
+*Boolean stream* | If true, a the execute will return a readable stream and a callback should not be provided.
 
 <a name="propfetchinfo"></a> The description of `fetchInfo` follows:
 
@@ -2187,7 +2193,27 @@ function fetchRowsFromRS(connection, resultSet, numRows)
 }
 ```
 
-#### <a name="queryoutputformats"></a> 9.1.3 Query Output Formats
+#### <a name="streamingresults"></a> 9.1.3 Streaming Results
+
+Streaming results basically uses resultsets but enables you to pipe the results to other streams (such http response).
+
+```javascript
+var stream = connection.execute('SELECT employees_name FROM oracledb_employees', {}, {
+  stream: true //if true, streaming is enabled
+});
+
+stream.on('error', function (error) {
+  //handle any error...
+});
+
+stream.on('data', function (data) {
+  //handle results...
+});
+
+//listen to any other standard stream events such as close/end/...
+```
+
+#### <a name="queryoutputformats"></a> 9.1.4 Query Output Formats
 
 Query rows may be returned as an array of column values, or as
 Javascript objects, depending on the values of
@@ -2257,7 +2283,7 @@ names follow Oracle's standard name-casing rules.  They will commonly
 be uppercase, since most applications create tables using unquoted,
 case-insensitive names.
 
-#### <a name="querymeta"></a> 9.1.4 Query Column Metadata
+#### <a name="querymeta"></a> 9.1.5 Query Column Metadata
 
 The column names of a query are returned in the
 [`execute()`](#execute) callback's `result.metaData` parameter
@@ -2290,7 +2316,7 @@ The names are in uppercase.  This is the default casing behavior for
 Oracle client programs when a database table is created with unquoted,
 case-insensitive column names.
 
-#### <a name="typemap"></a> 9.1.5 Result Type Mapping
+#### <a name="typemap"></a> 9.1.6 Result Type Mapping
 
 Oracle character, number and date columns can be selected.  Data types
 that are currently unsupported give a "datatype is not supported"
@@ -2418,7 +2444,7 @@ INSERT INTO customers VALUES
   (1001, 'Nichols', SDO_GEOMETRY(2001, 8307, SDO_POINT_TYPE (-71.48923,42.72347,NULL), NULL, NULL));
 
 COMMIT;
-```     
+```
 
 Instead of attempting to get `CUST_GEO_LOCATION` by directly calling a
 PL/SQL procedure that returns an `SDO_GEOMETRY` parameter, you could
@@ -2461,7 +2487,7 @@ you may want to bind using `type: oracledb.STRING`.  Output would be:
 { x: '-71.48923', y: '42.72347' }
 ```
 
-#### <a name="rowprefetching"></a> 9.1.6 Row Prefetching
+#### <a name="rowprefetching"></a> 9.1.7 Row Prefetching
 
 [Prefetching](http://docs.oracle.com/database/121/LNOCI/oci04sql.htm#LNOCI16355) is a query tuning feature allowing resource usage to be
 optimized.  It allows multiple rows to be returned in each network
