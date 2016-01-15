@@ -58,10 +58,10 @@ describe('43. PL/SQL binds', function() {
                      "    s VARCHAR2(2000) := '';\n" +
                      "  BEGIN\n" +
                      "    FOR i IN 1 .. strings.COUNT LOOP\n" +
-                     "      s := s || strings(i);\n" +
+                     "      s := s || NVL(strings(i), 'NULL');\n" +
                      "    END LOOP;\n" +
                      "    FOR i IN 1 .. numbers.COUNT LOOP\n" +
-                     "       s := s || numbers(i);\n" +
+                     "       s := s || NVL(numbers(i), 0);\n" +
                      "    END LOOP;\n" +
                      "    RETURN s;\n" +
                      "  END;\n" +
@@ -78,8 +78,8 @@ describe('43. PL/SQL binds', function() {
         function(callback) {
           var bindvars = {
             result: {type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 2000},
-            strings:  {type: oracledb.STRING, dir: oracledb.BIND_IN, val: ['John', 'Doe']},
-            numbers: {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: [0, 8, 11]}
+            strings:  {type: oracledb.STRING, dir: oracledb.BIND_IN, val: [null, 'John', 'Doe']},
+            numbers: {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: [null, 8, 11]}
           };
           connection.execute(
             "BEGIN :result := oracledb_testpack.test(:strings, :numbers); END;",
@@ -87,7 +87,7 @@ describe('43. PL/SQL binds', function() {
             function(err, result) {
               should.not.exist(err);
               // console.log(result);
-              result.outBinds.result.should.be.exactly('JohnDoe0811');
+              result.outBinds.result.should.be.exactly('NULLJohnDoe0811');
               callback();
             }
           );
