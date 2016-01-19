@@ -495,6 +495,8 @@ assist.dataTypeSupport = function(connection, tableName, array, done) {
           result.rows[i].CONTENT.should.eql(array[result.rows[i].NUM]);
         else if( Buffer.isBuffer(result.rows[i].CONTENT) )
           result.rows[i].CONTENT.toString('hex').should.eql(array[result.rows[i].NUM].toString('hex'));
+        else if (Object.prototype.toString.call(result.rows[i].CONTENT) === '[object Date]')
+          result.rows[i].CONTENT.getTime().should.eql(array[result.rows[i].NUM].getTime());
         else
           result.rows[i].CONTENT.toUTCString().should.eql(array[result.rows[i].NUM].toUTCString());
       }   
