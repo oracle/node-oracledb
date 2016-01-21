@@ -80,12 +80,16 @@ typedef struct Bind
   short               *ind;
   bool                isOut;
   bool                isInOut;          // Date/Timestamp needs this info
+  bool                isArray;
+  unsigned int        maxArraySize;
+  unsigned int        curArraySize;
   unsigned int        rowsReturned;     /* number rows returned for
                                            the bind (DML RETURNING) */
   dpi::DateTimeArray* dttmarr;
 
   Bind () : key(""), value(NULL), extvalue (NULL), len(NULL), len2(NULL),
             maxSize(0), type(0), ind(NULL), isOut(false), isInOut(false),
+            isArray(false), maxArraySize(0), curArraySize(0),
             rowsReturned(0), dttmarr ( NULL )
   {}
 }Bind;
@@ -349,10 +353,17 @@ private:
   static void GetBinds (Handle<Array> bindarray, eBaton* executeBaton);
   static void GetBindUnit (Local<Value> bindtypes, Bind* bind,
                            eBaton* executeBaton);
-  static void GetInBindParams (Local<Value> bindtypes, Bind* bind,
-                                     eBaton* executeBaton, BindType bindType);
+  static void GetInBindParams(Local<Value> v8val, Bind *bind, eBaton *executeBaton, BindType bindType);
+  static void GetInBindParamsScalar(Local<Value> v8val, Bind *bind, eBaton *executeBaton, BindType bindType);
+  static void GetInBindParamsArray(Local<Array> v8vals, Bind *bind, eBaton *executeBaton, BindType bindType);
+  static bool AllocateBindArray(unsigned short dataType, Bind* bind, eBaton *executeBaton, size_t *arrayElementSize);
+
   static void GetOutBindParams (unsigned short dataType, Bind* bind,
                                 eBaton* executeBaton);
+  static void GetOutBindParamsScalar (unsigned short dataType, Bind* bind,
+                                      eBaton* executeBaton);
+  static void GetOutBindParamsArray (unsigned short dataType, Bind* bind,
+                                     eBaton* executeBaton);
   static void Descr2Double ( Define* defines, unsigned int numCols,
                              unsigned int rowsFetched, bool getRS );
   static void Descr2protoILob ( eBaton *executeBaton, unsigned int numCols,
@@ -380,7 +391,7 @@ private:
                                             Bind *bind);
   //static void UpdateDateValue ( eBaton *executeBaton );
   static void UpdateDateValue ( eBaton *executeBaton, unsigned int index );
-  static void v8Date2OraDate ( v8::Local<v8::Value>, Bind *bind);
+  static long double v8Date2OraDate(v8::Local<v8::Value> val);
   static ConnectionBusyStatus getConnectionBusyStatus ( Connection *conn );
 
   // Callback/Utility function used to allocate buffer(s) for Bind Structs

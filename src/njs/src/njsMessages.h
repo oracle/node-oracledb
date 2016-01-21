@@ -66,6 +66,7 @@ typedef enum
   errBusyConnRS,
   errBusyConnDB,
   errInternalError,
+  errInvalidBindArray,
 
   // New ones should be added here
 

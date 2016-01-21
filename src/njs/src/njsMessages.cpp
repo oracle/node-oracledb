@@ -70,7 +70,7 @@ static const char *errMsg[] =
   "NJS-032: Connection cannot be released because a database call is in"
             " progress",
   "NJS-033: An internal error occurred. [%s][%s]",
-
+  "NJS-034: invalid (array) binding of parameter \"%s\": %s"
 };
 
 string NJSMessages::getErrorMsg ( NJSErrorType err, ... )

@@ -52,6 +52,7 @@
 #include "njsResultSet.h"
 #include "njsIntLob.h"
 #include <stdlib.h>
+#include <sstream>
 #include <iostream>
 #include <limits>
 using namespace std;
@@ -73,6 +74,51 @@ Nan::Persistent<FunctionTemplate> Connection::connectionTemplate_s;
 #define NJS_SIZE_T_OVERFLOW(maxSize,maxRows)                                  \
  ( ( ( maxSize != 0 ) &&                                                      \
      ( ( ( NJS_SIZE_T_MAX ) / ( (size_t)maxSize ) ) < (maxRows) ) ) ? 1 : 0)  \
+
+/*****************************************************************************/
+/*
+  DESCRIPTION
+    An abstract v8 value type
+*/
+typedef enum {
+  TYPE_INVALID = -1,
+  TYPE_NULL = 0,
+  TYPE_STRING,
+  TYPE_INTEGER,
+  TYPE_UINTEGER,
+  TYPE_NUMBER,
+  TYPE_DATE
+} abstractValueType;
+
+/*****************************************************************************/
+/*
+  DESCRIPTION
+    Get the abstract data type that can be used when binding a value.
+   
+  PARAMETERS
+    value - Abstract value type for all v8 JavaScript values and objects.
+    
+  RETURNS
+    bindDataType for the values that can be bound.
+*/
+static abstractValueType getAbstractValueType(v8::Local<v8::Value> value)
+{
+  if (value->IsUndefined() || value->IsNull()) {
+    return TYPE_NULL;
+  } else if (value->IsString()) {
+    return TYPE_STRING;
+  } else if (value->IsInt32()) {
+    return TYPE_INTEGER;
+  } else if (value->IsUint32()) {
+    return TYPE_UINTEGER;
+  } else if (value->IsNumber()) {
+    return TYPE_NUMBER;
+  } else if (value->IsDate()) {
+    return TYPE_DATE;
+  } else {
+    return TYPE_INVALID;
+  }
+}
 
 /*****************************************************************************/
 /*
@@ -700,6 +746,9 @@ void Connection::GetBindUnit (Local<Value> val, Bind* bind,
                                            "maxSize", 2 );
       goto exitGetBindUnit;
     }
+    
+    bind->maxArraySize = 0;
+    NJS_GET_UINT_FROM_JSON(bind->maxArraySize, executeBaton->error, bind_unit, "maxArraySize", 1, exitGetBindUnit);
 
     /* REFCURSOR(s) are supported only as OUT Binds now */
     if ( bind->type == DATA_CURSOR && dir != BIND_OUT )
@@ -766,6 +815,33 @@ void Connection::GetBindUnit (Local<Value> val, Bind* bind,
 void Connection::GetOutBindParams (unsigned short dataType, Bind* bind,
                                    eBaton *executeBaton)
 {
+  Nan::HandleScope scope;
+
+  if (bind->maxArraySize > 0)
+  {
+    // We are dealing with an PL/SQL indexed table bind variable
+    GetOutBindParamsArray(dataType, bind, executeBaton);
+  }
+  else
+  {
+    GetOutBindParamsScalar(dataType, bind, executeBaton);
+  }
+}
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Processing out binds for scalar value
+
+   PARAMETERS:
+     dataType - datatype of the bind
+     bind struct, eBaton struct
+*/
+void Connection::GetOutBindParamsScalar (unsigned short dataType, Bind* bind,
+                                         eBaton *executeBaton)
+{
+  Nan::HandleScope scope;
+
   switch(dataType)
   {
     case DATA_STR :
@@ -798,6 +874,51 @@ void Connection::GetOutBindParams (unsigned short dataType, Bind* bind,
       executeBaton->error= NJSMessages::getErrorMsg(errInvalidBindDataType,2);
       break;
   }
+
+  executeBaton->binds.push_back(bind);
+}
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Processing out binds for PL/SQL indexed table value
+
+   PARAMETERS:
+     dataType - datatype of the bind
+     bind struct, eBaton struct
+*/
+void Connection::GetOutBindParamsArray(unsigned short dataType, Bind *bind, eBaton *executeBaton)
+{
+  Nan::HandleScope scope;
+
+  // Mark bind as an array bind
+  bind->isArray = true;
+
+  // Check for supported bind types
+  switch(dataType)
+  {
+    case DATA_STR :
+      bind->type     = dpi::DpiVarChar;
+      break;
+    case DATA_NUM :
+      bind->type     = dpi::DpiDouble;
+      bind->maxSize  = sizeof(double);
+      break;
+    /*
+    case DATA_DATE :
+      bind->type     = dpi::DpiTimestampLTZ;
+      bind->maxSize  = 0;
+      break;
+    */
+    default :
+      executeBaton->error = NJSMessages::getErrorMsg(errInvalidBindArray, bind->key, "the \"type\" property must be specified and only STRING and NUMBER are (currently) supported");
+      break;
+  }
+
+  // Allocate for OUT Binds of PL/SQL indexed tables variables
+  size_t arrayElementSize = bind->maxSize;
+  Connection::AllocateBindArray(dataType, bind, executeBaton, &arrayElementSize);
+
   executeBaton->binds.push_back(bind);
 }
 
@@ -813,8 +934,33 @@ void Connection::GetOutBindParams (unsigned short dataType, Bind* bind,
      For IN Bind only len field field is used, and for only a scalar value now,
      allocate for one unit.
 */
-void Connection::GetInBindParams (Local<Value> v8val, Bind* bind,
-                                           eBaton* executeBaton, BindType type)
+void Connection::GetInBindParams(Local<Value> v8val, Bind* bind, eBaton* executeBaton, BindType type)
+{
+  Nan::HandleScope scope;
+
+  if (v8val->IsArray() || (bind->isInOut && bind->maxArraySize > 0))
+  {
+    GetInBindParamsArray(Local<Array>::Cast(v8val), bind, executeBaton, type);
+  }
+  else
+  {
+    GetInBindParamsScalar(v8val, bind, executeBaton, type);
+  }
+}
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Processing in binds for scalar values
+
+   PARAMETERS:
+     Handle value, bind struct, eBaton struct
+
+   NOTE:
+     For IN Bind only len field field is used, and for only a scalar value now,
+     allocate for one unit.
+*/
+void Connection::GetInBindParamsScalar(Local<Value> v8val, Bind* bind, eBaton* executeBaton, BindType type)
 {
   Nan::HandleScope scope;
 
@@ -918,8 +1064,7 @@ void Connection::GetInBindParams (Local<Value> v8val, Bind* bind,
     bind->type = dpi::DpiTimestampLTZ;
     *(bind->len) = 0;
     bind->maxSize = 0;
-    /* Convert v8::Date value to long double */
-    Connection::v8Date2OraDate ( v8val, bind);
+    *(reinterpret_cast<long double*>(bind->extvalue)) = Connection::v8Date2OraDate(v8val);
   }
   else if(v8val->IsObject ())
   {
@@ -957,6 +1102,407 @@ void Connection::GetInBindParams (Local<Value> v8val, Bind* bind,
   executeBaton->binds.push_back(bind);
   exitGetInBindParams:
   ;
+}
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Processing in binds for PL/SQL indexed table value
+
+   PARAMETERS:
+     Handle value, bind struct, eBaton struct
+
+   NOTE:
+     For IN Bind only len field field is used, and for only a scalar value now,
+     allocate for one unit.
+*/
+void Connection::GetInBindParamsArray(Local<Array> va8vals, Bind *bind, eBaton *executeBaton, BindType type)
+{
+  Nan::HandleScope scope;
+
+  // this is the actual array element size
+  size_t arrayElementSize = 0;
+
+  //
+  //  Step 1 - Analyze the bind parameter to determine if we actually can bind the array of values
+  //
+
+  // get the number of elements in the array
+  bind->curArraySize = va8vals->Length();
+
+  // Validate the "maxArraySize" property
+  if (!bind->isInOut)
+  {
+    // for INPUT parameter
+    if (bind->maxArraySize != 0)
+    {
+      executeBaton->error = NJSMessages::getErrorMsg(errInvalidBindArray, bind->key, "the \"maxArraySize\" property is not allowed when specifying a BIND_IN parameter");
+      goto exitGetInBindParams;
+    }
+    else
+    {
+      bind->maxArraySize = static_cast<unsigned int>(bind->curArraySize);
+    }
+  }
+  else
+  {
+    // for INPUT/OUTPUT parameter
+    if (bind->maxArraySize == 0)
+    {
+      executeBaton->error = NJSMessages::getErrorMsg(errInvalidBindArray, bind->key, "the \"maxArraySize\" property is mandatory when specifying a BIND_INOUT parameter");
+      goto exitGetInBindParams;
+    }
+    if (bind->curArraySize > bind->maxArraySize)
+    {
+      std::ostringstream s;
+      s << "the number of array elements \"" << bind->curArraySize << "\" is larger then the \"maxArraySize\" property \"" << bind->maxArraySize << "\"";
+      executeBaton->error = NJSMessages::getErrorMsg(errInvalidBindArray, bind->key, s.str().c_str());
+      goto exitGetInBindParams;
+    }
+  }
+
+  // make sure that the bind type is valid
+  switch (bind->type)
+  {
+    case DATA_STR:
+    case DATA_NUM:
+    /*
+    case DATA_DATE:
+    */
+      break;
+
+    default:
+      executeBaton->error = NJSMessages::getErrorMsg(errInvalidBindArray, bind->key, "the \"type\" property must be specified and only STRING and NUMBER are (currently) supported");
+      goto exitGetInBindParams;
+  }
+
+  // Make sure that all (not NULL) elements in the array have a valid and consistent type
+  for (unsigned int index = 0; index < bind->curArraySize; index++)
+  {
+    Local<Value> value = va8vals->Get(index);
+    abstractValueType type = getAbstractValueType(value);
+
+    // make sure that we generally have a valid value type
+    if (type == TYPE_INVALID)
+    {
+      std::ostringstream s;
+      s << "the array element \"" << index << "\" of the \"val\" property contains has an unsupported type";
+      executeBaton->error = NJSMessages::getErrorMsg(errInvalidBindArray, bind->key, s.str().c_str());
+      goto exitGetInBindParams;
+    }
+
+    // make sure that all values in the array have the exact same type or are null
+    switch (bind->type)
+    {
+      case DATA_STR:
+        if (type != TYPE_NULL && type != TYPE_STRING)
+        {
+          std::ostringstream s;
+          s << "the type of the array element \"" << index << "\" of the \"val\" property is not compatible with the \"type\" property STRING";
+          executeBaton->error = NJSMessages::getErrorMsg(errInvalidBindArray, bind->key, s.str().c_str());
+          goto exitGetInBindParams;
+        }
+        else
+        {
+          v8::String::Utf8Value str(value->ToString());
+          size_t stringLength = str.length();
+          if (stringLength > static_cast<size_t>(arrayElementSize))
+          {
+            arrayElementSize = stringLength;
+          }
+
+          // Check if we have a string with a size larger then the specified maxSize
+          //  (there is actually a default for maxSize if not specified)
+          if (stringLength > static_cast<size_t>(bind->maxSize))
+          {
+            std::ostringstream s;
+            s << "the string length " << stringLength << " of the array element \"" << index << "\" of the \"val\" property is larger then the \"maxSize\" property " << bind->maxSize;
+            executeBaton->error = NJSMessages::getErrorMsg(errInvalidBindArray, bind->key, s.str().c_str());
+            goto exitGetInBindParams;
+        }
+        }
+        break;
+
+      case DATA_NUM:
+        if (type != TYPE_NULL && type != TYPE_INTEGER && type != TYPE_UINTEGER && type != TYPE_NUMBER)
+        {
+          std::ostringstream s;
+          s << "the type of the array element \"" << index << "\" of the \"val\" property is not compatible with the \"type\" property NUMBER";
+          executeBaton->error = NJSMessages::getErrorMsg(errInvalidBindArray, bind->key, s.str().c_str());
+          goto exitGetInBindParams;
+        }
+        break;
+
+      /*
+      case DATA_DATE:
+        if (type != TYPE_NULL && type != TYPE_DATE)
+        {
+          std::ostringstream s;
+          s << "the type of the array element \"" << index << "\" of the \"val\" property is not compatible with the \"type\" property DATE";
+          executeBaton->error = NJSMessages::getErrorMsg(errInvalidBindArray, bind->key, s.str().c_str());
+          goto exitGetInBindParams;
+        }
+        break;
+      */
+    }
+  }
+
+  //
+  //  Step 2 - Allocate the needed buffers for the arrays of values and the indicators
+  //
+
+  // Because we we must bind a single Oracle numbertype, but in JavaScript
+  //  there might be different number types (Int, UInt and Number) we only
+  //  bind number columns as double.
+  size_t bufferSize = 0;
+  char* buffer = 0;
+  switch (bind->type)
+  {
+    case DATA_STR:
+      bind->type       = dpi::DpiVarChar;
+
+      // If we are dealing with an OUT binding
+      if (bind->isOut)
+      {
+        // If we are dealing with an OUT binding, it is not allowed to have am actual element largen than the maxSize argument
+        if (arrayElementSize > static_cast<size_t>(bind->maxSize))
+        {
+          std::ostringstream s;
+          s << "no array element size \"" << arrayElementSize << "\" is allowed to be larger then the given \"maxSize\" \"" << bind->maxSize << "\" property";
+          executeBaton->error = NJSMessages::getErrorMsg(errInvalidBindArray, bind->key, s.str().c_str());
+          goto exitGetInBindParams;
+        }
+        else
+        {
+          arrayElementSize = static_cast<size_t>(bind->maxSize);
+        }
+      }
+
+      // Because we also need to store the 0 at the end of the string, we need to increase the array element size by 1
+      arrayElementSize = arrayElementSize + 1;
+      bufferSize       = static_cast<size_t>(arrayElementSize * bind->maxArraySize);
+      buffer           = reinterpret_cast<char*>(malloc(bufferSize));
+      bind->value      = buffer;
+      break;
+
+    case DATA_NUM:
+      bind->type       = dpi::DpiDouble;
+      arrayElementSize = sizeof(double);
+      bufferSize       = static_cast<size_t>(arrayElementSize * bind->maxArraySize);
+      buffer           = reinterpret_cast<char*>(malloc(bufferSize));
+      bind->value      = buffer;
+      break;
+
+    /*
+    case DATA_DATE:
+      bind->type       = dpi::DpiTimestampLTZ;
+      arrayElementSize = sizeof(long double);
+      bufferSize       = static_cast<size_t>(arrayElementSize * bind->maxArraySize);
+      buffer           = reinterpret_cast<char*>(malloc(bufferSize));
+      bind->value      = 0;
+      bind->extvalue   = buffer;
+      bind->dttmarr    = NULL;
+      break;
+    */
+
+    default:
+      {
+        std::ostringstream s;
+        s << "Internal Error: invalid case for value \"" << bind->type << "\"";
+        Nan::ThrowError(s.str().c_str());
+      }
+      break;
+  }
+
+  // Initialize buffer
+  if (!buffer)
+  {
+    executeBaton->error = NJSMessages::getErrorMsg(errInsufficientMemory);
+    goto exitGetInBindParams;
+  }
+  memset(buffer, 0, bufferSize);
+
+  // Allocate indicator and len arrays
+  bind->ind = reinterpret_cast<short*>(malloc(sizeof(short) * bind->maxArraySize));
+  bind->len = reinterpret_cast<DPI_BUFLEN_TYPE*>(malloc(sizeof(DPI_BUFLEN_TYPE) * bind->maxArraySize));
+  bind->len2 = reinterpret_cast<unsigned int*>(malloc(sizeof(unsigned int) * bind->maxArraySize));
+  if (!bind->ind || !bind->len || !bind->len2)
+  {
+    executeBaton->error = NJSMessages::getErrorMsg(errInsufficientMemory);
+    goto exitGetInBindParams;
+  }
+
+  //
+  //  Step 3 - Convert and copy the values from the JavaScript values to the OCI buffers
+  //
+
+  // Because maxSize will not be increased here but rather only ion the Connection::PrepareAndBind method,
+  //  we must also increase the buffer pointer by 1 here.
+  for (unsigned int index = 0; index < bind->curArraySize; index++, buffer += arrayElementSize)
+  {
+    Local<Value> value = va8vals->Get(index);
+    abstractValueType type = getAbstractValueType(value);
+
+    switch (type)
+    {
+      case TYPE_NULL:
+        bind->ind[index] = -1;
+        bind->len[index] = 0;
+        bind->len2[index] = 0;
+        break;
+
+      case TYPE_STRING:
+        {
+          v8::String::Utf8Value str(value->ToString());
+          size_t stringLength = str.length();
+          if (stringLength > 0)
+          {
+            memcpy(buffer, *str, stringLength);
+          }
+          bind->ind[index] = 0;
+          bind->len[index] = 0;
+          bind->len2[index] = static_cast<DPI_BUFLEN_TYPE>(stringLength);
+        }
+        break;
+
+      case TYPE_INTEGER:
+      case TYPE_UINTEGER:
+      case TYPE_NUMBER:
+        *(reinterpret_cast<double*>(buffer)) = value->NumberValue();
+        bind->ind[index] = 0;
+        bind->len[index] = 0;
+        bind->len2[index] = sizeof(double);
+        break;
+
+      /*
+      case TYPE_DATE:
+        *(reinterpret_cast<long double*>(buffer)) = Connection::v8Date2OraDate(value);
+        bind->ind[index] = 0;
+        bind->len[index] = 0;
+        bind->len2[index] = sizeof(long double);
+        break;
+      */
+
+      default:
+        {
+          std::ostringstream s;
+          s << "Internal Error: invalid case for value \"" << type << "\"";
+          Nan::ThrowError(s.str().c_str());
+        }
+        break;
+    }
+  }
+
+  //
+  //  Step 4 - Finalize the bind settings
+  //
+
+  bind->isArray = true;
+  bind->maxSize = arrayElementSize;
+
+  executeBaton->binds.push_back(bind);
+
+  exitGetInBindParams:
+  ;
+}
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Allocate array buffers for one bind on an PL/SQL indexed table parameter
+
+   PARAMETERS:
+     the data type, bind struct, eBaton struct, array element size
+
+   NOTE:
+*/
+bool Connection::AllocateBindArray(unsigned short dataType, Bind* bind, eBaton *executeBaton, size_t *arrayElementSize)
+{
+  Nan::HandleScope scope;
+
+  size_t bufferSize = 0;
+  char* buffer = 0;
+
+  // Because we we must bind a single Oracle numbertype, but in JavaScript
+  //  there might be different number types (Int, UInt and Number) we only
+  //  bind number columns as double.
+  switch (dataType)
+  {
+    case DATA_STR:
+      bind->type       = dpi::DpiVarChar;
+
+      // If we are dealing with an OUT binding
+      if (bind->isOut)
+      {
+        // If we are dealing with an OUT binding, it is not allowed to have an actual element largen than the maxSize argument
+        if (*arrayElementSize > static_cast<size_t>(bind->maxSize))
+        {
+          std::ostringstream s;
+          s << "no array element size \"" << *arrayElementSize << "\" is allowed to be larger then the given \"maxSize\" \"" << bind->maxSize << "\" property";
+          executeBaton->error = NJSMessages::getErrorMsg(errInvalidBindArray, bind->key, s.str().c_str());
+          return false;
+        }
+        else
+        {
+          *arrayElementSize = static_cast<size_t>(bind->maxSize);
+        }
+      }
+
+      // Because we also need to store the 0 at the end of the string, we need to increase the array element size by 1
+      *arrayElementSize = *arrayElementSize + 1;
+      bufferSize        = static_cast<size_t>(*arrayElementSize * bind->maxArraySize);
+      buffer            = reinterpret_cast<char*>(malloc(bufferSize));
+      bind->value       = buffer;
+      break;
+
+    case DATA_NUM:
+      bind->type        = dpi::DpiDouble;
+      *arrayElementSize = sizeof(double);
+      bufferSize        = static_cast<size_t>(*arrayElementSize * bind->maxArraySize);
+      buffer            = reinterpret_cast<char*>(malloc(bufferSize));
+      bind->value       = buffer;
+      break;
+
+    /*
+    case DATA_DATE:
+      bind->type        = dpi::DpiTimestampLTZ;
+      *arrayElementSize = sizeof(long double);
+      bufferSize        = static_cast<size_t>(*arrayElementSize * bind->maxArraySize);
+      buffer            = reinterpret_cast<char*>(malloc(bufferSize));
+      bind->value       = 0;
+      bind->extvalue    = buffer;
+      bind->dttmarr     = NULL;
+      break;
+    */
+
+    default:
+      {
+        std::ostringstream s;
+        s << "Internal Error: invalid case for value \"" << dataType << "\"";
+        Nan::ThrowError(s.str().c_str());
+      }
+      break;
+  }
+
+  // Initialize buffer
+  if (!buffer)
+  {
+    executeBaton->error = NJSMessages::getErrorMsg(errInsufficientMemory);
+    return false;
+  }
+  memset(buffer, 0, bufferSize);
+
+  // Allocate indicator and len arrays
+  bind->ind = reinterpret_cast<short*>(malloc(sizeof(short) * bind->maxArraySize));
+  bind->len = reinterpret_cast<DPI_BUFLEN_TYPE*>(malloc(sizeof(DPI_BUFLEN_TYPE) * bind->maxArraySize));
+  bind->len2 = reinterpret_cast<unsigned int*>(malloc(sizeof(unsigned int) * bind->maxArraySize));
+  if (!bind->ind || !bind->len || !bind->len2)
+  {
+    executeBaton->error = NJSMessages::getErrorMsg(errInsufficientMemory);
+    return false;
+  }
+
+  return true;
 }
 
 /*****************************************************************************/
@@ -1239,10 +1785,12 @@ void Connection::PrepareAndBind (eBaton* executeBaton)
                 (executeBaton->binds[index]->maxSize + 1) :
                 executeBaton->binds[index]->maxSize,
               executeBaton->binds[index]->ind,
-              executeBaton->binds[index]->len,
+              (executeBaton->binds[index]->isArray) ? executeBaton->binds[index]->len2 : executeBaton->binds[index]->len,
               (executeBaton->stmtIsReturning &&
                 executeBaton->binds[index]->isOut) ?
               (void *)executeBaton : NULL,
+              (executeBaton->binds[index]->isArray) ? executeBaton->binds[index]->maxArraySize : 0,
+              (executeBaton->binds[index]->isArray) ? &(executeBaton->binds[index]->curArraySize) : 0,
               (executeBaton->stmtIsReturning &&
                 executeBaton->binds[index]->isOut) ?
               Connection::cbDynBufferGet : NULL);
@@ -1284,10 +1832,12 @@ void Connection::PrepareAndBind (eBaton* executeBaton)
                 (executeBaton->binds[index]->maxSize + 1) :
                  executeBaton->binds[index]->maxSize,
               executeBaton->binds[index]->ind,
-              executeBaton->binds[index]->len,
+              (executeBaton->binds[index]->isArray) ? executeBaton->binds[index]->len2 : executeBaton->binds[index]->len,
               (executeBaton->stmtIsReturning &&
                 executeBaton->binds[index]->isOut ) ?
                   (void *)executeBaton : NULL,
+              (executeBaton->binds[index]->isArray) ? executeBaton->binds[index]->maxArraySize : 0,
+              (executeBaton->binds[index]->isArray) ? &(executeBaton->binds[index]->curArraySize) : 0,
               (executeBaton->stmtIsReturning &&
                 executeBaton->binds[index]->isOut) ?
               Connection::cbDynBufferGet : NULL);
@@ -2225,13 +2775,21 @@ Local<Value> Connection::GetValue ( eBaton *executeBaton,
     }
     else
     {
-      return scope.Escape ( Connection::GetValueCommon (
-                                      executeBaton,
-                                      bind->ind[row],
-                                      bind->type,
-                                      (bind->type == DpiTimestampLTZ ) ?
-                                         bind->extvalue : bind->value,
-                                      bind->len[row] ));
+      if (!bind->isArray)
+      {
+        return scope.Escape ( Connection::GetValueCommon (
+                                        executeBaton,
+                                        bind->ind[row],
+                                        bind->type,
+                                        (bind->type == DpiTimestampLTZ ) ?
+                                           bind->extvalue : bind->value,
+                                        bind->len[row] ));
+      }
+      else
+      {
+        Local<Value> value = Connection::GetArrayValue(executeBaton, bind, static_cast<unsigned long>(bind->curArraySize));
+        return scope.Escape(value);
+      }
     }
   }
 }
@@ -3039,20 +3597,22 @@ void Connection::Async_AfterBreak (uv_work_t *req)
  *
  * PARAMETERS
  *   val      - expected to be a v8::Date Value
- *   bind     - bind structure to update.
+ *
+ * RETURNS
+ *   date as a long double with seconds since 1970-1-1 0:0:0
  *
  * NOTE:
  *   This function is used for IN Bind parameters, when v8::Date value is
  *   passed, conversion to Oracle-DB Type happens here.
  *
  */
-void Connection::v8Date2OraDate ( Local<Value> val, Bind *bind)
+long double Connection::v8Date2OraDate(v8::Local<v8::Value> val)
 {
   Nan::HandleScope scope;
   Local<Date> date = val.As<Date>();    // Expects to be of v8::Date type
 
   // Get the number of seconds from 1970-1-1 0:0:0
-  *(long double *)(bind->extvalue) = date->NumberValue ();
+  return static_cast<long double>(date->NumberValue ());
 }
 
 /***************************************************************************/
@@ -3063,8 +3623,9 @@ void Connection::v8Date2OraDate ( Local<Value> val, Bind *bind)
  *   Update the double-date value in Bind structure
  *
  * PARAMETERS
- *   ebaton   - execute Baton
- *   index    - position in the binds array
+ *   ebaton    - execute Baton
+ *   index     - position in the binds array
+ *   arraySize - the number of array entries when an array is bound
  *
  * NOTE:
  *   When execution process starts, base date is not initialized yet,
@@ -3075,17 +3636,21 @@ void Connection::v8Date2OraDate ( Local<Value> val, Bind *bind)
  */
 void Connection::UpdateDateValue ( eBaton * ebaton, unsigned int index )
 {
-  Bind * bind = ebaton->binds[index];
+  Bind* bind = ebaton->binds[index];
 
-  if ( bind->type == dpi::DpiTimestampLTZ )
+  if (bind->type == dpi::DpiTimestampLTZ)
   {
-    bind->dttmarr = ebaton->dpienv->getDateTimeArray (
-                                        ebaton->dpistmt->getError () );
-    bind->value = bind->dttmarr->init (1);
+    const int arraySize = bind->isArray ? bind->curArraySize : 1;
+
+    bind->dttmarr = ebaton->dpienv->getDateTimeArray(ebaton->dpistmt->getError());
+    bind->value = bind->dttmarr->init(arraySize);
     if (!bind->isOut)
     {
-      bind->dttmarr->setDateTime( 0,
-                                  (*(long double *)bind->extvalue));
+      long double* buffer = reinterpret_cast<long double*>(bind->extvalue);
+      for (int i = 0; i < arraySize; i++, buffer++)
+      {
+        bind->dttmarr->setDateTime(i, *buffer);
+      }
     }
   }
 }
