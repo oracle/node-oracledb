@@ -76,7 +76,9 @@ public:
 
   virtual void bind (unsigned int pos, unsigned short type, void *buf,
                      DPI_SZ_TYPE bufSize, short *ind, DPI_BUFLEN_TYPE *bufLen,
-                     void *data, cbtype cb);
+                     void *data,
+                     unsigned int maxarr_len, unsigned int *curelen,
+                     cbtype cb);
 
   virtual void bind (const unsigned char *name, int nameLen, 
                      unsigned int bndpos,

@@ -30,7 +30,7 @@ describe('43. PL/SQL binds', function() {
       });
     })
 
-    it('43.1.1 binding PL/SQL indexed table IN', function(done) {
+    it('43.1.1 binding PL/SQL indexed table IN by name', function(done) {
       async.series([
         function(callback) {
           var proc = "CREATE OR REPLACE PACKAGE\n" +
@@ -77,9 +77,9 @@ describe('43. PL/SQL binds', function() {
         },
         function(callback) {
           var bindvars = {
-            result: {type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 2000},
             strings:  {type: oracledb.STRING, dir: oracledb.BIND_IN, val: [null, 'John', 'Doe']},
-            numbers: {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: [null, 8, 11]}
+            numbers: {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: [null, 8, 11]},
+            result: {type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 2000}
           };
           connection.execute(
             "BEGIN :result := oracledb_testpack.test(:strings, :numbers); END;",
@@ -104,7 +104,77 @@ describe('43. PL/SQL binds', function() {
       ], done);
     });
 
-    it('43.1.2 binding PL/SQL indexed table IN OUT', function(done) {
+    it('43.1.2 binding PL/SQL indexed table IN by position', function(done) {
+      async.series([
+        function(callback) {
+          var proc = "CREATE OR REPLACE PACKAGE\n" +
+                      "oracledb_testpack\n" +
+                      "IS\n" +
+                      "  TYPE stringsType IS TABLE OF VARCHAR2(30) INDEX BY BINARY_INTEGER;\n" +
+                      "  TYPE numbersType IS TABLE OF NUMBER INDEX BY BINARY_INTEGER;\n" +
+                      "  PROCEDURE test(s IN stringsType, n IN numbersType);\n" +
+                      "END;";
+          connection.should.be.ok;
+          connection.execute(
+            proc,
+            function(err) {
+              should.not.exist(err);
+              callback();
+            }
+          );
+        },
+        function(callback) {
+          var proc = "CREATE OR REPLACE PACKAGE BODY\n" +
+                     "oracledb_testpack\n" +
+                     "IS\n" +
+                     "  PROCEDURE test(s IN stringsType, n IN numbersType)\n" +
+                     "  IS\n" +
+                     "  BEGIN\n" +
+                     "    IF (s(1) IS NULL OR s(1) <> 'John') THEN\n" +
+                     "      raise_application_error(-20000, 'Invalid s(1): \"' || s(1) || '\"');\n" +
+                     "    END IF;\n" +
+                     "    IF (s(2) IS NULL OR s(2) <> 'Doe') THEN\n" +
+                     "      raise_application_error(-20000, 'Invalid s(2): \"' || s(2) || '\"');\n" +
+                     "    END IF;\n" +
+                     "  END;\n" +
+                     "END;";
+          connection.should.be.ok;
+          connection.execute(
+            proc,
+            function(err) {
+              should.not.exist(err);
+              callback();
+            }
+          );
+        },
+        function(callback) {
+          var bindvars = [
+            {type: oracledb.STRING, dir: oracledb.BIND_IN, val: ['John', 'Doe']},
+            {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: [8, 11]}
+          ];
+          connection.execute(
+            "BEGIN oracledb_testpack.test(:1, :2); END;",
+            bindvars,
+            function(err, result) {
+              should.not.exist(err);
+              // console.log(result);
+              callback();
+            }
+          );
+        },
+        function(callback) {
+          connection.execute(
+            "DROP PACKAGE oracledb_testpack",
+            function(err) {
+              should.not.exist(err);
+              callback();
+            }
+          );
+        }
+      ], done);
+    });
+
+    it('43.1.3 binding PL/SQL indexed table IN OUT', function(done) {
       async.series([
         function(callback) {
           var proc = "CREATE OR REPLACE PACKAGE\n" +
@@ -177,7 +247,7 @@ describe('43. PL/SQL binds', function() {
       ], done);
     });
 
-    it('43.1.3 binding PL/SQL indexed table OUT', function(done) {
+    it('43.1.4 binding PL/SQL indexed table OUT', function(done) {
       async.series([
         function(callback) {
           var proc = "CREATE OR REPLACE PACKAGE\n" +
@@ -253,7 +323,7 @@ describe('43. PL/SQL binds', function() {
     //
     //  Test exceptions when using PL/SQL indexed table bindings
     //
-    it('43.1.4 binding PL/SQL indexed table exceptions', function(done) {
+    it('43.1.5 binding PL/SQL indexed table exceptions', function(done) {
       async.series([
         function(callback) {
           var proc = "CREATE OR REPLACE PACKAGE\n" +
