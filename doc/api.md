@@ -2785,19 +2785,33 @@ connection.execute(
 
     var lob = result.outBinds.lobbv[0];
     lob.on('error', function(err) { console.error(err); });
+    lob.on('finish',
+      function()
+      {
+        connection.commit(
+          function(err)
+          {
+            if (err)
+              console.error(err.message);
+            else
+              console.log("Text inserted successfully.");
+            connection.release(function(err) {
+              if (err) console.error(err.message);
+            });
+          });
+      });
 
     console.log('Reading from ' + inFileName);
     var inStream = fs.createReadStream(inFileName);
-    inStream.on('end', function() {
-                  connection.commit(
-                    function(err) {
-                      if (err)
-                        console.error(err.message);
-                      else
-                        console.log("Text inserted successfully.");
-                    });
-                });
-    inStream.on('error', function(err) { console.error(err); });
+    inStream.on('error',
+      function(err)
+      {
+        console.error(err);
+        connection.release(function(err) {
+          if (err) console.error(err.message);
+        });
+      });
+
     inStream.pipe(lob);  // copies the text to the CLOB
   });
   ```
@@ -2835,6 +2849,9 @@ connection.execute(
 
     lob.setEncoding('utf8');  // we want text, not binary output
     lob.on('error', function(err) { console.error(err); });
+    lob.on('close', function() {
+      connection.release(function(err) { if (err) console.error(err.message); }); 
+    });
 
     console.log('Writing to ' + outFileName);
     var outStream = fs.createWriteStream(outFileName);
