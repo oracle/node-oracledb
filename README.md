@@ -43,12 +43,17 @@ features, and on functionality requests from
 Prerequisites:
 
 - [Python 2.7](https://www.python.org/downloads/)
-- C++ Compiler (GCC, Visual Studio or similar)
-- Install the small, free [Oracle Instant Client](http://www.oracle.com/technetwork/database/features/instant-client/index-100365.html) libraries if your database is remote.  Or use a locally installed database such as the free [Oracle XE](http://www.oracle.com/technetwork/database/database-technologies/express-edition/overview/index.html) release.
+- C Compiler with support for C++ 11 (Xcode, gcc, Visual Studio or similar)
+- The small, free [Oracle Instant Client](http://www.oracle.com/technetwork/database/features/instant-client/index-100365.html) libraries if your database is remote.  Or use a locally installed database such as the free [Oracle XE](http://www.oracle.com/technetwork/database/database-technologies/express-edition/overview/index.html) release
+- Set `OCI_LIB_DIR` and `OCI_INC_DIR` during installation if the Oracle libraries and headers are in a non-default location 
 
-    `npm install oracledb` to install from the [NPM registry](https://www.npmjs.com/package/oracledb).
+Run `npm install oracledb` to install from the [NPM registry](https://www.npmjs.com/package/oracledb).
 
 See [INSTALL](https://github.com/oracle/node-oracledb/tree/master/INSTALL.md) for details.
+
+## <a name="examples"></a> Examples
+
+There are examples in the [examples](https://github.com/oracle/node-oracledb/tree/master/examples) directory.
 
 ### A simple query example:
 
@@ -83,10 +88,6 @@ With Oracle's sample HR schema, the output is:
 ```
 [ [ 60, 'IT' ], [ 90, 'Executive' ], [ 100, 'Finance' ] ]
 ```
-
-## <a name="examples"></a> Examples
-
-There are examples in the [examples](https://github.com/oracle/node-oracledb/tree/master/examples) directory.
 
 ## <a name="doc"></a> Documentation
 
