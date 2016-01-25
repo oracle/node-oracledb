@@ -97,8 +97,6 @@ See [Documentation for the Oracle Database Node.js Add-on](https://github.com/or
 
 See [CHANGELOG](https://github.com/oracle/node-oracledb/tree/master/CHANGELOG.md)
 
-*Note* there were two small, backward-compatibility breaking attribute name changes in node-oracledb 0.5.
-
 ## <a name="testing"></a> Testsuite
 
 To run the included testsuite see [test/README](https://github.com/oracle/node-oracledb/tree/master/test/README.md).
