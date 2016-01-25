@@ -1,6 +1,6 @@
 # node-oracledb version 1.6
 
-## <a name="about"></a> 1. About node-oracledb
+## <a name="about"></a> About node-oracledb
 
 The node-oracledb add-on for Node.js powers high performance Oracle Database applications.
 
@@ -38,6 +38,18 @@ We are actively working on supporting the best Oracle Database
 features, and on functionality requests from
 [users involved in the project](https://github.com/oracle/node-oracledb/issues).
 
+## <a name="installation"></a> Installation
+
+Prerequisites:
+
+- [Python 2.7](https://www.python.org/downloads/)
+- C++ Compiler (GCC, Visual Studio or similar)
+- Install the small, free [Oracle Instant Client](http://www.oracle.com/technetwork/database/features/instant-client/index-100365.html) libraries if your database is remote.  Or use a locally installed database such as the free [Oracle XE](http://www.oracle.com/technetwork/database/database-technologies/express-edition/overview/index.html) release.
+
+    `npm install oracledb` to install from the [NPM registry](https://www.npmjs.com/package/oracledb).
+
+See [INSTALL](https://github.com/oracle/node-oracledb/tree/master/INSTALL.md) for details.
+
 ### A simple query example:
 
 ```javascript
@@ -72,42 +84,33 @@ With Oracle's sample HR schema, the output is:
 [ [ 60, 'IT' ], [ 90, 'Executive' ], [ 100, 'Finance' ] ]
 ```
 
-## <a name="examples"></a> 2. Examples
+## <a name="examples"></a> Examples
 
 There are examples in the [examples](https://github.com/oracle/node-oracledb/tree/master/examples) directory.
 
-## <a name="installation"></a> 3. Installation
-
-The basic install steps are:
-
-- Install the small, free [Oracle Instant Client](http://www.oracle.com/technetwork/database/features/instant-client/index-100365.html) libraries if your database is remote.  Or use a locally installed database such as the free [Oracle XE](http://www.oracle.com/technetwork/database/database-technologies/express-edition/overview/index.html) release.
-- Run `npm install oracledb` to install from the [NPM registry](https://www.npmjs.com/package/oracledb).
-
-See [INSTALL](https://github.com/oracle/node-oracledb/tree/master/INSTALL.md) for details.
-
-## <a name="doc"></a> 4. Documentation
+## <a name="doc"></a> Documentation
 
 See [Documentation for the Oracle Database Node.js Add-on](https://github.com/oracle/node-oracledb/tree/master/doc/api.md).
 
-## <a name="changes"></a> 5. Changes
+## <a name="changes"></a> Changes
 
 See [CHANGELOG](https://github.com/oracle/node-oracledb/tree/master/CHANGELOG.md)
 
 *Note* there were two small, backward-compatibility breaking attribute name changes in node-oracledb 0.5.
 
-## <a name="testing"></a> 6. Testsuite
+## <a name="testing"></a> Testsuite
 
 To run the included testsuite see [test/README](https://github.com/oracle/node-oracledb/tree/master/test/README.md).
 
-## <a name="contrib"></a> 7. Contributing
+## <a name="contrib"></a> Contributing
 
-Node-oracledb is an open source project. See 
+Node-oracledb is an open source project. See
 [CONTRIBUTING](https://github.com/oracle/node-oracledb/tree/master/CONTRIBUTING.md)
 for details.
 
 Oracle gratefully acknowledges the contributions to node-oracledb that have been made by the community.
 
-## <a name="license"></a> 8. License
+## <a name="license"></a> License
 
 Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved.
 
