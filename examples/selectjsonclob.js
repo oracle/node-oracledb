@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -61,11 +61,10 @@ oracledb.getConnection(
           connection,
           function(err, result)
           {
-            if (err) {
+            if (err)
               console.error(err.message);
-            } else {              
+            else              
               console.log('Query results: ', result);
-            }
             doRelease(connection);
           });
       });
@@ -85,15 +84,14 @@ function doInsert(connection, data, cb)
       }
 
       var lob = result.outBinds.lobbv[0];
-      lob.on('error', function(err) { return cb(err); });
+      lob.on(
+        'error',
+        function(err) {
+          return cb(err);
+        });
 
-      var inStream = new stream.Readable();
-      inStream._read = function noop() {};
-      inStream.push(data);
-      inStream.push(null);
-
-      inStream.on(
-        'end',
+      lob.on(
+        'finish',
         function()
         {
           connection.commit(
@@ -107,7 +105,17 @@ function doInsert(connection, data, cb)
               }
             });
         });
-      inStream.on('error', function(err) { return cb(err); });
+
+      var inStream = new stream.Readable();
+      inStream._read = function noop() {};
+      inStream.push(data);
+      inStream.push(null);
+
+      inStream.on(
+        'error',
+        function(err) {
+          return cb(err);
+        });
       inStream.pipe(lob);
     });
 }
@@ -125,9 +133,21 @@ function doQuery(connection, cb)
       var lob = result.rows[0][0];  // just show first record
       if (lob === null) { return cb(new Error('CLOB was NULL')); }
       lob.setEncoding('utf8');      // set the encoding so we get a 'string' not a 'buffer'
-      lob.on('data', function(chunk) { clob += chunk; });
-      lob.on('close', function() { return cb(null, JSON.parse(clob)); });
-      lob.on('error', function(err) { return cb(err); });
+      lob.on('data',
+             function(chunk)
+             {
+               clob += chunk;
+             });
+      lob.on('close',
+             function()
+             {
+               return cb(null, JSON.parse(clob));
+             });
+      lob.on('error',
+             function(err)
+             {
+               return cb(err);
+             });
     });
 }
 

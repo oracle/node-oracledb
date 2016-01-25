@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -60,6 +60,10 @@ oracledb.getConnection(
         console.log("CLOB chunkSize is", lob.chunkSize);
 
         lob.setEncoding('utf8');  // set the encoding so we get a 'string' not a 'buffer'
+        // pieceSize is the number of bytes retrieved for each readable 'data' event.
+        // The default is lob.chunkSize.  The recommendation is for it to be a multiple of chunkSize.
+        // lob.pieceSize = 100;  // fetch smaller chunks to show repeated 'data' events
+
         lob.on('data',
                 function(chunk)
                 {
@@ -74,17 +78,19 @@ oracledb.getConnection(
                   console.log("lob.on 'end' event");
                   console.log("clob size is " + clob.length);
                   fs.writeFile(outFileName, clob, function(err) {
-                    if (err) {
+                    if (err)
                       console.error(err);
-                    } else {
+                    else
                       console.log("Completed write to " + outFileName);
-                    }
                   });
                 });
         lob.on('close',
                function()
                {
                  console.log("lob.on 'close' event");
+                 connection.release(function(err) {
+                   if (err) console.error(err);
+                 });
                });
         lob.on('error',
                 function(err)
