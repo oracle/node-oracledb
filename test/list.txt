@@ -496,8 +496,11 @@
         59.1.1 reads clob data one by one row from result set
 
 60. clobPlsqlString.js
-    60.1 PL/SQL OUT CLOB parameters can also be bound as STRING
-    60.2 The returned length is limited to the maximum size
+    60.1 BIND OUT as STRING
+        60.1.1 PL/SQL OUT CLOB parameters can also be bound as STRING
+        60.1.2 The returned length is limited to the maximum size
+    60.2 BIND OUT as CLOB
+        60.2.1 maxSize option does not take effect when bind out type is clob 
 
 61. checkClassesTypes.js
     61.1 Oracledb class
