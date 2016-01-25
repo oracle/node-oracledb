@@ -23,6 +23,11 @@
  *
  * DESCRIPTION
  *   Testing driver DML Returning feature.
+ *   
+ *   When DML affects multiple rows we can still use the RETURING INTO, 
+ *   but now we must return the values into a collection using the 
+ *   BULK COLLECT clause.
+ *   
  *
  * NUMBERING RULE
  *   Test numbers follow this numbering rule:
@@ -577,4 +582,62 @@ describe('6. dmlReturning.js', function(){
     })
 
   }) // 6.2 
+
+  describe('6.3 BULK COLLECT clause', function() {
+    
+    var connection = null;
+    var tableName = "oracledb_varchar2";
+    var dataLength = 500;
+    var rows = [];
+    for (var i = 0; i < dataLength; i++)
+      rows[i] = "Row Number " + i;
+
+    before(function(done) {
+      async.series([
+        function(cb) {
+          oracledb.getConnection(credential, function(err, conn) {
+            should.not.exist(err);
+            connection = conn;
+            cb();
+          });
+        },
+        function insertRows(cb) {
+          assist.setUp(connection, tableName, rows, cb);
+        }
+      ], done);
+    }) // before
+
+    after(function(done) {
+      async.series([
+        function(cb) {
+          connection.execute(
+            "DROP table " + tableName,
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          connection.release( function(err) {
+            should.not.exist(err);
+            cb();
+          });
+        }
+      ], done);
+    }) // after
+
+    /* Pending case*/
+    it.skip('6.3.1 ', function(done) {
+      connection.execute(
+        "SELECT * FROM " + tableName,
+        function(err, result) {
+          //console.log(result); 
+          console.log(result.rows.length);
+          done();
+        }
+      );
+    })
+    
+  }) // 6.3
 })

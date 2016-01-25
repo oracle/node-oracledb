@@ -164,7 +164,7 @@ describe('42. dataTypeRaw.js', function() {
       );
     })
 
-    it.only('42.3.1 INSERT statement with Object binding', function(done) {
+    it('42.3.1 INSERT statement with Object binding', function(done) {
       var seq = 1;
       var size = 10;
       var bindValue = assist.createBuffer(size);
@@ -204,6 +204,7 @@ describe('42. dataTypeRaw.js', function() {
         function(err, result) {
           should.exist(err);
           (err.message).should.startWith('NJS-028');
+          done();
         }
       );
     }) // 42.3.2
