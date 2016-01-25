@@ -51,7 +51,7 @@
           "cflags_cc"     : ['-fexceptions'],
           "libraries"     : ["-lclntsh"],
           "link_settings" : {
-             "libraries"  : ['-L<(oci_lib_dir)']
+             "libraries"  : ['-L<(oci_lib_dir) -Wl,-rpath,<(oci_lib_dir)']
         }
       }
     ],
