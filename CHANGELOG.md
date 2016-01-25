@@ -1,5 +1,7 @@
 # Change Log
 
+## node-oracledb v1.6.0 (DD Mon YYYY)
+
 ## node-oracledb v1.5.0 (21 Dec 2015)
 
 - Treat Oracle Database 'Success With Info' warnings as success.
