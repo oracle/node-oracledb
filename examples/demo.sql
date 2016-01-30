@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -55,6 +55,53 @@ BEGIN
     SELECT first_name, salary, hire_date
     FROM   employees
     WHERE  salary > p_sal;
+END;
+/
+SHOW ERRORS
+
+-- For plsqlarray.js example for PL/SQL 'INDEX BY' array binds
+DROP TABLE waveheight;
+CREATE TABLE waveheight (beach VARCHAR2(50), depth NUMBER);
+
+CREATE OR REPLACE PACKAGE beachpkg IS
+  TYPE beachType IS TABLE OF VARCHAR2(30) INDEX BY BINARY_INTEGER;
+  TYPE depthType IS TABLE OF NUMBER       INDEX BY BINARY_INTEGER;
+  PROCEDURE array_in(beaches IN beachType, depths IN depthType);
+  PROCEDURE array_out(beaches OUT beachType, depths OUT depthType);
+  PROCEDURE array_inout(beaches IN OUT beachType, depths IN OUT depthType);
+END;
+/
+SHOW ERRORS
+
+CREATE OR REPLACE PACKAGE BODY beachpkg IS
+
+  -- Insert array values into a table
+  PROCEDURE array_in(beaches IN beachType, depths IN depthType) IS
+  BEGIN
+    IF beaches.COUNT <> depths.COUNT THEN
+       RAISE_APPLICATION_ERROR(-20000, 'Array lengths must match for this example.');
+    END IF;
+    FORALL i IN INDICES OF beaches
+      INSERT INTO waveheight (beach, depth) VALUES (beaches(i), depths(i));
+  END;
+
+  -- Return the values from a table
+  PROCEDURE array_out(beaches OUT beachType, depths OUT depthType) IS
+  BEGIN
+    SELECT beach, depth BULK COLLECT INTO beaches, depths FROM waveheight;
+  END;
+
+  -- Return the arguments sorted
+  PROCEDURE array_inout(beaches IN OUT beachType, depths IN OUT depthType) IS
+  BEGIN
+    IF beaches.COUNT <> depths.COUNT THEN
+       RAISE_APPLICATION_ERROR(-20001, 'Array lengths must match for this example.');
+    END IF;
+    FORALL i IN INDICES OF beaches
+      INSERT INTO waveheight (beach, depth) VALUES (beaches(i), depths(i));
+    SELECT beach, depth BULK COLLECT INTO beaches, depths FROM waveheight ORDER BY 1;
+  END;
+
 END;
 /
 SHOW ERRORS
