@@ -124,6 +124,7 @@ limitations under the License.
   - 12.3 [DML RETURNING Bind Parameters](#dmlreturn)
   - 12.4 [REF CURSOR Bind Parameters](#refcursors)
   - 12.5 [LOB Bind Parameters](#lobbinds)
+  - 12.6 [PL/SQL Collection Associative Array (Index-by) Bind Parameters](#plsqlindexbybinds)
 13. [Transaction Management](#transactionmgt)
 14. [Statement Caching](#stmtcache)
 15. [External Configuration](#oraaccess)
@@ -1167,10 +1168,11 @@ If a bind value is an object it may have the following properties:
 
 Bind Property | Description
 ---------------|------------
-`val` | The input value or variable to be used for an IN or IN OUT bind variable.
 `dir` | The direction of the bind.  One of the [Oracledb Constants](#oracledbconstants) `BIND_IN`, `BIND_INOUT`, or `BIND_OUT`.
-`type` | The datatype to be bound. One of the [Oracledb Constants](#oracledbconstants) `STRING`, `NUMBER`, `DATE`, `CURSOR` or `BUFFER`.
+`maxArraySize` | The number of array elements to be allocated for a PL/SQL Collection `INDEX OF` associative array OUT or IN OUT array bind variable.
 `maxSize` | The maximum number of bytes that an OUT or IN OUT bind variable of type STRING or BUFFER can use. The default value is 200. The maximum limit is 32767.
+`type` | The datatype to be bound. One of the [Oracledb Constants](#oracledbconstants) `STRING`, `NUMBER`, `DATE`, `CURSOR` or `BUFFER`.
+`val` | The input value or variable to be used for an IN or IN OUT bind variable.
 
 The maximum size of a `BUFFER` type is 2000 bytes, unless you are
 using Oracle Database 12c and the database initialization parameter
@@ -2970,7 +2972,9 @@ bind a Node.js Buffer to an Oracle Database `RAW` type.  The type
 For each OUT and IN OUT bind parameter, a bind value object containing
 [`val`](#executebindParams), [`dir`](#executebindParams),
 [`type`](#executebindParams) and [`maxSize`](#executebindParams)
-properties is used.
+properties is used.  For
+[PL/SQL Associative Array binds](#plsqlindexbybinds) a
+[`maxArraySize`](#executebindParams) property is required.
 
 The `dir` attribute should be `BIND_OUT` or `BIND_INOUT`.
 
@@ -3004,9 +3008,6 @@ also returned as an object with the same keys.  Similarly, if
 bind-by-position is done by passing an array of bind values, then the
 OUT and IN OUT binds are in an array with the bind positions in the
 same order.
-
-With PL/SQL statements, only scalar parameters can be bound.  An array
-of values cannot be passed to a PL/SQL indexed table bind parameter.
 
 Here is an example program showing the use of binds:
 
@@ -3251,6 +3252,145 @@ connection.execute(
 
 See [Working with CLOB and BLOB Data](#lobhandling) for more information
 on working with Lob streams.
+
+### <a name="plsqlindexbybinds"></a> 12.6 PL/SQL Collection Associative Array (Index-by) Bind Parameters
+
+Arrays of strings and numbers can be bound to PL/SQL IN, IN OUT, and
+OUT parameters of PL/SQL `INDEX BY` associative array type.  This type
+was formerly called PL/SQL tables or index-by tables.  This method of
+binding can be a very efficient way of transferring small data sets.
+Note PL/SQL's `VARRAY` and nested table collection types cannot be
+bound.
+
+To bind arrays use the named bind syntax:
+
+```javascript
+connection.execute(
+  "BEGIN mypkg.myinproc(:bv); END;",
+  {
+    bv: { type: oracledb.NUMBER,
+          dir: oracledb.BIND_IN,
+          val: [1, 2, 23, 4, 10]
+        }
+  }, . . .
+```
+
+Positional bind syntax is not supported in this release.
+
+For OUT and IN OUT binds, the [`maxArraySize`](#executebindParams)
+bind property must be set.  Its value is the maximum number of
+elements that can be returned in an array.  An error will occur if the
+PL/SQL block attempts to insert data beyond this limit.  If the PL/SQL
+code returns fewer items, the JavaScript array will have the actual
+number of data elements and will not contain null entries.  Setting
+`maxArraySize` larger than needed will cause unnecessary memory
+allocation.
+
+For IN OUT binds, `maxArraySize` can be greater than the number of
+elements in the input array.  This allows more values to be returned
+than are passed in.
+
+For IN binds, `maxArraySize` is ignored, as also is `maxSize`.
+
+For `STRING` IN OUT or OUT binds, the string length
+[`maxSize`](#executebindParams) property may be set.  If it is not set
+the memory allocated per string will default to 200 bytes.  If the
+value is not large enough to hold the longest string data item in the
+collection a runtime error occurs.  To avoid unnecessary memory
+allocation, do not let the size be larger than needed.
+
+See
+[plsqlarray.js](https://github.com/oracle/node-oracledb/tree/master/examples/plsqlarray.js)
+for a full example.
+
+The following example passes an array of values to a PL/SQL procedure
+which inserts them into a table.  The procedure is defined as:
+
+```sql
+CREATE TABLE mytab (numcol NUMBER);
+
+CREATE OR REPLACE PACKAGE mypkg IS
+  TYPE numtype IS TABLE OF NUMBER INDEX BY BINARY_INTEGER;
+  PROCEDURE myinproc(p IN numtype);
+END;
+/
+
+CREATE OR REPLACE PACKAGE BODY mypkg IS
+  PROCEDURE myinproc(p IN numtype) IS
+  BEGIN
+    FORALL i IN INDICES OF p
+      INSERT INTO mytab (numcol) VALUES (p(i));
+  END;
+END;
+/
+```
+
+With this, the following JavaScript will result in `mytab` containing
+one row per value:
+
+```javascript
+connection.execute(
+  "BEGIN mypkg.myinproc(:bv); END;",
+  {
+    bv: { type: oracledb.NUMBER,
+          dir: oracledb.BIND_IN,
+          val: [1, 2, 23, 4, 10]
+        }
+  },
+  function (err) { . . . });
+```
+
+The next example fetches an array of values from a table:
+
+```sql
+CREATE TABLE mytab (numcol NUMBER);
+INSERT INTO mytable (numcol) VALUES (10);
+INSERT INTO mytable (numcol) VALUES (25);
+INSERT INTO mytable (numcol) VALUES (50);
+COMMIT;
+
+CREATE OR REPLACE PACKAGE mypkg IS
+  TYPE numtype IS TABLE OF NUMBER INDEX BY BINARY_INTEGER;
+  PROCEDURE myoutproc(p OUT numtype);
+END;
+/
+
+CREATE OR REPLACE PACKAGE BODY mypkg IS
+  PROCEDURE myoutproc(p OUT numtype) IS
+  BEGIN
+    SELECT numcol BULK COLLECT INTO p FROM mytab ORDER BY 1;
+  END;
+END;
+/
+```
+
+With this table and package, the following JavaScript will print
+`[ 10, 25, 50 ]`.
+
+```javascript
+connection.execute(
+  "BEGIN mypkg.myoutproc(:bv); END;",
+  {
+    bv: { type: oracledb.NUMBER,
+          dir: oracledb.BIND_OUT,
+          maxArraySize: 10 // allocate memory to hold 10 numbers
+        }
+  },
+  function (err, result) {
+    if (err) { console.error(err.message); return; }
+    console.log(result.outBinds.bv);
+  });
+```
+
+If `maxArraySize` was reduced to `2`, the script would fail with:
+
+```
+ORA-06513: PL/SQL: index for PL/SQL table out of range for host language array
+```
+
+See [Oracledb Constants](#oracledbconstants) and
+[execute(): Bind Parameters](#executebindParams) for more information
+about binding.
 
 ## <a name="transactionmgt"></a> 13. Transaction Management
 
