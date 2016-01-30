@@ -1,4 +1,5 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates.
+   All rights reserved. */
 
 /******************************************************************************
  *
@@ -52,7 +53,6 @@
 #include "njsResultSet.h"
 #include "njsIntLob.h"
 #include <stdlib.h>
-#include <iostream>
 #include <limits>
 using namespace std;
 
@@ -73,6 +73,7 @@ Nan::Persistent<FunctionTemplate> Connection::connectionTemplate_s;
 #define NJS_SIZE_T_OVERFLOW(maxSize,maxRows)                                  \
  ( ( ( maxSize != 0 ) &&                                                      \
      ( ( ( NJS_SIZE_T_MAX ) / ( (size_t)maxSize ) ) < (maxRows) ) ) ? 1 : 0)  \
+
 
 /*****************************************************************************/
 /*
@@ -700,7 +701,31 @@ void Connection::GetBindUnit (Local<Value> val, Bind* bind,
                                            "maxSize", 2 );
       goto exitGetBindUnit;
     }
+    
+    NJS_GET_UINT_FROM_JSON(bind->maxArraySize, executeBaton->error, bind_unit,
+                           "maxArraySize", 1, exitGetBindUnit);
 
+
+    Local<Value> element = bind_unit->Get(
+                               Nan::New<v8::String>("val").ToLocalChecked());
+
+    /*
+     * For IN binds maxArraySize is ignored and obtained from array size
+     * For INOUT bind, we do need maxArraySize to be specified by application
+     * For OUT bind, we can NOT determine the out value as ARRAY and so 
+     * no validation done here.
+     */
+    if ( dir == BIND_INOUT && element->IsArray () )
+    {
+      Local<Array>arr = Local<Array>::Cast (element);
+      
+      if ( arr->Length() > bind->maxArraySize )
+      {
+        executeBaton->error = NJSMessages::getErrorMsg ( errInvalidArraySize );
+        goto exitGetBindUnit;
+      }
+    }
+    
     /* REFCURSOR(s) are supported only as OUT Binds now */
     if ( bind->type == DATA_CURSOR && dir != BIND_OUT )
     {
@@ -709,9 +734,7 @@ void Connection::GetBindUnit (Local<Value> val, Bind* bind,
                                             "type", 2 ) ;
       goto exitGetBindUnit;
     }
-
-    Local<Value> element = bind_unit->Get(Nan::New<v8::String>("val").ToLocalChecked());
-
+    
     switch(dir)
     {
       case BIND_IN    :
@@ -739,7 +762,8 @@ void Connection::GetBindUnit (Local<Value> val, Bind* bind,
         if(!executeBaton->error.empty()) goto exitGetBindUnit;
         break;
       default         :
-        executeBaton->error = NJSMessages::getErrorMsg (errInvalidBindDirection);
+        executeBaton->error = NJSMessages::getErrorMsg (
+                                       errInvalidBindDirection);
         goto exitGetBindUnit;
         break;
     }
@@ -766,40 +790,64 @@ void Connection::GetBindUnit (Local<Value> val, Bind* bind,
 void Connection::GetOutBindParams (unsigned short dataType, Bind* bind,
                                    eBaton *executeBaton)
 {
+  Nan::HandleScope scope;
+
+  if ( bind->maxArraySize > 0 )
+  {
+    if ( (dataType != DATA_STR ) && ( dataType != DATA_NUM ) )
+    {
+      executeBaton->error = NJSMessages::getErrorMsg (
+                                     errInvalidTypeForArrayBind );
+      goto exitGetOutBindParams;
+    }
+    else
+    {
+      bind->isArray = true;
+    }
+  }
+  
   switch(dataType)
   {
     case DATA_STR :
       bind->type     =  dpi::DpiVarChar;
       break;
+
     case DATA_NUM :
       bind->type     = dpi::DpiDouble;
       bind->maxSize  = sizeof(double);
       break;
+
     case DATA_DATE :
       bind->type     = dpi::DpiTimestampLTZ;
-      bind->maxSize  = 0;
       break;
+
     case DATA_CURSOR :
       bind->type     = dpi::DpiRSet;
-      bind->maxSize  = 0;
       break;
+
     case DATA_BUFFER :
       bind->type     = dpi::DpiRaw;
       break;
+      
     case DATA_CLOB : 
       bind->type    = dpi::DpiClob;
-      bind->maxSize  = 0;
       break;
+
     case DATA_BLOB : 
       bind->type    = dpi::DpiBlob;
-      bind->maxSize  = 0;
       break;
+
     default :
       executeBaton->error= NJSMessages::getErrorMsg(errInvalidBindDataType,2);
       break;
   }
-  executeBaton->binds.push_back(bind);
+
+  executeBaton->binds.push_back(bind);       
+
+exitGetOutBindParams:
+  ;
 }
+
 
 /*****************************************************************************/
 /*
@@ -807,156 +855,565 @@ void Connection::GetOutBindParams (unsigned short dataType, Bind* bind,
      Processing in binds
 
    PARAMETERS:
-     Handle value, bind struct, eBaton struct
+     Handle value, bind struct, eBaton struct, Bind Type ( IN, INOUT, OUT)
 
    NOTE:
      For IN Bind only len field field is used, and for only a scalar value now,
      allocate for one unit.
 */
-void Connection::GetInBindParams (Local<Value> v8val, Bind* bind,
-                                           eBaton* executeBaton, BindType type)
+void Connection::GetInBindParams(Local<Value> v8val, Bind* bind,
+                                 eBaton* executeBaton, BindType type)
 {
   Nan::HandleScope scope;
+
+  if (v8val->IsArray() )
+  {
+    GetInBindParamsArray(Local<Array>::Cast(v8val), bind, executeBaton, type);
+  }
+  else
+  {
+    GetInBindParamsScalar(v8val, bind, executeBaton, type);
+  }
+}
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Processing in binds for scalar values
+
+   PARAMETERS:
+     Handle value, bind struct, eBaton struct, BindType (IN, INOUT, OUT)
+
+   NOTE:
+     For IN Bind only len field field is used, and for only a scalar value now,
+     allocate for one unit.
+*/
+void Connection::GetInBindParamsScalar(Local<Value> v8val, Bind* bind, 
+                                       eBaton* executeBaton, BindType type)
+{
+  Nan::HandleScope scope;
+  ValueType dataType = VALUETYPE_INVALID;
 
   /* Allocate for scalar indicator & length */
   bind->ind = (short *)malloc ( sizeof ( short ) );
   bind->len = (DPI_BUFLEN_TYPE *)malloc ( sizeof ( DPI_BUFLEN_TYPE ) );
 
   *(bind->ind)  = 0;
+  
+  dataType = Connection::GetValueType ( v8val );
 
-  if(v8val->IsUndefined() || v8val->IsNull())
+  switch ( dataType )
   {
-    bind->value = NULL;
-    *(bind->ind)   = -1;
-    bind->type        = dpi::DpiVarChar;
-  }
-  else if(v8val->IsString())
-  {
-    if( bind->type && bind->type != DATA_STR )
-    {
-      executeBaton->error= NJSMessages::getErrorMsg(
-                             errBindValueAndTypeMismatch, 2);
-      goto exitGetInBindParams;
-    }
+    case VALUETYPE_NULL:
+      bind->value = NULL;
+      *(bind->ind)   = -1;
+      bind->type        = dpi::DpiVarChar;
+      break;
 
-    v8::String::Utf8Value str(v8val->ToString());
-
-    bind->type = dpi::DpiVarChar;
-    if(type == BIND_INOUT)
+    case VALUETYPE_STRING:
     {
-      *(bind->len) = str.length();
-    }
-    else // IN
-    {
-      bind->maxSize = *(bind->len) = str.length();
-    }
-    DPI_SZ_TYPE size = (bind->maxSize >= *(bind->len) ) ?
-                       bind->maxSize : *(bind->len);
-    if(size)
-    {
-      bind->value = (char*)malloc((size_t)size);
-      if( !bind->value )
+      if( bind->type && bind->type != DATA_STR )
       {
-        executeBaton->error = NJSMessages::getErrorMsg(
-                                errInsufficientMemory );
-        return;
+        executeBaton->error= NJSMessages::getErrorMsg(
+                               errBindValueAndTypeMismatch, 2);
+        goto exitGetInBindParamsScalar;
       }
 
-      if(str.length())
-        memcpy(bind->value, *str, str.length());
-    }
-  }
-  else if(v8val->IsInt32())
-  {
-    if( bind->type && bind->type != DATA_NUM )
-    {
-      executeBaton->error= NJSMessages::getErrorMsg(
-                             errBindValueAndTypeMismatch, 2);
-      goto exitGetInBindParams;
-    }
-    bind->type = dpi::DpiInteger;
-    bind->maxSize = *(bind->len) = sizeof(int);
-    bind->value = (int*)malloc(*(bind->len));
-    *(int*)(bind->value) = v8val->ToInt32()->Value();
-  }
-  else if(v8val->IsUint32())
-  {
-    if( bind->type && bind->type != DATA_NUM )
-    {
-      executeBaton->error= NJSMessages::getErrorMsg(
-                             errBindValueAndTypeMismatch, 2);
-      goto exitGetInBindParams;
-    }
-    bind->type = dpi::DpiUnsignedInteger;
-    bind->maxSize = *(bind->len) = sizeof(unsigned int);
-    bind->value = (unsigned int*)malloc(*(bind->len));
-    *(unsigned int*)(bind->value) = v8val->ToUint32()->Value();
-  }
-  else if(v8val->IsNumber())
-  {
-    if( bind->type && bind->type != DATA_NUM )
-    {
-      executeBaton->error= NJSMessages::getErrorMsg(errBindValueAndTypeMismatch, 2);
-      goto exitGetInBindParams;
-    }
-    bind->type = dpi::DpiDouble;
-    bind->maxSize = *(bind->len) = sizeof(double);
-    bind->value = (double*)malloc(*(bind->len));
-    *(double*)(bind->value) = v8val->NumberValue();
-  }
-  else if(v8val->IsDate ())
-  {
-    if( bind->type && bind->type != DATA_DATE )
-    {
-      executeBaton->error= NJSMessages::getErrorMsg(errBindValueAndTypeMismatch, 2);
-      goto exitGetInBindParams;
-    }
-    /* This has to be allocated after stmt is initialized */
-    bind->dttmarr = NULL ;
-    bind->extvalue = (long double *) malloc (sizeof ( long double ) );
-    bind->value = NULL;
-    bind->type = dpi::DpiTimestampLTZ;
-    *(bind->len) = 0;
-    bind->maxSize = 0;
-    /* Convert v8::Date value to long double */
-    Connection::v8Date2OraDate ( v8val, bind);
-  }
-  else if(v8val->IsObject ())
-  {
-    Local<Object> obj = v8val->ToObject();
-    if (Buffer::HasInstance(obj)) {
-      size_t bufLen = Buffer::Length(obj);
-      bind->type = dpi::DpiRaw;
+      v8::String::Utf8Value str(v8val->ToString());
+
+      bind->type = dpi::DpiVarChar;
       if(type == BIND_INOUT)
       {
-        *(bind->len) = (DPI_BUFLEN_TYPE) bufLen;
+        *(bind->len) = str.length();
       }
       else // IN
       {
-        bind->maxSize =  (DPI_SZ_TYPE ) bufLen;
-        *(bind->len) = (DPI_BUFLEN_TYPE) bufLen;
+        bind->maxSize = *(bind->len) = str.length();
       }
       DPI_SZ_TYPE size = (bind->maxSize >= *(bind->len) ) ?
                          bind->maxSize : *(bind->len);
       if(size)
       {
-        bind->value = (char*)malloc(size);
-        if(bufLen)
-          memcpy(bind->value, Buffer::Data(obj), bufLen);
+        bind->value = (char*)malloc((size_t)size);
+        if( !bind->value )
+        {
+          executeBaton->error = NJSMessages::getErrorMsg(
+                                  errInsufficientMemory );
+          return;
+        }
+
+        if(str.length())
+          memcpy(bind->value, *str, str.length());
       }
-    } else {
-      executeBaton->error= NJSMessages::getErrorMsg(errInvalidBindDataType,2);
-      goto exitGetInBindParams;
+    }
+    break;
+    
+    case VALUETYPE_INTEGER:
+      if( bind->type && bind->type != DATA_NUM )
+      {
+        executeBaton->error= NJSMessages::getErrorMsg(
+                               errBindValueAndTypeMismatch, 2);
+        goto exitGetInBindParamsScalar;
+      }
+      bind->type = dpi::DpiInteger;
+      bind->maxSize = *(bind->len) = sizeof(int);
+      bind->value = (int*)malloc(*(bind->len));
+      *(int*)(bind->value) = v8val->ToInt32()->Value();
+      break;
+    
+    case VALUETYPE_UINTEGER:
+      if( bind->type && bind->type != DATA_NUM )
+      {
+        executeBaton->error= NJSMessages::getErrorMsg(
+                               errBindValueAndTypeMismatch, 2);
+        goto exitGetInBindParamsScalar;
+      }
+      bind->type = dpi::DpiUnsignedInteger;
+      bind->maxSize = *(bind->len) = sizeof(unsigned int);
+      bind->value = (unsigned int*)malloc(*(bind->len));
+      *(unsigned int*)(bind->value) = v8val->ToUint32()->Value();
+      break;
+
+    case VALUETYPE_NUMBER:
+      if( bind->type && bind->type != DATA_NUM )
+      {
+        executeBaton->error= NJSMessages::getErrorMsg(
+                                            errBindValueAndTypeMismatch, 2);
+        goto exitGetInBindParamsScalar;
+      }
+      bind->type = dpi::DpiDouble;
+      bind->maxSize = *(bind->len) = sizeof(double);
+      bind->value = (double*)malloc(*(bind->len));
+      *(double*)(bind->value) = v8val->NumberValue();
+      break;
+
+    case VALUETYPE_DATE:
+      if( bind->type && bind->type != DATA_DATE )
+      {
+        executeBaton->error= NJSMessages::getErrorMsg(
+                                     errBindValueAndTypeMismatch, 2);
+        goto exitGetInBindParamsScalar;
+      }
+
+      /* This has to be allocated after stmt is initialized */
+      bind->dttmarr = NULL ;
+      bind->extvalue = (long double *) malloc (sizeof ( long double ) );
+      bind->value = NULL;
+      bind->type = dpi::DpiTimestampLTZ;
+      *(bind->len) = 0;
+      bind->maxSize = 0;
+      /* Convert v8::Date value to long double */
+      Connection::v8Date2OraDate ( v8val, bind);
+      break;
+
+    case VALUETYPE_OBJECT:
+      {
+        Local<Object> obj = v8val->ToObject();
+        if (Buffer::HasInstance(obj)) 
+        {
+          size_t bufLen = Buffer::Length(obj);
+          bind->type = dpi::DpiRaw;
+          if(type == BIND_INOUT)
+          {
+            *(bind->len) = (DPI_BUFLEN_TYPE) bufLen;
+          }
+          else // IN
+          {
+            bind->maxSize =  (DPI_SZ_TYPE ) bufLen;
+            *(bind->len) = (DPI_BUFLEN_TYPE) bufLen;
+          }
+          DPI_SZ_TYPE size = (bind->maxSize >= *(bind->len) ) ?
+                             bind->maxSize : *(bind->len);
+          if(size)
+          {
+            bind->value = (char*)malloc(size);
+            if(bufLen)
+              memcpy(bind->value, Buffer::Data(obj), bufLen);
+          }
+        }
+        else 
+        {
+          executeBaton->error= NJSMessages::getErrorMsg(
+                                             errInvalidBindDataType,2);
+          goto exitGetInBindParamsScalar; 
+        }
+      }
+      break;
+  
+  default:
+    executeBaton->error= NJSMessages::getErrorMsg(errInvalidBindDataType,2);
+    goto exitGetInBindParamsScalar;
+    break;
+  }
+
+  executeBaton->binds.push_back(bind);
+  
+exitGetInBindParamsScalar:
+  ;
+}
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Processing in binds for PL/SQL indexed table value
+
+   PARAMETERS:
+     Handle value, bind struct, eBaton struct, Bindtype (IN, INOUT, OUT).
+
+   NOTE:
+     For IN Bind only len field field is used, and for only a scalar value now,
+     allocate for one unit.
+*/
+void Connection::GetInBindParamsArray(Local<Array> va8vals, Bind *bind,
+                                      eBaton *executeBaton, BindType type)
+{
+  Nan::HandleScope scope;
+  size_t           arrayElementSize = 0; // actual array element size
+  size_t           bufferSize = 0;
+  char*            buffer = 0;
+  
+  //
+  //  Step 1 - Analyze the bind parameter to determine if we actually can 
+  //           bind the array of values
+  //
+
+  bind->curArraySize = va8vals->Length();         // # of elements in Array
+
+  // Validate the "maxArraySize" property
+  if (!bind->isInOut)
+  {
+    bind->maxArraySize = static_cast<unsigned int>(bind->curArraySize);
+  }
+
+  // Currently only STRING & NUMBER are supported for Array Bind(s) 
+  if ( (bind->type != DATA_STR) && (bind->type != DATA_NUM) )
+  {
+    executeBaton->error = NJSMessages::getErrorMsg(
+                                           errInvalidTypeForArrayBind);
+    goto exitGetInBindParamsArray;
+  }
+
+  // Make sure that all (not NULL) elements in the array have a valid and
+  // consistent type
+  for (unsigned int index = 0; index < bind->curArraySize; index++)
+  {
+    Local<Value> value = va8vals->Get(index);
+    ValueType    vtype = GetValueType (value);
+
+    // make sure that we generally have a valid value type
+    if (vtype == VALUETYPE_INVALID)
+    {
+      executeBaton->error = NJSMessages::getErrorMsg(
+                                          errInvalidTypeForArrayBind);
+      
+      goto exitGetInBindParamsArray;
+    }
+
+    // make sure that all values in the array have the exact same type or are 
+    // null
+    switch (bind->type)
+    {
+      case DATA_STR:
+        if (vtype != VALUETYPE_NULL && vtype != VALUETYPE_STRING)
+        {
+          executeBaton->error = NJSMessages::getErrorMsg(
+                                     errIncompatibleTypeArrayBind);
+          goto exitGetInBindParamsArray;
+        }
+        else
+        {
+          v8::String::Utf8Value str(value->ToString());
+          size_t stringLength = str.length();
+          if (stringLength > static_cast<size_t>(arrayElementSize))
+          {
+            arrayElementSize = stringLength;
+          }
+
+          // Check if we have a string with a size larger then the specified
+          // maxSize (there is actually a default for maxSize if not specified)
+          if (stringLength > static_cast<size_t>(bind->maxSize))
+          {
+            executeBaton->error = NJSMessages::getErrorMsg(
+                                             errInvalidValueArrayBind);
+            goto exitGetInBindParamsArray;
+          }
+        }
+        break;
+
+      case DATA_NUM:
+        if (vtype != VALUETYPE_NULL && vtype != VALUETYPE_INTEGER &&
+            vtype != VALUETYPE_UINTEGER && vtype != VALUETYPE_NUMBER)
+        {
+          executeBaton->error = NJSMessages::getErrorMsg(
+                                          errIncompatibleTypeArrayBind);
+          goto exitGetInBindParamsArray;
+        }
+        break;
     }
   }
-  else
+
+  //
+  //  Step 2 - Allocate the needed buffers for the arrays of values and the 
+  //           indicators
+  //
+
+
+  switch (bind->type)
   {
-    executeBaton->error= NJSMessages::getErrorMsg(errInvalidBindDataType,2);
-    goto exitGetInBindParams;
+    case DATA_STR:
+      bind->type       = dpi::DpiVarChar;
+
+      // If we are dealing with an OUT binding
+      if (bind->isOut)
+      {
+        // If we are dealing with an OUT binding, it is not allowed to have
+        // am actual element largen than the maxSize argument
+        if (arrayElementSize > static_cast<size_t>(bind->maxSize))
+        {
+          executeBaton->error = NJSMessages::getErrorMsg(errInvalidArraySize);
+          goto exitGetInBindParamsArray;
+        }
+        else
+        {
+          arrayElementSize = static_cast<size_t>(bind->maxSize);
+        }
+      }
+
+      if ( NJS_SIZE_T_OVERFLOW (arrayElementSize, bind->maxArraySize ) )
+      {
+        executeBaton->error = NJSMessages::getErrorMsg ( errResultsTooLarge );
+        goto exitGetInBindParamsArray;
+      }
+      bufferSize       = static_cast<size_t>(arrayElementSize * 
+                                             bind->maxArraySize);      
+      buffer           = reinterpret_cast<char*>(malloc(bufferSize));
+      bind->value      = buffer;
+      break;
+
+    case DATA_NUM:
+      bind->type       = dpi::DpiDouble;
+      arrayElementSize = sizeof(double);
+      if ( NJS_SIZE_T_OVERFLOW (arrayElementSize, bind->maxArraySize ) )
+      {
+        executeBaton->error = NJSMessages::getErrorMsg ( errResultsTooLarge );
+        goto exitGetInBindParamsArray;
+      }
+      bufferSize       = static_cast<size_t>(arrayElementSize * 
+                                             bind->maxArraySize);
+      buffer           = reinterpret_cast<char*>(malloc(bufferSize));
+      bind->value      = buffer;
+      break;
+
+    default:
+      executeBaton->error = NJSMessages::getErrorMsg (
+                                     errInvalidTypeForArrayBind );
+      goto exitGetInBindParamsArray;
+      break;
   }
+
+  // Initialize buffer
+  if (!buffer)
+  {
+    executeBaton->error = NJSMessages::getErrorMsg(errInsufficientMemory);
+    goto exitGetInBindParamsArray;
+  }
+  memset(buffer, 0, bufferSize);
+
+  // Allocate indicator and len arrays
+  if ( NJS_SIZE_T_OVERFLOW ( sizeof (short), bind->maxArraySize ))
+  {
+    executeBaton->error = NJSMessages::getErrorMsg ( errResultsTooLarge );
+    goto exitGetInBindParamsArray;
+  }
+  bind->ind = reinterpret_cast<short*>(malloc(
+                                  sizeof(short) * bind->maxArraySize));
+
+  if ( NJS_SIZE_T_OVERFLOW ( sizeof ( DPI_BUFLEN_TYPE ), bind->maxArraySize ) )
+  {
+    executeBaton->error = NJSMessages::getErrorMsg ( errResultsTooLarge );
+    goto exitGetInBindParamsArray;
+  }
+  bind->len = reinterpret_cast<DPI_BUFLEN_TYPE*>(
+                malloc( sizeof(DPI_BUFLEN_TYPE) * bind->maxArraySize));
+  if ( NJS_SIZE_T_OVERFLOW ( sizeof ( unsigned int ), bind->maxArraySize ) )
+  {
+    executeBaton->error = NJSMessages::getErrorMsg ( errResultsTooLarge );
+    goto exitGetInBindParamsArray;
+  }
+                                  
+  if (!bind->ind || !bind->len)
+  {
+    executeBaton->error = NJSMessages::getErrorMsg(errInsufficientMemory);
+    goto exitGetInBindParamsArray;
+  }
+
+  //
+  //  Step 3 - Convert and copy the values from the JavaScript values to the
+  //           OCI buffers
+  //
+
+  for (unsigned int index = 0;
+       index < bind->curArraySize; 
+       index++, buffer += arrayElementSize)
+  {
+    Local<Value> value = va8vals->Get(index);
+    ValueType type = GetValueType(value);
+
+    switch (type)
+    {
+      case VALUETYPE_NULL:
+        bind->ind[index] = -1;
+        bind->len[index] = 0;
+        break;
+
+      case VALUETYPE_STRING:
+        {
+          v8::String::Utf8Value str(value->ToString());
+          size_t stringLength = str.length();
+          if (stringLength > 0)
+          {
+            memcpy(buffer, *str, stringLength);
+          }
+          bind->ind[index] = 0;
+          bind->len[index] = static_cast<DPI_BUFLEN_TYPE>(stringLength);
+        }
+        break;
+
+      case VALUETYPE_INTEGER:
+      case VALUETYPE_UINTEGER:
+      case VALUETYPE_NUMBER:
+        *(reinterpret_cast<double*>(buffer)) = value->NumberValue();
+        bind->ind[index] = 0;
+        bind->len[index] = sizeof ( double ) ;
+        break;
+
+      default:
+        executeBaton->error = NJSMessages::getErrorMsg ( 
+                                          errInvalidTypeForArrayBind ) ;
+        goto exitGetInBindParamsArray;
+        break;
+    }
+  }
+
+  //
+  //  Step 4 - Finalize the bind settings
+  //
+
+  bind->isArray = true;
+  bind->maxSize = arrayElementSize;
+
   executeBaton->binds.push_back(bind);
-  exitGetInBindParams:
+
+exitGetInBindParamsArray:
   ;
+}
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Allocate array buffers for one bind on an PL/SQL indexed table parameter
+
+   PARAMETERS:
+     the data type, bind struct, eBaton struct, array element size
+
+   NOTE:
+*/
+bool Connection::AllocateBindArray(unsigned short dataType, Bind* bind,
+                                   eBaton *executeBaton,
+                                   size_t *arrayElementSize)
+{
+  size_t           bufferSize = 0;
+  char*            buffer = 0;
+  bool             ret = false;
+
+  switch (dataType)
+  {
+  case dpi::DpiVarChar:
+    // If we are dealing with an OUT binding, it is not allowed to have
+    // an actual element largen than the maxSize argument
+    if (*arrayElementSize > static_cast<size_t>(bind->maxSize))
+    {
+      executeBaton->error = NJSMessages::getErrorMsg(errInvalidArraySize);
+      goto exitAllocateBindArray;
+    }
+    else
+    {
+      *arrayElementSize = static_cast<size_t>(bind->maxSize);
+    }
+  
+    if ( NJS_SIZE_T_OVERFLOW (*arrayElementSize, bind->maxArraySize ) )
+    {
+      executeBaton->error = NJSMessages::getErrorMsg ( errResultsTooLarge );
+      goto exitAllocateBindArray;
+    }
+    bufferSize        = static_cast<size_t>(*arrayElementSize *
+                                            bind->maxArraySize);
+    buffer            = reinterpret_cast<char*>(malloc(bufferSize));
+    bind->value       = buffer;
+    ret = true;
+    break;
+
+  case dpi::DpiDouble:
+    bind->type        = dpi::DpiDouble;
+    *arrayElementSize = sizeof(double);
+    if ( NJS_SIZE_T_OVERFLOW (*arrayElementSize, bind->maxArraySize ) )
+    {
+      executeBaton->error = NJSMessages::getErrorMsg ( errResultsTooLarge );
+      goto exitAllocateBindArray;
+    }
+    bufferSize        = static_cast<size_t>(*arrayElementSize *
+                                            bind->maxArraySize);
+    buffer            = reinterpret_cast<char*>(malloc(bufferSize));
+    bind->value       = buffer;
+    ret = true;
+    break;
+
+  default:
+    executeBaton->error = NJSMessages::getErrorMsg ( 
+                                    errInvalidTypeForArrayBind ) ;
+    goto exitAllocateBindArray;
+    break;
+  }
+
+  if ( ret )
+  {
+    // Initialize buffer
+    if (!buffer)
+    {
+      executeBaton->error = NJSMessages::getErrorMsg(errInsufficientMemory);
+      ret = false;
+    }
+  }
+  if ( ret )
+  {
+    memset(buffer, 0, bufferSize);
+
+    // Allocate indicator and len arrays
+    if ( NJS_SIZE_T_OVERFLOW ( sizeof(short), bind->maxArraySize ) )
+    {
+      executeBaton->error = NJSMessages::getErrorMsg ( errResultsTooLarge );
+      goto exitAllocateBindArray;
+    }
+    bind->ind = reinterpret_cast<short*>(malloc(
+                                       sizeof(short) * bind->maxArraySize));
+    if ( NJS_SIZE_T_OVERFLOW ( sizeof ( DPI_BUFLEN_TYPE ),
+                               bind->maxArraySize ) )
+    {
+      executeBaton->error = NJSMessages::getErrorMsg ( errResultsTooLarge );
+      goto exitAllocateBindArray;
+    }
+    bind->len = reinterpret_cast<DPI_BUFLEN_TYPE*>(
+                 malloc( sizeof(DPI_BUFLEN_TYPE) * bind->maxArraySize ) );
+
+    if (!bind->ind || !bind->len)
+    {
+      executeBaton->error = NJSMessages::getErrorMsg(errInsufficientMemory);
+      ret = false;
+    }
+  }
+
+exitAllocateBindArray:
+  return ret;
 }
 
 /*****************************************************************************/
@@ -1239,7 +1696,11 @@ void Connection::PrepareAndBind (eBaton* executeBaton)
                 (executeBaton->binds[index]->maxSize + 1) :
                 executeBaton->binds[index]->maxSize,
               executeBaton->binds[index]->ind,
-              executeBaton->binds[index]->len,
+                executeBaton->binds[index]->len,
+              (executeBaton->binds[index]->isArray) ?
+                executeBaton->binds[index]->maxArraySize : 0,
+              (executeBaton->binds[index]->isArray) ?
+                &(executeBaton->binds[index]->curArraySize) : 0,
               (executeBaton->stmtIsReturning &&
                 executeBaton->binds[index]->isOut) ?
               (void *)executeBaton : NULL,
@@ -1490,7 +1951,7 @@ boolean Connection::MapByType ( eBaton *executeBaton, unsigned short &dbType )
 
    RETURNS
      dbType   - As default is provided, always a DB Column type will
-                      be returned.
+                be returned.
 */
 unsigned short Connection::GetTargetType ( eBaton *executeBaton,
                                             std::string &name,
@@ -2195,7 +2656,8 @@ Local<Value> Connection::GetValue ( eBaton *executeBaton,
                            define->fetchType,
                            (define->fetchType == DpiTimestampLTZ ) ? 
                              (void *) &dblArr[row] : 
-                             (void *) ((char *)(define->buf) + ( row * (define->maxSize ))),
+                             (void *) ((char *)(define->buf) +
+                              ( row * (define->maxSize ))),
                            define->len[row] );
     return scope.Escape( value );
   }
@@ -2203,12 +2665,22 @@ Local<Value> Connection::GetValue ( eBaton *executeBaton,
   {
     // DML, PL/SQL execution
     Bind *bind = executeBaton->binds[col];
+    
     if(executeBaton->stmtIsReturning)
     {
+      // SQL statement with RETURNING INTO clause, will return an array
       Local<Value> value = Connection::GetArrayValue (
                                         executeBaton,
                                         executeBaton->binds[col], 
                          (unsigned long)executeBaton->rowsAffected );
+      return scope.Escape(value);
+    }
+    else if ( bind->isArray )
+    {
+      // PL/SQL array bind
+      Local<Value> value = Connection::GetArrayValue(executeBaton, 
+                                                     bind, 
+                            static_cast<unsigned long>(bind->curArraySize));
       return scope.Escape(value);
     }
     else if(bind->type == DpiRSet) 
@@ -2226,12 +2698,12 @@ Local<Value> Connection::GetValue ( eBaton *executeBaton,
     else
     {
       return scope.Escape ( Connection::GetValueCommon (
-                                      executeBaton,
-                                      bind->ind[row],
-                                      bind->type,
-                                      (bind->type == DpiTimestampLTZ ) ?
-                                         bind->extvalue : bind->value,
-                                      bind->len[row] ));
+                                        executeBaton,
+                                        bind->ind[row],
+                                        bind->type,
+                                        (bind->type == DpiTimestampLTZ ) ?
+                                           bind->extvalue : bind->value,
+                                        bind->len[row] ));
     }
   }
 }
@@ -2352,7 +2824,9 @@ Local<Value> Connection::GetValueCommon ( eBaton *executeBaton,
          value = date;
         break;
        case (dpi::DpiRaw) :
-         // TODO: We could use NewBuffer to save memory and CPU, but it gets the ownership of buffer to itself (behaviour changed in Nan 2.0)
+         // TODO: We could use NewBuffer to save memory and CPU, but it
+         // gets the ownership of buffer to itself (behaviour changed in
+         // Nan 2.0)
          value = Nan::CopyBuffer((char*)val, len).ToLocalChecked();
          break;
         // The LOB types are hit only by the define code path
@@ -2385,6 +2859,7 @@ Local<Value> Connection::GetValueCommon ( eBaton *executeBaton,
     To get an array as v8-Value from Bind structure - used in DML Returning
 
   PARAMETERS
+    eBaton   - executeBaton structure
     bind     - bind structure
     count    - row count
 
@@ -2392,7 +2867,8 @@ Local<Value> Connection::GetValueCommon ( eBaton *executeBaton,
     v8::Value  - this will be an array (even for 1 row, array or 1).
 */
 v8::Local<v8::Value> Connection::GetArrayValue ( eBaton *executeBaton,
-                                                  Bind *binds, unsigned long count )
+                                                 Bind *binds,
+                                                 unsigned long count )
 {
   Nan::EscapableHandleScope scope;
   Local<Date> date;
@@ -2427,7 +2903,9 @@ v8::Local<v8::Value> Connection::GetArrayValue ( eBaton *executeBaton,
       Nan::Set(arrVal, index,
                     Nan::New<v8::String> ((char *)binds->value +
                                         (index * binds->maxSize ),
-                                        binds->len2[index]).ToLocalChecked());
+                                         executeBaton->stmtIsReturning ?
+                                       binds->len2[index] :
+                                       binds->len[index] ).ToLocalChecked());
       break;
     case dpi::DpiInteger:
       Nan::Set(arrVal, index,
@@ -3039,20 +3517,22 @@ void Connection::Async_AfterBreak (uv_work_t *req)
  *
  * PARAMETERS
  *   val      - expected to be a v8::Date Value
- *   bind     - bind structure to update.
+ *   bind     - bind structure to update
+ *
  *
  * NOTE:
  *   This function is used for IN Bind parameters, when v8::Date value is
  *   passed, conversion to Oracle-DB Type happens here.
  *
  */
-void Connection::v8Date2OraDate ( Local<Value> val, Bind *bind)
+void Connection::v8Date2OraDate(v8::Local<v8::Value> val, Bind *bind)
 {
   Nan::HandleScope scope;
   Local<Date> date = val.As<Date>();    // Expects to be of v8::Date type
 
   // Get the number of seconds from 1970-1-1 0:0:0
   *(long double *)(bind->extvalue) = date->NumberValue ();
+
 }
 
 /***************************************************************************/
@@ -3063,8 +3543,8 @@ void Connection::v8Date2OraDate ( Local<Value> val, Bind *bind)
  *   Update the double-date value in Bind structure
  *
  * PARAMETERS
- *   ebaton   - execute Baton
- *   index    - position in the binds array
+ *   ebaton    - execute Baton
+ *   index     - position in the binds array
  *
  * NOTE:
  *   When execution process starts, base date is not initialized yet,
@@ -3075,13 +3555,13 @@ void Connection::v8Date2OraDate ( Local<Value> val, Bind *bind)
  */
 void Connection::UpdateDateValue ( eBaton * ebaton, unsigned int index )
 {
-  Bind * bind = ebaton->binds[index];
+  Bind* bind = ebaton->binds[index];
 
-  if ( bind->type == dpi::DpiTimestampLTZ )
+  if (bind->type == dpi::DpiTimestampLTZ)
   {
-    bind->dttmarr = ebaton->dpienv->getDateTimeArray (
-                                        ebaton->dpistmt->getError () );
-    bind->value = bind->dttmarr->init (1);
+    bind->dttmarr = ebaton->dpienv->getDateTimeArray(
+                                        ebaton->dpistmt->getError());
+    bind->value = bind->dttmarr->init(1);
     if (!bind->isOut)
     {
       bind->dttmarr->setDateTime( 0,
@@ -3118,6 +3598,16 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
   eBaton *executeBaton = (eBaton *)ctx;
   Bind *bind = (Bind *)executeBaton->binds[bndpos];
 
+  if ( bind->isArray )
+  {
+    size_t arrayElementSize = bind->maxSize;
+    
+    Connection::AllocateBindArray ( bind->type, bind, executeBaton,
+                                    &arrayElementSize );
+    return;
+  }
+  
+    
   if ( NJS_SIZE_T_OVERFLOW ( sizeof ( short ), nRows ) )
   {
     executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );

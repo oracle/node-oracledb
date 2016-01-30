@@ -1,4 +1,5 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates.
+   All rights reserved. */
 
 /******************************************************************************
  *
@@ -285,17 +286,24 @@ void StmtImpl::bind (unsigned int pos, unsigned short type, void *buf,
     PARAMETERS
       name         - name of the variable
       nameLen      - len of name.
+      bndpos       - position in array in case of DML Returning.
       type         - data type
       buf (IN/OUT) - data buffer for value
       bufSize      - size of buffer
       ind          - indicator
       bufLen       - returned buffer size
+      maxarr_len   - max array len in case of PL/SQL array binds
+      curelen      - current array len in case of PL/SQL array binds.
+      data         - if callback specified, data for callback
+      cb           - callback used in case of DML Returning.
 */
 void StmtImpl::bind (const unsigned char *name, int nameLen,
                      unsigned int bndpos,
                      unsigned short type, void *buf, DPI_SZ_TYPE bufSize,
                      short *ind, DPI_BUFLEN_TYPE *bufLen,
-                     void *data, cbtype cb)
+                     unsigned int maxarr_len, unsigned int *curelen,
+                     void *data,
+                     cbtype cb)
 {
   OCIBind *b = (OCIBind *)0;
 
@@ -305,7 +313,8 @@ void StmtImpl::bind (const unsigned char *name, int nameLen,
                           (type == DpiRSet) ? 0 : bufSize, type, 
                           (cb ? NULL : ind),
                           (cb ? NULL : bufLen),
-                          NULL, 0, NULL,
+                          NULL,
+                          maxarr_len, curelen,
                           (cb) ? OCI_DATA_AT_EXEC : OCI_DEFAULT), errh_);
   if ( cb )
   {
