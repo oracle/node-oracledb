@@ -72,6 +72,7 @@ typedef enum
   errInvalidArraySize,
   errIncompatibleTypeArrayBind,
   errInvalidValueArrayBind,
+  errEmptyArray,
   
 
   // New ones should be added here

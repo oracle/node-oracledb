@@ -76,8 +76,7 @@ static const char *errMsg[] =
   "NJS-036: given array is of size greater than maxArraySize",
   "NJS-037: incompatible type of value provided",
   "NJS-038: maxArraySize value should be greater than 0",
-  
-  
+  "NJS-039: empty array is not allowed for IN bind",
 };
 
 string NJSMessages::getErrorMsg ( NJSErrorType err, ... )

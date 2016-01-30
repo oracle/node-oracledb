@@ -715,13 +715,20 @@ void Connection::GetBindUnit (Local<Value> val, Bind* bind,
      * For OUT bind, we can NOT determine the out value as ARRAY and so 
      * no validation done here.
      */
-    if ( dir == BIND_INOUT && element->IsArray () )
+    if ( element->IsArray () )
     {
       Local<Array>arr = Local<Array>::Cast (element);
       
-      if ( arr->Length() > bind->maxArraySize )
+      if ( dir == BIND_INOUT && ( arr->Length() > bind->maxArraySize ) )
       {
         executeBaton->error = NJSMessages::getErrorMsg ( errInvalidArraySize );
+        goto exitGetBindUnit;
+      }
+
+      /* For IN bind, empty array is not allowed */      
+      if ( ( dir == BIND_IN || dir == BIND_INOUT ) && ( arr->Length () == 0 ) )
+      {
+        executeBaton->error = NJSMessages::getErrorMsg ( errEmptyArray ) ;
         goto exitGetBindUnit;
       }
     }
@@ -1127,15 +1134,6 @@ void Connection::GetInBindParamsArray(Local<Array> va8vals, Bind *bind,
           if (stringLength > static_cast<size_t>(arrayElementSize))
           {
             arrayElementSize = stringLength;
-          }
-
-          // Check if we have a string with a size larger then the specified
-          // maxSize (there is actually a default for maxSize if not specified)
-          if (stringLength > static_cast<size_t>(bind->maxSize))
-          {
-            executeBaton->error = NJSMessages::getErrorMsg(
-                                             errInvalidValueArrayBind);
-            goto exitGetInBindParamsArray;
           }
         }
         break;
