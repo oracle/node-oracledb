@@ -224,6 +224,12 @@
         22.1.3 works well with REF Cursor
     22.2 stores null value correctly
         22.2.1 testing Null, Empty string and Undefined
+     22.3 PL/SQL binding scalar
+        22.3.1 PL/SQL binding scalar values IN
+        22.3.2 bind scalar values INOUT
+        22.3.3 bind scalar values OUT
+    22.4 PL/SQL binding indexed tables
+      - 22.4.1 bind indexed table IN
 
 23. dataTypeNchar.js
     23.1 testing NCHAR data in various lengths
@@ -401,6 +407,37 @@
         42.3.7 DELETE statement with multiple rows matching
     42.4 in PL/SQL, the maximum size is 32767
       - 42.4.1 when data length is 200
+
+43. plsqlBinding.js
+    43.1 binding PL/SQL indexed table
+        43.1.1 binding PL/SQL indexed table IN 
+        43.1.2 binding PL/SQL indexed table IN OUT
+        43.1.3 binding PL/SQL indexed table OUT
+    43.2 test exceptions when using PL/SQL indexed table bindings
+        43.2.1 maxArraySize is ignored when specifying BIND_IN
+        43.2.2 maxArraySize is mandatory for BIND_INOUT
+        42.2.3 maxArraySize cannot smaller than the number of array elements
+        42.2.4 DATE type has not been supported yet
+        42.2.5 the type of the array element should be compatible with binding type declaration
+        42.2.6 type compatibility
+      - 42.2.7 maxSize restriction
+        42.2.8 dose not allow array syntax of bindings
+    43.3 binding PL/SQL scalar
+        43.3.1 binding PL/SQL scalar IN 
+      - 43.3.2 binding PL/SQL scalar IN/OUT
+        43.3.3 binding PL/SQL scalar OUT
+    43.4 test attribute - maxArraySize
+        43.4.1 maxArraySize property is ignored for BIND_IN
+        43.4.2 maxArraySize is mandatory for BIND_INOUT
+        43.4.3 maxArraySize cannot smaller than the number of array elements
+        43.4.4 maxArraySize can be equal to the number of array elements
+      - 43.4.5 negative case: large value
+        43.4.6 negative case: <0
+        43.4.7 negative case: = 0
+        43.4.8 negative case: assigning it to be a string
+        43.4.9 negative case: NaN
+    43.5 Indexed Table Null Elements
+      - 43.5.1 null elements work well
 
 51. accessTerminatedPoolAttributes.js
     can not access attributes of terminated pool
