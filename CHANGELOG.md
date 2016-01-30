@@ -1,6 +1,24 @@
 # Change Log
 
-## node-oracledb v1.6.0 (DD Mon YYYY)
+## node-oracledb v1.6.0 (30 Jan 2016)
+
+- Added support for binding PL/SQL Collection Associative Array
+  (Index-by) types containing numbers and strings.
+
+- Fixed a LOB problem causing an uncaught error to be generated.
+
+- Removed the 'close' event that was incorrectly emitted for LOB Writable
+  Streams.  The Node.js Streams documentation specifies it only for
+  Readable Streams.
+
+- Updated the LOB examples to show connection release.
+
+- Updated README so first-time users see pre-requisites earlier.
+
+- Extended the OS X install instructions with a way to install that doesn't
+  need root access for Instant Client 11.2 on El Capitan.
+
+- Added RPATH link option when building on OS X in preparation for future client.
 
 ## node-oracledb v1.5.0 (21 Dec 2015)
 
