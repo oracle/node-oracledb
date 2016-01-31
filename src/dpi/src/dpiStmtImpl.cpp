@@ -1,5 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates.
-   All rights reserved. */
+/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -247,7 +246,9 @@ void StmtImpl::prefetchRows (unsigned int prefetchRows)
 */
 void StmtImpl::bind (unsigned int pos, unsigned short type, void *buf,
                      DPI_SZ_TYPE bufSize, short *ind, DPI_BUFLEN_TYPE *bufLen,
-                     void *data, cbtype cb)
+                     unsigned int maxarr_len, unsigned int *curelen,
+                     void *data,
+                     cbtype cb)
 {
   OCIBind *b = (OCIBind *)0;
 
@@ -257,7 +258,8 @@ void StmtImpl::bind (unsigned int pos, unsigned short type, void *buf,
                          (type == DpiRSet) ? 0 : bufSize, type,
                          (cb ? NULL : ind),
                          (cb ? NULL : bufLen),
-                         NULL, 0, NULL,
+                         NULL,
+                         maxarr_len, curelen,
                          (cb) ? OCI_DATA_AT_EXEC : OCI_DEFAULT),
            errh_);
 
