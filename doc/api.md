@@ -2099,7 +2099,7 @@ less overhead.
 
 A result set is created when the `execute()` option property
 [`resultSet`](#executeoptions) is `true`.  Result set rows can be
-fetched using [`getRow()`](#getrow) or [`getRows()`](getrows) on the
+fetched using [`getRow()`](#getrow) or [`getRows()`](#getrows) on the
 `execute()` callback function's `result.resultSet` parameter property.
 
 For result sets the [`maxRows`](#propdbmaxrows) limit is ignored.  All
