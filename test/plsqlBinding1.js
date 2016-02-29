@@ -379,7 +379,7 @@ describe('43. plsqlBinding1.js', function() {
                       "  PROCEDURE test2(p IN OUT NOCOPY numbersType);\n" +
                       "  PROCEDURE test3(p IN datesType);\n" +
                       "  PROCEDURE test4(p IN stringsType);\n" +
-                      "  PROCEDURE test5(p IN numbersType);\n" +
+                      "  PROCEDURE test5(p OUT stringsType);\n" +
                       "END;";
           connection.should.be.ok;
           connection.execute(
@@ -398,7 +398,7 @@ describe('43. plsqlBinding1.js', function() {
                      "  PROCEDURE test2(p IN OUT NOCOPY numbersType) IS BEGIN NULL; END;\n" +
                      "  PROCEDURE test3(p IN datesType) IS BEGIN NULL; END;\n" +
                      "  PROCEDURE test4(p IN stringsType) IS BEGIN NULL; END;\n" +
-                     "  PROCEDURE test5(p IN numbersType) IS BEGIN NULL; END;\n" +
+                     "  PROCEDURE test5(p OUT stringsType) IS BEGIN NULL; END;\n" +
                      "END;";
           connection.should.be.ok;
           connection.execute(
@@ -519,7 +519,7 @@ describe('43. plsqlBinding1.js', function() {
         p:  {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: [1, 'hello']}
       };
       connection.execute(
-        "BEGIN oracledb_testpack.test5(:p); END;",
+        "BEGIN oracledb_testpack.test1(:p); END;",
         bindvars,
         function(err, result) {
           should.exist(err);

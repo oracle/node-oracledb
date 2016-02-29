@@ -443,8 +443,9 @@
   - 44.3 default binding type and direction with binding by name
     44.4 default binding type and direction with binding by position
     44.5 null elements in String and Number arrays
-    44.6 NJS-039: empty array is not allowed for IN bind
-  - 44.7 maxSize option applies to each elements of an array
+    44.6 empty array for BIND_IN and BIND_INOUT
+    44.7 empty array for BIND_OUT 
+  - 44.8 maxSize option applies to each elements of an array
 
 
 51. accessTerminatedPoolAttributes.js

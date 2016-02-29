@@ -539,7 +539,7 @@ describe('44. plsqlBinding2.js', function() {
     ], done);
   }) // 44.5
   
-  it('44.6 NJS-039: empty array is not allowed for IN bind', function(done) {
+  it('44.6 empty array for BIND_IN and BIND_INOUT', function(done) {
     async.series([
       // Pass arrays of values to a PL/SQL procedure
       function(callback) {
@@ -557,6 +557,7 @@ describe('44. plsqlBinding2.js', function() {
           function(err) {
             should.exist(err);
             (err.message).should.startWith('NJS-039');
+            // NJS-039: empty array is not allowed for IN bind
             callback();
           }
         );
@@ -569,6 +570,7 @@ describe('44. plsqlBinding2.js', function() {
             beach_inout: { type: oracledb.STRING, 
                            dir:  oracledb.BIND_INOUT,
                            val:  [],
+                           maxArraySize: 0
                          },
             depth_inout: { type: oracledb.NUMBER, 
                            dir:  oracledb.BIND_INOUT,
@@ -585,7 +587,63 @@ describe('44. plsqlBinding2.js', function() {
     ], done);
   }) // 44.6
 
-  it.skip('44.7 maxSize option applies to each elements of an array', function(done) {
+  it('44.7 empty array for BIND_OUT', function(done) {
+    async.series([
+      function(callback) {
+        var proc = "CREATE OR REPLACE PACKAGE\n" +
+                      "oracledb_testpack\n" +
+                      "IS\n" +
+                      "  TYPE stringsType IS TABLE OF VARCHAR2(2000) INDEX BY BINARY_INTEGER;\n" +
+                      "  PROCEDURE test(p OUT stringsType);\n" +
+                      "END;";
+        connection.execute(
+          proc,
+          function(err) {
+            should.not.exist(err);
+            callback();
+          }
+        );
+      },
+      function(callback) {
+        var proc = "CREATE OR REPLACE PACKAGE BODY\n" +
+                     "oracledb_testpack\n" +
+                     "IS\n" +
+                     "  PROCEDURE test(p OUT stringsType) IS BEGIN NULL; END;\n" +
+                     "END;";
+        connection.execute(
+          proc,
+          function(err) {
+            should.not.exist(err);
+            callback();
+          }
+        );
+      },
+      function(callback) {
+        connection.execute(
+          "BEGIN oracledb_testpack.test(:0); END;",
+          [
+            {type: oracledb.STRING, dir: oracledb.BIND_OUT, maxArraySize: 1}
+          ],
+          function(err, result) {
+            should.not.exist(err);
+            result.outBinds[0].should.eql([]);
+            callback();
+          }
+        );
+      },
+      function(callback) {
+        connection.execute(
+          "DROP PACKAGE oracledb_testpack",
+          function(err) {
+            should.not.exist(err);
+            callback();
+          }
+        );
+      }
+    ], done);
+  }) // 44.7
+
+  it.skip('44.8 maxSize option applies to each elements of an array', function(done) {
     async.series([
       // Pass arrays of values to a PL/SQL procedure
       function(callback) {
@@ -658,7 +716,6 @@ describe('44. plsqlBinding2.js', function() {
         );
       }
     ], done);
-  }) // 44.7
-
+  }) // 44.8
 
 })
