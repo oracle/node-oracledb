@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -88,7 +88,7 @@ oracledb.createPool (
             // console.log("Connections in use: " + pool.connectionsInUse);
 
             connection.execute(
-              "SELECT employee_id, first_name, last_name " +
+              "SELECT   employee_id, first_name, last_name " +
                 "FROM   employees " +
                 "WHERE  department_id = :id",
               [deptid],  // bind variable value
@@ -115,11 +115,11 @@ oracledb.createPool (
                   {
                     if (err) {
                       handleError(response, "normal release() callback", err);
-                      return;
+                    } else {
+                      htmlFooter(response);
                     }
                   });
 
-                htmlFooter(response);
               });
           });
       });
@@ -193,3 +193,13 @@ function htmlFooter(response)
   response.write("</body>\n</html>");
   response.end();
 }
+
+process
+.on('SIGTERM', function() {
+  console.log("\nTerminating");
+  process.exit(0);
+})
+.on('SIGINT', function() {
+  console.log("\nTerminating");
+  process.exit(0);
+});
