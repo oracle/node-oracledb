@@ -168,9 +168,9 @@ void Connection::Init(Handle<Object> target)
 NAN_METHOD(Connection::New)
 {
   Connection *connection = new Connection();
-  connection->Wrap(info.This());
+  connection->Wrap(info.Holder());
 
-  info.GetReturnValue().Set(info.This());
+  info.GetReturnValue().Set(info.Holder());
 }
 
 /*****************************************************************************/
@@ -442,7 +442,7 @@ NAN_METHOD(Connection::Execute)
   Connection *connection;
   NJS_GET_CALLBACK ( callback, info );
 
-  connection = Nan::ObjectWrap::Unwrap<Connection>(info.This());
+  connection = Nan::ObjectWrap::Unwrap<Connection>(info.Holder());
 
   /* If connection is invalid from JS, then throw an exception */
   NJS_CHECK_OBJECT_VALID2 ( connection, info ) ;
@@ -1298,7 +1298,7 @@ void Connection::GetInBindParamsArray(Local<Array> va8vals, Bind *bind,
   //
 
   bind->isArray = true;
-  bind->maxSize = arrayElementSize;
+  bind->maxSize = (ub4) arrayElementSize;
 
   executeBaton->binds.push_back(bind);
 
@@ -3077,7 +3077,7 @@ NAN_METHOD(Connection::Release)
   NJS_GET_CALLBACK ( callback, info );
   ConnectionBusyStatus connStat;
 
-  connection = Nan::ObjectWrap::Unwrap<Connection>(info.This());
+  connection = Nan::ObjectWrap::Unwrap<Connection>(info.Holder());
 
   /* If connection is invalide from JS, then throw an exception */
   NJS_CHECK_OBJECT_VALID2 ( connection, info ) ;
@@ -3203,7 +3203,7 @@ NAN_METHOD(Connection::Commit)
   Connection *connection;
   NJS_GET_CALLBACK ( callback, info );
 
-  connection = Nan::ObjectWrap::Unwrap<Connection>(info.This());
+  connection = Nan::ObjectWrap::Unwrap<Connection>(info.Holder());
 
   /* if connection is invalid from JS, then throw an exception */
   NJS_CHECK_OBJECT_VALID2 ( connection, info ) ;
@@ -3310,7 +3310,7 @@ NAN_METHOD(Connection::Rollback)
   Connection *connection;
   NJS_GET_CALLBACK ( callback, info );
 
-  connection = Nan::ObjectWrap::Unwrap<Connection>(info.This());
+  connection = Nan::ObjectWrap::Unwrap<Connection>(info.Holder());
   /* if connection is invalid from JS, then throw an exception */
   NJS_CHECK_OBJECT_VALID2 ( connection, info );
 
@@ -3413,7 +3413,7 @@ NAN_METHOD(Connection::Break)
   Connection *connection;
   NJS_GET_CALLBACK ( callback, info );
 
-  connection = Nan::ObjectWrap::Unwrap<Connection>(info.This());
+  connection = Nan::ObjectWrap::Unwrap<Connection>(info.Holder());
 
   /* If connection is invalid from JS, then throw an exception */
   NJS_CHECK_OBJECT_VALID2 ( connection, info );

@@ -146,9 +146,9 @@ void Pool::Init(Handle<Object> target)
 NAN_METHOD(Pool::New)
 {
   Pool *njsPool = new Pool();
-  njsPool->Wrap(info.This());
+  njsPool->Wrap(info.Holder());
 
-  info.GetReturnValue().Set(info.This());
+  info.GetReturnValue().Set(info.Holder());
 }
 
 /*****************************************************************************/
@@ -393,7 +393,7 @@ NAN_METHOD(Pool::GetConnection)
   Local<Function> callback;
   NJS_GET_CALLBACK ( callback, info );
 
-  Pool *njsPool = Nan::ObjectWrap::Unwrap<Pool>(info.This());
+  Pool *njsPool = Nan::ObjectWrap::Unwrap<Pool>(info.Holder());
 
   poolBaton *connBaton = new poolBaton ( callback );
 
@@ -519,7 +519,7 @@ NAN_METHOD(Pool::Terminate)
   Local<Function> callback;
   NJS_GET_CALLBACK ( callback, info );
 
-  Pool *njsPool = Nan::ObjectWrap::Unwrap<Pool>(info.This());
+  Pool *njsPool = Nan::ObjectWrap::Unwrap<Pool>(info.Holder());
 
   poolBaton *terminateBaton = new poolBaton ( callback );
 

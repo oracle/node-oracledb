@@ -230,9 +230,9 @@ NAN_METHOD(Oracledb::New)
                                   100 * portVer       +
                                         portUpdateVer ;
 
-  oracledb->Wrap(info.This());
-  oracledb->jsOracledb.Reset( info.This() );
-  info.GetReturnValue().Set(info.This());
+  oracledb->Wrap(info.Holder());
+  oracledb->jsOracledb.Reset( info.Holder() );
+  info.GetReturnValue().Set(info.Holder());
 }
 
 /*****************************************************************************/
@@ -684,7 +684,7 @@ NAN_METHOD(Oracledb::GetConnection)
   Local<Object> connProps;
   NJS_GET_CALLBACK ( callback, info );
 
-  Oracledb* oracledb = Nan::ObjectWrap::Unwrap<Oracledb> ( info.This() );
+  Oracledb* oracledb = Nan::ObjectWrap::Unwrap<Oracledb> ( info.Holder() );
   connectionBaton *connBaton = new connectionBaton ( callback );
 
   NJS_CHECK_OBJECT_VALID3 (oracledb, connBaton->error, exitGetConnection);
@@ -834,7 +834,7 @@ NAN_METHOD(Oracledb::CreatePool)
   Local<Object> poolProps;
   NJS_GET_CALLBACK ( callback, info );
 
-  Oracledb* oracledb = Nan::ObjectWrap::Unwrap<Oracledb> ( info.This() );
+  Oracledb* oracledb = Nan::ObjectWrap::Unwrap<Oracledb> ( info.Holder() );
   connectionBaton *poolBaton = new connectionBaton ( callback );
 
   NJS_CHECK_OBJECT_VALID3(oracledb, poolBaton->error, exitCreatePool);
