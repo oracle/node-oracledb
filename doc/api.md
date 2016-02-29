@@ -447,7 +447,33 @@ var oracledb = require('oracledb');
 oracledb.fetchAsString = [ oracledb.DATE, oracledb.NUMBER ];
 ```
 
-#### <a name="propdbmaxrows"></a> 3.2.5 maxRows
+#### <a name="propdblobprefetchsize"></a> 3.2.5 lobPrefetchSize
+
+```
+Number lobPrefetchSize
+```
+
+This attribute is temporarily disabled.  Setting it has no effect.
+
+Node-oracledb internally uses Oracle *LOB Locators* to manipulate long
+object (LOB) data.  LOB Prefetching allows LOB data to be returned
+early to node-oracledb when these locators are first returned.
+This is similar to the way [row prefetching](#rowprefetching) allows
+for efficient use of resources and round-trips between node-oracledb
+and the database.
+
+Prefetching of LOBs is mostly useful for small LOBs.
+
+The default size is 16384.
+
+##### Example
+
+```javascript
+var oracledb = require('oracledb');
+oracledb.lobPrefetchSize = 16384;
+```
+
+#### <a name="propdbmaxrows"></a> 3.2.6 maxRows
 
 ```
 Number maxRows
@@ -484,32 +510,6 @@ such truncation.
 ```javascript
 var oracledb = require('oracledb');
 oracledb.maxRows = 100;
-```
-
-#### <a name="propdblobprefetchsize"></a> 3.2.6 lobPrefetchSize
-
-```
-Number lobPrefetchSize
-```
-
-This attribute is temporarily disabled.  Setting it has no effect.
-
-Node-oracledb internally uses Oracle *LOB Locators* to manipulate long
-object (LOB) data.  LOB Prefetching allows LOB data to be returned
-early to node-oracledb when these locators are first returned.
-This is similar to the way [row prefetching](#rowprefetching) allows
-for efficient use of resources and round-trips between node-oracledb
-and the database.
-
-Prefetching of LOBs is mostly useful for small LOBs.
-
-The default size is 16384.
-
-##### Example
-
-```javascript
-var oracledb = require('oracledb');
-oracledb.lobPrefetchSize = 16384;
 ```
 
 #### <a name="propdboracleClientVersion"></a> 3.2.7 oracleClientVersion
