@@ -3416,20 +3416,80 @@ binding can be a very efficient way of transferring small data sets.
 Note PL/SQL's `VARRAY` and nested table collection types cannot be
 bound.
 
-To bind arrays use the named bind syntax:
+Given this table and PL/SQL package:
+
+```sql
+DROP TABLE mytab;
+CREATE TABLE mytab (id NUMBER, numcol NUMBER);
+
+CREATE OR REPLACE PACKAGE mypkg IS
+  TYPE numtype IS TABLE OF NUMBER INDEX BY BINARY_INTEGER;
+  PROCEDURE myinproc(p_id IN NUMBER, vals IN numtype);
+  PROCEDURE myoutproc(p_id IN NUMBER, vals OUT numtype);
+END;
+/
+
+CREATE OR REPLACE PACKAGE BODY mypkg IS
+
+  PROCEDURE myinproc(p_id IN NUMBER, vals IN numtype) IS
+  BEGIN
+    FORALL i IN INDICES OF vals
+      INSERT INTO mytab (id, numcol) VALUES (p_id, vals(i));
+  END;
+
+  PROCEDURE myoutproc(p_id IN NUMBER, vals OUT numtype) IS
+  BEGIN
+    SELECT numcol BULK COLLECT INTO vals FROM mytab WHERE id = p_id ORDER BY 1;
+  END;
+
+END;
+/
+```
+
+To bind an array in node-oracledb using "bind by name" syntax for insertion into `mytab` use:
 
 ```javascript
 connection.execute(
-  "BEGIN mypkg.myinproc(:bv); END;",
+  "BEGIN mypkg.myinproc(:id, :vals); END;",
   {
-    bv: { type: oracledb.NUMBER,
-          dir: oracledb.BIND_IN,
-          val: [1, 2, 23, 4, 10]
-        }
+	id: 1234,
+    vals: { type: oracledb.NUMBER,
+             dir: oracledb.BIND_IN,
+             val: [1, 2, 23, 4, 10]
+          }
   }, . . .
 ```
 
-Positional bind syntax is not supported in this release.
+Alternatively, "bind by position" syntax can be used:
+
+ ```javascript
+connection.execute(
+  "BEGIN mypkg.myinproc(:id, :vals); END;",
+  [
+    1234,
+    { type: oracledb.NUMBER,
+       dir: oracledb.BIND_IN,
+       val: [1, 2, 23, 4, 10]
+    }
+  ],
+
+  function (err) { . . . });
+```
+
+After executing either of these `mytab` will contain:
+
+```
+    ID         NUMCOL
+---------- ----------
+      1234          1
+      1234          2
+      1234         23
+      1234          4
+      1234         10
+```
+
+The [`type`](#executebindParams) must be set for PL/SQL array binds.
+It can be set to `STRING` or `NUMBER`
 
 For OUT and IN OUT binds, the [`maxArraySize`](#executebindParams)
 bind property must be set.  Its value is the maximum number of
@@ -3453,86 +3513,32 @@ value is not large enough to hold the longest string data item in the
 collection a runtime error occurs.  To avoid unnecessary memory
 allocation, do not let the size be larger than needed.
 
-See
-[plsqlarray.js](https://github.com/oracle/node-oracledb/tree/master/examples/plsqlarray.js)
-for a full example.
-
-The following example passes an array of values to a PL/SQL procedure
-which inserts them into a table.  The procedure is defined as:
+The next example fetches an array of values from a table.  First,
+insert these values:
 
 ```sql
-CREATE TABLE mytab (numcol NUMBER);
-
-CREATE OR REPLACE PACKAGE mypkg IS
-  TYPE numtype IS TABLE OF NUMBER INDEX BY BINARY_INTEGER;
-  PROCEDURE myinproc(p IN numtype);
-END;
-/
-
-CREATE OR REPLACE PACKAGE BODY mypkg IS
-  PROCEDURE myinproc(p IN numtype) IS
-  BEGIN
-    FORALL i IN INDICES OF p
-      INSERT INTO mytab (numcol) VALUES (p(i));
-  END;
-END;
-/
-```
-
-With this, the following JavaScript will result in `mytab` containing
-one row per value:
-
-```javascript
-connection.execute(
-  "BEGIN mypkg.myinproc(:bv); END;",
-  {
-    bv: { type: oracledb.NUMBER,
-          dir: oracledb.BIND_IN,
-          val: [1, 2, 23, 4, 10]
-        }
-  },
-  function (err) { . . . });
-```
-
-The next example fetches an array of values from a table:
-
-```sql
-CREATE TABLE mytab (numcol NUMBER);
-INSERT INTO mytable (numcol) VALUES (10);
-INSERT INTO mytable (numcol) VALUES (25);
-INSERT INTO mytable (numcol) VALUES (50);
+INSERT INTO mytab (id, numcol) VALUES (99, 10);
+INSERT INTO mytab (id, numcol) VALUES (99, 25);
+INSERT INTO mytab (id, numcol) VALUES (99, 50);
 COMMIT;
-
-CREATE OR REPLACE PACKAGE mypkg IS
-  TYPE numtype IS TABLE OF NUMBER INDEX BY BINARY_INTEGER;
-  PROCEDURE myoutproc(p OUT numtype);
-END;
-/
-
-CREATE OR REPLACE PACKAGE BODY mypkg IS
-  PROCEDURE myoutproc(p OUT numtype) IS
-  BEGIN
-    SELECT numcol BULK COLLECT INTO p FROM mytab ORDER BY 1;
-  END;
-END;
-/
 ```
 
-With this table and package, the following JavaScript will print
+With these values, the following node-oracledb code will print
 `[ 10, 25, 50 ]`.
 
 ```javascript
 connection.execute(
-  "BEGIN mypkg.myoutproc(:bv); END;",
+  "BEGIN mypkg.myoutproc(:id, :vals); END;",
   {
-    bv: { type: oracledb.NUMBER,
-          dir: oracledb.BIND_OUT,
-          maxArraySize: 10 // allocate memory to hold 10 numbers
+    id: 99,
+    vals: { type: oracledb.NUMBER,
+            dir:  oracledb.BIND_OUT,
+            maxArraySize: 10          // allocate memory to hold 10 numbers
         }
   },
   function (err, result) {
     if (err) { console.error(err.message); return; }
-    console.log(result.outBinds.bv);
+    console.log(result.outBinds.vals);
   });
 ```
 
@@ -3545,6 +3551,11 @@ ORA-06513: PL/SQL: index for PL/SQL table out of range for host language array
 See [Oracledb Constants](#oracledbconstants) and
 [execute(): Bind Parameters](#executebindParams) for more information
 about binding.
+
+See
+[plsqlarray.js](https://github.com/oracle/node-oracledb/tree/master/examples/plsqlarray.js)
+for a runnable example.
+
 
 ## <a name="transactionmgt"></a> 13. Transaction Management
 
