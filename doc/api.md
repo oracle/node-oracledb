@@ -518,7 +518,7 @@ oracledb.maxRows = 100;
 readonly Number oracleClientVersion
 ```
 
-This readonly property gives a numeric representation of the Oracle client library version. 
+This readonly property gives a numeric representation of the Oracle client library version.
 For version *a.b.c.d.e*, this property gives the number: `(100000000 * a) + (1000000 * b) + (10000 * c) + (100 * d) + e`
 
 ##### Example
@@ -882,7 +882,7 @@ Number poolIncrement
 ```
 
 The number of connections that are opened whenever a connection
-request exceeds the number of currently open connections. 
+request exceeds the number of currently open connections.
 
 This optional property overrides the *Oracledb*
 [`poolIncrement`](#propdbpoolincrement) property.
@@ -913,7 +913,7 @@ This optional property overrides the *Oracledb*
 Number queueTimeout
 ```
 
-The number of milliseconds after which connection requests waiting in the 
+The number of milliseconds after which connection requests waiting in the
 connection request queue are terminated.  If `queueTimeout` is
 set to 0, then queued connection requests are never terminated.
 
@@ -1095,7 +1095,7 @@ show a value of `null` for this attribute.  See
 readonly Number oracleServerVersion
 ```
 
-This readonly property gives a numeric representation of the Oracle database version. 
+This readonly property gives a numeric representation of the Oracle database version.
 For version *a.b.c.d.e*, this property gives the number: `(100000000 * a) + (1000000 * b) + (10000 * c) + (100 * d) + e`
 
 #### <a name="propconnstmtcachesize"></a> 4.1.5 stmtCacheSize
@@ -2087,7 +2087,7 @@ oracledb.createPool (
   },
   function(err, pool)
   {
-  . . . 
+  . . .
 ```
 
 The application can later, on some developer-chosen event, display the
@@ -2574,7 +2574,7 @@ INSERT INTO customers VALUES
   (1001, 'Nichols', SDO_GEOMETRY(2001, 8307, SDO_POINT_TYPE (-71.48923,42.72347,NULL), NULL, NULL));
 
 COMMIT;
-```     
+```
 
 Instead of attempting to get `CUST_GEO_LOCATION` by directly calling a
 PL/SQL procedure that returns an `SDO_GEOMETRY` parameter, you could
@@ -3006,7 +3006,7 @@ connection.execute(
     lob.setEncoding('utf8');  // we want text, not binary output
     lob.on('error', function(err) { console.error(err); });
     lob.on('close', function() {
-      connection.release(function(err) { if (err) console.error(err.message); }); 
+      connection.release(function(err) { if (err) console.error(err.message); });
     });
 
     console.log('Writing to ' + outFileName);
@@ -3452,7 +3452,7 @@ To bind an array in node-oracledb using "bind by name" syntax for insertion into
 connection.execute(
   "BEGIN mypkg.myinproc(:id, :vals); END;",
   {
-	id: 1234,
+    id: 1234,
     vals: { type: oracledb.NUMBER,
              dir: oracledb.BIND_IN,
              val: [1, 2, 23, 4, 10]
