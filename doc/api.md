@@ -1963,6 +1963,25 @@ A pool can be monitored by looking at the Pool attributes
 [`connectionsInUse`](#proppoolconnectionsinuse) and
 [`connectionsOpen`](#proppoolconnectionsopen).
 
+Node worker threads executing database statements on a connection will
+commonly wait for round-trips between node-oracledb and the database
+to complete.  Current Node versions have four worker threads by
+default.  When an application is handling a sustained number of user
+requests, and database operations take some time to execute, a
+limitation on thread availability may be observable.  In other cases
+it may be only be significant on slow networks.  If your application
+is affected, increasing the number of worker threads may improve
+throughput.  Do this by setting the environment variable
+[UV_THREADPOOL_SIZE](http://docs.libuv.org/en/v1.x/threadpool.html)
+before starting Node.
+
+For example, in a Linux terminal the number of Node worker threads can
+be increased to 10 by using:
+
+```shell
+UV_THREADPOOL_SIZE=10 node myapp.js
+```
+
 ### <a name="drcp"></a> 8.3 Database Resident Connection Pooling (DRCP)
 
 [Database Resident Connection Pooling](http://docs.oracle.com/database/121/ADFNS/adfns_perf_scale.htm#ADFNS228) (DRCP)
