@@ -418,29 +418,34 @@
         43.2.2 maxArraySize is mandatory for BIND_INOUT
         42.2.3 maxArraySize cannot smaller than the number of array elements
         42.2.4 DATE type has not been supported yet
-        42.2.5 the type of the array element should be compatible with binding type declaration
-        42.2.6 type compatibility
-        42.2.7 dose not allow array syntax of bindings
+        42.2.5 negative case (string): incorrect type of array element
+        42.2.6 negative case (number): incorrect type of array element
+        42.2.7 supports binding by position
     43.3 binding PL/SQL scalar
         43.3.1 binding PL/SQL scalar IN 
       - 43.3.2 binding PL/SQL scalar IN/OUT
-        43.3.3 binding PL/SQL scalar OUT
+        43.3.3 binding PL/SQL scalar OUT by name
+        43.3.4 binding PL/SQL scalar OUT by position
     43.4 test attribute - maxArraySize
         43.4.1 maxArraySize property is ignored for BIND_IN
         43.4.2 maxArraySize is mandatory for BIND_INOUT
         43.4.3 maxArraySize cannot smaller than the number of array elements
         43.4.4 maxArraySize can be equal to the number of array elements
       - 43.4.5 negative case: large value
-        43.4.6 negative case: <0
+        43.4.6 negative case: < 0
         43.4.7 negative case: = 0
-        43.4.8 negative case: assigning it to be a string
+        43.4.8 negative case: assigning a string to it
         43.4.9 negative case: NaN
 
 44. plsqlBinding2.js
     44.1 example case
-    44.2 null elements in String and Number arrays
-    44.3 NJS-039: empty array is not allowed for IN bind
-    - 44.4 maxSize option applies to each elements of an array
+    44.2 example case binding by position
+  - 44.3 default binding type and direction with binding by name
+    44.4 default binding type and direction with binding by position
+    44.5 null elements in String and Number arrays
+    44.6 NJS-039: empty array is not allowed for IN bind
+  - 44.7 maxSize option applies to each elements of an array
+
 
 51. accessTerminatedPoolAttributes.js
     can not access attributes of terminated pool

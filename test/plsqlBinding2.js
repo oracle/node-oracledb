@@ -243,7 +243,229 @@ describe('44. plsqlBinding2.js', function() {
     ], done);
   }) // 44.1
 
-  it('44.2 null elements in String and Number arrays', function(done) {
+  it('44.2 example case binding by position', function(done) {
+    async.series([
+      // Pass arrays of values to a PL/SQL procedure
+      function(callback) {
+        connection.execute(
+          "BEGIN beachpkg.array_in(:1, :2); END;",
+          [
+            { type: oracledb.STRING, 
+               dir:  oracledb.BIND_IN,
+               val:  ["Malibu Beach", "Bondi Beach", "Waikiki Beach"] },
+            { type: oracledb.NUMBER,
+               dir:  oracledb.BIND_IN,
+               val:  [45, 30, 67]
+            }
+          ],
+          function(err) {
+            should.not.exist(err);
+            callback();
+          }
+        );
+      },
+      // Fetch arrays of values from a PL/SQL procedure
+      function(callback) {
+        connection.execute(
+          "BEGIN beachpkg.array_out(:1, :2); END;",
+          [
+            { type: oracledb.STRING,
+              dir:  oracledb.BIND_OUT,
+              maxArraySize: 3 },
+            { type: oracledb.NUMBER,
+              dir:  oracledb.BIND_OUT,
+              maxArraySize: 3 }
+          ],
+          function(err, result) {
+            should.not.exist(err);
+            // console.log(result.outBinds);
+            (result.outBinds[0]).should.eql([ 'Malibu Beach', 'Bondi Beach', 'Waikiki Beach' ]);
+            (result.outBinds[1]).should.eql([45, 30, 67]);
+            callback();
+          }
+        );
+      },
+      function(callback) {
+        connection.rollback(function(err) {
+          should.not.exist(err);
+          callback();
+        });
+      },
+      // Return input arrays sorted by beach name
+      function(callback) {
+        connection.execute(
+          "BEGIN beachpkg.array_inout(:1, :2); END;",
+          [
+            { type: oracledb.STRING, 
+              dir:  oracledb.BIND_INOUT,
+              val:  ["Port Melbourne Beach", "Eighty Mile Beach", "Chesil Beach"],
+              maxArraySize: 3},
+            { type: oracledb.NUMBER, 
+              dir:  oracledb.BIND_INOUT,
+              val:  [8, 3, 70],
+              maxArraySize: 3}  
+          ],
+          function(err, result) {
+            should.not.exist(err);
+            // console.log(result.outBinds);
+            (result.outBinds[0]).should.eql([ 'Chesil Beach', 'Eighty Mile Beach', 'Port Melbourne Beach' ]);
+            (result.outBinds[1]).should.eql([ 70, 3, 8 ]);
+            callback();
+          }
+        );
+      }
+    ], done);
+  })
+  
+  it.skip('44.3 default binding type and direction with binding by name', function(done) {
+    async.series([
+      // Pass arrays of values to a PL/SQL procedure
+      function(callback) {
+        connection.execute(
+          "BEGIN beachpkg.array_in(:beach_in, :depth_in); END;",
+          {
+            beach_in: { //type: oracledb.STRING, 
+                        //dir:  oracledb.BIND_IN,
+                        val:  ["Malibu Beach", "Bondi Beach", "Waikiki Beach"] },
+            depth_in: { type: oracledb.NUMBER,
+                        dir:  oracledb.BIND_IN,
+                        val:  [45, 30, 67]
+                      }
+          },
+          function(err) {
+            should.not.exist(err);
+            callback();
+          }
+        );
+      },
+      // Fetch arrays of values from a PL/SQL procedure
+      function(callback) {
+        connection.execute(
+          "BEGIN beachpkg.array_out(:beach_out, :depth_out); END;",
+          {
+            beach_out: { type: oracledb.STRING,
+                         dir:  oracledb.BIND_OUT,
+                         maxArraySize: 3 },
+            depth_out: { type: oracledb.NUMBER,
+                         dir:  oracledb.BIND_OUT,
+                         maxArraySize: 3 }
+          },
+          function(err, result) {
+            should.not.exist(err);
+            // console.log(result.outBinds);
+            (result.outBinds.beach_out).should.eql([ 'Malibu Beach', 'Bondi Beach', 'Waikiki Beach' ]);
+            (result.outBinds.depth_out).should.eql([45, 30, 67]);
+            callback();
+          }
+        );
+      },
+      function(callback) {
+        connection.rollback(function(err) {
+          should.not.exist(err);
+          callback();
+        });
+      },
+      // Return input arrays sorted by beach name
+      function(callback) {
+        connection.execute(
+          "BEGIN beachpkg.array_inout(:beach_inout, :depth_inout); END;",
+          {
+            beach_inout: { type: oracledb.STRING, 
+                           dir:  oracledb.BIND_INOUT,
+                           val:  ["Port Melbourne Beach", "Eighty Mile Beach", "Chesil Beach"],
+                           maxArraySize: 3},
+            depth_inout: { type: oracledb.NUMBER, 
+                           dir:  oracledb.BIND_INOUT,
+                           val:  [8, 3, 70],
+                           maxArraySize: 3}
+          },
+          function(err, result) {
+            should.not.exist(err);
+            //console.log(result.outBinds);
+            (result.outBinds.beach_inout).should.eql([ 'Chesil Beach', 'Eighty Mile Beach', 'Port Melbourne Beach' ]);
+            (result.outBinds.depth_inout).should.eql([ 70, 3, 8 ]);
+            callback();
+          }
+        );
+      }
+    ], done);
+  }) // 44.3
+
+  it('44.4 default binding type and direction with binding by position', function(done) {
+    async.series([
+      // Pass arrays of values to a PL/SQL procedure
+      function(callback) {
+        connection.execute(
+          "BEGIN beachpkg.array_in(:1, :2); END;",
+          [
+            { type: oracledb.STRING, 
+               // dir:  oracledb.BIND_IN,
+               val:  ["Malibu Beach", "Bondi Beach", "Waikiki Beach"] },
+            { type: oracledb.NUMBER,
+               dir:  oracledb.BIND_IN,
+               val:  [45, 30, 67]
+            }
+          ],
+          function(err) {
+            should.not.exist(err);
+            callback();
+          }
+        );
+      },
+      // Fetch arrays of values from a PL/SQL procedure
+      function(callback) {
+        connection.execute(
+          "BEGIN beachpkg.array_out(:1, :2); END;",
+          [
+            { type: oracledb.STRING,
+              dir:  oracledb.BIND_OUT,
+              maxArraySize: 3 },
+            { type: oracledb.NUMBER,
+              dir:  oracledb.BIND_OUT,
+              maxArraySize: 3 }
+          ],
+          function(err, result) {
+            should.not.exist(err);
+            // console.log(result.outBinds);
+            (result.outBinds[0]).should.eql([ 'Malibu Beach', 'Bondi Beach', 'Waikiki Beach' ]);
+            (result.outBinds[1]).should.eql([45, 30, 67]);
+            callback();
+          }
+        );
+      },
+      function(callback) {
+        connection.rollback(function(err) {
+          should.not.exist(err);
+          callback();
+        });
+      },
+      // Return input arrays sorted by beach name
+      function(callback) {
+        connection.execute(
+          "BEGIN beachpkg.array_inout(:1, :2); END;",
+          [
+            { type: oracledb.STRING, 
+              dir:  oracledb.BIND_INOUT,
+              val:  ["Port Melbourne Beach", "Eighty Mile Beach", "Chesil Beach"],
+              maxArraySize: 3},
+            { type: oracledb.NUMBER, 
+              dir:  oracledb.BIND_INOUT,
+              val:  [8, 3, 70],
+              maxArraySize: 3}  
+          ],
+          function(err, result) {
+            should.not.exist(err);
+            // console.log(result.outBinds);
+            (result.outBinds[0]).should.eql([ 'Chesil Beach', 'Eighty Mile Beach', 'Port Melbourne Beach' ]);
+            (result.outBinds[1]).should.eql([ 70, 3, 8 ]);
+            callback();
+          }
+        );
+      }
+    ], done);
+  })
+
+  it('44.5 null elements in String and Number arrays', function(done) {
     async.series([
       // Pass arrays of values to a PL/SQL procedure
       function(callback) {
@@ -315,9 +537,9 @@ describe('44. plsqlBinding2.js', function() {
         );
       }
     ], done);
-  }) // 44.2
+  }) // 44.5
   
-  it('44.3 NJS-039: empty array is not allowed for IN bind', function(done) {
+  it('44.6 NJS-039: empty array is not allowed for IN bind', function(done) {
     async.series([
       // Pass arrays of values to a PL/SQL procedure
       function(callback) {
@@ -361,9 +583,9 @@ describe('44. plsqlBinding2.js', function() {
         );
       }
     ], done);
-  }) // 44.3
+  }) // 44.6
 
-  it.skip('44.4 maxSize option applies to each elements of an array', function(done) {
+  it.skip('44.7 maxSize option applies to each elements of an array', function(done) {
     async.series([
       // Pass arrays of values to a PL/SQL procedure
       function(callback) {
@@ -436,5 +658,7 @@ describe('44. plsqlBinding2.js', function() {
         );
       }
     ], done);
-  }) // 44.4
+  }) // 44.7
+
+
 })

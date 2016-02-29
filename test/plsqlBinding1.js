@@ -427,7 +427,7 @@ describe('43. plsqlBinding1.js', function() {
       );
     })
 
-    it('42.2.5 the type of the array element should be compatible with binding type declaration', function(done) {
+    it('42.2.5 negative case (string): incorrect type of array elements', function(done) {
       var bindvars = {
         p:  {type: oracledb.STRING, dir: oracledb.BIND_IN, val: ['hello', 1]}
       };
@@ -444,7 +444,7 @@ describe('43. plsqlBinding1.js', function() {
       );
     })
 
-    it('42.2.6 type compatibility', function(done) {
+    it('42.2.6 negative case (number): incorrect type of array element', function(done) {
       var bindvars = {
         p:  {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: [1, 'hello']}
       };
@@ -461,7 +461,7 @@ describe('43. plsqlBinding1.js', function() {
       );
     })
 
-    it('42.2.7 dose not allow array syntax of bindings', function(done) {
+    it('42.2.7 supports binding by position', function(done) {
       var bindvars = [
         {type: oracledb.STRING, dir: oracledb.BIND_IN, val: ['hello', 'node.js']}
       ];
@@ -578,7 +578,7 @@ describe('43. plsqlBinding1.js', function() {
             bindvars,
             function(err, result) {
               should.not.exist(err);
-              console.log(result);
+              // console.log(result);
               result.outBinds.stringValue.should.be.exactly('(Space odyssey)');
               result.outBinds.numberValue.should.be.exactly(2101);
               //result.outBinds.dateValue.should.eql(releaseDate)
@@ -598,7 +598,7 @@ describe('43. plsqlBinding1.js', function() {
       ], done);
     });
 
-    it('43.3.3 binding PL/SQL scalar OUT', function(done) {
+    it('43.3.3 binding PL/SQL scalar OUT by name', function(done) {
       async.series([
         function(callback) {
           var proc = "CREATE OR REPLACE\n" +
@@ -632,7 +632,7 @@ describe('43. plsqlBinding1.js', function() {
               // console.log(result);
               result.outBinds.stringValue.should.be.exactly('Space odyssey');
               result.outBinds.numberValue.should.be.exactly(2001);
-              (typeof (result.outBinds.dateValue)).should.eql('object');
+              (Object.prototype.toString.call(result.outBinds.dateValue)).should.eql('[object Date]');
               callback();
             }
           );
@@ -648,6 +648,57 @@ describe('43. plsqlBinding1.js', function() {
         }
       ], done);
     });
+
+    it('43.3.4 binding PL/SQL scalar OUT by postion', function(done) {
+      async.series([
+        function(callback) {
+          var proc = "CREATE OR REPLACE\n" +
+                     "PROCEDURE test(stringValue OUT VARCHAR2, numberValue OUT NUMBER, dateValue OUT DATE)\n" +
+                     "IS\n" +
+                     "BEGIN\n" +
+                     "  stringValue := 'Space odyssey';\n" +
+                     "  numberValue := 2001;\n" +
+                     "  dateValue   := TO_DATE('04-02-1968', 'MM-DD-YYYY');" + 
+                     "END test;\n";
+          connection.should.be.ok;
+          connection.execute(
+            proc,
+            function(err) {
+              should.not.exist(err);
+              callback();
+            }
+          );
+        },
+        function(callback) {
+          var bindvars = [
+            {type: oracledb.STRING, dir: oracledb.BIND_OUT},
+            {type: oracledb.NUMBER, dir: oracledb.BIND_OUT},
+            {type: oracledb.DATE, dir: oracledb.BIND_OUT}
+          ];
+          connection.execute(
+            "BEGIN test(:1, :2, :3); END;",
+            bindvars,
+            function(err, result) {
+              should.not.exist(err);
+              // console.log(result);
+              result.outBinds[0].should.be.exactly('Space odyssey');
+              result.outBinds[1].should.be.exactly(2001);
+              (Object.prototype.toString.call(result.outBinds[2])).should.eql('[object Date]');
+              callback();
+            }
+          );
+        },
+        function(callback) {
+          connection.execute(
+            "DROP PROCEDURE test",
+            function(err) {
+              should.not.exist(err);
+              callback();
+            }
+          );
+        }
+      ], done);
+    })
 
   }) // 43.3
 
@@ -805,7 +856,7 @@ describe('43. plsqlBinding1.js', function() {
       );
     })
 
-    it('43.4.6 negative case: <0', function(done) {
+    it('43.4.6 negative case: < 0', function(done) {
       var bindvars = {
         p:  {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: [1, 2, 3], maxArraySize: -9}
       };
@@ -837,7 +888,7 @@ describe('43. plsqlBinding1.js', function() {
       );
     })
 
-    it('43.4.8 negative case: assigning it to be a string', function(done) {
+    it('43.4.8 negative case: assign a string to it', function(done) {
       var bindvars = {
         p:  {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: [1, 2, 3], maxArraySize: 'foobar'}
       };
