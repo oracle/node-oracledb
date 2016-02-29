@@ -1,5 +1,9 @@
 # Change Log
 
+## node-oracledb v1.7.1 (1 Mar 2016)
+
+- Made public methods overwritable in new JavaScript layer
+
 ## node-oracledb v1.7.0 (29 Feb 2016)
 
 - Added a JavaScript wrapper around the C++ API to allow for easier

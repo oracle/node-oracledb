@@ -596,3 +596,10 @@
 
 65. uninitializedLob.js
     65.1 an uninitialized Lob is returned from a PL/SQL block
+
+66. writableProperties.js
+    66.1 allows overwriting of public methods on the oracledb instance
+    66.2 allows overwriting of public methods on pool instances
+    66.3 allows overwriting of public methods on connection instances
+    66.4 allows overwriting of public methods on resultset instances
+    66.5 allows overwriting of public methods on lob instances
