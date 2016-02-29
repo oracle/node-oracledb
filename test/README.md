@@ -63,12 +63,12 @@ and 'should' modules are installed by this command.
 
 ### 1.4 Configure Database credentials
 
-The database credentials for node-oracledb test suite are defined in dbConfig.js file. 
-You can set the credentials via environment variables or dbConfig.js file.
+The database credentials for node-oracledb test suite are defined in dbconfig.js file. 
+You can set the credentials via environment variables or dbconfig.js file.
 Change the credentials to a user who has privileges to connect and create tables. 
 
 ```
-vi <some-directory>/node_modules/oracledb/test/dbConfig.js
+vi <some-directory>/node_modules/oracledb/test/dbconfig.js
 ```
 
 ```javascript
