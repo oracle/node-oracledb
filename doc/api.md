@@ -106,7 +106,7 @@ limitations under the License.
      - 8.1.2 [Net Service Names for Connection Strings](#tnsnames)
      - 8.1.3 [JDBC and Node-oracledb Connection Strings Compared](#notjdbc)
   - 8.2 [Connection Pooling](#connpooling)
-     - 8.2.1 [Connection Pool Monitoring](#connpoolmonitor)
+     - 8.2.1 [Connection Pool Monitoring and Throughput](#connpoolmonitor)
   - 8.3 [Database Resident Connection Pooling (DRCP)](#drcp)
   - 8.4 [External Authentication](#extauth)
 9. [SQL Execution](#sqlexecution)
@@ -2051,7 +2051,7 @@ The Pool attribute [`stmtCacheSize`](#propconnstmtcachesize) can be
 used to set the statement cache size used by connections in the pool,
 see [Statement Caching](#stmtcache).
 
-#### <a name="connpoolmonitor"></a> 8.2.1 Connection Pool Monitoring
+#### <a name="connpoolmonitor"></a> 8.2.1 Connection Pool Monitoring and Throughput
 
 Connection pool usage can be monitored to choose the appropriate
 connection pool settings for your workload.
@@ -2097,23 +2097,24 @@ current statistics to the console by calling:
 pool._logStats();
 ```
 
+##### Number of Threads
+
 Node worker threads executing database statements on a connection will
-commonly wait for round-trips between node-oracledb and the database
-to complete.  Current Node versions have four worker threads by
-default.  When an application is handling a sustained number of user
-requests, and database operations take some time to execute, a
-limitation on thread availability may be observable.  In other cases
-it may be only be significant on slow networks.  If your application
-is affected, increasing the number of worker threads may improve
-throughput.  Do this by setting the environment variable
+commonly wait until round-trips between node-oracledb and the database
+are complete.  When an application handles a sustained number of user
+requests, and database operations take some time to execute or the
+network is slow, then the four default threads may all be in use.
+This prevents Node from handling more user load.  Increasing the
+number of worker threads may improve throughput.  Do this by setting
+the environment variable
 [UV_THREADPOOL_SIZE](http://docs.libuv.org/en/v1.x/threadpool.html)
 before starting Node.
 
-For example, in a Linux terminal the number of Node worker threads can
-be increased to 10 by using:
+For example, in a Linux terminal, the number of Node worker threads
+can be increased to 10 by using the following command:
 
-```shell
-UV_THREADPOOL_SIZE=10 node myapp.js
+```
+$ UV_THREADPOOL_SIZE=10 node myapp.js
 ```
 
 ### <a name="drcp"></a> 8.3 Database Resident Connection Pooling (DRCP)
