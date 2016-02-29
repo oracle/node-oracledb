@@ -73,7 +73,7 @@ typedef enum
   errIncompatibleTypeArrayBind,
   errInvalidValueArrayBind,
   errEmptyArray,
-  
+  errConnRequestTimeout,
 
   // New ones should be added here
 

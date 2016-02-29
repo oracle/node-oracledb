@@ -34,6 +34,7 @@
 'use strict';
 
 var oracledb = require('oracledb');
+var async = require('async');
 var should   = require('should');
 var dbConfig = require('./dbconfig.js');
 
@@ -296,7 +297,8 @@ describe('2. pool.js', function(){
           poolMax           : 2,
           poolIncrement     : 1,
           poolTimeout       : 28,
-          stmtCacheSize     : 23        
+          stmtCacheSize     : 23,
+          queueRequests     : false
         },
         function(err, pool) {
           should.not.exist(err);
@@ -614,4 +616,293 @@ describe('2. pool.js', function(){
     })
   
   })
+  
+  describe('2.7 getConnection', function(){
+    var pool1;
+    
+    beforeEach('get pool ready', function(done) {
+      oracledb.createPool(
+        {
+          externalAuth    : credential.externalAuth,
+          user              : credential.user,
+          password          : credential.password,
+          connectString     : credential.connectString,
+          poolMin           : 1,
+          poolMax           : 2,
+          poolIncrement     : 1,
+          poolTimeout       : 1       
+        },
+        function(err, pool){
+          should.not.exist(err);
+          pool1 = pool;
+          done();
+        }
+      );
+    });
+    
+    it('throws error if called after pool is terminated and a callback is not provided', function(done) {
+      pool1.terminate(function(err) {
+        should.not.exist(err);
+        
+        try {
+          pool1.getConnection(1);
+        } catch (err) {
+          should.exist(err);
+          (err.message).should.startWith('NJS-002: invalid pool');
+          done();
+        }
+      });
+    });
+    
+    it('passes error in callback if called after pool is terminated and a callback is provided', function(done) {
+      pool1.terminate(function(err) {
+        should.not.exist(err);
+        
+        pool1.getConnection(function(err, conn) {
+          should.exist(err);
+          (err.message).should.startWith('NJS-002: invalid pool');
+          done();
+        });
+      });
+    });
+  });
+  
+  describe('2.8 connection request queue (basic functionality)', function(){
+    function getBlockingSql(secondsToBlock) {
+      var blockingSql = '' +
+        'declare \n' +
+        ' \n' +
+        '  l_start timestamp with local time zone := systimestamp; \n' +
+        ' \n' +
+        'begin \n' +
+        ' \n' +
+        '  loop \n' +
+        '    exit when l_start + interval \'' + (secondsToBlock || 3) + '\' second <= systimestamp; \n' +
+        '  end loop; \n' +
+        ' \n' +
+        'end;';
+      
+      return blockingSql;
+    }
+    
+    it('2.8.1 generates ORA-24418 when calling getConnection if queueing is disabled', function(done) {
+      oracledb.createPool(
+        {
+          externalAuth    : credential.externalAuth,
+          user              : credential.user,
+          password          : credential.password,
+          connectString     : credential.connectString,
+          poolMin           : 0,
+          poolMax           : 1,
+          poolIncrement     : 1,
+          poolTimeout       : 1,
+          queueRequests     : false
+        },
+        function(err, pool){
+          should.not.exist(err);
+          
+          async.parallel(
+            [
+              function(cb) {
+                pool.getConnection(function(err, conn) {
+                  should.not.exist(err);
+
+                  conn.execute(getBlockingSql(3), function(err, result) {
+                    should.not.exist(err);
+
+                    conn.release(function(err) {
+                      cb();
+                    });
+                  });
+                });
+              },
+              function(cb) {
+                //using setTimeout to help ensure this gets to the db last
+                setTimeout(function() {
+                  pool.getConnection(function(err, conn) {
+                    should.exist(err);
+                    (err.message).should.startWith('ORA-24418: Cannot open further sessions');
+                    cb();
+                  });
+                }, 200);
+              }
+            ],
+            function(err, results){
+              pool.terminate(function(err) {
+                should.not.exist(err);
+                done();
+              });
+            }
+          );
+        }
+      );
+    });
+    
+    it('2.8.2 does not generate ORA-24418 when calling getConnection if queueing is enabled', function(done) {
+      oracledb.createPool(
+        {
+          externalAuth    : credential.externalAuth,
+          user              : credential.user,
+          password          : credential.password,
+          connectString     : credential.connectString,
+          poolMin           : 0,
+          poolMax           : 1,
+          poolIncrement     : 1,
+          poolTimeout       : 1,
+          queueRequests     : true //default
+        },
+        function(err, pool){
+          should.not.exist(err);
+          
+          async.parallel(
+            [
+              function(cb) {
+                pool.getConnection(function(err, conn) {
+                  should.not.exist(err);
+
+                  conn.execute(getBlockingSql(3), function(err, result) {
+                    should.not.exist(err);
+
+                    conn.release(function(err) {
+                      cb();
+                    });
+                  });
+                });
+              },
+              function(cb) {
+                //using setTimeout to help ensure this gets to the db last
+                setTimeout(function() {
+                  pool.getConnection(function(err, conn) {
+                    should.not.exist(err);
+                    
+                    conn.release(function(err) {
+                      should.not.exist(err);
+                      
+                      cb();
+                    });
+                  });
+                }, 100);
+              }
+            ],
+            function(err, results){
+              pool.terminate(function(err) {
+                should.not.exist(err);
+                done();
+              });
+            }
+          );
+        }
+      );
+    });
+    
+    it('2.8.3 generates NJS-040 if request is queued and queueTimeout expires', function(done) {
+      oracledb.createPool(
+        {
+          externalAuth    : credential.externalAuth,
+          user              : credential.user,
+          password          : credential.password,
+          connectString     : credential.connectString,
+          poolMin           : 0,
+          poolMax           : 1,
+          poolIncrement     : 1,
+          poolTimeout       : 1,
+          queueRequests     : true, //default
+          queueTimeout      : 2000 //2 seconds
+        },
+        function(err, pool){
+          should.not.exist(err);
+          
+          async.parallel(
+            [
+              function(cb) {
+                pool.getConnection(function(err, conn) {
+                  should.not.exist(err);
+
+                  conn.execute(getBlockingSql(4), function(err, result) {
+                    should.not.exist(err);
+
+                    conn.release(function(err) {
+                      cb();
+                    });
+                  });
+                });
+              },
+              function(cb) {
+                //using setTimeout to help ensure this gets to the db last
+                setTimeout(function() {
+                  pool.getConnection(function(err, conn) {
+                    should.exist(err);
+                    (err.message).should.equal('NJS-040: connection request timeout');
+                    cb();
+                  });
+                }, 100);
+              }
+            ],
+            function(err, results){
+              pool.terminate(function(err) {
+                should.not.exist(err);
+                done();
+              });
+            }
+          );
+        }
+      );
+    });
+    
+    it('2.8.4 does not generate NJS-040 if request is queued for less time than queueTimeout', function(done) {
+      oracledb.createPool(
+        {
+          externalAuth    : credential.externalAuth,
+          user              : credential.user,
+          password          : credential.password,
+          connectString     : credential.connectString,
+          poolMin           : 0,
+          poolMax           : 1,
+          poolIncrement     : 1,
+          poolTimeout       : 1,
+          queueRequests     : true, //default
+          queueTimeout      : 5000 //5 seconds
+        },
+        function(err, pool){
+          should.not.exist(err);
+          
+          async.parallel(
+            [
+              function(cb) {
+                pool.getConnection(function(err, conn) {
+                  should.not.exist(err);
+
+                  conn.execute(getBlockingSql(4), function(err, result) {
+                    should.not.exist(err);
+
+                    conn.release(function(err) {
+                      cb();
+                    });
+                  });
+                });
+              },
+              function(cb) {
+                //using setTimeout to help ensure this gets to the db last
+                setTimeout(function() {
+                  pool.getConnection(function(err, conn) {
+                    should.not.exist(err);
+                    
+                    conn.release(function(err) {
+                      cb();
+                    });
+                  });
+                }, 100);
+              }
+            ],
+            function(err, results){
+              pool.terminate(function(err) {
+                should.not.exist(err);
+                done();
+              });
+            }
+          );
+        }
+      );
+    });
+  });
 })

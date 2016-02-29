@@ -716,6 +716,58 @@ describe('1. connection.js', function(){
     })
   })
   
+  describe('1.6 Testing parameter assertions', function() {
+    var conn1;
+    var sql = 'select 1 from dual';
+    
+    beforeEach('get connection ready', function(done) {
+      oracledb.getConnection(credential, function(err, conn) {
+        should.not.exist(err);
+        conn1 = conn;
+        done();
+      });
+    });
+    
+    afterEach('release connection', function(done) {
+      conn1.release(function(err) {
+        should.not.exist(err);
+        done();
+      });
+    });
+
+    it('1.6.1 too few params without a callback should throw error', function(done) {
+      try {
+        conn1.execute(sql);
+      } catch (err) {
+        should.exist(err);
+        done();
+      }
+    });
+
+    it('1.6.2 too few params with a callback should pass error in callback', function(done) {
+      conn1.execute(function(err, result) {
+        should.exist(err);
+        done();
+      });
+    });
+
+    it('1.6.3 too many params without a callback should throw error', function(done) {
+      try {
+        conn1.execute(1, 2, 3, 4, 5);
+      } catch (err) {
+        should.exist(err);
+        done();
+      }
+    });
+
+    it('1.6.4 too many params with a callback should pass error in callback', function(done) {
+      conn1.execute(1, 2, 3, 4, function(err, result) {
+        should.exist(err);
+        done();
+      });
+    });
+  })
+  
 })
 
 

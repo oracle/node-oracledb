@@ -77,6 +77,7 @@ static const char *errMsg[] =
   "NJS-037: incompatible type of value provided",
   "NJS-038: maxArraySize value should be greater than 0",
   "NJS-039: empty array is not allowed for IN bind",
+  "NJS-040: connection request timeout",
 };
 
 string NJSMessages::getErrorMsg ( NJSErrorType err, ... )

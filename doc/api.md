@@ -49,8 +49,10 @@ limitations under the License.
      - 3.2.11 [poolMin](#propdbpoolmin)
      - 3.2.12 [poolTimeout](#propdbpooltimeout)
      - 3.2.13 [prefetchRows](#propdbprefetchrows)
-     - 3.2.14 [stmtCacheSize](#propdbstmtcachesize)
-     - 3.2.15 [version](#propdbversion)
+     - 3.2.14 [queueRequests](#propdbqueuerequests)
+     - 3.2.15 [queueTimeout](#propdbqueuetimeout)
+     - 3.2.16 [stmtCacheSize](#propdbstmtcachesize)
+     - 3.2.17 [version](#propdbversion)
   - 3.3 [Oracledb Methods](#oracledbmethods)
      - 3.3.1 [createPool()](#createpool)
      - 3.3.2 [getConnection()](#getconnectiondb)
@@ -85,7 +87,9 @@ limitations under the License.
      - 6.1.4 [poolMax](#proppoolpoolmax)
      - 6.1.5 [poolMin](#proppoolpoolmin)
      - 6.1.6 [poolTimeout](#proppoolpooltimeout)
-     - 6.1.7 [stmtCacheSize](#proppoolstmtcachesize)
+     - 6.1.7 [queueRequests](#proppoolqueuerequests)
+     - 6.1.8 [queueTimeout](#proppoolqueueTimeout)
+     - 6.1.9 [stmtCacheSize](#proppoolstmtcachesize)
   - 6.2 [Pool Methods](#poolmethods)
      - 6.2.1 [getConnection()](#getconnectionpool)
      - 6.2.2 [terminate()](#terminate)
@@ -102,6 +106,7 @@ limitations under the License.
      - 8.1.2 [Net Service Names for Connection Strings](#tnsnames)
      - 8.1.3 [JDBC and Node-oracledb Connection Strings Compared](#notjdbc)
   - 8.2 [Connection Pooling](#connpooling)
+     - 8.2.1 [Connection Pool Monitoring](#connpoolmonitor)
   - 8.3 [Database Resident Connection Pooling (DRCP)](#drcp)
   - 8.4 [External Authentication](#extauth)
 9. [SQL Execution](#sqlexecution)
@@ -564,7 +569,7 @@ request exceeds the number of currently open connections.
 
 The default value is 1.
 
-This property may be overridden when creating a connection pool.
+This property may be overridden when [creating a connection pool](#createpool).
 
 ##### Example
 
@@ -583,7 +588,7 @@ The maximum number of connections to which a connection pool can grow.
 
 The default value is 4.
 
-This property may be overridden when creating the connection pool.
+This property may be overridden when [creating a connection pool](#createpool).
 
 ##### Example
 
@@ -603,7 +608,7 @@ when there is no activity to the target database.
 
 The default value is 0.
 
-This property may be overridden when creating a connection pool.
+This property may be overridden when [creating a connection pool](#createpool).
 
 ##### Example
 
@@ -625,7 +630,7 @@ connections are never terminated.
 
 The default value is 60.
 
-This property may be overridden when creating a connection pool.
+This property may be overridden when [creating a connection pool](#createpool).
 
 ##### Example
 
@@ -664,7 +669,55 @@ var oracledb = require('oracledb');
 oracledb.prefetchRows = 100;
 ```
 
-#### <a name="propdbstmtcachesize"></a> 3.2.14 stmtCacheSize
+#### <a name="propdbqueuerequests"></a> 3.2.14 queueRequests
+
+```
+Boolean queueRequests
+```
+
+If this property is *true* and the number of connections "checked out"
+from the pool has reached the number specified by
+[`poolMax`](#propdbpoolmax), then new requests for connections are
+queued until in-use connections are released.
+
+If this property is *false* and a request for a connection is made
+from a pool where the number of "checked out" connections has reached
+`poolMax`, then an *ORA-24418* error indicating that further sessions
+cannot be opened will be returned.
+
+The default value is *true*.
+
+This property may be overridden when [creating a connection pool](#createpool).
+
+##### Example
+
+```javascript
+var oracledb = require('oracledb');
+oracledb.queueRequests = false;
+```
+
+#### <a name="propdbqueuetimeout"></a> 3.2.15 queueTimeout
+
+```
+Number queueTimeout
+```
+
+The number of milliseconds after which connection requests waiting in
+the connection request queue are terminated.  If `queueTimeout` is
+0, then queued connection requests are never terminated.
+
+The default value is 60000.
+
+This property may be overridden when [creating a connection pool](#createpool).
+
+##### Example
+
+```javascript
+var oracledb = require('oracledb');
+oracledb.queueTimeout = 3000; // 3 seconds
+```
+
+#### <a name="propdbstmtcachesize"></a> 3.2.16 stmtCacheSize
 
 ```
 Number stmtCacheSize
@@ -691,7 +744,7 @@ var oracledb = require('oracledb');
 oracledb.stmtCacheSize = 30;
 ```
 
-#### <a name="propdbversion"></a> 3.2.15 version
+#### <a name="propdbversion"></a> 3.2.17 version
 ```
 readonly Number version
 ```
@@ -783,10 +836,10 @@ name of a local Oracle database instance.  See
 Boolean externalAuth
 ```
 
-If this optional property is *true* then the pool's connections will
-be established using [External Authentication](#extauth).
+Indicate whether to connections should be established using
+[External Authentication](#extauth).
 
-This property overrides the *Oracledb*
+This optional property overrides the *Oracledb*
 [`externalAuth`](#propdbisexternalauth) property.
 
 The `user` and `password` properties should not be set when
@@ -800,10 +853,10 @@ Number stmtCacheSize
 ```
 
 The number of statements to be cached in the
-[statement cache](#stmtcache) of each connection.  This optional
-property may be used to override the
-[stmtCacheSize](#propdbstmtcachesize) property of the *Oracledb*
-object.
+[statement cache](#stmtcache) of each connection.
+
+This optional property overrides the *Oracledb*
+[`stmtCacheSize`](#propdbstmtcachesize) property.
 
 ```
 Number poolMax
@@ -811,26 +864,28 @@ Number poolMax
 
 The maximum number of connections to which a connection pool can grow.
 
-This optional property may be used to override the corresponding
-property in the *Oracledb* object.
+This optional property overrides the *Oracledb*
+[`poolMax`](#propdbpoolmax) property.
 
 ```
 Number poolMin
 ```
 
 The minimum number of connections a connection pool maintains, even
-when there is no activity to the target database.  This optional
-property may be used to override the corresponding property in the
-*Oracledb* object.
+when there is no activity to the target database.
+
+This optional property overrides the *Oracledb*
+[`poolMin`](#propdbpoolmin) property.
 
 ```
 Number poolIncrement
 ```
 
 The number of connections that are opened whenever a connection
-request exceeds the number of currently open connections. This
-optional property may be used to override the corresponding property
-in the *Oracledb* object.
+request exceeds the number of currently open connections. 
+
+This optional property overrides the *Oracledb*
+[`poolIncrement`](#propdbpoolincrement) property.
 
 ```
 Number poolTimeout
@@ -838,11 +893,32 @@ Number poolTimeout
 
 The number of seconds after which idle connections (unused in the
 pool) may be terminated.  Idle connections are terminated only when
-the pool is accessed.  If the `poolTimeout` is set to 0, then idle
+the pool is accessed.  If `poolTimeout` is set to 0, then idle
 connections are never terminated.
 
-This optional property may be used to override the corresponding
-property in the *Oracledb* object.
+This optional property overrides the *Oracledb*
+[`poolTimeout`](#propdbpooltimeout) property.
+
+```
+Boolean queueRequests
+```
+
+Indicate whether [`pool.getConnection()`](#getconnectionpool) calls
+should be queued when all available connections are in currently use.
+
+This optional property overrides the *Oracledb*
+[`queueRequests`](#propdbqueuerequests) property.
+
+```
+Number queueTimeout
+```
+
+The number of milliseconds after which connection requests waiting in the 
+connection request queue are terminated.  If `queueTimeout` is
+set to 0, then queued connection requests are never terminated.
+
+This optional property overrides the *Oracledb*
+[`queueTimeout`](#propdbqueuetimeout) property.
 
 ```
 function(Error error, Pool pool)
@@ -1533,10 +1609,29 @@ readonly Number poolTimeout
 ```
 
 The time (in seconds) after which the pool terminates idle connections
-(unused in the pool). The number of connection does not drop below
+(unused in the pool). The number of connections does not drop below
 poolMin.
 
-#### <a name="proppoolstmtcachesize"></a> 6.1.7 stmtCacheSize
+#### <a name="proppoolqueuerequests"></a> 6.1.7 queueRequests
+
+```
+readonly Boolean queueRequests
+```
+
+Determines whether requests for connections from the pool are queued
+when the number of connections "checked out" from the pool has reached
+the maximum number specified by [`poolMax`](#propdbpoolmax).
+
+#### <a name="proppoolqueueTimeout"></a> 6.1.8 queueTimeout
+
+```
+readonly Number queueTimeout
+```
+
+The time (in milliseconds) that a connection request should wait in
+the queue before the request is terminated.
+
+#### <a name="proppoolstmtcachesize"></a> 6.1.9 stmtCacheSize
 
 ```
 readonly Number stmtCacheSize
@@ -1544,9 +1639,6 @@ readonly Number stmtCacheSize
 
 The number of statements to be cached in the
 [statement cache](#stmtcache) of each connection.
-
-The default is the [`stmtCacheSize`](#propdbstmtcachesize) property of
-the *Oracledb* object when the pool is created.
 
 ### <a name="poolmethods"></a> 6.2 Pool Methods
 
@@ -1911,7 +2003,7 @@ object. Internally
 [OCI Session Pooling](https://docs.oracle.com/database/121/LNOCI/oci09adv.htm#LNOCI16617)
 is used.
 
-Connection are returned with the *Pool*
+A connection is returned with the *Pool*
 [`getConnection()`](#getconnectionpool) function:
 
 ```javascript
@@ -1959,9 +2051,51 @@ The Pool attribute [`stmtCacheSize`](#propconnstmtcachesize) can be
 used to set the statement cache size used by connections in the pool,
 see [Statement Caching](#stmtcache).
 
-A pool can be monitored by looking at the Pool attributes
-[`connectionsInUse`](#proppoolconnectionsinuse) and
-[`connectionsOpen`](#proppoolconnectionsopen).
+#### <a name="connpoolmonitor"></a> 8.2.1 Connection Pool Monitoring
+
+Connection pool usage can be monitored to choose the appropriate
+connection pool settings for your workload.
+
+The Pool attributes [`connectionsInUse`](#proppoolconnectionsinuse)
+and [`connectionsOpen`](#proppoolconnectionsopen) provide basic
+information about an active pool.
+
+When using a [pool queue](#propdbqueuerequests), further statistics
+can be enabled by setting the [`createPool()`](#createpool)
+`poolAttrs` parameter `_enableStats` to *true*.  Statistics
+can be output to the console by calling the *Pool* `_logStats()`
+method.  The underscore prefixes indicate that these are private
+attributes and methods.  As such, this functionality may be altered or
+enhanced in the future.
+
+Queue statistics include the number of `getConnection()` requests that
+were queued waiting for an available connection.  The sum and average
+time spent in the queue are also recorded.  If the pool queue is
+heavily used, consider increasing the connection pool
+[`poolMax`](#proppoolpoolmax) value.
+
+To enable recording of queue statistics:
+
+```javascript
+oracledb.createPool (
+  {
+    queueRequests : true,  // default is true
+    _enableStats  : true,   // default is false
+    user          : "hr",
+    password      : "welcome",
+    connectString : "localhost/XE"
+  },
+  function(err, pool)
+  {
+  . . . 
+```
+
+The application can later, on some developer-chosen event, display the
+current statistics to the console by calling:
+
+```javascript
+pool._logStats();
+```
 
 Node worker threads executing database statements on a connection will
 commonly wait for round-trips between node-oracledb and the database
@@ -2038,7 +2172,7 @@ to validate user access.  One of the benefits is that database
 credentials do not need to be hard coded in the application.
 
 To use external authentication, set the *Oracledb*
-[`externalAuth`](propdbextauth) property to *true*.  This property can
+[`externalAuth`](#propdbisexternalauth) property to *true*.  This property can
 also be set in the `connAttrs` or `poolAttrs` parameters of the
 *Oracledb* [`getConnection()`](#getconnectiondb) or
 [`createPool()`](#createpool) calls, respectively.  The `user` and
@@ -2118,7 +2252,7 @@ less overhead.
 
 A result set is created when the `execute()` option property
 [`resultSet`](#executeoptions) is `true`.  Result set rows can be
-fetched using [`getRow()`](#getrow) or [`getRows()`](getrows) on the
+fetched using [`getRow()`](#getrow) or [`getRows()`](#getrows) on the
 `execute()` callback function's `result.resultSet` parameter property.
 
 For result sets the [`maxRows`](#propdbmaxrows) limit is ignored.  All
@@ -3154,7 +3288,7 @@ If the `WHERE` clause matches no rows, the output would be:
 Oracle REF CURSORS can be fetched in node-oracledb by binding a
 `CURSOR` to a PL/SQL call.  The resulting bind variable becomes a
 [`ResultSet`](#resultsetclass), allowing rows to be fetched using
-[`getRow()`](#getrow) or [`getRows()`](getrows).  When all rows have
+[`getRow()`](#getrow) or [`getRows()`](#getrows).  When all rows have
 been fetched, or the application does not want to continue getting
 more rows, then the result set must be freed using
 [`close()`](#close).  If the REF cursor is not set to any value, or is
