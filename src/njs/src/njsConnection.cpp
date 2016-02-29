@@ -1744,6 +1744,10 @@ void Connection::PrepareAndBind (eBaton* executeBaton)
                  executeBaton->binds[index]->maxSize,
               executeBaton->binds[index]->ind,
               executeBaton->binds[index]->len,
+              (executeBaton->binds[index]->isArray) ?
+                executeBaton->binds[index]->maxArraySize : 0,
+              (executeBaton->binds[index]->isArray) ?
+                &(executeBaton->binds[index]->curArraySize ) : 0,
               (executeBaton->stmtIsReturning &&
                 executeBaton->binds[index]->isOut ) ?
                   (void *)executeBaton : NULL,
