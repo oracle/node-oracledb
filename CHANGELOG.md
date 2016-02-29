@@ -1,5 +1,7 @@
 # Change Log
 
+## node-oracledb v1.7.0 (DD Mon YYYY)
+
 ## node-oracledb v1.6.0 (30 Jan 2016)
 
 - Added support for binding PL/SQL Collection Associative Array
