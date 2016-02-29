@@ -1033,7 +1033,7 @@ void Connection::GetInBindParamsScalar(Local<Value> v8val, Bind* bind,
                              bind->maxSize : *(bind->len);
           if(size)
           {
-            bind->value = (char*)malloc(size);
+            bind->value = (char *)malloc((size_t) size);
             if(bufLen)
               memcpy(bind->value, Buffer::Data(obj), bufLen);
           }
@@ -2154,7 +2154,7 @@ void Connection::DoDefines ( eBaton* executeBaton, const dpi::MetaData* meta,
           return;
         }
         defines[col].buf = (char *)malloc(defines[col].maxSize *
-                                          executeBaton->maxRows) ;
+                                          (size_t) executeBaton->maxRows) ;
         if ( !defines[col].buf )
         {
           executeBaton->error = NJSMessages::getErrorMsg ( 
@@ -3602,7 +3602,7 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
 
   if ( bind->isArray )
   {
-    size_t arrayElementSize = bind->maxSize;
+    size_t arrayElementSize = (size_t) bind->maxSize;
     
     Connection::AllocateBindArray ( bind->type, bind, executeBaton,
                                     &arrayElementSize );
