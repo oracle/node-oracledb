@@ -201,7 +201,7 @@ describe('65. uninitializedLob.js', function() {
                  "      RETURNING id, blob_1 INTO :id, :blob_1; \n" +
                  "    ELSE \n" +
                  "      :id     := negative_one;\n" +
-                 "      :blob_1 := null; \n" +
+                 "      :blob_1 := null; \n" +   // <---- make sure :blob_1 always has a value. Or it hits DPI-007 error.
                  "    END IF;\n" +
                  "END; ";
 
