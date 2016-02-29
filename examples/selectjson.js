@@ -51,7 +51,7 @@ var checkver = function (conn, cb) {
   } else {
     return cb(null, conn);
   }
-}
+};
 
 var doinsert = function (conn, cb) {
   var data = { "userId": 1, "userName": "Chris", "location": "Australia" };
@@ -68,7 +68,7 @@ var doinsert = function (conn, cb) {
         return cb(null, conn);
       }
     });
-}
+};
 
 var dojsonquery = function (conn, cb) {
   conn.execute(
@@ -83,7 +83,7 @@ var dojsonquery = function (conn, cb) {
         return cb(null, conn);
       }
     });
-}
+};
 
 var dorelationalquery = function (conn, cb) {
   conn.execute(
@@ -97,7 +97,7 @@ var dorelationalquery = function (conn, cb) {
         return cb(null, conn);
       }
     });
-}
+};
 
 async.waterfall(
   [
