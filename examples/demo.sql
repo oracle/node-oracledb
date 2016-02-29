@@ -111,7 +111,7 @@ DROP TABLE j_purchaseorder;
 -- Note if your applications always insert valid JSON, you may delete
 -- the IS JSON check to remove its additional validation overhead.
 CREATE TABLE j_purchaseorder (po_document VARCHAR2(4000) CHECK (po_document IS JSON));
-INSERT INTO j_purchaseorder (po_document) VALUES ('{"userId":3,"userName":"Alison"}');
+INSERT INTO j_purchaseorder (po_document) VALUES ('{"userId":3,"userName":"Alison","location":"Australia"}');
 COMMIT;
 
 -- For selectjsonclob.js example of JSON datatype.  Requires Oracle Database 12.1.0.2
@@ -123,7 +123,7 @@ DROP TABLE j_purchaseorder_c;
 -- USER_JSON_COLUMNS.  EMPTY_CLOB() is currently needed by
 -- node-oracledb for inserting CLOB data.
 CREATE TABLE j_purchaseorder_c (po_document CLOB CHECK (po_document IS JSON or length(po_document) = 0));
-INSERT INTO j_purchaseorder_c (po_document) VALUES ('{"userId":4,"userName":"Changjie"}');
+INSERT INTO j_purchaseorder_c (po_document) VALUES ('{"userId":4,"userName":"Changjie","location":"China"}');
 COMMIT;
 
 -- For DML RETURNING aka RETURNING INTO examples

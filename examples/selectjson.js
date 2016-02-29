@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -30,62 +30,85 @@
  *
  *****************************************************************************/
 
+var async = require('async');
 var oracledb = require('oracledb');
 var dbConfig = require('./dbconfig.js');
 
-oracledb.getConnection(
-  {
-    user          : dbConfig.user,
-    password      : dbConfig.password,
-    connectString : dbConfig.connectString
-  },
-  function(err, connection)
-  {
-    if (err) {
+var doconnect = function(cb) {
+  oracledb.getConnection(dbConfig, cb);
+};
+
+var dorelease = function(conn) {
+  conn.release(function (err) {
+    if (err)
       console.error(err.message);
-      return;
-    }
-
-    if (connection.oracleServerVersion < 1201000200) {
-      console.error('This example only works with Oracle Database 12.1.0.2 or greater');
-      process.exit(1);
-    }
-
-    var data = { "userId": 1, "userName": "Chris", "location": "Australia" };
-    var s = JSON.stringify(data);
-
-    connection.execute(
-      "INSERT INTO j_purchaseorder (po_document) VALUES (:bv)",
-      [s], // bind the JSON string for inserting into the JSON column.
-      { autoCommit: true },
-      function (err) {
-        if (err) {
-          console.error(err.message);
-          doRelease(connection);
-          return;
-        }
-        console.log("Data inserted successfully.");
-        connection.execute(
-          "SELECT po_document FROM j_purchaseorder WHERE JSON_EXISTS (po_document, '$.location')",
-          function(err, result)
-          {
-            if (err) {
-              console.error(err.message);
-            } else {
-              var js = JSON.parse(result.rows[0][0]);  // just show first record
-              console.log('Query results: ', js);
-            }
-            doRelease(connection);
-          });
-      });
   });
+};
 
-function doRelease(connection)
-{
-  connection.release(
-    function(err) {
+var checkver = function (conn, cb) {
+  if (conn.oracleServerVersion < 1201000200) {
+    return cb(new Error('This example only works with Oracle Database 12.1.0.2 or greater'), conn);
+  } else {
+    return cb(null, conn);
+  }
+}
+
+var doinsert = function (conn, cb) {
+  var data = { "userId": 1, "userName": "Chris", "location": "Australia" };
+  var s = JSON.stringify(data);
+  conn.execute(
+    "INSERT INTO j_purchaseorder (po_document) VALUES (:bv)",
+    [s], // bind the JSON string for inserting into the JSON column.
+    { autoCommit: true },
+    function (err) {
       if (err) {
-        console.error(err.message);
+        return cb(err, conn);
+      } else {
+        console.log("Data inserted successfully.");
+        return cb(null, conn);
       }
     });
 }
+
+var dojsonquery = function (conn, cb) {
+  conn.execute(
+    "SELECT po_document FROM j_purchaseorder WHERE JSON_EXISTS (po_document, '$.location')",
+    function(err, result)
+    {
+      if (err) {
+        return cb(err, conn);
+      } else {
+        var js = JSON.parse(result.rows[0][0]);  // just show first record
+        console.log('Query results: ', js);
+        return cb(null, conn);
+      }
+    });
+}
+
+var dorelationalquery = function (conn, cb) {
+  conn.execute(
+    "SELECT JSON_VALUE(po_document, '$.location') FROM j_purchaseorder",
+    function(err, result)
+    {
+      if (err) {
+        return cb(err, conn);
+      } else {
+        console.log('Query results: ', result.rows[0][0]);  // just show first record
+        return cb(null, conn);
+      }
+    });
+}
+
+async.waterfall(
+  [
+    doconnect,
+    checkver,
+    doinsert,
+    dojsonquery,
+    dorelationalquery
+  ],
+  function (err, conn) {
+    if (err) { console.error("In waterfall error cb: ==>", err, "<=="); }
+    if (conn)
+      dorelease(conn);
+  });
