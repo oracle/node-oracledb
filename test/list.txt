@@ -47,6 +47,17 @@
         2.6.1 stmtCacheSize cannot be a negative value
         2.6.2 stmtCacheSize can be 0
         2.6.3 stmtCacheSize must be a Number
+    2.7 getConnection
+        2.7.1 throws error if called after pool is terminated and a callback is not provided
+        2.7.2 passes error in callback if called after pool is terminated and a callback is provided
+    2.8 connection request queue (basic functionality)
+        2.8.1 generates ORA-24418 when calling getConnection if queueing is disabled
+        2.8.2 does not generate ORA-24418 when calling getConnection if queueing is enabled
+        2.8.3 generates NJS-040 if request is queued and queueTimeout expires 
+        2.8.4 does not generate NJS-040 if request is queued for less time than queueTimeout
+    2.9 connection request queue (_enableStats & _logStats functionality)_logStats must be called prior to terminating pool.
+        2.9.1 works after the pool as been terminated
+
 
 3. examples.js
     3.1 connect.js
@@ -447,6 +458,13 @@
     44.7 empty array for BIND_OUT 
   - 44.8 maxSize option applies to each elements of an array
 
+45. instanceof.js
+    45.1 all constructors have been accounted for
+    45.2 instanceof works for the oracledb instance
+    45.3 instanceof works for pool instances
+    45.4 instanceof works for connection instances
+    45.5 instanceof works for resultset instances 
+    45.6 instanceof works for lob instances  
 
 51. accessTerminatedPoolAttributes.js
     can not access attributes of terminated pool

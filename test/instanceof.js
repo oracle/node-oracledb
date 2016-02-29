@@ -15,6 +15,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
+ * NAME
+ *   45. instanceof.js
+ *
+ * DESCRIPTION
+ *   Testing JS instanceof.
+ *
+ * NUMBERING RULE
+ *   Test numbers follow this numbering rule:
+ *     1  - 20  are reserved for basic functional tests
+ *     21 - 50  are reserved for data type supporting tests
+ *     51 onwards are for other tests 
+ *
  *****************************************************************************/
 'use strict';
 
@@ -40,8 +52,9 @@ if (dbConfig.externalAuth) {
   credential = dbConfig;
 }
 
-describe('instanceof.js', function() {
-  it('all constructors have been accounted for', function(done) {
+describe('45. instanceof.js', function() {
+  
+  it('45.1 all constructors have been accounted for', function(done) {
     var cLibKeysIdx;
     var cLibKeys;
     var instKeysIdx;
@@ -78,13 +91,13 @@ describe('instanceof.js', function() {
     done();
   });
   
-  it('instanceof works for the oracledb instance', function(done) {
+  it('45.2 instanceof works for the oracledb instance', function(done) {
     (oracledb instanceof oracledb.Oracledb).should.be.true;
 
     done();
   });
   
-  it('instanceof works for pool instances', function(done) {
+  it('45.3 instanceof works for pool instances', function(done) {
     oracledb.createPool(
       {
         externalAuth    : credential.externalAuth,
@@ -109,7 +122,7 @@ describe('instanceof.js', function() {
     );
   });
   
-  it('instanceof works for connection instances', function(done) {
+  it('45.4 instanceof works for connection instances', function(done) {
     oracledb.getConnection(credential, function(err, conn) {
       should.not.exist(err);
       
@@ -123,7 +136,7 @@ describe('instanceof.js', function() {
     });   
   });
   
-  it('instanceof works for resultset instances', function(done) {
+  it('45.5 instanceof works for resultset instances', function(done) {
     oracledb.getConnection(credential, function(err, conn) {
       should.not.exist(err);
       
@@ -152,7 +165,7 @@ describe('instanceof.js', function() {
     });   
   });
   
-  it('instanceof works for lob instances', function(done) {
+  it('45.6 instanceof works for lob instances', function(done) {
     oracledb.getConnection(credential, function(err, conn) {
       should.not.exist(err);
       
