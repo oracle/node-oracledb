@@ -42,7 +42,7 @@ var oracledb = require('oracledb');
 var async    = require('async');
 var should   = require('should');
 var stream   = require('stream');
-var dbConfig = require('./dbConfig.js');
+var dbConfig = require('./dbconfig.js');
 var assist   = require('./dataTypeAssist.js');
 
 describe('60. clobPlsqlString.js', function() {

@@ -40,7 +40,7 @@
 var oracledb = require('oracledb');
 var should = require('should');
 var async = require('async');
-var dbConfig = require('./dbConfig.js');
+var dbConfig = require('./dbconfig.js');
 var assist = require('./dataTypeAssist.js');
 
 describe('6. dmlReturning.js', function(){

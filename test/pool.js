@@ -31,10 +31,11 @@
  *     51 -     are for other tests 
  * 
  *****************************************************************************/
- 
+'use strict';
+
 var oracledb = require('oracledb');
-var should = require('should');
-var dbConfig = require('./dbConfig.js');
+var should   = require('should');
+var dbConfig = require('./dbconfig.js');
 
 describe('2. pool.js', function(){
   

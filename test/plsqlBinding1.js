@@ -19,10 +19,10 @@
  * See LICENSE.md for relevant licenses.
  *
  * NAME
- *   43. plsqlBinding.js
+ *   43. plsqlBinding1.js
  *
  * DESCRIPTION
- *    Allow binding of PL/SQL indexed tables (associative arrays).
+ *   Testing PL/SQL indexed tables (associative arrays).
  *
  * NUMBERING RULE
  *   Test numbers follow this numbering rule:
@@ -34,12 +34,11 @@
 'use strict';
 
 var oracledb = require('oracledb');
-var should = require('should');
-var async = require('async');
+var should   = require('should');
+var async    = require('async');
+var dbConfig = require('./dbconfig.js');
 
-var dbConfig = require('./dbConfig.js');
-
-describe('43. plsqlBinding.js', function() {
+describe('43. plsqlBinding1.js', function() {
   
   if(dbConfig.externalAuth){
     var credential = { externalAuth: true, connectString: dbConfig.connectString };
@@ -65,7 +64,7 @@ describe('43. plsqlBinding.js', function() {
       });
     })
 
-    it('43.1.1 binding PL/SQL indexed table IN by name', function(done) {
+    it('43.1.1 binding PL/SQL indexed table IN', function(done) {
       async.series([
         function(callback) {
           var proc = "CREATE OR REPLACE PACKAGE\n" +
@@ -139,77 +138,7 @@ describe('43. plsqlBinding.js', function() {
       ], done);
     });
 
-    it('43.1.2 binding PL/SQL indexed table IN by position', function(done) {
-      async.series([
-        function(callback) {
-          var proc = "CREATE OR REPLACE PACKAGE\n" +
-                      "oracledb_testpack\n" +
-                      "IS\n" +
-                      "  TYPE stringsType IS TABLE OF VARCHAR2(30) INDEX BY BINARY_INTEGER;\n" +
-                      "  TYPE numbersType IS TABLE OF NUMBER INDEX BY BINARY_INTEGER;\n" +
-                      "  PROCEDURE test(s IN stringsType, n IN numbersType);\n" +
-                      "END;";
-          connection.should.be.ok;
-          connection.execute(
-            proc,
-            function(err) {
-              should.not.exist(err);
-              callback();
-            }
-          );
-        },
-        function(callback) {
-          var proc = "CREATE OR REPLACE PACKAGE BODY\n" +
-                     "oracledb_testpack\n" +
-                     "IS\n" +
-                     "  PROCEDURE test(s IN stringsType, n IN numbersType)\n" +
-                     "  IS\n" +
-                     "  BEGIN\n" +
-                     "    IF (s(1) IS NULL OR s(1) <> 'John') THEN\n" +
-                     "      raise_application_error(-20000, 'Invalid s(1): \"' || s(1) || '\"');\n" +
-                     "    END IF;\n" +
-                     "    IF (s(2) IS NULL OR s(2) <> 'Doe') THEN\n" +
-                     "      raise_application_error(-20000, 'Invalid s(2): \"' || s(2) || '\"');\n" +
-                     "    END IF;\n" +
-                     "  END;\n" +
-                     "END;";
-          connection.should.be.ok;
-          connection.execute(
-            proc,
-            function(err) {
-              should.not.exist(err);
-              callback();
-            }
-          );
-        },
-        function(callback) {
-          var bindvars = [
-            {type: oracledb.STRING, dir: oracledb.BIND_IN, val: ['John', 'Doe']},
-            {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: [8, 11]}
-          ];
-          connection.execute(
-            "BEGIN oracledb_testpack.test(:1, :2); END;",
-            bindvars,
-            function(err, result) {
-              should.not.exist(err);
-              // console.log(result);
-              callback();
-            }
-          );
-        },
-        function(callback) {
-          connection.execute(
-            "DROP PACKAGE oracledb_testpack",
-            function(err) {
-              should.not.exist(err);
-              callback();
-            }
-          );
-        }
-      ], done);
-    });
-
-    it('43.1.3 binding PL/SQL indexed table IN OUT', function(done) {
+    it('43.1.2 binding PL/SQL indexed table IN OUT', function(done) {
       async.series([
         function(callback) {
           var proc = "CREATE OR REPLACE PACKAGE\n" +
@@ -282,7 +211,7 @@ describe('43. plsqlBinding.js', function() {
       ], done);
     });
 
-    it('43.1.4 binding PL/SQL indexed table OUT', function(done) {
+    it('43.1.3 binding PL/SQL indexed table OUT', function(done) {
       async.series([
         function(callback) {
           var proc = "CREATE OR REPLACE PACKAGE\n" +
@@ -532,24 +461,7 @@ describe('43. plsqlBinding.js', function() {
       );
     })
 
-    it.skip('42.2.7 maxSize restriction', function(done) {
-      var bindvars = {
-        p:  {type: oracledb.STRING, dir: oracledb.BIND_IN, val: ['this is a quite longs string'], maxSize: 10}
-      };
-      connection.execute(
-        "BEGIN oracledb_testpack.test4(:p); END;",
-        bindvars,
-        function(err, result) {
-          should.exist(err);
-          (err.message).should.startWith('NJS-039');
-          // NJS-039: Invalid value or size provided in Array binds.
-          should.not.exist(result);
-          done();
-        }
-      );
-    })
-
-    it('42.2.8 dose not allow array syntax of bindings', function(done) {
+    it('42.2.7 dose not allow array syntax of bindings', function(done) {
       var bindvars = [
         {type: oracledb.STRING, dir: oracledb.BIND_IN, val: ['hello', 'node.js']}
       ];
@@ -557,8 +469,9 @@ describe('43. plsqlBinding.js', function() {
         "BEGIN oracledb_testpack.test4(:1); END;",
         bindvars,
         function(err, result) {
-          should.not.exist(err);
-          should.exist(result);
+          should.exist(err);
+          (err.message).should.startWith('ORA-06550');  // this causes a PL/SQL syntax error
+          should.not.exist(result);
           done();
         }
       );
@@ -631,7 +544,8 @@ describe('43. plsqlBinding.js', function() {
         }
       ], done);
     });
-
+    
+    // Date data type not support yet
     it.skip('43.3.2 binding PL/SQL scalar IN/OUT', function(done) {
       async.series([
         function(callback) {
@@ -837,7 +751,7 @@ describe('43. plsqlBinding.js', function() {
         function(err, result) {
           should.exist(err);
           (err.message).should.startWith('NJS-036');
-          // NJS-036: Property maxArraySize is required for INOUT Array binds.
+          // NJS-036: given array is of size greater than maxArraySize
           should.not.exist(result);
           done();
         }
@@ -875,6 +789,7 @@ describe('43. plsqlBinding.js', function() {
       );
     })
 
+    // known bug
     // The maximum safe integer in JavaScript is (2^53 - 1). 
     it.skip('43.4.5 negative case: large value', function(done) {
       var bindvars = {
@@ -955,102 +870,4 @@ describe('43. plsqlBinding.js', function() {
     })
 
   }) // 43.4
-
-  describe('43.5 Indexed Table Null Elements', function() {
-    var connection = null;
-
-    before(function(done) {
-      async.series([
-        function(cb) {
-          oracledb.getConnection(credential, function(err, conn) {
-            should.not.exist(err);
-            connection = conn;
-            cb();
-          });
-        },
-        function(cb) {
-          var proc = "CREATE OR REPLACE PACKAGE\n" +
-                      "oracledb_testpack\n" +
-                      "IS\n" +
-                      "  TYPE stringsType IS TABLE OF VARCHAR2(30) INDEX BY BINARY_INTEGER;\n" +
-                      "  TYPE numbersType IS TABLE OF NUMBER INDEX BY BINARY_INTEGER;\n" +
-                      "  FUNCTION test(strings IN stringsType, numbers IN numbersType) RETURN VARCHAR2;\n" +
-                      "END;";
-          connection.should.be.ok;
-          connection.execute(
-            proc,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          ); 
-        }, 
-        function(cb) {
-          var proc = "CREATE OR REPLACE PACKAGE BODY\n" +
-                     "oracledb_testpack\n" +
-                     "IS\n" +
-                     "  FUNCTION test(strings IN stringsType, numbers IN numbersType) RETURN VARCHAR2\n" +
-                     "  IS\n" +
-                     "    s VARCHAR2(2000) := '';\n" +
-                     "  BEGIN\n" +
-                     "    FOR i IN 1 .. strings.COUNT LOOP\n" +
-                     "      s := s || strings(i);\n" +
-                     "    END LOOP;\n" +
-                     "    FOR i IN 1 .. numbers.COUNT LOOP\n" +
-                     "       s := s || numbers(i);\n" +
-                     "    END LOOP;\n" +
-                     "    RETURN s;\n" +
-                     "  END;\n" +
-                     "END;";  
-          connection.execute(
-            proc,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        }
-      ], done);
-    }) // before
-
-    after(function(done) {
-      async.series([
-        function(callback) {
-          connection.execute(
-            "DROP PACKAGE oracledb_testpack",
-            function(err) {
-              should.not.exist(err);
-              callback();
-            }
-          );     
-        },
-        function(callback) {
-          connection.release(function(err) {
-            should.not.exist(err);
-            callback();
-          });
-        }
-      ], done);
-    }) // after
-
-    it.skip('43.5.1 null elements work well', function(done) {
-      var bindvars = {
-        result: {type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 2000},
-        strings:  {type: oracledb.STRING, dir: oracledb.BIND_IN, val: ['One', 'Two', 'Three', null, '']},
-        numbers: {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: [1, 2, 3, null, '']}
-      };
-
-      connection.execute(
-        "BEGIN :result := oracledb_testpack.test(:strings, :numbers); END;",
-        bindvars,
-        function(err, result) {
-          should.not.exist(err);
-          // Error: NJS-037: incompatible type of value provided
-          console.log(result);
-          result.outBinds.result.should.be.exactly('OneTwoThree123');
-          done();
-        } 
-      );
-    })
-  }) // 43.5
 })

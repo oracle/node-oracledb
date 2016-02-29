@@ -36,7 +36,7 @@
 var oracledb = require('oracledb');
 var should   = require('should');
 var assist   = require('./dataTypeAssist.js');
-var dbConfig = require('./dbConfig.js');
+var dbConfig = require('./dbconfig.js');
 var async    = require('async');
 
 describe('22. dataTypeChar.js', function(){

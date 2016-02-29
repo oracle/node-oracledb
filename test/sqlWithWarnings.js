@@ -37,9 +37,9 @@
  
 var oracledb = require('oracledb');
 var fs       = require('fs');
-var should = require('should');
-var async = require('async');
-var dbConfig = require('./dbConfig.js');
+var should   = require('should');
+var async    = require('async');
+var dbConfig = require('./dbconfig.js');
 
 describe('64. sqlWithWarnings.js', function() {
 
