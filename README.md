@@ -2,15 +2,17 @@
 
 ## <a name="about"></a> About node-oracledb
 
-The node-oracledb add-on for Node.js powers high performance Oracle Database applications.
+The node-oracledb add-on for Node.js powers high performance Oracle
+Database applications.
 
-Node-oracledb connects Node.js 0.10, 0.12, 4.2 LTS and 5 to Oracle
-Database.
+Use node-oracledb to connect Node.js 0.10, 0.12, 4 LTS and 5 to
+Oracle Database.
 
-This is an open source project maintained by Oracle Corp.
+The add-on is stable, well documented, and has a comprehensive test suite.
 
-The node-oracledb home page is on the
+The node-oracledb project is open source and maintained by Oracle Corp.  The home page is on the
 [Oracle Technology Network](http://www.oracle.com/technetwork/database/database-technologies/scripting-languages/node_js/).
+
 
 ### Node-oracledb supports:
 
@@ -22,7 +24,7 @@ The node-oracledb home page is on the
 - [Smart mapping between JavaScript and Oracle types with manual override available](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#typemap)
 - [Data binding using JavaScript objects or arrays](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#bind)
 - [Transaction Management](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#transactionmgt)
-- [Inbuilt Connection Pooling](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#connpooling)
+- [Inbuilt Connection Pool with Queueing](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#connpooling)
 - [Database Resident Connection Pooling (DRCP)](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#drcp)
 - [External Authentication](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#extauth)
 - [Row Prefetching](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#rowprefetching)
