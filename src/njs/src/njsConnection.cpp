@@ -1498,7 +1498,8 @@ void Connection::Async_Execute (uv_work_t *req)
       executeBaton->rowsAffected = executeBaton->dpistmt->rowsAffected();
 
       // Check whether indicators were allocated as part of callback
-      if ( executeBaton->stmtIsReturning )
+      // Address GitHub issue #343
+      if ( executeBaton->stmtIsReturning && executeBaton->rowsAffected )
       {
         for ( unsigned int b = 0; b < executeBaton->binds.size (); b++ )
         {
@@ -3750,6 +3751,8 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
     // rowsReturns for INSERT will be zero, 
     // but we still need to allocate one descriptor
     bind->rowsReturned = 1;
+    // initialize indicator to null
+    *(bind->ind) = -1;
     if (nRows > 1)
       bind->rowsReturned = nRows;
     // allocate the array of Descriptor **
