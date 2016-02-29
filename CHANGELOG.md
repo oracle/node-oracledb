@@ -1,6 +1,26 @@
 # Change Log
 
-## node-oracledb v1.7.0 (DD Mon YYYY)
+## node-oracledb v1.7.0 (29 Feb 2016)
+
+- Added a JavaScript wrapper around the C++ API to allow for easier
+  extension.
+
+- Added a connection pool queue configured with `queueRequests` and
+  `queueTimeout` attributes.  The queue is enabled by default.
+  
+- Added connection pool option attribute `_enableStats` and method
+  `pool._logStats()` to display pool and queue statistics.  Note: these may
+  change in future.
+  
+- Added "bind by position" syntax for PL/SQL Index-by array binds.
+
+- Allowed node-oracledb class instances to be tested with 'instanceof'.
+
+- Fixed some bind issues when bind values are not set by the database.
+
+- Replaced internal usage of `info.This()` with `info.Holder()` for Node.js 0.10.
+
+- Fixed some compilation warnings with some Windows compilers.
 
 ## node-oracledb v1.6.0 (30 Jan 2016)
 
