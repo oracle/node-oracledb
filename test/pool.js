@@ -905,4 +905,50 @@ describe('2. pool.js', function(){
       );
     });
   });
+  
+  describe('2.9 connection request queue (_enableStats & _logStats functionality)', function(){
+    it('2.9.1 works after the pool as been terminated', function(done) {
+      oracledb.createPool(
+        {
+          externalAuth    : credential.externalAuth,
+          user              : credential.user,
+          password          : credential.password,
+          connectString     : credential.connectString,
+          poolMin           : 0,
+          poolMax           : 1,
+          poolIncrement     : 1,
+          poolTimeout       : 1,
+          queueRequests     : true, //default
+          _enableStats      : true
+        },
+        function(err, pool){
+          should.not.exist(err);
+          
+          pool.getConnection(function(err, conn) {
+            should.not.exist(err);
+
+            conn.execute('select 1 from dual', function(err, result) {
+              should.not.exist(err);
+
+              conn.release(function(err) {
+                should.not.exist(err);
+                
+                pool.terminate(function(err) {
+                  should.not.exist(err);
+                  
+                  try {
+                    pool._logStats();
+                  } catch (err) {
+                    should.not.exist(err);
+                  }
+                  
+                  done();
+                });
+              });
+            });
+          });
+        }
+      );
+    });
+  });
 })
