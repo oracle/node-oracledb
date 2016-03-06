@@ -26,6 +26,9 @@
  *   PL/SQL OUT CLOB parameters can also be bound as `STRING`
  *   The returned length is limited to the maximum size of maxSize option.
  * 
+ *   When the types of bind out variables are not STRING or BUFFER, 
+ *   maxSize option will not take effect.
+ * 
  * NUMBERING RULE
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
@@ -38,7 +41,8 @@
 var oracledb = require('oracledb');
 var async    = require('async');
 var should   = require('should');
-var dbConfig = require('./dbConfig.js');
+var stream   = require('stream');
+var dbConfig = require('./dbconfig.js');
 var assist   = require('./dataTypeAssist.js');
 
 describe('60. clobPlsqlString.js', function() {
@@ -51,35 +55,25 @@ describe('60. clobPlsqlString.js', function() {
   
   var connection = null;
   var tableName = "oracledb_myclobs";
-
+  
   before('get one connection, prepare table', function(done) {
     async.series([
       function(callback) {
         oracledb.getConnection(
-          credential, 
+          credential,
           function(err, conn) {
-          should.not.exist(err);
-          connection = conn;
-          callback();
+            should.not.exist(err);
+            connection = conn;
+            callback();
           }
         );
       },
       function(callback) {
         assist.createTable(connection, tableName, callback);
-      },
-      function(callback) {
-        connection.execute(
-          "INSERT INTO oracledb_myclobs (num, content) VALUES (1, 'abcdefghijklmnopqrstuvwxyz')",
-           function(err) {
-            should.not.exist(err);
-            callback();
-           }
-        );
       }
     ], done);
+  }) // before
 
-  })
-  
   after('release connection', function(done) {
     async.series([
       function(callback) {
@@ -98,37 +92,122 @@ describe('60. clobPlsqlString.js', function() {
         });
       }
     ], done);
+  }) // after
 
-  })
+  describe('60.1 BIND OUT as STRING', function() {
+    before('insert data', function(done) {
+      connection.execute(
+        "INSERT INTO oracledb_myclobs (num, content) VALUES (1, 'abcdefghijklmnopqrstuvwxyz')",
+        function(err) {
+          should.not.exist(err);
+          done();
+        }
+      );
+    }) // before
+  
+    it('60.1.1 PL/SQL OUT CLOB parameters can also be bound as STRING', function(done) {
+      connection.execute(
+        "BEGIN SELECT content INTO :cbv FROM oracledb_myclobs WHERE num = :id; END;",
+        {
+          id: 1,
+          cbv: { type: oracledb.STRING, dir: oracledb.BIND_OUT}
+        },
+        function(err, result) {
+          should.not.exist(err);
+          (result.outBinds.cbv).should.be.a.String;
+          (result.outBinds.cbv).should.eql('abcdefghijklmnopqrstuvwxyz');
+          done();
+        }
+      );
+    }) // 60.1.1
 
-  it('60.1 PL/SQL OUT CLOB parameters can also be bound as STRING', function(done) {
-    connection.execute(
-      "BEGIN SELECT content INTO :cbv FROM oracledb_myclobs WHERE num = :id; END;",
-      {
-        id: 1,
-        cbv: { type: oracledb.STRING, dir: oracledb.BIND_OUT}
-      },
-      function(err, result) {
-        should.not.exist(err);
-        (result.outBinds.cbv).should.be.a.String;
-        (result.outBinds.cbv).should.eql('abcdefghijklmnopqrstuvwxyz');
-        done();
-      }
-    );
-  })
+    it('60.1.2 The returned length is limited to the maximum size', function(done) {
+      connection.execute(
+        "BEGIN SELECT content INTO :cbv FROM oracledb_myclobs WHERE num = :id; END;",
+        {
+          id: 1,
+          cbv: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 5 }
+        },
+        function(err, result) {
+          should.exist(err);
+          (err.message).should.startWith('ORA-06502'); // PL/SQL: numeric or value error
+          done();
+        }
+      );
+    }) // 60.1.2
+  }) // 60.1
 
-  it('60.2 The returned length is limited to the maximum size', function(done) {
-    connection.execute(
-      "BEGIN SELECT content INTO :cbv FROM oracledb_myclobs WHERE num = :id; END;",
-      {
-        id: 1,
-        cbv: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 5 }
-      },
-      function(err, result) {
-        should.exist(err);
-        (err.message).should.startWith('ORA-06502'); // PL/SQL: numeric or value error
-        done();
-      }
-    );
-  })
+  describe('60.2 BIND OUT as CLOB', function() {
+    var dataLength = 1000000;
+    var rawData = assist.createCharString(dataLength);
+
+    it('60.2.1 maxSize option does not take effect when bind out type is clob', function(done) {
+      async.series([
+        function doInsert(callback) {
+          connection.execute(
+            "INSERT INTO " + tableName + " VALUES (2, EMPTY_CLOB()) RETURNING content INTO :lobbv",
+            { lobbv: {type: oracledb.CLOB, dir: oracledb.BIND_OUT} },
+            { autoCommit: false }, 
+            function(err, result) {
+              should.not.exist(err);
+              
+              var lob = result.outBinds.lobbv[0];
+              lob.on('error', function(err) {
+                should.not.exist(err);
+                return callback(err);
+              });
+ 
+              var inStream = new stream.Readable();
+              inStream._read = function noop() {};
+              inStream.push(rawData);
+              inStream.push(null);
+
+              inStream.on('error', function(err) { 
+                should.not.exist(err);
+                return callback(err);
+              });
+
+              inStream.on('end', function() {
+                connection.commit(function(err) {
+                  should.not.exist(err);
+                  callback();
+                });
+              });
+
+              inStream.pipe(lob);
+            }
+          );
+        },
+        function doQuery(callback) {
+          connection.execute(
+            "BEGIN SELECT content INTO :bv FROM " + tableName + " WHERE num = 2; END;",
+            { bv: {dir: oracledb.BIND_OUT, type: oracledb.CLOB} },
+            { maxRows: 500 },
+            function(err, result) {
+              should.not.exist(err);
+
+              var content = '';
+              var lob = result.outBinds.bv;
+              lob.setEncoding('utf8');
+
+              lob.on('data', function(chunk) {
+                content += chunk;
+              });
+
+              lob.on('end', function() {
+                (content.length).should.be.exactly(dataLength); 
+                (content).should.eql(rawData);
+                callback();
+              });
+
+              lob.on('error', function(err) {
+                should.not.exist(err);
+              });
+            }
+          );
+        }
+      ], done);
+    })
+  }) // 60.2
+  
 })

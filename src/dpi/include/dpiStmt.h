@@ -1,4 +1,5 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates.
+   All rights reserved. */
 
 /******************************************************************************
  *
@@ -175,13 +176,17 @@ public:
                                 // methods
   virtual void bind(unsigned int pos, unsigned short type, void  *buf,
                     DPI_SZ_TYPE bufSize, short *ind, DPI_BUFLEN_TYPE *bufLen,
-                    void *data, cbtype cb = NULL ) = 0;
+                    unsigned int maxarr_len, unsigned int *curelen,
+                    void *data,
+                    cbtype cb = NULL ) = 0;
 
   virtual void bind(const unsigned char *name, int nameLen,
                     unsigned int bndpos,
                     unsigned short type,  void *buf, DPI_SZ_TYPE  bufSize,
                     short *ind, DPI_BUFLEN_TYPE *bufLen,
-                    void *data, cbtype cb = NULL ) = 0;
+                    unsigned int maxarr_len, unsigned int *curelen,
+                    void *data,
+                    cbtype cb = NULL ) = 0;
 
   virtual void execute ( int numIterations, bool autoCommit = false) = 0;
 

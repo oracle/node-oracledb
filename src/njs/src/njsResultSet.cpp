@@ -170,9 +170,9 @@ NAN_METHOD(ResultSet::New)
 {
 
   ResultSet *resultSet = new ResultSet();
-  resultSet->Wrap(info.This());
+  resultSet->Wrap(info.Holder());
 
-  info.GetReturnValue().Set(info.This());
+  info.GetReturnValue().Set(info.Holder());
 }
 
 /*****************************************************************************/
@@ -243,7 +243,7 @@ NAN_METHOD(ResultSet::GetRow)
   Local<Function> callback;
   NJS_GET_CALLBACK ( callback, info );
 
-  ResultSet *njsResultSet = Nan::ObjectWrap::Unwrap<ResultSet>(info.This());
+  ResultSet *njsResultSet = Nan::ObjectWrap::Unwrap<ResultSet>(info.Holder());
 
   /* If njsResultSet is invalid from JS, then throw an exception */
   NJS_CHECK_OBJECT_VALID2 ( njsResultSet, info );
@@ -291,7 +291,7 @@ NAN_METHOD(ResultSet::GetRows)
   Local<Function> callback;
   NJS_GET_CALLBACK ( callback, info );
 
-  ResultSet *njsResultSet = Nan::ObjectWrap::Unwrap<ResultSet>(info.This());
+  ResultSet *njsResultSet = Nan::ObjectWrap::Unwrap<ResultSet>(info.Holder());
 
   /* If njsResultSet is invalid from JS, then throw an exception */
   NJS_CHECK_OBJECT_VALID2 ( njsResultSet, info );
@@ -557,7 +557,7 @@ NAN_METHOD(ResultSet::Close)
   Local<Function> callback;
   NJS_GET_CALLBACK ( callback, info );
 
-  ResultSet *njsResultSet = Nan::ObjectWrap::Unwrap<ResultSet>(info.This());
+  ResultSet *njsResultSet = Nan::ObjectWrap::Unwrap<ResultSet>(info.Holder());
 
   /* If njsResultSet is invalid from JS, then throw an exception */
   NJS_CHECK_OBJECT_VALID2 ( njsResultSet, info );

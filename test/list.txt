@@ -47,6 +47,17 @@
         2.6.1 stmtCacheSize cannot be a negative value
         2.6.2 stmtCacheSize can be 0
         2.6.3 stmtCacheSize must be a Number
+    2.7 getConnection
+        2.7.1 throws error if called after pool is terminated and a callback is not provided
+        2.7.2 passes error in callback if called after pool is terminated and a callback is provided
+    2.8 connection request queue (basic functionality)
+        2.8.1 generates ORA-24418 when calling getConnection if queueing is disabled
+        2.8.2 does not generate ORA-24418 when calling getConnection if queueing is enabled
+        2.8.3 generates NJS-040 if request is queued and queueTimeout expires
+        2.8.4 does not generate NJS-040 if request is queued for less time than queueTimeout
+    2.9 connection request queue (_enableStats & _logStats functionality)_logStats must be called prior to terminating pool.
+        2.9.1 works after the pool as been terminated
+
 
 3. examples.js
     3.1 connect.js
@@ -229,6 +240,12 @@
         22.1.3 works well with REF Cursor
     22.2 stores null value correctly
         22.2.1 testing Null, Empty string and Undefined
+     22.3 PL/SQL binding scalar
+        22.3.1 PL/SQL binding scalar values IN
+        22.3.2 bind scalar values INOUT
+        22.3.3 bind scalar values OUT
+    22.4 PL/SQL binding indexed tables
+      - 22.4.1 bind indexed table IN
 
 23. dataTypeNchar.js
     23.1 testing NCHAR data in various lengths
@@ -407,6 +424,53 @@
     42.4 in PL/SQL, the maximum size is 32767
       - 42.4.1 when data length is 200
 
+43. plsqlBinding1.js
+    43.1 binding PL/SQL indexed table
+        43.1.1 binding PL/SQL indexed table IN
+        43.1.2 binding PL/SQL indexed table IN OUT
+        43.1.3 binding PL/SQL indexed table OUT
+    43.2 test exceptions when using PL/SQL indexed table bindings
+        43.2.1 maxArraySize is ignored when specifying BIND_IN
+        43.2.2 maxArraySize is mandatory for BIND_INOUT
+        42.2.3 maxArraySize cannot smaller than the number of array elements
+        42.2.4 DATE type has not been supported yet
+        42.2.5 negative case (string): incorrect type of array element
+        42.2.6 negative case (number): incorrect type of array element
+        42.2.7 supports binding by position
+    43.3 binding PL/SQL scalar
+        43.3.1 binding PL/SQL scalar IN
+      - 43.3.2 binding PL/SQL scalar IN/OUT
+        43.3.3 binding PL/SQL scalar OUT by name
+        43.3.4 binding PL/SQL scalar OUT by position
+    43.4 test attribute - maxArraySize
+        43.4.1 maxArraySize property is ignored for BIND_IN
+        43.4.2 maxArraySize is mandatory for BIND_INOUT
+        43.4.3 maxArraySize cannot smaller than the number of array elements
+        43.4.4 maxArraySize can be equal to the number of array elements
+      - 43.4.5 negative case: large value
+        43.4.6 negative case: < 0
+        43.4.7 negative case: = 0
+        43.4.8 negative case: assigning a string to it
+        43.4.9 negative case: NaN
+
+44. plsqlBinding2.js
+    44.1 example case
+    44.2 example case binding by position
+  - 44.3 default binding type and direction with binding by name
+    44.4 default binding type and direction with binding by position
+    44.5 null elements in String and Number arrays
+    44.6 empty array for BIND_IN and BIND_INOUT
+    44.7 empty array for BIND_OUT
+  - 44.8 maxSize option applies to each elements of an array
+
+45. instanceof.js
+    45.1 all constructors have been accounted for
+    45.2 instanceof works for the oracledb instance
+    45.3 instanceof works for pool instances
+    45.4 instanceof works for connection instances
+    45.5 instanceof works for resultset instances
+    45.6 instanceof works for lob instances
+
 51. accessTerminatedPoolAttributes.js
     can not access attributes of terminated pool
 
@@ -501,8 +565,11 @@
         59.1.1 reads clob data one by one row from result set
 
 60. clobPlsqlString.js
-    60.1 PL/SQL OUT CLOB parameters can also be bound as STRING
-    60.2 The returned length is limited to the maximum size
+    60.1 BIND OUT as STRING
+        60.1.1 PL/SQL OUT CLOB parameters can also be bound as STRING
+        60.1.2 The returned length is limited to the maximum size
+    60.2 BIND OUT as CLOB
+        60.2.1 maxSize option does not take effect when bind out type is clob
 
 61. checkClassesTypes.js
     61.1 Oracledb class
@@ -531,3 +598,13 @@
         64.1.1 Executes an aggregate query which causes warnings
     64.2 PL/SQL - Success With Info
         64.2.1 Execute SQL Statement to create PLSQL procedure with warnings
+
+65. uninitializedLob.js
+    65.1 an uninitialized Lob is returned from a PL/SQL block
+
+66. writableProperties.js
+    66.1 allows overwriting of public methods on the oracledb instance
+    66.2 allows overwriting of public methods on pool instances
+    66.3 allows overwriting of public methods on connection instances
+    66.4 allows overwriting of public methods on resultset instances
+    66.5 allows overwriting of public methods on lob instances

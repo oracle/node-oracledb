@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016 Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -42,7 +42,7 @@ var oracledb = require('oracledb');
 var fs       = require('fs');
 var async    = require('async');
 var should   = require('should');
-var dbConfig = require('./dbConfig.js');
+var dbConfig = require('./dbconfig.js');
 var assist   = require('./dataTypeAssist.js');
 
 var inFileName = './test/fuzzydinosaur.jpg';  // contains the image to be inserted
@@ -94,9 +94,10 @@ describe('41. dataTypeBlob', function() {
       connection.should.be.ok;
       async.series([
         function blobinsert1(callback) {
-          var streamEndEventFired = false;
+          
+          var lobFinishEventFired = false;
           setTimeout( function() {
-            streamEndEventFired.should.equal(true, "inStream does not call 'end' event!")
+            lobFinishEventFired.should.equal(true, "lob does not call 'finish' event!")
             callback();
           }, 2000);
 
@@ -114,14 +115,6 @@ describe('41. dataTypeBlob', function() {
                 should.not.exist(err, "inStream.on 'end' event");
               });
 
-              inStream.on('end', function() {
-                streamEndEventFired = true;
-                // now commit updates
-                connection.commit( function(err) {
-                  should.not.exist(err);
-                });
-              });
-
               var lob = result.outBinds.lobbv[0];
 
               lob.on('error', function(err) {
@@ -129,6 +122,15 @@ describe('41. dataTypeBlob', function() {
               });
 
               inStream.pipe(lob);  // pipes the data to the BLOB
+
+              lob.on('finish', function() {
+                lobFinishEventFired = true;
+                // now commit updates
+                connection.commit(function(err) {
+                  should.not.exist(err);
+                });
+              });
+
             }
           );
         },

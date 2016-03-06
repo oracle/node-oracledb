@@ -330,9 +330,9 @@ NAN_METHOD(ILob::New)
 
   ILob *iLob = new ILob();
 
-  iLob->Wrap(info.This());
+  iLob->Wrap(info.Holder());
 
-  info.GetReturnValue().Set(info.This());
+  info.GetReturnValue().Set(info.Holder());
 }
 
 
@@ -356,7 +356,7 @@ NAN_METHOD(ILob::New)
 NAN_METHOD(ILob::Release)
 { 
 
-  ILob *iLob = Nan::ObjectWrap::Unwrap<ILob>(info.This());
+  ILob *iLob = Nan::ObjectWrap::Unwrap<ILob>(info.Holder());
   string msg;
 
   NJS_CHECK_OBJECT_VALID2(iLob, info);
@@ -834,7 +834,7 @@ NAN_METHOD(ILob::Read)
   ILob            *iLob;
 
   NJS_GET_CALLBACK(callback, info);
-  iLob = Nan::ObjectWrap::Unwrap<ILob>(info.This());
+  iLob = Nan::ObjectWrap::Unwrap<ILob>(info.Holder());
 
   /* If iLob object is invalid from JS, then throw an exception */
   NJS_CHECK_OBJECT_VALID2 (iLob, info);
@@ -1033,7 +1033,7 @@ NAN_METHOD(ILob::Write)
   ILob            *iLob;
 
   NJS_GET_CALLBACK(callback, info);
-  iLob = Nan::ObjectWrap::Unwrap<ILob>(info.This());
+  iLob = Nan::ObjectWrap::Unwrap<ILob>(info.Holder());
 
   /* If iLob is invalid from JS, then throw an exception */
   NJS_CHECK_OBJECT_VALID2 ( iLob, info );

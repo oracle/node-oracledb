@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -57,6 +57,23 @@ oracledb.getConnection(
 
         var lob = result.outBinds.lobbv[0];
         lob.on(
+          'finish',
+          function()
+          {
+            console.log("lob.on 'finish' event");
+            connection.commit(
+              function(err)
+              {
+                if (err)
+                  console.error(err.message);
+                else
+                  console.log("Text inserted successfully.");
+                connection.release(function(err) {
+                  if (err) console.error(err);
+                });
+              });
+          });
+        lob.on(
           'error',
           function(err)
           {
@@ -71,14 +88,6 @@ oracledb.getConnection(
           function()
           {
             console.log("inStream.on 'end' event");
-            connection.commit(
-              function(err)
-              {
-                if (err)
-                  console.error(err.message);
-                else
-                  console.log("Text inserted successfully.");
-              });
           });
         inStream.on(
           'error',
@@ -86,6 +95,9 @@ oracledb.getConnection(
           {
             console.log("inStream.on 'error' event");
             console.error(err);
+            connection.release(function(err) {
+              if (err) console.error(err.message);
+            });
           });
         inStream.pipe(lob);  // copies the text to the CLOB
       });

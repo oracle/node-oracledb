@@ -37,7 +37,7 @@ var oracledb = require('oracledb');
 var should = require('should');
 var async = require('async');
 var assist = require('./dataTypeAssist.js');
-var dbConfig = require('./dbConfig.js');
+var dbConfig = require('./dbconfig.js');
 
 describe('32. dataTypeDate.js', function() {
   

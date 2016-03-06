@@ -35,7 +35,7 @@
 var oracledb = require('oracledb');
 var should   = require('should');
 var async    = require('async');
-var dbConfig = require('./dbConfig.js');
+var dbConfig = require('./dbconfig.js');
 
 describe('8. autoCommitForSelect.js', function(){
   
