@@ -124,9 +124,7 @@ describe('13. stream.js', function () {
     it('13.1.1 stream results for oracle connection', function (done) {
       connection.should.be.ok;
 
-      var stream = connection.execute('SELECT employees_name FROM oracledb_employees', {}, {
-        stream: true
-      });
+      var stream = connection.stream('SELECT employees_name FROM oracledb_employees');
 
       stream.on('error', function (error) {
         should.fail(error, null, 'Error event should not be triggered');
@@ -148,8 +146,7 @@ describe('13. stream.js', function () {
     it('13.1.2 stream results for oracle connection (outFormat: oracledb.OBJECT)', function (done) {
       connection.should.be.ok;
 
-      var stream = connection.execute('SELECT employees_name FROM oracledb_employees', {}, {
-        stream: true,
+      var stream = connection.stream('SELECT employees_name FROM oracledb_employees', {}, {
         outFormat: oracledb.OBJECT
       });
 
@@ -173,9 +170,7 @@ describe('13. stream.js', function () {
     it('13.1.3 errors in query', function (done) {
       connection.should.be.ok;
 
-      var stream = connection.execute('SELECT NO_SUCH_TABLE FROM oracledb_employees', [], {
-        stream: true
-      });
+      var stream = connection.stream('SELECT NO_SUCH_TABLE FROM oracledb_employees');
 
       stream.on('error', function (error) {
         should.exist(error);

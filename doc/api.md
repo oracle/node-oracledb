@@ -71,8 +71,9 @@ limitations under the License.
         - 4.2.3.2 [execute(): Bind Parameters](#executebindParams)
         - 4.2.3.3 [execute(): Options](#executeoptions)
         - 4.2.3.4 [execute(): Callback Function](#executecallback)
-     - 4.2.4 [release()](#release)
-     - 4.2.5 [rollback()](#rollback)
+     - 4.2.4 [stream()](#stream)
+     - 4.2.5 [release()](#release)
+     - 4.2.6 [rollback()](#rollback)
 5. [Lob Class](#lobclass)
   - 5.1 [Lob Properties](#lobproperties)
      - 5.1.1 [chunkSize](#proplobchunksize)
@@ -1183,13 +1184,12 @@ Callback function parameter | Description
 ##### Prototype
 
 ```
-[stream.Readable] execute(String sql, [Object bindParams, [Object options,]] [function(Error error, [Object result]){}]);
+void execute(String sql, [Object bindParams, [Object options,]] function(Error error, [Object result]){});
 ```
 
 ##### Return Value
 
-For streaming queries, this function will return a readable stream.<br>
-For any other action, there is no output.
+None
 
 ##### Description
 
@@ -1206,9 +1206,6 @@ rows, the values of any OUT and IN OUT bind variables, and the number
 of rows affected by the execution of
 [DML](https://docs.oracle.com/database/121/CNCPT/glossary.htm#CNCPT2042)
 statements.
-
-In case of a query stream requested (options.stream=true), the callback is not used and instead the execute will return a readable stream.<br>
-See [Streaming Results](#streamingresults) for more information on streams.
 
 ##### Parameters
 
@@ -1292,7 +1289,6 @@ Options Property | Description
 *String outFormat* | Overrides *Oracledb* [`outFormat`](#propdboutformat)
 *Number prefetchRows* | Overrides *Oracledb* [`prefetchRows`](#propdbprefetchrows)
 *Boolean resultSet* | Determines whether query results should be returned as a [`ResultSet`](#resultsetclass) object or directly.  The default is `false`.
-*Boolean stream* | If true, a the execute will return a readable stream and a callback should not be provided.
 
 <a name="propfetchinfo"></a> The description of `fetchInfo` follows:
 
@@ -1408,7 +1404,30 @@ rows affected, for example the number of rows inserted. For non-DML
 statements such as queries, or if no rows are affected, then
 `rowsAffected` will be zero.
 
-#### <a name="release"></a> 4.2.4 release()
+#### <a name="release"></a> 4.2.4 stream()
+
+##### Prototype
+
+```
+[stream.Readable] execute(String sql, [Object bindParams, [Object options]]);
+```
+
+##### Return Value
+
+For streaming queries, this function will return a readable stream.
+
+##### Description
+
+This function provides query streaming support.<br>
+The input of this function is same as execute however the callback is no longer needed or used.<br>
+Instead this function will return a stream which will be used to fetch the data.<br>
+See [Streaming Results](#streamingresults) for more information on streams.
+
+##### Parameters
+
+See [connection.execute](#execute)
+
+#### <a name="release"></a> 4.2.5 release()
 
 ##### Prototype
 
@@ -1451,7 +1470,7 @@ Callback function parameter | Description
 ----------------------------|-------------
 *Error error* | If `release()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
-#### <a name="rollback"></a> 4.2.5 rollback()
+#### <a name="rollback"></a> 4.2.6 rollback()
 
 ##### Prototype
 
@@ -2354,9 +2373,7 @@ function fetchRowsFromRS(connection, resultSet, numRows)
 Streaming results basically uses resultsets but enables you to pipe the results to other streams (such http response).
 
 ```javascript
-var stream = connection.execute('SELECT employees_name FROM oracledb_employees', {}, {
-  stream: true //if true, streaming is enabled
-});
+var stream = connection.stream('SELECT employees_name FROM oracledb_employees', {}, {});
 
 stream.on('error', function (error) {
   //handle any error...
