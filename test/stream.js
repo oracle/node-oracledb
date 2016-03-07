@@ -145,7 +145,32 @@ describe('13. stream.js', function () {
       });
     });
 
-    it('13.1.2 errors in query', function (done) {
+    it('13.1.2 stream results for oracle connection (outFormat: oracledb.OBJECT)', function (done) {
+      connection.should.be.ok;
+
+      var stream = connection.execute('SELECT employees_name FROM oracledb_employees', {}, {
+        stream: true,
+        outFormat: oracledb.OBJECT
+      });
+
+      stream.on('error', function (error) {
+        should.fail(error, null, 'Error event should not be triggered');
+      });
+
+      var counter = 0;
+      stream.on('data', function (data) {
+        should.exist(data);
+        counter++;
+      });
+
+      stream.on('end', function () {
+        should.equal(counter, rowsAmount);
+
+        done();
+      });
+    });
+
+    it('13.1.3 errors in query', function (done) {
       connection.should.be.ok;
 
       var stream = connection.execute('SELECT NO_SUCH_TABLE FROM oracledb_employees', [], {
