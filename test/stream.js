@@ -60,7 +60,8 @@ describe('13. stream.js', function () {
             EXECUTE IMMEDIATE (' \
                 CREATE TABLE oracledb_employees ( \
                     employees_id NUMBER,  \
-                    employees_name VARCHAR2(20) \
+                    employees_name VARCHAR2(20), \
+                    employees_history CLOB \
                 ) \
             '); \
         END; ";
@@ -69,11 +70,14 @@ describe('13. stream.js', function () {
         "DECLARE \
             x NUMBER := 0; \
             n VARCHAR2(20); \
+            clobData CLOB;\
          BEGIN \
             FOR i IN 1..217 LOOP \
                x := x + 1; \
                n := 'staff ' || x; \
-               INSERT INTO oracledb_employees VALUES (x, n); \
+               INSERT INTO oracledb_employees VALUES (x, n, EMPTY_CLOB()) RETURNING employees_history INTO clobData; \
+               \
+               DBMS_LOB.WRITE(clobData, 20, 1, '12345678901234567890');\
             END LOOP; \
          END; ";
   var rowsAmount = 217;
@@ -139,7 +143,7 @@ describe('13. stream.js', function () {
       stream.on('end', function () {
         should.equal(counter, rowsAmount);
 
-        done();
+        setTimeout(done, 500);
       });
     });
 
@@ -163,7 +167,7 @@ describe('13. stream.js', function () {
       stream.on('end', function () {
         should.equal(counter, rowsAmount);
 
-        done();
+        setTimeout(done, 500);
       });
     });
 
@@ -174,11 +178,221 @@ describe('13. stream.js', function () {
 
       stream.on('error', function (error) {
         should.exist(error);
-        done();
+
+        setTimeout(done, 500);
       });
 
       stream.on('data', function (data) {
         should.fail(data, null, 'Data event should not be triggered');
+      });
+    });
+
+    it('13.1.4 no result', function (done) {
+      connection.should.be.ok;
+
+      var stream = connection.queryStream('SELECT * FROM oracledb_employees WHERE employees_name = :name', {
+        name: 'TEST_NO_RESULT'
+      });
+
+      stream.on('error', function (error) {
+        should.fail(error, null, 'Error event should not be triggered: ' + error);
+      });
+
+      var counter = 0;
+      stream.on('data', function (data) {
+        should.fail(data, nulll, 'Data event should not be triggered');
+      });
+
+      stream.on('end', function () {
+        should.equal(counter, 0);
+
+        setTimeout(done, 500);
+      });
+    });
+
+    it('13.1.5 single row', function (done) {
+      connection.should.be.ok;
+
+      var stream = connection.queryStream('SELECT employees_name FROM oracledb_employees WHERE employees_name = :name', {
+        name: 'staff 10'
+      });
+
+      stream.on('error', function (error) {
+        should.fail(error, null, 'Error event should not be triggered: ' + error);
+      });
+
+      var counter = 0;
+      stream.on('data', function (data) {
+        should.exist(data);
+        should.deepEqual(data, ['staff 10']);
+
+        counter++;
+      });
+
+      stream.on('end', function () {
+        should.equal(counter, 1);
+
+        setTimeout(done, 500);
+      });
+    });
+
+    it('13.1.6 multiple row', function (done) {
+      connection.should.be.ok;
+
+      var stream = connection.queryStream('SELECT employees_name FROM oracledb_employees where employees_id <= :maxId', {
+        maxId: 10
+      }, {
+        outFormat: oracledb.OBJECT
+      });
+
+      stream.on('error', function (error) {
+        should.fail(error, null, 'Error event should not be triggered: ' + error);
+      });
+
+      var counter = 0;
+      stream.on('data', function (data) {
+        should.exist(data);
+        should.deepEqual(data, {
+          EMPLOYEES_NAME: 'staff ' + (counter + 1)
+        });
+
+        counter++;
+      });
+
+      stream.on('end', function () {
+        should.equal(counter, 10);
+
+        setTimeout(done, 500);
+      });
+    });
+
+    it('13.1.7 invalid SQL', function (done) {
+      connection.should.be.ok;
+
+      var stream = connection.queryStream('UPDATE oracledb_employees SET employees_name = :name WHERE employees_id  :id', {
+        id: 10,
+        name: 'test_update'
+      }, {
+        outFormat: oracledb.OBJECT
+      });
+
+      stream.on('error', function (error) {
+        should.exist(error);
+
+        setTimeout(done, 500);
+      });
+
+      stream.on('data', function (data) {
+        should.fail(data, null, 'Data event should not be triggered');
+      });
+    });
+
+    it('13.1.8 Read CLOBs', function (done) {
+      connection.should.be.ok;
+
+      var stream = connection.queryStream('SELECT employees_name, employees_history FROM oracledb_employees where employees_id <= :maxId', {
+        maxId: 10
+      }, {
+        outFormat: oracledb.OBJECT
+      });
+
+      stream.on('error', function (error) {
+        should.fail(error, null, 'Error event should not be triggered: ' + error);
+      });
+
+      var counter = 0;
+      var clobs = [];
+      var clobsRead = 0;
+      stream.on('data', function (data) {
+        var rowIndex = counter;
+
+        should.exist(data);
+        should.equal(data.EMPLOYEES_NAME, 'staff ' + (rowIndex + 1));
+
+        should.exist(data.EMPLOYEES_HISTORY);
+        should.equal(data.EMPLOYEES_HISTORY.constructor.name, 'Lob');
+
+        var clob = [];
+        data.EMPLOYEES_HISTORY.setEncoding('utf8');
+        data.EMPLOYEES_HISTORY.on('data', function (data) {
+          clob.push(data);
+        });
+
+        data.EMPLOYEES_HISTORY.on('end', function () {
+          clobs[rowIndex] = clob.join('');
+          should.equal(clobs[rowIndex], '12345678901234567890');
+
+          clobsRead++;
+
+          if (clobsRead === 10) {
+            should.equal(counter, 10);
+
+            setTimeout(done, 500);
+          }
+        });
+
+        counter++;
+      });
+
+      stream.on('end', function () {
+        should.equal(counter, 10);
+      });
+    });
+
+    it('13.1.8 Read CLOBs after stream close', function (done) {
+      connection.should.be.ok;
+
+      this.timeout(10000);
+
+      var stream = connection.queryStream('SELECT employees_name, employees_history FROM oracledb_employees where employees_id <= :maxId', {
+        maxId: 10
+      }, {
+        outFormat: oracledb.OBJECT
+      });
+
+      stream.on('error', function (error) {
+        should.fail(error, null, 'Error event should not be triggered: ' + error);
+      });
+
+      var counter = 0;
+      var clobs = [];
+      var clobsRead = 0;
+      stream.on('data', function (data) {
+        var rowIndex = counter;
+
+        should.exist(data);
+        should.equal(data.EMPLOYEES_NAME, 'staff ' + (rowIndex + 1));
+
+        should.exist(data.EMPLOYEES_HISTORY);
+        should.equal(data.EMPLOYEES_HISTORY.constructor.name, 'Lob');
+
+        var clob = [];
+        data.EMPLOYEES_HISTORY.setEncoding('utf8');
+
+        setTimeout(function () {
+          data.EMPLOYEES_HISTORY.on('data', function (data) {
+            clob.push(data);
+          });
+
+          data.EMPLOYEES_HISTORY.on('end', function () {
+            clobs[rowIndex] = clob.join('');
+            should.equal(clobs[rowIndex], '12345678901234567890');
+
+            clobsRead++;
+
+            if (clobsRead === 10) {
+              should.equal(counter, 10);
+
+              setTimeout(done, 500);
+            }
+          });
+        }, 5000);
+
+        counter++;
+      });
+
+      stream.on('end', function () {
+        should.equal(counter, 10);
       });
     });
   });

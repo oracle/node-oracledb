@@ -2384,6 +2384,9 @@ stream.on('data', function (data) {
 });
 
 //listen to any other standard stream events such as close/end/...
+
+//once all data is read, LOBs read, .... make sure to call the stream close function which will close the internal resultset.
+stream.close();
 ```
 
 #### <a name="queryoutputformats"></a> 9.1.4 Query Output Formats
