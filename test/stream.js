@@ -395,5 +395,35 @@ describe('13. stream.js', function () {
         should.equal(counter, 10);
       });
     });
+
+    it.only('13.1.9 meta data', function (done) {
+      connection.should.be.ok;
+
+      var stream = connection.queryStream('SELECT employees_name FROM oracledb_employees WHERE employees_name = :name', {
+        name: 'staff 10'
+      });
+
+      var metaDataRead = false;
+      stream.on('metadata', function (metaData) {
+        should.deepEqual(metaData, [
+          {
+            name: 'EMPLOYEES_NAME'
+          }
+        ]);
+        metaDataRead = true;
+      });
+
+      stream.on('error', function (error) {
+        should.fail(error, null, 'Error event should not be triggered: ' + error);
+      });
+
+      stream.on('data', function () {});
+
+      stream.on('end', function () {
+        should.equal(metaDataRead, true);
+
+        setTimeout(done, 500);
+      });
+    });
   });
 });

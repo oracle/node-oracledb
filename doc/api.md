@@ -2383,6 +2383,10 @@ stream.on('data', function (data) {
   //handle results...
 });
 
+stream.on('metadata', function (metaData) {
+  //access metadata of query results
+});
+
 //listen to any other standard stream events such as close/end/...
 ```
 
