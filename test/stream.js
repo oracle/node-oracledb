@@ -449,5 +449,68 @@ describe('13. stream.js', function () {
         setTimeout(done, 500);
       });
     });
+
+    it('13.1.11 stream stress test', function (done) {
+      this.timeout(30000);
+
+      connection.should.be.ok;
+
+      var stream = connection.queryStream('SELECT employees_name FROM oracledb_employees', [], {
+        streamNumRows: 1
+      });
+
+      stream.on('error', function (error) {
+        should.fail(error, null, 'Error event should not be triggered');
+      });
+
+      var counter = 0;
+      var allData = [];
+      stream.on('data', function (data) {
+        should.exist(data);
+        allData.push(data);
+        counter++;
+      });
+
+      stream.on('end', function () {
+        should.equal(counter, rowsAmount);
+
+        var testDone = 0;
+        var subTest = function (callback) {
+          var query = connection.queryStream('SELECT employees_name FROM oracledb_employees', [], {
+            streamNumRows: Math.floor((Math.random() * (500 - 1)) + 1)
+          });
+
+          query.on('error', function (error) {
+            should.fail(error, null, 'Error event should not be triggered');
+          });
+
+          var testCounter = 0;
+          var testData = [];
+          query.on('data', function (data) {
+            should.exist(data);
+            testData.push(data);
+            testCounter++;
+          });
+
+          query.on('end', function () {
+            should.equal(testCounter, rowsAmount);
+            should.deepEqual(testData, allData);
+
+            testDone++;
+            callback();
+          });
+        };
+        var tests = [];
+        var i;
+        for (i = 0; i < 500; i++) {
+          tests.push(subTest);
+        }
+        async.parallel(tests, function () {
+          should.equal(testDone, tests.length);
+
+          done();
+        })
+      });
+    });
   });
 });
