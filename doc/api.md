@@ -71,8 +71,9 @@ limitations under the License.
         - 4.2.3.2 [execute(): Bind Parameters](#executebindParams)
         - 4.2.3.3 [execute(): Options](#executeoptions)
         - 4.2.3.4 [execute(): Callback Function](#executecallback)
-     - 4.2.4 [release()](#release)
-     - 4.2.5 [rollback()](#rollback)
+     - 4.2.4 [queryStream()](#queryStream)
+     - 4.2.5 [release()](#release)
+     - 4.2.6 [rollback()](#rollback)
 5. [Lob Class](#lobclass)
   - 5.1 [Lob Properties](#lobproperties)
      - 5.1.1 [chunkSize](#proplobchunksize)
@@ -113,10 +114,11 @@ limitations under the License.
   - 9.1 [SELECT Statements](#select)
      - 9.1.1 [Fetching Rows](#fetchingrows)
      - 9.1.2 [Result Set Handling](#resultsethandling)
-     - 9.1.3 [Query Output Formats](#queryoutputformats)
-     - 9.1.4 [Query Column Metadata](#querymeta)
-     - 9.1.5 [Result Type Mapping](#typemap)
-     - 9.1.6 [Row Prefetching](#rowprefetching)
+     - 9.1.3 [Streaming Results](#streamingresults)
+     - 9.1.4 [Query Output Formats](#queryoutputformats)
+     - 9.1.5 [Query Column Metadata](#querymeta)
+     - 9.1.6 [Result Type Mapping](#typemap)
+     - 9.1.7 [Row Prefetching](#rowprefetching)
 10. [PL/SQL Execution](#plsqlexecution)
   - 10.1 [PL/SQL Stored Procedures](#plsqlproc)
   - 10.2 [PL/SQL Stored Functions](#plsqlfunc)
@@ -1402,7 +1404,33 @@ rows affected, for example the number of rows inserted. For non-DML
 statements such as queries, or if no rows are affected, then
 `rowsAffected` will be zero.
 
-#### <a name="release"></a> 4.2.4 release()
+#### <a name="queryStream"></a> 4.2.4 queryStream()
+
+##### Prototype
+
+```
+[stream.Readable] execute(String sql, [Object bindParams, [Object options]]);
+```
+
+##### Return Value
+
+For streaming queries, this function will return a readable stream.
+
+##### Description
+
+This function provides query streaming support.<br>
+The input of this function is same as execute however the callback is no longer needed or used.<br>
+Instead this function will return a stream which will be used to fetch the data.<br>
+
+The amount of rows fetched internally is defined by the new streamNumRows option which does not impact the data returned via stream, but has a performance impact to reduce calls between the client and database and memory consumption.
+
+See [Streaming Results](#streamingresults) for more information on streams.
+
+##### Parameters
+
+See [connection.execute](#execute)
+
+#### <a name="release"></a> 4.2.5 release()
 
 ##### Prototype
 
@@ -1445,7 +1473,7 @@ Callback function parameter | Description
 ----------------------------|-------------
 *Error error* | If `release()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
-#### <a name="rollback"></a> 4.2.5 rollback()
+#### <a name="rollback"></a> 4.2.6 rollback()
 
 ##### Prototype
 
@@ -2343,7 +2371,33 @@ function fetchRowsFromRS(connection, resultSet, numRows)
 }
 ```
 
-#### <a name="queryoutputformats"></a> 9.1.3 Query Output Formats
+#### <a name="streamingresults"></a> 9.1.3 Streaming Results
+
+Streaming results basically uses resultsets but enables you to pipe the results to other streams (such http response).
+
+The amount of rows fetched internally is defined by the new streamNumRows option which does not impact the data returned via stream, but has a performance impact to reduce calls between the client and database and memory consumption.
+
+```javascript
+var stream = connection.queryStream('SELECT employees_name FROM oracledb_employees', {}, {
+  streamNumRows: 100 //default is 100 if not defined
+});
+
+stream.on('error', function (error) {
+  //handle any error...
+});
+
+stream.on('data', function (data) {
+  //handle results...
+});
+
+stream.on('metadata', function (metaData) {
+  //access metadata of query results
+});
+
+//listen to any other standard stream events such as close/end/...
+```
+
+#### <a name="queryoutputformats"></a> 9.1.4 Query Output Formats
 
 Query rows may be returned as an array of column values, or as
 Javascript objects, depending on the values of
@@ -2413,7 +2467,7 @@ names follow Oracle's standard name-casing rules.  They will commonly
 be uppercase, since most applications create tables using unquoted,
 case-insensitive names.
 
-#### <a name="querymeta"></a> 9.1.4 Query Column Metadata
+#### <a name="querymeta"></a> 9.1.5 Query Column Metadata
 
 The column names of a query are returned in the
 [`execute()`](#execute) callback's `result.metaData` parameter
@@ -2446,7 +2500,7 @@ The names are in uppercase.  This is the default casing behavior for
 Oracle client programs when a database table is created with unquoted,
 case-insensitive column names.
 
-#### <a name="typemap"></a> 9.1.5 Result Type Mapping
+#### <a name="typemap"></a> 9.1.6 Result Type Mapping
 
 Oracle character, number and date columns can be selected.  Data types
 that are currently unsupported give a "datatype is not supported"
@@ -2617,7 +2671,7 @@ you may want to bind using `type: oracledb.STRING`.  Output would be:
 { x: '-71.48923', y: '42.72347' }
 ```
 
-#### <a name="rowprefetching"></a> 9.1.6 Row Prefetching
+#### <a name="rowprefetching"></a> 9.1.7 Row Prefetching
 
 [Prefetching](http://docs.oracle.com/database/121/LNOCI/oci04sql.htm#LNOCI16355) is a query tuning feature allowing resource usage to be
 optimized.  It allows multiple rows to be returned in each network
