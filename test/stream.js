@@ -396,7 +396,7 @@ describe('13. stream.js', function () {
       });
     });
 
-    it.only('13.1.9 meta data', function (done) {
+    it('13.1.9 meta data', function (done) {
       connection.should.be.ok;
 
       var stream = connection.queryStream('SELECT employees_name FROM oracledb_employees WHERE employees_name = :name', {
@@ -421,6 +421,30 @@ describe('13. stream.js', function () {
 
       stream.on('end', function () {
         should.equal(metaDataRead, true);
+
+        setTimeout(done, 500);
+      });
+    });
+
+    it('13.1.10 stream results with bulk size set', function (done) {
+      connection.should.be.ok;
+
+      var stream = connection.queryStream('SELECT employees_name FROM oracledb_employees', [], {
+        streamNumRows: 1
+      });
+
+      stream.on('error', function (error) {
+        should.fail(error, null, 'Error event should not be triggered');
+      });
+
+      var counter = 0;
+      stream.on('data', function (data) {
+        should.exist(data);
+        counter++;
+      });
+
+      stream.on('end', function () {
+        should.equal(counter, rowsAmount);
 
         setTimeout(done, 500);
       });

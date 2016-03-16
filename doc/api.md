@@ -71,7 +71,7 @@ limitations under the License.
         - 4.2.3.2 [execute(): Bind Parameters](#executebindParams)
         - 4.2.3.3 [execute(): Options](#executeoptions)
         - 4.2.3.4 [execute(): Callback Function](#executecallback)
-     - 4.2.4 [stream()](#stream)
+     - 4.2.4 [queryStream()](#queryStream)
      - 4.2.5 [release()](#release)
      - 4.2.6 [rollback()](#rollback)
 5. [Lob Class](#lobclass)
@@ -1404,7 +1404,7 @@ rows affected, for example the number of rows inserted. For non-DML
 statements such as queries, or if no rows are affected, then
 `rowsAffected` will be zero.
 
-#### <a name="release"></a> 4.2.4 stream()
+#### <a name="queryStream"></a> 4.2.4 queryStream()
 
 ##### Prototype
 
@@ -1421,6 +1421,9 @@ For streaming queries, this function will return a readable stream.
 This function provides query streaming support.<br>
 The input of this function is same as execute however the callback is no longer needed or used.<br>
 Instead this function will return a stream which will be used to fetch the data.<br>
+
+The amount of rows fetched internally is defined by the new streamNumRows option which does not impact the data returned via stream, but has a performance impact to reduce calls between the client and database and memory consumption.
+
 See [Streaming Results](#streamingresults) for more information on streams.
 
 ##### Parameters
@@ -2372,8 +2375,12 @@ function fetchRowsFromRS(connection, resultSet, numRows)
 
 Streaming results basically uses resultsets but enables you to pipe the results to other streams (such http response).
 
+The amount of rows fetched internally is defined by the new streamNumRows option which does not impact the data returned via stream, but has a performance impact to reduce calls between the client and database and memory consumption.
+
 ```javascript
-var stream = connection.stream('SELECT employees_name FROM oracledb_employees', {}, {});
+var stream = connection.queryStream('SELECT employees_name FROM oracledb_employees', {}, {
+  streamNumRows: 100 //default is 100 if not defined
+});
 
 stream.on('error', function (error) {
   //handle any error...
