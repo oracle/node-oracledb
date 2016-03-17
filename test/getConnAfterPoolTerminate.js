@@ -14,8 +14,8 @@
  *
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'. 
+ *
+ * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
@@ -28,56 +28,58 @@
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
  *     21 - 50  are reserved for data type supporting tests
- *     51 -     are for other tests  
- * 
+ *     51 -     are for other tests
+ *
  *****************************************************************************/
 
 var oracledb = require('oracledb');
 var should   = require('should');
-var dbConfig = require('./dbConfig.js');
+var dbConfig = require('./dbconfig.js');
 
 describe('52. getConnAfterPoolTerminate.js', function(){
-  
+  var credential;
+
   if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
+    credential = { externalAuth: true, connectString: dbConfig.connectString };
   } else {
-    var credential = dbConfig;
+    credential = dbConfig;
   }
-  
+
   it('can not get connections from pool after pool is terminated', function(done){
     oracledb.createPool(
       {
         externalAuth  : credential.externalAuth,
-        user            : credential.user,
-        password        : credential.password,
-        connectString   : credential.connectString,
-        poolMin         : 2,
-        poolMax         : 10
+        user          : credential.user,
+        password      : credential.password,
+        connectString : credential.connectString,
+        poolMin       : 2,
+        poolMax       : 10
       },
       function(err, pool){
         should.not.exist(err);
         pool.should.be.ok;
+
         pool.getConnection( function(err, connection){
           should.not.exist(err);
           (pool.connectionsInUse).should.eql(1);
-          
+
           connection.execute(
             "SELECT (4+1) FROM dual",
             function(err, result){
               should.not.exist(err);
               (result.rows[0][0]).should.be.exactly(5);
-              
+
               connection.release( function(err){
                 should.not.exist(err);
-                
+
                 pool.terminate( function(err){
                   should.not.exist(err);
-                  
+
                   pool.getConnection( function(err){
                     should.exist(err);
-                     
+
+                    done();
                   });
-                  done();
                 });
               });
             }
@@ -86,4 +88,4 @@ describe('52. getConnAfterPoolTerminate.js', function(){
       }
     );
   })
-})
+});

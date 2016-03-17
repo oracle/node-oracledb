@@ -1,4 +1,5 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016 Oracle and/or its affiliates.
+   All rights reserved. */
 
 /******************************************************************************
  *
@@ -114,6 +115,22 @@ typedef enum
   CONN_BUSY_RS   = 5002,   // Connection busy with ResultSet operation
   CONN_BUSY_DB   = 5003,   // Connection busy with DB operation
 }ConnectionBusyStatus;
+
+/*
+ * v8 Value Type
+ */
+typedef enum
+{
+  VALUETYPE_INVALID = -1,                         /* Types not supported now */
+  VALUETYPE_NULL = 0,                                   /* Null or Undefined */
+  VALUETYPE_STRING,                                                /* string */
+  VALUETYPE_INTEGER,                                              /* Integer */
+  VALUETYPE_UINTEGER,                                    /* Unsigned Integer */
+  VALUETYPE_NUMBER,                                                /* Number */
+  VALUETYPE_DATE,                                                    /* Date */
+  VALUETYPE_OBJECT,                                      /* JSON object type */
+} ValueType ;
+
 
 /*
  * This class used to increment LOB, ResultSet and connection operation

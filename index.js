@@ -1,1 +1,1 @@
-module.exports = require('./lib/oracledb');
+module.exports = require('./lib/oracledb.js');

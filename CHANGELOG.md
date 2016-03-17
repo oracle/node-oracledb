@@ -1,5 +1,51 @@
 # Change Log
 
+## node-oracledb v1.7.1 (1 Mar 2016)
+
+- Made public methods overwritable in new JavaScript layer
+
+## node-oracledb v1.7.0 (29 Feb 2016)
+
+- Added a JavaScript wrapper around the C++ API to allow for easier
+  extension.
+
+- Added a connection pool queue configured with `queueRequests` and
+  `queueTimeout` attributes.  The queue is enabled by default.
+  
+- Added connection pool option attribute `_enableStats` and method
+  `pool._logStats()` to display pool and queue statistics.  Note: these may
+  change in future.
+  
+- Added "bind by position" syntax for PL/SQL Index-by array binds.
+
+- Allowed node-oracledb class instances to be tested with 'instanceof'.
+
+- Fixed some bind issues when bind values are not set by the database.
+
+- Replaced internal usage of `info.This()` with `info.Holder()` for Node.js 0.10.
+
+- Fixed some compilation warnings with some Windows compilers.
+
+## node-oracledb v1.6.0 (30 Jan 2016)
+
+- Added support for binding PL/SQL Collection Associative Array
+  (Index-by) types containing numbers and strings.
+
+- Fixed a LOB problem causing an uncaught error to be generated.
+
+- Removed the 'close' event that was incorrectly emitted for LOB Writable
+  Streams.  The Node.js Streams documentation specifies it only for
+  Readable Streams.
+
+- Updated the LOB examples to show connection release.
+
+- Updated README so first-time users see pre-requisites earlier.
+
+- Extended the OS X install instructions with a way to install that doesn't
+  need root access for Instant Client 11.2 on El Capitan.
+
+- Added RPATH link option when building on OS X in preparation for future client.
+
 ## node-oracledb v1.5.0 (21 Dec 2015)
 
 - Treat Oracle Database 'Success With Info' warnings as success.

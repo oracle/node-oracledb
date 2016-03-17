@@ -40,7 +40,7 @@
 
 var oracledb = require('oracledb');
 var should = require('should');
-var dbConfig = require('./dbConfig.js');
+var dbConfig = require('./dbconfig.js');
 
 describe('5. externalAuthentication.js', function(){
   
