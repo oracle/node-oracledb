@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -31,6 +31,8 @@ DROP FUNCTION testfunc;
 
 DROP PROCEDURE get_emp_rs;
 
+DROP PACKAGE beachpkg;
+
 DROP TABLE j_purchaseorder;
 
 DROP TABLE j_purchaseorder_c;
@@ -44,3 +46,5 @@ DROP TYPE dorow;
 DROP FUNCTION mydofetch;
 
 DROP TABLE myraw;
+
+DROP TABLE waveheight;

@@ -36,7 +36,7 @@
 var oracledb = require('oracledb');
 var should = require('should');
 var assist = require('./dataTypeAssist.js');
-var dbConfig = require('./dbConfig.js');
+var dbConfig = require('./dbconfig.js');
 
 describe('25. dataTypeNvarchar2.js', function() {
  

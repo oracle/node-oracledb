@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -41,7 +41,7 @@ oracledb.getConnection(
 
     connection.execute(
       "INSERT INTO mylobs (id, c) VALUES (:id, EMPTY_CLOB()) RETURNING c INTO :lobbv",
-      { id: 3, lobbv: {type: oracledb.CLOB, dir: oracledb.BIND_OUT} },
+      { id: 2, lobbv: {type: oracledb.CLOB, dir: oracledb.BIND_OUT} },
       { autoCommit: false },  // a transaction needs to span the INSERT and pipe()
       function(err, result)
       {
@@ -52,14 +52,6 @@ oracledb.getConnection(
         }
 
         var lob = result.outBinds.lobbv[0];
-        lob.on(
-          'error',
-          function(err)
-          {
-            console.log("lob.on 'error' event");
-            console.error(err);
-          });
-
         lob.on(
           'finish',
           function()
@@ -72,7 +64,20 @@ oracledb.getConnection(
                   console.error(err.message);
                 else
                   console.log("Text inserted successfully.");
+                connection.release(function(err) {
+                  if (err) console.error(err);
+                });
               });
+          });
+        lob.on(
+          'error',
+          function(err)
+          {
+            console.log("lob.on 'error' event");
+            console.error(err);
+            connection.release(function(err) {
+              if (err) console.error(err.message);
+            });
           });
 
         // See Node.js Streams examples for how to use 'drain' if write() returns false

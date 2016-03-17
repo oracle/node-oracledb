@@ -37,7 +37,7 @@ var oracledb = require('oracledb');
 var should = require('should');
 var async = require('async');
 var assist = require('./dataTypeAssist.js');
-var dbConfig = require('./dbConfig.js');
+var dbConfig = require('./dbconfig.js');
 
 describe('42. dataTypeRaw.js', function() {
   
@@ -168,7 +168,6 @@ describe('42. dataTypeRaw.js', function() {
       var seq = 1;
       var size = 10;
       var bindValue = assist.createBuffer(size);
-      // console.log("original value", bindValue.toString('hex'));
       
       connection.execute(
         "INSERT INTO " + tableName + " VALUES (:n, :c) RETURNING num, content INTO :rid, :rc",
@@ -183,8 +182,6 @@ describe('42. dataTypeRaw.js', function() {
           should.exist(err);
           (err.message).should.startWith('NJS-028');
           // NJS-028: raw database type is not supported with DML Returning statements
-          // (result.outBinds.rc[0].toString('hex')).should.eql(bindValue.toString('hex'));
-          // (result.outBinds.rc[0].length).should.be.exactly(size);
           done();
         }
       );
@@ -207,9 +204,6 @@ describe('42. dataTypeRaw.js', function() {
         function(err, result) {
           should.exist(err);
           (err.message).should.startWith('NJS-028');
-          // console.log(result);
-          // (result.outBinds.rc[0].toString('hex')).should.eql(bindValue.toString('hex'));
-          // (result.outBinds.rc[0].length).should.be.exactly(size);
           done();
         }
       );
@@ -232,9 +226,6 @@ describe('42. dataTypeRaw.js', function() {
         function(err, result) {
           should.exist(err);
           (err.message).should.startWith('NJS-028');
-          // console.log(result);
-          // (result.outBinds.rc[0].toString('hex')).should.eql(bindValue.toString('hex'));
-          // (result.outBinds.rc[0].length).should.be.exactly(size);
           done();
         }
       );
@@ -246,7 +237,6 @@ describe('42. dataTypeRaw.js', function() {
       var bindValue = assist.createBuffer(size);
  
       connection.execute(
-        //"INSERT INTO " + tableName + " VALUES (:n, :c) RETURNING num, content INTO :rid, :rc",
         "UPDATE " + tableName + " SET content = :c WHERE num = :n RETURNING num, content INTO :rid, :rc",
         {
           n   : seq,
@@ -258,9 +248,6 @@ describe('42. dataTypeRaw.js', function() {
         function(err, result) {
           should.exist(err);
           (err.message).should.startWith('NJS-028');
-          // console.log(result);
-          // (result.outBinds.rc[0].toString('hex')).should.eql(bindValue.toString('hex'));
-          // (result.outBinds.rc[0].length).should.be.exactly(size);
           done();
         }
       );
@@ -270,7 +257,6 @@ describe('42. dataTypeRaw.js', function() {
       var seq = 1;
 
       connection.execute(
-        // "INSERT INTO " + tableName + " VALUES (:n, :c) RETURNING num, content INTO :rid, :rc",
         "DELETE FROM " + tableName + " WHERE num = :1 RETURNING num, content INTO :2, :3",
         [
           seq,
@@ -281,9 +267,6 @@ describe('42. dataTypeRaw.js', function() {
         function(err, result) {
           should.exist(err);
           (err.message).should.startWith('NJS-028');
-          // console.log(result);
-          // (result.outBinds.rc[0].toString('hex')).should.eql(bindValue.toString('hex'));
-          // (result.outBinds.rc[0].length).should.be.exactly(size);
           done();
         }
       );
@@ -293,7 +276,6 @@ describe('42. dataTypeRaw.js', function() {
       var seq = 1;
 
       connection.execute(
-        // "INSERT INTO " + tableName + " VALUES (:n, :c) RETURNING num, content INTO :rid, :rc",
         "DELETE FROM " + tableName + " WHERE num > :n RETURNING num, content INTO :rid, :rc",
         {
           n   : seq,
@@ -304,9 +286,6 @@ describe('42. dataTypeRaw.js', function() {
         function(err, result) {
           should.exist(err);
           (err.message).should.startWith('NJS-028');
-          // console.log(result);
-          // (result.outBinds.rc[0].toString('hex')).should.eql(bindValue.toString('hex'));
-          // (result.outBinds.rc[0].length).should.be.exactly(size);
           done();
         }
       );

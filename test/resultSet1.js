@@ -33,9 +33,9 @@
  *****************************************************************************/
  
 var oracledb = require('oracledb');
-var should = require('should');
-var async = require('async');
-var dbConfig = require('./dbConfig.js');
+var should   = require('should');
+var async    = require('async');
+var dbConfig = require('./dbconfig.js');
 
 describe('12. resultSet1.js', function() {
   var connection = false;
@@ -1040,6 +1040,8 @@ describe('12. resultSet1.js', function() {
   })
   
   describe('12.6 Testing metaData', function() {
+    this.timeout(0);
+    
     it('12.6.1 the amount and value of metaData should be correct', function(done) {
       connection.should.be.ok;
 

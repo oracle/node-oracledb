@@ -41,7 +41,7 @@
 var oracledb = require('oracledb');
 var should   = require('should');
 var async    = require('async');
-var dbConfig = require('./dbConfig.js');
+var dbConfig = require('./dbconfig.js');
 
 describe('63. autoCommit4nestedExecutes.js', function() {
 	

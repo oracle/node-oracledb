@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -55,30 +55,6 @@ oracledb.getConnection(
           return;
         }
 
-        console.log('Reading from ' + inFileName);
-        var inStream = fs.createReadStream(inFileName);
-        inStream.on(
-          'end',
-          function()
-          {
-            console.log("inStream.on 'end' event");
-            connection.commit(
-              function(err)
-              {
-                if (err)
-                  console.error(err.message);
-                else
-                  console.log("Image uploaded successfully.");
-              });
-          });
-        inStream.on(
-          'error',
-          function(err)
-          {
-            console.log("inStream.on 'error' event");
-            console.error(err);
-          });
-
         var lob = result.outBinds.lobbv[0];
         lob.on(
           'error',
@@ -87,6 +63,37 @@ oracledb.getConnection(
             console.log("lob.on 'error' event");
             console.error(err);
           });
+        lob.on(
+          'finish',
+          function()
+          {
+            console.log("lob.on 'finish' event");
+            connection.commit(
+              function(err)
+              {
+                if (err)
+                  console.error(err.message);
+                else
+                  console.log("Image uploaded successfully.");
+                connection.release(function(err) {
+                  if (err) console.error(err.message);
+                });
+              });
+          });
+
+        console.log('Reading from ' + inFileName);
+        var inStream = fs.createReadStream(inFileName);
+        inStream.on(
+          'error',
+          function(err)
+          {
+            console.log("inStream.on 'error' event");
+            console.error(err);
+            connection.release(function(err) {
+              if (err) console.error(err.message);
+            });
+          });
+
         inStream.pipe(lob);  // copies the text to the BLOB
       });
   });

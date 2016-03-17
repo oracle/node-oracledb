@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -34,9 +34,10 @@
 "use strict"
 
 var oracledb = require('oracledb');
-var should = require('should');
-var assist = require('./dataTypeAssist.js');
-var dbConfig = require('./dbConfig.js');
+var should   = require('should');
+var assist   = require('./dataTypeAssist.js');
+var dbConfig = require('./dbconfig.js');
+var async    = require('async');
 
 describe('22. dataTypeChar.js', function(){
   
@@ -104,6 +105,210 @@ describe('22. dataTypeChar.js', function(){
   describe('22.2 stores null value correctly', function() {
     it('22.2.1 testing Null, Empty string and Undefined', function(done) {
       assist.verifyNullValues(connection, tableName, done);
+    })
+  })
+
+  describe('22.3 PL/SQL binding scalar', function() {
+
+    it('22.3.1 PL/SQL binding scalar values IN', function(done) {
+      async.series([
+        function(callback) {
+          var proc = "CREATE OR REPLACE\n" +
+                     "FUNCTION testchar(stringValue IN CHAR) RETURN CHAR\n" +
+                     "IS\n" +
+                     "BEGIN\n" +
+                     "  RETURN 'Hello ' || stringValue || ' world!';\n" +
+                     "END testchar;";
+          connection.should.be.ok;
+          connection.execute(
+            proc,
+            function(err) {
+              should.not.exist(err);
+              callback();
+            }
+          );
+        },
+        function(callback) {
+          var bindvars = {
+            result:      {type: oracledb.STRING, dir: oracledb.BIND_OUT},
+            stringValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: 'Node.js'}
+          };
+          connection.execute(
+            "BEGIN :result := testchar(:stringValue); END;",
+            bindvars,
+            function(err, result) {
+              should.not.exist(err);
+              // console.log(result);
+              callback();
+            }
+          );
+        },
+        function(callback) {
+          connection.execute(
+            "DROP FUNCTION testchar",
+            function(err) {
+              should.not.exist(err);
+              callback();
+            }
+          );
+        }
+      ], done);  
+    }) // 22.3.1
+
+    it('22.3.2 bind scalar values INOUT', function(done) {
+      async.series([
+        function(callback) {
+          var proc = "CREATE OR REPLACE\n" +
+                     "PROCEDURE test(stringValue IN OUT NOCOPY CHAR)\n" +
+                     "IS\n" +
+                     "BEGIN\n" +
+                     "  stringValue := '(' || stringValue || ')';\n" +
+                     "END test;\n";
+          connection.execute(
+            proc,
+            function(err) {
+              should.not.exist(err);
+              callback();
+            }
+          );
+        }, 
+        function(callback) {
+          var bindvars = { stringValue: {type: oracledb.STRING, dir: oracledb.BIND_INOUT, val: 'Node.js'} };
+          connection.execute(
+            "BEGIN test(:stringValue); END;",
+            bindvars,
+            function(err, result) {
+              should.exist(err);
+              // Error: ORA-06502: PL/SQL: numeric or value error: character string buffer too small
+              // For SQL*PLUS driver, the behavior is the same
+              callback();
+            }
+          );
+        },
+        function(callback) {
+          connection.execute(
+            "DROP PROCEDURE test",
+            function(err) {
+              should.not.exist(err);
+              callback();
+            }
+          );
+        }
+      ], done);
+    }) // 22.3.2
+
+    it('22.3.3 bind scalar values OUT', function(done) {
+      async.series([
+        function(callback) {
+          var proc = "CREATE OR REPLACE\n" +
+                     "PROCEDURE test(stringValue OUT NOCOPY CHAR)\n" +
+                     "IS\n" +
+                     "BEGIN\n" +
+                     "  stringValue := 'Hello Node.js World!';\n" +
+                     "END test;\n";
+          connection.execute(
+            proc,
+            function(err) {
+              should.not.exist(err);
+              callback();
+            }
+          );
+        }, 
+        function(callback) {
+          var bindvars = { stringValue: {type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize:200} };
+          connection.execute(
+            "BEGIN test(:stringValue); END;",
+            bindvars,
+            function(err, result) {
+              should.not.exist(err);
+              // There are trailing spaces with the outBind value as CHAR is a kind of 
+              // fix-size data type. So the case uses trim() function.
+              (result.outBinds.stringValue.trim()).should.be.exactly('Hello Node.js World!');
+              callback();
+            }
+          );
+        },
+        function(callback) {
+          connection.execute(
+            "DROP PROCEDURE test",
+            function(err) {
+              should.not.exist(err);
+              callback();
+            }
+          );
+        }
+      ], done);
+    }) // 22.3.3
+  }) // 22.3
+
+  describe('22.4 PL/SQL binding indexed tables', function() {
+    
+    it.skip('22.4.1 bind indexed table IN', function(done) {
+      async.series([
+        function(callback) {
+          var proc = "CREATE OR REPLACE PACKAGE\n" +
+                      "oracledb_testpack\n" +
+                      "IS\n" +
+                      "  TYPE stringsType IS TABLE OF CHAR(30) INDEX BY BINARY_INTEGER;\n" +
+                      "  FUNCTION test(strings IN stringsType) RETURN CHAR;\n" +
+                      "END;";
+          connection.should.be.ok;
+          connection.execute(
+            proc,
+            function(err) {
+              should.not.exist(err);
+              callback();
+            }
+          );
+        },
+        function(callback) {
+          var proc = "CREATE OR REPLACE PACKAGE BODY\n" +
+                     "oracledb_testpack\n" +
+                     "IS\n" +
+                     "  FUNCTION test(strings IN stringsType) RETURN CHAR\n" +
+                     "  IS\n" +
+                     "    s CHAR(2000) := '';\n" +
+                     "  BEGIN\n" +
+                     "    FOR i IN 1 .. strings.COUNT LOOP\n" +
+                     "      s := s || strings(i);\n" +
+                     "    END LOOP;\n" +
+                     "    RETURN s;\n" +
+                     "  END;\n" +
+                     "END;";
+          connection.execute(
+            proc,
+            function(err) {
+              should.not.exist(err);
+              callback();
+            }
+          );
+        },
+        function(callback) {
+          var bindvars = {
+            result:  {type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 2000},
+            strings: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: ['John', 'Doe']}
+          };
+          connection.execute(
+            "BEGIN :result := oracledb_testpack.test(:strings); END;",
+            bindvars,
+            function(err, result) {
+              should.not.exist(err);
+              console.log(result);
+              //result.outBinds.result.should.be.exactly('JohnDoe');
+              callback();
+            }
+          );
+        },
+        function(callback) {
+          connection.execute(
+            "DROP PACKAGE oracledb_testpack",
+            function(err) {
+              should.not.exist(err);
+              callback();
+            }
+          );
+        }
+      ], done);
     })
   })
 })
