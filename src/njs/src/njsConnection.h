@@ -115,6 +115,27 @@ typedef struct Define
   {}
 } Define;
 
+/**
+ * FieldInfo structure
+ **/
+typedef struct FieldInfo
+{
+  std::string       name;                     /* DB Column name */
+  std::string       type;                     /* Column data type (js)*/
+  std::string       originalType;             /* Column data type (db type)*/
+  unsigned int      size;                     /* Size at database */
+  unsigned int      precision;                /* Precision */
+  unsigned int      scale;                    /* Scale */
+  bool              isNullable;               /* Nullable */
+  // Constructor to initialize member variables.
+  FieldInfo ()
+    : name (""), type (""), originalType (""),
+    size(0), precision(0), scale(0), isNullable(false)
+  {
+  }
+
+} FieldInfo;
+
 
 /**
  * FetchInfo structure
@@ -138,33 +159,34 @@ typedef struct fetchInfo
 **/
 typedef struct eBaton
 {
-  uv_work_t            req;
-  std::string          sql;
-  std::string          error;
-  dpi::Env*            dpienv;
-  dpi::Conn*           dpiconn;
-  Connection           *njsconn;
-  DPI_SZ_TYPE          rowsAffected;
-  unsigned int         maxRows;
-  unsigned int         prefetchRows;
-  bool                 getRS;
-  bool                 autoCommit;
-  unsigned int         rowsFetched;
-  unsigned int         outFormat;
-  unsigned int         numCols;
-  dpi::Stmt            *dpistmt;
-  dpi::DpiStmtType     st;
-  bool                 stmtIsReturning;
-  std::vector<Bind*>   binds;
-  unsigned int         numOutBinds;    // # of out binds used for DML return
-  std::string          *columnNames;
-  Define               *defines;
-  unsigned int         fetchAsStringTypesCount;
-  DataType             *fetchAsStringTypes;  // Global by type settings
-  unsigned int         fetchInfoCount;   // Conversion requested count
-  FetchInfo            *fetchInfo;       // Conversion meta data
+  uv_work_t                 req;
+  std::string               sql;
+  std::string               error;
+  dpi::Env*                 dpienv;
+  dpi::Conn*                dpiconn;
+  Connection                *njsconn;
+  DPI_SZ_TYPE               rowsAffected;
+  unsigned int              maxRows;
+  unsigned int              prefetchRows;
+  bool                      getRS;
+  bool                      autoCommit;
+  unsigned int              rowsFetched;
+  unsigned int              outFormat;
+  unsigned int              numCols;
+  dpi::Stmt                 *dpistmt;
+  dpi::DpiStmtType          st;
+  bool                      stmtIsReturning;
+  std::vector<Bind*>        binds;
+  unsigned int              numOutBinds;    // # of out binds used for DML return
+  std::string               *columnNames;
+  Define                    *defines;
+  unsigned int              fetchAsStringTypesCount;
+  DataType                  *fetchAsStringTypes;  // Global by type settings
+  unsigned int              fetchInfoCount;   // Conversion requested count
+  FetchInfo                 *fetchInfo;       // Conversion meta data
   Nan::Persistent<Function> cb;
   RefCounter                counter;
+  FieldInfo                 *fields;
 
   eBaton( unsigned int& count, Local<Function> callback ) :
              sql(""), error(""), dpienv(NULL), dpiconn(NULL), njsconn(NULL),
@@ -174,7 +196,7 @@ typedef struct eBaton
              st(DpiStmtUnknown), stmtIsReturning (false), numOutBinds(0),
              columnNames(NULL), defines(NULL), fetchAsStringTypesCount (0),
              fetchAsStringTypes(NULL), fetchInfoCount(0), fetchInfo(NULL),
-             counter ( count )
+             counter ( count ), fields(NULL)
   { 
     cb.Reset( callback );
   }
@@ -216,6 +238,9 @@ typedef struct eBaton
      }
      if( columnNames )
        delete [] columnNames;
+     if( fields ) {
+        delete [] fields;
+     }
      if( defines && !getRS ) // To reuse fetch Buffers of ResultSet
      {
        for( unsigned int i=0; i<numCols; i++ )
@@ -260,12 +285,10 @@ public:
   static Nan::Persistent<FunctionTemplate> connectionTemplate_s;
   static void Init (Handle<Object> target);
   static Local<Value> GetRows (eBaton* executeBaton);
-  static Local<Value> GetMetaData (std::string* columnNames,
-                                    unsigned int numCols);
-  static void DoDefines ( eBaton* executeBaton, const dpi::MetaData*,
-                          unsigned int numCols );
+  static Local<Value> GetMetaData (FieldInfo* fields, unsigned int numCols);
+  static void DoDefines ( eBaton* executeBaton, const dpi::MetaData* meta, unsigned int numCols );
   static void DoFetch (eBaton* executeBaton);
-  static void CopyMetaData ( std::string*, const dpi::MetaData*, unsigned int ); 
+  static void CopyMetaData ( std::string* columnNames, FieldInfo* fields, const dpi::MetaData* meta, unsigned int numCols );
   bool isValid() { return isValid_; }
   dpi::Conn* getDpiConn() { return dpiconn_; }
 
@@ -332,6 +355,8 @@ private:
   static void PrepareAndBind (eBaton* executeBaton);
   
   static unsigned short SourceDBType2TargetDBType ( unsigned srcType );
+  static std::string SourceDBType2String ( unsigned srcType );
+  static std::string SourceDBType2JSString ( unsigned srcType );
   static boolean MapByName ( eBaton *executeBaton,
                               std::string &name,
                               unsigned short &targetType );

@@ -1473,8 +1473,9 @@ void Connection::Async_Execute (uv_work_t *req)
       const dpi::MetaData* meta   = executeBaton->dpistmt->getMetaData();
       executeBaton->numCols       = executeBaton->dpistmt->numCols();
       executeBaton->columnNames   = new std::string[executeBaton->numCols];
-      Connection::CopyMetaData( executeBaton->columnNames, meta, 
-                                executeBaton->numCols );
+      executeBaton->fields        = new FieldInfo[executeBaton->numCols];
+      Connection::CopyMetaData( executeBaton->columnNames, executeBaton->fields,
+                                meta, executeBaton->numCols);
 
       if ( executeBaton->getRS ) 
         goto exitAsyncExecute;
@@ -1760,23 +1761,99 @@ void Connection::PrepareAndBind (eBaton* executeBaton)
   }
 }
 
+std::string Connection::SourceDBType2JSString( unsigned dbType )
+{
+  switch ( dbType )
+  {
+  case dpi::DpiNumber:
+  case dpi::DpiBinaryFloat:
+  case dpi::DpiBinaryDouble:
+  case dpi::DpiDouble:
+  case dpi::DpiInteger:
+  case dpi::DpiUnsignedInteger:
+  case dpi::DpiRowid:
+  case dpi::DpiYearMonth:
+  case dpi::DpiDaySecond:
+    return "number";
+
+  case dpi::DpiVarChar:
+  case dpi::DpiFixedChar:
+  case dpi::DpiString:
+  case dpi::DpiLong:
+    return "string";
+
+  case dpi::DpiDate:
+  case dpi::DpiTimestamp:
+  case dpi::DpiTimestampTZ:
+  case dpi::DpiTimestampLTZ:
+    return "date";
+  }
+
+  return "object";
+}
+
+std::string Connection::SourceDBType2String( unsigned dbType ) {
+  switch ( dbType ) {
+    case DpiVarChar: return "varchar";
+    case DpiNumber: return "number";
+    case DpiInteger: return "integer";
+    case DpiDouble: return "double";
+    case DpiString: return "string";
+    case DpiLong: return "long";
+    case DpiDate: return "date";
+    case DpiRaw: return "raw";
+    case DpiLongRaw: return "longraw";
+    case DpiUnsignedInteger: return "unsignedinteger";
+    case DpiRowid: return "rowid";
+    case DpiFixedChar: return "fixedchar";
+    case DpiBinaryFloat: return "binaryfloat";
+    case DpiBinaryDouble: return "binarydouble";
+    case DpiUDT: return "udt";
+    case DpiRef: return "ref";
+    case DpiClob: return "clob";
+    case DpiBlob: return "blob";
+    case DpiBfile: return "bfile";
+    case DpiRSet: return "rset";
+    case DpiYearMonth: return "yearmonth";
+    case DpiDaySecond: return "daysecond";
+    case DpiTimestamp: return "timestamp";
+    case DpiTimestampTZ: return "timestamptz";
+    case DpiURowid: return "urowid";
+    case DpiTimestampLTZ: return "timestampltz";
+    case DpiTypeBase: return "typebase";
+    case DpiDateTimeArray: return "datetimearray";
+    case DpiIntervalArray: return "intervalarray";
+  }
+  return "undefined";
+}
+
 /*****************************************************************************/
 /*
    DESCRIPTION
-     copy column names from meta data to the string array passed as parameter. 
+     copy column properties from meta data to the string array (names) and
+     info class list (FieldInfo) passed as parameters.
 
    PARAMETERS:
-     string array  -  column names
-     metaData      -  metaData info from DPI
-     numCols       -  number of columns
+     string array   -  column names
+     fieldInfo list -  field metadata list
+     metaData       -  metaData info from DPI
+     numCols        -  number of columns
  */
-void Connection::CopyMetaData ( std::string* names, const dpi::MetaData* meta,
-                                unsigned int numCols )
+void Connection::CopyMetaData ( std::string* names,
+                                FieldInfo* fields,
+                                const dpi::MetaData* meta,
+                                unsigned int numCols)
 {
-  for (unsigned int col = 0; col < numCols; col++)
-  {
-    names[col] = std::string( (const char*)meta[col].colName,
-                            meta[col].colNameLen );
+  for (unsigned int col = 0; col < numCols; col++) {
+    names[col] = std::string( (const char*)meta[col].colName, meta[col].colNameLen );
+
+    fields[col].name = std::string( (const char*)meta[col].colName, meta[col].colNameLen );
+    fields[col].type = std::string( Connection::SourceDBType2JSString(meta[col].dbType) );
+    fields[col].originalType = std::string( Connection::SourceDBType2String(meta[col].dbType) );
+    fields[col].size = meta[col].dbSize;
+    fields[col].precision = meta[col].precision;
+    fields[col].scale = (unsigned int)meta[col].scale;
+    fields[col].isNullable = meta[col].isNullable;
   }
 }
 
@@ -2502,8 +2579,7 @@ void Connection::Async_AfterExecute(uv_work_t *req)
         Nan::Set(result, Nan::New<v8::String>("outBinds").ToLocalChecked(),Nan::Undefined());
         Nan::Set(result, Nan::New<v8::String>("rowsAffected").ToLocalChecked(), Nan::Undefined());
         Nan::Set(result, Nan::New<v8::String>("metaData").ToLocalChecked(), Connection::GetMetaData(
-                                                    executeBaton->columnNames,
-                                                    executeBaton->numCols));
+                                                    executeBaton->fields, executeBaton->numCols));
         break;
       case DpiStmtBegin :
       case DpiStmtDeclare :
@@ -2552,17 +2628,35 @@ exitAsyncAfterExecute:
    RETURNS:
      MetaData Handle
 */
-v8::Local<v8::Value> Connection::GetMetaData (std::string* columnNames,
-                                       unsigned int numCols )
+v8::Local<v8::Value> Connection::GetMetaData (FieldInfo* fields, unsigned int numCols)
 {
   Nan::EscapableHandleScope scope;
   Local<Array> metaArray = Nan::New<v8::Array>(numCols);
-  for(unsigned int i=0; i < numCols ; i++)
-  {
+
+  for(unsigned int i=0; i < numCols ; i++) {
     Local<Object> column = Nan::New<v8::Object>();
     Nan::Set(column, Nan::New<v8::String>("name").ToLocalChecked(),
-                Nan::New<v8::String>(columnNames[i].c_str()).ToLocalChecked()
+                Nan::New<v8::String>(fields[i].name).ToLocalChecked()
                 );
+    Nan::Set(column, Nan::New<v8::String>("type").ToLocalChecked(),
+                Nan::New<v8::String>(fields[i].type).ToLocalChecked()
+                );
+    Nan::Set(column, Nan::New<v8::String>("originalType").ToLocalChecked(),
+                Nan::New<v8::String>(fields[i].originalType).ToLocalChecked()
+                );
+    Nan::Set(column, Nan::New<v8::String>("size").ToLocalChecked(),
+                Nan::New<v8::Number>(fields[i].size)
+                );
+    Nan::Set(column, Nan::New<v8::String>("precision").ToLocalChecked(),
+                Nan::New<v8::Number>(fields[i].precision)
+                );
+    Nan::Set(column, Nan::New<v8::String>("scale").ToLocalChecked(),
+                Nan::New<v8::Number>(fields[i].scale)
+                );
+    Nan::Set(column, Nan::New<v8::String>("isNullable").ToLocalChecked(),
+                Nan::New<v8::Boolean>(fields[i].isNullable)
+                );
+
     Nan::Set(metaArray, i, column);
   }
   return scope.Escape(metaArray);
