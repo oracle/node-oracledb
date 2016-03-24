@@ -63,7 +63,7 @@ Nan::Persistent<FunctionTemplate> ResultSet::resultSetTemplate_s;
 /*
    DESCRIPTION
      Store the config in pool instance.
-   
+
    PARAMETERS
      stmt         -  dpi statement
      executeBaton - eBaton structure
@@ -81,7 +81,7 @@ void ResultSet::setResultSet ( dpi::Stmt *stmt, eBaton *executeBaton )
   }
   else
   {
-    /* 
+    /*
      * This could happen in REFCURSOR case, when the stored procedure
      * did not return a valid handle
      */
@@ -321,7 +321,7 @@ NAN_METHOD(ResultSet::GetRows)
                        info, 0, exitGetRows );
   if(!getRowsBaton->numRows)
   {
-    getRowsBaton->error = NJSMessages::getErrorMsg ( 
+    getRowsBaton->error = NJSMessages::getErrorMsg (
                                      errInvalidParameterValue, 1);
     goto exitGetRows;
   }

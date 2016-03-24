@@ -27,7 +27,7 @@
 #ifndef OCI_ORACLE
 # include <oci.h>
 #endif
- 
+
 #ifndef DPICOMMON_ORACLE
 # include <dpiCommon.h>
 #endif

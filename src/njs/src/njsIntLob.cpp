@@ -18,9 +18,9 @@
  * This file uses NAN:
  *
  * Copyright (c) 2015 NAN contributors
- * 
+ *
  * NAN contributors listed at https://github.com/rvagg/nan#contributors
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
  * "Software"), to deal in the Software without restriction, including
@@ -28,10 +28,10 @@
  * distribute, sublicense, and/or sell copies of the Software, and to
  * permit persons to whom the Software is furnished to do so, subject to
  * the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be
  * included in all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -39,7 +39,7 @@
  * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- * 
+ *
  * NAME
  *   njsIntLob.cpp
  *
@@ -141,7 +141,7 @@ void ILob::cleanup()
     delete [] buf_;
     buf_ = NULL;
   }
-  
+
   try
   {
     if (errh_)
@@ -150,12 +150,12 @@ void ILob::cleanup()
       errh_ = NULL;
     }
   }
-  
+
   catch (...)
   {
     // don't do anything
   }
-  
+
   try
   {
     if (lobLocator_)
@@ -164,7 +164,7 @@ void ILob::cleanup()
       lobLocator_ = NULL;
     }
   }
-  
+
   catch (...)
   {
     // don't do anything
@@ -204,7 +204,7 @@ void ILob::setILob(eBaton *executeBaton, ProtoILob *protoILob)
     lobLocator_            = protoILob->lobLocator_;
     protoILob->lobLocator_ = NULL;
     fetchType_             = protoILob->fetchType_;
-  
+
     // connection
     njsconn_               = executeBaton->njsconn;
     dpiconn_               = executeBaton->dpiconn;
@@ -262,7 +262,7 @@ void ILob::setILob(eBaton *executeBaton, ProtoILob *protoILob)
     nothing
 
   NOTES
-    
+
 */
 
 void ILob::Init(Handle<Object> target)
@@ -322,7 +322,7 @@ void ILob::Init(Handle<Object> target)
     ILob object
 
   NOTES
-    
+
 */
 
 NAN_METHOD(ILob::New)
@@ -354,7 +354,7 @@ NAN_METHOD(ILob::New)
 */
 
 NAN_METHOD(ILob::Release)
-{ 
+{
 
   ILob *iLob = Nan::ObjectWrap::Unwrap<ILob>(info.Holder());
   string msg;
@@ -390,7 +390,7 @@ NAN_METHOD(ILob::Release)
     Throws an exception
 
   NOTES
-    
+
 */
 
 void ILob::lobPropertyException(ILob *iLob,
@@ -422,11 +422,11 @@ void ILob::lobPropertyException(ILob *iLob,
     chunk size
 
   NOTES
-    
+
 */
 
 NAN_GETTER(ILob::GetChunkSize)
-{  
+{
   ILob *iLob = Nan::ObjectWrap::Unwrap<ILob>(info.Holder());
   string msg;
 
@@ -467,7 +467,7 @@ NAN_GETTER(ILob::GetChunkSize)
     throws error
 
   NOTES
-    
+
 */
 
 NAN_SETTER(ILob::SetChunkSize)
@@ -496,7 +496,7 @@ NAN_SETTER(ILob::SetChunkSize)
 */
 
 NAN_GETTER(ILob::GetLength)
-{  
+{
   ILob *iLob = Nan::ObjectWrap::Unwrap<ILob>(info.Holder());
   string msg;
 
@@ -537,7 +537,7 @@ NAN_GETTER(ILob::GetLength)
     throws error
 
   NOTES
-    
+
 */
 
 NAN_SETTER(ILob::SetLength)
@@ -561,11 +561,11 @@ NAN_SETTER(ILob::SetLength)
     the number of bytes that will be read for each read().
 
   NOTES
-    
+
 */
 
 NAN_GETTER(ILob::GetPieceSize)
-{  
+{
   ILob *iLob = Nan::ObjectWrap::Unwrap<ILob>(info.Holder());
   string msg;
 
@@ -605,7 +605,7 @@ NAN_GETTER(ILob::GetPieceSize)
     nothing
 
   NOTES
-    
+
 */
 
 NAN_SETTER(ILob::SetPieceSize)
@@ -636,7 +636,7 @@ NAN_SETTER(ILob::SetPieceSize)
     delete [] iLob->buf_;
     iLob->buf_ = NULL;
   }
-  
+
   if (iLob->fetchType_ == DpiClob)
   {
     try
@@ -669,11 +669,11 @@ NAN_SETTER(ILob::SetPieceSize)
     the current offset where read or write will happen.
 
   NOTES
-    
+
 */
 
 NAN_GETTER(ILob::GetOffset)
-{  
+{
   ILob *iLob = Nan::ObjectWrap::Unwrap<ILob>(info.Holder());
   string msg;
 
@@ -713,7 +713,7 @@ NAN_GETTER(ILob::GetOffset)
     nothing
 
   NOTES
-    
+
 */
 
 NAN_SETTER(ILob::SetOffset)
@@ -731,7 +731,7 @@ NAN_SETTER(ILob::SetOffset)
 
     NJS_SET_EXCEPTION(msg.c_str(), (int)msg.length());
   }
-  
+
   if (iLob->state_ == ACTIVE)
   {
     msg = NJSMessages::getErrorMsg(errBusyLob);
@@ -763,11 +763,11 @@ NAN_SETTER(ILob::SetOffset)
     the type of the LOB (either CLOB or BLOB)
 
   NOTES
-    
+
 */
 
 NAN_GETTER(ILob::GetType)
-{  
+{
   ILob *iLob = Nan::ObjectWrap::Unwrap<ILob>(info.Holder());
 
   NJS_CHECK_OBJECT_VALID2(iLob, info);
@@ -800,7 +800,7 @@ NAN_GETTER(ILob::GetType)
     throws error
 
   NOTES
-    
+
 */
 
 NAN_SETTER(ILob::SetType)
@@ -828,7 +828,7 @@ NAN_SETTER(ILob::SetType)
 */
 
 NAN_METHOD(ILob::Read)
-{ 
+{
 
   Local<Function>  callback;
   ILob            *iLob;
@@ -853,7 +853,7 @@ NAN_METHOD(ILob::Read)
 
    // mark Lob as active before leaving main thread, but not in
    // case of an error.
-  iLob->state_ = ACTIVE;       
+  iLob->state_ = ACTIVE;
 
   if( !iLob->njsconn_->isValid() )
   {
@@ -908,11 +908,11 @@ void ILob::Async_Read(uv_work_t *req)
     unsigned long long byteAmount = (unsigned long int)iLob->bufSize_;
     unsigned long long charAmount = 0;
     unsigned long long bufl = 0;
-    
+
     // Clobs read by characters
     if (iLob->fetchType_ == DpiClob)
     {
-      charAmount = iLob->bufSize_; 
+      charAmount = iLob->bufSize_;
       byteAmount = 0;
       // for CLOBs, buflen is adjusted to handle multi-byte charsets
       bufl = charAmount * iLob->dpiconn_->getByteExpansionRatio();
@@ -956,7 +956,7 @@ void ILob::Async_Read(uv_work_t *req)
 */
 
 void ILob::Async_AfterRead(uv_work_t *req)
-{ 
+{
   Nan::HandleScope scope;
 
   LobBaton     *lobBaton = (LobBaton *)req->data;
@@ -979,7 +979,7 @@ void ILob::Async_AfterRead(uv_work_t *req)
     {
       if (iLob->fetchType_ == DpiClob)
       {
-        Local<Value> str = Nan::New<v8::String>((char *)iLob->buf_, 
+        Local<Value> str = Nan::New<v8::String>((char *)iLob->buf_,
                                               iLob->amountRead_).ToLocalChecked();
         argv[1] = str;
       }
@@ -1026,7 +1026,7 @@ void ILob::Async_AfterRead(uv_work_t *req)
 */
 
 NAN_METHOD(ILob::Write)
-{ 
+{
 
   Local<Function>  callback;
   Local<Object> buffer_obj;
@@ -1056,7 +1056,7 @@ NAN_METHOD(ILob::Write)
 
    // mark Lob as active before leaving main thread, but not in
    // case of an error
-  iLob->state_ = ACTIVE;       
+  iLob->state_ = ACTIVE;
 
   if( !iLob->njsconn_->isValid() )
   {
@@ -1111,14 +1111,14 @@ void ILob::Async_Write(uv_work_t *req)
     unsigned long long byteAmount = lobBaton->writelen;
     unsigned long long charAmount = 0; // interested in byte amount only
     // for CLOBs, buflen is adjusted to handle multi-byte charsets
-    unsigned long long bufl = charAmount * 
+    unsigned long long bufl = charAmount *
                                iLob->dpiconn_->getByteExpansionRatio();
-    
+
     Lob::write((DpiHandle *)iLob->svch_, (DpiHandle *)iLob->errh_,
               (Descriptor *)iLob->lobLocator_, byteAmount, charAmount,
               iLob->offset_, lobBaton->writebuf, bufl);
 
-    
+
     iLob->amountWritten_ = (unsigned long)byteAmount;
     if (iLob->fetchType_ == DpiClob)
       iLob->offset_ += charAmount;  // offset for CLOBs is character based
@@ -1153,7 +1153,7 @@ void ILob::Async_Write(uv_work_t *req)
 */
 
 void ILob::Async_AfterWrite(uv_work_t *req)
-{ 
+{
   Nan::HandleScope scope;
 
   LobBaton     *lobBaton = (LobBaton *)req->data;
@@ -1264,12 +1264,12 @@ void ProtoILob::cleanup()
       errh_ = NULL;
     }
   }
-  
+
   catch (...)
   {
     // don't do anything
   }
-  
+
   try
   {
     if (lobLocator_)
@@ -1278,7 +1278,7 @@ void ProtoILob::cleanup()
       lobLocator_ = NULL;
     }
   }
-  
+
   catch (...)
   {
     // don't do anything

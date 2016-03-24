@@ -19,9 +19,9 @@
  * This file uses NAN:
  *
  * Copyright (c) 2015 NAN contributors
- * 
+ *
  * NAN contributors listed at https://github.com/rvagg/nan#contributors
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
  * "Software"), to deal in the Software without restriction, including
@@ -29,10 +29,10 @@
  * distribute, sublicense, and/or sell copies of the Software, and to
  * permit persons to whom the Software is furnished to do so, subject to
  * the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be
  * included in all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -40,7 +40,7 @@
  * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- * 
+ *
  * NAME
  *  njsConnection.h
  *
@@ -129,7 +129,7 @@ typedef struct fetchInfo
     : name (""), type ( DATA_DEFAULT )
   {
   }
-  
+
 } FetchInfo;
 
 
@@ -169,13 +169,13 @@ typedef struct eBaton
   eBaton( unsigned int& count, Local<Function> callback ) :
              sql(""), error(""), dpienv(NULL), dpiconn(NULL), njsconn(NULL),
              rowsAffected(0), maxRows(0), prefetchRows(0),
-             getRS(false), autoCommit(false), rowsFetched(0), 
+             getRS(false), autoCommit(false), rowsFetched(0),
              outFormat(0), numCols(0), dpistmt(NULL),
              st(DpiStmtUnknown), stmtIsReturning (false), numOutBinds(0),
              columnNames(NULL), defines(NULL), fetchAsStringTypesCount (0),
              fetchAsStringTypes(NULL), fetchInfoCount(0), fetchInfo(NULL),
              counter ( count )
-  { 
+  {
     cb.Reset( callback );
   }
 
@@ -187,9 +187,9 @@ typedef struct eBaton
        for( unsigned int index = 0 ;index < binds.size(); index++ )
        {
          // donot free date value here, it is done in DateTimeArray functions
-         if(binds[index]->type != DpiTimestampLTZ ) 
+         if(binds[index]->type != DpiTimestampLTZ )
          {
-           // do not free refcursor type.  
+           // do not free refcursor type.
            if( binds[index]->value && binds[index]->type != DpiRSet )
            {
              free(binds[index]->value);
@@ -227,13 +227,13 @@ typedef struct eBaton
            for (unsigned int j = 0; j < maxRows; j++)
            {
                  // free all those unused descriptors that were never fetched.
-             
+
              if (((Descriptor **)(defines[i].buf))[j])
                Env::freeDescriptor(((Descriptor **)(defines[i].buf))[j],
-                                   LobDescriptorType);  
+                                   LobDescriptorType);
            }
          }
-         
+
          free(defines[i].buf);
          free(defines[i].len);
          free(defines[i].ind);
@@ -265,7 +265,7 @@ public:
   static void DoDefines ( eBaton* executeBaton, const dpi::MetaData*,
                           unsigned int numCols );
   static void DoFetch (eBaton* executeBaton);
-  static void CopyMetaData ( std::string*, const dpi::MetaData*, unsigned int ); 
+  static void CopyMetaData ( std::string*, const dpi::MetaData*, unsigned int );
   bool isValid() { return isValid_; }
   dpi::Conn* getDpiConn() { return dpiconn_; }
 
@@ -321,7 +321,7 @@ private:
   static NAN_SETTER(SetAction);
   static NAN_SETTER(SetOracleServerVersion);
 
-  static void connectionPropertyException(Connection* njsConn, 
+  static void connectionPropertyException(Connection* njsConn,
                                           NJSErrorType errType,
                                           string property);
 
@@ -330,7 +330,7 @@ private:
 
 
   static void PrepareAndBind (eBaton* executeBaton);
-  
+
   static unsigned short SourceDBType2TargetDBType ( unsigned srcType );
   static boolean MapByName ( eBaton *executeBaton,
                               std::string &name,
@@ -338,7 +338,7 @@ private:
 
 
   static boolean MapByType ( eBaton *executeBaton, unsigned short &targetType);
-  
+
   static unsigned short GetTargetType ( eBaton *executeBaton,
                                          std::string &name,
                                         unsigned short defaultType);
@@ -376,16 +376,16 @@ private:
                                          bool isQuery,
                                          unsigned int index,
                                          unsigned int row = 0);
-  // for primitive types (Number, String and Date) 
-  static v8::Local<v8::Value> GetValueCommon (eBaton *executeBaton, 
-                                         short ind, 
-                                         unsigned short type, 
+  // for primitive types (Number, String and Date)
+  static v8::Local<v8::Value> GetValueCommon (eBaton *executeBaton,
+                                         short ind,
+                                         unsigned short type,
                                          void* val, DPI_BUFLEN_TYPE len);
   // for refcursor
-  static v8::Local<v8::Value> GetValueRefCursor (eBaton *executeBaton, 
+  static v8::Local<v8::Value> GetValueRefCursor (eBaton *executeBaton,
                                                   Bind *bind);
   // for lobs
-  static v8::Local<v8::Value> GetValueLob (eBaton *executeBaton, 
+  static v8::Local<v8::Value> GetValueLob (eBaton *executeBaton,
                                             Bind *bind);
   static void UpdateDateValue ( eBaton *executeBaton, unsigned int index );
   static void v8Date2OraDate(v8::Local<v8::Value> val, Bind *bind);
@@ -398,7 +398,7 @@ private:
 
   // Callback used in DML-Return SQL statements to
   // identify block of memeory for each row.
-  static int  cbDynBufferGet ( void *ctx, DPI_SZ_TYPE nRows, 
+  static int  cbDynBufferGet ( void *ctx, DPI_SZ_TYPE nRows,
                                unsigned int bndpos,
                                unsigned long iter, unsigned long index,
                                dvoid **bufpp, void **alenpp, void **indpp,
@@ -419,7 +419,7 @@ private:
   static inline ValueType GetValueType ( v8::Local<v8::Value> v )
   {
     ValueType type = VALUETYPE_INVALID;
-    
+
     if ( v->IsUndefined () || v->IsNull () )
     {
       type = VALUETYPE_NULL;
@@ -451,7 +451,7 @@ private:
 
     return type;
   }
-  
+
 
   dpi::Conn*     dpiconn_;
   bool           isValid_;

@@ -18,9 +18,9 @@
  * This file uses NAN:
  *
  * Copyright (c) 2015 NAN contributors
- * 
+ *
  * NAN contributors listed at https://github.com/rvagg/nan#contributors
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
  * "Software"), to deal in the Software without restriction, including
@@ -28,10 +28,10 @@
  * distribute, sublicense, and/or sell copies of the Software, and to
  * permit persons to whom the Software is furnished to do so, subject to
  * the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be
  * included in all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -39,7 +39,7 @@
  * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- * 
+ *
  * NAME
  *   njsPool.h
  *
@@ -69,7 +69,7 @@ public:
                   unsigned int poolMin, unsigned int poolIncrement,
                   unsigned int poolTimeout, unsigned stmtCacheSize,
                   unsigned int lobPrefetchSize);
-   
+
    // Define Pool Constructor
    static Nan::Persistent<FunctionTemplate> poolTemplate_s ;
 
@@ -77,7 +77,7 @@ private:
 
    static NAN_METHOD(New);
 
-   // Get Connection Methods 
+   // Get Connection Methods
    static NAN_METHOD(GetConnection);
    static void Async_GetConnection(uv_work_t* req);
    static void Async_AfterGetConnection(uv_work_t* req);
@@ -137,7 +137,7 @@ typedef struct poolBaton
   poolBaton( Local<Function> callback ) :
                  error(""), connClass(""),
                  dpiconn(NULL), njspool(NULL), lobPrefetchSize(0)
-  { 
+  {
     cb.Reset( callback );
   }
 

@@ -56,7 +56,7 @@ class DateTimeArray;
                      PUBLIC CONSTANTS
   ---------------------------------------------------------------------------*/
 
-  
+
 /*---------------------------------------------------------------------------
                      PUBLIC TYPES
   ---------------------------------------------------------------------------*/
@@ -105,30 +105,30 @@ class Env
                                 // DateTime array
   virtual DateTimeArray * getDateTimeArray( OCIError *errh ) const = 0;
   virtual void            releaseDateTimeArray ( DateTimeArray *arr ) const = 0;
-  
+
                                  // handle and descriptor methods
   virtual DpiHandle * allocHandle(HandleType handleType) = 0;
-  
+
   static void freeHandle(DpiHandle *handle, HandleType handleType);
-  
-  
+
+
   virtual Descriptor * allocDescriptor(DescriptorType descriptorType)
                               = 0;
-  
+
   static void freeDescriptor(Descriptor *descriptor,
                              DescriptorType descriptorType);
-  
+
   virtual void allocDescriptorArray(DescriptorType descriptorType,
                                     unsigned int arraySize,
                                     Descriptor **descriptorArray) = 0;
-  
+
   static void freeDescriptorArray(Descriptor **descriptorArray,
                                   DescriptorType descriptorType);
 
-  
+
   virtual DpiHandle * envHandle() const = 0;
 
-  
+
 protected:
                                 // clients cannot do new and delete
   Env();

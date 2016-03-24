@@ -106,7 +106,7 @@ Env * Env::createEnv( const string & drvName )
      nothing
 
    NOTES:
-     
+
  */
 
 void Env::freeHandle(DpiHandle *handle, HandleType handleType)
@@ -129,7 +129,7 @@ void Env::freeHandle(DpiHandle *handle, HandleType handleType)
      nothing
 
    NOTES:
-     
+
  */
 
 void Env::freeDescriptor(Descriptor *descriptor,
@@ -153,7 +153,7 @@ void Env::freeDescriptor(Descriptor *descriptor,
      nothing
 
    NOTES:
-     
+
  */
 
 void Env::freeDescriptorArray(Descriptor **descriptorArray,

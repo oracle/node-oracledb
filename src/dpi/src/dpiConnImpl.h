@@ -55,7 +55,7 @@ class PoolImpl;
 
 
 /*
- * The maximum character expansion ratio from any DB character to 
+ * The maximum character expansion ratio from any DB character to
  * AL32UTF8 is known to be 3-times
  */
 #define DPI_WORSTCASE_CHAR_CONVERSION_RATIO    3
@@ -143,7 +143,7 @@ private:
     return ( csid == DPI_AL32UTF8 ) ? DPI_BESTCASE_CHAR_CONVERSION_RATIO :
              DPI_WORSTCASE_CHAR_CONVERSION_RATIO;
   }
-  
+
   void cleanup();
 
 

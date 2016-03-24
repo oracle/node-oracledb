@@ -18,9 +18,9 @@
  * This file uses NAN:
  *
  * Copyright (c) 2015 NAN contributors
- * 
+ *
  * NAN contributors listed at https://github.com/rvagg/nan#contributors
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
  * "Software"), to deal in the Software without restriction, including
@@ -28,10 +28,10 @@
  * distribute, sublicense, and/or sell copies of the Software, and to
  * permit persons to whom the Software is furnished to do so, subject to
  * the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be
  * included in all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -39,7 +39,7 @@
  * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- * 
+ *
  * NAME
  *  njsILob.h
  *
@@ -82,23 +82,23 @@ typedef struct LobBaton
   char              *writebuf;
   unsigned long long writelen;
   RefCounter         counter;
-  
+
   Nan::Persistent<Function> cb;
 
   LobBaton( unsigned int& count, Local<Function> callback ):
     error(""), dpienv(NULL), dpiconn(NULL), iLob(NULL), writebuf(NULL),
     writelen(0), counter( count )
-  { 
+  {
     cb.Reset( callback );
   }
 
   ~LobBaton ()
-   { 
+   {
      cb.Reset();
    }
-  
+
 } LobBaton;
-  
+
 
 
 
@@ -130,7 +130,7 @@ public:
   ProtoILob(eBaton *executeBaton, Descriptor *lobLocator, unsigned short fetchType);
 
   ~ProtoILob();
-  
+
 private:
   void cleanup();
 
@@ -145,16 +145,16 @@ class ILob : public Nan::ObjectWrap
 {
  public:
   void setILob(eBaton *executeBaton,  ProtoILob *protoILob);
-  
+
                                 // Define ILob Constructor
   static Nan::Persistent<FunctionTemplate> iLobTemplate_s;
-  
+
   static void Init(Handle<Object> target);
 
 
  private:
   ILob();
-  
+
   ~ILob();
 
   void cleanup();
@@ -166,7 +166,7 @@ class ILob : public Nan::ObjectWrap
   static void lobPropertyException(ILob *iLob, NJSErrorType err,
                                    string property);
 
-  
+
                                 // Getters for properties
   static NAN_GETTER(GetChunkSize);
   static NAN_GETTER(GetLength);
@@ -174,7 +174,7 @@ class ILob : public Nan::ObjectWrap
   static NAN_GETTER(GetOffset);
   static NAN_GETTER(GetType);
 
-  
+
                                 // Setters for properties
   static NAN_SETTER(SetChunkSize);
   static NAN_SETTER(SetLength);
@@ -182,7 +182,7 @@ class ILob : public Nan::ObjectWrap
   static NAN_SETTER(SetOffset);
   static NAN_SETTER(SetType);
 
-  
+
                                 // Read Method on ILob class
   static NAN_METHOD(Read);
   static void Async_Read (uv_work_t *req);
@@ -195,7 +195,7 @@ class ILob : public Nan::ObjectWrap
 
   Descriptor    *lobLocator_;
   unsigned short fetchType_;
-  
+
   Connection    *njsconn_;
   dpi::Conn     *dpiconn_;
   DpiHandle     *svch_;

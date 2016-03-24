@@ -211,7 +211,7 @@ unsigned int StmtImpl::numCols ()
 /*****************************************************************************/
 /*
   DESCRIPTION
-    Prefetch Rows set on statement handle 
+    Prefetch Rows set on statement handle
 
   PARAMETERS
     prefetchRows count
@@ -253,8 +253,8 @@ void StmtImpl::bind (unsigned int pos, unsigned short type, void *buf,
   OCIBind *b = (OCIBind *)0;
 
   ociCall (DPIBINDBYPOS (stmth_, &b, errh_, pos,
-                         (cb ? NULL : (type==DpiRSet) ? 
-                           (void *)&(((StmtImpl*)buf)->stmth_) : buf), 
+                         (cb ? NULL : (type==DpiRSet) ?
+                           (void *)&(((StmtImpl*)buf)->stmth_) : buf),
                          (type == DpiRSet) ? 0 : bufSize, type,
                          (cb ? NULL : ind),
                          (cb ? NULL : bufLen),
@@ -310,8 +310,8 @@ void StmtImpl::bind (const unsigned char *name, int nameLen,
 
   ociCall (DPIBINDBYNAME (stmth_, &b, errh_, name, nameLen,
                           (cb ? NULL : (type == DpiRSet) ?
-                            (void *)&((StmtImpl*)buf)->stmth_: buf), 
-                          (type == DpiRSet) ? 0 : bufSize, type, 
+                            (void *)&((StmtImpl*)buf)->stmth_: buf),
+                          (type == DpiRSet) ? 0 : bufSize, type,
                           (cb ? NULL : ind),
                           (cb ? NULL : bufLen),
                           NULL,
@@ -413,7 +413,7 @@ void StmtImpl::define (unsigned int pos, unsigned short type, void *buf,
   if ((type == DpiClob) || (type == DpiBlob) || (type == DpiBfile))
   {
     boolean isLobPrefetchLength = true;
-    
+
     ociCall(OCIAttrSet(d, OCI_HTYPE_DEFINE, &isLobPrefetchLength, 0,
                        OCI_ATTR_LOBPREFETCH_LENGTH, errh_), errh_);
   }
@@ -523,10 +523,10 @@ const MetaData* StmtImpl::getMetaData ()
     }
     else
     {                           // avoid uninitialized variables
-      meta_[col].precision = 0;  
+      meta_[col].precision = 0;
       meta_[col].scale = 0;
     }
-      
+
     OCIDescriptorFree( colDesc, OCI_DTYPE_PARAM);
     col++;
   }
@@ -565,7 +565,7 @@ void StmtImpl::cleanup ()
     // Release not called for ref cursor.
     if ( refCursor_ )
       OCIHandleFree ( stmth_, OCI_HTYPE_STMT );
-    else 
+    else
       ociCall ( OCIStmtRelease (stmth_, errh_, NULL, 0, OCI_DEFAULT), errh_ );
 
     stmth_ = NULL;

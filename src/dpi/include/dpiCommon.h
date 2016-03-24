@@ -34,7 +34,7 @@ namespace dpi
                      PUBLIC CONSTANTS
   ----------------------------------------------------------------------------*/
 
-  
+
 enum HandleType
 {
   ErrorHandleType = 2  // OCI_HTYPE_ERROR

@@ -656,7 +656,7 @@ DateTimeArray* EnvImpl::getDateTimeArray (OCIError *errh) const
   {
     throw ExceptionImpl ( DpiErrMemAllocFail ) ;
   }
-  return dtmarr; 
+  return dtmarr;
 }
 
 
@@ -691,7 +691,7 @@ void EnvImpl::releaseDateTimeArray ( DateTimeArray *arr )  const
      allocated DPI handle
 
    NOTES:
-     
+
  */
 
 DpiHandle * EnvImpl::allocHandle(HandleType handleType)
@@ -718,7 +718,7 @@ DpiHandle * EnvImpl::allocHandle(HandleType handleType)
      allocated DPI descriptor
 
    NOTES:
-     
+
  */
 
 Descriptor * EnvImpl::allocDescriptor(DescriptorType descriptorType)
@@ -746,7 +746,7 @@ Descriptor * EnvImpl::allocDescriptor(DescriptorType descriptorType)
      allocated DPI descriptor array
 
    NOTES:
-     
+
  */
 
 void EnvImpl::allocDescriptorArray(DescriptorType descriptorType,
@@ -772,7 +772,7 @@ void EnvImpl::allocDescriptorArray(DescriptorType descriptorType,
      OCI environment handle
 
    NOTES:
-     
+
  */
 
 DpiHandle * EnvImpl::envHandle() const

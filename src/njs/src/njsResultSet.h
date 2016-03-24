@@ -18,9 +18,9 @@
  * This file uses NAN:
  *
  * Copyright (c) 2015 NAN contributors
- * 
+ *
  * NAN contributors listed at https://github.com/rvagg/nan#contributors
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
  * "Software"), to deal in the Software without restriction, including
@@ -28,10 +28,10 @@
  * distribute, sublicense, and/or sell copies of the Software, and to
  * permit persons to whom the Software is furnished to do so, subject to
  * the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be
  * included in all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -39,7 +39,7 @@
  * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- * 
+ *
  * NAME
  *   njsResultSet.h
  *
@@ -72,10 +72,10 @@ typedef struct rsBaton
   uv_work_t            req;
   std::string          error;
   bool                 fetchMultiple;   // set for getRows() method.
-  bool                 errOnActiveOrInvalid; 
-                                        // set if going to exit upon already 
-                                        // active or invalid  
-  eBaton               *ebaton;  
+  bool                 errOnActiveOrInvalid;
+                                        // set if going to exit upon already
+                                        // active or invalid
+  eBaton               *ebaton;
   unsigned int         numRows;         // rows to be fetched.
   ResultSet*           njsRS;           // resultset object.
 
@@ -133,7 +133,7 @@ private:
 
   static void clearFetchBuffer( Define* defineBuffers,
                                 unsigned int numCols );
-  
+
 
   dpi::Stmt            *dpistmt_;
   dpi::Env             *dpienv_;

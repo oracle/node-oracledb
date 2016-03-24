@@ -80,7 +80,7 @@ public:
                      unsigned int maxarr_len, unsigned int *curelen,
                      void *data, cbtype cb);
 
-  virtual void bind (const unsigned char *name, int nameLen, 
+  virtual void bind (const unsigned char *name, int nameLen,
                      unsigned int bndpos,
                      unsigned short type, void *buf, DPI_SZ_TYPE bufSize,
                      short *ind, DPI_BUFLEN_TYPE *bufLen,
