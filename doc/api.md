@@ -750,10 +750,9 @@ oracledb.stmtCacheSize = 30;
 #### <a name="propdbstreamnumrows"></a> 3.2.17 streamNumRows
 
 A value used when streaming rows with [`queryStream()`](#querystream).
-It does not limit the total number of rows returned by the stream.
-The value is passed to internal [getRows()](#getrows) calls and is
-used only for tuning because `getRows()` may be internally called one
-or more times when streaming results.
+It does not limit the total number of rows returned by the stream or
+the `data` events generated.  The value is passed to internal
+[getRows()](#getrows) calls and is used only for tuning.
 
 The default value is 100.
 
@@ -1434,20 +1433,28 @@ stream.Readable queryStream(String sql, [Object bindParams, [Object options]]);
 
 ##### Return Value
 
-This function will return a readable stream for queries.
+This function will return a
+[Readable Stream](https://nodejs.org/api/stream.html) for queries.
 
 ##### Description
 
-This function provides query streaming support.  The input of this
-function is same as `execute()` however a callback is not used.
-Instead this function returns a stream used to fetch data.  See
-[Streaming Results](#streamingresults) for more information.
+This function provides query streaming support.  The parameters are
+the same as [`execute()`](#execute) except a callback is not used.
+Instead this function returns a stream used to fetch data.
+
+Each row is returned as a `data` event.  Query metadata is available
+via a `metadata` event.  The `end` event indicates the end of the
+query results.
+
+Query results must be fetched to completion to avoid resource leaks.
 
 The connection must remain open until the stream is completely read.
 
+See [Streaming Query Results](#streamingresults) for more information.
+
 ##### Parameters
 
-See [connection.execute()](#execute).
+See [execute()](#execute).
 
 An additional options attribute `streamNumRows` can be set.  This
 overrides *Oracledb* [`streamNumRows`](#propdbstreamnumrows).
@@ -2436,7 +2443,8 @@ specified by the [`oracledb.streamNumRows`](#propdbstreamnumrows)
 value or the `queryStream()` option attribute `streamNumRows`.  This
 value does not alter the number of rows returned by the stream since
 `getRows()` will be called each time more rows are needed.  However
-the value can be used to tune performance.
+the value can be used to tune performance, as also can the value of
+[`prefetchRows`](#propdbprefetchrows).
 
 There is no explicit ResultSet `close()` call for streaming query
 results.  This call will be executed internally when all data has been
@@ -3014,7 +3022,7 @@ Lob switches to flowing mode.
 For unpiped Readable Lobs operating in flowing mode where the Lob is
 read through event handlers, the Lob object can be switched to paused
 mode by calling `pause()`.  Once the Lob is in paused mode, it stops
-emitting 'data' events.
+emitting `data` events.
 
 Similarly, a Readable Lob operating in the paused mode can be switched
 to flowing mode by calling `resume()`.  It will then start emitting
