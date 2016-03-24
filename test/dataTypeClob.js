@@ -37,7 +37,7 @@
  *     51 onwards are for other tests
  *
  *****************************************************************************/
-"use strict";
+'use strict';
 
 var oracledb = require('oracledb');
 var fs       = require('fs');
@@ -257,6 +257,12 @@ describe('40. dataTypeClob.js', function() {
               });
             }
           );
+        },
+        function deleteOutFile(callback) {
+          fs.unlink(outFileName, function(err) {
+            should.not.exist(err);
+            callback();
+          });
         }
       ], done);  // async
 
