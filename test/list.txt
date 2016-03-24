@@ -238,8 +238,7 @@
         13.1.8 Read CLOBs
         13.1.9 Read CLOBs after stream close
         13.1.10 meta data
-        13.1.11 stream results with bulk size set
-        13.1.12 stream stress test
+        13.1.11 stream stress test
 
 14. stream2.js
     14.1 Bind by position and return an array
@@ -251,10 +250,6 @@
     14.7 Negative - queryStream() has no parameters
     14.8 Negative - give invalid SQL as first parameter
     14.9 Negatvie - give non-query SQL
-    - 14.10 Negative - set streamNumRows to be 0
-    - 14.11 Negative - set streamNumRows to be NaN
-    14.12 Negative - set streamNumRows to be a negative number
-    14.13 Negative - set streamNumRows to be a string
 
 21. datatypeAssist.js
 

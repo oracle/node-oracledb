@@ -428,38 +428,12 @@ describe('13. stream1.js', function () {
       });
     });
 
-    it('13.1.11 stream results with bulk size set', function (done) {
-      connection.should.be.ok;
-
-      var stream = connection.queryStream('SELECT employees_name FROM nodb_employees', [], {
-        streamNumRows: 1
-      });
-
-      stream.on('error', function (error) {
-        should.fail(error, null, 'Error event should not be triggered');
-      });
-
-      var counter = 0;
-      stream.on('data', function (data) {
-        should.exist(data);
-        counter++;
-      });
-
-      stream.on('end', function () {
-        should.equal(counter, rowsAmount);
-
-        setTimeout(done, 500);
-      });
-    });
-
-    it('13.1.12 stream stress test', function (done) {
+    it('13.1.11 stream stress test', function (done) {
       this.timeout(30000);
 
       connection.should.be.ok;
 
-      var stream = connection.queryStream('SELECT employees_name FROM nodb_employees', [], {
-        streamNumRows: 1
-      });
+      var stream = connection.queryStream('SELECT employees_name FROM nodb_employees');
 
       stream.on('error', function (error) {
         should.fail(error, null, 'Error event should not be triggered');
@@ -478,9 +452,7 @@ describe('13. stream1.js', function () {
 
         var testDone = 0;
         var subTest = function (callback) {
-          var query = connection.queryStream('SELECT employees_name FROM nodb_employees', [], {
-            streamNumRows: Math.floor((Math.random() * (500 - 1)) + 1)
-          });
+          var query = connection.queryStream('SELECT employees_name FROM nodb_employees');
 
           query.on('error', function (error) {
             should.fail(error, null, 'Error event should not be triggered');
