@@ -133,12 +133,12 @@ describe('62. lobProperties.js', function() {
 
             async.parallel([
               function(callback) {
-                clobStream.on('end', function() {
+                clob.on('finish', function() {
                   callback();
                 });
               },
               function(callback) {
-                blobStream.on('end', function() {
+                blob.on('finish', function() {
                   callback();
                 });
               }
