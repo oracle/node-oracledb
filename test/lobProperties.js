@@ -42,7 +42,7 @@ var dbConfig = require('./dbconfig.js');
 
 describe('62. lobProperties.js', function() {
 
-        if(dbConfig.externalAuth){
+  if(dbConfig.externalAuth){
     var credential = { externalAuth: true, connectString: dbConfig.connectString };
   } else {
     var credential = dbConfig;
@@ -56,9 +56,9 @@ describe('62. lobProperties.js', function() {
 
   before('prepare table and LOB data', function(done) {
 
-        var sqlCreateTab =
-            " BEGIN "
-          + "   DECLARE "
+    var sqlCreateTab =
+      " BEGIN "
+      + "   DECLARE "
       + "     e_table_exists EXCEPTION; "
       + "     PRAGMA EXCEPTION_INIT(e_table_exists, -00942); "
       + "   BEGIN "
