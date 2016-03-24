@@ -241,6 +241,24 @@
         13.1.11 stream results with bulk size set
         13.1.12 stream stress test
 
+<<<<<<< HEAD
+14. stream2.js
+    14.1 Bind by position and return an array
+    14.2 Bind by name and return an array
+    14.3 Bind by position and return an object
+    14.4 Bind by name and return an object
+    14.5 explicitly set resultSet option to be false 
+    14.6 maxRows option is ignored as expect
+    14.7 Negative - queryStream() has no parameters
+    14.8 Negative - give invalid SQL as first parameter
+    14.9 Negatvie - give non-query SQL
+    - 14.10 Negative - set streamNumRows to be 0
+    - 14.11 Negative - set streamNumRows to be NaN
+    14.12 Negative - set streamNumRows to be a negative number
+    14.13 Negative - set streamNumRows to be a string
+   
+=======
+>>>>>>> 80041ca9e2b44dc2a3f70e5deb6d8b9da8eaf134
 21. datatypeAssist.js
 
 22. dataTypeChar.js

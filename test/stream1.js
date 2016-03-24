@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -19,7 +19,7 @@
  * See LICENSE.md for relevant licenses.
  *
  * NAME
- *   13. stream.js
+ *   13. stream1.js
  *
  * DESCRIPTION
  *   Testing driver query results via stream feature.
@@ -31,13 +31,14 @@
  *     51 onwards are for other tests
  *
  *****************************************************************************/
+'use strict';
 
 var oracledb = require('oracledb');
-var should = require('should');
-var async = require('async');
+var should   = require('should');
+var async    = require('async');
 var dbConfig = require('./dbconfig.js');
 
-describe('13. stream.js', function () {
+describe('13. stream1.js', function () {
   var connection = false;
 
   if (dbConfig.externalAuth) {
@@ -178,7 +179,6 @@ describe('13. stream.js', function () {
 
       stream.on('error', function (error) {
         should.exist(error);
-
         setTimeout(done, 500);
       });
 
