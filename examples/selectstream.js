@@ -44,10 +44,7 @@ oracledb.getConnection(
     }
 
     var stream = connection.queryStream(
-      'SELECT first_name, last_name FROM employees ORDER BY employee_id',
-      [], // no bind variables
-      { streamNumRows: 100 } // Used for tuning.  Does not affect how many rows are returned.
-                             // Default is 100
+      'SELECT first_name, last_name FROM employees ORDER BY employee_id'
     );
 
     stream.on('error', function (error) {

@@ -52,8 +52,7 @@ limitations under the License.
      - 3.2.14 [queueRequests](#propdbqueuerequests)
      - 3.2.15 [queueTimeout](#propdbqueuetimeout)
      - 3.2.16 [stmtCacheSize](#propdbstmtcachesize)
-     - 3.2.17 [streamNumRows](#propdbstreamnumrows)
-     - 3.2.18 [version](#propdbversion)
+     - 3.2.17 [version](#propdbversion)
   - 3.3 [Oracledb Methods](#oracledbmethods)
      - 3.3.1 [createPool()](#createpool)
      - 3.3.2 [getConnection()](#getconnectiondb)
@@ -490,6 +489,9 @@ The default value is 100.
 
 This property may be overridden in an [`execute()`](#execute) call.
 
+This property is also used by [`queryStream()`](#querystream) as an
+internal buffer size tuning parameter.
+
 To improve database efficiency, SQL queries should use a row
 limiting clause like [OFFSET /
 FETCH](https://docs.oracle.com/database/121/SQLRF/statements_10002.htm#BABEAACC)
@@ -747,25 +749,7 @@ var oracledb = require('oracledb');
 oracledb.stmtCacheSize = 30;
 ```
 
-#### <a name="propdbstreamnumrows"></a> 3.2.17 streamNumRows
-
-A value used when streaming rows with [`queryStream()`](#querystream).
-It does not limit the total number of rows returned by the stream or
-the `data` events generated.  The value is passed to internal
-[getRows()](#getrows) calls and is used only for tuning.
-
-The default value is 100.
-
-This property may be overridden in a [`queryStream()`](#querystream) call.
-
-##### Example
-
-```javascript
-var oracledb = require('oracledb');
-oracledb.streamNumRows = 100;
-```
-
-#### <a name="propdbversion"></a> 3.2.18 version
+#### <a name="propdbversion"></a> 3.2.17 version
 ```
 readonly Number version
 ```
@@ -1450,14 +1434,17 @@ Query results must be fetched to completion to avoid resource leaks.
 
 The connection must remain open until the stream is completely read.
 
+For tuning purposes the [`oracledb.maxRows`](#propdbmaxrows) property
+can be used to size an internal buffer used by `queryStream()`.  Note
+it does not limit the number of rows returned by the stream.  The
+[`oracledb.prefetchRows`](#propdbprefetchrows) value will also affect
+performance.
+
 See [Streaming Query Results](#streamingresults) for more information.
 
 ##### Parameters
 
 See [execute()](#execute).
-
-An additional options attribute `streamNumRows` can be set.  This
-overrides *Oracledb* [`streamNumRows`](#propdbstreamnumrows).
 
 #### <a name="release"></a> 4.2.5 release()
 
@@ -2439,12 +2426,11 @@ The query stream implementation is a wrapper over the
 [getRows()](#getrows) are made internally to fetch each successive
 subset of data, each row of which will generate a `data` event.  The
 number of rows fetched from the database by each `getRows()` call is
-specified by the [`oracledb.streamNumRows`](#propdbstreamnumrows)
-value or the `queryStream()` option attribute `streamNumRows`.  This
-value does not alter the number of rows returned by the stream since
+set to the value of [`oracledb.maxRows`](#propdbmaxrows).  This value
+does not alter the number of rows returned by the stream since
 `getRows()` will be called each time more rows are needed.  However
 the value can be used to tune performance, as also can the value of
-[`prefetchRows`](#propdbprefetchrows).
+[`oracledb.prefetchRows`](#propdbprefetchrows).
 
 There is no explicit ResultSet `close()` call for streaming query
 results.  This call will be executed internally when all data has been
@@ -2454,11 +2440,7 @@ data, use a [ResultSet with callbacks](#resultsethandling).
 An example of streaming query results is:
 
 ```javascript
-var stream = connection.queryStream('SELECT employees_name FROM employees',
-    [],  // no bind variables
-    { streamNumRows: 100 } // Used for tuning.  Does not affect how many rows are returned.
-                           // Default is 100
-);
+var stream = connection.queryStream('SELECT employees_name FROM employees');
 
 stream.on('error', function (error) {
   // handle any error...
