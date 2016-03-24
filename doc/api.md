@@ -2461,6 +2461,8 @@ stream.on('metadata', function (metadata) {
 // listen to any other standard stream events...
 ```
 
+See [selectstream.js](https://github.com/oracle/node-oracledb/tree/master/examples/selectstream.js) for a runnable example.
+
 #### <a name="queryoutputformats"></a> 9.1.4 Query Output Formats
 
 Query rows may be returned as an array of column values, or as
