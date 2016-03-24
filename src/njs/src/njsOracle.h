@@ -77,6 +77,7 @@ using namespace v8;
                                       (NJS_NODE_ORACLEDB_MINOR * 100) +   \
                                       (NJS_NODE_ORACLEDB_PATCH) )
 
+
 class Oracledb: public Nan::ObjectWrap
 {
  public:
@@ -104,6 +105,8 @@ class Oracledb: public Nan::ObjectWrap
    {  return fetchAsStringTypesCount_ ;   }
 
 private:
+   const string driverName() const;
+
    // Define Oracledb Constructor
    static Nan::Persistent<FunctionTemplate> oracledbTemplate_s;
 

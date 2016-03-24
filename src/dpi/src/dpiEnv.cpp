@@ -86,9 +86,9 @@ Env::~Env()
      nothing
  */
 
-Env * Env::createEnv()
+Env * Env::createEnv( const string & drvName )
 {
-  return EnvImpl::createEnvImpl();
+  return EnvImpl::createEnvImpl( drvName );
 }
 
 

@@ -83,11 +83,12 @@ PoolImpl::PoolImpl(EnvImpl *env, OCIEnv *envh,
                    int poolMin, int poolIncrement,
                    int poolTimeout, bool externalAuth, int stmtCacheSize)
   try : env_(env), externalAuth_(externalAuth), envh_(envh), errh_(NULL),
-        spoolh_(NULL), poolName_(NULL)
+        spoolh_(NULL), poolName_(NULL), poolAuth_(NULL)
 {
   ub4 mode = externalAuth ? OCI_DEFAULT : OCI_SPC_HOMOGENEOUS;
   void *errh   = NULL;
   void *spoolh = NULL;
+  void *poolAuth = NULL;
 
   unsigned char spoolMode = OCI_SPOOL_ATTRVAL_NOWAIT; // spoolMode is a ub1
 
@@ -101,6 +102,22 @@ PoolImpl::PoolImpl(EnvImpl *env, OCIEnv *envh,
   ociCall(OCIHandleAlloc((void *)envh_, (dvoid **)&spoolh,
                          OCI_HTYPE_SPOOL, 0, (dvoid **)0), errh_);
   spoolh_ = ( OCISPool * ) spoolh;
+
+  ociCall ( OCIHandleAlloc ( ( void * ) envh_, ( dvoid ** ) &poolAuth,
+                             OCI_HTYPE_AUTHINFO, 0, ( dvoid ** ) 0 ), errh_ );
+
+  poolAuth_ = ( OCIAuthInfo *) poolAuth;
+
+  if ( !(env_->drvName()).empty() )
+  {
+    ociCall ( OCIAttrSet ( ( void * ) poolAuth_, OCI_HTYPE_AUTHINFO,
+                           ( OraText * ) ( env_->drvName() ).data (),
+                           ( ub4 ) ( ( env_->drvName() ).length () ),
+                           OCI_ATTR_DRIVER_NAME, errh_ ), errh_ );
+  }
+
+  ociCall ( OCIAttrSet ( spoolh_, OCI_HTYPE_SPOOL, poolAuth_, 0,
+                         OCI_ATTR_SPOOL_AUTH, errh_ ), errh_ );
 
   ociCall(OCISessionPoolCreate(envh_, errh_, spoolh_,
                                &poolName_, &poolNameLen_,
@@ -120,6 +137,7 @@ PoolImpl::PoolImpl(EnvImpl *env, OCIEnv *envh,
   ociCall (OCIAttrSet (spoolh_, OCI_HTYPE_SPOOL, &spoolMode,
                        sizeof (spoolMode), OCI_ATTR_SPOOL_GETMODE, errh_ ),
            errh_ ) ;
+
 }
 
 catch (...)
@@ -349,6 +367,12 @@ void PoolImpl::releaseConnection(ConnImpl *conn)
 
 void PoolImpl::cleanup()
 {
+  if ( poolAuth_ )
+  {
+    OCIHandleFree (poolAuth_, OCI_HTYPE_AUTHINFO );
+    poolAuth_ = NULL;
+  }
+
   if (poolName_)
   {
     // Ignore errors thrown.

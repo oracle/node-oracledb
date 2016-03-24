@@ -91,6 +91,7 @@ class PoolImpl : public SPool
   OCISPool    *spoolh_;         // OCI session pool handle
   OraText     *poolName_;       // pool name
   ub4          poolNameLen_;    // pool name length
+  OCIAuthInfo *poolAuth_;       // pool Auth handle
 };
 
 

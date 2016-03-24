@@ -62,11 +62,11 @@ class EnvImpl : public Env
 {
  public:
                                // creation/termination
-  EnvImpl();
+  EnvImpl( const string & drvName = "" );
 
   virtual ~EnvImpl();
 
-  static EnvImpl * createEnvImpl();
+  static EnvImpl * createEnvImpl( const string & drvName = "" );
 
   virtual void terminate();
 
@@ -82,6 +82,8 @@ class EnvImpl : public Env
 
   virtual void poolTimeout(unsigned int poolTimeout);
   virtual unsigned int poolTimeout() const;
+
+  virtual const string & drvName();
 
   virtual void externalAuth(bool externalAuth);
   virtual bool externalAuth() const;
@@ -137,10 +139,11 @@ private:
   unsigned int poolIncrement_;  // pool increment
   unsigned int poolTimeout_;    // pool timeout
 
-  bool         externalAuth_; // doing external authentication
+  bool         externalAuth_;   // doing external authentication
   bool         isEventEnabled_; // EVENTS are enabled
 
   unsigned int stmtCacheSize_;  // statement cache size
+  string       drvName_;        // driver name
 
  };
 

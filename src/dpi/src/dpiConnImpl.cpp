@@ -620,6 +620,17 @@ void ConnImpl::initConnImpl ( bool pool, bool externalAuth,
                            OCI_ATTR_CONNECTION_CLASS, errh_ ), errh_ );
   }
 
+  /* In case of Pool, we set the driver name on poolAuth_ handle in
+   * Pool implimentation. For non-pooled connections we set it here.
+   */
+  if ( !pool &&  !(env_->drvName()).empty() )
+  {
+    ociCall ( OCIAttrSet ( (void*) auth_, OCI_HTYPE_AUTHINFO,
+                           (OraText *) ( env_->drvName() ).data (),
+                           ( ub4 ) ( ( env_->drvName() ).length () ),
+                           OCI_ATTR_DRIVER_NAME, errh_ ), errh_);
+  }
+
   ociCall ( OCISessionGet ( envh_, errh_, &svch_, auth_, poolNmRconnStr,
                           ( ub4 ) nameLen, NULL, 0, NULL, NULL, NULL,
                           mode ), errh_ );

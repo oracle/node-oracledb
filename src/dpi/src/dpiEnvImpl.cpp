@@ -54,7 +54,6 @@
 #endif
 
 
-
 /*---------------------------------------------------------------------------
                      PRIVATE CONSTANTS
   ---------------------------------------------------------------------------*/
@@ -88,11 +87,12 @@ static const int kStmtCacheSize = 60;
 
  */
 
-EnvImpl::EnvImpl()
+EnvImpl::EnvImpl( const string & drvName )
 
 try : envh_(NULL), poolMax_(kPoolMax), poolMin_(kPoolMin),
       poolIncrement_(kPoolIncrement), poolTimeout_(kPoolTimeout),
-      externalAuth_(false),  stmtCacheSize_(kStmtCacheSize)
+      externalAuth_(false), stmtCacheSize_(kStmtCacheSize),
+      drvName_(drvName)
 {
 
   sword rc = OCIEnvNlsCreate (&envh_, OCI_THREADED | OCI_OBJECT, NULL, NULL,
@@ -151,9 +151,9 @@ EnvImpl::~EnvImpl()
      nothing
  */
 
-EnvImpl * EnvImpl::createEnvImpl()
+EnvImpl * EnvImpl::createEnvImpl( const string & drvName )
 {
-  return new EnvImpl();
+  return new EnvImpl( drvName );
 }
 
 
@@ -353,6 +353,27 @@ unsigned int EnvImpl::poolTimeout() const
   return poolTimeout_;
 }
 
+
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Get the driver name
+
+   PARAMETERS:
+     none
+
+   RETURNS:
+     driver name
+
+   NOTES:
+
+ */
+
+const string & EnvImpl::drvName()
+{
+  return drvName_;
+}
 
 /*****************************************************************************/
 /*
@@ -758,8 +779,6 @@ DpiHandle * EnvImpl::envHandle() const
 {
   return (DpiHandle *)envh_;
 }
-
-
 
 /* end of file dpiEnvImpl.cpp */
 

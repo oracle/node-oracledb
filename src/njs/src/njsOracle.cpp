@@ -56,6 +56,7 @@
 #include "njsResultSet.h"
 #include "njsMessages.h"
 #include "njsIntLob.h"
+#include <sstream>
                                         //peristent Oracledb class handle
 Nan::Persistent<FunctionTemplate> Oracledb::oracledbTemplate_s;
 
@@ -68,6 +69,8 @@ Nan::Persistent<FunctionTemplate> Oracledb::oracledbTemplate_s;
 #define NJS_PREFETCH_ROWS       100
 #define NJS_LOB_PREFETCH_SIZE 16384
 
+#define NJS_DRIVERNAME_PREFIX "node-oracledb"
+
 /*****************************************************************************/
 /*
    DESCRIPTION
@@ -75,7 +78,7 @@ Nan::Persistent<FunctionTemplate> Oracledb::oracledbTemplate_s;
  */
 Oracledb::Oracledb()
 {
-  dpienv_             = dpi::Env::createEnv();
+  dpienv_             = dpi::Env::createEnv( driverName() );
   outFormat_          = ROWS_ARRAY;
   maxRows_            = NJS_MAX_ROWS;
   autoCommit_         = false;
@@ -109,6 +112,26 @@ Oracledb::~Oracledb()
   {
     dpienv_->terminate();
   }
+}
+
+/*
+ * DESCRIPTION
+ *   Compose the driver name using the constants NJS_DRIVERNAME_PREFIX,
+ *   NJS_NODE_ORACLEDB_MAJOR, NJS_NODE_ORACLEDB_MINOR and
+ *   NJS_NODE_ORACLEDB_PATCH
+ */
+const string Oracledb::driverName() const
+{
+  stringstream strm;
+
+  strm << NJS_DRIVERNAME_PREFIX << " : ";          //append prefix
+  strm << NJS_NODE_ORACLEDB_MAJOR;                 //append Mjor version
+  strm << ".";
+  strm << NJS_NODE_ORACLEDB_MINOR;                 //append Minor version
+  strm << ".";
+  strm << NJS_NODE_ORACLEDB_PATCH;                 //append Patch version
+
+  return strm.str();
 }
 
 /*****************************************************************************/

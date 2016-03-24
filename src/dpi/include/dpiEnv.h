@@ -66,7 +66,7 @@ class Env
  public:
                                 // creation/termination
 
-  static Env * createEnv();
+  static Env * createEnv( const string &drvName = "" );
 
   virtual void terminate() = 0;
 
