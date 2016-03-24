@@ -226,6 +226,21 @@
         12.7.1 maxRows option is ignored when resultSet option is true
         12.7.2 maxRows option is ignored with REF Cursor
 
+13. stream.js
+    13.1 Testing ResultSet stream
+        13.1.1 stream results for oracle connection
+        13.1.2 stream results for oracle connection (outFormat: oracledb.OBJECT)
+        13.1.3 errors in query
+        13.1.4 no result
+        13.1.5 single row
+        13.1.6 multiple row
+        13.1.7 invalid SQL
+        13.1.8 Read CLOBs
+        13.1.9 Read CLOBs after stream close
+        13.1.10 meta data
+        13.1.11 stream results with bulk size set
+        13.1.12 stream stress test
+        
 21. datatypeAssist.js
 
 22. dataTypeChar.js
@@ -603,4 +618,3 @@
     66.3 allows overwriting of public methods on connection instances
     66.4 allows overwriting of public methods on resultset instances
     66.5 allows overwriting of public methods on lob instances
-

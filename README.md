@@ -13,11 +13,10 @@ The add-on is stable, well documented, and has a comprehensive test suite.
 The node-oracledb project is open source and maintained by Oracle Corp.  The home page is on the
 [Oracle Technology Network](http://www.oracle.com/technetwork/database/database-technologies/scripting-languages/node_js/).
 
-
 ### Node-oracledb supports:
 
 - [SQL and PL/SQL execution](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#sqlexecution)
-- [Fetching of large result sets](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#resultsethandling)
+- Fetching of query results by [callbacks](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#resultsethandling) or [streams](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#streamingresults)
 - [REF CURSORs](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#refcursors)
 - [Large Objects: CLOBs and BLOBs](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#lobhandling)
 - [Query results as JavaScript objects or array ](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#queryoutputformats)

@@ -52,7 +52,8 @@ limitations under the License.
      - 3.2.14 [queueRequests](#propdbqueuerequests)
      - 3.2.15 [queueTimeout](#propdbqueuetimeout)
      - 3.2.16 [stmtCacheSize](#propdbstmtcachesize)
-     - 3.2.17 [version](#propdbversion)
+     - 3.2.17 [streamNumRows](#propdbstreamnumrows)
+     - 3.2.18 [version](#propdbversion)
   - 3.3 [Oracledb Methods](#oracledbmethods)
      - 3.3.1 [createPool()](#createpool)
      - 3.3.2 [getConnection()](#getconnectiondb)
@@ -71,8 +72,9 @@ limitations under the License.
         - 4.2.3.2 [execute(): Bind Parameters](#executebindParams)
         - 4.2.3.3 [execute(): Options](#executeoptions)
         - 4.2.3.4 [execute(): Callback Function](#executecallback)
-     - 4.2.4 [release()](#release)
-     - 4.2.5 [rollback()](#rollback)
+     - 4.2.4 [queryStream()](#querystream)
+     - 4.2.5 [release()](#release)
+     - 4.2.6 [rollback()](#rollback)
 5. [Lob Class](#lobclass)
   - 5.1 [Lob Properties](#lobproperties)
      - 5.1.1 [chunkSize](#proplobchunksize)
@@ -113,10 +115,11 @@ limitations under the License.
   - 9.1 [SELECT Statements](#select)
      - 9.1.1 [Fetching Rows](#fetchingrows)
      - 9.1.2 [Result Set Handling](#resultsethandling)
-     - 9.1.3 [Query Output Formats](#queryoutputformats)
-     - 9.1.4 [Query Column Metadata](#querymeta)
-     - 9.1.5 [Result Type Mapping](#typemap)
-     - 9.1.6 [Row Prefetching](#rowprefetching)
+     - 9.1.3 [Streaming Query Results](#streamingresults)
+     - 9.1.4 [Query Output Formats](#queryoutputformats)
+     - 9.1.5 [Query Column Metadata](#querymeta)
+     - 9.1.6 [Result Type Mapping](#typemap)
+     - 9.1.7 [Row Prefetching](#rowprefetching)
 10. [PL/SQL Execution](#plsqlexecution)
   - 10.1 [PL/SQL Stored Procedures](#plsqlproc)
   - 10.2 [PL/SQL Stored Functions](#plsqlfunc)
@@ -744,7 +747,26 @@ var oracledb = require('oracledb');
 oracledb.stmtCacheSize = 30;
 ```
 
-#### <a name="propdbversion"></a> 3.2.17 version
+#### <a name="propdbstreamnumrows"></a> 3.2.17 streamNumRows
+
+A value used when streaming rows with [`queryStream()`](#querystream).
+It does not limit the total number of rows returned by the stream.
+The value is passed to internal [getRows()](#getrows) calls and is
+used only for tuning because `getRows()` may be internally called one
+or more times when streaming results.
+
+The default value is 100.
+
+This property may be overridden in a [`queryStream()`](#querystream) call.
+
+##### Example
+
+```javascript
+var oracledb = require('oracledb');
+oracledb.streamNumRows = 100;
+```
+
+#### <a name="propdbversion"></a> 3.2.18 version
 ```
 readonly Number version
 ```
@@ -1402,7 +1424,35 @@ rows affected, for example the number of rows inserted. For non-DML
 statements such as queries, or if no rows are affected, then
 `rowsAffected` will be zero.
 
-#### <a name="release"></a> 4.2.4 release()
+#### <a name="querystream"></a> 4.2.4 queryStream()
+
+##### Prototype
+
+```
+stream.Readable queryStream(String sql, [Object bindParams, [Object options]]);
+```
+
+##### Return Value
+
+This function will return a readable stream for queries.
+
+##### Description
+
+This function provides query streaming support.  The input of this
+function is same as `execute()` however a callback is not used.
+Instead this function returns a stream used to fetch data.  See
+[Streaming Results](#streamingresults) for more information.
+
+The connection must remain open until the stream is completely read.
+
+##### Parameters
+
+See [connection.execute()](#execute).
+
+An additional options attribute `streamNumRows` can be set.  This
+overrides *Oracledb* [`streamNumRows`](#propdbstreamnumrows).
+
+#### <a name="release"></a> 4.2.5 release()
 
 ##### Prototype
 
@@ -1445,7 +1495,7 @@ Callback function parameter | Description
 ----------------------------|-------------
 *Error error* | If `release()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
-#### <a name="rollback"></a> 4.2.5 rollback()
+#### <a name="rollback"></a> 4.2.6 rollback()
 
 ##### Prototype
 
@@ -2218,6 +2268,9 @@ A SQL or PL/SQL statement may be executed using the *Connection*
 After all database calls on the connection complete, the application
 should use the [`release()`](#release) call to release the connection.
 
+Queries may optionally be streamed using the *Connection*
+[`queryStream()`](#querystream) method.
+
 ### <a name="select"></a> 9.1 SELECT Statements
 
 #### <a name="fetchingrows"></a> 9.1.1 Fetching Rows
@@ -2244,8 +2297,10 @@ restricted to [`maxRows`](#propdbmaxrows):
 #### <a name="resultsethandling"></a> 9.1.2 Result Set Handling
 
 When the number of query rows is relatively big, or can't be
-predicted, it is recommended to use a [`ResultSet`](#resultsetclass).
-This prevents query results being unexpectedly truncated by the
+predicted, it is recommended to use a [`ResultSet`](#resultsetclass)
+with callbacks, as described in this section, or via the ResultSet
+stream wrapper, as described [later](#streamingresults).  This
+prevents query results being unexpectedly truncated by the
 [`maxRows`](#propdbmaxrows) limit and removes the need to oversize
 `maxRows` to avoid such truncation.  Otherwise, for queries that
 return a known small number of rows, non-result set queries may have
@@ -2343,7 +2398,65 @@ function fetchRowsFromRS(connection, resultSet, numRows)
 }
 ```
 
-#### <a name="queryoutputformats"></a> 9.1.3 Query Output Formats
+#### <a name="streamingresults"></a> 9.1.3 Streaming Query Results
+
+Streaming query results allows data to be piped to other streams, for
+example when dealing with HTTP responses.
+
+Use [`connection.queryStream()`](#querystream) to create a stream and
+listen for events.  Each row is returned as a `data` event.  Query
+metadata is available via a `metadata` event.  The `end` event
+indicates the end of the query results.
+
+The connection must remain open until the stream is completely read.
+
+Query results must be fetched to completion to avoid resource leaks.
+
+The query stream implementation is a wrapper over the
+[ResultSet Class](#resultsetclass).  In particular, calls to
+[getRows()](#getrows) are made internally to fetch each successive
+subset of data, each row of which will generate a `data` event.  The
+number of rows fetched from the database by each `getRows()` call is
+specified by the [`oracledb.streamNumRows`](#propdbstreamnumrows)
+value or the `queryStream()` option attribute `streamNumRows`.  This
+value does not alter the number of rows returned by the stream since
+`getRows()` will be called each time more rows are needed.  However
+the value can be used to tune performance.
+
+There is no explicit ResultSet `close()` call for streaming query
+results.  This call will be executed internally when all data has been
+fetched.  If you need to be able to stop a query before retrieving all
+data, use a [ResultSet with callbacks](#resultsethandling).
+
+An example of streaming query results is:
+
+```javascript
+var stream = connection.queryStream('SELECT employees_name FROM employees',
+    [],  // no bind variables
+    { streamNumRows: 100 } // Used for tuning.  Does not affect how many rows are returned.
+                           // Default is 100
+);
+
+stream.on('error', function (error) {
+  // handle any error...
+});
+
+stream.on('data', function (data) {
+  // handle data row...
+});
+
+stream.on('end', function () {
+  // release connection...
+});
+
+stream.on('metadata', function (metadata) {
+  // access metadata of query
+});
+
+// listen to any other standard stream events...
+```
+
+#### <a name="queryoutputformats"></a> 9.1.4 Query Output Formats
 
 Query rows may be returned as an array of column values, or as
 Javascript objects, depending on the values of
@@ -2413,7 +2526,7 @@ names follow Oracle's standard name-casing rules.  They will commonly
 be uppercase, since most applications create tables using unquoted,
 case-insensitive names.
 
-#### <a name="querymeta"></a> 9.1.4 Query Column Metadata
+#### <a name="querymeta"></a> 9.1.5 Query Column Metadata
 
 The column names of a query are returned in the
 [`execute()`](#execute) callback's `result.metaData` parameter
@@ -2446,7 +2559,7 @@ The names are in uppercase.  This is the default casing behavior for
 Oracle client programs when a database table is created with unquoted,
 case-insensitive column names.
 
-#### <a name="typemap"></a> 9.1.5 Result Type Mapping
+#### <a name="typemap"></a> 9.1.6 Result Type Mapping
 
 Oracle character, number and date columns can be selected.  Data types
 that are currently unsupported give a "datatype is not supported"
@@ -2617,7 +2730,7 @@ you may want to bind using `type: oracledb.STRING`.  Output would be:
 { x: '-71.48923', y: '42.72347' }
 ```
 
-#### <a name="rowprefetching"></a> 9.1.6 Row Prefetching
+#### <a name="rowprefetching"></a> 9.1.7 Row Prefetching
 
 [Prefetching](http://docs.oracle.com/database/121/LNOCI/oci04sql.htm#LNOCI16355) is a query tuning feature allowing resource usage to be
 optimized.  It allows multiple rows to be returned in each network
@@ -2850,7 +2963,7 @@ connection.execute(
 ```
 
 The query rows can be handled using a
-[ResultSet](http://localhost:8899/doc/api.md#resultsethandling).
+[ResultSet](#resultsethandling).
 
 Remember to first enable output using `DBMS_OUTPUT.ENABLE(NULL)`.
 
