@@ -130,8 +130,7 @@
                 ]
               }
             }
-          }
-        },
+          },
           "Debug": {
               "msvs_settings": {
                   "VCCLCompilerTool": {
@@ -157,6 +156,7 @@
                   }
               }
           }
+        }
       }
     ],
   ],
