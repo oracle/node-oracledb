@@ -14,8 +14,8 @@
  *
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'. 
+ *
+ * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
@@ -30,8 +30,8 @@
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
  *     21 - 50  are reserved for data type supporting tests
- *     51 -     are for other tests 
- * 
+ *     51 -     are for other tests
+ *
  *****************************************************************************/
 
 var oracledb = require('oracledb');
@@ -41,13 +41,13 @@ var dbConfig = require('./dbconfig.js');
 var assist = require('./dataTypeAssist.js');
 
 describe('4. binding.js', function() {
-  
+
   if(dbConfig.externalAuth){
     var credential = { externalAuth: true, connectString: dbConfig.connectString };
   } else {
     var credential = dbConfig;
   }
-  
+
   describe('4.1 test STRING, NUMBER, ARRAY & JSON format', function() {
     var connection = null;
     before(function(done) {
@@ -57,14 +57,14 @@ describe('4. binding.js', function() {
         done();
       });
     })
-  
+
     after(function(done) {
       connection.release( function(err) {
         if(err) { console.error(err.message); return; }
         done();
       });
     })
-    
+
     it('4.1.1 VARCHAR2 binding, Object & Array formats', function(done) {
       async.series([
         function(callback) {
@@ -144,7 +144,7 @@ describe('4. binding.js', function() {
             "BEGIN oracledb_testproc(:o); END;",
             {
               o: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
-            }, 
+            },
             function(err, result) {
               should.not.exist(err);
               // console.log(result);
@@ -239,7 +239,7 @@ describe('4. binding.js', function() {
           );
         }
       ], done);
-    }) 
+    })
 
     it('4.1.4 Multiple binding values, Change binding order', function(done) {
       async.series([
@@ -274,7 +274,7 @@ describe('4. binding.js', function() {
               callback();
             }
           );
-        },  
+        },
         function(callback) {
           connection.execute(
             "BEGIN oracledb_testproc(:io, :o, :i); END;",
@@ -306,11 +306,11 @@ describe('4. binding.js', function() {
     it('4.1.5 default bind type - STRING', function(done) {
       connection.should.be.ok;
       var sql = "begin :n := 1001; end;";
-      var bindVar = { n : { dir: oracledb.BIND_OUT } };  
+      var bindVar = { n : { dir: oracledb.BIND_OUT } };
       var options = { };
-    
+
       connection.execute(
-        sql, 
+        sql,
         bindVar,
         options,
         function(err, result) {
@@ -320,14 +320,14 @@ describe('4. binding.js', function() {
           result.outBinds.n.should.eql('1001');
           done();
         }
-      );      
+      );
     })
 
   })
-  
+
   describe('4.2 mixing named with positional binding', function() {
     var connection = null;
-    var createTable = 
+    var createTable =
       "BEGIN \
           DECLARE \
               e_table_exists EXCEPTION; \
@@ -363,7 +363,7 @@ describe('4. binding.js', function() {
         );
       });
     })
-  
+
     afterEach(function(done) {
       connection.should.be.ok;
       connection.execute(
@@ -429,12 +429,12 @@ describe('4. binding.js', function() {
         }
       );
     })
- 
+
   })
-  
+
   describe('4.3 insert with DATE column and DML returning', function(done) {
     var connection = null;
-    var createTable = 
+    var createTable =
       "BEGIN \
           DECLARE \
               e_table_exists EXCEPTION; \
@@ -467,7 +467,7 @@ describe('4. binding.js', function() {
         );
       });
     })
-  
+
     afterEach(function(done) {
       connection.should.be.ok;
       connection.execute(
@@ -484,20 +484,20 @@ describe('4. binding.js', function() {
 
     var insert1 = 'insert into oracledb_binding (num, str, dt) values (:0, :1, :2)';
     var insert2 = 'insert into oracledb_binding (num, str, dt) values (:0, :1, :2) returning num into :3';
-    var param1 = { 0: 123, 1: 'str', 2: new Date() }; 
+    var param1 = { 0: 123, 1: 'str', 2: new Date() };
     var param2 = { 0: 123, 1: 'str', 2: new Date(), 3: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT } };
     var param3 = [ 123, 'str', new Date() ];
     var param4 = [ 123, 'str', new Date(), { type: oracledb.NUMBER, dir: oracledb.BIND_OUT } ];
 
     var options = { autoCommit: true };
- 
+
     it('4.3.1 passes in object syntax without returning into', function(done) {
       connection.execute(
         insert1,
         param1,
         options,
         function(err, result) {
-          should.not.exist(err); 
+          should.not.exist(err);
           result.rowsAffected.should.be.exactly(1);
           connection.execute(
             "SELECT * FROM oracledb_binding",
@@ -519,7 +519,7 @@ describe('4. binding.js', function() {
         param2,
         options,
         function(err, result) {
-          should.not.exist(err); 
+          should.not.exist(err);
           result.rowsAffected.should.be.exactly(1);
           //console.log(result);
           result.outBinds.should.eql({ '3': [123] });
@@ -543,7 +543,7 @@ describe('4. binding.js', function() {
         param3,
         options,
         function(err, result) {
-          should.not.exist(err); 
+          should.not.exist(err);
           result.rowsAffected.should.be.exactly(1);
           // console.log(result);
           connection.execute(
@@ -566,7 +566,7 @@ describe('4. binding.js', function() {
         param4,
         options,
         function(err, result) {
-          should.not.exist(err);  
+          should.not.exist(err);
           result.rowsAffected.should.be.exactly(1);
           // console.log(result);
           result.outBinds[0].should.eql([123]);
@@ -585,10 +585,10 @@ describe('4. binding.js', function() {
     })
 
   })
-  
+
   describe('4.4 test maxSize option', function() {
     var connection = null;
-    
+
     before(function(done) {
       oracledb.getConnection(credential, function(err, conn) {
         if(err) { console.error(err.message); return; }
@@ -596,7 +596,7 @@ describe('4. binding.js', function() {
         done();
       });
     })
-  
+
     after(function(done) {
       connection.release( function(err) {
         if(err) { console.error(err.message); return; }
@@ -635,7 +635,7 @@ describe('4. binding.js', function() {
               callback();
             }
           );
-        }, 
+        },
         function(callback) {
           connection.execute(
             "BEGIN oracledb_testproc(:o); END;",
@@ -677,13 +677,13 @@ describe('4. binding.js', function() {
 
     it('4.4.3 Negative - bind out data exceeds default length', function(done) {
       connection.execute(
-        "BEGIN :o := lpad('A',201,'x'); END;", 
-         { o: { type: oracledb.STRING, dir : oracledb.BIND_OUT } }, 
-         function (err, result) { 
+        "BEGIN :o := lpad('A',201,'x'); END;",
+         { o: { type: oracledb.STRING, dir : oracledb.BIND_OUT } },
+         function (err, result) {
            should.exist(err);
            // ORA-06502: PL/SQL: numeric or value error
            err.message.should.startWith('ORA-06502:');
-           // console.log(result.outBinds.o.length); 
+           // console.log(result.outBinds.o.length);
            done();
          }
       );
@@ -691,7 +691,7 @@ describe('4. binding.js', function() {
 
     it.skip('4.4.4 maximum value is 32767', function(done) {
       connection.execute(
-        "BEGIN :o := lpad('A',32767,'x'); END;", 
+        "BEGIN :o := lpad('A',32767,'x'); END;",
         { o: { type: oracledb.STRING, dir : oracledb.BIND_OUT, maxSize:50000 } },
         function(err, result) {
           should.exist(err);
@@ -699,7 +699,7 @@ describe('4. binding.js', function() {
         }
       );
     })
-  }) // 4.4 
+  }) // 4.4
 
   describe('4.5 The default direction for binding is BIND_IN', function() {
     var connection = null;
@@ -712,7 +712,7 @@ describe('4. binding.js', function() {
         assist.createTable(connection, tableName, done);
       });
     })
-  
+
     after(function(done) {
       async.series([
         function(callback) {
@@ -733,7 +733,7 @@ describe('4. binding.js', function() {
       ], done);
     })
 
-    
+
     it('4.5.1 ',function(done) {
       connection.execute(
         "insert into oracledb_raw (num) values (:id)",
@@ -750,14 +750,14 @@ describe('4. binding.js', function() {
   describe('4.6 PL/SQL block with empty outBinds', function() {
 
     it('4.6.1 ', function(done) {
-      
-      var sql = "begin execute immediate 'drop table does_not_exist'; " 
-        + "exception when others then " 
-        + "if sqlcode <> -942 then " 
-        + "raise; " 
-        + "end if; end;"; 
-      var binds = []; 
-      var options = {}; 
+
+      var sql = "begin execute immediate 'drop table does_not_exist'; "
+        + "exception when others then "
+        + "if sqlcode <> -942 then "
+        + "raise; "
+        + "end if; end;";
+      var binds = [];
+      var options = {};
 
       oracledb.getConnection(
         credential,
@@ -765,10 +765,10 @@ describe('4. binding.js', function() {
         {
           should.not.exist(err);
           connection.execute(
-            sql, 
-            binds, 
+            sql,
+            binds,
             options,
-            function(err, result) 
+            function(err, result)
             {
               should.not.exist(err);
               result.should.eql(

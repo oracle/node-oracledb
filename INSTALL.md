@@ -650,7 +650,7 @@ module.exports = {
 ```
 
 Run one of the examples:
-	
+
 ```
 node select1.js
 ```

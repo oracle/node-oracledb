@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'. 
+ * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
@@ -30,11 +30,11 @@
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
  *     21 - 50  are reserved for data type supporting tests
- *     51 onwards are for other tests 
- * 
+ *     51 onwards are for other tests
+ *
  *****************************************************************************/
 "use strict";
- 
+
 var oracledb = require('oracledb');
 var fs       = require('fs');
 var should   = require('should');
@@ -66,12 +66,12 @@ describe('64. sqlWithWarnings.js', function() {
   })
 
   describe('64.1 test case offered by GitHub user', function() {
-    
+
     var tableName = "test_aggregate";
 
-    before('prepare table', function(done) {  
-      var sqlCreateTab = 
-        "BEGIN " + 
+    before('prepare table', function(done) {
+      var sqlCreateTab =
+        "BEGIN " +
         "  DECLARE " +
         "    e_table_exists EXCEPTION; " +
         "    PRAGMA EXCEPTION_INIT(e_table_exists, -00942); " +
@@ -83,9 +83,9 @@ describe('64. sqlWithWarnings.js', function() {
         "   END; " +
         "   EXECUTE IMMEDIATE (' " +
         "     CREATE TABLE " + tableName +" ( " +
-        "       num_col NUMBER " + 
+        "       num_col NUMBER " +
         "     )" +
-        "   '); " + 
+        "   '); " +
         "END; ";
 
       async.series([
@@ -150,8 +150,8 @@ describe('64. sqlWithWarnings.js', function() {
   }) // 64.1
 
   describe('64.2 PL/SQL - Success With Info', function() {
-    
-    var plsqlWithWarning = 
+
+    var plsqlWithWarning =
       " CREATE OR REPLACE PROCEDURE get_emp_rs_inout " +
       "   (p_in IN NUMBER, p_out OUT SYS_REFCURSOR ) AS " +
       "  BEGIN " +
@@ -160,7 +160,7 @@ describe('64. sqlWithWarnings.js', function() {
 
     it('64.2.1 Execute SQL Statement to create PLSQL procedure with warnings', function(done) {
       connection.should.be.an.Object;
-      connection.execute ( 
+      connection.execute (
         plsqlWithWarning,
         function ( err, result ) {
           should.not.exist ( err );

@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'. 
+ * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
@@ -28,10 +28,10 @@
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
  *     21 - 50  are reserved for data type supporting tests
- *     51 onwards are for other tests 
- * 
+ *     51 onwards are for other tests
+ *
  *****************************************************************************/
- 
+
 var oracledb = require ( 'oracledb' );
 var should = require ( 'should' );
 var async = require('async');
@@ -53,7 +53,7 @@ describe('56. fetchAs.js', function() {
       done();
     });
   })
-    
+
   afterEach('release connection, reset fetchAsString property', function(done) {
     oracledb.fetchAsString = [];
     connection.release( function(err) {
@@ -99,8 +99,8 @@ describe('56. fetchAs.js', function() {
       [],
       {
         outFormat: oracledb.OBJECT,
-        fetchInfo : 
-        { 
+        fetchInfo :
+        {
           "TS_DATE" : { type : oracledb.STRING },
           "TS_NUM"  : { type : oracledb.STRING }
         }
@@ -124,8 +124,8 @@ describe('56. fetchAs.js', function() {
       [],
       {
         outFormat: oracledb.OBJECT,
-        fetchInfo : 
-        { 
+        fetchInfo :
+        {
           "TS_DATE" : { type : oracledb.STRING },
           "TS_NUM"  : { type : oracledb.STRING }
         }
@@ -143,14 +143,14 @@ describe('56. fetchAs.js', function() {
 
   it('56.5 Fetch DATE, NUMBER column as STRING by-type and override at execute time', function(done) {
     oracledb.fetchAsString = [ oracledb.DATE, oracledb.NUMBER ];
-    
+
     connection.execute(
       "SELECT 1234567 AS TS_NUM, TO_TIMESTAMP('1999-12-01 11:10:01.00123', 'YYYY-MM-DD HH:MI:SS.FF') AS TS_DATE FROM DUAL",
       [],
       {
         outFormat: oracledb.OBJECT,
-        fetchInfo : 
-        { 
+        fetchInfo :
+        {
           "TS_DATE" : { type : oracledb.DEFAULT },
           "TS_NUM"  : { type : oracledb.STRING }
         }
@@ -165,15 +165,15 @@ describe('56. fetchAs.js', function() {
       }
     );
   })
-  
+
   it('56.6 Fetch ROWID column values STRING - non-ResultSet', function(done) {
     connection.execute(
       "SELECT ROWID from DUAL",
       [],
-      { 
+      {
         outFormat : oracledb.OBJECT,
-        fetchInfo : 
-        { 
+        fetchInfo :
+        {
           "ROWID" : { type : oracledb.STRING }
         }
       },
@@ -190,17 +190,17 @@ describe('56. fetchAs.js', function() {
     connection.execute(
       "SELECT ROWID from DUAL",
       [],
-      { 
+      {
         outFormat : oracledb.OBJECT,
         resultSet : true,
-        fetchInfo : 
-        { 
+        fetchInfo :
+        {
           "ROWID" : { type : oracledb.STRING }
         }
       },
       function(err, result) {
         should.not.exist(err);
- 
+
         result.resultSet.getRow( function(err, row) {
           should.not.exist(err);
           // console.log(row);
@@ -213,14 +213,14 @@ describe('56. fetchAs.js', function() {
       }
     );
   })
-  
+
   /*
-  * The maximum safe integer in JavaScript is (2^53 - 1). 
+  * The maximum safe integer in JavaScript is (2^53 - 1).
   * The minimum safe integer in JavaScript is (-(2^53 - 1)).
-  * Numbers out of above range will be rounded. 
+  * Numbers out of above range will be rounded.
   * The last element is out of Oracle database standard Number range. It will be rounded by database.
   */
-  var numStrs = 
+  var numStrs =
   [
     '17249138680355831',
     '-17249138680355831',
@@ -229,7 +229,7 @@ describe('56. fetchAs.js', function() {
     '0.1724913868035583123456789123456789123456'
   ];
 
-  var numResults = 
+  var numResults =
   [
     '17249138680355831',
     '-17249138680355831',
@@ -245,8 +245,8 @@ describe('56. fetchAs.js', function() {
         [],
         {
           outFormat : oracledb.OBJECT,
-          fetchInfo : 
-          { 
+          fetchInfo :
+          {
             "TS_NUM"  : { type : oracledb.STRING }
           }
         },

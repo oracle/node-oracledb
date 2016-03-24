@@ -14,8 +14,8 @@
  *
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'. 
+ *
+ * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
@@ -25,15 +25,15 @@
  *    Testing Oracle data type support - BINARY_DOUBLE.
  *
  * NOTE
- *   BINARY_DOUBLE support is still under enhancement. 
+ *   BINARY_DOUBLE support is still under enhancement.
  *   There is precision issue. This test is suspended.
  *
  * NUMBERING RULE
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
  *     21 - 50  are reserved for data type supporting tests
- *     51 -     are for other tests  
- * 
+ *     51 -     are for other tests
+ *
  *****************************************************************************/
 "use strict"
 
@@ -44,14 +44,14 @@ var assist = require('./dataTypeAssist.js');
 var dbConfig = require('./dbconfig.js');
 
 describe('31. dataTypeBinaryDouble.js', function() {
-  
+
   if(dbConfig.externalAuth){
     var credential = { externalAuth: true, connectString: dbConfig.connectString };
   } else {
     var credential = dbConfig;
   }
-  
-  var connection = null;  
+
+  var connection = null;
   var tableName = "oracledb_double";
 
   before('get one connection', function(done) {
@@ -61,16 +61,16 @@ describe('31. dataTypeBinaryDouble.js', function() {
       done();
     });
   })
-  
+
   after('release connection', function(done) {
     connection.release( function(err) {
       should.not.exist(err);
       done();
     });
   })
-  
+
   describe('31.1 testing BINARY_DOUBLE data', function() {
-    
+
     var numbers = assist.data.numbersForBinaryFloat.concat(assist.data.numbersForBinaryDouble);
 
     before('create table, insert data',function(done) {
@@ -106,7 +106,7 @@ describe('31. dataTypeBinaryDouble.js', function() {
       assist.verifyNullValues(connection, tableName, done);
     })
   })
-  
+
   describe('31.3 testing floating-point numbers which cannot be precisely represent', function() {
     var nums =
     [
@@ -135,7 +135,7 @@ describe('31. dataTypeBinaryDouble.js', function() {
         { outFormat: oracledb.OBJECT },
         function(err, result) {
           should.not.exist(err);
-          
+
           for(var i = 0; i < nums.length; i++) {
             result.rows[i].CONTENT.should.not.be.exactly(nums[ result.rows[i].NUM ]);
             approxeq(result.rows[i].CONTENT, nums[ result.rows[i].NUM ]).should.be.ok;

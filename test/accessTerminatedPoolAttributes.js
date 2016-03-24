@@ -14,8 +14,8 @@
  *
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'. 
+ *
+ * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
@@ -28,8 +28,8 @@
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
  *     21 - 50  are reserved for data type supporting tests
- *     51 -     are for other tests 
- * 
+ *     51 -     are for other tests
+ *
  *****************************************************************************/
 
 var oracledb = require('oracledb');
@@ -37,13 +37,13 @@ var should   = require('should');
 var dbConfig = require('./dbconfig.js');
 
 describe('51. accessTerminatedPoolAttributes.js', function(){
-  
+
   if(dbConfig.externalAuth){
     var credential = { externalAuth: true, connectString: dbConfig.connectString };
   } else {
     var credential = dbConfig;
   }
-  
+
   it('can not access attributes of terminated pool', function(done){
     oracledb.createPool(
       {
@@ -64,19 +64,19 @@ describe('51. accessTerminatedPoolAttributes.js', function(){
         }
         //(pool.connectionsOpen).should.eql(2);
         (pool.connectionsInUse).should.eql(0);
-        
+
         pool.getConnection( function(err, connection){
           (pool.connectionsInUse).should.eql(1);
-          
+
           connection.release( function(err){
             should.not.exist(err);
             (pool.connectionsInUse).should.eql(0);
-            
+
             pool.terminate( function(err){
               should.not.exist(err);
               try{
                 (pool.connectionsOpen).should.eql(2);
-              } 
+              }
               catch(err){
                 should.exist(err);
                 (err.message).should.eql('NJS-002: invalid pool');
@@ -87,6 +87,6 @@ describe('51. accessTerminatedPoolAttributes.js', function(){
         });
       }
     );
-  
+
   })
 })

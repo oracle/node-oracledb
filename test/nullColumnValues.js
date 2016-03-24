@@ -14,8 +14,8 @@
  *
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'. 
+ *
+ * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
@@ -28,8 +28,8 @@
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
  *     21 - 50  are reserved for data type supporting tests
- *     51 -     are for other tests  
- * 
+ *     51 -     are for other tests
+ *
  *****************************************************************************/
 
 var oracledb = require('oracledb');
@@ -38,16 +38,16 @@ var async = require('async');
 var dbConfig = require('./dbconfig.js');
 
 describe('10. nullColumnValues.js', function() {
-  
+
   if(dbConfig.externalAuth){
     var credential = { externalAuth: true, connectString: dbConfig.connectString };
   } else {
     var credential = dbConfig;
   }
-  
+
   var connection = false;
   beforeEach('get connection & create table', function(done){
-    var makeTable = 
+    var makeTable =
       "BEGIN \
             DECLARE \
                 e_table_exists EXCEPTION; \
@@ -89,12 +89,12 @@ describe('10. nullColumnValues.js', function() {
         makeTable,
         function(err){
           if(err) { console.error(err.message); return; }
-          done(); 
+          done();
         }
       );
     });
   })
-  
+
   afterEach('drop table and release connection', function(done){
     connection.execute(
       "DROP TABLE oracledb_departments",
@@ -107,23 +107,23 @@ describe('10. nullColumnValues.js', function() {
       }
     );
   })
-  
+
   it('10.1 a simple query for null value', function(done) {
     connection.should.be.ok;
-    
+
     connection.execute(
       "SELECT null FROM DUAL",
       function(err, result) {
         should.not.exist(err);
         result.rows[0].should.eql( [null] );
         done();
-      } 
+      }
     );
   })
-  
+
   it('10.2 in-bind for null column value', function(done) {
     connection.should.be.ok;
-    
+
     async.series([
       function(callback) {
         connection.execute(
@@ -158,12 +158,12 @@ describe('10. nullColumnValues.js', function() {
         );
       }
     ], done);
-    
+
   })
-  
+
   it('10.3 out-bind for null column value', function(done) {
     connection.should.be.ok;
-    
+
     async.series([
       function(callback) {
         var proc = "CREATE OR REPLACE PROCEDURE oracledb_testproc (p_out OUT VARCHAR2) \
@@ -181,7 +181,7 @@ describe('10. nullColumnValues.js', function() {
       },
       function(callback) {
         connection.execute(
-          "BEGIN oracledb_testproc(:o); END;", 
+          "BEGIN oracledb_testproc(:o); END;",
           {
             o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
           },
@@ -191,10 +191,10 @@ describe('10. nullColumnValues.js', function() {
             callback();
           }
         );
-      }, 
+      },
       function(callback) {
         connection.execute(
-          "DROP PROCEDURE oracledb_testproc", 
+          "DROP PROCEDURE oracledb_testproc",
           function(err) {
             should.not.exist(err);
             callback();
@@ -203,10 +203,10 @@ describe('10. nullColumnValues.js', function() {
       }
     ], done);
   })
-  
+
   it('10.4 DML Returning for null column value', function(done) {
     connection.should.be.ok;
-    
+
     connection.execute(
       "UPDATE oracledb_departments SET department_name = :dname, \
         manager_id = :mid WHERE department_id = :did \
@@ -232,10 +232,10 @@ describe('10. nullColumnValues.js', function() {
         }
     );
   })
-  
+
   it('10.5 resultSet for null value', function(done) {
     connection.should.be.ok;
-    
+
     async.series([
       function(callback) {
         connection.execute(
@@ -263,7 +263,7 @@ describe('10. nullColumnValues.js', function() {
             fetchRowFromRS(result.resultSet);
           }
         );
-        
+
         function fetchRowFromRS(rs) {
           rs.getRow(function(err, row) {
             should.not.exist(err);
@@ -282,5 +282,5 @@ describe('10. nullColumnValues.js', function() {
       }
     ], done);
   })
-  
+
 })

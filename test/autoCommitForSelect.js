@@ -14,8 +14,8 @@
  *
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'. 
+ *
+ * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
@@ -28,8 +28,8 @@
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
  *     21 - 50  are reserved for data type supporting tests
- *     51 -     are for other tests 
- * 
+ *     51 -     are for other tests
+ *
  *****************************************************************************/
 
 var oracledb = require('oracledb');
@@ -38,7 +38,7 @@ var async    = require('async');
 var dbConfig = require('./dbconfig.js');
 
 describe('8. autoCommitForSelect.js', function(){
-  
+
   if(dbConfig.externalAuth){
     var credential = { externalAuth: true, connectString: dbConfig.connectString };
   } else {
@@ -46,8 +46,8 @@ describe('8. autoCommitForSelect.js', function(){
   }
   var connection = false;
   var anotherConnection = false;
-  
-  var script = 
+
+  var script =
       "BEGIN \
           DECLARE \
               e_table_exists EXCEPTION; \
@@ -75,7 +75,7 @@ describe('8. autoCommitForSelect.js', function(){
                    (20, ''Marketing'') \
           '); \
       END; ";
-  
+
   before(function(done){
     async.parallel([
       function(callback){
@@ -92,9 +92,9 @@ describe('8. autoCommitForSelect.js', function(){
           callback();
         });
       }
-    ], done);   
+    ], done);
   })
-  
+
   after(function(done){
     async.parallel([
       function(callback){
@@ -111,7 +111,7 @@ describe('8. autoCommitForSelect.js', function(){
       }
     ], done);
   })
-  
+
   beforeEach(function(done){
     connection.execute(script, function(err){
       if(err) { console.error(err.message); return; }
@@ -123,7 +123,7 @@ describe('8. autoCommitForSelect.js', function(){
       });
     });
   })
-  
+
   afterEach(function(done){
     connection.execute(
         'DROP TABLE oracledb_departments',
@@ -133,11 +133,11 @@ describe('8. autoCommitForSelect.js', function(){
         }
       );
   })
-  
+
   it('8.1 should return previous value when autoCommit is false', function(done){
     connection.should.be.ok;
     oracledb.autoCommit = false;
-    
+
     async.series([
       function(callback){
         connection.execute(
@@ -199,11 +199,11 @@ describe('8. autoCommitForSelect.js', function(){
       }
     ], done);
   })
-  
+
   it('8.2 can use explicit commit() to keep data consistent', function(done){
     connection.should.be.ok;
     oracledb.autoCommit = false;
-    
+
     async.series([
       function(callback){
         connection.execute(
@@ -271,11 +271,11 @@ describe('8. autoCommitForSelect.js', function(){
       }
     ], done);
   })
-  
+
   it('8.3 can also use the autoCommit for SELECTs feature', function(done){
     connection.should.be.ok;
     oracledb.autoCommit = false;
-    
+
     async.series([
       function(callback){
         connection.execute(

@@ -14,8 +14,8 @@
  *
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'. 
+ *
+ * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
@@ -28,8 +28,8 @@
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
  *     21 - 50  are reserved for data type supporting tests
- *     51 onwards are for other tests  
- * 
+ *     51 onwards are for other tests
+ *
  *****************************************************************************/
 'use strict';
 
@@ -39,7 +39,7 @@ var async    = require('async');
 var dbConfig = require('./dbconfig.js');
 
 describe('43. plsqlBinding1.js', function() {
-  
+
   if(dbConfig.externalAuth){
     var credential = { externalAuth: true, connectString: dbConfig.connectString };
   } else {
@@ -56,7 +56,7 @@ describe('43. plsqlBinding1.js', function() {
         done();
       });
     })
-  
+
     after(function(done) {
       connection.release( function(err) {
         if(err) { console.error(err.message); return; }
@@ -388,8 +388,8 @@ describe('43. plsqlBinding1.js', function() {
               should.not.exist(err);
               callback();
             }
-          );  
-        }, 
+          );
+        },
         function(callback) {
           var proc = "CREATE OR REPLACE PACKAGE BODY\n" +
                      "oracledb_testpack\n" +
@@ -411,7 +411,7 @@ describe('43. plsqlBinding1.js', function() {
         }
       ], done);
     }) // before
-  
+
     after(function(done) {
       async.series([
         function(callback) {
@@ -421,7 +421,7 @@ describe('43. plsqlBinding1.js', function() {
               should.not.exist(err);
               callback();
             }
-          );     
+          );
         },
         function(callback) {
           connection.release(function(err) {
@@ -432,7 +432,7 @@ describe('43. plsqlBinding1.js', function() {
       ], done);
     }) // after
 
-    it('43.2.1 maxArraySize is ignored when specifying BIND_IN', function(done) { 
+    it('43.2.1 maxArraySize is ignored when specifying BIND_IN', function(done) {
       var bindvars = {
         p:  {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: [1, 2, 3], maxArraySize: 2}
       };
@@ -445,7 +445,7 @@ describe('43. plsqlBinding1.js', function() {
           done();
         }
       );
-    }) 
+    })
 
     it('43.2.2 maxArraySize is mandatory for BIND_INOUT ', function(done) {
       var bindvars = {
@@ -473,7 +473,7 @@ describe('43. plsqlBinding1.js', function() {
         bindvars,
         function(err, result) {
           should.exist(err);
-          (err.message).should.startWith('NJS-036'); 
+          (err.message).should.startWith('NJS-036');
           // NJS-036: Given Array is of size greater than maxArraySize property.
           should.not.exist(result);
           done();
@@ -558,7 +558,7 @@ describe('43. plsqlBinding1.js', function() {
         done();
       });
     })
-  
+
     after(function(done) {
       connection.release( function(err) {
         if(err) { console.error(err.message); return; }
@@ -613,7 +613,7 @@ describe('43. plsqlBinding1.js', function() {
         }
       ], done);
     });
-    
+
     // Date data type not support yet
     it.skip('43.3.2 binding PL/SQL scalar IN/OUT', function(done) {
       async.series([
@@ -676,7 +676,7 @@ describe('43. plsqlBinding1.js', function() {
                      "BEGIN\n" +
                      "  stringValue := 'Space odyssey';\n" +
                      "  numberValue := 2001;\n" +
-                     "  dateValue   := TO_DATE('04-02-1968', 'MM-DD-YYYY');" + 
+                     "  dateValue   := TO_DATE('04-02-1968', 'MM-DD-YYYY');" +
                      "END test;\n";
           connection.should.be.ok;
           connection.execute(
@@ -727,7 +727,7 @@ describe('43. plsqlBinding1.js', function() {
                      "BEGIN\n" +
                      "  stringValue := 'Space odyssey';\n" +
                      "  numberValue := 2001;\n" +
-                     "  dateValue   := TO_DATE('04-02-1968', 'MM-DD-YYYY');" + 
+                     "  dateValue   := TO_DATE('04-02-1968', 'MM-DD-YYYY');" +
                      "END test;\n";
           connection.should.be.ok;
           connection.execute(
@@ -803,8 +803,8 @@ describe('43. plsqlBinding1.js', function() {
               should.not.exist(err);
               cb();
             }
-          ); 
-        }, 
+          );
+        },
         function(cb) {
           var proc = "CREATE OR REPLACE PACKAGE BODY\n" +
                      "oracledb_testpack\n" +
@@ -835,7 +835,7 @@ describe('43. plsqlBinding1.js', function() {
               should.not.exist(err);
               callback();
             }
-          );     
+          );
         },
         function(callback) {
           connection.release(function(err) {
@@ -910,7 +910,7 @@ describe('43. plsqlBinding1.js', function() {
     })
 
     // known bug
-    // The maximum safe integer in JavaScript is (2^53 - 1). 
+    // The maximum safe integer in JavaScript is (2^53 - 1).
     it.skip('43.4.5 negative case: large value', function(done) {
       var bindvars = {
         p:  {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: [1, 2, 3], maxArraySize: 987654321}

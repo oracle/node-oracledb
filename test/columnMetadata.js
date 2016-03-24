@@ -14,8 +14,8 @@
  *
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'. 
+ *
+ * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
@@ -28,8 +28,8 @@
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
  *     21 - 50  are reserved for data type supporting tests
- *     51 -     are for other tests 
- * 
+ *     51 -     are for other tests
+ *
  *****************************************************************************/
 
 var oracledb = require('oracledb');
@@ -38,16 +38,16 @@ var async = require('async');
 var dbConfig = require('./dbconfig.js');
 
 describe('9. columnMetadata.js', function(){
-  
+
   if(dbConfig.externalAuth){
     var credential = { externalAuth: true, connectString: dbConfig.connectString };
   } else {
     var credential = dbConfig;
   }
-  
+
   var connection = false;
   beforeEach('get connection & create table', function(done){
-    var makeTable = 
+    var makeTable =
       "BEGIN \
             DECLARE \
                 e_table_exists EXCEPTION; \
@@ -89,12 +89,12 @@ describe('9. columnMetadata.js', function(){
         makeTable,
         function(err){
           if(err) { console.error(err.message); return; }
-          done(); 
+          done();
         }
       );
     });
   })
-  
+
   afterEach('drop table and release connection', function(done){
     connection.execute(
       "DROP TABLE oracledb_departments",
@@ -107,7 +107,7 @@ describe('9. columnMetadata.js', function(){
       }
     );
   })
-  
+
   it('9.1 shows metaData correctly when retrieving 1 column from a 4-column table', function(done){
     connection.should.be.ok;
     connection.execute(
@@ -121,7 +121,7 @@ describe('9. columnMetadata.js', function(){
       }
     );
   })
-  
+
   it('9.2 shows metaData when retrieving 2 columns. MetaData is correct in content and sequence', function(done){
     connection.should.be.ok;
     connection.execute(
@@ -136,7 +136,7 @@ describe('9. columnMetadata.js', function(){
       }
     );
   })
-  
+
   it('9.3 shows metaData correctly when retrieve 3 columns', function(done){
     connection.should.be.ok;
     connection.execute(
@@ -152,7 +152,7 @@ describe('9. columnMetadata.js', function(){
       }
     );
   })
-  
+
   it('9.4 shows metaData correctly when retrieving all columns with [SELECT * FROM table] statement', function(done){
     connection.should.be.ok;
     connection.execute(
@@ -169,11 +169,11 @@ describe('9. columnMetadata.js', function(){
       }
     );
   })
-  
+
   it('9.5 works for SELECT count(*)', function(done){
     connection.should.be.ok;
     connection.execute(
-      "SELECT count(*) FROM oracledb_departments", 
+      "SELECT count(*) FROM oracledb_departments",
       function(err, result){
         should.not.exist(err);
         result.rows[0][0].should.be.exactly(3);
@@ -183,7 +183,7 @@ describe('9. columnMetadata.js', function(){
       }
     );
   })
-  
+
   it('9.6 works when a query returns no rows', function(done){
     connection.should.be.ok;
     connection.execute(
@@ -200,14 +200,14 @@ describe('9. columnMetadata.js', function(){
       }
     );
   })
-  
+
   it('9.7 works for tables whose column names were created case sensitively', function(done){
     connection.should.be.ok;
-    
+
     async.series([
       function(callback){
-        
-        var dummyTable = 
+
+        var dummyTable =
           "BEGIN " +
           "   DECLARE " +
           "       e_table_exists EXCEPTION; " +
@@ -225,7 +225,7 @@ describe('9. columnMetadata.js', function(){
           "       )" +
           "   '); " +
           "END; ";
-        
+
         connection.execute(
           dummyTable,
           function(err){
@@ -257,7 +257,7 @@ describe('9. columnMetadata.js', function(){
       }
     ], done);
   })
-  
+
   it('9.8 only works for SELECT statement, does not work for INSERT', function(done){
     connection.should.be.ok;
     connection.execute(
@@ -266,7 +266,7 @@ describe('9. columnMetadata.js', function(){
         should.not.exist(err);
         (result.rowsAffected).should.be.exactly(1);
         should.not.exist(result.metaData);
-        
+
         connection.execute(
           'SELECT * FROM oracledb_departments WHERE department_id = :1',
           [99],
@@ -285,7 +285,7 @@ describe('9. columnMetadata.js', function(){
       }
     );
   })
-  
+
   it('9.9 only works for SELECT statement, does not work for UPDATE', function(done){
     connection.should.be.ok;
     connection.execute(
@@ -295,7 +295,7 @@ describe('9. columnMetadata.js', function(){
         should.not.exist(err);
         (result.rowsAffected).should.be.exactly(1);
         should.not.exist(result.metaData);
-        
+
         connection.execute(
           "SELECT department_name FROM oracledb_departments WHERE department_id = :1",
           [40],
@@ -310,13 +310,13 @@ describe('9. columnMetadata.js', function(){
       }
     );
   })
-  
+
   it('9.10 works with a large number of columns', function(done){
     connection.should.be.ok;
     // create a 100-column table
     var column_size = 100;
     var columns_string = genColumns(column_size);
-    
+
     function genColumns(size) {
       var buffer = [];
       for(var i = 0; i < size; i++) {
@@ -324,12 +324,12 @@ describe('9. columnMetadata.js', function(){
       }
       return buffer.join();
     }
-    
+
     var table_name = "oracledb_large_columns";
     var sqlCreate = "CREATE TABLE " + table_name + " ( " + columns_string + " )";
     var sqlSelect = "SELECT * FROM " + table_name;
     var sqlDrop = "DROP TABLE " + table_name;
-    
+
     async.series([
       function(callback) {
         connection.execute(
@@ -363,11 +363,11 @@ describe('9. columnMetadata.js', function(){
       }
     ], done);
   })
-  
+
   it('9.11 works with column names consisting of single characters', function(done){
     connection.should.be.ok;
     var tableName = "oracledb_single_char";
-    var sqlCreate = 
+    var sqlCreate =
           "BEGIN " +
           "   DECLARE " +
           "       e_table_exists EXCEPTION; " +
@@ -418,17 +418,17 @@ describe('9. columnMetadata.js', function(){
           }
         );
       }
-    ], done);   
-    
+    ], done);
+
   })
-  
+
   it('9.12 works with a SQL WITH statement', function(done){
     connection.should.be.ok;
-    
-    var sqlWith = "WITH oracledb_dep AS " + 
-                  "(SELECT * FROM oracledb_departments WHERE location_id < 2000) " + 
+
+    var sqlWith = "WITH oracledb_dep AS " +
+                  "(SELECT * FROM oracledb_departments WHERE location_id < 2000) " +
                   "SELECT * FROM oracledb_dep WHERE department_id > 50";
-    
+
     connection.execute(
       sqlWith,
       function(err, result) {

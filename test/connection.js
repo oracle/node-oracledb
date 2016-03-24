@@ -14,8 +14,8 @@
  *
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'. 
+ *
+ * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
@@ -28,8 +28,8 @@
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
  *     21 - 50  are reserved for data type supporting tests
- *     51 -     are for other tests  
- * 
+ *     51 -     are for other tests
+ *
  *****************************************************************************/
 
 var oracledb = require('oracledb');
@@ -38,17 +38,17 @@ var async = require('async');
 var dbConfig = require('./dbconfig.js');
 
 describe('1. connection.js', function(){
-  
+
   if(dbConfig.externalAuth){
     var credential = { externalAuth: true, connectString: dbConfig.connectString };
   } else {
     var credential = dbConfig;
   }
-  
+
   describe('1.1 can run SQL query with different output formats', function(){
     var connection = false;
-    
-    var script = 
+
+    var script =
       "BEGIN \
           DECLARE \
               e_table_exists EXCEPTION; \
@@ -85,9 +85,9 @@ describe('1. connection.js', function(){
           if(err) { console.error(err.message); return; }
           done();
         });
-      });      
+      });
     })
-    
+
     after(function(done){
       connection.execute(
         'DROP TABLE oracledb_departments',
@@ -100,15 +100,15 @@ describe('1. connection.js', function(){
         }
       );
     })
-    
+
     var query = "SELECT department_id, department_name " +
                 "FROM oracledb_departments " +
                 "WHERE department_id = :id";
-    
+
     it('1.1.1 ARRAY format by default', function(done) {
       var defaultFormat = oracledb.outFormat;
       defaultFormat.should.be.exactly(oracledb.ARRAY);
-      
+
       connection.should.be.ok;
       connection.execute(query, [40], function(err, result){
         should.not.exist(err);
@@ -116,7 +116,7 @@ describe('1. connection.js', function(){
         done();
       });
     })
-    
+
     it('1.1.2 ARRAY format explicitly', function(done) {
       connection.should.be.ok;
        connection.execute(
@@ -128,11 +128,11 @@ describe('1. connection.js', function(){
          }
        );
     })
-  
-    it('1.1.3 OBJECT format', function(done){   
+
+    it('1.1.3 OBJECT format', function(done){
       connection.should.be.ok;
       connection.execute(
-        query, {id: 20}, {outFormat: oracledb.OBJECT}, 
+        query, {id: 20}, {outFormat: oracledb.OBJECT},
         function(err, result){
           should.not.exist(err);
           (result.rows).should.eql([{ DEPARTMENT_ID: 20, DEPARTMENT_NAME: 'Marketing' }]);
@@ -140,7 +140,7 @@ describe('1. connection.js', function(){
         }
       );
     })
-    
+
     it('1.1.4 Negative test - invalid outFormat value', function(done){
       connection.should.be.ok;
       connection.execute(
@@ -153,10 +153,10 @@ describe('1. connection.js', function(){
       );
     })
   })
-  
-  describe('1.2 limits the number of rows fetched', function(){ 
+
+  describe('1.2 limits the number of rows fetched', function(){
     var connection = false;
-    var createTable = 
+    var createTable =
       "BEGIN \
           DECLARE \
               e_table_exists EXCEPTION; \
@@ -173,9 +173,9 @@ describe('1. connection.js', function(){
                   employee_name VARCHAR2(20) \
               ) \
           '); \
-      END; "; 
-    
-    var insertRows = 
+      END; ";
+
+    var insertRows =
       "DECLARE \
           x NUMBER := 0; \
           n VARCHAR2(20); \
@@ -199,10 +199,10 @@ describe('1. connection.js', function(){
             done();
           });
         });
-      });     
- 
+      });
+
     })
-    
+
     after(function(done){
       connection.execute(
         'DROP TABLE oracledb_employees',
@@ -215,11 +215,11 @@ describe('1. connection.js', function(){
         }
       );
     })
-    
+
     it('1.2.1 by default, the number is 100', function(done){
       var defaultLimit = oracledb.maxRows;
       defaultLimit.should.be.exactly(100);
-    
+
       connection.should.be.ok;
       connection.execute(
         "SELECT * FROM oracledb_employees",
@@ -227,16 +227,16 @@ describe('1. connection.js', function(){
           should.not.exist(err);
           should.exist(result);
           // Return 100 records although the table has 107 rows.
-          (result.rows).should.have.length(100); 
+          (result.rows).should.have.length(100);
           done();
         }
       );
     })
-  
+
     it('1.2.2 can also specify for each execution', function(done){
       connection.should.be.ok;
       connection.execute(
-        "SELECT * FROM oracledb_employees", 
+        "SELECT * FROM oracledb_employees",
         {}, { maxRows: 25 },
         function(err, result){
           should.not.exist(err);
@@ -247,11 +247,11 @@ describe('1. connection.js', function(){
         }
       );
     })
-    
+
     it('1.2.3 can not set maxRows to be 0', function(done){
       connection.should.be.ok;
       connection.execute(
-        "SELECT * FROM oracledb_employees", 
+        "SELECT * FROM oracledb_employees",
         {}, { maxRows: 0 },
         function(err, result){
           should.exist(err);
@@ -260,11 +260,11 @@ describe('1. connection.js', function(){
         }
       );
     })
-    
+
     it('1.2.4 cannot set maxRows to be a negative number', function(done){
       connection.should.be.ok;
       connection.execute(
-        "SELECT * FROM oracledb_employees", 
+        "SELECT * FROM oracledb_employees",
         {}, {maxRows: -5},
         function(err, result){
           should.exist(err);
@@ -276,14 +276,14 @@ describe('1. connection.js', function(){
 
     it('1.2.5 sets maxRows to be very large value', function(done) {
       connection.execute(
-        "SELECT * FROM oracledb_employees", 
-        {}, 
+        "SELECT * FROM oracledb_employees",
+        {},
         {maxRows: 500000},
         function(err, result){
           should.not.exist(err);
           (result.rows.length).should.eql(rowsAmount);
           done();
-        }  
+        }
       );
     })
 
@@ -305,12 +305,12 @@ describe('1. connection.js', function(){
       }
 
       connection.execute(
-        sql, 
+        sql,
         { offset: myoffset, maxnumrows: mymaxnumrows },
         { maxRows: 150 },
         function(err, result) {
-          should.not.exist(err);    
-          (result.rows.length).should.eql(mymaxnumrows); 
+          should.not.exist(err);
+          (result.rows.length).should.eql(mymaxnumrows);
           done();
         }
       );
@@ -319,13 +319,13 @@ describe('1. connection.js', function(){
 
   describe('1.3 can call PL/SQL procedures', function(){
     var connection = false;
-    
+
     var proc = "CREATE OR REPLACE PROCEDURE binding_test (p_in IN VARCHAR2, p_inout IN OUT VARCHAR2, p_out OUT VARCHAR2) "
                 + "AS "
                 + "BEGIN "
                 + "  p_out := p_in || ' ' || p_inout; "
                 + "END; ";
-    
+
     before(function(done){
       oracledb.getConnection(credential, function(err, conn) {
         if(err) { console.error(err.message); return; }
@@ -336,7 +336,7 @@ describe('1. connection.js', function(){
         });
       });
     })
-    
+
     after(function(done){
       connection.execute(
         "DROP PROCEDURE binding_test",
@@ -349,7 +349,7 @@ describe('1. connection.js', function(){
         }
       );
     })
-    
+
     it('1.3.1 bind parameters in various ways', function(done){
       var bindValues = {
         i: 'Alan', // default is type STRING and direction Infinity
@@ -369,9 +369,9 @@ describe('1. connection.js', function(){
       );
     })
   })
-  
+
   describe('1.4 statementCacheSize controls statement caching', function() {
-    var makeTable = 
+    var makeTable =
         "BEGIN \
             DECLARE \
                 e_table_exists EXCEPTION; \
@@ -404,10 +404,10 @@ describe('1. connection.js', function(){
                    (2001, ''Karen Morton'') \
             '); \
         END; ";
-    
+
     var connection = false;
     var defaultStmtCache = oracledb.stmtCacheSize; // 30
-    
+
     beforeEach('get connection and prepare table', function(done) {
       oracledb.getConnection(credential, function(err, conn) {
         if(err) { console.error(err.message); return; }
@@ -416,12 +416,12 @@ describe('1. connection.js', function(){
           makeTable,
           function(err){
             if(err) { console.error(err.message); return; }
-            done(); 
+            done();
           }
         );
       });
     })
-    
+
     afterEach('drop table and release connection', function(done) {
       oracledb.stmtCacheSize = defaultStmtCache;
       connection.execute(
@@ -438,48 +438,7 @@ describe('1. connection.js', function(){
 
     it('1.4.1 stmtCacheSize = 0, which disable statement caching', function(done) {
       connection.should.be.ok;
-      oracledb.stmtCacheSize = 0;   
-
-      async.series([
-        function(callback) {
-          connection.execute(
-            "INSERT INTO oracledb_employees VALUES (:num, :str)",
-            { num: 1003, str: 'Robyn Sands' },
-            { autoCommit: true },
-            function(err) {
-              should.not.exist(err);
-              callback();
-            }
-          );
-        },
-        function(callback) {
-          connection.execute(
-            "INSERT INTO oracledb_employees VALUES (:num, :str)",
-            { num: 1004, str: 'Bryant Lin' },
-            { autoCommit: true },
-            function(err) {
-              should.not.exist(err);
-              callback();
-            }
-          );
-        },
-        function(callback) {
-          connection.execute(
-            "INSERT INTO oracledb_employees VALUES (:num, :str)",
-            { num: 1005, str: 'Patrick Engebresson' },
-            { autoCommit: true },
-            function(err) {
-              should.not.exist(err);
-              callback();
-            }
-          );
-        }
-      ], done);
-    })  
-    
-    it('1.4.2 works well when statement cache enabled (stmtCacheSize > 0) ', function(done) {
-      connection.should.be.ok;
-      oracledb.stmtCacheSize = 100;  
+      oracledb.stmtCacheSize = 0;
 
       async.series([
         function(callback) {
@@ -517,11 +476,52 @@ describe('1. connection.js', function(){
         }
       ], done);
     })
-    
+
+    it('1.4.2 works well when statement cache enabled (stmtCacheSize > 0) ', function(done) {
+      connection.should.be.ok;
+      oracledb.stmtCacheSize = 100;
+
+      async.series([
+        function(callback) {
+          connection.execute(
+            "INSERT INTO oracledb_employees VALUES (:num, :str)",
+            { num: 1003, str: 'Robyn Sands' },
+            { autoCommit: true },
+            function(err) {
+              should.not.exist(err);
+              callback();
+            }
+          );
+        },
+        function(callback) {
+          connection.execute(
+            "INSERT INTO oracledb_employees VALUES (:num, :str)",
+            { num: 1004, str: 'Bryant Lin' },
+            { autoCommit: true },
+            function(err) {
+              should.not.exist(err);
+              callback();
+            }
+          );
+        },
+        function(callback) {
+          connection.execute(
+            "INSERT INTO oracledb_employees VALUES (:num, :str)",
+            { num: 1005, str: 'Patrick Engebresson' },
+            { autoCommit: true },
+            function(err) {
+              should.not.exist(err);
+              callback();
+            }
+          );
+        }
+      ], done);
+    })
+
   })
-  
+
   describe('1.5 Testing commit() & rollback() functions', function() {
-    var makeTable = 
+    var makeTable =
         "BEGIN \
             DECLARE \
                 e_table_exists EXCEPTION; \
@@ -549,7 +549,7 @@ describe('1. connection.js', function(){
                    (1002, ''Karen Morton'') \
             '); \
         END; ";
-    
+
     var conn1 = false;
     var conn2 = false;
     beforeEach('get 2 connections and create the table', function(done) {
@@ -573,7 +573,7 @@ describe('1. connection.js', function(){
           conn1.execute(
             makeTable,
             [],
-            { autoCommit: true }, 
+            { autoCommit: true },
             function(err) {
               should.not.exist(err);
               callback();
@@ -582,7 +582,7 @@ describe('1. connection.js', function(){
         }
       ], done);
     })
-    
+
     afterEach('drop table and release connections', function(done) {
       conn1.should.be.ok;
       conn2.should.be.ok;
@@ -608,10 +608,10 @@ describe('1. connection.js', function(){
             callback();
           });
         }
-      ], done);  
+      ], done);
     })
-    
-  
+
+
     it('1.5.1 commit() function works well', function(done) {
       async.series([
         function(callback) {
@@ -661,9 +661,9 @@ describe('1. connection.js', function(){
           );
         },
       ], done);
-    
+
     })
-    
+
     it('1.5.2 rollback() function works well', function(done) {
       async.series([
         function(callback) {
@@ -715,11 +715,11 @@ describe('1. connection.js', function(){
       ], done);
     })
   })
-  
+
   describe('1.6 Testing parameter assertions', function() {
     var conn1;
     var sql = 'select 1 from dual';
-    
+
     beforeEach('get connection ready', function(done) {
       oracledb.getConnection(credential, function(err, conn) {
         should.not.exist(err);
@@ -727,7 +727,7 @@ describe('1. connection.js', function(){
         done();
       });
     });
-    
+
     afterEach('release connection', function(done) {
       conn1.release(function(err) {
         should.not.exist(err);
@@ -767,25 +767,5 @@ describe('1. connection.js', function(){
       });
     });
   })
-  
+
 })
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -14,8 +14,8 @@
  *
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'. 
+ *
+ * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
@@ -28,8 +28,8 @@
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
  *     21 - 50  are reserved for data type supporting tests
- *     51 -     are for other tests 
- * 
+ *     51 -     are for other tests
+ *
  *****************************************************************************/
 "use strict"
 
@@ -40,18 +40,18 @@ var dbConfig = require('./dbconfig.js');
 var async    = require('async');
 
 describe('22. dataTypeChar.js', function(){
-  
+
   if(dbConfig.externalAuth){
     var credential = { externalAuth: true, connectString: dbConfig.connectString };
   } else {
     var credential = dbConfig;
   }
-  
+
   var connection = null;
   var tableName = "oracledb_char";
 
   var strLen = [100, 1000, 2000];  // char string length
-  var strs = 
+  var strs =
   [
     assist.createCharString(strLen[0]),
     assist.createCharString(strLen[1]),
@@ -65,16 +65,16 @@ describe('22. dataTypeChar.js', function(){
       done();
     });
   })
-  
+
   after('release connection', function(done) {
     connection.release( function(err) {
       should.not.exist(err);
       done();
     });
-  })           
+  })
 
   describe('22.1 testing CHAR data in various lengths', function() {
-    
+
     before('create table, insert data',function(done) {
       assist.setUp(connection, tableName, strs, done);
     })
@@ -152,7 +152,7 @@ describe('22. dataTypeChar.js', function(){
             }
           );
         }
-      ], done);  
+      ], done);
     }) // 22.3.1
 
     it('22.3.2 bind scalar values INOUT', function(done) {
@@ -171,7 +171,7 @@ describe('22. dataTypeChar.js', function(){
               callback();
             }
           );
-        }, 
+        },
         function(callback) {
           var bindvars = { stringValue: {type: oracledb.STRING, dir: oracledb.BIND_INOUT, val: 'Node.js'} };
           connection.execute(
@@ -213,7 +213,7 @@ describe('22. dataTypeChar.js', function(){
               callback();
             }
           );
-        }, 
+        },
         function(callback) {
           var bindvars = { stringValue: {type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize:200} };
           connection.execute(
@@ -221,7 +221,7 @@ describe('22. dataTypeChar.js', function(){
             bindvars,
             function(err, result) {
               should.not.exist(err);
-              // There are trailing spaces with the outBind value as CHAR is a kind of 
+              // There are trailing spaces with the outBind value as CHAR is a kind of
               // fix-size data type. So the case uses trim() function.
               (result.outBinds.stringValue.trim()).should.be.exactly('Hello Node.js World!');
               callback();
@@ -242,7 +242,7 @@ describe('22. dataTypeChar.js', function(){
   }) // 22.3
 
   describe('22.4 PL/SQL binding indexed tables', function() {
-    
+
     it.skip('22.4.1 bind indexed table IN', function(done) {
       async.series([
         function(callback) {

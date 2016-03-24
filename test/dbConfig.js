@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'. 
+ * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
@@ -25,7 +25,7 @@
  *   Holds the credentials used by node-oracledb tests to connect to
  *   the database.  The user requires privileges to connect and create
  *   tables.
- * 
+ *
  *   See examples/dbconfig.js for details about connection credentials.
  *
  *****************************************************************************/

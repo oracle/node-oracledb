@@ -15,7 +15,7 @@ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-The node-oracledb test suite uses 'mocha', 'should' and 'async'. 
+The node-oracledb test suite uses 'mocha', 'should' and 'async'.
 See LICENSE.md for relevant licenses.
 
 ## 1. Preparations for running tests
@@ -23,7 +23,7 @@ See LICENSE.md for relevant licenses.
 ### 1.1 Create a working directory
 
 ```
-mkdir <some-directory> 
+mkdir <some-directory>
 cd <some-directory>
 ```
 
@@ -47,25 +47,25 @@ npm install node-oracledb
 
 ### 1.3 Install test-dependent modules
 
-The test suite uses [mocha](https://www.npmjs.com/package/mocha), 
-[async](https://www.npmjs.com/package/async) and 
-[should](https://www.npmjs.com/package/should). 
+The test suite uses [mocha](https://www.npmjs.com/package/mocha),
+[async](https://www.npmjs.com/package/async) and
+[should](https://www.npmjs.com/package/should).
 
 ```
-cd <some-directory>/node_modules/oracledb 
+cd <some-directory>/node_modules/oracledb
 npm install
 ```
 
 Note: Running `npm install` within oracledb/ directory will recompile
 oracledb module and install all its dependent modules which are listed
-in `devDependencies` field in `package.json` file. So 'mocha', 'async' 
+in `devDependencies` field in `package.json` file. So 'mocha', 'async'
 and 'should' modules are installed by this command.
 
 ### 1.4 Configure Database credentials
 
-The database credentials for node-oracledb test suite are defined in dbconfig.js file. 
+The database credentials for node-oracledb test suite are defined in dbconfig.js file.
 You can set the credentials via environment variables or dbconfig.js file.
-Change the credentials to a user who has privileges to connect and create tables. 
+Change the credentials to a user who has privileges to connect and create tables.
 
 ```
 vi <some-directory>/node_modules/oracledb/test/dbconfig.js
@@ -93,7 +93,7 @@ for more details.
 #### On Unix-like systems
 
 ```
-cd <some-directory>/node_modules/oracledb 
+cd <some-directory>/node_modules/oracledb
 npm test
 ```
 
@@ -102,25 +102,25 @@ This calls the `test` script defined in `oracledb/package.json`.
 #### On Windows
 
 ```
-cd <some-directory>/node_modules/oracledb 
+cd <some-directory>/node_modules/oracledb
 npm run-script testWindows
 ```
 
 This calls the `testWindows` script defined in `oracledb/package.json`.
-See [npm scripts](https://docs.npmjs.com/misc/scripts) for more infomation 
+See [npm scripts](https://docs.npmjs.com/misc/scripts) for more infomation
 about how npm handles the "scripts" field of `package.json`.
 
 ### 2.2 Run specified test(s)
 
 ```
-cd <some-directory>/node_modules/oracledb 
+cd <some-directory>/node_modules/oracledb
 <mocha-executable-file-directory>/mocha test/<test-names>
 ```
 
 See [mochajs.org](http://mochajs.org/) for more information on running tests with mocha.
 
 ## 3. Adding Tests
-See [CONTRIBUTING](https://github.com/oracle/node-oracledb/blob/master/CONTRIBUTING.md) 
+See [CONTRIBUTING](https://github.com/oracle/node-oracledb/blob/master/CONTRIBUTING.md)
 for general information on contribution requirements.
 
 For easy correlation between results and test code, each test is

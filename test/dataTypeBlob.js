@@ -14,29 +14,29 @@
  *
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'. 
+ *
+ * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
  *   41. dataTypeBlob.js
  *
  * DESCRIPTION
- *    Testing Oracle data type support - BLOB. 
- *    This test corresponds to example files: 
+ *    Testing Oracle data type support - BLOB.
+ *    This test corresponds to example files:
  *         blobinsert1.js, blobstream1.js and blobstream2.js
  *    Firstly, Loads an image data and INSERTs it into a BLOB column.
- *    Secondly, SELECTs the BLOB and pipes it to a file, blobstreamout.jpg 
+ *    Secondly, SELECTs the BLOB and pipes it to a file, blobstreamout.jpg
  *    Thirdly, SELECTs the BLOB and compares it with the original image
  *
  * NUMBERING RULE
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
  *     21 - 50  are reserved for data type supporting tests
- *     51 onwards are for other tests  
- * 
+ *     51 onwards are for other tests
+ *
  *****************************************************************************/
-"use strict" 
+"use strict"
 
 var oracledb = require('oracledb');
 var fs       = require('fs');
@@ -67,7 +67,7 @@ describe('41. dataTypeBlob', function() {
       done();
     });
   })
-  
+
   after('release connection', function(done) {
     connection.release( function(err) {
       should.not.exist(err);
@@ -94,7 +94,7 @@ describe('41. dataTypeBlob', function() {
       connection.should.be.ok;
       async.series([
         function blobinsert1(callback) {
-          
+
           var lobFinishEventFired = false;
           setTimeout( function() {
             lobFinishEventFired.should.equal(true, "lob does not call 'finish' event!")
@@ -109,7 +109,7 @@ describe('41. dataTypeBlob', function() {
               should.not.exist(err);
               (result.rowsAffected).should.be.exactly(1);
               (result.outBinds.lobbv.length).should.be.exactly(1);
-              
+
               var inStream = fs.createReadStream(inFileName);
               inStream.on('error', function(err) {
                 should.not.exist(err, "inStream.on 'end' event");
@@ -164,7 +164,7 @@ describe('41. dataTypeBlob', function() {
               outStream.on('finish', function() {
                 fs.readFile( inFileName, function(err, originalData) {
                   should.not.exist(err);
-                  
+
                   fs.readFile( outFileName, function(err, generatedData) {
                     should.not.exist(err);
                     originalData.should.eql(generatedData);
@@ -191,7 +191,7 @@ describe('41. dataTypeBlob', function() {
             { n: 2 },
             function(err, result) {
               should.not.exist(err);
-              
+
               var blob = Buffer(0);
               var blobLength = 0;
               var lob = result.rows[0][0];
@@ -209,12 +209,12 @@ describe('41. dataTypeBlob', function() {
                 blobLength = blobLength + chunk.length;
                 blob = Buffer.concat([blob, chunk], blobLength);
               });
-              
+
               lob.on('end', function() {
                 fs.readFile( inFileName, function(err, data) {
                   should.not.exist(err);
                   lobEndEventFired = true;
-                  
+
                   data.length.should.be.exactly(blob.length);
                   data.should.eql(blob);
                 });

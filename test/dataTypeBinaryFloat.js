@@ -14,8 +14,8 @@
  *
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'. 
+ *
+ * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
@@ -28,8 +28,8 @@
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
  *     21 - 50  are reserved for data type supporting tests
- *     51 -     are for other tests  
- * 
+ *     51 -     are for other tests
+ *
  *****************************************************************************/
 "use strict"
 
@@ -40,13 +40,13 @@ var assist = require('./dataTypeAssist.js');
 var dbConfig = require('./dbconfig.js');
 
 describe('30. dataTypeBinaryFloat.js', function() {
-  
+
   if(dbConfig.externalAuth){
     var credential = { externalAuth: true, connectString: dbConfig.connectString };
   } else {
     var credential = dbConfig;
   }
-  
+
   var connection = null;
   var tableName = "oracledb_binary_float";
 
@@ -57,7 +57,7 @@ describe('30. dataTypeBinaryFloat.js', function() {
       done();
     });
   })
-  
+
   after('release connection', function(done) {
     connection.release( function(err) {
       should.not.exist(err);
@@ -94,7 +94,7 @@ describe('30. dataTypeBinaryFloat.js', function() {
     it('30.1.3 works well with REF Cursor', function(done) {
       assist.verifyRefCursor(connection, tableName, numbers, done);
     })
-    
+
   })  // 30.1
 
   describe('30.2 stores null value correctly', function() {
@@ -102,7 +102,7 @@ describe('30. dataTypeBinaryFloat.js', function() {
       assist.verifyNullValues(connection, tableName, done);
     })
   })
-  
+
   describe('30.3 testing floating-point numbers which cannot be precisely represent', function() {
     var nums =
     [
@@ -133,7 +133,7 @@ describe('30. dataTypeBinaryFloat.js', function() {
         { outFormat: oracledb.OBJECT },
         function(err, result) {
           should.not.exist(err);
-          
+
           for(var i = 0; i < nums.length; i++) {
             result.rows[i].CONTENT.should.not.be.exactly(nums[ result.rows[i].NUM ]);
             approxeq(result.rows[i].CONTENT, nums[ result.rows[i].NUM ]).should.be.ok;

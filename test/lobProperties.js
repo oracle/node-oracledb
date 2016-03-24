@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'. 
+ * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
@@ -29,8 +29,8 @@
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
  *     21 - 50  are reserved for data type supporting tests
- *     51 onwards are for other tests 
- * 
+ *     51 onwards are for other tests
+ *
  *****************************************************************************/
 'use strict';
 
@@ -42,7 +42,7 @@ var dbConfig = require('./dbconfig.js');
 
 describe('62. lobProperties.js', function() {
 
-	if(dbConfig.externalAuth){
+        if(dbConfig.externalAuth){
     var credential = { externalAuth: true, connectString: dbConfig.connectString };
   } else {
     var credential = dbConfig;
@@ -55,13 +55,13 @@ describe('62. lobProperties.js', function() {
 
 
   before('prepare table and LOB data', function(done) {
-  		
-  	var sqlCreateTab = 
-  	    " BEGIN "  
-  	  + "   DECLARE " 
-      + "     e_table_exists EXCEPTION; " 
-      + "     PRAGMA EXCEPTION_INIT(e_table_exists, -00942); "  
-      + "   BEGIN " 
+
+        var sqlCreateTab =
+            " BEGIN "
+          + "   DECLARE "
+      + "     e_table_exists EXCEPTION; "
+      + "     PRAGMA EXCEPTION_INIT(e_table_exists, -00942); "
+      + "   BEGIN "
       + "     EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " '); "
       + "   EXCEPTION "
       + "     WHEN e_table_exists "
@@ -70,14 +70,14 @@ describe('62. lobProperties.js', function() {
       + "   EXECUTE IMMEDIATE (' "
       + "     CREATE TABLE " + tableName + " ( "
       + "       id NUMBER, c CLOB, b BLOB "
-      + "     ) " 
-      + "   '); " 
+      + "     ) "
+      + "   '); "
       + " END; ";
-  
-    var sqlInsert = "INSERT INTO " + tableName + " VALUES (:i, EMPTY_CLOB(), EMPTY_BLOB()) " 
+
+    var sqlInsert = "INSERT INTO " + tableName + " VALUES (:i, EMPTY_CLOB(), EMPTY_BLOB()) "
                      + " RETURNING c, b INTO :clob, :blob";
 
-    var bindVar = 
+    var bindVar =
        {
          i: 1,
          clob: { type: oracledb.CLOB, dir: oracledb.BIND_OUT },
@@ -109,7 +109,7 @@ describe('62. lobProperties.js', function() {
           bindVar,
           function(err, result) {
             should.not.exist(err);
-            
+
             var clob = result.outBinds.clob[0];
             var blob = result.outBinds.blob[0];
             var clobStream = fs.createReadStream(clobFileName);
@@ -169,9 +169,9 @@ describe('62. lobProperties.js', function() {
       }
     ], done);
   }) // before
-  
+
   after(function(done) {
-    
+
     async.series([
       function(cb) {
         connection.execute(
@@ -199,7 +199,7 @@ describe('62. lobProperties.js', function() {
         should.not.exist(err);
         var clob = result.rows[0][1],
             blob = result.rows[0][2];
-        
+
         var t1 = clob.chunkSize,
             t2 = blob.chunkSize;
 
@@ -215,7 +215,7 @@ describe('62. lobProperties.js', function() {
           // console.log(err.message);
           // Cannot assign to read only property 'chunkSize' of #<Lob>
         }
-      
+
         try {
           blob.chunkSize = t2 + 1;
         } catch(err) {
@@ -322,7 +322,7 @@ describe('62. lobProperties.js', function() {
               blob = result.rows[0][2];
 
           var newValue = clob.pieceSize - 500;
-  
+
           clob.pieceSize -= 500;
           blob.pieceSize -= 500;
           (clob.pieceSize).should.eql(newValue);

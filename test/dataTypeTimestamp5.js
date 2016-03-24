@@ -14,8 +14,8 @@
  *
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'. 
+ *
+ * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
@@ -28,8 +28,8 @@
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
  *     21 - 50  are reserved for data type supporting tests
- *     51 -     are for other tests 
- * 
+ *     51 -     are for other tests
+ *
  *****************************************************************************/
  "use strict";
 
@@ -40,13 +40,13 @@ var assist = require('./dataTypeAssist.js');
 var dbConfig = require('./dbconfig.js');
 
 describe('37. dataTypeTimestamp5.js', function() {
-  
+
   if(dbConfig.externalAuth){
     var credential = { externalAuth: true, connectString: dbConfig.connectString };
   } else {
     var credential = dbConfig;
   }
-  
+
   var connection = false;
   var tableName = "oracledb_timestamp5";
 
@@ -84,16 +84,16 @@ describe('37. dataTypeTimestamp5.js', function() {
 
     it('37.1.1 works well with SELECT query', function(done) {
       assist.dataTypeSupport(connection, tableName, dates, done);
-    }) 
+    })
 
     it('37.1.2 works well with result set', function(done) {
       assist.verifyResultSet(connection, tableName, dates, done);
-    }) 
-    
+    })
+
     it('37.1.3 works well with REF Cursor', function(done) {
       assist.verifyRefCursor(connection, tableName, dates, done);
-    }) 
-    
+    })
+
   }) // end of 37.1 suite
 
   describe('37.2 stores null value correctly', function() {
@@ -124,7 +124,7 @@ describe('37. dataTypeTimestamp5.js', function() {
     })
 
     it('37.3.2 SELECT query - formatted data for comparison', function(done) {
-      var sql = "SELECT num, TO_CHAR(content AT TIME ZONE '-8:00', 'DD-MM-YYYY HH24:MI:SS.FF TZR') AS TS_DATA FROM " 
+      var sql = "SELECT num, TO_CHAR(content AT TIME ZONE '-8:00', 'DD-MM-YYYY HH24:MI:SS.FF TZR') AS TS_DATA FROM "
                  + tableName + " WHERE num = :no";
 
       async.forEach(timestamps, function(timestamp, cb) {
@@ -132,7 +132,7 @@ describe('37. dataTypeTimestamp5.js', function() {
         connection.execute(
           sql,
           { no: bv },
-          { 
+          {
             outFormat: oracledb.OBJECT
           },
           function(err, result) {
@@ -140,7 +140,7 @@ describe('37. dataTypeTimestamp5.js', function() {
             // console.log(result.rows);
             (result.rows[0].TS_DATA).should.equal(assist.content.timestamps5[bv]);
             cb();
-          } 
+          }
         );
       }, function(err) {
           should.not.exist(err);

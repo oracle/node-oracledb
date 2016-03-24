@@ -25,7 +25,7 @@
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
  *     21 - 50  are reserved for data type supporting tests
- *     51 onwards are for other tests 
+ *     51 onwards are for other tests
  *
  *****************************************************************************/
 'use strict';
@@ -53,14 +53,14 @@ if (dbConfig.externalAuth) {
 }
 
 describe('45. instanceof.js', function() {
-  
+
   it('45.1 all constructors have been accounted for', function(done) {
     var cLibKeysIdx;
     var cLibKeys;
     var instKeysIdx;
     var instKeys;
     var foundAllConstructors = true;
-    
+
     cLibKeys = Object.keys(oracledbCLib);
     instKeys = Object.keys(oracledb);
 
@@ -69,34 +69,34 @@ describe('45. instanceof.js', function() {
       if (typeof oracledbCLib[cLibKeys[cLibKeysIdx]] !== 'function') {
         continue cLibLoop;
       }
-      
+
       for (instKeysIdx = 0; instKeysIdx < instKeys.length; instKeysIdx += 1) {
         if (cLibKeys[cLibKeysIdx] === instKeys[instKeysIdx] ||
           // The following exception is because the Lob class is documented as "Lob"
           // so that's how it was exposed on the instance
-          cLibKeys[cLibKeysIdx] === 'ILob' && instKeys[instKeysIdx] === 'Lob' 
+          cLibKeys[cLibKeysIdx] === 'ILob' && instKeys[instKeysIdx] === 'Lob'
         ) {
           continue cLibLoop;
         }
       }
-      
+
       foundAllConstructors = false;
       console.log('Failed to account for ' + cLibKeys[cLibKeysIdx]);
-      
+
       break cLibLoop;
     }
-    
+
     foundAllConstructors.should.be.true;
-    
+
     done();
   });
-  
+
   it('45.2 instanceof works for the oracledb instance', function(done) {
     (oracledb instanceof oracledb.Oracledb).should.be.true;
 
     done();
   });
-  
+
   it('45.3 instanceof works for pool instances', function(done) {
     oracledb.createPool(
       {
@@ -106,40 +106,40 @@ describe('45. instanceof.js', function() {
         connectString     : credential.connectString,
         poolMin           : 0,
         poolMax           : 1,
-        poolIncrement     : 1     
+        poolIncrement     : 1
       },
       function(err, pool){
         should.not.exist(err);
-        
+
         (pool instanceof oracledb.Pool).should.be.true;
-        
+
         pool.terminate(function(err) {
           should.not.exist(err);
-          
+
           done();
         });
       }
     );
   });
-  
+
   it('45.4 instanceof works for connection instances', function(done) {
     oracledb.getConnection(credential, function(err, conn) {
       should.not.exist(err);
-      
+
       (conn instanceof oracledb.Connection).should.be.true;
-      
+
       conn.release(function(err) {
         should.not.exist(err);
 
         done();
       });
-    });   
+    });
   });
-  
+
   it('45.5 instanceof works for resultset instances', function(done) {
     oracledb.getConnection(credential, function(err, conn) {
       should.not.exist(err);
-      
+
       conn.execute(
         'select 1 from dual union select 2 from dual',
         [], // no binds
@@ -148,12 +148,12 @@ describe('45. instanceof.js', function() {
         },
         function(err, result) {
           should.not.exist(err);
-          
+
           (result.resultSet instanceof oracledb.ResultSet).should.be.true;
-          
+
           result.resultSet.close(function(err) {
             should.not.exist(err);
-            
+
             conn.release(function(err) {
               should.not.exist(err);
 
@@ -162,20 +162,20 @@ describe('45. instanceof.js', function() {
           });
         }
        );
-    });   
+    });
   });
-  
+
   it('45.6 instanceof works for lob instances', function(done) {
     oracledb.getConnection(credential, function(err, conn) {
       should.not.exist(err);
-      
+
       conn.execute(
         'select to_clob(dummy) from dual',
         function(err, result) {
           should.not.exist(err);
-          
+
           (result.rows[0][0] instanceof oracledb.Lob).should.be.true;
-          
+
           conn.release(function(err) {
             should.not.exist(err);
 
@@ -183,6 +183,6 @@ describe('45. instanceof.js', function() {
           });
         }
        );
-    });   
+    });
   });
 });

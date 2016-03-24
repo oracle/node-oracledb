@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'. 
+ * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
@@ -28,8 +28,8 @@
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
  *     21 - 50  are reserved for data type supporting tests
- *     51 onwards are for other tests 
- * 
+ *     51 onwards are for other tests
+ *
  *****************************************************************************/
  "use strict";
 
@@ -45,8 +45,8 @@ describe('57. nestedCursor.js', function() {
   } else {
     var credential = dbConfig;
   }
- 
-	var createParentTable = 
+
+  var createParentTable =
       "BEGIN \
           DECLARE \
               e_table_exists EXCEPTION; \
@@ -81,7 +81,7 @@ describe('57. nestedCursor.js', function() {
           '); \
       END; ";
 
-  var createChildTable = 
+  var createChildTable =
       "BEGIN \
           DECLARE \
               e_table_exists EXCEPTION; \
@@ -133,13 +133,13 @@ describe('57. nestedCursor.js', function() {
           '); \
       END; ";
 
-  var cursorExpr = 
+  var cursorExpr =
       "CREATE OR REPLACE PROCEDURE cursor_parent_child (p_out OUT SYS_REFCURSOR) \
            AS \
            BEGIN \
              OPEN p_out FOR \
                SELECT p ";
-  
+
   var connection = false;
   before(function(done) {
     async.series([
@@ -204,7 +204,7 @@ describe('57. nestedCursor.js', function() {
       }
     ], done);
   })
-  
+
   function fetchOneRowFromRS(rs, cb) {
     rs.getRow(function(err, row) {
       if(err) {
@@ -226,11 +226,11 @@ describe('57. nestedCursor.js', function() {
       }
     });
   }
-  
+
   it('57.1 testing nested cursor support - result set', function(done) {
     connection.should.be.ok;
-    
-    var sql = 
+
+    var sql =
         "SELECT p.description, \
              CURSOR( \
                SELECT c.description   \
@@ -265,8 +265,8 @@ describe('57. nestedCursor.js', function() {
                    WHERE c.parent_id = p.id  \
                  ) children  \
                FROM test_parent_tab p;  \
-           END; "; 
-    
+           END; ";
+
     async.series([
       function(callback) {
         connection.execute(

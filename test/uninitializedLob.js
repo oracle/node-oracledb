@@ -14,8 +14,8 @@
  *
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'. 
+ *
+ * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
@@ -29,8 +29,8 @@
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
  *     21 - 50  are reserved for data type supporting tests
- *     51 onwards are for other tests  
- * 
+ *     51 onwards are for other tests
+ *
  *****************************************************************************/
 'use strict';
 
@@ -76,9 +76,9 @@ describe('65. uninitializedLob.js', function() {
                     "       spoc_cm_id NUMBER, \n" +
                     "       created_timestamp TIMESTAMP(5) DEFAULT SYSTIMESTAMP, \n" +
                     "       modified_timestamp TIMESTAMP(5) DEFAULT SYSTIMESTAMP \n" +
-                    "     ) \n" +  
-                    "   '); \n" +   
-                    "END; "; 
+                    "     ) \n" +
+                    "   '); \n" +
+                    "END; ";
 
         connection.execute(
           proc,
@@ -86,7 +86,7 @@ describe('65. uninitializedLob.js', function() {
             should.not.exist(err);
             callback();
           }
-        ); 
+        );
       },
       function createSeq(callback) {
         var proc =  "BEGIN \n" +
@@ -100,9 +100,9 @@ describe('65. uninitializedLob.js', function() {
                     "     THEN NULL; \n" +
                     "   END; \n" +
                     "   EXECUTE IMMEDIATE (' \n" +
-                    "     CREATE SEQUENCE testlobdpi_seq INCREMENT BY 1 START WITH 1 NOMAXVALUE CACHE 50 ORDER  \n" +  
-                    "   '); \n" +   
-                    "END; "; 
+                    "     CREATE SEQUENCE testlobdpi_seq INCREMENT BY 1 START WITH 1 NOMAXVALUE CACHE 50 ORDER  \n" +
+                    "   '); \n" +
+                    "END; ";
 
         connection.execute(
           proc,
@@ -110,7 +110,7 @@ describe('65. uninitializedLob.js', function() {
             should.not.exist(err);
             callback();
           }
-        ); 
+        );
       },
       function(callback) {
         var proc = "create or replace trigger testlobdpi_rbi  \n" +
@@ -118,14 +118,14 @@ describe('65. uninitializedLob.js', function() {
                    "  for each row \n" +
                    "begin \n" +
                    "  :new.id := testlobdpi_seq.nextval;\n" +
-                   "end;"; 
+                   "end;";
         connection.execute(
           proc,
           function(err) {
             should.not.exist(err);
             callback();
           }
-        ); 
+        );
       },
       function(callback) {
         var proc = "create or replace trigger testlobdpi_rbu  \n" +
@@ -133,15 +133,15 @@ describe('65. uninitializedLob.js', function() {
                    "  for each row \n" +
                    "begin \n" +
                    "  :new.modified_timestamp := systimestamp;\n" +
-                   "end;"; 
+                   "end;";
         connection.execute(
           proc,
           function(err) {
             should.not.exist(err);
             callback();
           }
-        ); 
-      }, 
+        );
+      },
       function(callback) {
         var sql = "ALTER TABLE testlobdpi ADD (blob_1 BLOB, unit32_1 NUMBER, date_1 TIMESTAMP(5), " +
                   "  string_1 VARCHAR2(250), CONSTRAINT string_1_uk UNIQUE (string_1))";
@@ -152,7 +152,7 @@ describe('65. uninitializedLob.js', function() {
             should.not.exist(err);
             callback();
           }
-        ); 
+        );
       }
     ], done);
   }) // before
@@ -194,8 +194,8 @@ describe('65. uninitializedLob.js', function() {
                  "  row_count NUMBER := 0;" +
                  "  negative_one NUMBER := -1;" +
                  "BEGIN \n" +
-                 "  SELECT COUNT(*) INTO row_count FROM testlobdpi WHERE (string_1 = :string_1);" + 
-                 "    IF (row_count = 0 ) THEN\n" + 
+                 "  SELECT COUNT(*) INTO row_count FROM testlobdpi WHERE (string_1 = :string_1);" +
+                 "    IF (row_count = 0 ) THEN\n" +
                  "      INSERT INTO testlobdpi (blob_1, string_1, spoc_cm_id) \n" +
                  "      VALUES (empty_blob(), :string_1, :spoc_cm_id) \n" +
                  "      RETURNING id, blob_1 INTO :id, :blob_1; \n" +
@@ -221,7 +221,7 @@ describe('65. uninitializedLob.js', function() {
           }
 
           //console.log(n + ':',result);
-          
+
           if (result.outBinds.id == -1) {
             // a dup was found
             return next(null)

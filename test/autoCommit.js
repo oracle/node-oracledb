@@ -14,8 +14,8 @@
  *
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'. 
+ *
+ * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
@@ -28,8 +28,8 @@
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
  *     21 - 50  are reserved for data type supporting tests
- *     51 -     are for other tests 
- * 
+ *     51 -     are for other tests
+ *
  *****************************************************************************/
 "use strict";
 
@@ -45,12 +45,12 @@ describe('7. autoCommit.js', function() {
   } else {
     var credential = dbConfig;
   }
-  
+
   var pool = null;
   var connection  = null;
 
   before('create pool, get one connection, create table', function(done) {
-    var script = 
+    var script =
         "BEGIN \
             DECLARE \
                 e_table_exists EXCEPTION; \
@@ -93,10 +93,10 @@ describe('7. autoCommit.js', function() {
           should.not.exist(err);
           connection = conn;
           callback();
-        }); 
+        });
       },
       function(callback) {
-        connection.execute( 
+        connection.execute(
           script,
           function(err) {
             should.not.exist(err);
@@ -106,8 +106,8 @@ describe('7. autoCommit.js', function() {
       }
     ], done);
   })
-  
-  after('drop table, release connection, terminate pool', function(done) {    
+
+  after('drop table, release connection, terminate pool', function(done) {
     async.series([
       function(callback) {
         connection.execute(
@@ -141,10 +141,10 @@ describe('7. autoCommit.js', function() {
       function(err) {
         should.not.exist(err);
         done();
-      } 
+      }
     );
   })
-  
+
   it('7.1 autoCommit takes effect when setting oracledb.autoCommit before connecting', function(done) {
     var conn1 = null;
     var conn2 = null;
@@ -251,7 +251,7 @@ describe('7. autoCommit.js', function() {
           }
         );
       },
-      function(callback) {     
+      function(callback) {
         pool.getConnection(
           function(err, conn) {
             should.not.exist(err);
@@ -311,7 +311,7 @@ describe('7. autoCommit.js', function() {
   it('7.3 autoCommit setting does not affect previous SQL result', function(done) {
     var conn1 = null;
     var conn2 = null;
-    
+
     async.series([
       function(callback) {
         pool.getConnection(
@@ -331,7 +331,7 @@ describe('7. autoCommit.js', function() {
           }
         );
       },
-      function(callback) {     
+      function(callback) {
         pool.getConnection(
           function(err, conn) {
             should.not.exist(err);
@@ -399,7 +399,6 @@ describe('7. autoCommit.js', function() {
         });
       }
     ], done);
-  }) 
-  
-})
+  })
 
+})

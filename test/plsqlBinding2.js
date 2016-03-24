@@ -14,8 +14,8 @@
  *
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'. 
+ *
+ * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
@@ -28,8 +28,8 @@
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
  *     21 - 50  are reserved for data type supporting tests
- *     51 onwards are for other tests  
- * 
+ *     51 onwards are for other tests
+ *
  *****************************************************************************/
 'use strict';
 
@@ -68,9 +68,9 @@ describe('44. plsqlBinding2.js', function() {
                     "     THEN NULL; \n" +
                     "   END; \n" +
                     "   EXECUTE IMMEDIATE (' \n" +
-                    "     CREATE TABLE waveheight (beach VARCHAR2(50), depth NUMBER)  \n" +  
-                    "   '); \n" +   
-                    "END; "; 
+                    "     CREATE TABLE waveheight (beach VARCHAR2(50), depth NUMBER)  \n" +
+                    "   '); \n" +
+                    "END; ";
 
         connection.execute(
           proc,
@@ -104,7 +104,7 @@ describe('44. plsqlBinding2.js', function() {
                    "  BEGIN \n" +
                    "    IF beaches.COUNT <> depths.COUNT THEN \n" +
                    "      RAISE_APPLICATION_ERROR(-20000, 'Array lengths must match for this example.'); \n" +
-                   "    END IF; \n" + 
+                   "    END IF; \n" +
                    "    FORALL i IN INDICES OF beaches \n" +
                    "      INSERT INTO waveheight (beach, depth) VALUES (beaches(i), depths(i)); \n" +
                    "  END; \n" +
@@ -121,7 +121,7 @@ describe('44. plsqlBinding2.js', function() {
                    "      INSERT INTO waveheight (beach, depth) VALUES (beaches(i), depths(i)); \n" +
                    "      SELECT beach, depth BULK COLLECT INTO beaches, depths FROM waveheight ORDER BY 1; \n" +
                    "  END; \n  " +
-                   "END;"; 
+                   "END;";
 
         connection.execute(
           proc,
@@ -130,7 +130,7 @@ describe('44. plsqlBinding2.js', function() {
             callback();
           }
         );
-      }, 
+      },
       function(callback) {
         connection.commit(function(err) {
           should.not.exist(err);
@@ -144,7 +144,7 @@ describe('44. plsqlBinding2.js', function() {
     async.series([
       function(callback) {
         connection.execute(
-          "DROP TABLE waveheight", 
+          "DROP TABLE waveheight",
           function(err) {
             should.not.exist(err);
             callback();
@@ -155,7 +155,7 @@ describe('44. plsqlBinding2.js', function() {
         connection.execute(
           "DROP PACKAGE beachpkg",
           function(err) {
-            should.not.exist(err); 
+            should.not.exist(err);
             callback();
           }
         );
@@ -176,7 +176,7 @@ describe('44. plsqlBinding2.js', function() {
         connection.execute(
           "BEGIN beachpkg.array_in(:beach_in, :depth_in); END;",
           {
-            beach_in: { type: oracledb.STRING, 
+            beach_in: { type: oracledb.STRING,
                         dir:  oracledb.BIND_IN,
                         val:  ["Malibu Beach", "Bondi Beach", "Waikiki Beach"] },
             depth_in: { type: oracledb.NUMBER,
@@ -222,11 +222,11 @@ describe('44. plsqlBinding2.js', function() {
         connection.execute(
           "BEGIN beachpkg.array_inout(:beach_inout, :depth_inout); END;",
           {
-            beach_inout: { type: oracledb.STRING, 
+            beach_inout: { type: oracledb.STRING,
                            dir:  oracledb.BIND_INOUT,
                            val:  ["Port Melbourne Beach", "Eighty Mile Beach", "Chesil Beach"],
                            maxArraySize: 3},
-            depth_inout: { type: oracledb.NUMBER, 
+            depth_inout: { type: oracledb.NUMBER,
                            dir:  oracledb.BIND_INOUT,
                            val:  [8, 3, 70],
                            maxArraySize: 3}
@@ -250,7 +250,7 @@ describe('44. plsqlBinding2.js', function() {
         connection.execute(
           "BEGIN beachpkg.array_in(:1, :2); END;",
           [
-            { type: oracledb.STRING, 
+            { type: oracledb.STRING,
                dir:  oracledb.BIND_IN,
                val:  ["Malibu Beach", "Bondi Beach", "Waikiki Beach"] },
             { type: oracledb.NUMBER,
@@ -296,14 +296,14 @@ describe('44. plsqlBinding2.js', function() {
         connection.execute(
           "BEGIN beachpkg.array_inout(:1, :2); END;",
           [
-            { type: oracledb.STRING, 
+            { type: oracledb.STRING,
               dir:  oracledb.BIND_INOUT,
               val:  ["Port Melbourne Beach", "Eighty Mile Beach", "Chesil Beach"],
               maxArraySize: 3},
-            { type: oracledb.NUMBER, 
+            { type: oracledb.NUMBER,
               dir:  oracledb.BIND_INOUT,
               val:  [8, 3, 70],
-              maxArraySize: 3}  
+              maxArraySize: 3}
           ],
           function(err, result) {
             should.not.exist(err);
@@ -316,7 +316,7 @@ describe('44. plsqlBinding2.js', function() {
       }
     ], done);
   })
-  
+
   it.skip('44.3 default binding type and direction with binding by name', function(done) {
     async.series([
       // Pass arrays of values to a PL/SQL procedure
@@ -324,7 +324,7 @@ describe('44. plsqlBinding2.js', function() {
         connection.execute(
           "BEGIN beachpkg.array_in(:beach_in, :depth_in); END;",
           {
-            beach_in: { //type: oracledb.STRING, 
+            beach_in: { //type: oracledb.STRING,
                         //dir:  oracledb.BIND_IN,
                         val:  ["Malibu Beach", "Bondi Beach", "Waikiki Beach"] },
             depth_in: { type: oracledb.NUMBER,
@@ -370,11 +370,11 @@ describe('44. plsqlBinding2.js', function() {
         connection.execute(
           "BEGIN beachpkg.array_inout(:beach_inout, :depth_inout); END;",
           {
-            beach_inout: { type: oracledb.STRING, 
+            beach_inout: { type: oracledb.STRING,
                            dir:  oracledb.BIND_INOUT,
                            val:  ["Port Melbourne Beach", "Eighty Mile Beach", "Chesil Beach"],
                            maxArraySize: 3},
-            depth_inout: { type: oracledb.NUMBER, 
+            depth_inout: { type: oracledb.NUMBER,
                            dir:  oracledb.BIND_INOUT,
                            val:  [8, 3, 70],
                            maxArraySize: 3}
@@ -398,7 +398,7 @@ describe('44. plsqlBinding2.js', function() {
         connection.execute(
           "BEGIN beachpkg.array_in(:1, :2); END;",
           [
-            { type: oracledb.STRING, 
+            { type: oracledb.STRING,
                // dir:  oracledb.BIND_IN,
                val:  ["Malibu Beach", "Bondi Beach", "Waikiki Beach"] },
             { type: oracledb.NUMBER,
@@ -444,14 +444,14 @@ describe('44. plsqlBinding2.js', function() {
         connection.execute(
           "BEGIN beachpkg.array_inout(:1, :2); END;",
           [
-            { type: oracledb.STRING, 
+            { type: oracledb.STRING,
               dir:  oracledb.BIND_INOUT,
               val:  ["Port Melbourne Beach", "Eighty Mile Beach", "Chesil Beach"],
               maxArraySize: 3},
-            { type: oracledb.NUMBER, 
+            { type: oracledb.NUMBER,
               dir:  oracledb.BIND_INOUT,
               val:  [8, 3, 70],
-              maxArraySize: 3}  
+              maxArraySize: 3}
           ],
           function(err, result) {
             should.not.exist(err);
@@ -472,7 +472,7 @@ describe('44. plsqlBinding2.js', function() {
         connection.execute(
           "BEGIN beachpkg.array_in(:beach_in, :depth_in); END;",
           {
-            beach_in: { type: oracledb.STRING, 
+            beach_in: { type: oracledb.STRING,
                         dir:  oracledb.BIND_IN,
                         val:  ["Malibu Beach", "Bondi Beach", null, "Waikiki Beach", '', null] },
             depth_in: { type: oracledb.NUMBER,
@@ -518,11 +518,11 @@ describe('44. plsqlBinding2.js', function() {
         connection.execute(
           "BEGIN beachpkg.array_inout(:beach_inout, :depth_inout); END;",
           {
-            beach_inout: { type: oracledb.STRING, 
+            beach_inout: { type: oracledb.STRING,
                            dir:  oracledb.BIND_INOUT,
                            val:  ["Port Melbourne Beach", "Eighty Mile Beach", '', "Chesil Beach", null, ''],
                            maxArraySize: 10},
-            depth_inout: { type: oracledb.NUMBER, 
+            depth_inout: { type: oracledb.NUMBER,
                            dir:  oracledb.BIND_INOUT,
                            val:  [null, 8, null, 3, null, 70],
                            maxArraySize: 10}
@@ -538,7 +538,7 @@ describe('44. plsqlBinding2.js', function() {
       }
     ], done);
   }) // 44.5
-  
+
   it('44.6 empty array for BIND_IN and BIND_INOUT', function(done) {
     async.series([
       // Pass arrays of values to a PL/SQL procedure
@@ -546,7 +546,7 @@ describe('44. plsqlBinding2.js', function() {
         connection.execute(
           "BEGIN beachpkg.array_in(:beach_in, :depth_in); END;",
           {
-            beach_in: { type: oracledb.STRING, 
+            beach_in: { type: oracledb.STRING,
                         dir:  oracledb.BIND_IN,
                         val:  [] },
             depth_in: { type: oracledb.NUMBER,
@@ -567,12 +567,12 @@ describe('44. plsqlBinding2.js', function() {
         connection.execute(
           "BEGIN beachpkg.array_inout(:beach_inout, :depth_inout); END;",
           {
-            beach_inout: { type: oracledb.STRING, 
+            beach_inout: { type: oracledb.STRING,
                            dir:  oracledb.BIND_INOUT,
                            val:  [],
                            maxArraySize: 0
                          },
-            depth_inout: { type: oracledb.NUMBER, 
+            depth_inout: { type: oracledb.NUMBER,
                            dir:  oracledb.BIND_INOUT,
                            val:  [],
                            maxArraySize: 3}
@@ -650,7 +650,7 @@ describe('44. plsqlBinding2.js', function() {
         connection.execute(
           "BEGIN beachpkg.array_in(:beach_in, :depth_in); END;",
           {
-            beach_in: { type: oracledb.STRING, 
+            beach_in: { type: oracledb.STRING,
                         dir:  oracledb.BIND_IN,
                         val:  ["Malibu", "Bondi", "Waikiki"] },
             depth_in: { type: oracledb.NUMBER,
@@ -696,12 +696,12 @@ describe('44. plsqlBinding2.js', function() {
         connection.execute(
           "BEGIN beachpkg.array_inout(:beach_inout, :depth_inout); END;",
           {
-            beach_inout: { type: oracledb.STRING, 
+            beach_inout: { type: oracledb.STRING,
                            dir:  oracledb.BIND_INOUT,
                            val:  ["Port Melbourne Beach", "Eighty Mile Beach", "Chesil Beach"],
                            maxArraySize: 3,
                            maxSize : 5},
-            depth_inout: { type: oracledb.NUMBER, 
+            depth_inout: { type: oracledb.NUMBER,
                            dir:  oracledb.BIND_INOUT,
                            val:  [8, 3, 70],
                            maxArraySize: 3}

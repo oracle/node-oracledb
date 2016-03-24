@@ -14,8 +14,8 @@
  *
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'. 
+ *
+ * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
@@ -25,16 +25,16 @@
  *
  *   PL/SQL OUT CLOB parameters can also be bound as `STRING`
  *   The returned length is limited to the maximum size of maxSize option.
- * 
- *   When the types of bind out variables are not STRING or BUFFER, 
+ *
+ *   When the types of bind out variables are not STRING or BUFFER,
  *   maxSize option will not take effect.
- * 
+ *
  * NUMBERING RULE
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
  *     21 - 50  are reserved for data type supporting tests
- *     51 onwards are for other tests  
- * 
+ *     51 onwards are for other tests
+ *
  *****************************************************************************/
 "use strict";
 
@@ -52,10 +52,10 @@ describe('60. clobPlsqlString.js', function() {
   } else {
     var credential = dbConfig;
   }
-  
+
   var connection = null;
   var tableName = "oracledb_myclobs";
-  
+
   before('get one connection, prepare table', function(done) {
     async.series([
       function(callback) {
@@ -104,7 +104,7 @@ describe('60. clobPlsqlString.js', function() {
         }
       );
     }) // before
-  
+
     it('60.1.1 PL/SQL OUT CLOB parameters can also be bound as STRING', function(done) {
       connection.execute(
         "BEGIN SELECT content INTO :cbv FROM oracledb_myclobs WHERE num = :id; END;",
@@ -147,22 +147,22 @@ describe('60. clobPlsqlString.js', function() {
           connection.execute(
             "INSERT INTO " + tableName + " VALUES (2, EMPTY_CLOB()) RETURNING content INTO :lobbv",
             { lobbv: {type: oracledb.CLOB, dir: oracledb.BIND_OUT} },
-            { autoCommit: false }, 
+            { autoCommit: false },
             function(err, result) {
               should.not.exist(err);
-              
+
               var lob = result.outBinds.lobbv[0];
               lob.on('error', function(err) {
                 should.not.exist(err);
                 return callback(err);
               });
- 
+
               var inStream = new stream.Readable();
               inStream._read = function noop() {};
               inStream.push(rawData);
               inStream.push(null);
 
-              inStream.on('error', function(err) { 
+              inStream.on('error', function(err) {
                 should.not.exist(err);
                 return callback(err);
               });
@@ -195,7 +195,7 @@ describe('60. clobPlsqlString.js', function() {
               });
 
               lob.on('end', function() {
-                (content.length).should.be.exactly(dataLength); 
+                (content.length).should.be.exactly(dataLength);
                 (content).should.eql(rawData);
                 callback();
               });
@@ -209,5 +209,5 @@ describe('60. clobPlsqlString.js', function() {
       ], done);
     })
   }) // 60.2
-  
+
 })

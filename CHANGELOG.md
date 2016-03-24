@@ -11,11 +11,11 @@
 
 - Added a connection pool queue configured with `queueRequests` and
   `queueTimeout` attributes.  The queue is enabled by default.
-  
+
 - Added connection pool option attribute `_enableStats` and method
   `pool._logStats()` to display pool and queue statistics.  Note: these may
   change in future.
-  
+
 - Added "bind by position" syntax for PL/SQL Index-by array binds.
 
 - Allowed node-oracledb class instances to be tested with 'instanceof'.
@@ -62,7 +62,7 @@
 
 ## node-oracledb v1.4.0 (17 Nov 2015)
 
-- Upgraded NAN dependency to version 2 allowing node-oracledb to build 
+- Upgraded NAN dependency to version 2 allowing node-oracledb to build
   with Node 0.10, 0.12, 4 and 5.  Note: a compiler supporting C++11 is required to build with Node 4.2 and 5.
 
 - Fixed a cursor leak when statement execution fails.
@@ -133,7 +133,7 @@
 
 - Fixed a crash with NULL or uninitialized REF CURSOR OUT bind variables.
 
-- Fixed potential memory leak when connecting throws an error. 
+- Fixed potential memory leak when connecting throws an error.
 
 - Added a check to throw an error sooner when a CURSOR type is used for IN or IN OUT binds. (Support is pending).
 

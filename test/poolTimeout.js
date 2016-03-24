@@ -14,8 +14,8 @@
  *
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'. 
+ *
+ * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
@@ -28,8 +28,8 @@
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
  *     21 - 50  are reserved for data type supporting tests
- *     51 -     are for other tests 
- * 
+ *     51 -     are for other tests
+ *
  *****************************************************************************/
 
 var oracledb = require('oracledb');
@@ -40,13 +40,13 @@ var dbConfig = require('./dbconfig.js');
 describe('11. poolTimeout.js', function(){
   this.timeout(0); // disable suite-level Time-out
   var pool = false;
-  
+
   if(dbConfig.externalAuth){
     var credential = { externalAuth: true, connectString: dbConfig.connectString };
   } else {
     var credential = dbConfig;
   }
-  
+
   before(function(done){
     oracledb.createPool(
       {
@@ -66,17 +66,17 @@ describe('11. poolTimeout.js', function(){
         pool = pooling;
         done();
       }
-    ); 
+    );
   })
-  
+
   after(function(done){
     pool.terminate(function(err){
       if(err) { console.log(err.message); return; }
       //console.log("---- pool terminated.");
       done();
-    }); 
+    });
   })
-  
+
   it(' pool terminates idle connections after specify time', function(done){
     pool.should.be.ok;
     if(!credential.externalAuth){
@@ -85,7 +85,7 @@ describe('11. poolTimeout.js', function(){
       pool.connectionsOpen.should.be.exactly(0);
     }
     pool.connectionsInUse.should.be.exactly(0).and.be.a.Number;
-    
+
     var conn1 = false;
     var conn2 = false;
     var conn3 = false;
@@ -99,7 +99,7 @@ describe('11. poolTimeout.js', function(){
           //console.log("-- create conn 1");
           callback();
         });
-      }, 
+      },
       function(callback){
         pool.connectionsOpen.should.be.exactly(1);
         pool.connectionsInUse.should.be.exactly(1);
@@ -180,10 +180,10 @@ describe('11. poolTimeout.js', function(){
       function(callback){
         /*11g client timeout idle connctions as part of session release */
         //pool.connectionsOpen.should.be.exactly(3);
-        
+
         /*12c client is done as part of get connection*/
         //pool.connectionsOpen.should.be.exactly(1);
-         
+
         pool.connectionsInUse.should.be.exactly(1);
         conn4.should.be.ok;
         conn4.release( function(err){
@@ -195,7 +195,7 @@ describe('11. poolTimeout.js', function(){
         });
       }
     ], done);
-    
+
   })
-    
+
 })

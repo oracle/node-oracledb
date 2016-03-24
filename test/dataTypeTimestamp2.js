@@ -14,8 +14,8 @@
  *
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'. 
+ *
+ * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
@@ -28,10 +28,10 @@
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
  *     21 - 50  are reserved for data type supporting tests
- *     51 -     are for other tests 
- * 
+ *     51 -     are for other tests
+ *
  *****************************************************************************/
-"use strict"; 
+"use strict";
 
 var oracledb = require('oracledb');
 var should = require('should');
@@ -40,13 +40,13 @@ var assist = require('./dataTypeAssist.js');
 var dbConfig = require('./dbconfig.js');
 
 describe('34. dataTypeTimestamp2.js', function() {
-  
+
   if(dbConfig.externalAuth){
     var credential = { externalAuth: true, connectString: dbConfig.connectString };
   } else {
     var credential = dbConfig;
   }
-  
+
   var connection = null;
   var tableName = "oracledb_timestamp2";
 
@@ -84,16 +84,16 @@ describe('34. dataTypeTimestamp2.js', function() {
 
     it('34.1.1 works well with SELECT query', function(done) {
       assist.dataTypeSupport(connection, tableName, dates, done);
-    }) 
+    })
 
     it('34.1.2 works well with result set', function(done) {
       assist.verifyResultSet(connection, tableName, dates, done);
-    }) 
-    
+    })
+
     it('34.1.3 works well with REF Cursor', function(done) {
       assist.verifyRefCursor(connection, tableName, dates, done);
-    }) 
-    
+    })
+
   }) // end of 34.1 suite
 
   describe('34.2 sotres null value correctly', function() {
@@ -101,10 +101,10 @@ describe('34. dataTypeTimestamp2.js', function() {
       assist.verifyNullValues(connection, tableName, done);
     })
   })
-  
+
   describe('34.3 testing database TIMESTAMP(p)', function(done) {
     var timestamps = assist.TIMESTAMP_STRINGS;
-    
+
     before(function(done) {
       assist.setUp4sql(connection, tableName, timestamps, done);
     })
@@ -122,7 +122,7 @@ describe('34. dataTypeTimestamp2.js', function() {
     it('34.3.1 SELECT query - original data', function(done) {
       assist.selectOriginalData(connection, tableName, timestamps, done);
     })
-    
+
     it('34.3.2 SELECT query - formatted data for comparison', function(done) {
       async.forEach(timestamps, function(timestamp, cb) {
         var bv = timestamps.indexOf(timestamp);
@@ -135,7 +135,7 @@ describe('34. dataTypeTimestamp2.js', function() {
             // console.log(result.rows);
             (result.rows[0].TS_DATA).should.equal(assist.content.timestamps2[bv]);
             cb();
-          } 
+          }
         );
       }, function(err) {
           should.not.exist(err);

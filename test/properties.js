@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'. 
+ * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
@@ -29,8 +29,8 @@
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
  *     21 - 50  are reserved for data type supporting tests
- *     51 onwards are for other tests 
- * 
+ *     51 onwards are for other tests
+ *
  *****************************************************************************/
 "use strict"
 
@@ -50,7 +50,7 @@ describe('58. properties.js', function() {
   }
 
   describe('58.1 Oracledb Class', function() {
-    
+
     var defaultValues = {};
 
     before('save the default values', function() {
@@ -66,25 +66,25 @@ describe('58. properties.js', function() {
       defaultValues.externalAuth    = oracledb.externalAuth;
       defaultValues.fetchAsString   = oracledb.fetchAsString;
       defaultValues.outFormat       = oracledb.outFormat;
-      defaultValues.lobPrefetchSize = oracledb.lobPrefetchSize;   
+      defaultValues.lobPrefetchSize = oracledb.lobPrefetchSize;
     })
 
     after('restore the values', function() {
-      oracledb.poolMin          = defaultValues.poolMin;        
-      oracledb.poolMax          = defaultValues.poolMax;        
-      oracledb.poolIncrement    = defaultValues.poolIncrement;  
-      oracledb.poolTimeout      = defaultValues.poolTimeout;    
-      oracledb.maxRows          = defaultValues.maxRows;        
-      oracledb.prefetchRows     = defaultValues.prefetchRows;   
-      oracledb.autoCommit       = defaultValues.autoCommit;     
+      oracledb.poolMin          = defaultValues.poolMin;
+      oracledb.poolMax          = defaultValues.poolMax;
+      oracledb.poolIncrement    = defaultValues.poolIncrement;
+      oracledb.poolTimeout      = defaultValues.poolTimeout;
+      oracledb.maxRows          = defaultValues.maxRows;
+      oracledb.prefetchRows     = defaultValues.prefetchRows;
+      oracledb.autoCommit       = defaultValues.autoCommit;
       // oracledb.version          = defaultValues.version;         // version is a read-only property. it needn't to restore.
-      oracledb.connClass        = defaultValues.connClass;      
-      oracledb.externalAuth     = defaultValues.externalAuth;   
-      oracledb.fetchAsString    = defaultValues.fetchAsString;  
-      oracledb.outFormat        = defaultValues.outFormat;      
+      oracledb.connClass        = defaultValues.connClass;
+      oracledb.externalAuth     = defaultValues.externalAuth;
+      oracledb.fetchAsString    = defaultValues.fetchAsString;
+      oracledb.outFormat        = defaultValues.outFormat;
       oracledb.lobPrefetchSize  = defaultValues.lobPrefetchSize;
     })
-   
+
     it('58.1.1 poolMin', function() {
       var t = oracledb.poolMin;
       oracledb.poolMin = t + 1;
@@ -143,7 +143,7 @@ describe('58. properties.js', function() {
 
     it('58.1.8 version (read-only)', function() {
       (oracledb.version).should.be.a.Number;
-      
+
       try {
         oracledb.version = 5;
       } catch(err) {
@@ -234,7 +234,7 @@ describe('58. properties.js', function() {
       } catch(err) {
         should.exist(err);
         (err.message).should.startWith('NJS-014');
-      } 
+      }
     })
 
     it('58.2.2 poolMax', function() {
@@ -346,7 +346,7 @@ describe('58. properties.js', function() {
     })
 
     it('58.3.4 action (write-only)', function() {
-      
+
       try {
         var t = connection.action;
       } catch(err) {
@@ -365,13 +365,13 @@ describe('58. properties.js', function() {
     })
 
     it('58.3.5 module (write-only)', function() {
-   
+
       try {
         var t = connection.module;
       } catch(err) {
         should.exist(err);
         (err.message).should.startWith('NJS-015');
-      }   
+      }
 
       try {
         connection.module = 4;
@@ -379,7 +379,7 @@ describe('58. properties.js', function() {
         should.exist(err);
         (err.message).should.startWith('NJS-004');  // invalid value
       }
-      
+
       connection.module = "103.3 module";
     })
 
@@ -399,7 +399,7 @@ describe('58. properties.js', function() {
   }) // 58.3
 
   describe('58.4 ResultSet Class', function() {
-    
+
     var tableName = "oracledb_number";
     var numbers = assist.data.numbers;
     var connection = null;
@@ -437,7 +437,7 @@ describe('58. properties.js', function() {
         "DROP TABLE " + tableName,
         function(err) {
           should.not.exist(err);
-          
+
           connection.release( function(err) {
             should.not.exist(err);
             done();
@@ -450,13 +450,13 @@ describe('58. properties.js', function() {
       should.exist(resultSet.metaData);
       var t = resultSet.metaData;
       t.should.eql( [ { name: 'NUM' }, { name: 'CONTENT' } ] );
-      
+
       try {
         resultSet.metaData = {"foo": "bar"};
       } catch(err) {
         should.exist(err);
         (err.message).should.startWith('NJS-014');
-      } 
+      }
     })
 
   }) // 58.5
