@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -28,7 +28,7 @@
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
  *     21 - 50  are reserved for data type supporting tests
- *     51 -     are for other tests
+ *     51 onwards are for other tests
  *
  *****************************************************************************/
 
@@ -50,7 +50,7 @@ describe('11. poolTimeout.js', function(){
   before(function(done){
     oracledb.createPool(
       {
-        externalAuth  : credential.externalAuth,
+        externalAuth    : credential.externalAuth,
         user            : credential.user,
         password        : credential.password,
         connectString   : credential.connectString,
@@ -77,7 +77,7 @@ describe('11. poolTimeout.js', function(){
     });
   })
 
-  it(' pool terminates idle connections after specify time', function(done){
+  it('11.1 pool terminates idle connections after specify time', function(done){
     pool.should.be.ok;
     if(!credential.externalAuth){
       pool.connectionsOpen.should.be.exactly(1).and.be.a.Number;

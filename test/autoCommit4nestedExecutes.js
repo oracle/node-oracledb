@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -33,7 +33,7 @@
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
  *     21 - 50  are reserved for data type supporting tests
- *     51 onwards     are for other tests
+ *     51 onwards are for other tests
  *
  *****************************************************************************/
 'use strict';
@@ -51,7 +51,7 @@ describe('63. autoCommit4nestedExecutes.js', function() {
     var credential = dbConfig;
   }
 
-  var tableName  = "oracledb_issue269tab";
+  var tableName  = "nodb_issue269tab";
   var procName   = "issue269proc";
   var connection = null;
 

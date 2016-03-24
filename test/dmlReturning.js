@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -33,15 +33,16 @@
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
  *     21 - 50  are reserved for data type supporting tests
- *     51 -     are for other tests
+ *     51 onwards are for other tests
  *
  *****************************************************************************/
+'use strict';
 
 var oracledb = require('oracledb');
-var should = require('should');
-var async = require('async');
+var should   = require('should');
+var async    = require('async');
 var dbConfig = require('./dbconfig.js');
-var assist = require('./dataTypeAssist.js');
+var assist   = require('./dataTypeAssist.js');
 
 describe('6. dmlReturning.js', function(){
 
@@ -61,29 +62,29 @@ describe('6. dmlReturning.js', function(){
                 e_table_exists EXCEPTION; \
                 PRAGMA EXCEPTION_INIT(e_table_exists, -00942); \
             BEGIN \
-                EXECUTE IMMEDIATE ('DROP TABLE oracledb_dmlreturn'); \
+                EXECUTE IMMEDIATE ('DROP TABLE nodb_dmlreturn'); \
             EXCEPTION \
                 WHEN e_table_exists \
                 THEN NULL; \
             END; \
             EXECUTE IMMEDIATE (' \
-                CREATE TABLE oracledb_dmlreturn ( \
+                CREATE TABLE nodb_dmlreturn ( \
                     id NUMBER,  \
                     name VARCHAR2(4000) \
                 ) \
             '); \
             EXECUTE IMMEDIATE (' \
-              INSERT INTO oracledb_dmlreturn  \
+              INSERT INTO nodb_dmlreturn  \
                    VALUES \
                    (1001,''Chris Jones'') \
             '); \
             EXECUTE IMMEDIATE (' \
-              INSERT INTO oracledb_dmlreturn  \
+              INSERT INTO nodb_dmlreturn  \
                    VALUES \
                    (1002,''Tom Kyte'') \
             '); \
             EXECUTE IMMEDIATE (' \
-              INSERT INTO oracledb_dmlreturn  \
+              INSERT INTO nodb_dmlreturn  \
                    VALUES \
                    (2001, ''Karen Morton'') \
             '); \
@@ -103,7 +104,7 @@ describe('6. dmlReturning.js', function(){
 
     afterEach('drop table and release connection', function(done) {
       connection.execute(
-        "DROP TABLE oracledb_dmlreturn",
+        "DROP TABLE nodb_dmlreturn",
         function(err){
           if(err) { console.error(err.message); return; }
           connection.release( function(err){
@@ -117,7 +118,7 @@ describe('6. dmlReturning.js', function(){
     it('6.1.1 INSERT statement with Object binding', function(done) {
       connection.should.be.ok;
       connection.execute(
-        "INSERT INTO oracledb_dmlreturn VALUES (1003, 'Robyn Sands') RETURNING id, name INTO :rid, :rname",
+        "INSERT INTO nodb_dmlreturn VALUES (1003, 'Robyn Sands') RETURNING id, name INTO :rid, :rname",
         {
           rid: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT},
           rname: { type: oracledb.STRING, dir: oracledb.BIND_OUT}
@@ -136,7 +137,7 @@ describe('6. dmlReturning.js', function(){
     it('6.1.2 INSERT statement with Array binding', function(done) {
       connection.should.be.ok;
       connection.execute(
-        "INSERT INTO oracledb_dmlreturn VALUES (1003, 'Robyn Sands') RETURNING id, name INTO :rid, :rname",
+        "INSERT INTO nodb_dmlreturn VALUES (1003, 'Robyn Sands') RETURNING id, name INTO :rid, :rname",
         [
           { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
           { type: oracledb.STRING, dir: oracledb.BIND_OUT }
@@ -156,7 +157,7 @@ describe('6. dmlReturning.js', function(){
     it.skip('6.1.3 INSERT statement with small maxSize restriction', function(done) {
       connection.should.be.ok;
       connection.execute(
-        "INSERT INTO oracledb_dmlreturn VALUES (1003, 'Robyn Sands Delaware') RETURNING id, name INTO :rid, :rname",
+        "INSERT INTO nodb_dmlreturn VALUES (1003, 'Robyn Sands Delaware') RETURNING id, name INTO :rid, :rname",
         {
           rid: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
           rname: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 2 }
@@ -174,7 +175,7 @@ describe('6. dmlReturning.js', function(){
     it('6.1.4 UPDATE statement with single row matched', function(done) {
       connection.should.be.ok;
       connection.execute(
-        "UPDATE oracledb_dmlreturn SET name = :n WHERE id = :i RETURNING id, name INTO :rid, :rname",
+        "UPDATE nodb_dmlreturn SET name = :n WHERE id = :i RETURNING id, name INTO :rid, :rname",
         {
           n: "Kerry Osborne",
           i: 2001,
@@ -196,7 +197,7 @@ describe('6. dmlReturning.js', function(){
     it('6.1.5 UPDATE statement with single row matched & Array binding', function(done) {
       connection.should.be.ok;
       connection.execute(
-        "UPDATE oracledb_dmlreturn SET name = :n WHERE id = :i RETURNING id, name INTO :rid, :rname",
+        "UPDATE nodb_dmlreturn SET name = :n WHERE id = :i RETURNING id, name INTO :rid, :rname",
         [
           "Kerry Osborne",
           2001,
@@ -218,7 +219,7 @@ describe('6. dmlReturning.js', function(){
     it('6.1.6 UPDATE statements with multiple rows matched', function(done) {
       connection.should.be.ok;
       connection.execute(
-        "UPDATE oracledb_dmlreturn SET id = :i RETURNING id, name INTO :rid, :rname",
+        "UPDATE nodb_dmlreturn SET id = :i RETURNING id, name INTO :rid, :rname",
         {
           i: 999,
           rid: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
@@ -239,7 +240,7 @@ describe('6. dmlReturning.js', function(){
     it('6.1.7 UPDATE statements with multiple rows matched & Array binding', function(done) {
       connection.should.be.ok;
       connection.execute(
-        "UPDATE oracledb_dmlreturn SET id = :i RETURNING id, name INTO :rid, :rname",
+        "UPDATE nodb_dmlreturn SET id = :i RETURNING id, name INTO :rid, :rname",
         [
           999,
           { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
@@ -260,7 +261,7 @@ describe('6. dmlReturning.js', function(){
     it('6.1.8 DELETE statement with Object binding', function(done){
       connection.should.be.ok;
       connection.execute(
-        "DELETE FROM oracledb_dmlreturn WHERE name like '%Chris%' RETURNING id, name INTO :rid, :rname",
+        "DELETE FROM nodb_dmlreturn WHERE name like '%Chris%' RETURNING id, name INTO :rid, :rname",
         {
           rid: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
           rname: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
@@ -280,7 +281,7 @@ describe('6. dmlReturning.js', function(){
     it('6.1.9 DELETE statement with Array binding', function(done){
       connection.should.be.ok;
       connection.execute(
-        "DELETE FROM oracledb_dmlreturn WHERE name like '%Chris%' RETURNING id, name INTO :rid, :rname",
+        "DELETE FROM nodb_dmlreturn WHERE name like '%Chris%' RETURNING id, name INTO :rid, :rname",
         [
           { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
           { type: oracledb.STRING, dir: oracledb.BIND_OUT }
@@ -330,7 +331,7 @@ describe('6. dmlReturning.js', function(){
 
       connection.should.be.ok;
       connection.execute(
-        "INSERT INTO oracledb_dmlreturn VALUES (:i, :n) RETURNING id, name INTO :rid, :rname",
+        "INSERT INTO nodb_dmlreturn VALUES (:i, :n) RETURNING id, name INTO :rid, :rname",
         {
           i: size,
           n: makeString(size),
@@ -350,7 +351,7 @@ describe('6. dmlReturning.js', function(){
 
     it('6.1.11 Negative test - wrong SQL got correct error thrown', function(done) {
       connection.should.be.ok;
-      var wrongSQL = "UPDATE oracledb_dmlreturn SET doesnotexist = 'X' WHERE id = :id RETURNING name INTO :rn";
+      var wrongSQL = "UPDATE nodb_dmlreturn SET doesnotexist = 'X' WHERE id = :id RETURNING name INTO :rn";
 
       connection.execute(
         wrongSQL,
@@ -369,7 +370,7 @@ describe('6. dmlReturning.js', function(){
     })
 
     it('6.1.12 Negative test - data type is not supported with DML Returning statments', function(done) {
-      var sql = "UPDATE oracledb_dmlreturn SET name = 'Leslie Lin' WHERE id = :id RETURNING name INTO :rn ";
+      var sql = "UPDATE nodb_dmlreturn SET name = 'Leslie Lin' WHERE id = :id RETURNING name INTO :rn ";
       var bindVar =
         {
           id: 1002,
@@ -390,7 +391,7 @@ describe('6. dmlReturning.js', function(){
   describe('6.2 DATE and TIMESTAMP data', function() {
 
     var connection = null;
-    var tableName = "oracledb_date";
+    var tableName = "nodb_date";
     var dates = assist.DATE_STRINGS;
 
     beforeEach('get connection, prepare table', function(done) {
@@ -586,7 +587,7 @@ describe('6. dmlReturning.js', function(){
   describe('6.3 BULK COLLECT clause', function() {
 
     var connection = null;
-    var tableName = "oracledb_varchar2";
+    var tableName = "nodb_varchar2";
     var dataLength = 500;
     var rows = [];
     for (var i = 0; i < dataLength; i++)

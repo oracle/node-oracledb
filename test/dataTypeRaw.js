@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -28,15 +28,15 @@
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
  *     21 - 50  are reserved for data type supporting tests
- *     51 -     are for other tests
+ *     51 onwards are for other tests
  *
  *****************************************************************************/
-"use strict";
+'use strict';
 
 var oracledb = require('oracledb');
-var should = require('should');
-var async = require('async');
-var assist = require('./dataTypeAssist.js');
+var should   = require('should');
+var async    = require('async');
+var assist   = require('./dataTypeAssist.js');
 var dbConfig = require('./dbconfig.js');
 
 describe('42. dataTypeRaw.js', function() {
@@ -48,7 +48,7 @@ describe('42. dataTypeRaw.js', function() {
   }
 
   var connection = null;
-  var tableName = "oracledb_raw";
+  var tableName = "nodb_raw";
 
   var bufLen = [10 ,100, 1000, 2000]; // buffer length
   var bufs = [];
@@ -296,7 +296,7 @@ describe('42. dataTypeRaw.js', function() {
   describe('42.4 in PL/SQL, the maximum size is 32767', function() {
 
     var proc =
-      "CREATE OR REPLACE PROCEDURE oracledb_testraw (p_in IN RAW, p_out OUT RAW) " +
+      "CREATE OR REPLACE PROCEDURE nodb_testraw (p_in IN RAW, p_out OUT RAW) " +
       "AS " +
       "BEGIN " +
       "  p_out := p_in; " +
@@ -314,7 +314,7 @@ describe('42. dataTypeRaw.js', function() {
 
     after(function(done) {
       connection.execute(
-        "DROP PROCEDURE oracledb_testraw",
+        "DROP PROCEDURE nodb_testraw",
         function(err) {
           should.not.exist(err);
           done();
@@ -327,7 +327,7 @@ describe('42. dataTypeRaw.js', function() {
       var buf = assist.createBuffer(size);
 
       connection.execute(
-        "BEGIN oracledb_testraw(:i, :o); END;",
+        "BEGIN nodb_testraw(:i, :o); END;",
         {
           i: { type: oracledb.BUFFER, dir: oracledb.BIND_IN, val: buf },
           o: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: 10}
@@ -347,7 +347,7 @@ describe('42. dataTypeRaw.js', function() {
       var buf = assist.createBuffer(size);
 
       connection.execute(
-        "BEGIN oracledb_testraw(:i, :o); END;",
+        "BEGIN nodb_testraw(:i, :o); END;",
         {
           i: { type: oracledb.BUFFER, dir: oracledb.BIND_IN, val: buf },
           o: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: 32767}
@@ -367,7 +367,7 @@ describe('42. dataTypeRaw.js', function() {
       var buf = assist.createBuffer(size);
 
       connection.execute(
-        "BEGIN oracledb_testraw(:i, :o); END;",
+        "BEGIN nodb_testraw(:i, :o); END;",
         {
           i: { type: oracledb.BUFFER, dir: oracledb.BIND_IN, val: buf },
           o: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: 32767}
@@ -386,7 +386,7 @@ describe('42. dataTypeRaw.js', function() {
       var buf = assist.createBuffer(size);
 
       connection.execute(
-        "BEGIN oracledb_testraw(:i, :o); END;",
+        "BEGIN nodb_testraw(:i, :o); END;",
         {
           i: { type: oracledb.BUFFER, dir: oracledb.BIND_IN, val: buf },
           o: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: 40000}

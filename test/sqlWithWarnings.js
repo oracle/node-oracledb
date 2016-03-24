@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -67,7 +67,7 @@ describe('64. sqlWithWarnings.js', function() {
 
   describe('64.1 test case offered by GitHub user', function() {
 
-    var tableName = "test_aggregate";
+    var tableName = "nodb_aggregate";
 
     before('prepare table', function(done) {
       var sqlCreateTab =
@@ -155,7 +155,7 @@ describe('64. sqlWithWarnings.js', function() {
       " CREATE OR REPLACE PROCEDURE get_emp_rs_inout " +
       "   (p_in IN NUMBER, p_out OUT SYS_REFCURSOR ) AS " +
       "  BEGIN " +
-      "    OPEN p_out FOR SELECT * FROM oracledb_employees " +
+      "    OPEN p_out FOR SELECT * FROM nodb_employees " +
       "  END;"
 
     it('64.2.1 Execute SQL Statement to create PLSQL procedure with warnings', function(done) {

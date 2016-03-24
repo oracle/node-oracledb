@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -36,7 +36,7 @@
  *     51 onwards are for other tests
  *
  *****************************************************************************/
-"use strict";
+'use strict';
 
 var oracledb = require('oracledb');
 var async    = require('async');
@@ -54,7 +54,7 @@ describe('60. clobPlsqlString.js', function() {
   }
 
   var connection = null;
-  var tableName = "oracledb_myclobs";
+  var tableName = "nodb_myclobs";
 
   before('get one connection, prepare table', function(done) {
     async.series([
@@ -78,7 +78,7 @@ describe('60. clobPlsqlString.js', function() {
     async.series([
       function(callback) {
         connection.execute(
-          "DROP TABLE oracledb_myclobs",
+          "DROP TABLE nodb_myclobs",
           function(err) {
             should.not.exist(err);
             callback();
@@ -97,7 +97,7 @@ describe('60. clobPlsqlString.js', function() {
   describe('60.1 BIND OUT as STRING', function() {
     before('insert data', function(done) {
       connection.execute(
-        "INSERT INTO oracledb_myclobs (num, content) VALUES (1, 'abcdefghijklmnopqrstuvwxyz')",
+        "INSERT INTO nodb_myclobs (num, content) VALUES (1, 'abcdefghijklmnopqrstuvwxyz')",
         function(err) {
           should.not.exist(err);
           done();
@@ -107,7 +107,7 @@ describe('60. clobPlsqlString.js', function() {
 
     it('60.1.1 PL/SQL OUT CLOB parameters can also be bound as STRING', function(done) {
       connection.execute(
-        "BEGIN SELECT content INTO :cbv FROM oracledb_myclobs WHERE num = :id; END;",
+        "BEGIN SELECT content INTO :cbv FROM nodb_myclobs WHERE num = :id; END;",
         {
           id: 1,
           cbv: { type: oracledb.STRING, dir: oracledb.BIND_OUT}
@@ -123,7 +123,7 @@ describe('60. clobPlsqlString.js', function() {
 
     it('60.1.2 The returned length is limited to the maximum size', function(done) {
       connection.execute(
-        "BEGIN SELECT content INTO :cbv FROM oracledb_myclobs WHERE num = :id; END;",
+        "BEGIN SELECT content INTO :cbv FROM nodb_myclobs WHERE num = :id; END;",
         {
           id: 1,
           cbv: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 5 }

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -31,11 +31,11 @@
  *     51 onwards are for other tests
  *
  *****************************************************************************/
-"use strict"
+'use strict';
 
 var oracledb = require('oracledb');
-var should = require('should');
-var assist = require('./dataTypeAssist.js');
+var should   = require('should');
+var assist   = require('./dataTypeAssist.js');
 var dbConfig = require('./dbconfig.js');
 
 describe('23. dataTypeNchar.js', function(){
@@ -47,7 +47,7 @@ describe('23. dataTypeNchar.js', function(){
   }
 
   var connection = null;
-  var tableName = "oracledb_nchar";
+  var tableName = "nodb_nchar";
 
   var strLen = [10, 100, 500, 1000];
   var strs = [];

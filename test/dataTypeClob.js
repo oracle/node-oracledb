@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016 Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -59,7 +59,7 @@ describe('40. dataTypeClob.js', function() {
   }
 
   var connection = null;
-  var tableName = "oracledb_myclobs";
+  var tableName = "nodb_myclobs";
 
   before('get one connection', function(done) {
     oracledb.getConnection(credential, function(err, conn) {
@@ -103,7 +103,7 @@ describe('40. dataTypeClob.js', function() {
           }, 2000);
 
           connection.execute(
-            "INSERT INTO oracledb_myclobs (num, content) VALUES (:n, EMPTY_CLOB()) RETURNING content INTO :lobbv",
+            "INSERT INTO nodb_myclobs (num, content) VALUES (:n, EMPTY_CLOB()) RETURNING content INTO :lobbv",
             { n: 1, lobbv: {type: oracledb.CLOB, dir: oracledb.BIND_OUT} },
             { autoCommit: false },  // a transaction needs to span the INSERT and pipe()
             function(err, result) {
@@ -142,7 +142,7 @@ describe('40. dataTypeClob.js', function() {
           }, 2000);
 
           connection.execute(
-            "SELECT content FROM oracledb_myclobs WHERE num = :n",
+            "SELECT content FROM nodb_myclobs WHERE num = :n",
             { n: 1 },
             function(err, result) {
               should.not.exist(err);
@@ -188,7 +188,7 @@ describe('40. dataTypeClob.js', function() {
           }, 2000);
 
           connection.execute(
-            "SELECT content FROM oracledb_myclobs WHERE num = :n",
+            "SELECT content FROM nodb_myclobs WHERE num = :n",
             { n: 1 },
             function(err, result) {
               should.not.exist(err);
@@ -231,7 +231,7 @@ describe('40. dataTypeClob.js', function() {
           }, 2000);
 
           connection.execute(
-            "SELECT content FROM oracledb_myclobs WHERE num = :n",
+            "SELECT content FROM nodb_myclobs WHERE num = :n",
             { n: 1 },
             { outFormat: oracledb.OBJECT },
             function(err, result) {

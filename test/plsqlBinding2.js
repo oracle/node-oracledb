@@ -62,13 +62,13 @@ describe('44. plsqlBinding2.js', function() {
                     "    e_table_exists EXCEPTION; \n" +
                     "    PRAGMA EXCEPTION_INIT(e_table_exists, -00942);\n " +
                     "   BEGIN \n" +
-                    "     EXECUTE IMMEDIATE ('DROP TABLE waveheight'); \n" +
+                    "     EXECUTE IMMEDIATE ('DROP TABLE nodb_waveheight'); \n" +
                     "   EXCEPTION \n" +
                     "     WHEN e_table_exists \n" +
                     "     THEN NULL; \n" +
                     "   END; \n" +
                     "   EXECUTE IMMEDIATE (' \n" +
-                    "     CREATE TABLE waveheight (beach VARCHAR2(50), depth NUMBER)  \n" +
+                    "     CREATE TABLE nodb_waveheight (beach VARCHAR2(50), depth NUMBER)  \n" +
                     "   '); \n" +
                     "END; ";
 
@@ -82,7 +82,7 @@ describe('44. plsqlBinding2.js', function() {
 
       },
       function createPkg(callback) {
-        var proc = "CREATE OR REPLACE PACKAGE beachpkg IS\n" +
+        var proc = "CREATE OR REPLACE PACKAGE nodb_beachpkg IS\n" +
                    "  TYPE beachType IS TABLE OF VARCHAR2(30) INDEX BY BINARY_INTEGER;\n" +
                    "  TYPE depthType IS TABLE OF NUMBER       INDEX BY BINARY_INTEGER;\n" +
                    "  PROCEDURE array_in(beaches IN beachType, depths IN depthType);\n" +
@@ -99,18 +99,18 @@ describe('44. plsqlBinding2.js', function() {
         );
       },
       function(callback) {
-        var proc = "CREATE OR REPLACE PACKAGE BODY beachpkg IS \n" +
+        var proc = "CREATE OR REPLACE PACKAGE BODY nodb_beachpkg IS \n" +
                    "  PROCEDURE array_in(beaches IN beachType, depths IN depthType) IS \n" +
                    "  BEGIN \n" +
                    "    IF beaches.COUNT <> depths.COUNT THEN \n" +
                    "      RAISE_APPLICATION_ERROR(-20000, 'Array lengths must match for this example.'); \n" +
                    "    END IF; \n" +
                    "    FORALL i IN INDICES OF beaches \n" +
-                   "      INSERT INTO waveheight (beach, depth) VALUES (beaches(i), depths(i)); \n" +
+                   "      INSERT INTO nodb_waveheight (beach, depth) VALUES (beaches(i), depths(i)); \n" +
                    "  END; \n" +
                    "  PROCEDURE array_out(beaches OUT beachType, depths OUT depthType) IS \n" +
                    "  BEGIN \n" +
-                   "    SELECT beach, depth BULK COLLECT INTO beaches, depths FROM waveheight; \n" +
+                   "    SELECT beach, depth BULK COLLECT INTO beaches, depths FROM nodb_waveheight; \n" +
                    "  END; \n" +
                    "  PROCEDURE array_inout(beaches IN OUT beachType, depths IN OUT depthType) IS \n" +
                    "  BEGIN \n" +
@@ -118,8 +118,8 @@ describe('44. plsqlBinding2.js', function() {
                    "      RAISE_APPLICATION_ERROR(-20001, 'Array lenghts must match for this example.'); \n" +
                    "    END IF; \n" +
                    "    FORALL i IN INDICES OF beaches \n" +
-                   "      INSERT INTO waveheight (beach, depth) VALUES (beaches(i), depths(i)); \n" +
-                   "      SELECT beach, depth BULK COLLECT INTO beaches, depths FROM waveheight ORDER BY 1; \n" +
+                   "      INSERT INTO nodb_waveheight (beach, depth) VALUES (beaches(i), depths(i)); \n" +
+                   "      SELECT beach, depth BULK COLLECT INTO beaches, depths FROM nodb_waveheight ORDER BY 1; \n" +
                    "  END; \n  " +
                    "END;";
 
@@ -144,7 +144,7 @@ describe('44. plsqlBinding2.js', function() {
     async.series([
       function(callback) {
         connection.execute(
-          "DROP TABLE waveheight",
+          "DROP TABLE nodb_waveheight",
           function(err) {
             should.not.exist(err);
             callback();
@@ -153,7 +153,7 @@ describe('44. plsqlBinding2.js', function() {
       },
       function(callback) {
         connection.execute(
-          "DROP PACKAGE beachpkg",
+          "DROP PACKAGE nodb_beachpkg",
           function(err) {
             should.not.exist(err);
             callback();
@@ -174,7 +174,7 @@ describe('44. plsqlBinding2.js', function() {
       // Pass arrays of values to a PL/SQL procedure
       function(callback) {
         connection.execute(
-          "BEGIN beachpkg.array_in(:beach_in, :depth_in); END;",
+          "BEGIN nodb_beachpkg.array_in(:beach_in, :depth_in); END;",
           {
             beach_in: { type: oracledb.STRING,
                         dir:  oracledb.BIND_IN,
@@ -193,7 +193,7 @@ describe('44. plsqlBinding2.js', function() {
       // Fetch arrays of values from a PL/SQL procedure
       function(callback) {
         connection.execute(
-          "BEGIN beachpkg.array_out(:beach_out, :depth_out); END;",
+          "BEGIN nodb_beachpkg.array_out(:beach_out, :depth_out); END;",
           {
             beach_out: { type: oracledb.STRING,
                          dir:  oracledb.BIND_OUT,
@@ -220,7 +220,7 @@ describe('44. plsqlBinding2.js', function() {
       // Return input arrays sorted by beach name
       function(callback) {
         connection.execute(
-          "BEGIN beachpkg.array_inout(:beach_inout, :depth_inout); END;",
+          "BEGIN nodb_beachpkg.array_inout(:beach_inout, :depth_inout); END;",
           {
             beach_inout: { type: oracledb.STRING,
                            dir:  oracledb.BIND_INOUT,
@@ -248,7 +248,7 @@ describe('44. plsqlBinding2.js', function() {
       // Pass arrays of values to a PL/SQL procedure
       function(callback) {
         connection.execute(
-          "BEGIN beachpkg.array_in(:1, :2); END;",
+          "BEGIN nodb_beachpkg.array_in(:1, :2); END;",
           [
             { type: oracledb.STRING,
                dir:  oracledb.BIND_IN,
@@ -267,7 +267,7 @@ describe('44. plsqlBinding2.js', function() {
       // Fetch arrays of values from a PL/SQL procedure
       function(callback) {
         connection.execute(
-          "BEGIN beachpkg.array_out(:1, :2); END;",
+          "BEGIN nodb_beachpkg.array_out(:1, :2); END;",
           [
             { type: oracledb.STRING,
               dir:  oracledb.BIND_OUT,
@@ -294,7 +294,7 @@ describe('44. plsqlBinding2.js', function() {
       // Return input arrays sorted by beach name
       function(callback) {
         connection.execute(
-          "BEGIN beachpkg.array_inout(:1, :2); END;",
+          "BEGIN nodb_beachpkg.array_inout(:1, :2); END;",
           [
             { type: oracledb.STRING,
               dir:  oracledb.BIND_INOUT,
@@ -322,7 +322,7 @@ describe('44. plsqlBinding2.js', function() {
       // Pass arrays of values to a PL/SQL procedure
       function(callback) {
         connection.execute(
-          "BEGIN beachpkg.array_in(:beach_in, :depth_in); END;",
+          "BEGIN nodb_beachpkg.array_in(:beach_in, :depth_in); END;",
           {
             beach_in: { //type: oracledb.STRING,
                         //dir:  oracledb.BIND_IN,
@@ -341,7 +341,7 @@ describe('44. plsqlBinding2.js', function() {
       // Fetch arrays of values from a PL/SQL procedure
       function(callback) {
         connection.execute(
-          "BEGIN beachpkg.array_out(:beach_out, :depth_out); END;",
+          "BEGIN nodb_beachpkg.array_out(:beach_out, :depth_out); END;",
           {
             beach_out: { type: oracledb.STRING,
                          dir:  oracledb.BIND_OUT,
@@ -368,7 +368,7 @@ describe('44. plsqlBinding2.js', function() {
       // Return input arrays sorted by beach name
       function(callback) {
         connection.execute(
-          "BEGIN beachpkg.array_inout(:beach_inout, :depth_inout); END;",
+          "BEGIN nodb_beachpkg.array_inout(:beach_inout, :depth_inout); END;",
           {
             beach_inout: { type: oracledb.STRING,
                            dir:  oracledb.BIND_INOUT,
@@ -396,7 +396,7 @@ describe('44. plsqlBinding2.js', function() {
       // Pass arrays of values to a PL/SQL procedure
       function(callback) {
         connection.execute(
-          "BEGIN beachpkg.array_in(:1, :2); END;",
+          "BEGIN nodb_beachpkg.array_in(:1, :2); END;",
           [
             { type: oracledb.STRING,
                // dir:  oracledb.BIND_IN,
@@ -415,7 +415,7 @@ describe('44. plsqlBinding2.js', function() {
       // Fetch arrays of values from a PL/SQL procedure
       function(callback) {
         connection.execute(
-          "BEGIN beachpkg.array_out(:1, :2); END;",
+          "BEGIN nodb_beachpkg.array_out(:1, :2); END;",
           [
             { type: oracledb.STRING,
               dir:  oracledb.BIND_OUT,
@@ -442,7 +442,7 @@ describe('44. plsqlBinding2.js', function() {
       // Return input arrays sorted by beach name
       function(callback) {
         connection.execute(
-          "BEGIN beachpkg.array_inout(:1, :2); END;",
+          "BEGIN nodb_beachpkg.array_inout(:1, :2); END;",
           [
             { type: oracledb.STRING,
               dir:  oracledb.BIND_INOUT,
@@ -470,7 +470,7 @@ describe('44. plsqlBinding2.js', function() {
       // Pass arrays of values to a PL/SQL procedure
       function(callback) {
         connection.execute(
-          "BEGIN beachpkg.array_in(:beach_in, :depth_in); END;",
+          "BEGIN nodb_beachpkg.array_in(:beach_in, :depth_in); END;",
           {
             beach_in: { type: oracledb.STRING,
                         dir:  oracledb.BIND_IN,
@@ -489,7 +489,7 @@ describe('44. plsqlBinding2.js', function() {
       // Fetch arrays of values from a PL/SQL procedure
       function(callback) {
         connection.execute(
-          "BEGIN beachpkg.array_out(:beach_out, :depth_out); END;",
+          "BEGIN nodb_beachpkg.array_out(:beach_out, :depth_out); END;",
           {
             beach_out: { type: oracledb.STRING,
                          dir:  oracledb.BIND_OUT,
@@ -516,7 +516,7 @@ describe('44. plsqlBinding2.js', function() {
       // Return input arrays sorted by beach name
       function(callback) {
         connection.execute(
-          "BEGIN beachpkg.array_inout(:beach_inout, :depth_inout); END;",
+          "BEGIN nodb_beachpkg.array_inout(:beach_inout, :depth_inout); END;",
           {
             beach_inout: { type: oracledb.STRING,
                            dir:  oracledb.BIND_INOUT,
@@ -544,7 +544,7 @@ describe('44. plsqlBinding2.js', function() {
       // Pass arrays of values to a PL/SQL procedure
       function(callback) {
         connection.execute(
-          "BEGIN beachpkg.array_in(:beach_in, :depth_in); END;",
+          "BEGIN nodb_beachpkg.array_in(:beach_in, :depth_in); END;",
           {
             beach_in: { type: oracledb.STRING,
                         dir:  oracledb.BIND_IN,
@@ -565,7 +565,7 @@ describe('44. plsqlBinding2.js', function() {
       // Return input arrays sorted by beach name
       function(callback) {
         connection.execute(
-          "BEGIN beachpkg.array_inout(:beach_inout, :depth_inout); END;",
+          "BEGIN nodb_beachpkg.array_inout(:beach_inout, :depth_inout); END;",
           {
             beach_inout: { type: oracledb.STRING,
                            dir:  oracledb.BIND_INOUT,
@@ -648,7 +648,7 @@ describe('44. plsqlBinding2.js', function() {
       // Pass arrays of values to a PL/SQL procedure
       function(callback) {
         connection.execute(
-          "BEGIN beachpkg.array_in(:beach_in, :depth_in); END;",
+          "BEGIN nodb_beachpkg.array_in(:beach_in, :depth_in); END;",
           {
             beach_in: { type: oracledb.STRING,
                         dir:  oracledb.BIND_IN,
@@ -667,7 +667,7 @@ describe('44. plsqlBinding2.js', function() {
       // Fetch arrays of values from a PL/SQL procedure
       function(callback) {
         connection.execute(
-          "BEGIN beachpkg.array_out(:beach_out, :depth_out); END;",
+          "BEGIN nodb_beachpkg.array_out(:beach_out, :depth_out); END;",
           {
             beach_out: { type: oracledb.STRING,
                          dir:  oracledb.BIND_OUT,
@@ -694,7 +694,7 @@ describe('44. plsqlBinding2.js', function() {
       // Return input arrays sorted by beach name
       function(callback) {
         connection.execute(
-          "BEGIN beachpkg.array_inout(:beach_inout, :depth_inout); END;",
+          "BEGIN nodb_beachpkg.array_inout(:beach_inout, :depth_inout); END;",
           {
             beach_inout: { type: oracledb.STRING,
                            dir:  oracledb.BIND_INOUT,

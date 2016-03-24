@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -33,8 +33,8 @@
  *****************************************************************************/
 
 var oracledb = require ( 'oracledb' );
-var should = require ( 'should' );
-var async = require('async');
+var should   = require ( 'should' );
+var async    = require('async');
 var dbConfig = require ( './dbconfig.js' );
 
 describe('56. fetchAs.js', function() {

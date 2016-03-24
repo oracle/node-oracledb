@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -36,8 +36,8 @@
 
 var oracledb = require('oracledb');
 var fs       = require('fs');
-var should = require('should');
-var async = require('async');
+var should   = require('should');
+var async    = require('async');
 var dbConfig = require('./dbconfig.js');
 
 describe('62. lobProperties.js', function() {
@@ -48,7 +48,7 @@ describe('62. lobProperties.js', function() {
     var credential = dbConfig;
   }
 
-  var tableName = "oracledb_mylobs";
+  var tableName = "nodb_mylobs";
   var connection = null;
   var sqlSelect = "SELECT * FROM " + tableName + " WHERE id = :i";
   var defaultChunkSize = null;

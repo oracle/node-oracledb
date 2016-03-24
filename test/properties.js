@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -32,7 +32,7 @@
  *     51 onwards are for other tests
  *
  *****************************************************************************/
-"use strict"
+'use strict';
 
 var oracledb = require('oracledb');
 var fs       = require('fs');
@@ -400,7 +400,7 @@ describe('58. properties.js', function() {
 
   describe('58.4 ResultSet Class', function() {
 
-    var tableName = "oracledb_number";
+    var tableName = "nodb_number";
     var numbers = assist.data.numbers;
     var connection = null;
     var resultSet = null;

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -28,13 +28,14 @@
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
  *     21 - 50  are reserved for data type supporting tests
- *     51 -     are for other tests
+ *     51 onwards are for other tests
  *
  *****************************************************************************/
+'use strict';
 
 var oracledb = require('oracledb');
-var should = require('should');
-var async = require('async');
+var should   = require('should');
+var async    = require('async');
 var dbConfig = require('./dbconfig.js');
 
 describe('9. columnMetadata.js', function(){
@@ -53,13 +54,13 @@ describe('9. columnMetadata.js', function(){
                 e_table_exists EXCEPTION; \
                 PRAGMA EXCEPTION_INIT(e_table_exists, -00942); \
             BEGIN \
-                EXECUTE IMMEDIATE ('DROP TABLE oracledb_departments'); \
+                EXECUTE IMMEDIATE ('DROP TABLE nodb_departments'); \
             EXCEPTION \
                 WHEN e_table_exists \
                 THEN NULL; \
             END; \
             EXECUTE IMMEDIATE (' \
-                CREATE TABLE oracledb_departments ( \
+                CREATE TABLE nodb_departments ( \
                     department_id NUMBER,  \
                     department_name VARCHAR2(20), \
                     manager_id NUMBER, \
@@ -67,17 +68,17 @@ describe('9. columnMetadata.js', function(){
                 ) \
             '); \
             EXECUTE IMMEDIATE (' \
-              INSERT INTO oracledb_departments  \
+              INSERT INTO nodb_departments  \
                    VALUES \
                    (40,''Human Resources'', 203, 2400) \
             '); \
             EXECUTE IMMEDIATE (' \
-              INSERT INTO oracledb_departments  \
+              INSERT INTO nodb_departments  \
                    VALUES \
                    (50,''Shipping'', 121, 1500) \
             '); \
             EXECUTE IMMEDIATE (' \
-              INSERT INTO oracledb_departments  \
+              INSERT INTO nodb_departments  \
                    VALUES \
                    (90, ''Executive'', 100, 1700) \
             '); \
@@ -97,7 +98,7 @@ describe('9. columnMetadata.js', function(){
 
   afterEach('drop table and release connection', function(done){
     connection.execute(
-      "DROP TABLE oracledb_departments",
+      "DROP TABLE nodb_departments",
       function(err){
         if(err) { console.error(err.message); return; }
         connection.release( function(err){
@@ -111,7 +112,7 @@ describe('9. columnMetadata.js', function(){
   it('9.1 shows metaData correctly when retrieving 1 column from a 4-column table', function(done){
     connection.should.be.ok;
     connection.execute(
-      "SELECT location_id FROM oracledb_departments WHERE department_id = :did",
+      "SELECT location_id FROM nodb_departments WHERE department_id = :did",
       [50],
       function(err, result){
         should.not.exist(err);
@@ -125,7 +126,7 @@ describe('9. columnMetadata.js', function(){
   it('9.2 shows metaData when retrieving 2 columns. MetaData is correct in content and sequence', function(done){
     connection.should.be.ok;
     connection.execute(
-      "SELECT department_id, department_name FROM oracledb_departments WHERE location_id = :lid",
+      "SELECT department_id, department_name FROM nodb_departments WHERE location_id = :lid",
       [1700],
       function(err, result){
         should.not.exist(err);
@@ -140,7 +141,7 @@ describe('9. columnMetadata.js', function(){
   it('9.3 shows metaData correctly when retrieve 3 columns', function(done){
     connection.should.be.ok;
     connection.execute(
-      "SELECT department_id, department_name, manager_id FROM oracledb_departments WHERE location_id = :lid",
+      "SELECT department_id, department_name, manager_id FROM nodb_departments WHERE location_id = :lid",
       [2400],
       function(err, result){
         should.not.exist(err);
@@ -156,7 +157,7 @@ describe('9. columnMetadata.js', function(){
   it('9.4 shows metaData correctly when retrieving all columns with [SELECT * FROM table] statement', function(done){
     connection.should.be.ok;
     connection.execute(
-      "SELECT * FROM oracledb_departments",
+      "SELECT * FROM nodb_departments",
       function(err, result){
         should.not.exist(err);
         result.rows.length.should.be.exactly(3);
@@ -173,7 +174,7 @@ describe('9. columnMetadata.js', function(){
   it('9.5 works for SELECT count(*)', function(done){
     connection.should.be.ok;
     connection.execute(
-      "SELECT count(*) FROM oracledb_departments",
+      "SELECT count(*) FROM nodb_departments",
       function(err, result){
         should.not.exist(err);
         result.rows[0][0].should.be.exactly(3);
@@ -187,7 +188,7 @@ describe('9. columnMetadata.js', function(){
   it('9.6 works when a query returns no rows', function(done){
     connection.should.be.ok;
     connection.execute(
-      "SELECT * FROM oracledb_departments WHERE department_id = :did",
+      "SELECT * FROM nodb_departments WHERE department_id = :did",
       [100],
       function(err, result){
         should.not.exist(err);
@@ -213,13 +214,13 @@ describe('9. columnMetadata.js', function(){
           "       e_table_exists EXCEPTION; " +
           "       PRAGMA EXCEPTION_INIT(e_table_exists, -00942); " +
           "   BEGIN " +
-          "       EXECUTE IMMEDIATE ('DROP TABLE dummy_table'); " +
+          "       EXECUTE IMMEDIATE ('DROP TABLE nodb_testtab'); " +
           "   EXCEPTION " +
           "       WHEN e_table_exists " +
           "       THEN NULL; " +
           "   END; " +
           "   EXECUTE IMMEDIATE (' " +
-          "       CREATE TABLE dummy_table ( " +
+          "       CREATE TABLE nodb_testtab ( " +
           "           id NUMBER,  " +
           '           "nAme" VARCHAR2(20) ' +
           "       )" +
@@ -236,7 +237,7 @@ describe('9. columnMetadata.js', function(){
       },
       function(callback){
         connection.execute(
-          "SELECT * FROM dummy_table",
+          "SELECT * FROM nodb_testtab",
           function(err, result){
             should.not.exist(err);
             (result.rows.length).should.be.exactly(0);
@@ -248,7 +249,7 @@ describe('9. columnMetadata.js', function(){
       },
       function(callback){
         connection.execute(
-          "DROP TABLE dummy_table",
+          "DROP TABLE nodb_testtab",
           function(err){
             should.not.exist(err);
             callback();
@@ -261,14 +262,14 @@ describe('9. columnMetadata.js', function(){
   it('9.8 only works for SELECT statement, does not work for INSERT', function(done){
     connection.should.be.ok;
     connection.execute(
-      "INSERT INTO oracledb_departments VALUES (99, 'FACILITY', 456, 1700)",
+      "INSERT INTO nodb_departments VALUES (99, 'FACILITY', 456, 1700)",
       function(err, result){
         should.not.exist(err);
         (result.rowsAffected).should.be.exactly(1);
         should.not.exist(result.metaData);
 
         connection.execute(
-          'SELECT * FROM oracledb_departments WHERE department_id = :1',
+          'SELECT * FROM nodb_departments WHERE department_id = :1',
           [99],
           function(err, result){
             should.not.exist(err);
@@ -289,7 +290,7 @@ describe('9. columnMetadata.js', function(){
   it('9.9 only works for SELECT statement, does not work for UPDATE', function(done){
     connection.should.be.ok;
     connection.execute(
-      "UPDATE oracledb_departments SET department_name = 'Finance' WHERE department_id = :did",
+      "UPDATE nodb_departments SET department_name = 'Finance' WHERE department_id = :did",
       { did: 40 },
       function(err, result){
         should.not.exist(err);
@@ -297,7 +298,7 @@ describe('9. columnMetadata.js', function(){
         should.not.exist(result.metaData);
 
         connection.execute(
-          "SELECT department_name FROM oracledb_departments WHERE department_id = :1",
+          "SELECT department_name FROM nodb_departments WHERE department_id = :1",
           [40],
           function(err, result){
             should.not.exist(err);
@@ -325,7 +326,7 @@ describe('9. columnMetadata.js', function(){
       return buffer.join();
     }
 
-    var table_name = "oracledb_large_columns";
+    var table_name = "nodb_large_columns";
     var sqlCreate = "CREATE TABLE " + table_name + " ( " + columns_string + " )";
     var sqlSelect = "SELECT * FROM " + table_name;
     var sqlDrop = "DROP TABLE " + table_name;
@@ -366,7 +367,7 @@ describe('9. columnMetadata.js', function(){
 
   it('9.11 works with column names consisting of single characters', function(done){
     connection.should.be.ok;
-    var tableName = "oracledb_single_char";
+    var tableName = "nodb_single_char";
     var sqlCreate =
           "BEGIN " +
           "   DECLARE " +
@@ -425,9 +426,9 @@ describe('9. columnMetadata.js', function(){
   it('9.12 works with a SQL WITH statement', function(done){
     connection.should.be.ok;
 
-    var sqlWith = "WITH oracledb_dep AS " +
-                  "(SELECT * FROM oracledb_departments WHERE location_id < 2000) " +
-                  "SELECT * FROM oracledb_dep WHERE department_id > 50";
+    var sqlWith = "WITH nodb_dep AS " +
+                  "(SELECT * FROM nodb_departments WHERE location_id < 2000) " +
+                  "SELECT * FROM nodb_dep WHERE department_id > 50";
 
     connection.execute(
       sqlWith,

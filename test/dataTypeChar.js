@@ -28,10 +28,10 @@
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
  *     21 - 50  are reserved for data type supporting tests
- *     51 -     are for other tests
+ *     51 onwards are for other tests
  *
  *****************************************************************************/
-"use strict"
+'use strict';
 
 var oracledb = require('oracledb');
 var should   = require('should');
@@ -48,7 +48,7 @@ describe('22. dataTypeChar.js', function(){
   }
 
   var connection = null;
-  var tableName = "oracledb_char";
+  var tableName = "nodb_char";
 
   var strLen = [100, 1000, 2000];  // char string length
   var strs =
@@ -247,7 +247,7 @@ describe('22. dataTypeChar.js', function(){
       async.series([
         function(callback) {
           var proc = "CREATE OR REPLACE PACKAGE\n" +
-                      "oracledb_testpack\n" +
+                      "nodb_testpack\n" +
                       "IS\n" +
                       "  TYPE stringsType IS TABLE OF CHAR(30) INDEX BY BINARY_INTEGER;\n" +
                       "  FUNCTION test(strings IN stringsType) RETURN CHAR;\n" +
@@ -263,7 +263,7 @@ describe('22. dataTypeChar.js', function(){
         },
         function(callback) {
           var proc = "CREATE OR REPLACE PACKAGE BODY\n" +
-                     "oracledb_testpack\n" +
+                     "nodb_testpack\n" +
                      "IS\n" +
                      "  FUNCTION test(strings IN stringsType) RETURN CHAR\n" +
                      "  IS\n" +
@@ -289,7 +289,7 @@ describe('22. dataTypeChar.js', function(){
             strings: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: ['John', 'Doe']}
           };
           connection.execute(
-            "BEGIN :result := oracledb_testpack.test(:strings); END;",
+            "BEGIN :result := nodb_testpack.test(:strings); END;",
             bindvars,
             function(err, result) {
               should.not.exist(err);
@@ -301,7 +301,7 @@ describe('22. dataTypeChar.js', function(){
         },
         function(callback) {
           connection.execute(
-            "DROP PACKAGE oracledb_testpack",
+            "DROP PACKAGE nodb_testpack",
             function(err) {
               should.not.exist(err);
               callback();

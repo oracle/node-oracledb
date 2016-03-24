@@ -98,24 +98,24 @@ describe('3. examples.js', function(){
                 e_table_exists EXCEPTION; \
                 PRAGMA EXCEPTION_INIT(e_table_exists, -00942); \
             BEGIN \
-                EXECUTE IMMEDIATE ('DROP TABLE oracledb_departments'); \
+                EXECUTE IMMEDIATE ('DROP TABLE nodb_departments'); \
             EXCEPTION \
                 WHEN e_table_exists \
                 THEN NULL; \
             END; \
             EXECUTE IMMEDIATE (' \
-                CREATE TABLE oracledb_departments ( \
+                CREATE TABLE nodb_departments ( \
                     department_id NUMBER,  \
                     department_name VARCHAR2(20) \
                 ) \
             '); \
             EXECUTE IMMEDIATE (' \
-              INSERT INTO oracledb_departments  \
+              INSERT INTO nodb_departments  \
                    (department_id, department_name) VALUES \
                    (40,''Human Resources'') \
             '); \
             EXECUTE IMMEDIATE (' \
-              INSERT INTO oracledb_departments  \
+              INSERT INTO nodb_departments  \
                    (department_id, department_name) VALUES \
                    (180, ''Construction'') \
             '); \
@@ -131,7 +131,7 @@ describe('3. examples.js', function(){
         function(callback){
           connection.execute(
               "SELECT department_id, department_name "
-            + "FROM oracledb_departments "
+            + "FROM nodb_departments "
             + "WHERE department_id = :did",
             [180],
             function(err, result) {
@@ -152,29 +152,29 @@ describe('3. examples.js', function(){
                 e_table_exists EXCEPTION; \
                 PRAGMA EXCEPTION_INIT(e_table_exists, -00942); \
             BEGIN \
-                EXECUTE IMMEDIATE ('DROP TABLE oracledb_locations'); \
+                EXECUTE IMMEDIATE ('DROP TABLE nodb_locations'); \
             EXCEPTION \
                 WHEN e_table_exists \
                 THEN NULL; \
             END; \
             EXECUTE IMMEDIATE (' \
-                CREATE TABLE oracledb_locations ( \
+                CREATE TABLE nodb_locations ( \
                     location_id NUMBER,  \
                     city VARCHAR2(20) \
                 ) \
             '); \
             EXECUTE IMMEDIATE (' \
-              INSERT INTO oracledb_locations  \
+              INSERT INTO nodb_locations  \
                    (location_id, city) VALUES \
                    (9999,''Shenzhen'') \
             '); \
             EXECUTE IMMEDIATE (' \
-              INSERT INTO oracledb_locations  \
+              INSERT INTO nodb_locations  \
                    (location_id, city) VALUES \
                    (2300, ''Singapore'') \
             '); \
             EXECUTE IMMEDIATE (' \
-              INSERT INTO oracledb_locations  \
+              INSERT INTO nodb_locations  \
                    (location_id, city) VALUES \
                    (1500, ''South San Francisco'') \
             '); \
@@ -190,7 +190,7 @@ describe('3. examples.js', function(){
         function(callback){
           connection.execute(
               "SELECT location_id, city "
-            + "FROM oracledb_locations "
+            + "FROM nodb_locations "
             + "WHERE city LIKE 'S%' "
             + "ORDER BY city",
             function(err, result) {
@@ -205,7 +205,7 @@ describe('3. examples.js', function(){
         function(callback){
           connection.execute(
               "SELECT location_id, city "
-            + "FROM oracledb_locations "
+            + "FROM nodb_locations "
             + "WHERE city LIKE 'S%' "
             + "ORDER BY city",
             {},
@@ -262,13 +262,13 @@ describe('3. examples.js', function(){
           "       e_table_exists EXCEPTION; " +
           "       PRAGMA EXCEPTION_INIT(e_table_exists, -00942); " +
           "   BEGIN " +
-          "       EXECUTE IMMEDIATE ('DROP TABLE j_purchaseorder'); " +
+          "       EXECUTE IMMEDIATE ('DROP TABLE nodb_purchaseorder'); " +
           "   EXCEPTION " +
           "       WHEN e_table_exists " +
           "       THEN NULL; " +
           "   END; " +
           "   EXECUTE IMMEDIATE (' " +
-          "       CREATE TABLE j_purchaseorder ( " +
+          "       CREATE TABLE nodb_purchaseorder ( " +
           "           po_document VARCHAR2(4000) CONSTRAINT ensure_json CHECK (po_document IS JSON) " +
           "       )" +
           "   '); " +
@@ -287,7 +287,7 @@ describe('3. examples.js', function(){
           },
           function(callback){
             connection.execute(
-              "INSERT INTO j_purchaseorder (po_document) VALUES (:bv)",
+              "INSERT INTO nodb_purchaseorder (po_document) VALUES (:bv)",
               [s],
               function(err, result){
                 should.not.exist(err);
@@ -298,7 +298,7 @@ describe('3. examples.js', function(){
           },
           function(callback){
             connection.execute(
-              "SELECT po_document FROM j_purchaseorder",
+              "SELECT po_document FROM nodb_purchaseorder",
               function(err, result){
                 should.not.exist(err);
 
@@ -312,7 +312,7 @@ describe('3. examples.js', function(){
           },
           function(callback){
             connection.execute(
-              "DROP TABLE j_purchaseorder",
+              "DROP TABLE nodb_purchaseorder",
               function(err){
                 should.not.exist(err);
                 callback();
@@ -335,13 +335,13 @@ describe('3. examples.js', function(){
       "       e_table_exists EXCEPTION; " +
       "       PRAGMA EXCEPTION_INIT(e_table_exists, -00942); " +
       "   BEGIN " +
-      "       EXECUTE IMMEDIATE ('DROP TABLE datetest'); " +
+      "       EXECUTE IMMEDIATE ('DROP TABLE nodb_testdate'); " +
       "   EXCEPTION " +
       "       WHEN e_table_exists " +
       "       THEN NULL; " +
       "   END; " +
       "   EXECUTE IMMEDIATE (' " +
-      "       CREATE TABLE datetest ( " +
+      "       CREATE TABLE nodb_testdate ( " +
       "           timestampcol TIMESTAMP, " +
       "           datecol DATE " +
       "       )" +
@@ -378,7 +378,7 @@ describe('3. examples.js', function(){
         },
         function(callback){   // insert data
           connection.execute(
-            "INSERT INTO datetest (timestampcol, datecol) VALUES (:ts, :td)",
+            "INSERT INTO nodb_testdate (timestampcol, datecol) VALUES (:ts, :td)",
             { ts: date, td: date },
             { autoCommit: false },
             function(err){
@@ -389,7 +389,7 @@ describe('3. examples.js', function(){
         },
         function(callback){    // select data
           connection.execute(
-            "SELECT timestampcol, datecol FROM datetest",
+            "SELECT timestampcol, datecol FROM nodb_testdate",
             function(err, result){
               should.not.exist(err);
               var ts = result.rows[0][0];
@@ -411,7 +411,7 @@ describe('3. examples.js', function(){
         },
         function(callback){
           connection.execute(
-            "DROP TABLE datetest",
+            "DROP TABLE nodb_testdate",
             function(err){
               should.not.exist(err);
               callback();
@@ -432,13 +432,13 @@ describe('3. examples.js', function(){
               e_table_exists EXCEPTION; \
               PRAGMA EXCEPTION_INIT(e_table_exists, -00942); \
           BEGIN \
-              EXECUTE IMMEDIATE ('DROP TABLE oracledb_employees'); \
+              EXECUTE IMMEDIATE ('DROP TABLE nodb_employees'); \
           EXCEPTION \
               WHEN e_table_exists \
               THEN NULL; \
           END; \
           EXECUTE IMMEDIATE (' \
-              CREATE TABLE oracledb_employees ( \
+              CREATE TABLE nodb_employees ( \
                   employees_id NUMBER,  \
                   employees_name VARCHAR2(20) \
               ) \
@@ -453,7 +453,7 @@ describe('3. examples.js', function(){
           FOR i IN 1..107 LOOP \
              x := x + 1; \
              n := 'staff ' || x; \
-             INSERT INTO oracledb_employees VALUES (x, n); \
+             INSERT INTO nodb_employees VALUES (x, n); \
           END LOOP; \
        END; ";
 
@@ -473,7 +473,7 @@ describe('3. examples.js', function(){
 
     after(function(done){
       connection.execute(
-        'DROP TABLE oracledb_employees',
+        'DROP TABLE nodb_employees',
         function(err){
           if(err) { console.error(err.message); return; }
           connection.release( function(err){
@@ -490,7 +490,7 @@ describe('3. examples.js', function(){
 
       connection.should.be.ok;
       connection.execute(
-        "SELECT * FROM oracledb_employees",
+        "SELECT * FROM nodb_employees",
         function(err, result){
           should.not.exist(err);
           should.exist(result);
@@ -504,7 +504,7 @@ describe('3. examples.js', function(){
     it('3.6.2 can also specify for each execution', function(done){
       connection.should.be.ok;
       connection.execute(
-        "SELECT * FROM oracledb_employees",
+        "SELECT * FROM nodb_employees",
         {}, {maxRows: 25},
         function(err, result){
           should.not.exist(err);
@@ -538,7 +538,7 @@ describe('3. examples.js', function(){
 
     it('3.7.1 can call PL/SQL procedure and binding parameters in various ways', function(done){
       var proc =
-        "CREATE OR REPLACE PROCEDURE testproc (p_in IN VARCHAR2, p_inout IN OUT VARCHAR2, p_out OUT NUMBER) \
+        "CREATE OR REPLACE PROCEDURE nodb_testproc (p_in IN VARCHAR2, p_inout IN OUT VARCHAR2, p_out OUT NUMBER) \
            AS \
            BEGIN \
              p_inout := p_in || p_inout; \
@@ -562,7 +562,7 @@ describe('3. examples.js', function(){
         },
         function(callback){
           connection.execute(
-            "BEGIN testproc(:i, :io, :o); END;",
+            "BEGIN nodb_testproc(:i, :io, :o); END;",
             bindVars,
             function(err, result){
               should.not.exist(err);
@@ -574,7 +574,7 @@ describe('3. examples.js', function(){
         },
         function(callback){
           connection.execute(
-            "DROP PROCEDURE testproc",
+            "DROP PROCEDURE nodb_testproc",
             function(err, result){
               should.not.exist(err);
               callback();
@@ -586,7 +586,7 @@ describe('3. examples.js', function(){
 
     it('3.7.2 can call PL/SQL function', function(done) {
       var proc =
-        "CREATE OR REPLACE FUNCTION testfunc (p1_in IN VARCHAR2, p2_in IN VARCHAR2) RETURN VARCHAR2 \
+        "CREATE OR REPLACE FUNCTION nodb_testfunc (p1_in IN VARCHAR2, p2_in IN VARCHAR2) RETURN VARCHAR2 \
            AS \
            BEGIN \
              return p1_in || p2_in; \
@@ -609,7 +609,7 @@ describe('3. examples.js', function(){
         },
         function(callback){
           connection.execute(
-            "BEGIN :ret := testfunc(:p1, :p2); END;",
+            "BEGIN :ret := nodb_testfunc(:p1, :p2); END;",
             bindVars,
             function(err, result){
               should.not.exist(err);
@@ -621,7 +621,7 @@ describe('3. examples.js', function(){
         },
         function(callback){
           connection.execute(
-            "DROP FUNCTION testfunc",
+            "DROP FUNCTION nodb_testfunc",
             function(err, result){
               should.not.exist(err);
               callback();
@@ -641,13 +641,13 @@ describe('3. examples.js', function(){
       "       e_table_exists EXCEPTION; " +
       "       PRAGMA EXCEPTION_INIT(e_table_exists, -00942); " +
       "   BEGIN " +
-      "       EXECUTE IMMEDIATE ('DROP TABLE test_insert'); " +
+      "       EXECUTE IMMEDIATE ('DROP TABLE nodb_testinsert'); " +
       "   EXCEPTION " +
       "       WHEN e_table_exists " +
       "       THEN NULL; " +
       "   END; " +
       "   EXECUTE IMMEDIATE (' " +
-      "       CREATE TABLE test_insert ( " +
+      "       CREATE TABLE nodb_testinsert ( " +
       "           id NUMBER,  " +
       "           name VARCHAR2(20) " +
       "       )" +
@@ -682,7 +682,7 @@ describe('3. examples.js', function(){
         },
         function(callback){
           connection.execute(
-            "INSERT INTO test_insert VALUES (:id, :nm)",
+            "INSERT INTO nodb_testinsert VALUES (:id, :nm)",
             [1, 'Chris'],  // Bind values
             function(err, result){
               should.not.exist(err);
@@ -693,7 +693,7 @@ describe('3. examples.js', function(){
         },
         function(callback){
           connection.execute(
-            "INSERT INTO test_insert VALUES (:id, :nm)",
+            "INSERT INTO nodb_testinsert VALUES (:id, :nm)",
             [2, 'Alison'],  // Bind values
             function(err, result){
               should.not.exist(err);
@@ -704,7 +704,7 @@ describe('3. examples.js', function(){
         },
         function(callback){
           connection.execute(
-            "UPDATE test_insert SET name = 'Bambi'",
+            "UPDATE nodb_testinsert SET name = 'Bambi'",
             function(err, result){
               should.not.exist(err);
               (result.rowsAffected).should.be.exactly(2);
@@ -714,7 +714,7 @@ describe('3. examples.js', function(){
         },
         function(callback){
           connection.execute(
-            "DROP TABLE test_insert",
+            "DROP TABLE nodb_testinsert",
             function(err){
               should.not.exist(err);
               callback();
@@ -734,13 +734,13 @@ describe('3. examples.js', function(){
       "       e_table_exists EXCEPTION; " +
       "       PRAGMA EXCEPTION_INIT(e_table_exists, -00942); " +
       "   BEGIN " +
-      "       EXECUTE IMMEDIATE ('DROP TABLE test_commit'); " +
+      "       EXECUTE IMMEDIATE ('DROP TABLE nodb_testcommit'); " +
       "   EXCEPTION " +
       "       WHEN e_table_exists " +
       "       THEN NULL; " +
       "   END; " +
       "   EXECUTE IMMEDIATE (' " +
-      "       CREATE TABLE test_commit ( " +
+      "       CREATE TABLE nodb_testcommit ( " +
       "           id NUMBER,  " +
       "           name VARCHAR2(20) " +
       "       )" +
@@ -782,7 +782,7 @@ describe('3. examples.js', function(){
         },
         function(callback){
           conn1.execute(
-            "INSERT INTO test_commit VALUES (:id, :nm)",
+            "INSERT INTO nodb_testcommit VALUES (:id, :nm)",
             [1, 'Chris'],  // Bind values
             { autoCommit: true },
             function(err, result){
@@ -794,7 +794,7 @@ describe('3. examples.js', function(){
         },
         function(callback){
           conn1.execute(
-            "INSERT INTO test_commit VALUES (:id, :nm)",
+            "INSERT INTO nodb_testcommit VALUES (:id, :nm)",
             [2, 'Alison'],  // Bind values
             // { autoCommit: true },
             function(err, result){
@@ -806,7 +806,7 @@ describe('3. examples.js', function(){
         },
         function(callback){
           conn2.execute(
-            "SELECT * FROM test_commit",
+            "SELECT * FROM nodb_testcommit",
             function(err, result){
               should.not.exist(err);
               // This will only show 'Chris' because inserting 'Alison' is not commited by default.
@@ -819,7 +819,7 @@ describe('3. examples.js', function(){
         },
         function(callback){
           conn1.execute(
-            "DROP TABLE test_commit",
+            "DROP TABLE nodb_testcommit",
             function(err){
               should.not.exist(err);
               callback();
@@ -840,13 +840,13 @@ describe('3. examples.js', function(){
               e_table_exists EXCEPTION; \
               PRAGMA EXCEPTION_INIT(e_table_exists, -00942); \
           BEGIN \
-              EXECUTE IMMEDIATE ('DROP TABLE oracledb_employees'); \
+              EXECUTE IMMEDIATE ('DROP TABLE nodb_employees'); \
           EXCEPTION \
               WHEN e_table_exists \
               THEN NULL; \
           END; \
           EXECUTE IMMEDIATE (' \
-              CREATE TABLE oracledb_employees ( \
+              CREATE TABLE nodb_employees ( \
                   employees_id NUMBER,  \
                   employees_name VARCHAR2(20) \
               ) \
@@ -861,7 +861,7 @@ describe('3. examples.js', function(){
           FOR i IN 1..207 LOOP \
              x := x + 1; \
              n := 'staff ' || x; \
-             INSERT INTO oracledb_employees VALUES (x, n); \
+             INSERT INTO nodb_employees VALUES (x, n); \
           END LOOP; \
        END; ";
 
@@ -881,7 +881,7 @@ describe('3. examples.js', function(){
 
     after(function(done){
       connection.execute(
-        'DROP TABLE oracledb_employees',
+        'DROP TABLE nodb_employees',
         function(err){
           if(err) { console.error(err.message); return; }
           connection.release( function(err){
@@ -897,7 +897,7 @@ describe('3. examples.js', function(){
       var rowCount = 1;
 
       connection.execute(
-        "SELECT employees_name FROM oracledb_employees",
+        "SELECT employees_name FROM nodb_employees",
         [],
         { resultSet: true, prefetchRows: 50 },
         function(err, result) {
@@ -931,7 +931,7 @@ describe('3. examples.js', function(){
       var numRows = 10;  // number of rows to return from each call to getRows()
 
       connection.execute(
-        "SELECT * FROM oracledb_employees",
+        "SELECT * FROM nodb_employees",
         [],
         { resultSet: true, prefetchRows: 110 },
         function(err, result) {
@@ -971,45 +971,45 @@ describe('3. examples.js', function(){
                 e_table_exists EXCEPTION; \
                 PRAGMA EXCEPTION_INIT(e_table_exists, -00942); \
             BEGIN \
-                EXECUTE IMMEDIATE ('DROP TABLE oracledb_employees'); \
+                EXECUTE IMMEDIATE ('DROP TABLE nodb_employees'); \
             EXCEPTION \
                 WHEN e_table_exists \
                 THEN NULL; \
             END; \
             EXECUTE IMMEDIATE (' \
-                CREATE TABLE oracledb_employees ( \
+                CREATE TABLE nodb_employees ( \
                     name VARCHAR2(40),  \
                     salary NUMBER, \
                     hire_date DATE \
                 ) \
             '); \
             EXECUTE IMMEDIATE (' \
-              INSERT INTO oracledb_employees  \
+              INSERT INTO nodb_employees  \
                    (name, salary, hire_date) VALUES \
                    (''Steven'',24000, TO_DATE(''20030617'', ''yyyymmdd'')) \
             '); \
             EXECUTE IMMEDIATE (' \
-              INSERT INTO oracledb_employees  \
+              INSERT INTO nodb_employees  \
                    (name, salary, hire_date) VALUES \
                    (''Neena'',17000, TO_DATE(''20050921'', ''yyyymmdd'')) \
             '); \
             EXECUTE IMMEDIATE (' \
-              INSERT INTO oracledb_employees  \
+              INSERT INTO nodb_employees  \
                    (name, salary, hire_date) VALUES \
                    (''Lex'',17000, TO_DATE(''20010112'', ''yyyymmdd'')) \
             '); \
             EXECUTE IMMEDIATE (' \
-              INSERT INTO oracledb_employees  \
+              INSERT INTO nodb_employees  \
                    (name, salary, hire_date) VALUES \
                    (''Nancy'',12008, TO_DATE(''20020817'', ''yyyymmdd'')) \
             '); \
             EXECUTE IMMEDIATE (' \
-              INSERT INTO oracledb_employees  \
+              INSERT INTO nodb_employees  \
                    (name, salary, hire_date) VALUES \
                    (''Karen'',14000, TO_DATE(''20050104'', ''yyyymmdd'')) \
             '); \
             EXECUTE IMMEDIATE (' \
-              INSERT INTO oracledb_employees  \
+              INSERT INTO nodb_employees  \
                    (name, salary, hire_date) VALUES \
                    (''Peter'',9000, TO_DATE(''20100525'', ''yyyymmdd'')) \
             '); \
@@ -1020,7 +1020,7 @@ describe('3. examples.js', function(){
            AS \
            BEGIN \
              OPEN p_recordset FOR  \
-               SELECT * FROM oracledb_employees \
+               SELECT * FROM nodb_employees \
                WHERE salary > p_sal; \
            END; ";
 
@@ -1059,7 +1059,7 @@ describe('3. examples.js', function(){
 
     after(function(done){
       connection.execute(
-        'DROP TABLE oracledb_employees',
+        'DROP TABLE nodb_employees',
         function(err){
           if(err) { console.error(err.message); return; }
           connection.release( function(err){

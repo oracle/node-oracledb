@@ -65,13 +65,13 @@ describe('65. uninitializedLob.js', function() {
                     "    e_table_exists EXCEPTION; \n" +
                     "    PRAGMA EXCEPTION_INIT(e_table_exists, -00942);\n " +
                     "   BEGIN \n" +
-                    "     EXECUTE IMMEDIATE ('DROP TABLE testlobdpi'); \n" +
+                    "     EXECUTE IMMEDIATE ('DROP TABLE nodb_lobdpi'); \n" +
                     "   EXCEPTION \n" +
                     "     WHEN e_table_exists \n" +
                     "     THEN NULL; \n" +
                     "   END; \n" +
                     "   EXECUTE IMMEDIATE (' \n" +
-                    "     CREATE TABLE testlobdpi ( \n" +
+                    "     CREATE TABLE nodb_lobdpi ( \n" +
                     "       id NUMBER NOT NULL PRIMARY KEY, \n" +
                     "       spoc_cm_id NUMBER, \n" +
                     "       created_timestamp TIMESTAMP(5) DEFAULT SYSTIMESTAMP, \n" +
@@ -94,13 +94,13 @@ describe('65. uninitializedLob.js', function() {
                     "    e_sequence_exists EXCEPTION; \n" +
                     "    PRAGMA EXCEPTION_INIT(e_sequence_exists, -02289);\n " +
                     "   BEGIN \n" +
-                    "     EXECUTE IMMEDIATE ('DROP SEQUENCE testlobdpi_seq'); \n" +
+                    "     EXECUTE IMMEDIATE ('DROP SEQUENCE nodb_lobdpi_seq'); \n" +
                     "   EXCEPTION \n" +
                     "     WHEN e_sequence_exists \n" +
                     "     THEN NULL; \n" +
                     "   END; \n" +
                     "   EXECUTE IMMEDIATE (' \n" +
-                    "     CREATE SEQUENCE testlobdpi_seq INCREMENT BY 1 START WITH 1 NOMAXVALUE CACHE 50 ORDER  \n" +
+                    "     CREATE SEQUENCE nodb_lobdpi_seq INCREMENT BY 1 START WITH 1 NOMAXVALUE CACHE 50 ORDER  \n" +
                     "   '); \n" +
                     "END; ";
 
@@ -113,11 +113,11 @@ describe('65. uninitializedLob.js', function() {
         );
       },
       function(callback) {
-        var proc = "create or replace trigger testlobdpi_rbi  \n" +
-                   "  before insert on testlobdpi referencing old as old new as new \n" +
+        var proc = "create or replace trigger nodb_lobdpi_rbi  \n" +
+                   "  before insert on nodb_lobdpi referencing old as old new as new \n" +
                    "  for each row \n" +
                    "begin \n" +
-                   "  :new.id := testlobdpi_seq.nextval;\n" +
+                   "  :new.id := nodb_lobdpi_seq.nextval;\n" +
                    "end;";
         connection.execute(
           proc,
@@ -128,8 +128,8 @@ describe('65. uninitializedLob.js', function() {
         );
       },
       function(callback) {
-        var proc = "create or replace trigger testlobdpi_rbu  \n" +
-                   "  before update on testlobdpi referencing old as old new as new \n" +
+        var proc = "create or replace trigger nodb_lobdpi_rbu  \n" +
+                   "  before update on nodb_lobdpi referencing old as old new as new \n" +
                    "  for each row \n" +
                    "begin \n" +
                    "  :new.modified_timestamp := systimestamp;\n" +
@@ -143,7 +143,7 @@ describe('65. uninitializedLob.js', function() {
         );
       },
       function(callback) {
-        var sql = "ALTER TABLE testlobdpi ADD (blob_1 BLOB, unit32_1 NUMBER, date_1 TIMESTAMP(5), " +
+        var sql = "ALTER TABLE nodb_lobdpi ADD (blob_1 BLOB, unit32_1 NUMBER, date_1 TIMESTAMP(5), " +
                   "  string_1 VARCHAR2(250), CONSTRAINT string_1_uk UNIQUE (string_1))";
 
         connection.execute(
@@ -161,7 +161,7 @@ describe('65. uninitializedLob.js', function() {
     async.series([
       function(callback) {
         connection.execute(
-          "DROP SEQUENCE testlobdpi_seq",
+          "DROP SEQUENCE nodb_lobdpi_seq",
           function(err) {
             should.not.exist(err);
             callback();
@@ -170,7 +170,7 @@ describe('65. uninitializedLob.js', function() {
       },
       function(callback) {
         connection.execute(
-          "DROP TABLE testlobdpi",
+          "DROP TABLE nodb_lobdpi",
           function(err) {
             should.not.exist(err);
             callback();
@@ -194,9 +194,9 @@ describe('65. uninitializedLob.js', function() {
                  "  row_count NUMBER := 0;" +
                  "  negative_one NUMBER := -1;" +
                  "BEGIN \n" +
-                 "  SELECT COUNT(*) INTO row_count FROM testlobdpi WHERE (string_1 = :string_1);" +
+                 "  SELECT COUNT(*) INTO row_count FROM nodb_lobdpi WHERE (string_1 = :string_1);" +
                  "    IF (row_count = 0 ) THEN\n" +
-                 "      INSERT INTO testlobdpi (blob_1, string_1, spoc_cm_id) \n" +
+                 "      INSERT INTO nodb_lobdpi (blob_1, string_1, spoc_cm_id) \n" +
                  "      VALUES (empty_blob(), :string_1, :spoc_cm_id) \n" +
                  "      RETURNING id, blob_1 INTO :id, :blob_1; \n" +
                  "    ELSE \n" +

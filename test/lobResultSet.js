@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -35,13 +35,13 @@
  *     51 onwards are for other tests
  *
  *****************************************************************************/
-"use strict";
+'use strict';
 
 var oracledb = require('oracledb');
 var fs       = require('fs');
 var async    = require('async');
 var should   = require('should');
-var stream = require('stream');
+var stream   = require('stream');
 var dbConfig = require('./dbconfig.js');
 var assist   = require('./dataTypeAssist.js');
 
@@ -73,7 +73,7 @@ describe('59. lobResultSet.js', function() {
 
   describe('59.1 CLOB data', function() {
 
-    var tableName = "oracledb_myclobs";
+    var tableName = "nodb_myclobs";
     before('create table', function(done) {
       assist.createTable(connection, tableName, done);
     })

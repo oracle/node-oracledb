@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016 Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -58,7 +58,7 @@ describe('41. dataTypeBlob', function() {
   }
 
   var connection = null;
-  var tableName = "oracledb_myblobs";
+  var tableName = "nodb_myblobs";
 
   before('get one connection', function(done) {
     oracledb.getConnection(credential, function(err, conn) {
@@ -102,7 +102,7 @@ describe('41. dataTypeBlob', function() {
           }, 2000);
 
           connection.execute(
-            "INSERT INTO oracledb_myblobs (num, content) VALUES (:n, EMPTY_BLOB()) RETURNING content INTO :lobbv",
+            "INSERT INTO nodb_myblobs (num, content) VALUES (:n, EMPTY_BLOB()) RETURNING content INTO :lobbv",
             { n: 2, lobbv: {type: oracledb.BLOB, dir: oracledb.BIND_OUT} },
             { autoCommit: false },  // a transaction needs to span the INSERT and pipe()
             function(err, result) {
@@ -142,7 +142,7 @@ describe('41. dataTypeBlob', function() {
           }, 2000);
 
           connection.execute(
-            "SELECT content FROM oracledb_myblobs WHERE num = :n",
+            "SELECT content FROM nodb_myblobs WHERE num = :n",
             { n: 2 },
             function(err, result) {
               should.not.exist(err);
@@ -187,7 +187,7 @@ describe('41. dataTypeBlob', function() {
           }, 2000);
 
           connection.execute(
-            "SELECT content FROM oracledb_myblobs WHERE num = :n",
+            "SELECT content FROM nodb_myblobs WHERE num = :n",
             { n: 2 },
             function(err, result) {
               should.not.exist(err);

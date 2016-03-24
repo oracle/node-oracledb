@@ -41,27 +41,27 @@ var assist = exports;
 /* Mapping between table names and data types */
 assist.allDataTypeNames =
 {
-  "oracledb_char"         : "CHAR(2000)",
-  "oracledb_nchar"        : "NCHAR(1000)",
-  "oracledb_varchar2"     : "VARCHAR2(4000)",
-  "oracledb_nvarchar2"    : "NVARCHAR2(2000)",
-  "oracledb_number"       : "NUMBER",
-  "oracledb_number2"      : "NUMBER(15, 5)",
-  "oracledb_float"        : "FLOAT",
-  "oracledb_float2"       : "FLOAT(90)",
-  "oracledb_binary_float" : "BINARY_FLOAT",
-  "oracledb_double"       : "BINARY_DOUBLE",
-  "oracledb_date"         : "DATE",
-  "oracledb_timestamp1"   : "TIMESTAMP",
-  "oracledb_timestamp2"   : "TIMESTAMP(5)",
-  "oracledb_timestamp3"   : "TIMESTAMP WITH TIME ZONE",
-  "oracledb_timestamp4"   : "TIMESTAMP (2) WITH TIME ZONE",
-  "oracledb_timestamp5"   : "TIMESTAMP WITH LOCAL TIME ZONE",
-  "oracledb_timestamp6"   : "TIMESTAMP (9) WITH LOCAL TIME ZONE",
-  "oracledb_rowid"        : "ROWID",
-  "oracledb_myclobs"      : "CLOB",
-  "oracledb_myblobs"      : "BLOB",
-  "oracledb_raw"          : "RAW(2000)"
+  "nodb_char"         : "CHAR(2000)",
+  "nodb_nchar"        : "NCHAR(1000)",
+  "nodb_varchar2"     : "VARCHAR2(4000)",
+  "nodb_nvarchar2"    : "NVARCHAR2(2000)",
+  "nodb_number"       : "NUMBER",
+  "nodb_number2"      : "NUMBER(15, 5)",
+  "nodb_float"        : "FLOAT",
+  "nodb_float2"       : "FLOAT(90)",
+  "nodb_binary_float" : "BINARY_FLOAT",
+  "nodb_double"       : "BINARY_DOUBLE",
+  "nodb_date"         : "DATE",
+  "nodb_timestamp1"   : "TIMESTAMP",
+  "nodb_timestamp2"   : "TIMESTAMP(5)",
+  "nodb_timestamp3"   : "TIMESTAMP WITH TIME ZONE",
+  "nodb_timestamp4"   : "TIMESTAMP (2) WITH TIME ZONE",
+  "nodb_timestamp5"   : "TIMESTAMP WITH LOCAL TIME ZONE",
+  "nodb_timestamp6"   : "TIMESTAMP (9) WITH LOCAL TIME ZONE",
+  "nodb_rowid"        : "ROWID",
+  "nodb_myclobs"      : "CLOB",
+  "nodb_myblobs"      : "BLOB",
+  "nodb_raw"          : "RAW(2000)"
 };
 
 assist.data = {

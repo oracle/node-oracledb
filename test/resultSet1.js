@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -52,13 +52,13 @@ describe('12. resultSet1.js', function() {
               e_table_exists EXCEPTION; \
               PRAGMA EXCEPTION_INIT(e_table_exists, -00942); \
           BEGIN \
-              EXECUTE IMMEDIATE ('DROP TABLE oracledb_employees'); \
+              EXECUTE IMMEDIATE ('DROP TABLE nodb_employees'); \
           EXCEPTION \
               WHEN e_table_exists \
               THEN NULL; \
           END; \
           EXECUTE IMMEDIATE (' \
-              CREATE TABLE oracledb_employees ( \
+              CREATE TABLE nodb_employees ( \
                   employees_id NUMBER,  \
                   employees_name VARCHAR2(20) \
               ) \
@@ -73,7 +73,7 @@ describe('12. resultSet1.js', function() {
           FOR i IN 1..217 LOOP \
              x := x + 1; \
              n := 'staff ' || x; \
-             INSERT INTO oracledb_employees VALUES (x, n); \
+             INSERT INTO nodb_employees VALUES (x, n); \
           END LOOP; \
        END; ";
   var rowsAmount = 217;
@@ -94,7 +94,7 @@ describe('12. resultSet1.js', function() {
 
   after(function(done) {
     connection.execute(
-      'DROP TABLE oracledb_employees',
+      'DROP TABLE nodb_employees',
       function(err) {
         if(err) { console.error(err.message); return; }
         connection.release(function(err) {
@@ -110,7 +110,7 @@ describe('12. resultSet1.js', function() {
       connection.should.be.ok;
 
       connection.execute(
-        "SELECT employees_name FROM oracledb_employees",
+        "SELECT employees_name FROM nodb_employees",
         [],
         { resultSet: false, prefetchRows: 100, maxRows: 1000 },
         function(err, result) {
@@ -129,7 +129,7 @@ describe('12. resultSet1.js', function() {
       connection.should.be.ok;
 
       connection.execute(
-        "SELECT employees_name FROM oracledb_employees",
+        "SELECT employees_name FROM nodb_employees",
         [],
         { resultSet: true, prefetchRows: 100, maxRows: 1000 },
         function(err, result) {
@@ -146,7 +146,7 @@ describe('12. resultSet1.js', function() {
       connection.should.be.ok;
 
       connection.execute(
-        "SELECT employees_name FROM oracledb_employees",
+        "SELECT employees_name FROM nodb_employees",
         [],
         { resultSet: 0, prefetchRows: 100, maxRows: 1000 },
         function(err, result) {
@@ -165,7 +165,7 @@ describe('12. resultSet1.js', function() {
       connection.should.be.ok;
 
       connection.execute(
-        "SELECT employees_name FROM oracledb_employees",
+        "SELECT employees_name FROM nodb_employees",
         [],
         { resultSet: null, prefetchRows: 100, maxRows: 1000 },
         function(err, result) {
@@ -183,7 +183,7 @@ describe('12. resultSet1.js', function() {
       connection.should.be.ok;
 
       connection.execute(
-        "SELECT employees_name FROM oracledb_employees",
+        "SELECT employees_name FROM nodb_employees",
         [],
         { resultSet: undefined, prefetchRows: 100, maxRows: 1000 },
         function(err, result) {
@@ -201,7 +201,7 @@ describe('12. resultSet1.js', function() {
       connection.should.be.ok;
 
       connection.execute(
-        "SELECT employees_name FROM oracledb_employees",
+        "SELECT employees_name FROM nodb_employees",
         [],
         { resultSet: NaN, prefetchRows: 100, maxRows: 1000 },
         function(err, result) {
@@ -219,7 +219,7 @@ describe('12. resultSet1.js', function() {
       connection.should.be.ok;
 
       connection.execute(
-        "SELECT employees_name FROM oracledb_employees",
+        "SELECT employees_name FROM nodb_employees",
         [],
         { resultSet: 1, prefetchRows: 100, maxRows: 1000 },
         function(err, result) {
@@ -236,7 +236,7 @@ describe('12. resultSet1.js', function() {
       connection.should.be.ok;
 
       connection.execute(
-        "SELECT employees_name FROM oracledb_employees",
+        "SELECT employees_name FROM nodb_employees",
         [],
         { resultSet: -1, prefetchRows: 100, maxRows: 1000 },
         function(err, result) {
@@ -253,7 +253,7 @@ describe('12. resultSet1.js', function() {
       connection.should.be.ok;
 
       connection.execute(
-        "SELECT employees_name FROM oracledb_employees",
+        "SELECT employees_name FROM nodb_employees",
         [],
         { resultSet: 'foo', prefetchRows: 100, maxRows: 1000 },
         function(err, result) {
@@ -273,7 +273,7 @@ describe('12. resultSet1.js', function() {
       connection.should.be.ok;
 
       connection.execute(
-        "SELECT employees_name FROM oracledb_employees",
+        "SELECT employees_name FROM nodb_employees",
         [],
         { resultSet: true, prefetchRows: -10, maxRows: 1000 },
         function(err, result) {
@@ -288,7 +288,7 @@ describe('12. resultSet1.js', function() {
       connection.should.be.ok;
 
       connection.execute(
-        "SELECT employees_name FROM oracledb_employees",
+        "SELECT employees_name FROM nodb_employees",
         [],
         { resultSet: true, prefetchRows: 'bar', maxRows: 1000 },
         function(err, result) {
@@ -303,7 +303,7 @@ describe('12. resultSet1.js', function() {
       connection.should.be.ok;
 
       connection.execute(
-        "SELECT employees_name FROM oracledb_employees",
+        "SELECT employees_name FROM nodb_employees",
         [],
         { resultSet: true, prefetchRows: NaN, maxRows: 1000 },
         function(err, result) {
@@ -318,7 +318,7 @@ describe('12. resultSet1.js', function() {
       connection.should.be.ok;
 
       connection.execute(
-        "SELECT employees_name FROM oracledb_employees",
+        "SELECT employees_name FROM nodb_employees",
         [],
         { resultSet: true, prefetchRows: null, maxRows: 1000 },
         function(err, result) {
@@ -333,7 +333,7 @@ describe('12. resultSet1.js', function() {
       connection.should.be.ok;
 
       connection.execute(
-        "SELECT employees_name FROM oracledb_employees",
+        "SELECT employees_name FROM nodb_employees",
         [],
         { resultSet: true, prefetchRows: 0, maxRows: 1000 },
         function(err, result) {
@@ -352,7 +352,7 @@ describe('12. resultSet1.js', function() {
       var accessCount = 0;
 
       connection.execute(
-        "SELECT employees_name FROM oracledb_employees",
+        "SELECT employees_name FROM nodb_employees",
         [],
         { resultSet: true, prefetchRows: 100 },
         function(err, result) {
@@ -385,7 +385,7 @@ describe('12. resultSet1.js', function() {
       var accessCount = 0;
 
       connection.execute(
-        "SELECT employees_name FROM oracledb_employees",
+        "SELECT employees_name FROM nodb_employees",
         [],
         { resultSet: true, prefetchRows: 100 },
         function(err, result) {
@@ -418,7 +418,7 @@ describe('12. resultSet1.js', function() {
       var accessCount = 0;
 
       connection.execute(
-        "SELECT employees_name FROM oracledb_employees",
+        "SELECT employees_name FROM nodb_employees",
         [],
         { resultSet: true, prefetchRows: 100 },
         function(err, result) {
@@ -451,7 +451,7 @@ describe('12. resultSet1.js', function() {
       var accessCount = 0;
 
       connection.execute(
-        "SELECT employees_name FROM oracledb_employees",
+        "SELECT employees_name FROM nodb_employees",
         [],
         { resultSet: true, prefetchRows: 100 },
         function(err, result) {
@@ -484,7 +484,7 @@ describe('12. resultSet1.js', function() {
       var accessCount = 0;
 
       connection.execute(
-        "SELECT employees_name FROM oracledb_employees",
+        "SELECT employees_name FROM nodb_employees",
         [],
         { resultSet: true, prefetchRows: 100, outFormat: oracledb.ARRAY },
         function(err, result) {
@@ -520,7 +520,7 @@ describe('12. resultSet1.js', function() {
       var accessCount = 0;
 
       connection.execute(
-        "SELECT employees_name FROM oracledb_employees",
+        "SELECT employees_name FROM nodb_employees",
         [],
         { resultSet: true, prefetchRows: 100, outFormat: oracledb.OBJECT },
         function(err, result) {
@@ -556,7 +556,7 @@ describe('12. resultSet1.js', function() {
       var accessCount = 0;
 
       connection.execute(
-        "SELECT employees_name FROM oracledb_employees",
+        "SELECT employees_name FROM nodb_employees",
         [],
         { resultSet: true, prefetchRows: 100 },
         function(err, result) {
@@ -588,7 +588,7 @@ describe('12. resultSet1.js', function() {
       var nRows = 5;
       var accessCount = 0;
       connection.execute(
-        "SELECT employees_name FROM oracledb_employees WHERE employees_id > 300",
+        "SELECT employees_name FROM nodb_employees WHERE employees_id > 300",
         [],
         { resultSet: true },
         function(err, result) {
@@ -620,7 +620,7 @@ describe('12. resultSet1.js', function() {
       connection.should.be.ok;
 
       connection.execute(
-        "SELECT employees_name FROM oracledb_employees",
+        "SELECT employees_name FROM nodb_employees",
         [],
         { resultSet: true, prefetchRows: 100 },
         function(err, result) {
@@ -647,7 +647,7 @@ describe('12. resultSet1.js', function() {
       var nRows = 0;
 
       connection.execute(
-        "SELECT employees_name FROM oracledb_employees",
+        "SELECT employees_name FROM nodb_employees",
         [],
         { resultSet: true, prefetchRows: 100 },
         function(err, result) {
@@ -673,7 +673,7 @@ describe('12. resultSet1.js', function() {
       var nRows = -5;
 
       connection.execute(
-        "SELECT employees_name FROM oracledb_employees",
+        "SELECT employees_name FROM nodb_employees",
         [],
         { resultSet: true, prefetchRows: 100 },
         function(err, result) {
@@ -699,7 +699,7 @@ describe('12. resultSet1.js', function() {
       var nRows = null;  // setting to 'undefined' is the same
 
       connection.execute(
-        "SELECT employees_name FROM oracledb_employees",
+        "SELECT employees_name FROM nodb_employees",
         [],
         { resultSet: true, prefetchRows: 100 },
         function(err, result) {
@@ -727,7 +727,7 @@ describe('12. resultSet1.js', function() {
       var accessCount = 0;
 
       connection.execute(
-        "SELECT employees_name FROM oracledb_employees",
+        "SELECT employees_name FROM nodb_employees",
         [],
         { resultSet: true, prefetchRows: 100 },
         function(err, result) {
@@ -760,7 +760,7 @@ describe('12. resultSet1.js', function() {
       var accessCount = 0;
 
       connection.execute(
-        "SELECT employees_name FROM oracledb_employees",
+        "SELECT employees_name FROM nodb_employees",
         [],
         { resultSet: true, prefetchRows: 100, outFormat: oracledb.ARRAY },
         function(err, result) {
@@ -794,7 +794,7 @@ describe('12. resultSet1.js', function() {
       var accessCount = 0;
 
       connection.execute(
-        "SELECT employees_name FROM oracledb_employees",
+        "SELECT employees_name FROM nodb_employees",
         [],
         { resultSet: true, prefetchRows: 100, outFormat: oracledb.OBJECT },
         function(err, result) {
@@ -827,7 +827,7 @@ describe('12. resultSet1.js', function() {
       connection.should.be.ok;
       var accessCount = 0;
       connection.execute(
-        "SELECT employees_name FROM oracledb_employees WHERE employees_id > 300",
+        "SELECT employees_name FROM nodb_employees WHERE employees_id > 300",
         [],
         { resultSet: true },
         function(err, result) {
@@ -860,7 +860,7 @@ describe('12. resultSet1.js', function() {
       var nRows = 2;
 
       connection.execute(
-        "SELECT employees_name FROM oracledb_employees",
+        "SELECT employees_name FROM nodb_employees",
         [],
         { resultSet: true, prefetchRows: 100 },
         function(err, result) {
@@ -891,7 +891,7 @@ describe('12. resultSet1.js', function() {
       var accessCount = 0;
 
       connection.execute(
-        "SELECT employees_name FROM oracledb_employees",
+        "SELECT employees_name FROM nodb_employees",
         [],
         { resultSet: true, prefetchRows: 100 },
         function(err, result) {
@@ -921,7 +921,7 @@ describe('12. resultSet1.js', function() {
       var accessCount = 0;
 
       connection.execute(
-        "SELECT employees_name FROM oracledb_employees",
+        "SELECT employees_name FROM nodb_employees",
         [],
         { resultSet: true, prefetchRows: 100 },
         function(err, result) {
@@ -958,7 +958,7 @@ describe('12. resultSet1.js', function() {
       var accessCount = 0;
 
       connection.execute(
-        "SELECT employees_name FROM oracledb_employees",
+        "SELECT employees_name FROM nodb_employees",
         [],
         { resultSet: true, prefetchRows: 100 },
         function(err, result) {
@@ -996,7 +996,7 @@ describe('12. resultSet1.js', function() {
       async.series([
         function(callback) {
           connection.execute(
-            "SELECT employees_name FROM oracledb_employees",
+            "SELECT employees_name FROM nodb_employees",
             [],
             { resultSet: true, prefetchRows: 100 },
             function(err, result) {
@@ -1008,7 +1008,7 @@ describe('12. resultSet1.js', function() {
         function(callback) {
           accessCount = 0;
           connection.execute(
-            "SELECT * FROM oracledb_employees",
+            "SELECT * FROM nodb_employees",
             [],
             { resultSet: true, prefetchRows: 100 },
             function(err, result) {
@@ -1065,7 +1065,7 @@ describe('12. resultSet1.js', function() {
 
       var createTab = function(size) {
         var buffer = new StringBuffer();
-        buffer.append("CREATE TABLE oracledb_manycolumns( ");
+        buffer.append("CREATE TABLE nodb_manycolumns( ");
 
         for(var i = 0; i < size-1; i++) {
           buffer.append("c" + i + " NUMBER, ");
@@ -1091,7 +1091,7 @@ describe('12. resultSet1.js', function() {
         },
         function(callback){
           connection.execute(
-            "SELECT * FROM oracledb_manycolumns",
+            "SELECT * FROM nodb_manycolumns",
             [],
             { resultSet: true},
             function(err, result){
@@ -1106,7 +1106,7 @@ describe('12. resultSet1.js', function() {
         },
         function(callback) {
           connection.execute(
-            "DROP TABLE oracledb_manycolumns",
+            "DROP TABLE nodb_manycolumns",
             function(err) {
               should.not.exist(err);
               callback();
@@ -1118,7 +1118,7 @@ describe('12. resultSet1.js', function() {
 
     it('12.6.2 can distinguish lower case and upper case', function(done) {
       connection.should.be.ok;
-      var tableName = "oracledb_uppercase";
+      var tableName = "nodb_uppercase";
       var createTable =
         " BEGIN " +
         "   DECLARE " +
@@ -1176,7 +1176,7 @@ describe('12. resultSet1.js', function() {
 
     it('12.6.3 can contain quotes', function(done) {
       connection.should.be.ok;
-      var tableName = "oracledb_quotes";
+      var tableName = "nodb_quotes";
       var createTable =
         " BEGIN " +
         "   DECLARE " +
@@ -1234,7 +1234,7 @@ describe('12. resultSet1.js', function() {
 
     it('12.6.4 can contain underscore', function(done) {
       connection.should.be.ok;
-      var tableName = "oracledb_underscore";
+      var tableName = "nodb_underscore";
       var createTable =
         " BEGIN " +
         "   DECLARE " +
@@ -1297,7 +1297,7 @@ describe('12. resultSet1.js', function() {
       var accessCount = 0;
       var rowsLimit = 50;
       connection.execute(
-        "SELECT * FROM oracledb_employees",
+        "SELECT * FROM nodb_employees",
         [],
         { resultSet: true, maxRows: rowsLimit },
         function(err, result) {
@@ -1330,7 +1330,7 @@ describe('12. resultSet1.js', function() {
            AS \
            BEGIN \
              OPEN p_out FOR  \
-               SELECT * FROM oracledb_employees \
+               SELECT * FROM nodb_employees \
                WHERE employees_id <= p_in; \
            END; ";
 

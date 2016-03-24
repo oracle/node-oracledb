@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -34,8 +34,8 @@
  "use strict";
 
 var oracledb = require('oracledb');
-var should = require('should');
-var async = require('async');
+var should   = require('should');
+var async    = require('async');
 var dbConfig = require('./dbconfig.js');
 
 describe('57. nestedCursor.js', function() {
@@ -52,30 +52,30 @@ describe('57. nestedCursor.js', function() {
               e_table_exists EXCEPTION; \
               PRAGMA EXCEPTION_INIT(e_table_exists, -00942); \
           BEGIN \
-              EXECUTE IMMEDIATE ('DROP TABLE test_parent_tab'); \
+              EXECUTE IMMEDIATE ('DROP TABLE nodb_parent_tab'); \
           EXCEPTION \
               WHEN e_table_exists \
               THEN NULL; \
           END; \
           EXECUTE IMMEDIATE (' \
-              CREATE TABLE test_parent_tab ( \
+              CREATE TABLE nodb_parent_tab ( \
                   id NUMBER,  \
                   description VARCHAR2(32), \
                   CONSTRAINT parent_tab_pk PRIMARY KEY (id) \
               ) \
           '); \
           EXECUTE IMMEDIATE (' \
-              INSERT INTO test_parent_tab (id, description)  \
+              INSERT INTO nodb_parent_tab (id, description)  \
                    VALUES \
                    (1,''Parent 1'') \
           '); \
           EXECUTE IMMEDIATE (' \
-              INSERT INTO test_parent_tab (id, description)  \
+              INSERT INTO nodb_parent_tab (id, description)  \
                    VALUES \
                    (2,''Parent 2'') \
           '); \
           EXECUTE IMMEDIATE (' \
-              INSERT INTO test_parent_tab (id, description)  \
+              INSERT INTO nodb_parent_tab (id, description)  \
                    VALUES \
                    (3,''Parent 3'') \
           '); \
@@ -87,47 +87,47 @@ describe('57. nestedCursor.js', function() {
               e_table_exists EXCEPTION; \
               PRAGMA EXCEPTION_INIT(e_table_exists, -00942); \
           BEGIN \
-              EXECUTE IMMEDIATE ('DROP TABLE test_child_tab'); \
+              EXECUTE IMMEDIATE ('DROP TABLE nodb_child_tab'); \
           EXCEPTION \
               WHEN e_table_exists \
               THEN NULL; \
           END; \
           EXECUTE IMMEDIATE (' \
-              CREATE TABLE test_child_tab ( \
+              CREATE TABLE nodb_child_tab ( \
                   id NUMBER,  \
                   parent_id NUMBER, \
                   description VARCHAR2(32), \
                   CONSTRAINT child_tab_pk PRIMARY KEY (id), \
-                  CONSTRAINT child_parent_fk FOREIGN KEY (parent_id) REFERENCES test_parent_tab(id) \
+                  CONSTRAINT child_parent_fk FOREIGN KEY (parent_id) REFERENCES nodb_parent_tab(id) \
               ) \
           '); \
           EXECUTE IMMEDIATE (' \
-              INSERT INTO test_child_tab (id, parent_id, description)  \
+              INSERT INTO nodb_child_tab (id, parent_id, description)  \
                    VALUES \
                    (1, 1, ''Child 1'') \
           '); \
           EXECUTE IMMEDIATE (' \
-              INSERT INTO test_child_tab (id, parent_id, description)  \
+              INSERT INTO nodb_child_tab (id, parent_id, description)  \
                    VALUES \
                    (2, 1, ''Child 2'') \
           '); \
           EXECUTE IMMEDIATE (' \
-              INSERT INTO test_child_tab (id, parent_id, description)  \
+              INSERT INTO nodb_child_tab (id, parent_id, description)  \
                    VALUES \
                    (3, 2, ''Child 3'') \
           '); \
           EXECUTE IMMEDIATE (' \
-              INSERT INTO test_child_tab (id, parent_id, description)  \
+              INSERT INTO nodb_child_tab (id, parent_id, description)  \
                    VALUES \
                    (4, 2, ''Child 4'') \
           '); \
           EXECUTE IMMEDIATE (' \
-              INSERT INTO test_child_tab (id, parent_id, description)  \
+              INSERT INTO nodb_child_tab (id, parent_id, description)  \
                    VALUES \
                    (5, 2, ''Child 5'') \
           '); \
           EXECUTE IMMEDIATE (' \
-              INSERT INTO test_child_tab (id, parent_id, description)  \
+              INSERT INTO nodb_child_tab (id, parent_id, description)  \
                    VALUES \
                    (6, 3, ''Child 6'') \
           '); \
@@ -180,7 +180,7 @@ describe('57. nestedCursor.js', function() {
     async.series([
       function(callback) {
         connection.execute(
-          "DROP TABLE test_child_tab",
+          "DROP TABLE nodb_child_tab",
           function(err) {
             should.not.exist(err);
             callback();
@@ -189,7 +189,7 @@ describe('57. nestedCursor.js', function() {
       },
       function(callback) {
         connection.execute(
-          "DROP TABLE test_parent_tab",
+          "DROP TABLE nodb_parent_tab",
           function(err) {
             should.not.exist(err);
             callback();
@@ -234,10 +234,10 @@ describe('57. nestedCursor.js', function() {
         "SELECT p.description, \
              CURSOR( \
                SELECT c.description   \
-               FROM test_child_tab c   \
+               FROM nodb_child_tab c   \
                WHERE c.parent_id = p.id  \
              ) children  \
-         FROM test_parent_tab p";
+         FROM nodb_parent_tab p";
 
     connection.execute(
       sql,
@@ -261,10 +261,10 @@ describe('57. nestedCursor.js', function() {
                SELECT p.description, \
                  CURSOR( \
                    SELECT c.description   \
-                   FROM test_child_tab c   \
+                   FROM nodb_child_tab c   \
                    WHERE c.parent_id = p.id  \
                  ) children  \
-               FROM test_parent_tab p;  \
+               FROM nodb_parent_tab p;  \
            END; ";
 
     async.series([

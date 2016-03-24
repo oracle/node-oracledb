@@ -174,7 +174,7 @@
     10.5 resultSet for null value
 
 11. poolTimeout.js
-    pool terminates idle connections after specify time
+    11.1 pool terminates idle connections after specify time
 
 12. resultSet1.js
     12.1 Testing resultSet option

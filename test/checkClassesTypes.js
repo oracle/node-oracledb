@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -82,7 +82,7 @@ describe('61. checkClassesTypes.js', function() {
 
   it('61.3 Lob Class', function(done) {
     var connection = null;
-    var clobTableName = "oracledb_myclobs";
+    var clobTableName = "nodb_myclobs";
 
     async.series([
       function getConn(callback) {
