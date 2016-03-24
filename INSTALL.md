@@ -231,19 +231,18 @@ the root user.
 
 ### 3.3 Install the add-on
 
-
 Tell the installer where to find Instant Client:
 
 ```
-export OCI_LIB_DIR=/opt/oracle/instantclient_12_1
-export OCI_INC_DIR=/opt/oracle/instantclient_12_1/sdk/include
+export OCI_LIB_DIR=/opt/oracle/instantclient
+export OCI_INC_DIR=/opt/oracle/instantclient/sdk/include
 ```
 
 These variables are only needed during installation.
 
 If Instant Client is in `/opt/oracle/instantclient` and you have no
 other Oracle software installed, then these variables are not
-required.  See
+actually required.  See
 [Oracle Client Location Heuristic on Linux](#linuxinstsearchpath).
 
 If you are behind a firewall you may need to set your proxy, for
