@@ -1940,9 +1940,12 @@ oracledb.getConnection(
   . . .
 ```
 
-For more information see
+Applications that request [DRCP](#drcp) connections, for example with
+`myhost/XE:pooled`, must use local [Connection Pooling](#connpooling).
+
+For more information on Easy Connect strings see
 [Understanding the Easy Connect Naming Method](https://docs.oracle.com/database/121/NETAG/naming.htm#i498306)
-in the Oracle documentation..
+in the Oracle documentation.
 
 #### <a name="tnsnames"></a> 8.1.2 Net Service Names for Connection Strings
 
@@ -1980,7 +1983,11 @@ The `tnsnames.ora` file can be in a default location such as
 `/etc/tnsnames.ora`. Alternatively set the `TNS_ADMIN` environment
 variable and put the file in `$TNS_ADMIN/tnsnames.ora`.
 
-For more information see
+Applications that request [DRCP](#drcp) connections, for example where
+the `tnsnames.ora` connection description contains `(SERVER=POOLED)`,
+must use local [Connection Pooling](#connpooling).
+
+For more information on `tnsnames.ora` files see
 [General Syntax of tnsnames.ora](https://docs.oracle.com/database/121/NETRF/tnsnames.htm#NETRF260)
 in the Oracle documentation.
 
@@ -2175,10 +2182,6 @@ multiple client processes or run on multiple middle-tier application
 servers.  DRCP reduces the overall number of connections that a
 database must handle.
 
-DRCP is distinct from node-oracledb's local
-[connection pool](#poolclass).  The two pools can be used separately,
-or together.
-
 DRCP is useful for applications which share the same database credentials, have
 similar session settings (for example date format settings and PL/SQL
 package state), and where the application gets a database connection,
@@ -2186,18 +2189,20 @@ works on it for a relatively short duration, and then releases it.
 
 To use DRCP in node-oracledb:
 
-1. The DRCP pool must be started in the database: `execute dbms_connection_pool.start_pool();`
-2. The `getConnection()` property `connectString` must specify to use a pooled server, either by the Easy Connect syntax like `myhost/sales:POOLED`, or by using a `tnsnames.ora` alias for a connection that contains `(SERVER=POOLED)`.
-3. The [`connectionClass`](#propdbconclass) should be set by the node-oracledb application.  If it is not set, the pooled server session memory will not be reused optimally.
+1. The DRCP pool must be started in the database: `SQL> execute dbms_connection_pool.start_pool();`
+2. The [`connectionClass`](#propdbconclass) should be set by the node-oracledb application.  If it is not set, the pooled server session memory will not be reused optimally.
+3. The `getConnection()` property `connectString` must specify to use a pooled server, either by the Easy Connect syntax like `myhost/sales:POOLED`, or by using a `tnsnames.ora` alias for a connection that contains `(SERVER=POOLED)`.
 
-The DRCP 'Purity' value is NEW for
-[`oracledb.getConnection()`](#getconnectiondb) connections that do not
-use a local connection pool.  These connections reuse a DRCP pooled
-server process (thus avoiding the costs of process creation and
-destruction) but do not reuse its session memory.  The 'Purity' is
-SELF for [`pool.getConnection()`](#getconnectionpool) connections,
-allowing reuse of the pooled server process and session memory, giving
-maximum benefit from DRCP.  See the Oracle documentation on
+DRCP connections can only be used with node-oracledb's local
+[connection pool](#poolclass).  If the non-local pool connection
+method `oracledb.getConnection()` is called and the `connectString`
+indicates a DRCP server should be used, then an error *ORA-56609:
+Usage not supported with DRCP* occurs.
+
+The DRCP 'Purity' is SELF for DRCP
+[`pool.getConnection()`](#getconnectionpool) connections.  This allows
+reuse of the pooled server process and session memory, giving maximum
+benefit from DRCP.  See the Oracle documentation on
 [benefiting from scalability](http://docs.oracle.com/database/121/ADFNS/adfns_perf_scale.htm#ADFNS506).
 
 The
