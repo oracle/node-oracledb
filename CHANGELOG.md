@@ -1,5 +1,29 @@
 # Change Log
 
+## node-oracledb v1.8.0 (24 Mar 2016)
+
+- Added `connection.queryStream()` for returning query results using a
+  Node Readable Stream (Sagie Gur-Ari).
+
+- Connection strings requesting DRCP server can now only be used with
+  a node-oracledb connection pool.  They will give *ORA-56609* when
+  used with `oracledb.getConnection()`.
+
+- Set the internal driver name to `node-oracledb : 1.8.0`.  This is
+  visible to DBAs, for example in `V$SESSION_CONNECT_INFO`.
+
+- Added up-time to pool queue statistics.
+
+- Fixed creation of Windows debug builds.
+
+- Bumped NAN dependency to NAN 2.2.
+
+- Added .editorconfig file (Sagie Gur-Ari).
+
+- Improved test date and time checks (Antonio Bustos).
+
+- Improved some parameter checks for `maxArraySize` and `maxSize`.
+
 ## node-oracledb v1.7.1 (1 Mar 2016)
 
 - Made public methods overwritable in new JavaScript layer
