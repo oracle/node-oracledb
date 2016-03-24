@@ -58,7 +58,7 @@ var dodrop = function (conn, cb) {
   + "    RAISE; "
   + "  END IF; "
   + "END;",
-    function(err, result)
+    function(err)
     {
       if (err) {
         return cb(err, conn);
@@ -72,7 +72,7 @@ var dodrop = function (conn, cb) {
 var docreate = function (conn, cb) {
   conn.execute(
     "CREATE TABLE test (id NUMBER, name VARCHAR2(20))",
-    function(err, result)
+    function(err)
     {
       if (err) {
         return cb(err, conn);
