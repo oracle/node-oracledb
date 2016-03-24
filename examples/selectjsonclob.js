@@ -22,7 +22,7 @@
  *   Executes a query from a JSON table using CLOB storage.
  *   Requires Oracle Database 12.1.0.2, which has extensive JSON datatype support.
  *   See http://docs.oracle.com/database/121/ADXDB/json.htm#CACGCBEG
- * 
+ *
  *   Use demo.sql to create the required table.
  *
  *****************************************************************************/

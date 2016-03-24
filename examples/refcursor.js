@@ -22,7 +22,7 @@
  *   Shows using a Result Set to fetch rows from a REF CURSOR
  *   Uses Oracle's sample HR schema.
  *   Use demo.sql to create the required procedure or do:
- * 
+ *
  *  CREATE OR REPLACE PROCEDURE get_emp_rs (p_sal IN NUMBER, p_recordset OUT SYS_REFCURSOR)
  *  AS
  *  BEGIN
@@ -59,7 +59,7 @@ oracledb.getConnection(
   {
     if (err) { console.error(err.message); return; }
     var bindvars = {
-      sal:  12000,  
+      sal:  12000,
       cursor:  { type: oracledb.CURSOR, dir : oracledb.BIND_OUT }
     };
     connection.execute(
@@ -80,8 +80,8 @@ oracledb.getConnection(
 function fetchRowsFromRS(connection, resultSet, numRows)
 {
   resultSet.getRows( // get numRows rows
-    numRows,   
-    function (err, rows) 
+    numRows,
+    function (err, rows)
     {
       if (err) {
         console.log(err);

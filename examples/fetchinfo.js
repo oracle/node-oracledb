@@ -19,7 +19,7 @@
  *   fetchinfo.js
  *
  * DESCRIPTION
- *   Show how numbers and dates can be returned as strings using fetchAsString 
+ *   Show how numbers and dates can be returned as strings using fetchAsString
  *   and fetchInfo
  *   Uses Oracle's sample HR schema.
  *

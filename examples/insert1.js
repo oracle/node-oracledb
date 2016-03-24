@@ -70,14 +70,14 @@ oracledb.getConnection(
                   {
                     if (err) { console.error(err.message); return; }
                     console.log("Rows updated: " + result.rowsAffected); // 2
-                    
+
                     connection.execute(
                       "DROP TABLE test",
                       function(err)
                       {
                         if (err) { console.error(err.message); return; }
                         console.log("Table dropped");
-                        
+
                         connection.release(
                           function(err)
                           {

@@ -22,17 +22,17 @@
  *   Holds the credentials used by node-oracledb examples to connect
  *   to the database.  Production applications should consider using
  *   External Authentication to avoid hard coded credentials.
- * 
+ *
  *   Applications can set the connectString value to an Easy Connect
  *   string, or a Net Service Name from a tnsnames.ora file or
  *   external naming service, or it can be the name of a local Oracle
  *   database instance.
- * 
+ *
  *   If node-oracledb is linked with Instant Client, then an Easy
  *   Connect string is generally appropriate.  The syntax is:
- * 
+ *
  *     [//]host_name[:port][/service_name][:server_type][/instance_name]
- * 
+ *
  *   Commonly just the host_name and service_name are needed
  *   e.g. "localhost/orcl" or "localhost/XE"
  *
@@ -50,7 +50,7 @@
  *   Wallet so passwords do not need to be hard coded into the
  *   application.  The user and password properties for connecting or
  *   creating a pool should not be set when externalAuth is true.
- * 
+ *
  * TROUBLESHOOTING
  *   Errors like:
  *     ORA-12541: TNS:no listener
