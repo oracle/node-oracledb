@@ -495,8 +495,10 @@ assist.dataTypeSupport = function(connection, tableName, array, done) {
           result.rows[i].CONTENT.should.eql(array[result.rows[i].NUM]);
         else if( Buffer.isBuffer(result.rows[i].CONTENT) )
           result.rows[i].CONTENT.toString('hex').should.eql(array[result.rows[i].NUM].toString('hex'));
-        else
-          result.rows[i].CONTENT.toUTCString().should.eql(array[result.rows[i].NUM].toUTCString());
+        else if (Object.prototype.toString.call(result.rows[i].CONTENT) === '[object Date]') 
+          result.rows[i].CONTENT.getTime().should.eql(array[result.rows[i].NUM].getTime());
+        else 
+          should.not.exist(new Error('Uncaught data type!'));
       }
       done();
     }
@@ -574,8 +576,10 @@ function fetchRowsFromRS(rs, array, cb)
           rows[i].CONTENT.should.eql(array[rows[i].NUM]);
         else if( Buffer.isBuffer(rows[i].CONTENT) )
           rows[i].CONTENT.toString('hex').should.eql(array[rows[i].NUM].toString('hex'));
-        else
-          rows[i].CONTENT.toUTCString().should.eql(array[rows[i].NUM].toUTCString());
+        else if (Object.prototype.toString.call(rows[i].CONTENT) === '[object Date]') 
+          rows[i].CONTENT.getTime().should.eql(array[rows[i].NUM].getTime());
+        else 
+          should.not.exist(new Error('Uncaught data type!'));
       }
       return fetchRowsFromRS(rs, array, cb);
     } else {

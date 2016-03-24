@@ -83,6 +83,12 @@ describe('32. dataTypeDate.js', function() {
     })
 
     it('32.1.1 works well with SELECT query', function(done) {
+      var arrayLength = dates.length;
+      for (var i = 0; i < arrayLength; i++) {
+        if (dates[i].getMilliseconds() > 0) 
+          dates[i].setMilliseconds(0);          
+      }
+      
       assist.dataTypeSupport(connection, tableName, dates, done);
     })
 
