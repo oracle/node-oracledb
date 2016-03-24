@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -65,26 +65,29 @@ oracledb.getConnection(
           doRelease(connection);
           return;
         }
-        console.log(result);
+        // console.log(result);
         fetchRowsFromRS(connection, result.resultSet, numRows);
       });
   });
 
 function fetchRowsFromRS(connection, resultSet, numRows)
 {
-  resultSet.getRows( // get numRows rows
-    numRows,
+  resultSet.getRows(
+    numRows,  // get this many rows
     function (err, rows)
     {
       if (err) {
-        console.log(err);
-        doClose(connection, resultSet); // always close the result set
-      } else if (rows.length === 0) {    // no rows, or no more rows
+        console.error(err);
         doClose(connection, resultSet); // always close the result set
       } else if (rows.length > 0) {
         console.log("fetchRowsFromRS(): Got " + rows.length + " rows");
         console.log(rows);
-        fetchRowsFromRS(connection, resultSet, numRows);
+        if (rows.length === numRows) // might be more rows
+          fetchRowsFromRS(connection, resultSet, numRows);
+        else
+          doClose(connection, resultSet); // always close the result set
+      } else { // no rows
+        doClose(connection, resultSet); // always close the result set
       }
     });
 }
