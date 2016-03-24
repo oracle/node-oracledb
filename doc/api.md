@@ -2052,7 +2052,9 @@ oracledb.getConnection(
 
 When applications use a lot of connections for short periods, Oracle
 recommends using a connection pool for efficiency.  Each node-oracledb
-process can use one or more local pools of connections.
+process can use one or more local pools of connections.  Each pool can
+contain one or more connections.  A pool can grow or shrink, as
+needed.
 
 A connection *Pool* object is created by calling the
 [`createPool()`](#createpool) function of the *Oracledb*
@@ -2107,6 +2109,14 @@ Authentication is used, the pool behavior is different, see
 The Pool attribute [`stmtCacheSize`](#propconnstmtcachesize) can be
 used to set the statement cache size used by connections in the pool,
 see [Statement Caching](#stmtcache).
+
+If `poolMax` has been reached (meaning all connections in a pool are
+in use), and new [`pool.getConnection()`](#getconnectionpool) requests
+are made, then the requests will be queued until in-use connections
+are released.  The queue can disabled by setting the pool property
+[`queueRequests`](#propdbqueuerequests) to `false`.  When the queue is
+disabled, `pool.getConnection()` requests that cannot be satisfied
+will return an error.
 
 #### <a name="connpoolmonitor"></a> 8.2.1 Connection Pool Monitoring and Throughput
 
@@ -3707,8 +3717,8 @@ statement is executed irrespective of the value of `autoCommit`.
 
 ## <a name="stmtcache"></a> 14. Statement Caching
 
-Node-oracledb uses the
-[Oracle OCI statement cache](https://docs.oracle.com/database/121/LNOCI/oci09adv.htm#i471377).
+Node-oracledb's [`execute()`](#execute) method uses the
+[Oracle OCI statement cache](https://docs.oracle.com/database/121/LNOCI/oci09adv.htm#i471377) instead of requiring applications to prepare and execute statements in separate steps.
 Each non-pooled connection and each session in the connection pool has
 its own cache of statements with a default size of 30.  Statement
 caching lets cursors be used without re-parsing the statement.
