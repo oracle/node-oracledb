@@ -719,6 +719,13 @@ void Connection::GetBindUnit (Local<Value> val, Bind* bind,
     {
       Local<Array>arr = Local<Array>::Cast (element);
       
+      // For INOUT bind, maxArraySize is required
+      if ( dir == BIND_INOUT && ( arr->Length () > 0 && !bind->maxArraySize ) )
+      {
+        executeBaton->error = NJSMessages::getErrorMsg ( errReqdMaxArraySize );
+        goto exitGetBindUnit;
+      }
+
       if ( dir == BIND_INOUT && ( arr->Length() > bind->maxArraySize ) )
       {
         executeBaton->error = NJSMessages::getErrorMsg ( errInvalidArraySize );
@@ -1168,7 +1175,8 @@ void Connection::GetInBindParamsArray(Local<Array> va8vals, Bind *bind,
         // am actual element largen than the maxSize argument
         if (arrayElementSize > static_cast<size_t>(bind->maxSize))
         {
-          executeBaton->error = NJSMessages::getErrorMsg(errInvalidArraySize);
+          executeBaton->error = NJSMessages::getErrorMsg(
+                                         errInsufficientBufferForBinds);
           goto exitGetInBindParamsArray;
         }
         else
@@ -1331,7 +1339,8 @@ bool Connection::AllocateBindArray(unsigned short dataType, Bind* bind,
     // an actual element largen than the maxSize argument
     if (*arrayElementSize > static_cast<size_t>(bind->maxSize))
     {
-      executeBaton->error = NJSMessages::getErrorMsg(errInvalidArraySize);
+      executeBaton->error = NJSMessages::getErrorMsg(
+                                               errInsufficientBufferForBinds);
       goto exitAllocateBindArray;
     }
     else

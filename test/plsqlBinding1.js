@@ -456,8 +456,8 @@ describe('43. plsqlBinding1.js', function() {
         bindvars,
         function(err, result) {
           should.exist(err);
-          (err.message).should.startWith('NJS-036');
-          // NJS-036: Property maxArraySize is required for INOUT Array binds.
+          (err.message).should.startWith('NJS-035');
+          // NJS-035: maxArraySize is required for IN OUT array bind
           should.not.exist(result);
           done();
         }
@@ -870,8 +870,8 @@ describe('43. plsqlBinding1.js', function() {
         bindvars,
         function(err, result) {
           should.exist(err);
-          (err.message).should.startWith('NJS-036');
-          // NJS-036: given array is of size greater than maxArraySize
+          (err.message).should.startWith('NJS-035');
+          // NJS-035: maxArraySize is required for IN OUT array bind
           should.not.exist(result);
           done();
         }
@@ -950,8 +950,8 @@ describe('43. plsqlBinding1.js', function() {
         bindvars,
         function(err, result) {
           should.exist(err);
-          (err.message).should.startWith('NJS-036');
-          // NJS-036: given array is of size greater than maxArraySize
+          (err.message).should.startWith('NJS-035');
+          // NJS-035: maxArraySize is required for IN OUT array bind
           done();
         }
       );
