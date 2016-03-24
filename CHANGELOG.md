@@ -16,7 +16,7 @@
   `pool._logStats()` to display pool and queue statistics.  Note: these may
   change in future.
 
-- Added "bind by position" syntax for PL/SQL Index-by array binds.
+- Added "bind by position" syntax for PL/SQL Index-by array binds (Dieter Oberkofler).
 
 - Allowed node-oracledb class instances to be tested with 'instanceof'.
 
@@ -29,7 +29,7 @@
 ## node-oracledb v1.6.0 (30 Jan 2016)
 
 - Added support for binding PL/SQL Collection Associative Array
-  (Index-by) types containing numbers and strings.
+  (Index-by) types containing numbers and strings (Dieter Oberkofler).
 
 - Fixed a LOB problem causing an uncaught error to be generated.
 
@@ -46,9 +46,11 @@
 
 - Added RPATH link option when building on OS X in preparation for future client.
 
+- README updates (Kevin Sheedy)
+
 ## node-oracledb v1.5.0 (21 Dec 2015)
 
-- Treat Oracle Database 'Success With Info' warnings as success.
+- Treat Oracle Database 'Success With Info' warnings as success (Francisco Trevino).
 
 - Extend rollback-on-connection-release with 11g Oracle Clients to occur for all non-query executions. (Not needed with 12c clients).
 
@@ -63,7 +65,7 @@
 ## node-oracledb v1.4.0 (17 Nov 2015)
 
 - Upgraded NAN dependency to version 2 allowing node-oracledb to build
-  with Node 0.10, 0.12, 4 and 5.  Note: a compiler supporting C++11 is required to build with Node 4.2 and 5.
+  with Node 0.10, 0.12, 4 and 5 (Richard Natal).  Note: a compiler supporting C++11 is required to build with Node 4 and 5.
 
 - Fixed a cursor leak when statement execution fails.
 
@@ -87,7 +89,7 @@
 
 ## node-oracledb v1.2.0 (25 Sep 2015)
 
-- Added support for RAW data type.
+- Added support for RAW data type (Bruno Jouhier).
 
 - Added a `type` property to the Lob class to distinguish CLOB and BLOB types.
 
@@ -99,11 +101,11 @@
 
 - Optimized CLOB memory allocation to account for different database-to-client character set expansions.
 
-- Fixed a crash while reading a LOB from a closed connection
+- Fixed a crash while reading a LOB from a closed connection.
 
-- Fixed a crash when selecting multiple rows with LOB values.
+- Fixed a crash when selecting multiple rows with LOB values (Bruno Jouhier).
 
-- Corrected the order of Stream 'end' and 'close' events when reading a LOB.
+- Corrected the order of Stream 'end' and 'close' events when reading a LOB (Bruno Jouhier).
 
 - Fixed AIX-specific REF CURSOR related failures.
 
@@ -118,6 +120,8 @@
 - Made installation halt sooner for Node.js versions currently known to be unusable.
 
 - Fixed a typo in `examples/dbmsoutputgetline.js`
+
+- Windows install instruction updates (Bill Christo)
 
 ## node-oracledb v1.1.0 (3 Sep 2015)
 
@@ -188,7 +192,7 @@
 
 ## node-oracledb v0.6.0 (26 May 2015)
 
-- Node-oracledb now builds with Node.js 0.10, Node.js 0.12 and io.js.
+- Node-oracledb now builds with Node.js 0.10, Node.js 0.12 and io.js (Richard Natal).
 
 - Fixed naming of `autoCommit` in examples.
 
@@ -206,7 +210,7 @@
 
 ## node-oracledb v0.4.2 (28 Mar 2015)
 
-- node-oracledb is now officially installable from https://www.npmjs.com/package/oracledb
+- node-oracledb is now officially installable from https://www.npmjs.com/package/oracledb (Tim Branyen)
 
 - Added metadata support. Query column names are now provided in the `execute()` callback result object.
 
@@ -220,15 +224,17 @@
 
 - The `isAutoCommit` flags now works with query execution. This is useful in cases where multiple DML statements are executed followed by a SELECT statement. This can be used to avoid a round trip to the database that an explicit call to `commit()` would add.
 
-- Added AIX build support to package.json.
+- Added AIX build support to package.json (Hannes Prirschl).
 
 - Improved errors messages when setting out of range property values.
 
 - Fixed a bug: When `terminate()` of a connection pool fails because connections have not yet been closed, subsequent use of `release()` to close those connections no longer gives an error "ORA-24550: Signal Received".
 
+- Some code refactoring (Krishna Narasimhan).
+
 ## node-oracledb v0.3.1 (16 Feb 2015)
 
-- Added Windows build configuration.
+- Added Windows build configuration (Rinie Kervel).
 
 - Added Database Resident Connection Pooling (DRCP) support.
 
