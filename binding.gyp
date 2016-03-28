@@ -165,6 +165,11 @@
                       "src/dpi/include/",
                       "<!(node -e \"require('nan')\")"
     ],
+  },
+  {
+    "target_name": "action_after_build",
+    "type": "none",
+    "dependencies": [ "<(module_name)" ]
   }
   ]
 }
