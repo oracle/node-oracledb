@@ -33,6 +33,7 @@
     "url": "git://github.com/oracle/node-oracledb.git"
   },
   "dependencies": {
+    "instantclient": "~0.0.5",
     "nan": "~2.2.0"
   },
   "devDependencies": {
@@ -41,10 +42,10 @@
       "async": "~0.9.0"
   },
   "scripts": {
-      "preinstall": "npm install instantclient",
-      "install": "node_modules/.bin/instantclient && node-gyp rebuild",
-      "test": "mocha -R spec --timeout 10000 test/*.js",
-      "testWindows": "mocha -R spec --timeout 0 test\\*.js"
+    "install": " ",
+	"postinstall": "node_modules/.bin/instantclient && node-gyp rebuild",
+    "test": "mocha -R spec --timeout 10000 test/*.js",
+    "testWindows": "mocha -R spec --timeout 0 test\\*.js"
   },
   "engines": {
     "node": ">=0.10.28 <6"
