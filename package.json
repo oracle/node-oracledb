@@ -43,7 +43,7 @@
   },
   "scripts": {
     "install": " ",
-	"postinstall": "node_modules/.bin/instantclient && node-gyp rebuild",
+    "postinstall": "node_modules/.bin/instantclient && node-gyp rebuild",
     "test": "mocha -R spec --timeout 10000 test/*.js",
     "testWindows": "mocha -R spec --timeout 0 test\\*.js"
   },
