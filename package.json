@@ -33,7 +33,7 @@
     "url": "git://github.com/oracle/node-oracledb.git"
   },
   "dependencies": {
-    "instantclient": "~0.06",
+    "instantclient": "~0.07",
     "nan": "~2.2.0"
   },
   "devDependencies": {
