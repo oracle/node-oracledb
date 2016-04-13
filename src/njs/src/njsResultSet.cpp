@@ -431,7 +431,7 @@ void ResultSet::Async_GetRows(uv_work_t *req)
 
   try
   {
-    if (!ebaton->noMetadata) {
+    if ( ebaton->metaData ) {
         Connection::CopyMetaData ( ebaton->columnNames, ebaton->fields, njsRS->meta_,
                                    njsRS->numCols_ );
     }

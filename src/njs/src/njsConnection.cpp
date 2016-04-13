@@ -463,7 +463,7 @@ NAN_METHOD(Connection::Execute)
   executeBaton->prefetchRows = connection->oracledb_->getPrefetchRows();
   executeBaton->outFormat    = connection->oracledb_->getOutFormat();
   executeBaton->autoCommit   = connection->oracledb_->getAutoCommit();
-  executeBaton->noMetadata   = connection->oracledb_->getNoMetadata();
+  executeBaton->metaData     = connection->oracledb_->getMetaData();
   executeBaton->dpienv       = connection->oracledb_->getDpiEnv();
   executeBaton->fetchAsStringTypes = 
     (DataType*) connection->oracledb_->getFetchAsStringTypes ();
@@ -556,8 +556,8 @@ void Connection::ProcessOptions (Nan::NAN_METHOD_ARGS_TYPE args, unsigned int in
                              options, "resultSet", 2, exitProcessOptions );
     NJS_GET_BOOL_FROM_JSON ( executeBaton->autoCommit, executeBaton->error,
                              options, "autoCommit", 2, exitProcessOptions );
-    NJS_GET_BOOL_FROM_JSON ( executeBaton->noMetadata, executeBaton->error,
-                             options, "noMetadata", 2, exitProcessOptions );
+    NJS_GET_BOOL_FROM_JSON ( executeBaton->metaData, executeBaton->error,
+                             options, "metaData", 2, exitProcessOptions );
 
     // Optional fetchAs specifications
     Local<Value> val = options->Get(Nan::New<v8::String>("fetchInfo").ToLocalChecked());
@@ -1477,7 +1477,7 @@ void Connection::Async_Execute (uv_work_t *req)
       executeBaton->numCols       = executeBaton->dpistmt->numCols();
       executeBaton->columnNames   = new std::string[executeBaton->numCols];
       executeBaton->fields        = new FieldInfo[executeBaton->numCols];
-      if (!executeBaton->noMetadata) {
+      if ( executeBaton->metaData ) {
         Connection::CopyMetaData( executeBaton->columnNames, executeBaton->fields,
                                     meta, executeBaton->numCols);
       }
@@ -2604,12 +2604,12 @@ void Connection::Async_AfterExecute(uv_work_t *req)
         }
         Nan::Set(result, Nan::New<v8::String>("outBinds").ToLocalChecked(),Nan::Undefined());
         Nan::Set(result, Nan::New<v8::String>("rowsAffected").ToLocalChecked(), Nan::Undefined());
-        if (executeBaton->noMetadata) {
-            Nan::Set(result, Nan::New<v8::String>("metaData").ToLocalChecked(), Nan::Undefined());
-        }
-        else {
+        if ( executeBaton->metaData) {
             Nan::Set(result, Nan::New<v8::String>("metaData").ToLocalChecked(), Connection::GetMetaData(
                                                                 executeBaton->fields, executeBaton->numCols));
+        }
+        else {
+            Nan::Set(result, Nan::New<v8::String>("metaData").ToLocalChecked(), Nan::Undefined());
         }
         break;
       case DpiStmtBegin :

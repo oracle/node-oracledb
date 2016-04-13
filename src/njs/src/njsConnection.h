@@ -170,7 +170,7 @@ typedef struct eBaton
   unsigned int              prefetchRows;
   bool                      getRS;
   bool                      autoCommit;
-  bool                      noMetadata;
+  bool                      metaData;
   unsigned int              rowsFetched;
   unsigned int              outFormat;
   unsigned int              numCols;
@@ -192,7 +192,7 @@ typedef struct eBaton
   eBaton( unsigned int& count, Local<Function> callback ) :
              sql(""), error(""), dpienv(NULL), dpiconn(NULL), njsconn(NULL),
              rowsAffected(0), maxRows(0), prefetchRows(0),
-             getRS(false), autoCommit(false), noMetadata(false), rowsFetched(0),
+             getRS(false), autoCommit(false), metaData(true), rowsFetched(0),
              outFormat(0), numCols(0), dpistmt(NULL),
              st(DpiStmtUnknown), stmtIsReturning (false), numOutBinds(0),
              columnNames(NULL), defines(NULL), fetchAsStringTypesCount (0),

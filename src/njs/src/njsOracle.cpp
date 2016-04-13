@@ -79,7 +79,7 @@ Oracledb::Oracledb()
   outFormat_          = ROWS_ARRAY;
   maxRows_            = NJS_MAX_ROWS;
   autoCommit_         = false;
-  noMetadata_         = false;
+  metaData_           = true;
   stmtCacheSize_      = NJS_STMT_CACHE_SIZE;
   poolMax_            = NJS_POOL_MAX;
   poolMin_            = NJS_POOL_MIN;
@@ -166,9 +166,9 @@ void Oracledb::Init(Handle<Object> target)
     Oracledb::SetAutoCommit );
   Nan::SetAccessor(
     temp->InstanceTemplate(),
-    Nan::New<v8::String>("noMetadata").ToLocalChecked(),
-    Oracledb::GetNoMetadata,
-    Oracledb::SetNoMetadata );
+    Nan::New<v8::String>("metaData").ToLocalChecked(),
+    Oracledb::GetMetadata,
+    Oracledb::SetMetadata );
   Nan::SetAccessor(
     temp->InstanceTemplate(),
     Nan::New<v8::String>("maxRows").ToLocalChecked(),
@@ -463,25 +463,25 @@ NAN_SETTER(Oracledb::SetAutoCommit)
 /*****************************************************************************/
 /*
    DESCRIPTION
-     Get Accessor of noMetadata property
+     Get Accessor of metaData property
 */
-NAN_GETTER(Oracledb::GetNoMetadata)
+NAN_GETTER(Oracledb::GetMetadata)
 {
   Oracledb* oracledb = Nan::ObjectWrap::Unwrap<Oracledb>(info.Holder());
   NJS_CHECK_OBJECT_VALID2(oracledb, info);
-  info.GetReturnValue().Set(Nan::New<v8::Boolean>(oracledb->noMetadata_));
+  info.GetReturnValue().Set(Nan::New<v8::Boolean>(oracledb->metaData_));
 }
 
 /*****************************************************************************/
 /*
    DESCRIPTION
-     Set Accessor of noMetadata property
+     Set Accessor of metaData property
 */
-NAN_SETTER(Oracledb::SetNoMetadata)
+NAN_SETTER(Oracledb::SetMetadata)
 {
   Oracledb* oracledb = Nan::ObjectWrap::Unwrap<Oracledb>(info.Holder());
   NJS_CHECK_OBJECT_VALID (oracledb);
-  oracledb->noMetadata_ = value->ToBoolean()->Value();
+  oracledb->metaData_ = value->ToBoolean()->Value();
 }
 
 /*****************************************************************************/
