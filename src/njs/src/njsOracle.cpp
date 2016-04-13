@@ -167,8 +167,8 @@ void Oracledb::Init(Handle<Object> target)
   Nan::SetAccessor(
     temp->InstanceTemplate(),
     Nan::New<v8::String>("metaData").ToLocalChecked(),
-    Oracledb::GetMetadata,
-    Oracledb::SetMetadata );
+    Oracledb::GetMetaData,
+    Oracledb::SetMetaData );
   Nan::SetAccessor(
     temp->InstanceTemplate(),
     Nan::New<v8::String>("maxRows").ToLocalChecked(),
@@ -465,7 +465,7 @@ NAN_SETTER(Oracledb::SetAutoCommit)
    DESCRIPTION
      Get Accessor of metaData property
 */
-NAN_GETTER(Oracledb::GetMetadata)
+NAN_GETTER(Oracledb::GetMetaData)
 {
   Oracledb* oracledb = Nan::ObjectWrap::Unwrap<Oracledb>(info.Holder());
   NJS_CHECK_OBJECT_VALID2(oracledb, info);
@@ -477,7 +477,7 @@ NAN_GETTER(Oracledb::GetMetadata)
    DESCRIPTION
      Set Accessor of metaData property
 */
-NAN_SETTER(Oracledb::SetMetadata)
+NAN_SETTER(Oracledb::SetMetaData)
 {
   Oracledb* oracledb = Nan::ObjectWrap::Unwrap<Oracledb>(info.Holder());
   NJS_CHECK_OBJECT_VALID (oracledb);

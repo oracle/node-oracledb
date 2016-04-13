@@ -127,7 +127,7 @@ private:
    static NAN_GETTER(GetPoolTimeout);
    static NAN_GETTER(GetStmtCacheSize);
    static NAN_GETTER(GetAutoCommit);
-   static NAN_GETTER(GetMetadata);
+   static NAN_GETTER(GetMetaData);
    static NAN_GETTER(GetMaxRows);
    static NAN_GETTER(GetOutFormat);
    static NAN_GETTER(GetVersion);
@@ -145,7 +145,7 @@ private:
    static NAN_SETTER(SetPoolTimeout);
    static NAN_SETTER(SetStmtCacheSize);
    static NAN_SETTER(SetAutoCommit);
-   static NAN_SETTER(SetMetadata);
+   static NAN_SETTER(SetMetaData);
    static NAN_SETTER(SetMaxRows);
    static NAN_SETTER(SetOutFormat);
    static NAN_SETTER(SetVersion);
