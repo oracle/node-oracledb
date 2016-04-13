@@ -200,6 +200,7 @@ NAN_GETTER(ResultSet::GetMetaData)
     info.GetReturnValue().SetUndefined();
     return;
   }
+
   std::string *columnNames = new std::string[njsResultSet->numCols_];
   FieldInfo *fields = new FieldInfo[njsResultSet->numCols_];
   Connection::CopyMetaData ( columnNames, fields, njsResultSet->meta_, njsResultSet->numCols_ );
@@ -430,8 +431,10 @@ void ResultSet::Async_GetRows(uv_work_t *req)
 
   try
   {
-    Connection::CopyMetaData ( ebaton->columnNames, ebaton->fields, njsRS->meta_,
-                               njsRS->numCols_ );
+    if (!ebaton->noMetadata) {
+        Connection::CopyMetaData ( ebaton->columnNames, ebaton->fields, njsRS->meta_,
+                                   njsRS->numCols_ );
+    }
     ebaton->numCols      = njsRS->numCols_;
     if( !njsRS->defineBuffers_ ||
         njsRS->fetchRowCount_  < getRowsBaton->numRows )

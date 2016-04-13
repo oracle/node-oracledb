@@ -122,14 +122,14 @@ typedef struct FieldInfo
 {
   std::string       name;                     /* DB Column name */
   std::string       type;                     /* Column data type (js)*/
-  std::string       originalType;             /* Column data type (db type)*/
+  unsigned short    originalType;             /* Column data type (db type)*/
   unsigned int      size;                     /* Size at database */
   unsigned int      precision;                /* Precision */
   unsigned int      scale;                    /* Scale */
   bool              isNullable;               /* Nullable */
   // Constructor to initialize member variables.
   FieldInfo ()
-    : name (""), type (""), originalType (""),
+    : name (""), type (""), originalType (0),
     size(0), precision(0), scale(0), isNullable(false)
   {
   }
@@ -170,6 +170,7 @@ typedef struct eBaton
   unsigned int              prefetchRows;
   bool                      getRS;
   bool                      autoCommit;
+  bool                      noMetadata;
   unsigned int              rowsFetched;
   unsigned int              outFormat;
   unsigned int              numCols;
@@ -191,7 +192,7 @@ typedef struct eBaton
   eBaton( unsigned int& count, Local<Function> callback ) :
              sql(""), error(""), dpienv(NULL), dpiconn(NULL), njsconn(NULL),
              rowsAffected(0), maxRows(0), prefetchRows(0),
-             getRS(false), autoCommit(false), rowsFetched(0), 
+             getRS(false), autoCommit(false), noMetadata(false), rowsFetched(0),
              outFormat(0), numCols(0), dpistmt(NULL),
              st(DpiStmtUnknown), stmtIsReturning (false), numOutBinds(0),
              columnNames(NULL), defines(NULL), fetchAsStringTypesCount (0),
@@ -355,7 +356,7 @@ private:
   static void PrepareAndBind (eBaton* executeBaton);
   
   static unsigned short SourceDBType2TargetDBType ( unsigned srcType );
-  static std::string SourceDBType2String ( unsigned srcType );
+  static unsigned short SourceDBType2DBTYPE ( unsigned srcType );
   static std::string SourceDBType2JSString ( unsigned srcType );
   static boolean MapByName ( eBaton *executeBaton,
                               std::string &name,

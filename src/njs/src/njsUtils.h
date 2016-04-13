@@ -58,6 +58,42 @@
 
 #include "njsMessages.h"
 
+// Original oracle db data types.
+typedef enum
+{
+  DBTYPE_UNKNOWN           = 0,
+  DBTYPE_VARCHAR           = 1001,
+  DBTYPE_NUMBER            = 1002,
+  DBTYPE_INTEGER           = 1003,
+  DBTYPE_DOUBLE            = 1004,
+  DBTYPE_STRING            = 1005,
+  DBTYPE_LONG              = 1008,
+  DBTYPE_DATE              = 1012,
+  DBTYPE_RAW               = 1023,
+  DBTYPE_LONGRAW           = 1024,
+  DBTYPE_UNSIGNEDINTEGER   = 1068,
+  DBTYPE_ROWID             = 1104,
+  DBTYPE_FIXEDCHAR         = 1096,
+  DBTYPE_BINARYFLOAT       = 1100,
+  DBTYPE_BINARYDOUBLE      = 1101,
+  DBTYPE_UDT               = 1108,
+  DBTYPE_REF               = 1111,
+  DBTYPE_CLOB              = 1112,
+  DBTYPE_BLOB              = 1113,
+  DBTYPE_BFILE             = 1114,
+  DBTYPE_RSET              = 1116,
+  DBTYPE_YEARMONTH         = 1182,
+  DBTYPE_DAYSECOND         = 1183,
+  DBTYPE_TIMESTAMP         = 1187,
+  DBTYPE_TIMESTAMPTZ       = 1188,
+  DBTYPE_UROWID            = 1208,
+  DBTYPE_TIMESTAMPLTZ      = 1232,
+  DBTYPE_TYPEBASE          = 1999,
+  DBTYPE_DATETIMEARRAY     = 1998,
+  DBTYPE_INTERVALARRAY     = 1997
+}DbDataType;
+
+
 // User specified data types for binds and defines.
 typedef enum
 {

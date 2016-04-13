@@ -463,6 +463,7 @@ NAN_METHOD(Connection::Execute)
   executeBaton->prefetchRows = connection->oracledb_->getPrefetchRows();
   executeBaton->outFormat    = connection->oracledb_->getOutFormat();
   executeBaton->autoCommit   = connection->oracledb_->getAutoCommit();
+  executeBaton->noMetadata   = connection->oracledb_->getNoMetadata();
   executeBaton->dpienv       = connection->oracledb_->getDpiEnv();
   executeBaton->fetchAsStringTypes = 
     (DataType*) connection->oracledb_->getFetchAsStringTypes ();
@@ -555,6 +556,8 @@ void Connection::ProcessOptions (Nan::NAN_METHOD_ARGS_TYPE args, unsigned int in
                              options, "resultSet", 2, exitProcessOptions );
     NJS_GET_BOOL_FROM_JSON ( executeBaton->autoCommit, executeBaton->error,
                              options, "autoCommit", 2, exitProcessOptions );
+    NJS_GET_BOOL_FROM_JSON ( executeBaton->noMetadata, executeBaton->error,
+                             options, "noMetadata", 2, exitProcessOptions );
 
     // Optional fetchAs specifications
     Local<Value> val = options->Get(Nan::New<v8::String>("fetchInfo").ToLocalChecked());
@@ -1474,9 +1477,10 @@ void Connection::Async_Execute (uv_work_t *req)
       executeBaton->numCols       = executeBaton->dpistmt->numCols();
       executeBaton->columnNames   = new std::string[executeBaton->numCols];
       executeBaton->fields        = new FieldInfo[executeBaton->numCols];
-      Connection::CopyMetaData( executeBaton->columnNames, executeBaton->fields,
-                                meta, executeBaton->numCols);
-
+      if (!executeBaton->noMetadata) {
+        Connection::CopyMetaData( executeBaton->columnNames, executeBaton->fields,
+                                    meta, executeBaton->numCols);
+      }
       if ( executeBaton->getRS ) 
         goto exitAsyncExecute;
 
@@ -1761,6 +1765,17 @@ void Connection::PrepareAndBind (eBaton* executeBaton)
   }
 }
 
+/*****************************************************************************/
+/*
+  DESCRIPTION
+    To convert various Oracle Database type to the javascript type-name
+
+  PARAMETERS
+    dbType - Dpi enumeration of database type
+
+  RETURNS
+    js type-name (string)
+*/
 std::string Connection::SourceDBType2JSString( unsigned dbType )
 {
   switch ( dbType )
@@ -1792,39 +1807,50 @@ std::string Connection::SourceDBType2JSString( unsigned dbType )
   return "object";
 }
 
-std::string Connection::SourceDBType2String( unsigned dbType ) {
+/*****************************************************************************/
+/*
+  DESCRIPTION
+    To convert various Oracle Database type to the one in public enum
+
+  PARAMETERS
+    dbType - Dpi enumeration of database type
+
+  RETURNS
+    DbDataType (Util enumeration)
+*/
+unsigned short Connection::SourceDBType2DBTYPE( unsigned dbType ) {
   switch ( dbType ) {
-    case DpiVarChar: return "varchar";
-    case DpiNumber: return "number";
-    case DpiInteger: return "integer";
-    case DpiDouble: return "double";
-    case DpiString: return "string";
-    case DpiLong: return "long";
-    case DpiDate: return "date";
-    case DpiRaw: return "raw";
-    case DpiLongRaw: return "longraw";
-    case DpiUnsignedInteger: return "unsignedinteger";
-    case DpiRowid: return "rowid";
-    case DpiFixedChar: return "fixedchar";
-    case DpiBinaryFloat: return "binaryfloat";
-    case DpiBinaryDouble: return "binarydouble";
-    case DpiUDT: return "udt";
-    case DpiRef: return "ref";
-    case DpiClob: return "clob";
-    case DpiBlob: return "blob";
-    case DpiBfile: return "bfile";
-    case DpiRSet: return "rset";
-    case DpiYearMonth: return "yearmonth";
-    case DpiDaySecond: return "daysecond";
-    case DpiTimestamp: return "timestamp";
-    case DpiTimestampTZ: return "timestamptz";
-    case DpiURowid: return "urowid";
-    case DpiTimestampLTZ: return "timestampltz";
-    case DpiTypeBase: return "typebase";
-    case DpiDateTimeArray: return "datetimearray";
-    case DpiIntervalArray: return "intervalarray";
+    case DpiVarChar: return DBTYPE_VARCHAR;
+    case DpiNumber: return DBTYPE_NUMBER;
+    case DpiInteger: return DBTYPE_INTEGER;
+    case DpiDouble: return DBTYPE_DOUBLE;
+    case DpiString: return DBTYPE_STRING;
+    case DpiLong: return DBTYPE_LONG;
+    case DpiDate: return DBTYPE_DATE;
+    case DpiRaw: return DBTYPE_RAW;
+    case DpiLongRaw: return DBTYPE_LONGRAW;
+    case DpiUnsignedInteger: return DBTYPE_UNSIGNEDINTEGER;
+    case DpiRowid: return DBTYPE_ROWID;
+    case DpiFixedChar: return DBTYPE_FIXEDCHAR;
+    case DpiBinaryFloat: return DBTYPE_BINARYFLOAT;
+    case DpiBinaryDouble: return DBTYPE_BINARYDOUBLE;
+    case DpiUDT: return DBTYPE_UDT;
+    case DpiRef: return DBTYPE_REF;
+    case DpiClob: return DBTYPE_CLOB;
+    case DpiBlob: return DBTYPE_BLOB;
+    case DpiBfile: return DBTYPE_BFILE;
+    case DpiRSet: return DBTYPE_RSET;
+    case DpiYearMonth: return DBTYPE_YEARMONTH;
+    case DpiDaySecond: return DBTYPE_DAYSECOND;
+    case DpiTimestamp: return DBTYPE_TIMESTAMP;
+    case DpiTimestampTZ: return DBTYPE_TIMESTAMPTZ;
+    case DpiURowid: return DBTYPE_UROWID;
+    case DpiTimestampLTZ: return DBTYPE_TIMESTAMPLTZ;
+    case DpiTypeBase: return DBTYPE_TYPEBASE;
+    case DpiDateTimeArray: return DBTYPE_DATETIMEARRAY;
+    case DpiIntervalArray: return DBTYPE_INTERVALARRAY;
   }
-  return "undefined";
+  return DBTYPE_UNKNOWN;
 }
 
 /*****************************************************************************/
@@ -1849,7 +1875,7 @@ void Connection::CopyMetaData ( std::string* names,
 
     fields[col].name = std::string( (const char*)meta[col].colName, meta[col].colNameLen );
     fields[col].type = std::string( Connection::SourceDBType2JSString(meta[col].dbType) );
-    fields[col].originalType = std::string( Connection::SourceDBType2String(meta[col].dbType) );
+    fields[col].originalType = Connection::SourceDBType2DBTYPE(meta[col].dbType);
     fields[col].size = meta[col].dbSize;
     fields[col].precision = meta[col].precision;
     fields[col].scale = (unsigned int)meta[col].scale;
@@ -2578,8 +2604,13 @@ void Connection::Async_AfterExecute(uv_work_t *req)
         }
         Nan::Set(result, Nan::New<v8::String>("outBinds").ToLocalChecked(),Nan::Undefined());
         Nan::Set(result, Nan::New<v8::String>("rowsAffected").ToLocalChecked(), Nan::Undefined());
-        Nan::Set(result, Nan::New<v8::String>("metaData").ToLocalChecked(), Connection::GetMetaData(
-                                                    executeBaton->fields, executeBaton->numCols));
+        if (executeBaton->noMetadata) {
+            Nan::Set(result, Nan::New<v8::String>("metaData").ToLocalChecked(), Nan::Undefined());
+        }
+        else {
+            Nan::Set(result, Nan::New<v8::String>("metaData").ToLocalChecked(), Connection::GetMetaData(
+                                                                executeBaton->fields, executeBaton->numCols));
+        }
         break;
       case DpiStmtBegin :
       case DpiStmtDeclare :
@@ -2642,7 +2673,7 @@ v8::Local<v8::Value> Connection::GetMetaData (FieldInfo* fields, unsigned int nu
                 Nan::New<v8::String>(fields[i].type).ToLocalChecked()
                 );
     Nan::Set(column, Nan::New<v8::String>("originalType").ToLocalChecked(),
-                Nan::New<v8::String>(fields[i].originalType).ToLocalChecked()
+                Nan::New<v8::Number>(fields[i].originalType)
                 );
     Nan::Set(column, Nan::New<v8::String>("size").ToLocalChecked(),
                 Nan::New<v8::Number>(fields[i].size)
