@@ -51,9 +51,9 @@ static const char *errMsg[] =
   "NJS-013: invalid bind direction",
   "NJS-014: %s is a read-only property",
   "NJS-016: buffer is too small for OUT binds",
-  "NJS-017: concurrent operations on resultSet are not allowed",
+  "NJS-017: concurrent operations on ResultSet are not allowed",
   "NJS-018: invalid result set",
-  "NJS-019: resultSet cannot be returned for non-query statements",
+  "NJS-019: ResultSet cannot be returned for non-query statements",
   "NJS-020: empty array was specified to fetch values as string",
   "NJS-021: invalid type for conversion specified",
   "NJS-022: invalid LOB",
@@ -63,13 +63,10 @@ static const char *errMsg[] =
   "NJS-026: maxRows must be greater than zero",
   "NJS-027: unexpected SQL parsing error",
   "NJS-028: raw database type is not supported with DML Returning statements",
-  "NJS-029: Invalid object from javascript",
-  "NJS-030: connection cannot be released because Lob operations are in"
-            " progress",
-  "NJS-031: connection cannot be released because ResultSet operations are"
-            " in progress",
-  "NJS-032: connection cannot be released because a database call is in"
-            " progress",
+  "NJS-029: invalid object from JavaScript",
+  "NJS-030: connection cannot be released because Lob operations are in progress",
+  "NJS-031: connection cannot be released because ResultSet operations are in progress",
+  "NJS-032: connection cannot be released because a database call is in progress",
   "NJS-033: an internal error occurred. [%s][%s]",
   "NJS-034: data type is unsupported for array bind",
   "NJS-035: maxArraySize is required for IN OUT array bind",
@@ -78,6 +75,9 @@ static const char *errMsg[] =
   "NJS-038: maxArraySize value should be greater than 0",
   "NJS-039: empty array is not allowed for IN bind",
   "NJS-040: connection request timeout",
+  "NJS-041: cannot convert ResultSet to QueryStream after invoking methods",
+  "NJS-042: cannot invoke ResultSet methods after converting to QueryStream",
+  "NJS-043: ResultSet already converted to QueryStream",
 };
 
 string NJSMessages::getErrorMsg ( NJSErrorType err, ... )

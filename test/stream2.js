@@ -242,20 +242,15 @@ describe('14. stream2.js', function() {
   }) // 14.6
 
   it('14.7 Negative - queryStream() has no parameters', function(done) {
+    var stream;
 
-    var stream = connection.queryStream();
-
-    stream.on('error', function(error) {
-      should.exist(error);
-      // console.log(error);
-      // NJS-006: invalid type for parameter 1
-      setTimeout(done, 500);
-    });
-
-    stream.on('data', function(data) {
-      should.not.exist(data);
-    });
-
+    try {
+      stream = connection.queryStream();
+    } catch (err) {
+      should.exist(err);
+      err.message.should.eql('NJS-009: invalid number of parameters');
+      done();
+    }
   })
 
   it('14.8 Negative - give invalid SQL as first parameter', function(done) {

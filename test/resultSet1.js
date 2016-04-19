@@ -630,15 +630,16 @@ describe('12. resultSet1.js', function() {
       );
 
       function fetchRowFromRS(rs) {
-        rs.getRows(function(err, rows) {
+        try {
+          rs.getRows(function() {});
+        } catch (err) {
           should.exist(err);
           err.message.should.eql('NJS-009: invalid number of parameters');
-          should.not.exist(rows);
           rs.close(function(err) {
             should.not.exist(err);
             done();
           });
-        });
+        }
       }
     })
 
@@ -685,7 +686,7 @@ describe('12. resultSet1.js', function() {
       function fetchRowFromRS(rs, numRows) {
         rs.getRows(numRows, function(err, rows) {
           should.exist(err);
-          err.message.should.startWith('NJS-006: invalid type for parameter 1');
+          err.message.should.eql('NJS-006: invalid type for parameter 1');
           rs.close(function(err) {
             should.not.exist(err);
             done();
@@ -709,14 +710,16 @@ describe('12. resultSet1.js', function() {
       );
 
       function fetchRowFromRS(rs, numRows) {
-        rs.getRows(numRows, function(err, rows) {
+        try {
+          rs.getRows(numRows, function() {});
+        } catch (err) {
           should.exist(err);
           err.message.should.startWith('NJS-006: invalid type for parameter 1');
           rs.close(function(err) {
             should.not.exist(err);
             done();
           });
-        });
+        }
       }
     })
   })
@@ -870,15 +873,16 @@ describe('12. resultSet1.js', function() {
       );
 
       function fetchRowFromRS(rs, numRows) {
-        rs.getRow(numRows, function(err, row) {
+        try {
+          rs.getRow(numRows, function() {});
+        } catch (err) {
           should.exist(err);
           err.message.should.eql('NJS-009: invalid number of parameters');
-          should.not.exist(row);
           rs.close(function(err) {
             should.not.exist(err);
             done();
           });
-        });
+        }
       }
     })
 

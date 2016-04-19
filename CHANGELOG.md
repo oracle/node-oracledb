@@ -1,5 +1,35 @@
 # Change Log
 
+## node-oracledb v1.9.0 Development (19 Apr 2016)
+
+** Note this is a development release: features are subject to change.**
+
+- Added Promise support. All asynchronous functions can now return
+  promises. By default the standard Promise library is used for Node
+  0.12, 4 and 5.  This can be overridden.
+
+- Added a `toQueryStream()` method for ResultSets, letting REF CURSORS
+  be transformed into Readable Streams.
+
+- Added an experimental query Stream `_close()` method.  It allows query
+  streams to be closed without needing to fetch all the data.  It is
+  not for production use.
+
+- Added aliases `pool.close()` and `connection.close()` for
+  `pool.terminate()` and `connection.release()` respectively.
+
+- Some method parameter validation checks, such as the number or types
+  of parameters, will now throw errors synchronously instead of
+  returning errors via the callback.
+
+- Removed an extra call to `getRows()` made by `queryStream()` at
+  end-of-fetch.
+
+- Some random crashes caused by connections being garbage collected
+  while still in use should no longer occur.
+
+- Regularized NJS error message capitalization.
+
 ## node-oracledb v1.8.0 (24 Mar 2016)
 
 - Added `connection.queryStream()` for returning query results using a

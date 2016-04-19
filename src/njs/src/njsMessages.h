@@ -74,6 +74,9 @@ typedef enum
   errInvalidValueArrayBind,
   errEmptyArray,
   errConnRequestTimeout,
+  errCannotConvertRsToStream,
+  errCannotInvokeRsMethods,
+  errResultSetAlreadyConverted,
 
   // New ones should be added here
 
