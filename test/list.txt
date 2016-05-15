@@ -141,7 +141,6 @@
         6.2.8 DELETE statement, multiple rows matched, Array binding format
         6.2.9 Negative test - bind value and type mismatch
 
-
 7. autoCommit.js
     7.1 autoCommit takes effect when setting oracledb.autoCommit before connecting
     7.2 autoCommit takes effect when setting oracledb.autoCommit after connecting
