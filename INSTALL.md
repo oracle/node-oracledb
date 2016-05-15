@@ -402,47 +402,13 @@ Download the [Node.js package](http://nodejs.org) for OS X 64-bit and install it
 
 ### 5.3 Install the free Oracle Instant Client 'Basic' and 'SDK' ZIPs
 
-Do either of the options given in [5.3.1](#instosxICroot) or [5.3.2](#instosxICuser).
+Follow the steps in either [5.3.1](#instosxICuser) or [5.3.2](#instosxICroot).
 
-### <a name="instosxICroot"></a> 5.3.1 Install Instant Client in /opt
-
-This first installation option puts Instant Client in the default
-location used by the node-oracledb installer.  It requires root
-access.  If you don't want to update system directories then follow
-the alternative steps in [5.3.2](#instosxICuser).
-
-Download the free **Basic** and **SDK** ZIPs from
-[Oracle Technology Network](http://www.oracle.com/technetwork/topics/intel-macsoft-096467.html)
-and
-[install them](http://www.oracle.com/technetwork/topics/intel-macsoft-096467.html#ic_osx_inst)
-into the same directory:
-
-```
-sudo su -
-unzip instantclient-basic-macos.x64-11.2.0.4.0.zip
-unzip instantclient-sdk-macos.x64-11.2.0.4.0.zip
-mkdir /opt/oracle
-mv instantclient_11_2 /opt/oracle/instantclient
-ln -s /opt/oracle/instantclient/libclntsh.dylib.11.1 /opt/oracle/instantclient/libclntsh.dylib
-```
-
-Link the OCI libraries into the default library path:
-
-```
-ln -s /opt/oracle/instantclient/{libclntsh.dylib.11.1,libnnz11.dylib,libociei.dylib} /usr/local/lib/
-```
-
-Continue with [5.4](#instosxICaddon).
-
-### <a name="instosxICuser"></a> 5.3.2 Install Instant Client in a user directory
-
-This is an alternative to [5.3.1](#instosxICroot)  that does not require root access.
+### <a name="instosxICuser"></a> 5.3.1 Install Instant Client in a user directory
 
 Download the free **Basic** and **SDK** 64-bit ZIPs from
 [Oracle Technology Network](http://www.oracle.com/technetwork/topics/intel-macsoft-096467.html)
-and
-[install them](http://www.oracle.com/technetwork/topics/intel-macsoft-096467.html#ic_osx_inst)
-into the same directory:
+and unzip them somewhere under your home directory:
 
 ```
 unzip instantclient-basic-macos.x64-11.2.0.4.0.zip
@@ -468,6 +434,34 @@ export OCI_INC_DIR=~/instantclient_11_2/sdk/include
 ```
 
 These variables are only needed during installation.
+
+Continue with [5.4](#instosxICaddon).
+
+### <a name="instosxICroot"></a> 5.3.2 Install Instant Client in /opt
+
+This alternative to [5.3.1](#instosxICroot) requires root access.  It
+puts Instant Client in the default location used by the node-oracledb
+installer.  If you don't want to update system directories then follow
+the steps in [5.3.1](#instosxICuser) instead.
+
+Download the free **Basic** and **SDK** ZIPs from
+[Oracle Technology Network](http://www.oracle.com/technetwork/topics/intel-macsoft-096467.html)
+and install them into the same directory:
+
+```
+sudo su -
+unzip instantclient-basic-macos.x64-11.2.0.4.0.zip
+unzip instantclient-sdk-macos.x64-11.2.0.4.0.zip
+mkdir /opt/oracle
+mv instantclient_11_2 /opt/oracle/instantclient
+ln -s /opt/oracle/instantclient/libclntsh.dylib.11.1 /opt/oracle/instantclient/libclntsh.dylib
+```
+
+Link the OCI libraries into the default library path:
+
+```
+ln -s /opt/oracle/instantclient/{libclntsh.dylib.11.1,libnnz11.dylib,libociei.dylib} /usr/local/lib/
+```
 
 ### <a name="instosxICaddon"></a> 5.4 Install the add-on
 
