@@ -88,8 +88,8 @@ Nan::Persistent<FunctionTemplate> ILob::iLobTemplate_s;
 
 ILob::ILob():
   lobLocator_(NULL), njsconn_(NULL), dpiconn_(NULL), svch_(NULL), errh_(NULL),
-  isValid_(false), state_(INACTIVE), buf_(NULL), bufSize_(0), chunkSize_(0),
-  length_(0), offset_(1), amountRead_(0), type_(DATA_UNKNOWN)
+  isValid_(false), state_(NJS_INACTIVE), buf_(NULL), bufSize_(0), chunkSize_(0),
+  length_(0), offset_(1), amountRead_(0), type_(NJS_DATATYPE_UNKNOWN)
 {
 
 }
@@ -227,12 +227,12 @@ void ILob::setILob(eBaton *executeBaton, ProtoILob *protoILob)
     {
       // accommodate multi-byte charsets
       buf_ = new char[bufSize_ * dpiconn_->getByteExpansionRatio()];
-      type_ = DATA_CLOB;
+      type_ = NJS_DATATYPE_CLOB;
     }
     else if (fetchType_ == DpiBlob)
     {
       buf_ = new char[bufSize_];
-      type_ = DATA_BLOB;
+      type_ = NJS_DATATYPE_BLOB;
     }
 
     // Now the ILob object is valid
@@ -616,7 +616,7 @@ NAN_SETTER(ILob::SetPieceSize)
   NJS_CHECK_OBJECT_VALID(iLob);
   NJS_SET_PROP_UINT(iLob->bufSize_, value, "pieceSize");
 
-  if (iLob->state_ == ACTIVE)
+  if (iLob->state_ == NJS_ACTIVE)
   {
     msg = NJSMessages::getErrorMsg(errBusyLob);
 
@@ -732,7 +732,7 @@ NAN_SETTER(ILob::SetOffset)
     NJS_SET_EXCEPTION(msg.c_str(), (int)msg.length());
   }
 
-  if (iLob->state_ == ACTIVE)
+  if (iLob->state_ == NJS_ACTIVE)
   {
     msg = NJSMessages::getErrorMsg(errBusyLob);
 
@@ -853,7 +853,7 @@ NAN_METHOD(ILob::Read)
 
    // mark Lob as active before leaving main thread, but not in
    // case of an error.
-  iLob->state_ = ACTIVE;
+  iLob->state_ = NJS_ACTIVE;
 
   if( !iLob->njsconn_->isValid() )
   {
@@ -964,7 +964,7 @@ void ILob::Async_AfterRead(uv_work_t *req)
   Nan::TryCatch  tc;
   Local<Value> argv[2];
 
-  iLob->state_ = INACTIVE;     // mark Lob as inactive as back in main thread
+  iLob->state_ = NJS_INACTIVE;     // mark Lob as inactive as back in main thread
 
   if(!(lobBaton->error).empty())
   {
@@ -1056,7 +1056,7 @@ NAN_METHOD(ILob::Write)
 
    // mark Lob as active before leaving main thread, but not in
    // case of an error
-  iLob->state_ = ACTIVE;
+  iLob->state_ = NJS_ACTIVE;
 
   if( !iLob->njsconn_->isValid() )
   {
@@ -1161,7 +1161,7 @@ void ILob::Async_AfterWrite(uv_work_t *req)
   Nan::TryCatch  tc;
   Local<Value> argv[1];
 
-  iLob->state_ = INACTIVE;     // mark Lob as inactive as back in main thread
+  iLob->state_ = NJS_INACTIVE;     // mark Lob as inactive as back in main thread
 
   if(!(lobBaton->error).empty())
     argv[0] = v8::Exception::Error(Nan::New<v8::String>((lobBaton->error).c_str()).ToLocalChecked());

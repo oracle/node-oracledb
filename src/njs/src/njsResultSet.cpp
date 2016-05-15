@@ -77,7 +77,7 @@ void ResultSet::setResultSet ( dpi::Stmt *stmt, eBaton *executeBaton )
   {
     this->meta_        = stmt->getMetaData();
     this->numCols_     = this->dpistmt_->numCols();
-    this->state_       = INACTIVE;
+    this->state_       = NJS_INACTIVE;
   }
   else
   {
@@ -87,7 +87,7 @@ void ResultSet::setResultSet ( dpi::Stmt *stmt, eBaton *executeBaton )
      */
     this->numCols_     = 0;
     this->meta_        = NULL;
-    this->state_       = INVALID;
+    this->state_       = NJS_INVALID;
   }
 
   this->outFormat_     = executeBaton->outFormat;
@@ -193,7 +193,7 @@ NAN_GETTER(ResultSet::GetMetaData)
     info.GetReturnValue().SetUndefined();
     return;
   }
-  else if(njsResultSet->state_ == INVALID)
+  else if(njsResultSet->state_ == NJS_INVALID)
   {
     msg = NJSMessages::getErrorMsg ( errInvalidResultSet );
     NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
@@ -222,7 +222,7 @@ NAN_SETTER(ResultSet::SetMetaData)
   NJS_CHECK_OBJECT_VALID(njsResultSet);
   if(!njsResultSet->njsconn_->isValid())
     msg = NJSMessages::getErrorMsg ( errInvalidConnection );
-  else if(njsResultSet->state_ == INVALID)
+  else if(njsResultSet->state_ == NJS_INVALID)
     msg = NJSMessages::getErrorMsg(errInvalidResultSet);
   else
     msg = NJSMessages::getErrorMsg(errReadOnly, "metaData");
@@ -252,21 +252,21 @@ NAN_METHOD(ResultSet::GetRow)
                                           callback );
   getRowsBaton->njsRS = njsResultSet;
 
-  if(njsResultSet->state_ == INVALID)
+  if(njsResultSet->state_ == NJS_INVALID)
   {
     getRowsBaton->error = NJSMessages::getErrorMsg ( errInvalidResultSet );
     // donot alter the state while exiting
     getRowsBaton->errOnActiveOrInvalid = true;
     goto exitGetRow;
   }
-  if(njsResultSet->state_ == ACTIVE)
+  if(njsResultSet->state_ == NJS_ACTIVE)
   {
     getRowsBaton->error = NJSMessages::getErrorMsg ( errBusyResultSet );
     // donot alter the state while exiting
     getRowsBaton->errOnActiveOrInvalid = true;
     goto exitGetRow;
   }
-  njsResultSet->state_  = ACTIVE;
+  njsResultSet->state_  = NJS_ACTIVE;
 
   NJS_CHECK_NUMBER_OF_ARGS ( getRowsBaton->error, info, 1, 1, exitGetRow );
 
@@ -300,21 +300,21 @@ NAN_METHOD(ResultSet::GetRows)
                                           callback );
   getRowsBaton->njsRS = njsResultSet;
 
-  if(njsResultSet->state_ == INVALID)
+  if(njsResultSet->state_ == NJS_INVALID)
   {
     getRowsBaton->error = NJSMessages::getErrorMsg ( errInvalidResultSet );
     // donot alter the state while exiting
     getRowsBaton->errOnActiveOrInvalid = true;
     goto exitGetRows;
   }
-  else if(njsResultSet->state_ == ACTIVE)
+  else if(njsResultSet->state_ == NJS_ACTIVE)
   {
     getRowsBaton->error = NJSMessages::getErrorMsg ( errBusyResultSet );
     // donot alter the state while exiting
     getRowsBaton->errOnActiveOrInvalid = true;
     goto exitGetRows;
   }
-  njsResultSet->state_  = ACTIVE;
+  njsResultSet->state_  = NJS_ACTIVE;
 
   NJS_CHECK_NUMBER_OF_ARGS ( getRowsBaton->error, info, 2, 2, exitGetRows );
   NJS_GET_ARG_V8UINT ( getRowsBaton->numRows, getRowsBaton->error,
@@ -530,7 +530,7 @@ void ResultSet::Async_AfterGetRows(uv_work_t *req)
   exitAsyncAfterGetRows:
   if(!getRowsBaton->errOnActiveOrInvalid)
   {
-    getRowsBaton->njsRS->state_ = INACTIVE;
+    getRowsBaton->njsRS->state_ = NJS_INACTIVE;
   }
 
   Local<Function> callback = Nan::New(getRowsBaton->ebaton->cb);
@@ -566,21 +566,21 @@ NAN_METHOD(ResultSet::Close)
                                         callback );
   closeBaton->njsRS = njsResultSet;
 
-  if(njsResultSet->state_ == INVALID)
+  if(njsResultSet->state_ == NJS_INVALID)
   {
     closeBaton->error = NJSMessages::getErrorMsg ( errInvalidResultSet );
     // donot alter the state while exiting
     closeBaton->errOnActiveOrInvalid = true;
     goto exitClose;
   }
-  else if(njsResultSet->state_ == ACTIVE)
+  else if(njsResultSet->state_ == NJS_ACTIVE)
   {
     closeBaton->error = NJSMessages::getErrorMsg ( errBusyResultSet );
     // donot alter the state while exiting
     closeBaton->errOnActiveOrInvalid = true;
     goto exitClose;
   }
-  njsResultSet->state_ = ACTIVE;
+  njsResultSet->state_ = NJS_ACTIVE;
 
   NJS_CHECK_NUMBER_OF_ARGS ( closeBaton->error, info, 1, 1, exitClose );
 
@@ -680,14 +680,14 @@ void ResultSet::Async_AfterClose(uv_work_t *req)
     argv[0] = v8::Exception::Error(Nan::New<v8::String>((closeBaton->error).c_str()).ToLocalChecked());
     if(!closeBaton->errOnActiveOrInvalid)
     {
-      closeBaton->njsRS->state_ = INACTIVE;
+      closeBaton->njsRS->state_ = NJS_INACTIVE;
     }
   }
   else
   {
     argv[0] = Nan::Undefined();
     // resultset is not valid after close succeeds.
-    closeBaton-> njsRS-> state_ = INVALID;
+    closeBaton-> njsRS-> state_ = NJS_INVALID;
   }
   Local<Function> callback = Nan::New(closeBaton->ebaton->cb);
   delete closeBaton;

@@ -126,7 +126,7 @@ typedef struct fetchInfo
 
   // Constructor to initialize member variables.
   fetchInfo ()
-    : name (""), type ( DATA_DEFAULT )
+    : name (""), type ( NJS_DATATYPE_DEFAULT )
   {
   }
 
@@ -418,35 +418,35 @@ private:
 
   static inline ValueType GetValueType ( v8::Local<v8::Value> v )
   {
-    ValueType type = VALUETYPE_INVALID;
+    ValueType type = NJS_VALUETYPE_INVALID;
 
     if ( v->IsUndefined () || v->IsNull () )
     {
-      type = VALUETYPE_NULL;
+      type = NJS_VALUETYPE_NULL;
     }
     else if ( v->IsString () )
     {
-      type = VALUETYPE_STRING;
+      type = NJS_VALUETYPE_STRING;
     }
     else if ( v->IsInt32 () )
     {
-      type = VALUETYPE_INTEGER;
+      type = NJS_VALUETYPE_INTEGER;
     }
     else if ( v->IsUint32 () )
     {
-      type = VALUETYPE_UINTEGER;
+      type = NJS_VALUETYPE_UINTEGER;
     }
     else if ( v->IsNumber () )
     {
-      type = VALUETYPE_NUMBER;
+      type = NJS_VALUETYPE_NUMBER;
     }
     else if ( v->IsDate () )
     {
-      type = VALUETYPE_DATE;
+      type = NJS_VALUETYPE_DATE;
     }
     else if ( v->IsObject () )
     {
-      type = VALUETYPE_OBJECT;
+      type = NJS_VALUETYPE_OBJECT;
     }
 
     return type;

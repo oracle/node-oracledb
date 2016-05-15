@@ -583,8 +583,8 @@ void Connection::ProcessOptions (Nan::NAN_METHOD_ARGS_TYPE args, unsigned int in
           fInfo[index].type = (DataType) tmptype;
 
           // Only Conversion to STRING allowed now. Either STRING or DB type.
-          if ( ( fInfo[index].type != DATA_DEFAULT ) &&
-               ( fInfo[index].type != DATA_STR ) )
+          if ( ( fInfo[index].type != NJS_DATATYPE_DEFAULT ) &&
+               ( fInfo[index].type != NJS_DATATYPE_STR ) )
           {
             executeBaton->error = NJSMessages::getErrorMsg (
                                                errInvalidTypeForConversion );
@@ -682,7 +682,7 @@ void Connection::GetBindUnit (Local<Value> val, Bind* bind,
                                        eBaton* executeBaton)
 {
   Nan::HandleScope scope;
-  unsigned int dir   = BIND_IN;
+  unsigned int dir   = NJS_BIND_IN;
 
   if(val->IsObject() && !val->IsDate() && !Buffer::HasInstance(val))
   {
@@ -694,7 +694,7 @@ void Connection::GetBindUnit (Local<Value> val, Bind* bind,
     bind->maxSize = NJS_MAX_OUT_BIND_SIZE;
     NJS_GET_UINT_FROM_JSON   ( bind->maxSize, executeBaton->error,
                                bind_unit, "maxSize", 1, exitGetBindUnit );
-    if(!bind->maxSize && dir != BIND_IN)
+    if(!bind->maxSize && dir != NJS_BIND_IN)
     {
       executeBaton->error = NJSMessages::getErrorMsg (
                                            errInvalidPropertyValueInParam,
@@ -720,20 +720,22 @@ void Connection::GetBindUnit (Local<Value> val, Bind* bind,
       Local<Array>arr = Local<Array>::Cast (element);
 
       // For INOUT bind, maxArraySize is required
-      if ( dir == BIND_INOUT && ( arr->Length () > 0 && !bind->maxArraySize ) )
+      if ( dir == NJS_BIND_INOUT &&
+           ( arr->Length () > 0 && !bind->maxArraySize ) )
       {
         executeBaton->error = NJSMessages::getErrorMsg ( errReqdMaxArraySize );
         goto exitGetBindUnit;
       }
 
-      if ( dir == BIND_INOUT && ( arr->Length() > bind->maxArraySize ) )
+      if ( dir == NJS_BIND_INOUT && ( arr->Length() > bind->maxArraySize ) )
       {
         executeBaton->error = NJSMessages::getErrorMsg ( errInvalidArraySize );
         goto exitGetBindUnit;
       }
 
       /* For IN bind, empty array is not allowed */
-      if ( ( dir == BIND_IN || dir == BIND_INOUT ) && ( arr->Length () == 0 ) )
+      if ( ( dir == NJS_BIND_IN || dir == NJS_BIND_INOUT ) &&
+           ( arr->Length () == 0 ) )
       {
         executeBaton->error = NJSMessages::getErrorMsg ( errEmptyArray ) ;
         goto exitGetBindUnit;
@@ -741,7 +743,7 @@ void Connection::GetBindUnit (Local<Value> val, Bind* bind,
     }
 
     /* REFCURSOR(s) are supported only as OUT Binds now */
-    if ( bind->type == DATA_CURSOR && dir != BIND_OUT )
+    if ( bind->type == NJS_DATATYPE_CURSOR && dir != NJS_BIND_OUT )
     {
       executeBaton->error = NJSMessages::getErrorMsg (
                                             errInvalidPropertyValueInParam,
@@ -751,26 +753,27 @@ void Connection::GetBindUnit (Local<Value> val, Bind* bind,
 
     switch(dir)
     {
-      case BIND_IN    :
+      case NJS_BIND_IN    :
         bind->isOut  = false;
         bind->isInOut  = false;
-        Connection::GetInBindParams(element, bind, executeBaton, BIND_IN );
+        Connection::GetInBindParams(element, bind, executeBaton, NJS_BIND_IN );
         if(!executeBaton->error.empty()) goto exitGetBindUnit;
         break;
-      case BIND_INOUT :
+      case NJS_BIND_INOUT :
         bind->isOut  = true;
         bind->isInOut  = true;
-        Connection::GetInBindParams(element, bind, executeBaton, BIND_INOUT);
+        Connection::GetInBindParams(element, bind, executeBaton,
+                                    NJS_BIND_INOUT);
         if(!executeBaton->error.empty()) goto exitGetBindUnit;
         break;
-      case BIND_OUT   :
+      case NJS_BIND_OUT   :
         bind->isOut  = true;
         bind->isInOut  = false;
         executeBaton->numOutBinds++;
-        if ( bind->type == DATA_DEFAULT )
+        if ( bind->type == NJS_DATATYPE_DEFAULT )
         {
           /* For OUT binds, if type is not specified, assume STRING */
-          bind->type = DATA_STR;
+          bind->type = NJS_DATATYPE_STR;
         }
         Connection::GetOutBindParams(bind->type, bind, executeBaton);
         if(!executeBaton->error.empty()) goto exitGetBindUnit;
@@ -785,7 +788,7 @@ void Connection::GetBindUnit (Local<Value> val, Bind* bind,
   else
   {
     bind->isOut  = false;
-    Connection::GetInBindParams(val, bind, executeBaton, BIND_IN);
+    Connection::GetInBindParams(val, bind, executeBaton, NJS_BIND_IN);
     if(!executeBaton->error.empty()) goto exitGetBindUnit;
   }
   exitGetBindUnit:
@@ -808,7 +811,7 @@ void Connection::GetOutBindParams (unsigned short dataType, Bind* bind,
 
   if ( bind->maxArraySize > 0 )
   {
-    if ( (dataType != DATA_STR ) && ( dataType != DATA_NUM ) )
+    if ( (dataType != NJS_DATATYPE_STR ) && ( dataType != NJS_DATATYPE_NUM ) )
     {
       executeBaton->error = NJSMessages::getErrorMsg (
                                      errInvalidTypeForArrayBind );
@@ -822,32 +825,32 @@ void Connection::GetOutBindParams (unsigned short dataType, Bind* bind,
 
   switch(dataType)
   {
-    case DATA_STR :
+    case NJS_DATATYPE_STR :
       bind->type     =  dpi::DpiVarChar;
       break;
 
-    case DATA_NUM :
+    case NJS_DATATYPE_NUM :
       bind->type     = dpi::DpiDouble;
       bind->maxSize  = sizeof(double);
       break;
 
-    case DATA_DATE :
+    case NJS_DATATYPE_DATE :
       bind->type     = dpi::DpiTimestampLTZ;
       break;
 
-    case DATA_CURSOR :
+    case NJS_DATATYPE_CURSOR :
       bind->type     = dpi::DpiRSet;
       break;
 
-    case DATA_BUFFER :
+    case NJS_DATATYPE_BUFFER :
       bind->type     = dpi::DpiRaw;
       break;
 
-    case DATA_CLOB :
+    case NJS_DATATYPE_CLOB :
       bind->type    = dpi::DpiClob;
       break;
 
-    case DATA_BLOB :
+    case NJS_DATATYPE_BLOB :
       bind->type    = dpi::DpiBlob;
       break;
 
@@ -906,7 +909,7 @@ void Connection::GetInBindParamsScalar(Local<Value> v8val, Bind* bind,
                                        eBaton* executeBaton, BindType type)
 {
   Nan::HandleScope scope;
-  ValueType dataType = VALUETYPE_INVALID;
+  ValueType dataType = NJS_VALUETYPE_INVALID;
 
   /* Allocate for scalar indicator & length */
   bind->ind = (short *)malloc ( sizeof ( short ) );
@@ -918,15 +921,15 @@ void Connection::GetInBindParamsScalar(Local<Value> v8val, Bind* bind,
 
   switch ( dataType )
   {
-    case VALUETYPE_NULL:
+    case NJS_VALUETYPE_NULL:
       bind->value = NULL;
       *(bind->ind)   = -1;
       bind->type        = dpi::DpiVarChar;
       break;
 
-    case VALUETYPE_STRING:
+    case NJS_VALUETYPE_STRING:
     {
-      if( bind->type && bind->type != DATA_STR )
+      if( bind->type && bind->type != NJS_DATATYPE_STR )
       {
         executeBaton->error= NJSMessages::getErrorMsg(
                                errBindValueAndTypeMismatch, 2);
@@ -936,7 +939,7 @@ void Connection::GetInBindParamsScalar(Local<Value> v8val, Bind* bind,
       v8::String::Utf8Value str(v8val->ToString());
 
       bind->type = dpi::DpiVarChar;
-      if(type == BIND_INOUT)
+      if(type == NJS_BIND_INOUT)
       {
         *(bind->len) = str.length();
       }
@@ -962,8 +965,8 @@ void Connection::GetInBindParamsScalar(Local<Value> v8val, Bind* bind,
     }
     break;
 
-    case VALUETYPE_INTEGER:
-      if( bind->type && bind->type != DATA_NUM )
+    case NJS_VALUETYPE_INTEGER:
+      if( bind->type && bind->type != NJS_DATATYPE_NUM )
       {
         executeBaton->error= NJSMessages::getErrorMsg(
                                errBindValueAndTypeMismatch, 2);
@@ -975,8 +978,8 @@ void Connection::GetInBindParamsScalar(Local<Value> v8val, Bind* bind,
       *(int*)(bind->value) = v8val->ToInt32()->Value();
       break;
 
-    case VALUETYPE_UINTEGER:
-      if( bind->type && bind->type != DATA_NUM )
+    case NJS_VALUETYPE_UINTEGER:
+      if( bind->type && bind->type != NJS_DATATYPE_NUM )
       {
         executeBaton->error= NJSMessages::getErrorMsg(
                                errBindValueAndTypeMismatch, 2);
@@ -988,8 +991,8 @@ void Connection::GetInBindParamsScalar(Local<Value> v8val, Bind* bind,
       *(unsigned int*)(bind->value) = v8val->ToUint32()->Value();
       break;
 
-    case VALUETYPE_NUMBER:
-      if( bind->type && bind->type != DATA_NUM )
+    case NJS_VALUETYPE_NUMBER:
+      if( bind->type && bind->type != NJS_DATATYPE_NUM )
       {
         executeBaton->error= NJSMessages::getErrorMsg(
                                             errBindValueAndTypeMismatch, 2);
@@ -1001,8 +1004,8 @@ void Connection::GetInBindParamsScalar(Local<Value> v8val, Bind* bind,
       *(double*)(bind->value) = v8val->NumberValue();
       break;
 
-    case VALUETYPE_DATE:
-      if( bind->type && bind->type != DATA_DATE )
+    case NJS_VALUETYPE_DATE:
+      if( bind->type && bind->type != NJS_DATATYPE_DATE )
       {
         executeBaton->error= NJSMessages::getErrorMsg(
                                      errBindValueAndTypeMismatch, 2);
@@ -1020,14 +1023,14 @@ void Connection::GetInBindParamsScalar(Local<Value> v8val, Bind* bind,
       Connection::v8Date2OraDate ( v8val, bind);
       break;
 
-    case VALUETYPE_OBJECT:
+    case NJS_VALUETYPE_OBJECT:
       {
         Local<Object> obj = v8val->ToObject();
         if (Buffer::HasInstance(obj))
         {
           size_t bufLen = Buffer::Length(obj);
           bind->type = dpi::DpiRaw;
-          if(type == BIND_INOUT)
+          if(type == NJS_BIND_INOUT)
           {
             *(bind->len) = (DPI_BUFLEN_TYPE) bufLen;
           }
@@ -1100,7 +1103,7 @@ void Connection::GetInBindParamsArray(Local<Array> va8vals, Bind *bind,
   }
 
   // Currently only STRING & NUMBER are supported for Array Bind(s)
-  if ( (bind->type != DATA_STR) && (bind->type != DATA_NUM) )
+  if ( (bind->type != NJS_DATATYPE_STR) && (bind->type != NJS_DATATYPE_NUM) )
   {
     executeBaton->error = NJSMessages::getErrorMsg(
                                            errInvalidTypeForArrayBind);
@@ -1115,7 +1118,7 @@ void Connection::GetInBindParamsArray(Local<Array> va8vals, Bind *bind,
     ValueType    vtype = GetValueType (value);
 
     // make sure that we generally have a valid value type
-    if (vtype == VALUETYPE_INVALID)
+    if (vtype == NJS_VALUETYPE_INVALID)
     {
       executeBaton->error = NJSMessages::getErrorMsg(
                                           errInvalidTypeForArrayBind);
@@ -1127,8 +1130,8 @@ void Connection::GetInBindParamsArray(Local<Array> va8vals, Bind *bind,
     // null
     switch (bind->type)
     {
-      case DATA_STR:
-        if (vtype != VALUETYPE_NULL && vtype != VALUETYPE_STRING)
+      case NJS_DATATYPE_STR:
+        if (vtype != NJS_VALUETYPE_NULL && vtype != NJS_VALUETYPE_STRING)
         {
           executeBaton->error = NJSMessages::getErrorMsg(
                                      errIncompatibleTypeArrayBind);
@@ -1145,9 +1148,9 @@ void Connection::GetInBindParamsArray(Local<Array> va8vals, Bind *bind,
         }
         break;
 
-      case DATA_NUM:
-        if (vtype != VALUETYPE_NULL && vtype != VALUETYPE_INTEGER &&
-            vtype != VALUETYPE_UINTEGER && vtype != VALUETYPE_NUMBER)
+      case NJS_DATATYPE_NUM:
+        if (vtype != NJS_VALUETYPE_NULL && vtype != NJS_VALUETYPE_INTEGER &&
+            vtype != NJS_VALUETYPE_UINTEGER && vtype != NJS_VALUETYPE_NUMBER)
         {
           executeBaton->error = NJSMessages::getErrorMsg(
                                           errIncompatibleTypeArrayBind);
@@ -1165,7 +1168,7 @@ void Connection::GetInBindParamsArray(Local<Array> va8vals, Bind *bind,
 
   switch (bind->type)
   {
-    case DATA_STR:
+    case NJS_DATATYPE_STR:
       bind->type       = dpi::DpiVarChar;
 
       // If we are dealing with an OUT binding
@@ -1196,7 +1199,7 @@ void Connection::GetInBindParamsArray(Local<Array> va8vals, Bind *bind,
       bind->value      = buffer;
       break;
 
-    case DATA_NUM:
+    case NJS_DATATYPE_NUM:
       bind->type       = dpi::DpiDouble;
       arrayElementSize = sizeof(double);
       if ( NJS_SIZE_T_OVERFLOW (arrayElementSize, bind->maxArraySize ) )
@@ -1267,12 +1270,12 @@ void Connection::GetInBindParamsArray(Local<Array> va8vals, Bind *bind,
 
     switch (type)
     {
-      case VALUETYPE_NULL:
+      case NJS_VALUETYPE_NULL:
         bind->ind[index] = -1;
         bind->len[index] = 0;
         break;
 
-      case VALUETYPE_STRING:
+      case NJS_VALUETYPE_STRING:
         {
           v8::String::Utf8Value str(value->ToString());
           size_t stringLength = str.length();
@@ -1285,9 +1288,9 @@ void Connection::GetInBindParamsArray(Local<Array> va8vals, Bind *bind,
         }
         break;
 
-      case VALUETYPE_INTEGER:
-      case VALUETYPE_UINTEGER:
-      case VALUETYPE_NUMBER:
+      case NJS_VALUETYPE_INTEGER:
+      case NJS_VALUETYPE_UINTEGER:
+      case NJS_VALUETYPE_NUMBER:
         *(reinterpret_cast<double*>(buffer)) = value->NumberValue();
         bind->ind[index] = 0;
         bind->len[index] = sizeof ( double ) ;
@@ -1859,15 +1862,15 @@ boolean Connection::MapByName ( eBaton *executeBaton, std::string &name,
       /* COLUMN name should match */
       if ( executeBaton->fetchInfo[f].name.compare ( name ) == 0 )
       {
-        /* Only DATA_STR & DATA_DEFAULT allowed.  For DATA_DEFAULT,
+        /* Only NJS_DATATYPE_STR & NJS_DATATYPE_DEFAULT allowed.  For NJS_DATATYPE_DEFAULT,
          * the type is identified from metadata and is already set.
-         * In case of DATA_STR, set the return value.
+         * In case of NJS_DATATYPE_STR, set the return value.
          */
-        if ( executeBaton->fetchInfo[f].type == DATA_STR )
+        if ( executeBaton->fetchInfo[f].type == NJS_DATATYPE_STR )
         {
           targetType = dpi::DpiVarChar;
         }
-        else if ( executeBaton->fetchInfo[f].type == DATA_DEFAULT )
+        else if ( executeBaton->fetchInfo[f].type == NJS_DATATYPE_DEFAULT )
         {
           targetType = Connection::SourceDBType2TargetDBType ( targetType );
         }
@@ -1913,7 +1916,7 @@ boolean Connection::MapByType ( eBaton *executeBaton, unsigned short &dbType )
       /* Numeric Type */
       for ( unsigned int t = 0 ; !modified && ( t < count ) ; t++)
       {
-        if ( executeBaton->fetchAsStringTypes[t] == DATA_NUM )
+        if ( executeBaton->fetchAsStringTypes[t] == NJS_DATATYPE_NUM )
         {
           /*
            * Convert all Numeric values to STRING
@@ -1932,7 +1935,7 @@ boolean Connection::MapByType ( eBaton *executeBaton, unsigned short &dbType )
       /* DATE/TIMESTAMP */
       for ( unsigned int t = 0 ; !modified && ( t < count ) ; t ++ )
       {
-        if ( executeBaton->fetchAsStringTypes[t] == DATA_DATE )
+        if ( executeBaton->fetchAsStringTypes[t] == NJS_DATATYPE_DATE )
         {
           /* Convert all DATE/TIMESTAMP values to STRING */
           dbType = dpi::DpiVarChar;
@@ -2594,7 +2597,7 @@ v8::Local<v8::Value> Connection::GetRows (eBaton* executeBaton)
   Local<Array> rowsArray;
   switch(executeBaton->outFormat)
   {
-    case ROWS_ARRAY :
+    case NJS_ROWS_ARRAY :
       rowsArray = Nan::New<v8::Array>(executeBaton->rowsFetched);
       for(unsigned int i = 0; i < executeBaton->rowsFetched; i++)
       {
@@ -2606,7 +2609,7 @@ v8::Local<v8::Value> Connection::GetRows (eBaton* executeBaton)
         Nan::Set(rowsArray, i, row);
       }
       break;
-    case ROWS_OBJECT :
+    case NJS_ROWS_OBJECT :
       rowsArray = Nan::New<v8::Array>(executeBaton->rowsFetched);
       for(unsigned int i =0 ; i < executeBaton->rowsFetched; i++)
       {
@@ -3063,14 +3066,14 @@ v8::Local<v8::Value> Connection::GetOutBindObject ( eBaton *executeBaton )
  */
 ConnectionBusyStatus Connection::getConnectionBusyStatus ( Connection *conn )
 {
-  ConnectionBusyStatus connStatus = CONN_NOT_BUSY;
+  ConnectionBusyStatus connStatus = NJS_CONN_NOT_BUSY;
 
   if ( conn->lobCount_ != 0 )
-    connStatus = CONN_BUSY_LOB;
+    connStatus = NJS_CONN_BUSY_LOB;
   else if ( conn->rsCount_ != 0 )
-    connStatus = CONN_BUSY_RS;
+    connStatus = NJS_CONN_BUSY_RS;
   else if ( conn->dbCount_ != 1 ) // 1 for Release operaion itself
-    connStatus = CONN_BUSY_DB;
+    connStatus = NJS_CONN_BUSY_DB;
 
   return connStatus;
 }
@@ -3110,17 +3113,17 @@ NAN_METHOD(Connection::Release)
   connStat = getConnectionBusyStatus ( connection );
   switch ( connStat )
   {
-    case CONN_NOT_BUSY:
+    case NJS_CONN_NOT_BUSY:
       connection->isValid_    = false;
       releaseBaton->dpiconn   = connection->dpiconn_;
       break;
-    case CONN_BUSY_LOB:
+    case NJS_CONN_BUSY_LOB:
       releaseBaton->error = NJSMessages::getErrorMsg( errBusyConnLOB );
       break;
-    case CONN_BUSY_RS:
+    case NJS_CONN_BUSY_RS:
       releaseBaton->error = NJSMessages::getErrorMsg( errBusyConnRS );
       break;
-    case CONN_BUSY_DB:
+    case NJS_CONN_BUSY_DB:
       releaseBaton->error = NJSMessages::getErrorMsg( errBusyConnDB );
       break;
   }

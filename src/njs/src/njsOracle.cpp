@@ -79,7 +79,7 @@ Nan::Persistent<FunctionTemplate> Oracledb::oracledbTemplate_s;
 Oracledb::Oracledb()
 {
   dpienv_             = dpi::Env::createEnv( driverName() );
-  outFormat_          = ROWS_ARRAY;
+  outFormat_          = NJS_ROWS_ARRAY;
   maxRows_            = NJS_MAX_ROWS;
   autoCommit_         = false;
   stmtCacheSize_      = NJS_STMT_CACHE_SIZE;
@@ -653,7 +653,7 @@ NAN_SETTER(Oracledb::SetFetchAsString)
   {
     DataType type = (DataType)
                     array->Get(t).As<v8::Integer>()->ToInt32()->Value ();
-    if ( ( type == DATA_STR  ) || ( type == DATA_DEFAULT ) )
+    if ( ( type == NJS_DATATYPE_STR  ) || ( type == NJS_DATATYPE_DEFAULT ) )
     {
       msg = NJSMessages::getErrorMsg ( errInvalidTypeForConversion );
       NJS_SET_EXCEPTION(msg.c_str(), (int)msg.length () );
