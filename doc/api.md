@@ -129,20 +129,21 @@ limitations under the License.
   - 10.3 [Anonymous PL/SQL blocks](#plsqlanon)
   - 10.4 [Using DBMS_OUTPUT](#dbmsoutput)
 11. [Working with CLOB and BLOB Data](#lobhandling)
-12. [Bind Parameters for Prepared Statements](#bind)
-  - 12.1 [IN Bind Parameters](#inbind)
-  - 12.2 [OUT and IN OUT Bind Parameters](#outbind)
-  - 12.3 [DML RETURNING Bind Parameters](#dmlreturn)
-  - 12.4 [REF CURSOR Bind Parameters](#refcursors)
-  - 12.5 [LOB Bind Parameters](#lobbinds)
-  - 12.6 [PL/SQL Collection Associative Array (Index-by) Bind Parameters](#plsqlindexbybinds)
-13. [Transaction Management](#transactionmgt)
-14. [Statement Caching](#stmtcache)
-15. [External Configuration](#oraaccess)
-16. [Globalization and National Language Support (NLS)](#nls)
-17. [End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend)
-18. [Promises in node-oracledb](#promiseoverview)
-  - 18.1 [Custom Promise Libraries](#custompromises)
+12. [Oracle Database 12.1 JSON Datatype](#jsondatatype)
+13. [Bind Parameters for Prepared Statements](#bind)
+  - 13.1 [IN Bind Parameters](#inbind)
+  - 13.2 [OUT and IN OUT Bind Parameters](#outbind)
+  - 13.3 [DML RETURNING Bind Parameters](#dmlreturn)
+  - 13.4 [REF CURSOR Bind Parameters](#refcursors)
+  - 13.5 [LOB Bind Parameters](#lobbinds)
+  - 13.6 [PL/SQL Collection Associative Array (Index-by) Bind Parameters](#plsqlindexbybinds)
+14. [Transaction Management](#transactionmgt)
+15. [Statement Caching](#stmtcache)
+16. [External Configuration](#oraaccess)
+17. [Globalization and National Language Support (NLS)](#nls)
+18. [End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend)
+19. [Promises in node-oracledb](#promiseoverview)
+  - 19.1 [Custom Promise Libraries](#custompromises)
 
 ## <a name="intro"></a> 1. Introduction
 
@@ -3217,7 +3218,81 @@ connection.execute(
   });
 ```
 
-## <a name="bind"></a> 12. Bind Parameters for Prepared Statements
+## <a name="jsondatatype"></a> 12. Oracle Database 12.1 JSON Datatype
+
+Oracle Database 12.1.0.2 introduced native support for JSON data.  You
+can use JSON with relational database features, including
+transactions, indexing, declarative querying, and views.  You can
+project JSON data relationally, making it available for relational
+processes and tools.
+
+JSON data in the database is stored as BLOB, CLOB or VARCHAR2 data.
+This means that node-oracledb can easily insert and query it.
+
+As an example, the following table has a `PO_DOCUMENT` column that is
+enforced to be JSON:
+
+```sql
+CREATE TABLE po (po_document VARCHAR2(4000) CHECK (po_document IS JSON));
+```
+
+To insert data using node-oracledb:
+
+```javascript
+var data = { customerId: 100, item: 1234, quantity: 2 };
+var s = JSON.stringify(data);  // change JavaScript value to a JSON string
+
+connection.execute(
+  "INSERT INTO po (po_document) VALUES (:bv)",
+  [s]  // bind the JSON string
+  function (err) {
+  . . .
+  });
+```
+
+Queries can access JSON with Oracle JSON path expressions.  These
+expressions are matched by Oracle SQL functions and conditions to
+select portions of the JSON data.  Path expressions can use wildcards
+and array ranges.  An example is `$.friends` which is the value of
+JSON field `friends`.
+
+Oracle provides SQL functions and conditions to create, query, and
+operate on JSON data stored in the database.  An example is the Oracle
+SQL Function `JSON_TABLE` which projects JSON data to a relational
+format effectively making it usable like an inline relational view.
+Another example is `JSON_EXISTS` which tests for the existence of a
+particular value within some JSON data:
+
+This example looks for JSON entries that have a `quantity` field:
+
+```JavaScript
+conn.execute(
+  "SELECT po_document FROM po WHERE JSON_EXISTS (po_document, '$.quantity')",
+  function(err, result)
+  {
+    if (err) {
+      . . .
+    } else {
+      var js = JSON.parse(result.rows[0][0]);  // show only first record in this example
+      console.log('Query results: ', js);
+    }
+  });
+```
+
+After the previous `INSERT` example, this query would display:
+
+```
+{ customerId: 100, item: 1234, quantity: 2 }
+```
+
+See [selectjson.js](https://github.com/oracle/node-oracledb/tree/master/examples/selectjson.js)
+and [selectjsonclob.js](https://github.com/oracle/node-oracledb/tree/master/examples/selectjsonclob.js)
+for runnable examples.
+
+For more information about using JSON in Oracle Database see [JSON in
+Oracle Database](http://docs.oracle.com/database/121/ADXDB/json.htm#ADXDB6246).
+
+## <a name="bind"></a> 13. Bind Parameters for Prepared Statements
 
 SQL and PL/SQL statements may contain bind parameters, indicated by
 colon-prefixed identifiers or numerals.  These indicate where
@@ -3238,7 +3313,7 @@ of values cannot be bound to a PL/SQL bind parameter.
 OUT bind parameters for `RETURNING INTO` clauses will always return an
 array of values. See [DML RETURNING Bind Parameters](#dmlreturn).
 
-### <a name="inbind"></a> 12.1 IN Bind Parameters
+### <a name="inbind"></a> 13.1 IN Bind Parameters
 
 With IN binds, the bound data value, or current value of a JavaScript
 variable, is used during execution of the SQL statement.
@@ -3322,7 +3397,7 @@ For IN binds the direction must be `BIND_IN`.  The type can be
 bind a Node.js Buffer to an Oracle Database `RAW` type.  The type
 `CURSOR` cannot be used with IN binds.
 
-### <a name="outbind"></a> 12.2 OUT and IN OUT Bind Parameters
+### <a name="outbind"></a> 13.2 OUT and IN OUT Bind Parameters
 
 For each OUT and IN OUT bind parameter, a bind value object containing
 [`val`](#executebindParams), [`dir`](#executebindParams),
@@ -3425,7 +3500,7 @@ var bindVars = [
 ];
 ```
 
-### <a name="dmlreturn"></a> 12.3 DML RETURNING Bind Parameters
+### <a name="dmlreturn"></a> 13.3 DML RETURNING Bind Parameters
 
 Bind parameters from "DML RETURNING" statements (such as `INSERT
 ... RETURNING ... INTO ...`) can use `STRING`, `NUMBER` or `DATE` for
@@ -3485,7 +3560,7 @@ If the `WHERE` clause matches no rows, the output would be:
 { rid: [], rname: [] }
 ```
 
-### <a name="refcursors"></a> 12.4 REF CURSOR Bind Parameters
+### <a name="refcursors"></a> 13.4 REF CURSOR Bind Parameters
 
 Oracle REF CURSORS can be fetched in node-oracledb by binding a
 `CURSOR` to a PL/SQL call.  The resulting bind variable becomes a
@@ -3617,7 +3692,7 @@ Query results must be fetched to completion to avoid resource leaks.
 The ResultSet `close()` call for streaming query results will be
 executed internally when all data has been fetched.
 
-### <a name="lobbinds"></a> 12.5 LOB Bind Parameters
+### <a name="lobbinds"></a> 13.5 LOB Bind Parameters
 
 LOBs can be bound with `dir` set to `BIND_OUT`.  Binding LOBs with
 `BIND_IN` or `BIND_INOUT` is currently not supported.
@@ -3662,7 +3737,7 @@ connection.execute(
 See [Working with CLOB and BLOB Data](#lobhandling) for more information
 on working with Lob streams.
 
-### <a name="plsqlindexbybinds"></a> 12.6 PL/SQL Collection Associative Array (Index-by) Bind Parameters
+### <a name="plsqlindexbybinds"></a> 13.6 PL/SQL Collection Associative Array (Index-by) Bind Parameters
 
 Arrays of strings and numbers can be bound to PL/SQL IN, IN OUT, and
 OUT parameters of PL/SQL `INDEX BY` associative array type.  This type
@@ -3812,7 +3887,7 @@ See
 for a runnable example.
 
 
-## <a name="transactionmgt"></a> 13. Transaction Management
+## <a name="transactionmgt"></a> 14. Transaction Management
 
 By default,
 [DML](https://docs.oracle.com/database/121/CNCPT/glossary.htm#CNCPT2042)
@@ -3842,7 +3917,7 @@ Note: Oracle Database will implicitly commit when a
 [DDL](https://docs.oracle.com/database/121/CNCPT/glossary.htm#CHDJJGGF)
 statement is executed irrespective of the value of `autoCommit`.
 
-## <a name="stmtcache"></a> 14. Statement Caching
+## <a name="stmtcache"></a> 15. Statement Caching
 
 Node-oracledb's [`execute()`](#execute) method uses the
 [Oracle OCI statement cache](https://docs.oracle.com/database/121/LNOCI/oci09adv.htm#i471377) instead of requiring applications to prepare and execute statements in separate steps.
@@ -3893,7 +3968,7 @@ the [`createPool()`](#createpool) method.
 With Oracle Database 12c, the statement cache size can be automatically tuned with the
 [External Configuration](#oraaccess) *oraaccess.xml* file.
 
-## <a name="oraaccess"></a> 15. External Configuration
+## <a name="oraaccess"></a> 16. External Configuration
 
 When node-oracledb is linked with Oracle Database 12c client libraries, the Oracle
 client-side configuration file
@@ -3909,7 +3984,7 @@ For example, oraaccess.xml can be used to:
 Other features can also be enabled.  Refer to the
 [oraaccess.xml documentation](http://docs.oracle.com/database/121/LNOCI/oci10new.htm#LNOCI73052)
 
-## <a name="nls"></a> 16. Globalization and National Language Support (NLS)
+## <a name="nls"></a> 17. Globalization and National Language Support (NLS)
 
 Node-oracledb can use Oracle's
 [National Language Support (NLS)](https://docs.oracle.com/database/121/NLSPG/toc.htm)
@@ -3926,7 +4001,7 @@ can be used to configure further aspects of node-oracledb data access
 globalization.  Refer to
 [NLS Documentation](https://docs.oracle.com/database/121/NLSPG/ch3globenv.htm#g1028448).
 
-## <a name="endtoend"></a> 17. End-to-end Tracing, Mid-tier Authentication, and Auditing
+## <a name="endtoend"></a> 18. End-to-end Tracing, Mid-tier Authentication, and Auditing
 
 The Connection properties [action](#propconnaction),
 [module](#propconnmodule), and [clientId](#propconnclientid) set
@@ -4017,7 +4092,7 @@ current values by querying the Oracle data dictionary or using PL/SQL
 procedures such as `DBMS_APPLICATION_INFO.READ_MODULE()` with the
 understanding that these require round-trips to the database.
 
-## <a name="promiseoverview"></a> 18. Promises in node-oracledb
+## <a name="promiseoverview"></a> 19. Promises in node-oracledb
 
 Node-oracledb supports Promises with all asynchronous methods.  The native Promise
 implementation is used in Node 0.12 and greater.  Promise support is not
@@ -4111,7 +4186,7 @@ Unhandled Rejection at:  Promise {
 ]
 ```
 
-### <a name="custompromises"></a> 18.1 Custom Promise Libraries
+### <a name="custompromises"></a> 19.1 Custom Promise Libraries
 
 The Promise implementation is designed to be overridden, allowing a
 custom Promise library to be used.  An external library can also be
