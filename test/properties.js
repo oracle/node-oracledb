@@ -67,6 +67,9 @@ describe('58. properties.js', function() {
       defaultValues.fetchAsString   = oracledb.fetchAsString;
       defaultValues.outFormat       = oracledb.outFormat;
       defaultValues.lobPrefetchSize = oracledb.lobPrefetchSize;
+      defaultValues.queueRequests   = oracledb.queueRequests;
+      defaultValues.queueTimeout    = oracledb.queueTimeout;
+      defaultValues.stmtCacheSize   = oracledb.stmtCacheSize;
     })
 
     after('restore the values', function() {
@@ -83,6 +86,9 @@ describe('58. properties.js', function() {
       oracledb.fetchAsString    = defaultValues.fetchAsString;
       oracledb.outFormat        = defaultValues.outFormat;
       oracledb.lobPrefetchSize  = defaultValues.lobPrefetchSize;
+      oracledb.queueRequests    = defaultValues.queueRequests;
+      oracledb.queueTimeout     = defaultValues.queueTimeout;
+      oracledb.stmtCacheSize    = defaultValues.stmtCacheSize;
     })
 
     it('58.1.1 poolMin', function() {
@@ -139,6 +145,7 @@ describe('58. properties.js', function() {
 
       t.should.eql(defaultValues.autoCommit);
       (oracledb.autoCommit).should.eql( !defaultValues.autoCommit );
+
     })
 
     it('58.1.8 version (read-only)', function() {
@@ -201,6 +208,30 @@ describe('58. properties.js', function() {
         (err.message).should.startWith('NJS-014');
       }
     } );
+
+    it('58.1.15 queueRequests', function() {
+      var t = oracledb.queueRequests;
+      oracledb.queueRequests = false;
+
+      should.equal(t, true);
+      should.notEqual(t, oracledb.queueRequests);
+    })
+
+    it('58.1.16 queueTimeout', function() {
+      var t = oracledb.queueTimeout;
+      oracledb.queueTimeout = t + 1000;
+
+      should.equal(t, defaultValues.queueTimeout);
+      should.notEqual(oracledb.queueTimeout, defaultValues.queueTimeout);
+    })
+
+    it('58.1.17 stmtCacheSize', function() {
+      var t = oracledb.stmtCacheSize;
+      oracledb.stmtCacheSize = t + 5;
+
+      should.equal(t, defaultValues.stmtCacheSize);
+      should.notEqual(oracledb.stmtCacheSize, defaultValues.stmtCacheSize);
+    })
 
   }) // 58.1
 
@@ -284,6 +315,55 @@ describe('58. properties.js', function() {
         (err.message).should.startWith('NJS-014');
       }
     })
+
+    it('58.2.6 connectionsInUse', function() {
+      var t = pool.connectionsInUse;
+      t.should.be.a.Number;
+
+      try {
+        pool.connectionsInUse = t + 1;
+      } catch(err) {
+        should.exist(err);
+        (err.message).should.startWith('NJS-014');
+      }
+    })
+
+    it('58.2.7 connectionsOpen', function() {
+      var t = pool.connectionsOpen;
+      t.should.be.a.Number;
+
+      try {
+        pool.connectionsOpen = t + 1;
+      } catch(err) {
+        should.exist(err);
+        (err.message).should.startWith('NJS-014');
+      }
+    })
+
+    it('58.2.8 queueRequests', function() {
+      var t = pool.queueRequests;
+      t.should.be.a.Boolean;
+
+      try {
+        pool.queueRequests = !t;
+      } catch(err) {
+        should.exist(err);
+        (err.message).should.startWith('NJS-014');
+      }
+    })
+
+    it('58.2.9 queueTimeout', function() {
+      var t = pool.queueTimeout;
+      t.should.be.a.Number;
+
+      try {
+        pool.queueTimeout = t + 1000;
+      } catch(err) {
+        should.exist(err);
+        (err.message).should.startWith('NJS-014');
+      }
+    })
+
   }) // 58.2
 
   describe('58.3 Connection Class', function() {
