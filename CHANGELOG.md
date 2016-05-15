@@ -1,8 +1,10 @@
 # Change Log
 
+## node-oracledb v1.9.1 (DD Mon YYYY)
+
 ## node-oracledb v1.9.0 Development (19 Apr 2016)
 
-** Note this is a development release: features are subject to change.**
+** Note this is a development release: features are subject to change. **
 
 - Added Promise support. All asynchronous functions can now return
   promises. By default the standard Promise library is used for Node
