@@ -22,7 +22,6 @@ var oracledbCLib;
 var oracledb = require('oracledb');
 var should   = require('should');
 var dbConfig = require('./dbconfig.js');
-var credential;
 
 try {
   oracledbCLib =  require('../build/Release/oracledb');
@@ -32,12 +31,6 @@ try {
   } else {
     throw err;
   }
-}
-
-if (dbConfig.externalAuth) {
-  credential = { externalAuth: true, connectString: dbConfig.connectString };
-} else {
-  credential = dbConfig;
 }
 
 describe('66. writeableProperties.js', function() {
@@ -74,10 +67,10 @@ describe('66. writeableProperties.js', function() {
   it('66.2 allows overwriting of public methods on pool instances', function(done) {
     oracledb.createPool(
       {
-        externalAuth    : credential.externalAuth,
-        user              : credential.user,
-        password          : credential.password,
-        connectString     : credential.connectString,
+        externalAuth      : dbConfig.externalAuth,
+        user              : dbConfig.user,
+        password          : dbConfig.password,
+        connectString     : dbConfig.connectString,
         poolMin           : 0,
         poolMax           : 1,
         poolIncrement     : 1
@@ -115,7 +108,7 @@ describe('66. writeableProperties.js', function() {
   });
 
   it('66.3 allows overwriting of public methods on connection instances', function(done) {
-    oracledb.getConnection(credential, function(err, conn) {
+    oracledb.getConnection(dbConfig, function(err, conn) {
       var keys;
       var keysIdx;
       var originalFunction;
@@ -147,7 +140,7 @@ describe('66. writeableProperties.js', function() {
   });
 
   it('66.4 allows overwriting of public methods on resultset instances', function(done) {
-    oracledb.getConnection(credential, function(err, conn) {
+    oracledb.getConnection(dbConfig, function(err, conn) {
       should.not.exist(err);
 
       conn.execute(
@@ -194,7 +187,7 @@ describe('66. writeableProperties.js', function() {
   });
 
   it('66.5 allows overwriting of public methods on lob instances', function(done) {
-    oracledb.getConnection(credential, function(err, conn) {
+    oracledb.getConnection(dbConfig, function(err, conn) {
       should.not.exist(err);
 
       conn.execute(

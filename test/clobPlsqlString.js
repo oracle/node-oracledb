@@ -47,12 +47,6 @@ var assist   = require('./dataTypeAssist.js');
 
 describe('60. clobPlsqlString.js', function() {
 
-  if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
-
   var connection = null;
   var tableName = "nodb_myclobs";
 
@@ -60,7 +54,7 @@ describe('60. clobPlsqlString.js', function() {
     async.series([
       function(callback) {
         oracledb.getConnection(
-          credential,
+          dbConfig,
           function(err, conn) {
             should.not.exist(err);
             connection = conn;

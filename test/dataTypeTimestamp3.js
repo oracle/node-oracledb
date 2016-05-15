@@ -44,14 +44,7 @@ var dbConfig = require('./dbconfig.js');
 
 describe('35. dataTypeTimestamp3.js', function() {
 
-  if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
-
-  var connection = false;
-
+  var connection = null;
   var tableName = "nodb_datatype_timestamp";
   var sqlCreate =
         "BEGIN " +
@@ -73,7 +66,7 @@ describe('35. dataTypeTimestamp3.js', function() {
            "END; ";
   var sqlDrop = "DROP table " + tableName;
   before( function(done){
-    oracledb.getConnection(credential, function(err, conn){
+    oracledb.getConnection(dbConfig, function(err, conn){
       if(err) { console.error(err.message); return; }
       connection = conn;
       connection.execute(

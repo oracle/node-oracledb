@@ -40,18 +40,13 @@ var dbConfig = require('./dbconfig.js');
 
 describe('14. stream2.js', function() {
 
-  if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
-
   var connection = null;
   var rowsAmount = 217;
+
   beforeEach(function(done) {
     async.series([
       function getConn(cb) {
-        oracledb.getConnection(credential, function(err, conn) {
+        oracledb.getConnection(dbConfig, function(err, conn) {
           should.not.exist(err);
           connection = conn;
           cb();

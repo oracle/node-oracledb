@@ -40,12 +40,6 @@ var dbConfig = require('./dbconfig.js');
 
 describe('7. autoCommit.js', function() {
 
-  if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
-
   var pool = null;
   var connection  = null;
 
@@ -73,10 +67,10 @@ describe('7. autoCommit.js', function() {
       function(callback) {
         oracledb.createPool(
           {
-            externalAuth  : credential.externalAuth,
-            user          : credential.user,
-            password      : credential.password,
-            connectString : credential.connectString,
+            externalAuth  : dbConfig.externalAuth,
+            user          : dbConfig.user,
+            password      : dbConfig.password,
+            connectString : dbConfig.connectString,
             poolMin       : 3,
             poolMax       : 7,
             poolIncrement : 1

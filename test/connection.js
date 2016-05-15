@@ -39,15 +39,9 @@ var dbConfig = require('./dbconfig.js');
 
 describe('1. connection.js', function(){
 
-  if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
-
   describe('1.1 can run SQL query with different output formats', function(){
-    var connection = false;
 
+    var connection = null;
     var script =
       "BEGIN \
           DECLARE \
@@ -78,7 +72,7 @@ describe('1. connection.js', function(){
       END; ";
 
     before(function(done){
-      oracledb.getConnection(credential, function(err, conn) {
+      oracledb.getConnection(dbConfig, function(err, conn) {
         if(err) { console.error(err.message); return; }
         connection = conn;
         connection.execute(script, function(err) {
@@ -189,7 +183,7 @@ describe('1. connection.js', function(){
     var rowsAmount = 107;
 
     before(function(done){
-      oracledb.getConnection(credential, function(err, conn) {
+      oracledb.getConnection(dbConfig, function(err, conn) {
         if(err) { console.error(err.message); return; }
         connection = conn;
         connection.execute(createTable, function(err) {
@@ -327,7 +321,7 @@ describe('1. connection.js', function(){
                 + "END; ";
 
     before(function(done){
-      oracledb.getConnection(credential, function(err, conn) {
+      oracledb.getConnection(dbConfig, function(err, conn) {
         if(err) { console.error(err.message); return; }
         connection = conn;
         connection.execute(proc, function(err, result) {
@@ -409,7 +403,7 @@ describe('1. connection.js', function(){
     var defaultStmtCache = oracledb.stmtCacheSize; // 30
 
     beforeEach('get connection and prepare table', function(done) {
-      oracledb.getConnection(credential, function(err, conn) {
+      oracledb.getConnection(dbConfig, function(err, conn) {
         if(err) { console.error(err.message); return; }
         connection = conn;
         conn.execute(
@@ -555,14 +549,14 @@ describe('1. connection.js', function(){
     beforeEach('get 2 connections and create the table', function(done) {
       async.series([
         function(callback) {
-          oracledb.getConnection(credential, function(err, conn) {
+          oracledb.getConnection(dbConfig, function(err, conn) {
             should.not.exist(err);
             conn1 = conn;
             callback();
           });
         },
         function(callback) {
-          oracledb.getConnection(credential, function(err, conn) {
+          oracledb.getConnection(dbConfig, function(err, conn) {
             should.not.exist(err);
             conn2 = conn;
             callback();
@@ -720,7 +714,7 @@ describe('1. connection.js', function(){
     var conn1;
 
     beforeEach('get connection ready', function(done) {
-      oracledb.getConnection(credential, function(err, conn) {
+      oracledb.getConnection(dbConfig, function(err, conn) {
         should.not.exist(err);
         conn1 = conn;
         done();
@@ -892,7 +886,7 @@ describe('1. connection.js', function(){
 
   describe('1.7 Close method', function() {
     it('1.7.1 close can be used as an alternative to release', function(done) {
-      oracledb.getConnection(credential, function(err, conn) {
+      oracledb.getConnection(dbConfig, function(err, conn) {
         should.not.exist(err);
 
         conn.close(function(err) {

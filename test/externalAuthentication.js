@@ -43,13 +43,7 @@ var oracledb = require('oracledb');
 var should   = require('should');
 var dbConfig = require('./dbconfig.js');
 
-describe('5. externalAuthentication.js', function(){
-
-  if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
+describe('5. externalAuthentication.js', function() {
 
   it('5.1 connection should succeed when setting externalAuth to be false and providing user/password', function(done){
     oracledb.getConnection(
@@ -94,10 +88,10 @@ describe('5. externalAuthentication.js', function(){
   })
 
   it('5.3 can get connection from oracledb', function(done){
-    // console.log(credential);
+    // console.log(dbConfig);
     if(dbConfig.externalAuth){
       oracledb.getConnection(
-        credential,
+        dbConfig,
         function(err, connection){
           should.not.exist(err);
           connection.should.be.ok;
@@ -124,7 +118,7 @@ describe('5. externalAuthentication.js', function(){
   it('5.4 can create pool', function(done){
     if(dbConfig.externalAuth){
       oracledb.createPool(
-        credential,
+        dbConfig,
         function(err, pool){
           should.not.exist(err);
           pool.should.be.ok;

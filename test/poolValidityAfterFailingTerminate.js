@@ -31,25 +31,20 @@
  *     51 onwards are for other tests
  *
  *****************************************************************************/
+'use strict';
 
 var oracledb = require('oracledb');
 var should   = require('should');
 var dbConfig = require('./dbconfig.js');
 
-describe('53. poolValidityAfterFailingTernimate.js', function(){
+describe('53. poolValidityAfterFailingTernimate.js', function() {
 
-  if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
-
-  it('pool should be available after failing terminate', function(done){
+  it('pool should be available after failing terminate', function(done) {
     oracledb.createPool(
-      credential,
+      dbConfig,
       function(err, pool) {
         should.not.exist(err);
-        pool.getConnection( function(err, connection){
+        pool.getConnection( function(err, connection) {
           should.not.exist(err);
           pool.terminate(
             function(err){

@@ -40,18 +40,12 @@ var dbConfig = require('./dbconfig.js');
 
 describe('55. resultSet2.js', function() {
 
-  if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
-
   var connection = null;
   var tableName = "nodb_employees";
   var rowsAmount = 300;
 
   before('get one connection', function(done) {
-    oracledb.getConnection(credential, function(err, conn) {
+    oracledb.getConnection(dbConfig, function(err, conn) {
       should.not.exist(err);
       connection = conn;
       done();
@@ -272,7 +266,7 @@ describe('55. resultSet2.js', function() {
 
     beforeEach(function(done) {
       oracledb.getConnection(
-        credential,
+        dbConfig,
         function(err, conn) {
           should.not.exist(err);
           conn2 = conn;

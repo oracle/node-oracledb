@@ -42,17 +42,10 @@ var dbConfig = require('./dbconfig.js');
 
 describe('62. lobProperties.js', function() {
 
-  if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
-
   var tableName = "nodb_mylobs";
   var connection = null;
   var sqlSelect = "SELECT * FROM " + tableName + " WHERE id = :i";
   var defaultChunkSize = null;
-
 
   before('prepare table and LOB data', function(done) {
 
@@ -88,7 +81,7 @@ describe('62. lobProperties.js', function() {
 
     async.series([
       function(cb) {
-        oracledb.getConnection(credential, function(err, conn) {
+        oracledb.getConnection(dbConfig, function(err, conn) {
           should.not.exist(err);
           connection = conn;
           cb();

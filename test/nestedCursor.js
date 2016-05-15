@@ -40,12 +40,6 @@ var dbConfig = require('./dbconfig.js');
 
 describe('57. nestedCursor.js', function() {
 
-  if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
-
   var createParentTable =
       "BEGIN \
           DECLARE \
@@ -145,7 +139,7 @@ describe('57. nestedCursor.js', function() {
     async.series([
       function(callback) {
         oracledb.getConnection(
-          credential,
+          dbConfig,
           function(err, conn) {
             connection = conn;
             callback();

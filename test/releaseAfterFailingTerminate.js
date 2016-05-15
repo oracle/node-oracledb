@@ -36,17 +36,11 @@ var oracledb = require('oracledb');
 var should   = require('should');
 var dbConfig = require('./dbconfig.js');
 
-describe('54. releaseAfterFailingTerminate.js', function(){
-
-  if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
+describe('54. releaseAfterFailingTerminate.js', function() {
 
   it('can still release connections after failing pool termination', function(done){
     oracledb.createPool(
-      credential,
+      dbConfig,
       function(err, pool) {
         should.not.exist(err);
         pool.getConnection( function(err, connection){

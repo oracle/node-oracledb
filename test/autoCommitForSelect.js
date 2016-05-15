@@ -40,13 +40,8 @@ var dbConfig = require('./dbconfig.js');
 
 describe('8. autoCommitForSelect.js', function(){
 
-  if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
-  var connection = false;
-  var anotherConnection = false;
+  var connection = null;
+  var anotherConnection = null;
 
   var script =
       "BEGIN \
@@ -80,14 +75,14 @@ describe('8. autoCommitForSelect.js', function(){
   before(function(done){
     async.parallel([
       function(callback){
-        oracledb.getConnection(credential, function(err, conn){
+        oracledb.getConnection(dbConfig, function(err, conn){
           if(err) { console.error(err.message); return; }
           connection = conn;
           callback();
         });
       },
       function(callback){
-        oracledb.getConnection(credential, function(err, conn){
+        oracledb.getConnection(dbConfig, function(err, conn){
           if(err) { console.error(err.message); return; }
           anotherConnection = conn;
           callback();

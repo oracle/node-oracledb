@@ -38,14 +38,8 @@ var async    = require('async');
 var dbConfig = require('./dbconfig.js');
 
 describe('12. resultSet1.js', function() {
-  var connection = false;
 
-  if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
-
+  var connection = null;
   var createTable =
       "BEGIN \
           DECLARE \
@@ -79,7 +73,7 @@ describe('12. resultSet1.js', function() {
   var rowsAmount = 217;
 
   before(function(done) {
-    oracledb.getConnection(credential, function(err, conn) {
+    oracledb.getConnection(dbConfig, function(err, conn) {
       if(err) { console.error(err.message); return; }
       connection = conn;
       connection.execute(createTable, function(err) {

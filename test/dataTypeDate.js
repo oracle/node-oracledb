@@ -41,17 +41,11 @@ var dbConfig = require('./dbconfig.js');
 
 describe('32. dataTypeDate.js', function() {
 
-  if(dbConfig.externalAuth) {
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
-
   var connection = null;
   var tableName = "nodb_date";
 
   before('get one connection', function(done) {
-    oracledb.getConnection(credential, function(err, conn) {
+    oracledb.getConnection(dbConfig, function(err, conn) {
       should.not.exist(err);
       connection = conn;
       done();

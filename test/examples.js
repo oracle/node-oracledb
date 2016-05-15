@@ -31,6 +31,7 @@
  *     51 onwards are for other tests
  *
  *****************************************************************************/
+'use strict';
 
 var oracledb = require('oracledb');
 var should   = require('should');
@@ -39,15 +40,9 @@ var dbConfig = require('./dbconfig.js');
 
 describe('3. examples.js', function(){
 
-  if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
-
   describe('3.1 connect.js', function(){
     it('3.1.1 tests a basic connection to the database', function(done){
-      oracledb.getConnection(credential, function(error, connection){
+      oracledb.getConnection(dbConfig, function(error, connection){
         should.not.exist(error);
         connection.should.be.ok;
         connection.release( function(err){
@@ -64,9 +59,9 @@ describe('3. examples.js', function(){
       (oracledb.version).should.be.greaterThan(0);
       // console.log("Driver version number is " + oracledb.version);
 
-      major = Math.floor(oracledb.version/10000);
-      minor = Math.floor(oracledb.version/100) % 100;
-      patch = oracledb.version % 100;
+      var major = Math.floor(oracledb.version/10000);
+      var minor = Math.floor(oracledb.version/100) % 100;
+      var patch = oracledb.version % 100;
       // console.log("Driver version text is " + major + "." + minor + "." + patch);
     })
   })
@@ -75,7 +70,7 @@ describe('3. examples.js', function(){
     var connection = false;
 
     before(function(done){
-      oracledb.getConnection(credential, function(err, conn) {
+      oracledb.getConnection(dbConfig, function(err, conn) {
         if(err) { console.error(err.message); return; }
         connection = conn;
         done();
@@ -232,7 +227,7 @@ describe('3. examples.js', function(){
     var connection = false;
 
     before(function(done){
-      oracledb.getConnection(credential, function(err, conn){
+      oracledb.getConnection(dbConfig, function(err, conn){
         if(err) { console.error(err.message); return; }
         connection = conn;
         done();
@@ -351,7 +346,7 @@ describe('3. examples.js', function(){
     var date = new Date();
 
     before(function(done){
-      oracledb.getConnection(credential, function(err, conn){
+      oracledb.getConnection(dbConfig, function(err, conn){
         if(err) { console.error(err.message); return; }
         connection = conn;
         done();
@@ -458,7 +453,7 @@ describe('3. examples.js', function(){
        END; ";
 
     before(function(done){
-      oracledb.getConnection(credential, function(err, conn){
+      oracledb.getConnection(dbConfig, function(err, conn){
         if(err) { console.error(err.message); return; }
         connection = conn;
         connection.execute(createTable, function(err){
@@ -522,7 +517,7 @@ describe('3. examples.js', function(){
     var connection = false;
 
     before(function(done){
-      oracledb.getConnection(credential, function(err, conn){
+      oracledb.getConnection(dbConfig, function(err, conn){
         if(err) { console.error(err.message); return; }
         connection = conn;
         done();
@@ -655,7 +650,7 @@ describe('3. examples.js', function(){
       "END; ";
 
     before(function(done){
-      oracledb.getConnection(credential, function(err, conn){
+      oracledb.getConnection(dbConfig, function(err, conn){
         if(err) { console.error(err.message); return; }
         connection = conn;
         done();
@@ -748,10 +743,10 @@ describe('3. examples.js', function(){
       "END; ";
 
     before(function(done){
-      oracledb.getConnection(credential, function(err, conn){
+      oracledb.getConnection(dbConfig, function(err, conn){
         if(err) { console.error(err.message); return; }
         conn1 = conn;
-        oracledb.getConnection(credential, function(err, conn){
+        oracledb.getConnection(dbConfig, function(err, conn){
           if(err) { console.error(err.message); return; }
           conn2 = conn;
           done();
@@ -866,7 +861,7 @@ describe('3. examples.js', function(){
        END; ";
 
     before(function(done){
-      oracledb.getConnection(credential, function(err, conn){
+      oracledb.getConnection(dbConfig, function(err, conn){
         if(err) { console.error(err.message); return; }
         connection = conn;
         connection.execute(createTable, function(err){
@@ -1028,7 +1023,7 @@ describe('3. examples.js', function(){
       async.series([
         function(callback) {
           oracledb.getConnection(
-            credential,
+            dbConfig,
             function(err, conn) {
               should.not.exist(err);
               connection = conn;

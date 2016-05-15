@@ -51,17 +51,11 @@ var outFileName = './test/blobstreamout.jpg';
 describe('41. dataTypeBlob', function() {
   this.timeout(10000);
 
-  if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
-
   var connection = null;
   var tableName = "nodb_myblobs";
 
   before('get one connection', function(done) {
-    oracledb.getConnection(credential, function(err, conn) {
+    oracledb.getConnection(dbConfig, function(err, conn) {
       should.not.exist(err);
       connection = conn;
       done();

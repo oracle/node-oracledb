@@ -41,12 +41,6 @@ var async    = require('async');
 
 describe('22. dataTypeChar.js', function(){
 
-  if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
-
   var connection = null;
   var tableName = "nodb_char";
 
@@ -59,7 +53,7 @@ describe('22. dataTypeChar.js', function(){
   ];
 
   before('get one connection', function(done) {
-    oracledb.getConnection(credential, function(err, conn) {
+    oracledb.getConnection(dbConfig, function(err, conn) {
       should.not.exist(err);
       connection = conn;
       done();

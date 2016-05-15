@@ -46,12 +46,6 @@ var assist   = require('./dataTypeAssist.js');
 
 describe('6. dmlReturning.js', function(){
 
-  if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
-
   describe('6.1 NUMBER & STRING driver data type', function() {
 
     var connection = null;
@@ -89,7 +83,7 @@ describe('6. dmlReturning.js', function(){
                    (2001, ''Karen Morton'') \
             '); \
         END; ";
-      oracledb.getConnection(credential, function(err, conn) {
+      oracledb.getConnection(dbConfig, function(err, conn) {
         if(err) { console.error(err.message); return; }
         connection = conn;
         conn.execute(
@@ -397,7 +391,7 @@ describe('6. dmlReturning.js', function(){
     beforeEach('get connection, prepare table', function(done) {
       async.series([
         function(callback) {
-          oracledb.getConnection(credential, function(err, conn) {
+          oracledb.getConnection(dbConfig, function(err, conn) {
             should.not.exist(err);
             connection = conn;
             callback();

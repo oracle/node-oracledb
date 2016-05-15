@@ -34,7 +34,6 @@ var oracledbCLib;
 var oracledb = require('oracledb');
 var should   = require('should');
 var dbConfig = require('./dbconfig.js');
-var credential;
 
 try {
   oracledbCLib =  require('../build/Release/oracledb');
@@ -44,12 +43,6 @@ try {
   } else {
     throw err;
   }
-}
-
-if (dbConfig.externalAuth) {
-  credential = { externalAuth: true, connectString: dbConfig.connectString };
-} else {
-  credential = dbConfig;
 }
 
 describe('45. instanceof.js', function() {
@@ -100,10 +93,10 @@ describe('45. instanceof.js', function() {
   it('45.3 instanceof works for pool instances', function(done) {
     oracledb.createPool(
       {
-        externalAuth    : credential.externalAuth,
-        user              : credential.user,
-        password          : credential.password,
-        connectString     : credential.connectString,
+        externalAuth    : dbConfig.externalAuth,
+        user              : dbConfig.user,
+        password          : dbConfig.password,
+        connectString     : dbConfig.connectString,
         poolMin           : 0,
         poolMax           : 1,
         poolIncrement     : 1
@@ -123,7 +116,7 @@ describe('45. instanceof.js', function() {
   });
 
   it('45.4 instanceof works for connection instances', function(done) {
-    oracledb.getConnection(credential, function(err, conn) {
+    oracledb.getConnection(dbConfig, function(err, conn) {
       should.not.exist(err);
 
       (conn instanceof oracledb.Connection).should.be.true;
@@ -137,7 +130,7 @@ describe('45. instanceof.js', function() {
   });
 
   it('45.5 instanceof works for resultset instances', function(done) {
-    oracledb.getConnection(credential, function(err, conn) {
+    oracledb.getConnection(dbConfig, function(err, conn) {
       should.not.exist(err);
 
       conn.execute(
@@ -166,7 +159,7 @@ describe('45. instanceof.js', function() {
   });
 
   it('45.6 instanceof works for lob instances', function(done) {
-    oracledb.getConnection(credential, function(err, conn) {
+    oracledb.getConnection(dbConfig, function(err, conn) {
       should.not.exist(err);
 
       conn.execute(

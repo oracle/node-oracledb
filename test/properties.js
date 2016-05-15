@@ -43,12 +43,6 @@ var assist   = require('./dataTypeAssist.js');
 
 describe('58. properties.js', function() {
 
-  if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
-
   describe('58.1 Oracledb Class', function() {
 
     var defaultValues = {};
@@ -370,7 +364,7 @@ describe('58. properties.js', function() {
     var connection = null;
 
     before('get one connection', function(done) {
-      oracledb.getConnection(credential, function(err, conn) {
+      oracledb.getConnection(dbConfig, function(err, conn) {
         should.not.exist(err);
         connection = conn;
         done();
@@ -488,7 +482,7 @@ describe('58. properties.js', function() {
     before('get resultSet class', function(done) {
       async.series([
         function(callback) {
-          oracledb.getConnection(credential, function(err, conn) {
+          oracledb.getConnection(dbConfig, function(err, conn) {
             should.not.exist(err);
             connection = conn;
             callback();

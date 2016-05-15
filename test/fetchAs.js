@@ -31,6 +31,7 @@
  *     51 onwards are for other tests
  *
  *****************************************************************************/
+'use strict';
 
 var oracledb = require ( 'oracledb' );
 var should   = require ( 'should' );
@@ -39,15 +40,9 @@ var dbConfig = require ( './dbconfig.js' );
 
 describe('56. fetchAs.js', function() {
 
-  if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
-
   var connection = null;
   beforeEach('get one connection', function(done) {
-    oracledb.getConnection(credential, function(err, conn) {
+    oracledb.getConnection(dbConfig, function(err, conn) {
       should.not.exist(err);
       connection = conn;
       done();

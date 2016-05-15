@@ -28,30 +28,24 @@
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
  *     21 - 50  are reserved for data type supporting tests
- *     51 -     are for other tests
+ *     51 onwards are for other tests
  *
  *****************************************************************************/
+'use strict';
 
 var oracledb = require('oracledb');
 var should   = require('should');
 var dbConfig = require('./dbconfig.js');
 
-describe('52. getConnAfterPoolTerminate.js', function(){
-  var credential;
+describe('52. getConnAfterPoolTerminate.js', function() {
 
-  if(dbConfig.externalAuth){
-    credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    credential = dbConfig;
-  }
-
-  it('can not get connections from pool after pool is terminated', function(done){
+  it('can not get connections from pool after pool is terminated', function(done) {
     oracledb.createPool(
       {
-        externalAuth  : credential.externalAuth,
-        user          : credential.user,
-        password      : credential.password,
-        connectString : credential.connectString,
+        externalAuth  : dbConfig.externalAuth,
+        user          : dbConfig.user,
+        password      : dbConfig.password,
+        connectString : dbConfig.connectString,
         poolMin       : 2,
         poolMax       : 10
       },

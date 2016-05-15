@@ -50,19 +50,14 @@ var inFileName = './test/clobexample.txt';  // the file with text to be inserted
 var outFileName = './test/clobstreamout.txt';
 
 describe('40. dataTypeClob.js', function() {
-  this.timeout(15000);
 
-  if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
+  this.timeout(15000);
 
   var connection = null;
   var tableName = "nodb_myclobs";
 
   before('get one connection', function(done) {
-    oracledb.getConnection(credential, function(err, conn) {
+    oracledb.getConnection(dbConfig, function(err, conn) {
       should.not.exist(err);
       connection = conn;
       done();

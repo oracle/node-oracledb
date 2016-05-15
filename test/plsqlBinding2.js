@@ -40,17 +40,12 @@ var dbConfig = require('./dbconfig.js');
 
 describe('44. plsqlBinding2.js', function() {
 
-  if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
-
   var connection = null;
+
   beforeEach(function(done) {
     async.series([
       function(callback) {
-        oracledb.getConnection(credential, function(err, conn) {
+        oracledb.getConnection(dbConfig, function(err, conn) {
           should.not.exist(err);
           connection = conn;
           callback();

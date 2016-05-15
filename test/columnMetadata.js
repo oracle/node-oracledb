@@ -40,13 +40,8 @@ var dbConfig = require('./dbconfig.js');
 
 describe('9. columnMetadata.js', function(){
 
-  if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
+  var connection = null;
 
-  var connection = false;
   beforeEach('get connection & create table', function(done){
     var makeTable =
       "BEGIN \
@@ -83,7 +78,8 @@ describe('9. columnMetadata.js', function(){
                    (90, ''Executive'', 100, 1700) \
             '); \
         END; ";
-    oracledb.getConnection(credential, function(err, conn){
+
+    oracledb.getConnection(dbConfig, function(err, conn){
       if(err) { console.error(err.message); return; }
       connection = conn;
       conn.execute(
