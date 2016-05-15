@@ -1,3 +1,5 @@
+Overview of node-oracledb functional tests
+
 1. connection.js
     1.1 can run SQL query with different output formats
         1.1.1 ARRAY format by default
