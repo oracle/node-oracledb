@@ -49,6 +49,7 @@ typedef enum
   errInvalidBindDataType,
   errInvalidBindDirection,
   errReadOnly,
+  errNoTypeForConversion,
   errInsufficientBufferForBinds,
   errBusyResultSet,
   errInvalidResultSet,
@@ -74,6 +75,9 @@ typedef enum
   errInvalidValueArrayBind,
   errEmptyArray,
   errConnRequestTimeout,
+  errUsedInJS41,
+  errUsedInJS42,
+  errUsedInJS43,
 
   // New ones should be added here
 

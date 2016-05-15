@@ -78,20 +78,21 @@ Nan::Persistent<FunctionTemplate> Oracledb::oracledbTemplate_s;
  */
 Oracledb::Oracledb()
 {
-  dpienv_             = dpi::Env::createEnv( driverName() );
-  outFormat_          = NJS_ROWS_ARRAY;
-  maxRows_            = NJS_MAX_ROWS;
-  autoCommit_         = false;
-  stmtCacheSize_      = NJS_STMT_CACHE_SIZE;
-  poolMax_            = NJS_POOL_MAX;
-  poolMin_            = NJS_POOL_MIN;
-  poolIncrement_      = NJS_POOL_INCR;
-  poolTimeout_        = NJS_POOL_TIMEOUT;
-  prefetchRows_       = NJS_PREFETCH_ROWS;
-  connClass_          = "";
-  externalAuth_       = false;
-  fetchAsStringTypes_ = NULL;
-  lobPrefetchSize_    = NJS_LOB_PREFETCH_SIZE;
+  dpienv_                  = dpi::Env::createEnv( driverName() );
+  outFormat_               = NJS_ROWS_ARRAY;
+  maxRows_                 = NJS_MAX_ROWS;
+  autoCommit_              = false;
+  stmtCacheSize_           = NJS_STMT_CACHE_SIZE;
+  poolMax_                 = NJS_POOL_MAX;
+  poolMin_                 = NJS_POOL_MIN;
+  poolIncrement_           = NJS_POOL_INCR;
+  poolTimeout_             = NJS_POOL_TIMEOUT;
+  prefetchRows_            = NJS_PREFETCH_ROWS;
+  connClass_               = "";
+  externalAuth_            = false;
+  fetchAsStringTypes_      = NULL;
+  fetchAsStringTypesCount_ = 0;
+  lobPrefetchSize_         = NJS_LOB_PREFETCH_SIZE;
 }
 
 /*****************************************************************************/

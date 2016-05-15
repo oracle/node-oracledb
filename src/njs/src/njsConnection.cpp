@@ -542,6 +542,8 @@ void Connection::ProcessOptions (Nan::NAN_METHOD_ARGS_TYPE args, unsigned int in
 {
   Nan::HandleScope scope;
   Local<Object> options;
+  FetchInfo *fInfo = NULL;
+
   if(args[index]->IsObject() && !args[index]->IsArray())
   {
     options = args[index]->ToObject();
@@ -564,13 +566,12 @@ void Connection::ProcessOptions (Nan::NAN_METHOD_ARGS_TYPE args, unsigned int in
       Local<Array> keys = fetchInfo->GetOwnPropertyNames ();
       if ( keys->Length () > 0 )
       {
-        FetchInfo *fInfo = executeBaton->fetchInfo =
-                           new FetchInfo[keys->Length()];
+        fInfo = executeBaton->fetchInfo = new FetchInfo[keys->Length()];
         executeBaton->fetchInfoCount = keys->Length ();
 
         for (unsigned int index = 0 ; index < keys->Length() ; index ++ )
         {
-          unsigned int tmptype = 0 ;
+          unsigned int tmptype = 0xFFFFFFFF ;
 
           Local<String> temp = keys->Get (index).As<String>();
           NJSString (fInfo[index].name, temp );
@@ -580,6 +581,13 @@ void Connection::ProcessOptions (Nan::NAN_METHOD_ARGS_TYPE args, unsigned int in
 
           NJS_GET_UINT_FROM_JSON (tmptype, executeBaton->error,
                                   colInfo, "type", 2, exitProcessOptions );
+          if ( tmptype == 0xFFFFFFFF )
+          {
+            executeBaton->error = NJSMessages::getErrorMsg (
+                                                  errNoTypeForConversion );
+            goto exitProcessOptions;
+          }
+
           fInfo[index].type = (DataType) tmptype;
 
           // Only Conversion to STRING allowed now. Either STRING or DB type.
@@ -607,8 +615,14 @@ void Connection::ProcessOptions (Nan::NAN_METHOD_ARGS_TYPE args, unsigned int in
                                                    index);
     goto exitProcessOptions;
   }
-  exitProcessOptions:
-  ;
+
+exitProcessOptions:
+  // On error, clear off fInfo array.
+  if ( !executeBaton->error.empty () && ( fInfo != NULL ) )
+  {
+    delete [] fInfo;
+    executeBaton->fetchInfo = NULL;
+  }
 }
 
 /*****************************************************************************/

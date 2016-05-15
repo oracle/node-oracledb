@@ -284,4 +284,18 @@ describe('56. fetchAs.js', function() {
       done();
     });
   })
+
+  // FetchInfo format should <columName> : {type : oracledb.<type>
+  it ('56.10 invalid syntax for type should result in error', function (done){
+    connection.execute (
+      "SELECT SYSDATE AS THE_DATE FROM DUAL",
+      { },
+      { fetchInfo : { "THE_DATE" : oracledb.STRING }},
+      function ( err, result ) {
+        should.exist ( err ) ;
+        err.message.should.startWith ('NJS-015:');
+        done ();
+      } );
+  });
+
 })
