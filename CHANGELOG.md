@@ -1,5 +1,7 @@
 # Change Log
 
+## node-oracledb v1.9.0 (DD Mon YYYY)
+
 ## node-oracledb v1.8.0 (24 Mar 2016)
 
 - Added `connection.queryStream()` for returning query results using a

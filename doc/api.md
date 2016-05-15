@@ -1,4 +1,4 @@
-# node-oracledb 1.8: Documentation for the Oracle Database Node.js Add-on
+# node-oracledb 1.9: Documentation for the Oracle Database Node.js Add-on
 
 *Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved.*
 
