@@ -362,8 +362,8 @@ private:
 
   static void GetOutBindParams (unsigned short dataType, Bind* bind,
                                 eBaton* executeBaton);
-  static void Descr2Double ( Define* defines, unsigned int numCols,
-                             unsigned int rowsFetched, bool getRS );
+  static NJSErrorType Descr2Double ( Define* defines, unsigned int numCols,
+                                     unsigned int rowsFetched, bool getRS );
   static void Descr2protoILob ( eBaton *executeBaton, unsigned int numCols,
                                 unsigned int rowsFetched );
   static v8::Local<v8::Value> GetOutBinds (eBaton* executeBaton);

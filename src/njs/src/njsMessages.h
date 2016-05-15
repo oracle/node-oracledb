@@ -35,7 +35,8 @@ using namespace std;
 
 typedef enum
 {
-  errMissingCallback = 1,
+  errSuccess = 0,
+  errMissingCallback,
   errInvalidPool,
   errInvalidConnection,
   errInvalidPropertyValue,

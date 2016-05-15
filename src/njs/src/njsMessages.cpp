@@ -36,6 +36,7 @@ using namespace std;
 
 static const char *errMsg[] =
 {
+  "NJS-000: success",                              // errSuccess
   "NJS-001: expected callback as last parameter",  // errMissingCallback
   "NJS-002: invalid pool",                         // errInvalidPool
   "NJS-003: invalid connection",                   // errInvalidConnection
@@ -92,7 +93,7 @@ string NJSMessages::getErrorMsg ( NJSErrorType err, ... )
   {
     // print all specified arguments
     va_start (vlist, err);
-    if ( vsnprintf (msg, MAX_ERROR_MSG_LEN, errMsg[err-1], vlist) <= 0)
+    if ( vsnprintf (msg, MAX_ERROR_MSG_LEN, errMsg[err], vlist) <= 0)
     {
       msg[0] = 0;
     }

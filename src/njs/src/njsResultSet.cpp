@@ -73,22 +73,14 @@ void ResultSet::setResultSet ( dpi::Stmt *stmt, eBaton *executeBaton )
   this->dpistmt_       = stmt;
   this->dpienv_        = executeBaton->dpienv;
   this->njsconn_       = executeBaton->njsconn;
-  if ( stmt )
-  {
-    this->meta_        = stmt->getMetaData();
-    this->numCols_     = this->dpistmt_->numCols();
-    this->state_       = NJS_INACTIVE;
-  }
-  else
-  {
-    /*
-     * This could happen in REFCURSOR case, when the stored procedure
-     * did not return a valid handle
-     */
-    this->numCols_     = 0;
-    this->meta_        = NULL;
-    this->state_       = NJS_INVALID;
-  }
+  this->numCols_       = 0;    // numCols_ and meta_ are initialized as part
+  this->meta_          = NULL; // of the first call on RS
+
+  /*
+   * stmt can be NULL in REFCURSOR case, when the stored procedure
+   * did not return a valid stmt handle
+   */
+  this->state_ = ( stmt ) ? NJS_INACTIVE : NJS_INVALID;
 
   this->outFormat_     = executeBaton->outFormat;
   this->fetchRowCount_ = 0;
@@ -228,12 +220,30 @@ NAN_GETTER(ResultSet::GetMetaData)
     info.GetReturnValue().SetUndefined();
     return;
   }
+  if ( !njsResultSet->meta_ )
+  {
+    try
+    {
+      njsResultSet->meta_    = njsResultSet->dpistmt_->getMetaData();
+      njsResultSet->numCols_ = njsResultSet->dpistmt_->numCols();
+    }
+    catch(dpi::Exception &e)
+    {
+      NJS_SET_CONN_ERR_STATUS ( e.errnum(), NULL );
+      NJS_SET_EXCEPTION(e.what(), (int) strlen(e.what()));
+      info.GetReturnValue().SetUndefined();
+      return;
+    }
+  }
   std::string *columnNames = new std::string[njsResultSet->numCols_];
   Connection::CopyMetaData ( columnNames, njsResultSet->meta_,
                              njsResultSet->numCols_ );
   Local<Value> meta;
   meta = Connection::GetMetaData( columnNames,
                                   njsResultSet->numCols_ );
+  delete [] columnNames;
+  columnNames = NULL;
+
   info.GetReturnValue().Set(meta);
 }
 
@@ -383,7 +393,6 @@ void ResultSet::GetRowsCommon(rsBaton *getRowsBaton)
 
   ebaton                     = getRowsBaton->ebaton;
   njsRS                      = getRowsBaton->njsRS;
-  ebaton->columnNames        = new std::string[njsRS->numCols_];
   ebaton->maxRows            = getRowsBaton->numRows;
   ebaton->dpistmt            = njsRS->dpistmt_;
   ebaton->getRS              = true;
@@ -458,15 +467,24 @@ void ResultSet::Async_GetRows(uv_work_t *req)
 
   try
   {
+    if ( !njsRS->meta_ )
+    {
+      njsRS->meta_    = njsRS->dpistmt_->getMetaData();
+      njsRS->numCols_ = njsRS->dpistmt_->numCols();
+    }
+    ebaton->columnNames        = new std::string[njsRS->numCols_];
     Connection::CopyMetaData ( ebaton->columnNames, njsRS->meta_,
                                njsRS->numCols_ );
     ebaton->numCols      = njsRS->numCols_;
+
+    // Allocate if not already done, or need more buffer
     if( !njsRS->defineBuffers_ ||
         njsRS->fetchRowCount_  < getRowsBaton->numRows )
     {
       if( njsRS->defineBuffers_ )
       {
-        ResultSet::clearFetchBuffer(njsRS->defineBuffers_, njsRS->numCols_);
+        ResultSet::clearFetchBuffer(njsRS->defineBuffers_, njsRS->numCols_,
+                                    njsRS->fetchRowCount_);
         getRowsBaton-> njsRS-> defineBuffers_ = NULL;
       }
       Connection::DoDefines(ebaton, njsRS->meta_, njsRS->numCols_);
@@ -480,8 +498,11 @@ void ResultSet::Async_GetRows(uv_work_t *req)
     }
     else
     {
+      // Buffers are reused except for LOB columns
       for (unsigned int col = 0; col < njsRS->numCols_; col++)
       {
+       // In case of LOB column, descriptor would have been wrapped by
+       // ProtoILob & njsIntLob and set the element to NULL, so reallocate
         switch(njsRS->meta_[col].dbType)
         {
         case dpi::DpiClob:
@@ -489,15 +510,26 @@ void ResultSet::Async_GetRows(uv_work_t *req)
         case dpi::DpiBfile:
           for (unsigned int j = 0; j < ebaton->maxRows; j++)
           {
-            ((Descriptor **)(njsRS->defineBuffers_[col].buf))[j] =
-              ebaton->dpienv->allocDescriptor(LobDescriptorType);
+            if ( !( ((Descriptor **)(njsRS->defineBuffers_[col].buf))[j] ) )
+            {
+              ((Descriptor **)(njsRS->defineBuffers_[col].buf))[j] =
+                ebaton->dpienv->allocDescriptor(LobDescriptorType);
+            }
           }
+          break;
+
+        default:
           break;
         }
       }
     }
     ebaton->defines      = njsRS->defineBuffers_;
     Connection::DoFetch(ebaton);
+    if ( !ebaton->error.empty () )
+    {
+      getRowsBaton->error = ebaton->error;
+      goto exitAsyncGetRows;
+    }
 
     if(ebaton->rowsFetched != getRowsBaton->numRows)
       njsRS->rsEmpty_ = true;
@@ -661,7 +693,8 @@ void ResultSet::Async_Close(uv_work_t *req)
     unsigned int numCols  = closeBaton-> njsRS-> numCols_;
     if(defineBuffers)
     {
-      ResultSet::clearFetchBuffer(defineBuffers, numCols);
+      ResultSet::clearFetchBuffer(defineBuffers, numCols,
+                                  closeBaton-> njsRS-> fetchRowCount_);
       closeBaton-> njsRS-> defineBuffers_ = NULL;
     }
 
@@ -735,7 +768,8 @@ void ResultSet::Async_AfterClose(uv_work_t *req)
     defineBuffers    -  Define bufferes from njsResultSet,
     numCols          -  # of columns
 */
-void ResultSet::clearFetchBuffer( Define* defineBuffers, unsigned int numCols)
+void ResultSet::clearFetchBuffer( Define* defineBuffers, unsigned int numCols,
+                                  unsigned int numRows )
 {
    for( unsigned int i=0; i<numCols; i++ )
    {
@@ -744,6 +778,20 @@ void ResultSet::clearFetchBuffer( Define* defineBuffers, unsigned int numCols)
        defineBuffers[i].dttmarr->release ();
        defineBuffers[i].extbuf = NULL;
      }
+     else if ( ( defineBuffers[i].fetchType == DpiClob ) ||
+                 ( defineBuffers[i].fetchType == DpiBlob ) ||
+                 ( defineBuffers[i].fetchType == DpiBfile ) )
+     {
+       for (unsigned int j = 0; j < numRows; j++)
+       {
+         if (((Descriptor **)(defineBuffers[i].buf))[j])
+         {
+           Env::freeDescriptor(((Descriptor **)(defineBuffers[i].buf))[j],
+                               LobDescriptorType);
+         }
+       }
+     }
+
      free(defineBuffers[i].buf);
      free(defineBuffers[i].len);
      free(defineBuffers[i].ind);

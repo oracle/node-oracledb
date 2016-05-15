@@ -132,7 +132,7 @@ private:
   static NAN_SETTER(SetMetaData);
 
   static void clearFetchBuffer( Define* defineBuffers,
-                                unsigned int numCols );
+                                unsigned int numCols, unsigned int numRows );
 
 
   dpi::Stmt            *dpistmt_;

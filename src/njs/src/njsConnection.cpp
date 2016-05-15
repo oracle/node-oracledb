@@ -1505,14 +1505,17 @@ void Connection::Async_Execute (uv_work_t *req)
       }
 
       executeBaton->dpistmt->execute(0, executeBaton->autoCommit);
+
+      if ( executeBaton->getRS )
+      {
+        goto exitAsyncExecute;
+      }
+
       const dpi::MetaData* meta   = executeBaton->dpistmt->getMetaData();
       executeBaton->numCols       = executeBaton->dpistmt->numCols();
       executeBaton->columnNames   = new std::string[executeBaton->numCols];
       Connection::CopyMetaData( executeBaton->columnNames, meta,
                                 executeBaton->numCols );
-
-      if ( executeBaton->getRS )
-        goto exitAsyncExecute;
 
       Connection::DoDefines(executeBaton, meta, executeBaton->numCols);
       /* If any errors while creating define structures, bail out */
@@ -2300,15 +2303,23 @@ void Connection::DoDefines ( eBaton* executeBaton, const dpi::MetaData* meta,
  */
 void Connection::DoFetch (eBaton* executeBaton)
 {
+  NJSErrorType errNum = errSuccess;
   executeBaton->dpistmt->fetch ( executeBaton->maxRows );
   executeBaton->rowsFetched = executeBaton->dpistmt->rowsFetched();
-  Connection::Descr2Double ( executeBaton->defines,
-                             executeBaton->numCols,
-                             executeBaton->rowsFetched,
-                             executeBaton->getRS );
-  Connection::Descr2protoILob ( executeBaton,
-                                executeBaton->numCols,
-                                executeBaton->rowsFetched );
+  errNum = Connection::Descr2Double ( executeBaton->defines,
+                                      executeBaton->numCols,
+                                      executeBaton->rowsFetched,
+                                      executeBaton->getRS );
+  if ( !errNum )
+  {
+    Connection::Descr2protoILob ( executeBaton,
+                                  executeBaton->numCols,
+                                  executeBaton->rowsFetched );
+  }
+  else
+  {
+    executeBaton->error = NJSMessages::getErrorMsg ( errNum );
+  }
 }
 
 /*****************************************************************************/
@@ -2322,35 +2333,53 @@ void Connection::DoFetch (eBaton* executeBaton)
      rowsFetched   - rows fetched
      getRS         - boolean set for resultset
  */
-void Connection::Descr2Double( Define* defines, unsigned int numCols,
+NJSErrorType Connection::Descr2Double( Define* defines, unsigned int numCols,
                                unsigned int rowsFetched, bool getRS )
 {
-                                /* Special processing for certain data types */
-  for (unsigned int col = 0; col < numCols; col ++ )
+  NJSErrorType errNum = errSuccess;
+
+  /* Special processing for certain data types */
+  for (unsigned int col = 0; !errNum && ( col < numCols ); col ++ )
   {
-
     /* Special processing for datetime, as it is obtained as descriptors */
-
     if ( defines[col].dttmarr )
     {
       long double *dblArr = NULL;
-
-      defines[col].buf =
-      dblArr = (long double *)malloc ( sizeof ( long double ) *
-                                                rowsFetched );
-
-      for ( int row = 0; row < (int) rowsFetched; row ++ )
+      if ( !defines[col].buf )
       {
-        dblArr[row] = defines[col].dttmarr->getDateTime (row);
+        // size_t overflow check not required here as rowsFetched(unsigned int)
+        // multiplied by sizeof(long double) never cause size_t overflow
+        defines[col].buf =
+        dblArr =
+          (long double *)malloc ( sizeof ( long double ) * rowsFetched );
+
+        if( !defines[col].buf )
+        {
+          errNum = errInsufficientMemory;
+        }
       }
-      defines[col].buf = (void *) dblArr;
-      if ( !getRS )
+      else
       {
-        defines[col].dttmarr->release ();
-        defines[col].extbuf = NULL;
+        dblArr = (long double *) defines[col].buf;
+      }
+
+      if ( !errNum )
+      {
+        for ( int row = 0; row < (int) rowsFetched; row ++ )
+        {
+          dblArr[row] = defines[col].dttmarr->getDateTime (row);
+        }
+
+        if ( !getRS )
+        {
+          defines[col].dttmarr->release ();
+          defines[col].extbuf = NULL;
+        }
       }
     }
   }
+
+  return errNum;
 }
 
 /*****************************************************************************/
@@ -2511,13 +2540,6 @@ void Connection::Async_AfterExecute(uv_work_t *req)
     switch(executeBaton->st)
     {
       case DpiStmtSelect :
-        rowArray = Connection::GetRows(executeBaton);
-        if(!(executeBaton->error).empty())
-        {
-          argv[0] = v8::Exception::Error(Nan::New<v8::String>((executeBaton->error).c_str()).ToLocalChecked());
-          argv[1] = Nan::Undefined();
-          goto exitAsyncAfterExecute;
-        }
         if( executeBaton->getRS )
         {
           Local<Object> resultSet = Nan::New<FunctionTemplate>(
@@ -2542,6 +2564,13 @@ void Connection::Async_AfterExecute(uv_work_t *req)
         }
         else
         {
+          rowArray = Connection::GetRows(executeBaton);
+          if(!(executeBaton->error).empty())
+          {
+            argv[0] = v8::Exception::Error(Nan::New<v8::String>((executeBaton->error).c_str()).ToLocalChecked());
+            argv[1] = Nan::Undefined();
+            goto exitAsyncAfterExecute;
+          }
           Nan::Set(result, Nan::New<v8::String>("rows").ToLocalChecked(), rowArray);
           Nan::Set(result, Nan::New<v8::String>("resultSet").ToLocalChecked(), Nan::Undefined());
         }
@@ -2595,6 +2624,7 @@ void Connection::Async_AfterExecute(uv_work_t *req)
   }
 exitAsyncAfterExecute:
   Local<Function> callback = Nan::New<Function>(executeBaton->cb);
+  executeBaton->getRS = false;  // To cleanup in case of parent SQL execution
   delete executeBaton;
   Nan::MakeCallback( Nan::GetCurrentContext()->Global(), callback, 2, argv );
   if(tc.HasCaught())
