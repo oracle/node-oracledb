@@ -1,6 +1,6 @@
 # Test node-oracledb
 
-*Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved.*
+*Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved.*
 
 You may not use the identified files except in compliance with the Apache
 License, Version 2.0 (the "License.")
@@ -15,10 +15,19 @@ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-The node-oracledb test suite uses 'mocha', 'should' and 'async'.
-See LICENSE.md for relevant licenses.
+The node-oracledb test suite uses 'mocha', 'should' and 'async'.  See
+[LICENSE](https://github.com/oracle/node-oracledb/blob/master/LICENSE.md)
+for relevant licenses.
 
 ## 1. Preparations for running tests
+
+See [INSTALL](https://github.com/oracle/node-oracledb/blob/master/INSTALL.md)
+for installation requirements and more details.
+
+Note: the
+[test suite](https://github.com/oracle/node-oracledb/tree/master/test)
+is in GitHub.  From node-oracledb 1.9.1 it is not included when
+installing from npmjs.com with `npm install oracledb`.
 
 ### 1.1 Create a working directory
 
@@ -29,13 +38,7 @@ cd <some-directory>
 
 ### 1.2 Get node-oracledb from GitHub
 
-See [INSTALL](https://github.com/oracle/node-oracledb/blob/master/INSTALL.md)
-for installation requirements and more details.
-
-Note: test suite ships with GitHub repository. We have not provided tests with
-'npm install oracledb' from npmjs.com since 1.9.1.
-
-Clone project repository to local
+Clone the project repository:
 
 ```
 cd <some-directory>
@@ -49,9 +52,9 @@ cd <some-directory>/node-oracledb
 npm install
 ```
 
-Running `npm install` within node-oracledb/ directory will recompile
-oracledb module and install all its dependent modules which are listed
-in the `devDependencies` field of `package.json` file. Thus, 'mocha', 'async'
+Running `npm install` within the node-oracledb/ directory will recompile
+oracledb and install all its dependent modules.  These are listed
+in the `devDependencies` field of `package.json` file.  Thus, 'mocha', 'async'
 and 'should' modules are installed by this command.
 
 The test suite uses [mocha](https://www.npmjs.com/package/mocha),
@@ -60,8 +63,8 @@ The test suite uses [mocha](https://www.npmjs.com/package/mocha),
 
 ### 1.4 Configure Database credentials
 
-The database credentials for node-oracledb test suite are defined in dbconfig.js file.
-You can set the credentials via environment variables or dbconfig.js file.
+The database credentials for node-oracledb test suite are defined in `dbconfig.js`.
+They can also be set via environment variables shown in that file.
 
 
 ```
@@ -77,19 +80,19 @@ module.exports = {
 };
 ```
 
-Note: running test suite requires the schema that provided by credentials
-having below priviledges:
-- CREATE TABLE
-- CREATE SESSION
-- CREATE PROCEDURE
-- CREATE SEQUENCE
-- CREATE TRIGGER
-
 To use external authentication, set the `externalAuth` property to
 `true`.  Also make sure Oracle Database and the authentication service
 have been appropriately configured.  See
 [Documentation for External Authentication](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#extauth)
 for more details.
+
+Note: the test suite requires a schema with these privileges:
+
+- CREATE TABLE
+- CREATE SESSION
+- CREATE PROCEDURE
+- CREATE SEQUENCE
+- CREATE TRIGGER
 
 ### 1.5 Set NODE_PATH
 
@@ -144,4 +147,4 @@ assigned a number. The following number ranges have been chosen:
 
 ## 4. Test Index
 
-See `test/list.txt` for the list of existing tests.
+See [`test/list.txt`](https://github.com/oracle/node-oracledb/blob/master/test/list.txt) for the list of existing tests.
