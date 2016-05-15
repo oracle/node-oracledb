@@ -159,11 +159,11 @@ describe('22. dataTypeChar.js', function(){
       async.series([
         function(callback) {
           var proc = "CREATE OR REPLACE\n" +
-                     "PROCEDURE test(stringValue IN OUT NOCOPY CHAR)\n" +
+                     "PROCEDURE nodb_testproc(stringValue IN OUT NOCOPY CHAR)\n" +
                      "IS\n" +
                      "BEGIN\n" +
                      "  stringValue := '(' || stringValue || ')';\n" +
-                     "END test;\n";
+                     "END nodb_testproc;\n";
           connection.execute(
             proc,
             function(err) {
@@ -175,7 +175,7 @@ describe('22. dataTypeChar.js', function(){
         function(callback) {
           var bindvars = { stringValue: {type: oracledb.STRING, dir: oracledb.BIND_INOUT, val: 'Node.js'} };
           connection.execute(
-            "BEGIN test(:stringValue); END;",
+            "BEGIN nodb_testproc(:stringValue); END;",
             bindvars,
             function(err, result) {
               should.exist(err);
@@ -187,7 +187,7 @@ describe('22. dataTypeChar.js', function(){
         },
         function(callback) {
           connection.execute(
-            "DROP PROCEDURE test",
+            "DROP PROCEDURE nodb_testproc",
             function(err) {
               should.not.exist(err);
               callback();
@@ -201,11 +201,11 @@ describe('22. dataTypeChar.js', function(){
       async.series([
         function(callback) {
           var proc = "CREATE OR REPLACE\n" +
-                     "PROCEDURE test(stringValue OUT NOCOPY CHAR)\n" +
+                     "PROCEDURE nodb_testproc(stringValue OUT NOCOPY CHAR)\n" +
                      "IS\n" +
                      "BEGIN\n" +
                      "  stringValue := 'Hello Node.js World!';\n" +
-                     "END test;\n";
+                     "END nodb_testproc;\n";
           connection.execute(
             proc,
             function(err) {
@@ -217,7 +217,7 @@ describe('22. dataTypeChar.js', function(){
         function(callback) {
           var bindvars = { stringValue: {type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize:200} };
           connection.execute(
-            "BEGIN test(:stringValue); END;",
+            "BEGIN nodb_testproc(:stringValue); END;",
             bindvars,
             function(err, result) {
               should.not.exist(err);
@@ -230,7 +230,7 @@ describe('22. dataTypeChar.js', function(){
         },
         function(callback) {
           connection.execute(
-            "DROP PROCEDURE test",
+            "DROP PROCEDURE nodb_testproc",
             function(err) {
               should.not.exist(err);
               callback();
@@ -265,7 +265,7 @@ describe('22. dataTypeChar.js', function(){
           var proc = "CREATE OR REPLACE PACKAGE BODY\n" +
                      "nodb_testpack\n" +
                      "IS\n" +
-                     "  FUNCTION test(strings IN stringsType) RETURN CHAR\n" +
+                     "  FUNCTION nodb_testfunc(strings IN stringsType) RETURN CHAR\n" +
                      "  IS\n" +
                      "    s CHAR(2000) := '';\n" +
                      "  BEGIN\n" +
@@ -289,7 +289,7 @@ describe('22. dataTypeChar.js', function(){
             strings: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: ['John', 'Doe']}
           };
           connection.execute(
-            "BEGIN :result := nodb_testpack.test(:strings); END;",
+            "BEGIN :result := nodb_testpack.nodb_testfunc(:strings); END;",
             bindvars,
             function(err, result) {
               should.not.exist(err);
