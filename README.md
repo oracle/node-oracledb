@@ -5,7 +5,7 @@
 The node-oracledb add-on for Node.js powers high performance Oracle
 Database applications.
 
-Use node-oracledb to connect Node.js 0.10, 0.12, 4 LTS and 5 to
+Use node-oracledb to connect Node.js 0.10, 0.12, 4 and 5 to
 Oracle Database.
 
 The add-on is stable, well documented, and has a comprehensive test suite.
@@ -15,11 +15,12 @@ The node-oracledb project is open source and maintained by Oracle Corp.  The hom
 
 ### Node-oracledb supports:
 
+- [Promises](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#promiseoverview), Callbacks and Streams
 - [SQL and PL/SQL execution](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#sqlexecution)
-- Fetching of query results by [callbacks](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#resultsethandling) or [streams](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#streamingresults)
 - [REF CURSORs](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#refcursors)
 - [Large Objects: CLOBs and BLOBs](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#lobhandling)
-- [Query results as JavaScript objects or array ](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#queryoutputformats)
+- Oracle Database 12.1 [JSON datatype](http://docs.oracle.com/database/121/ADXDB/json.htm#ADXDB6246)
+- [Query results as JavaScript objects or arrays](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#queryoutputformats)
 - [Smart mapping between JavaScript and Oracle types with manual override available](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#typemap)
 - [Data binding using JavaScript objects or arrays](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#bind)
 - [Transaction Management](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#transactionmgt)
@@ -34,6 +35,10 @@ The node-oracledb project is open source and maintained by Oracle Corp.  The hom
   - [Fast Application Notification (FAN)](http://docs.oracle.com/database/121/ADFNS/adfns_avail.htm#ADFNS538)
   - [Runtime Load Balancing (RLB)](http://docs.oracle.com/database/121/ADFNS/adfns_perf_scale.htm#ADFNS515)
   - [Transparent Application Failover (TAF)](http://docs.oracle.com/database/121/ADFNS/adfns_avail.htm#ADFNS534)
+
+Various Oracle Database and Oracle Client versions, can be used.
+Oracle's cross-version compatibility allows one node-oracledb
+installation to connect to different database versions.
 
 We are actively working on supporting the best Oracle Database
 features, and on functionality requests from
@@ -56,7 +61,7 @@ See [INSTALL](https://github.com/oracle/node-oracledb/tree/master/INSTALL.md) fo
 
 There are examples in the [examples](https://github.com/oracle/node-oracledb/tree/master/examples) directory.
 
-### A simple query example:
+### A simple query example with callbacks:
 
 ```javascript
 var oracledb = require('oracledb');
@@ -90,6 +95,8 @@ With Oracle's sample HR schema, the output is:
 [ [ 60, 'IT' ], [ 90, 'Executive' ], [ 100, 'Finance' ] ]
 ```
 
+Node Promises can also be used.
+
 ## <a name="doc"></a> Documentation
 
 See [Documentation for the Oracle Database Node.js Add-on](https://github.com/oracle/node-oracledb/tree/master/doc/api.md).
@@ -98,9 +105,9 @@ See [Documentation for the Oracle Database Node.js Add-on](https://github.com/or
 
 See [CHANGELOG](https://github.com/oracle/node-oracledb/tree/master/CHANGELOG.md)
 
-## <a name="testing"></a> Testsuite
+## <a name="testing"></a> Test Suite
 
-To run the included testsuite see [test/README](https://github.com/oracle/node-oracledb/tree/master/test/README.md).
+To run the included test suite see [test/README](https://github.com/oracle/node-oracledb/tree/master/test/README.md).
 
 ## <a name="contrib"></a> Contributing
 

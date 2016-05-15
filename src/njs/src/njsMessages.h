@@ -76,9 +76,9 @@ typedef enum
   errInvalidValueArrayBind,
   errEmptyArray,
   errConnRequestTimeout,
-  errUsedInJS41,
-  errUsedInJS42,
-  errUsedInJS43,
+  errCannotConvertRsToStream,
+  errCannotInvokeRsMethods,
+  errResultSetAlreadyConverted,
 
   // New ones should be added here
 

@@ -2599,7 +2599,7 @@ void Connection::Async_AfterExecute(uv_work_t *req)
                       Nan::New<v8::String>("outBinds").ToLocalChecked(),
                       outBindValue,
                       v8::ReadOnly);
-        
+
         Nan::Set(result, Nan::New<v8::String>("rowsAffected").ToLocalChecked(), Nan::Undefined());
 
         Nan::Set(result, Nan::New<v8::String>("rows").ToLocalChecked(), Nan::Undefined());

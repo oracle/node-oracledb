@@ -718,7 +718,6 @@ describe('1. connection.js', function(){
 
   describe('1.6 Testing parameter assertions', function() {
     var conn1;
-    var sql = 'select 1 from dual';
 
     beforeEach('get connection ready', function(done) {
       oracledb.getConnection(credential, function(err, conn) {
@@ -735,37 +734,173 @@ describe('1. connection.js', function(){
       });
     });
 
-    it('1.6.1 too few params without a callback should throw error', function(done) {
+    it('1.6.1 too few params should throw an error', function(done) {
+      // This test returns a promise because the last parameter to execute is not
+      // a function. Normally, errors thrown in a promise would be directed to
+      // to a catch handler. In the case of an "accidental promise" the error
+      // could go undetected. Because of this, the promisify function in util.js
+      // uses process.nextTick to throw invalid number or type of params (NJS-009
+      // and NJS-006). This test has been updated to account for this behavior.
+      var promiseSupportEnabled = oracledb.Promise !== undefined;
+      var listeners = process.listeners('uncaughtException');
+
+      if (promiseSupportEnabled) {
+        process.removeAllListeners('uncaughtException');
+
+        process.once('uncaughtException', function(err) {
+          listeners.forEach(function(listener) {
+            process.on('uncaughtException', listener);
+          });
+
+          should.exist(err);
+
+          done();
+        });
+      }
+
+      // Using try catch for instances where promises are not supported or have
+      // been disabled by setting oracledb.Promise to something falsey.
       try {
-        conn1.execute(sql);
+        conn1.execute();
       } catch (err) {
+        if (promiseSupportEnabled) {
+          listeners.forEach(function(listener) {
+            process.on('uncaughtException', listener);
+          });
+        }
+
         should.exist(err);
+
         done();
       }
     });
 
-    it('1.6.2 too few params with a callback should pass error in callback', function(done) {
-      conn1.execute(function(err, result) {
-        should.exist(err);
-        done();
-      });
-    });
+    it('1.6.2 too many params should throw error', function(done) {
+      // This test returns a promise because the last parameter to execute is not
+      // a function. Normally, errors thrown in a promise would be directed to
+      // to a catch handler. In the case of an "accidental promise" the error
+      // could go undetected. Because of this, the promisify function in util.js
+      // uses process.nextTick to throw invalid number or type of params (NJS-009
+      // and NJS-006). This test has been updated to account for this behavior.
+      var promiseSupportEnabled = oracledb.Promise !== undefined;
+      var listeners = process.listeners('uncaughtException');
 
-    it('1.6.3 too many params without a callback should throw error', function(done) {
+      if (promiseSupportEnabled) {
+        process.removeAllListeners('uncaughtException');
+
+        process.once('uncaughtException', function(err) {
+          listeners.forEach(function(listener) {
+            process.on('uncaughtException', listener);
+          });
+
+          should.exist(err);
+
+          done();
+        });
+      }
+
+      // Using try catch for instances where promises are not supported or have
+      // been disabled by setting oracledb.Promise to something falsey.
       try {
         conn1.execute(1, 2, 3, 4, 5);
       } catch (err) {
+        if (promiseSupportEnabled) {
+          listeners.forEach(function(listener) {
+            process.on('uncaughtException', listener);
+          });
+        }
+        should.exist(err);
+
+        done();
+      }
+    });
+
+    it('1.6.3 wrong type for param 1 should throw an error', function(done) {
+      // Don't need to listen for unhandledRejection because a promise will not
+      // be returned as the last param is a function.
+      try {
+        conn1.execute(1, function() {});
+      } catch (err) {
         should.exist(err);
         done();
       }
     });
 
-    it('1.6.4 too many params with a callback should pass error in callback', function(done) {
-      conn1.execute(1, 2, 3, 4, function(err, result) {
+    it('1.6.4 wrong type for param 2 should throw an error', function(done) {
+      // This test returns a promise because the last parameter to execute is not
+      // a function. Normally, errors thrown in a promise would be directed to
+      // to a catch handler. In the case of an "accidental promise" the error
+      // could go undetected. Because of this, the promisify function in util.js
+      // uses process.nextTick to throw invalid number or type of params (NJS-009
+      // and NJS-006). This test has been updated to account for this behavior.
+      var promiseSupportEnabled = oracledb.Promise !== undefined;
+      var listeners = process.listeners('uncaughtException');
+
+      if (promiseSupportEnabled) {
+        process.removeAllListeners('uncaughtException');
+
+        process.once('uncaughtException', function(err) {
+          listeners.forEach(function(listener) {
+            process.on('uncaughtException', listener);
+          });
+
+          should.exist(err);
+
+          done();
+        });
+      }
+
+      // Using try catch for instances where promises are not supported or have
+      // been disabled by setting oracledb.Promise to something falsey.
+      try {
+        conn1.execute('select 1 from dual', 1);
+      } catch (err) {
+        if (promiseSupportEnabled) {
+          listeners.forEach(function(listener) {
+            process.on('uncaughtException', listener);
+          });
+        }
+
+        should.exist(err);
+
+        done();
+      }
+    });
+
+    it('1.6.5 wrong type for param 3 should throw an error', function(done) {
+      // Don't need to listen for unhandledRejection because a promise will not
+      // be returned as the last param is a function.
+      try {
+        conn1.execute('select 1 from dual', 1, function() {});
+      } catch (err) {
         should.exist(err);
         done();
+      }
+    });
+
+    it('1.6.6 wrong type for param 4 should throw an error', function(done) {
+      // Don't need to listen for unhandledRejection because a promise will not
+      // be returned as the last param is a function.
+      try {
+        conn1.execute('select 1 from dual', {}, 1, function() {});
+      } catch (err) {
+        should.exist(err);
+        done();
+      }
+    });
+  });
+
+  describe('1.7 Close method', function() {
+    it('1.7.1 close can be used as an alternative to release', function(done) {
+      oracledb.getConnection(credential, function(err, conn) {
+        should.not.exist(err);
+
+        conn.close(function(err) {
+          should.not.exist(err);
+          done();
+        });
       });
     });
-  })
+  });
 
-})
+});

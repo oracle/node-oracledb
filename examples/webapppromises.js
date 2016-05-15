@@ -16,10 +16,11 @@
  * limitations under the License.
  *
  * NAME
- *   webapp.js
+ *   webapppromises.js
  *
  * DESCRIPTION
- *   Shows a web based query using connections from connection pool.
+ *   Shows a web based query using connections from connection pool. This is
+ *   similar to webapp.js but uses promises.
  *
  *   This displays a table of employees in the specified department.
  *
@@ -41,8 +42,7 @@ var httpPort = 7000;
 // HTTP server that executes a query based on the URL parameter given.
 // The pool values shown are the default values.
 function init() {
-  oracledb.createPool(
-    {
+  oracledb.createPool({
       user: dbConfig.user,
       password: dbConfig.password,
       connectString: dbConfig.connectString,
@@ -50,13 +50,8 @@ function init() {
       poolMin: 0, // let the pool shrink completely
       poolIncrement: 1, // only grow the pool by one connection at a time
       poolTimeout: 0  // never terminate idle connections
-    },
-    function(err, pool) {
-      if (err) {
-        console.error("createPool() error: " + err.message);
-        return;
-      }
-
+  })
+    .then(function(pool) {
       // Create HTTP server and listen on port - httpPort
       http
         .createServer(function(request, response) {
@@ -65,8 +60,10 @@ function init() {
         .listen(httpPort, "localhost");
 
       console.log("Server running at http://localhost:" + httpPort);
-    }
-  );
+    })
+    .catch(function(err) {
+      console.error("createPool() error: " + err.message);
+    });
 }
 
 function handleRequest(request, response, pool) {
@@ -90,46 +87,42 @@ function handleRequest(request, response, pool) {
   }
 
   // Checkout a connection from the pool
-  pool.getConnection(function(err, connection) {
-    if (err) {
-      handleError(response, "getConnection() error", err);
-      return;
-    }
+  pool.getConnection()
+    .then(function(connection) {
+      // console.log("Connections open: " + pool.connectionsOpen);
+      // console.log("Connections in use: " + pool.connectionsInUse);
 
-    // console.log("Connections open: " + pool.connectionsOpen);
-    // console.log("Connections in use: " + pool.connectionsInUse);
+      connection.execute(
+        "SELECT employee_id, first_name, last_name " +
+        "FROM employees " +
+        "WHERE department_id = :id",
+        [deptid] // bind variable value
+      )
+        .then(function(result) {
+          displayResults(response, result, deptid);
 
-    connection.execute(
-      "SELECT employee_id, first_name, last_name " +
-      "FROM employees " +
-      "WHERE department_id = :id",
-      [deptid], // bind variable value
-      function(err, result) {
-        if (err) {
-          connection.release(function(err) {
-            if (err) {
+          /* Release the connection back to the connection pool */
+          connection.release()
+            .then(function() {
+              htmlFooter(response);
+            })
+            .catch(function(err) {
+              handleError(response, "normal release() error", err);
+            });
+        })
+        .catch(function(err) {
+          connection.release()
+            .catch(function(err) {
               // Just logging because handleError call below will have already
               // ended the response.
               console.error("execute() error release() error", err);
-            }
-          });
+            });
           handleError(response, "execute() error", err);
-          return;
-        }
-
-        displayResults(response, result, deptid);
-
-        /* Release the connection back to the connection pool */
-        connection.release(function(err) {
-          if (err) {
-            handleError(response, "normal release() error", err);
-          } else {
-            htmlFooter(response);
-          }
         });
-      }
-    );
-  });
+    })
+    .catch(function(err) {
+      handleError(response, "getConnection() error", err);
+    });
 }
 
 // Report an error

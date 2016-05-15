@@ -640,12 +640,14 @@ describe('2. pool.js', function(){
       );
     });
 
-    it('2.7.1 throws error if called after pool is terminated and a callback is not provided', function(done) {
+    // Skipping this test because assertions were added to the JS layer for all
+    // public methods. This now throws NJS-009: invalid number of parameters.
+    it.skip('2.7.1 throws error if called after pool is terminated and a callback is not provided', function(done) {
       pool1.terminate(function(err) {
         should.not.exist(err);
 
         try {
-          pool1.getConnection(1);
+          pool1.getConnection();
         } catch (err) {
           should.exist(err);
           (err.message).should.startWith('NJS-002: invalid pool');
@@ -953,4 +955,30 @@ describe('2. pool.js', function(){
       );
     });
   });
-})
+
+  describe('2.10 Close method', function(){
+    it('2.10.1 close can be used as an alternative to release', function(done) {
+      oracledb.createPool(
+        {
+          externalAuth      : credential.externalAuth,
+          user              : credential.user,
+          password          : credential.password,
+          connectString     : credential.connectString,
+          poolMin           : 0,
+          poolMax           : 1,
+          poolIncrement     : 1,
+          poolTimeout       : 1
+        },
+        function(err, pool){
+          should.not.exist(err);
+
+          pool.close(function(err) {
+            should.not.exist(err);
+
+            done();
+          });
+        }
+      );
+    });
+  });
+});

@@ -1038,7 +1038,7 @@ NAN_METHOD(ILob::Write)
   /* If iLob is invalid from JS, then throw an exception */
   NJS_CHECK_OBJECT_VALID2 ( iLob, info );
 
-  LobBaton *lobBaton = new LobBaton ( iLob->njsconn_->LOBCount (), 
+  LobBaton *lobBaton = new LobBaton ( iLob->njsconn_->LOBCount (),
                                       buffer_obj, callback );
 
   NJS_CHECK_NUMBER_OF_ARGS (lobBaton->error, info, 2, 2, exitWrite);

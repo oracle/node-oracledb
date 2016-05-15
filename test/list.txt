@@ -18,6 +18,15 @@
     1.5 Testing commit() & rollback() functions
         1.5.1 commit() function works well
         1.5.2 rollback() function works well
+    1.6 Testing parameter assertions
+        1.6.1 too few params should throw an error
+        1.6.2 too many params should throw error
+        1.6.3 wrong type for param 1 should throw an error
+        1.6.4 wrong type for param 2 should throw an error
+        1.6.5 wrong type for param 3 should throw an error
+        1.6.6 wrong type for param 4 should throw an error
+    1.7 Close method
+        1.7.1 close can be used as an alternative to release
 
 2. pool.js
     2.1 default values
@@ -57,6 +66,8 @@
         2.8.4 does not generate NJS-040 if request is queued for less time than queueTimeout
     2.9 connection request queue (_enableStats & _logStats functionality)_logStats must be called prior to terminating pool.
         2.9.1 works after the pool as been terminated
+    2.10 Close method
+        2.10.1 close can be used as an alternative to release
 
 
 3. examples.js
@@ -226,7 +237,7 @@
         12.7.2 maxRows option is ignored with REF Cursor
 
 13. stream.js
-    13.1 Testing ResultSet stream
+    13.1 Testing QueryStream
         13.1.1 stream results for oracle connection
         13.1.2 stream results for oracle connection (outFormat: oracledb.OBJECT)
         13.1.3 errors in query
@@ -238,6 +249,13 @@
         13.1.9 Read CLOBs after stream close
         13.1.10 meta data
         13.1.11 stream stress test
+    13.2 Testing QueryStream._close
+        13.2.1 should be able to stop the stream early with _close
+        13.2.2 should be able to stop the stream before any data
+        13.2.3 should invoke an optional callback passed to _close
+    13.3 Testing QueryStream\'s maxRows control
+        13.3.1 should use oracledb.maxRows for fetching
+        13.3.2 should default to 100 if oracledb.maxRows is falsey
 
 14. stream2.js
     14.1 Bind by position and return an array
@@ -248,7 +266,32 @@
     14.6 maxRows option is ignored as expect
     14.7 Negative - queryStream() has no parameters
     14.8 Negative - give invalid SQL as first parameter
-    14.9 Negatvie - give non-query SQL
+    14.9 Negative - give non-query SQL
+
+15. resultsetToQueryStream.js
+    15.1 Testing ResultSet.toQueryStream
+        15.1.1 should allow resultsets to be converted to streams
+    15.2 Testing ResultSet/QueryStream conversion errors
+        15.2.1 should prevent conversion to stream after getRow is invoked
+        15.2.2 should prevent conversion to stream after getRows is invoked
+        15.2.3 should prevent conversion to stream after close is invoked
+        15.2.4 should prevent invoking getRow after conversion to stream
+        15.2.5 should prevent invoking getRows after conversion to stream
+        15.2.6 should prevent invoking close after conversion to stream
+        15.2.7 should prevent calling toQueryStream more than once
+
+16. promises.js
+      16.1 returns a promise from oracledb.getConnection
+      16.2 returns a promise from oracledb.createPool
+      16.3 returns a promise from pool.terminate
+      16.4 returns a promise from pool.getConnection
+      16.5 returns a promise from connection.release
+      16.6 returns a promise from connection.execute
+      16.7 returns a promise from connection.commit
+      16.8 returns a promise form connection.rollback
+      16.9 returns a promise from resultSet.close
+      16.10 returns a promise from resultSet.getRow
+      16.11 returns a promise from resultSet.getRows
 
 21. datatypeAssist.js
 

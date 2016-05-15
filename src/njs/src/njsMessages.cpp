@@ -53,19 +53,19 @@ static const char *errMsg[] =
   "NJS-014: %s is a read-only property",           // errReadOnly
   "NJS-015: type was not specified for conversion", // errNoTypeForConversion
   "NJS-016: buffer is too small for OUT binds",    // errInsufficientBufferForBinds
-  "NJS-017: concurrent operations on resultSet are not allowed", // errBusyResultSet
-  "NJS-018: invalid result set",                   // errInvalidResultSet
-  "NJS-019: resultSet cannot be returned for non-query statements", // errInvalidNonQueryExecution
+  "NJS-017: concurrent operations on ResultSet are not allowed", // errBusyResultSet
+  "NJS-018: invalid ResultSet",                   // errInvalidResultSet
+  "NJS-019: ResultSet cannot be returned for non-query statements", // errInvalidNonQueryExecution
   "NJS-020: empty array was specified to fetch values as string", // errEmptyArrayForFetchAs
   "NJS-021: invalid type for conversion specified", // errInvalidTypeForConversion
-  "NJS-022: invalid LOB",                           // errInvalidLob
+  "NJS-022: invalid Lob",                           // errInvalidLob
   "NJS-023: concurrent operations on LOB are not allowed",  // errBusyLob
   "NJS-024: memory allocation failed",  // errInsufficientMemory
   "NJS-025: overflow when calculating results area size", // errResultsTooLarge
   "NJS-026: maxRows must be greater than zero",   // errInvalidmaxRows
   "NJS-027: unexpected SQL parsing error",        // errSQLSyntaxError
   "NJS-028: raw database type is not supported with DML Returning statements", // errBufferReturningInvalid
-  "NJS-029: Invalid object from javascript",      // errInvalidJSObject
+  "NJS-029: invalid object from JavaScript",      // errInvalidJSObject
   "NJS-030: connection cannot be released because Lob operations are in progress",  // errBusyConnLOB
   "NJS-031: connection cannot be released because ResultSet operations are in progress", // errBusyConnRS
   "NJS-032: connection cannot be released because a database call is in progress", // errBusyConnDB
@@ -77,10 +77,9 @@ static const char *errMsg[] =
   "NJS-038: maxArraySize value should be greater than 0", // errInvalidValueArrayBind
   "NJS-039: empty array is not allowed for IN bind", // errEmptyArray
   "NJS-040: connection request timeout",  // errConnRequestTimeout
-  "NJS-041: error used in JS layer 41",
-  "NJS-042: error used in JS Layer 42",
-  "NJS-043: error used in JS Layer 43",
-
+  "NJS-041: cannot convert ResultSet to QueryStream after invoking methods", // errCannotConvertRsToStream
+  "NJS-042: cannot invoke ResultSet methods after converting to QueryStream", // errCannotInvokeRsMethods
+  "NJS-043: ResultSet already converted to QueryStream", // errResultSetAlreadyConverted
 };
 
 string NJSMessages::getErrorMsg ( NJSErrorType err, ... )

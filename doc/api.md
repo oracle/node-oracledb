@@ -49,10 +49,11 @@ limitations under the License.
      - 3.2.11 [poolMin](#propdbpoolmin)
      - 3.2.12 [poolTimeout](#propdbpooltimeout)
      - 3.2.13 [prefetchRows](#propdbprefetchrows)
-     - 3.2.14 [queueRequests](#propdbqueuerequests)
-     - 3.2.15 [queueTimeout](#propdbqueuetimeout)
-     - 3.2.16 [stmtCacheSize](#propdbstmtcachesize)
-     - 3.2.17 [version](#propdbversion)
+     - 3.2.14 [Promise](#propdbpromise)
+     - 3.2.15 [queueRequests](#propdbqueuerequests)
+     - 3.2.16 [queueTimeout](#propdbqueuetimeout)
+     - 3.2.17 [stmtCacheSize](#propdbstmtcachesize)
+     - 3.2.18 [version](#propdbversion)
   - 3.3 [Oracledb Methods](#oracledbmethods)
      - 3.3.1 [createPool()](#createpool)
      - 3.3.2 [getConnection()](#getconnectiondb)
@@ -65,15 +66,16 @@ limitations under the License.
      - 4.1.5 [stmtCacheSize](#propconnstmtcachesize)
   - 4.2 [Connection Methods](#connectionmethods)
      - 4.2.1 [break()](#break)
-     - 4.2.2 [commit()](#commit)
-     - 4.2.3 [execute()](#execute)
-        - 4.2.3.1 [execute(): SQL Statement](#executesqlparam)
-        - 4.2.3.2 [execute(): Bind Parameters](#executebindParams)
-        - 4.2.3.3 [execute(): Options](#executeoptions)
-        - 4.2.3.4 [execute(): Callback Function](#executecallback)
-     - 4.2.4 [queryStream()](#querystream)
-     - 4.2.5 [release()](#release)
-     - 4.2.6 [rollback()](#rollback)
+     - 4.2.2 [close()](#connectionclose)
+     - 4.2.3 [commit()](#commit)
+     - 4.2.4 [execute()](#execute)
+        - 4.2.4.1 [execute(): SQL Statement](#executesqlparam)
+        - 4.2.4.2 [execute(): Bind Parameters](#executebindParams)
+        - 4.2.4.3 [execute(): Options](#executeoptions)
+        - 4.2.4.4 [execute(): Callback Function](#executecallback)
+     - 4.2.5 [queryStream()](#querystream)
+     - 4.2.6 [release()](#release)
+     - 4.2.7 [rollback()](#rollback)
 5. [Lob Class](#lobclass)
   - 5.1 [Lob Properties](#lobproperties)
      - 5.1.1 [chunkSize](#proplobchunksize)
@@ -92,8 +94,9 @@ limitations under the License.
      - 6.1.8 [queueTimeout](#proppoolqueueTimeout)
      - 6.1.9 [stmtCacheSize](#proppoolstmtcachesize)
   - 6.2 [Pool Methods](#poolmethods)
-     - 6.2.1 [getConnection()](#getconnectionpool)
-     - 6.2.2 [terminate()](#terminate)
+     - 6.2.1 [close()](#poolclose)
+     - 6.2.2 [getConnection()](#getconnectionpool)
+     - 6.2.3 [terminate()](#terminate)
 7. [ResultSet Class](#resultsetclass)
   - 7.1 [ResultSet Properties](#resultsetproperties)
      - 7.1.1 [metaData](#rsmetadata)
@@ -101,6 +104,7 @@ limitations under the License.
      - 7.2.1 [close()](#close)
      - 7.2.2 [getRow()](#getrow)
      - 7.2.3 [getRows()](#getrows)
+     - 7.2.4 [toQueryStream()](#toquerystream)
 8. [Connection Handling](#connectionhandling)
   - 8.1 [Connection Strings](#connectionstrings)
      - 8.1.1 [Easy Connect Syntax for Connection Strings](#easyconnect)
@@ -137,6 +141,8 @@ limitations under the License.
 15. [External Configuration](#oraaccess)
 16. [Globalization and National Language Support (NLS)](#nls)
 17. [End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend)
+18. [Promises in node-oracledb](#promiseoverview)
+  - 18.1 [Custom Promise Libraries](#custompromises)
 
 ## <a name="intro"></a> 1. Introduction
 
@@ -147,7 +153,7 @@ sections 2 - 7 and the user guide in subsequent sections.
 
 For how to install node-oracledb, see [INSTALL](https://github.com/oracle/node-oracledb/blob/master/INSTALL.md).
 
-### Example: Simple SELECT statement implementation in Node.js
+### Example: Simple SELECT statement in Node.js with Callbacks
 
 ```javascript
 var oracledb = require('oracledb');
@@ -185,6 +191,8 @@ With Oracle's sample HR schema, the output is:
 ```
 [ [ 60, 'IT' ], [ 90, 'Executive' ], [ 100, 'Finance' ] ]
 ```
+
+Node-oracledb can also use [Promises](#promiseoverview).
 
 There are more node-oracledb examples in the
 [examples](https://github.com/oracle/node-oracledb/tree/master/examples)
@@ -674,7 +682,36 @@ var oracledb = require('oracledb');
 oracledb.prefetchRows = 100;
 ```
 
-#### <a name="propdbqueuerequests"></a> 3.2.14 queueRequests
+#### <a name="propdbpromise"></a> 3.2.14 Promise
+
+```
+Promise Promise
+```
+
+Node-oracledb supports Promises on all methods.  The standard Promise
+library is used in Node 0.12 and greater.  Promise support is not
+enabled by default in Node 0.10.
+
+See [Promises in node-oracledb](#promiseoverview) for a discussion of
+using Promises.
+
+This property can be set to override or disable the Promise
+implementation.
+
+##### Example
+
+```javascript
+var mylib = require('myfavpromiseimplementation');
+oracledb.Promise = mylib;
+```
+
+Promises can be completely disabled by setting
+
+```javascript
+oracledb.Promise = null;
+```
+
+#### <a name="propdbqueuerequests"></a> 3.2.15 queueRequests
 
 ```
 Boolean queueRequests
@@ -701,7 +738,7 @@ var oracledb = require('oracledb');
 oracledb.queueRequests = false;
 ```
 
-#### <a name="propdbqueuetimeout"></a> 3.2.15 queueTimeout
+#### <a name="propdbqueuetimeout"></a> 3.2.16 queueTimeout
 
 ```
 Number queueTimeout
@@ -722,7 +759,7 @@ var oracledb = require('oracledb');
 oracledb.queueTimeout = 3000; // 3 seconds
 ```
 
-#### <a name="propdbstmtcachesize"></a> 3.2.16 stmtCacheSize
+#### <a name="propdbstmtcachesize"></a> 3.2.17 stmtCacheSize
 
 ```
 Number stmtCacheSize
@@ -749,7 +786,7 @@ var oracledb = require('oracledb');
 oracledb.stmtCacheSize = 30;
 ```
 
-#### <a name="propdbversion"></a> 3.2.17 version
+#### <a name="propdbversion"></a> 3.2.18 version
 ```
 readonly Number version
 ```
@@ -770,20 +807,19 @@ console.log("Driver version number is " + oracledb.version);
 
 ##### Prototype
 
+Callback (Asynchronous):
 ```
-void createPool(Object poolAttrs, function(Error error, Pool pool){});
+createPool(Object poolAttrs, function(Error error, Pool pool){});
 ```
-
-##### Return Value
-
-None
+Promise:
+```
+promise = createPool(Object poolAttrs);
+```
 
 ##### Description
 
 This method creates a pool of connections with the specified username,
 password and connection string.
-
-This is an asynchronous call.
 
 Internally, `createPool()` creates an [OCI Session
 Pool](https://docs.oracle.com/database/121/LNOCI/oci09adv.htm#LNOCI16617)
@@ -792,7 +828,8 @@ for each Pool object.
 The default properties may be overridden by specifying new properties
 in the `poolAttrs` parameter.
 
-A pool should be terminated with the [`terminate()`](#terminate) call.
+A pool should be terminated with the [`Pool.close()`](#poolclose)
+call, but only after all connections have been released.
 
 ##### Parameters
 
@@ -940,13 +977,14 @@ Callback function parameter | Description
 
 ##### Prototype
 
+Callback (Asynchronous):
 ```
-void getConnection(Object connAttrs, function(Error error, Connection conn){});
+getConnection(Object connAttrs, function(Error error, Connection conn){});
 ```
-
-##### Return Value
-
-None
+Promise:
+```
+promise = getConnection(Object connAttrs);
+```
 
 ##### Description
 
@@ -957,8 +995,6 @@ are used infrequently, this call may be more efficient than creating
 and managing a connection pool.  However, in most cases, Oracle
 recommends getting new connections from a
 [connection pool](#createpool).
-
-This is an asynchronous call.
 
 See [Connection Handling](#connectionhandling) for more information on
 connections.
@@ -1120,13 +1156,14 @@ connection is created in the pool.
 
 ##### Prototype
 
+Callback (Asynchronous):
 ```
-void break(function(Error error){});
+break(function(Error error){});
 ```
-
-##### Return Value
-
-None
+Promise:
+```
+promise = break();
+```
 
 ##### Description
 
@@ -1137,8 +1174,6 @@ the time the break is issued, the `break()` is effectively a no-op.
 
 If the running asynchronous operation is interrupted, its callback
 will return an error.
-
-This is an asynchronous call.
 
 ##### Parameters
 
@@ -1152,23 +1187,64 @@ Callback function parameter | Description
 ----------------------------|-------------
 *Error error* | If `break()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
-####  <a name="commit"></a> 4.2.2 commit()
+####  <a name="connectionclose"></a> 4.2.2 close()
 
 ##### Prototype
 
+Callback (Asynchronous):
 ```
-void commit(function(Error error){});
+close(function(Error error){});
+```
+Promise:
+```
+promise = close();
 ```
 
-##### Return Value
+##### Description
 
-None
+Releases a connection.  If the connection was obtained from the pool,
+the connection is returned to the pool and is available for reuse.
+
+Note: calling `close()` when connections are no longer required is
+strongly encouraged.  Releasing helps avoid resource leakage and can
+improve system efficiency.
+
+When a connection is released, any ongoing transaction on the
+connection is rolled back.
+
+After releasing a connection to a pool, there is no
+guarantee a subsequent `getConnection()` call gets back the same
+database connection.  The application must redo any ALTER SESSION
+statements on the new connection object, as required.
+
+##### Parameters
+
+```
+function(Error error)
+```
+
+The parameters of the callback function are:
+
+Callback function parameter | Description
+----------------------------|-------------
+*Error error* | If `close()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+
+####  <a name="commit"></a> 4.2.3 commit()
+
+##### Prototype
+
+Callback (Asynchronous):
+```
+commit(function(Error error){});
+```
+Promise:
+```
+promise = commit();
+```
 
 ##### Description
 
 This call commits the current transaction in progress on the connection.
-
-This is an asynchronous call.
 
 ##### Parameters
 
@@ -1182,29 +1258,28 @@ Callback function parameter | Description
 ----------------------------|-------------
 *Error error* | If `commit()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
-#### <a name="execute"></a> 4.2.3 execute()
+#### <a name="execute"></a> 4.2.4 execute()
 
 ##### Prototype
 
+Callback (Asynchronous):
 ```
-void execute(String sql, [Object bindParams, [Object options,]] function(Error error, [Object result]){});
+execute(String sql, [Object bindParams, [Object options,]] function(Error error, [Object result]){});
 ```
-
-##### Return Value
-
-None
+Promise:
+```
+promise = execute(String sql, [Object bindParams, [Object options]]);
+```
 
 ##### Description
 
 This call executes a SQL or PL/SQL statement.  See [SQL Execution](#sqlexecution) for examples.
 
-This is an asynchronous call.
-
 The statement to be executed may contain [IN binds](#inbind),
 [OUT or IN OUT](#outbind) bind values or variables, which are bound
 using either an object or an array.
 
-A callback function returns a `result` object, containing any fetched
+A callback function returns a [`result`](#executecallback) object, containing any fetched
 rows, the values of any OUT and IN OUT bind variables, and the number
 of rows affected by the execution of
 [DML](https://docs.oracle.com/database/121/CNCPT/glossary.htm#CNCPT2042)
@@ -1222,7 +1297,7 @@ Parameter | Description
 
 The parameters are discussed in the next sections.
 
-##### <a name="executesqlparam"></a> 4.2.3.1 `execute()`: SQL Statement
+##### <a name="executesqlparam"></a> 4.2.4.1 `execute()`: SQL Statement
 
 ```
 String sql
@@ -1231,7 +1306,7 @@ String sql
 The SQL or PL/SQL statement that `execute()` executes. The statement
 may contain bind variables.
 
-##### <a name="executebindParams"></a> 4.2.3.2 `execute()`: Bind Parameters
+##### <a name="executebindParams"></a> 4.2.4.2 `execute()`: Bind Parameters
 ```
 Object bindParams
 ```
@@ -1268,7 +1343,7 @@ Note `CURSOR` bind variables can only be used for PL/SQL OUT binds.
 
 See [Bind Parameters for Prepared Statements](#bind) for usage and examples.
 
-##### <a name="executeoptions"></a> 4.2.3.3 `execute()`: Options
+##### <a name="executeoptions"></a> 4.2.4.3 `execute()`: Options
 ```
 Object options
 ```
@@ -1336,7 +1411,7 @@ settings in the `execute()` call.  Use the global
 See [Result Type Mapping](#typemap) for more information on query type
 mapping.
 
-##### <a name="executecallback"></a> 4.2.3.4 `execute()`: Callback Function
+##### <a name="executecallback"></a> 4.2.4.4 `execute()`: Callback Function
 ```
 function(Error error, [Object result])
 ```
@@ -1407,17 +1482,17 @@ rows affected, for example the number of rows inserted. For non-DML
 statements such as queries, or if no rows are affected, then
 `rowsAffected` will be zero.
 
-#### <a name="querystream"></a> 4.2.4 queryStream()
+#### <a name="querystream"></a> 4.2.5 queryStream()
 
 ##### Prototype
 
 ```
-stream.Readable queryStream(String sql, [Object bindParams, [Object options]]);
+queryStream(String sql, [Object bindParams, [Object options]]);
 ```
 
 ##### Return Value
 
-This function will return a
+This method will return a
 [Readable Stream](https://nodejs.org/api/stream.html) for queries.
 
 ##### Description
@@ -1446,67 +1521,27 @@ See [Streaming Query Results](#streamingresults) for more information.
 
 See [execute()](#execute).
 
-#### <a name="release"></a> 4.2.5 release()
+#### <a name="release"></a> 4.2.6 release()
+
+An alias for [Connection.close()](#connectionclose).
+
+#### <a name="rollback"></a> 4.2.7 rollback()
 
 ##### Prototype
 
+Callback (Asynchronous):
 ```
-void release(function(Error error){});
+rollback(function(Error error){});
 ```
-
-##### Return Value
-
-None
-
-##### Description
-
-Releases a connection.  If the connection was obtained from the pool,
-the connection is returned to the pool.
-
-Note: calling `release()` when connections are no longer required is
-strongly encouraged.  Releasing helps avoid resource leakage and can
-improve system efficiency.
-
-When a connection is released, any ongoing transaction on the
-connection is rolled back.
-
-After releasing a connection to a pool, there is no
-guarantee a subsequent `getConnection()` call gets back the same
-database connection.  The application must redo any ALTER SESSION
-statements on the new connection object, as required.
-
-This is an asynchronous call.
-
-##### Parameters
-
+Promise:
 ```
-function(Error error)
+promise = rollback();
 ```
-
-The parameters of the callback function are:
-
-Callback function parameter | Description
-----------------------------|-------------
-*Error error* | If `release()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
-
-#### <a name="rollback"></a> 4.2.6 rollback()
-
-##### Prototype
-
-```
-void rollback(function(Error error){});
-```
-
-##### Return Value
-
-None
 
 ##### Description
 
 This call rolls back the current transaction in progress on the
 connection.
-
-This is an asynchronous call.
 
 ##### Parameters
 
@@ -1591,7 +1626,7 @@ is used.
 
 After the application finishes using a connection pool, it should
 release all connections and terminate the connection pool by calling
-the `terminate()` function on the Pool object.
+the `close()` method on the Pool object.
 
 See [Connection Pooling](#connpooling) for more information.
 
@@ -1686,30 +1721,62 @@ The number of statements to be cached in the
 
 ### <a name="poolmethods"></a> 6.2 Pool Methods
 
-#### <a name="getconnectionpool"></a> 6.2.1 getConnection()
+#### <a name="poolclose"></a> 6.2.1 close()
 
 ##### Prototype
 
+Callback (Asynchronous):
 ```
-void getConnection(function(Error error, Connection conn){});
+close(function(Error error){});
+```
+Promise:
+```
+promise = close();
 ```
 
-##### Return Value
+##### Description
 
-None
+This call terminates the connection pool.
+
+Any open connections should be released with [`Connection.close()`](#connectionclose)
+before `Pool.close()` is called.
+
+##### Parameters
+
+```
+function(Error error)
+```
+
+The parameters of the callback function are:
+
+Callback function parameter | Description
+----------------------------|-------------
+*Error error* | If `close()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+
+
+#### <a name="getconnectionpool"></a> 6.2.2 getConnection()
+
+##### Prototype
+
+Callback (Asynchronous):
+```
+getConnection(function(Error error, Connection conn){});
+```
+Promise:
+```
+promise = getConnection();
+```
 
 ##### Description
 
 This method obtains a connection from the connection pool.
 
 If a previously opened connection is available in the pool, that
-connection is returned. If all connections in the pool are in use, a
+connection is returned.  If all connections in the pool are in use, a
 new connection is created and returned to the caller, as long as the
 number of connections does not exceed the specified maximum for the
 pool. If the pool is at its maximum limit, the `getConnection()` call
 results in an error, such as *ORA-24418: Cannot open further sessions*.
-
-This is an asynchronous call.
 
 See [Connection Handling](#connectionhandling) for more information on
 connections.
@@ -1727,44 +1794,16 @@ Callback function parameter | Description
 *Error error* | If `getConnection()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 *Connection connection* | The newly created connection.   If `getConnection()` fails, `connection` will be NULL.  See [Connection class](#connectionclass) for more details.
 
-#### <a name="terminate"></a> 6.2.2 terminate()
+#### <a name="terminate"></a> 6.2.3 terminate()
 
-##### Prototype
-
-```
-void terminate(function(Error error){});
-```
-
-##### Return Value
-
-None
-
-##### Description
-
-This call terminates the connection pool.
-
-Any open connections should be released with [`release()`](#release)
-before `terminate()` is called.
-
-This is an asynchronous call.
-
-##### Parameters
-
-```
-function(Error error)
-```
-
-The parameters of the callback function are:
-
-Callback function parameter | Description
-----------------------------|-------------
-*Error error* | If `terminate()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+An alias for [Pool.close()](#poolclose).
 
 ## <a name="resultsetclass"></a> 7. ResultSet Class
 
 Result sets allow query results to fetched from the database one at a
-time, or in groups of rows.  This enables applications to process very
-large data sets.
+time, or in groups of rows.  They can also be converted to Readable
+Streams.  Result sets enable applications to process very large data
+sets.
 
 Result sets should also be used where the number of query rows cannot
 be predicted and may be larger than a sensible
@@ -1802,13 +1841,14 @@ create tables using unquoted, case-insensitive names.
 
 ##### Prototype
 
+Callback (Asynchronous):
 ```
-void close(function(Error error){});
+close(function(Error error){});
 ```
-
-##### Return Value
-
-None
+Promise:
+```
+promise = close();
+```
 
 ##### Description
 
@@ -1819,13 +1859,14 @@ of fetch or when no more rows are needed.
 
 ##### Prototype
 
+Callback (Asynchronous):
 ```
-void getRow(function(Error error, Object row){});
+getRow(function(Error error, Object row){});
 ```
-
-##### Return Value
-
-None
+Promise:
+```
+promise = getRow();
+```
 
 ##### Description
 
@@ -1837,19 +1878,44 @@ At the end of fetching, the `ResultSet` should be freed by calling [`close()`](#
 
 ##### Prototype
 
+Callback (Asynchronous):
 ```
-void getRows(Number numRows, function(Error error, Array rows){});
+getRows(Number numRows, function(Error error, Array rows){});
 ```
-
-##### Return Value
-
-None
+Promise:
+```
+promise = getRows(Number numRows);
+```
 
 ##### Description
 
 This call fetches `numRows` rows of the result set as an object or an array of column values, depending on the value of [outFormat](#propdboutformat).
 
 At the end of fetching, the `ResultSet` should be freed by calling [`close()`](#close).
+
+#### <a name="toquerystream"></a> 7.2.4 toQueryStream()
+
+##### Prototype
+
+```
+toQueryStream();
+```
+
+##### Return Value
+
+This method will return a
+[Readable Stream](https://nodejs.org/api/stream.html).
+
+##### Description
+
+This synchronous method converts a ResultSet into a stream.
+
+It can be used to make ResultSets from top-level queries or from REF
+CURSOR bind variables streamable.  To make top-level queries
+streamable, the alternative [`connection.queryStream()`](#querystream)
+method may be easier to use.
+
+See [Streaming Query Results](#streamingresults) for more information.
 
 ## <a name="connectionhandling"></a> 8. Connection Handling
 
@@ -1874,7 +1940,7 @@ oracledb.getConnection(
   });
 ```
 
-Connections should be released with [`release()`](#release) when no
+Connections should be released with [`Connection.close()`](#connectionclose) when no
 longer needed:
 
 ```javascript
@@ -1892,7 +1958,7 @@ oracledb.getConnection(
 
     . . .  // use connection
 
-    connection.release(
+    connection.close(
       function(err)
       {
         if (err) { console.error(err.message); }
@@ -2078,11 +2144,11 @@ oracledb.createPool (
   });
 ```
 
-Connections should be released with [`release()`](#release) when no
+Connections should be released with [`Connection.close()`](#connectionclose) when no
 longer needed:
 
 ```javascript
-    connection.release(
+    connection.close(
       function(err)
       {
         if (err) { console.error(err.message); }
@@ -2091,7 +2157,7 @@ longer needed:
 
 After an application finishes using a connection pool, it should
 release all connections and terminate the connection pool by calling
-the [`terminate()`](#terminate) method on the Pool object.
+the [`Pool.close()`](#poolclose) method.
 
 The growth characteristics of a connection pool are determined by the
 Pool attributes [`poolIncrement`](#proppoolpoolincrement),
@@ -2272,10 +2338,12 @@ number of open connections does not fall below `poolMin`.
 ## <a name="sqlexecution"></a> 9. SQL Execution
 
 A SQL or PL/SQL statement may be executed using the *Connection*
-[`execute()`](#execute) method.
+[`execute()`](#execute) method.  Either the callback style shown
+below, or [promises](#promiseoverview) may be used.
 
 After all database calls on the connection complete, the application
-should use the [`release()`](#release) call to release the connection.
+should use the [`Connection.close()`](#connectionclose) call to
+release the connection.
 
 Queries may optionally be streamed using the *Connection*
 [`queryStream()`](#querystream) method.
@@ -2327,8 +2395,9 @@ When all rows have been fetched, or the application does not want to
 continue getting more rows, then the result set should be freed using
 [`close()`](#close).
 
-REF CURSORS returned from a PL/SQL block via an `oracledb.CURSOR` OUT bind
-are also available as a `ResultSet`.
+REF CURSORS returned from a PL/SQL block via an `oracledb.CURSOR` OUT
+bind are also available as a `ResultSet`. See
+[REF CURSOR Bind Parameters](#refcursors).
 
 The format of each row will be an array or object, depending on the
 value of [outFormat](#propdboutformat).
@@ -2351,8 +2420,6 @@ connection.execute(
     fetchOneRowFromRS(connection, result.resultSet);
   });
 });
-
-. . .
 
 function fetchOneRowFromRS(connection, resultSet)
 {
@@ -2387,8 +2454,6 @@ connection.execute(
   });
 });
 
-. . .
-
 function fetchRowsFromRS(connection, resultSet, numRows)
 {
   resultSet.getRows( // get numRows rows
@@ -2397,11 +2462,14 @@ function fetchRowsFromRS(connection, resultSet, numRows)
     {
       if (err) {
          . . .                        // close the result set and release the connection
-      } else if (rows.length == 0) {  // no rows, or no more rows
-        . . .                         // close the result set and release the connection
-      } else if (rows.length > 0) {
-        console.log(rows);
-        fetchRowsFromRS(connection, resultSet, numRows);  // get next set of rows
+      } else if (rows.length > 0) {   // got some rows
+        console.log(rows);            // process rows
+        if (rows.length === numRows)  // might be more rows
+          fetchRowsFromRS(connection, resultSet, numRows);
+        else                          // got fewer rows than requested so must be at end
+          . . .                       // close the result set and release the connection
+      } else {                        // else no rows
+          . . .                       // close the result set and release the connection
       }
     });
 }
@@ -2412,14 +2480,18 @@ function fetchRowsFromRS(connection, resultSet, numRows)
 Streaming query results allows data to be piped to other streams, for
 example when dealing with HTTP responses.
 
-Use [`connection.queryStream()`](#querystream) to create a stream and
-listen for events.  Each row is returned as a `data` event.  Query
+Use [`connection.queryStream()`](#querystream) to create a stream from
+a top level query and listen for events.  You can also call
+[`connection.execute()`](#execute) and use
+[`toQueryStream()`](#toquerystream) to return a stream from the
+returned [`ResultSet`](#resultsetclass) or OUT bind REF CURSOR
+ResultSet.
+
+With streaming, each row is returned as a `data` event.  Query
 metadata is available via a `metadata` event.  The `end` event
 indicates the end of the query results.
 
 The connection must remain open until the stream is completely read.
-
-Query results must be fetched to completion to avoid resource leaks.
 
 The query stream implementation is a wrapper over the
 [ResultSet Class](#resultsetclass).  In particular, calls to
@@ -2432,10 +2504,14 @@ does not alter the number of rows returned by the stream since
 the value can be used to tune performance, as also can the value of
 [`oracledb.prefetchRows`](#propdbprefetchrows).
 
-There is no explicit ResultSet `close()` call for streaming query
-results.  This call will be executed internally when all data has been
-fetched.  If you need to be able to stop a query before retrieving all
-data, use a [ResultSet with callbacks](#resultsethandling).
+Query results must be fetched to completion to avoid resource leaks.
+The ResultSet `close()` call for streaming query results will be
+executed internally when all data has been fetched.  If you need to be
+able to stop a query before retrieving all data, use a
+[ResultSet with callbacks](#resultsethandling).  (Note: An
+experimental `querystream._close()` method exists to terminate a
+stream early.  It is under evaluation, may changed or be removed, and
+should not be used in production.)
 
 An example of streaming query results is:
 
@@ -2461,7 +2537,12 @@ stream.on('metadata', function (metadata) {
 // listen to any other standard stream events...
 ```
 
-See [selectstream.js](https://github.com/oracle/node-oracledb/tree/master/examples/selectstream.js) for a runnable example.
+See
+[selectstream.js](https://github.com/oracle/node-oracledb/tree/master/examples/selectstream.js)
+for a runnable example using `connection.queryStream()`.
+
+The [REF CURSOR Bind Parameters](#refcursors) section shows using
+`toQueryStream()` to return a stream for a REF CURSOR.
 
 #### <a name="queryoutputformats"></a> 9.1.4 Query Output Formats
 
@@ -3071,7 +3152,7 @@ connection.execute(
               console.error(err.message);
             else
               console.log("Text inserted successfully.");
-            connection.release(function(err) {
+            connection.close(function(err) {
               if (err) console.error(err.message);
             });
           });
@@ -3083,7 +3164,7 @@ connection.execute(
       function(err)
       {
         console.error(err);
-        connection.release(function(err) {
+        connection.close(function(err) {
           if (err) console.error(err.message);
         });
       });
@@ -3126,7 +3207,7 @@ connection.execute(
     lob.setEncoding('utf8');  // we want text, not binary output
     lob.on('error', function(err) { console.error(err); });
     lob.on('close', function() {
-      connection.release(function(err) { if (err) console.error(err.message); });
+      connection.close(function(err) { if (err) console.error(err.message); });
     });
 
     console.log('Writing to ' + outFileName);
@@ -3409,20 +3490,20 @@ If the `WHERE` clause matches no rows, the output would be:
 Oracle REF CURSORS can be fetched in node-oracledb by binding a
 `CURSOR` to a PL/SQL call.  The resulting bind variable becomes a
 [`ResultSet`](#resultsetclass), allowing rows to be fetched using
-[`getRow()`](#getrow) or [`getRows()`](#getrows).  When all rows have
-been fetched, or the application does not want to continue getting
-more rows, then the result set must be freed using
-[`close()`](#close).  If the REF cursor is not set to any value, or is
-set to NULL, in the PL/SQL procedure, then the returned `ResultSet` is
-invalid and methods like `getRows()` will return an error when
-invoked.
+[`getRow()`](#getrow) or [`getRows()`](#getrows).  The ResultSet can
+also be converted to a Readable Stream by using
+[`toQueryStream()`](#toquerystream).
+
+If using `getRow()` or `getRows()` the result set must be freed using
+[`close()`](#close) when all rows have been fetched, or when the
+application does not want to continue getting more rows.  If the REF
+CURSOR is set to NULL or is not set in the PL/SQL procedure then the
+returned `ResultSet` is invalid and methods like `getRows()` will
+return an error when invoked.
 
 When using Oracle Database 11gR2 or greater, then
 [`prefetchRows`](#propdbprefetchrows) can be used to tune the
 performance of fetching REF CURSORS.
-
-See [refcursor.js](https://github.com/oracle/node-oracledb/tree/master/examples/refcursor.js)
-for a complete example.
 
 Given a PL/SQL procedure defined as:
 
@@ -3444,25 +3525,22 @@ This PL/SQL procedure can be called in node-oracledb using:
 ```javascript
 var oracledb = require('oracledb');
 
-. . .
-
 var numRows = 10;  // number of rows to return from each call to getRows()
 
+var plsql = "BEGIN get_emp_rs(:sal, :cursor); END;";
 var bindvars = {
   sal:  6000,
   cursor:  { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
 }
 
 connection.execute(
-  "BEGIN get_emp_rs(:sal, :cursor); END;",
+  plsql,
   bindvars,
   function(err, result)
   {
     if (err) { . . . }
     fetchRowsFromRS(connection, result.outBinds.cursor, numRows);
   });
-
-. . .
 
 function fetchRowsFromRS(connection, resultSet, numRows)
 {
@@ -3472,15 +3550,72 @@ function fetchRowsFromRS(connection, resultSet, numRows)
     {
       if (err) {
          . . .                        // close the result set and release the connection
-      } else if (rows.length == 0) {  // no rows, or no more rows
-        . . .                         // close the result set and release the connection
-      } else if (rows.length > 0) {
-        console.log(rows);
-        fetchRowsFromRS(connection, resultSet, numRows);  // get next set of rows
+      } else if (rows.length > 0) {   // got some rows
+        console.log(rows);            // process rows
+        if (rows.length === numRows)  // might be more rows
+          fetchRowsFromRS(connection, resultSet, numRows);
+        else                          // got fewer rows than requested so must be at end
+          . . .                       // close the result set and release the connection
+      } else {                        // else no rows
+          . . .                       // close the result set and release the connection
       }
     });
 }
 ```
+
+See [refcursor.js](https://github.com/oracle/node-oracledb/tree/master/examples/refcursor.js)
+for a complete example.
+
+To convert the REF CURSOR ResultSet to a stream, use
+[`toQueryStream()`](#toquerystream).  With the PL/SQL and bind values
+from the previous examples, the code would become:
+
+```javascript
+connection.execute(
+  plsql,
+  bindvars,
+  function(err, result)
+  {
+    if (err) { . . . }
+    fetchRCFromStream(connection, result.outBinds.cursor);
+  });
+
+function fetchRCFromStream(connection, cursor)
+{
+  var stream = cursor.toQueryStream();
+
+  stream.on('error', function (error) {
+    // console.log("stream 'error' event");
+    console.error(error);
+    return;
+  });
+
+  stream.on('metadata', function (metadata) {
+    // console.log("stream 'metadata' event");
+    console.log(metadata);
+  });
+
+  stream.on('data', function (data) {
+    // console.log("stream 'data' event");
+    console.log(data);
+  });
+
+  stream.on('end', function () {
+    // console.log("stream 'end' event");
+    connection.release(
+      function(err) {
+        if (err) {
+          console.error(err.message);
+        }
+      });
+  });
+}
+```
+
+The connection must remain open until the stream is completely read.
+Query results must be fetched to completion to avoid resource leaks.
+The ResultSet `close()` call for streaming query results will be
+executed internally when all data has been fetched.
 
 ### <a name="lobbinds"></a> 12.5 LOB Bind Parameters
 
@@ -3881,3 +4016,142 @@ node-oracledb attributes are set.  Applications can also find the
 current values by querying the Oracle data dictionary or using PL/SQL
 procedures such as `DBMS_APPLICATION_INFO.READ_MODULE()` with the
 understanding that these require round-trips to the database.
+
+## <a name="promiseoverview"></a> 18. Promises in node-oracledb
+
+Node-oracledb supports Promises with all asynchronous methods.  The native Promise
+implementation is used in Node 0.12 and greater.  Promise support is not
+enabled by default in Node 0.10.
+
+If an asynchronous method is invoked without a callback, it returns a
+Promise:
+
+```javascript
+var oracledb = require('oracledb');
+
+oracledb.getConnection(
+  {
+    user          : "hr",
+    password      : "welcome",
+    connectString : "localhost/XE"
+  })
+  .then(function(conn) {
+    return conn.execute(
+      "SELECT department_id, department_name " +
+        "FROM departments " +
+        "WHERE manager_id < :id",
+      [110]  // bind value for :id
+    )
+      .then(function(result) {
+        console.log(result.rows);
+        return conn.close();
+      })
+      .catch(function(err) {
+        console.error(err);
+        return conn.close();
+      });
+  })
+  .catch(function(err) {
+    console.error(err);
+  });
+```
+
+With Oracle's sample HR schema, the output is:
+
+```
+[ [ 60, 'IT' ], [ 90, 'Executive' ], [ 100, 'Finance' ] ]
+```
+
+Notice there are two promise "chains": one to get a connection and the
+other to use it.  This is required because it is only possible to
+refer to the connection within the function to which it was passed.
+
+When invoking asynchronous methods, it is possible to accidentally
+get a Promise by forgetting to pass a callback function:
+
+```javascript
+oracledb.getConnection(
+  {
+    user          : "hr",
+    password      : "welcome",
+    connectString : "localhost/WRONG_SERVICE_NAME"
+  });
+  . . .
+```
+
+Since the returned promise will not have a catch block, as the
+developer intended to use the callback programming style, any
+rejections that occur will go unnoticed.  Node.js 4.0 added the
+`unhandledRejection` event can prevent such rejections from going
+unnoticed:
+
+```javascript
+process.on('unhandledRejection', (reason, p) => {
+  console.error("Unhandled Rejection at: ", p, " reason: ", reason);
+  // application specific logging, throwing an error, or other logic here
+});
+
+oracledb.getConnection(
+  {
+    user          : "hr",
+    password      : "welcome",
+    connectString : "localhost/WRONG_SERVICE_NAME"
+  });
+  . . .
+```
+
+Whereas the code without the `unhandledRejection` exception silently
+exited, adding the handler could, for example, show:
+
+```
+$ node myapp.js
+Unhandled Rejection at:  Promise {
+  <rejected> [Error: ORA-12514: TNS:listener does not currently know of service requested in connect descriptor
+] }  reason:  [Error: ORA-12514: TNS:listener does not currently know of service requested in connect descriptor
+]
+```
+
+### <a name="custompromises"></a> 18.1 Custom Promise Libraries
+
+The Promise implementation is designed to be overridden, allowing a
+custom Promise library to be used.  An external library can also be
+used to add Promise support to Node 0.10.
+
+```javascript
+var mylib = require('myfavpromiseimplementation');
+oracledb.Promise = mylib;
+```
+
+Promises can be completely disabled by setting
+
+```javascript
+oracledb.Promise = null;
+```
+
+If your code uses the promise style in Node 0.10 but you have not
+installed your own promise library then you will get an error like:
+
+```
+$ node mypromiseapp.js
+
+node_modules/oracledb/lib/util.js:53
+    throw new Error(getErrorMessage(errorCode, messageArg1));
+          ^
+Error: NJS-009: invalid number of parameters
+    at Object.assert (node_modules/oracledb/lib/util.js:53:11)
+    at Oracledb.getConnection (node_modules/oracledb/lib/oracledb.js:71:12)
+    at Oracledb.getConnection (node_modules/oracledb/lib/util.js:72:19)
+    at Object.<anonymous> (mypromiseapp.js:8:10)
+    at Module._compile (module.js:456:26)
+    at Object.Module._extensions..js (module.js:474:10)
+    at Module.load (module.js:356:32)
+    at Function.Module._load (module.js:312:12)
+    at Function.Module.runMain (module.js:497:10)
+    at startup (node.js:119:16)
+```
+
+Because node-oracledb Promises support is not enabled by default when
+using Node 0.10, the callback API is expected.  The error stack trace
+indicates that line 10 of `mypromiseapp.js` forgot to pass the
+callback.  Either install your own Promise library or use the callback
+programming style.
