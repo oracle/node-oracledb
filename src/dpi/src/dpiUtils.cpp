@@ -67,12 +67,12 @@ static void ociCallCommon(sword rc, void *handle, ub4 errType)
   if (rc == OCI_INVALID_HANDLE)
     throw ExceptionImpl(DpiOciInvalidHandle);
 
-  OraText ociErrorMsg[OCI_ERROR_MAXMSG_SIZE];
+  OraText ociErrorMsg[OCI_ERROR_MAXMSG_SIZE2];
   sb4     ociErrorNo = 0;
-  memset(ociErrorMsg, 0, OCI_ERROR_MAXMSG_SIZE);
+  memset(ociErrorMsg, 0, OCI_ERROR_MAXMSG_SIZE2);
 
   rc = OCIErrorGet(handle, 1, NULL, &ociErrorNo, ociErrorMsg,
-                   OCI_ERROR_MAXMSG_SIZE-1, errType);
+                   OCI_ERROR_MAXMSG_SIZE2-1, errType);
   if (rc)
     throw ExceptionImpl(DpiErrUnkOciError);
   else

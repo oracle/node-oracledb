@@ -43,18 +43,16 @@ namespace dpi
 
 enum DpiError                          // error type
 {
-  DpiErrNoError   = 0, // "DPI not an error"
-  DpiErrInternal,      // "DPI internal error"
-  DpiErrUnkOciError,   // "Could not get OCI error message"
-  DpiErrNoEnv,         // "No OCI environment handle created"
-  DpiErrInvalidState,  // "Invalid state while working with timestamp"
-  DpiErrUninitialized, // "Uninitialized state while working with timestamp"
+  DpiErrNoError   = 0,
+  DpiErrInternal,
+  DpiErrUnkOciError,
+  DpiErrNoEnv,
+  DpiErrInvalidState,
+  DpiErrUninitialized,
   DpiErrExtAuth,
-       // "user and password should not be set when using external authentication"
   DpiOciInvalidHandle,
-    // "Invalid OCI Handle/Descriptor or invalid parameter for OCI handle/descriptor allocation call"
-  DpiErrMemAllocFail,   // "Memory allocatio failed"
-  DpiErrNullValue,      // "Unexpected NULL value"
+  DpiErrMemAllocFail,
+  DpiErrNullValue,
 };
 
 
