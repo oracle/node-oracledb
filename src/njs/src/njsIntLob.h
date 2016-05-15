@@ -84,7 +84,7 @@ typedef struct LobBaton
   RefCounter         counter;
 
   Nan::Persistent<Function> cb;
-
+  Nan::Persistent<Object> lobbuf;
   LobBaton( unsigned int& count, Local<Function> callback ):
     error(""), dpienv(NULL), dpiconn(NULL), iLob(NULL), writebuf(NULL),
     writelen(0), counter( count )
@@ -92,9 +92,18 @@ typedef struct LobBaton
     cb.Reset( callback );
   }
 
+  LobBaton( unsigned int& count, Local<Object> buffer_obj, Local<Function> callback ):
+    error(""), dpienv(NULL), dpiconn(NULL), iLob(NULL), writebuf(NULL),
+    writelen(0), counter( count )
+  {
+    cb.Reset( callback );
+    lobbuf.Reset(buffer_obj);
+  }
+
   ~LobBaton ()
    {
      cb.Reset();
+     lobbuf.Reset();
    }
 
 } LobBaton;

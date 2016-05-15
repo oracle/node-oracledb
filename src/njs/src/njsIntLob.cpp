@@ -1029,7 +1029,7 @@ NAN_METHOD(ILob::Write)
 {
 
   Local<Function>  callback;
-  Local<Object> buffer_obj;
+  Local<Object> buffer_obj = info[0]->ToObject();
   ILob            *iLob;
 
   NJS_GET_CALLBACK(callback, info);
@@ -1038,7 +1038,8 @@ NAN_METHOD(ILob::Write)
   /* If iLob is invalid from JS, then throw an exception */
   NJS_CHECK_OBJECT_VALID2 ( iLob, info );
 
-  LobBaton *lobBaton = new LobBaton ( iLob->njsconn_->LOBCount (), callback );
+  LobBaton *lobBaton = new LobBaton ( iLob->njsconn_->LOBCount (), 
+                                      buffer_obj, callback );
 
   NJS_CHECK_NUMBER_OF_ARGS (lobBaton->error, info, 2, 2, exitWrite);
 
@@ -1050,7 +1051,6 @@ NAN_METHOD(ILob::Write)
 
   lobBaton->iLob = iLob;
 
-  buffer_obj = info[0]->ToObject();
   lobBaton->writebuf = Buffer::Data(buffer_obj);
   lobBaton->writelen = Buffer::Length(buffer_obj);
 
