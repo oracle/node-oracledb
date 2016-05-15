@@ -17,7 +17,7 @@ limitations under the License.
 
 ## Contents
 
-1. [Overview](#installation)
+1. [Overview](#overview)
 2. [Node-oracledb Installation on Linux with Instant Client RPMs](#instrpm)
 3. [Node-oracledb Installation on Linux with Instant Client ZIP files](#instzip)
 4. [Node-oracledb Installation on Linux with a Local Database](#instoh)
