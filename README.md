@@ -30,7 +30,7 @@ The node-oracledb project is open source and maintained by Oracle Corp.  The hom
 - [Statement Caching](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#stmtcache)
 - [Client Result Caching](http://docs.oracle.com/database/121/ADFNS/adfns_perf_scale.htm#ADFNS464)
 - [End-to-end Tracing, Mid-tier Authentication, and Auditing](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#endtoend)
-- High Availability Features
+- Oracle High Availability Features
   - [Fast Application Notification (FAN)](http://docs.oracle.com/database/121/ADFNS/adfns_avail.htm#ADFNS538)
   - [Runtime Load Balancing (RLB)](http://docs.oracle.com/database/121/ADFNS/adfns_perf_scale.htm#ADFNS515)
   - [Transparent Application Failover (TAF)](http://docs.oracle.com/database/121/ADFNS/adfns_avail.htm#ADFNS534)
@@ -45,7 +45,7 @@ Prerequisites:
 
 - [Python 2.7](https://www.python.org/downloads/)
 - C Compiler with support for C++ 11 (Xcode, gcc, Visual Studio or similar)
-- The small, free [Oracle Instant Client](http://www.oracle.com/technetwork/database/features/instant-client/index-100365.html) "basic" and "SDK" packages if your database is remote.  Or use a locally installed database such as the free [Oracle XE](http://www.oracle.com/technetwork/database/database-technologies/express-edition/overview/index.html) release
+- The small, free [Oracle Instant Client](http://www.oracle.com/technetwork/database/features/instant-client/index-100365.html) "basic" and "SDK" packages if your database is remote.  Or use the libraries and headers from a locally installed database such as the free [Oracle XE](http://www.oracle.com/technetwork/database/database-technologies/express-edition/overview/index.html) release
 - Set `OCI_LIB_DIR` and `OCI_INC_DIR` during installation if the Oracle libraries and headers are in a non-default location
 
 Run `npm install oracledb` to install from the [NPM registry](https://www.npmjs.com/package/oracledb).
