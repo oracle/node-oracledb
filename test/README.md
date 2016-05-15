@@ -1,6 +1,6 @@
-# Testing node-oracledb
+# Test node-oracledb
 
-*Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved.*
+*Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved.*
 
 You may not use the identified files except in compliance with the Apache
 License, Version 2.0 (the "License.")
@@ -27,48 +27,45 @@ mkdir <some-directory>
 cd <some-directory>
 ```
 
-### 1.2 Install node-oracledb
+### 1.2 Get node-oracledb from GitHub
 
 See [INSTALL](https://github.com/oracle/node-oracledb/blob/master/INSTALL.md)
 for installation requirements and more details.
 
-Install with:
+Note: test suite ships with GitHub repository. We have not provided tests with
+'npm install oracledb' from npmjs.com since 1.9.1.
+
+Clone project repository to local
 
 ```
-npm install oracledb
-```
-
-Alternatively use a GitHub clone:
-
-```
+cd <some-directory>
 git clone https://github.com/oracle/node-oracledb.git
-npm install node-oracledb
 ```
 
-### 1.3 Install test-dependent modules
+### 1.3 Build
+
+```
+cd <some-directory>/node-oracledb
+npm install
+```
+
+Running `npm install` within node-oracledb/ directory will recompile
+oracledb module and install all its dependent modules which are listed
+in the `devDependencies` field of `package.json` file. Thus, 'mocha', 'async'
+and 'should' modules are installed by this command.
 
 The test suite uses [mocha](https://www.npmjs.com/package/mocha),
 [async](https://www.npmjs.com/package/async) and
 [should](https://www.npmjs.com/package/should).
 
-```
-cd <some-directory>/node_modules/oracledb
-npm install
-```
-
-Note: Running `npm install` within oracledb/ directory will recompile
-oracledb module and install all its dependent modules which are listed
-in `devDependencies` field in `package.json` file. So 'mocha', 'async'
-and 'should' modules are installed by this command.
-
 ### 1.4 Configure Database credentials
 
 The database credentials for node-oracledb test suite are defined in dbconfig.js file.
 You can set the credentials via environment variables or dbconfig.js file.
-Change the credentials to a user who has privileges to connect and create tables.
+
 
 ```
-vi <some-directory>/node_modules/oracledb/test/dbconfig.js
+vi <some-directory>/node-oracledb/test/dbconfig.js
 ```
 
 ```javascript
@@ -80,56 +77,71 @@ module.exports = {
 };
 ```
 
+Note: running test suite requires the schema that provided by credentials
+having below priviledges:
+- CREATE TABLE
+- CREATE SESSION
+- CREATE PROCEDURE
+- CREATE SEQUENCE
+- CREATE TRIGGER
+
 To use external authentication, set the `externalAuth` property to
 `true`.  Also make sure Oracle Database and the authentication service
 have been appropriately configured.  See
 [Documentation for External Authentication](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#extauth)
 for more details.
 
-## 2. Running tests
+### 1.5 Set NODE_PATH
+
+```bash
+export NODE_PATH=<some-directory>/node-oracledb/lib
+```
+
+## 2. Run tests
 
 ### 2.1 Run the complete test suite
 
-#### On Unix-like systems
+#### 2.1.1 On Unix-like systems
 
 ```
-cd <some-directory>/node_modules/oracledb
+cd <some-directory>/node-oracledb
 npm test
 ```
 
 This calls the `test` script defined in `oracledb/package.json`.
 
-#### On Windows
+#### 2.1.2 On Windows
 
 ```
-cd <some-directory>/node_modules/oracledb
+cd <some-directory>/node_oracledb
 npm run-script testWindows
 ```
 
 This calls the `testWindows` script defined in `oracledb/package.json`.
-See [npm scripts](https://docs.npmjs.com/misc/scripts) for more infomation
+
+See [npm scripts](https://docs.npmjs.com/misc/scripts) for more information
 about how npm handles the "scripts" field of `package.json`.
 
 ### 2.2 Run specified test(s)
 
 ```
-cd <some-directory>/node_modules/oracledb
+cd <some-directory>/node_oracledb
 <mocha-executable-file-directory>/mocha test/<test-names>
 ```
 
 See [mochajs.org](http://mochajs.org/) for more information on running tests with mocha.
 
-## 3. Adding Tests
+## 3. Add Tests
 See [CONTRIBUTING](https://github.com/oracle/node-oracledb/blob/master/CONTRIBUTING.md)
 for general information on contribution requirements.
 
 For easy correlation between results and test code, each test is
-assigned a number.  The following number ranges have been chosen:
+assigned a number. The following number ranges have been chosen:
 
 - 1  - 20  are reserved for basic functional tests
 - 21 - 50  are reserved for data type supporting tests
 - 51 onwards are for other tests
 
-## 4. Test List
+## 4. Test Index
 
 See `test/list.txt` for the list of existing tests.
