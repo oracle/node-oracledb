@@ -340,7 +340,7 @@ describe('58. properties.js', function() {
       }
     })
 
-    it('58.2.8 queueRequests', function() {
+    it.skip('58.2.8 queueRequests', function() {
       var t = pool.queueRequests;
       t.should.be.a.Boolean;
 
@@ -352,7 +352,7 @@ describe('58. properties.js', function() {
       }
     })
 
-    it('58.2.9 queueTimeout', function() {
+    it.skip('58.2.9 queueTimeout', function() {
       var t = pool.queueTimeout;
       t.should.be.a.Number;
 
