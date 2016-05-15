@@ -648,8 +648,16 @@ NAN_SETTER(Oracledb::SetFetchAsString)
 
   oracledb->fetchAsStringTypesCount_ = array->Length ();
 
+  // Overflow check is not required as number of fetchAsString is NOT expected
+  // to be huge.
   oracledb->fetchAsStringTypes_ = (DataType *)malloc (
                                       array->Length() * sizeof ( DataType ) );
+  if ( !oracledb->fetchAsStringTypes_ )
+  {
+    msg = NJSMessages::getErrorMsg ( errInsufficientMemory ) ;
+    NJS_SET_EXCEPTION ( msg.c_str (), (int) msg.length () );
+  }
+
   for ( unsigned int t = 0 ; t < array->Length () ; t ++ )
   {
     DataType type = (DataType)
@@ -1048,10 +1056,13 @@ const DataType * Oracledb::getFetchAsStringTypes () const
     unsigned int count = fetchAsStringTypesCount_;
 
     types = (DataType * )malloc ( sizeof ( DataType ) * count ) ;
-
-    for ( unsigned int i = 0 ; i < count ; i ++ )
+    // Memory allocation failure is reported to application by the caller.
+    if ( types )
     {
-      types[i] = fetchAsStringTypes_[i];
+      for ( unsigned int i = 0 ; i < count ; i ++ )
+      {
+        types[i] = fetchAsStringTypes_[i];
+      }
     }
   }
 

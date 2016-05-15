@@ -102,6 +102,12 @@ void ResultSet::setResultSet ( dpi::Stmt *stmt, eBaton *executeBaton )
 
     this->fetchAsStringTypes_ = (DataType * ) malloc (
                                                 count * sizeof ( DataType ) );
+    if ( !this->fetchAsStringTypes_ )
+    {
+      executeBaton->error = NJSMessages::getErrorMsg ( errInsufficientMemory );
+      goto exitSetResultSet;
+    }
+
     for ( unsigned int i = 0 ; i < count ; i ++ )
     {
       this->fetchAsStringTypes_[i] = executeBaton->fetchAsStringTypes[i] ;
@@ -121,6 +127,12 @@ void ResultSet::setResultSet ( dpi::Stmt *stmt, eBaton *executeBaton )
   if ( executeBaton->getRS && executeBaton->fetchInfo )
   {
     this->fetchInfo_ = new FetchInfo[executeBaton->fetchInfoCount];
+    if ( !this->fetchInfo_ )
+    {
+      executeBaton->error = NJSMessages::getErrorMsg ( errInsufficientMemory );
+      goto exitSetResultSet;
+    }
+
     for ( unsigned int i = 0; i < executeBaton->fetchInfoCount; i ++ )
     {
       this->fetchInfo_[i].type = executeBaton->fetchInfo[i].type;
@@ -132,6 +144,22 @@ void ResultSet::setResultSet ( dpi::Stmt *stmt, eBaton *executeBaton )
   {
     this->fetchInfo_      = NULL;
     this->fetchInfoCount_ = 0;
+  }
+
+exitSetResultSet:
+  if ( !executeBaton->error.empty () )
+  {
+    if ( this -> fetchAsStringTypes_ )
+    {
+      free ( this -> fetchAsStringTypes_ ) ;
+      this -> fetchAsStringTypes_ = NULL;
+    }
+
+    if ( this->fetchInfo_ )
+    {
+      delete [] this -> fetchInfo_ ;
+      this -> fetchInfo_ = NULL ;
+    }
   }
 }
 

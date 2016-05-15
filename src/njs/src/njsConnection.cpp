@@ -472,6 +472,15 @@ NAN_METHOD(Connection::Execute)
   executeBaton->dpiconn      = connection->dpiconn_;
   executeBaton->njsconn      = connection;
 
+  // In case of no fetchAs and memory allocation failure fetchAsStringTypes
+  // will be NULL.  Check the combination of Count & types.
+  if ( ( executeBaton->fetchAsStringTypesCount > 0 ) &&
+       !executeBaton->fetchAsStringTypes )
+  {
+    executeBaton->error = NJSMessages::getErrorMsg ( errInsufficientMemory );
+    goto exitExecute;
+  }
+
   if(info.Length() > 2)
   {
     Connection::ProcessBinds(info, 1, executeBaton);
@@ -2497,6 +2506,8 @@ void Connection::Async_AfterExecute(uv_work_t *req)
     argv[0] = Nan::Undefined();
     Local<Object> result = Nan::New<v8::Object>();
     Local<Value> rowArray;
+    Local<Value> outBindValue;   // v8 Value for any out binds
+
     switch(executeBaton->st)
     {
       case DpiStmtSelect :
@@ -2509,14 +2520,23 @@ void Connection::Async_AfterExecute(uv_work_t *req)
         }
         if( executeBaton->getRS )
         {
-          Nan::Set(result, Nan::New<v8::String>("rows").ToLocalChecked(), Nan::Undefined());
-          Local<Object> resultSet = Nan::New<FunctionTemplate>(ResultSet::resultSetTemplate_s)->
-                                GetFunction() ->NewInstance();
+          Local<Object> resultSet = Nan::New<FunctionTemplate>(
+              ResultSet::resultSetTemplate_s)->GetFunction() ->NewInstance();
 
           /* ResultSet case, the statement object is ready for fetching */
-         (Nan::ObjectWrap::Unwrap<ResultSet> (resultSet))->
-                                  setResultSet( executeBaton->dpistmt,
-                                                executeBaton);
+          (Nan::ObjectWrap::Unwrap<ResultSet> (resultSet))->
+                       setResultSet( executeBaton->dpistmt, executeBaton);
+
+          if ( !executeBaton->error.empty () )
+          {
+            argv[0] = v8::Exception::Error (
+                                       Nan::New<v8::String> (
+                           (executeBaton->error).c_str()).ToLocalChecked ());
+            argv[1] = Nan::Undefined ();
+            goto exitAsyncAfterExecute;
+          }
+
+          Nan::Set(result, Nan::New<v8::String>("rows").ToLocalChecked(), Nan::Undefined());
 
           Nan::Set(result, Nan::New<v8::String>("resultSet").ToLocalChecked(), resultSet);
         }
@@ -2531,11 +2551,28 @@ void Connection::Async_AfterExecute(uv_work_t *req)
                                                     executeBaton->columnNames,
                                                     executeBaton->numCols));
         break;
-      case DpiStmtBegin :
-      case DpiStmtDeclare :
-      case DpiStmtCall :
+
+      case DpiStmtBegin:
+      case DpiStmtDeclare:
+      case DpiStmtCall:
+        outBindValue = Connection::GetOutBinds(executeBaton);
+        // If any error report in callback
+        if ( !executeBaton->error.empty () )
+        {
+          argv[0] = v8::Exception::Error (
+                      Nan::New<v8::String> (
+                           (executeBaton->error).c_str()).ToLocalChecked ());
+          argv[1] = Nan::Undefined ();
+          goto exitAsyncAfterExecute;
+        }
+
+        Nan::ForceSet(result,
+                      Nan::New<v8::String>("outBinds").ToLocalChecked(),
+                      outBindValue,
+                      v8::ReadOnly);
+        
         Nan::Set(result, Nan::New<v8::String>("rowsAffected").ToLocalChecked(), Nan::Undefined());
-        Nan::ForceSet(result, Nan::New<v8::String>("outBinds").ToLocalChecked(),Connection::GetOutBinds(executeBaton), v8::ReadOnly);
+
         Nan::Set(result, Nan::New<v8::String>("rows").ToLocalChecked(), Nan::Undefined());
         Nan::Set(result, Nan::New<v8::String>("metaData").ToLocalChecked(), Nan::Undefined());
         break;
@@ -2609,6 +2646,8 @@ v8::Local<v8::Value> Connection::GetRows (eBaton* executeBaton)
 {
   Nan::EscapableHandleScope scope;
   Local<Array> rowsArray;
+  Local<Value> val;
+
   switch(executeBaton->outFormat)
   {
     case NJS_ROWS_ARRAY :
@@ -2618,7 +2657,15 @@ v8::Local<v8::Value> Connection::GetRows (eBaton* executeBaton)
         Local<Array> row = Nan::New<v8::Array>(executeBaton->numCols);
         for(unsigned int j = 0; j < executeBaton->numCols; j++)
         {
-          Nan::Set(row, j, Connection::GetValue(executeBaton, true, j, i));
+          val = Connection::GetValue ( executeBaton, true, j, i );
+          if ( executeBaton->error.empty ())
+          {
+            Nan::Set(row, j, val);
+          }
+          else
+          {
+            goto exitGetRows;
+          }
         }
         Nan::Set(rowsArray, i, row);
       }
@@ -2631,10 +2678,18 @@ v8::Local<v8::Value> Connection::GetRows (eBaton* executeBaton)
 
         for(unsigned int j = 0; j < executeBaton->numCols; j++)
         {
-          Nan::Set(row, Nan::New<v8::String>(executeBaton->columnNames[j].c_str(),
-                               (int) executeBaton->columnNames[j].length()).ToLocalChecked(),
-                   Connection::GetValue(executeBaton, true, j, i));
-
+          val = Connection::GetValue ( executeBaton, true, j, i );
+          if ( executeBaton->error.empty () )
+          {
+            Nan::Set(row,
+                     Nan::New<v8::String>(executeBaton->columnNames[j].c_str(),
+                 (int) executeBaton->columnNames[j].length()).ToLocalChecked(),
+                     val );
+          }
+          else
+          {
+            goto exitGetRows;
+          }
         }
         Nan::Set(rowsArray, i, row);
       }
@@ -2767,6 +2822,10 @@ Local<Value> Connection::GetValueRefCursor ( eBaton *executeBaton,
     (Nan::ObjectWrap::Unwrap<ResultSet> (resultSet))->
                        setResultSet( (dpi::Stmt*)(bind->value),
                                      executeBaton);
+    if ( !executeBaton->error.empty () )
+    {
+      value = Nan::Null ();
+    }
     value = resultSet;
   }
   else
@@ -3024,10 +3083,19 @@ v8::Local<v8::Value> Connection::GetOutBindArray ( eBaton *executeBaton )
     {
       Local<Value> val ;
       val = Connection::GetValue ( executeBaton, false, index );
-      Nan::Set(arrayBinds, it, val );
-      it ++;
+      if ( executeBaton->error.empty() )
+      {
+        Nan::Set(arrayBinds, it, val );
+        it ++;
+      }
+      else
+      {
+        goto exitGetOutBindArray;
+      }
     }
   }
+
+exitGetOutBindArray:
   return scope.Escape(arrayBinds);
 }
 
@@ -3057,11 +3125,20 @@ v8::Local<v8::Value> Connection::GetOutBindObject ( eBaton *executeBaton )
       binds[index]->key.erase(binds[index]->key.begin());
 
       val = Connection::GetValue ( executeBaton, false, index );
-      Nan::Set( objectBinds, Nan::New<v8::String>( binds[index]->key.c_str(),
-                        (int) binds[index]->key.length() ).ToLocalChecked(),
-                        val );
+      if ( executeBaton->error.empty () )
+      {
+        Nan::Set( objectBinds,
+                  Nan::New<v8::String>( binds[index]->key.c_str(),
+                  (int) binds[index]->key.length() ).ToLocalChecked(),
+                  val );
+      }
+      else
+      {
+        goto exitGetOutBindObject;
+      }
     }
   }
+exitGetOutBindObject:
   return scope.Escape(objectBinds);
 }
 
