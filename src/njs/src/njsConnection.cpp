@@ -2428,9 +2428,9 @@ void Connection::Descr2protoILob( eBaton *executeBaton, unsigned int numCols,
 
           for (unsigned int i = 0; i < col; i++)
           {
-            if ((defines[col].fetchType == DpiClob) ||
-                (defines[col].fetchType == DpiBlob) ||
-                (defines[col].fetchType == DpiBfile))
+            if ((defines[i].fetchType == DpiClob) ||
+                (defines[i].fetchType == DpiBlob) ||
+                (defines[i].fetchType == DpiBfile))
             {
               for (unsigned int j = 0; j <  executeBaton->rowsFetched; j++)
               {
