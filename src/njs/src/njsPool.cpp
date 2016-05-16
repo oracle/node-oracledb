@@ -74,17 +74,19 @@ Pool::~Pool(){}
 void Pool::setPool( dpi::SPool *dpipool, Oracledb* oracledb, unsigned int poolMax,
                     unsigned int poolMin, unsigned int poolIncrement,
                     unsigned int poolTimeout, unsigned stmtCacheSize,
-                    unsigned int lobPrefetchSize)
+                    unsigned int lobPrefetchSize, Local<Object> jsOradb )
 {
-  this->dpipool_       = dpipool;
-  this->isValid_       = true;
-  this->oracledb_      = oracledb;
-  this->poolMax_       = poolMax;
-  this->poolMin_       = poolMin;
-  this->poolIncrement_ = poolIncrement;
-  this->poolTimeout_   = poolTimeout;
-  this->stmtCacheSize_ = stmtCacheSize;
+  this->dpipool_         = dpipool;
+  this->isValid_         = true;
+  this->oracledb_        = oracledb;
+  this->poolMax_         = poolMax;
+  this->poolMin_         = poolMin;
+  this->poolIncrement_   = poolIncrement;
+  this->poolTimeout_     = poolTimeout;
+  this->stmtCacheSize_   = stmtCacheSize;
   this->lobPrefetchSize_ = lobPrefetchSize;
+
+  this->jsParent_.Reset ( jsOradb );
 }
 
 /*****************************************************************************/
@@ -395,7 +397,7 @@ NAN_METHOD(Pool::GetConnection)
 
   Pool *njsPool = Nan::ObjectWrap::Unwrap<Pool>(info.Holder());
 
-  poolBaton *connBaton = new poolBaton ( callback );
+  poolBaton *connBaton = new poolBaton ( callback, info.Holder() );
 
   NJS_CHECK_OBJECT_VALID3 ( njsPool, connBaton->error, exitGetConnection);
   NJS_CHECK_NUMBER_OF_ARGS ( connBaton->error, info, 1, 1, exitGetConnection );
@@ -491,7 +493,8 @@ void Pool::Async_AfterGetConnection(uv_work_t *req)
     Local<Object> connection = lft->GetFunction()-> NewInstance();
     (Nan::ObjectWrap::Unwrap<Connection> (connection))->
                                  setConnection( connBaton->dpiconn,
-                                                connBaton->njspool->oracledb_ );
+                                                connBaton->njspool->oracledb_,
+                                                Nan::New( connBaton->jsPool ) );
     argv[1] = connection;
   }
 
@@ -521,7 +524,7 @@ NAN_METHOD(Pool::Terminate)
 
   Pool *njsPool = Nan::ObjectWrap::Unwrap<Pool>(info.Holder());
 
-  poolBaton *terminateBaton = new poolBaton ( callback );
+  poolBaton *terminateBaton = new poolBaton ( callback, info.Holder() );
 
   NJS_CHECK_OBJECT_VALID3 (njsPool, terminateBaton->error, exitTerminate);
   NJS_CHECK_NUMBER_OF_ARGS ( terminateBaton->error, info, 1, 1, exitTerminate );
@@ -608,6 +611,11 @@ void Pool::Async_AfterTerminate(uv_work_t *req)
     terminateBaton-> njspool-> isValid_ = false;
   }
 
+  /*
+   * When we release the iLob, we have to clear the reference of
+   * its parent.
+   */
+  terminateBaton->njspool->jsParent_.Reset ();
   Local<Function> callback = Nan::New<Function>(terminateBaton->cb);
   delete terminateBaton;
   Nan::MakeCallback( Nan::GetCurrentContext()->Global(),

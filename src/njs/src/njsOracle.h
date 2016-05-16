@@ -187,31 +187,32 @@ class Pool;
 
 typedef struct connectionBaton
 {
-  uv_work_t req;
-  std::string user;
-  std::string pswrd;
-  std::string connStr;
-  std::string connClass;
-  bool externalAuth;
+  uv_work_t                  req;
+  std::string                user;
+  std::string                pswrd;
+  std::string                connStr;
+  std::string                connClass;
+  bool                       externalAuth;
   std::string error;
 
-  int poolMax;
-  int poolMin;
-  int poolIncrement;
-  int poolTimeout;
-  int stmtCacheSize;
-  unsigned int lobPrefetchSize;
+  int                        poolMax;
+  int                        poolMin;
+  int                        poolIncrement;
+  int                        poolTimeout;
+  int                        stmtCacheSize;
+  unsigned int               lobPrefetchSize;
 
-  unsigned int maxRows;
-  unsigned int outFormat;
-  Nan::Persistent<Function> cb;
-  dpi::Env*   dpienv;
-  dpi::Conn*  dpiconn;
-  dpi::SPool* dpipool;
+  unsigned int               maxRows;
+  unsigned int               outFormat;
+  Nan::Persistent<Function>  cb;
+  dpi::Env*                  dpienv;
+  dpi::Conn*                 dpiconn;
+  dpi::SPool*                dpipool;
+  Nan::Persistent<Object>    jsOradb;
 
   Oracledb *oracledb;
 
-  connectionBaton( Local<Function> callback ) :
+  connectionBaton( Local<Function> callback, Local<Object> jsOradbObj ) :
                       user(""), pswrd(""), connStr(""), connClass(""),
                       externalAuth(false), error(""),
                       poolMax(0), poolMin(0), poolIncrement(0),
@@ -220,11 +221,13 @@ typedef struct connectionBaton
                       dpiconn(NULL), dpipool(NULL)
   {
     cb.Reset( callback );
+    jsOradb.Reset ( jsOradbObj );
   }
 
   ~connectionBaton()
    {
      cb.Reset();
+     jsOradb.Reset ();
    }
 
 }connectionBaton;

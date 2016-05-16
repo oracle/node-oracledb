@@ -69,25 +69,29 @@ class ResultSet;
 **/
 typedef struct rsBaton
 {
-  uv_work_t            req;
-  std::string          error;
-  bool                 fetchMultiple;   // set for getRows() method.
-  bool                 errOnActiveOrInvalid;
-                                        // set if going to exit upon already
-                                        // active or invalid
-  eBaton               *ebaton;
-  unsigned int         numRows;         // rows to be fetched.
-  ResultSet*           njsRS;           // resultset object.
+  uv_work_t                 req;
+  std::string               error;
+  bool                      fetchMultiple; // set for getRows() method.
+  bool                      errOnActiveOrInvalid;
+                                           // set if going to exit upon already
+                                           // active or invalid
+  eBaton                    *ebaton;
+  unsigned int              numRows;       // rows to be fetched.
+  ResultSet*                njsRS;         // resultset object.
+  Nan::Persistent<Object>   jsRS;
 
-  rsBaton( unsigned int& count, Local<Function> callback )
+  rsBaton( unsigned int& count, Local<Function> callback,
+           Local<Object> jsRSObj, Local<Object> jsConn )
     :  error(""), fetchMultiple(false), errOnActiveOrInvalid(false),
        numRows(0), njsRS(NULL)
   {
-    ebaton = new eBaton( count, callback );
+    jsRS.Reset ( jsRSObj );
+    ebaton = new eBaton( count, callback, jsConn );
   }
 
   ~rsBaton()
    {
+     jsRS.Reset ();
      if(ebaton)
      {
        delete ebaton;
@@ -135,20 +139,21 @@ private:
                                 unsigned int numCols, unsigned int numRows );
 
 
-  dpi::Stmt            *dpistmt_;
-  dpi::Env             *dpienv_;
-  Connection           *njsconn_;
-  State                state_;
-  bool                 rsEmpty_;
-  Define               *defineBuffers_;
-  unsigned int         numCols_;
-  unsigned int         fetchRowCount_;
-  unsigned int         outFormat_;
-  const dpi::MetaData  *meta_;
-  DataType             *fetchAsStringTypes_;
-  unsigned int         fetchAsStringTypesCount_;
-  FetchInfo            *fetchInfo_;
-  unsigned int         fetchInfoCount_;
+  dpi::Stmt                 *dpistmt_;
+  dpi::Env                  *dpienv_;
+  Connection                *njsconn_;
+  State                     state_;
+  bool                      rsEmpty_;
+  Define                    *defineBuffers_;
+  unsigned int              numCols_;
+  unsigned int              fetchRowCount_;
+  unsigned int              outFormat_;
+  const dpi::MetaData       *meta_;
+  DataType                  *fetchAsStringTypes_;
+  unsigned int              fetchAsStringTypesCount_;
+  FetchInfo                 *fetchInfo_;
+  unsigned int              fetchInfoCount_;
+  Nan::Persistent<Object>   jsParent_;
 };
 
 

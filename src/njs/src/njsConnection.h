@@ -165,8 +165,10 @@ typedef struct eBaton
   FetchInfo            *fetchInfo;       // Conversion meta data
   Nan::Persistent<Function> cb;
   RefCounter                counter;
+  Nan::Persistent<Object>   jsConn;
 
-  eBaton( unsigned int& count, Local<Function> callback ) :
+  eBaton( unsigned int& count, Local<Function> callback,
+           Local<Object> jsConnObj ) :
              sql(""), error(""), dpienv(NULL), dpiconn(NULL), njsconn(NULL),
              rowsAffected(0), maxRows(0), prefetchRows(0),
              getRS(false), autoCommit(false), rowsFetched(0),
@@ -177,11 +179,13 @@ typedef struct eBaton
              counter ( count )
   {
     cb.Reset( callback );
+    jsConn.Reset ( jsConnObj );
   }
 
   ~eBaton ()
    {
      cb.Reset ();
+     jsConn.Reset ();
      if( !binds.empty() )
      {
        for( unsigned int index = 0 ;index < binds.size(); index++ )
@@ -255,8 +259,7 @@ typedef struct eBaton
 class Connection: public Nan::ObjectWrap
 {
 public:
-  void setConnection (dpi::Conn*, Oracledb* oracledb);
-  // Define Connection Constructor
+  void setConnection ( dpi::Conn*, Oracledb* oracledb, Local<Object> obj );
   static Nan::Persistent<FunctionTemplate> connectionTemplate_s;
   static void Init (Handle<Object> target);
   static Local<Value> GetRows (eBaton* executeBaton);
@@ -325,6 +328,7 @@ private:
                                           NJSErrorType errType,
                                           string property);
 
+  // Define Connection Constructor
   Connection ();
   ~Connection ();
 
@@ -460,9 +464,10 @@ private:
    * Counters to see whether connection is busy or not with LOB, ResultSet or
    * DB operations. This counters used to prevent releasing busy connection.
    */
-  unsigned int   lobCount_;    // LOB operations counter
-  unsigned int   rsCount_;     // ResultSet operations counter
-  unsigned int   dbCount_;     // Connection or DB operations counter
+  unsigned int              lobCount_;    // LOB operations counter
+  unsigned int              rsCount_;     // ResultSet operations counter
+  unsigned int              dbCount_;     // Connection or DB operations counter
+  Nan::Persistent<Object>   jsParent_;
 
 };
 

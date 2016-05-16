@@ -210,6 +210,8 @@ void ILob::setILob(eBaton *executeBaton, ProtoILob *protoILob)
     dpiconn_               = executeBaton->dpiconn;
     svch_                  = executeBaton->dpiconn->getSvch();
 
+    this->jsParent_.Reset ( executeBaton->jsConn );
+
     // error
     errh_                  = protoILob->errh_;
     protoILob->errh_       = NULL;
@@ -368,6 +370,11 @@ NAN_METHOD(ILob::Release)
     return;
   }
 
+  /*
+   * When we release the iLob, we have to clear the reference of
+   * its parent jsConn.
+   */
+  iLob->jsParent_.Reset ();
   iLob->cleanup();
 
   info.GetReturnValue().SetUndefined();
@@ -831,7 +838,7 @@ NAN_METHOD(ILob::Read)
 {
 
   Local<Function>  callback;
-  ILob            *iLob;
+  ILob             *iLob;
 
   NJS_GET_CALLBACK(callback, info);
   iLob = Nan::ObjectWrap::Unwrap<ILob>(info.Holder());
@@ -839,7 +846,8 @@ NAN_METHOD(ILob::Read)
   /* If iLob object is invalid from JS, then throw an exception */
   NJS_CHECK_OBJECT_VALID2 (iLob, info);
 
-  LobBaton *lobBaton = new LobBaton ( iLob->njsconn_->LOBCount (), callback );
+  LobBaton *lobBaton = new LobBaton ( iLob->njsconn_->LOBCount (), callback,
+                                      info.Holder() );
 
   NJS_CHECK_NUMBER_OF_ARGS (lobBaton->error, info, 1, 1, exitRead);
 
@@ -1030,7 +1038,7 @@ NAN_METHOD(ILob::Write)
 
   Local<Function>  callback;
   Local<Object> buffer_obj = info[0]->ToObject();
-  ILob            *iLob;
+  ILob             *iLob;
 
   NJS_GET_CALLBACK(callback, info);
   iLob = Nan::ObjectWrap::Unwrap<ILob>(info.Holder());
@@ -1038,8 +1046,8 @@ NAN_METHOD(ILob::Write)
   /* If iLob is invalid from JS, then throw an exception */
   NJS_CHECK_OBJECT_VALID2 ( iLob, info );
 
-  LobBaton *lobBaton = new LobBaton ( iLob->njsconn_->LOBCount (),
-                                      buffer_obj, callback );
+  LobBaton *lobBaton = new LobBaton ( iLob->njsconn_->LOBCount (), buffer_obj,
+                                      callback, info.Holder() );
 
   NJS_CHECK_NUMBER_OF_ARGS (lobBaton->error, info, 2, 2, exitWrite);
 

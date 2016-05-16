@@ -717,7 +717,7 @@ NAN_METHOD(Oracledb::GetConnection)
   NJS_GET_CALLBACK ( callback, info );
 
   Oracledb* oracledb = Nan::ObjectWrap::Unwrap<Oracledb> ( info.Holder() );
-  connectionBaton *connBaton = new connectionBaton ( callback );
+  connectionBaton *connBaton = new connectionBaton ( callback, info.Holder() );
 
   NJS_CHECK_OBJECT_VALID3 (oracledb, connBaton->error, exitGetConnection);
 
@@ -835,7 +835,8 @@ void Oracledb::Async_AfterGetConnection (uv_work_t *req)
     Local<Object> connection = lft->GetFunction()-> NewInstance();
     (Nan::ObjectWrap::Unwrap<Connection> (connection))->
                                 setConnection( connBaton->dpiconn,
-                                               connBaton->oracledb );
+                                               connBaton->oracledb,
+                                               Nan::New( connBaton->jsOradb ) );
     argv[1] = connection;
   }
   Local<Function> callback = Nan::New<Function>(connBaton->cb);
@@ -867,7 +868,7 @@ NAN_METHOD(Oracledb::CreatePool)
   NJS_GET_CALLBACK ( callback, info );
 
   Oracledb* oracledb = Nan::ObjectWrap::Unwrap<Oracledb> ( info.Holder() );
-  connectionBaton *poolBaton = new connectionBaton ( callback );
+  connectionBaton *poolBaton = new connectionBaton ( callback, info.Holder() );
 
   NJS_CHECK_OBJECT_VALID3(oracledb, poolBaton->error, exitCreatePool);
 
@@ -992,14 +993,16 @@ void Oracledb::Async_AfterCreatePool (uv_work_t *req)
     argv[0] = Nan::Undefined();
     Local<Object> njsPool = Nan::New(Pool::poolTemplate_s)->
                              GetFunction() ->NewInstance();
-    (Nan::ObjectWrap::Unwrap<Pool> (njsPool))-> setPool ( poolBaton->dpipool,
-                                                     poolBaton->oracledb,
-                                                     poolBaton->poolMax,
-                                                     poolBaton->poolMin,
-                                                     poolBaton->poolIncrement,
-                                                     poolBaton->poolTimeout,
-                                                     poolBaton->stmtCacheSize,
-                                                     poolBaton->lobPrefetchSize);
+    (Nan::ObjectWrap::Unwrap<Pool> (njsPool))-> setPool (
+                                            poolBaton->dpipool,
+                                            poolBaton->oracledb,
+                                            poolBaton->poolMax,
+                                            poolBaton->poolMin,
+                                            poolBaton->poolIncrement,
+                                            poolBaton->poolTimeout,
+                                            poolBaton->stmtCacheSize,
+                                            poolBaton->lobPrefetchSize,
+                                            Nan::New( poolBaton->jsOradb ) );
     argv[1] = njsPool;
   }
   Local<Function> callback = Nan::New(poolBaton->cb);

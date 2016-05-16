@@ -101,9 +101,9 @@ Connection::~Connection()
      Initialize connection attributes after forming it.
 
    PARAMETERS:
-     DPI Connection, Oracledb reference
+     DPI Connection, Oracledb reference, reference to js parent
 */
-void Connection::setConnection(dpi::Conn* dpiconn, Oracledb* oracledb)
+void Connection::setConnection(dpi::Conn* dpiconn, Oracledb* oracledb, Local<Object> jsParentObj)
 {
    this->dpiconn_   = dpiconn;
    this->isValid_   = true;
@@ -111,6 +111,8 @@ void Connection::setConnection(dpi::Conn* dpiconn, Oracledb* oracledb)
    this->lobCount_  = 0;
    this->rsCount_   = 0;
    this->dbCount_   = 0;
+
+   this->jsParent_.Reset ( jsParentObj );
 }
 
 /*****************************************************************************/
@@ -447,7 +449,8 @@ NAN_METHOD(Connection::Execute)
   /* If connection is invalid from JS, then throw an exception */
   NJS_CHECK_OBJECT_VALID2 ( connection, info ) ;
 
-  eBaton *executeBaton = new eBaton ( connection->DBCount (), callback );
+  eBaton *executeBaton = new eBaton ( connection->DBCount (), callback,
+                                      info.Holder () );
 
   NJS_CHECK_NUMBER_OF_ARGS ( executeBaton->error, info, 2, 4, exitExecute );
 
@@ -3181,7 +3184,7 @@ exitGetOutBindObject:
  *   Checks whther connection is busy with database call or not using counters
  *
  * PARAMETERS
- *   connection      - connection object to check it's counters
+ *   connection      - connection object to check its counters
  *
  * Note: Currently this function can be used only in Release () method
  */
@@ -3217,10 +3220,17 @@ NAN_METHOD(Connection::Release)
 
   connection = Nan::ObjectWrap::Unwrap<Connection>(info.Holder());
 
-  /* If connection is invalide from JS, then throw an exception */
+  /* If connection is invalid from JS, then throw an exception */
   NJS_CHECK_OBJECT_VALID2 ( connection, info ) ;
 
-  eBaton *releaseBaton = new eBaton ( connection->DBCount (), callback );
+  eBaton *releaseBaton = new eBaton ( connection->DBCount (), callback,
+                                      info.Holder() );
+
+  /*
+   * When we release the connection, we have to clear the reference of
+   * its parent.
+   */
+  releaseBaton->njsconn = connection;
 
   NJS_CHECK_NUMBER_OF_ARGS ( releaseBaton->error, info, 1, 1, exitRelease );
   if(!connection->isValid_)
@@ -3316,6 +3326,13 @@ void Connection::Async_AfterRelease(uv_work_t *req)
     argv[0] = v8::Exception::Error(Nan::New<v8::String>((releaseBaton->error).c_str()).ToLocalChecked());
   else
     argv[0] = Nan::Undefined();
+
+  /*
+   * When we release the connection, we have to clear the reference of
+   * its parent.
+   */
+  releaseBaton->njsconn->jsParent_.Reset ();
+
   Local<Function> callback = Nan::New<Function>(releaseBaton->cb);
   delete releaseBaton;
   Nan::MakeCallback( Nan::GetCurrentContext()->Global(),
@@ -3346,7 +3363,8 @@ NAN_METHOD(Connection::Commit)
   /* if connection is invalid from JS, then throw an exception */
   NJS_CHECK_OBJECT_VALID2 ( connection, info ) ;
 
-  eBaton *commitBaton = new eBaton ( connection->DBCount (), callback );
+  eBaton *commitBaton = new eBaton ( connection->DBCount (), callback,
+                                     info.Holder() );
 
   NJS_CHECK_NUMBER_OF_ARGS ( commitBaton->error, info, 1, 1, exitCommit );
   if(!connection->isValid_)
@@ -3452,7 +3470,8 @@ NAN_METHOD(Connection::Rollback)
   /* if connection is invalid from JS, then throw an exception */
   NJS_CHECK_OBJECT_VALID2 ( connection, info );
 
-  eBaton *rollbackBaton = new eBaton ( connection->DBCount (), callback );
+  eBaton *rollbackBaton = new eBaton ( connection->DBCount (), callback,
+                                       info.Holder() );
   NJS_CHECK_NUMBER_OF_ARGS ( rollbackBaton->error, info, 1, 1, exitRollback );
 
   if(!connection->isValid_)
@@ -3556,7 +3575,8 @@ NAN_METHOD(Connection::Break)
   /* If connection is invalid from JS, then throw an exception */
   NJS_CHECK_OBJECT_VALID2 ( connection, info );
 
-  eBaton *breakBaton = new eBaton ( connection->DBCount (), callback );
+  eBaton *breakBaton = new eBaton ( connection->DBCount (), callback,
+                                    info.Holder() );
 
   NJS_CHECK_NUMBER_OF_ARGS ( breakBaton->error, info, 1, 1, exitBreak );
 

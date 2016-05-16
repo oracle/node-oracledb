@@ -76,6 +76,8 @@ void ResultSet::setResultSet ( dpi::Stmt *stmt, eBaton *executeBaton )
   this->numCols_       = 0;    // numCols_ and meta_ are initialized as part
   this->meta_          = NULL; // of the first call on RS
 
+  this->jsParent_.Reset ( executeBaton->jsConn );
+
   /*
    * stmt can be NULL in REFCURSOR case, when the stored procedure
    * did not return a valid stmt handle
@@ -286,8 +288,9 @@ NAN_METHOD(ResultSet::GetRow)
   /* If njsResultSet is invalid from JS, then throw an exception */
   NJS_CHECK_OBJECT_VALID2 ( njsResultSet, info );
 
+  Local<Object> jsConn = Nan::New ( njsResultSet->jsParent_ );
   rsBaton   *getRowsBaton = new rsBaton ( njsResultSet->njsconn_->RSCount (),
-                                          callback );
+                                          callback, info.Holder(), jsConn );
   getRowsBaton->njsRS = njsResultSet;
 
   if(njsResultSet->state_ == NJS_INVALID)
@@ -334,8 +337,9 @@ NAN_METHOD(ResultSet::GetRows)
   /* If njsResultSet is invalid from JS, then throw an exception */
   NJS_CHECK_OBJECT_VALID2 ( njsResultSet, info );
 
+  Local<Object> jsConn = Nan::New ( njsResultSet->jsParent_ );
   rsBaton   *getRowsBaton = new rsBaton ( njsResultSet->njsconn_->RSCount (),
-                                          callback );
+                                          callback, info.Holder(), jsConn );
   getRowsBaton->njsRS = njsResultSet;
 
   if(njsResultSet->state_ == NJS_INVALID)
@@ -622,8 +626,9 @@ NAN_METHOD(ResultSet::Close)
   /* If njsResultSet is invalid from JS, then throw an exception */
   NJS_CHECK_OBJECT_VALID2 ( njsResultSet, info );
 
+  Local<Object> jsConn = Nan::New ( njsResultSet->jsParent_ );
   rsBaton   *closeBaton = new rsBaton ( njsResultSet->njsconn_->RSCount (),
-                                        callback );
+                                        callback, info.Holder(), jsConn );
   closeBaton->njsRS = njsResultSet;
 
   if(njsResultSet->state_ == NJS_INVALID)
@@ -750,8 +755,16 @@ void ResultSet::Async_AfterClose(uv_work_t *req)
     // resultset is not valid after close succeeds.
     closeBaton-> njsRS-> state_ = NJS_INVALID;
   }
+
+  /*
+   * When we close the resultSet, we have to clear the reference of
+   * its parent.
+   */
+  closeBaton->njsRS->jsParent_.Reset ();
+
   Local<Function> callback = Nan::New(closeBaton->ebaton->cb);
   delete closeBaton;
+
   Nan::MakeCallback( Nan::GetCurrentContext()->Global(), callback, 1, argv );
   if(tc.HasCaught())
   {
