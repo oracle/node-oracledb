@@ -107,7 +107,7 @@ See [CHANGELOG](https://github.com/oracle/node-oracledb/tree/master/CHANGELOG.md
 
 ## <a name="testing"></a> Test Suite
 
-To run the included test suite see [test/README](https://github.com/oracle/node-oracledb/tree/master/test/README.md).
+To run the test suite see [test/README](https://github.com/oracle/node-oracledb/tree/master/test/README.md).
 
 ## <a name="contrib"></a> Contributing
 
