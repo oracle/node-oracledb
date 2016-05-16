@@ -33,12 +33,12 @@ The [*node-oracledb*](https://github.com/oracle/node-oracledb) add-on for Node.j
 The steps below create a Node.js installation for testing.  Adjust the
 steps for your environment.
 
-This node-oracledb release has been tested with Node 0.10, 0.12, 4.2 LTS
-and 5 on 64-bit Oracle Linux and Windows.  The add-on can also build
+This node-oracledb release has been tested with Node 0.10, 0.12, 4, 5
+and 6 on 64-bit Oracle Linux and Windows.  The add-on can also build
 in some Mac OS X, 32-bit Linux, 32-bit Windows, Solaris and AIX
 environments, but these architectures have not been fully tested.
 
-### Prerequisites
+### <a name="prerequisites"></a> Prerequisites
 
 Installation requires Oracle 11.2 or 12.1 client libraries.
 These are included in Oracle Instant Client RPMs or ZIPs, a full
@@ -48,10 +48,11 @@ Client 12.1 you can connect to Oracle Database 10.2 or greater.  Use
 Oracle Client 11.2 if you need to connect to Oracle Database 9.2.
 
 A compiler is required.  Use Visual Studio on Windows, gcc on Linux or
-Xcode on OS X.  When building with Node 4 onwards, the compiler must support
-C++11.  Note the default compiler on Oracle Linux 6 and RHEL 6 does
-not have the required support.  Install a newer compiler or upgrade to
-Oracle Linux 7.
+Xcode on OS X.  ** When building with Node 4 onwards, the compiler must
+support C++11. **  Note the default compiler on Oracle Linux 6 and RHEL 6
+does not have the required support.  Install a
+[newer compiler](https://blogs.oracle.com/opal/entry/getting_a_c_11_compatible)
+or upgrade to Oracle Linux 7.
 
 Python 2.7 is needed by node-gyp.  If another version of Python occurs
 first in your binary path then, when you install node-oracledb, use
