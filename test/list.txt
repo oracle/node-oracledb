@@ -528,12 +528,11 @@ Overview of node-oracledb functional tests
   - 44.8 maxSize option applies to each elements of an array
 
 45. instanceof.js
-    45.1 all constructors have been accounted for
-    45.2 instanceof works for the oracledb instance
-    45.3 instanceof works for pool instances
-    45.4 instanceof works for connection instances
-    45.5 instanceof works for resultset instances
-    45.6 instanceof works for lob instances
+    45.1 instanceof works for the oracledb instance
+    45.2 instanceof works for pool instances
+    45.3 instanceof works for connection instances
+    45.4 instanceof works for resultset instances
+    45.5 instanceof works for lob instances
 
 51. accessTerminatedPoolAttributes.js
     can not access attributes of terminated pool
@@ -667,8 +666,7 @@ Overview of node-oracledb functional tests
     65.1 an uninitialized Lob is returned from a PL/SQL block
 
 66. writableProperties.js
-    66.1 allows overwriting of public methods on the oracledb instance
-    66.2 allows overwriting of public methods on pool instances
-    66.3 allows overwriting of public methods on connection instances
-    66.4 allows overwriting of public methods on resultset instances
-    66.5 allows overwriting of public methods on lob instances
+    66.1 allows overwriting of public methods on pool instances
+    66.2 allows overwriting of public methods on connection instances
+    66.3 allows overwriting of public methods on resultset instances
+    66.4 allows overwriting of public methods on lob instances
