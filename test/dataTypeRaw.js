@@ -174,7 +174,7 @@ describe('42. dataTypeRaw.js', function() {
         { autoCommit: true },
         function(err, result) {
           should.exist(err);
-          (err.message).should.startWith('NJS-028');
+          (err.message).should.startWith('NJS-028:');
           // NJS-028: raw database type is not supported with DML Returning statements
           done();
         }
@@ -197,7 +197,7 @@ describe('42. dataTypeRaw.js', function() {
         { autoCommit: true },
         function(err, result) {
           should.exist(err);
-          (err.message).should.startWith('NJS-028');
+          (err.message).should.startWith('NJS-028:');
           done();
         }
       );
@@ -219,7 +219,7 @@ describe('42. dataTypeRaw.js', function() {
         { autoCommit: true },
         function(err, result) {
           should.exist(err);
-          (err.message).should.startWith('NJS-028');
+          (err.message).should.startWith('NJS-028:');
           done();
         }
       );
@@ -241,7 +241,7 @@ describe('42. dataTypeRaw.js', function() {
         { autoCommit: true },
         function(err, result) {
           should.exist(err);
-          (err.message).should.startWith('NJS-028');
+          (err.message).should.startWith('NJS-028:');
           done();
         }
       );
@@ -260,7 +260,7 @@ describe('42. dataTypeRaw.js', function() {
         { autoCommit: true },
         function(err, result) {
           should.exist(err);
-          (err.message).should.startWith('NJS-028');
+          (err.message).should.startWith('NJS-028:');
           done();
         }
       );
@@ -279,7 +279,7 @@ describe('42. dataTypeRaw.js', function() {
         { autoCommit: true },
         function(err, result) {
           should.exist(err);
-          (err.message).should.startWith('NJS-028');
+          (err.message).should.startWith('NJS-028:');
           done();
         }
       );

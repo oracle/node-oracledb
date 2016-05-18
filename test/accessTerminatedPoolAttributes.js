@@ -74,7 +74,8 @@ describe('51. accessTerminatedPoolAttributes.js', function(){
               }
               catch(err){
                 should.exist(err);
-                (err.message).should.eql('NJS-002: invalid pool');
+                (err.message).should.startWith('NJS-002:');
+                // NJS-002: invalid pool
               }
               done();
             });

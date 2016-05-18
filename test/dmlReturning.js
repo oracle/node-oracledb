@@ -159,7 +159,8 @@ describe('6. dmlReturning.js', function(){
         { autoCommit: true },
         function(err, result) {
           should.exist(err);
-          err.message.should.startWith('NJS-016'); // NJS-016: buffer is too small for OUT binds
+          err.message.should.startWith('NJS-016:');
+          // NJS-016: buffer is too small for OUT binds
           //console.log(result);
           done();
         }
@@ -374,7 +375,7 @@ describe('6. dmlReturning.js', function(){
       connection.execute(sql, bindVar, function(err, result) {
         should.exist(err);
         // NJS-028: raw database type is not supported with DML Returning statements
-        (err.message).should.startWith('NJS-028: ');
+        (err.message).should.startWith('NJS-028:');
         done();
       });
 

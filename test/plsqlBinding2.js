@@ -551,7 +551,7 @@ describe('44. plsqlBinding2.js', function() {
           },
           function(err) {
             should.exist(err);
-            (err.message).should.startWith('NJS-039');
+            (err.message).should.startWith('NJS-039:');
             // NJS-039: empty array is not allowed for IN bind
             callback();
           }
@@ -574,7 +574,7 @@ describe('44. plsqlBinding2.js', function() {
           },
           function(err, result) {
             should.exist(err);
-            (err.message).should.startWith('NJS-039');
+            (err.message).should.startWith('NJS-039:');
             callback();
           }
         );

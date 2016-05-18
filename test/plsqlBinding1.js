@@ -450,7 +450,7 @@ describe('43. plsqlBinding1.js', function() {
         bindvars,
         function(err, result) {
           should.exist(err);
-          (err.message).should.startWith('NJS-035');
+          (err.message).should.startWith('NJS-035:');
           // NJS-035: maxArraySize is required for IN OUT array bind
           should.not.exist(result);
           done();
@@ -467,7 +467,7 @@ describe('43. plsqlBinding1.js', function() {
         bindvars,
         function(err, result) {
           should.exist(err);
-          (err.message).should.startWith('NJS-036');
+          (err.message).should.startWith('NJS-036:');
           // NJS-036: Given Array is of size greater than maxArraySize property.
           should.not.exist(result);
           done();
@@ -484,7 +484,7 @@ describe('43. plsqlBinding1.js', function() {
         bindvars,
         function(err, result) {
           should.exist(err);
-          (err.message).should.startWith('NJS-034');
+          (err.message).should.startWith('NJS-034:');
           should.not.exist(result);
           done();
         }
@@ -500,7 +500,7 @@ describe('43. plsqlBinding1.js', function() {
         bindvars,
         function(err, result) {
           should.exist(err);
-          (err.message).should.startWith('NJS-037');
+          (err.message).should.startWith('NJS-037:');
           // NJS-037: incompatible type of value provided.
           should.not.exist(result);
           done();
@@ -517,7 +517,7 @@ describe('43. plsqlBinding1.js', function() {
         bindvars,
         function(err, result) {
           should.exist(err);
-          (err.message).should.startWith('NJS-037');
+          (err.message).should.startWith('NJS-037:');
           // NJS-037: incompatible type of value provided.
           should.not.exist(result);
           done();
@@ -864,7 +864,7 @@ describe('43. plsqlBinding1.js', function() {
         bindvars,
         function(err, result) {
           should.exist(err);
-          (err.message).should.startWith('NJS-035');
+          (err.message).should.startWith('NJS-035:');
           // NJS-035: maxArraySize is required for IN OUT array bind
           should.not.exist(result);
           done();
@@ -881,7 +881,7 @@ describe('43. plsqlBinding1.js', function() {
         bindvars,
         function(err, result) {
           should.exist(err);
-          (err.message).should.startWith('NJS-036');
+          (err.message).should.startWith('NJS-036:');
           // NJS-036: given Array is of size greater than maxArraySize property.
           should.not.exist(result);
           done();
@@ -928,7 +928,7 @@ describe('43. plsqlBinding1.js', function() {
         bindvars,
         function(err, result) {
           should.exist(err);
-          (err.message).should.startWith('NJS-007');
+          (err.message).should.startWith('NJS-007:');
           // NJS-007: invalid value for "maxArraySize"
           done();
         }
@@ -944,7 +944,7 @@ describe('43. plsqlBinding1.js', function() {
         bindvars,
         function(err, result) {
           should.exist(err);
-          (err.message).should.startWith('NJS-035');
+          (err.message).should.startWith('NJS-035:');
           // NJS-035: maxArraySize is required for IN OUT array bind
           done();
         }
@@ -960,7 +960,7 @@ describe('43. plsqlBinding1.js', function() {
         bindvars,
         function(err, result) {
           should.exist(err);
-          (err.message).should.startWith('NJS-008');
+          (err.message).should.startWith('NJS-008:');
           // NJS-008: invalid type for "maxArraySize"
           done();
         }
@@ -976,7 +976,7 @@ describe('43. plsqlBinding1.js', function() {
         bindvars,
         function(err, result) {
           should.exist(err);
-          (err.message).should.startWith('NJS-007');
+          (err.message).should.startWith('NJS-007:');
           // NJS-007: invalid value for "maxArraySize"
           done();
         }

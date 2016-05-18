@@ -733,8 +733,7 @@ describe('4. binding.js', function() {
     it('4.5.1 ',function(done) {
       connection.execute(
         "insert into nodb_raw (num) values (:id)",
-        { id: { val: 1, type: oracledb.NUMBER } },  // fails with error  NJS-013: invalid bind direction
-        // { id: { val: 1, type: oracledb.NUMBER, dir: oracledb.BIND_IN } }, // works
+        { id: { val: 1, type: oracledb.NUMBER } },
         function(err, result) {
           should.not.exist(err);
           done();

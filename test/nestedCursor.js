@@ -202,9 +202,8 @@ describe('57. nestedCursor.js', function() {
   function fetchOneRowFromRS(rs, cb) {
     rs.getRow(function(err, row) {
       if(err) {
-        // console.error("Error at accessing RS: " + err.message);
         // NJS-010: unsupported data type in select list
-        (err.message).should.startWith('NJS-010');
+        (err.message).should.startWith('NJS-010:');
         rs.close(function(err) {
           should.not.exist(err);
           cb();

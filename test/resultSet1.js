@@ -272,7 +272,8 @@ describe('12. resultSet1.js', function() {
         { resultSet: true, prefetchRows: -10, maxRows: 1000 },
         function(err, result) {
           should.exist(err);
-          err.message.should.startWith('NJS-007: invalid value for "prefetchRows"');
+          (err.message).should.startWith('NJS-007:');
+          // NJS-007: invalid value for "prefetchRows"
           done();
         }
       );
@@ -287,7 +288,8 @@ describe('12. resultSet1.js', function() {
         { resultSet: true, prefetchRows: 'bar', maxRows: 1000 },
         function(err, result) {
           should.exist(err);
-          err.message.should.startWith('NJS-008: invalid type for "prefetchRows"');
+          (err.message).should.startWith('NJS-008:');
+          // NJS-008: invalid type for "prefetchRows"
           done();
         }
       );
@@ -302,7 +304,8 @@ describe('12. resultSet1.js', function() {
         { resultSet: true, prefetchRows: NaN, maxRows: 1000 },
         function(err, result) {
           should.exist(err);
-          err.message.should.startWith('NJS-007: invalid value for "prefetchRows"');
+          (err.message).should.startWith('NJS-007:');
+          // NJS-007: invalid value for "prefetchRows"
           done();
         }
       );
@@ -628,7 +631,8 @@ describe('12. resultSet1.js', function() {
           rs.getRows(function() {});
         } catch (err) {
           should.exist(err);
-          err.message.should.eql('NJS-009: invalid number of parameters');
+          (err.message).should.startWith('NJS-009:');
+          // NJS-009: invalid number of parameters
           rs.close(function(err) {
             should.not.exist(err);
             done();
@@ -654,7 +658,8 @@ describe('12. resultSet1.js', function() {
       function fetchRowFromRS(rs, numRows) {
         rs.getRows(numRows, function(err, rows) {
           should.exist(err);
-          err.message.should.eql('NJS-005: invalid value for parameter 1');
+          (err.message).should.startWith('NJS-005:');
+          // NJS-005: invalid value for parameter 1
           rs.close(function(err) {
             should.not.exist(err);
             done();
@@ -680,7 +685,8 @@ describe('12. resultSet1.js', function() {
       function fetchRowFromRS(rs, numRows) {
         rs.getRows(numRows, function(err, rows) {
           should.exist(err);
-          err.message.should.eql('NJS-006: invalid type for parameter 1');
+          (err.message).should.startWith('NJS-006:');
+          // NJS-006: invalid type for parameter 1
           rs.close(function(err) {
             should.not.exist(err);
             done();
@@ -708,7 +714,8 @@ describe('12. resultSet1.js', function() {
           rs.getRows(numRows, function() {});
         } catch (err) {
           should.exist(err);
-          err.message.should.startWith('NJS-006: invalid type for parameter 1');
+          (err.message).should.startWith('NJS-006:');
+          // NJS-006: invalid type for parameter 1
           rs.close(function(err) {
             should.not.exist(err);
             done();
@@ -871,7 +878,8 @@ describe('12. resultSet1.js', function() {
           rs.getRow(numRows, function() {});
         } catch (err) {
           should.exist(err);
-          err.message.should.eql('NJS-009: invalid number of parameters');
+          (err.message).should.startWith('NJS-009:');
+          // NJS-009: invalid number of parameters
           rs.close(function(err) {
             should.not.exist(err);
             done();
@@ -941,7 +949,7 @@ describe('12. resultSet1.js', function() {
               accessCount.should.be.exactly(10);
               rs.close(function(err) {
                 should.exist(err);
-                err.message.should.startWith('NJS-018:');
+                (err.message).should.startWith('NJS-018:');
                 done();
               });
             });
@@ -977,7 +985,7 @@ describe('12. resultSet1.js', function() {
               should.not.exist(err);
               rs.getRows(numRows, function(err, rows) {
                 should.exist(err);
-                err.message.should.startWith('NJS-018:');
+                (err.message).should.startWith('NJS-018:');
                 done();
               });
             });

@@ -243,7 +243,8 @@ describe('14. stream2.js', function() {
       stream = connection.queryStream();
     } catch (err) {
       should.exist(err);
-      err.message.should.eql('NJS-009: invalid number of parameters');
+      (err.message).should.startWith('NJS-009:');
+      // NJS-009: invalid number of parameters
       done();
     }
   })
@@ -253,7 +254,8 @@ describe('14. stream2.js', function() {
 
     stream.on('error', function(error) {
       should.exist(error);
-      //  NJS-019: resultSet cannot be returned for non-query statements
+      (error.message).should.startWith('NJS-019:');
+      // NJS-019: resultSet cannot be returned for non-query statements
       setTimeout(done, 500);
     });
 
@@ -268,7 +270,8 @@ describe('14. stream2.js', function() {
 
     stream.on('error', function(error) {
       should.exist(error);
-      //  NJS-019: resultSet cannot be returned for non-query statements
+      (error.message).should.startWith('NJS-019:');
+      // NJS-019: resultSet cannot be returned for non-query statements
       setTimeout(done, 500);
     });
 

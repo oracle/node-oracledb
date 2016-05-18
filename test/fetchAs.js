@@ -288,7 +288,7 @@ describe('56. fetchAs.js', function() {
       { fetchInfo : { "THE_DATE" : oracledb.STRING }},
       function ( err, result ) {
         should.exist ( err ) ;
-        err.message.should.startWith ('NJS-015:');
+        (err.message).should.startWith ('NJS-015:');
         done ();
       } );
   });

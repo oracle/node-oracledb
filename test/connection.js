@@ -31,6 +31,7 @@
  *     51 -     are for other tests
  *
  *****************************************************************************/
+'use strict';
 
 var oracledb = require('oracledb');
 var should   = require('should');
@@ -141,7 +142,8 @@ describe('1. connection.js', function(){
         query, {id: 20}, {outFormat:0 },
         function(err, result){
           should.exist(err);
-          (err.message).should.equal('NJS-004: invalid value for property outFormat');
+          (err.message).should.startWith('NJS-004:');
+          // NJS-004: invalid value for property outFormat
           done();
         }
       );
@@ -249,7 +251,8 @@ describe('1. connection.js', function(){
         {}, { maxRows: 0 },
         function(err, result){
           should.exist(err);
-          err.message.should.startWith('NJS-026:');  // NJS-026: maxRows must be greater than zero
+          (err.message).should.startWith('NJS-026:');
+          // NJS-026: maxRows must be greater than zero
           done();
         }
       );
@@ -262,7 +265,7 @@ describe('1. connection.js', function(){
         {}, {maxRows: -5},
         function(err, result){
           should.exist(err);
-          (err.message).should.startWith('NJS-007: invalid value for');
+          (err.message).should.startWith('NJS-007:');
           done();
         }
       );

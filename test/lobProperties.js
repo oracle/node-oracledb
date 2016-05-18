@@ -368,7 +368,7 @@ describe('62. lobProperties.js', function() {
           clob.pieceSize = -100;
         } catch(err) {
           should.exist(err);
-          (err.message).should.startWith('NJS-004');
+          (err.message).should.startWith('NJS-004:');
           // NJS-004: invalid value for property pieceSize
         }
 
@@ -394,7 +394,7 @@ describe('62. lobProperties.js', function() {
           clob.pieceSize = null;
         } catch(err) {
           should.exist(err);
-          (err.message).should.startWith('NJS-004');
+          (err.message).should.startWith('NJS-004:');
           // NJS-004: invalid value for property pieceSize
         }
 
@@ -420,7 +420,7 @@ describe('62. lobProperties.js', function() {
           clob.pieceSize = NaN;
         } catch(err) {
           should.exist(err);
-          (err.message).should.startWith('NJS-004');
+          (err.message).should.startWith('NJS-004:');
           // NJS-004: invalid value for property pieceSize
         }
 

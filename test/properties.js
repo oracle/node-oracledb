@@ -150,7 +150,7 @@ describe('58. properties.js', function() {
       } catch(err) {
         should.exist(err);
         // console.log(err.message);
-        (err.message).should.startWith('NJS-014');
+        (err.message).should.startWith('NJS-014:');
       }
     })
 
@@ -199,7 +199,7 @@ describe('58. properties.js', function() {
         oracledb.oracleClientVersion = t + 1;
       } catch(err) {
         should.exist(err);
-        (err.message).should.startWith('NJS-014');
+        (err.message).should.startWith('NJS-014:');
       }
     } );
 
@@ -258,7 +258,7 @@ describe('58. properties.js', function() {
         pool.poolMin = t + 1;
       } catch(err) {
         should.exist(err);
-        (err.message).should.startWith('NJS-014');
+        (err.message).should.startWith('NJS-014:');
       }
     })
 
@@ -270,7 +270,7 @@ describe('58. properties.js', function() {
         pool.poolMax = t + 1;
       } catch(err) {
         should.exist(err);
-        (err.message).should.startWith('NJS-014');
+        (err.message).should.startWith('NJS-014:');
       }
     })
 
@@ -282,7 +282,7 @@ describe('58. properties.js', function() {
         pool.poolIncrement = t + 1;
       } catch(err) {
         should.exist(err);
-        (err.message).should.startWith('NJS-014');
+        (err.message).should.startWith('NJS-014:');
       }
     })
 
@@ -294,7 +294,7 @@ describe('58. properties.js', function() {
         pool.poolTimeout = t + 1;
       } catch(err) {
         should.exist(err);
-        (err.message).should.startWith('NJS-014');
+        (err.message).should.startWith('NJS-014:');
       }
     })
 
@@ -306,7 +306,7 @@ describe('58. properties.js', function() {
         pool.stmtCacheSize = t + 1;
       } catch(err) {
         should.exist(err);
-        (err.message).should.startWith('NJS-014');
+        (err.message).should.startWith('NJS-014:');
       }
     })
 
@@ -318,7 +318,7 @@ describe('58. properties.js', function() {
         pool.connectionsInUse = t + 1;
       } catch(err) {
         should.exist(err);
-        (err.message).should.startWith('NJS-014');
+        (err.message).should.startWith('NJS-014:');
       }
     })
 
@@ -330,7 +330,7 @@ describe('58. properties.js', function() {
         pool.connectionsOpen = t + 1;
       } catch(err) {
         should.exist(err);
-        (err.message).should.startWith('NJS-014');
+        (err.message).should.startWith('NJS-014:');
       }
     })
 
@@ -342,7 +342,7 @@ describe('58. properties.js', function() {
         pool.queueRequests = !t;
       } catch(err) {
         should.exist(err);
-        (err.message).should.startWith('NJS-014');
+        (err.message).should.startWith('NJS-014:');
       }
     })
 
@@ -354,7 +354,7 @@ describe('58. properties.js', function() {
         pool.queueTimeout = t + 1000;
       } catch(err) {
         should.exist(err);
-        (err.message).should.startWith('NJS-014');
+        (err.message).should.startWith('NJS-014:');
       }
     })
 
@@ -397,7 +397,7 @@ describe('58. properties.js', function() {
         connection.stmtCacheSize = t + 1;
       } catch(err) {
         should.exist(err);
-        (err.message).should.startWith('NJS-014');
+        (err.message).should.startWith('NJS-014:');
       }
     })
 
@@ -406,14 +406,14 @@ describe('58. properties.js', function() {
         var t = connection.clientId;
       } catch(err) {
         should.exist(err);
-        (err.message).should.startWith('NJS-015'); // write-only
+        (err.message).should.startWith('NJS-015:'); // write-only
       }
 
       try {
         connection.clientId = 4;
       } catch(err) {
         should.exist(err);
-        (err.message).should.startWith('NJS-004');  // invalid value
+        (err.message).should.startWith('NJS-004:');  // invalid value
       }
 
       connection.clientId = "103.3";
@@ -425,14 +425,14 @@ describe('58. properties.js', function() {
         var t = connection.action;
       } catch(err) {
         should.exist(err);
-        (err.message).should.startWith('NJS-015');
+        (err.message).should.startWith('NJS-015:');
       }
 
       try {
         connection.action = 4;
       } catch(err) {
         should.exist(err);
-        (err.message).should.startWith('NJS-004');  // invalid value
+        (err.message).should.startWith('NJS-004:');  // invalid value
       }
 
       connection.action = "103.3 action";
@@ -444,14 +444,14 @@ describe('58. properties.js', function() {
         var t = connection.module;
       } catch(err) {
         should.exist(err);
-        (err.message).should.startWith('NJS-015');
+        (err.message).should.startWith('NJS-015:');
       }
 
       try {
         connection.module = 4;
       } catch(err) {
         should.exist(err);
-        (err.message).should.startWith('NJS-004');  // invalid value
+        (err.message).should.startWith('NJS-004:');  // invalid value
       }
 
       connection.module = "103.3 module";
@@ -466,7 +466,7 @@ describe('58. properties.js', function() {
       }
       catch (err) {
         should.exist ( err );
-        (err.message).should.startWith('NJS-014');
+        (err.message).should.startWith('NJS-014:');
       }
     });
 
@@ -529,7 +529,7 @@ describe('58. properties.js', function() {
         resultSet.metaData = {"foo": "bar"};
       } catch(err) {
         should.exist(err);
-        (err.message).should.startWith('NJS-014');
+        (err.message).should.startWith('NJS-014:');
       }
     })
 

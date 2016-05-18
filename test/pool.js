@@ -85,7 +85,7 @@ describe('2. pool.js', function() {
         },
         function(err, pool){
           should.exist(err);
-          (err.message).should.startWith('NJS-007: invalid value for');
+          (err.message).should.startWith('NJS-007:');
           done();
         }
       );
@@ -106,7 +106,7 @@ describe('2. pool.js', function() {
         },
         function(err, pool){
           should.exist(err);
-          (err.message).should.startWith('NJS-007: invalid value for');
+          (err.message).should.startWith('NJS-007:');
           done();
         }
       );
@@ -232,7 +232,7 @@ describe('2. pool.js', function() {
         },
         function(err, pool){
           should.exist(err);
-          (err.message).should.startWith('NJS-007: invalid value for');
+          (err.message).should.startWith('NJS-007:');
           done();
         }
       );
@@ -274,7 +274,7 @@ describe('2. pool.js', function() {
         },
         function(err, pool){
           should.exist(err);
-          (err.message).should.startWith('NJS-008: invalid type for');
+          (err.message).should.startWith('NJS-008:');
           done();
         }
       );
@@ -357,7 +357,8 @@ describe('2. pool.js', function() {
         },
         function(err, pool){
           should.exist(err);
-          (err.message).should.startWith('NJS-007: invalid value for');
+          (err.message).should.startWith('NJS-007:');
+          // NJS-007: invalid value for
           done();
         }
       );
@@ -399,7 +400,7 @@ describe('2. pool.js', function() {
         },
         function(err, pool){
           should.exist(err);
-          (err.message).should.startWith('NJS-008: invalid type for');
+          (err.message).should.startWith('NJS-008:');
           done();
         }
       );
@@ -488,7 +489,8 @@ describe('2. pool.js', function() {
         },
         function(err, pool){
           should.exist(err);
-          (err.message).should.startWith('NJS-007: invalid value for');
+          (err.message).should.startWith('NJS-007:');
+          // NJS-007: invalid value for
           done();
         }
       );
@@ -534,7 +536,8 @@ describe('2. pool.js', function() {
         },
         function(err, pool){
           should.exist(err);
-          (err.message).should.startWith('NJS-007: invalid value for');
+          (err.message).should.startWith('NJS-007:');
+          // NJS-007: invalid value for
           done();
         }
       );
@@ -558,7 +561,8 @@ describe('2. pool.js', function() {
         },
         function(err, pool){
           should.exist(err);
-          (err.message).should.startWith('NJS-007: invalid value for');
+          (err.message).should.startWith('NJS-007:');
+          // NJS-007: invalid value for
           done();
         }
       );
@@ -603,7 +607,8 @@ describe('2. pool.js', function() {
         },
         function(err, pool){
           should.exist(err);
-          (err.message).should.startWith('NJS-007: invalid value for');
+          (err.message).should.startWith('NJS-007:');
+          // NJS-007: invalid value for
           done();
         }
       );
@@ -644,7 +649,8 @@ describe('2. pool.js', function() {
           pool1.getConnection();
         } catch (err) {
           should.exist(err);
-          (err.message).should.startWith('NJS-002: invalid pool');
+          (err.message).should.startWith('NJS-002:');
+          // NJS-002: invalid pool
           done();
         }
       });
@@ -656,7 +662,8 @@ describe('2. pool.js', function() {
 
         pool1.getConnection(function(err, conn) {
           should.exist(err);
-          (err.message).should.startWith('NJS-002: invalid pool');
+          (err.message).should.startWith('NJS-002:');
+          // NJS-002: invalid pool
           done();
         });
       });

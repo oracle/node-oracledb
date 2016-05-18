@@ -104,7 +104,8 @@ describe('39. dataTypeRowid.js', function() {
         "SELECT * FROM " + tableName,
         function(err, result) {
           should.exist(err);
-          err.message.should.startWith('NJS-010:'); // unsupported data type in select list
+          (err.message).should.startWith('NJS-010:');
+          // unsupported data type in select list
           done();
         }
       );

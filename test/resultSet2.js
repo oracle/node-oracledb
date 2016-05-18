@@ -286,7 +286,7 @@ describe('55. resultSet2.js', function() {
             should.not.exist(err);
             rs.close(function(err) {
               should.exist(err);
-              err.message.should.startWith('NJS-003'); // invalid connection
+              err.message.should.startWith('NJS-003:'); // invalid connection
               cb();
             });
           });
@@ -446,7 +446,7 @@ describe('55. resultSet2.js', function() {
           ], function(err) {
             if(err) {
               // console.log(err);
-              err.message.should.startWith('NJS-017');
+              err.message.should.startWith('NJS-017:');
               result.resultSet.close(function(err) {
                 done();
               });
@@ -482,7 +482,7 @@ describe('55. resultSet2.js', function() {
           ], function(err) {
             if(err) {
               // console.log(err);
-              err.message.should.startWith('NJS-017');
+              (err.message).should.startWith('NJS-017:');
               result.outBinds.out.close(function(err) {
                 done();
               });
@@ -624,7 +624,7 @@ describe('55. resultSet2.js', function() {
         function(err, result) {
           should.exist(err);
           // console.log(err);
-          err.message.should.startWith('NJS-019');
+          err.message.should.startWith('NJS-019:');
           done();
         }
       );
@@ -757,7 +757,7 @@ describe('55. resultSet2.js', function() {
         if(err) {
           // console.error("Error at accessing RS: " + err.message);
           // NJS-010: unsupported data type in select list
-          (err.message).should.startWith('NJS-010');
+          (err.message).should.startWith('NJS-010:');
           rs.close( function(err) {
             should.not.exist(err);
             cb();
@@ -826,7 +826,8 @@ describe('55. resultSet2.js', function() {
             },
             function(err, result) {
               should.not.exist(err);
-              // Error occurs -  NJS-007: invalid value for "type" in parameter 2
+              (err.message).should.startWith('NJS-007:');
+              // NJS-007: invalid value for "type" in parameter 2
               console.log(result);
               callback();
             }
