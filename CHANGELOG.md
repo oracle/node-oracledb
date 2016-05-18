@@ -1,10 +1,37 @@
 # Change Log
 
-## node-oracledb v1.9.1 (DD Mon YYYY)
+## node-oracledb v1.9.1 (18 May 2016)
+
+- Upgraded to NAN 2.3 for Node 6 support.
+
+- Added a persistent reference to JavaScript objects during Async
+  operations to prevent crashes due to premature garbage collection.
+
+- Added a persistent reference to the internal Lob buffer to prevent
+  premature garbage collection.
+
+- Fixed memory leaks when using ResultSets.
+
+- Fixed memory leak with the Pool queue timer map.
+
+- Fixed memory release logic when querying LOBs and an error occurs.
+
+- Improved some null pointer checking.
+
+- Altered some node-oracledb NJS-xyz error message text for consistency.
+
+- Improved validation for `fetchInfo` usage.
+
+- Increased the internal buffer size for Oracle Database error messages.
+
+- Call `pause()` internally when closing a query Stream with `_close()`.
+
+- Fixed a symbol redefinition warning for `DATA_BLOB` when compiling on Windows.
+
+- The test suite is no longer installed with `npm install oracledb`.
+  The tests remain available in GitHub.
 
 ## node-oracledb v1.9.0 Development (19 Apr 2016)
-
-** Note this is a development release: features are subject to change. **
 
 - Added Promise support. All asynchronous functions can now return
   promises. By default the standard Promise library is used for Node
@@ -58,7 +85,7 @@
 
 ## node-oracledb v1.7.1 (1 Mar 2016)
 
-- Made public methods overwritable in new JavaScript layer
+- Made public methods over-writable in the new JavaScript layer
 
 ## node-oracledb v1.7.0 (29 Feb 2016)
 
