@@ -1509,16 +1509,16 @@ void Connection::Async_Execute (uv_work_t *req)
 
       executeBaton->dpistmt->execute(0, executeBaton->autoCommit);
 
-      if ( executeBaton->getRS )
-      {
-        goto exitAsyncExecute;
-      }
-
       const dpi::MetaData* meta   = executeBaton->dpistmt->getMetaData();
       executeBaton->numCols       = executeBaton->dpistmt->numCols();
       executeBaton->columnNames   = new std::string[executeBaton->numCols];
       Connection::CopyMetaData( executeBaton->columnNames, meta,
                                 executeBaton->numCols );
+
+      if ( executeBaton->getRS )
+      {
+        goto exitAsyncExecute;
+      }
 
       Connection::DoDefines(executeBaton, meta, executeBaton->numCols);
       /* If any errors while creating define structures, bail out */

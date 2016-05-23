@@ -1,5 +1,9 @@
 # Change Log
 
+## node-oracledb v1.9.2 (DD Mon YYYY)
+
+- Fix `results.metaData` for queries with `{resultSet: true}`
+
 ## node-oracledb v1.9.1 (18 May 2016)
 
 - Upgraded to NAN 2.3 for Node 6 support.
