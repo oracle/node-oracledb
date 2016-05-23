@@ -1,6 +1,6 @@
 # Change Log
 
-## node-oracledb v1.9.2 (DD Mon YYYY)
+## node-oracledb v1.9.2 (23 May 2016)
 
 - Fix `results.metaData` for queries with `{resultSet: true}`
 
