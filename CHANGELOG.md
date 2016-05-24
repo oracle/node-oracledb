@@ -1,8 +1,12 @@
 # Change Log
 
+## node-oracledb v1.9.3 (24 May 2016)
+
+- Fix error with `OCI_ERROR_MAXMSG_SIZE2` when building with Oracle client 11.2.0.1 and 11.2.0.2.
+
 ## node-oracledb v1.9.2 (23 May 2016)
 
-- Fix `results.metaData` for queries with `{resultSet: true}`
+- Fix `results.metaData` for queries with `{resultSet: true}`.
 
 ## node-oracledb v1.9.1 (18 May 2016)
 
