@@ -447,7 +447,7 @@ the steps in [5.3.1](#instosxICuser) instead.
 
 Download the free **Basic** and **SDK** ZIPs from
 [Oracle Technology Network](http://www.oracle.com/technetwork/topics/intel-macsoft-096467.html)
-and install them into the same directory:
+and install them into the same directory  (don't use 'Basic-Lite', it won't work) :
 
 ```
 sudo su -
