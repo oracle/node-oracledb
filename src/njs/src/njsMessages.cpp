@@ -73,7 +73,7 @@ static const char *errMsg[] =
   "NJS-034: data type is unsupported for array bind", // errInvalidTypeForArrayBind
   "NJS-035: maxArraySize is required for IN OUT array bind", // errReqdMaxArraySize
   "NJS-036: given array is of size greater than maxArraySize", // errInvalidArraySize
-  "NJS-037: incompatible type of value provided", // errIncompatibleTypeArrayBind
+  "NJS-037: incompatible type of value provided for array bind %s", // errIncompatibleTypeArrayBind
   "NJS-038: maxArraySize value should be greater than 0", // errInvalidValueArrayBind
   "NJS-039: empty array is not allowed for IN bind", // errEmptyArray
   "NJS-040: connection request timeout",  // errConnRequestTimeout
