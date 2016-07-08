@@ -19,7 +19,7 @@ The node-oracledb project is open source and maintained by Oracle Corp.  The hom
 - [SQL and PL/SQL execution](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#sqlexecution)
 - [REF CURSORs](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#refcursors)
 - [Large Objects: CLOBs and BLOBs](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#lobhandling)
-- Oracle Database 12.1 [JSON datatype](http://docs.oracle.com/database/121/ADXDB/json.htm#ADXDB6246)
+- Oracle Database 12.1 [JSON datatype](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#jsondatatype)
 - [Query results as JavaScript objects or arrays](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#queryoutputformats)
 - [Smart mapping between JavaScript and Oracle types with manual override available](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#typemap)
 - [Data binding using JavaScript objects or arrays](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#bind)
