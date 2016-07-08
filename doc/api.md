@@ -295,7 +295,7 @@ Constants for `execute()` [bind parameter](#executebindParams) and
 [Lob](#proplobtype) `type` properties, for
 [`fetchAsString`](#propdbfetchasstring) and
 [`fetchInfo`](#propexecfetchinfo), and for
-[extended metadata](#propexecextendedmetadata).
+[extended metadata](#propdbextendedmetadata).
 
 Not all constants can be used in all places.
 
@@ -319,7 +319,7 @@ Oracledb.STRING                 // (2001) Bind as JavaScript string type
 
 #### <a name="oracledbconstantsdbtype"></a> 3.1.3 Oracle Database Type Constants
 
-These types are shown in [extended metadata](#propexecextendedmetadata)
+These types are shown in [extended metadata](#propdbextendedmetadata)
 for queries and REF CURSORS.  They indicate the Oracle database type.
 
 ```
@@ -1552,8 +1552,9 @@ Array metaData
 For `SELECT` statements, this contains an array of objects describing
 details of columns for the select list.  For non queries, this property is undefined.
 
-Each column's `name` is always given.  If the execute option
-[`extendedMetaData`](#propexecextendedmetadata) is `true` then
+Each column's `name` is always given.  If the *Oracledb*
+[`extendedMetaData`](#propdbextendedmetadata) or `execute()` option
+[`extendedMetaData`](#propexecextendedmetadata) are `true` then
 additional information is included.
 
 - `name`: The column name follows Oracle's standard name-casing rules.  It will commonly be uppercase, since most applications create tables using unquoted, case-insensitive names.
@@ -1976,8 +1977,9 @@ Array metaData
 Contains an array of objects with metadata about the query or REF
 CURSOR columns.
 
-Each column's `name` is always given.  If the `execute()` option
-[`extendedMetaData`](#propexecextendedmetadata) is `true` then
+Each column's `name` is always given.  If the *Oracledb*
+[`extendedMetaData`](#propdbextendedmetadata) or `execute()` option
+[`extendedMetaData`](#propexecextendedmetadata) are `true` then
 additional information is included.
 
 See [`result.metaData`](#execmetadata) for the available attributes.
