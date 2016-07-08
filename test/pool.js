@@ -912,7 +912,7 @@ describe('2. pool.js', function() {
   });
 
   describe('2.9 connection request queue (_enableStats & _logStats functionality)', function(){
-    it('2.9.1 works after the pool as been terminated', function(done) {
+    it('2.9.1 does not works after the pool has been terminated', function(done) {
       oracledb.createPool(
         {
           externalAuth      : dbConfig.externalAuth,
@@ -944,7 +944,8 @@ describe('2. pool.js', function() {
                   try {
                     pool._logStats();
                   } catch (err) {
-                    should.not.exist(err);
+                    should.exist(err);
+                    (err.message).should.startWith("NJS-002:"); // NJS-002: invalid pool
                   }
 
                   done();
