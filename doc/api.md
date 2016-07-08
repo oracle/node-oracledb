@@ -3490,6 +3490,16 @@ Using bind parameters is recommended in preference to constructing SQL
 or PL/SQL statements by string concatenation.  This is for performance
 and security.
 
+Inserted data that is bound is passed to the database separately from
+the statement text.  It can never be executed.  This means there is no
+need to escape bound data inserted into the database.
+
+If a statement is executed more than once with different values for
+the bind parameters, Oracle can re-use context from the initial
+execution, thus improving performance.  However, if similar statements
+contain hard coded values instead of bind parameters, Oracle sees the
+statement text is different and would be less efficient.
+
 IN binds are values passed into the database.  OUT binds are used to
 retrieve data.  IN OUT binds are passed in, and may return a different
 value after the statement executes.
