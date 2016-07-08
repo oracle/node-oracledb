@@ -506,7 +506,10 @@ This property helps avoid situations where using JavaScript types can
 lead to numeric precision loss, or where date conversion is unwanted.
 
 The valid types that can be mapped to strings are
-[`DATE`](#oracledbconstantsnodbtype) and [`NUMBER`](#oracledbconstantsnodbtype).
+[`DATE`](#oracledbconstantsnodbtype) and
+[`NUMBER`](#oracledbconstantsnodbtype).  Columns of type `ROWID` and
+`TIMESTAMP WITH TIME ZONE` that cannot natively be fetched can also be
+mapped and fetched as strings.
 
 The maximum length of a string created by this mapping is 200 bytes.
 
@@ -2847,10 +2850,10 @@ The default query result type mappings for Oracle Database types to JavaScript t
     Therefore, timestamps having greater
     precision lose their sub-millisecond fractional part
     when fetched. Internally, `TIMESTAMP` and `DATE`
-    columns are fetched as `TIMESTAMP WITH LOCAL TIMEZONE` using
+    columns are fetched as `TIMESTAMP WITH LOCAL TIME ZONE` using
     [OCIDateTime](https://docs.oracle.com/database/121/LNOCI/oci12oty.htm#LNOCI16840).
     When binding a JavaScript Date value in an `INSERT` statement, the date is also inserted as `TIMESTAMP WITH
-    LOCAL TIMEZONE` using OCIDateTime.
+    LOCAL TIME ZONE` using OCIDateTime.
 
 ##### Fetching as String
 
@@ -3695,8 +3698,8 @@ returned array length is not greater than one.  This will help identify
 invalid data or an incorrect `WHERE` clause that causes more results
 to be returned.
 
-Oracle Database DATE, TIMESTAMP and TIMESTAMP WITH LOCAL TIME ZONE
-types can be bound as `DATE` for DML RETURNING.  These types and ROWID
+Oracle Database `DATE`, `TIMESTAMP` and `TIMESTAMP WITH LOCAL TIME ZONE`
+types can be bound as `DATE` for DML RETURNING.  These types and `ROWID`
 can also be bound as `STRING`.
 
 An example of DML RETURNING binds is:
