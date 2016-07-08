@@ -113,7 +113,7 @@ describe('22. dataTypeChar.js', function(){
                      "BEGIN\n" +
                      "  RETURN 'Hello ' || stringValue || ' world!';\n" +
                      "END testchar;";
-          connection.should.be.ok;
+          connection.should.be.ok();
           connection.execute(
             proc,
             function(err) {
@@ -246,7 +246,7 @@ describe('22. dataTypeChar.js', function(){
                       "  TYPE stringsType IS TABLE OF CHAR(30) INDEX BY BINARY_INTEGER;\n" +
                       "  FUNCTION test(strings IN stringsType) RETURN CHAR;\n" +
                       "END;";
-          connection.should.be.ok;
+          connection.should.be.ok();
           connection.execute(
             proc,
             function(err) {

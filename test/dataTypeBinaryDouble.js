@@ -132,7 +132,7 @@ describe('31. dataTypeBinaryDouble.js', function() {
 
           for(var i = 0; i < nums.length; i++) {
             result.rows[i].CONTENT.should.not.be.exactly(nums[ result.rows[i].NUM ]);
-            approxeq(result.rows[i].CONTENT, nums[ result.rows[i].NUM ]).should.be.ok;
+            approxeq(result.rows[i].CONTENT, nums[ result.rows[i].NUM ]).should.be.ok();
           }
           done();
         }

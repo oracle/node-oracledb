@@ -86,7 +86,7 @@ describe('40. dataTypeClob.js', function() {
     })
 
     it('40.1.1 stores CLOB value correctly', function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
       async.series([
         function clobinsert1(callback) {
 

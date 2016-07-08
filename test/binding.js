@@ -69,7 +69,7 @@ describe('4. binding.js', function() {
                       BEGIN \
                         p_out := 'abcdef'; \
                       END;";
-          connection.should.be.ok;
+          connection.should.be.ok();
           connection.execute(
             proc,
             function(err) {
@@ -126,7 +126,7 @@ describe('4. binding.js', function() {
                       BEGIN \
                         p_out := 10010; \
                       END;";
-          connection.should.be.ok;
+          connection.should.be.ok();
           connection.execute(
             proc,
             function(err) {
@@ -184,7 +184,7 @@ describe('4. binding.js', function() {
                         p_inout := p_in || ' ' || p_inout; \
                         p_out := 101; \
                       END; ";
-          connection.should.be.ok;
+          connection.should.be.ok();
           connection.execute(
             proc,
             function(err) {
@@ -246,7 +246,7 @@ describe('4. binding.js', function() {
                         p_inout := p_in || ' ' || p_inout; \
                         p_out := 101; \
                       END; ";
-          connection.should.be.ok;
+          connection.should.be.ok();
           connection.execute(
             proc,
             function(err) {
@@ -300,7 +300,7 @@ describe('4. binding.js', function() {
     })
 
     it('4.1.5 default bind type - STRING', function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
       var sql = "begin :n := 1001; end;";
       var bindVar = { n : { dir: oracledb.BIND_OUT } };
       var options = { };
@@ -361,7 +361,7 @@ describe('4. binding.js', function() {
     })
 
     afterEach(function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
       connection.execute(
         "DROP TABLE nodb_binding",
         function(err) {
@@ -462,7 +462,7 @@ describe('4. binding.js', function() {
     })
 
     afterEach(function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
       connection.execute(
         "DROP TABLE nodb_binding",
         function(err) {
@@ -605,7 +605,7 @@ describe('4. binding.js', function() {
                       BEGIN \
                         p_out := 'ABCDEF GHIJK LMNOP QRSTU'; \
                       END;";
-          connection.should.be.ok;
+          connection.should.be.ok();
           connection.execute(
             proc,
             function(err) {

@@ -51,7 +51,7 @@ describe('51. accessTerminatedPoolAttributes.js', function(){
       },
       function(err, pool){
         should.not.exist(err);
-        pool.should.be.ok;
+        pool.should.be.ok();
         if(dbConfig.externalAuth){
           pool.connectionsOpen.should.be.exactly(0);
         } else {

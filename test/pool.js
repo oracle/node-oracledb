@@ -44,7 +44,7 @@ describe('2. pool.js', function() {
     it('2.1.1 set properties to default values if not explicitly specified', function(done) {
       oracledb.createPool(dbConfig, function(err, pool) {
         should.not.exist(err);
-        pool.should.be.ok;
+        pool.should.be.ok();
 
         var defaultMin = 0;
         var defaultMax = 4;
@@ -196,7 +196,7 @@ describe('2. pool.js', function() {
         },
         function(err, pool){
           should.not.exist(err);
-          pool.should.be.ok;
+          pool.should.be.ok();
           if(dbConfig.externalAuth){
             pool.connectionsOpen.should.be.exactly(0);
           } else {
@@ -296,7 +296,7 @@ describe('2. pool.js', function() {
         },
         function(err, pool) {
           should.not.exist(err);
-          pool.should.be.ok;
+          pool.should.be.ok();
           if(!dbConfig.externalAuth){
             pool.connectionsOpen.should.be.exactly(1);
           } else {
@@ -306,13 +306,13 @@ describe('2. pool.js', function() {
 
           pool.getConnection( function(err, conn1){
             should.not.exist(err);
-            conn1.should.be.ok;
+            conn1.should.be.ok();
             pool.connectionsOpen.should.be.exactly(1);
             pool.connectionsInUse.should.be.exactly(1);
 
             pool.getConnection( function(err, conn2){
               should.not.exist(err);
-              conn2.should.be.ok;
+              conn2.should.be.ok();
               pool.connectionsOpen.should.be.exactly(2);
               pool.connectionsInUse.should.be.exactly(2);
 
@@ -421,30 +421,30 @@ describe('2. pool.js', function() {
         },
         function(err, pool){
           should.not.exist(err);
-          pool.should.be.ok;
+          pool.should.be.ok();
 
           pool.getConnection( function(err, conn1){
             should.not.exist(err);
-            conn1.should.be.ok;
+            conn1.should.be.ok();
             pool.connectionsOpen.should.be.exactly(1);
             pool.connectionsInUse.should.be.exactly(1);
 
             pool.getConnection( function(err, conn2){
               should.not.exist(err);
-              conn2.should.be.ok;
+              conn2.should.be.ok();
               pool.connectionsOpen.should.be.exactly(3);   // Bug 20774464 - Occurs on External Authentication
               pool.connectionsInUse.should.be.exactly(2);
 
               pool.getConnection( function(err, conn3){
                 should.not.exist(err);
-                conn3.should.be.ok;
+                conn3.should.be.ok();
                 pool.connectionsOpen.should.be.exactly(3);
                 pool.connectionsInUse.should.be.exactly(3);
 
                 // (connectionsOpen + poolIncrement) > poolMax
                 pool.getConnection( function(err, conn4){
                   should.not.exist(err);
-                  conn4.should.be.ok;
+                  conn4.should.be.ok();
                   pool.connectionsOpen.should.be.exactly(4);
                   pool.connectionsOpen.should.be.exactly(4);
                   conn4.release( function(err){
@@ -511,7 +511,7 @@ describe('2. pool.js', function() {
         },
         function(err, pool){
           should.not.exist(err);
-          pool.should.be.ok;
+          pool.should.be.ok();
 
           pool.terminate(function(err){
             should.not.exist(err);
@@ -583,7 +583,7 @@ describe('2. pool.js', function() {
         },
         function(err, pool){
           should.not.exist(err);
-          pool.should.be.ok;
+          pool.should.be.ok();
           pool.terminate(function(err){
             should.not.exist(err);
             done();

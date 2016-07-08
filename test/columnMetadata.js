@@ -179,7 +179,7 @@ describe('9. columnMetadata.js', function(){
         function(err, result){
           should.not.exist(err);
           result.rows[0][0].should.be.exactly(3);
-          result.metaData.should.be.ok;
+          result.metaData.should.be.ok();
           result.metaData[0].name.should.eql('COUNT(*)');
           done();
         }
@@ -217,7 +217,7 @@ describe('9. columnMetadata.js', function(){
             [99],
             function(err, result){
               should.not.exist(err);
-              result.metaData.should.be.ok;
+              result.metaData.should.be.ok();
               result.metaData.length.should.be.exactly(4);
               result.metaData[0].name.should.eql('DEPARTMENT_ID');
               result.metaData[1].name.should.eql('DEPARTMENT_NAME');
@@ -246,7 +246,7 @@ describe('9. columnMetadata.js', function(){
             [40],
             function(err, result){
               should.not.exist(err);
-              result.metaData.should.be.ok;
+              result.metaData.should.be.ok();
               result.metaData[0].name.should.eql('DEPARTMENT_NAME');
               result.rows[0][0].should.eql('Finance');
               done();

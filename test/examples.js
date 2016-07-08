@@ -44,7 +44,7 @@ describe('3. examples.js', function(){
     it('3.1.1 tests a basic connection to the database', function(done){
       oracledb.getConnection(dbConfig, function(error, connection){
         should.not.exist(error);
-        connection.should.be.ok;
+        connection.should.be.ok();
         connection.release( function(err){
           should.not.exist(err);
           done();
@@ -269,7 +269,7 @@ describe('3. examples.js', function(){
           "   '); " +
           "END; ";
 
-        connection.should.be.ok;
+        connection.should.be.ok();
         async.series([
           function(callback){
             connection.execute(
@@ -483,7 +483,7 @@ describe('3. examples.js', function(){
       var defaultLimit = oracledb.maxRows;
       defaultLimit.should.be.exactly(100);
 
-      connection.should.be.ok;
+      connection.should.be.ok();
       connection.execute(
         "SELECT * FROM nodb_employees ORDER BY employees_id",
         function(err, result){
@@ -497,7 +497,7 @@ describe('3. examples.js', function(){
     })
 
     it('3.6.2 can also specify for each execution', function(done){
-      connection.should.be.ok;
+      connection.should.be.ok();
       connection.execute(
         "SELECT * FROM nodb_employees ORDER BY employees_id",
         {}, {maxRows: 25},
@@ -888,7 +888,7 @@ describe('3. examples.js', function(){
     })
 
     it('3.10.1 resultset1.js - getRow() function', function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
       var rowCount = 1;
 
       connection.execute(
@@ -922,7 +922,7 @@ describe('3. examples.js', function(){
     })
 
     it('3.10.2 resultset2.js - getRows() function', function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
       var numRows = 10;  // number of rows to return from each call to getRows()
 
       connection.execute(
@@ -1066,7 +1066,7 @@ describe('3. examples.js', function(){
     })
 
     it('3.11.1 REF CURSOR', function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
       var numRows = 100;  // number of rows to return from each call to getRows()
 
       connection.execute(

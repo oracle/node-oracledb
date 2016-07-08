@@ -481,7 +481,7 @@ assist.sqlCreateTable = function(tableName)
 /************************* Functions for Verifiction *********************************/
 
 assist.dataTypeSupport = function(connection, tableName, array, done) {
-  connection.should.be.ok;
+  connection.should.be.ok();
   connection.execute(
     "SELECT * FROM " + tableName + " ORDER BY num",
     [],
@@ -615,7 +615,7 @@ assist.verifyNullValues = function(connection, tableName, done)
 {
   var sqlInsert = "INSERT INTO " + tableName + " VALUES(:no, :bindValue)";
 
-  connection.should.be.ok;
+  connection.should.be.ok();
   async.series([
     function createTable(callback) {
       var sqlCreate = assist.sqlCreateTable(tableName);

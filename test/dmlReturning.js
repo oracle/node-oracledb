@@ -110,7 +110,7 @@ describe('6. dmlReturning.js', function(){
     })
 
     it('6.1.1 INSERT statement with Object binding', function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
       connection.execute(
         "INSERT INTO nodb_dmlreturn VALUES (1003, 'Robyn Sands') RETURNING id, name INTO :rid, :rname",
         {
@@ -129,7 +129,7 @@ describe('6. dmlReturning.js', function(){
     })
 
     it('6.1.2 INSERT statement with Array binding', function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
       connection.execute(
         "INSERT INTO nodb_dmlreturn VALUES (1003, 'Robyn Sands') RETURNING id, name INTO :rid, :rname",
         [
@@ -149,7 +149,7 @@ describe('6. dmlReturning.js', function(){
 
     // it currently fails on OS X
     it.skip('6.1.3 INSERT statement with small maxSize restriction', function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
       connection.execute(
         "INSERT INTO nodb_dmlreturn VALUES (1003, 'Robyn Sands Delaware') RETURNING id, name INTO :rid, :rname",
         {
@@ -168,7 +168,7 @@ describe('6. dmlReturning.js', function(){
     })
 
     it('6.1.4 UPDATE statement with single row matched', function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
       connection.execute(
         "UPDATE nodb_dmlreturn SET name = :n WHERE id = :i RETURNING id, name INTO :rid, :rname",
         {
@@ -190,7 +190,7 @@ describe('6. dmlReturning.js', function(){
     })
 
     it('6.1.5 UPDATE statement with single row matched & Array binding', function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
       connection.execute(
         "UPDATE nodb_dmlreturn SET name = :n WHERE id = :i RETURNING id, name INTO :rid, :rname",
         [
@@ -212,7 +212,7 @@ describe('6. dmlReturning.js', function(){
     })
 
     it('6.1.6 UPDATE statements with multiple rows matched', function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
       connection.execute(
         "UPDATE nodb_dmlreturn SET id = :i RETURNING id, name INTO :rid, :rname",
         {
@@ -233,7 +233,7 @@ describe('6. dmlReturning.js', function(){
     })
 
     it('6.1.7 UPDATE statements with multiple rows matched & Array binding', function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
       connection.execute(
         "UPDATE nodb_dmlreturn SET id = :i RETURNING id, name INTO :rid, :rname",
         [
@@ -254,7 +254,7 @@ describe('6. dmlReturning.js', function(){
     })
 
     it('6.1.8 DELETE statement with Object binding', function(done){
-      connection.should.be.ok;
+      connection.should.be.ok();
       connection.execute(
         "DELETE FROM nodb_dmlreturn WHERE name like '%Chris%' RETURNING id, name INTO :rid, :rname",
         {
@@ -274,7 +274,7 @@ describe('6. dmlReturning.js', function(){
     })
 
     it('6.1.9 DELETE statement with Array binding', function(done){
-      connection.should.be.ok;
+      connection.should.be.ok();
       connection.execute(
         "DELETE FROM nodb_dmlreturn WHERE name like '%Chris%' RETURNING id, name INTO :rid, :rname",
         [
@@ -324,7 +324,7 @@ describe('6. dmlReturning.js', function(){
       /*** string length **/
       var size = 4000;
 
-      connection.should.be.ok;
+      connection.should.be.ok();
       connection.execute(
         "INSERT INTO nodb_dmlreturn VALUES (:i, :n) RETURNING id, name INTO :rid, :rname",
         {
@@ -345,7 +345,7 @@ describe('6. dmlReturning.js', function(){
     })
 
     it('6.1.11 Negative test - wrong SQL got correct error thrown', function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
       var wrongSQL = "UPDATE nodb_dmlreturn SET doesnotexist = 'X' WHERE id = :id RETURNING name INTO :rn";
 
       connection.execute(

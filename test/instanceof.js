@@ -38,7 +38,7 @@ var dbConfig = require('./dbconfig.js');
 describe('45. instanceof.js', function() {
 
   it('45.1 instanceof works for the oracledb instance', function(done) {
-    (oracledb instanceof oracledb.Oracledb).should.be.true;
+    (oracledb instanceof oracledb.Oracledb).should.be.true();
 
     done();
   });
@@ -57,7 +57,7 @@ describe('45. instanceof.js', function() {
       function(err, pool){
         should.not.exist(err);
 
-        (pool instanceof oracledb.Pool).should.be.true;
+        (pool instanceof oracledb.Pool).should.be.true();
 
         pool.terminate(function(err) {
           should.not.exist(err);
@@ -72,7 +72,7 @@ describe('45. instanceof.js', function() {
     oracledb.getConnection(dbConfig, function(err, conn) {
       should.not.exist(err);
 
-      (conn instanceof oracledb.Connection).should.be.true;
+      (conn instanceof oracledb.Connection).should.be.true();
 
       conn.release(function(err) {
         should.not.exist(err);
@@ -95,7 +95,7 @@ describe('45. instanceof.js', function() {
         function(err, result) {
           should.not.exist(err);
 
-          (result.resultSet instanceof oracledb.ResultSet).should.be.true;
+          (result.resultSet instanceof oracledb.ResultSet).should.be.true();
 
           result.resultSet.close(function(err) {
             should.not.exist(err);
@@ -120,7 +120,7 @@ describe('45. instanceof.js', function() {
         function(err, result) {
           should.not.exist(err);
 
-          (result.rows[0][0] instanceof oracledb.Lob).should.be.true;
+          (result.rows[0][0] instanceof oracledb.Lob).should.be.true();
 
           conn.release(function(err) {
             should.not.exist(err);

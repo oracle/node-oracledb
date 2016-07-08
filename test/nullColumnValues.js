@@ -104,7 +104,7 @@ describe('10. nullColumnValues.js', function() {
   })
 
   it('10.1 a simple query for null value', function(done) {
-    connection.should.be.ok;
+    connection.should.be.ok();
 
     connection.execute(
       "SELECT null FROM DUAL",
@@ -117,7 +117,7 @@ describe('10. nullColumnValues.js', function() {
   })
 
   it('10.2 in-bind for null column value', function(done) {
-    connection.should.be.ok;
+    connection.should.be.ok();
 
     async.series([
       function(callback) {
@@ -157,7 +157,7 @@ describe('10. nullColumnValues.js', function() {
   })
 
   it('10.3 out-bind for null column value', function(done) {
-    connection.should.be.ok;
+    connection.should.be.ok();
 
     async.series([
       function(callback) {
@@ -200,7 +200,7 @@ describe('10. nullColumnValues.js', function() {
   })
 
   it('10.4 DML Returning for null column value', function(done) {
-    connection.should.be.ok;
+    connection.should.be.ok();
 
     connection.execute(
       "UPDATE nodb_departments SET department_name = :dname, \
@@ -229,7 +229,7 @@ describe('10. nullColumnValues.js', function() {
   })
 
   it('10.5 resultSet for null value', function(done) {
-    connection.should.be.ok;
+    connection.should.be.ok();
 
     async.series([
       function(callback) {

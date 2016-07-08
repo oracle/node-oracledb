@@ -131,7 +131,7 @@ describe('8. autoCommitForSelect.js', function(){
   })
 
   it('8.1 should return previous value when autoCommit is false', function(done){
-    connection.should.be.ok;
+    connection.should.be.ok();
     oracledb.autoCommit = false;
 
     async.series([
@@ -197,7 +197,7 @@ describe('8. autoCommitForSelect.js', function(){
   })
 
   it('8.2 can use explicit commit() to keep data consistent', function(done){
-    connection.should.be.ok;
+    connection.should.be.ok();
     oracledb.autoCommit = false;
 
     async.series([
@@ -269,7 +269,7 @@ describe('8. autoCommitForSelect.js', function(){
   })
 
   it('8.3 can also use the autoCommit for SELECTs feature', function(done){
-    connection.should.be.ok;
+    connection.should.be.ok();
     oracledb.autoCommit = false;
 
     async.series([

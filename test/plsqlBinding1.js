@@ -68,7 +68,7 @@ describe('43. plsqlBinding1.js', function() {
                       "  TYPE numbersType IS TABLE OF NUMBER INDEX BY BINARY_INTEGER;\n" +
                       "  FUNCTION test(strings IN stringsType, numbers IN numbersType) RETURN VARCHAR2;\n" +
                       "END;";
-          connection.should.be.ok;
+          connection.should.be.ok();
           connection.execute(
             proc,
             function(err) {
@@ -94,7 +94,7 @@ describe('43. plsqlBinding1.js', function() {
                      "    RETURN s;\n" +
                      "  END;\n" +
                      "END;";
-          connection.should.be.ok;
+          connection.should.be.ok();
           connection.execute(
             proc,
             function(err) {
@@ -142,7 +142,7 @@ describe('43. plsqlBinding1.js', function() {
                       "  TYPE numbersType IS TABLE OF NUMBER INDEX BY BINARY_INTEGER;\n" +
                       "  PROCEDURE test(s IN stringsType, n IN numbersType);\n" +
                       "END;";
-          connection.should.be.ok;
+          connection.should.be.ok();
           connection.execute(
             proc,
             function(err) {
@@ -166,7 +166,7 @@ describe('43. plsqlBinding1.js', function() {
                      "    END IF;\n" +
                      "  END;\n" +
                      "END;";
-          connection.should.be.ok;
+          connection.should.be.ok();
           connection.execute(
             proc,
             function(err) {
@@ -212,7 +212,7 @@ describe('43. plsqlBinding1.js', function() {
                       "  TYPE numbersType IS TABLE OF NUMBER INDEX BY BINARY_INTEGER;\n" +
                       "  PROCEDURE test(strings IN OUT NOCOPY stringsType, numbers IN OUT NOCOPY numbersType);\n" +
                       "END;";
-          connection.should.be.ok;
+          connection.should.be.ok();
           connection.execute(
             proc,
             function(err) {
@@ -237,7 +237,7 @@ describe('43. plsqlBinding1.js', function() {
                      "    numbers(numbers.COUNT + 1) := 4711;\n" +
                      "  END;\n" +
                      "END;";
-          connection.should.be.ok;
+          connection.should.be.ok();
           connection.execute(
             proc,
             function(err) {
@@ -285,7 +285,7 @@ describe('43. plsqlBinding1.js', function() {
                      "  TYPE numbersType IS TABLE OF NUMBER INDEX BY BINARY_INTEGER;\n" +
                      "  PROCEDURE test(items IN NUMBER, strings OUT NOCOPY stringsType, numbers OUT NOCOPY numbersType);\n" +
                      "END;";
-          connection.should.be.ok;
+          connection.should.be.ok();
           connection.execute(
             proc,
             function(err) {
@@ -309,7 +309,7 @@ describe('43. plsqlBinding1.js', function() {
                      "    END LOOP;\n" +
                      "  END;\n" +
                      "END;";
-          connection.should.be.ok;
+          connection.should.be.ok();
           connection.execute(
             proc,
             function(err) {
@@ -375,7 +375,7 @@ describe('43. plsqlBinding1.js', function() {
                       "  PROCEDURE test4(p IN stringsType);\n" +
                       "  PROCEDURE test5(p OUT stringsType);\n" +
                       "END;";
-          connection.should.be.ok;
+          connection.should.be.ok();
           connection.execute(
             proc,
             function(err) {
@@ -394,7 +394,7 @@ describe('43. plsqlBinding1.js', function() {
                      "  PROCEDURE test4(p IN stringsType) IS BEGIN NULL; END;\n" +
                      "  PROCEDURE test5(p OUT stringsType) IS BEGIN NULL; END;\n" +
                      "END;";
-          connection.should.be.ok;
+          connection.should.be.ok();
           connection.execute(
             proc,
             function(err) {
@@ -569,7 +569,7 @@ describe('43. plsqlBinding1.js', function() {
                      "BEGIN\n" +
                      "  RETURN stringValue || ' ' || numberValue || ' released in ' || TO_CHAR(dateValue, 'MON YYYY');\n" +
                      "END nodb_test;";
-          connection.should.be.ok;
+          connection.should.be.ok();
           connection.execute(
             proc,
             function(err) {
@@ -620,7 +620,7 @@ describe('43. plsqlBinding1.js', function() {
                      "  numberValue := NumberValue + 100;\n" +
                      //"  dateValue   := "
                      "END nodb_test;\n";
-          connection.should.be.ok;
+          connection.should.be.ok();
           connection.execute(
             proc,
             function(err) {
@@ -672,7 +672,7 @@ describe('43. plsqlBinding1.js', function() {
                      "  numberValue := 2001;\n" +
                      "  dateValue   := TO_DATE('04-02-1968', 'MM-DD-YYYY');" +
                      "END nodb_test;\n";
-          connection.should.be.ok;
+          connection.should.be.ok();
           connection.execute(
             proc,
             function(err) {
@@ -723,7 +723,7 @@ describe('43. plsqlBinding1.js', function() {
                      "  numberValue := 2001;\n" +
                      "  dateValue   := TO_DATE('04-02-1968', 'MM-DD-YYYY');" +
                      "END nodb_test;\n";
-          connection.should.be.ok;
+          connection.should.be.ok();
           connection.execute(
             proc,
             function(err) {
@@ -790,7 +790,7 @@ describe('43. plsqlBinding1.js', function() {
                       "  PROCEDURE test4(p IN stringsType);\n" +
                       "  PROCEDURE test5(p IN numbersType);\n" +
                       "END;";
-          connection.should.be.ok;
+          connection.should.be.ok();
           connection.execute(
             proc,
             function(err) {

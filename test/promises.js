@@ -50,7 +50,7 @@ describe('16. promises.js', function(){
 
     promise
       .then(function(conn) {
-        conn.should.be.ok;
+        conn.should.be.ok();
         conn.release(function(err) {
           if (err)
             return done(err);
@@ -70,7 +70,7 @@ describe('16. promises.js', function(){
 
     promise
       .then(function(pool) {
-        pool.should.be.ok;
+        pool.should.be.ok();
         pool.terminate(function(err) {
           if (err)
             return done(err);
@@ -86,7 +86,7 @@ describe('16. promises.js', function(){
   it('16.3 returns a promise from pool.terminate', function(done) {
     oracledb.createPool(dbConfig)
       .then(function(pool) {
-        pool.should.be.ok;
+        pool.should.be.ok();
         var promise = pool.terminate();
         promise.should.be.an.instanceof(oracledb.Promise);
         return promise;
@@ -102,7 +102,7 @@ describe('16. promises.js', function(){
   it('16.4 returns a promise from pool.getConnection', function(done) {
     oracledb.createPool(dbConfig)
       .then(function(pool) {
-        pool.should.be.ok;
+        pool.should.be.ok();
         var getConnPromise = pool.getConnection();
         getConnPromise.should.be.an.instanceof(oracledb.Promise);
         getConnPromise
@@ -130,7 +130,7 @@ describe('16. promises.js', function(){
   it('16.5 returns a promise from connection.release', function(done) {
     oracledb.getConnection(dbConfig)
       .then(function(conn) {
-        conn.should.be.ok;
+        conn.should.be.ok();
         var promise = conn.release();
         promise.should.be.an.instanceof(oracledb.Promise);
         return promise;
@@ -146,7 +146,7 @@ describe('16. promises.js', function(){
   it('16.6 returns a promise from connection.execute', function(done) {
     oracledb.getConnection(dbConfig)
       .then(function(conn) {
-        conn.should.be.ok;
+        conn.should.be.ok();
         var executePromise = conn.execute('select 1 from dual');
         executePromise.should.be.an.instanceof(oracledb.Promise);
         return executePromise
@@ -166,7 +166,7 @@ describe('16. promises.js', function(){
     oracledb.getConnection(dbConfig)
       .then(function(conn) {
         var commitPromise;
-        conn.should.be.ok;
+        conn.should.be.ok();
         commitPromise = conn.commit();
         commitPromise.should.be.an.instanceof(oracledb.Promise);
 
@@ -185,7 +185,7 @@ describe('16. promises.js', function(){
     oracledb.getConnection(dbConfig)
       .then(function(conn) {
         var rollbackPromise;
-        conn.should.be.ok;
+        conn.should.be.ok();
         rollbackPromise = conn.rollback();
         rollbackPromise.should.be.an.instanceof(oracledb.Promise);
 
@@ -203,7 +203,7 @@ describe('16. promises.js', function(){
   it('16.9 returns a promise from resultSet.close', function(done) {
     oracledb.getConnection(dbConfig)
       .then(function(conn) {
-        conn.should.be.ok;
+        conn.should.be.ok();
 
         return conn.execute('select 1 from dual', [], {resultSet: true})
           .then(function(result) {
@@ -264,7 +264,7 @@ describe('16. promises.js', function(){
 
     oracledb.getConnection(dbConfig)
       .then(function(conn) {
-        conn.should.be.ok;
+        conn.should.be.ok();
 
         return conn.execute('select 1 from dual', [], {resultSet: true})
           .then(function(result) {
@@ -321,7 +321,7 @@ describe('16. promises.js', function(){
 
     oracledb.getConnection(dbConfig)
       .then(function(conn) {
-        conn.should.be.ok;
+        conn.should.be.ok();
 
         return conn.execute('select 1 from dual union select 2 from dual', [], {resultSet: true})
           .then(function(result) {

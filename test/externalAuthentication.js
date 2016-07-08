@@ -55,7 +55,7 @@ describe('5. externalAuthentication.js', function() {
       },
       function(err, conn){
         should.not.exist(err);
-        conn.should.be.ok;
+        conn.should.be.ok();
         conn.execute(
           "select (7+8) from dual",
           function(err, result){
@@ -94,7 +94,7 @@ describe('5. externalAuthentication.js', function() {
         dbConfig,
         function(err, connection){
           should.not.exist(err);
-          connection.should.be.ok;
+          connection.should.be.ok();
           sql = "select (1+4) from dual";
           connection.execute(
             sql,
@@ -121,11 +121,11 @@ describe('5. externalAuthentication.js', function() {
         dbConfig,
         function(err, pool){
           should.not.exist(err);
-          pool.should.be.ok;
+          pool.should.be.ok();
 
           pool.getConnection(function(err, connection){
             should.not.exist(err);
-            connection.should.be.ok;
+            connection.should.be.ok();
 
             sql = "select (1+4) from dual";
             connection.execute(

@@ -180,7 +180,7 @@ describe('7. autoCommit.js', function() {
           { outFormat: oracledb.OBJECT },
           function(err, result) {
             should.not.exist(err);
-            result.rows[0].DEPARTMENT_ID.should.eql(82).and.be.a.Number;
+            result.rows[0].DEPARTMENT_ID.should.eql(82).and.be.a.Number();
             callback();
           }
         );
@@ -201,7 +201,7 @@ describe('7. autoCommit.js', function() {
           { outFormat: oracledb.OBJECT },
           function(err, result) {
             should.not.exist(err);
-            result.rows[0].DEPARTMENT_ID.should.eql(101).and.be.a.Number;
+            result.rows[0].DEPARTMENT_ID.should.eql(101).and.be.a.Number();
             callback();
           }
         );
@@ -261,7 +261,7 @@ describe('7. autoCommit.js', function() {
           { outFormat: oracledb.OBJECT },
           function(err, result) {
             should.not.exist(err);
-            result.rows[0].DEPARTMENT_ID.should.eql(82).and.be.a.Number;
+            result.rows[0].DEPARTMENT_ID.should.eql(82).and.be.a.Number();
             callback();
           }
         );
@@ -282,7 +282,7 @@ describe('7. autoCommit.js', function() {
           { outFormat: oracledb.OBJECT },
           function(err, result) {
             should.not.exist(err);
-            result.rows[0].DEPARTMENT_ID.should.eql(101).and.be.a.Number;
+            result.rows[0].DEPARTMENT_ID.should.eql(101).and.be.a.Number();
             callback();
           }
         );

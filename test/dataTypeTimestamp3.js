@@ -93,7 +93,7 @@ describe('35. dataTypeTimestamp3.js', function() {
   })
 
   it('supports TIMESTAMP WITH TIME ZONE data type', function(done) {
-    connection.should.be.ok;
+    connection.should.be.ok();
 
     var timestamps = [
         new Date(-100000000),

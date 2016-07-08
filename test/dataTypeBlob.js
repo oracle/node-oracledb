@@ -85,7 +85,7 @@ describe('41. dataTypeBlob', function() {
     })
 
     it('41.1.1 stores BLOB value correctly', function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
       async.series([
         function blobinsert1(callback) {
 

@@ -147,7 +147,7 @@ describe('57. nestedCursor.js', function() {
         );
       },
       function(callback) {
-        connection.should.be.ok;
+        connection.should.be.ok();
         connection.execute(
           createParentTable,
           function(err) {
@@ -157,7 +157,7 @@ describe('57. nestedCursor.js', function() {
         );
       },
       function(callback) {
-        connection.should.be.ok;
+        connection.should.be.ok();
         connection.execute(
           createChildTable,
           function(err) {
@@ -221,7 +221,7 @@ describe('57. nestedCursor.js', function() {
   }
 
   it('57.1 testing nested cursor support - result set', function(done) {
-    connection.should.be.ok;
+    connection.should.be.ok();
 
     var sql =
         "SELECT p.description, \

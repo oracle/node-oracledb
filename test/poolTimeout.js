@@ -74,7 +74,7 @@ describe('11. poolTimeout.js', function(){
   })
 
   it('11.1 pool terminates idle connections after specify time', function(done){
-    pool.should.be.ok;
+    pool.should.be.ok();
     if(!dbConfig.externalAuth){
       pool.connectionsOpen.should.be.exactly(1).and.be.a.Number;
     } else {
@@ -90,7 +90,7 @@ describe('11. poolTimeout.js', function(){
       function(callback){
         pool.getConnection( function(err, conn){
           should.not.exist(err);
-          conn.should.be.ok;
+          conn.should.be.ok();
           conn1 = conn;
           //console.log("-- create conn 1");
           callback();
@@ -101,7 +101,7 @@ describe('11. poolTimeout.js', function(){
         pool.connectionsInUse.should.be.exactly(1);
         pool.getConnection( function(err, conn){
           should.not.exist(err);
-          conn.should.be.ok;
+          conn.should.be.ok();
           conn2 = conn;
           //console.log("-- create conn 2");
           callback();
@@ -116,7 +116,7 @@ describe('11. poolTimeout.js', function(){
         pool.connectionsInUse.should.be.exactly(2);
         pool.getConnection( function(err, conn){
           should.not.exist(err);
-          conn.should.be.ok;
+          conn.should.be.ok();
           conn3 = conn;
           //console.log("-- create conn 3");
           callback();
@@ -125,7 +125,7 @@ describe('11. poolTimeout.js', function(){
       function(callback){
         pool.connectionsOpen.should.be.exactly(3);
         pool.connectionsInUse.should.be.exactly(3);
-        conn1.should.be.ok;
+        conn1.should.be.ok();
         conn1.release( function(err){
           should.not.exist(err);
           //console.log("-- release conn 1");
@@ -135,7 +135,7 @@ describe('11. poolTimeout.js', function(){
       function(callback){
         pool.connectionsOpen.should.be.exactly(3);
         pool.connectionsInUse.should.be.exactly(2);
-        conn2.should.be.ok;
+        conn2.should.be.ok();
         conn2.release( function(err){
           should.not.exist(err);
           //console.log("-- release conn 2");
@@ -145,7 +145,7 @@ describe('11. poolTimeout.js', function(){
       function(callback){
         pool.connectionsOpen.should.be.exactly(3);
         pool.connectionsInUse.should.be.exactly(1);
-        conn3.should.be.ok;
+        conn3.should.be.ok();
         conn3.release( function(err){
           should.not.exist(err);
           //console.log("-- release conn 3");
@@ -167,7 +167,7 @@ describe('11. poolTimeout.js', function(){
         pool.connectionsInUse.should.be.exactly(0);
         pool.getConnection( function(err, conn){
           should.not.exist(err);
-          conn.should.be.ok;
+          conn.should.be.ok();
           conn4 = conn;
           //console.log("-- create conn 4");
           callback();
@@ -181,7 +181,7 @@ describe('11. poolTimeout.js', function(){
         //pool.connectionsOpen.should.be.exactly(1);
 
         pool.connectionsInUse.should.be.exactly(1);
-        conn4.should.be.ok;
+        conn4.should.be.ok();
         conn4.release( function(err){
           should.not.exist(err);
           pool.connectionsOpen.should.be.exactly(1);

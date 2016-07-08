@@ -104,7 +104,7 @@ describe('1. connection.js', function(){
       var defaultFormat = oracledb.outFormat;
       defaultFormat.should.be.exactly(oracledb.ARRAY);
 
-      connection.should.be.ok;
+      connection.should.be.ok();
       connection.execute(query, [40], function(err, result){
         should.not.exist(err);
         (result.rows).should.eql([[ 40, 'Human Resources' ]]);
@@ -113,7 +113,7 @@ describe('1. connection.js', function(){
     })
 
     it('1.1.2 ARRAY format explicitly', function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
        connection.execute(
          query, {id: 20}, {outFormat: oracledb.ARRAY},
          function(err, result){
@@ -125,7 +125,7 @@ describe('1. connection.js', function(){
     })
 
     it('1.1.3 OBJECT format', function(done){
-      connection.should.be.ok;
+      connection.should.be.ok();
       connection.execute(
         query, {id: 20}, {outFormat: oracledb.OBJECT},
         function(err, result){
@@ -137,7 +137,7 @@ describe('1. connection.js', function(){
     })
 
     it('1.1.4 Negative test - invalid outFormat value', function(done){
-      connection.should.be.ok;
+      connection.should.be.ok();
       connection.execute(
         query, {id: 20}, {outFormat:0 },
         function(err, result){
@@ -216,7 +216,7 @@ describe('1. connection.js', function(){
       var defaultLimit = oracledb.maxRows;
       defaultLimit.should.be.exactly(100);
 
-      connection.should.be.ok;
+      connection.should.be.ok();
       connection.execute(
         "SELECT * FROM nodb_employees ORDER BY employee_id",
         function(err, result){
@@ -230,7 +230,7 @@ describe('1. connection.js', function(){
     })
 
     it('1.2.2 can also specify for each execution', function(done){
-      connection.should.be.ok;
+      connection.should.be.ok();
       connection.execute(
         "SELECT * FROM nodb_employees ORDER BY employee_id",
         {}, { maxRows: 25 },
@@ -245,7 +245,7 @@ describe('1. connection.js', function(){
     })
 
     it('1.2.3 can not set maxRows to be 0', function(done){
-      connection.should.be.ok;
+      connection.should.be.ok();
       connection.execute(
         "SELECT * FROM nodb_employees ORDER BY employee_id",
         {}, { maxRows: 0 },
@@ -259,7 +259,7 @@ describe('1. connection.js', function(){
     })
 
     it('1.2.4 cannot set maxRows to be a negative number', function(done){
-      connection.should.be.ok;
+      connection.should.be.ok();
       connection.execute(
         "SELECT * FROM nodb_employees ORDER BY employee_id",
         {}, {maxRows: -5},
@@ -285,7 +285,7 @@ describe('1. connection.js', function(){
     })
 
     it('1.2.6 shows 12c new way to limit the number of records fetched by queries', function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
 
       var myoffset     = 2;  // number of rows to skip
       var mymaxnumrows = 6;  // number of rows to fetch
@@ -353,7 +353,7 @@ describe('1. connection.js', function(){
         io: { val: 'Turing', type: oracledb.STRING, dir: oracledb.BIND_INOUT },
         o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
       };
-      connection.should.be.ok;
+      connection.should.be.ok();
       connection.execute(
         "BEGIN nodb_bindingtest(:i, :io, :o); END;",
         bindValues,
@@ -434,7 +434,7 @@ describe('1. connection.js', function(){
     })
 
     it('1.4.1 stmtCacheSize = 0, which disable statement caching', function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
       oracledb.stmtCacheSize = 0;
 
       async.series([
@@ -475,7 +475,7 @@ describe('1. connection.js', function(){
     })
 
     it('1.4.2 works well when statement cache enabled (stmtCacheSize > 0) ', function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
       oracledb.stmtCacheSize = 100;
 
       async.series([
@@ -566,7 +566,7 @@ describe('1. connection.js', function(){
           });
         },
         function(callback) {
-          conn1.should.be.ok;
+          conn1.should.be.ok();
           conn1.execute(
             makeTable,
             [],
@@ -581,8 +581,8 @@ describe('1. connection.js', function(){
     })
 
     afterEach('drop table and release connections', function(done) {
-      conn1.should.be.ok;
-      conn2.should.be.ok;
+      conn1.should.be.ok();
+      conn2.should.be.ok();
       async.series([
         function(callback) {
           conn2.execute(

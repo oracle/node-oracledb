@@ -77,7 +77,7 @@ describe('27. dataTypeNumber2.js', function() {
     })
 
     it('27.1.1 SELECT query', function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
       connection.execute(
         "SELECT * FROM " + tableName,
         [],
@@ -97,7 +97,7 @@ describe('27. dataTypeNumber2.js', function() {
     }) // 27.1.1
 
     it('27.1.2 resultSet stores NUMBER(p, s) data correctly', function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
       var numRows = 3; // number of rows to return from each call to getRows()
       connection.execute(
         "SELECT * FROM " + tableName,

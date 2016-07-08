@@ -62,7 +62,7 @@ describe('55. resultSet2.js', function() {
   describe('55.1 query a RDBMS function', function() {
 
     it('55.1.1 LPAD function', function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
       connection.execute(
         "select lpad('a',100,'x') from dual",
         [],
@@ -101,7 +101,7 @@ describe('55. resultSet2.js', function() {
     })
 
     it('55.2.1 query with one binding variable', function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
       var rowCount = 0;
       connection.execute(
         "SELECT * FROM nodb_employees WHERE employees_id > :1",
@@ -143,7 +143,7 @@ describe('55. resultSet2.js', function() {
     })
 
     it('55.3.1 result set', function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
       var accessCount = 0;
       var numRows = 4;
       var flag = 1; // 1 - getRow(); 2 - getRows(); 3 - to close resultSet.
@@ -198,7 +198,7 @@ describe('55. resultSet2.js', function() {
     })
 
     it('55.3.2 REF Cursor', function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
       var accessCount = 0;
       var numRows = 4;
       var flag = 1; // 1 - getRow(); 2 - getRows(); 3 - to close resultSet.
@@ -295,7 +295,7 @@ describe('55. resultSet2.js', function() {
     }
 
     it('55.4.1 result set', function(done) {
-      conn2.should.be.ok;
+      conn2.should.be.ok();
       conn2.execute(
         "SELECT * FROM nodb_employees ORDER BY employees_id",
         [],
@@ -308,7 +308,7 @@ describe('55. resultSet2.js', function() {
     })
 
     it('55.4.2 REF Cursor', function(done) {
-      conn2.should.be.ok;
+      conn2.should.be.ok();
 
       conn2.execute(
         "BEGIN get_emp_rs(:in, :out); END;",
@@ -334,7 +334,7 @@ describe('55. resultSet2.js', function() {
     })
 
     it('55.5.1 (1) get RS (2) modify data in that table and commit (3) check RS', function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
       var rowsCount = 0;
       var rs = false;
       async.series([
@@ -428,7 +428,7 @@ describe('55. resultSet2.js', function() {
     }
 
     it('55.6.1 concurrent operations on resultSet are not allowed', function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
 
       connection.execute(
         "SELECT * FROM nodb_employees ORDER BY employees_id",
@@ -462,7 +462,7 @@ describe('55. resultSet2.js', function() {
     })
 
     it('55.6.2 concurrent operation on REF Cursor are not allowed', function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
 
       connection.execute(
         "BEGIN get_emp_rs(:in, :out); END;",
@@ -539,7 +539,7 @@ describe('55. resultSet2.js', function() {
     }
 
     it('55.7.1 can access multiple resultSet on one connection', function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
       async.parallel([
         function(callback) {
           connection.execute(
@@ -570,7 +570,7 @@ describe('55. resultSet2.js', function() {
     })
 
     it('55.7.2 can access multiple REF Cursor', function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
 
       async.parallel([
         function(callback) {
@@ -616,7 +616,7 @@ describe('55. resultSet2.js', function() {
     })
 
     it('55.8.1 resultSet cannot be returned for non-query statements', function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
       connection.execute(
         "UPDATE nodb_employees SET employees_name = 'Alan' WHERE employees_id = 100",
         [],
@@ -711,7 +711,7 @@ describe('55. resultSet2.js', function() {
     })
 
     it('55.10.1 ', function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
       var numRows = 10;
       var closeRS = true;
       connection.execute(
@@ -890,7 +890,7 @@ describe('55. resultSet2.js', function() {
     })
 
     it('55.13.1 ', function (done ) {
-      connection.should.be.ok;
+      connection.should.be.ok();
 
       connection.execute (
         "BEGIN get_invalid_refcur ( :p ); END; ",

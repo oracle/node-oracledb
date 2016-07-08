@@ -51,7 +51,7 @@ describe('52. getConnAfterPoolTerminate.js', function() {
       },
       function(err, pool){
         should.not.exist(err);
-        pool.should.be.ok;
+        pool.should.be.ok();
 
         pool.getConnection( function(err, connection){
           should.not.exist(err);
