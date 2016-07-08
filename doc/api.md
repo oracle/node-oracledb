@@ -295,7 +295,7 @@ Constants for `execute()` [bind parameter](#executebindParams) and
 [Lob](#proplobtype) `type` properties, for
 [`fetchAsString`](#propdbfetchasstring) and
 [`fetchInfo`](#propexecfetchinfo), and for
-[extended metadata]([#propexecextendedmetadata).
+[extended metadata](#propexecextendedmetadata).
 
 Not all constants can be used in all places.
 
