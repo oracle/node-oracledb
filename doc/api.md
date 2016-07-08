@@ -2832,7 +2832,7 @@ Description of the properties is given in the
 
 #### <a name="typemap"></a> 9.1.6 Result Type Mapping
 
-Oracle character, number and date columns can be selected.  Data types
+Oracle character, number and date columns can be selected.  Datatypes
 that are currently unsupported give a "datatype is not supported"
 error.
 
