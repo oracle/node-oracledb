@@ -109,7 +109,7 @@ Overview of node-oracledb functional tests
         4.1.5 default bind type - STRING
     4.2 mixing named with positional binding
         4.2.1 array binding is ok
-      - 4.2.2 array binding with mixing JSON should throw an error
+        4.2.2 array binding with mixing JSON should throw an error
     4.3 insert with DATE column and DML returning
         4.3.1 passes in object syntax without returning into
         4.3.2 passes in object syntax with returning into
