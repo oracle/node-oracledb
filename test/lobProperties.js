@@ -42,7 +42,7 @@ var dbConfig = require('./dbconfig.js');
 
 describe('62. lobProperties.js', function() {
 
-  var tableName = "nodb_mylobs";
+  var tableName = "nodb_mylobprops";
   var connection = null;
   var sqlSelect = "SELECT * FROM " + tableName + " WHERE id = :i";
   var defaultChunkSize = null;

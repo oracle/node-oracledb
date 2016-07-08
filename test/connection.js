@@ -49,24 +49,24 @@ describe('1. connection.js', function(){
               e_table_missing EXCEPTION; \
               PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \
           BEGIN \
-              EXECUTE IMMEDIATE ('DROP TABLE nodb_conn_dept'); \
+              EXECUTE IMMEDIATE ('DROP TABLE nodb_conn_dept1'); \
           EXCEPTION \
               WHEN e_table_missing \
               THEN NULL; \
           END; \
           EXECUTE IMMEDIATE (' \
-              CREATE TABLE nodb_conn_dept ( \
+              CREATE TABLE nodb_conn_dept1 ( \
                   department_id NUMBER,  \
                   department_name VARCHAR2(20) \
               ) \
           '); \
           EXECUTE IMMEDIATE (' \
-              INSERT INTO nodb_conn_dept  \
+              INSERT INTO nodb_conn_dept1  \
                    (department_id, department_name) VALUES \
                    (40,''Human Resources'') \
           '); \
           EXECUTE IMMEDIATE (' \
-              INSERT INTO nodb_conn_dept  \
+              INSERT INTO nodb_conn_dept1  \
                    (department_id, department_name) VALUES \
                    (20, ''Marketing'') \
           '); \
@@ -85,7 +85,7 @@ describe('1. connection.js', function(){
 
     after(function(done){
       connection.execute(
-        'DROP TABLE nodb_conn_dept',
+        'DROP TABLE nodb_conn_dept1',
         function(err){
           if(err) { console.error(err.message); return; }
           connection.release( function(err) {
@@ -97,7 +97,7 @@ describe('1. connection.js', function(){
     })
 
     var query = "SELECT department_id, department_name " +
-                "FROM nodb_conn_dept " +
+                "FROM nodb_conn_dept1 " +
                 "WHERE department_id = :id";
 
     it('1.1.1 ARRAY format by default', function(done) {
@@ -158,13 +158,13 @@ describe('1. connection.js', function(){
               e_table_missing EXCEPTION; \
               PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \
           BEGIN \
-              EXECUTE IMMEDIATE ('DROP TABLE nodb_conn_emp'); \
+              EXECUTE IMMEDIATE ('DROP TABLE nodb_conn_emp2'); \
           EXCEPTION \
               WHEN e_table_missing \
               THEN NULL; \
           END; \
           EXECUTE IMMEDIATE (' \
-              CREATE TABLE nodb_conn_emp ( \
+              CREATE TABLE nodb_conn_emp2 ( \
                   employee_id NUMBER,  \
                   employee_name VARCHAR2(20) \
               ) \
@@ -179,7 +179,7 @@ describe('1. connection.js', function(){
           FOR i IN 1..107 LOOP \
              x := x + 1; \
              n := 'staff ' || x; \
-             INSERT INTO nodb_conn_emp VALUES (x, n); \
+             INSERT INTO nodb_conn_emp2 VALUES (x, n); \
           END LOOP; \
        END; ";
     var rowsAmount = 107;
@@ -201,7 +201,7 @@ describe('1. connection.js', function(){
 
     after(function(done){
       connection.execute(
-        'DROP TABLE nodb_conn_emp',
+        'DROP TABLE nodb_conn_emp2',
         function(err){
           if(err) { console.error(err.message); return; }
           connection.release( function(err) {
@@ -218,7 +218,7 @@ describe('1. connection.js', function(){
 
       connection.should.be.ok();
       connection.execute(
-        "SELECT * FROM nodb_conn_emp ORDER BY employee_id",
+        "SELECT * FROM nodb_conn_emp2 ORDER BY employee_id",
         function(err, result){
           should.not.exist(err);
           should.exist(result);
@@ -232,7 +232,7 @@ describe('1. connection.js', function(){
     it('1.2.2 can also specify for each execution', function(done){
       connection.should.be.ok();
       connection.execute(
-        "SELECT * FROM nodb_conn_emp ORDER BY employee_id",
+        "SELECT * FROM nodb_conn_emp2 ORDER BY employee_id",
         {}, { maxRows: 25 },
         function(err, result){
           should.not.exist(err);
@@ -247,7 +247,7 @@ describe('1. connection.js', function(){
     it('1.2.3 can not set maxRows to be 0', function(done){
       connection.should.be.ok();
       connection.execute(
-        "SELECT * FROM nodb_conn_emp ORDER BY employee_id",
+        "SELECT * FROM nodb_conn_emp2 ORDER BY employee_id",
         {}, { maxRows: 0 },
         function(err, result){
           should.exist(err);
@@ -261,7 +261,7 @@ describe('1. connection.js', function(){
     it('1.2.4 cannot set maxRows to be a negative number', function(done){
       connection.should.be.ok();
       connection.execute(
-        "SELECT * FROM nodb_conn_emp ORDER BY employee_id",
+        "SELECT * FROM nodb_conn_emp2 ORDER BY employee_id",
         {}, {maxRows: -5},
         function(err, result){
           should.exist(err);
@@ -273,7 +273,7 @@ describe('1. connection.js', function(){
 
     it('1.2.5 sets maxRows to be very large value', function(done) {
       connection.execute(
-        "SELECT * FROM nodb_conn_emp ORDER BY employee_id",
+        "SELECT * FROM nodb_conn_emp2 ORDER BY employee_id",
         {},
         {maxRows: 500000},
         function(err, result){
@@ -289,7 +289,7 @@ describe('1. connection.js', function(){
 
       var myoffset     = 2;  // number of rows to skip
       var mymaxnumrows = 6;  // number of rows to fetch
-      var sql = "SELECT employee_id, employee_name FROM nodb_conn_emp ORDER BY employee_id";
+      var sql = "SELECT employee_id, employee_name FROM nodb_conn_emp2 ORDER BY employee_id";
 
       if (connection.oracleServerVersion >= 1201000000) {
         // 12c row-limiting syntax
@@ -374,29 +374,29 @@ describe('1. connection.js', function(){
                 e_table_missing EXCEPTION; \
                 PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \
             BEGIN \
-                EXECUTE IMMEDIATE ('DROP TABLE nodb_conn_emp'); \
+                EXECUTE IMMEDIATE ('DROP TABLE nodb_conn_emp4'); \
             EXCEPTION \
                 WHEN e_table_missing \
                 THEN NULL; \
             END; \
             EXECUTE IMMEDIATE (' \
-                CREATE TABLE nodb_conn_emp ( \
+                CREATE TABLE nodb_conn_emp4 ( \
                     id NUMBER,  \
                     name VARCHAR2(4000) \
                 ) \
             '); \
             EXECUTE IMMEDIATE (' \
-              INSERT INTO nodb_conn_emp  \
+              INSERT INTO nodb_conn_emp4  \
                    VALUES \
                    (1001,''Chris Jones'') \
             '); \
             EXECUTE IMMEDIATE (' \
-              INSERT INTO nodb_conn_emp  \
+              INSERT INTO nodb_conn_emp4  \
                    VALUES \
                    (1002,''Tom Kyte'') \
             '); \
             EXECUTE IMMEDIATE (' \
-              INSERT INTO nodb_conn_emp  \
+              INSERT INTO nodb_conn_emp4  \
                    VALUES \
                    (2001, ''Karen Morton'') \
             '); \
@@ -422,7 +422,7 @@ describe('1. connection.js', function(){
     afterEach('drop table and release connection', function(done) {
       oracledb.stmtCacheSize = defaultStmtCache;
       connection.execute(
-        "DROP TABLE nodb_conn_emp",
+        "DROP TABLE nodb_conn_emp4",
         function(err){
           if(err) { console.error(err.message); return; }
           connection.release( function(err){
@@ -440,7 +440,7 @@ describe('1. connection.js', function(){
       async.series([
         function(callback) {
           connection.execute(
-            "INSERT INTO nodb_conn_emp VALUES (:num, :str)",
+            "INSERT INTO nodb_conn_emp4 VALUES (:num, :str)",
             { num: 1003, str: 'Robyn Sands' },
             { autoCommit: true },
             function(err) {
@@ -451,7 +451,7 @@ describe('1. connection.js', function(){
         },
         function(callback) {
           connection.execute(
-            "INSERT INTO nodb_conn_emp VALUES (:num, :str)",
+            "INSERT INTO nodb_conn_emp4 VALUES (:num, :str)",
             { num: 1004, str: 'Bryant Lin' },
             { autoCommit: true },
             function(err) {
@@ -462,7 +462,7 @@ describe('1. connection.js', function(){
         },
         function(callback) {
           connection.execute(
-            "INSERT INTO nodb_conn_emp VALUES (:num, :str)",
+            "INSERT INTO nodb_conn_emp4 VALUES (:num, :str)",
             { num: 1005, str: 'Patrick Engebresson' },
             { autoCommit: true },
             function(err) {
@@ -481,7 +481,7 @@ describe('1. connection.js', function(){
       async.series([
         function(callback) {
           connection.execute(
-            "INSERT INTO nodb_conn_emp VALUES (:num, :str)",
+            "INSERT INTO nodb_conn_emp4 VALUES (:num, :str)",
             { num: 1003, str: 'Robyn Sands' },
             { autoCommit: true },
             function(err) {
@@ -492,7 +492,7 @@ describe('1. connection.js', function(){
         },
         function(callback) {
           connection.execute(
-            "INSERT INTO nodb_conn_emp VALUES (:num, :str)",
+            "INSERT INTO nodb_conn_emp4 VALUES (:num, :str)",
             { num: 1004, str: 'Bryant Lin' },
             { autoCommit: true },
             function(err) {
@@ -503,7 +503,7 @@ describe('1. connection.js', function(){
         },
         function(callback) {
           connection.execute(
-            "INSERT INTO nodb_conn_emp VALUES (:num, :str)",
+            "INSERT INTO nodb_conn_emp4 VALUES (:num, :str)",
             { num: 1005, str: 'Patrick Engebresson' },
             { autoCommit: true },
             function(err) {
@@ -524,24 +524,24 @@ describe('1. connection.js', function(){
                 e_table_missing EXCEPTION; \
                 PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \
             BEGIN \
-                EXECUTE IMMEDIATE ('DROP TABLE nodb_conn_emp'); \
+                EXECUTE IMMEDIATE ('DROP TABLE nodb_conn_emp5'); \
             EXCEPTION \
                 WHEN e_table_missing \
                 THEN NULL; \
             END; \
             EXECUTE IMMEDIATE (' \
-                CREATE TABLE nodb_conn_emp ( \
+                CREATE TABLE nodb_conn_emp5 ( \
                     id NUMBER,  \
                     name VARCHAR2(4000) \
                 ) \
             '); \
             EXECUTE IMMEDIATE (' \
-              INSERT INTO nodb_conn_emp  \
+              INSERT INTO nodb_conn_emp5  \
                    VALUES \
                    (1001,''Tom Kyte'') \
             '); \
             EXECUTE IMMEDIATE (' \
-              INSERT INTO nodb_conn_emp  \
+              INSERT INTO nodb_conn_emp5  \
                    VALUES \
                    (1002, ''Karen Morton'') \
             '); \
@@ -586,7 +586,7 @@ describe('1. connection.js', function(){
       async.series([
         function(callback) {
           conn2.execute(
-            "DROP TABLE nodb_conn_emp",
+            "DROP TABLE nodb_conn_emp5",
             function(err) {
               should.not.exist(err);
               callback();
@@ -613,7 +613,7 @@ describe('1. connection.js', function(){
       async.series([
         function(callback) {
           conn2.execute(
-            "INSERT INTO nodb_conn_emp VALUES (:num, :str)",
+            "INSERT INTO nodb_conn_emp5 VALUES (:num, :str)",
             { num: 1003, str: 'Patrick Engebresson' },
             function(err) {
               should.not.exist(err);
@@ -623,7 +623,7 @@ describe('1. connection.js', function(){
         },
         function(callback) {
           conn1.execute(
-            "SELECT COUNT(*) FROM nodb_conn_emp",
+            "SELECT COUNT(*) FROM nodb_conn_emp5",
             function(err, result) {
               should.not.exist(err);
               result.rows[0][0].should.be.exactly(2);
@@ -633,7 +633,7 @@ describe('1. connection.js', function(){
         },
         function(callback) {
           conn2.execute(
-            "SELECT COUNT(*) FROM nodb_conn_emp",
+            "SELECT COUNT(*) FROM nodb_conn_emp5",
             function(err, result) {
               should.not.exist(err);
               result.rows[0][0].should.be.exactly(3);
@@ -649,7 +649,7 @@ describe('1. connection.js', function(){
         },
         function(callback) {
           conn1.execute(
-            "SELECT COUNT(*) FROM nodb_conn_emp",
+            "SELECT COUNT(*) FROM nodb_conn_emp5",
             function(err, result) {
               should.not.exist(err);
               result.rows[0][0].should.be.exactly(3);
@@ -665,7 +665,7 @@ describe('1. connection.js', function(){
       async.series([
         function(callback) {
           conn2.execute(
-            "INSERT INTO nodb_conn_emp VALUES (:num, :str)",
+            "INSERT INTO nodb_conn_emp5 VALUES (:num, :str)",
             { num: 1003, str: 'Patrick Engebresson' },
             function(err) {
               should.not.exist(err);
@@ -675,7 +675,7 @@ describe('1. connection.js', function(){
         },
         function(callback) {
           conn1.execute(
-            "SELECT COUNT(*) FROM nodb_conn_emp",
+            "SELECT COUNT(*) FROM nodb_conn_emp5",
             function(err, result) {
               should.not.exist(err);
               result.rows[0][0].should.be.exactly(2);
@@ -685,7 +685,7 @@ describe('1. connection.js', function(){
         },
         function(callback) {
           conn2.execute(
-            "SELECT COUNT(*) FROM nodb_conn_emp",
+            "SELECT COUNT(*) FROM nodb_conn_emp5",
             function(err, result) {
               should.not.exist(err);
               result.rows[0][0].should.be.exactly(3);
@@ -701,7 +701,7 @@ describe('1. connection.js', function(){
         },
         function(callback) {
           conn2.execute(
-            "SELECT COUNT(*) FROM nodb_conn_emp",
+            "SELECT COUNT(*) FROM nodb_conn_emp5",
             function(err, result) {
               should.not.exist(err);
               result.rows[0][0].should.be.exactly(2);

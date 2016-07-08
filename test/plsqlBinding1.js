@@ -62,7 +62,7 @@ describe('43. plsqlBinding1.js', function() {
       async.series([
         function(callback) {
           var proc = "CREATE OR REPLACE PACKAGE\n" +
-                      "nodb_testpack\n" +
+                      "nodb_plsqlbindpack1\n" +
                       "IS\n" +
                       "  TYPE stringsType IS TABLE OF VARCHAR2(30) INDEX BY BINARY_INTEGER;\n" +
                       "  TYPE numbersType IS TABLE OF NUMBER INDEX BY BINARY_INTEGER;\n" +
@@ -79,7 +79,7 @@ describe('43. plsqlBinding1.js', function() {
         },
         function(callback) {
           var proc = "CREATE OR REPLACE PACKAGE BODY\n" +
-                     "nodb_testpack\n" +
+                     "nodb_plsqlbindpack1\n" +
                      "IS\n" +
                      "  FUNCTION test(strings IN stringsType, numbers IN numbersType) RETURN VARCHAR2\n" +
                      "  IS\n" +
@@ -110,7 +110,7 @@ describe('43. plsqlBinding1.js', function() {
             numbers: {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: [0, 8, 11]}
           };
           connection.execute(
-            "BEGIN :result := nodb_testpack.test(:strings, :numbers); END;",
+            "BEGIN :result := nodb_plsqlbindpack1.test(:strings, :numbers); END;",
             bindvars,
             function(err, result) {
               should.not.exist(err);
@@ -122,7 +122,7 @@ describe('43. plsqlBinding1.js', function() {
         },
         function(callback) {
           connection.execute(
-            "DROP PACKAGE nodb_testpack",
+            "DROP PACKAGE nodb_plsqlbindpack1",
             function(err) {
               should.not.exist(err);
               callback();
@@ -136,7 +136,7 @@ describe('43. plsqlBinding1.js', function() {
       async.series([
         function(callback) {
           var proc = "CREATE OR REPLACE PACKAGE\n" +
-                      "nodb_testpack\n" +
+                      "nodb_plsqlbindpack2\n" +
                       "IS\n" +
                       "  TYPE stringsType IS TABLE OF VARCHAR2(30) INDEX BY BINARY_INTEGER;\n" +
                       "  TYPE numbersType IS TABLE OF NUMBER INDEX BY BINARY_INTEGER;\n" +
@@ -153,7 +153,7 @@ describe('43. plsqlBinding1.js', function() {
         },
         function(callback) {
           var proc = "CREATE OR REPLACE PACKAGE BODY\n" +
-                     "nodb_testpack\n" +
+                     "nodb_plsqlbindpack2\n" +
                      "IS\n" +
                      "  PROCEDURE test(s IN stringsType, n IN numbersType)\n" +
                      "  IS\n" +
@@ -181,7 +181,7 @@ describe('43. plsqlBinding1.js', function() {
             {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: [8, 11]}
           ];
           connection.execute(
-            "BEGIN nodb_testpack.test(:1, :2); END;",
+            "BEGIN nodb_plsqlbindpack2.test(:1, :2); END;",
             bindvars,
             function(err, result) {
               should.not.exist(err);
@@ -192,7 +192,7 @@ describe('43. plsqlBinding1.js', function() {
         },
         function(callback) {
           connection.execute(
-            "DROP PACKAGE nodb_testpack",
+            "DROP PACKAGE nodb_plsqlbindpack2",
             function(err) {
               should.not.exist(err);
               callback();
@@ -206,7 +206,7 @@ describe('43. plsqlBinding1.js', function() {
       async.series([
         function(callback) {
           var proc = "CREATE OR REPLACE PACKAGE\n" +
-                      "nodb_testpack\n" +
+                      "nodb_plsqlbindpack3\n" +
                       "IS\n" +
                       "  TYPE stringsType IS TABLE OF VARCHAR2(30) INDEX BY BINARY_INTEGER;\n" +
                       "  TYPE numbersType IS TABLE OF NUMBER INDEX BY BINARY_INTEGER;\n" +
@@ -223,7 +223,7 @@ describe('43. plsqlBinding1.js', function() {
         },
         function(callback) {
           var proc = "CREATE OR REPLACE PACKAGE BODY\n" +
-                     "nodb_testpack\n" +
+                     "nodb_plsqlbindpack3\n" +
                      "IS\n" +
                      "  PROCEDURE test(strings IN OUT NOCOPY stringsType, numbers IN OUT NOCOPY numbersType)\n" +
                      "  IS\n" +
@@ -252,7 +252,7 @@ describe('43. plsqlBinding1.js', function() {
             numbers:  {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: [1, 2, 3], maxArraySize: 4}
           };
           connection.execute(
-            "BEGIN nodb_testpack.test(:strings, :numbers); END;",
+            "BEGIN nodb_plsqlbindpack3.test(:strings, :numbers); END;",
             bindvars,
             function(err, result) {
               should.not.exist(err);
@@ -265,7 +265,7 @@ describe('43. plsqlBinding1.js', function() {
         },
         function(callback) {
           connection.execute(
-            "DROP PACKAGE nodb_testpack",
+            "DROP PACKAGE nodb_plsqlbindpack3",
             function(err) {
               should.not.exist(err);
               callback();
@@ -279,7 +279,7 @@ describe('43. plsqlBinding1.js', function() {
       async.series([
         function(callback) {
           var proc = "CREATE OR REPLACE PACKAGE\n" +
-                     "nodb_testpack\n" +
+                     "nodb_plsqlbindpack4\n" +
                      "IS\n" +
                      "  TYPE stringsType IS TABLE OF VARCHAR2(30) INDEX BY BINARY_INTEGER;\n" +
                      "  TYPE numbersType IS TABLE OF NUMBER INDEX BY BINARY_INTEGER;\n" +
@@ -296,7 +296,7 @@ describe('43. plsqlBinding1.js', function() {
         },
         function(callback) {
           var proc = "CREATE OR REPLACE PACKAGE BODY\n" +
-                     "nodb_testpack\n" +
+                     "nodb_plsqlbindpack4\n" +
                      "IS\n" +
                      "  PROCEDURE test(items IN NUMBER, strings OUT NOCOPY stringsType, numbers OUT NOCOPY numbersType)\n" +
                      "  IS\n" +
@@ -325,7 +325,7 @@ describe('43. plsqlBinding1.js', function() {
             numbers:  {type: oracledb.NUMBER, dir: oracledb.BIND_OUT, maxArraySize: 3}
           };
           connection.execute(
-            "BEGIN nodb_testpack.test(:items, :strings, :numbers); END;",
+            "BEGIN nodb_plsqlbindpack4.test(:items, :strings, :numbers); END;",
             bindvars,
             function(err, result) {
               should.not.exist(err);
@@ -338,7 +338,7 @@ describe('43. plsqlBinding1.js', function() {
         },
         function(callback) {
           connection.execute(
-            "DROP PACKAGE nodb_testpack",
+            "DROP PACKAGE nodb_plsqlbindpack4",
             function(err) {
               should.not.exist(err);
               callback();
@@ -364,7 +364,7 @@ describe('43. plsqlBinding1.js', function() {
         },
         function(callback) {
           var proc = "CREATE OR REPLACE PACKAGE\n" +
-                      "nodb_testpack\n" +
+                      "nodb_plsqlbindpack21\n" +
                       "IS\n" +
                       "  TYPE datesType IS TABLE OF DATE INDEX BY BINARY_INTEGER;\n" +
                       "  TYPE numbersType IS TABLE OF NUMBER INDEX BY BINARY_INTEGER;\n" +
@@ -386,7 +386,7 @@ describe('43. plsqlBinding1.js', function() {
         },
         function(callback) {
           var proc = "CREATE OR REPLACE PACKAGE BODY\n" +
-                     "nodb_testpack\n" +
+                     "nodb_plsqlbindpack21\n" +
                      "IS\n" +
                      "  PROCEDURE test1(p IN numbersType) IS BEGIN NULL; END;\n" +
                      "  PROCEDURE test2(p IN OUT NOCOPY numbersType) IS BEGIN NULL; END;\n" +
@@ -410,7 +410,7 @@ describe('43. plsqlBinding1.js', function() {
       async.series([
         function(callback) {
           connection.execute(
-            "DROP PACKAGE nodb_testpack",
+            "DROP PACKAGE nodb_plsqlbindpack21",
             function(err) {
               should.not.exist(err);
               callback();
@@ -431,7 +431,7 @@ describe('43. plsqlBinding1.js', function() {
         p:  {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: [1, 2, 3], maxArraySize: 2}
       };
       connection.execute(
-        "BEGIN nodb_testpack.test1(:p); END;",
+        "BEGIN nodb_plsqlbindpack21.test1(:p); END;",
         bindvars,
         function(err, result) {
           should.not.exist(err);
@@ -446,7 +446,7 @@ describe('43. plsqlBinding1.js', function() {
         p:  {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: [1, 2, 3]}
       };
       connection.execute(
-        "BEGIN nodb_testpack.test2(:p); END;",
+        "BEGIN nodb_plsqlbindpack21.test2(:p); END;",
         bindvars,
         function(err, result) {
           should.exist(err);
@@ -463,7 +463,7 @@ describe('43. plsqlBinding1.js', function() {
         p:  {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: [1, 2, 3], maxArraySize: 2}
       };
       connection.execute(
-        "BEGIN nodb_testpack.test3(:p); END;",
+        "BEGIN nodb_plsqlbindpack21.test3(:p); END;",
         bindvars,
         function(err, result) {
           should.exist(err);
@@ -480,7 +480,7 @@ describe('43. plsqlBinding1.js', function() {
         p:  {type: oracledb.DATE, dir: oracledb.BIND_IN, val: [new Date(), new Date()]}
       };
       connection.execute(
-        "BEGIN nodb_testpack.test3(:p); END;",
+        "BEGIN nodb_plsqlbindpack21.test3(:p); END;",
         bindvars,
         function(err, result) {
           should.exist(err);
@@ -496,7 +496,7 @@ describe('43. plsqlBinding1.js', function() {
         p:  {type: oracledb.STRING, dir: oracledb.BIND_IN, val: ['hello', 1]}
       };
       connection.execute(
-        "BEGIN nodb_testpack.test4(:p); END;",
+        "BEGIN nodb_plsqlbindpack21.test4(:p); END;",
         bindvars,
         function(err, result) {
           should.exist(err);
@@ -513,7 +513,7 @@ describe('43. plsqlBinding1.js', function() {
         p:  {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: [1, 'hello']}
       };
       connection.execute(
-        "BEGIN nodb_testpack.test1(:p); END;",
+        "BEGIN nodb_plsqlbindpack21.test1(:p); END;",
         bindvars,
         function(err, result) {
           should.exist(err);
@@ -530,7 +530,7 @@ describe('43. plsqlBinding1.js', function() {
         {type: oracledb.STRING, dir: oracledb.BIND_IN, val: ['hello', 'node.js']}
       ];
       connection.execute(
-        "BEGIN nodb_testpack.test4(:1); END;",
+        "BEGIN nodb_plsqlbindpack21.test4(:1); END;",
         bindvars,
         function(err, result) {
           should.not.exist(err);
@@ -564,11 +564,11 @@ describe('43. plsqlBinding1.js', function() {
       async.series([
         function(callback) {
           var proc = "CREATE OR REPLACE\n" +
-                     "FUNCTION nodb_test(stringValue IN VARCHAR2, numberValue IN NUMBER, dateValue IN DATE) RETURN VARCHAR2\n" +
+                     "FUNCTION nodb_plsqlbindfunc31(stringValue IN VARCHAR2, numberValue IN NUMBER, dateValue IN DATE) RETURN VARCHAR2\n" +
                      "IS\n" +
                      "BEGIN\n" +
                      "  RETURN stringValue || ' ' || numberValue || ' released in ' || TO_CHAR(dateValue, 'MON YYYY');\n" +
-                     "END nodb_test;";
+                     "END nodb_plsqlbindfunc31;";
           connection.should.be.ok();
           connection.execute(
             proc,
@@ -586,7 +586,7 @@ describe('43. plsqlBinding1.js', function() {
             dateValue:   {type: oracledb.DATE, dir: oracledb.BIND_IN, val: new Date(1968, 3, 2) }
           };
           connection.execute(
-            "BEGIN :result := nodb_test(:stringValue, :numberValue, :dateValue); END;",
+            "BEGIN :result := nodb_plsqlbindfunc31(:stringValue, :numberValue, :dateValue); END;",
             bindvars,
             function(err, result) {
               should.not.exist(err);
@@ -598,7 +598,7 @@ describe('43. plsqlBinding1.js', function() {
         },
         function(callback) {
           connection.execute(
-            "DROP FUNCTION nodb_test",
+            "DROP FUNCTION nodb_plsqlbindfunc31",
             function(err) {
               should.not.exist(err);
               callback();
@@ -613,13 +613,13 @@ describe('43. plsqlBinding1.js', function() {
       async.series([
         function(callback) {
           var proc = "CREATE OR REPLACE\n" +
-                     "PROCEDURE nodb_test(stringValue IN OUT NOCOPY VARCHAR2, numberValue IN OUT NOCOPY NUMBER, dateValue IN OUT NOCOPY DATE)\n" +
+                     "PROCEDURE nodb_plsqlbindproc32(stringValue IN OUT NOCOPY VARCHAR2, numberValue IN OUT NOCOPY NUMBER, dateValue IN OUT NOCOPY DATE)\n" +
                      "IS\n" +
                      "BEGIN\n" +
                      "  stringValue := '(' || stringValue || ')';\n" +
                      "  numberValue := NumberValue + 100;\n" +
                      //"  dateValue   := "
-                     "END nodb_test;\n";
+                     "END nodb_plsqlbindproc32;\n";
           connection.should.be.ok();
           connection.execute(
             proc,
@@ -637,7 +637,7 @@ describe('43. plsqlBinding1.js', function() {
             dateValue:   {type: oracledb.DATE, dir: oracledb.BIND_INOUT, val: releaseDate}
           };
           connection.execute(
-            "BEGIN nodb_test(:stringValue, :numberValue, :dateValue); END;",
+            "BEGIN nodb_plsqlbindproc32(:stringValue, :numberValue, :dateValue); END;",
             bindvars,
             function(err, result) {
               should.not.exist(err);
@@ -651,7 +651,7 @@ describe('43. plsqlBinding1.js', function() {
         },
         function(callback) {
           connection.execute(
-            "DROP PROCEDURE nodb_test",
+            "DROP PROCEDURE nodb_plsqlbindproc32",
             function(err) {
               should.not.exist(err);
               callback();
@@ -665,13 +665,13 @@ describe('43. plsqlBinding1.js', function() {
       async.series([
         function(callback) {
           var proc = "CREATE OR REPLACE\n" +
-                     "PROCEDURE nodb_test(stringValue OUT VARCHAR2, numberValue OUT NUMBER, dateValue OUT DATE)\n" +
+                     "PROCEDURE nodb_plsqlbindproc33(stringValue OUT VARCHAR2, numberValue OUT NUMBER, dateValue OUT DATE)\n" +
                      "IS\n" +
                      "BEGIN\n" +
                      "  stringValue := 'Space odyssey';\n" +
                      "  numberValue := 2001;\n" +
                      "  dateValue   := TO_DATE('04-02-1968', 'MM-DD-YYYY');" +
-                     "END nodb_test;\n";
+                     "END nodb_plsqlbindproc33;\n";
           connection.should.be.ok();
           connection.execute(
             proc,
@@ -688,7 +688,7 @@ describe('43. plsqlBinding1.js', function() {
             dateValue:    {type: oracledb.DATE, dir: oracledb.BIND_OUT}
           };
           connection.execute(
-            "BEGIN nodb_test(:stringValue, :numberValue, :dateValue); END;",
+            "BEGIN nodb_plsqlbindproc33(:stringValue, :numberValue, :dateValue); END;",
             bindvars,
             function(err, result) {
               should.not.exist(err);
@@ -702,7 +702,7 @@ describe('43. plsqlBinding1.js', function() {
         },
         function(callback) {
           connection.execute(
-            "DROP PROCEDURE nodb_test",
+            "DROP PROCEDURE nodb_plsqlbindproc33",
             function(err) {
               should.not.exist(err);
               callback();
@@ -716,13 +716,13 @@ describe('43. plsqlBinding1.js', function() {
       async.series([
         function(callback) {
           var proc = "CREATE OR REPLACE\n" +
-                     "PROCEDURE nodb_test(stringValue OUT VARCHAR2, numberValue OUT NUMBER, dateValue OUT DATE)\n" +
+                     "PROCEDURE nodb_plsqlbindproc34(stringValue OUT VARCHAR2, numberValue OUT NUMBER, dateValue OUT DATE)\n" +
                      "IS\n" +
                      "BEGIN\n" +
                      "  stringValue := 'Space odyssey';\n" +
                      "  numberValue := 2001;\n" +
                      "  dateValue   := TO_DATE('04-02-1968', 'MM-DD-YYYY');" +
-                     "END nodb_test;\n";
+                     "END nodb_plsqlbindproc34;\n";
           connection.should.be.ok();
           connection.execute(
             proc,
@@ -739,7 +739,7 @@ describe('43. plsqlBinding1.js', function() {
             {type: oracledb.DATE, dir: oracledb.BIND_OUT}
           ];
           connection.execute(
-            "BEGIN nodb_test(:1, :2, :3); END;",
+            "BEGIN nodb_plsqlbindproc34(:1, :2, :3); END;",
             bindvars,
             function(err, result) {
               should.not.exist(err);
@@ -753,7 +753,7 @@ describe('43. plsqlBinding1.js', function() {
         },
         function(callback) {
           connection.execute(
-            "DROP PROCEDURE nodb_test",
+            "DROP PROCEDURE nodb_plsqlbindproc34",
             function(err) {
               should.not.exist(err);
               callback();
@@ -779,7 +779,7 @@ describe('43. plsqlBinding1.js', function() {
         },
         function(cb) {
           var proc = "CREATE OR REPLACE PACKAGE\n" +
-                      "nodb_testpack\n" +
+                      "nodb_plsqlbindpack41\n" +
                       "IS\n" +
                       "  TYPE datesType IS TABLE OF DATE INDEX BY BINARY_INTEGER;\n" +
                       "  TYPE numbersType IS TABLE OF NUMBER INDEX BY BINARY_INTEGER;\n" +
@@ -801,7 +801,7 @@ describe('43. plsqlBinding1.js', function() {
         },
         function(cb) {
           var proc = "CREATE OR REPLACE PACKAGE BODY\n" +
-                     "nodb_testpack\n" +
+                     "nodb_plsqlbindpack41\n" +
                      "IS\n" +
                      "  PROCEDURE test1(p IN numbersType) IS BEGIN NULL; END;\n" +
                      "  PROCEDURE test2(p IN OUT NOCOPY numbersType) IS BEGIN NULL; END;\n" +
@@ -824,7 +824,7 @@ describe('43. plsqlBinding1.js', function() {
       async.series([
         function(callback) {
           connection.execute(
-            "DROP PACKAGE nodb_testpack",
+            "DROP PACKAGE nodb_plsqlbindpack41",
             function(err) {
               should.not.exist(err);
               callback();
@@ -845,7 +845,7 @@ describe('43. plsqlBinding1.js', function() {
         p:  {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: [1, 2, 3], maxArraySize: 1}
       };
       connection.execute(
-        "BEGIN nodb_testpack.test1(:p); END;",
+        "BEGIN nodb_plsqlbindpack41.test1(:p); END;",
         bindvars,
         function(err, result) {
           should.not.exist(err);
@@ -860,7 +860,7 @@ describe('43. plsqlBinding1.js', function() {
         p:  {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: [1, 2, 3]}
       };
       connection.execute(
-        "BEGIN nodb_testpack.test2(:p); END;",
+        "BEGIN nodb_plsqlbindpack41.test2(:p); END;",
         bindvars,
         function(err, result) {
           should.exist(err);
@@ -877,7 +877,7 @@ describe('43. plsqlBinding1.js', function() {
         p:  {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: [1, 2, 3], maxArraySize: 2}
       };
       connection.execute(
-        "BEGIN nodb_testpack.test2(:p); END;",
+        "BEGIN nodb_plsqlbindpack41.test2(:p); END;",
         bindvars,
         function(err, result) {
           should.exist(err);
@@ -894,7 +894,7 @@ describe('43. plsqlBinding1.js', function() {
         p:  {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: [1, 2, 3], maxArraySize: 3}
       };
       connection.execute(
-        "BEGIN nodb_testpack.test2(:p); END;",
+        "BEGIN nodb_plsqlbindpack41.test2(:p); END;",
         bindvars,
         function(err, result) {
           should.not.exist(err);
@@ -910,7 +910,7 @@ describe('43. plsqlBinding1.js', function() {
         p:  {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: [1, 2, 3], maxArraySize: 987654321}
       };
       connection.execute(
-        "BEGIN nodb_testpack.test2(:p); END;",
+        "BEGIN nodb_plsqlbindpack41.test2(:p); END;",
         bindvars,
         function(err, result) {
           should.not.exist(err);
@@ -924,7 +924,7 @@ describe('43. plsqlBinding1.js', function() {
         p:  {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: [1, 2, 3], maxArraySize: -9}
       };
       connection.execute(
-        "BEGIN nodb_testpack.test2(:p); END;",
+        "BEGIN nodb_plsqlbindpack41.test2(:p); END;",
         bindvars,
         function(err, result) {
           should.exist(err);
@@ -940,7 +940,7 @@ describe('43. plsqlBinding1.js', function() {
         p:  {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: [1, 2, 3], maxArraySize: 0}
       };
       connection.execute(
-        "BEGIN nodb_testpack.test2(:p); END;",
+        "BEGIN nodb_plsqlbindpack41.test2(:p); END;",
         bindvars,
         function(err, result) {
           should.exist(err);
@@ -956,7 +956,7 @@ describe('43. plsqlBinding1.js', function() {
         p:  {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: [1, 2, 3], maxArraySize: 'foobar'}
       };
       connection.execute(
-        "BEGIN nodb_testpack.test2(:p); END;",
+        "BEGIN nodb_plsqlbindpack41.test2(:p); END;",
         bindvars,
         function(err, result) {
           should.exist(err);
@@ -972,7 +972,7 @@ describe('43. plsqlBinding1.js', function() {
         p:  {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: [1, 2, 3], maxArraySize: NaN}
       };
       connection.execute(
-        "BEGIN nodb_testpack.test2(:p); END;",
+        "BEGIN nodb_plsqlbindpack41.test2(:p); END;",
         bindvars,
         function(err, result) {
           should.exist(err);

@@ -204,7 +204,7 @@ describe('55. resultSet2.js', function() {
       var flag = 1; // 1 - getRow(); 2 - getRows(); 3 - to close resultSet.
 
       connection.execute(
-        "BEGIN get_emp_rs(:in, :out); END;",
+        "BEGIN nodb_rs2_get_emp(:in, :out); END;",
         {
           in: 200,
           out: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
@@ -311,7 +311,7 @@ describe('55. resultSet2.js', function() {
       conn2.should.be.ok();
 
       conn2.execute(
-        "BEGIN get_emp_rs(:in, :out); END;",
+        "BEGIN nodb_rs2_get_emp(:in, :out); END;",
         {
           in: 200,
           out: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
@@ -465,7 +465,7 @@ describe('55. resultSet2.js', function() {
       connection.should.be.ok();
 
       connection.execute(
-        "BEGIN get_emp_rs(:in, :out); END;",
+        "BEGIN nodb_rs2_get_emp(:in, :out); END;",
         {
           in: 0,
           out: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
@@ -575,7 +575,7 @@ describe('55. resultSet2.js', function() {
       async.parallel([
         function(callback) {
           connection.execute(
-            "BEGIN get_emp_rs(:in, :out); END;",
+            "BEGIN nodb_rs2_get_emp(:in, :out); END;",
             {
               in: 200,
               out: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
@@ -588,7 +588,7 @@ describe('55. resultSet2.js', function() {
         },
         function(callback) {
           connection.execute(
-            "BEGIN get_emp_rs(:in, :out); END;",
+            "BEGIN nodb_rs2_get_emp(:in, :out); END;",
             {
               in: 100,
               out: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
@@ -643,7 +643,7 @@ describe('55. resultSet2.js', function() {
 
     it('55.9.1 ', function(done) {
       var proc =
-        "CREATE OR REPLACE FUNCTION nodb_testfunc RETURN VARCHAR2 \
+        "CREATE OR REPLACE FUNCTION nodb_rs2_testfunc RETURN VARCHAR2 \
            IS \
              emp_name VARCHAR2(20);   \
            BEGIN \
@@ -663,19 +663,19 @@ describe('55. resultSet2.js', function() {
         },
         function(callback) {
           connection.execute(
-            "SELECT nodb_testfunc FROM dual",
+            "SELECT nodb_rs2_testfunc FROM dual",
             [],
             { resultSet: true },
             function(err, result) {
               should.not.exist(err);
-              (result.resultSet.metaData[0].name).should.eql('NODB_TESTFUNC');
+              (result.resultSet.metaData[0].name).should.eql('NODB_RS2_TESTFUNC');
               fetchRowFromRS(result.resultSet, callback);
             }
           );
         },
         function(callback) {
           connection.execute(
-            "DROP FUNCTION nodb_testfunc",
+            "DROP FUNCTION nodb_rs2_testfunc",
             function(err, result) {
               should.not.exist(err);
               callback();
@@ -799,7 +799,7 @@ describe('55. resultSet2.js', function() {
 
     it('55.12.1 does not work currently due to known bug', function(done) {
       var proc =
-          "CREATE OR REPLACE PROCEDURE get_emp_rs_inout (p_in IN NUMBER, p_out IN OUT SYS_REFCURSOR) \
+          "CREATE OR REPLACE PROCEDURE nodb_rs2_get_emp_inout (p_in IN NUMBER, p_out IN OUT SYS_REFCURSOR) \
              AS \
              BEGIN \
                OPEN p_out FOR  \
@@ -819,7 +819,7 @@ describe('55. resultSet2.js', function() {
         },
         function(callback) {
           connection.execute(
-            "BEGIN get_emp_rs_inout(:in, :out); END;",
+            "BEGIN nodb_rs2_get_emp_inout(:in, :out); END;",
             {
               in: 200,
               out: { type: oracledb.CURSOR, dir: oracledb.BIND_INOUT }
@@ -835,7 +835,7 @@ describe('55. resultSet2.js', function() {
         },
         function(callback) {
           connection.execute(
-            "DROP PROCEDURE get_emp_rs_inout",
+            "DROP PROCEDURE nodb_rs2_get_emp_inout",
             function(err) {
               should.not.exist(err);
               callback();
@@ -1025,7 +1025,7 @@ function insertData(connection, tableName, done)
 function createProc1(connection, tableName, done)
 {
   var sqlProc =
-    "CREATE OR REPLACE PROCEDURE get_emp_rs (p_in IN NUMBER, p_out OUT SYS_REFCURSOR) " +
+    "CREATE OR REPLACE PROCEDURE nodb_rs2_get_emp (p_in IN NUMBER, p_out OUT SYS_REFCURSOR) " +
     "  AS " +
     "  BEGIN " +
     "    OPEN p_out FOR " +
@@ -1046,7 +1046,7 @@ function createProc1(connection, tableName, done)
 function dropProc1(connection, done)
 {
   connection.execute(
-    'DROP PROCEDURE get_emp_rs',
+    'DROP PROCEDURE nodb_rs2_get_emp',
     function(err) {
       should.not.exist(err);
       done();
