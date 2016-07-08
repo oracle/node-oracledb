@@ -794,6 +794,7 @@ describe('4. binding.js', function() {
                sql,
                binds,
                function ( err, result ) {
+                 (result.rows[0][0]).should.be.a.Date();
                  should.not.exist ( err );
                  done ();
                }
@@ -815,6 +816,7 @@ describe('4. binding.js', function() {
                sql,
                binds,
                function ( err, result ) {
+                 (result.rows[0][0]).should.be.a.Date();
                  should.not.exist ( err );
                  done ();
                } );
@@ -835,6 +837,7 @@ describe('4. binding.js', function() {
                sql,
                binds,
                function ( err, result ) {
+                 (result.rows[0][0]).should.be.a.Date();
                  should.not.exist ( err );
                  done ();
                } );
@@ -855,6 +858,7 @@ describe('4. binding.js', function() {
                sql,
                binds,
                function ( err, result ) {
+                 (result.rows[0][0]).should.be.a.Date();
                  should.not.exist ( err );
                  done ();
                } );
@@ -875,7 +879,7 @@ describe('4. binding.js', function() {
               binds,
               function ( err, result ) {
                 should.exist ( err );
-                (err.message).should.startWith ( 'NJS-044');
+                (err.message).should.startWith ( 'NJS-044:');
                 done ();
              } );
          });
@@ -895,7 +899,7 @@ describe('4. binding.js', function() {
               binds,
               function ( err, result ) {
                 should.exist ( err );
-                (err.message).should.startWith ( 'NJS-044');
+                (err.message).should.startWith ( 'NJS-044:');
                 done ();
               } );
          });
@@ -915,10 +919,10 @@ describe('4. binding.js', function() {
               binds,
               function ( err, result ) {
                 should.exist ( err );
-                (err.message).should.startWith ( 'NJS-044');
+                (err.message).should.startWith ( 'NJS-044:');
                 done ();
               } );
           });
-      });
-  });
+      }); // 4.7.7
+  }); // 4.7
 })

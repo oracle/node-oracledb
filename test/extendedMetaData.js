@@ -1455,6 +1455,7 @@ describe('17. extendedMetaData.js', function() {
             [],
             { outFormat: oracledb.OBJECT, extendedMetaData: true },
             function(err, result) {
+              oracledb.fetchAsString = [];
               should.not.exist(err);
               (result.rows[0]).DT.should.be.a.String();
               (result.rows[0]).NUM.should.be.a.String();
@@ -1475,13 +1476,13 @@ describe('17. extendedMetaData.js', function() {
               cb();
             }
           );
+        },
+        function(cb) {
+          var defaultValue = [];
+          (oracledb.fetchAsString).should.eql(defaultValue);
+          cb();
         }
-      ], function(err) {
-        should.not.exist(err);
-        var defaultValue = [];
-        oracledb.fetchAsString = defaultValue;
-        done();
-      });
+      ], done);
 
     }); // 17.6.2
 
@@ -1498,6 +1499,7 @@ describe('17. extendedMetaData.js', function() {
             [],
             { outFormat: oracledb.OBJECT, extendedMetaData: true },
             function(err, result) {
+              oracledb.fetchAsString = [];
               should.not.exist(err);
               (result.rows[0]).DT.should.be.a.String();
               (result.rows[0]).NUM.should.be.a.String();
@@ -1518,12 +1520,13 @@ describe('17. extendedMetaData.js', function() {
               cb();
             }
           );
+        },
+        function(cb) {
+          var defaultValue = [];
+          (oracledb.fetchAsString).should.eql(defaultValue);
+          cb();
         }
-      ], function(err) {
-        var defaultValue = [];
-        oracledb.fetchAsString = defaultValue;
-        done();
-      });
+      ], done);
 
     }); // 17.6.3
 
