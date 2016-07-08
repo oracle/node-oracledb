@@ -267,16 +267,24 @@ Overview of node-oracledb functional tests
         13.3.2 should default to 100 if oracledb.maxRows is false
 
 14. stream2.js
-    14.1 meta data event
-    14.2 Bind by position and return an array
-    14.3 Bind by name and return an array
-    14.4 Bind by position and return an object
-    14.5 Bind by name and return an object
-    14.6 explicitly setting resultSet option to be false takes no effect
-    14.7 maxRows option is ignored as expect
-    14.8 Negative - queryStream() has no parameters
-    14.9 Negative - give invalid SQL as first parameter
-    14.10 Negatvie - give non-query SQL
+    14.1 Bind by position and return an array
+    14.2 Bind by name and return an array
+    14.3 Bind by position and return an object
+    14.4 Bind by name and return an object
+    14.5 explicitly setting resultSet option to be false takes no effect
+    14.6 maxRows option is ignored as expect
+    14.7 Negative - queryStream() has no parameters
+    14.8 Negative - give invalid SQL as first parameter
+    14.9 Negatvie - give non-query SQL
+    14.10 metadata event - single column
+    14.11 metadata event - multiple columns
+    14.12 metadata event - all column names occurring
+    14.13 metadata event - no return rows
+    14.14 metadata event - negative: non-query SQL
+    14.15 metadata event - case sensitive columns
+    14.16 metadata event - large number of columns
+    14.17 metadata event - single character column
+    14.18 metadata event - duplicate column alias
 
 15. resultsetToQueryStream.js
     15.1 Testing ResultSet.toQueryStream

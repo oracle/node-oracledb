@@ -49,7 +49,7 @@ var inFileName = './test/fuzzydinosaur.jpg';  // contains the image to be insert
 var outFileName = './test/blobstreamout.jpg';
 
 describe('41. dataTypeBlob', function() {
-  this.timeout(10000);
+  this.timeout(20000);
 
   var connection = null;
   var tableName = "nodb_myblobs";

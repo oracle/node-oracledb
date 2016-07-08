@@ -41,7 +41,7 @@
       "async": "^1.5.0"
   },
   "scripts": {
-      "test": "mocha -R spec --timeout 10000 test/*.js",
+      "test": "mocha -R spec --timeout 100000 test/*.js",
       "testWindows": "mocha -R spec --timeout 0 test\\*.js"
   },
   "engines": {

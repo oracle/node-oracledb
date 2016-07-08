@@ -470,7 +470,7 @@ describe('9. columnMetadata.js', function(){
 
     it('9.5.1 works when using duplicate column alias', function(done) {
       connection.execute(
-        "SELECT 1 a, 'abc' a from dual",
+        "SELECT 1 a, 'abc' a FROM dual",
         function(err, result) {
           should.not.exist(err);
           result.metaData[0].name.should.eql('A');

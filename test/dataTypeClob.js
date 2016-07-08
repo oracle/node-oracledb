@@ -50,8 +50,7 @@ var inFileName = './test/clobexample.txt';  // the file with text to be inserted
 var outFileName = './test/clobstreamout.txt';
 
 describe('40. dataTypeClob.js', function() {
-
-  this.timeout(15000);
+  this.timeout(10000);
 
   var connection = null;
   var tableName = "nodb_myclobs";
