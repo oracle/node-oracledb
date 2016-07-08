@@ -423,25 +423,25 @@ describe('14. stream2.js', function() {
                    "        e_table_missing EXCEPTION; \n" +
                    "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n " +
                    "    BEGIN \n" +
-                   "        EXECUTE IMMEDIATE ('DROP TABLE nodb_casesensitive'); \n" +
+                   "        EXECUTE IMMEDIATE ('DROP TABLE nodb_streamcases'); \n" +
                    "    EXCEPTION \n" +
                    "        WHEN e_table_missing \n" +
                    "        THEN NULL; \n" +
                    "    END; \n" +
                    "    EXECUTE IMMEDIATE (' \n" +
-                   "        CREATE TABLE nodb_casesensitive ( \n" +
+                   "        CREATE TABLE nodb_streamcases ( \n" +
                    "            id NUMBER,  \n" +
                    '           "nAmE" VARCHAR2(20) \n' +
                    "        ) \n" +
                    "    '); \n" +
                    "    EXECUTE IMMEDIATE (' \n" +
-                   "        INSERT INTO nodb_casesensitive VALUES (23, ''Changjie'') \n" +
+                   "        INSERT INTO nodb_streamcases VALUES (23, ''Changjie'') \n" +
                    "    '); \n" +
                    "    EXECUTE IMMEDIATE (' \n" +
-                   "        INSERT INTO nodb_casesensitive VALUES (24, ''Nancy'') \n" +
+                   "        INSERT INTO nodb_streamcases VALUES (24, ''Nancy'') \n" +
                    "    '); \n" +
                    "    EXECUTE IMMEDIATE (' \n" +
-                   "        INSERT INTO nodb_casesensitive VALUES (25, ''Chris'') \n" +
+                   "        INSERT INTO nodb_streamcases VALUES (25, ''Chris'') \n" +
                    "    '); \n" +
                    "END; ";
 
@@ -454,7 +454,7 @@ describe('14. stream2.js', function() {
         );
       },
       function(cb) {
-        var sql = 'SELECT "nAmE" FROM nodb_casesensitive ORDER BY id';
+        var sql = 'SELECT "nAmE" FROM nodb_streamcases ORDER BY id';
         var stream = connection.queryStream(sql);
         var resultArray = new Array();
 
@@ -488,7 +488,7 @@ describe('14. stream2.js', function() {
       },
       function(cb) {
         connection.execute(
-          "DROP TABLE nodb_casesensitive",
+          "DROP TABLE nodb_streamcases",
           function(err) {
             should.not.exist(err);
             cb();
@@ -511,15 +511,31 @@ describe('14. stream2.js', function() {
       return buffer.join();
     }
 
-    var table_name = "nodb_large_columns";
-    var sqlCreate = "CREATE TABLE " + table_name + " ( " + columns_string + " )";
+    var table_name = "nodb_streamstess";
     var sqlSelect = "SELECT * FROM " + table_name;
     var sqlDrop = "DROP TABLE " + table_name;
+
+    var proc = "BEGIN \n" +
+               "    DECLARE \n" +
+               "        e_table_missing EXCEPTION; \n" +
+               "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n " +
+               "    BEGIN \n" +
+               "        EXECUTE IMMEDIATE ('DROP TABLE nodb_streamstess'); \n" +
+               "    EXCEPTION \n" +
+               "        WHEN e_table_missing \n" +
+               "        THEN NULL; \n" +
+               "    END; \n" +
+               "    EXECUTE IMMEDIATE (' \n" +
+               "        CREATE TABLE nodb_streamstess ( \n" +
+               columns_string +
+               "        ) \n" +
+               "    '); \n" +
+               "END; ";
 
     async.series([
       function(cb) {
         connection.execute(
-          sqlCreate,
+          proc,
           function(err) {
             should.not.exist(err);
             cb();
@@ -565,7 +581,7 @@ describe('14. stream2.js', function() {
 
   it('14.17 metadata event - single character column', function(done) {
 
-    var tableName = "nodb_single_char";
+    var tableName = "nodb_streamsinglechar";
     var sqlCreate =
         "BEGIN \n" +
         "   DECLARE \n" +

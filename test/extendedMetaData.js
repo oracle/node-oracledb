@@ -1051,7 +1051,7 @@ describe('17. extendedMetaData.js', function() {
 
     });
 
-    it('17.3.27 TIMESTAMP (9) WITH TIME ZONE', function(done) {
+    it('17.3.27 TIMESTAMP (2) WITH TIME ZONE', function(done) {
 
       connection.execute(
         "SELECT ts4 FROM nodb_metadata",
@@ -1156,7 +1156,7 @@ describe('17. extendedMetaData.js', function() {
     it('17.3.33 UROWID', function(done) {
 
       connection.execute(
-        "SELECT rid FROM nodb_metadata",
+        "SELECT urid FROM nodb_metadata",
         [],
         { extendedMetaData: true },
         function(err, result) {
@@ -1246,12 +1246,18 @@ describe('17. extendedMetaData.js', function() {
     it('17.3.38 RAW(2000)', function(done) {
 
       connection.execute(
-        "SELECT mybfile FROM nodb_metadata",
+        "SELECT myraw FROM nodb_metadata",
         [],
         { extendedMetaData: true },
         function(err, result) {
-          (err.message).should.startWith('NJS-010:');
-          // NJS-010: unsupported data type in select list
+          should.not.exist(err);
+          (result.metaData).should.deepEqual(
+            [ { name: 'MYRAW',
+                fetchType: oracledb.BUFFER,
+                dbType: oracledb.DB_TYPE_RAW,
+                byteSize: 2000,
+                nullable: true } ]
+          );
           done();
         }
       );
@@ -1325,7 +1331,7 @@ describe('17. extendedMetaData.js', function() {
 
       async.series([
         function(cb) {
-          var proc = "CREATE OR REPLACE PROCEDURE get_rc (p_out OUT SYS_REFCURSOR) \n" +
+          var proc = "CREATE OR REPLACE PROCEDURE get_emd_rc (p_out OUT SYS_REFCURSOR) \n" +
                      "AS \n" +
                      "BEGIN \n" +
                      "    OPEN p_out FOR \n" +
@@ -1342,7 +1348,7 @@ describe('17. extendedMetaData.js', function() {
         },
         function(cb) {
           connection.execute(
-            "BEGIN get_rc(:out); END;",
+            "BEGIN get_emd_rc(:out); END;",
             {
               out: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
             },
@@ -1356,7 +1362,7 @@ describe('17. extendedMetaData.js', function() {
         },
         function(cb) {
           connection.execute(
-            "DROP PROCEDURE get_rc",
+            "DROP PROCEDURE get_emd_rc",
             function(err) {
               should.not.exist(err);
               cb();
@@ -1438,13 +1444,12 @@ describe('17. extendedMetaData.js', function() {
 
     it("17.6.2 oracledb.fetchAsString", function(done) {
 
-      var defaultValue = oracledb.fetchAsString;
       async.series([
-        function(cb) {
+        function change(cb) {
           oracledb.fetchAsString = [ oracledb.DATE, oracledb.NUMBER ];
           cb();
         },
-        function(cb) {
+        function test(cb) {
           connection.execute(
             "SELECT * FROM nodb_md",
             [],
@@ -1470,37 +1475,31 @@ describe('17. extendedMetaData.js', function() {
               cb();
             }
           );
-        },
-        function(cb) {
-          oracledb.fetchAsString = [];
-          (oracledb.fetchAsString).should.eql(defaultValue);
-          cb();
         }
-      ], done);
+      ], function(err) {
+        should.not.exist(err);
+        var defaultValue = [];
+        oracledb.fetchAsString = defaultValue;
+        done();
+      });
+
     }); // 17.6.2
 
     it("17.6.3 can override at execution", function(done) {
 
-      var defaultValue = oracledb.fetchAsString;
       async.series([
-        function(cb) {
+        function change(cb) {
           oracledb.fetchAsString = [ oracledb.DATE, oracledb.NUMBER ];
           cb();
         },
-        function(cb) {
+        function test(cb) {
           connection.execute(
             "SELECT * FROM nodb_md",
             [],
-            { outFormat: oracledb.OBJECT,
-              extendedMetaData: true,
-              fetchInfo:
-              {
-                "DT": { type: oracledb.DEFAULT }
-              }
-            },
+            { outFormat: oracledb.OBJECT, extendedMetaData: true },
             function(err, result) {
               should.not.exist(err);
-              (result.rows[0]).DT.should.be.a.Date();
+              (result.rows[0]).DT.should.be.a.String();
               (result.rows[0]).NUM.should.be.a.String();
               (result.metaData).should.deepEqual([
                 { name: 'NUM',
@@ -1514,18 +1513,18 @@ describe('17. extendedMetaData.js', function() {
                   dbType: oracledb.DB_TYPE_VARCHAR,
                   byteSize: 1000,
                   nullable: true },
-                { name: 'DT', fetchType: oracledb.DATE, dbType: oracledb.DB_TYPE_DATE, nullable: true }
+                { name: 'DT', fetchType: oracledb.STRING, dbType: oracledb.DB_TYPE_DATE, nullable: true }
               ]);
               cb();
             }
           );
-        },
-        function(cb) {
-          oracledb.fetchAsString = [];
-          (oracledb.fetchAsString).should.eql(defaultValue);
-          cb();
         }
-      ], done);
+      ], function(err) {
+        var defaultValue = [];
+        oracledb.fetchAsString = defaultValue;
+        done();
+      });
+
     }); // 17.6.3
 
   }); // 17.6
@@ -1564,13 +1563,13 @@ describe('17. extendedMetaData.js', function() {
                      "        e_table_missing EXCEPTION; \n" +
                      "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n " +
                      "    BEGIN \n" +
-                     "        EXECUTE IMMEDIATE ('DROP TABLE nodb_casesensitive'); \n" +
+                     "        EXECUTE IMMEDIATE ('DROP TABLE nodb_md_casesensitive'); \n" +
                      "    EXCEPTION \n" +
                      "        WHEN e_table_missing \n" +
                      "        THEN NULL; \n" +
                      "    END; \n" +
                      "    EXECUTE IMMEDIATE (' \n" +
-                     "        CREATE TABLE nodb_casesensitive ( \n" +
+                     "        CREATE TABLE nodb_md_casesensitive ( \n" +
                      "            id NUMBER,  \n" +
                      '           "nAme" VARCHAR2(20) \n' +
                      "        ) \n" +
@@ -1587,7 +1586,7 @@ describe('17. extendedMetaData.js', function() {
         },
         function(callback){
           connection.execute(
-            "SELECT * FROM nodb_casesensitive",
+            "SELECT * FROM nodb_md_casesensitive",
             [],
             { extendedMetaData: true },
             function(err, result) {
@@ -1613,7 +1612,7 @@ describe('17. extendedMetaData.js', function() {
         },
         function(callback){
           connection.execute(
-            "DROP TABLE nodb_casesensitive",
+            "DROP TABLE nodb_md_casesensitive",
             function(err){
               should.not.exist(err);
               callback();
@@ -1630,7 +1629,7 @@ describe('17. extendedMetaData.js', function() {
 
     it("17.9.1 works with column names comprised of single character", function(done) {
 
-      var tableName = "nodb_single_char";
+      var tableName = "nodb_md_singlechar";
       var sqlCreate =
           "BEGIN \n" +
           "   DECLARE \n" +
@@ -1746,15 +1745,31 @@ describe('17. extendedMetaData.js', function() {
         return buffer.join();
       }
 
-      var table_name = "nodb_large_columns";
-      var sqlCreate = "CREATE TABLE " + table_name + " ( " + columns_string + " )";
+      var table_name = "nodb_md_largecolumns";
       var sqlSelect = "SELECT * FROM " + table_name;
       var sqlDrop = "DROP TABLE " + table_name;
+
+      var proc = "BEGIN \n" +
+                 "    DECLARE \n" +
+                 "        e_table_missing EXCEPTION; \n" +
+                 "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n " +
+                 "    BEGIN \n" +
+                 "        EXECUTE IMMEDIATE ('DROP TABLE nodb_md_largecolumns'); \n" +
+                 "    EXCEPTION \n" +
+                 "        WHEN e_table_missing \n" +
+                 "        THEN NULL; \n" +
+                 "    END; \n" +
+                 "    EXECUTE IMMEDIATE (' \n" +
+                 "        CREATE TABLE nodb_md_largecolumns ( \n" +
+                 columns_string +
+                 "        ) \n" +
+                 "    '); \n" +
+                 "END; ";
 
       async.series([
         function(callback) {
           connection.execute(
-            sqlCreate,
+            proc,
             function(err){
               should.not.exist(err);
               callback();

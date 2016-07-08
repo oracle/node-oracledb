@@ -367,14 +367,30 @@ describe('9. columnMetadata.js', function(){
       }
 
       var table_name = "nodb_large_columns";
-      var sqlCreate = "CREATE TABLE " + table_name + " ( " + columns_string + " )";
       var sqlSelect = "SELECT * FROM " + table_name;
       var sqlDrop = "DROP TABLE " + table_name;
+
+      var proc = "BEGIN \n" +
+                 "    DECLARE \n" +
+                 "        e_table_missing EXCEPTION; \n" +
+                 "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n " +
+                 "    BEGIN \n" +
+                 "        EXECUTE IMMEDIATE ('DROP TABLE nodb_large_columns'); \n" +
+                 "    EXCEPTION \n" +
+                 "        WHEN e_table_missing \n" +
+                 "        THEN NULL; \n" +
+                 "    END; \n" +
+                 "    EXECUTE IMMEDIATE (' \n" +
+                 "        CREATE TABLE nodb_large_columns ( \n" +
+                 columns_string +
+                 "        ) \n" +
+                 "    '); \n" +
+                 "END; ";
 
       async.series([
         function(callback) {
           connection.execute(
-            sqlCreate,
+            proc,
             function(err){
               should.not.exist(err);
               callback();
