@@ -76,15 +76,17 @@ class ConnImpl : public Conn
            unsigned int stmtCacheSize,
            const string &user, const string &password,
            const string &connString,
-           const string &connClass);
+           const string &connClass,
+           DBPrivileges dbPriv );
 
   ConnImpl(PoolImpl *pool, OCIEnv *envh, bool externalAuth,
-           OraText *poolName, ub4 poolNameLen, const string &connClass
-           );
+           OraText *poolName, ub4 poolNameLen, const string &connClass,
+           const string &user, const string &password, const string &tag,
+           const boolean any, const DBPrivileges dbPriv );
 
   virtual ~ConnImpl();
 
-  virtual void release();
+  virtual void release( const string &tag, boolean retag);
 
                                 // interface properties
   virtual void stmtCacheSize(unsigned int stmtCacheSize);
@@ -98,6 +100,10 @@ class ConnImpl : public Conn
   virtual void module(const string &module);
 
   virtual void action(const string &action);
+
+  // Connection with requested tag returned or not?
+  virtual boolean sameTag ()      { return sameTag_;  }
+
   virtual int getByteExpansionRatio ();
 
                               // interface methods
@@ -136,7 +142,8 @@ private:
 
   void initConnImpl( bool pool, bool externalAuth, const string& connClass,
                      OraText *poolNmRconnStr, ub4 nameLen,
-                     const string &user, const string &password );
+                     const string &user, const string &password,
+                     const string &tag, boolean any, DBPrivileges dbPriv );
 
   int getCsRatio ( ub2 csid )
   {
@@ -159,6 +166,9 @@ private:
   int         csratio_;         // character expansion ratio
   OCIServer   *srvh_;           // OCI server handle
   bool        dropConn_;        // Set flag in case of unusable connection
+  string      tag_;             // Session tag
+  boolean     retag_;           // How to retag? (leave it, update, clear)
+  boolean     sameTag_;         // connection is of same tag as requested?
 };
 
 

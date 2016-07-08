@@ -50,9 +50,9 @@ enum DpiError                          // error type
   DpiErrInvalidState,
   DpiErrUninitialized,
   DpiErrExtAuth,
-  DpiOciInvalidHandle,
-  DpiErrMemAllocFail,
-  DpiErrNullValue,
+  DpiOciInvalidHandle,  // "Invalid OCI Handle/Descriptor or invalid parameter for OCI handle/descriptor allocation call"
+  DpiErrMemAllocFail,   // "Memory allocation failed"
+  DpiErrNullValue,      // "Unexpected NULL value"
 };
 
 

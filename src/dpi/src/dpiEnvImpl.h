@@ -62,11 +62,15 @@ class EnvImpl : public Env
 {
  public:
                                // creation/termination
-  EnvImpl( const string & drvName = "" );
+  EnvImpl( const string &drvName,
+           unsigned int charset,
+           unsigned int ncharset);
 
   virtual ~EnvImpl();
 
-  static EnvImpl * createEnvImpl( const string & drvName = "" );
+  static EnvImpl * createEnvImpl( const string& drvName,
+                                  unsigned int charset,
+                                  unsigned int ncharset);
 
   virtual void terminate();
 
@@ -91,6 +95,9 @@ class EnvImpl : public Env
   virtual void isEventEnabled(bool isEventEnabled);
   virtual bool isEventEnabled() const;
 
+  virtual unsigned int dbcharset () const;
+  virtual unsigned int dbncharset () const;
+
                                 // interface  methods
   virtual SPool * createPool(const string &user, const string &password,
                              const string &connString,
@@ -98,12 +105,13 @@ class EnvImpl : public Env
                              int poolIncrement,
                              int poolTimeout,
                              int stmtCacheSize,
-                             bool externalAuth);
+                             bool externalAuth,
+                             bool homogeneous );
 
   virtual Conn * getConnection(const string &user, const string &password,
                                const string &connString, int stmtCacheSize,
                                const string &connClass,
-                               bool externalAuth);
+                               bool externalAuth, DBPrivileges dbPriv);
 
 
                                 // internal methods
@@ -145,6 +153,8 @@ private:
   unsigned int stmtCacheSize_;  // statement cache size
   string       drvName_;        // driver name
 
+  unsigned int charset_;        // charset id
+  unsigned int ncharset_;       // ncharset id
  };
 
 

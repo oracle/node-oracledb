@@ -791,7 +791,8 @@ void Oracledb::Async_GetConnection (uv_work_t *req)
                                               connBaton->connStr,
                                               connBaton->stmtCacheSize,
                                               connBaton->connClass,
-                                              connBaton->externalAuth );
+                                              connBaton->externalAuth,
+                                              dbPrivNONE );
 
     connBaton->dpiconn->lobPrefetchSize(connBaton->lobPrefetchSize);
   }

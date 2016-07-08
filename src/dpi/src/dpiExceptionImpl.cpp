@@ -49,16 +49,17 @@ using namespace std;
 
 static const char *dpiErrors[] =
 {
-  "not an error",                              // DPI-000 - DpiErrNoError
-  "internal error",                            // DPI-001 - DpiErrInternal
-  "could not get OCI error message",           // DPI-002 - DpiErrUnkOciError
-  "no OCI environment handle created",         // DPI-003 - DpiErrNoEnv
-  "invalid state while working with timestamp",// DPI-004 - DpiErrInvalidState
+  "not an error",                                     // DPI-000 - DpiErrNoError
+  "internal error",                                   // DPI-001 - DpiErrInternal
+  "could not get OCI error message",                  // DPI-002 - DpiErrUnkOciError
+  "no OCI environment handle created",                // DPI-003 - DpiErrNoEnv
+  "invalid state while working with timestamp",       // DPI-004 - DpiErrInvalidState
   "uninitialized state while working with timestamp", // DPI-005 - DpiErrUninitialized
-  "user and password should not be set when using external authentication", // DPI-006 - DpiErrExtAuth
-  "invalid OCI handle or descriptor",          // DPI-007 - DpiOciInvalidHandle
-  "memory allocation failed",                  // DPI-008 - DpiErrMemAllocFail
-  "unexpected NULL value",                     // DPI-009 - DpiErrNullValue
+  "user and password should not be set when using external authentication",
+                                                      // DPI-006 - DpiErrExtAuth
+  "invalid OCI handle or descriptor",                 // DPI-007 - DpiOciInvalidHandle
+  "memory allocation failed",                         // DPI-008 - DpiErrMemAllocFail
+  "unexpected NULL value",                            // DPI-009 - DpiErrNullValue
 };
 
 

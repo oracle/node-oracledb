@@ -66,7 +66,9 @@ class Env
  public:
                                 // creation/termination
 
-  static Env * createEnv( const string &drvName = "" );
+  static Env * createEnv( const string &drvName,
+                          unsigned int charset = 0,
+                          unsigned int ncharset = 0);
 
   virtual void terminate() = 0;
 
@@ -86,6 +88,8 @@ class Env
   virtual void externalAuth(bool externalAuth) = 0;
   virtual bool externalAuth() const = 0;
 
+  virtual unsigned int dbcharset () const = 0;
+  virtual unsigned int dbncharset () const = 0 ;
 
                                  // methods
   virtual SPool * createPool(const string &user, const string &password,
@@ -94,17 +98,20 @@ class Env
                              int poolIncrement = -1,
                              int poolTimeout = -1,
                              int stmtCacheSize = -1,
-                             bool externalAuth = false) = 0;
+                             bool externalAuth = false,
+                             bool homogeneous = true ) = 0;
 
-  virtual Conn * getConnection(const string &user, const string &password,
+  virtual Conn * getConnection(const string &user,
+                               const string &password,
                                const string &connString,
                                int stmtCacheSize,
                                const string &connClass = "",
-                               bool externalAuth = false) = 0;
+                               bool externalAuth = false,
+                               DBPrivileges dbpriv = dbPrivNONE ) = 0;
 
                                 // DateTime array
   virtual DateTimeArray * getDateTimeArray( OCIError *errh ) const = 0;
-  virtual void            releaseDateTimeArray ( DateTimeArray *arr ) const = 0;
+  virtual void            releaseDateTimeArray ( DateTimeArray *arr ) const =0;
 
                                  // handle and descriptor methods
   virtual DpiHandle * allocHandle(HandleType handleType) = 0;
