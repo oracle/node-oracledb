@@ -147,4 +147,15 @@ assigned a number. The following number ranges have been chosen:
 
 ## 4. Test Index
 
-See [`test/list.txt`](https://github.com/oracle/node-oracledb/blob/master/test/list.txt) for the list of existing tests.
+See [`test/list.txt`](https://github.com/oracle/node-oracledb/blob/master/test/list.txt)
+for the list of existing tests.
+
+## 5. Tests Compatibility
+
+- We conduct base testing with Instant Client 11.2.0.4 and 12.1.0.2 on Linux X64
+and Windows 7.
+
+- Users of 11.2.0.1 and 11.2.0.2 clients may see failures with poolTimeout.js
+and dataTypeDouble.js.
+
+- Slow networks may cause some tests to timeout.
