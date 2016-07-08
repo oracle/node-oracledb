@@ -78,7 +78,8 @@ Nan::Persistent<FunctionTemplate> Oracledb::oracledbTemplate_s;
  */
 Oracledb::Oracledb()
 {
-  dpienv_                  = dpi::Env::createEnv( driverName() );
+  dpienv_                  = dpi::Env::createEnv( driverName(), DPI_AL32UTF8,
+                                                  DPI_AL32UTF8 );
   outFormat_               = NJS_ROWS_ARRAY;
   maxRows_                 = NJS_MAX_ROWS;
   autoCommit_              = false;
