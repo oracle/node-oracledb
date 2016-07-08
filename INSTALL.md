@@ -49,8 +49,8 @@ client-server network compatibility applies.  For example, with Oracle
 Client 12.1 you can connect to Oracle Database 10.2 or greater.  Use
 Oracle Client 11.2 if you need to connect to Oracle Database 9.2.
 
-A compiler is required.  Use Visual Studio on Windows, gcc on Linux or
-Xcode on OS X.  ** When building with Node 4 onwards, the compiler must
+A compiler is required.  Use Visual Studio on Windows, GCC on Linux or
+Xcode on OS X.  ** When building with Node 4 onward, the compiler must
 support C++11. **  Note the default compiler on Oracle Linux 6 and RHEL 6
 does not have the required support.  Install a
 [newer compiler](https://blogs.oracle.com/opal/entry/getting_a_c_11_compatible)
@@ -238,9 +238,9 @@ export OCI_INC_DIR=/opt/oracle/instantclient/sdk/include
 
 These variables are only needed during installation.
 
-If Instant Client is in `/opt/oracle/instantclient` and you have no
-other Oracle software installed, then these variables are not
-actually required.  See
+If Instant Client is in the default location
+`/opt/oracle/instantclient` and you have no other Oracle software
+installed, then these variables are not actually required.  See
 [Oracle Client Location Heuristic on Linux](#linuxinstsearchpath).
 
 If you are behind a firewall you may need to set your proxy, for
@@ -457,6 +457,11 @@ without re-installing node-oracledb.
 
 ## <a name="instosx"></a> 6. Node-oracledb Installation on OS X with Instant Client
 
+Note: If you use Instant Client 11.2 because you need to connect to
+Oracle Database 9.2, refer to
+[these older instructions](https://github.com/oracle/node-oracledb/blob/v1.9.3/INSTALL.md#instosx).
+Otherwise follow the instructions below for Instant Client 12.1.
+
 ### 6.1 Install Xcode
 
 Building node-oracledb requires Xcode from the Mac App store.
@@ -465,70 +470,34 @@ Building node-oracledb requires Xcode from the Mac App store.
 
 Download the [Node.js package](http://nodejs.org) for OS X 64-bit and install it.
 
-### 6.3 Install the free Oracle Instant Client 'Basic' and 'SDK' ZIPs
-
-Follow the steps in either [6.3.1](#instosxICuser) or [6.3.2](#instosxICroot).
-
-### <a name="instosxICuser"></a> 6.3.1 Install Instant Client in a user directory
+### 6.3 Install the free Oracle Instant Client 12.1 'Basic' and 'SDK' ZIPs
 
 Download the free **Basic** and **SDK** 64-bit ZIPs from
 [Oracle Technology Network](http://www.oracle.com/technetwork/topics/intel-macsoft-096467.html)
-and unzip them somewhere under your home directory:
+and install them into the same directory, for example:
 
 ```
-unzip instantclient-basic-macos.x64-11.2.0.4.0.zip
-unzip instantclient-sdk-macos.x64-11.2.0.4.0.zip
-cd instantclient_11_2
-ln -s libclntsh.dylib.11.1 libclntsh.dylib
+cd /opt/oracle
+unzip instantclient-basic-macos.x64-12.1.0.2.0.zip
+unzip instantclient-sdk-macos.x64-12.1.0.2.0.zip
+mv instantclient_12_1 instantclient
+cd instantclient
+ln -s libclntsh.dylib.12.1 libclntsh.dylib
 ```
 
-Link the OCI libraries into the user default library path:
+### 6.4 Install the add-on
+
+Tell the installer where to find Instant Client:
 
 ```
-mkdir ~/lib
-ln -s $(pwd)/{libclntsh.dylib,libclntsh.dylib.11.1,libnnz11.dylib,libociei.dylib} ~/lib/
-```
-
-To allow the node-oracledb installer to find the Instant Client
-libraries and headers, set the install-time variables `OCI_LIB_DIR`
-and `OCI_INC_DIR` to the appropriate directories:
-
-```
-export OCI_LIB_DIR=~/lib
-export OCI_INC_DIR=~/instantclient_11_2/sdk/include
+export OCI_LIB_DIR=/opt/oracle/instantclient
+export OCI_INC_DIR=/opt/oracle/instantclient/sdk/include
 ```
 
 These variables are only needed during installation.
 
-Continue with [6.4](#instosxICaddon).
-
-### <a name="instosxICroot"></a> 6.3.2 Install Instant Client in /opt
-
-This alternative to [6.3.1](#instosxICroot) requires root access.  It
-puts Instant Client in the default location used by the node-oracledb
-installer.  If you don't want to update system directories then follow
-the steps in [6.3.1](#instosxICuser) instead.
-
-Download the free **Basic** and **SDK** ZIPs from
-[Oracle Technology Network](http://www.oracle.com/technetwork/topics/intel-macsoft-096467.html)
-and install them into the same directory:
-
-```
-sudo su -
-unzip instantclient-basic-macos.x64-11.2.0.4.0.zip
-unzip instantclient-sdk-macos.x64-11.2.0.4.0.zip
-mkdir /opt/oracle
-mv instantclient_11_2 /opt/oracle/instantclient
-ln -s /opt/oracle/instantclient/libclntsh.dylib.11.1 /opt/oracle/instantclient/libclntsh.dylib
-```
-
-Link the OCI libraries into the default library path:
-
-```
-ln -s /opt/oracle/instantclient/{libclntsh.dylib.11.1,libnnz11.dylib,libociei.dylib} /usr/local/lib/
-```
-
-### <a name="instosxICaddon"></a> 6.4 Install the add-on
+If Instant Client is the default location `/opt/oracle/instantclient`
+then these variables are not actually required.
 
 If you are behind a firewall you may need to set your proxy, for
 example:
@@ -537,7 +506,7 @@ example:
 export http_proxy=http://my-proxy.example.com:80/
 ```
 
-As a normal user, install node-oracledb from the
+Install node-oracledb from the
 [NPM registry](https://www.npmjs.com/package/oracledb):
 
 ```
@@ -723,7 +692,7 @@ After node-oracle has been built on the source computer, copy the
 
 The destination computer's `PATH` needs to include Visual Studio
 redistributables.  If you used Oracle client 11.2 then the Visual
-Studio 2005 restributable is required.  For Oracle client 12.1, use
+Studio 2005 redistributable is required.  For Oracle client 12.1, use
 the Visual Studio 2010 redistributable.
 
 You can also find out the version required by locating the library
@@ -777,7 +746,7 @@ Install them into the /opt/oracle.
 ```
 cd /opt/oracle
 unzip instantclient-basic-aix.ppc64-12.1.0.2.0.zip
-uzip instantclient-sdk-aix.ppc64-12.1.0.2.0.zip
+unzip instantclient-sdk-aix.ppc64-12.1.0.2.0.zip
 ```
 
 To run applications, you will need to set the link path:
