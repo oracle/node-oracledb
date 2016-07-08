@@ -53,7 +53,7 @@ describe('11. poolTimeout.js', function(){
         poolMin         : 1,
         poolMax         : 5,
         poolIncrement   : 2,
-        poolTimeout     : 2,
+        poolTimeout     : 5,
         stmtCacheSize   : 23
       },
       function(err, pooling){
