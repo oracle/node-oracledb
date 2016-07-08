@@ -136,6 +136,7 @@ ILob::~ILob()
 
 void ILob::cleanup()
 {
+  this->jsParent_.Reset ();
   if (buf_)
   {
     delete [] buf_;
@@ -371,10 +372,8 @@ NAN_METHOD(ILob::Release)
   }
 
   /*
-   * When we release the iLob, we have to clear the reference of
-   * its parent jsConn.
+   * cleanup() will clear the reference of its parent jsConn.
    */
-  iLob->jsParent_.Reset ();
   iLob->cleanup();
 
   info.GetReturnValue().SetUndefined();
