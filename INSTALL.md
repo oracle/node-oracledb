@@ -130,12 +130,6 @@ example:
 export http_proxy=http://my-proxy.example.com:80/
 ```
 
-or, in `csh`:
-
-```
-setenv http_proxy http://my-proxy.example.com:80/
-```
-
 Install node-oracledb from the
 [NPM registry](https://www.npmjs.com/package/oracledb):
 
@@ -256,12 +250,6 @@ example:
 export http_proxy=http://my-proxy.example.com:80/
 ```
 
-or, in `csh`:
-
-```
-setenv http_proxy http://my-proxy.example.com:80/
-```
-
 Install node-oracledb from the
 [NPM registry](https://www.npmjs.com/package/oracledb):
 
@@ -301,7 +289,8 @@ node select1.js
 
 ## <a name="instoh"></a> 4. Node-oracledb installation on Linux with a Local Database
 
-The ORACLE_HOME can be either a database home or a full Oracle client installation installed with Oracle's `runInstaller`.
+The `ORACLE_HOME` can be either a database home or a full Oracle
+client installation installed with Oracle's `runInstaller`.
 
 For easy development, the free
 [Oracle XE](http://www.oracle.com/technetwork/database/database-technologies/express-edition/overview/index.html)
@@ -328,11 +317,24 @@ export PATH=/opt/node-v4.2.3-linux-x64/bin:$PATH
 
 ### 4.2 Install the add-on
 
-The installer will automatically look for Oracle libraries and headers under
-`$ORACLE_HOME`, see
+Set required Oracle environment variables, such as `ORACLE_HOME` by
+executing:
+
+```
+source /usr/local/bin/oraenv
+```
+
+Or, if you are using Oracle XE, by executing:
+
+````
+source /u01/app/oracle/product/11.2.0/xe/bin/oracle_env.sh
+```
+
+The node-oracledb installer will automatically look for Oracle
+libraries and headers under `$ORACLE_HOME`, see
 [Oracle Client Location Heuristic on Linux](#linuxinstsearchpath).
-However, if you have Instant Client RPMs installed and don't wish the RPMs
-to be used, you must explicitly set two environment variables:
+However, if you also have Instant Client RPMs installed and don't wish the
+RPMs to be used, you must explicitly set two environment variables:
 
 ```
 export OCI_LIB_DIR=$ORACLE_HOME/lib
@@ -348,12 +350,6 @@ example:
 export http_proxy=http://my-proxy.example.com:80/
 ```
 
-or, in `csh`:
-
-```
-setenv http_proxy http://my-proxy.example.com:80/
-```
-
 Install node-oracledb from the
 [NPM registry](https://www.npmjs.com/package/oracledb):
 
@@ -364,15 +360,20 @@ npm install oracledb
 If you are installing with `sudo`, you may need to use `sudo -E` to
 preserve the environment variable values.
 
+Note: A compiler supporting C++11 is required when building with
+Node.js 4 or later, otherwise the NAN component will fail to build.
+
 ### 4.3 Run an example program
 
-Set `LD_LIBRARY_PATH` to the Oracle library directory.  This variable,
-and other variables used by Oracle clients, are typically set in a
-shell by executing `source /usr/local/bin/oraenv`.  Or, if you are
-using Oracle XE, execute `source
-/u01/app/oracle/product/11.2.0/xe/bin/oracle_env.sh`.  The Node.js
-process will need access permissions for the Oracle libraries and
-other files.
+Set `LD_LIBRARY_PATH` to the Oracle library directory, if it was not
+set by `oraenv` or `oracle_env.sh`:
+
+```
+export LD_LIBRARY_PATH=$ORACLE_HOME/lib
+```
+
+Make sure the Node.js process has directory and file access
+permissions for the Oracle libraries and other files.
 
 Download the
 [example programs](https://github.com/oracle/node-oracledb/tree/master/examples) from GitHub.
@@ -423,6 +424,19 @@ npm install oracledb
 node example.js
 ```
 
+### <a name="forcerpath"></a> Forcing RPATH
+
+If rpath is not automatically enabled when installing node-oracledb on
+Linux, you can force it to be used.  Do this by setting the
+node-oracledb installation variable `FORCE_RPATH` to any value.  For
+example when installing with a local database:
+
+```
+source /usr/local/bin/oraenv    # this sets ORACLE_HOME and LD_LIBRARY_PATH
+FORCE_RPATH=1 npm install oracledb
+node example.js
+```
+
 ### Using Instant Client RPMs without RPATH
 
 If you want to use Instant Client RPMs without using rpath, then set
@@ -440,23 +454,6 @@ node example.js
 This is useful if you will need to upgrade Oracle Instant Client RPMs
 to a new major or minor version (for example from 11.2 to 12.1)
 without re-installing node-oracledb.
-
-If you are installing with `sudo`, you may need to use `sudo -E` to
-preserve the environment variable values.
-
-### Forcing RPATH
-
-If you want to force using rpath when installing node-oracledb on
-Linux, then set the node-oracledb installation variable `FORCE_RPATH`
-to any value.  For example:
-
-```
-export OCI_LIB_DIR=/opt/oracle/instantclient
-export OCI_INC_DIR=/opt/oracle/instantclient/sdk/include
-FORCE_RPATH=1 npm install oracledb
-unset OCI_LIB_DIR OCI_INC_DIR
-node example.js
-```
 
 ## <a name="instosx"></a> 6. Node-oracledb Installation on OS X with Instant Client
 
@@ -538,12 +535,6 @@ example:
 
 ```
 export http_proxy=http://my-proxy.example.com:80/
-```
-
-or, in `csh`:
-
-```
-setenv http_proxy http://my-proxy.example.com:80/
 ```
 
 As a normal user, install node-oracledb from the
