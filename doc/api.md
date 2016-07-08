@@ -3307,9 +3307,6 @@ IN binds are values passed into the database.  OUT binds are used to
 retrieve data.  IN OUT binds are passed in, and may return a different
 value after the statement executes.
 
-With PL/SQL statements, only scalar parameters can be bound.  An array
-of values cannot be bound to a PL/SQL bind parameter.
-
 OUT bind parameters for `RETURNING INTO` clauses will always return an
 array of values. See [DML RETURNING Bind Parameters](#dmlreturn).
 
