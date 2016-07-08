@@ -77,9 +77,12 @@ static const char *errMsg[] =
   "NJS-038: maxArraySize value should be greater than 0", // errInvalidValueArrayBind
   "NJS-039: empty array is not allowed for IN bind", // errEmptyArray
   "NJS-040: connection request timeout",  // errConnRequestTimeout
+
   "NJS-041: cannot convert ResultSet to QueryStream after invoking methods", // errCannotConvertRsToStream
   "NJS-042: cannot invoke ResultSet methods after converting to QueryStream", // errCannotInvokeRsMethods
   "NJS-043: ResultSet already converted to QueryStream", // errResultSetAlreadyConverted
+  "NJS-044: named JSON object is not expected in this context", // errNamedJSON
+
 };
 
 string NJSMessages::getErrorMsg ( NJSErrorType err, ... )

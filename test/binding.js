@@ -400,25 +400,22 @@ describe('4. binding.js', function() {
       );
     })
 
-    it.skip('4.2.2 array binding with mixing JSON should throw an error', function(done) {
+    it('4.2.2 array binding with mixing JSON should throw an error', function(done) {
       connection.execute(
         insert,
         param2,
         options,
         function(err, result) {
-          should.exist(err);  // pending to fix
-          result.rowsAffected.should.be.exactly(1);
-          //result.outBinds[0].should.eql([1]);
-          //console.log(result);
+          should.exist(err);
+          (err.message).should.startWith('NJS-044');
+          // NJS-044: named JSON object is not expected in this context
           connection.execute(
             "SELECT * FROM nodb_binding",
             [],
             options,
             function(err, result) {
               should.not.exist(err);
-              //console.log(result);
-              result.rows[0].ID.should.be.exactly(2);
-              result.rows[0].NAME.should.eql('changjie');
+              (result.rows).should.be.eql([]);
               done();
             }
           );

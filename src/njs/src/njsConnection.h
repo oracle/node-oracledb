@@ -357,7 +357,7 @@ private:
   static void GetOptions (Handle<Object> options, eBaton* executeBaton);
   static void GetBinds (Handle<Object> bindobj, eBaton* executeBaton);
   static void GetBinds (Handle<Array> bindarray, eBaton* executeBaton);
-  static void GetBindUnit (Local<Value> bindtypes, Bind* bind,
+  static void GetBindUnit (Local<Value> bindtypes, Bind* bind, bool array,
                            eBaton* executeBaton);
   static void GetInBindParams(Local<Value> v8val, Bind *bind, eBaton *executeBaton, BindType bindType);
   static void GetInBindParamsScalar(Local<Value> v8val, Bind *bind, eBaton *executeBaton, BindType bindType);

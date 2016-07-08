@@ -662,7 +662,7 @@ void Connection::GetBinds (Handle<Object> bindobj, eBaton* executeBaton)
     bind->key = ":"+std::string(str);
     Local<Value> val__ = bindobj->Get(Nan::New<v8::String>((char*)str.c_str(),
                            (int) str.length()).ToLocalChecked());
-    Connection::GetBindUnit(val__, bind, executeBaton);
+    Connection::GetBindUnit(val__, bind, false, executeBaton);
     if(!executeBaton->error.empty())
       goto exitGetBinds;
   }
@@ -689,7 +689,7 @@ void Connection::GetBinds (Handle<Array> binds, eBaton* executeBaton)
   {
     Bind* bind = new Bind;
     Local<Value> val__ = binds->Get(index);
-    GetBindUnit(val__, bind, executeBaton);
+    GetBindUnit(val__, bind, true, executeBaton);
     if(!executeBaton->error.empty()) goto exitGetBinds;
   }
   exitGetBinds:
@@ -702,9 +702,12 @@ void Connection::GetBinds (Handle<Array> binds, eBaton* executeBaton)
      Processing each bind varible
 
    PARAMETERS:
-     Handle value, eBaton struct
+     val          - handle value
+     bind         - one bind structure to initialize
+     array        - array input or JSON input
+     executeBaton - eBaton structure
 */
-void Connection::GetBindUnit (Local<Value> val, Bind* bind,
+void Connection::GetBindUnit (Local<Value> val, Bind* bind, bool array,
                                        eBaton* executeBaton)
 {
   Nan::HandleScope scope;
@@ -713,6 +716,46 @@ void Connection::GetBindUnit (Local<Value> val, Bind* bind,
   if(val->IsObject() && !val->IsDate() && !Buffer::HasInstance(val))
   {
     Local<Object> bind_unit = val->ToObject();
+
+    if ( array )
+    {
+      // In case of array binds, JSON objects are expected to be unnamed.
+      // Named json object gets confused as we look for "dir", "type",
+      // "maxSize"  key words, but "name" will not match.
+      // Array binds syntax
+      //    [ id, name, {type : oracledb.STRING, dir : oracledb.BIND_OUT}]
+      // the 3rd parameter is unnamed JSON object.
+      // [ id, n, { a: { type : oracledb.STRING, dir : oracledb.BIND_OUT} }]
+      // will fail now.
+      Local<Array> keys = bind_unit->GetOwnPropertyNames ();
+      if ( keys->Length () > 0 )
+      {
+        bool valid = false;
+
+        for ( unsigned int index = 0; !valid && ( index < keys->Length ()) ;
+            index ++ )
+        {
+          std::string key;
+
+          Local<String> temp = keys->Get (index).As<String> ();
+          NJSString ( key, temp );
+
+          if ( ( key.compare ( "dir" ) == 0 ) ||
+               ( key.compare ( "type" ) == 0 ) ||
+               ( key.compare ( "maxSize" ) == 0 ) )
+          {
+            valid = true;
+          }
+        }
+
+        if ( !valid )
+        {
+          executeBaton->error = NJSMessages::getErrorMsg ( errNamedJSON );
+          goto exitGetBindUnit;
+        }
+      }
+    }
+
     NJS_GET_UINT_FROM_JSON   ( dir, executeBaton->error,
                                bind_unit, "dir", 1, exitGetBindUnit );
     NJS_GET_UINT_FROM_JSON   ( bind->type, executeBaton->error,

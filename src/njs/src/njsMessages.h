@@ -79,6 +79,7 @@ typedef enum
   errCannotConvertRsToStream,
   errCannotInvokeRsMethods,
   errResultSetAlreadyConverted,
+  errNamedJSON,
 
   // New ones should be added here
 
