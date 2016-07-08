@@ -25,6 +25,8 @@ limitations under the License.
 6. [Node-oracledb Installation on Windows](#instwin)
 7. [Copying node-oracledb Binaries on Windows](#winbins)
 8. [Advanced Installation on Linux](#linuxadv)
+9. [Node-oracledb Installation on AIX.PPC64 with Instant Client ZIP files](#instaix)
+10. [Node-oracledb Installation on SOLARIS.X64 with Instant Client ZIP files](#instsolarisamd)
 
 ## <a name="overview"></a> 1. Overview
 
@@ -65,9 +67,10 @@ Instructions may need to be adjusted for your platform and environment.
 
 I have ... | Follow this ...
 ----------|-----------------
-Linux.  My database is on another machine.  | [Node-oracledb Installation on Linux with Instant Client RPMs](#instrpm)
-Solaris or AIX.  My database is on another machine. | [Node-oracledb Installation on Linux with Instant Client ZIP files](#instzip)
-Linux, Solaris or AIX.  My database is on the same machine. |  [Node-oracledb Installation on Linux with a Local Database](#instoh)
+Linux.  My database is on another machine.  | [Node-oracledb Installation on Linux with Instant Client RPMs](#instrpm), [Node-oracledb Installation on Linux with Instant Client ZIP files](#instzip)
+AIX.  My database is on another machine. | [Node-oracledb Installation on AIX.PPC64 with Instant Client ZIP files](#instaix)
+Solaris.x64.  My database is on another machine. | [Node-oracledb Installation on SOLARIS.X64 with Instant Client ZIP files](#instsolarisamd)
+Linux, Solaris or AIX.  My database is on the same machine. | [Node-oracledb Installation on Linux with a Local Database](#instoh)
 Linux, Solaris or AIX. I have the full Oracle client (installed via runInstaller) on the same machine. |  [Node-oracledb Installation on Linux with a Local Database](#instoh)
 Apple OS X | [Node-oracledb Installation on OS X with Instant Client](#instosx)
 Windows | [Node-oracledb Installation on Windows](#instwin)
@@ -741,4 +744,235 @@ export OCI_INC_DIR=/opt/oracle/instantclient/sdk/include
 FORCE_RPATH=1 npm install oracledb
 unset OCI_LIB_DIR OCI_INC_DIR
 node example.js
+```
+
+## <a name="instaix"></a> 9. Node-oracledb Installation on AIX.PPC64 with Instant Client ZIP files
+
+### 9.1 Install Node.js
+
+Download IBM AIX.PPC64 SDK for Node.js from
+(https://nodejs.org/).
+The downloaded file will be a shell script.
+
+Execute the shell script. While executing, a prompt will appear asking for the Install Folder and Link Folder.
+Give the desired location, say `/opt`, where node binary is supposed to build. On completion, a success message will be displayed.
+
+```
+sh node-v0.10.40-aix-ppc64.bin
+```
+
+Set PATH to include Node.js and Node-gyp binaries.
+
+```
+export PATH=/opt/node-v4.2.1/bin:$PATH
+export PATH=/opt/node-v4.2.1/lib/node_modules/npm/bin/node-gyp-bin:$PATH
+```
+
+Set LIBPATH to include libstdc++.a and libgcc_s.a. This setting is only needed with Node.js v0.10.* and v0.12.*,
+whereas this setting is not required from Node.js V4 and later versions.
+
+With Node.js V0.10.* and V0.12.*, the libstdc++ dependency is taken care by explicitly adding '/opt/freeware/lib64' in $LIBPATH.
+Since Node.js V4 or later uses GCC 4.8, there is no need to explictly set '/opt/freeware/lib64' in $LIBPATH.
+
+```
+export LIBPATH=/opt/freeware/lib64
+```
+
+### 9.2 Install the free Oracle Instant Client 'Basic' and 'SDK' ZIPs
+
+Download the free **Basic** and **SDK** ZIPs from
+[Oracle Technology Network]( http://www.oracle.com/technetwork/topics/aix5lsoft-098883.html)
+and
+Install them into the /opt/oracle.
+
+```
+cd /opt/oracle
+unzip instantclient-basic-aix.ppc64-12.1.0.2.0.zip
+uzip instantclient-sdk-aix.ppc64-12.1.0.2.0.zip
+cd instantclient_12_1
+```
+
+To run applications, you will need to set the link path:
+
+```
+export LIBPATH=/opt/oracle/instantclient_12_1:$LIBPATH
+```
+
+### 9.3 Install the add-on
+
+Tell the installer where to find Instant Client:
+
+```
+export OCI_LIB_DIR=/opt/oracle/instantclient_12_1
+export OCI_INC_DIR=/opt/oracle/instantclient_12_1/sdk/include
+```
+
+These variables are only needed during installation.
+
+If you are behind a firewall you may need to set your proxy, for
+example:
+
+```
+export http_proxy=http://my-proxy.example.com:80/
+```
+
+Install node-oracledb from the
+[NPM registry](https://www.npmjs.com/package/oracledb):
+
+```
+npm install oracledb
+```
+
+Note:The make version should be GNU Make v4.1-1 (or 3.80-3 for AIX) or above on the AIX.PPC64 platform for building node-oracledb.
+
+### 9.4 Run an example program
+
+Download the
+[example programs](https://github.com/oracle/node-oracledb/tree/master/examples) from GitHub.
+
+Edit `dbconfig.js` and set the database credentials to your
+environment:
+
+```
+module.exports = {
+  user          : "hr",
+  password      : "welcome",
+  connectString : "localhost/XE"
+};
+```
+
+Run one of the examples:
+
+```
+node select1.js
+```
+
+Note:
+A compiler supporting C++11 is required when building with Node.js v4 or later, otherwise the NAN component will fail to build.
+The V8 JavaScript engine's use of C++11 features results in a dependency on version 4.8 or later of the GNU Compiler Collection (GCC).
+GCC 4.8 or later, is required for Node.js version 4 and later.
+
+
+## <a name="instsolarisamd"></a> 10. Node-oracledb Installation on SOLARIS.X64 with Instant Client ZIP files
+
+### 10.1 Install Node.js
+
+Download the
+[Node.js Source code] (https://nodejs.org/) .
+Compile and Build the Node.js engine from the source code.
+
+```
+ ./configure --prefix=/scratch/node_project/node/node-v0.12.7/nodejs0127
+ make
+ make install
+```
+
+Note:
+The *configure* file, *common.gypi* file and *Makefile* are not handled for the Solaris.x64 platform.
+
+For Solaris.x64, the processor is 'i386'.
+By default, inside the *configure* file, 'i386' is set to 'ia32' which is for 32 bit architecture.
+If the installation is performed on a 64 bit architecture, 'i386' should be set to 'x64' instead of 'ia32'.
+
+```
+matchup = {
+    ...
+    '__i386__'    : 'x64',
+    ...
+```
+
+Accordingly, the changes should be made in *common.gypi* so that the 'x64' target architecture point to 'i386', which is setup in the above step.
+
+```
+target_arch=="x64"', {
+ 'xcode_settings': {'ARCHS': ['i386']},
+```
+
+Also changes have to be done in *Makefile*
+
+```
+ifeq ($(DESTCPU),arm)
+ ...
+else
+ ARCH=x64
+ ...
+```
+Node.js binaries for Solaris.x64 are available on Node.js site ('node-v*-sunos-x64.tar'- which just needs extracting the tar files and the software will be installed).
+However, even simple Node.js program will fail when installing through these binaries.
+So install Node.js engine by compiling and building the source code with the steps and changes as mentioned above.
+
+Set PATH to include Node.js and Node-gyp binaries
+
+```
+export PATH=/opt/node-v0.12.8/bin:$PATH
+export PATH=/opt/node-v0.12.8/lib/node_modules/npm/bin/node-gyp-bin:$PATH
+```
+
+If warnings are shown for 'objdump' and 'dtrace', set PATH to include the same.
+[Most likely /usr/gnu/bin and /usr/bin respectively]
+
+### 10.2 Install the free Oracle Instant Client 'Basic' and 'SDK' ZIPs
+
+Download the free **Basic** and **SDK** ZIPs from
+[Oracle Technology Network]( http://www.oracle.com/technetwork/topics/solx8664soft-097204.html )
+and
+Install them into /opt/oracle.
+
+```
+cd /opt/oracle
+unzip instantclient-basic-solaris.x64-12.1.0.2.0.zip
+unzip instantclient-sdk-solaris.x64-12.1.0.2.0.zip
+cd instantclient_12_1
+```
+
+To run applications, you will need to set the link path:
+
+```
+export LD_LIBRARY_PATH_64=/opt/oracle/instantclient_12_1:$LD_LIBRARY_PATH_64
+```
+
+### 10.3 Install the add-on
+
+Tell the installer where to find Instant Client:
+
+```
+export OCI_LIB_DIR=/opt/oracle/instantclient_12_1
+export OCI_INC_DIR=/opt/oracle/instantclient_12_1/sdk/include
+```
+These variables are only needed during installation.
+
+If you are behind a firewall you may need to set your proxy, for
+example:
+
+```
+export http_proxy=http://my-proxy.example.com:80/
+```
+
+Install node-oracledb from the
+[NPM registry](https://www.npmjs.com/package/oracledb):
+
+```
+npm install oracledb
+```
+
+### 10.4 Run an example program
+
+Download the
+[example programs](https://github.com/oracle/node-oracledb/tree/master/examples) from GitHub.
+
+Edit `dbconfig.js` and set the database credentials to your
+environment:
+
+```
+module.exports = {
+  user          : "hr",
+  password      : "welcome",
+  connectString : "localhost/XE"
+};
+```
+
+Run one of the examples:
+
+```
+node select1.js
 ```
