@@ -493,7 +493,7 @@ describe('58. properties.js', function() {
         },
         function(callback) {
           connection.execute(
-            "SELECT * FROM " + tableName,
+            "SELECT * FROM " + tableName + " ORDER BY num",
             [],
             { resultSet: true, outFormat: oracledb.OBJECT },
             function(err, result) {

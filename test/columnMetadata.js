@@ -158,7 +158,7 @@ describe('9. columnMetadata.js', function(){
     it('9.1.4 shows metaData correctly when retrieving all columns with [SELECT * FROM table] statement', function(done){
 
       connection.execute(
-        "SELECT * FROM nodb_departments",
+        "SELECT * FROM nodb_departments ORDER BY department_id",
         function(err, result){
           should.not.exist(err);
           result.rows.length.should.be.exactly(3);
@@ -260,7 +260,7 @@ describe('9. columnMetadata.js', function(){
 
       var sqlWith = "WITH nodb_dep AS " +
                     "(SELECT * FROM nodb_departments WHERE location_id < 2000) " +
-                    "SELECT * FROM nodb_dep WHERE department_id > 50";
+                    "SELECT * FROM nodb_dep WHERE department_id > 50 ORDER BY department_id";
 
       connection.execute(
         sqlWith,
@@ -278,7 +278,7 @@ describe('9. columnMetadata.js', function(){
 
     it('9.1.10 displays metaData correctly with result set', function(done) {
       connection.execute(
-        "SELECT * FROM nodb_departments",
+        "SELECT * FROM nodb_departments ORDER BY department_id",
         [],
         { resultSet: true },
         function(err, result) {

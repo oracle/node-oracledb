@@ -485,7 +485,7 @@ describe('3. examples.js', function(){
 
       connection.should.be.ok;
       connection.execute(
-        "SELECT * FROM nodb_employees",
+        "SELECT * FROM nodb_employees ORDER BY employees_id",
         function(err, result){
           should.not.exist(err);
           should.exist(result);
@@ -499,7 +499,7 @@ describe('3. examples.js', function(){
     it('3.6.2 can also specify for each execution', function(done){
       connection.should.be.ok;
       connection.execute(
-        "SELECT * FROM nodb_employees",
+        "SELECT * FROM nodb_employees ORDER BY employees_id",
         {}, {maxRows: 25},
         function(err, result){
           should.not.exist(err);
@@ -801,7 +801,7 @@ describe('3. examples.js', function(){
         },
         function(callback){
           conn2.execute(
-            "SELECT * FROM nodb_testcommit",
+            "SELECT * FROM nodb_testcommit  ORDER BY id",
             function(err, result){
               should.not.exist(err);
               // This will only show 'Chris' because inserting 'Alison' is not commited by default.
@@ -926,7 +926,7 @@ describe('3. examples.js', function(){
       var numRows = 10;  // number of rows to return from each call to getRows()
 
       connection.execute(
-        "SELECT * FROM nodb_employees",
+        "SELECT * FROM nodb_employees ORDER BY employees_id",
         [],
         { resultSet: true, prefetchRows: 110 },
         function(err, result) {
@@ -1015,7 +1015,7 @@ describe('3. examples.js', function(){
            AS \
            BEGIN \
              OPEN p_recordset FOR  \
-               SELECT * FROM nodb_employees \
+               SELECT * FROM nodb_employees\
                WHERE salary > p_sal; \
            END; ";
 

@@ -218,7 +218,7 @@ describe('1. connection.js', function(){
 
       connection.should.be.ok;
       connection.execute(
-        "SELECT * FROM nodb_employees",
+        "SELECT * FROM nodb_employees ORDER BY employee_id",
         function(err, result){
           should.not.exist(err);
           should.exist(result);
@@ -232,7 +232,7 @@ describe('1. connection.js', function(){
     it('1.2.2 can also specify for each execution', function(done){
       connection.should.be.ok;
       connection.execute(
-        "SELECT * FROM nodb_employees",
+        "SELECT * FROM nodb_employees ORDER BY employee_id",
         {}, { maxRows: 25 },
         function(err, result){
           should.not.exist(err);
@@ -247,7 +247,7 @@ describe('1. connection.js', function(){
     it('1.2.3 can not set maxRows to be 0', function(done){
       connection.should.be.ok;
       connection.execute(
-        "SELECT * FROM nodb_employees",
+        "SELECT * FROM nodb_employees ORDER BY employee_id",
         {}, { maxRows: 0 },
         function(err, result){
           should.exist(err);
@@ -261,7 +261,7 @@ describe('1. connection.js', function(){
     it('1.2.4 cannot set maxRows to be a negative number', function(done){
       connection.should.be.ok;
       connection.execute(
-        "SELECT * FROM nodb_employees",
+        "SELECT * FROM nodb_employees ORDER BY employee_id",
         {}, {maxRows: -5},
         function(err, result){
           should.exist(err);
@@ -273,7 +273,7 @@ describe('1. connection.js', function(){
 
     it('1.2.5 sets maxRows to be very large value', function(done) {
       connection.execute(
-        "SELECT * FROM nodb_employees",
+        "SELECT * FROM nodb_employees ORDER BY employee_id",
         {},
         {maxRows: 500000},
         function(err, result){

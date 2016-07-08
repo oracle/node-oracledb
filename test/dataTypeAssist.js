@@ -483,7 +483,7 @@ assist.sqlCreateTable = function(tableName)
 assist.dataTypeSupport = function(connection, tableName, array, done) {
   connection.should.be.ok;
   connection.execute(
-    "SELECT * FROM " + tableName,
+    "SELECT * FROM " + tableName + " ORDER BY num",
     [],
     { outFormat: oracledb.OBJECT },
     function(err, result) {

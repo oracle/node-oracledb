@@ -155,7 +155,7 @@ describe('8. autoCommitForSelect.js', function(){
       },
       function(callback){
         connection.execute(
-          "SELECT * FROM nodb_departments",
+          "SELECT * FROM nodb_departments ORDER BY department_id",
           function(err, result){
             should.not.exist(err);
             (result.rows).should.containEql([180, 'Construction']);
@@ -165,7 +165,7 @@ describe('8. autoCommitForSelect.js', function(){
       },
       function(callback){
         anotherConnection.execute(
-          "SELECT * FROM nodb_departments",
+          "SELECT * FROM nodb_departments ORDER BY department_id",
           function(err, result){
             should.not.exist(err);
             (result.rows).should.not.containEql([180, 'Construction']);
@@ -227,7 +227,7 @@ describe('8. autoCommitForSelect.js', function(){
       },
       function(callback){
         connection.execute(
-          "SELECT * FROM nodb_departments",
+          "SELECT * FROM nodb_departments ORDER BY department_id",
           function(err, result){
             should.not.exist(err);
             (result.rows).should.containEql([180, 'Construction']);
@@ -237,7 +237,7 @@ describe('8. autoCommitForSelect.js', function(){
       },
       function(callback){
         anotherConnection.execute(
-          "SELECT * FROM nodb_departments",
+          "SELECT * FROM nodb_departments ORDER BY department_id",
           function(err, result){
             should.not.exist(err);
             (result.rows).should.containEql([180, 'Construction']);
@@ -299,7 +299,7 @@ describe('8. autoCommitForSelect.js', function(){
       },
       function(callback){
         connection.execute(
-          "SELECT * FROM nodb_departments",
+          "SELECT * FROM nodb_departments ORDER BY department_id",
           {},
           {autoCommit: true},
           function(err, result){
@@ -311,7 +311,7 @@ describe('8. autoCommitForSelect.js', function(){
       },
       function(callback){
         anotherConnection.execute(
-          "SELECT * FROM nodb_departments",
+          "SELECT * FROM nodb_departments ORDER BY department_id",
           function(err, result){
             should.not.exist(err);
             (result.rows).should.containEql([180, 'Construction']);

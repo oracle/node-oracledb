@@ -297,7 +297,7 @@ describe('55. resultSet2.js', function() {
     it('55.4.1 result set', function(done) {
       conn2.should.be.ok;
       conn2.execute(
-        "SELECT * FROM nodb_employees",
+        "SELECT * FROM nodb_employees ORDER BY employees_id",
         [],
         { resultSet: true },
         function(err, result) {
@@ -340,7 +340,7 @@ describe('55. resultSet2.js', function() {
       async.series([
         function(callback) {
           connection.execute(
-            "SELECT * FROM nodb_employees",
+            "SELECT * FROM nodb_employees ORDER BY employees_id",
             [],
             { resultSet: true },
             function(err, result) {
@@ -431,7 +431,7 @@ describe('55. resultSet2.js', function() {
       connection.should.be.ok;
 
       connection.execute(
-        "SELECT * FROM nodb_employees",
+        "SELECT * FROM nodb_employees ORDER BY employees_id",
         [],
         { resultSet: true },
         function(err, result) {
@@ -543,7 +543,7 @@ describe('55. resultSet2.js', function() {
       async.parallel([
         function(callback) {
           connection.execute(
-            "SELECT * FROM nodb_employees",
+            "SELECT * FROM nodb_employees ORDER BY employees_id",
             [],
             { resultSet: true },
             function(err, result) {
@@ -554,7 +554,7 @@ describe('55. resultSet2.js', function() {
         },
         function(callback) {
           connection.execute(
-            "SELECT * FROM nodb_employees",
+            "SELECT * FROM nodb_employees ORDER BY employees_id",
             [],
             { resultSet: true },
             function(err, result) {
@@ -715,7 +715,7 @@ describe('55. resultSet2.js', function() {
       var numRows = 10;
       var closeRS = true;
       connection.execute(
-        "SELECT * FROM nodb_employees",
+        "SELECT * FROM nodb_employees ORDER BY employees_id",
         [],
         { resultSet: true },
         function(err, result) {

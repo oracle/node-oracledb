@@ -1303,7 +1303,7 @@ describe('12. resultSet1.js', function() {
       var accessCount = 0;
       var rowsLimit = 50;
       connection.execute(
-        "SELECT * FROM nodb_employees",
+        "SELECT * FROM nodb_employees ORDER BY employees_id",
         [],
         { resultSet: true, maxRows: rowsLimit },
         function(err, result) {

@@ -385,7 +385,7 @@ describe('4. binding.js', function() {
           result.outBinds[0].should.eql([1]);
           // console.log(result);
           connection.execute(
-            "SELECT * FROM nodb_binding",
+            "SELECT * FROM nodb_binding ORDER BY id",
             [],
             options,
             function(err, result) {
@@ -410,7 +410,7 @@ describe('4. binding.js', function() {
           (err.message).should.startWith('NJS-044');
           // NJS-044: named JSON object is not expected in this context
           connection.execute(
-            "SELECT * FROM nodb_binding",
+            "SELECT * FROM nodb_binding ORDER BY id",
             [],
             options,
             function(err, result) {
@@ -493,7 +493,7 @@ describe('4. binding.js', function() {
           should.not.exist(err);
           result.rowsAffected.should.be.exactly(1);
           connection.execute(
-            "SELECT * FROM nodb_binding",
+            "SELECT * FROM nodb_binding ORDER BY num",
             [],
             options,
             function(err, result) {
@@ -517,7 +517,7 @@ describe('4. binding.js', function() {
           //console.log(result);
           result.outBinds.should.eql({ '3': [123] });
           connection.execute(
-            "SELECT * FROM nodb_binding",
+            "SELECT * FROM nodb_binding ORDER BY num",
             [],
             options,
             function(err, result) {
@@ -540,7 +540,7 @@ describe('4. binding.js', function() {
           result.rowsAffected.should.be.exactly(1);
           // console.log(result);
           connection.execute(
-            "SELECT * FROM nodb_binding",
+            "SELECT * FROM nodb_binding ORDER BY num",
             [],
             options,
             function(err, result) {
@@ -564,7 +564,7 @@ describe('4. binding.js', function() {
           // console.log(result);
           result.outBinds[0].should.eql([123]);
           connection.execute(
-            "SELECT * FROM nodb_binding",
+            "SELECT * FROM nodb_binding ORDER BY num",
             [],
             options,
             function(err, result) {
