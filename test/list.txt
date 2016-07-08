@@ -397,6 +397,12 @@ Overview of node-oracledb functional tests
     17.11 basic stress test
         17.11.1 large number of columns
 
+18. constants.js
+      18.1 dbTypes maps correctly between names and numbers
+      18.2 jsTypes maps correctly
+      18.3 binding contants maps correctly
+
+
 21. datatypeAssist.js
 
 22. dataTypeChar.js
