@@ -777,4 +777,148 @@ describe('4. binding.js', function() {
 
     })
   })
+
+  // Test cases involving JSON value as input
+  describe ('4.7 Value as JSON named/unamed test cases', function () {
+    it ( '4.7.1 valid case when numeric values are passed as it is',
+       function (done ) {
+         var sql = "SELECT SYSDATE FROM DUAL WHERE :b = 1 and :c = 456 ";
+         var binds = [ 1, 456 ];
+
+         oracledb.getConnection (
+           dbConfig,
+           function (err, connection ){
+
+             should.not.exist ( err ) ;
+             connection.execute (
+               sql,
+               binds,
+               function ( err, result ) {
+                 should.not.exist ( err );
+                 done ();
+               }
+             );
+           });
+      });
+
+    it ( '4.7.2 Valid values when one of the value is passed as JSON ',
+       function (done ) {
+         var sql = "SELECT SYSDATE FROM DUAL WHERE :b = 1 and :c = 456 ";
+         var binds = [ 1, { val : 456 } ];
+
+         oracledb.getConnection (
+           dbConfig,
+           function (err, connection ){
+
+             should.not.exist ( err ) ;
+             connection.execute (
+               sql,
+               binds,
+               function ( err, result ) {
+                 should.not.exist ( err );
+                 done ();
+               } );
+           });
+      });
+
+    it ( '4.7.3 Valid test case when one of the value is passed as JSON ',
+      function (done ) {
+        var sql = "SELECT SYSDATE FROM DUAL WHERE :b = 1 and :c = 456 ";
+        var binds = [ {val :  1}, 456 ];
+
+         oracledb.getConnection (
+           dbConfig,
+           function (err, connection ){
+
+             should.not.exist ( err ) ;
+             connection.execute (
+               sql,
+               binds,
+               function ( err, result ) {
+                 should.not.exist ( err );
+                 done ();
+               } );
+           });
+      });
+
+    it ( '4.7.4 Valid Test case when both values are passed as JSON',
+      function (done ) {
+        var sql = "SELECT SYSDATE FROM DUAL WHERE :b = 1 and :c = 456 ";
+        var binds = [ {val : 1}, {val : 456 } ];
+
+         oracledb.getConnection (
+           dbConfig,
+           function (err, connection ){
+
+             should.not.exist ( err ) ;
+             connection.execute (
+               sql,
+               binds,
+               function ( err, result ) {
+                 should.not.exist ( err );
+                 done ();
+               } );
+           });
+      });
+
+    it ( '4.7.5 Invalid Test case when value is passed as named JSON',
+      function (done ) {
+        var sql = "SELECT SYSDATE FROM DUAL WHERE :b = 1 and :c = 456 ";
+        var binds = [ {val : 1}, { c: {val : 456 } } ];
+
+        oracledb.getConnection (
+          dbConfig,
+          function (err, connection ){
+            should.not.exist ( err ) ;
+            connection.execute (
+              sql,
+              binds,
+              function ( err, result ) {
+                should.exist ( err );
+                (err.message).should.startWith ( 'NJS-044');
+                done ();
+             } );
+         });
+      });
+
+    it ( '4.7.6 Invalid Test case when other-value is passed as named JSON',
+      function (done ) {
+        var sql = "SELECT SYSDATE FROM DUAL WHERE :b = 1 and :c = 456 ";
+        var binds = [ { b: {val : 1} }, {val : 456 } ];
+
+        oracledb.getConnection (
+          dbConfig,
+          function (err, connection ){
+            should.not.exist ( err ) ;
+            connection.execute (
+              sql,
+              binds,
+              function ( err, result ) {
+                should.exist ( err );
+                (err.message).should.startWith ( 'NJS-044');
+                done ();
+              } );
+         });
+      });
+
+    it ( '4.7.7 Invalid Test case when all values is passed as named JSON',
+      function (done ) {
+        var sql = "SELECT SYSDATE FROM DUAL WHERE :b = 1 and :c = 456 ";
+        var binds = [ { b: {val : 1} }, { c: {val : 456 } } ];
+
+        oracledb.getConnection (
+          dbConfig,
+          function (err, connection ){
+            should.not.exist ( err ) ;
+            connection.execute (
+              sql,
+              binds,
+              function ( err, result ) {
+                should.exist ( err );
+                (err.message).should.startWith ( 'NJS-044');
+                done ();
+              } );
+          });
+      });
+  });
 })

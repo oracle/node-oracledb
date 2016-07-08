@@ -724,14 +724,17 @@ void Connection::GetBindUnit (Local<Value> val, Bind* bind, bool array,
 
     if ( array )
     {
-      // In case of array binds, JSON objects are expected to be unnamed.
-      // Named json object gets confused as we look for "dir", "type",
-      // "maxSize"  key words, but "name" will not match.
-      // Array binds syntax
+      // In case of bind-by-position, JSON objects are expected to be unnamed.
+      // If JSON object is provided, we look for "dir", "type", "maxSize",
+      // "val"  key names.  If not found report error
+      // values provided as in Array syntax - working case.
       //    [ id, name, {type : oracledb.STRING, dir : oracledb.BIND_OUT}]
-      // the 3rd parameter is unnamed JSON object.
+      // In this example the 3rd parameter is unnamed JSON object.
+      //
       // [ id, n, { a: { type : oracledb.STRING, dir : oracledb.BIND_OUT} }]
-      // will fail now.
+      // will fail now.  In this example the third parameter JSON object has
+      // a key with name "a" and value as another JSON.  Incorrect syntax
+      //
       Local<Array> keys = bind_unit->GetOwnPropertyNames ();
       if ( keys->Length () > 0 )
       {
@@ -747,7 +750,8 @@ void Connection::GetBindUnit (Local<Value> val, Bind* bind, bool array,
 
           if ( ( key.compare ( "dir" ) == 0 ) ||
                ( key.compare ( "type" ) == 0 ) ||
-               ( key.compare ( "maxSize" ) == 0 ) )
+               ( key.compare ( "maxSize" ) == 0 ) ||
+               ( key.compare ( "val" ) == 0 ) )
           {
             valid = true;
           }
