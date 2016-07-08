@@ -101,11 +101,15 @@ Node Promises can also be used.
 
 See [Documentation for the Oracle Database Node.js Add-on](https://github.com/oracle/node-oracledb/tree/master/doc/api.md).
 
+## <a name="help"></a> Help
+
+Issues and questions can be raised with the node-oracledb community on [GitHub](https://github.com/oracle/node-oracledb/issues).
+
 ## <a name="changes"></a> Changes
 
-See [CHANGELOG](https://github.com/oracle/node-oracledb/tree/master/CHANGELOG.md)
+See [CHANGELOG](https://github.com/oracle/node-oracledb/tree/master/CHANGELOG.md).
 
-## <a name="testing"></a> Test Suite
+## <a name="testing"></a> Tests
 
 To run the test suite see [test/README](https://github.com/oracle/node-oracledb/tree/master/test/README.md).
 
