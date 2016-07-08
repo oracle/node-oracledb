@@ -1,5 +1,44 @@
 # Change Log
 
+## node-oracledb v1.10.0 (8 Jul 2016)
+
+- Enhanced query and REF CURSOR metadata is available when a new
+  `oracledb.extendedMetaData` or `execute()` option `extendedMetaData`
+  property is `true`. (Leonardo Olmi).
+
+- Fixed an issue preventing the garbage collector cleaning up when a
+  query with LOBs is executed but LOB data isn't actually streamed.
+
+- Fixed a bug where an error event could have been emitted on a
+  QueryStream instance prior to the underlying ResultSet having been
+  closed.  This would cause problems if the user tried to close the
+  connection in the error event handler as the ResultSet could have
+  prevented it.
+
+- Fixed a bug where the public `close()` method was invoked on the
+  ResultSet instance that underlies the QueryStream instance if an
+  error occurred during a call to `getRows()`. The public method would
+  have thrown an error had the QueryStream instance been created from
+  a ResultSet instance via the `toQueryStream()` method. Now the
+  underlying C++ layer's `close()` method is invoked directly.
+
+- Updated `Pool._logStats()` to throw an error instead of printing to
+  the console if the pool is not valid.
+
+- Report an error earlier when a named bind object is used in a
+  bind-by-position context.  A new error NJS-044 is returned.
+  Previously errors like ORA-06502 were given.
+
+- Added GitHub Issue and Pull Request templates.
+
+- Some enhancements were made to the underlying DPI data access layer.
+  **These are not exposed to node-oracledb users.**
+
+   - Allow <code>SYSDBA</code> connections
+   - Allow session tagging
+   - Allow the character set and national character set to be specified via parameters to the DPI layer.
+   - Support heterogeneous pools (in addition to existing homogeneous pools)
+
 ## node-oracledb v1.9.3 (24 May 2016)
 
 - Fix error with `OCI_ERROR_MAXMSG_SIZE2` when building with Oracle client 11.2.0.1 and 11.2.0.2.
