@@ -312,7 +312,7 @@ describe('4. binding.js', function() {
         function(err, result) {
           should.not.exist(err);
           // console.log(result);
-          result.outBinds.n.should.be.a.String;
+          result.outBinds.n.should.be.a.String();
           result.outBinds.n.should.eql('1001');
           done();
         }

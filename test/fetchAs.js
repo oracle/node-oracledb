@@ -82,7 +82,7 @@ describe('56. fetchAs.js', function() {
       function(err, result) {
         should.not.exist(err);
         // console.log(result.rows[0]);
-        result.rows[0].TS_DATE.should.be.a.String;
+        result.rows[0].TS_DATE.should.be.a.String();
         done();
       }
     );
@@ -103,8 +103,8 @@ describe('56. fetchAs.js', function() {
       function(err, result) {
         should.not.exist(err);
         // console.log(result.rows[0]);
-        result.rows[0].TS_DATE.should.be.a.String;
-        result.rows[0].TS_NUM.should.be.a.String;
+        result.rows[0].TS_DATE.should.be.a.String();
+        result.rows[0].TS_NUM.should.be.a.String();
         Number(result.rows[0].TS_NUM).should.equal(1234567);
         done();
       }
@@ -128,8 +128,8 @@ describe('56. fetchAs.js', function() {
       function(err, result) {
         should.not.exist(err);
         // console.log(result.rows[0]);
-        result.rows[0].TS_DATE.should.be.a.String;
-        result.rows[0].TS_NUM.should.be.a.String;
+        result.rows[0].TS_DATE.should.be.a.String();
+        result.rows[0].TS_NUM.should.be.a.String();
         Number(result.rows[0].TS_NUM).should.equal(1234567);
         done();
       }
@@ -154,7 +154,7 @@ describe('56. fetchAs.js', function() {
         should.not.exist(err);
         // console.log(result.rows[0]);
         result.rows[0].TS_DATE.should.be.an.Object;
-        result.rows[0].TS_NUM.should.be.a.String;
+        result.rows[0].TS_NUM.should.be.a.String();
         Number(result.rows[0].TS_NUM).should.equal(1234567);
         done();
       }
@@ -175,7 +175,7 @@ describe('56. fetchAs.js', function() {
       function(err, result) {
         should.not.exist(err);
         // console.log(result.rows[0].TS_DATA);
-        result.rows[0].ROWID.should.be.a.String;
+        result.rows[0].ROWID.should.be.a.String();
         done();
       }
     );
@@ -199,7 +199,7 @@ describe('56. fetchAs.js', function() {
         result.resultSet.getRow( function(err, row) {
           should.not.exist(err);
           // console.log(row);
-          row.ROWID.should.be.a.String;
+          row.ROWID.should.be.a.String();
           result.resultSet.close( function(err) {
             should.not.exist(err);
             done();
@@ -247,7 +247,7 @@ describe('56. fetchAs.js', function() {
         },
         function(err, result) {
           should.not.exist(err);
-          result.rows[0].TS_NUM.should.be.a.String;
+          result.rows[0].TS_NUM.should.be.a.String();
           (result.rows[0].TS_NUM).should.eql(numResults[numStrs.indexOf(element)]);
           callback();
         }
@@ -269,7 +269,7 @@ describe('56. fetchAs.js', function() {
         function(err, result) {
           should.not.exist(err);
           // console.log(result.rows[0].TS_NUM);
-          result.rows[0].TS_NUM.should.be.a.String;
+          result.rows[0].TS_NUM.should.be.a.String();
           (result.rows[0].TS_NUM).should.eql(numResults[numStrs.indexOf(element)]);
           callback();
         }

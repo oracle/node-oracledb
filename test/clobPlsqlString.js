@@ -108,7 +108,7 @@ describe('60. clobPlsqlString.js', function() {
         },
         function(err, result) {
           should.not.exist(err);
-          (result.outBinds.cbv).should.be.a.String;
+          (result.outBinds.cbv).should.be.a.String();
           (result.outBinds.cbv).should.eql('abcdefghijklmnopqrstuvwxyz');
           done();
         }

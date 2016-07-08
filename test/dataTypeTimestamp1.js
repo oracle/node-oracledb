@@ -148,7 +148,7 @@ describe('33. dataTypeTimestamp1.js', function() {
         options,
         function(err, result) {
           should.not.exist(err);
-          (result.outBinds.bv).should.be.a.String;
+          (result.outBinds.bv).should.be.a.String();
           done();
         }
       );

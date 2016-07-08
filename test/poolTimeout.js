@@ -76,11 +76,11 @@ describe('11. poolTimeout.js', function(){
   it('11.1 pool terminates idle connections after specify time', function(done){
     pool.should.be.ok();
     if(!dbConfig.externalAuth){
-      pool.connectionsOpen.should.be.exactly(1).and.be.a.Number;
+      pool.connectionsOpen.should.be.exactly(1).and.be.a.Number();
     } else {
       pool.connectionsOpen.should.be.exactly(0);
     }
-    pool.connectionsInUse.should.be.exactly(0).and.be.a.Number;
+    pool.connectionsInUse.should.be.exactly(0).and.be.a.Number();
 
     var conn1 = null;
     var conn2 = null;
