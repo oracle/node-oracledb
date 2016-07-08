@@ -90,12 +90,12 @@ describe('3. examples.js', function(){
       var script1 =
         "BEGIN \
             DECLARE \
-                e_table_exists EXCEPTION; \
-                PRAGMA EXCEPTION_INIT(e_table_exists, -00942); \
+                e_table_missing EXCEPTION; \
+                PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \
             BEGIN \
                 EXECUTE IMMEDIATE ('DROP TABLE nodb_departments'); \
             EXCEPTION \
-                WHEN e_table_exists \
+                WHEN e_table_missing \
                 THEN NULL; \
             END; \
             EXECUTE IMMEDIATE (' \
@@ -144,12 +144,12 @@ describe('3. examples.js', function(){
       var script2 =
         "BEGIN \
             DECLARE \
-                e_table_exists EXCEPTION; \
-                PRAGMA EXCEPTION_INIT(e_table_exists, -00942); \
+                e_table_missing EXCEPTION; \
+                PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \
             BEGIN \
                 EXECUTE IMMEDIATE ('DROP TABLE nodb_locations'); \
             EXCEPTION \
-                WHEN e_table_exists \
+                WHEN e_table_missing \
                 THEN NULL; \
             END; \
             EXECUTE IMMEDIATE (' \
@@ -254,12 +254,12 @@ describe('3. examples.js', function(){
         var script =
           "BEGIN " +
           "   DECLARE " +
-          "       e_table_exists EXCEPTION; " +
-          "       PRAGMA EXCEPTION_INIT(e_table_exists, -00942); " +
+          "       e_table_missing EXCEPTION; " +
+          "       PRAGMA EXCEPTION_INIT(e_table_missing, -00942); " +
           "   BEGIN " +
           "       EXECUTE IMMEDIATE ('DROP TABLE nodb_purchaseorder'); " +
           "   EXCEPTION " +
-          "       WHEN e_table_exists " +
+          "       WHEN e_table_missing " +
           "       THEN NULL; " +
           "   END; " +
           "   EXECUTE IMMEDIATE (' " +
@@ -327,12 +327,12 @@ describe('3. examples.js', function(){
     var script =
       "BEGIN " +
       "   DECLARE " +
-      "       e_table_exists EXCEPTION; " +
-      "       PRAGMA EXCEPTION_INIT(e_table_exists, -00942); " +
+      "       e_table_missing EXCEPTION; " +
+      "       PRAGMA EXCEPTION_INIT(e_table_missing, -00942); " +
       "   BEGIN " +
       "       EXECUTE IMMEDIATE ('DROP TABLE nodb_testdate'); " +
       "   EXCEPTION " +
-      "       WHEN e_table_exists " +
+      "       WHEN e_table_missing " +
       "       THEN NULL; " +
       "   END; " +
       "   EXECUTE IMMEDIATE (' " +
@@ -424,12 +424,12 @@ describe('3. examples.js', function(){
     var createTable =
       "BEGIN \
           DECLARE \
-              e_table_exists EXCEPTION; \
-              PRAGMA EXCEPTION_INIT(e_table_exists, -00942); \
+              e_table_missing EXCEPTION; \
+              PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \
           BEGIN \
               EXECUTE IMMEDIATE ('DROP TABLE nodb_employees'); \
           EXCEPTION \
-              WHEN e_table_exists \
+              WHEN e_table_missing \
               THEN NULL; \
           END; \
           EXECUTE IMMEDIATE (' \
@@ -633,12 +633,12 @@ describe('3. examples.js', function(){
     var script =
       "BEGIN " +
       "   DECLARE " +
-      "       e_table_exists EXCEPTION; " +
-      "       PRAGMA EXCEPTION_INIT(e_table_exists, -00942); " +
+      "       e_table_missing EXCEPTION; " +
+      "       PRAGMA EXCEPTION_INIT(e_table_missing, -00942); " +
       "   BEGIN " +
       "       EXECUTE IMMEDIATE ('DROP TABLE nodb_testinsert'); " +
       "   EXCEPTION " +
-      "       WHEN e_table_exists " +
+      "       WHEN e_table_missing " +
       "       THEN NULL; " +
       "   END; " +
       "   EXECUTE IMMEDIATE (' " +
@@ -726,12 +726,12 @@ describe('3. examples.js', function(){
     var script =
       "BEGIN " +
       "   DECLARE " +
-      "       e_table_exists EXCEPTION; " +
-      "       PRAGMA EXCEPTION_INIT(e_table_exists, -00942); " +
+      "       e_table_missing EXCEPTION; " +
+      "       PRAGMA EXCEPTION_INIT(e_table_missing, -00942); " +
       "   BEGIN " +
       "       EXECUTE IMMEDIATE ('DROP TABLE nodb_testcommit'); " +
       "   EXCEPTION " +
-      "       WHEN e_table_exists " +
+      "       WHEN e_table_missing " +
       "       THEN NULL; " +
       "   END; " +
       "   EXECUTE IMMEDIATE (' " +
@@ -832,12 +832,12 @@ describe('3. examples.js', function(){
     var createTable =
       "BEGIN \
           DECLARE \
-              e_table_exists EXCEPTION; \
-              PRAGMA EXCEPTION_INIT(e_table_exists, -00942); \
+              e_table_missing EXCEPTION; \
+              PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \
           BEGIN \
               EXECUTE IMMEDIATE ('DROP TABLE nodb_employees'); \
           EXCEPTION \
-              WHEN e_table_exists \
+              WHEN e_table_missing \
               THEN NULL; \
           END; \
           EXECUTE IMMEDIATE (' \
@@ -963,12 +963,12 @@ describe('3. examples.js', function(){
     var script =
         "BEGIN \
             DECLARE \
-                e_table_exists EXCEPTION; \
-                PRAGMA EXCEPTION_INIT(e_table_exists, -00942); \
+                e_table_missing EXCEPTION; \
+                PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \
             BEGIN \
                 EXECUTE IMMEDIATE ('DROP TABLE nodb_employees'); \
             EXCEPTION \
-                WHEN e_table_exists \
+                WHEN e_table_missing \
                 THEN NULL; \
             END; \
             EXECUTE IMMEDIATE (' \

@@ -56,12 +56,12 @@ describe('65. uninitializedLob.js', function() {
       function createTab(callback) {
         var proc =  "BEGIN \n" +
                     "  DECLARE \n" +
-                    "    e_table_exists EXCEPTION; \n" +
-                    "    PRAGMA EXCEPTION_INIT(e_table_exists, -00942);\n " +
+                    "    e_table_missing EXCEPTION; \n" +
+                    "    PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n " +
                     "   BEGIN \n" +
                     "     EXECUTE IMMEDIATE ('DROP TABLE nodb_lobdpi'); \n" +
                     "   EXCEPTION \n" +
-                    "     WHEN e_table_exists \n" +
+                    "     WHEN e_table_missing \n" +
                     "     THEN NULL; \n" +
                     "   END; \n" +
                     "   EXECUTE IMMEDIATE (' \n" +

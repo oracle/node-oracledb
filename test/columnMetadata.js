@@ -61,12 +61,12 @@ describe('9. columnMetadata.js', function(){
     beforeEach('create the table', function(done) {
       var proc = "BEGIN \n" +
                  "    DECLARE \n" +
-                 "        e_table_exists EXCEPTION; \n" +
-                 "        PRAGMA EXCEPTION_INIT(e_table_exists, -00942);\n " +
+                 "        e_table_missing EXCEPTION; \n" +
+                 "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n " +
                  "    BEGIN \n" +
                  "        EXECUTE IMMEDIATE ('DROP TABLE nodb_departments'); \n" +
                  "    EXCEPTION \n" +
-                 "        WHEN e_table_exists \n" +
+                 "        WHEN e_table_missing \n" +
                  "        THEN NULL; \n" +
                  "    END; \n" +
                  "    EXECUTE IMMEDIATE (' \n" +
@@ -302,12 +302,12 @@ describe('9. columnMetadata.js', function(){
 
           var proc = "BEGIN \n" +
                      "    DECLARE \n" +
-                     "        e_table_exists EXCEPTION; \n" +
-                     "        PRAGMA EXCEPTION_INIT(e_table_exists, -00942);\n " +
+                     "        e_table_missing EXCEPTION; \n" +
+                     "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n " +
                      "    BEGIN \n" +
                      "        EXECUTE IMMEDIATE ('DROP TABLE nodb_casesensitive'); \n" +
                      "    EXCEPTION \n" +
-                     "        WHEN e_table_exists \n" +
+                     "        WHEN e_table_missing \n" +
                      "        THEN NULL; \n" +
                      "    END; \n" +
                      "    EXECUTE IMMEDIATE (' \n" +
@@ -414,12 +414,12 @@ describe('9. columnMetadata.js', function(){
       var sqlCreate =
           "BEGIN \n" +
           "   DECLARE \n" +
-          "       e_table_exists EXCEPTION; \n" +
-          "       PRAGMA EXCEPTION_INIT(e_table_exists, -00942); \n" +
+          "       e_table_missing EXCEPTION; \n" +
+          "       PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
           "   BEGIN \n" +
           "       EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " '); \n" +
           "   EXCEPTION \n" +
-          "       WHEN e_table_exists \n" +
+          "       WHEN e_table_missing \n" +
           "       THEN NULL; \n" +
           "   END; \n" +
           "   EXECUTE IMMEDIATE (' \n" +
