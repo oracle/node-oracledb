@@ -65,9 +65,9 @@ describe('14. stream2.js', function() {
                    "    END; \n" +
                    "    EXECUTE IMMEDIATE (' \n" +
                    "        CREATE TABLE nodb_employees ( \n" +
-                   "            employees_id NUMBER, \n" +
-                   "            employees_name VARCHAR2(20), \n" +
-                   "            employees_history CLOB \n" +
+                   "            employee_id NUMBER, \n" +
+                   "            employee_name VARCHAR2(20), \n" +
+                   "            employee_history CLOB \n" +
                    "        ) \n" +
                    "    '); \n" +
                    "END; ";
@@ -89,7 +89,7 @@ describe('14. stream2.js', function() {
                    "    FOR i IN 1..217 LOOP \n" +
                    "        x := x + 1; \n" +
                    "        n := 'staff ' || x; \n" +
-                   "        INSERT INTO nodb_employees VALUES (x, n, EMPTY_CLOB()) RETURNING employees_history INTO clobData; \n" +
+                   "        INSERT INTO nodb_employees VALUES (x, n, EMPTY_CLOB()) RETURNING employee_history INTO clobData; \n" +
                    "        DBMS_LOB.WRITE(clobData, 20, 1, '12345678901234567890'); \n" +
                    "    END LOOP; \n" +
                    "end; ";
@@ -125,8 +125,37 @@ describe('14. stream2.js', function() {
     ], done);
   }) // after
 
-  it('14.1 Bind by position and return an array', function(done) {
-    var sql = 'SELECT employees_name FROM nodb_employees WHERE employees_id = :1';
+  it('14.1 meta data event', function(done) {
+    var sql = 'SELECT * FROM nodb_employees ORDER BY employee_id';
+    var stream = connection.queryStream(sql);
+
+    var metaDataRead = false;
+    stream.on('metadata', function(metaData) {
+      should.deepEqual(
+        metaData,
+        [ { name: 'EMPLOYEE_ID' },
+          { name: 'EMPLOYEE_NAME' },
+          { name: 'EMPLOYEE_HISTORY' } ]
+      );
+      metaDataRead = true;
+    });
+
+    stream.on('error', function(error) {
+      should.not.exist(error);
+    });
+
+    stream.on('data', function(data) {
+      should.exist(data);
+      should.equal(metaDataRead, true);
+    });
+
+    stream.on('end', function() {
+      setTimeout(done, 500);
+    });
+  })
+
+  it('14.2 Bind by position and return an array', function(done) {
+    var sql = 'SELECT employee_name FROM nodb_employees WHERE employee_id = :1';
     var stream = connection.queryStream(sql, [40]);
 
     stream.on('error', function(error) {
@@ -141,10 +170,10 @@ describe('14. stream2.js', function() {
     stream.on('end', function() {
       setTimeout(done, 500);
     });
-  }) // 14.1
+  })
 
-  it('14.2 Bind by name and return an array', function(done) {
-    var sql = 'SELECT employees_name FROM nodb_employees WHERE employees_id = :id';
+  it('14.3 Bind by name and return an array', function(done) {
+    var sql = 'SELECT employee_name FROM nodb_employees WHERE employee_id = :id';
     var stream = connection.queryStream(sql, {id: 40});
 
     stream.on('error', function(error) {
@@ -159,10 +188,10 @@ describe('14. stream2.js', function() {
     stream.on('end', function() {
       setTimeout(done, 500);
     });
-  }) // 14.2
+  })
 
-  it('14.3 Bind by position and return an object', function(done) {
-    var sql = 'SELECT employees_name FROM nodb_employees WHERE employees_id = :1';
+  it('14.4 Bind by position and return an object', function(done) {
+    var sql = 'SELECT employee_name FROM nodb_employees WHERE employee_id = :1';
     var stream = connection.queryStream(sql, [40], {outFormat: oracledb.OBJECT});
 
     stream.on('error', function(error) {
@@ -171,16 +200,16 @@ describe('14. stream2.js', function() {
 
     stream.on('data', function(data) {
       should.exist(data);
-      (data.EMPLOYEES_NAME).should.eql('staff 40');
+      (data.EMPLOYEE_NAME).should.eql('staff 40');
     });
 
     stream.on('end', function() {
       setTimeout(done, 500);
     });
-  }) // 14.3
+  })
 
-  it('14.4 Bind by name and return an object', function(done) {
-    var sql = 'SELECT employees_name FROM nodb_employees WHERE employees_id = :id';
+  it('14.5 Bind by name and return an object', function(done) {
+    var sql = 'SELECT employee_name FROM nodb_employees WHERE employee_id = :id';
     var stream = connection.queryStream(sql, {id: 40}, {outFormat: oracledb.OBJECT});
 
     stream.on('error', function(error) {
@@ -189,16 +218,16 @@ describe('14. stream2.js', function() {
 
     stream.on('data', function(data) {
       should.exist(data);
-      (data.EMPLOYEES_NAME).should.eql('staff 40');
+      (data.EMPLOYEE_NAME).should.eql('staff 40');
     });
 
     stream.on('end', function() {
       setTimeout(done, 500);
     });
-  }) // 14.4
+  })
 
-  it('14.5 explicitly set resultSet option to be false', function(done) {
-    var sql = 'SELECT employees_name FROM nodb_employees WHERE employees_id = :1';
+  it('14.6 explicitly setting resultSet option to be false takes no effect', function(done) {
+    var sql = 'SELECT employee_name FROM nodb_employees WHERE employee_id = :1';
     var stream = connection.queryStream(sql, [40], {resultSet: false});
 
     stream.on('error', function(error) {
@@ -213,10 +242,10 @@ describe('14. stream2.js', function() {
     stream.on('end', function() {
       setTimeout(done, 500);
     });
-  }) // 14.5
+  })
 
-  it('14.6 maxRows option is ignored as expect', function(done) {
-    var sql = 'SELECT employees_name FROM nodb_employees';
+  it('14.7 maxRows option is ignored as expect', function(done) {
+    var sql = 'SELECT employee_name FROM nodb_employees ORDER BY employee_name';
     var stream = connection.queryStream(sql, [], {maxRows: 50});
 
     stream.on('error', function(error) {
@@ -234,9 +263,9 @@ describe('14. stream2.js', function() {
       setTimeout(done, 500);
     });
 
-  }) // 14.6
+  })
 
-  it('14.7 Negative - queryStream() has no parameters', function(done) {
+  it('14.8 Negative - queryStream() has no parameters', function(done) {
     var stream;
 
     try {
@@ -249,7 +278,7 @@ describe('14. stream2.js', function() {
     }
   })
 
-  it('14.8 Negative - give invalid SQL as first parameter', function(done) {
+  it('14.9 Negative - give invalid SQL as first parameter', function(done) {
     var stream = connection.queryStream('foobar');
 
     stream.on('error', function(error) {
@@ -264,7 +293,7 @@ describe('14. stream2.js', function() {
     });
   })
 
-  it('14.9 Negatvie - give non-query SQL', function(done) {
+  it('14.10 Negatvie - give non-query SQL', function(done) {
     var sql = "INSERT INTO nodb_employees VALUES (300, 'staff 300', EMPTY_CLOB())";
     var stream = connection.queryStream(sql);
 
