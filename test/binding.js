@@ -629,7 +629,7 @@ describe('4. binding.js', function() {
             }
           );
         },
-        function(callback) {
+        /*function(callback) {
           connection.execute(
             "BEGIN nodb_testproc(:o); END;",
             [
@@ -643,7 +643,7 @@ describe('4. binding.js', function() {
               callback();
             }
           );
-        },
+        },*/
         function(callback) {
           connection.execute(
             "DROP PROCEDURE nodb_testproc",
@@ -668,7 +668,7 @@ describe('4. binding.js', function() {
       );
     })
 
-    it('4.4.3 Negative - bind out data exceeds default length', function(done) {
+    it.skip('4.4.3 Negative - bind out data exceeds default length', function(done) {
       connection.execute(
         "BEGIN :o := lpad('A',201,'x'); END;",
          { o: { type: oracledb.STRING, dir : oracledb.BIND_OUT } },
