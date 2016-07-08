@@ -4100,8 +4100,10 @@ statement is executed irrespective of the value of `autoCommit`.
 
 Node-oracledb's [`execute()`](#execute) method uses the
 [Oracle OCI statement cache](https://docs.oracle.com/database/121/LNOCI/oci09adv.htm#i471377)
-instead of requiring applications to prepare, execute (and then
-re-execute without re-preparing) statements in separate steps.
+to make re-execution of statements efficient.  This cache removes the
+need for a separate 'prepare' method which is sometimes seen in other
+Oracle APIs: there is no separate 'prepare' method in node-oracledb.
+
 Each non-pooled connection and each session in the connection pool has
 its own cache of statements with a default size of 30.  Statement
 caching lets cursors be used without re-parsing the statement.
