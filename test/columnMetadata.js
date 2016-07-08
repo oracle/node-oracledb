@@ -58,19 +58,19 @@ describe('9. columnMetadata.js', function(){
 
   describe('9.1 tests with the same table', function() {
 
-    beforeEach('create the table', function(done) {
+    before('create the table', function(done) {
       var proc = "BEGIN \n" +
                  "    DECLARE \n" +
                  "        e_table_missing EXCEPTION; \n" +
                  "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n " +
                  "    BEGIN \n" +
-                 "        EXECUTE IMMEDIATE ('DROP TABLE nodb_departments'); \n" +
+                 "        EXECUTE IMMEDIATE ('DROP TABLE nodb_cmd'); \n" +
                  "    EXCEPTION \n" +
                  "        WHEN e_table_missing \n" +
                  "        THEN NULL; \n" +
                  "    END; \n" +
                  "    EXECUTE IMMEDIATE (' \n" +
-                 "        CREATE TABLE nodb_departments ( \n" +
+                 "        CREATE TABLE nodb_cmd ( \n" +
                  "            department_id NUMBER,  \n" +
                  "            department_name VARCHAR2(20), \n" +
                  "            manager_id NUMBER, \n" +
@@ -78,15 +78,15 @@ describe('9. columnMetadata.js', function(){
                  "        ) \n" +
                  "    '); \n" +
                  "    EXECUTE IMMEDIATE (' \n" +
-                 "        INSERT INTO nodb_departments VALUES \n" +
+                 "        INSERT INTO nodb_cmd VALUES \n" +
                  "        (40,''Human Resources'', 203, 2400) \n" +
                  "    '); \n" +
                  "    EXECUTE IMMEDIATE (' \n" +
-                 "        INSERT INTO nodb_departments VALUES \n" +
+                 "        INSERT INTO nodb_cmd VALUES \n" +
                  "        (50,''Shipping'', 121, 1500) \n" +
                  "    '); \n" +
                  "    EXECUTE IMMEDIATE (' \n" +
-                 "        INSERT INTO nodb_departments VALUES \n" +
+                 "        INSERT INTO nodb_cmd VALUES \n" +
                  "        (90, ''Executive'', 100, 1700) \n" +
                  "    '); \n" +
                  "END; ";
@@ -98,22 +98,22 @@ describe('9. columnMetadata.js', function(){
           done();
         }
       );
-    }) // beforeEach
+    }) // before
 
-    afterEach(function(done) {
+    after(function(done) {
       connection.execute(
-        "DROP TABLE nodb_departments",
+        "DROP TABLE nodb_cmd",
         function(err) {
           should.not.exist(err);
           done();
         }
       );
-    }) // afterEach
+    }) // after
 
     it('9.1.1 shows metaData correctly when retrieving 1 column from a 4-column table', function(done){
 
       connection.execute(
-        "SELECT location_id FROM nodb_departments WHERE department_id = :did",
+        "SELECT location_id FROM nodb_cmd WHERE department_id = :did",
         [50],
         function(err, result){
           should.not.exist(err);
@@ -127,7 +127,7 @@ describe('9. columnMetadata.js', function(){
     it('9.1.2 shows metaData when retrieving 2 columns. MetaData is correct in content and sequence', function(done){
 
       connection.execute(
-        "SELECT department_id, department_name FROM nodb_departments WHERE location_id = :lid",
+        "SELECT department_id, department_name FROM nodb_cmd WHERE location_id = :lid",
         [1700],
         function(err, result){
           should.not.exist(err);
@@ -142,7 +142,7 @@ describe('9. columnMetadata.js', function(){
     it('9.1.3 shows metaData correctly when retrieve 3 columns', function(done){
 
       connection.execute(
-        "SELECT department_id, department_name, manager_id FROM nodb_departments WHERE location_id = :lid",
+        "SELECT department_id, department_name, manager_id FROM nodb_cmd WHERE location_id = :lid",
         [2400],
         function(err, result){
           should.not.exist(err);
@@ -158,7 +158,7 @@ describe('9. columnMetadata.js', function(){
     it('9.1.4 shows metaData correctly when retrieving all columns with [SELECT * FROM table] statement', function(done){
 
       connection.execute(
-        "SELECT * FROM nodb_departments ORDER BY department_id",
+        "SELECT * FROM nodb_cmd ORDER BY department_id",
         function(err, result){
           should.not.exist(err);
           result.rows.length.should.be.exactly(3);
@@ -175,7 +175,7 @@ describe('9. columnMetadata.js', function(){
     it('9.1.5 works for SELECT count(*)', function(done){
 
       connection.execute(
-        "SELECT count(*) FROM nodb_departments",
+        "SELECT count(*) FROM nodb_cmd",
         function(err, result){
           should.not.exist(err);
           result.rows[0][0].should.be.exactly(3);
@@ -189,7 +189,7 @@ describe('9. columnMetadata.js', function(){
     it('9.1.6 works when a query returns no rows', function(done){
 
       connection.execute(
-        "SELECT * FROM nodb_departments WHERE department_id = :did",
+        "SELECT * FROM nodb_cmd WHERE department_id = :did",
         [100],
         function(err, result){
           should.not.exist(err);
@@ -206,14 +206,14 @@ describe('9. columnMetadata.js', function(){
     it('9.1.7 only works for SELECT statement, does not work for INSERT', function(done){
 
       connection.execute(
-        "INSERT INTO nodb_departments VALUES (99, 'FACILITY', 456, 1700)",
+        "INSERT INTO nodb_cmd VALUES (99, 'FACILITY', 456, 1700)",
         function(err, result){
           should.not.exist(err);
           (result.rowsAffected).should.be.exactly(1);
           should.not.exist(result.metaData);
 
           connection.execute(
-            'SELECT * FROM nodb_departments WHERE department_id = :1',
+            'SELECT * FROM nodb_cmd WHERE department_id = :1',
             [99],
             function(err, result){
               should.not.exist(err);
@@ -234,7 +234,7 @@ describe('9. columnMetadata.js', function(){
     it('9.1.8 only works for SELECT statement, does not work for UPDATE', function(done){
 
       connection.execute(
-        "UPDATE nodb_departments SET department_name = 'Finance' WHERE department_id = :did",
+        "UPDATE nodb_cmd SET department_name = 'Finance' WHERE department_id = :did",
         { did: 40 },
         function(err, result){
           should.not.exist(err);
@@ -242,7 +242,7 @@ describe('9. columnMetadata.js', function(){
           should.not.exist(result.metaData);
 
           connection.execute(
-            "SELECT department_name FROM nodb_departments WHERE department_id = :1",
+            "SELECT department_name FROM nodb_cmd WHERE department_id = :1",
             [40],
             function(err, result){
               should.not.exist(err);
@@ -259,7 +259,7 @@ describe('9. columnMetadata.js', function(){
     it('9.1.9 works with a SQL WITH statement', function(done){
 
       var sqlWith = "WITH nodb_dep AS " +
-                    "(SELECT * FROM nodb_departments WHERE location_id < 2000) " +
+                    "(SELECT * FROM nodb_cmd WHERE location_id < 2000) " +
                     "SELECT * FROM nodb_dep WHERE department_id > 50 ORDER BY department_id";
 
       connection.execute(
@@ -278,7 +278,7 @@ describe('9. columnMetadata.js', function(){
 
     it('9.1.10 displays metaData correctly with result set', function(done) {
       connection.execute(
-        "SELECT * FROM nodb_departments ORDER BY department_id",
+        "SELECT * FROM nodb_cmd ORDER BY department_id",
         [],
         { resultSet: true },
         function(err, result) {

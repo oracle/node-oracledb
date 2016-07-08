@@ -41,7 +41,7 @@ var dbConfig = require('./dbconfig.js');
 describe('55. resultSet2.js', function() {
 
   var connection = null;
-  var tableName = "nodb_employees";
+  var tableName = "nodb_rs2_emp";
   var rowsAmount = 300;
 
   before('get one connection', function(done) {
@@ -104,7 +104,7 @@ describe('55. resultSet2.js', function() {
       connection.should.be.ok();
       var rowCount = 0;
       connection.execute(
-        "SELECT * FROM nodb_employees WHERE employees_id > :1",
+        "SELECT * FROM nodb_rs2_emp WHERE employees_id > :1",
         [200],
         { resultSet: true },
         function(err, result) {
@@ -148,7 +148,7 @@ describe('55. resultSet2.js', function() {
       var numRows = 4;
       var flag = 1; // 1 - getRow(); 2 - getRows(); 3 - to close resultSet.
       connection.execute(
-        "SELECT * FROM nodb_employees WHERE employees_id > :1",
+        "SELECT * FROM nodb_rs2_emp WHERE employees_id > :1",
         [200],
         { resultSet: true },
         function(err, result) {
@@ -297,7 +297,7 @@ describe('55. resultSet2.js', function() {
     it('55.4.1 result set', function(done) {
       conn2.should.be.ok();
       conn2.execute(
-        "SELECT * FROM nodb_employees ORDER BY employees_id",
+        "SELECT * FROM nodb_rs2_emp ORDER BY employees_id",
         [],
         { resultSet: true },
         function(err, result) {
@@ -340,7 +340,7 @@ describe('55. resultSet2.js', function() {
       async.series([
         function(callback) {
           connection.execute(
-            "SELECT * FROM nodb_employees ORDER BY employees_id",
+            "SELECT * FROM nodb_rs2_emp ORDER BY employees_id",
             [],
             { resultSet: true },
             function(err, result) {
@@ -352,7 +352,7 @@ describe('55. resultSet2.js', function() {
         },
         function(callback) {
           connection.execute(
-            "TRUNCATE TABLE nodb_employees",
+            "TRUNCATE TABLE nodb_rs2_emp",
             [],
             { autoCommit: true },
             function(err) {
@@ -431,7 +431,7 @@ describe('55. resultSet2.js', function() {
       connection.should.be.ok();
 
       connection.execute(
-        "SELECT * FROM nodb_employees ORDER BY employees_id",
+        "SELECT * FROM nodb_rs2_emp ORDER BY employees_id",
         [],
         { resultSet: true },
         function(err, result) {
@@ -543,7 +543,7 @@ describe('55. resultSet2.js', function() {
       async.parallel([
         function(callback) {
           connection.execute(
-            "SELECT * FROM nodb_employees ORDER BY employees_id",
+            "SELECT * FROM nodb_rs2_emp ORDER BY employees_id",
             [],
             { resultSet: true },
             function(err, result) {
@@ -554,7 +554,7 @@ describe('55. resultSet2.js', function() {
         },
         function(callback) {
           connection.execute(
-            "SELECT * FROM nodb_employees ORDER BY employees_id",
+            "SELECT * FROM nodb_rs2_emp ORDER BY employees_id",
             [],
             { resultSet: true },
             function(err, result) {
@@ -618,7 +618,7 @@ describe('55. resultSet2.js', function() {
     it('55.8.1 resultSet cannot be returned for non-query statements', function(done) {
       connection.should.be.ok();
       connection.execute(
-        "UPDATE nodb_employees SET employees_name = 'Alan' WHERE employees_id = 100",
+        "UPDATE nodb_rs2_emp SET employees_name = 'Alan' WHERE employees_id = 100",
         [],
         { resultSet: true },
         function(err, result) {
@@ -715,7 +715,7 @@ describe('55. resultSet2.js', function() {
       var numRows = 10;
       var closeRS = true;
       connection.execute(
-        "SELECT * FROM nodb_employees ORDER BY employees_id",
+        "SELECT * FROM nodb_rs2_emp ORDER BY employees_id",
         [],
         { resultSet: true },
         function(err, result) {
@@ -789,7 +789,7 @@ describe('55. resultSet2.js', function() {
 
   describe.skip('55.12 bind a cursor BIND_INOUT', function() {
 
-    before('prepare table nodb_employees', function(done) {
+    before('prepare table nodb_rs2_emp', function(done) {
       setUp(connection, tableName, done);
     })
 
@@ -803,7 +803,7 @@ describe('55. resultSet2.js', function() {
              AS \
              BEGIN \
                OPEN p_out FOR  \
-                 SELECT * FROM nodb_employees \
+                 SELECT * FROM nodb_rs2_emp \
                  WHERE employees_id > p_in; \
              END; ";
 

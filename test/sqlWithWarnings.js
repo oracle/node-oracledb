@@ -149,7 +149,7 @@ describe('64. sqlWithWarnings.js', function() {
       " CREATE OR REPLACE PROCEDURE get_emp_rs_inout " +
       "   (p_in IN NUMBER, p_out OUT SYS_REFCURSOR ) AS " +
       "  BEGIN " +
-      "    OPEN p_out FOR SELECT * FROM nodb_employees " +
+      "    OPEN p_out FOR SELECT * FROM nodb_sql_emp " +
       "  END;"
 
     it('64.2.1 Execute SQL Statement to create PLSQL procedure with warnings', function(done) {

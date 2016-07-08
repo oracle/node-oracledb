@@ -48,13 +48,13 @@ describe('10. nullColumnValues.js', function() {
                 e_table_missing EXCEPTION; \
                 PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \
             BEGIN \
-                EXECUTE IMMEDIATE ('DROP TABLE nodb_departments'); \
+                EXECUTE IMMEDIATE ('DROP TABLE nodb_nullcol_dept'); \
             EXCEPTION \
                 WHEN e_table_missing \
                 THEN NULL; \
             END; \
             EXECUTE IMMEDIATE (' \
-                CREATE TABLE nodb_departments ( \
+                CREATE TABLE nodb_nullcol_dept ( \
                     department_id NUMBER,  \
                     department_name VARCHAR2(20), \
                     manager_id NUMBER, \
@@ -62,17 +62,17 @@ describe('10. nullColumnValues.js', function() {
                 ) \
             '); \
             EXECUTE IMMEDIATE (' \
-              INSERT INTO nodb_departments  \
+              INSERT INTO nodb_nullcol_dept  \
                    VALUES \
                    (40,''Human Resources'', 203, 2400) \
             '); \
             EXECUTE IMMEDIATE (' \
-              INSERT INTO nodb_departments  \
+              INSERT INTO nodb_nullcol_dept  \
                    VALUES \
                    (50,''Shipping'', 121, 1500) \
             '); \
             EXECUTE IMMEDIATE (' \
-              INSERT INTO nodb_departments  \
+              INSERT INTO nodb_nullcol_dept  \
                    VALUES \
                    (90, ''Executive'', 100, 1700) \
             '); \
@@ -92,7 +92,7 @@ describe('10. nullColumnValues.js', function() {
 
   afterEach('drop table and release connection', function(done){
     connection.execute(
-      "DROP TABLE nodb_departments",
+      "DROP TABLE nodb_nullcol_dept",
       function(err){
         if(err) { console.error(err.message); return; }
         connection.release( function(err){
@@ -122,7 +122,7 @@ describe('10. nullColumnValues.js', function() {
     async.series([
       function(callback) {
         connection.execute(
-          "INSERT INTO nodb_departments VALUES(:did, :dname, :mid, :mname)",
+          "INSERT INTO nodb_nullcol_dept VALUES(:did, :dname, :mid, :mname)",
           {
             did: 101,
             dname: 'Facility',
@@ -138,7 +138,7 @@ describe('10. nullColumnValues.js', function() {
       },
       function(callback) {
         connection.execute(
-          "SELECT * FROM nodb_departments WHERE department_id = :did",
+          "SELECT * FROM nodb_nullcol_dept WHERE department_id = :did",
           { did: 101 },
           { outFormat: oracledb.OBJECT },
           function(err, result) {
@@ -203,7 +203,7 @@ describe('10. nullColumnValues.js', function() {
     connection.should.be.ok();
 
     connection.execute(
-      "UPDATE nodb_departments SET department_name = :dname, \
+      "UPDATE nodb_nullcol_dept SET department_name = :dname, \
         manager_id = :mid WHERE department_id = :did \
         RETURNING department_id, department_name, manager_id INTO \
         :rdid, :rdname, :rmid",
@@ -234,7 +234,7 @@ describe('10. nullColumnValues.js', function() {
     async.series([
       function(callback) {
         connection.execute(
-          "UPDATE nodb_departments SET department_name = :dname, \
+          "UPDATE nodb_nullcol_dept SET department_name = :dname, \
           manager_id = :mid WHERE department_id = :did ",
           {
             dname: '',
@@ -250,7 +250,7 @@ describe('10. nullColumnValues.js', function() {
       },
       function(callback) {
         connection.execute(
-          "SELECT * FROM nodb_departments WHERE department_id = :1",
+          "SELECT * FROM nodb_nullcol_dept WHERE department_id = :1",
           [50],
           { resultSet: true },
           function(err, result) {

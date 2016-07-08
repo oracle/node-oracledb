@@ -57,13 +57,13 @@ describe('15. resultsetToStream.js', function () {
                    "        e_table_missing EXCEPTION; \n" +
                    "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n " +
                    "    BEGIN \n" +
-                   "        EXECUTE IMMEDIATE ('DROP TABLE nodb_employees'); \n" +
+                   "        EXECUTE IMMEDIATE ('DROP TABLE nodb_rs2stream'); \n" +
                    "    EXCEPTION \n" +
                    "        WHEN e_table_missing \n" +
                    "        THEN NULL; \n" +
                    "    END; \n" +
                    "    EXECUTE IMMEDIATE (' \n" +
-                   "        CREATE TABLE nodb_employees ( \n" +
+                   "        CREATE TABLE nodb_rs2stream ( \n" +
                    "            employees_id NUMBER, \n" +
                    "            employees_name VARCHAR2(20), \n" +
                    "            employees_history CLOB \n" +
@@ -88,7 +88,7 @@ describe('15. resultsetToStream.js', function () {
                    "    FOR i IN 1..217 LOOP \n" +
                    "        x := x + 1; \n" +
                    "        n := 'staff ' || x; \n" +
-                   "        INSERT INTO nodb_employees VALUES (x, n, EMPTY_CLOB()) RETURNING employees_history INTO clobData; \n" +
+                   "        INSERT INTO nodb_rs2stream VALUES (x, n, EMPTY_CLOB()) RETURNING employees_history INTO clobData; \n" +
                    "        DBMS_LOB.WRITE(clobData, 20, 1, '12345678901234567890'); \n" +
                    "    END LOOP; \n" +
                    "end; ";
@@ -108,7 +108,7 @@ describe('15. resultsetToStream.js', function () {
     async.series([
       function(callback) {
         connection.execute(
-          "DROP TABLE nodb_employees",
+          "DROP TABLE nodb_rs2stream",
           function(err) {
             should.not.exist(err);
             callback();
@@ -128,7 +128,7 @@ describe('15. resultsetToStream.js', function () {
     it('15.1.1 should allow resultsets to be converted to streams', function (done) {
       connection.execute(
         'begin \n' +
-        '  open :cursor for select employees_name from nodb_employees; \n' +
+        '  open :cursor for select employees_name from nodb_rs2stream; \n' +
         'end;',
         {
           cursor:  { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
@@ -163,7 +163,7 @@ describe('15. resultsetToStream.js', function () {
     it('15.2.1 should prevent conversion to stream after getRow is invoked', function (done) {
       connection.execute(
         'begin \n' +
-        '  open :cursor for select employees_name from nodb_employees; \n' +
+        '  open :cursor for select employees_name from nodb_rs2stream; \n' +
         'end;',
         {
           cursor:  { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
@@ -195,7 +195,7 @@ describe('15. resultsetToStream.js', function () {
     it('15.2.2 should prevent conversion to stream after getRows is invoked', function (done) {
       connection.execute(
         'begin \n' +
-        '  open :cursor for select employees_name from nodb_employees; \n' +
+        '  open :cursor for select employees_name from nodb_rs2stream; \n' +
         'end;',
         {
           cursor:  { type: oracledb.CURSOR, dir : oracledb.BIND_OUT }
@@ -226,7 +226,7 @@ describe('15. resultsetToStream.js', function () {
     it('15.2.3 should prevent conversion to stream after close is invoked', function (done) {
       connection.execute(
         'begin \n' +
-        '  open :cursor for select employees_name from nodb_employees; \n' +
+        '  open :cursor for select employees_name from nodb_rs2stream; \n' +
         'end;',
         {
           cursor:  { type: oracledb.CURSOR, dir : oracledb.BIND_OUT }
@@ -254,7 +254,7 @@ describe('15. resultsetToStream.js', function () {
     it('15.2.4 should prevent invoking getRow after conversion to stream', function (done) {
       connection.execute(
         'begin \n' +
-        '  open :cursor for select employees_name from nodb_employees; \n' +
+        '  open :cursor for select employees_name from nodb_rs2stream; \n' +
         'end;',
         {
           cursor:  { type: oracledb.CURSOR, dir : oracledb.BIND_OUT }
@@ -283,7 +283,7 @@ describe('15. resultsetToStream.js', function () {
     it('15.2.5 should prevent invoking getRows after conversion to stream', function (done) {
       connection.execute(
         'begin \n' +
-        '  open :cursor for select employees_name from nodb_employees; \n' +
+        '  open :cursor for select employees_name from nodb_rs2stream; \n' +
         'end;',
         {
           cursor:  { type: oracledb.CURSOR, dir : oracledb.BIND_OUT }
@@ -311,7 +311,7 @@ describe('15. resultsetToStream.js', function () {
     it('15.2.6 should prevent invoking close after conversion to stream', function (done) {
       connection.execute(
         'begin \n' +
-        '  open :cursor for select employees_name from nodb_employees; \n' +
+        '  open :cursor for select employees_name from nodb_rs2stream; \n' +
         'end;',
         {
           cursor:  { type: oracledb.CURSOR, dir : oracledb.BIND_OUT }
@@ -339,7 +339,7 @@ describe('15. resultsetToStream.js', function () {
     it('15.2.7 should prevent calling toQueryStream more than once', function (done) {
       connection.execute(
         'begin \n' +
-        '  open :cursor for select employees_name from nodb_employees; \n' +
+        '  open :cursor for select employees_name from nodb_rs2stream; \n' +
         'end;',
         {
           cursor:  { type: oracledb.CURSOR, dir : oracledb.BIND_OUT }

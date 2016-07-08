@@ -49,24 +49,24 @@ describe('8. autoCommitForSelect.js', function(){
               e_table_missing EXCEPTION; \
               PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \
           BEGIN \
-              EXECUTE IMMEDIATE ('DROP TABLE nodb_departments'); \
+              EXECUTE IMMEDIATE ('DROP TABLE nodb_commit4_dept'); \
           EXCEPTION \
               WHEN e_table_missing \
               THEN NULL; \
           END; \
           EXECUTE IMMEDIATE (' \
-              CREATE TABLE nodb_departments ( \
+              CREATE TABLE nodb_commit4_dept ( \
                   department_id NUMBER,  \
                   department_name VARCHAR2(20) \
               ) \
           '); \
           EXECUTE IMMEDIATE (' \
-              INSERT INTO nodb_departments  \
+              INSERT INTO nodb_commit4_dept  \
                    (department_id, department_name) VALUES \
                    (40,''Human Resources'') \
           '); \
           EXECUTE IMMEDIATE (' \
-              INSERT INTO nodb_departments  \
+              INSERT INTO nodb_commit4_dept  \
                    (department_id, department_name) VALUES \
                    (20, ''Marketing'') \
           '); \
@@ -122,7 +122,7 @@ describe('8. autoCommitForSelect.js', function(){
 
   afterEach(function(done){
     connection.execute(
-        'DROP TABLE nodb_departments',
+        'DROP TABLE nodb_commit4_dept',
         function(err){
           if(err) { console.error(err.message); return; }
           done();
@@ -137,7 +137,7 @@ describe('8. autoCommitForSelect.js', function(){
     async.series([
       function(callback){
         connection.execute(
-          "INSERT INTO nodb_departments VALUES (180, 'Construction')",
+          "INSERT INTO nodb_commit4_dept VALUES (180, 'Construction')",
           function(err){
             should.not.exist(err);
             callback();
@@ -146,7 +146,7 @@ describe('8. autoCommitForSelect.js', function(){
       },
       function(callback){
         connection.execute(
-          "UPDATE nodb_departments SET department_id = 99 WHERE department_name = 'Marketing'",
+          "UPDATE nodb_commit4_dept SET department_id = 99 WHERE department_name = 'Marketing'",
           function(err){
             should.not.exist(err);
             callback();
@@ -155,7 +155,7 @@ describe('8. autoCommitForSelect.js', function(){
       },
       function(callback){
         connection.execute(
-          "SELECT * FROM nodb_departments ORDER BY department_id",
+          "SELECT * FROM nodb_commit4_dept ORDER BY department_id",
           function(err, result){
             should.not.exist(err);
             (result.rows).should.containEql([180, 'Construction']);
@@ -165,7 +165,7 @@ describe('8. autoCommitForSelect.js', function(){
       },
       function(callback){
         anotherConnection.execute(
-          "SELECT * FROM nodb_departments ORDER BY department_id",
+          "SELECT * FROM nodb_commit4_dept ORDER BY department_id",
           function(err, result){
             should.not.exist(err);
             (result.rows).should.not.containEql([180, 'Construction']);
@@ -175,7 +175,7 @@ describe('8. autoCommitForSelect.js', function(){
       },
       function(callback){
         connection.execute(
-          "SELECT department_id FROM nodb_departments WHERE department_name = 'Marketing'",
+          "SELECT department_id FROM nodb_commit4_dept WHERE department_name = 'Marketing'",
           function(err, result){
             should.not.exist(err);
             (result.rows[0][0]).should.eql(99);
@@ -185,7 +185,7 @@ describe('8. autoCommitForSelect.js', function(){
       },
       function(callback){
         anotherConnection.execute(
-          "SELECT department_id FROM nodb_departments WHERE department_name = 'Marketing'",
+          "SELECT department_id FROM nodb_commit4_dept WHERE department_name = 'Marketing'",
           function(err, result){
             should.not.exist(err);
             (result.rows[0][0]).should.eql(20);
@@ -203,7 +203,7 @@ describe('8. autoCommitForSelect.js', function(){
     async.series([
       function(callback){
         connection.execute(
-          "INSERT INTO nodb_departments VALUES (180, 'Construction')",
+          "INSERT INTO nodb_commit4_dept VALUES (180, 'Construction')",
           function(err){
             should.not.exist(err);
             callback();
@@ -212,7 +212,7 @@ describe('8. autoCommitForSelect.js', function(){
       },
       function(callback){
         connection.execute(
-          "UPDATE nodb_departments SET department_id = 99 WHERE department_name = 'Marketing'",
+          "UPDATE nodb_commit4_dept SET department_id = 99 WHERE department_name = 'Marketing'",
           function(err){
             should.not.exist(err);
             callback();
@@ -227,7 +227,7 @@ describe('8. autoCommitForSelect.js', function(){
       },
       function(callback){
         connection.execute(
-          "SELECT * FROM nodb_departments ORDER BY department_id",
+          "SELECT * FROM nodb_commit4_dept ORDER BY department_id",
           function(err, result){
             should.not.exist(err);
             (result.rows).should.containEql([180, 'Construction']);
@@ -237,7 +237,7 @@ describe('8. autoCommitForSelect.js', function(){
       },
       function(callback){
         anotherConnection.execute(
-          "SELECT * FROM nodb_departments ORDER BY department_id",
+          "SELECT * FROM nodb_commit4_dept ORDER BY department_id",
           function(err, result){
             should.not.exist(err);
             (result.rows).should.containEql([180, 'Construction']);
@@ -247,7 +247,7 @@ describe('8. autoCommitForSelect.js', function(){
       },
       function(callback){
         connection.execute(
-          "SELECT department_id FROM nodb_departments WHERE department_name = 'Marketing'",
+          "SELECT department_id FROM nodb_commit4_dept WHERE department_name = 'Marketing'",
           function(err, result){
             should.not.exist(err);
             (result.rows[0][0]).should.eql(99);
@@ -257,7 +257,7 @@ describe('8. autoCommitForSelect.js', function(){
       },
       function(callback){
         anotherConnection.execute(
-          "SELECT department_id FROM nodb_departments WHERE department_name = 'Marketing'",
+          "SELECT department_id FROM nodb_commit4_dept WHERE department_name = 'Marketing'",
           function(err, result){
             should.not.exist(err);
             (result.rows[0][0]).should.eql(99);
@@ -275,7 +275,7 @@ describe('8. autoCommitForSelect.js', function(){
     async.series([
       function(callback){
         connection.execute(
-          "INSERT INTO nodb_departments VALUES (180, 'Construction')",
+          "INSERT INTO nodb_commit4_dept VALUES (180, 'Construction')",
           function(err){
             should.not.exist(err);
             callback();
@@ -284,7 +284,7 @@ describe('8. autoCommitForSelect.js', function(){
       },
       function(callback){
         connection.execute(
-          "UPDATE nodb_departments SET department_id = 99 WHERE department_name = 'Marketing'",
+          "UPDATE nodb_commit4_dept SET department_id = 99 WHERE department_name = 'Marketing'",
           function(err){
             should.not.exist(err);
             callback();
@@ -299,7 +299,7 @@ describe('8. autoCommitForSelect.js', function(){
       },
       function(callback){
         connection.execute(
-          "SELECT * FROM nodb_departments ORDER BY department_id",
+          "SELECT * FROM nodb_commit4_dept ORDER BY department_id",
           {},
           {autoCommit: true},
           function(err, result){
@@ -311,7 +311,7 @@ describe('8. autoCommitForSelect.js', function(){
       },
       function(callback){
         anotherConnection.execute(
-          "SELECT * FROM nodb_departments ORDER BY department_id",
+          "SELECT * FROM nodb_commit4_dept ORDER BY department_id",
           function(err, result){
             should.not.exist(err);
             (result.rows).should.containEql([180, 'Construction']);
@@ -321,7 +321,7 @@ describe('8. autoCommitForSelect.js', function(){
       },
       function(callback){
         connection.execute(
-          "SELECT department_id FROM nodb_departments WHERE department_name = 'Marketing'",
+          "SELECT department_id FROM nodb_commit4_dept WHERE department_name = 'Marketing'",
           function(err, result){
             should.not.exist(err);
             (result.rows[0][0]).should.eql(99);
@@ -331,7 +331,7 @@ describe('8. autoCommitForSelect.js', function(){
       },
       function(callback){
         anotherConnection.execute(
-          "SELECT department_id FROM nodb_departments WHERE department_name = 'Marketing'",
+          "SELECT department_id FROM nodb_commit4_dept WHERE department_name = 'Marketing'",
           function(err, result){
             should.not.exist(err);
             (result.rows[0][0]).should.eql(99);

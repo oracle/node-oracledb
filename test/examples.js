@@ -93,24 +93,24 @@ describe('3. examples.js', function(){
                 e_table_missing EXCEPTION; \
                 PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \
             BEGIN \
-                EXECUTE IMMEDIATE ('DROP TABLE nodb_departments'); \
+                EXECUTE IMMEDIATE ('DROP TABLE nodb_eg_dept'); \
             EXCEPTION \
                 WHEN e_table_missing \
                 THEN NULL; \
             END; \
             EXECUTE IMMEDIATE (' \
-                CREATE TABLE nodb_departments ( \
+                CREATE TABLE nodb_eg_dept ( \
                     department_id NUMBER,  \
                     department_name VARCHAR2(20) \
                 ) \
             '); \
             EXECUTE IMMEDIATE (' \
-              INSERT INTO nodb_departments  \
+              INSERT INTO nodb_eg_dept  \
                    (department_id, department_name) VALUES \
                    (40,''Human Resources'') \
             '); \
             EXECUTE IMMEDIATE (' \
-              INSERT INTO nodb_departments  \
+              INSERT INTO nodb_eg_dept  \
                    (department_id, department_name) VALUES \
                    (180, ''Construction'') \
             '); \
@@ -126,7 +126,7 @@ describe('3. examples.js', function(){
         function(callback){
           connection.execute(
               "SELECT department_id, department_name "
-            + "FROM nodb_departments "
+            + "FROM nodb_eg_dept "
             + "WHERE department_id = :did",
             [180],
             function(err, result) {
@@ -427,13 +427,13 @@ describe('3. examples.js', function(){
               e_table_missing EXCEPTION; \
               PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \
           BEGIN \
-              EXECUTE IMMEDIATE ('DROP TABLE nodb_employees'); \
+              EXECUTE IMMEDIATE ('DROP TABLE nodb_eg_emp'); \
           EXCEPTION \
               WHEN e_table_missing \
               THEN NULL; \
           END; \
           EXECUTE IMMEDIATE (' \
-              CREATE TABLE nodb_employees ( \
+              CREATE TABLE nodb_eg_emp ( \
                   employees_id NUMBER,  \
                   employees_name VARCHAR2(20) \
               ) \
@@ -448,7 +448,7 @@ describe('3. examples.js', function(){
           FOR i IN 1..107 LOOP \
              x := x + 1; \
              n := 'staff ' || x; \
-             INSERT INTO nodb_employees VALUES (x, n); \
+             INSERT INTO nodb_eg_emp VALUES (x, n); \
           END LOOP; \
        END; ";
 
@@ -468,7 +468,7 @@ describe('3. examples.js', function(){
 
     after(function(done){
       connection.execute(
-        'DROP TABLE nodb_employees',
+        'DROP TABLE nodb_eg_emp',
         function(err){
           if(err) { console.error(err.message); return; }
           connection.release( function(err){
@@ -485,7 +485,7 @@ describe('3. examples.js', function(){
 
       connection.should.be.ok();
       connection.execute(
-        "SELECT * FROM nodb_employees ORDER BY employees_id",
+        "SELECT * FROM nodb_eg_emp ORDER BY employees_id",
         function(err, result){
           should.not.exist(err);
           should.exist(result);
@@ -499,7 +499,7 @@ describe('3. examples.js', function(){
     it('3.6.2 can also specify for each execution', function(done){
       connection.should.be.ok();
       connection.execute(
-        "SELECT * FROM nodb_employees ORDER BY employees_id",
+        "SELECT * FROM nodb_eg_emp ORDER BY employees_id",
         {}, {maxRows: 25},
         function(err, result){
           should.not.exist(err);
@@ -835,13 +835,13 @@ describe('3. examples.js', function(){
               e_table_missing EXCEPTION; \
               PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \
           BEGIN \
-              EXECUTE IMMEDIATE ('DROP TABLE nodb_employees'); \
+              EXECUTE IMMEDIATE ('DROP TABLE nodb_eg_emp'); \
           EXCEPTION \
               WHEN e_table_missing \
               THEN NULL; \
           END; \
           EXECUTE IMMEDIATE (' \
-              CREATE TABLE nodb_employees ( \
+              CREATE TABLE nodb_eg_emp ( \
                   employees_id NUMBER,  \
                   employees_name VARCHAR2(20) \
               ) \
@@ -856,7 +856,7 @@ describe('3. examples.js', function(){
           FOR i IN 1..207 LOOP \
              x := x + 1; \
              n := 'staff ' || x; \
-             INSERT INTO nodb_employees VALUES (x, n); \
+             INSERT INTO nodb_eg_emp VALUES (x, n); \
           END LOOP; \
        END; ";
 
@@ -876,7 +876,7 @@ describe('3. examples.js', function(){
 
     after(function(done){
       connection.execute(
-        'DROP TABLE nodb_employees',
+        'DROP TABLE nodb_eg_emp',
         function(err){
           if(err) { console.error(err.message); return; }
           connection.release( function(err){
@@ -892,7 +892,7 @@ describe('3. examples.js', function(){
       var rowCount = 1;
 
       connection.execute(
-        "SELECT employees_name FROM nodb_employees",
+        "SELECT employees_name FROM nodb_eg_emp",
         [],
         { resultSet: true, prefetchRows: 50 },
         function(err, result) {
@@ -926,7 +926,7 @@ describe('3. examples.js', function(){
       var numRows = 10;  // number of rows to return from each call to getRows()
 
       connection.execute(
-        "SELECT * FROM nodb_employees ORDER BY employees_id",
+        "SELECT * FROM nodb_eg_emp ORDER BY employees_id",
         [],
         { resultSet: true, prefetchRows: 110 },
         function(err, result) {
@@ -966,45 +966,45 @@ describe('3. examples.js', function(){
                 e_table_missing EXCEPTION; \
                 PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \
             BEGIN \
-                EXECUTE IMMEDIATE ('DROP TABLE nodb_employees'); \
+                EXECUTE IMMEDIATE ('DROP TABLE nodb_eg_emp'); \
             EXCEPTION \
                 WHEN e_table_missing \
                 THEN NULL; \
             END; \
             EXECUTE IMMEDIATE (' \
-                CREATE TABLE nodb_employees ( \
+                CREATE TABLE nodb_eg_emp ( \
                     name VARCHAR2(40),  \
                     salary NUMBER, \
                     hire_date DATE \
                 ) \
             '); \
             EXECUTE IMMEDIATE (' \
-              INSERT INTO nodb_employees  \
+              INSERT INTO nodb_eg_emp  \
                    (name, salary, hire_date) VALUES \
                    (''Steven'',24000, TO_DATE(''20030617'', ''yyyymmdd'')) \
             '); \
             EXECUTE IMMEDIATE (' \
-              INSERT INTO nodb_employees  \
+              INSERT INTO nodb_eg_emp  \
                    (name, salary, hire_date) VALUES \
                    (''Neena'',17000, TO_DATE(''20050921'', ''yyyymmdd'')) \
             '); \
             EXECUTE IMMEDIATE (' \
-              INSERT INTO nodb_employees  \
+              INSERT INTO nodb_eg_emp  \
                    (name, salary, hire_date) VALUES \
                    (''Lex'',17000, TO_DATE(''20010112'', ''yyyymmdd'')) \
             '); \
             EXECUTE IMMEDIATE (' \
-              INSERT INTO nodb_employees  \
+              INSERT INTO nodb_eg_emp  \
                    (name, salary, hire_date) VALUES \
                    (''Nancy'',12008, TO_DATE(''20020817'', ''yyyymmdd'')) \
             '); \
             EXECUTE IMMEDIATE (' \
-              INSERT INTO nodb_employees  \
+              INSERT INTO nodb_eg_emp  \
                    (name, salary, hire_date) VALUES \
                    (''Karen'',14000, TO_DATE(''20050104'', ''yyyymmdd'')) \
             '); \
             EXECUTE IMMEDIATE (' \
-              INSERT INTO nodb_employees  \
+              INSERT INTO nodb_eg_emp  \
                    (name, salary, hire_date) VALUES \
                    (''Peter'',9000, TO_DATE(''20100525'', ''yyyymmdd'')) \
             '); \
@@ -1015,7 +1015,7 @@ describe('3. examples.js', function(){
            AS \
            BEGIN \
              OPEN p_recordset FOR  \
-               SELECT * FROM nodb_employees\
+               SELECT * FROM nodb_eg_emp\
                WHERE salary > p_sal; \
            END; ";
 
@@ -1054,7 +1054,7 @@ describe('3. examples.js', function(){
 
     after(function(done){
       connection.execute(
-        'DROP TABLE nodb_employees',
+        'DROP TABLE nodb_eg_emp',
         function(err){
           if(err) { console.error(err.message); return; }
           connection.release( function(err){
