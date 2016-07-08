@@ -87,17 +87,18 @@ class Oracledb: public Nan::ObjectWrap
    // Oracledb class
    static void Init(Handle<Object> target);
 
-   dpi::Env*          getDpiEnv () const          { return dpienv_; }
-   bool               getAutoCommit () const      { return autoCommit_; }
-   unsigned int       getOutFormat () const       { return outFormat_; }
-   unsigned int       getMaxRows ()  const        { return maxRows_; }
-   unsigned int       getStmtCacheSize ()  const  { return stmtCacheSize_; }
-   unsigned int       getPoolMin () const         { return poolMin_; }
-   unsigned int       getPoolMax () const         { return poolMax_; }
-   unsigned int       getPoolIncrement () const   { return poolIncrement_; }
-   unsigned int       getPoolTimeout () const     { return poolTimeout_; }
-   unsigned int       getPrefetchRows () const    { return prefetchRows_; }
-   const std::string& getConnectionClass () const { return connClass_; }
+   dpi::Env*          getDpiEnv () const           { return dpienv_; }
+   bool               getAutoCommit () const       { return autoCommit_; }
+   unsigned int       getOutFormat () const        { return outFormat_; }
+   unsigned int       getMaxRows ()  const         { return maxRows_; }
+   unsigned int       getStmtCacheSize ()  const   { return stmtCacheSize_; }
+   unsigned int       getPoolMin () const          { return poolMin_; }
+   unsigned int       getPoolMax () const          { return poolMax_; }
+   unsigned int       getPoolIncrement () const    { return poolIncrement_; }
+   unsigned int       getPoolTimeout () const      { return poolTimeout_; }
+   unsigned int       getPrefetchRows () const     { return prefetchRows_; }
+   const std::string& getConnectionClass () const  { return connClass_; }
+   bool               getExtendedMetaData () const { return extendedMetaData_; }
 
    const DataType*    getFetchAsStringTypes () const;
 
@@ -129,6 +130,7 @@ private:
    static NAN_GETTER(GetPoolTimeout);
    static NAN_GETTER(GetStmtCacheSize);
    static NAN_GETTER(GetAutoCommit);
+   static NAN_GETTER(GetExtendedMetaData);
    static NAN_GETTER(GetMaxRows);
    static NAN_GETTER(GetOutFormat);
    static NAN_GETTER(GetVersion);
@@ -146,6 +148,7 @@ private:
    static NAN_SETTER(SetPoolTimeout);
    static NAN_SETTER(SetStmtCacheSize);
    static NAN_SETTER(SetAutoCommit);
+   static NAN_SETTER(SetExtendedMetaData);
    static NAN_SETTER(SetMaxRows);
    static NAN_SETTER(SetOutFormat);
    static NAN_SETTER(SetVersion);
@@ -162,6 +165,7 @@ private:
    dpi::Env* dpienv_;
    unsigned int outFormat_;
    bool         autoCommit_;
+   bool         extendedMetaData_;
    unsigned int maxRows_;
 
    unsigned int stmtCacheSize_;

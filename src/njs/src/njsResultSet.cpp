@@ -65,16 +65,19 @@ Nan::Persistent<FunctionTemplate> ResultSet::resultSetTemplate_s;
      Store the config in pool instance.
 
    PARAMETERS
-     stmt         -  dpi statement
+     stmt         - dpi statement
      executeBaton - eBaton structure
+     numCols      - number of columns
+     mInfo        - an array of structs representing column info
 */
-void ResultSet::setResultSet ( dpi::Stmt *stmt, eBaton *executeBaton )
+void ResultSet::setResultSet ( dpi::Stmt          *stmt,   eBaton *executeBaton,
+                               const unsigned int numCols,
+                               const MetaInfo     *mInfo )
 {
-  this->dpistmt_       = stmt;
-  this->dpienv_        = executeBaton->dpienv;
-  this->njsconn_       = executeBaton->njsconn;
-  this->numCols_       = 0;    // numCols_ and meta_ are initialized as part
-  this->meta_          = NULL; // of the first call on RS
+  this->dpistmt_ = stmt;
+  this->dpienv_  = executeBaton->dpienv;
+  this->njsconn_ = executeBaton->njsconn;
+  this->numCols_ = numCols;
 
   this->jsParent_.Reset ( executeBaton->jsConn );
 
@@ -84,75 +87,35 @@ void ResultSet::setResultSet ( dpi::Stmt *stmt, eBaton *executeBaton )
    */
   this->state_ = ( stmt ) ? NJS_INACTIVE : NJS_INVALID;
 
-  this->outFormat_     = executeBaton->outFormat;
-  this->fetchRowCount_ = 0;
-  this->rsEmpty_       = false;
-  this->defineBuffers_ = NULL;
+  this->outFormat_        = executeBaton->outFormat;
+  this->fetchRowCount_    = 0;
+  this->rsEmpty_          = false;
+  this->defineBuffers_    = NULL;
+  this->extendedMetaData_ = executeBaton->extendedMetaData;
+  this->mInfo_            = new MetaInfo [ this->numCols_ ];
 
-  /* (Deep) Copy by-type conversion rules if available for later use */
-  if ( executeBaton -> fetchAsStringTypes )
+  if ( !this->mInfo_ )
   {
-    unsigned int count = executeBaton->fetchAsStringTypesCount;
-
-    this->fetchAsStringTypes_ = (DataType * ) malloc (
-                                                count * sizeof ( DataType ) );
-    if ( !this->fetchAsStringTypes_ )
-    {
       executeBaton->error = NJSMessages::getErrorMsg ( errInsufficientMemory );
       goto exitSetResultSet;
-    }
+   }
 
-    for ( unsigned int i = 0 ; i < count ; i ++ )
-    {
-      this->fetchAsStringTypes_[i] = executeBaton->fetchAsStringTypes[i] ;
-    }
-    this->fetchAsStringTypesCount_ = count;
-  }
-  else
+   // In refCursor case mInfo can be NULL
+  if ( mInfo )
   {
-    this->fetchAsStringTypes_      = NULL;
-    this->fetchAsStringTypesCount_ = 0;
-  }
-
-  /* (Deep) Copy by-name conversion rules if available for later use
-   * The by-name conversion rules are applicable only for ResultSet
-   * RefCursor require by-cursor definitions
-   */
-  if ( executeBaton->getRS && executeBaton->fetchInfo )
-  {
-    this->fetchInfo_ = new FetchInfo[executeBaton->fetchInfoCount];
-    if ( !this->fetchInfo_ )
+    for ( unsigned int col = 0; col < this->numCols_; col++ )
     {
-      executeBaton->error = NJSMessages::getErrorMsg ( errInsufficientMemory );
-      goto exitSetResultSet;
+      this->mInfo_[col] = mInfo[col];
     }
-
-    for ( unsigned int i = 0; i < executeBaton->fetchInfoCount; i ++ )
-    {
-      this->fetchInfo_[i].type = executeBaton->fetchInfo[i].type;
-      this->fetchInfo_[i].name = executeBaton->fetchInfo[i].name;
-    }
-    this->fetchInfoCount_ = executeBaton->fetchInfoCount ;
-  }
-  else
-  {
-    this->fetchInfo_      = NULL;
-    this->fetchInfoCount_ = 0;
   }
 
 exitSetResultSet:
   if ( !executeBaton->error.empty () )
   {
-    if ( this -> fetchAsStringTypes_ )
+    if ( this->mInfo_ )
     {
-      free ( this -> fetchAsStringTypes_ ) ;
-      this -> fetchAsStringTypes_ = NULL;
-    }
-
-    if ( this->fetchInfo_ )
-    {
-      delete [] this -> fetchInfo_ ;
-      this -> fetchInfo_ = NULL ;
+      delete [] this -> mInfo_ ;
+      this -> mInfo_ = NULL ;
     }
   }
 }
@@ -222,29 +185,11 @@ NAN_GETTER(ResultSet::GetMetaData)
     info.GetReturnValue().SetUndefined();
     return;
   }
-  if ( !njsResultSet->meta_ )
-  {
-    try
-    {
-      njsResultSet->meta_    = njsResultSet->dpistmt_->getMetaData();
-      njsResultSet->numCols_ = njsResultSet->dpistmt_->numCols();
-    }
-    catch(dpi::Exception &e)
-    {
-      NJS_SET_CONN_ERR_STATUS ( e.errnum(), NULL );
-      NJS_SET_EXCEPTION(e.what(), (int) strlen(e.what()));
-      info.GetReturnValue().SetUndefined();
-      return;
-    }
-  }
-  std::string *columnNames = new std::string[njsResultSet->numCols_];
-  Connection::CopyMetaData ( columnNames, njsResultSet->meta_,
-                             njsResultSet->numCols_ );
-  Local<Value> meta;
-  meta = Connection::GetMetaData( columnNames,
-                                  njsResultSet->numCols_ );
-  delete [] columnNames;
-  columnNames = NULL;
+
+  Local<Value> meta = Connection::GetMetaData(
+                                         njsResultSet->mInfo_,
+                                         njsResultSet->numCols_,
+                                         njsResultSet->extendedMetaData_ );
 
   info.GetReturnValue().Set(meta);
 }
@@ -404,28 +349,8 @@ void ResultSet::GetRowsCommon(rsBaton *getRowsBaton)
   ebaton->outFormat          = njsRS->outFormat_;
   ebaton->njsconn            = njsRS->njsconn_;
   ebaton->dpiconn            = njsRS->njsconn_->getDpiConn();
-
-  if ( njsRS->fetchAsStringTypesCount_ )
-  {
-    ebaton->fetchAsStringTypes = njsRS->fetchAsStringTypes_;
-    ebaton->fetchAsStringTypesCount = njsRS->fetchAsStringTypesCount_;
-  }
-  else
-  {
-    ebaton->fetchAsStringTypes = NULL;
-    ebaton->fetchAsStringTypesCount = 0;
-  }
-
-  /* Copy by-name conversion rules */
-  ebaton->fetchInfoCount   = njsRS->fetchInfoCount_;
-  if ( ebaton->fetchInfoCount )
-  {
-    ebaton->fetchInfo = njsRS->fetchInfo_;
-  }
-  else
-  {
-    ebaton->fetchInfo = NULL;
-  }
+  ebaton->numCols            = njsRS->numCols_;
+  ebaton->mInfo              = njsRS->mInfo_;
 
 exitGetRowsCommon:
   getRowsBaton->req.data  = (void *)getRowsBaton;
@@ -471,16 +396,6 @@ void ResultSet::Async_GetRows(uv_work_t *req)
 
   try
   {
-    if ( !njsRS->meta_ )
-    {
-      njsRS->meta_    = njsRS->dpistmt_->getMetaData();
-      njsRS->numCols_ = njsRS->dpistmt_->numCols();
-    }
-    ebaton->columnNames        = new std::string[njsRS->numCols_];
-    Connection::CopyMetaData ( ebaton->columnNames, njsRS->meta_,
-                               njsRS->numCols_ );
-    ebaton->numCols      = njsRS->numCols_;
-
     // Allocate if not already done, or need more buffer
     if( !njsRS->defineBuffers_ ||
         njsRS->fetchRowCount_  < getRowsBaton->numRows )
@@ -491,7 +406,7 @@ void ResultSet::Async_GetRows(uv_work_t *req)
                                     njsRS->fetchRowCount_);
         getRowsBaton-> njsRS-> defineBuffers_ = NULL;
       }
-      Connection::DoDefines(ebaton, njsRS->meta_, njsRS->numCols_);
+      Connection::DoDefines( ebaton );
       if ( !ebaton->error.empty () )
       {
         getRowsBaton->error = ebaton->error;
@@ -507,7 +422,7 @@ void ResultSet::Async_GetRows(uv_work_t *req)
       {
        // In case of LOB column, descriptor would have been wrapped by
        // ProtoILob & njsIntLob and set the element to NULL, so reallocate
-        switch(njsRS->meta_[col].dbType)
+        switch( njsRS->mInfo_[col].dbType )
         {
         case dpi::DpiClob:
         case dpi::DpiBlob:
@@ -696,22 +611,17 @@ void ResultSet::Async_Close(uv_work_t *req)
 
     Define* defineBuffers = closeBaton-> njsRS-> defineBuffers_;
     unsigned int numCols  = closeBaton-> njsRS-> numCols_;
+
     if(defineBuffers)
     {
       ResultSet::clearFetchBuffer(defineBuffers, numCols,
                                   closeBaton-> njsRS-> fetchRowCount_);
       closeBaton-> njsRS-> defineBuffers_ = NULL;
     }
-
-    if ( closeBaton->njsRS->fetchAsStringTypes_ )
+    if ( closeBaton-> njsRS-> mInfo_ )
     {
-      free ( closeBaton->njsRS->fetchAsStringTypes_ ) ;
-      closeBaton->njsRS->fetchAsStringTypes_ = NULL;
-    }
-    if ( closeBaton->njsRS->fetchInfo_ )
-    {
-      delete [] closeBaton->njsRS->fetchInfo_;
-      closeBaton->njsRS->fetchInfo_ = NULL;
+      delete [] closeBaton->njsRS->mInfo_;
+      closeBaton->njsRS->mInfo_ = NULL;
     }
   }
   catch(dpi::Exception& e)

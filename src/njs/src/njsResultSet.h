@@ -108,7 +108,9 @@ public:
 
    static void Init(Handle<Object> target);
 
-   void setResultSet ( dpi::Stmt *dpistmt, eBaton *executebaton );
+   void setResultSet ( dpi::Stmt          *dpistmt, eBaton *executebaton,
+                       const unsigned int numCols,
+                       const MetaInfo     *mInfo );
 
    // Define ResultSet Constructor
    static Nan::Persistent<FunctionTemplate> resultSetTemplate_s ;
@@ -148,12 +150,9 @@ private:
   unsigned int              numCols_;
   unsigned int              fetchRowCount_;
   unsigned int              outFormat_;
-  const dpi::MetaData       *meta_;
-  DataType                  *fetchAsStringTypes_;
-  unsigned int              fetchAsStringTypesCount_;
-  FetchInfo                 *fetchInfo_;
-  unsigned int              fetchInfoCount_;
+  bool                      extendedMetaData_;
   Nan::Persistent<Object>   jsParent_;
+  MetaInfo                  *mInfo_;
 };
 
 

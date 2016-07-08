@@ -462,18 +462,20 @@ NAN_METHOD(Connection::Execute)
   NJS_GET_ARG_V8STRING (sql, executeBaton->error, info, 0, exitExecute);
   NJSString (executeBaton->sql, sql);
 
-  executeBaton->maxRows      = connection->oracledb_->getMaxRows();
-  executeBaton->prefetchRows = connection->oracledb_->getPrefetchRows();
-  executeBaton->outFormat    = connection->oracledb_->getOutFormat();
-  executeBaton->autoCommit   = connection->oracledb_->getAutoCommit();
-  executeBaton->dpienv       = connection->oracledb_->getDpiEnv();
+  executeBaton->maxRows            = connection->oracledb_->getMaxRows();
+  executeBaton->prefetchRows       = connection->oracledb_->getPrefetchRows();
+  executeBaton->outFormat          = connection->oracledb_->getOutFormat();
+  executeBaton->autoCommit         = connection->oracledb_->getAutoCommit();
+  executeBaton->dpienv             = connection->oracledb_->getDpiEnv();
   executeBaton->fetchAsStringTypes =
     (DataType*) connection->oracledb_->getFetchAsStringTypes ();
   executeBaton->fetchAsStringTypesCount =
     connection->oracledb_->getFetchAsStringTypesCount ();
 
-  executeBaton->dpiconn      = connection->dpiconn_;
-  executeBaton->njsconn      = connection;
+  executeBaton->dpiconn            = connection->dpiconn_;
+  executeBaton->njsconn            = connection;
+  executeBaton->extendedMetaData   =
+                              connection->oracledb_->getExtendedMetaData ();
 
   // In case of no fetchAs and memory allocation failure fetchAsStringTypes
   // will be NULL.  Check the combination of Count & types.
@@ -569,6 +571,9 @@ void Connection::ProcessOptions (Nan::NAN_METHOD_ARGS_TYPE args, unsigned int in
                              options, "resultSet", 2, exitProcessOptions );
     NJS_GET_BOOL_FROM_JSON ( executeBaton->autoCommit, executeBaton->error,
                              options, "autoCommit", 2, exitProcessOptions );
+    NJS_GET_BOOL_FROM_JSON ( executeBaton->extendedMetaData,
+                             executeBaton->error, options, "extendedMetaData",
+                             2, exitProcessOptions );
 
     // Optional fetchAs specifications
     Local<Value> val = options->Get(Nan::New<v8::String>("fetchInfo").ToLocalChecked());
@@ -1552,18 +1557,28 @@ void Connection::Async_Execute (uv_work_t *req)
 
       executeBaton->dpistmt->execute(0, executeBaton->autoCommit);
 
-      const dpi::MetaData* meta   = executeBaton->dpistmt->getMetaData();
-      executeBaton->numCols       = executeBaton->dpistmt->numCols();
-      executeBaton->columnNames   = new std::string[executeBaton->numCols];
-      Connection::CopyMetaData( executeBaton->columnNames, meta,
-                                executeBaton->numCols );
+      const MetaData* mData = executeBaton->dpistmt->getMetaData(
+                                           executeBaton->extendedMetaData );
+      executeBaton->numCols = executeBaton->dpistmt->numCols();
+
+      executeBaton->mInfo   = new MetaInfo  [ executeBaton->numCols ];
+
+      if ( !executeBaton->mInfo )
+      {
+        executeBaton->error = NJSMessages::getErrorMsg
+                                           ( errInsufficientMemory );
+        goto exitAsyncExecute;
+      }
+
+      Connection::CopyMetaData ( executeBaton->mInfo, executeBaton, mData,
+                                 executeBaton->numCols );
 
       if ( executeBaton->getRS )
       {
         goto exitAsyncExecute;
       }
 
-      Connection::DoDefines(executeBaton, meta, executeBaton->numCols);
+      Connection::DoDefines ( executeBaton );
       /* If any errors while creating define structures, bail out */
       if ( !executeBaton->error.empty() )
         goto exitAsyncExecute;
@@ -1648,7 +1663,15 @@ void Connection::Async_Execute (uv_work_t *req)
        }
      }
 
-     /* For each OUT Binds of CURSOR type, get the dpistmt state */
+     // allocate exteBinds vector with bind-array-size and initialize to NULL
+     executeBaton->extBinds.resize (
+                   ( unsigned int ) ( executeBaton->binds.size () ), NULL );
+
+     /*
+      * For each OUT Binds of valid CURSOR type, set prefetch and get
+      * meta data
+      */
+
      for ( unsigned int b = 0; b < executeBaton->binds.size (); b ++ )
      {
        Bind *bind = executeBaton->binds[b];
@@ -1663,6 +1686,28 @@ void Connection::Async_Execute (uv_work_t *req)
            // set the prefetch on the valid cursor object
            ((dpi::Stmt *)(bind->value))->prefetchRows (
                                               executeBaton->prefetchRows ) ;
+           // Get metaData and number of columns on valid cursor object
+           ExtBind* extBind = new ExtBind ();
+           if ( !extBind )
+           {
+             executeBaton->error = NJSMessages::getErrorMsg
+                                           ( errInsufficientMemory );
+             goto exitAsyncExecute;
+           }
+           const MetaData* mData = ((Stmt*)bind->value)->getMetaData(
+                                           executeBaton->extendedMetaData );
+           extBind->numCols      = ((Stmt*)bind->value)->numCols ();
+
+           extBind->mInfo        = new MetaInfo  [ extBind->numCols ];
+           if ( !extBind->mInfo )
+           {
+             executeBaton->error = NJSMessages::getErrorMsg
+                                                ( errInsufficientMemory );
+             goto exitAsyncExecute;
+           }
+           Connection::CopyMetaData ( extBind->mInfo, executeBaton, mData,
+                                      extBind->numCols );
+           executeBaton->extBinds [ b ] = extBind;
          }
          else
          {
@@ -1847,20 +1892,103 @@ void Connection::PrepareAndBind (eBaton* executeBaton)
 /*****************************************************************************/
 /*
    DESCRIPTION
-     copy column names from meta data to the string array passed as parameter.
+     Copies metaData into MetaInfo and gets target fetchTypes
 
    PARAMETERS:
-     string array  -  column names
-     metaData      -  metaData info from DPI
-     numCols       -  number of columns
+     mInfo         - an array of structs representing column info
+     executeBaton  - eBaton structure
+     mData         - meta data of columns
+     numCols       - number of columns
  */
-void Connection::CopyMetaData ( std::string* names, const dpi::MetaData* meta,
-                                unsigned int numCols )
+void Connection::CopyMetaData ( MetaInfo           *mInfo,
+                                eBaton             *executeBaton,
+                                const MetaData*    mData,
+                                const unsigned int numCols )
 {
-  for (unsigned int col = 0; col < numCols; col++)
+  for ( unsigned int col = 0; col < numCols; col++ )
   {
-    names[col] = std::string( (const char*)meta[col].colName,
-                            meta[col].colNameLen );
+    mInfo[col].name         = string( (const char*)mData[col].colName,
+                                      mData[col].colNameLen );
+    mInfo[col].dbType       = mData[col].dbType;
+    mInfo[col].byteSize     = mData[col].dbSize;
+
+    if ( executeBaton->extendedMetaData )
+    {
+      mInfo[col].precision  = mData[col].precision;
+      mInfo[col].scale      = mData[col].scale;
+      mInfo[col].isNullable = mData[col].isNullable;
+    }
+
+    switch( mData[col].dbType )
+    {
+      case dpi::DpiNumber:
+      case dpi::DpiBinaryFloat:
+      case dpi::DpiBinaryDouble:
+        mInfo[col].dpiFetchType = Connection::GetTargetType ( executeBaton,
+                                                 mInfo[col].name,
+                                                 dpi::DpiDouble );
+        mInfo[col].njsFetchType =
+                     ( mInfo[col].dpiFetchType == dpi::DpiVarChar ) ?
+                                  NJS_DATATYPE_STR : NJS_DATATYPE_NUM;
+        break;
+
+      case dpi::DpiVarChar:
+      case dpi::DpiFixedChar:
+        mInfo[col].dpiFetchType = Connection::GetTargetType ( executeBaton,
+                                                 mInfo[col].name,
+                                                 dpi::DpiVarChar );
+        mInfo[col].njsFetchType = NJS_DATATYPE_STR;
+        break;
+
+      case dpi::DpiDate:
+      case dpi::DpiTimestamp:
+      case dpi::DpiTimestampLTZ:
+        mInfo[col].dpiFetchType = Connection::GetTargetType ( executeBaton,
+                                                 mInfo[col].name,
+                                                 dpi::DpiTimestampLTZ );
+        mInfo[col].njsFetchType =
+                     ( mInfo[col].dpiFetchType == dpi::DpiVarChar ) ?
+                                  NJS_DATATYPE_STR : NJS_DATATYPE_DATE;
+        break;
+
+      case dpi::DpiTimestampTZ:
+        mInfo[col].dpiFetchType = Connection::GetTargetType ( executeBaton,
+                                                 mInfo[col].name,
+                                                 dpi::DpiTimestampLTZ );
+        mInfo[col].njsFetchType =
+                     ( mInfo[col].dpiFetchType == dpi::DpiVarChar ) ?
+                                  NJS_DATATYPE_STR : NJS_DATATYPE_UNKNOWN;
+        break;
+
+      case dpi::DpiRaw:
+        mInfo[col].dpiFetchType = DpiRaw;
+        mInfo[col].njsFetchType = NJS_DATATYPE_BUFFER;
+        break;
+
+      case dpi::DpiClob:
+        mInfo[col].dpiFetchType = mData[col].dbType;
+        mInfo[col].njsFetchType = NJS_DATATYPE_CLOB;
+        break;
+
+      case dpi::DpiBlob:
+        mInfo[col].dpiFetchType = mData[col].dbType;
+        mInfo[col].njsFetchType = NJS_DATATYPE_BLOB;
+        break;
+
+      case dpi::DpiRowid:
+        mInfo[col].dpiFetchType = Connection::GetTargetType ( executeBaton,
+                                                 mInfo[col].name,
+                                                 dpi::DpiRowid );
+        mInfo[col].njsFetchType =
+                     ( mInfo[col].dpiFetchType == dpi::DpiVarChar ) ?
+                                  NJS_DATATYPE_STR : NJS_DATATYPE_UNKNOWN;
+        break;
+
+      default:
+        mInfo[col].njsFetchType = NJS_DATATYPE_UNKNOWN;
+        mInfo[col].dbType       = NJS_DATATYPE_UNKNOWN;
+        break;
+    }
   }
 }
 
@@ -2032,7 +2160,7 @@ boolean Connection::MapByType ( eBaton *executeBaton, unsigned short &dbType )
      oracledb type
 
    PARAMETERS
-     eBaton  - executeBaton Structure
+     eBaton  - executeBaton structure
      name    - column name
      default Type - if no override provided, to return the default DB type
 
@@ -2084,9 +2212,9 @@ unsigned short Connection::GetTargetType ( eBaton *executeBaton,
    PARAMETERS:
      eBaton struct
  */
-void Connection::DoDefines ( eBaton* executeBaton, const dpi::MetaData* meta,
-                             unsigned int numCols )
+void Connection::DoDefines ( eBaton* executeBaton )
 {
+  unsigned int numCols = executeBaton->numCols;
   Define *defines = executeBaton->defines = new Define[numCols];
   int csratio = executeBaton->dpiconn->getByteExpansionRatio ();
 
@@ -2099,14 +2227,12 @@ void Connection::DoDefines ( eBaton* executeBaton, const dpi::MetaData* meta,
 
   for (unsigned int col = 0; col < numCols; col++)
   {
-    switch(meta[col].dbType)
+    switch( executeBaton->mInfo[col].dbType )
     {
       case dpi::DpiNumber :
       case dpi::DpiBinaryFloat :
       case dpi::DpiBinaryDouble :
-        defines[col].fetchType = Connection::GetTargetType ( executeBaton,
-                                               executeBaton->columnNames[col],
-                                                 dpi::DpiDouble) ;
+        defines[col].fetchType = executeBaton->mInfo[col].dpiFetchType;
         /* For VARCHAR2 type, make sure sufficient buffer is available */
         defines[col].maxSize = ( defines[col].fetchType == dpi::DpiVarChar) ?
                                NJS_MAX_FETCH_AS_STRING_SIZE : sizeof (double);
@@ -2133,9 +2259,7 @@ void Connection::DoDefines ( eBaton* executeBaton, const dpi::MetaData* meta,
         break;
       case dpi::DpiVarChar :
       case dpi::DpiFixedChar :
-        defines[col].fetchType = Connection::GetTargetType ( executeBaton,
-                                             executeBaton->columnNames[col],
-                                             meta[col].dbType );
+        defines[col].fetchType = executeBaton->mInfo[col].dpiFetchType;
 
         /*
          * the buffer size is increased to account for possible character
@@ -2143,12 +2267,10 @@ void Connection::DoDefines ( eBaton* executeBaton, const dpi::MetaData* meta,
          * to AL32UTF8
          */
 
-        if ( meta[col].dbSize != 0 )
+        if ( executeBaton->mInfo[col].byteSize != 0 )
         {
-          /* dbSize will be zero in case of "select null from dual" and
-           * malloc(0) behaves diffrently on different platforms, so avoiding it
-           */
-          defines[col].maxSize   = (meta[col].dbSize) * csratio;
+          defines[col].maxSize   = ( executeBaton->mInfo[col].byteSize ) *
+                                                              csratio;
 
           if ( NJS_SIZE_T_OVERFLOW ( defines[col].maxSize,
                                          executeBaton->maxRows ) )
@@ -2177,11 +2299,9 @@ void Connection::DoDefines ( eBaton* executeBaton, const dpi::MetaData* meta,
       case dpi::DpiTimestamp:
       case dpi::DpiTimestampTZ:
       case dpi::DpiTimestampLTZ:
-        defines[col].fetchType = Connection::GetTargetType ( executeBaton,
-                                               executeBaton->columnNames[col],
-                                               dpi::DpiTimestampLTZ );
+        defines[col].fetchType = executeBaton->mInfo[col].dpiFetchType;
 
-        if ( ( meta[col].dbType == dpi::DpiTimestampTZ ) &&
+        if ( ( executeBaton->mInfo[col].dbType == dpi::DpiTimestampTZ ) &&
              ( defines[col].fetchType != dpi::DpiVarChar ))
         {
           /*
@@ -2197,7 +2317,7 @@ void Connection::DoDefines ( eBaton* executeBaton, const dpi::MetaData* meta,
         {
           defines[col].dttmarr   = executeBaton->dpienv->getDateTimeArray (
                                      executeBaton->dpistmt->getError () );
-          defines[col].maxSize   = meta[col].dbSize;
+          defines[col].maxSize   = executeBaton->mInfo[col].byteSize;
           defines[col].extbuf    = defines[col].dttmarr->init(
                                                       executeBaton->maxRows);
         }
@@ -2229,7 +2349,7 @@ void Connection::DoDefines ( eBaton* executeBaton, const dpi::MetaData* meta,
         break;
       case dpi::DpiRaw :
         defines[col].fetchType = DpiRaw;
-        defines[col].maxSize   = meta[col].dbSize;
+        defines[col].maxSize   = executeBaton->mInfo[col].byteSize;
 
         if ( NJS_SIZE_T_OVERFLOW ( defines[col].maxSize,
                                    executeBaton->maxRows ) )
@@ -2251,7 +2371,7 @@ void Connection::DoDefines ( eBaton* executeBaton, const dpi::MetaData* meta,
       case dpi::DpiClob:
       case dpi::DpiBlob:
       case dpi::DpiBfile:
-        defines[col].fetchType = meta[col].dbType;
+        defines[col].fetchType = executeBaton->mInfo[col].dbType;
         defines[col].maxSize   = sizeof(Descriptor *);
 
         if ( NJS_SIZE_T_OVERFLOW ( defines[col].maxSize,
@@ -2280,9 +2400,8 @@ void Connection::DoDefines ( eBaton* executeBaton, const dpi::MetaData* meta,
         break;
 
       case dpi::DpiRowid:
-        defines[col].fetchType = Connection::GetTargetType ( executeBaton,
-                                               executeBaton->columnNames[col],
-                                               dpi::DpiRowid );
+        defines[col].fetchType = executeBaton->mInfo[col].dpiFetchType;
+
         if ( defines[col].fetchType != dpi::DpiVarChar )
         {
           executeBaton->error = NJSMessages::getErrorMsg (
@@ -2593,7 +2712,9 @@ void Connection::Async_AfterExecute(uv_work_t *req)
 
           /* ResultSet case, the statement object is ready for fetching */
           (Nan::ObjectWrap::Unwrap<ResultSet> (resultSet))->
-                       setResultSet( executeBaton->dpistmt, executeBaton);
+                       setResultSet( executeBaton->dpistmt, executeBaton,
+                                     executeBaton->numCols,
+                                     executeBaton->mInfo );
 
           if ( !executeBaton->error.empty () )
           {
@@ -2622,9 +2743,10 @@ void Connection::Async_AfterExecute(uv_work_t *req)
         }
         Nan::Set(result, Nan::New<v8::String>("outBinds").ToLocalChecked(),Nan::Undefined());
         Nan::Set(result, Nan::New<v8::String>("rowsAffected").ToLocalChecked(), Nan::Undefined());
-        Nan::Set(result, Nan::New<v8::String>("metaData").ToLocalChecked(), Connection::GetMetaData(
-                                                    executeBaton->columnNames,
-                                                    executeBaton->numCols));
+        Nan::Set( result, Nan::New<v8::String>("metaData").ToLocalChecked(),
+                  Connection::GetMetaData( executeBaton->mInfo,
+                                           executeBaton->numCols,
+                                           executeBaton->extendedMetaData ) );
         break;
 
       case DpiStmtBegin:
@@ -2645,7 +2767,6 @@ void Connection::Async_AfterExecute(uv_work_t *req)
                       Nan::New<v8::String>("outBinds").ToLocalChecked(),
                       outBindValue,
                       v8::ReadOnly);
-
         Nan::Set(result, Nan::New<v8::String>("rowsAffected").ToLocalChecked(), Nan::Undefined());
 
         Nan::Set(result, Nan::New<v8::String>("rows").ToLocalChecked(), Nan::Undefined());
@@ -2685,25 +2806,68 @@ exitAsyncAfterExecute:
      Method to populate Metadata array
 
    PARAMETERS:
-     columnNames - Column Names
-     numCols     - number of columns
+     mInfo            - an array of structs representing column info
+     numCols          - number of columns
+     extendedMetaData - true  - populate all the fields
+                        false - populate only column names
 
    RETURNS:
      MetaData Handle
 */
-v8::Local<v8::Value> Connection::GetMetaData (std::string* columnNames,
-                                       unsigned int numCols )
+v8::Local<v8::Value> Connection::GetMetaData (
+                                          const MetaInfo     *mInfo,
+                                          const unsigned int numCols,
+                                          const bool         extendedMetaData )
 {
   Nan::EscapableHandleScope scope;
   Local<Array> metaArray = Nan::New<v8::Array>(numCols);
+
   for(unsigned int i=0; i < numCols ; i++)
   {
     Local<Object> column = Nan::New<v8::Object>();
-    Nan::Set(column, Nan::New<v8::String>("name").ToLocalChecked(),
-                Nan::New<v8::String>(columnNames[i].c_str()).ToLocalChecked()
-                );
+
+    Nan::Set( column, Nan::New<v8::String>("name").ToLocalChecked(),
+              Nan::New<v8::String>(mInfo[i].name).ToLocalChecked() );
+    if ( extendedMetaData )
+    {
+      Nan::Set( column, Nan::New<v8::String>("fetchType").ToLocalChecked(),
+                Nan::New<v8::Number>(mInfo[i].njsFetchType) );
+      Nan::Set( column, Nan::New<v8::String>("dbType").ToLocalChecked(),
+                Nan::New<v8::Number>(mInfo[i].dbType) );
+      switch ( mInfo[i].dbType )
+      {
+        case dpi::DpiVarChar:
+        case dpi::DpiFixedChar:
+        case dpi::DpiRaw:
+          Nan::Set( column, Nan::New<v8::String>("byteSize").ToLocalChecked(),
+                    Nan::New<v8::Number>(mInfo[i].byteSize) );
+          break;
+
+        case dpi::DpiNumber:
+          Nan::Set( column, Nan::New<v8::String>("precision").ToLocalChecked(),
+                    Nan::New<v8::Number>(mInfo[i].precision) );
+          Nan::Set( column, Nan::New<v8::String>("scale").ToLocalChecked(),
+                    Nan::New<v8::Number>(mInfo[i].scale) );
+          break;
+
+        case dpi::DpiTimestamp:
+        case dpi::DpiTimestampTZ:
+        case dpi::DpiTimestampLTZ:
+          // For the TIMESTAMP type columns, use mInfo.scale for precision
+          Nan::Set( column, Nan::New<v8::String>("precision").ToLocalChecked(),
+                    Nan::New<v8::Number>(mInfo[i].scale) );
+          break;
+
+        default:
+          break;
+      }
+      Nan::Set( column, Nan::New<v8::String>("nullable").ToLocalChecked(),
+                Nan::New<v8::Boolean>(mInfo[i].isNullable) );
+    }
+
     Nan::Set(metaArray, i, column);
   }
+
   return scope.Escape(metaArray);
 }
 
@@ -2758,8 +2922,8 @@ v8::Local<v8::Value> Connection::GetRows (eBaton* executeBaton)
           if ( executeBaton->error.empty () )
           {
             Nan::Set(row,
-                     Nan::New<v8::String>(executeBaton->columnNames[j].c_str(),
-                 (int) executeBaton->columnNames[j].length()).ToLocalChecked(),
+                     Nan::New<v8::String>(executeBaton->mInfo[j].name.c_str(),
+                     executeBaton->mInfo[j].name.length()).ToLocalChecked(),
                      val );
           }
           else
@@ -2824,7 +2988,8 @@ Local<Value> Connection::GetValue ( eBaton *executeBaton,
   else
   {
     // DML, PL/SQL execution
-    Bind *bind = executeBaton->binds[col];
+    Bind    *bind     = executeBaton->binds[col];
+    ExtBind *extBind  = executeBaton->extBinds[col];
 
     if(executeBaton->stmtIsReturning)
     {
@@ -2846,7 +3011,7 @@ Local<Value> Connection::GetValue ( eBaton *executeBaton,
     else if(bind->type == DpiRSet)
     {
       return scope.Escape ( Connection::GetValueRefCursor (
-                                      executeBaton, bind ));
+                                      executeBaton, bind, extBind ) );
     }
     else if (( bind->type == DpiClob ) ||
              ( bind->type == DpiBlob ) ||
@@ -2874,14 +3039,16 @@ Local<Value> Connection::GetValue ( eBaton *executeBaton,
      Method to create handle for refcursor
 
    PARAMETERS:
-     executeBaton - struct eBaton
-     bind         - struct bind
+     executeBaton - eBaton
+     bind         - bind
+     extBind      - extended bind fields
 
    RETURNS:
      Handle
 */
-Local<Value> Connection::GetValueRefCursor ( eBaton *executeBaton,
-                                              Bind *bind )
+Local<Value> Connection::GetValueRefCursor ( eBaton  *executeBaton,
+                                             Bind    *bind,
+                                             ExtBind *extBind )
 {
   Nan::EscapableHandleScope scope;
   Local<Object> resultSet;
@@ -2889,15 +3056,20 @@ Local<Value> Connection::GetValueRefCursor ( eBaton *executeBaton,
 
   if(bind->ind[0] != -1)
   {
+    unsigned int numCols  = 0;
+    const MetaInfo *mInfo = NULL;
+
     resultSet = Nan::New<FunctionTemplate>(ResultSet::resultSetTemplate_s)->
                             GetFunction() ->NewInstance();
-    /*
-     * IN case of REFCURSOR, bind->flags will indicate whether we got
-     * a valid handle, based on that numCols, metaData are queried.
-     */
+
+    if ( extBind )
+    {
+      numCols = extBind->numCols;
+      mInfo   = extBind->mInfo;
+    }
     (Nan::ObjectWrap::Unwrap<ResultSet> (resultSet))->
-                       setResultSet( (dpi::Stmt*)(bind->value),
-                                     executeBaton);
+                       setResultSet( ( dpi::Stmt*)(bind->value), executeBaton,
+                                       numCols, mInfo );
     if ( !executeBaton->error.empty () )
     {
       value = Nan::Null ();

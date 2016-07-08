@@ -22,38 +22,34 @@ limitations under the License.
   - 2.1 [Error Properties](#properror)
 3. [Oracledb Class](#oracledbclass)
   - 3.1 [Oracledb Constants](#oracledbconstants)
-     - ARRAY
-     - BIND_IN
-     - BIND_INOUT
-     - BIND_OUT
-     - BLOB
-     - BUFFER
-     - CLOB
-     - CURSOR
-     - DATE
-     - DEFAULT
-     - NUMBER
-     - OBJECT
-     - STRING
+     - 3.1.1 [Query `outFormat` Constants](#oracledbconstantsoutformat)
+        - [`ARRAY`](#oracledbconstantsoutformat), [`OBJECT`](#oracledbconstantsoutformat)
+     - 3.1.2 [Node-oracledb Type Constants](#oracledbconstantsnodbtype)
+        - [`BLOB`](#oracledbconstantsnodbtype), [`BUFFER`](#oracledbconstantsnodbtype), [`CLOB`](#oracledbconstantsnodbtype), [`CURSOR`](#oracledbconstantsnodbtype), [`DATE`](#oracledbconstantsnodbtype), [`DEFAULT`](#oracledbconstantsnodbtype), [`NUMBER`](#oracledbconstantsnodbtype), [`STRING`](#oracledbconstantsnodbtype)
+     - 3.1.3 [Oracle Database Type Constants](#oracledbconstantsdbtype)
+        - [`DB_TYPE_BINARY_DOUBLE`](#oracledbconstantsdbtype), [`DB_TYPE_BINARY_FLOAT`](#oracledbconstantsdbtype), [`DB_TYPE_BLOB`](#oracledbconstantsdbtype), [`DB_TYPE_CLOB`](#oracledbconstantsdbtype), [`DB_TYPE_DATE`](#oracledbconstantsdbtype), [`DB_TYPE_CHAR`](#oracledbconstantsdbtype), [`DB_TYPE_NUMBER`](#oracledbconstantsdbtype), [`DB_TYPE_RAW`](#oracledbconstantsdbtype), [`DB_TYPE_ROWID`](#oracledbconstantsdbtype), [`DB_TYPE_TIMESTAMPLTZ`](#oracledbconstantsdbtype), [`DB_TYPE_TIMESTAMPTZ`](#oracledbconstantsdbtype), [`DB_TYPE_TIMESTAMP`](#oracledbconstantsdbtype), [`DB_TYPE_VARCHAR`](#oracledbconstantsdbtype)
+     - 3.1.4 [Execute Bind Direction Constants](#oracledbconstantsbinddir)
+        - [`BIND_IN`](#oracledbconstantsbinddir), [`BIND_INOUT`](#oracledbconstantsbinddir), [`BIND_OUT`](#oracledbconstantsbinddir)
   - 3.2 [Oracledb Properties](#oracledbproperties)
      - 3.2.1 [autoCommit](#propdbisautocommit)
      - 3.2.2 [connectionClass](#propdbconclass)
-     - 3.2.3 [externalAuth](#propdbisexternalauth)
-     - 3.2.4 [fetchAsString](#propdbfetchasstring)
-     - 3.2.5 [lobPrefetchSize](#propdblobprefetchsize)
-     - 3.2.6 [maxRows](#propdbmaxrows)
-     - 3.2.7 [oracleClientVersion](#propdboracleClientVersion)
-     - 3.2.8 [outFormat](#propdboutformat)
-     - 3.2.9 [poolIncrement](#propdbpoolincrement)
-     - 3.2.10 [poolMax](#propdbpoolmax)
-     - 3.2.11 [poolMin](#propdbpoolmin)
-     - 3.2.12 [poolTimeout](#propdbpooltimeout)
-     - 3.2.13 [prefetchRows](#propdbprefetchrows)
-     - 3.2.14 [Promise](#propdbpromise)
-     - 3.2.15 [queueRequests](#propdbqueuerequests)
-     - 3.2.16 [queueTimeout](#propdbqueuetimeout)
-     - 3.2.17 [stmtCacheSize](#propdbstmtcachesize)
-     - 3.2.18 [version](#propdbversion)
+     - 3.2.3 [extendedMetaData](#propdbextendedmetadata)
+     - 3.2.4 [externalAuth](#propdbisexternalauth)
+     - 3.2.5 [fetchAsString](#propdbfetchasstring)
+     - 3.2.6 [lobPrefetchSize](#propdblobprefetchsize)
+     - 3.2.7 [maxRows](#propdbmaxrows)
+     - 3.2.8 [oracleClientVersion](#propdboracleClientVersion)
+     - 3.2.9 [outFormat](#propdboutformat)
+     - 3.2.10 [poolIncrement](#propdbpoolincrement)
+     - 3.2.11 [poolMax](#propdbpoolmax)
+     - 3.2.12 [poolMin](#propdbpoolmin)
+     - 3.2.13 [poolTimeout](#propdbpooltimeout)
+     - 3.2.14 [prefetchRows](#propdbprefetchrows)
+     - 3.2.15 [Promise](#propdbpromise)
+     - 3.2.16 [queueRequests](#propdbqueuerequests)
+     - 3.2.17 [queueTimeout](#propdbqueuetimeout)
+     - 3.2.18 [stmtCacheSize](#propdbstmtcachesize)
+     - 3.2.19 [version](#propdbversion)
   - 3.3 [Oracledb Methods](#oracledbmethods)
      - 3.3.1 [createPool()](#createpool)
      - 3.3.2 [getConnection()](#getconnectiondb)
@@ -71,8 +67,22 @@ limitations under the License.
      - 4.2.4 [execute()](#execute)
         - 4.2.4.1 [execute(): SQL Statement](#executesqlparam)
         - 4.2.4.2 [execute(): Bind Parameters](#executebindParams)
+          - [`dir`](#executebindParams), [`maxArraySize`](#executebindParams), [`maxSize`](#executebindParams), [`type`](#executebindParams), [`val`](#executebindParams)
         - 4.2.4.3 [execute(): Options](#executeoptions)
+          - 4.2.4.3.1 [`autoCommit`](#propexecautocommit)
+          - 4.2.4.3.2 [`extendedMetaData`](#propexecextendedmetadata)
+          - 4.2.4.3.3 [`fetchInfo`](#propexecfetchinfo)
+          - 4.2.4.3.4 [`maxRows`](#propexecmaxrows)
+          - 4.2.4.3.5 [`outFormat`](#propexecoutformat)
+          - 4.2.4.3.6 [`prefetchRows`](#propexecprefetchrows)
+          - 4.2.4.3.7 [`resultSet`](#propexecresultset)
         - 4.2.4.4 [execute(): Callback Function](#executecallback)
+          - 4.2.4.4.1 [`metaData`](#execmetadata)
+            -  [`name`](#execmetadata), [`fetchType`](#execmetadata), [`dbType`](#execmetadata), [`byteSize`](#execmetadata), [`precision`](#execmetadata), [`scale`](#execmetadata), [`nullable`](#execmetadata)
+          - 4.2.4.4.2 [`outBinds`](#execoutbinds)
+          - 4.2.4.4.3 [`resultSet`](#execresultset)
+          - 4.2.4.4.4 [`rows`](#execrows)
+          - 4.2.4.4.5 [`rowsAffected`](#execrowsaffected)
      - 4.2.5 [queryStream()](#querystream)
      - 4.2.6 [release()](#release)
      - 4.2.7 [rollback()](#rollback)
@@ -262,61 +272,98 @@ same object.
 
 ### <a name="oracledbconstants"></a> 3.1 Oracledb Constants
 
-These constants are defined in the `oracledb` module that provides all
-the node-oracledb functionality.  Individual constant usage is
+These constants are defined in the `oracledb` module.  Usage is
 described later in this document.
 
-#### Constants for the query result [outFormat](#propdboutformat) option:
+The numeric values for the constants are shown to aid debugging.  They
+may change in future, so use the constant names in applications.
+
+
+#### <a name="oracledbconstantsoutformat"></a> 3.1.1 Query `outFormat` Constants
+
+Constants for the query result [outFormat](#propdboutformat) option:
 
 ```
-Oracledb.ARRAY                     // Fetch each row as array of column values
+Oracledb.ARRAY                  // (4001) Fetch each row as array of column values
 
-Oracledb.OBJECT                    // Fetch each row as an object
+Oracledb.OBJECT                 // (4002) Fetch each row as an object
 ```
 
-#### Type constants for `execute()` [bind parameter](#executebindParams) and [Lob](#proplobpiecesize) `type` properties, for [`fetchAsString`](#propdbfetchasstring), and for [`fetchInfo`](#propfetchinfo)
+#### <a name="oracledbconstantsnodbtype"></a> 3.1.2 Node-oracledb Type Constants
 
-Not all constants can be used in all places:
+Constants for `execute()` [bind parameter](#executebindParams) and
+[Lob](#proplobtype) `type` properties, for
+[`fetchAsString`](#propdbfetchasstring) and
+[`fetchInfo`](#propexecfetchinfo), and for
+[extended metadata]([#propexecextendedmetadata).
+
+Not all constants can be used in all places.
 
 ```
-Oracledb.BLOB                      // Bind a BLOB to a Node.js Stream
+Oracledb.BLOB                   // (2007) Bind a BLOB to a Node.js Stream
 
-Oracledb.BUFFER                    // Bind a RAW to a Node.js Buffer
+Oracledb.BUFFER                 // (2005) Bind a RAW to a Node.js Buffer
 
-Oracledb.CLOB                      // Bind a CLOB to a Node.js Stream
+Oracledb.CLOB                   // (2006) Bind a CLOB to a Node.js Stream
 
-Oracledb.CURSOR                    // Bind a REF CURSOR to a node-oracledb ResultSet class
+Oracledb.CURSOR                 // (2004) Bind a REF CURSOR to a node-oracledb ResultSet class
 
-Oracledb.DATE                      // Bind as JavaScript date type.  Can also be used for fetchAsString and fetchInfo
+Oracledb.DATE                   // (2003) Bind as JavaScript date type.  Can also be used for fetchAsString and fetchInfo
 
-Oracledb.DEFAULT                   // Used with fetchInfo to reset the fetch type to the database type
+Oracledb.DEFAULT                // (0) Used with fetchInfo to reset the fetch type to the database type
 
-Oracledb.NUMBER                    // Bind as JavaScript number type.  Can also be used for fetchAsString and fetchInfo
+Oracledb.NUMBER                 // (2002) Bind as JavaScript number type.  Can also be used for fetchAsString and fetchInfo
 
-Oracledb.STRING                    // Bind as JavaScript string type
+Oracledb.STRING                 // (2001) Bind as JavaScript string type
 ```
 
-#### Constants for `execute()` [bind parameter](#executebindParams) `dir` properties
+#### <a name="oracledbconstantsdbtype"></a> 3.1.3 Oracle Database Type Constants
+
+These types are shown in [extended metadata](#propexecextendedmetadata)
+for queries and REF CURSORS.  They indicate the Oracle database type.
+
+```
+Oracledb.DB_TYPE_BINARY_DOUBLE  // (101) BINARY_DOUBLE
+
+Oracledb.DB_TYPE_BINARY_FLOAT   // (100) BINARY_FLOAT
+
+Oracledb.DB_TYPE_BLOB           // (113) BLOB
+
+Oracledb.DB_TYPE_CLOB           // (112) CLOB
+
+Oracledb.DB_TYPE_DATE           // (12) DATE
+
+Oracledb.DB_TYPE_CHAR           // (96) CHAR
+
+Oracledb.DB_TYPE_NUMBER         // (2) NUMBER or FLOAT
+
+Oracledb.DB_TYPE_RAW            // (23) RAW
+
+Oracledb.DB_TYPE_ROWID          // (104) ROWID
+
+Oracledb.DB_TYPE_TIMESTAMP      // (187) TIMESTAMP
+
+Oracledb.DB_TYPE_TIMESTAMPLTZ   // (232) TIMESTAMP WITH LOCAL TIME ZONE
+
+Oracledb.DB_TYPE_TIMESTAMPTZ    // (188) TIMESTAMP WITH TIME ZONE
+
+Oracledb.DB_TYPE_VARCHAR        // (1) VARCHAR2
+```
+
+#### <a name="oracledbconstantsbinddir"></a> 3.1.4 Execute Bind Direction Constants
+
+Constants for `execute()` [bind parameter](#executebindParams) `dir`
+properties.
 
 These specify whether data values bound to SQL or PL/SQL bind
 parameters are passed into, or out from, the database:
 
 ```
-Oracledb.BIND_IN                   // Direction for IN binds
+Oracledb.BIND_IN                // (3001) Direction for IN binds
 
-Oracledb.BIND_INOUT                // Direction for IN OUT binds
+Oracledb.BIND_INOUT             // (3002) Direction for IN OUT binds
 
-Oracledb.BIND_OUT                  // Direction for OUT binds
-
-```
-
-#### Example
-
-This example shows setting the output format so all query results are returned in object format:
-
-```javascript
-var oracledb = require("oracledb");
-oracledb.outFormat = oracledb.OBJECT;
+Oracledb.BIND_OUT               // (3003) Direction for OUT binds
 ```
 
 ### <a name="oracledbproperties"></a> 3.2 Oracledb Properties
@@ -350,7 +397,7 @@ execution.
 
 The default value is *false*.
 
-This property may be overridden in an [`execute()`](#execute) call.
+This property may be overridden in an [`execute()`](#executeoptions) call.
 
 Note prior to node-oracledb 0.5 this property was called
 `isAutoCommit`.
@@ -393,7 +440,27 @@ var oracledb = require('oracledb');
 oracledb.connectionClass = 'HRPOOL';
 ```
 
-#### <a name="propdbisexternalauth"></a> 3.2.3 externalAuth
+#### <a name="propdbextendedmetadata"></a> 3.2.3 extendedMetaData
+
+```
+Boolean extendedMetaData
+```
+
+Determines whether additional metadata is available for queries and
+for REF CURSORs returned from PL/SQL blocks.
+
+The default value for `extendedMetaData` is `false`. With this value,
+the [`result.metaData`](#execmetadata)
+[`result.resultSet.metaData`](#rsmetadata) objects only include column
+names.
+
+If `extendedMetaData` is `true` then `metaData` will contain
+additional attributes.  These are listed in
+[Result Object Properties](#execmetadata).
+
+This property may be overridden in an [`execute()`](#executeoptions) call.
+
+#### <a name="propdbisexternalauth"></a> 3.2.4 externalAuth
 
 ```
 Boolean externalAuth
@@ -422,7 +489,7 @@ var oracledb = require('oracledb');
 oracledb.externalAuth = false;
 ```
 
-#### <a name="propdbfetchasstring"></a> 3.2.4 fetchAsString
+#### <a name="propdbfetchasstring"></a> 3.2.5 fetchAsString
 
 ```
 Array fetchAsString
@@ -439,7 +506,7 @@ This property helps avoid situations where using JavaScript types can
 lead to numeric precision loss, or where date conversion is unwanted.
 
 The valid types that can be mapped to strings are
-[`DATE`](#oracledbconstants) and [`NUMBER`](#oracledbconstants).
+[`DATE`](#oracledbconstantsnodbtype) and [`NUMBER`](#oracledbconstantsnodbtype).
 
 The maximum length of a string created by this mapping is 200 bytes.
 
@@ -458,7 +525,7 @@ var oracledb = require('oracledb');
 oracledb.fetchAsString = [ oracledb.DATE, oracledb.NUMBER ];
 ```
 
-#### <a name="propdblobprefetchsize"></a> 3.2.5 lobPrefetchSize
+#### <a name="propdblobprefetchsize"></a> 3.2.6 lobPrefetchSize
 
 ```
 Number lobPrefetchSize
@@ -484,7 +551,7 @@ var oracledb = require('oracledb');
 oracledb.lobPrefetchSize = 16384;
 ```
 
-#### <a name="propdbmaxrows"></a> 3.2.6 maxRows
+#### <a name="propdbmaxrows"></a> 3.2.7 maxRows
 
 ```
 Number maxRows
@@ -496,7 +563,7 @@ this limit are not fetched from the database.
 
 The default value is 100.
 
-This property may be overridden in an [`execute()`](#execute) call.
+This property may be overridden in an [`execute()`](#executeoptions) call.
 
 This property is also used by [`queryStream()`](#querystream) as an
 internal buffer size tuning parameter.
@@ -526,7 +593,7 @@ var oracledb = require('oracledb');
 oracledb.maxRows = 100;
 ```
 
-#### <a name="propdboracleClientVersion"></a> 3.2.7 oracleClientVersion
+#### <a name="propdboracleClientVersion"></a> 3.2.8 oracleClientVersion
 
 ```
 readonly Number oracleClientVersion
@@ -542,7 +609,7 @@ var oracledb = require('oracledb');
 console.log("Oracle client library version number is " + oracledb.oracleClientVersion);
 ```
 
-#### <a name="propdboutformat"></a> 3.2.8 outFormat
+#### <a name="propdboutformat"></a> 3.2.9 outFormat
 
 ```
 Number outFormat
@@ -550,7 +617,7 @@ Number outFormat
 
 The format of rows fetched when using the [`execute()`](#execute)
 call. This can be either of the [Oracledb
-constants](#oracledbconstants) `ARRAY` or `OBJECT`.  The default value
+constants](#oracledbconstantsoutformat) `ARRAY` or `OBJECT`.  The default value
 is `ARRAY` which is more efficient.
 
 If specified as `ARRAY`, each row is fetched as an array of column
@@ -563,7 +630,7 @@ Oracle's standard name-casing rules.  It will commonly be uppercase,
 since most applications create tables using unquoted, case-insensitive
 names.
 
-This property may be overridden in an [`execute()`](#execute) call.
+This property may be overridden in an [`execute()`](#executeoptions) call.
 
 ##### Example
 
@@ -572,7 +639,7 @@ var oracledb = require('oracledb');
 oracledb.outFormat = oracledb.ARRAY;
 ```
 
-#### <a name="propdbpoolincrement"></a> 3.2.9 poolIncrement
+#### <a name="propdbpoolincrement"></a> 3.2.10 poolIncrement
 
 ```
 Number poolIncrement
@@ -592,7 +659,7 @@ var oracledb = require('oracledb');
 oracledb.poolIncrement = 1;
 ```
 
-#### <a name="propdbpoolmax"></a> 3.2.10 poolMax
+#### <a name="propdbpoolmax"></a> 3.2.11 poolMax
 
 ```
 Number poolMax
@@ -611,7 +678,7 @@ var oracledb = require('oracledb');
 oracledb.poolMax = 4;
 ```
 
-#### <a name="propdbpoolmin"></a> 3.2.11 poolMin
+#### <a name="propdbpoolmin"></a> 3.2.12 poolMin
 
 ```
 Number poolMin
@@ -631,7 +698,7 @@ var oracledb = require('oracledb');
 oracledb.poolMin = 0;
 ```
 
-#### <a name="propdbpooltimeout"></a> 3.2.12 poolTimeout
+#### <a name="propdbpooltimeout"></a> 3.2.13 poolTimeout
 
 ```
 Number poolTimeout
@@ -653,7 +720,7 @@ var oracledb = require('oracledb');
 oracledb.poolTimeout = 60;
 ```
 
-#### <a name="propdbprefetchrows"></a> 3.2.13 prefetchRows
+#### <a name="propdbprefetchrows"></a> 3.2.14 prefetchRows
 
 ```
 Number prefetchRows
@@ -683,7 +750,7 @@ var oracledb = require('oracledb');
 oracledb.prefetchRows = 100;
 ```
 
-#### <a name="propdbpromise"></a> 3.2.14 Promise
+#### <a name="propdbpromise"></a> 3.2.15 Promise
 
 ```
 Promise Promise
@@ -712,7 +779,7 @@ Promises can be completely disabled by setting
 oracledb.Promise = null;
 ```
 
-#### <a name="propdbqueuerequests"></a> 3.2.15 queueRequests
+#### <a name="propdbqueuerequests"></a> 3.2.16 queueRequests
 
 ```
 Boolean queueRequests
@@ -739,7 +806,7 @@ var oracledb = require('oracledb');
 oracledb.queueRequests = false;
 ```
 
-#### <a name="propdbqueuetimeout"></a> 3.2.16 queueTimeout
+#### <a name="propdbqueuetimeout"></a> 3.2.17 queueTimeout
 
 ```
 Number queueTimeout
@@ -760,7 +827,7 @@ var oracledb = require('oracledb');
 oracledb.queueTimeout = 3000; // 3 seconds
 ```
 
-#### <a name="propdbstmtcachesize"></a> 3.2.17 stmtCacheSize
+#### <a name="propdbstmtcachesize"></a> 3.2.18 stmtCacheSize
 
 ```
 Number stmtCacheSize
@@ -787,7 +854,7 @@ var oracledb = require('oracledb');
 oracledb.stmtCacheSize = 30;
 ```
 
-#### <a name="propdbversion"></a> 3.2.18 version
+#### <a name="propdbversion"></a> 3.2.19 version
 ```
 readonly Number version
 ```
@@ -1291,10 +1358,10 @@ statements.
 
 Parameter | Description
 ----------|------------
-`String sql` | The SQL string that is executed. The SQL string may contain bind parameters.
-`Object bindParams` | This function parameter is needed if there are bind parameters in the SQL statement.
-`Object options` | This is an optional parameter to `execute()` that may be used to control statement execution.
-`function(Error error, [Object result])` | Callback function with the execution results.
+[`String sql`](#executesqlparam) | The SQL string that is executed. The SQL string may contain bind parameters.
+[`Object bindParams`](#executebindParams) | This function parameter is needed if there are bind parameters in the SQL statement.
+[`Object options`](#executeoptions) | This is an optional parameter to `execute()` that may be used to control statement execution.
+[`function(Error error, [Object result])`](#executecallback) | Callback function with the execution results.
 
 The parameters are discussed in the next sections.
 
@@ -1325,10 +1392,10 @@ If a bind value is an object it may have the following properties:
 
 Bind Property | Description
 ---------------|------------
-`dir` | The direction of the bind.  One of the [Oracledb Constants](#oracledbconstants) `BIND_IN`, `BIND_INOUT`, or `BIND_OUT`.
+`dir` | The direction of the bind.  One of the [Oracledb Constants](#oracledbconstantsbinddir) `BIND_IN`, `BIND_INOUT`, or `BIND_OUT`.
 `maxArraySize` | The number of array elements to be allocated for a PL/SQL Collection `INDEX OF` associative array OUT or IN OUT array bind variable.
 `maxSize` | The maximum number of bytes that an OUT or IN OUT bind variable of type STRING or BUFFER can use. The default value is 200. The maximum limit is 32767.
-`type` | The datatype to be bound. One of the [Oracledb Constants](#oracledbconstants) `STRING`, `NUMBER`, `DATE`, `CURSOR` or `BUFFER`.
+`type` | The datatype to be bound. One of the [Oracledb Constants](#oracledbconstantsbinddir) `STRING`, `NUMBER`, `DATE`, `CURSOR` or `BUFFER`.
 `val` | The input value or variable to be used for an IN or IN OUT bind variable.
 
 The maximum size of a `BUFFER` type is 2000 bytes, unless you are
@@ -1345,6 +1412,7 @@ Note `CURSOR` bind variables can only be used for PL/SQL OUT binds.
 See [Bind Parameters for Prepared Statements](#bind) for usage and examples.
 
 ##### <a name="executeoptions"></a> 4.2.4.3 `execute()`: Options
+
 ```
 Object options
 ```
@@ -1358,22 +1426,31 @@ otherwise you will get an error like *ORA-01036: Illegal variable
 name/number* or *NJS-012: encountered invalid bind datatype*.
 
 The following properties can be set or overridden for the execution of
-a statement:
+a statement.
 
-Options Property | Description
-----------------|-------------
-*Boolean autoCommit* | Overrides *Oracledb* [`autoCommit`](#propdbisautocommit)
-*Object fetchInfo* | Object defining how query column data should be represented in JavaScript. See [below](#propfetchinfo).
-*Number maxRows* | Overrides *Oracledb* [`maxRows`](#propdbmaxrows)
-*String outFormat* | Overrides *Oracledb* [`outFormat`](#propdboutformat)
-*Number prefetchRows* | Overrides *Oracledb* [`prefetchRows`](#propdbprefetchrows)
-*Boolean resultSet* | Determines whether query results should be returned as a [`ResultSet`](#resultsetclass) object or directly.  The default is `false`.
+###### <a name="propexecautocommit"></a> 4.2.4.3.1 `autoCommit`
 
-<a name="propfetchinfo"></a> The description of `fetchInfo` follows:
+```
+Boolean autoCommit
+```
+
+Overrides *Oracledb* [`autoCommit`](#propdbisautocommit).
+
+###### <a name="propexecextendedmetadata"></a> 4.2.4.3.2 `extendedMetaData`
+
+```
+Boolean extendedMetaData
+```
+
+Overrides *Oracledb* [extendedMetaData](#propdbextendedmetadata).
+
+###### <a name="propfetchinfo"></a> <a name="propexecfetchinfo"></a> 4.2.4.3.3 `fetchInfo`
 
 ```
 Object fetchInfo
 ```
+
+Object defining how query column data should be represented in JavaScript.
 
 The `fetchInfo` property can be used to indicate that number or date
 columns in a query should be returned as strings instead of their
@@ -1393,15 +1470,15 @@ fetchInfo:
 Each column is specified by name, using Oracle's standard naming
 convention.
 
-The valid values for `type` are [`STRING`](#oracledbconstants) and
-[`DEFAULT`](#oracledbconstants).  The former indicates that the given
+The valid values for `type` are [`STRING`](#oracledbconstantsnodbtype) and
+[`DEFAULT`](#oracledbconstantsnodbtype).  The former indicates that the given
 column should be returned as a string.  The latter can be used to
 override any global mapping given by
 [`fetchAsString`](#propdbfetchasstring) and allow the column data for
 this query to be returned in native format.
 
 The maximum length of a string created by type mapping is 200 bytes.
-However, if a database column that is already of type STRING is
+However, if a database column that is already of type `STRING` is
 specified in `fetchInfo`, then the actual database metadata will be
 used to determine the maximum length.
 
@@ -1412,7 +1489,42 @@ settings in the `execute()` call.  Use the global
 See [Result Type Mapping](#typemap) for more information on query type
 mapping.
 
+###### <a name="propexecmaxrows"></a> 4.2.4.3.4 `maxRows`
+
+```
+Number maxRows
+```
+
+Overrides *Oracledb* [`maxRows`](#propdbmaxrows).
+
+###### <a name="propexecoutformat"></a> 4.2.4.3.5 `outFormat`
+
+```
+String outFormat
+```
+
+Overrides *Oracledb* [`outFormat`](#propdboutformat).
+
+###### <a name="propexecprefetchrows"></a> 4.2.4.3.6 `prefetchRows`
+
+```
+Number prefetchRows
+```
+
+Overrides *Oracledb* [`prefetchRows`](#propdbprefetchrows).
+
+###### <a name="propexecresultset"></a> 4.2.4.3.7 `resultSet`
+
+```
+Boolean resultSet
+```
+
+Determines whether query results should be returned as a
+[`ResultSet`](#resultsetclass) object or directly.  The default is
+`false`.
+
 ##### <a name="executecallback"></a> 4.2.4.4 `execute()`: Callback Function
+
 ```
 function(Error error, [Object result])
 ```
@@ -1424,21 +1536,42 @@ Callback function parameter | Description
 *Error error* | If `execute()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 *Object result* | The [`result`](#resultobject) object, described below. For DDL statements and DML where the application only checks `error` for success or failure, the `result` parameter can be omitted.
 
-
-<a name="resultobject"></a>
-##### Result Object Properties
+##### <a name="resultobject"></a> Result Object Properties
 
 The properties of `result` object from the `execute()` callback are described below.
+
+###### <a name="execmetadata"></a> 4.2.4.4.1 `metaData`
 
 ```
 Array metaData
 ```
 
-For `SELECT` statements, this contains an array of column names for
-the select list.  For non queries, this property is undefined.  The
-column names follow Oracle's standard name-casing rules.  They will
-commonly be uppercase, since most applications create tables using
-unquoted, case-insensitive names.
+For `SELECT` statements, this contains an array of objects describing
+details of columns for the select list.  For non queries, this property is undefined.
+
+Each column's `name` is always given.  If the execute option
+[`extendedMetaData`](#propexecextendedmetadata) is `true` then
+additional information is included.
+
+- `name`: The column name follows Oracle's standard name-casing rules.  It will commonly be uppercase, since most applications create tables using unquoted, case-insensitive names.
+- `fetchType`: one of the [Node-oracledb Type Constant](#oracledbconstantsnodbtype) values.
+- `dbType`: one of the [Oracle Database Type Constant](#oracledbconstantsdbtype) values.
+- `byteSize`: the database byte size.  This is only set for `DB_TYPE_VARCHAR`, `DB_TYPE_CHAR` and `DB_TYPE_RAW` column types.
+- `precision`: set only for `DB_TYPE_NUMBER`, `DB_TYPE_TIMESTAMP`, `DB_TYPE_TIMESTAMPTZ` and `DB_TYPE_TIMESTAMPLTZ` columns.
+- `scale`: set only for `DB_TYPE_NUMBER` columns.
+- `nullable`: indicates whether `NULL` values are permitted for this column.
+
+For numeric arguments: when `precision` is `0`, then the column is
+simply a `NUMBER`.  If `precision` is nonzero and `scale` is `-127`,
+then the column is a `FLOAT`.  Otherwise, it is a `NUMBER(precision,
+scale)`.
+
+Note for Lobs, the [Lob type property](#proplobtype) also indicates
+whether the object is a `BLOB` or `CLOB`.
+
+See [Query Column Metadata](#querymeta) for examples.
+
+###### <a name="execoutbinds"></a> 4.2.4.4.2 `outBinds`
 
 ```
 Array/object outBinds
@@ -1449,6 +1582,8 @@ values. If [`bindParams`](#executebindParams) is passed as an array,
 then `outBinds` is returned as an array. If `bindParams` is passed as
 an object, then `outBinds` is returned as an object.
 
+###### <a name="execresultset"></a> 4.2.4.4.3 `resultSet`
+
 ```
 Object resultSet
 ```
@@ -1456,6 +1591,8 @@ Object resultSet
 For `SELECT` statements when the [`resultSet`](#executeoptions)
 option is `true`, use the `resultSet` object to fetch rows.  See
 [ResultSet Class](#resultsetclass).
+
+###### <a name="execrows"></a> 4.2.4.4.4 `rows`
 
 ```
 Array rows
@@ -1471,6 +1608,8 @@ fetched, then `rows` is an array that contains one single row.  The
 number of rows returned is limited to the `maxRows` configuration
 property of the *Oracledb* object, although this may be overridden in
 any `execute()` call.
+
+###### <a name="execrowsaffected"></a> 4.2.4.4.5 `rowsAffected`
 
 ```
 Number rowsAffected
@@ -1610,8 +1749,8 @@ readonly Number type
 
 This read-only attribute shows the type of Lob being used.  It will
 have the value of one of the constants
-[`Oracledb.BLOB`](#oracledbconstants) or
-[`Oracledb.CLOB`](#oracledbconstants).  The value is derived from the
+[`Oracledb.BLOB`](#oracledbconstantsnodbtype) or
+[`Oracledb.CLOB`](#oracledbconstantsnodbtype).  The value is derived from the
 bind type when using LOB bind variables, or from the column type when
 a LOB is returned by a query.
 
@@ -1813,7 +1952,7 @@ be predicted and may be larger than a sensible
 A *ResultSet* object is obtained by setting `resultSet: true` in the
 `options` parameter of the *Connection* [`execute()`](#execute) method
 when executing a query.  A *ResultSet* is also returned to
-node-oracledb when binding as type [`CURSOR`](#oracledbconstants) to a
+node-oracledb when binding as type [`CURSOR`](#oracledbconstantsnodbtype) to a
 PL/SQL REF CURSOR bind parameter.
 
 The value of [`prefetchRows`](#propdbprefetchrows) can be adjusted to
@@ -1831,10 +1970,14 @@ The properties of a *ResultSet* object are listed below.
 Array metaData
 ```
 
-Contains an array of column names for the select list of the query or
-REF CURSOR.  The column names follow Oracle's standard name-casing
-rules.  They will commonly be uppercase, since most applications
-create tables using unquoted, case-insensitive names.
+Contains an array of objects with metadata about the query or REF
+CURSOR columns.
+
+Each column's `name` is always given.  If the `execute()` option
+[`extendedMetaData`](#propexecextendedmetadata) is `true` then
+additional information is included.
+
+See [`result.metaData`](#execmetadata) for the available attributes.
 
 ### <a name="resultsetmethods"></a> 7.2 ResultSet Methods
 
@@ -2617,9 +2760,8 @@ case-insensitive names.
 
 #### <a name="querymeta"></a> 9.1.5 Query Column Metadata
 
-The column names of a query are returned in the
-[`execute()`](#execute) callback's `result.metaData` parameter
-attribute:
+The column names of a query are returned in the `execute()` callback's
+[`result.metaData`](#execmetadata) attribute:
 
 ```javascript
 connection.execute(
@@ -2635,10 +2777,10 @@ connection.execute(
 ```
 
 When using a [`ResultSet`](#resultsetclass), metadata is also
-available in `result.resultSet.metaData`.
+available in [`result.resultSet.metaData`](#rsmetadata).
 
-The metadata is an array of objects, one per column.  Each object has
-a `name` attribute:
+The metadata is an array of objects, one per column.  By default each
+object has a `name` attribute:
 
 ```
 [ { name: 'DEPARTMENT_ID' }, { name: 'DEPARTMENT_NAME' } ]
@@ -2647,6 +2789,46 @@ a `name` attribute:
 The names are in uppercase.  This is the default casing behavior for
 Oracle client programs when a database table is created with unquoted,
 case-insensitive column names.
+
+##### Extended Metadata
+
+More metadata is included when the *Oracledb*
+[`extendedMetaData`](#propdbextendedmetadata) or `execute()` option
+[`extendedMetaData`](#propexecextendedmetadata) is `true`.  For
+example:
+
+```javascript
+connection.execute(
+  "SELECT department_id, department_name " +
+    "FROM departments " +
+    "WHERE manager_id < :id",
+  [110],  // bind value for :id
+  { extendedMetaData: true },
+  function(err, result)
+  {
+    if (err) { console.error(err.message); return; }
+    console.log(result.metaData);  // show the extended metadata
+  });
+```
+
+The output is:
+
+```
+[ { name: 'DEPARTMENT_ID',
+    fetchType: 2002,
+    dbType: 2,
+    precision: 4,
+    scale: 0,
+    nullable: false },
+  { name: 'DEPARTMENT_NAME',
+    fetchType: 2001,
+    dbType: 1,
+    byteSize: 30,
+    nullable: false } ]
+```
+
+Description of the properties is given in the
+[`result.metaData`](#execmetadata) description.
 
 #### <a name="typemap"></a> 9.1.6 Result Type Mapping
 
@@ -2692,7 +2874,7 @@ Only number and date columns can be mapped to strings with `fetchAsString`.
 The maximum length of a string created can be 200 bytes.
 
 Individual queries can use the [`execute()`](#execute) option
-[`fetchInfo`](#propfetchinfo) to map individual number or date columns
+[`fetchInfo`](#propexecfetchinfo) to map individual number or date columns
 to strings without affecting other columns or other queries.  Any
 global `fetchAsString` setting can be overridden to allow specific
 columns to have data returned in native format:
@@ -3816,7 +3998,7 @@ After executing either of these `mytab` will contain:
 ```
 
 The [`type`](#executebindParams) must be set for PL/SQL array binds.
-It can be set to `STRING` or `NUMBER`
+It can be set to [`STRING`](#oracledbconstantsnodbtype) or [`NUMBER`](#oracledbconstantsnodbtype).
 
 For OUT and IN OUT binds, the [`maxArraySize`](#executebindParams)
 bind property must be set.  Its value is the maximum number of
@@ -3917,12 +4099,15 @@ statement is executed irrespective of the value of `autoCommit`.
 ## <a name="stmtcache"></a> 15. Statement Caching
 
 Node-oracledb's [`execute()`](#execute) method uses the
-[Oracle OCI statement cache](https://docs.oracle.com/database/121/LNOCI/oci09adv.htm#i471377) instead of requiring applications to prepare and execute statements in separate steps.
+[Oracle OCI statement cache](https://docs.oracle.com/database/121/LNOCI/oci09adv.htm#i471377)
+instead of requiring applications to prepare, execute (and then
+re-execute without re-preparing) statements in separate steps.
 Each non-pooled connection and each session in the connection pool has
 its own cache of statements with a default size of 30.  Statement
 caching lets cursors be used without re-parsing the statement.
 Statement caching also reduces meta data transfer costs between the
-node-oracledb and the database.  Performance and scalability are improved.
+node-oracledb and the database.  Performance and scalability are
+improved.
 
 In general, set the statement cache to the size of the working set of
 statements being executed by the application.
@@ -4154,7 +4339,7 @@ oracledb.getConnection(
 Since the returned promise will not have a catch block, as the
 developer intended to use the callback programming style, any
 rejections that occur will go unnoticed.  Node.js 4.0 added the
-`unhandledRejection` event can prevent such rejections from going
+`unhandledRejection` event to prevent such rejections from going
 unnoticed:
 
 ```javascript

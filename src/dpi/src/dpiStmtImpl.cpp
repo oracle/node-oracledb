@@ -475,12 +475,18 @@ unsigned int StmtImpl::rowsFetched () const
     obtains column meta data
 
   PARAMETERS
-    -None-
+    extendedMetaData -  true  - all fields are populated
+                        false - only column name, db type, size  is populated.
 
   RETURNS
-    -None-
+    Pointer to MetaData struct.
 */
-const MetaData* StmtImpl::getMetaData ()
+
+/*
+ * The returned pointer to MetaData struct should not be freed by the caller
+ * since this will be freed as part of StmtImpl::release()
+ */
+const MetaData* StmtImpl::getMetaData ( bool extendedMetaData )
 {
 
   if ( !meta_ )
@@ -509,30 +515,53 @@ const MetaData* StmtImpl::getMetaData ()
                            (void*) &(meta_[col].dbType),(ub4 *) 0,
                            (ub4) OCI_ATTR_DATA_TYPE,
                            errh_ ), errh_ );
-        ociCall(OCIAttrGet(colDesc, (ub4) OCI_DTYPE_PARAM,
-                           (void*) &(meta_[col].dbSize),(ub4 *) 0,
-                           (ub4) OCI_ATTR_DATA_SIZE,
-                           errh_ ), errh_ );
-        ociCall(OCIAttrGet(colDesc, (ub4) OCI_DTYPE_PARAM,
-                           (void*) &(meta_[col].isNullable),(ub4*) 0,
-                           (ub4) OCI_ATTR_IS_NULL,
-                           errh_ ), errh_ );
-        if (meta_[col].dbType == DpiNumber || meta_[col].dbType == DpiBinaryFloat
-               ||meta_[col].dbType == DpiBinaryDouble )
+        switch (  meta_[col].dbType )
+        {
+          case DpiVarChar:
+          case DpiFixedChar:
+          case DpiRaw:
+            // byteSize in case VARCHAR, FIXEDCHAR, RAW columns
+            ociCall(OCIAttrGet(colDesc, (ub4) OCI_DTYPE_PARAM,
+                               (void*) &(meta_[col].dbSize),(ub4 *) 0,
+                               (ub4) OCI_ATTR_DATA_SIZE,
+                               errh_ ), errh_ );
+            break;
+
+          default:
+            break;
+        }
+
+        if ( extendedMetaData )
         {
           ociCall(OCIAttrGet(colDesc, (ub4) OCI_DTYPE_PARAM,
-                             (void*) &(meta_[col].precision),(ub4* ) 0,
-                             (ub4) OCI_ATTR_PRECISION,
+                             (void*) &(meta_[col].isNullable),(ub4*) 0,
+                             (ub4) OCI_ATTR_IS_NULL,
                              errh_ ), errh_ );
-          ociCall(OCIAttrGet(colDesc, (ub4) OCI_DTYPE_PARAM,
-                             (void*) &(meta_[col].scale),(ub4*) 0,
-                             (ub4) OCI_ATTR_SCALE,
-                             errh_ ), errh_ );
-        }
-        else
-        {                           // avoid uninitialized variables
-          meta_[col].precision = 0;
-          meta_[col].scale = 0;
+          switch ( meta_[col].dbType )
+          {
+            case DpiNumber:
+              ociCall(OCIAttrGet(colDesc, (ub4) OCI_DTYPE_PARAM,
+                                 (void*) &(meta_[col].precision),(ub4* ) 0,
+                                 (ub4) OCI_ATTR_PRECISION,
+                                 errh_ ), errh_ );
+              ociCall(OCIAttrGet(colDesc, (ub4) OCI_DTYPE_PARAM,
+                                 (void*) &(meta_[col].scale),(ub4*) 0,
+                                 (ub4) OCI_ATTR_SCALE,
+                                 errh_ ), errh_ );
+              break;
+
+            case DpiTimestamp:
+            case DpiTimestampTZ:
+            case DpiTimestampLTZ:
+              ociCall(OCIAttrGet(colDesc, (ub4) OCI_DTYPE_PARAM,
+                                 (void*) &(meta_[col].scale),(ub4*) 0,
+                                 (ub4) OCI_ATTR_SCALE,
+                                 errh_ ), errh_ );
+              break;
+
+            default:
+              break;
+          }
         }
 
         OCIDescriptorFree( colDesc, OCI_DTYPE_PARAM);
