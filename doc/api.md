@@ -27,7 +27,7 @@ limitations under the License.
      - 3.1.2 [Node-oracledb Type Constants](#oracledbconstantsnodbtype)
         - [`BLOB`](#oracledbconstantsnodbtype), [`BUFFER`](#oracledbconstantsnodbtype), [`CLOB`](#oracledbconstantsnodbtype), [`CURSOR`](#oracledbconstantsnodbtype), [`DATE`](#oracledbconstantsnodbtype), [`DEFAULT`](#oracledbconstantsnodbtype), [`NUMBER`](#oracledbconstantsnodbtype), [`STRING`](#oracledbconstantsnodbtype)
      - 3.1.3 [Oracle Database Type Constants](#oracledbconstantsdbtype)
-        - [`DB_TYPE_BINARY_DOUBLE`](#oracledbconstantsdbtype), [`DB_TYPE_BINARY_FLOAT`](#oracledbconstantsdbtype), [`DB_TYPE_BLOB`](#oracledbconstantsdbtype), [`DB_TYPE_CLOB`](#oracledbconstantsdbtype), [`DB_TYPE_DATE`](#oracledbconstantsdbtype), [`DB_TYPE_CHAR`](#oracledbconstantsdbtype), [`DB_TYPE_NUMBER`](#oracledbconstantsdbtype), [`DB_TYPE_RAW`](#oracledbconstantsdbtype), [`DB_TYPE_ROWID`](#oracledbconstantsdbtype), [`DB_TYPE_TIMESTAMPLTZ`](#oracledbconstantsdbtype), [`DB_TYPE_TIMESTAMPTZ`](#oracledbconstantsdbtype), [`DB_TYPE_TIMESTAMP`](#oracledbconstantsdbtype), [`DB_TYPE_VARCHAR`](#oracledbconstantsdbtype)
+        - [`DB_TYPE_BINARY_DOUBLE`](#oracledbconstantsdbtype), [`DB_TYPE_BINARY_FLOAT`](#oracledbconstantsdbtype), [`DB_TYPE_BLOB`](#oracledbconstantsdbtype), [`DB_TYPE_CLOB`](#oracledbconstantsdbtype), [`DB_TYPE_DATE`](#oracledbconstantsdbtype), [`DB_TYPE_CHAR`](#oracledbconstantsdbtype), [`DB_TYPE_NUMBER`](#oracledbconstantsdbtype), [`DB_TYPE_RAW`](#oracledbconstantsdbtype), [`DB_TYPE_ROWID`](#oracledbconstantsdbtype), [`DB_TYPE_TIMESTAMP_LTZ`](#oracledbconstantsdbtype), [`DB_TYPE_TIMESTAMP_TZ`](#oracledbconstantsdbtype), [`DB_TYPE_TIMESTAMP`](#oracledbconstantsdbtype), [`DB_TYPE_VARCHAR`](#oracledbconstantsdbtype)
      - 3.1.4 [Execute Bind Direction Constants](#oracledbconstantsbinddir)
         - [`BIND_IN`](#oracledbconstantsbinddir), [`BIND_INOUT`](#oracledbconstantsbinddir), [`BIND_OUT`](#oracledbconstantsbinddir)
   - 3.2 [Oracledb Properties](#oracledbproperties)
@@ -329,11 +329,11 @@ Oracledb.DB_TYPE_BINARY_FLOAT   // (100) BINARY_FLOAT
 
 Oracledb.DB_TYPE_BLOB           // (113) BLOB
 
+Oracledb.DB_TYPE_CHAR           // (96) CHAR
+
 Oracledb.DB_TYPE_CLOB           // (112) CLOB
 
 Oracledb.DB_TYPE_DATE           // (12) DATE
-
-Oracledb.DB_TYPE_CHAR           // (96) CHAR
 
 Oracledb.DB_TYPE_NUMBER         // (2) NUMBER or FLOAT
 
@@ -343,9 +343,9 @@ Oracledb.DB_TYPE_ROWID          // (104) ROWID
 
 Oracledb.DB_TYPE_TIMESTAMP      // (187) TIMESTAMP
 
-Oracledb.DB_TYPE_TIMESTAMPLTZ   // (232) TIMESTAMP WITH LOCAL TIME ZONE
+Oracledb.DB_TYPE_TIMESTAMP_LTZ  // (232) TIMESTAMP WITH LOCAL TIME ZONE
 
-Oracledb.DB_TYPE_TIMESTAMPTZ    // (188) TIMESTAMP WITH TIME ZONE
+Oracledb.DB_TYPE_TIMESTAMP_TZ   // (188) TIMESTAMP WITH TIME ZONE
 
 Oracledb.DB_TYPE_VARCHAR        // (1) VARCHAR2
 ```
@@ -1561,7 +1561,7 @@ additional information is included.
 - `fetchType`: one of the [Node-oracledb Type Constant](#oracledbconstantsnodbtype) values.
 - `dbType`: one of the [Oracle Database Type Constant](#oracledbconstantsdbtype) values.
 - `byteSize`: the database byte size.  This is only set for `DB_TYPE_VARCHAR`, `DB_TYPE_CHAR` and `DB_TYPE_RAW` column types.
-- `precision`: set only for `DB_TYPE_NUMBER`, `DB_TYPE_TIMESTAMP`, `DB_TYPE_TIMESTAMPTZ` and `DB_TYPE_TIMESTAMPLTZ` columns.
+- `precision`: set only for `DB_TYPE_NUMBER`, `DB_TYPE_TIMESTAMP`, `DB_TYPE_TIMESTAMP_TZ` and `DB_TYPE_TIMESTAMP_LTZ` columns.
 - `scale`: set only for `DB_TYPE_NUMBER` columns.
 - `nullable`: indicates whether `NULL` values are permitted for this column.
 
