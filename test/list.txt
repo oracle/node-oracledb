@@ -678,3 +678,6 @@ Overview of node-oracledb functional tests
     66.2 allows overwriting of public methods on connection instances
     66.3 allows overwriting of public methods on resultset instances
     66.4 allows overwriting of public methods on lob instances
+
+67. utf8MultibyteCharacter.js
+    67.1 works with UTF-8 multibyte characters
