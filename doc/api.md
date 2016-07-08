@@ -1565,13 +1565,15 @@ additional information is included.
 - `scale`: set only for `DB_TYPE_NUMBER` columns.
 - `nullable`: indicates whether `NULL` values are permitted for this column.
 
-For numeric arguments: when `precision` is `0`, then the column is
+For numeric columns: when `precision` is `0`, then the column is
 simply a `NUMBER`.  If `precision` is nonzero and `scale` is `-127`,
 then the column is a `FLOAT`.  Otherwise, it is a `NUMBER(precision,
 scale)`.
 
-Note for Lobs, the [Lob type property](#proplobtype) also indicates
-whether the object is a `BLOB` or `CLOB`.
+Metadata for Result Sets and REF CURSORS is available in a
+[ResultSet property](#rsmetadata).  For Lobs, a
+[Lob type property](#proplobtype) also indicates whether the object is
+a `BLOB` or `CLOB`.
 
 See [Query Column Metadata](#querymeta) for examples.
 
