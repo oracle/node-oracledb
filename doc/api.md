@@ -120,12 +120,12 @@ limitations under the License.
      - 8.1.1 [Easy Connect Syntax for Connection Strings](#easyconnect)
      - 8.1.2 [Net Service Names for Connection Strings](#tnsnames)
      - 8.1.3 [JDBC and Node-oracledb Connection Strings Compared](#notjdbc)
-  - 8.2 [Connection Pooling](#connpooling)
-     - 8.2.1 [Connection Pool Size and Number of Threads](#conpoolthreadpoolsize)
-     - 8.2.2 [Connection Pool Queue](#connpoolqueue)
-     - 8.2.3 [Connection Pool Monitoring and Throughput](#connpoolmonitor)
-  - 8.3 [Database Resident Connection Pooling (DRCP)](#drcp)
-  - 8.4 [External Authentication](#extauth)
+  - 8.2 [Connections and Number of Threads](#numberofthreads)
+  - 8.3 [Connection Pooling](#connpooling)
+     - 8.3.1 [Connection Pool Queue](#connpoolqueue)
+     - 8.3.2 [Connection Pool Monitoring and Throughput](#connpoolmonitor)
+  - 8.4 [Database Resident Connection Pooling (DRCP)](#drcp)
+  - 8.5 [External Authentication](#extauth)
 9. [SQL Execution](#sqlexecution)
   - 9.1 [SELECT Statements](#select)
      - 9.1.1 [Fetching Rows](#fetchingrows)
@@ -679,7 +679,7 @@ This property may be overridden when [creating a connection pool](#createpool).
 
 If you increase this value, you may want to increase the number of
 threads available to node-oracledb.  See
-[Connection Pool Size and Number of Threads](#conpoolthreadpoolsize).
+[Connections and Number of Threads](#numberofthreads).
 
 ##### Example
 
@@ -2266,7 +2266,32 @@ oracledb.getConnection(
   . . .
 ```
 
-### <a name="connpooling"></a> 8.2 Connection Pooling
+### <a name="numberofthreads"></a> 8.2 Connections and Number of Threads
+
+If you use a large number of connections, such as via increasing
+[`poolMax`](#proppoolpoolmax), you may want to also increase the
+number of threads available to node-oracledb.
+
+Node worker threads executing database statements on a connection will
+commonly wait until round-trips between node-oracledb and the database
+are complete.  When an application handles a sustained number of user
+requests, and database operations take some time to execute or the
+network is slow, then the four default threads may all be held in
+use. This prevents other connections from beginning work and stops
+Node from handling more user load.  Increasing the number of worker
+threads may improve throughput.  Do this by setting the environment
+variable
+[UV_THREADPOOL_SIZE](http://docs.libuv.org/en/v1.x/threadpool.html)
+before starting Node.
+
+For example, in a Linux terminal, the number of Node worker threads
+can be increased to 10 by using the following command:
+
+```
+$ UV_THREADPOOL_SIZE=10 node myapp.js
+```
+
+### <a name="connpooling"></a> 8.3 Connection Pooling
 
 When applications use a lot of connections for short periods, Oracle
 recommends using a connection pool for efficiency.  Each node-oracledb
@@ -2328,31 +2353,7 @@ The Pool attribute [`stmtCacheSize`](#propconnstmtcachesize) can be
 used to set the statement cache size used by connections in the pool,
 see [Statement Caching](#stmtcache).
 
-#### <a name="conpoolthreadpoolsize"></a> 8.2.1 Connection Pool Size and Number of Threads
-
-If you increase [`poolMax`](#proppoolpoolmax), you may want to
-also increase the number of threads available to node-oracledb.
-
-Node worker threads executing database statements on a connection will
-commonly wait until round-trips between node-oracledb and the database
-are complete.  When an application handles a sustained number of user
-requests, and database operations take some time to execute or the
-network is slow, then the four default threads may all be held in
-use. This prevents other connections from beginning work and stops
-Node from handling more user load.  Increasing the number of worker
-threads may improve throughput.  Do this by setting the environment
-variable
-[UV_THREADPOOL_SIZE](http://docs.libuv.org/en/v1.x/threadpool.html)
-before starting Node.
-
-For example, in a Linux terminal, the number of Node worker threads
-can be increased to 10 by using the following command:
-
-```
-$ UV_THREADPOOL_SIZE=10 node myapp.js
-```
-
-#### <a name="connpoolqueue"></a> 8.2.2 Connection Pool Queue
+#### <a name="connpoolqueue"></a> 8.3.1 Connection Pool Queue
 
 By default when `poolMax` has been reached (meaning all connections in
 a pool are in use), and more
@@ -2379,7 +2380,7 @@ connection is [released](#connectionclose), and the number of
 connections in use drops below the value of
 [`poolMax`](#proppoolpoolmax).
 
-#### <a name="connpoolmonitor"></a> 8.2.3 Connection Pool Monitoring and Throughput
+#### <a name="connpoolmonitor"></a> 8.3.2 Connection Pool Monitoring and Throughput
 
 Connection pool usage should be monitored to choose the appropriate
 connection pool settings for your workload.
@@ -2465,11 +2466,11 @@ Attribute                               |
 
 One related environment variable is is shown by `_logStats()`:
 
-Environment Variable                                       | Description
------------------------------------------------------------|-------------
-[`process.env.UV_THREADPOOL_SIZE`](#conpoolthreadpoolsize) | The number of worker threads for this process.
+Environment Variable                                 | Description
+-----------------------------------------------------|-------------
+[`process.env.UV_THREADPOOL_SIZE`](#numberofthreads) | The number of worker threads for this process.
 
-### <a name="drcp"></a> 8.3 Database Resident Connection Pooling (DRCP)
+### <a name="drcp"></a> 8.4 Database Resident Connection Pooling (DRCP)
 
 [Database Resident Connection Pooling](http://docs.oracle.com/database/121/ADFNS/adfns_perf_scale.htm#ADFNS228) (DRCP)
 enables database resource sharing for applications that run in
@@ -2510,7 +2511,7 @@ Oracle white paper
 [PHP Scalability and High Availability](http://www.oracle.com/technetwork/topics/php/php-scalability-ha-twp-128842.pdf).
 This paper also gives more detail on configuring DRCP.
 
-### <a name="extauth"></a> 8.4 External Authentication
+### <a name="extauth"></a> 8.5 External Authentication
 
 External Authentication allows applications to use an external
 password store (such as
