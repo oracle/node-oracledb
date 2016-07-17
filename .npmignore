@@ -7,5 +7,6 @@ CONTRIBUTING.md
 /build
 /node_modules
 /oracle_private_test
+/.github
 oracledb-*.tgz
 .npmignore
