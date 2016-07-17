@@ -834,14 +834,13 @@ void Connection::GetBindUnit (Local<Value> val, Bind* bind, bool array,
       case NJS_BIND_IN    :
         bind->isOut  = false;
         bind->isInOut  = false;
-        Connection::GetInBindParams(element, bind, executeBaton, NJS_BIND_IN );
+        Connection::GetInBindParams(element, bind, executeBaton );
         if(!executeBaton->error.empty()) goto exitGetBindUnit;
         break;
       case NJS_BIND_INOUT :
         bind->isOut  = true;
         bind->isInOut  = true;
-        Connection::GetInBindParams(element, bind, executeBaton,
-                                    NJS_BIND_INOUT);
+        Connection::GetInBindParams(element, bind, executeBaton );
         if(!executeBaton->error.empty()) goto exitGetBindUnit;
         break;
       case NJS_BIND_OUT   :
@@ -866,7 +865,7 @@ void Connection::GetBindUnit (Local<Value> val, Bind* bind, bool array,
   else
   {
     bind->isOut  = false;
-    Connection::GetInBindParams(val, bind, executeBaton, NJS_BIND_IN);
+    Connection::GetInBindParams(val, bind, executeBaton );
     if(!executeBaton->error.empty()) goto exitGetBindUnit;
   }
   exitGetBindUnit:
@@ -957,17 +956,17 @@ exitGetOutBindParams:
      allocate for one unit.
 */
 void Connection::GetInBindParams(Local<Value> v8val, Bind* bind,
-                                 eBaton* executeBaton, BindType type)
+                                 eBaton* executeBaton )
 {
   Nan::HandleScope scope;
 
   if (v8val->IsArray() )
   {
-    GetInBindParamsArray(Local<Array>::Cast(v8val), bind, executeBaton, type);
+    GetInBindParamsArray(Local<Array>::Cast(v8val), bind, executeBaton );
   }
   else
   {
-    GetInBindParamsScalar(v8val, bind, executeBaton, type);
+    GetInBindParamsScalar(v8val, bind, executeBaton );
   }
 }
 
@@ -984,10 +983,11 @@ void Connection::GetInBindParams(Local<Value> v8val, Bind* bind,
      allocate for one unit.
 */
 void Connection::GetInBindParamsScalar(Local<Value> v8val, Bind* bind,
-                                       eBaton* executeBaton, BindType type)
+                                       eBaton* executeBaton)
 {
   Nan::HandleScope scope;
-  ValueType dataType = NJS_VALUETYPE_INVALID;
+  ValueType        valType = NJS_VALUETYPE_INVALID;
+  boolean          v8valNULL ;   /* whether given v8 value is NULL/Undefined */
 
   /* Allocate for scalar indicator & length */
   bind->ind = (short *)malloc ( sizeof ( short ) );
@@ -995,9 +995,42 @@ void Connection::GetInBindParamsScalar(Local<Value> v8val, Bind* bind,
 
   *(bind->ind)  = 0;
 
-  dataType = Connection::GetValueType ( v8val );
+  valType = Connection::GetValueType ( v8val );
+  v8valNULL = ( valType == NJS_VALUETYPE_NULL ) ? true : false;
 
-  switch ( dataType )
+  /*
+   * In case of INOUT Bind, if given value is NULL
+   * make use of specified OUT bind type
+   */
+  if ( v8valNULL && bind->isInOut )
+  {
+    switch ( bind->type )
+    {
+    case NJS_DATATYPE_STR:
+      valType = NJS_VALUETYPE_STRING;
+      break;
+
+    case NJS_DATATYPE_NUM:
+      valType = NJS_VALUETYPE_NUMBER;
+      break;
+
+    case NJS_DATATYPE_DATE:
+      valType = NJS_VALUETYPE_DATE;
+      break;
+
+    case NJS_DATATYPE_BUFFER:
+      valType = NJS_VALUETYPE_OBJECT;    /* DB RAW Type, v8 Buffer */
+      break;
+
+    // The following types are NOT supported as IN BIND (for INOUT) ignore
+    case NJS_DATATYPE_CURSOR:
+    case NJS_DATATYPE_CLOB:
+    case NJS_DATATYPE_BLOB:
+      break;
+    }
+  }
+
+  switch ( valType )
   {
     case NJS_VALUETYPE_NULL:
       bind->value = NULL;
@@ -1014,10 +1047,16 @@ void Connection::GetInBindParamsScalar(Local<Value> v8val, Bind* bind,
         goto exitGetInBindParamsScalar;
       }
 
-      v8::String::Utf8Value str(v8val->ToString());
+      /*
+       * Use empty string in case of IN value is NULL, but overriden for
+       * INOUT binds
+       */
+      v8::String::Utf8Value str( v8valNULL ?
+                           Nan::New<v8::String> ( "", 0 ).ToLocalChecked() :
+                           v8val->ToString());
 
       bind->type = dpi::DpiVarChar;
-      if(type == NJS_BIND_INOUT)
+      if( bind->isInOut )
       {
         *(bind->len) = str.length();
       }
@@ -1053,7 +1092,7 @@ void Connection::GetInBindParamsScalar(Local<Value> v8val, Bind* bind,
       bind->type = dpi::DpiInteger;
       bind->maxSize = *(bind->len) = sizeof(int);
       bind->value = (int*)malloc(*(bind->len));
-      *(int*)(bind->value) = v8val->ToInt32()->Value();
+      *(int*)(bind->value) = v8valNULL ? 0 : v8val->ToInt32()->Value();
       break;
 
     case NJS_VALUETYPE_UINTEGER:
@@ -1066,7 +1105,8 @@ void Connection::GetInBindParamsScalar(Local<Value> v8val, Bind* bind,
       bind->type = dpi::DpiUnsignedInteger;
       bind->maxSize = *(bind->len) = sizeof(unsigned int);
       bind->value = (unsigned int*)malloc(*(bind->len));
-      *(unsigned int*)(bind->value) = v8val->ToUint32()->Value();
+      *(unsigned int*)(bind->value) = v8valNULL ? 0 :
+                                        v8val->ToUint32()->Value();
       break;
 
     case NJS_VALUETYPE_NUMBER:
@@ -1079,7 +1119,7 @@ void Connection::GetInBindParamsScalar(Local<Value> v8val, Bind* bind,
       bind->type = dpi::DpiDouble;
       bind->maxSize = *(bind->len) = sizeof(double);
       bind->value = (double*)malloc(*(bind->len));
-      *(double*)(bind->value) = v8val->NumberValue();
+      *(double*)(bind->value) = v8valNULL ? 0 : v8val->NumberValue ();
       break;
 
     case NJS_VALUETYPE_DATE:
@@ -1104,11 +1144,23 @@ void Connection::GetInBindParamsScalar(Local<Value> v8val, Bind* bind,
     case NJS_VALUETYPE_OBJECT:
       {
         Local<Object> obj = v8val->ToObject();
-        if (Buffer::HasInstance(obj))
+
+        if ( v8valNULL && bind->isInOut )
+        {
+          /*
+           * In case of RAW/Buffer type and INOUT Bind, if IN value is NULL,
+           * allocate based on OUT type, maxSize
+           */
+          bind->type = dpi::DpiRaw;
+          *( bind->len ) = ( DPI_BUFLEN_TYPE ) (( bind->isInOut ) ?
+                                                  bind->maxSize : 0 );
+          bind->value = ( char *) malloc ( *(bind -> len ) );
+        }
+        else if (Buffer::HasInstance(obj))
         {
           size_t bufLen = Buffer::Length(obj);
           bind->type = dpi::DpiRaw;
-          if(type == NJS_BIND_INOUT)
+          if( bind->isInOut )
           {
             *(bind->len) = (DPI_BUFLEN_TYPE) bufLen;
           }
@@ -1160,7 +1212,7 @@ exitGetInBindParamsScalar:
      allocate for one unit.
 */
 void Connection::GetInBindParamsArray(Local<Array> va8vals, Bind *bind,
-                                      eBaton *executeBaton, BindType type)
+                                      eBaton *executeBaton )
 {
   Nan::HandleScope scope;
   size_t           arrayElementSize = 0; // actual array element size
@@ -3906,8 +3958,9 @@ void Connection::v8Date2OraDate(v8::Local<v8::Value> val, Bind *bind)
   Local<Date> date = val.As<Date>();    // Expects to be of v8::Date type
 
   // Get the number of seconds from 1970-1-1 0:0:0
-  *(long double *)(bind->extvalue) = date->NumberValue ();
-
+  // In case given value is NULL/Undefined, set it to 0
+  *(long double *)(bind->extvalue) = (val->IsNull () || val->IsUndefined ()) ?
+                                       0 : date->NumberValue ();
 }
 
 /***************************************************************************/
@@ -3979,22 +4032,26 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
 
     Connection::AllocateBindArray ( bind->type, bind, executeBaton,
                                     &arrayElementSize );
-    return;
+    goto exitcbDynBufferAllocate;
   }
 
 
   if ( NJS_SIZE_T_OVERFLOW ( sizeof ( short ), nRows ) )
   {
     executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
-    return;
+    goto exitcbDynBufferAllocate;
   }
   else
   {
-    bind->ind = (short *)malloc ( (size_t)nRows * sizeof ( short ) ) ;
-    if( !bind->ind )
+    if ( !bind->ind )
     {
-      executeBaton->error = NJSMessages::getErrorMsg( errInsufficientMemory );
-      return;
+      bind->ind = (short *)malloc ( (size_t)nRows * sizeof ( short ) ) ;
+      if( !bind->ind )
+      {
+        executeBaton->error = NJSMessages::getErrorMsg(
+                                                    errInsufficientMemory );
+        goto exitcbDynBufferAllocate;
+      }
     }
   }
   if ( dmlReturning )
@@ -4002,22 +4059,32 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
     if ( NJS_SIZE_T_OVERFLOW ( sizeof ( unsigned int ), nRows ) )
     {
       executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
-      return;
+      goto exitcbDynBufferAllocate;
     }
     else
     {
       bind->len2 = ( unsigned int *)malloc ( nRows * sizeof ( unsigned int ) );
       if( !bind->len2 )
       {
-        executeBaton->error = NJSMessages::getErrorMsg( errInsufficientMemory );
-        return;
+        executeBaton->error = NJSMessages::getErrorMsg(
+                                                   errInsufficientMemory );
+        goto exitcbDynBufferAllocate;
       }
     }
   }
   else
   {
-    bind->len = (DPI_BUFLEN_TYPE *)malloc ( nRows *
-                                            sizeof ( DPI_BUFLEN_TYPE ) );
+    if ( !bind->len )
+    {
+      bind->len = (DPI_BUFLEN_TYPE *)malloc ( nRows *
+                                              sizeof ( DPI_BUFLEN_TYPE ) );
+      if ( !bind->len )
+      {
+        executeBaton->error = NJSMessages::getErrorMsg (
+                                                  errInsufficientMemory ) ;
+        goto exitcbDynBufferAllocate;
+      }
+    }
   }
 
   switch ( bind->type )
@@ -4028,7 +4095,7 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
     if ( NJS_SIZE_T_OVERFLOW ( (bind->maxSize + 1), nRows) )
     {
       executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
-      return;
+      goto exitcbDynBufferAllocate;
     }
     else
     {
@@ -4037,7 +4104,7 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
       {
         executeBaton->error = NJSMessages::getErrorMsg(
                                 errInsufficientMemory);
-        return;
+        goto exitcbDynBufferAllocate;
       }
     }
 
@@ -4055,7 +4122,7 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
     if ( NJS_SIZE_T_OVERFLOW ( sizeof (int), nRows) )
     {
       executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
-      return;
+      goto exitcbDynBufferAllocate;
     }
     else
     {
@@ -4064,7 +4131,7 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
       {
         executeBaton->error = NJSMessages::getErrorMsg(
                                 errInsufficientMemory);
-        return;
+        goto exitcbDynBufferAllocate;
       }
     }
     if ( !dmlReturning )
@@ -4077,7 +4144,7 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
     if ( NJS_SIZE_T_OVERFLOW ( sizeof ( unsigned int ), nRows) )
     {
       executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
-      return;
+      goto exitcbDynBufferAllocate;
     }
     else
     {
@@ -4086,7 +4153,7 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
       {
         executeBaton->error = NJSMessages::getErrorMsg(
                                 errInsufficientMemory);
-        return;
+        goto exitcbDynBufferAllocate;
       }
     }
     if ( !dmlReturning )
@@ -4099,7 +4166,7 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
     if ( NJS_SIZE_T_OVERFLOW ( sizeof ( double ), nRows) )
     {
       executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
-      return;
+      goto exitcbDynBufferAllocate;
     }
     else
     {
@@ -4108,7 +4175,7 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
       {
         executeBaton->error = NJSMessages::getErrorMsg(
                                 errInsufficientMemory);
-        return;
+        goto exitcbDynBufferAllocate;
       }
     }
     if ( !dmlReturning )
@@ -4131,7 +4198,7 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
     if ( NJS_SIZE_T_OVERFLOW ( sizeof ( Descriptor * ), nRows) )
     {
       executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
-      return;
+      goto exitcbDynBufferAllocate;
     }
     else
     {
@@ -4140,7 +4207,7 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
       {
         executeBaton->error = NJSMessages::getErrorMsg(
                                 errInsufficientMemory);
-        return;
+        goto exitcbDynBufferAllocate;
       }
     }
     // and allocate the underlying descriptor(s)
@@ -4161,7 +4228,7 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
       if ( NJS_SIZE_T_OVERFLOW ( sizeof ( long double ), nRows) )
       {
         executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
-        return;
+        goto exitcbDynBufferAllocate;
       }
       else
       {
@@ -4171,7 +4238,7 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
         {
           executeBaton->error = NJSMessages::getErrorMsg(
                                   errInsufficientMemory);
-          return;
+          goto exitcbDynBufferAllocate;
         }
       }
       // needed to post-process DML RETURNING of TimestampLTZ
@@ -4194,7 +4261,7 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
     if ( NJS_SIZE_T_OVERFLOW ( bind->maxSize, nRows ) )
     {
       executeBaton->error = NJSMessages::getErrorMsg ( errResultsTooLarge );
-      return;
+      goto exitcbDynBufferAllocate;
     }
     else
     {
@@ -4203,6 +4270,9 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
     }
     break;
   }
+
+exitcbDynBufferAllocate:
+  ;
 }
 
 /****************************************************************************/

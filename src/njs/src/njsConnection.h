@@ -420,9 +420,9 @@ private:
   static void GetBinds (Handle<Array> bindarray, eBaton* executeBaton);
   static void GetBindUnit (Local<Value> bindtypes, Bind* bind, bool array,
                            eBaton* executeBaton);
-  static void GetInBindParams(Local<Value> v8val, Bind *bind, eBaton *executeBaton, BindType bindType);
-  static void GetInBindParamsScalar(Local<Value> v8val, Bind *bind, eBaton *executeBaton, BindType bindType);
-  static void GetInBindParamsArray(Local<Array> v8vals, Bind *bind, eBaton *executeBaton, BindType bindType);
+  static void GetInBindParams(Local<Value> v8val, Bind *bind, eBaton *executeBaton);
+  static void GetInBindParamsScalar(Local<Value> v8val, Bind *bind, eBaton *executeBaton);
+  static void GetInBindParamsArray(Local<Array> v8vals, Bind *bind, eBaton *executeBaton);
   static bool AllocateBindArray(unsigned short dataType, Bind* bind, eBaton *executeBaton, size_t *arrayElementSize);
 
   static void GetOutBindParams (unsigned short dataType, Bind* bind,
