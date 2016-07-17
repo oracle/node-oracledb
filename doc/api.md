@@ -121,7 +121,9 @@ limitations under the License.
      - 8.1.2 [Net Service Names for Connection Strings](#tnsnames)
      - 8.1.3 [JDBC and Node-oracledb Connection Strings Compared](#notjdbc)
   - 8.2 [Connection Pooling](#connpooling)
-     - 8.2.1 [Connection Pool Monitoring and Throughput](#connpoolmonitor)
+     - 8.2.1 [Connection Pool Size and Number of Threads](#conpoolthreadpoolsize)
+     - 8.2.2 [Connection Pool Queue](#connpoolqueue)
+     - 8.2.3 [Connection Pool Monitoring and Throughput](#connpoolmonitor)
   - 8.3 [Database Resident Connection Pooling (DRCP)](#drcp)
   - 8.4 [External Authentication](#extauth)
 9. [SQL Execution](#sqlexecution)
@@ -674,6 +676,10 @@ The maximum number of connections to which a connection pool can grow.
 The default value is 4.
 
 This property may be overridden when [creating a connection pool](#createpool).
+
+If you increase this value, you may want to increase the number of
+threads available to node-oracledb.  See
+[Connection Pool Size and Number of Threads](#conpoolthreadpoolsize).
 
 ##### Example
 
@@ -2322,17 +2328,60 @@ The Pool attribute [`stmtCacheSize`](#propconnstmtcachesize) can be
 used to set the statement cache size used by connections in the pool,
 see [Statement Caching](#stmtcache).
 
-If `poolMax` has been reached (meaning all connections in a pool are
-in use), and new [`pool.getConnection()`](#getconnectionpool) requests
-are made, then the requests will be queued until in-use connections
-are released.  The queue can disabled by setting the pool property
+#### <a name="conpoolthreadpoolsize"></a> 8.2.1 Connection Pool Size and Number of Threads
+
+If you increase [`poolMax`](#proppoolpoolmax), you may want to
+also increase the number of threads available to node-oracledb.
+
+Node worker threads executing database statements on a connection will
+commonly wait until round-trips between node-oracledb and the database
+are complete.  When an application handles a sustained number of user
+requests, and database operations take some time to execute or the
+network is slow, then the four default threads may all be held in
+use. This prevents other connections from beginning work and stops
+Node from handling more user load.  Increasing the number of worker
+threads may improve throughput.  Do this by setting the environment
+variable
+[UV_THREADPOOL_SIZE](http://docs.libuv.org/en/v1.x/threadpool.html)
+before starting Node.
+
+For example, in a Linux terminal, the number of Node worker threads
+can be increased to 10 by using the following command:
+
+```
+$ UV_THREADPOOL_SIZE=10 node myapp.js
+```
+
+#### <a name="connpoolqueue"></a> 8.2.2 Connection Pool Queue
+
+By default when `poolMax` has been reached (meaning all connections in
+a pool are in use), and more
+[`pool.getConnection()`](#getconnectionpool) requests are made, then
+each new request will be queued until an in-use connection is released
+back to the pool with [`connection.close()`](#connectionclose).  If
+`poolMax` has not been reached, then connections can be satisfied and
+are not queued.
+
+The pool queue can be disabled by setting the pool property
 [`queueRequests`](#propdbqueuerequests) to `false`.  When the queue is
-disabled, `pool.getConnection()` requests that cannot be satisfied
-will return an error.
+disabled, `pool.getConnection()` requests that cannot immediately be
+satisfied will return an error.
 
-#### <a name="connpoolmonitor"></a> 8.2.1 Connection Pool Monitoring and Throughput
+The amount of time that a queued request will wait for a free
+connection can be configured with [queueTimeout](#propdbqueuetimeout).
+When connections are timed out of the queue, they will return the
+error `NJS-040` to the application.
 
-Connection pool usage can be monitored to choose the appropriate
+Internally the queue is implemented in node-oracledb's JavaScript top
+level.  A queued connection request is dequeued and passed down to
+node-oracledb's underlying C++ connection pool when an active
+connection is [released](#connectionclose), and the number of
+connections in use drops below the value of
+[`poolMax`](#proppoolpoolmax).
+
+#### <a name="connpoolmonitor"></a> 8.2.3 Connection Pool Monitoring and Throughput
+
+Connection pool usage should be monitored to choose the appropriate
 connection pool settings for your workload.
 
 The Pool attributes [`connectionsInUse`](#proppoolconnectionsinuse)
@@ -2344,14 +2393,8 @@ can be enabled by setting the [`createPool()`](#createpool)
 `poolAttrs` parameter `_enableStats` to *true*.  Statistics
 can be output to the console by calling the *Pool* `_logStats()`
 method.  The underscore prefixes indicate that these are private
-attributes and methods.  As such, this functionality may be altered or
-enhanced in the future.
-
-Queue statistics include the number of `getConnection()` requests that
-were queued waiting for an available connection.  The sum and average
-time spent in the queue are also recorded.  If the pool queue is
-heavily used, consider increasing the connection pool
-[`poolMax`](#proppoolpoolmax) value.
+attributes and methods.  **This interface may be altered or
+enhanced in the future**.
 
 To enable recording of queue statistics:
 
@@ -2376,25 +2419,55 @@ current statistics to the console by calling:
 pool._logStats();
 ```
 
-##### Number of Threads
+The current implementation of `_logStats()` displays pool queue
+statistics, pool settings, and related environment variables.
 
-Node worker threads executing database statements on a connection will
-commonly wait until round-trips between node-oracledb and the database
-are complete.  When an application handles a sustained number of user
-requests, and database operations take some time to execute or the
-network is slow, then the four default threads may all be in use.
-This prevents Node from handling more user load.  Increasing the
-number of worker threads may improve throughput.  Do this by setting
-the environment variable
-[UV_THREADPOOL_SIZE](http://docs.libuv.org/en/v1.x/threadpool.html)
-before starting Node.
+##### Statistics
 
-For example, in a Linux terminal, the number of Node worker threads
-can be increased to 10 by using the following command:
+The statistics displayed by `_logStats()` in this release are:
 
-```
-$ UV_THREADPOOL_SIZE=10 node myapp.js
-```
+Statistic                 | Description
+--------------------------|-------------
+total up time             | The number of milliseconds this pool has been running.
+total connection requests | Number of `Pool.getConnection()` requests made by the application to this pool.
+total requests enqueued   | Number of `Pool.getConnection()` requests that could not be immediately satisfied because every connection in this pool was already being used, and so they had to be queued waiting for the application to return an in-use connection to the pool.
+total requests dequeued   | Number of `Pool.getConnection()` requests that were dequeued when a connection in this pool became available for use.
+total requests failed     | Number of `Pool.getConnection()` requests that invoked the underlying C++ `Pool.getConnection()` callback with an error state. Does not include queue request timeout errors.
+total request timeouts    | Number of queued `Pool.getConnection()` requests that were timed out after they had spent [queueTimeout](#propdbqueuetimeout) or longer in this pool's queue.
+max queue length          | Maximum number of `Pool.getConnection()` requests that were ever waiting at one time.
+sum of time in queue      | The sum of the time (milliseconds) that dequeued requests spent in the queue.
+min time in queue         | The minimum time (milliseconds) that any dequeued request spent in the queue.
+max time in queue         | The maximum time (milliseconds) that any dequeued request spent in the queue.
+avg time in queue         | The average time (milliseconds) that dequeued requests spent in the queue.
+pool connections in use   | The number of connections from this pool that `Pool.getConnection()` returned successfully to the application and have not yet been released back to the pool.
+pool connections open     | The number of connections in this pool that have been established to the database.
+
+Note that for efficiency, the minimum, maximum, average, and sum of
+times in the queue are calculated when requests are removed from the
+queue.  They do not take into account times for connection requests
+still waiting in the queue.
+
+##### Attribute Values
+
+The `_logStats()` method also shows attribute values in effect for the pool:
+
+Attribute                               |
+----------------------------------------|
+[`queueRequests`](#propdbqueuerequests) |
+[`queueTimeout`](#propdbqueuetimeout)   |
+[`poolMin`](#propdbpoolmin)             |
+[`poolMax`](#propdbpoolmax)             |
+[`poolIncrement`](#propdbpoolincrement) |
+[`poolTimeout`](#propdbpooltimeout)     |
+[`stmtCacheSize`](#propdbstmtcachesize) |
+
+##### Related Environment Variables
+
+One related environment variable is is shown by `_logStats()`:
+
+Environment Variable                                       | Description
+-----------------------------------------------------------|-------------
+[`process.env.UV_THREADPOOL_SIZE`](#conpoolthreadpoolsize) | The number of worker threads for this process.
 
 ### <a name="drcp"></a> 8.3 Database Resident Connection Pooling (DRCP)
 
@@ -3025,7 +3098,7 @@ different default prefetch size or change it for each query, as
 determined by user benchmarking.
 
 The default prefetch size was heuristically chosen to give decent
-performance for developers who don't read documentation.  Skilled
+performance for developers who do not read documentation.  Skilled
 developers should benchmark their applications and adjust the prefetch
 value of each query for optimum performance, memory use, and network
 utilization.
