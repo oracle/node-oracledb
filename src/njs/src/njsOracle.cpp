@@ -383,9 +383,21 @@ NAN_GETTER(Oracledb::GetMaxRows)
 */
 NAN_SETTER(Oracledb::SetMaxRows)
 {
-  Oracledb* oracledb = Nan::ObjectWrap::Unwrap<Oracledb>(info.Holder());
+  unsigned int tempMaxRows = NJS_MAX_ROWS;
+  Oracledb*    oracledb    = Nan::ObjectWrap::Unwrap<Oracledb>(info.Holder());
+
   NJS_CHECK_OBJECT_VALID(oracledb);
-  NJS_SET_PROP_UINT(oracledb->maxRows_, value, "maxRows");
+  NJS_SET_PROP_UINT(tempMaxRows, value, "maxRows");
+
+  if ( tempMaxRows <= 0 )
+  {
+    string errMsg = NJSMessages::getErrorMsg ( errInvalidmaxRows );
+    NJS_SET_EXCEPTION( errMsg.c_str(), errMsg.length() );
+  }
+  else
+  {
+    oracledb->maxRows_ = tempMaxRows;
+  }
 }
 
 /*****************************************************************************/

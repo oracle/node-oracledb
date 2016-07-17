@@ -24,6 +24,9 @@
  * DESCRIPTION
  *   Testing nested cursor.
  *
+ *   Note: Nested cursor is still not a supported data type. So NJS-010
+ *         error is expected.
+ *
  * NUMBERING RULE
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
@@ -40,6 +43,7 @@ var dbConfig = require('./dbconfig.js');
 
 describe('57. nestedCursor.js', function() {
 
+  var connection = null;
   var createParentTable =
       "BEGIN \
           DECLARE \
@@ -55,7 +59,7 @@ describe('57. nestedCursor.js', function() {
               CREATE TABLE nodb_parent_tab ( \
                   id NUMBER,  \
                   description VARCHAR2(32), \
-                  CONSTRAINT parent_tab_pk PRIMARY KEY (id) \
+                  CONSTRAINT nodb_parent_tab_pk PRIMARY KEY (id) \
               ) \
           '); \
           EXECUTE IMMEDIATE (' \
@@ -91,8 +95,8 @@ describe('57. nestedCursor.js', function() {
                   id NUMBER,  \
                   parent_id NUMBER, \
                   description VARCHAR2(32), \
-                  CONSTRAINT child_tab_pk PRIMARY KEY (id), \
-                  CONSTRAINT child_parent_fk FOREIGN KEY (parent_id) REFERENCES nodb_parent_tab(id) \
+                  CONSTRAINT nodb_child_tab_pk PRIMARY KEY (id), \
+                  CONSTRAINT nodb_child_parent_fk FOREIGN KEY (parent_id) REFERENCES nodb_parent_tab(id) \
               ) \
           '); \
           EXECUTE IMMEDIATE (' \
@@ -128,13 +132,12 @@ describe('57. nestedCursor.js', function() {
       END; ";
 
   var cursorExpr =
-      "CREATE OR REPLACE PROCEDURE cursor_parent_child (p_out OUT SYS_REFCURSOR) \
+      "CREATE OR REPLACE PROCEDURE nodb_cursor_parent_child (p_out OUT SYS_REFCURSOR) \
            AS \
            BEGIN \
              OPEN p_out FOR \
                SELECT p ";
 
-  var connection = false;
   before(function(done) {
     async.series([
       function(callback) {
@@ -199,27 +202,6 @@ describe('57. nestedCursor.js', function() {
     ], done);
   })
 
-  function fetchOneRowFromRS(rs, cb) {
-    rs.getRow(function(err, row) {
-      if(err) {
-        // NJS-010: unsupported data type in select list
-        (err.message).should.startWith('NJS-010:');
-        rs.close(function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      } else if(row) {
-        console.log(row);
-        fetchOneRowFromRS(rs, cb);
-      } else {
-        rs.close(function(err) {
-          should.not.exist(err);
-          cb();
-        });
-      }
-    });
-  }
-
   it('57.1 testing nested cursor support - result set', function(done) {
     connection.should.be.ok();
 
@@ -237,17 +219,19 @@ describe('57. nestedCursor.js', function() {
       [],
       { resultSet: true },
       function(err, result) {
-        should.not.exist(err);
-        should.exist(result.resultSet);
-        fetchOneRowFromRS(result.resultSet, done);
+        should.exist(err);
+        (err.message).should.startWith('NJS-010:');
+        // NJS-010: unsupported data type in select list
+        should.not.exist(result);
+        done();
       }
     );
 
-  })
+  }) // 57.1
 
   it('57.2 testing nested cursor support - REF Cursor', function(done) {
     var testproc =
-        "CREATE OR REPLACE PROCEDURE get_family_tree(p_out OUT SYS_REFCURSOR)  \
+        "CREATE OR REPLACE PROCEDURE nodb_get_family_tree(p_out OUT SYS_REFCURSOR)  \
            AS \
            BEGIN \
              OPEN p_out FOR  \
@@ -272,19 +256,22 @@ describe('57. nestedCursor.js', function() {
       },
       function(callback){
         connection.execute(
-          "BEGIN get_family_tree(:out); END;",
+          "BEGIN nodb_get_family_tree(:out); END;",
           {
             out: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
           },
           function(err, result) {
-            should.not.exist(err);
-            fetchOneRowFromRS(result.outBinds.out, callback);
+            should.exist(err);
+            (err.message).should.startWith('NJS-010:');
+            // NJS-010: unsupported data type in select list
+            should.not.exist(result);
+            callback();
           }
         );
       },
       function(callback) {
         connection.execute(
-          "DROP PROCEDURE get_family_tree",
+          "DROP PROCEDURE nodb_get_family_tree",
           function(err, result) {
             should.not.exist(err);
             callback();
@@ -292,5 +279,6 @@ describe('57. nestedCursor.js', function() {
         );
       }
     ], done);
-  })
+  }) // 57.2
+
 })

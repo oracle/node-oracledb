@@ -563,6 +563,13 @@ void Connection::ProcessOptions (Nan::NAN_METHOD_ARGS_TYPE args, unsigned int in
     options = args[index]->ToObject();
     NJS_GET_UINT_FROM_JSON ( executeBaton->maxRows, executeBaton->error,
                              options, "maxRows", 2, exitProcessOptions );
+
+    if ( executeBaton->maxRows <= 0 )
+    {
+      executeBaton->error = NJSMessages::getErrorMsg ( errInvalidmaxRows );
+      goto exitProcessOptions;
+    }
+
     NJS_GET_UINT_FROM_JSON ( executeBaton->prefetchRows, executeBaton->error,
                              options, "prefetchRows", 2, exitProcessOptions );
     NJS_GET_UINT_FROM_JSON ( executeBaton->outFormat, executeBaton->error,
@@ -1628,6 +1635,8 @@ void Connection::Async_Execute (uv_work_t *req)
 
       Connection::CopyMetaData ( executeBaton->mInfo, executeBaton, mData,
                                  executeBaton->numCols );
+      if ( !executeBaton->error.empty() )
+        goto exitAsyncExecute;
 
       if ( executeBaton->getRS )
       {
@@ -1763,6 +1772,9 @@ void Connection::Async_Execute (uv_work_t *req)
            }
            Connection::CopyMetaData ( extBind->mInfo, executeBaton, mData,
                                       extBind->numCols );
+           if ( !executeBaton->error.empty() )
+             goto exitAsyncExecute;
+
            executeBaton->extBinds [ b ] = extBind;
          }
          else
@@ -1806,6 +1818,21 @@ void Connection::Async_Execute (uv_work_t *req)
          executeBaton->dpistmt )
     {
         executeBaton->dpistmt->release ();
+    }
+
+    // In case of error, release the statement handles allocated (REF CURSOR)
+    if ( !(executeBaton->error).empty() )
+    {
+      for( unsigned int index = 0 ;index < executeBaton->binds.size();
+           index++ )
+      {
+        if( executeBaton->binds[index]->value &&
+            ( executeBaton->binds[index]->type == DpiRSet ) )
+        {
+          ((Stmt*)executeBaton->binds[index]->value)->release ();
+          executeBaton->binds[index]->value = NULL;
+        }
+      }
     }
   ;
 }
@@ -1961,7 +1988,9 @@ void Connection::CopyMetaData ( MetaInfo           *mInfo,
                                 const MetaData*    mData,
                                 const unsigned int numCols )
 {
-  for ( unsigned int col = 0; col < numCols; col++ )
+  bool error = false;
+
+  for ( unsigned int col = 0; !error && ( col < numCols ); col++ )
   {
     mInfo[col].name         = string( (const char*)mData[col].colName,
                                       mData[col].colNameLen );
@@ -2045,6 +2074,16 @@ void Connection::CopyMetaData ( MetaInfo           *mInfo,
         mInfo[col].dbType       = NJS_DATATYPE_UNKNOWN;
         break;
     }
+
+    if ( mInfo[col].njsFetchType == NJS_DATATYPE_UNKNOWN )
+    {
+      error = true;
+    }
+  }
+
+  if ( error )
+  {
+    executeBaton->error = NJSMessages::getErrorMsg ( errUnsupportedDatType );
   }
 }
 
@@ -2270,19 +2309,17 @@ unsigned short Connection::GetTargetType ( eBaton *executeBaton,
  */
 void Connection::DoDefines ( eBaton* executeBaton )
 {
-  unsigned int numCols = executeBaton->numCols;
-  Define *defines = executeBaton->defines = new Define[numCols];
-  int csratio = executeBaton->dpiconn->getByteExpansionRatio ();
+  unsigned int numCols  = executeBaton->numCols;
+  Define       *defines = executeBaton->defines = new Define[numCols];
+  int          csratio  = executeBaton->dpiconn->getByteExpansionRatio ();
+  bool         error    = false;
 
-  // Check for maxRows must be greater than zero in case of non-resultSet
-  if ( executeBaton->maxRows == 0 )
+  for (unsigned int col = 0; !error && ( col < numCols ); col++)
   {
-    executeBaton->error = NJSMessages::getErrorMsg ( errInvalidmaxRows );
-    return;
-  }
-
-  for (unsigned int col = 0; col < numCols; col++)
-  {
+    /*
+     * Only supported DB column types handled here and others would have
+     * reported error while processing meta-data
+     */
     switch( executeBaton->mInfo[col].dbType )
     {
       case dpi::DpiNumber :
@@ -2297,7 +2334,7 @@ void Connection::DoDefines ( eBaton* executeBaton )
                                        executeBaton->maxRows ) )
         {
           executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
-          return;
+          error = true;
         }
         else
         {
@@ -2308,7 +2345,7 @@ void Connection::DoDefines ( eBaton* executeBaton )
           {
             executeBaton->error = NJSMessages::getErrorMsg(
                                     errInsufficientMemory );
-            return;
+            error = true;
           }
         }
 
@@ -2320,7 +2357,7 @@ void Connection::DoDefines ( eBaton* executeBaton )
         /*
          * the buffer size is increased to account for possible character
          * size expansion when data is converted from the DB character set
-         * to AL32UTF8
+         * to client character set
          */
 
         if ( executeBaton->mInfo[col].byteSize != 0 )
@@ -2333,7 +2370,7 @@ void Connection::DoDefines ( eBaton* executeBaton )
           {
             executeBaton->error = NJSMessages::getErrorMsg(
                                                errResultsTooLarge );
-            return;
+            error = true;
           }
           else
           {
@@ -2343,7 +2380,7 @@ void Connection::DoDefines ( eBaton* executeBaton )
             {
               executeBaton->error = NJSMessages::getErrorMsg(
                                       errInsufficientMemory );
-              return;
+              error = true;
             }
           }
         }
@@ -2351,23 +2388,12 @@ void Connection::DoDefines ( eBaton* executeBaton )
          * not required.
          */
         break;
+      case dpi::DpiTimestampTZ:
+        // TIMESTAMPTZ WITH TIMEZONE (TZ) supported only as STRING value
       case dpi::DpiDate :
       case dpi::DpiTimestamp:
-      case dpi::DpiTimestampTZ:
       case dpi::DpiTimestampLTZ:
         defines[col].fetchType = executeBaton->mInfo[col].dpiFetchType;
-
-        if ( ( executeBaton->mInfo[col].dbType == dpi::DpiTimestampTZ ) &&
-             ( defines[col].fetchType != dpi::DpiVarChar ))
-        {
-          /*
-           * TIMESTAMP WITH TIMEZONE (TZ) column type supported only as
-           * STRING value.
-           */
-          executeBaton->error = NJSMessages::getErrorMsg (
-                                             errUnsupportedDatType ) ;
-          return;
-        }
 
         if ( defines[col].fetchType != dpi::DpiVarChar )
         {
@@ -2385,8 +2411,9 @@ void Connection::DoDefines ( eBaton* executeBaton )
           if ( NJS_SIZE_T_OVERFLOW ( defines[col].maxSize,
                                          executeBaton->maxRows ) )
           {
-            executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
-            return;
+            executeBaton->error =
+                           NJSMessages::getErrorMsg( errResultsTooLarge );
+            error = true;
           }
           else
           {
@@ -2397,7 +2424,7 @@ void Connection::DoDefines ( eBaton* executeBaton )
             {
               executeBaton->error = NJSMessages::getErrorMsg(
                                        errInsufficientMemory);
-              return;
+              error = true;
             }
           }
 
@@ -2412,15 +2439,18 @@ void Connection::DoDefines ( eBaton* executeBaton )
         {
           executeBaton->error = NJSMessages::getErrorMsg (
                                                      errResultsTooLarge ) ;
-          return;
+          error = true;
         }
-        defines[col].buf = (char *)malloc(defines[col].maxSize *
-                                          (size_t) executeBaton->maxRows) ;
-        if ( !defines[col].buf )
+        else
         {
-          executeBaton->error = NJSMessages::getErrorMsg (
-                                         errInsufficientMemory );
-          return;
+          defines[col].buf = (char *)malloc(defines[col].maxSize *
+                                          (size_t) executeBaton->maxRows) ;
+          if ( !defines[col].buf )
+          {
+            executeBaton->error = NJSMessages::getErrorMsg (
+                                           errInsufficientMemory );
+            error = true;
+          }
         }
         break;
 
@@ -2434,7 +2464,7 @@ void Connection::DoDefines ( eBaton* executeBaton )
                                        executeBaton->maxRows ) )
         {
           executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
-          return;
+          error = true;
         }
         else
         {
@@ -2443,34 +2473,33 @@ void Connection::DoDefines ( eBaton* executeBaton )
 
           if( !defines[col].buf )
           {
-            executeBaton->error = NJSMessages::getErrorMsg( errInsufficientMemory );
-            return;
+            executeBaton->error =
+                          NJSMessages::getErrorMsg( errInsufficientMemory );
+            error = true;
           }
         }
 
-        for (unsigned int j = 0; j < executeBaton->maxRows; j++)
+        if ( !error )
         {
-          ((Descriptor **)(defines[col].buf))[j] =
-            executeBaton->dpienv->allocDescriptor(LobDescriptorType);
+          for (unsigned int j = 0; j < executeBaton->maxRows; j++)
+          {
+            ((Descriptor **)(defines[col].buf))[j] =
+              executeBaton->dpienv->allocDescriptor(LobDescriptorType);
+          }
         }
         break;
 
       case dpi::DpiRowid:
         defines[col].fetchType = executeBaton->mInfo[col].dpiFetchType;
 
-        if ( defines[col].fetchType != dpi::DpiVarChar )
-        {
-          executeBaton->error = NJSMessages::getErrorMsg (
-                                                    errUnsupportedDatType);
-          return;
-        }
+        // ROWID supported only as STRING value
         defines[col].maxSize = NJS_MAX_FETCH_AS_STRING_SIZE;
 
         if ( NJS_SIZE_T_OVERFLOW ( defines[col].maxSize,
                                        executeBaton->maxRows ) )
         {
           executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
-          return;
+          error = true;
         }
         else
         {
@@ -2481,36 +2510,41 @@ void Connection::DoDefines ( eBaton* executeBaton )
           {
             executeBaton->error = NJSMessages::getErrorMsg(
                                     errInsufficientMemory);
-            return;
+            error = true;
           }
         }
         break;
 
       default :
-        executeBaton->error = NJSMessages::getErrorMsg(errUnsupportedDatType);
-        return;
+        // For unsupported column types, an error is reported earlier itself
+        executeBaton->error = NJSMessages::getErrorMsg( errInternalError,
+                                              "default:", "DoDefines" );
+        error = true;
         break;
     }
 
-    defines[col].ind = (short*)malloc (sizeof(short)*(executeBaton->maxRows));
-    if(!defines[col].ind)
+    if ( !error )
     {
-      executeBaton->error = NJSMessages::getErrorMsg( errInsufficientMemory );
-      return;
-    }
-    defines[col].len = (DPI_BUFLEN_TYPE *)malloc(sizeof(DPI_BUFLEN_TYPE)*
-                                           executeBaton->maxRows);
-    if(!defines[col].len)
-    {
-      executeBaton->error = NJSMessages::getErrorMsg( errInsufficientMemory );
-      return;
-    }
+      defines[col].ind = (short*)malloc ( sizeof( short ) *
+                                          ( executeBaton->maxRows ) );
+      if(!defines[col].ind)
+      {
+        executeBaton->error = NJSMessages::getErrorMsg( errInsufficientMemory );
+        error = true;
+      }
+      defines[col].len = (DPI_BUFLEN_TYPE *)malloc(sizeof(DPI_BUFLEN_TYPE)*
+                                             executeBaton->maxRows);
+      if(!defines[col].len)
+      {
+        executeBaton->error = NJSMessages::getErrorMsg( errInsufficientMemory );
+        error = true;
+      }
 
-    executeBaton->dpistmt->define(col+1, defines[col].fetchType,
-                 (defines[col].buf) ? defines[col].buf : defines[col].extbuf,
-                 defines[col].maxSize, defines[col].ind, defines[col].len);
+      executeBaton->dpistmt->define(col+1, defines[col].fetchType,
+                   (defines[col].buf) ? defines[col].buf : defines[col].extbuf,
+                   defines[col].maxSize, defines[col].ind, defines[col].len);
+    }
   }
-  executeBaton->numCols     = numCols;
 }
 
 /*****************************************************************************/

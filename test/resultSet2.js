@@ -745,47 +745,22 @@ describe('55. resultSet2.js', function() {
 
   describe('55.11 result set with unsupported data types', function() {
 
-    var sql2 = "SELECT dummy, rowid FROM dual";
-
-    function fetchOneRowFromRS(rs, cb) {
-      rs.getRow(function(err, row) {
-        /* Currently, even if the driver doesn't support certain data type
-         * the result set can still be created.
-         */
-        // Error at accessing RS
-        should.exist(err);
-        if(err) {
-          // console.error("Error at accessing RS: " + err.message);
-          // NJS-010: unsupported data type in select list
-          (err.message).should.startWith('NJS-010:');
-          rs.close( function(err) {
-            should.not.exist(err);
-            cb();
-          });
-        } else if(row) {
-          console.log(row);
-          fetchOneRowFromRS(rs, cb);
-        } else {
-          rs.close( function(err) {
-            should.not.exist(err);
-            cb();
-          });
-        }
-      });
-    }
-
     it('55.11.1 ROWID date type', function(done) {
       connection.execute(
-        sql2,
+        "SELECT dummy, rowid FROM dual",
         [],
         { resultSet: true },
         function(err, result) {
-          should.not.exist(err);
-          fetchOneRowFromRS(result.resultSet, done);
+          should.exist(err);
+          (err.message).should.startWith('NJS-010:');
+          // NJS-010: unsupported data type in select list
+          should.not.exist(result);
+          done();
         }
       );
     })
-  })
+
+  }) // 55.11
 
   describe.skip('55.12 bind a cursor BIND_INOUT', function() {
 

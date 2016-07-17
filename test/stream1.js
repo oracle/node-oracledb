@@ -594,7 +594,7 @@ describe('13. stream1.js', function () {
       });
     });
 
-    it('13.3.2 should default to 100 if oracledb.maxRows is false', function (done) {
+    it('13.3.2 Negative - should fail with NJS-026 if oracledb.maxRows is zero', function (done) {
       var defaultMaxRows;
       var testMaxRows = 0;
 
@@ -602,30 +602,15 @@ describe('13. stream1.js', function () {
 
       defaultMaxRows = oracledb.maxRows;
 
-      oracledb.maxRows = testMaxRows;
-
-      var stream = connection.queryStream('SELECT employee_name FROM nodb_stream1 ORDER BY employee_name');
-
-      stream.on('data', function () {
-        stream.pause();
-
-        // Using the internal/private caches to validate
-        should.equal(stream._fetchedRows.length, (99 - stream._readableState.buffer.length));
-        stream._close();
-      });
-
-      stream.on('close', function() {
+      try {
+        oracledb.maxRows = testMaxRows;
+      } catch (err) {
+        should.exist(err);
+        (err.message).should.startWith('NJS-026:');
+        // NJS-026: maxRows must be greater than zero
         oracledb.maxRows = defaultMaxRows;
         done();
-      });
-
-      stream.on('end', function () {
-        done(new Error('Reached the end of the stream'));
-      });
-
-      stream.on('error', function (err) {
-        done(err);
-      });
+      }
     });
   });
 });
