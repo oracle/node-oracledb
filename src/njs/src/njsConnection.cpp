@@ -2927,7 +2927,7 @@ v8::Local<v8::Value> Connection::GetRows (eBaton* executeBaton)
           {
             Nan::Set(row,
                      Nan::New<v8::String>(executeBaton->mInfo[j].name.c_str(),
-                     executeBaton->mInfo[j].name.length()).ToLocalChecked(),
+                 (int) executeBaton->mInfo[j].name.length()).ToLocalChecked(),
                      val );
           }
           else
