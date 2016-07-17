@@ -145,6 +145,10 @@ assigned a number. The following number ranges have been chosen:
 - 21 - 50  are reserved for data type supporting tests
 - 51 onwards are for other tests
 
+In order to include your tests in the suite, add each new test file
+name to test/opts/mocha.opts. Please also add a description of each
+individual test to test/list.txt.
+
 ## 4. Test Index
 
 See [`test/list.txt`](https://github.com/oracle/node-oracledb/blob/master/test/list.txt)
