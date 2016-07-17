@@ -214,17 +214,18 @@ Scripts to create Oracle's sample schemas can be found at
 
 ## <a name="errorobj"></a> 2. Errors
 
-Unless otherwise specified, the last parameter of each method is a
-callback.  If an application does not pass a callback function where
-it is expected, then node-oracledb throws an exception of type *Error*.
+The last parameter of each method is a callback, unless
+[Promises](#promiseoverview) are being used.  The first parameter of
+the callback is an *Error* object that contains error information if
+the call fails.  If the call succeeds, then the object is null.
 
-The first parameter of the callback is an *Error* object that
-contains error information if the call fails.  If the call succeeds,
-then the object is null.
+When using Promises, the `catch()` callback's error object will
+contain error information when the Promise chain fails.
 
-If an invalid value is set for a property, then the *Error* object is
-thrown.  The same is true for invalid operations on
-read-only or write-only properties.
+If an invalid value is set for a property, then an error occurs.  The
+same is true for invalid operations on read-only or write-only
+properties.  If an unrecognized property name is used, it will be
+ignored.
 
 ### <a name="properror"></a> 2.1 Error Properties
 
