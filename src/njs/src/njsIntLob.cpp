@@ -975,7 +975,8 @@ void ILob::Async_AfterRead(uv_work_t *req)
 
   if(!(lobBaton->error).empty())
   {
-    argv[0] = v8::Exception::Error(Nan::New<v8::String>((lobBaton->error).c_str()).ToLocalChecked());
+    argv[0] = v8::Exception::Error(
+                    Nan::New<v8::String>(lobBaton->error).ToLocalChecked());
     argv[1] = Nan::Undefined();
   }
   else
@@ -987,7 +988,7 @@ void ILob::Async_AfterRead(uv_work_t *req)
       if (iLob->fetchType_ == DpiClob)
       {
         Local<Value> str = Nan::New<v8::String>((char *)iLob->buf_,
-                                              iLob->amountRead_).ToLocalChecked();
+                                         iLob->amountRead_).ToLocalChecked();
         argv[1] = str;
       }
       else
@@ -1171,7 +1172,8 @@ void ILob::Async_AfterWrite(uv_work_t *req)
   iLob->state_ = NJS_INACTIVE;     // mark Lob as inactive as back in main thread
 
   if(!(lobBaton->error).empty())
-    argv[0] = v8::Exception::Error(Nan::New<v8::String>((lobBaton->error).c_str()).ToLocalChecked());
+    argv[0] = v8::Exception::Error(
+                  Nan::New<v8::String>(lobBaton->error).ToLocalChecked());
   else
     argv[0] = Nan::Undefined();
 

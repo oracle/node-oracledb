@@ -143,7 +143,8 @@ void ResultSet::Init(Handle<Object> target)
     ResultSet::SetMetaData );
 
   resultSetTemplate_s.Reset( temp);
-  Nan::Set(target, Nan::New<v8::String>("ResultSet").ToLocalChecked(), temp->GetFunction());
+  Nan::Set(target, Nan::New<v8::String>("ResultSet").ToLocalChecked(),
+           temp->GetFunction());
 }
 
 /*****************************************************************************/
@@ -480,7 +481,8 @@ void ResultSet::Async_AfterGetRows(uv_work_t *req)
 
   if(!(getRowsBaton->error).empty())
   {
-    argv[0] = v8::Exception::Error(Nan::New<v8::String>((getRowsBaton->error).c_str()).ToLocalChecked());
+    argv[0] = v8::Exception::Error(
+                   Nan::New<v8::String>(getRowsBaton->error).ToLocalChecked());
     argv[1] = Nan::Undefined();
   }
   else
@@ -497,7 +499,8 @@ void ResultSet::Async_AfterGetRows(uv_work_t *req)
       rowsArray = Connection::GetRows(ebaton);
       if(!(ebaton->error).empty())
       {
-        argv[0] = v8::Exception::Error(Nan::New<v8::String>((ebaton->error).c_str()).ToLocalChecked());
+        argv[0] = v8::Exception::Error(
+                        Nan::New<v8::String>(ebaton->error).ToLocalChecked());
         argv[1] = Nan::Undefined();
         goto exitAsyncAfterGetRows;
       }
@@ -653,7 +656,8 @@ void ResultSet::Async_AfterClose(uv_work_t *req)
 
   if(!(closeBaton->error).empty())
   {
-    argv[0] = v8::Exception::Error(Nan::New<v8::String>((closeBaton->error).c_str()).ToLocalChecked());
+    argv[0] = v8::Exception::Error(
+                   Nan::New<v8::String>(closeBaton->error).ToLocalChecked());
     if(!closeBaton->errOnActiveOrInvalid)
     {
       closeBaton->njsRS->state_ = NJS_INACTIVE;

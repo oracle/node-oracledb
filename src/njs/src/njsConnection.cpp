@@ -665,8 +665,8 @@ void Connection::GetBinds (Handle<Object> bindobj, eBaton* executeBaton)
     Handle<String> temp = array->Get(index).As<String>();
     NJSString(str, temp);
     bind->key = ":"+std::string(str);
-    Local<Value> val__ = bindobj->Get(Nan::New<v8::String>((char*)str.c_str(),
-                           (int) str.length()).ToLocalChecked());
+    Local<Value> val__ = bindobj->Get(
+                                 Nan::New<v8::String>(str).ToLocalChecked());
     Connection::GetBindUnit(val__, bind, false, executeBaton);
     if(!executeBaton->error.empty())
       goto exitGetBinds;
@@ -1052,7 +1052,7 @@ void Connection::GetInBindParamsScalar(Local<Value> v8val, Bind* bind,
        * INOUT binds
        */
       v8::String::Utf8Value str( v8valNULL ?
-                           Nan::New<v8::String> ( "", 0 ).ToLocalChecked() :
+                           Nan::New<v8::String> ( "" ).ToLocalChecked() :
                            v8val->ToString());
 
       bind->type = dpi::DpiVarChar;
@@ -2748,7 +2748,8 @@ void Connection::Async_AfterExecute(uv_work_t *req)
   Local<Value> argv[2];
   if(!(executeBaton->error).empty())
   {
-    argv[0] = v8::Exception::Error(Nan::New<v8::String>((executeBaton->error).c_str()).ToLocalChecked());
+    argv[0] = v8::Exception::Error(
+                 Nan::New<v8::String>(executeBaton->error).ToLocalChecked());
     argv[1] = Nan::Undefined();
   }
   else
@@ -2775,22 +2776,25 @@ void Connection::Async_AfterExecute(uv_work_t *req)
           if ( !executeBaton->error.empty () )
           {
             argv[0] = v8::Exception::Error (
-                                       Nan::New<v8::String> (
-                           (executeBaton->error).c_str()).ToLocalChecked ());
+                                            Nan::New<v8::String> (
+                                    executeBaton->error).ToLocalChecked());
             argv[1] = Nan::Undefined ();
             goto exitAsyncAfterExecute;
           }
 
-          Nan::Set(result, Nan::New<v8::String>("rows").ToLocalChecked(), Nan::Undefined());
+          Nan::Set(result, Nan::New<v8::String>("rows").ToLocalChecked(),
+                   Nan::Undefined());
 
-          Nan::Set(result, Nan::New<v8::String>("resultSet").ToLocalChecked(), resultSet);
+          Nan::Set(result, Nan::New<v8::String>("resultSet").ToLocalChecked(),
+                   resultSet);
         }
         else
         {
           rowArray = Connection::GetRows(executeBaton);
           if(!(executeBaton->error).empty())
           {
-            argv[0] = v8::Exception::Error(Nan::New<v8::String>((executeBaton->error).c_str()).ToLocalChecked());
+            argv[0] = v8::Exception::Error(
+                  Nan::New<v8::String>(executeBaton->error).ToLocalChecked());
             argv[1] = Nan::Undefined();
             goto exitAsyncAfterExecute;
           }
@@ -2814,7 +2818,7 @@ void Connection::Async_AfterExecute(uv_work_t *req)
         {
           argv[0] = v8::Exception::Error (
                       Nan::New<v8::String> (
-                           (executeBaton->error).c_str()).ToLocalChecked ());
+                                    executeBaton->error).ToLocalChecked ());
           argv[1] = Nan::Undefined ();
           goto exitAsyncAfterExecute;
         }
@@ -2823,24 +2827,34 @@ void Connection::Async_AfterExecute(uv_work_t *req)
                       Nan::New<v8::String>("outBinds").ToLocalChecked(),
                       outBindValue,
                       v8::ReadOnly);
-        Nan::Set(result, Nan::New<v8::String>("rowsAffected").ToLocalChecked(), Nan::Undefined());
+        Nan::Set(result, Nan::New<v8::String>("rowsAffected").ToLocalChecked(),
+                 Nan::Undefined());
 
-        Nan::Set(result, Nan::New<v8::String>("rows").ToLocalChecked(), Nan::Undefined());
-        Nan::Set(result, Nan::New<v8::String>("metaData").ToLocalChecked(), Nan::Undefined());
+        Nan::Set(result, Nan::New<v8::String>("rows").ToLocalChecked(),
+                 Nan::Undefined());
+        Nan::Set(result, Nan::New<v8::String>("metaData").ToLocalChecked(),
+                 Nan::Undefined());
         break;
       default :
-        Nan::ForceSet(result, Nan::New<v8::String>("rowsAffected").ToLocalChecked(),
-                    Nan::New<v8::Integer>((unsigned int) executeBaton->rowsAffected), v8::ReadOnly);
+        Nan::ForceSet(result,
+                      Nan::New<v8::String>("rowsAffected").ToLocalChecked(),
+             Nan::New<v8::Integer>((unsigned int) executeBaton->rowsAffected),
+                      v8::ReadOnly);
         if( executeBaton->numOutBinds )
         {
-          Nan::ForceSet(result, Nan::New<v8::String>("outBinds").ToLocalChecked(), Connection::GetOutBinds(executeBaton), v8::ReadOnly);
+          Nan::ForceSet(result,
+                        Nan::New<v8::String>("outBinds").ToLocalChecked(),
+                        Connection::GetOutBinds(executeBaton), v8::ReadOnly);
         }
         else
         {
-          Nan::Set(result, Nan::New<v8::String>("outBinds").ToLocalChecked(),Nan::Undefined());
+          Nan::Set(result, Nan::New<v8::String>("outBinds").ToLocalChecked(),
+                   Nan::Undefined());
         }
-        Nan::Set(result, Nan::New<v8::String>("rows").ToLocalChecked(), Nan::Undefined());
-        Nan::Set(result, Nan::New<v8::String>("metaData").ToLocalChecked(), Nan::Undefined());
+        Nan::Set(result, Nan::New<v8::String>("rows").ToLocalChecked(),
+                 Nan::Undefined());
+        Nan::Set(result, Nan::New<v8::String>("metaData").ToLocalChecked(),
+                 Nan::Undefined());
         break;
     }
     argv[1] = result;
@@ -2978,8 +2992,7 @@ v8::Local<v8::Value> Connection::GetRows (eBaton* executeBaton)
           if ( executeBaton->error.empty () )
           {
             Nan::Set(row,
-                     Nan::New<v8::String>(executeBaton->mInfo[j].name.c_str(),
-                 (int) executeBaton->mInfo[j].name.length()).ToLocalChecked(),
+          Nan::New<v8::String>(executeBaton->mInfo[j].name).ToLocalChecked(),
                      val );
           }
           else
@@ -3432,8 +3445,7 @@ v8::Local<v8::Value> Connection::GetOutBindObject ( eBaton *executeBaton )
       if ( executeBaton->error.empty () )
       {
         Nan::Set( objectBinds,
-                  Nan::New<v8::String>( binds[index]->key.c_str(),
-                  (int) binds[index]->key.length() ).ToLocalChecked(),
+                  Nan::New<v8::String>( binds[index]->key ).ToLocalChecked(),
                   val );
       }
       else
@@ -3594,7 +3606,8 @@ void Connection::Async_AfterRelease(uv_work_t *req)
   Local<Value> argv[1];
 
   if(!(releaseBaton->error).empty())
-    argv[0] = v8::Exception::Error(Nan::New<v8::String>((releaseBaton->error).c_str()).ToLocalChecked());
+    argv[0] = v8::Exception::Error(
+                Nan::New<v8::String>(releaseBaton->error).ToLocalChecked());
   else
     argv[0] = Nan::Undefined();
 
@@ -3708,7 +3721,8 @@ void Connection::Async_AfterCommit (uv_work_t *req)
   Local<Value> argv[1];
 
   if(!(commitBaton->error).empty())
-    argv[0] = v8::Exception::Error(Nan::New<v8::String>((commitBaton->error).c_str()).ToLocalChecked());
+    argv[0] = v8::Exception::Error(
+                 Nan::New<v8::String>(commitBaton->error).ToLocalChecked());
   else
     argv[0] = Nan::Undefined();
 
@@ -3813,7 +3827,8 @@ void Connection::Async_AfterRollback(uv_work_t *req)
   Local<Value> argv[1];
 
   if(!(rollbackBaton->error).empty())
-    argv[0] = v8::Exception::Error(Nan::New<v8::String>((rollbackBaton->error).c_str()).ToLocalChecked());
+    argv[0] = v8::Exception::Error(
+            Nan::New<v8::String>(rollbackBaton->error).ToLocalChecked());
   else
     argv[0] = Nan::Undefined();
 
@@ -3922,7 +3937,8 @@ void Connection::Async_AfterBreak (uv_work_t *req)
   Local<Value> argv[1];
 
   if(!(breakBaton->error).empty())
-    argv[0] = v8::Exception::Error(Nan::New<v8::String>((breakBaton->error).c_str()).ToLocalChecked());
+    argv[0] = v8::Exception::Error(
+                  Nan::New<v8::String>(breakBaton->error).ToLocalChecked());
   else
     argv[0] = Nan::Undefined();
   Local<Function> callback = Nan::New<Function>(breakBaton->cb);
@@ -4441,8 +4457,10 @@ v8::Local<v8::Value> Connection::NewLob(eBaton* executeBaton,
   argv[0] = iLob;
 
   Local<Value>   result =
-    Local<Function>::Cast(jsOracledb->Get(Nan::New<v8::String>("newLob").ToLocalChecked()))->Call(
-      jsOracledb, 1, argv);
+    Local<Function>::Cast(
+                          jsOracledb->Get(
+                    Nan::New<v8::String>("newLob").ToLocalChecked()))->Call(
+                            jsOracledb, 1, argv);
 
   return scope.Escape(result);
 }

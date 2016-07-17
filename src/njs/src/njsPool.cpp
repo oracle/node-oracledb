@@ -136,7 +136,8 @@ void Pool::Init(Handle<Object> target)
     Pool::SetStmtCacheSize );
 
   poolTemplate_s.Reset( temp );
-  Nan::Set(target, Nan::New<v8::String>("Pool").ToLocalChecked(), temp->GetFunction());
+  Nan::Set(target, Nan::New<v8::String>("Pool").ToLocalChecked(),
+           temp->GetFunction());
 }
 
 /*****************************************************************************/
@@ -483,7 +484,8 @@ void Pool::Async_AfterGetConnection(uv_work_t *req)
 
   if(!(connBaton->error).empty())
   {
-    argv[0] = v8::Exception::Error(Nan::New<v8::String>((connBaton->error).c_str()).ToLocalChecked());
+    argv[0] = v8::Exception::Error(
+                     Nan::New<v8::String>(connBaton->error).ToLocalChecked());
     argv[1] = Nan::Undefined();
   }
   else
@@ -602,7 +604,8 @@ void Pool::Async_AfterTerminate(uv_work_t *req)
 
   if(!(terminateBaton->error).empty())
   {
-    argv[0] = v8::Exception::Error(Nan::New<v8::String>((terminateBaton->error).c_str()).ToLocalChecked());
+    argv[0] = v8::Exception::Error(
+                Nan::New<v8::String>(terminateBaton->error).ToLocalChecked());
   }
   else
   {

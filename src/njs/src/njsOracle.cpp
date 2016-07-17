@@ -542,8 +542,8 @@ NAN_GETTER(Oracledb::GetConnectionClass)
 {
   Oracledb *oracledb = Nan::ObjectWrap::Unwrap<Oracledb>(info.Holder());
   NJS_CHECK_OBJECT_VALID2(oracledb, info);
-  Local<String> value = Nan::New<v8::String>(oracledb->connClass_.c_str(),
-                         (int)oracledb->connClass_.length ()).ToLocalChecked();
+  Local<String> value = Nan::New<v8::String>
+                          (oracledb->connClass_).ToLocalChecked();
   info.GetReturnValue().Set(value);
 }
 
@@ -857,7 +857,8 @@ void Oracledb::Async_AfterGetConnection (uv_work_t *req)
   Local<Value> argv[2];
   if( !(connBaton->error).empty() )
   {
-    argv[0] = v8::Exception::Error(Nan::New<v8::String>( (connBaton->error).c_str() ).ToLocalChecked());
+    argv[0] = v8::Exception::Error(Nan::New<v8::String>(
+                                        connBaton->error ).ToLocalChecked());
     argv[1] = Nan::Null();
   }
   else
@@ -1017,7 +1018,8 @@ void Oracledb::Async_AfterCreatePool (uv_work_t *req)
 
   if (!poolBaton->error.empty())
   {
-    argv[0] = v8::Exception::Error(Nan::New<v8::String>(( poolBaton->error).c_str() ).ToLocalChecked());
+    argv[0] = v8::Exception::Error(
+                   Nan::New<v8::String>( poolBaton->error ).ToLocalChecked());
     argv[1] = Nan::Undefined();
   }
   else
