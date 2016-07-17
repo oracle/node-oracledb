@@ -267,9 +267,13 @@ typedef struct eBaton
      {
        for( unsigned int index = 0 ;index < extBinds.size(); index++ )
        {
-         if ( extBinds[ index ] != NULL )
+         if ( extBinds[index] )
          {
-           delete extBinds[ index ];
+           if ( extBinds[index]->mInfo )
+           {
+             delete [] extBinds[index]->mInfo;
+           }
+           delete extBinds[index];
          }
        }
        extBinds.clear ();
