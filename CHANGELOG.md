@@ -1,5 +1,21 @@
 # Change Log
 
+## node-oracledb v1.10.1 (21 Jul 2016)
+
+- Fixed a bug that prevented a null value to be passed from JavaScript into an IN OUT bind.
+
+- Fixed a memory leak introduced in 1.10 with REF CURSORs.
+
+- Fixed a memory leak in error handling paths when using REF CURSORs.
+
+- Made an internal change for queries selecting unsupported column types allowing them to report an error earlier.
+
+- Made an internal change to use std::string& for string lengths.
+
+- Fixed a compilation warning on Windows.
+
+- Added a mocha configuration file for the test suite.
+
 ## node-oracledb v1.10.0 (8 Jul 2016)
 
 - Enhanced query and REF CURSOR metadata is available when a new
