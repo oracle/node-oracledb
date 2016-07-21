@@ -2,7 +2,7 @@
 
 ## node-oracledb v1.10.1 (21 Jul 2016)
 
-- Fixed a bug that prevented a null value to be passed from JavaScript into an IN OUT bind.
+- Fixed a bug that prevented a null value being passed from JavaScript into an IN OUT bind.
 
 - Fixed a memory leak introduced in 1.10 with REF CURSORs.
 
