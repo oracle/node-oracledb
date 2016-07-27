@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -14,8 +14,8 @@
  *
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'. 
+ *
+ * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
@@ -31,30 +31,24 @@
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
  *     21 - 50  are reserved for data type supporting tests
- *     51 -     are for other tests 
- * 
+ *     51 onwards are for other tests
+ *
  *****************************************************************************/
-"use strict"; 
+'use strict';
 
 var oracledb = require('oracledb');
-var should = require('should');
-var async = require('async');
-var assist = require('./dataTypeAssist.js');
-var dbConfig = require('./dbConfig.js');
+var should   = require('should');
+var async    = require('async');
+var assist   = require('./dataTypeAssist.js');
+var dbConfig = require('./dbconfig.js');
 
 describe('38. dataTypeTimestamp6.js', function() {
-  
-  if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
-  
-  var connection = false;
-  var tableName = "oracledb_timestamp6";
+
+  var connection = null;
+  var tableName = "nodb_timestamp6";
 
   before('get one connection', function(done) {
-    oracledb.getConnection(credential, function(err, conn) {
+    oracledb.getConnection(dbConfig, function(err, conn) {
       should.not.exist(err);
       connection = conn;
       done();
@@ -87,18 +81,18 @@ describe('38. dataTypeTimestamp6.js', function() {
 
     it('38.1.1 works well with SELECT query', function(done) {
       assist.dataTypeSupport(connection, tableName, dates, done);
-    }) 
+    })
 
     it('38.1.2 works well with result set', function(done) {
       assist.verifyResultSet(connection, tableName, dates, done);
-    }) 
-    
+    })
+
     it('38.1.3 works well with REF Cursor', function(done) {
       assist.verifyRefCursor(connection, tableName, dates, done);
-    }) 
-    
+    })
+
   }) // end of 37.1 suite
-  
+
   describe('38.2 stores null value correctly', function() {
     it('38.2.1 testing Null, Empty string and Undefined', function(done) {
       assist.verifyNullValues(connection, tableName, done);
@@ -127,7 +121,7 @@ describe('38. dataTypeTimestamp6.js', function() {
     })
 
     it('38.3.2 SELECT query - formatted data for comparison', function(done) {
-      var sql = "SELECT num, TO_CHAR(content AT TIME ZONE '-8:00', 'DD-MM-YYYY HH24:MI:SS.FF TZR') AS TS_DATA FROM " 
+      var sql = "SELECT num, TO_CHAR(content AT TIME ZONE '-8:00', 'DD-MM-YYYY HH24:MI:SS.FF TZR') AS TS_DATA FROM "
                  + tableName + " WHERE num = :no";
 
       async.forEach(timestamps, function(timestamp, cb) {
@@ -135,15 +129,15 @@ describe('38. dataTypeTimestamp6.js', function() {
         connection.execute(
           sql,
           { no: bv },
-          { 
-            outFormat: oracledb.OBJECT 
+          {
+            outFormat: oracledb.OBJECT
           },
           function(err, result) {
             should.not.exist(err);
             // console.log(result.rows);
             (result.rows[0].TS_DATA).should.equal(assist.content.timestamps6[bv]);
             cb();
-          } 
+          }
         );
       }, function(err) {
           should.not.exist(err);

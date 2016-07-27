@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -14,8 +14,8 @@
  *
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'. 
+ *
+ * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
@@ -28,30 +28,24 @@
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
  *     21 - 50  are reserved for data type supporting tests
- *     51 -     are for other tests 
- * 
+ *     51 onwards are for other tests
+ *
  *****************************************************************************/
-"use strict";
-   
+'use strict';
+
 var oracledb = require('oracledb');
-var should = require('should');
-var async = require('async');
-var assist = require('./dataTypeAssist.js');
-var dbConfig = require('./dbConfig.js');
+var should   = require('should');
+var async    = require('async');
+var assist   = require('./dataTypeAssist.js');
+var dbConfig = require('./dbconfig.js');
 
 describe('32. dataTypeDate.js', function() {
-  
-  if(dbConfig.externalAuth) {
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
-  
+
   var connection = null;
-  var tableName = "oracledb_date";
+  var tableName = "nodb_date";
 
   before('get one connection', function(done) {
-    oracledb.getConnection(credential, function(err, conn) {
+    oracledb.getConnection(dbConfig, function(err, conn) {
       should.not.exist(err);
       connection = conn;
       done();
@@ -64,10 +58,10 @@ describe('32. dataTypeDate.js', function() {
       done();
     });
   })
-  
+
   describe('32.1 Testing JavaScript Date data', function() {
     var dates = assist.data.dates;
-    
+
     before('create table, insert data',function(done) {
       assist.setUp(connection, tableName, dates, done);
     })
@@ -83,16 +77,22 @@ describe('32. dataTypeDate.js', function() {
     })
 
     it('32.1.1 works well with SELECT query', function(done) {
+      var arrayLength = dates.length;
+      for (var i = 0; i < arrayLength; i++) {
+        if (dates[i].getMilliseconds() > 0)
+          dates[i].setMilliseconds(0);
+      }
+
       assist.dataTypeSupport(connection, tableName, dates, done);
-    }) 
+    })
 
     it('32.1.2 works well with result set', function(done) {
       assist.verifyResultSet(connection, tableName, dates, done);
-    }) 
-    
+    })
+
     it('32.1.3 works well with REF Cursor', function(done) {
       assist.verifyRefCursor(connection, tableName, dates, done);
-    }) 
+    })
 
   }) // 32.1 suite
 
@@ -107,7 +107,7 @@ describe('32. dataTypeDate.js', function() {
 
     before(function(done) {
       assist.setUp4sql(connection, tableName, dates, done);
-    }) 
+    })
 
     after(function(done) {
       connection.execute(
@@ -135,14 +135,14 @@ describe('32. dataTypeDate.js', function() {
             // console.log(result.rows);
             (result.rows[0].TS_DATA).should.equal(assist.content.dates[bv]);
             cb();
-          } 
+          }
         );
       }, function(err) {
           should.not.exist(err);
           done();
       });
-    }) 
+    })
 
-  }) // end of 32.3 suite 
+  }) // end of 32.3 suite
 
 })

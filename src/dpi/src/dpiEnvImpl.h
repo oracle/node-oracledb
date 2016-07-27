@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -62,11 +62,15 @@ class EnvImpl : public Env
 {
  public:
                                // creation/termination
-  EnvImpl();
+  EnvImpl( const string &drvName,
+           unsigned int charset,
+           unsigned int ncharset);
 
   virtual ~EnvImpl();
 
-  static EnvImpl * createEnvImpl();
+  static EnvImpl * createEnvImpl( const string& drvName,
+                                  unsigned int charset,
+                                  unsigned int ncharset);
 
   virtual void terminate();
 
@@ -83,11 +87,16 @@ class EnvImpl : public Env
   virtual void poolTimeout(unsigned int poolTimeout);
   virtual unsigned int poolTimeout() const;
 
+  virtual const string & drvName();
+
   virtual void externalAuth(bool externalAuth);
   virtual bool externalAuth() const;
 
   virtual void isEventEnabled(bool isEventEnabled);
   virtual bool isEventEnabled() const;
+
+  virtual unsigned int dbcharset () const;
+  virtual unsigned int dbncharset () const;
 
                                 // interface  methods
   virtual SPool * createPool(const string &user, const string &password,
@@ -96,12 +105,13 @@ class EnvImpl : public Env
                              int poolIncrement,
                              int poolTimeout,
                              int stmtCacheSize,
-                             bool externalAuth);
+                             bool externalAuth,
+                             bool homogeneous );
 
   virtual Conn * getConnection(const string &user, const string &password,
                                const string &connString, int stmtCacheSize,
                                const string &connClass,
-                               bool externalAuth);
+                               bool externalAuth, DBPrivileges dbPriv);
 
 
                                 // internal methods
@@ -113,15 +123,15 @@ class EnvImpl : public Env
   virtual DateTimeArray* getDateTimeArray ( OCIError *errh ) const ;
   virtual void           releaseDateTimeArray ( DateTimeArray *arr ) const ;
 
-  
+
   virtual DpiHandle * allocHandle(HandleType handleType);
-  
+
   virtual Descriptor * allocDescriptor(DescriptorType descriptorType);
-    
+
   virtual void allocDescriptorArray(DescriptorType descriptorType,
                                     unsigned int arraySize,
                                     Descriptor *descriptorArray[]);
-  
+
   virtual DpiHandle * envHandle() const;
 
 
@@ -137,11 +147,14 @@ private:
   unsigned int poolIncrement_;  // pool increment
   unsigned int poolTimeout_;    // pool timeout
 
-  bool         externalAuth_; // doing external authentication
+  bool         externalAuth_;   // doing external authentication
   bool         isEventEnabled_; // EVENTS are enabled
 
   unsigned int stmtCacheSize_;  // statement cache size
+  string       drvName_;        // driver name
 
+  unsigned int charset_;        // charset id
+  unsigned int ncharset_;       // ncharset id
  };
 
 

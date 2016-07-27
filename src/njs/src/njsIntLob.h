@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -18,9 +18,9 @@
  * This file uses NAN:
  *
  * Copyright (c) 2015 NAN contributors
- * 
+ *
  * NAN contributors listed at https://github.com/rvagg/nan#contributors
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
  * "Software"), to deal in the Software without restriction, including
@@ -28,10 +28,10 @@
  * distribute, sublicense, and/or sell copies of the Software, and to
  * permit persons to whom the Software is furnished to do so, subject to
  * the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be
  * included in all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -39,7 +39,7 @@
  * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- * 
+ *
  * NAME
  *  njsILob.h
  *
@@ -73,32 +73,48 @@ class ILob;
 
 typedef struct LobBaton
 {
-  uv_work_t          req;
-  std::string        error;
-  dpi::Env          *dpienv;
-  dpi::Conn         *dpiconn;
+  uv_work_t                  req;
+  std::string                error;
+  dpi::Env                  *dpienv;
+  dpi::Conn                 *dpiconn;
 
-  ILob              *iLob;
-  char              *writebuf;
-  unsigned long long writelen;
-  RefCounter         counter;
-  
-  Nan::Persistent<Function> cb;
+  ILob                      *iLob;
+  char                      *writebuf;
+  unsigned long long         writelen;
+  RefCounter                 counter;
 
-  LobBaton( unsigned int& count, Local<Function> callback ):
+  Nan::Persistent<Function>  cb;
+  Nan::Persistent<Object>    lobbuf;
+  Nan::Persistent<Object>    jsLob;
+
+  LobBaton( unsigned int& count, Local<Function> callback,
+            Local<Object> jsLobObj ):
     error(""), dpienv(NULL), dpiconn(NULL), iLob(NULL), writebuf(NULL),
     writelen(0), counter( count )
-  { 
+  {
     cb.Reset( callback );
+    jsLob.Reset ( jsLobObj );
+  }
+
+  LobBaton( unsigned int& count, Local<Object> buffer_obj,
+            Local<Function> callback, Local<Object> jsLobObj ):
+    error(""), dpienv(NULL), dpiconn(NULL), iLob(NULL), writebuf(NULL),
+    writelen(0), counter( count )
+  {
+    cb.Reset( callback );
+    lobbuf.Reset(buffer_obj);
+    jsLob.Reset ( jsLobObj );
   }
 
   ~LobBaton ()
-   { 
+   {
      cb.Reset();
+     lobbuf.Reset();
+     jsLob.Reset ();
    }
-  
+
 } LobBaton;
-  
+
 
 
 
@@ -130,7 +146,7 @@ public:
   ProtoILob(eBaton *executeBaton, Descriptor *lobLocator, unsigned short fetchType);
 
   ~ProtoILob();
-  
+
 private:
   void cleanup();
 
@@ -145,16 +161,16 @@ class ILob : public Nan::ObjectWrap
 {
  public:
   void setILob(eBaton *executeBaton,  ProtoILob *protoILob);
-  
+
                                 // Define ILob Constructor
   static Nan::Persistent<FunctionTemplate> iLobTemplate_s;
-  
+
   static void Init(Handle<Object> target);
 
 
  private:
   ILob();
-  
+
   ~ILob();
 
   void cleanup();
@@ -166,7 +182,7 @@ class ILob : public Nan::ObjectWrap
   static void lobPropertyException(ILob *iLob, NJSErrorType err,
                                    string property);
 
-  
+
                                 // Getters for properties
   static NAN_GETTER(GetChunkSize);
   static NAN_GETTER(GetLength);
@@ -174,7 +190,7 @@ class ILob : public Nan::ObjectWrap
   static NAN_GETTER(GetOffset);
   static NAN_GETTER(GetType);
 
-  
+
                                 // Setters for properties
   static NAN_SETTER(SetChunkSize);
   static NAN_SETTER(SetLength);
@@ -182,7 +198,7 @@ class ILob : public Nan::ObjectWrap
   static NAN_SETTER(SetOffset);
   static NAN_SETTER(SetType);
 
-  
+
                                 // Read Method on ILob class
   static NAN_METHOD(Read);
   static void Async_Read (uv_work_t *req);
@@ -193,24 +209,25 @@ class ILob : public Nan::ObjectWrap
   static void Async_Write (uv_work_t *req);
   static void Async_AfterWrite (uv_work_t *req);
 
-  Descriptor    *lobLocator_;
-  unsigned short fetchType_;
-  
-  Connection    *njsconn_;
-  dpi::Conn     *dpiconn_;
-  DpiHandle     *svch_;
-  DpiHandle     *errh_;
-  bool           isValid_;
-  State          state_;
+  Descriptor               *lobLocator_;
+  unsigned short            fetchType_;
 
-  char              *buf_;
-  unsigned int       bufSize_;
-  unsigned int       chunkSize_;
-  unsigned long long length_;
-  unsigned long long offset_;
-  unsigned long      amountRead_;
-  unsigned long long amountWritten_;
-  unsigned int       type_;
+  Connection               *njsconn_;
+  dpi::Conn                *dpiconn_;
+  DpiHandle                *svch_;
+  DpiHandle                *errh_;
+  bool                      isValid_;
+  State                     state_;
+
+  char                     *buf_;
+  unsigned int              bufSize_;
+  unsigned int              chunkSize_;
+  unsigned long long        length_;
+  unsigned long long        offset_;
+  unsigned long             amountRead_;
+  unsigned long long        amountWritten_;
+  unsigned int              type_;
+  Nan::Persistent<Object>   jsParent_;
 };
 
 #endif                       /** __NJSILOB_H__ **/

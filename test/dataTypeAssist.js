@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'. 
+ * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
@@ -28,9 +28,10 @@
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
  *     21 - 50  are reserved for data type supporting tests
- *     51 -     are for other tests  
- * 
+ *     51 onwards are for other tests
+ *
  *****************************************************************************/
+'use strict';
 
 var oracledb = require('oracledb');
 var should = require('should');
@@ -39,29 +40,29 @@ var async = require('async');
 var assist = exports;
 
 /* Mapping between table names and data types */
-assist.allDataTypeNames = 
+assist.allDataTypeNames =
 {
-  "oracledb_char"         : "CHAR(2000)",
-  "oracledb_nchar"        : "NCHAR(1000)",
-  "oracledb_varchar2"     : "VARCHAR2(4000)",
-  "oracledb_nvarchar2"    : "NVARCHAR2(2000)",
-  "oracledb_number"       : "NUMBER", 
-  "oracledb_number2"      : "NUMBER(15, 5)",
-  "oracledb_float"        : "FLOAT",
-  "oracledb_float2"       : "FLOAT(90)",
-  "oracledb_binary_float" : "BINARY_FLOAT",
-  "oracledb_double"       : "BINARY_DOUBLE",
-  "oracledb_date"         : "DATE",
-  "oracledb_timestamp1"   : "TIMESTAMP",
-  "oracledb_timestamp2"   : "TIMESTAMP(5)",
-  "oracledb_timestamp3"   : "TIMESTAMP WITH TIME ZONE",
-  "oracledb_timestamp4"   : "TIMESTAMP (2) WITH TIME ZONE",
-  "oracledb_timestamp5"   : "TIMESTAMP WITH LOCAL TIME ZONE",
-  "oracledb_timestamp6"   : "TIMESTAMP (9) WITH LOCAL TIME ZONE",
-  "oracledb_rowid"        : "ROWID",
-  "oracledb_myclobs"      : "CLOB",
-  "oracledb_myblobs"      : "BLOB",
-  "oracledb_raw"          : "RAW(2000)"
+  "nodb_char"         : "CHAR(2000)",
+  "nodb_nchar"        : "NCHAR(1000)",
+  "nodb_varchar2"     : "VARCHAR2(4000)",
+  "nodb_nvarchar2"    : "NVARCHAR2(2000)",
+  "nodb_number"       : "NUMBER",
+  "nodb_number2"      : "NUMBER(15, 5)",
+  "nodb_float"        : "FLOAT",
+  "nodb_float2"       : "FLOAT(90)",
+  "nodb_binary_float" : "BINARY_FLOAT",
+  "nodb_double"       : "BINARY_DOUBLE",
+  "nodb_date"         : "DATE",
+  "nodb_timestamp1"   : "TIMESTAMP",
+  "nodb_timestamp2"   : "TIMESTAMP(5)",
+  "nodb_timestamp3"   : "TIMESTAMP WITH TIME ZONE",
+  "nodb_timestamp4"   : "TIMESTAMP (2) WITH TIME ZONE",
+  "nodb_timestamp5"   : "TIMESTAMP WITH LOCAL TIME ZONE",
+  "nodb_timestamp6"   : "TIMESTAMP (9) WITH LOCAL TIME ZONE",
+  "nodb_rowid"        : "ROWID",
+  "nodb_myclobs"      : "CLOB",
+  "nodb_myblobs"      : "BLOB",
+  "nodb_raw"          : "RAW(2000)"
 };
 
 assist.data = {
@@ -69,7 +70,7 @@ assist.data = {
     '\"',
     ' ',
     '\'',
-    '%', 
+    '%',
     '&',
     '^',
     '~',
@@ -99,7 +100,7 @@ assist.data = {
     ':',
     '\\',
     '|'
-  ], 
+  ],
   strings: [
     null,
     "true",
@@ -127,7 +128,7 @@ assist.data = {
   ],
   alphabet: [
     'A', 'B', 'C', 'D', 'E',
-    'F', 'G', 'H', 'I', 'J', 
+    'F', 'G', 'H', 'I', 'J',
     'K', 'L', 'M', 'N', 'O',
     'P', 'Q', 'R', 'S', 'T',
     'U', 'V', 'W', 'X', 'Y',
@@ -152,12 +153,12 @@ assist.data = {
     0.00000123,
     -0.00000123,
     1234567890.0123,
-    -1234567890.0123 
+    -1234567890.0123
   ],
-  numbersForBinaryFloat: 
+  numbersForBinaryFloat:
   [
-    1, 
-    0, 
+    1,
+    0,
     8,
     -8,
     1234,
@@ -189,7 +190,7 @@ assist.data = {
   ]
 };
 
-assist.DATE_STRINGS = 
+assist.DATE_STRINGS =
 [
   "TO_DATE('2005-01-06','YYYY-DD-MM') ",
   "TO_DATE('2005-09-01', 'YYYY-MM-DD')",
@@ -200,7 +201,7 @@ assist.DATE_STRINGS =
 ];
 
 // for TIMESTAMP WITHOUT TIME ZONE
-assist.TIMESTAMP_STRINGS = 
+assist.TIMESTAMP_STRINGS =
 [
   "TO_TIMESTAMP('2005-01-06', 'YYYY-DD-MM') ",
   "TO_TIMESTAMP('2005-09-01', 'YYYY-MM-DD')",
@@ -224,7 +225,7 @@ assist.TIMESTAMP_STRINGS =
 ];
 
 // for TIMESTAMP WITH TIME ZONE
-assist.TIMESTAMP_TZ_STRINGS = 
+assist.TIMESTAMP_TZ_STRINGS =
 [
   "TO_TIMESTAMP_TZ('1999-12-01 11:00:00.1 -8:00', 'YYYY-MM-DD HH:MI:SS.FF TZH:TZM')",
   "TO_TIMESTAMP_TZ('1999-12-01 11:00:00.12 -8:00', 'YYYY-MM-DD HH:MI:SS.FF TZH:TZM')",
@@ -238,11 +239,11 @@ assist.TIMESTAMP_TZ_STRINGS =
   "TO_TIMESTAMP_TZ('1999-12-01 11:20:02.0000123 -8:00', 'YYYY-MM-DD HH:MI:SS.FF TZH:TZM')",
   "TO_TIMESTAMP_TZ('1999-12-01 11:00:00.12345678 -8:00', 'YYYY-MM-DD HH:MI:SS.FF TZH:TZM')",
   "TO_TIMESTAMP_TZ('1999-12-01 11:00:00.123456789 -8:00', 'YYYY-MM-DD HH:MI:SS.FF TZH:TZM')",
-  "TO_TIMESTAMP_TZ('1999-12-01 11:00:00 -8:00', 'YYYY-MM-DD HH:MI:SS TZH:TZM')"  
+  "TO_TIMESTAMP_TZ('1999-12-01 11:00:00 -8:00', 'YYYY-MM-DD HH:MI:SS TZH:TZM')"
 ];
 
 // content serves as reference logs
-assist.content = 
+assist.content =
 {
   dates:
   [
@@ -346,10 +347,10 @@ StringBuffer.prototype = {
       this.index += 1;
       return this;
     },
-    
+
     toString: function() {
       return this.buffer.join("");
-    }   
+    }
 };
 
 assist.createCharString = function(size) {
@@ -378,7 +379,7 @@ assist.createBuffer = function(size) {
   return new Buffer(array);
 }
 
-assist.setUp = function(connection, tableName, array, done) 
+assist.setUp = function(connection, tableName, array, done)
 {
   async.series([
     function(callback) {
@@ -402,7 +403,7 @@ assist.setUp4sql = function(connection, tableName, array, done)
   ], done);
 }
 
-assist.createTable = function(connection, tableName, done) 
+assist.createTable = function(connection, tableName, done)
 {
   var sqlCreate = assist.sqlCreateTable(tableName);
   connection.execute(
@@ -414,7 +415,7 @@ assist.createTable = function(connection, tableName, done)
   );
 }
 
-assist.insertDataArray = function(connection, tableName, array, done) 
+assist.insertDataArray = function(connection, tableName, array, done)
 {
   async.forEach(array, function(element, cb) {
     connection.execute(
@@ -432,11 +433,11 @@ assist.insertDataArray = function(connection, tableName, array, done)
   });
 }
 
-assist.insertData4sql = function(connection, tableName, array, done) 
+assist.insertData4sql = function(connection, tableName, array, done)
 {
   async.forEach(array, function(element, cb) {
     var sql = "INSERT INTO " + tableName + " VALUES(:no, " + element + " )";
-    
+
     connection.execute(
       sql,
       { no: array.indexOf(element) },
@@ -451,26 +452,26 @@ assist.insertData4sql = function(connection, tableName, array, done)
   });
 }
 
-assist.sqlCreateTable = function(tableName) 
+assist.sqlCreateTable = function(tableName)
 {
-  var createTab = 
-        "BEGIN " + 
+  var createTab =
+        "BEGIN " +
         "  DECLARE " +
-        "    e_table_exists EXCEPTION; " +
-        "    PRAGMA EXCEPTION_INIT(e_table_exists, -00942); " +
+        "    e_table_missing EXCEPTION; " +
+        "    PRAGMA EXCEPTION_INIT(e_table_missing, -00942); " +
         "   BEGIN " +
         "     EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " '); " +
         "   EXCEPTION " +
-        "     WHEN e_table_exists " +
+        "     WHEN e_table_missing " +
         "     THEN NULL; " +
         "   END; " +
         "   EXECUTE IMMEDIATE (' " +
         "     CREATE TABLE " + tableName +" ( " +
-        "       num NUMBER(10), " + 
+        "       num NUMBER(10), " +
         "       content " + assist.allDataTypeNames[tableName] + ", " +
-        "       CONSTRAINT " + tableName + "_pk PRIMARY KEY (num) " + 
+        "       CONSTRAINT " + tableName + "_pk PRIMARY KEY (num) " +
         "     )" +
-        "   '); " + 
+        "   '); " +
         "END; ";
 
   return createTab;
@@ -480,26 +481,28 @@ assist.sqlCreateTable = function(tableName)
 /************************* Functions for Verifiction *********************************/
 
 assist.dataTypeSupport = function(connection, tableName, array, done) {
-  connection.should.be.ok;
+  connection.should.be.ok();
   connection.execute(
-    "SELECT * FROM " + tableName,
+    "SELECT * FROM " + tableName + " ORDER BY num",
     [],
     { outFormat: oracledb.OBJECT },
     function(err, result) {
       should.not.exist(err);
       // console.log(result);
       for(var i = 0; i < array.length; i++) {
-        if( (typeof result.rows[i].CONTENT) === 'string' )   
+        if( (typeof result.rows[i].CONTENT) === 'string' )
           result.rows[i].CONTENT.trim().should.eql(array[result.rows[i].NUM]);
         else if( (typeof result.rows[i].CONTENT) === 'number' )
           result.rows[i].CONTENT.should.eql(array[result.rows[i].NUM]);
         else if( Buffer.isBuffer(result.rows[i].CONTENT) )
           result.rows[i].CONTENT.toString('hex').should.eql(array[result.rows[i].NUM].toString('hex'));
+        else if (Object.prototype.toString.call(result.rows[i].CONTENT) === '[object Date]')
+          result.rows[i].CONTENT.getTime().should.eql(array[result.rows[i].NUM].getTime());
         else
-          result.rows[i].CONTENT.toUTCString().should.eql(array[result.rows[i].NUM].toUTCString());
-      }   
+          should.not.exist(new Error('Uncaught data type!'));
+      }
       done();
-    }  
+    }
   );
 }
 
@@ -520,12 +523,12 @@ assist.verifyResultSet = function(connection, tableName, array, done)
 
 assist.verifyRefCursor = function(connection, tableName, array, done)
 {
-  var createProc = 
+  var createProc =
         "CREATE OR REPLACE PROCEDURE testproc (p_out OUT SYS_REFCURSOR) " +
-        "AS " + 
+        "AS " +
         "BEGIN " +
         "  OPEN p_out FOR " +
-        "SELECT * FROM " + tableName  + "; " +  
+        "SELECT * FROM " + tableName  + "; " +
         "END; ";
   async.series([
     function createProcedure(callback) {
@@ -568,14 +571,16 @@ function fetchRowsFromRS(rs, array, cb)
   rs.getRows(numRows, function(err, rows) {
     if(rows.length > 0) {
       for(var i = 0; i < rows.length; i++) {
-        if( (typeof rows[i].CONTENT) === 'string' ) 
-          rows[i].CONTENT.trim().should.eql(array[rows[i].NUM]); 
+        if( (typeof rows[i].CONTENT) === 'string' )
+          rows[i].CONTENT.trim().should.eql(array[rows[i].NUM]);
         else if( (typeof rows[i].CONTENT) === 'number' )
           rows[i].CONTENT.should.eql(array[rows[i].NUM]);
         else if( Buffer.isBuffer(rows[i].CONTENT) )
           rows[i].CONTENT.toString('hex').should.eql(array[rows[i].NUM].toString('hex'));
-        else 
-          rows[i].CONTENT.toUTCString().should.eql(array[rows[i].NUM].toUTCString());     
+        else if (Object.prototype.toString.call(rows[i].CONTENT) === '[object Date]')
+          rows[i].CONTENT.getTime().should.eql(array[rows[i].NUM].getTime());
+        else
+          should.not.exist(new Error('Uncaught data type!'));
       }
       return fetchRowsFromRS(rs, array, cb);
     } else {
@@ -587,7 +592,7 @@ function fetchRowsFromRS(rs, array, cb)
   });
 }
 
-assist.selectOriginalData = function(connection, tableName, array, done) 
+assist.selectOriginalData = function(connection, tableName, array, done)
 {
   async.forEach(array, function(element, cb) {
     connection.execute(
@@ -606,11 +611,11 @@ assist.selectOriginalData = function(connection, tableName, array, done)
 }
 
 /* Null value verfication */
-assist.verifyNullValues = function(connection, tableName, done) 
-{  
+assist.verifyNullValues = function(connection, tableName, done)
+{
   var sqlInsert = "INSERT INTO " + tableName + " VALUES(:no, :bindValue)";
 
-  connection.should.be.ok;
+  connection.should.be.ok();
   async.series([
     function createTable(callback) {
       var sqlCreate = assist.sqlCreateTable(tableName);
@@ -620,7 +625,7 @@ assist.verifyNullValues = function(connection, tableName, done)
           should.not.exist(err);
           callback();
         }
-      ); 
+      );
     },
     function JSEmptyString(callback) {
       var num = 1;
@@ -700,7 +705,7 @@ assist.verifyNullValues = function(connection, tableName, done)
     }
   ], done);
 
-  function verifyNull(id, cb) 
+  function verifyNull(id, cb)
   {
     connection.execute(
       "SELECT content FROM " + tableName + " WHERE num = :1",
@@ -710,10 +715,10 @@ assist.verifyNullValues = function(connection, tableName, done)
         // console.log(result);
         result.rows.should.eql([ [null] ]);
         cb();
-      } 
+      }
     );
   }
 
-} 
+}
 
 module.exports = assist;

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /*******************************************************************************
  *
@@ -43,12 +43,12 @@ namespace dpi
                      PUBLIC CONSTANTS
   ----------------------------------------------------------------------------*/
 
-  
+
 /*----------------------------------------------------------------------------
                      PUBLIC TYPES
   ----------------------------------------------------------------------------*/
 
-  
+
 /*******************************************************************************
  * NAME     Lob
  *
@@ -58,28 +58,28 @@ namespace dpi
  *   read - read the Lob
  *
  ******************************************************************************/
-  
+
 class Lob
 {
  public:
 
   static void read(DpiHandle *svch, DpiHandle *errh, Descriptor *lobLocator,
-                   unsigned long long &byteAmount, 
+                   unsigned long long &byteAmount,
                    unsigned long long &charAmount,
                    unsigned long long offset,
                    void *buf,
                    unsigned long long bufl);
-  
+
   static void write(DpiHandle *svch, DpiHandle *errh, Descriptor *lobLocator,
-                    unsigned long long &byteAmount, 
+                    unsigned long long &byteAmount,
                     unsigned long long &charAmount,
                     unsigned long long offset,
                     void *buf,
                     unsigned long long bufl);
-  
+
   static unsigned int chunkSize(DpiHandle *svch, DpiHandle *errh,
                                 Descriptor *lobLocator);
-  
+
   static unsigned long long length(DpiHandle *svch, DpiHandle *errh,
                               Descriptor *lobLocator);
 };

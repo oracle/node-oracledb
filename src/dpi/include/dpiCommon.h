@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /*******************************************************************************
  *
@@ -34,7 +34,7 @@ namespace dpi
                      PUBLIC CONSTANTS
   ----------------------------------------------------------------------------*/
 
-  
+
 enum HandleType
 {
   ErrorHandleType = 2  // OCI_HTYPE_ERROR

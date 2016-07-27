@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -54,7 +54,6 @@
 #endif
 
 
-
 /*---------------------------------------------------------------------------
                      PRIVATE CONSTANTS
   ---------------------------------------------------------------------------*/
@@ -79,24 +78,28 @@ static const int kStmtCacheSize = 60;
      Constructor for the EnvImpl class.
 
    PARAMETERS:
-     none
+     drvName                driver name
+     charset                charset id
+     ncharset               ncharset id
 
    RETURNS:
      nothing
 
    NOTES:
 
- */
-
-EnvImpl::EnvImpl()
+*/
+EnvImpl::EnvImpl( const string &drvName,
+                  unsigned int charset,
+                  unsigned int ncharset )
 
 try : envh_(NULL), poolMax_(kPoolMax), poolMin_(kPoolMin),
       poolIncrement_(kPoolIncrement), poolTimeout_(kPoolTimeout),
-      externalAuth_(false),  stmtCacheSize_(kStmtCacheSize)
+      externalAuth_(false),  stmtCacheSize_(kStmtCacheSize), drvName_(drvName),
+      charset_ ( charset ), ncharset_ ( ncharset )
 {
 
   sword rc = OCIEnvNlsCreate (&envh_, OCI_THREADED | OCI_OBJECT, NULL, NULL,
-                              NULL, NULL, 0, NULL, DPI_AL32UTF8, DPI_AL32UTF8);
+                              NULL, NULL, 0, NULL, charset, ncharset);
 
   if (rc)
   {
@@ -150,10 +153,11 @@ EnvImpl::~EnvImpl()
    RETURNS:
      nothing
  */
-
-EnvImpl * EnvImpl::createEnvImpl()
+EnvImpl * EnvImpl::createEnvImpl( const string& drvName,
+                                  unsigned int charset,
+                                  unsigned int ncharset)
 {
-  return new EnvImpl();
+  return new EnvImpl( drvName, charset, ncharset );
 }
 
 
@@ -354,6 +358,27 @@ unsigned int EnvImpl::poolTimeout() const
 }
 
 
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Get the driver name
+
+   PARAMETERS:
+     none
+
+   RETURNS:
+     driver name
+
+   NOTES:
+
+ */
+
+const string & EnvImpl::drvName()
+{
+  return drvName_;
+}
+
 /*****************************************************************************/
 /*
    DESCRIPTION
@@ -441,6 +466,40 @@ bool EnvImpl::isEventEnabled() const
   return isEventEnabled_;
 }
 
+/*****************************************************************************/
+/*
+  DESCRIPTION
+    returns the charsetid used in this EnvImpl.  If none provided at
+    creation time, could be 0.
+
+  PARAMETERS
+    -NONE-
+
+  RETURNS
+    charset id
+*/
+unsigned int EnvImpl::dbcharset () const
+{
+  return charset_;
+}
+
+/*****************************************************************************/
+/*
+  DESCRIPTION
+    returns the ncharsetid used in this EnvImpl.  If none provided at
+    creation time, could be 0.
+
+  PARAMETERS
+    -NONE-
+
+  RETURNS
+    ncharset id
+*/
+unsigned int EnvImpl::dbncharset () const
+{
+  return ncharset_;
+}
+
 
 /*****************************************************************************/
 /*
@@ -454,6 +513,10 @@ bool EnvImpl::isEventEnabled() const
      poolMax       - Max number of connections for session pool
      poolMin       - Min number of connections for session pool
      poolIncrement - Increment count for session pool
+     poolTimeout   - Timeout duration after which getConnection will fail
+     stmtCacheSize - # of statements to cache
+     externalAuth  - external Authentication used or not
+     homogenous    - homongeous pool authentication or not
 
    RETURNS:
      created pool
@@ -466,7 +529,7 @@ SPool * EnvImpl::createPool(const string &user, const string &password,
                             const string &connString,
                             int poolMax, int poolMin, int poolIncrement,
                             int poolTimeout, int stmtCacheSize,
-                            bool externalAuth)
+                            bool externalAuth, bool homogenous)
 {
   return new PoolImpl(this, envh_, user, password, connString,
                       (poolMax == -1) ? poolMax_ : poolMax,
@@ -477,7 +540,7 @@ SPool * EnvImpl::createPool(const string &user, const string &password,
                                             poolTimeout,
                       externalAuth,
                       (stmtCacheSize == -1) ? stmtCacheSize_ :
-                      stmtCacheSize);
+                      stmtCacheSize, homogenous );
 }
 
 
@@ -488,10 +551,14 @@ SPool * EnvImpl::createPool(const string &user, const string &password,
      Get connection.
 
    PARAMETERS:
-     user       - userid
-     password   - password
-     connString - connect string
-     connAttrs  - connection attributes
+     user          - userid
+     password      - password
+     connString    - connect string
+     stmtCacheSize - # statement cached
+     connClass     - DRCP connection class string
+     externalAuth  - external Authentication used or not
+     dbPriv        - DB Privileges (SYSDBA or none).
+
 
    RETURNS:
      created connection
@@ -500,13 +567,13 @@ SPool * EnvImpl::createPool(const string &user, const string &password,
 Conn * EnvImpl::getConnection(const string &user, const string &password,
                               const string &connString,
                               int stmtCacheSize, const string &connClass,
-                              bool externalAuth)
+                              bool externalAuth, DBPrivileges dbPriv )
 {
   return (Conn *)new ConnImpl(this, envh_, externalAuth,
                               (stmtCacheSize == -1) ? stmtCacheSize_ :
                                                       stmtCacheSize,
                               user, password,
-                              connString, connClass);
+                              connString, connClass, dbPriv);
 }
 
 
@@ -635,7 +702,7 @@ DateTimeArray* EnvImpl::getDateTimeArray (OCIError *errh) const
   {
     throw ExceptionImpl ( DpiErrMemAllocFail ) ;
   }
-  return dtmarr; 
+  return dtmarr;
 }
 
 
@@ -670,7 +737,7 @@ void EnvImpl::releaseDateTimeArray ( DateTimeArray *arr )  const
      allocated DPI handle
 
    NOTES:
-     
+
  */
 
 DpiHandle * EnvImpl::allocHandle(HandleType handleType)
@@ -697,7 +764,7 @@ DpiHandle * EnvImpl::allocHandle(HandleType handleType)
      allocated DPI descriptor
 
    NOTES:
-     
+
  */
 
 Descriptor * EnvImpl::allocDescriptor(DescriptorType descriptorType)
@@ -725,7 +792,7 @@ Descriptor * EnvImpl::allocDescriptor(DescriptorType descriptorType)
      allocated DPI descriptor array
 
    NOTES:
-     
+
  */
 
 void EnvImpl::allocDescriptorArray(DescriptorType descriptorType,
@@ -751,15 +818,13 @@ void EnvImpl::allocDescriptorArray(DescriptorType descriptorType,
      OCI environment handle
 
    NOTES:
-     
+
  */
 
 DpiHandle * EnvImpl::envHandle() const
 {
   return (DpiHandle *)envh_;
 }
-
-
 
 /* end of file dpiEnvImpl.cpp */
 

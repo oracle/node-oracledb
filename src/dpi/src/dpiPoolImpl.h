@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -62,7 +62,7 @@ class PoolImpl : public SPool
            const string &user, const string &password,
            const string &connString,
            int poolMax, int poolMin, int poolIncrement, int poolTimeout,
-           bool externalAuth, int stmtCacheSize);
+           bool externalAuth, int stmtCacheSize, bool homogeneous);
 
   virtual ~PoolImpl();
 
@@ -75,7 +75,12 @@ class PoolImpl : public SPool
   virtual unsigned int connectionsInUse() const;
 
                                 // interface methods
-  virtual Conn * getConnection( const std::string& connClass );
+  virtual Conn * getConnection( const std::string& connClass,
+                                const std::string& user,
+                                const std::string& password,
+                                const std::string& tag,
+                                const boolean any,
+                                const DBPrivileges dbPriv );
 
                                 // internal methods
   virtual void releaseConnection(ConnImpl *conn);
@@ -91,6 +96,7 @@ class PoolImpl : public SPool
   OCISPool    *spoolh_;         // OCI session pool handle
   OraText     *poolName_;       // pool name
   ub4          poolNameLen_;    // pool name length
+  OCIAuthInfo *poolAuth_;       // pool Auth handle
 };
 
 

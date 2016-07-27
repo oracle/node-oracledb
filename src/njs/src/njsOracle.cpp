@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -18,9 +18,9 @@
  * This file uses NAN:
  *
  * Copyright (c) 2015 NAN contributors
- * 
+ *
  * NAN contributors listed at https://github.com/rvagg/nan#contributors
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
  * "Software"), to deal in the Software without restriction, including
@@ -28,10 +28,10 @@
  * distribute, sublicense, and/or sell copies of the Software, and to
  * permit persons to whom the Software is furnished to do so, subject to
  * the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be
  * included in all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -39,7 +39,7 @@
  * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- * 
+ *
  * NAME
  *   njsOracle.cpp
  *
@@ -56,6 +56,7 @@
 #include "njsResultSet.h"
 #include "njsMessages.h"
 #include "njsIntLob.h"
+#include <sstream>
                                         //peristent Oracledb class handle
 Nan::Persistent<FunctionTemplate> Oracledb::oracledbTemplate_s;
 
@@ -68,6 +69,8 @@ Nan::Persistent<FunctionTemplate> Oracledb::oracledbTemplate_s;
 #define NJS_PREFETCH_ROWS       100
 #define NJS_LOB_PREFETCH_SIZE 16384
 
+#define NJS_DRIVERNAME_PREFIX "node-oracledb"
+
 /*****************************************************************************/
 /*
    DESCRIPTION
@@ -75,20 +78,23 @@ Nan::Persistent<FunctionTemplate> Oracledb::oracledbTemplate_s;
  */
 Oracledb::Oracledb()
 {
-  dpienv_             = dpi::Env::createEnv();
-  outFormat_          = ROWS_ARRAY;
-  maxRows_            = NJS_MAX_ROWS;
-  autoCommit_         = false;
-  stmtCacheSize_      = NJS_STMT_CACHE_SIZE;
-  poolMax_            = NJS_POOL_MAX;
-  poolMin_            = NJS_POOL_MIN;
-  poolIncrement_      = NJS_POOL_INCR;
-  poolTimeout_        = NJS_POOL_TIMEOUT;
-  prefetchRows_       = NJS_PREFETCH_ROWS;
-  connClass_          = "";
-  externalAuth_       = false;
-  fetchAsStringTypes_ = NULL;
-  lobPrefetchSize_    = NJS_LOB_PREFETCH_SIZE;
+  dpienv_                  = dpi::Env::createEnv( driverName(), DPI_AL32UTF8,
+                                                  DPI_AL32UTF8 );
+  outFormat_               = NJS_ROWS_ARRAY;
+  maxRows_                 = NJS_MAX_ROWS;
+  autoCommit_              = false;
+  extendedMetaData_        = false;
+  stmtCacheSize_           = NJS_STMT_CACHE_SIZE;
+  poolMax_                 = NJS_POOL_MAX;
+  poolMin_                 = NJS_POOL_MIN;
+  poolIncrement_           = NJS_POOL_INCR;
+  poolTimeout_             = NJS_POOL_TIMEOUT;
+  prefetchRows_            = NJS_PREFETCH_ROWS;
+  connClass_               = "";
+  externalAuth_            = false;
+  fetchAsStringTypes_      = NULL;
+  fetchAsStringTypesCount_ = 0;
+  lobPrefetchSize_         = NJS_LOB_PREFETCH_SIZE;
 }
 
 /*****************************************************************************/
@@ -109,6 +115,26 @@ Oracledb::~Oracledb()
   {
     dpienv_->terminate();
   }
+}
+
+/*
+ * DESCRIPTION
+ *   Compose the driver name using the constants NJS_DRIVERNAME_PREFIX,
+ *   NJS_NODE_ORACLEDB_MAJOR, NJS_NODE_ORACLEDB_MINOR and
+ *   NJS_NODE_ORACLEDB_PATCH
+ */
+const string Oracledb::driverName() const
+{
+  stringstream strm;
+
+  strm << NJS_DRIVERNAME_PREFIX << " : ";          //append prefix
+  strm << NJS_NODE_ORACLEDB_MAJOR;                 //append Mjor version
+  strm << ".";
+  strm << NJS_NODE_ORACLEDB_MINOR;                 //append Minor version
+  strm << ".";
+  strm << NJS_NODE_ORACLEDB_PATCH;                 //append Patch version
+
+  return strm.str();
 }
 
 /*****************************************************************************/
@@ -163,6 +189,11 @@ void Oracledb::Init(Handle<Object> target)
     Nan::New<v8::String>("autoCommit").ToLocalChecked(),
     Oracledb::GetAutoCommit,
     Oracledb::SetAutoCommit );
+  Nan::SetAccessor(
+    temp->InstanceTemplate(),
+    Nan::New<v8::String>("extendedMetaData").ToLocalChecked(),
+    Oracledb::GetExtendedMetaData,
+    Oracledb::SetExtendedMetaData );
   Nan::SetAccessor(
     temp->InstanceTemplate(),
     Nan::New<v8::String>("maxRows").ToLocalChecked(),
@@ -230,9 +261,9 @@ NAN_METHOD(Oracledb::New)
                                   100 * portVer       +
                                         portUpdateVer ;
 
-  oracledb->Wrap(info.This());
-  oracledb->jsOracledb.Reset( info.This() );
-  info.GetReturnValue().Set(info.This());
+  oracledb->Wrap(info.Holder());
+  oracledb->jsOracledb.Reset( info.Holder() );
+  info.GetReturnValue().Set(info.Holder());
 }
 
 /*****************************************************************************/
@@ -352,9 +383,21 @@ NAN_GETTER(Oracledb::GetMaxRows)
 */
 NAN_SETTER(Oracledb::SetMaxRows)
 {
-  Oracledb* oracledb = Nan::ObjectWrap::Unwrap<Oracledb>(info.Holder());
+  unsigned int tempMaxRows = NJS_MAX_ROWS;
+  Oracledb*    oracledb    = Nan::ObjectWrap::Unwrap<Oracledb>(info.Holder());
+
   NJS_CHECK_OBJECT_VALID(oracledb);
-  NJS_SET_PROP_UINT(oracledb->maxRows_, value, "maxRows");
+  NJS_SET_PROP_UINT(tempMaxRows, value, "maxRows");
+
+  if ( tempMaxRows <= 0 )
+  {
+    string errMsg = NJSMessages::getErrorMsg ( errInvalidmaxRows );
+    NJS_SET_EXCEPTION( errMsg.c_str(), errMsg.length() );
+  }
+  else
+  {
+    oracledb->maxRows_ = tempMaxRows;
+  }
 }
 
 /*****************************************************************************/
@@ -457,6 +500,30 @@ NAN_SETTER(Oracledb::SetAutoCommit)
 /*****************************************************************************/
 /*
    DESCRIPTION
+     Get Accessor of extendedMetaData property
+*/
+NAN_GETTER(Oracledb::GetExtendedMetaData)
+{
+  Oracledb* oracledb = Nan::ObjectWrap::Unwrap<Oracledb>(info.Holder());
+  NJS_CHECK_OBJECT_VALID2(oracledb, info);
+  info.GetReturnValue().Set(Nan::New<v8::Boolean>(oracledb->extendedMetaData_));
+}
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Set Accessor of extendedMetaData property
+*/
+NAN_SETTER(Oracledb::SetExtendedMetaData)
+{
+  Oracledb* oracledb = Nan::ObjectWrap::Unwrap<Oracledb>(info.Holder());
+  NJS_CHECK_OBJECT_VALID (oracledb);
+  oracledb->extendedMetaData_ = value->ToBoolean()->Value();
+}
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
      Get Accessor of version property
 */
 NAN_GETTER(Oracledb::GetVersion)
@@ -487,8 +554,8 @@ NAN_GETTER(Oracledb::GetConnectionClass)
 {
   Oracledb *oracledb = Nan::ObjectWrap::Unwrap<Oracledb>(info.Holder());
   NJS_CHECK_OBJECT_VALID2(oracledb, info);
-  Local<String> value = Nan::New<v8::String>(oracledb->connClass_.c_str(),
-                         (int)oracledb->connClass_.length ()).ToLocalChecked();
+  Local<String> value = Nan::New<v8::String>
+                          (oracledb->connClass_).ToLocalChecked();
   info.GetReturnValue().Set(value);
 }
 
@@ -601,7 +668,7 @@ NAN_SETTER(Oracledb::SetFetchAsString)
     msg = NJSMessages::getErrorMsg ( errEmptyArrayForFetchAs );
     NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length () );
   }
-      
+
   array = value.As<v8::Array> ();
   if ( array->Length () == 0 )
   {
@@ -613,7 +680,7 @@ NAN_SETTER(Oracledb::SetFetchAsString)
     }
     return;
   }
-  
+
   // If already defined, clear the array.
   if ( oracledb->fetchAsStringTypes_ )
   {
@@ -623,14 +690,22 @@ NAN_SETTER(Oracledb::SetFetchAsString)
   }
 
   oracledb->fetchAsStringTypesCount_ = array->Length ();
-  
-  oracledb->fetchAsStringTypes_ = (DataType *)malloc ( 
+
+  // Overflow check is not required as number of fetchAsString is NOT expected
+  // to be huge.
+  oracledb->fetchAsStringTypes_ = (DataType *)malloc (
                                       array->Length() * sizeof ( DataType ) );
+  if ( !oracledb->fetchAsStringTypes_ )
+  {
+    msg = NJSMessages::getErrorMsg ( errInsufficientMemory ) ;
+    NJS_SET_EXCEPTION ( msg.c_str (), (int) msg.length () );
+  }
+
   for ( unsigned int t = 0 ; t < array->Length () ; t ++ )
   {
-    DataType type = (DataType) 
+    DataType type = (DataType)
                     array->Get(t).As<v8::Integer>()->ToInt32()->Value ();
-    if ( ( type == DATA_STR  ) || ( type == DATA_DEFAULT ) )
+    if ( ( type == NJS_DATATYPE_STR  ) || ( type == NJS_DATATYPE_DEFAULT ) )
     {
       msg = NJSMessages::getErrorMsg ( errInvalidTypeForConversion );
       NJS_SET_EXCEPTION(msg.c_str(), (int)msg.length () );
@@ -684,8 +759,8 @@ NAN_METHOD(Oracledb::GetConnection)
   Local<Object> connProps;
   NJS_GET_CALLBACK ( callback, info );
 
-  Oracledb* oracledb = Nan::ObjectWrap::Unwrap<Oracledb> ( info.This() );
-  connectionBaton *connBaton = new connectionBaton ( callback );
+  Oracledb* oracledb = Nan::ObjectWrap::Unwrap<Oracledb> ( info.Holder() );
+  connectionBaton *connBaton = new connectionBaton ( callback, info.Holder() );
 
   NJS_CHECK_OBJECT_VALID3 (oracledb, connBaton->error, exitGetConnection);
 
@@ -759,8 +834,9 @@ void Oracledb::Async_GetConnection (uv_work_t *req)
                                               connBaton->connStr,
                                               connBaton->stmtCacheSize,
                                               connBaton->connClass,
-                                              connBaton->externalAuth );
-    
+                                              connBaton->externalAuth,
+                                              dbPrivNONE );
+
     connBaton->dpiconn->lobPrefetchSize(connBaton->lobPrefetchSize);
   }
   catch (dpi::Exception& e)
@@ -793,9 +869,10 @@ void Oracledb::Async_AfterGetConnection (uv_work_t *req)
   Local<Value> argv[2];
   if( !(connBaton->error).empty() )
   {
-    argv[0] = v8::Exception::Error(Nan::New<v8::String>( (connBaton->error).c_str() ).ToLocalChecked());
+    argv[0] = v8::Exception::Error(Nan::New<v8::String>(
+                                        connBaton->error ).ToLocalChecked());
     argv[1] = Nan::Null();
-  } 
+  }
   else
   {
     argv[0] = Nan::Undefined();
@@ -803,7 +880,8 @@ void Oracledb::Async_AfterGetConnection (uv_work_t *req)
     Local<Object> connection = lft->GetFunction()-> NewInstance();
     (Nan::ObjectWrap::Unwrap<Connection> (connection))->
                                 setConnection( connBaton->dpiconn,
-                                               connBaton->oracledb );
+                                               connBaton->oracledb,
+                                               Nan::New( connBaton->jsOradb ) );
     argv[1] = connection;
   }
   Local<Function> callback = Nan::New<Function>(connBaton->cb);
@@ -829,13 +907,13 @@ void Oracledb::Async_AfterGetConnection (uv_work_t *req)
 NAN_METHOD(Oracledb::CreatePool)
 {
   Nan::HandleScope scope;
-  
+
   Local<Function> callback;
   Local<Object> poolProps;
   NJS_GET_CALLBACK ( callback, info );
 
-  Oracledb* oracledb = Nan::ObjectWrap::Unwrap<Oracledb> ( info.This() );
-  connectionBaton *poolBaton = new connectionBaton ( callback );
+  Oracledb* oracledb = Nan::ObjectWrap::Unwrap<Oracledb> ( info.Holder() );
+  connectionBaton *poolBaton = new connectionBaton ( callback, info.Holder() );
 
   NJS_CHECK_OBJECT_VALID3(oracledb, poolBaton->error, exitCreatePool);
 
@@ -952,7 +1030,8 @@ void Oracledb::Async_AfterCreatePool (uv_work_t *req)
 
   if (!poolBaton->error.empty())
   {
-    argv[0] = v8::Exception::Error(Nan::New<v8::String>(( poolBaton->error).c_str() ).ToLocalChecked());
+    argv[0] = v8::Exception::Error(
+                   Nan::New<v8::String>( poolBaton->error ).ToLocalChecked());
     argv[1] = Nan::Undefined();
   }
   else
@@ -960,14 +1039,16 @@ void Oracledb::Async_AfterCreatePool (uv_work_t *req)
     argv[0] = Nan::Undefined();
     Local<Object> njsPool = Nan::New(Pool::poolTemplate_s)->
                              GetFunction() ->NewInstance();
-    (Nan::ObjectWrap::Unwrap<Pool> (njsPool))-> setPool ( poolBaton->dpipool,
-                                                     poolBaton->oracledb,
-                                                     poolBaton->poolMax,
-                                                     poolBaton->poolMin,
-                                                     poolBaton->poolIncrement,
-                                                     poolBaton->poolTimeout,
-                                                     poolBaton->stmtCacheSize,
-                                                     poolBaton->lobPrefetchSize);
+    (Nan::ObjectWrap::Unwrap<Pool> (njsPool))-> setPool (
+                                            poolBaton->dpipool,
+                                            poolBaton->oracledb,
+                                            poolBaton->poolMax,
+                                            poolBaton->poolMin,
+                                            poolBaton->poolIncrement,
+                                            poolBaton->poolTimeout,
+                                            poolBaton->stmtCacheSize,
+                                            poolBaton->lobPrefetchSize,
+                                            Nan::New( poolBaton->jsOradb ) );
     argv[1] = njsPool;
   }
   Local<Function> callback = Nan::New(poolBaton->cb);
@@ -1024,13 +1105,16 @@ const DataType * Oracledb::getFetchAsStringTypes () const
     unsigned int count = fetchAsStringTypesCount_;
 
     types = (DataType * )malloc ( sizeof ( DataType ) * count ) ;
-
-    for ( unsigned int i = 0 ; i < count ; i ++ )
+    // Memory allocation failure is reported to application by the caller.
+    if ( types )
     {
-      types[i] = fetchAsStringTypes_[i];
+      for ( unsigned int i = 0 ; i < count ; i ++ )
+      {
+        types[i] = fetchAsStringTypes_[i];
+      }
     }
   }
-  
+
   return types;
 }
 

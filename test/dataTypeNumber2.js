@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -14,8 +14,8 @@
  *
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'. 
+ *
+ * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
@@ -28,37 +28,31 @@
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
  *     21 - 50  are reserved for data type supporting tests
- *     51 -     are for other tests  
- * 
+ *     51 onwards are for other tests
+ *
  *****************************************************************************/
-"use strict"
-  
+'use strict';
+
 var oracledb = require('oracledb');
-var should = require('should');
-var async = require('async');
-var assist = require('./dataTypeAssist.js');
-var dbConfig = require('./dbConfig.js');
+var should   = require('should');
+var async    = require('async');
+var assist   = require('./dataTypeAssist.js');
+var dbConfig = require('./dbconfig.js');
 
 describe('27. dataTypeNumber2.js', function() {
-  
-  if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
-  
+
   var connection = null;
-  var tableName = "oracledb_number2";
+  var tableName = "nodb_number2";
   var numbers = assist.data.numbers;
 
   before('get one connection', function(done) {
-    oracledb.getConnection(credential, function(err, conn) {
+    oracledb.getConnection(dbConfig, function(err, conn) {
       should.not.exist(err);
       connection = conn;
       done();
     });
   })
-  
+
   after('release connection', function(done) {
     connection.release( function(err) {
       should.not.exist(err);
@@ -83,7 +77,7 @@ describe('27. dataTypeNumber2.js', function() {
     })
 
     it('27.1.1 SELECT query', function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
       connection.execute(
         "SELECT * FROM " + tableName,
         [],
@@ -92,9 +86,9 @@ describe('27. dataTypeNumber2.js', function() {
           should.not.exist(err);
           // console.log(result);
           for(var j = 0; j < numbers.length; j++) {
-            if(Math.abs( numbers[result.rows[j].NUM] ) == 0.00000123) 
+            if(Math.abs( numbers[result.rows[j].NUM] ) == 0.00000123)
               result.rows[j].CONTENT.should.be.exactly(0);
-            else            
+            else
               result.rows[j].CONTENT.should.be.exactly(numbers[result.rows[j].NUM]);
           }
           done();
@@ -103,7 +97,7 @@ describe('27. dataTypeNumber2.js', function() {
     }) // 27.1.1
 
     it('27.1.2 resultSet stores NUMBER(p, s) data correctly', function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
       var numRows = 3; // number of rows to return from each call to getRows()
       connection.execute(
         "SELECT * FROM " + tableName,
@@ -116,16 +110,16 @@ describe('27. dataTypeNumber2.js', function() {
           fetchRowsFromRS(result.resultSet);
         }
       );
-    
+
       function fetchRowsFromRS(rs) {
         rs.getRows(numRows, function(err, rows) {
           should.not.exist(err);
           if(rows.length > 0) {
             for(var i = 0; i < rows.length; i++) {
-              if(Math.abs( numbers[rows[i].NUM] ) == 0.00000123) 
+              if(Math.abs( numbers[rows[i].NUM] ) == 0.00000123)
                 rows[i].CONTENT.should.be.exactly(0);
-             else              
-               rows[i].CONTENT.should.be.exactly(numbers[rows[i].NUM]);         
+             else
+               rows[i].CONTENT.should.be.exactly(numbers[rows[i].NUM]);
             }
             return fetchRowsFromRS(rs);
           } else if(rows.length == 0) {
@@ -139,11 +133,11 @@ describe('27. dataTypeNumber2.js', function() {
             done();
           }
         });
-      }    
+      }
     })
 
   }) // 27.1
-  
+
   describe('27.2 stores null value correctly', function() {
     it('27.2.1 testing Null, Empty string and Undefined', function(done) {
       assist.verifyNullValues(connection, tableName, done);

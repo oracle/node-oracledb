@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -48,7 +48,7 @@ using namespace dpi;
 
   DESCRIPTION
     Read from the Lob Locator.
- 
+
   PARAMETERS
     svch                - OCI service handle
     errh                - OCI error handle
@@ -56,7 +56,7 @@ using namespace dpi;
 
     byteAmount (IN/OUT) - IN: number of bytes to read
                           OUT: number of bytes read
-                          Used for BLOB and BFILE always.  
+                          Used for BLOB and BFILE always.
                           For CLOB, it is used only when charAmount is zero.
 
     charAmount (IN/OUT) - IN: number of characters to read. Set to zero if
@@ -74,15 +74,15 @@ using namespace dpi;
     nothing
 
   NOTES
-    
+
 */
-  
+
 void Lob::read(DpiHandle *svch, DpiHandle *errh, Descriptor *lobLocator,
                unsigned long long &byteAmount, unsigned long long &charAmount,
                unsigned long long offset, void *buf, unsigned long long bufl)
 {
   ociCall(OCILobRead2((OCISvcCtx *)svch, (OCIError *)errh,
-                      (OCILobLocator *)lobLocator, 
+                      (OCILobLocator *)lobLocator,
                       (oraub8 *)&byteAmount, (oraub8 *)&charAmount,
                       offset, buf, (oraub8)(byteAmount ? byteAmount : bufl),
                       OCI_ONE_PIECE, NULL, NULL, 0, SQLCS_IMPLICIT),
@@ -95,7 +95,7 @@ void Lob::read(DpiHandle *svch, DpiHandle *errh, Descriptor *lobLocator,
 
   DESCRIPTION
     Write to the Lob Locator.
- 
+
   PARAMETERS
     svch                - OCI service handle
     errh                - OCI error handle
@@ -103,7 +103,7 @@ void Lob::read(DpiHandle *svch, DpiHandle *errh, Descriptor *lobLocator,
 
     byteAmount (IN/OUT) - IN: number of bytes to write
                           OUT: number of bytes actually written
-                          Used for BLOB and BFILE always.  
+                          Used for BLOB and BFILE always.
                           For CLOB, it is used only when charAmount is zero.
 
     charAmount (IN/OUT) - IN: number of characters to written. Set to zero if
@@ -121,15 +121,15 @@ void Lob::read(DpiHandle *svch, DpiHandle *errh, Descriptor *lobLocator,
     nothing
 
   NOTES
-    
+
 */
-  
+
 void Lob::write(DpiHandle *svch, DpiHandle *errh, Descriptor *lobLocator,
                 unsigned long long &byteAmount, unsigned long long &charAmount,
                 unsigned long long offset, void *buf, unsigned long long bufl)
 {
   ociCall(OCILobWrite2((OCISvcCtx *)svch, (OCIError *)errh,
-                      (OCILobLocator *)lobLocator, 
+                      (OCILobLocator *)lobLocator,
                       (oraub8 *)&byteAmount, (oraub8 *)&charAmount,
                       offset, buf, (oraub8)(byteAmount ? byteAmount : bufl),
                       OCI_ONE_PIECE, NULL, NULL, 0, SQLCS_IMPLICIT),
@@ -142,7 +142,7 @@ void Lob::write(DpiHandle *svch, DpiHandle *errh, Descriptor *lobLocator,
 
   DESCRIPTION
     Get Lob chunk size
- 
+
   PARAMETERS
     svch            - OCI service handle
     errh            - OCI error handle
@@ -154,14 +154,14 @@ void Lob::write(DpiHandle *svch, DpiHandle *errh, Descriptor *lobLocator,
     nothing
 
   NOTES
-    
+
 */
-  
+
 unsigned int Lob::chunkSize(DpiHandle *svch, DpiHandle *errh,
                             Descriptor *lobLocator)
 {
   unsigned int chunkSize = 0;
-  
+
   ociCall(OCILobGetChunkSize((OCISvcCtx *)svch, (OCIError *)errh,
                              (OCILobLocator *)lobLocator, &chunkSize),
           (OCIError *)errh);
@@ -175,7 +175,7 @@ unsigned int Lob::chunkSize(DpiHandle *svch, DpiHandle *errh,
 
   DESCRIPTION
     Get Lob length
- 
+
   PARAMETERS
     svch         - OCI service handle
     errh         - OCI error handle
@@ -187,14 +187,14 @@ unsigned int Lob::chunkSize(DpiHandle *svch, DpiHandle *errh,
     nothing
 
   NOTES
-    
+
 */
-  
+
 unsigned long long Lob::length(DpiHandle *svch, DpiHandle *errh,
                           Descriptor *lobLocator)
 {
   oraub8 length = 0;
-  
+
   ociCall(OCILobGetLength2((OCISvcCtx *)svch, (OCIError *)errh,
                            (OCILobLocator *)lobLocator, (oraub8 *)&length),
           (OCIError *)errh);

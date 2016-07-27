@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -14,8 +14,8 @@
  *
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'. 
+ *
+ * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
@@ -28,50 +28,44 @@
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
  *     21 - 50  are reserved for data type supporting tests
- *     51 -     are for other tests  
- * 
+ *     51 onwards are for other tests
+ *
  *****************************************************************************/
-"use strict";
+'use strict';
 
 var oracledb = require('oracledb');
-var should = require('should');
-var async = require('async');
-var assist = require('./dataTypeAssist.js');
-var dbConfig = require('./dbConfig.js');
+var should   = require('should');
+var async    = require('async');
+var assist   = require('./dataTypeAssist.js');
+var dbConfig = require('./dbconfig.js');
 
 describe('42. dataTypeRaw.js', function() {
-  
-  if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
-  
+
   var connection = null;
-  var tableName = "oracledb_raw";
+  var tableName = "nodb_raw";
 
   var bufLen = [10 ,100, 1000, 2000]; // buffer length
   var bufs = [];
-  for(var i = 0; i < bufLen.length; i++) 
+  for(var i = 0; i < bufLen.length; i++)
     bufs[i] = assist.createBuffer(bufLen[i]);
-  
+
   before('get one connection', function(done) {
-    oracledb.getConnection(credential, function(err, conn) {
+    oracledb.getConnection(dbConfig, function(err, conn) {
       should.not.exist(err);
       connection = conn;
       done();
     });
   })
-  
+
   after('release connection', function(done) {
     connection.release( function(err) {
       should.not.exist(err);
       done();
     });
   })
-  
+
   describe('42.1 testing RAW data in various lengths', function() {
-    
+
     before('create table, insert data', function(done) {
       assist.setUp(connection, tableName, bufs, done);
     })
@@ -99,11 +93,11 @@ describe('42. dataTypeRaw.js', function() {
     })
 
     it('42.1.4 result set getRow() function works well with RAW', function(done) {
-      
+
       var sql1 = "select dummy, HEXTORAW('0123456789ABCDEF0123456789ABCDEF') from dual";
       connection.execute(
         sql1,
-        [], 
+        [],
         { resultSet: true },
         function(err, result) {
           should.not.exist(err);
@@ -133,15 +127,15 @@ describe('42. dataTypeRaw.js', function() {
          { c : { val: 1234, type: oracledb.BUFFER, dir:oracledb.BIND_IN } },
          function(err, result) {
           should.exist(err);
-          // NJS-011: encountered bind value and type mismatch 
+          // NJS-011: encountered bind value and type mismatch
           (err.message).should.startWith('NJS-011:');
           done();
          }
       );
-    }) 
+    })
 
   })
-  
+
   describe('42.2 stores null value correctly', function() {
     it('42.2.1 testing Null, Empty string and Undefined', function(done) {
       assist.verifyNullValues(connection, tableName, done);
@@ -149,7 +143,7 @@ describe('42. dataTypeRaw.js', function() {
   })
 
   describe('42.3 DML Returning - Currently not support RAW', function() {
-    
+
     before('create table', function(done) {
       assist.createTable(connection, tableName, done);
     })
@@ -168,7 +162,7 @@ describe('42. dataTypeRaw.js', function() {
       var seq = 1;
       var size = 10;
       var bindValue = assist.createBuffer(size);
-      
+
       connection.execute(
         "INSERT INTO " + tableName + " VALUES (:n, :c) RETURNING num, content INTO :rid, :rc",
         {
@@ -180,7 +174,7 @@ describe('42. dataTypeRaw.js', function() {
         { autoCommit: true },
         function(err, result) {
           should.exist(err);
-          (err.message).should.startWith('NJS-028');
+          (err.message).should.startWith('NJS-028:');
           // NJS-028: raw database type is not supported with DML Returning statements
           done();
         }
@@ -203,7 +197,7 @@ describe('42. dataTypeRaw.js', function() {
         { autoCommit: true },
         function(err, result) {
           should.exist(err);
-          (err.message).should.startWith('NJS-028');
+          (err.message).should.startWith('NJS-028:');
           done();
         }
       );
@@ -225,7 +219,7 @@ describe('42. dataTypeRaw.js', function() {
         { autoCommit: true },
         function(err, result) {
           should.exist(err);
-          (err.message).should.startWith('NJS-028');
+          (err.message).should.startWith('NJS-028:');
           done();
         }
       );
@@ -235,7 +229,7 @@ describe('42. dataTypeRaw.js', function() {
       var seq = 2;
       var size = 10;
       var bindValue = assist.createBuffer(size);
- 
+
       connection.execute(
         "UPDATE " + tableName + " SET content = :c WHERE num = :n RETURNING num, content INTO :rid, :rc",
         {
@@ -247,7 +241,7 @@ describe('42. dataTypeRaw.js', function() {
         { autoCommit: true },
         function(err, result) {
           should.exist(err);
-          (err.message).should.startWith('NJS-028');
+          (err.message).should.startWith('NJS-028:');
           done();
         }
       );
@@ -266,11 +260,11 @@ describe('42. dataTypeRaw.js', function() {
         { autoCommit: true },
         function(err, result) {
           should.exist(err);
-          (err.message).should.startWith('NJS-028');
+          (err.message).should.startWith('NJS-028:');
           done();
         }
       );
-    }) 
+    })
 
     it('42.3.7 DELETE statement with multiple rows matching', function(done) {
       var seq = 1;
@@ -285,22 +279,22 @@ describe('42. dataTypeRaw.js', function() {
         { autoCommit: true },
         function(err, result) {
           should.exist(err);
-          (err.message).should.startWith('NJS-028');
+          (err.message).should.startWith('NJS-028:');
           done();
         }
       );
-    }) 
+    })
 
   }) // 42.3
 
   describe('42.4 in PL/SQL, the maximum size is 32767', function() {
-    
-    var proc = 
-      "CREATE OR REPLACE PROCEDURE oracledb_testraw (p_in IN RAW, p_out OUT RAW) " +
+
+    var proc =
+      "CREATE OR REPLACE PROCEDURE nodb_testraw (p_in IN RAW, p_out OUT RAW) " +
       "AS " +
       "BEGIN " +
       "  p_out := p_in; " +
-      "END; "; 
+      "END; ";
 
     before('create procedure', function(done) {
       connection.execute(
@@ -314,20 +308,20 @@ describe('42. dataTypeRaw.js', function() {
 
     after(function(done) {
       connection.execute(
-        "DROP PROCEDURE oracledb_testraw",
+        "DROP PROCEDURE nodb_testraw",
         function(err) {
           should.not.exist(err);
           done();
         }
       );
     })
-   
+
     it('42.4.1 when data length is less than maxSize', function(done) {
       var size = 5;
       var buf = assist.createBuffer(size);
 
       connection.execute(
-        "BEGIN oracledb_testraw(:i, :o); END;",
+        "BEGIN nodb_testraw(:i, :o); END;",
         {
           i: { type: oracledb.BUFFER, dir: oracledb.BIND_IN, val: buf },
           o: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: 10}
@@ -347,7 +341,7 @@ describe('42. dataTypeRaw.js', function() {
       var buf = assist.createBuffer(size);
 
       connection.execute(
-        "BEGIN oracledb_testraw(:i, :o); END;",
+        "BEGIN nodb_testraw(:i, :o); END;",
         {
           i: { type: oracledb.BUFFER, dir: oracledb.BIND_IN, val: buf },
           o: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: 32767}
@@ -367,7 +361,7 @@ describe('42. dataTypeRaw.js', function() {
       var buf = assist.createBuffer(size);
 
       connection.execute(
-        "BEGIN oracledb_testraw(:i, :o); END;",
+        "BEGIN nodb_testraw(:i, :o); END;",
         {
           i: { type: oracledb.BUFFER, dir: oracledb.BIND_IN, val: buf },
           o: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: 32767}
@@ -386,7 +380,7 @@ describe('42. dataTypeRaw.js', function() {
       var buf = assist.createBuffer(size);
 
       connection.execute(
-        "BEGIN oracledb_testraw(:i, :o); END;",
+        "BEGIN nodb_testraw(:i, :o); END;",
         {
           i: { type: oracledb.BUFFER, dir: oracledb.BIND_IN, val: buf },
           o: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: 40000}

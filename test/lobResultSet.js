@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -14,8 +14,8 @@
  *
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'. 
+ *
+ * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
@@ -24,46 +24,40 @@
  * DESCRIPTION
  *
  *   Inspired by https://github.com/oracle/node-oracledb/issues/210
- *   Testing Lob data and result set. 
- *   Create a table contains Lob data. Read the Lob to result set. Get 
+ *   Testing Lob data and result set.
+ *   Create a table contains Lob data. Read the Lob to result set. Get
  *     rows one by one. Read the lob data on each row.
- * 
+ *
  * NUMBERING RULE
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
  *     21 - 50  are reserved for data type supporting tests
- *     51 onwards are for other tests  
- * 
+ *     51 onwards are for other tests
+ *
  *****************************************************************************/
-"use strict";
+'use strict';
 
 var oracledb = require('oracledb');
 var fs       = require('fs');
 var async    = require('async');
 var should   = require('should');
-var stream = require('stream');
-var dbConfig = require('./dbConfig.js');
+var stream   = require('stream');
+var dbConfig = require('./dbconfig.js');
 var assist   = require('./dataTypeAssist.js');
 
-var inFileName = './test/clobexample.txt'; 
+var inFileName = './test/clobexample.txt';
 
 describe('59. lobResultSet.js', function() {
 
-  if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
-  
   var connection = null;
   before('get one connection', function(done) {
-    oracledb.getConnection(credential, function(err, conn) {
+    oracledb.getConnection(dbConfig, function(err, conn) {
       should.not.exist(err);
       connection = conn;
       done();
     });
   })
-  
+
   after('release connection', function(done) {
     connection.release( function(err) {
       should.not.exist(err);
@@ -72,8 +66,8 @@ describe('59. lobResultSet.js', function() {
   })
 
   describe('59.1 CLOB data', function() {
-    
-    var tableName = "oracledb_myclobs";
+
+    var tableName = "nodb_myclobs";
     before('create table', function(done) {
       assist.createTable(connection, tableName, done);
     })
@@ -92,7 +86,7 @@ describe('59. lobResultSet.js', function() {
       async.series([
         function(callback) {
           insertClob(1, callback);
-        },  
+        },
         function(callback) {
           insertClob(2, callback);
         },
@@ -103,7 +97,7 @@ describe('59. lobResultSet.js', function() {
           connection.execute(
             "SELECT num, content FROM " + tableName,
             [],
-            { resultSet: true }, 
+            { resultSet: true },
             function(err, result) {
               should.not.exist(err);
               // console.log(result);
@@ -113,7 +107,7 @@ describe('59. lobResultSet.js', function() {
         }
       ], done);
     })
-    
+
     function fetchOneRowFromRS(resultSet, callback)
     {
       resultSet.getRow( function(err, row) {
@@ -123,11 +117,11 @@ describe('59. lobResultSet.js', function() {
             should.not.exist(err);
             callback();
           });
-        } 
+        }
         else {
           var lob = row[1];
           lob.setEncoding('utf8');
-          
+
           var text = '';
           lob.on('data', function(chunk) {
             text += chunk;
@@ -145,8 +139,8 @@ describe('59. lobResultSet.js', function() {
 
       });
     }
-  
-    function insertClob(id, cb) 
+
+    function insertClob(id, cb)
     {
       connection.execute(
         "INSERT INTO " + tableName + " VALUES (:n, EMPTY_CLOB()) RETURNING content INTO :lobbv",
@@ -155,7 +149,7 @@ describe('59. lobResultSet.js', function() {
           should.not.exist(err);
           var lob = result.outBinds.lobbv[0];
           var inStream = fs.createReadStream(inFileName);
-          
+
           inStream.pipe(lob);
 
           inStream.on('end', function() {
@@ -168,7 +162,7 @@ describe('59. lobResultSet.js', function() {
           inStream.on('error', function(err) {
             should.not.exist(err);
           });
- 
+
         }
       );
     }
@@ -176,4 +170,3 @@ describe('59. lobResultSet.js', function() {
   }) // 59.1
 
 }) // 59
-

@@ -20,7 +20,7 @@
  *
  * DESCRIPTION
  *   Displays PL/SQL DBMS_OUTPUT in node-oracledb, fetching one record at a time.
- * 
+ *
  *****************************************************************************/
 
 var async = require('async');

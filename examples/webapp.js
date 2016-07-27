@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -32,107 +32,108 @@
  *
  *****************************************************************************/
 
-var http     = require('http');
+var http = require('http');
 var oracledb = require('oracledb');
 var dbConfig = require('./dbconfig.js');
-
-var portid = 7000;    // HTTP listening port number
+var httpPort = 7000;
 
 // Main entry point.  Creates a connection pool, on callback creates an
-// HTTP server and executes a query based on the URL parameter given.
+// HTTP server that executes a query based on the URL parameter given.
 // The pool values shown are the default values.
-oracledb.createPool (
-  {
-    user          : dbConfig.user,
-    password      : dbConfig.password,
-    connectString : dbConfig.connectString,
-    poolMax       : 4, // maximum size of the pool
-    poolMin       : 0, // let the pool shrink completely
-    poolIncrement : 1, // only grow the pool by one connection at a time
-    poolTimeout   : 0  // never terminate idle connections
-  },
-  function(err, pool)
-  {
+function init() {
+  oracledb.createPool(
+    {
+      user: dbConfig.user,
+      password: dbConfig.password,
+      connectString: dbConfig.connectString,
+      poolMax: 4, // maximum size of the pool
+      poolMin: 0, // let the pool shrink completely
+      poolIncrement: 1, // only grow the pool by one connection at a time
+      poolTimeout: 0  // never terminate idle connections
+    },
+    function(err, pool) {
+      if (err) {
+        console.error("createPool() error: " + err.message);
+        return;
+      }
+
+      // Create HTTP server and listen on port - httpPort
+      http
+        .createServer(function(request, response) {
+          handleRequest(request, response, pool);
+        })
+        .listen(httpPort, "localhost");
+
+      console.log("Server running at http://localhost:" + httpPort);
+    }
+  );
+}
+
+function handleRequest(request, response, pool) {
+  var urlparts = request.url.split("/");
+  var deptid = urlparts[1];
+
+  htmlHeader(
+    response,
+    "Oracle Database Driver for Node.js",
+    "Example using node-oracledb driver"
+  );
+
+  if (deptid != parseInt(deptid)) {
+    handleError(
+      response,
+      'URL path "' + deptid + '" is not an integer.  Try http://localhost:' + httpPort + '/30',
+      null
+    );
+
+    return;
+  }
+
+  // Checkout a connection from the pool
+  pool.getConnection(function(err, connection) {
     if (err) {
-      console.error("createPool() callback: " + err.message);
+      handleError(response, "getConnection() error", err);
       return;
     }
 
-    // Create HTTP server and listen on port - portid
-    var hs = http.createServer (
-      function(request, response)  // Callback gets HTTP request & response object
-      {
-        var urlparts = request.url.split("/");
-        var deptid   = urlparts[1];
+    // console.log("Connections open: " + pool.connectionsOpen);
+    // console.log("Connections in use: " + pool.connectionsInUse);
 
-        htmlHeader(response,
-                   "Oracle Database Driver for Node.js" ,
-                   "Example using node-oracledb driver");
-
-        if (deptid != parseInt(deptid)) {
-          handleError(response, 'URL path "' + deptid +
-                      '" is not an integer.  Try http://localhost:' + portid + '/30', null);
+    connection.execute(
+      "SELECT employee_id, first_name, last_name " +
+      "FROM employees " +
+      "WHERE department_id = :id",
+      [deptid], // bind variable value
+      function(err, result) {
+        if (err) {
+          connection.release(function(err) {
+            if (err) {
+              // Just logging because handleError call below will have already
+              // ended the response.
+              console.error("execute() error release() error", err);
+            }
+          });
+          handleError(response, "execute() error", err);
           return;
         }
 
-        // Checkout a connection from the pool
-        pool.getConnection (
-          function(err, connection)
-          {
-            if (err) {
-              handleError(response, "getConnection() failed ", err);
-              return;
-            }
+        displayResults(response, result, deptid);
 
-            // console.log("Connections open: " + pool.connectionsOpen);
-            // console.log("Connections in use: " + pool.connectionsInUse);
-
-            connection.execute(
-              "SELECT employee_id, first_name, last_name " +
-                "FROM   employees " +
-                "WHERE  department_id = :id",
-              [deptid],  // bind variable value
-              function(err, result)
-              {
-                if (err) {
-                  connection.release(
-                    function(err)
-                    {
-                      if (err) {
-                        handleError(response, "execute() error release() callback", err);
-                        return;
-                      }
-                    });
-                  handleError(response, "execute() callback", err);
-                  return;
-                }
-
-                displayResults(response, result, deptid);
-
-                /* Release the connection back to the connection pool */
-                connection.release(
-                  function(err)
-                  {
-                    if (err) {
-                      handleError(response, "normal release() callback", err);
-                      return;
-                    }
-                  });
-
-                htmlFooter(response);
-              });
-          });
-      });
-
-    hs.listen(portid, "localhost");
-
-    console.log("Server running at http://localhost:" + portid);
+        /* Release the connection back to the connection pool */
+        connection.release(function(err) {
+          if (err) {
+            handleError(response, "normal release() error", err);
+          } else {
+            htmlFooter(response);
+          }
+        });
+      }
+    );
   });
-
+}
 
 // Report an error
-function handleError(response, text, err)
-{
+function handleError(response, text, err) {
   if (err) {
     text += err.message;
   }
@@ -141,10 +142,8 @@ function handleError(response, text, err)
   htmlFooter(response);
 }
 
-
 // Display query results
-function displayResults(response, result, deptid)
-{
+function displayResults(response, result, deptid) {
   response.write("<h2>" + "Employees in Department " + deptid + "</h2>");
   response.write("<table>");
 
@@ -166,30 +165,38 @@ function displayResults(response, result, deptid)
   response.write("</table>");
 }
 
-
 // Prepare HTML header
-function htmlHeader(response, title, caption)
-{
-  response.writeHead (200, {"Content-Type" : "text/html" });
-  response.write     ("<!DOCTYPE html>");
-  response.write     ("<html>");
-  response.write     ("<head>");
-  response.write     ("<style>" +
-                      "body {background:#FFFFFF;color:#000000;font-family:Arial,sans-serif;margin:40px;padding:10px;font-size:12px;text-align:center;}" +
-                      "h1 {margin:0px;margin-bottom:12px;background:#FF0000;text-align:center;color:#FFFFFF;font-size:28px;}" +
-                      "table {border-collapse: collapse;   margin-left:auto; margin-right:auto;}" +
-                      "td {padding:8px;border-style:solid}" +
-                     "</style>\n");
-  response.write     ("<title>" + caption + "</title>");
-  response.write     ("</head>");
-  response.write     ("<body>");
-  response.write     ("<h1>" + title + "</h1>");
+function htmlHeader(response, title, caption) {
+  response.writeHead(200, {"Content-Type": "text/html"});
+  response.write("<!DOCTYPE html>");
+  response.write("<html>");
+  response.write("<head>");
+  response.write("<style>" +
+    "body {background:#FFFFFF;color:#000000;font-family:Arial,sans-serif;margin:40px;padding:10px;font-size:12px;text-align:center;}" +
+    "h1 {margin:0px;margin-bottom:12px;background:#FF0000;text-align:center;color:#FFFFFF;font-size:28px;}" +
+    "table {border-collapse: collapse;   margin-left:auto; margin-right:auto;}" +
+    "td {padding:8px;border-style:solid}" +
+    "</style>\n");
+  response.write("<title>" + caption + "</title>");
+  response.write("</head>");
+  response.write("<body>");
+  response.write("<h1>" + title + "</h1>");
 }
 
-
 // Prepare HTML footer
-function htmlFooter(response)
-{
+function htmlFooter(response) {
   response.write("</body>\n</html>");
   response.end();
 }
+
+process
+  .on('SIGTERM', function() {
+    console.log("\nTerminating");
+    process.exit(0);
+  })
+  .on('SIGINT', function() {
+    console.log("\nTerminating");
+    process.exit(0);
+  });
+
+init();

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -14,8 +14,8 @@
  *
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'. 
+ *
+ * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
@@ -28,49 +28,43 @@
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
  *     21 - 50  are reserved for data type supporting tests
- *     51 onwards are for other tests  
- * 
+ *     51 onwards are for other tests
+ *
  *****************************************************************************/
-"use strict"
+'use strict';
 
 var oracledb = require('oracledb');
-var should = require('should');
-var assist = require('./dataTypeAssist.js');
-var dbConfig = require('./dbConfig.js');
+var should   = require('should');
+var assist   = require('./dataTypeAssist.js');
+var dbConfig = require('./dbconfig.js');
 
 describe('23. dataTypeNchar.js', function(){
-  
-  if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
-  
-  var connection = null;
-  var tableName = "oracledb_nchar";
 
-  var strLen = [10, 100, 500, 1000]; 
+  var connection = null;
+  var tableName = "nodb_nchar";
+
+  var strLen = [10, 100, 500, 1000];
   var strs = [];
   for(var i = 0; i < strLen.length; i++)
     strs[i] = assist.createCharString(strLen[i]);
-  
+
   before('get one connection', function(done) {
-    oracledb.getConnection(credential, function(err, conn) {
+    oracledb.getConnection(dbConfig, function(err, conn) {
       should.not.exist(err);
       connection = conn;
       done();
     });
   })
-  
+
   after('release connection', function(done) {
     connection.release( function(err) {
       should.not.exist(err);
       done();
     });
-  })    
+  })
 
   describe('23.1 testing NCHAR data in various lengths', function() {
-    
+
     before('create table, insert data',function(done) {
       assist.setUp(connection, tableName, strs, done);
     })
@@ -103,5 +97,5 @@ describe('23. dataTypeNchar.js', function(){
       assist.verifyNullValues(connection, tableName, done);
     })
   })
-  
+
 })

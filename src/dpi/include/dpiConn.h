@@ -46,6 +46,14 @@ namespace dpi
 /*---------------------------------------------------------------------------
                      PUBLIC CONSTANTS
   ---------------------------------------------------------------------------*/
+// Enumeration for Database Privileges
+typedef enum
+{
+  dbPrivNONE = 0,                                             // None specified
+  dbPrivSYSDBA,                                                       // SYSDBA
+} DBPrivileges;
+
+
 
 /*---------------------------------------------------------------------------
                      PUBLIC TYPES
@@ -58,7 +66,7 @@ class Conn
 public:
                                 // termination
 
-  virtual void release() = 0;
+  virtual void release( const string &tag = "", boolean retag = false ) = 0;
 
                                 // properties
   virtual void stmtCacheSize(unsigned int stmtCacheSize) = 0;
@@ -74,6 +82,10 @@ public:
   virtual void module(const string &module) = 0;
 
   virtual void action(const string &action) = 0;
+
+  // In case of pooled-connections & tagged sessions, did we get session
+  // with provided Tag
+  virtual boolean sameTag () = 0;
 
                                 // methods
   virtual Stmt* getStmt (const string &sql="") = 0;

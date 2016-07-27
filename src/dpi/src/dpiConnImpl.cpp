@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -73,6 +73,8 @@ using namespace std;
      user          - userid
      password      - password
      connString    - connect string
+     connClass     - DRCP Connection class string
+     dbPriv        - DB Privileges (SYSDBA or none).
 
    RETURNS:
      nothing
@@ -81,16 +83,19 @@ using namespace std;
 ConnImpl::ConnImpl(EnvImpl *env, OCIEnv *envh, bool externalAuth,
                    unsigned int stmtCacheSize,
                    const string &user, const string &password,
-                   const string &connString, const string &connClass)
+                   const string &connString, const string &connClass,
+                   DBPrivileges dbPriv)
 
 try :  env_(env), pool_(NULL),
        envh_(envh), errh_(NULL), auth_(NULL), svch_(NULL), sessh_(NULL),
-       hasTxn_(false), srvh_(NULL), dropConn_(false)
+       hasTxn_(false), srvh_(NULL), dropConn_(false), tag_(""),
+       retag_(false), sameTag_ (false)
 {
 
   this->initConnImpl ( false, externalAuth, connClass,
                        ( OraText * ) connString.data (),
-                       ( ub4 ) connString.length (), user, password );
+                       ( ub4 ) connString.length (), user, password, "",
+                       false, dbPriv );
 
   this->stmtCacheSize(stmtCacheSize);
 }
@@ -113,25 +118,33 @@ catch (...)
      poolName        - name of the pool
      poolNameLen     - length of pool name
      connectionClass - connection class.
+     user            - username in case of non-homogenous pool
+     password        - password in case of non-homogenous pool
+     tag             - session tag name
+     matchAny        - Match Tag name as MATCHANY or EXACT
+     dbPriv          - DB privileges (SYSDBA or none).
 
    RETURNS:
      nothing
 
    NOTES:
      This constructor to be used in session-pool scenarios.
+     For homogeneous pool, user, password should be empty string.
  */
 
 ConnImpl::ConnImpl(PoolImpl *pool, OCIEnv *envh, bool externalAuth,
-                   OraText *poolName, ub4 poolNameLen, const string& connClass
-                   )
+                   OraText *poolName, ub4 poolNameLen, const string& connClass,
+                   const string &user, const string &password,
+                   const string &tag, const boolean matchAny,
+                   const DBPrivileges dbPriv )
 
 try :  env_(NULL), pool_(pool),
        envh_(envh), errh_(NULL), auth_(NULL),
        svch_(NULL), sessh_(NULL), hasTxn_(false), srvh_(NULL),
-       dropConn_(false)
+       dropConn_(false), tag_ (""), retag_ (false), sameTag_(false)
 {
   this->initConnImpl ( true, externalAuth, connClass, poolName, poolNameLen,
-                       "", "" );
+                       user, password, tag, matchAny, dbPriv );
 }
 
 catch (...)
@@ -169,7 +182,8 @@ ConnImpl::~ConnImpl()
      Release the connection.
 
    PARAMETERS:
-     none
+     tag    - session tag name
+     retag  - tagCLRTAG, tagNONE
 
    RETURNS:
      nothing
@@ -178,7 +192,7 @@ ConnImpl::~ConnImpl()
 
  */
 
-void ConnImpl::release()
+void ConnImpl::release( const string &tag, boolean retag )
 {
   #if OCI_MAJOR_VERSION >= 12
     ociCall(OCIAttrGet(sessh_, OCI_HTYPE_SESSION, &hasTxn_, NULL,
@@ -187,6 +201,13 @@ void ConnImpl::release()
 
   if(hasTxn_)
     rollback();
+
+  retag_ = retag;                       /* for later use */
+
+  if ( tag.length () > 0 )
+  {
+    tag_ = tag;
+  }
 
   if (pool_)
     pool_->releaseConnection(this);
@@ -564,6 +585,9 @@ unsigned int ConnImpl::getServerVersion ()
      poolNmRconnStr - poolName or connectString
      user           - userid in case of non-pool scenario
      password       - password in case of non-pool scenario
+     tag            - session tag name
+     any            - Match session tag name as MATCHANY or MATCHEXACT
+     dbPriv         - DB Privileges (SYSDBA or none)
 
    RETURNS:
      nothing
@@ -571,7 +595,8 @@ unsigned int ConnImpl::getServerVersion ()
 
 void ConnImpl::initConnImpl ( bool pool, bool externalAuth,
                    const string& connClass, OraText *poolNmRconnStr,
-                   ub4 nameLen, const string &user, const string &password )
+                   ub4 nameLen, const string &user, const string &password,
+                   const string &tag, const boolean any, DBPrivileges dbPriv )
 {
   ub4 mode        = OCI_DEFAULT;
   ub2 csid        = 0;
@@ -611,6 +636,18 @@ void ConnImpl::initConnImpl ( bool pool, bool externalAuth,
                            OCI_ATTR_PASSWORD, errh_ ), errh_ );
   }
 
+  switch ( dbPriv )
+  {
+    case dbPrivSYSDBA:
+      mode |= OCI_SESSGET_SYSDBA;
+      break;
+
+    case dbPrivNONE:
+    default:
+      break;
+  }
+
+
   // If connection class provided, set it on auth handle
   if ( connClass.length () )
   {
@@ -620,8 +657,36 @@ void ConnImpl::initConnImpl ( bool pool, bool externalAuth,
                            OCI_ATTR_CONNECTION_CLASS, errh_ ), errh_ );
   }
 
+  /* In case of Pool, we set the driver name on poolAuth_ handle in
+   * Pool implimentation. For non-pooled connections we set it here.
+   */
+  if ( !pool &&  !(env_->drvName()).empty() )
+  {
+    ociCall ( OCIAttrSet ( (void*) auth_, OCI_HTYPE_AUTHINFO,
+                           (OraText *) ( env_->drvName() ).data (),
+                           ( ub4 ) ( ( env_->drvName() ).length () ),
+                           OCI_ATTR_DRIVER_NAME, errh_ ), errh_);
+  }
+
+  /*
+   * Applicable only on Pooled sessions - attempts to return a session with
+   * specified tag
+   *
+   * If any is false - then a session with a different tag is never returned
+   * if any is true -  if such a session not available, available untagged
+   *                   if no untagged is available, then any tagged session
+   *                   is returned.  All returned sessions are authenticated.
+   *
+   * sameTag_ flag will be true if such a tagged session was returned
+   *                   false otherwise.
+   */
+  if ( pool && any )
+  {
+    mode |= OCI_SESSGET_SPOOL_MATCHANY;
+  }
+
   ociCall ( OCISessionGet ( envh_, errh_, &svch_, auth_, poolNmRconnStr,
-                          ( ub4 ) nameLen, NULL, 0, NULL, NULL, NULL,
+                          ( ub4 ) nameLen, NULL, 0, NULL, NULL, &sameTag_,
                           mode ), errh_ );
 
   ociCall ( OCIAttrGet ( svch_, OCI_HTYPE_SVCCTX, &sessh_,  0,
@@ -675,7 +740,21 @@ void ConnImpl::cleanup()
         relMode |= OCI_SESSRLS_DROPSESS;
     }
 
-    OCISessionRelease(svch_, errh_, NULL, 0, relMode);
+    // Re-tagging
+    if( retag_ )
+    {
+      relMode |= OCI_SESSRLS_RETAG;
+    }
+
+    /*
+     * RETAG behavior: (same as in OCI).
+     *  if retag_ is TRUE & tag_ length is non-zero, then tag_ is set
+     *  if retag_ is TRUE & tag_ length is zero, then session-tag is cleared
+     *  if retag_ is FALSE, then no action taken(if tag_ given will be ignored)
+     */
+
+    OCISessionRelease(svch_, errh_, (OraText *)tag_.c_str (),
+                      (ub4) tag_.length (), relMode);
     svch_ = NULL;
   }
 

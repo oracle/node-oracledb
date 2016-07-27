@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'. 
+ * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
@@ -29,28 +29,22 @@
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
  *     21 - 50  are reserved for data type supporting tests
- *     51 onwards are for other tests 
- * 
+ *     51 onwards are for other tests
+ *
  *****************************************************************************/
-"use strict"
+'use strict';
 
 var oracledb = require('oracledb');
 var fs       = require('fs');
-var should = require('should');
-var async = require('async');
-var dbConfig = require('./dbConfig.js');
+var should   = require('should');
+var async    = require('async');
+var dbConfig = require('./dbconfig.js');
 var assist   = require('./dataTypeAssist.js');
 
 describe('58. properties.js', function() {
 
-  if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
-
   describe('58.1 Oracledb Class', function() {
-    
+
     var defaultValues = {};
 
     before('save the default values', function() {
@@ -66,25 +60,31 @@ describe('58. properties.js', function() {
       defaultValues.externalAuth    = oracledb.externalAuth;
       defaultValues.fetchAsString   = oracledb.fetchAsString;
       defaultValues.outFormat       = oracledb.outFormat;
-      defaultValues.lobPrefetchSize = oracledb.lobPrefetchSize;   
+      defaultValues.lobPrefetchSize = oracledb.lobPrefetchSize;
+      defaultValues.queueRequests   = oracledb.queueRequests;
+      defaultValues.queueTimeout    = oracledb.queueTimeout;
+      defaultValues.stmtCacheSize   = oracledb.stmtCacheSize;
     })
 
     after('restore the values', function() {
-      oracledb.poolMin          = defaultValues.poolMin;        
-      oracledb.poolMax          = defaultValues.poolMax;        
-      oracledb.poolIncrement    = defaultValues.poolIncrement;  
-      oracledb.poolTimeout      = defaultValues.poolTimeout;    
-      oracledb.maxRows          = defaultValues.maxRows;        
-      oracledb.prefetchRows     = defaultValues.prefetchRows;   
-      oracledb.autoCommit       = defaultValues.autoCommit;     
+      oracledb.poolMin          = defaultValues.poolMin;
+      oracledb.poolMax          = defaultValues.poolMax;
+      oracledb.poolIncrement    = defaultValues.poolIncrement;
+      oracledb.poolTimeout      = defaultValues.poolTimeout;
+      oracledb.maxRows          = defaultValues.maxRows;
+      oracledb.prefetchRows     = defaultValues.prefetchRows;
+      oracledb.autoCommit       = defaultValues.autoCommit;
       // oracledb.version          = defaultValues.version;         // version is a read-only property. it needn't to restore.
-      oracledb.connClass        = defaultValues.connClass;      
-      oracledb.externalAuth     = defaultValues.externalAuth;   
-      oracledb.fetchAsString    = defaultValues.fetchAsString;  
-      oracledb.outFormat        = defaultValues.outFormat;      
+      oracledb.connClass        = defaultValues.connClass;
+      oracledb.externalAuth     = defaultValues.externalAuth;
+      oracledb.fetchAsString    = defaultValues.fetchAsString;
+      oracledb.outFormat        = defaultValues.outFormat;
       oracledb.lobPrefetchSize  = defaultValues.lobPrefetchSize;
+      oracledb.queueRequests    = defaultValues.queueRequests;
+      oracledb.queueTimeout     = defaultValues.queueTimeout;
+      oracledb.stmtCacheSize    = defaultValues.stmtCacheSize;
     })
-   
+
     it('58.1.1 poolMin', function() {
       var t = oracledb.poolMin;
       oracledb.poolMin = t + 1;
@@ -139,23 +139,24 @@ describe('58. properties.js', function() {
 
       t.should.eql(defaultValues.autoCommit);
       (oracledb.autoCommit).should.eql( !defaultValues.autoCommit );
+
     })
 
     it('58.1.8 version (read-only)', function() {
-      (oracledb.version).should.be.a.Number;
-      
+      (oracledb.version).should.be.a.Number();
+
       try {
         oracledb.version = 5;
       } catch(err) {
         should.exist(err);
         // console.log(err.message);
-        (err.message).should.startWith('NJS-014');
+        (err.message).should.startWith('NJS-014:');
       }
     })
 
     it('58.1.9 connClass', function() {
       oracledb.connClass = "cc";
-      (oracledb.connClass).should.be.a.String;
+      (oracledb.connClass).should.be.a.String();
     })
 
     it('58.1.10 externalAuth', function() {
@@ -192,15 +193,39 @@ describe('58. properties.js', function() {
 
     it('58.1.14 oracleClientVersion (read-only)', function () {
       var t = oracledb.oracleClientVersion ;
-      t.should.be.a.Number;
+      t.should.be.a.Number();
 
       try {
         oracledb.oracleClientVersion = t + 1;
       } catch(err) {
         should.exist(err);
-        (err.message).should.startWith('NJS-014');
+        (err.message).should.startWith('NJS-014:');
       }
     } );
+
+    it('58.1.15 queueRequests', function() {
+      var t = oracledb.queueRequests;
+      oracledb.queueRequests = false;
+
+      should.equal(t, true);
+      should.notEqual(t, oracledb.queueRequests);
+    })
+
+    it('58.1.16 queueTimeout', function() {
+      var t = oracledb.queueTimeout;
+      oracledb.queueTimeout = t + 1000;
+
+      should.equal(t, defaultValues.queueTimeout);
+      should.notEqual(oracledb.queueTimeout, defaultValues.queueTimeout);
+    })
+
+    it('58.1.17 stmtCacheSize', function() {
+      var t = oracledb.stmtCacheSize;
+      oracledb.stmtCacheSize = t + 5;
+
+      should.equal(t, defaultValues.stmtCacheSize);
+      should.notEqual(oracledb.stmtCacheSize, defaultValues.stmtCacheSize);
+    })
 
   }) // 58.1
 
@@ -227,70 +252,119 @@ describe('58. properties.js', function() {
 
     it('58.2.1 poolMin', function() {
       var t = pool.poolMin;
-      t.should.be.a.Number;
+      t.should.be.a.Number();
 
       try {
         pool.poolMin = t + 1;
       } catch(err) {
         should.exist(err);
-        (err.message).should.startWith('NJS-014');
-      } 
+        (err.message).should.startWith('NJS-014:');
+      }
     })
 
     it('58.2.2 poolMax', function() {
       var t = pool.poolMax;
-      t.should.be.a.Number;
+      t.should.be.a.Number();
 
       try {
         pool.poolMax = t + 1;
       } catch(err) {
         should.exist(err);
-        (err.message).should.startWith('NJS-014');
+        (err.message).should.startWith('NJS-014:');
       }
     })
 
     it('58.2.3 poolIncrement', function() {
       var t = pool.poolIncrement;
-      t.should.be.a.Number;
+      t.should.be.a.Number();
 
       try {
         pool.poolIncrement = t + 1;
       } catch(err) {
         should.exist(err);
-        (err.message).should.startWith('NJS-014');
+        (err.message).should.startWith('NJS-014:');
       }
     })
 
     it('58.2.4 poolTimeout', function() {
       var t = pool.poolTimeout;
-      t.should.be.a.Number;
+      t.should.be.a.Number();
 
       try {
         pool.poolTimeout = t + 1;
       } catch(err) {
         should.exist(err);
-        (err.message).should.startWith('NJS-014');
+        (err.message).should.startWith('NJS-014:');
       }
     })
 
     it('58.2.5 stmtCacheSize', function() {
       var t = pool.stmtCacheSize;
-      t.should.be.a.Number;
+      t.should.be.a.Number();
 
       try {
         pool.stmtCacheSize = t + 1;
       } catch(err) {
         should.exist(err);
-        (err.message).should.startWith('NJS-014');
+        (err.message).should.startWith('NJS-014:');
       }
     })
+
+    it('58.2.6 connectionsInUse', function() {
+      var t = pool.connectionsInUse;
+      t.should.be.a.Number();
+
+      try {
+        pool.connectionsInUse = t + 1;
+      } catch(err) {
+        should.exist(err);
+        (err.message).should.startWith('NJS-014:');
+      }
+    })
+
+    it('58.2.7 connectionsOpen', function() {
+      var t = pool.connectionsOpen;
+      t.should.be.a.Number();
+
+      try {
+        pool.connectionsOpen = t + 1;
+      } catch(err) {
+        should.exist(err);
+        (err.message).should.startWith('NJS-014:');
+      }
+    })
+
+    it.skip('58.2.8 queueRequests', function() {
+      var t = pool.queueRequests;
+      t.should.be.a.Boolean;
+
+      try {
+        pool.queueRequests = !t;
+      } catch(err) {
+        should.exist(err);
+        (err.message).should.startWith('NJS-014:');
+      }
+    })
+
+    it.skip('58.2.9 queueTimeout', function() {
+      var t = pool.queueTimeout;
+      t.should.be.a.Number();
+
+      try {
+        pool.queueTimeout = t + 1000;
+      } catch(err) {
+        should.exist(err);
+        (err.message).should.startWith('NJS-014:');
+      }
+    })
+
   }) // 58.2
 
   describe('58.3 Connection Class', function() {
     var connection = null;
 
     before('get one connection', function(done) {
-      oracledb.getConnection(credential, function(err, conn) {
+      oracledb.getConnection(dbConfig, function(err, conn) {
         should.not.exist(err);
         connection = conn;
         done();
@@ -311,19 +385,19 @@ describe('58. properties.js', function() {
       should.equal(connection.module, null);
       should.equal(connection.clientId, null);
 
-      (connection.stmtCacheSize).should.be.a.Number;
+      (connection.stmtCacheSize).should.be.a.Number();
       (connection.stmtCacheSize).should.be.greaterThan(0);
     })
 
     it('58.3.2 stmtCacheSize (read-only)', function() {
       var t = connection.stmtCacheSize;
-      t.should.be.a.Number;
+      t.should.be.a.Number();
 
       try {
         connection.stmtCacheSize = t + 1;
       } catch(err) {
         should.exist(err);
-        (err.message).should.startWith('NJS-014');
+        (err.message).should.startWith('NJS-014:');
       }
     })
 
@@ -332,75 +406,75 @@ describe('58. properties.js', function() {
         var t = connection.clientId;
       } catch(err) {
         should.exist(err);
-        (err.message).should.startWith('NJS-015'); // write-only
+        (err.message).should.startWith('NJS-015:'); // write-only
       }
 
       try {
         connection.clientId = 4;
       } catch(err) {
         should.exist(err);
-        (err.message).should.startWith('NJS-004');  // invalid value
+        (err.message).should.startWith('NJS-004:');  // invalid value
       }
 
       connection.clientId = "103.3";
     })
 
     it('58.3.4 action (write-only)', function() {
-      
+
       try {
         var t = connection.action;
       } catch(err) {
         should.exist(err);
-        (err.message).should.startWith('NJS-015');
+        (err.message).should.startWith('NJS-015:');
       }
 
       try {
         connection.action = 4;
       } catch(err) {
         should.exist(err);
-        (err.message).should.startWith('NJS-004');  // invalid value
+        (err.message).should.startWith('NJS-004:');  // invalid value
       }
 
       connection.action = "103.3 action";
     })
 
     it('58.3.5 module (write-only)', function() {
-   
+
       try {
         var t = connection.module;
       } catch(err) {
         should.exist(err);
-        (err.message).should.startWith('NJS-015');
-      }   
+        (err.message).should.startWith('NJS-015:');
+      }
 
       try {
         connection.module = 4;
       } catch(err) {
         should.exist(err);
-        (err.message).should.startWith('NJS-004');  // invalid value
+        (err.message).should.startWith('NJS-004:');  // invalid value
       }
-      
+
       connection.module = "103.3 module";
     })
 
     it('58.3.6 oracleServerVersion (read-only)', function () {
       var t = connection.oracleServerVersion;
-      t.should.be.a.Number;
+      t.should.be.a.Number();
 
       try {
         connection.oracleServerVersion = t + 1;
       }
       catch (err) {
         should.exist ( err );
-        (err.message).should.startWith('NJS-014');
+        (err.message).should.startWith('NJS-014:');
       }
     });
 
   }) // 58.3
 
   describe('58.4 ResultSet Class', function() {
-    
-    var tableName = "oracledb_number";
+
+    var tableName = "nodb_number";
     var numbers = assist.data.numbers;
     var connection = null;
     var resultSet = null;
@@ -408,7 +482,7 @@ describe('58. properties.js', function() {
     before('get resultSet class', function(done) {
       async.series([
         function(callback) {
-          oracledb.getConnection(credential, function(err, conn) {
+          oracledb.getConnection(dbConfig, function(err, conn) {
             should.not.exist(err);
             connection = conn;
             callback();
@@ -419,7 +493,7 @@ describe('58. properties.js', function() {
         },
         function(callback) {
           connection.execute(
-            "SELECT * FROM " + tableName,
+            "SELECT * FROM " + tableName + " ORDER BY num",
             [],
             { resultSet: true, outFormat: oracledb.OBJECT },
             function(err, result) {
@@ -437,7 +511,7 @@ describe('58. properties.js', function() {
         "DROP TABLE " + tableName,
         function(err) {
           should.not.exist(err);
-          
+
           connection.release( function(err) {
             should.not.exist(err);
             done();
@@ -450,13 +524,13 @@ describe('58. properties.js', function() {
       should.exist(resultSet.metaData);
       var t = resultSet.metaData;
       t.should.eql( [ { name: 'NUM' }, { name: 'CONTENT' } ] );
-      
+
       try {
         resultSet.metaData = {"foo": "bar"};
       } catch(err) {
         should.exist(err);
-        (err.message).should.startWith('NJS-014');
-      } 
+        (err.message).should.startWith('NJS-014:');
+      }
     })
 
   }) // 58.5

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -14,8 +14,8 @@
  *
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'. 
+ *
+ * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
@@ -28,69 +28,64 @@
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
  *     21 - 50  are reserved for data type supporting tests
- *     51 -     are for other tests  
- * 
+ *     51 -     are for other tests
+ *
  *****************************************************************************/
+'use strict';
 
 var oracledb = require('oracledb');
-var should = require('should');
-var async = require('async');
-var dbConfig = require('./dbConfig.js');
+var should   = require('should');
+var async    = require('async');
+var dbConfig = require('./dbconfig.js');
 
 describe('1. connection.js', function(){
-  
-  if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
-  
+
   describe('1.1 can run SQL query with different output formats', function(){
-    var connection = false;
-    
-    var script = 
+
+    var connection = null;
+    var script =
       "BEGIN \
           DECLARE \
-              e_table_exists EXCEPTION; \
-              PRAGMA EXCEPTION_INIT(e_table_exists, -00942); \
+              e_table_missing EXCEPTION; \
+              PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \
           BEGIN \
-              EXECUTE IMMEDIATE ('DROP TABLE oracledb_departments'); \
+              EXECUTE IMMEDIATE ('DROP TABLE nodb_conn_dept1'); \
           EXCEPTION \
-              WHEN e_table_exists \
+              WHEN e_table_missing \
               THEN NULL; \
           END; \
           EXECUTE IMMEDIATE (' \
-              CREATE TABLE oracledb_departments ( \
+              CREATE TABLE nodb_conn_dept1 ( \
                   department_id NUMBER,  \
                   department_name VARCHAR2(20) \
               ) \
           '); \
           EXECUTE IMMEDIATE (' \
-              INSERT INTO oracledb_departments  \
+              INSERT INTO nodb_conn_dept1  \
                    (department_id, department_name) VALUES \
                    (40,''Human Resources'') \
           '); \
           EXECUTE IMMEDIATE (' \
-              INSERT INTO oracledb_departments  \
+              INSERT INTO nodb_conn_dept1  \
                    (department_id, department_name) VALUES \
                    (20, ''Marketing'') \
           '); \
       END; ";
 
     before(function(done){
-      oracledb.getConnection(credential, function(err, conn) {
+      oracledb.getConnection(dbConfig, function(err, conn) {
         if(err) { console.error(err.message); return; }
         connection = conn;
         connection.execute(script, function(err) {
           if(err) { console.error(err.message); return; }
           done();
         });
-      });      
+      });
     })
-    
+
     after(function(done){
       connection.execute(
-        'DROP TABLE oracledb_departments',
+        'DROP TABLE nodb_conn_dept1',
         function(err){
           if(err) { console.error(err.message); return; }
           connection.release( function(err) {
@@ -100,25 +95,25 @@ describe('1. connection.js', function(){
         }
       );
     })
-    
+
     var query = "SELECT department_id, department_name " +
-                "FROM oracledb_departments " +
+                "FROM nodb_conn_dept1 " +
                 "WHERE department_id = :id";
-    
+
     it('1.1.1 ARRAY format by default', function(done) {
       var defaultFormat = oracledb.outFormat;
       defaultFormat.should.be.exactly(oracledb.ARRAY);
-      
-      connection.should.be.ok;
+
+      connection.should.be.ok();
       connection.execute(query, [40], function(err, result){
         should.not.exist(err);
         (result.rows).should.eql([[ 40, 'Human Resources' ]]);
         done();
       });
     })
-    
+
     it('1.1.2 ARRAY format explicitly', function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
        connection.execute(
          query, {id: 20}, {outFormat: oracledb.ARRAY},
          function(err, result){
@@ -128,11 +123,11 @@ describe('1. connection.js', function(){
          }
        );
     })
-  
-    it('1.1.3 OBJECT format', function(done){   
-      connection.should.be.ok;
+
+    it('1.1.3 OBJECT format', function(done){
+      connection.should.be.ok();
       connection.execute(
-        query, {id: 20}, {outFormat: oracledb.OBJECT}, 
+        query, {id: 20}, {outFormat: oracledb.OBJECT},
         function(err, result){
           should.not.exist(err);
           (result.rows).should.eql([{ DEPARTMENT_ID: 20, DEPARTMENT_NAME: 'Marketing' }]);
@@ -140,42 +135,43 @@ describe('1. connection.js', function(){
         }
       );
     })
-    
+
     it('1.1.4 Negative test - invalid outFormat value', function(done){
-      connection.should.be.ok;
+      connection.should.be.ok();
       connection.execute(
         query, {id: 20}, {outFormat:0 },
         function(err, result){
           should.exist(err);
-          (err.message).should.equal('NJS-004: invalid value for property outFormat');
+          (err.message).should.startWith('NJS-004:');
+          // NJS-004: invalid value for property outFormat
           done();
         }
       );
     })
   })
-  
-  describe('1.2 limits the number of rows fetched', function(){ 
+
+  describe('1.2 limits the number of rows fetched', function(){
     var connection = false;
-    var createTable = 
+    var createTable =
       "BEGIN \
           DECLARE \
-              e_table_exists EXCEPTION; \
-              PRAGMA EXCEPTION_INIT(e_table_exists, -00942); \
+              e_table_missing EXCEPTION; \
+              PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \
           BEGIN \
-              EXECUTE IMMEDIATE ('DROP TABLE oracledb_employees'); \
+              EXECUTE IMMEDIATE ('DROP TABLE nodb_conn_emp2'); \
           EXCEPTION \
-              WHEN e_table_exists \
+              WHEN e_table_missing \
               THEN NULL; \
           END; \
           EXECUTE IMMEDIATE (' \
-              CREATE TABLE oracledb_employees ( \
+              CREATE TABLE nodb_conn_emp2 ( \
                   employee_id NUMBER,  \
                   employee_name VARCHAR2(20) \
               ) \
           '); \
-      END; "; 
-    
-    var insertRows = 
+      END; ";
+
+    var insertRows =
       "DECLARE \
           x NUMBER := 0; \
           n VARCHAR2(20); \
@@ -183,13 +179,13 @@ describe('1. connection.js', function(){
           FOR i IN 1..107 LOOP \
              x := x + 1; \
              n := 'staff ' || x; \
-             INSERT INTO oracledb_employees VALUES (x, n); \
+             INSERT INTO nodb_conn_emp2 VALUES (x, n); \
           END LOOP; \
        END; ";
     var rowsAmount = 107;
 
     before(function(done){
-      oracledb.getConnection(credential, function(err, conn) {
+      oracledb.getConnection(dbConfig, function(err, conn) {
         if(err) { console.error(err.message); return; }
         connection = conn;
         connection.execute(createTable, function(err) {
@@ -199,13 +195,13 @@ describe('1. connection.js', function(){
             done();
           });
         });
-      });     
- 
+      });
+
     })
-    
+
     after(function(done){
       connection.execute(
-        'DROP TABLE oracledb_employees',
+        'DROP TABLE nodb_conn_emp2',
         function(err){
           if(err) { console.error(err.message); return; }
           connection.release( function(err) {
@@ -215,28 +211,28 @@ describe('1. connection.js', function(){
         }
       );
     })
-    
+
     it('1.2.1 by default, the number is 100', function(done){
       var defaultLimit = oracledb.maxRows;
       defaultLimit.should.be.exactly(100);
-    
-      connection.should.be.ok;
+
+      connection.should.be.ok();
       connection.execute(
-        "SELECT * FROM oracledb_employees",
+        "SELECT * FROM nodb_conn_emp2 ORDER BY employee_id",
         function(err, result){
           should.not.exist(err);
           should.exist(result);
           // Return 100 records although the table has 107 rows.
-          (result.rows).should.have.length(100); 
+          (result.rows).should.have.length(100);
           done();
         }
       );
     })
-  
+
     it('1.2.2 can also specify for each execution', function(done){
-      connection.should.be.ok;
+      connection.should.be.ok();
       connection.execute(
-        "SELECT * FROM oracledb_employees", 
+        "SELECT * FROM nodb_conn_emp2 ORDER BY employee_id",
         {}, { maxRows: 25 },
         function(err, result){
           should.not.exist(err);
@@ -247,28 +243,29 @@ describe('1. connection.js', function(){
         }
       );
     })
-    
+
     it('1.2.3 can not set maxRows to be 0', function(done){
-      connection.should.be.ok;
+      connection.should.be.ok();
       connection.execute(
-        "SELECT * FROM oracledb_employees", 
+        "SELECT * FROM nodb_conn_emp2 ORDER BY employee_id",
         {}, { maxRows: 0 },
         function(err, result){
           should.exist(err);
-          err.message.should.startWith('NJS-026:');  // NJS-026: maxRows must be greater than zero
+          (err.message).should.startWith('NJS-026:');
+          // NJS-026: maxRows must be greater than zero
           done();
         }
       );
     })
-    
+
     it('1.2.4 cannot set maxRows to be a negative number', function(done){
-      connection.should.be.ok;
+      connection.should.be.ok();
       connection.execute(
-        "SELECT * FROM oracledb_employees", 
+        "SELECT * FROM nodb_conn_emp2 ORDER BY employee_id",
         {}, {maxRows: -5},
         function(err, result){
           should.exist(err);
-          (err.message).should.startWith('NJS-007: invalid value for');
+          (err.message).should.startWith('NJS-007:');
           done();
         }
       );
@@ -276,23 +273,23 @@ describe('1. connection.js', function(){
 
     it('1.2.5 sets maxRows to be very large value', function(done) {
       connection.execute(
-        "SELECT * FROM oracledb_employees", 
-        {}, 
+        "SELECT * FROM nodb_conn_emp2 ORDER BY employee_id",
+        {},
         {maxRows: 500000},
         function(err, result){
           should.not.exist(err);
           (result.rows.length).should.eql(rowsAmount);
           done();
-        }  
+        }
       );
     })
 
     it('1.2.6 shows 12c new way to limit the number of records fetched by queries', function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
 
       var myoffset     = 2;  // number of rows to skip
       var mymaxnumrows = 6;  // number of rows to fetch
-      var sql = "SELECT employee_id, employee_name FROM oracledb_employees ORDER BY employee_id";
+      var sql = "SELECT employee_id, employee_name FROM nodb_conn_emp2 ORDER BY employee_id";
 
       if (connection.oracleServerVersion >= 1201000000) {
         // 12c row-limiting syntax
@@ -305,12 +302,12 @@ describe('1. connection.js', function(){
       }
 
       connection.execute(
-        sql, 
+        sql,
         { offset: myoffset, maxnumrows: mymaxnumrows },
         { maxRows: 150 },
         function(err, result) {
-          should.not.exist(err);    
-          (result.rows.length).should.eql(mymaxnumrows); 
+          should.not.exist(err);
+          (result.rows.length).should.eql(mymaxnumrows);
           done();
         }
       );
@@ -319,15 +316,15 @@ describe('1. connection.js', function(){
 
   describe('1.3 can call PL/SQL procedures', function(){
     var connection = false;
-    
-    var proc = "CREATE OR REPLACE PROCEDURE binding_test (p_in IN VARCHAR2, p_inout IN OUT VARCHAR2, p_out OUT VARCHAR2) "
+
+    var proc = "CREATE OR REPLACE PROCEDURE nodb_bindingtest (p_in IN VARCHAR2, p_inout IN OUT VARCHAR2, p_out OUT VARCHAR2) "
                 + "AS "
                 + "BEGIN "
                 + "  p_out := p_in || ' ' || p_inout; "
                 + "END; ";
-    
+
     before(function(done){
-      oracledb.getConnection(credential, function(err, conn) {
+      oracledb.getConnection(dbConfig, function(err, conn) {
         if(err) { console.error(err.message); return; }
         connection = conn;
         connection.execute(proc, function(err, result) {
@@ -336,10 +333,10 @@ describe('1. connection.js', function(){
         });
       });
     })
-    
+
     after(function(done){
       connection.execute(
-        "DROP PROCEDURE binding_test",
+        "DROP PROCEDURE nodb_bindingtest",
         function(err, result){
           if(err) { console.error(err.message); return; }
           connection.release(function(err) {
@@ -349,16 +346,16 @@ describe('1. connection.js', function(){
         }
       );
     })
-    
+
     it('1.3.1 bind parameters in various ways', function(done){
       var bindValues = {
         i: 'Alan', // default is type STRING and direction Infinity
         io: { val: 'Turing', type: oracledb.STRING, dir: oracledb.BIND_INOUT },
         o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
       };
-      connection.should.be.ok;
+      connection.should.be.ok();
       connection.execute(
-        "BEGIN binding_test(:i, :io, :o); END;",
+        "BEGIN nodb_bindingtest(:i, :io, :o); END;",
         bindValues,
         function(err, result){
           should.not.exist(err);
@@ -369,63 +366,63 @@ describe('1. connection.js', function(){
       );
     })
   })
-  
+
   describe('1.4 statementCacheSize controls statement caching', function() {
-    var makeTable = 
+    var makeTable =
         "BEGIN \
             DECLARE \
-                e_table_exists EXCEPTION; \
-                PRAGMA EXCEPTION_INIT(e_table_exists, -00942); \
+                e_table_missing EXCEPTION; \
+                PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \
             BEGIN \
-                EXECUTE IMMEDIATE ('DROP TABLE oracledb_employees'); \
+                EXECUTE IMMEDIATE ('DROP TABLE nodb_conn_emp4'); \
             EXCEPTION \
-                WHEN e_table_exists \
+                WHEN e_table_missing \
                 THEN NULL; \
             END; \
             EXECUTE IMMEDIATE (' \
-                CREATE TABLE oracledb_employees ( \
+                CREATE TABLE nodb_conn_emp4 ( \
                     id NUMBER,  \
                     name VARCHAR2(4000) \
                 ) \
             '); \
             EXECUTE IMMEDIATE (' \
-              INSERT INTO oracledb_employees  \
+              INSERT INTO nodb_conn_emp4  \
                    VALUES \
                    (1001,''Chris Jones'') \
             '); \
             EXECUTE IMMEDIATE (' \
-              INSERT INTO oracledb_employees  \
+              INSERT INTO nodb_conn_emp4  \
                    VALUES \
                    (1002,''Tom Kyte'') \
             '); \
             EXECUTE IMMEDIATE (' \
-              INSERT INTO oracledb_employees  \
+              INSERT INTO nodb_conn_emp4  \
                    VALUES \
                    (2001, ''Karen Morton'') \
             '); \
         END; ";
-    
+
     var connection = false;
     var defaultStmtCache = oracledb.stmtCacheSize; // 30
-    
+
     beforeEach('get connection and prepare table', function(done) {
-      oracledb.getConnection(credential, function(err, conn) {
+      oracledb.getConnection(dbConfig, function(err, conn) {
         if(err) { console.error(err.message); return; }
         connection = conn;
         conn.execute(
           makeTable,
           function(err){
             if(err) { console.error(err.message); return; }
-            done(); 
+            done();
           }
         );
       });
     })
-    
+
     afterEach('drop table and release connection', function(done) {
       oracledb.stmtCacheSize = defaultStmtCache;
       connection.execute(
-        "DROP TABLE oracledb_employees",
+        "DROP TABLE nodb_conn_emp4",
         function(err){
           if(err) { console.error(err.message); return; }
           connection.release( function(err){
@@ -437,13 +434,13 @@ describe('1. connection.js', function(){
     })
 
     it('1.4.1 stmtCacheSize = 0, which disable statement caching', function(done) {
-      connection.should.be.ok;
-      oracledb.stmtCacheSize = 0;   
+      connection.should.be.ok();
+      oracledb.stmtCacheSize = 0;
 
       async.series([
         function(callback) {
           connection.execute(
-            "INSERT INTO oracledb_employees VALUES (:num, :str)",
+            "INSERT INTO nodb_conn_emp4 VALUES (:num, :str)",
             { num: 1003, str: 'Robyn Sands' },
             { autoCommit: true },
             function(err) {
@@ -454,7 +451,7 @@ describe('1. connection.js', function(){
         },
         function(callback) {
           connection.execute(
-            "INSERT INTO oracledb_employees VALUES (:num, :str)",
+            "INSERT INTO nodb_conn_emp4 VALUES (:num, :str)",
             { num: 1004, str: 'Bryant Lin' },
             { autoCommit: true },
             function(err) {
@@ -465,48 +462,7 @@ describe('1. connection.js', function(){
         },
         function(callback) {
           connection.execute(
-            "INSERT INTO oracledb_employees VALUES (:num, :str)",
-            { num: 1005, str: 'Patrick Engebresson' },
-            { autoCommit: true },
-            function(err) {
-              should.not.exist(err);
-              callback();
-            }
-          );
-        }
-      ], done);
-    })  
-    
-    it('1.4.2 works well when statement cache enabled (stmtCacheSize > 0) ', function(done) {
-      connection.should.be.ok;
-      oracledb.stmtCacheSize = 100;  
-
-      async.series([
-        function(callback) {
-          connection.execute(
-            "INSERT INTO oracledb_employees VALUES (:num, :str)",
-            { num: 1003, str: 'Robyn Sands' },
-            { autoCommit: true },
-            function(err) {
-              should.not.exist(err);
-              callback();
-            }
-          );
-        },
-        function(callback) {
-          connection.execute(
-            "INSERT INTO oracledb_employees VALUES (:num, :str)",
-            { num: 1004, str: 'Bryant Lin' },
-            { autoCommit: true },
-            function(err) {
-              should.not.exist(err);
-              callback();
-            }
-          );
-        },
-        function(callback) {
-          connection.execute(
-            "INSERT INTO oracledb_employees VALUES (:num, :str)",
+            "INSERT INTO nodb_conn_emp4 VALUES (:num, :str)",
             { num: 1005, str: 'Patrick Engebresson' },
             { autoCommit: true },
             function(err) {
@@ -517,63 +473,104 @@ describe('1. connection.js', function(){
         }
       ], done);
     })
-    
+
+    it('1.4.2 works well when statement cache enabled (stmtCacheSize > 0) ', function(done) {
+      connection.should.be.ok();
+      oracledb.stmtCacheSize = 100;
+
+      async.series([
+        function(callback) {
+          connection.execute(
+            "INSERT INTO nodb_conn_emp4 VALUES (:num, :str)",
+            { num: 1003, str: 'Robyn Sands' },
+            { autoCommit: true },
+            function(err) {
+              should.not.exist(err);
+              callback();
+            }
+          );
+        },
+        function(callback) {
+          connection.execute(
+            "INSERT INTO nodb_conn_emp4 VALUES (:num, :str)",
+            { num: 1004, str: 'Bryant Lin' },
+            { autoCommit: true },
+            function(err) {
+              should.not.exist(err);
+              callback();
+            }
+          );
+        },
+        function(callback) {
+          connection.execute(
+            "INSERT INTO nodb_conn_emp4 VALUES (:num, :str)",
+            { num: 1005, str: 'Patrick Engebresson' },
+            { autoCommit: true },
+            function(err) {
+              should.not.exist(err);
+              callback();
+            }
+          );
+        }
+      ], done);
+    })
+
   })
-  
+
   describe('1.5 Testing commit() & rollback() functions', function() {
-    var makeTable = 
+    var makeTable =
         "BEGIN \
             DECLARE \
-                e_table_exists EXCEPTION; \
-                PRAGMA EXCEPTION_INIT(e_table_exists, -00942); \
+                e_table_missing EXCEPTION; \
+                PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \
             BEGIN \
-                EXECUTE IMMEDIATE ('DROP TABLE oracledb_employees'); \
+                EXECUTE IMMEDIATE ('DROP TABLE nodb_conn_emp5'); \
             EXCEPTION \
-                WHEN e_table_exists \
+                WHEN e_table_missing \
                 THEN NULL; \
             END; \
             EXECUTE IMMEDIATE (' \
-                CREATE TABLE oracledb_employees ( \
+                CREATE TABLE nodb_conn_emp5 ( \
                     id NUMBER,  \
                     name VARCHAR2(4000) \
                 ) \
             '); \
             EXECUTE IMMEDIATE (' \
-              INSERT INTO oracledb_employees  \
+              INSERT INTO nodb_conn_emp5  \
                    VALUES \
                    (1001,''Tom Kyte'') \
             '); \
             EXECUTE IMMEDIATE (' \
-              INSERT INTO oracledb_employees  \
+              INSERT INTO nodb_conn_emp5  \
                    VALUES \
                    (1002, ''Karen Morton'') \
             '); \
         END; ";
-    
+
     var conn1 = false;
     var conn2 = false;
     beforeEach('get 2 connections and create the table', function(done) {
       async.series([
         function(callback) {
-          oracledb.getConnection(credential, function(err, conn) {
+          oracledb.getConnection(dbConfig, function(err, conn) {
             should.not.exist(err);
             conn1 = conn;
             callback();
           });
         },
         function(callback) {
-          oracledb.getConnection(credential, function(err, conn) {
+          oracledb.getConnection(dbConfig, function(err, conn) {
             should.not.exist(err);
             conn2 = conn;
             callback();
           });
         },
         function(callback) {
-          conn1.should.be.ok;
+          conn1.should.be.ok();
           conn1.execute(
             makeTable,
             [],
-            { autoCommit: true }, 
+            { autoCommit: true },
             function(err) {
               should.not.exist(err);
               callback();
@@ -582,14 +579,14 @@ describe('1. connection.js', function(){
         }
       ], done);
     })
-    
+
     afterEach('drop table and release connections', function(done) {
-      conn1.should.be.ok;
-      conn2.should.be.ok;
+      conn1.should.be.ok();
+      conn2.should.be.ok();
       async.series([
         function(callback) {
           conn2.execute(
-            "DROP TABLE oracledb_employees",
+            "DROP TABLE nodb_conn_emp5",
             function(err) {
               should.not.exist(err);
               callback();
@@ -608,15 +605,15 @@ describe('1. connection.js', function(){
             callback();
           });
         }
-      ], done);  
+      ], done);
     })
-    
-  
+
+
     it('1.5.1 commit() function works well', function(done) {
       async.series([
         function(callback) {
           conn2.execute(
-            "INSERT INTO oracledb_employees VALUES (:num, :str)",
+            "INSERT INTO nodb_conn_emp5 VALUES (:num, :str)",
             { num: 1003, str: 'Patrick Engebresson' },
             function(err) {
               should.not.exist(err);
@@ -626,7 +623,7 @@ describe('1. connection.js', function(){
         },
         function(callback) {
           conn1.execute(
-            "SELECT COUNT(*) FROM oracledb_employees",
+            "SELECT COUNT(*) FROM nodb_conn_emp5",
             function(err, result) {
               should.not.exist(err);
               result.rows[0][0].should.be.exactly(2);
@@ -636,7 +633,7 @@ describe('1. connection.js', function(){
         },
         function(callback) {
           conn2.execute(
-            "SELECT COUNT(*) FROM oracledb_employees",
+            "SELECT COUNT(*) FROM nodb_conn_emp5",
             function(err, result) {
               should.not.exist(err);
               result.rows[0][0].should.be.exactly(3);
@@ -652,7 +649,7 @@ describe('1. connection.js', function(){
         },
         function(callback) {
           conn1.execute(
-            "SELECT COUNT(*) FROM oracledb_employees",
+            "SELECT COUNT(*) FROM nodb_conn_emp5",
             function(err, result) {
               should.not.exist(err);
               result.rows[0][0].should.be.exactly(3);
@@ -661,14 +658,14 @@ describe('1. connection.js', function(){
           );
         },
       ], done);
-    
+
     })
-    
+
     it('1.5.2 rollback() function works well', function(done) {
       async.series([
         function(callback) {
           conn2.execute(
-            "INSERT INTO oracledb_employees VALUES (:num, :str)",
+            "INSERT INTO nodb_conn_emp5 VALUES (:num, :str)",
             { num: 1003, str: 'Patrick Engebresson' },
             function(err) {
               should.not.exist(err);
@@ -678,7 +675,7 @@ describe('1. connection.js', function(){
         },
         function(callback) {
           conn1.execute(
-            "SELECT COUNT(*) FROM oracledb_employees",
+            "SELECT COUNT(*) FROM nodb_conn_emp5",
             function(err, result) {
               should.not.exist(err);
               result.rows[0][0].should.be.exactly(2);
@@ -688,7 +685,7 @@ describe('1. connection.js', function(){
         },
         function(callback) {
           conn2.execute(
-            "SELECT COUNT(*) FROM oracledb_employees",
+            "SELECT COUNT(*) FROM nodb_conn_emp5",
             function(err, result) {
               should.not.exist(err);
               result.rows[0][0].should.be.exactly(3);
@@ -704,7 +701,7 @@ describe('1. connection.js', function(){
         },
         function(callback) {
           conn2.execute(
-            "SELECT COUNT(*) FROM oracledb_employees",
+            "SELECT COUNT(*) FROM nodb_conn_emp5",
             function(err, result) {
               should.not.exist(err);
               result.rows[0][0].should.be.exactly(2);
@@ -715,25 +712,192 @@ describe('1. connection.js', function(){
       ], done);
     })
   })
-  
-})
 
+  describe('1.6 Testing parameter assertions', function() {
+    var conn1;
 
+    beforeEach('get connection ready', function(done) {
+      oracledb.getConnection(dbConfig, function(err, conn) {
+        should.not.exist(err);
+        conn1 = conn;
+        done();
+      });
+    });
 
+    afterEach('release connection', function(done) {
+      conn1.release(function(err) {
+        should.not.exist(err);
+        done();
+      });
+    });
 
+    it('1.6.1 too few params should throw an error', function(done) {
+      // This test returns a promise because the last parameter to execute is not
+      // a function. Normally, errors thrown in a promise would be directed to
+      // to a catch handler. In the case of an "accidental promise" the error
+      // could go undetected. Because of this, the promisify function in util.js
+      // uses process.nextTick to throw invalid number or type of params (NJS-009
+      // and NJS-006). This test has been updated to account for this behavior.
+      var promiseSupportEnabled = oracledb.Promise !== undefined;
+      var listeners = process.listeners('uncaughtException');
 
+      if (promiseSupportEnabled) {
+        process.removeAllListeners('uncaughtException');
 
+        process.once('uncaughtException', function(err) {
+          listeners.forEach(function(listener) {
+            process.on('uncaughtException', listener);
+          });
 
+          should.exist(err);
 
+          done();
+        });
+      }
 
+      // Using try catch for instances where promises are not supported or have
+      // been disabled by setting oracledb.Promise to something falsey.
+      try {
+        conn1.execute();
+      } catch (err) {
+        if (promiseSupportEnabled) {
+          listeners.forEach(function(listener) {
+            process.on('uncaughtException', listener);
+          });
+        }
 
+        should.exist(err);
 
+        done();
+      }
+    });
 
+    it('1.6.2 too many params should throw error', function(done) {
+      // This test returns a promise because the last parameter to execute is not
+      // a function. Normally, errors thrown in a promise would be directed to
+      // to a catch handler. In the case of an "accidental promise" the error
+      // could go undetected. Because of this, the promisify function in util.js
+      // uses process.nextTick to throw invalid number or type of params (NJS-009
+      // and NJS-006). This test has been updated to account for this behavior.
+      var promiseSupportEnabled = oracledb.Promise !== undefined;
+      var listeners = process.listeners('uncaughtException');
 
+      if (promiseSupportEnabled) {
+        process.removeAllListeners('uncaughtException');
 
+        process.once('uncaughtException', function(err) {
+          listeners.forEach(function(listener) {
+            process.on('uncaughtException', listener);
+          });
 
+          should.exist(err);
 
+          done();
+        });
+      }
 
+      // Using try catch for instances where promises are not supported or have
+      // been disabled by setting oracledb.Promise to something falsey.
+      try {
+        conn1.execute(1, 2, 3, 4, 5);
+      } catch (err) {
+        if (promiseSupportEnabled) {
+          listeners.forEach(function(listener) {
+            process.on('uncaughtException', listener);
+          });
+        }
+        should.exist(err);
 
+        done();
+      }
+    });
 
+    it('1.6.3 wrong type for param 1 should throw an error', function(done) {
+      // Don't need to listen for unhandledRejection because a promise will not
+      // be returned as the last param is a function.
+      try {
+        conn1.execute(1, function() {});
+      } catch (err) {
+        should.exist(err);
+        done();
+      }
+    });
 
+    it('1.6.4 wrong type for param 2 should throw an error', function(done) {
+      // This test returns a promise because the last parameter to execute is not
+      // a function. Normally, errors thrown in a promise would be directed to
+      // to a catch handler. In the case of an "accidental promise" the error
+      // could go undetected. Because of this, the promisify function in util.js
+      // uses process.nextTick to throw invalid number or type of params (NJS-009
+      // and NJS-006). This test has been updated to account for this behavior.
+      var promiseSupportEnabled = oracledb.Promise !== undefined;
+      var listeners = process.listeners('uncaughtException');
+
+      if (promiseSupportEnabled) {
+        process.removeAllListeners('uncaughtException');
+
+        process.once('uncaughtException', function(err) {
+          listeners.forEach(function(listener) {
+            process.on('uncaughtException', listener);
+          });
+
+          should.exist(err);
+
+          done();
+        });
+      }
+
+      // Using try catch for instances where promises are not supported or have
+      // been disabled by setting oracledb.Promise to something falsey.
+      try {
+        conn1.execute('select 1 from dual', 1);
+      } catch (err) {
+        if (promiseSupportEnabled) {
+          listeners.forEach(function(listener) {
+            process.on('uncaughtException', listener);
+          });
+        }
+
+        should.exist(err);
+
+        done();
+      }
+    });
+
+    it('1.6.5 wrong type for param 3 should throw an error', function(done) {
+      // Don't need to listen for unhandledRejection because a promise will not
+      // be returned as the last param is a function.
+      try {
+        conn1.execute('select 1 from dual', 1, function() {});
+      } catch (err) {
+        should.exist(err);
+        done();
+      }
+    });
+
+    it('1.6.6 wrong type for param 4 should throw an error', function(done) {
+      // Don't need to listen for unhandledRejection because a promise will not
+      // be returned as the last param is a function.
+      try {
+        conn1.execute('select 1 from dual', {}, 1, function() {});
+      } catch (err) {
+        should.exist(err);
+        done();
+      }
+    });
+  });
+
+  describe('1.7 Close method', function() {
+    it('1.7.1 close can be used as an alternative to release', function(done) {
+      oracledb.getConnection(dbConfig, function(err, conn) {
+        should.not.exist(err);
+
+        conn.close(function(err) {
+          should.not.exist(err);
+          done();
+        });
+      });
+    });
+  });
+
+});

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -14,8 +14,8 @@
  *
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'. 
+ *
+ * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
@@ -28,34 +28,28 @@
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
  *     21 - 50  are reserved for data type supporting tests
- *     51 -     are for other tests  
- * 
+ *     51 -     are for other tests
+ *
  *****************************************************************************/
 
 var oracledb = require('oracledb');
 var should   = require('should');
-var dbConfig = require('./dbConfig.js');
+var dbConfig = require('./dbconfig.js');
 
-describe('54. releaseAfterFailingTerminate.js', function(){
+describe('54. releaseAfterFailingTerminate.js', function() {
 
-  if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
-  
   it('can still release connections after failing pool termination', function(done){
     oracledb.createPool(
-      credential,
+      dbConfig,
       function(err, pool) {
         should.not.exist(err);
         pool.getConnection( function(err, connection){
           should.not.exist(err);
-          pool.terminate( 
+          pool.terminate(
             function(err){
               should.exist(err);
               (err.message).should.startWith('ORA-24422:');
-              
+
               connection.release( function(err){
                 should.not.exist(err);
                 done();

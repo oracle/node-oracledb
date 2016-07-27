@@ -1,9 +1,12 @@
+.editorconfig
 INSTALL.md
 CONTRIBUTING.md
 /doc
 /examples
+/test
 /build
 /node_modules
 /oracle_private_test
+/.github
 oracledb-*.tgz
 .npmignore

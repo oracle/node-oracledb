@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'. 
+ * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
@@ -28,32 +28,27 @@
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
  *     21 - 50  are reserved for data type supporting tests
- *     51 onwards are for other tests 
- * 
+ *     51 onwards are for other tests
+ *
  *****************************************************************************/
- 
+'use strict';
+
 var oracledb = require ( 'oracledb' );
-var should = require ( 'should' );
-var async = require('async');
-var dbConfig = require ( './dbConfig.js' );
+var should   = require ( 'should' );
+var async    = require('async');
+var dbConfig = require ( './dbconfig.js' );
 
 describe('56. fetchAs.js', function() {
 
-  if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
-
   var connection = null;
   beforeEach('get one connection', function(done) {
-    oracledb.getConnection(credential, function(err, conn) {
+    oracledb.getConnection(dbConfig, function(err, conn) {
       should.not.exist(err);
       connection = conn;
       done();
     });
   })
-    
+
   afterEach('release connection, reset fetchAsString property', function(done) {
     oracledb.fetchAsString = [];
     connection.release( function(err) {
@@ -87,7 +82,7 @@ describe('56. fetchAs.js', function() {
       function(err, result) {
         should.not.exist(err);
         // console.log(result.rows[0]);
-        result.rows[0].TS_DATE.should.be.a.String;
+        result.rows[0].TS_DATE.should.be.a.String();
         done();
       }
     );
@@ -99,8 +94,8 @@ describe('56. fetchAs.js', function() {
       [],
       {
         outFormat: oracledb.OBJECT,
-        fetchInfo : 
-        { 
+        fetchInfo :
+        {
           "TS_DATE" : { type : oracledb.STRING },
           "TS_NUM"  : { type : oracledb.STRING }
         }
@@ -108,8 +103,8 @@ describe('56. fetchAs.js', function() {
       function(err, result) {
         should.not.exist(err);
         // console.log(result.rows[0]);
-        result.rows[0].TS_DATE.should.be.a.String;
-        result.rows[0].TS_NUM.should.be.a.String;
+        result.rows[0].TS_DATE.should.be.a.String();
+        result.rows[0].TS_NUM.should.be.a.String();
         Number(result.rows[0].TS_NUM).should.equal(1234567);
         done();
       }
@@ -124,8 +119,8 @@ describe('56. fetchAs.js', function() {
       [],
       {
         outFormat: oracledb.OBJECT,
-        fetchInfo : 
-        { 
+        fetchInfo :
+        {
           "TS_DATE" : { type : oracledb.STRING },
           "TS_NUM"  : { type : oracledb.STRING }
         }
@@ -133,8 +128,8 @@ describe('56. fetchAs.js', function() {
       function(err, result) {
         should.not.exist(err);
         // console.log(result.rows[0]);
-        result.rows[0].TS_DATE.should.be.a.String;
-        result.rows[0].TS_NUM.should.be.a.String;
+        result.rows[0].TS_DATE.should.be.a.String();
+        result.rows[0].TS_NUM.should.be.a.String();
         Number(result.rows[0].TS_NUM).should.equal(1234567);
         done();
       }
@@ -143,14 +138,14 @@ describe('56. fetchAs.js', function() {
 
   it('56.5 Fetch DATE, NUMBER column as STRING by-type and override at execute time', function(done) {
     oracledb.fetchAsString = [ oracledb.DATE, oracledb.NUMBER ];
-    
+
     connection.execute(
       "SELECT 1234567 AS TS_NUM, TO_TIMESTAMP('1999-12-01 11:10:01.00123', 'YYYY-MM-DD HH:MI:SS.FF') AS TS_DATE FROM DUAL",
       [],
       {
         outFormat: oracledb.OBJECT,
-        fetchInfo : 
-        { 
+        fetchInfo :
+        {
           "TS_DATE" : { type : oracledb.DEFAULT },
           "TS_NUM"  : { type : oracledb.STRING }
         }
@@ -159,28 +154,28 @@ describe('56. fetchAs.js', function() {
         should.not.exist(err);
         // console.log(result.rows[0]);
         result.rows[0].TS_DATE.should.be.an.Object;
-        result.rows[0].TS_NUM.should.be.a.String;
+        result.rows[0].TS_NUM.should.be.a.String();
         Number(result.rows[0].TS_NUM).should.equal(1234567);
         done();
       }
     );
   })
-  
+
   it('56.6 Fetch ROWID column values STRING - non-ResultSet', function(done) {
     connection.execute(
       "SELECT ROWID from DUAL",
       [],
-      { 
+      {
         outFormat : oracledb.OBJECT,
-        fetchInfo : 
-        { 
+        fetchInfo :
+        {
           "ROWID" : { type : oracledb.STRING }
         }
       },
       function(err, result) {
         should.not.exist(err);
         // console.log(result.rows[0].TS_DATA);
-        result.rows[0].ROWID.should.be.a.String;
+        result.rows[0].ROWID.should.be.a.String();
         done();
       }
     );
@@ -190,21 +185,21 @@ describe('56. fetchAs.js', function() {
     connection.execute(
       "SELECT ROWID from DUAL",
       [],
-      { 
+      {
         outFormat : oracledb.OBJECT,
         resultSet : true,
-        fetchInfo : 
-        { 
+        fetchInfo :
+        {
           "ROWID" : { type : oracledb.STRING }
         }
       },
       function(err, result) {
         should.not.exist(err);
- 
+
         result.resultSet.getRow( function(err, row) {
           should.not.exist(err);
           // console.log(row);
-          row.ROWID.should.be.a.String;
+          row.ROWID.should.be.a.String();
           result.resultSet.close( function(err) {
             should.not.exist(err);
             done();
@@ -213,14 +208,14 @@ describe('56. fetchAs.js', function() {
       }
     );
   })
-  
+
   /*
-  * The maximum safe integer in JavaScript is (2^53 - 1). 
+  * The maximum safe integer in JavaScript is (2^53 - 1).
   * The minimum safe integer in JavaScript is (-(2^53 - 1)).
-  * Numbers out of above range will be rounded. 
+  * Numbers out of above range will be rounded.
   * The last element is out of Oracle database standard Number range. It will be rounded by database.
   */
-  var numStrs = 
+  var numStrs =
   [
     '17249138680355831',
     '-17249138680355831',
@@ -229,7 +224,7 @@ describe('56. fetchAs.js', function() {
     '0.1724913868035583123456789123456789123456'
   ];
 
-  var numResults = 
+  var numResults =
   [
     '17249138680355831',
     '-17249138680355831',
@@ -245,14 +240,14 @@ describe('56. fetchAs.js', function() {
         [],
         {
           outFormat : oracledb.OBJECT,
-          fetchInfo : 
-          { 
+          fetchInfo :
+          {
             "TS_NUM"  : { type : oracledb.STRING }
           }
         },
         function(err, result) {
           should.not.exist(err);
-          result.rows[0].TS_NUM.should.be.a.String;
+          result.rows[0].TS_NUM.should.be.a.String();
           (result.rows[0].TS_NUM).should.eql(numResults[numStrs.indexOf(element)]);
           callback();
         }
@@ -274,7 +269,7 @@ describe('56. fetchAs.js', function() {
         function(err, result) {
           should.not.exist(err);
           // console.log(result.rows[0].TS_NUM);
-          result.rows[0].TS_NUM.should.be.a.String;
+          result.rows[0].TS_NUM.should.be.a.String();
           (result.rows[0].TS_NUM).should.eql(numResults[numStrs.indexOf(element)]);
           callback();
         }
@@ -284,4 +279,18 @@ describe('56. fetchAs.js', function() {
       done();
     });
   })
+
+  // FetchInfo format should <columName> : {type : oracledb.<type>
+  it ('56.10 invalid syntax for type should result in error', function (done){
+    connection.execute (
+      "SELECT SYSDATE AS THE_DATE FROM DUAL",
+      { },
+      { fetchInfo : { "THE_DATE" : oracledb.STRING }},
+      function ( err, result ) {
+        should.exist ( err ) ;
+        (err.message).should.startWith ('NJS-015:');
+        done ();
+      } );
+  });
+
 })

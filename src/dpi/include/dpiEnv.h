@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -56,7 +56,7 @@ class DateTimeArray;
                      PUBLIC CONSTANTS
   ---------------------------------------------------------------------------*/
 
-  
+
 /*---------------------------------------------------------------------------
                      PUBLIC TYPES
   ---------------------------------------------------------------------------*/
@@ -66,7 +66,9 @@ class Env
  public:
                                 // creation/termination
 
-  static Env * createEnv();
+  static Env * createEnv( const string &drvName,
+                          unsigned int charset = 0,
+                          unsigned int ncharset = 0);
 
   virtual void terminate() = 0;
 
@@ -86,6 +88,8 @@ class Env
   virtual void externalAuth(bool externalAuth) = 0;
   virtual bool externalAuth() const = 0;
 
+  virtual unsigned int dbcharset () const = 0;
+  virtual unsigned int dbncharset () const = 0 ;
 
                                  // methods
   virtual SPool * createPool(const string &user, const string &password,
@@ -94,41 +98,44 @@ class Env
                              int poolIncrement = -1,
                              int poolTimeout = -1,
                              int stmtCacheSize = -1,
-                             bool externalAuth = false) = 0;
+                             bool externalAuth = false,
+                             bool homogeneous = true ) = 0;
 
-  virtual Conn * getConnection(const string &user, const string &password,
+  virtual Conn * getConnection(const string &user,
+                               const string &password,
                                const string &connString,
                                int stmtCacheSize,
                                const string &connClass = "",
-                               bool externalAuth = false) = 0;
+                               bool externalAuth = false,
+                               DBPrivileges dbpriv = dbPrivNONE ) = 0;
 
                                 // DateTime array
   virtual DateTimeArray * getDateTimeArray( OCIError *errh ) const = 0;
-  virtual void            releaseDateTimeArray ( DateTimeArray *arr ) const = 0;
-  
+  virtual void            releaseDateTimeArray ( DateTimeArray *arr ) const =0;
+
                                  // handle and descriptor methods
   virtual DpiHandle * allocHandle(HandleType handleType) = 0;
-  
+
   static void freeHandle(DpiHandle *handle, HandleType handleType);
-  
-  
+
+
   virtual Descriptor * allocDescriptor(DescriptorType descriptorType)
                               = 0;
-  
+
   static void freeDescriptor(Descriptor *descriptor,
                              DescriptorType descriptorType);
-  
+
   virtual void allocDescriptorArray(DescriptorType descriptorType,
                                     unsigned int arraySize,
                                     Descriptor **descriptorArray) = 0;
-  
+
   static void freeDescriptorArray(Descriptor **descriptorArray,
                                   DescriptorType descriptorType);
 
-  
+
   virtual DpiHandle * envHandle() const = 0;
 
-  
+
 protected:
                                 // clients cannot do new and delete
   Env();

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'. 
+ * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
@@ -29,55 +29,48 @@
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
  *     21 - 50  are reserved for data type supporting tests
- *     51 onwards are for other tests 
- * 
+ *     51 onwards are for other tests
+ *
  *****************************************************************************/
 'use strict';
 
 var oracledb = require('oracledb');
 var fs       = require('fs');
-var should = require('should');
-var async = require('async');
-var dbConfig = require('./dbConfig.js');
+var should   = require('should');
+var async    = require('async');
+var dbConfig = require('./dbconfig.js');
 
 describe('62. lobProperties.js', function() {
 
-	if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
-
-  var tableName = "oracledb_mylobs";
+  var tableName = "nodb_mylobprops";
   var connection = null;
   var sqlSelect = "SELECT * FROM " + tableName + " WHERE id = :i";
   var defaultChunkSize = null;
 
-
   before('prepare table and LOB data', function(done) {
-  		
-  	var sqlCreateTab = 
-  	    " BEGIN "  
-  	  + "   DECLARE " 
-      + "     e_table_exists EXCEPTION; " 
-      + "     PRAGMA EXCEPTION_INIT(e_table_exists, -00942); "  
-      + "   BEGIN " 
+
+    var sqlCreateTab =
+      " BEGIN "
+      + "   DECLARE "
+      + "     e_table_missing EXCEPTION; "
+      + "     PRAGMA EXCEPTION_INIT(e_table_missing, -00942); "
+      + "   BEGIN "
       + "     EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " '); "
       + "   EXCEPTION "
-      + "     WHEN e_table_exists "
+      + "     WHEN e_table_missing "
       + "     THEN NULL; "
       + "   END;  "
       + "   EXECUTE IMMEDIATE (' "
       + "     CREATE TABLE " + tableName + " ( "
       + "       id NUMBER, c CLOB, b BLOB "
-      + "     ) " 
-      + "   '); " 
+      + "     ) "
+      + "   '); "
       + " END; ";
-  
-    var sqlInsert = "INSERT INTO " + tableName + " VALUES (:i, EMPTY_CLOB(), EMPTY_BLOB()) " 
+
+    var sqlInsert = "INSERT INTO " + tableName + " VALUES (:i, EMPTY_CLOB(), EMPTY_BLOB()) "
                      + " RETURNING c, b INTO :clob, :blob";
 
-    var bindVar = 
+    var bindVar =
        {
          i: 1,
          clob: { type: oracledb.CLOB, dir: oracledb.BIND_OUT },
@@ -88,7 +81,7 @@ describe('62. lobProperties.js', function() {
 
     async.series([
       function(cb) {
-        oracledb.getConnection(credential, function(err, conn) {
+        oracledb.getConnection(dbConfig, function(err, conn) {
           should.not.exist(err);
           connection = conn;
           cb();
@@ -109,7 +102,7 @@ describe('62. lobProperties.js', function() {
           bindVar,
           function(err, result) {
             should.not.exist(err);
-            
+
             var clob = result.outBinds.clob[0];
             var blob = result.outBinds.blob[0];
             var clobStream = fs.createReadStream(clobFileName);
@@ -133,12 +126,12 @@ describe('62. lobProperties.js', function() {
 
             async.parallel([
               function(callback) {
-                clobStream.on('end', function() {
+                clob.on('finish', function() {
                   callback();
                 });
               },
               function(callback) {
-                blobStream.on('end', function() {
+                blob.on('finish', function() {
                   callback();
                 });
               }
@@ -169,9 +162,9 @@ describe('62. lobProperties.js', function() {
       }
     ], done);
   }) // before
-  
+
   after(function(done) {
-    
+
     async.series([
       function(cb) {
         connection.execute(
@@ -199,12 +192,12 @@ describe('62. lobProperties.js', function() {
         should.not.exist(err);
         var clob = result.rows[0][1],
             blob = result.rows[0][2];
-        
+
         var t1 = clob.chunkSize,
             t2 = blob.chunkSize;
 
-        t1.should.be.a.Number;
-        t2.should.be.a.Number;
+        t1.should.be.a.Number();
+        t2.should.be.a.Number();
         t1.should.eql(t2);
         defaultChunkSize = clob.chunkSize;
 
@@ -215,7 +208,7 @@ describe('62. lobProperties.js', function() {
           // console.log(err.message);
           // Cannot assign to read only property 'chunkSize' of #<Lob>
         }
-      
+
         try {
           blob.chunkSize = t2 + 1;
         } catch(err) {
@@ -240,8 +233,8 @@ describe('62. lobProperties.js', function() {
         var t1 = clob.length,
             t2 = blob.length;
 
-        t1.should.be.a.Number;
-        t2.should.be.a.Number;
+        t1.should.be.a.Number();
+        t2.should.be.a.Number();
         t1.should.not.eql(t2);
 
         try {
@@ -322,7 +315,7 @@ describe('62. lobProperties.js', function() {
               blob = result.rows[0][2];
 
           var newValue = clob.pieceSize - 500;
-  
+
           clob.pieceSize -= 500;
           blob.pieceSize -= 500;
           (clob.pieceSize).should.eql(newValue);
@@ -375,7 +368,7 @@ describe('62. lobProperties.js', function() {
           clob.pieceSize = -100;
         } catch(err) {
           should.exist(err);
-          (err.message).should.startWith('NJS-004');
+          (err.message).should.startWith('NJS-004:');
           // NJS-004: invalid value for property pieceSize
         }
 
@@ -401,7 +394,7 @@ describe('62. lobProperties.js', function() {
           clob.pieceSize = null;
         } catch(err) {
           should.exist(err);
-          (err.message).should.startWith('NJS-004');
+          (err.message).should.startWith('NJS-004:');
           // NJS-004: invalid value for property pieceSize
         }
 
@@ -427,7 +420,7 @@ describe('62. lobProperties.js', function() {
           clob.pieceSize = NaN;
         } catch(err) {
           should.exist(err);
-          (err.message).should.startWith('NJS-004');
+          (err.message).should.startWith('NJS-004:');
           // NJS-004: invalid value for property pieceSize
         }
 

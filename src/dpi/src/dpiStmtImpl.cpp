@@ -38,6 +38,10 @@
 # include <dpiConnImpl.h>
 #endif
 
+#ifndef DPIEXCEPTIONIMPL_ORACLE
+# include <dpiExceptionImpl.h>
+#endif
+
 #ifndef DPIDATETIMEARRAYIMPL_ORACLE
 #include <dpiDateTimeArrayImpl.h>
 #endif
@@ -211,7 +215,7 @@ unsigned int StmtImpl::numCols ()
 /*****************************************************************************/
 /*
   DESCRIPTION
-    Prefetch Rows set on statement handle 
+    Prefetch Rows set on statement handle
 
   PARAMETERS
     prefetchRows count
@@ -247,17 +251,18 @@ void StmtImpl::prefetchRows (unsigned int prefetchRows)
 */
 void StmtImpl::bind (unsigned int pos, unsigned short type, void *buf,
                      DPI_SZ_TYPE bufSize, short *ind, DPI_BUFLEN_TYPE *bufLen,
+                     unsigned int maxarr_len, unsigned int *curelen,
                      void *data, cbtype cb)
 {
   OCIBind *b = (OCIBind *)0;
 
   ociCall (DPIBINDBYPOS (stmth_, &b, errh_, pos,
-                         (cb ? NULL : (type==DpiRSet) ? 
-                           (void *)&(((StmtImpl*)buf)->stmth_) : buf), 
+                         (cb ? NULL : (type==DpiRSet) ?
+                           (void *)&(((StmtImpl*)buf)->stmth_) : buf),
                          (type == DpiRSet) ? 0 : bufSize, type,
                          (cb ? NULL : ind),
                          (cb ? NULL : bufLen),
-                         NULL, 0, NULL,
+                         NULL, maxarr_len, curelen,
                          (cb) ? OCI_DATA_AT_EXEC : OCI_DEFAULT),
            errh_);
 
@@ -309,8 +314,8 @@ void StmtImpl::bind (const unsigned char *name, int nameLen,
 
   ociCall (DPIBINDBYNAME (stmth_, &b, errh_, name, nameLen,
                           (cb ? NULL : (type == DpiRSet) ?
-                            (void *)&((StmtImpl*)buf)->stmth_: buf), 
-                          (type == DpiRSet) ? 0 : bufSize, type, 
+                            (void *)&((StmtImpl*)buf)->stmth_: buf),
+                          (type == DpiRSet) ? 0 : bufSize, type,
                           (cb ? NULL : ind),
                           (cb ? NULL : bufLen),
                           NULL,
@@ -412,7 +417,7 @@ void StmtImpl::define (unsigned int pos, unsigned short type, void *buf,
   if ((type == DpiClob) || (type == DpiBlob) || (type == DpiBfile))
   {
     boolean isLobPrefetchLength = true;
-    
+
     ociCall(OCIAttrSet(d, OCI_HTYPE_DEFINE, &isLobPrefetchLength, 0,
                        OCI_ATTR_LOBPREFETCH_LENGTH, errh_), errh_);
   }
@@ -470,64 +475,99 @@ unsigned int StmtImpl::rowsFetched () const
     obtains column meta data
 
   PARAMETERS
-    -None-
+    extendedMetaData -  true  - all fields are populated
+                        false - only column name, db type, size  is populated.
 
   RETURNS
-    -None-
+    Pointer to MetaData struct.
 */
-const MetaData* StmtImpl::getMetaData ()
+
+/*
+ * The returned pointer to MetaData struct should not be freed by the caller
+ * since this will be freed as part of StmtImpl::release()
+ */
+const MetaData* StmtImpl::getMetaData ( bool extendedMetaData )
 {
-  numCols();
 
-  if (!numCols_)
-    return NULL;
-
-  ub4       col = 0;
-  void *colDesc = (OCIParam *) 0;
-
-  meta_ = new MetaData[numCols_];
-  void *colName = NULL;
-
-  while (col < numCols_)
+  if ( !meta_ )
   {
-    ociCall(OCIParamGet((void *)stmth_, OCI_HTYPE_STMT, errh_,
-                        &colDesc, (ub4) (col+1)), errh_ );
-    ociCall(OCIAttrGet(colDesc, (ub4) OCI_DTYPE_PARAM, &colName,
-                       (ub4 *) &(meta_[col].colNameLen),
-                       (ub4) OCI_ATTR_NAME,errh_ ), errh_ );
-    meta_[col].colName = (unsigned char *) colName;
-    ociCall(OCIAttrGet(colDesc, (ub4) OCI_DTYPE_PARAM,
-                       (void*) &(meta_[col].dbType),(ub4 *) 0,
-                       (ub4) OCI_ATTR_DATA_TYPE,
-                       errh_ ), errh_ );
-    ociCall(OCIAttrGet(colDesc, (ub4) OCI_DTYPE_PARAM,
-                       (void*) &(meta_[col].dbSize),(ub4 *) 0,
-                       (ub4) OCI_ATTR_DATA_SIZE,
-                       errh_ ), errh_ );
-    ociCall(OCIAttrGet(colDesc, (ub4) OCI_DTYPE_PARAM,
-                       (void*) &(meta_[col].isNullable),(ub4*) 0,
-                       (ub4) OCI_ATTR_IS_NULL,
-                       errh_ ), errh_ );
-    if (meta_[col].dbType == DpiNumber || meta_[col].dbType == DpiBinaryFloat
-           ||meta_[col].dbType == DpiBinaryDouble )
+    if ( numCols () )
     {
-      ociCall(OCIAttrGet(colDesc, (ub4) OCI_DTYPE_PARAM,
-                         (void*) &(meta_[col].precision),(ub4* ) 0,
-                         (ub4) OCI_ATTR_PRECISION,
-                         errh_ ), errh_ );
-      ociCall(OCIAttrGet(colDesc, (ub4) OCI_DTYPE_PARAM,
-                         (void*) &(meta_[col].scale),(ub4*) 0,
-                         (ub4) OCI_ATTR_SCALE,
-                         errh_ ), errh_ );
+      ub4       col = 0;
+      void *colDesc = (OCIParam *) 0;
+      void *colName = NULL;
+
+      meta_ = new MetaData[numCols_];
+      if ( !meta_ )
+      {
+        throw ExceptionImpl ( DpiErrMemAllocFail ) ;
+      }
+
+      while (col < numCols_)
+      {
+        ociCall(OCIParamGet((void *)stmth_, OCI_HTYPE_STMT, errh_,
+                            &colDesc, (ub4) (col+1)), errh_ );
+        ociCall(OCIAttrGet(colDesc, (ub4) OCI_DTYPE_PARAM, &colName,
+                           (ub4 *) &(meta_[col].colNameLen),
+                           (ub4) OCI_ATTR_NAME,errh_ ), errh_ );
+        meta_[col].colName = (unsigned char *) colName;
+        ociCall(OCIAttrGet(colDesc, (ub4) OCI_DTYPE_PARAM,
+                           (void*) &(meta_[col].dbType),(ub4 *) 0,
+                           (ub4) OCI_ATTR_DATA_TYPE,
+                           errh_ ), errh_ );
+        switch (  meta_[col].dbType )
+        {
+          case DpiVarChar:
+          case DpiFixedChar:
+          case DpiRaw:
+            // byteSize in case VARCHAR, FIXEDCHAR, RAW columns
+            ociCall(OCIAttrGet(colDesc, (ub4) OCI_DTYPE_PARAM,
+                               (void*) &(meta_[col].dbSize),(ub4 *) 0,
+                               (ub4) OCI_ATTR_DATA_SIZE,
+                               errh_ ), errh_ );
+            break;
+
+          default:
+            break;
+        }
+
+        if ( extendedMetaData )
+        {
+          ociCall(OCIAttrGet(colDesc, (ub4) OCI_DTYPE_PARAM,
+                             (void*) &(meta_[col].isNullable),(ub4*) 0,
+                             (ub4) OCI_ATTR_IS_NULL,
+                             errh_ ), errh_ );
+          switch ( meta_[col].dbType )
+          {
+            case DpiNumber:
+              ociCall(OCIAttrGet(colDesc, (ub4) OCI_DTYPE_PARAM,
+                                 (void*) &(meta_[col].precision),(ub4* ) 0,
+                                 (ub4) OCI_ATTR_PRECISION,
+                                 errh_ ), errh_ );
+              ociCall(OCIAttrGet(colDesc, (ub4) OCI_DTYPE_PARAM,
+                                 (void*) &(meta_[col].scale),(ub4*) 0,
+                                 (ub4) OCI_ATTR_SCALE,
+                                 errh_ ), errh_ );
+              break;
+
+            case DpiTimestamp:
+            case DpiTimestampTZ:
+            case DpiTimestampLTZ:
+              ociCall(OCIAttrGet(colDesc, (ub4) OCI_DTYPE_PARAM,
+                                 (void*) &(meta_[col].scale),(ub4*) 0,
+                                 (ub4) OCI_ATTR_SCALE,
+                                 errh_ ), errh_ );
+              break;
+
+            default:
+              break;
+          }
+        }
+
+        OCIDescriptorFree( colDesc, OCI_DTYPE_PARAM);
+        col++;
+      }
     }
-    else
-    {                           // avoid uninitialized variables
-      meta_[col].precision = 0;  
-      meta_[col].scale = 0;
-    }
-      
-    OCIDescriptorFree( colDesc, OCI_DTYPE_PARAM);
-    col++;
   }
 
   return meta_;
@@ -564,7 +604,7 @@ void StmtImpl::cleanup ()
     // Release not called for ref cursor.
     if ( refCursor_ )
       OCIHandleFree ( stmth_, OCI_HTYPE_STMT );
-    else 
+    else
       ociCall ( OCIStmtRelease (stmth_, errh_, NULL, 0, OCI_DEFAULT), errh_ );
 
     stmth_ = NULL;

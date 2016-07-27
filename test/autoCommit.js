@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -14,8 +14,8 @@
  *
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'. 
+ *
+ * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
@@ -28,41 +28,35 @@
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
  *     21 - 50  are reserved for data type supporting tests
- *     51 -     are for other tests 
- * 
+ *     51 onwards are for other tests
+ *
  *****************************************************************************/
-"use strict";
+'use strict';
 
 var oracledb = require('oracledb');
 var should   = require('should');
 var async    = require('async');
-var dbConfig = require('./dbConfig.js');
+var dbConfig = require('./dbconfig.js');
 
 describe('7. autoCommit.js', function() {
 
-  if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
-  
   var pool = null;
   var connection  = null;
 
   before('create pool, get one connection, create table', function(done) {
-    var script = 
+    var script =
         "BEGIN \
             DECLARE \
-                e_table_exists EXCEPTION; \
-                PRAGMA EXCEPTION_INIT(e_table_exists, -00942); \
+                e_table_missing EXCEPTION; \
+                PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \
             BEGIN \
-                EXECUTE IMMEDIATE ('DROP TABLE oracledb_departments'); \
+                EXECUTE IMMEDIATE ('DROP TABLE nodb_commit_dept'); \
             EXCEPTION \
-                WHEN e_table_exists \
+                WHEN e_table_missing \
                 THEN NULL; \
             END; \
             EXECUTE IMMEDIATE (' \
-                CREATE TABLE oracledb_departments ( \
+                CREATE TABLE nodb_commit_dept ( \
                     department_id NUMBER,  \
                     department_name VARCHAR2(20) \
                 ) \
@@ -73,10 +67,10 @@ describe('7. autoCommit.js', function() {
       function(callback) {
         oracledb.createPool(
           {
-            externalAuth  : credential.externalAuth,
-            user          : credential.user,
-            password      : credential.password,
-            connectString : credential.connectString,
+            externalAuth  : dbConfig.externalAuth,
+            user          : dbConfig.user,
+            password      : dbConfig.password,
+            connectString : dbConfig.connectString,
             poolMin       : 3,
             poolMax       : 7,
             poolIncrement : 1
@@ -93,10 +87,10 @@ describe('7. autoCommit.js', function() {
           should.not.exist(err);
           connection = conn;
           callback();
-        }); 
+        });
       },
       function(callback) {
-        connection.execute( 
+        connection.execute(
           script,
           function(err) {
             should.not.exist(err);
@@ -106,12 +100,12 @@ describe('7. autoCommit.js', function() {
       }
     ], done);
   })
-  
-  after('drop table, release connection, terminate pool', function(done) {    
+
+  after('drop table, release connection, terminate pool', function(done) {
     async.series([
       function(callback) {
         connection.execute(
-          "DROP TABLE oracledb_departments",
+          "DROP TABLE nodb_commit_dept",
           function(err) {
             should.not.exist(err);
             callback();
@@ -137,14 +131,14 @@ describe('7. autoCommit.js', function() {
     oracledb.autoCommit = false;  /* Restore to default value */
 
     connection.execute(
-      "TRUNCATE TABLE oracledb_departments",
+      "TRUNCATE TABLE nodb_commit_dept",
       function(err) {
         should.not.exist(err);
         done();
-      } 
+      }
     );
   })
-  
+
   it('7.1 autoCommit takes effect when setting oracledb.autoCommit before connecting', function(done) {
     var conn1 = null;
     var conn2 = null;
@@ -163,7 +157,7 @@ describe('7. autoCommit.js', function() {
       },
       function(callback) {
         conn1.execute(
-          "INSERT INTO oracledb_departments VALUES (82, 'Security')",
+          "INSERT INTO nodb_commit_dept VALUES (82, 'Security')",
           function(err) {
             should.not.exist(err);
             callback();
@@ -181,19 +175,19 @@ describe('7. autoCommit.js', function() {
       },
       function(callback) {
         conn2.execute(
-          "SELECT department_id FROM oracledb_departments WHERE department_name = 'Security'",
+          "SELECT department_id FROM nodb_commit_dept WHERE department_name = 'Security'",
           [],
           { outFormat: oracledb.OBJECT },
           function(err, result) {
             should.not.exist(err);
-            result.rows[0].DEPARTMENT_ID.should.eql(82).and.be.a.Number;
+            result.rows[0].DEPARTMENT_ID.should.eql(82).and.be.a.Number();
             callback();
           }
         );
       },
       function(callback) {
         conn1.execute(
-          "UPDATE oracledb_departments SET department_id = 101 WHERE department_name = 'Security'",
+          "UPDATE nodb_commit_dept SET department_id = 101 WHERE department_name = 'Security'",
           function(err){
             should.not.exist(err);
             callback();
@@ -202,12 +196,12 @@ describe('7. autoCommit.js', function() {
       },
       function(callback) {
         conn2.execute(
-          "SELECT department_id FROM oracledb_departments WHERE department_name = 'Security'",
+          "SELECT department_id FROM nodb_commit_dept WHERE department_name = 'Security'",
           [],
           { outFormat: oracledb.OBJECT },
           function(err, result) {
             should.not.exist(err);
-            result.rows[0].DEPARTMENT_ID.should.eql(101).and.be.a.Number;
+            result.rows[0].DEPARTMENT_ID.should.eql(101).and.be.a.Number();
             callback();
           }
         );
@@ -244,14 +238,14 @@ describe('7. autoCommit.js', function() {
       function(callback) {
         oracledb.autoCommit = true;   // change autoCommit after connection
         conn1.execute(
-          "INSERT INTO oracledb_departments VALUES (82, 'Security')",
+          "INSERT INTO nodb_commit_dept VALUES (82, 'Security')",
           function(err) {
             should.not.exist(err);
             callback();
           }
         );
       },
-      function(callback) {     
+      function(callback) {
         pool.getConnection(
           function(err, conn) {
             should.not.exist(err);
@@ -262,19 +256,19 @@ describe('7. autoCommit.js', function() {
       },
       function(callback) {
         conn2.execute(
-          "SELECT department_id FROM oracledb_departments WHERE department_name = 'Security'",
+          "SELECT department_id FROM nodb_commit_dept WHERE department_name = 'Security'",
           [],
           { outFormat: oracledb.OBJECT },
           function(err, result) {
             should.not.exist(err);
-            result.rows[0].DEPARTMENT_ID.should.eql(82).and.be.a.Number;
+            result.rows[0].DEPARTMENT_ID.should.eql(82).and.be.a.Number();
             callback();
           }
         );
       },
       function(callback) {
         conn1.execute(
-          "UPDATE oracledb_departments SET department_id = 101 WHERE department_name = 'Security'",
+          "UPDATE nodb_commit_dept SET department_id = 101 WHERE department_name = 'Security'",
           function(err){
             should.not.exist(err);
             callback();
@@ -283,12 +277,12 @@ describe('7. autoCommit.js', function() {
       },
       function(callback) {
         conn2.execute(
-          "SELECT department_id FROM oracledb_departments WHERE department_name = 'Security'",
+          "SELECT department_id FROM nodb_commit_dept WHERE department_name = 'Security'",
           [],
           { outFormat: oracledb.OBJECT },
           function(err, result) {
             should.not.exist(err);
-            result.rows[0].DEPARTMENT_ID.should.eql(101).and.be.a.Number;
+            result.rows[0].DEPARTMENT_ID.should.eql(101).and.be.a.Number();
             callback();
           }
         );
@@ -311,7 +305,7 @@ describe('7. autoCommit.js', function() {
   it('7.3 autoCommit setting does not affect previous SQL result', function(done) {
     var conn1 = null;
     var conn2 = null;
-    
+
     async.series([
       function(callback) {
         pool.getConnection(
@@ -324,14 +318,14 @@ describe('7. autoCommit.js', function() {
       },
       function(callback) {
         conn1.execute(
-          "INSERT INTO oracledb_departments VALUES (82, 'Security')",
+          "INSERT INTO nodb_commit_dept VALUES (82, 'Security')",
           function(err) {
             should.not.exist(err);
             callback();
           }
         );
       },
-      function(callback) {     
+      function(callback) {
         pool.getConnection(
           function(err, conn) {
             should.not.exist(err);
@@ -343,7 +337,7 @@ describe('7. autoCommit.js', function() {
       function(callback) {
         oracledb.autoCommit = true;   // change autoCommit after connection
         conn2.execute(
-          "SELECT department_id FROM oracledb_departments WHERE department_name = 'Security'",
+          "SELECT department_id FROM nodb_commit_dept WHERE department_name = 'Security'",
           [],
           { outFormat: oracledb.OBJECT },
           function(err, result) {
@@ -355,7 +349,7 @@ describe('7. autoCommit.js', function() {
       },
       function(callback) {
         conn2.execute(
-          "INSERT INTO oracledb_departments VALUES (99, 'Marketing')",
+          "INSERT INTO nodb_commit_dept VALUES (99, 'Marketing')",
           function(err) {
             should.not.exist(err);
             callback();
@@ -364,7 +358,7 @@ describe('7. autoCommit.js', function() {
       },
       function(callback) {
         conn2.execute(
-          "SELECT COUNT(*) as amount FROM oracledb_departments",
+          "SELECT COUNT(*) as amount FROM nodb_commit_dept",
           [],
           { outFormat: oracledb.OBJECT },
           function(err, result) {
@@ -376,7 +370,7 @@ describe('7. autoCommit.js', function() {
       },
       function(callback) {
         conn1.execute(
-          "SELECT COUNT(*) as amount FROM oracledb_departments",
+          "SELECT COUNT(*) as amount FROM nodb_commit_dept",
           [],
           { outFormat: oracledb.OBJECT },
           function(err, result) {
@@ -399,7 +393,6 @@ describe('7. autoCommit.js', function() {
         });
       }
     ], done);
-  }) 
-  
-})
+  })
 
+})

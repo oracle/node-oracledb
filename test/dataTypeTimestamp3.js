@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -14,8 +14,8 @@
  *
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'. 
+ *
+ * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
@@ -31,49 +31,42 @@
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
  *     21 - 50  are reserved for data type supporting tests
- *     51 -     are for other tests 
- * 
+ *     51 onwards are for other tests
+ *
  *****************************************************************************/
-"use strict";
- 
+'use strict';
+
 var oracledb = require('oracledb');
-var should = require('should');
-var async = require('async');
-var assist = require('./dataTypeAssist.js');
-var dbConfig = require('./dbConfig.js');
+var should   = require('should');
+var async    = require('async');
+var assist   = require('./dataTypeAssist.js');
+var dbConfig = require('./dbconfig.js');
 
 describe('35. dataTypeTimestamp3.js', function() {
-  
-  if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
-  
-  var connection = false;
-  
-  var tableName = "oracledb_datatype_timestamp";
-  var sqlCreate = 
+
+  var connection = null;
+  var tableName = "nodb_datatype_timestamp";
+  var sqlCreate =
         "BEGIN " +
            "   DECLARE " +
-           "       e_table_exists EXCEPTION; " +
-           "       PRAGMA EXCEPTION_INIT(e_table_exists, -00942); " +
+           "       e_table_missing EXCEPTION; " +
+           "       PRAGMA EXCEPTION_INIT(e_table_missing, -00942); " +
            "   BEGIN " +
            "       EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " '); " +
            "   EXCEPTION " +
-           "       WHEN e_table_exists " +
+           "       WHEN e_table_missing " +
            "       THEN NULL; " +
            "   END; " +
            "   EXECUTE IMMEDIATE (' " +
            "       CREATE TABLE " + tableName +" ( " +
-           "           num NUMBER, " + 
+           "           num NUMBER, " +
            "           content TIMESTAMP WITH TIME ZONE "  +
            "       )" +
            "   '); " +
            "END; ";
   var sqlDrop = "DROP table " + tableName;
   before( function(done){
-    oracledb.getConnection(credential, function(err, conn){
+    oracledb.getConnection(dbConfig, function(err, conn){
       if(err) { console.error(err.message); return; }
       connection = conn;
       connection.execute(
@@ -85,7 +78,7 @@ describe('35. dataTypeTimestamp3.js', function() {
       );
     });
   })
-  
+
   after( function(done){
     connection.execute(
       sqlDrop,
@@ -100,17 +93,17 @@ describe('35. dataTypeTimestamp3.js', function() {
   })
 
   it('supports TIMESTAMP WITH TIME ZONE data type', function(done) {
-    connection.should.be.ok;
-    
+    connection.should.be.ok();
+
     var timestamps = [
         new Date(-100000000),
         new Date(0),
         new Date(10000000000),
         new Date(100000000000)
     ];
-    
+
     var sqlInsert = "INSERT INTO " + tableName + " VALUES(:no, :bindValue)";
-    
+
     async.forEach(timestamps, function(timestamp, callback) {
       connection.execute(
         sqlInsert,
@@ -128,12 +121,12 @@ describe('35. dataTypeTimestamp3.js', function() {
         { outFormat: oracledb.OBJECT },
         function(err, result) {
           should.exist(err);
-          err.message.should.startWith('NJS-010:'); // unsupported data type in select list
-    
-          done();         
+          (err.message).should.startWith('NJS-010:'); // unsupported data type in select list
+
+          done();
         }
       );
     });
   })
-  
+
 })

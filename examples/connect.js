@@ -19,9 +19,9 @@
  *   connect.js
  *
  * DESCRIPTION
- *   Tests a basic connection to the database. 
+ *   Tests a basic connection to the database.
  *   See dbconfig.js for information on connectString formats.
- * 
+ *
  *****************************************************************************/
 
 var oracledb = require('oracledb');

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -80,15 +80,17 @@ Env::~Env()
      Create the Env object.
 
    PARAMETERS:
-     none
+     drvName        - driver name
+     charset        - charset id
+     ncharset       - ncharset id
 
    RETURNS:
      nothing
  */
-
-Env * Env::createEnv()
+Env * Env::createEnv( const string& drvName,
+                      unsigned int charset, unsigned int ncharset)
 {
-  return EnvImpl::createEnvImpl();
+  return EnvImpl::createEnvImpl( drvName, charset, ncharset );
 }
 
 
@@ -106,7 +108,7 @@ Env * Env::createEnv()
      nothing
 
    NOTES:
-     
+
  */
 
 void Env::freeHandle(DpiHandle *handle, HandleType handleType)
@@ -129,7 +131,7 @@ void Env::freeHandle(DpiHandle *handle, HandleType handleType)
      nothing
 
    NOTES:
-     
+
  */
 
 void Env::freeDescriptor(Descriptor *descriptor,
@@ -153,7 +155,7 @@ void Env::freeDescriptor(Descriptor *descriptor,
      nothing
 
    NOTES:
-     
+
  */
 
 void Env::freeDescriptorArray(Descriptor **descriptorArray,

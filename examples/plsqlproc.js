@@ -21,7 +21,7 @@
  * DESCRIPTION
  *   Show calling a PL/SQL procedure and binding parameters in various ways
  *   Use demo.sql to create the required procedure or do:
- * 
+ *
  *   CREATE OR REPLACE PROCEDURE testproc (p_in IN VARCHAR2, p_inout IN OUT VARCHAR2, p_out OUT NUMBER)
  *     AS
  *   BEGIN
@@ -56,6 +56,6 @@ oracledb.getConnection(
       function (err, result)
       {
         if (err) { console.error(err.message); return; }
-        console.log(result.outBinds);        
+        console.log(result.outBinds);
       });
   });

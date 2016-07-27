@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -14,8 +14,8 @@
  *
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
- * The node-oracledb test suite uses 'mocha', 'should' and 'async'. 
+ *
+ * The node-oracledb test suite uses 'mocha', 'should' and 'async'.
  * See LICENSE.md for relevant licenses.
  *
  * NAME
@@ -28,38 +28,33 @@
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
  *     21 - 50  are reserved for data type supporting tests
- *     51 -     are for other tests  
- * 
+ *     51 onwards are for other tests
+ *
  *****************************************************************************/
+'use strict';
 
 var oracledb = require('oracledb');
-var should = require('should');
-var async = require('async');
-var dbConfig = require('./dbConfig.js');
+var should   = require('should');
+var async    = require('async');
+var dbConfig = require('./dbconfig.js');
 
 describe('10. nullColumnValues.js', function() {
-  
-  if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
-  
-  var connection = false;
+
+  var connection = null;
   beforeEach('get connection & create table', function(done){
-    var makeTable = 
+    var makeTable =
       "BEGIN \
             DECLARE \
-                e_table_exists EXCEPTION; \
-                PRAGMA EXCEPTION_INIT(e_table_exists, -00942); \
+                e_table_missing EXCEPTION; \
+                PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \
             BEGIN \
-                EXECUTE IMMEDIATE ('DROP TABLE oracledb_departments'); \
+                EXECUTE IMMEDIATE ('DROP TABLE nodb_nullcol_dept'); \
             EXCEPTION \
-                WHEN e_table_exists \
+                WHEN e_table_missing \
                 THEN NULL; \
             END; \
             EXECUTE IMMEDIATE (' \
-                CREATE TABLE oracledb_departments ( \
+                CREATE TABLE nodb_nullcol_dept ( \
                     department_id NUMBER,  \
                     department_name VARCHAR2(20), \
                     manager_id NUMBER, \
@@ -67,37 +62,37 @@ describe('10. nullColumnValues.js', function() {
                 ) \
             '); \
             EXECUTE IMMEDIATE (' \
-              INSERT INTO oracledb_departments  \
+              INSERT INTO nodb_nullcol_dept  \
                    VALUES \
                    (40,''Human Resources'', 203, 2400) \
             '); \
             EXECUTE IMMEDIATE (' \
-              INSERT INTO oracledb_departments  \
+              INSERT INTO nodb_nullcol_dept  \
                    VALUES \
                    (50,''Shipping'', 121, 1500) \
             '); \
             EXECUTE IMMEDIATE (' \
-              INSERT INTO oracledb_departments  \
+              INSERT INTO nodb_nullcol_dept  \
                    VALUES \
                    (90, ''Executive'', 100, 1700) \
             '); \
         END; ";
-    oracledb.getConnection(credential, function(err, conn){
+    oracledb.getConnection(dbConfig, function(err, conn){
       if(err) { console.error(err.message); return; }
       connection = conn;
       conn.execute(
         makeTable,
         function(err){
           if(err) { console.error(err.message); return; }
-          done(); 
+          done();
         }
       );
     });
   })
-  
+
   afterEach('drop table and release connection', function(done){
     connection.execute(
-      "DROP TABLE oracledb_departments",
+      "DROP TABLE nodb_nullcol_dept",
       function(err){
         if(err) { console.error(err.message); return; }
         connection.release( function(err){
@@ -107,27 +102,27 @@ describe('10. nullColumnValues.js', function() {
       }
     );
   })
-  
+
   it('10.1 a simple query for null value', function(done) {
-    connection.should.be.ok;
-    
+    connection.should.be.ok();
+
     connection.execute(
       "SELECT null FROM DUAL",
       function(err, result) {
         should.not.exist(err);
         result.rows[0].should.eql( [null] );
         done();
-      } 
+      }
     );
   })
-  
+
   it('10.2 in-bind for null column value', function(done) {
-    connection.should.be.ok;
-    
+    connection.should.be.ok();
+
     async.series([
       function(callback) {
         connection.execute(
-          "INSERT INTO oracledb_departments VALUES(:did, :dname, :mid, :mname)",
+          "INSERT INTO nodb_nullcol_dept VALUES(:did, :dname, :mid, :mname)",
           {
             did: 101,
             dname: 'Facility',
@@ -143,7 +138,7 @@ describe('10. nullColumnValues.js', function() {
       },
       function(callback) {
         connection.execute(
-          "SELECT * FROM oracledb_departments WHERE department_id = :did",
+          "SELECT * FROM nodb_nullcol_dept WHERE department_id = :did",
           { did: 101 },
           { outFormat: oracledb.OBJECT },
           function(err, result) {
@@ -158,15 +153,15 @@ describe('10. nullColumnValues.js', function() {
         );
       }
     ], done);
-    
+
   })
-  
+
   it('10.3 out-bind for null column value', function(done) {
-    connection.should.be.ok;
-    
+    connection.should.be.ok();
+
     async.series([
       function(callback) {
-        var proc = "CREATE OR REPLACE PROCEDURE oracledb_testproc (p_out OUT VARCHAR2) \
+        var proc = "CREATE OR REPLACE PROCEDURE nodb_testproc (p_out OUT VARCHAR2) \
                     AS \
                     BEGIN \
                       p_out := ''; \
@@ -181,7 +176,7 @@ describe('10. nullColumnValues.js', function() {
       },
       function(callback) {
         connection.execute(
-          "BEGIN oracledb_testproc(:o); END;", 
+          "BEGIN nodb_testproc(:o); END;",
           {
             o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
           },
@@ -191,10 +186,10 @@ describe('10. nullColumnValues.js', function() {
             callback();
           }
         );
-      }, 
+      },
       function(callback) {
         connection.execute(
-          "DROP PROCEDURE oracledb_testproc", 
+          "DROP PROCEDURE nodb_testproc",
           function(err) {
             should.not.exist(err);
             callback();
@@ -203,12 +198,12 @@ describe('10. nullColumnValues.js', function() {
       }
     ], done);
   })
-  
+
   it('10.4 DML Returning for null column value', function(done) {
-    connection.should.be.ok;
-    
+    connection.should.be.ok();
+
     connection.execute(
-      "UPDATE oracledb_departments SET department_name = :dname, \
+      "UPDATE nodb_nullcol_dept SET department_name = :dname, \
         manager_id = :mid WHERE department_id = :did \
         RETURNING department_id, department_name, manager_id INTO \
         :rdid, :rdname, :rmid",
@@ -232,14 +227,14 @@ describe('10. nullColumnValues.js', function() {
         }
     );
   })
-  
+
   it('10.5 resultSet for null value', function(done) {
-    connection.should.be.ok;
-    
+    connection.should.be.ok();
+
     async.series([
       function(callback) {
         connection.execute(
-          "UPDATE oracledb_departments SET department_name = :dname, \
+          "UPDATE nodb_nullcol_dept SET department_name = :dname, \
           manager_id = :mid WHERE department_id = :did ",
           {
             dname: '',
@@ -255,7 +250,7 @@ describe('10. nullColumnValues.js', function() {
       },
       function(callback) {
         connection.execute(
-          "SELECT * FROM oracledb_departments WHERE department_id = :1",
+          "SELECT * FROM nodb_nullcol_dept WHERE department_id = :1",
           [50],
           { resultSet: true },
           function(err, result) {
@@ -263,7 +258,7 @@ describe('10. nullColumnValues.js', function() {
             fetchRowFromRS(result.resultSet);
           }
         );
-        
+
         function fetchRowFromRS(rs) {
           rs.getRow(function(err, row) {
             should.not.exist(err);
@@ -282,5 +277,5 @@ describe('10. nullColumnValues.js', function() {
       }
     ], done);
   })
-  
+
 })
