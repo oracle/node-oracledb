@@ -54,7 +54,7 @@
       "module_path": "./build/Release",
       "host": "https://raw.githubusercontent.com/bchr02/node-oracledb/prebuild_support/bin",
       "remote_path": "",
-      "package_name": "{module_name}-v{version}-{node_abi}-{platform}-{arch}.tar.gz"
+      "package_name": "{module_name}-v{version}-{node_abi}-{platform}-{arch}-{toolset}.tar.gz"
 },
   "engines": {
     "node": ">=0.10.28 <7"
