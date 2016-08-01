@@ -115,6 +115,49 @@ typedef struct Define
   {}
 } Define;
 
+/**
+ * MetaInfo structure, this is parallel structure to Metadata
+ *
+ * NOTE:
+ *
+ * dbTYpe       - database table column data type (SQLT_xxx constants).
+ * dpiFetchType - data type used with OCI calls after FetchAs/FetInfo rules
+ *                applied used between DB layer and Driver
+ * njsFetchType - data type reported to the application for this column -
+ *                driver types (Oracledb.constants).
+ **/
+typedef struct MetaInfo
+{
+  std::string       name;                   // DB column name
+  unsigned short    dbType;                 // DB column type
+  unsigned short    dpiFetchType;           // Target fetchType for DPI
+  short             njsFetchType;           // Target fetchType for NJS
+  unsigned short    byteSize;               // Size In bytes at database
+  unsigned char     precision;              // Precision
+  char              scale;                  // Scale
+  unsigned char     isNullable;             // Nullable
+
+  MetaInfo ()
+    : name(""), dbType(0), dpiFetchType(0), njsFetchType(NJS_DATATYPE_UNKNOWN),
+      byteSize(0), precision(0), scale(0), isNullable(false)
+  {}
+
+} MetaInfo;
+
+/**
+ * This is a parallel structure to Bind and stores extended bind fields
+ * in specific cases like refCursor
+ **/
+typedef struct ExtBind
+{
+  unsigned int numCols;          // number of columns
+  MetaInfo     *mInfo;           // MetaInfo structure
+
+  ExtBind ()
+    : numCols ( 0 ), mInfo ( NULL )
+    {}
+}ExtBind;
+
 
 /**
  * FetchInfo structure
@@ -126,7 +169,7 @@ typedef struct fetchInfo
 
   // Constructor to initialize member variables.
   fetchInfo ()
-    : name (""), type ( DATA_DEFAULT )
+    : name (""), type ( NJS_DATATYPE_DEFAULT )
   {
   }
 
@@ -138,50 +181,56 @@ typedef struct fetchInfo
 **/
 typedef struct eBaton
 {
-  uv_work_t            req;
-  std::string          sql;
-  std::string          error;
-  dpi::Env*            dpienv;
-  dpi::Conn*           dpiconn;
-  Connection           *njsconn;
-  DPI_SZ_TYPE          rowsAffected;
-  unsigned int         maxRows;
-  unsigned int         prefetchRows;
-  bool                 getRS;
-  bool                 autoCommit;
-  unsigned int         rowsFetched;
-  unsigned int         outFormat;
-  unsigned int         numCols;
-  dpi::Stmt            *dpistmt;
-  dpi::DpiStmtType     st;
-  bool                 stmtIsReturning;
-  std::vector<Bind*>   binds;
-  unsigned int         numOutBinds;    // # of out binds used for DML return
-  std::string          *columnNames;
-  Define               *defines;
-  unsigned int         fetchAsStringTypesCount;
-  DataType             *fetchAsStringTypes;  // Global by type settings
-  unsigned int         fetchInfoCount;   // Conversion requested count
-  FetchInfo            *fetchInfo;       // Conversion meta data
+  uv_work_t                 req;
+  std::string               sql;
+  std::string               error;
+  dpi::Env*                 dpienv;
+  dpi::Conn*                dpiconn;
+  Connection                *njsconn;
+  DPI_SZ_TYPE               rowsAffected;
+  unsigned int              maxRows;
+  unsigned int              prefetchRows;
+  bool                      getRS;
+  bool                      autoCommit;
+  unsigned int              rowsFetched;
+  unsigned int              outFormat;
+  unsigned int              numCols;
+  dpi::Stmt                 *dpistmt;
+  dpi::DpiStmtType          st;
+  bool                      stmtIsReturning;
+  std::vector<Bind*>        binds;
+  std::vector<ExtBind*>     extBinds;
+  unsigned int              numOutBinds;    // # of out binds used for DML return
+  Define                    *defines;
+  unsigned int              fetchAsStringTypesCount;
+  DataType                  *fetchAsStringTypes;  // Global by type settings
+  unsigned int              fetchInfoCount;       // Conversion requested count
+  FetchInfo                 *fetchInfo;           // Conversion meta data
   Nan::Persistent<Function> cb;
   RefCounter                counter;
+  Nan::Persistent<Object>   jsConn;
+  bool                      extendedMetaData;
+  MetaInfo                  *mInfo;
 
-  eBaton( unsigned int& count, Local<Function> callback ) :
+  eBaton( unsigned int& count, Local<Function> callback,
+           Local<Object> jsConnObj ) :
              sql(""), error(""), dpienv(NULL), dpiconn(NULL), njsconn(NULL),
              rowsAffected(0), maxRows(0), prefetchRows(0),
-             getRS(false), autoCommit(false), rowsFetched(0),
-             outFormat(0), numCols(0), dpistmt(NULL),
-             st(DpiStmtUnknown), stmtIsReturning (false), numOutBinds(0),
-             columnNames(NULL), defines(NULL), fetchAsStringTypesCount (0),
-             fetchAsStringTypes(NULL), fetchInfoCount(0), fetchInfo(NULL),
-             counter ( count )
+             getRS(false), autoCommit(false), rowsFetched(0), outFormat(0),
+             numCols(0), dpistmt(NULL), st(DpiStmtUnknown),
+             stmtIsReturning (false), numOutBinds(0), defines(NULL),
+             fetchAsStringTypesCount (0), fetchAsStringTypes(NULL),
+             fetchInfoCount(0), fetchInfo(NULL), counter ( count ),
+             extendedMetaData(false), mInfo(NULL)
   {
     cb.Reset( callback );
+    jsConn.Reset ( jsConnObj );
   }
 
   ~eBaton ()
    {
      cb.Reset ();
+     jsConn.Reset ();
      if( !binds.empty() )
      {
        for( unsigned int index = 0 ;index < binds.size(); index++ )
@@ -214,8 +263,25 @@ typedef struct eBaton
          delete binds[index];
        }
      }
-     if( columnNames )
-       delete [] columnNames;
+     if( !extBinds.empty() )
+     {
+       for( unsigned int index = 0 ;index < extBinds.size(); index++ )
+       {
+         if ( extBinds[index] )
+         {
+           if ( extBinds[index]->mInfo )
+           {
+             delete [] extBinds[index]->mInfo;
+           }
+           delete extBinds[index];
+         }
+       }
+       extBinds.clear ();
+     }
+     if( mInfo && !getRS )
+     {
+        delete [] mInfo;
+     }
      if( defines && !getRS ) // To reuse fetch Buffers of ResultSet
      {
        for( unsigned int i=0; i<numCols; i++ )
@@ -255,17 +321,19 @@ typedef struct eBaton
 class Connection: public Nan::ObjectWrap
 {
 public:
-  void setConnection (dpi::Conn*, Oracledb* oracledb);
-  // Define Connection Constructor
+  void setConnection ( dpi::Conn*, Oracledb* oracledb, Local<Object> obj );
   static Nan::Persistent<FunctionTemplate> connectionTemplate_s;
   static void Init (Handle<Object> target);
   static Local<Value> GetRows (eBaton* executeBaton);
-  static Local<Value> GetMetaData (std::string* columnNames,
-                                    unsigned int numCols);
-  static void DoDefines ( eBaton* executeBaton, const dpi::MetaData*,
-                          unsigned int numCols );
+  static Local<Value> GetMetaData ( const MetaInfo*    mInfo,
+                                    const unsigned int numCols,
+                                    const bool         extendedMetaData );
+  static void DoDefines ( eBaton* executeBaton );
   static void DoFetch (eBaton* executeBaton);
-  static void CopyMetaData ( std::string*, const dpi::MetaData*, unsigned int );
+  static void CopyMetaData ( MetaInfo*            mInfo,
+                             eBaton*              executeBaton,
+                             const                MetaData* meta,
+                             const unsigned int   numCols );
   bool isValid() { return isValid_; }
   dpi::Conn* getDpiConn() { return dpiconn_; }
 
@@ -325,6 +393,7 @@ private:
                                           NJSErrorType errType,
                                           string property);
 
+  // Define Connection Constructor
   Connection ();
   ~Connection ();
 
@@ -353,17 +422,17 @@ private:
   static void GetOptions (Handle<Object> options, eBaton* executeBaton);
   static void GetBinds (Handle<Object> bindobj, eBaton* executeBaton);
   static void GetBinds (Handle<Array> bindarray, eBaton* executeBaton);
-  static void GetBindUnit (Local<Value> bindtypes, Bind* bind,
+  static void GetBindUnit (Local<Value> bindtypes, Bind* bind, bool array,
                            eBaton* executeBaton);
-  static void GetInBindParams(Local<Value> v8val, Bind *bind, eBaton *executeBaton, BindType bindType);
-  static void GetInBindParamsScalar(Local<Value> v8val, Bind *bind, eBaton *executeBaton, BindType bindType);
-  static void GetInBindParamsArray(Local<Array> v8vals, Bind *bind, eBaton *executeBaton, BindType bindType);
+  static void GetInBindParams(Local<Value> v8val, Bind *bind, eBaton *executeBaton);
+  static void GetInBindParamsScalar(Local<Value> v8val, Bind *bind, eBaton *executeBaton);
+  static void GetInBindParamsArray(Local<Array> v8vals, Bind *bind, eBaton *executeBaton);
   static bool AllocateBindArray(unsigned short dataType, Bind* bind, eBaton *executeBaton, size_t *arrayElementSize);
 
   static void GetOutBindParams (unsigned short dataType, Bind* bind,
                                 eBaton* executeBaton);
-  static void Descr2Double ( Define* defines, unsigned int numCols,
-                             unsigned int rowsFetched, bool getRS );
+  static NJSErrorType Descr2Double ( Define* defines, unsigned int numCols,
+                                     unsigned int rowsFetched, bool getRS );
   static void Descr2protoILob ( eBaton *executeBaton, unsigned int numCols,
                                 unsigned int rowsFetched );
   static v8::Local<v8::Value> GetOutBinds (eBaton* executeBaton);
@@ -382,8 +451,9 @@ private:
                                          unsigned short type,
                                          void* val, DPI_BUFLEN_TYPE len);
   // for refcursor
-  static v8::Local<v8::Value> GetValueRefCursor (eBaton *executeBaton,
-                                                  Bind *bind);
+  static v8::Local<v8::Value> GetValueRefCursor ( eBaton  *executeBaton,
+                                                  Bind    *bind,
+                                                  ExtBind *extBinds );
   // for lobs
   static v8::Local<v8::Value> GetValueLob (eBaton *executeBaton,
                                             Bind *bind);
@@ -418,35 +488,35 @@ private:
 
   static inline ValueType GetValueType ( v8::Local<v8::Value> v )
   {
-    ValueType type = VALUETYPE_INVALID;
+    ValueType type = NJS_VALUETYPE_INVALID;
 
     if ( v->IsUndefined () || v->IsNull () )
     {
-      type = VALUETYPE_NULL;
+      type = NJS_VALUETYPE_NULL;
     }
     else if ( v->IsString () )
     {
-      type = VALUETYPE_STRING;
+      type = NJS_VALUETYPE_STRING;
     }
     else if ( v->IsInt32 () )
     {
-      type = VALUETYPE_INTEGER;
+      type = NJS_VALUETYPE_INTEGER;
     }
     else if ( v->IsUint32 () )
     {
-      type = VALUETYPE_UINTEGER;
+      type = NJS_VALUETYPE_UINTEGER;
     }
     else if ( v->IsNumber () )
     {
-      type = VALUETYPE_NUMBER;
+      type = NJS_VALUETYPE_NUMBER;
     }
     else if ( v->IsDate () )
     {
-      type = VALUETYPE_DATE;
+      type = NJS_VALUETYPE_DATE;
     }
     else if ( v->IsObject () )
     {
-      type = VALUETYPE_OBJECT;
+      type = NJS_VALUETYPE_OBJECT;
     }
 
     return type;
@@ -460,9 +530,10 @@ private:
    * Counters to see whether connection is busy or not with LOB, ResultSet or
    * DB operations. This counters used to prevent releasing busy connection.
    */
-  unsigned int   lobCount_;    // LOB operations counter
-  unsigned int   rsCount_;     // ResultSet operations counter
-  unsigned int   dbCount_;     // Connection or DB operations counter
+  unsigned int              lobCount_;    // LOB operations counter
+  unsigned int              rsCount_;     // ResultSet operations counter
+  unsigned int              dbCount_;     // Connection or DB operations counter
+  Nan::Persistent<Object>   jsParent_;
 
 };
 

@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -47,12 +47,6 @@ var assist   = require('./dataTypeAssist.js');
 
 describe('60. clobPlsqlString.js', function() {
 
-  if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
-
   var connection = null;
   var tableName = "nodb_myclobs";
 
@@ -60,7 +54,7 @@ describe('60. clobPlsqlString.js', function() {
     async.series([
       function(callback) {
         oracledb.getConnection(
-          credential,
+          dbConfig,
           function(err, conn) {
             should.not.exist(err);
             connection = conn;
@@ -114,7 +108,7 @@ describe('60. clobPlsqlString.js', function() {
         },
         function(err, result) {
           should.not.exist(err);
-          (result.outBinds.cbv).should.be.a.String;
+          (result.outBinds.cbv).should.be.a.String();
           (result.outBinds.cbv).should.eql('abcdefghijklmnopqrstuvwxyz');
           done();
         }

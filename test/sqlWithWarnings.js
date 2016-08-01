@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -43,15 +43,9 @@ var dbConfig = require('./dbconfig.js');
 
 describe('64. sqlWithWarnings.js', function() {
 
-  if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
-
   var connection = null;
   before('get one connection', function(done) {
-    oracledb.getConnection(credential, function(err, conn) {
+    oracledb.getConnection(dbConfig, function(err, conn) {
       should.not.exist(err);
       connection = conn;
       done();
@@ -73,12 +67,12 @@ describe('64. sqlWithWarnings.js', function() {
       var sqlCreateTab =
         "BEGIN " +
         "  DECLARE " +
-        "    e_table_exists EXCEPTION; " +
-        "    PRAGMA EXCEPTION_INIT(e_table_exists, -00942); " +
+        "    e_table_missing EXCEPTION; " +
+        "    PRAGMA EXCEPTION_INIT(e_table_missing, -00942); " +
         "   BEGIN " +
         "     EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " '); " +
         "   EXCEPTION " +
-        "     WHEN e_table_exists " +
+        "     WHEN e_table_missing " +
         "     THEN NULL; " +
         "   END; " +
         "   EXECUTE IMMEDIATE (' " +
@@ -155,7 +149,7 @@ describe('64. sqlWithWarnings.js', function() {
       " CREATE OR REPLACE PROCEDURE get_emp_rs_inout " +
       "   (p_in IN NUMBER, p_out OUT SYS_REFCURSOR ) AS " +
       "  BEGIN " +
-      "    OPEN p_out FOR SELECT * FROM nodb_employees " +
+      "    OPEN p_out FOR SELECT * FROM nodb_sql_emp " +
       "  END;"
 
     it('64.2.1 Execute SQL Statement to create PLSQL procedure with warnings', function(done) {

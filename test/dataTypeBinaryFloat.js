@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -41,17 +41,11 @@ var dbConfig = require('./dbconfig.js');
 
 describe('30. dataTypeBinaryFloat.js', function() {
 
-  if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
-
   var connection = null;
   var tableName = "nodb_binary_float";
 
   before('get one connection', function(done) {
-    oracledb.getConnection(credential, function(err, conn) {
+    oracledb.getConnection(dbConfig, function(err, conn) {
       should.not.exist(err);
       connection = conn;
       done();
@@ -136,7 +130,7 @@ describe('30. dataTypeBinaryFloat.js', function() {
 
           for(var i = 0; i < nums.length; i++) {
             result.rows[i].CONTENT.should.not.be.exactly(nums[ result.rows[i].NUM ]);
-            approxeq(result.rows[i].CONTENT, nums[ result.rows[i].NUM ]).should.be.ok;
+            approxeq(result.rows[i].CONTENT, nums[ result.rows[i].NUM ]).should.be.ok();
           }
           done();
         }

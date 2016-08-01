@@ -22,62 +22,16 @@ var oracledbCLib;
 var oracledb = require('oracledb');
 var should   = require('should');
 var dbConfig = require('./dbconfig.js');
-var credential;
-
-try {
-  oracledbCLib =  require('../build/Release/oracledb');
-} catch (err) {
-  if (err.code === 'MODULE_NOT_FOUND') {
-    oracledbCLib = require('../build/Debug/oracledb');
-  } else {
-    throw err;
-  }
-}
-
-if (dbConfig.externalAuth) {
-  credential = { externalAuth: true, connectString: dbConfig.connectString };
-} else {
-  credential = dbConfig;
-}
 
 describe('66. writeableProperties.js', function() {
-  it('66.1 allows overwriting of public methods on the oracledb instance', function(done) {
-    var keys = Object.keys(oracledb);
-    var keysIdx;
-    var originalFunction;
 
-    function isConstructorFunction(name) {
-      // The following has an exception for ILob, which was documented and
-      // exposed on oracledb as Lob
-      return typeof oracledbCLib[name] === 'function' || name === 'Lob';
-    }
-
-    for (keysIdx = 0; keysIdx < keys.length; keysIdx += 1) {
-      if (typeof oracledb[keys[keysIdx]] === 'function' &&
-        !isConstructorFunction(keys[keysIdx]) // skip constructor functions from the C layer
-      ) {
-        try {
-          originalFunction = oracledb[keys[keysIdx]];
-
-          oracledb[keys[keysIdx]] = function() {};
-
-          oracledb[keys[keysIdx]] = originalFunction;
-        } catch (err) {
-          should.not.exist(err);
-        }
-      }
-    }
-
-    done();
-  });
-
-  it('66.2 allows overwriting of public methods on pool instances', function(done) {
+  it('66.1 allows overwriting of public methods on pool instances', function(done) {
     oracledb.createPool(
       {
-        externalAuth    : credential.externalAuth,
-        user              : credential.user,
-        password          : credential.password,
-        connectString     : credential.connectString,
+        externalAuth      : dbConfig.externalAuth,
+        user              : dbConfig.user,
+        password          : dbConfig.password,
+        connectString     : dbConfig.connectString,
         poolMin           : 0,
         poolMax           : 1,
         poolIncrement     : 1
@@ -114,8 +68,8 @@ describe('66. writeableProperties.js', function() {
     );
   });
 
-  it('66.3 allows overwriting of public methods on connection instances', function(done) {
-    oracledb.getConnection(credential, function(err, conn) {
+  it('66.2 allows overwriting of public methods on connection instances', function(done) {
+    oracledb.getConnection(dbConfig, function(err, conn) {
       var keys;
       var keysIdx;
       var originalFunction;
@@ -146,8 +100,8 @@ describe('66. writeableProperties.js', function() {
     });
   });
 
-  it('66.4 allows overwriting of public methods on resultset instances', function(done) {
-    oracledb.getConnection(credential, function(err, conn) {
+  it('66.3 allows overwriting of public methods on resultset instances', function(done) {
+    oracledb.getConnection(dbConfig, function(err, conn) {
       should.not.exist(err);
 
       conn.execute(
@@ -193,8 +147,8 @@ describe('66. writeableProperties.js', function() {
     });
   });
 
-  it('66.5 allows overwriting of public methods on lob instances', function(done) {
-    oracledb.getConnection(credential, function(err, conn) {
+  it('66.4 allows overwriting of public methods on lob instances', function(done) {
+    oracledb.getConnection(dbConfig, function(err, conn) {
       should.not.exist(err);
 
       conn.execute(

@@ -35,7 +35,8 @@ using namespace std;
 
 typedef enum
 {
-  errMissingCallback = 1,
+  errSuccess = 0,
+  errMissingCallback,
   errInvalidPool,
   errInvalidConnection,
   errInvalidPropertyValue,
@@ -49,6 +50,7 @@ typedef enum
   errInvalidBindDataType,
   errInvalidBindDirection,
   errReadOnly,
+  errNoTypeForConversion,
   errInsufficientBufferForBinds,
   errBusyResultSet,
   errInvalidResultSet,
@@ -74,6 +76,10 @@ typedef enum
   errInvalidValueArrayBind,
   errEmptyArray,
   errConnRequestTimeout,
+  errCannotConvertRsToStream,
+  errCannotInvokeRsMethods,
+  errResultSetAlreadyConverted,
+  errNamedJSON,
 
   // New ones should be added here
 

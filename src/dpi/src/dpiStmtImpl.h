@@ -94,7 +94,12 @@ public:
                        DPI_SZ_TYPE bufSize, short *ind, DPI_BUFLEN_TYPE *bufLen);
   virtual void fetch (unsigned int numRows = 1);
 
-  virtual const MetaData *getMetaData ();
+
+/*
+ * The returned pointer to MetaData struct should not be freed by the caller
+ * since this will be freed as part of StmtImpl::release()
+ */
+  virtual const MetaData *getMetaData ( bool extendedMetaData );
 
   virtual OCIError *     getError () { return errh_;  }
 

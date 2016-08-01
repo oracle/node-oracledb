@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -43,12 +43,6 @@ var assist   = require('./dataTypeAssist.js');
 
 describe('61. checkClassesTypes.js', function() {
 
-  if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
-
   it('61.1 Oracledb class', function() {
     var type = Object.prototype.toString.call(oracledb);
     type.should.eql('[object Oracledb]');
@@ -59,7 +53,7 @@ describe('61. checkClassesTypes.js', function() {
       [
         function(callback)
         {
-          oracledb.getConnection(credential, callback);
+          oracledb.getConnection(dbConfig, callback);
         },
         function(connection, callback)
         {
@@ -86,7 +80,7 @@ describe('61. checkClassesTypes.js', function() {
 
     async.series([
       function getConn(callback) {
-        oracledb.getConnection(credential, function(err, conn) {
+        oracledb.getConnection(dbConfig, function(err, conn) {
           should.not.exist(err);
           connection = conn;
           callback();
@@ -167,7 +161,7 @@ describe('61. checkClassesTypes.js', function() {
     async.waterfall(
       [
         function(callback) {
-          oracledb.createPool(credential, callback);
+          oracledb.createPool(dbConfig, callback);
         },
         function(pool, callback) {
           var type = Object.prototype.toString.call(pool);
@@ -190,7 +184,7 @@ describe('61. checkClassesTypes.js', function() {
     async.waterfall(
       [
         function(callback) {
-          oracledb.getConnection(credential, callback);
+          oracledb.getConnection(dbConfig, callback);
         },
         function(connection, callback) {
           connection.execute(

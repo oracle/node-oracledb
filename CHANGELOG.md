@@ -1,5 +1,127 @@
 # Change Log
 
+## node-oracledb v1.10.1 (21 Jul 2016)
+
+- Fixed a bug that prevented a null value being passed from JavaScript into an IN OUT bind.
+
+- Fixed a memory leak introduced in 1.10 with REF CURSORs.
+
+- Fixed a memory leak in error handling paths when using REF CURSORs.
+
+- Made an internal change for queries selecting unsupported column types allowing them to report an error earlier.
+
+- Made an internal change to use std::string& for string lengths.
+
+- Fixed a compilation warning on Windows.
+
+- Added a mocha configuration file for the test suite.
+
+## node-oracledb v1.10.0 (8 Jul 2016)
+
+- Enhanced query and REF CURSOR metadata is available when a new
+  `oracledb.extendedMetaData` or `execute()` option `extendedMetaData`
+  property is `true`. (Leonardo Olmi).
+
+- Fixed an issue preventing the garbage collector cleaning up when a
+  query with LOBs is executed but LOB data isn't actually streamed.
+
+- Fixed a bug where an error event could have been emitted on a
+  QueryStream instance prior to the underlying ResultSet having been
+  closed.  This would cause problems if the user tried to close the
+  connection in the error event handler as the ResultSet could have
+  prevented it.
+
+- Fixed a bug where the public `close()` method was invoked on the
+  ResultSet instance that underlies the QueryStream instance if an
+  error occurred during a call to `getRows()`. The public method would
+  have thrown an error had the QueryStream instance been created from
+  a ResultSet instance via the `toQueryStream()` method. Now the
+  underlying C++ layer's `close()` method is invoked directly.
+
+- Updated `Pool._logStats()` to throw an error instead of printing to
+  the console if the pool is not valid.
+
+- Report an error earlier when a named bind object is used in a
+  bind-by-position context.  A new error NJS-044 is returned.
+  Previously errors like ORA-06502 were given.
+
+- Added GitHub Issue and Pull Request templates.
+
+- Some enhancements were made to the underlying DPI data access layer.
+  **These are not exposed to node-oracledb users.**
+
+   - Allow <code>SYSDBA</code> connections
+   - Allow session tagging
+   - Allow the character set and national character set to be specified via parameters to the DPI layer.
+   - Support heterogeneous pools (in addition to existing homogeneous pools)
+
+## node-oracledb v1.9.3 (24 May 2016)
+
+- Fix error with `OCI_ERROR_MAXMSG_SIZE2` when building with Oracle client 11.2.0.1 and 11.2.0.2.
+
+## node-oracledb v1.9.2 (23 May 2016)
+
+- Fix `results.metaData` for queries with `{resultSet: true}`.
+
+## node-oracledb v1.9.1 (18 May 2016)
+
+- Upgraded to NAN 2.3 for Node 6 support.
+
+- Added a persistent reference to JavaScript objects during Async
+  operations to prevent crashes due to premature garbage collection.
+
+- Added a persistent reference to the internal Lob buffer to prevent
+  premature garbage collection.
+
+- Fixed memory leaks when using ResultSets.
+
+- Fixed memory leak with the Pool queue timer map.
+
+- Fixed memory release logic when querying LOBs and an error occurs.
+
+- Improved some null pointer checking.
+
+- Altered some node-oracledb NJS-xyz error message text for consistency.
+
+- Improved validation for `fetchInfo` usage.
+
+- Increased the internal buffer size for Oracle Database error messages.
+
+- Call `pause()` internally when closing a query Stream with `_close()`.
+
+- Fixed a symbol redefinition warning for `DATA_BLOB` when compiling on Windows.
+
+- The test suite is no longer installed with `npm install oracledb`.
+  The tests remain available in GitHub.
+
+## node-oracledb v1.9.0 Development (19 Apr 2016)
+
+- Added Promise support. All asynchronous functions can now return
+  promises. By default the standard Promise library is used for Node
+  0.12, 4 and 5.  This can be overridden.
+
+- Added a `toQueryStream()` method for ResultSets, letting REF CURSORS
+  be transformed into Readable Streams.
+
+- Added an experimental query Stream `_close()` method.  It allows query
+  streams to be closed without needing to fetch all the data.  It is
+  not for production use.
+
+- Added aliases `pool.close()` and `connection.close()` for
+  `pool.terminate()` and `connection.release()` respectively.
+
+- Some method parameter validation checks, such as the number or types
+  of parameters, will now throw errors synchronously instead of
+  returning errors via the callback.
+
+- Removed an extra call to `getRows()` made by `queryStream()` at
+  end-of-fetch.
+
+- Some random crashes caused by connections being garbage collected
+  while still in use should no longer occur.
+
+- Regularized NJS error message capitalization.
+
 ## node-oracledb v1.8.0 (24 Mar 2016)
 
 - Added `connection.queryStream()` for returning query results using a
@@ -26,7 +148,7 @@
 
 ## node-oracledb v1.7.1 (1 Mar 2016)
 
-- Made public methods overwritable in new JavaScript layer
+- Made public methods over-writable in the new JavaScript layer
 
 ## node-oracledb v1.7.0 (29 Feb 2016)
 

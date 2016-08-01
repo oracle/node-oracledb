@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -68,7 +68,7 @@ public:
    void setPool ( dpi::SPool *, Oracledb* oracledb, unsigned int poolMax,
                   unsigned int poolMin, unsigned int poolIncrement,
                   unsigned int poolTimeout, unsigned stmtCacheSize,
-                  unsigned int lobPrefetchSize);
+                  unsigned int lobPrefetchSize, Local<Object> jsOraDB );
 
    // Define Pool Constructor
    static Nan::Persistent<FunctionTemplate> poolTemplate_s ;
@@ -115,35 +115,39 @@ private:
    dpi::SPool *dpipool_;
    bool isValid_;
 
-   Oracledb* oracledb_;
-   unsigned int poolMin_;
-   unsigned int poolMax_;
-   unsigned int poolIncrement_;
-   unsigned int poolTimeout_;
-   unsigned int stmtCacheSize_;
-   unsigned int lobPrefetchSize_;
+   Oracledb*                 oracledb_;
+   unsigned int              poolMin_;
+   unsigned int              poolMax_;
+   unsigned int              poolIncrement_;
+   unsigned int              poolTimeout_;
+   unsigned int              stmtCacheSize_;
+   unsigned int              lobPrefetchSize_;
+   Nan::Persistent<Object>   jsParent_;
 };
 
 typedef struct poolBaton
 {
-  uv_work_t req;
-  std::string error;
-  std::string connClass;
-  Nan::Persistent<Function> cb;
-  dpi::Conn*  dpiconn;
-  Pool*       njspool;
-  unsigned int lobPrefetchSize;
+  uv_work_t                  req;
+  std::string                error;
+  std::string                connClass;
+  Nan::Persistent<Function>  cb;
+  dpi::Conn*                 dpiconn;
+  Pool*                      njspool;
+  unsigned int               lobPrefetchSize;
+  Nan::Persistent<Object>    jsPool;
 
-  poolBaton( Local<Function> callback ) :
+  poolBaton( Local<Function> callback, Local<Object> poolObj ) :
                  error(""), connClass(""),
                  dpiconn(NULL), njspool(NULL), lobPrefetchSize(0)
   {
     cb.Reset( callback );
+    jsPool.Reset ( poolObj );
   }
 
   ~poolBaton()
    {
      cb.Reset();
+     jsPool.Reset ();
    }
 
 }poolBaton;

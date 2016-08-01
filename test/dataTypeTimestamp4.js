@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -44,24 +44,17 @@ var dbConfig = require('./dbconfig.js');
 
 describe('36. dataTypeTimestamp4.js', function() {
 
-  if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
-
-  var connection = false;
-
+  var connection = null;
   var tableName = "nodb_datatype_timestamp";
   var sqlCreate =
         "BEGIN " +
            "   DECLARE " +
-           "       e_table_exists EXCEPTION; " +
-           "       PRAGMA EXCEPTION_INIT(e_table_exists, -00942); " +
+           "       e_table_missing EXCEPTION; " +
+           "       PRAGMA EXCEPTION_INIT(e_table_missing, -00942); " +
            "   BEGIN " +
            "       EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " '); " +
            "   EXCEPTION " +
-           "       WHEN e_table_exists " +
+           "       WHEN e_table_missing " +
            "       THEN NULL; " +
            "   END; " +
            "   EXECUTE IMMEDIATE (' " +
@@ -73,7 +66,7 @@ describe('36. dataTypeTimestamp4.js', function() {
            "END; ";
   var sqlDrop = "DROP table " + tableName;
   before( function(done){
-    oracledb.getConnection(credential, function(err, conn){
+    oracledb.getConnection(dbConfig, function(err, conn){
       if(err) { console.error(err.message); return; }
       connection = conn;
       connection.execute(
@@ -100,7 +93,7 @@ describe('36. dataTypeTimestamp4.js', function() {
   })
 
   it('supports TIMESTAMP WITH TIME ZONE data type', function(done) {
-    connection.should.be.ok;
+    connection.should.be.ok();
 
     var timestamps = [
         new Date(-100000000),
@@ -128,7 +121,7 @@ describe('36. dataTypeTimestamp4.js', function() {
         { outFormat: oracledb.OBJECT },
         function(err, result) {
           should.exist(err);
-          err.message.should.startWith('NJS-010:'); // unsupported data type in select list
+          (err.message).should.startWith('NJS-010:'); // unsupported data type in select list
           /*
           console.log(result);
           for(var j = 0; j < timestamps.length; j++)

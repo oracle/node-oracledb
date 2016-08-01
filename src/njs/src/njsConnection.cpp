@@ -101,9 +101,9 @@ Connection::~Connection()
      Initialize connection attributes after forming it.
 
    PARAMETERS:
-     DPI Connection, Oracledb reference
+     DPI Connection, Oracledb reference, reference to js parent
 */
-void Connection::setConnection(dpi::Conn* dpiconn, Oracledb* oracledb)
+void Connection::setConnection(dpi::Conn* dpiconn, Oracledb* oracledb, Local<Object> jsParentObj)
 {
    this->dpiconn_   = dpiconn;
    this->isValid_   = true;
@@ -111,6 +111,8 @@ void Connection::setConnection(dpi::Conn* dpiconn, Oracledb* oracledb)
    this->lobCount_  = 0;
    this->rsCount_   = 0;
    this->dbCount_   = 0;
+
+   this->jsParent_.Reset ( jsParentObj );
 }
 
 /*****************************************************************************/
@@ -447,7 +449,8 @@ NAN_METHOD(Connection::Execute)
   /* If connection is invalid from JS, then throw an exception */
   NJS_CHECK_OBJECT_VALID2 ( connection, info ) ;
 
-  eBaton *executeBaton = new eBaton ( connection->DBCount (), callback );
+  eBaton *executeBaton = new eBaton ( connection->DBCount (), callback,
+                                      info.Holder () );
 
   NJS_CHECK_NUMBER_OF_ARGS ( executeBaton->error, info, 2, 4, exitExecute );
 
@@ -459,18 +462,29 @@ NAN_METHOD(Connection::Execute)
   NJS_GET_ARG_V8STRING (sql, executeBaton->error, info, 0, exitExecute);
   NJSString (executeBaton->sql, sql);
 
-  executeBaton->maxRows      = connection->oracledb_->getMaxRows();
-  executeBaton->prefetchRows = connection->oracledb_->getPrefetchRows();
-  executeBaton->outFormat    = connection->oracledb_->getOutFormat();
-  executeBaton->autoCommit   = connection->oracledb_->getAutoCommit();
-  executeBaton->dpienv       = connection->oracledb_->getDpiEnv();
+  executeBaton->maxRows            = connection->oracledb_->getMaxRows();
+  executeBaton->prefetchRows       = connection->oracledb_->getPrefetchRows();
+  executeBaton->outFormat          = connection->oracledb_->getOutFormat();
+  executeBaton->autoCommit         = connection->oracledb_->getAutoCommit();
+  executeBaton->dpienv             = connection->oracledb_->getDpiEnv();
   executeBaton->fetchAsStringTypes =
     (DataType*) connection->oracledb_->getFetchAsStringTypes ();
   executeBaton->fetchAsStringTypesCount =
     connection->oracledb_->getFetchAsStringTypesCount ();
 
-  executeBaton->dpiconn      = connection->dpiconn_;
-  executeBaton->njsconn      = connection;
+  executeBaton->dpiconn            = connection->dpiconn_;
+  executeBaton->njsconn            = connection;
+  executeBaton->extendedMetaData   =
+                              connection->oracledb_->getExtendedMetaData ();
+
+  // In case of no fetchAs and memory allocation failure fetchAsStringTypes
+  // will be NULL.  Check the combination of Count & types.
+  if ( ( executeBaton->fetchAsStringTypesCount > 0 ) &&
+       !executeBaton->fetchAsStringTypes )
+  {
+    executeBaton->error = NJSMessages::getErrorMsg ( errInsufficientMemory );
+    goto exitExecute;
+  }
 
   if(info.Length() > 2)
   {
@@ -542,11 +556,20 @@ void Connection::ProcessOptions (Nan::NAN_METHOD_ARGS_TYPE args, unsigned int in
 {
   Nan::HandleScope scope;
   Local<Object> options;
+  FetchInfo *fInfo = NULL;
+
   if(args[index]->IsObject() && !args[index]->IsArray())
   {
     options = args[index]->ToObject();
     NJS_GET_UINT_FROM_JSON ( executeBaton->maxRows, executeBaton->error,
                              options, "maxRows", 2, exitProcessOptions );
+
+    if ( executeBaton->maxRows <= 0 )
+    {
+      executeBaton->error = NJSMessages::getErrorMsg ( errInvalidmaxRows );
+      goto exitProcessOptions;
+    }
+
     NJS_GET_UINT_FROM_JSON ( executeBaton->prefetchRows, executeBaton->error,
                              options, "prefetchRows", 2, exitProcessOptions );
     NJS_GET_UINT_FROM_JSON ( executeBaton->outFormat, executeBaton->error,
@@ -555,6 +578,9 @@ void Connection::ProcessOptions (Nan::NAN_METHOD_ARGS_TYPE args, unsigned int in
                              options, "resultSet", 2, exitProcessOptions );
     NJS_GET_BOOL_FROM_JSON ( executeBaton->autoCommit, executeBaton->error,
                              options, "autoCommit", 2, exitProcessOptions );
+    NJS_GET_BOOL_FROM_JSON ( executeBaton->extendedMetaData,
+                             executeBaton->error, options, "extendedMetaData",
+                             2, exitProcessOptions );
 
     // Optional fetchAs specifications
     Local<Value> val = options->Get(Nan::New<v8::String>("fetchInfo").ToLocalChecked());
@@ -564,13 +590,12 @@ void Connection::ProcessOptions (Nan::NAN_METHOD_ARGS_TYPE args, unsigned int in
       Local<Array> keys = fetchInfo->GetOwnPropertyNames ();
       if ( keys->Length () > 0 )
       {
-        FetchInfo *fInfo = executeBaton->fetchInfo =
-                           new FetchInfo[keys->Length()];
+        fInfo = executeBaton->fetchInfo = new FetchInfo[keys->Length()];
         executeBaton->fetchInfoCount = keys->Length ();
 
         for (unsigned int index = 0 ; index < keys->Length() ; index ++ )
         {
-          unsigned int tmptype = 0 ;
+          unsigned int tmptype = 0xFFFFFFFF ;
 
           Local<String> temp = keys->Get (index).As<String>();
           NJSString (fInfo[index].name, temp );
@@ -580,11 +605,18 @@ void Connection::ProcessOptions (Nan::NAN_METHOD_ARGS_TYPE args, unsigned int in
 
           NJS_GET_UINT_FROM_JSON (tmptype, executeBaton->error,
                                   colInfo, "type", 2, exitProcessOptions );
+          if ( tmptype == 0xFFFFFFFF )
+          {
+            executeBaton->error = NJSMessages::getErrorMsg (
+                                                  errNoTypeForConversion );
+            goto exitProcessOptions;
+          }
+
           fInfo[index].type = (DataType) tmptype;
 
           // Only Conversion to STRING allowed now. Either STRING or DB type.
-          if ( ( fInfo[index].type != DATA_DEFAULT ) &&
-               ( fInfo[index].type != DATA_STR ) )
+          if ( ( fInfo[index].type != NJS_DATATYPE_DEFAULT ) &&
+               ( fInfo[index].type != NJS_DATATYPE_STR ) )
           {
             executeBaton->error = NJSMessages::getErrorMsg (
                                                errInvalidTypeForConversion );
@@ -607,8 +639,14 @@ void Connection::ProcessOptions (Nan::NAN_METHOD_ARGS_TYPE args, unsigned int in
                                                    index);
     goto exitProcessOptions;
   }
-  exitProcessOptions:
-  ;
+
+exitProcessOptions:
+  // On error, clear off fInfo array.
+  if ( !executeBaton->error.empty () && ( fInfo != NULL ) )
+  {
+    delete [] fInfo;
+    executeBaton->fetchInfo = NULL;
+  }
 }
 
 /*****************************************************************************/
@@ -634,9 +672,9 @@ void Connection::GetBinds (Handle<Object> bindobj, eBaton* executeBaton)
     Handle<String> temp = array->Get(index).As<String>();
     NJSString(str, temp);
     bind->key = ":"+std::string(str);
-    Local<Value> val__ = bindobj->Get(Nan::New<v8::String>((char*)str.c_str(),
-                           (int) str.length()).ToLocalChecked());
-    Connection::GetBindUnit(val__, bind, executeBaton);
+    Local<Value> val__ = bindobj->Get(
+                                 Nan::New<v8::String>(str).ToLocalChecked());
+    Connection::GetBindUnit(val__, bind, false, executeBaton);
     if(!executeBaton->error.empty())
       goto exitGetBinds;
   }
@@ -663,7 +701,7 @@ void Connection::GetBinds (Handle<Array> binds, eBaton* executeBaton)
   {
     Bind* bind = new Bind;
     Local<Value> val__ = binds->Get(index);
-    GetBindUnit(val__, bind, executeBaton);
+    GetBindUnit(val__, bind, true, executeBaton);
     if(!executeBaton->error.empty()) goto exitGetBinds;
   }
   exitGetBinds:
@@ -676,17 +714,64 @@ void Connection::GetBinds (Handle<Array> binds, eBaton* executeBaton)
      Processing each bind varible
 
    PARAMETERS:
-     Handle value, eBaton struct
+     val          - handle value
+     bind         - one bind structure to initialize
+     array        - array input or JSON input
+     executeBaton - eBaton structure
 */
-void Connection::GetBindUnit (Local<Value> val, Bind* bind,
+void Connection::GetBindUnit (Local<Value> val, Bind* bind, bool array,
                                        eBaton* executeBaton)
 {
   Nan::HandleScope scope;
-  unsigned int dir   = BIND_IN;
+  unsigned int dir   = NJS_BIND_IN;
 
   if(val->IsObject() && !val->IsDate() && !Buffer::HasInstance(val))
   {
     Local<Object> bind_unit = val->ToObject();
+
+    if ( array )
+    {
+      // In case of bind-by-position, JSON objects are expected to be unnamed.
+      // If JSON object is provided, we look for "dir", "type", "maxSize",
+      // "val"  key names.  If not found report error
+      // values provided as in Array syntax - working case.
+      //    [ id, name, {type : oracledb.STRING, dir : oracledb.BIND_OUT}]
+      // In this example the 3rd parameter is unnamed JSON object.
+      //
+      // [ id, n, { a: { type : oracledb.STRING, dir : oracledb.BIND_OUT} }]
+      // will fail now.  In this example the third parameter JSON object has
+      // a key with name "a" and value as another JSON.  Incorrect syntax
+      //
+      Local<Array> keys = bind_unit->GetOwnPropertyNames ();
+      if ( keys->Length () > 0 )
+      {
+        bool valid = false;
+
+        for ( unsigned int index = 0; !valid && ( index < keys->Length ()) ;
+            index ++ )
+        {
+          std::string key;
+
+          Local<String> temp = keys->Get (index).As<String> ();
+          NJSString ( key, temp );
+
+          if ( ( key.compare ( "dir" ) == 0 ) ||
+               ( key.compare ( "type" ) == 0 ) ||
+               ( key.compare ( "maxSize" ) == 0 ) ||
+               ( key.compare ( "val" ) == 0 ) )
+          {
+            valid = true;
+          }
+        }
+
+        if ( !valid )
+        {
+          executeBaton->error = NJSMessages::getErrorMsg ( errNamedJSON );
+          goto exitGetBindUnit;
+        }
+      }
+    }
+
     NJS_GET_UINT_FROM_JSON   ( dir, executeBaton->error,
                                bind_unit, "dir", 1, exitGetBindUnit );
     NJS_GET_UINT_FROM_JSON   ( bind->type, executeBaton->error,
@@ -694,7 +779,7 @@ void Connection::GetBindUnit (Local<Value> val, Bind* bind,
     bind->maxSize = NJS_MAX_OUT_BIND_SIZE;
     NJS_GET_UINT_FROM_JSON   ( bind->maxSize, executeBaton->error,
                                bind_unit, "maxSize", 1, exitGetBindUnit );
-    if(!bind->maxSize && dir != BIND_IN)
+    if(!bind->maxSize && dir != NJS_BIND_IN)
     {
       executeBaton->error = NJSMessages::getErrorMsg (
                                            errInvalidPropertyValueInParam,
@@ -720,20 +805,22 @@ void Connection::GetBindUnit (Local<Value> val, Bind* bind,
       Local<Array>arr = Local<Array>::Cast (element);
 
       // For INOUT bind, maxArraySize is required
-      if ( dir == BIND_INOUT && ( arr->Length () > 0 && !bind->maxArraySize ) )
+      if ( dir == NJS_BIND_INOUT &&
+           ( arr->Length () > 0 && !bind->maxArraySize ) )
       {
         executeBaton->error = NJSMessages::getErrorMsg ( errReqdMaxArraySize );
         goto exitGetBindUnit;
       }
 
-      if ( dir == BIND_INOUT && ( arr->Length() > bind->maxArraySize ) )
+      if ( dir == NJS_BIND_INOUT && ( arr->Length() > bind->maxArraySize ) )
       {
         executeBaton->error = NJSMessages::getErrorMsg ( errInvalidArraySize );
         goto exitGetBindUnit;
       }
 
       /* For IN bind, empty array is not allowed */
-      if ( ( dir == BIND_IN || dir == BIND_INOUT ) && ( arr->Length () == 0 ) )
+      if ( ( dir == NJS_BIND_IN || dir == NJS_BIND_INOUT ) &&
+           ( arr->Length () == 0 ) )
       {
         executeBaton->error = NJSMessages::getErrorMsg ( errEmptyArray ) ;
         goto exitGetBindUnit;
@@ -741,7 +828,7 @@ void Connection::GetBindUnit (Local<Value> val, Bind* bind,
     }
 
     /* REFCURSOR(s) are supported only as OUT Binds now */
-    if ( bind->type == DATA_CURSOR && dir != BIND_OUT )
+    if ( bind->type == NJS_DATATYPE_CURSOR && dir != NJS_BIND_OUT )
     {
       executeBaton->error = NJSMessages::getErrorMsg (
                                             errInvalidPropertyValueInParam,
@@ -751,26 +838,26 @@ void Connection::GetBindUnit (Local<Value> val, Bind* bind,
 
     switch(dir)
     {
-      case BIND_IN    :
+      case NJS_BIND_IN    :
         bind->isOut  = false;
         bind->isInOut  = false;
-        Connection::GetInBindParams(element, bind, executeBaton, BIND_IN );
+        Connection::GetInBindParams(element, bind, executeBaton );
         if(!executeBaton->error.empty()) goto exitGetBindUnit;
         break;
-      case BIND_INOUT :
+      case NJS_BIND_INOUT :
         bind->isOut  = true;
         bind->isInOut  = true;
-        Connection::GetInBindParams(element, bind, executeBaton, BIND_INOUT);
+        Connection::GetInBindParams(element, bind, executeBaton );
         if(!executeBaton->error.empty()) goto exitGetBindUnit;
         break;
-      case BIND_OUT   :
+      case NJS_BIND_OUT   :
         bind->isOut  = true;
         bind->isInOut  = false;
         executeBaton->numOutBinds++;
-        if ( bind->type == DATA_DEFAULT )
+        if ( bind->type == NJS_DATATYPE_DEFAULT )
         {
           /* For OUT binds, if type is not specified, assume STRING */
-          bind->type = DATA_STR;
+          bind->type = NJS_DATATYPE_STR;
         }
         Connection::GetOutBindParams(bind->type, bind, executeBaton);
         if(!executeBaton->error.empty()) goto exitGetBindUnit;
@@ -785,7 +872,7 @@ void Connection::GetBindUnit (Local<Value> val, Bind* bind,
   else
   {
     bind->isOut  = false;
-    Connection::GetInBindParams(val, bind, executeBaton, BIND_IN);
+    Connection::GetInBindParams(val, bind, executeBaton );
     if(!executeBaton->error.empty()) goto exitGetBindUnit;
   }
   exitGetBindUnit:
@@ -808,7 +895,7 @@ void Connection::GetOutBindParams (unsigned short dataType, Bind* bind,
 
   if ( bind->maxArraySize > 0 )
   {
-    if ( (dataType != DATA_STR ) && ( dataType != DATA_NUM ) )
+    if ( (dataType != NJS_DATATYPE_STR ) && ( dataType != NJS_DATATYPE_NUM ) )
     {
       executeBaton->error = NJSMessages::getErrorMsg (
                                      errInvalidTypeForArrayBind );
@@ -822,32 +909,32 @@ void Connection::GetOutBindParams (unsigned short dataType, Bind* bind,
 
   switch(dataType)
   {
-    case DATA_STR :
+    case NJS_DATATYPE_STR :
       bind->type     =  dpi::DpiVarChar;
       break;
 
-    case DATA_NUM :
+    case NJS_DATATYPE_NUM :
       bind->type     = dpi::DpiDouble;
       bind->maxSize  = sizeof(double);
       break;
 
-    case DATA_DATE :
+    case NJS_DATATYPE_DATE :
       bind->type     = dpi::DpiTimestampLTZ;
       break;
 
-    case DATA_CURSOR :
+    case NJS_DATATYPE_CURSOR :
       bind->type     = dpi::DpiRSet;
       break;
 
-    case DATA_BUFFER :
+    case NJS_DATATYPE_BUFFER :
       bind->type     = dpi::DpiRaw;
       break;
 
-    case DATA_CLOB :
+    case NJS_DATATYPE_CLOB :
       bind->type    = dpi::DpiClob;
       break;
 
-    case DATA_BLOB :
+    case NJS_DATATYPE_BLOB :
       bind->type    = dpi::DpiBlob;
       break;
 
@@ -876,17 +963,17 @@ exitGetOutBindParams:
      allocate for one unit.
 */
 void Connection::GetInBindParams(Local<Value> v8val, Bind* bind,
-                                 eBaton* executeBaton, BindType type)
+                                 eBaton* executeBaton )
 {
   Nan::HandleScope scope;
 
   if (v8val->IsArray() )
   {
-    GetInBindParamsArray(Local<Array>::Cast(v8val), bind, executeBaton, type);
+    GetInBindParamsArray(Local<Array>::Cast(v8val), bind, executeBaton );
   }
   else
   {
-    GetInBindParamsScalar(v8val, bind, executeBaton, type);
+    GetInBindParamsScalar(v8val, bind, executeBaton );
   }
 }
 
@@ -903,10 +990,11 @@ void Connection::GetInBindParams(Local<Value> v8val, Bind* bind,
      allocate for one unit.
 */
 void Connection::GetInBindParamsScalar(Local<Value> v8val, Bind* bind,
-                                       eBaton* executeBaton, BindType type)
+                                       eBaton* executeBaton)
 {
   Nan::HandleScope scope;
-  ValueType dataType = VALUETYPE_INVALID;
+  ValueType        valType = NJS_VALUETYPE_INVALID;
+  boolean          v8valNULL ;   /* whether given v8 value is NULL/Undefined */
 
   /* Allocate for scalar indicator & length */
   bind->ind = (short *)malloc ( sizeof ( short ) );
@@ -914,29 +1002,68 @@ void Connection::GetInBindParamsScalar(Local<Value> v8val, Bind* bind,
 
   *(bind->ind)  = 0;
 
-  dataType = Connection::GetValueType ( v8val );
+  valType = Connection::GetValueType ( v8val );
+  v8valNULL = ( valType == NJS_VALUETYPE_NULL ) ? true : false;
 
-  switch ( dataType )
+  /*
+   * In case of INOUT Bind, if given value is NULL
+   * make use of specified OUT bind type
+   */
+  if ( v8valNULL && bind->isInOut )
   {
-    case VALUETYPE_NULL:
+    switch ( bind->type )
+    {
+    case NJS_DATATYPE_STR:
+      valType = NJS_VALUETYPE_STRING;
+      break;
+
+    case NJS_DATATYPE_NUM:
+      valType = NJS_VALUETYPE_NUMBER;
+      break;
+
+    case NJS_DATATYPE_DATE:
+      valType = NJS_VALUETYPE_DATE;
+      break;
+
+    case NJS_DATATYPE_BUFFER:
+      valType = NJS_VALUETYPE_OBJECT;    /* DB RAW Type, v8 Buffer */
+      break;
+
+    // The following types are NOT supported as IN BIND (for INOUT) ignore
+    case NJS_DATATYPE_CURSOR:
+    case NJS_DATATYPE_CLOB:
+    case NJS_DATATYPE_BLOB:
+      break;
+    }
+  }
+
+  switch ( valType )
+  {
+    case NJS_VALUETYPE_NULL:
       bind->value = NULL;
       *(bind->ind)   = -1;
       bind->type        = dpi::DpiVarChar;
       break;
 
-    case VALUETYPE_STRING:
+    case NJS_VALUETYPE_STRING:
     {
-      if( bind->type && bind->type != DATA_STR )
+      if( bind->type && bind->type != NJS_DATATYPE_STR )
       {
         executeBaton->error= NJSMessages::getErrorMsg(
                                errBindValueAndTypeMismatch, 2);
         goto exitGetInBindParamsScalar;
       }
 
-      v8::String::Utf8Value str(v8val->ToString());
+      /*
+       * Use empty string in case of IN value is NULL, but overriden for
+       * INOUT binds
+       */
+      v8::String::Utf8Value str( v8valNULL ?
+                           Nan::New<v8::String> ( "" ).ToLocalChecked() :
+                           v8val->ToString());
 
       bind->type = dpi::DpiVarChar;
-      if(type == BIND_INOUT)
+      if( bind->isInOut )
       {
         *(bind->len) = str.length();
       }
@@ -962,8 +1089,8 @@ void Connection::GetInBindParamsScalar(Local<Value> v8val, Bind* bind,
     }
     break;
 
-    case VALUETYPE_INTEGER:
-      if( bind->type && bind->type != DATA_NUM )
+    case NJS_VALUETYPE_INTEGER:
+      if( bind->type && bind->type != NJS_DATATYPE_NUM )
       {
         executeBaton->error= NJSMessages::getErrorMsg(
                                errBindValueAndTypeMismatch, 2);
@@ -972,11 +1099,11 @@ void Connection::GetInBindParamsScalar(Local<Value> v8val, Bind* bind,
       bind->type = dpi::DpiInteger;
       bind->maxSize = *(bind->len) = sizeof(int);
       bind->value = (int*)malloc(*(bind->len));
-      *(int*)(bind->value) = v8val->ToInt32()->Value();
+      *(int*)(bind->value) = v8valNULL ? 0 : v8val->ToInt32()->Value();
       break;
 
-    case VALUETYPE_UINTEGER:
-      if( bind->type && bind->type != DATA_NUM )
+    case NJS_VALUETYPE_UINTEGER:
+      if( bind->type && bind->type != NJS_DATATYPE_NUM )
       {
         executeBaton->error= NJSMessages::getErrorMsg(
                                errBindValueAndTypeMismatch, 2);
@@ -985,11 +1112,12 @@ void Connection::GetInBindParamsScalar(Local<Value> v8val, Bind* bind,
       bind->type = dpi::DpiUnsignedInteger;
       bind->maxSize = *(bind->len) = sizeof(unsigned int);
       bind->value = (unsigned int*)malloc(*(bind->len));
-      *(unsigned int*)(bind->value) = v8val->ToUint32()->Value();
+      *(unsigned int*)(bind->value) = v8valNULL ? 0 :
+                                        v8val->ToUint32()->Value();
       break;
 
-    case VALUETYPE_NUMBER:
-      if( bind->type && bind->type != DATA_NUM )
+    case NJS_VALUETYPE_NUMBER:
+      if( bind->type && bind->type != NJS_DATATYPE_NUM )
       {
         executeBaton->error= NJSMessages::getErrorMsg(
                                             errBindValueAndTypeMismatch, 2);
@@ -998,11 +1126,11 @@ void Connection::GetInBindParamsScalar(Local<Value> v8val, Bind* bind,
       bind->type = dpi::DpiDouble;
       bind->maxSize = *(bind->len) = sizeof(double);
       bind->value = (double*)malloc(*(bind->len));
-      *(double*)(bind->value) = v8val->NumberValue();
+      *(double*)(bind->value) = v8valNULL ? 0 : v8val->NumberValue ();
       break;
 
-    case VALUETYPE_DATE:
-      if( bind->type && bind->type != DATA_DATE )
+    case NJS_VALUETYPE_DATE:
+      if( bind->type && bind->type != NJS_DATATYPE_DATE )
       {
         executeBaton->error= NJSMessages::getErrorMsg(
                                      errBindValueAndTypeMismatch, 2);
@@ -1020,14 +1148,26 @@ void Connection::GetInBindParamsScalar(Local<Value> v8val, Bind* bind,
       Connection::v8Date2OraDate ( v8val, bind);
       break;
 
-    case VALUETYPE_OBJECT:
+    case NJS_VALUETYPE_OBJECT:
       {
         Local<Object> obj = v8val->ToObject();
-        if (Buffer::HasInstance(obj))
+
+        if ( v8valNULL && bind->isInOut )
+        {
+          /*
+           * In case of RAW/Buffer type and INOUT Bind, if IN value is NULL,
+           * allocate based on OUT type, maxSize
+           */
+          bind->type = dpi::DpiRaw;
+          *( bind->len ) = ( DPI_BUFLEN_TYPE ) (( bind->isInOut ) ?
+                                                  bind->maxSize : 0 );
+          bind->value = ( char *) malloc ( *(bind -> len ) );
+        }
+        else if (Buffer::HasInstance(obj))
         {
           size_t bufLen = Buffer::Length(obj);
           bind->type = dpi::DpiRaw;
-          if(type == BIND_INOUT)
+          if( bind->isInOut )
           {
             *(bind->len) = (DPI_BUFLEN_TYPE) bufLen;
           }
@@ -1079,7 +1219,7 @@ exitGetInBindParamsScalar:
      allocate for one unit.
 */
 void Connection::GetInBindParamsArray(Local<Array> va8vals, Bind *bind,
-                                      eBaton *executeBaton, BindType type)
+                                      eBaton *executeBaton )
 {
   Nan::HandleScope scope;
   size_t           arrayElementSize = 0; // actual array element size
@@ -1100,7 +1240,7 @@ void Connection::GetInBindParamsArray(Local<Array> va8vals, Bind *bind,
   }
 
   // Currently only STRING & NUMBER are supported for Array Bind(s)
-  if ( (bind->type != DATA_STR) && (bind->type != DATA_NUM) )
+  if ( (bind->type != NJS_DATATYPE_STR) && (bind->type != NJS_DATATYPE_NUM) )
   {
     executeBaton->error = NJSMessages::getErrorMsg(
                                            errInvalidTypeForArrayBind);
@@ -1115,7 +1255,7 @@ void Connection::GetInBindParamsArray(Local<Array> va8vals, Bind *bind,
     ValueType    vtype = GetValueType (value);
 
     // make sure that we generally have a valid value type
-    if (vtype == VALUETYPE_INVALID)
+    if (vtype == NJS_VALUETYPE_INVALID)
     {
       executeBaton->error = NJSMessages::getErrorMsg(
                                           errInvalidTypeForArrayBind);
@@ -1127,8 +1267,8 @@ void Connection::GetInBindParamsArray(Local<Array> va8vals, Bind *bind,
     // null
     switch (bind->type)
     {
-      case DATA_STR:
-        if (vtype != VALUETYPE_NULL && vtype != VALUETYPE_STRING)
+      case NJS_DATATYPE_STR:
+        if (vtype != NJS_VALUETYPE_NULL && vtype != NJS_VALUETYPE_STRING)
         {
           executeBaton->error = NJSMessages::getErrorMsg(
                                      errIncompatibleTypeArrayBind);
@@ -1145,9 +1285,9 @@ void Connection::GetInBindParamsArray(Local<Array> va8vals, Bind *bind,
         }
         break;
 
-      case DATA_NUM:
-        if (vtype != VALUETYPE_NULL && vtype != VALUETYPE_INTEGER &&
-            vtype != VALUETYPE_UINTEGER && vtype != VALUETYPE_NUMBER)
+      case NJS_DATATYPE_NUM:
+        if (vtype != NJS_VALUETYPE_NULL && vtype != NJS_VALUETYPE_INTEGER &&
+            vtype != NJS_VALUETYPE_UINTEGER && vtype != NJS_VALUETYPE_NUMBER)
         {
           executeBaton->error = NJSMessages::getErrorMsg(
                                           errIncompatibleTypeArrayBind);
@@ -1165,7 +1305,7 @@ void Connection::GetInBindParamsArray(Local<Array> va8vals, Bind *bind,
 
   switch (bind->type)
   {
-    case DATA_STR:
+    case NJS_DATATYPE_STR:
       bind->type       = dpi::DpiVarChar;
 
       // If we are dealing with an OUT binding
@@ -1196,7 +1336,7 @@ void Connection::GetInBindParamsArray(Local<Array> va8vals, Bind *bind,
       bind->value      = buffer;
       break;
 
-    case DATA_NUM:
+    case NJS_DATATYPE_NUM:
       bind->type       = dpi::DpiDouble;
       arrayElementSize = sizeof(double);
       if ( NJS_SIZE_T_OVERFLOW (arrayElementSize, bind->maxArraySize ) )
@@ -1267,12 +1407,12 @@ void Connection::GetInBindParamsArray(Local<Array> va8vals, Bind *bind,
 
     switch (type)
     {
-      case VALUETYPE_NULL:
+      case NJS_VALUETYPE_NULL:
         bind->ind[index] = -1;
         bind->len[index] = 0;
         break;
 
-      case VALUETYPE_STRING:
+      case NJS_VALUETYPE_STRING:
         {
           v8::String::Utf8Value str(value->ToString());
           size_t stringLength = str.length();
@@ -1285,9 +1425,9 @@ void Connection::GetInBindParamsArray(Local<Array> va8vals, Bind *bind,
         }
         break;
 
-      case VALUETYPE_INTEGER:
-      case VALUETYPE_UINTEGER:
-      case VALUETYPE_NUMBER:
+      case NJS_VALUETYPE_INTEGER:
+      case NJS_VALUETYPE_UINTEGER:
+      case NJS_VALUETYPE_NUMBER:
         *(reinterpret_cast<double*>(buffer)) = value->NumberValue();
         bind->ind[index] = 0;
         bind->len[index] = sizeof ( double ) ;
@@ -1479,16 +1619,31 @@ void Connection::Async_Execute (uv_work_t *req)
       }
 
       executeBaton->dpistmt->execute(0, executeBaton->autoCommit);
-      const dpi::MetaData* meta   = executeBaton->dpistmt->getMetaData();
-      executeBaton->numCols       = executeBaton->dpistmt->numCols();
-      executeBaton->columnNames   = new std::string[executeBaton->numCols];
-      Connection::CopyMetaData( executeBaton->columnNames, meta,
-                                executeBaton->numCols );
 
-      if ( executeBaton->getRS )
+      const MetaData* mData = executeBaton->dpistmt->getMetaData(
+                                           executeBaton->extendedMetaData );
+      executeBaton->numCols = executeBaton->dpistmt->numCols();
+
+      executeBaton->mInfo   = new MetaInfo  [ executeBaton->numCols ];
+
+      if ( !executeBaton->mInfo )
+      {
+        executeBaton->error = NJSMessages::getErrorMsg
+                                           ( errInsufficientMemory );
+        goto exitAsyncExecute;
+      }
+
+      Connection::CopyMetaData ( executeBaton->mInfo, executeBaton, mData,
+                                 executeBaton->numCols );
+      if ( !executeBaton->error.empty() )
         goto exitAsyncExecute;
 
-      Connection::DoDefines(executeBaton, meta, executeBaton->numCols);
+      if ( executeBaton->getRS )
+      {
+        goto exitAsyncExecute;
+      }
+
+      Connection::DoDefines ( executeBaton );
       /* If any errors while creating define structures, bail out */
       if ( !executeBaton->error.empty() )
         goto exitAsyncExecute;
@@ -1573,7 +1728,15 @@ void Connection::Async_Execute (uv_work_t *req)
        }
      }
 
-     /* For each OUT Binds of CURSOR type, get the dpistmt state */
+     // allocate exteBinds vector with bind-array-size and initialize to NULL
+     executeBaton->extBinds.resize (
+                   ( unsigned int ) ( executeBaton->binds.size () ), NULL );
+
+     /*
+      * For each OUT Binds of valid CURSOR type, set prefetch and get
+      * meta data
+      */
+
      for ( unsigned int b = 0; b < executeBaton->binds.size (); b ++ )
      {
        Bind *bind = executeBaton->binds[b];
@@ -1588,6 +1751,31 @@ void Connection::Async_Execute (uv_work_t *req)
            // set the prefetch on the valid cursor object
            ((dpi::Stmt *)(bind->value))->prefetchRows (
                                               executeBaton->prefetchRows ) ;
+           // Get metaData and number of columns on valid cursor object
+           ExtBind* extBind = new ExtBind ();
+           if ( !extBind )
+           {
+             executeBaton->error = NJSMessages::getErrorMsg
+                                           ( errInsufficientMemory );
+             goto exitAsyncExecute;
+           }
+           const MetaData* mData = ((Stmt*)bind->value)->getMetaData(
+                                           executeBaton->extendedMetaData );
+           extBind->numCols      = ((Stmt*)bind->value)->numCols ();
+
+           extBind->mInfo        = new MetaInfo  [ extBind->numCols ];
+           if ( !extBind->mInfo )
+           {
+             executeBaton->error = NJSMessages::getErrorMsg
+                                                ( errInsufficientMemory );
+             goto exitAsyncExecute;
+           }
+           Connection::CopyMetaData ( extBind->mInfo, executeBaton, mData,
+                                      extBind->numCols );
+           if ( !executeBaton->error.empty() )
+             goto exitAsyncExecute;
+
+           executeBaton->extBinds [ b ] = extBind;
          }
          else
          {
@@ -1630,6 +1818,21 @@ void Connection::Async_Execute (uv_work_t *req)
          executeBaton->dpistmt )
     {
         executeBaton->dpistmt->release ();
+    }
+
+    // In case of error, release the statement handles allocated (REF CURSOR)
+    if ( !(executeBaton->error).empty() )
+    {
+      for( unsigned int index = 0 ;index < executeBaton->binds.size();
+           index++ )
+      {
+        if( executeBaton->binds[index]->value &&
+            ( executeBaton->binds[index]->type == DpiRSet ) )
+        {
+          ((Stmt*)executeBaton->binds[index]->value)->release ();
+          executeBaton->binds[index]->value = NULL;
+        }
+      }
     }
   ;
 }
@@ -1772,20 +1975,115 @@ void Connection::PrepareAndBind (eBaton* executeBaton)
 /*****************************************************************************/
 /*
    DESCRIPTION
-     copy column names from meta data to the string array passed as parameter.
+     Copies metaData into MetaInfo and gets target fetchTypes
 
    PARAMETERS:
-     string array  -  column names
-     metaData      -  metaData info from DPI
-     numCols       -  number of columns
+     mInfo         - an array of structs representing column info
+     executeBaton  - eBaton structure
+     mData         - meta data of columns
+     numCols       - number of columns
  */
-void Connection::CopyMetaData ( std::string* names, const dpi::MetaData* meta,
-                                unsigned int numCols )
+void Connection::CopyMetaData ( MetaInfo           *mInfo,
+                                eBaton             *executeBaton,
+                                const MetaData*    mData,
+                                const unsigned int numCols )
 {
-  for (unsigned int col = 0; col < numCols; col++)
+  bool error = false;
+
+  for ( unsigned int col = 0; !error && ( col < numCols ); col++ )
   {
-    names[col] = std::string( (const char*)meta[col].colName,
-                            meta[col].colNameLen );
+    mInfo[col].name         = string( (const char*)mData[col].colName,
+                                      mData[col].colNameLen );
+    mInfo[col].dbType       = mData[col].dbType;
+    mInfo[col].byteSize     = mData[col].dbSize;
+
+    if ( executeBaton->extendedMetaData )
+    {
+      mInfo[col].precision  = mData[col].precision;
+      mInfo[col].scale      = mData[col].scale;
+      mInfo[col].isNullable = mData[col].isNullable;
+    }
+
+    switch( mData[col].dbType )
+    {
+      case dpi::DpiNumber:
+      case dpi::DpiBinaryFloat:
+      case dpi::DpiBinaryDouble:
+        mInfo[col].dpiFetchType = Connection::GetTargetType ( executeBaton,
+                                                 mInfo[col].name,
+                                                 dpi::DpiDouble );
+        mInfo[col].njsFetchType =
+                     ( mInfo[col].dpiFetchType == dpi::DpiVarChar ) ?
+                                  NJS_DATATYPE_STR : NJS_DATATYPE_NUM;
+        break;
+
+      case dpi::DpiVarChar:
+      case dpi::DpiFixedChar:
+        mInfo[col].dpiFetchType = Connection::GetTargetType ( executeBaton,
+                                                 mInfo[col].name,
+                                                 dpi::DpiVarChar );
+        mInfo[col].njsFetchType = NJS_DATATYPE_STR;
+        break;
+
+      case dpi::DpiDate:
+      case dpi::DpiTimestamp:
+      case dpi::DpiTimestampLTZ:
+        mInfo[col].dpiFetchType = Connection::GetTargetType ( executeBaton,
+                                                 mInfo[col].name,
+                                                 dpi::DpiTimestampLTZ );
+        mInfo[col].njsFetchType =
+                     ( mInfo[col].dpiFetchType == dpi::DpiVarChar ) ?
+                                  NJS_DATATYPE_STR : NJS_DATATYPE_DATE;
+        break;
+
+      case dpi::DpiTimestampTZ:
+        mInfo[col].dpiFetchType = Connection::GetTargetType ( executeBaton,
+                                                 mInfo[col].name,
+                                                 dpi::DpiTimestampLTZ );
+        mInfo[col].njsFetchType =
+                     ( mInfo[col].dpiFetchType == dpi::DpiVarChar ) ?
+                                  NJS_DATATYPE_STR : NJS_DATATYPE_UNKNOWN;
+        break;
+
+      case dpi::DpiRaw:
+        mInfo[col].dpiFetchType = DpiRaw;
+        mInfo[col].njsFetchType = NJS_DATATYPE_BUFFER;
+        break;
+
+      case dpi::DpiClob:
+        mInfo[col].dpiFetchType = mData[col].dbType;
+        mInfo[col].njsFetchType = NJS_DATATYPE_CLOB;
+        break;
+
+      case dpi::DpiBlob:
+        mInfo[col].dpiFetchType = mData[col].dbType;
+        mInfo[col].njsFetchType = NJS_DATATYPE_BLOB;
+        break;
+
+      case dpi::DpiRowid:
+        mInfo[col].dpiFetchType = Connection::GetTargetType ( executeBaton,
+                                                 mInfo[col].name,
+                                                 dpi::DpiRowid );
+        mInfo[col].njsFetchType =
+                     ( mInfo[col].dpiFetchType == dpi::DpiVarChar ) ?
+                                  NJS_DATATYPE_STR : NJS_DATATYPE_UNKNOWN;
+        break;
+
+      default:
+        mInfo[col].njsFetchType = NJS_DATATYPE_UNKNOWN;
+        mInfo[col].dbType       = NJS_DATATYPE_UNKNOWN;
+        break;
+    }
+
+    if ( mInfo[col].njsFetchType == NJS_DATATYPE_UNKNOWN )
+    {
+      error = true;
+    }
+  }
+
+  if ( error )
+  {
+    executeBaton->error = NJSMessages::getErrorMsg ( errUnsupportedDatType );
   }
 }
 
@@ -1859,15 +2157,15 @@ boolean Connection::MapByName ( eBaton *executeBaton, std::string &name,
       /* COLUMN name should match */
       if ( executeBaton->fetchInfo[f].name.compare ( name ) == 0 )
       {
-        /* Only DATA_STR & DATA_DEFAULT allowed.  For DATA_DEFAULT,
+        /* Only NJS_DATATYPE_STR & NJS_DATATYPE_DEFAULT allowed.  For NJS_DATATYPE_DEFAULT,
          * the type is identified from metadata and is already set.
-         * In case of DATA_STR, set the return value.
+         * In case of NJS_DATATYPE_STR, set the return value.
          */
-        if ( executeBaton->fetchInfo[f].type == DATA_STR )
+        if ( executeBaton->fetchInfo[f].type == NJS_DATATYPE_STR )
         {
           targetType = dpi::DpiVarChar;
         }
-        else if ( executeBaton->fetchInfo[f].type == DATA_DEFAULT )
+        else if ( executeBaton->fetchInfo[f].type == NJS_DATATYPE_DEFAULT )
         {
           targetType = Connection::SourceDBType2TargetDBType ( targetType );
         }
@@ -1913,7 +2211,7 @@ boolean Connection::MapByType ( eBaton *executeBaton, unsigned short &dbType )
       /* Numeric Type */
       for ( unsigned int t = 0 ; !modified && ( t < count ) ; t++)
       {
-        if ( executeBaton->fetchAsStringTypes[t] == DATA_NUM )
+        if ( executeBaton->fetchAsStringTypes[t] == NJS_DATATYPE_NUM )
         {
           /*
            * Convert all Numeric values to STRING
@@ -1932,7 +2230,7 @@ boolean Connection::MapByType ( eBaton *executeBaton, unsigned short &dbType )
       /* DATE/TIMESTAMP */
       for ( unsigned int t = 0 ; !modified && ( t < count ) ; t ++ )
       {
-        if ( executeBaton->fetchAsStringTypes[t] == DATA_DATE )
+        if ( executeBaton->fetchAsStringTypes[t] == NJS_DATATYPE_DATE )
         {
           /* Convert all DATE/TIMESTAMP values to STRING */
           dbType = dpi::DpiVarChar;
@@ -1957,7 +2255,7 @@ boolean Connection::MapByType ( eBaton *executeBaton, unsigned short &dbType )
      oracledb type
 
    PARAMETERS
-     eBaton  - executeBaton Structure
+     eBaton  - executeBaton structure
      name    - column name
      default Type - if no override provided, to return the default DB type
 
@@ -2009,29 +2307,25 @@ unsigned short Connection::GetTargetType ( eBaton *executeBaton,
    PARAMETERS:
      eBaton struct
  */
-void Connection::DoDefines ( eBaton* executeBaton, const dpi::MetaData* meta,
-                             unsigned int numCols )
+void Connection::DoDefines ( eBaton* executeBaton )
 {
-  Define *defines = executeBaton->defines = new Define[numCols];
-  int csratio = executeBaton->dpiconn->getByteExpansionRatio ();
+  unsigned int numCols  = executeBaton->numCols;
+  Define       *defines = executeBaton->defines = new Define[numCols];
+  int          csratio  = executeBaton->dpiconn->getByteExpansionRatio ();
+  bool         error    = false;
 
-  // Check for maxRows must be greater than zero in case of non-resultSet
-  if ( executeBaton->maxRows == 0 )
+  for (unsigned int col = 0; !error && ( col < numCols ); col++)
   {
-    executeBaton->error = NJSMessages::getErrorMsg ( errInvalidmaxRows );
-    return;
-  }
-
-  for (unsigned int col = 0; col < numCols; col++)
-  {
-    switch(meta[col].dbType)
+    /*
+     * Only supported DB column types handled here and others would have
+     * reported error while processing meta-data
+     */
+    switch( executeBaton->mInfo[col].dbType )
     {
       case dpi::DpiNumber :
       case dpi::DpiBinaryFloat :
       case dpi::DpiBinaryDouble :
-        defines[col].fetchType = Connection::GetTargetType ( executeBaton,
-                                               executeBaton->columnNames[col],
-                                                 dpi::DpiDouble) ;
+        defines[col].fetchType = executeBaton->mInfo[col].dpiFetchType;
         /* For VARCHAR2 type, make sure sufficient buffer is available */
         defines[col].maxSize = ( defines[col].fetchType == dpi::DpiVarChar) ?
                                NJS_MAX_FETCH_AS_STRING_SIZE : sizeof (double);
@@ -2040,7 +2334,7 @@ void Connection::DoDefines ( eBaton* executeBaton, const dpi::MetaData* meta,
                                        executeBaton->maxRows ) )
         {
           executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
-          return;
+          error = true;
         }
         else
         {
@@ -2051,36 +2345,32 @@ void Connection::DoDefines ( eBaton* executeBaton, const dpi::MetaData* meta,
           {
             executeBaton->error = NJSMessages::getErrorMsg(
                                     errInsufficientMemory );
-            return;
+            error = true;
           }
         }
 
         break;
       case dpi::DpiVarChar :
       case dpi::DpiFixedChar :
-        defines[col].fetchType = Connection::GetTargetType ( executeBaton,
-                                             executeBaton->columnNames[col],
-                                             meta[col].dbType );
+        defines[col].fetchType = executeBaton->mInfo[col].dpiFetchType;
 
         /*
          * the buffer size is increased to account for possible character
          * size expansion when data is converted from the DB character set
-         * to AL32UTF8
+         * to client character set
          */
 
-        if ( meta[col].dbSize != 0 )
+        if ( executeBaton->mInfo[col].byteSize != 0 )
         {
-          /* dbSize will be zero in case of "select null from dual" and
-           * malloc(0) behaves diffrently on different platforms, so avoiding it
-           */
-          defines[col].maxSize   = (meta[col].dbSize) * csratio;
+          defines[col].maxSize   = ( executeBaton->mInfo[col].byteSize ) *
+                                                              csratio;
 
           if ( NJS_SIZE_T_OVERFLOW ( defines[col].maxSize,
                                          executeBaton->maxRows ) )
           {
             executeBaton->error = NJSMessages::getErrorMsg(
                                                errResultsTooLarge );
-            return;
+            error = true;
           }
           else
           {
@@ -2090,7 +2380,7 @@ void Connection::DoDefines ( eBaton* executeBaton, const dpi::MetaData* meta,
             {
               executeBaton->error = NJSMessages::getErrorMsg(
                                       errInsufficientMemory );
-              return;
+              error = true;
             }
           }
         }
@@ -2098,31 +2388,18 @@ void Connection::DoDefines ( eBaton* executeBaton, const dpi::MetaData* meta,
          * not required.
          */
         break;
+      case dpi::DpiTimestampTZ:
+        // TIMESTAMPTZ WITH TIMEZONE (TZ) supported only as STRING value
       case dpi::DpiDate :
       case dpi::DpiTimestamp:
-      case dpi::DpiTimestampTZ:
       case dpi::DpiTimestampLTZ:
-        defines[col].fetchType = Connection::GetTargetType ( executeBaton,
-                                               executeBaton->columnNames[col],
-                                               dpi::DpiTimestampLTZ );
-
-        if ( ( meta[col].dbType == dpi::DpiTimestampTZ ) &&
-             ( defines[col].fetchType != dpi::DpiVarChar ))
-        {
-          /*
-           * TIMESTAMP WITH TIMEZONE (TZ) column type supported only as
-           * STRING value.
-           */
-          executeBaton->error = NJSMessages::getErrorMsg (
-                                             errUnsupportedDatType ) ;
-          return;
-        }
+        defines[col].fetchType = executeBaton->mInfo[col].dpiFetchType;
 
         if ( defines[col].fetchType != dpi::DpiVarChar )
         {
           defines[col].dttmarr   = executeBaton->dpienv->getDateTimeArray (
                                      executeBaton->dpistmt->getError () );
-          defines[col].maxSize   = meta[col].dbSize;
+          defines[col].maxSize   = executeBaton->mInfo[col].byteSize;
           defines[col].extbuf    = defines[col].dttmarr->init(
                                                       executeBaton->maxRows);
         }
@@ -2134,8 +2411,9 @@ void Connection::DoDefines ( eBaton* executeBaton, const dpi::MetaData* meta,
           if ( NJS_SIZE_T_OVERFLOW ( defines[col].maxSize,
                                          executeBaton->maxRows ) )
           {
-            executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
-            return;
+            executeBaton->error =
+                           NJSMessages::getErrorMsg( errResultsTooLarge );
+            error = true;
           }
           else
           {
@@ -2146,7 +2424,7 @@ void Connection::DoDefines ( eBaton* executeBaton, const dpi::MetaData* meta,
             {
               executeBaton->error = NJSMessages::getErrorMsg(
                                        errInsufficientMemory);
-              return;
+              error = true;
             }
           }
 
@@ -2154,36 +2432,39 @@ void Connection::DoDefines ( eBaton* executeBaton, const dpi::MetaData* meta,
         break;
       case dpi::DpiRaw :
         defines[col].fetchType = DpiRaw;
-        defines[col].maxSize   = meta[col].dbSize;
+        defines[col].maxSize   = executeBaton->mInfo[col].byteSize;
 
         if ( NJS_SIZE_T_OVERFLOW ( defines[col].maxSize,
                                    executeBaton->maxRows ) )
         {
           executeBaton->error = NJSMessages::getErrorMsg (
                                                      errResultsTooLarge ) ;
-          return;
+          error = true;
         }
-        defines[col].buf = (char *)malloc(defines[col].maxSize *
-                                          (size_t) executeBaton->maxRows) ;
-        if ( !defines[col].buf )
+        else
         {
-          executeBaton->error = NJSMessages::getErrorMsg (
-                                         errInsufficientMemory );
-          return;
+          defines[col].buf = (char *)malloc(defines[col].maxSize *
+                                          (size_t) executeBaton->maxRows) ;
+          if ( !defines[col].buf )
+          {
+            executeBaton->error = NJSMessages::getErrorMsg (
+                                           errInsufficientMemory );
+            error = true;
+          }
         }
         break;
 
       case dpi::DpiClob:
       case dpi::DpiBlob:
       case dpi::DpiBfile:
-        defines[col].fetchType = meta[col].dbType;
+        defines[col].fetchType = executeBaton->mInfo[col].dbType;
         defines[col].maxSize   = sizeof(Descriptor *);
 
         if ( NJS_SIZE_T_OVERFLOW ( defines[col].maxSize,
                                        executeBaton->maxRows ) )
         {
           executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
-          return;
+          error = true;
         }
         else
         {
@@ -2192,35 +2473,33 @@ void Connection::DoDefines ( eBaton* executeBaton, const dpi::MetaData* meta,
 
           if( !defines[col].buf )
           {
-            executeBaton->error = NJSMessages::getErrorMsg( errInsufficientMemory );
-            return;
+            executeBaton->error =
+                          NJSMessages::getErrorMsg( errInsufficientMemory );
+            error = true;
           }
         }
 
-        for (unsigned int j = 0; j < executeBaton->maxRows; j++)
+        if ( !error )
         {
-          ((Descriptor **)(defines[col].buf))[j] =
-            executeBaton->dpienv->allocDescriptor(LobDescriptorType);
+          for (unsigned int j = 0; j < executeBaton->maxRows; j++)
+          {
+            ((Descriptor **)(defines[col].buf))[j] =
+              executeBaton->dpienv->allocDescriptor(LobDescriptorType);
+          }
         }
         break;
 
       case dpi::DpiRowid:
-        defines[col].fetchType = Connection::GetTargetType ( executeBaton,
-                                               executeBaton->columnNames[col],
-                                               dpi::DpiRowid );
-        if ( defines[col].fetchType != dpi::DpiVarChar )
-        {
-          executeBaton->error = NJSMessages::getErrorMsg (
-                                                    errUnsupportedDatType);
-          return;
-        }
+        defines[col].fetchType = executeBaton->mInfo[col].dpiFetchType;
+
+        // ROWID supported only as STRING value
         defines[col].maxSize = NJS_MAX_FETCH_AS_STRING_SIZE;
 
         if ( NJS_SIZE_T_OVERFLOW ( defines[col].maxSize,
                                        executeBaton->maxRows ) )
         {
           executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
-          return;
+          error = true;
         }
         else
         {
@@ -2231,36 +2510,41 @@ void Connection::DoDefines ( eBaton* executeBaton, const dpi::MetaData* meta,
           {
             executeBaton->error = NJSMessages::getErrorMsg(
                                     errInsufficientMemory);
-            return;
+            error = true;
           }
         }
         break;
 
       default :
-        executeBaton->error = NJSMessages::getErrorMsg(errUnsupportedDatType);
-        return;
+        // For unsupported column types, an error is reported earlier itself
+        executeBaton->error = NJSMessages::getErrorMsg( errInternalError,
+                                              "default:", "DoDefines" );
+        error = true;
         break;
     }
 
-    defines[col].ind = (short*)malloc (sizeof(short)*(executeBaton->maxRows));
-    if(!defines[col].ind)
+    if ( !error )
     {
-      executeBaton->error = NJSMessages::getErrorMsg( errInsufficientMemory );
-      return;
-    }
-    defines[col].len = (DPI_BUFLEN_TYPE *)malloc(sizeof(DPI_BUFLEN_TYPE)*
-                                           executeBaton->maxRows);
-    if(!defines[col].len)
-    {
-      executeBaton->error = NJSMessages::getErrorMsg( errInsufficientMemory );
-      return;
-    }
+      defines[col].ind = (short*)malloc ( sizeof( short ) *
+                                          ( executeBaton->maxRows ) );
+      if(!defines[col].ind)
+      {
+        executeBaton->error = NJSMessages::getErrorMsg( errInsufficientMemory );
+        error = true;
+      }
+      defines[col].len = (DPI_BUFLEN_TYPE *)malloc(sizeof(DPI_BUFLEN_TYPE)*
+                                             executeBaton->maxRows);
+      if(!defines[col].len)
+      {
+        executeBaton->error = NJSMessages::getErrorMsg( errInsufficientMemory );
+        error = true;
+      }
 
-    executeBaton->dpistmt->define(col+1, defines[col].fetchType,
-                 (defines[col].buf) ? defines[col].buf : defines[col].extbuf,
-                 defines[col].maxSize, defines[col].ind, defines[col].len);
+      executeBaton->dpistmt->define(col+1, defines[col].fetchType,
+                   (defines[col].buf) ? defines[col].buf : defines[col].extbuf,
+                   defines[col].maxSize, defines[col].ind, defines[col].len);
+    }
   }
-  executeBaton->numCols     = numCols;
 }
 
 /*****************************************************************************/
@@ -2274,15 +2558,23 @@ void Connection::DoDefines ( eBaton* executeBaton, const dpi::MetaData* meta,
  */
 void Connection::DoFetch (eBaton* executeBaton)
 {
+  NJSErrorType errNum = errSuccess;
   executeBaton->dpistmt->fetch ( executeBaton->maxRows );
   executeBaton->rowsFetched = executeBaton->dpistmt->rowsFetched();
-  Connection::Descr2Double ( executeBaton->defines,
-                             executeBaton->numCols,
-                             executeBaton->rowsFetched,
-                             executeBaton->getRS );
-  Connection::Descr2protoILob ( executeBaton,
-                                executeBaton->numCols,
-                                executeBaton->rowsFetched );
+  errNum = Connection::Descr2Double ( executeBaton->defines,
+                                      executeBaton->numCols,
+                                      executeBaton->rowsFetched,
+                                      executeBaton->getRS );
+  if ( !errNum )
+  {
+    Connection::Descr2protoILob ( executeBaton,
+                                  executeBaton->numCols,
+                                  executeBaton->rowsFetched );
+  }
+  else
+  {
+    executeBaton->error = NJSMessages::getErrorMsg ( errNum );
+  }
 }
 
 /*****************************************************************************/
@@ -2296,35 +2588,53 @@ void Connection::DoFetch (eBaton* executeBaton)
      rowsFetched   - rows fetched
      getRS         - boolean set for resultset
  */
-void Connection::Descr2Double( Define* defines, unsigned int numCols,
+NJSErrorType Connection::Descr2Double( Define* defines, unsigned int numCols,
                                unsigned int rowsFetched, bool getRS )
 {
-                                /* Special processing for certain data types */
-  for (unsigned int col = 0; col < numCols; col ++ )
+  NJSErrorType errNum = errSuccess;
+
+  /* Special processing for certain data types */
+  for (unsigned int col = 0; !errNum && ( col < numCols ); col ++ )
   {
-
     /* Special processing for datetime, as it is obtained as descriptors */
-
     if ( defines[col].dttmarr )
     {
       long double *dblArr = NULL;
-
-      defines[col].buf =
-      dblArr = (long double *)malloc ( sizeof ( long double ) *
-                                                rowsFetched );
-
-      for ( int row = 0; row < (int) rowsFetched; row ++ )
+      if ( !defines[col].buf )
       {
-        dblArr[row] = defines[col].dttmarr->getDateTime (row);
+        // size_t overflow check not required here as rowsFetched(unsigned int)
+        // multiplied by sizeof(long double) never cause size_t overflow
+        defines[col].buf =
+        dblArr =
+          (long double *)malloc ( sizeof ( long double ) * rowsFetched );
+
+        if( !defines[col].buf )
+        {
+          errNum = errInsufficientMemory;
+        }
       }
-      defines[col].buf = (void *) dblArr;
-      if ( !getRS )
+      else
       {
-        defines[col].dttmarr->release ();
-        defines[col].extbuf = NULL;
+        dblArr = (long double *) defines[col].buf;
+      }
+
+      if ( !errNum )
+      {
+        for ( int row = 0; row < (int) rowsFetched; row ++ )
+        {
+          dblArr[row] = defines[col].dttmarr->getDateTime (row);
+        }
+
+        if ( !getRS )
+        {
+          defines[col].dttmarr->release ();
+          defines[col].extbuf = NULL;
+        }
       }
     }
   }
+
+  return errNum;
 }
 
 /*****************************************************************************/
@@ -2373,9 +2683,9 @@ void Connection::Descr2protoILob( eBaton *executeBaton, unsigned int numCols,
 
           for (unsigned int i = 0; i < col; i++)
           {
-            if ((defines[col].fetchType == DpiClob) ||
-                (defines[col].fetchType == DpiBlob) ||
-                (defines[col].fetchType == DpiBfile))
+            if ((defines[i].fetchType == DpiClob) ||
+                (defines[i].fetchType == DpiBlob) ||
+                (defines[i].fetchType == DpiBfile))
             {
               for (unsigned int j = 0; j <  executeBaton->rowsFetched; j++)
               {
@@ -2472,7 +2782,8 @@ void Connection::Async_AfterExecute(uv_work_t *req)
   Local<Value> argv[2];
   if(!(executeBaton->error).empty())
   {
-    argv[0] = v8::Exception::Error(Nan::New<v8::String>((executeBaton->error).c_str()).ToLocalChecked());
+    argv[0] = v8::Exception::Error(
+                 Nan::New<v8::String>(executeBaton->error).ToLocalChecked());
     argv[1] = Nan::Undefined();
   }
   else
@@ -2480,67 +2791,111 @@ void Connection::Async_AfterExecute(uv_work_t *req)
     argv[0] = Nan::Undefined();
     Local<Object> result = Nan::New<v8::Object>();
     Local<Value> rowArray;
+    Local<Value> outBindValue;   // v8 Value for any out binds
+
     switch(executeBaton->st)
     {
       case DpiStmtSelect :
-        rowArray = Connection::GetRows(executeBaton);
-        if(!(executeBaton->error).empty())
-        {
-          argv[0] = v8::Exception::Error(Nan::New<v8::String>((executeBaton->error).c_str()).ToLocalChecked());
-          argv[1] = Nan::Undefined();
-          goto exitAsyncAfterExecute;
-        }
         if( executeBaton->getRS )
         {
-          Nan::Set(result, Nan::New<v8::String>("rows").ToLocalChecked(), Nan::Undefined());
-          Local<Object> resultSet = Nan::New<FunctionTemplate>(ResultSet::resultSetTemplate_s)->
-                                GetFunction() ->NewInstance();
+          Local<Object> resultSet = Nan::New<FunctionTemplate>(
+              ResultSet::resultSetTemplate_s)->GetFunction() ->NewInstance();
 
           /* ResultSet case, the statement object is ready for fetching */
-         (Nan::ObjectWrap::Unwrap<ResultSet> (resultSet))->
-                                  setResultSet( executeBaton->dpistmt,
-                                                executeBaton);
+          (Nan::ObjectWrap::Unwrap<ResultSet> (resultSet))->
+                       setResultSet( executeBaton->dpistmt, executeBaton,
+                                     executeBaton->numCols,
+                                     executeBaton->mInfo );
 
-          Nan::Set(result, Nan::New<v8::String>("resultSet").ToLocalChecked(), resultSet);
+          if ( !executeBaton->error.empty () )
+          {
+            argv[0] = v8::Exception::Error (
+                                            Nan::New<v8::String> (
+                                    executeBaton->error).ToLocalChecked());
+            argv[1] = Nan::Undefined ();
+            goto exitAsyncAfterExecute;
+          }
+
+          Nan::Set(result, Nan::New<v8::String>("rows").ToLocalChecked(),
+                   Nan::Undefined());
+
+          Nan::Set(result, Nan::New<v8::String>("resultSet").ToLocalChecked(),
+                   resultSet);
         }
         else
         {
+          rowArray = Connection::GetRows(executeBaton);
+          if(!(executeBaton->error).empty())
+          {
+            argv[0] = v8::Exception::Error(
+                  Nan::New<v8::String>(executeBaton->error).ToLocalChecked());
+            argv[1] = Nan::Undefined();
+            goto exitAsyncAfterExecute;
+          }
           Nan::Set(result, Nan::New<v8::String>("rows").ToLocalChecked(), rowArray);
           Nan::Set(result, Nan::New<v8::String>("resultSet").ToLocalChecked(), Nan::Undefined());
         }
         Nan::Set(result, Nan::New<v8::String>("outBinds").ToLocalChecked(),Nan::Undefined());
         Nan::Set(result, Nan::New<v8::String>("rowsAffected").ToLocalChecked(), Nan::Undefined());
-        Nan::Set(result, Nan::New<v8::String>("metaData").ToLocalChecked(), Connection::GetMetaData(
-                                                    executeBaton->columnNames,
-                                                    executeBaton->numCols));
+        Nan::Set( result, Nan::New<v8::String>("metaData").ToLocalChecked(),
+                  Connection::GetMetaData( executeBaton->mInfo,
+                                           executeBaton->numCols,
+                                           executeBaton->extendedMetaData ) );
         break;
-      case DpiStmtBegin :
-      case DpiStmtDeclare :
-      case DpiStmtCall :
-        Nan::Set(result, Nan::New<v8::String>("rowsAffected").ToLocalChecked(), Nan::Undefined());
-        Nan::ForceSet(result, Nan::New<v8::String>("outBinds").ToLocalChecked(),Connection::GetOutBinds(executeBaton), v8::ReadOnly);
-        Nan::Set(result, Nan::New<v8::String>("rows").ToLocalChecked(), Nan::Undefined());
-        Nan::Set(result, Nan::New<v8::String>("metaData").ToLocalChecked(), Nan::Undefined());
+
+      case DpiStmtBegin:
+      case DpiStmtDeclare:
+      case DpiStmtCall:
+        outBindValue = Connection::GetOutBinds(executeBaton);
+        // If any error report in callback
+        if ( !executeBaton->error.empty () )
+        {
+          argv[0] = v8::Exception::Error (
+                      Nan::New<v8::String> (
+                                    executeBaton->error).ToLocalChecked ());
+          argv[1] = Nan::Undefined ();
+          goto exitAsyncAfterExecute;
+        }
+
+        Nan::ForceSet(result,
+                      Nan::New<v8::String>("outBinds").ToLocalChecked(),
+                      outBindValue,
+                      v8::ReadOnly);
+        Nan::Set(result, Nan::New<v8::String>("rowsAffected").ToLocalChecked(),
+                 Nan::Undefined());
+
+        Nan::Set(result, Nan::New<v8::String>("rows").ToLocalChecked(),
+                 Nan::Undefined());
+        Nan::Set(result, Nan::New<v8::String>("metaData").ToLocalChecked(),
+                 Nan::Undefined());
         break;
       default :
-        Nan::ForceSet(result, Nan::New<v8::String>("rowsAffected").ToLocalChecked(),
-                    Nan::New<v8::Integer>((unsigned int) executeBaton->rowsAffected), v8::ReadOnly);
+        Nan::ForceSet(result,
+                      Nan::New<v8::String>("rowsAffected").ToLocalChecked(),
+             Nan::New<v8::Integer>((unsigned int) executeBaton->rowsAffected),
+                      v8::ReadOnly);
         if( executeBaton->numOutBinds )
         {
-          Nan::ForceSet(result, Nan::New<v8::String>("outBinds").ToLocalChecked(), Connection::GetOutBinds(executeBaton), v8::ReadOnly);
+          Nan::ForceSet(result,
+                        Nan::New<v8::String>("outBinds").ToLocalChecked(),
+                        Connection::GetOutBinds(executeBaton), v8::ReadOnly);
         }
         else
         {
-          Nan::Set(result, Nan::New<v8::String>("outBinds").ToLocalChecked(),Nan::Undefined());
+          Nan::Set(result, Nan::New<v8::String>("outBinds").ToLocalChecked(),
+                   Nan::Undefined());
         }
-        Nan::Set(result, Nan::New<v8::String>("rows").ToLocalChecked(), Nan::Undefined());
-        Nan::Set(result, Nan::New<v8::String>("metaData").ToLocalChecked(), Nan::Undefined());
+        Nan::Set(result, Nan::New<v8::String>("rows").ToLocalChecked(),
+                 Nan::Undefined());
+        Nan::Set(result, Nan::New<v8::String>("metaData").ToLocalChecked(),
+                 Nan::Undefined());
         break;
     }
     argv[1] = result;
   }
 exitAsyncAfterExecute:
   Local<Function> callback = Nan::New<Function>(executeBaton->cb);
+  executeBaton->getRS = false;  // To cleanup in case of parent SQL execution
   delete executeBaton;
   Nan::MakeCallback( Nan::GetCurrentContext()->Global(), callback, 2, argv );
   if(tc.HasCaught())
@@ -2555,25 +2910,68 @@ exitAsyncAfterExecute:
      Method to populate Metadata array
 
    PARAMETERS:
-     columnNames - Column Names
-     numCols     - number of columns
+     mInfo            - an array of structs representing column info
+     numCols          - number of columns
+     extendedMetaData - true  - populate all the fields
+                        false - populate only column names
 
    RETURNS:
      MetaData Handle
 */
-v8::Local<v8::Value> Connection::GetMetaData (std::string* columnNames,
-                                       unsigned int numCols )
+v8::Local<v8::Value> Connection::GetMetaData (
+                                          const MetaInfo     *mInfo,
+                                          const unsigned int numCols,
+                                          const bool         extendedMetaData )
 {
   Nan::EscapableHandleScope scope;
   Local<Array> metaArray = Nan::New<v8::Array>(numCols);
+
   for(unsigned int i=0; i < numCols ; i++)
   {
     Local<Object> column = Nan::New<v8::Object>();
-    Nan::Set(column, Nan::New<v8::String>("name").ToLocalChecked(),
-                Nan::New<v8::String>(columnNames[i].c_str()).ToLocalChecked()
-                );
+
+    Nan::Set( column, Nan::New<v8::String>("name").ToLocalChecked(),
+              Nan::New<v8::String>(mInfo[i].name).ToLocalChecked() );
+    if ( extendedMetaData )
+    {
+      Nan::Set( column, Nan::New<v8::String>("fetchType").ToLocalChecked(),
+                Nan::New<v8::Number>(mInfo[i].njsFetchType) );
+      Nan::Set( column, Nan::New<v8::String>("dbType").ToLocalChecked(),
+                Nan::New<v8::Number>(mInfo[i].dbType) );
+      switch ( mInfo[i].dbType )
+      {
+        case dpi::DpiVarChar:
+        case dpi::DpiFixedChar:
+        case dpi::DpiRaw:
+          Nan::Set( column, Nan::New<v8::String>("byteSize").ToLocalChecked(),
+                    Nan::New<v8::Number>(mInfo[i].byteSize) );
+          break;
+
+        case dpi::DpiNumber:
+          Nan::Set( column, Nan::New<v8::String>("precision").ToLocalChecked(),
+                    Nan::New<v8::Number>(mInfo[i].precision) );
+          Nan::Set( column, Nan::New<v8::String>("scale").ToLocalChecked(),
+                    Nan::New<v8::Number>(mInfo[i].scale) );
+          break;
+
+        case dpi::DpiTimestamp:
+        case dpi::DpiTimestampTZ:
+        case dpi::DpiTimestampLTZ:
+          // For the TIMESTAMP type columns, use mInfo.scale for precision
+          Nan::Set( column, Nan::New<v8::String>("precision").ToLocalChecked(),
+                    Nan::New<v8::Number>(mInfo[i].scale) );
+          break;
+
+        default:
+          break;
+      }
+      Nan::Set( column, Nan::New<v8::String>("nullable").ToLocalChecked(),
+                Nan::New<v8::Boolean>(mInfo[i].isNullable) );
+    }
+
     Nan::Set(metaArray, i, column);
   }
+
   return scope.Escape(metaArray);
 }
 
@@ -2592,21 +2990,31 @@ v8::Local<v8::Value> Connection::GetRows (eBaton* executeBaton)
 {
   Nan::EscapableHandleScope scope;
   Local<Array> rowsArray;
+  Local<Value> val;
+
   switch(executeBaton->outFormat)
   {
-    case ROWS_ARRAY :
+    case NJS_ROWS_ARRAY :
       rowsArray = Nan::New<v8::Array>(executeBaton->rowsFetched);
       for(unsigned int i = 0; i < executeBaton->rowsFetched; i++)
       {
         Local<Array> row = Nan::New<v8::Array>(executeBaton->numCols);
         for(unsigned int j = 0; j < executeBaton->numCols; j++)
         {
-          Nan::Set(row, j, Connection::GetValue(executeBaton, true, j, i));
+          val = Connection::GetValue ( executeBaton, true, j, i );
+          if ( executeBaton->error.empty ())
+          {
+            Nan::Set(row, j, val);
+          }
+          else
+          {
+            goto exitGetRows;
+          }
         }
         Nan::Set(rowsArray, i, row);
       }
       break;
-    case ROWS_OBJECT :
+    case NJS_ROWS_OBJECT :
       rowsArray = Nan::New<v8::Array>(executeBaton->rowsFetched);
       for(unsigned int i =0 ; i < executeBaton->rowsFetched; i++)
       {
@@ -2614,10 +3022,17 @@ v8::Local<v8::Value> Connection::GetRows (eBaton* executeBaton)
 
         for(unsigned int j = 0; j < executeBaton->numCols; j++)
         {
-          Nan::Set(row, Nan::New<v8::String>(executeBaton->columnNames[j].c_str(),
-                               (int) executeBaton->columnNames[j].length()).ToLocalChecked(),
-                   Connection::GetValue(executeBaton, true, j, i));
-
+          val = Connection::GetValue ( executeBaton, true, j, i );
+          if ( executeBaton->error.empty () )
+          {
+            Nan::Set(row,
+          Nan::New<v8::String>(executeBaton->mInfo[j].name).ToLocalChecked(),
+                     val );
+          }
+          else
+          {
+            goto exitGetRows;
+          }
         }
         Nan::Set(rowsArray, i, row);
       }
@@ -2676,7 +3091,8 @@ Local<Value> Connection::GetValue ( eBaton *executeBaton,
   else
   {
     // DML, PL/SQL execution
-    Bind *bind = executeBaton->binds[col];
+    Bind    *bind     = executeBaton->binds[col];
+    ExtBind *extBind  = executeBaton->extBinds[col];
 
     if(executeBaton->stmtIsReturning)
     {
@@ -2698,7 +3114,7 @@ Local<Value> Connection::GetValue ( eBaton *executeBaton,
     else if(bind->type == DpiRSet)
     {
       return scope.Escape ( Connection::GetValueRefCursor (
-                                      executeBaton, bind ));
+                                      executeBaton, bind, extBind ) );
     }
     else if (( bind->type == DpiClob ) ||
              ( bind->type == DpiBlob ) ||
@@ -2726,14 +3142,16 @@ Local<Value> Connection::GetValue ( eBaton *executeBaton,
      Method to create handle for refcursor
 
    PARAMETERS:
-     executeBaton - struct eBaton
-     bind         - struct bind
+     executeBaton - eBaton
+     bind         - bind
+     extBind      - extended bind fields
 
    RETURNS:
      Handle
 */
-Local<Value> Connection::GetValueRefCursor ( eBaton *executeBaton,
-                                              Bind *bind )
+Local<Value> Connection::GetValueRefCursor ( eBaton  *executeBaton,
+                                             Bind    *bind,
+                                             ExtBind *extBind )
 {
   Nan::EscapableHandleScope scope;
   Local<Object> resultSet;
@@ -2741,15 +3159,24 @@ Local<Value> Connection::GetValueRefCursor ( eBaton *executeBaton,
 
   if(bind->ind[0] != -1)
   {
+    unsigned int numCols  = 0;
+    const MetaInfo *mInfo = NULL;
+
     resultSet = Nan::New<FunctionTemplate>(ResultSet::resultSetTemplate_s)->
                             GetFunction() ->NewInstance();
-    /*
-     * IN case of REFCURSOR, bind->flags will indicate whether we got
-     * a valid handle, based on that numCols, metaData are queried.
-     */
+
+    if ( extBind )
+    {
+      numCols = extBind->numCols;
+      mInfo   = extBind->mInfo;
+    }
     (Nan::ObjectWrap::Unwrap<ResultSet> (resultSet))->
-                       setResultSet( (dpi::Stmt*)(bind->value),
-                                     executeBaton);
+                       setResultSet( ( dpi::Stmt*)(bind->value), executeBaton,
+                                       numCols, mInfo );
+    if ( !executeBaton->error.empty () )
+    {
+      value = Nan::Null ();
+    }
     value = resultSet;
   }
   else
@@ -3007,10 +3434,19 @@ v8::Local<v8::Value> Connection::GetOutBindArray ( eBaton *executeBaton )
     {
       Local<Value> val ;
       val = Connection::GetValue ( executeBaton, false, index );
-      Nan::Set(arrayBinds, it, val );
-      it ++;
+      if ( executeBaton->error.empty() )
+      {
+        Nan::Set(arrayBinds, it, val );
+        it ++;
+      }
+      else
+      {
+        goto exitGetOutBindArray;
+      }
     }
   }
+
+exitGetOutBindArray:
   return scope.Escape(arrayBinds);
 }
 
@@ -3040,11 +3476,19 @@ v8::Local<v8::Value> Connection::GetOutBindObject ( eBaton *executeBaton )
       binds[index]->key.erase(binds[index]->key.begin());
 
       val = Connection::GetValue ( executeBaton, false, index );
-      Nan::Set( objectBinds, Nan::New<v8::String>( binds[index]->key.c_str(),
-                        (int) binds[index]->key.length() ).ToLocalChecked(),
-                        val );
+      if ( executeBaton->error.empty () )
+      {
+        Nan::Set( objectBinds,
+                  Nan::New<v8::String>( binds[index]->key ).ToLocalChecked(),
+                  val );
+      }
+      else
+      {
+        goto exitGetOutBindObject;
+      }
     }
   }
+exitGetOutBindObject:
   return scope.Escape(objectBinds);
 }
 
@@ -3057,20 +3501,20 @@ v8::Local<v8::Value> Connection::GetOutBindObject ( eBaton *executeBaton )
  *   Checks whther connection is busy with database call or not using counters
  *
  * PARAMETERS
- *   connection      - connection object to check it's counters
+ *   connection      - connection object to check its counters
  *
  * Note: Currently this function can be used only in Release () method
  */
 ConnectionBusyStatus Connection::getConnectionBusyStatus ( Connection *conn )
 {
-  ConnectionBusyStatus connStatus = CONN_NOT_BUSY;
+  ConnectionBusyStatus connStatus = NJS_CONN_NOT_BUSY;
 
   if ( conn->lobCount_ != 0 )
-    connStatus = CONN_BUSY_LOB;
+    connStatus = NJS_CONN_BUSY_LOB;
   else if ( conn->rsCount_ != 0 )
-    connStatus = CONN_BUSY_RS;
+    connStatus = NJS_CONN_BUSY_RS;
   else if ( conn->dbCount_ != 1 ) // 1 for Release operaion itself
-    connStatus = CONN_BUSY_DB;
+    connStatus = NJS_CONN_BUSY_DB;
 
   return connStatus;
 }
@@ -3093,10 +3537,17 @@ NAN_METHOD(Connection::Release)
 
   connection = Nan::ObjectWrap::Unwrap<Connection>(info.Holder());
 
-  /* If connection is invalide from JS, then throw an exception */
+  /* If connection is invalid from JS, then throw an exception */
   NJS_CHECK_OBJECT_VALID2 ( connection, info ) ;
 
-  eBaton *releaseBaton = new eBaton ( connection->DBCount (), callback );
+  eBaton *releaseBaton = new eBaton ( connection->DBCount (), callback,
+                                      info.Holder() );
+
+  /*
+   * When we release the connection, we have to clear the reference of
+   * its parent.
+   */
+  releaseBaton->njsconn = connection;
 
   NJS_CHECK_NUMBER_OF_ARGS ( releaseBaton->error, info, 1, 1, exitRelease );
   if(!connection->isValid_)
@@ -3110,17 +3561,17 @@ NAN_METHOD(Connection::Release)
   connStat = getConnectionBusyStatus ( connection );
   switch ( connStat )
   {
-    case CONN_NOT_BUSY:
+    case NJS_CONN_NOT_BUSY:
       connection->isValid_    = false;
       releaseBaton->dpiconn   = connection->dpiconn_;
       break;
-    case CONN_BUSY_LOB:
+    case NJS_CONN_BUSY_LOB:
       releaseBaton->error = NJSMessages::getErrorMsg( errBusyConnLOB );
       break;
-    case CONN_BUSY_RS:
+    case NJS_CONN_BUSY_RS:
       releaseBaton->error = NJSMessages::getErrorMsg( errBusyConnRS );
       break;
-    case CONN_BUSY_DB:
+    case NJS_CONN_BUSY_DB:
       releaseBaton->error = NJSMessages::getErrorMsg( errBusyConnDB );
       break;
   }
@@ -3189,9 +3640,17 @@ void Connection::Async_AfterRelease(uv_work_t *req)
   Local<Value> argv[1];
 
   if(!(releaseBaton->error).empty())
-    argv[0] = v8::Exception::Error(Nan::New<v8::String>((releaseBaton->error).c_str()).ToLocalChecked());
+    argv[0] = v8::Exception::Error(
+                Nan::New<v8::String>(releaseBaton->error).ToLocalChecked());
   else
     argv[0] = Nan::Undefined();
+
+  /*
+   * When we release the connection, we have to clear the reference of
+   * its parent.
+   */
+  releaseBaton->njsconn->jsParent_.Reset ();
+
   Local<Function> callback = Nan::New<Function>(releaseBaton->cb);
   delete releaseBaton;
   Nan::MakeCallback( Nan::GetCurrentContext()->Global(),
@@ -3222,7 +3681,8 @@ NAN_METHOD(Connection::Commit)
   /* if connection is invalid from JS, then throw an exception */
   NJS_CHECK_OBJECT_VALID2 ( connection, info ) ;
 
-  eBaton *commitBaton = new eBaton ( connection->DBCount (), callback );
+  eBaton *commitBaton = new eBaton ( connection->DBCount (), callback,
+                                     info.Holder() );
 
   NJS_CHECK_NUMBER_OF_ARGS ( commitBaton->error, info, 1, 1, exitCommit );
   if(!connection->isValid_)
@@ -3295,7 +3755,8 @@ void Connection::Async_AfterCommit (uv_work_t *req)
   Local<Value> argv[1];
 
   if(!(commitBaton->error).empty())
-    argv[0] = v8::Exception::Error(Nan::New<v8::String>((commitBaton->error).c_str()).ToLocalChecked());
+    argv[0] = v8::Exception::Error(
+                 Nan::New<v8::String>(commitBaton->error).ToLocalChecked());
   else
     argv[0] = Nan::Undefined();
 
@@ -3328,7 +3789,8 @@ NAN_METHOD(Connection::Rollback)
   /* if connection is invalid from JS, then throw an exception */
   NJS_CHECK_OBJECT_VALID2 ( connection, info );
 
-  eBaton *rollbackBaton = new eBaton ( connection->DBCount (), callback );
+  eBaton *rollbackBaton = new eBaton ( connection->DBCount (), callback,
+                                       info.Holder() );
   NJS_CHECK_NUMBER_OF_ARGS ( rollbackBaton->error, info, 1, 1, exitRollback );
 
   if(!connection->isValid_)
@@ -3399,7 +3861,8 @@ void Connection::Async_AfterRollback(uv_work_t *req)
   Local<Value> argv[1];
 
   if(!(rollbackBaton->error).empty())
-    argv[0] = v8::Exception::Error(Nan::New<v8::String>((rollbackBaton->error).c_str()).ToLocalChecked());
+    argv[0] = v8::Exception::Error(
+            Nan::New<v8::String>(rollbackBaton->error).ToLocalChecked());
   else
     argv[0] = Nan::Undefined();
 
@@ -3432,7 +3895,8 @@ NAN_METHOD(Connection::Break)
   /* If connection is invalid from JS, then throw an exception */
   NJS_CHECK_OBJECT_VALID2 ( connection, info );
 
-  eBaton *breakBaton = new eBaton ( connection->DBCount (), callback );
+  eBaton *breakBaton = new eBaton ( connection->DBCount (), callback,
+                                    info.Holder() );
 
   NJS_CHECK_NUMBER_OF_ARGS ( breakBaton->error, info, 1, 1, exitBreak );
 
@@ -3507,7 +3971,8 @@ void Connection::Async_AfterBreak (uv_work_t *req)
   Local<Value> argv[1];
 
   if(!(breakBaton->error).empty())
-    argv[0] = v8::Exception::Error(Nan::New<v8::String>((breakBaton->error).c_str()).ToLocalChecked());
+    argv[0] = v8::Exception::Error(
+                  Nan::New<v8::String>(breakBaton->error).ToLocalChecked());
   else
     argv[0] = Nan::Undefined();
   Local<Function> callback = Nan::New<Function>(breakBaton->cb);
@@ -3543,8 +4008,9 @@ void Connection::v8Date2OraDate(v8::Local<v8::Value> val, Bind *bind)
   Local<Date> date = val.As<Date>();    // Expects to be of v8::Date type
 
   // Get the number of seconds from 1970-1-1 0:0:0
-  *(long double *)(bind->extvalue) = date->NumberValue ();
-
+  // In case given value is NULL/Undefined, set it to 0
+  *(long double *)(bind->extvalue) = (val->IsNull () || val->IsUndefined ()) ?
+                                       0 : date->NumberValue ();
 }
 
 /***************************************************************************/
@@ -3616,22 +4082,26 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
 
     Connection::AllocateBindArray ( bind->type, bind, executeBaton,
                                     &arrayElementSize );
-    return;
+    goto exitcbDynBufferAllocate;
   }
 
 
   if ( NJS_SIZE_T_OVERFLOW ( sizeof ( short ), nRows ) )
   {
     executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
-    return;
+    goto exitcbDynBufferAllocate;
   }
   else
   {
-    bind->ind = (short *)malloc ( (size_t)nRows * sizeof ( short ) ) ;
-    if( !bind->ind )
+    if ( !bind->ind )
     {
-      executeBaton->error = NJSMessages::getErrorMsg( errInsufficientMemory );
-      return;
+      bind->ind = (short *)malloc ( (size_t)nRows * sizeof ( short ) ) ;
+      if( !bind->ind )
+      {
+        executeBaton->error = NJSMessages::getErrorMsg(
+                                                    errInsufficientMemory );
+        goto exitcbDynBufferAllocate;
+      }
     }
   }
   if ( dmlReturning )
@@ -3639,22 +4109,32 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
     if ( NJS_SIZE_T_OVERFLOW ( sizeof ( unsigned int ), nRows ) )
     {
       executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
-      return;
+      goto exitcbDynBufferAllocate;
     }
     else
     {
       bind->len2 = ( unsigned int *)malloc ( nRows * sizeof ( unsigned int ) );
       if( !bind->len2 )
       {
-        executeBaton->error = NJSMessages::getErrorMsg( errInsufficientMemory );
-        return;
+        executeBaton->error = NJSMessages::getErrorMsg(
+                                                   errInsufficientMemory );
+        goto exitcbDynBufferAllocate;
       }
     }
   }
   else
   {
-    bind->len = (DPI_BUFLEN_TYPE *)malloc ( nRows *
-                                            sizeof ( DPI_BUFLEN_TYPE ) );
+    if ( !bind->len )
+    {
+      bind->len = (DPI_BUFLEN_TYPE *)malloc ( nRows *
+                                              sizeof ( DPI_BUFLEN_TYPE ) );
+      if ( !bind->len )
+      {
+        executeBaton->error = NJSMessages::getErrorMsg (
+                                                  errInsufficientMemory ) ;
+        goto exitcbDynBufferAllocate;
+      }
+    }
   }
 
   switch ( bind->type )
@@ -3665,7 +4145,7 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
     if ( NJS_SIZE_T_OVERFLOW ( (bind->maxSize + 1), nRows) )
     {
       executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
-      return;
+      goto exitcbDynBufferAllocate;
     }
     else
     {
@@ -3674,7 +4154,7 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
       {
         executeBaton->error = NJSMessages::getErrorMsg(
                                 errInsufficientMemory);
-        return;
+        goto exitcbDynBufferAllocate;
       }
     }
 
@@ -3692,7 +4172,7 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
     if ( NJS_SIZE_T_OVERFLOW ( sizeof (int), nRows) )
     {
       executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
-      return;
+      goto exitcbDynBufferAllocate;
     }
     else
     {
@@ -3701,7 +4181,7 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
       {
         executeBaton->error = NJSMessages::getErrorMsg(
                                 errInsufficientMemory);
-        return;
+        goto exitcbDynBufferAllocate;
       }
     }
     if ( !dmlReturning )
@@ -3714,7 +4194,7 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
     if ( NJS_SIZE_T_OVERFLOW ( sizeof ( unsigned int ), nRows) )
     {
       executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
-      return;
+      goto exitcbDynBufferAllocate;
     }
     else
     {
@@ -3723,7 +4203,7 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
       {
         executeBaton->error = NJSMessages::getErrorMsg(
                                 errInsufficientMemory);
-        return;
+        goto exitcbDynBufferAllocate;
       }
     }
     if ( !dmlReturning )
@@ -3736,7 +4216,7 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
     if ( NJS_SIZE_T_OVERFLOW ( sizeof ( double ), nRows) )
     {
       executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
-      return;
+      goto exitcbDynBufferAllocate;
     }
     else
     {
@@ -3745,7 +4225,7 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
       {
         executeBaton->error = NJSMessages::getErrorMsg(
                                 errInsufficientMemory);
-        return;
+        goto exitcbDynBufferAllocate;
       }
     }
     if ( !dmlReturning )
@@ -3768,7 +4248,7 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
     if ( NJS_SIZE_T_OVERFLOW ( sizeof ( Descriptor * ), nRows) )
     {
       executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
-      return;
+      goto exitcbDynBufferAllocate;
     }
     else
     {
@@ -3777,7 +4257,7 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
       {
         executeBaton->error = NJSMessages::getErrorMsg(
                                 errInsufficientMemory);
-        return;
+        goto exitcbDynBufferAllocate;
       }
     }
     // and allocate the underlying descriptor(s)
@@ -3798,7 +4278,7 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
       if ( NJS_SIZE_T_OVERFLOW ( sizeof ( long double ), nRows) )
       {
         executeBaton->error = NJSMessages::getErrorMsg( errResultsTooLarge );
-        return;
+        goto exitcbDynBufferAllocate;
       }
       else
       {
@@ -3808,7 +4288,7 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
         {
           executeBaton->error = NJSMessages::getErrorMsg(
                                   errInsufficientMemory);
-          return;
+          goto exitcbDynBufferAllocate;
         }
       }
       // needed to post-process DML RETURNING of TimestampLTZ
@@ -3831,7 +4311,7 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
     if ( NJS_SIZE_T_OVERFLOW ( bind->maxSize, nRows ) )
     {
       executeBaton->error = NJSMessages::getErrorMsg ( errResultsTooLarge );
-      return;
+      goto exitcbDynBufferAllocate;
     }
     else
     {
@@ -3840,6 +4320,9 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
     }
     break;
   }
+
+exitcbDynBufferAllocate:
+  ;
 }
 
 /****************************************************************************/
@@ -4008,8 +4491,10 @@ v8::Local<v8::Value> Connection::NewLob(eBaton* executeBaton,
   argv[0] = iLob;
 
   Local<Value>   result =
-    Local<Function>::Cast(jsOracledb->Get(Nan::New<v8::String>("newLob").ToLocalChecked()))->Call(
-      jsOracledb, 1, argv);
+    Local<Function>::Cast(
+                          jsOracledb->Get(
+                    Nan::New<v8::String>("newLob").ToLocalChecked()))->Call(
+                            jsOracledb, 1, argv);
 
   return scope.Escape(result);
 }

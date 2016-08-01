@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -73,28 +73,44 @@ class ILob;
 
 typedef struct LobBaton
 {
-  uv_work_t          req;
-  std::string        error;
-  dpi::Env          *dpienv;
-  dpi::Conn         *dpiconn;
+  uv_work_t                  req;
+  std::string                error;
+  dpi::Env                  *dpienv;
+  dpi::Conn                 *dpiconn;
 
-  ILob              *iLob;
-  char              *writebuf;
-  unsigned long long writelen;
-  RefCounter         counter;
+  ILob                      *iLob;
+  char                      *writebuf;
+  unsigned long long         writelen;
+  RefCounter                 counter;
 
-  Nan::Persistent<Function> cb;
+  Nan::Persistent<Function>  cb;
+  Nan::Persistent<Object>    lobbuf;
+  Nan::Persistent<Object>    jsLob;
 
-  LobBaton( unsigned int& count, Local<Function> callback ):
+  LobBaton( unsigned int& count, Local<Function> callback,
+            Local<Object> jsLobObj ):
     error(""), dpienv(NULL), dpiconn(NULL), iLob(NULL), writebuf(NULL),
     writelen(0), counter( count )
   {
     cb.Reset( callback );
+    jsLob.Reset ( jsLobObj );
+  }
+
+  LobBaton( unsigned int& count, Local<Object> buffer_obj,
+            Local<Function> callback, Local<Object> jsLobObj ):
+    error(""), dpienv(NULL), dpiconn(NULL), iLob(NULL), writebuf(NULL),
+    writelen(0), counter( count )
+  {
+    cb.Reset( callback );
+    lobbuf.Reset(buffer_obj);
+    jsLob.Reset ( jsLobObj );
   }
 
   ~LobBaton ()
    {
      cb.Reset();
+     lobbuf.Reset();
+     jsLob.Reset ();
    }
 
 } LobBaton;
@@ -193,24 +209,25 @@ class ILob : public Nan::ObjectWrap
   static void Async_Write (uv_work_t *req);
   static void Async_AfterWrite (uv_work_t *req);
 
-  Descriptor    *lobLocator_;
-  unsigned short fetchType_;
+  Descriptor               *lobLocator_;
+  unsigned short            fetchType_;
 
-  Connection    *njsconn_;
-  dpi::Conn     *dpiconn_;
-  DpiHandle     *svch_;
-  DpiHandle     *errh_;
-  bool           isValid_;
-  State          state_;
+  Connection               *njsconn_;
+  dpi::Conn                *dpiconn_;
+  DpiHandle                *svch_;
+  DpiHandle                *errh_;
+  bool                      isValid_;
+  State                     state_;
 
-  char              *buf_;
-  unsigned int       bufSize_;
-  unsigned int       chunkSize_;
-  unsigned long long length_;
-  unsigned long long offset_;
-  unsigned long      amountRead_;
-  unsigned long long amountWritten_;
-  unsigned int       type_;
+  char                     *buf_;
+  unsigned int              bufSize_;
+  unsigned int              chunkSize_;
+  unsigned long long        length_;
+  unsigned long long        offset_;
+  unsigned long             amountRead_;
+  unsigned long long        amountWritten_;
+  unsigned int              type_;
+  Nan::Persistent<Object>   jsParent_;
 };
 
 #endif                       /** __NJSILOB_H__ **/

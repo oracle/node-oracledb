@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -50,19 +50,13 @@ var inFileName = './test/clobexample.txt';  // the file with text to be inserted
 var outFileName = './test/clobstreamout.txt';
 
 describe('40. dataTypeClob.js', function() {
-  this.timeout(15000);
-
-  if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
+  this.timeout(10000);
 
   var connection = null;
   var tableName = "nodb_myclobs";
 
   before('get one connection', function(done) {
-    oracledb.getConnection(credential, function(err, conn) {
+    oracledb.getConnection(dbConfig, function(err, conn) {
       should.not.exist(err);
       connection = conn;
       done();
@@ -92,7 +86,7 @@ describe('40. dataTypeClob.js', function() {
     })
 
     it('40.1.1 stores CLOB value correctly', function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
       async.series([
         function clobinsert1(callback) {
 

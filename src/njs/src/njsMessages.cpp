@@ -36,48 +36,53 @@ using namespace std;
 
 static const char *errMsg[] =
 {
-  "NJS-001: expected callback as last parameter",
-  "NJS-002: invalid pool",
-  "NJS-003: invalid connection",
-  "NJS-004: invalid value for property %s",
-  "NJS-005: invalid value for parameter %d",
-  "NJS-006: invalid type for parameter %d",
-  "NJS-007: invalid value for \"%s\" in parameter %d",
-  "NJS-008: invalid type for \"%s\" in parameter %d",
-  "NJS-009: invalid number of parameters",
-  "NJS-010: unsupported data type in select list",
-  "NJS-011: encountered bind value and type mismatch in parameter %d",
-  "NJS-012: encountered invalid bind datatype in parameter %d",
-  "NJS-013: invalid bind direction",
-  "NJS-014: %s is a read-only property",
-  "NJS-016: buffer is too small for OUT binds",
-  "NJS-017: concurrent operations on resultSet are not allowed",
-  "NJS-018: invalid result set",
-  "NJS-019: resultSet cannot be returned for non-query statements",
-  "NJS-020: empty array was specified to fetch values as string",
-  "NJS-021: invalid type for conversion specified",
-  "NJS-022: invalid LOB",
-  "NJS-023: concurrent operations on LOB are not allowed",
-  "NJS-024: memory allocation failed",
-  "NJS-025: overflow when calculating results area size",
-  "NJS-026: maxRows must be greater than zero",
-  "NJS-027: unexpected SQL parsing error",
-  "NJS-028: raw database type is not supported with DML Returning statements",
-  "NJS-029: Invalid object from javascript",
-  "NJS-030: connection cannot be released because Lob operations are in"
-            " progress",
-  "NJS-031: connection cannot be released because ResultSet operations are"
-            " in progress",
-  "NJS-032: connection cannot be released because a database call is in"
-            " progress",
-  "NJS-033: an internal error occurred. [%s][%s]",
-  "NJS-034: data type is unsupported for array bind",
-  "NJS-035: maxArraySize is required for IN OUT array bind",
-  "NJS-036: given array is of size greater than maxArraySize",
-  "NJS-037: incompatible type of value provided",
-  "NJS-038: maxArraySize value should be greater than 0",
-  "NJS-039: empty array is not allowed for IN bind",
-  "NJS-040: connection request timeout",
+  "NJS-000: success",                              // errSuccess
+  "NJS-001: expected callback as last parameter",  // errMissingCallback
+  "NJS-002: invalid pool",                         // errInvalidPool
+  "NJS-003: invalid connection",                   // errInvalidConnection
+  "NJS-004: invalid value for property %s",        // errInvalidPropertyValue
+  "NJS-005: invalid value for parameter %d",       // errInvalidParameterValue
+  "NJS-006: invalid type for parameter %d",        // errInvalidParameterType
+  "NJS-007: invalid value for \"%s\" in parameter %d", // errInvalidPropertyValueInParam
+  "NJS-008: invalid type for \"%s\" in parameter %d",  // errInvalidPropertyTypeInParam
+  "NJS-009: invalid number of parameters",         // errInvalidNumberOfParameters
+  "NJS-010: unsupported data type in select list", // errUnsupportedDatType
+  "NJS-011: encountered bind value and type mismatch in parameter %d", // errBindValueAndTypeMismatch
+  "NJS-012: encountered invalid bind datatype in parameter %d", // errInvalidBindDataType
+  "NJS-013: invalid bind direction",               // errInvalidBindDirection
+  "NJS-014: %s is a read-only property",           // errReadOnly
+  "NJS-015: type was not specified for conversion", // errNoTypeForConversion
+  "NJS-016: buffer is too small for OUT binds",    // errInsufficientBufferForBinds
+  "NJS-017: concurrent operations on ResultSet are not allowed", // errBusyResultSet
+  "NJS-018: invalid ResultSet",                   // errInvalidResultSet
+  "NJS-019: ResultSet cannot be returned for non-query statements", // errInvalidNonQueryExecution
+  "NJS-020: empty array was specified to fetch values as string", // errEmptyArrayForFetchAs
+  "NJS-021: invalid type for conversion specified", // errInvalidTypeForConversion
+  "NJS-022: invalid Lob",                           // errInvalidLob
+  "NJS-023: concurrent operations on LOB are not allowed",  // errBusyLob
+  "NJS-024: memory allocation failed",  // errInsufficientMemory
+  "NJS-025: overflow when calculating results area size", // errResultsTooLarge
+  "NJS-026: maxRows must be greater than zero",   // errInvalidmaxRows
+  "NJS-027: unexpected SQL parsing error",        // errSQLSyntaxError
+  "NJS-028: raw database type is not supported with DML Returning statements", // errBufferReturningInvalid
+  "NJS-029: invalid object from JavaScript",      // errInvalidJSObject
+  "NJS-030: connection cannot be released because Lob operations are in progress",  // errBusyConnLOB
+  "NJS-031: connection cannot be released because ResultSet operations are in progress", // errBusyConnRS
+  "NJS-032: connection cannot be released because a database call is in progress", // errBusyConnDB
+  "NJS-033: an internal error occurred. [%s][%s]", // errInternalError
+  "NJS-034: data type is unsupported for array bind", // errInvalidTypeForArrayBind
+  "NJS-035: maxArraySize is required for IN OUT array bind", // errReqdMaxArraySize
+  "NJS-036: given array is of size greater than maxArraySize", // errInvalidArraySize
+  "NJS-037: incompatible type of value provided", // errIncompatibleTypeArrayBind
+  "NJS-038: maxArraySize value should be greater than 0", // errInvalidValueArrayBind
+  "NJS-039: empty array is not allowed for IN bind", // errEmptyArray
+  "NJS-040: connection request timeout",  // errConnRequestTimeout
+
+  "NJS-041: cannot convert ResultSet to QueryStream after invoking methods", // errCannotConvertRsToStream
+  "NJS-042: cannot invoke ResultSet methods after converting to QueryStream", // errCannotInvokeRsMethods
+  "NJS-043: ResultSet already converted to QueryStream", // errResultSetAlreadyConverted
+  "NJS-044: named JSON object is not expected in this context", // errNamedJSON
+
 };
 
 string NJSMessages::getErrorMsg ( NJSErrorType err, ... )
@@ -90,7 +95,7 @@ string NJSMessages::getErrorMsg ( NJSErrorType err, ... )
   {
     // print all specified arguments
     va_start (vlist, err);
-    if ( vsnprintf (msg, MAX_ERROR_MSG_LEN, errMsg[err-1], vlist) <= 0)
+    if ( vsnprintf (msg, MAX_ERROR_MSG_LEN, errMsg[err], vlist) <= 0)
     {
       msg[0] = 0;
     }

@@ -20,3 +20,6 @@ sqlnet.log
 sqlnet.ora
 tnsnames.ora
 oraaccess.xml
+instantclient
+instantclient_11_2
+instantclient_12_1

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -88,8 +88,8 @@ Nan::Persistent<FunctionTemplate> ILob::iLobTemplate_s;
 
 ILob::ILob():
   lobLocator_(NULL), njsconn_(NULL), dpiconn_(NULL), svch_(NULL), errh_(NULL),
-  isValid_(false), state_(INACTIVE), buf_(NULL), bufSize_(0), chunkSize_(0),
-  length_(0), offset_(1), amountRead_(0), type_(DATA_UNKNOWN)
+  isValid_(false), state_(NJS_INACTIVE), buf_(NULL), bufSize_(0), chunkSize_(0),
+  length_(0), offset_(1), amountRead_(0), type_(NJS_DATATYPE_UNKNOWN)
 {
 
 }
@@ -136,6 +136,7 @@ ILob::~ILob()
 
 void ILob::cleanup()
 {
+  this->jsParent_.Reset ();
   if (buf_)
   {
     delete [] buf_;
@@ -210,6 +211,8 @@ void ILob::setILob(eBaton *executeBaton, ProtoILob *protoILob)
     dpiconn_               = executeBaton->dpiconn;
     svch_                  = executeBaton->dpiconn->getSvch();
 
+    this->jsParent_.Reset ( executeBaton->jsConn );
+
     // error
     errh_                  = protoILob->errh_;
     protoILob->errh_       = NULL;
@@ -227,12 +230,12 @@ void ILob::setILob(eBaton *executeBaton, ProtoILob *protoILob)
     {
       // accommodate multi-byte charsets
       buf_ = new char[bufSize_ * dpiconn_->getByteExpansionRatio()];
-      type_ = DATA_CLOB;
+      type_ = NJS_DATATYPE_CLOB;
     }
     else if (fetchType_ == DpiBlob)
     {
       buf_ = new char[bufSize_];
-      type_ = DATA_BLOB;
+      type_ = NJS_DATATYPE_BLOB;
     }
 
     // Now the ILob object is valid
@@ -368,6 +371,9 @@ NAN_METHOD(ILob::Release)
     return;
   }
 
+  /*
+   * cleanup() will clear the reference of its parent jsConn.
+   */
   iLob->cleanup();
 
   info.GetReturnValue().SetUndefined();
@@ -616,7 +622,7 @@ NAN_SETTER(ILob::SetPieceSize)
   NJS_CHECK_OBJECT_VALID(iLob);
   NJS_SET_PROP_UINT(iLob->bufSize_, value, "pieceSize");
 
-  if (iLob->state_ == ACTIVE)
+  if (iLob->state_ == NJS_ACTIVE)
   {
     msg = NJSMessages::getErrorMsg(errBusyLob);
 
@@ -732,7 +738,7 @@ NAN_SETTER(ILob::SetOffset)
     NJS_SET_EXCEPTION(msg.c_str(), (int)msg.length());
   }
 
-  if (iLob->state_ == ACTIVE)
+  if (iLob->state_ == NJS_ACTIVE)
   {
     msg = NJSMessages::getErrorMsg(errBusyLob);
 
@@ -831,7 +837,7 @@ NAN_METHOD(ILob::Read)
 {
 
   Local<Function>  callback;
-  ILob            *iLob;
+  ILob             *iLob;
 
   NJS_GET_CALLBACK(callback, info);
   iLob = Nan::ObjectWrap::Unwrap<ILob>(info.Holder());
@@ -839,7 +845,8 @@ NAN_METHOD(ILob::Read)
   /* If iLob object is invalid from JS, then throw an exception */
   NJS_CHECK_OBJECT_VALID2 (iLob, info);
 
-  LobBaton *lobBaton = new LobBaton ( iLob->njsconn_->LOBCount (), callback );
+  LobBaton *lobBaton = new LobBaton ( iLob->njsconn_->LOBCount (), callback,
+                                      info.Holder() );
 
   NJS_CHECK_NUMBER_OF_ARGS (lobBaton->error, info, 1, 1, exitRead);
 
@@ -853,7 +860,7 @@ NAN_METHOD(ILob::Read)
 
    // mark Lob as active before leaving main thread, but not in
    // case of an error.
-  iLob->state_ = ACTIVE;
+  iLob->state_ = NJS_ACTIVE;
 
   if( !iLob->njsconn_->isValid() )
   {
@@ -964,11 +971,12 @@ void ILob::Async_AfterRead(uv_work_t *req)
   Nan::TryCatch  tc;
   Local<Value> argv[2];
 
-  iLob->state_ = INACTIVE;     // mark Lob as inactive as back in main thread
+  iLob->state_ = NJS_INACTIVE;     // mark Lob as inactive as back in main thread
 
   if(!(lobBaton->error).empty())
   {
-    argv[0] = v8::Exception::Error(Nan::New<v8::String>((lobBaton->error).c_str()).ToLocalChecked());
+    argv[0] = v8::Exception::Error(
+                    Nan::New<v8::String>(lobBaton->error).ToLocalChecked());
     argv[1] = Nan::Undefined();
   }
   else
@@ -980,7 +988,7 @@ void ILob::Async_AfterRead(uv_work_t *req)
       if (iLob->fetchType_ == DpiClob)
       {
         Local<Value> str = Nan::New<v8::String>((char *)iLob->buf_,
-                                              iLob->amountRead_).ToLocalChecked();
+                                         iLob->amountRead_).ToLocalChecked();
         argv[1] = str;
       }
       else
@@ -1029,8 +1037,8 @@ NAN_METHOD(ILob::Write)
 {
 
   Local<Function>  callback;
-  Local<Object> buffer_obj;
-  ILob            *iLob;
+  Local<Object> buffer_obj = info[0]->ToObject();
+  ILob             *iLob;
 
   NJS_GET_CALLBACK(callback, info);
   iLob = Nan::ObjectWrap::Unwrap<ILob>(info.Holder());
@@ -1038,7 +1046,8 @@ NAN_METHOD(ILob::Write)
   /* If iLob is invalid from JS, then throw an exception */
   NJS_CHECK_OBJECT_VALID2 ( iLob, info );
 
-  LobBaton *lobBaton = new LobBaton ( iLob->njsconn_->LOBCount (), callback );
+  LobBaton *lobBaton = new LobBaton ( iLob->njsconn_->LOBCount (), buffer_obj,
+                                      callback, info.Holder() );
 
   NJS_CHECK_NUMBER_OF_ARGS (lobBaton->error, info, 2, 2, exitWrite);
 
@@ -1050,13 +1059,12 @@ NAN_METHOD(ILob::Write)
 
   lobBaton->iLob = iLob;
 
-  buffer_obj = info[0]->ToObject();
   lobBaton->writebuf = Buffer::Data(buffer_obj);
   lobBaton->writelen = Buffer::Length(buffer_obj);
 
    // mark Lob as active before leaving main thread, but not in
    // case of an error
-  iLob->state_ = ACTIVE;
+  iLob->state_ = NJS_ACTIVE;
 
   if( !iLob->njsconn_->isValid() )
   {
@@ -1161,10 +1169,11 @@ void ILob::Async_AfterWrite(uv_work_t *req)
   Nan::TryCatch  tc;
   Local<Value> argv[1];
 
-  iLob->state_ = INACTIVE;     // mark Lob as inactive as back in main thread
+  iLob->state_ = NJS_INACTIVE;     // mark Lob as inactive as back in main thread
 
   if(!(lobBaton->error).empty())
-    argv[0] = v8::Exception::Error(Nan::New<v8::String>((lobBaton->error).c_str()).ToLocalChecked());
+    argv[0] = v8::Exception::Error(
+                  Nan::New<v8::String>(lobBaton->error).ToLocalChecked());
   else
     argv[0] = Nan::Undefined();
 

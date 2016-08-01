@@ -34,76 +34,22 @@ var oracledbCLib;
 var oracledb = require('oracledb');
 var should   = require('should');
 var dbConfig = require('./dbconfig.js');
-var credential;
-
-try {
-  oracledbCLib =  require('../build/Release/oracledb');
-} catch (err) {
-  if (err.code === 'MODULE_NOT_FOUND') {
-    oracledbCLib = require('../build/Debug/oracledb');
-  } else {
-    throw err;
-  }
-}
-
-if (dbConfig.externalAuth) {
-  credential = { externalAuth: true, connectString: dbConfig.connectString };
-} else {
-  credential = dbConfig;
-}
 
 describe('45. instanceof.js', function() {
 
-  it('45.1 all constructors have been accounted for', function(done) {
-    var cLibKeysIdx;
-    var cLibKeys;
-    var instKeysIdx;
-    var instKeys;
-    var foundAllConstructors = true;
-
-    cLibKeys = Object.keys(oracledbCLib);
-    instKeys = Object.keys(oracledb);
-
-    cLibLoop:
-    for (cLibKeysIdx = 0; cLibKeysIdx < cLibKeys.length; cLibKeysIdx += 1) {
-      if (typeof oracledbCLib[cLibKeys[cLibKeysIdx]] !== 'function') {
-        continue cLibLoop;
-      }
-
-      for (instKeysIdx = 0; instKeysIdx < instKeys.length; instKeysIdx += 1) {
-        if (cLibKeys[cLibKeysIdx] === instKeys[instKeysIdx] ||
-          // The following exception is because the Lob class is documented as "Lob"
-          // so that's how it was exposed on the instance
-          cLibKeys[cLibKeysIdx] === 'ILob' && instKeys[instKeysIdx] === 'Lob'
-        ) {
-          continue cLibLoop;
-        }
-      }
-
-      foundAllConstructors = false;
-      console.log('Failed to account for ' + cLibKeys[cLibKeysIdx]);
-
-      break cLibLoop;
-    }
-
-    foundAllConstructors.should.be.true;
+  it('45.1 instanceof works for the oracledb instance', function(done) {
+    (oracledb instanceof oracledb.Oracledb).should.be.true();
 
     done();
   });
 
-  it('45.2 instanceof works for the oracledb instance', function(done) {
-    (oracledb instanceof oracledb.Oracledb).should.be.true;
-
-    done();
-  });
-
-  it('45.3 instanceof works for pool instances', function(done) {
+  it('45.2 instanceof works for pool instances', function(done) {
     oracledb.createPool(
       {
-        externalAuth    : credential.externalAuth,
-        user              : credential.user,
-        password          : credential.password,
-        connectString     : credential.connectString,
+        externalAuth    : dbConfig.externalAuth,
+        user              : dbConfig.user,
+        password          : dbConfig.password,
+        connectString     : dbConfig.connectString,
         poolMin           : 0,
         poolMax           : 1,
         poolIncrement     : 1
@@ -111,7 +57,7 @@ describe('45. instanceof.js', function() {
       function(err, pool){
         should.not.exist(err);
 
-        (pool instanceof oracledb.Pool).should.be.true;
+        (pool instanceof oracledb.Pool).should.be.true();
 
         pool.terminate(function(err) {
           should.not.exist(err);
@@ -122,11 +68,11 @@ describe('45. instanceof.js', function() {
     );
   });
 
-  it('45.4 instanceof works for connection instances', function(done) {
-    oracledb.getConnection(credential, function(err, conn) {
+  it('45.3 instanceof works for connection instances', function(done) {
+    oracledb.getConnection(dbConfig, function(err, conn) {
       should.not.exist(err);
 
-      (conn instanceof oracledb.Connection).should.be.true;
+      (conn instanceof oracledb.Connection).should.be.true();
 
       conn.release(function(err) {
         should.not.exist(err);
@@ -136,8 +82,8 @@ describe('45. instanceof.js', function() {
     });
   });
 
-  it('45.5 instanceof works for resultset instances', function(done) {
-    oracledb.getConnection(credential, function(err, conn) {
+  it('45.4 instanceof works for resultset instances', function(done) {
+    oracledb.getConnection(dbConfig, function(err, conn) {
       should.not.exist(err);
 
       conn.execute(
@@ -149,7 +95,7 @@ describe('45. instanceof.js', function() {
         function(err, result) {
           should.not.exist(err);
 
-          (result.resultSet instanceof oracledb.ResultSet).should.be.true;
+          (result.resultSet instanceof oracledb.ResultSet).should.be.true();
 
           result.resultSet.close(function(err) {
             should.not.exist(err);
@@ -165,8 +111,8 @@ describe('45. instanceof.js', function() {
     });
   });
 
-  it('45.6 instanceof works for lob instances', function(done) {
-    oracledb.getConnection(credential, function(err, conn) {
+  it('45.5 instanceof works for lob instances', function(done) {
+    oracledb.getConnection(dbConfig, function(err, conn) {
       should.not.exist(err);
 
       conn.execute(
@@ -174,7 +120,7 @@ describe('45. instanceof.js', function() {
         function(err, result) {
           should.not.exist(err);
 
-          (result.rows[0][0] instanceof oracledb.Lob).should.be.true;
+          (result.rows[0][0] instanceof oracledb.Lob).should.be.true();
 
           conn.release(function(err) {
             should.not.exist(err);

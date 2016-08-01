@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -31,6 +31,7 @@
  *     51 onwards are for other tests
  *
  *****************************************************************************/
+'use strict';
 
 var oracledb = require ( 'oracledb' );
 var should   = require ( 'should' );
@@ -39,15 +40,9 @@ var dbConfig = require ( './dbconfig.js' );
 
 describe('56. fetchAs.js', function() {
 
-  if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
-
   var connection = null;
   beforeEach('get one connection', function(done) {
-    oracledb.getConnection(credential, function(err, conn) {
+    oracledb.getConnection(dbConfig, function(err, conn) {
       should.not.exist(err);
       connection = conn;
       done();
@@ -87,7 +82,7 @@ describe('56. fetchAs.js', function() {
       function(err, result) {
         should.not.exist(err);
         // console.log(result.rows[0]);
-        result.rows[0].TS_DATE.should.be.a.String;
+        result.rows[0].TS_DATE.should.be.a.String();
         done();
       }
     );
@@ -108,8 +103,8 @@ describe('56. fetchAs.js', function() {
       function(err, result) {
         should.not.exist(err);
         // console.log(result.rows[0]);
-        result.rows[0].TS_DATE.should.be.a.String;
-        result.rows[0].TS_NUM.should.be.a.String;
+        result.rows[0].TS_DATE.should.be.a.String();
+        result.rows[0].TS_NUM.should.be.a.String();
         Number(result.rows[0].TS_NUM).should.equal(1234567);
         done();
       }
@@ -133,8 +128,8 @@ describe('56. fetchAs.js', function() {
       function(err, result) {
         should.not.exist(err);
         // console.log(result.rows[0]);
-        result.rows[0].TS_DATE.should.be.a.String;
-        result.rows[0].TS_NUM.should.be.a.String;
+        result.rows[0].TS_DATE.should.be.a.String();
+        result.rows[0].TS_NUM.should.be.a.String();
         Number(result.rows[0].TS_NUM).should.equal(1234567);
         done();
       }
@@ -159,7 +154,7 @@ describe('56. fetchAs.js', function() {
         should.not.exist(err);
         // console.log(result.rows[0]);
         result.rows[0].TS_DATE.should.be.an.Object;
-        result.rows[0].TS_NUM.should.be.a.String;
+        result.rows[0].TS_NUM.should.be.a.String();
         Number(result.rows[0].TS_NUM).should.equal(1234567);
         done();
       }
@@ -180,7 +175,7 @@ describe('56. fetchAs.js', function() {
       function(err, result) {
         should.not.exist(err);
         // console.log(result.rows[0].TS_DATA);
-        result.rows[0].ROWID.should.be.a.String;
+        result.rows[0].ROWID.should.be.a.String();
         done();
       }
     );
@@ -204,7 +199,7 @@ describe('56. fetchAs.js', function() {
         result.resultSet.getRow( function(err, row) {
           should.not.exist(err);
           // console.log(row);
-          row.ROWID.should.be.a.String;
+          row.ROWID.should.be.a.String();
           result.resultSet.close( function(err) {
             should.not.exist(err);
             done();
@@ -252,7 +247,7 @@ describe('56. fetchAs.js', function() {
         },
         function(err, result) {
           should.not.exist(err);
-          result.rows[0].TS_NUM.should.be.a.String;
+          result.rows[0].TS_NUM.should.be.a.String();
           (result.rows[0].TS_NUM).should.eql(numResults[numStrs.indexOf(element)]);
           callback();
         }
@@ -274,7 +269,7 @@ describe('56. fetchAs.js', function() {
         function(err, result) {
           should.not.exist(err);
           // console.log(result.rows[0].TS_NUM);
-          result.rows[0].TS_NUM.should.be.a.String;
+          result.rows[0].TS_NUM.should.be.a.String();
           (result.rows[0].TS_NUM).should.eql(numResults[numStrs.indexOf(element)]);
           callback();
         }
@@ -284,4 +279,18 @@ describe('56. fetchAs.js', function() {
       done();
     });
   })
+
+  // FetchInfo format should <columName> : {type : oracledb.<type>
+  it ('56.10 invalid syntax for type should result in error', function (done){
+    connection.execute (
+      "SELECT SYSDATE AS THE_DATE FROM DUAL",
+      { },
+      { fetchInfo : { "THE_DATE" : oracledb.STRING }},
+      function ( err, result ) {
+        should.exist ( err ) ;
+        (err.message).should.startWith ('NJS-015:');
+        done ();
+      } );
+  });
+
 })
