@@ -69,8 +69,8 @@ using namespace v8;
 
 /* Keep the version in sync with package.json */
 #define NJS_NODE_ORACLEDB_MAJOR       1
-#define NJS_NODE_ORACLEDB_MINOR       8
-#define NJS_NODE_ORACLEDB_PATCH       0
+#define NJS_NODE_ORACLEDB_MINOR       10
+#define NJS_NODE_ORACLEDB_PATCH       1
 
 /* Used for Oracledb.version */
 #define NJS_NODE_ORACLEDB_VERSION   ( (NJS_NODE_ORACLEDB_MAJOR * 10000) + \
@@ -87,17 +87,18 @@ class Oracledb: public Nan::ObjectWrap
    // Oracledb class
    static void Init(Handle<Object> target);
 
-   dpi::Env*          getDpiEnv () const          { return dpienv_; }
-   bool               getAutoCommit () const      { return autoCommit_; }
-   unsigned int       getOutFormat () const       { return outFormat_; }
-   unsigned int       getMaxRows ()  const        { return maxRows_; }
-   unsigned int       getStmtCacheSize ()  const  { return stmtCacheSize_; }
-   unsigned int       getPoolMin () const         { return poolMin_; }
-   unsigned int       getPoolMax () const         { return poolMax_; }
-   unsigned int       getPoolIncrement () const   { return poolIncrement_; }
-   unsigned int       getPoolTimeout () const     { return poolTimeout_; }
-   unsigned int       getPrefetchRows () const    { return prefetchRows_; }
-   const std::string& getConnectionClass () const { return connClass_; }
+   dpi::Env*          getDpiEnv () const           { return dpienv_; }
+   bool               getAutoCommit () const       { return autoCommit_; }
+   unsigned int       getOutFormat () const        { return outFormat_; }
+   unsigned int       getMaxRows ()  const         { return maxRows_; }
+   unsigned int       getStmtCacheSize ()  const   { return stmtCacheSize_; }
+   unsigned int       getPoolMin () const          { return poolMin_; }
+   unsigned int       getPoolMax () const          { return poolMax_; }
+   unsigned int       getPoolIncrement () const    { return poolIncrement_; }
+   unsigned int       getPoolTimeout () const      { return poolTimeout_; }
+   unsigned int       getPrefetchRows () const     { return prefetchRows_; }
+   const std::string& getConnectionClass () const  { return connClass_; }
+   bool               getExtendedMetaData () const { return extendedMetaData_; }
 
    const DataType*    getFetchAsStringTypes () const;
 
@@ -129,6 +130,7 @@ private:
    static NAN_GETTER(GetPoolTimeout);
    static NAN_GETTER(GetStmtCacheSize);
    static NAN_GETTER(GetAutoCommit);
+   static NAN_GETTER(GetExtendedMetaData);
    static NAN_GETTER(GetMaxRows);
    static NAN_GETTER(GetOutFormat);
    static NAN_GETTER(GetVersion);
@@ -146,6 +148,7 @@ private:
    static NAN_SETTER(SetPoolTimeout);
    static NAN_SETTER(SetStmtCacheSize);
    static NAN_SETTER(SetAutoCommit);
+   static NAN_SETTER(SetExtendedMetaData);
    static NAN_SETTER(SetMaxRows);
    static NAN_SETTER(SetOutFormat);
    static NAN_SETTER(SetVersion);
@@ -162,6 +165,7 @@ private:
    dpi::Env* dpienv_;
    unsigned int outFormat_;
    bool         autoCommit_;
+   bool         extendedMetaData_;
    unsigned int maxRows_;
 
    unsigned int stmtCacheSize_;
@@ -187,31 +191,32 @@ class Pool;
 
 typedef struct connectionBaton
 {
-  uv_work_t req;
-  std::string user;
-  std::string pswrd;
-  std::string connStr;
-  std::string connClass;
-  bool externalAuth;
+  uv_work_t                  req;
+  std::string                user;
+  std::string                pswrd;
+  std::string                connStr;
+  std::string                connClass;
+  bool                       externalAuth;
   std::string error;
 
-  int poolMax;
-  int poolMin;
-  int poolIncrement;
-  int poolTimeout;
-  int stmtCacheSize;
-  unsigned int lobPrefetchSize;
+  int                        poolMax;
+  int                        poolMin;
+  int                        poolIncrement;
+  int                        poolTimeout;
+  int                        stmtCacheSize;
+  unsigned int               lobPrefetchSize;
 
-  unsigned int maxRows;
-  unsigned int outFormat;
-  Nan::Persistent<Function> cb;
-  dpi::Env*   dpienv;
-  dpi::Conn*  dpiconn;
-  dpi::SPool* dpipool;
+  unsigned int               maxRows;
+  unsigned int               outFormat;
+  Nan::Persistent<Function>  cb;
+  dpi::Env*                  dpienv;
+  dpi::Conn*                 dpiconn;
+  dpi::SPool*                dpipool;
+  Nan::Persistent<Object>    jsOradb;
 
   Oracledb *oracledb;
 
-  connectionBaton( Local<Function> callback ) :
+  connectionBaton( Local<Function> callback, Local<Object> jsOradbObj ) :
                       user(""), pswrd(""), connStr(""), connClass(""),
                       externalAuth(false), error(""),
                       poolMax(0), poolMin(0), poolIncrement(0),
@@ -220,11 +225,13 @@ typedef struct connectionBaton
                       dpiconn(NULL), dpipool(NULL)
   {
     cb.Reset( callback );
+    jsOradb.Reset ( jsOradbObj );
   }
 
   ~connectionBaton()
    {
      cb.Reset();
+     jsOradb.Reset ();
    }
 
 }connectionBaton;

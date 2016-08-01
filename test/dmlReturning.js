@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -46,12 +46,6 @@ var assist   = require('./dataTypeAssist.js');
 
 describe('6. dmlReturning.js', function(){
 
-  if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
-
   describe('6.1 NUMBER & STRING driver data type', function() {
 
     var connection = null;
@@ -59,12 +53,12 @@ describe('6. dmlReturning.js', function(){
       var makeTable =
       "BEGIN \
             DECLARE \
-                e_table_exists EXCEPTION; \
-                PRAGMA EXCEPTION_INIT(e_table_exists, -00942); \
+                e_table_missing EXCEPTION; \
+                PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \
             BEGIN \
                 EXECUTE IMMEDIATE ('DROP TABLE nodb_dmlreturn'); \
             EXCEPTION \
-                WHEN e_table_exists \
+                WHEN e_table_missing \
                 THEN NULL; \
             END; \
             EXECUTE IMMEDIATE (' \
@@ -89,7 +83,7 @@ describe('6. dmlReturning.js', function(){
                    (2001, ''Karen Morton'') \
             '); \
         END; ";
-      oracledb.getConnection(credential, function(err, conn) {
+      oracledb.getConnection(dbConfig, function(err, conn) {
         if(err) { console.error(err.message); return; }
         connection = conn;
         conn.execute(
@@ -116,7 +110,7 @@ describe('6. dmlReturning.js', function(){
     })
 
     it('6.1.1 INSERT statement with Object binding', function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
       connection.execute(
         "INSERT INTO nodb_dmlreturn VALUES (1003, 'Robyn Sands') RETURNING id, name INTO :rid, :rname",
         {
@@ -135,7 +129,7 @@ describe('6. dmlReturning.js', function(){
     })
 
     it('6.1.2 INSERT statement with Array binding', function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
       connection.execute(
         "INSERT INTO nodb_dmlreturn VALUES (1003, 'Robyn Sands') RETURNING id, name INTO :rid, :rname",
         [
@@ -155,7 +149,7 @@ describe('6. dmlReturning.js', function(){
 
     // it currently fails on OS X
     it.skip('6.1.3 INSERT statement with small maxSize restriction', function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
       connection.execute(
         "INSERT INTO nodb_dmlreturn VALUES (1003, 'Robyn Sands Delaware') RETURNING id, name INTO :rid, :rname",
         {
@@ -165,7 +159,8 @@ describe('6. dmlReturning.js', function(){
         { autoCommit: true },
         function(err, result) {
           should.exist(err);
-          err.message.should.startWith('NJS-016'); // NJS-016: buffer is too small for OUT binds
+          err.message.should.startWith('NJS-016:');
+          // NJS-016: buffer is too small for OUT binds
           //console.log(result);
           done();
         }
@@ -173,7 +168,7 @@ describe('6. dmlReturning.js', function(){
     })
 
     it('6.1.4 UPDATE statement with single row matched', function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
       connection.execute(
         "UPDATE nodb_dmlreturn SET name = :n WHERE id = :i RETURNING id, name INTO :rid, :rname",
         {
@@ -195,7 +190,7 @@ describe('6. dmlReturning.js', function(){
     })
 
     it('6.1.5 UPDATE statement with single row matched & Array binding', function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
       connection.execute(
         "UPDATE nodb_dmlreturn SET name = :n WHERE id = :i RETURNING id, name INTO :rid, :rname",
         [
@@ -217,7 +212,7 @@ describe('6. dmlReturning.js', function(){
     })
 
     it('6.1.6 UPDATE statements with multiple rows matched', function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
       connection.execute(
         "UPDATE nodb_dmlreturn SET id = :i RETURNING id, name INTO :rid, :rname",
         {
@@ -238,7 +233,7 @@ describe('6. dmlReturning.js', function(){
     })
 
     it('6.1.7 UPDATE statements with multiple rows matched & Array binding', function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
       connection.execute(
         "UPDATE nodb_dmlreturn SET id = :i RETURNING id, name INTO :rid, :rname",
         [
@@ -259,7 +254,7 @@ describe('6. dmlReturning.js', function(){
     })
 
     it('6.1.8 DELETE statement with Object binding', function(done){
-      connection.should.be.ok;
+      connection.should.be.ok();
       connection.execute(
         "DELETE FROM nodb_dmlreturn WHERE name like '%Chris%' RETURNING id, name INTO :rid, :rname",
         {
@@ -279,7 +274,7 @@ describe('6. dmlReturning.js', function(){
     })
 
     it('6.1.9 DELETE statement with Array binding', function(done){
-      connection.should.be.ok;
+      connection.should.be.ok();
       connection.execute(
         "DELETE FROM nodb_dmlreturn WHERE name like '%Chris%' RETURNING id, name INTO :rid, :rname",
         [
@@ -329,7 +324,7 @@ describe('6. dmlReturning.js', function(){
       /*** string length **/
       var size = 4000;
 
-      connection.should.be.ok;
+      connection.should.be.ok();
       connection.execute(
         "INSERT INTO nodb_dmlreturn VALUES (:i, :n) RETURNING id, name INTO :rid, :rname",
         {
@@ -350,7 +345,7 @@ describe('6. dmlReturning.js', function(){
     })
 
     it('6.1.11 Negative test - wrong SQL got correct error thrown', function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
       var wrongSQL = "UPDATE nodb_dmlreturn SET doesnotexist = 'X' WHERE id = :id RETURNING name INTO :rn";
 
       connection.execute(
@@ -380,7 +375,7 @@ describe('6. dmlReturning.js', function(){
       connection.execute(sql, bindVar, function(err, result) {
         should.exist(err);
         // NJS-028: raw database type is not supported with DML Returning statements
-        (err.message).should.startWith('NJS-028: ');
+        (err.message).should.startWith('NJS-028:');
         done();
       });
 
@@ -397,7 +392,7 @@ describe('6. dmlReturning.js', function(){
     beforeEach('get connection, prepare table', function(done) {
       async.series([
         function(callback) {
-          oracledb.getConnection(credential, function(err, conn) {
+          oracledb.getConnection(dbConfig, function(err, conn) {
             should.not.exist(err);
             connection = conn;
             callback();
@@ -583,62 +578,4 @@ describe('6. dmlReturning.js', function(){
     })
 
   }) // 6.2
-
-  describe('6.3 BULK COLLECT clause', function() {
-
-    var connection = null;
-    var tableName = "nodb_varchar2";
-    var dataLength = 500;
-    var rows = [];
-    for (var i = 0; i < dataLength; i++)
-      rows[i] = "Row Number " + i;
-
-    before(function(done) {
-      async.series([
-        function(cb) {
-          oracledb.getConnection(credential, function(err, conn) {
-            should.not.exist(err);
-            connection = conn;
-            cb();
-          });
-        },
-        function insertRows(cb) {
-          assist.setUp(connection, tableName, rows, cb);
-        }
-      ], done);
-    }) // before
-
-    after(function(done) {
-      async.series([
-        function(cb) {
-          connection.execute(
-            "DROP table " + tableName,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          connection.release( function(err) {
-            should.not.exist(err);
-            cb();
-          });
-        }
-      ], done);
-    }) // after
-
-    /* Pending case*/
-    it.skip('6.3.1 ', function(done) {
-      connection.execute(
-        "SELECT * FROM " + tableName,
-        function(err, result) {
-          //console.log(result);
-          console.log(result.rows.length);
-          done();
-        }
-      );
-    })
-
-  }) // 6.3
 })

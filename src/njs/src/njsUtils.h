@@ -61,59 +61,59 @@
 // User specified data types for binds and defines.
 typedef enum
 {
-  DATA_UNKNOWN  = -1,
-  DATA_DEFAULT  = 0,  // Used in FetchInfo Context only, fetch as DB type
-  DATA_STR      = 2001,
-  DATA_NUM      = 2002,
-  DATA_DATE     = 2003,
-  DATA_CURSOR   = 2004,
-  DATA_BUFFER   = 2005,
-  DATA_CLOB     = 2006,
-  DATA_BLOB     = 2007
+  NJS_DATATYPE_UNKNOWN  = -1,
+  NJS_DATATYPE_DEFAULT  = 0,  // Used in FetchInfo Context only, fetch as DB type
+  NJS_DATATYPE_STR      = 2001,
+  NJS_DATATYPE_NUM      = 2002,
+  NJS_DATATYPE_DATE     = 2003,
+  NJS_DATATYPE_CURSOR   = 2004,
+  NJS_DATATYPE_BUFFER   = 2005,
+  NJS_DATATYPE_CLOB     = 2006,
+  NJS_DATATYPE_BLOB     = 2007
 }DataType;
 
 // User specified bind types.
 typedef enum
 {
-  BIND_UNKNOWN  = -1,
-  BIND_IN       = 3001,
-  BIND_INOUT    = 3002,
-  BIND_OUT      = 3003
+  NJS_BIND_UNKNOWN  = -1,
+  NJS_BIND_IN       = 3001,
+  NJS_BIND_INOUT    = 3002,
+  NJS_BIND_OUT      = 3003
 }BindType;
 
 // outFormat types.
 typedef enum
 {
-  ROWS_UNKNOWN  = -1,
-  ROWS_ARRAY    = 4001,
-  ROWS_OBJECT   = 4002
+  NJS_ROWS_UNKNOWN  = -1,
+  NJS_ROWS_ARRAY    = 4001,
+  NJS_ROWS_OBJECT   = 4002
 }RowsType;
 
 // states
 typedef enum
 {
-  INVALID   = 0,
-  ACTIVE    = 1,
-  INACTIVE  = 2,
+  NJS_INVALID   = 0,
+  NJS_ACTIVE    = 1,
+  NJS_INACTIVE  = 2,
 }State;
 
 // args
 typedef enum
 {
-  ARGS_ZERO  = 0,
-  ARGS_ONE   = 1,
-  ARGS_TWO   = 2,
-  ARGS_THREE = 3,
-  ARGS_FOUR  = 4
+  NJS_ARGS_ZERO  = 0,
+  NJS_ARGS_ONE   = 1,
+  NJS_ARGS_TWO   = 2,
+  NJS_ARGS_THREE = 3,
+  NJS_ARGS_FOUR  = 4
 }ArgsType;
 
 // ConnectionBusyStatus status
 typedef enum
 {
-  CONN_NOT_BUSY  = 0,      // Connection not busy
-  CONN_BUSY_LOB  = 5001,   // Connection busy with LOB operation
-  CONN_BUSY_RS   = 5002,   // Connection busy with ResultSet operation
-  CONN_BUSY_DB   = 5003,   // Connection busy with DB operation
+  NJS_CONN_NOT_BUSY  = 0,      // Connection not busy
+  NJS_CONN_BUSY_LOB  = 5001,   // Connection busy with LOB operation
+  NJS_CONN_BUSY_RS   = 5002,   // Connection busy with ResultSet operation
+  NJS_CONN_BUSY_DB   = 5003,   // Connection busy with DB operation
 }ConnectionBusyStatus;
 
 /*
@@ -121,14 +121,14 @@ typedef enum
  */
 typedef enum
 {
-  VALUETYPE_INVALID = -1,                         /* Types not supported now */
-  VALUETYPE_NULL = 0,                                   /* Null or Undefined */
-  VALUETYPE_STRING,                                                /* string */
-  VALUETYPE_INTEGER,                                              /* Integer */
-  VALUETYPE_UINTEGER,                                    /* Unsigned Integer */
-  VALUETYPE_NUMBER,                                                /* Number */
-  VALUETYPE_DATE,                                                    /* Date */
-  VALUETYPE_OBJECT,                                      /* JSON object type */
+  NJS_VALUETYPE_INVALID = -1,                     /* Types not supported now */
+  NJS_VALUETYPE_NULL = 0,                               /* Null or Undefined */
+  NJS_VALUETYPE_STRING,                                            /* string */
+  NJS_VALUETYPE_INTEGER,                                          /* Integer */
+  NJS_VALUETYPE_UINTEGER,                                /* Unsigned Integer */
+  NJS_VALUETYPE_NUMBER,                                            /* Number */
+  NJS_VALUETYPE_DATE,                                                /* Date */
+  NJS_VALUETYPE_OBJECT,                                  /* JSON object type */
 } ValueType ;
 
 

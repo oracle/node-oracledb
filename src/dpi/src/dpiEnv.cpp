@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -80,15 +80,17 @@ Env::~Env()
      Create the Env object.
 
    PARAMETERS:
-     none
+     drvName        - driver name
+     charset        - charset id
+     ncharset       - ncharset id
 
    RETURNS:
      nothing
  */
-
-Env * Env::createEnv( const string & drvName )
+Env * Env::createEnv( const string& drvName,
+                      unsigned int charset, unsigned int ncharset)
 {
-  return EnvImpl::createEnvImpl( drvName );
+  return EnvImpl::createEnvImpl( drvName, charset, ncharset );
 }
 
 

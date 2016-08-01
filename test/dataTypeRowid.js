@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -44,17 +44,11 @@ var dbConfig = require('./dbconfig.js');
 
 describe('39. dataTypeRowid.js', function() {
 
-  if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
-
   var connection = null;
   var tableName = "nodb_rowid";
 
   before('get one connection', function(done) {
-    oracledb.getConnection(credential, function(err, conn) {
+    oracledb.getConnection(dbConfig, function(err, conn) {
       should.not.exist(err);
       connection = conn;
       done();
@@ -110,7 +104,8 @@ describe('39. dataTypeRowid.js', function() {
         "SELECT * FROM " + tableName,
         function(err, result) {
           should.exist(err);
-          err.message.should.startWith('NJS-010:'); // unsupported data type in select list
+          (err.message).should.startWith('NJS-010:');
+          // unsupported data type in select list
           done();
         }
       );

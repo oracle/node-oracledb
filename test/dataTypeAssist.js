@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -28,9 +28,10 @@
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests
  *     21 - 50  are reserved for data type supporting tests
- *     51 -     are for other tests
+ *     51 onwards are for other tests
  *
  *****************************************************************************/
+'use strict';
 
 var oracledb = require('oracledb');
 var should = require('should');
@@ -456,12 +457,12 @@ assist.sqlCreateTable = function(tableName)
   var createTab =
         "BEGIN " +
         "  DECLARE " +
-        "    e_table_exists EXCEPTION; " +
-        "    PRAGMA EXCEPTION_INIT(e_table_exists, -00942); " +
+        "    e_table_missing EXCEPTION; " +
+        "    PRAGMA EXCEPTION_INIT(e_table_missing, -00942); " +
         "   BEGIN " +
         "     EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " '); " +
         "   EXCEPTION " +
-        "     WHEN e_table_exists " +
+        "     WHEN e_table_missing " +
         "     THEN NULL; " +
         "   END; " +
         "   EXECUTE IMMEDIATE (' " +
@@ -480,9 +481,9 @@ assist.sqlCreateTable = function(tableName)
 /************************* Functions for Verifiction *********************************/
 
 assist.dataTypeSupport = function(connection, tableName, array, done) {
-  connection.should.be.ok;
+  connection.should.be.ok();
   connection.execute(
-    "SELECT * FROM " + tableName,
+    "SELECT * FROM " + tableName + " ORDER BY num",
     [],
     { outFormat: oracledb.OBJECT },
     function(err, result) {
@@ -614,7 +615,7 @@ assist.verifyNullValues = function(connection, tableName, done)
 {
   var sqlInsert = "INSERT INTO " + tableName + " VALUES(:no, :bindValue)";
 
-  connection.should.be.ok;
+  connection.should.be.ok();
   async.series([
     function createTable(callback) {
       var sqlCreate = assist.sqlCreateTable(tableName);

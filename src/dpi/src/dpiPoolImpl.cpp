@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -69,6 +69,7 @@ using namespace std;
      poolIncrement - pool increment
      poolTimeout   - pool timeout
      stmtCacheSize - statement cache size
+     homogeneous   - homogeneous or non-homogeneous pool
 
    RETURNS:
      nothing
@@ -81,16 +82,22 @@ PoolImpl::PoolImpl(EnvImpl *env, OCIEnv *envh,
                    const string &user, const string &password,
                    const string &connString, int poolMax,
                    int poolMin, int poolIncrement,
-                   int poolTimeout, bool externalAuth, int stmtCacheSize)
+                   int poolTimeout, bool externalAuth, int stmtCacheSize,
+                   bool homogeneous)
   try : env_(env), externalAuth_(externalAuth), envh_(envh), errh_(NULL),
         spoolh_(NULL), poolName_(NULL), poolAuth_(NULL)
 {
-  ub4 mode = externalAuth ? OCI_DEFAULT : OCI_SPC_HOMOGENEOUS;
+  ub4 mode = OCI_DEFAULT;
   void *errh   = NULL;
   void *spoolh = NULL;
   void *poolAuth = NULL;
 
   unsigned char spoolMode = OCI_SPOOL_ATTRVAL_NOWAIT; // spoolMode is a ub1
+
+  if ( homogeneous )
+  {
+    mode |= OCI_SPC_HOMOGENEOUS ;
+  }
 
   if (externalAuth && (password.length() || user.length()))
       throw ExceptionImpl(DpiErrExtAuth);
@@ -302,7 +309,12 @@ unsigned int PoolImpl::connectionsInUse() const
 
    PARAMETERS:
      connectionClass - connection class.
-                       If specified as empty string, then no connection class
+     user            - user name in case of non-homogeneous pool
+     password        - password in case of non-homogenous pool
+     tag             - session tag name
+     any             - match tag name as MATCHANY or MATCHEXACT
+     dbPriv          - DB Privileges (SYSDBA or none)
+
 
    RETURNS:
      created connection
@@ -311,11 +323,16 @@ unsigned int PoolImpl::connectionsInUse() const
 
  */
 
-Conn * PoolImpl::getConnection ( const std::string& connClass)
+Conn * PoolImpl::getConnection ( const std::string& connClass,
+                                 const std::string& user,
+                                 const std::string& password,
+                                 const std::string& tag,
+                                 const boolean any,
+                                 const DBPrivileges dbPriv)
 {
-  Conn *conn = new ConnImpl(this, envh_, externalAuth_,
-                            poolName_, poolNameLen_, connClass
-                            );
+  Conn *conn = new ConnImpl(this, envh_, externalAuth_, poolName_,
+                            poolNameLen_, connClass, user, password, tag,
+                            any, dbPriv );
   return conn;
 }
 

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -22,11 +22,11 @@
  *   dbConfig.js
  *
  * DESCRIPTION
- *   Holds the credentials used by node-oracledb tests to connect to
+ *   Holds the dbConfigs used by node-oracledb tests to connect to
  *   the database.  The user requires privileges to connect and create
  *   tables.
  *
- *   See examples/dbconfig.js for details about connection credentials.
+ *   See examples/dbconfig.js for details about connection dbConfigs.
  *
  *****************************************************************************/
 

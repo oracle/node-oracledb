@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -49,19 +49,13 @@ var inFileName = './test/fuzzydinosaur.jpg';  // contains the image to be insert
 var outFileName = './test/blobstreamout.jpg';
 
 describe('41. dataTypeBlob', function() {
-  this.timeout(10000);
-
-  if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
+  this.timeout(20000);
 
   var connection = null;
   var tableName = "nodb_myblobs";
 
   before('get one connection', function(done) {
-    oracledb.getConnection(credential, function(err, conn) {
+    oracledb.getConnection(dbConfig, function(err, conn) {
       should.not.exist(err);
       connection = conn;
       done();
@@ -91,7 +85,7 @@ describe('41. dataTypeBlob', function() {
     })
 
     it('41.1.1 stores BLOB value correctly', function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
       async.series([
         function blobinsert1(callback) {
 

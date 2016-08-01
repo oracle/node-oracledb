@@ -136,15 +136,20 @@ typedef enum
 #endif
 
 
-typedef struct
+typedef struct MetaData
 {
   unsigned char  *colName;       // column name
   unsigned int    colNameLen;    // length of column name
   unsigned short  dbType;        // database server type
   unsigned short  dbSize;        // size at database
-  unsigned int    precision;     // precision
+  unsigned char   precision;     // precision
   char            scale;         // scale
   unsigned char   isNullable;    // is the column nullable?
+
+  MetaData ()
+    : colName ( NULL ), colNameLen ( 0 ), dbType ( 0 ), dbSize ( 0 ),
+      precision ( 0 ), scale ( 0 ), isNullable ( 0 )
+    {}
 } MetaData;
 
 
@@ -195,7 +200,12 @@ public:
 
   virtual void fetch(unsigned int numRows = 1) = 0;
 
-  virtual const MetaData * getMetaData() = 0;
+
+/*
+ * The returned pointer to MetaData struct should not be freed by the caller
+ * since this will be freed as part of StmtImpl::release()
+ */
+  virtual const MetaData * getMetaData( bool extendedMetaData ) = 0;
 
   virtual unsigned int rowsFetched() const = 0;
 

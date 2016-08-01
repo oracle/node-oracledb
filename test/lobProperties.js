@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -42,29 +42,22 @@ var dbConfig = require('./dbconfig.js');
 
 describe('62. lobProperties.js', function() {
 
-  if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
-
-  var tableName = "nodb_mylobs";
+  var tableName = "nodb_mylobprops";
   var connection = null;
   var sqlSelect = "SELECT * FROM " + tableName + " WHERE id = :i";
   var defaultChunkSize = null;
-
 
   before('prepare table and LOB data', function(done) {
 
     var sqlCreateTab =
       " BEGIN "
       + "   DECLARE "
-      + "     e_table_exists EXCEPTION; "
-      + "     PRAGMA EXCEPTION_INIT(e_table_exists, -00942); "
+      + "     e_table_missing EXCEPTION; "
+      + "     PRAGMA EXCEPTION_INIT(e_table_missing, -00942); "
       + "   BEGIN "
       + "     EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " '); "
       + "   EXCEPTION "
-      + "     WHEN e_table_exists "
+      + "     WHEN e_table_missing "
       + "     THEN NULL; "
       + "   END;  "
       + "   EXECUTE IMMEDIATE (' "
@@ -88,7 +81,7 @@ describe('62. lobProperties.js', function() {
 
     async.series([
       function(cb) {
-        oracledb.getConnection(credential, function(err, conn) {
+        oracledb.getConnection(dbConfig, function(err, conn) {
           should.not.exist(err);
           connection = conn;
           cb();
@@ -203,8 +196,8 @@ describe('62. lobProperties.js', function() {
         var t1 = clob.chunkSize,
             t2 = blob.chunkSize;
 
-        t1.should.be.a.Number;
-        t2.should.be.a.Number;
+        t1.should.be.a.Number();
+        t2.should.be.a.Number();
         t1.should.eql(t2);
         defaultChunkSize = clob.chunkSize;
 
@@ -240,8 +233,8 @@ describe('62. lobProperties.js', function() {
         var t1 = clob.length,
             t2 = blob.length;
 
-        t1.should.be.a.Number;
-        t2.should.be.a.Number;
+        t1.should.be.a.Number();
+        t2.should.be.a.Number();
         t1.should.not.eql(t2);
 
         try {
@@ -375,7 +368,7 @@ describe('62. lobProperties.js', function() {
           clob.pieceSize = -100;
         } catch(err) {
           should.exist(err);
-          (err.message).should.startWith('NJS-004');
+          (err.message).should.startWith('NJS-004:');
           // NJS-004: invalid value for property pieceSize
         }
 
@@ -401,7 +394,7 @@ describe('62. lobProperties.js', function() {
           clob.pieceSize = null;
         } catch(err) {
           should.exist(err);
-          (err.message).should.startWith('NJS-004');
+          (err.message).should.startWith('NJS-004:');
           // NJS-004: invalid value for property pieceSize
         }
 
@@ -427,7 +420,7 @@ describe('62. lobProperties.js', function() {
           clob.pieceSize = NaN;
         } catch(err) {
           should.exist(err);
-          (err.message).should.startWith('NJS-004');
+          (err.message).should.startWith('NJS-004:');
           // NJS-004: invalid value for property pieceSize
         }
 

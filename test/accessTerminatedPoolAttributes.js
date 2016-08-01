@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -39,26 +39,20 @@ var dbConfig = require('./dbconfig.js');
 
 describe('51. accessTerminatedPoolAttributes.js', function(){
 
-  if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
-
   it('can not access attributes of terminated pool', function(done){
     oracledb.createPool(
       {
-        externalAuth    : credential.externalAuth,
-        user            : credential.user,
-        password        : credential.password,
-        connectString   : credential.connectString,
+        externalAuth    : dbConfig.externalAuth,
+        user            : dbConfig.user,
+        password        : dbConfig.password,
+        connectString   : dbConfig.connectString,
         poolMin         : 2,
         poolMax         : 10
       },
       function(err, pool){
         should.not.exist(err);
-        pool.should.be.ok;
-        if(credential.externalAuth){
+        pool.should.be.ok();
+        if(dbConfig.externalAuth){
           pool.connectionsOpen.should.be.exactly(0);
         } else {
           pool.connectionsOpen.should.be.exactly(pool.poolMin);
@@ -80,7 +74,8 @@ describe('51. accessTerminatedPoolAttributes.js', function(){
               }
               catch(err){
                 should.exist(err);
-                (err.message).should.eql('NJS-002: invalid pool');
+                (err.message).should.startWith('NJS-002:');
+                // NJS-002: invalid pool
               }
               done();
             });

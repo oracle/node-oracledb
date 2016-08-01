@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -38,6 +38,12 @@
   #define  snprintf  _snprintf
 #endif
 
+#ifdef OCI_ERROR_MAXMSG_SIZE2
+/* A bigger message size is defined from 11.2.0.3 onwards */
+#define DPIUTILS_OCI_ERR_MAX_SIZE OCI_ERROR_MAXMSG_SIZE2
+#else
+#define DPIUTILS_OCI_ERR_MAX_SIZE OCI_ERROR_MAXMSG_SIZE
+#endif
 
 /*****************************************************************************/
 /*
@@ -67,12 +73,12 @@ static void ociCallCommon(sword rc, void *handle, ub4 errType)
   if (rc == OCI_INVALID_HANDLE)
     throw ExceptionImpl(DpiOciInvalidHandle);
 
-  OraText ociErrorMsg[OCI_ERROR_MAXMSG_SIZE];
+  OraText ociErrorMsg[DPIUTILS_OCI_ERR_MAX_SIZE];
   sb4     ociErrorNo = 0;
-  memset(ociErrorMsg, 0, OCI_ERROR_MAXMSG_SIZE);
+  memset(ociErrorMsg, 0, DPIUTILS_OCI_ERR_MAX_SIZE);
 
   rc = OCIErrorGet(handle, 1, NULL, &ociErrorNo, ociErrorMsg,
-                   OCI_ERROR_MAXMSG_SIZE-1, errType);
+                   DPIUTILS_OCI_ERR_MAX_SIZE-1, errType);
   if (rc)
     throw ExceptionImpl(DpiErrUnkOciError);
   else

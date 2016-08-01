@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -41,17 +41,11 @@ var dbConfig = require('./dbconfig.js');
 
 describe('33. dataTypeTimestamp1.js', function() {
 
-  if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
-
   var connection = null;
   var tableName = "nodb_timestamp1";
 
   before('get one connection', function(done) {
-    oracledb.getConnection(credential, function(err, conn) {
+    oracledb.getConnection(dbConfig, function(err, conn) {
       should.not.exist(err);
       connection = conn;
       done();
@@ -154,7 +148,7 @@ describe('33. dataTypeTimestamp1.js', function() {
         options,
         function(err, result) {
           should.not.exist(err);
-          (result.outBinds.bv).should.be.a.String;
+          (result.outBinds.bv).should.be.a.String();
           done();
         }
       );

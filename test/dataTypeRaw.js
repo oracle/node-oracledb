@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -41,12 +41,6 @@ var dbConfig = require('./dbconfig.js');
 
 describe('42. dataTypeRaw.js', function() {
 
-  if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
-
   var connection = null;
   var tableName = "nodb_raw";
 
@@ -56,7 +50,7 @@ describe('42. dataTypeRaw.js', function() {
     bufs[i] = assist.createBuffer(bufLen[i]);
 
   before('get one connection', function(done) {
-    oracledb.getConnection(credential, function(err, conn) {
+    oracledb.getConnection(dbConfig, function(err, conn) {
       should.not.exist(err);
       connection = conn;
       done();
@@ -180,7 +174,7 @@ describe('42. dataTypeRaw.js', function() {
         { autoCommit: true },
         function(err, result) {
           should.exist(err);
-          (err.message).should.startWith('NJS-028');
+          (err.message).should.startWith('NJS-028:');
           // NJS-028: raw database type is not supported with DML Returning statements
           done();
         }
@@ -203,7 +197,7 @@ describe('42. dataTypeRaw.js', function() {
         { autoCommit: true },
         function(err, result) {
           should.exist(err);
-          (err.message).should.startWith('NJS-028');
+          (err.message).should.startWith('NJS-028:');
           done();
         }
       );
@@ -225,7 +219,7 @@ describe('42. dataTypeRaw.js', function() {
         { autoCommit: true },
         function(err, result) {
           should.exist(err);
-          (err.message).should.startWith('NJS-028');
+          (err.message).should.startWith('NJS-028:');
           done();
         }
       );
@@ -247,7 +241,7 @@ describe('42. dataTypeRaw.js', function() {
         { autoCommit: true },
         function(err, result) {
           should.exist(err);
-          (err.message).should.startWith('NJS-028');
+          (err.message).should.startWith('NJS-028:');
           done();
         }
       );
@@ -266,7 +260,7 @@ describe('42. dataTypeRaw.js', function() {
         { autoCommit: true },
         function(err, result) {
           should.exist(err);
-          (err.message).should.startWith('NJS-028');
+          (err.message).should.startWith('NJS-028:');
           done();
         }
       );
@@ -285,7 +279,7 @@ describe('42. dataTypeRaw.js', function() {
         { autoCommit: true },
         function(err, result) {
           should.exist(err);
-          (err.message).should.startWith('NJS-028');
+          (err.message).should.startWith('NJS-028:');
           done();
         }
       );

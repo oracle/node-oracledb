@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -45,12 +45,6 @@ var dbConfig = require('./dbconfig.js');
 
 describe('63. autoCommit4nestedExecutes.js', function() {
 
-  if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
-
   var tableName  = "nodb_issue269tab";
   var procName   = "issue269proc";
   var connection = null;
@@ -60,12 +54,12 @@ describe('63. autoCommit4nestedExecutes.js', function() {
     var sqlCreateTab =
         " BEGIN "
       + "   DECLARE "
-      + "     e_table_exists EXCEPTION; "
-      + "     PRAGMA EXCEPTION_INIT(e_table_exists, -00942); "
+      + "     e_table_missing EXCEPTION; "
+      + "     PRAGMA EXCEPTION_INIT(e_table_missing, -00942); "
       + "   BEGIN "
       + "     EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " '); "
       + "   EXCEPTION "
-      + "     WHEN e_table_exists "
+      + "     WHEN e_table_missing "
       + "     THEN NULL; "
       + "   END;  "
       + "   EXECUTE IMMEDIATE (' "
@@ -90,7 +84,7 @@ describe('63. autoCommit4nestedExecutes.js', function() {
 
     async.series([
       function(cb) {
-        oracledb.getConnection(credential, function(err, conn) {
+        oracledb.getConnection(dbConfig, function(err, conn) {
           should.not.exist(err);
           connection = conn;
           cb();
@@ -172,7 +166,7 @@ describe('63. autoCommit4nestedExecutes.js', function() {
     async.series([
       function getPool(cb) {
         oracledb.createPool(
-          credential,
+          dbConfig,
           function(err, pooling) {
             should.not.exist(err);
             pool = pooling;

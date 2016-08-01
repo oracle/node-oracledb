@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -41,18 +41,12 @@ var dbConfig = require('./dbconfig.js');
 
 describe('27. dataTypeNumber2.js', function() {
 
-  if(dbConfig.externalAuth){
-    var credential = { externalAuth: true, connectString: dbConfig.connectString };
-  } else {
-    var credential = dbConfig;
-  }
-
   var connection = null;
   var tableName = "nodb_number2";
   var numbers = assist.data.numbers;
 
   before('get one connection', function(done) {
-    oracledb.getConnection(credential, function(err, conn) {
+    oracledb.getConnection(dbConfig, function(err, conn) {
       should.not.exist(err);
       connection = conn;
       done();
@@ -83,7 +77,7 @@ describe('27. dataTypeNumber2.js', function() {
     })
 
     it('27.1.1 SELECT query', function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
       connection.execute(
         "SELECT * FROM " + tableName,
         [],
@@ -103,7 +97,7 @@ describe('27. dataTypeNumber2.js', function() {
     }) // 27.1.1
 
     it('27.1.2 resultSet stores NUMBER(p, s) data correctly', function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
       var numRows = 3; // number of rows to return from each call to getRows()
       connection.execute(
         "SELECT * FROM " + tableName,
