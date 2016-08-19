@@ -134,9 +134,9 @@ Overview of node-oracledb functional tests
         5.1.8 throws error when getting pool from oracledb only given password when externalAuth is enabled
     5.2 tests only work when externalAuth is configured on DB
         5.2.1 can get connection from oracledb with external authentication
-      - 5.2.2 can get pool from oracledb with external authentication
+        5.2.2 can get pool from oracledb with external authentication
         5.2.3 gets multiple connections from oracledb
-      - 5.2.4 gets multiple pools from oracledb
+        5.2.4 gets multiple pools from oracledb
 
 6. dmlReturning.js
     6.1 NUMBER & STRING driver data type

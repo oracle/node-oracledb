@@ -75,16 +75,15 @@ vi <some-directory>/node-oracledb/test/dbconfig.js
 module.exports = {
   user          : process.env.NODE_ORACLEDB_USER || "hr",
   password      : process.env.NODE_ORACLEDB_PASSWORD || "welcome",
-  connectString : process.env.NODE_ORACLEDB_CONNECTIONSTRING || "localhost/orcl",
-  externalAuth  : process.env.NODE_ORACLEDB_EXTERNALAUTH ? true : false
+  connectString : process.env.NODE_ORACLEDB_CONNECTIONSTRING || "localhost/orcl"
 };
 ```
 
-To use external authentication, set the `externalAuth` property to
-`true`.  Also make sure Oracle Database and the authentication service
-have been appropriately configured.  See
+To enable external authentication tests, please make sure Oracle Database
+and the authentication service have been appropriately configured.  See
 [Documentation for External Authentication](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#extauth)
-for more details.
+for more details. And then, set the environment variable `NODE_ORACLEDB_EXTERNALAUTH`
+to be `true`.
 
 Note: the test suite requires a schema with these privileges:
 
