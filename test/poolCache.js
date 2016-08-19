@@ -518,5 +518,118 @@ describe('67. poolCache.js', function() {
         });
       });
     });
-  });
+  }); // 67.2
+
+// This suite extends 67.1.6 case with various types
+  describe('67.3 poolAlias attribute', function() {
+
+    it('67.3.1 throws an error if poolAttrs.poolAlias is an object', function(done) {
+
+      dbConfig.poolAlias = {'foo': 'bar'};
+
+      oracledb.createPool(dbConfig, function(err, pool) {
+        should.exist(err);
+
+        (err.message).should.startWith('NJS-004:');
+
+        done();
+      });
+    });
+
+    it('67.3.2 throws an error if poolAttrs.poolAlias is an array', function(done) {
+
+      dbConfig.poolAlias = [];
+
+      oracledb.createPool(dbConfig, function(err, pool) {
+        should.exist(err);
+
+        (err.message).should.startWith('NJS-004:');
+        // NJS-004: invalid value for property poolAttrs.poolAlias
+        done();
+      });
+    });
+
+    it('67.3.3 throws an error if poolAttrs.poolAlias is a number', function(done) {
+
+      dbConfig.poolAlias = 123;
+
+      oracledb.createPool(dbConfig, function(err, pool) {
+        should.exist(err);
+
+        (err.message).should.startWith('NJS-004:');
+
+        done();
+      });
+    });
+
+    it('67.3.4 throws an error if poolAttrs.poolAlias is a boolean', function(done) {
+
+      dbConfig.poolAlias = false;
+
+      oracledb.createPool(dbConfig, function(err, pool) {
+        should.exist(err);
+
+        (err.message).should.startWith('NJS-004:');
+
+        done();
+      });
+    });
+
+    it('67.3.5 throws an error if poolAttrs.poolAlias is null', function(done) {
+
+      dbConfig.poolAlias = null;
+
+      oracledb.createPool(dbConfig, function(err, pool) {
+        should.exist(err);
+
+        (err.message).should.startWith('NJS-004:');
+
+        done();
+      });
+    });
+
+    it('67.3.6 throws an error if poolAttrs.poolAlias is an empty string', function(done) {
+
+      dbConfig.poolAlias = '';
+
+      oracledb.createPool(dbConfig, function(err, pool) {
+        should.exist(err);
+
+        (err.message).should.startWith('NJS-004:');
+
+        done();
+      });
+    });
+
+    it('67.3.7 throws an error if poolAttrs.poolAlias is NaN', function(done) {
+
+      dbConfig.poolAlias = NaN;
+
+      oracledb.createPool(dbConfig, function(err, pool) {
+        should.exist(err);
+
+        (err.message).should.startWith('NJS-004:');
+
+        done();
+      });
+    });
+
+    it('67.3.8 works if poolAttrs.poolAlias is undefined', function(done) {
+
+      dbConfig.poolAlias = undefined;
+
+      oracledb.createPool(dbConfig, function(err, pool) {
+
+        pool.should.be.ok();
+        (pool.poolAlias).should.equal('default');
+
+        pool.close(function(err) {
+          should.not.exist(err);
+          done();
+        });
+
+      });
+    });
+
+  }); // 67.3
 });

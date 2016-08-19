@@ -817,6 +817,15 @@ Overview of node-oracledb functional tests
         67.2.4 throws an error if an attempt is made to use a poolAlias for a pool that is not in the cache
         67.2.5 gets a connection from the default pool, even after an aliased pool is created
         67.2.6 uses the right pool, even after multiple pools are created
+    67.3 poolAlias attribute
+        67.3.1 throws an error if poolAttrs.poolAlias is an object
+        67.3.2 throws an error if poolAttrs.poolAlias is an array
+        67.3.3 throws an error if poolAttrs.poolAlias is a number
+        67.3.4 throws an error if poolAttrs.poolAlias is a boolean
+        67.3.5 throws an error if poolAttrs.poolAlias is null
+        67.3.6 throws an error if poolAttrs.poolAlias is an empty string
+        67.3.7 throws an error if poolAttrs.poolAlias is NaN
+        67.3.8 works if poolAttrs.poolAlias is undefined
 
 68. multipleLobInsertion.js
     68.1 inserts multiple BLOBs
