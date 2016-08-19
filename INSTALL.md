@@ -50,8 +50,8 @@ Client 12.1 you can connect to Oracle Database 10.2 or greater.  Use
 Oracle Client 11.2 if you need to connect to Oracle Database 9.2.
 
 A compiler is required.  Use Visual Studio on Windows, GCC on Linux or
-Xcode on OS X.  ** When building with Node 4 onward, the compiler must
-support C++11. **  Note the default compiler on Oracle Linux 6 and RHEL 6
+Xcode on OS X.  **When building with Node 4 onward, the compiler must
+support C++11.**  Note the default compiler on Oracle Linux 6 and RHEL 6
 does not have the required support.  Install a
 [newer compiler](https://blogs.oracle.com/opal/entry/getting_a_c_11_compatible)
 or upgrade to Oracle Linux 7.
