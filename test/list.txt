@@ -120,7 +120,21 @@ Overview of node-oracledb functional tests
         4.4.3 Negative - bind out data exceeds default length
       - 4.4.4 maximum value is 32767
     4.5 The default direction for binding is BIND_IN
-      - 4.5.1
+        4.5.1
+    4.6 PL/SQL block with empty outBinds
+        4.6.1
+    4.7 Value as JSON named/unamed test cases
+        4.7.1 valid case when numeric values are passed as it is
+        4.7.2 Valid values when one of the value is passed as JSON
+        4.7.3 Valid test case when one of the value is passed as JSON
+        4.7.4 Valid Test case when both values are passed as JSON
+        4.7.5 Invalid Test case when value is passed as named JSON
+        4.7.6 Invalid Test case when other-value is passed as named JSON
+        4.7.7 Invalid Test case when all values is passed as named JSON
+    4.8 bind DATE
+        4.8.1 binding out in Object & Array formats
+        4.8.2 BIND_IN
+      - 4.8.3 BIND_INOUT
 
 5. externalAuth.js
     5.1 tests that work both when DB has configured externalAuth and not configured
@@ -609,10 +623,10 @@ Overview of node-oracledb functional tests
         43.2.1 maxArraySize is ignored when specifying BIND_IN
         43.2.2 maxArraySize is mandatory for BIND_INOUT
         42.2.3 maxArraySize cannot smaller than the number of array elements
-        42.2.4 DATE type has not been supported yet
-        42.2.5 negative case (string): incorrect type of array element
-        42.2.6 negative case (number): incorrect type of array element
-        42.2.7 supports binding by position
+        43.2.4 DATE type has not been supported yet
+        43.2.5 negative case (string): incorrect type of array element
+        43.2.6 negative case (number): incorrect type of array element
+        43.2.7 supports binding by position
     43.3 binding PL/SQL scalar
         43.3.1 binding PL/SQL scalar IN
       - 43.3.2 binding PL/SQL scalar IN/OUT

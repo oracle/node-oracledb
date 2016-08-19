@@ -43,17 +43,11 @@ var assist   = require('./dataTypeAssist.js');
 
 describe('4. binding.js', function() {
 
-  var credentials = {
-                      user: dbConfig.user,
-                      password: dbConfig.password,
-                      connectString: dbConfig.connectString
-                    };
-
   describe('4.1 test STRING, NUMBER, ARRAY & JSON format', function() {
 
     var connection = null;
     before(function(done) {
-      oracledb.getConnection(credentials, function(err, conn) {
+      oracledb.getConnection(dbConfig, function(err, conn) {
         if(err) { console.error(err.message); return; }
         connection = conn;
         done();
@@ -179,7 +173,7 @@ describe('4. binding.js', function() {
           );
         }
       ], done);
-    })
+    }); // 4.1.2
 
     it('4.1.3 Multiple binding values, Object & Array formats', function(done) {
       async.series([
@@ -353,7 +347,7 @@ describe('4. binding.js', function() {
     var options = { autoCommit: true, outFormat: oracledb.OBJECT };
 
     beforeEach(function(done) {
-      oracledb.getConnection(credentials, function(err, conn) {
+      oracledb.getConnection(dbConfig, function(err, conn) {
         should.not.exist(err);
         connection = conn;
         conn.execute(
@@ -454,7 +448,7 @@ describe('4. binding.js', function() {
       END; ";
 
     beforeEach(function(done) {
-      oracledb.getConnection(credentials, function(err, conn) {
+      oracledb.getConnection(dbConfig, function(err, conn) {
         should.not.exist(err);
         connection = conn;
         conn.execute(
@@ -589,7 +583,7 @@ describe('4. binding.js', function() {
     var connection = null;
 
     before(function(done) {
-      oracledb.getConnection(credentials, function(err, conn) {
+      oracledb.getConnection(dbConfig, function(err, conn) {
         if(err) { console.error(err.message); return; }
         connection = conn;
         done();
@@ -705,7 +699,7 @@ describe('4. binding.js', function() {
     var tableName = "nodb_raw";
 
     before(function(done) {
-      oracledb.getConnection(credentials, function(err, conn) {
+      oracledb.getConnection(dbConfig, function(err, conn) {
         if(err) { console.error(err.message); return; }
         connection = conn;
         assist.createTable(connection, tableName, done);
@@ -758,7 +752,7 @@ describe('4. binding.js', function() {
       var options = {};
 
       oracledb.getConnection(
-        credentials,
+        dbConfig,
         function(err, connection)
         {
           should.not.exist(err);
@@ -792,7 +786,7 @@ describe('4. binding.js', function() {
          var binds = [ 1, 456 ];
 
          oracledb.getConnection (
-           credentials,
+           dbConfig,
            function (err, connection ){
 
              should.not.exist ( err ) ;
@@ -814,7 +808,7 @@ describe('4. binding.js', function() {
          var binds = [ 1, { val : 456 } ];
 
          oracledb.getConnection (
-           credentials,
+           dbConfig,
            function (err, connection ){
 
              should.not.exist ( err ) ;
@@ -835,7 +829,7 @@ describe('4. binding.js', function() {
         var binds = [ {val :  1}, 456 ];
 
          oracledb.getConnection (
-           credentials,
+           dbConfig,
            function (err, connection ){
 
              should.not.exist ( err ) ;
@@ -856,7 +850,7 @@ describe('4. binding.js', function() {
         var binds = [ {val : 1}, {val : 456 } ];
 
          oracledb.getConnection (
-           credentials,
+           dbConfig,
            function (err, connection ){
 
              should.not.exist ( err ) ;
@@ -877,7 +871,7 @@ describe('4. binding.js', function() {
         var binds = [ {val : 1}, { c: {val : 456 } } ];
 
         oracledb.getConnection (
-          credentials,
+          dbConfig,
           function (err, connection ){
             should.not.exist ( err ) ;
             connection.execute (
@@ -897,7 +891,7 @@ describe('4. binding.js', function() {
         var binds = [ { b: {val : 1} }, {val : 456 } ];
 
         oracledb.getConnection (
-          credentials,
+          dbConfig,
           function (err, connection ){
             should.not.exist ( err ) ;
             connection.execute (
@@ -917,7 +911,7 @@ describe('4. binding.js', function() {
         var binds = [ { b: {val : 1} }, { c: {val : 456 } } ];
 
         oracledb.getConnection (
-          credentials,
+          dbConfig,
           function (err, connection ){
             should.not.exist ( err ) ;
             connection.execute (
@@ -931,4 +925,193 @@ describe('4. binding.js', function() {
           });
       }); // 4.7.7
   }); // 4.7
-})
+
+  describe('4.8 bind DATE', function() {
+
+    var connection = null;
+    before(function(done) {
+      oracledb.getConnection(dbConfig, function(err, conn) {
+        should.not.exist(err);
+        connection = conn;
+        done();
+      });
+    }); // before
+
+    after(function(done) {
+      connection.release(function(err) {
+        should.not.exist(err);
+        done();
+      });
+    }); // after
+
+    it('4.8.1 binding out in Object & Array formats', function(done) {
+
+      async.series([
+        function(cb) {
+          var proc = "CREATE OR REPLACE PROCEDURE nodb_binddate1 ( \n" +
+                     "    p_out1 OUT DATE, \n" +
+                     "    p_out2 OUT DATE \n" +
+                     ") \n" +
+                     "AS \n" +
+                     "BEGIN \n" +
+                     "    p_out1 := SYSDATE + 10; \n" +
+                     "    p_out2 := TO_DATE('5-AUG-2016'); \n" +
+                     "END;";
+
+          connection.execute(
+            proc,
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          connection.execute(
+            "BEGIN nodb_binddate1(:o1, :o2); END;",
+            {
+              o1: { type: oracledb.DATE, dir: oracledb.BIND_OUT },
+              o2: { type: oracledb.DATE, dir: oracledb.BIND_OUT }
+            },
+            function(err, result) {
+              should.not.exist(err);
+              // console.log(result);
+              (result.outBinds.o1).should.be.a.Date();
+
+              var vdate = new Date(2016, 7, 5);
+              (result.outBinds.o2).should.eql(vdate);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          connection.execute(
+            "BEGIN nodb_binddate1(:o1, :o2); END;",
+            [
+              { type: oracledb.DATE, dir: oracledb.BIND_OUT },
+              { type: oracledb.DATE, dir: oracledb.BIND_OUT }
+            ],
+            function(err, result) {
+              should.not.exist(err);
+              (result.outBinds[0]).should.be.a.Date();
+
+              var vdate = new Date(2016, 7, 5);
+              (result.outBinds[1]).should.eql(vdate);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          connection.execute(
+            "DROP PROCEDURE nodb_binddate1",
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        }
+      ], done);
+
+    }); // 4.8.1
+
+    it('4.8.2 BIND_IN', function(done) {
+
+      async.series([
+        function(cb) {
+          var proc = "CREATE OR REPLACE PROCEDURE nodb_binddate2 ( \n" +
+                     "    p_in IN DATE, \n" +
+                     "    p_out OUT DATE \n" +
+                     ") \n" +
+                     "AS \n" +
+                     "BEGIN \n" +
+                     "    p_out := p_in; \n" +
+                     "END;";
+
+          connection.execute(
+            proc,
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          var vdate = new Date(2016, 7, 5);
+          connection.execute(
+            "BEGIN nodb_binddate2(:i, :o); END;",
+            {
+              i: { type: oracledb.DATE, dir: oracledb.BIND_IN, val: vdate },
+              o: { type: oracledb.DATE, dir: oracledb.BIND_OUT }
+            },
+            function(err, result) {
+              should.not.exist(err);
+              // console.log(result);
+              (result.outBinds.o).should.eql(vdate);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          connection.execute(
+            "DROP PROCEDURE nodb_binddate2",
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        }
+      ], done);
+
+    }); // 4.8.2
+
+    it.skip('4.8.3 BIND_INOUT', function(done) {
+
+      async.series([
+        function(cb) {
+          var proc = "CREATE OR REPLACE PROCEDURE nodb_binddate3 ( \n" +
+                     "    p_inout IN OUT DATE \n" +
+                     ") \n" +
+                     "AS \n" +
+                     "BEGIN \n" +
+                     "    p_inout := p_inout; \n" +
+                     "END;";
+
+          connection.execute(
+            proc,
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          var vdate = new Date(2016, 7, 5);
+          connection.execute(
+
+            "BEGIN nodb_binddate3(:io); END;",
+            {
+              io: { val: vdate, dir : oracledb.BIND_INOUT, type: oracledb.DATE }
+            },
+            function(err, result) {
+              should.not.exist(err);
+              console.log(result);
+              (result.outBinds.o).should.eql(vdate);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          connection.execute(
+            "DROP PROCEDURE nodb_binddate3",
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        }
+      ], done);
+
+    }); // 4.8.3
+
+  }); // 4.8
+});
