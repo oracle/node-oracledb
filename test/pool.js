@@ -34,14 +34,16 @@
 'use strict';
 
 var oracledb = require('oracledb');
-var async = require('async');
+var async    = require('async');
 var should   = require('should');
 var dbConfig = require('./dbconfig.js');
 
 describe('2. pool.js', function() {
 
-  describe('2.1 default values', function() {
-    it('2.1.1 set properties to default values if not explicitly specified', function(done) {
+  describe('2.1 default settting', function() {
+
+    it('2.1.1 testing default values of pool properties', function(done) {
+
       oracledb.createPool(dbConfig, function(err, pool) {
         should.not.exist(err);
         pool.should.be.ok();
@@ -66,10 +68,13 @@ describe('2. pool.js', function() {
           done();
         });
       });
-    })
-  })
 
-  describe('2.2 poolMin', function(){
+    });
+
+  });
+
+  describe('2.2 poolMin', function() {
+
     it('2.2.1 poolMin cannot be a negative number', function(done){
       oracledb.createPool(
         {
@@ -211,12 +216,12 @@ describe('2. pool.js', function() {
         }
       );
 
-
     })
 
-  })
+  }); // 2.2
 
   describe('2.3 poolMax', function(){
+
     it('2.3.1 poolMax cannot be a negative value', function(done){
       oracledb.createPool(
         {
@@ -339,7 +344,7 @@ describe('2. pool.js', function() {
       );
     })
 
-  })
+  }); // 2.3
 
   describe('2.4 poolIncrement', function(){
     it('2.4.1 poolIncrement cannot be a negative value', function(done){
@@ -471,9 +476,10 @@ describe('2. pool.js', function() {
       );
     })
 
-  })
+  }) // 2.4
 
-  describe('2.5 poolTimeout', function(){
+  describe('2.5 poolTimeout', function() {
+
     it('2.5.1 poolTimeout cannot be a negative number', function(done){
       oracledb.createPool(
         {
@@ -545,7 +551,8 @@ describe('2. pool.js', function() {
 
   })
 
-  describe('2.6 stmtCacheSize', function(){
+  describe('2.6 stmtCacheSize', function() {
+
     it('2.6.1 stmtCacheSize cannot be a negative value', function(done){
       oracledb.createPool(
         {
@@ -639,9 +646,9 @@ describe('2. pool.js', function() {
       );
     });
 
-    // Skipping this test because assertions were added to the JS layer for all
-    // public methods. This now throws NJS-009: invalid number of parameters.
-    it.skip('2.7.1 throws error if called after pool is terminated and a callback is not provided', function(done) {
+    // This case was skipped. JavaScript layer conducts assertions for all public methods.
+    // The case used to throw NJS-002 error.
+    it('2.7.1 throws error if called after pool is terminated and a callback is not provided', function(done) {
       pool1.terminate(function(err) {
         should.not.exist(err);
 
@@ -649,8 +656,8 @@ describe('2. pool.js', function() {
           pool1.getConnection();
         } catch (err) {
           should.exist(err);
-          (err.message).should.startWith('NJS-002:');
-          // NJS-002: invalid pool
+          (err.message).should.startWith('NJS-009:');
+          // NJS-009: invalid number of parameters
           done();
         }
       });
@@ -982,5 +989,58 @@ describe('2. pool.js', function() {
         }
       );
     });
-  });
+  }); // 2.10
+
+  describe('2.11 External Authentication', function() {
+
+    // need to skip these tests if external authentication is enable for the whole suite
+    var it = (!dbConfig.externalAuth) ? global.it : global.it.skip;
+
+    it('2.11.1 throws error when providing username and password with external authentication', function(done) {
+
+      if(!dbConfig.user || !dbConfig.password) {
+        console.error("user/password required.");
+      } else {
+        oracledb.createPool(
+          {
+            externalAuth:  true,
+            user:          dbConfig.user,
+            password:      dbConfig.password,
+            connectString: dbConfig.connectString
+          },
+          function(err, pool) {
+            should.exist(err);
+            (err.message).should.startWith("DPI-006:");
+            // DPI-006: user and password should not be set when using external authentication
+            should.not.exist(pool);
+            done();
+          }
+        );
+      }
+
+    });
+
+    it('2.11.2 throws error when providing username', function(done) {
+
+      if(!dbConfig.user) {
+        console.error("user/password required.");
+      } else {
+        oracledb.createPool(
+          {
+            externalAuth:  true,
+            user:          dbConfig.user,
+            connectString: dbConfig.connectString
+          },
+          function(err, pool) {
+            should.exist(err);
+            (err.message).should.startWith("DPI-006:");
+            should.not.exist(pool);
+            done();
+          }
+        );
+      }
+    });
+
+  }); // 2.11
+
 });
