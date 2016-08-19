@@ -1,5 +1,7 @@
 # Change Log
 
+## node-oracledb v1.10.2 (DD Mon YYYY)
+
 ## node-oracledb v1.10.1 (21 Jul 2016)
 
 - Fixed a bug that prevented a null value being passed from JavaScript into an IN OUT bind.
