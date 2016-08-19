@@ -282,7 +282,7 @@ describe('5. externalAuth.js', function() {
         function(callback) {
           oracledb.createPool(
             {
-              externalAuth:  true,
+              externalAuth: true,
               connectString: dbConfig.connectString
             },
             function(err, pool) {
@@ -418,6 +418,72 @@ describe('5. externalAuth.js', function() {
       });
 
     }); // 5.2.4
+
+    it("5.2.5 poolMin no longer takes effect under externalAuth", function(done) {
+
+      oracledb.createPool(
+        {
+          externalAuth: true,
+          connectString: dbConfig.connectString,
+          poolMin: 5,
+          poolMax: 20,
+          poolIncrement: 2
+        },
+        function(err, pool) {
+          (pool.connectionsOpen).should.be.exactly(0);
+
+          pool.close(function(err) {
+            should.not.exist(err);
+            done();
+          });
+        }
+      );
+
+    });
+
+    it("5.2.6 poolIncrement no longer takes effect", function(done) {
+
+      async.waterfall([
+        function(callback) {
+          oracledb.createPool(
+            {
+              externalAuth: true,
+              connectString: dbConfig.connectString,
+              poolMin: 5,
+              poolMax: 20,
+              poolIncrement: 2
+            },
+            function(err, pool) {
+              callback(err, pool);
+            }
+          );
+        },
+        function(pool, callback) {
+          pool.getConnection( function(err, conn1) {
+            (pool.connectionsOpen).should.be.exactly(1);
+            callback(err, conn1, pool);
+          });
+        },
+        function(conn1, pool, callback) {
+          pool.getConnection( function(err, conn2) {
+            (pool.connectionsOpen).should.be.exactly(2);
+            callback(err, conn1, conn2, pool);
+          });
+        }
+      ], function(err, conn1, conn2, pool) {
+        should.not.exist(err);
+        conn1.close( function(err) {
+          should.not.exist(err);
+          conn2.close(function(err) {
+            should.not.exist(err);
+            pool.close(function(err) {
+              should.not.exist(err);
+              done();
+            });
+          });
+        });
+      });
+    });
 
   }); // 5.2
 
