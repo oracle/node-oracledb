@@ -167,8 +167,8 @@ describe('67. poolCache.js', function() {
       });
     });
 
-    it('67.1.6 throws an error if poolAttrs.poolAlias is not a string or number', function(done) {
-      // Setting poolAlias to something other than a string or number. Could be
+    it('67.1.6 throws an error if poolAttrs.poolAlias is not a string', function(done) {
+      // Setting poolAlias to something other than a string. Could be
       // boolean, object, array, etc.
       dbConfig.poolAlias = {};
 
