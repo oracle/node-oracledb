@@ -165,3 +165,62 @@ and Windows 7.
 and dataTypeDouble.js.
 
 - Slow networks may cause some tests to timeout.
+
+## 6. Troubleshooting
+
+You may encounter some troubles when running the test suite. These troubles
+might be caused by the concurrency issue of Mocha framework, network latencies,
+or database server issues. This section gives some issues that we ever saw
+and our solutions.
+
+### 6.1 ORA-00054: resource busy and acquire with NOWAIT specified or timeout expired
+
+This error occurs when Node.js programs try to change database objects which
+hold locks. The workaround would be:
+
+(1) Use unique DB object names for each test to avoid interference between
+test files.
+(2) Try not to use 'beforeEach' blocks for object operations to avoid
+the interference between cases.
+
+### 6.2 ORA-00018: maximum number of sessions exceeded
+
+This error occurs when the test suite takes up more sessions than the
+configured limit. You can alter the session limit on the database server side.
+If you do not have access to change the database session setting, you could
+use the below script to deliberately add an interval between tests.
+
+```Bash
+arr=$(ls test/*js)
+for case in ${arr[@]}
+do
+  var="$NODE_PATH/../node_modules/.bin/mocha --timeout 10000 $case"
+  eval $var
+  sleep 1
+done
+```
+
+### 6.3 ORA-28865: SSL connection closed
+
+You may encounter this error when the test suite sends more connection
+requests per second than the database is configured to handle.
+
+There are two solutions:
+
+- Solution 1: Change database `RATE_LIMIT` configuration. This parameter
+defines the connection count allowed per second. See [RATE_LIMIT](http://docs.oracle.com/database/121/NETRF/listener.htm#NETRF426)
+for more information.
+
+- Solution 2: Set the `RETRY_COUNT` and `RETRY_DELAY` parameters in
+connectString.
+
+For example, below is the connectString which could be defined in
+`tnsnames.ora` file.
+
+```
+dbaccess = (description=(RETRY_COUNT=20)(RETRY_DELAY=3)
+          (address=(protocol=tcps)(port=1521)(host=<db-host>))
+          (connect_data=(service_name=<service-name>))
+          (security=(my_wallet_directory=<wallet-location>)(ssl_server_cert_dn=<ssl-server-cert-dn>))
+       )
+```
