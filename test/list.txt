@@ -782,3 +782,8 @@ Overview of node-oracledb functional tests
     66.2 allows overwriting of public methods on connection instances
     66.3 allows overwriting of public methods on resultset instances
     66.4 allows overwriting of public methods on lob instances
+
+
+68. multipleLobInsertion.js
+    68.1 inserts multiple BLOBs
+    68.2 inserts multiple CLOBs
