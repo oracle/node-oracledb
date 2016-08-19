@@ -1020,7 +1020,7 @@ describe('2. pool.js', function() {
 
     });
 
-    it('2.11.2 throws error when providing username', function(done) {
+    it('2.11.2 throws error when given with username and without password', function(done) {
 
       if(!dbConfig.user) {
         console.error("user/password required.");
@@ -1039,6 +1039,29 @@ describe('2. pool.js', function() {
           }
         );
       }
+
+    });
+
+    it('2.11.3 throws error when given with password and without username', function(done) {
+
+      if(!dbConfig.user) {
+        console.error("user/password required.");
+      } else {
+        oracledb.createPool(
+          {
+            externalAuth:  true,
+            password:      dbConfig.password,
+            connectString: dbConfig.connectString
+          },
+          function(err, pool) {
+            should.exist(err);
+            (err.message).should.startWith("DPI-006:");
+            should.not.exist(pool);
+            done();
+          }
+        );
+      }
+
     });
 
   }); // 2.11
