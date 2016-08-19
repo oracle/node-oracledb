@@ -1,6 +1,6 @@
 # Change Log
 
-## node-oracledb v1.10.2 (DD Mon YYYY)
+## node-oracledb v1.11.0 (DD Mon YYYY)
 
 ## node-oracledb v1.10.1 (21 Jul 2016)
 
