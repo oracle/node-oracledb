@@ -70,3 +70,4 @@ test/uninitializedLob.js
 test/writableProperties.js
 test/poolCache.js
 test/multipleLobInsertion.js
+test/driverName.js
