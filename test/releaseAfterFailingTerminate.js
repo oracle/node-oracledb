@@ -56,7 +56,13 @@ describe('54. releaseAfterFailingTerminate.js', function() {
 
               connection.release( function(err){
                 should.not.exist(err);
-                done();
+
+                // Still need to clean up the pool from this test.
+                pool.terminate(function(err) {
+                  should.not.exist(err);
+
+                  done();
+                });
               });
             }
           );

@@ -81,6 +81,8 @@ typedef enum
   errResultSetAlreadyConverted,
   errNamedJSON,
   errCannotLoadBinary,
+  errPoolWithAliasAlreadyExists,
+  errPoolWithAliasNotFound,
 
   // New ones should be added here
 

@@ -797,6 +797,28 @@ Overview of node-oracledb functional tests
     66.3 allows overwriting of public methods on resultset instances
     66.4 allows overwriting of public methods on lob instances
 
+67. poolCache.js
+    67.1 basic functional tests
+        67.1.1 caches pool as default if pool is created when cache is empty
+        67.1.2 removes the pool from the cache on terminate
+        67.1.3 can cache and retrieve an aliased pool
+        67.1.4 throws an error if the poolAlias already exists in the cache
+        67.1.5 does not throw an error if multiple pools are created without an alias
+        67.1.6 throws an error if poolAttrs.poolAlias is not a string or number
+        67.1.7 makes poolAttrs.poolAlias a read-only attribute on the pool named alias
+        67.1.8 retrieves the default pool, even after an aliased pool is created
+        67.1.9 retrieves the right pool, even after multiple pools are created
+        67.1.10 throws an error if the pool specified in getPool doesn't exist
+        67.1.11 does not throw an error if multiple pools are created without a poolAlias in the same call stack
+    67.2 oracledb.getConnection functional tests
+        67.2.1 gets a connection from the default pool, returns a promise
+        67.2.2 gets a connection from the default pool, invokes the callback
+        67.2.3 gets a connection from the pool with the specified alias, returns a promise
+        67.2.4 gets a connection from the pool with the specified alias, invokes the callback
+        67.2.5 throws an error if an attempt is made to use the default pool when it does not exist
+        67.2.6 throws an error if an attempt is made to use a poolAlias for a pool that is not in the cache
+        67.2.7 gets a connection from the default pool, even after an aliased pool is created
+        67.2.8 uses the right pool, even after multiple pools are created
 
 68. multipleLobInsertion.js
     68.1 inserts multiple BLOBs

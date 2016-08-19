@@ -60,7 +60,13 @@ describe('53. poolValidityAfterFailingTernimate.js', function() {
                 should.not.exist(err);
 
                 // console.log("Open connections: " + pool.connectionsOpen);
-                done();
+
+                // Still need to clean up the pool from this test.
+                pool.terminate(function(err) {
+                  should.not.exist(err);
+
+                  done();
+                });
               });
             }
           );

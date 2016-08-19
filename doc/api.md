@@ -53,6 +53,7 @@ limitations under the License.
   - 3.3 [Oracledb Methods](#oracledbmethods)
      - 3.3.1 [`createPool()`](#createpool)
      - 3.3.2 [`getConnection()`](#getconnectiondb)
+     - 3.3.3 [`getPool()`](#getpool)
 4. [Connection Class](#connectionclass)
   - 4.1 [Connection Properties](#connectionproperties)
      - 4.1.1 [`action`](#propconnaction)
@@ -122,8 +123,9 @@ limitations under the License.
      - 8.1.3 [JDBC and Node-oracledb Connection Strings Compared](#notjdbc)
   - 8.2 [Connections and Number of Threads](#numberofthreads)
   - 8.3 [Connection Pooling](#connpooling)
-     - 8.3.1 [Connection Pool Queue](#connpoolqueue)
-     - 8.3.2 [Connection Pool Monitoring and Throughput](#connpoolmonitor)
+     - 8.3.1 [Connection Pool Cache](#connpoolcache)
+     - 8.3.2 [Connection Pool Queue](#connpoolqueue)
+     - 8.3.3 [Connection Pool Monitoring and Throughput](#connpoolmonitor)
   - 8.4 [Database Resident Connection Pooling (DRCP)](#drcp)
   - 8.5 [External Authentication](#extauth)
 9. [SQL Execution](#sqlexecution)
@@ -885,7 +887,7 @@ console.log("Driver version number is " + oracledb.version);
 
 ##### Prototype
 
-Callback (Asynchronous):
+Callback:
 ```
 createPool(Object poolAttrs, function(Error error, Pool pool){});
 ```
@@ -906,11 +908,14 @@ for each Pool object.
 The default properties may be overridden by specifying new properties
 in the `poolAttrs` parameter.
 
-A pool should be terminated with the [`Pool.close()`](#poolclose)
+It is possible to add pools to the pool cache when calling `createPool()`.
+See [Connection Pool Cache](#connpoolcache) for more details.
+
+A pool should be terminated with the [`pool.close()`](#poolclose)
 call, but only after all connections have been released.
 
 ##### Parameters
-
+<a name="createpoolpoolattrs"></a>
 ```
 Object poolAttrs
 ```
@@ -977,6 +982,18 @@ The number of statements to be cached in the
 
 This optional property overrides the *Oracledb*
 [`stmtCacheSize`](#propdbstmtcachesize) property.
+<a name="createpoolpoolattrspoolalias"></a>
+```
+String poolAlias
+```
+
+The `poolAlias` is an optional property that is used to explicitly add pools to the
+connection pool cache. If a pool alias is provided, then the new pool will be added
+to the connection pool cache and the `poolAlias` value can then be used with methods
+that utilize the connection pool cache, such as [oracledb.getPool()](#getpool) and
+[oracledb.getConnection()](#getconnectiondb).
+
+See [Connection Pool Cache](#connpoolcache) for details and examples.
 
 ```
 Number poolMax
@@ -1055,29 +1072,47 @@ Callback function parameter | Description
 
 ##### Prototype
 
-Callback (Asynchronous):
+Callback:
 ```
-getConnection(Object connAttrs, function(Error error, Connection conn){});
+getConnection([String poolAlias | Object connAttrs], function(Error error, Connection conn){});
 ```
 Promise:
 ```
-promise = getConnection(Object connAttrs);
+promise = getConnection([String poolAlias | Object connAttrs]);
 ```
 
 ##### Description
 
-Obtains a connection directly from an *Oracledb* object.
+Obtains a connection from a pool in the [connection pool cache](#connpoolcache) or creates a new,
+non-pooled connection.
 
-These connections are not pooled.  For situations where connections
-are used infrequently, this call may be more efficient than creating
-and managing a connection pool.  However, in most cases, Oracle
-recommends getting new connections from a
-[connection pool](#createpool).
+For situations where connections are used infrequently, creating a new connection
+may be more efficient than creating and managing a connection pool. However, in
+most cases, Oracle recommends getting connections from a [connection pool](#createpool).
+
+The following table shows the various signatures that can be used when invoking
+`getConnection` and describes how the function will behave as a result.
+
+Signature | Description
+--------- | -----------
+oracledb.getConnection() | Gets a connection from the default pool, returns a promise.
+oracledb.getConnection(callback) | Gets a connection from the default pool, invokes the callback.
+oracledb.getConnection(poolAlias) | Gets a connection from the pool with the specified `poolAlias`, returns a promise.
+oracledb.getConnection(poolAlias, callback) | Gets a connection from the pool with the specified `poolAlias`, invokes the callback.
+oracledb.getConnection(connAttrs) | Creates a standalone connection, returns a promise.
+oracledb.getConnection(connAttrs, callback) | Creates a standalone connection, invokes the callback.
 
 See [Connection Handling](#connectionhandling) for more information on
 connections.
 
 ##### Parameters
+
+```
+String poolAlias
+```
+
+The `poolAlias` parameter is used to specify which pool in the connection pool
+cache to use to obtain the connection.
 
 ```
 Object connAttrs
@@ -1153,6 +1188,28 @@ Callback function parameter | Description
 ----------------------------|-------------
 *Error error* | If `getConnection()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 *Connection connection* | The newly created connection.  If `getConnection()` fails, `connection` will be NULL.  See [Connection class](#connectionclass) for more details.
+
+#### <a name="getpool"></a> 3.3.3 getPool()
+
+##### Prototype
+
+```
+getPool([String poolAlias]);
+```
+
+##### Description
+
+Retrieves a pool from the [connection pool cache](#connpoolcache). Note that this is a synchronous
+method.
+
+##### Parameters
+
+```
+String poolAlias
+```
+
+The pool alias of the pool to retrieve from the connection pool cache. The default
+value is 'default' which will retrieve the default pool.
 
 ## <a name="connectionclass"></a> 4. Connection Class
 
@@ -1234,7 +1291,7 @@ connection is created in the pool.
 
 ##### Prototype
 
-Callback (Asynchronous):
+Callback:
 ```
 break(function(Error error){});
 ```
@@ -1269,7 +1326,7 @@ Callback function parameter | Description
 
 ##### Prototype
 
-Callback (Asynchronous):
+Callback:
 ```
 close(function(Error error){});
 ```
@@ -1311,7 +1368,7 @@ Callback function parameter | Description
 
 ##### Prototype
 
-Callback (Asynchronous):
+Callback:
 ```
 commit(function(Error error){});
 ```
@@ -1340,7 +1397,7 @@ Callback function parameter | Description
 
 ##### Prototype
 
-Callback (Asynchronous):
+Callback:
 ```
 execute(String sql, [Object bindParams, [Object options,]] function(Error error, [Object result]){});
 ```
@@ -1676,13 +1733,13 @@ See [execute()](#execute).
 
 #### <a name="release"></a> 4.2.6 release()
 
-An alias for [Connection.close()](#connectionclose).
+An alias for [connection.close()](#connectionclose).
 
 #### <a name="rollback"></a> 4.2.7 rollback()
 
 ##### Prototype
 
-Callback (Asynchronous):
+Callback:
 ```
 rollback(function(Error error){});
 ```
@@ -1878,7 +1935,7 @@ The number of statements to be cached in the
 
 ##### Prototype
 
-Callback (Asynchronous):
+Callback:
 ```
 close(function(Error error){});
 ```
@@ -1891,8 +1948,10 @@ promise = close();
 
 This call terminates the connection pool.
 
-Any open connections should be released with [`Connection.close()`](#connectionclose)
-before `Pool.close()` is called.
+Any open connections should be released with [`connection.close()`](#connectionclose)
+before `pool.close()` is called.
+
+If the pool was cached in the [connection pool cache](#connpoolcache) it will be removed automatically.
 
 ##### Parameters
 
@@ -1911,7 +1970,7 @@ Callback function parameter | Description
 
 ##### Prototype
 
-Callback (Asynchronous):
+Callback:
 ```
 getConnection(function(Error error, Connection conn){});
 ```
@@ -1949,7 +2008,7 @@ Callback function parameter | Description
 
 #### <a name="terminate"></a> 6.2.3 terminate()
 
-An alias for [Pool.close()](#poolclose).
+An alias for [pool.close()](#poolclose).
 
 ## <a name="resultsetclass"></a> 7. ResultSet Class
 
@@ -1999,7 +2058,7 @@ See [`result.metaData`](#execmetadata) for the available attributes.
 
 ##### Prototype
 
-Callback (Asynchronous):
+Callback:
 ```
 close(function(Error error){});
 ```
@@ -2017,7 +2076,7 @@ of fetch or when no more rows are needed.
 
 ##### Prototype
 
-Callback (Asynchronous):
+Callback:
 ```
 getRow(function(Error error, Object row){});
 ```
@@ -2036,7 +2095,7 @@ At the end of fetching, the `ResultSet` should be freed by calling [`close()`](#
 
 ##### Prototype
 
-Callback (Asynchronous):
+Callback:
 ```
 getRows(Number numRows, function(Error error, Array rows){});
 ```
@@ -2098,7 +2157,7 @@ oracledb.getConnection(
   });
 ```
 
-Connections should be released with [`Connection.close()`](#connectionclose) when no
+Connections should be released with [`connection.close()`](#connectionclose) when no
 longer needed:
 
 ```javascript
@@ -2327,7 +2386,7 @@ oracledb.createPool (
   });
 ```
 
-Connections should be released with [`Connection.close()`](#connectionclose) when no
+Connections should be released with [`connection.close()`](#connectionclose) when no
 longer needed:
 
 ```javascript
@@ -2340,7 +2399,7 @@ longer needed:
 
 After an application finishes using a connection pool, it should
 release all connections and terminate the connection pool by calling
-the [`Pool.close()`](#poolclose) method.
+the [`pool.close()`](#poolclose) method.
 
 The growth characteristics of a connection pool are determined by the
 Pool attributes [`poolIncrement`](#proppoolpoolincrement),
@@ -2353,7 +2412,125 @@ The Pool attribute [`stmtCacheSize`](#propconnstmtcachesize) can be
 used to set the statement cache size used by connections in the pool,
 see [Statement Caching](#stmtcache).
 
-#### <a name="connpoolqueue"></a> 8.3.1 Connection Pool Queue
+#### <a name="connpoolcache"></a> 8.3.1 Connection Pool Cache
+
+Node-oracledb has an internal connection pool cache which can be used to
+facilitate sharing pools across modules and simplify getting connections from
+pools in the cache.
+
+Methods that can affect or use the connection pool cache include:
+- [oracledb.createPool()](#createpool) - can add a pool to the cache
+- [oracledb.getPool()](#getpool) - retrieves a pool from the cache (synchronous)
+- [oracledb.getConnection()](#getconnectiondb) - can use a pool in the cache to retrieve connections
+- [pool.close()](#closepool) - automatically removes the pool from the cache if needed
+
+Pools are added to the cache if a [`poolAlias`](#createpoolpoolattrspoolalias)
+property is provided in the [`poolAttrs`](#createpoolpoolattrs) object when
+invoking `oracledb.createPool()`. If a pool with the alias 'default' is not in the
+cache and a pool is created without providing a pool alias, that pool will be cached
+using the pool alias 'default'. The pool with this pool alias is used by default in
+methods that utilize the connection pool cache.
+
+There can be multiple pools in the cache provided each pool is created with
+a unique pool alias.
+
+##### Examples using the default pool
+
+Assuming the connection pool cache is empty, the following will create a new pool
+and cache it using the pool alias 'default':
+```javascript
+var oracledb = require('oracledb');
+
+oracledb.createPool (
+  {
+    user: 'hr',
+    password: 'welcome',
+    connectString: 'localhost/XE'
+  },
+  function(err, pool) {
+    console.log(pool.poolAlias); // default
+  }
+);
+```
+
+Once cached, the default pool can be retrieved using `oracledb.getPool()` without
+passing the `poolAlias` parameter:
+
+```javascript
+var oracledb = require('oracledb');
+var pool = oracledb.getPool();
+
+pool.getConnection(function(err, conn) {
+   // Use connection
+});
+```
+
+If the pool is being retrieved only to call `pool.getConnection`, then the shortcut
+`oracledb.getConnection` may be used instead:
+
+```javascript
+var oracledb = require('oracledb');
+
+oracledb.getConnection(function(err, conn) {
+   // Use connection
+});
+```
+
+##### Examples using multiple pools
+
+If the application needs to use more than one pool at a time, unique pool aliases
+can be used when creating the pools:
+
+```javascript
+var oracledb = require('oracledb');
+
+var hrPoolPromise = oracledb.createPool({
+  poolAlias: 'pool1',
+  users: 'hr',
+  password: 'welcome',
+  connectString: 'localhost/XE'
+});
+
+var shPoolPromise = oracledb.createPool({
+  poolAlias: 'pool2',
+  user: 'sh',
+  password: 'welcome',
+  connectString: 'localhost/XE'
+});
+
+Promise.all([hrPoolPromise, shPoolPromise])
+  .then(function(pools) {
+    console.log(pools[0].poolAlias); // pool1
+    console.log(pools[1].poolAlias); // pool2
+  })
+  .catch(function(err) {
+    // handle error
+  })
+```
+
+To use the methods or attributes of a pool in the cache, a pool can be retrieved
+from the cache by passing its pool alias to `oracledb.getPool()`:
+
+```javascript
+var oracledb = require('oracledb');
+var pool = oracledb.getPool('pool1'); // or 'pool2'
+
+pool.getConnection(function(err, conn) {
+   // Use connection
+});
+```
+
+The `oracledb.getConnection` shortcut can also be used with a pool alias:
+
+```javascript
+var oracledb = require('oracledb');
+
+oracledb.getConnection('pool1', function(err, conn) { // or 'pool2'
+   // Use connection
+});
+```
+
+#### <a name="connpoolqueue"></a> 8.3.2 Connection Pool Queue
 
 By default when `poolMax` has been reached (meaning all connections in
 a pool are in use), and more
@@ -2380,7 +2557,7 @@ connection is [released](#connectionclose), and the number of
 connections in use drops below the value of
 [`poolMax`](#proppoolpoolmax).
 
-#### <a name="connpoolmonitor"></a> 8.3.2 Connection Pool Monitoring and Throughput
+#### <a name="connpoolmonitor"></a> 8.3.3 Connection Pool Monitoring and Throughput
 
 Connection pool usage should be monitored to choose the appropriate
 connection pool settings for your workload.
@@ -2430,17 +2607,17 @@ The statistics displayed by `_logStats()` in this release are:
 Statistic                 | Description
 --------------------------|-------------
 total up time             | The number of milliseconds this pool has been running.
-total connection requests | Number of `Pool.getConnection()` requests made by the application to this pool.
-total requests enqueued   | Number of `Pool.getConnection()` requests that could not be immediately satisfied because every connection in this pool was already being used, and so they had to be queued waiting for the application to return an in-use connection to the pool.
-total requests dequeued   | Number of `Pool.getConnection()` requests that were dequeued when a connection in this pool became available for use.
-total requests failed     | Number of `Pool.getConnection()` requests that invoked the underlying C++ `Pool.getConnection()` callback with an error state. Does not include queue request timeout errors.
-total request timeouts    | Number of queued `Pool.getConnection()` requests that were timed out after they had spent [queueTimeout](#propdbqueuetimeout) or longer in this pool's queue.
-max queue length          | Maximum number of `Pool.getConnection()` requests that were ever waiting at one time.
+total connection requests | Number of `pool.getConnection()` requests made by the application to this pool.
+total requests enqueued   | Number of `pool.getConnection()` requests that could not be immediately satisfied because every connection in this pool was already being used, and so they had to be queued waiting for the application to return an in-use connection to the pool.
+total requests dequeued   | Number of `pool.getConnection()` requests that were dequeued when a connection in this pool became available for use.
+total requests failed     | Number of `pool.getConnection()` requests that invoked the underlying C++ `pool.getConnection()` callback with an error state. Does not include queue request timeout errors.
+total request timeouts    | Number of queued `pool.getConnection()` requests that were timed out after they had spent [queueTimeout](#propdbqueuetimeout) or longer in this pool's queue.
+max queue length          | Maximum number of `pool.getConnection()` requests that were ever waiting at one time.
 sum of time in queue      | The sum of the time (milliseconds) that dequeued requests spent in the queue.
 min time in queue         | The minimum time (milliseconds) that any dequeued request spent in the queue.
 max time in queue         | The maximum time (milliseconds) that any dequeued request spent in the queue.
 avg time in queue         | The average time (milliseconds) that dequeued requests spent in the queue.
-pool connections in use   | The number of connections from this pool that `Pool.getConnection()` returned successfully to the application and have not yet been released back to the pool.
+pool connections in use   | The number of connections from this pool that `pool.getConnection()` returned successfully to the application and have not yet been released back to the pool.
 pool connections open     | The number of connections in this pool that have been established to the database.
 
 Note that for efficiency, the minimum, maximum, average, and sum of
@@ -2452,15 +2629,16 @@ still waiting in the queue.
 
 The `_logStats()` method also shows attribute values in effect for the pool:
 
-Attribute                               |
-----------------------------------------|
-[`queueRequests`](#propdbqueuerequests) |
-[`queueTimeout`](#propdbqueuetimeout)   |
-[`poolMin`](#propdbpoolmin)             |
-[`poolMax`](#propdbpoolmax)             |
-[`poolIncrement`](#propdbpoolincrement) |
-[`poolTimeout`](#propdbpooltimeout)     |
-[`stmtCacheSize`](#propdbstmtcachesize) |
+Attribute                                   |
+--------------------------------------------|
+[`poolAlias`](#createpoolpoolattrspoolalias)|
+[`queueRequests`](#propdbqueuerequests)     |
+[`queueTimeout`](#propdbqueuetimeout)       |
+[`poolMin`](#propdbpoolmin)                 |
+[`poolMax`](#propdbpoolmax)                 |
+[`poolIncrement`](#propdbpoolincrement)     |
+[`poolTimeout`](#propdbpooltimeout)         |
+[`stmtCacheSize`](#propdbstmtcachesize)     |
 
 ##### Related Environment Variables
 
@@ -2568,7 +2746,7 @@ A SQL or PL/SQL statement may be executed using the *Connection*
 below, or [promises](#promiseoverview) may be used.
 
 After all database calls on the connection complete, the application
-should use the [`Connection.close()`](#connectionclose) call to
+should use the [`connection.close()`](#connectionclose) call to
 release the connection.
 
 Queries may optionally be streamed using the *Connection*

@@ -68,4 +68,5 @@ test/autoCommit4nestedExecutes.js
 test/sqlWithWarnings.js
 test/uninitializedLob.js
 test/writableProperties.js
+test/poolCache.js
 test/multipleLobInsertion.js
