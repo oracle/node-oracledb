@@ -238,9 +238,9 @@ describe('5. externalAuth.js', function() {
 
   }); // 5.1
 
-  describe('5.2 tests only work when externalAuth is configured on DB', function() {
+  describe.skip('5.2 tests only work when externalAuth is configured on DB', function() {
 
-    // need to skip these tests if external authentication is enable for the whole suite
+    // need to skip these tests if external authentication is not configured
     var it = (dbConfig.externalAuth) ? global.it : global.it.skip;
 
     it("5.2.1 can get connection from oracledb with external authentication", function(done) {
@@ -276,7 +276,7 @@ describe('5. externalAuth.js', function() {
 
     }); // 5.2.1
 
-    it.skip("5.2.2 can get pool from oracledb with external authentication", function(done) {
+    it("5.2.2 can get pool from oracledb with external authentication", function(done) {
 
       async.waterfall([
         function(callback) {
@@ -366,7 +366,7 @@ describe('5. externalAuth.js', function() {
 
     }); // 5.2.3
 
-    it.skip("5.2.4 gets multiple pools from oracledb", function(done) {
+    it("5.2.4 gets multiple pools from oracledb", function(done) {
 
       var getPools = function(id, callback) {
         oracledb.createPool(
