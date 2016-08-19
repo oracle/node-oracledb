@@ -830,3 +830,6 @@ Overview of node-oracledb functional tests
 68. multipleLobInsertion.js
     68.1 inserts multiple BLOBs
     68.2 inserts multiple CLOBs
+
+69. driverName.js
+    69.1 checks the driver name

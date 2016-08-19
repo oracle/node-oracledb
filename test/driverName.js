@@ -80,7 +80,7 @@ describe('69. driverName.js', function() {
             // 12c database can return the full driver name, e.g. 'node-oracledb 1.11'
             if(dbVerMajor == 12) {
               var addonVer = getAddonVer();
-              (result.rows[0][0]).should.equal("node-oracledb : " + addonVer);
+              (result.rows[0][0].trim()).should.equal("node-oracledb : " + addonVer);
             }
             // 11g database only returns the first 8 characters of the driver name
             else if(dbVerMajor == 11) {
