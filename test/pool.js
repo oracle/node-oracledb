@@ -658,8 +658,8 @@ describe('2. pool.js', function() {
           should.exist(err);
           (err.message).should.startWith('NJS-009:');
           // NJS-009: invalid number of parameters
-          done();
         }
+        done();
       });
     });
 
