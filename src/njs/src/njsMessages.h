@@ -80,6 +80,7 @@ typedef enum
   errCannotInvokeRsMethods,
   errResultSetAlreadyConverted,
   errNamedJSON,
+  errCannotLoadBinary,
 
   // New ones should be added here
 
