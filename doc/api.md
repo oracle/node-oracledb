@@ -97,13 +97,14 @@ limitations under the License.
   - 6.1 [Pool Properties](#poolproperties)
      - 6.1.1 [`connectionsInUse`](#proppoolconnectionsinuse)
      - 6.1.2 [`connectionsOpen`](#proppoolconnectionsopen)
-     - 6.1.3 [`poolIncrement`](#proppoolpoolincrement)
-     - 6.1.4 [`poolMax`](#proppoolpoolmax)
-     - 6.1.5 [`poolMin`](#proppoolpoolmin)
-     - 6.1.6 [`poolTimeout`](#proppoolpooltimeout)
-     - 6.1.7 [`queueRequests`](#proppoolqueuerequests)
-     - 6.1.8 [`queueTimeout`](#proppoolqueueTimeout)
-     - 6.1.9 [`stmtCacheSize`](#proppoolstmtcachesize)
+     - 6.1.3 [`poolAlias`](#proppoolpoolalias)
+     - 6.1.4 [`poolIncrement`](#proppoolpoolincrement)
+     - 6.1.5 [`poolMax`](#proppoolpoolmax)
+     - 6.1.6 [`poolMin`](#proppoolpoolmin)
+     - 6.1.7 [`poolTimeout`](#proppoolpooltimeout)
+     - 6.1.8 [`queueRequests`](#proppoolqueuerequests)
+     - 6.1.9 [`queueTimeout`](#proppoolqueueTimeout)
+     - 6.1.10 [`stmtCacheSize`](#proppoolstmtcachesize)
   - 6.2 [Pool Methods](#poolmethods)
      - 6.2.1 [`close()`](#poolclose)
      - 6.2.2 [`getConnection()`](#getconnectionpool)
@@ -1864,7 +1865,15 @@ readonly Number connectionsOpen
 The number of currently open connections in the underlying connection
 pool.
 
-#### <a name="proppoolpoolincrement"></a> 6.1.3 poolIncrement
+#### <a name="proppoolpoolalias"></a> 6.1.3 poolAlias
+
+```
+readonly Number poolAlias
+```
+
+The alias of this pool in the [connection pool cache](#connpoolcache).  An alias cannot be changed once the pool has been created.
+
+#### <a name="proppoolpoolincrement"></a> 6.1.4 poolIncrement
 
 ```
 readonly Number poolIncrement
@@ -1873,7 +1882,7 @@ readonly Number poolIncrement
 The number of connections that are opened whenever a connection
 request exceeds the number of currently open connections.
 
-#### <a name="proppoolpoolmax"></a> 6.1.4 poolMax
+#### <a name="proppoolpoolmax"></a> 6.1.5 poolMax
 
 ```
 readonly Number poolMax
@@ -1882,7 +1891,7 @@ readonly Number poolMax
 The maximum number of connections that can be open in the connection
 pool.
 
-#### <a name="proppoolpoolmin"></a> 6.1.5 poolMin
+#### <a name="proppoolpoolmin"></a> 6.1.6 poolMin
 
 ```
 readonly Number poolMin
@@ -1891,7 +1900,7 @@ readonly Number poolMin
 The minimum number of connections a connection pool maintains, even
 when there is no activity to the target database.
 
-#### <a name="proppoolpooltimeout"></a> 6.1.6 poolTimeout
+#### <a name="proppoolpooltimeout"></a> 6.1.7 poolTimeout
 
 ```
 readonly Number poolTimeout
@@ -1901,7 +1910,7 @@ The time (in seconds) after which the pool terminates idle connections
 (unused in the pool). The number of connections does not drop below
 poolMin.
 
-#### <a name="proppoolqueuerequests"></a> 6.1.7 queueRequests
+#### <a name="proppoolqueuerequests"></a> 6.1.8 queueRequests
 
 ```
 readonly Boolean queueRequests
@@ -1911,7 +1920,7 @@ Determines whether requests for connections from the pool are queued
 when the number of connections "checked out" from the pool has reached
 the maximum number specified by [`poolMax`](#propdbpoolmax).
 
-#### <a name="proppoolqueueTimeout"></a> 6.1.8 queueTimeout
+#### <a name="proppoolqueueTimeout"></a> 6.1.9 queueTimeout
 
 ```
 readonly Number queueTimeout
@@ -1920,7 +1929,7 @@ readonly Number queueTimeout
 The time (in milliseconds) that a connection request should wait in
 the queue before the request is terminated.
 
-#### <a name="proppoolstmtcachesize"></a> 6.1.9 stmtCacheSize
+#### <a name="proppoolstmtcachesize"></a> 6.1.10 stmtCacheSize
 
 ```
 readonly Number stmtCacheSize
@@ -1951,7 +1960,7 @@ This call terminates the connection pool.
 Any open connections should be released with [`connection.close()`](#connectionclose)
 before `pool.close()` is called.
 
-If the pool was cached in the [connection pool cache](#connpoolcache) it will be removed automatically.
+If the pool is in the [connection pool cache](#connpoolcache) it will be removed from the cache.
 
 ##### Parameters
 
@@ -2422,7 +2431,7 @@ Methods that can affect or use the connection pool cache include:
 - [oracledb.createPool()](#createpool) - can add a pool to the cache
 - [oracledb.getPool()](#getpool) - retrieves a pool from the cache (synchronous)
 - [oracledb.getConnection()](#getconnectiondb) - can use a pool in the cache to retrieve connections
-- [pool.close()](#closepool) - automatically removes the pool from the cache if needed
+- [pool.close()](#poolclose) - automatically removes the pool from the cache if needed
 
 Pools are added to the cache if a [`poolAlias`](#createpoolpoolattrspoolalias)
 property is provided in the [`poolAttrs`](#createpoolpoolattrs) object when
