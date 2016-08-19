@@ -66,17 +66,23 @@ describe('35. dataTypeTimestamp3.js', function() {
            "END; ";
   var sqlDrop = "DROP table " + tableName;
   before( function(done){
-    oracledb.getConnection(dbConfig, function(err, conn){
-      if(err) { console.error(err.message); return; }
-      connection = conn;
-      connection.execute(
-        sqlCreate,
-        function(err) {
-          if(err) { console.error(err.message); return; }
-          done();
-        }
-      );
-    });
+    oracledb.getConnection(
+      {
+        user:          dbConfig.user,
+        password:      dbConfig.password,
+        connectString: dbConfig.connectString
+      },
+      function(err, conn){
+        should.not.exist(err);
+        connection = conn;
+        connection.execute(
+          sqlCreate,
+          function(err) {
+            should.not.exist(err);
+            done();
+          }
+        );
+      });
   })
 
   after( function(done){

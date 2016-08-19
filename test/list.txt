@@ -70,10 +70,6 @@ Overview of node-oracledb functional tests
         2.9.1 works after the pool as been terminated
     2.10 Close method
         2.10.1 close can be used as an alternative to release
-    2.11 External Authentication
-        2.11.1 throws error when providing username and password with external authentication
-        2.11.2 throws error when given with username and without password
-        2.11.3 throws error when given with password and without username
 
 3. examples.js
     3.1 connect.js
@@ -126,11 +122,21 @@ Overview of node-oracledb functional tests
     4.5 The default direction for binding is BIND_IN
       - 4.5.1
 
-5. externalAuthentication.js
-    5.1 connection should succeed when setting externalAuth to be false and providing user/password
-    5.2 error should be thrown when setting externalAuth to be true and providing user/password
-    5.3 can get connection from oracledb
-    5.4 can create pool
+5. externalAuth.js
+    5.1 tests that work both when DB has configured externalAuth and not configured
+        5.1.1 can get connection from oracledb with correct user/password when externalAuth is disabled
+        5.1.2 throws error when getting connection from oracledb with correct user/password when externalAuth is enabled
+        5.1.3 throws error when gettting connection from oracledb given only 'user' when externalAuth is enabled
+        5.1.4 throws error when gettting connection from oracledb given only 'password' when externalAuth is enabled
+        5.1.5 can get pool from oracledb with user/password when externalAuth is disabled
+        5.1.6 throws error when getting pool from oracledb given user/password when externalAuth is enabled
+        5.1.7 throws error when getting pool from oracledb only given username when externalAuth is enabled
+        5.1.8 throws error when getting pool from oracledb only given password when externalAuth is enabled
+    5.2 tests only work when externalAuth is configured on DB
+        5.2.1 can get connection from oracledb with external authentication
+      - 5.2.2 can get pool from oracledb with external authentication
+        5.2.3 gets multiple connections from oracledb
+      - 5.2.4 gets multiple pools from oracledb
 
 6. dmlReturning.js
     6.1 NUMBER & STRING driver data type

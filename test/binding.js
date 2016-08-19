@@ -43,11 +43,17 @@ var assist   = require('./dataTypeAssist.js');
 
 describe('4. binding.js', function() {
 
+  var credentials = {
+                      user: dbConfig.user,
+                      password: dbConfig.password,
+                      connectString: dbConfig.connectString
+                    };
+
   describe('4.1 test STRING, NUMBER, ARRAY & JSON format', function() {
 
     var connection = null;
     before(function(done) {
-      oracledb.getConnection(dbConfig, function(err, conn) {
+      oracledb.getConnection(credentials, function(err, conn) {
         if(err) { console.error(err.message); return; }
         connection = conn;
         done();
@@ -347,7 +353,7 @@ describe('4. binding.js', function() {
     var options = { autoCommit: true, outFormat: oracledb.OBJECT };
 
     beforeEach(function(done) {
-      oracledb.getConnection(dbConfig, function(err, conn) {
+      oracledb.getConnection(credentials, function(err, conn) {
         should.not.exist(err);
         connection = conn;
         conn.execute(
@@ -448,7 +454,7 @@ describe('4. binding.js', function() {
       END; ";
 
     beforeEach(function(done) {
-      oracledb.getConnection(dbConfig, function(err, conn) {
+      oracledb.getConnection(credentials, function(err, conn) {
         should.not.exist(err);
         connection = conn;
         conn.execute(
@@ -583,7 +589,7 @@ describe('4. binding.js', function() {
     var connection = null;
 
     before(function(done) {
-      oracledb.getConnection(dbConfig, function(err, conn) {
+      oracledb.getConnection(credentials, function(err, conn) {
         if(err) { console.error(err.message); return; }
         connection = conn;
         done();
@@ -699,7 +705,7 @@ describe('4. binding.js', function() {
     var tableName = "nodb_raw";
 
     before(function(done) {
-      oracledb.getConnection(dbConfig, function(err, conn) {
+      oracledb.getConnection(credentials, function(err, conn) {
         if(err) { console.error(err.message); return; }
         connection = conn;
         assist.createTable(connection, tableName, done);
@@ -752,7 +758,7 @@ describe('4. binding.js', function() {
       var options = {};
 
       oracledb.getConnection(
-        dbConfig,
+        credentials,
         function(err, connection)
         {
           should.not.exist(err);
@@ -786,7 +792,7 @@ describe('4. binding.js', function() {
          var binds = [ 1, 456 ];
 
          oracledb.getConnection (
-           dbConfig,
+           credentials,
            function (err, connection ){
 
              should.not.exist ( err ) ;
@@ -808,7 +814,7 @@ describe('4. binding.js', function() {
          var binds = [ 1, { val : 456 } ];
 
          oracledb.getConnection (
-           dbConfig,
+           credentials,
            function (err, connection ){
 
              should.not.exist ( err ) ;
@@ -829,7 +835,7 @@ describe('4. binding.js', function() {
         var binds = [ {val :  1}, 456 ];
 
          oracledb.getConnection (
-           dbConfig,
+           credentials,
            function (err, connection ){
 
              should.not.exist ( err ) ;
@@ -850,7 +856,7 @@ describe('4. binding.js', function() {
         var binds = [ {val : 1}, {val : 456 } ];
 
          oracledb.getConnection (
-           dbConfig,
+           credentials,
            function (err, connection ){
 
              should.not.exist ( err ) ;
@@ -871,7 +877,7 @@ describe('4. binding.js', function() {
         var binds = [ {val : 1}, { c: {val : 456 } } ];
 
         oracledb.getConnection (
-          dbConfig,
+          credentials,
           function (err, connection ){
             should.not.exist ( err ) ;
             connection.execute (
@@ -891,7 +897,7 @@ describe('4. binding.js', function() {
         var binds = [ { b: {val : 1} }, {val : 456 } ];
 
         oracledb.getConnection (
-          dbConfig,
+          credentials,
           function (err, connection ){
             should.not.exist ( err ) ;
             connection.execute (
@@ -911,7 +917,7 @@ describe('4. binding.js', function() {
         var binds = [ { b: {val : 1} }, { c: {val : 456 } } ];
 
         oracledb.getConnection (
-          dbConfig,
+          credentials,
           function (err, connection ){
             should.not.exist ( err ) ;
             connection.execute (

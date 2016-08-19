@@ -45,11 +45,18 @@ describe('17. extendedMetaData.js', function() {
 
     async.series([
       function(cb) {
-        oracledb.getConnection(dbConfig, function(err, conn) {
-          should.not.exist(err);
-          connection = conn;
-          cb();
-        });
+        oracledb.getConnection(
+          {
+            user: dbConfig.user,
+            password: dbConfig.password,
+            connectString: dbConfig.connectString
+          },
+          function(err, conn) {
+            should.not.exist(err);
+            connection = conn;
+            cb();
+          }
+        );
       },
       function(cb) {
         var proc = "BEGIN \n" +

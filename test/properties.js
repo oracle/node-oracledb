@@ -234,7 +234,11 @@ describe('58. properties.js', function() {
 
     before(function(done) {
       oracledb.createPool(
-        dbConfig,
+        {
+          user:          dbConfig.user,
+          password:      dbConfig.password,
+          connectString: dbConfig.connectString
+        },
         function(err, p) {
           should.not.exist(err);
           pool = p;
@@ -364,11 +368,18 @@ describe('58. properties.js', function() {
     var connection = null;
 
     before('get one connection', function(done) {
-      oracledb.getConnection(dbConfig, function(err, conn) {
-        should.not.exist(err);
-        connection = conn;
-        done();
-      });
+      oracledb.getConnection(
+        {
+          user:          dbConfig.user,
+          password:      dbConfig.password,
+          connectString: dbConfig.connectString
+        },
+        function(err, conn) {
+          should.not.exist(err);
+          connection = conn;
+          done();
+        }
+      );
     })
 
     after('release connection', function(done) {
@@ -482,11 +493,18 @@ describe('58. properties.js', function() {
     before('get resultSet class', function(done) {
       async.series([
         function(callback) {
-          oracledb.getConnection(dbConfig, function(err, conn) {
-            should.not.exist(err);
-            connection = conn;
-            callback();
-          });
+          oracledb.getConnection(
+            {
+              user:          dbConfig.user,
+              password:      dbConfig.password,
+              connectString: dbConfig.connectString
+            },
+            function(err, conn) {
+              should.not.exist(err);
+              connection = conn;
+              callback();
+            }
+          );
         },
         function(callback) {
           assist.setUp(connection, tableName, numbers, callback);

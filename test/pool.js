@@ -44,30 +44,37 @@ describe('2. pool.js', function() {
 
     it('2.1.1 testing default values of pool properties', function(done) {
 
-      oracledb.createPool(dbConfig, function(err, pool) {
-        should.not.exist(err);
-        pool.should.be.ok();
-
-        var defaultMin = 0;
-        var defaultMax = 4;
-        var defaultIncrement = 1;
-        var defaultTimeout = 60;
-        var defaultStmtCacheSize = 30;
-
-        pool.poolMin.should.be.exactly(defaultMin).and.be.a.Number();
-        pool.poolMax.should.be.exactly(defaultMax).and.be.a.Number();
-        pool.poolIncrement.should.be.exactly(defaultIncrement).and.be.a.Number();
-        pool.poolTimeout.should.be.exactly(defaultTimeout).and.be.a.Number();
-        pool.stmtCacheSize.should.be.exactly(defaultStmtCacheSize).and.be.a.Number();
-
-        pool.connectionsOpen.should.equal(0);
-        pool.connectionsInUse.should.equal(0);
-
-        pool.terminate(function(err){
+      oracledb.createPool(
+        {
+          user:          dbConfig.user,
+          password:      dbConfig.password,
+          connectString: dbConfig.connectString
+        },
+        function(err, pool) {
           should.not.exist(err);
-          done();
-        });
-      });
+          pool.should.be.ok();
+
+          var defaultMin = 0;
+          var defaultMax = 4;
+          var defaultIncrement = 1;
+          var defaultTimeout = 60;
+          var defaultStmtCacheSize = 30;
+
+          pool.poolMin.should.be.exactly(defaultMin).and.be.a.Number();
+          pool.poolMax.should.be.exactly(defaultMax).and.be.a.Number();
+          pool.poolIncrement.should.be.exactly(defaultIncrement).and.be.a.Number();
+          pool.poolTimeout.should.be.exactly(defaultTimeout).and.be.a.Number();
+          pool.stmtCacheSize.should.be.exactly(defaultStmtCacheSize).and.be.a.Number();
+
+          pool.connectionsOpen.should.equal(0);
+          pool.connectionsInUse.should.equal(0);
+
+          pool.terminate(function(err){
+            should.not.exist(err);
+            done();
+          });
+      }
+    );
 
     });
 
@@ -78,7 +85,6 @@ describe('2. pool.js', function() {
     it('2.2.1 poolMin cannot be a negative number', function(done){
       oracledb.createPool(
         {
-          externalAuth      : dbConfig.externalAuth,
           user              : dbConfig.user,
           password          : dbConfig.password,
           connectString     : dbConfig.connectString,
@@ -99,7 +105,6 @@ describe('2. pool.js', function() {
     it('2.2.2 poolMin must be a Number', function(done){
       oracledb.createPool(
         {
-          externalAuth      : dbConfig.externalAuth,
           user              : dbConfig.user,
           password          : dbConfig.password,
           connectString     : dbConfig.connectString,
@@ -120,7 +125,6 @@ describe('2. pool.js', function() {
     it('2.2.3 poolMin cannot equal to poolMax', function(done){
       oracledb.createPool(
         {
-          externalAuth      : dbConfig.externalAuth,
           user              : dbConfig.user,
           password          : dbConfig.password,
           connectString     : dbConfig.connectString,
@@ -131,10 +135,8 @@ describe('2. pool.js', function() {
           stmtCacheSize     : 23
         },
         function(err, pool){
-          if(!dbConfig.externalAuth){
-            should.exist(err);
-            (err.message).should.startWith('ORA-24413:');
-          }
+          should.exist(err);
+          (err.message).should.startWith('ORA-24413:');
           done();
         }
       );
@@ -143,7 +145,6 @@ describe('2. pool.js', function() {
     it('2.2.4 poolMin cannot greater than poolMax', function(done){
       oracledb.createPool(
         {
-          externalAuth      : dbConfig.externalAuth,
           user              : dbConfig.user,
           password          : dbConfig.password,
           connectString     : dbConfig.connectString,
@@ -154,10 +155,8 @@ describe('2. pool.js', function() {
           stmtCacheSize     : 23
         },
         function(err, pool){
-          if(!dbConfig.externalAuth){
-            should.exist(err);
-            (err.message).should.startWith('ORA-24413:');
-          }
+          should.exist(err);
+          (err.message).should.startWith('ORA-24413:');
           done();
         }
       );
@@ -166,7 +165,6 @@ describe('2. pool.js', function() {
     it('2.2.5 (poolMin + poolIncrement) cannot greater than poolMax', function(done){
       oracledb.createPool(
         {
-          externalAuth      : dbConfig.externalAuth,
           user              : dbConfig.user,
           password          : dbConfig.password,
           connectString     : dbConfig.connectString,
@@ -177,19 +175,17 @@ describe('2. pool.js', function() {
           stmtCacheSize     : 23
         },
         function(err, pool){
-          if(!dbConfig.externalAuth){
-            should.exist(err);
-            (err.message).should.startWith('ORA-24413:');
-          }
+          should.exist(err);
+          (err.message).should.startWith('ORA-24413:');
           done();
         }
       );
     })
 
-    it('2.2.6 (poolMin + poolIncrement) can equal to poolMax', function(done){
+    it('2.2.6 (poolMin + poolIncrement) can equal to poolMax', function(done) {
+
       oracledb.createPool(
         {
-          externalAuth      : dbConfig.externalAuth,
           user              : dbConfig.user,
           password          : dbConfig.password,
           connectString     : dbConfig.connectString,
@@ -202,11 +198,7 @@ describe('2. pool.js', function() {
         function(err, pool){
           should.not.exist(err);
           pool.should.be.ok();
-          if(dbConfig.externalAuth){
-            pool.connectionsOpen.should.be.exactly(0);
-          } else {
-            pool.connectionsOpen.should.be.exactly(pool.poolMin);
-          }
+          pool.connectionsOpen.should.be.exactly(pool.poolMin);
           pool.connectionsInUse.should.be.exactly(0);
 
           pool.terminate(function(err){
@@ -225,7 +217,6 @@ describe('2. pool.js', function() {
     it('2.3.1 poolMax cannot be a negative value', function(done){
       oracledb.createPool(
         {
-          externalAuth      : dbConfig.externalAuth,
           user              : dbConfig.user,
           password          : dbConfig.password,
           connectString     : dbConfig.connectString,
@@ -246,7 +237,6 @@ describe('2. pool.js', function() {
     it('2.3.2 poolMax cannot be 0', function(done){
       oracledb.createPool(
         {
-          externalAuth      : dbConfig.externalAuth,
           user              : dbConfig.user,
           password          : dbConfig.password,
           connectString     : dbConfig.connectString,
@@ -267,7 +257,6 @@ describe('2. pool.js', function() {
     it('2.3.3 poolMax must be a number', function(done){
       oracledb.createPool(
         {
-          externalAuth      : dbConfig.externalAuth,
           user              : dbConfig.user,
           password          : dbConfig.password,
           connectString     : dbConfig.connectString,
@@ -288,7 +277,6 @@ describe('2. pool.js', function() {
     it('2.3.4 poolMax limits the pool capacity', function(done){
       oracledb.createPool(
         {
-          externalAuth      : dbConfig.externalAuth,
           user              : dbConfig.user,
           password          : dbConfig.password,
           connectString     : dbConfig.connectString,
@@ -302,11 +290,7 @@ describe('2. pool.js', function() {
         function(err, pool) {
           should.not.exist(err);
           pool.should.be.ok();
-          if(!dbConfig.externalAuth){
-            pool.connectionsOpen.should.be.exactly(1);
-          } else {
-            pool.connectionsOpen.should.be.exactly(0);
-          }
+          pool.connectionsOpen.should.be.exactly(1);
           pool.connectionsInUse.should.be.exactly(0);
 
           pool.getConnection( function(err, conn1){
@@ -350,7 +334,6 @@ describe('2. pool.js', function() {
     it('2.4.1 poolIncrement cannot be a negative value', function(done){
       oracledb.createPool(
         {
-          externalAuth      : dbConfig.externalAuth,
           user              : dbConfig.user,
           password          : dbConfig.password,
           connectString     : dbConfig.connectString,
@@ -372,7 +355,6 @@ describe('2. pool.js', function() {
     it('2.4.2 poolIncrement cannot be 0', function(done){
       oracledb.createPool(
         {
-          externalAuth      : dbConfig.externalAuth,
           user              : dbConfig.user,
           password          : dbConfig.password,
           connectString     : dbConfig.connectString,
@@ -383,7 +365,7 @@ describe('2. pool.js', function() {
           stmtCacheSize     : 23
         },
         function(err, pool){
-          should.exist(err);  // Bug 20774464 - Occurs on External Authentication
+          should.exist(err);
           (err.message).should.startWith('ORA-24413:');
           done();
         }
@@ -393,7 +375,6 @@ describe('2. pool.js', function() {
     it('2.4.3 poolIncrement must be a Number', function(done){
       oracledb.createPool(
         {
-          externalAuth      : dbConfig.externalAuth,
           user              : dbConfig.user,
           password          : dbConfig.password,
           connectString     : dbConfig.connectString,
@@ -414,7 +395,6 @@ describe('2. pool.js', function() {
     it('2.4.4 the amount of open connections equals to poolMax when (connectionsOpen + poolIncrement) > poolMax', function(done){
       oracledb.createPool(
         {
-          externalAuth      : dbConfig.externalAuth,
           user              : dbConfig.user,
           password          : dbConfig.password,
           connectString     : dbConfig.connectString,
@@ -437,7 +417,7 @@ describe('2. pool.js', function() {
             pool.getConnection( function(err, conn2){
               should.not.exist(err);
               conn2.should.be.ok();
-              pool.connectionsOpen.should.be.exactly(3);   // Bug 20774464 - Occurs on External Authentication
+              pool.connectionsOpen.should.be.exactly(3);
               pool.connectionsInUse.should.be.exactly(2);
 
               pool.getConnection( function(err, conn3){
@@ -483,7 +463,6 @@ describe('2. pool.js', function() {
     it('2.5.1 poolTimeout cannot be a negative number', function(done){
       oracledb.createPool(
         {
-          externalAuth      : dbConfig.externalAuth,
           user              : dbConfig.user,
           password          : dbConfig.password,
           connectString     : dbConfig.connectString,
@@ -505,7 +484,6 @@ describe('2. pool.js', function() {
     it('2.5.2 poolTimeout can be 0, which disables timeout feature', function(done){
       oracledb.createPool(
         {
-          externalAuth      : dbConfig.externalAuth,
           user              : dbConfig.user,
           password          : dbConfig.password,
           connectString     : dbConfig.connectString,
@@ -530,7 +508,6 @@ describe('2. pool.js', function() {
     it('2.5.3 poolTimeout must be a number', function(done){
       oracledb.createPool(
         {
-          externalAuth      : dbConfig.externalAuth,
           user              : dbConfig.user,
           password          : dbConfig.password,
           connectString     : dbConfig.connectString,
@@ -556,7 +533,6 @@ describe('2. pool.js', function() {
     it('2.6.1 stmtCacheSize cannot be a negative value', function(done){
       oracledb.createPool(
         {
-          externalAuth      : dbConfig.externalAuth,
           user              : dbConfig.user,
           password          : dbConfig.password,
           connectString     : dbConfig.connectString,
@@ -578,7 +554,6 @@ describe('2. pool.js', function() {
     it('2.6.2 stmtCacheSize can be 0', function(done){
       oracledb.createPool(
         {
-          externalAuth      : dbConfig.externalAuth,
           user              : dbConfig.user,
           password          : dbConfig.password,
           connectString     : dbConfig.connectString,
@@ -602,7 +577,6 @@ describe('2. pool.js', function() {
     it('2.6.3 stmtCacheSize must be a Number', function(done){
       oracledb.createPool(
         {
-          externalAuth      : dbConfig.externalAuth,
           user              : dbConfig.user,
           password          : dbConfig.password,
           connectString     : dbConfig.connectString,
@@ -629,7 +603,6 @@ describe('2. pool.js', function() {
     beforeEach('get pool ready', function(done) {
       oracledb.createPool(
         {
-          externalAuth      : dbConfig.externalAuth,
           user              : dbConfig.user,
           password          : dbConfig.password,
           connectString     : dbConfig.connectString,
@@ -700,7 +673,6 @@ describe('2. pool.js', function() {
     it('2.8.1 generates ORA-24418 when calling getConnection if queueing is disabled', function(done) {
       oracledb.createPool(
         {
-          externalAuth      : dbConfig.externalAuth,
           user              : dbConfig.user,
           password          : dbConfig.password,
           connectString     : dbConfig.connectString,
@@ -753,7 +725,6 @@ describe('2. pool.js', function() {
     it('2.8.2 does not generate ORA-24418 when calling getConnection if queueing is enabled', function(done) {
       oracledb.createPool(
         {
-          externalAuth      : dbConfig.externalAuth,
           user              : dbConfig.user,
           password          : dbConfig.password,
           connectString     : dbConfig.connectString,
@@ -810,7 +781,6 @@ describe('2. pool.js', function() {
     it('2.8.3 generates NJS-040 if request is queued and queueTimeout expires', function(done) {
       oracledb.createPool(
         {
-          externalAuth      : dbConfig.externalAuth,
           user              : dbConfig.user,
           password          : dbConfig.password,
           connectString     : dbConfig.connectString,
@@ -864,7 +834,6 @@ describe('2. pool.js', function() {
     it('2.8.4 does not generate NJS-040 if request is queued for less time than queueTimeout', function(done) {
       oracledb.createPool(
         {
-          externalAuth      : dbConfig.externalAuth,
           user              : dbConfig.user,
           password          : dbConfig.password,
           connectString     : dbConfig.connectString,
@@ -922,7 +891,6 @@ describe('2. pool.js', function() {
     it('2.9.1 does not works after the pool has been terminated', function(done) {
       oracledb.createPool(
         {
-          externalAuth      : dbConfig.externalAuth,
           user              : dbConfig.user,
           password          : dbConfig.password,
           connectString     : dbConfig.connectString,
@@ -969,7 +937,6 @@ describe('2. pool.js', function() {
     it('2.10.1 close can be used as an alternative to release', function(done) {
       oracledb.createPool(
         {
-          externalAuth      : dbConfig.externalAuth,
           user              : dbConfig.user,
           password          : dbConfig.password,
           connectString     : dbConfig.connectString,
@@ -990,80 +957,5 @@ describe('2. pool.js', function() {
       );
     });
   }); // 2.10
-
-  describe('2.11 External Authentication', function() {
-
-    // need to skip these tests if external authentication is enable for the whole suite
-    var it = (!dbConfig.externalAuth) ? global.it : global.it.skip;
-
-    it('2.11.1 throws error when providing username and password with external authentication', function(done) {
-
-      if(!dbConfig.user || !dbConfig.password) {
-        console.error("user/password required.");
-      } else {
-        oracledb.createPool(
-          {
-            externalAuth:  true,
-            user:          dbConfig.user,
-            password:      dbConfig.password,
-            connectString: dbConfig.connectString
-          },
-          function(err, pool) {
-            should.exist(err);
-            (err.message).should.startWith("DPI-006:");
-            // DPI-006: user and password should not be set when using external authentication
-            should.not.exist(pool);
-            done();
-          }
-        );
-      }
-
-    });
-
-    it('2.11.2 throws error when given with username and without password', function(done) {
-
-      if(!dbConfig.user) {
-        console.error("user/password required.");
-      } else {
-        oracledb.createPool(
-          {
-            externalAuth:  true,
-            user:          dbConfig.user,
-            connectString: dbConfig.connectString
-          },
-          function(err, pool) {
-            should.exist(err);
-            (err.message).should.startWith("DPI-006:");
-            should.not.exist(pool);
-            done();
-          }
-        );
-      }
-
-    });
-
-    it('2.11.3 throws error when given with password and without username', function(done) {
-
-      if(!dbConfig.user) {
-        console.error("user/password required.");
-      } else {
-        oracledb.createPool(
-          {
-            externalAuth:  true,
-            password:      dbConfig.password,
-            connectString: dbConfig.connectString
-          },
-          function(err, pool) {
-            should.exist(err);
-            (err.message).should.startWith("DPI-006:");
-            should.not.exist(pool);
-            done();
-          }
-        );
-      }
-
-    });
-
-  }); // 2.11
 
 });

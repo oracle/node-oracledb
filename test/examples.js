@@ -40,9 +40,15 @@ var dbConfig = require('./dbconfig.js');
 
 describe('3. examples.js', function(){
 
+  var credentials = {
+                      user:          dbConfig.user,
+                      password:      dbConfig.password,
+                      connectString: dbConfig.connectString
+                    };
+
   describe('3.1 connect.js', function(){
     it('3.1.1 tests a basic connection to the database', function(done){
-      oracledb.getConnection(dbConfig, function(error, connection){
+      oracledb.getConnection(credentials, function(error, connection){
         should.not.exist(error);
         connection.should.be.ok();
         connection.release( function(err){
@@ -70,7 +76,7 @@ describe('3. examples.js', function(){
     var connection = false;
 
     before(function(done){
-      oracledb.getConnection(dbConfig, function(err, conn) {
+      oracledb.getConnection(credentials, function(err, conn) {
         if(err) { console.error(err.message); return; }
         connection = conn;
         done();
@@ -227,7 +233,7 @@ describe('3. examples.js', function(){
     var connection = false;
 
     before(function(done){
-      oracledb.getConnection(dbConfig, function(err, conn){
+      oracledb.getConnection(credentials, function(err, conn){
         if(err) { console.error(err.message); return; }
         connection = conn;
         done();
@@ -346,7 +352,7 @@ describe('3. examples.js', function(){
     var date = new Date();
 
     before(function(done){
-      oracledb.getConnection(dbConfig, function(err, conn){
+      oracledb.getConnection(credentials, function(err, conn){
         if(err) { console.error(err.message); return; }
         connection = conn;
         done();
@@ -453,7 +459,7 @@ describe('3. examples.js', function(){
        END; ";
 
     before(function(done){
-      oracledb.getConnection(dbConfig, function(err, conn){
+      oracledb.getConnection(credentials, function(err, conn){
         if(err) { console.error(err.message); return; }
         connection = conn;
         connection.execute(createTable, function(err){
@@ -517,7 +523,7 @@ describe('3. examples.js', function(){
     var connection = false;
 
     before(function(done){
-      oracledb.getConnection(dbConfig, function(err, conn){
+      oracledb.getConnection(credentials, function(err, conn){
         if(err) { console.error(err.message); return; }
         connection = conn;
         done();
@@ -650,7 +656,7 @@ describe('3. examples.js', function(){
       "END; ";
 
     before(function(done){
-      oracledb.getConnection(dbConfig, function(err, conn){
+      oracledb.getConnection(credentials, function(err, conn){
         if(err) { console.error(err.message); return; }
         connection = conn;
         done();
@@ -743,10 +749,10 @@ describe('3. examples.js', function(){
       "END; ";
 
     before(function(done){
-      oracledb.getConnection(dbConfig, function(err, conn){
+      oracledb.getConnection(credentials, function(err, conn){
         if(err) { console.error(err.message); return; }
         conn1 = conn;
-        oracledb.getConnection(dbConfig, function(err, conn){
+        oracledb.getConnection(credentials, function(err, conn){
           if(err) { console.error(err.message); return; }
           conn2 = conn;
           done();
@@ -861,7 +867,7 @@ describe('3. examples.js', function(){
        END; ";
 
     before(function(done){
-      oracledb.getConnection(dbConfig, function(err, conn){
+      oracledb.getConnection(credentials, function(err, conn){
         if(err) { console.error(err.message); return; }
         connection = conn;
         connection.execute(createTable, function(err){
@@ -1023,7 +1029,7 @@ describe('3. examples.js', function(){
       async.series([
         function(callback) {
           oracledb.getConnection(
-            dbConfig,
+            credentials,
             function(err, conn) {
               should.not.exist(err);
               connection = conn;

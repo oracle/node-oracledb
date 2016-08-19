@@ -41,7 +41,11 @@ describe('53. poolValidityAfterFailingTernimate.js', function() {
 
   it('pool should be available after failing terminate', function(done) {
     oracledb.createPool(
-      dbConfig,
+      {
+        user: dbConfig.user,
+        password: dbConfig.password,
+        connectString: dbConfig.connectString
+      },
       function(err, pool) {
         should.not.exist(err);
         pool.getConnection( function(err, connection) {

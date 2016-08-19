@@ -33,20 +33,27 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require ( 'oracledb' );
-var should   = require ( 'should' );
+var oracledb = require ('oracledb');
+var should   = require ('should');
 var async    = require('async');
-var dbConfig = require ( './dbconfig.js' );
+var dbConfig = require ('./dbconfig.js');
 
 describe('56. fetchAs.js', function() {
 
   var connection = null;
   beforeEach('get one connection', function(done) {
-    oracledb.getConnection(dbConfig, function(err, conn) {
-      should.not.exist(err);
-      connection = conn;
-      done();
-    });
+    oracledb.getConnection(
+      {
+        user:          dbConfig.user,
+        password:      dbConfig.password,
+        connectString: dbConfig.connectString
+      },
+      function(err, conn) {
+        should.not.exist(err);
+        connection = conn;
+        done();
+      }
+    );
   })
 
   afterEach('release connection, reset fetchAsString property', function(done) {

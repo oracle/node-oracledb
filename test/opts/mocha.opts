@@ -8,7 +8,7 @@ test/connection.js
 test/pool.js
 test/examples.js
 test/binding.js
-test/externalAuthentication.js
+test/externalAuth.js
 test/dmlReturning.js
 test/autoCommit.js
 test/autoCommitForSelect.js

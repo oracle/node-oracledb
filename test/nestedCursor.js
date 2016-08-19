@@ -142,7 +142,11 @@ describe('57. nestedCursor.js', function() {
     async.series([
       function(callback) {
         oracledb.getConnection(
-          dbConfig,
+          {
+            user: dbConfig.user,
+            password: dbConfig.password,
+            connectString: dbConfig.connectString
+          },
           function(err, conn) {
             connection = conn;
             callback();
