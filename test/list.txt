@@ -811,14 +811,12 @@ Overview of node-oracledb functional tests
         67.1.10 throws an error if the pool specified in getPool doesn't exist
         67.1.11 does not throw an error if multiple pools are created without a poolAlias in the same call stack
     67.2 oracledb.getConnection functional tests
-        67.2.1 gets a connection from the default pool, returns a promise
-        67.2.2 gets a connection from the default pool, invokes the callback
-        67.2.3 gets a connection from the pool with the specified alias, returns a promise
-        67.2.4 gets a connection from the pool with the specified alias, invokes the callback
-        67.2.5 throws an error if an attempt is made to use the default pool when it does not exist
-        67.2.6 throws an error if an attempt is made to use a poolAlias for a pool that is not in the cache
-        67.2.7 gets a connection from the default pool, even after an aliased pool is created
-        67.2.8 uses the right pool, even after multiple pools are created
+        67.2.1 gets a connection from the default pool
+        67.2.2 gets a connection from the pool with the specified alias when no alias is specified
+        67.2.3 throws an error if an attempt is made to use the default pool when it does not exist
+        67.2.4 throws an error if an attempt is made to use a poolAlias for a pool that is not in the cache
+        67.2.5 gets a connection from the default pool, even after an aliased pool is created
+        67.2.6 uses the right pool, even after multiple pools are created
 
 68. multipleLobInsertion.js
     68.1 inserts multiple BLOBs

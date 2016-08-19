@@ -301,63 +301,49 @@ describe('67. poolCache.js', function() {
     });
 
     it('67.1.11 does not throw an error if multiple pools are created without a poolAlias in the same call stack', function(done) {
-      var pool1Promise;
-      var pool2Promise;
+      var pool1;
+      var pool2;
 
-      pool1Promise = oracledb.createPool(dbConfig);
-
-      pool2Promise = oracledb.createPool(dbConfig);
-
-      Promise.all([pool1Promise, pool2Promise])
-        .then(function(pools) {
-          pools[0].close(function(err){
-            should.not.exist(err);
-
-            pools[1].close(function(err){
+      async.parallel(
+        [
+          function(callback) {
+            oracledb.createPool(dbConfig, function(err, pool) {
               should.not.exist(err);
 
-              done();
+              pool1 = pool;
+
+              callback();
             });
-          });
-        })
-        .catch(function(createPoolErr) {
-          // Second pool should have failed, get the default and close it. Need
-          // to wait briefly as Promise.all catches after first promise rejection
-          // so default pool may not have been created yet.
-          setTimeout(function() {
-            oracledb.getPool().close(function(err) {
+          },
+          function(callback) {
+            oracledb.createPool(dbConfig, function(err, pool) {
+              should.not.exist(err);
+
+              pool2 = pool;
+
+              callback();
+            });
+          }
+        ],
+        function(createPoolErr) {
+          should.not.exist(createPoolErr);
+
+          pool1.close(function(err) {
+            should.not.exist(err);
+
+            pool2.close(function(err) {
               should.not.exist(err);
 
               done(createPoolErr);
             });
-          }, 100);
-        });
+          });
+        }
+      );
     });
   });
 
   describe('67.2 oracledb.getConnection functional tests', function() {
-    it('67.2.1 gets a connection from the default pool, returns a promise', function(done) {
-      oracledb.createPool(dbConfig, function(err, pool) {
-        should.not.exist(err);
-
-        // Not specifying a poolAlias, default will be used
-        oracledb.getConnection()
-          .then(function(conn) {
-            return conn.close();
-          })
-          .then(function() {
-            return pool.close();
-          })
-          .then(function() {
-            done();
-          })
-          .catch(function(err) {
-            done(err);
-          });
-      });
-    });
-
-    it('67.2.2 gets a connection from the default pool, invokes the callback', function(done) {
+    it('67.2.1 gets a connection from the default pool when no alias is specified', function(done) {
       oracledb.createPool(dbConfig, function(err, pool) {
         should.not.exist(err);
 
@@ -378,31 +364,7 @@ describe('67. poolCache.js', function() {
       });
     });
 
-    it('67.2.3 gets a connection from the pool with the specified poolAlias, returns a promise', function(done) {
-      var poolAlias = 'random-pool-alias';
-
-      dbConfig.poolAlias = poolAlias;
-
-      oracledb.createPool(dbConfig, function(err, pool) {
-        should.not.exist(err);
-
-        oracledb.getConnection(poolAlias)
-          .then(function(conn) {
-            return conn.close();
-          })
-          .then(function() {
-            return pool.close();
-          })
-          .then(function() {
-            done();
-          })
-          .catch(function(err) {
-            done(err);
-          });
-      });
-    });
-
-    it('67.2.4 gets a connection from the pool with the specified poolAlias, invokes the callback', function(done) {
+    it('67.2.2 gets a connection from the pool with the specified poolAlias', function(done) {
       var poolAlias = 'random-pool-alias';
 
       dbConfig.poolAlias = poolAlias;
@@ -426,7 +388,7 @@ describe('67. poolCache.js', function() {
       });
     });
 
-    it('67.2.5 throws an error if an attempt is made to use the default pool when it does not exist', function(done) {
+    it('67.2.3 throws an error if an attempt is made to use the default pool when it does not exist', function(done) {
       dbConfig.poolAlias = 'random-pool-alias';
 
       oracledb.createPool(dbConfig, function(err, pool) {
@@ -447,7 +409,7 @@ describe('67. poolCache.js', function() {
       });
     });
 
-    it('67.2.6 throws an error if an attempt is made to use a poolAlias for a pool that is not in the cache', function(done) {
+    it('67.2.4 throws an error if an attempt is made to use a poolAlias for a pool that is not in the cache', function(done) {
       dbConfig.poolAlias = 'random-pool-alias';
 
       oracledb.createPool(dbConfig, function(err, pool) {
@@ -467,7 +429,7 @@ describe('67. poolCache.js', function() {
       });
     });
 
-    it('67.2.7 gets a connection from the default pool, even after an aliased pool is created', function(done) {
+    it('67.2.5 gets a connection from the default pool, even after an aliased pool is created', function(done) {
       oracledb.createPool(dbConfig, function(err, pool1) {
         should.not.exist(err);
 
@@ -506,7 +468,7 @@ describe('67. poolCache.js', function() {
       });
     });
 
-    it('67.2.8 uses the right pool, even after multiple pools are created', function(done) {
+    it('67.2.6 uses the right pool, even after multiple pools are created', function(done) {
       var aliasToUse = 'random-pool-alias-2';
 
       dbConfig.poolAlias = 'random-pool-alias';
