@@ -62,8 +62,8 @@
           "oci_lib_dir%" : '<!(echo ${OCI_LIB_DIR:="/opt/oracle/instantclient/"})',
           },
           "libraries"     : ["-lclntsh"],
-          "cflags"        : ['-fexceptions'],
-          "cflags_cc"     : ['-fexceptions'],
+          "cflags"        : ['-fexceptions', '-fsigned-char'],
+          "cflags_cc"     : ['-fexceptions', '-fsigned-char'],
           "link_settings" : {
              "libraries"  : ['-L<(oci_lib_dir)']
         }

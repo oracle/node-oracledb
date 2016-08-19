@@ -1688,7 +1688,7 @@ void Connection::Async_Execute (uv_work_t *req)
                ( executeBaton->binds[b]->type == dpi::DpiVarChar ))
           {
             bool err = false;
-            for ( DPI_SZ_TYPE row = 0 ;
+            for ( DPI_USZ_TYPE row = 0 ;
                   !err && ( row < executeBaton->rowsAffected) ;
                   row ++ )
             {
@@ -2600,38 +2600,42 @@ NJSErrorType Connection::Descr2Double( Define* defines, unsigned int numCols,
     /* Special processing for datetime, as it is obtained as descriptors */
     if ( defines[col].dttmarr )
     {
-      long double *dblArr = NULL;
-      if ( !defines[col].buf )
+      if ( rowsFetched )
       {
-        // size_t overflow check not required here as rowsFetched(unsigned int)
-        // multiplied by sizeof(long double) never cause size_t overflow
-        defines[col].buf =
-        dblArr =
-          (long double *)malloc ( sizeof ( long double ) * rowsFetched );
-
-        if( !defines[col].buf )
+        long double *dblArr = NULL;
+        if ( !defines[col].buf )
         {
-          errNum = errInsufficientMemory;
+          // size_t overflow check not required here as rowsFetched
+          // (unsigned int) multiplied by sizeof(long double) never cause
+          // size_t overflow
+          defines[col].buf =
+          dblArr =
+            (long double *)malloc ( sizeof ( long double ) * rowsFetched );
+
+          if( !defines[col].buf )
+          {
+            errNum = errInsufficientMemory;
+          }
+        }
+        else
+        {
+          dblArr = (long double *) defines[col].buf;
+        }
+
+        if ( !errNum )
+        {
+          for ( int row = 0; row < (int) rowsFetched; row ++ )
+          {
+            dblArr[row] = defines[col].dttmarr->getDateTime (row);
+          }
         }
       }
-      else
-      {
-        dblArr = (long double *) defines[col].buf;
-      }
 
-      if ( !errNum )
+      if ( !getRS )
       {
-        for ( int row = 0; row < (int) rowsFetched; row ++ )
-        {
-          dblArr[row] = defines[col].dttmarr->getDateTime (row);
-        }
-
-        if ( !getRS )
-        {
-          defines[col].dttmarr->release ();
-          defines[col].dttmarr = NULL;
-          defines[col].extbuf = NULL;
-        }
+        defines[col].dttmarr->release ();
+        defines[col].dttmarr = NULL;
+        defines[col].extbuf  = NULL;
       }
     }
   }

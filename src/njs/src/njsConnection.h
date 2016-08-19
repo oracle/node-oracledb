@@ -133,8 +133,8 @@ typedef struct MetaInfo
   unsigned short    dpiFetchType;           // Target fetchType for DPI
   short             njsFetchType;           // Target fetchType for NJS
   unsigned short    byteSize;               // Size In bytes at database
-  unsigned char     precision;              // Precision
-  char              scale;                  // Scale
+  short             precision;              // Precision
+  signed   char     scale;                  // Scale, range starts from -127
   unsigned char     isNullable;             // Nullable
 
   MetaInfo ()
@@ -187,7 +187,7 @@ typedef struct eBaton
   dpi::Env*                 dpienv;
   dpi::Conn*                dpiconn;
   Connection                *njsconn;
-  DPI_SZ_TYPE               rowsAffected;
+  DPI_USZ_TYPE              rowsAffected;
   unsigned int              maxRows;
   unsigned int              prefetchRows;
   bool                      getRS;

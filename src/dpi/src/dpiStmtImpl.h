@@ -67,7 +67,7 @@ public:
 
   // Attributes
   virtual DpiStmtType stmtType () const;
-  virtual DPI_SZ_TYPE  rowsAffected () const;
+  virtual DPI_USZ_TYPE  rowsAffected () const;
   virtual unsigned int numCols() ;
   virtual void prefetchRows( unsigned int prefetchRows ) ;
   virtual unsigned int rowsFetched () const ;
