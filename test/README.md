@@ -135,6 +135,7 @@ cd <some-directory>/node_oracledb
 See [mochajs.org](http://mochajs.org/) for more information on running tests with mocha.
 
 ## 3. Add Tests
+
 See [CONTRIBUTING](https://github.com/oracle/node-oracledb/blob/master/CONTRIBUTING.md)
 for general information on contribution requirements.
 
@@ -146,10 +147,12 @@ assigned a number. The following number ranges have been chosen:
 - 51 onwards are for other tests
 
 In order to include your tests in the suite, add each new test file
-name to test/opts/mocha.opts. Please also add a description of each
-individual test to test/list.txt.
+name to [`test/opts/mocha.opts`](https://github.com/oracle/node-oracledb/blob/master/test/opts/mocha.opts).
 
-## 4. Test Index
+Please also add a description of each individual test to the Test
+List.
+
+## 4. Test List
 
 See [`test/list.txt`](https://github.com/oracle/node-oracledb/blob/master/test/list.txt)
 for the list of existing tests.
