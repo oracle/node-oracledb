@@ -989,6 +989,8 @@ void Oracledb::Async_CreatePool (uv_work_t *req)
 
   try
   {
+    // externAuth is not supported in homogeneous pool, in case app specified
+    // externalAuth, then make it as heterogeneous pool.
     poolBaton->dpipool = poolBaton-> dpienv ->
                                      createPool ( poolBaton->user,
                                                   poolBaton->pswrd,
@@ -998,7 +1000,8 @@ void Oracledb::Async_CreatePool (uv_work_t *req)
                                                   poolBaton->poolIncrement,
                                                   poolBaton->poolTimeout,
                                                   poolBaton->stmtCacheSize,
-                                                  poolBaton->externalAuth );
+                                                  poolBaton->externalAuth,
+                                   poolBaton->externalAuth ? false : true  );
   }
   catch (dpi::Exception &e)
   {

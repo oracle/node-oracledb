@@ -1725,6 +1725,7 @@ void Connection::Async_Execute (uv_work_t *req)
        {
          bind->dttmarr->release () ;
          bind->dttmarr = NULL;
+         bind->value = NULL;
        }
      }
 
@@ -2628,6 +2629,7 @@ NJSErrorType Connection::Descr2Double( Define* defines, unsigned int numCols,
         if ( !getRS )
         {
           defines[col].dttmarr->release ();
+          defines[col].dttmarr = NULL;
           defines[col].extbuf = NULL;
         }
       }
