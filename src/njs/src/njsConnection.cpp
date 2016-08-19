@@ -192,7 +192,7 @@ void Connection::connectionPropertyException(Connection* njsConn,
     msg = NJSMessages::getErrorMsg(errInvalidConnection);
   else
     msg = NJSMessages::getErrorMsg(errType, property.c_str());
-  NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
+  NJS_SET_EXCEPTION ( msg.c_str() );
 }
 
 /*****************************************************************************/
@@ -207,7 +207,7 @@ NAN_GETTER(Connection::GetStmtCacheSize)
   if(!njsConn->isValid_)
   {
     string error = NJSMessages::getErrorMsg ( errInvalidConnection );
-    NJS_SET_EXCEPTION(error.c_str(), error.length());
+    NJS_SET_EXCEPTION ( error.c_str() );
     info.GetReturnValue().SetUndefined();
     return;
   }
@@ -219,7 +219,7 @@ NAN_GETTER(Connection::GetStmtCacheSize)
   catch(dpi::Exception &e)
   {
     NJS_SET_CONN_ERR_STATUS (  e.errnum(), njsConn->dpiconn_ );
-    NJS_SET_EXCEPTION(e.what(), strlen(e.what()));
+    NJS_SET_EXCEPTION ( e.what() );
   }
   info.GetReturnValue().Set(Nan::Undefined());
 }
@@ -262,7 +262,7 @@ NAN_SETTER(Connection::SetClientId)
   if(!njsConn->isValid_)
   {
     string msg = NJSMessages::getErrorMsg(errInvalidConnection);
-    NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
+    NJS_SET_EXCEPTION ( msg.c_str() );
     return;
   }
   else
@@ -276,7 +276,7 @@ NAN_SETTER(Connection::SetClientId)
     catch(dpi::Exception &e)
     {
       NJS_SET_CONN_ERR_STATUS (  e.errnum(), njsConn->dpiconn_ );
-      NJS_SET_EXCEPTION(e.what(), strlen(e.what()));
+      NJS_SET_EXCEPTION ( e.what() );
     }
   }
 }
@@ -304,7 +304,7 @@ NAN_SETTER(Connection::SetModule)
   if(!njsConn->isValid_)
   {
     string msg = NJSMessages::getErrorMsg(errInvalidConnection);
-    NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
+    NJS_SET_EXCEPTION ( msg.c_str() );
     return;
   }
   else
@@ -318,7 +318,7 @@ NAN_SETTER(Connection::SetModule)
     catch(dpi::Exception &e)
     {
       NJS_SET_CONN_ERR_STATUS (  e.errnum(), njsConn->dpiconn_ );
-      NJS_SET_EXCEPTION(e.what(), strlen(e.what()));
+      NJS_SET_EXCEPTION ( e.what() );
     }
   }
 }
@@ -346,7 +346,7 @@ NAN_SETTER(Connection::SetAction)
   if(!njsConn->isValid_)
   {
     string msg = NJSMessages::getErrorMsg(errInvalidConnection);
-    NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
+    NJS_SET_EXCEPTION ( msg.c_str() );
     return;
   }
   else
@@ -360,7 +360,7 @@ NAN_SETTER(Connection::SetAction)
     catch(dpi::Exception &e)
     {
       NJS_SET_CONN_ERR_STATUS (  e.errnum(), njsConn->dpiconn_ );
-      NJS_SET_EXCEPTION(e.what(), strlen(e.what()));
+      NJS_SET_EXCEPTION ( e.what() );
     }
   }
 }
@@ -377,7 +377,7 @@ NAN_GETTER (Connection::GetOracleServerVersion)
   if ( !njsConn->isValid_ )
   {
     string error = NJSMessages::getErrorMsg ( errInvalidConnection );
-    NJS_SET_EXCEPTION(error.c_str(), error.length() );
+    NJS_SET_EXCEPTION ( error.c_str() );
     info.GetReturnValue().SetUndefined();
   }
 
@@ -406,7 +406,7 @@ NAN_GETTER (Connection::GetOracleServerVersion)
   catch ( dpi::Exception &e)
   {
     NJS_SET_CONN_ERR_STATUS ( e.errnum(), njsConn->dpiconn_ );
-    NJS_SET_EXCEPTION ( e.what(), strlen (e.what () ) );
+    NJS_SET_EXCEPTION  (  e.what() );
     info.GetReturnValue().SetUndefined();
   }
 }
@@ -507,7 +507,7 @@ NAN_METHOD(Connection::Execute)
     delete executeBaton;
     string error = NJSMessages::getErrorMsg ( errInternalError,
                                               "uv_queue_work", "Execute" );
-    NJS_SET_EXCEPTION(error.c_str(), error.length());
+    NJS_SET_EXCEPTION ( error.c_str() );
   }
 
   info.GetReturnValue().SetUndefined();
@@ -3593,7 +3593,7 @@ exitRelease:
     delete releaseBaton;
     string error = NJSMessages::getErrorMsg ( errInternalError,
                                               "uv_queue_work", "Release" );
-    NJS_SET_EXCEPTION(error.c_str(), error.length());
+    NJS_SET_EXCEPTION ( error.c_str() );
   }
   info.GetReturnValue().SetUndefined();
   scope.Escape ( Nan::Undefined () );
@@ -3708,7 +3708,7 @@ exitCommit:
     delete commitBaton;
     string error = NJSMessages::getErrorMsg ( errInternalError,
                                               "uv_queue_work", "Commit" );
-    NJS_SET_EXCEPTION(error.c_str(), error.length());
+    NJS_SET_EXCEPTION ( error.c_str() );
   }
 
   info.GetReturnValue().SetUndefined();
@@ -3815,7 +3815,7 @@ NAN_METHOD(Connection::Rollback)
     delete rollbackBaton;
     string error = NJSMessages::getErrorMsg ( errInternalError,
                                               "uv_queue_work", "Rollback" );
-    NJS_SET_EXCEPTION(error.c_str(), error.length());
+    NJS_SET_EXCEPTION ( error.c_str() );
   }
   info.GetReturnValue().SetUndefined();
 }
@@ -3923,7 +3923,7 @@ NAN_METHOD(Connection::Break)
     delete breakBaton;
     string error = NJSMessages::getErrorMsg ( errInternalError,
                                               "uv_queue_work", "Break" );
-    NJS_SET_EXCEPTION(error.c_str(), error.length());
+    NJS_SET_EXCEPTION ( error.c_str() );
   }
 
   info.GetReturnValue().SetUndefined();

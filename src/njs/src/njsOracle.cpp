@@ -392,7 +392,7 @@ NAN_SETTER(Oracledb::SetMaxRows)
   if ( tempMaxRows <= 0 )
   {
     string errMsg = NJSMessages::getErrorMsg ( errInvalidmaxRows );
-    NJS_SET_EXCEPTION( errMsg.c_str(), errMsg.length() );
+    NJS_SET_EXCEPTION ( errMsg.c_str() );
   }
   else
   {
@@ -541,7 +541,7 @@ NAN_SETTER(Oracledb::SetVersion)
 {
   std::string msg;
   msg = NJSMessages::getErrorMsg(errReadOnly, "version");
-  NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
+  NJS_SET_EXCEPTION ( msg.c_str() );
 }
 
 
@@ -666,7 +666,7 @@ NAN_SETTER(Oracledb::SetFetchAsString)
   if ( !value->IsArray () )
   {
     msg = NJSMessages::getErrorMsg ( errEmptyArrayForFetchAs );
-    NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length () );
+    NJS_SET_EXCEPTION ( msg.c_str() );
   }
 
   array = value.As<v8::Array> ();
@@ -698,7 +698,7 @@ NAN_SETTER(Oracledb::SetFetchAsString)
   if ( !oracledb->fetchAsStringTypes_ )
   {
     msg = NJSMessages::getErrorMsg ( errInsufficientMemory ) ;
-    NJS_SET_EXCEPTION ( msg.c_str (), (int) msg.length () );
+    NJS_SET_EXCEPTION ( msg.c_str () );
   }
 
   for ( unsigned int t = 0 ; t < array->Length () ; t ++ )
@@ -708,7 +708,7 @@ NAN_SETTER(Oracledb::SetFetchAsString)
     if ( ( type == NJS_DATATYPE_STR  ) || ( type == NJS_DATATYPE_DEFAULT ) )
     {
       msg = NJSMessages::getErrorMsg ( errInvalidTypeForConversion );
-      NJS_SET_EXCEPTION(msg.c_str(), (int)msg.length () );
+      NJS_SET_EXCEPTION ( msg.c_str() );
     }
     oracledb->fetchAsStringTypes_[t] = type;
   }
@@ -738,7 +738,7 @@ NAN_SETTER(Oracledb::SetOracleClientVersion )
 {
   std::string msg;
   msg = NJSMessages::getErrorMsg (errReadOnly, "oracleClientVersion");
-  NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
+  NJS_SET_EXCEPTION ( msg.c_str() );
 }
 
 
@@ -805,7 +805,7 @@ exitGetConnection :
     string error = NJSMessages::getErrorMsg ( errInternalError,
                                               "uv_queue_work",
                                               "GetConnection" );
-    NJS_SET_EXCEPTION(error.c_str(), error.length());
+    NJS_SET_EXCEPTION ( error.c_str() );
   }
   info.GetReturnValue().SetUndefined();
 }
@@ -964,7 +964,7 @@ exitCreatePool:
     delete poolBaton;
     string error = NJSMessages::getErrorMsg ( errInternalError,
                                               "uv_queue_work", "CreatePool" );
-    NJS_SET_EXCEPTION(error.c_str(), error.length());
+    NJS_SET_EXCEPTION ( error.c_str() );
   }
 
   info.GetReturnValue().SetUndefined();
