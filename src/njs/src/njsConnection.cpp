@@ -1329,8 +1329,6 @@ void Connection::GetInBindParamsArray(Local<Array> va8vals, Bind *bind,
         if (vtype != NJS_VALUETYPE_NULL && vtype != NJS_VALUETYPE_INTEGER &&
             vtype != NJS_VALUETYPE_UINTEGER && vtype != NJS_VALUETYPE_NUMBER)
         {
-          executeBaton->error = NJSMessages::getErrorMsg(
-                                          errIncompatibleTypeArrayBind, bind->key.c_str());
           GenerateArrayBindError(bind, executeBaton);
           goto exitGetInBindParamsArray;
         }
