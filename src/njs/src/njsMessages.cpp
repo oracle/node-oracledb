@@ -84,6 +84,7 @@ static const char *errMsg[] =
   "NJS-045: cannot load the oracledb add-on binary", // errCannotLoadBinary
   "NJS-046: pool alias \"%s\" already exists in the connection pool cache", // errPoolWithAliasAlreadyExists
   "NJS-047: pool alias \"%s\" not found in connection pool cache", // errPoolWithAliasNotFound
+  "NJS-048: incompatible type of value provided for array bind at index %d", // errIncompatibleTypeArrayIndexBind
 };
 
 string NJSMessages::getErrorMsg ( NJSErrorType err, ... )

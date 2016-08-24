@@ -83,6 +83,7 @@ typedef enum
   errCannotLoadBinary,
   errPoolWithAliasAlreadyExists,
   errPoolWithAliasNotFound,
+  errIncompatibleTypeArrayIndexBind,
 
   // New ones should be added here
 

@@ -1209,6 +1209,47 @@ exitGetInBindParamsScalar:
 /*****************************************************************************/
 /*
    DESCRIPTION
+     Generate the error for invalid type array bind.
+
+   PARAMETERS:
+     Bind struct, eBaton struct.
+*/
+
+void GenerateArrayBindError(Bind *bind, eBaton *executeBaton)
+{
+  const char*                   paramName;
+  int                           index;
+  std::vector<Bind *>::iterator it;
+
+  paramName = bind->key.c_str();
+
+  // Check if the paramName is present.
+  // If present, it is bind by name.
+  // Else, it is bind by position.
+
+  if( strlen(paramName) )
+  {
+    executeBaton->error = NJSMessages::getErrorMsg(
+                               errIncompatibleTypeArrayBind, bind->key.c_str());
+  }
+  else
+  {
+
+    // The bind we are looking for exists. So 'it' cannot be binds.end.
+    it = std::find (
+                executeBaton->binds.begin(), executeBaton->binds.end(),
+                bind );
+    
+    index = std::distance(executeBaton->binds.begin(), it);
+
+    executeBaton->error = NJSMessages::getErrorMsg(
+                               errIncompatibleTypeArrayIndexBind, index);
+  }
+}
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
      Processing in binds for PL/SQL indexed table value
 
    PARAMETERS:
@@ -1270,8 +1311,7 @@ void Connection::GetInBindParamsArray(Local<Array> va8vals, Bind *bind,
       case NJS_DATATYPE_STR:
         if (vtype != NJS_VALUETYPE_NULL && vtype != NJS_VALUETYPE_STRING)
         {
-          executeBaton->error = NJSMessages::getErrorMsg(
-                                     errIncompatibleTypeArrayBind, bind->key.c_str());
+          GenerateArrayBindError(bind, executeBaton);
           goto exitGetInBindParamsArray;
         }
         else
@@ -1291,6 +1331,7 @@ void Connection::GetInBindParamsArray(Local<Array> va8vals, Bind *bind,
         {
           executeBaton->error = NJSMessages::getErrorMsg(
                                           errIncompatibleTypeArrayBind, bind->key.c_str());
+          GenerateArrayBindError(bind, executeBaton);
           goto exitGetInBindParamsArray;
         }
         break;
