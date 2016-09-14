@@ -166,7 +166,7 @@ Local<Primitive> Pool::getPoolProperty(Pool* njsPool, unsigned int poolProperty)
   if(!njsPool->isValid_)
   {
     string msg = NJSMessages::getErrorMsg(errInvalidPool);
-    NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
+    NJS_SET_EXCEPTION ( msg.c_str() );
     return scope.Escape ( Nan::Undefined() ) ;
   }
   else
@@ -236,7 +236,7 @@ NAN_GETTER(Pool::GetConnectionsOpen)
   if(!njsPool->isValid_)
   {
     string msg = NJSMessages::getErrorMsg(errInvalidPool);
-    NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
+    NJS_SET_EXCEPTION ( msg.c_str() );
     info.GetReturnValue().SetUndefined();
     return;
   }
@@ -248,7 +248,7 @@ NAN_GETTER(Pool::GetConnectionsOpen)
   catch(dpi::Exception &e)
   {
     NJS_SET_CONN_ERR_STATUS ( e.errnum(), NULL );
-    NJS_SET_EXCEPTION(e.what(), (int) strlen(e.what()));
+    NJS_SET_EXCEPTION ( e.what() );
   }
   info.GetReturnValue().SetUndefined();
 }
@@ -265,7 +265,7 @@ NAN_GETTER(Pool::GetConnectionsInUse)
   if(!njsPool->isValid_)
   {
     string error = NJSMessages::getErrorMsg ( errInvalidPool );
-    NJS_SET_EXCEPTION(error.c_str(), (int) error.length());
+    NJS_SET_EXCEPTION ( error.c_str() );
     info.GetReturnValue().SetUndefined();
     return;
   }
@@ -277,7 +277,7 @@ NAN_GETTER(Pool::GetConnectionsInUse)
   catch(dpi::Exception &e)
   {
     NJS_SET_CONN_ERR_STATUS ( e.errnum(), NULL );
-    NJS_SET_EXCEPTION(e.what(), (int) strlen(e.what()));
+    NJS_SET_EXCEPTION ( e.what() );
   }
   info.GetReturnValue().SetUndefined();
 }
@@ -310,7 +310,7 @@ void Pool::setPoolProperty (Pool* njsPool, string property)
     msg = NJSMessages::getErrorMsg(errInvalidPool);
   else
     msg = NJSMessages::getErrorMsg(errReadOnly, property.c_str());
-  NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
+  NJS_SET_EXCEPTION ( msg.c_str() );
 }
 
 /*****************************************************************************/
@@ -425,7 +425,7 @@ exitGetConnection:
     string error = NJSMessages::getErrorMsg ( errInternalError,
                                               "uv_queue_work",
                                               "GetConnection" );
-    NJS_SET_EXCEPTION(error.c_str(), error.length());
+    NJS_SET_EXCEPTION ( error.c_str() );
   }
 
   info.GetReturnValue().SetUndefined();
@@ -550,7 +550,7 @@ exitTerminate:
     delete terminateBaton;
     string error = NJSMessages::getErrorMsg ( errInternalError,
                                               "uv_queue_work", "Terminate" );
-    NJS_SET_EXCEPTION(error.c_str(), error.length());
+    NJS_SET_EXCEPTION ( error.c_str() );
   }
 
   info.GetReturnValue().SetUndefined();

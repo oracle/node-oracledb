@@ -81,11 +81,18 @@ describe('62. lobProperties.js', function() {
 
     async.series([
       function(cb) {
-        oracledb.getConnection(dbConfig, function(err, conn) {
-          should.not.exist(err);
-          connection = conn;
-          cb();
-        });
+        oracledb.getConnection(
+          {
+            user: dbConfig.user,
+            password: dbConfig.password,
+            connectString: dbConfig.connectString
+          },
+          function(err, conn) {
+            should.not.exist(err);
+            connection = conn;
+            cb();
+          }
+        );
       },
       function(cb) {
         connection.execute(

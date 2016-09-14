@@ -83,17 +83,24 @@ describe('6. dmlReturning.js', function(){
                    (2001, ''Karen Morton'') \
             '); \
         END; ";
-      oracledb.getConnection(dbConfig, function(err, conn) {
-        if(err) { console.error(err.message); return; }
-        connection = conn;
-        conn.execute(
-          makeTable,
-          function(err){
-            if(err) { console.error(err.message); return; }
-            done();
-          }
-        );
-      });
+      oracledb.getConnection(
+        {
+          user:          dbConfig.user,
+          password:      dbConfig.password,
+          connectString: dbConfig.connectString
+        },
+        function(err, conn) {
+          should.not.exist(err);
+          connection = conn;
+          conn.execute(
+            makeTable,
+            function(err){
+              should.not.exist(err);
+              done();
+            }
+          );
+        }
+      );
     })
 
     afterEach('drop table and release connection', function(done) {
@@ -392,11 +399,18 @@ describe('6. dmlReturning.js', function(){
     beforeEach('get connection, prepare table', function(done) {
       async.series([
         function(callback) {
-          oracledb.getConnection(dbConfig, function(err, conn) {
-            should.not.exist(err);
-            connection = conn;
-            callback();
-          });
+          oracledb.getConnection(
+            {
+              user:          dbConfig.user,
+              password:      dbConfig.password,
+              connectString: dbConfig.connectString
+            },
+            function(err, conn) {
+              should.not.exist(err);
+              connection = conn;
+              callback();
+            }
+          );
         },
         function(callback) {
           assist.setUp4sql(connection, tableName, dates, callback);

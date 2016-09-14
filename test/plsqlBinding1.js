@@ -40,11 +40,17 @@ var dbConfig = require('./dbconfig.js');
 
 describe('43. plsqlBinding1.js', function() {
 
+  var credentials = {
+                      user:          dbConfig.user,
+                      password:      dbConfig.password,
+                      connectString: dbConfig.connectString
+                    };
+
   describe('43.1 binding PL/SQL indexed table', function() {
     var connection = null;
 
     before(function(done) {
-      oracledb.getConnection(dbConfig, function(err, conn) {
+      oracledb.getConnection(credentials, function(err, conn) {
         if(err) { console.error(err.message); return; }
         connection = conn;
         done();
@@ -356,7 +362,7 @@ describe('43. plsqlBinding1.js', function() {
     before(function(done) {
       async.series([
         function(callback) {
-          oracledb.getConnection(dbConfig, function(err, conn) {
+          oracledb.getConnection(credentials, function(err, conn) {
             should.not.exist(err);
             connection = conn;
             callback();
@@ -458,7 +464,7 @@ describe('43. plsqlBinding1.js', function() {
       );
     })
 
-    it('42.2.3 maxArraySize cannot smaller than the number of array elements', function(done) {
+    it('43.2.3 maxArraySize cannot smaller than the number of array elements', function(done) {
       var bindvars = {
         p:  {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: [1, 2, 3], maxArraySize: 2}
       };
@@ -475,7 +481,7 @@ describe('43. plsqlBinding1.js', function() {
       );
     })
 
-    it('42.2.4 DATE type has not been supported yet', function(done) {
+    it('43.2.4 DATE type has not been supported yet', function(done) {
       var bindvars = {
         p:  {type: oracledb.DATE, dir: oracledb.BIND_IN, val: [new Date(), new Date()]}
       };
@@ -485,13 +491,14 @@ describe('43. plsqlBinding1.js', function() {
         function(err, result) {
           should.exist(err);
           (err.message).should.startWith('NJS-034:');
+          // NJS-034: data type is unsupported for array bind
           should.not.exist(result);
           done();
         }
       );
     })
 
-    it('42.2.5 negative case (string): incorrect type of array elements', function(done) {
+    it('43.2.5 negative case (string): incorrect type of array elements', function(done) {
       var bindvars = {
         p:  {type: oracledb.STRING, dir: oracledb.BIND_IN, val: ['hello', 1]}
       };
@@ -508,7 +515,7 @@ describe('43. plsqlBinding1.js', function() {
       );
     })
 
-    it('42.2.6 negative case (number): incorrect type of array element', function(done) {
+    it('43.2.6 negative case (number): incorrect type of array element', function(done) {
       var bindvars = {
         p:  {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: [1, 'hello']}
       };
@@ -525,7 +532,7 @@ describe('43. plsqlBinding1.js', function() {
       );
     })
 
-    it('42.2.7 supports binding by position', function(done) {
+    it('43.2.7 supports binding by position', function(done) {
       var bindvars = [
         {type: oracledb.STRING, dir: oracledb.BIND_IN, val: ['hello', 'node.js']}
       ];
@@ -546,7 +553,7 @@ describe('43. plsqlBinding1.js', function() {
     var connection = null;
 
     before(function(done) {
-      oracledb.getConnection(dbConfig, function(err, conn) {
+      oracledb.getConnection(credentials, function(err, conn) {
         if(err) { console.error(err.message); return; }
         connection = conn;
         done();
@@ -771,7 +778,7 @@ describe('43. plsqlBinding1.js', function() {
     before(function(done) {
       async.series([
         function(cb) {
-          oracledb.getConnection(dbConfig, function(err, conn) {
+          oracledb.getConnection(credentials, function(err, conn) {
             should.not.exist(err);
             connection = conn;
             cb();

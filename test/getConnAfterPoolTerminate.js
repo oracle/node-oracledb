@@ -42,7 +42,6 @@ describe('52. getConnAfterPoolTerminate.js', function() {
   it('can not get connections from pool after pool is terminated', function(done) {
     oracledb.createPool(
       {
-        externalAuth  : dbConfig.externalAuth,
         user          : dbConfig.user,
         password      : dbConfig.password,
         connectString : dbConfig.connectString,

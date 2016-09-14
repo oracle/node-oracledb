@@ -45,11 +45,18 @@ describe('55. resultSet2.js', function() {
   var rowsAmount = 300;
 
   before('get one connection', function(done) {
-    oracledb.getConnection(dbConfig, function(err, conn) {
-      should.not.exist(err);
-      connection = conn;
-      done();
-    });
+    oracledb.getConnection(
+      {
+        user:          dbConfig.user,
+        password:      dbConfig.password,
+        connectString: dbConfig.connectString
+      },
+      function(err, conn) {
+        should.not.exist(err);
+        connection = conn;
+        done();
+      }
+    );
   })
 
   after('release connection', function(done) {
@@ -266,7 +273,11 @@ describe('55. resultSet2.js', function() {
 
     beforeEach(function(done) {
       oracledb.getConnection(
-        dbConfig,
+        {
+          user:          dbConfig.user,
+          password:      dbConfig.password,
+          connectString: dbConfig.connectString
+        },
         function(err, conn) {
           should.not.exist(err);
           conn2 = conn;

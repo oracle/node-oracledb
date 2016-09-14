@@ -46,12 +46,19 @@ describe('65. uninitializedLob.js', function() {
   var connection = null;
   before(function(done) {
     async.series([
-      function(callback) {
-        oracledb.getConnection(dbConfig, function(err, conn) {
-          should.not.exist(err);
-          connection = conn;
-          callback();
-        });
+      function getConn(cb) {
+        oracledb.getConnection(
+          {
+            user:          dbConfig.user,
+            password:      dbConfig.password,
+            connectString: dbConfig.connectString
+          },
+          function(err, conn) {
+            should.not.exist(err);
+            connection = conn;
+            cb();
+          }
+        );
       },
       function createTab(callback) {
         var proc =  "BEGIN \n" +

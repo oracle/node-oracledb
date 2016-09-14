@@ -175,14 +175,14 @@ NAN_GETTER(ResultSet::GetMetaData)
   if(!njsResultSet->njsconn_->isValid())
   {
     msg = NJSMessages::getErrorMsg ( errInvalidConnection );
-    NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
+    NJS_SET_EXCEPTION ( msg.c_str() );
     info.GetReturnValue().SetUndefined();
     return;
   }
   else if(njsResultSet->state_ == NJS_INVALID)
   {
     msg = NJSMessages::getErrorMsg ( errInvalidResultSet );
-    NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
+    NJS_SET_EXCEPTION ( msg.c_str() );
     info.GetReturnValue().SetUndefined();
     return;
   }
@@ -212,7 +212,7 @@ NAN_SETTER(ResultSet::SetMetaData)
     msg = NJSMessages::getErrorMsg(errInvalidResultSet);
   else
     msg = NJSMessages::getErrorMsg(errReadOnly, "metaData");
-  NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
+  NJS_SET_EXCEPTION ( msg.c_str() );
 }
 
 /*****************************************************************************/
@@ -365,7 +365,7 @@ exitGetRowsCommon:
     string error = NJSMessages::getErrorMsg ( errInternalError,
                                               "uv_queue_work",
                                               "GetRowsCommon" );
-    NJS_SET_EXCEPTION(error.c_str(), error.length());
+    NJS_SET_EXCEPTION ( error.c_str() );
   }
 
 }
@@ -586,7 +586,7 @@ exitClose:
     string error = NJSMessages::getErrorMsg ( errInternalError,
                                               "uv_queue_work",
                                               "ResultSetClose" );
-    NJS_SET_EXCEPTION(error.c_str(), error.length());
+    NJS_SET_EXCEPTION ( error.c_str() );
   }
 
   info.GetReturnValue().SetUndefined();

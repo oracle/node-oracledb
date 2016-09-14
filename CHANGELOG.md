@@ -1,5 +1,21 @@
 # Change Log
 
+## node-oracledb v1.11.0 (19 Aug 2016)
+
+- Added a connection pool cache feature allowing pools to have aliases and be more easily used.
+
+- Improved the bootstrap error message when the node-oracledb binary cannot be loaded.
+
+- Fixed memory leaks with `DATE` and `TIMESTAMP` bind values.
+
+- Fixed external authentication which broke in 1.10.
+
+- Fixed metadata `scale` and `precision` values on AIX.
+
+- Made an internal change to replace `std::string.data()` with `std::string.c_str()`.
+
+- Made an internal change to remove an unused parameter from the `NJS_SET_EXCEPTION` macro.
+
 ## node-oracledb v1.10.1 (21 Jul 2016)
 
 - Fixed a bug that prevented a null value being passed from JavaScript into an IN OUT bind.
@@ -10,7 +26,7 @@
 
 - Made an internal change for queries selecting unsupported column types allowing them to report an error earlier.
 
-- Made an internal change to use std::string& for string lengths.
+- Made an internal change to use `std::string&` for string lengths.
 
 - Fixed a compilation warning on Windows.
 

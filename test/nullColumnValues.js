@@ -77,17 +77,24 @@ describe('10. nullColumnValues.js', function() {
                    (90, ''Executive'', 100, 1700) \
             '); \
         END; ";
-    oracledb.getConnection(dbConfig, function(err, conn){
-      if(err) { console.error(err.message); return; }
-      connection = conn;
-      conn.execute(
-        makeTable,
-        function(err){
-          if(err) { console.error(err.message); return; }
-          done();
-        }
-      );
-    });
+    oracledb.getConnection(
+      {
+        user:          dbConfig.user,
+        password:      dbConfig.password,
+        connectString: dbConfig.connectString
+      },
+      function(err, conn){
+        should.not.exist(err);
+        connection = conn;
+        conn.execute(
+          makeTable,
+          function(err){
+            should.not.exist(err);
+            done();
+          }
+        );
+      }
+    );
   })
 
   afterEach('drop table and release connection', function(done){

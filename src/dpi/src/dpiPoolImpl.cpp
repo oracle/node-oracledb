@@ -118,7 +118,7 @@ PoolImpl::PoolImpl(EnvImpl *env, OCIEnv *envh,
   if ( !(env_->drvName()).empty() )
   {
     ociCall ( OCIAttrSet ( ( void * ) poolAuth_, OCI_HTYPE_AUTHINFO,
-                           ( OraText * ) ( env_->drvName() ).data (),
+                           ( OraText * ) ( env_->drvName() ).c_str (),
                            ( ub4 ) ( ( env_->drvName() ).length () ),
                            OCI_ATTR_DRIVER_NAME, errh_ ), errh_ );
   }
@@ -128,12 +128,12 @@ PoolImpl::PoolImpl(EnvImpl *env, OCIEnv *envh,
 
   ociCall(OCISessionPoolCreate(envh_, errh_, spoolh_,
                                &poolName_, &poolNameLen_,
-                               (OraText *)connString.data (),
+                               (OraText *)connString.c_str (),
                                (ub4) connString.length(),
                                poolMin, poolMax,
                                poolIncrement,
-                               (OraText *)user.data (), (ub4) user.length(),
-                               (OraText *)password.data (),
+                               (OraText *)user.c_str (), (ub4) user.length(),
+                               (OraText *)password.c_str (),
                                (ub4) password.length(),
                                mode), errh_ );
 

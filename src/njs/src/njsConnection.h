@@ -133,8 +133,8 @@ typedef struct MetaInfo
   unsigned short    dpiFetchType;           // Target fetchType for DPI
   short             njsFetchType;           // Target fetchType for NJS
   unsigned short    byteSize;               // Size In bytes at database
-  unsigned char     precision;              // Precision
-  char              scale;                  // Scale
+  short             precision;              // Precision
+  signed   char     scale;                  // Scale, range starts from -127
   unsigned char     isNullable;             // Nullable
 
   MetaInfo ()
@@ -187,7 +187,7 @@ typedef struct eBaton
   dpi::Env*                 dpienv;
   dpi::Conn*                dpiconn;
   Connection                *njsconn;
-  DPI_SZ_TYPE               rowsAffected;
+  DPI_USZ_TYPE              rowsAffected;
   unsigned int              maxRows;
   unsigned int              prefetchRows;
   bool                      getRS;
@@ -235,30 +235,26 @@ typedef struct eBaton
      {
        for( unsigned int index = 0 ;index < binds.size(); index++ )
        {
-         // donot free date value here, it is done in DateTimeArray functions
-         if(binds[index]->type != DpiTimestampLTZ )
+         // do not free refcursor type.
+         if( binds[index]->value && binds[index]->type != DpiRSet )
          {
-           // do not free refcursor type.
-           if( binds[index]->value && binds[index]->type != DpiRSet )
-           {
-             free(binds[index]->value);
-           }
-           if ( binds[index]->extvalue )
-           {
-             free ( binds[index]->extvalue );
-           }
-           if ( binds[index]->ind )
-           {
-             free ( binds[index]->ind );
-           }
-           if ( binds[index]->len )
-           {
-             free ( binds[index]->len );
-           }
-           if ( binds[index]->len2 )
-           {
-             free ( binds[index]->len2 ) ;
-           }
+           free(binds[index]->value);
+         }
+         if ( binds[index]->extvalue )
+         {
+           free ( binds[index]->extvalue );
+         }
+         if ( binds[index]->ind )
+         {
+           free ( binds[index]->ind );
+         }
+         if ( binds[index]->len )
+         {
+           free ( binds[index]->len );
+         }
+         if ( binds[index]->len2 )
+         {
+           free ( binds[index]->len2 ) ;
          }
          delete binds[index];
        }

@@ -47,11 +47,18 @@ describe('14. stream2.js', function() {
   before(function(done) {
     async.series([
       function getConn(cb) {
-        oracledb.getConnection(dbConfig, function(err, conn) {
-          should.not.exist(err);
-          connection = conn;
-          cb();
-        });
+        oracledb.getConnection(
+          {
+            user:          dbConfig.user,
+            password:      dbConfig.password,
+            connectString: dbConfig.connectString
+          },
+          function(err, conn) {
+            should.not.exist(err);
+            connection = conn;
+            cb();
+          }
+        );
       },
       function createTab(cb) {
         var proc = "BEGIN \n" +

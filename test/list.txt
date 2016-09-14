@@ -71,7 +71,6 @@ Overview of node-oracledb functional tests
     2.10 Close method
         2.10.1 close can be used as an alternative to release
 
-
 3. examples.js
     3.1 connect.js
         3.1.1 tests a basic connection to the database
@@ -121,13 +120,37 @@ Overview of node-oracledb functional tests
         4.4.3 Negative - bind out data exceeds default length
       - 4.4.4 maximum value is 32767
     4.5 The default direction for binding is BIND_IN
-      - 4.5.1
+        4.5.1
+    4.6 PL/SQL block with empty outBinds
+        4.6.1
+    4.7 Value as JSON named/unamed test cases
+        4.7.1 valid case when numeric values are passed as it is
+        4.7.2 Valid values when one of the value is passed as JSON
+        4.7.3 Valid test case when one of the value is passed as JSON
+        4.7.4 Valid Test case when both values are passed as JSON
+        4.7.5 Invalid Test case when value is passed as named JSON
+        4.7.6 Invalid Test case when other-value is passed as named JSON
+        4.7.7 Invalid Test case when all values is passed as named JSON
+    4.8 bind DATE
+        4.8.1 binding out in Object & Array formats
+        4.8.2 BIND_IN
+      - 4.8.3 BIND_INOUT
 
-5. externalAuthentication.js
-    5.1 connection should succeed when setting externalAuth to be false and providing user/password
-    5.2 error should be thrown when setting externalAuth to be true and providing user/password
-    5.3 can get connection from oracledb
-    5.4 can create pool
+5. externalAuth.js
+    5.1 tests that work both when DB has configured externalAuth and not configured
+        5.1.1 can get connection from oracledb with correct user/password when externalAuth is disabled
+        5.1.2 throws error when getting connection from oracledb with correct user/password when externalAuth is enabled
+        5.1.3 throws error when gettting connection from oracledb given only 'user' when externalAuth is enabled
+        5.1.4 throws error when gettting connection from oracledb given only 'password' when externalAuth is enabled
+        5.1.5 can get pool from oracledb with user/password when externalAuth is disabled
+        5.1.6 throws error when getting pool from oracledb given user/password when externalAuth is enabled
+        5.1.7 throws error when getting pool from oracledb only given username when externalAuth is enabled
+        5.1.8 throws error when getting pool from oracledb only given password when externalAuth is enabled
+    5.2 tests only work when externalAuth is configured on DB
+        5.2.1 can get connection from oracledb with external authentication
+        5.2.2 can get pool from oracledb with external authentication
+        5.2.3 gets multiple connections from oracledb
+        5.2.4 gets multiple pools from oracledb
 
 6. dmlReturning.js
     6.1 NUMBER & STRING driver data type
@@ -600,10 +623,10 @@ Overview of node-oracledb functional tests
         43.2.1 maxArraySize is ignored when specifying BIND_IN
         43.2.2 maxArraySize is mandatory for BIND_INOUT
         42.2.3 maxArraySize cannot smaller than the number of array elements
-        42.2.4 DATE type has not been supported yet
-        42.2.5 negative case (string): incorrect type of array element
-        42.2.6 negative case (number): incorrect type of array element
-        42.2.7 supports binding by position
+        43.2.4 DATE type has not been supported yet
+        43.2.5 negative case (string): incorrect type of array element
+        43.2.6 negative case (number): incorrect type of array element
+        43.2.7 supports binding by position
     43.3 binding PL/SQL scalar
         43.3.1 binding PL/SQL scalar IN
       - 43.3.2 binding PL/SQL scalar IN/OUT
@@ -773,3 +796,40 @@ Overview of node-oracledb functional tests
     66.2 allows overwriting of public methods on connection instances
     66.3 allows overwriting of public methods on resultset instances
     66.4 allows overwriting of public methods on lob instances
+
+67. poolCache.js
+    67.1 basic functional tests
+        67.1.1 caches pool as default if pool is created when cache is empty
+        67.1.2 removes the pool from the cache on terminate
+        67.1.3 can cache and retrieve an aliased pool
+        67.1.4 throws an error if the poolAlias already exists in the cache
+        67.1.5 does not throw an error if multiple pools are created without an alias
+        67.1.6 throws an error if poolAttrs.poolAlias is not a string
+        67.1.7 makes poolAttrs.poolAlias a read-only attribute on the pool named alias
+        67.1.8 retrieves the default pool, even after an aliased pool is created
+        67.1.9 retrieves the right pool, even after multiple pools are created
+        67.1.10 throws an error if the pool specified in getPool doesn't exist
+        67.1.11 does not throw an error if multiple pools are created without a poolAlias in the same call stack
+    67.2 oracledb.getConnection functional tests
+        67.2.1 gets a connection from the default pool
+        67.2.2 gets a connection from the pool with the specified alias when no alias is specified
+        67.2.3 throws an error if an attempt is made to use the default pool when it does not exist
+        67.2.4 throws an error if an attempt is made to use a poolAlias for a pool that is not in the cache
+        67.2.5 gets a connection from the default pool, even after an aliased pool is created
+        67.2.6 uses the right pool, even after multiple pools are created
+    67.3 poolAlias attribute
+        67.3.1 throws an error if poolAttrs.poolAlias is an object
+        67.3.2 throws an error if poolAttrs.poolAlias is an array
+        67.3.3 throws an error if poolAttrs.poolAlias is a number
+        67.3.4 throws an error if poolAttrs.poolAlias is a boolean
+        67.3.5 throws an error if poolAttrs.poolAlias is null
+        67.3.6 throws an error if poolAttrs.poolAlias is an empty string
+        67.3.7 throws an error if poolAttrs.poolAlias is NaN
+        67.3.8 works if poolAttrs.poolAlias is undefined
+
+68. multipleLobInsertion.js
+    68.1 inserts multiple BLOBs
+    68.2 inserts multiple CLOBs
+
+69. driverName.js
+    69.1 checks the driver name
