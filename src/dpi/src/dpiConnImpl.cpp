@@ -93,7 +93,7 @@ try :  env_(env), pool_(NULL),
 {
 
   this->initConnImpl ( false, externalAuth, connClass,
-                       ( OraText * ) connString.data (),
+                       ( OraText * ) connString.c_str (),
                        ( ub4 ) connString.length (), user, password, "",
                        false, dbPriv );
 
@@ -373,7 +373,7 @@ unsigned int ConnImpl::lobPrefetchSize() const
 
 void ConnImpl::clientId(const string &clientId)
 {
-  ociCall(OCIAttrSet(sessh_, OCI_HTYPE_SESSION, (void *)clientId.data(),
+  ociCall(OCIAttrSet(sessh_, OCI_HTYPE_SESSION, (void *)clientId.c_str(),
                      (ub4)clientId.length(), OCI_ATTR_CLIENT_IDENTIFIER, errh_),
           errh_);
 }
@@ -397,7 +397,7 @@ void ConnImpl::clientId(const string &clientId)
 
 void ConnImpl::module(const string &module)
 {
-  ociCall(OCIAttrSet(sessh_, OCI_HTYPE_SESSION, (void *)module.data(),
+  ociCall(OCIAttrSet(sessh_, OCI_HTYPE_SESSION, (void *)module.c_str(),
                      (ub4) module.length(), OCI_ATTR_MODULE, errh_), errh_);
 }
 
@@ -420,7 +420,7 @@ void ConnImpl::module(const string &module)
 
 void ConnImpl::action(const string &action)
 {
-  ociCall(OCIAttrSet(sessh_, OCI_HTYPE_SESSION, (void *)action.data(),
+  ociCall(OCIAttrSet(sessh_, OCI_HTYPE_SESSION, (void *)action.c_str(),
                      (ub4) action.length(), OCI_ATTR_ACTION, errh_), errh_);
 }
 
@@ -627,11 +627,11 @@ void ConnImpl::initConnImpl ( bool pool, bool externalAuth,
   if ( !pool )
   {
     ociCall ( OCIAttrSet ( ( void * ) auth_, OCI_HTYPE_AUTHINFO,
-                           ( void * ) user.data (), ( ub4 ) user.length (),
+                           ( void * ) user.c_str (), ( ub4 ) user.length (),
                            OCI_ATTR_USERNAME, errh_ ), errh_ );
 
     ociCall ( OCIAttrSet ( ( void * ) auth_, OCI_HTYPE_AUTHINFO,
-                           ( void * ) password.data (),
+                           ( void * ) password.c_str (),
                            ( ub4 ) password.length (),
                            OCI_ATTR_PASSWORD, errh_ ), errh_ );
   }
@@ -652,7 +652,7 @@ void ConnImpl::initConnImpl ( bool pool, bool externalAuth,
   if ( connClass.length () )
   {
     ociCall ( OCIAttrSet ( ( void* ) auth_, OCI_HTYPE_AUTHINFO,
-                           ( void * ) connClass.data (),
+                           ( void * ) connClass.c_str (),
                            ( ub4 ) connClass.length (),
                            OCI_ATTR_CONNECTION_CLASS, errh_ ), errh_ );
   }
@@ -663,7 +663,7 @@ void ConnImpl::initConnImpl ( bool pool, bool externalAuth,
   if ( !pool &&  !(env_->drvName()).empty() )
   {
     ociCall ( OCIAttrSet ( (void*) auth_, OCI_HTYPE_AUTHINFO,
-                           (OraText *) ( env_->drvName() ).data (),
+                           (OraText *) ( env_->drvName() ).c_str (),
                            ( ub4 ) ( ( env_->drvName() ).length () ),
                            OCI_ATTR_DRIVER_NAME, errh_ ), errh_);
   }

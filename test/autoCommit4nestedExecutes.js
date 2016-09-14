@@ -49,6 +49,12 @@ describe('63. autoCommit4nestedExecutes.js', function() {
   var procName   = "issue269proc";
   var connection = null;
 
+  var credentials = {
+                      user: dbConfig.user,
+                      password: dbConfig.password,
+                      connectString: dbConfig.connectString
+                    };
+
   before('prepare table and procedure', function(done) {
 
     var sqlCreateTab =
@@ -84,7 +90,7 @@ describe('63. autoCommit4nestedExecutes.js', function() {
 
     async.series([
       function(cb) {
-        oracledb.getConnection(dbConfig, function(err, conn) {
+        oracledb.getConnection(credentials, function(err, conn) {
           should.not.exist(err);
           connection = conn;
           cb();
@@ -166,7 +172,7 @@ describe('63. autoCommit4nestedExecutes.js', function() {
     async.series([
       function getPool(cb) {
         oracledb.createPool(
-          dbConfig,
+          credentials,
           function(err, pooling) {
             should.not.exist(err);
             pool = pooling;

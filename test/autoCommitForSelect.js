@@ -73,20 +73,35 @@ describe('8. autoCommitForSelect.js', function(){
       END; ";
 
   before(function(done){
+
     async.parallel([
       function(callback){
-        oracledb.getConnection(dbConfig, function(err, conn){
-          if(err) { console.error(err.message); return; }
-          connection = conn;
-          callback();
-        });
+        oracledb.getConnection(
+          {
+            user:          dbConfig.user,
+            password:      dbConfig.password,
+            connectString: dbConfig.connectString
+          },
+          function(err, conn) {
+            should.not.exist(err);
+            connection = conn;
+            callback();
+          }
+        );
       },
       function(callback){
-        oracledb.getConnection(dbConfig, function(err, conn){
-          if(err) { console.error(err.message); return; }
-          anotherConnection = conn;
-          callback();
-        });
+        oracledb.getConnection(
+          {
+            user:          dbConfig.user,
+            password:      dbConfig.password,
+            connectString: dbConfig.connectString
+          },
+          function(err, conn) {
+            should.not.exist(err);
+            anotherConnection = conn;
+            callback();
+          }
+        );
       }
     ], done);
   })

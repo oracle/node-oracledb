@@ -40,7 +40,11 @@ describe('54. releaseAfterFailingTerminate.js', function() {
 
   it('can still release connections after failing pool termination', function(done){
     oracledb.createPool(
-      dbConfig,
+      {
+        user: dbConfig.user,
+        password: dbConfig.password,
+        connectString: dbConfig.connectString
+      },
       function(err, pool) {
         should.not.exist(err);
         pool.getConnection( function(err, connection){
@@ -52,7 +56,13 @@ describe('54. releaseAfterFailingTerminate.js', function() {
 
               connection.release( function(err){
                 should.not.exist(err);
-                done();
+
+                // Still need to clean up the pool from this test.
+                pool.terminate(function(err) {
+                  should.not.exist(err);
+
+                  done();
+                });
               });
             }
           );

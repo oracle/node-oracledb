@@ -54,7 +54,11 @@ describe('60. clobPlsqlString.js', function() {
     async.series([
       function(callback) {
         oracledb.getConnection(
-          dbConfig,
+          {
+            user: dbConfig.user,
+            password: dbConfig.password,
+            connectString: dbConfig.connectString
+          },
           function(err, conn) {
             should.not.exist(err);
             connection = conn;

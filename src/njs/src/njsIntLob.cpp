@@ -366,7 +366,7 @@ NAN_METHOD(ILob::Release)
   if( !iLob->njsconn_->isValid() )
   {
     msg = NJSMessages::getErrorMsg ( errInvalidConnection );
-    NJS_SET_EXCEPTION( msg.c_str(), (int) msg.length() );
+    NJS_SET_EXCEPTION ( msg.c_str() );
     info.GetReturnValue().SetUndefined();
     return;
   }
@@ -411,7 +411,7 @@ void ILob::lobPropertyException(ILob *iLob,
   else
     msg = NJSMessages::getErrorMsg(errInvalidLob);
 
-  NJS_SET_EXCEPTION(msg.c_str(), (int)msg.length());
+  NJS_SET_EXCEPTION ( msg.c_str() );
 }
 
 
@@ -440,7 +440,7 @@ NAN_GETTER(ILob::GetChunkSize)
   if( !iLob->njsconn_->isValid() )
   {
     msg = NJSMessages::getErrorMsg ( errInvalidConnection );
-    NJS_SET_EXCEPTION( msg.c_str(), (int) msg.length() );
+    NJS_SET_EXCEPTION ( msg.c_str() );
     info.GetReturnValue().SetUndefined();
     return;
   }
@@ -453,7 +453,7 @@ NAN_GETTER(ILob::GetChunkSize)
   catch(dpi::Exception &e)
   {
     NJS_SET_CONN_ERR_STATUS ( e.errnum(), iLob->dpiconn_ );
-    NJS_SET_EXCEPTION(e.what(), strlen(e.what()));
+    NJS_SET_EXCEPTION ( e.what() );
   }
 
   info.GetReturnValue().SetUndefined();
@@ -510,7 +510,7 @@ NAN_GETTER(ILob::GetLength)
   if( !iLob->njsconn_->isValid() )
   {
     msg = NJSMessages::getErrorMsg ( errInvalidConnection );
-    NJS_SET_EXCEPTION( msg.c_str(), (int) msg.length() );
+    NJS_SET_EXCEPTION ( msg.c_str() );
     info.GetReturnValue().SetUndefined();
     return;
   }
@@ -523,7 +523,7 @@ NAN_GETTER(ILob::GetLength)
   catch(dpi::Exception &e)
   {
     NJS_SET_CONN_ERR_STATUS ( e.errnum(), iLob->dpiconn_ );
-    NJS_SET_EXCEPTION(e.what(), strlen(e.what()));
+    NJS_SET_EXCEPTION ( e.what() );
   }
 
   info.GetReturnValue().SetUndefined();
@@ -579,7 +579,7 @@ NAN_GETTER(ILob::GetPieceSize)
   if( !iLob->njsconn_->isValid() )
   {
     msg = NJSMessages::getErrorMsg ( errInvalidConnection );
-    NJS_SET_EXCEPTION( msg.c_str(), (int) msg.length() );
+    NJS_SET_EXCEPTION ( msg.c_str() );
     info.GetReturnValue().SetUndefined();
     return;
   }
@@ -592,7 +592,7 @@ NAN_GETTER(ILob::GetPieceSize)
   catch(dpi::Exception &e)
   {
     NJS_SET_CONN_ERR_STATUS ( e.errnum(), iLob->dpiconn_ );
-    NJS_SET_EXCEPTION(e.what(), strlen(e.what()));
+    NJS_SET_EXCEPTION ( e.what() );
   }
 
   info.GetReturnValue().SetUndefined();
@@ -626,14 +626,14 @@ NAN_SETTER(ILob::SetPieceSize)
   {
     msg = NJSMessages::getErrorMsg(errBusyLob);
 
-    NJS_SET_EXCEPTION(msg.c_str(), (int)msg.length());
+    NJS_SET_EXCEPTION ( msg.c_str() );
     return;
   }
 
   if( !iLob->njsconn_->isValid() )
   {
     msg = NJSMessages::getErrorMsg ( errInvalidConnection );
-    NJS_SET_EXCEPTION( msg.c_str(), (int) msg.length() );
+    NJS_SET_EXCEPTION ( msg.c_str() );
     return;
   }
 
@@ -654,7 +654,7 @@ NAN_SETTER(ILob::SetPieceSize)
     catch(dpi::Exception &e)
     {
       NJS_SET_CONN_ERR_STATUS (  e.errnum(), iLob->dpiconn_ );
-      NJS_SET_EXCEPTION(e.what(), strlen(e.what()));
+      NJS_SET_EXCEPTION ( e.what() );
     }
   }
   else
@@ -687,7 +687,7 @@ NAN_GETTER(ILob::GetOffset)
   if( !iLob->njsconn_->isValid() )
   {
     msg = NJSMessages::getErrorMsg ( errInvalidConnection );
-    NJS_SET_EXCEPTION( msg.c_str(), (int) msg.length() );
+    NJS_SET_EXCEPTION ( msg.c_str() );
     info.GetReturnValue().SetUndefined();
     return;
   }
@@ -700,7 +700,7 @@ NAN_GETTER(ILob::GetOffset)
   catch(dpi::Exception &e)
   {
     NJS_SET_CONN_ERR_STATUS ( e.errnum(), iLob->dpiconn_ );
-    NJS_SET_EXCEPTION(e.what(), strlen(e.what()));
+    NJS_SET_EXCEPTION ( e.what() );
   }
 
   info.GetReturnValue().SetUndefined();
@@ -735,21 +735,21 @@ NAN_SETTER(ILob::SetOffset)
   {
     string msg = NJSMessages::getErrorMsg(errInvalidPropertyValue, "offset");
 
-    NJS_SET_EXCEPTION(msg.c_str(), (int)msg.length());
+    NJS_SET_EXCEPTION ( msg.c_str() );
   }
 
   if (iLob->state_ == NJS_ACTIVE)
   {
     msg = NJSMessages::getErrorMsg(errBusyLob);
 
-    NJS_SET_EXCEPTION(msg.c_str(), (int)msg.length());
+    NJS_SET_EXCEPTION ( msg.c_str() );
     return;
   }
 
   if( !iLob->njsconn_->isValid() )
   {
     msg = NJSMessages::getErrorMsg ( errInvalidConnection );
-    NJS_SET_EXCEPTION( msg.c_str(), (int) msg.length() );
+    NJS_SET_EXCEPTION ( msg.c_str() );
     return;
   }
 
@@ -786,7 +786,7 @@ NAN_GETTER(ILob::GetType)
 
   catch(dpi::Exception &e)
   {
-    NJS_SET_EXCEPTION(e.what(), strlen(e.what()));
+    NJS_SET_EXCEPTION ( e.what() );
   }
 
     info.GetReturnValue().SetUndefined();
@@ -879,7 +879,7 @@ NAN_METHOD(ILob::Read)
     delete lobBaton;
     string error = NJSMessages::getErrorMsg ( errInternalError,
                                               "uv_queue_work", "LobRead" );
-    NJS_SET_EXCEPTION(error.c_str(), error.length());
+    NJS_SET_EXCEPTION ( error.c_str() );
   }
 
   info.GetReturnValue().SetUndefined();
@@ -1083,7 +1083,7 @@ NAN_METHOD(ILob::Write)
     delete lobBaton;
     string error = NJSMessages::getErrorMsg ( errInternalError,
                                               "uv_queue_work", "LobWrite" );
-    NJS_SET_EXCEPTION(error.c_str(), error.length());
+    NJS_SET_EXCEPTION ( error.c_str() );
   }
 
   info.GetReturnValue().SetUndefined();

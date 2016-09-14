@@ -8,7 +8,7 @@ test/connection.js
 test/pool.js
 test/examples.js
 test/binding.js
-test/externalAuthentication.js
+test/externalAuth.js
 test/dmlReturning.js
 test/autoCommit.js
 test/autoCommitForSelect.js
@@ -68,3 +68,6 @@ test/autoCommit4nestedExecutes.js
 test/sqlWithWarnings.js
 test/uninitializedLob.js
 test/writableProperties.js
+test/poolCache.js
+test/multipleLobInsertion.js
+test/driverName.js

@@ -40,12 +40,18 @@ var dbConfig = require('./dbconfig.js');
 
 describe('44. plsqlBinding2.js', function() {
 
+  var credentials = {
+                      user:          dbConfig.user,
+                      password:      dbConfig.password,
+                      connectString: dbConfig.connectString
+                    };
+
   var connection = null;
 
   beforeEach(function(done) {
     async.series([
       function(callback) {
-        oracledb.getConnection(dbConfig, function(err, conn) {
+        oracledb.getConnection(credentials, function(err, conn) {
           should.not.exist(err);
           connection = conn;
           callback();

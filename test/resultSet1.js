@@ -73,17 +73,27 @@ describe('12. resultSet1.js', function() {
   var rowsAmount = 217;
 
   before(function(done) {
-    oracledb.getConnection(dbConfig, function(err, conn) {
-      if(err) { console.error(err.message); return; }
-      connection = conn;
-      connection.execute(createTable, function(err) {
-        if(err) { console.error(err.message); return; }
-        connection.execute(insertRows, function(err) {
-          if(err) { console.error(err.message); return; }
-          done();
-        });
-      });
-    });
+    oracledb.getConnection(
+      {
+        user:          dbConfig.user,
+        password:      dbConfig.password,
+        connectString: dbConfig.connectString
+      },
+      function(err, conn) {
+        should.not.exist(err);
+        connection = conn;
+        connection.execute(
+          createTable,
+          function(err) {
+            should.not.exist(err);
+            connection.execute(insertRows, function(err) {
+              should.not.exist(err);
+              done();
+            });
+          })
+        ;
+      }
+    );
   })
 
   after(function(done) {

@@ -46,7 +46,6 @@ describe('11. poolTimeout.js', function(){
   before(function(done){
     oracledb.createPool(
       {
-        externalAuth    : dbConfig.externalAuth,
         user            : dbConfig.user,
         password        : dbConfig.password,
         connectString   : dbConfig.connectString,
@@ -75,11 +74,7 @@ describe('11. poolTimeout.js', function(){
 
   it('11.1 pool terminates idle connections after specify time', function(done){
     pool.should.be.ok();
-    if(!dbConfig.externalAuth){
-      pool.connectionsOpen.should.be.exactly(1).and.be.a.Number();
-    } else {
-      pool.connectionsOpen.should.be.exactly(0);
-    }
+    pool.connectionsOpen.should.be.exactly(1).and.be.a.Number();
     pool.connectionsInUse.should.be.exactly(0).and.be.a.Number();
 
     var conn1 = null;
@@ -108,11 +103,7 @@ describe('11. poolTimeout.js', function(){
         });
       },
       function(callback){
-        if(!dbConfig.externalAuth){
-          pool.connectionsOpen.should.be.exactly(3);
-        } else {
-          pool.connectionsOpen.should.be.exactly(2);
-        }
+        pool.connectionsOpen.should.be.exactly(3);
         pool.connectionsInUse.should.be.exactly(2);
         pool.getConnection( function(err, conn){
           should.not.exist(err);

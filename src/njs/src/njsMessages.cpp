@@ -32,7 +32,7 @@ using namespace std;
 #include "njsMessages.h"
 
 // Maximum buffer size to compose error message
-#define MAX_ERROR_MSG_LEN 1024
+#define NJS_MAX_ERROR_MSG_LEN 1024
 
 static const char *errMsg[] =
 {
@@ -77,17 +77,18 @@ static const char *errMsg[] =
   "NJS-038: maxArraySize value should be greater than 0", // errInvalidValueArrayBind
   "NJS-039: empty array is not allowed for IN bind", // errEmptyArray
   "NJS-040: connection request timeout",  // errConnRequestTimeout
-
   "NJS-041: cannot convert ResultSet to QueryStream after invoking methods", // errCannotConvertRsToStream
   "NJS-042: cannot invoke ResultSet methods after converting to QueryStream", // errCannotInvokeRsMethods
   "NJS-043: ResultSet already converted to QueryStream", // errResultSetAlreadyConverted
   "NJS-044: named JSON object is not expected in this context", // errNamedJSON
-
+  "NJS-045: cannot load the oracledb add-on binary", // errCannotLoadBinary
+  "NJS-046: pool alias \"%s\" already exists in the connection pool cache", // errPoolWithAliasAlreadyExists
+  "NJS-047: pool alias \"%s\" not found in connection pool cache", // errPoolWithAliasNotFound
 };
 
 string NJSMessages::getErrorMsg ( NJSErrorType err, ... )
 {
-  char msg[MAX_ERROR_MSG_LEN + 1]; // buffer to get formatted/substituted error msg
+  char msg[NJS_MAX_ERROR_MSG_LEN + 1]; // buffer to get formatted/substituted error msg
   va_list vlist;                   // variable argument list
   std::string str;
 
@@ -95,7 +96,7 @@ string NJSMessages::getErrorMsg ( NJSErrorType err, ... )
   {
     // print all specified arguments
     va_start (vlist, err);
-    if ( vsnprintf (msg, MAX_ERROR_MSG_LEN, errMsg[err], vlist) <= 0)
+    if ( vsnprintf (msg, NJS_MAX_ERROR_MSG_LEN, errMsg[err], vlist) <= 0)
     {
       msg[0] = 0;
     }

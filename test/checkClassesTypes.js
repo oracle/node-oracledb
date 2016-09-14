@@ -43,6 +43,12 @@ var assist   = require('./dataTypeAssist.js');
 
 describe('61. checkClassesTypes.js', function() {
 
+  var credentials = {
+                      user: dbConfig.user,
+                      password: dbConfig.password,
+                      connectString: dbConfig.connectString
+                    };
+
   it('61.1 Oracledb class', function() {
     var type = Object.prototype.toString.call(oracledb);
     type.should.eql('[object Oracledb]');
@@ -53,7 +59,7 @@ describe('61. checkClassesTypes.js', function() {
       [
         function(callback)
         {
-          oracledb.getConnection(dbConfig, callback);
+          oracledb.getConnection(credentials, callback);
         },
         function(connection, callback)
         {
@@ -80,7 +86,7 @@ describe('61. checkClassesTypes.js', function() {
 
     async.series([
       function getConn(callback) {
-        oracledb.getConnection(dbConfig, function(err, conn) {
+        oracledb.getConnection(credentials, function(err, conn) {
           should.not.exist(err);
           connection = conn;
           callback();
@@ -161,7 +167,7 @@ describe('61. checkClassesTypes.js', function() {
     async.waterfall(
       [
         function(callback) {
-          oracledb.createPool(dbConfig, callback);
+          oracledb.createPool(credentials, callback);
         },
         function(pool, callback) {
           var type = Object.prototype.toString.call(pool);
@@ -184,7 +190,7 @@ describe('61. checkClassesTypes.js', function() {
     async.waterfall(
       [
         function(callback) {
-          oracledb.getConnection(dbConfig, callback);
+          oracledb.getConnection(credentials, callback);
         },
         function(connection, callback) {
           connection.execute(

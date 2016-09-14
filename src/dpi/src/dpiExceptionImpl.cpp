@@ -163,7 +163,7 @@ ExceptionImpl::~ExceptionImpl() throw ()
 
 const char * ExceptionImpl::what() const throw()
 {
-  return message_.data();
+  return message_.c_str ();
 }
 
 
@@ -207,7 +207,7 @@ int ExceptionImpl::errnum() const throw()
 
  const char * ExceptionImpl::origin() const throw()
 {
-  return origin_.data();
+  return origin_.c_str ();
 }
 
 

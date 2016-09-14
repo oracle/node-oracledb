@@ -42,7 +42,6 @@ describe('51. accessTerminatedPoolAttributes.js', function(){
   it('can not access attributes of terminated pool', function(done){
     oracledb.createPool(
       {
-        externalAuth    : dbConfig.externalAuth,
         user            : dbConfig.user,
         password        : dbConfig.password,
         connectString   : dbConfig.connectString,
@@ -52,12 +51,7 @@ describe('51. accessTerminatedPoolAttributes.js', function(){
       function(err, pool){
         should.not.exist(err);
         pool.should.be.ok();
-        if(dbConfig.externalAuth){
-          pool.connectionsOpen.should.be.exactly(0);
-        } else {
-          pool.connectionsOpen.should.be.exactly(pool.poolMin);
-        }
-        //(pool.connectionsOpen).should.eql(2);
+        pool.connectionsOpen.should.be.exactly(pool.poolMin);
         (pool.connectionsInUse).should.eql(0);
 
         pool.getConnection( function(err, connection){
