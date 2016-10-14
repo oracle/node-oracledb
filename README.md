@@ -83,6 +83,9 @@ oracledb.getConnection(
       [110],  // bind value for :id
       function(err, result)
       {
+        connection.release(function (err) {
+          if (err) console.error(err.message);
+        });
         if (err) { console.error(err.message); return; }
         console.log(result.rows);
       });
