@@ -2,7 +2,7 @@
 
 ## <a name="about"></a> About node-oracledb
 
-The node-oracledb add-on for Node.js powers high performance Oracle
+The node-oracledb module for Node.js powers high performance Oracle
 Database applications.
 
 Use node-oracledb to connect Node.js 0.10, 0.12, 4, and 6 to
@@ -53,7 +53,7 @@ Prerequisites:
 - The small, free [Oracle Instant Client](http://www.oracle.com/technetwork/database/features/instant-client/index-100365.html) "basic" and "SDK" packages if your database is remote.  Or use the libraries and headers from a locally installed database such as the free [Oracle XE](http://www.oracle.com/technetwork/database/database-technologies/express-edition/overview/index.html) release
 - Set `OCI_LIB_DIR` and `OCI_INC_DIR` during installation if the Oracle libraries and headers are in a non-default location
 
-Run `npm install oracledb` to install from the [NPM registry](https://www.npmjs.com/package/oracledb).
+Run `npm install oracledb` to install from the [npm registry](https://www.npmjs.com/package/oracledb).
 
 See [INSTALL](https://github.com/oracle/node-oracledb/tree/master/INSTALL.md) for details.
 
