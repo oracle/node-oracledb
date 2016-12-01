@@ -74,7 +74,7 @@ describe('26. dataTypeNumber.js', function() {
 
     after(function(done) {
       connection.execute(
-        "DROP table " + tableName,
+        "DROP table " + tableName + " PURGE",
         function(err) {
           should.not.exist(err);
           done();

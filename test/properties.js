@@ -550,7 +550,7 @@ describe('58. properties.js', function() {
 
     after( function(done) {
       connection.execute(
-        "DROP TABLE " + tableName,
+        "DROP TABLE " + tableName + " PURGE",
         function(err) {
           should.not.exist(err);
 

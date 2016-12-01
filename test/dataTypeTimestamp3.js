@@ -51,7 +51,7 @@ describe('35. dataTypeTimestamp3.js', function() {
            "       e_table_missing EXCEPTION; " +
            "       PRAGMA EXCEPTION_INIT(e_table_missing, -00942); " +
            "   BEGIN " +
-           "       EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " '); " +
+           "       EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " PURGE'); " +
            "   EXCEPTION " +
            "       WHEN e_table_missing " +
            "       THEN NULL; " +
@@ -63,7 +63,7 @@ describe('35. dataTypeTimestamp3.js', function() {
            "       )" +
            "   '); " +
            "END; ";
-  var sqlDrop = "DROP table " + tableName;
+  var sqlDrop = "DROP table " + tableName + " PURGE";
   before( function(done){
     oracledb.getConnection(
       {

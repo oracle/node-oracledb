@@ -49,7 +49,7 @@ describe('8. autoCommitForSelect.js', function(){
               e_table_missing EXCEPTION; \
               PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \
           BEGIN \
-              EXECUTE IMMEDIATE ('DROP TABLE nodb_commit4_dept'); \
+              EXECUTE IMMEDIATE ('DROP TABLE nodb_commit4_dept PURGE'); \
           EXCEPTION \
               WHEN e_table_missing \
               THEN NULL; \
@@ -137,7 +137,7 @@ describe('8. autoCommitForSelect.js', function(){
 
   afterEach(function(done){
     connection.execute(
-        'DROP TABLE nodb_commit4_dept',
+        'DROP TABLE nodb_commit4_dept purge',
         function(err){
           if(err) { console.error(err.message); return; }
           done();

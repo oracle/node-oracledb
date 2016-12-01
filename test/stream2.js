@@ -66,7 +66,7 @@ describe('14. stream2.js', function() {
                    "        e_table_exists EXCEPTION; \n" +
                    "        PRAGMA EXCEPTION_INIT(e_table_exists, -00942);\n " +
                    "    BEGIN \n" +
-                   "        EXECUTE IMMEDIATE ('DROP TABLE nodb_stream2'); \n" +
+                   "        EXECUTE IMMEDIATE ('DROP TABLE nodb_stream2 PURGE'); \n" +
                    "    EXCEPTION \n" +
                    "        WHEN e_table_exists \n" +
                    "        THEN NULL; \n" +
@@ -117,7 +117,7 @@ describe('14. stream2.js', function() {
     async.series([
       function(callback) {
         connection.execute(
-          "DROP TABLE nodb_stream2",
+          "DROP TABLE nodb_stream2 PURGE",
           function(err) {
             should.not.exist(err);
             callback();
@@ -429,7 +429,7 @@ describe('14. stream2.js', function() {
                    "        e_table_missing EXCEPTION; \n" +
                    "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n " +
                    "    BEGIN \n" +
-                   "        EXECUTE IMMEDIATE ('DROP TABLE nodb_streamcases'); \n" +
+                   "        EXECUTE IMMEDIATE ('DROP TABLE nodb_streamcases PURGE'); \n" +
                    "    EXCEPTION \n" +
                    "        WHEN e_table_missing \n" +
                    "        THEN NULL; \n" +
@@ -494,7 +494,7 @@ describe('14. stream2.js', function() {
       },
       function(cb) {
         connection.execute(
-          "DROP TABLE nodb_streamcases",
+          "DROP TABLE nodb_streamcases PURGE",
           function(err) {
             should.not.exist(err);
             cb();
@@ -519,14 +519,14 @@ describe('14. stream2.js', function() {
 
     var table_name = "nodb_streamstess";
     var sqlSelect = "SELECT * FROM " + table_name;
-    var sqlDrop = "DROP TABLE " + table_name;
+    var sqlDrop = "DROP TABLE " + table_name + " PURGE";
 
     var proc = "BEGIN \n" +
                "    DECLARE \n" +
                "        e_table_missing EXCEPTION; \n" +
                "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n " +
                "    BEGIN \n" +
-               "        EXECUTE IMMEDIATE ('DROP TABLE nodb_streamstess'); \n" +
+               "        EXECUTE IMMEDIATE ('DROP TABLE nodb_streamstess PURGE'); \n" +
                "    EXCEPTION \n" +
                "        WHEN e_table_missing \n" +
                "        THEN NULL; \n" +
@@ -594,7 +594,7 @@ describe('14. stream2.js', function() {
         "       e_table_missing EXCEPTION; \n" +
         "       PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
         "   BEGIN \n" +
-        "       EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " '); \n" +
+        "       EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " PURGE'); \n" +
         "   EXCEPTION \n" +
         "       WHEN e_table_missing \n" +
         "       THEN NULL; \n" +
@@ -607,7 +607,7 @@ describe('14. stream2.js', function() {
         "   '); \n" +
         "END; \n";
     var sqlSelect = "SELECT * FROM " + tableName;
-    var sqlDrop = "DROP TABLE " + tableName;
+    var sqlDrop = "DROP TABLE " + tableName + " PURGE";
 
     async.series([
       function(cb) {

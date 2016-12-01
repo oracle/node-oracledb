@@ -76,7 +76,7 @@ describe('60. clobPlsqlString.js', function() {
     async.series([
       function(callback) {
         connection.execute(
-          "DROP TABLE nodb_myclobs",
+          "DROP TABLE nodb_myclobs purge",
           function(err) {
             should.not.exist(err);
             callback();

@@ -724,7 +724,8 @@ describe('2. pool.js', function() {
                 setTimeout(function() {
                   pool.getConnection(function(err, conn) {
                     should.exist(err);
-                    (err.message).should.startWith('ORA-24418: Cannot open further sessions');
+                    // ORA-24418: Cannot open further sessions
+                    (err.message).should.startWith('ORA-24418:');
                     should.not.exist(conn);
                     cb();
                   });

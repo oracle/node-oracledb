@@ -83,7 +83,7 @@ describe("72. lobBind2.js", function() {
                  "        e_table_missing EXCEPTION; \n" +
                  "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
                  "    BEGIN \n" +
-                 "        EXECUTE IMMEDIATE('DROP TABLE nodb_tab_clob72'); \n" +
+                 "        EXECUTE IMMEDIATE('DROP TABLE nodb_tab_clob72 PURGE'); \n" +
                  "    EXCEPTION \n" +
                  "        WHEN e_table_missing \n" +
                  "        THEN NULL; \n" +
@@ -102,7 +102,7 @@ describe("72. lobBind2.js", function() {
 
     after(function(done) {
 
-      var sql = "DROP TABLE nodb_tab_clob72";
+      var sql = "DROP TABLE nodb_tab_clob72 PURGE";
       executeSQL(sql, done);
 
     }); // after
@@ -487,7 +487,7 @@ describe("72. lobBind2.js", function() {
                  "        e_table_missing EXCEPTION; \n" +
                  "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
                  "    BEGIN \n" +
-                 "        EXECUTE IMMEDIATE('DROP TABLE nodb_tab_blob72'); \n" +
+                 "        EXECUTE IMMEDIATE('DROP TABLE nodb_tab_blob72 PURGE'); \n" +
                  "    EXCEPTION \n" +
                  "        WHEN e_table_missing \n" +
                  "        THEN NULL; \n" +
@@ -506,7 +506,7 @@ describe("72. lobBind2.js", function() {
 
     after(function(done) {
 
-      var sql = "DROP TABLE nodb_tab_blob72";
+      var sql = "DROP TABLE nodb_tab_blob72 PURGE";
       executeSQL(sql, done);
 
     }); // after

@@ -63,7 +63,7 @@ describe('44. plsqlBindIndexedTable2.js', function() {
                     "    e_table_missing EXCEPTION; \n" +
                     "    PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n " +
                     "   BEGIN \n" +
-                    "     EXECUTE IMMEDIATE ('DROP TABLE nodb_waveheight'); \n" +
+                    "     EXECUTE IMMEDIATE ('DROP TABLE nodb_waveheight PURGE'); \n" +
                     "   EXCEPTION \n" +
                     "     WHEN e_table_missing \n" +
                     "     THEN NULL; \n" +
@@ -145,7 +145,7 @@ describe('44. plsqlBindIndexedTable2.js', function() {
     async.series([
       function(callback) {
         connection.execute(
-          "DROP TABLE nodb_waveheight",
+          "DROP TABLE nodb_waveheight PURGE",
           function(err) {
             should.not.exist(err);
             callback();

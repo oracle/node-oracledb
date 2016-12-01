@@ -55,7 +55,7 @@ describe('1. connection.js', function(){
               e_table_missing EXCEPTION; \
               PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \
           BEGIN \
-              EXECUTE IMMEDIATE ('DROP TABLE nodb_conn_dept1'); \
+              EXECUTE IMMEDIATE ('DROP TABLE nodb_conn_dept1 PURGE'); \
           EXCEPTION \
               WHEN e_table_missing \
               THEN NULL; \
@@ -94,7 +94,7 @@ describe('1. connection.js', function(){
 
     after(function(done){
       connection.execute(
-        'DROP TABLE nodb_conn_dept1',
+        'DROP TABLE nodb_conn_dept1 PURGE',
         function(err){
           if(err) { console.error(err.message); return; }
           connection.release( function(err) {
@@ -168,7 +168,7 @@ describe('1. connection.js', function(){
               e_table_missing EXCEPTION; \
               PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \
           BEGIN \
-              EXECUTE IMMEDIATE ('DROP TABLE nodb_conn_emp2'); \
+              EXECUTE IMMEDIATE ('DROP TABLE nodb_conn_emp2 PURGE'); \
           EXCEPTION \
               WHEN e_table_missing \
               THEN NULL; \
@@ -215,7 +215,7 @@ describe('1. connection.js', function(){
 
     after(function(done){
       connection.execute(
-        'DROP TABLE nodb_conn_emp2',
+        'DROP TABLE nodb_conn_emp2 PURGE',
         function(err){
           if(err) { console.error(err.message); return; }
           connection.release( function(err) {
@@ -390,7 +390,7 @@ describe('1. connection.js', function(){
                 e_table_missing EXCEPTION; \
                 PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \
             BEGIN \
-                EXECUTE IMMEDIATE ('DROP TABLE nodb_conn_emp4'); \
+                EXECUTE IMMEDIATE ('DROP TABLE nodb_conn_emp4 PURGE'); \
             EXCEPTION \
                 WHEN e_table_missing \
                 THEN NULL; \
@@ -438,7 +438,7 @@ describe('1. connection.js', function(){
     afterEach('drop table and release connection', function(done) {
       oracledb.stmtCacheSize = defaultStmtCache;
       connection.execute(
-        "DROP TABLE nodb_conn_emp4",
+        "DROP TABLE nodb_conn_emp4 PURGE",
         function(err){
           if(err) { console.error(err.message); return; }
           connection.release( function(err){
@@ -540,7 +540,7 @@ describe('1. connection.js', function(){
                 e_table_missing EXCEPTION; \
                 PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \
             BEGIN \
-                EXECUTE IMMEDIATE ('DROP TABLE nodb_conn_emp5'); \
+                EXECUTE IMMEDIATE ('DROP TABLE nodb_conn_emp5 PURGE'); \
             EXCEPTION \
                 WHEN e_table_missing \
                 THEN NULL; \
@@ -602,7 +602,7 @@ describe('1. connection.js', function(){
       async.series([
         function(callback) {
           conn2.execute(
-            "DROP TABLE nodb_conn_emp5",
+            "DROP TABLE nodb_conn_emp5 PURGE",
             function(err) {
               should.not.exist(err);
               callback();

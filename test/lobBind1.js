@@ -84,7 +84,7 @@ describe('71. lobBind1.js', function() {
                  "        e_table_missing EXCEPTION; \n" +
                  "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
                  "    BEGIN \n" +
-                 "        EXECUTE IMMEDIATE('DROP TABLE nodb_tab_clob1'); \n" +
+                 "        EXECUTE IMMEDIATE('DROP TABLE nodb_tab_clob1 PURGE'); \n" +
                  "    EXCEPTION \n" +
                  "        WHEN e_table_missing \n" +
                  "        THEN NULL; \n" +
@@ -102,7 +102,7 @@ describe('71. lobBind1.js', function() {
                  "        e_table_missing EXCEPTION; \n" +
                  "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
                  "    BEGIN \n" +
-                 "        EXECUTE IMMEDIATE('DROP TABLE nodb_tab_clob2'); \n" +
+                 "        EXECUTE IMMEDIATE('DROP TABLE nodb_tab_clob2 PURGE'); \n" +
                  "    EXCEPTION \n" +
                  "        WHEN e_table_missing \n" +
                  "        THEN NULL; \n" +
@@ -130,11 +130,11 @@ describe('71. lobBind1.js', function() {
 
       async.series([
         function(cb) {
-          var sql = "DROP TABLE nodb_tab_clob1";
+          var sql = "DROP TABLE nodb_tab_clob1 PURGE";
           executeSQL(sql, cb);
         },
         function(cb) {
-          var sql = "DROP TABLE nodb_tab_clob2";
+          var sql = "DROP TABLE nodb_tab_clob2 PURGE";
           executeSQL(sql, cb);
         }
       ], done);
@@ -852,7 +852,7 @@ describe('71. lobBind1.js', function() {
                  "        e_table_missing EXCEPTION; \n" +
                  "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
                  "    BEGIN \n" +
-                 "        EXECUTE IMMEDIATE('DROP TABLE nodb_tab_blob1'); \n" +
+                 "        EXECUTE IMMEDIATE('DROP TABLE nodb_tab_blob1 PURGE'); \n" +
                  "    EXCEPTION \n" +
                  "        WHEN e_table_missing \n" +
                  "        THEN NULL; \n" +
@@ -870,7 +870,7 @@ describe('71. lobBind1.js', function() {
                  "        e_table_missing EXCEPTION; \n" +
                  "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
                  "    BEGIN \n" +
-                 "        EXECUTE IMMEDIATE('DROP TABLE nodb_tab_blob2'); \n" +
+                 "        EXECUTE IMMEDIATE('DROP TABLE nodb_tab_blob2 PURGE'); \n" +
                  "    EXCEPTION \n" +
                  "        WHEN e_table_missing \n" +
                  "        THEN NULL; \n" +
@@ -898,13 +898,13 @@ describe('71. lobBind1.js', function() {
       async.series([
         function(cb) {
 
-          var sql = "DROP TABLE nodb_tab_blob1";
+          var sql = "DROP TABLE nodb_tab_blob1 PURGE";
           executeSQL(sql, cb);
 
         },
         function(cb) {
 
-          var sql = "DROP TABLE nodb_tab_blob2";
+          var sql = "DROP TABLE nodb_tab_blob2 PURGE";
           executeSQL(sql, cb);
 
         }

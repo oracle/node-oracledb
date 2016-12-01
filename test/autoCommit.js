@@ -50,7 +50,7 @@ describe('7. autoCommit.js', function() {
                 e_table_missing EXCEPTION; \
                 PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \
             BEGIN \
-                EXECUTE IMMEDIATE ('DROP TABLE nodb_commit_dept'); \
+                EXECUTE IMMEDIATE ('DROP TABLE nodb_commit_dept purge'); \
             EXCEPTION \
                 WHEN e_table_missing \
                 THEN NULL; \
@@ -104,7 +104,7 @@ describe('7. autoCommit.js', function() {
     async.series([
       function(callback) {
         connection.execute(
-          "DROP TABLE nodb_commit_dept",
+          "DROP TABLE nodb_commit_dept purge",
           function(err) {
             should.not.exist(err);
             callback();

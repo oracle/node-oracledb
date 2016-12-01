@@ -147,7 +147,7 @@ describe('61. checkClassesTypes.js', function() {
       },
       function dropTab(callback) {
         connection.execute(
-          "DROP TABLE " + clobTableName,
+          "DROP TABLE " + clobTableName + " PURGE",
           function(err) {
             should.not.exist(err);
             callback();

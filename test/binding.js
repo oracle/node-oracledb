@@ -329,7 +329,7 @@ describe('4. binding.js', function() {
               e_table_missing EXCEPTION; \
               PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \
           BEGIN \
-              EXECUTE IMMEDIATE ('DROP TABLE nodb_binding1'); \
+              EXECUTE IMMEDIATE ('DROP TABLE nodb_binding1 PURGE'); \
           EXCEPTION \
               WHEN e_table_missing \
               THEN NULL; \
@@ -363,7 +363,7 @@ describe('4. binding.js', function() {
     afterEach(function(done) {
       connection.should.be.ok();
       connection.execute(
-        "DROP TABLE nodb_binding1",
+        "DROP TABLE nodb_binding1 PURGE",
         function(err) {
           should.not.exist(err);
           connection.release(function(err) {
@@ -436,7 +436,7 @@ describe('4. binding.js', function() {
               e_table_missing EXCEPTION; \
               PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \
           BEGIN \
-              EXECUTE IMMEDIATE ('DROP TABLE nodb_binding2'); \
+              EXECUTE IMMEDIATE ('DROP TABLE nodb_binding2 PURGE'); \
           EXCEPTION \
               WHEN e_table_missing \
               THEN NULL; \
@@ -467,7 +467,7 @@ describe('4. binding.js', function() {
     afterEach(function(done) {
       connection.should.be.ok();
       connection.execute(
-        "DROP TABLE nodb_binding2",
+        "DROP TABLE nodb_binding2 PURGE",
         function(err) {
           should.not.exist(err);
           connection.release(function(err) {
@@ -719,7 +719,7 @@ describe('4. binding.js', function() {
       async.series([
         function(callback) {
           connection.execute(
-            "DROP TABLE " + tableName,
+            "DROP TABLE " + tableName + " PURGE",
             function(err) {
               should.not.exist(err);
               callback();
@@ -752,7 +752,7 @@ describe('4. binding.js', function() {
 
     it('4.6.1 ', function(done) {
 
-      var sql = "begin execute immediate 'drop table does_not_exist'; "
+      var sql = "begin execute immediate 'drop table does_not_exist purge'; "
         + "exception when others then "
         + "if sqlcode <> -942 then "
         + "raise; "
@@ -979,7 +979,7 @@ describe('4. binding.js', function() {
                      "AS \n" +
                      "BEGIN \n" +
                      "    p_out1 := SYSDATE + 10; \n" +
-                     "    p_out2 := TO_DATE('5-AUG-2016'); \n" +
+                     "    p_out2 := TO_DATE('2016-08-05', 'YYYY-MM-DD'); \n" +
                      "END;";
 
           connection.execute(

@@ -48,7 +48,7 @@ describe('10. nullColumnValues.js', function() {
                 e_table_missing EXCEPTION; \
                 PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \
             BEGIN \
-                EXECUTE IMMEDIATE ('DROP TABLE nodb_nullcol_dept'); \
+                EXECUTE IMMEDIATE ('DROP TABLE nodb_nullcol_dept PURGE'); \
             EXCEPTION \
                 WHEN e_table_missing \
                 THEN NULL; \
@@ -99,7 +99,7 @@ describe('10. nullColumnValues.js', function() {
 
   afterEach('drop table and release connection', function(done){
     connection.execute(
-      "DROP TABLE nodb_nullcol_dept",
+      "DROP TABLE nodb_nullcol_dept PURGE",
       function(err){
         if(err) { console.error(err.message); return; }
         connection.release( function(err){

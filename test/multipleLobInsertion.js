@@ -66,7 +66,7 @@ describe('68. multipleLobInsertion.js', function() {
                    "        e_table_missing EXCEPTION; \n" +
                    "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
                    "    BEGIN \n" +
-                   "        EXECUTE IMMEDIATE('DROP TABLE nodb_multi_blob'); \n" +
+                   "        EXECUTE IMMEDIATE('DROP TABLE nodb_multi_blob PURGE'); \n" +
                    "    EXCEPTION \n" +
                    "        WHEN e_table_missing \n" +
                    "        THEN NULL; \n" +
@@ -97,7 +97,7 @@ describe('68. multipleLobInsertion.js', function() {
                    "        e_table_missing EXCEPTION; \n" +
                    "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
                    "    BEGIN \n" +
-                   "        EXECUTE IMMEDIATE('DROP TABLE nodb_multi_clob'); \n" +
+                   "        EXECUTE IMMEDIATE('DROP TABLE nodb_multi_clob PURGE'); \n" +
                    "    EXCEPTION \n" +
                    "        WHEN e_table_missing \n" +
                    "        THEN NULL; \n" +
@@ -130,7 +130,7 @@ describe('68. multipleLobInsertion.js', function() {
     async.series([
       function(cb) {
         connection.execute(
-          "DROP TABLE nodb_multi_clob",
+          "DROP TABLE nodb_multi_clob PURGE",
           function(err) {
             should.not.exist(err);
             cb();
@@ -139,7 +139,7 @@ describe('68. multipleLobInsertion.js', function() {
       },
       function(cb) {
         connection.execute(
-          "DROP TABLE nodb_multi_blob",
+          "DROP TABLE nodb_multi_blob PURGE",
           function(err) {
             should.not.exist(err);
             cb();

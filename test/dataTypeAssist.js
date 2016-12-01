@@ -460,7 +460,7 @@ assist.sqlCreateTable = function(tableName)
         "    e_table_missing EXCEPTION; " +
         "    PRAGMA EXCEPTION_INIT(e_table_missing, -00942); " +
         "   BEGIN " +
-        "     EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " '); " +
+        "     EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " PURGE'); " +
         "   EXCEPTION " +
         "     WHEN e_table_missing " +
         "     THEN NULL; " +
@@ -697,7 +697,7 @@ assist.verifyNullValues = function(connection, tableName, done)
     },
     function dropTable(callback) {
       connection.execute(
-        "DROP table " + tableName,
+        "DROP table " + tableName + " PURGE",
         function(err) {
           should.not.exist(err);
           callback();

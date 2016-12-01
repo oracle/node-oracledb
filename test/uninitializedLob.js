@@ -66,7 +66,7 @@ describe('65. uninitializedLob.js', function() {
                     "    e_table_missing EXCEPTION; \n" +
                     "    PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n " +
                     "   BEGIN \n" +
-                    "     EXECUTE IMMEDIATE ('DROP TABLE nodb_lobdpi'); \n" +
+                    "     EXECUTE IMMEDIATE ('DROP TABLE nodb_lobdpi PURGE'); \n" +
                     "   EXCEPTION \n" +
                     "     WHEN e_table_missing \n" +
                     "     THEN NULL; \n" +
@@ -171,7 +171,7 @@ describe('65. uninitializedLob.js', function() {
       },
       function(callback) {
         connection.execute(
-          "DROP TABLE nodb_lobdpi",
+          "DROP TABLE nodb_lobdpi PURGE",
           function(err) {
             should.not.exist(err);
             callback();

@@ -56,7 +56,7 @@ describe('6. dmlReturning.js', function(){
                 e_table_missing EXCEPTION; \
                 PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \
             BEGIN \
-                EXECUTE IMMEDIATE ('DROP TABLE nodb_dmlreturn'); \
+                EXECUTE IMMEDIATE ('DROP TABLE nodb_dmlreturn PURGE'); \
             EXCEPTION \
                 WHEN e_table_missing \
                 THEN NULL; \
@@ -105,7 +105,7 @@ describe('6. dmlReturning.js', function(){
 
     afterEach('drop table and release connection', function(done) {
       connection.execute(
-        "DROP TABLE nodb_dmlreturn",
+        "DROP TABLE nodb_dmlreturn PURGE",
         function(err){
           if(err) { console.error(err.message); return; }
           connection.release( function(err){
@@ -426,7 +426,7 @@ describe('6. dmlReturning.js', function(){
       async.series([
         function(callback) {
           connection.execute(
-            "DROP table " + tableName,
+            "DROP table " + tableName + " PURGE",
             function(err) {
               should.not.exist(err);
               callback();

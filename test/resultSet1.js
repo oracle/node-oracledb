@@ -46,7 +46,7 @@ describe('12. resultSet1.js', function() {
               e_table_missing EXCEPTION; \
               PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \
           BEGIN \
-              EXECUTE IMMEDIATE ('DROP TABLE nodb_rs1_emp'); \
+              EXECUTE IMMEDIATE ('DROP TABLE nodb_rs1_emp PURGE'); \
           EXCEPTION \
               WHEN e_table_missing \
               THEN NULL; \
@@ -98,7 +98,7 @@ describe('12. resultSet1.js', function() {
 
   after(function(done) {
     connection.execute(
-      'DROP TABLE nodb_rs1_emp',
+      'DROP TABLE nodb_rs1_emp PURGE',
       function(err) {
         if(err) { console.error(err.message); return; }
         connection.release(function(err) {
@@ -1120,7 +1120,7 @@ describe('12. resultSet1.js', function() {
         },
         function(callback) {
           connection.execute(
-            "DROP TABLE nodb_manycolumns",
+            "DROP TABLE nodb_manycolumns PURGE",
             function(err) {
               should.not.exist(err);
               callback();
@@ -1139,7 +1139,7 @@ describe('12. resultSet1.js', function() {
         "     e_table_missing EXCEPTION; " +
         "     PRAGMA EXCEPTION_INIT(e_table_missing, -00942); " +
         "   BEGIN " +
-        "     EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " '); " +
+        "     EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " PURGE'); " +
         "   EXCEPTION " +
         "     WHEN e_table_missing " +
         "     THEN NULL; " +
@@ -1178,7 +1178,7 @@ describe('12. resultSet1.js', function() {
         },
         function(callback) {
           connection.execute(
-            "DROP TABLE " + tableName,
+            "DROP TABLE " + tableName + " PURGE",
             function(err) {
               should.not.exist(err);
               callback();
@@ -1197,7 +1197,7 @@ describe('12. resultSet1.js', function() {
         "     e_table_missing EXCEPTION; " +
         "     PRAGMA EXCEPTION_INIT(e_table_missing, -00942); " +
         "   BEGIN " +
-        "     EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " '); " +
+        "     EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " PURGE'); " +
         "   EXCEPTION " +
         "     WHEN e_table_missing " +
         "     THEN NULL; " +
@@ -1236,7 +1236,7 @@ describe('12. resultSet1.js', function() {
         },
         function(callback) {
           connection.execute(
-            "DROP TABLE " + tableName,
+            "DROP TABLE " + tableName + " PURGE",
             function(err) {
               should.not.exist(err);
               callback();
@@ -1255,7 +1255,7 @@ describe('12. resultSet1.js', function() {
         "     e_table_missing EXCEPTION; " +
         "     PRAGMA EXCEPTION_INIT(e_table_missing, -00942); " +
         "   BEGIN " +
-        "     EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " '); " +
+        "     EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " PURGE'); " +
         "   EXCEPTION " +
         "     WHEN e_table_missing " +
         "     THEN NULL; " +
@@ -1294,7 +1294,7 @@ describe('12. resultSet1.js', function() {
         },
         function(callback) {
           connection.execute(
-            "DROP TABLE " + tableName,
+            "DROP TABLE " + tableName + " PURGE",
             function(err) {
               should.not.exist(err);
               callback();

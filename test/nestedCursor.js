@@ -50,7 +50,7 @@
               e_table_missing EXCEPTION; \
               PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \
           BEGIN \
-              EXECUTE IMMEDIATE ('DROP TABLE nodb_parent_tab'); \
+              EXECUTE IMMEDIATE ('DROP TABLE nodb_parent_tab PURGE'); \
           EXCEPTION \
               WHEN e_table_missing \
               THEN NULL; \
@@ -85,7 +85,7 @@
               e_table_missing EXCEPTION; \
               PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \
           BEGIN \
-              EXECUTE IMMEDIATE ('DROP TABLE nodb_child_tab'); \
+              EXECUTE IMMEDIATE ('DROP TABLE nodb_child_tab PURGE'); \
           EXCEPTION \
               WHEN e_table_missing \
               THEN NULL; \
@@ -174,7 +174,7 @@
      async.series([
        function(callback) {
          connection.execute(
-          "DROP TABLE nodb_child_tab",
+          "DROP TABLE nodb_child_tab PURGE",
           function(err) {
             should.not.exist(err);
             callback();
@@ -183,7 +183,7 @@
        },
        function(callback) {
          connection.execute(
-          "DROP TABLE nodb_parent_tab",
+          "DROP TABLE nodb_parent_tab PURGE",
           function(err) {
             should.not.exist(err);
             callback();
