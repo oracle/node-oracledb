@@ -1080,7 +1080,7 @@ void Connection::GetInBindParamsScalar(Local<Value> v8val, Bind* bind,
                                                     errBindValueTooLarge );
         goto exitGetInBindParamsScalar;
       }
-      
+
       bind->type = dpi::DpiVarChar;
       if( bind->isInOut )
       {
@@ -3475,12 +3475,12 @@ void Connection::Async_AfterExecute(uv_work_t *req)
       case DpiStmtSelect :
         if( executeBaton->getRS )
         {
-	  Local<Object> resultSet =
+          Local<Object> resultSet =
             Nan::NewInstance (
-	      Local<Function>::Cast (
+          Local<Function>::Cast (
                 Nan::GetFunction (
-		  Nan::New<FunctionTemplate> (
-      ResultSet::resultSetTemplate_s )).ToLocalChecked() )).ToLocalChecked ();
+          Nan::New<FunctionTemplate> (
+            ResultSet::resultSetTemplate_s )).ToLocalChecked() )).ToLocalChecked ();
 
           /* ResultSet case, the statement object is ready for fetching */
           (Nan::ObjectWrap::Unwrap<ResultSet> (resultSet))->
@@ -3844,8 +3844,8 @@ Local<Value> Connection::GetValueRefCursor ( eBaton  *executeBaton,
     const MetaInfo *mInfo = NULL;
 
     resultSet = Nan::NewInstance (
-		  Local<Function>::Cast (
-		    Nan::GetFunction (
+          Local<Function>::Cast (
+            Nan::GetFunction (
                       Nan::New <FunctionTemplate>(
      ResultSet::resultSetTemplate_s )).ToLocalChecked () ) ).ToLocalChecked ();
 
@@ -5372,9 +5372,9 @@ v8::Local<v8::Value> Connection::NewLob( eBaton    *executeBaton,
   Local<Value>   argv[1];
 
   v8::Local<v8::Object> iLob = Nan::NewInstance (
-				  Local<Function>::Cast (
-					  Nan::GetFunction (
-						  Nan::New<FunctionTemplate>(
+                  Local<Function>::Cast (
+                      Nan::GetFunction (
+                          Nan::New<FunctionTemplate>(
      ILob::iLobTemplate_s)).ToLocalChecked() ) ).ToLocalChecked ();
 
   // the ownership of all handles in the ProtoILob are transferred to ILob

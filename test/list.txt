@@ -1109,7 +1109,7 @@ Overview of node-oracledb functional tests
 
  74.lobBindAsStringBuffer.js
     74.1 CLOB, PLSQL, BIND_IN
-       74.1.1 PLSQL, BIND_IN with String length 32768 
+       74.1.1 PLSQL, BIND_IN with String length 32768
        74.1.2 PLSQL, BIND_IN with String length 65535
        74.1.3 PLSQL, BIND_IN with null
        74.1.4 PLSQL, BIND_IN with empty string
