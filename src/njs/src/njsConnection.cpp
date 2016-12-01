@@ -1066,6 +1066,13 @@ void Connection::GetInBindParamsScalar(Local<Value> v8val, Bind* bind,
                            Nan::New<v8::String> ( "" ).ToLocalChecked() :
                            v8val->ToString());
 
+      if ( str.length () > DPI_MAX_BUFLEN )
+      {
+        executeBaton->error = NJSMessages::getErrorMsg (
+                                                    errBindValueTooLarge );
+        goto exitGetInBindParamsScalar;
+      }
+      
       bind->type = dpi::DpiVarChar;
       if( bind->isInOut )
       {
@@ -1179,6 +1186,14 @@ void Connection::GetInBindParamsScalar(Local<Value> v8val, Bind* bind,
           if (Buffer::HasInstance(obj))
           {
             size_t bufLen = Buffer::Length(obj);
+
+            if ( bufLen > DPI_MAX_BUFLEN )
+            {
+              executeBaton->error = NJSMessages::getErrorMsg (
+                                              errBindValueTooLarge ) ;
+              goto exitGetInBindParamsScalar;
+            }
+
             bind->type = dpi::DpiRaw;
             if( bind->isInOut )
             {
