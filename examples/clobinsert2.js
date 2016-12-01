@@ -53,10 +53,10 @@ oracledb.getConnection(
 
         var lob = result.outBinds.lobbv[0];
         lob.on(
-          'finish',
+          'close',
           function()
           {
-            console.log("lob.on 'finish' event");
+            console.log("lob.on 'close' event");
             connection.commit(
               function(err)
               {

@@ -83,6 +83,9 @@ typedef enum
   errCannotLoadBinary,
   errPoolWithAliasAlreadyExists,
   errPoolWithAliasNotFound,
+  errLOBBindActive,
+  errTempLOBINOUTBind,
+  errBusyConnTEMPLOB,
   errBindValueTooLarge,
 
   // New ones should be added here

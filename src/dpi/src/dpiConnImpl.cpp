@@ -89,9 +89,11 @@ ConnImpl::ConnImpl(EnvImpl *env, OCIEnv *envh, bool externalAuth,
 
 try :  env_(env), pool_(NULL),
        envh_(envh), errh_(NULL), auth_(NULL), svch_(NULL), sessh_(NULL),
-       hasTxn_(false), srvh_(NULL), dropConn_(false), inTag_(""), outTag_(""),
-       relTag_(""), retag_(false), tagMatched_ (false),
-       pingInterval_(DPI_NO_PING_INTERVAL), lasttick_ ( NULL )
+       hasTxn_(false), csRatio_ (DPI_BEST_CASE_BYTE_CONVERSION_RATIO),
+       lobCSRatio_(DPI_BEST_CASE_CHAR_CONVERSION_RATIO), srvh_(NULL),
+       dropConn_(false), inTag_(""), outTag_(""), relTag_(""), retag_(false),
+       tagMatched_ (false), pingInterval_(DPI_NO_PING_INTERVAL),
+       lasttick_ ( NULL )
 {
 
   this->initConnImpl ( false, externalAuth, connClass,
@@ -144,7 +146,9 @@ ConnImpl::ConnImpl(PoolImpl *pool, OCIEnv *envh, bool externalAuth,
 
 try :  env_(NULL), pool_(pool),
        envh_(envh), errh_(NULL), auth_(NULL),
-       svch_(NULL), sessh_(NULL), hasTxn_(false), srvh_(NULL),
+       svch_(NULL), sessh_(NULL), hasTxn_(false),
+       csRatio_ (DPI_BEST_CASE_BYTE_CONVERSION_RATIO),
+       lobCSRatio_(DPI_BEST_CASE_CHAR_CONVERSION_RATIO), srvh_(NULL),
        dropConn_(false), inTag_ (""), outTag_(""), relTag_(""), retag_ (false),
        tagMatched_(false), pingInterval_ (pingInterval), lasttick_ ( NULL )
 {
@@ -268,7 +272,23 @@ void ConnImpl::stmtCacheSize(unsigned int stmtCacheSize)
 /*****************************************************************************/
 /*
    DESCRIPTION
-     Get the DBCHARSET ID
+     Gets the char expansion ratio for LOBs
+
+   PARAMETERS:
+     -NONE-
+
+   RETURNS:
+     Char expansion ratio (unsigned int)
+ */
+unsigned int ConnImpl::getLOBCharExpansionRatio ()
+{
+  return lobCSRatio_;
+}
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Get the byte expansion ratio for non-LOB scenarios
 
    PARAMETERS:
      -NONE-
@@ -276,9 +296,9 @@ void ConnImpl::stmtCacheSize(unsigned int stmtCacheSize)
    RETURNS:
      Byte expansion ratio (int)
  */
-int ConnImpl::getByteExpansionRatio ()
+unsigned int ConnImpl::getVarCharByteExpansionRatio ()
 {
-  return csratio_;
+  return csRatio_;
 }
 
 /*****************************************************************************/
@@ -797,7 +817,13 @@ void ConnImpl::initConnImpl ( bool pool, bool externalAuth,
                          ( ub4 * ) 0, ( ub4 ) OCI_ATTR_CHARSET_ID, errh_ ),
                           errh_ );
 
-  csratio_ = getCsRatio ( csid );
+  // Client character set is always AL32UTF8
+  if ( csid != DPI_AL32UTF8 )
+  {
+    csRatio_ = DPI_WORST_CASE_BYTE_CONVERSION_RATIO;
+  }
+  // Bug in LOB code, alwasy use worst case conversion ratio
+  lobCSRatio_ = DPI_WORST_CASE_CHAR_CONVERSION_RATIO;
 }
 
 /*****************************************************************************/

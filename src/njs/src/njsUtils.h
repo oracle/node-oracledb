@@ -92,9 +92,10 @@ typedef enum
 // states
 typedef enum
 {
-  NJS_INVALID   = 0,
-  NJS_ACTIVE    = 1,
-  NJS_INACTIVE  = 2,
+  NJS_INVALID     = 0,  // Underlying DPI object freed
+  NJS_ACTIVE      = 1,  // Object is busy with some operation
+  NJS_INACTIVE    = 2,  // Object is free for any operation
+  NJSBIND_ACTIVE  = 3,  // Object active as BIND_IN or BIND_INOUT
 }State;
 
 // args
@@ -110,10 +111,11 @@ typedef enum
 // ConnectionBusyStatus status
 typedef enum
 {
-  NJS_CONN_NOT_BUSY  = 0,      // Connection not busy
-  NJS_CONN_BUSY_LOB  = 5001,   // Connection busy with LOB operation
-  NJS_CONN_BUSY_RS   = 5002,   // Connection busy with ResultSet operation
-  NJS_CONN_BUSY_DB   = 5003,   // Connection busy with DB operation
+  NJS_CONN_NOT_BUSY     = 0,      // Connection not busy
+  NJS_CONN_BUSY_LOB     = 5001,   // Connection busy with LOB operation
+  NJS_CONN_BUSY_RS      = 5002,   // Connection busy with ResultSet operation
+  NJS_CONN_BUSY_DB      = 5003,   // Connection busy with DB operation
+  NJS_CONN_BUSY_TEMPLOB = 5004,   // Connection busy with active temp LOBs
 }ConnectionBusyStatus;
 
 /*
@@ -130,6 +132,13 @@ typedef enum
   NJS_VALUETYPE_DATE,                                                /* Date */
   NJS_VALUETYPE_OBJECT,                                  /* JSON object type */
 } ValueType ;
+
+// Extended bind type
+typedef enum
+{
+  NJS_EXTBIND_REFCURSOR = 0,
+  NJS_EXTBIND_LOB       = 1,
+} ExtBindType;
 
 
 /*

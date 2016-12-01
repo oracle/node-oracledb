@@ -72,4 +72,7 @@ test/poolCache.js
 test/multipleLobInsertion.js
 test/driverName.js
 test/plsqlBindScalar.js
+test/lobBind1.js
+test/lobBind2.js
 test/poolPing.js
+test/lobBindAsStringBuffer.js

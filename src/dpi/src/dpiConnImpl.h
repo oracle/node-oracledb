@@ -55,13 +55,28 @@ class PoolImpl;
 
 
 /*
- * The maximum character expansion ratio from any DB character to
+ * The maximum byte expansion ratio from any DB character to
  * AL32UTF8 is known to be 3-times
  */
-#define DPI_WORSTCASE_CHAR_CONVERSION_RATIO    3
+#define DPI_WORST_CASE_BYTE_CONVERSION_RATIO    3
 
-// No character expansion required if DB has AL32UTF8 charset
-#define DPI_BESTCASE_CHAR_CONVERSION_RATIO     1
+/*
+ * No byte expansion required if DB has AL32UTF8 charset since client is
+ * always AL32UTF8
+ */
+#define DPI_BEST_CASE_BYTE_CONVERSION_RATIO     1
+
+/*
+ * The maximum character expansion ratio from any DB character to
+ * AL32UTF8 is known to be 4-times for LOBs
+ */
+#define DPI_WORST_CASE_CHAR_CONVERSION_RATIO    4
+
+/*
+ * No character expansion required if DB has AL32UTF8 charset since client is
+ * always AL32UTF8
+ */
+#define DPI_BEST_CASE_CHAR_CONVERSION_RATIO     1
 
 // Context property name used to store the last-accessed-time of the
 // connection.  This time and pingInterval are used to decide whether to
@@ -113,7 +128,9 @@ class ConnImpl : public Conn
   // tag associated with connection
   virtual std::string& tag ()    { return outTag_;     }
 
-  virtual int getByteExpansionRatio ();
+  virtual unsigned int getVarCharByteExpansionRatio ();
+
+  virtual unsigned int getLOBCharExpansionRatio ();
 
                               // interface methods
   virtual Stmt* getStmt(const string &sql);
@@ -155,14 +172,7 @@ private:
                      const string &tag, boolean any, std::string &curTag,
                      boolean &found, DBPrivileges dbPriv );
 
-  int getCsRatio ( ub2 csid )
-  {
-    return ( csid == DPI_AL32UTF8 ) ? DPI_BESTCASE_CHAR_CONVERSION_RATIO :
-             DPI_WORSTCASE_CHAR_CONVERSION_RATIO;
-  }
-
   void cleanup();
-
 
   EnvImpl      *env_;           // parent Env object
   PoolImpl     *pool_;          // parent pool object if created from a pool
@@ -172,7 +182,8 @@ private:
   OCISvcCtx    *svch_;          // OCI service handle
   OCISession   *sessh_;         // OCI Session handle. Do not free this.
   boolean      hasTxn_;         // set if transaction is in progress
-  int          csratio_;        // character expansion ratio
+  int          csRatio_;        // character expansion ratio
+  int          lobCSRatio_;     // character expansion ratio for LOBs
   OCIServer    *srvh_;          // OCI server handle
   bool         dropConn_;       // Set flag in case of unusable connection
   string       inTag_;          // To fetch connections with specified inTag_

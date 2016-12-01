@@ -137,6 +137,43 @@ COMMIT;
 DROP TABLE mylobs;
 CREATE TABLE mylobs (id NUMBER, c CLOB, b BLOB);
 
+-- Procedure to test LOB OUT bind
+CREATE OR REPLACE PROCEDURE lob_out (c_out OUT CLOB)
+AS
+BEGIN
+  SELECT c INTO c_out FROM mylobs WHERE id = 5;
+END;
+/
+
+-- Procedure to test LOB INOUT bind
+CREATE OR REPLACE PROCEDURE lob_in_out (c_inout IN OUT CLOB)
+AS
+BEGIN
+  DELETE FROM mylobs WHERE id=50 or id=100;
+  INSERT INTO mylobs (id, c) VALUES (50, c_inout);
+  INSERT INTO mylobs (id, c) VALUES (100, TO_CLOB('Sample text'));
+  SELECT c INTO c_inout FROM mylobs WHERE id = 100;
+END;
+/
+
+-- Procedure to test bind IN support for CLOB AS String and BLOB as Buffer with
+-- more than 32K size data
+CREATE OR REPLACE PROCEDURE lobs_in (clob_in IN CLOB, blob_in IN BLOB)
+AS
+BEGIN
+  INSERT INTO mylobs (id, c, b) VALUES (200, clob_in, blob_in);
+END;
+/
+
+-- Procedure to test bind OUT support for CLOB AS String and BLOB as Buffer with
+-- more than 32K size data
+CREATE OR REPLACE PROCEDURE lobs_out (clob_out OUT CLOB, blob_out OUT BLOB)
+AS
+BEGIN
+  SELECT c, b INTO clob_out, blob_out FROM mylobs WHERE id = 200;
+END;
+/
+
 -- For DBMS_OUTPUT example dbmsoutputpipe.js
 CREATE OR REPLACE TYPE dorow AS TABLE OF VARCHAR2(32767);
 /

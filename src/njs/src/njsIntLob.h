@@ -151,7 +151,7 @@ private:
   void cleanup();
 
   Descriptor        *lobLocator_;
-  unsigned short     fetchType_;
+  unsigned short     dpiLobType_;
   DpiHandle         *errh_;
   unsigned int       chunkSize_;
   unsigned long long length_;
@@ -160,8 +160,24 @@ private:
 class ILob : public Nan::ObjectWrap
 {
  public:
-  void setILob(eBaton *executeBaton,  ProtoILob *protoILob);
+  void         setILob ( eBaton *executeBaton,  ProtoILob *protoILob,
+                         bool   tempLob );
 
+  /* Checks whether state and type are good for Bind and set the state to
+   * NJSBIND_ACTIVE. Check for temp LOB INOUT bind not supported
+   */
+  NJSErrorType preBind ( Bind *bind );
+
+  /*
+   * In case of BIND_INOUT, create a duplicate LOB locator and in case of
+   * BIND_IN initialize the LOB locator
+   */
+  void         doBind ( Bind *bind );
+
+  // Process LOB for BIND_IN or BIND_INOUT after passing it to the bind call
+  void         postBind ();
+
+  static bool  hasILobInstance ( Local<Object> obj );
                                 // Define ILob Constructor
   static Nan::Persistent<FunctionTemplate> iLobTemplate_s;
 
@@ -174,10 +190,15 @@ class ILob : public Nan::ObjectWrap
   ~ILob();
 
   void cleanup();
+  inline NJSErrorType getErrNumber ( bool processBind );
 
   static NAN_METHOD(New);
 
   static NAN_METHOD(Release);
+
+  static NAN_METHOD(Close);
+  static void Async_Close(uv_work_t *req);
+  static void Async_AfterClose (uv_work_t *req);
 
   static void lobPropertyException(ILob *iLob, NJSErrorType err,
                                    string property);
@@ -189,6 +210,7 @@ class ILob : public Nan::ObjectWrap
   static NAN_GETTER(GetPieceSize);
   static NAN_GETTER(GetOffset);
   static NAN_GETTER(GetType);
+  static NAN_GETTER(GetIsTempLob);
 
 
                                 // Setters for properties
@@ -197,6 +219,7 @@ class ILob : public Nan::ObjectWrap
   static NAN_SETTER(SetPieceSize);
   static NAN_SETTER(SetOffset);
   static NAN_SETTER(SetType);
+  static NAN_SETTER(SetIsTempLob);
 
 
                                 // Read Method on ILob class
@@ -210,7 +233,7 @@ class ILob : public Nan::ObjectWrap
   static void Async_AfterWrite (uv_work_t *req);
 
   Descriptor               *lobLocator_;
-  unsigned short            fetchType_;
+  unsigned short            dpiLobType_;
 
   Connection               *njsconn_;
   dpi::Conn                *dpiconn_;
@@ -226,7 +249,9 @@ class ILob : public Nan::ObjectWrap
   unsigned long long        offset_;
   unsigned long             amountRead_;
   unsigned long long        amountWritten_;
-  unsigned int              type_;
+  unsigned int              njsLobType_;
+  bool                      isTempLob_;
+  unsigned int              *tempLobCount_;
   Nan::Persistent<Object>   jsParent_;
 };
 

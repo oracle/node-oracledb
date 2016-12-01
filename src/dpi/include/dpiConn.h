@@ -106,7 +106,9 @@ public:
 
   virtual unsigned int getServerVersion () = 0;
 
-  virtual int getByteExpansionRatio () = 0;
+  virtual unsigned int getVarCharByteExpansionRatio () = 0;
+
+  virtual unsigned int getLOBCharExpansionRatio () = 0;
 
   virtual void setErrState ( int errNum ) = 0;
 

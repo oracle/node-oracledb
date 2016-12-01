@@ -95,8 +95,7 @@ Oracledb::Oracledb()
   fetchAsStringTypes_      = NULL;
   fetchAsStringTypesCount_ = 0;
   lobPrefetchSize_         = NJS_LOB_PREFETCH_SIZE;
-
-  poolPingInterval_        = NJS_POOL_DEFAULT_PING_INTERVAL ;
+  poolPingInterval_        = NJS_POOL_DEFAULT_PING_INTERVAL;
 }
 
 /*****************************************************************************/

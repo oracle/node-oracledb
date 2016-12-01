@@ -324,7 +324,7 @@ describe('70. plsqlBindScalar.js', function() {
       );
     }); // 70.2.3
 
-    it('70.2.4 Negatvie: bind value and type mismatch - val: empty string', function(done) {
+    it('70.2.4 Negative: bind value and type mismatch - val: empty string', function(done) {
       var bindVar = {
         output:   resultBind,
         numValue: {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: ''}
@@ -612,7 +612,7 @@ describe('70. plsqlBindScalar.js', function() {
       );
     }); // 70.3.8
 
-    it('70.3.9 val: epoc date 1970-1-1', function(done) {
+    it('70.3.9 val: epoch date 1970-1-1', function(done) {
       var date = new Date ( 1970, 0, 1 );
       var bindVar = {
         output:   resultBind,
@@ -1735,7 +1735,7 @@ describe('70. plsqlBindScalar.js', function() {
       );
     }); // 70.7.8
 
-    it('70.7.9 val: epoc date 1970-1-1', function(done) {
+    it('70.7.9 val: epoch date 1970-1-1', function(done) {
       var date = new Date ( 1970, 0, 1 );
       var bindVar = {
         p_inout : {
@@ -3369,7 +3369,7 @@ describe('70. plsqlBindScalar.js', function() {
       );
     }); // 70.11.8
 
-    it('70.11.9 val: epoc date 1970-1-1', function(done) {
+    it('70.11.9 val: epoch date 1970-1-1', function(done) {
       var date = '1970-01-01 00:00:00.000000000';
       var bindVar = {
         output:   resultBind,
@@ -3548,7 +3548,7 @@ describe('70. plsqlBindScalar.js', function() {
       );
     }); // 70.12.8
 
-    it('70.12.9 val: epoc date 1970-1-1', function(done) {
+    it('70.12.9 val: epoch date 1970-1-1', function(done) {
       var date = new Date( Date.UTC( 1970, 0, 1, 0, 0, 0, 0 ) );
       var bindVar = {
         output:   resultBind,
@@ -3890,7 +3890,7 @@ describe('70. plsqlBindScalar.js', function() {
       );
     }); // 70.14.8
 
-    it('70.14.9 val: epoc date 1970-1-1', function(done) {
+    it('70.14.9 val: epoch date 1970-1-1', function(done) {
       var date = new Date ( 1970, 0, 1, 0, 0, 0, 0 );
       var bindVar = {
         p_inout : {
@@ -4167,7 +4167,7 @@ describe('70. plsqlBindScalar.js', function() {
       );
     }); // 70.15.8
 
-    it('70.15.9 val: epoc date 1970-1-1', function(done) {
+    it('70.15.9 val: epoch date 1970-1-1', function(done) {
       var date = '1970-01-01 00:00:00.000000000 -08:00';
       var bindVar = {
         output:   resultBind,
@@ -4346,7 +4346,7 @@ describe('70. plsqlBindScalar.js', function() {
       );
     }); // 70.16.8
 
-    it('70.16.9 val: epoc date 1970-1-1', function(done) {
+    it('70.16.9 val: epoch date 1970-1-1', function(done) {
       var date = new Date( Date.UTC( 1970, 0, 1, 0, 0, 0, 0 ) );
       var bindVar = {
         output:   resultBind,
@@ -4687,7 +4687,7 @@ describe('70. plsqlBindScalar.js', function() {
       );
     }); // 70.18.8
 
-    it('70.18.9 val: epoc date 1970-1-1', function(done) {
+    it('70.18.9 val: epoch date 1970-1-1', function(done) {
       var date = new Date ( 1970, 0, 1, 0, 0, 0, 0 );
       var bindVar = {
         p_inout : {
@@ -4965,7 +4965,7 @@ describe('70. plsqlBindScalar.js', function() {
       );
     }); // 70.19.8
 
-    it('70.19.9 val: epoc date 1970-1-1', function(done) {
+    it('70.19.9 val: epoch date 1970-1-1', function(done) {
       var date = '1970-01-01 00:00:00.000000000';
       var bindVar = {
         output:   resultBind,
@@ -5144,7 +5144,7 @@ describe('70. plsqlBindScalar.js', function() {
       );
     }); // 70.20.8
 
-    it('70.20.9 val: epoc date 1970-1-1', function(done) {
+    it('70.20.9 val: epoch date 1970-1-1', function(done) {
       var date = new Date( Date.UTC( 1970, 0, 1, 0, 0, 0, 0 ) );
       var bindVar = {
         output:   resultBind,
@@ -5486,7 +5486,7 @@ describe('70. plsqlBindScalar.js', function() {
       );
     }); // 70.22.8
 
-    it('70.22.9 val: epoc date 1970-1-1', function(done) {
+    it('70.22.9 val: epoch date 1970-1-1', function(done) {
       var date = new Date ( 1970, 0, 1, 0, 0, 0, 0 );
       var bindVar = {
         p_inout : {
@@ -5507,7 +5507,7 @@ describe('70. plsqlBindScalar.js', function() {
       );
     }); // 70.22.9
 
-    it('70.22.10 NULL IN and NON-NULL out', function(done) {
+    it('70.22.10 NULL IN and NON-NULL OUT', function(done) {
       var proc72210 = "CREATE OR REPLACE PROCEDURE nodb_inoutproc72210 (p_inout IN OUT TIMESTAMP WITH LOCAL TIME ZONE) \n" +
                  "AS \n" +
                  "BEGIN \n" +

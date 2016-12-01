@@ -379,11 +379,10 @@ describe('42. dataTypeRaw.js', function() {
           i: { type: oracledb.BUFFER, dir: oracledb.BIND_IN, val: buf },
           o: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: 32767}
         },
-        function(err, result) {
+        function(err) {
           should.exist(err);
-          // ORA-01460: unimplemented or unreasonable conversion requested
-          (err.message).should.startWith('ORA-01460');
-          should.not.exist(result);
+          // ORA-06502: PL/SQL: numeric or value error\nORA-06512: at line 1
+          (err.message).should.startWith('ORA-06502');
           done();
         }
       );
@@ -399,11 +398,10 @@ describe('42. dataTypeRaw.js', function() {
           i: { type: oracledb.BUFFER, dir: oracledb.BIND_IN, val: buf },
           o: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: 40000}
         },
-        function(err, result) {
+        function(err) {
           should.exist(err);
-          // ORA-01460: unimplemented or unreasonable conversion requested
-          (err.message).should.startWith('ORA-01460');
-          should.not.exist(result);
+          // ORA-06502: PL/SQL: numeric or value error\nORA-06512: at line 1
+          (err.message).should.startWith('ORA-06502');
           done();
         }
       );

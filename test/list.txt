@@ -844,7 +844,7 @@ Overview of node-oracledb functional tests
 70. plsqlBindScalar.js
     70.1 PL/SQL bind scalar, dir: BIND_IN and BIND_OUT, type: STRING
         70.1.1 basic case: a simple string
-        70.1.2 negative: bind value and type mismatch
+        70.1.2 negative: bind in value and type mismatch
         70.1.3 val: null
         70.1.4 val: empty string
         70.1.5 val: undefined
@@ -854,7 +854,7 @@ Overview of node-oracledb functional tests
         70.2.1 basic case
         70.2.2 auto detect number type
         70.2.3 val: null
-        70.2.4 Negatvie: bind value and type mismatch - val: empty string
+        70.2.4 Negative: bind value and type mismatch - val: empty string
         70.2.5 val: 0
         70.2.6 val: undefined
         70.2.7 val: NaN
@@ -935,7 +935,7 @@ Overview of node-oracledb functional tests
         70.10.3 NUMBER, null values
         70.10.4 DATE, null values
         70.10.5 BUFFER
-        70.10.6 TIMESTAMP, null value
+        70.10.6 TIMESTAMP, null values
         70.10.7 TIMESTAMP WITH TIME ZONE, null values
         70.10.8 TIMESTAMP WITH LOCAL TIME ZONE, null values
     70.11 dir: BIND_IN and BIND_OUT, type: TIMESTAMP(convert STRING to TIMESTAMP)
@@ -946,32 +946,32 @@ Overview of node-oracledb functional tests
         70.11.5 val: NaN
         70.11.7 val: invalid Date Value: Feb 30, 2016
         70.11.8 val: 1969-12-31
-        70.11.9 val: epoc date 1970-1-1
+        70.11.9 val: epoch date 1970-1-1
     70.12 dir: BIND_IN and BIND_OUT, type: TIMESTAMP(WITH VARCHAR2 RETURN)
         70.12.1 basic case
         70.12.2 val: null
-      - 70.12.3 val: empty string
+        70.12.3 val: empty string
         70.12.4 val: undefined
-      - 70.12.5 val: NaN
-      - 70.12.7 val: invalid Date Value: Feb 30, 2016
-      - 70.12.8 val: 1969-12-31
-      - 70.12.9 val: epoc date 1970-1-1
+        70.12.5 val: NaN
+        70.12.7 val: invalid Date Value: Feb 30, 2016
+        70.12.8 val: 1969-12-31
+        70.12.9 val: epoch date 1970-1-1
         70.12.10 val: create Date value using numeric value: new Date(number)
-      - 70.12.11 val: create Date value using numeric value: 0
+        70.12.11 val: create Date value using numeric value: 0
     70.13 dir: BIND_IN and BIND_OUT, type: TIMESTAMP
-      - 70.13.1 val: empty string
+        70.13.1 val: empty string
         70.13.2 val: undefined
-      - 70.13.3 val: NaN
+        70.13.3 val: NaN
     70.14 dir: BIND_INOUT, type:TIMESTAMP
         70.14.1 basic case
         70.14.2 auto detect data type
         70.14.3 val: null
-      - 70.14.4 val: empty string
+        70.14.4 val: empty string
         70.14.5 val: undefined
-      - 70.14.6 val: NaN
+        70.14.6 val: NaN
         70.14.7 val: invalid Date Value: Feb 30, 2016
         70.14.8 val: 1969-12-31
-        70.14.9 val: epoc date 1970-1-1
+        70.14.9 val: epoch date 1970-1-1
         70.14.10 NULL IN and NON-NULL out
         70.14.11 NON-NULL IN and NULL OUT
     70.15 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE(convert STRING to TIMESTAMP)
@@ -982,32 +982,32 @@ Overview of node-oracledb functional tests
         70.15.5 val: NaN
         70.15.7 val: invalid Date Value: Feb 30, 2016
         70.15.8 val: 1969-12-31
-        70.15.9 val: epoc date 1970-1-1
+        70.15.9 val: epoch date 1970-1-1
     70.16 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE(WITH VARCHAR2 RETURN)
         70.16.1 basic case
         70.16.2 val: null
-      - 70.16.3 val: empty string
+        70.16.3 val: empty string
         70.16.4 val: undefined
-      - 70.16.5 val: NaN
-      - 70.16.7 val: invalid Date Value: Feb 30, 2016
-      - 70.16.8 val: 1969-12-31
-      - 70.16.9 val: epoc date 1970-1-1
+        70.16.5 val: NaN
+        70.16.7 val: invalid Date Value: Feb 30, 2016
+        70.16.8 val: 1969-12-31
+        70.16.9 val: epoch date 1970-1-1
         70.16.10 val: create Date value using numeric value: new Date(number)
-      - 70.16.11 val: create Date value using numeric value: 0
+        70.16.11 val: create Date value using numeric value: 0
     70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE
-      - 70.17.1 val: empty string
+        70.17.1 val: empty string
         70.17.2 val: undefined
-      - 70.17.3 val: NaN
+        70.17.3 val: NaN
     70.18 dir: BIND_INOUT, type:TIMESTAMP WITH TIME ZONE
         70.18.1 basic case
         70.18.2 auto detect data type
         70.18.3 val: null
-      - 70.18.4 val: empty string
+        70.18.4 val: empty string
         70.18.5 val: undefined
-      - 70.18.6 val: NaN
+        70.18.6 val: NaN
         70.18.7 val: invalid Date Value: Feb 30, 2016
         70.18.8 val: 1969-12-31
-        70.18.9 val: epoc date 1970-1-1
+        70.18.9 val: epoch date 1970-1-1
         70.18.10 NULL IN and NON-NULL out
         70.18.11 NON-NULL IN and NULL OUT
     70.19 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH LOCAL TIME ZONE(convert STRING to TIMESTAMP)
@@ -1018,34 +1018,70 @@ Overview of node-oracledb functional tests
         70.19.5 val: NaN
         70.19.7 val: invalid Date Value: Feb 30, 2016
         70.19.8 val: 1969-12-31
-        70.19.9 val: epoc date 1970-1-1
+        70.19.9 val: epoch date 1970-1-1
     70.20 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH LOCAL TIME ZONE(WITH VARCHAR2 RETURN)
         70.20.1 basic case
         70.20.2 val: null
-      - 70.20.3 val: empty string
+        70.20.3 val: empty string
         70.20.4 val: undefined
-      - 70.20.5 val: NaN
-      - 70.20.7 val: invalid Date Value: Feb 30, 2016
-      - 70.20.8 val: 1969-12-31
-      - 70.20.9 val: epoc date 1970-1-1
+        70.20.5 val: NaN
+        70.20.7 val: invalid Date Value: Feb 30, 2016
+        70.20.8 val: 1969-12-31
+        70.20.9 val: epoch date 1970-1-1
         70.20.10 val: create Date value using numeric value: new Date(number)
-      - 70.20.11 val: create Date value using numeric value: 0
+        70.20.11 val: create Date value using numeric value: 0
     70.21 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH LOCAL TIME ZONE
-      - 70.21.1 val: empty string
+        70.21.1 val: empty string
         70.21.2 val: undefined
-      - 70.21.3 val: NaN
+        70.21.3 val: NaN
     70.22 dir: BIND_INOUT, type:TIMESTAMP WITH LOCAL TIME ZONE
         70.22.1 basic case
         70.22.2 auto detect data type
         70.22.3 val: null
-      - 70.22.4 val: empty string
+        70.22.4 val: empty string
         70.22.5 val: undefined
-      - 70.22.6 val: NaN
+        70.22.6 val: NaN
         70.22.7 val: invalid Date Value: Feb 30, 2016
         70.22.8 val: 1969-12-31
-        70.22.9 val: epoc date 1970-1-1
-        70.22.10 NULL IN and NON-NULL out
+        70.22.9 val: epoch date 1970-1-1
+        70.22.10 NULL IN and NON-NULL OUT
         70.22.11 NON-NULL IN and NULL OUT
+
+71. lobBind1.js
+    71.1 persistent CLOB
+        71.1.1 BIND_IN, DML, a String variable
+        71.1.2 BIND_IN, DML, null
+        71.1.3 BIND_IN, DML, a txt file
+        71.1.4 BIND_IN, PL/SQL, a txt file
+        71.1.5 BIND_OUT, PL/SQL, a string
+        71.1.6 BIND_OUT, PL/SQL, a txt file
+        71.1.7 BIND_INOUT, PL/SQL, A String
+        71.1.8 BIND_INOUT, PL/SQL, a txt file
+        71.1.9 Negative: BIND_INOUT, PL/SQL, String as bind IN Value
+    71.2 persistent BLOB
+        71.2.1 BIND_IN, DML, a Buffer value
+        71.2.2 BIND_IN, DML, null
+        71.2.3 BIND_IN, DML, a jpg file
+        71.2.4 BIND_IN, PL/SQL, a jpg file
+        71.2.5 BIND_OUT, PL/SQL, a Buffer value
+        71.2.6 BIND_OUT, PL/SQL, a jpg file
+        71.2.7 BIND_INOUT, PL/SQL, a Buffer value
+        71.2.8 BIND_INOUT, PL/SQL, a jpg file
+        71.2.9 Negative: BIND_INOUT, PL/SQL, Buffer as bind IN value
+
+72. lobBind2.js
+    72.1 CLOB
+        72.1.1 BIND_IN, DML, a txt file
+        72.1.2 BIND_IN, PL/SQL, a txt file
+        72.1.3 Negative - invalid type
+        72.1.4 Negative - invalid value
+        72.1.5 Negative - inconsistent datatypes
+        72.1.6 DML - UPDATE statement
+    72.2 BLOB
+        72.2.1 BIND_IN, DML, a jpg file
+        72.2.2 BIND_IN, PL/SQL, a jpg file
+        72.2.3 Negative - inconsistent datatypes
+        72.2.4 Negative - not providing first parameter
 
 73. poolPing.js
     73.1 the default value of poolPingInterval is 60
@@ -1070,3 +1106,76 @@ Overview of node-oracledb functional tests
     73.20 can be set at pool creation. Negative: 'random-string'
     73.21 cannot surpass the upper limit at pool creation
     73.22 cannot surpass the lower limit at pool creation
+
+ 74.lobBindAsStringBuffer.js
+    74.1 CLOB, PLSQL, BIND_IN
+       74.1.1 PLSQL, BIND_IN with String length 32768 
+       74.1.2 PLSQL, BIND_IN with String length 65535
+       74.1.3 PLSQL, BIND_IN with null
+       74.1.4 PLSQL, BIND_IN with empty string
+       74.1.5 PLSQL, BIND_IN with undefined
+       74.1.6 PLSQL, BIND_IN with NaN
+       74.1.5 PLSQL, BIND_IN with 0
+       74.1.8 PLSQL, BIND_IN bind value and type mismatch
+       74.1.9 PLSQL, BIND_IN mixing named with positional binding
+       74.1.10 PLSQL, BIND_IN with invalid CLOB
+    74.2 CLOB, PLSQL, BIND_OUT
+       74.2.1 PLSQL, BIND_OUT with String length 32768
+       74.2.2 PLSQL, BIND_OUT with String length 65535
+       74.2.3 PLSQL, BIND_OUT with null
+       74.2.4 PLSQL, BIND_OUT with empty string
+       74.2.5 PLSQL, BIND_OUT with undefined
+       74.2.6 PLSQL, BIND_OUT mixing named with positional binding
+       74.2.7 PLSQL, BIND_OUT with limited maxSize
+    74.3 CLOB, PLSQL, BIND_INOUT
+       74.3.1 PLSQL, BIND_INOUT
+    74.4 BLOB, PLSQL, BIND_IN
+       74.4.1 PLSQL, BIND_IN with Buffer size 32768
+       74.4.2 PLSQL, BIND_IN with Buffer size 65535
+       74.4.3 PLSQL, BIND_IN with null
+       74.4.4 PLSQL, BIND_IN with empty string
+       74.4.5 PLSQL, BIND_IN with undefined
+       74.4.6 PLSQL, BIND_IN with NaN
+       74.4.7 PLSQL, BIND_IN with 0
+       74.4.8 PLSQL, BIND_IN bind value and type mismatch
+       74.4.9 PLSQL, BIND_IN mixing named with positional binding
+       74.4.10 PLSQL, BIND_IN without maxSize
+       74.4.11 PLSQL, BIND_IN with invalid BLOB
+    74.5 BLOB, PLSQL, BIND_OUT
+       74.5.1 PLSQL, BIND_OUT with Buffer size 32768
+       74.5.2 PLSQL, BIND_OUT with Buffer size 65535
+       74.5.3 PLSQL, BIND_OUT with null
+       74.5.4 PLSQL, BIND_OUT with empty string
+       74.5.5 PLSQL, BIND_OUT with undefined
+       74.5.6 PLSQL, BIND_OUT mixing named with positional binding
+       74.5.7 PLSQL, BIND_OUT with limited maxSize
+       74.5.8 PLSQL, BIND_OUT without maxSize
+    74.6 BLOB, PLSQL, BIND_INOUT
+       74.6.1 PLSQL, BIND_INOUT
+    74.7 Multiple CLOBs, BIND_IN
+       74.7.1 PLSQL, BIND_IN, bind two string
+       74.7.2 PLSQL, BIND_IN, bind a txt file and a string
+    74.8 Multiple CLOBs, BIND_OUT
+       74.8.1 PLSQL, BIND_OUT, bind two string
+       74.8.2 PLSQL, BIND_OUT, bind a txt file and a string
+    74.9 Multiple CLOBs, BIND INOUT
+       74.9.1 PLSQL, BIND_INOUT, bind a txt file and a string
+    74.10 Multiple BLOBs, BIND_IN
+       74.10.1 PLSQL, BIND_IN, bind two Buffer
+       74.10.2 PLSQL, BIND_IN, bind a JPG file and a Buffer
+    74.11 Multiple BLOBs, BIND_OUT
+       74.11.1 PLSQL, BIND_OUT, bind two buffer
+       74.11.2 PLSQL, BIND_OUT, bind a JPG file and a Buffer
+    74.12 Multiple BLOBs, BIND_INOUT
+       74.12.1 PLSQL, BIND_INOUT, bind a JPG and a buffer
+    74.13 Multiple LOBs, BIND_IN
+       74.13.1 PLSQL, CLOB&BLOB, bind a string and a buffer
+       74.13.2 PLSQL, CLOB&BLOB, bind a string and a JPG file
+       74.13.3 PLSQL, CLOB&BLOB, bind a txt file and a Buffer
+    74.14 Multiple LOBs, BIND_OUT
+       74.14.1 PLSQL, CLOB&BLOB, bind a string and a buffer
+       74.14.2 PLSQL, CLOB&BLOB, bind a string and a JPG file
+       74.14.3 PLSQL, CLOB&BLOB, bind a txt file and a buffer
+    74.15 Multiple LOBs, BIND_INOUT
+       74.15.1 PLSQL, BIND_INOUT, bind a string and a buffer
+
