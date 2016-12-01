@@ -973,6 +973,8 @@ The default properties may be overridden by specifying new properties
 in the `poolAttrs` parameter.
 
 It is possible to add pools to the pool cache when calling `createPool()`.
+This allows pools to later be accessed by name, removing the need to
+pass the pool object through code.
 See [Connection Pool Cache](#connpoolcache) for more details.
 
 A pool should be terminated with the [`pool.close()`](#poolclose)
@@ -1181,12 +1183,12 @@ The following table shows the various signatures that can be used when invoking
 
 Signature | Description
 --------- | -----------
-oracledb.getConnection() | Gets a connection from the default pool.  Returns a promise.
-oracledb.getConnection(callback) | Gets a connection from the default pool.  Invokes the callback.
-oracledb.getConnection(poolAlias) | Gets a connection from the pool with the specified `poolAlias`.  Returns a promise.
-oracledb.getConnection(poolAlias, callback) | Gets a connection from the pool with the specified `poolAlias`.  Invokes the callback.
-oracledb.getConnection(connAttrs) | Creates a standalone, non-pooled connection. Returns a promise.
-oracledb.getConnection(connAttrs, callback) | Creates a standalone, non-pooled connection.  Invokes the callback.
+`oracledb.getConnection()` | Gets a connection from the previously created default pool.  Returns a promise.
+`oracledb.getConnection(callback)` | Gets a connection from the previously created default pool.  Invokes the callback.
+`oracledb.getConnection(poolAlias)` | Gets a connection from the previously created pool with the specified `poolAlias`.  Returns a promise.
+`oracledb.getConnection(poolAlias, callback)` | Gets a connection from the previously created pool with the specified `poolAlias`.  Invokes the callback.
+`oracledb.getConnection(connAttrs)` | Creates a standalone, non-pooled connection. Returns a promise.
+`oracledb.getConnection(connAttrs, callback)` | Creates a standalone, non-pooled connection.  Invokes the callback.
 
 See [Connection Handling](#connectionhandling) for more information on
 connections.
@@ -2132,12 +2134,12 @@ An alias for [pool.close()](#poolclose).
 
 ## <a name="resultsetclass"></a> 7. ResultSet Class
 
-Result sets allow query results to fetched from the database one at a
+Result Sets allow query results to fetched from the database one at a
 time, or in groups of rows.  They can also be converted to Readable
-Streams.  Result sets enable applications to process very large data
+Streams.  Result Sets enable applications to process very large data
 sets.
 
-Result sets should also be used where the number of query rows cannot
+Result Sets should also be used where the number of query rows cannot
 be predicted and may be larger than a sensible
 [`maxRows`](#propdbmaxrows) size.
 
@@ -2148,9 +2150,9 @@ node-oracledb when binding as type [`CURSOR`](#oracledbconstantsnodbtype) to a
 PL/SQL REF CURSOR bind parameter.
 
 The value of [`prefetchRows`](#propdbprefetchrows) can be adjusted to
-tune the performance of result sets.
+tune the performance of Result Sets.
 
-See [ResultSet Handling](#resultsethandling) for more information on result sets.
+See [ResultSet Handling](#resultsethandling) for more information on Result Sets.
 
 ### <a name="resultsetproperties"></a> 7.1 ResultSet Properties
 
@@ -2207,7 +2209,7 @@ promise = getRow();
 
 ##### Description
 
-This call fetches one row of the result set as an object or an array of column values, depending on the value of [outFormat](#propdboutformat).
+This call fetches one row of the Result Set as an object or an array of column values, depending on the value of [outFormat](#propdboutformat).
 
 At the end of fetching, the `ResultSet` should be freed by calling [`close()`](#close).
 
@@ -2226,7 +2228,7 @@ promise = getRows(Number numRows);
 
 ##### Description
 
-This call fetches `numRows` rows of the result set as an object or an array of column values, depending on the value of [outFormat](#propdboutformat).
+This call fetches `numRows` rows of the Result Set as an object or an array of column values, depending on the value of [outFormat](#propdboutformat).
 
 At the end of fetching, the `ResultSet` should be freed by calling [`close()`](#close).
 
@@ -2304,7 +2306,7 @@ oracledb.getConnection(
 ```
 
 Applications which are heavy users of connections should create and
-use a [Connection Pool]("#connpooling).
+use a [Connection Pool](#connpooling).
 
 ### <a name="connectionstrings"></a> 8.1 Connection Strings
 
@@ -2956,6 +2958,12 @@ release the connection.
 Queries may optionally be streamed using the *Connection*
 [`queryStream()`](#querystream) method.
 
+Connections can handle one database operation at a time.  Other
+operations will block.  Structure your code to avoid starting parallel
+operations on connections.  For example, instead of using
+`async.each()` which calls each of its items in parallel, use
+`async.eachSeries()`.
+
 ### <a name="select"></a> 9.1 SELECT Statements
 
 #### <a name="fetchingrows"></a> 9.1.1 Fetching Rows
@@ -2990,19 +2998,19 @@ stream wrapper, as described [later](#streamingresults).  This
 prevents query results being unexpectedly truncated by the
 [`maxRows`](#propdbmaxrows) limit and removes the need to oversize
 `maxRows` to avoid such truncation.  Otherwise, for queries that
-return a known small number of rows, non-result set queries may have
+return a known small number of rows, non-Result Set queries may have
 less overhead.
 
-A result set is created when the `execute()` option property
-[`resultSet`](#executeoptions) is `true`.  Result set rows can be
+A Result Set is created when the `execute()` option property
+[`resultSet`](#executeoptions) is `true`.  Result Set rows can be
 fetched using [`getRow()`](#getrow) or [`getRows()`](#getrows) on the
 `execute()` callback function's `result.resultSet` parameter property.
 
-For result sets the [`maxRows`](#propdbmaxrows) limit is ignored.  All
+For Result Sets, the [`maxRows`](#propdbmaxrows) limit is ignored.  All
 rows can be fetched.
 
 When all rows have been fetched, or the application does not want to
-continue getting more rows, then the result set should be freed using
+continue getting more rows, then the Result Set should be freed using
 [`close()`](#close).
 
 REF CURSORS returned from a PL/SQL block via an `oracledb.CURSOR` OUT
@@ -3023,7 +3031,7 @@ To fetch one row at a time use `getRow()` :
 connection.execute(
   "SELECT employee_id, last_name FROM employees ORDER BY employee_id",
   [], // no bind variables
-  { resultSet: true }, // return a result set.  Default is false
+  { resultSet: true }, // return a Result Set.  Default is false
   function(err, result)
   {
     if (err) { . . . }
@@ -3037,9 +3045,9 @@ function fetchOneRowFromRS(connection, resultSet)
     function (err, row)
     {
       if (err) {
-         . . .           // close the result set and release the connection
+         . . .           // close the Result Set and release the connection
       } else if (!row) { // no rows, or no more rows
-        . . .            // close the result set and release the connection
+        . . .            // close the Result Set and release the connection
       } else {
         console.log(row);
         fetchOneRowFromRS(connection, resultSet);  // get next row
@@ -3056,7 +3064,7 @@ var numRows = 10;  // number of rows to return from each call to getRows()
 connection.execute(
   "SELECT employee_id, last_name FROM employees ORDER BY employee_id",
   [], // no bind variables
-  { resultSet: true }, // return a result set.  Default is false
+  { resultSet: true }, // return a Result Set.  Default is false
   function(err, result)
   {
     if (err) { . . . }
@@ -3071,15 +3079,15 @@ function fetchRowsFromRS(connection, resultSet, numRows)
     function (err, rows)
     {
       if (err) {
-         . . .                        // close the result set and release the connection
+         . . .                        // close the Result Set and release the connection
       } else if (rows.length > 0) {   // got some rows
         console.log(rows);            // process rows
         if (rows.length === numRows)  // might be more rows
           fetchRowsFromRS(connection, resultSet, numRows);
         else                          // got fewer rows than requested so must be at end
-          . . .                       // close the result set and release the connection
+          . . .                       // close the Result Set and release the connection
       } else {                        // else no rows
-          . . .                       // close the result set and release the connection
+          . . .                       // close the Result Set and release the connection
       }
     });
 }
@@ -3317,6 +3325,8 @@ The default query result type mappings for Oracle Database types to JavaScript t
     [OCIDateTime](https://docs.oracle.com/database/122/LNOCI/object-relational-data-types-in-oci.htm#LNOCI16840).
     When binding a JavaScript Date value in an `INSERT` statement, the date is also inserted as `TIMESTAMP WITH
     LOCAL TIME ZONE` using OCIDateTime.
+    See [Working with Dates Using the Node.js Driver](https://jsao.io/2016/09/working-with-dates-using-the-nodejs-driver/) for
+    a discussion of date handling.
 
 ##### Fetching as String
 
@@ -3965,7 +3975,7 @@ See [selectjson.js](https://github.com/oracle/node-oracledb/tree/master/examples
 and [selectjsonclob.js](https://github.com/oracle/node-oracledb/tree/master/examples/selectjsonclob.js)
 for runnable examples.
 
-For more information about using JSON in Oracle Database see
+For more information about using JSON in Oracle Database see the
 [Database JSON Developer's Guide](https://docs.oracle.com/database/122/ADJSN/toc.htm).
 
 ## <a name="bind"></a> 13. Bind Parameters for Prepared Statements
@@ -4252,7 +4262,7 @@ Oracle REF CURSORS can be fetched in node-oracledb by binding a
 also be converted to a Readable Stream by using
 [`toQueryStream()`](#toquerystream).
 
-If using `getRow()` or `getRows()` the result set must be freed using
+If using `getRow()` or `getRows()` the Result Set must be freed using
 [`close()`](#close) when all rows have been fetched, or when the
 application does not want to continue getting more rows.  If the REF
 CURSOR is set to NULL or is not set in the PL/SQL procedure then the
@@ -4307,15 +4317,15 @@ function fetchRowsFromRS(connection, resultSet, numRows)
     function (err, rows)
     {
       if (err) {
-         . . .                        // close the result set and release the connection
+         . . .                        // close the Result Set and release the connection
       } else if (rows.length > 0) {   // got some rows
         console.log(rows);            // process rows
         if (rows.length === numRows)  // might be more rows
           fetchRowsFromRS(connection, resultSet, numRows);
         else                          // got fewer rows than requested so must be at end
-          . . .                       // close the result set and release the connection
+          . . .                       // close the Result Set and release the connection
       } else {                        // else no rows
-          . . .                       // close the result set and release the connection
+          . . .                       // close the Result Set and release the connection
       }
     });
 }
