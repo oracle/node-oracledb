@@ -722,13 +722,16 @@ void ConnImpl::initConnImpl ( bool pool, bool externalAuth,
     ociCall ( OCIAttrGet ( svch_, OCI_HTYPE_SVCCTX, &sessh_,  0,
                            OCI_ATTR_SESSION, errh_ ), errh_ );
 
+#if ( (OCI_MAJOR_VERSION > 12)  ||   \
+      ( OCI_MAJOR_VERSION == 12 && OCI_MINOR_VERSION >= 2 ) )
+    break;
+#else
+
     // For stand alone (non-pooled) connections and pingInterval set to
     // no-ping, exit the loop to return the session.
     if ( !pool || pingInterval_ < 0 )
       break;
 
-#if ( ( OCI_MAJOR_VERSION < 12 ) ||                                \
-      ( OCI_MAJOR_VERSION == 12 && OCI_MINOR_VERSION < 2 ) )
     //
     // PingInterval elapsed implementation is available  only for
     //   pooled-connections and
@@ -782,8 +785,6 @@ void ConnImpl::initConnImpl ( bool pool, bool externalAuth,
     // If session is not good, release it and drop from pool too.
     ociCall ( OCISessionRelease ( svch_, errh_, (OraText *)"", (sword)0,
                                   OCI_SESSRLS_DROPSESS ), errh_ ) ;
-#else
-    break;              // For 12.2 and above, got a session.
 #endif
   }
 
