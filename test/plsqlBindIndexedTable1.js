@@ -19,7 +19,7 @@
  * See LICENSE.md for relevant licenses.
  *
  * NAME
- *   43. plsqlBinding1.js
+ *   43. plsqlBindIndexedTable1.js
  *
  * DESCRIPTION
  *   Testing PL/SQL indexed tables (associative arrays).
@@ -38,7 +38,7 @@ var should   = require('should');
 var async    = require('async');
 var dbConfig = require('./dbconfig.js');
 
-describe('43. plsqlBinding1.js', function() {
+describe('43. plsqlBindIndexedTable1.js', function() {
 
   var credentials = {
                       user:          dbConfig.user,
@@ -481,7 +481,7 @@ describe('43. plsqlBinding1.js', function() {
       );
     })
 
-    it('43.2.4 DATE type has not been supported yet', function(done) {
+    it('43.2.4 DATE type indexed table has not been supported yet', function(done) {
       var bindvars = {
         p:  {type: oracledb.DATE, dir: oracledb.BIND_IN, val: [new Date(), new Date()]}
       };
@@ -615,8 +615,7 @@ describe('43. plsqlBinding1.js', function() {
       ], done);
     });
 
-    // Date data type not support yet
-    it.skip('43.3.2 binding PL/SQL scalar IN/OUT', function(done) {
+    it('43.3.2 binding PL/SQL scalar IN/OUT', function(done) {
       async.series([
         function(callback) {
           var proc = "CREATE OR REPLACE\n" +

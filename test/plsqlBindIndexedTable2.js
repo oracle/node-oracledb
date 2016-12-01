@@ -19,7 +19,7 @@
  * See LICENSE.md for relevant licenses.
  *
  * NAME
- *   44. plsqlBinding2.js
+ *   44. plsqlBindIndexedTable2.js
  *
  * DESCRIPTION
  *   Testing PL/SQL indexed tables (associative arrays).
@@ -38,7 +38,7 @@ var should   = require('should');
 var async    = require('async');
 var dbConfig = require('./dbconfig.js');
 
-describe('44. plsqlBinding2.js', function() {
+describe('44. plsqlBindIndexedTable2.js', function() {
 
   var credentials = {
                       user:          dbConfig.user,

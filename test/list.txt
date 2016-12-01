@@ -618,7 +618,7 @@ Overview of node-oracledb functional tests
     42.4 in PL/SQL, the maximum size is 32767
       - 42.4.1 when data length is 200
 
-43. plsqlBinding1.js
+43. plsqlBindIndexedTable1.js.js
     43.1 binding PL/SQL indexed table
         43.1.1 binding PL/SQL indexed table IN
         43.1.2 binding PL/SQL indexed table IN OUT
@@ -633,7 +633,7 @@ Overview of node-oracledb functional tests
         43.2.7 supports binding by position
     43.3 binding PL/SQL scalar
         43.3.1 binding PL/SQL scalar IN
-      - 43.3.2 binding PL/SQL scalar IN/OUT
+        43.3.2 binding PL/SQL scalar IN/OUT
         43.3.3 binding PL/SQL scalar OUT by name
         43.3.4 binding PL/SQL scalar OUT by position
     43.4 test attribute - maxArraySize
@@ -647,7 +647,7 @@ Overview of node-oracledb functional tests
         43.4.8 negative case: assigning a string to it
         43.4.9 negative case: NaN
 
-44. plsqlBinding2.js
+44. plsqlBindIndexedTable2.js.js
     44.1 example case
     44.2 example case binding by position
   - 44.3 default binding type and direction with binding by name
@@ -837,3 +837,65 @@ Overview of node-oracledb functional tests
 
 69. driverName.js
     69.1 checks the driver name
+
+70. plsqlBindScalar.js
+    70.1 PL/SQL bind scalar, dir: BIND_IN and BIND_OUT, type: STRING
+        70.1.1 basic case: a simple string
+        70.1.2 negative: bind value and type mismatch
+        70.1.3 val: null
+        70.1.4 val: empty string
+        70.1.5 val: undefined
+        70.1.6 tests default dir & type
+        70.1.7 val: NaN
+    70.2 dir: BIND_IN and BIND_OUT, type: NUMBER
+        70.2.1 basic case
+        70.2.2 auto detect number type
+        70.2.3 val: null
+        70.2.4 Negatvie: bind value and type mismatch - val: empty string
+        70.2.5 val: 0
+        70.2.6 val: undefined
+      - 70.2.7 val: NaN
+    70.3 dir: BIND_IN and BIND_OUT, type: DATE
+        70.3.1 basic case
+        70.3.2 auto detect Date type
+        70.3.3 val: null
+        70.3.4 val: empty string, negative - bind value and type mismatch
+        70.3.5 val: undefined
+        70.3.6 val: NaN
+    70.4 dir: BIND_IN and BIND_OUT, type: BUFFER
+        70.4.1 basic case
+        70.4.2 auto detect Buffer type
+        70.4.3 val: null
+        70.4.4 val: empty string
+        70.4.5 val: undefined
+        70.4.6 val: NaN
+    70.5 dir: BIND_INOUT, type: STRING
+        70.5.1 basic case: a simple string
+        70.5.2 tests default type
+        70.5.3 negative: bind value and type mismatch
+        70.5.4 val: null
+        70.5.5 val: empty string
+        70.5.6 val: undefined
+        70.5.7 val: NaN
+    70.6 dir: BIND_INOUT, type: NUMBER
+        70.6.1 basic case
+        70.6.2 auto detect number type
+        70.6.3 negative: bind value and type mismatch - val: empty string
+      - 70.6.4 val: null
+      - 70.6.5 val: undefined
+      - 70.6.6 val: NaN
+        70.6.7 val: 0
+    70.7 dir: BIND_INOUT, type: DATE
+        70.7.1 basic case
+        70.7.2 auto detect Date type
+      - 70.7.3 val: null
+        70.7.4 val: empty string, negative - bind value and type mismatch
+      - 70.7.5 val: undefined
+        70.7.6 val: NaN
+    70.8 dir: BIND_INOUT, type: BUFFER
+        70.8.1 basic case
+        70.8.2 auto detect BUFFER type
+      - 70.8.3 val: null
+        70.8.4 val: empty string
+      - 70.8.5 val: undefined
+        70.8.6 val: NaN

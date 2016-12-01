@@ -48,8 +48,8 @@ test/dataTypeClob.js
 test/dataTypeBlob.js
 test/dataTypeRaw.js
 
-test/plsqlBinding1.js
-test/plsqlBinding2.js
+test/plsqlBindIndexedTable1.js
+test/plsqlBindIndexedTable2.js
 test/instanceof.js
 test/accessTerminatedPoolAttributes.js
 test/getConnAfterPoolTerminate.js
@@ -71,3 +71,4 @@ test/writableProperties.js
 test/poolCache.js
 test/multipleLobInsertion.js
 test/driverName.js
+test/plsqlBindScalar.js
