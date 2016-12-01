@@ -42,6 +42,7 @@
   },
   "scripts": {
       "test": "mocha --opts test/opts/mocha.opts",
+      "posttest": "node test/opts/versions.js",
       "testWindows": "mocha --opts test\\opts\\mocha.opts"
   },
   "engines": {
