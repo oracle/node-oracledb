@@ -67,24 +67,24 @@ limitations under the License.
      - 4.2.2 [`close()`](#connectionclose)
      - 4.2.3 [`commit()`](#commit)
      - 4.2.4 [`execute()`](#execute)
-        - 4.2.4.1 [`execute()`: SQL Statement](#executesqlparam)
-        - 4.2.4.2 [`execute()`: Bind Parameters](#executebindParams)
-          - [`dir`](#executebindParams), [`maxArraySize`](#executebindParams), [`maxSize`](#executebindParams), [`type`](#executebindParams), [`val`](#executebindParams)
-        - 4.2.4.3 [`execute()`: Options](#executeoptions)
-          - 4.2.4.3.1 [`autoCommit`](#propexecautocommit)
-          - 4.2.4.3.2 [`extendedMetaData`](#propexecextendedmetadata)
-          - 4.2.4.3.3 [`fetchInfo`](#propexecfetchinfo)
-          - 4.2.4.3.4 [`maxRows`](#propexecmaxrows)
-          - 4.2.4.3.5 [`outFormat`](#propexecoutformat)
-          - 4.2.4.3.6 [`prefetchRows`](#propexecprefetchrows)
-          - 4.2.4.3.7 [`resultSet`](#propexecresultset)
-        - 4.2.4.4 [`execute()`: Callback Function](#executecallback)
-          - 4.2.4.4.1 [`metaData`](#execmetadata)
-            -  [`name`](#execmetadata), [`fetchType`](#execmetadata), [`dbType`](#execmetadata), [`byteSize`](#execmetadata), [`precision`](#execmetadata), [`scale`](#execmetadata), [`nullable`](#execmetadata)
-          - 4.2.4.4.2 [`outBinds`](#execoutbinds)
-          - 4.2.4.4.3 [`resultSet`](#execresultset)
-          - 4.2.4.4.4 [`rows`](#execrows)
-          - 4.2.4.4.5 [`rowsAffected`](#execrowsaffected)
+         - 4.2.4.1 [`execute()`: SQL Statement](#executesqlparam)
+         - 4.2.4.2 [`execute()`: Bind Parameters](#executebindParams)
+             - [`dir`](#executebindParams), [`maxArraySize`](#executebindParams), [`maxSize`](#executebindParams), [`type`](#executebindParams), [`val`](#executebindParams)
+         - 4.2.4.3 [`execute()`: Options](#executeoptions)
+             - 4.2.4.3.1 [`autoCommit`](#propexecautocommit)
+             - 4.2.4.3.2 [`extendedMetaData`](#propexecextendedmetadata)
+             - 4.2.4.3.3 [`fetchInfo`](#propexecfetchinfo)
+             - 4.2.4.3.4 [`maxRows`](#propexecmaxrows)
+             - 4.2.4.3.5 [`outFormat`](#propexecoutformat)
+             - 4.2.4.3.6 [`prefetchRows`](#propexecprefetchrows)
+             - 4.2.4.3.7 [`resultSet`](#propexecresultset)
+         - 4.2.4.4 [`execute()`: Callback Function](#executecallback)
+             - 4.2.4.4.1 [`metaData`](#execmetadata)
+                 -  [`name`](#execmetadata), [`fetchType`](#execmetadata), [`dbType`](#execmetadata), [`byteSize`](#execmetadata), [`precision`](#execmetadata), [`scale`](#execmetadata), [`nullable`](#execmetadata)
+             - 4.2.4.4.2 [`outBinds`](#execoutbinds)
+             - 4.2.4.4.3 [`resultSet`](#execresultset)
+             - 4.2.4.4.4 [`rows`](#execrows)
+             - 4.2.4.4.5 [`rowsAffected`](#execrowsaffected)
      - 4.2.5 [`queryStream()`](#querystream)
      - 4.2.6 [`release()`](#release)
      - 4.2.7 [`rollback()`](#rollback)
@@ -140,6 +140,11 @@ limitations under the License.
      - 9.1.4 [Query Output Formats](#queryoutputformats)
      - 9.1.5 [Query Column Metadata](#querymeta)
      - 9.1.6 [Result Type Mapping](#typemap)
+         - 9.1.6.1 [Fetching Character Types](#stringhandling)
+         - 9.1.6.2 [Fetching Numbers](#numberhandling)
+         - 9.1.6.3 [Fetching Date and Timestamps](#datehandling)
+         - 9.1.6.4 [Fetching Numbers and Dates as String](#fetchasstringhandling)
+         - 9.1.6.5 [Mapping Custom Types](#customtypehandling)
      - 9.1.7 [Row Prefetching](#rowprefetching)
 10. [PL/SQL Execution](#plsqlexecution)
   - 10.1 [PL/SQL Stored Procedures](#plsqlproc)
@@ -525,6 +530,7 @@ By default all columns are returned as native types.
 
 This property helps avoid situations where using JavaScript types can
 lead to numeric precision loss, or where date conversion is unwanted.
+See [Result Type Mapping](#typemap) for more discussion.
 
 The valid types that can be mapped to strings are
 [`DATE`](#oracledbconstantsnodbtype) and
@@ -3306,29 +3312,88 @@ Description of the properties is given in the
 
 #### <a name="typemap"></a> 9.1.6 Result Type Mapping
 
-Oracle character, number and date columns can be selected.  Datatypes
-that are currently unsupported give a "datatype is not supported"
-error.
+Oracle character, number and date columns can be selected directly
+	into JavaScript strings and numbers.  BLOBs and CLOBs can be fetched
+into [Lobs](#lobclass).
+
+Datatypes that are currently unsupported give a "datatype is not
+supported" error.
+
+##### <a name="stringhandling"></a> 9.1.6.1 Fetching Character Types
+
+Variable and fixed length character columns are mapped to JavaScript strings.
+
+##### <a name="numberhandling"></a> 9.1.6.2 Fetching Numbers
+
+By default all numeric columns are mapped to JavaScript numbers.
+
+When numbers are fetched from the database, conversion to JavaScript's
+less precise binary number format can result in "unexpected"
+representations.  For example:
+
+```javascript
+conn.execute(
+"select 38.73 from dual",
+function (err, result) {
+  if (err)
+    . . .
+  else
+    console.log(result.rows[0]); // gives 38.730000000000004
+});
+```
+
+Similar issues can occur with binary floating-point arithmetic
+purely in Node.js, for example:
+
+```javascript
+console.log(0.2 + 0.7); // gives 0.8999999999999999
+```
+
+The primary recommendation for number handling is to use Oracle SQL or
+PL/SQL for mathematical operations, particularly for currency
+calculations.  Alternatively you can use `fetchAsString` or
+`fetchInfo` (see next section) to fetch numbers in string format, and
+then use one of the available third-party JavaScript number libraries
+that handles more precision.
+
+When using `fetchAsString` or `fetchInfo`, you may need to
+explicitly use `NLS_NUMERIC_CHARACTERS` to override your NLS
+settings and force the decimal separator to be a period.  This can
+be done by executing:
+
+```
+ALTER SESSION SET NLS_NUMERIC_CHARACTERS = '.,'
+```
+
+Alternatively you can set the equivalent environment variable prior
+to starting Node.js:
+
+```
+export NLS_NUMERIC_CHARACTERS='.,'
+```
+
+Note this environment variable is not used unless the `NLS_LANG`
+environment variable is also set.
+
+##### <a name="datehandling"></a> 9.1.6.3 Fetching Date and Timestamps
 
 The default query result type mappings for Oracle Database types to JavaScript types are:
 
--   Variable and fixed length character columns are mapped to JavaScript strings.
+Date and timestamp columns are mapped to JavaScript dates.  Note that
+JavaScript Date has millisecond precision.  Therefore, timestamps
+having greater precision lose their sub-millisecond fractional part
+when fetched. Internally, `TIMESTAMP` and `DATE` columns are fetched
+as `TIMESTAMP WITH LOCAL TIME ZONE`
+using
+[OCIDateTime](https://docs.oracle.com/database/122/LNOCI/object-relational-data-types-in-oci.htm#LNOCI16840).
+When binding a JavaScript Date value in an `INSERT` statement, the
+date is also inserted as `TIMESTAMP WITH LOCAL TIME ZONE` using
+OCIDateTime.
+See
+[Working with Dates Using the Node.js Driver](https://jsao.io/2016/09/working-with-dates-using-the-nodejs-driver/) for
+a discussion of date handling.
 
--   All numeric columns are mapped to JavaScript numbers.
-
--   Date and timestamp columns are mapped to JavaScript dates.
-    Note that JavaScript Date has millisecond precision.
-    Therefore, timestamps having greater
-    precision lose their sub-millisecond fractional part
-    when fetched. Internally, `TIMESTAMP` and `DATE`
-    columns are fetched as `TIMESTAMP WITH LOCAL TIME ZONE` using
-    [OCIDateTime](https://docs.oracle.com/database/122/LNOCI/object-relational-data-types-in-oci.htm#LNOCI16840).
-    When binding a JavaScript Date value in an `INSERT` statement, the date is also inserted as `TIMESTAMP WITH
-    LOCAL TIME ZONE` using OCIDateTime.
-    See [Working with Dates Using the Node.js Driver](https://jsao.io/2016/09/working-with-dates-using-the-nodejs-driver/) for
-    a discussion of date handling.
-
-##### Fetching as String
+##### <a name="fetchasstringhandling"></a> 9.1.6.4 Fetching Numbers and Dates as String
 
 The global [`fetchAsString`](#propdbfetchasstring) property can be
 used to force all number or date columns queried by an application to
@@ -3409,11 +3474,10 @@ represented as numbers:
 [ [ 'Grant', Thu May 24 2007 00:00:00 GMT+1000 (AEST), 7000, 0.15 ] ]
 ```
 
-
 To map columns returned from REF CURSORS, use `fetchAsString`.  The
 `fetchInfo` settings do not apply.
 
-##### Mapping Custom Types
+##### <a name="customtypehandling"></a> 9.1.6.5 Mapping Custom Types
 
 Datatypes such as an Oracle Locator `SDO_GEOMETRY`, or your own custom
 types, cannot be fetched directly in node-oracledb.  Instead, utilize
