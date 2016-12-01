@@ -1887,13 +1887,11 @@ void Connection::PrepareAndBind (eBaton* executeBaton)
 
         // Convert v8::Date to Oracle DB Type for IN and IN/OUT binds
         if ( executeBaton->binds[index]->type == DpiTimestampLTZ &&
-            // InOut bind
-            (executeBaton->binds[index]->isInOut ||
-            // In bind
-            (!executeBaton->binds[index]->isOut &&
-             !executeBaton->binds[index]->isInOut)))
+             ( executeBaton->binds[index]->isInOut ||  // INOUT binds
+               !executeBaton->binds[index]->isOut ) )  // NOT OUT  && NOT INOUT
         {
-          Connection::UpdateDateValue ( executeBaton, index ) ;
+          Connection::UpdateDateValue ( executeBaton,
+                                        executeBaton->binds[index], 1 ) ;
         }
 
         // Bind by name
@@ -1944,7 +1942,8 @@ void Connection::PrepareAndBind (eBaton* executeBaton)
             (!executeBaton->binds[index]->isOut &&
              !executeBaton->binds[index]->isInOut)))
         {
-          Connection::UpdateDateValue ( executeBaton, index ) ;
+          Connection::UpdateDateValue ( executeBaton,
+                                        executeBaton->binds[index], 1 ) ;
         }
 
         // Bind by position
@@ -4037,19 +4036,22 @@ void Connection::v8Date2OraDate(v8::Local<v8::Value> val, Bind *bind)
  *   Used for IN bind to provide the v8::Date value.
  *
  */
-void Connection::UpdateDateValue ( eBaton * ebaton, unsigned int index )
+void Connection::UpdateDateValue ( eBaton * ebaton, Bind *bind, unsigned int nRows )
 {
-  Bind* bind = ebaton->binds[index];
-
   if (bind->type == dpi::DpiTimestampLTZ)
   {
     bind->dttmarr = ebaton->dpienv->getDateTimeArray(
                                         ebaton->dpistmt->getError());
-    bind->value = bind->dttmarr->init(1);
-    if (!bind->isOut)
+    bind->value = bind->dttmarr->init( nRows );
+
+    // Update with provided value only for IN or INOUT binds
+    if (!bind->isOut || bind->isInOut)
     {
-      bind->dttmarr->setDateTime( 0,
-                                  (*(long double *)bind->extvalue));
+      for ( unsigned int row = 0 ; row < nRows ; row ++ )
+      {
+        bind->dttmarr->setDateTime( 0,
+                                  (*((long double *)bind->extvalue + row )));
+      }
     }
   }
 }
@@ -4288,14 +4290,16 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
       }
       else
       {
-        bind->extvalue = (long double *) malloc ( sizeof ( long double ) *
-                                                  nRows );
-
         if( !bind->extvalue )
         {
-          executeBaton->error = NJSMessages::getErrorMsg(
-                                  errInsufficientMemory);
-          goto exitcbDynBufferAllocate;
+          bind->extvalue = (long double *) malloc ( sizeof ( long double ) *
+                                                    nRows );
+          if( !bind->extvalue )
+          {
+            executeBaton->error = NJSMessages::getErrorMsg(
+                                    errInsufficientMemory);
+            goto exitcbDynBufferAllocate;
+          }
         }
       }
       // needed to post-process DML RETURNING of TimestampLTZ
@@ -4304,9 +4308,12 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
       bind->rowsReturned = 1;
       if (nRows > 1)
         bind->rowsReturned = nRows;
-      bind->dttmarr = executeBaton->dpienv->getDateTimeArray (
-        executeBaton->dpistmt->getError () );
-      bind->value = bind->dttmarr->init(nRows);
+
+      /* In case of OUT bind or RETURNING INTO statements, allocate here */
+      if ( ( bind->isOut && !bind->isInOut ) || executeBaton->stmtIsReturning )
+      {
+        Connection::UpdateDateValue ( executeBaton, bind, nRows ) ;
+      }
     }
     break;
 

@@ -453,7 +453,7 @@ private:
   // for lobs
   static v8::Local<v8::Value> GetValueLob (eBaton *executeBaton,
                                             Bind *bind);
-  static void UpdateDateValue ( eBaton *executeBaton, unsigned int index );
+  static void UpdateDateValue ( eBaton *executeBaton, Bind *bind, unsigned int nRows );
   static void v8Date2OraDate(v8::Local<v8::Value> val, Bind *bind);
   static ConnectionBusyStatus getConnectionBusyStatus ( Connection *conn );
 
