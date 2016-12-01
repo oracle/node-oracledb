@@ -140,7 +140,7 @@ void Pool::Init(Handle<Object> target)
     Nan::New<v8::String>("poolPingInterval").ToLocalChecked(),
     Pool::GetPoolPingInterval,
     Pool::SetPoolPingInterval );
-  
+
 
   poolTemplate_s.Reset( temp );
   Nan::Set(target, Nan::New<v8::String>("Pool").ToLocalChecked(),
@@ -337,7 +337,7 @@ NAN_GETTER(Pool::GetPoolPingInterval)
   Pool *njsPool = Nan::ObjectWrap::Unwrap<Pool>( info.Holder() );
   NJS_CHECK_OBJECT_VALID2(njsPool, info ) ;
   info.GetReturnValue().Set(getPoolProperty (njsPool,
-                                             njsPool->pingInterval_));  
+                                             njsPool->pingInterval_));
 }
 
 

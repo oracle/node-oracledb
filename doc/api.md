@@ -3935,7 +3935,7 @@ conn.execute(
   [50],
   function(err, result)
   {
-	if (err) { console.error(err.message); return; }
+    if (err) { console.error(err.message); return; }
     for (var i = 0; i < result.rows.length; i++)
       console.log(result.rows[i][0]);
   });

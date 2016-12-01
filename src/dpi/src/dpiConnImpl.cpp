@@ -730,7 +730,7 @@ void ConnImpl::initConnImpl ( bool pool, bool externalAuth,
 #if ( ( OCI_MAJOR_VERSION < 12 ) ||                                \
       ( OCI_MAJOR_VERSION == 12 && OCI_MINOR_VERSION < 2 ) )
     //
-    // PingInterval elapsed implementation is available  only for 
+    // PingInterval elapsed implementation is available  only for
     //   pooled-connections and
     //   pingInterval_ is specified to check (-ve never check)
     //
@@ -747,7 +747,7 @@ void ConnImpl::initConnImpl ( bool pool, bool externalAuth,
                                      (ub1)s_propPingName_.length(),
                                      (void **)&lasttick_ ), errh_ );
 
-      // If the session is obtained firstime from pool, context value 
+      // If the session is obtained firstime from pool, context value
       // will not be there, in that case, allocate and set it.
       if ( !lasttick_ )
       {
@@ -842,11 +842,11 @@ void ConnImpl::cleanup()
     // In 12.2 and above OCI has a different
     // light-weight ping mechanism and is always enabled, so this
     // implementation is only for Oracle Client library versions <= 12.1
-    
+
     // Set the current time on the session to be used later whether
     // this time is elapsed against pingInterval_.
     if ( sessh_ )
-    {      
+    {
       // For Later use, update the session with current time only
       // if ping is desired.
 

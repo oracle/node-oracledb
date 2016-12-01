@@ -95,7 +95,7 @@ Oracledb::Oracledb()
   fetchAsStringTypes_      = NULL;
   fetchAsStringTypesCount_ = 0;
   lobPrefetchSize_         = NJS_LOB_PREFETCH_SIZE;
-  
+
   poolPingInterval_        = NJS_POOL_DEFAULT_PING_INTERVAL ;
 }
 
@@ -1033,7 +1033,7 @@ void Oracledb::Async_CreatePool (uv_work_t *req)
     // externAuth is not supported in homogeneous pool, in case app specified
     // externalAuth, then make it as heterogeneous pool.
     poolBaton->dpipool = poolBaton-> dpienv ->
-                                     createPool ( 
+                                     createPool (
                                        poolBaton->user,
                                        poolBaton->pswrd,
                                        poolBaton->connStr,
