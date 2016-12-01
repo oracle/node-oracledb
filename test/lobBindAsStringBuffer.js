@@ -1667,7 +1667,7 @@ describe('74.lobBindAsStringBuffer.js', function() {
       var bigStr_1 = getRandomString(size_1, specialStr);
       var bigStr_2 = getRandomString(size_2, specialStr);
       var bufferStr_1 = node6plus ? Buffer.from(bigStr_1, "utf-8") : new Buffer(bigStr_1, "utf-8");
-      var bufferStr_2 = node6plus ? Buffer.from(bigStr_2, "utf-8") : new Buffer(bigStr_2, "utf-8");;
+      var bufferStr_2 = node6plus ? Buffer.from(bigStr_2, "utf-8") : new Buffer(bigStr_2, "utf-8");
       var sequence = 100;
       var bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -1799,7 +1799,6 @@ describe('74.lobBindAsStringBuffer.js', function() {
       var specialStr = "74.10.2";
       var size_1 = 32768;
       var sequence = 101;
-      var size_1 = 32768;
       var bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         b1: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: size_1 },

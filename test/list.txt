@@ -1075,13 +1075,16 @@ Overview of node-oracledb functional tests
         72.1.2 BIND_IN, PL/SQL, a txt file
         72.1.3 Negative - invalid type
         72.1.4 Negative - invalid value
-        72.1.5 Negative - inconsistent datatypes
-        72.1.6 DML - UPDATE statement
+        72.1.5 DML - UPDATE statement
+        72.1.6 promise test of createLob()
     72.2 BLOB
         72.2.1 BIND_IN, DML, a jpg file
         72.2.2 BIND_IN, PL/SQL, a jpg file
         72.2.3 Negative - inconsistent datatypes
         72.2.4 Negative - not providing first parameter
+        72.2.5 promise test of createLob()
+        72.2.6 Negative - call lob.close() twice
+        72.2.7 Negative - call lob.close() after closing lob
 
 73. poolPing.js
     73.1 the default value of poolPingInterval is 60

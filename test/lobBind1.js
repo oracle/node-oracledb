@@ -583,7 +583,7 @@ describe('71. lobBind1.js', function() {
 
       var seq = 7;
       var inStr  = "I love the sunshine today!",
-          outStr = "A new day has come.";
+        outStr = "A new day has come.";
 
       var proc = "CREATE OR REPLACE PROCEDURE nodb_proc_clob_inout1 \n" +
                  "  (p_num IN NUMBER, p_inout IN OUT CLOB) \n" +
@@ -1346,7 +1346,7 @@ describe('71. lobBind1.js', function() {
         outBufID = 70;
 
       var inBuf  = assist.createBuffer(10),
-          outBuf = assist.createBuffer(100);
+        outBuf = assist.createBuffer(100);
 
       var proc = "CREATE OR REPLACE PROCEDURE nodb_proc_blob_inout1 \n" +
                  "  (p_in IN NUMBER, p_outbufid IN NUMBER, p_inout IN OUT BLOB) \n" +

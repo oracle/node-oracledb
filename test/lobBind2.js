@@ -298,62 +298,10 @@ describe("72. lobBind2.js", function() {
 
     }); // 72.1.4
 
-    it("72.1.5 Negative - inconsistent datatypes", function(done) {
+
+    it("72.1.5 DML - UPDATE statement", function(done) {
 
       var seq = 5;
-
-      async.series([
-        function(cb) {
-          connection.createLob(oracledb.BLOB, function(err, lob) {
-            should.not.exist(err);
-
-            lob.on("close", function(err) {
-              should.not.exist(err);
-
-              connection.commit(function(err) {
-                should.not.exist(err);
-
-                return cb();
-              });
-            }); // close event
-
-            lob.on("error", function(err) {
-              should.not.exist(err, "lob.on 'error' event.");
-            });
-
-            lob.on("finish", function() {
-              connection.execute(
-                "insert into nodb_tab_clob72 (id, content) values (:id, :bindvar)",
-                { id: seq, bindvar: lob},
-                function(err) {
-                  should.exist(err);
-                  (err.message).should.startWith("ORA-00932:");
-                  // ORA-00932: inconsistent datatypes: expected CLOB got BLOB
-
-                  lob.close(function(err) {
-                    should.not.exist(err);
-                  });
-                }
-              );
-            }); // finish event
-
-            var inStream = fs.createReadStream(inFileName);
-
-            inStream.on("error", function(err) {
-              should.not.exist(err, "inStream.on 'error' event.");
-            });
-
-            inStream.pipe(lob);
-
-          }); // createLob()
-        }
-      ], done);
-
-    }); // 72.1.5
-
-    it("72.1.6 DML - UPDATE statement", function(done) {
-
-      var seq = 6;
 
       async.series([
         function(cb) {
@@ -419,11 +367,11 @@ describe("72. lobBind2.js", function() {
         }
       ], done);
 
-    }); // 72.1.6
+    }); // 72.1.5
 
-    it("72.1.7 promise test of createLob()", function(done) {
+    it("72.1.6 promise test of createLob()", function(done) {
 
-      var seq = 7;
+      var seq = 6;
 
       if (oracledb.Promise) {
         connection.createLob(oracledb.CLOB)
@@ -474,7 +422,7 @@ describe("72. lobBind2.js", function() {
         return done();
       }
 
-    }); // 72.1.7
+    }); // 72.1.6
 
   }); // 72.1
 
@@ -805,85 +753,9 @@ describe("72. lobBind2.js", function() {
 
     }); // 72.2.5
 
-    it("72.2.6 Negative - createLob() without lob.close()", function(done) {
+    it.skip("72.2.6 Negative - call lob.close() twice", function(done) {
 
       var seq = 6000;
-      var connHandler, lobHandler;
-
-      async.series([
-        function(cb) {
-          oracledb.getConnection(
-            dbConfig,
-            function(err, conn) {
-              should.not.exist(err);
-              connHandler = conn;
-
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          connHandler.createLob(oracledb.BLOB, function(err, lob) {
-            should.not.exist(err);
-
-            lobHandler = lob;
-
-            lob.on("error", function(err) {
-              should.not.exist(err, "lob.on 'error' event.");
-            });
-
-            lob.on("finish", function() {
-              connHandler.execute(
-                "insert into nodb_tab_blob72 (id, content) values (:id, :bindvar)",
-                { id: seq, bindvar: lob },
-                function(err) {
-                  should.not.exist(err);
-
-                  cb()
-                }
-              ); // execute()
-            }); // finish event
-
-            var inStream = fs.createReadStream(jpgFileName);
-            inStream.on("error", function(err) {
-              should.not.exist(err, "inStream.on 'error' event.");
-            });
-
-            inStream.pipe(lob);
-
-          });
-        },
-        function(cb) {
-          connHandler.close(function(err) {
-            should.exist(err);
-            (err.message).should.startWith('NJS-050:');
-            // NJS-050: cannot release connection with active temporary LOBs created by createLob()
-            cb();
-          });
-        },
-        function(cb) {
-          lobHandler.close(function(err) {
-            should.not.exist(err);
-
-          });
-
-          lobHandler.on("close", function(err) {
-              should.not.exist(err);
-
-              connHandler.commit(function(err) {
-                should.not.exist(err);
-
-                return cb();
-              });
-            }); // close event
-        }
-      ], done);
-
-    }); // 72.2.6
-
-    it.skip("72.2.7 Negative - call lob.close() twice", function(done) {
-
-      var seq = 7000;
 
       async.series([
         function(cb) {
@@ -939,11 +811,11 @@ describe("72. lobBind2.js", function() {
         }
       ], done);
 
-    }); // 72.2.7
+    }); // 72.2.6
 
-    it.skip("72.2.8 Negative - call lob.close() after closing lob", function(done) {
+    it.skip("72.2.7 Negative - call lob.close() after closing lob", function(done) {
 
-      var seq = 8000;
+      var seq = 7000;
 
       async.series([
         function(cb) {
@@ -999,7 +871,7 @@ describe("72. lobBind2.js", function() {
         }
       ], done);
 
-    }); // 72.2.8
+    }); // 72.2.7
 
   }); // 72.2
 
