@@ -51,7 +51,12 @@ oracledb.getConnection(
         if (err) { console.error(err.message); return; }
         if (result.rows.length === 0) { console.log("No results"); return; }
 
-        var blob = Buffer(0);
+        var blob;
+        if (Number(process.version.match(/^v(\d+\.\d+)/)[1]) < 4)
+          blob = Buffer(0);  // deprecated usage
+        else
+          blob = Buffer.from([]);
+
         var blobLength = 0;
         var lob = result.rows[0][0];
 
