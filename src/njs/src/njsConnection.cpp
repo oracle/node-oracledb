@@ -1103,7 +1103,8 @@ void Connection::GetInBindParamsScalar(Local<Value> v8val, Bind* bind,
       bind->type = dpi::DpiInteger;
       bind->maxSize = *(bind->len) = sizeof(int);
       bind->value = (int*)malloc(*(bind->len));
-      *(int*)(bind->value) = v8valNULL ? 0 : v8val->ToInt32()->Value();
+      *(int*)(bind->value) = v8valNULL ? 0 :
+                                Nan::To<int32_t> (v8val).FromJust ();
       break;
 
     case NJS_VALUETYPE_UINTEGER:
@@ -1117,7 +1118,7 @@ void Connection::GetInBindParamsScalar(Local<Value> v8val, Bind* bind,
       bind->maxSize = *(bind->len) = sizeof(unsigned int);
       bind->value = (unsigned int*)malloc(*(bind->len));
       *(unsigned int*)(bind->value) = v8valNULL ? 0 :
-                                        v8val->ToUint32()->Value();
+                                        Nan::To<uint32_t>(v8val).FromJust();
       break;
 
     case NJS_VALUETYPE_NUMBER:
@@ -2816,8 +2817,12 @@ void Connection::Async_AfterExecute(uv_work_t *req)
       case DpiStmtSelect :
         if( executeBaton->getRS )
         {
-          Local<Object> resultSet = Nan::New<FunctionTemplate>(
-              ResultSet::resultSetTemplate_s)->GetFunction() ->NewInstance();
+	  Local<Object> resultSet =
+            Nan::NewInstance (
+	      Local<Function>::Cast (
+                Nan::GetFunction (
+		  Nan::New<FunctionTemplate> (
+      ResultSet::resultSetTemplate_s )).ToLocalChecked() )).ToLocalChecked ();
 
           /* ResultSet case, the statement object is ready for fetching */
           (Nan::ObjectWrap::Unwrap<ResultSet> (resultSet))->
@@ -3180,8 +3185,11 @@ Local<Value> Connection::GetValueRefCursor ( eBaton  *executeBaton,
     unsigned int numCols  = 0;
     const MetaInfo *mInfo = NULL;
 
-    resultSet = Nan::New<FunctionTemplate>(ResultSet::resultSetTemplate_s)->
-                            GetFunction() ->NewInstance();
+    resultSet = Nan::NewInstance (
+		  Local<Function>::Cast (
+		    Nan::GetFunction (
+                      Nan::New <FunctionTemplate>(
+     ResultSet::resultSetTemplate_s )).ToLocalChecked () ) ).ToLocalChecked ();
 
     if ( extBind )
     {
@@ -4507,7 +4515,11 @@ v8::Local<v8::Value> Connection::NewLob(eBaton* executeBaton,
   Local<Object>  jsOracledb = Nan::New<Object>(connection->oracledb_->jsOracledb);
   Local<Value>   argv[1];
 
-  Local<Object>  iLob = Nan::New<FunctionTemplate>(ILob::iLobTemplate_s)->GetFunction()->NewInstance();
+  v8::Local<v8::Object> iLob = Nan::NewInstance (
+				  Local<Function>::Cast (
+					  Nan::GetFunction (
+						  Nan::New<FunctionTemplate>(
+     ILob::iLobTemplate_s)).ToLocalChecked() ) ).ToLocalChecked ();
 
   // the ownership of all handles in the ProtoILob are transferred to ILob
   // here.  Any error in initialization of ILob will cleanup the OCI

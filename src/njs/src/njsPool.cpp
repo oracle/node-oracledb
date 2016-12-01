@@ -553,12 +553,16 @@ void Pool::Async_AfterGetConnection(uv_work_t *req)
   else
   {
     argv[0] = Nan::Undefined();
-    Local<FunctionTemplate> lft = Nan::New(Connection::connectionTemplate_s);
-    Local<Object> connection = lft->GetFunction()-> NewInstance();
+    Local<Object> connection = Nan::NewInstance (
+                                 Local<Function>::Cast (
+                                   Nan::GetFunction (
+                                     Nan::New<FunctionTemplate> (
+   Connection::connectionTemplate_s )).ToLocalChecked () )).ToLocalChecked ();
+
     (Nan::ObjectWrap::Unwrap<Connection> (connection))->
                                  setConnection( connBaton->dpiconn,
                                                 connBaton->njspool->oracledb_,
-                                                Nan::New( connBaton->jsPool ) );
+                                               Nan::New( connBaton->jsPool ) );
     argv[1] = connection;
   }
 

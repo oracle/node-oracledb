@@ -711,7 +711,7 @@ NAN_SETTER(Oracledb::SetFetchAsString)
   for ( unsigned int t = 0 ; t < array->Length () ; t ++ )
   {
     DataType type = (DataType)
-                    array->Get(t).As<v8::Integer>()->ToInt32()->Value ();
+    Nan::To<int32_t> ( array->Get(t).As<v8::Integer>() ).FromJust ();
     if ( ( type == NJS_DATATYPE_STR  ) || ( type == NJS_DATATYPE_DEFAULT ) )
     {
       msg = NJSMessages::getErrorMsg ( errInvalidTypeForConversion );
@@ -913,8 +913,13 @@ void Oracledb::Async_AfterGetConnection (uv_work_t *req)
   else
   {
     argv[0] = Nan::Undefined();
-    Local<FunctionTemplate> lft = Nan::New<FunctionTemplate>(Connection::connectionTemplate_s);
-    Local<Object> connection = lft->GetFunction()-> NewInstance();
+    Local<Object> connection =
+      Nan::NewInstance (
+        Local<Function>::Cast (
+          Nan::GetFunction (
+            Nan::New<FunctionTemplate> (
+   Connection::connectionTemplate_s )).ToLocalChecked () )).ToLocalChecked ();
+
     (Nan::ObjectWrap::Unwrap<Connection> (connection))->
                                 setConnection( connBaton->dpiconn,
                                                connBaton->oracledb,
@@ -1083,8 +1088,13 @@ void Oracledb::Async_AfterCreatePool (uv_work_t *req)
   else
   {
     argv[0] = Nan::Undefined();
-    Local<Object> njsPool = Nan::New(Pool::poolTemplate_s)->
-                             GetFunction() ->NewInstance();
+    Local<Object> njsPool =
+      Nan::NewInstance (
+        Local<Function>::Cast (
+          Nan::GetFunction (
+            Nan::New<FunctionTemplate> (
+              Pool::poolTemplate_s)).ToLocalChecked () )).ToLocalChecked ();
+
     (Nan::ObjectWrap::Unwrap<Pool> (njsPool))-> setPool (
                                             poolBaton->dpipool,
                                             poolBaton->oracledb,

@@ -250,7 +250,7 @@ private:
 {                                                                             \
   if( args[index]->IsUint32() )                                               \
   {                                                                           \
-    val = args[index]->ToUint32()->Value();                                   \
+    val = Nan::To<uint32_t> (args[index] ).FromJust();                        \
     err.clear();                                                              \
   }                                                                           \
   else                                                                        \
@@ -298,7 +298,7 @@ private:
   err.clear();                                                                \
   if( v8value->IsUint32() )                                                   \
   {                                                                           \
-    val = v8value->ToUint32()->Value();                                       \
+    val = Nan::To<uint32_t> (v8value).FromJust ();                            \
   }                                                                           \
   else if(v8value->IsUndefined() || v8value->IsNull () )                      \
   {                                                                           \
@@ -330,7 +330,7 @@ private:
   err.clear();                                                                \
   if( v8value->IsInt32() )                                                    \
   {                                                                           \
-    val = v8value->ToInt32()->Value();                                        \
+    val = ( Nan::To<int32_t> ( v8value) ).FromJust () ;                         \
   }                                                                           \
   else if(v8value->IsUndefined() || v8value->IsNull ())                       \
   {                                                                           \
@@ -394,7 +394,7 @@ private:
   string errMsg;                                                              \
   if( v8value->IsUint32() )                                                   \
   {                                                                           \
-    val = v8value->ToUint32()->Value();                                       \
+    val = (Nan::To<uint32_t> (v8value) ).FromJust () ;                        \
   }                                                                           \
   else                                                                        \
   {                                                                           \
@@ -414,7 +414,7 @@ private:
   string errMsg;                                                              \
   if ( v8value->IsInt32 () )                                                  \
   {                                                                           \
-    val = v8value->ToInt32 ()->Value ();                                      \
+    val = (Nan::To<int32_t> ( v8value ) ).FromJust ();                        \
   }                                                                           \
   else                                                                        \
   {                                                                           \
