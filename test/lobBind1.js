@@ -579,11 +579,11 @@ describe('71. lobBind1.js', function() {
 
     }); // 71.1.6
 
-    it('71.1.7 BIND_INOUT, PL/SQL, A String', function(done) {
+    it('71.1.7 BIND_INOUT, PL/SQL, A String. IN LOB value does not change.', function(done) {
 
       var seq = 7;
       var inStr  = "I love the sunshine today!",
-        outStr = "A new day has come.";
+          outStr = "A new day has come.";
 
       var proc = "CREATE OR REPLACE PROCEDURE nodb_proc_clob_inout1 \n" +
                  "  (p_num IN NUMBER, p_inout IN OUT CLOB) \n" +
@@ -635,19 +635,45 @@ describe('71. lobBind1.js', function() {
 
                   var lobout = result2.outBinds.io;
 
-                  lobout.setEncoding('utf8');
-                  var clobData = '';
+                  async.parallel([
+                    function(callback) {
+                      lobout.setEncoding("utf8");
+                      var clobData = "";
 
-                  lobout.on('data', function(chunk) {
-                    clobData += chunk;
-                  });
+                      lobout.on("data", function(chunk) {
+                        clobData += chunk;
+                      });
 
-                  lobout.on('error', function(err) {
-                    should.not.exist(err, "lob.on 'error' event.");
-                  });
+                      lobout.on("error", function(err) {
+                        should.not.exist(err, "lob.on 'error' event.");
+                      });
 
-                  lobout.on('end', function() {
-                    should.strictEqual(clobData, outStr);
+                      lobout.on("end", function() {
+                        should.strictEqual(clobData, outStr);
+
+                        return callback();
+                      });
+                    },
+                    function(callback) {
+                      lob.setEncoding("utf8");
+                      var clobData = "";
+
+                      lob.on("data", function(chunk) {
+                        clobData += chunk;
+                      });
+
+                      lob.on("error", function(err) {
+                        should.not.exist(err, "lob.on 'error' event.");
+                      });
+
+                      lob.on("end", function() {
+                        should.strictEqual(clobData, inStr);
+
+                        return callback();
+                      });
+                    }
+                  ], function(err) {
+                    should.not.exist(err);
                     return cb();
                   });
 
@@ -1320,7 +1346,7 @@ describe('71. lobBind1.js', function() {
         outBufID = 70;
 
       var inBuf  = assist.createBuffer(10),
-        outBuf = assist.createBuffer(100);
+          outBuf = assist.createBuffer(100);
 
       var proc = "CREATE OR REPLACE PROCEDURE nodb_proc_blob_inout1 \n" +
                  "  (p_in IN NUMBER, p_outbufid IN NUMBER, p_inout IN OUT BLOB) \n" +

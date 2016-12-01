@@ -458,12 +458,9 @@
          },
          function(cb) {
 
-           setTimeout(function() {
-             rset.close(function(err) {
-               should.not.exist(err);
-               return cb();
-             });
-           }, 100);
+           rset.close(function() {
+             return cb();
+           });
 
          }
        ], done);
@@ -507,12 +504,9 @@
          },
          function(cb) {
 
-           setTimeout(function() {
-             rcur.close(function(err) {
-               should.not.exist(err);
-               return cb();
-             });
-           }, 100);
+           rcur.close(function() {
+             return cb();
+           });
 
          }
        ], done);
