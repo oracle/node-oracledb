@@ -1817,4 +1817,464 @@ describe('70. plsqlBindScalar.js', function() {
 
   }); // 70.9
 
+  describe('70.10 Check the bind-in values in PL/SQL', function() {
+
+    it('70.10.1 STRING, basic', function(done) {
+
+      async.series([
+        function(cb) {
+          var proc = "CREATE OR REPLACE FUNCTION nodb_checkplsqlvalue1 (p_in IN OUT VARCHAR2) RETURN VARCHAR2 \n" +
+                     "IS \n" +
+                     "    comparison VARCHAR2(20); \n" +
+                     "BEGIN \n" +
+                     "    IF p_in = 'Shenzhen City' THEN \n" +
+                     "        comparison := 'the same'; \n" +
+                     "    ELSE \n" +
+                     "        comparison := 'different'; \n" +
+                     "    END IF; \n" +
+                     "    RETURN comparison; \n" +
+                     "END;";
+
+          connection.execute(
+            proc,
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        },
+        function theSame(cb) {
+          var bindVar = {
+            output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+            p_in: {type: oracledb.STRING, dir: oracledb.BIND_INOUT, val: 'Shenzhen City'}
+          };
+          connection.execute(
+            "begin :output := nodb_checkplsqlvalue1 (:p_in); end;",
+            bindVar,
+            function(err, result) {
+              should.not.exist(err);
+              // console.log(result);
+              should.strictEqual(result.outBinds.output, 'the same');
+              should.strictEqual(result.outBinds.p_in, 'Shenzhen City');
+              cb();
+            }
+          );
+        },
+        function diff(cb) {
+          var bindVar = {
+            output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+            p_in: {type: oracledb.STRING, dir: oracledb.BIND_INOUT, val: 'Shenzhen city'}
+          };
+          connection.execute(
+            "begin :output := nodb_checkplsqlvalue1 (:p_in); end;",
+            bindVar,
+            function(err, result) {
+              should.not.exist(err);
+              // console.log(result);
+              should.strictEqual(result.outBinds.output, 'different');
+              should.strictEqual(result.outBinds.p_in, 'Shenzhen city');
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          connection.execute(
+            "drop function nodb_checkplsqlvalue1",
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        }
+      ], done);
+
+    }); // 70.10.1
+
+    it('70.10.2 STRING, null, empty string, undefined', function(done) {
+      async.series([
+        function(cb) {
+          var proc = "CREATE OR REPLACE FUNCTION nodb_checkplsqlvalue2 (p_in IN OUT VARCHAR2) RETURN VARCHAR2 \n" +
+                     "IS \n" +
+                     "    comparison VARCHAR2(20); \n" +
+                     "BEGIN \n" +
+                     "    IF p_in IS NULL THEN \n" +
+                     "        comparison := 'correct'; \n" +
+                     "    ELSE \n" +
+                     "        comparison := 'wrong'; \n" +
+                     "    END IF; \n" +
+                     "    RETURN comparison; \n" +
+                     "END;";
+
+          connection.execute(
+            proc,
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        },
+        function correct(cb) {
+          var bindVar = {
+            output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+            p_in: {type: oracledb.STRING, dir: oracledb.BIND_INOUT, val: null}
+          };
+          connection.execute(
+            "begin :output := nodb_checkplsqlvalue2 (:p_in); end;",
+            bindVar,
+            function(err, result) {
+              should.not.exist(err);
+              // console.log(result);
+              should.strictEqual(result.outBinds.output, 'correct');
+              should.strictEqual(result.outBinds.p_in, null);
+              cb();
+            }
+          );
+        },
+        function correct(cb) {
+          var bindVar = {
+            output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+            p_in: {type: oracledb.STRING, dir: oracledb.BIND_INOUT, val: ''}
+          };
+          connection.execute(
+            "begin :output := nodb_checkplsqlvalue2 (:p_in); end;",
+            bindVar,
+            function(err, result) {
+              should.not.exist(err);
+              // console.log(result);
+              should.strictEqual(result.outBinds.output, 'correct');
+              should.strictEqual(result.outBinds.p_in, null);
+              cb();
+            }
+          );
+        },
+        function correct(cb) {
+          var bindVar = {
+            output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+            p_in: {type: oracledb.STRING, dir: oracledb.BIND_INOUT, val: undefined}
+          };
+          connection.execute(
+            "begin :output := nodb_checkplsqlvalue2 (:p_in); end;",
+            bindVar,
+            function(err, result) {
+              should.not.exist(err);
+              // console.log(result);
+              should.strictEqual(result.outBinds.output, 'correct');
+              should.strictEqual(result.outBinds.p_in, null);
+              cb();
+            }
+          );
+        },
+        function wrong(cb) {
+          var bindVar = {
+            output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+            p_in: {type: oracledb.STRING, dir: oracledb.BIND_INOUT, val: 'foobar'}
+          };
+          connection.execute(
+            "begin :output := nodb_checkplsqlvalue2 (:p_in); end;",
+            bindVar,
+            function(err, result) {
+              should.not.exist(err);
+              // console.log(result);
+              should.strictEqual(result.outBinds.output, 'wrong');
+              should.strictEqual(result.outBinds.p_in, 'foobar');
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          connection.execute(
+            "drop function nodb_checkplsqlvalue2",
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        }
+      ], done);
+    }); // 70.10.2
+
+    it('70.10.3 NUMBER, null values', function(done) {
+
+      async.series([
+        function(cb) {
+          var proc = "CREATE OR REPLACE FUNCTION nodb_checkplsqlvalue3 (p_in IN OUT NUMBER) RETURN VARCHAR2 \n" +
+                     "IS \n" +
+                     "    comparison VARCHAR2(20); \n" +
+                     "BEGIN \n" +
+                     "    IF p_in IS NULL THEN \n" +
+                     "        comparison := 'correct'; \n" +
+                     "    ELSE \n" +
+                     "        comparison := 'wrong'; \n" +
+                     "    END IF; \n" +
+                     "    RETURN comparison; \n" +
+                     "END;";
+
+          connection.execute(
+            proc,
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        },
+        function correct(cb) {
+          var bindVar = {
+            output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+            p_in: {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: null}
+          };
+          connection.execute(
+            "begin :output := nodb_checkplsqlvalue3 (:p_in); end;",
+            bindVar,
+            function(err, result) {
+              should.not.exist(err);
+              // console.log(result);
+              should.strictEqual(result.outBinds.output, 'correct');
+              should.strictEqual(result.outBinds.p_in, null);
+              cb();
+            }
+          );
+        },
+        function correct(cb) {
+          var bindVar = {
+            output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+            p_in: {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: undefined}
+          };
+          connection.execute(
+            "begin :output := nodb_checkplsqlvalue3 (:p_in); end;",
+            bindVar,
+            function(err, result) {
+              should.not.exist(err);
+              // console.log(result);
+              should.strictEqual(result.outBinds.output, 'correct');
+              should.strictEqual(result.outBinds.p_in, null);
+              cb();
+            }
+          );
+        },
+        function wrong(cb) {
+          var bindVar = {
+            output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+            p_in: {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: 0}
+          };
+          connection.execute(
+            "begin :output := nodb_checkplsqlvalue3 (:p_in); end;",
+            bindVar,
+            function(err, result) {
+              should.not.exist(err);
+              // console.log(result);
+              should.strictEqual(result.outBinds.output, 'wrong');
+              should.strictEqual(result.outBinds.p_in, 0);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          connection.execute(
+            "drop function nodb_checkplsqlvalue3",
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        }
+      ], done);
+
+    }); // 70.10.3
+
+    it('70.10.4 DATE, null values', function(done) {
+
+      async.series([
+        function(cb) {
+          var proc = "CREATE OR REPLACE FUNCTION nodb_checkplsqlvalue4 (p_in IN OUT DATE) RETURN VARCHAR2 \n" +
+                     "IS \n" +
+                     "    comparison VARCHAR2(20); \n" +
+                     "BEGIN \n" +
+                     "    IF p_in IS NULL THEN \n" +
+                     "        comparison := 'correct'; \n" +
+                     "    ELSE \n" +
+                     "        comparison := 'wrong'; \n" +
+                     "    END IF; \n" +
+                     "    RETURN comparison; \n" +
+                     "END;";
+
+          connection.execute(
+            proc,
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        },
+        function correct(cb) {
+          var bindVar = {
+            output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+            p_in: {type: oracledb.DATE, dir: oracledb.BIND_INOUT, val: null}
+          };
+          connection.execute(
+            "begin :output := nodb_checkplsqlvalue4 (:p_in); end;",
+            bindVar,
+            function(err, result) {
+              should.not.exist(err);
+              // console.log(result);
+              should.strictEqual(result.outBinds.output, 'correct');
+              should.strictEqual(result.outBinds.p_in, null);
+              cb();
+            }
+          );
+        },
+        function diff(cb) {
+          var today = new Date();
+          var bindVar = {
+            output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+            p_in: { type: oracledb.DATE, dir: oracledb.BIND_INOUT, val: today }
+          };
+          connection.execute(
+            "begin :output := nodb_checkplsqlvalue4 (:p_in); end;",
+            bindVar,
+            function(err, result) {
+              should.not.exist(err);
+              // console.log(result);
+              should.strictEqual(result.outBinds.output, 'wrong');
+              cb();
+            }
+          );
+        },
+        function correct(cb) {
+          var bindVar = {
+            output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+            p_in: {type: oracledb.DATE, dir: oracledb.BIND_INOUT, val: undefined}
+          };
+          connection.execute(
+            "begin :output := nodb_checkplsqlvalue4 (:p_in); end;",
+            bindVar,
+            function(err, result) {
+              should.not.exist(err);
+              // console.log(result);
+              should.strictEqual(result.outBinds.output, 'correct');
+              should.strictEqual(result.outBinds.p_in, null);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          connection.execute(
+            "drop function nodb_checkplsqlvalue4",
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        }
+      ], done);
+
+    }); // 70.10.4
+
+    it('70.10.5 BUFFER', function(done) {
+      async.series([
+        function(cb) {
+          var proc = "CREATE OR REPLACE FUNCTION nodb_checkplsqlvalue5 (p_in IN OUT RAW) RETURN VARCHAR2 \n" +
+                     "IS \n" +
+                     "    comparison VARCHAR2(20); \n" +
+                     "BEGIN \n" +
+                     "    IF p_in IS NULL THEN \n" +
+                     "        comparison := 'correct'; \n" +
+                     "    ELSE \n" +
+                     "        comparison := 'wrong'; \n" +
+                     "    END IF; \n" +
+                     "    RETURN comparison; \n" +
+                     "END;";
+
+          connection.execute(
+            proc,
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        },
+        function correct(cb) {
+          var bindVar = {
+            output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+            p_in: {type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, val: null}
+          };
+          connection.execute(
+            "begin :output := nodb_checkplsqlvalue5 (:p_in); end;",
+            bindVar,
+            function(err, result) {
+              should.not.exist(err);
+              // console.log(result);
+              should.strictEqual(result.outBinds.output, 'correct');
+              should.strictEqual(result.outBinds.p_in, null);
+              cb();
+            }
+          );
+        },
+        function correct(cb) {
+          var bindVar = {
+            output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+            p_in: {type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, val: new Buffer('')}
+          };
+          connection.execute(
+            "begin :output := nodb_checkplsqlvalue5 (:p_in); end;",
+            bindVar,
+            function(err, result) {
+              should.not.exist(err);
+              // console.log(result);
+              should.strictEqual(result.outBinds.output, 'correct');
+              should.strictEqual(result.outBinds.p_in, null);
+              cb();
+            }
+          );
+        },
+        function correct(cb) {
+          var bindVar = {
+            output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+            p_in: {type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, val: undefined}
+          };
+          connection.execute(
+            "begin :output := nodb_checkplsqlvalue5 (:p_in); end;",
+            bindVar,
+            function(err, result) {
+              should.not.exist(err);
+              // console.log(result);
+              should.strictEqual(result.outBinds.output, 'correct');
+              should.strictEqual(result.outBinds.p_in, null);
+              cb();
+            }
+          );
+        },
+        function wrong(cb) {
+
+          var bufsize = 21;
+          var bufValue = assist.createBuffer(bufsize);
+          var bindVar = {
+            output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+            p_in: {type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, val: bufValue}
+          };
+          connection.execute(
+            "begin :output := nodb_checkplsqlvalue5 (:p_in); end;",
+            bindVar,
+            function(err, result) {
+              should.not.exist(err);
+              // console.log(result);
+              should.strictEqual(result.outBinds.output, 'wrong');
+              (result.outBinds.p_in).should.eql(bufValue);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          connection.execute(
+            "drop function nodb_checkplsqlvalue5",
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        }
+      ], done);
+    }); // 70.10.5
+
+  }); // 70.10
+
 });
