@@ -7,6 +7,10 @@ Use the questions at the bottom of this template as a guide.
 
 Use Markdown syntax, particularly for code blocks: see https://help.github.com/articles/basic-writing-and-formatting-syntax/
 
+### For security issues:
+
+See https://www.oracle.com/support/assurance/vulnerability-remediation/reporting-security-vulnerabilities.html for how to report security issues.
+
 ### For installation issues:
 
 Use a gist for screen output and logs: see https://gist.github.com/
