@@ -1030,7 +1030,7 @@ describe('74.lobBindAsStringBuffer.js', function() {
             bindVar,
             function(err, result) {
               should.not.exist(err);
-              should.strictEqual(result.outBinds.c, '');
+              should.strictEqual(result.outBinds.c, null);
               cb();
             }
           );
@@ -1077,19 +1077,19 @@ describe('74.lobBindAsStringBuffer.js', function() {
       );
     }); // 74.3.1
 
-    it.skip('74.3.2 PLSQL, BIND_INOUT with String length 32767', function(done) {
+    it('74.3.2 PLSQL, BIND_INOUT with String length 32767', function(done) {
       var specialStr = "74.3.2";
       var len = 32767;
       var clobVal = getRandomString(len, specialStr);
       var bindVar = {
-        lob_in_out: { dir: oracledb.BIND_INOUT, type: oracledb.STRING, val: clobVal }
+        lob_in_out: { dir: oracledb.BIND_INOUT, type: oracledb.STRING, val: clobVal, maxSize: len }
       };
 
       connection.execute(
         sqlRun,
         bindVar,
         function(err, result) {
-          should.exist(err);
+          should.not.exist(err);
           var resultLength = result.outBinds.lob_in_out.length;
           var specStrLength = specialStr.length;
           should.strictEqual(resultLength, len);
@@ -1722,20 +1722,20 @@ describe('74.lobBindAsStringBuffer.js', function() {
       );
     }); // 74.6.1
 
-    it.skip('74.6.2 PLSQL, BIND_INOUT with Buffer size 32767', function(done) {
+    it('74.6.2 PLSQL, BIND_INOUT with Buffer size 32767', function(done) {
       var size = 32767;
       var specialStr = "74.6.2";
       var bigStr = getRandomString(size, specialStr);
       var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
       var bindVar = {
-        lob_in_out: { dir: oracledb.BIND_INOUT, type: oracledb.BUFFER, val: bufferStr }
+        lob_in_out: { dir: oracledb.BIND_INOUT, type: oracledb.BUFFER, val: bufferStr, maxSize: size }
       };
 
       connection.execute(
         sqlRun,
         bindVar,
         function(err, result) {
-          should.exist(err);
+          should.not.exist(err);
           var resultLength = result.outBinds.lob_in_out.length;
           var specStrLength = specialStr.length;
           should.strictEqual(result.outBinds.lob_in_out.length, size);
