@@ -619,20 +619,19 @@ describe('2. pool.js', function() {
       );
     });
 
-    // This case was skipped. JavaScript layer conducts assertions for all public methods.
-    // The case used to throw NJS-002 error.
     it('2.7.1 throws error if called after pool is terminated and a callback is not provided', function(done) {
       pool1.terminate(function(err) {
         should.not.exist(err);
 
-        try {
-          pool1.getConnection();
-        } catch (err) {
-          should.exist(err);
-          (err.message).should.startWith('NJS-009:');
-          // NJS-009: invalid number of parameters
-        }
-        done();
+        pool1.getConnection()
+          .then(function(conn) {
+            done(new Error('"then" branch executed instead of "catch" branch'));
+          })
+          .catch(function(err) {
+            should.exist(err);
+            err.message.should.startWith('NJS-002:');
+            done();
+          });
       });
     });
 
