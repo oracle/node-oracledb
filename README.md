@@ -1,4 +1,4 @@
-# node-oracledb version 1.11
+# node-oracledb version 1.12
 
 ## <a name="about"></a> About node-oracledb
 
