@@ -911,6 +911,28 @@ describe('1. connection.js', function(){
         });
       });
     });
+  }); // 1.7
+
+  describe('1.8 invalid credentials', function() {
+
+    it('1.8.1 cannot get connections with invalid credentials', function(done) {
+
+      oracledb.getConnection(
+        {
+          user: 'notexist',
+          password: 'nopass',
+          connectString: dbConfig.connectString
+        },
+        function(err, connection) {
+          should.exist(err);
+          (err.message).should.startWith('ORA-01017:');
+          should.not.exist(connection);
+          done();
+        }
+      );
+
+    });
+
   });
 
 });

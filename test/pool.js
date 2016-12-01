@@ -958,4 +958,26 @@ describe('2. pool.js', function() {
     });
   }); // 2.10
 
+  describe.skip('2.11 invalid credentials', function() {
+
+    it('2.11.1 cannot get connections with invalid credentials', function(done) {
+
+      oracledb.createPool(
+        {
+          user: 'notexist',
+          password: 'nopass',
+          connectString: 'inst1'
+        },
+        function(err, pool) {
+          should.exist(err);
+          console.log(err.message);
+          should.not.exist(pool);
+          done();
+        }
+      );
+
+    });
+
+  }); // 2.11
+
 });

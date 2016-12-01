@@ -29,6 +29,8 @@ Overview of node-oracledb functional tests
         1.6.6 wrong type for param 4 should throw an error
     1.7 Close method
         1.7.1 close can be used as an alternative to release
+    1.8 invalid credentials
+        1.8.1 cannot get connections with invalid credentials
 
 2. pool.js
     2.1 default values
@@ -70,6 +72,8 @@ Overview of node-oracledb functional tests
         2.9.1 works after the pool as been terminated
     2.10 Close method
         2.10.1 close can be used as an alternative to release
+    2.11 invalid credentials
+      - 2.11.1 cannot get connections with invalid credentials
 
 3. examples.js
     3.1 connect.js
