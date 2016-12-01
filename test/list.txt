@@ -61,8 +61,7 @@ Overview of node-oracledb functional tests
         2.6.2 stmtCacheSize can be 0
         2.6.3 stmtCacheSize must be a Number
     2.7 getConnection
-        2.7.1 throws error if called after pool is terminated and a callback is not provided
-        2.7.2 passes error in callback if called after pool is terminated and a callback is provided
+        2.7.1 passes error in callback if called after pool is terminated and a callback is provided
     2.8 connection request queue (basic functionality)
         2.8.1 generates ORA-24418 when calling getConnection if queueing is disabled
         2.8.2 does not generate ORA-24418 when calling getConnection if queueing is enabled
@@ -854,7 +853,9 @@ Overview of node-oracledb functional tests
         70.2.4 Negatvie: bind value and type mismatch - val: empty string
         70.2.5 val: 0
         70.2.6 val: undefined
-      - 70.2.7 val: NaN
+        70.2.7 val: NaN
+        70.2.8 val: -1
+      - 70.2.9 val: maxval
     70.3 dir: BIND_IN and BIND_OUT, type: DATE
         70.3.1 basic case
         70.3.2 auto detect Date type
@@ -862,6 +863,12 @@ Overview of node-oracledb functional tests
         70.3.4 val: empty string, negative - bind value and type mismatch
         70.3.5 val: undefined
         70.3.6 val: NaN
+        70.3.7 val: invalid Date Value: Feb 30, 2016
+        70.3.8 val: 1969-12-31
+        70.3.9 val: epoc date 1970-1-1
+        70.3.10 val: create Date value using numeric value: new Date(number)
+        70.3.11 val: create Date value using numeric value: new Date(7 number)
+        70.3.12 val: create Date value using numeric value: 0
     70.4 dir: BIND_IN and BIND_OUT, type: BUFFER
         70.4.1 basic case
         70.4.2 auto detect Buffer type
@@ -877,25 +884,50 @@ Overview of node-oracledb functional tests
         70.5.5 val: empty string
         70.5.6 val: undefined
         70.5.7 val: NaN
+        70.5.8 NULL IN and NON-NULL out
+        70.5.9 NON-NULL IN and NULL OUT
+        70.5.10 n Length IN and 2n OUT
+        70.5.11 2n Length IN and n OUT
     70.6 dir: BIND_INOUT, type: NUMBER
         70.6.1 basic case
         70.6.2 auto detect number type
         70.6.3 negative: bind value and type mismatch - val: empty string
-      - 70.6.4 val: null
-      - 70.6.5 val: undefined
+        70.6.4 val: null
+        70.6.5 val: undefined
       - 70.6.6 val: NaN
         70.6.7 val: 0
+        70.6.8 val: -1
+      - 70.6.9 val: maxval
+        70.6.10 NULL IN and NON-NULL out
+        70.6.11 NON-NULL IN and NULL OUT
     70.7 dir: BIND_INOUT, type: DATE
         70.7.1 basic case
         70.7.2 auto detect Date type
-      - 70.7.3 val: null
+        70.7.3 val: null
         70.7.4 val: empty string, negative - bind value and type mismatch
-      - 70.7.5 val: undefined
+        70.7.5 val: undefined
         70.7.6 val: NaN
+        70.7.7 val: invalid Date Value: Feb 30, 2016
+        70.7.8 val: 1969-12-31
+        70.7.9 val: epoc date 1970-1-1
+        70.7.10 NULL IN and NON-NULL out
+        70.7.11 NON-NULL IN and NULL OUT
     70.8 dir: BIND_INOUT, type: BUFFER
         70.8.1 basic case
         70.8.2 auto detect BUFFER type
-      - 70.8.3 val: null
+        70.8.3 val: null
         70.8.4 val: empty string
-      - 70.8.5 val: undefined
+        70.8.5 val: undefined
         70.8.6 val: NaN
+    70.9 Query the binded data by SQL
+        70.9.1 basic case
+        70.9.2 dir: BIND_INOUT, val: null
+        70.9.3 dir: BIND_IN, val: null
+        70.9.4 dir: BIND_INOUT, val: undefined
+        70.9.5 dir: BIND_IN, val: undefined
+    70.10 Check the bind-in values in PL/SQL
+        70.10.1 STRING, basic
+        70.10.2 STRING, null, empty string, undefined
+        70.10.3 NUMBER, null values
+        70.10.4 DATE, null values
+        70.10.5 BUFFER

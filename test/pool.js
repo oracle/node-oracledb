@@ -619,23 +619,7 @@ describe('2. pool.js', function() {
       );
     });
 
-    it('2.7.1 throws error if called after pool is terminated and a callback is not provided', function(done) {
-      pool1.terminate(function(err) {
-        should.not.exist(err);
-
-        pool1.getConnection()
-          .then(function(conn) {
-            done(new Error('"then" branch executed instead of "catch" branch'));
-          })
-          .catch(function(err) {
-            should.exist(err);
-            err.message.should.startWith('NJS-002:');
-            done();
-          });
-      });
-    });
-
-    it('2.7.2 passes error in callback if called after pool is terminated and a callback is provided', function(done) {
+    it('2.7.1 passes error in callback if called after pool is terminated and a callback is provided', function(done) {
       pool1.terminate(function(err) {
         should.not.exist(err);
 
@@ -647,6 +631,7 @@ describe('2. pool.js', function() {
         });
       });
     });
+
   });
 
   describe('2.8 connection request queue (basic functionality)', function(){

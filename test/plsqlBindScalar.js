@@ -50,7 +50,7 @@ describe('70. plsqlBindScalar.js', function() {
       connection = conn;
 
       // Note down whether node runtime version is >= 6 or not
-      if ( process.versions["node"].substring ( 0, 1 ) == "6" )
+      if ( process.versions["node"].substring ( 0, 1 ) >= "6" )
         nodever6 = true;
 
       done();
@@ -95,7 +95,7 @@ describe('70. plsqlBindScalar.js', function() {
     }); // after
 
     var sqlrun = "BEGIN :output := nodb_plsqlbindfunc71(:strValue); END;";
-    var resultBind = {type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 2000};
+    var resultBind = {type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 2000};    
 
     it('70.1.1 basic case: a simple string', function(done) {
       var bindVar = {
@@ -221,7 +221,7 @@ describe('70. plsqlBindScalar.js', function() {
           done();
         }
       );
-    });
+    });// 70.1.7
 
   }); // 70.1
 
@@ -382,8 +382,44 @@ describe('70. plsqlBindScalar.js', function() {
           done();
         }
       );
-    }); // 70.2.
+    }); // 70.2.7
 
+    it('70.2.8 val: -1', function(done) {
+      var bindVar = {
+        output:   resultBind,
+        numValue: {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: -1}
+      };
+
+      connection.execute(
+        sqlrun,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          // console.log(result);
+          should.strictEqual(result.outBinds.output, -1);
+          done();
+        }
+      );
+    }); // 70.2.8
+
+    it.skip('70.2.9 val: maxval', function(done) {
+      var bindVar = {
+        output:   resultBind,
+        numValue: {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: 0x0FFFFFFFFFFFFFFF}
+      };
+
+      connection.execute(
+        sqlrun,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          // console.log(result);
+          should.strictEqual(result.outBinds.output, 0x0FFFFFFFFFFFFFFF);
+          done();
+        }
+      );
+    }); // 70.2.9
+   
   }); // 70.2
 
   describe('70.3 dir: BIND_IN and BIND_OUT, type: DATE', function() {
@@ -418,7 +454,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     var sqlrun = "BEGIN :output := nodb_plsqlbindfunc73(:dateValue); END;";
     var resultBind = {type: oracledb.DATE, dir: oracledb.BIND_OUT};
-    var dt = new Date(2016, 8, 1);
+    var dt = new Date( 2016, 8, 1 );
 
     it('70.3.1 basic case', function(done) {
       var bindVar = {
@@ -527,6 +563,121 @@ describe('70. plsqlBindScalar.js', function() {
         }
       );
     }); // 70.3.6
+
+    it('70.3.7 val: invalid Date Value: Feb 30, 2016', function(done) {
+      var date = new Date ( 2016, 1, 30 );
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
+      };
+
+      connection.execute(
+        sqlrun,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          var resultDate = new Date ( 2016, 2, 1);
+          (result.outBinds.output).should.eql(resultDate);
+          done();
+        }
+      );
+    }); // 70.3.7
+
+    it('70.3.8 val: 1969-12-31', function(done) {
+      var date = new Date ( 1969, 11, 31 );
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
+      };
+
+      connection.execute(
+        sqlrun,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          (result.outBinds.output).should.eql(date);
+          done();
+        }
+      );
+    }); // 70.3.8
+
+    it('70.3.9 val: epoc date 1970-1-1', function(done) {
+      var date = new Date ( 1970, 0, 1 );
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
+      };
+
+      connection.execute(
+        sqlrun,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          (result.outBinds.output).should.eql(date);
+          done();
+        }
+      );
+    }); // 70.3.9
+
+    it('70.3.10 val: create Date value using numeric value: new Date(number)', function(done) {
+      var date = new Date ( 1476780296673 );
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
+      };
+
+      connection.execute(
+        sqlrun,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          //Oracle stores only the fractions up to second in a DATE field.
+          var dateResult = new Date ( 1476780296000 );
+          (result.outBinds.output).should.eql(dateResult);
+          done();
+        }
+      );
+    }); // 70.3.10
+
+    it('70.3.11 val: create Date value using numeric value: new Date(7 number)', function(done) {
+      var date = new Date ( 2011, 5, 3, 4, 6, 23, 123 );
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
+      };
+
+      connection.execute(
+        sqlrun,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          //Oracle stores only the fractions up to second in a DATE field.
+          var dateResult = new Date ( 2011, 5, 3, 4, 6, 23, 0 );
+          (result.outBinds.output).should.eql(dateResult);
+          done();
+        }
+      );
+    }); // 70.3.11
+
+    it('70.3.12 val: create Date value using numeric value: 0', function(done) {
+      //Zero time is 01 January 1970 00:00:00 UTC
+      var date = new Date ( 0 );
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
+      };
+
+      connection.execute(
+        sqlrun,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          var dateResult = new Date ( Date.UTC( 1970, 0, 1 ) );
+          (result.outBinds.output).should.eql(dateResult);
+          done();
+        }
+      );
+    }); // 70.3.12
 
   }); // 70.3
 
@@ -849,6 +1000,208 @@ describe('70. plsqlBindScalar.js', function() {
       );
     }); // 70.5.7
 
+    it('70.5.8 NULL IN and NON-NULL out', function(done) {
+      var proc508 = "CREATE OR REPLACE PROCEDURE nodb_inoutproc508 (p_inout IN OUT STRING) \n" +
+                 "AS \n" +
+                 "BEGIN \n" +
+                 "    p_inout := 'abc'; \n" +
+                 "END nodb_inoutproc508;";
+      var bindVar = {
+        p_inout : {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.STRING,
+          val:  null
+        }
+      };
+      var sqlrun508 = "begin nodb_inoutproc508(p_inout => :p_inout); end;";
+      var sqldrop = "DROP PROCEDURE nodb_inoutproc508";
+      async.series([
+        function(cb) {
+          connection.execute(
+             proc508,
+             function(err) {
+                should.not.exist(err);
+                cb();
+              }
+            );
+          },
+        function(cb) {
+          connection.execute(
+            sqlrun508,
+            bindVar,
+            function(err, result) {
+              should.not.exist(err);
+              // console.log(result);
+              should.strictEqual(result.outBinds.p_inout, 'abc');
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          connection.execute(
+            sqldrop,
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        }
+      ], done);
+    }); // 70.5.8
+  
+    it('70.5.9 NON-NULL IN and NULL OUT', function(done) {
+      var proc509 = "CREATE OR REPLACE PROCEDURE nodb_inoutproc509 (p_inout IN OUT STRING) \n" +
+                 "AS \n" +
+                 "BEGIN \n" +
+                 "    p_inout := null; \n" +
+                 "END nodb_inoutproc509;"      
+      var bindVar = {
+        p_inout : {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.STRING,
+          val:  "abc"
+        }
+      };
+      var sqlrun509 = "begin nodb_inoutproc509(p_inout => :p_inout); end;";
+      var sqldrop = "DROP PROCEDURE nodb_inoutproc509";
+
+      async.series([
+        function(cb) {
+          connection.execute(
+             proc509,
+             function(err) {
+                should.not.exist(err);
+                cb();
+              }
+            );
+          },
+        function(cb) {
+          connection.execute(
+            sqlrun509,
+            bindVar,
+            function(err, result) {
+              should.not.exist(err);
+              // console.log(result);
+              should.strictEqual(result.outBinds.p_inout, null);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          connection.execute(
+            sqldrop,
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        }
+      ], done);
+    }); // 70.5.9
+
+    it('70.5.10 n Length IN and 2n OUT', function(done) {
+      var proc510 = "CREATE OR REPLACE PROCEDURE nodb_inoutproc510 (p_inout IN OUT STRING) \n" +
+                 "AS \n" +
+                 "BEGIN \n" +
+                 "    p_inout := concat (p_inout, p_inout); \n" +
+                 "END nodb_inoutproc510;"
+      var strVar = "abcdefghijklmnopqrstuvwxyz";
+      var bindVar = {
+        p_inout : {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.STRING,
+          val:  strVar
+        }
+      };
+      var sqlrun510 = "begin nodb_inoutproc510(p_inout => :p_inout); end;";
+    var sqldrop = "DROP PROCEDURE nodb_inoutproc510";
+    async.series([
+        function(cb) {
+          connection.execute(
+             proc510,
+             function(err) {
+                should.not.exist(err);
+                cb();
+              }
+            );
+          },
+        function(cb) {
+          connection.execute(
+            sqlrun510,
+            bindVar,
+            function(err, result) {
+              should.not.exist(err);
+              // console.log(result);
+              var resutVar = strVar + strVar;
+              should.strictEqual(result.outBinds.p_inout, resutVar);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          connection.execute(
+            sqldrop,
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        }
+      ], done);
+    }); // 70.5.10
+
+    it('70.5.11 2n Length IN and n OUT', function(done) {
+      var proc511 = "CREATE OR REPLACE PROCEDURE nodb_inoutproc511 (p_inout IN OUT STRING) \n" +
+                 "AS \n" +
+                 "BEGIN \n" +
+                 "    p_inout := substr ( p_inout, 1, Length(p_inout)/2 ); \n" +
+                 "END nodb_inoutproc511;"
+      var strVar = "Pack my bag with five dozen liquor jugs";
+      var bindVar = {
+        p_inout : {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.STRING,
+          val:  strVar
+        }
+      };
+      var sqlrun511 = "begin nodb_inoutproc511(p_inout => :p_inout); end;";
+      var sqldrop = "DROP PROCEDURE nodb_inoutproc511";
+      async.series([
+          function(cb) {
+            connection.execute(
+               proc511,
+               function(err) {
+                  should.not.exist(err);
+                  cb();
+                }
+              );
+            },
+          function(cb) {
+            connection.execute(
+              sqlrun511,
+              bindVar,
+              function(err, result) {
+                should.not.exist(err);
+                // console.log(result);
+                var resultVar = "Pack my bag with fiv";
+                //var resultVar=strVar.substr(0,(strVar.length-1)/2);
+                should.strictEqual(result.outBinds.p_inout, resultVar);
+                cb();
+              }
+            );
+          },
+          function(cb) {
+            connection.execute(
+              sqldrop,
+              function(err) {
+                should.not.exist(err);
+                cb();
+              }
+            );
+          }
+        ], done);
+      }); // 70.5.11
+
   }); // 70.5
 
   describe('70.6 dir: BIND_INOUT, type: NUMBER', function() {
@@ -1028,6 +1381,147 @@ describe('70. plsqlBindScalar.js', function() {
       );
     }); // 70.6.7
 
+    it('70.6.8 val: -1', function(done) {
+      var bindVar = {
+        p_inout : {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.NUMBER,
+          val:  -1
+        }
+      };
+
+      connection.execute(
+        sqlrun,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          // console.log(result);
+          should.strictEqual(result.outBinds.p_inout, -1);
+          done();
+        }
+      );
+    }); // 70.6.8
+
+    it.skip('70.6.9 val: maxval', function(done) {
+      var bindVar = {
+        p_inout : {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.NUMBER,
+          val:  0x0FFFFFFFFFFFFFFF
+        }
+      };
+
+      connection.execute(
+        sqlrun,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          should.strictEqual(result.outBinds.p_inout, Number.MAX_VALUE);
+          done();
+        }
+      );
+    }); // 70.6.9
+
+    it('70.6.10 NULL IN and NON-NULL out', function(done) {
+      var proc610 = "CREATE OR REPLACE PROCEDURE nodb_inoutproc610 (p_inout IN OUT NUMBER) \n" +
+                   "AS \n" +
+                   "BEGIN \n" +
+                   "    p_inout := 3; \n" +
+                   "END nodb_inoutproc610;";
+      var bindVar = {
+        p_inout : {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.NUMBER,
+          val:  null
+        }
+      };  
+      var sqlrun610 = "begin nodb_inoutproc610(p_inout => :p_inout); end;";
+      var sqldrop = "DROP PROCEDURE nodb_inoutproc610";
+
+      async.series([
+        function(cb) {
+          connection.execute(
+             proc610,
+             function(err) {
+                should.not.exist(err);
+                cb();
+              }
+            );
+          },
+        function(cb) {
+          connection.execute(
+            sqlrun610,
+            bindVar,
+            function(err, result) {
+              should.not.exist(err);
+              // console.log(result);
+              should.strictEqual(result.outBinds.p_inout, 3);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          connection.execute(
+            sqldrop,
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        }
+      ], done);
+    }); // 70.6.10 
+
+    it('70.6.11 NON-NULL IN and NULL OUT', function(done) {
+      var proc611 = "CREATE OR REPLACE PROCEDURE nodb_inoutproc611 (p_inout IN OUT NUMBER) \n" +
+                   "AS \n" +
+                   "BEGIN \n" +
+                   "    p_inout := null; \n" +
+                   "END nodb_inoutproc611;";
+      var bindVar = {
+        p_inout : {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.NUMBER,
+          val:  3
+        }
+      };  
+      var sqlrun611 = "begin nodb_inoutproc611(p_inout => :p_inout); end;";
+      var sqldrop = "DROP PROCEDURE nodb_inoutproc611";
+
+      async.series([
+        function(cb) {
+          connection.execute(
+             proc611,
+             function(err) {
+                should.not.exist(err);
+                cb();
+              }
+            );
+          },
+        function(cb) {
+          connection.execute(
+            sqlrun611,
+            bindVar,
+            function(err, result) {
+              should.not.exist(err);
+              // console.log(result);
+              should.strictEqual(result.outBinds.p_inout, null);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          connection.execute(
+            sqldrop,
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        }
+      ], done); 
+    });// 70.6.11
+
   }); // 70.6
 
   describe('70.7 dir: BIND_INOUT, type: DATE', function() {
@@ -1061,7 +1555,7 @@ describe('70. plsqlBindScalar.js', function() {
     }); // after
 
     var sqlrun = "begin nodb_inoutproc7(p_inout => :p_inout); end;";
-    var daterun = new Date(2016, 7, 5);
+    var daterun = new Date( 2016, 7, 5 );
 
     it('70.7.1 basic case', function(done) {
       var bindVar = {
@@ -1186,6 +1680,171 @@ describe('70. plsqlBindScalar.js', function() {
       );
     }); // 70.7.6
 
+    it('70.7.7 val: invalid Date Value: Feb 30, 2016', function(done) {
+      var date = new Date ( 2016, 1, 30 );
+      var bindVar = {
+        p_inout : {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.DATE,
+          val:  date
+        }
+      };
+
+      connection.execute(
+        sqlrun,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          //console.log(result);
+          var resultDate = new Date ( 2016, 2, 1 );
+          (result.outBinds.p_inout).should.eql(resultDate);
+          done();
+        }
+      );
+    }); // 70.7.7
+
+    it('70.7.8 val: 1969-12-31', function(done) {
+      var date = new Date ( 1969, 11, 31 );
+      var bindVar = {
+        p_inout : {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.DATE,
+          val:  date
+        }
+      };
+
+      connection.execute(
+        sqlrun,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          (result.outBinds.p_inout).should.eql(date);
+          done();
+        }
+      );
+    }); // 70.7.8
+
+    it('70.7.9 val: epoc date 1970-1-1', function(done) {
+      var date = new Date ( 1970, 0, 1 );
+      var bindVar = {
+        p_inout : {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.DATE,
+          val:  date
+        }
+      };
+
+      connection.execute(
+        sqlrun,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          (result.outBinds.p_inout).should.eql(date);
+          done();
+        }
+      );
+    }); // 70.7.9
+
+    it('70.7.10 NULL IN and NON-NULL out', function(done) {
+      var proc710 = "CREATE OR REPLACE PROCEDURE nodb_inoutproc710 (p_inout IN OUT DATE) \n" +
+                 "AS \n" +
+                 "BEGIN \n" +
+                 "    p_inout := TO_DATE('5-AUG-2016'); \n" +
+                 "END nodb_inoutproc710;";
+      var bindVar = {
+        p_inout : {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.DATE,
+          val:  null
+        }
+      }; 
+      var sqlrun710 = "begin nodb_inoutproc710(p_inout => :p_inout); end;";
+      var sqldrop = "DROP PROCEDURE nodb_inoutproc710";
+      async.series([
+        function(cb) {
+          connection.execute(
+             proc710,
+             function(err) {
+                should.not.exist(err);
+                cb();
+              }
+            );
+          },
+        function(cb) {
+          connection.execute(
+            sqlrun710,
+            bindVar,
+            function(err, result) {
+              should.not.exist(err);
+              var date = new Date( 2016, 7, 5 );
+              (result.outBinds.p_inout).should.eql(date);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          connection.execute(
+            sqldrop,
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        }
+      ], done);
+    }); // 70.7.10 
+  
+    it('70.7.11 NON-NULL IN and NULL OUT', function(done) {
+      var proc711 = "CREATE OR REPLACE PROCEDURE nodb_inoutproc711 (p_inout IN OUT DATE) \n" +
+                 "AS \n" +
+                 "BEGIN \n" +
+                 "    p_inout := null; \n" +
+                 "END nodb_inoutproc711;";
+      var date = new Date( 2011, 0, 12 );
+      var bindVar = {
+          p_inout : {
+            dir:  oracledb.BIND_INOUT,
+            type: oracledb.DATE,
+            val:  date
+          }
+        };
+      var sqlrun711 = "begin nodb_inoutproc711(p_inout => :p_inout); end;";
+      var sqldrop = "DROP PROCEDURE nodb_inoutproc711";
+      async.series([
+        function(cb) {
+          connection.execute(
+             proc711,
+             function(err) {
+                should.not.exist(err);
+                cb();
+              }
+            );
+          },
+        function(cb) {
+          connection.execute(
+            sqlrun711,
+            bindVar,
+            function(err, result) {
+              should.not.exist(err);
+              // console.log(result);
+              should.strictEqual(result.outBinds.p_inout, null);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          connection.execute(
+            sqldrop,
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        }
+      ], done);
+    }); // 70.7.11
+
+      
   }); // 70.7
 
   describe('70.8 dir: BIND_INOUT, type: BUFFER', function() {
@@ -1480,7 +2139,7 @@ describe('70. plsqlBindScalar.js', function() {
       var rowid = 1;
       var bufsize = 201;
       var bufValue = assist.createBuffer(bufsize);
-      var daterun = new Date(2016, 7, 5);
+      var daterun = new Date( 2016, 7, 5 );
 
       var bindVar = {
         p_in: rowid,
