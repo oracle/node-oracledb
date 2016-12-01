@@ -19,10 +19,12 @@
  *   selectjson.js
  *
  * DESCRIPTION
- *   Executes a query from a JSON table.
+ *   Shows some JSON features of Oracle Database 12c.
  *   Requires Oracle Database 12.1.0.2, which has extensive JSON datatype support.
- *   See http://docs.oracle.com/database/121/ADXDB/json.htm#CACGCBEG
- *   Use demo.sql to create the required table or do:
+ *   See http://docs.oracle.com/database/122/ADJSN/toc.htm
+ *
+ *   Uses Oracle's sample HR schema.
+ *   Also run demo.sql to create the required extra table or do:
  *
  *   DROP TABLE j_purchaseorder;
  *   CREATE TABLE j_purchaseorder
@@ -99,13 +101,37 @@ var dorelationalquery = function (conn, cb) {
     });
 };
 
+var dojsonfromrelational = function (conn, cb) {
+  if (conn.oracleServerVersion < 1202000000)  // JSON_OBJECT is new in Oracle Database 12.2
+    return cb(null, conn);
+  else {
+    conn.execute(
+      "SELECT JSON_object ('deptId' IS d.department_id, 'name' IS d.department_name) department "
+      + "FROM departments d "
+      + "WHERE department_id < :did",
+      [50],
+      function(err, result)
+      {
+        if (err) {
+          return cb(err, conn);
+        } else {
+          console.log('Oracle Database 12.2 JSON_OBJECT Query results: ');
+          for (var i = 0; i < result.rows.length; i++)
+            console.log(result.rows[i][0]);
+          return cb(null, conn);
+        }
+      });
+  }
+};
+
 async.waterfall(
   [
     doconnect,
     checkver,
     doinsert,
     dojsonquery,
-    dorelationalquery
+    dorelationalquery,
+    dojsonfromrelational
   ],
   function (err, conn) {
     if (err) { console.error("In waterfall error cb: ==>", err, "<=="); }

@@ -147,7 +147,7 @@ limitations under the License.
   - 10.3 [Anonymous PL/SQL blocks](#plsqlanon)
   - 10.4 [Using DBMS_OUTPUT](#dbmsoutput)
 11. [Working with CLOB and BLOB Data](#lobhandling)
-12. [Oracle Database 12.1 JSON Datatype](#jsondatatype)
+12. [Oracle Database 12c JSON Datatype](#jsondatatype)
 13. [Bind Parameters for Prepared Statements](#bind)
   - 13.1 [IN Bind Parameters](#inbind)
   - 13.2 [OUT and IN OUT Bind Parameters](#outbind)
@@ -3855,7 +3855,7 @@ connection.execute(
   });
 ```
 
-## <a name="jsondatatype"></a> 12. Oracle Database 12.1 JSON Datatype
+## <a name="jsondatatype"></a> 12. Oracle Database 12c JSON Datatype
 
 Oracle Database 12.1.0.2 introduced native support for JSON data.  You
 can use JSON with relational database features, including
@@ -3920,6 +3920,34 @@ After the previous `INSERT` example, this query would display:
 
 ```
 { customerId: 100, item: 1234, quantity: 2 }
+```
+
+In Oracle Database 12.2
+the
+[`JSON_OBJECT` ](https://docs.oracle.com/cloud/latest/db122/ADJSN/generation.htm#ADJSN-GUID-1084A518-A44A-4654-A796-C1DD4D8EC2AA) function
+is a great way to convert relational table data to JSON:
+
+```JavaScript
+conn.execute(
+  "select json_object ('deptId' is d.department_id, 'name' is d.department_name) department "
+  + "from departments d "
+  + "where department_id < :did",
+  [50],
+  function(err, result)
+  {
+	if (err) { console.error(err.message); return; }
+    for (var i = 0; i < result.rows.length; i++)
+      console.log(result.rows[i][0]);
+  });
+```
+
+This produces
+
+```
+{"deptId":10,"name":"Administration"}
+{"deptId":20,"name":"Marketing"}
+{"deptId":30,"name":"Purchasing"}
+{"deptId":40,"name":"Human Resources"}
 ```
 
 See [selectjson.js](https://github.com/oracle/node-oracledb/tree/master/examples/selectjson.js)
