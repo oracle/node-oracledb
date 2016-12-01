@@ -694,7 +694,7 @@ void ConnImpl::initConnImpl ( bool pool, bool externalAuth,
 
   ociCall ( OCISessionGet ( envh_, errh_, &svch_, auth_, poolNmRconnStr,
                             ( ub4 ) nameLen, (OraText*)tag.c_str(),
-                            tag.length(),
+                            (ub4) tag.length(),
                             &retTag,
                             &retTagLen,
                             &tagMatched_, mode ),

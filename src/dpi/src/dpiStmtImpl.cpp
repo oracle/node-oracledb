@@ -637,7 +637,7 @@ void StmtImpl::cleanup ()
     This function is a dummy function, the Dynamic bind concept is not used
     for IN binds, and so this function is dummy.
 */
-sb4 StmtImpl::inbindCallback ( dvoid *ctxp, OCIBind */*bindp*/, ub4 /*iter*/,
+sb4 StmtImpl::inbindCallback ( dvoid *ctxp, OCIBind * /*bindp*/, ub4 /*iter*/,
                                ub4 /*index*/, dvoid **bufpp, ub4 *alenpp,
                                ub1 *piecep, dvoid **indpp )
 {
