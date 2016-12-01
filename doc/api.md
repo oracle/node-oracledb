@@ -481,9 +481,10 @@ The default value is *false*.
 The `user` and `password` properties for connecting or creating a pool
 should not be set when `externalAuth` is *true*.
 
-This property can be overridden in the *Oracledb*
-[`getConnection()`](#getconnectiondb) or [`createPool()`](#createpool)
-calls.
+This property can be overridden in the
+[`oracledb.createPool()`](#createpool) call and when getting a
+standalone connection from
+[`oracledb.getConnection()`](#getconnectiondb).
 
 Note prior to node-oracledb 0.5 this property was called
 `isExternalAuth`.
@@ -965,8 +966,8 @@ Boolean externalAuth
 Indicate whether to connections should be established using
 [External Authentication](#extauth).
 
-This optional property overrides the *Oracledb*
-[`externalAuth`](#propdbisexternalauth) property.
+This optional property overrides the
+[`oracledb.externalAuth`](#propdbisexternalauth) property.
 
 The `user` and `password` properties should not be set when
 `externalAuth` is *true*.
@@ -981,8 +982,8 @@ Number stmtCacheSize
 The number of statements to be cached in the
 [statement cache](#stmtcache) of each connection.
 
-This optional property overrides the *Oracledb*
-[`stmtCacheSize`](#propdbstmtcachesize) property.
+This optional property overrides the
+[`oracledb.stmtCacheSize`](#propdbstmtcachesize) property.
 <a name="createpoolpoolattrspoolalias"></a>
 ```
 String poolAlias
@@ -991,8 +992,8 @@ String poolAlias
 The `poolAlias` is an optional property that is used to explicitly add pools to the
 connection pool cache. If a pool alias is provided, then the new pool will be added
 to the connection pool cache and the `poolAlias` value can then be used with methods
-that utilize the connection pool cache, such as [oracledb.getPool()](#getpool) and
-[oracledb.getConnection()](#getconnectiondb).
+that utilize the connection pool cache, such as [`oracledb.getPool()`](#getpool) and
+[`oracledb.getConnection()`](#getconnectiondb).
 
 See [Connection Pool Cache](#connpoolcache) for details and examples.
 
@@ -1002,8 +1003,8 @@ Number poolMax
 
 The maximum number of connections to which a connection pool can grow.
 
-This optional property overrides the *Oracledb*
-[`poolMax`](#propdbpoolmax) property.
+This optional property overrides the
+[`oracledb.poolMax`](#propdbpoolmax) property.
 
 ```
 Number poolMin
@@ -1012,8 +1013,8 @@ Number poolMin
 The minimum number of connections a connection pool maintains, even
 when there is no activity to the target database.
 
-This optional property overrides the *Oracledb*
-[`poolMin`](#propdbpoolmin) property.
+This optional property overrides the
+[`oracledb.poolMin`](#propdbpoolmin) property.
 
 ```
 Number poolIncrement
@@ -1022,8 +1023,8 @@ Number poolIncrement
 The number of connections that are opened whenever a connection
 request exceeds the number of currently open connections.
 
-This optional property overrides the *Oracledb*
-[`poolIncrement`](#propdbpoolincrement) property.
+This optional property overrides the
+[`oracledb.poolIncrement`](#propdbpoolincrement) property.
 
 ```
 Number poolTimeout
@@ -1034,18 +1035,19 @@ pool) may be terminated.  Idle connections are terminated only when
 the pool is accessed.  If `poolTimeout` is set to 0, then idle
 connections are never terminated.
 
-This optional property overrides the *Oracledb*
-[`poolTimeout`](#propdbpooltimeout) property.
+This optional property overrides the
+[`oracledb.poolTimeout`](#propdbpooltimeout) property.
 
 ```
 Boolean queueRequests
 ```
 
-Indicate whether [`pool.getConnection()`](#getconnectionpool) calls
-should be queued when all available connections are in currently use.
+Indicate whether [`pool.getConnection()`](#getconnectionpool)
+(or [`oracledb.getConnection()`](#getconnectiondb) calls that use a pool)
+should be queued when all available connections in the pool are currently in use.
 
-This optional property overrides the *Oracledb*
-[`queueRequests`](#propdbqueuerequests) property.
+This optional property overrides the
+[`oracledb.queueRequests`](#propdbqueuerequests) property.
 
 ```
 Number queueTimeout
@@ -1055,8 +1057,8 @@ The number of milliseconds after which connection requests waiting in the
 connection request queue are terminated.  If `queueTimeout` is
 set to 0, then queued connection requests are never terminated.
 
-This optional property overrides the *Oracledb*
-[`queueTimeout`](#propdbqueuetimeout) property.
+This optional property overrides the
+[`oracledb.queueTimeout`](#propdbqueuetimeout) property.
 
 ```
 function(Error error, Pool pool)
@@ -1096,12 +1098,12 @@ The following table shows the various signatures that can be used when invoking
 
 Signature | Description
 --------- | -----------
-oracledb.getConnection() | Gets a connection from the default pool, returns a promise.
-oracledb.getConnection(callback) | Gets a connection from the default pool, invokes the callback.
-oracledb.getConnection(poolAlias) | Gets a connection from the pool with the specified `poolAlias`, returns a promise.
-oracledb.getConnection(poolAlias, callback) | Gets a connection from the pool with the specified `poolAlias`, invokes the callback.
-oracledb.getConnection(connAttrs) | Creates a standalone connection, returns a promise.
-oracledb.getConnection(connAttrs, callback) | Creates a standalone connection, invokes the callback.
+oracledb.getConnection() | Gets a connection from the default pool.  Returns a promise.
+oracledb.getConnection(callback) | Gets a connection from the default pool.  Invokes the callback.
+oracledb.getConnection(poolAlias) | Gets a connection from the pool with the specified `poolAlias`.  Returns a promise.
+oracledb.getConnection(poolAlias, callback) | Gets a connection from the pool with the specified `poolAlias`.  Invokes the callback.
+oracledb.getConnection(connAttrs) | Creates a standalone, non-pooled connection. Returns a promise.
+oracledb.getConnection(connAttrs, callback) | Creates a standalone, non-pooled connection.  Invokes the callback.
 
 See [Connection Handling](#connectionhandling) for more information on
 connections.
@@ -1160,8 +1162,8 @@ Boolean externalAuth
 If this optional property is *true* then the connection will be
 established using [External Authentication](#extauth).
 
-This optional property overrides the *Oracledb*
-[`externalAuth`](#propdbisexternalauth) property.
+This optional property overrides the
+[`oracledb.externalAuth`](#propdbisexternalauth) property.
 
 The `user` and `password` properties should not be set when
 `externalAuth` is *true*.
@@ -1176,8 +1178,7 @@ Number stmtCacheSize
 The number of statements to be cached in the
 [statement cache](#stmtcache) of each connection.  This optional
 property may be used to override the
-[stmtCacheSize](#propdbstmtcachesize) property of the *Oracledb*
-object.
+[`oracledb.stmtCacheSize`](#propdbstmtcachesize) property.
 
 ```
 function(Error error, Connection conn)
@@ -1502,7 +1503,7 @@ a statement.
 Boolean autoCommit
 ```
 
-Overrides *Oracledb* [`autoCommit`](#propdbisautocommit).
+Overrides [`oracledb.autoCommit`](#propdbisautocommit).
 
 ###### <a name="propexecextendedmetadata"></a> 4.2.4.3.2 `extendedMetaData`
 
@@ -1510,7 +1511,7 @@ Overrides *Oracledb* [`autoCommit`](#propdbisautocommit).
 Boolean extendedMetaData
 ```
 
-Overrides *Oracledb* [extendedMetaData](#propdbextendedmetadata).
+Overrides [`oracledb.extendedMetaData`](#propdbextendedmetadata).
 
 ###### <a name="propfetchinfo"></a> <a name="propexecfetchinfo"></a> 4.2.4.3.3 `fetchInfo`
 
@@ -1563,7 +1564,7 @@ mapping.
 Number maxRows
 ```
 
-Overrides *Oracledb* [`maxRows`](#propdbmaxrows).
+Overrides [`oracledb.maxRows`](#propdbmaxrows).
 
 ###### <a name="propexecoutformat"></a> 4.2.4.3.5 `outFormat`
 
@@ -1571,7 +1572,7 @@ Overrides *Oracledb* [`maxRows`](#propdbmaxrows).
 String outFormat
 ```
 
-Overrides *Oracledb* [`outFormat`](#propdboutformat).
+Overrides [`oracledb.outFormat`](#propdboutformat).
 
 ###### <a name="propexecprefetchrows"></a> 4.2.4.3.6 `prefetchRows`
 
@@ -1579,7 +1580,7 @@ Overrides *Oracledb* [`outFormat`](#propdboutformat).
 Number prefetchRows
 ```
 
-Overrides *Oracledb* [`prefetchRows`](#propdbprefetchrows).
+Overrides [`oracledb.prefetchRows`](#propdbprefetchrows).
 
 ###### <a name="propexecresultset"></a> 4.2.4.3.7 `resultSet`
 
@@ -1617,8 +1618,8 @@ Array metaData
 For `SELECT` statements, this contains an array of objects describing
 details of columns for the select list.  For non queries, this property is undefined.
 
-Each column's `name` is always given.  If the *Oracledb*
-[`extendedMetaData`](#propdbextendedmetadata) or `execute()` option
+Each column's `name` is always given.  If the
+[`oracledb.extendedMetaData`](#propdbextendedmetadata) or `execute()` option
 [`extendedMetaData`](#propexecextendedmetadata) are `true` then
 additional information is included.
 
@@ -1828,7 +1829,7 @@ a LOB is returned by a query.
 ## <a name="poolclass"></a> 6. Pool Class
 
 A connection *Pool* object is created by calling the
-[`createPool()`](#createpool) method of the *Oracledb* object.
+[`oracledb.createPool()`](#createpool) method.
 
 The *Pool* object obtains connections to the Oracle database using the
 `getConnection()` method to "check them out" from the pool. Internally
@@ -2054,8 +2055,8 @@ Array metaData
 Contains an array of objects with metadata about the query or REF
 CURSOR columns.
 
-Each column's `name` is always given.  If the *Oracledb*
-[`extendedMetaData`](#propdbextendedmetadata) or `execute()` option
+Each column's `name` is always given.  If the
+[`oracledb.extendedMetaData`](#propdbextendedmetadata) or `execute()` option
 [`extendedMetaData`](#propexecextendedmetadata) are `true` then
 additional information is included.
 
@@ -2146,7 +2147,7 @@ See [Streaming Query Results](#streamingresults) for more information.
 ## <a name="connectionhandling"></a> 8. Connection Handling
 
 In applications which use connections infrequently, create a connection
-with *Oracledb* [`getConnection()`](#getconnectiondb):
+with [`oracledb.getConnection()`](#getconnectiondb):
 
 ```javascript
 var oracledb = require('oracledb');
@@ -2197,8 +2198,8 @@ use a [Connection Pool]("#connpooling).
 
 ### <a name="connectionstrings"></a> 8.1 Connection Strings
 
-The *Oracledb* [`getConnection()`](#getconnectiondb) and *Pool*
-[`getConnection()`](#getconnectionpool) `connectString` can be an Easy
+The `connectString` parameter for [`oracledb.getConnection()`](#getconnectiondb) and
+[`pool.getConnection()`](#getconnectionpool) can be an Easy
 Connect string, or a Net Service Name from a local `tnsnames.ora` file
 or external naming service, or it can be the SID of a local Oracle
 database instance.
@@ -2362,19 +2363,18 @@ $ UV_THREADPOOL_SIZE=10 node myapp.js
 ### <a name="connpooling"></a> 8.3 Connection Pooling
 
 When applications use a lot of connections for short periods, Oracle
-recommends using a connection pool for efficiency.  Each node-oracledb
-process can use one or more local pools of connections.  Each pool can
+recommends using a connection pool for efficiency.  Each pool can
 contain one or more connections.  A pool can grow or shrink, as
-needed.
+needed.  Each node-oracledb process can use one or more local pools of
+connections.
 
-A connection *Pool* object is created by calling the
-[`createPool()`](#createpool) function of the *Oracledb*
-object. Internally
+A pool is created by calling the
+[`oracledb.createPool()`](#createpool) method. Internally
 [OCI Session Pooling](https://docs.oracle.com/database/121/LNOCI/oci09adv.htm#LNOCI16617)
 is used.
 
-A connection is returned with the *Pool*
-[`getConnection()`](#getconnectionpool) function:
+A connection is returned with the
+[`pool.getConnection()`](#getconnectionpool) function:
 
 ```javascript
 var oracledb = require('oracledb');
@@ -2425,7 +2425,7 @@ see [Statement Caching](#stmtcache).
 
 Node-oracledb has an internal connection pool cache which can be used to
 facilitate sharing pools across modules and simplify getting connections from
-pools in the cache.
+pools.
 
 Methods that can affect or use the connection pool cache include:
 - [oracledb.createPool()](#createpool) - can add a pool to the cache
@@ -2436,8 +2436,8 @@ Methods that can affect or use the connection pool cache include:
 Pools are added to the cache if a [`poolAlias`](#createpoolpoolattrspoolalias)
 property is provided in the [`poolAttrs`](#createpoolpoolattrs) object when
 invoking `oracledb.createPool()`. If a pool with the alias 'default' is not in the
-cache and a pool is created without providing a pool alias, that pool will be cached
-using the pool alias 'default'. The pool with this pool alias is used by default in
+cache and a pool is created without providing a pool alias, this pool will be cached
+using the pool alias 'default'. This pool is used by default in
 methods that utilize the connection pool cache.
 
 There can be multiple pools in the cache provided each pool is created with
@@ -2457,12 +2457,12 @@ oracledb.createPool (
     connectString: 'localhost/XE'
   },
   function(err, pool) {
-    console.log(pool.poolAlias); // default
+    console.log(pool.poolAlias); // 'default'
   }
 );
 ```
 
-Once cached, the default pool can be retrieved using `oracledb.getPool()` without
+Once cached, the default pool can be retrieved using [oracledb.getPool()](#getpool) without
 passing the `poolAlias` parameter:
 
 ```javascript
@@ -2470,18 +2470,19 @@ var oracledb = require('oracledb');
 var pool = oracledb.getPool();
 
 pool.getConnection(function(err, conn) {
-   // Use connection
+  . . . // Use connection
 });
 ```
 
-If the pool is being retrieved only to call `pool.getConnection`, then the shortcut
-`oracledb.getConnection` may be used instead:
+This specific sequence can be simplified by using the shortcut to
+[oracledb.getConnection()](#getconnectiondb) that returns a connection
+from a pool:
 
 ```javascript
 var oracledb = require('oracledb');
 
 oracledb.getConnection(function(err, conn) {
-   // Use connection
+  . . . // Use connection from previously created 'default' pool
 });
 ```
 
@@ -2509,33 +2510,33 @@ var shPoolPromise = oracledb.createPool({
 
 Promise.all([hrPoolPromise, shPoolPromise])
   .then(function(pools) {
-    console.log(pools[0].poolAlias); // pool1
-    console.log(pools[1].poolAlias); // pool2
+    console.log(pools[0].poolAlias); // 'pool1'
+    console.log(pools[1].poolAlias); // 'pool2'
   })
   .catch(function(err) {
-    // handle error
+    . . . // handle error
   })
 ```
 
 To use the methods or attributes of a pool in the cache, a pool can be retrieved
-from the cache by passing its pool alias to `oracledb.getPool()`:
+from the cache by passing its pool alias to [oracledb.getPool()](#getpool):
 
 ```javascript
 var oracledb = require('oracledb');
 var pool = oracledb.getPool('pool1'); // or 'pool2'
 
 pool.getConnection(function(err, conn) {
-   // Use connection
+  . . . // Use connection
 });
 ```
 
-The `oracledb.getConnection` shortcut can also be used with a pool alias:
+The [oracledb.getConnection()](#getconnectiondb) shortcut can also be used with a pool alias:
 
 ```javascript
 var oracledb = require('oracledb');
 
 oracledb.getConnection('pool1', function(err, conn) { // or 'pool2'
-   // Use connection
+  . . . // Use connection from the pool
 });
 ```
 
@@ -2543,15 +2544,16 @@ oracledb.getConnection('pool1', function(err, conn) { // or 'pool2'
 
 By default when `poolMax` has been reached (meaning all connections in
 a pool are in use), and more
-[`pool.getConnection()`](#getconnectionpool) requests are made, then
-each new request will be queued until an in-use connection is released
-back to the pool with [`connection.close()`](#connectionclose).  If
-`poolMax` has not been reached, then connections can be satisfied and
-are not queued.
+[`pool.getConnection()`](#getconnectionpool) requests
+(or [`oracledb.getConnection()`](#getconnectiondb) calls that use a pool)
+are made, then each new request will be queued until an
+in-use connection is released back to the pool
+with [`connection.close()`](#connectionclose).  If `poolMax` has not
+been reached, then connections can be satisfied and are not queued.
 
 The pool queue can be disabled by setting the pool property
 [`queueRequests`](#propdbqueuerequests) to `false`.  When the queue is
-disabled, `pool.getConnection()` requests that cannot immediately be
+disabled, `getConnection()` requests to a pool that cannot immediately be
 satisfied will return an error.
 
 The amount of time that a queued request will wait for a free
@@ -2578,7 +2580,7 @@ information about an active pool.
 When using a [pool queue](#propdbqueuerequests), further statistics
 can be enabled by setting the [`createPool()`](#createpool)
 `poolAttrs` parameter `_enableStats` to *true*.  Statistics
-can be output to the console by calling the *Pool* `_logStats()`
+can be output to the console by calling the `pool._logStats()`
 method.  The underscore prefixes indicate that these are private
 attributes and methods.  **This interface may be altered or
 enhanced in the future**.
@@ -2616,17 +2618,17 @@ The statistics displayed by `_logStats()` in this release are:
 Statistic                 | Description
 --------------------------|-------------
 total up time             | The number of milliseconds this pool has been running.
-total connection requests | Number of `pool.getConnection()` requests made by the application to this pool.
-total requests enqueued   | Number of `pool.getConnection()` requests that could not be immediately satisfied because every connection in this pool was already being used, and so they had to be queued waiting for the application to return an in-use connection to the pool.
-total requests dequeued   | Number of `pool.getConnection()` requests that were dequeued when a connection in this pool became available for use.
-total requests failed     | Number of `pool.getConnection()` requests that invoked the underlying C++ `pool.getConnection()` callback with an error state. Does not include queue request timeout errors.
-total request timeouts    | Number of queued `pool.getConnection()` requests that were timed out after they had spent [queueTimeout](#propdbqueuetimeout) or longer in this pool's queue.
-max queue length          | Maximum number of `pool.getConnection()` requests that were ever waiting at one time.
+total connection requests | Number of `getConnection()` requests made by the application to this pool.
+total requests enqueued   | Number of `getConnection()` requests that could not be immediately satisfied because every connection in this pool was already being used, and so they had to be queued waiting for the application to return an in-use connection to the pool.
+total requests dequeued   | Number of `getConnection()` requests that were dequeued when a connection in this pool became available for use.
+total requests failed     | Number of `getConnection()` requests that invoked the underlying C++ `getConnection()` callback with an error state. Does not include queue request timeout errors.
+total request timeouts    | Number of queued `getConnection()` requests that were timed out after they had spent [queueTimeout](#propdbqueuetimeout) or longer in this pool's queue.
+max queue length          | Maximum number of `getConnection()` requests that were ever waiting at one time.
 sum of time in queue      | The sum of the time (milliseconds) that dequeued requests spent in the queue.
 min time in queue         | The minimum time (milliseconds) that any dequeued request spent in the queue.
 max time in queue         | The maximum time (milliseconds) that any dequeued request spent in the queue.
 avg time in queue         | The average time (milliseconds) that dequeued requests spent in the queue.
-pool connections in use   | The number of connections from this pool that `pool.getConnection()` returned successfully to the application and have not yet been released back to the pool.
+pool connections in use   | The number of connections from this pool that `getConnection()` returned successfully to the application and have not yet been released back to the pool.
 pool connections open     | The number of connections in this pool that have been established to the database.
 
 Note that for efficiency, the minimum, maximum, average, and sum of
@@ -2677,15 +2679,15 @@ To use DRCP in node-oracledb:
 3. The `getConnection()` property `connectString` must specify to use a pooled server, either by the Easy Connect syntax like `myhost/sales:POOLED`, or by using a `tnsnames.ora` alias for a connection that contains `(SERVER=POOLED)`.
 
 DRCP connections can only be used with node-oracledb's local
-[connection pool](#poolclass).  If the non-local pool connection
-method `oracledb.getConnection()` is called and the `connectString`
+[connection pool](#poolclass).  If a standalone (non-local pool)
+connection is created with
+[`oracledb.getConnection()`](#getconnectiondb) and the `connectString`
 indicates a DRCP server should be used, then an error *ORA-56609:
 Usage not supported with DRCP* occurs.
 
-The DRCP 'Purity' is SELF for DRCP
-[`pool.getConnection()`](#getconnectionpool) connections.  This allows
-reuse of the pooled server process and session memory, giving maximum
-benefit from DRCP.  See the Oracle documentation on
+The DRCP 'Purity' is SELF for DRCP connections.  This allows reuse of
+both the pooled server process and session memory, giving maximum benefit
+from DRCP.  See the Oracle documentation on
 [benefiting from scalability](http://docs.oracle.com/database/121/ADFNS/adfns_perf_scale.htm#ADFNS506).
 
 The
@@ -2710,11 +2712,11 @@ the
 to validate user access.  One of the benefits is that database
 credentials do not need to be hard coded in the application.
 
-To use external authentication, set the *Oracledb*
-[`externalAuth`](#propdbisexternalauth) property to *true*.  This property can
+To use external authentication, set the
+[`oracledb.externalAuth`](#propdbisexternalauth) property to *true*.  This property can
 also be set in the `connAttrs` or `poolAttrs` parameters of the
-*Oracledb* [`getConnection()`](#getconnectiondb) or
-[`createPool()`](#createpool) calls, respectively.  The `user` and
+[`oracledb.getConnection()`](#getconnectiondb) or
+[`oracledb.createPool()`](#createpool) calls, respectively.  The `user` and
 `password` properties should not be set, or should be empty strings:
 
 ```javascript
@@ -2729,13 +2731,13 @@ oracledb.getConnection(
 ```
 
 When `externalAuth` is set, any subsequent connections obtained using
-the *Oracledb* [`getConnection()`](#getconnectiondb) or *Pool*
-[`getConnection()`](#getconnectionpool) calls will use external
+the [`oracledb.getConnection()`](#getconnectiondb) or
+[`pool.getConnection()`](#getconnectionpool) calls will use external
 authentication.  Setting this property does not affect the operation
 of existing connections or pools.
 
-Using `externalAuth` in the `connAttrs` parameter of a *Pool*
-`getConnection()` call is not possible.  The connections from a *Pool*
+Using `externalAuth` in the `connAttrs` parameter of a
+`pool.getConnection()` call is not possible.  The connections from a *Pool*
 object are always obtained in the manner in which the pool was
 initially created.
 
@@ -3061,8 +3063,8 @@ case-insensitive column names.
 
 ##### Extended Metadata
 
-More metadata is included when the *Oracledb*
-[`extendedMetaData`](#propdbextendedmetadata) or `execute()` option
+More metadata is included when the
+[`oracledb.extendedMetaData`](#propdbextendedmetadata) or `connection.execute()` option
 [`extendedMetaData`](#propexecextendedmetadata) is `true`.  For
 example:
 
@@ -4363,10 +4365,11 @@ last `execute()` call of a transaction in preference to using an
 additional, explicit `commit()` call.
 
 When a connection is released, any ongoing transaction will be rolled
-back.  Therefore if a released, pooled connection is used by a
-subsequent [`pool.getConnection()`](#getconnectionpool) call, then any
-DML statements performed on the obtained connection are always in a
-new transaction.
+back.  Therefore if a released, pooled connection is re-used by a
+subsequent [`pool.getConnection()`](#getconnectionpool) call
+(or [`oracledb.getConnection()`](#getconnectiondb) call that uses a
+pool), then any DML statements performed on the obtained connection are
+always in a new transaction.
 
 When an application ends, any uncommitted transaction on a connection
 will be rolled back.
