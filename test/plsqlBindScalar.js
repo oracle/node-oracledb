@@ -1259,12 +1259,13 @@ describe('70. plsqlBindScalar.js', function() {
       );
     }); // 70.8.2
 
-    it.skip('70.8.3 val: null', function(done) {
+    it('70.8.3 val: null', function(done) {
+      var emptybuf = new Buffer.alloc(0);
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
           type: oracledb.BUFFER,
-          val:  null,
+          val:  emptybuf,
           maxSize: 32767
         }
       };
@@ -1274,19 +1275,20 @@ describe('70. plsqlBindScalar.js', function() {
         bindVar,
         function(err, result) {
           should.not.exist(err);
-          console.log(result);
-          //(result.outBinds.p_inout).should.eql(bufValue);
+          // console.log(result);
+          should.strictEqual(result.outBinds.p_inout, null);
           done();
         }
       );
     }); // 70.8.3
 
     it('70.8.4 val: empty string', function(done) {
+      var emptybuf = new Buffer.from('');
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
           type: oracledb.BUFFER,
-          val:  '',
+          val:  emptybuf,
           maxSize: 32767
         }
       };
@@ -1295,8 +1297,9 @@ describe('70. plsqlBindScalar.js', function() {
         sqlrun,
         bindVar,
         function(err, result) {
-          should.exist(err);
-          (err.message).should.startWith('NJS-011:');
+          should.not.exist(err);
+          // console.log(result);
+          should.strictEqual(result.outBinds.p_inout, null);
           done();
         }
       );
@@ -1346,5 +1349,439 @@ describe('70. plsqlBindScalar.js', function() {
     }); // 70.8.6
 
   }); // 70.8
+
+  describe('70.9 Query the binded data by SQL', function() {
+    before(function(done) {
+
+      var proc1 ="BEGIN \n" +
+                 "    DECLARE \n" +
+                 "        e_table_missing EXCEPTION; \n" +
+                 "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
+                 "    BEGIN \n" +
+                 "        EXECUTE IMMEDIATE('DROP TABLE nodb_plsqlbindtab'); \n" +
+                 "    EXCEPTION \n" +
+                 "        WHEN e_table_missing \n" +
+                 "        THEN NULL; \n" +
+                 "    END; \n" +
+                 "    EXECUTE IMMEDIATE (' \n" +
+                 "        CREATE TABLE nodb_plsqlbindtab ( \n" +
+                 "            id     NUMBER, \n" +
+                 "            str    VARCHAR2(4000), \n" +
+                 "            num    NUMBER, \n" +
+                 "            dat    DATE, \n" +
+                 "            buf    RAW(2000) \n" +
+                 "        ) \n" +
+                 "    '); \n" +
+                 "END; ";
+
+      var proc2 ="CREATE OR REPLACE PROCEDURE nodb_inoutproc9 ( \n" +
+                 "    p_in IN NUMBER, p_inout1 IN OUT VARCHAR2, \n" +
+                 "    p_inout2 IN OUT NUMBER, p_inout3 IN OUT DATE, p_inout4 IN OUT RAW) \n" +
+                 "AS \n" +
+                 "BEGIN \n" +
+                 "    insert into nodb_plsqlbindtab(id, str, num, dat, buf) values (p_in, p_inout1, p_inout2, p_inout3, p_inout4); \n" +
+                 "END nodb_inoutproc9;";
+
+      var proc3 ="CREATE OR REPLACE PROCEDURE nodb_inoutproc10 ( \n" +
+                 "    p_in IN NUMBER, p_str IN VARCHAR2, \n" +
+                 "    p_num IN NUMBER, p_dat IN DATE, p_buf IN RAW) \n" +
+                 "AS \n" +
+                 "BEGIN \n" +
+                 "    insert into nodb_plsqlbindtab(id, str, num, dat, buf) values (p_in, p_str, p_num, p_dat, p_buf); \n" +
+                 "END nodb_inoutproc10;";
+
+      async.series([
+        function(cb) {
+          connection.execute(
+            proc1,
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          connection.execute(
+            proc2,
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          connection.execute(
+            proc3,
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        }
+      ], done);
+
+    }); // before
+
+    after(function(done) {
+
+      async.series([
+        function(cb) {
+          connection.execute(
+            "DROP PROCEDURE nodb_inoutproc9",
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          connection.execute(
+            "DROP PROCEDURE nodb_inoutproc10",
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          connection.execute(
+            "DROP TABLE nodb_plsqlbindtab",
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        }
+      ], done);
+    }); // after
+
+    var sqlinout = "begin nodb_inoutproc9(:p_in, :p_inout1, :p_inout2, :p_inout3, :p_inout4); end;";
+    var sqlin    = "begin nodb_inoutproc10(:p_in, :p_str, :p_num, :p_dat, :p_buf); end;";
+
+    it('70.9.1 basic case', function(done) {
+
+      var rowid = 1;
+      var bufsize = 201;
+      var bufValue = assist.createBuffer(bufsize);
+      var daterun = new Date(2016, 7, 5);
+
+      var bindVar = {
+        p_in: rowid,
+        p_inout1: {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.STRING,
+          val:  "PL/SQL Binding INOUT Scalar"
+        },
+        p_inout2: {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.NUMBER,
+          val:  101
+        },
+        p_inout3: {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.DATE,
+          val:  daterun
+        },
+        p_inout4: {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.BUFFER,
+          val:  bufValue,
+          maxSize: 32767
+        }
+      };
+
+      async.series([
+        function(cb) {
+          connection.execute(
+            sqlinout,
+            bindVar,
+            function(err, result) {
+              should.not.exist(err);
+              // console.log(result);
+              should.strictEqual(result.outBinds.p_inout1, "PL/SQL Binding INOUT Scalar");
+              should.strictEqual(result.outBinds.p_inout2, 101);
+              (result.outBinds.p_inout3).should.eql(daterun);
+              (result.outBinds.p_inout4).should.eql(bufValue);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          connection.execute(
+            "select * from nodb_plsqlbindtab where id = :i",
+            [rowid],
+            { outFormat: oracledb.OBJECT },
+            function(err, result) {
+              should.not.exist(err);
+              // console.log(result);
+              should.strictEqual(result.rows[0].STR, "PL/SQL Binding INOUT Scalar");
+              should.strictEqual(result.rows[0].NUM, 101);
+              (result.rows[0].DAT).should.eql(daterun);
+              (result.rows[0].BUF).should.eql(bufValue);
+              cb();
+            }
+          );
+        }
+      ], done);
+
+    }); // 70.9.1
+
+    it.skip('70.9.2 dir: BIND_INOUT, val: null', function(done) {
+
+      var rowid = 2;
+      var emptybuf = new Buffer.alloc(0);
+      // var emptybuf = new Buffer.from('');
+
+      var bindVar = {
+        p_in: rowid,
+        p_inout1: {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.STRING,
+          val:  null
+        },
+        p_inout2: {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.NUMBER,
+          val:  null
+        },
+        p_inout3: {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.DATE,
+          val:  null
+        },
+        p_inout4: {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.BUFFER,
+          val:  emptybuf,
+          maxSize: 32767
+        }
+      };
+
+      async.series([
+        function(cb) {
+          connection.execute(
+            sqlinout,
+            bindVar,
+            function(err, result) {
+              should.not.exist(err);
+              //console.log(result);
+              should.strictEqual(result.outBinds.p_inout1, null);
+              should.strictEqual(result.outBinds.p_inout2, null);
+              (result.outBinds.p_inout3).should.eql(null);
+              (result.outBinds.p_inout4).should.eql(null);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          connection.execute(
+            "select * from nodb_plsqlbindtab where id = :i",
+            [rowid],
+            { outFormat: oracledb.OBJECT },
+            function(err, result) {
+              should.not.exist(err);
+              console.log(result);
+              should.strictEqual(result.rows[0].STR, null);
+              should.strictEqual(result.rows[0].NUM, null);
+              should.strictEqual(result.rows[0].DAT, null);
+              should.strictEqual(result.rows[0].BUF, null);
+              cb();
+            }
+          );
+        }
+      ], done);
+
+    }); // 70.9.2
+
+    it('70.9.3 dir: BIND_IN, val: null', function(done) {
+
+      var rowid = 3;
+      var emptybuf = new Buffer.alloc(0);
+      // var emptybuf = new Buffer.from('');
+
+      var bindVar = {
+        p_in: rowid,
+        p_str: {
+          dir:  oracledb.BIND_IN,
+          type: oracledb.STRING,
+          val:  null
+        },
+        p_num: {
+          dir:  oracledb.BIND_IN,
+          type: oracledb.NUMBER,
+          val:  null
+        },
+        p_dat: {
+          dir:  oracledb.BIND_IN,
+          type: oracledb.DATE,
+          val:  null
+        },
+        p_buf: {
+          dir:  oracledb.BIND_IN,
+          type: oracledb.BUFFER,
+          val:  emptybuf,
+          maxSize: 32767
+        }
+      };
+
+      async.series([
+        function(cb) {
+          connection.execute(
+            sqlin,
+            bindVar,
+            function(err, result) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          connection.execute(
+            "select * from nodb_plsqlbindtab where id = :i",
+            [rowid],
+            { outFormat: oracledb.OBJECT },
+            function(err, result) {
+              should.not.exist(err);
+              // console.log(result);
+              should.strictEqual(result.rows[0].STR, null);
+              should.strictEqual(result.rows[0].NUM, null);
+              should.strictEqual(result.rows[0].DAT, null);
+              should.strictEqual(result.rows[0].BUF, null);
+              cb();
+            }
+          );
+        }
+      ], done);
+
+    }); // 70.9.3
+
+    it.skip('70.9.4 dir: BIND_INOUT, val: undefined', function(done) {
+      var rowid = 4;
+      var emptybuf = new Buffer.alloc(0);
+      // var emptybuf = new Buffer.from('');
+
+      var bindVar = {
+        p_in: rowid,
+        p_inout1: {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.STRING,
+          val:  undefined
+        },
+        p_inout2: {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.NUMBER,
+          val:  undefined
+        },
+        p_inout3: {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.DATE,
+          val:  undefined
+        },
+        p_inout4: {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.BUFFER,
+          val:  emptybuf,
+          maxSize: 32767
+        }
+      };
+
+      async.series([
+        function(cb) {
+          connection.execute(
+            sqlinout,
+            bindVar,
+            function(err, result) {
+              should.not.exist(err);
+              //console.log(result);
+              should.strictEqual(result.outBinds.p_inout1, null);
+              should.strictEqual(result.outBinds.p_inout2, null);
+              should.strictEqual(result.outBinds.p_inout3, null);
+              should.strictEqual(result.outBinds.p_inout4, null);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          connection.execute(
+            "select * from nodb_plsqlbindtab where id = :i",
+            [rowid],
+            { outFormat: oracledb.OBJECT },
+            function(err, result) {
+              should.not.exist(err);
+              console.log(result);
+              should.strictEqual(result.rows[0].STR, null);
+              should.strictEqual(result.rows[0].NUM, null);
+              should.strictEqual(result.rows[0].DAT, null);
+              should.strictEqual(result.rows[0].BUF, null);
+              cb();
+            }
+          );
+        }
+      ], done);
+    }); // 70.9.4
+
+    it('70.9.5 dir: BIND_IN, val: undefined', function(done) {
+
+      var rowid = 5;
+      var emptybuf = new Buffer.alloc(0);
+      // var emptybuf = new Buffer.from('');
+
+      var bindVar = {
+        p_in: rowid,
+        p_str: {
+          dir:  oracledb.BIND_IN,
+          type: oracledb.STRING,
+          val:  undefined
+        },
+        p_num: {
+          dir:  oracledb.BIND_IN,
+          type: oracledb.NUMBER,
+          val:  undefined
+        },
+        p_dat: {
+          dir:  oracledb.BIND_IN,
+          type: oracledb.DATE,
+          val:  undefined
+        },
+        p_buf: {
+          dir:  oracledb.BIND_IN,
+          type: oracledb.BUFFER,
+          val:  emptybuf,
+          maxSize: 32767
+        }
+      };
+
+      async.series([
+        function(cb) {
+          connection.execute(
+            sqlin,
+            bindVar,
+            function(err, result) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          connection.execute(
+            "select * from nodb_plsqlbindtab where id = :i",
+            [rowid],
+            { outFormat: oracledb.OBJECT },
+            function(err, result) {
+              should.not.exist(err);
+              // console.log(result);
+              should.strictEqual(result.rows[0].STR, null);
+              should.strictEqual(result.rows[0].NUM, null);
+              should.strictEqual(result.rows[0].DAT, null);
+              should.strictEqual(result.rows[0].BUF, null);
+              cb();
+            }
+          );
+        }
+      ], done);
+
+    }); // 70.9.5
+
+  }); // 70.9
 
 });
