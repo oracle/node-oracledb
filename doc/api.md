@@ -198,11 +198,22 @@ oracledb.getConnection(
       {
         if (err) {
           console.error(err.message);
+          doRelease(connection);
           return;
         }
         console.log(result.rows);
+        doRelease(connection);
       });
   });
+
+function doRelease(connection)
+{
+  connection.close(
+    function(err) {
+      if (err)
+        console.error(err.message);
+    });
+}
 ```
 
 With Oracle's sample HR schema, the output is:

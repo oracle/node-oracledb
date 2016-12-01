@@ -45,7 +45,9 @@ Prerequisites:
 
 - [Python 2.7](https://www.python.org/downloads/)
 - C Compiler with support for C++ 11 (Xcode, gcc, Visual Studio or similar)
-- Oracle 11.2 or 12.1 client libraries.  Use the small, free [Oracle Instant Client](http://www.oracle.com/technetwork/database/features/instant-client/index-100365.html) "basic" and "SDK" packages if your database is remote.  Or use the libraries and headers from a locally installed database such as the free [Oracle XE](http://www.oracle.com/technetwork/database/database-technologies/express-edition/overview/index.html) release. Oracle's standard client-server network compatibility applies: Oracle Client 12.1 can connect to Oracle Database 10.2 or greater. Oracle Client 11.2 can connect to Oracle Database 9.2 or greater.
+- Oracle 11.2 or 12.1 client libraries.  Use the small, free [Oracle Instant Client](http://www.oracle.com/technetwork/database/features/instant-client/index-100365.html) "basic" and "SDK" packages if your database is remote.  Or use the libraries and headers from a locally installed database such as the free [Oracle XE](http://www.oracle.com/technetwork/database/database-technologies/express-edition/overview/index.html) release.
+
+  Oracle's standard client-server network compatibility applies: Oracle Client 12.1 can connect to Oracle Database 10.2 or greater. Oracle Client 11.2 can connect to Oracle Database 9.2 or greater.
 - Set `OCI_LIB_DIR` and `OCI_INC_DIR` during installation if the Oracle libraries and headers are in a non-default location
 
 Run `npm install oracledb` to install from the [npm registry](https://www.npmjs.com/package/oracledb).
@@ -54,43 +56,11 @@ See [INSTALL](https://github.com/oracle/node-oracledb/tree/master/INSTALL.md) fo
 
 ## <a name="examples"></a> Examples
 
-There are examples in the [examples](https://github.com/oracle/node-oracledb/tree/master/examples) directory.
-
-### A simple query example with callbacks:
-
-```javascript
-var oracledb = require('oracledb');
-
-oracledb.getConnection(
-  {
-    user          : "hr",
-    password      : "welcome",
-    connectString : "localhost/XE"
-  },
-  function(err, connection)
-  {
-    if (err) { console.error(err.message); return; }
-
-    connection.execute(
-      "SELECT department_id, department_name " +
-        "FROM departments " +
-        "WHERE manager_id < :id",
-      [110],  // bind value for :id
-      function(err, result)
-      {
-        if (err) { console.error(err.message); return; }
-        console.log(result.rows);
-      });
-  });
-```
-
-With Oracle's sample HR schema, the output is:
-
-```
-[ [ 60, 'IT' ], [ 90, 'Executive' ], [ 100, 'Finance' ] ]
-```
-
-Node Promises can also be used.
+See the
+[examples](https://github.com/oracle/node-oracledb/tree/master/examples) directory.
+Start
+with
+[examples/select1.js](https://github.com/oracle/node-oracledb/tree/master/examples/select1.js).
 
 ## <a name="doc"></a> Documentation
 
