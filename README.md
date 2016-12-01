@@ -35,10 +35,6 @@ The node-oracledb project is open source and maintained by Oracle Corp.  The hom
   - [Runtime Load Balancing (RLB)](http://docs.oracle.com/database/121/ADFNS/adfns_perf_scale.htm#ADFNS515)
   - [Transparent Application Failover (TAF)](http://docs.oracle.com/database/121/ADFNS/adfns_avail.htm#ADFNS534)
 
-Various Oracle Database and Oracle Client versions, can be used.
-Oracle's cross-version compatibility allows one node-oracledb
-installation to connect to different database versions.
-
 We are actively working on supporting the best Oracle Database
 features, and on functionality requests from
 [users involved in the project](https://github.com/oracle/node-oracledb/issues).
@@ -49,7 +45,7 @@ Prerequisites:
 
 - [Python 2.7](https://www.python.org/downloads/)
 - C Compiler with support for C++ 11 (Xcode, gcc, Visual Studio or similar)
-- The small, free [Oracle Instant Client](http://www.oracle.com/technetwork/database/features/instant-client/index-100365.html) "basic" and "SDK" packages if your database is remote.  Or use the libraries and headers from a locally installed database such as the free [Oracle XE](http://www.oracle.com/technetwork/database/database-technologies/express-edition/overview/index.html) release
+- Oracle 11.2 or 12.1 client libraries.  Use the small, free [Oracle Instant Client](http://www.oracle.com/technetwork/database/features/instant-client/index-100365.html) "basic" and "SDK" packages if your database is remote.  Or use the libraries and headers from a locally installed database such as the free [Oracle XE](http://www.oracle.com/technetwork/database/database-technologies/express-edition/overview/index.html) release. Oracle's standard client-server network compatibility applies: Oracle Client 12.1 can connect to Oracle Database 10.2 or greater. Oracle Client 11.2 can connect to Oracle Database 9.2 or greater.
 - Set `OCI_LIB_DIR` and `OCI_INC_DIR` during installation if the Oracle libraries and headers are in a non-default location
 
 Run `npm install oracledb` to install from the [NPM registry](https://www.npmjs.com/package/oracledb).
