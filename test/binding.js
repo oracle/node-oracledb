@@ -932,11 +932,23 @@ describe('4. binding.js', function() {
 
     var connection = null;
     before(function(done) {
-      oracledb.getConnection(dbConfig, function(err, conn) {
-        should.not.exist(err);
-        connection = conn;
-        done();
-      });
+      async.series([
+        function(cb) {
+          oracledb.getConnection(dbConfig, function(err, conn) {
+            should.not.exist(err);
+            connection = conn;
+            cb();
+          });
+        },
+        function(cb) {
+          connection.execute(
+            "alter session set time_zone='UTC'",
+            function(err) {
+              should.not.exist(err);
+              cb();
+            });
+        }
+      ],done);
     }); // before
 
     after(function(done) {
@@ -980,7 +992,7 @@ describe('4. binding.js', function() {
               // console.log(result);
               (result.outBinds.o1).should.be.a.Date();
 
-              var vdate = new Date(2016, 7, 5);
+              var vdate = new Date( "2016-08-05T00:00:00.000Z" );
               (result.outBinds.o2).should.eql(vdate);
               cb();
             }
@@ -997,7 +1009,7 @@ describe('4. binding.js', function() {
               should.not.exist(err);
               (result.outBinds[0]).should.be.a.Date();
 
-              var vdate = new Date(2016, 7, 5);
+              var vdate = new Date( "2016-08-05T00:00:00.000Z" );
               (result.outBinds[1]).should.eql(vdate);
               cb();
             }
@@ -1038,7 +1050,7 @@ describe('4. binding.js', function() {
           );
         },
         function(cb) {
-          var vdate = new Date(2016, 7, 5);
+          var vdate = new Date( Date.UTC( 2016, 7, 5 ) );
           connection.execute(
             "BEGIN nodb_binddate2(:i, :o); END;",
             {
@@ -1047,7 +1059,7 @@ describe('4. binding.js', function() {
             },
             function(err, result) {
               should.not.exist(err);
-              // console.log(result);
+              var vdate = new Date( "2016-08-05T00:00:00.000Z" );
               (result.outBinds.o).should.eql(vdate);
               cb();
             }
@@ -1087,7 +1099,7 @@ describe('4. binding.js', function() {
           );
         },
         function(cb) {
-          var vdate = new Date(2016, 7, 5);
+          var vdate = new Date( Date.UTC( 2016, 7, 5 ) );
           connection.execute(
             "BEGIN nodb_binddate3(:io); END;",
             {
@@ -1095,6 +1107,7 @@ describe('4. binding.js', function() {
             },
             function(err, result) {
               should.not.exist(err);
+              var vdate = new Date( "2016-08-05T00:00:00.000Z" );
               (result.outBinds.io).should.eql(vdate);
               cb();
             }

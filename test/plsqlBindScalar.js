@@ -42,19 +42,31 @@ var assist   = require('./dataTypeAssist.js');
 describe('70. plsqlBindScalar.js', function() {
 
   var connection = null;
-  var nodever6   = false;  // assume node runtime version is lower than 6
+  var node6plus   = false;  // assume node runtime version is lower than 6
 
   before(function(done) {
-    oracledb.getConnection(dbConfig, function(err, conn) {
-      should.not.exist(err);
-      connection = conn;
+    async.series([
+      function(cb) {
+        oracledb.getConnection(dbConfig, function(err, conn) {
+          should.not.exist(err);
+          connection = conn;
+          // Note down whether node runtime version is >= 6 or not
+          if ( process.versions["node"].substring ( 0, 1 ) >= "6" )
+            node6plus = true;
 
-      // Note down whether node runtime version is >= 6 or not
-      if ( process.versions["node"].substring ( 0, 1 ) >= "6" )
-        nodever6 = true;
+          cb();
+        });
+      },
+      function(cb) {
+        connection.execute(
+          "alter session set time_zone='UTC'",
+          function(err) {
+            should.not.exist(err);
+            done();
+          });
+      }
+    ],done);
 
-      done();
-    });
   }); // before
 
   after(function(done) {
@@ -1776,7 +1788,7 @@ describe('70. plsqlBindScalar.js', function() {
             bindVar,
             function(err, result) {
               should.not.exist(err);
-              var date = new Date( 2016, 7, 5 );
+              var date = new Date( "2016-08-05T00:00:00.000Z" );
               (result.outBinds.p_inout).should.eql(date);
               cb();
             }
@@ -1926,7 +1938,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.8.3 val: null', function(done) {
       var emptybuf;
-      if ( nodever6 )
+      if ( node6plus )
         emptybuf = Buffer.alloc ( 0 ) ;
       else
         emptybuf = new Buffer ( 0 );
@@ -1955,7 +1967,7 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.8.4 val: empty string', function(done) {
       var emptybuf;
 
-      if ( nodever6 )
+      if ( node6plus )
         emptybuf = Buffer.from ("", "utf-8" );
       else
         emptybuf = new Buffer ( "", "utf-8" ) ;
@@ -2207,7 +2219,7 @@ describe('70. plsqlBindScalar.js', function() {
       var rowid = 2;
       var emptybuf;
 
-      if ( nodever6 )
+      if ( node6plus )
         emptybuf = Buffer.alloc ( 0 ) ;
       else
         emptybuf = new Buffer ( 0 )  ;
@@ -2278,7 +2290,7 @@ describe('70. plsqlBindScalar.js', function() {
       var rowid = 3;
       var emptybuf;
 
-      if ( nodever6 )
+      if ( node6plus )
         emptybuf = Buffer.alloc ( 0 ) ;
       else
         emptybuf = new Buffer ( 0 ) ;
@@ -2343,7 +2355,7 @@ describe('70. plsqlBindScalar.js', function() {
       var rowid = 4;
       var emptybuf;
 
-      if ( nodever6 )
+      if ( node6plus )
         emptybuf = Buffer.alloc ( 0 ) ;
       else
         emptybuf = new Buffer ( 0 ) ;
@@ -2413,7 +2425,7 @@ describe('70. plsqlBindScalar.js', function() {
       var rowid = 5;
       var emptybuf;
 
-      if ( nodever6 )
+      if ( node6plus )
         emptybuf = Buffer.alloc ( 0 ) ;
       else
         emptybuf = new Buffer ( 0 ) ;
@@ -2961,7 +2973,7 @@ describe('70. plsqlBindScalar.js', function() {
         function correct(cb) {
           var bindVar = {
             output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
-            p_in: {type: oracledb.TIMESTAMP, dir: oracledb.BIND_INOUT, val: null}
+            p_in: {type: oracledb.DATE, dir: oracledb.BIND_INOUT, val: null}
           };
           connection.execute(
             "begin :output := nodb_checkplsqlvalue6 (:p_in); end;",
@@ -2979,7 +2991,7 @@ describe('70. plsqlBindScalar.js', function() {
           var today = new Date();
           var bindVar = {
             output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
-            p_in: { type: oracledb.TIMESTAMP, dir: oracledb.BIND_INOUT, val: today }
+            p_in: { type: oracledb.DATE, dir: oracledb.BIND_INOUT, val: today }
           };
           connection.execute(
             "begin :output := nodb_checkplsqlvalue6 (:p_in); end;",
@@ -2995,7 +3007,7 @@ describe('70. plsqlBindScalar.js', function() {
         function correct(cb) {
           var bindVar = {
             output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
-            p_in: {type: oracledb.TIMESTAMP, dir: oracledb.BIND_INOUT, val: undefined}
+            p_in: {type: oracledb.DATE, dir: oracledb.BIND_INOUT, val: undefined}
           };
           connection.execute(
             "begin :output := nodb_checkplsqlvalue6 (:p_in); end;",
@@ -3049,7 +3061,7 @@ describe('70. plsqlBindScalar.js', function() {
         function correct(cb) {
           var bindVar = {
             output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
-            p_in: {type: oracledb.TIMESTAMP_TZ, dir: oracledb.BIND_INOUT, val: null}
+            p_in: {type: oracledb.DATE, dir: oracledb.BIND_INOUT, val: null}
           };
           connection.execute(
             "begin :output := nodb_checkplsqlvalue7 (:p_in); end;",
@@ -3067,7 +3079,7 @@ describe('70. plsqlBindScalar.js', function() {
           var today = new Date();
           var bindVar = {
             output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
-            p_in: { type: oracledb.TIMESTAMP_TZ, dir: oracledb.BIND_INOUT, val: today }
+            p_in: { type: oracledb.DATE, dir: oracledb.BIND_INOUT, val: today }
           };
           connection.execute(
             "begin :output := nodb_checkplsqlvalue7 (:p_in); end;",
@@ -3083,7 +3095,7 @@ describe('70. plsqlBindScalar.js', function() {
         function correct(cb) {
           var bindVar = {
             output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
-            p_in: {type: oracledb.TIMESTAMP_TZ, dir: oracledb.BIND_INOUT, val: undefined}
+            p_in: {type: oracledb.DATE, dir: oracledb.BIND_INOUT, val: undefined}
           };
           connection.execute(
             "begin :output := nodb_checkplsqlvalue7 (:p_in); end;",
@@ -3137,7 +3149,7 @@ describe('70. plsqlBindScalar.js', function() {
         function correct(cb) {
           var bindVar = {
             output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
-            p_in: {type: oracledb.TIMESTAMP_LTZ, dir: oracledb.BIND_INOUT, val: null}
+            p_in: {type: oracledb.DATE, dir: oracledb.BIND_INOUT, val: null}
           };
           connection.execute(
             "begin :output := nodb_checkplsqlvalue8 (:p_in); end;",
@@ -3155,7 +3167,7 @@ describe('70. plsqlBindScalar.js', function() {
           var today = new Date();
           var bindVar = {
             output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
-            p_in: { type: oracledb.TIMESTAMP_LTZ, dir: oracledb.BIND_INOUT, val: today }
+            p_in: { type: oracledb.DATE, dir: oracledb.BIND_INOUT, val: today }
           };
           connection.execute(
             "begin :output := nodb_checkplsqlvalue8 (:p_in); end;",
@@ -3171,7 +3183,7 @@ describe('70. plsqlBindScalar.js', function() {
         function correct(cb) {
           var bindVar = {
             output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
-            p_in: {type: oracledb.TIMESTAMP_LTZ, dir: oracledb.BIND_INOUT, val: undefined}
+            p_in: {type: oracledb.DATE, dir: oracledb.BIND_INOUT, val: undefined}
           };
           connection.execute(
             "begin :output := nodb_checkplsqlvalue8 (:p_in); end;",
@@ -3412,28 +3424,28 @@ describe('70. plsqlBindScalar.js', function() {
     var resultBind = {type: oracledb.STRING, dir: oracledb.BIND_OUT};
 
     it('70.12.1 basic case', function(done) {
-      var date = new Date( 2016, 8, 10, 14, 10, 10, 123 );
+      var date = new Date( "2016-09-10T14:10:10.123Z" );
       var bindVar = {
         output:   resultBind,
-        dateValue: {type: oracledb.TIMESTAMP, dir: oracledb.BIND_IN, val: date}
+        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
       };
 
       connection.execute(
-        sqlrun_dt,
-        bindVar,
-        function(err, result) {
+         sqlrun_dt,
+         bindVar,
+         function(err, result) {
           should.not.exist(err);
-          var resultDate = new Date(result.outBinds.output);
-          resultDate.should.eql(date);
-          done();
+          var expectDate = "2016-09-10 14:10:10.123000000";
+          (result.outBinds.output).should.eql(expectDate);
+           done();
         }
-      );
+     );
     }); // 70.12.1
 
     it('70.12.2 val: null', function(done) {
       var bindVar = {
         output:   resultBind,
-        dateValue: {type: oracledb.TIMESTAMP, dir: oracledb.BIND_IN, val: null}
+        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: null}
       };
 
       connection.execute(
@@ -3447,10 +3459,10 @@ describe('70. plsqlBindScalar.js', function() {
       );
     }); // 70.12.2
 
-    it.skip('70.12.3 val: empty string', function(done) {
+    it('70.12.3 val: empty string', function(done) {
       var bindVar = {
         output:   resultBind,
-        dateValue: {type: oracledb.TIMESTAMP, dir: oracledb.BIND_IN, val: ''}
+        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: ''}
       };
 
       connection.execute(
@@ -3467,7 +3479,7 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.12.4 val: undefined', function(done) {
       var bindVar = {
         output:   resultBind,
-        dateValue: {type: oracledb.TIMESTAMP, dir: oracledb.BIND_IN, val: undefined}
+        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: undefined}
       };
 
       connection.execute(
@@ -3481,10 +3493,10 @@ describe('70. plsqlBindScalar.js', function() {
       );
     }); // 70.12.4
 
-    it.skip('70.12.5 val: NaN', function(done) {
+    it('70.12.5 val: NaN', function(done) {
       var bindVar = {
         output:   resultBind,
-        dateValue: {type: oracledb.TIMESTAMP, dir: oracledb.BIND_IN, val: NaN}
+        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: NaN}
       };
 
       connection.execute(
@@ -3499,11 +3511,11 @@ describe('70. plsqlBindScalar.js', function() {
       );
     }); // 70.12.5
 
-    it.skip('70.12.7 val: invalid Date Value: Feb 30, 2016', function(done) {
-      var date = new Date( 2016, 1, 30, 0, 0, 0, 0 );
+    it('70.12.7 val: invalid Date Value: Feb 30, 2016', function(done) {
+      var date = new Date( Date.UTC( 2016, 1, 30, 0, 0, 0, 0 ) );
       var bindVar = {
         output:   resultBind,
-        dateValue: {type: oracledb.TIMESTAMP, dir: oracledb.BIND_IN, val: date}
+        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
       };
 
       connection.execute(
@@ -3511,20 +3523,18 @@ describe('70. plsqlBindScalar.js', function() {
         bindVar,
         function(err, result) {
           should.not.exist(err);
-          console.log(result.outBinds.output);
-          var expectDate = new Date( 2016, 2, 1, 0, 0, 0, 0 );
-          var resultDate = new Date(result.outBinds.output);
-          resultDate.should.eql(expectDate);
+          var resultDate = "2016-03-01 00:00:00.000000000";
+          (result.outBinds.output).should.eql(resultDate);
           done();
         }
       );
     }); // 70.12.7
 
-    it.skip('70.12.8 val: 1969-12-31', function(done) {
-      var date = new Date( 1969, 11, 31, 0, 0, 0, 0 );
+    it('70.12.8 val: 1969-12-31', function(done) {
+      var date = new Date( Date.UTC( 1969, 11, 31, 0, 0, 0, 0 ) );
       var bindVar = {
         output:   resultBind,
-        dateValue: {type: oracledb.TIMESTAMP, dir: oracledb.BIND_IN, val: date}
+        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
       };
 
       connection.execute(
@@ -3532,18 +3542,18 @@ describe('70. plsqlBindScalar.js', function() {
         bindVar,
         function(err, result) {
           should.not.exist(err);
-          var resultDate = new Date(result.outBinds.output);
-          resultDate.should.eql(date);
+          var resultDate = "1969-12-31 00:00:00.000000000";
+          (result.outBinds.output).should.eql(resultDate);
           done();
         }
       );
     }); // 70.12.8
 
-    it.skip('70.12.9 val: epoc date 1970-1-1', function(done) {
-      var date = new Date( 1970, 0, 1, 0, 0, 0, 0 );
+    it('70.12.9 val: epoc date 1970-1-1', function(done) {
+      var date = new Date( Date.UTC( 1970, 0, 1, 0, 0, 0, 0 ) );
       var bindVar = {
         output:   resultBind,
-        dateValue: {type: oracledb.TIMESTAMP, dir: oracledb.BIND_IN, val: date}
+        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
       };
 
       connection.execute(
@@ -3551,18 +3561,18 @@ describe('70. plsqlBindScalar.js', function() {
         bindVar,
         function(err, result) {
           should.not.exist(err);
-          var resultDate = new Date(result.outBinds.output);
-          resultDate.should.eql(date);
+          var resultDate = "1970-01-01 00:00:00.000000000";
+          (result.outBinds.output).should.eql(resultDate);
           done();
         }
       );
     }); // 70.12.9
 
     it('70.12.10 val: create Date value using numeric value: new Date(number)', function(done) {
-      var date = new Date ( 1476780296673 );
+      var date = new Date ( 1476780296673 ); //Integer value representing the number of milliseconds since 1 January 1970 00:00:00 UTC
       var bindVar = {
         output:   resultBind,
-        dateValue: {type: oracledb.TIMESTAMP, dir: oracledb.BIND_IN, val: date}
+        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
       };
 
       connection.execute(
@@ -3570,19 +3580,19 @@ describe('70. plsqlBindScalar.js', function() {
         bindVar,
         function(err, result) {
           should.not.exist(err);
-          var resultDate = new Date(result.outBinds.output);
-          resultDate.should.eql(date);
+          var resultDate = "2016-10-18 08:44:56.673000000";
+          (result.outBinds.output).should.eql(resultDate);
           done();
         }
       );
     }); // 70.12.10
 
-    it.skip('70.12.11 val: create Date value using numeric value: 0', function(done) {
+    it('70.12.11 val: create Date value using numeric value: 0', function(done) {
       //Zero time is 01 January 1970 00:00:00 UTC
       var date = new Date ( 0 );
       var bindVar = {
         output:   resultBind,
-        dateValue: {type: oracledb.TIMESTAMP, dir: oracledb.BIND_IN, val: date}
+        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
       };
 
       connection.execute(
@@ -3590,9 +3600,8 @@ describe('70. plsqlBindScalar.js', function() {
         bindVar,
         function(err, result) {
           should.not.exist(err);
-          var expectDate = new Date (Date.UTC( 1970, 0, 1, 0, 0, 0, 0 ));
-          var resultDate = new Date(result.outBinds.output);
-          resultDate.should.eql(expectDate);
+          var resultDate = "1970-01-01 00:00:00.000000000";
+          (result.outBinds.output).should.eql(resultDate);
           done();
         }
       );
@@ -3631,19 +3640,18 @@ describe('70. plsqlBindScalar.js', function() {
     }); // after
 
     var sqlrun = "BEGIN :output := nodb_plsqlbindfunc713(:dateValue); END;";
-    var resultBind = {type: oracledb.TIMESTAMP, dir: oracledb.BIND_OUT};
+    var resultBind = {type: oracledb.DATE, dir: oracledb.BIND_OUT};
 
-    it.skip('70.13.1 val: empty string', function(done) {
+    it('70.13.1 val: empty string', function(done) {
       var bindVar = {
         output:   resultBind,
-        dateValue: {type: oracledb.TIMESTAMP, dir: oracledb.BIND_IN, val: ''}
+        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: ''}
       };
 
       connection.execute(
         sqlrun,
         bindVar,
         function(err, result) {
-          console.log(result);
           should.exist(err);
           (err.message).should.startWith('NJS-011:');
           done();
@@ -3654,7 +3662,7 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.13.2 val: undefined', function(done) {
       var bindVar = {
         output:   resultBind,
-        dateValue: {type: oracledb.TIMESTAMP, dir: oracledb.BIND_IN, val: undefined}
+        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: undefined}
       };
 
       connection.execute(
@@ -3668,10 +3676,10 @@ describe('70. plsqlBindScalar.js', function() {
       );
     }); // 70.13.2
 
-    it.skip('70.13.3 val: NaN', function(done) {
+    it('70.13.3 val: NaN', function(done) {
       var bindVar = {
         output:   resultBind,
-        dateValue: {type: oracledb.TIMESTAMP, dir: oracledb.BIND_IN, val: NaN}
+        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: NaN}
       };
 
       connection.execute(
@@ -3723,7 +3731,7 @@ describe('70. plsqlBindScalar.js', function() {
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
-          type: oracledb.TIMESTAMP,
+          type: oracledb.DATE,
           val:  date
         }
       };
@@ -3762,7 +3770,7 @@ describe('70. plsqlBindScalar.js', function() {
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
-          type: oracledb.TIMESTAMP,
+          type: oracledb.DATE,
           val:  null
         }
       };
@@ -3778,11 +3786,11 @@ describe('70. plsqlBindScalar.js', function() {
       );
     }); // 70.14.3
 
-    it.skip('70.14.4 val: empty string', function(done) {
+    it('70.14.4 val: empty string', function(done) {
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
-          type: oracledb.TIMESTAMP,
+          type: oracledb.DATE,
           val:  ''
         }
       };
@@ -3791,7 +3799,6 @@ describe('70. plsqlBindScalar.js', function() {
         sqlrun,
         bindVar,
         function(err, result) {
-          console.log(result.outBinds.output);
           should.exist(err);
           (err.message).should.startWith('NJS-011:');
           done();
@@ -3803,7 +3810,7 @@ describe('70. plsqlBindScalar.js', function() {
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
-          type: oracledb.TIMESTAMP,
+          type: oracledb.DATE,
           val:  undefined
         }
       };
@@ -3820,11 +3827,11 @@ describe('70. plsqlBindScalar.js', function() {
       );
     }); // 70.14.5
 
-    it.skip('70.14.6 val: NaN', function(done) {
+    it('70.14.6 val: NaN', function(done) {
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
-          type: oracledb.TIMESTAMP,
+          type: oracledb.DATE,
           val:  NaN
         }
       };
@@ -3845,7 +3852,7 @@ describe('70. plsqlBindScalar.js', function() {
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
-          type: oracledb.TIMESTAMP,
+          type: oracledb.DATE,
           val:  date
         }
       };
@@ -3868,7 +3875,7 @@ describe('70. plsqlBindScalar.js', function() {
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
-          type: oracledb.TIMESTAMP,
+          type: oracledb.DATE,
           val:  date
         }
       };
@@ -3889,7 +3896,7 @@ describe('70. plsqlBindScalar.js', function() {
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
-          type: oracledb.TIMESTAMP,
+          type: oracledb.DATE,
           val:  date
         }
       };
@@ -3914,7 +3921,7 @@ describe('70. plsqlBindScalar.js', function() {
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
-          type: oracledb.TIMESTAMP,
+          type: oracledb.DATE,
           val:  null
         }
       };
@@ -3963,7 +3970,7 @@ describe('70. plsqlBindScalar.js', function() {
       var bindVar = {
           p_inout : {
             dir:  oracledb.BIND_INOUT,
-            type: oracledb.TIMESTAMP,
+            type: oracledb.DATE,
             val:  date
           }
         };
@@ -4215,10 +4222,10 @@ describe('70. plsqlBindScalar.js', function() {
     var resultBind = {type: oracledb.STRING, dir: oracledb.BIND_OUT};
 
     it('70.16.1 basic case', function(done) {
-      var date = new Date( 2016, 8, 10, 14, 10, 10, 123 );
+      var date = new Date( "2016-09-10T14:10:10.123Z" );
       var bindVar = {
         output:   resultBind,
-        dateValue: {type: oracledb.TIMESTAMP_TZ, dir: oracledb.BIND_IN, val: date}
+        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
       };
 
       connection.execute(
@@ -4226,8 +4233,8 @@ describe('70. plsqlBindScalar.js', function() {
         bindVar,
         function(err, result) {
           should.not.exist(err);
-          var resultDate = new Date(result.outBinds.output);
-          resultDate.should.eql(date);
+          var expectDate = "2016-09-10 14:10:10.123000000";
+          (result.outBinds.output).should.eql(expectDate);
           done();
         }
       );
@@ -4236,7 +4243,7 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.16.2 val: null', function(done) {
       var bindVar = {
         output:   resultBind,
-        dateValue: {type: oracledb.TIMESTAMP_TZ, dir: oracledb.BIND_IN, val: null}
+        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: null}
       };
 
       connection.execute(
@@ -4250,10 +4257,10 @@ describe('70. plsqlBindScalar.js', function() {
       );
     }); // 70.16.2
 
-    it.skip('70.16.3 val: empty string', function(done) {
+    it('70.16.3 val: empty string', function(done) {
       var bindVar = {
         output:   resultBind,
-        dateValue: {type: oracledb.TIMESTAMP_TZ, dir: oracledb.BIND_IN, val: ''}
+        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: ''}
       };
 
       connection.execute(
@@ -4270,7 +4277,7 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.16.4 val: undefined', function(done) {
       var bindVar = {
         output:   resultBind,
-        dateValue: {type: oracledb.TIMESTAMP_TZ, dir: oracledb.BIND_IN, val: undefined}
+        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: undefined}
       };
 
       connection.execute(
@@ -4284,10 +4291,10 @@ describe('70. plsqlBindScalar.js', function() {
       );
     }); // 70.16.4
 
-    it.skip('70.16.5 val: NaN', function(done) {
+    it('70.16.5 val: NaN', function(done) {
       var bindVar = {
         output:   resultBind,
-        dateValue: {type: oracledb.TIMESTAMP_TZ, dir: oracledb.BIND_IN, val: NaN}
+        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: NaN}
       };
 
       connection.execute(
@@ -4302,11 +4309,11 @@ describe('70. plsqlBindScalar.js', function() {
       );
     }); // 70.16.5
 
-    it.skip('70.16.7 val: invalid Date Value: Feb 30, 2016', function(done) {
-      var date = new Date( 2016, 1, 30, 0, 0, 0, 0 );
+    it('70.16.7 val: invalid Date Value: Feb 30, 2016', function(done) {
+      var date = new Date( Date.UTC( 2016, 1, 30, 0, 0, 0, 0 ) );
       var bindVar = {
         output:   resultBind,
-        dateValue: {type: oracledb.TIMESTAMP_TZ, dir: oracledb.BIND_IN, val: date}
+        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
       };
 
       connection.execute(
@@ -4314,20 +4321,18 @@ describe('70. plsqlBindScalar.js', function() {
         bindVar,
         function(err, result) {
           should.not.exist(err);
-          console.log(result.outBinds.output);
-          var expectDate = new Date( 2016, 2, 1, 0, 0, 0, 0 );
-          var resultDate = new Date(result.outBinds.output);
-          resultDate.should.eql(expectDate);
+          var resultDate = "2016-03-01 00:00:00.000000000";
+          (result.outBinds.output).should.eql(resultDate);
           done();
         }
       );
     }); // 70.16.7
 
-    it.skip('70.16.8 val: 1969-12-31', function(done) {
-      var date = new Date( 1969, 11, 31, 0, 0, 0, 0 );
+    it('70.16.8 val: 1969-12-31', function(done) {
+      var date = new Date( Date.UTC( 1969, 11, 31, 0, 0, 0, 0 ) );
       var bindVar = {
         output:   resultBind,
-        dateValue: {type: oracledb.TIMESTAMP_TZ, dir: oracledb.BIND_IN, val: date}
+        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
       };
 
       connection.execute(
@@ -4335,18 +4340,18 @@ describe('70. plsqlBindScalar.js', function() {
         bindVar,
         function(err, result) {
           should.not.exist(err);
-          var resultDate = new Date(result.outBinds.output);
-          resultDate.should.eql(date);
+          var resultDate = "1969-12-31 00:00:00.000000000";
+          (result.outBinds.output).should.eql(resultDate);
           done();
         }
       );
     }); // 70.16.8
 
-    it.skip('70.16.9 val: epoc date 1970-1-1', function(done) {
-      var date = new Date( 1970, 0, 1, 0, 0, 0, 0 );
+    it('70.16.9 val: epoc date 1970-1-1', function(done) {
+      var date = new Date( Date.UTC( 1970, 0, 1, 0, 0, 0, 0 ) );
       var bindVar = {
         output:   resultBind,
-        dateValue: {type: oracledb.TIMESTAMP_TZ, dir: oracledb.BIND_IN, val: date}
+        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
       };
 
       connection.execute(
@@ -4354,8 +4359,8 @@ describe('70. plsqlBindScalar.js', function() {
         bindVar,
         function(err, result) {
           should.not.exist(err);
-          var resultDate = new Date(result.outBinds.output);
-          resultDate.should.eql(date);
+          var resultDate = "1970-01-01 00:00:00.000000000";
+          (result.outBinds.output).should.eql(resultDate);
           done();
         }
       );
@@ -4365,7 +4370,7 @@ describe('70. plsqlBindScalar.js', function() {
       var date = new Date ( 1476780296673 );
       var bindVar = {
         output:   resultBind,
-        dateValue: {type: oracledb.TIMESTAMP_TZ, dir: oracledb.BIND_IN, val: date}
+        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
       };
 
       connection.execute(
@@ -4373,19 +4378,19 @@ describe('70. plsqlBindScalar.js', function() {
         bindVar,
         function(err, result) {
           should.not.exist(err);
-          var resultDate = new Date(result.outBinds.output);
-          resultDate.should.eql(date);
+          var resultDate = "2016-10-18 08:44:56.673000000";
+          (result.outBinds.output).should.eql(resultDate);
           done();
         }
       );
     }); // 70.16.10
 
-    it.skip('70.16.11 val: create Date value using numeric value: 0', function(done) {
+    it('70.16.11 val: create Date value using numeric value: 0', function(done) {
       //Zero time is 01 January 1970 00:00:00 UTC
       var date = new Date ( 0 );
       var bindVar = {
         output:   resultBind,
-        dateValue: {type: oracledb.TIMESTAMP_TZ, dir: oracledb.BIND_IN, val: date}
+        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
       };
 
       connection.execute(
@@ -4393,9 +4398,8 @@ describe('70. plsqlBindScalar.js', function() {
         bindVar,
         function(err, result) {
           should.not.exist(err);
-          var expectDate = new Date (Date.UTC( 1970, 0, 1, 0, 0, 0, 0 ));
-          var resultDate = new Date(result.outBinds.output);
-          resultDate.should.eql(expectDate);
+          var resultDate = "1970-01-01 00:00:00.000000000";
+          (result.outBinds.output).should.eql(resultDate);
           done();
         }
       );
@@ -4434,19 +4438,18 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
     }); // after
 
     var sqlrun = "BEGIN :output := nodb_plsqlbindfunc717(:dateValue); END;";
-    var resultBind = {type: oracledb.TIMESTAMP_TZ, dir: oracledb.BIND_OUT};
+    var resultBind = {type: oracledb.DATE, dir: oracledb.BIND_OUT};
 
-    it.skip('70.17.1 val: empty string', function(done) {
+    it('70.17.1 val: empty string', function(done) {
       var bindVar = {
         output:   resultBind,
-        dateValue: {type: oracledb.TIMESTAMP_TZ, dir: oracledb.BIND_IN, val: ''}
+        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: ''}
       };
 
       connection.execute(
         sqlrun,
         bindVar,
         function(err, result) {
-          console.log(result);
           should.exist(err);
           (err.message).should.startWith('NJS-011:');
           done();
@@ -4457,7 +4460,7 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
     it('70.17.2 val: undefined', function(done) {
       var bindVar = {
         output:   resultBind,
-        dateValue: {type: oracledb.TIMESTAMP_TZ, dir: oracledb.BIND_IN, val: undefined}
+        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: undefined}
       };
 
       connection.execute(
@@ -4471,10 +4474,10 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
       );
     }); // 70.17.2
 
-    it.skip('70.17.3 val: NaN', function(done) {
+    it('70.17.3 val: NaN', function(done) {
       var bindVar = {
         output:   resultBind,
-        dateValue: {type: oracledb.TIMESTAMP_TZ, dir: oracledb.BIND_IN, val: NaN}
+        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: NaN}
       };
 
       connection.execute(
@@ -4525,7 +4528,7 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
-          type: oracledb.TIMESTAMP_TZ,
+          type: oracledb.DATE,
           val:  date
         }
       };
@@ -4564,7 +4567,7 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
-          type: oracledb.TIMESTAMP_TZ,
+          type: oracledb.DATE,
           val:  null
         }
       };
@@ -4580,11 +4583,11 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
       );
     }); // 70.18.3
 
-    it.skip('70.18.4 val: empty string', function(done) {
+    it('70.18.4 val: empty string', function(done) {
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
-          type: oracledb.TIMESTAMP_TZ,
+          type: oracledb.DATE,
           val:  ''
         }
       };
@@ -4593,7 +4596,6 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
         sqlrun,
         bindVar,
         function(err, result) {
-          console.log(result.outBinds.output);
           should.exist(err);
           (err.message).should.startWith('NJS-011:');
           done();
@@ -4605,7 +4607,7 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
-          type: oracledb.TIMESTAMP_TZ,
+          type: oracledb.DATE,
           val:  undefined
         }
       };
@@ -4622,11 +4624,11 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
       );
     }); // 70.18.5
 
-    it.skip('70.18.6 val: NaN', function(done) {
+    it('70.18.6 val: NaN', function(done) {
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
-          type: oracledb.TIMESTAMP_TZ,
+          type: oracledb.DATE,
           val:  NaN
         }
       };
@@ -4647,7 +4649,7 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
-          type: oracledb.TIMESTAMP_TZ,
+          type: oracledb.DATE,
           val:  date
         }
       };
@@ -4670,7 +4672,7 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
-          type: oracledb.TIMESTAMP_TZ,
+          type: oracledb.DATE,
           val:  date
         }
       };
@@ -4691,7 +4693,7 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
-          type: oracledb.TIMESTAMP_TZ,
+          type: oracledb.DATE,
           val:  date
         }
       };
@@ -4716,7 +4718,7 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
-          type: oracledb.TIMESTAMP_TZ,
+          type: oracledb.DATE,
           val:  null
         }
       };
@@ -4765,7 +4767,7 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
       var bindVar = {
           p_inout : {
             dir:  oracledb.BIND_INOUT,
-            type: oracledb.TIMESTAMP_TZ,
+            type: oracledb.DATE,
             val:  date
           }
         };
@@ -5018,10 +5020,10 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
     var resultBind = {type: oracledb.STRING, dir: oracledb.BIND_OUT};
 
     it('70.20.1 basic case', function(done) {
-      var date = new Date( 2016, 8, 10, 14, 10, 10, 123 );
+      var date = new Date( "2016-09-10T14:10:10.123Z" );
       var bindVar = {
         output:   resultBind,
-        dateValue: {type: oracledb.TIMESTAMP_LTZ, dir: oracledb.BIND_IN, val: date}
+        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
       };
 
       connection.execute(
@@ -5029,8 +5031,8 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
         bindVar,
         function(err, result) {
           should.not.exist(err);
-          var resultDate = new Date(result.outBinds.output);
-          resultDate.should.eql(date);
+          var expectDate = "2016-09-10 14:10:10.123000000";
+          (result.outBinds.output).should.eql(expectDate);
           done();
         }
       );
@@ -5039,7 +5041,7 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
     it('70.20.2 val: null', function(done) {
       var bindVar = {
         output:   resultBind,
-        dateValue: {type: oracledb.TIMESTAMP_LTZ, dir: oracledb.BIND_IN, val: null}
+        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: null}
       };
 
       connection.execute(
@@ -5053,10 +5055,10 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
       );
     }); // 70.20.2
 
-    it.skip('70.20.3 val: empty string', function(done) {
+    it('70.20.3 val: empty string', function(done) {
       var bindVar = {
         output:   resultBind,
-        dateValue: {type: oracledb.TIMESTAMP_LTZ, dir: oracledb.BIND_IN, val: ''}
+        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: ''}
       };
 
       connection.execute(
@@ -5073,7 +5075,7 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
     it('70.20.4 val: undefined', function(done) {
       var bindVar = {
         output:   resultBind,
-        dateValue: {type: oracledb.TIMESTAMP_LTZ, dir: oracledb.BIND_IN, val: undefined}
+        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: undefined}
       };
 
       connection.execute(
@@ -5087,10 +5089,10 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
       );
     }); // 70.20.4
 
-    it.skip('70.20.5 val: NaN', function(done) {
+    it('70.20.5 val: NaN', function(done) {
       var bindVar = {
         output:   resultBind,
-        dateValue: {type: oracledb.TIMESTAMP_LTZ, dir: oracledb.BIND_IN, val: NaN}
+        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: NaN}
       };
 
       connection.execute(
@@ -5105,11 +5107,11 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
       );
     }); // 70.20.5
 
-    it.skip('70.20.7 val: invalid Date Value: Feb 30, 2016', function(done) {
-      var date = new Date( 2016, 1, 30, 0, 0, 0, 0 );
+    it('70.20.7 val: invalid Date Value: Feb 30, 2016', function(done) {
+       var date = new Date( Date.UTC( 2016, 1, 30, 0, 0, 0, 0 ) );
       var bindVar = {
         output:   resultBind,
-        dateValue: {type: oracledb.TIMESTAMP_LTZ, dir: oracledb.BIND_IN, val: date}
+        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
       };
 
       connection.execute(
@@ -5117,20 +5119,18 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
         bindVar,
         function(err, result) {
           should.not.exist(err);
-          console.log(result.outBinds.output);
-          var expectDate = new Date( 2016, 2, 1, 0, 0, 0, 0 );
-          var resultDate = new Date(result.outBinds.output);
-          resultDate.should.eql(expectDate);
+          var resultDate = "2016-03-01 00:00:00.000000000";
+          (result.outBinds.output).should.eql(resultDate);
           done();
         }
       );
     }); // 70.20.7
 
-    it.skip('70.20.8 val: 1969-12-31', function(done) {
-      var date = new Date( 1969, 11, 31, 0, 0, 0, 0 );
+    it('70.20.8 val: 1969-12-31', function(done) {
+      var date = new Date( Date.UTC( 1969, 11, 31, 0, 0, 0, 0 ) );
       var bindVar = {
         output:   resultBind,
-        dateValue: {type: oracledb.TIMESTAMP_LTZ, dir: oracledb.BIND_IN, val: date}
+        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
       };
 
       connection.execute(
@@ -5138,18 +5138,18 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
         bindVar,
         function(err, result) {
           should.not.exist(err);
-          var resultDate = new Date(result.outBinds.output);
-          resultDate.should.eql(date);
+          var resultDate = "1969-12-31 00:00:00.000000000";
+          (result.outBinds.output).should.eql(resultDate);
           done();
         }
       );
     }); // 70.20.8
 
-    it.skip('70.20.9 val: epoc date 1970-1-1', function(done) {
-      var date = new Date( 1970, 0, 1, 0, 0, 0, 0 );
+    it('70.20.9 val: epoc date 1970-1-1', function(done) {
+      var date = new Date( Date.UTC( 1970, 0, 1, 0, 0, 0, 0 ) );
       var bindVar = {
         output:   resultBind,
-        dateValue: {type: oracledb.TIMESTAMP_LTZ, dir: oracledb.BIND_IN, val: date}
+        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
       };
 
       connection.execute(
@@ -5157,8 +5157,8 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
         bindVar,
         function(err, result) {
           should.not.exist(err);
-          var resultDate = new Date(result.outBinds.output);
-          resultDate.should.eql(date);
+          var resultDate = "1970-01-01 00:00:00.000000000";
+          (result.outBinds.output).should.eql(resultDate);
           done();
         }
       );
@@ -5168,7 +5168,7 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
       var date = new Date ( 1476780296673 );
       var bindVar = {
         output:   resultBind,
-        dateValue: {type: oracledb.TIMESTAMP_LTZ, dir: oracledb.BIND_IN, val: date}
+        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
       };
 
       connection.execute(
@@ -5176,19 +5176,19 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
         bindVar,
         function(err, result) {
           should.not.exist(err);
-          var resultDate = new Date(result.outBinds.output);
-          resultDate.should.eql(date);
+          var resultDate = "2016-10-18 08:44:56.673000000";
+          (result.outBinds.output).should.eql(resultDate);
           done();
         }
       );
     }); // 70.20.10
 
-    it.skip('70.20.11 val: create Date value using numeric value: 0', function(done) {
+    it('70.20.11 val: create Date value using numeric value: 0', function(done) {
       //Zero time is 01 January 1970 00:00:00 UTC
       var date = new Date ( 0 );
       var bindVar = {
         output:   resultBind,
-        dateValue: {type: oracledb.TIMESTAMP_LTZ, dir: oracledb.BIND_IN, val: date}
+        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
       };
 
       connection.execute(
@@ -5196,9 +5196,8 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
         bindVar,
         function(err, result) {
           should.not.exist(err);
-          var expectDate = new Date ( Date.UTC( 1970, 0, 1, 0, 0, 0, 0 ) );
-          var resultDate = new Date(result.outBinds.output);
-          resultDate.should.eql(expectDate);
+          var resultDate = "1970-01-01 00:00:00.000000000";
+          (result.outBinds.output).should.eql(resultDate);
           done();
         }
       );
@@ -5237,19 +5236,18 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
     }); // after
 
     var sqlrun = "BEGIN :output := nodb_plsqlbindfunc721(:dateValue); END;";
-    var resultBind = {type: oracledb.TIMESTAMP_LTZ, dir: oracledb.BIND_OUT};
+    var resultBind = {type: oracledb.DATE, dir: oracledb.BIND_OUT};
 
-    it.skip('70.21.1 val: empty string', function(done) {
+    it('70.21.1 val: empty string', function(done) {
       var bindVar = {
         output:   resultBind,
-        dateValue: {type: oracledb.TIMESTAMP_LTZ, dir: oracledb.BIND_IN, val: ''}
+        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: ''}
       };
 
       connection.execute(
         sqlrun,
         bindVar,
         function(err, result) {
-          console.log(result);
           should.exist(err);
           (err.message).should.startWith('NJS-011:');
           done();
@@ -5260,7 +5258,7 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
     it('70.21.2 val: undefined', function(done) {
       var bindVar = {
         output:   resultBind,
-        dateValue: {type: oracledb.TIMESTAMP_LTZ, dir: oracledb.BIND_IN, val: undefined}
+        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: undefined}
       };
 
       connection.execute(
@@ -5274,10 +5272,10 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
       );
     }); // 70.21.2
 
-    it.skip('70.21.3 val: NaN', function(done) {
+    it('70.21.3 val: NaN', function(done) {
       var bindVar = {
         output:   resultBind,
-        dateValue: {type: oracledb.TIMESTAMP_LTZ, dir: oracledb.BIND_IN, val: NaN}
+        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: NaN}
       };
 
       connection.execute(
@@ -5329,7 +5327,7 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
-          type: oracledb.TIMESTAMP_LTZ,
+          type: oracledb.DATE,
           val:  date
         }
       };
@@ -5368,7 +5366,7 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
-          type: oracledb.TIMESTAMP_LTZ,
+          type: oracledb.DATE,
           val:  null
         }
       };
@@ -5384,11 +5382,11 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
       );
     }); // 70.22.3
 
-    it.skip('70.22.4 val: empty string', function(done) {
+    it('70.22.4 val: empty string', function(done) {
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
-          type: oracledb.TIMESTAMP_LTZ,
+          type: oracledb.DATE,
           val:  ''
         }
       };
@@ -5397,7 +5395,6 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
         sqlrun,
         bindVar,
         function(err, result) {
-          console.log(result.outBinds.output);
           should.exist(err);
           (err.message).should.startWith('NJS-011:');
           done();
@@ -5409,7 +5406,7 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
-          type: oracledb.TIMESTAMP_LTZ,
+          type: oracledb.DATE,
           val:  undefined
         }
       };
@@ -5426,11 +5423,11 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
       );
     }); // 70.22.5
 
-    it.skip('70.22.6 val: NaN', function(done) {
+    it('70.22.6 val: NaN', function(done) {
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
-          type: oracledb.TIMESTAMP_LTZ,
+          type: oracledb.DATE,
           val:  NaN
         }
       };
@@ -5451,7 +5448,7 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
-          type: oracledb.TIMESTAMP_LTZ,
+          type: oracledb.DATE,
           val:  date
         }
       };
@@ -5474,7 +5471,7 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
-          type: oracledb.TIMESTAMP_LTZ,
+          type: oracledb.DATE,
           val:  date
         }
       };
@@ -5495,7 +5492,7 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
-          type: oracledb.TIMESTAMP_LTZ,
+          type: oracledb.DATE,
           val:  date
         }
       };
@@ -5520,7 +5517,7 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
-          type: oracledb.TIMESTAMP_LTZ,
+          type: oracledb.DATE,
           val:  null
         }
       };
@@ -5569,7 +5566,7 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
       var bindVar = {
           p_inout : {
             dir:  oracledb.BIND_INOUT,
-            type: oracledb.TIMESTAMP_LTZ,
+            type: oracledb.DATE,
             val:  date
           }
         };
