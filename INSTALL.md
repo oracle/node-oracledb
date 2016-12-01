@@ -63,7 +63,7 @@ the `--python` option to indicate the correct version.  For example:
 
 ### Which Instructions to Follow
 
-Instructions may need to be adjusted for your platform and environment.
+Instructions may need to be adjusted for your platform, environment and versions being used.
 
 I have ... | Follow this ...
 ----------|-----------------
@@ -92,19 +92,19 @@ install Oracle Linux yourself, it is free from
 
 ### 2.1 Install Node.js
 
-Download the
-[Node.js Linux 64-bit binaries](http://nodejs.org) and
-extract the file, for example into `/opt`:
+Download and extract the [Node.js "Linux Binaries"](http://nodejs.org)
+package.  For example, if you downloaded version 6.9.1 for 64-bit you
+could install Node.js into `/opt`:
 
 ```
 cd /opt
-tar -Jxf node-v4.2.3-linux-x64.tar.xz
+tar -Jxf node-v6.9.1-linux-x64.tar.xz
 ```
 
 Set PATH to include Node.js:
 
 ```
-export PATH=/opt/node-v4.2.3-linux-x64/bin:$PATH
+export PATH=/opt/node-v6.9.1-linux-x64/bin:$PATH
 ```
 
 ### 2.2 Install the free Oracle Instant Client 'Basic' and 'SDK' RPMs
@@ -159,7 +159,7 @@ Download the
 [example programs](https://github.com/oracle/node-oracledb/tree/master/examples) from GitHub.
 
 Edit `dbconfig.js` and set the database credentials to your
-environment.
+environment, for example:
 
 ```
 module.exports = {
@@ -179,19 +179,19 @@ node select1.js
 
 ### 3.1 Install Node.js
 
-Download the
-[Node.js Linux 64-bit binaries](http://nodejs.org/) and
-extract the file, for example into `/opt`:
+Download and extract the [Node.js "Linux Binaries"](http://nodejs.org)
+package.  For example, if you downloaded version 6.9.1 for 64-bit you
+could install Node.js into `/opt`:
 
 ```
 cd /opt
-tar -Jxf node-v4.2.3-linux-x64.tar.xz
+tar -Jxf node-v6.9.1-linux-x64.tar.xz
 ```
 
 Set PATH to include Node.js:
 
 ```
-export PATH=/opt/node-v4.2.3-linux-x64/bin:$PATH
+export PATH=/opt/node-v6.9.1-linux-x64/bin:$PATH
 ```
 
 ### 3.2 Install the free Oracle Instant Client 'Basic' and 'SDK' ZIPs
@@ -269,7 +269,7 @@ Download the
 [example programs](https://github.com/oracle/node-oracledb/tree/master/examples) from GitHub.
 
 Edit `dbconfig.js` and set the database credentials to your
-environment:
+environment, for example:
 
 ```
 module.exports = {
@@ -300,19 +300,19 @@ Oracle Database.
 
 ### 4.1 Install Node.js
 
-Download the
-[Node.js Linux 64-bit binaries](http://nodejs.org/) and
-extract the file, for example into `/opt`:
+Download and extract the [Node.js "Linux Binaries"](http://nodejs.org)
+package.  For example, if you downloaded version 6.9.1 for 64-bit you
+could install Node.js into `/opt`:
 
 ```
 cd /opt
-tar -zxf node-v4.2.3-linux-x64.tar.gz
+tar -zxf node-v6.9.1-linux-x64.tar.gz
 ```
 
 Set your PATH variable to include Node.js:
 
 ```
-export PATH=/opt/node-v4.2.3-linux-x64/bin:$PATH
+export PATH=/opt/node-v6.9.1-linux-x64/bin:$PATH
 ```
 
 ### 4.2 Install the add-on
@@ -379,7 +379,7 @@ Download the
 [example programs](https://github.com/oracle/node-oracledb/tree/master/examples) from GitHub.
 
 Edit `dbconfig.js` and set the database credentials to your
-environment:
+environment, for example:
 
 ```
 module.exports = {
@@ -522,7 +522,7 @@ Download the
 [example programs](https://github.com/oracle/node-oracledb/tree/master/examples) from GitHub.
 
 Edit `dbconfig.js` and set the database credentials to your
-environment:
+environment, for example:
 
 ```
 module.exports = {
@@ -566,7 +566,7 @@ during build and run time.  Otherwise use a 64-bit Node.js with a
 
 ### 7.2 Install Node.js
 
-Install the 64-bit Node.js  MSI (e.g. node-v4.2.3-x64.msi) from
+Install the 64-bit Node.js  MSI (e.g. node-v6.9.1-x64.msi) from
 [nodejs.org](http://nodejs.org/).  Make sure the option to
 add the Node and npm directories to the path is selected.
 
@@ -660,7 +660,7 @@ Download the
 [example programs](https://github.com/oracle/node-oracledb/tree/master/examples) from GitHub.
 
 Edit `dbconfig.js` and set the database credentials to your
-environment:
+environment, for example:
 
 ```
 module.exports = {
@@ -712,13 +712,16 @@ if you see `MSVCR100.dll` then you need the VC++ 10 redistributable.
 
 Download [Node.js](https://nodejs.org/) for AIX on Power Systems.
 
-Execute the downloaded shell script.  It will prompt for the Install
-Folder and Link Folder.  Give the desired location, for example
-`/opt`, where the Node binary will be built:
+Execute the downloaded shell script.  For example, if you
+downloaded Node 4.2 then run:
 
 ```
 sh node-v4.2.1-aix-ppc64.bin
 ```
+
+It will prompt for the Install Folder and Link Folder.  Give the
+desired location, for example `/opt`, where the Node binary will be
+built.
 
 On completion, a success message will be displayed
 
@@ -734,7 +737,7 @@ For Node.js 0.10 and 0.12, set `LIBPATH` to include `libstdc++.a` and `libgcc_s.
 export LIBPATH=/opt/freeware/lib64
 ```
 
-This setting is not required for Node.js 4.x or later.
+This setting is not required for Node.js 4 or later.
 
 ### 9.2 Install the free Oracle Instant Client 'Basic' and 'SDK' ZIPs
 
@@ -792,7 +795,7 @@ Download the
 [example programs](https://github.com/oracle/node-oracledb/tree/master/examples) from GitHub.
 
 Edit `dbconfig.js` and set the database credentials to your
-environment:
+environment, for example:
 
 ```
 module.exports = {
@@ -881,7 +884,7 @@ Download the
 [example programs](https://github.com/oracle/node-oracledb/tree/master/examples) from GitHub.
 
 Edit `dbconfig.js` and set the database credentials to your
-environment:
+environment, for example:
 
 ```
 module.exports = {
