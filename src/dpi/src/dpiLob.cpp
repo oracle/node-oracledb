@@ -27,13 +27,13 @@
  *
  *****************************************************************************/
 
-#ifndef DPIUTILS_ORACLE
-# include <dpiUtils.h>
+#ifndef DPILOB_ORACLE
+# include <dpiLob.h>
 #endif
 
 
-#ifndef DPILOB_ORACLE
-# include <dpiLob.h>
+#ifndef DPIUTILS_ORACLE
+# include <dpiUtils.h>
 #endif
 
 
@@ -267,7 +267,6 @@ void Lob::createTempLob ( DpiHandle *svch, DpiHandle *errh,
     Frees a temporary LOB
 
   PARAMETERS
-    envh            - OCI ENV handle
     svch            - OCI service handle
     errh            - OCI error handle
     lobLocator      - Lob locator
@@ -277,8 +276,32 @@ void Lob::createTempLob ( DpiHandle *svch, DpiHandle *errh,
     nothing
 
 */
-void Lob::freeTempLob ( DpiHandle *envh, DpiHandle *svch, DpiHandle *errh,
+void Lob::freeTempLob ( DpiHandle *svch, DpiHandle *errh,
                         Descriptor *lobLocator )
+{
+  ociCall ( OCILobFreeTemporary ( ( OCISvcCtx * ) svch, ( OCIError * ) errh,
+                                  ( OCILobLocator * ) lobLocator ),
+            ( OCIError * ) errh );
+}
+
+
+/*******************************************************************************
+
+  DESCRIPTION
+    Check whether given LOB is temporary or not
+
+  PARAMETERS
+    envh            - OCI ENV handle
+    errh            - OCI error handle
+    lobLocator      - Lob locator
+
+
+  RETURNS
+    boolean -  true if LOB is temporary
+               false otherwise
+*/
+boolean Lob::isTempLob ( DpiHandle *envh, DpiHandle *errh,
+                         Descriptor *lobLocator )
 {
   boolean isTemporary = FALSE;
 
@@ -286,12 +309,7 @@ void Lob::freeTempLob ( DpiHandle *envh, DpiHandle *svch, DpiHandle *errh,
                                 ( OCILobLocator * ) lobLocator, &isTemporary ),
             ( OCIError * ) errh );
 
-  if ( isTemporary )
-  {
-    ociCall ( OCILobFreeTemporary ( ( OCISvcCtx * ) svch, ( OCIError * ) errh,
-                                    ( OCILobLocator * ) lobLocator ),
-              ( OCIError * ) errh );
-  }
+  return isTemporary;
 }
 
 

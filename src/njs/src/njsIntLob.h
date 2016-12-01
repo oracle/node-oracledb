@@ -82,6 +82,7 @@ typedef struct LobBaton
   char                      *writebuf;
   unsigned long long         writelen;
   RefCounter                 counter;
+  bool                       errOnActiveOrInvalid;
 
   Nan::Persistent<Function>  cb;
   Nan::Persistent<Object>    lobbuf;
@@ -90,7 +91,7 @@ typedef struct LobBaton
   LobBaton( unsigned int& count, Local<Function> callback,
             Local<Object> jsLobObj ):
     error(""), dpienv(NULL), dpiconn(NULL), iLob(NULL), writebuf(NULL),
-    writelen(0), counter( count )
+    writelen(0), counter( count ), errOnActiveOrInvalid(false)
   {
     cb.Reset( callback );
     jsLob.Reset ( jsLobObj );
@@ -99,7 +100,7 @@ typedef struct LobBaton
   LobBaton( unsigned int& count, Local<Object> buffer_obj,
             Local<Function> callback, Local<Object> jsLobObj ):
     error(""), dpienv(NULL), dpiconn(NULL), iLob(NULL), writebuf(NULL),
-    writelen(0), counter( count )
+    writelen(0), counter( count ), errOnActiveOrInvalid(false)
   {
     cb.Reset( callback );
     lobbuf.Reset(buffer_obj);
@@ -155,6 +156,7 @@ private:
   DpiHandle         *errh_;
   unsigned int       chunkSize_;
   unsigned long long length_;
+  bool               isTempLob_;
 };
 
 class ILob : public Nan::ObjectWrap
@@ -189,7 +191,8 @@ class ILob : public Nan::ObjectWrap
 
   ~ILob();
 
-  void cleanup();
+  void cleanupDPI ();
+  void cleanupNJS ();
   inline NJSErrorType getErrNumber ( bool processBind );
 
   static NAN_METHOD(New);
@@ -210,7 +213,8 @@ class ILob : public Nan::ObjectWrap
   static NAN_GETTER(GetPieceSize);
   static NAN_GETTER(GetOffset);
   static NAN_GETTER(GetType);
-  static NAN_GETTER(GetIsTempLob);
+  static NAN_GETTER(GetIsAutoCloseLob);
+  static NAN_GETTER(GetIsValid);
 
 
                                 // Setters for properties
@@ -219,7 +223,8 @@ class ILob : public Nan::ObjectWrap
   static NAN_SETTER(SetPieceSize);
   static NAN_SETTER(SetOffset);
   static NAN_SETTER(SetType);
-  static NAN_SETTER(SetIsTempLob);
+  static NAN_SETTER(SetIsAutoCloseLob);
+  static NAN_SETTER(SetIsValid);
 
 
                                 // Read Method on ILob class
@@ -252,6 +257,7 @@ class ILob : public Nan::ObjectWrap
   unsigned int              njsLobType_;
   bool                      isTempLob_;
   unsigned int              *tempLobCount_;
+  bool                      isAutoCloseLob_;
   Nan::Persistent<Object>   jsParent_;
 };
 

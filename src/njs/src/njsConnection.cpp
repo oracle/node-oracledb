@@ -1304,10 +1304,7 @@ void Connection::GetInBindParamsScalar(Local<Value> v8val, Bind* bind,
             executeBaton->njsconn->InitExtBind ( extBind, NJS_EXTBIND_LOB );
 
             // Store the reference to IN LOB object
-            extBind->fields.extLob.value =
-                                ( void * ) malloc ( sizeof ( Descriptor * ) );
-            *(Descriptor **)extBind->fields.extLob.value =
-                                       reinterpret_cast<Descriptor *>(iLob);
+            extBind->fields.extLob.value = (void *) iLob;
 
             // create a persistent reference to avoid un-expected GC
             Nan::Persistent<Object> *jsBindObj;
@@ -1987,7 +1984,6 @@ void Connection::Async_Execute (uv_work_t *req)
           if ( !executeBaton->binds[index]->isOut )
           {
             Lob::freeTempLob (
-                         executeBaton->dpienv->envHandle(),
                          executeBaton->dpiconn->getSvch(),
                          executeBaton->dpiconn->getErrh (),
                          *( Descriptor** ) executeBaton->binds[index]->value );
@@ -2118,7 +2114,13 @@ void Connection::LOB2StringOrBuffer ( eBaton* executeBaton, unsigned int index,
   *bind->len  = ( DPI_BUFLEN_TYPE ) byteAmount;
 
 exitLOB2StringOrBuffer:
-  // Free the allocated LOB descriptor and memory for out bind
+  if ( Lob::isTempLob ( executeBaton->dpienv->envHandle(),
+                        executeBaton->dpiconn->getErrh (), lobLocator ) )
+  {
+    Lob::freeTempLob ( executeBaton->dpiconn->getSvch(),
+                       executeBaton->dpiconn->getErrh (),
+                       lobLocator );
+  }
   Env::freeDescriptor ( lobLocator, LobDescriptorType );
   if ( !executeBaton->error.empty() )
   {
@@ -2268,11 +2270,12 @@ void Connection::Descr2StringOrBuffer ( eBaton* executeBaton )
         }
         else
         {
-          // Free the temp LOB created  for IN bind
-          Lob::freeTempLob ( executeBaton->dpienv->envHandle (),
-                             executeBaton->dpiconn->getSvch (),
-                             executeBaton->dpiconn->getErrh (),
-                             *( Descriptor** ) bind->value );
+          if ( *bind->ind != -1 )
+          {
+            Lob::freeTempLob ( executeBaton->dpiconn->getSvch (),
+                               executeBaton->dpiconn->getErrh (),
+                               *( Descriptor** ) bind->value );
+          }
 
           // Free the allocated LOB descriptor
           Env::freeDescriptor( *(Descriptor **) bind->value,
@@ -2392,8 +2395,8 @@ void Connection::PrepareLOBsForBind ( eBaton* executeBaton, unsigned int index )
        executeBaton->extBinds[index]->type == NJS_EXTBIND_LOB &&
        !executeBaton->extBinds[index]->fields.extLob.isStringBuffer2LOB )
   {
-    ILob *iLob = ( ILob * ) ( * ( static_cast<ILob**>
-                 ( executeBaton->extBinds[index]->fields.extLob.value ) ) );
+    ILob *iLob = ( ILob * )
+                 ( executeBaton->extBinds[index]->fields.extLob.value );
 
     if ( bind->isInOut )
     {
@@ -3458,9 +3461,11 @@ void Connection::Async_AfterExecute(uv_work_t *req)
            executeBaton->extBinds[index]->type == NJS_EXTBIND_LOB &&
            !executeBaton->extBinds[index]->fields.extLob.isStringBuffer2LOB )
       {
-        ILob *iLob = ( ILob * ) ( * ( static_cast<ILob**>
-                       ( executeBaton->extBinds[index]->fields.extLob.value ) ) );
+        ILob *iLob = ( ILob * )
+                     ( executeBaton->extBinds[index]->fields.extLob.value );
         iLob->postBind ();
+
+        executeBaton->extBinds[index]->fields.extLob.value = NULL;
       }
     }
   }
@@ -4212,10 +4217,6 @@ ConnectionBusyStatus Connection::getConnectionBusyStatus ( Connection *conn )
     connStatus = NJS_CONN_BUSY_RS;
   else if ( conn->dbCount_ != 1 ) // 1 for Release operaion itself
     connStatus = NJS_CONN_BUSY_DB;
-  else if ( conn->tempLobCount_ != 0 )
-  {
-    connStatus = NJS_CONN_BUSY_TEMPLOB;
-  }
 
   return connStatus;
 }
@@ -4274,9 +4275,6 @@ NAN_METHOD(Connection::Release)
       break;
     case NJS_CONN_BUSY_DB:
       releaseBaton->error = NJSMessages::getErrorMsg( errBusyConnDB );
-      break;
-    case NJS_CONN_BUSY_TEMPLOB:
-      releaseBaton->error = NJSMessages::getErrorMsg( errBusyConnTEMPLOB );
       break;
   }
 
@@ -4347,7 +4345,19 @@ void Connection::Async_AfterRelease(uv_work_t *req)
     argv[0] = v8::Exception::Error(
                 Nan::New<v8::String>(releaseBaton->error).ToLocalChecked());
   else
-    argv[0] = Nan::Undefined();
+  {
+    // Populate error if Temporary LOBs are still open
+    if ( releaseBaton->njsconn->tempLobCount_ != 0 )
+    {
+      releaseBaton->error = NJSMessages::getErrorMsg( errBusyConnTEMPLOB );
+      argv[0] = v8::Exception::Error(
+                Nan::New<v8::String>(releaseBaton->error).ToLocalChecked());
+    }
+    else
+    {
+      argv[0] = Nan::Undefined();
+    }
+  }
 
   /*
    * When we release the connection, we have to clear the reference of
@@ -4847,8 +4857,7 @@ void Connection::Async_AfterCreateLob (uv_work_t *req)
                                            createLobBaton->lobInfo->lobLocator,
                                            lobType );
 
-    // The last parameter sets isTempLob_ to true
-    Local<Value> value = NewLob ( createLobBaton, protoILob, true );
+    Local<Value> value = NewLob ( createLobBaton, protoILob, false );
 
     delete protoILob;
 
@@ -5344,12 +5353,13 @@ int Connection::cbDynBufferGet ( void *ctx, DPI_SZ_TYPE nRows,
     Create a new LOB object.
 
   PARAMETERS
-    executeBaton - eBaton struct containing execute context info
-    protoILob    - ProtoILob object created using LOB locator in the process
-                   of creating ILob object
-    isTempLob    - boolean
-                   true  - in case of temporary LOB
-                   false - otherwise
+    executeBaton   - eBaton struct containing execute context info
+    protoILob      - ProtoILob object created using LOB locator in the process
+                     of creating ILob object
+    isAutoCloseLob - bool
+                     true   - the Lob object will be closed at end of streaming
+                              operation
+                     false  - otherwise
 
   RETURNS
     a Lob object
@@ -5372,7 +5382,7 @@ int Connection::cbDynBufferGet ( void *ctx, DPI_SZ_TYPE nRows,
 
 v8::Local<v8::Value> Connection::NewLob( eBaton    *executeBaton,
                                          ProtoILob *protoILob,
-                                         bool      isTempLob )
+                                         bool      isAutoCloseLob )
 {
   Nan::EscapableHandleScope scope;
   Connection     *connection = executeBaton->njsconn;
@@ -5390,7 +5400,7 @@ v8::Local<v8::Value> Connection::NewLob( eBaton    *executeBaton,
   // handles in the ILob cleanup routine.
 
   (Nan::ObjectWrap::Unwrap<ILob>(iLob))->setILob ( executeBaton, protoILob,
-                                                   isTempLob );
+                                                   isAutoCloseLob );
 
   if (!executeBaton->error.empty())
     return Nan::Null();

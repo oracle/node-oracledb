@@ -1083,8 +1083,8 @@ Overview of node-oracledb functional tests
         72.2.3 Negative - inconsistent datatypes
         72.2.4 Negative - not providing first parameter
         72.2.5 promise test of createLob()
-        72.2.6 Negative - call lob.close() twice
-        72.2.7 Negative - call lob.close() after closing lob
+        72.2.6 Negative - call lob.close() twice concurrently
+        72.2.7 call lob.close() multiple times sequentially
 
 73. poolPing.js
     73.1 the default value of poolPingInterval is 60

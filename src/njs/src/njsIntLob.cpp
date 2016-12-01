@@ -90,7 +90,7 @@ ILob::ILob():
   lobLocator_(NULL), njsconn_(NULL), dpiconn_(NULL), svch_(NULL), errh_(NULL),
   isValid_(false), state_(NJS_INACTIVE), buf_(NULL), bufSize_(0), chunkSize_(0),
   length_(0), offset_(1), amountRead_(0), njsLobType_(NJS_DATATYPE_UNKNOWN),
-  isTempLob_(false), tempLobCount_(NULL)
+  isTempLob_(false), tempLobCount_(NULL), isAutoCloseLob_(true)
 {
 
 }
@@ -114,16 +114,9 @@ ILob::ILob():
 
 ILob::~ILob()
 {
-  cleanup();
+  this->cleanupDPI ();
 
-  // Decrement the temp LOB count if it freed through garbage collection
-  if ( tempLobCount_ )
-  {
-    --( *tempLobCount_ );
-    tempLobCount_ = NULL;
-  }
-
-  this->jsParent_.Reset ();
+  this->cleanupNJS ();
 }
 
 
@@ -131,7 +124,7 @@ ILob::~ILob()
 /*****************************************************************************/
 /*
   DESCRIPTION
-    Cleanup for the ILob class.
+    Cleanup DPI/OCI handles for the ILob class.
 
   PARAMETERS
     none
@@ -144,16 +137,15 @@ ILob::~ILob()
     Therefore, it should not throw any exceptions.
  */
 
-void ILob::cleanup()
+void ILob::cleanupDPI ()
 {
   this->isValid_ = false;
 
   try
   {
-    if ( lobLocator_ && isTempLob_ )
+    if ( lobLocator_ && isTempLob_ && this->njsconn_->isValid() )
     {
-      Lob::freeTempLob ( njsconn_->oracledb_->getDpiEnv()->envHandle(),
-                         svch_, errh_, lobLocator_ );
+      Lob::freeTempLob ( svch_, errh_, lobLocator_ );
     }
 
   }
@@ -161,12 +153,6 @@ void ILob::cleanup()
   catch (...)
   {
     // don't do anything
-  }
-
-  if (buf_)
-  {
-    free ( buf_ );
-    buf_ = NULL;
   }
 
   try
@@ -198,6 +184,39 @@ void ILob::cleanup()
   }
 }
 
+/*****************************************************************************/
+/*
+  DESCRIPTION
+    Cleanup non-dpi members for the ILob class.
+
+  PARAMETERS
+    none
+
+  RETURNS
+    nothing
+
+  NOTES
+    This method is called from the destructor and the release() method.
+    Therefore, it should not throw any exceptions.
+ */
+
+void ILob::cleanupNJS ()
+{
+  if (buf_)
+  {
+    free ( buf_ );
+    buf_ = NULL;
+  }
+
+  if ( this->tempLobCount_ )
+  {
+    --( *this->tempLobCount_ );
+    this->tempLobCount_ = NULL;
+  }
+
+  this->jsParent_.Reset ();
+}
+
 
 
 /*****************************************************************************/
@@ -206,11 +225,11 @@ void ILob::cleanup()
     Initialize ILob attributes after forming it.
 
   PARAMETERS
-    executeBaton - execute baton
-    lobLocator   - Lob locator
-    isTempLob    - boolean
-                   true  - in case of temporary LOB
-                   false - otherwise
+    executeBaton   - execute baton
+    lobLocator     - Lob locator
+    isAutoCloseLob - boolean
+                     true   - Lob object closed at end of streaming operation
+                     false  - otherwise
 
   RETURNS
     nothing
@@ -224,7 +243,7 @@ void ILob::cleanup()
 */
 
 void ILob::setILob ( eBaton *executeBaton, ProtoILob *protoILob,
-                     bool isTempLob )
+                     bool isAutoCloseLob )
 {
       //  The try/catch block is necessary as we are making a DPI call to get
       //  the svch_ and allocating the buf_.  Both of these can throw
@@ -235,7 +254,8 @@ void ILob::setILob ( eBaton *executeBaton, ProtoILob *protoILob,
     lobLocator_            = protoILob->lobLocator_;
     protoILob->lobLocator_ = NULL;
     dpiLobType_            = protoILob->dpiLobType_;
-    isTempLob_             = isTempLob;
+    isAutoCloseLob_        = isAutoCloseLob;
+    isTempLob_             = protoILob->isTempLob_;
 
     if ( isTempLob_ )
     {
@@ -285,7 +305,8 @@ void ILob::setILob ( eBaton *executeBaton, ProtoILob *protoILob,
   {
     NJS_SET_CONN_ERR_STATUS ( e.errnum(), executeBaton->dpiconn );
     executeBaton->error = std::string(e.what());
-    cleanup();
+    cleanupDPI ();
+    cleanupNJS ();
   }
 }
 
@@ -512,9 +533,14 @@ void ILob::Init(Handle<Object> target)
     ILob::SetType);
 
   Nan::SetAccessor(tpl->InstanceTemplate(),
-    Nan::New<v8::String>("tempLob").ToLocalChecked(),
-    ILob::GetIsTempLob,
-    ILob::SetIsTempLob);
+    Nan::New<v8::String>("autoCloseLob").ToLocalChecked(),
+    ILob::GetIsAutoCloseLob,
+    ILob::SetIsAutoCloseLob);
+
+  Nan::SetAccessor(tpl->InstanceTemplate(),
+    Nan::New<v8::String>("valid").ToLocalChecked(),
+    ILob::GetIsValid,
+    ILob::SetIsValid);
 
   iLobTemplate_s.Reset(tpl);
   Nan::Set(target, Nan::New<v8::String>("ILob").ToLocalChecked(), tpl->GetFunction());
@@ -588,12 +614,9 @@ NAN_METHOD(ILob::Release)
     return;
   }
 
-  /*
-   * cleanup() will clear the reference of its parent jsConn.
-   */
-  iLob->cleanup();
+  iLob->cleanupDPI ();
 
-  iLob->jsParent_.Reset ();
+  iLob->cleanupNJS ();
 
   info.GetReturnValue().SetUndefined();
 }
@@ -623,30 +646,32 @@ NAN_METHOD(ILob::Close)
 
   ILob   *iLob = Nan::ObjectWrap::Unwrap<ILob> ( info.Holder() );
 
+  /* If iLob is invalid from JS, then throw an exception */
   NJS_CHECK_OBJECT_VALID2 ( iLob, info );
 
   LobBaton *lobBaton = new LobBaton ( iLob->njsconn_->LOBCount (), callback,
                                       info.Holder() );
+
+  lobBaton->iLob = iLob;
 
   NJS_CHECK_NUMBER_OF_ARGS ( lobBaton->error, info, 1, 1, exitClose );
 
   if ( !iLob->isValid_ || iLob->state_ != NJS_INACTIVE )
   {
     lobBaton->error = NJSMessages::getErrorMsg ( iLob->getErrNumber( false ) );
+    lobBaton->errOnActiveOrInvalid = true;
     goto exitClose;
   }
+
+  // mark Lob as active before leaving main thread, but not in
+  // case of an error.
+  iLob->state_ = NJS_ACTIVE;
 
   if( !iLob->njsconn_->isValid () )
   {
     lobBaton->error = NJSMessages::getErrorMsg ( errInvalidConnection );
     goto exitClose;
   }
-
-  lobBaton->iLob = iLob;
-
-   // mark Lob as active before leaving main thread, but not in
-   // case of an error.
-  iLob->state_ = NJS_ACTIVE;
 
  exitClose:
   lobBaton->req.data  = ( void* )lobBaton;
@@ -680,17 +705,19 @@ void ILob::Async_Close(uv_work_t *req)
 {
   LobBaton *lobBaton = ( LobBaton* )req->data;
   ILob     *iLob     = lobBaton->iLob;
-  if ( !( lobBaton->error ).empty () )
+
+  if ( !lobBaton->error.empty () )
     goto exitAsyncClose;
 
-  // Free the temp LOBs returned from procedure when close() called explicitly
-  if ( !iLob->isTempLob_ )
+  try
   {
-    Lob::freeTempLob ( iLob->njsconn_->oracledb_->getDpiEnv()->envHandle(),
-                       iLob->svch_, iLob->errh_, iLob->lobLocator_ );
+    iLob->cleanupDPI ();
   }
-
-  lobBaton->iLob->cleanup ();
+  catch (dpi::Exception& e)
+  {
+    NJS_SET_CONN_ERR_STATUS ( e.errnum(), iLob->dpiconn_ );
+    lobBaton->error = std::string(e.what());
+  }
 
   exitAsyncClose:
   ;
@@ -713,28 +740,21 @@ void ILob::Async_AfterClose(uv_work_t *req)
   ILob             *iLob = lobBaton->iLob;
   Nan::TryCatch    tc;
 
-  iLob->state_ = NJS_INACTIVE;
-
-  // When we close the LOB, we have to clear the reference of its parent.
-  iLob->jsParent_.Reset ();
+  if ( !lobBaton->errOnActiveOrInvalid )
+  {
+    iLob->state_ = NJS_INACTIVE;
+  }
 
   Local<Value> argv[1];
 
-  if( !( lobBaton->error ).empty () )
+  if( !lobBaton->error.empty () )
     argv[0] = v8::Exception::Error(
                 Nan::New<v8::String> ( lobBaton->error ).ToLocalChecked () );
   else
   {
     argv[0] = Nan::Undefined ();
 
-    // Decrement temp LOB count and reset the isTempLob_ flag to false to avoid
-    // free again during garbage collection time
-    if ( iLob->isTempLob_ )
-    {
-      --( *iLob->tempLobCount_ );
-      // Set NULL to not decrement again in other code paths
-      iLob->tempLobCount_ = NULL;
-    }
+    iLob->cleanupNJS ();
   }
 
   Local<Function> callback = Nan::New<Function> ( lobBaton->cb );
@@ -1190,7 +1210,7 @@ NAN_SETTER(ILob::SetType)
 /*****************************************************************************/
 /*
   DESCRIPTION
-    Get Accessor of isTempLob_ property
+    Get Accessor of autoCloseLob property
 
   PARAMETERS
     args - ILob object
@@ -1202,19 +1222,19 @@ NAN_SETTER(ILob::SetType)
   NOTES
 
 */
-NAN_GETTER(ILob::GetIsTempLob)
+NAN_GETTER(ILob::GetIsAutoCloseLob)
 {
   ILob *iLob = Nan::ObjectWrap::Unwrap<ILob> ( info.Holder () );
 
   NJS_CHECK_OBJECT_VALID2( iLob, info );
-  info.GetReturnValue ().Set ( Nan::New<v8::Boolean> ( iLob->isTempLob_ ) );
+  info.GetReturnValue ().Set ( Nan::New<v8::Boolean>( iLob->isAutoCloseLob_ ) );
 }
 
 
 /*****************************************************************************/
 /*
   DESCRIPTION
-    Set Accessor of tempLob property - throws error as tempLob is a read-only
+    Set Accessor of autoCloseLob property - throws error as isAutoCloseLob is a read-only
     property.
 
   PARAMETERS
@@ -1226,12 +1246,60 @@ NAN_GETTER(ILob::GetIsTempLob)
   NOTES
 
 */
-NAN_SETTER(ILob::SetIsTempLob)
+NAN_SETTER(ILob::SetIsAutoCloseLob)
 {
   ILob *iLob = Nan::ObjectWrap::Unwrap<ILob> ( info.Holder () );
   NJS_CHECK_OBJECT_VALID ( iLob );
-  lobPropertyException ( iLob, errReadOnly, "tempLob" );
+  lobPropertyException ( iLob, errReadOnly, "autoCloseLob" );
 }
+
+
+/*****************************************************************************/
+/*
+  DESCRIPTION
+    Get Accessor of isValid_ property
+
+  PARAMETERS
+    args - ILob object
+
+  RETURNS
+    true  - if iLob is temporaray LOB instance
+    false - otherwise
+
+  NOTES
+
+*/
+NAN_GETTER(ILob::GetIsValid)
+{
+  ILob *iLob = Nan::ObjectWrap::Unwrap<ILob> ( info.Holder () );
+
+  NJS_CHECK_OBJECT_VALID2( iLob, info );
+  info.GetReturnValue ().Set ( Nan::New<v8::Boolean>( iLob->isValid_ ) );
+}
+
+
+/*****************************************************************************/
+/*
+  DESCRIPTION
+    Set Accessor of isValid_ property - throws error as isValid_ is a read-only
+    property.
+
+  PARAMETERS
+    args - ILob object
+
+  RETURNS
+    throws error
+
+  NOTES
+
+*/
+NAN_SETTER(ILob::SetIsValid)
+{
+  ILob *iLob = Nan::ObjectWrap::Unwrap<ILob> ( info.Holder () );
+  NJS_CHECK_OBJECT_VALID ( iLob );
+  lobPropertyException ( iLob, errReadOnly, "valid" );
+}
+
 
 /*****************************************************************************/
 /*
@@ -1263,15 +1331,16 @@ NAN_METHOD(ILob::Read)
   LobBaton *lobBaton = new LobBaton ( iLob->njsconn_->LOBCount (), callback,
                                       info.Holder() );
 
+  lobBaton->iLob = iLob;
+
   NJS_CHECK_NUMBER_OF_ARGS (lobBaton->error, info, 1, 1, exitRead);
 
   if ( !iLob->isValid_ || iLob->state_ != NJS_INACTIVE )
   {
     lobBaton->error = NJSMessages::getErrorMsg ( iLob->getErrNumber ( false ) );
+    lobBaton->errOnActiveOrInvalid = true;
     goto exitRead;
   }
-
-  lobBaton->iLob = iLob;
 
    // mark Lob as active before leaving main thread, but not in
    // case of an error.
@@ -1329,19 +1398,19 @@ void ILob::Async_Read(uv_work_t *req)
   {
     unsigned long long byteAmount = (unsigned long int)iLob->bufSize_;
     unsigned long long charAmount = 0;
-    unsigned long long bufl = 0;
+    unsigned long long bufLen     = 0;
 
     // Clobs read by characters
     if (iLob->dpiLobType_ == DpiClob)
     {
       charAmount = iLob->bufSize_;
       byteAmount = 0;
-      // for CLOBs, buflen is adjusted to handle multi-byte charsets
-      bufl = charAmount * iLob->dpiconn_->getLOBCharExpansionRatio ();
+      // for CLOBs, bufLen is adjusted to handle multi-byte charsets
+      bufLen = charAmount * iLob->dpiconn_->getLOBCharExpansionRatio ();
     }
     Lob::read((DpiHandle *)iLob->svch_, (DpiHandle *)iLob->errh_,
               (Descriptor *)iLob->lobLocator_, byteAmount, charAmount,
-              iLob->offset_, (void *)iLob->buf_, bufl);
+              iLob->offset_, (void *)iLob->buf_, bufLen);
 
     // amountRead_ used in Async_AfterRead to construct string
     iLob->amountRead_ = (unsigned long)byteAmount;
@@ -1386,7 +1455,10 @@ void ILob::Async_AfterRead(uv_work_t *req)
   Nan::TryCatch  tc;
   Local<Value> argv[2];
 
-  iLob->state_ = NJS_INACTIVE;     // mark Lob as inactive as back in main thread
+  if ( !lobBaton->errOnActiveOrInvalid )
+  {
+    iLob->state_ = NJS_INACTIVE; // mark Lob as inactive as back in main thread
+  }
 
   if(!(lobBaton->error).empty())
   {
@@ -1464,15 +1536,16 @@ NAN_METHOD(ILob::Write)
   LobBaton *lobBaton = new LobBaton ( iLob->njsconn_->LOBCount (), buffer_obj,
                                       callback, info.Holder() );
 
+  lobBaton->iLob = iLob;
+
   NJS_CHECK_NUMBER_OF_ARGS (lobBaton->error, info, 2, 2, exitWrite);
 
   if ( !iLob->isValid_ || iLob->state_ != NJS_INACTIVE )
   {
     lobBaton->error = NJSMessages::getErrorMsg ( iLob->getErrNumber ( false ) );
+    lobBaton->errOnActiveOrInvalid = true;
     goto exitWrite;
   }
-
-  lobBaton->iLob = iLob;
 
   lobBaton->writebuf = Buffer::Data(buffer_obj);
   lobBaton->writelen = Buffer::Length(buffer_obj);
@@ -1533,13 +1606,13 @@ void ILob::Async_Write(uv_work_t *req)
   {
     unsigned long long byteAmount = lobBaton->writelen;
     unsigned long long charAmount = 0; // interested in byte amount only
-    // for CLOBs, buflen is adjusted to handle multi-byte charsets
-    unsigned long long bufl = charAmount *
-                               iLob->dpiconn_->getLOBCharExpansionRatio ();
+    // for CLOBs, bufLen is adjusted to handle multi-byte charsets
+    unsigned long long bufLen     = charAmount *
+                                    iLob->dpiconn_->getLOBCharExpansionRatio ();
 
     Lob::write((DpiHandle *)iLob->svch_, (DpiHandle *)iLob->errh_,
               (Descriptor *)iLob->lobLocator_, byteAmount, charAmount,
-              iLob->offset_, lobBaton->writebuf, bufl);
+              iLob->offset_, lobBaton->writebuf, bufLen);
 
 
     iLob->amountWritten_ = (unsigned long)byteAmount;
@@ -1584,7 +1657,10 @@ void ILob::Async_AfterWrite(uv_work_t *req)
   Nan::TryCatch  tc;
   Local<Value> argv[1];
 
-  iLob->state_ = NJS_INACTIVE;     // mark Lob as inactive as back in main thread
+  if ( !lobBaton->errOnActiveOrInvalid )
+  {
+    iLob->state_ = NJS_INACTIVE; // mark Lob as inactive as back in main thread
+  }
 
   if(!(lobBaton->error).empty())
     argv[0] = v8::Exception::Error(
@@ -1630,6 +1706,8 @@ try : lobLocator_(lobLocator), dpiLobType_(fetchType), errh_(NULL),
   chunkSize_ = Lob::chunkSize(executeBaton->dpiconn->getSvch(),
                               errh_, lobLocator_);
   length_ = Lob::length(executeBaton->dpiconn->getSvch(), errh_, lobLocator_);
+  isTempLob_ = ( bool ) Lob::isTempLob ( executeBaton->dpienv->envHandle(),
+                                         errh_, lobLocator_ );
 }
 catch (dpi::Exception &e)
 {

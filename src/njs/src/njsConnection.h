@@ -238,8 +238,8 @@ typedef struct eBaton
   bool                      extendedMetaData;
   MetaInfo                  *mInfo;
   LobInfo                   *lobInfo;
-  std::vector<Nan::Persistent<Object>*> persistentRefs; // Persistent Refs to
-                                                        // JS Objects
+  std::vector<Nan::Persistent<Object>*>
+                            persistentRefs; // Persistent Refs to JS Objects
 
   eBaton( unsigned int& count, Local<Function> callback,
            Local<Object> jsConnObj ) :
@@ -566,7 +566,7 @@ private:
   // NewLob Method on Connection class
   static v8::Local<v8::Value> NewLob( eBaton*   executeBaton,
                                       ProtoILob *protoILob,
-                                      bool      tempLob = false );
+                                      bool      isAutoCloseLob = true );
 
   static inline ValueType GetValueType ( v8::Local<v8::Value> v )
   {

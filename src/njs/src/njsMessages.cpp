@@ -85,8 +85,8 @@ static const char *errMsg[] =
   "NJS-046: pool alias \"%s\" already exists in the connection pool cache", // errPoolWithAliasAlreadyExists
   "NJS-047: pool alias \"%s\" not found in the connection pool cache", // errPoolWithAliasNotFound
   "NJS-048: operation not permitted while Lob object is active in a bind operation", // errLOBBindActive
-  "NJS-049: cannot use bind direction IN OUT for temporary LOBs created by createLob()", // errTempLOBINOUTBind
-  "NJS-050: cannot release connection with active temporary LOBs created by createLob()", // errBusyConnTEMPLOB
+  "NJS-049: cannot use bind direction IN OUT for temporary LOBs", // errTempLOBINOUTBind
+  "NJS-050: Temporary LOBs were open when the connection was closed", // errBusyConnTEMPLOB
   "NJS-051: given data as bind value is too large", // errBindValueTooLarge
 };
 

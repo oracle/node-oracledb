@@ -753,7 +753,7 @@ describe("72. lobBind2.js", function() {
 
     }); // 72.2.5
 
-    it.skip("72.2.6 Negative - call lob.close() twice", function(done) {
+    it("72.2.6 Negative - call lob.close() twice concurrently", function(done) {
 
       var seq = 6000;
 
@@ -790,7 +790,9 @@ describe("72. lobBind2.js", function() {
                   });
 
                   lob.close(function(err) {
-                    should.not.exist(err);
+                    should.exist(err);
+                    (err.message).should.startWith("NJS-023:");
+                    // NJS-023: concurrent operations on a Lob are not allowed
                   });
                 }
               );
@@ -813,7 +815,7 @@ describe("72. lobBind2.js", function() {
 
     }); // 72.2.6
 
-    it.skip("72.2.7 Negative - call lob.close() after closing lob", function(done) {
+    it("72.2.7 call lob.close() multiple times sequentially", function(done) {
 
       var seq = 7000;
 

@@ -14,6 +14,18 @@
  *
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ **
+ * NAME
+ *   66. writableProperties.js
+ *
+ * DESCRIPTION
+ *   Testing writable properties.
+ *
+ * NUMBERING RULE
+ *   Test numbers follow this numbering rule:
+ *     1  - 20  are reserved for basic functional tests
+ *     21 - 50  are reserved for data type supporting tests
+ *     51 onwards are for other tests
  *
  *****************************************************************************/
 'use strict';
@@ -22,7 +34,7 @@ var oracledb = require('oracledb');
 var should   = require('should');
 var dbConfig = require('./dbconfig.js');
 
-describe('66. writeableProperties.js', function() {
+describe('66. writableProperties.js', function() {
 
   it('66.1 allows overwriting of public methods on pool instances', function(done) {
     oracledb.createPool(
@@ -180,13 +192,27 @@ describe('66. writeableProperties.js', function() {
             }
           }
 
-          conn.release(function(err) {
+          lob.on("close", function(err) {
             should.not.exist(err);
 
-            done();
+            conn.release(function(err) {
+              should.not.exist(err);
+
+              done();
+            });
+          }); // lob close event
+
+          lob.on("error", function(err) {
+            should.not.exist(err, "lob.on 'error' event.");
           });
+
+          lob.close(function(err) {
+            should.not.exist(err);
+          });
+
         }
        );
     });
-  });
+  }); // 66.4
+
 });

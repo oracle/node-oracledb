@@ -115,7 +115,6 @@ typedef enum
   NJS_CONN_BUSY_LOB     = 5001,   // Connection busy with LOB operation
   NJS_CONN_BUSY_RS      = 5002,   // Connection busy with ResultSet operation
   NJS_CONN_BUSY_DB      = 5003,   // Connection busy with DB operation
-  NJS_CONN_BUSY_TEMPLOB = 5004,   // Connection busy with active temp LOBs
 }ConnectionBusyStatus;
 
 /*
