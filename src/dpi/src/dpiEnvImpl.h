@@ -106,7 +106,8 @@ class EnvImpl : public Env
                              int poolTimeout,
                              int stmtCacheSize,
                              bool externalAuth,
-                             bool homogeneous );
+                             bool homogeneous,
+                             int poolPingInterval );
 
   virtual Conn * getConnection(const string &user, const string &password,
                                const string &connString, int stmtCacheSize,

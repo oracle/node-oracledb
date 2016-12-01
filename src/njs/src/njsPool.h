@@ -68,7 +68,8 @@ public:
    void setPool ( dpi::SPool *, Oracledb* oracledb, unsigned int poolMax,
                   unsigned int poolMin, unsigned int poolIncrement,
                   unsigned int poolTimeout, unsigned stmtCacheSize,
-                  unsigned int lobPrefetchSize, Local<Object> jsOraDB );
+                  unsigned int lobPrefetchSize, int pingInterval,
+                  Local<Object> jsOraDB );
 
    // Define Pool Constructor
    static Nan::Persistent<FunctionTemplate> poolTemplate_s ;
@@ -95,8 +96,12 @@ private:
   static NAN_GETTER(GetConnectionsOpen);
   static NAN_GETTER(GetConnectionsInUse);
   static NAN_GETTER(GetStmtCacheSize);
+  static NAN_GETTER(GetPoolPingInterval);
 
-  static Local<Primitive> getPoolProperty(Pool* njsPool, unsigned int poolProperty);
+  static Local<Primitive> getPoolProperty(Pool* njsPool,
+                                          unsigned int poolProperty);
+  static Local<Primitive> getPoolProperty(Pool* njsPool, int poolProperty);
+
 
   // Define Setter Accessors to properties
   static NAN_SETTER(SetPoolMax);
@@ -106,6 +111,7 @@ private:
   static NAN_SETTER(SetConnectionsOpen);
   static NAN_SETTER(SetConnectionsInUse);
   static NAN_SETTER(SetStmtCacheSize);
+  static NAN_SETTER(SetPoolPingInterval);
 
   static void setPoolProperty(Pool* njsPool, string property);
 
@@ -122,6 +128,7 @@ private:
    unsigned int              poolTimeout_;
    unsigned int              stmtCacheSize_;
    unsigned int              lobPrefetchSize_;
+   int                       pingInterval_;
    Nan::Persistent<Object>   jsParent_;
 };
 

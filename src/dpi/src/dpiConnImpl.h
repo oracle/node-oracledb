@@ -63,6 +63,11 @@ class PoolImpl;
 // No character expansion required if DB has AL32UTF8 charset
 #define DPI_BESTCASE_CHAR_CONVERSION_RATIO     1
 
+// Context property name used to store the last-accessed-time of the
+// connection.  This time and pingInterval are used to decide whether to
+// ping or not
+#define DPI_TIME_2_PING_NAME       "TIME_2_PING"
+
 /*---------------------------------------------------------------------------
                      PUBLIC TYPES
   ---------------------------------------------------------------------------*/
@@ -82,7 +87,8 @@ class ConnImpl : public Conn
   ConnImpl(PoolImpl *pool, OCIEnv *envh, bool externalAuth,
            OraText *poolName, ub4 poolNameLen, const string &connClass,
            const string &user, const string &password, const string &tag,
-           const boolean any, const DBPrivileges dbPriv );
+           const boolean matchAny, const DBPrivileges dbPriv,
+           int pingInterval = DPI_NO_PING_INTERVAL );
 
   virtual ~ConnImpl();
 
@@ -158,23 +164,25 @@ private:
   void cleanup();
 
 
-  EnvImpl     *env_;            // parent Env object
-  PoolImpl    *pool_;           // parent pool object if created from a pool
-
-  OCIEnv      *envh_;           // OCI enviornment handle
-  OCIError    *errh_;           // OCI error handle
-  OCIAuthInfo *auth_;           // OCI auth handle
-  OCISvcCtx   *svch_;           // OCI service handle
-  OCISession  *sessh_;          // OCI Session handle. Do not free this.
-  boolean     hasTxn_;          // set if transaction is in progress
-  int         csratio_;         // character expansion ratio
-  OCIServer   *srvh_;           // OCI server handle
-  bool        dropConn_;        // Set flag in case of unusable connection
-  string      inTag_;           // To fetch connections with specified inTag_
-  string      outTag_;          // When connection is given, what is tag val
-  string      relTag_;          // Release connectih specified tag
-  boolean     retag_;           // How to retag? (update, ignore)
-  boolean     tagMatched_;      // connection is of same tag as requested?
+  EnvImpl      *env_;           // parent Env object
+  PoolImpl     *pool_;          // parent pool object if created from a pool
+  OCIEnv       *envh_;          // OCI enviornment handle
+  OCIError     *errh_;          // OCI error handle
+  OCIAuthInfo  *auth_;          // OCI auth handle
+  OCISvcCtx    *svch_;          // OCI service handle
+  OCISession   *sessh_;         // OCI Session handle. Do not free this.
+  boolean      hasTxn_;         // set if transaction is in progress
+  int          csratio_;        // character expansion ratio
+  OCIServer    *srvh_;          // OCI server handle
+  bool         dropConn_;       // Set flag in case of unusable connection
+  string       inTag_;          // To fetch connections with specified inTag_
+  string       outTag_;         // When connection is given, what is tag val
+  string       relTag_;         // Release connectih specified tag
+  boolean      retag_;          // How to retag? (update, ignore)
+  boolean      tagMatched_;     // connection is of same tag as requested?
+  int          pingInterval_;   // Time to elapse before checking for aliveness
+  long         *lasttick_;      // next ping time if time elapsed.
+  static string s_propPingName_;// Property name used in Context APIs
 };
 
 

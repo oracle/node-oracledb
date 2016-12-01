@@ -329,7 +329,7 @@ describe('12. resultSet1.js', function() {
         [],
         { resultSet: true, prefetchRows: null, maxRows: 1000 },
         function(err, result) {
-          should.exist(err);
+          should.not.exist(err);
           // console.log(result);
           done();
         }

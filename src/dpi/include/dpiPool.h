@@ -33,7 +33,8 @@
 # include <dpiConn.h>
 #endif
 
-
+// Default value for poolPingInterval parameter, no pinging is done by default
+#define DPI_NO_PING_INTERVAL       -1
 
 namespace dpi
 {
@@ -57,6 +58,7 @@ class SPool
 
   virtual unsigned int connectionsInUse() const = 0;
 
+  virtual int          poolMax() const = 0 ;
 
                                 // methods
   virtual Conn * getConnection( const std::string &connClass  = "",

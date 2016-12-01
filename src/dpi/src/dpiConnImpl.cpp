@@ -41,8 +41,6 @@
 # include <dpiExceptionImpl.h>
 #endif
 
-#include <iostream>
-
 // Error numbers to set the drop_sess flag in sessionRelease()
 #define DPI_CONNERR_INVALID_SESS                  22
 #define DPI_CONNERR_SESS_KILLED                   28
@@ -54,6 +52,9 @@
 #define DPI_MAX_VERSION_SIZE                      512
 
 using namespace std;
+
+// Initialize the static member variable
+std::string ConnImpl::s_propPingName_ =  DPI_TIME_2_PING_NAME ;
 
 
 /*---------------------------------------------------------------------------
@@ -89,7 +90,8 @@ ConnImpl::ConnImpl(EnvImpl *env, OCIEnv *envh, bool externalAuth,
 try :  env_(env), pool_(NULL),
        envh_(envh), errh_(NULL), auth_(NULL), svch_(NULL), sessh_(NULL),
        hasTxn_(false), srvh_(NULL), dropConn_(false), inTag_(""), outTag_(""),
-       relTag_(""), retag_(false), tagMatched_ (false)
+       relTag_(""), retag_(false), tagMatched_ (false),
+       pingInterval_(DPI_NO_PING_INTERVAL), lasttick_ ( NULL )
 {
 
   this->initConnImpl ( false, externalAuth, connClass,
@@ -122,7 +124,9 @@ catch (...)
      password        - password in case of non-homogenous pool
      tag             - session tag name
      matchAny        - Match Tag name as MATCHANY or EXACT
-     dbPriv          - DB privileges (SYSDBA or none).
+     dbPriv          - DB privileges (SYSDBA or none)
+     pingInterval    - duration in seconds to elapse before checking
+                       the health of connection being dispensed.
 
    RETURNS:
      nothing
@@ -136,13 +140,13 @@ ConnImpl::ConnImpl(PoolImpl *pool, OCIEnv *envh, bool externalAuth,
                    OraText *poolName, ub4 poolNameLen, const string& connClass,
                    const string &user, const string &password,
                    const string &tag, const boolean matchAny,
-                   const DBPrivileges dbPriv )
+                   const DBPrivileges dbPriv, int pingInterval )
 
 try :  env_(NULL), pool_(pool),
        envh_(envh), errh_(NULL), auth_(NULL),
        svch_(NULL), sessh_(NULL), hasTxn_(false), srvh_(NULL),
        dropConn_(false), inTag_ (""), outTag_(""), relTag_(""), retag_ (false),
-       tagMatched_(false)
+       tagMatched_(false), pingInterval_ (pingInterval), lasttick_ ( NULL )
 {
   this->initConnImpl ( true, externalAuth, connClass, poolName, poolNameLen,
                        user, password, tag, matchAny, outTag_, tagMatched_,
@@ -600,13 +604,18 @@ void ConnImpl::initConnImpl ( bool pool, bool externalAuth,
                    const string &tag, const boolean matchAny,
                    std::string & curTag, boolean &found, DBPrivileges dbPriv )
 {
-  ub4 mode          = OCI_DEFAULT;
-  ub2 csid          = 0;
-  void *errh        = NULL;
-  void *auth        = NULL;
+  ub4 mode           = OCI_DEFAULT;
+  ub2 csid           = 0;
+  void *errh         = NULL;
+  void *auth         = NULL;
+  OraText *retTag    = NULL ; // To fetch current tag on session
+  ub4     retTagLen  = 0 ;    // current tag len
+  int maxPingRetries = pool ? pool_->poolMax () + 1 : 1 ;
 
-  OraText *retTag   = NULL ; // To fetch current tag on session
-  ub4     retTagLen = 0 ;    // current tag len
+#if ( ( OCI_MAJOR_VERSION < 12 ) ||                             \
+      ( OCI_MAJOR_VERSION == 12 && OCI_MINOR_VERSION < 2 ) )
+  time_t curTime;
+#endif
 
   if ( pool )
     mode = externalAuth ? ( OCI_SESSGET_CREDEXT | OCI_SESSGET_SPOOL ) :
@@ -692,7 +701,14 @@ void ConnImpl::initConnImpl ( bool pool, bool externalAuth,
     mode |= OCI_SESSGET_SPOOL_MATCHANY;
   }
 
-  ociCall ( OCISessionGet ( envh_, errh_, &svch_, auth_, poolNmRconnStr,
+#if ( ( OCI_MAJOR_VERSION < 12 ) ||                             \
+      ( OCI_MAJOR_VERSION == 12 && OCI_MINOR_VERSION < 2 ) )
+  curTime = time ( NULL ) ;               // current tick count
+#endif
+
+  for (int iter = 0; iter < maxPingRetries; iter ++ )
+  {
+    ociCall ( OCISessionGet ( envh_, errh_, &svch_, auth_, poolNmRconnStr,
                             ( ub4 ) nameLen, (OraText*)tag.c_str(),
                             (ub4) tag.length(),
                             &retTag,
@@ -700,14 +716,80 @@ void ConnImpl::initConnImpl ( bool pool, bool externalAuth,
                             &tagMatched_, mode ),
             errh_ );
 
-  outTag_ = string ( (char *) retTag, retTagLen ) ;
+    outTag_ = string ( (char *) retTag, retTagLen ) ;
 
-  ociCall ( OCIAttrGet ( svch_, OCI_HTYPE_SVCCTX, &sessh_,  0,
-                         OCI_ATTR_SESSION, errh_ ), errh_ );
+    // session object from svch handle
+    ociCall ( OCIAttrGet ( svch_, OCI_HTYPE_SVCCTX, &sessh_,  0,
+                           OCI_ATTR_SESSION, errh_ ), errh_ );
+
+    // For stand alone (non-pooled) connections and pingInterval set to
+    // no-ping, exit the loop to return the session.
+    if ( !pool || pingInterval_ < 0 )
+      break;
+
+#if ( ( OCI_MAJOR_VERSION < 12 ) ||                                \
+      ( OCI_MAJOR_VERSION == 12 && OCI_MINOR_VERSION < 2 ) )
+    //
+    // PingInterval elapsed implementation is available  only for 
+    //   pooled-connections and
+    //   pingInterval_ is specified to check (-ve never check)
+    //
+
+    // Use the last stamped time set on the session to check for elapsed
+    // This implementation is only of client versions < 12.2
+    if ( pingInterval_ > 0 )
+    {
+      // get last tick count if any set from earlier release.
+      // if none, 0 will be returned.
+      ociCall ( OCIContextGetValue ( sessh_,
+                                     errh_,
+                                     (ub1 *)s_propPingName_.c_str(),
+                                     (ub1)s_propPingName_.length(),
+                                     (void **)&lasttick_ ), errh_ );
+
+      // If the session is obtained firstime from pool, context value 
+      // will not be there, in that case, allocate and set it.
+      if ( !lasttick_ )
+      {
+        ociCall ( OCIMemoryAlloc ( sessh_, errh_, (void **)&lasttick_,
+                                   OCI_DURATION_SESSION, sizeof (long),
+                                   OCI_MEMORY_CLEARED ), errh_ );
+        sword ret = OCIContextSetValue ( sessh_, errh_, OCI_DURATION_SESSION,
+                                       (ub1 *) s_propPingName_.c_str(),
+                                       (ub1)s_propPingName_.length(),
+                                       (void *) lasttick_ ) ;
+        // In case if the allocated memory could not be associated with session
+        // free the memory allocated and return error.
+        // In case if succeeded, then the allocated memory will be deallocated
+        // internally by OCI when the session is freed.
+        if ( ret != OCI_SUCCESS )
+        {
+          OCIMemoryFree ( sessh_, errh_, lasttick_ );
+          ociCall ( ret, errh_ );
+        }
+      }
+      else if ( *lasttick_ > curTime )
+      {
+        // If time not elapsed => no need to ping
+        break;
+      }
+    }
+
+    // Check for aliveness of session
+    if ( OCIPing ( svch_, errh_, OCI_DEFAULT ) == OCI_SUCCESS )
+      break;
+
+    // If session is not good, release it and drop from pool too.
+    ociCall ( OCISessionRelease ( svch_, errh_, (OraText *)"", (sword)0,
+                                  OCI_SESSRLS_DROPSESS ), errh_ ) ;
+#else
+    break;              // For 12.2 and above, got a session.
+#endif
+  }
 
   // Initialize the server handle from service handle
   ociCall ( OCIAttrGet ( svch_, OCI_HTYPE_SVCCTX, ( void * ) &srvh_, 0,
-                        ( ub4 ) OCI_ATTR_SERVER, errh_ ), errh_ );
+                          ( ub4 ) OCI_ATTR_SERVER, errh_ ), errh_ );
 
   // Get the DBCHARSET from server
   ociCall ( OCIAttrGet ( srvh_, ( ub4 ) OCI_HTYPE_SERVER, ( void * ) &csid,
@@ -752,6 +834,29 @@ void ConnImpl::cleanup()
       if ( dropConn_ || ( serverStatus != OCI_SERVER_NORMAL ) )
         relMode |= OCI_SESSRLS_DROPSESS;
     }
+
+#if ( ( OCI_MAJOR_VERSION < 12 ) ||                   \
+      ( OCI_MAJOR_VERSION == 12 && OCI_MINOR_VERSION < 2 ) )
+    // The ping Interval and last-stamped-time is used to decide whether
+    // to explicitly check for aliveness of the connection.
+    // In 12.2 and above OCI has a different
+    // light-weight ping mechanism and is always enabled, so this
+    // implementation is only for Oracle Client library versions <= 12.1
+    
+    // Set the current time on the session to be used later whether
+    // this time is elapsed against pingInterval_.
+    if ( sessh_ )
+    {      
+      // For Later use, update the session with current time only
+      // if ping is desired.
+
+      if ( pingInterval_ > 0 )
+      {
+        time_t curTime          = time ( NULL ) ;    // Current time in seconds
+        *lasttick_              = (long) curTime + pingInterval_;
+      }
+    }
+#endif
 
     // Re-tagging
     if( retag_ )

@@ -260,6 +260,8 @@ private:
   }                                                                           \
 }
 
+
+
 /*
  * Get the std string value from JSON for the given key.
  * index is the argument index in the caller.
@@ -298,7 +300,7 @@ private:
   {                                                                           \
     val = v8value->ToUint32()->Value();                                       \
   }                                                                           \
-  else if(v8value->IsUndefined())                                             \
+  else if(v8value->IsUndefined() || v8value->IsNull () )                      \
   {                                                                           \
     ;                                                                         \
   }                                                                           \
@@ -316,6 +318,39 @@ private:
   }                                                                           \
 }
 
+
+/*
+ * Get the int value from JSON for the given key.
+ * index is the argument index in the caller.
+ * DO NOT SET ANY VALUE to val IF NULL OR UNDEFINED
+ */
+#define NJS_GET_INT_FROM_JSON( val, err, obj, key, index, exitCode )          \
+{                                                                             \
+  Local<Value> v8value = obj->Get(Nan::New<v8::String>(key).ToLocalChecked());\
+  err.clear();                                                                \
+  if( v8value->IsInt32() )                                                    \
+  {                                                                           \
+    val = v8value->ToInt32()->Value();                                        \
+  }                                                                           \
+  else if(v8value->IsUndefined() || v8value->IsNull ())                       \
+  {                                                                           \
+    ;                                                                         \
+  }                                                                           \
+  else if(v8value->IsNumber())                                                \
+  {                                                                           \
+    err = NJSMessages::getErrorMsg ( errInvalidPropertyValueInParam,          \
+                                     key, index+1 );                          \
+    goto exitCode;                                                            \
+  }                                                                           \
+  else                                                                        \
+  {                                                                           \
+    err = NJSMessages::getErrorMsg ( errInvalidPropertyTypeInParam,           \
+                                     key, index+1 );                          \
+    goto exitCode;                                                            \
+  }                                                                           \
+}
+
+
 /*
  * Get the boolean value from JSON for the given key.
  * index is the argument index in the caller.
@@ -323,7 +358,7 @@ private:
 #define NJS_GET_BOOL_FROM_JSON( val, err, obj, key, index, exitCode )         \
 {                                                                             \
   Local<Value> v8value = obj->Get(Nan::New<v8::String>(key).ToLocalChecked());\
-  if ( !v8value->IsUndefined () )                                             \
+  if ( !v8value->IsUndefined () && !v8value->IsNull () )                      \
   {                                                                           \
     val = v8value->ToBoolean()->Value();                                      \
   }                                                                           \
@@ -366,6 +401,25 @@ private:
     errMsg = NJSMessages::getErrorMsg ( errInvalidPropertyValue,              \
                                      prop );                                  \
     NJS_SET_EXCEPTION ( errMsg.c_str() );                                     \
+  }                                                                           \
+}
+
+/*
+ * Convert v8value to long for properties.
+ * If it is not a v8 int, throw exception,
+ * prop is the name of the property
+ */
+#define NJS_SET_PROP_INT(val, v8value, prop )                                 \
+{                                                                             \
+  string errMsg;                                                              \
+  if ( v8value->IsInt32 () )                                                  \
+  {                                                                           \
+    val = v8value->ToInt32 ()->Value ();                                      \
+  }                                                                           \
+  else                                                                        \
+  {                                                                           \
+    errMsg = NJSMessages::getErrorMsg ( errInvalidPropertyValue, prop );      \
+    NJS_SET_EXCEPTION ( errMsg.c_str () );                                    \
   }                                                                           \
 }
 

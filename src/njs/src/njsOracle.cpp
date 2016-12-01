@@ -60,16 +60,16 @@
                                         //peristent Oracledb class handle
 Nan::Persistent<FunctionTemplate> Oracledb::oracledbTemplate_s;
 
-#define NJS_MAX_ROWS            100
-#define NJS_STMT_CACHE_SIZE      30
-#define NJS_POOL_MIN              0
-#define NJS_POOL_MAX              4
-#define NJS_POOL_INCR             1
-#define NJS_POOL_TIMEOUT         60
-#define NJS_PREFETCH_ROWS       100
-#define NJS_LOB_PREFETCH_SIZE 16384
-
-#define NJS_DRIVERNAME_PREFIX "node-oracledb"
+#define NJS_MAX_ROWS                     100
+#define NJS_STMT_CACHE_SIZE              30
+#define NJS_POOL_MIN                     0
+#define NJS_POOL_MAX                     4
+#define NJS_POOL_INCR                    1
+#define NJS_POOL_TIMEOUT                 60
+#define NJS_POOL_DEFAULT_PING_INTERVAL   60
+#define NJS_PREFETCH_ROWS                100
+#define NJS_LOB_PREFETCH_SIZE            16384
+#define NJS_DRIVERNAME_PREFIX            "node-oracledb"
 
 /*****************************************************************************/
 /*
@@ -95,6 +95,8 @@ Oracledb::Oracledb()
   fetchAsStringTypes_      = NULL;
   fetchAsStringTypesCount_ = 0;
   lobPrefetchSize_         = NJS_LOB_PREFETCH_SIZE;
+  
+  poolPingInterval_        = NJS_POOL_DEFAULT_PING_INTERVAL ;
 }
 
 /*****************************************************************************/
@@ -234,6 +236,11 @@ void Oracledb::Init(Handle<Object> target)
     Nan::New<v8::String>("oracleClientVersion").ToLocalChecked(),
     Oracledb::GetOracleClientVersion,
     Oracledb::SetOracleClientVersion );
+  Nan::SetAccessor (
+    temp->InstanceTemplate (),
+    Nan::New<v8::String>("poolPingInterval").ToLocalChecked (),
+    Oracledb::GetPoolPingInterval,
+    Oracledb::SetPoolPingInterval );
 
   oracledbTemplate_s.Reset(temp);
   Nan::Set(target, Nan::New<v8::String>("Oracledb").ToLocalChecked(),temp->GetFunction());
@@ -742,10 +749,40 @@ NAN_SETTER(Oracledb::SetOracleClientVersion )
 }
 
 
+/*****************************************************************************/
+/*
+  DESCRIPTION
+    Get Accessor of Ping Interval
+*/
+NAN_GETTER(Oracledb::GetPoolPingInterval)
+{
+  Oracledb *oracledb = ObjectWrap::Unwrap<Oracledb>(info.Holder());
+  NJS_CHECK_OBJECT_VALID2(oracledb, info );
+  Local<Integer> value = Nan::New<v8::Integer>((int)
+                           ( oracledb->poolPingInterval_ ) );
+  info.GetReturnValue ().Set ( value ) ;
+}
 
 
 /*****************************************************************************/
-                                                                             /*
+/*
+  DESCRIPTION
+    Set Accessor of Ping Interval
+*/
+NAN_SETTER(Oracledb::SetPoolPingInterval)
+{
+  long poolPingInterval = 0;
+  Oracledb* oracledb = Nan::ObjectWrap::Unwrap<Oracledb> (info.Holder());
+  NJS_CHECK_OBJECT_VALID (oracledb);
+  NJS_SET_PROP_INT (poolPingInterval, value, "pingPoolInterval" );
+  oracledb->poolPingInterval_ = poolPingInterval ;
+}
+
+
+
+
+/*****************************************************************************/
+/*
    DESCRIPTION
      Get Connection method on Oracledb class.
 
@@ -947,6 +984,10 @@ NAN_METHOD(Oracledb::CreatePool)
   NJS_GET_BOOL_FROM_JSON   ( poolBaton->externalAuth, poolBaton->error,
                              poolProps, "externalAuth", 0, exitCreatePool );
 
+  poolBaton->poolPingInterval = oracledb->poolPingInterval_;
+  NJS_GET_INT_FROM_JSON    ( poolBaton->poolPingInterval, poolBaton->error,
+                             poolProps, "poolPingInterval", 0, exitCreatePool);
+
   poolBaton->oracledb  =  oracledb;
   poolBaton->dpienv    =  oracledb->dpienv_;
   poolBaton->lobPrefetchSize =  oracledb->lobPrefetchSize_;
@@ -992,16 +1033,18 @@ void Oracledb::Async_CreatePool (uv_work_t *req)
     // externAuth is not supported in homogeneous pool, in case app specified
     // externalAuth, then make it as heterogeneous pool.
     poolBaton->dpipool = poolBaton-> dpienv ->
-                                     createPool ( poolBaton->user,
-                                                  poolBaton->pswrd,
-                                                  poolBaton->connStr,
-                                                  poolBaton->poolMax,
-                                                  poolBaton->poolMin,
-                                                  poolBaton->poolIncrement,
-                                                  poolBaton->poolTimeout,
-                                                  poolBaton->stmtCacheSize,
-                                                  poolBaton->externalAuth,
-                                   poolBaton->externalAuth ? false : true  );
+                                     createPool ( 
+                                       poolBaton->user,
+                                       poolBaton->pswrd,
+                                       poolBaton->connStr,
+                                       poolBaton->poolMax,
+                                       poolBaton->poolMin,
+                                       poolBaton->poolIncrement,
+                                       poolBaton->poolTimeout,
+                                       poolBaton->stmtCacheSize,
+                                       poolBaton->externalAuth,
+                                       poolBaton->externalAuth ? false : true,
+                                       poolBaton->poolPingInterval );
   }
   catch (dpi::Exception &e)
   {
@@ -1051,6 +1094,7 @@ void Oracledb::Async_AfterCreatePool (uv_work_t *req)
                                             poolBaton->poolTimeout,
                                             poolBaton->stmtCacheSize,
                                             poolBaton->lobPrefetchSize,
+                                            poolBaton->poolPingInterval,
                                             Nan::New( poolBaton->jsOradb ) );
     argv[1] = njsPool;
   }

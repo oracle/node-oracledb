@@ -36,6 +36,7 @@
 
 #include <string>
 
+#include <time.h>
 
 
 namespace dpi

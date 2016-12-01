@@ -43,7 +43,6 @@
 
 #define DPI_AL32UTF8         873
 
-
 namespace dpi
 {
 
@@ -99,7 +98,9 @@ class Env
                              int poolTimeout = -1,
                              int stmtCacheSize = -1,
                              bool externalAuth = false,
-                             bool homogeneous = true ) = 0;
+                             bool homogeneous = true,
+                        int poolPingInterval = DPI_NO_PING_INTERVAL ) = 0 ;
+                     // default Ping Interval is assumed to be no-ping
 
   virtual Conn * getConnection(const string &user,
                                const string &password,

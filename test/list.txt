@@ -1046,3 +1046,27 @@ Overview of node-oracledb functional tests
         70.22.9 val: epoc date 1970-1-1
         70.22.10 NULL IN and NON-NULL out
         70.22.11 NON-NULL IN and NULL OUT
+
+73. poolPing.js
+    73.1 the default value of poolPingInterval is 60
+    73.2 does not change after the pool has been created
+    73.3 can not be changed on pool object
+    73.4 can not be accessed on connection object
+    73.5 can be set to 0, means always ping
+    73.6 can be set to negative values, means never ping
+    73.7 Negative: Number.MAX_SAFE_INTEGER
+    73.8 cannot surpass the upper limit
+    73.9 cannot surpass the lower Limit
+    73.10 Negative: null
+    73.11 Negative: NaN
+    73.12 Negative: undefined
+    73.13 Negative: 'random-string'
+    73.14 can be set at pool creation, e.g. positive value 1234
+    73.15 can be set at pool creation, e.g. negative value -4321
+    73.16 can be set at pool creation, e.g. 0 means always ping
+    73.17 Setting to 'null' will use current value from oracledb
+    73.18 Setting to 'undefined' will use current value from oracledb
+    73.19 can be set at pool creation. Negative: NaN
+    73.20 can be set at pool creation. Negative: 'random-string'
+    73.21 cannot surpass the upper limit at pool creation
+    73.22 cannot surpass the lower limit at pool creation

@@ -43,13 +43,14 @@ limitations under the License.
      - 3.2.10 [`poolIncrement`](#propdbpoolincrement)
      - 3.2.11 [`poolMax`](#propdbpoolmax)
      - 3.2.12 [`poolMin`](#propdbpoolmin)
-     - 3.2.13 [`poolTimeout`](#propdbpooltimeout)
-     - 3.2.14 [`prefetchRows`](#propdbprefetchrows)
-     - 3.2.15 [`Promise`](#propdbpromise)
-     - 3.2.16 [`queueRequests`](#propdbqueuerequests)
-     - 3.2.17 [`queueTimeout`](#propdbqueuetimeout)
-     - 3.2.18 [`stmtCacheSize`](#propdbstmtcachesize)
-     - 3.2.19 [`version`](#propdbversion)
+     - 3.2.13 [`poolPingInterval`](#propdbpoolpinginterval)
+     - 3.2.14 [`poolTimeout`](#propdbpooltimeout)
+     - 3.2.15 [`prefetchRows`](#propdbprefetchrows)
+     - 3.2.16 [`Promise`](#propdbpromise)
+     - 3.2.17 [`queueRequests`](#propdbqueuerequests)
+     - 3.2.18 [`queueTimeout`](#propdbqueuetimeout)
+     - 3.2.19 [`stmtCacheSize`](#propdbstmtcachesize)
+     - 3.2.20 [`version`](#propdbversion)
   - 3.3 [Oracledb Methods](#oracledbmethods)
      - 3.3.1 [`createPool()`](#createpool)
      - 3.3.2 [`getConnection()`](#getconnectiondb)
@@ -101,10 +102,11 @@ limitations under the License.
      - 6.1.4 [`poolIncrement`](#proppoolpoolincrement)
      - 6.1.5 [`poolMax`](#proppoolpoolmax)
      - 6.1.6 [`poolMin`](#proppoolpoolmin)
-     - 6.1.7 [`poolTimeout`](#proppoolpooltimeout)
-     - 6.1.8 [`queueRequests`](#proppoolqueuerequests)
-     - 6.1.9 [`queueTimeout`](#proppoolqueueTimeout)
-     - 6.1.10 [`stmtCacheSize`](#proppoolstmtcachesize)
+     - 6.1.7 [`poolPingInterval`](#proppoolpoolpinginterval)
+     - 6.1.8 [`poolTimeout`](#proppoolpooltimeout)
+     - 6.1.9 [`queueRequests`](#proppoolqueuerequests)
+     - 6.1.10 [`queueTimeout`](#proppoolqueueTimeout)
+     - 6.1.11 [`stmtCacheSize`](#proppoolstmtcachesize)
   - 6.2 [Pool Methods](#poolmethods)
      - 6.2.1 [`close()`](#poolclose)
      - 6.2.2 [`getConnection()`](#getconnectionpool)
@@ -127,6 +129,7 @@ limitations under the License.
      - 8.3.1 [Connection Pool Cache](#connpoolcache)
      - 8.3.2 [Connection Pool Queue](#connpoolqueue)
      - 8.3.3 [Connection Pool Monitoring and Throughput](#connpoolmonitor)
+     - 8.3.4 [Connection Pool Pinging](#connpoolpinging)
   - 8.4 [Database Resident Connection Pooling (DRCP)](#drcp)
   - 8.5 [External Authentication](#extauth)
 9. [SQL Execution](#sqlexecution)
@@ -712,7 +715,46 @@ var oracledb = require('oracledb');
 oracledb.poolMin = 0;
 ```
 
-#### <a name="propdbpooltimeout"></a> 3.2.13 poolTimeout
+#### <a name="propdbpoolpinginterval"></a> 3.2.13 poolPingInterval
+
+```
+Number poolPingInterval
+```
+
+When a pool [`getConnection()`](#getconnectionpool) is called and the
+connection has been idle in the pool for at least `poolPingInterval`
+seconds, an internal "ping" will be performed first to check the
+aliveness of the connection.  At the cost of some overhead for
+infrequently accessed connection pools, connection pinging improves
+the chance a pooled connection is valid when it is used because
+indentifed un-unusable connections will not be returned to the
+application by `getConnection()`.
+
+Note unless `poolPingInterval` is `0`, it is possible for un-usable
+connections to be returned by a pool `getConnection()`.  Since it is
+also possible for connections to become unusable after
+`getConnection()` is called, applications should implement appropriate
+statement execution error checking.
+
+The default value is `60` seconds.  Possible values for `poolPingInterval` are:
+
+Value   | Behavior of a Pool `getConnection()` call
+--------|------------------------------------------
+`n` < 0 | Never checks for connection aliveness
+`0`     | Always checks for connection aliveness. There is some overhead in performing a ping so non-zero values are recommended for most applications
+`n` > 0 | Checks aliveness if the connection has been idle in the pool (not "checked out" to the application by `getConnection()`) for at least `n` seconds
+
+This property may be overridden when [creating a connection pool](#createpool).
+
+See [Connection Pool Pinging](#connpoolpinging) for more discussion.
+
+##### Example
+```javascript
+var oracledb = require('oracledb');
+oracledb.poolPingInterval = 60;
+```
+
+#### <a name="propdbpooltimeout"></a> 3.2.14 poolTimeout
 
 ```
 Number poolTimeout
@@ -734,7 +776,7 @@ var oracledb = require('oracledb');
 oracledb.poolTimeout = 60;
 ```
 
-#### <a name="propdbprefetchrows"></a> 3.2.14 prefetchRows
+#### <a name="propdbprefetchrows"></a> 3.2.15 prefetchRows
 
 ```
 Number prefetchRows
@@ -764,7 +806,7 @@ var oracledb = require('oracledb');
 oracledb.prefetchRows = 100;
 ```
 
-#### <a name="propdbpromise"></a> 3.2.15 Promise
+#### <a name="propdbpromise"></a> 3.2.16 Promise
 
 ```
 Promise Promise
@@ -793,7 +835,7 @@ Promises can be completely disabled by setting
 oracledb.Promise = null;
 ```
 
-#### <a name="propdbqueuerequests"></a> 3.2.16 queueRequests
+#### <a name="propdbqueuerequests"></a> 3.2.17 queueRequests
 
 ```
 Boolean queueRequests
@@ -820,7 +862,7 @@ var oracledb = require('oracledb');
 oracledb.queueRequests = false;
 ```
 
-#### <a name="propdbqueuetimeout"></a> 3.2.17 queueTimeout
+#### <a name="propdbqueuetimeout"></a> 3.2.18 queueTimeout
 
 ```
 Number queueTimeout
@@ -841,7 +883,7 @@ var oracledb = require('oracledb');
 oracledb.queueTimeout = 3000; // 3 seconds
 ```
 
-#### <a name="propdbstmtcachesize"></a> 3.2.18 stmtCacheSize
+#### <a name="propdbstmtcachesize"></a> 3.2.19 stmtCacheSize
 
 ```
 Number stmtCacheSize
@@ -868,7 +910,7 @@ var oracledb = require('oracledb');
 oracledb.stmtCacheSize = 30;
 ```
 
-#### <a name="propdbversion"></a> 3.2.19 version
+#### <a name="propdbversion"></a> 3.2.20 version
 ```
 readonly Number version
 ```
@@ -998,6 +1040,16 @@ that utilize the connection pool cache, such as [`oracledb.getPool()`](#getpool)
 See [Connection Pool Cache](#connpoolcache) for details and examples.
 
 ```
+Number poolIncrement
+```
+
+The number of connections that are opened whenever a connection
+request exceeds the number of currently open connections.
+
+This optional property overrides the
+[`oracledb.poolIncrement`](#propdbpoolincrement) property.
+
+```
 Number poolMax
 ```
 
@@ -1017,14 +1069,16 @@ This optional property overrides the
 [`oracledb.poolMin`](#propdbpoolmin) property.
 
 ```
-Number poolIncrement
+Number poolPingInterval
 ```
 
-The number of connections that are opened whenever a connection
-request exceeds the number of currently open connections.
+When a pool [`getConnection()`](#getconnectionpool) is called and the
+connection has been idle in the pool for at least `poolPingInterval`
+seconds, an internal "ping" will be performed first to check the
+aliveness of the connection.
 
 This optional property overrides the
-[`oracledb.poolIncrement`](#propdbpoolincrement) property.
+[`oracledb.poolPingInterval`](#propdbpoolpinginterval) property.
 
 ```
 Number poolTimeout
@@ -1854,7 +1908,7 @@ readonly Number connectionsInUse
 ```
 
 The number of currently active connections in the connection pool
-i.e.  the number of connections currently checked-out using
+i.e. the number of connections currently "checked out" using
 `getConnection()`.
 
 #### <a name="proppoolconnectionsopen"></a> 6.1.2 connectionsOpen
@@ -1883,6 +1937,8 @@ readonly Number poolIncrement
 The number of connections that are opened whenever a connection
 request exceeds the number of currently open connections.
 
+See [`oracledb.poolIncrement`](#propdbpoolincrement).
+
 #### <a name="proppoolpoolmax"></a> 6.1.5 poolMax
 
 ```
@@ -1891,6 +1947,8 @@ readonly Number poolMax
 
 The maximum number of connections that can be open in the connection
 pool.
+
+See [`oracledb.poolMax`](#propdbpoolmax).
 
 #### <a name="proppoolpoolmin"></a> 6.1.6 poolMin
 
@@ -1901,7 +1959,22 @@ readonly Number poolMin
 The minimum number of connections a connection pool maintains, even
 when there is no activity to the target database.
 
-#### <a name="proppoolpooltimeout"></a> 6.1.7 poolTimeout
+See [`oracledb.poolMin`](#propdbpoolmin).
+
+#### <a name="proppoolpoolpinginterval"></a> 6.1.7 poolPingInterval
+
+```
+readonly Number poolPingInterval
+```
+
+The maximum number of seconds that a connection can remain idle in a
+connection pool (not "checked out" to the application by
+`getConnection()`) before node-oracledb pings the database prior to
+returning that connection to the application.
+
+See [`oracledb.poolPingInterval`](#propdbpoolpinginterval).
+
+#### <a name="proppoolpooltimeout"></a> 6.1.8 poolTimeout
 
 ```
 readonly Number poolTimeout
@@ -1911,7 +1984,9 @@ The time (in seconds) after which the pool terminates idle connections
 (unused in the pool). The number of connections does not drop below
 poolMin.
 
-#### <a name="proppoolqueuerequests"></a> 6.1.8 queueRequests
+See [`oracledb.poolTimeout`](#propdbpooltimeout).
+
+#### <a name="proppoolqueuerequests"></a> 6.1.9 queueRequests
 
 ```
 readonly Boolean queueRequests
@@ -1921,7 +1996,9 @@ Determines whether requests for connections from the pool are queued
 when the number of connections "checked out" from the pool has reached
 the maximum number specified by [`poolMax`](#propdbpoolmax).
 
-#### <a name="proppoolqueueTimeout"></a> 6.1.9 queueTimeout
+See [`oracledb.queueRequests`](#propdbqueuerequests).
+
+#### <a name="proppoolqueueTimeout"></a> 6.1.10 queueTimeout
 
 ```
 readonly Number queueTimeout
@@ -1930,7 +2007,9 @@ readonly Number queueTimeout
 The time (in milliseconds) that a connection request should wait in
 the queue before the request is terminated.
 
-#### <a name="proppoolstmtcachesize"></a> 6.1.10 stmtCacheSize
+See [`oracledb.queueTimeout`](#propdbqueuetimeout).
+
+#### <a name="proppoolstmtcachesize"></a> 6.1.11 stmtCacheSize
 
 ```
 readonly Number stmtCacheSize
@@ -1938,6 +2017,8 @@ readonly Number stmtCacheSize
 
 The number of statements to be cached in the
 [statement cache](#stmtcache) of each connection.
+
+See [`oracledb.stmtCacheSize`](#propdbstmtcachesize).
 
 ### <a name="poolmethods"></a> 6.2 Pool Methods
 
@@ -2649,6 +2730,7 @@ Attribute                                   |
 [`poolMax`](#propdbpoolmax)                 |
 [`poolIncrement`](#propdbpoolincrement)     |
 [`poolTimeout`](#propdbpooltimeout)         |
+[`poolPingInterval`](#propdbpoolpinginterval) |
 [`stmtCacheSize`](#propdbstmtcachesize)     |
 
 ##### Related Environment Variables
@@ -2658,6 +2740,59 @@ One related environment variable is is shown by `_logStats()`:
 Environment Variable                                 | Description
 -----------------------------------------------------|-------------
 [`process.env.UV_THREADPOOL_SIZE`](#numberofthreads) | The number of worker threads for this process.
+
+#### <a name="connpoolpinging"></a> 8.3.4 Connection Pool Pinging
+
+When connections are idle in a connection pool (not "checked out" to
+the application by `getConnection()`), there is the possibility that a
+network or Database instance failure makes those connections unusable.
+A `getConnection()` call will happily return a connection from the
+pool but an error occurs when the application later uses the
+connection.
+
+By default, when a pool [`getConnection()`](#getconnectionpool) is
+called and the connection has been idle in the pool for at least `60`
+seconds then an internal "ping" will be performed first to check the
+aliveness of the connection.  At the cost of some overhead for
+infrequently accessed connection pools, connection pinging improves
+the chance a pooled connection is valid when it is used because
+indentifed un-unusable connections will not be returned to the
+application by `getConnection()`.
+
+For active applications that are getting and releasing connections
+rapidly, no pings will be needed so there is no overhead.
+
+If a ping detects the connection is invalid, for example if the
+network had disconnected, then node-oracledb internally drops the
+unusable connection and obtains another from the pool.  This second
+connection may also need a ping.  This ping-and-release process may be
+repeated until:
+
+- an existing connection that doesn't qualify for pinging is obtained. The `getConnection()` call returns this to the application.  Note it is not guaranteed to  be usable
+- a new, usable connection is opened. This is returned to the application
+- a number of unsuccessful attempts to find a valid connection have been made, after which an error is returned to the application
+
+Applications should continue to do appropriate error checking when
+using connections in case they have become invalid in the time since
+`getConnection()` was called.  This error checking will also protect
+against cases where the network dropped out but a connection was idle
+in the pool for less than `60` seconds and so `getConnection()` did
+not ping.  In all cases, when a bad connection
+is [released](#connectionclose) back to the pool, the connection is
+automatically destroyed.  This allows a valid connection to be opened
+by a subsequent `getConnection()` call.
+
+The default ping interval is `60` seconds.  The interval can be set with
+the [`oracledb.poolPingInterval`](#propdbpoolpinginterval) property or
+during [pool creation](#createpool).
+
+Posible values for `poolPingInterval` are:
+
+Value   | Behavior of a Pool `getConnection()` call
+--------|------------------------------------------
+`n` < 0 | Never checks for connection aliveness
+`0`     | Always checks for connection aliveness. There is some overhead in performing a ping so non-zero values are recommended for most applications
+`n` > 0 | Checks aliveness if the connection has been idle in the pool (not "checked out" to the application by `getConnection()`) for at least `n` seconds
 
 ### <a name="drcp"></a> 8.4 Database Resident Connection Pooling (DRCP)
 

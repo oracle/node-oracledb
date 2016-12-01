@@ -507,16 +507,17 @@ unsigned int EnvImpl::clientncharset () const
      Create the Pool object.
 
    PARAMETERS:
-     user          - userid
-     password      - password
-     connString    - connect string
-     poolMax       - Max number of connections for session pool
-     poolMin       - Min number of connections for session pool
-     poolIncrement - Increment count for session pool
-     poolTimeout   - Timeout duration after which getConnection will fail
-     stmtCacheSize - # of statements to cache
-     externalAuth  - external Authentication used or not
-     homogenous    - homongeous pool authentication or not
+     user             - userid
+     password         - password
+     connString       - connect string
+     poolMax          - Max number of connections for session pool
+     poolMin          - Min number of connections for session pool
+     poolIncrement    - Increment count for session pool
+     poolTimeout      - Timeout duration after which getConnection will fail
+     stmtCacheSize    - # of statements to cache
+     externalAuth     - external Authentication used or not
+     homogenous       - homongeous pool authentication or not
+     poolPingInterval - ping Interval used to check for healthiness
 
    RETURNS:
      created pool
@@ -529,7 +530,8 @@ SPool * EnvImpl::createPool(const string &user, const string &password,
                             const string &connString,
                             int poolMax, int poolMin, int poolIncrement,
                             int poolTimeout, int stmtCacheSize,
-                            bool externalAuth, bool homogenous)
+                            bool externalAuth, bool homogenous,
+                            int poolPingInterval)
 {
   return new PoolImpl(this, envh_, user, password, connString,
                       (poolMax == -1) ? poolMax_ : poolMax,
@@ -540,7 +542,8 @@ SPool * EnvImpl::createPool(const string &user, const string &password,
                                             poolTimeout,
                       externalAuth,
                       (stmtCacheSize == -1) ? stmtCacheSize_ :
-                      stmtCacheSize, homogenous );
+                      stmtCacheSize, homogenous,
+                      poolPingInterval );
 }
 
 

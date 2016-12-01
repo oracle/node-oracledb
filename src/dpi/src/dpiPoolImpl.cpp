@@ -83,9 +83,10 @@ PoolImpl::PoolImpl(EnvImpl *env, OCIEnv *envh,
                    const string &connString, int poolMax,
                    int poolMin, int poolIncrement,
                    int poolTimeout, bool externalAuth, int stmtCacheSize,
-                   bool homogeneous)
+                   bool homogeneous, int poolPingInterval )
   try : env_(env), externalAuth_(externalAuth), envh_(envh), errh_(NULL),
-        spoolh_(NULL), poolName_(NULL), poolAuth_(NULL)
+        spoolh_(NULL), poolName_(NULL), poolAuth_(NULL), poolMax_(0),
+        poolPingInterval_(poolPingInterval)
 {
   ub4 mode = OCI_DEFAULT;
   void *errh   = NULL;
@@ -139,6 +140,7 @@ PoolImpl::PoolImpl(EnvImpl *env, OCIEnv *envh,
 
   this->poolTimeout(poolTimeout);
   this->stmtCacheSize(stmtCacheSize);
+  poolMax_ = poolMax;
 
   /* In case of no free connections available, report error */
   ociCall (OCIAttrSet (spoolh_, OCI_HTYPE_SPOOL, &spoolMode,
@@ -301,6 +303,25 @@ unsigned int PoolImpl::connectionsInUse() const
 }
 
 
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Get the PoolMax specified while creating the session-ppol.
+
+   PARAMETERS
+     -None-
+
+   RETURNS
+     poolMax provided while creating the pool
+
+   NOTES:
+     -None-
+*/
+int PoolImpl::poolMax () const
+{
+  return poolMax_;
+}
+
 
 /*****************************************************************************/
 /*
@@ -328,11 +349,11 @@ Conn * PoolImpl::getConnection ( const std::string& connClass,
                                  const std::string& password,
                                  const std::string& tag,
                                  const boolean matchAnyTag,
-                                 const DBPrivileges dbPriv)
+                                 const DBPrivileges dbPriv )
 {
   Conn *conn = new ConnImpl(this, envh_, externalAuth_, poolName_,
                             poolNameLen_, connClass, user, password, tag,
-                            matchAnyTag, dbPriv );
+                            matchAnyTag, dbPriv, poolPingInterval_ );
   return conn;
 }
 

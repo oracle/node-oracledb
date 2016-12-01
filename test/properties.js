@@ -48,22 +48,23 @@ describe('58. properties.js', function() {
     var defaultValues = {};
 
     before('save the default values', function() {
-      defaultValues.poolMin         = oracledb.poolMin;
-      defaultValues.poolMax         = oracledb.poolMax;
-      defaultValues.poolIncrement   = oracledb.poolIncrement;
-      defaultValues.poolTimeout     = oracledb.poolTimeout;
-      defaultValues.maxRows         = oracledb.maxRows;
-      defaultValues.prefetchRows    = oracledb.prefetchRows;
-      defaultValues.autoCommit      = oracledb.autoCommit;
-      defaultValues.version         = oracledb.version;
-      defaultValues.connClass       = oracledb.connClass;
-      defaultValues.externalAuth    = oracledb.externalAuth;
-      defaultValues.fetchAsString   = oracledb.fetchAsString;
-      defaultValues.outFormat       = oracledb.outFormat;
-      defaultValues.lobPrefetchSize = oracledb.lobPrefetchSize;
-      defaultValues.queueRequests   = oracledb.queueRequests;
-      defaultValues.queueTimeout    = oracledb.queueTimeout;
-      defaultValues.stmtCacheSize   = oracledb.stmtCacheSize;
+      defaultValues.poolMin          = oracledb.poolMin;
+      defaultValues.poolMax          = oracledb.poolMax;
+      defaultValues.poolIncrement    = oracledb.poolIncrement;
+      defaultValues.poolTimeout      = oracledb.poolTimeout;
+      defaultValues.maxRows          = oracledb.maxRows;
+      defaultValues.prefetchRows     = oracledb.prefetchRows;
+      defaultValues.autoCommit       = oracledb.autoCommit;
+      defaultValues.version          = oracledb.version;
+      defaultValues.connClass        = oracledb.connClass;
+      defaultValues.externalAuth     = oracledb.externalAuth;
+      defaultValues.fetchAsString    = oracledb.fetchAsString;
+      defaultValues.outFormat        = oracledb.outFormat;
+      defaultValues.lobPrefetchSize  = oracledb.lobPrefetchSize;
+      defaultValues.queueRequests    = oracledb.queueRequests;
+      defaultValues.queueTimeout     = oracledb.queueTimeout;
+      defaultValues.stmtCacheSize    = oracledb.stmtCacheSize;
+      defaultValues.poolPingInterval = oracledb.poolPingInterval;
     })
 
     after('restore the values', function() {
@@ -83,6 +84,7 @@ describe('58. properties.js', function() {
       oracledb.queueRequests    = defaultValues.queueRequests;
       oracledb.queueTimeout     = defaultValues.queueTimeout;
       oracledb.stmtCacheSize    = defaultValues.stmtCacheSize;
+      oracledb.poolPingInterval = defaultValues.poolPingInterval;
     })
 
     it('58.1.1 poolMin', function() {
@@ -227,6 +229,14 @@ describe('58. properties.js', function() {
       should.notEqual(oracledb.stmtCacheSize, defaultValues.stmtCacheSize);
     })
 
+    it('58.1.18 poolPingInterval', function() {
+      var t = oracledb.poolPingInterval;
+      oracledb.poolPingInterval = t + 100;
+
+      should.equal(t, defaultValues.poolPingInterval);
+      should.notEqual(oracledb.poolPingInterval, defaultValues.poolPingInterval);
+    })
+
   }) // 58.1
 
   describe('58.2 Pool Class', function() {
@@ -356,6 +366,18 @@ describe('58. properties.js', function() {
 
       try {
         pool.queueTimeout = t + 1000;
+      } catch(err) {
+        should.exist(err);
+        (err.message).should.startWith('NJS-014:');
+      }
+    })
+
+    it('58.2.10 poolPingInterval', function() {
+      var t = pool.poolPingInterval;
+      t.should.be.a.Number();
+
+      try {
+        pool.poolPingInterval = t + 100;
       } catch(err) {
         should.exist(err);
         (err.message).should.startWith('NJS-014:');
