@@ -420,7 +420,7 @@ sessions specified*.
 
 Each of the configuration properties is described below.
 
-#### <a name="propdbisautocommit"></a> 3.2.1 autoCommit
+#### <a name="propdbisautocommit"></a> 3.2.1 `oracledb.autoCommit`
 
 ```
 Boolean autoCommit
@@ -444,7 +444,7 @@ var oracledb = require('oracledb');
 oracledb.autoCommit = false;
 ```
 
-#### <a name="propdbconclass"></a> 3.2.2 connectionClass
+#### <a name="propdbconclass"></a> 3.2.2 `oracledb.connectionClass`
 
 ```
 String connectionClass
@@ -475,7 +475,7 @@ var oracledb = require('oracledb');
 oracledb.connectionClass = 'HRPOOL';
 ```
 
-#### <a name="propdbextendedmetadata"></a> 3.2.3 extendedMetaData
+#### <a name="propdbextendedmetadata"></a> 3.2.3 `oracledb.extendedMetaData`
 
 ```
 Boolean extendedMetaData
@@ -495,7 +495,7 @@ additional attributes.  These are listed in
 
 This property may be overridden in an [`execute()`](#executeoptions) call.
 
-#### <a name="propdbisexternalauth"></a> 3.2.4 externalAuth
+#### <a name="propdbisexternalauth"></a> 3.2.4 `oracledb.externalAuth`
 
 ```
 Boolean externalAuth
@@ -525,7 +525,7 @@ var oracledb = require('oracledb');
 oracledb.externalAuth = false;
 ```
 
-#### <a name="propdbfetchasstring"></a> 3.2.5 fetchAsString
+#### <a name="propdbfetchasstring"></a> 3.2.5 `oracledb.fetchAsString`
 
 ```
 Array fetchAsString
@@ -565,7 +565,7 @@ var oracledb = require('oracledb');
 oracledb.fetchAsString = [ oracledb.DATE, oracledb.NUMBER ];
 ```
 
-#### <a name="propdblobprefetchsize"></a> 3.2.6 lobPrefetchSize
+#### <a name="propdblobprefetchsize"></a> 3.2.6 `oracledb.lobPrefetchSize`
 
 ```
 Number lobPrefetchSize
@@ -591,7 +591,7 @@ var oracledb = require('oracledb');
 oracledb.lobPrefetchSize = 16384;
 ```
 
-#### <a name="propdbmaxrows"></a> 3.2.7 maxRows
+#### <a name="propdbmaxrows"></a> 3.2.7 `oracledb.maxRows`
 
 ```
 Number maxRows
@@ -633,7 +633,7 @@ var oracledb = require('oracledb');
 oracledb.maxRows = 100;
 ```
 
-#### <a name="propdboracleClientVersion"></a> 3.2.8 oracleClientVersion
+#### <a name="propdboracleClientVersion"></a> 3.2.8 `oracledb.oracleClientVersion`
 
 ```
 readonly Number oracleClientVersion
@@ -649,7 +649,7 @@ var oracledb = require('oracledb');
 console.log("Oracle client library version number is " + oracledb.oracleClientVersion);
 ```
 
-#### <a name="propdboutformat"></a> 3.2.9 outFormat
+#### <a name="propdboutformat"></a> 3.2.9 `oracledb.outFormat`
 
 ```
 Number outFormat
@@ -679,7 +679,7 @@ var oracledb = require('oracledb');
 oracledb.outFormat = oracledb.ARRAY;
 ```
 
-#### <a name="propdbpoolincrement"></a> 3.2.10 poolIncrement
+#### <a name="propdbpoolincrement"></a> 3.2.10 `oracledb.poolIncrement`
 
 ```
 Number poolIncrement
@@ -699,7 +699,7 @@ var oracledb = require('oracledb');
 oracledb.poolIncrement = 1;
 ```
 
-#### <a name="propdbpoolmax"></a> 3.2.11 poolMax
+#### <a name="propdbpoolmax"></a> 3.2.11 `oracledb.poolMax`
 
 ```
 Number poolMax
@@ -722,7 +722,7 @@ var oracledb = require('oracledb');
 oracledb.poolMax = 4;
 ```
 
-#### <a name="propdbpoolmin"></a> 3.2.12 poolMin
+#### <a name="propdbpoolmin"></a> 3.2.12 `oracledb.poolMin`
 
 ```
 Number poolMin
@@ -742,7 +742,7 @@ var oracledb = require('oracledb');
 oracledb.poolMin = 0;
 ```
 
-#### <a name="propdbpoolpinginterval"></a> 3.2.13 poolPingInterval
+#### <a name="propdbpoolpinginterval"></a> 3.2.13 `oracledb.poolPingInterval`
 
 ```
 Number poolPingInterval
@@ -762,7 +762,7 @@ client library, the value of `poolPingInterval` is ignored.  Oracle
 client 12.2 has a lightweight, always-enabled connection check that
 replaces explicit pinging.
 
-With Oracle client 12c or earlier, unless `poolPingInterval` is `0`,
+With Oracle client 12.1 or earlier, unless `poolPingInterval` is `0`,
 it is possible for un-usable connections to be returned by a pool
 `getConnection()`.  Since it is also possible for connections to
 become unusable after `getConnection()` is called, applications should
@@ -786,7 +786,7 @@ var oracledb = require('oracledb');
 oracledb.poolPingInterval = 60;
 ```
 
-#### <a name="propdbpooltimeout"></a> 3.2.14 poolTimeout
+#### <a name="propdbpooltimeout"></a> 3.2.14 `oracledb.poolTimeout`
 
 ```
 Number poolTimeout
@@ -808,7 +808,7 @@ var oracledb = require('oracledb');
 oracledb.poolTimeout = 60;
 ```
 
-#### <a name="propdbprefetchrows"></a> 3.2.15 prefetchRows
+#### <a name="propdbprefetchrows"></a> 3.2.15 `oracledb.prefetchRows`
 
 ```
 Number prefetchRows
@@ -839,7 +839,7 @@ var oracledb = require('oracledb');
 oracledb.prefetchRows = 100;
 ```
 
-#### <a name="propdbpromise"></a> 3.2.16 Promise
+#### <a name="propdbpromise"></a> 3.2.16 `oracledb.Promise`
 
 ```
 Promise Promise
@@ -868,7 +868,7 @@ Promises can be completely disabled by setting
 oracledb.Promise = null;
 ```
 
-#### <a name="propdbqueuerequests"></a> 3.2.17 queueRequests
+#### <a name="propdbqueuerequests"></a> 3.2.17 `oracledb.queueRequests`
 
 ```
 Boolean queueRequests
@@ -897,7 +897,7 @@ oracledb.queueRequests = false;
 
 See [Connection Pool Queue](#connpoolqueue) for more information.
 
-#### <a name="propdbqueuetimeout"></a> 3.2.18 queueTimeout
+#### <a name="propdbqueuetimeout"></a> 3.2.18 `oracledb.queueTimeout`
 
 ```
 Number queueTimeout
@@ -920,7 +920,7 @@ oracledb.queueTimeout = 3000; // 3 seconds
 
 See [Connection Pool Queue](#connpoolqueue) for more information.
 
-#### <a name="propdbstmtcachesize"></a> 3.2.19 stmtCacheSize
+#### <a name="propdbstmtcachesize"></a> 3.2.19 `oracledb.stmtCacheSize`
 
 ```
 Number stmtCacheSize
@@ -947,7 +947,7 @@ var oracledb = require('oracledb');
 oracledb.stmtCacheSize = 30;
 ```
 
-#### <a name="propdbversion"></a> 3.2.20 version
+#### <a name="propdbversion"></a> 3.2.20 `oracledb.version`
 ```
 readonly Number version
 ```
@@ -964,7 +964,7 @@ console.log("Driver version number is " + oracledb.version);
 
 ### <a name="oracledbmethods"></a> 3.3 Oracledb Methods
 
-#### <a name="createpool"></a> 3.3.1 createPool()
+#### <a name="createpool"></a> 3.3.1 `oracledb.createPool()`
 
 ##### Prototype
 
@@ -1173,7 +1173,7 @@ Callback function parameter | Description
 *Error error* | If `createPool()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 *Pool pool*   | The newly created connection pool. If `createPool()` fails, `pool` will be NULL.  See [Pool class](#poolclass) for more information.
 
-#### <a name="getconnectiondb"></a> 3.3.2 getConnection()
+#### <a name="getconnectiondb"></a> 3.3.2 `oracledb.getConnection()`
 
 ##### Prototype
 
@@ -1293,7 +1293,7 @@ Callback function parameter | Description
 *Error error* | If `getConnection()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 *Connection connection* | The newly created connection.  If `getConnection()` fails, `connection` will be NULL.  See [Connection class](#connectionclass) for more details.
 
-#### <a name="getpool"></a> 3.3.3 getPool()
+#### <a name="getpool"></a> 3.3.3 `oracledb.getPool()`
 
 ##### Prototype
 
@@ -1328,7 +1328,7 @@ The connection is used to access an Oracle database.
 
 The properties of a *Connection* object are listed below.
 
-#### <a name="propconnaction"></a> 4.1.1 action
+#### <a name="propconnaction"></a> 4.1.1 `connection.action`
 
 ```
 writeonly String action
@@ -1341,7 +1341,7 @@ This is a write-only property.  Displaying a Connection object will
 show a value of `null` for this attribute.  See
 [End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend).
 
-#### <a name="propconnclientid"></a> 4.1.2 clientId
+#### <a name="propconnclientid"></a> 4.1.2 `connection.clientId`
 
 ```
 writeonly String clientId
@@ -1356,7 +1356,7 @@ This is a write-only property.  Displaying a Connection object will
 show a value of `null` for this attribute.  See
 [End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend).
 
-#### <a name="propconnmodule"></a> 4.1.3 module
+#### <a name="propconnmodule"></a> 4.1.3 `connection.module`
 
 ```
 writeonly String module
@@ -1369,7 +1369,7 @@ This is a write-only property.  Displaying a Connection object will
 show a value of `null` for this attribute.  See
 [End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend).
 
-#### <a name="propconnoracleserverversion"></a> 4.1.4 oracleServerVersion
+#### <a name="propconnoracleserverversion"></a> 4.1.4 `connection.oracleServerVersion`
 
 ```
 readonly Number oracleServerVersion
@@ -1378,7 +1378,7 @@ readonly Number oracleServerVersion
 This readonly property gives a numeric representation of the Oracle database version.
 For version *a.b.c.d.e*, this property gives the number: `(100000000 * a) + (1000000 * b) + (10000 * c) + (100 * d) + e`
 
-#### <a name="propconnstmtcachesize"></a> 4.1.5 stmtCacheSize
+#### <a name="propconnstmtcachesize"></a> 4.1.5 `connection.stmtCacheSize`
 
 ```
 readonly Number stmtCacheSize
@@ -1391,7 +1391,7 @@ connection is created in the pool.
 
 ### <a name="connectionmethods"></a> 4.2 Connection Methods
 
-#### <a name="break"></a> 4.2.1 break()
+#### <a name="break"></a> 4.2.1 `connection.break()`
 
 ##### Prototype
 
@@ -1426,7 +1426,7 @@ Callback function parameter | Description
 ----------------------------|-------------
 *Error error* | If `break()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
-####  <a name="connectionclose"></a> 4.2.2 close()
+####  <a name="connectionclose"></a> 4.2.2 `connection.close()`
 
 ##### Prototype
 
@@ -1444,9 +1444,10 @@ promise = close();
 Releases a connection.  If the connection was obtained from the pool,
 the connection is returned to the pool and is available for reuse.
 
-Note: calling `close()` when connections are no longer required is
-strongly encouraged.  Releasing helps avoid resource leakage and can
-improve system efficiency.
+Calling `close()` as soon as a connection is no longer required is
+strongly encouraged.  Releasing early can improve system efficiency.
+Calling `close()` for pooled connections is required to prevent the
+pool running out of connections.
 
 When a connection is released, any ongoing transaction on the
 connection is rolled back.
@@ -1455,6 +1456,11 @@ After releasing a connection to a pool, there is no
 guarantee a subsequent `getConnection()` call gets back the same
 database connection.  The application must redo any ALTER SESSION
 statements on the new connection object, as required.
+
+If an error occurs on a pooled connection and that error is known to
+make the connection unusable, then `close()` will drop that connection
+from the connection pool.  So a future pooled `getConnection()` call
+that grows the pool will create a new, valid connection.
 
 ##### Parameters
 
@@ -1468,7 +1474,7 @@ Callback function parameter | Description
 ----------------------------|-------------
 *Error error* | If `close()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
-####  <a name="commit"></a> 4.2.3 commit()
+####  <a name="commit"></a> 4.2.3 `connection.commit()`
 
 ##### Prototype
 
@@ -1497,7 +1503,7 @@ Callback function parameter | Description
 ----------------------------|-------------
 *Error error* | If `commit()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
-#### <a name="connectioncreatelob"></a> 4.2.4 createLob()
+#### <a name="connectioncreatelob"></a> 4.2.4 `connection.createLob()`
 
 ##### Prototype
 
@@ -1557,7 +1563,7 @@ Callback function parameter | Description
 *Error error* | If `createLob()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
 
-#### <a name="execute"></a> 4.2.5 execute()
+#### <a name="execute"></a> 4.2.5 `connection.execute()`
 
 ##### Prototype
 
@@ -1859,9 +1865,9 @@ For
 statements (including SELECT FOR UPDATE) this contains the number of
 rows affected, for example the number of rows inserted. For non-DML
 statements such as queries, or if no rows are affected, then
-`rowsAffected` will be zero.
+`rowsAffected` will appear as undefined.
 
-#### <a name="querystream"></a> 4.2.6 queryStream()
+#### <a name="querystream"></a> 4.2.6 `connection.queryStream()`
 
 ##### Prototype
 
@@ -1900,11 +1906,11 @@ See [Streaming Query Results](#streamingresults) for more information.
 
 See [execute()](#execute).
 
-#### <a name="release"></a> 4.2.7 release()
+#### <a name="release"></a> 4.2.7 `connection.release()`
 
 An alias for [connection.close()](#connectionclose).
 
-#### <a name="rollback"></a> 4.2.8 rollback()
+#### <a name="rollback"></a> 4.2.8 `connection.rollback()`
 
 ##### Prototype
 
@@ -1947,7 +1953,7 @@ See [Working with CLOB and BLOB Data](#lobhandling) and [LOB Bind Parameters](#l
 
 The properties of a Lob object are listed below.
 
-#### <a name="proplobchunksize"></a> 5.1.1 chunkSize
+#### <a name="proplobchunksize"></a> 5.1.1 `lob.chunkSize`
 
 ```
 readonly Number chunkSize
@@ -1956,7 +1962,7 @@ readonly Number chunkSize
 This corresponds to the size used by the Oracle LOB layer when
 accessing or modifying the LOB value.
 
-#### <a name="proploblength"></a> 5.1.2 length
+#### <a name="proploblength"></a> 5.1.2 `lob.length`
 
 ```
 readonly Number length
@@ -1964,7 +1970,7 @@ readonly Number length
 
 Length of a queried LOB in bytes (for BLOBs) or characters (for CLOBs).
 
-#### <a name="proplobpiecesize"></a> 5.1.3 pieceSize
+#### <a name="proplobpiecesize"></a> 5.1.3 `lob.pieceSize`
 
 ```
 Number pieceSize
@@ -1978,9 +1984,12 @@ The default value is [`chunkSize`](#proplobchunksize).
 For efficiency, it is recommended that `pieceSize` be a multiple of
 `chunkSize`.
 
+The property should not be reset in the middle of streaming since data
+will be lost when internal buffers are resized.
+
 The maximum value for `pieceSize` is limited to the value of UINT_MAX.
 
-#### <a name="proplobtype"></a> 5.1.4 type
+#### <a name="proplobtype"></a> 5.1.4 `lob.type`
 
 ```
 readonly Number type
@@ -1995,7 +2004,7 @@ a LOB is returned by a query.
 
 ### <a name="lobmethods"></a> 5.2 Lob Methods
 
-#### <a name="lobclose"></a> 5.2.1 close()
+#### <a name="lobclose"></a> 5.2.1 `lob.close()`
 
 ##### Prototype
 
@@ -2067,7 +2076,7 @@ See [Connection Pooling](#connpooling) for more information.
 The *Pool* object properties may be read to determine the current
 values.
 
-#### <a name="proppoolconnectionsinuse"></a> 6.1.1 connectionsInUse
+#### <a name="proppoolconnectionsinuse"></a> 6.1.1 `pool.connectionsInUse`
 
 ```
 readonly Number connectionsInUse
@@ -2077,7 +2086,7 @@ The number of currently active connections in the connection pool
 i.e. the number of connections currently "checked out" using
 `getConnection()`.
 
-#### <a name="proppoolconnectionsopen"></a> 6.1.2 connectionsOpen
+#### <a name="proppoolconnectionsopen"></a> 6.1.2 `pool.connectionsOpen`
 
 ```
 readonly Number connectionsOpen
@@ -2086,7 +2095,7 @@ readonly Number connectionsOpen
 The number of currently open connections in the underlying connection
 pool.
 
-#### <a name="proppoolpoolalias"></a> 6.1.3 poolAlias
+#### <a name="proppoolpoolalias"></a> 6.1.3 `pool.poolAlias`
 
 ```
 readonly Number poolAlias
@@ -2094,7 +2103,7 @@ readonly Number poolAlias
 
 The alias of this pool in the [connection pool cache](#connpoolcache).  An alias cannot be changed once the pool has been created.
 
-#### <a name="proppoolpoolincrement"></a> 6.1.4 poolIncrement
+#### <a name="proppoolpoolincrement"></a> 6.1.4 `pool.poolIncrement`
 
 ```
 readonly Number poolIncrement
@@ -2105,7 +2114,7 @@ request exceeds the number of currently open connections.
 
 See [`oracledb.poolIncrement`](#propdbpoolincrement).
 
-#### <a name="proppoolpoolmax"></a> 6.1.5 poolMax
+#### <a name="proppoolpoolmax"></a> 6.1.5 `pool.poolMax`
 
 ```
 readonly Number poolMax
@@ -2116,7 +2125,7 @@ pool.
 
 See [`oracledb.poolMax`](#propdbpoolmax).
 
-#### <a name="proppoolpoolmin"></a> 6.1.6 poolMin
+#### <a name="proppoolpoolmin"></a> 6.1.6 `pool.poolMin`
 
 ```
 readonly Number poolMin
@@ -2127,7 +2136,7 @@ when there is no activity to the target database.
 
 See [`oracledb.poolMin`](#propdbpoolmin).
 
-#### <a name="proppoolpoolpinginterval"></a> 6.1.7 poolPingInterval
+#### <a name="proppoolpoolpinginterval"></a> 6.1.7 `pool.poolPingInterval`
 
 ```
 readonly Number poolPingInterval
@@ -2140,7 +2149,7 @@ returning that connection to the application.
 
 See [`oracledb.poolPingInterval`](#propdbpoolpinginterval).
 
-#### <a name="proppoolpooltimeout"></a> 6.1.8 poolTimeout
+#### <a name="proppoolpooltimeout"></a> 6.1.8 `pool.poolTimeout`
 
 ```
 readonly Number poolTimeout
@@ -2152,7 +2161,7 @@ poolMin.
 
 See [`oracledb.poolTimeout`](#propdbpooltimeout).
 
-#### <a name="proppoolqueuerequests"></a> 6.1.9 queueRequests
+#### <a name="proppoolqueuerequests"></a> 6.1.9 `pool.queueRequests`
 
 ```
 readonly Boolean queueRequests
@@ -2164,7 +2173,7 @@ the maximum number specified by [`poolMax`](#propdbpoolmax).
 
 See [`oracledb.queueRequests`](#propdbqueuerequests).
 
-#### <a name="proppoolqueueTimeout"></a> 6.1.10 queueTimeout
+#### <a name="proppoolqueueTimeout"></a> 6.1.10 `pool.queueTimeout`
 
 ```
 readonly Number queueTimeout
@@ -2175,7 +2184,7 @@ the queue before the request is terminated.
 
 See [`oracledb.queueTimeout`](#propdbqueuetimeout).
 
-#### <a name="proppoolstmtcachesize"></a> 6.1.11 stmtCacheSize
+#### <a name="proppoolstmtcachesize"></a> 6.1.11 `pool.stmtCacheSize`
 
 ```
 readonly Number stmtCacheSize
@@ -2188,7 +2197,7 @@ See [`oracledb.stmtCacheSize`](#propdbstmtcachesize).
 
 ### <a name="poolmethods"></a> 6.2 Pool Methods
 
-#### <a name="poolclose"></a> 6.2.1 close()
+#### <a name="poolclose"></a> 6.2.1 `pool.close()`
 
 ##### Prototype
 
@@ -2223,7 +2232,7 @@ Callback function parameter | Description
 *Error error* | If `close()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
 
-#### <a name="getconnectionpool"></a> 6.2.2 getConnection()
+#### <a name="getconnectionpool"></a> 6.2.2 `pool.getConnection()`
 
 ##### Prototype
 
@@ -2263,7 +2272,7 @@ Callback function parameter | Description
 *Error error* | If `getConnection()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 *Connection connection* | The newly created connection.   If `getConnection()` fails, `connection` will be NULL.  See [Connection class](#connectionclass) for more details.
 
-#### <a name="terminate"></a> 6.2.3 terminate()
+#### <a name="terminate"></a> 6.2.3 `pool.terminate()`
 
 An alias for [pool.close()](#poolclose).
 
@@ -2293,7 +2302,7 @@ See [ResultSet Handling](#resultsethandling) for more information on Result Sets
 
 The properties of a *ResultSet* object are listed below.
 
-#### <a name="rsmetadata"></a> 7.1.1 metaData
+#### <a name="rsmetadata"></a> 7.1.1 `resultset.metaData`
 
 ```
 readonly Array metaData
@@ -2311,7 +2320,7 @@ See [`result.metaData`](#execmetadata) for the available attributes.
 
 ### <a name="resultsetmethods"></a> 7.2 ResultSet Methods
 
-#### <a name="close"></a> 7.2.1 close()
+#### <a name="close"></a> 7.2.1 `resultset.close()`
 
 ##### Prototype
 
@@ -2329,7 +2338,7 @@ promise = close();
 Closes a `ResultSet`.  Applications should always call this at the end
 of fetch or when no more rows are needed.
 
-#### <a name="getrow"></a> 7.2.2 getRow()
+#### <a name="getrow"></a> 7.2.2 `resultset.getRow()`
 
 ##### Prototype
 
@@ -2348,7 +2357,7 @@ This call fetches one row of the Result Set as an object or an array of column v
 
 At the end of fetching, the `ResultSet` should be freed by calling [`close()`](#close).
 
-#### <a name="getrows"></a> 7.2.3 getRows()
+#### <a name="getrows"></a> 7.2.3 `resultset.getRows()`
 
 ##### Prototype
 
@@ -2367,7 +2376,7 @@ This call fetches `numRows` rows of the Result Set as an object or an array of c
 
 At the end of fetching, the `ResultSet` should be freed by calling [`close()`](#close).
 
-#### <a name="toquerystream"></a> 7.2.4 toQueryStream()
+#### <a name="toquerystream"></a> 7.2.4 `resultset.toQueryStream()`
 
 ##### Prototype
 
@@ -2665,6 +2674,9 @@ longer needed:
       });
 ```
 
+Make sure to release connections in all codes paths, include error
+handlers.
+
 After an application finishes using a connection pool, it should
 release all connections and terminate the connection pool by calling
 the [`pool.close()`](#poolclose) method.
@@ -2928,7 +2940,7 @@ Environment Variable                                 | Description
 
 #### <a name="connpoolpinging"></a> 8.3.4 Connection Pool Pinging
 
-If node-oracledb uses Oracle client 12c or earlier, and when
+If node-oracledb uses Oracle client 12.1 or earlier, and when
 connections are idle in a connection pool (not "checked out" to the
 application by `getConnection()`), there is the possibility that a
 network or Database instance failure makes those connections unusable.
@@ -2941,9 +2953,10 @@ lightweight, always-enabled connection check.  It will return a valid
 connection to the node-oracledb driver, which in turn returns it via
 `getConnection()`.  When node-oracledb is built with Oracle client
 12.2, then the value of the `poolPingInterval` attribute described
-below is ignored and no explicit ping is executed.
+below is ignored and no explicit ping is executed because it is not
+needed.
 
-With Oracle client 12c and earlier, when a
+With Oracle client 12.1 and earlier, when a
 pool [`getConnection()`](#getconnectionpool) is called and the
 connection has been idle in the pool for at least `60` seconds then an
 internal "ping" will be performed first to check the aliveness of the
@@ -3730,7 +3743,7 @@ connection.execute(
 ## <a name="plsqlexecution"></a> 10. PL/SQL Execution
 
 PL/SQL stored procedures, functions and anonymous blocks can be called
-from node-oracledb.
+from node-oracledb using [`execute()`](#execute).
 
 ### <a name="plsqlproc"></a> 10.1 PL/SQL Stored Procedures
 
@@ -5245,8 +5258,11 @@ configure the Oracle client language and territory only.
 
 Oracle NLS environment variables, or statements like `ALTER SESSION`,
 can be used to configure further aspects of node-oracledb data access
-globalization.  Refer to
-[NLS Documentation](https://docs.oracle.com/database/122/NLSPG/setting-up-globalization-support-environment.htm#NLSPG003).
+globalization. Examples are `NLS_NUMERIC_CHARACTERS` (discussed
+in [Fetching Numbers](#numberhandling)), and `NLS_DATE_FORMAT`
+(discussed in [Fetching Numbers and Dates as String](#fetchasstringhandling)).
+Refer to [NLS Documentation](https://docs.oracle.com/database/122/NLSPG/setting-up-globalization-support-environment.htm#NLSPG003) for
+others.
 
 ## <a name="endtoend"></a> 18. End-to-end Tracing, Mid-tier Authentication, and Auditing
 
