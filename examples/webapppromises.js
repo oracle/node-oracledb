@@ -128,7 +128,7 @@ function handleRequest(request, response, pool) {
 // Report an error
 function handleError(response, text, err) {
   if (err) {
-    text += err.message;
+    text += ": " + err.message;
   }
   console.error(text);
   response.write("<p>Error: " + text + "</p>");
