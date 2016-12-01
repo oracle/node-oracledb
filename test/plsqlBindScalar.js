@@ -95,7 +95,7 @@ describe('70. plsqlBindScalar.js', function() {
     }); // after
 
     var sqlrun = "BEGIN :output := nodb_plsqlbindfunc71(:strValue); END;";
-    var resultBind = {type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 2000};    
+    var resultBind = {type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 2000};
 
     it('70.1.1 basic case: a simple string', function(done) {
       var bindVar = {
@@ -115,7 +115,7 @@ describe('70. plsqlBindScalar.js', function() {
       );
     }); // 70.1.1
 
-    it('70.1.2 negative: bind value and type mismatch', function(done) {
+    it('70.1.2 negative: bind in value and type mismatch', function(done) {
       var bindVar = {
         output:   resultBind,
         strValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: 42}
@@ -419,7 +419,7 @@ describe('70. plsqlBindScalar.js', function() {
         }
       );
     }); // 70.2.9
-   
+
   }); // 70.2
 
   describe('70.3 dir: BIND_IN and BIND_OUT, type: DATE', function() {
@@ -1048,13 +1048,13 @@ describe('70. plsqlBindScalar.js', function() {
         }
       ], done);
     }); // 70.5.8
-  
+
     it('70.5.9 NON-NULL IN and NULL OUT', function(done) {
       var proc509 = "CREATE OR REPLACE PROCEDURE nodb_inoutproc509 (p_inout IN OUT STRING) \n" +
                  "AS \n" +
                  "BEGIN \n" +
                  "    p_inout := null; \n" +
-                 "END nodb_inoutproc509;"      
+                 "END nodb_inoutproc509;"
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
@@ -1434,7 +1434,7 @@ describe('70. plsqlBindScalar.js', function() {
           type: oracledb.NUMBER,
           val:  null
         }
-      };  
+      };
       var sqlrun610 = "begin nodb_inoutproc610(p_inout => :p_inout); end;";
       var sqldrop = "DROP PROCEDURE nodb_inoutproc610";
 
@@ -1470,7 +1470,7 @@ describe('70. plsqlBindScalar.js', function() {
           );
         }
       ], done);
-    }); // 70.6.10 
+    }); // 70.6.10
 
     it('70.6.11 NON-NULL IN and NULL OUT', function(done) {
       var proc611 = "CREATE OR REPLACE PROCEDURE nodb_inoutproc611 (p_inout IN OUT NUMBER) \n" +
@@ -1484,7 +1484,7 @@ describe('70. plsqlBindScalar.js', function() {
           type: oracledb.NUMBER,
           val:  3
         }
-      };  
+      };
       var sqlrun611 = "begin nodb_inoutproc611(p_inout => :p_inout); end;";
       var sqldrop = "DROP PROCEDURE nodb_inoutproc611";
 
@@ -1519,7 +1519,7 @@ describe('70. plsqlBindScalar.js', function() {
             }
           );
         }
-      ], done); 
+      ], done);
     });// 70.6.11
 
   }); // 70.6
@@ -1757,7 +1757,7 @@ describe('70. plsqlBindScalar.js', function() {
           type: oracledb.DATE,
           val:  null
         }
-      }; 
+      };
       var sqlrun710 = "begin nodb_inoutproc710(p_inout => :p_inout); end;";
       var sqldrop = "DROP PROCEDURE nodb_inoutproc710";
       async.series([
@@ -1792,8 +1792,8 @@ describe('70. plsqlBindScalar.js', function() {
           );
         }
       ], done);
-    }); // 70.7.10 
-  
+    }); // 70.7.10
+
     it('70.7.11 NON-NULL IN and NULL OUT', function(done) {
       var proc711 = "CREATE OR REPLACE PROCEDURE nodb_inoutproc711 (p_inout IN OUT DATE) \n" +
                  "AS \n" +
@@ -1844,7 +1844,7 @@ describe('70. plsqlBindScalar.js', function() {
       ], done);
     }); // 70.7.11
 
-      
+
   }); // 70.7
 
   describe('70.8 dir: BIND_INOUT, type: BUFFER', function() {
@@ -1927,7 +1927,7 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.8.3 val: null', function(done) {
       var emptybuf;
       if ( nodever6 )
-        emptybuf = new Buffer.alloc ( 0 ) ;
+        emptybuf = Buffer.alloc ( 0 ) ;
       else
         emptybuf = new Buffer ( 0 );
 
@@ -1956,7 +1956,7 @@ describe('70. plsqlBindScalar.js', function() {
       var emptybuf;
 
       if ( nodever6 )
-        emptybuf = new Buffer.from ("", "utf-8" );
+        emptybuf = Buffer.from ("", "utf-8" );
       else
         emptybuf = new Buffer ( "", "utf-8" ) ;
 
@@ -2208,9 +2208,9 @@ describe('70. plsqlBindScalar.js', function() {
       var emptybuf;
 
       if ( nodever6 )
-        emptybuf = new Buffer.alloc ( 0 ) ;
+        emptybuf = Buffer.alloc ( 0 ) ;
       else
-        emptybuf = new Buffer ( 0 ) ;
+        emptybuf = new Buffer ( 0 )  ;
 
       var bindVar = {
         p_in: rowid,
@@ -2279,7 +2279,7 @@ describe('70. plsqlBindScalar.js', function() {
       var emptybuf;
 
       if ( nodever6 )
-        emptybuf = new Buffer.alloc ( 0 ) ;
+        emptybuf = Buffer.alloc ( 0 ) ;
       else
         emptybuf = new Buffer ( 0 ) ;
 
@@ -2344,7 +2344,7 @@ describe('70. plsqlBindScalar.js', function() {
       var emptybuf;
 
       if ( nodever6 )
-        emptybuf = new Buffer.alloc ( 0 ) ;
+        emptybuf = Buffer.alloc ( 0 ) ;
       else
         emptybuf = new Buffer ( 0 ) ;
 
@@ -2414,7 +2414,7 @@ describe('70. plsqlBindScalar.js', function() {
       var emptybuf;
 
       if ( nodever6 )
-        emptybuf = new Buffer.alloc ( 0 ) ;
+        emptybuf = Buffer.alloc ( 0 ) ;
       else
         emptybuf = new Buffer ( 0 ) ;
 
@@ -2934,6 +2934,2680 @@ describe('70. plsqlBindScalar.js', function() {
       ], done);
     }); // 70.10.5
 
+    it('70.10.6 TIMESTAMP, null values', function(done) {
+
+      async.series([
+        function(cb) {
+          var proc = "CREATE OR REPLACE FUNCTION nodb_checkplsqlvalue6 (p_in IN OUT TIMESTAMP) RETURN VARCHAR2 \n" +
+                     "IS \n" +
+                     "    comparison VARCHAR2(20); \n" +
+                     "BEGIN \n" +
+                     "    IF p_in IS NULL THEN \n" +
+                     "        comparison := 'correct'; \n" +
+                     "    ELSE \n" +
+                     "        comparison := 'wrong'; \n" +
+                     "    END IF; \n" +
+                     "    RETURN comparison; \n" +
+                     "END;";
+
+          connection.execute(
+            proc,
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        },
+        function correct(cb) {
+          var bindVar = {
+            output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+            p_in: {type: oracledb.TIMESTAMP, dir: oracledb.BIND_INOUT, val: null}
+          };
+          connection.execute(
+            "begin :output := nodb_checkplsqlvalue6 (:p_in); end;",
+            bindVar,
+            function(err, result) {
+              should.not.exist(err);
+              // console.log(result);
+              should.strictEqual(result.outBinds.output, 'correct');
+              should.strictEqual(result.outBinds.p_in, null);
+              cb();
+            }
+          );
+        },
+        function diff(cb) {
+          var today = new Date();
+          var bindVar = {
+            output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+            p_in: { type: oracledb.TIMESTAMP, dir: oracledb.BIND_INOUT, val: today }
+          };
+          connection.execute(
+            "begin :output := nodb_checkplsqlvalue6 (:p_in); end;",
+            bindVar,
+            function(err, result) {
+              should.not.exist(err);
+              // console.log(result);
+              should.strictEqual(result.outBinds.output, 'wrong');
+              cb();
+            }
+          );
+        },
+        function correct(cb) {
+          var bindVar = {
+            output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+            p_in: {type: oracledb.TIMESTAMP, dir: oracledb.BIND_INOUT, val: undefined}
+          };
+          connection.execute(
+            "begin :output := nodb_checkplsqlvalue6 (:p_in); end;",
+            bindVar,
+            function(err, result) {
+              should.not.exist(err);
+              // console.log(result);
+              should.strictEqual(result.outBinds.output, 'correct');
+              should.strictEqual(result.outBinds.p_in, null);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          connection.execute(
+            "drop function nodb_checkplsqlvalue6",
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        }
+      ], done);
+
+    }); // 70.10.6
+
+    it('70.10.7 TIMESTAMP WITH TIME ZONE, null values', function(done) {
+
+      async.series([
+        function(cb) {
+          var proc = "CREATE OR REPLACE FUNCTION nodb_checkplsqlvalue7 (p_in IN OUT TIMESTAMP WITH TIME ZONE) RETURN VARCHAR2 \n" +
+                     "IS \n" +
+                     "    comparison VARCHAR2(20); \n" +
+                     "BEGIN \n" +
+                     "    IF p_in IS NULL THEN \n" +
+                     "        comparison := 'correct'; \n" +
+                     "    ELSE \n" +
+                     "        comparison := 'wrong'; \n" +
+                     "    END IF; \n" +
+                     "    RETURN comparison; \n" +
+                     "END;";
+
+          connection.execute(
+            proc,
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        },
+        function correct(cb) {
+          var bindVar = {
+            output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+            p_in: {type: oracledb.TIMESTAMP_TZ, dir: oracledb.BIND_INOUT, val: null}
+          };
+          connection.execute(
+            "begin :output := nodb_checkplsqlvalue7 (:p_in); end;",
+            bindVar,
+            function(err, result) {
+              should.not.exist(err);
+              // console.log(result);
+              should.strictEqual(result.outBinds.output, 'correct');
+              should.strictEqual(result.outBinds.p_in, null);
+              cb();
+            }
+          );
+        },
+        function diff(cb) {
+          var today = new Date();
+          var bindVar = {
+            output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+            p_in: { type: oracledb.TIMESTAMP_TZ, dir: oracledb.BIND_INOUT, val: today }
+          };
+          connection.execute(
+            "begin :output := nodb_checkplsqlvalue7 (:p_in); end;",
+            bindVar,
+            function(err, result) {
+              should.not.exist(err);
+              // console.log(result);
+              should.strictEqual(result.outBinds.output, 'wrong');
+              cb();
+            }
+          );
+        },
+        function correct(cb) {
+          var bindVar = {
+            output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+            p_in: {type: oracledb.TIMESTAMP_TZ, dir: oracledb.BIND_INOUT, val: undefined}
+          };
+          connection.execute(
+            "begin :output := nodb_checkplsqlvalue7 (:p_in); end;",
+            bindVar,
+            function(err, result) {
+              should.not.exist(err);
+              // console.log(result);
+              should.strictEqual(result.outBinds.output, 'correct');
+              should.strictEqual(result.outBinds.p_in, null);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          connection.execute(
+            "drop function nodb_checkplsqlvalue7",
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        }
+      ], done);
+
+    }); // 70.10.7
+
+    it('70.10.8 TIMESTAMP WITH LOCAL TIME ZONE, null values', function(done) {
+
+      async.series([
+        function(cb) {
+          var proc = "CREATE OR REPLACE FUNCTION nodb_checkplsqlvalue8 (p_in IN OUT TIMESTAMP WITH LOCAL TIME ZONE) RETURN VARCHAR2 \n" +
+                     "IS \n" +
+                     "    comparison VARCHAR2(20); \n" +
+                     "BEGIN \n" +
+                     "    IF p_in IS NULL THEN \n" +
+                     "        comparison := 'correct'; \n" +
+                     "    ELSE \n" +
+                     "        comparison := 'wrong'; \n" +
+                     "    END IF; \n" +
+                     "    RETURN comparison; \n" +
+                     "END;";
+
+          connection.execute(
+            proc,
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        },
+        function correct(cb) {
+          var bindVar = {
+            output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+            p_in: {type: oracledb.TIMESTAMP_LTZ, dir: oracledb.BIND_INOUT, val: null}
+          };
+          connection.execute(
+            "begin :output := nodb_checkplsqlvalue8 (:p_in); end;",
+            bindVar,
+            function(err, result) {
+              should.not.exist(err);
+              // console.log(result);
+              should.strictEqual(result.outBinds.output, 'correct');
+              should.strictEqual(result.outBinds.p_in, null);
+              cb();
+            }
+          );
+        },
+        function diff(cb) {
+          var today = new Date();
+          var bindVar = {
+            output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+            p_in: { type: oracledb.TIMESTAMP_LTZ, dir: oracledb.BIND_INOUT, val: today }
+          };
+          connection.execute(
+            "begin :output := nodb_checkplsqlvalue8 (:p_in); end;",
+            bindVar,
+            function(err, result) {
+              should.not.exist(err);
+              // console.log(result);
+              should.strictEqual(result.outBinds.output, 'wrong');
+              cb();
+            }
+          );
+        },
+        function correct(cb) {
+          var bindVar = {
+            output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+            p_in: {type: oracledb.TIMESTAMP_LTZ, dir: oracledb.BIND_INOUT, val: undefined}
+          };
+          connection.execute(
+            "begin :output := nodb_checkplsqlvalue8 (:p_in); end;",
+            bindVar,
+            function(err, result) {
+              should.not.exist(err);
+              // console.log(result);
+              should.strictEqual(result.outBinds.output, 'correct');
+              should.strictEqual(result.outBinds.p_in, null);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          connection.execute(
+            "drop function nodb_checkplsqlvalue8",
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        }
+      ], done);
+
+    }); // 70.10.8
+
   }); // 70.10
+
+  describe('70.11 dir: BIND_IN and BIND_OUT, type: TIMESTAMP(convert STRING to TIMESTAMP)', function() {
+
+    before(function(done) {
+      var proc = "CREATE OR REPLACE \n" +
+                 "FUNCTION nodb_plsqlbindfunc711(dateValue IN TIMESTAMP) RETURN VARCHAR2 \n" +
+                 "IS \n" +
+                 "BEGIN \n" +
+                 "    RETURN TO_CHAR(dateValue,'YYYY-MM-DD HH24:MI:SS.FF');\n" +
+                 "END nodb_plsqlbindfunc711;";
+
+      connection.execute(
+        proc,
+        function(err) {
+          should.not.exist(err);
+          done();
+        }
+      );
+    }); // before
+
+    after(function(done) {
+      var sql = "DROP FUNCTION nodb_plsqlbindfunc711";
+      connection.execute(
+        sql,
+        function(err) {
+          should.not.exist(err);
+          done();
+        }
+      );
+    }); // after
+
+    var sqlrun_str = "BEGIN :output := nodb_plsqlbindfunc711(TO_TIMESTAMP(:dateValue, 'YYYY-MM-DD HH24:MI:SS.FF')); END;";
+    var resultBind = {type: oracledb.STRING, dir: oracledb.BIND_OUT};
+
+    it('70.11.1 basic case', function(done) {
+      var date = '1999-12-01 11:00:00.001231000';
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: date}
+      };
+
+      connection.execute(
+        sqlrun_str,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          //TIMESTAMP [(fractional_seconds)]: Accepted fractional_seconds_precision values are 0 to 9. The default is 6
+          should.strictEqual(result.outBinds.output, date);
+          done();
+        }
+      );
+    }); // 70.11.1
+
+    it('70.11.2 val: null', function(done) {
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: null}
+      };
+
+      connection.execute(
+        sqlrun_str,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          should.strictEqual(result.outBinds.output, null);
+          done();
+        }
+      );
+    }); // 70.11.2
+
+    it('70.11.3 val: empty string', function(done) {
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: ''}
+      };
+
+      connection.execute(
+        sqlrun_str,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          should.strictEqual(result.outBinds.output, null);
+          done();
+        }
+      );
+    }); // 70.11.3
+
+    it('70.11.4 val: undefined', function(done) {
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: undefined}
+      };
+
+      connection.execute(
+        sqlrun_str,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          should.strictEqual(result.outBinds.output, null);
+          done();
+        }
+      );
+    }); // 70.11.4
+
+    it('70.11.5 val: NaN', function(done) {
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: NaN}
+      };
+
+      connection.execute(
+        sqlrun_str,
+        bindVar,
+        function(err, result) {
+          should.exist(err);
+          //NJS-011: encountered bind value and type mismatch in parameter 2
+          (err.message).should.startWith('NJS-011:');
+          done();
+        }
+      );
+    }); // 70.11.5
+
+    it('70.11.7 val: invalid Date Value: Feb 30, 2016', function(done) {
+      var date = '2016-02-30 00:00:00.000000000';
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: date}
+      };
+
+      connection.execute(
+        sqlrun_str,
+        bindVar,
+        function(err, result) {
+          should.exist(err);
+          //ORA-01839: date not valid for month specified
+          (err.message).should.startWith("ORA-01839");
+          done();
+        }
+      );
+    }); // 70.11.7
+
+    it('70.11.8 val: 1969-12-31', function(done) {
+      var date = '1969-12-31 00:00:00.000000000';
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: date}
+      };
+
+      connection.execute(
+        sqlrun_str,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          (result.outBinds.output).should.eql(date);
+          done();
+        }
+      );
+    }); // 70.11.8
+
+    it('70.11.9 val: epoc date 1970-1-1', function(done) {
+      var date = '1970-01-01 00:00:00.000000000';
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: date}
+      };
+
+      connection.execute(
+        sqlrun_str,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          (result.outBinds.output).should.eql(date);
+          done();
+        }
+      );
+    }); // 70.11.9
+
+  });//70.11
+
+  describe('70.12 dir: BIND_IN and BIND_OUT, type: TIMESTAMP(WITH VARCHAR2 RETURN)', function() {
+
+    before(function(done) {
+      var proc = "CREATE OR REPLACE \n" +
+                 "FUNCTION nodb_plsqlbindfunc712(dateValue IN TIMESTAMP) RETURN VARCHAR2 \n" +
+                 "IS \n" +
+                 "BEGIN \n" +
+                 "    RETURN TO_CHAR(dateValue,'YYYY-MM-DD HH24:MI:SS.FF');\n" +
+                 "END nodb_plsqlbindfunc712;";
+
+      connection.execute(
+        proc,
+        function(err) {
+          should.not.exist(err);
+          done();
+        }
+      );
+    }); // before
+
+    after(function(done) {
+      var sql = "DROP FUNCTION nodb_plsqlbindfunc712";
+      connection.execute(
+        sql,
+        function(err) {
+          should.not.exist(err);
+          done();
+        }
+      );
+    }); // after
+
+    var sqlrun_dt = "BEGIN :output := nodb_plsqlbindfunc712(:dateValue); END;";
+    var resultBind = {type: oracledb.STRING, dir: oracledb.BIND_OUT};
+
+    it('70.12.1 basic case', function(done) {
+      var date = new Date( 2016, 8, 10, 14, 10, 10, 123 );
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.TIMESTAMP, dir: oracledb.BIND_IN, val: date}
+      };
+
+      connection.execute(
+        sqlrun_dt,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          var resultDate = new Date(result.outBinds.output);
+          resultDate.should.eql(date);
+          done();
+        }
+      );
+    }); // 70.12.1
+
+    it('70.12.2 val: null', function(done) {
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.TIMESTAMP, dir: oracledb.BIND_IN, val: null}
+      };
+
+      connection.execute(
+        sqlrun_dt,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          should.strictEqual(result.outBinds.output, null);
+          done();
+        }
+      );
+    }); // 70.12.2
+
+    it.skip('70.12.3 val: empty string', function(done) {
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.TIMESTAMP, dir: oracledb.BIND_IN, val: ''}
+      };
+
+      connection.execute(
+        sqlrun_dt,
+        bindVar,
+        function(err, result) {
+          should.exist(err);
+          (err.message).should.startWith('NJS-011:');
+          done();
+        }
+      );
+    }); // 70.12.3
+
+    it('70.12.4 val: undefined', function(done) {
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.TIMESTAMP, dir: oracledb.BIND_IN, val: undefined}
+      };
+
+      connection.execute(
+        sqlrun_dt,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          should.strictEqual(result.outBinds.output, null);
+          done();
+        }
+      );
+    }); // 70.12.4
+
+    it.skip('70.12.5 val: NaN', function(done) {
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.TIMESTAMP, dir: oracledb.BIND_IN, val: NaN}
+      };
+
+      connection.execute(
+        sqlrun_dt,
+        bindVar,
+        function(err, result) {
+          should.exist(err);
+          //NJS-011: encountered bind value and type mismatch in parameter 2
+          (err.message).should.startWith('NJS-011:');
+          done();
+        }
+      );
+    }); // 70.12.5
+
+    it.skip('70.12.7 val: invalid Date Value: Feb 30, 2016', function(done) {
+      var date = new Date( 2016, 1, 30, 0, 0, 0, 0 );
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.TIMESTAMP, dir: oracledb.BIND_IN, val: date}
+      };
+
+      connection.execute(
+        sqlrun_dt,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          console.log(result.outBinds.output);
+          var expectDate = new Date( 2016, 2, 1, 0, 0, 0, 0 );
+          var resultDate = new Date(result.outBinds.output);
+          resultDate.should.eql(expectDate);
+          done();
+        }
+      );
+    }); // 70.12.7
+
+    it.skip('70.12.8 val: 1969-12-31', function(done) {
+      var date = new Date( 1969, 11, 31, 0, 0, 0, 0 );
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.TIMESTAMP, dir: oracledb.BIND_IN, val: date}
+      };
+
+      connection.execute(
+        sqlrun_dt,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          var resultDate = new Date(result.outBinds.output);
+          resultDate.should.eql(date);
+          done();
+        }
+      );
+    }); // 70.12.8
+
+    it.skip('70.12.9 val: epoc date 1970-1-1', function(done) {
+      var date = new Date( 1970, 0, 1, 0, 0, 0, 0 );
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.TIMESTAMP, dir: oracledb.BIND_IN, val: date}
+      };
+
+      connection.execute(
+        sqlrun_dt,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          var resultDate = new Date(result.outBinds.output);
+          resultDate.should.eql(date);
+          done();
+        }
+      );
+    }); // 70.12.9
+
+    it('70.12.10 val: create Date value using numeric value: new Date(number)', function(done) {
+      var date = new Date ( 1476780296673 );
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.TIMESTAMP, dir: oracledb.BIND_IN, val: date}
+      };
+
+      connection.execute(
+        sqlrun_dt,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          var resultDate = new Date(result.outBinds.output);
+          resultDate.should.eql(date);
+          done();
+        }
+      );
+    }); // 70.12.10
+
+    it.skip('70.12.11 val: create Date value using numeric value: 0', function(done) {
+      //Zero time is 01 January 1970 00:00:00 UTC
+      var date = new Date ( 0 );
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.TIMESTAMP, dir: oracledb.BIND_IN, val: date}
+      };
+
+      connection.execute(
+        sqlrun_dt,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          var expectDate = new Date (Date.UTC( 1970, 0, 1, 0, 0, 0, 0 ));
+          var resultDate = new Date(result.outBinds.output);
+          resultDate.should.eql(expectDate);
+          done();
+        }
+      );
+    }); // 70.12.11
+
+  });//70.12
+
+  describe('70.13 dir: BIND_IN and BIND_OUT, type: TIMESTAMP', function() {
+
+    before(function(done) {
+      var proc = "CREATE OR REPLACE \n" +
+                 "FUNCTION nodb_plsqlbindfunc713(dateValue IN TIMESTAMP) RETURN TIMESTAMP \n" +
+                 "IS \n" +
+                 "BEGIN \n" +
+                 "    RETURN dateValue;\n" +
+                 "END nodb_plsqlbindfunc713;";
+
+      connection.execute(
+        proc,
+        function(err) {
+          should.not.exist(err);
+          done();
+        }
+      );
+    }); // before
+
+    after(function(done) {
+      var sql = "DROP FUNCTION nodb_plsqlbindfunc713";
+      connection.execute(
+        sql,
+        function(err) {
+          should.not.exist(err);
+          done();
+        }
+      );
+    }); // after
+
+    var sqlrun = "BEGIN :output := nodb_plsqlbindfunc713(:dateValue); END;";
+    var resultBind = {type: oracledb.TIMESTAMP, dir: oracledb.BIND_OUT};
+
+    it.skip('70.13.1 val: empty string', function(done) {
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.TIMESTAMP, dir: oracledb.BIND_IN, val: ''}
+      };
+
+      connection.execute(
+        sqlrun,
+        bindVar,
+        function(err, result) {
+          console.log(result);
+          should.exist(err);
+          (err.message).should.startWith('NJS-011:');
+          done();
+        }
+      );
+    }); // 70.13.1
+
+    it('70.13.2 val: undefined', function(done) {
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.TIMESTAMP, dir: oracledb.BIND_IN, val: undefined}
+      };
+
+      connection.execute(
+        sqlrun,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          should.strictEqual(result.outBinds.output, null);
+          done();
+        }
+      );
+    }); // 70.13.2
+
+    it.skip('70.13.3 val: NaN', function(done) {
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.TIMESTAMP, dir: oracledb.BIND_IN, val: NaN}
+      };
+
+      connection.execute(
+        sqlrun,
+        bindVar,
+        function(err, result) {
+          should.exist(err);
+          //NJS-011: encountered bind value and type mismatch in parameter 2
+          (err.message).should.startWith('NJS-011:');
+          done();
+        }
+      );
+    }); // 70.13.3
+
+  });//70.13
+
+  describe('70.14 dir: BIND_INOUT, type:TIMESTAMP', function(){
+    before(function(done){
+      var proc = "CREATE OR REPLACE PROCEDURE nodb_inoutproc714 (p_inout IN OUT TIMESTAMP) \n" +
+                 "AS \n" +
+                 "BEGIN \n" +
+                 "    p_inout := p_inout; \n" +
+                 "END nodb_inoutproc714;";
+
+      connection.execute(
+        proc,
+        function(err) {
+          should.not.exist(err);
+          done();
+        }
+      );
+    });//before
+
+    after(function(done){
+      var sql = "DROP PROCEDURE nodb_inoutproc714";
+      connection.execute(
+        sql,
+        function(err) {
+          should.not.exist(err);
+          done();
+        }
+      );
+    });//after
+
+    var sqlrun = "begin nodb_inoutproc714(p_inout => :p_inout); end;";
+
+    it('70.14.1 basic case', function(done){
+      var date = new Date( 2016, 7, 5, 12, 13, 14, 123 );
+      var bindVar = {
+        p_inout : {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.TIMESTAMP,
+          val:  date
+        }
+      };
+      connection.execute(
+        sqlrun,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          (result.outBinds.p_inout).should.eql(date);
+          done();
+        }
+      );
+    });//70.14.1
+
+    it('70.14.2 auto detect data type', function(done) {
+      var date = new Date( 2016, 7, 5, 12, 13, 14, 123 );
+      var bindVar = {
+        p_inout : {
+          dir:  oracledb.BIND_INOUT,
+          val:  date
+        }
+      };
+
+      connection.execute(
+        sqlrun,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          (result.outBinds.p_inout).should.eql(date);
+          done();
+        }
+      );
+    }); // 70.14.2
+
+    it('70.14.3 val: null', function(done) {
+      var bindVar = {
+        p_inout : {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.TIMESTAMP,
+          val:  null
+        }
+      };
+
+      connection.execute(
+        sqlrun,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          should.strictEqual(result.outBinds.p_inout, null);
+          done();
+        }
+      );
+    }); // 70.14.3
+
+    it.skip('70.14.4 val: empty string', function(done) {
+      var bindVar = {
+        p_inout : {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.TIMESTAMP,
+          val:  ''
+        }
+      };
+
+      connection.execute(
+        sqlrun,
+        bindVar,
+        function(err, result) {
+          console.log(result.outBinds.output);
+          should.exist(err);
+          (err.message).should.startWith('NJS-011:');
+          done();
+        }
+      );
+    }); // 70.14.4
+
+    it('70.14.5 val: undefined', function(done) {
+      var bindVar = {
+        p_inout : {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.TIMESTAMP,
+          val:  undefined
+        }
+      };
+
+      connection.execute(
+        sqlrun,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          // console.log(result);
+          should.strictEqual(result.outBinds.p_inout, null);
+          done();
+        }
+      );
+    }); // 70.14.5
+
+    it.skip('70.14.6 val: NaN', function(done) {
+      var bindVar = {
+        p_inout : {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.TIMESTAMP,
+          val:  NaN
+        }
+      };
+
+      connection.execute(
+        sqlrun,
+        bindVar,
+        function(err, result) {
+          should.exist(err);
+          (err.message).should.startWith('NJS-011:');
+          done();
+        }
+      );
+    }); // 70.14.6
+
+    it('70.14.7 val: invalid Date Value: Feb 30, 2016', function(done) {
+      var date = new Date ( 2016, 1, 30, 0, 0, 0, 0 );
+      var bindVar = {
+        p_inout : {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.TIMESTAMP,
+          val:  date
+        }
+      };
+
+      connection.execute(
+        sqlrun,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          //console.log(result);
+          var resultDate = new Date ( 2016, 2, 1, 0, 0, 0, 0 );
+          (result.outBinds.p_inout).should.eql(resultDate);
+          done();
+        }
+      );
+    }); // 70.14.7
+
+    it('70.14.8 val: 1969-12-31', function(done) {
+      var date = new Date ( 1969, 11, 31, 0, 0, 0, 0 );
+      var bindVar = {
+        p_inout : {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.TIMESTAMP,
+          val:  date
+        }
+      };
+
+      connection.execute(
+        sqlrun,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          (result.outBinds.p_inout).should.eql(date);
+          done();
+        }
+      );
+    }); // 70.14.8
+
+    it('70.14.9 val: epoc date 1970-1-1', function(done) {
+      var date = new Date ( 1970, 0, 1, 0, 0, 0, 0 );
+      var bindVar = {
+        p_inout : {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.TIMESTAMP,
+          val:  date
+        }
+      };
+
+      connection.execute(
+        sqlrun,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          (result.outBinds.p_inout).should.eql(date);
+          done();
+        }
+      );
+    }); // 70.14.9
+
+    it('70.14.10 NULL IN and NON-NULL out', function(done) {
+      var proc71410 = "CREATE OR REPLACE PROCEDURE nodb_inoutproc71410 (p_inout IN OUT TIMESTAMP) \n" +
+                 "AS \n" +
+                 "BEGIN \n" +
+                 "    p_inout := TO_TIMESTAMP('1999-12-01 11:00:00.001231000', 'YYYY-MM-DD HH24:MI:SS.FF'); \n" +
+                 "END nodb_inoutproc71410;";
+      var bindVar = {
+        p_inout : {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.TIMESTAMP,
+          val:  null
+        }
+      };
+      var sqlrun71410 = "begin nodb_inoutproc71410(p_inout => :p_inout); end;";
+      var sqldrop = "DROP PROCEDURE nodb_inoutproc71410";
+      async.series([
+        function(cb) {
+          connection.execute(
+             proc71410,
+             function(err) {
+                should.not.exist(err);
+                cb();
+              }
+            );
+          },
+        function(cb) {
+          connection.execute(
+            sqlrun71410,
+            bindVar,
+            function(err, result) {
+              should.not.exist(err);
+              (result.outBinds.p_inout).should.not.eql(null);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          connection.execute(
+            sqldrop,
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        }
+      ], done);
+    }); // 70.14.10
+
+    it('70.14.11 NON-NULL IN and NULL OUT', function(done) {
+      var proc71411 = "CREATE OR REPLACE PROCEDURE nodb_inoutproc71411 (p_inout IN OUT TIMESTAMP) \n" +
+                 "AS \n" +
+                 "BEGIN \n" +
+                 "    p_inout := null; \n" +
+                 "END nodb_inoutproc71411;";
+      var date = new Date( 2011, 0, 12, 0, 0, 0, 0 );
+      var bindVar = {
+          p_inout : {
+            dir:  oracledb.BIND_INOUT,
+            type: oracledb.TIMESTAMP,
+            val:  date
+          }
+        };
+      var sqlrun71411 = "begin nodb_inoutproc71411(p_inout => :p_inout); end;";
+      var sqldrop = "DROP PROCEDURE nodb_inoutproc71411";
+      async.series([
+        function(cb) {
+          connection.execute(
+             proc71411,
+             function(err) {
+                should.not.exist(err);
+                cb();
+              }
+            );
+          },
+        function(cb) {
+          connection.execute(
+            sqlrun71411,
+            bindVar,
+            function(err, result) {
+              should.not.exist(err);
+              should.strictEqual(result.outBinds.p_inout, null);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          connection.execute(
+            sqldrop,
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        }
+      ], done);
+    }); // 70.14.11
+
+  });//70.14
+
+  describe('70.15 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE(convert STRING to TIMESTAMP)', function() {
+
+    before(function(done) {
+      var proc = "CREATE OR REPLACE \n" +
+                 "FUNCTION nodb_plsqlbindfunc715(dateValue IN TIMESTAMP WITH TIME ZONE) RETURN VARCHAR2 \n" +
+                 "IS \n" +
+                 "BEGIN \n" +
+                 "    RETURN TO_CHAR(dateValue, 'YYYY-MM-DD HH24:MI:SS.FF TZH:TZM');\n" +
+                 "END nodb_plsqlbindfunc715;";
+
+      connection.execute(
+        proc,
+        function(err) {
+          should.not.exist(err);
+          done();
+        }
+      );
+    }); // before
+
+    after(function(done) {
+      var sql = "DROP FUNCTION nodb_plsqlbindfunc715";
+      connection.execute(
+        sql,
+        function(err) {
+          should.not.exist(err);
+          done();
+        }
+      );
+    }); // after
+
+    var sqlrun_str = "BEGIN :output := nodb_plsqlbindfunc715(TO_TIMESTAMP_TZ(:dateValue, 'YYYY-MM-DD HH24:MI:SS.FF TZH:TZM')); END;";
+    var resultBind = {type: oracledb.STRING, dir: oracledb.BIND_OUT};
+
+    it('70.15.1 basic case', function(done) {
+      var date = '1999-12-01 11:00:00.123450000 -08:00';
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: date}
+      };
+
+      connection.execute(
+        sqlrun_str,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          (result.outBinds.output).should.eql(date);
+          done();
+        }
+      );
+    }); // 70.15.1
+
+    it('70.15.2 val: null', function(done) {
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: null}
+      };
+
+      connection.execute(
+        sqlrun_str,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          should.strictEqual(result.outBinds.output, null);
+          done();
+        }
+      );
+    }); // 70.15.2
+
+    it('70.15.3 val: empty string', function(done) {
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: ''}
+      };
+
+      connection.execute(
+        sqlrun_str,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          should.strictEqual(result.outBinds.output, null);
+          done();
+        }
+      );
+    }); // 70.15.3
+
+    it('70.15.4 val: undefined', function(done) {
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: undefined}
+      };
+
+      connection.execute(
+        sqlrun_str,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          should.strictEqual(result.outBinds.output, null);
+          done();
+        }
+      );
+    }); // 70.15.4
+
+    it('70.15.5 val: NaN', function(done) {
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: NaN}
+      };
+
+      connection.execute(
+        sqlrun_str,
+        bindVar,
+        function(err, result) {
+          should.exist(err);
+          //NJS-011: encountered bind value and type mismatch in parameter 2
+          (err.message).should.startWith('NJS-011:');
+          done();
+        }
+      );
+    }); // 70.15.5
+
+    it('70.15.7 val: invalid Date Value: Feb 30, 2016', function(done) {
+      var date = '2016-02-30 00:00:00.000000000 -08:00';
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: date}
+      };
+
+      connection.execute(
+        sqlrun_str,
+        bindVar,
+        function(err, result) {
+          should.exist(err);
+          //ORA-01839: date not valid for month specified
+          (err.message).should.startWith("ORA-01839");
+          done();
+        }
+      );
+    }); // 70.15.7
+
+    it('70.15.8 val: 1969-12-31', function(done) {
+      var date = '1969-12-31 00:00:00.000000000 -08:00';
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: date}
+      };
+
+      connection.execute(
+        sqlrun_str,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          (result.outBinds.output).should.eql(date);
+          done();
+        }
+      );
+    }); // 70.15.8
+
+    it('70.15.9 val: epoc date 1970-1-1', function(done) {
+      var date = '1970-01-01 00:00:00.000000000 -08:00';
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: date}
+      };
+
+      connection.execute(
+        sqlrun_str,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          (result.outBinds.output).should.eql(date);
+          done();
+        }
+      );
+    }); // 70.15.9
+
+  });//70.15
+
+  describe('70.16 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE(WITH VARCHAR2 RETURN)', function() {
+
+    before(function(done) {
+      var proc = "CREATE OR REPLACE \n" +
+                 "FUNCTION nodb_plsqlbindfunc716(dateValue IN TIMESTAMP WITH TIME ZONE) RETURN VARCHAR2 \n" +
+                 "IS \n" +
+                 "BEGIN \n" +
+                 "    RETURN TO_CHAR(dateValue,'YYYY-MM-DD HH24:MI:SS.FF');\n" +
+                 "END nodb_plsqlbindfunc716;";
+
+      connection.execute(
+        proc,
+        function(err) {
+          should.not.exist(err);
+          done();
+        }
+      );
+    }); // before
+
+    after(function(done) {
+      var sql = "DROP FUNCTION nodb_plsqlbindfunc716";
+      connection.execute(
+        sql,
+        function(err) {
+          should.not.exist(err);
+          done();
+        }
+      );
+    }); // after
+
+    var sqlrun_dt = "BEGIN :output := nodb_plsqlbindfunc716(:dateValue); END;";
+    var resultBind = {type: oracledb.STRING, dir: oracledb.BIND_OUT};
+
+    it('70.16.1 basic case', function(done) {
+      var date = new Date( 2016, 8, 10, 14, 10, 10, 123 );
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.TIMESTAMP_TZ, dir: oracledb.BIND_IN, val: date}
+      };
+
+      connection.execute(
+        sqlrun_dt,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          var resultDate = new Date(result.outBinds.output);
+          resultDate.should.eql(date);
+          done();
+        }
+      );
+    }); // 70.16.1
+
+    it('70.16.2 val: null', function(done) {
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.TIMESTAMP_TZ, dir: oracledb.BIND_IN, val: null}
+      };
+
+      connection.execute(
+        sqlrun_dt,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          should.strictEqual(result.outBinds.output, null);
+          done();
+        }
+      );
+    }); // 70.16.2
+
+    it.skip('70.16.3 val: empty string', function(done) {
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.TIMESTAMP_TZ, dir: oracledb.BIND_IN, val: ''}
+      };
+
+      connection.execute(
+        sqlrun_dt,
+        bindVar,
+        function(err, result) {
+          should.exist(err);
+          (err.message).should.startWith('NJS-011:');
+          done();
+        }
+      );
+    }); // 70.16.3
+
+    it('70.16.4 val: undefined', function(done) {
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.TIMESTAMP_TZ, dir: oracledb.BIND_IN, val: undefined}
+      };
+
+      connection.execute(
+        sqlrun_dt,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          should.strictEqual(result.outBinds.output, null);
+          done();
+        }
+      );
+    }); // 70.16.4
+
+    it.skip('70.16.5 val: NaN', function(done) {
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.TIMESTAMP_TZ, dir: oracledb.BIND_IN, val: NaN}
+      };
+
+      connection.execute(
+        sqlrun_dt,
+        bindVar,
+        function(err, result) {
+          should.exist(err);
+          //NJS-011: encountered bind value and type mismatch in parameter 2
+          (err.message).should.startWith('NJS-011:');
+          done();
+        }
+      );
+    }); // 70.16.5
+
+    it.skip('70.16.7 val: invalid Date Value: Feb 30, 2016', function(done) {
+      var date = new Date( 2016, 1, 30, 0, 0, 0, 0 );
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.TIMESTAMP_TZ, dir: oracledb.BIND_IN, val: date}
+      };
+
+      connection.execute(
+        sqlrun_dt,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          console.log(result.outBinds.output);
+          var expectDate = new Date( 2016, 2, 1, 0, 0, 0, 0 );
+          var resultDate = new Date(result.outBinds.output);
+          resultDate.should.eql(expectDate);
+          done();
+        }
+      );
+    }); // 70.16.7
+
+    it.skip('70.16.8 val: 1969-12-31', function(done) {
+      var date = new Date( 1969, 11, 31, 0, 0, 0, 0 );
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.TIMESTAMP_TZ, dir: oracledb.BIND_IN, val: date}
+      };
+
+      connection.execute(
+        sqlrun_dt,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          var resultDate = new Date(result.outBinds.output);
+          resultDate.should.eql(date);
+          done();
+        }
+      );
+    }); // 70.16.8
+
+    it.skip('70.16.9 val: epoc date 1970-1-1', function(done) {
+      var date = new Date( 1970, 0, 1, 0, 0, 0, 0 );
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.TIMESTAMP_TZ, dir: oracledb.BIND_IN, val: date}
+      };
+
+      connection.execute(
+        sqlrun_dt,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          var resultDate = new Date(result.outBinds.output);
+          resultDate.should.eql(date);
+          done();
+        }
+      );
+    }); // 70.16.9
+
+    it('70.16.10 val: create Date value using numeric value: new Date(number)', function(done) {
+      var date = new Date ( 1476780296673 );
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.TIMESTAMP_TZ, dir: oracledb.BIND_IN, val: date}
+      };
+
+      connection.execute(
+        sqlrun_dt,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          var resultDate = new Date(result.outBinds.output);
+          resultDate.should.eql(date);
+          done();
+        }
+      );
+    }); // 70.16.10
+
+    it.skip('70.16.11 val: create Date value using numeric value: 0', function(done) {
+      //Zero time is 01 January 1970 00:00:00 UTC
+      var date = new Date ( 0 );
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.TIMESTAMP_TZ, dir: oracledb.BIND_IN, val: date}
+      };
+
+      connection.execute(
+        sqlrun_dt,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          var expectDate = new Date (Date.UTC( 1970, 0, 1, 0, 0, 0, 0 ));
+          var resultDate = new Date(result.outBinds.output);
+          resultDate.should.eql(expectDate);
+          done();
+        }
+      );
+    }); // 70.16.11
+
+  });//70.16
+
+describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', function() {
+
+    before(function(done) {
+      var proc = "CREATE OR REPLACE \n" +
+                 "FUNCTION nodb_plsqlbindfunc717(dateValue IN TIMESTAMP WITH TIME ZONE) RETURN TIMESTAMP WITH TIME ZONE \n" +
+                 "IS \n" +
+                 "BEGIN \n" +
+                 "    RETURN dateValue;\n" +
+                 "END nodb_plsqlbindfunc717;";
+
+      connection.execute(
+        proc,
+        function(err) {
+          should.not.exist(err);
+          done();
+        }
+      );
+    }); // before
+
+    after(function(done) {
+      var sql = "DROP FUNCTION nodb_plsqlbindfunc717";
+      connection.execute(
+        sql,
+        function(err) {
+          should.not.exist(err);
+          done();
+        }
+      );
+    }); // after
+
+    var sqlrun = "BEGIN :output := nodb_plsqlbindfunc717(:dateValue); END;";
+    var resultBind = {type: oracledb.TIMESTAMP_TZ, dir: oracledb.BIND_OUT};
+
+    it.skip('70.17.1 val: empty string', function(done) {
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.TIMESTAMP_TZ, dir: oracledb.BIND_IN, val: ''}
+      };
+
+      connection.execute(
+        sqlrun,
+        bindVar,
+        function(err, result) {
+          console.log(result);
+          should.exist(err);
+          (err.message).should.startWith('NJS-011:');
+          done();
+        }
+      );
+    }); // 70.17.1
+
+    it('70.17.2 val: undefined', function(done) {
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.TIMESTAMP_TZ, dir: oracledb.BIND_IN, val: undefined}
+      };
+
+      connection.execute(
+        sqlrun,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          should.strictEqual(result.outBinds.output, null);
+          done();
+        }
+      );
+    }); // 70.17.2
+
+    it.skip('70.17.3 val: NaN', function(done) {
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.TIMESTAMP_TZ, dir: oracledb.BIND_IN, val: NaN}
+      };
+
+      connection.execute(
+        sqlrun,
+        bindVar,
+        function(err, result) {
+          should.exist(err);
+          //NJS-011: encountered bind value and type mismatch in parameter 2
+          (err.message).should.startWith('NJS-011:');
+          done();
+        }
+      );
+    }); // 70.17.3
+  });//70.17
+
+  describe('70.18 dir: BIND_INOUT, type:TIMESTAMP WITH TIME ZONE', function(){
+    before(function(done){
+      var proc = "CREATE OR REPLACE PROCEDURE nodb_inoutproc718 (p_inout IN OUT TIMESTAMP WITH TIME ZONE) \n" +
+                 "AS \n" +
+                 "BEGIN \n" +
+                 "    p_inout := p_inout; \n" +
+                 "END nodb_inoutproc718;";
+
+      connection.execute(
+        proc,
+        function(err) {
+          should.not.exist(err);
+          done();
+        }
+      );
+    });//before
+
+    after(function(done){
+      var sql = "DROP PROCEDURE nodb_inoutproc718";
+      connection.execute(
+        sql,
+        function(err) {
+          should.not.exist(err);
+          done();
+        }
+      );
+    });//after
+
+    var sqlrun = "begin nodb_inoutproc718(p_inout => :p_inout); end;";
+
+    it('70.18.1 basic case', function(done){
+      var date = new Date( 2016, 7, 5, 12, 13, 14, 123 );
+      var bindVar = {
+        p_inout : {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.TIMESTAMP_TZ,
+          val:  date
+        }
+      };
+      connection.execute(
+        sqlrun,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          (result.outBinds.p_inout).should.eql(date);
+          done();
+        }
+      );
+    });//70.18.1
+
+    it('70.18.2 auto detect data type', function(done) {
+      var date = new Date( 2016, 7, 5, 12, 13, 14, 123 );
+      var bindVar = {
+        p_inout : {
+          dir:  oracledb.BIND_INOUT,
+          val:  date
+        }
+      };
+
+      connection.execute(
+        sqlrun,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          (result.outBinds.p_inout).should.eql(date);
+          done();
+        }
+      );
+    }); // 70.18.2
+
+    it('70.18.3 val: null', function(done) {
+      var bindVar = {
+        p_inout : {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.TIMESTAMP_TZ,
+          val:  null
+        }
+      };
+
+      connection.execute(
+        sqlrun,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          should.strictEqual(result.outBinds.p_inout, null);
+          done();
+        }
+      );
+    }); // 70.18.3
+
+    it.skip('70.18.4 val: empty string', function(done) {
+      var bindVar = {
+        p_inout : {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.TIMESTAMP_TZ,
+          val:  ''
+        }
+      };
+
+      connection.execute(
+        sqlrun,
+        bindVar,
+        function(err, result) {
+          console.log(result.outBinds.output);
+          should.exist(err);
+          (err.message).should.startWith('NJS-011:');
+          done();
+        }
+      );
+    }); // 70.18.4
+
+    it('70.18.5 val: undefined', function(done) {
+      var bindVar = {
+        p_inout : {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.TIMESTAMP_TZ,
+          val:  undefined
+        }
+      };
+
+      connection.execute(
+        sqlrun,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          // console.log(result);
+          should.strictEqual(result.outBinds.p_inout, null);
+          done();
+        }
+      );
+    }); // 70.18.5
+
+    it.skip('70.18.6 val: NaN', function(done) {
+      var bindVar = {
+        p_inout : {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.TIMESTAMP_TZ,
+          val:  NaN
+        }
+      };
+
+      connection.execute(
+        sqlrun,
+        bindVar,
+        function(err, result) {
+          should.exist(err);
+          (err.message).should.startWith('NJS-011:');
+          done();
+        }
+      );
+    }); // 70.18.6
+
+    it('70.18.7 val: invalid Date Value: Feb 30, 2016', function(done) {
+      var date = new Date ( 2016, 1, 30, 0, 0, 0, 0 );
+      var bindVar = {
+        p_inout : {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.TIMESTAMP_TZ,
+          val:  date
+        }
+      };
+
+      connection.execute(
+        sqlrun,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          //console.log(result);
+          var resultDate = new Date ( 2016, 2, 1, 0, 0, 0, 0 );
+          (result.outBinds.p_inout).should.eql(resultDate);
+          done();
+        }
+      );
+    }); // 70.18.7
+
+    it('70.18.8 val: 1969-12-31', function(done) {
+      var date = new Date ( 1969, 11, 31, 0, 0, 0, 0 );
+      var bindVar = {
+        p_inout : {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.TIMESTAMP_TZ,
+          val:  date
+        }
+      };
+
+      connection.execute(
+        sqlrun,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          (result.outBinds.p_inout).should.eql(date);
+          done();
+        }
+      );
+    }); // 70.18.8
+
+    it('70.18.9 val: epoc date 1970-1-1', function(done) {
+      var date = new Date ( 1970, 0, 1, 0, 0, 0, 0 );
+      var bindVar = {
+        p_inout : {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.TIMESTAMP_TZ,
+          val:  date
+        }
+      };
+
+      connection.execute(
+        sqlrun,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          (result.outBinds.p_inout).should.eql(date);
+          done();
+        }
+      );
+    }); // 70.18.9
+
+    it('70.18.10 NULL IN and NON-NULL out', function(done) {
+      var proc71810 = "CREATE OR REPLACE PROCEDURE nodb_inoutproc71810 (p_inout IN OUT TIMESTAMP WITH TIME ZONE) \n" +
+                 "AS \n" +
+                 "BEGIN \n" +
+                 "    p_inout := TO_TIMESTAMP_TZ('1999-12-01 11:00:00.001231000', 'YYYY-MM-DD HH24:MI:SS.FF'); \n" +
+                 "END nodb_inoutproc71810;";
+      var bindVar = {
+        p_inout : {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.TIMESTAMP_TZ,
+          val:  null
+        }
+      };
+      var sqlrun71810 = "begin nodb_inoutproc71810(p_inout => :p_inout); end;";
+      var sqldrop = "DROP PROCEDURE nodb_inoutproc71810";
+      async.series([
+        function(cb) {
+          connection.execute(
+             proc71810,
+             function(err) {
+                should.not.exist(err);
+                cb();
+              }
+            );
+          },
+        function(cb) {
+          connection.execute(
+            sqlrun71810,
+            bindVar,
+            function(err, result) {
+              should.not.exist(err);
+              (result.outBinds.p_inout).should.not.eql(null);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          connection.execute(
+            sqldrop,
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        }
+      ], done);
+    }); // 70.18.10
+
+    it('70.18.11 NON-NULL IN and NULL OUT', function(done) {
+      var proc71811 = "CREATE OR REPLACE PROCEDURE nodb_inoutproc71811 (p_inout IN OUT TIMESTAMP WITH TIME ZONE) \n" +
+                 "AS \n" +
+                 "BEGIN \n" +
+                 "    p_inout := null; \n" +
+                 "END nodb_inoutproc71811;";
+      var date = new Date( 2011, 0, 12, 0, 0, 0, 0 );
+      var bindVar = {
+          p_inout : {
+            dir:  oracledb.BIND_INOUT,
+            type: oracledb.TIMESTAMP_TZ,
+            val:  date
+          }
+        };
+      var sqlrun71811 = "begin nodb_inoutproc71811(p_inout => :p_inout); end;";
+      var sqldrop = "DROP PROCEDURE nodb_inoutproc71811";
+      async.series([
+        function(cb) {
+          connection.execute(
+             proc71811,
+             function(err) {
+                should.not.exist(err);
+                cb();
+              }
+            );
+          },
+        function(cb) {
+          connection.execute(
+            sqlrun71811,
+            bindVar,
+            function(err, result) {
+              should.not.exist(err);
+              should.strictEqual(result.outBinds.p_inout, null);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          connection.execute(
+            sqldrop,
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        }
+      ], done);
+    }); // 70.18.11
+
+  });//70.18
+
+  describe('70.19 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH LOCAL TIME ZONE(convert STRING to TIMESTAMP)', function() {
+
+    before(function(done) {
+      var proc = "CREATE OR REPLACE \n" +
+                 "FUNCTION nodb_plsqlbindfunc719(dateValue IN TIMESTAMP WITH LOCAL TIME ZONE) RETURN VARCHAR2 \n" +
+                 "IS \n" +
+                 "BEGIN \n" +
+                 "    RETURN TO_CHAR(dateValue, 'YYYY-MM-DD HH24:MI:SS.FF');\n" +
+                 "END nodb_plsqlbindfunc719;";
+
+      connection.execute(
+        proc,
+        function(err) {
+          should.not.exist(err);
+          done();
+        }
+      );
+    }); // before
+
+    after(function(done) {
+      var sql = "DROP FUNCTION nodb_plsqlbindfunc719";
+      connection.execute(
+        sql,
+        function(err) {
+          should.not.exist(err);
+          done();
+        }
+      );
+    }); // after
+
+    var sqlrun_str = "BEGIN :output := nodb_plsqlbindfunc719(TO_TIMESTAMP_TZ(:dateValue, 'YYYY-MM-DD HH24:MI:SS.FF')); END;";
+    var resultBind = {type: oracledb.STRING, dir: oracledb.BIND_OUT};
+
+    it('70.19.1 basic case', function(done) {
+      var date = '1999-12-01 11:00:00.123450000';
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: date}
+      };
+
+      connection.execute(
+        sqlrun_str,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          (result.outBinds.output).should.eql(date);
+          done();
+        }
+      );
+    }); // 70.19.1
+
+    it('70.19.2 val: null', function(done) {
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: null}
+      };
+
+      connection.execute(
+        sqlrun_str,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          should.strictEqual(result.outBinds.output, null);
+          done();
+        }
+      );
+    }); // 70.19.2
+
+    it('70.19.3 val: empty string', function(done) {
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: ''}
+      };
+
+      connection.execute(
+        sqlrun_str,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          should.strictEqual(result.outBinds.output, null);
+          done();
+        }
+      );
+    }); // 70.19.3
+
+    it('70.19.4 val: undefined', function(done) {
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: undefined}
+      };
+
+      connection.execute(
+        sqlrun_str,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          should.strictEqual(result.outBinds.output, null);
+          done();
+        }
+      );
+    }); // 70.19.4
+
+    it('70.19.5 val: NaN', function(done) {
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: NaN}
+      };
+
+      connection.execute(
+        sqlrun_str,
+        bindVar,
+        function(err, result) {
+          should.exist(err);
+          //NJS-011: encountered bind value and type mismatch in parameter 2
+          (err.message).should.startWith('NJS-011:');
+          done();
+        }
+      );
+    }); // 70.19.5
+
+    it('70.19.7 val: invalid Date Value: Feb 30, 2016', function(done) {
+      var date = '2016-02-30 00:00:00.000000000';
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: date}
+      };
+
+      connection.execute(
+        sqlrun_str,
+        bindVar,
+        function(err, result) {
+          should.exist(err);
+          //ORA-01839: date not valid for month specified
+          (err.message).should.startWith("ORA-01839");
+          done();
+        }
+      );
+    }); // 70.19.7
+
+    it('70.19.8 val: 1969-12-31', function(done) {
+      var date = '1969-12-31 00:00:00.000000000';
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: date}
+      };
+
+      connection.execute(
+        sqlrun_str,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          var resultDate = result.outBinds.output.toLowerCase();
+          resultDate.should.eql(date);
+          done();
+        }
+      );
+    }); // 70.19.8
+
+    it('70.19.9 val: epoc date 1970-1-1', function(done) {
+      var date = '1970-01-01 00:00:00.000000000';
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: date}
+      };
+
+      connection.execute(
+        sqlrun_str,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          (result.outBinds.output).should.eql(date);
+          done();
+        }
+      );
+    }); // 70.19.9
+
+  });//70.19
+
+  describe('70.20 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH LOCAL TIME ZONE(WITH VARCHAR2 RETURN)', function() {
+
+    before(function(done) {
+      var proc = "CREATE OR REPLACE \n" +
+                 "FUNCTION nodb_plsqlbindfunc720(dateValue IN TIMESTAMP WITH LOCAL TIME ZONE) RETURN VARCHAR2 \n" +
+                 "IS \n" +
+                 "BEGIN \n" +
+                 "    RETURN TO_CHAR(dateValue,'YYYY-MM-DD HH24:MI:SS.FF');\n" +
+                 "END nodb_plsqlbindfunc720;";
+
+      connection.execute(
+        proc,
+        function(err) {
+          should.not.exist(err);
+          done();
+        }
+      );
+    }); // before
+
+    after(function(done) {
+      var sql = "DROP FUNCTION nodb_plsqlbindfunc720";
+      connection.execute(
+        sql,
+        function(err) {
+          should.not.exist(err);
+          done();
+        }
+      );
+    }); // after
+
+    var sqlrun_dt = "BEGIN :output := nodb_plsqlbindfunc720(:dateValue); END;";
+    var resultBind = {type: oracledb.STRING, dir: oracledb.BIND_OUT};
+
+    it('70.20.1 basic case', function(done) {
+      var date = new Date( 2016, 8, 10, 14, 10, 10, 123 );
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.TIMESTAMP_LTZ, dir: oracledb.BIND_IN, val: date}
+      };
+
+      connection.execute(
+        sqlrun_dt,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          var resultDate = new Date(result.outBinds.output);
+          resultDate.should.eql(date);
+          done();
+        }
+      );
+    }); // 70.20.1
+
+    it('70.20.2 val: null', function(done) {
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.TIMESTAMP_LTZ, dir: oracledb.BIND_IN, val: null}
+      };
+
+      connection.execute(
+        sqlrun_dt,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          should.strictEqual(result.outBinds.output, null);
+          done();
+        }
+      );
+    }); // 70.20.2
+
+    it.skip('70.20.3 val: empty string', function(done) {
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.TIMESTAMP_LTZ, dir: oracledb.BIND_IN, val: ''}
+      };
+
+      connection.execute(
+        sqlrun_dt,
+        bindVar,
+        function(err, result) {
+          should.exist(err);
+          (err.message).should.startWith('NJS-011:');
+          done();
+        }
+      );
+    }); // 70.20.3
+
+    it('70.20.4 val: undefined', function(done) {
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.TIMESTAMP_LTZ, dir: oracledb.BIND_IN, val: undefined}
+      };
+
+      connection.execute(
+        sqlrun_dt,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          should.strictEqual(result.outBinds.output, null);
+          done();
+        }
+      );
+    }); // 70.20.4
+
+    it.skip('70.20.5 val: NaN', function(done) {
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.TIMESTAMP_LTZ, dir: oracledb.BIND_IN, val: NaN}
+      };
+
+      connection.execute(
+        sqlrun_dt,
+        bindVar,
+        function(err, result) {
+          should.exist(err);
+          //NJS-011: encountered bind value and type mismatch in parameter 2
+          (err.message).should.startWith('NJS-011:');
+          done();
+        }
+      );
+    }); // 70.20.5
+
+    it.skip('70.20.7 val: invalid Date Value: Feb 30, 2016', function(done) {
+      var date = new Date( 2016, 1, 30, 0, 0, 0, 0 );
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.TIMESTAMP_LTZ, dir: oracledb.BIND_IN, val: date}
+      };
+
+      connection.execute(
+        sqlrun_dt,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          console.log(result.outBinds.output);
+          var expectDate = new Date( 2016, 2, 1, 0, 0, 0, 0 );
+          var resultDate = new Date(result.outBinds.output);
+          resultDate.should.eql(expectDate);
+          done();
+        }
+      );
+    }); // 70.20.7
+
+    it.skip('70.20.8 val: 1969-12-31', function(done) {
+      var date = new Date( 1969, 11, 31, 0, 0, 0, 0 );
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.TIMESTAMP_LTZ, dir: oracledb.BIND_IN, val: date}
+      };
+
+      connection.execute(
+        sqlrun_dt,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          var resultDate = new Date(result.outBinds.output);
+          resultDate.should.eql(date);
+          done();
+        }
+      );
+    }); // 70.20.8
+
+    it.skip('70.20.9 val: epoc date 1970-1-1', function(done) {
+      var date = new Date( 1970, 0, 1, 0, 0, 0, 0 );
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.TIMESTAMP_LTZ, dir: oracledb.BIND_IN, val: date}
+      };
+
+      connection.execute(
+        sqlrun_dt,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          var resultDate = new Date(result.outBinds.output);
+          resultDate.should.eql(date);
+          done();
+        }
+      );
+    }); // 70.20.9
+
+    it('70.20.10 val: create Date value using numeric value: new Date(number)', function(done) {
+      var date = new Date ( 1476780296673 );
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.TIMESTAMP_LTZ, dir: oracledb.BIND_IN, val: date}
+      };
+
+      connection.execute(
+        sqlrun_dt,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          var resultDate = new Date(result.outBinds.output);
+          resultDate.should.eql(date);
+          done();
+        }
+      );
+    }); // 70.20.10
+
+    it.skip('70.20.11 val: create Date value using numeric value: 0', function(done) {
+      //Zero time is 01 January 1970 00:00:00 UTC
+      var date = new Date ( 0 );
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.TIMESTAMP_LTZ, dir: oracledb.BIND_IN, val: date}
+      };
+
+      connection.execute(
+        sqlrun_dt,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          var expectDate = new Date ( Date.UTC( 1970, 0, 1, 0, 0, 0, 0 ) );
+          var resultDate = new Date(result.outBinds.output);
+          resultDate.should.eql(expectDate);
+          done();
+        }
+      );
+    }); // 70.20.11
+
+  });//70.20
+
+  describe('70.21 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH LOCAL TIME ZONE', function() {
+
+    before(function(done) {
+      var proc = "CREATE OR REPLACE \n" +
+                 "FUNCTION nodb_plsqlbindfunc721(dateValue IN TIMESTAMP WITH LOCAL TIME ZONE) RETURN TIMESTAMP WITH LOCAL TIME ZONE \n" +
+                 "IS \n" +
+                 "BEGIN \n" +
+                 "    RETURN dateValue;\n" +
+                 "END nodb_plsqlbindfunc721;";
+
+      connection.execute(
+        proc,
+        function(err) {
+          should.not.exist(err);
+          done();
+        }
+      );
+    }); // before
+
+    after(function(done) {
+      var sql = "DROP FUNCTION nodb_plsqlbindfunc721";
+      connection.execute(
+        sql,
+        function(err) {
+          should.not.exist(err);
+          done();
+        }
+      );
+    }); // after
+
+    var sqlrun = "BEGIN :output := nodb_plsqlbindfunc721(:dateValue); END;";
+    var resultBind = {type: oracledb.TIMESTAMP_LTZ, dir: oracledb.BIND_OUT};
+
+    it.skip('70.21.1 val: empty string', function(done) {
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.TIMESTAMP_LTZ, dir: oracledb.BIND_IN, val: ''}
+      };
+
+      connection.execute(
+        sqlrun,
+        bindVar,
+        function(err, result) {
+          console.log(result);
+          should.exist(err);
+          (err.message).should.startWith('NJS-011:');
+          done();
+        }
+      );
+    }); // 70.21.1
+
+    it('70.21.2 val: undefined', function(done) {
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.TIMESTAMP_LTZ, dir: oracledb.BIND_IN, val: undefined}
+      };
+
+      connection.execute(
+        sqlrun,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          should.strictEqual(result.outBinds.output, null);
+          done();
+        }
+      );
+    }); // 70.21.2
+
+    it.skip('70.21.3 val: NaN', function(done) {
+      var bindVar = {
+        output:   resultBind,
+        dateValue: {type: oracledb.TIMESTAMP_LTZ, dir: oracledb.BIND_IN, val: NaN}
+      };
+
+      connection.execute(
+        sqlrun,
+        bindVar,
+        function(err, result) {
+          should.exist(err);
+          //NJS-011: encountered bind value and type mismatch in parameter 2
+          (err.message).should.startWith('NJS-011:');
+          done();
+        }
+      );
+    }); // 70.21.3
+
+  });//70.21
+
+  describe('70.22 dir: BIND_INOUT, type:TIMESTAMP WITH LOCAL TIME ZONE', function(){
+    before(function(done){
+      var proc = "CREATE OR REPLACE PROCEDURE nodb_inoutproc722 (p_inout IN OUT TIMESTAMP WITH LOCAL TIME ZONE) \n" +
+                 "AS \n" +
+                 "BEGIN \n" +
+                 "    p_inout := p_inout; \n" +
+                 "END nodb_inoutproc722;";
+
+      connection.execute(
+        proc,
+        function(err) {
+          should.not.exist(err);
+          done();
+        }
+      );
+    });//before
+
+    after(function(done){
+      var sql = "DROP PROCEDURE nodb_inoutproc722";
+      connection.execute(
+        sql,
+        function(err) {
+          should.not.exist(err);
+          done();
+        }
+      );
+    });//after
+
+    var sqlrun = "begin nodb_inoutproc722(p_inout => :p_inout); end;";
+
+    it('70.22.1 basic case', function(done){
+      var date = new Date( 2016, 7, 5, 12, 13, 14, 123 );
+      var bindVar = {
+        p_inout : {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.TIMESTAMP_LTZ,
+          val:  date
+        }
+      };
+      connection.execute(
+        sqlrun,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          (result.outBinds.p_inout).should.eql(date);
+          done();
+        }
+      );
+    });//70.22.1
+
+    it('70.22.2 auto detect data type', function(done) {
+      var date = new Date( 2016, 7, 5, 12, 13, 14, 123 );
+      var bindVar = {
+        p_inout : {
+          dir:  oracledb.BIND_INOUT,
+          val:  date
+        }
+      };
+
+      connection.execute(
+        sqlrun,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          (result.outBinds.p_inout).should.eql(date);
+          done();
+        }
+      );
+    }); // 70.22.2
+
+    it('70.22.3 val: null', function(done) {
+      var bindVar = {
+        p_inout : {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.TIMESTAMP_LTZ,
+          val:  null
+        }
+      };
+
+      connection.execute(
+        sqlrun,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          should.strictEqual(result.outBinds.p_inout, null);
+          done();
+        }
+      );
+    }); // 70.22.3
+
+    it.skip('70.22.4 val: empty string', function(done) {
+      var bindVar = {
+        p_inout : {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.TIMESTAMP_LTZ,
+          val:  ''
+        }
+      };
+
+      connection.execute(
+        sqlrun,
+        bindVar,
+        function(err, result) {
+          console.log(result.outBinds.output);
+          should.exist(err);
+          (err.message).should.startWith('NJS-011:');
+          done();
+        }
+      );
+    }); // 70.22.4
+
+    it('70.22.5 val: undefined', function(done) {
+      var bindVar = {
+        p_inout : {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.TIMESTAMP_LTZ,
+          val:  undefined
+        }
+      };
+
+      connection.execute(
+        sqlrun,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          // console.log(result);
+          should.strictEqual(result.outBinds.p_inout, null);
+          done();
+        }
+      );
+    }); // 70.22.5
+
+    it.skip('70.22.6 val: NaN', function(done) {
+      var bindVar = {
+        p_inout : {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.TIMESTAMP_LTZ,
+          val:  NaN
+        }
+      };
+
+      connection.execute(
+        sqlrun,
+        bindVar,
+        function(err, result) {
+          should.exist(err);
+          (err.message).should.startWith('NJS-011:');
+          done();
+        }
+      );
+    }); // 70.22.6
+
+    it('70.22.7 val: invalid Date Value: Feb 30, 2016', function(done) {
+      var date = new Date ( 2016, 1, 30, 0, 0, 0, 0 );
+      var bindVar = {
+        p_inout : {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.TIMESTAMP_LTZ,
+          val:  date
+        }
+      };
+
+      connection.execute(
+        sqlrun,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          //console.log(result);
+          var resultDate = new Date ( 2016, 2, 1, 0, 0, 0, 0 );
+          (result.outBinds.p_inout).should.eql(resultDate);
+          done();
+        }
+      );
+    }); // 70.22.7
+
+    it('70.22.8 val: 1969-12-31', function(done) {
+      var date = new Date ( 1969, 11, 31, 0, 0, 0, 0 );
+      var bindVar = {
+        p_inout : {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.TIMESTAMP_LTZ,
+          val:  date
+        }
+      };
+
+      connection.execute(
+        sqlrun,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          (result.outBinds.p_inout).should.eql(date);
+          done();
+        }
+      );
+    }); // 70.22.8
+
+    it('70.22.9 val: epoc date 1970-1-1', function(done) {
+      var date = new Date ( 1970, 0, 1, 0, 0, 0, 0 );
+      var bindVar = {
+        p_inout : {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.TIMESTAMP_LTZ,
+          val:  date
+        }
+      };
+
+      connection.execute(
+        sqlrun,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          (result.outBinds.p_inout).should.eql(date);
+          done();
+        }
+      );
+    }); // 70.22.9
+
+    it('70.22.10 NULL IN and NON-NULL out', function(done) {
+      var proc72210 = "CREATE OR REPLACE PROCEDURE nodb_inoutproc72210 (p_inout IN OUT TIMESTAMP WITH LOCAL TIME ZONE) \n" +
+                 "AS \n" +
+                 "BEGIN \n" +
+                 "    p_inout := TO_TIMESTAMP_TZ('1999-12-01 11:00:00.001231000', 'YYYY-MM-DD HH24:MI:SS.FF'); \n" +
+                 "END nodb_inoutproc72210;";
+      var bindVar = {
+        p_inout : {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.TIMESTAMP_LTZ,
+          val:  null
+        }
+      };
+      var sqlrun72210 = "begin nodb_inoutproc72210(p_inout => :p_inout); end;";
+      var sqldrop = "DROP PROCEDURE nodb_inoutproc72210";
+      async.series([
+        function(cb) {
+          connection.execute(
+             proc72210,
+             function(err) {
+                should.not.exist(err);
+                cb();
+              }
+            );
+          },
+        function(cb) {
+          connection.execute(
+            sqlrun72210,
+            bindVar,
+            function(err, result) {
+              should.not.exist(err);
+              (result.outBinds.p_inout).should.not.eql(null);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          connection.execute(
+            sqldrop,
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        }
+      ], done);
+    }); // 70.22.10
+
+    it('70.22.11 NON-NULL IN and NULL OUT', function(done) {
+      var proc72211 = "CREATE OR REPLACE PROCEDURE nodb_inoutproc72211 (p_inout IN OUT TIMESTAMP WITH LOCAL TIME ZONE) \n" +
+                 "AS \n" +
+                 "BEGIN \n" +
+                 "    p_inout := null; \n" +
+                 "END nodb_inoutproc72211;";
+      var date = new Date( 2011, 0, 12, 0, 0, 0, 0 );
+      var bindVar = {
+          p_inout : {
+            dir:  oracledb.BIND_INOUT,
+            type: oracledb.TIMESTAMP_LTZ,
+            val:  date
+          }
+        };
+      var sqlrun72211 = "begin nodb_inoutproc72211(p_inout => :p_inout); end;";
+      var sqldrop = "DROP PROCEDURE nodb_inoutproc72211";
+      async.series([
+        function(cb) {
+          connection.execute(
+             proc72211,
+             function(err) {
+                should.not.exist(err);
+                cb();
+              }
+            );
+          },
+        function(cb) {
+          connection.execute(
+            sqlrun72211,
+            bindVar,
+            function(err, result) {
+              should.not.exist(err);
+              should.strictEqual(result.outBinds.p_inout, null);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          connection.execute(
+            sqldrop,
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        }
+      ], done);
+    }); // 70.22.11
+
+  });//70.22
 
 });

@@ -813,6 +813,8 @@ Overview of node-oracledb functional tests
         67.1.9 retrieves the right pool, even after multiple pools are created
         67.1.10 throws an error if the pool specified in getPool doesn't exist
         67.1.11 does not throw an error if multiple pools are created without a poolAlias in the same call stack
+        67.1.12 uses callback syntax function(err) instead of function(err,pool)
+        67.1.13 Negative: call back is called with function(err)
     67.2 oracledb.getConnection functional tests
         67.2.1 gets a connection from the default pool
         67.2.2 gets a connection from the pool with the specified alias when no alias is specified
@@ -820,6 +822,7 @@ Overview of node-oracledb functional tests
         67.2.4 throws an error if an attempt is made to use a poolAlias for a pool that is not in the cache
         67.2.5 gets a connection from the default pool, even after an aliased pool is created
         67.2.6 uses the right pool, even after multiple pools are created
+        67.2.7 gets a connection from the default pool with callback function(err)
     67.3 poolAlias attribute
         67.3.1 throws an error if poolAttrs.poolAlias is an object
         67.3.2 throws an error if poolAttrs.poolAlias is an array
@@ -931,3 +934,114 @@ Overview of node-oracledb functional tests
         70.10.3 NUMBER, null values
         70.10.4 DATE, null values
         70.10.5 BUFFER
+        70.10.6 TIMESTAMP, null value
+        70.10.7 TIMESTAMP WITH TIME ZONE, null values
+        70.10.8 TIMESTAMP WITH LOCAL TIME ZONE, null values
+    70.11 dir: BIND_IN and BIND_OUT, type: TIMESTAMP(convert STRING to TIMESTAMP)
+        70.11.1 basic case
+        70.11.2 val: null
+        70.11.3 val: empty string
+        70.11.4 val: undefined
+        70.11.5 val: NaN
+        70.11.7 val: invalid Date Value: Feb 30, 2016
+        70.11.8 val: 1969-12-31
+        70.11.9 val: epoc date 1970-1-1
+    70.12 dir: BIND_IN and BIND_OUT, type: TIMESTAMP(WITH VARCHAR2 RETURN)
+        70.12.1 basic case
+        70.12.2 val: null
+      - 70.12.3 val: empty string
+        70.12.4 val: undefined
+      - 70.12.5 val: NaN
+      - 70.12.7 val: invalid Date Value: Feb 30, 2016
+      - 70.12.8 val: 1969-12-31
+      - 70.12.9 val: epoc date 1970-1-1
+        70.12.10 val: create Date value using numeric value: new Date(number)
+      - 70.12.11 val: create Date value using numeric value: 0
+    70.13 dir: BIND_IN and BIND_OUT, type: TIMESTAMP
+      - 70.13.1 val: empty string
+        70.13.2 val: undefined
+      - 70.13.3 val: NaN
+    70.14 dir: BIND_INOUT, type:TIMESTAMP
+        70.14.1 basic case
+        70.14.2 auto detect data type
+        70.14.3 val: null
+      - 70.14.4 val: empty string
+        70.14.5 val: undefined
+      - 70.14.6 val: NaN
+        70.14.7 val: invalid Date Value: Feb 30, 2016
+        70.14.8 val: 1969-12-31
+        70.14.9 val: epoc date 1970-1-1
+        70.14.10 NULL IN and NON-NULL out
+        70.14.11 NON-NULL IN and NULL OUT
+    70.15 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE(convert STRING to TIMESTAMP)
+        70.15.1 basic case
+        70.15.2 val: null
+        70.15.3 val: empty string
+        70.15.4 val: undefined
+        70.15.5 val: NaN
+        70.15.7 val: invalid Date Value: Feb 30, 2016
+        70.15.8 val: 1969-12-31
+        70.15.9 val: epoc date 1970-1-1
+    70.16 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE(WITH VARCHAR2 RETURN)
+        70.16.1 basic case
+        70.16.2 val: null
+      - 70.16.3 val: empty string
+        70.16.4 val: undefined
+      - 70.16.5 val: NaN
+      - 70.16.7 val: invalid Date Value: Feb 30, 2016
+      - 70.16.8 val: 1969-12-31
+      - 70.16.9 val: epoc date 1970-1-1
+        70.16.10 val: create Date value using numeric value: new Date(number)
+      - 70.16.11 val: create Date value using numeric value: 0
+    70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE
+      - 70.17.1 val: empty string
+        70.17.2 val: undefined
+      - 70.17.3 val: NaN
+    70.18 dir: BIND_INOUT, type:TIMESTAMP WITH TIME ZONE
+        70.18.1 basic case
+        70.18.2 auto detect data type
+        70.18.3 val: null
+      - 70.18.4 val: empty string
+        70.18.5 val: undefined
+      - 70.18.6 val: NaN
+        70.18.7 val: invalid Date Value: Feb 30, 2016
+        70.18.8 val: 1969-12-31
+        70.18.9 val: epoc date 1970-1-1
+        70.18.10 NULL IN and NON-NULL out
+        70.18.11 NON-NULL IN and NULL OUT
+    70.19 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH LOCAL TIME ZONE(convert STRING to TIMESTAMP)
+        70.19.1 basic case
+        70.19.2 val: null
+        70.19.3 val: empty string
+        70.19.4 val: undefined
+        70.19.5 val: NaN
+        70.19.7 val: invalid Date Value: Feb 30, 2016
+        70.19.8 val: 1969-12-31
+        70.19.9 val: epoc date 1970-1-1
+    70.20 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH LOCAL TIME ZONE(WITH VARCHAR2 RETURN)
+        70.20.1 basic case
+        70.20.2 val: null
+      - 70.20.3 val: empty string
+        70.20.4 val: undefined
+      - 70.20.5 val: NaN
+      - 70.20.7 val: invalid Date Value: Feb 30, 2016
+      - 70.20.8 val: 1969-12-31
+      - 70.20.9 val: epoc date 1970-1-1
+        70.20.10 val: create Date value using numeric value: new Date(number)
+      - 70.20.11 val: create Date value using numeric value: 0
+    70.21 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH LOCAL TIME ZONE
+      - 70.21.1 val: empty string
+        70.21.2 val: undefined
+      - 70.21.3 val: NaN
+    70.22 dir: BIND_INOUT, type:TIMESTAMP WITH LOCAL TIME ZONE
+        70.22.1 basic case
+        70.22.2 auto detect data type
+        70.22.3 val: null
+      - 70.22.4 val: empty string
+        70.22.5 val: undefined
+      - 70.22.6 val: NaN
+        70.22.7 val: invalid Date Value: Feb 30, 2016
+        70.22.8 val: 1969-12-31
+        70.22.9 val: epoc date 1970-1-1
+        70.22.10 NULL IN and NON-NULL out
+        70.22.11 NON-NULL IN and NULL OUT

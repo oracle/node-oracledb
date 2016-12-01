@@ -340,6 +340,44 @@ describe('67. poolCache.js', function() {
         }
       );
     });
+
+    it('67.1.12 uses callback syntax function(err) instead of function(err,pool)', function(done) {
+      oracledb.createPool({ // this becomes the default pool
+        user          : dbConfig.user,
+        password      : dbConfig.password,
+        connectString : dbConfig.connectString,
+        poolMax : 4,
+        poolMin : 1,
+        poolIncrement: 1,
+        poolTimeout: 0 // never terminate unused connections
+      },function(err) {
+        var defaultPool = oracledb.getPool();
+        should.exist(defaultPool);
+        (defaultPool.poolAlias).should.equal('default');
+        defaultPool.close(function(err) {
+          should.not.exist(err);
+        });
+        done();
+      });
+    });
+
+    it('67.1.13 Negative: call back is called with function(err)', function(done) {
+      this.timeout(10000);
+      oracledb.createPool({ // this becomes the default pool
+        user          : dbConfig.user,
+        password      : 'wrongpassword',
+        connectString : dbConfig.connectString,
+        poolMax : 4,
+        poolMin : 1,
+        poolIncrement: 1,
+        poolTimeout: 0 // never terminate unused connections
+      },function(err) {
+        should.exist(err);
+        // ORA-01017: invalid username/password; logon denied
+        (err.message).should.startWith('ORA-01017:');
+        done();
+      });
+    });
   });
 
   describe('67.2 oracledb.getConnection functional tests', function() {
@@ -518,6 +556,31 @@ describe('67. poolCache.js', function() {
         });
       });
     });
+
+    it('67.2.7 gets a connection from the default pool with callback function(err)', function(done) {
+      oracledb.createPool({ // this becomes the default pool
+        user          : dbConfig.user,
+        password      : dbConfig.password,
+        connectString : dbConfig.connectString,
+        poolMax : 4,
+        poolMin : 1,
+        poolIncrement: 1,
+        poolTimeout: 0 // never terminate unused connections
+      },function(err) {
+        var defaultPool = oracledb.getPool();
+        should.exist(defaultPool);
+        oracledb.getConnection(function(err, conn) {
+          should.not.exist(err);
+          conn.release(function(err) {
+            should.not.exist(err);
+            defaultPool.close(function(err){
+              should.not.exist(err);
+              done();
+            });
+          });
+        });
+      });
+     });
   }); // 67.2
 
 // This suite extends 67.1.6 case with various types

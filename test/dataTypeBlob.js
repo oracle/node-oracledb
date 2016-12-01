@@ -52,9 +52,14 @@ describe('41. dataTypeBlob', function() {
   this.timeout(20000);
 
   var connection = null;
+  var nodever6   = false;
+
   var tableName = "nodb_myblobs";
 
   before('get one connection', function(done) {
+    if ( process.versions["node"].substring (0, 1) >= "6" )
+      nodever6 = true;
+
     oracledb.getConnection(
       {
         user:          dbConfig.user,
@@ -193,7 +198,7 @@ describe('41. dataTypeBlob', function() {
             function(err, result) {
               should.not.exist(err);
 
-              var blob = Buffer(0);
+              var blob = nodever6 ? Buffer.alloc(0) : new Buffer(0);
               var blobLength = 0;
               var lob = result.rows[0][0];
 
