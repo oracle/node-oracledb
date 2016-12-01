@@ -321,7 +321,7 @@ describe('12. resultSet1.js', function() {
       );
     })
 
-    it('12.2.4 cannot set prefetchRows to be null', function(done) {
+    it('12.2.4 prefetchRows can be set to null', function(done) {
       connection.should.be.ok();
 
       connection.execute(
