@@ -111,20 +111,10 @@ DROP TABLE j_purchaseorder;
 -- Note if your applications always insert valid JSON, you may delete
 -- the IS JSON check to remove its additional validation overhead.
 CREATE TABLE j_purchaseorder (po_document VARCHAR2(4000) CHECK (po_document IS JSON));
-INSERT INTO j_purchaseorder (po_document) VALUES ('{"userId":3,"userName":"Alison","location":"Australia"}');
-COMMIT;
 
 -- For selectjsonclob.js example of JSON datatype.  Requires Oracle Database 12.1.0.2
 DROP TABLE j_purchaseorder_c;
--- The extra CHECK clause 'or length(po_document) = 0' clause allows
--- EMPTY_CLOB() to be inserted into the table.  The extra clause is
--- not needed if you have a database patch for bug 21636362.  The
--- extra 'or' clause will stop the table appearing in
--- USER_JSON_COLUMNS.  EMPTY_CLOB() is currently needed by
--- node-oracledb for inserting CLOB data.
-CREATE TABLE j_purchaseorder_c (po_document CLOB CHECK (po_document IS JSON or length(po_document) = 0));
-INSERT INTO j_purchaseorder_c (po_document) VALUES ('{"userId":4,"userName":"Changjie","location":"China"}');
-COMMIT;
+CREATE TABLE j_purchaseorder_c (po_document CLOB CHECK (po_document IS JSON));
 
 -- For DML RETURNING aka RETURNING INTO examples
 DROP TABLE dmlrupdtab;
@@ -137,42 +127,33 @@ COMMIT;
 DROP TABLE mylobs;
 CREATE TABLE mylobs (id NUMBER, c CLOB, b BLOB);
 
--- Procedure to test LOB OUT bind
-CREATE OR REPLACE PROCEDURE lob_out (c_out OUT CLOB)
+-- For lobbinds.js: Procedure to show IN bind support for LOBs
+CREATE OR REPLACE PROCEDURE lobs_in (p_id IN NUMBER, c_in IN CLOB, b_in IN BLOB)
 AS
 BEGIN
-  SELECT c INTO c_out FROM mylobs WHERE id = 5;
+  INSERT INTO mylobs (id, c, b) VALUES (p_id, c_in, b_in);
 END;
 /
+SHOW ERRORS
 
--- Procedure to test LOB INOUT bind
-CREATE OR REPLACE PROCEDURE lob_in_out (c_inout IN OUT CLOB)
+-- For lobbinds.js: Procedure to show bind OUT support for LOBs
+CREATE OR REPLACE PROCEDURE lobs_out (p_id IN NUMBER, c_out OUT CLOB, b_out OUT BLOB)
 AS
 BEGIN
-  DELETE FROM mylobs WHERE id=50 or id=100;
-  INSERT INTO mylobs (id, c) VALUES (50, c_inout);
-  INSERT INTO mylobs (id, c) VALUES (100, TO_CLOB('Sample text'));
-  SELECT c INTO c_inout FROM mylobs WHERE id = 100;
+  SELECT c, b INTO c_out, b_out FROM mylobs WHERE id = p_id;
 END;
 /
+SHOW ERRORS
 
--- Procedure to test bind IN support for CLOB AS String and BLOB as Buffer with
--- more than 32K size data
-CREATE OR REPLACE PROCEDURE lobs_in (clob_in IN CLOB, blob_in IN BLOB)
+-- For lobbinds.js: Procedure to show PL/SQL IN OUT bind support for LOBs
+CREATE OR REPLACE PROCEDURE lob_in_out (p_id IN NUMBER, c_inout IN OUT CLOB)
 AS
 BEGIN
-  INSERT INTO mylobs (id, c, b) VALUES (200, clob_in, blob_in);
+  INSERT INTO mylobs (id, c) VALUES (p_id, c_inout);
+  SELECT 'New LOB: ' || c INTO c_inout FROM mylobs WHERE id = p_id;
 END;
 /
-
--- Procedure to test bind OUT support for CLOB AS String and BLOB as Buffer with
--- more than 32K size data
-CREATE OR REPLACE PROCEDURE lobs_out (clob_out OUT CLOB, blob_out OUT BLOB)
-AS
-BEGIN
-  SELECT c, b INTO clob_out, blob_out FROM mylobs WHERE id = 200;
-END;
-/
+SHOW ERRORS
 
 -- For DBMS_OUTPUT example dbmsoutputpipe.js
 CREATE OR REPLACE TYPE dorow AS TABLE OF VARCHAR2(32767);

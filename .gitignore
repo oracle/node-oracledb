@@ -13,6 +13,8 @@ node_modules
 /examples/clobstream2out.txt
 /examples/blobstream1out.jpg
 /examples/blobstream2out.jpg
+/examples/lobbindsout1.txt
+/examples/lobbindsout2.txt
 
 # Oracle Ignores
 sqlnet.log

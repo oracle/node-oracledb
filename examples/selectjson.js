@@ -72,7 +72,9 @@ var doinsert = function (conn, cb) {
     });
 };
 
+// 1. Selecting JSON stored in a VARCHAR2 column
 var dojsonquery = function (conn, cb) {
+  console.log('1. Selecting JSON stored in a VARCHAR2 column');
   conn.execute(
     "SELECT po_document FROM j_purchaseorder WHERE JSON_EXISTS (po_document, '$.location')",
     function(err, result)
@@ -87,7 +89,9 @@ var dojsonquery = function (conn, cb) {
     });
 };
 
+// 2. Using JSON_VALUE to extract a value from a JSON column
 var dorelationalquery = function (conn, cb) {
+  console.log('2. Using JSON_VALUE to extract a value from a JSON column');
   conn.execute(
     "SELECT JSON_VALUE(po_document, '$.location') FROM j_purchaseorder",
     function(err, result)
@@ -101,10 +105,13 @@ var dorelationalquery = function (conn, cb) {
     });
 };
 
+// 3. Using JSON_OBJECT to extract relational data as JSON
 var dojsonfromrelational = function (conn, cb) {
-  if (conn.oracleServerVersion < 1202000000)  // JSON_OBJECT is new in Oracle Database 12.2
+  console.log('3. Using JSON_OBJECT to extract relational data as JSON');
+  if (conn.oracleServerVersion < 1202000000) { // JSON_OBJECT is new in Oracle Database 12.2
+    console.log('The JSON_OBJECT example only works with Oracle Database 12.2 or greater');
     return cb(null, conn);
-  else {
+  } else {
     conn.execute(
       "SELECT JSON_object ('deptId' IS d.department_id, 'name' IS d.department_name) department "
       + "FROM departments d "
@@ -115,7 +122,6 @@ var dojsonfromrelational = function (conn, cb) {
         if (err) {
           return cb(err, conn);
         } else {
-          console.log('Oracle Database 12.2 JSON_OBJECT Query results: ');
           for (var i = 0; i < result.rows.length; i++)
             console.log(result.rows[i][0]);
           return cb(null, conn);
