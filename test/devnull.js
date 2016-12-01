@@ -39,7 +39,7 @@ function DevNull(opts) {
   opts = opts || {};
   stream.Writable.call(this, opts);
 
-};
+}
 
 // step 1 - to extend the Writable Class
 util.inherits(DevNull, stream.Writable);
