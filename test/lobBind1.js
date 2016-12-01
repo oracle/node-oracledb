@@ -39,6 +39,7 @@ var should   = require('should');
 var async    = require('async');
 var dbConfig = require('./dbconfig.js');
 var assist   = require('./dataTypeAssist.js');
+var devnull  = require('./devnull');
 
 describe('71. lobBind1.js', function() {
 
@@ -579,7 +580,7 @@ describe('71. lobBind1.js', function() {
 
     }); // 71.1.6
 
-    it('71.1.7 BIND_INOUT, PL/SQL, A String. IN LOB value does not change.', function(done) {
+    it('71.1.7 BIND_INOUT, PL/SQL, A String. IN LOB gets auto closed.', function(done) {
 
       var seq = 7;
       var inStr  = "I love the sunshine today!",
@@ -621,13 +622,13 @@ describe('71. lobBind1.js', function() {
               should.not.exist(err);
               (result.rows.length).should.not.eql(0);
 
-              var lob = result.rows[0][0];
+              var lobin = result.rows[0][0];
 
               connection.execute(
                 sql2,
                 {
                   id: seq,
-                  io: { val: lob, type: oracledb.CLOB, dir: oracledb.BIND_INOUT }
+                  io: { val: lobin, type: oracledb.CLOB, dir: oracledb.BIND_INOUT }
                 },
                 { autoCommit: true },
                 function(err, result2) {
@@ -636,7 +637,7 @@ describe('71. lobBind1.js', function() {
                   var lobout = result2.outBinds.io;
 
                   async.parallel([
-                    function(callback) {
+                    function verifyOUT(callback) {
                       lobout.setEncoding("utf8");
                       var clobData = "";
 
@@ -654,23 +655,18 @@ describe('71. lobBind1.js', function() {
                         return callback();
                       });
                     },
-                    function(callback) {
-                      lob.setEncoding("utf8");
-                      var clobData = "";
+                    function verifyIN(callback) {
 
-                      lob.on("data", function(chunk) {
-                        clobData += chunk;
-                      });
+                      lobin.pipe(devnull());
 
-                      lob.on("error", function(err) {
-                        should.not.exist(err, "lob.on 'error' event.");
-                      });
-
-                      lob.on("end", function() {
-                        should.strictEqual(clobData, inStr);
+                      lobin.on('error', function(err) {
+                        should.exist(err);
+                        (err.message).should.startWith('NJS-022:');
+                        // Error: NJS-022: invalid Lob
 
                         return callback();
                       });
+
                     }
                   ], function(err) {
                     should.not.exist(err);

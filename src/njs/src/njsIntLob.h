@@ -185,14 +185,16 @@ class ILob : public Nan::ObjectWrap
 
   static void Init(Handle<Object> target);
 
+  void cleanupDPI ();
+
+  void cleanupNJS ();
+
 
  private:
   ILob();
 
   ~ILob();
 
-  void cleanupDPI ();
-  void cleanupNJS ();
   inline NJSErrorType getErrNumber ( bool processBind );
 
   static NAN_METHOD(New);

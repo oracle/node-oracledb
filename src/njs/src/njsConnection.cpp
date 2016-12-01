@@ -1960,6 +1960,26 @@ void Connection::Async_Execute (uv_work_t *req)
         executeBaton->dpistmt->release ();
     }
 
+    // Auto close the IN-LOB used for INOUT bind
+    for ( unsigned int index = 0 ;index < executeBaton->binds.size ();
+          index++ )
+    {
+      Bind *bind = executeBaton->binds[index];
+
+      if ( ( bind->type == DpiClob || bind->type == DpiBlob ) && bind->isInOut )
+      {
+        if ( executeBaton->extBinds[index] &&
+             executeBaton->extBinds[index]->type == NJS_EXTBIND_LOB &&
+             !executeBaton->extBinds[index]->fields.extLob.isStringBuffer2LOB )
+        {
+          ILob *iLob = ( ILob * )
+                       ( executeBaton->extBinds[index]->fields.extLob.value );
+          // cleanupNJS() will be called later in Async_AfterExecute()
+          iLob->cleanupDPI ();
+        }
+      }
+    }
+
     // In case of error, free the allocated resources
     if ( !(executeBaton->error).empty() )
     {
@@ -2103,12 +2123,22 @@ void Connection::LOB2StringOrBuffer ( eBaton* executeBaton, unsigned int index,
               lobLocator, byteAmount, charAmount, offset,
               bind->value, bufLen );
 
-  // There is more data in the LOB than the maxSize, set the error
+  /*
+   * byteAmount returns the number of bytes read into the buffer irrespective
+   * of charAmount or byteAmount passed to Lob::read()
+   * If there is more data in the LOB than the maxSize, set the error
+   */
   if ( byteAmount > ( unsigned long long ) bind->maxSize )
   {
     executeBaton->error = NJSMessages::getErrorMsg(
                                           errInsufficientBufferForBinds);
     goto exitLOB2StringOrBuffer;
+  }
+
+  // Treat empty LOB case as NULL to be consistent with varchar/buffer columns
+  if ( !byteAmount )
+  {
+    *bind->ind = -1;
   }
 
   *bind->len  = ( DPI_BUFLEN_TYPE ) byteAmount;
@@ -3390,40 +3420,58 @@ void Connection::Descr2protoILob( eBaton *executeBaton, unsigned int numCols,
   {
     Bind *bind = executeBaton->binds[obndpos];
 
-    if ((!bind->isOut && !bind->isInOut) ||
-        ( bind->ind && *(sb2 *)bind->ind == -1))
-      continue;  // we only need to process the non-null OUT binds
-
-    if (bind->type == DpiClob || bind->type == DpiBlob)
+    if ( ( bind->isOut || bind->isInOut ) &&
+         ( bind->type == DpiClob || bind->type == DpiBlob ) )
     {
-      Descriptor *lobLocator = NULL;
-
-      if ( executeBaton->stmtIsReturning )
+      // Free the allocated descriptors in case of NULL OUTs or DML returning
+      if ( *bind->ind == -1 )
       {
-        // TODO: Update this loop when support for array binds is added.
-        // For UPDATE, loop through all the rows returned for each bind
-        // For INSERT, eventually we will consider the iters.
-        //             For now only 1 row will be inserted.
-        for ( unsigned int rowidx = 0; rowidx < bind->rowsReturned; rowidx++ )
+        if ( executeBaton->stmtIsReturning )
         {
-          lobLocator           =
-                  ( ( Descriptor ** ) bind->value )[ rowidx ];
-          ProtoILob *protoILob = new ProtoILob ( executeBaton, lobLocator,
-                                                 bind->type );
-
-          ( ( Descriptor ** )( bind->value ) )[rowidx] =
-            reinterpret_cast<Descriptor *>( protoILob );
+          for ( unsigned int rowidx = 0; rowidx < bind->rowsReturned;
+                rowidx++ )
+          {
+            Env::freeDescriptor ( ( ( Descriptor ** ) bind->value )[ rowidx ],
+                                  LobDescriptorType);
+          }
+        }
+        else
+        {
+          Env::freeDescriptor ( *( ( Descriptor ** ) bind->value ),
+                                LobDescriptorType);
         }
       }
-      else // case for PLSQL INOUT or OUT
+      else
       {
-        lobLocator                    = *( ( Descriptor ** ) bind->value );
+        Descriptor *lobLocator = NULL;
 
-        ProtoILob *protoILob          = new ProtoILob ( executeBaton,
-                                                        lobLocator,
-                                                        bind->type );
-        *((Descriptor **)bind->value) =
-                                  reinterpret_cast<Descriptor *>( protoILob );
+        if ( executeBaton->stmtIsReturning )
+        {
+          // TODO: Update this loop when support for array binds is added.
+          // For UPDATE, loop through all the rows returned for each bind
+          // For INSERT, eventually we will consider the iters.
+          //             For now only 1 row will be inserted.
+          for ( unsigned int rowidx = 0; rowidx < bind->rowsReturned; rowidx++ )
+          {
+            lobLocator           =
+                    ( ( Descriptor ** ) bind->value )[ rowidx ];
+            ProtoILob *protoILob = new ProtoILob ( executeBaton, lobLocator,
+                                                   bind->type );
+
+            ( ( Descriptor ** )( bind->value ) )[rowidx] =
+              reinterpret_cast<Descriptor *>( protoILob );
+          }
+        }
+        else
+        {
+          lobLocator                    = *( ( Descriptor ** ) bind->value );
+
+          ProtoILob *protoILob          = new ProtoILob ( executeBaton,
+                                                          lobLocator,
+                                                          bind->type );
+          *((Descriptor **)bind->value) =
+                                    reinterpret_cast<Descriptor *>( protoILob );
+        }
       }
     }
   }
@@ -3464,6 +3512,13 @@ void Connection::Async_AfterExecute(uv_work_t *req)
         ILob *iLob = ( ILob * )
                      ( executeBaton->extBinds[index]->fields.extLob.value );
         iLob->postBind ();
+
+        // Auto-close the IN-LOB used for INOUT bind
+        if ( bind->isInOut )
+        {
+          // cleanupDPI() called in Async_Execute since it is a DPI/OCI call
+          iLob->cleanupNJS ();
+        }
 
         executeBaton->extBinds[index]->fields.extLob.value = NULL;
       }

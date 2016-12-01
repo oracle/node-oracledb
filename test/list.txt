@@ -1055,7 +1055,7 @@ Overview of node-oracledb functional tests
         71.1.4 BIND_IN, PL/SQL, a txt file
         71.1.5 BIND_OUT, PL/SQL, a string
         71.1.6 BIND_OUT, PL/SQL, a txt file
-        71.1.7 BIND_INOUT, PL/SQL, A String
+        71.1.7 BIND_INOUT, PL/SQL, A String. IN LOB gets auto closed.
         71.1.8 BIND_INOUT, PL/SQL, a txt file
         71.1.9 Negative: BIND_INOUT, PL/SQL, String as bind IN Value
     71.2 persistent BLOB
