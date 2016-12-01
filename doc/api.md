@@ -66,34 +66,37 @@ limitations under the License.
      - 4.2.1 [`break()`](#break)
      - 4.2.2 [`close()`](#connectionclose)
      - 4.2.3 [`commit()`](#commit)
-     - 4.2.4 [`execute()`](#execute)
-         - 4.2.4.1 [`execute()`: SQL Statement](#executesqlparam)
-         - 4.2.4.2 [`execute()`: Bind Parameters](#executebindParams)
+     - 4.2.4 [`createLob()`](#connectioncreatelob)
+     - 4.2.5 [`execute()`](#execute)
+         - 4.2.5.1 [`execute()`: SQL Statement](#executesqlparam)
+         - 4.2.5.2 [`execute()`: Bind Parameters](#executebindParams)
              - [`dir`](#executebindParams), [`maxArraySize`](#executebindParams), [`maxSize`](#executebindParams), [`type`](#executebindParams), [`val`](#executebindParams)
-         - 4.2.4.3 [`execute()`: Options](#executeoptions)
-             - 4.2.4.3.1 [`autoCommit`](#propexecautocommit)
-             - 4.2.4.3.2 [`extendedMetaData`](#propexecextendedmetadata)
-             - 4.2.4.3.3 [`fetchInfo`](#propexecfetchinfo)
-             - 4.2.4.3.4 [`maxRows`](#propexecmaxrows)
-             - 4.2.4.3.5 [`outFormat`](#propexecoutformat)
-             - 4.2.4.3.6 [`prefetchRows`](#propexecprefetchrows)
-             - 4.2.4.3.7 [`resultSet`](#propexecresultset)
-         - 4.2.4.4 [`execute()`: Callback Function](#executecallback)
-             - 4.2.4.4.1 [`metaData`](#execmetadata)
+         - 4.2.5.3 [`execute()`: Options](#executeoptions)
+             - 4.2.5.3.1 [`autoCommit`](#propexecautocommit)
+             - 4.2.5.3.2 [`extendedMetaData`](#propexecextendedmetadata)
+             - 4.2.5.3.3 [`fetchInfo`](#propexecfetchinfo)
+             - 4.2.5.3.4 [`maxRows`](#propexecmaxrows)
+             - 4.2.5.3.5 [`outFormat`](#propexecoutformat)
+             - 4.2.5.3.6 [`prefetchRows`](#propexecprefetchrows)
+             - 4.2.5.3.7 [`resultSet`](#propexecresultset)
+         - 4.2.5.4 [`execute()`: Callback Function](#executecallback)
+             - 4.2.5.4.1 [`metaData`](#execmetadata)
                  -  [`name`](#execmetadata), [`fetchType`](#execmetadata), [`dbType`](#execmetadata), [`byteSize`](#execmetadata), [`precision`](#execmetadata), [`scale`](#execmetadata), [`nullable`](#execmetadata)
-             - 4.2.4.4.2 [`outBinds`](#execoutbinds)
-             - 4.2.4.4.3 [`resultSet`](#execresultset)
-             - 4.2.4.4.4 [`rows`](#execrows)
-             - 4.2.4.4.5 [`rowsAffected`](#execrowsaffected)
-     - 4.2.5 [`queryStream()`](#querystream)
-     - 4.2.6 [`release()`](#release)
-     - 4.2.7 [`rollback()`](#rollback)
+             - 4.2.5.4.2 [`outBinds`](#execoutbinds)
+             - 4.2.5.4.3 [`resultSet`](#execresultset)
+             - 4.2.5.4.4 [`rows`](#execrows)
+             - 4.2.5.4.5 [`rowsAffected`](#execrowsaffected)
+     - 4.2.6 [`queryStream()`](#querystream)
+     - 4.2.7 [`release()`](#release)
+     - 4.2.8 [`rollback()`](#rollback)
 5. [Lob Class](#lobclass)
   - 5.1 [Lob Properties](#lobproperties)
      - 5.1.1 [`chunkSize`](#proplobchunksize)
      - 5.1.2 [`length`](#proploblength)
      - 5.1.3 [`pieceSize`](#proplobpiecesize)
      - 5.1.4 [`type`](#proplobtype)
+  - 5.2 [Lob Methods](#lobmethods)
+     - 5.2.1 [`close()`](#lobclose)
 6. [Pool Class](#poolclass)
   - 6.1 [Pool Properties](#poolproperties)
      - 6.1.1 [`connectionsInUse`](#proppoolconnectionsinuse)
@@ -152,6 +155,12 @@ limitations under the License.
   - 10.3 [Anonymous PL/SQL blocks](#plsqlanon)
   - 10.4 [Using DBMS_OUTPUT](#dbmsoutput)
 11. [Working with CLOB and BLOB Data](#lobhandling)
+  - 11.1 [Simple Insertion of LOBs](#basiclobinsert)
+  - 11.2 [Streams and Lobs](#streamsandlobs)
+  - 11.3 [Using RETURNING INTO to Insert into LOBs](#lobinsertdiscussion)
+  - 11.4 [Using `createLob()`](#templobdiscussion)
+  - 11.5 [Closing Lobs](#closinglobs)
+  - 11.6 [Getting LOBs from Oracle Database](#queryinglobs)
 12. [Oracle Database 12c JSON Datatype](#jsondatatype)
 13. [Bind Parameters for Prepared Statements](#bind)
   - 13.1 [IN Bind Parameters](#inbind)
@@ -316,20 +325,21 @@ Oracledb.OBJECT                 // (4002) Fetch each row as an object
 
 #### <a name="oracledbconstantsnodbtype"></a> 3.1.2 Node-oracledb Type Constants
 
-Constants for `execute()` [bind parameter](#executebindParams) and
-[Lob](#proplobtype) `type` properties, for
-[`fetchAsString`](#propdbfetchasstring) and
-[`fetchInfo`](#propexecfetchinfo), and for
-[extended metadata](#propdbextendedmetadata).
+Constants for `execute()` [bind parameter](#executebindParams) `type` property,
+for the [`createLob()`](#connectioncreatelob) `type` parameter,
+for the [Lob](#proplobtype) `type` property,
+for [`fetchAsString`](#propdbfetchasstring)
+and [`fetchInfo`](#propexecfetchinfo), and
+for [extended metadata](#propdbextendedmetadata).
 
 Not all constants can be used in all places.
 
 ```
-Oracledb.BLOB                   // (2007) Bind a BLOB to a Node.js Stream
+Oracledb.BLOB                   // (2007) Bind a BLOB to a Node.js Stream or create a temporary BLOB
 
-Oracledb.BUFFER                 // (2005) Bind a RAW to a Node.js Buffer
+Oracledb.BUFFER                 // (2005) Bind a RAW or BLOB to a Node.js Buffer
 
-Oracledb.CLOB                   // (2006) Bind a CLOB to a Node.js Stream
+Oracledb.CLOB                   // (2006) Bind a CLOB to a Node.js Stream or create a temporary CLOB
 
 Oracledb.CURSOR                 // (2004) Bind a REF CURSOR to a node-oracledb ResultSet class
 
@@ -339,13 +349,13 @@ Oracledb.DEFAULT                // (0) Used with fetchInfo to reset the fetch ty
 
 Oracledb.NUMBER                 // (2002) Bind as JavaScript number type.  Can also be used for fetchAsString and fetchInfo
 
-Oracledb.STRING                 // (2001) Bind as JavaScript string type
+Oracledb.STRING                 // (2001) Bind as JavaScript String type.  Can be used for most database types.
 ```
 
 #### <a name="oracledbconstantsdbtype"></a> 3.1.3 Oracle Database Type Constants
 
 These types are shown in [extended metadata](#propdbextendedmetadata)
-for queries and REF CURSORS.  They indicate the Oracle database type.
+for queries and REF CURSORS.  They indicate the Oracle Database type.
 
 ```
 Oracledb.DB_TYPE_BINARY_DOUBLE  // (101) BINARY_DOUBLE
@@ -744,7 +754,7 @@ seconds, an internal "ping" will be performed first to check the
 aliveness of the connection.  At the cost of some overhead for
 infrequently accessed connection pools, connection pinging improves
 the chance a pooled connection is valid when it is used because
-indentifed un-unusable connections will not be returned to the
+identified un-unusable connections will not be returned to the
 application by `getConnection()`.
 
 Note when node-oracledb is built with version 12.2 of the Oracle
@@ -752,7 +762,7 @@ client library, the value of `poolPingInterval` is ignored.  Oracle
 client 12.2 has a lightweight, always-enabled connection check that
 replaces explicit pinging.
 
-With Oracle client 12.1 or earlier, unless `poolPingInterval` is `0`,
+With Oracle client 12c or earlier, unless `poolPingInterval` is `0`,
 it is possible for un-usable connections to be returned by a pool
 `getConnection()`.  Since it is also possible for connections to
 become unusable after `getConnection()` is called, applications should
@@ -814,6 +824,7 @@ application.  The cache management is transparently handled by the
 Oracle client libraries.
 
 `prefetchRows` is ignored unless a [`ResultSet`](#resultsetclass) is used.
+It is also ignored when the query involves a LOB.
 
 The default value is 100.
 
@@ -835,8 +846,8 @@ Promise Promise
 ```
 
 Node-oracledb supports Promises on all methods.  The standard Promise
-library is used in Node 0.12 and greater.  Promise support is not
-enabled by default in Node 0.10.
+library is used in Node.js 0.12 and greater.  Promise support is not
+enabled by default in Node.js 0.10.
 
 See [Promises in node-oracledb](#promiseoverview) for a discussion of
 using Promises.
@@ -1486,7 +1497,67 @@ Callback function parameter | Description
 ----------------------------|-------------
 *Error error* | If `commit()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
-#### <a name="execute"></a> 4.2.4 execute()
+#### <a name="connectioncreatelob"></a> 4.2.4 createLob()
+
+##### Prototype
+
+Callback:
+```
+createLob(Number type, function(Error error, Lob lob){});
+```
+Promise:
+```
+promise = createLob(Number type);
+```
+
+##### Description
+
+Creates a [Lob](#lobclass) as an Oracle
+[temporary LOB](http://docs.oracle.com/database/122/ADLOB/introduction-to-large-objects.htm#ADLOB45120).
+The LOB is initially empty.  Data can be streamed to the LOB, which
+can then be passed into PL/SQL blocks, or inserted into the database.
+
+When no longer required, Lobs created with `createLob()` should be
+closed with [`lob.close()`](#lobclose) because Oracle Database
+resources will be held open if temporary LOBs are not closed.  If the
+application does not explicitly call `lob.close()`, then the temporary
+tablespace storage for LOBs created with `createLob()` is freed when a
+non-pooled connection is closed, or when a pooled connection is
+removed from a pool due to pool shrinkage or pool termination.  The
+temporary tablespace storage is also freed at end of scope, as long as
+the connection is still open.
+
+Open temporary LOB usage can be monitored using the view
+[`V$TEMPORARY_LOBS`](http://docs.oracle.com/database/122/ADLOB/managing-LOBs.htm#ADLOB45157).
+
+LOBs created with `createLob()` can be bound for IN and for OUT binds,
+but not for IN OUT binds.  This is to stop temporary LOB leaks where
+node-oracledb is unable to free resources held by the initial
+temporary LOB.
+
+See [Working with CLOB and BLOB Data](#lobhandling) and [LOB Bind Parameters](#lobbinds) for more information.
+
+##### Parameters
+
+```
+Number type
+```
+
+One of the [`oracledb.CLOB`](#oracledbconstantsnodbtype)
+or [`oracledb.BLOB`](#oracledbconstantsnodbtype) constants.
+
+```
+function(Error error)
+```
+
+The parameters of the callback function are:
+
+Callback function parameter | Description
+----------------------------|-------------
+*Error error* | If `createLob()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+
+
+#### <a name="execute"></a> 4.2.5 execute()
 
 ##### Prototype
 
@@ -1525,7 +1596,7 @@ Parameter | Description
 
 The parameters are discussed in the next sections.
 
-##### <a name="executesqlparam"></a> 4.2.4.1 `execute()`: SQL Statement
+##### <a name="executesqlparam"></a> 4.2.5.1 `execute()`: SQL Statement
 
 ```
 String sql
@@ -1534,7 +1605,7 @@ String sql
 The SQL or PL/SQL statement that `execute()` executes. The statement
 may contain bind variables.
 
-##### <a name="executebindParams"></a> 4.2.4.2 `execute()`: Bind Parameters
+##### <a name="executebindParams"></a> 4.2.5.2 `execute()`: Bind Parameters
 ```
 Object bindParams
 ```
@@ -1554,24 +1625,29 @@ Bind Property | Description
 ---------------|------------
 `dir` | The direction of the bind.  One of the [Oracledb Constants](#oracledbconstantsbinddir) `BIND_IN`, `BIND_INOUT`, or `BIND_OUT`.
 `maxArraySize` | The number of array elements to be allocated for a PL/SQL Collection `INDEX OF` associative array OUT or IN OUT array bind variable.
-`maxSize` | The maximum number of bytes that an OUT or IN OUT bind variable of type STRING or BUFFER can use. The default value is 200. The maximum limit is 32767.
-`type` | The datatype to be bound. One of the [Oracledb Constants](#oracledbconstantsbinddir) `STRING`, `NUMBER`, `DATE`, `CURSOR` or `BUFFER`.
+`maxSize` | The maximum number of bytes that an OUT or IN OUT bind variable of type `STRING` or `BUFFER` can use to get data. The default value is 200. The maximum limit depends on the database type.
+`type` | The datatype to be bound. One of the [Oracledb Constants](#oracledbconstantsbinddir) `BLOB`, `BUFFER`, `CLOB`, `CURSOR`, `DATE`, `NUMBER`, or `STRING`.
 `val` | The input value or variable to be used for an IN or IN OUT bind variable.
 
-The maximum size of a `BUFFER` type is 2000 bytes, unless you are
-using Oracle Database 12c and the database initialization parameter
-`MAX_STRING_SIZE` has a value of `EXTENDED`.  In this case the maximum
-size of a `BUFFER` is 32767.
+The limit for `maxSize` when binding as a `BUFFER` type is 2000 bytes,
+and as a `STRING` is 4000 bytes unless you are using Oracle Database
+12c and the database initialization parameter `MAX_STRING_SIZE` has a
+value of `EXTENDED`.  In this case the limit is 32767 bytes.
+
+When binding Oracle LOBs, as `STRING` or `BUFFER`, the value of
+`maxSize` can be much larger, see the limits
+in [LOB Bind Parameters](#lobbinds).
+
+When binding IN OUT, then `maxSize` refers to the size of the returned
+value.  The input value can be smaller or bigger.
 
 With OUT binds, where the type cannot be inferred by node-oracledb
 because there is no input data value, the type defaults to `STRING`
 whenever `type` is not specified.
 
-Note `CURSOR` bind variables can only be used for PL/SQL OUT binds.
+Note `CURSOR` bind variables can be used only for PL/SQL OUT binds.
 
-See [Bind Parameters for Prepared Statements](#bind) for usage and examples.
-
-##### <a name="executeoptions"></a> 4.2.4.3 `execute()`: Options
+##### <a name="executeoptions"></a> 4.2.5.3 `execute()`: Options
 
 ```
 Object options
@@ -1588,7 +1664,7 @@ name/number* or *NJS-012: encountered invalid bind datatype*.
 The following properties can be set or overridden for the execution of
 a statement.
 
-###### <a name="propexecautocommit"></a> 4.2.4.3.1 `autoCommit`
+###### <a name="propexecautocommit"></a> 4.2.5.3.1 `autoCommit`
 
 ```
 Boolean autoCommit
@@ -1596,7 +1672,7 @@ Boolean autoCommit
 
 Overrides [`oracledb.autoCommit`](#propdbisautocommit).
 
-###### <a name="propexecextendedmetadata"></a> 4.2.4.3.2 `extendedMetaData`
+###### <a name="propexecextendedmetadata"></a> 4.2.5.3.2 `extendedMetaData`
 
 ```
 Boolean extendedMetaData
@@ -1604,7 +1680,7 @@ Boolean extendedMetaData
 
 Overrides [`oracledb.extendedMetaData`](#propdbextendedmetadata).
 
-###### <a name="propfetchinfo"></a> <a name="propexecfetchinfo"></a> 4.2.4.3.3 `fetchInfo`
+###### <a name="propfetchinfo"></a> <a name="propexecfetchinfo"></a> 4.2.5.3.3 `fetchInfo`
 
 ```
 Object fetchInfo
@@ -1649,7 +1725,7 @@ settings in the `execute()` call.  Use the global
 See [Result Type Mapping](#typemap) for more information on query type
 mapping.
 
-###### <a name="propexecmaxrows"></a> 4.2.4.3.4 `maxRows`
+###### <a name="propexecmaxrows"></a> 4.2.5.3.4 `maxRows`
 
 ```
 Number maxRows
@@ -1657,7 +1733,7 @@ Number maxRows
 
 Overrides [`oracledb.maxRows`](#propdbmaxrows).
 
-###### <a name="propexecoutformat"></a> 4.2.4.3.5 `outFormat`
+###### <a name="propexecoutformat"></a> 4.2.5.3.5 `outFormat`
 
 ```
 String outFormat
@@ -1665,7 +1741,7 @@ String outFormat
 
 Overrides [`oracledb.outFormat`](#propdboutformat).
 
-###### <a name="propexecprefetchrows"></a> 4.2.4.3.6 `prefetchRows`
+###### <a name="propexecprefetchrows"></a> 4.2.5.3.6 `prefetchRows`
 
 ```
 Number prefetchRows
@@ -1673,7 +1749,7 @@ Number prefetchRows
 
 Overrides [`oracledb.prefetchRows`](#propdbprefetchrows).
 
-###### <a name="propexecresultset"></a> 4.2.4.3.7 `resultSet`
+###### <a name="propexecresultset"></a> 4.2.5.3.7 `resultSet`
 
 ```
 Boolean resultSet
@@ -1683,7 +1759,7 @@ Determines whether query results should be returned as a
 [`ResultSet`](#resultsetclass) object or directly.  The default is
 `false`.
 
-##### <a name="executecallback"></a> 4.2.4.4 `execute()`: Callback Function
+##### <a name="executecallback"></a> 4.2.5.4 `execute()`: Callback Function
 
 ```
 function(Error error, [Object result])
@@ -1700,7 +1776,7 @@ Callback function parameter | Description
 
 The properties of `result` object from the `execute()` callback are described below.
 
-###### <a name="execmetadata"></a> 4.2.4.4.1 `metaData`
+###### <a name="execmetadata"></a> 4.2.5.4.1 `metaData`
 
 ```
 readonly Array metaData
@@ -1734,7 +1810,7 @@ a `BLOB` or `CLOB`.
 
 See [Query Column Metadata](#querymeta) for examples.
 
-###### <a name="execoutbinds"></a> 4.2.4.4.2 `outBinds`
+###### <a name="execoutbinds"></a> 4.2.5.4.2 `outBinds`
 
 ```
 Array/object outBinds
@@ -1745,7 +1821,7 @@ values. If [`bindParams`](#executebindParams) is passed as an array,
 then `outBinds` is returned as an array. If `bindParams` is passed as
 an object, then `outBinds` is returned as an object.
 
-###### <a name="execresultset"></a> 4.2.4.4.3 `resultSet`
+###### <a name="execresultset"></a> 4.2.5.4.3 `resultSet`
 
 ```
 Object resultSet
@@ -1755,7 +1831,7 @@ For `SELECT` statements when the [`resultSet`](#executeoptions)
 option is `true`, use the `resultSet` object to fetch rows.  See
 [ResultSet Class](#resultsetclass).
 
-###### <a name="execrows"></a> 4.2.4.4.4 `rows`
+###### <a name="execrows"></a> 4.2.5.4.4 `rows`
 
 ```
 Array rows
@@ -1772,7 +1848,7 @@ number of rows returned is limited to the `maxRows` configuration
 property of the *Oracledb* object, although this may be overridden in
 any `execute()` call.
 
-###### <a name="execrowsaffected"></a> 4.2.4.4.5 `rowsAffected`
+###### <a name="execrowsaffected"></a> 4.2.5.4.5 `rowsAffected`
 
 ```
 Number rowsAffected
@@ -1785,7 +1861,7 @@ rows affected, for example the number of rows inserted. For non-DML
 statements such as queries, or if no rows are affected, then
 `rowsAffected` will be zero.
 
-#### <a name="querystream"></a> 4.2.5 queryStream()
+#### <a name="querystream"></a> 4.2.6 queryStream()
 
 ##### Prototype
 
@@ -1824,11 +1900,11 @@ See [Streaming Query Results](#streamingresults) for more information.
 
 See [execute()](#execute).
 
-#### <a name="release"></a> 4.2.6 release()
+#### <a name="release"></a> 4.2.7 release()
 
 An alias for [connection.close()](#connectionclose).
 
-#### <a name="rollback"></a> 4.2.7 rollback()
+#### <a name="rollback"></a> 4.2.8 rollback()
 
 ##### Prototype
 
@@ -1863,9 +1939,9 @@ Callback function parameter | Description
 Lob objects can be used to access Oracle Database CLOB and BLOB data.
 
 A Lob object implements the
-[Node Stream](https://nodejs.org/api/stream.html) interface.
+[Node.js Stream](https://nodejs.org/api/stream.html) interface.
 
-See [Working with CLOB and BLOB Data](#lobhandling) for more information.
+See [Working with CLOB and BLOB Data](#lobhandling) and [LOB Bind Parameters](#lobbinds) for more information.
 
 ### <a name="lobproperties"></a> 5.1 Lob Properties
 
@@ -1916,6 +1992,59 @@ have the value of one of the constants
 [`Oracledb.CLOB`](#oracledbconstantsnodbtype).  The value is derived from the
 bind type when using LOB bind variables, or from the column type when
 a LOB is returned by a query.
+
+### <a name="lobmethods"></a> 5.2 Lob Methods
+
+#### <a name="lobclose"></a> 5.2.1 close()
+
+##### Prototype
+
+Callback:
+```
+close(function(Error error){});
+```
+Promise:
+```
+promise = close();
+```
+
+##### Description
+
+Explicitly closes a Lob.
+
+Lobs created with [`createLob()`](#connectioncreatelob) should be
+explicitly closed with [`lob.close()`](#lobclose) when no longer
+needed.  This frees resources in node-oracledb and in Oracle Database.
+
+Persistent or temporary Lobs returned from the database may also be
+closed with `lob.close()` as long as streaming is not currently
+happening.  Note these Lobs are automatically closed when streamed or
+used as the source for an IN OUT bind.  If you try to close a Lob
+being used for streaming you will get the error *NJS-023: concurrent
+operations on a Lob are not allowed*.
+
+The `lob.close()` method emits
+the [Node.js Stream](https://nodejs.org/api/stream.html) 'close' event
+unless the Lob has already been explicitly or automatically closed.
+
+The connection must be open when calling `lob.close()` on a temporary
+LOB, such as those created by `createLob()`.
+
+Once a Lob is closed, it cannot be bound.
+
+See [Closing Lobs](#closinglobs) for more discussion.
+
+##### Parameters
+
+```
+function(Error error)
+```
+
+The parameters of the callback function are:
+
+Callback function parameter | Description
+----------------------------|-------------
+*Error error* | If `close()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
 ## <a name="poolclass"></a> 6. Pool Class
 
@@ -2464,19 +2593,19 @@ If you use a large number of connections, such as via increasing
 [`poolMax`](#proppoolpoolmax), you may want to also increase the
 number of threads available to node-oracledb.
 
-Node worker threads executing database statements on a connection will
+Node.js worker threads executing database statements on a connection will
 commonly wait until round-trips between node-oracledb and the database
 are complete.  When an application handles a sustained number of user
 requests, and database operations take some time to execute or the
 network is slow, then the four default threads may all be held in
 use. This prevents other connections from beginning work and stops
-Node from handling more user load.  Increasing the number of worker
+Node.js from handling more user load.  Increasing the number of worker
 threads may improve throughput.  Do this by setting the environment
 variable
 [UV_THREADPOOL_SIZE](https://docs.libuv.org/en/v1.x/threadpool.html)
 before starting Node.
 
-For example, in a Linux terminal, the number of Node worker threads
+For example, in a Linux terminal, the number of Node.js worker threads
 can be increased to 10 by using the following command:
 
 ```
@@ -2696,7 +2825,7 @@ satisfied will return an error.
 The amount of time that a queued request will wait for a free
 connection can be configured with [queueTimeout](#propdbqueuetimeout).
 When connections are timed out of the queue, they will return the
-error `NJS-040` to the application.
+error *NJS-040: connection request timeout* to the application.
 
 Internally the queue is implemented in node-oracledb's JavaScript top
 level.  A queued connection request is dequeued and passed down to
@@ -2799,7 +2928,7 @@ Environment Variable                                 | Description
 
 #### <a name="connpoolpinging"></a> 8.3.4 Connection Pool Pinging
 
-If node-oracledb uses Oracle client 12.1 or earlier, and when
+If node-oracledb uses Oracle client 12c or earlier, and when
 connections are idle in a connection pool (not "checked out" to the
 application by `getConnection()`), there is the possibility that a
 network or Database instance failure makes those connections unusable.
@@ -2814,13 +2943,13 @@ connection to the node-oracledb driver, which in turn returns it via
 12.2, then the value of the `poolPingInterval` attribute described
 below is ignored and no explicit ping is executed.
 
-With Oracle client 12.1 and earlier, when a
+With Oracle client 12c and earlier, when a
 pool [`getConnection()`](#getconnectionpool) is called and the
 connection has been idle in the pool for at least `60` seconds then an
 internal "ping" will be performed first to check the aliveness of the
 connection.  At the cost of some overhead for infrequently accessed
 connection pools, connection pinging improves the chance a pooled
-connection is valid when it is used because indentifed un-unusable
+connection is valid when it is used because identified un-unusable
 connections will not be returned to the application by
 `getConnection()`.
 
@@ -2852,7 +2981,7 @@ The default ping interval is `60` seconds.  The interval can be set with
 the [`oracledb.poolPingInterval`](#propdbpoolpinginterval) property or
 during [pool creation](#createpool).
 
-Posible values for `poolPingInterval` are:
+Possible values for `poolPingInterval` are:
 
 Value   | Behavior of a Pool `getConnection()` call
 --------|------------------------------------------
@@ -3171,7 +3300,7 @@ The [REF CURSOR Bind Parameters](#refcursors) section shows using
 #### <a name="queryoutputformats"></a> 9.1.4 Query Output Formats
 
 Query rows may be returned as an array of column values, or as
-Javascript objects, depending on the values of
+JavaScript objects, depending on the values of
 [outFormat](#propdboutformat).
 
 The default format for each row is an array of column values.
@@ -3313,7 +3442,7 @@ Description of the properties is given in the
 #### <a name="typemap"></a> 9.1.6 Result Type Mapping
 
 Oracle character, number and date columns can be selected directly
-	into JavaScript strings and numbers.  BLOBs and CLOBs can be fetched
+into JavaScript strings and numbers.  BLOBs and CLOBs are selected
 into [Lobs](#lobclass).
 
 Datatypes that are currently unsupported give a "datatype is not
@@ -3555,7 +3684,7 @@ by Oracle's underlying client libraries.
 By default [`prefetchRows`](#propdbprefetchrows) is 100 for
 [`ResultSet`](#resultsetclass) fetches.  The application can choose a
 different default prefetch size or change it for each query, as
-determined by user benchmarking.
+determined by user bench-marking.
 
 The default prefetch size was heuristically chosen to give decent
 performance for developers who do not read documentation.  Skilled
@@ -3781,28 +3910,124 @@ Remember to first enable output using `DBMS_OUTPUT.ENABLE(NULL)`.
 
 ## <a name="lobhandling"></a> 11. Working with CLOB and BLOB Data
 
-The [Lob Class](#lobclass) in node-oracledb implements the
-[Node.js Stream](https://nodejs.org/api/stream.html) interface to provide
-read and write access to CLOB and BLOB database columns and PL/SQL
-bind parameters.  Note, currently only `BIND_OUT` is supported for LOB bind
+Oracle Database uses LOB datatypes to store long objects. The CLOB
+type is used for character data and the BLOB type is used for binary
+data.
+
+There are runnable LOB examples in the GitHub
+[examples](https://github.com/oracle/node-oracledb/tree/master/examples)
+directory.
+
+### <a name="basiclobinsert"></a> 11.1 Simple Insertion of LOBs
+
+Node.js String or Buffer types can be passed into PL/SQL blocks or
+inserted into the database by binding to LOB columns or PL/SQL
 parameters.
 
-It is the application's responsibility to make sure the connection is
-not released while a Lob operation such as `pipe()` is in progress.
+If the data is larger than can be handled as a String or Buffer in
+Node.js or node-oracledb, it will need to be streamed to
+a [Lob](#lobclass), as discussed later.
+See [LOB Bind Parameters](#lobbinds) for size considerations regarding
+LOB binds.  Note node-oracledb will internally use a temporary LOB to
+insert String or Buffer data larger than 32 KB.  This is transparent
+to the application but size limits on the JavaScript String or Buffer
+still apply.
+
+Given the table:
+
+```sql
+CREATE TABLE mylobs (id NUMBER, c CLOB, b BLOB);
+```
+
+an `INSERT` example is:
+
+```javascript
+var fs = require('fs');
+var str = fs.readFileSync('example.txt', 'utf8');
+. . .
+
+conn.execute(
+  "INSERT INTO mylobs (id, myclobcol) VALUES (:idbv, :cbv)",
+  { idbv: 1,
+    cbv: str },  // type and direction are optional for IN binds
+  function(err, result)
+  {
+    if (err)
+      console.error(err.message);
+    else
+      console.log('CLOB inserted from example.txt');
+. . .
+```
+
+Updating LOBs is similar to insertion:
+
+```javascript
+conn.execute(
+  "UPDATE mylobs SET myclobcol = :cbv WHERE id = :idbv",
+  { idbv: 1, cbv: str },
+. . .
+```
+
+Buffers can similarly be bound for inserting into, or updating, BLOB columns.
+
+When using PL/SQL, a procedure:
+
+```sql
+PROCEDURE lobs_in (p_id IN NUMBER, c_in IN CLOB, b_in IN BLOB) . . .
+```
+
+can be called like:
+
+```javascript
+bigStr = 'My string to insert';
+bigBuf = Buffer.from([. . .]);
+
+conn.execute(
+  "BEGIN lobs_in(:id, :c, :b); END;",
+  { id: 20,
+    c: bigStr,    // type and direction are optional for IN binds
+    b: bigBuf } },
+  function (err)
+  {
+    if (err) { return cb(err, conn); }
+    console.log("Completed");
+    return cb(null, conn);
+  }
+);
+```
+
+### <a name="streamsandlobs"></a> 11.2 Streams and Lobs
+
+The [Lob Class](#lobclass) in node-oracledb implements
+the [Node.js Stream](https://nodejs.org/api/stream.html) interface to
+provide streaming access to CLOB and BLOB database columns and to
+PL/SQL bind parameters.
+
+Node-oracledb Lobs can represent persistent LOBs (those permanently
+stored in the database) or temporary LOBs (such as those created
+with [`connection.createLob()`](#connectioncreatelob), or returned
+from some SQL or PL/SQL).
+
+If multiple LOBs are streamed concurrently, worker threads will
+effectively be serialized on the connection.
+
+It is the application's responsibility to make sure the connection
+remains open while a Stream operation such as `pipe()` is in progress.
 
 #### Readable Lobs
 
 Being a Stream object, a Lob being read from the database has two
-modes of operation: "flowing mode" and "paused mode".  In flowing mode
+modes of operation: "flowing mode" and "paused mode".  In flowing mode,
 data is piped to another stream, or events are posted as data is read.
 In paused mode the application must explicitly call `read()` to get
 data.
 
 The `read(size)` unit is in characters for CLOBs and in bytes for BLOBs.
 
-When reading a LOB from the database, make sure to fetch all data.
-Resources are only released at completion of the read or if there is a
-LOB error.
+When reading a LOB from the database, resources are automatically
+released at completion of the readable stream or if there is a LOB
+error.  The `lob.close()` method can also be used to close persistent
+LOBs that have not been streamed to completion.
 
 A Readable Lob object starts out in paused mode.  If a 'data' event
 handler is added, or the Lob is piped to a Writeable stream, then the
@@ -3819,45 +4044,36 @@ to flowing mode by calling `resume()`.  It will then start emitting
 
 #### Writeable Lobs
 
-Lobs are written to the database with `pipe()`. Alternatively the
-`write()` method can be called successively, with the last piece being
-written by the `end()` method.  The `end()` method must be called
-because it frees resources.  If the Lob is being piped into, then the
-`write()` and `end()` methods are automatically called.
+Lobs are written to with `pipe()`. Alternatively the `write()` method
+can be called successively, with the last piece being written by the
+`end()` method.  The `end()` method must be called because it frees
+resources.  If the Lob is being piped into, then the `write()` and
+`end()` methods are automatically called.
 
-Writeable Lobs also have events, see the
-[Node.js Stream](https://nodejs.org/api/stream.html) documentation.
+Writeable Lobs also have events, see
+the [Node.js Stream](https://nodejs.org/api/stream.html)
+documentation.
 
-#### Examples
+At the conclusion of streaming into a Writeable Lob, the `close` event
+will occur.  It is recommended to put logic such as committing and
+releasing connections in this event (or after it occurs).  See
+[lobinsert2.js](https://github.com/oracle/node-oracledb/tree/master/examples/lobinsert2.js).
 
-There are runnable LOB examples in the GitHub
-[examples](https://github.com/oracle/node-oracledb/tree/master/examples)
-directory.
+### <a name="lobinsertdiscussion"></a> 11.3 Using RETURNING INTO to Insert into LOBs
 
-The following code is based on example
-[`clobinsert1.js`](https://github.com/oracle/node-oracledb/tree/master/examples/clobinsert1.js).
-It shows inserting text into an Oracle Database CLOB column using
-flowing mode.  It first inserts an `EMPTY_CLOB()` and uses a
-`RETURNING INTO` clause to pass the new LOB locator to node-oracledb,
-where it is available as an instance of the [Lob Class](#lobclass).  A
-Stream `pipe()` call loads data into the LOB.  The data is committed
-when the 'end' event fires, indicating the load has completed.
-Autocommit is disabled when getting the locator because a transaction
-must be open until the LOB data is inserted.  In this example the
-input data stream is simply a file on disk.  Both the Lob stream and
-input data stream have 'error' events to handle unexpected issues:
+If Strings or Buffers are too large to be directly inserted into the
+database (see [Simple Insertion of LOBs](#basiclobinsert)), use a
+`RETURNING INTO` clause to retrieve a [Lob](#lobclass) for a table
+item.  Data can then be streamed into the Lob and committed directly
+to the table:
 
 ```javascript
-var oracledb = require('oracledb');
-
-. . .
-
 connection.execute(
   "INSERT INTO mylobs (id, c) VALUES (:id, EMPTY_CLOB()) RETURNING c INTO :lobbv",
-  { id: 1, lobbv: {type: oracledb.CLOB, dir: oracledb.BIND_OUT} },
+  { id: 4,
+    lobbv: {type: oracledb.CLOB, dir: oracledb.BIND_OUT} },
   { autoCommit: false },  // a transaction needs to span the INSERT and pipe()
-  function(err, result)
-  {
+  function(err, result) {
     if (err) { console.error(err.message); return; }
     if (result.rowsAffected != 1 || result.outBinds.lobbv.length != 1) {
       console.error('Error getting a LOB locator');
@@ -3865,81 +4081,325 @@ connection.execute(
     }
 
     var lob = result.outBinds.lobbv[0];
-    lob.on('error', function(err) { console.error(err); });
-    lob.on('finish',
-      function()
-      {
-        connection.commit(
-          function(err)
-          {
-            if (err)
-              console.error(err.message);
-            else
-              console.log("Text inserted successfully.");
-            connection.close(function(err) {
-              if (err) console.error(err.message);
-            });
+    lob.on('close', function() {
+        connection.commit(  // all data is loaded so we can commit it
+          function(err) {
+            if (err) console.error(err.message);
+            connection.close(function(err) { if (err) console.error(err); });
           });
       });
-
-    console.log('Reading from ' + inFileName);
-    var inStream = fs.createReadStream(inFileName);
-    inStream.on('error',
-      function(err)
-      {
+    lob.on('error', function(err) {
         console.error(err);
         connection.close(function(err) {
           if (err) console.error(err.message);
         });
       });
 
-    inStream.pipe(lob);  // copies the text to the CLOB
-  });
-  ```
-
-The `EMPTY_CLOB()` / `RETURNING INTO` sequence is used because
-node-oracledb currently does not support temporary LOBs and `BIND_IN`
-for LOBs.  A similar sequence is used to update LOBs.
-
-The following example shows selecting a CLOB using flowing mode and
-writing it to a file.  It is similar to the example
-[`clobstream1.js`](https://github.com/oracle/node-oracledb/tree/master/examples/clobstream1.js).
-The returned column value is a Lob stream which is piped to an opened
-file stream.
-
-By default the Lob stream is a Node.js buffer - which is useful for
-BLOB data.  Since this example uses a CLOB, the `setEncoding()` call
-is used to indicate data should be a string.  Both the Lob stream and
-output data stream have 'error' events to handle unexpected issues:
-
-```javascript
-var oracledb = require('oracledb');
-
-. . .
-
-connection.execute(
-  "SELECT c FROM mylobs WHERE id = :id",
-  { id: 1 },
-  function(err, result)
-  {
-    if (err) { console.error(err.message); return; }
-    if (result.rows.length === 0) { console.log("No results"); return; }
-
-    var lob = result.rows[0][0];
-    if (lob === null) { console.log("CLOB was NULL"); return; }
-
-    lob.setEncoding('utf8');  // we want text, not binary output
-    lob.on('error', function(err) { console.error(err); });
-    lob.on('close', function() {
-      connection.close(function(err) { if (err) console.error(err.message); });
-    });
-
-    console.log('Writing to ' + outFileName);
-    var outStream = fs.createWriteStream(outFileName);
-    outStream.on('error', function(err) { console.error(err); });
-    lob.pipe(outStream);
+    var inStream = fs.createReadStream('example.txt'); // open the file to read from
+    inStream.on('error', function(err) { if (err) console.error(err); });
+    inStream.pipe(lob);  // copies the text to the LOB
   });
 ```
+
+This example streams from a file into the table.  When the data has
+been completely streamed, the Lob is automatically closed and the
+'close' event triggered.  At this point the data can be committed.
+
+See [lobinsert2.js](https://github.com/oracle/node-oracledb/tree/master/examples/lobinsert2.js) for
+the full example.
+
+### <a name="templobdiscussion"></a> 11.4 Using `createLob()`
+
+Node-oracledb applications can create Oracle 'temporary LOBs' by
+calling [`connection.createLob()`](#connectioncreatelob).  These are
+instances of the [Lob](#lobclass) class. They can be populated with
+data and passed to PL/SQL blocks.  This is useful if the data is
+larger than feasible for direct binding
+(see [Simple Insertion of LOBs](#basiclobinsert)).  These Lobs can
+also be used for SQL statement IN binds, however the `RETURNING INTO`
+method shown above will be more efficient.
+
+Lobs from `createLob()` will use space in the temporary tablespace
+until [`lob.close()`](#lobclose) is called.  Database Administrators
+can track this usage by querying
+[`V$TEMPORARY_LOBS`](http://docs.oracle.com/database/122/ADLOB/managing-LOBs.htm#ADLOB45157).
+
+Temporary Lobs such as those created with `createLob()` can be bound
+as IN and as OUT binds, but not for IN OUT binds.  This is to stop
+temporary LOB leaks where node-oracledb is unable to free resources
+held by the initial temporary LOB.
+
+#### Passing a Lob Into PL/SQL
+
+The following insertion example is based on
+[lobplsqltemp.js](https://github.com/oracle/node-oracledb/tree/master/examples/lobplsqltemp.js).
+It creates an empty LOB, populates it, and then passes it to a PL/SQL
+procedure.
+
+A temporary LOB can be created
+with [`connection.createLob()`](#connectioncreatelob):
+
+```javascript
+conn.createLob(oracledb.CLOB, function(err, templob) {
+  if (err) { . . . }
+
+  // ... else use templob
+});
+```
+
+Once created, data can be inserted into it.  For example to read a
+text file:
+
+```javascript
+templob.on('error', function(err) { somecallback(err); });
+
+// The data was loaded into the temporary LOB, so use it
+templob.on('finish', function() { somecallback(null, templob); });
+
+// copies the text from 'example.txt' to the temporary LOB
+var inStream = fs.createReadStream('example.txt');
+inStream.on('error', function(err) { . . . });
+inStream.pipe(templob);
+```
+
+Now the LOB has been populated, it can be bound in `somecallback()` to
+a PL/SQL IN parameter:
+
+```javascript
+// For PROCEDURE lobs_in (p_id IN NUMBER, c_in IN CLOB, b_in IN BLOB)
+conn.execute(
+  "BEGIN lobs_in(:id, :c, null); END;",
+  { id: 3,
+    c: templob }, // type and direction are optional for IN binds
+  function(err)
+  {
+    if (err) { return cb(err); }
+    console.log("Call completed");
+    return cb(null, conn, templob);
+  });
+```
+
+When the LOB is no longer needed, it should be closed
+with [`lob.close()`](#lobclose):
+
+```javascript
+templob.close(function (err) {
+  if (err)
+    . . .
+  else
+    // success
+});
+```
+
+### <a name="closinglobs"></a> 11.5 Closing Lobs
+
+Closing a Lob frees up resources. In particular, the temporary
+tablespace storage used by a temporary LOB is released.  Once a Lob is
+closed, it can no longer be bound or used for streaming.
+
+Lobs created with [`createLob()`](#connectioncreatelob) should be
+explicitly closed with [`lob.close()`](#lobclose).  If not explicitly
+closed, these Lobs are closed when the connection is closed (for
+non-pooled connections), or when a pooled connection is removed from a
+pool due to planned pool shrinkage or pool termination.  If
+connections are never removed from the pool, you will have 'LOB leaks'
+and the temporary tablespace will fill up.
+
+Persistent or temporary Lobs returned from the database should be
+closed with `lob.close()` unless they have been automatically closed.
+Automatic closing of returned Lobs occurs when:
+
+  - streaming has completed
+  - a stream error occurs
+  - the Lob was used as the source for an IN OUT bind
+
+If you try to close a Lob
+being used for streaming you will get the error *NJS-023: concurrent
+operations on a Lob are not allowed*.
+
+The connection must be open when calling `lob.close()` on a temporary
+LOB.  If the connection is closed and temporary LOBs are still open,
+the warning *NJS-050: Temporary LOBs were open when the connection was
+closed* will occur. You should review the application logic and
+explicitly close any open Lobs.  These temporary Lobs will have been
+created with `lob.createLob()` or returned from the database, perhaps
+as the result of a SQL operation like `substr()` on a Lob column.
+Persistent LOBs can be closed without the connection being open.
+
+The `lob.close()` method emits
+the [Node.js Stream](https://nodejs.org/api/stream.html) 'close' event
+unless the Lob has already been closed explicitly or automatically.
+
+### <a name="queryinglobs"></a> 11.6 Getting LOBs from Oracle Database
+
+#### Getting LOBs as String or Buffer
+
+To return data easily to node-oracledb, PL/SQL LOB OUT parameters can
+be bound as `oracledb.STRING` or `oracledb.BUFFER`.
+See [LOB Bind Parameters](#lobbinds) for size considerations regarding
+LOB binds.
+
+```javascript
+conn.execute(
+  "BEGIN lobs_out(:id, :c, :b); END;",
+  { id: 20,
+    c: {type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 50000},
+    b: {type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: 50000} },
+  function (err, result)
+  {
+    if (err) { return cb(err, conn); }
+
+    var str = result.outBinds.c;  // a String
+    var buf = result.outBinds.b;  // a Buffer
+    return cb(null, conn, str, buf); // do something with str and buf
+  });
+```
+
+The fetched String and Buffer can be used directly in Node.js.
+
+If the data is larger than can be handled as a String or Buffer in
+Node.js or node-oracledb, it will need to be explicitly streamed to
+a [Lob](#lobclass), as discussed previously.
+See [LOB Bind Parameters](#lobbinds) for size considerations regarding
+LOB binds.  Note node-oracledb will internally use a temporary LOB to
+fetch String or Buffer data larger than 32 KB.  This is transparent to
+the application but size limits on the String or Buffer still apply.
+
+#### Selecting and Fetching Lob Instances
+
+When a `SELECT` clause contains a LOB column, or a PL/SQL OUT
+parameter returns a LOB, instances of [Lob](#lobclass) are created.
+
+For each Lob, the [`lob.type`](#proplobtype) property will
+be [`oracledb.BLOB`](#oracledbconstantsnodbtype)
+or [`oracledb.CLOB`](#oracledbconstantsnodbtype), depending on the
+column or PL/SQL parameter type.
+
+Returned LOBs can be used
+as [Readable Streams](https://nodejs.org/api/stream.html).  Data can
+be streamed from each Lob, for example to a file.  At the conclusion
+of the stream, persistent LOBs are automatically closed.
+
+Lobs returned from the database that are not streamed can be passed
+back to the database as IN binds for PL/SQL blocks, for `INSERT`, or
+for `UPDATE` statements.  The Lobs should then be closed
+with [`lob.close()`](#lobclose).  If they are passed as IN OUT binds,
+they will be automatically closed and the
+execution [`outBinds`](#execoutbinds) property will contain the
+updated Lob.
+
+##### LOB Query Example
+
+LOBs can be queried from the database.  Each CLOB or BLOB returns
+a [Lob](#lobclass).  The table:
+
+```sql
+CREATE TABLE mylobs (id NUMBER, c CLOB, b BLOB);
+```
+can be called to get a Lob `clob` like:
+
+```javascript
+conn.execute(
+  "SELECT c FROM mylobs WHERE id = 1",
+  function(err, result)
+  {
+    if (err) {
+      return cb(err);
+    }
+    if (result.rows.length === 0) {
+      return cb(new Error("whoops"));
+    }
+    var clob = result.rows[0][0]; // Instance of a node-oracledb Lob
+    // console.log(clob.type);    // -> 2006 aka oracledb.CLOB
+    cb(null, clob);               // do something with the Lob
+  });
+```
+
+##### PL/SQL LOB Parameter Fetch Example
+
+A PL/SQL procedure such as this:
+
+```sql
+PROCEDURE lobs_out (id IN NUMBER, clob_out OUT CLOB, blob_out OUT BLOB) . . .
+```
+
+can be called to get the [Lobs](#lobclass) `clob` and `blob`:
+
+```javascript
+conn.execute(
+  "BEGIN lobs_out(:id, :c, :b); END;",
+  { id: 1,
+    c: {type: oracledb.CLOB, dir: oracledb.BIND_OUT},
+    b: {type: oracledb.BLOB, dir: oracledb.BIND_OUT} },
+  function(err, result)
+  {
+    if (err) {
+      return cb(err, conn);
+    }
+
+    var clob = result.outBinds.c;
+    var blob = result.outBinds.b;
+    cb(null, clob, blob);         // do something with the Lobs
+  });
+```
+
+##### Streaming Out a Lob
+
+Once a Lob is obtained from a query or PL/SQL OUT bind, it can be
+streamed out:
+
+```javascript
+if (lob === null) {
+    // . . . do special handling such as create an empty file or throw an error
+}
+
+if (lob.type === oracledb.CLOB) {
+  lob.setEncoding('utf8');  // set the encoding so we get a 'string' not a 'buffer'
+}
+
+lob.on('error', function(err) { cb(err); });
+lob.on('close', function() { cb(null); });   // all done.  The Lob is automatically closed.
+
+var outStream = fs.createWriteStream('myoutput.txt');
+outStream.on('error', function(err) { cb(err); });
+
+// switch into flowing mode and push the LOB to myoutput.txt
+lob.pipe(outStream);
+```
+
+Note the Lob is automatically closed at the end of the stream.
+
+An alternative to the `lob.pipe()` call is to have a `data` event on
+the Lob Stream which processes each chunk of LOB data separately.
+Either a String or Buffer can be built up or, if the LOB is big, each
+chunk can be written to another Stream or to a file:
+
+```javascript
+if (lob === null) {
+    // . . . do special handling such as create an empty file or throw an error
+}
+
+var str = "";
+
+lob.setEncoding('utf8');  // set the encoding so we get a 'string' not a 'buffer'
+lob.on('error', function(err) { cb(err); });
+lob.on('close', function() { cb(null); });   // all done.  The Lob is automatically closed.
+lob.on('data', function(chunk) {
+    str += chunk; // or use Buffer.concat() for BLOBS
+});
+lob.on('end', function() {
+    fs.writeFile(..., str, ...);
+});
+
+```
+
+Node-oracledb's [`lob.pieceSize`](#proplobpiecesize) can be used to
+control the number of bytes retrieved for each readable 'data' event.
+This sets the number of bytes (for BLOBs) or characters (for CLOBs).
+The default is [`lob.chunkSize`](#proplobchunksize).  The
+recommendation is for it to be a multiple of `chunkSize`.
+
+See [lobbinds.js](https://github.com/oracle/node-oracledb/tree/master/examples/lobbinds.js) for a full example.
 
 ## <a name="jsondatatype"></a> 12. Oracle Database 12c JSON Datatype
 
@@ -4012,7 +4472,7 @@ In Oracle Database 12.2 the
 [`JSON_OBJECT` ](https://docs.oracle.com/cloud/latest/db122/ADJSN/generation.htm#ADJSN-GUID-1084A518-A44A-4654-A796-C1DD4D8EC2AA) function
 is a great way to convert relational table data to JSON:
 
-```JavaScript
+```javascript
 conn.execute(
   "select json_object ('deptId' is d.department_id, 'name' is d.department_name) department "
   + "from departments d "
@@ -4026,7 +4486,7 @@ conn.execute(
   });
 ```
 
-This produces
+This produces:
 
 ```
 {"deptId":10,"name":"Administration"}
@@ -4047,7 +4507,9 @@ For more information about using JSON in Oracle Database see the
 SQL and PL/SQL statements may contain bind parameters, indicated by
 colon-prefixed identifiers or numerals.  These indicate where
 separately specified values are substituted when the statement is
-executed.  Bind parameters are also called bind variables.
+executed.  Bind variables can be used to substitute data but not the
+text of the statement.  Bind parameters are also called bind
+variables.
 
 Using bind parameters is recommended in preference to constructing SQL
 or PL/SQL statements by string concatenation.  This is for performance
@@ -4151,8 +4613,8 @@ connection.execute(
 
 For IN binds the direction must be `BIND_IN`.  The type can be
 `STRING`, `NUMBER`, `DATE` matching the data.  The type `BUFFER` can
-bind a Node.js Buffer to an Oracle Database `RAW` type.  The type
-`CURSOR` cannot be used with IN binds.
+bind a Node.js Buffer to an Oracle Database `RAW` or `BLOB` type.  The
+type `CURSOR` cannot be used with IN binds.
 
 ### <a name="outbind"></a> 13.2 OUT and IN OUT Bind Parameters
 
@@ -4171,16 +4633,17 @@ For `BIND_INOUT` parameters, the `type` attribute should be `STRING`,
 For `BIND_OUT` parameters the `type` attribute should be `STRING`,
 `NUMBER`, `DATE`, `CURSOR`, `BLOB`, `CLOB` or `BUFFER`.
 
-The type `BUFFER` is used to bind an Oracle Database `RAW` to a
-Node.js Buffer.
+The type `BUFFER` is used to bind an Oracle Database `RAW` or `BLOB`
+to a Node.js Buffer.
 
 If `type` is not specified then `STRING` is assumed.
 
-A `maxSize` should be set for `STRING` OUT or IN OUT binds.  This is
-the maximum number of bytes the bind parameter will return.  If the
-output value does not fit in `maxSize` bytes, then an error such
-*ORA-06502: PL/SQL: numeric or value error: character string buffer
-too small* or *NJS-016: buffer is too small for OUT binds* occurs.
+A `maxSize` should be set for `STRING` or `BUFFER` OUT or IN OUT
+binds.  This is the maximum number of bytes the bind parameter will
+return.  If the output value does not fit in `maxSize` bytes, then an
+error such *ORA-06502: PL/SQL: numeric or value error: character
+string buffer too small* or *NJS-016: buffer is too small for OUT
+binds* occurs.
 
 A default value of 200 bytes is used when `maxSize` is not provided
 for OUT binds of type `STRING` or `BUFFER`.
@@ -4260,13 +4723,13 @@ var bindVars = [
 ### <a name="dmlreturn"></a> 13.3 DML RETURNING Bind Parameters
 
 Bind parameters from "DML RETURNING" statements (such as `INSERT
-... RETURNING ... INTO ...`) can use `STRING`, `NUMBER` or `DATE` for
-the OUT [`type`](#executebindParams).
+... RETURNING ... INTO ...`) can use `BLOB`, `CLOB`, `STRING`,
+`NUMBER` or `DATE` for the OUT [`type`](#executebindParams).
 
 For `STRING` types, an error occurs if [`maxSize`](#executebindParams)
 is not large enough to hold a returned value.
 
-Note each DML RETURNING bind parameter is returned as an array
+Note each DML RETURNING bind OUT parameter is returned as an array
 containing zero or more elements.  Application code that is designed
 to expect only one value could be made more robust if it confirms the
 returned array length is not greater than one.  This will help identify
@@ -4276,6 +4739,10 @@ to be returned.
 Oracle Database `DATE`, `TIMESTAMP` and `TIMESTAMP WITH LOCAL TIME ZONE`
 types can be bound as `DATE` for DML RETURNING.  These types and `ROWID`
 can also be bound as `STRING`.
+
+No duplicate binds are allowed in a DML statement with a `RETURNING`
+clause, and no duplication is allowed between bind variables in the
+DML section and the `RETURNING` section of the statement.
 
 An example of DML RETURNING binds is:
 
@@ -4451,48 +4918,65 @@ executed internally when all data has been fetched.
 
 ### <a name="lobbinds"></a> 13.5 LOB Bind Parameters
 
-LOBs can be bound with `dir` set to `BIND_OUT`.  Binding LOBs with
-`BIND_IN` or `BIND_INOUT` is currently not supported.
+Database CLOBs can be bound with `type` set
+to [`oracledb.CLOB`](#oracledbconstants).  Database BLOBs can be bound
+as [`oracledb.BLOB`](#oracledbconstants).  These binds accept, or
+return, node-oracledb [Lob](#lobclass) instances, which implement the
+Node.js Stream interface.
 
-To use the node-oracledb [Lob API](#lobclass), CLOB variables should be bound with
-`type` [CLOB](#oracledbconstants).  BLOB variables should be bound
-with `type` [BLOB](#oracledbconstants).
+Lobs may represent Oracle Database persistent LOBs (those stored in
+tables) or temporary LOBs (such as those created
+with [`createLob()`](#connectioncreatelob) or returned by some SQL and
+PL/SQL operations).
 
-PL/SQL OUT CLOB parameters can also be bound as `STRING` but this is
-not recommended because the returned length is limited to the maximum
-limit of [`maxSize`](#executebindParams).
+Persistent LOBs can be bound with direction `BIND_IN`, `BIND_OUT` or
+`BIND_INOUT`, depending on context.
 
-The following code snippet binds a PL/SQL OUT CLOB parameter and
-returns a Lob to node-oracledb:
+Temporary LOBs can be bound with direction `BIND_IN` or `BIND_OUT`,
+but not with `BIND_INOUT`.  This is to prevent temporary LOB leaks
+where node-oracledb is unable to free resources held by the initial
+temporary LOB.
 
-```javascript
-/*
-  CREATE TABLE mylobs (id number, c CLOB);
-  INSERT INTO mylobs . . .
-  CREATE OR REPLACE PROCEDURE myproc (p_id IN NUMBER, p_c OUT CLOB) AS
-  BEGIN
-    SELECT c INTO p_c FROM mylobs WHERE id = p_id;
-  END;
-*/
+Note that any PL/SQL OUT LOB parameter should be initialized in the
+PL/SQL block - even just to NULL - before the PL/SQL code
+completes. Make sure to do this in all PL/SQL code paths including in
+error handlers. This prevents node-oracledb throwing the error
+*DPI-007: invalid OCI handle or descriptor*.
 
-var oracledb = require('oracledb');
+In many cases it will be easier to work with JavaScript Strings and
+Buffers instead of [Lobs](#lobclass).  These types can be bound
+directly for SQL IN binds to insert into, or update, LOB columns.
+They can also be bound to PL/SQL LOB parameters.  Use the bind
+type [`oracledb.STRING`](#oracledbconstants) for CLOBs
+and [`oracledb.BUFFER`](#oracledbconstants) for BLOBs.  The default
+size used for these binds in the OUT direction is 200, so set
+`maxSize` appropriately.
 
-. . .
+See [Working with CLOB and BLOB Data](#lobhandling) for examples and
+more information on binding and working with LOBs.
 
-connection.execute(
-  "BEGIN myproc(:id, :cbv); END;",
-  { id: 1, cbv: { type: oracledb.CLOB, dir: oracledb.BIND_OUT} },
-  function(err, result)
-  {
-    if (err) { console.error(err.message); return; }
-    var lob = result.outBinds.cbv;
+#### Maximum Limits (Bytes) for Binding LOBs to Strings and Buffers
 
-    // Use Node.js Streams API to fetch the CLOB data from lob
-    . . .
-```
+DB Type | Bind Type       | Direction   | Oracle Client 12c Limit<sup>*</sup> | Oracle Client 11g Limit<sup>*</sup>
+--------|-----------------|-------------|-------------------------|------------------------
+CLOB    | oracledb.STRING |BIND_IN      |  2 GB                   | 64 KB
+CLOB    | oracledb.STRING |BIND_OUT     |  1 GB                   | 64 KB
+CLOB    | oracledb.STRING |BIND_INOUT   | 32 KB                   | 32 KB
+BLOB    | oracledb.BUFFER |BIND_IN      |  2 GB                   | 64 KB
+BLOB    | oracledb.BUFFER |BIND_OUT     |  2 GB                   | 64 KB
+BLOB    | oracledb.BUFFER |BIND_INOUT   | 32 KB                   | 32 KB
 
-See [Working with CLOB and BLOB Data](#lobhandling) for more information
-on working with Lob streams.
+<sup>*</sup>The largest usable data length is one byte less than the size shown.
+
+Internally, node-oracledb uses temporary LOBs when binding Strings and
+Buffers larger than 32 KB.  Since temporary LOBs cannot be used for IN
+OUT binds, the data size in this case is restricted to 32 KB.
+
+In practice, the limitation on binding IN or OUT is the memory
+available to Node.js.  You will see the error *JavaScript heap out of
+memory* when you try to create large Strings or Buffers.  So, for most
+large data sizes, it is recommended to bind as `oracledb.CLOB` or
+`oracledb.BLOB` and use [Lob streaming](#streamsandlobs).
 
 ### <a name="plsqlindexbybinds"></a> 13.6 PL/SQL Collection Associative Array (Index-by) Bind Parameters
 
@@ -4858,8 +5342,8 @@ understanding that these require round-trips to the database.
 ## <a name="promiseoverview"></a> 19. Promises in node-oracledb
 
 Node-oracledb supports Promises with all asynchronous methods.  The native Promise
-implementation is used in Node 0.12 and greater.  Promise support is not
-enabled by default in Node 0.10.
+implementation is used in Node.js 0.12 and greater.  Promise support is not
+enabled by default in Node.js 0.10.
 
 If an asynchronous method is invoked without a callback, it returns a
 Promise:
@@ -4953,7 +5437,7 @@ Unhandled Rejection at:  Promise {
 
 The Promise implementation is designed to be overridden, allowing a
 custom Promise library to be used.  An external library can also be
-used to add Promise support to Node 0.10.
+used to add Promise support to Node.js 0.10.
 
 ```javascript
 var mylib = require('myfavpromiseimplementation');
@@ -4966,7 +5450,7 @@ Promises can be completely disabled by setting
 oracledb.Promise = null;
 ```
 
-If your code uses the promise style in Node 0.10 but you have not
+If your code uses the promise style in Node.js 0.10 but you have not
 installed your own promise library then you will get an error like:
 
 ```
@@ -4989,7 +5473,7 @@ Error: NJS-009: invalid number of parameters
 ```
 
 Because node-oracledb Promises support is not enabled by default when
-using Node 0.10, the callback API is expected.  The error stack trace
+using Node.js 0.10, the callback API is expected.  The error stack trace
 indicates that line 10 of `mypromiseapp.js` forgot to pass the
 callback.  Either install your own Promise library or use the callback
 programming style.
