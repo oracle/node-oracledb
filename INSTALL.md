@@ -42,11 +42,11 @@ environments, but these architectures have not been fully tested.
 
 ### <a name="prerequisites"></a> Prerequisites
 
-Installation requires Oracle 11.2 or 12.1 client libraries.
+Installation requires Oracle 11.2 or 12c client libraries.
 These are included in Oracle Instant Client RPMs or ZIPs, a full
 Oracle Client, or a database on the same machine.  Oracle's standard
 client-server network compatibility applies.  For example, with Oracle
-Client 12.1 you can connect to Oracle Database 10.2 or greater.  Use
+Client 12c you can connect to Oracle Database 10.2 or greater.  Use
 Oracle Client 11.2 if you need to connect to Oracle Database 9.2.
 
 A compiler is required.  Use Visual Studio on Windows, GCC on Linux or
@@ -74,7 +74,7 @@ Linux.  My database is on the same machine | [Node-oracledb Installation on Linu
 Linux. I have the full Oracle client (installed via `runInstaller`) on the same machine |  [Node-oracledb Installation on Linux with a Local Database](#instoh)
 Apple OS X | [Node-oracledb Installation on OS X with Instant Client](#instosx)
 Windows | [Node-oracledb Installation on Windows](#instwin)
-Another OS with Oracle Database 11.2 or 12.1, or client libraries available | Update binding.gyp and make any code changes required, sign the [OCA](https://www.oracle.com/technetwork/community/oca-486395.html), and submit a pull request with your patch.
+Another OS with Oracle Database 11.2 or 12c, or client libraries available | Update binding.gyp and make any code changes required, sign the [OCA](https://www.oracle.com/technetwork/community/oca-486395.html), and submit a pull request with your patch.
 
 ### Other Resources Useful for node-oracledb
 
