@@ -114,7 +114,7 @@ function handleRequest(request, response, pool) {
           displayResults(response, result, deptid);
 
           /* Release the connection back to the connection pool */
-          connection.release()
+          connection.close()
             .then(function() {
               htmlFooter(response);
             })
@@ -123,7 +123,7 @@ function handleRequest(request, response, pool) {
             });
         })
         .catch(function(err) {
-          connection.release()
+          connection.close()
             .catch(function(err) {
               // Just logging because handleError call below will have already
               // ended the response.

@@ -66,7 +66,7 @@ oracledb.getConnection(
           function()
           {
             console.log("lob.on 'close' event");
-            connection.release(function(err) {
+            connection.close(function(err) {
               if (err) console.error(err.message);
             });
           });

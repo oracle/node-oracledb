@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -72,7 +72,7 @@ var doit = function(pool) {
     ],
     function (err, conn) {
       if (err) { console.error("In waterfall error cb: ==>", err, "<=="); }
-      conn.release(function (err) { if (err) console.error(err.message); });
+      conn.close(function (err) { if (err) console.error(err.message); });
     });
 };
 

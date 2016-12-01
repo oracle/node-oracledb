@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -130,7 +130,7 @@ function releaseConnection(err) {
   }
 
   console.log("----- Rollback complete --------");
-  connection.release(logReleaseError); // close the connection
+  connection.close(logReleaseError); // close the connection
 }
 
 function logReleaseError(err) {

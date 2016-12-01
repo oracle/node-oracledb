@@ -64,7 +64,7 @@ oracledb.getConnection(
                   console.error(err.message);
                 else
                   console.log("Text inserted successfully.");
-                connection.release(function(err) {
+                connection.close(function(err) {
                   if (err) console.error(err);
                 });
               });
@@ -75,7 +75,7 @@ oracledb.getConnection(
           {
             console.log("lob.on 'error' event");
             console.error(err);
-            connection.release(function(err) {
+            connection.close(function(err) {
               if (err) console.error(err.message);
             });
           });

@@ -43,7 +43,7 @@ var doconnect = function(cb) {
 };
 
 var dorelease = function(conn) {
-  conn.release(function (err) {
+  conn.close(function (err) {
     if (err)
       console.error(err.message);
   });
@@ -144,7 +144,7 @@ var doquery = function (conn, cb) {
           // Uncomment the autoCommit option above and you will see both rows
           console.log(result.rows);
 
-          connection2.release(
+          connection2.close(
             function(err)
             {
               if (err) {

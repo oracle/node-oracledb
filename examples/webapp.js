@@ -118,7 +118,7 @@ function handleRequest(request, response, pool) {
       [deptid], // bind variable value
       function(err, result) {
         if (err) {
-          connection.release(function(err) {
+          connection.close(function(err) {
             if (err) {
               // Just logging because handleError call below will have already
               // ended the response.
@@ -132,7 +132,7 @@ function handleRequest(request, response, pool) {
         displayResults(response, result, deptid);
 
         /* Release the connection back to the connection pool */
-        connection.release(function(err) {
+        connection.close(function(err) {
           if (err) {
             handleError(response, "normal release() error", err);
           } else {

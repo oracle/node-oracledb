@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -100,7 +100,7 @@ function fetchRowsFromRS(connection, resultSet, numRows)
 
 function doRelease(connection)
 {
-  connection.release(
+  connection.close(
     function(err)
     {
       if (err) { console.error(err.message); }

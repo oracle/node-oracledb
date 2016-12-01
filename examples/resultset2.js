@@ -94,7 +94,7 @@ function fetchRowsFromRS(connection, resultSet, numRows)
 
 function doRelease(connection)
 {
-  connection.release(
+  connection.close(
     function(err)
     {
       if (err) { console.error(err.message); }
