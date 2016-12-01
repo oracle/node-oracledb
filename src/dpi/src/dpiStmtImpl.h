@@ -61,7 +61,7 @@ class StmtImpl : public Stmt
 {
 public:
   // Constructor & Destructor
-  StmtImpl (EnvImpl *env, OCIEnv *envh, ConnImpl *conn, OCISvcCtx *svch,
+  StmtImpl (OCIEnv *envh, ConnImpl *conn, OCISvcCtx *svch,
             const string &sql);
   virtual ~StmtImpl ();
 

@@ -79,7 +79,7 @@ class PoolImpl : public SPool
                                 const std::string& user,
                                 const std::string& password,
                                 const std::string& tag,
-                                const boolean any,
+                                const boolean matchAnyTag,
                                 const DBPrivileges dbPriv );
 
                                 // internal methods

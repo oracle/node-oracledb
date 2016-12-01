@@ -102,7 +102,10 @@ class ConnImpl : public Conn
   virtual void action(const string &action);
 
   // Connection with requested tag returned or not?
-  virtual boolean sameTag ()      { return sameTag_;  }
+  virtual boolean tagMatched ()  { return tagMatched_; }
+
+  // tag associated with connection
+  virtual std::string& tag ()    { return outTag_;     }
 
   virtual int getByteExpansionRatio ();
 
@@ -143,7 +146,8 @@ private:
   void initConnImpl( bool pool, bool externalAuth, const string& connClass,
                      OraText *poolNmRconnStr, ub4 nameLen,
                      const string &user, const string &password,
-                     const string &tag, boolean any, DBPrivileges dbPriv );
+                     const string &tag, boolean any, std::string &curTag,
+                     boolean &found, DBPrivileges dbPriv );
 
   int getCsRatio ( ub2 csid )
   {
@@ -166,9 +170,11 @@ private:
   int         csratio_;         // character expansion ratio
   OCIServer   *srvh_;           // OCI server handle
   bool        dropConn_;        // Set flag in case of unusable connection
-  string      tag_;             // Session tag
-  boolean     retag_;           // How to retag? (leave it, update, clear)
-  boolean     sameTag_;         // connection is of same tag as requested?
+  string      inTag_;           // To fetch connections with specified inTag_
+  string      outTag_;          // When connection is given, what is tag val
+  string      relTag_;          // Release connectih specified tag
+  boolean     retag_;           // How to retag? (update, ignore)
+  boolean     tagMatched_;      // connection is of same tag as requested?
 };
 
 

@@ -38,10 +38,11 @@
 
 #include <string>
 
-using std::string;
-
 namespace dpi
 {
+
+using std::string;
+
 
 
 /*---------------------------------------------------------------------------

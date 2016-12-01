@@ -34,8 +34,6 @@
 #endif
 
 
-using std::string;
-
 using namespace dpi;
 
 
@@ -61,9 +59,9 @@ class ExceptionImpl : public Exception
   virtual const char * origin() const throw();
 
 private:
-  string origin_;
+  std::string origin_;
   int    errnum_;
-  string message_;
+  std::string message_;
 
 };
 

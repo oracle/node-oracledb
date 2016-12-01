@@ -34,12 +34,12 @@
 #endif
 
 
-using std::string;
-
-
 
 namespace dpi
 {
+
+using std::string;
+
 
 
 /*---------------------------------------------------------------------------
@@ -59,12 +59,12 @@ class SPool
 
 
                                 // methods
-  virtual Conn * getConnection( const std::string &connClass = "",
-                                const std::string &username = "",
-                                const std::string &password = "",
-                                const std::string &tag = "",
-                                const boolean any = false,
-                                const DBPrivileges dbPriv = dbPrivNONE ) = 0;
+  virtual Conn * getConnection( const std::string &connClass  = "",
+                                const std::string &username   = "",
+                                const std::string &password   = "",
+                                const std::string &tag        = "",
+                                const boolean     matchAnyTag = false,
+                                const DBPrivileges dbPriv     = dbPrivNONE) =0;
 
 
 protected:

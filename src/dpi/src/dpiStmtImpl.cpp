@@ -68,7 +68,6 @@ using namespace std;
       Constructor for StmtImpl class created by Connection object.
 
     PARAMETERS:
-      env          - global env object
       envh         - OCIEnv handle
       conn         - parent connImpl object
       svch         - OCISvcCtx handle
@@ -84,7 +83,7 @@ using namespace std;
       at the end of the execution.
       # of parallel threads can be configured at nodejs level.
 */
-StmtImpl::StmtImpl (EnvImpl *env, OCIEnv *envh, ConnImpl *conn,
+StmtImpl::StmtImpl (OCIEnv *envh, ConnImpl *conn,
                     OCISvcCtx *svch, const string &sql)
 
   try : conn_(conn), errh_(NULL), svch_(svch),
@@ -638,8 +637,8 @@ void StmtImpl::cleanup ()
     This function is a dummy function, the Dynamic bind concept is not used
     for IN binds, and so this function is dummy.
 */
-sb4 StmtImpl::inbindCallback ( dvoid *ctxp, OCIBind *bindp, ub4 iter,
-                               ub4 index, dvoid **bufpp, ub4 *alenpp,
+sb4 StmtImpl::inbindCallback ( dvoid *ctxp, OCIBind */*bindp*/, ub4 /*iter*/,
+                               ub4 /*index*/, dvoid **bufpp, ub4 *alenpp,
                                ub1 *piecep, dvoid **indpp )
 {
   DpiCallbackCtx *cbCtx = (DpiCallbackCtx *)ctxp;

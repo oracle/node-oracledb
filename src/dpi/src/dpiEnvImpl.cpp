@@ -478,7 +478,7 @@ bool EnvImpl::isEventEnabled() const
   RETURNS
     charset id
 */
-unsigned int EnvImpl::dbcharset () const
+unsigned int EnvImpl::clientcharset () const
 {
   return charset_;
 }
@@ -495,7 +495,7 @@ unsigned int EnvImpl::dbcharset () const
   RETURNS
     ncharset id
 */
-unsigned int EnvImpl::dbncharset () const
+unsigned int EnvImpl::clientncharset () const
 {
   return ncharset_;
 }

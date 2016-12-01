@@ -88,14 +88,14 @@ ConnImpl::ConnImpl(EnvImpl *env, OCIEnv *envh, bool externalAuth,
 
 try :  env_(env), pool_(NULL),
        envh_(envh), errh_(NULL), auth_(NULL), svch_(NULL), sessh_(NULL),
-       hasTxn_(false), srvh_(NULL), dropConn_(false), tag_(""),
-       retag_(false), sameTag_ (false)
+       hasTxn_(false), srvh_(NULL), dropConn_(false), inTag_(""), outTag_(""),
+       relTag_(""), retag_(false), tagMatched_ (false)
 {
 
   this->initConnImpl ( false, externalAuth, connClass,
                        ( OraText * ) connString.c_str (),
                        ( ub4 ) connString.length (), user, password, "",
-                       false, dbPriv );
+                       false, outTag_, tagMatched_, dbPriv );
 
   this->stmtCacheSize(stmtCacheSize);
 }
@@ -141,10 +141,12 @@ ConnImpl::ConnImpl(PoolImpl *pool, OCIEnv *envh, bool externalAuth,
 try :  env_(NULL), pool_(pool),
        envh_(envh), errh_(NULL), auth_(NULL),
        svch_(NULL), sessh_(NULL), hasTxn_(false), srvh_(NULL),
-       dropConn_(false), tag_ (""), retag_ (false), sameTag_(false)
+       dropConn_(false), inTag_ (""), outTag_(""), relTag_(""), retag_ (false),
+       tagMatched_(false)
 {
   this->initConnImpl ( true, externalAuth, connClass, poolName, poolNameLen,
-                       user, password, tag, matchAny, dbPriv );
+                       user, password, tag, matchAny, outTag_, tagMatched_,
+                       dbPriv );
 }
 
 catch (...)
@@ -202,11 +204,10 @@ void ConnImpl::release( const string &tag, boolean retag )
   if(hasTxn_)
     rollback();
 
-  retag_ = retag;                       /* for later use */
-
-  if ( tag.length () > 0 )
+  retag_ = retag;
+  if ( retag )
   {
-    tag_ = tag;
+    relTag_ = tag; // Update release-tag with given value only if flag is set.
   }
 
   if (pool_)
@@ -318,7 +319,7 @@ unsigned int ConnImpl::stmtCacheSize() const
 
  */
 
-void ConnImpl::lobPrefetchSize(unsigned int lobPrefetchSize)
+void ConnImpl::lobPrefetchSize(unsigned int /* lobPrefetchSize */ )
 {
 // Temporarily disable this attribute.
 #if 0
@@ -443,7 +444,7 @@ void ConnImpl::action(const string &action)
 
 Stmt* ConnImpl::getStmt (const string &sql)
 {
-  StmtImpl *stmt = new StmtImpl ( env_, envh_, this, svch_, sql);
+  StmtImpl *stmt = new StmtImpl ( envh_, this, svch_, sql);
 
   return stmt;
 }
@@ -586,7 +587,7 @@ unsigned int ConnImpl::getServerVersion ()
      user           - userid in case of non-pool scenario
      password       - password in case of non-pool scenario
      tag            - session tag name
-     any            - Match session tag name as MATCHANY or MATCHEXACT
+     matchAny       - Match session tag name as MATCHANY or MATCHEXACT
      dbPriv         - DB Privileges (SYSDBA or none)
 
    RETURNS:
@@ -596,12 +597,16 @@ unsigned int ConnImpl::getServerVersion ()
 void ConnImpl::initConnImpl ( bool pool, bool externalAuth,
                    const string& connClass, OraText *poolNmRconnStr,
                    ub4 nameLen, const string &user, const string &password,
-                   const string &tag, const boolean any, DBPrivileges dbPriv )
+                   const string &tag, const boolean matchAny,
+                   std::string & curTag, boolean &found, DBPrivileges dbPriv )
 {
-  ub4 mode        = OCI_DEFAULT;
-  ub2 csid        = 0;
-  void *errh      = NULL;
-  void *auth      = NULL;
+  ub4 mode          = OCI_DEFAULT;
+  ub2 csid          = 0;
+  void *errh        = NULL;
+  void *auth        = NULL;
+
+  OraText *retTag   = NULL ; // To fetch current tag on session
+  ub4     retTagLen = 0 ;    // current tag len
 
   if ( pool )
     mode = externalAuth ? ( OCI_SESSGET_CREDEXT | OCI_SESSGET_SPOOL ) :
@@ -672,22 +677,30 @@ void ConnImpl::initConnImpl ( bool pool, bool externalAuth,
    * Applicable only on Pooled sessions - attempts to return a session with
    * specified tag
    *
-   * If any is false - then a session with a different tag is never returned
-   * if any is true -  if such a session not available, available untagged
-   *                   if no untagged is available, then any tagged session
-   *                   is returned.  All returned sessions are authenticated.
+   * If matchAny is false - then a session with a different tag is
+   *                        never returned
+   * if matchAny is true  - if such a session not available, available
+   *                        untagged if no untagged is available, then any
+   *                        tagged session is returned.  All returned sessions
+   *                        are authenticated.
    *
-   * sameTag_ flag will be true if such a tagged session was returned
-   *                   false otherwise.
+   * tagMatched_ flag       will be true if such a tagged session was returned
+   *                        false otherwise.
    */
-  if ( pool && any )
+  if ( pool && matchAny )
   {
     mode |= OCI_SESSGET_SPOOL_MATCHANY;
   }
 
   ociCall ( OCISessionGet ( envh_, errh_, &svch_, auth_, poolNmRconnStr,
-                          ( ub4 ) nameLen, NULL, 0, NULL, NULL, &sameTag_,
-                          mode ), errh_ );
+                            ( ub4 ) nameLen, (OraText*)tag.c_str(),
+                            tag.length(),
+                            &retTag,
+                            &retTagLen,
+                            &tagMatched_, mode ),
+            errh_ );
+
+  outTag_ = string ( (char *) retTag, retTagLen ) ;
 
   ociCall ( OCIAttrGet ( svch_, OCI_HTYPE_SVCCTX, &sessh_,  0,
                          OCI_ATTR_SESSION, errh_ ), errh_ );
@@ -748,13 +761,13 @@ void ConnImpl::cleanup()
 
     /*
      * RETAG behavior: (same as in OCI).
-     *  if retag_ is TRUE & tag_ length is non-zero, then tag_ is set
-     *  if retag_ is TRUE & tag_ length is zero, then session-tag is cleared
-     *  if retag_ is FALSE, then no action taken(if tag_ given will be ignored)
+     *  if retag_ is TRUE & relTag_ length is non-zero, then relTag_ is set
+     *  if retag_ is TRUE & relTag_ length is zero, then session-tag is cleared
+     *  if retag_ is FALSE, then no action taken
      */
 
-    OCISessionRelease(svch_, errh_, (OraText *)tag_.c_str (),
-                      (ub4) tag_.length (), relMode);
+    OCISessionRelease(svch_, errh_, (OraText *)relTag_.c_str (),
+                      (ub4) relTag_.length (), relMode);
     svch_ = NULL;
   }
 
@@ -770,6 +783,7 @@ void ConnImpl::cleanup()
     errh_ = NULL;
   }
 }
+
 
 
 

@@ -327,12 +327,12 @@ Conn * PoolImpl::getConnection ( const std::string& connClass,
                                  const std::string& user,
                                  const std::string& password,
                                  const std::string& tag,
-                                 const boolean any,
+                                 const boolean matchAnyTag,
                                  const DBPrivileges dbPriv)
 {
   Conn *conn = new ConnImpl(this, envh_, externalAuth_, poolName_,
                             poolNameLen_, connClass, user, password, tag,
-                            any, dbPriv );
+                            matchAnyTag, dbPriv );
   return conn;
 }
 

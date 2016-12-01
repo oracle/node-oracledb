@@ -4290,6 +4290,7 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
       {
         bind->extvalue = (long double *) malloc ( sizeof ( long double ) *
                                                   nRows );
+
         if( !bind->extvalue )
         {
           executeBaton->error = NJSMessages::getErrorMsg(

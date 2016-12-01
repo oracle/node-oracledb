@@ -43,11 +43,11 @@
 
 #define DPI_AL32UTF8         873
 
-using std::string;
-
 
 namespace dpi
 {
+
+using std::string;
 
 class DateTimeArray;
 
@@ -88,8 +88,8 @@ class Env
   virtual void externalAuth(bool externalAuth) = 0;
   virtual bool externalAuth() const = 0;
 
-  virtual unsigned int dbcharset () const = 0;
-  virtual unsigned int dbncharset () const = 0 ;
+  virtual unsigned int clientcharset () const = 0;
+  virtual unsigned int clientncharset () const = 0 ;
 
                                  // methods
   virtual SPool * createPool(const string &user, const string &password,
