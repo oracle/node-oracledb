@@ -14,16 +14,16 @@ The node-oracledb project is open source and maintained by Oracle Corp.  The hom
 
 ### Node-oracledb supports:
 
-- [Promises](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#promiseoverview), Callbacks and Streams
+- [Promises](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#promiseoverview), [Callbacks](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#intro) and [Streams](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#querystream)
 - [SQL and PL/SQL execution](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#sqlexecution)
 - [REF CURSORs](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#refcursors)
-- [Large Objects: CLOBs and BLOBs](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#lobhandling)
-- Oracle Database 12.1 [JSON datatype](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#jsondatatype)
+- [Large Objects: CLOBs and BLOBs as Streams or Strings and Buffers](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#lobhandling)
+- [Oracle Database 12c JSON datatype](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#jsondatatype)
 - [Query results as JavaScript objects or arrays](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#queryoutputformats)
 - [Smart mapping between JavaScript and Oracle types with manual override available](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#typemap)
 - [Data binding using JavaScript objects or arrays](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#bind)
 - [Transaction Management](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#transactionmgt)
-- [Inbuilt Connection Pool with Queueing](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#connpooling)
+- [Inbuilt Connection Pool with Queueing, Aliasing and Liveness checking](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#connpooling)
 - [Database Resident Connection Pooling (DRCP)](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#drcp)
 - [External Authentication](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#extauth)
 - [Row Prefetching](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#rowprefetching)
@@ -45,9 +45,9 @@ Prerequisites:
 
 - [Python 2.7](https://www.python.org/downloads/)
 - C Compiler with support for C++ 11 (Xcode, gcc, Visual Studio or similar)
-- Oracle 11.2 or 12.1 client libraries.  Use the small, free [Oracle Instant Client](http://www.oracle.com/technetwork/database/features/instant-client/index-100365.html) "basic" and "SDK" packages if your database is remote.  Or use the libraries and headers from a locally installed database such as the free [Oracle XE](http://www.oracle.com/technetwork/database/database-technologies/express-edition/overview/index.html) release.
+- Oracle 11.2 or 12c client libraries.  Use the small, free [Oracle Instant Client](http://www.oracle.com/technetwork/database/features/instant-client/index-100365.html) "basic" and "SDK" packages if your database is remote.  Or use the libraries and headers from a locally installed database such as the free [Oracle XE](http://www.oracle.com/technetwork/database/database-technologies/express-edition/overview/index.html) release.
 
-  Oracle's standard client-server network compatibility applies: Oracle Client 12.1 can connect to Oracle Database 10.2 or greater. Oracle Client 11.2 can connect to Oracle Database 9.2 or greater.
+  Oracle's standard client-server network compatibility applies: Oracle Client 12c can connect to Oracle Database 10.2 or greater. Oracle Client 11.2 can connect to Oracle Database 9.2 or greater.
 - Set `OCI_LIB_DIR` and `OCI_INC_DIR` during installation if the Oracle libraries and headers are in a non-default location
 
 Run `npm install oracledb` to install from the [npm registry](https://www.npmjs.com/package/oracledb).
