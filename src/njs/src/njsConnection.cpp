@@ -73,6 +73,14 @@ Nan::Persistent<FunctionTemplate> Connection::connectionTemplate_s;
 
 #define NJS_SIZE_T_MAX std::numeric_limits<std::size_t>::max()
 
+// Temporarily suppress compile warnings that certain NJS_SIZE_T_OVERFLOW
+// calls can never overflow, and are therefore redundant.
+// These are seen on OS X.
+#if defined(__clang__)
+#pragma clang diagnostic ignored "-Wtautological-constant-out-of-range-compare"
+#endif
+// End temporary patch
+
 #define NJS_SIZE_T_OVERFLOW(maxSize,maxRows)                                  \
  ( ( ( maxSize != 0 ) &&                                                      \
      ( ( ( NJS_SIZE_T_MAX ) / ( (size_t)maxSize ) ) < (maxRows) ) ) ? 1 : 0)  \
