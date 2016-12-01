@@ -101,7 +101,7 @@ describe('6. dmlReturning.js', function(){
           );
         }
       );
-    })
+    });
 
     afterEach('drop table and release connection', function(done) {
       connection.execute(
@@ -114,7 +114,7 @@ describe('6. dmlReturning.js', function(){
           });
         }
       );
-    })
+    });
 
     it('6.1.1 INSERT statement with Object binding', function(done) {
       connection.should.be.ok();
@@ -133,7 +133,7 @@ describe('6. dmlReturning.js', function(){
           done();
         }
       );
-    })
+    });
 
     it('6.1.2 INSERT statement with Array binding', function(done) {
       connection.should.be.ok();
@@ -152,7 +152,7 @@ describe('6. dmlReturning.js', function(){
           done();
         }
       );
-    })
+    });
 
     // it currently fails on OS X
     it.skip('6.1.3 INSERT statement with small maxSize restriction', function(done) {
@@ -169,10 +169,12 @@ describe('6. dmlReturning.js', function(){
           err.message.should.startWith('NJS-016:');
           // NJS-016: buffer is too small for OUT binds
           //console.log(result);
+
+          should.not.exist(result);
           done();
         }
       );
-    })
+    });
 
     it('6.1.4 UPDATE statement with single row matched', function(done) {
       connection.should.be.ok();
@@ -194,7 +196,7 @@ describe('6. dmlReturning.js', function(){
           done();
         }
       );
-    })
+    });
 
     it('6.1.5 UPDATE statement with single row matched & Array binding', function(done) {
       connection.should.be.ok();
@@ -216,7 +218,7 @@ describe('6. dmlReturning.js', function(){
           done();
         }
       );
-    })
+    });
 
     it('6.1.6 UPDATE statements with multiple rows matched', function(done) {
       connection.should.be.ok();
@@ -237,7 +239,7 @@ describe('6. dmlReturning.js', function(){
           done();
         }
       );
-    })
+    });
 
     it('6.1.7 UPDATE statements with multiple rows matched & Array binding', function(done) {
       connection.should.be.ok();
@@ -258,7 +260,7 @@ describe('6. dmlReturning.js', function(){
           done();
         }
       );
-    })
+    });
 
     it('6.1.8 DELETE statement with Object binding', function(done){
       connection.should.be.ok();
@@ -278,7 +280,7 @@ describe('6. dmlReturning.js', function(){
           done();
         }
       );
-    })
+    });
 
     it('6.1.9 DELETE statement with Array binding', function(done){
       connection.should.be.ok();
@@ -298,7 +300,7 @@ describe('6. dmlReturning.js', function(){
           done();
         }
       );
-    })
+    });
 
     // it currently fails with 11.2 database
     it('6.1.10 Stress test - support 4k varchars', function(done){
@@ -310,7 +312,7 @@ describe('6. dmlReturning.js', function(){
           buffer.append('A');
 
         return buffer.toString();
-      }
+      };
 
       var StringBuffer = function() {
         this.buffer = [];
@@ -349,7 +351,7 @@ describe('6. dmlReturning.js', function(){
           done();
         }
       );
-    })
+    });
 
     it('6.1.11 Negative test - wrong SQL got correct error thrown', function(done) {
       connection.should.be.ok();
@@ -369,7 +371,7 @@ describe('6. dmlReturning.js', function(){
           done();
         }
       );
-    })
+    });
 
     it('6.1.12 Negative test - data type is not supported with DML Returning statments', function(done) {
       var sql = "UPDATE nodb_dmlreturn SET name = 'Leslie Lin' WHERE id = :id RETURNING name INTO :rn ";
@@ -383,12 +385,14 @@ describe('6. dmlReturning.js', function(){
         should.exist(err);
         // NJS-028: raw database type is not supported with DML Returning statements
         (err.message).should.startWith('NJS-028:');
+
+        should.not.exist(result);
         done();
       });
 
-    })
+    });
 
-  }) // 6.1
+  }); // 6.1
 
   describe('6.2 DATE and TIMESTAMP data', function() {
 
@@ -416,7 +420,7 @@ describe('6. dmlReturning.js', function(){
           assist.setUp4sql(connection, tableName, dates, callback);
         }
       ], done);
-    }) // before
+    }); // before
 
     afterEach('drop table, release connection', function(done) {
       async.series([
@@ -436,7 +440,7 @@ describe('6. dmlReturning.js', function(){
           });
         }
       ], done);
-    })
+    });
 
     function runSQL(sql, bindVar, isSingleMatch, callback)
     {
@@ -465,14 +469,16 @@ describe('6. dmlReturning.js', function(){
 
       runSQL(sql, bindVar, isSingleMatch, done);
 
-    })
+    });
 
     it('6.2.2 INSERT statement with JavaScript date bind in ', function(done) {
       var sql = "INSERT INTO " + tableName + " VALUES (:no, :c) RETURNING num, content INTO :rnum, :rcontent";
+      var ndate = new Date(2003, 9, 23, 11, 50, 30, 12);
+
       var bindVar =
         {
           no: 51,
-          c: new Date(2003, 09, 23, 11, 50, 30, 123),
+          c: ndate,
           rnum: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
           rcontent: { type: oracledb.DATE, dir: oracledb.BIND_OUT }
         };
@@ -480,7 +486,7 @@ describe('6. dmlReturning.js', function(){
 
       runSQL(sql, bindVar, isSingleMatch, done);
 
-    })
+    });
 
     it('6.2.3 INSERT statement with Array binding', function(done) {
       var sql = "INSERT INTO " + tableName + " VALUES (50, TO_TIMESTAMP_TZ('1999-12-01 11:00:00.123456 -8:00', 'YYYY-MM-DD HH:MI:SS.FF TZH:TZM')) RETURNING num, content INTO :rnum, :rcontent";
@@ -493,13 +499,13 @@ describe('6. dmlReturning.js', function(){
 
       runSQL(sql, bindVar, isSingleMatch, done);
 
-    })
+    });
 
     it('6.2.4 UPDATE statement with single row matched', function(done) {
       var sql = "UPDATE " + tableName + " SET content = :c WHERE num = :n RETURNING num, content INTO :rnum, :rcontent";
       var bindVar =
         {
-          c: { type: oracledb.DATE, dir: oracledb.BIND_IN, val: new Date(2003, 09, 23, 11, 50, 30, 123) },
+          c: { type: oracledb.DATE, dir: oracledb.BIND_IN, val: new Date(2003, 9, 23, 11, 50, 30, 123) },
           n: 0,
           rnum: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
           rcontent: { type: oracledb.DATE, dir: oracledb.BIND_OUT }
@@ -508,13 +514,13 @@ describe('6. dmlReturning.js', function(){
 
       runSQL(sql, bindVar, isSingleMatch, done);
 
-    })
+    });
 
     it('6.2.5 UPDATE statements with multiple rows matched, ARRAY binding format', function(done) {
       var sql = "UPDATE " + tableName + " SET content = :c WHERE num < :n RETURNING num, content INTO :rnum, :rcontent";
       var bindVar =
         [
-          { type: oracledb.DATE, dir: oracledb.BIND_IN, val: new Date(2003, 09, 23, 11, 50, 30, 123) },
+          { type: oracledb.DATE, dir: oracledb.BIND_IN, val: new Date(2003, 9, 23, 11, 50, 30, 123) },
           100,
           { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
           { type: oracledb.DATE, dir: oracledb.BIND_OUT }
@@ -523,7 +529,7 @@ describe('6. dmlReturning.js', function(){
 
       runSQL(sql, bindVar, isSingleMatch, done);
 
-    })
+    });
 
     it('6.2.6 UPDATE statements, multiple rows, TIMESTAMP data', function(done) {
       var sql = "UPDATE " + tableName + " SET content = TO_TIMESTAMP_TZ('1999-12-01 11:00:00.123456 -8:00', 'YYYY-MM-DD HH:MI:SS.FF TZH:TZM') " +
@@ -533,12 +539,12 @@ describe('6. dmlReturning.js', function(){
           n: 100,
           rnum: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
           rcontent: { type: oracledb.DATE, dir: oracledb.BIND_OUT }
-        }
+        };
       var isSingleMatch = false;
 
       runSQL(sql, bindVar, isSingleMatch, done);
 
-    })
+    });
 
     it('6.2.7 DELETE statement, single row matched, Object binding format', function(done) {
       var sql = "DELETE FROM " + tableName + " WHERE num = :n RETURNING num, content INTO :rnum, :rcontent";
@@ -552,7 +558,7 @@ describe('6. dmlReturning.js', function(){
 
       runSQL(sql, bindVar, isSingleMatch, done);
 
-    })
+    });
 
     it('6.2.8 DELETE statement, multiple rows matched, Array binding format', function(done) {
       var sql = "DELETE FROM " + tableName + " WHERE num >= :n RETURNING num, content INTO :rnum, :rcontent";
@@ -565,14 +571,14 @@ describe('6. dmlReturning.js', function(){
       var isSingleMatch = false;
 
       runSQL(sql, bindVar, isSingleMatch, done);
-    })
+    });
 
     it('6.2.9 Negative test - bind value and type mismatch', function(done) {
       var wrongSQL = "UPDATE " + tableName + " SET content = :c WHERE num = :n RETURNING num, content INTO :rnum, :rcontent";
       var bindVar =
         {
           n: 0,
-          c: { type: oracledb.STRING, dir: oracledb.BIND_IN, val: new Date(2003, 09, 23, 11, 50, 30, 123) },
+          c: { type: oracledb.STRING, dir: oracledb.BIND_IN, val: new Date(2003, 9, 23, 11, 50, 30, 123) },
           rnum: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
           rcontent: { type: oracledb.DATE, dir: oracledb.BIND_OUT }
         };
@@ -585,11 +591,13 @@ describe('6. dmlReturning.js', function(){
           // console.log(err.message);
           // NJS-011: encountered bind value and type mismatch
           (err.message).should.startWith('NJS-011:');
+
+          should.not.exist(result);
           done();
         }
       );
 
-    })
+    });
 
-  }) // 6.2
-})
+  }); // 6.2
+});

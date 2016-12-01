@@ -111,7 +111,7 @@ describe('14. stream2.js', function() {
         );
       }
     ], done);
-  }) // before
+  }); // before
 
   after(function(done) {
     async.series([
@@ -131,7 +131,7 @@ describe('14. stream2.js', function() {
         });
       },
     ], done);
-  }) // after
+  }); // after
 
   it('14.1 Bind by position and return an array', function(done) {
     var sql = 'SELECT employee_name FROM nodb_stream2 WHERE employee_id = :1';
@@ -149,7 +149,7 @@ describe('14. stream2.js', function() {
     stream.on('end', function() {
       setTimeout(done, 500);
     });
-  })
+  });
 
   it('14.2 Bind by name and return an array', function(done) {
     var sql = 'SELECT employee_name FROM nodb_stream2 WHERE employee_id = :id';
@@ -167,7 +167,7 @@ describe('14. stream2.js', function() {
     stream.on('end', function() {
       setTimeout(done, 500);
     });
-  })
+  });
 
   it('14.3 Bind by position and return an object', function(done) {
     var sql = 'SELECT employee_name FROM nodb_stream2 WHERE employee_id = :1';
@@ -185,7 +185,7 @@ describe('14. stream2.js', function() {
     stream.on('end', function() {
       setTimeout(done, 500);
     });
-  })
+  });
 
   it('14.4 Bind by name and return an object', function(done) {
     var sql = 'SELECT employee_name FROM nodb_stream2 WHERE employee_id = :id';
@@ -203,7 +203,7 @@ describe('14. stream2.js', function() {
     stream.on('end', function() {
       setTimeout(done, 500);
     });
-  })
+  });
 
   it('14.5 explicitly setting resultSet option to be false takes no effect', function(done) {
     var sql = 'SELECT employee_name FROM nodb_stream2 WHERE employee_id = :1';
@@ -221,7 +221,7 @@ describe('14. stream2.js', function() {
     stream.on('end', function() {
       setTimeout(done, 500);
     });
-  })
+  });
 
   it('14.6 maxRows option is ignored as expect', function(done) {
     var sql = 'SELECT employee_name FROM nodb_stream2 ORDER BY employee_name';
@@ -242,20 +242,19 @@ describe('14. stream2.js', function() {
       setTimeout(done, 500);
     });
 
-  })
+  });
 
   it('14.7 Negative - queryStream() has no parameters', function(done) {
-    var stream;
 
     try {
-      stream = connection.queryStream();
+      connection.queryStream();
     } catch (err) {
       should.exist(err);
       (err.message).should.startWith('NJS-009:');
       // NJS-009: invalid number of parameters
       done();
     }
-  })
+  });
 
   it('14.8 Negative - give invalid SQL as first parameter', function(done) {
     var stream = connection.queryStream('foobar');
@@ -270,7 +269,7 @@ describe('14. stream2.js', function() {
     stream.on('data', function(data) {
       should.not.exist(data);
     });
-  })
+  });
 
   it('14.9 Negatvie - give non-query SQL', function(done) {
     var sql = "INSERT INTO nodb_stream2 VALUES (300, 'staff 300', EMPTY_CLOB())";
@@ -286,7 +285,7 @@ describe('14. stream2.js', function() {
     stream.on('data', function(data) {
       should.not.exist(data);
     });
-  })
+  });
 
   it('14.10 metadata event - single column', function(done) {
     var sql = 'SELECT employee_name FROM nodb_stream2 WHERE employee_id = :id';
@@ -313,7 +312,7 @@ describe('14. stream2.js', function() {
     stream.on('end', function() {
       setTimeout(done, 500);
     });
-  })
+  });
 
   it('14.11 metadata event - multiple columns', function(done) {
     var sql = 'SELECT employee_name, employee_history FROM nodb_stream2 WHERE employee_id = :id';
@@ -341,7 +340,7 @@ describe('14. stream2.js', function() {
     stream.on('end', function() {
       setTimeout(done, 500);
     });
-  })
+  });
 
   it('14.12 metadata event - all column names occurring', function(done) {
     var sql = 'SELECT * FROM nodb_stream2 ORDER BY employee_id';
@@ -370,7 +369,7 @@ describe('14. stream2.js', function() {
     stream.on('end', function() {
       setTimeout(done, 500);
     });
-  })
+  });
 
   it('14.13 metadata event - no return rows', function(done) {
     var sql = 'SELECT employee_name FROM nodb_stream2 WHERE employee_id = :id';
@@ -397,14 +396,14 @@ describe('14. stream2.js', function() {
     stream.on('end', function() {
       setTimeout(done, 500);
     });
-  })
+  });
 
   it('14.14 metadata event - negative: non-query SQL', function(done) {
     var sql = "INSERT INTO nodb_stream2 VALUES (300, 'staff 300', EMPTY_CLOB())";
     var stream = connection.queryStream(sql);
 
     var metaDataRead = false;
-    stream.on('metadata', function(metaData) {
+    stream.on('metadata', function() {
       metaDataRead = true;
     });
 
@@ -420,7 +419,7 @@ describe('14. stream2.js', function() {
     stream.on('data', function(data) {
       should.not.exist(data);
     });
-  })
+  });
 
   it('14.15 metadata event - case sensitive columns', function(done) {
     async.series([
@@ -503,7 +502,7 @@ describe('14. stream2.js', function() {
         );
       }
     ], done);
-  }) // 14.15
+  }); // 14.15
 
   it('14.16 metadata event - large number of columns', function(done) {
 
@@ -584,7 +583,7 @@ describe('14. stream2.js', function() {
         );
       }
     ], done);
-  }) // 14.16
+  }); // 14.16
 
   it('14.17 metadata event - single character column', function(done) {
 
@@ -636,7 +635,7 @@ describe('14. stream2.js', function() {
           should.not.exist(error);
         });
 
-        stream.on('data', function(data) {
+        stream.on('data', function() {
           should.equal(metaDataRead, true);
         });
 
@@ -654,7 +653,7 @@ describe('14. stream2.js', function() {
         );
       }
     ], done);
-  }) // 14.17
+  }); // 14.17
 
   it('14.18 metadata event - duplicate column alias', function(done) {
 
@@ -682,5 +681,5 @@ describe('14. stream2.js', function() {
     stream.on('end', function() {
       setTimeout(done, 500);
     });
-  })
-})
+  });
+});

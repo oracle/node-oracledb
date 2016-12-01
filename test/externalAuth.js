@@ -95,6 +95,7 @@ describe('5. externalAuth.js', function() {
           should.exist(err);
           (err.message).should.startWith("DPI-006:");
           // DPI-006: user and password should not be set when using external authentication
+          should.not.exist(conn);
           done();
         }
       );
@@ -113,6 +114,7 @@ describe('5. externalAuth.js', function() {
           should.exist(err);
           (err.message).should.startWith("DPI-006:");
           // DPI-006: user and password should not be set when using external authentication
+          should.not.exist(conn);
           done();
         }
       );
@@ -131,6 +133,8 @@ describe('5. externalAuth.js', function() {
           should.exist(err);
           (err.message).should.startWith("DPI-006:");
           // DPI-006: user and password should not be set when using external authentication
+
+          should.not.exist(conn);
           done();
         }
       );

@@ -109,7 +109,7 @@ describe('15. resultsetToStream.js', function () {
         );
       }
     ], done);
-  }) // before
+  }); // before
 
   after(function(done) {
     async.series([
@@ -129,7 +129,7 @@ describe('15. resultsetToStream.js', function () {
         });
       },
     ], done);
-  }) // after
+  }); // after
 
   describe('15.1 Testing ResultSet.toQueryStream', function () {
     it('15.1.1 should allow resultsets to be converted to streams', function (done) {
@@ -180,7 +180,7 @@ describe('15. resultsetToStream.js', function () {
 
           var cursor = result.outBinds.cursor;
 
-          cursor.getRow(function(err, row) {
+          cursor.getRow(function(err) {
             should.not.exist(err);
 
             cursor.close(function(err) {
@@ -190,7 +190,7 @@ describe('15. resultsetToStream.js', function () {
           });
 
           try {
-            var stream = cursor.toQueryStream();
+            cursor.toQueryStream();
           } catch (err) {
             (err.message).should.startWith('NJS-041:');
             // NJS-041: cannot convert to stream after invoking methods
@@ -212,7 +212,7 @@ describe('15. resultsetToStream.js', function () {
 
           var cursor = result.outBinds.cursor;
 
-          cursor.getRows(5, function(err, rows) {
+          cursor.getRows(5, function(err) {
             should.not.exist(err);
 
             cursor.close(function(err) {
@@ -222,7 +222,7 @@ describe('15. resultsetToStream.js', function () {
           });
 
           try {
-            var stream = cursor.toQueryStream();
+            cursor.toQueryStream();
           } catch (err) {
             (err.message).should.startWith('NJS-041:');
           }
@@ -250,7 +250,7 @@ describe('15. resultsetToStream.js', function () {
           });
 
           try {
-            var stream = cursor.toQueryStream();
+            cursor.toQueryStream();
           } catch (err) {
             (err.message).should.startWith('NJS-041:');
           }
@@ -272,7 +272,7 @@ describe('15. resultsetToStream.js', function () {
           var cursor = result.outBinds.cursor;
           var stream = cursor.toQueryStream();
 
-          cursor.getRow(function(err, row) {
+          cursor.getRow(function(err) {
             (err.message).should.startWith('NJS-042:');
             // NJS-042: cannot invoke methods after converting to stream
 
@@ -301,7 +301,7 @@ describe('15. resultsetToStream.js', function () {
           var cursor = result.outBinds.cursor;
           var stream = cursor.toQueryStream();
 
-          cursor.getRows(5, function(err, rows) {
+          cursor.getRows(5, function(err) {
             (err.message).should.startWith('NJS-042:');
 
             // Closing cursor via stream._close because the cursor.close method

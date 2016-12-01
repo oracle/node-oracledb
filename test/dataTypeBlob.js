@@ -72,19 +72,19 @@ describe('41. dataTypeBlob', function() {
         done();
       }
     );
-  })
+  });
 
   after('release connection', function(done) {
     connection.release( function(err) {
       should.not.exist(err);
       done();
     });
-  })
+  });
 
   describe('41.1 testing BLOB data type', function() {
     before('create table', function(done) {
       assist.createTable(connection, tableName, done);
-    })
+    });
 
     after(function(done) {
       connection.execute(
@@ -94,7 +94,7 @@ describe('41. dataTypeBlob', function() {
           done();
         }
       );
-    })
+    });
 
     it('41.1.1 stores BLOB value correctly', function(done) {
       connection.should.be.ok();
@@ -103,7 +103,7 @@ describe('41. dataTypeBlob', function() {
 
           var lobFinishEventFired = false;
           setTimeout( function() {
-            lobFinishEventFired.should.equal(true, "lob does not call 'finish' event!")
+            lobFinishEventFired.should.equal(true, "lob does not call 'finish' event!");
             callback();
           }, 2000);
 
@@ -236,13 +236,13 @@ describe('41. dataTypeBlob', function() {
           });
         }
       ], done);
-    }) // 41.1.1
-  }) //41.1
+    }); // 41.1.1
+  }); //41.1
 
   describe('41.2 stores null value correctly', function() {
     it('41.2.1 testing Null, Empty string and Undefined', function(done) {
       assist.verifyNullValues(connection, tableName, done);
-    })
-  })
+    });
+  });
 
-})
+});

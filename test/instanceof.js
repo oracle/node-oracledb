@@ -30,7 +30,6 @@
  *****************************************************************************/
 'use strict';
 
-var oracledbCLib;
 var oracledb = require('oracledb');
 var should   = require('should');
 var dbConfig = require('./dbconfig.js');

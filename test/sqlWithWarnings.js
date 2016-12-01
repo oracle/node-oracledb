@@ -36,7 +36,6 @@
 "use strict";
 
 var oracledb = require('oracledb');
-var fs       = require('fs');
 var should   = require('should');
 var async    = require('async');
 var dbConfig = require('./dbconfig.js');
@@ -57,14 +56,14 @@ describe('64. sqlWithWarnings.js', function() {
         done();
       }
     );
-  })
+  });
 
   after('release connection', function(done) {
     connection.release( function(err) {
       should.not.exist(err);
       done();
     });
-  })
+  });
 
   describe('64.1 test case offered by GitHub user', function() {
 
@@ -124,7 +123,7 @@ describe('64. sqlWithWarnings.js', function() {
           });
         }
       ], done);
-    }) // before
+    }); // before
 
     after(function(done) {
       connection.execute(
@@ -134,21 +133,21 @@ describe('64. sqlWithWarnings.js', function() {
           done();
         }
       );
-    })
+    });
 
     it('64.1.1 Executes an aggregate query which causes warnings', function(done) {
       connection.execute(
         "SELECT MAX(NUM_COL) AS NUM_COL FROM " + tableName,
         [],
         { maxRows: 1 },
-        function(err, result) {
+        function(err) {
           should.not.exist(err);
           done();
         }
       );
-    })
+    });
 
-  }) // 64.1
+  }); // 64.1
 
   describe('64.2 PL/SQL - Success With Info', function() {
 
@@ -157,19 +156,19 @@ describe('64. sqlWithWarnings.js', function() {
       "   (p_in IN NUMBER, p_out OUT SYS_REFCURSOR ) AS " +
       "  BEGIN " +
       "    OPEN p_out FOR SELECT * FROM nodb_sql_emp " +
-      "  END;"
+      "  END;";
 
     it('64.2.1 Execute SQL Statement to create PLSQL procedure with warnings', function(done) {
       connection.should.be.an.Object;
       connection.execute (
         plsqlWithWarning,
-        function ( err, result ) {
+        function (err) {
           should.not.exist ( err );
           done();
         }
       );
-    })
+    });
 
-  }) // 64.2
+  }); // 64.2
 
-})
+});

@@ -98,7 +98,7 @@ describe('7. autoCommit.js', function() {
         );
       }
     ], done);
-  })
+  });
 
   after('drop table, release connection, terminate pool', function(done) {
     async.series([
@@ -124,7 +124,7 @@ describe('7. autoCommit.js', function() {
         });
       }
     ], done);
-  })
+  });
 
   afterEach('truncate table, reset the oracledb properties', function(done) {
     oracledb.autoCommit = false;  /* Restore to default value */
@@ -136,7 +136,7 @@ describe('7. autoCommit.js', function() {
         done();
       }
     );
-  })
+  });
 
   it('7.1 autoCommit takes effect when setting oracledb.autoCommit before connecting', function(done) {
     var conn1 = null;
@@ -218,7 +218,7 @@ describe('7. autoCommit.js', function() {
         });
       }
     ], done);
-  })
+  });
 
   it('7.2 autoCommit takes effect when setting oracledb.autoCommit after connecting', function(done) {
     var conn1 = null;
@@ -299,7 +299,7 @@ describe('7. autoCommit.js', function() {
         });
       }
     ], done);
-  })
+  });
 
   it('7.3 autoCommit setting does not affect previous SQL result', function(done) {
     var conn1 = null;
@@ -392,6 +392,6 @@ describe('7. autoCommit.js', function() {
         });
       }
     ], done);
-  })
+  });
 
-})
+});

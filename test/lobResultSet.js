@@ -41,7 +41,6 @@ var oracledb = require('oracledb');
 var fs       = require('fs');
 var async    = require('async');
 var should   = require('should');
-var stream   = require('stream');
 var dbConfig = require('./dbconfig.js');
 var assist   = require('./dataTypeAssist.js');
 
@@ -63,21 +62,21 @@ describe('59. lobResultSet.js', function() {
         done();
       }
     );
-  })
+  });
 
   after('release connection', function(done) {
     connection.release( function(err) {
       should.not.exist(err);
       done();
     });
-  })
+  });
 
   describe('59.1 CLOB data', function() {
 
     var tableName = "nodb_myclobs";
     before('create table', function(done) {
       assist.createTable(connection, tableName, done);
-    })
+    });
 
     after(function(done) {
       connection.execute(
@@ -87,7 +86,7 @@ describe('59. lobResultSet.js', function() {
           done();
         }
       );
-    })
+    });
 
     it('59.1.1 reads clob data one by one row from result set', function(done) {
       async.series([
@@ -113,7 +112,7 @@ describe('59. lobResultSet.js', function() {
           );
         }
       ], done);
-    })
+    });
 
     function fetchOneRowFromRS(resultSet, callback)
     {
@@ -129,9 +128,9 @@ describe('59. lobResultSet.js', function() {
           var lob = row[1];
           lob.setEncoding('utf8');
 
-          var text = '';
+          var text;
           lob.on('data', function(chunk) {
-            text += chunk;
+            text = text + chunk;
           });
 
           lob.on('end', function() {
@@ -174,6 +173,6 @@ describe('59. lobResultSet.js', function() {
       );
     }
 
-  }) // 59.1
+  }); // 59.1
 
-}) // 59
+}); // 59

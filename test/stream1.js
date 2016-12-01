@@ -111,7 +111,7 @@ describe('13. stream1.js', function () {
         );
       }
     ], done);
-  }) // before
+  }); // before
 
   after(function(done) {
     async.series([
@@ -131,7 +131,7 @@ describe('13. stream1.js', function () {
         });
       },
     ], done);
-  }) // after
+  }); // after
 
   describe('13.1 Testing QueryStream', function () {
     it('13.1.1 stream results for oracle connection', function (done) {
@@ -489,7 +489,7 @@ describe('13. stream1.js', function () {
           should.equal(testDone, tests.length);
 
           done();
-        })
+        });
       });
     });
   });

@@ -521,10 +521,10 @@ describe('17. extendedMetaData.js', function() {
           should.not.exist(err);
           (result.metaData).should.deepEqual(
             [ { name: 'VCH',
-                fetchType: oracledb.STRING,
-                dbType: oracledb.DB_TYPE_VARCHAR,
-                byteSize: 4000,
-                nullable: true } ]
+              fetchType: oracledb.STRING,
+              dbType: oracledb.DB_TYPE_VARCHAR,
+              byteSize: 4000,
+              nullable: true } ]
           );
           done();
         }
@@ -542,10 +542,10 @@ describe('17. extendedMetaData.js', function() {
           should.not.exist(err);
           (result.metaData).should.deepEqual(
             [ { name: 'NVCH',
-                fetchType: oracledb.STRING,
-                dbType: oracledb.DB_TYPE_VARCHAR,
-                byteSize: 4000,
-                nullable: true } ]
+              fetchType: oracledb.STRING,
+              dbType: oracledb.DB_TYPE_VARCHAR,
+              byteSize: 4000,
+              nullable: true } ]
           );
           done();
         }
@@ -563,10 +563,10 @@ describe('17. extendedMetaData.js', function() {
           should.not.exist(err);
           (result.metaData).should.deepEqual(
             [ { name: 'CH',
-                fetchType: oracledb.STRING,
-                dbType: oracledb.DB_TYPE_CHAR,
-                byteSize: 2000,
-                nullable: true } ]
+              fetchType: oracledb.STRING,
+              dbType: oracledb.DB_TYPE_CHAR,
+              byteSize: 2000,
+              nullable: true } ]
           );
           done();
         }
@@ -584,10 +584,10 @@ describe('17. extendedMetaData.js', function() {
           should.not.exist(err);
           (result.metaData).should.deepEqual(
             [ { name: 'CH',
-                fetchType: oracledb.STRING,
-                dbType: oracledb.DB_TYPE_CHAR,
-                byteSize: 2000,
-                nullable: true } ]
+              fetchType: oracledb.STRING,
+              dbType: oracledb.DB_TYPE_CHAR,
+              byteSize: 2000,
+              nullable: true } ]
           );
           done();
         }
@@ -605,11 +605,11 @@ describe('17. extendedMetaData.js', function() {
           should.not.exist(err);
           (result.metaData).should.deepEqual(
             [ { name: 'NUM1',
-                fetchType: oracledb.NUMBER,
-                dbType: oracledb.DB_TYPE_NUMBER,
-                precision: 0,
-                scale: -127,
-                nullable: true } ]
+              fetchType: oracledb.NUMBER,
+              dbType: oracledb.DB_TYPE_NUMBER,
+              precision: 0,
+              scale: -127,
+              nullable: true } ]
           );
           done();
         }
@@ -627,11 +627,11 @@ describe('17. extendedMetaData.js', function() {
           should.not.exist(err);
           (result.metaData).should.deepEqual(
             [ { name: 'NUM2',
-                fetchType: oracledb.NUMBER,
-                dbType: oracledb.DB_TYPE_NUMBER,
-                precision: 9,
-                scale: 0,
-                nullable: true } ]
+              fetchType: oracledb.NUMBER,
+              dbType: oracledb.DB_TYPE_NUMBER,
+              precision: 9,
+              scale: 0,
+              nullable: true } ]
           );
           done();
         }
@@ -649,11 +649,11 @@ describe('17. extendedMetaData.js', function() {
           should.not.exist(err);
           (result.metaData).should.deepEqual(
             [ { name: 'NUM3',
-                fetchType: oracledb.NUMBER,
-                dbType: oracledb.DB_TYPE_NUMBER,
-                precision: 15,
-                scale: 5,
-                nullable: true } ]
+              fetchType: oracledb.NUMBER,
+              dbType: oracledb.DB_TYPE_NUMBER,
+              precision: 15,
+              scale: 5,
+              nullable: true } ]
           );
           done();
         }
@@ -671,11 +671,11 @@ describe('17. extendedMetaData.js', function() {
           should.not.exist(err);
           (result.metaData).should.deepEqual(
             [ { name: 'NUM4',
-                fetchType: oracledb.NUMBER,
-                dbType: oracledb.DB_TYPE_NUMBER,
-                precision: 38,
-                scale: 1,
-                nullable: true } ]
+              fetchType: oracledb.NUMBER,
+              dbType: oracledb.DB_TYPE_NUMBER,
+              precision: 38,
+              scale: 1,
+              nullable: true } ]
           );
           done();
         }
@@ -693,11 +693,11 @@ describe('17. extendedMetaData.js', function() {
           should.not.exist(err);
           (result.metaData).should.deepEqual(
             [ { name: 'NUM5',
-                fetchType: oracledb.NUMBER,
-                dbType: oracledb.DB_TYPE_NUMBER,
-                precision: 7,
-                scale: -2,
-                nullable: true } ]
+              fetchType: oracledb.NUMBER,
+              dbType: oracledb.DB_TYPE_NUMBER,
+              precision: 7,
+              scale: -2,
+              nullable: true } ]
           );
           done();
         }
@@ -715,11 +715,11 @@ describe('17. extendedMetaData.js', function() {
           should.not.exist(err);
           (result.metaData).should.deepEqual(
             [ { name: 'NUM6',
-                fetchType: oracledb.NUMBER,
-                dbType: oracledb.DB_TYPE_NUMBER,
-                precision: 23,
-                scale: 15,
-                nullable: true } ]
+              fetchType: oracledb.NUMBER,
+              dbType: oracledb.DB_TYPE_NUMBER,
+              precision: 23,
+              scale: 15,
+              nullable: true } ]
           );
           done();
         }
@@ -737,11 +737,11 @@ describe('17. extendedMetaData.js', function() {
           should.not.exist(err);
           (result.metaData).should.deepEqual(
             [ { name: 'DECI1',
-                fetchType: oracledb.NUMBER,
-                dbType: oracledb.DB_TYPE_NUMBER,
-                precision: 38,
-                scale: 0,
-                nullable: true } ]
+              fetchType: oracledb.NUMBER,
+              dbType: oracledb.DB_TYPE_NUMBER,
+              precision: 38,
+              scale: 0,
+              nullable: true } ]
           );
           done();
         }
@@ -759,11 +759,11 @@ describe('17. extendedMetaData.js', function() {
           should.not.exist(err);
           (result.metaData).should.deepEqual(
             [ { name: 'DECI2',
-                fetchType: oracledb.NUMBER,
-                dbType: oracledb.DB_TYPE_NUMBER,
-                precision: 8,
-                scale: 18,
-                nullable: true } ]
+              fetchType: oracledb.NUMBER,
+              dbType: oracledb.DB_TYPE_NUMBER,
+              precision: 8,
+              scale: 18,
+              nullable: true } ]
           );
           done();
         }
@@ -781,11 +781,11 @@ describe('17. extendedMetaData.js', function() {
           should.not.exist(err);
           (result.metaData).should.deepEqual(
             [ { name: 'INTENUM',
-                fetchType: oracledb.NUMBER,
-                dbType: oracledb.DB_TYPE_NUMBER,
-                precision: 38,
-                scale: 0,
-                nullable: true } ]
+              fetchType: oracledb.NUMBER,
+              dbType: oracledb.DB_TYPE_NUMBER,
+              precision: 38,
+              scale: 0,
+              nullable: true } ]
           );
           done();
         }
@@ -803,11 +803,11 @@ describe('17. extendedMetaData.js', function() {
           should.not.exist(err);
           (result.metaData).should.deepEqual(
             [ { name: 'INTNUM',
-                fetchType: oracledb.NUMBER,
-                dbType: oracledb.DB_TYPE_NUMBER,
-                precision: 38,
-                scale: 0,
-                nullable: true } ]
+              fetchType: oracledb.NUMBER,
+              dbType: oracledb.DB_TYPE_NUMBER,
+              precision: 38,
+              scale: 0,
+              nullable: true } ]
           );
           done();
         }
@@ -825,11 +825,11 @@ describe('17. extendedMetaData.js', function() {
           should.not.exist(err);
           (result.metaData).should.deepEqual(
             [ { name: 'SINT',
-                fetchType: oracledb.NUMBER,
-                dbType: oracledb.DB_TYPE_NUMBER,
-                precision: 38,
-                scale: 0,
-                nullable: true } ]
+              fetchType: oracledb.NUMBER,
+              dbType: oracledb.DB_TYPE_NUMBER,
+              precision: 38,
+              scale: 0,
+              nullable: true } ]
           );
           done();
         }
@@ -847,11 +847,11 @@ describe('17. extendedMetaData.js', function() {
           should.not.exist(err);
           (result.metaData).should.deepEqual(
             [ { name: 'FLOAT1',
-                fetchType: oracledb.NUMBER,
-                dbType: oracledb.DB_TYPE_NUMBER,
-                precision: 126,
-                scale: -127,
-                nullable: true } ]
+              fetchType: oracledb.NUMBER,
+              dbType: oracledb.DB_TYPE_NUMBER,
+              precision: 126,
+              scale: -127,
+              nullable: true } ]
           );
           done();
         }
@@ -869,11 +869,11 @@ describe('17. extendedMetaData.js', function() {
           should.not.exist(err);
           (result.metaData).should.deepEqual(
             [ { name: 'FLOAT2',
-                fetchType: oracledb.NUMBER,
-                dbType: oracledb.DB_TYPE_NUMBER,
-                precision: 90,
-                scale: -127,
-                nullable: true } ]
+              fetchType: oracledb.NUMBER,
+              dbType: oracledb.DB_TYPE_NUMBER,
+              precision: 90,
+              scale: -127,
+              nullable: true } ]
           );
           done();
         }
@@ -891,11 +891,11 @@ describe('17. extendedMetaData.js', function() {
           should.not.exist(err);
           (result.metaData).should.deepEqual(
             [ { name: 'DOUBLE',
-                fetchType: oracledb.NUMBER,
-                dbType: oracledb.DB_TYPE_NUMBER,
-                precision: 126,
-                scale: -127,
-                nullable: true } ]
+              fetchType: oracledb.NUMBER,
+              dbType: oracledb.DB_TYPE_NUMBER,
+              precision: 126,
+              scale: -127,
+              nullable: true } ]
           );
           done();
         }
@@ -913,11 +913,11 @@ describe('17. extendedMetaData.js', function() {
           should.not.exist(err);
           (result.metaData).should.deepEqual(
             [ { name: 'RENUM',
-                fetchType: oracledb.NUMBER,
-                dbType: oracledb.DB_TYPE_NUMBER,
-                precision: 63,
-                scale: -127,
-                nullable: true } ]
+              fetchType: oracledb.NUMBER,
+              dbType: oracledb.DB_TYPE_NUMBER,
+              precision: 63,
+              scale: -127,
+              nullable: true } ]
           );
           done();
         }
@@ -935,6 +935,7 @@ describe('17. extendedMetaData.js', function() {
           should.exist(err);
           (err.message).should.startWith('NJS-010:');
           // NJS-010: unsupported data type in select list
+          should.not.exist(result);
           done();
         }
       );
@@ -951,9 +952,9 @@ describe('17. extendedMetaData.js', function() {
           should.not.exist(err);
           (result.metaData).should.deepEqual(
             [ { name: 'BF',
-                fetchType: oracledb.NUMBER,
-                dbType: oracledb.DB_TYPE_BINARY_FLOAT,
-                nullable: true } ]
+              fetchType: oracledb.NUMBER,
+              dbType: oracledb.DB_TYPE_BINARY_FLOAT,
+              nullable: true } ]
           );
           done();
         }
@@ -971,9 +972,9 @@ describe('17. extendedMetaData.js', function() {
           should.not.exist(err);
           (result.metaData).should.deepEqual(
             [ { name: 'BD',
-                fetchType: oracledb.NUMBER,
-                dbType: oracledb.DB_TYPE_BINARY_DOUBLE,
-                nullable: true } ]
+              fetchType: oracledb.NUMBER,
+              dbType: oracledb.DB_TYPE_BINARY_DOUBLE,
+              nullable: true } ]
           );
           done();
         }
@@ -991,9 +992,9 @@ describe('17. extendedMetaData.js', function() {
           should.not.exist(err);
           (result.metaData).should.deepEqual(
             [ { name: 'DT',
-                fetchType: oracledb.DATE,
-                dbType: oracledb.DB_TYPE_DATE,
-                nullable: true } ]
+              fetchType: oracledb.DATE,
+              dbType: oracledb.DB_TYPE_DATE,
+              nullable: true } ]
           );
           done();
         }
@@ -1011,10 +1012,10 @@ describe('17. extendedMetaData.js', function() {
           should.not.exist(err);
           (result.metaData).should.deepEqual(
             [ { name: 'TS1',
-                fetchType: oracledb.DATE,
-                dbType: oracledb.DB_TYPE_TIMESTAMP,
-                precision: 6,
-                nullable: true } ]
+              fetchType: oracledb.DATE,
+              dbType: oracledb.DB_TYPE_TIMESTAMP,
+              precision: 6,
+              nullable: true } ]
           );
           done();
         }
@@ -1032,10 +1033,10 @@ describe('17. extendedMetaData.js', function() {
           should.not.exist(err);
           (result.metaData).should.deepEqual(
             [ { name: 'TS2',
-                fetchType: oracledb.DATE,
-                dbType: oracledb.DB_TYPE_TIMESTAMP,
-                precision: 5,
-                nullable: true } ]
+              fetchType: oracledb.DATE,
+              dbType: oracledb.DB_TYPE_TIMESTAMP,
+              precision: 5,
+              nullable: true } ]
           );
           done();
         }
@@ -1052,6 +1053,7 @@ describe('17. extendedMetaData.js', function() {
         function(err, result) {
           (err.message).should.startWith('NJS-010:');
           // NJS-010: unsupported data type in select list
+          should.not.exist(result);
           done();
         }
       );
@@ -1067,6 +1069,7 @@ describe('17. extendedMetaData.js', function() {
         function(err, result) {
           (err.message).should.startWith('NJS-010:');
           // NJS-010: unsupported data type in select list
+          should.not.exist(result);
           done();
         }
       );
@@ -1083,10 +1086,10 @@ describe('17. extendedMetaData.js', function() {
           should.not.exist(err);
           (result.metaData).should.deepEqual(
             [ { name: 'TS5',
-                fetchType: oracledb.DATE,
-                dbType: oracledb.DB_TYPE_TIMESTAMP_LTZ,
-                precision: 6,
-                nullable: true } ]
+              fetchType: oracledb.DATE,
+              dbType: oracledb.DB_TYPE_TIMESTAMP_LTZ,
+              precision: 6,
+              nullable: true } ]
           );
           done();
         }
@@ -1104,10 +1107,10 @@ describe('17. extendedMetaData.js', function() {
           should.not.exist(err);
           (result.metaData).should.deepEqual(
             [ { name: 'TS6',
-                fetchType: oracledb.DATE,
-                dbType: oracledb.DB_TYPE_TIMESTAMP_LTZ,
-                precision: 9,
-                nullable: true } ]
+              fetchType: oracledb.DATE,
+              dbType: oracledb.DB_TYPE_TIMESTAMP_LTZ,
+              precision: 9,
+              nullable: true } ]
           );
           done();
         }
@@ -1124,6 +1127,7 @@ describe('17. extendedMetaData.js', function() {
         function(err, result) {
           (err.message).should.startWith('NJS-010:');
           // NJS-010: unsupported data type in select list
+          should.not.exist(result);
           done();
         }
       );
@@ -1139,6 +1143,7 @@ describe('17. extendedMetaData.js', function() {
         function(err, result) {
           (err.message).should.startWith('NJS-010:');
           // NJS-010: unsupported data type in select list
+          should.not.exist(result);
           done();
         }
       );
@@ -1154,6 +1159,7 @@ describe('17. extendedMetaData.js', function() {
         function(err, result) {
           (err.message).should.startWith('NJS-010:');
           // NJS-010: unsupported data type in select list
+          should.not.exist(result);
           done();
         }
       );
@@ -1169,6 +1175,7 @@ describe('17. extendedMetaData.js', function() {
         function(err, result) {
           (err.message).should.startWith('NJS-010:');
           // NJS-010: unsupported data type in select list
+          should.not.exist(result);
           done();
         }
       );
@@ -1185,9 +1192,9 @@ describe('17. extendedMetaData.js', function() {
           should.not.exist(err);
           (result.metaData).should.deepEqual(
             [ { name: 'CLB',
-                fetchType: oracledb.CLOB,
-                dbType: oracledb.DB_TYPE_CLOB,
-                nullable: true } ]
+              fetchType: oracledb.CLOB,
+              dbType: oracledb.DB_TYPE_CLOB,
+              nullable: true } ]
           );
           done();
         }
@@ -1205,9 +1212,9 @@ describe('17. extendedMetaData.js', function() {
           should.not.exist(err);
           (result.metaData).should.deepEqual(
             [ { name: 'BLB',
-                fetchType: oracledb.BLOB,
-                dbType: oracledb.DB_TYPE_BLOB,
-                nullable: true } ]
+              fetchType: oracledb.BLOB,
+              dbType: oracledb.DB_TYPE_BLOB,
+              nullable: true } ]
           );
           done();
         }
@@ -1225,9 +1232,9 @@ describe('17. extendedMetaData.js', function() {
           should.not.exist(err);
           (result.metaData).should.deepEqual(
             [ { name: 'NCLB',
-                fetchType: oracledb.CLOB,
-                dbType: oracledb.DB_TYPE_CLOB,
-                nullable: true } ]
+              fetchType: oracledb.CLOB,
+              dbType: oracledb.DB_TYPE_CLOB,
+              nullable: true } ]
           );
           done();
         }
@@ -1244,6 +1251,8 @@ describe('17. extendedMetaData.js', function() {
         function(err, result) {
           (err.message).should.startWith('NJS-010:');
           // NJS-010: unsupported data type in select list
+
+          should.not.exist(result);
           done();
         }
       );
@@ -1260,10 +1269,10 @@ describe('17. extendedMetaData.js', function() {
           should.not.exist(err);
           (result.metaData).should.deepEqual(
             [ { name: 'MYRAW',
-                fetchType: oracledb.BUFFER,
-                dbType: oracledb.DB_TYPE_RAW,
-                byteSize: 2000,
-                nullable: true } ]
+              fetchType: oracledb.BUFFER,
+              dbType: oracledb.DB_TYPE_RAW,
+              byteSize: 2000,
+              nullable: true } ]
           );
           done();
         }
@@ -1635,7 +1644,7 @@ describe('17. extendedMetaData.js', function() {
 
   }); // 17.8
 
-  describe("17.9 single character column", function(done) {
+  describe("17.9 single character column", function() {
 
     it("17.9.1 works with column names comprised of single character", function(done) {
 

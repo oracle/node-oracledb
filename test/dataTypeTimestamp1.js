@@ -57,21 +57,21 @@ describe('33. dataTypeTimestamp1.js', function() {
         done();
       }
     );
-  })
+  });
 
   after('release connection', function(done) {
     connection.release( function(err) {
       should.not.exist(err);
       done();
     });
-  })
+  });
 
   describe('33.1 Testing JavaScript Date with database TIMESTAMP', function() {
     var dates = assist.data.dates;
 
     before('create table, insert data',function(done) {
       assist.setUp(connection, tableName, dates, done);
-    })
+    });
 
     after(function(done) {
       connection.execute(
@@ -81,34 +81,34 @@ describe('33. dataTypeTimestamp1.js', function() {
           done();
         }
       );
-    })
+    });
 
     it('33.1.1 works well with SELECT query', function(done) {
       assist.dataTypeSupport(connection, tableName, dates, done);
-    })
+    });
 
     it('33.1.2 works well with result set', function(done) {
       assist.verifyResultSet(connection, tableName, dates, done);
-    })
+    });
 
     it('33.1.3 works well with REF Cursor', function(done) {
       assist.verifyRefCursor(connection, tableName, dates, done);
-    })
+    });
 
-  }) // end of 33.1 suite
+  }); // end of 33.1 suite
 
   describe('33.2 stores null value correctly', function() {
     it('33.2.1 testing Null, Empty string and Undefined', function(done) {
       assist.verifyNullValues(connection, tableName, done);
-    })
-  })
+    });
+  });
 
   describe('33.3 testing TIMESTAMP without TIME ZONE', function() {
     var timestamps = assist.TIMESTAMP_STRINGS;
 
     before(function(done) {
       assist.setUp4sql(connection, tableName, timestamps, done);
-    })
+    });
 
     after(function(done) {
       connection.execute(
@@ -118,11 +118,11 @@ describe('33. dataTypeTimestamp1.js', function() {
           done();
         }
       );
-    }) // after
+    }); // after
 
     it('32.3.1 SELECT query - original data', function(done) {
       assist.selectOriginalData(connection, tableName, timestamps, done);
-    })
+    });
 
     it('33.3.2 SELECT query - formatted data for comparison', function(done) {
       async.forEach(timestamps, function(timestamp, cb) {
@@ -139,10 +139,10 @@ describe('33. dataTypeTimestamp1.js', function() {
           }
         );
       }, function(err) {
-          should.not.exist(err);
-          done();
+        should.not.exist(err);
+        done();
       });
-    })
+    });
 
     it('33.3.3 returns scalar types from PL/SQL block', function(done) {
       var sql = "BEGIN SELECT systimestamp into :bv from dual; END;";
@@ -160,8 +160,8 @@ describe('33. dataTypeTimestamp1.js', function() {
         }
       );
 
-    })
+    });
 
-  }) // end of 33.3 suite
+  }); // end of 33.3 suite
 
-})
+});

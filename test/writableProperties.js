@@ -18,18 +18,11 @@
  *****************************************************************************/
 'use strict';
 
-var oracledbCLib;
 var oracledb = require('oracledb');
 var should   = require('should');
 var dbConfig = require('./dbconfig.js');
 
 describe('66. writeableProperties.js', function() {
-
-  var credentials = {
-                      user:          dbConfig.user,
-                      password:       dbConfig.password,
-                      connectString: dbConfig.connectString
-                    };
 
   it('66.1 allows overwriting of public methods on pool instances', function(done) {
     oracledb.createPool(
@@ -75,7 +68,7 @@ describe('66. writeableProperties.js', function() {
 
   it('66.2 allows overwriting of public methods on connection instances', function(done) {
 
-    oracledb.getConnection(credentials, function(err, conn) {
+    oracledb.getConnection(dbConfig, function(err, conn) {
       var keys;
       var keysIdx;
       var originalFunction;
@@ -108,7 +101,7 @@ describe('66. writeableProperties.js', function() {
 
   it('66.3 allows overwriting of public methods on resultset instances', function(done) {
 
-    oracledb.getConnection(credentials, function(err, conn) {
+    oracledb.getConnection(dbConfig, function(err, conn) {
       should.not.exist(err);
 
       conn.execute(
@@ -156,7 +149,7 @@ describe('66. writeableProperties.js', function() {
 
   it('66.4 allows overwriting of public methods on lob instances', function(done) {
 
-    oracledb.getConnection(credentials, function(err, conn) {
+    oracledb.getConnection(dbConfig, function(err, conn) {
       should.not.exist(err);
 
       conn.execute(

@@ -61,20 +61,20 @@ describe('25. dataTypeNvarchar2.js', function() {
         done();
       }
     );
-  })
+  });
 
   after('release connection', function(done) {
     connection.release( function(err) {
       should.not.exist(err);
       done();
     });
-  })
+  });
 
   describe('25.1 testing NVARCHAR2 data in various lengths', function() {
 
     before('create table, insert data',function(done) {
       assist.setUp(connection, tableName, strs, done);
-    })
+    });
 
     after(function(done) {
       connection.execute(
@@ -84,25 +84,25 @@ describe('25. dataTypeNvarchar2.js', function() {
           done();
         }
       );
-    })
+    });
 
     it('25.1.1 SELECT query', function(done) {
       assist.dataTypeSupport(connection, tableName, strs, done);
-    })
+    });
 
     it('25.1.2 resultSet stores NVARCHAR2 data correctly', function(done) {
       assist.verifyResultSet(connection, tableName, strs, done);
-    })
+    });
 
     it('25.1.3 works well with REF Cursor', function(done) {
       assist.verifyRefCursor(connection, tableName, strs, done);
-    })
-  })
+    });
+  });
 
   describe('25.2 stores null value correctly', function() {
     it('25.2.1 testing Null, Empty string and Undefined', function(done) {
       assist.verifyNullValues(connection, tableName, done);
-    })
-  })
+    });
+  });
 
-})
+});

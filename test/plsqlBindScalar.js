@@ -62,7 +62,7 @@ describe('70. plsqlBindScalar.js', function() {
           "alter session set time_zone='UTC'",
           function(err) {
             should.not.exist(err);
-            done();
+            cb();
           });
       }
     ],done);
@@ -136,7 +136,7 @@ describe('70. plsqlBindScalar.js', function() {
       connection.execute(
         sqlrun,
         bindVar,
-        function(err, result) {
+        function(err) {
           should.exist(err);
           (err.message).should.startWith('NJS-011:');
           // NJS-011: encountered bind value and type mismatch in parameter 2
@@ -226,7 +226,7 @@ describe('70. plsqlBindScalar.js', function() {
       connection.execute(
         sqlrun,
         bindVar,
-        function(err, result) {
+        function(err) {
           should.exist(err);
           // console.log(result);
           (err.message).should.startWith('NJS-011');
@@ -333,7 +333,7 @@ describe('70. plsqlBindScalar.js', function() {
       connection.execute(
         sqlrun,
         bindVar,
-        function(err, result) {
+        function(err) {
           should.exist(err);
           (err.message).should.startWith('NJS-011');
           // console.log(result);
@@ -387,10 +387,9 @@ describe('70. plsqlBindScalar.js', function() {
       connection.execute(
         sqlrun,
         bindVar,
-        function(err, result) {
+        function(err) {
           should.not.exist(err);
-          // console.log(result);
-          // (err.message).should.startWith('NJS-011:');
+
           done();
         }
       );
@@ -531,7 +530,7 @@ describe('70. plsqlBindScalar.js', function() {
       connection.execute(
         sqlrun,
         bindVar,
-        function(err, result) {
+        function(err) {
           should.exist(err);
           (err.message).should.startWith('NJS-011:');
           // console.log(result);
@@ -567,7 +566,7 @@ describe('70. plsqlBindScalar.js', function() {
       connection.execute(
         sqlrun,
         bindVar,
-        function(err, result) {
+        function(err) {
           should.exist(err);
           (err.message).should.startWith('NJS-011:');
           // console.log(result);
@@ -791,7 +790,7 @@ describe('70. plsqlBindScalar.js', function() {
       connection.execute(
         sqlrun,
         bindVar,
-        function(err, result) {
+        function(err) {
           should.exist(err);
           (err.message).should.startWith('NJS-011:');
           // console.log(result);
@@ -826,7 +825,7 @@ describe('70. plsqlBindScalar.js', function() {
       connection.execute(
         sqlrun,
         bindVar,
-        function(err, result) {
+        function(err) {
           should.exist(err);
           (err.message).should.startWith('NJS-011:');
           done();
@@ -921,7 +920,7 @@ describe('70. plsqlBindScalar.js', function() {
       connection.execute(
         sqlrun,
         bindVar,
-        function(err, result) {
+        function(err) {
           should.exist(err);
           (err.message).should.startWith('NJS-011');
           done();
@@ -1004,7 +1003,7 @@ describe('70. plsqlBindScalar.js', function() {
       connection.execute(
         sqlrun,
         bindVar,
-        function(err, result) {
+        function(err) {
           should.exist(err);
           (err.message).should.startWith('NJS-011');
           done();
@@ -1032,11 +1031,11 @@ describe('70. plsqlBindScalar.js', function() {
           connection.execute(
              proc508,
              function(err) {
-                should.not.exist(err);
-                cb();
-              }
+               should.not.exist(err);
+               cb();
+             }
             );
-          },
+        },
         function(cb) {
           connection.execute(
             sqlrun508,
@@ -1066,7 +1065,7 @@ describe('70. plsqlBindScalar.js', function() {
                  "AS \n" +
                  "BEGIN \n" +
                  "    p_inout := null; \n" +
-                 "END nodb_inoutproc509;"
+                 "END nodb_inoutproc509;";
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
@@ -1082,11 +1081,11 @@ describe('70. plsqlBindScalar.js', function() {
           connection.execute(
              proc509,
              function(err) {
-                should.not.exist(err);
-                cb();
-              }
+               should.not.exist(err);
+               cb();
+             }
             );
-          },
+        },
         function(cb) {
           connection.execute(
             sqlrun509,
@@ -1116,7 +1115,7 @@ describe('70. plsqlBindScalar.js', function() {
                  "AS \n" +
                  "BEGIN \n" +
                  "    p_inout := concat (p_inout, p_inout); \n" +
-                 "END nodb_inoutproc510;"
+                 "END nodb_inoutproc510;";
       var strVar = "abcdefghijklmnopqrstuvwxyz";
       var bindVar = {
         p_inout : {
@@ -1126,17 +1125,17 @@ describe('70. plsqlBindScalar.js', function() {
         }
       };
       var sqlrun510 = "begin nodb_inoutproc510(p_inout => :p_inout); end;";
-    var sqldrop = "DROP PROCEDURE nodb_inoutproc510";
-    async.series([
+      var sqldrop = "DROP PROCEDURE nodb_inoutproc510";
+      async.series([
         function(cb) {
           connection.execute(
              proc510,
              function(err) {
-                should.not.exist(err);
-                cb();
-              }
+               should.not.exist(err);
+               cb();
+             }
             );
-          },
+        },
         function(cb) {
           connection.execute(
             sqlrun510,
@@ -1167,7 +1166,7 @@ describe('70. plsqlBindScalar.js', function() {
                  "AS \n" +
                  "BEGIN \n" +
                  "    p_inout := substr ( p_inout, 1, Length(p_inout)/2 ); \n" +
-                 "END nodb_inoutproc511;"
+                 "END nodb_inoutproc511;";
       var strVar = "Pack my bag with five dozen liquor jugs";
       var bindVar = {
         p_inout : {
@@ -1179,17 +1178,17 @@ describe('70. plsqlBindScalar.js', function() {
       var sqlrun511 = "begin nodb_inoutproc511(p_inout => :p_inout); end;";
       var sqldrop = "DROP PROCEDURE nodb_inoutproc511";
       async.series([
-          function(cb) {
-            connection.execute(
+        function(cb) {
+          connection.execute(
                proc511,
                function(err) {
-                  should.not.exist(err);
-                  cb();
-                }
+                 should.not.exist(err);
+                 cb();
+               }
               );
-            },
-          function(cb) {
-            connection.execute(
+        },
+        function(cb) {
+          connection.execute(
               sqlrun511,
               bindVar,
               function(err, result) {
@@ -1201,18 +1200,18 @@ describe('70. plsqlBindScalar.js', function() {
                 cb();
               }
             );
-          },
-          function(cb) {
-            connection.execute(
+        },
+        function(cb) {
+          connection.execute(
               sqldrop,
               function(err) {
                 should.not.exist(err);
                 cb();
               }
             );
-          }
-        ], done);
-      }); // 70.5.11
+        }
+      ], done);
+    }); // 70.5.11
 
   }); // 70.5
 
@@ -1301,7 +1300,7 @@ describe('70. plsqlBindScalar.js', function() {
       connection.execute(
         sqlrun,
         bindVar,
-        function(err, result) {
+        function(err) {
           should.exist(err);
           (err.message).should.startWith('NJS-011:');
           done();
@@ -1455,11 +1454,11 @@ describe('70. plsqlBindScalar.js', function() {
           connection.execute(
              proc610,
              function(err) {
-                should.not.exist(err);
-                cb();
-              }
+               should.not.exist(err);
+               cb();
+             }
             );
-          },
+        },
         function(cb) {
           connection.execute(
             sqlrun610,
@@ -1505,11 +1504,11 @@ describe('70. plsqlBindScalar.js', function() {
           connection.execute(
              proc611,
              function(err) {
-                should.not.exist(err);
-                cb();
-              }
+               should.not.exist(err);
+               cb();
+             }
             );
-          },
+        },
         function(cb) {
           connection.execute(
             sqlrun611,
@@ -1643,7 +1642,7 @@ describe('70. plsqlBindScalar.js', function() {
       connection.execute(
         sqlrun,
         bindVar,
-        function(err, result) {
+        function(err) {
           should.exist(err);
           (err.message).should.startWith('NJS-011:');
           done();
@@ -1684,7 +1683,7 @@ describe('70. plsqlBindScalar.js', function() {
       connection.execute(
         sqlrun,
         bindVar,
-        function(err, result) {
+        function(err) {
           should.exist(err);
           (err.message).should.startWith('NJS-011:');
           done();
@@ -1777,11 +1776,11 @@ describe('70. plsqlBindScalar.js', function() {
           connection.execute(
              proc710,
              function(err) {
-                should.not.exist(err);
-                cb();
-              }
+               should.not.exist(err);
+               cb();
+             }
             );
-          },
+        },
         function(cb) {
           connection.execute(
             sqlrun710,
@@ -1814,12 +1813,12 @@ describe('70. plsqlBindScalar.js', function() {
                  "END nodb_inoutproc711;";
       var date = new Date( 2011, 0, 12 );
       var bindVar = {
-          p_inout : {
-            dir:  oracledb.BIND_INOUT,
-            type: oracledb.DATE,
-            val:  date
-          }
-        };
+        p_inout : {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.DATE,
+          val:  date
+        }
+      };
       var sqlrun711 = "begin nodb_inoutproc711(p_inout => :p_inout); end;";
       var sqldrop = "DROP PROCEDURE nodb_inoutproc711";
       async.series([
@@ -1827,11 +1826,11 @@ describe('70. plsqlBindScalar.js', function() {
           connection.execute(
              proc711,
              function(err) {
-                should.not.exist(err);
-                cb();
-              }
+               should.not.exist(err);
+               cb();
+             }
             );
-          },
+        },
         function(cb) {
           connection.execute(
             sqlrun711,
@@ -2028,7 +2027,7 @@ describe('70. plsqlBindScalar.js', function() {
       connection.execute(
         sqlrun,
         bindVar,
-        function(err, result) {
+        function(err) {
           should.exist(err);
           (err.message).should.startWith('NJS-011:');
           done();
@@ -2325,7 +2324,7 @@ describe('70. plsqlBindScalar.js', function() {
           connection.execute(
             sqlin,
             bindVar,
-            function(err, result) {
+            function(err) {
               should.not.exist(err);
               cb();
             }
@@ -2460,7 +2459,7 @@ describe('70. plsqlBindScalar.js', function() {
           connection.execute(
             sqlin,
             bindVar,
-            function(err, result) {
+            function(err) {
               should.not.exist(err);
               cb();
             }
@@ -3324,7 +3323,7 @@ describe('70. plsqlBindScalar.js', function() {
       connection.execute(
         sqlrun_str,
         bindVar,
-        function(err, result) {
+        function(err) {
           should.exist(err);
           //NJS-011: encountered bind value and type mismatch in parameter 2
           (err.message).should.startWith('NJS-011:');
@@ -3343,7 +3342,7 @@ describe('70. plsqlBindScalar.js', function() {
       connection.execute(
         sqlrun_str,
         bindVar,
-        function(err, result) {
+        function(err) {
           should.exist(err);
           //ORA-01839: date not valid for month specified
           (err.message).should.startWith("ORA-01839");
@@ -3434,11 +3433,11 @@ describe('70. plsqlBindScalar.js', function() {
          sqlrun_dt,
          bindVar,
          function(err, result) {
-          should.not.exist(err);
-          var expectDate = "2016-09-10 14:10:10.123000000";
-          (result.outBinds.output).should.eql(expectDate);
+           should.not.exist(err);
+           var expectDate = "2016-09-10 14:10:10.123000000";
+           (result.outBinds.output).should.eql(expectDate);
            done();
-        }
+         }
      );
     }); // 70.12.1
 
@@ -3468,7 +3467,7 @@ describe('70. plsqlBindScalar.js', function() {
       connection.execute(
         sqlrun_dt,
         bindVar,
-        function(err, result) {
+        function(err) {
           should.exist(err);
           (err.message).should.startWith('NJS-011:');
           done();
@@ -3502,7 +3501,7 @@ describe('70. plsqlBindScalar.js', function() {
       connection.execute(
         sqlrun_dt,
         bindVar,
-        function(err, result) {
+        function(err) {
           should.exist(err);
           //NJS-011: encountered bind value and type mismatch in parameter 2
           (err.message).should.startWith('NJS-011:');
@@ -3651,7 +3650,7 @@ describe('70. plsqlBindScalar.js', function() {
       connection.execute(
         sqlrun,
         bindVar,
-        function(err, result) {
+        function(err) {
           should.exist(err);
           (err.message).should.startWith('NJS-011:');
           done();
@@ -3685,7 +3684,7 @@ describe('70. plsqlBindScalar.js', function() {
       connection.execute(
         sqlrun,
         bindVar,
-        function(err, result) {
+        function(err) {
           should.exist(err);
           //NJS-011: encountered bind value and type mismatch in parameter 2
           (err.message).should.startWith('NJS-011:');
@@ -3798,7 +3797,7 @@ describe('70. plsqlBindScalar.js', function() {
       connection.execute(
         sqlrun,
         bindVar,
-        function(err, result) {
+        function(err) {
           should.exist(err);
           (err.message).should.startWith('NJS-011:');
           done();
@@ -3839,7 +3838,7 @@ describe('70. plsqlBindScalar.js', function() {
       connection.execute(
         sqlrun,
         bindVar,
-        function(err, result) {
+        function(err) {
           should.exist(err);
           (err.message).should.startWith('NJS-011:');
           done();
@@ -3932,11 +3931,11 @@ describe('70. plsqlBindScalar.js', function() {
           connection.execute(
              proc71410,
              function(err) {
-                should.not.exist(err);
-                cb();
-              }
+               should.not.exist(err);
+               cb();
+             }
             );
-          },
+        },
         function(cb) {
           connection.execute(
             sqlrun71410,
@@ -3968,12 +3967,12 @@ describe('70. plsqlBindScalar.js', function() {
                  "END nodb_inoutproc71411;";
       var date = new Date( 2011, 0, 12, 0, 0, 0, 0 );
       var bindVar = {
-          p_inout : {
-            dir:  oracledb.BIND_INOUT,
-            type: oracledb.DATE,
-            val:  date
-          }
-        };
+        p_inout : {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.DATE,
+          val:  date
+        }
+      };
       var sqlrun71411 = "begin nodb_inoutproc71411(p_inout => :p_inout); end;";
       var sqldrop = "DROP PROCEDURE nodb_inoutproc71411";
       async.series([
@@ -3981,11 +3980,11 @@ describe('70. plsqlBindScalar.js', function() {
           connection.execute(
              proc71411,
              function(err) {
-                should.not.exist(err);
-                cb();
-              }
+               should.not.exist(err);
+               cb();
+             }
             );
-          },
+        },
         function(cb) {
           connection.execute(
             sqlrun71411,
@@ -4122,7 +4121,7 @@ describe('70. plsqlBindScalar.js', function() {
       connection.execute(
         sqlrun_str,
         bindVar,
-        function(err, result) {
+        function(err) {
           should.exist(err);
           //NJS-011: encountered bind value and type mismatch in parameter 2
           (err.message).should.startWith('NJS-011:');
@@ -4141,7 +4140,7 @@ describe('70. plsqlBindScalar.js', function() {
       connection.execute(
         sqlrun_str,
         bindVar,
-        function(err, result) {
+        function(err) {
           should.exist(err);
           //ORA-01839: date not valid for month specified
           (err.message).should.startWith("ORA-01839");
@@ -4266,7 +4265,7 @@ describe('70. plsqlBindScalar.js', function() {
       connection.execute(
         sqlrun_dt,
         bindVar,
-        function(err, result) {
+        function(err) {
           should.exist(err);
           (err.message).should.startWith('NJS-011:');
           done();
@@ -4300,7 +4299,7 @@ describe('70. plsqlBindScalar.js', function() {
       connection.execute(
         sqlrun_dt,
         bindVar,
-        function(err, result) {
+        function(err) {
           should.exist(err);
           //NJS-011: encountered bind value and type mismatch in parameter 2
           (err.message).should.startWith('NJS-011:');
@@ -4407,7 +4406,7 @@ describe('70. plsqlBindScalar.js', function() {
 
   });//70.16
 
-describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', function() {
+  describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', function() {
 
     before(function(done) {
       var proc = "CREATE OR REPLACE \n" +
@@ -4449,7 +4448,7 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
       connection.execute(
         sqlrun,
         bindVar,
-        function(err, result) {
+        function(err) {
           should.exist(err);
           (err.message).should.startWith('NJS-011:');
           done();
@@ -4483,7 +4482,7 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
       connection.execute(
         sqlrun,
         bindVar,
-        function(err, result) {
+        function(err) {
           should.exist(err);
           //NJS-011: encountered bind value and type mismatch in parameter 2
           (err.message).should.startWith('NJS-011:');
@@ -4595,7 +4594,7 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
       connection.execute(
         sqlrun,
         bindVar,
-        function(err, result) {
+        function(err) {
           should.exist(err);
           (err.message).should.startWith('NJS-011:');
           done();
@@ -4636,7 +4635,7 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
       connection.execute(
         sqlrun,
         bindVar,
-        function(err, result) {
+        function(err) {
           should.exist(err);
           (err.message).should.startWith('NJS-011:');
           done();
@@ -4729,11 +4728,11 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
           connection.execute(
              proc71810,
              function(err) {
-                should.not.exist(err);
-                cb();
-              }
+               should.not.exist(err);
+               cb();
+             }
             );
-          },
+        },
         function(cb) {
           connection.execute(
             sqlrun71810,
@@ -4765,12 +4764,12 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
                  "END nodb_inoutproc71811;";
       var date = new Date( 2011, 0, 12, 0, 0, 0, 0 );
       var bindVar = {
-          p_inout : {
-            dir:  oracledb.BIND_INOUT,
-            type: oracledb.DATE,
-            val:  date
-          }
-        };
+        p_inout : {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.DATE,
+          val:  date
+        }
+      };
       var sqlrun71811 = "begin nodb_inoutproc71811(p_inout => :p_inout); end;";
       var sqldrop = "DROP PROCEDURE nodb_inoutproc71811";
       async.series([
@@ -4778,11 +4777,11 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
           connection.execute(
              proc71811,
              function(err) {
-                should.not.exist(err);
-                cb();
-              }
+               should.not.exist(err);
+               cb();
+             }
             );
-          },
+        },
         function(cb) {
           connection.execute(
             sqlrun71811,
@@ -4919,7 +4918,7 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
       connection.execute(
         sqlrun_str,
         bindVar,
-        function(err, result) {
+        function(err) {
           should.exist(err);
           //NJS-011: encountered bind value and type mismatch in parameter 2
           (err.message).should.startWith('NJS-011:');
@@ -4938,7 +4937,7 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
       connection.execute(
         sqlrun_str,
         bindVar,
-        function(err, result) {
+        function(err) {
           should.exist(err);
           //ORA-01839: date not valid for month specified
           (err.message).should.startWith("ORA-01839");
@@ -5064,7 +5063,7 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
       connection.execute(
         sqlrun_dt,
         bindVar,
-        function(err, result) {
+        function(err) {
           should.exist(err);
           (err.message).should.startWith('NJS-011:');
           done();
@@ -5098,7 +5097,7 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
       connection.execute(
         sqlrun_dt,
         bindVar,
-        function(err, result) {
+        function(err) {
           should.exist(err);
           //NJS-011: encountered bind value and type mismatch in parameter 2
           (err.message).should.startWith('NJS-011:');
@@ -5108,7 +5107,7 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
     }); // 70.20.5
 
     it('70.20.7 val: invalid Date Value: Feb 30, 2016', function(done) {
-       var date = new Date( Date.UTC( 2016, 1, 30, 0, 0, 0, 0 ) );
+      var date = new Date( Date.UTC( 2016, 1, 30, 0, 0, 0, 0 ) );
       var bindVar = {
         output:   resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
@@ -5247,7 +5246,7 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
       connection.execute(
         sqlrun,
         bindVar,
-        function(err, result) {
+        function(err) {
           should.exist(err);
           (err.message).should.startWith('NJS-011:');
           done();
@@ -5281,7 +5280,7 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
       connection.execute(
         sqlrun,
         bindVar,
-        function(err, result) {
+        function(err) {
           should.exist(err);
           //NJS-011: encountered bind value and type mismatch in parameter 2
           (err.message).should.startWith('NJS-011:');
@@ -5394,7 +5393,7 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
       connection.execute(
         sqlrun,
         bindVar,
-        function(err, result) {
+        function(err) {
           should.exist(err);
           (err.message).should.startWith('NJS-011:');
           done();
@@ -5435,7 +5434,7 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
       connection.execute(
         sqlrun,
         bindVar,
-        function(err, result) {
+        function(err) {
           should.exist(err);
           (err.message).should.startWith('NJS-011:');
           done();
@@ -5528,11 +5527,11 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
           connection.execute(
              proc72210,
              function(err) {
-                should.not.exist(err);
-                cb();
-              }
+               should.not.exist(err);
+               cb();
+             }
             );
-          },
+        },
         function(cb) {
           connection.execute(
             sqlrun72210,
@@ -5564,12 +5563,12 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
                  "END nodb_inoutproc72211;";
       var date = new Date( 2011, 0, 12, 0, 0, 0, 0 );
       var bindVar = {
-          p_inout : {
-            dir:  oracledb.BIND_INOUT,
-            type: oracledb.DATE,
-            val:  date
-          }
-        };
+        p_inout : {
+          dir:  oracledb.BIND_INOUT,
+          type: oracledb.DATE,
+          val:  date
+        }
+      };
       var sqlrun72211 = "begin nodb_inoutproc72211(p_inout => :p_inout); end;";
       var sqldrop = "DROP PROCEDURE nodb_inoutproc72211";
       async.series([
@@ -5577,11 +5576,11 @@ describe('70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE', func
           connection.execute(
              proc72211,
              function(err) {
-                should.not.exist(err);
-                cb();
-              }
+               should.not.exist(err);
+               cb();
+             }
             );
-          },
+        },
         function(cb) {
           connection.execute(
             sqlrun72211,

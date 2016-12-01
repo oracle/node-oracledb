@@ -35,7 +35,6 @@
 
 var oracledb = require('oracledb');
 var should   = require('should');
-var async    = require('async');
 var assist   = require('./dataTypeAssist.js');
 var dbConfig = require('./dbconfig.js');
 
@@ -57,14 +56,14 @@ describe('30. dataTypeBinaryFloat.js', function() {
         done();
       }
     );
-  })
+  });
 
   after('release connection', function(done) {
     connection.release( function(err) {
       should.not.exist(err);
       done();
     });
-  })
+  });
 
   describe('30.1 testing BINARY_FLOAT data', function() {
 
@@ -72,7 +71,7 @@ describe('30. dataTypeBinaryFloat.js', function() {
 
     before('create table, insert data',function(done) {
       assist.setUp(connection, tableName, numbers, done);
-    })
+    });
 
     after(function(done) {
       connection.execute(
@@ -82,40 +81,40 @@ describe('30. dataTypeBinaryFloat.js', function() {
           done();
         }
       );
-    })
+    });
 
     it('30.1.1 works well with SELECT query', function(done) {
       assist.dataTypeSupport(connection, tableName, numbers, done);
-    })
+    });
 
     it('30.1.2 works well with result set', function(done) {
       assist.verifyResultSet(connection, tableName, numbers, done);
-    })
+    });
 
     it('30.1.3 works well with REF Cursor', function(done) {
       assist.verifyRefCursor(connection, tableName, numbers, done);
-    })
+    });
 
-  })  // 30.1
+  });  // 30.1
 
   describe('30.2 stores null value correctly', function() {
     it('30.2.1 testing Null, Empty string and Undefined', function(done) {
       assist.verifyNullValues(connection, tableName, done);
-    })
-  })
+    });
+  });
 
   describe('30.3 testing floating-point numbers which cannot be precisely represent', function() {
     var nums =
-    [
-      2345.67,
-      9876.54321,
-      0.01234,
-      0.00000123
-    ];
+      [
+        2345.67,
+        9876.54321,
+        0.01234,
+        0.00000123
+      ];
 
     before('create table, insert data',function(done) {
       assist.setUp(connection, tableName, nums, done);
-    })
+    });
 
     after(function(done) {
       connection.execute(
@@ -125,7 +124,7 @@ describe('30. dataTypeBinaryFloat.js', function() {
           done();
         }
       );
-    })
+    });
 
     it('30.3.1 rounding numbers', function(done) {
       connection.execute(
@@ -142,12 +141,12 @@ describe('30. dataTypeBinaryFloat.js', function() {
           done();
         }
       );
-    })
+    });
 
     function approxeq(v1, v2)
     {
       var precision = 0.001;
       return Math.abs(v1 - v2) < precision;
     }
-  }) // 30.3
-})
+  }); // 30.3
+});

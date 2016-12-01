@@ -60,21 +60,21 @@ describe('38. dataTypeTimestamp6.js', function() {
         done();
       }
     );
-  })
+  });
 
   after('release connection', function(done) {
     connection.release( function(err) {
       should.not.exist(err);
       done();
     });
-  })
+  });
 
   describe('38.1 Testing JavaScript Date with database TIMESTAMP(9) WITH LOCAL TIME ZONE', function() {
     var dates = assist.data.dates;
 
     before('create table, insert data',function(done) {
       assist.setUp(connection, tableName, dates, done);
-    })
+    });
 
     after(function(done) {
       connection.execute(
@@ -84,34 +84,34 @@ describe('38. dataTypeTimestamp6.js', function() {
           done();
         }
       );
-    })
+    });
 
     it('38.1.1 works well with SELECT query', function(done) {
       assist.dataTypeSupport(connection, tableName, dates, done);
-    })
+    });
 
     it('38.1.2 works well with result set', function(done) {
       assist.verifyResultSet(connection, tableName, dates, done);
-    })
+    });
 
     it('38.1.3 works well with REF Cursor', function(done) {
       assist.verifyRefCursor(connection, tableName, dates, done);
-    })
+    });
 
-  }) // end of 37.1 suite
+  }); // end of 37.1 suite
 
   describe('38.2 stores null value correctly', function() {
     it('38.2.1 testing Null, Empty string and Undefined', function(done) {
       assist.verifyNullValues(connection, tableName, done);
-    })
-  })
+    });
+  });
 
   describe('38.3 testing TIMESTAMP WITH LOCAL TIME ZONE', function() {
     var timestamps = assist.TIMESTAMP_TZ_STRINGS;
 
     before(function(done) {
       assist.setUp4sql(connection, tableName, timestamps, done);
-    })
+    });
 
     after(function(done) {
       connection.execute(
@@ -121,11 +121,11 @@ describe('38. dataTypeTimestamp6.js', function() {
           done();
         }
       );
-    }) // after
+    }); // after
 
     it('38.3.1 SELECT query - original data', function(done) {
       assist.selectOriginalData(connection, tableName, timestamps, done);
-    })
+    });
 
     it('38.3.2 SELECT query - formatted data for comparison', function(done) {
       var sql = "SELECT num, TO_CHAR(content AT TIME ZONE '-8:00', 'DD-MM-YYYY HH24:MI:SS.FF TZR') AS TS_DATA FROM "
@@ -147,9 +147,9 @@ describe('38. dataTypeTimestamp6.js', function() {
           }
         );
       }, function(err) {
-          should.not.exist(err);
-          done();
+        should.not.exist(err);
+        done();
       });
-    })
-  }) // end of 38.3 suite
-})
+    });
+  }); // end of 38.3 suite
+});

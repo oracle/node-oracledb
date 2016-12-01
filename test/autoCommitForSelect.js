@@ -104,7 +104,7 @@ describe('8. autoCommitForSelect.js', function(){
         );
       }
     ], done);
-  })
+  });
 
   after(function(done){
     async.parallel([
@@ -121,7 +121,7 @@ describe('8. autoCommitForSelect.js', function(){
         });
       }
     ], done);
-  })
+  });
 
   beforeEach(function(done){
     connection.execute(script, function(err){
@@ -133,7 +133,7 @@ describe('8. autoCommitForSelect.js', function(){
         done();
       });
     });
-  })
+  });
 
   afterEach(function(done){
     connection.execute(
@@ -143,7 +143,7 @@ describe('8. autoCommitForSelect.js', function(){
           done();
         }
       );
-  })
+  });
 
   it('8.1 should return previous value when autoCommit is false', function(done){
     connection.should.be.ok();
@@ -209,7 +209,7 @@ describe('8. autoCommitForSelect.js', function(){
         );
       }
     ], done);
-  })
+  });
 
   it('8.2 can use explicit commit() to keep data consistent', function(done){
     connection.should.be.ok();
@@ -281,7 +281,7 @@ describe('8. autoCommitForSelect.js', function(){
         );
       }
     ], done);
-  })
+  });
 
   it('8.3 can also use the autoCommit for SELECTs feature', function(done){
     connection.should.be.ok();
@@ -355,5 +355,5 @@ describe('8. autoCommitForSelect.js', function(){
         );
       }
     ], done);
-  })
-})
+  });
+});

@@ -54,7 +54,7 @@ describe('56. fetchAs.js', function() {
         done();
       }
     );
-  })
+  });
 
   afterEach('release connection, reset fetchAsString property', function(done) {
     oracledb.fetchAsString = [];
@@ -62,7 +62,7 @@ describe('56. fetchAs.js', function() {
       should.not.exist(err);
       done();
     });
-  })
+  });
 
   it('56.1 property value check', function() {
 
@@ -76,7 +76,7 @@ describe('56. fetchAs.js', function() {
 
     oracledb.fetchAsString = [ oracledb.DATE, oracledb.NUMBER ];
     (oracledb.fetchAsString).should.eql( [2003, 2002] );
-  })
+  });
 
   it('56.2 Fetch DATE column values as STRING - by-Column name', function(done) {
     connection.execute(
@@ -93,7 +93,7 @@ describe('56. fetchAs.js', function() {
         done();
       }
     );
-  })
+  });
 
   it('56.3 Fetch DATE, NUMBER column values STRING - by Column-name', function(done) {
     connection.execute(
@@ -116,7 +116,7 @@ describe('56. fetchAs.js', function() {
         done();
       }
     );
-  })
+  });
 
   it('56.4 Fetch DATE, NUMBER as STRING by-time configuration and by-name', function(done) {
     oracledb.fetchAsString = [ oracledb.DATE, oracledb.NUMBER ];
@@ -141,7 +141,7 @@ describe('56. fetchAs.js', function() {
         done();
       }
     );
-  })
+  });
 
   it('56.5 Fetch DATE, NUMBER column as STRING by-type and override at execute time', function(done) {
     oracledb.fetchAsString = [ oracledb.DATE, oracledb.NUMBER ];
@@ -166,7 +166,7 @@ describe('56. fetchAs.js', function() {
         done();
       }
     );
-  })
+  });
 
   it('56.6 Fetch ROWID column values STRING - non-ResultSet', function(done) {
     connection.execute(
@@ -186,7 +186,7 @@ describe('56. fetchAs.js', function() {
         done();
       }
     );
-  })
+  });
 
   it('56.7 Fetch ROWID column values STRING - ResultSet', function(done) {
     connection.execute(
@@ -214,7 +214,7 @@ describe('56. fetchAs.js', function() {
         });
       }
     );
-  })
+  });
 
   /*
   * The maximum safe integer in JavaScript is (2^53 - 1).
@@ -223,22 +223,22 @@ describe('56. fetchAs.js', function() {
   * The last element is out of Oracle database standard Number range. It will be rounded by database.
   */
   var numStrs =
-  [
-    '17249138680355831',
-    '-17249138680355831',
-    '0.17249138680355831',
-    '-0.17249138680355831',
-    '0.1724913868035583123456789123456789123456'
-  ];
+    [
+      '17249138680355831',
+      '-17249138680355831',
+      '0.17249138680355831',
+      '-0.17249138680355831',
+      '0.1724913868035583123456789123456789123456'
+    ];
 
   var numResults =
-  [
-    '17249138680355831',
-    '-17249138680355831',
-    '.17249138680355831',
-    '-.17249138680355831',
-    '.172491386803558312345678912345678912346'
-  ];
+    [
+      '17249138680355831',
+      '-17249138680355831',
+      '.17249138680355831',
+      '-.17249138680355831',
+      '.172491386803558312345678912345678912346'
+    ];
 
   it('56.8 large numbers with fetchInfo', function(done) {
     async.forEach(numStrs, function(element, callback) {
@@ -263,7 +263,7 @@ describe('56. fetchAs.js', function() {
       should.not.exist(err);
       done();
     });
-  })
+  });
 
   it('56.9 large numbers with setting fetchAsString property', function(done) {
     oracledb.fetchAsString = [ oracledb.NUMBER ];
@@ -285,7 +285,7 @@ describe('56. fetchAs.js', function() {
       should.not.exist(err);
       done();
     });
-  })
+  });
 
   // FetchInfo format should <columName> : {type : oracledb.<type>
   it ('56.10 invalid syntax for type should result in error', function (done){
@@ -293,11 +293,11 @@ describe('56. fetchAs.js', function() {
       "SELECT SYSDATE AS THE_DATE FROM DUAL",
       { },
       { fetchInfo : { "THE_DATE" : oracledb.STRING }},
-      function ( err, result ) {
+      function ( err ) {
         should.exist ( err ) ;
         (err.message).should.startWith ('NJS-015:');
         done ();
       } );
   });
 
-})
+});

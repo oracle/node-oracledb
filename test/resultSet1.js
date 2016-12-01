@@ -94,7 +94,7 @@ describe('12. resultSet1.js', function() {
         ;
       }
     );
-  })
+  });
 
   after(function(done) {
     connection.execute(
@@ -107,7 +107,7 @@ describe('12. resultSet1.js', function() {
         });
       }
     );
-  })
+  });
 
   describe('12.1 Testing resultSet option', function() {
     it('12.1.1 when resultSet option = false, content of result is correct', function(done) {
@@ -127,7 +127,7 @@ describe('12. resultSet1.js', function() {
           done();
         }
       );
-    })
+    });
 
     it('12.1.2 when resultSet option = true, content of result is correct', function(done) {
       connection.should.be.ok();
@@ -144,7 +144,7 @@ describe('12. resultSet1.js', function() {
           done();
         }
       );
-    })
+    });
 
     it('12.1.3 when resultSet option = 0, it behaves like false', function(done) {
       connection.should.be.ok();
@@ -163,7 +163,7 @@ describe('12. resultSet1.js', function() {
           done();
         }
       );
-    })
+    });
 
     it('12.1.4 when resultSet option = null, it behaves like false',function(done) {
       connection.should.be.ok();
@@ -181,7 +181,7 @@ describe('12. resultSet1.js', function() {
           done();
         }
       );
-    })
+    });
 
     it('12.1.5 when resultSet option = undefined, it behaves like false', function(done) {
       connection.should.be.ok();
@@ -199,7 +199,7 @@ describe('12. resultSet1.js', function() {
           done();
         }
       );
-    })
+    });
 
     it('12.1.6 when resultSet option = NaN, it behaves like false', function(done) {
       connection.should.be.ok();
@@ -217,7 +217,7 @@ describe('12. resultSet1.js', function() {
           done();
         }
       );
-    })
+    });
 
     it('12.1.7 when resultSet option = 1, it behaves like true', function(done) {
       connection.should.be.ok();
@@ -234,7 +234,7 @@ describe('12. resultSet1.js', function() {
           done();
         }
       );
-    })
+    });
 
     it('12.1.8 when resultSet option = -1, it behaves like true', function(done) {
       connection.should.be.ok();
@@ -251,7 +251,7 @@ describe('12. resultSet1.js', function() {
           done();
         }
       );
-    })
+    });
 
     it('12.1.9 when resultSet option is a random string, it behaves like true', function(done) {
       connection.should.be.ok();
@@ -268,11 +268,11 @@ describe('12. resultSet1.js', function() {
           done();
         }
       );
-    })
+    });
 
-  })
+  });
 
-  describe('12.2 Testing prefetchRows option', function(done) {
+  describe('12.2 Testing prefetchRows option', function() {
     it('12.2.1 cannot set prefetchRows to be a negative value', function(done) {
       connection.should.be.ok();
 
@@ -280,14 +280,14 @@ describe('12. resultSet1.js', function() {
         "SELECT employees_name FROM nodb_rs1_emp",
         [],
         { resultSet: true, prefetchRows: -10, maxRows: 1000 },
-        function(err, result) {
+        function(err) {
           should.exist(err);
           (err.message).should.startWith('NJS-007:');
           // NJS-007: invalid value for "prefetchRows"
           done();
         }
       );
-    })
+    });
 
     it('12.2.2 cannot set prefetchRows to be a random string', function(done) {
       connection.should.be.ok();
@@ -296,14 +296,14 @@ describe('12. resultSet1.js', function() {
         "SELECT employees_name FROM nodb_rs1_emp",
         [],
         { resultSet: true, prefetchRows: 'bar', maxRows: 1000 },
-        function(err, result) {
+        function(err) {
           should.exist(err);
           (err.message).should.startWith('NJS-008:');
           // NJS-008: invalid type for "prefetchRows"
           done();
         }
       );
-    })
+    });
 
     it('12.2.3 cannot set prefetchRows to be NaN', function(done) {
       connection.should.be.ok();
@@ -312,14 +312,14 @@ describe('12. resultSet1.js', function() {
         "SELECT employees_name FROM nodb_rs1_emp",
         [],
         { resultSet: true, prefetchRows: NaN, maxRows: 1000 },
-        function(err, result) {
+        function(err) {
           should.exist(err);
           (err.message).should.startWith('NJS-007:');
           // NJS-007: invalid value for "prefetchRows"
           done();
         }
       );
-    })
+    });
 
     it('12.2.4 prefetchRows can be set to null', function(done) {
       connection.should.be.ok();
@@ -328,13 +328,13 @@ describe('12. resultSet1.js', function() {
         "SELECT employees_name FROM nodb_rs1_emp",
         [],
         { resultSet: true, prefetchRows: null, maxRows: 1000 },
-        function(err, result) {
+        function(err) {
           should.not.exist(err);
-          // console.log(result);
+
           done();
         }
       );
-    })
+    });
 
     it('12.2.5 prefetchRows can be set to 0', function(done) {
       connection.should.be.ok();
@@ -343,14 +343,14 @@ describe('12. resultSet1.js', function() {
         "SELECT employees_name FROM nodb_rs1_emp",
         [],
         { resultSet: true, prefetchRows: 0, maxRows: 1000 },
-        function(err, result) {
+        function(err) {
           should.not.exist(err);
           done();
         }
       );
-    })
+    });
 
-  })
+  });
 
   describe('12.3 Testing function getRows()', function() {
     it('12.3.1 retrieved set is exactly the size of result', function(done) {
@@ -384,7 +384,7 @@ describe('12. resultSet1.js', function() {
           }
         });
       }
-    })
+    });
 
     it('12.3.2 retrieved set is greater than the size of result', function(done) {
       connection.should.be.ok();
@@ -417,7 +417,7 @@ describe('12. resultSet1.js', function() {
           }
         });
       }
-    })
+    });
 
     it('12.3.3 retrieved set is half of the size of result', function(done) {
       connection.should.be.ok();
@@ -450,7 +450,7 @@ describe('12. resultSet1.js', function() {
           }
         });
       }
-    })
+    });
 
     it('12.3.4 retrieved set is one tenth of the size of the result', function(done) {
       connection.should.be.ok();
@@ -483,7 +483,7 @@ describe('12. resultSet1.js', function() {
           }
         });
       }
-    })
+    });
 
     it('12.3.5 data in resultSet is array when setting outFormat ARRAY', function(done) {
       connection.should.be.ok();
@@ -519,7 +519,7 @@ describe('12. resultSet1.js', function() {
           }
         });
       }
-    })
+    });
 
     it('12.3.6 data in resultSet is object when setting outFormat OBJECT', function(done) {
       connection.should.be.ok();
@@ -555,7 +555,7 @@ describe('12. resultSet1.js', function() {
           }
         });
       }
-    })
+    });
 
     it('12.3.7 the size of retrieved set can be set to 1', function(done) {
       connection.should.be.ok();
@@ -588,12 +588,12 @@ describe('12. resultSet1.js', function() {
           }
         });
       }
-    })
+    });
 
     it('12.3.8 query 0 row', function(done) {
       connection.should.be.ok();
-      var nRows = 5;
       var accessCount = 0;
+
       connection.execute(
         "SELECT employees_name FROM nodb_rs1_emp WHERE employees_id > 300",
         [],
@@ -609,8 +609,8 @@ describe('12. resultSet1.js', function() {
           should.not.exist(err);
           if(rows) {
             accessCount++;
-            row[0].should.eql('staff ' + accessCount);
-            row.should.be.an.Array;
+            rows[0].should.eql('staff ' + accessCount);
+            rows.should.be.an.Array;
             return fetchRowsFromRS(rs, numRows);
           } else {
             rs.close(function(err) {
@@ -621,7 +621,7 @@ describe('12. resultSet1.js', function() {
           }
         });
       }
-    })
+    });
 
     it('12.3.9 Negative - To omit the first parameter', function(done) {
       connection.should.be.ok();
@@ -649,7 +649,7 @@ describe('12. resultSet1.js', function() {
           });
         }
       }
-    })
+    });
 
     it('12.3.10 Negative - set the 1st parameter of getRows() to be 0', function(done) {
       connection.should.be.ok();
@@ -666,7 +666,7 @@ describe('12. resultSet1.js', function() {
       );
 
       function fetchRowFromRS(rs, numRows) {
-        rs.getRows(numRows, function(err, rows) {
+        rs.getRows(numRows, function(err) {
           should.exist(err);
           (err.message).should.startWith('NJS-005:');
           // NJS-005: invalid value for parameter 1
@@ -676,7 +676,7 @@ describe('12. resultSet1.js', function() {
           });
         });
       }
-    })
+    });
 
     it('12.3.11 Negative - set the 1st parameter of getRows() to be -5', function(done) {
       connection.should.be.ok();
@@ -693,7 +693,7 @@ describe('12. resultSet1.js', function() {
       );
 
       function fetchRowFromRS(rs, numRows) {
-        rs.getRows(numRows, function(err, rows) {
+        rs.getRows(numRows, function(err) {
           should.exist(err);
           (err.message).should.startWith('NJS-006:');
           // NJS-006: invalid type for parameter 1
@@ -703,7 +703,7 @@ describe('12. resultSet1.js', function() {
           });
         });
       }
-    })
+    });
 
     it('12.3.12 Negative - set the 1st parameter of getRows() to be null', function(done) {
       connection.should.be.ok();
@@ -732,8 +732,8 @@ describe('12. resultSet1.js', function() {
           });
         }
       }
-    })
-  })
+    });
+  });
 
   describe('12.4 Testing function getRow()', function() {
     it('12.4.1 works well with all correct setting', function(done) {
@@ -767,7 +767,7 @@ describe('12. resultSet1.js', function() {
           }
         });
       }
-    })
+    });
 
     it('12.4.2 data in resultSet is array when setting outFormat ARRAY', function(done) {
       connection.should.be.ok();
@@ -801,7 +801,7 @@ describe('12. resultSet1.js', function() {
           }
         });
       }
-    })
+    });
 
     it('12.4.3 data in resultSet is object when setting outFormat OBJECT', function(done) {
       connection.should.be.ok();
@@ -835,7 +835,7 @@ describe('12. resultSet1.js', function() {
           }
         });
       }
-    })
+    });
 
     it('12.4.4 query 0 row', function(done) {
       connection.should.be.ok();
@@ -867,7 +867,7 @@ describe('12. resultSet1.js', function() {
           }
         });
       }
-    })
+    });
 
     it('12.4.5 Negative - set the first parameter like getRows()', function(done){
       connection.should.be.ok();
@@ -896,9 +896,9 @@ describe('12. resultSet1.js', function() {
           });
         }
       }
-    })
+    });
 
-  })
+  });
 
   describe('12.5 Testing function close()', function() {
     it('12.5.1 does not call close()', function(done) {
@@ -929,7 +929,7 @@ describe('12. resultSet1.js', function() {
           }
         });
       }
-    })
+    });
 
     it('12.5.2 invokes close() twice', function(done) {
       connection.should.be.ok();
@@ -966,12 +966,11 @@ describe('12. resultSet1.js', function() {
           }
         });
       }
-    })
+    });
 
     it('12.5.3 uses getRows after calling close()', function(done) {
       connection.should.be.ok();
       var nRows = Math.ceil(rowsAmount/10);
-      var accessCount = 0;
 
       connection.execute(
         "SELECT employees_name FROM nodb_rs1_emp",
@@ -988,12 +987,11 @@ describe('12. resultSet1.js', function() {
           should.not.exist(err);
 
           if(rows.length > 0) {
-            accessCount++;
             return fetchRowFromRS(rs, numRows);
           } else {
             rs.close(function(err) {
               should.not.exist(err);
-              rs.getRows(numRows, function(err, rows) {
+              rs.getRows(numRows, function(err) {
                 should.exist(err);
                 (err.message).should.startWith('NJS-018:');
                 done();
@@ -1002,7 +1000,7 @@ describe('12. resultSet1.js', function() {
           }
         });
       }
-    })
+    });
 
     it('12.5.4 closes one resultSet and then open another resultSet', function(done) {
       connection.should.be.ok();
@@ -1051,9 +1049,9 @@ describe('12. resultSet1.js', function() {
           }
         });
       }
-    })
+    });
 
-  })
+  });
 
   describe('12.6 Testing metaData', function() {
     this.timeout(0);
@@ -1090,7 +1088,7 @@ describe('12. resultSet1.js', function() {
         buffer.append(" )");
 
         return buffer.toString();
-      }
+      };
       /*********************/
       var columnsAmount = 1000;
       async.series([
@@ -1130,7 +1128,7 @@ describe('12. resultSet1.js', function() {
           );
         }
       ], done);
-    })
+    });
 
     it('12.6.2 can distinguish lower case and upper case', function(done) {
       connection.should.be.ok();
@@ -1188,7 +1186,7 @@ describe('12. resultSet1.js', function() {
           );
         }
       ], done);
-    })
+    });
 
     it('12.6.3 can contain quotes', function(done) {
       connection.should.be.ok();
@@ -1246,7 +1244,7 @@ describe('12. resultSet1.js', function() {
           );
         }
       ], done);
-    })
+    });
 
     it('12.6.4 can contain underscore', function(done) {
       connection.should.be.ok();
@@ -1304,14 +1302,14 @@ describe('12. resultSet1.js', function() {
           );
         }
       ], done);
-    })
-  })
+    });
+  });
 
   describe('12.7 Testing maxRows', function() {
     it('12.7.1 maxRows option is ignored when resultSet option is true', function(done) {
       connection.should.be.ok();
-      var accessCount = 0;
       var rowsLimit = 50;
+
       connection.execute(
         "SELECT * FROM nodb_rs1_emp ORDER BY employees_id",
         [],
@@ -1325,7 +1323,6 @@ describe('12. resultSet1.js', function() {
         rs.getRow(function(err, row) {
           should.not.exist(err);
           if(row) {
-            accessCount++;
             return fetchRowFromRS(rs);
           } else {
             rs.close(function(err) {
@@ -1335,7 +1332,7 @@ describe('12. resultSet1.js', function() {
           }
         });
       }
-    })
+    });
 
     it('12.7.2 maxRows option is ignored with REF Cursor', function(done) {
       connection.should.be.ok();
@@ -1400,7 +1397,7 @@ describe('12. resultSet1.js', function() {
           }
         });
       }
-    })
-  })
+    });
+  });
 
-})
+});

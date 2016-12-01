@@ -39,7 +39,6 @@
 var oracledb = require('oracledb');
 var should   = require('should');
 var async    = require('async');
-var assist   = require('./dataTypeAssist.js');
 var dbConfig = require('./dbconfig.js');
 
 describe('36. dataTypeTimestamp4.js', function() {
@@ -84,7 +83,7 @@ describe('36. dataTypeTimestamp4.js', function() {
         );
       }
     );
-  })
+  });
 
   after( function(done){
     connection.execute(
@@ -97,16 +96,16 @@ describe('36. dataTypeTimestamp4.js', function() {
         });
       }
     );
-  })
+  });
 
   it('supports TIMESTAMP WITH TIME ZONE data type', function(done) {
     connection.should.be.ok();
 
     var timestamps = [
-        new Date(-100000000),
-        new Date(0),
-        new Date(10000000000),
-        new Date(100000000000)
+      new Date(-100000000),
+      new Date(0),
+      new Date(10000000000),
+      new Date(100000000000)
     ];
 
     var sqlInsert = "INSERT INTO " + tableName + " VALUES(:no, :bindValue)";
@@ -129,6 +128,7 @@ describe('36. dataTypeTimestamp4.js', function() {
         function(err, result) {
           should.exist(err);
           (err.message).should.startWith('NJS-010:'); // unsupported data type in select list
+          should.not.exist(result);
           /*
           console.log(result);
           for(var j = 0; j < timestamps.length; j++)
@@ -138,6 +138,6 @@ describe('36. dataTypeTimestamp4.js', function() {
         }
       );
     });
-  })
+  });
 
-})
+});

@@ -132,6 +132,7 @@ describe('67. poolCache.js', function() {
           should.exist(err);
 
           (err.message).should.startWith('NJS-046:');
+          should.not.exist(pool2);
 
           pool1.close(function(err){
             should.not.exist(err);
@@ -174,8 +175,9 @@ describe('67. poolCache.js', function() {
 
       oracledb.createPool(dbConfig, function(err, pool) {
         should.exist(err);
-
         (err.message).should.startWith('NJS-004:');
+
+        should.not.exist(pool);
 
         done();
       });
@@ -351,6 +353,8 @@ describe('67. poolCache.js', function() {
         poolIncrement: 1,
         poolTimeout: 0 // never terminate unused connections
       }, function(err) {
+        should.not.exist(err);
+
         var defaultPool = oracledb.getPool();
         should.exist(defaultPool);
         (defaultPool.poolAlias).should.equal('default');
@@ -389,11 +393,11 @@ describe('67. poolCache.js', function() {
         (pool.poolAlias).should.eql('named-pool');
 
         (function() {
-        oracledb.getPool();
+          oracledb.getPool();
         }).should.throw(/^NJS-047:/);
 
         (function() {
-        oracledb.getPool('named-pool');
+          oracledb.getPool('named-pool');
         }).should.be.ok();
 
         done();
@@ -454,7 +458,7 @@ describe('67. poolCache.js', function() {
         should.not.exist(err);
 
         // Not specifying a poolAlias, default will be used
-        oracledb.getConnection(function(err, conn) {
+        oracledb.getConnection(function(err) {
           should.exist(err);
 
           (err.message).should.startWith('NJS-047:');
@@ -474,7 +478,7 @@ describe('67. poolCache.js', function() {
       oracledb.createPool(dbConfig, function(err, pool) {
         should.not.exist(err);
 
-        oracledb.getConnection('pool-alias-that-does-not-exist', function(err, conn) {
+        oracledb.getConnection('pool-alias-that-does-not-exist', function(err) {
           should.exist(err);
 
           (err.message).should.startWith('NJS-047:');
@@ -588,6 +592,8 @@ describe('67. poolCache.js', function() {
         poolIncrement: 1,
         poolTimeout: 0 // never terminate unused connections
       }, function(err) {
+        should.not.exist(err);
+
         var defaultPool = oracledb.getPool();
         should.exist(defaultPool);
 
@@ -604,7 +610,7 @@ describe('67. poolCache.js', function() {
           });
         });
       });
-     });
+    });
   }); // 67.2
 
 // This suite extends 67.1.6 case with various types
@@ -614,7 +620,7 @@ describe('67. poolCache.js', function() {
 
       dbConfig.poolAlias = {'foo': 'bar'};
 
-      oracledb.createPool(dbConfig, function(err, pool) {
+      oracledb.createPool(dbConfig, function(err) {
         should.exist(err);
 
         (err.message).should.startWith('NJS-004:');
@@ -627,7 +633,7 @@ describe('67. poolCache.js', function() {
 
       dbConfig.poolAlias = [];
 
-      oracledb.createPool(dbConfig, function(err, pool) {
+      oracledb.createPool(dbConfig, function(err) {
         should.exist(err);
 
         (err.message).should.startWith('NJS-004:');
@@ -640,7 +646,7 @@ describe('67. poolCache.js', function() {
 
       dbConfig.poolAlias = 123;
 
-      oracledb.createPool(dbConfig, function(err, pool) {
+      oracledb.createPool(dbConfig, function(err) {
         should.exist(err);
 
         (err.message).should.startWith('NJS-004:');
@@ -653,7 +659,7 @@ describe('67. poolCache.js', function() {
 
       dbConfig.poolAlias = false;
 
-      oracledb.createPool(dbConfig, function(err, pool) {
+      oracledb.createPool(dbConfig, function(err) {
         should.exist(err);
 
         (err.message).should.startWith('NJS-004:');
@@ -666,7 +672,7 @@ describe('67. poolCache.js', function() {
 
       dbConfig.poolAlias = null;
 
-      oracledb.createPool(dbConfig, function(err, pool) {
+      oracledb.createPool(dbConfig, function(err) {
         should.exist(err);
 
         (err.message).should.startWith('NJS-004:');
@@ -679,7 +685,7 @@ describe('67. poolCache.js', function() {
 
       dbConfig.poolAlias = '';
 
-      oracledb.createPool(dbConfig, function(err, pool) {
+      oracledb.createPool(dbConfig, function(err) {
         should.exist(err);
 
         (err.message).should.startWith('NJS-004:');
@@ -692,7 +698,7 @@ describe('67. poolCache.js', function() {
 
       dbConfig.poolAlias = NaN;
 
-      oracledb.createPool(dbConfig, function(err, pool) {
+      oracledb.createPool(dbConfig, function(err) {
         should.exist(err);
 
         (err.message).should.startWith('NJS-004:');

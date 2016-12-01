@@ -41,10 +41,10 @@ var dbConfig = require('./dbconfig.js');
 describe('3. examples.js', function(){
 
   var credentials = {
-                      user:          dbConfig.user,
-                      password:      dbConfig.password,
-                      connectString: dbConfig.connectString
-                    };
+    user:          dbConfig.user,
+    password:      dbConfig.password,
+    connectString: dbConfig.connectString
+  };
 
   describe('3.1 connect.js', function(){
     it('3.1.1 tests a basic connection to the database', function(done){
@@ -56,8 +56,8 @@ describe('3. examples.js', function(){
           done();
         });
       });
-    })
-  })
+    });
+  });
 
   describe('3.2 version.js', function(){
     it('3.2.1 shows the oracledb version attribute', function(){
@@ -68,9 +68,13 @@ describe('3. examples.js', function(){
       var major = Math.floor(oracledb.version/10000);
       var minor = Math.floor(oracledb.version/100) % 100;
       var patch = oracledb.version % 100;
+
+      (major).should.be.a.Number();
+      (minor).should.be.a.Number();
+      (patch).should.be.a.Number();
       // console.log("Driver version text is " + major + "." + minor + "." + patch);
-    })
-  })
+    });
+  });
 
   describe('3.3 select1.js & select2.js', function(){
     var connection = false;
@@ -81,16 +85,16 @@ describe('3. examples.js', function(){
         connection = conn;
         done();
       });
-    })
+    });
 
     after(function(done){
       if(connection){
         connection.release( function(err){
-        if(err) { console.error(err.message); return; }
-        done();
+          if(err) { console.error(err.message); return; }
+          done();
         });
       }
-    })
+    });
 
     it('3.3.1. execute a basic query', function(done){
       var script1 =
@@ -138,13 +142,13 @@ describe('3. examples.js', function(){
             function(err, result) {
               should.not.exist(err);
               (result.rows).should.eql([[ 180, 'Construction' ]]);
-               callback();
+              callback();
             }
           );
         }
       ], done);
 
-    })
+    });
 
     it('3.3.2. execute queries to show array and object formats', function(done){
       var script2 =
@@ -224,9 +228,9 @@ describe('3. examples.js', function(){
         }
       ], done);
 
-    })
+    });
 
-  })
+  });
 
   /* Oracle Database 12.1.0.2 has extensive JSON datatype support */
   describe('3.4 selectjson.js - 12.1.0.2 feature', function(){
@@ -238,14 +242,14 @@ describe('3. examples.js', function(){
         connection = conn;
         done();
       });
-    })
+    });
 
     after(function(done){
       connection.release( function(err){
         if(err) { console.error(err.message); return; }
         done();
       });
-    })
+    });
 
     it('3.4.1 executes a query from a JSON table', function(done){
       if (connection.oracleServerVersion < 1201000200)
@@ -324,9 +328,9 @@ describe('3. examples.js', function(){
 
       } // else
 
-    })
+    });
 
-  })
+  });
 
   describe('3.5 date.js', function(){
     var connection = false;
@@ -357,14 +361,14 @@ describe('3. examples.js', function(){
         connection = conn;
         done();
       });
-    })
+    });
 
     after(function(done){
       connection.release( function(err){
         if(err) { console.error(err.message); return; }
         done();
       });
-    })
+    });
 
     it('3.5.1 inserts and query DATE and TIMESTAMP columns', function(done){
       async.series([
@@ -420,9 +424,9 @@ describe('3. examples.js', function(){
           );
         }
       ], done);
-    })
+    });
 
-  })
+  });
 
   describe('3.6 rowlimit.js', function(){
     var connection = false;
@@ -470,7 +474,7 @@ describe('3. examples.js', function(){
           });
         });
       });
-    })
+    });
 
     after(function(done){
       connection.execute(
@@ -483,7 +487,7 @@ describe('3. examples.js', function(){
           });
         }
       );
-    })
+    });
 
     it('3.6.1 by default, the number is 100', function(done){
       var defaultLimit = oracledb.maxRows;
@@ -500,7 +504,7 @@ describe('3. examples.js', function(){
           done();
         }
       );
-    })
+    });
 
     it('3.6.2 can also specify for each execution', function(done){
       connection.should.be.ok();
@@ -515,9 +519,9 @@ describe('3. examples.js', function(){
           done();
         }
       );
-    })
+    });
 
-  })
+  });
 
   describe('3.7 plsql.js', function(){
     var connection = false;
@@ -528,14 +532,14 @@ describe('3. examples.js', function(){
         connection = conn;
         done();
       });
-    })
+    });
 
     after(function(done){
       connection.release( function(err){
         if(err) { console.error(err.message); return; }
         done();
       });
-    })
+    });
 
     it('3.7.1 can call PL/SQL procedure and binding parameters in various ways', function(done){
       var proc =
@@ -549,7 +553,7 @@ describe('3. examples.js', function(){
         i:  'Chris',  // bind type is determined from the data type
         io: { val: 'Jones', dir : oracledb.BIND_INOUT },
         o:  { type: oracledb.NUMBER, dir : oracledb.BIND_OUT }
-      }
+      };
 
       async.series([
         function(callback){
@@ -576,14 +580,14 @@ describe('3. examples.js', function(){
         function(callback){
           connection.execute(
             "DROP PROCEDURE nodb_eg_proc7",
-            function(err, result){
+            function(err){
               should.not.exist(err);
               callback();
             }
           );
         }
       ], done);
-    })
+    });
 
     it('3.7.2 can call PL/SQL function', function(done) {
       var proc =
@@ -623,16 +627,16 @@ describe('3. examples.js', function(){
         function(callback){
           connection.execute(
             "DROP FUNCTION nodb_eg_func7",
-            function(err, result){
+            function(err){
               should.not.exist(err);
               callback();
             }
           );
         }
       ], done);
-    })
+    });
 
-  })
+  });
 
   describe('3.8 insert1.js', function(){
     var connection = false;
@@ -661,14 +665,14 @@ describe('3. examples.js', function(){
         connection = conn;
         done();
       });
-    })
+    });
 
     after(function(done){
       connection.release( function(err){
         if(err) { console.error(err.message); return; }
         done();
       });
-    })
+    });
 
     it('3.8.1 creates a table and inserts data', function(done){
       async.series([
@@ -723,8 +727,8 @@ describe('3. examples.js', function(){
           );
         }
       ], done);
-    })
-  })
+    });
+  });
 
   describe('3.9 insert2.js', function(){
     var conn1 = false;
@@ -758,7 +762,7 @@ describe('3. examples.js', function(){
           done();
         });
       });
-    })
+    });
 
     after(function(done){
       conn1.release( function(err){
@@ -768,7 +772,7 @@ describe('3. examples.js', function(){
           done();
         });
       });
-    })
+    });
 
     it('3.9.1 tests the auto commit behavior', function(done){
       async.series([
@@ -829,8 +833,8 @@ describe('3. examples.js', function(){
         }
       ], done);
 
-    })
-  })
+    });
+  });
 
   describe('3.10 resultset.js', function() {
     var connection = false;
@@ -878,7 +882,7 @@ describe('3. examples.js', function(){
           });
         });
       });
-    })
+    });
 
     after(function(done){
       connection.execute(
@@ -891,7 +895,7 @@ describe('3. examples.js', function(){
           });
         }
       );
-    })
+    });
 
     it('3.10.1 resultset1.js - getRow() function', function(done) {
       connection.should.be.ok();
@@ -925,7 +929,7 @@ describe('3. examples.js', function(){
           }
         });
       }
-    })
+    });
 
     it('3.10.2 resultset2.js - getRows() function', function(done) {
       connection.should.be.ok();
@@ -960,9 +964,9 @@ describe('3. examples.js', function(){
           }
         });
       }
-    })
+    });
 
-  })
+  });
 
   describe('3.11 refcursor.js', function() {
     var connection = false;
@@ -1056,7 +1060,7 @@ describe('3. examples.js', function(){
           );
         }
       ], done);
-    })
+    });
 
     after(function(done){
 
@@ -1127,7 +1131,7 @@ describe('3. examples.js', function(){
           }
         );
       }
-    })
-  })
+    });
+  });
 
-})
+});
