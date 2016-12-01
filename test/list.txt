@@ -814,7 +814,8 @@ Overview of node-oracledb functional tests
         67.1.10 throws an error if the pool specified in getPool doesn't exist
         67.1.11 does not throw an error if multiple pools are created without a poolAlias in the same call stack
         67.1.12 uses callback syntax function(err) instead of function(err,pool)
-        67.1.13 Negative: call back is called with function(err)
+        67.1.13 Negative: callback is called with function(err)
+        67.1.14 a named pool does not also create a default pool
     67.2 oracledb.getConnection functional tests
         67.2.1 gets a connection from the default pool
         67.2.2 gets a connection from the pool with the specified alias when no alias is specified

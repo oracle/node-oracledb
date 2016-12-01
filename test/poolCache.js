@@ -341,7 +341,7 @@ describe('67. poolCache.js', function() {
       );
     });
 
-    it('67.1.12 uses callback syntax function(err) instead of function(err,pool)', function(done) {
+    it('67.1.12 uses callback syntax function(err) instead of function(err, pool)', function(done) {
       oracledb.createPool({ // this becomes the default pool
         user          : dbConfig.user,
         password      : dbConfig.password,
@@ -350,10 +350,11 @@ describe('67. poolCache.js', function() {
         poolMin : 1,
         poolIncrement: 1,
         poolTimeout: 0 // never terminate unused connections
-      },function(err) {
+      }, function(err) {
         var defaultPool = oracledb.getPool();
         should.exist(defaultPool);
         (defaultPool.poolAlias).should.equal('default');
+
         defaultPool.close(function(err) {
           should.not.exist(err);
         });
@@ -361,7 +362,7 @@ describe('67. poolCache.js', function() {
       });
     });
 
-    it('67.1.13 Negative: call back is called with function(err)', function(done) {
+    it('67.1.13 Negative: callback is called with function(err)', function(done) {
       this.timeout(10000);
       oracledb.createPool({ // this becomes the default pool
         user          : dbConfig.user,
@@ -371,10 +372,30 @@ describe('67. poolCache.js', function() {
         poolMin : 1,
         poolIncrement: 1,
         poolTimeout: 0 // never terminate unused connections
-      },function(err) {
+      }, function(err) {
         should.exist(err);
         // ORA-01017: invalid username/password; logon denied
         (err.message).should.startWith('ORA-01017:');
+        done();
+      });
+    });
+
+    it('67.1.14 a named pool does not also create a default pool', function(done) {
+      var poolAlias = "named-pool";
+      dbConfig.poolAlias = poolAlias;
+      oracledb.createPool(dbConfig, function(err, pool) {
+        should.not.exist(err);
+        pool.should.be.ok();
+        (pool.poolAlias).should.eql('named-pool');
+
+        (function() {
+        oracledb.getPool();
+        }).should.throw(/^NJS-047:/);
+
+        (function() {
+        oracledb.getPool('named-pool');
+        }).should.be.ok();
+
         done();
       });
     });
@@ -566,13 +587,16 @@ describe('67. poolCache.js', function() {
         poolMin : 1,
         poolIncrement: 1,
         poolTimeout: 0 // never terminate unused connections
-      },function(err) {
+      }, function(err) {
         var defaultPool = oracledb.getPool();
         should.exist(defaultPool);
+
         oracledb.getConnection(function(err, conn) {
           should.not.exist(err);
-          conn.release(function(err) {
+
+          conn.close(function(err) {
             should.not.exist(err);
+
             defaultPool.close(function(err){
               should.not.exist(err);
               done();
