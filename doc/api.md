@@ -583,7 +583,7 @@ internal buffer size tuning parameter.
 
 To improve database efficiency, SQL queries should use a row
 limiting clause like [OFFSET /
-FETCH](https://docs.oracle.com/database/121/SQLRF/statements_10002.htm#BABEAACC)
+FETCH](https://docs.oracle.com/database/122/SQLRF/SELECT.htm#GUID-CFA006CA-6FF1-4972-821E-6996142A51C6__BABEAACC)
 or equivalent. The `maxRows` property can be used to stop badly coded
 queries from returning unexpectedly large numbers of rows.
 
@@ -955,7 +955,7 @@ This method creates a pool of connections with the specified username,
 password and connection string.
 
 Internally, `createPool()` creates an [OCI Session
-Pool](https://docs.oracle.com/database/121/LNOCI/oci09adv.htm#LNOCI16617)
+Pool](https://docs.oracle.com/database/122/LNOCI/oci-programming-advanced-topics.htm#LNOCI16617)
 for each Pool object.
 
 The default properties may be overridden by specifying new properties
@@ -995,7 +995,7 @@ String user
 ```
 
 The database user name.  Can be a simple user name or a proxy of the form *alison[fred]*. See the
-[Client Access Through Proxy](https://docs.oracle.com/cd/B19306_01/appdev.102/b14250/oci02bas.htm#LNOCI13341)
+[Client Access Through a Proxy](https://docs.oracle.com/database/122/LNOCI/oci-programming-basics.htm#GUID-D77D0D4A-7483-423A-9767-CBB5854A15CC)
 section in the OCI manual for more details about proxy
 authentication.
 
@@ -1304,7 +1304,7 @@ The properties of a *Connection* object are listed below.
 writeonly String action
 ```
 
-The [action](https://docs.oracle.com/database/121/LNOCI/oci08sca.htm#sthref1434)
+The [action](https://docs.oracle.com/database/122/LNOCI/managing-scalable-platforms.htm#LNOCI-GUID-624A4771-58C5-4E2B-8131-E3389F58A0D6)
 attribute for end-to-end application tracing.
 
 This is a write-only property.  Displaying a Connection object will
@@ -1318,9 +1318,9 @@ writeonly String clientId
 ```
 
 The [client
-identifier](https://docs.oracle.com/database/121/LNOCI/oci08sca.htm#sthref1414)
+identifier](https://docs.oracle.com/database/122/LNOCI/managing-scalable-platforms.htm#LNOCI-GUID-8A9F1295-4360-4AC6-99A4-050C5C82E0B0)
 for end-to-end application tracing, use with mid-tier authentication,
-and with [Virtual Private Databases](http://docs.oracle.com/database/121/CNCPT/cmntopc.htm#CNCPT62345).
+and with [Virtual Private Databases](https://docs.oracle.com/database/122/CNCPT/topics-for-database-administrators-and-developers.htm#GUID-89DB0C3C-A36F-4254-8C82-020F5F6DE31F).
 
 This is a write-only property.  Displaying a Connection object will
 show a value of `null` for this attribute.  See
@@ -1332,7 +1332,7 @@ show a value of `null` for this attribute.  See
 writeonly String module
 ```
 
-The [module](https://docs.oracle.com/database/121/LNOCI/oci08sca.htm#sthref1433)
+The [module](https://docs.oracle.com/database/122/LNOCI/managing-scalable-platforms.htm#LNOCI-GUID-624A4771-58C5-4E2B-8131-E3389F58A0D6)
 attribute for end-to-end application tracing.
 
 This is a write-only property.  Displaying a Connection object will
@@ -1491,7 +1491,7 @@ using either an object or an array.
 A callback function returns a [`result`](#executecallback) object, containing any fetched
 rows, the values of any OUT and IN OUT bind variables, and the number
 of rows affected by the execution of
-[DML](https://docs.oracle.com/database/121/CNCPT/glossary.htm#CNCPT2042)
+[DML](https://docs.oracle.com/database/122/CNCPT/sql.htm#GUID-90EA5D9B-76F2-4916-9F7E-CF0D8AA1A09D)
 statements.
 
 ##### Parameters
@@ -1760,7 +1760,7 @@ Number rowsAffected
 ```
 
 For
-[DML](https://docs.oracle.com/database/121/CNCPT/glossary.htm#CNCPT2042)
+[DML](https://docs.oracle.com/database/122/CNCPT/sql.htm#GUID-90EA5D9B-76F2-4916-9F7E-CF0D8AA1A09D)
 statements (including SELECT FOR UPDATE) this contains the number of
 rows affected, for example the number of rows inserted. For non-DML
 statements such as queries, or if no rows are affected, then
@@ -1905,7 +1905,7 @@ A connection *Pool* object is created by calling the
 
 The *Pool* object obtains connections to the Oracle database using the
 `getConnection()` method to "check them out" from the pool. Internally
-[OCI Session Pooling](https://docs.oracle.com/database/121/LNOCI/oci09adv.htm#LNOCI16617)
+[OCI Session Pooling](https://docs.oracle.com/database/122/LNOCI/oci-programming-advanced-topics.htm#LNOCI16617)
 is used.
 
 After the application finishes using a connection pool, it should
@@ -2335,7 +2335,7 @@ Applications that request [DRCP](#drcp) connections, for example with
 `myhost/XE:pooled`, must use local [Connection Pooling](#connpooling).
 
 For more information on Easy Connect strings see
-[Understanding the Easy Connect Naming Method](https://docs.oracle.com/database/121/NETAG/naming.htm#i498306)
+[Understanding the Easy Connect Naming Method](https://docs.oracle.com/database/122/NETAG/configuring-naming-methods.htm#NETAG255)
 in the Oracle documentation.
 
 #### <a name="tnsnames"></a> 8.1.2 Net Service Names for Connection Strings
@@ -2379,7 +2379,7 @@ the `tnsnames.ora` connection description contains `(SERVER=POOLED)`,
 must use local [Connection Pooling](#connpooling).
 
 For more information on `tnsnames.ora` files see
-[General Syntax of tnsnames.ora](https://docs.oracle.com/database/121/NETRF/tnsnames.htm#NETRF260)
+[General Syntax of tnsnames.ora](https://docs.oracle.com/database/122/NETRF/local-naming-parameters-in-tnsnames-ora-file.htm#NETRF1361)
 in the Oracle documentation.
 
 #### <a name="notjdbc"></a> 8.1.3 JDBC and Node-oracledb Connection Strings Compared
@@ -2406,7 +2406,7 @@ oracledb.getConnection(
 ```
 
 Alternatively, if a JDBC connection string uses an old-style
-[SID](http://docs.oracle.com/database/121/NETRF/glossary.htm#NETRF1681),
+[SID](https://docs.oracle.com/database/122/NETRF/glossary.htm#GUID-145065A5-C9C7-4E77-9BBB-8028960D005E),
 and there is no service name available:
 
 ```
@@ -2454,7 +2454,7 @@ use. This prevents other connections from beginning work and stops
 Node from handling more user load.  Increasing the number of worker
 threads may improve throughput.  Do this by setting the environment
 variable
-[UV_THREADPOOL_SIZE](http://docs.libuv.org/en/v1.x/threadpool.html)
+[UV_THREADPOOL_SIZE](https://docs.libuv.org/en/v1.x/threadpool.html)
 before starting Node.
 
 For example, in a Linux terminal, the number of Node worker threads
@@ -2481,7 +2481,7 @@ and (iii) the number of those connections is less than the pool's
 
 A pool is created by calling the
 [`oracledb.createPool()`](#createpool) method. Internally
-[OCI Session Pooling](https://docs.oracle.com/database/121/LNOCI/oci09adv.htm#LNOCI16617)
+[OCI Session Pooling](https://docs.oracle.com/database/122/LNOCI/oci-programming-advanced-topics.htm#LNOCI16617)
 is used.
 
 A connection is returned with the
@@ -2843,7 +2843,7 @@ Value   | Behavior of a Pool `getConnection()` call
 
 ### <a name="drcp"></a> 8.4 Database Resident Connection Pooling (DRCP)
 
-[Database Resident Connection Pooling](http://docs.oracle.com/database/121/ADFNS/adfns_perf_scale.htm#ADFNS228) (DRCP)
+[Database Resident Connection Pooling](https://docs.oracle.com/database/122/ADFNS/performance-and-scalability.htm#ADFNS228) (DRCP)
 enables database resource sharing for applications that run in
 multiple client processes or run on multiple middle-tier application
 servers.  DRCP reduces the overall number of connections that a
@@ -2870,10 +2870,10 @@ Usage not supported with DRCP* occurs.
 The DRCP 'Purity' is SELF for DRCP connections.  This allows reuse of
 both the pooled server process and session memory, giving maximum benefit
 from DRCP.  See the Oracle documentation on
-[benefiting from scalability](http://docs.oracle.com/database/121/ADFNS/adfns_perf_scale.htm#ADFNS506).
+[benefiting from scalability](https://docs.oracle.com/database/122/ADFNS/performance-and-scalability.htm#ADFNS1428).
 
 The
-[Oracle DRCP documentation](http://docs.oracle.com/database/121/ADFNS/adfns_perf_scale.htm#ADFNS228)
+[Oracle DRCP documentation](https://docs.oracle.com/database/122/ADFNS/performance-and-scalability.htm#ADFNS228)
 has more details, including when to use, and when not to use DRCP.
 
 There are a number of Oracle Database `V$` views that can be used to
@@ -2886,11 +2886,11 @@ This paper also gives more detail on configuring DRCP.
 
 External Authentication allows applications to use an external
 password store (such as
-[Oracle Wallet](http://docs.oracle.com/database/121/DBIMI/to_dbimi10236_d209.htm#DBIMI10236)),
+[Oracle Wallet](https://docs.oracle.com/database/122/DBIMI/using-oracle-wallet-manager.htm#DBIMI162)),
 the
-[Secure Socket Layer](http://docs.oracle.com/database/121/DBSEG/asossl.htm#DBSEG070)
+[Secure Socket Layer](https://docs.oracle.com/database/122/DBSEG/configuring-secure-sockets-layer-authentication.htm#DBSEG070)
 (SSL), or the
-[operating system](http://docs.oracle.com/database/121/DBSEG/authentication.htm#DBSEG30035)
+[operating system](https://docs.oracle.com/database/122/DBSEG/configuring-authentication.htm#DBSEG30035)
 to validate user access.  One of the benefits is that database
 credentials do not need to be hard coded in the application.
 
@@ -3303,7 +3303,7 @@ The default query result type mappings for Oracle Database types to JavaScript t
     precision lose their sub-millisecond fractional part
     when fetched. Internally, `TIMESTAMP` and `DATE`
     columns are fetched as `TIMESTAMP WITH LOCAL TIME ZONE` using
-    [OCIDateTime](https://docs.oracle.com/database/121/LNOCI/oci12oty.htm#LNOCI16840).
+    [OCIDateTime](https://docs.oracle.com/database/122/LNOCI/object-relational-data-types-in-oci.htm#LNOCI16840).
     When binding a JavaScript Date value in an `INSERT` statement, the date is also inserted as `TIMESTAMP WITH
     LOCAL TIME ZONE` using OCIDateTime.
 
@@ -3401,7 +3401,7 @@ type components to scalar values, or use a pipelined table.
 
 For example, consider a `CUSTOMERS` table having a `CUST_GEO_LOCATION`
 column of type `SDO_GEOMETRY`, as created in this [example
-schema](http://docs.oracle.com/cd/E17781_01/appdev.112/e18750/xe_locator.htm#XELOC560):
+schema](https://docs.oracle.com/cd/E17781_01/appdev.112/e18750/xe_locator.htm#XELOC560):
 
 ```sql
 CREATE TABLE customers (
@@ -3458,7 +3458,8 @@ you may want to bind using `type: oracledb.STRING`.  Output would be:
 
 #### <a name="rowprefetching"></a> 9.1.7 Row Prefetching
 
-[Prefetching](http://docs.oracle.com/database/121/LNOCI/oci04sql.htm#LNOCI16355) is a query tuning feature allowing resource usage to be
+[Prefetching](https://docs.oracle.com/database/122/LNOCI/using-sql_statements-in-oci.htm#LNOCI16355)
+is a query tuning feature allowing resource usage to be
 optimized.  It allows multiple rows to be returned in each network
 trip from Oracle Database to node-oracledb when a
 [`ResultSet`](#resultsetclass) is used for query or REF CURSOR data.
@@ -3618,7 +3619,7 @@ See [Bind Parameters for Prepared Statements](#bind) for information on binding.
 ### <a name="dbmsoutput"></a> 10.4 Using DBMS_OUTPUT
 
 The
-[DBMS_OUTPUT](http://docs.oracle.com/database/121/ARPLS/d_output.htm#ARPLS036)
+[DBMS_OUTPUT](https://docs.oracle.com/database/122/ARPLS/DBMS_OUTPUT.htm#ARPLS67300)
 package is the standard way to "print" output from PL/SQL.  The way
 DBMS_OUTPUT works is like a buffer.  Your Node.js application code
 must first turn on DBMS_OUTPUT buffering for the current connection by
@@ -3922,8 +3923,7 @@ After the previous `INSERT` example, this query would display:
 { customerId: 100, item: 1234, quantity: 2 }
 ```
 
-In Oracle Database 12.2
-the
+In Oracle Database 12.2 the
 [`JSON_OBJECT` ](https://docs.oracle.com/cloud/latest/db122/ADJSN/generation.htm#ADJSN-GUID-1084A518-A44A-4654-A796-C1DD4D8EC2AA) function
 is a great way to convert relational table data to JSON:
 
@@ -3954,8 +3954,8 @@ See [selectjson.js](https://github.com/oracle/node-oracledb/tree/master/examples
 and [selectjsonclob.js](https://github.com/oracle/node-oracledb/tree/master/examples/selectjsonclob.js)
 for runnable examples.
 
-For more information about using JSON in Oracle Database see [JSON in
-Oracle Database](http://docs.oracle.com/database/121/ADXDB/json.htm#ADXDB6246).
+For more information about using JSON in Oracle Database see
+[Database JSON Developer's Guide](https://docs.oracle.com/database/122/ADJSN/toc.htm).
 
 ## <a name="bind"></a> 13. Bind Parameters for Prepared Statements
 
@@ -4562,7 +4562,7 @@ for a runnable example.
 ## <a name="transactionmgt"></a> 14. Transaction Management
 
 By default,
-[DML](https://docs.oracle.com/database/121/CNCPT/glossary.htm#CNCPT2042)
+[DML](https://docs.oracle.com/database/122/CNCPT/sql.htm#GUID-90EA5D9B-76F2-4916-9F7E-CF0D8AA1A09D)
 statements are not committed in node-oracledb.
 
 The node-oracledb add-on implements [`commit()`](#commit) and
@@ -4587,13 +4587,13 @@ When an application ends, any uncommitted transaction on a connection
 will be rolled back.
 
 Note: Oracle Database will implicitly commit when a
-[DDL](https://docs.oracle.com/database/121/CNCPT/glossary.htm#CHDJJGGF)
+[DDL](https://docs.oracle.com/database/122/CNCPT/sql.htm#GUID-C25B548B-363A-4FE5-B4EE-784502BAAD08)
 statement is executed irrespective of the value of `autoCommit`.
 
 ## <a name="stmtcache"></a> 15. Statement Caching
 
 Node-oracledb's [`execute()`](#execute) method uses the
-[Oracle OCI statement cache](https://docs.oracle.com/database/121/LNOCI/oci09adv.htm#i471377)
+[Oracle OCI statement cache](https://docs.oracle.com/database/122/LNOCI/oci-programming-advanced-topics.htm#LNOCI16655)
 to make re-execution of statements efficient.  This cache removes the
 need for a separate 'prepare' method which is sometimes seen in other
 Oracle APIs: there is no separate 'prepare' method in node-oracledb.
@@ -4650,22 +4650,22 @@ With Oracle Database 12c, the statement cache size can be automatically tuned wi
 
 When node-oracledb is linked with Oracle Database 12c client libraries, the Oracle
 client-side configuration file
-[oraaccess.xml](http://docs.oracle.com/database/121/LNOCI/oci10new.htm#LNOCI73052)
+[oraaccess.xml](https://docs.oracle.com/database/122/LNOCI/more-oci-advanced-topics.htm#LNOCI73052)
 can be used to configure some behaviors of node-oracledb.
 
 For example, oraaccess.xml can be used to:
 
-- turn on [Fast Application Notification](http://docs.oracle.com/database/121/ADFNS/adfns_avail.htm#ADFNS538) (FAN) events to enable FAN notifications and [Runtime Load Balancing](http://docs.oracle.com/database/121/ADFNS/adfns_perf_scale.htm#ADFNS515) (RLB)
-- configure [Client Result Caching](http://docs.oracle.com/database/121/ADFNS/adfns_perf_scale.htm#ADFNS464) parameters
-- turn on [Client Statement Cache Auto-tuning](http://docs.oracle.com/database/121/LNOCI/oci10new.htm#LNOCI73009)
+- turn on [Fast Application Notification](https://docs.oracle.com/database/122/ADFNS/high-availability.htm#ADFNS538) (FAN) events to enable FAN notifications and [Runtime Load Balancing](https://docs.oracle.com/database/122/ADFNS/connection_strategies.htm#ADFNS515) (RLB)
+- configure [Client Result Caching](https://docs.oracle.com/database/122/ADFNS/performance-and-scalability.htm#ADFNS464) parameters
+- turn on [Client Statement Cache Auto-tuning](https://docs.oracle.com/database/122/LNOCI/more-oci-advanced-topics.htm#LNOCI73051)
 
 Other features can also be enabled.  Refer to the
-[oraaccess.xml documentation](http://docs.oracle.com/database/121/LNOCI/oci10new.htm#LNOCI73052)
+[oraaccess.xml documentation](https://docs.oracle.com/database/122/LNOCI/more-oci-advanced-topics.htm#LNOCI73052)
 
 ## <a name="nls"></a> 17. Globalization and National Language Support (NLS)
 
 Node-oracledb can use Oracle's
-[National Language Support (NLS)](https://docs.oracle.com/database/121/NLSPG/toc.htm)
+[National Language Support (NLS)](https://docs.oracle.com/database/122/NLSPG/toc.htm)
 to assist in globalizing applications.
 
 Node-oracledb always uses Oracle's AL32UTF8 character set internally.
@@ -4677,14 +4677,14 @@ configure the Oracle client language and territory only.
 Oracle NLS environment variables, or statements like `ALTER SESSION`,
 can be used to configure further aspects of node-oracledb data access
 globalization.  Refer to
-[NLS Documentation](https://docs.oracle.com/database/121/NLSPG/ch3globenv.htm#g1028448).
+[NLS Documentation](https://docs.oracle.com/database/122/NLSPG/setting-up-globalization-support-environment.htm#NLSPG003).
 
 ## <a name="endtoend"></a> 18. End-to-end Tracing, Mid-tier Authentication, and Auditing
 
 The Connection properties [action](#propconnaction),
 [module](#propconnmodule), and [clientId](#propconnclientid) set
 metadata for
-[end-to-end tracing](http://docs.oracle.com/database/121/TGSQL/tgsql_trace.htm#CHDBDGIJ).
+[end-to-end tracing](https://docs.oracle.com/database/122/TGSQL/performing-application-tracing.htm#TGSQL792).
 The values can be tracked in database views, shown in audit trails,
 and seen in tools such as Enterprise Manager.
 
@@ -4693,7 +4693,7 @@ own mid-tier authentication but connect to the database using the one
 database schema.  By setting `clientId` to the application's
 authenticated username, the database is aware of who the actual end
 user is.  This can, for example, be used by Oracle
-[Virtual Private Database](http://docs.oracle.com/database/121/CNCPT/cmntopc.htm#CNCPT62345)
+[Virtual Private Database](https://docs.oracle.com/database/122/CNCPT/topics-for-database-administrators-and-developers.htm#GUID-89DB0C3C-A36F-4254-8C82-020F5F6DE31F)
 policies to automatically restrict data access by that user.
 
 Applications should set the properties because they can greatly help
@@ -4736,9 +4736,9 @@ HR         Chris                Query departments    End-to-end example
 ```
 
 The values can also be manually set by calling
-[`DBMS_APPLICATION_INFO`](http://docs.oracle.com/cd/B19306_01/appdev.102/b14258/d_appinf.htm#CHECEIEB)
+[`DBMS_APPLICATION_INFO`](https://docs.oracle.com/cd/B19306_01/appdev.102/b14258/d_appinf.htm#CHECEIEB)
 procedures or
-[`DBMS_SESSION.SET_IDENTIFIER`](http://docs.oracle.com/cd/B19306_01/appdev.102/b14258/d_sessio.htm#SET_IDENTIFIER),
+[`DBMS_SESSION.SET_IDENTIFIER`](https://docs.oracle.com/cd/B19306_01/appdev.102/b14258/d_sessio.htm#SET_IDENTIFIER),
 however these cause explicit round-trips, reducing scalability.
 
 In general, applications should be consistent about how, and when,

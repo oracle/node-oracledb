@@ -28,12 +28,12 @@ The node-oracledb project is open source and maintained by Oracle Corp.  The hom
 - [External Authentication](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#extauth)
 - [Row Prefetching](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#rowprefetching)
 - [Statement Caching](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#stmtcache)
-- [Client Result Caching](http://docs.oracle.com/database/121/ADFNS/adfns_perf_scale.htm#ADFNS464)
+- [Client Result Caching](https://docs.oracle.com/database/122/ADFNS/performance-and-scalability.htm#ADFNS464)
 - [End-to-end Tracing, Mid-tier Authentication, and Auditing](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#endtoend)
 - Oracle High Availability Features
-  - [Fast Application Notification (FAN)](http://docs.oracle.com/database/121/ADFNS/adfns_avail.htm#ADFNS538)
-  - [Runtime Load Balancing (RLB)](http://docs.oracle.com/database/121/ADFNS/adfns_perf_scale.htm#ADFNS515)
-  - [Transparent Application Failover (TAF)](http://docs.oracle.com/database/121/ADFNS/adfns_avail.htm#ADFNS534)
+  - [Fast Application Notification (FAN)](https://docs.oracle.com/database/122/ADFNS/high-availability.htm#ADFNS538)
+  - [Runtime Load Balancing (RLB)](https://docs.oracle.com/database/122/ADFNS/connection_strategies.htm#ADFNS515)
+  - [Transparent Application Failover (TAF)](https://docs.oracle.com/database/122/ADFNS/high-availability.htm#ADFNS-GUID-96599425-9BDA-483C-9BA2-4A4D13013A37)
 
 We are actively working on supporting the best Oracle Database
 features, and on functionality requests from
