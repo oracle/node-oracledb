@@ -1000,40 +1000,45 @@ void Connection::GetInBindParamsScalar(Local<Value> v8val, Bind* bind,
   bind->ind = (short *)malloc ( sizeof ( short ) );
   bind->len = (DPI_BUFLEN_TYPE *)malloc ( sizeof ( DPI_BUFLEN_TYPE ) );
 
-  *(bind->ind)  = 0;
-
   valType = Connection::GetValueType ( v8val );
   v8valNULL = ( valType == NJS_VALUETYPE_NULL ) ? true : false;
 
+  // set the indicator based on given value is NULL or not.
+  *(bind->ind) = v8valNULL ? -1 : 0;
+
   /*
-   * In case of INOUT Bind, if given value is NULL
+   * In case of IN/INOUT Bind, if given value is NULL
    * make use of specified OUT bind type
    */
-  if ( v8valNULL && bind->isInOut )
+  if ( v8valNULL && ( bind->isInOut || !bind->isOut ) )
   {
-    switch ( bind->type )
+    // If the type specified as part BIND specification use it.
+    if ( bind->type )
     {
-    case NJS_DATATYPE_STR:
-      valType = NJS_VALUETYPE_STRING;
-      break;
+      switch ( bind->type )
+      {
+      case NJS_DATATYPE_STR:
+        valType = NJS_VALUETYPE_STRING;
+        break;
 
-    case NJS_DATATYPE_NUM:
-      valType = NJS_VALUETYPE_NUMBER;
-      break;
+      case NJS_DATATYPE_NUM:
+        valType = NJS_VALUETYPE_NUMBER;
+        break;
 
-    case NJS_DATATYPE_DATE:
-      valType = NJS_VALUETYPE_DATE;
-      break;
+      case NJS_DATATYPE_DATE:
+        valType = NJS_VALUETYPE_DATE;
+        break;
 
-    case NJS_DATATYPE_BUFFER:
-      valType = NJS_VALUETYPE_OBJECT;    /* DB RAW Type, v8 Buffer */
-      break;
+      case NJS_DATATYPE_BUFFER:
+        valType = NJS_VALUETYPE_OBJECT;    /* DB RAW Type, v8 Buffer */
+        break;
 
-    // The following types are NOT supported as IN BIND (for INOUT) ignore
-    case NJS_DATATYPE_CURSOR:
-    case NJS_DATATYPE_CLOB:
-    case NJS_DATATYPE_BLOB:
-      break;
+      // The following types are NOT supported as IN BIND (for INOUT) ignore
+      case NJS_DATATYPE_CURSOR:
+      case NJS_DATATYPE_CLOB:
+      case NJS_DATATYPE_BLOB:
+        break;
+      }
     }
   }
 
@@ -1041,8 +1046,7 @@ void Connection::GetInBindParamsScalar(Local<Value> v8val, Bind* bind,
   {
     case NJS_VALUETYPE_NULL:
       bind->value = NULL;
-      *(bind->ind)   = -1;
-      bind->type        = dpi::DpiVarChar;
+      bind->type  = dpi::DpiVarChar;
       break;
 
     case NJS_VALUETYPE_STRING:
@@ -1144,52 +1148,61 @@ void Connection::GetInBindParamsScalar(Local<Value> v8val, Bind* bind,
       bind->type = dpi::DpiTimestampLTZ;
       *(bind->len) = 0;
       bind->maxSize = 0;
-      /* Convert v8::Date value to long double */
-      Connection::v8Date2OraDate ( v8val, bind);
+      if ( !v8valNULL )
+      {
+        /* Convert v8::Date value to long double */
+        Connection::v8Date2OraDate ( v8val, bind);
+      }
+      else
+      {
+        *(long double *)(bind->extvalue) = 0L;
+      }
       break;
 
     case NJS_VALUETYPE_OBJECT:
       {
-        Local<Object> obj = v8val->ToObject();
-
-        if ( v8valNULL && bind->isInOut )
+        if ( v8valNULL && ( bind->isInOut || !bind->isOut ) )
         {
           /*
            * In case of RAW/Buffer type and INOUT Bind, if IN value is NULL,
            * allocate based on OUT type, maxSize
            */
           bind->type = dpi::DpiRaw;
-          *( bind->len ) = ( DPI_BUFLEN_TYPE ) (( bind->isInOut ) ?
-                                                  bind->maxSize : 0 );
+          *( bind->len ) = ( DPI_BUFLEN_TYPE ) bind->maxSize ;
           bind->value = ( char *) malloc ( *(bind -> len ) );
-        }
-        else if (Buffer::HasInstance(obj))
-        {
-          size_t bufLen = Buffer::Length(obj);
-          bind->type = dpi::DpiRaw;
-          if( bind->isInOut )
-          {
-            *(bind->len) = (DPI_BUFLEN_TYPE) bufLen;
-          }
-          else // IN
-          {
-            bind->maxSize =  (DPI_SZ_TYPE ) bufLen;
-            *(bind->len) = (DPI_BUFLEN_TYPE) bufLen;
-          }
-          DPI_SZ_TYPE size = (bind->maxSize >= *(bind->len) ) ?
-                             bind->maxSize : *(bind->len);
-          if(size)
-          {
-            bind->value = (char *)malloc((size_t) size);
-            if(bufLen)
-              memcpy(bind->value, Buffer::Data(obj), bufLen);
-          }
         }
         else
         {
-          executeBaton->error= NJSMessages::getErrorMsg(
+          Local<Object> obj = v8val->ToObject();
+
+          if (Buffer::HasInstance(obj))
+          {
+            size_t bufLen = Buffer::Length(obj);
+            bind->type = dpi::DpiRaw;
+            if( bind->isInOut )
+            {
+              *(bind->len) = (DPI_BUFLEN_TYPE) bufLen;
+            }
+            else // IN
+            {
+              bind->maxSize =  (DPI_SZ_TYPE ) bufLen;
+              *(bind->len) = (DPI_BUFLEN_TYPE) bufLen;
+            }
+            DPI_SZ_TYPE size = (bind->maxSize >= *(bind->len) ) ?
+                               bind->maxSize : *(bind->len);
+            if(size)
+            {
+              bind->value = (char *)malloc((size_t) size);
+              if(bufLen)
+                memcpy(bind->value, Buffer::Data(obj), bufLen);
+            }
+          }
+          else
+          {
+            executeBaton->error= NJSMessages::getErrorMsg(
                                              errInvalidBindDataType,2);
-          goto exitGetInBindParamsScalar;
+            goto exitGetInBindParamsScalar;
+          }
         }
       }
       break;
@@ -4049,8 +4062,11 @@ void Connection::UpdateDateValue ( eBaton * ebaton, Bind *bind, unsigned int nRo
     {
       for ( unsigned int row = 0 ; row < nRows ; row ++ )
       {
-        bind->dttmarr->setDateTime( 0,
-                                  (*((long double *)bind->extvalue + row )));
+        if ( bind->ind[row] != -1 )
+        {
+          bind->dttmarr->setDateTime( 0,
+                                   (*((long double *)bind->extvalue + row )));
+        }
       }
     }
   }

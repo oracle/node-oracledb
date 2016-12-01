@@ -42,11 +42,17 @@ var assist   = require('./dataTypeAssist.js');
 describe('70. plsqlBindScalar.js', function() {
 
   var connection = null;
+  var nodever6   = false;  // assume node runtime version is lower than 6
 
   before(function(done) {
     oracledb.getConnection(dbConfig, function(err, conn) {
       should.not.exist(err);
       connection = conn;
+
+      // Note down whether node runtime version is >= 6 or not
+      if ( process.versions["node"].substring ( 0, 1 ) == "6" )
+        nodever6 = true;
+
       done();
     });
   }); // before
@@ -360,7 +366,7 @@ describe('70. plsqlBindScalar.js', function() {
       );
     }); // 70.2.6
 
-    it.skip('70.2.7 val: NaN', function(done) {
+    it('70.2.7 val: NaN', function(done) {
       var bindVar = {
         output:   resultBind,
         numValue: {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: NaN}
@@ -370,9 +376,9 @@ describe('70. plsqlBindScalar.js', function() {
         sqlrun,
         bindVar,
         function(err, result) {
-          should.exist(err);
+          should.not.exist(err);
           // console.log(result);
-          (err.message).should.startWith('NJS-011:');
+          // (err.message).should.startWith('NJS-011:');
           done();
         }
       );
@@ -938,7 +944,7 @@ describe('70. plsqlBindScalar.js', function() {
       );
     }); // 70.6.3
 
-    it.skip('70.6.4 val: null', function(done) {
+    it('70.6.4 val: null', function(done) {
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
@@ -959,7 +965,7 @@ describe('70. plsqlBindScalar.js', function() {
       );
     }); // 70.6.4
 
-    it.skip('70.6.5 val: undefined',function(done) {
+    it('70.6.5 val: undefined',function(done) {
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
@@ -1098,7 +1104,7 @@ describe('70. plsqlBindScalar.js', function() {
       );
     }); // 70.7.2
 
-    it.skip('70.7.3 val: null', function(done) {
+    it('70.7.3 val: null', function(done) {
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
@@ -1112,8 +1118,8 @@ describe('70. plsqlBindScalar.js', function() {
         bindVar,
         function(err, result) {
           should.not.exist(err);
-          console.log(result);
-          // should.strictEqual(result.outBinds.p_inout, null);
+          // console.log(result);
+          should.strictEqual(result.outBinds.p_inout, null);
           done();
         }
       );
@@ -1139,7 +1145,7 @@ describe('70. plsqlBindScalar.js', function() {
       );
     }); // 70.7.4
 
-    it.skip('70.7.5 val: undefined', function(done) {
+    it('70.7.5 val: undefined', function(done) {
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
@@ -1153,8 +1159,8 @@ describe('70. plsqlBindScalar.js', function() {
         bindVar,
         function(err, result) {
           should.not.exist(err);
-           console.log(result);
-          //(result.outBinds.p_inout).should.eql(daterun);
+          // console.log(result);
+          should.strictEqual(result.outBinds.p_inout, null);
           done();
         }
       );
@@ -1260,7 +1266,12 @@ describe('70. plsqlBindScalar.js', function() {
     }); // 70.8.2
 
     it('70.8.3 val: null', function(done) {
-      var emptybuf = new Buffer.alloc(0);
+      var emptybuf;
+      if ( nodever6 )
+        emptybuf = new Buffer.alloc ( 0 ) ;
+      else
+        emptybuf = new Buffer ( 0 );
+
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
@@ -1283,7 +1294,13 @@ describe('70. plsqlBindScalar.js', function() {
     }); // 70.8.3
 
     it('70.8.4 val: empty string', function(done) {
-      var emptybuf = new Buffer.from('');
+      var emptybuf;
+
+      if ( nodever6 )
+        emptybuf = new Buffer.from ("", "utf-8" );
+      else
+        emptybuf = new Buffer ( "", "utf-8" ) ;
+
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
@@ -1305,7 +1322,7 @@ describe('70. plsqlBindScalar.js', function() {
       );
     }); // 70.8.4
 
-    it.skip('70.8.5 val: undefined', function(done) {
+    it('70.8.5 val: undefined', function(done) {
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
@@ -1320,8 +1337,8 @@ describe('70. plsqlBindScalar.js', function() {
         bindVar,
         function(err, result) {
           should.not.exist(err);
-          console.log(result);
-          //(result.outBinds.p_inout).should.eql(bufValue);
+          // console.log(result);
+          should.strictEqual(result.outBinds.p_inout, null);
           done();
         }
       );
@@ -1526,11 +1543,15 @@ describe('70. plsqlBindScalar.js', function() {
 
     }); // 70.9.1
 
-    it.skip('70.9.2 dir: BIND_INOUT, val: null', function(done) {
+    it('70.9.2 dir: BIND_INOUT, val: null', function(done) {
 
       var rowid = 2;
-      var emptybuf = new Buffer.alloc(0);
-      // var emptybuf = new Buffer.from('');
+      var emptybuf;
+
+      if ( nodever6 )
+        emptybuf = new Buffer.alloc ( 0 ) ;
+      else
+        emptybuf = new Buffer ( 0 ) ;
 
       var bindVar = {
         p_in: rowid,
@@ -1567,8 +1588,8 @@ describe('70. plsqlBindScalar.js', function() {
               //console.log(result);
               should.strictEqual(result.outBinds.p_inout1, null);
               should.strictEqual(result.outBinds.p_inout2, null);
-              (result.outBinds.p_inout3).should.eql(null);
-              (result.outBinds.p_inout4).should.eql(null);
+              should.strictEqual(result.outBinds.p_inout3, null);
+              should.strictEqual(result.outBinds.p_inout4, null);
               cb();
             }
           );
@@ -1580,7 +1601,7 @@ describe('70. plsqlBindScalar.js', function() {
             { outFormat: oracledb.OBJECT },
             function(err, result) {
               should.not.exist(err);
-              console.log(result);
+              // console.log(result);
               should.strictEqual(result.rows[0].STR, null);
               should.strictEqual(result.rows[0].NUM, null);
               should.strictEqual(result.rows[0].DAT, null);
@@ -1596,8 +1617,12 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.9.3 dir: BIND_IN, val: null', function(done) {
 
       var rowid = 3;
-      var emptybuf = new Buffer.alloc(0);
-      // var emptybuf = new Buffer.from('');
+      var emptybuf;
+
+      if ( nodever6 )
+        emptybuf = new Buffer.alloc ( 0 ) ;
+      else
+        emptybuf = new Buffer ( 0 ) ;
 
       var bindVar = {
         p_in: rowid,
@@ -1655,10 +1680,14 @@ describe('70. plsqlBindScalar.js', function() {
 
     }); // 70.9.3
 
-    it.skip('70.9.4 dir: BIND_INOUT, val: undefined', function(done) {
+    it('70.9.4 dir: BIND_INOUT, val: undefined', function(done) {
       var rowid = 4;
-      var emptybuf = new Buffer.alloc(0);
-      // var emptybuf = new Buffer.from('');
+      var emptybuf;
+
+      if ( nodever6 )
+        emptybuf = new Buffer.alloc ( 0 ) ;
+      else
+        emptybuf = new Buffer ( 0 ) ;
 
       var bindVar = {
         p_in: rowid,
@@ -1708,7 +1737,7 @@ describe('70. plsqlBindScalar.js', function() {
             { outFormat: oracledb.OBJECT },
             function(err, result) {
               should.not.exist(err);
-              console.log(result);
+              // console.log(result);
               should.strictEqual(result.rows[0].STR, null);
               should.strictEqual(result.rows[0].NUM, null);
               should.strictEqual(result.rows[0].DAT, null);
@@ -1723,8 +1752,12 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.9.5 dir: BIND_IN, val: undefined', function(done) {
 
       var rowid = 5;
-      var emptybuf = new Buffer.alloc(0);
-      // var emptybuf = new Buffer.from('');
+      var emptybuf;
+
+      if ( nodever6 )
+        emptybuf = new Buffer.alloc ( 0 ) ;
+      else
+        emptybuf = new Buffer ( 0 ) ;
 
       var bindVar = {
         p_in: rowid,

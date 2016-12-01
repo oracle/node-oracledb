@@ -1066,7 +1066,7 @@ describe('4. binding.js', function() {
 
     }); // 4.8.2
 
-    it.skip('4.8.3 BIND_INOUT', function(done) {
+    it('4.8.3 BIND_INOUT', function(done) {
 
       async.series([
         function(cb) {
@@ -1089,15 +1089,13 @@ describe('4. binding.js', function() {
         function(cb) {
           var vdate = new Date(2016, 7, 5);
           connection.execute(
-
             "BEGIN nodb_binddate3(:io); END;",
             {
               io: { val: vdate, dir : oracledb.BIND_INOUT, type: oracledb.DATE }
             },
             function(err, result) {
               should.not.exist(err);
-              console.log(result);
-              (result.outBinds.o).should.eql(vdate);
+              (result.outBinds.io).should.eql(vdate);
               cb();
             }
           );
