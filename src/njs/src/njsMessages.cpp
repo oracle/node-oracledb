@@ -87,7 +87,8 @@ static const char *errMsg[] =
   "NJS-048: operation not permitted while Lob object is active in a bind operation", // errLOBBindActive
   "NJS-049: cannot use bind direction IN OUT for temporary LOBs", // errTempLOBINOUTBind
   "NJS-050: Temporary LOBs were open when the connection was closed", // errBusyConnTEMPLOB
-  "NJS-051: given data as bind value is too large", // errBindValueTooLarge
+  "NJS-051: data must be shorter than %d", // errBindValueTooLarge
+  "NJS-052: \"%s\" must be less than %d", // errMaxValueTooLarge
 };
 
 string NJSMessages::getErrorMsg ( NJSErrorType err, ... )

@@ -801,6 +801,17 @@ void Connection::GetBindUnit (Local<Value> val, Bind* bind, bool array,
       goto exitGetBindUnit;
     }
 
+    // for INOUT and OUT bind maxSize is used, and if a large value is
+    // specified, report error and bail out.
+    if ( ( dir == NJS_BIND_INOUT || dir == NJS_BIND_OUT ) &&
+         ( bind->maxSize > DPI_MAX_BUFLEN ) )
+    {
+      executeBaton->error = NJSMessages::getErrorMsg ( errMaxValueTooLarge,
+                                                       "maxSize", 
+                                                       DPI_MAX_BUFLEN, 2 );
+      goto exitGetBindUnit;
+    }
+
     NJS_GET_UINT_FROM_JSON(bind->maxArraySize, executeBaton->error, bind_unit,
                            "maxArraySize", 1, exitGetBindUnit);
 
@@ -1085,7 +1096,8 @@ void Connection::GetInBindParamsScalar(Local<Value> v8val, Bind* bind,
       if ( str.length () > DPI_MAX_BUFLEN )
       {
         executeBaton->error = NJSMessages::getErrorMsg (
-                                                    errBindValueTooLarge );
+                                                        errBindValueTooLarge,
+                                                        DPI_MAX_BUFLEN );
         goto exitGetInBindParamsScalar;
       }
 
@@ -1234,7 +1246,8 @@ void Connection::GetInBindParamsScalar(Local<Value> v8val, Bind* bind,
             if ( bufLen > DPI_MAX_BUFLEN )
             {
               executeBaton->error = NJSMessages::getErrorMsg (
-                                              errBindValueTooLarge ) ;
+                                             errBindValueTooLarge,
+                                             DPI_MAX_BUFLEN ) ;
               goto exitGetInBindParamsScalar;
             }
 

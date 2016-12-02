@@ -87,6 +87,7 @@ typedef enum
   errTempLOBINOUTBind,
   errBusyConnTEMPLOB,
   errBindValueTooLarge,
+  errMaxValueTooLarge,
 
   // New ones should be added here
 

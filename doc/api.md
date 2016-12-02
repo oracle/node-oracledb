@@ -3714,7 +3714,7 @@ end-of-fetch at the same time.
 The value of `prefetchRows` size is ignored when *not* using a
 `ResultSet`.
 
-Prefetching from REF CURSORS requires Oracle Database 11gR2 or
+Prefetching from REF CURSORS requires Oracle Database 11.2 or
 greater.
 
 Prefetching can be disabled by setting `prefetchRows` to 0.
@@ -4540,7 +4540,8 @@ statement text is different and would be less efficient.
 
 IN binds are values passed into the database.  OUT binds are used to
 retrieve data.  IN OUT binds are passed in, and may return a different
-value after the statement executes.
+value after the statement executes.  IN OUT binds can be used for
+PL/SQL calls, but not for SQL.
 
 OUT bind parameters for `RETURNING INTO` clauses will always return an
 array of values. See [DML RETURNING Bind Parameters](#dmlreturn).
@@ -4813,7 +4814,7 @@ CURSOR is set to NULL or is not set in the PL/SQL procedure then the
 returned `ResultSet` is invalid and methods like `getRows()` will
 return an error when invoked.
 
-When using Oracle Database 11gR2 or greater, then
+When using Oracle Database 11.2 or greater, then
 [`prefetchRows`](#propdbprefetchrows) can be used to tune the
 performance of fetching REF CURSORS.
 
@@ -4968,28 +4969,32 @@ size used for these binds in the OUT direction is 200, so set
 See [Working with CLOB and BLOB Data](#lobhandling) for examples and
 more information on binding and working with LOBs.
 
-#### Maximum Limits (Bytes) for Binding LOBs to Strings and Buffers
+#### Theoretical Limits (Bytes) for Binding LOBs to Strings and Buffers
 
-DB Type | Bind Type       | Direction   | Oracle Client 12c Limit<sup>*</sup> | Oracle Client 11g Limit<sup>*</sup>
+DB Type | Bind Type       | Direction   | Oracle Client 12c Limit<sup>*</sup> | Oracle Client 11.2 Limit<sup>*</sup>
 --------|-----------------|-------------|-------------------------|------------------------
-CLOB    | oracledb.STRING |BIND_IN      |  2 GB                   | 64 KB
+CLOB    | oracledb.STRING |BIND_IN      |  1 GB                   | 64 KB
 CLOB    | oracledb.STRING |BIND_OUT     |  1 GB                   | 64 KB
 CLOB    | oracledb.STRING |BIND_INOUT   | 32 KB                   | 32 KB
-BLOB    | oracledb.BUFFER |BIND_IN      |  2 GB                   | 64 KB
-BLOB    | oracledb.BUFFER |BIND_OUT     |  2 GB                   | 64 KB
+BLOB    | oracledb.BUFFER |BIND_IN      |  1 GB                   | 64 KB
+BLOB    | oracledb.BUFFER |BIND_OUT     |  1 GB                   | 64 KB
 BLOB    | oracledb.BUFFER |BIND_INOUT   | 32 KB                   | 32 KB
 
-<sup>*</sup>The largest usable data length is one byte less than the size shown.
-
-Internally, node-oracledb uses temporary LOBs when binding Strings and
-Buffers larger than 32 KB.  Since temporary LOBs cannot be used for IN
-OUT binds, the data size in this case is restricted to 32 KB.
+<sup>*</sup>The largest usable data length is two bytes less than the
+size shown for 12c and one byte less for 11.2.
 
 In practice, the limitation on binding IN or OUT is the memory
-available to Node.js.  You will see the error *JavaScript heap out of
-memory* when you try to create large Strings or Buffers.  So, for most
-large data sizes, it is recommended to bind as `oracledb.CLOB` or
-`oracledb.BLOB` and use [Lob streaming](#streamsandlobs).
+available to Node.js and the V8 engine.  For data larger than several
+megabytes, it is recommended to bind as `oracledb.CLOB` or
+`oracledb.BLOB` and use [Lob streaming](#streamsandlobs).  If you try
+to create large Strings or Buffers in Node.js you will see errors like
+*JavaScript heap out of memory*, or other space related messages.
+
+Internally, for PL/SQL calls, node-oracledb uses temporary LOBs when
+binding Strings and Buffers larger than 32 KB.  Since temporary LOBs
+cannot be used for IN OUT binds, the data size in this case is
+restricted to 32 KB.  For SQL call no temporary LOBs are used.
+
 
 ### <a name="plsqlindexbybinds"></a> 13.6 PL/SQL Collection Associative Array (Index-by) Bind Parameters
 
