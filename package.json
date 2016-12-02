@@ -46,7 +46,7 @@
       "testWindows": "mocha --opts test\\opts\\mocha.opts && npm run posttest"
   },
   "engines": {
-    "node": ">=0.10.28 <7"
+    "node": ">=0.10.28"
   },
   "maintainers": [
     {
