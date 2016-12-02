@@ -424,6 +424,75 @@ describe("72. lobBind2.js", function() {
 
     }); // 72.1.6
 
+    it("72.1.7 Negative - BIND_INOUT, PL/SQL", function(done) {
+
+      var seq = 7;
+      var outStr = "This is a out bind string.";
+      var proc = "CREATE OR REPLACE PROCEDURE nodb_proc_clob_inout1 \n" +
+                 "  (p_num IN NUMBER, p_inout IN OUT CLOB) \n" +
+                 "AS \n" +
+                 "BEGIN \n" +
+                 "    insert into nodb_tab_clob72 (id, content) values (p_num, p_inout); \n" +
+                 "    select to_clob('" + outStr + "') into p_inout from dual; \n" +
+                 "END nodb_proc_clob_inout1;";
+
+      async.series([
+        function(cb) {
+          executeSQL(proc, cb);
+        },
+        function(cb) {
+          connection.createLob(oracledb.CLOB, function(err, lob) {
+            should.not.exist(err);
+
+            lob.on("close", function(err) {
+              should.not.exist(err);
+
+              connection.commit(function(err) {
+                should.not.exist(err);
+
+                return cb();
+              });
+            }); // close event
+
+            lob.on("error", function(err) {
+              should.not.exist(err, "lob.on 'error' event.");
+            });
+
+            lob.on("finish", function() {
+              connection.execute(
+                "begin nodb_proc_clob_inout1(:id, :io); end;",
+                {
+                  id: seq,
+                  io: { type: oracledb.CLOB, dir: oracledb.BIND_INOUT, val: lob}
+                },
+                function(err) {
+                  should.exist(err);
+                  (err.message).should.startWith("NJS-049:");
+                  // NJS-049: cannot use bind direction IN OUT for temporary LOBs
+                  lob.close(function(err) {
+                    should.not.exist(err);
+                  });
+                }
+              );
+            }); // finish event
+
+            var inStream = fs.createReadStream(inFileName);
+
+            inStream.on("error", function(err) {
+              should.not.exist(err, "inStream.on 'error' event.");
+            });
+
+            inStream.pipe(lob);
+          });
+
+        },
+        function(cb) {
+          var sql = "DROP PROCEDURE nodb_proc_clob_inout1";
+          executeSQL(sql, cb);
+        }
+      ], done);
+    }); // 72.1.7
+
   }); // 72.1
 
   describe("72.2 BLOB", function() {

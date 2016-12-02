@@ -19,7 +19,7 @@
  * See LICENSE.md for relevant licenses.
  *
  * NAME
- *   62. lobProperties.js
+ *   62. lobProperties1.js
  *
  * DESCRIPTION
  *   Testing getters and setters for LOB class.
@@ -40,9 +40,9 @@ var should   = require('should');
 var async    = require('async');
 var dbConfig = require('./dbconfig.js');
 
-describe('62. lobProperties.js', function() {
+describe('62. lobProperties1.js', function() {
 
-  var tableName = "nodb_mylobprops";
+  var tableName = "nodb_tab_mylobprops";
   var connection = null;
   var sqlSelect = "SELECT * FROM " + tableName + " WHERE id = :i";
   var defaultChunkSize = null;

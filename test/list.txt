@@ -770,7 +770,7 @@ Overview of node-oracledb functional tests
     61.4 Pool Class
     61.5 ResultSet Class
 
-62. lobProperties.js
+62. lobProperties1.js
     62.1 chunkSize (read-only)
     62.2 length (read-only)
     62.3 pieceSize -default value is chunkSize

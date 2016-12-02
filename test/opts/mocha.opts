@@ -63,7 +63,7 @@ test/properties.js
 test/lobResultSet.js
 test/clobPlsqlString.js
 test/checkClassesTypes.js
-test/lobProperties.js
+test/lobProperties1.js
 test/autoCommit4nestedExecutes.js
 test/sqlWithWarnings.js
 test/uninitializedLob.js
@@ -76,3 +76,4 @@ test/lobBind1.js
 test/lobBind2.js
 test/poolPing.js
 test/lobBindAsStringBuffer.js
+test/lobProperties2.js
