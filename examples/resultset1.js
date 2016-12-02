@@ -52,7 +52,7 @@ oracledb.getConnection(
           doRelease(connection);
           return;
         }
-        console.log(result);
+        // console.log(result);
         fetchOneRowFromRS(connection, result.resultSet);
       });
   });
