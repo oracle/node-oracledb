@@ -853,7 +853,7 @@ describe('74.lobBindAsStringBuffer.js', function() {
       var sequence = 14;
       var bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-        c: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 65538 }
+        c: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 65535 }
       };
 
       async.series([
