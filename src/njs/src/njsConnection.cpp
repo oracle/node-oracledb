@@ -807,7 +807,7 @@ void Connection::GetBindUnit (Local<Value> val, Bind* bind, bool array,
          ( bind->maxSize > DPI_MAX_BUFLEN ) )
     {
       executeBaton->error = NJSMessages::getErrorMsg ( errMaxValueTooLarge,
-                                                       "maxSize", 
+                                                       "maxSize",
                                                        DPI_MAX_BUFLEN, 2 );
       goto exitGetBindUnit;
     }
