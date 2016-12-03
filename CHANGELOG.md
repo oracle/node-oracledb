@@ -1,5 +1,54 @@
 # Change Log
 
+## node-oracledb v1.12.0 Development (3 Dec 2016)
+
+- Significantly enhanced LOB support:
+   - Added `BIND_IN` support for DML
+   - Added `BIND_IN`, `BIND_OUT`, `BIND_INOUT` support for PL/SQL
+   - Added a `connection.createLob()` method to create temporary LOBs
+   - Added a `lob.close()` method
+   - Made enhancements to allow binding String or Buffer data as `STRING` or `BUFFER` to LOB database types
+   - Writeable LOB Streams now conclude with a 'close' event
+
+- Added a connection pool 'ping' feature controlled with
+  `oracledb.poolPingInterval` and a corresponding `createPool()`
+  option. This validates pooled connections when they are returned
+  from a `getConnection()` call.  Values are
+
+     - zero: always ping for every pooled `getConnection()`
+     - negative: never ping
+     - positive: time in seconds the connection must be idle in the pool before `getConnection()` does a ping.  Default is 60 seconds
+
+  The setting is a no-op when node-oracledb is built with Oracle
+  Database 12.2 client libraries, where a new, lower-level OCI feature
+  provides an always-on, lightweight connection check.
+
+- Upgraded NAN dependency from 2.3 to 2.4.
+
+- Stated compatibility is now for Node.js 0.12, 4, 6 and 7.
+
+- Fixed return value of the DATE type bound as `BIND_INOUT`.
+
+- Fixed passing NULL values bound as `BIND_INOUT` for several data types.
+
+- Fixed compilation warnings with newer Node.js versions due to V8 deprecations.
+
+- Fixed some Windows and OS X compilation warnings.
+
+- Linted JavaScript files, standardizing code, example and test files.
+
+- Updated various examples and created new ones.
+
+- Updated README.md and api.md introductory examples, based on a patch proposed by [Leigh Schrandt](https://github.com/stealthybox).
+
+- Updated README.md thanks to [Nick Heiner](https://github.com/NickHeiner).
+
+- Updated documentation links to point to the Oracle Database 12.2 documentation.
+
+- Made some internal changes to the DPI layer to avoid name space collisions
+  and fix session tagging.  These are not visible / exposed through
+  node-oracledb.
+
 ## node-oracledb v1.11.0 (19 Aug 2016)
 
 - Added a connection pool cache feature allowing pools to have aliases and be more easily used.
