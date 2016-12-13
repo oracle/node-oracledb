@@ -770,11 +770,11 @@ implement appropriate statement execution error checking.
 
 The default value is `60` seconds.  Possible values for `poolPingInterval` are:
 
-Value   | Behavior of a Pool `getConnection()` call
---------|------------------------------------------
-`n` < 0 | Never checks for connection aliveness
-`0`     | Always checks for connection aliveness. There is some overhead in performing a ping so non-zero values are recommended for most applications
-`n` > 0 | Checks aliveness if the connection has been idle in the pool (not "checked out" to the application by `getConnection()`) for at least `n` seconds
+Value     | Behavior of a Pool `getConnection()` call
+----------|------------------------------------------
+`n` < `0` | Never checks for connection aliveness
+`0`       | Always checks for connection aliveness. There is some overhead in performing a ping so non-zero values are recommended for most applications
+`n` > `0` | Checks aliveness if the connection has been idle in the pool (not "checked out" to the application by `getConnection()`) for at least `n` seconds
 
 This property may be overridden when [creating a connection pool](#createpool).
 
@@ -2996,11 +2996,11 @@ during [pool creation](#createpool).
 
 Possible values for `poolPingInterval` are:
 
-Value   | Behavior of a Pool `getConnection()` call
---------|------------------------------------------
-`n` < 0 | Never checks for connection aliveness
-`0`     | Always checks for connection aliveness. There is some overhead in performing a ping so non-zero values are recommended for most applications
-`n` > 0 | Checks aliveness if the connection has been idle in the pool (not "checked out" to the application by `getConnection()`) for at least `n` seconds
+Value     | Behavior of a Pool `getConnection()` call
+----------|------------------------------------------
+`n` < `0` | Never checks for connection aliveness
+`0`       | Always checks for connection aliveness. There is some overhead in performing a ping so non-zero values are recommended for most applications
+`n` > `0` | Checks aliveness if the connection has been idle in the pool (not "checked out" to the application by `getConnection()`) for at least `n` seconds
 
 ### <a name="drcp"></a> 8.4 Database Resident Connection Pooling (DRCP)
 
