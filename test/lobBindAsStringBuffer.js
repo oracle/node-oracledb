@@ -478,7 +478,7 @@ describe('74.lobBindAsStringBuffer.js', function() {
       executeSQL(proc_drop, done);
     }); // after
 
-    it('74.1.1 PLSQL, BIND_IN with String length 32768', function(done) {
+    it('74.1.1 PLSQL, BIND_IN with String length 32K', function(done) {
       // Driver already supports CLOB AS STRING and BLOB AS BUFFER for PLSQL BIND if the data size less than or equal to 32767.
       // As part of this enhancement, driver allows even if data size more than 32767 for both column types
       var len = 32768;
@@ -508,7 +508,7 @@ describe('74.lobBindAsStringBuffer.js', function() {
       ], done);
     });  // 74.1.1
 
-    it('74.1.2 PLSQL, BIND_IN with String length 65535', function(done) {
+    it('74.1.2 PLSQL, BIND_IN with String length 64K - 1', function(done) {
       // The upper limit on the number of bytes of data that can be bound as
       // `STRING` or `BUFFER` when node-oracledb is linked with Oracle Client
       // 11.2 libraries is 64 Kb.  With Oracle Client 12, the limit is 2 Gb
@@ -1017,7 +1017,7 @@ describe('74.lobBindAsStringBuffer.js', function() {
       var sequence = 20;
       var bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-        c: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 32768 }
+        c: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 65535 }
       };
 
       async.series([
