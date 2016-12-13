@@ -75,7 +75,7 @@ var  dostream = function(lob, cb) {
     function(err)
     {
       // console.log("lob.on 'error' event");
-      cb(err);
+      return cb(err);
     });
   lob.on(
     'end',
@@ -88,7 +88,7 @@ var  dostream = function(lob, cb) {
     function()
     {
       // console.log("lob.on 'close' event");
-      cb(null);
+      return cb(null);
     });
 
   var outStream = fs.createWriteStream(outFileName);
@@ -97,7 +97,7 @@ var  dostream = function(lob, cb) {
     function(err)
     {
       // console.log("outStream.on 'error' event");
-      cb(err);
+      return cb(err);
     });
 
   // Switch into flowing mode and push the LOB to the file
@@ -119,7 +119,7 @@ var doquery = function(cb) {
       if (lob === null) {
         return cb(new Error("LOB was NULL"));
       }
-      cb(null, lob);
+      return cb(null, lob);
     });
 };
 

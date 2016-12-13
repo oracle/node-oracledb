@@ -202,7 +202,7 @@ var query_plsql_inout = function (conn, cb) {
             function(err)
             {
               // console.log("clob2.on 'error' event");
-              cb(err);
+              return cb(err);
             });
           clob2.on(
             'end',
@@ -226,7 +226,7 @@ var query_plsql_inout = function (conn, cb) {
             function(err)
             {
               // console.log("outStream.on 'error' event");
-              cb(err);
+              return cb(err);
             });
 
           // Switch into flowing mode and push the LOB to the file
@@ -279,7 +279,7 @@ var plsql_out_inout = function (conn, cb) {
             function(err)
             {
               // console.log("clob2.on 'error' event");
-              cb(err);
+              return cb(err);
             });
           clob2.on(
             'end',
@@ -302,7 +302,7 @@ var plsql_out_inout = function (conn, cb) {
             function(err)
             {
               // console.log("outStream.on 'error' event");
-              cb(err);
+              return cb(err);
             });
 
           // Switch into flowing mode and push the LOB to the file

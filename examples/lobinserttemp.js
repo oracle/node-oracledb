@@ -69,7 +69,7 @@ var docreatetemplob = function (conn, cb) {
       return cb(err);
     }
     console.log("Temporary LOB created with createLob()");
-    cb(null, conn, templob);
+    return cb(null, conn, templob);
   });
 };
 
@@ -87,7 +87,7 @@ var doloadtemplob = function (conn, templob, cb) {
     function(err)
     {
       console.log("templob.on 'error' event");
-      cb(err);
+      return cb(err);
     });
 
   templob.on(
@@ -96,7 +96,7 @@ var doloadtemplob = function (conn, templob, cb) {
     {
       console.log("templob.on 'finish' event");
       // The data was loaded into the temporary LOB
-      cb(null, conn, templob);
+      return cb(null, conn, templob);
     });
 
   console.log('Reading from ' + inFileName);
@@ -106,7 +106,7 @@ var doloadtemplob = function (conn, templob, cb) {
     function(err)
     {
       console.log("inStream.on 'error' event");
-      cb(err);
+      return cb(err);
     });
 
   inStream.pipe(templob);  // copies the text to the temporary LOB

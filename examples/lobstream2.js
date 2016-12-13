@@ -71,7 +71,7 @@ var doquery = function(conn, cb) {
       if (lob === null) {
         return cb(new Error("LOB was NULL"), conn);
       }
-      cb(null, conn, lob);
+      return cb(null, conn, lob);
     });
 };
 
@@ -83,7 +83,7 @@ var  dostream = function(conn, clob, cb) {
     function(err)
     {
       console.log("clob.on 'error' event");
-      cb(err, conn);
+      return cb(err, conn);
     });
 
   // node-oracledb's lob.pieceSize is the number of bytes retrieved
@@ -112,7 +112,7 @@ var  dostream = function(conn, clob, cb) {
     function()
     {
       console.log("clob.on 'close' event");
-      cb(null, conn);
+      return cb(null, conn);
     });
 };
 
