@@ -3519,21 +3519,55 @@ environment variable is also set.
 
 ##### <a name="datehandling"></a> 9.1.6.3 Fetching Date and Timestamps
 
-The default query result type mappings for Oracle Database types to JavaScript types are:
-
 Date and timestamp columns are mapped to JavaScript dates.  Note that
 JavaScript Date has millisecond precision.  Therefore, timestamps
 having greater precision lose their sub-millisecond fractional part
-when fetched. Internally, `TIMESTAMP` and `DATE` columns are fetched
-as `TIMESTAMP WITH LOCAL TIME ZONE`
-using
-[OCIDateTime](https://docs.oracle.com/database/122/LNOCI/object-relational-data-types-in-oci.htm#LNOCI16840).
-When binding a JavaScript Date value in an `INSERT` statement, the
-date is also inserted as `TIMESTAMP WITH LOCAL TIME ZONE` using
-OCIDateTime.
+when fetched.
+
+Internally, `TIMESTAMP` and `DATE` columns are fetched as `TIMESTAMP
+WITH LOCAL TIME ZONE`.  When binding a JavaScript Date value in an
+`INSERT` statement, the date is also inserted as `TIMESTAMP WITH LOCAL
+TIME ZONE`.  In the database, `TIMESTAMP WITH LOCAL TIME ZONE` dates
+are normalized to the database time zone.  When retrieved, they are
+returned in the session time zone.
+
+To make appliations more portable, it is recommended to always set the
+session time zone to a pre-determined value, such as UTC.  This can be
+done by setting the environment
+variable
+[`ORA_SDTZ`](http://docs.oracle.com/database/122/NLSPG/datetime-data-types-and-time-zone-support.htm#NLSPG263) before
+starting Node.js, for example:
+
+```
+$ export ORA_SDTZ='UTC'
+$ node myapp.js
+```
+
+The session time zone can also be changed at runtime for each connection by
+executing:
+
+```sql
+connection.execute(
+  "ALTER SESSION SET TIME_ZONE='UTC'"
+  function(err) { ... }
+);
+```
+
+To do this without requiring the overhead of a 'round trip' to execute
+the `ALTER` statement, you could use a trigger:
+
+```sql
+CREATE OR REPLACE TRIGGER my_logon_trigger
+  AFTER LOGON
+  ON hr.SCHEMA
+BEGIN
+  EXECUTE IMMEDIATE 'ALTER SESSION SET TIME_ZONE=''UTC''';
+END;
+```
+
 See
 [Working with Dates Using the Node.js Driver](https://jsao.io/2016/09/working-with-dates-using-the-nodejs-driver/) for
-a discussion of date handling.
+more discussion of date handling.
 
 ##### <a name="fetchasstringhandling"></a> 9.1.6.4 Fetching Numbers and Dates as String
 
