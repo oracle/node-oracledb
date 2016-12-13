@@ -1630,9 +1630,9 @@ If a bind value is an object it may have the following properties:
 Bind Property | Description
 ---------------|------------
 `dir` | The direction of the bind.  One of the [Oracledb Constants](#oracledbconstantsbinddir) `BIND_IN`, `BIND_INOUT`, or `BIND_OUT`.
-`maxArraySize` | The number of array elements to be allocated for a PL/SQL Collection `INDEX OF` associative array OUT or IN OUT array bind variable.
-`maxSize` | The maximum number of bytes that an OUT or IN OUT bind variable of type `STRING` or `BUFFER` can use to get data. The default value is 200. The maximum limit depends on the database type.
-`type` | The datatype to be bound. One of the [Oracledb Constants](#oracledbconstantsbinddir) `BLOB`, `BUFFER`, `CLOB`, `CURSOR`, `DATE`, `NUMBER`, or `STRING`.
+`maxArraySize` | The number of array elements to be allocated for a PL/SQL Collection `INDEX OF` associative array OUT or IN OUT array bind variable.  For IN binds, the value of `maxArraySize` is ignored.
+`maxSize` | The maximum number of bytes that an OUT or IN OUT bind variable of type `STRING` or `BUFFER` can use to get data. The default value is 200. The maximum limit depends on the database type, see below.  When binding IN OUT, then `maxSize` refers to the size of the returned  value: the input value can be smaller or bigger.  For IN binds, `maxSize` is ignored.
+`type` | The datatype to be bound.  One of the [Oracledb Constants](#oracledbconstantsbinddir) `BLOB`, `BUFFER`, `CLOB`, `CURSOR`, `DATE`, `NUMBER`, or `STRING`.  With IN OUT binds the type can be explicitly set with `type` or it will default to the type of the input data value.  With OUT binds, the type defaults to `STRING` whenever `type` is not specified.
 `val` | The input value or variable to be used for an IN or IN OUT bind variable.
 
 The limit for `maxSize` when binding as a `BUFFER` type is 2000 bytes,
@@ -1643,13 +1643,6 @@ value of `EXTENDED`.  In this case the limit is 32767 bytes.
 When binding Oracle LOBs, as `STRING` or `BUFFER`, the value of
 `maxSize` can be much larger, see the limits
 in [LOB Bind Parameters](#lobbinds).
-
-When binding IN OUT, then `maxSize` refers to the size of the returned
-value.  The input value can be smaller or bigger.
-
-With OUT binds, where the type cannot be inferred by node-oracledb
-because there is no input data value, the type defaults to `STRING`
-whenever `type` is not specified.
 
 Note `CURSOR` bind variables can be used only for PL/SQL OUT binds.
 
