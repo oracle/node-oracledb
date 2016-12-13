@@ -61,7 +61,7 @@ var dorelease = function(conn) {
 // Cleanup anything other than lobinsert1.js demonstration data
 var docleanup = function (conn, cb) {
   conn.execute(
-    'delete from mylobs where id > 2',
+    'DELETE FROM mylobs WHERE id > 2',
     function(err) {
       return cb(err, conn);
     });
@@ -316,7 +316,7 @@ var plsql_out_inout = function (conn, cb) {
 var doshowvtemplob = function (conn, cb) {
   console.log('6. Query from V$TEMPORARY_LOBS:');
   conn.execute(
-    "select * from v$temporary_lobs",
+    "SELECT * FROM V$TEMPORARY_LOBS",
     [], { outFormat: oracledb.OBJECT },
     function (err, result) {
       if (err) {

@@ -57,7 +57,7 @@ var dorelease = function(conn) {
 // Cleanup anything other than lobinsert1.js demo data
 var docleanup = function (conn, cb) {
   conn.execute(
-    'delete from mylobs where id > 2',
+    'DELETE FROM mylobs WHERE id > 2',
     function(err) {
       return cb(err, conn);
     });

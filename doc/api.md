@@ -4524,9 +4524,9 @@ is a great way to convert relational table data to JSON:
 
 ```javascript
 conn.execute(
-  "select json_object ('deptId' is d.department_id, 'name' is d.department_name) department "
-  + "from departments d "
-  + "where department_id < :did",
+  "SELECT JSON_OBJECT ('deptId' IS d.department_id, 'name' IS d.department_name) department "
+  + "FROM departments d "
+  + "WHERE department_id < :did",
   [50],
   function(err, result)
   {

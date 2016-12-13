@@ -65,7 +65,7 @@ var dorelease = function(conn) {
 
 var docleanup = function (conn, cb) {
   conn.execute(
-    'delete from mylobs',
+    'DELETE FROM mylobs',
     function(err) {
       return cb(err, conn);
     });
