@@ -3786,6 +3786,9 @@ connection.execute(
 PL/SQL stored procedures, functions and anonymous blocks can be called
 from node-oracledb using [`execute()`](#execute).
 
+Note the error property of the callback is not set when PL/SQL
+"success with info" warnings such as compilation warnings occur.
+
 ### <a name="plsqlproc"></a> 10.1 PL/SQL Stored Procedures
 
 The PL/SQL procedure:
