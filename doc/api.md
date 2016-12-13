@@ -717,9 +717,9 @@ The default value is 4.
 
 This property may be overridden when [creating a connection pool](#createpool).
 
-If you increase this value, you may want to increase the number of
-threads available to node-oracledb.  See
-[Connections and Number of Threads](#numberofthreads).
+If you increase this value, you should increase the number of threads
+available to node-oracledb.
+See [Connections and Number of Threads](#numberofthreads).
 
 ##### Example
 
@@ -1215,6 +1215,10 @@ Signature | Description
 
 See [Connection Handling](#connectionhandling) for more information on
 connections.
+
+Note if the application opens a number of connections, you should
+increase the number of threads available to node-oracledb.
+See [Connections and Number of Threads](#numberofthreads).
 
 ##### Parameters
 
