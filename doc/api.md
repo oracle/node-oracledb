@@ -3494,28 +3494,9 @@ console.log(0.2 + 0.7); // gives 0.8999999999999999
 The primary recommendation for number handling is to use Oracle SQL or
 PL/SQL for mathematical operations, particularly for currency
 calculations.  Alternatively you can use `fetchAsString` or
-`fetchInfo` (see next section) to fetch numbers in string format, and
-then use one of the available third-party JavaScript number libraries
-that handles more precision.
-
-When using `fetchAsString` or `fetchInfo`, you may need to
-explicitly use `NLS_NUMERIC_CHARACTERS` to override your NLS
-settings and force the decimal separator to be a period.  This can
-be done by executing:
-
-```
-ALTER SESSION SET NLS_NUMERIC_CHARACTERS = '.,'
-```
-
-Alternatively you can set the equivalent environment variable prior
-to starting Node.js:
-
-```
-export NLS_NUMERIC_CHARACTERS='.,'
-```
-
-Note this environment variable is not used unless the `NLS_LANG`
-environment variable is also set.
+`fetchInfo` (see [below](#fetchasstringhandling)) to fetch numbers in
+string format, and then use one of the available third-party
+JavaScript number libraries that handles more precision.
 
 ##### <a name="datehandling"></a> 9.1.6.3 Fetching Date and Timestamps
 
@@ -3531,7 +3512,7 @@ TIME ZONE`.  In the database, `TIMESTAMP WITH LOCAL TIME ZONE` dates
 are normalized to the database time zone.  When retrieved, they are
 returned in the session time zone.
 
-To make appliations more portable, it is recommended to always set the
+To make applications more portable, it is recommended to always set the
 session time zone to a pre-determined value, such as UTC.  This can be
 done by setting the environment
 variable
@@ -3546,9 +3527,9 @@ $ node myapp.js
 The session time zone can also be changed at runtime for each connection by
 executing:
 
-```sql
+```javascript
 connection.execute(
-  "ALTER SESSION SET TIME_ZONE='UTC'"
+  "ALTER SESSION SET TIME_ZONE='UTC'",
   function(err) { ... }
 );
 ```
@@ -3652,6 +3633,28 @@ represented as numbers:
 
 To map columns returned from REF CURSORS, use `fetchAsString`.  The
 `fetchInfo` settings do not apply.
+
+When using `fetchAsString` or `fetchInfo` for numbers, you may need to
+explicitly use `NLS_NUMERIC_CHARACTERS` to override your NLS settings
+and force the decimal separator to be a period.  This can be done for
+each connection by executing the statement:
+
+```javascript
+connection.execute(
+  "ALTER SESSION SET NLS_NUMERIC_CHARACTERS = '.,'",
+  function(err) { ... }
+);
+```
+
+Alternatively you can set the equivalent environment variable prior
+to starting Node.js:
+
+```
+$ export NLS_NUMERIC_CHARACTERS='.,'
+```
+
+Note this environment variable is not used unless the `NLS_LANG`
+environment variable is also set.
 
 ##### <a name="customtypehandling"></a> 9.1.6.5 Mapping Custom Types
 
