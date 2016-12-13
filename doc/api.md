@@ -2614,7 +2614,7 @@ use. This prevents other connections from beginning work and stops
 Node.js from handling more user load.  Increasing the number of worker
 threads may improve throughput.  Do this by setting the environment
 variable
-[UV_THREADPOOL_SIZE](https://docs.libuv.org/en/v1.x/threadpool.html)
+[UV_THREADPOOL_SIZE](http://docs.libuv.org/en/v1.x/threadpool.html)
 before starting Node.
 
 For example, in a Linux terminal, the number of Node.js worker threads
