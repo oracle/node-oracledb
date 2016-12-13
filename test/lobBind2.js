@@ -822,69 +822,7 @@ describe("72. lobBind2.js", function() {
 
     }); // 72.2.5
 
-    it("72.2.6 Negative - call lob.close() twice concurrently", function(done) {
-
-      var seq = 6000;
-
-      async.series([
-        function(cb) {
-          connection.createLob(oracledb.BLOB, function(err, lob) {
-            should.not.exist(err);
-
-            lob.on("close", function(err) {
-              should.not.exist(err);
-
-              connection.commit(function(err) {
-                should.not.exist(err);
-
-                return cb();
-              });
-            }); // close event
-
-            lob.on("error", function(err) {
-              should.not.exist(err, "lob.on 'error' event.");
-            });
-
-            lob.on("finish", function() {
-              connection.execute(
-                "insert into nodb_tab_blob72 (id, content) values (:id, :bindvar)",
-                { id: seq, bindvar: lob},
-                function(err, result) {
-                  should.not.exist(err);
-
-                  should.strictEqual(result.rowsAffected, 1);
-
-                  lob.close(function(err) {
-                    should.not.exist(err);
-                  });
-
-                  lob.close(function(err) {
-                    should.exist(err);
-                    (err.message).should.startWith("NJS-023:");
-                    // NJS-023: concurrent operations on a Lob are not allowed
-                  });
-                }
-              );
-            }); // finish event
-
-            var inStream = fs.createReadStream(jpgFileName);
-
-            inStream.on("error", function(err) {
-              should.not.exist(err, "inStream.on 'error' event.");
-            });
-
-            inStream.pipe(lob);
-
-          }); // createLob()
-        },
-        function(cb) {
-          verifyBlobValue(seq, jpgFileName, cb);
-        }
-      ], done);
-
-    }); // 72.2.6
-
-    it("72.2.7 call lob.close() multiple times sequentially", function(done) {
+    it("72.2.6 call lob.close() multiple times sequentially", function(done) {
 
       var seq = 7000;
 
@@ -942,7 +880,7 @@ describe("72. lobBind2.js", function() {
         }
       ], done);
 
-    }); // 72.2.7
+    }); // 72.2.6
 
   }); // 72.2
 
