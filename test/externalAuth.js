@@ -95,6 +95,7 @@ describe('5. externalAuth.js', function() {
           should.exist(err);
           (err.message).should.startWith("DPI-006:");
           // DPI-006: user and password should not be set when using external authentication
+          should.not.exist(conn);
           done();
         }
       );
@@ -113,6 +114,7 @@ describe('5. externalAuth.js', function() {
           should.exist(err);
           (err.message).should.startWith("DPI-006:");
           // DPI-006: user and password should not be set when using external authentication
+          should.not.exist(conn);
           done();
         }
       );
@@ -131,6 +133,8 @@ describe('5. externalAuth.js', function() {
           should.exist(err);
           (err.message).should.startWith("DPI-006:");
           // DPI-006: user and password should not be set when using external authentication
+
+          should.not.exist(conn);
           done();
         }
       );
@@ -240,8 +244,9 @@ describe('5. externalAuth.js', function() {
 
   describe('5.2 tests only work when externalAuth is configured on DB', function() {
 
-    // need to skip these tests if external authentication is not configured
-    var it = (process.env.NODE_ORACLEDB_EXTERNALAUTH) ? global.it : global.it.skip;
+    before(function() {
+      if ( !(process.env.NODE_ORACLEDB_EXTERNALAUTH) ) this.skip();
+    });
 
     it("5.2.1 can get connection from oracledb with external authentication", function(done) {
 

@@ -38,10 +38,11 @@
 
 #include <string>
 
-using std::string;
-
 namespace dpi
 {
+
+using std::string;
+
 
 
 /*---------------------------------------------------------------------------
@@ -119,6 +120,7 @@ typedef enum
   #define  DPI_SZ_TYPE         sb8
   #define  DPI_USZ_TYPE        ub8
   #define  DPI_BUFLEN_TYPE     ub4
+  #define  DPI_MAX_BUFLEN    (1024*1024*1024 - 2)  // max for binding: 1GB-2
   #define  DPIBINDBYPOS    OCIBindByPos2
   #define  DPIBINDBYNAME   OCIBindByName2
   #define  DPIDEFINEBYPOS  OCIDefineByPos2
@@ -129,6 +131,7 @@ typedef enum
   #define  DPI_SZ_TYPE         sb4
   #define  DPI_USZ_TYPE        ub4
   #define  DPI_BUFLEN_TYPE     ub2
+  #define  DPI_MAX_BUFLEN      UB2MAXVAL
   #define  DPIBINDBYPOS    OCIBindByPos
   #define  DPIBINDBYNAME   OCIBindByName
   #define  DPIDEFINEBYPOS  OCIDefineByPos

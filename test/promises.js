@@ -35,7 +35,6 @@
 
 var oracledb = require('oracledb');
 var should   = require('should');
-var async    = require('async');
 var dbConfig = require('./dbconfig.js');
 
 // Need to skip these tests if Promises are not supported
@@ -43,14 +42,8 @@ var it = (oracledb.Promise) ? global.it : global.it.skip;
 
 describe('16. promises.js', function(){
 
-  var credentials = {
-                      user:          dbConfig.user,
-                      password:      dbConfig.password,
-                      connectString: dbConfig.connectString
-                    };
-
   it('16.1 returns a promise from oracledb.getConnection', function(done) {
-    var promise = oracledb.getConnection(credentials);
+    var promise = oracledb.getConnection(dbConfig);
 
     promise.should.be.an.instanceof(oracledb.Promise);
 
@@ -65,12 +58,13 @@ describe('16. promises.js', function(){
         });
       })
       .catch(function(err) {
-        return done(err);
+        should.not.exist(err);
+        return done();
       });
-  })
+  });
 
   it('16.2 returns a promise from oracledb.createPool', function(done) {
-    var promise = oracledb.createPool(credentials);
+    var promise = oracledb.createPool(dbConfig);
 
     promise.should.be.an.instanceof(oracledb.Promise);
 
@@ -85,12 +79,13 @@ describe('16. promises.js', function(){
         });
       })
       .catch(function(err) {
-        return done(err);
+        should.not.exist(err);
+        return done();
       });
-  })
+  });
 
   it('16.3 returns a promise from pool.terminate', function(done) {
-    oracledb.createPool(credentials)
+    oracledb.createPool(dbConfig)
       .then(function(pool) {
         pool.should.be.ok();
         var promise = pool.terminate();
@@ -101,12 +96,13 @@ describe('16. promises.js', function(){
         return done();
       })
       .catch(function(err) {
-        return done(err);
+        should.not.exist(err);
+        return done();
       });
-  })
+  });
 
   it('16.4 returns a promise from pool.getConnection', function(done) {
-    oracledb.createPool(credentials)
+    oracledb.createPool(dbConfig)
       .then(function(pool) {
         pool.should.be.ok();
         var getConnPromise = pool.getConnection();
@@ -129,12 +125,13 @@ describe('16. promises.js', function(){
           });
       })
       .catch(function(err) {
-        return done(err);
+        should.not.exist(err);
+        return done();
       });
-  })
+  });
 
   it('16.5 returns a promise from connection.release', function(done) {
-    oracledb.getConnection(credentials)
+    oracledb.getConnection(dbConfig)
       .then(function(conn) {
         conn.should.be.ok();
         var promise = conn.release();
@@ -145,12 +142,13 @@ describe('16. promises.js', function(){
         return done();
       })
       .catch(function(err) {
-        return done(err);
+        should.not.exist(err);
+        return done();
       });
-  })
+  });
 
   it('16.6 returns a promise from connection.execute', function(done) {
-    oracledb.getConnection(credentials)
+    oracledb.getConnection(dbConfig)
       .then(function(conn) {
         conn.should.be.ok();
         var executePromise = conn.execute('select 1 from dual');
@@ -164,12 +162,13 @@ describe('16. promises.js', function(){
           });
       })
       .catch(function(err) {
-        return done(err);
+        should.not.exist(err);
+        return done();
       });
-  })
+  });
 
   it('16.7 returns a promise from connection.commit', function(done) {
-    oracledb.getConnection(credentials)
+    oracledb.getConnection(dbConfig)
       .then(function(conn) {
         var commitPromise;
         conn.should.be.ok();
@@ -183,12 +182,13 @@ describe('16. promises.js', function(){
           });
       })
       .catch(function(err) {
-        return done(err);
+        should.not.exist(err);
+        return done();
       });
-  })
+  });
 
   it('16.8 returns a promise form connection.rollback', function(done) {
-    oracledb.getConnection(credentials)
+    oracledb.getConnection(dbConfig)
       .then(function(conn) {
         var rollbackPromise;
         conn.should.be.ok();
@@ -202,12 +202,13 @@ describe('16. promises.js', function(){
           });
       })
       .catch(function(err) {
-        return done(err);
+        should.not.exist(err);
+        return done();
       });
-  })
+  });
 
   it('16.9 returns a promise from resultSet.close', function(done) {
-    oracledb.getConnection(credentials)
+    oracledb.getConnection(dbConfig)
       .then(function(conn) {
         conn.should.be.ok();
 
@@ -225,9 +226,10 @@ describe('16. promises.js', function(){
           });
       })
       .catch(function(err) {
-        return done(err);
+        should.not.exist(err);
+        return done();
       });
-  })
+  });
 
   it('16.10 returns a promise from resultSet.getRow', function(done) {
 
@@ -235,7 +237,7 @@ describe('16. promises.js', function(){
       return resultSet.close()
         .then(function() {
           conn.release();
-        })
+        });
     }
 
     function processResultSet(conn, resultSet) {
@@ -268,7 +270,7 @@ describe('16. promises.js', function(){
       });
     }
 
-    oracledb.getConnection(credentials)
+    oracledb.getConnection(dbConfig)
       .then(function(conn) {
         conn.should.be.ok();
 
@@ -281,10 +283,11 @@ describe('16. promises.js', function(){
           });
       })
       .catch(function(err) {
-        return done(err);
-       });
+        should.not.exist(err);
+        return done();
+      });
 
-  }) // 16.10
+  }); // 16.10
 
   it('16.11 returns a promise from resultSet.getRows', function(done) {
     function finishProcessing(conn, resultSet) {
@@ -325,7 +328,7 @@ describe('16. promises.js', function(){
       });
     }
 
-    oracledb.getConnection(credentials)
+    oracledb.getConnection(dbConfig)
       .then(function(conn) {
         conn.should.be.ok();
 
@@ -338,8 +341,9 @@ describe('16. promises.js', function(){
           });
       })
       .catch(function(err) {
-        return done(err);
+        should.not.exist(err);
+        return done();
       });
-  }) // 16.11
+  }); // 16.11
 
-})
+});

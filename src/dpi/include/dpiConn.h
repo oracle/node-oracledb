@@ -36,13 +36,15 @@
 
 #include <string>
 
-
-using std::string;
-
+#include <time.h>
 
 
 namespace dpi
 {
+
+using std::string;
+
+
 /*---------------------------------------------------------------------------
                      PUBLIC CONSTANTS
   ---------------------------------------------------------------------------*/
@@ -71,8 +73,6 @@ public:
                                 // properties
   virtual void stmtCacheSize(unsigned int stmtCacheSize) = 0;
   virtual unsigned int stmtCacheSize() const = 0;
-  virtual int getByteExpansionRatio () = 0;
-  virtual void setErrState ( int errNum ) = 0;
 
   virtual void lobPrefetchSize(unsigned int lobPrefetchSize) = 0;
   virtual unsigned int lobPrefetchSize() const = 0;
@@ -83,9 +83,13 @@ public:
 
   virtual void action(const string &action) = 0;
 
+                              // Session Tag
   // In case of pooled-connections & tagged sessions, did we get session
   // with provided Tag
-  virtual boolean sameTag () = 0;
+  virtual boolean tagMatched () = 0;
+  // In case of pooled-connections & tagged sessions, session tag at
+  // session acquiring time
+  virtual std::string &tag () = 0;
 
                                 // methods
   virtual Stmt* getStmt (const string &sql="") = 0;
@@ -101,6 +105,12 @@ public:
   virtual DpiHandle *getErrh () = 0;
 
   virtual unsigned int getServerVersion () = 0;
+
+  virtual unsigned int getVarCharByteExpansionRatio () = 0;
+
+  virtual unsigned int getLOBCharExpansionRatio () = 0;
+
+  virtual void setErrState ( int errNum ) = 0;
 
 protected:
                                 // clients cannot do new and delete

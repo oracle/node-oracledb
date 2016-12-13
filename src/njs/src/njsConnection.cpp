@@ -65,10 +65,21 @@ Nan::Persistent<FunctionTemplate> Connection::connectionTemplate_s;
 // max number of bytes for data converted to string with fetchAsString or fetchInfo
 #define NJS_MAX_FETCH_AS_STRING_SIZE 200
 
+// Max number of bytes allowed for PLSQL STRING/BUFFER arguments
+#define NJS_THRESHOLD_SIZE_PLSQL_STRING_ARG 32767
+
 // number of rows prefetched by non-ResultSet queries
 #define NJS_PREFETCH_NON_RESULTSET 2
 
 #define NJS_SIZE_T_MAX std::numeric_limits<std::size_t>::max()
+
+// Temporarily suppress compile warnings that certain NJS_SIZE_T_OVERFLOW
+// calls can never overflow, and are therefore redundant.
+// These are seen on OS X.
+#if defined(__clang__)
+#pragma clang diagnostic ignored "-Wtautological-constant-out-of-range-compare"
+#endif
+// End temporary patch
 
 #define NJS_SIZE_T_OVERFLOW(maxSize,maxRows)                                  \
  ( ( ( maxSize != 0 ) &&                                                      \
@@ -105,12 +116,13 @@ Connection::~Connection()
 */
 void Connection::setConnection(dpi::Conn* dpiconn, Oracledb* oracledb, Local<Object> jsParentObj)
 {
-   this->dpiconn_   = dpiconn;
-   this->isValid_   = true;
-   this->oracledb_  = oracledb;
-   this->lobCount_  = 0;
-   this->rsCount_   = 0;
-   this->dbCount_   = 0;
+   this->dpiconn_      = dpiconn;
+   this->isValid_      = true;
+   this->oracledb_     = oracledb;
+   this->lobCount_     = 0;
+   this->rsCount_      = 0;
+   this->dbCount_      = 0;
+   this->tempLobCount_ = 0;
 
    this->jsParent_.Reset ( jsParentObj );
 }
@@ -134,6 +146,7 @@ void Connection::Init(Handle<Object> target)
   Nan::SetPrototypeMethod(tpl, "commit", Commit);
   Nan::SetPrototypeMethod(tpl, "rollback", Rollback);
   Nan::SetPrototypeMethod(tpl, "break", Break);
+  Nan::SetPrototypeMethod(tpl, "createLob", CreateLob);
 
   Nan::SetAccessor(tpl->InstanceTemplate(),
                                               Nan::New<v8::String>("stmtCacheSize").ToLocalChecked(),
@@ -725,7 +738,8 @@ void Connection::GetBindUnit (Local<Value> val, Bind* bind, bool array,
   Nan::HandleScope scope;
   unsigned int dir   = NJS_BIND_IN;
 
-  if(val->IsObject() && !val->IsDate() && !Buffer::HasInstance(val))
+  if ( val->IsObject () && !val->IsDate () && !Buffer::HasInstance ( val ) &&
+       !( ILob::hasILobInstance ( val->ToObject () ) ) )
   {
     Local<Object> bind_unit = val->ToObject();
 
@@ -784,6 +798,17 @@ void Connection::GetBindUnit (Local<Value> val, Bind* bind, bool array,
       executeBaton->error = NJSMessages::getErrorMsg (
                                            errInvalidPropertyValueInParam,
                                            "maxSize", 2 );
+      goto exitGetBindUnit;
+    }
+
+    // for INOUT and OUT bind maxSize is used, and if a large value is
+    // specified, report error and bail out.
+    if ( ( dir == NJS_BIND_INOUT || dir == NJS_BIND_OUT ) &&
+         ( bind->maxSize > DPI_MAX_BUFLEN ) )
+    {
+      executeBaton->error = NJSMessages::getErrorMsg ( errMaxValueTooLarge,
+                                                       "maxSize",
+                                                       DPI_MAX_BUFLEN, 2 );
       goto exitGetBindUnit;
     }
 
@@ -944,6 +969,7 @@ void Connection::GetOutBindParams (unsigned short dataType, Bind* bind,
   }
 
   executeBaton->binds.push_back(bind);
+  executeBaton->extBinds.push_back(NULL);
 
 exitGetOutBindParams:
   ;
@@ -993,47 +1019,53 @@ void Connection::GetInBindParamsScalar(Local<Value> v8val, Bind* bind,
                                        eBaton* executeBaton)
 {
   Nan::HandleScope scope;
-  ValueType        valType = NJS_VALUETYPE_INVALID;
+  ValueType        valType   = NJS_VALUETYPE_INVALID;
   boolean          v8valNULL ;   /* whether given v8 value is NULL/Undefined */
+  ExtBind          *extBind  = NULL;
 
   /* Allocate for scalar indicator & length */
   bind->ind = (short *)malloc ( sizeof ( short ) );
   bind->len = (DPI_BUFLEN_TYPE *)malloc ( sizeof ( DPI_BUFLEN_TYPE ) );
 
-  *(bind->ind)  = 0;
-
   valType = Connection::GetValueType ( v8val );
   v8valNULL = ( valType == NJS_VALUETYPE_NULL ) ? true : false;
 
+  // set the indicator based on given value is NULL or not.
+  *(bind->ind) = v8valNULL ? -1 : 0;
+
   /*
-   * In case of INOUT Bind, if given value is NULL
+   * In case of IN/INOUT Bind, if given value is NULL
    * make use of specified OUT bind type
    */
-  if ( v8valNULL && bind->isInOut )
+  if ( v8valNULL && ( bind->isInOut || !bind->isOut ) )
   {
-    switch ( bind->type )
+    // If the type specified as part BIND specification use it.
+    if ( bind->type )
     {
-    case NJS_DATATYPE_STR:
-      valType = NJS_VALUETYPE_STRING;
-      break;
+      switch ( bind->type )
+      {
+      case NJS_DATATYPE_STR:
+        valType = NJS_VALUETYPE_STRING;
+        break;
 
-    case NJS_DATATYPE_NUM:
-      valType = NJS_VALUETYPE_NUMBER;
-      break;
+      case NJS_DATATYPE_NUM:
+        valType = NJS_VALUETYPE_NUMBER;
+        break;
 
-    case NJS_DATATYPE_DATE:
-      valType = NJS_VALUETYPE_DATE;
-      break;
+      case NJS_DATATYPE_DATE:
+        valType = NJS_VALUETYPE_DATE;
+        break;
 
-    case NJS_DATATYPE_BUFFER:
-      valType = NJS_VALUETYPE_OBJECT;    /* DB RAW Type, v8 Buffer */
-      break;
+      case NJS_DATATYPE_BUFFER:
+      case NJS_DATATYPE_CLOB:
+      case NJS_DATATYPE_BLOB:
+        valType = NJS_VALUETYPE_OBJECT;  // DB RAW Type, v8 Buffer or LOB object
+        break;
 
-    // The following types are NOT supported as IN BIND (for INOUT) ignore
-    case NJS_DATATYPE_CURSOR:
-    case NJS_DATATYPE_CLOB:
-    case NJS_DATATYPE_BLOB:
-      break;
+      // The following types are NOT supported as IN BIND (for INOUT) ignore
+      case NJS_DATATYPE_CURSOR:
+        break;
+      }
     }
   }
 
@@ -1041,8 +1073,7 @@ void Connection::GetInBindParamsScalar(Local<Value> v8val, Bind* bind,
   {
     case NJS_VALUETYPE_NULL:
       bind->value = NULL;
-      *(bind->ind)   = -1;
-      bind->type        = dpi::DpiVarChar;
+      bind->type  = dpi::DpiVarChar;
       break;
 
     case NJS_VALUETYPE_STRING:
@@ -1061,6 +1092,14 @@ void Connection::GetInBindParamsScalar(Local<Value> v8val, Bind* bind,
       v8::String::Utf8Value str( v8valNULL ?
                            Nan::New<v8::String> ( "" ).ToLocalChecked() :
                            v8val->ToString());
+
+      if ( str.length () > DPI_MAX_BUFLEN )
+      {
+        executeBaton->error = NJSMessages::getErrorMsg (
+                                                        errBindValueTooLarge,
+                                                        DPI_MAX_BUFLEN );
+        goto exitGetInBindParamsScalar;
+      }
 
       bind->type = dpi::DpiVarChar;
       if( bind->isInOut )
@@ -1099,7 +1138,8 @@ void Connection::GetInBindParamsScalar(Local<Value> v8val, Bind* bind,
       bind->type = dpi::DpiInteger;
       bind->maxSize = *(bind->len) = sizeof(int);
       bind->value = (int*)malloc(*(bind->len));
-      *(int*)(bind->value) = v8valNULL ? 0 : v8val->ToInt32()->Value();
+      *(int*)(bind->value) = v8valNULL ? 0 :
+                                Nan::To<int32_t> (v8val).FromJust ();
       break;
 
     case NJS_VALUETYPE_UINTEGER:
@@ -1113,7 +1153,7 @@ void Connection::GetInBindParamsScalar(Local<Value> v8val, Bind* bind,
       bind->maxSize = *(bind->len) = sizeof(unsigned int);
       bind->value = (unsigned int*)malloc(*(bind->len));
       *(unsigned int*)(bind->value) = v8valNULL ? 0 :
-                                        v8val->ToUint32()->Value();
+                                        Nan::To<uint32_t>(v8val).FromJust();
       break;
 
     case NJS_VALUETYPE_NUMBER:
@@ -1144,52 +1184,152 @@ void Connection::GetInBindParamsScalar(Local<Value> v8val, Bind* bind,
       bind->type = dpi::DpiTimestampLTZ;
       *(bind->len) = 0;
       bind->maxSize = 0;
-      /* Convert v8::Date value to long double */
-      Connection::v8Date2OraDate ( v8val, bind);
+      if ( !v8valNULL )
+      {
+        /* Convert v8::Date value to long double */
+        Connection::v8Date2OraDate ( v8val, bind);
+      }
+      else
+      {
+        *(long double *)(bind->extvalue) = 0L;
+      }
       break;
 
     case NJS_VALUETYPE_OBJECT:
       {
-        Local<Object> obj = v8val->ToObject();
-
-        if ( v8valNULL && bind->isInOut )
+        if ( v8valNULL && ( bind->isInOut || !bind->isOut ) )
         {
-          /*
-           * In case of RAW/Buffer type and INOUT Bind, if IN value is NULL,
-           * allocate based on OUT type, maxSize
-           */
-          bind->type = dpi::DpiRaw;
-          *( bind->len ) = ( DPI_BUFLEN_TYPE ) (( bind->isInOut ) ?
-                                                  bind->maxSize : 0 );
-          bind->value = ( char *) malloc ( *(bind -> len ) );
-        }
-        else if (Buffer::HasInstance(obj))
-        {
-          size_t bufLen = Buffer::Length(obj);
-          bind->type = dpi::DpiRaw;
-          if( bind->isInOut )
+          // In case of LOB INOUT bind and if IN value is NULL, descriptor
+          // allocation happens in cbDynBufferAllocate but set DPI type here
+          if ( ( bind->type == NJS_DATATYPE_CLOB ) ||
+               ( bind->type == NJS_DATATYPE_BLOB ) )
           {
-            *(bind->len) = (DPI_BUFLEN_TYPE) bufLen;
+            bind->type = ( bind->type == NJS_DATATYPE_CLOB ) ?
+                                                           DpiClob : DpiBlob;
           }
-          else // IN
+          else
           {
-            bind->maxSize =  (DPI_SZ_TYPE ) bufLen;
-            *(bind->len) = (DPI_BUFLEN_TYPE) bufLen;
-          }
-          DPI_SZ_TYPE size = (bind->maxSize >= *(bind->len) ) ?
-                             bind->maxSize : *(bind->len);
-          if(size)
-          {
-            bind->value = (char *)malloc((size_t) size);
-            if(bufLen)
-              memcpy(bind->value, Buffer::Data(obj), bufLen);
+            /*
+             * In case of RAW/Buffer type and INOUT Bind, if IN value is NULL,
+             * allocate based on OUT type, maxSize
+             */
+            bind->type     = dpi::DpiRaw;
+            *( bind->len ) = ( DPI_BUFLEN_TYPE ) bind->maxSize ;
+            bind->value    = ( char *) malloc ( *(bind -> len ) );
+            if ( !bind->value )
+            {
+              executeBaton->error = NJSMessages::getErrorMsg (
+                                                 errInsufficientMemory );
+              goto exitGetInBindParamsScalar;
+            }
           }
         }
         else
         {
-          executeBaton->error= NJSMessages::getErrorMsg(
-                                             errInvalidBindDataType,2);
-          goto exitGetInBindParamsScalar;
+          Local<Object> obj = v8val->ToObject();
+
+          if ( Buffer::HasInstance ( obj ) )
+          {
+            size_t bufLen = Buffer::Length(obj);
+
+            if( bind->type && bind->type != NJS_DATATYPE_BUFFER )
+            {
+              executeBaton->error= NJSMessages::getErrorMsg(
+                                              errBindValueAndTypeMismatch, 2);
+              goto exitGetInBindParamsScalar;
+            }
+            else
+            {
+              bind->type = dpi::DpiRaw;
+            }
+
+            if ( bufLen > DPI_MAX_BUFLEN )
+            {
+              executeBaton->error = NJSMessages::getErrorMsg (
+                                             errBindValueTooLarge,
+                                             DPI_MAX_BUFLEN ) ;
+              goto exitGetInBindParamsScalar;
+            }
+
+            if( bind->isInOut )
+            {
+              *(bind->len) = (DPI_BUFLEN_TYPE) bufLen;
+            }
+            else // IN
+            {
+              bind->maxSize  = ( DPI_SZ_TYPE ) bufLen;
+              *( bind->len ) = ( DPI_BUFLEN_TYPE ) bufLen;
+            }
+            DPI_SZ_TYPE size = ( bind->maxSize >= *( bind->len ) ) ?
+                                 bind->maxSize : *( bind->len );
+            if( size )
+            {
+              bind->value = ( char * ) malloc ( ( size_t ) size );
+              if ( !bind->value )
+              {
+                executeBaton->error = NJSMessages::getErrorMsg
+                                              ( errInsufficientMemory );
+                goto exitGetInBindParamsScalar;
+              }
+              if ( bufLen )
+              {
+                memcpy ( bind->value, Buffer::Data( obj ), bufLen );
+              }
+            }
+          }
+          else if ( ILob::hasILobInstance ( obj ) )
+          {
+            Local<String> key      = Nan::New<v8::String>("iLob").
+                                                  ToLocalChecked();
+
+            // JS script binds stream object, get it's member iLob
+            Local<Value>  v8value  = obj->Get ( key );
+            Local<Object> jsILob   = v8value->ToObject ();
+            ILob          *iLob    = Nan::ObjectWrap::Unwrap<ILob> ( jsILob );
+
+            // Pre-process LOB for bind
+            NJSErrorType  errNum   = iLob->preBind ( bind );
+
+            if ( errNum != errSuccess )
+            {
+              executeBaton->error = NJSMessages::getErrorMsg ( errNum );
+              goto exitGetInBindParamsScalar;
+            }
+
+            // bind->value will be allocated with descriptor during doBind()
+            bind->value   = ( void * ) malloc ( sizeof ( Descriptor * ) );
+            if ( !bind->value )
+            {
+              executeBaton->error = NJSMessages::getErrorMsg
+                                            ( errInsufficientMemory );
+              goto exitGetInBindParamsScalar;
+            }
+            *(bind->len)  = ( DPI_BUFLEN_TYPE ) 0;
+            bind->maxSize = ( DPI_SZ_TYPE ) sizeof ( Descriptor * );
+
+            extBind = new ExtBind ();
+            if ( !extBind )
+            {
+              executeBaton->error = NJSMessages::getErrorMsg
+                                            ( errInsufficientMemory );
+              goto exitGetInBindParamsScalar;
+            }
+            executeBaton->njsconn->InitExtBind ( extBind, NJS_EXTBIND_LOB );
+
+            // Store the reference to IN LOB object
+            extBind->fields.extLob.value = (void *) iLob;
+
+            // create a persistent reference to avoid un-expected GC
+            Nan::Persistent<Object> *jsBindObj;
+            jsBindObj = new Nan::Persistent<Object> ( obj );
+            executeBaton->persistentRefs.push_back ( jsBindObj );
+          }
+          else
+          {
+            executeBaton->error= NJSMessages::getErrorMsg(
+                                               errInvalidBindDataType,2);
+              goto exitGetInBindParamsScalar;
+          }
         }
       }
       break;
@@ -1201,6 +1341,7 @@ void Connection::GetInBindParamsScalar(Local<Value> v8val, Bind* bind,
   }
 
   executeBaton->binds.push_back(bind);
+  executeBaton->extBinds.push_back ( extBind );
 
 exitGetInBindParamsScalar:
   ;
@@ -1449,6 +1590,7 @@ void Connection::GetInBindParamsArray(Local<Array> va8vals, Bind *bind,
   bind->maxSize = (ub4) arrayElementSize;
 
   executeBaton->binds.push_back(bind);
+  executeBaton->extBinds.push_back ( NULL );
 
 exitGetInBindParamsArray:
   ;
@@ -1729,10 +1871,6 @@ void Connection::Async_Execute (uv_work_t *req)
        }
      }
 
-     // allocate exteBinds vector with bind-array-size and initialize to NULL
-     executeBaton->extBinds.resize (
-                   ( unsigned int ) ( executeBaton->binds.size () ), NULL );
-
      /*
       * For each OUT Binds of valid CURSOR type, set prefetch and get
       * meta data
@@ -1760,19 +1898,26 @@ void Connection::Async_Execute (uv_work_t *req)
                                            ( errInsufficientMemory );
              goto exitAsyncExecute;
            }
+           executeBaton->njsconn->InitExtBind ( extBind,
+                                                NJS_EXTBIND_REFCURSOR );
+
            const MetaData* mData = ((Stmt*)bind->value)->getMetaData(
                                            executeBaton->extendedMetaData );
-           extBind->numCols      = ((Stmt*)bind->value)->numCols ();
 
-           extBind->mInfo        = new MetaInfo  [ extBind->numCols ];
-           if ( !extBind->mInfo )
+           extBind->fields.extRefCursor.numCols =
+                                            ((Stmt*)bind->value)->numCols();
+
+           extBind->fields.extRefCursor.mInfo   =
+                             new MetaInfo[extBind->fields.extRefCursor.numCols];
+           if ( !extBind->fields.extRefCursor.mInfo )
            {
              executeBaton->error = NJSMessages::getErrorMsg
                                                 ( errInsufficientMemory );
              goto exitAsyncExecute;
            }
-           Connection::CopyMetaData ( extBind->mInfo, executeBaton, mData,
-                                      extBind->numCols );
+           Connection::CopyMetaData ( extBind->fields.extRefCursor.mInfo,
+                                      executeBaton, mData,
+                                      extBind->fields.extRefCursor.numCols );
            if ( !executeBaton->error.empty() )
              goto exitAsyncExecute;
 
@@ -1785,6 +1930,13 @@ void Connection::Async_Execute (uv_work_t *req)
            bind->value = NULL;
          }
        }
+     }
+
+     // Process Bind enhancement CLOB/BLOB As String/Buffer if any
+     Descr2StringOrBuffer ( executeBaton );
+     if ( !executeBaton->error.empty () )
+     {
+       goto exitAsyncExecute;
      }
 
      // process any lob descriptor out binds
@@ -1821,22 +1973,512 @@ void Connection::Async_Execute (uv_work_t *req)
         executeBaton->dpistmt->release ();
     }
 
-    // In case of error, release the statement handles allocated (REF CURSOR)
+    // Auto close the IN-LOB used for INOUT bind
+    for ( unsigned int index = 0 ;index < executeBaton->binds.size ();
+          index++ )
+    {
+      Bind *bind = executeBaton->binds[index];
+
+      if ( ( bind->type == DpiClob || bind->type == DpiBlob ) && bind->isInOut )
+      {
+        if ( executeBaton->extBinds[index] &&
+             executeBaton->extBinds[index]->type == NJS_EXTBIND_LOB &&
+             !executeBaton->extBinds[index]->fields.extLob.isStringBuffer2LOB )
+        {
+          ILob *iLob = ( ILob * )
+                       ( executeBaton->extBinds[index]->fields.extLob.value );
+          // cleanupNJS() will be called later in Async_AfterExecute()
+          iLob->cleanupDPI ();
+        }
+      }
+    }
+
+    // In case of error, free the allocated resources
     if ( !(executeBaton->error).empty() )
     {
       for( unsigned int index = 0 ;index < executeBaton->binds.size();
            index++ )
       {
+        // release the statement handles allocated (REF CURSOR)
         if( executeBaton->binds[index]->value &&
             ( executeBaton->binds[index]->type == DpiRSet ) )
         {
           ((Stmt*)executeBaton->binds[index]->value)->release ();
           executeBaton->binds[index]->value = NULL;
         }
+
+        // Free the temp LOB and allocated bind descriptors for
+        // Clob/Blob As String/Buffer
+        if ( executeBaton->extBinds[index] &&
+             executeBaton->extBinds[index]->type == NJS_EXTBIND_LOB &&
+             executeBaton->extBinds[index]->fields.extLob.isStringBuffer2LOB )
+        {
+          // Free the temp LOB created  for IN bind
+          if ( !executeBaton->binds[index]->isOut )
+          {
+            Lob::freeTempLob (
+                         executeBaton->dpiconn->getSvch(),
+                         executeBaton->dpiconn->getErrh (),
+                         *( Descriptor** ) executeBaton->binds[index]->value );
+          }
+
+          // Free the LOB descriptor
+          if ( executeBaton->binds[index]->value )
+          {
+            Env::freeDescriptor(
+                        *( Descriptor ** ) executeBaton->binds[index]->value,
+                        LobDescriptorType );
+          }
+        }
       }
     }
   ;
 }
+
+
+/****************************************************************************/
+/* NAME
+ *   Connection::CLOB2String
+ *
+ * DESCRIPTION
+ *   Process bind enhancements for CLOB as String
+ *   Read the string from CLOB
+ *
+ * PARAMETERS
+ *   executeBaton  - Baton structure containing bind, statement information
+ *   index         - Index of the Bind vector
+ *
+ */
+void Connection::CLOB2String ( eBaton* executeBaton, unsigned int index )
+{
+  unsigned long long byteAmount  = 0;
+  // Set the charAmount to (maxSize + 1) to know whether given maxSize good
+  // enough to store PLSQL OUT data
+  unsigned long long charAmount  = executeBaton->binds[index]->maxSize + 1;
+
+  executeBaton->binds[index]->type = DpiVarChar;
+  LOB2StringOrBuffer ( executeBaton, index, byteAmount, charAmount );
+}
+
+
+/****************************************************************************/
+/* NAME
+ *   Connection::BLOB2Buffer
+ *
+ * DESCRIPTION
+ *   Process bind enhancements for CLOB as String
+ *   Read the buffer from BLOB
+ *
+ * PARAMETERS
+ *   executeBaton  - Baton structure containing bind, statement information
+ *   index         - Index of the Bind vector
+ *
+ */
+void Connection::BLOB2Buffer ( eBaton* executeBaton, unsigned int index )
+{
+  // Set the charAmount to (maxSize + 1) to know whether given maxSize good
+  // enough to store PLSQL OUT data
+  unsigned long long byteAmount  = executeBaton->binds[index]->maxSize + 1;
+  unsigned long long charAmount  = 0;
+
+  executeBaton->binds[index]->type = DpiRaw;
+  LOB2StringOrBuffer ( executeBaton, index, byteAmount, charAmount );
+}
+
+
+/****************************************************************************/
+/* NAME
+ *   Connection::LOB2StringOrBuffer
+ *
+ * DESCRIPTION
+ *   Process bind enhancements for CLOB/BLOB As String/Buffer
+ *   For PLSQL OUT binds, if type conversion happened from string/buffer to
+ *   LOB then read the string/buffer from LOB and revert the bind type
+ *
+ * PARAMETERS
+ *   executeBaton  - Baton structure containing bind, statement information
+ *   index         - Index of the Bind vector
+ *   byteAmount    - Number of byte to read from LOB
+ *   charAmount    - Number of characters to read from LOB
+ *
+ */
+void Connection::LOB2StringOrBuffer ( eBaton* executeBaton, unsigned int index,
+                                      unsigned long long byteAmount,
+                                      unsigned long long charAmount )
+{
+  Bind               *bind       = executeBaton->binds[index];
+  unsigned long long bufLen      = 0;
+  unsigned long long offset      = 1;
+  Descriptor         *lobLocator = *(Descriptor **) bind->value;
+
+  if ( byteAmount )
+  {
+    bufLen     = byteAmount;
+  }
+  else
+  {
+    bufLen     = charAmount*executeBaton->dpiconn->getLOBCharExpansionRatio ();
+  }
+
+  // Free the allocator to store address of lobLocator
+  free ( bind->value );
+  bind->value = NULL;  // Assign NULL to make use malloc failure check
+  // Allocate the buffer to read the data from OUT LOB
+  bind->value   = ( char * ) malloc ( bufLen );
+  if ( !bind->value )
+  {
+    executeBaton->error = NJSMessages::getErrorMsg ( errInsufficientMemory );
+    goto exitLOB2StringOrBuffer;
+  }
+
+  Lob::read ( (DpiHandle *) executeBaton->dpiconn->getSvch(),
+              (DpiHandle *) executeBaton->dpiconn->getErrh (),
+              lobLocator, byteAmount, charAmount, offset,
+              bind->value, bufLen );
+
+  /*
+   * byteAmount returns the number of bytes read into the buffer irrespective
+   * of charAmount or byteAmount passed to Lob::read()
+   * If there is more data in the LOB than the maxSize, set the error
+   */
+  if ( byteAmount > ( unsigned long long ) bind->maxSize )
+  {
+    executeBaton->error = NJSMessages::getErrorMsg(
+                                          errInsufficientBufferForBinds);
+    goto exitLOB2StringOrBuffer;
+  }
+
+  // Treat empty LOB case as NULL to be consistent with varchar/buffer columns
+  if ( !byteAmount )
+  {
+    *bind->ind = -1;
+  }
+
+  *bind->len  = ( DPI_BUFLEN_TYPE ) byteAmount;
+
+exitLOB2StringOrBuffer:
+  if ( Lob::isTempLob ( executeBaton->dpienv->envHandle(),
+                        executeBaton->dpiconn->getErrh (), lobLocator ) )
+  {
+    Lob::freeTempLob ( executeBaton->dpiconn->getSvch(),
+                       executeBaton->dpiconn->getErrh (),
+                       lobLocator );
+  }
+  Env::freeDescriptor ( lobLocator, LobDescriptorType );
+  if ( !executeBaton->error.empty() )
+  {
+    free ( bind->value );
+    bind->value = NULL;  // Set NULL to avoid double free in case of error
+  }
+}
+
+
+/****************************************************************************/
+/* NAME
+ *   Connection::String2CLOB
+ *
+ * DESCRIPTION
+ *   Process bind enhancements for CLOB as String
+ *   Create temp CLOB and write the given string into it
+ *
+ * PARAMETERS
+ *   executeBaton  - Baton structure containing bind information
+ *   index         - Index of the Bind vector
+
+ */
+void Connection::String2CLOB ( eBaton* executeBaton, unsigned int index )
+{
+  executeBaton->binds[index]->type = DpiClob;
+  StringOrBuffer2LOB ( executeBaton, index, OCI_TEMP_CLOB );
+}
+
+
+/****************************************************************************/
+/* NAME
+ *   Connection::Buffer2BLOB
+ *
+ * DESCRIPTION
+ *   Process bind enhancements for BLOB as Buffer
+ *   Create temp BLOB and write the given buffer into it
+ *
+ * PARAMETERS
+ *   executeBaton  - Baton structure containing bind information
+ *   index         - Index of the Bind vector
+
+ */
+void Connection::Buffer2BLOB ( eBaton* executeBaton, unsigned int index )
+{
+  executeBaton->binds[index]->type = DpiBlob;
+  StringOrBuffer2LOB ( executeBaton, index, OCI_TEMP_BLOB );
+}
+
+
+/****************************************************************************/
+/* NAME
+ *   Connection::StringOrBuffer2LOB
+ *
+ * DESCRIPTION
+ *   Process bind enhancements for CLOB/BLOB As String/Buffer
+ *   For PLSQL IN binds if input String/Buffer data size > 32767 then it will
+ *   be converted to LOB and bind type adjusted accordingly
+ *
+ * PARAMETERS
+ *   executeBaton  - Baton structure containing bind information
+ *   index         - Index of the Bind vector
+ *   lobType       - OCI_TEMP_CLOB in case of String to CLOB
+ *                   OCI_TEMP_BLOB in case of Buffer to BLOB
+ */
+void Connection::StringOrBuffer2LOB ( eBaton* executeBaton, unsigned int index,
+                                      unsigned char lobType )
+{
+  Bind *bind = executeBaton->binds[index];
+
+  Descriptor         *lobLocator = NULL;
+  unsigned long long byteAmount  = ( unsigned long long ) *( bind->len );;
+  unsigned long long charAmount  = 0;
+  unsigned long long bufLen      = byteAmount;
+  unsigned long long offset      = 1;
+
+  lobLocator = executeBaton->dpienv->allocDescriptor ( LobDescriptorType );
+
+  Lob::createTempLob ( executeBaton->dpiconn->getSvch(),
+                       executeBaton->dpiconn->getErrh (),
+                       lobLocator, lobType );
+
+  Lob::write ( ( DpiHandle * ) executeBaton->dpiconn->getSvch (),
+               ( DpiHandle * ) executeBaton->dpiconn->getErrh (),
+               ( Descriptor * ) lobLocator, byteAmount, charAmount, offset,
+               bind->value, bufLen );
+
+  // Free the memory allocated to store js input string/buffer and
+  // re-allocate to store lobLocator
+  free ( bind->value );
+  bind->value = ( void * ) malloc ( sizeof ( Descriptor * ) );
+
+  *( ( Descriptor ** ) bind->value ) = lobLocator;
+  bind->maxSize  = ( DPI_SZ_TYPE ) sizeof( Descriptor * );
+  *( bind->len ) = ( DPI_BUFLEN_TYPE ) 0;
+}
+
+
+/****************************************************************************/
+/* NAME
+ *   Connection::Descr2StringOrBuffer
+ *
+ * DESCRIPTION
+ *   Process bind enhancements for CLOB/BLOB As String/Buffer
+ *   For PLSQL OUT binds, if type conversion happened from string/buffer to
+ *   LOB then read the string/buffer from LOB and revert the bind type
+ *   For PLSQL IN binds, if type conversion happened then free the allocated
+ *   LOB resources
+ *
+ * PARAMETERS
+ *   executeBaton  - Baton structure containing bind, statement information
+ *   index         - Index of the Bind vector
+ *
+ * NOTE:
+ *  Bind enhancements for CLOB/BLOB As String/Buffer not supported for INOUT
+ *  arguments
+ */
+void Connection::Descr2StringOrBuffer ( eBaton* executeBaton )
+{
+
+  Bind    *bind;
+  ExtBind *extBind;
+
+  if ( executeBaton->st == DpiStmtBegin ||
+       executeBaton->st == DpiStmtDeclare || executeBaton->st == DpiStmtCall )
+  {
+    for ( unsigned int b = 0; b < executeBaton->binds.size (); b ++ )
+    {
+      bind    = executeBaton->binds[b];
+      extBind = executeBaton->extBinds[b];
+      // Check to see if temp LOB conversion happened
+      if ( extBind && extBind->type == NJS_EXTBIND_LOB &&
+           extBind->fields.extLob.isStringBuffer2LOB )
+      {
+        // In case of non-NULL OUT Bind, read the data from LOB
+        if ( bind->isOut && *bind->ind != -1 )
+        {
+          if ( bind->type == DpiClob )
+          {
+            // Read the String from CLOB
+            CLOB2String ( executeBaton, b );
+          }
+          else
+          {
+            // Read the String from BLOB
+            BLOB2Buffer ( executeBaton, b );
+          }
+        }
+        else
+        {
+          if ( *bind->ind != -1 )
+          {
+            Lob::freeTempLob ( executeBaton->dpiconn->getSvch (),
+                               executeBaton->dpiconn->getErrh (),
+                               *( Descriptor** ) bind->value );
+          }
+
+          // Free the allocated LOB descriptor
+          Env::freeDescriptor( *(Descriptor **) bind->value,
+                               LobDescriptorType);
+        }
+      }
+    }
+  }
+}
+
+
+/****************************************************************************/
+/* NAME
+ *   Connection::ConvertStringOrBuffer2LOB
+ *
+ * DESCRIPTION
+ *   Process bind enhancements for CLOB/BLOB As String/Buffer
+ *   For PLSQL IN binds if input String/Buffer data size > 32767 then it will
+ *   be converted to LOB and bind type adjusted accordingly
+ *   For PLSQL OUT binds, if maxSize > 32767 then bind type will be chaned
+ *   DpiClob/DpiBlob accordingly
+ *
+ * PARAMETERS
+ *   executeBaton  - Baton structure containing bind, statement information
+ *   index         - Index of the Bind vector
+ *
+ * NOTE:
+ *  Bind enhancements for CLOB/BLOB As String/Buffer not supported for INOUT
+ *  arguments
+ *
+ */
+void Connection::ConvertStringOrBuffer2LOB ( eBaton* executeBaton,
+                                             unsigned int index )
+{
+  Bind *bind = executeBaton->binds[index];
+
+  // In case of IN bind convert string/buffer to LOB if input data
+  // is not NULL and data size more than 32k
+  if ( !bind->isOut && *bind->ind != -1  &&
+       ( bind->len && *bind->len > NJS_THRESHOLD_SIZE_PLSQL_STRING_ARG ) )
+  {
+    // This block is only for BIND_IN case
+    ExtBind* extBind = new ExtBind ();
+    if ( !extBind )
+    {
+      executeBaton->error = NJSMessages::getErrorMsg
+                                    ( errInsufficientMemory );
+      goto exitConvertStringOrBuffer2LOB;
+    }
+    executeBaton->njsconn->InitExtBind ( extBind, NJS_EXTBIND_LOB );
+    // Set a flag to know that type conversion happened
+    // This helps in later steps to clean LOB resources
+    extBind->fields.extLob.isStringBuffer2LOB = true;
+    executeBaton->extBinds[index]             = extBind;
+
+    if ( bind->type == DpiVarChar )
+    {
+      // Convert String to CLOB
+      String2CLOB ( executeBaton, index );
+    }
+    else
+    {
+      // Convert Buffer to BLOB
+      Buffer2BLOB ( executeBaton, index );
+    }
+  }
+  else if ( bind->maxSize > NJS_THRESHOLD_SIZE_PLSQL_STRING_ARG )
+  {
+    // This block is only for BIND_OUT case
+    ExtBind* extBind = new ExtBind ();
+
+    if ( !extBind )
+    {
+      executeBaton->error = NJSMessages::getErrorMsg
+                                    ( errInsufficientMemory );
+      goto exitConvertStringOrBuffer2LOB;
+    }
+    executeBaton->njsconn->InitExtBind ( extBind, NJS_EXTBIND_LOB );
+
+    // Set a flag to know that type conversion happened
+    // This helps in later steps for converting LOB to String/Buffer and
+    // clean LOB resources
+    extBind->fields.extLob.isStringBuffer2LOB = true;
+    executeBaton->extBinds[index]             = extBind;
+
+    // Change the bind->type to LOB to handle more than 32k data
+    bind->type = ( bind->type == DpiVarChar ) ? DpiClob : DpiBlob;
+  }
+exitConvertStringOrBuffer2LOB:
+  ;
+}
+
+
+/****************************************************************************/
+/* NAME
+ *   Connection::PrepareLOBsForBind
+ *
+ * DESCRIPTION
+ *   Handle Bind support for CLOB/BLOB As String/Buffer
+ *   For INOUT Binds, create duplicate LOB locator from the IN  LOB object
+ *   For IN bind, just get the LOB locator from the IN LOB object
+ *
+ * PARAMETERS
+ *   executeBaton  - Baton structure containing bind, statement information
+ *   index         - Index of the Bind vector
+ *
+ * NOTE:
+ *   For OUT binds, descriptor allocation happens in cbDynBufferAllocate ()
+ *
+ */
+void Connection::PrepareLOBsForBind ( eBaton* executeBaton, unsigned int index )
+{
+  Bind *bind = executeBaton->binds[index];
+
+  // Don't process in case of CLOB/BLOB as String/Buffer
+  if ( executeBaton->extBinds[index] &&
+       executeBaton->extBinds[index]->type == NJS_EXTBIND_LOB &&
+       !executeBaton->extBinds[index]->fields.extLob.isStringBuffer2LOB )
+  {
+    ILob *iLob = ( ILob * )
+                 ( executeBaton->extBinds[index]->fields.extLob.value );
+
+    if ( bind->isInOut )
+    {
+      *( ( void ** ) bind->value ) =
+        executeBaton->dpienv->allocDescriptor ( LobDescriptorType );
+    }
+    iLob->doBind ( bind );
+  }
+}
+
+
+/****************************************************************************/
+/* NAME
+ *   Connection::InitExtBind
+ *
+ * DESCRIPTION
+ *   Initialize ExtBind variable since it has union with structures
+ *
+ * PARAMETERS
+ *   extBind   - ExtBind struct to initialize
+ *   fieldType - Type of the struct in the union to initialize
+ *
+ */
+void Connection::InitExtBind ( ExtBind *extBind, ExtBindType fieldType )
+{
+  extBind->type = fieldType;
+
+  if ( fieldType == NJS_EXTBIND_REFCURSOR )
+  {
+    extBind->fields.extRefCursor.numCols = 0;
+    extBind->fields.extRefCursor.mInfo   = NULL;
+  }
+  else
+  {
+    extBind->fields.extLob.value              = NULL;
+    extBind->fields.extLob.isStringBuffer2LOB = false;
+  }
+}
+
 
 /*****************************************************************************/
 /*
@@ -1865,35 +2507,53 @@ void Connection::PrepareAndBind (eBaton* executeBaton)
         {
           executeBaton->error = NJSMessages::getErrorMsg (
                                                      errInvalidResultSet ) ;
+          goto exitPrepareAndBind;
+        }
+
+        // Process bind enhancements CLOB/BLOB As String/Buffer for PL/SQL
+        if ( ( executeBaton->st == DpiStmtBegin ||
+               executeBaton->st == DpiStmtDeclare ||
+               executeBaton->st == DpiStmtCall ) &&
+             ( !executeBaton->binds[index]->isInOut &&
+             ( executeBaton->binds[index]->type == DpiVarChar ||
+               executeBaton->binds[index]->type == DpiRaw ) ) )
+        {
+          ConvertStringOrBuffer2LOB ( executeBaton, index );
+        }
+
+        if ( !executeBaton->error.empty() )
+        {
+          goto exitPrepareAndBind;
+        }
+
+        // process LOB object for IN and INOUT bind
+        if ( ( executeBaton->binds[index]->isInOut ||
+               !executeBaton->binds[index]->isOut ) &&
+             ( *(executeBaton->binds[index]->ind) != -1 ) &&
+             ( executeBaton->binds[index]->type == DpiClob ||
+               executeBaton->binds[index]->type == DpiBlob ) )
+        {
+          PrepareLOBsForBind ( executeBaton, index );
         }
 
         // Allocate for OUT Binds
         // For DML Returning, allocation happens through callback.
+        // binds->value is a pointer to a pointer in case of LOBs
         if ( executeBaton->binds[index]->isOut &&
              !executeBaton->stmtIsReturning &&
              !executeBaton->binds[index]->value )
         {
           Connection::cbDynBufferAllocate ( executeBaton,
                                             false, 1, index );
-          // LOBs: binds[index]->value is a pointer to a pointer
-          // we need to allocate the underlying LOB descriptor
-          if (executeBaton->binds[index]->type == DpiClob ||
-              executeBaton->binds[index]->type == DpiBlob)
-          {
-            *((void **)executeBaton->binds[index]->value) =
-              executeBaton->dpienv->allocDescriptor(LobDescriptorType);
-          }
         }
 
         // Convert v8::Date to Oracle DB Type for IN and IN/OUT binds
         if ( executeBaton->binds[index]->type == DpiTimestampLTZ &&
-            // InOut bind
-            (executeBaton->binds[index]->isInOut ||
-            // In bind
-            (!executeBaton->binds[index]->isOut &&
-             !executeBaton->binds[index]->isInOut)))
+             ( executeBaton->binds[index]->isInOut ||  // INOUT binds
+               !executeBaton->binds[index]->isOut ) )  // NOT OUT  && NOT INOUT
         {
-          Connection::UpdateDateValue ( executeBaton, index ) ;
+          Connection::UpdateDateValue ( executeBaton,
+                                        executeBaton->binds[index], 1 ) ;
         }
 
         // Bind by name
@@ -1926,6 +2586,32 @@ void Connection::PrepareAndBind (eBaton* executeBaton)
       for(unsigned int index = 0 ;index < executeBaton->binds.size();
           index++)
       {
+        // Process bind enhancements CLOB/BLOB As String/Buffer for PL/SQL
+        if ( ( executeBaton->st == DpiStmtBegin ||
+               executeBaton->st == DpiStmtDeclare ||
+               executeBaton->st == DpiStmtCall ) &&
+             ( !executeBaton->binds[index]->isInOut &&
+             ( executeBaton->binds[index]->type == DpiVarChar ||
+               executeBaton->binds[index]->type == DpiRaw ) ) )
+        {
+          ConvertStringOrBuffer2LOB ( executeBaton, index );
+        }
+
+        if ( !executeBaton->error.empty() )
+        {
+          goto exitPrepareAndBind;
+        }
+
+        // process LOB object for IN and INOUT bind
+        if ( ( executeBaton->binds[index]->isInOut ||
+               !executeBaton->binds[index]->isOut ) &&
+             ( *(executeBaton->binds[index]->ind) != -1 ) &&
+             ( executeBaton->binds[index]->type == DpiClob ||
+               executeBaton->binds[index]->type == DpiBlob ) )
+        {
+          PrepareLOBsForBind ( executeBaton, index );
+        }
+
         // Allocate for OUT Binds
         // For DML Returning, allocation happens through callback
         if ( executeBaton->binds[index]->isOut &&
@@ -1944,7 +2630,8 @@ void Connection::PrepareAndBind (eBaton* executeBaton)
             (!executeBaton->binds[index]->isOut &&
              !executeBaton->binds[index]->isInOut)))
         {
-          Connection::UpdateDateValue ( executeBaton, index ) ;
+          Connection::UpdateDateValue ( executeBaton,
+                                        executeBaton->binds[index], 1 ) ;
         }
 
         // Bind by position
@@ -1971,6 +2658,8 @@ void Connection::PrepareAndBind (eBaton* executeBaton)
       }
     }
   }
+exitPrepareAndBind:
+  ;
 }
 
 /*****************************************************************************/
@@ -2312,7 +3001,7 @@ void Connection::DoDefines ( eBaton* executeBaton )
 {
   unsigned int numCols  = executeBaton->numCols;
   Define       *defines = executeBaton->defines = new Define[numCols];
-  int          csratio  = executeBaton->dpiconn->getByteExpansionRatio ();
+  int          csratio  = executeBaton->dpiconn->getVarCharByteExpansionRatio();
   bool         error    = false;
 
   for (unsigned int col = 0; !error && ( col < numCols ); col++)
@@ -2744,25 +3433,58 @@ void Connection::Descr2protoILob( eBaton *executeBaton, unsigned int numCols,
   {
     Bind *bind = executeBaton->binds[obndpos];
 
-    if ((!bind->isOut && !bind->isInOut) ||
-        ( bind->ind && *(sb2 *)bind->ind == -1))
-      continue;  // we only need to process the non-null OUT binds
-
-    if (bind->type == DpiClob || bind->type == DpiBlob)
+    if ( ( bind->isOut || bind->isInOut ) &&
+         ( bind->type == DpiClob || bind->type == DpiBlob ) )
     {
-      // TODO: Update this loop when support for array binds is added.
-      // For UPDATE, loop through all the rows returned for each bind
-      // For INSERT, eventually we will consider the iters.
-      //             For now only 1 row will be inserted.
-      for (unsigned int rowidx = 0; rowidx < bind->rowsReturned; rowidx++)
+      // Free the allocated descriptors in case of NULL OUTs or DML returning
+      if ( *bind->ind == -1 )
       {
-        Descriptor *lobLocator =
-          (Descriptor *)((Descriptor **)bind->value)[rowidx];
-        ProtoILob *protoILob = new ProtoILob(executeBaton, lobLocator,
-                                             bind->type);
+        if ( executeBaton->stmtIsReturning )
+        {
+          for ( unsigned int rowidx = 0; rowidx < bind->rowsReturned;
+                rowidx++ )
+          {
+            Env::freeDescriptor ( ( ( Descriptor ** ) bind->value )[ rowidx ],
+                                  LobDescriptorType);
+          }
+        }
+        else
+        {
+          Env::freeDescriptor ( *( ( Descriptor ** ) bind->value ),
+                                LobDescriptorType);
+        }
+      }
+      else
+      {
+        Descriptor *lobLocator = NULL;
 
-        ((Descriptor **)(bind->value))[rowidx] =
-          reinterpret_cast<Descriptor *>(protoILob);
+        if ( executeBaton->stmtIsReturning )
+        {
+          // TODO: Update this loop when support for array binds is added.
+          // For UPDATE, loop through all the rows returned for each bind
+          // For INSERT, eventually we will consider the iters.
+          //             For now only 1 row will be inserted.
+          for ( unsigned int rowidx = 0; rowidx < bind->rowsReturned; rowidx++ )
+          {
+            lobLocator           =
+                    ( ( Descriptor ** ) bind->value )[ rowidx ];
+            ProtoILob *protoILob = new ProtoILob ( executeBaton, lobLocator,
+                                                   bind->type );
+
+            ( ( Descriptor ** )( bind->value ) )[rowidx] =
+              reinterpret_cast<Descriptor *>( protoILob );
+          }
+        }
+        else
+        {
+          lobLocator                    = *( ( Descriptor ** ) bind->value );
+
+          ProtoILob *protoILob          = new ProtoILob ( executeBaton,
+                                                          lobLocator,
+                                                          bind->type );
+          *((Descriptor **)bind->value) =
+                                    reinterpret_cast<Descriptor *>( protoILob );
+        }
       }
     }
   }
@@ -2786,6 +3508,36 @@ void Connection::Async_AfterExecute(uv_work_t *req)
   eBaton *executeBaton = (eBaton*)req->data;
   Nan::TryCatch tc;
   Local<Value> argv[2];
+
+  // Set the state of IN LOB to INACTIVE in case of BIND_IN or BIND_INOUT LOB
+  for ( unsigned int index = 0 ;index < executeBaton->binds.size ();
+        index++ )
+  {
+    Bind *bind = executeBaton->binds[index];
+
+    if ( ( bind->type == DpiClob || bind->type == DpiBlob ) &&
+           ( !bind->isOut || bind->isInOut ) )
+    {
+      if ( executeBaton->extBinds[index] &&
+           executeBaton->extBinds[index]->type == NJS_EXTBIND_LOB &&
+           !executeBaton->extBinds[index]->fields.extLob.isStringBuffer2LOB )
+      {
+        ILob *iLob = ( ILob * )
+                     ( executeBaton->extBinds[index]->fields.extLob.value );
+        iLob->postBind ();
+
+        // Auto-close the IN-LOB used for INOUT bind
+        if ( bind->isInOut )
+        {
+          // cleanupDPI() called in Async_Execute since it is a DPI/OCI call
+          iLob->cleanupNJS ();
+        }
+
+        executeBaton->extBinds[index]->fields.extLob.value = NULL;
+      }
+    }
+  }
+
   if(!(executeBaton->error).empty())
   {
     argv[0] = v8::Exception::Error(
@@ -2804,8 +3556,12 @@ void Connection::Async_AfterExecute(uv_work_t *req)
       case DpiStmtSelect :
         if( executeBaton->getRS )
         {
-          Local<Object> resultSet = Nan::New<FunctionTemplate>(
-              ResultSet::resultSetTemplate_s)->GetFunction() ->NewInstance();
+          Local<Object> resultSet =
+            Nan::NewInstance (
+          Local<Function>::Cast (
+                Nan::GetFunction (
+          Nan::New<FunctionTemplate> (
+            ResultSet::resultSetTemplate_s )).ToLocalChecked() )).ToLocalChecked ();
 
           /* ResultSet case, the statement object is ready for fetching */
           (Nan::ObjectWrap::Unwrap<ResultSet> (resultSet))->
@@ -3168,22 +3924,30 @@ Local<Value> Connection::GetValueRefCursor ( eBaton  *executeBaton,
     unsigned int numCols  = 0;
     const MetaInfo *mInfo = NULL;
 
-    resultSet = Nan::New<FunctionTemplate>(ResultSet::resultSetTemplate_s)->
-                            GetFunction() ->NewInstance();
+    resultSet = Nan::NewInstance (
+          Local<Function>::Cast (
+            Nan::GetFunction (
+                      Nan::New <FunctionTemplate>(
+     ResultSet::resultSetTemplate_s )).ToLocalChecked () ) ).ToLocalChecked ();
 
-    if ( extBind )
+    if ( extBind && extBind->type == NJS_EXTBIND_REFCURSOR )
     {
-      numCols = extBind->numCols;
-      mInfo   = extBind->mInfo;
-    }
-    (Nan::ObjectWrap::Unwrap<ResultSet> (resultSet))->
+      numCols = extBind->fields.extRefCursor.numCols;
+      mInfo   = extBind->fields.extRefCursor.mInfo;
+
+      (Nan::ObjectWrap::Unwrap<ResultSet> (resultSet))->
                        setResultSet( ( dpi::Stmt*)(bind->value), executeBaton,
                                        numCols, mInfo );
-    if ( !executeBaton->error.empty () )
+      if ( !executeBaton->error.empty () )
+      {
+        value = Nan::Null ();
+      }
+      value = resultSet;
+    }
+    else
     {
       value = Nan::Null ();
     }
-    value = resultSet;
   }
   else
   {
@@ -3649,7 +4413,19 @@ void Connection::Async_AfterRelease(uv_work_t *req)
     argv[0] = v8::Exception::Error(
                 Nan::New<v8::String>(releaseBaton->error).ToLocalChecked());
   else
-    argv[0] = Nan::Undefined();
+  {
+    // Populate error if Temporary LOBs are still open
+    if ( releaseBaton->njsconn->tempLobCount_ != 0 )
+    {
+      releaseBaton->error = NJSMessages::getErrorMsg( errBusyConnTEMPLOB );
+      argv[0] = v8::Exception::Error(
+                Nan::New<v8::String>(releaseBaton->error).ToLocalChecked());
+    }
+    else
+    {
+      argv[0] = Nan::Undefined();
+    }
+  }
 
   /*
    * When we release the connection, we have to clear the reference of
@@ -3991,6 +4767,185 @@ void Connection::Async_AfterBreak (uv_work_t *req)
   }
 }
 
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Method on Connection to create Temporary LOB
+
+   PARAMETERS:
+     Arguments - LOB Type -- oracledb.CLOB or oracledb.BLOB
+                 Callback function
+*/
+NAN_METHOD(Connection::CreateLob)
+{
+  Local<Function> callback;
+  Connection      *connection;
+  unsigned short  lobType;
+
+
+  NJS_GET_CALLBACK ( callback, info );
+
+  connection = Nan::ObjectWrap::Unwrap<Connection> ( info.Holder() );
+
+  /* If connection is invalid from JS, then throw an exception */
+  NJS_CHECK_OBJECT_VALID2 ( connection, info ) ;
+
+  eBaton *createLobBaton = new eBaton ( connection->DBCount (), callback,
+                                        info.Holder () );
+
+  NJS_CHECK_NUMBER_OF_ARGS ( createLobBaton->error, info, 2, 2, exitCreateLob );
+
+  if ( !connection->isValid_ )
+  {
+    createLobBaton->error = NJSMessages::getErrorMsg ( errInvalidConnection );
+    goto exitCreateLob;
+  }
+
+  NJS_GET_ARG_V8UINT ( lobType, createLobBaton->error, info, 0, exitCreateLob );
+
+  if ( lobType != NJS_DATATYPE_CLOB && lobType != NJS_DATATYPE_BLOB )
+  {
+    createLobBaton->error = NJSMessages::getErrorMsg (
+                                         errInvalidParameterValue, 1 );
+    goto exitCreateLob;
+  }
+
+  if ( lobType == NJS_DATATYPE_CLOB )
+  {
+    createLobBaton->lobInfo = new LobInfo ( OCI_TEMP_CLOB );
+  }
+  else
+  {
+    createLobBaton->lobInfo = new LobInfo ( OCI_TEMP_BLOB );
+  }
+
+  createLobBaton->dpienv  = connection->oracledb_->getDpiEnv();
+  createLobBaton->dpiconn = connection->dpiconn_;
+  createLobBaton->njsconn = connection;
+
+exitCreateLob:
+  createLobBaton->req.data  = ( void* ) createLobBaton;
+
+  int status = uv_queue_work ( uv_default_loop (), &createLobBaton->req,
+               Async_CreateLob, ( uv_after_work_cb )Async_AfterCreateLob );
+  // delete the Baton if uv_queue_work fails
+  if ( status )
+  {
+    delete createLobBaton;
+    string error = NJSMessages::getErrorMsg ( errInternalError,
+                                              "uv_queue_work", "CreateLob" );
+    NJS_SET_EXCEPTION ( error.c_str() );
+  }
+
+  info.GetReturnValue().SetUndefined();
+}
+
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Worker function of CreateLob  method
+
+   PARAMETERS:
+     UV queue work block
+
+   NOTES:
+     DPI call execution
+*/
+void Connection::Async_CreateLob(uv_work_t *req)
+{
+
+  eBaton *createLobBaton = ( eBaton* ) req->data;
+
+  if( !createLobBaton->error.empty() )
+    goto exitAsyncCreateLob;
+
+  try
+  {
+    createLobBaton->lobInfo->lobLocator =
+                createLobBaton->dpienv->allocDescriptor ( LobDescriptorType );
+
+    Lob::createTempLob ( createLobBaton->dpiconn->getSvch (),
+                         createLobBaton->dpiconn->getErrh (),
+                         createLobBaton->lobInfo->lobLocator,
+                         createLobBaton->lobInfo->lobType );
+  }
+  catch ( dpi::Exception& e )
+  {
+    NJS_SET_CONN_ERR_STATUS ( e.errnum (), createLobBaton->dpiconn );
+    createLobBaton->error = std::string ( e.what () );
+    goto exitAsyncCreateLob;
+  }
+
+  exitAsyncCreateLob:
+    // In case of erros, free LOB locator if it allocated
+    if( !createLobBaton->error.empty () )
+    {
+      if ( createLobBaton->lobInfo && createLobBaton->lobInfo->lobLocator )
+      {
+        Env::freeDescriptor( createLobBaton->lobInfo->lobLocator,
+                             LobDescriptorType);
+        createLobBaton->lobInfo->lobLocator = NULL;
+      }
+    }
+}
+
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Callback function of CreateLob method
+
+   PARAMETERS:
+     UV queue work block
+*/
+void Connection::Async_AfterCreateLob (uv_work_t *req)
+{
+  Nan::HandleScope scope;
+
+  eBaton           *createLobBaton = (eBaton*)req->data;
+  Nan::TryCatch    tc;
+  Local<Value>     argv[2];
+
+  if( !createLobBaton->error.empty () )
+  {
+    argv[0] = v8::Exception::Error (
+              Nan::New<v8::String>( createLobBaton->error ).ToLocalChecked ());
+    argv[1] = Nan::Undefined ();
+  }
+  else
+  {
+    argv[0] = Nan::Undefined ();
+
+    unsigned short lobType =
+     ( createLobBaton->lobInfo->lobType == OCI_TEMP_CLOB ) ? DpiClob : DpiBlob;
+
+    ProtoILob *protoILob = new ProtoILob ( createLobBaton,
+                                           createLobBaton->lobInfo->lobLocator,
+                                           lobType );
+
+    Local<Value> value = NewLob ( createLobBaton, protoILob, false );
+
+    delete protoILob;
+
+    // The lobLocator handed-over to ILob class and no longer needed
+    createLobBaton->lobInfo->lobLocator = NULL;
+
+    argv[1] = value;
+  }
+
+  Local<Function> callback = Nan::New<Function> ( createLobBaton->cb );
+  delete createLobBaton;
+  Nan::MakeCallback( Nan::GetCurrentContext()->Global(),
+                      callback, 2, argv );
+  if( tc.HasCaught () )
+  {
+    Nan::FatalException ( tc );
+  }
+}
+
+
 /****************************************************************************/
 /* NAME
  *   Connection::v8Date2OraDate
@@ -4037,19 +4992,25 @@ void Connection::v8Date2OraDate(v8::Local<v8::Value> val, Bind *bind)
  *   Used for IN bind to provide the v8::Date value.
  *
  */
-void Connection::UpdateDateValue ( eBaton * ebaton, unsigned int index )
+void Connection::UpdateDateValue ( eBaton * ebaton, Bind *bind, unsigned int nRows )
 {
-  Bind* bind = ebaton->binds[index];
-
   if (bind->type == dpi::DpiTimestampLTZ)
   {
     bind->dttmarr = ebaton->dpienv->getDateTimeArray(
                                         ebaton->dpistmt->getError());
-    bind->value = bind->dttmarr->init(1);
-    if (!bind->isOut)
+    bind->value = bind->dttmarr->init( nRows );
+
+    // Update with provided value only for IN or INOUT binds
+    if (!bind->isOut || bind->isInOut)
     {
-      bind->dttmarr->setDateTime( 0,
-                                  (*(long double *)bind->extvalue));
+      for ( unsigned int row = 0 ; row < nRows ; row ++ )
+      {
+        if ( bind->ind[row] != -1 )
+        {
+          bind->dttmarr->setDateTime( 0,
+                                   (*((long double *)bind->extvalue + row )));
+        }
+      }
     }
   }
 }
@@ -4288,13 +5249,16 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
       }
       else
       {
-        bind->extvalue = (long double *) malloc ( sizeof ( long double ) *
-                                                  nRows );
         if( !bind->extvalue )
         {
-          executeBaton->error = NJSMessages::getErrorMsg(
-                                  errInsufficientMemory);
-          goto exitcbDynBufferAllocate;
+          bind->extvalue = (long double *) malloc ( sizeof ( long double ) *
+                                                    nRows );
+          if( !bind->extvalue )
+          {
+            executeBaton->error = NJSMessages::getErrorMsg(
+                                    errInsufficientMemory);
+            goto exitcbDynBufferAllocate;
+          }
         }
       }
       // needed to post-process DML RETURNING of TimestampLTZ
@@ -4303,9 +5267,12 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
       bind->rowsReturned = 1;
       if (nRows > 1)
         bind->rowsReturned = nRows;
-      bind->dttmarr = executeBaton->dpienv->getDateTimeArray (
-        executeBaton->dpistmt->getError () );
-      bind->value = bind->dttmarr->init(nRows);
+
+      /* In case of OUT bind or RETURNING INTO statements, allocate here */
+      if ( ( bind->isOut && !bind->isInOut ) || executeBaton->stmtIsReturning )
+      {
+        Connection::UpdateDateValue ( executeBaton, bind, nRows ) ;
+      }
     }
     break;
 
@@ -4454,7 +5421,13 @@ int Connection::cbDynBufferGet ( void *ctx, DPI_SZ_TYPE nRows,
     Create a new LOB object.
 
   PARAMETERS
-    none
+    executeBaton   - eBaton struct containing execute context info
+    protoILob      - ProtoILob object created using LOB locator in the process
+                     of creating ILob object
+    isAutoCloseLob - bool
+                     true   - the Lob object will be closed at end of streaming
+                              operation
+                     false  - otherwise
 
   RETURNS
     a Lob object
@@ -4475,21 +5448,27 @@ int Connection::cbDynBufferGet ( void *ctx, DPI_SZ_TYPE nRows,
 
 */
 
-v8::Local<v8::Value> Connection::NewLob(eBaton* executeBaton,
-                                         ProtoILob *protoILob)
+v8::Local<v8::Value> Connection::NewLob( eBaton    *executeBaton,
+                                         ProtoILob *protoILob,
+                                         bool      isAutoCloseLob )
 {
   Nan::EscapableHandleScope scope;
   Connection     *connection = executeBaton->njsconn;
   Local<Object>  jsOracledb = Nan::New<Object>(connection->oracledb_->jsOracledb);
   Local<Value>   argv[1];
 
-  Local<Object>  iLob = Nan::New<FunctionTemplate>(ILob::iLobTemplate_s)->GetFunction()->NewInstance();
+  v8::Local<v8::Object> iLob = Nan::NewInstance (
+                  Local<Function>::Cast (
+                      Nan::GetFunction (
+                          Nan::New<FunctionTemplate>(
+     ILob::iLobTemplate_s)).ToLocalChecked() ) ).ToLocalChecked ();
 
   // the ownership of all handles in the ProtoILob are transferred to ILob
   // here.  Any error in initialization of ILob will cleanup the OCI
   // handles in the ILob cleanup routine.
 
-  (Nan::ObjectWrap::Unwrap<ILob>(iLob))->setILob(executeBaton, protoILob);
+  (Nan::ObjectWrap::Unwrap<ILob>(iLob))->setILob ( executeBaton, protoILob,
+                                                   isAutoCloseLob );
 
   if (!executeBaton->error.empty())
     return Nan::Null();

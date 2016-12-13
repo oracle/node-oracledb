@@ -208,7 +208,7 @@ requests per second than the database is configured to handle.
 There are two solutions:
 
 - Solution 1: Change database `RATE_LIMIT` configuration. This parameter
-defines the connection count allowed per second. See [RATE_LIMIT](http://docs.oracle.com/database/121/NETRF/listener.htm#NETRF426)
+defines the connection count allowed per second. See [RATE_LIMIT](https://docs.oracle.com/database/122/NETRF/Oracle-Net-Listener-parameters-in-listener-ora-file.htm#NETRF426)
 for more information.
 
 - Solution 2: Set the `RETRY_COUNT` and `RETRY_DELAY` parameters in

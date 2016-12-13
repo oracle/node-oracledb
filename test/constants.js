@@ -35,14 +35,12 @@
 
 var oracledb = require('oracledb');
 var should   = require('should');
-var async    = require('async');
-var dbConfig = require('./dbconfig.js');
-
 
 describe('18. constants.js', function() {
 
   it('18.1 dbTypes maps correctly between names and numbers', function() {
 
+    should.exist(oracledb);
     (oracledb.DB_TYPE_VARCHAR).should.be.exactly(1);
     (oracledb.DB_TYPE_NUMBER).should.be.exactly(2);
     (oracledb.DB_TYPE_DATE).should.be.exactly(12);

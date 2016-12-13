@@ -30,6 +30,9 @@
 #ifndef DPILOB_ORACLE
 # define DPILOB_ORACLE
 
+#ifndef OCI_ORACLE
+# include <oci.h>
+#endif
 
 #ifndef DPICOMMON_ORACLE
 # include <dpiCommon.h>
@@ -82,6 +85,19 @@ class Lob
 
   static unsigned long long length(DpiHandle *svch, DpiHandle *errh,
                               Descriptor *lobLocator);
+
+  static void cacheDescriptor ( DpiHandle *svch, DpiHandle *errh,
+                                Descriptor *srcLocator,
+                                Descriptor **dstLocator );
+
+  static void createTempLob ( DpiHandle *svch, DpiHandle *errh,
+                              Descriptor *lobLocator, unsigned char lobType );
+
+  static void freeTempLob   ( DpiHandle  *svch, DpiHandle *errh,
+                              Descriptor *lobLocator );
+
+  static boolean isTempLob  ( DpiHandle *envh, DpiHandle *errh,
+                              Descriptor *lobLocator );
 };
 
 

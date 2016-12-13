@@ -25,6 +25,9 @@
 #ifndef DPI_ORACLE
 # define DPI_ORACLE
 
+#define DPI_MAJOR_VERSION          1
+#define DPI_MINOR_VERSION          12
+#define DPI_PATCH_LEVEL            0
 
 #ifndef DPIEXCEPTION_ORACLE
 # include <dpiException.h>

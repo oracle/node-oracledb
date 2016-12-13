@@ -80,5 +80,5 @@ describe('52. getConnAfterPoolTerminate.js', function() {
         });
       }
     );
-  })
+  });
 });

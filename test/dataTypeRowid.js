@@ -60,20 +60,20 @@ describe('39. dataTypeRowid.js', function() {
         done();
       }
     );
-  })
+  });
 
   after('release connection', function(done) {
     connection.release( function(err) {
       should.not.exist(err);
       done();
     });
-  })
+  });
 
   describe('39.1 testing ROWID data type', function() {
     before(function(done) {
       async.series([
         function makeTable(callback) {
-          assist.createTable(connection, tableName, done);
+          assist.createTable(connection, tableName, callback);
         },
         function insertOneRow(callback) {
           connection.execute(
@@ -94,17 +94,17 @@ describe('39. dataTypeRowid.js', function() {
           );
         }
       ], done);
-    })
+    });
 
     after(function(done) {
       connection.execute(
-        "DROP table " + tableName,
+        "DROP table " + tableName + " PURGE",
         function(err) {
           should.not.exist(err);
           done();
         }
       );
-    })
+    });
 
     it('39.1.1 is still unsupported data type', function(done) {
       connection.execute(
@@ -113,10 +113,11 @@ describe('39. dataTypeRowid.js', function() {
           should.exist(err);
           (err.message).should.startWith('NJS-010:');
           // unsupported data type in select list
+          should.not.exist(result);
           done();
         }
       );
-    })
-  })
+    });
+  });
 
-})
+});

@@ -95,8 +95,8 @@ class EnvImpl : public Env
   virtual void isEventEnabled(bool isEventEnabled);
   virtual bool isEventEnabled() const;
 
-  virtual unsigned int dbcharset () const;
-  virtual unsigned int dbncharset () const;
+  virtual unsigned int clientcharset () const;
+  virtual unsigned int clientncharset () const;
 
                                 // interface  methods
   virtual SPool * createPool(const string &user, const string &password,
@@ -106,7 +106,8 @@ class EnvImpl : public Env
                              int poolTimeout,
                              int stmtCacheSize,
                              bool externalAuth,
-                             bool homogeneous );
+                             bool homogeneous,
+                             int poolPingInterval );
 
   virtual Conn * getConnection(const string &user, const string &password,
                                const string &connString, int stmtCacheSize,

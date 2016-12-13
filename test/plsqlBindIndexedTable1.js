@@ -19,7 +19,7 @@
  * See LICENSE.md for relevant licenses.
  *
  * NAME
- *   43. plsqlBinding1.js
+ *   43. plsqlBindIndexedTable1.js
  *
  * DESCRIPTION
  *   Testing PL/SQL indexed tables (associative arrays).
@@ -38,13 +38,13 @@ var should   = require('should');
 var async    = require('async');
 var dbConfig = require('./dbconfig.js');
 
-describe('43. plsqlBinding1.js', function() {
+describe('43. plsqlBindIndexedTable1.js', function() {
 
   var credentials = {
-                      user:          dbConfig.user,
-                      password:      dbConfig.password,
-                      connectString: dbConfig.connectString
-                    };
+    user:          dbConfig.user,
+    password:      dbConfig.password,
+    connectString: dbConfig.connectString
+  };
 
   describe('43.1 binding PL/SQL indexed table', function() {
     var connection = null;
@@ -55,14 +55,14 @@ describe('43. plsqlBinding1.js', function() {
         connection = conn;
         done();
       });
-    })
+    });
 
     after(function(done) {
       connection.release( function(err) {
         if(err) { console.error(err.message); return; }
         done();
       });
-    })
+    });
 
     it('43.1.1 binding PL/SQL indexed table IN by name', function(done) {
       async.series([
@@ -189,7 +189,7 @@ describe('43. plsqlBinding1.js', function() {
           connection.execute(
             "BEGIN nodb_plsqlbindpack2.test(:1, :2); END;",
             bindvars,
-            function(err, result) {
+            function(err) {
               should.not.exist(err);
               // console.log(result);
               callback();
@@ -354,7 +354,7 @@ describe('43. plsqlBinding1.js', function() {
       ], done);
     });
 
-  })
+  });
 
   describe('43.2 test exceptions when using PL/SQL indexed table bindings', function() {
     var connection = null;
@@ -410,7 +410,7 @@ describe('43. plsqlBinding1.js', function() {
           );
         }
       ], done);
-    }) // before
+    }); // before
 
     after(function(done) {
       async.series([
@@ -430,7 +430,7 @@ describe('43. plsqlBinding1.js', function() {
           });
         }
       ], done);
-    }) // after
+    }); // after
 
     it('43.2.1 maxArraySize is ignored when specifying BIND_IN', function(done) {
       var bindvars = {
@@ -445,7 +445,7 @@ describe('43. plsqlBinding1.js', function() {
           done();
         }
       );
-    })
+    });
 
     it('43.2.2 maxArraySize is mandatory for BIND_INOUT ', function(done) {
       var bindvars = {
@@ -462,7 +462,7 @@ describe('43. plsqlBinding1.js', function() {
           done();
         }
       );
-    })
+    });
 
     it('43.2.3 maxArraySize cannot smaller than the number of array elements', function(done) {
       var bindvars = {
@@ -479,9 +479,9 @@ describe('43. plsqlBinding1.js', function() {
           done();
         }
       );
-    })
+    });
 
-    it('43.2.4 DATE type has not been supported yet', function(done) {
+    it('43.2.4 DATE type indexed table has not been supported yet', function(done) {
       var bindvars = {
         p:  {type: oracledb.DATE, dir: oracledb.BIND_IN, val: [new Date(), new Date()]}
       };
@@ -496,7 +496,7 @@ describe('43. plsqlBinding1.js', function() {
           done();
         }
       );
-    })
+    });
 
     it('43.2.5 negative case (string): incorrect type of array elements', function(done) {
       var bindvars = {
@@ -513,7 +513,7 @@ describe('43. plsqlBinding1.js', function() {
           done();
         }
       );
-    })
+    });
 
     it('43.2.6 negative case (number): incorrect type of array element', function(done) {
       var bindvars = {
@@ -530,7 +530,7 @@ describe('43. plsqlBinding1.js', function() {
           done();
         }
       );
-    })
+    });
 
     it('43.2.7 supports binding by position', function(done) {
       var bindvars = [
@@ -545,9 +545,9 @@ describe('43. plsqlBinding1.js', function() {
           done();
         }
       );
-    })
+    });
 
-  }) // 43.2
+  }); // 43.2
 
   describe('43.3 binding PL/SQL scalar', function() {
     var connection = null;
@@ -558,14 +558,14 @@ describe('43. plsqlBinding1.js', function() {
         connection = conn;
         done();
       });
-    })
+    });
 
     after(function(done) {
       connection.release( function(err) {
         if(err) { console.error(err.message); return; }
         done();
       });
-    })
+    });
 
     it('43.3.1 binding PL/SQL scalar IN', function(done) {
       async.series([
@@ -615,8 +615,7 @@ describe('43. plsqlBinding1.js', function() {
       ], done);
     });
 
-    // Date data type not support yet
-    it.skip('43.3.2 binding PL/SQL scalar IN/OUT', function(done) {
+    it('43.3.2 binding PL/SQL scalar IN/OUT', function(done) {
       async.series([
         function(callback) {
           var proc = "CREATE OR REPLACE\n" +
@@ -768,9 +767,9 @@ describe('43. plsqlBinding1.js', function() {
           );
         }
       ], done);
-    })
+    });
 
-  }) // 43.3
+  }); // 43.3
 
   describe('43.4 test attribute - maxArraySize', function() {
     var connection = null;
@@ -825,7 +824,7 @@ describe('43. plsqlBinding1.js', function() {
           );
         }
       ], done);
-    }) // before
+    }); // before
 
     after(function(done) {
       async.series([
@@ -845,7 +844,7 @@ describe('43. plsqlBinding1.js', function() {
           });
         }
       ], done);
-    }) // after
+    }); // after
 
     it('43.4.1 maxArraySize property is ignored for BIND_IN', function(done) {
       var bindvars = {
@@ -860,7 +859,7 @@ describe('43. plsqlBinding1.js', function() {
           done();
         }
       );
-    })
+    });
 
     it('43.4.2 maxArraySize is mandatory for BIND_INOUT', function(done) {
       var bindvars = {
@@ -877,7 +876,7 @@ describe('43. plsqlBinding1.js', function() {
           done();
         }
       );
-    })
+    });
 
     it('43.4.3 maxArraySize cannot smaller than the number of array elements', function(done) {
       var bindvars = {
@@ -894,7 +893,7 @@ describe('43. plsqlBinding1.js', function() {
           done();
         }
       );
-    })
+    });
 
     it('43.4.4 maxArraySize can be equal to the number of array elements', function(done) {
       var bindvars = {
@@ -903,12 +902,12 @@ describe('43. plsqlBinding1.js', function() {
       connection.execute(
         "BEGIN nodb_plsqlbindpack41.test2(:p); END;",
         bindvars,
-        function(err, result) {
+        function(err) {
           should.not.exist(err);
           done();
         }
       );
-    })
+    });
 
     // known bug
     // The maximum safe integer in JavaScript is (2^53 - 1).
@@ -919,12 +918,12 @@ describe('43. plsqlBinding1.js', function() {
       connection.execute(
         "BEGIN nodb_plsqlbindpack41.test2(:p); END;",
         bindvars,
-        function(err, result) {
+        function(err) {
           should.not.exist(err);
           done();
         }
       );
-    })
+    });
 
     it('43.4.6 negative case: < 0', function(done) {
       var bindvars = {
@@ -933,14 +932,14 @@ describe('43. plsqlBinding1.js', function() {
       connection.execute(
         "BEGIN nodb_plsqlbindpack41.test2(:p); END;",
         bindvars,
-        function(err, result) {
+        function(err) {
           should.exist(err);
           (err.message).should.startWith('NJS-007:');
           // NJS-007: invalid value for "maxArraySize"
           done();
         }
       );
-    })
+    });
 
     it('43.4.7 negative case: = 0', function(done) {
       var bindvars = {
@@ -949,14 +948,14 @@ describe('43. plsqlBinding1.js', function() {
       connection.execute(
         "BEGIN nodb_plsqlbindpack41.test2(:p); END;",
         bindvars,
-        function(err, result) {
+        function(err) {
           should.exist(err);
           (err.message).should.startWith('NJS-035:');
           // NJS-035: maxArraySize is required for IN OUT array bind
           done();
         }
       );
-    })
+    });
 
     it('43.4.8 negative case: assign a string to it', function(done) {
       var bindvars = {
@@ -965,14 +964,14 @@ describe('43. plsqlBinding1.js', function() {
       connection.execute(
         "BEGIN nodb_plsqlbindpack41.test2(:p); END;",
         bindvars,
-        function(err, result) {
+        function(err) {
           should.exist(err);
           (err.message).should.startWith('NJS-008:');
           // NJS-008: invalid type for "maxArraySize"
           done();
         }
       );
-    })
+    });
 
     it('43.4.9 negative case: NaN', function(done) {
       var bindvars = {
@@ -981,14 +980,14 @@ describe('43. plsqlBinding1.js', function() {
       connection.execute(
         "BEGIN nodb_plsqlbindpack41.test2(:p); END;",
         bindvars,
-        function(err, result) {
+        function(err) {
           should.exist(err);
           (err.message).should.startWith('NJS-007:');
           // NJS-007: invalid value for "maxArraySize"
           done();
         }
       );
-    })
+    });
 
-  }) // 43.4
-})
+  }); // 43.4
+});

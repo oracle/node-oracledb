@@ -16,14 +16,17 @@
  * limitations under the License.
  *
  * NAME
- *   clobupdate1.js
+ *   lobinsert2.js
  *
  * DESCRIPTION
- *   UPDATEs an existing CLOB column by loading the text of this script into it.
+ *   INSERTs text into a CLOB column using the 'RETURNING INTO' method.
+ *
+ *   For smaller LOBs you will probably prefer the method shown in lobinsert1.js
+ *
+ *   Create clobexample.txt before running this example.
  *   Use demo.sql to create the required table or do:
  *     DROP TABLE mylobs;
  *     CREATE TABLE mylobs (id NUMBER, c CLOB, b BLOB);
- *   Run clobinsert1.js to load initial text before running this example.
  *
  *****************************************************************************/
 
@@ -31,7 +34,7 @@ var fs = require('fs');
 var oracledb = require('oracledb');
 var dbConfig = require('./dbconfig.js');
 
-var inFileName = 'clobupdate1.js';  // the file with the new text for the CLOB
+var inFileName = 'clobexample.txt';  // the file with text to be inserted into the database
 
 oracledb.getConnection(
   {
@@ -44,9 +47,9 @@ oracledb.getConnection(
     if (err) { console.error(err.message); return; }
 
     connection.execute(
-      "UPDATE mylobs SET c = EMPTY_CLOB() WHERE id = :id RETURNING c INTO :lobbv",
-      { id: 1, lobbv: {type: oracledb.CLOB, dir: oracledb.BIND_OUT} },
-      { autoCommit: false },  // a transaction needs to be open until the pipe() completes
+      "INSERT INTO mylobs (id, c) VALUES (:id, EMPTY_CLOB()) RETURNING c INTO :lobbv",
+      { id: 4, lobbv: {type: oracledb.CLOB, dir: oracledb.BIND_OUT} },
+      { autoCommit: false },  // a transaction needs to span the INSERT and pipe()
       function(err, result)
       {
         if (err) { console.error(err.message); return; }
@@ -57,10 +60,10 @@ oracledb.getConnection(
 
         var lob = result.outBinds.lobbv[0];
         lob.on(
-          'finish',
+          'close',
           function()
           {
-            console.log("lob.on 'finish' event");
+            console.log("lob.on 'close' event");
             connection.commit(
               function(err)
               {
@@ -68,7 +71,7 @@ oracledb.getConnection(
                   console.error(err.message);
                 else
                   console.log("Text inserted successfully.");
-                connection.release(function(err) {
+                connection.close(function(err) {
                   if (err) console.error(err);
                 });
               });
@@ -79,26 +82,21 @@ oracledb.getConnection(
           {
             console.log("lob.on 'error' event");
             console.error(err);
+            connection.close(function(err) {
+              if (err) console.error(err.message);
+            });
           });
 
         console.log('Reading from ' + inFileName);
         var inStream = fs.createReadStream(inFileName);
         inStream.on(
-          'end',
-          function()
-          {
-            console.log("inStream.on 'end' event");
-          });
-        inStream.on(
           'error',
           function(err)
           {
             console.log("inStream.on 'error' event");
-            console.error(err);
-            connection.release(function(err) {
-              if (err) console.error(err.message);
-            });
+            if (err) console.error(err);
           });
-        inStream.pipe(lob);  // copies the text to the CLOB
+
+        inStream.pipe(lob);  // copies the text to the LOB
       });
   });

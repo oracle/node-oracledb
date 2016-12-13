@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -52,7 +52,7 @@ oracledb.getConnection(
           doRelease(connection);
           return;
         }
-        console.log(result);
+        // console.log(result);
         fetchOneRowFromRS(connection, result.resultSet);
       });
   });
@@ -78,7 +78,7 @@ function fetchOneRowFromRS(connection, resultSet)
 
 function doRelease(connection)
 {
-  connection.release(
+  connection.close(
     function(err)
     {
       if (err) { console.error(err.message); }

@@ -7,6 +7,10 @@ Use the questions at the bottom of this template as a guide.
 
 Use Markdown syntax, particularly for code blocks: see https://help.github.com/articles/basic-writing-and-formatting-syntax/
 
+### For security issues:
+
+See https://www.oracle.com/support/assurance/vulnerability-remediation/reporting-security-vulnerabilities.html for how to report security issues.
+
 ### For installation issues:
 
 Use a gist for screen output and logs: see https://gist.github.com/
@@ -16,6 +20,14 @@ Review the install instructions at https://github.com/oracle/node-oracledb/blob/
 
 Review your output and logs.  **Google any errors**
 Try to install in a different way.  Try some potential solutions.
+
+For Node 4 onwards, you need a compiler with C++11 support.
+
+Did the error indicate a network connection issue?  Do you need to set `http_proxy`?
+
+Try running `npm cache clean` and deleting the `node_modules/oracledb` directory.
+
+Do you have an old version of `node-gyp` installed?  Try updating it.  Also try deleting `$HOME/.node-gyp` or equivalent.
 
 #### Answer the following questions:
 
@@ -31,4 +43,4 @@ Try to install in a different way.  Try some potential solutions.
 
 6. What is your OS and version?
 
-7. What compiler version did you use?
+7. What compiler version did you use?  For example, with GCC, run `gcc --version`

@@ -92,9 +92,10 @@ typedef enum
 // states
 typedef enum
 {
-  NJS_INVALID   = 0,
-  NJS_ACTIVE    = 1,
-  NJS_INACTIVE  = 2,
+  NJS_INVALID     = 0,  // Underlying DPI object freed
+  NJS_ACTIVE      = 1,  // Object is busy with some operation
+  NJS_INACTIVE    = 2,  // Object is free for any operation
+  NJSBIND_ACTIVE  = 3,  // Object active as BIND_IN or BIND_INOUT
 }State;
 
 // args
@@ -110,10 +111,10 @@ typedef enum
 // ConnectionBusyStatus status
 typedef enum
 {
-  NJS_CONN_NOT_BUSY  = 0,      // Connection not busy
-  NJS_CONN_BUSY_LOB  = 5001,   // Connection busy with LOB operation
-  NJS_CONN_BUSY_RS   = 5002,   // Connection busy with ResultSet operation
-  NJS_CONN_BUSY_DB   = 5003,   // Connection busy with DB operation
+  NJS_CONN_NOT_BUSY     = 0,      // Connection not busy
+  NJS_CONN_BUSY_LOB     = 5001,   // Connection busy with LOB operation
+  NJS_CONN_BUSY_RS      = 5002,   // Connection busy with ResultSet operation
+  NJS_CONN_BUSY_DB      = 5003,   // Connection busy with DB operation
 }ConnectionBusyStatus;
 
 /*
@@ -130,6 +131,13 @@ typedef enum
   NJS_VALUETYPE_DATE,                                                /* Date */
   NJS_VALUETYPE_OBJECT,                                  /* JSON object type */
 } ValueType ;
+
+// Extended bind type
+typedef enum
+{
+  NJS_EXTBIND_REFCURSOR = 0,
+  NJS_EXTBIND_LOB       = 1,
+} ExtBindType;
 
 
 /*
@@ -250,7 +258,7 @@ private:
 {                                                                             \
   if( args[index]->IsUint32() )                                               \
   {                                                                           \
-    val = args[index]->ToUint32()->Value();                                   \
+    val = Nan::To<uint32_t> (args[index] ).FromJust();                        \
     err.clear();                                                              \
   }                                                                           \
   else                                                                        \
@@ -259,6 +267,8 @@ private:
     goto exitCode ;                                                           \
   }                                                                           \
 }
+
+
 
 /*
  * Get the std string value from JSON for the given key.
@@ -296,9 +306,9 @@ private:
   err.clear();                                                                \
   if( v8value->IsUint32() )                                                   \
   {                                                                           \
-    val = v8value->ToUint32()->Value();                                       \
+    val = Nan::To<uint32_t> (v8value).FromJust ();                            \
   }                                                                           \
-  else if(v8value->IsUndefined())                                             \
+  else if(v8value->IsUndefined() || v8value->IsNull () )                      \
   {                                                                           \
     ;                                                                         \
   }                                                                           \
@@ -316,6 +326,39 @@ private:
   }                                                                           \
 }
 
+
+/*
+ * Get the int value from JSON for the given key.
+ * index is the argument index in the caller.
+ * DO NOT SET ANY VALUE to val IF NULL OR UNDEFINED
+ */
+#define NJS_GET_INT_FROM_JSON( val, err, obj, key, index, exitCode )          \
+{                                                                             \
+  Local<Value> v8value = obj->Get(Nan::New<v8::String>(key).ToLocalChecked());\
+  err.clear();                                                                \
+  if( v8value->IsInt32() )                                                    \
+  {                                                                           \
+    val = ( Nan::To<int32_t> ( v8value) ).FromJust () ;                         \
+  }                                                                           \
+  else if(v8value->IsUndefined() || v8value->IsNull ())                       \
+  {                                                                           \
+    ;                                                                         \
+  }                                                                           \
+  else if(v8value->IsNumber())                                                \
+  {                                                                           \
+    err = NJSMessages::getErrorMsg ( errInvalidPropertyValueInParam,          \
+                                     key, index+1 );                          \
+    goto exitCode;                                                            \
+  }                                                                           \
+  else                                                                        \
+  {                                                                           \
+    err = NJSMessages::getErrorMsg ( errInvalidPropertyTypeInParam,           \
+                                     key, index+1 );                          \
+    goto exitCode;                                                            \
+  }                                                                           \
+}
+
+
 /*
  * Get the boolean value from JSON for the given key.
  * index is the argument index in the caller.
@@ -323,7 +366,7 @@ private:
 #define NJS_GET_BOOL_FROM_JSON( val, err, obj, key, index, exitCode )         \
 {                                                                             \
   Local<Value> v8value = obj->Get(Nan::New<v8::String>(key).ToLocalChecked());\
-  if ( !v8value->IsUndefined () )                                             \
+  if ( !v8value->IsUndefined () && !v8value->IsNull () )                      \
   {                                                                           \
     val = v8value->ToBoolean()->Value();                                      \
   }                                                                           \
@@ -359,13 +402,32 @@ private:
   string errMsg;                                                              \
   if( v8value->IsUint32() )                                                   \
   {                                                                           \
-    val = v8value->ToUint32()->Value();                                       \
+    val = (Nan::To<uint32_t> (v8value) ).FromJust () ;                        \
   }                                                                           \
   else                                                                        \
   {                                                                           \
     errMsg = NJSMessages::getErrorMsg ( errInvalidPropertyValue,              \
                                      prop );                                  \
     NJS_SET_EXCEPTION ( errMsg.c_str() );                                     \
+  }                                                                           \
+}
+
+/*
+ * Convert v8value to long for properties.
+ * If it is not a v8 int, throw exception,
+ * prop is the name of the property
+ */
+#define NJS_SET_PROP_INT(val, v8value, prop )                                 \
+{                                                                             \
+  string errMsg;                                                              \
+  if ( v8value->IsInt32 () )                                                  \
+  {                                                                           \
+    val = (Nan::To<int32_t> ( v8value ) ).FromJust ();                        \
+  }                                                                           \
+  else                                                                        \
+  {                                                                           \
+    errMsg = NJSMessages::getErrorMsg ( errInvalidPropertyValue, prop );      \
+    NJS_SET_EXCEPTION ( errMsg.c_str () );                                    \
   }                                                                           \
 }
 

@@ -55,7 +55,22 @@ oracledb.getConnection(
       bindvars,
       function (err, result)
       {
-        if (err) { console.error(err.message); return; }
+        if (err) {
+          console.error(err.message);
+          doRelease(connection);
+          return;
+        }
         console.log(result.outBinds);
+        doRelease(connection);
       });
   });
+
+function doRelease(connection)
+{
+  connection.close(
+    function(err) {
+      if (err) {
+        console.error(err.message);
+      }
+    });
+}

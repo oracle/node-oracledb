@@ -150,13 +150,24 @@ typedef struct MetaInfo
  **/
 typedef struct ExtBind
 {
-  unsigned int numCols;          // number of columns
-  MetaInfo     *mInfo;           // MetaInfo structure
+  ExtBindType type;
 
-  ExtBind ()
-    : numCols ( 0 ), mInfo ( NULL )
-    {}
-}ExtBind;
+  union
+  {
+    struct
+    {
+      unsigned int numCols;            // number of columns
+      MetaInfo     *mInfo;             // MetaInfo structure
+    } extRefCursor;
+
+    struct
+    {
+      void *value;             // Stores extra bind reference
+      bool isStringBuffer2LOB; // Specifies whether string or buffer Converted
+                               // to LOB or not
+    } extLob;
+  } fields;
+} ExtBind;
 
 
 /**
@@ -175,6 +186,21 @@ typedef struct fetchInfo
 
 } FetchInfo;
 
+
+/**
+ * LobInfo struct
+ **/
+typedef struct LobInfo
+{
+  Descriptor    *lobLocator;
+  unsigned char lobType;
+
+  // Constructor to initialize member variables.
+  LobInfo ( unsigned char type )
+    : lobLocator ( NULL ), lobType ( type )
+  {
+  }
+} LobInfo;
 
 /**
 * Baton for Asynchronous Connection methods
@@ -211,6 +237,9 @@ typedef struct eBaton
   Nan::Persistent<Object>   jsConn;
   bool                      extendedMetaData;
   MetaInfo                  *mInfo;
+  LobInfo                   *lobInfo;
+  std::vector<Nan::Persistent<Object>*>
+                            persistentRefs; // Persistent Refs to JS Objects
 
   eBaton( unsigned int& count, Local<Function> callback,
            Local<Object> jsConnObj ) :
@@ -221,7 +250,7 @@ typedef struct eBaton
              stmtIsReturning (false), numOutBinds(0), defines(NULL),
              fetchAsStringTypesCount (0), fetchAsStringTypes(NULL),
              fetchInfoCount(0), fetchInfo(NULL), counter ( count ),
-             extendedMetaData(false), mInfo(NULL)
+             extendedMetaData(false), mInfo(NULL), lobInfo(NULL)
   {
     cb.Reset( callback );
     jsConn.Reset ( jsConnObj );
@@ -265,18 +294,42 @@ typedef struct eBaton
        {
          if ( extBinds[index] )
          {
-           if ( extBinds[index]->mInfo )
+           if ( extBinds[index]->type == NJS_EXTBIND_REFCURSOR &&
+                extBinds[index]->fields.extRefCursor.mInfo )
            {
-             delete [] extBinds[index]->mInfo;
+             delete [] extBinds[index]->fields.extRefCursor.mInfo;
+           }
+           else if ( extBinds[index]->type == NJS_EXTBIND_LOB &&
+                     extBinds[index]->fields.extLob.value )
+           {
+             free ( extBinds[index]->fields.extLob.value );
            }
            delete extBinds[index];
          }
        }
        extBinds.clear ();
      }
+     if( !persistentRefs.empty() )
+     {
+       for( unsigned int index = 0 ;index < persistentRefs.size();
+            index++ )
+       {
+         persistentRefs[index]->Reset ();
+         delete persistentRefs[index];
+       }
+       persistentRefs.clear ();
+     }
      if( mInfo && !getRS )
      {
         delete [] mInfo;
+     }
+     if ( lobInfo )
+     {
+       if ( lobInfo->lobLocator )
+       {
+         free ( lobInfo->lobLocator );
+       }
+       delete lobInfo;
      }
      if( defines && !getRS ) // To reuse fetch Buffers of ResultSet
      {
@@ -342,6 +395,9 @@ public:
   inline unsigned int& RSCount  ()   { return rsCount_;  }
   inline unsigned int& DBCount  ()   { return dbCount_;  }
 
+  // Reference counter for child temp Lob objects
+  inline unsigned int* TempLOBCount ()   { return &tempLobCount_; }
+
   Oracledb* oracledb_;
 
 private:
@@ -371,6 +427,11 @@ private:
   static void Async_Break(uv_work_t *req);
   static void Async_AfterBreak (uv_work_t *req);
 
+  // CreateLob Method on Connection class
+  static NAN_METHOD(CreateLob);
+  static void Async_CreateLob(uv_work_t *req);
+  static void Async_AfterCreateLob (uv_work_t *req);
+
   // Define Getter Accessors to properties
   static NAN_GETTER(GetStmtCacheSize);
   static NAN_GETTER(GetClientId);
@@ -395,6 +456,30 @@ private:
 
 
   static void PrepareAndBind (eBaton* executeBaton);
+
+  static void ConvertStringOrBuffer2LOB ( eBaton* executeBaton,
+                                                unsigned int index );
+
+  static void String2CLOB ( eBaton* executeBaton, unsigned int index );
+
+  static void Buffer2BLOB ( eBaton* executeBaton, unsigned int index );
+
+  static void StringOrBuffer2LOB ( eBaton* executeBaton, unsigned int index,
+                                   unsigned char lobType );
+
+  static void Descr2StringOrBuffer ( eBaton* executeBaton );
+
+  static void CLOB2String ( eBaton* executeBaton, unsigned int index );
+
+  static void BLOB2Buffer ( eBaton* executeBaton, unsigned int index );
+
+  static void LOB2StringOrBuffer ( eBaton* executeBaton, unsigned int index,
+                                   unsigned long long byteAmount,
+                                   unsigned long long charAmount );
+
+  static void PrepareLOBsForBind ( eBaton* executeBaton, unsigned int index );
+
+  static void InitExtBind ( ExtBind *extBind, ExtBindType fieldType );
 
   static unsigned short SourceDBType2TargetDBType ( unsigned srcType );
   static boolean MapByName ( eBaton *executeBaton,
@@ -453,7 +538,7 @@ private:
   // for lobs
   static v8::Local<v8::Value> GetValueLob (eBaton *executeBaton,
                                             Bind *bind);
-  static void UpdateDateValue ( eBaton *executeBaton, unsigned int index );
+  static void UpdateDateValue ( eBaton *executeBaton, Bind *bind, unsigned int nRows );
   static void v8Date2OraDate(v8::Local<v8::Value> val, Bind *bind);
   static ConnectionBusyStatus getConnectionBusyStatus ( Connection *conn );
 
@@ -479,8 +564,9 @@ private:
                                unsigned short **rcode, unsigned char *piecep );
 
   // NewLob Method on Connection class
-  static v8::Local<v8::Value> NewLob(eBaton* executeBaton,
-                                      ProtoILob *protoILob);
+  static v8::Local<v8::Value> NewLob( eBaton*   executeBaton,
+                                      ProtoILob *protoILob,
+                                      bool      isAutoCloseLob = true );
 
   static inline ValueType GetValueType ( v8::Local<v8::Value> v )
   {
@@ -529,6 +615,7 @@ private:
   unsigned int              lobCount_;    // LOB operations counter
   unsigned int              rsCount_;     // ResultSet operations counter
   unsigned int              dbCount_;     // Connection or DB operations counter
+  unsigned int              tempLobCount_;// temp LOB counter
   Nan::Persistent<Object>   jsParent_;
 
 };

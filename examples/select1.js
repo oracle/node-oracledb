@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -19,17 +19,23 @@
  *   select1.js
  *
  * DESCRIPTION
- *   Executes a basic query without using a ResultSet.
+ *   Executes a basic query without using a connection pool or ResultSet.
  *   Uses Oracle's sample HR schema.
  *
  *   Scripts to create the HR schema can be found at:
  *   https://github.com/oracle/db-sample-schemas
+ *
+ *   For a connection pool example see webapp.js
+ *   For a ResultSet example see resultset2.js
+ *   For a query stream example see selectstream.js
+ *   For a Promise example see promises.js
  *
  *****************************************************************************/
 
 var oracledb = require('oracledb');
 var dbConfig = require('./dbconfig.js');
 
+// Get a non-pooled connection
 oracledb.getConnection(
   {
     user          : dbConfig.user,
@@ -43,10 +49,19 @@ oracledb.getConnection(
       return;
     }
     connection.execute(
+      // The statement to execute
       "SELECT department_id, department_name " +
         "FROM departments " +
-        "WHERE department_id = :did",
+        "WHERE department_id = :id",
+
+      // The "bind value" 180 for the "bind variable" :id
       [180],
+
+      // Optional execute options argument, such as the query result format
+      // or whether to get extra metadata
+      // { outFormat: oracledb.OBJECT, extendedMetaData: true },
+
+      // The callback function handles the SQL execution results
       function(err, result)
       {
         if (err) {
@@ -54,15 +69,16 @@ oracledb.getConnection(
           doRelease(connection);
           return;
         }
-        console.log(result.metaData);
-        console.log(result.rows);
+        console.log(result.metaData); // [ { name: 'DEPARTMENT_ID' }, { name: 'DEPARTMENT_NAME' } ]
+        console.log(result.rows);     // [ [ 180, 'Construction' ] ]
         doRelease(connection);
       });
   });
 
+// Note: connections should always be released when not needed
 function doRelease(connection)
 {
-  connection.release(
+  connection.close(
     function(err) {
       if (err) {
         console.error(err.message);

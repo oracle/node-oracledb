@@ -27,13 +27,13 @@
  *
  *****************************************************************************/
 
-#ifndef DPIUTILS_ORACLE
-# include <dpiUtils.h>
+#ifndef DPILOB_ORACLE
+# include <dpiLob.h>
 #endif
 
 
-#ifndef DPILOB_ORACLE
-# include <dpiLob.h>
+#ifndef DPIUTILS_ORACLE
+# include <dpiUtils.h>
 #endif
 
 
@@ -202,6 +202,115 @@ unsigned long long Lob::length(DpiHandle *svch, DpiHandle *errh,
   return (unsigned long long)length;
 }
 
+
+/*******************************************************************************
+
+  DESCRIPTION
+    Assigns one LOB locator to another
+
+  PARAMETERS
+    svch            - OCI service handle
+    errh            - OCI error handle
+    srcLocator      - The LOB locator to copy from
+    dstLocator      - The LOB locator to copy to
+
+
+  RETURNS
+    nothing
+
+  NOTES
+
+*/
+void Lob::cacheDescriptor ( DpiHandle *svch, DpiHandle *errh,
+                            Descriptor *srcLocator, Descriptor **dstLocator )
+{
+  ociCall ( OCILobLocatorAssign ( ( OCISvcCtx * ) svch, ( OCIError * ) errh,
+                                  ( OCILobLocator * ) srcLocator,
+                                  ( OCILobLocator ** ) dstLocator ),
+            ( OCIError * ) errh );
+}
+
+
+/*******************************************************************************
+
+  DESCRIPTION
+    Creates a temporary LOB
+
+  PARAMETERS
+    svch            - OCI service handle
+    errh            - OCI error handle
+    lobLocator      - Lob locator
+    lobType         - The type of LOB to create.
+                      OCI_TEMP_BLOB - For a temporary BLOB
+                      OCI_TEMP_CLOB - For a temporary CLOB
+
+
+  RETURNS
+    nothing
+
+*/
+void Lob::createTempLob ( DpiHandle *svch, DpiHandle *errh,
+                          Descriptor *lobLocator, unsigned char lobType )
+{
+  ociCall ( OCILobCreateTemporary( ( OCISvcCtx * ) svch, ( OCIError * ) errh,
+                                   ( OCILobLocator * ) lobLocator,
+                                   ( ub2 ) OCI_DEFAULT, SQLCS_IMPLICIT,
+                                   ( ub1 )lobType, false,
+                                   OCI_DURATION_SESSION ),
+            ( OCIError * ) errh );
+}
+
+
+/*******************************************************************************
+
+  DESCRIPTION
+    Frees a temporary LOB
+
+  PARAMETERS
+    svch            - OCI service handle
+    errh            - OCI error handle
+    lobLocator      - Lob locator
+
+
+  RETURNS
+    nothing
+
+*/
+void Lob::freeTempLob ( DpiHandle *svch, DpiHandle *errh,
+                        Descriptor *lobLocator )
+{
+  ociCall ( OCILobFreeTemporary ( ( OCISvcCtx * ) svch, ( OCIError * ) errh,
+                                  ( OCILobLocator * ) lobLocator ),
+            ( OCIError * ) errh );
+}
+
+
+/*******************************************************************************
+
+  DESCRIPTION
+    Check whether given LOB is temporary or not
+
+  PARAMETERS
+    envh            - OCI ENV handle
+    errh            - OCI error handle
+    lobLocator      - Lob locator
+
+
+  RETURNS
+    boolean -  true if LOB is temporary
+               false otherwise
+*/
+boolean Lob::isTempLob ( DpiHandle *envh, DpiHandle *errh,
+                         Descriptor *lobLocator )
+{
+  boolean isTemporary = FALSE;
+
+  ociCall ( OCILobIsTemporary ( ( OCIEnv * ) envh, ( OCIError * ) errh,
+                                ( OCILobLocator * ) lobLocator, &isTemporary ),
+            ( OCIError * ) errh );
+
+  return isTemporary;
+}
 
 
 /* end of dpiDateTimeArrayImpl.cpp  */

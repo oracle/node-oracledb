@@ -43,11 +43,10 @@
 
 #define DPI_AL32UTF8         873
 
-using std::string;
-
-
 namespace dpi
 {
+
+using std::string;
 
 class DateTimeArray;
 
@@ -88,8 +87,8 @@ class Env
   virtual void externalAuth(bool externalAuth) = 0;
   virtual bool externalAuth() const = 0;
 
-  virtual unsigned int dbcharset () const = 0;
-  virtual unsigned int dbncharset () const = 0 ;
+  virtual unsigned int clientcharset () const = 0;
+  virtual unsigned int clientncharset () const = 0 ;
 
                                  // methods
   virtual SPool * createPool(const string &user, const string &password,
@@ -99,7 +98,9 @@ class Env
                              int poolTimeout = -1,
                              int stmtCacheSize = -1,
                              bool externalAuth = false,
-                             bool homogeneous = true ) = 0;
+                             bool homogeneous = true,
+                        int poolPingInterval = DPI_NO_PING_INTERVAL ) = 0 ;
+                     // default Ping Interval is assumed to be no-ping
 
   virtual Conn * getConnection(const string &user,
                                const string &password,

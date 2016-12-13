@@ -35,7 +35,6 @@
 
 var oracledb = require('oracledb');
 var should   = require('should');
-var async    = require('async');
 var assist   = require('./dataTypeAssist.js');
 var dbConfig = require('./dbconfig.js');
 
@@ -62,42 +61,42 @@ describe('42. dataTypeRaw.js', function() {
         done();
       }
     );
-  })
+  });
 
   after('release connection', function(done) {
     connection.release( function(err) {
       should.not.exist(err);
       done();
     });
-  })
+  });
 
   describe('42.1 testing RAW data in various lengths', function() {
 
     before('create table, insert data', function(done) {
       assist.setUp(connection, tableName, bufs, done);
-    })
+    });
 
     after(function(done) {
       connection.execute(
-        "DROP table " + tableName,
+        "DROP table " + tableName + " PURGE",
         function(err) {
           should.not.exist(err);
           done();
         }
       );
-    })
+    });
 
     it('42.1.1 SELECT query', function(done) {
       assist.dataTypeSupport(connection, tableName, bufs, done);
-    })
+    });
 
     it('42.1.2 resultSet stores RAW data correctly', function(done) {
       assist.verifyResultSet(connection, tableName, bufs, done);
-    })
+    });
 
     it('42.1.3 works well with REF Cursor', function(done) {
       assist.verifyRefCursor(connection, tableName, bufs, done);
-    })
+    });
 
     it('42.1.4 result set getRow() function works well with RAW', function(done) {
 
@@ -126,44 +125,45 @@ describe('42. dataTypeRaw.js', function() {
           }
         });
       }
-    }) // 42.1.4
+    }); // 42.1.4
 
     it('42.1.5 a negative case which hits NJS-011 error', function(done) {
       connection.execute(
         "INSERT INTO " + tableName + " (content ) VALUES (:c)",
          { c : { val: 1234, type: oracledb.BUFFER, dir:oracledb.BIND_IN } },
          function(err, result) {
-          should.exist(err);
+           should.exist(err);
           // NJS-011: encountered bind value and type mismatch
-          (err.message).should.startWith('NJS-011:');
-          done();
+           (err.message).should.startWith('NJS-011:');
+           should.not.exist(result);
+           done();
          }
       );
-    })
+    });
 
-  })
+  });
 
   describe('42.2 stores null value correctly', function() {
     it('42.2.1 testing Null, Empty string and Undefined', function(done) {
       assist.verifyNullValues(connection, tableName, done);
-    })
-  })
+    });
+  });
 
   describe('42.3 DML Returning - Currently not support RAW', function() {
 
     before('create table', function(done) {
       assist.createTable(connection, tableName, done);
-    })
+    });
 
     after(function(done) {
       connection.execute(
-        "DROP table " + tableName,
+        "DROP table " + tableName + " PURGE",
         function(err) {
           should.not.exist(err);
           done();
         }
       );
-    })
+    });
 
     it('42.3.1 INSERT statement with Object binding', function(done) {
       var seq = 1;
@@ -183,10 +183,11 @@ describe('42. dataTypeRaw.js', function() {
           should.exist(err);
           (err.message).should.startWith('NJS-028:');
           // NJS-028: raw database type is not supported with DML Returning statements
+          should.not.exist(result);
           done();
         }
       );
-    })  // 42.3.1
+    });  // 42.3.1
 
     it('42.3.2 INSERT statement with ARRAY binding', function(done) {
       var seq = 2;
@@ -205,10 +206,11 @@ describe('42. dataTypeRaw.js', function() {
         function(err, result) {
           should.exist(err);
           (err.message).should.startWith('NJS-028:');
+          should.not.exist(result);
           done();
         }
       );
-    }) // 42.3.2
+    }); // 42.3.2
 
     it('42.3.3 INSERT statement with exact maxSize restriction', function(done) {
       var seq = 3;
@@ -227,10 +229,11 @@ describe('42. dataTypeRaw.js', function() {
         function(err, result) {
           should.exist(err);
           (err.message).should.startWith('NJS-028:');
+          should.not.exist(result);
           done();
         }
       );
-    })
+    });
 
     it('42.3.4 UPDATE statement', function(done) {
       var seq = 2;
@@ -249,10 +252,11 @@ describe('42. dataTypeRaw.js', function() {
         function(err, result) {
           should.exist(err);
           (err.message).should.startWith('NJS-028:');
+          should.not.exist(result);
           done();
         }
       );
-    }) // 42.3.4
+    }); // 42.3.4
 
     it('42.3.6 DELETE statement with single row matching', function(done) {
       var seq = 1;
@@ -268,10 +272,11 @@ describe('42. dataTypeRaw.js', function() {
         function(err, result) {
           should.exist(err);
           (err.message).should.startWith('NJS-028:');
+          should.not.exist(result);
           done();
         }
       );
-    })
+    });
 
     it('42.3.7 DELETE statement with multiple rows matching', function(done) {
       var seq = 1;
@@ -287,12 +292,13 @@ describe('42. dataTypeRaw.js', function() {
         function(err, result) {
           should.exist(err);
           (err.message).should.startWith('NJS-028:');
+          should.not.exist(result);
           done();
         }
       );
-    })
+    });
 
-  }) // 42.3
+  }); // 42.3
 
   describe('42.4 in PL/SQL, the maximum size is 32767', function() {
 
@@ -311,7 +317,7 @@ describe('42. dataTypeRaw.js', function() {
           done();
         }
       );
-    })
+    });
 
     after(function(done) {
       connection.execute(
@@ -321,7 +327,7 @@ describe('42. dataTypeRaw.js', function() {
           done();
         }
       );
-    })
+    });
 
     it('42.4.1 when data length is less than maxSize', function(done) {
       var size = 5;
@@ -341,7 +347,7 @@ describe('42. dataTypeRaw.js', function() {
           done();
         }
       );
-    })
+    });
 
     it('42.4.2 when data length is 32767', function(done) {
       var size = 32767;
@@ -361,7 +367,7 @@ describe('42. dataTypeRaw.js', function() {
           done();
         }
       );
-    })
+    });
 
     it('42.4.3 when data length greater than maxSize', function(done) {
       var size = 32800;
@@ -373,14 +379,14 @@ describe('42. dataTypeRaw.js', function() {
           i: { type: oracledb.BUFFER, dir: oracledb.BIND_IN, val: buf },
           o: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: 32767}
         },
-        function(err, result) {
+        function(err) {
           should.exist(err);
-          // ORA-01460: unimplemented or unreasonable conversion requested
-          (err.message).should.startWith('ORA-01460');
+          // ORA-06502: PL/SQL: numeric or value error\nORA-06512: at line 1
+          (err.message).should.startWith('ORA-06502');
           done();
         }
       );
-    })
+    });
 
     it('42.4.4 when maxSize is greater than 32767', function(done) {
       var size = 32800;
@@ -392,14 +398,14 @@ describe('42. dataTypeRaw.js', function() {
           i: { type: oracledb.BUFFER, dir: oracledb.BIND_IN, val: buf },
           o: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: 40000}
         },
-        function(err, result) {
+        function(err) {
           should.exist(err);
-          // ORA-01460: unimplemented or unreasonable conversion requested
-          (err.message).should.startWith('ORA-01460');
+          // ORA-06502: PL/SQL: numeric or value error\nORA-06512: at line 1
+          (err.message).should.startWith('ORA-06502');
           done();
         }
       );
-    })
-  }) // 42.4
+    });
+  }); // 42.4
 
-})
+});

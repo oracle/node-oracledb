@@ -35,7 +35,6 @@
 
 var oracledb = require('oracledb');
 var should   = require('should');
-var async    = require('async');
 var assist   = require('./dataTypeAssist.js');
 var dbConfig = require('./dbconfig.js');
 
@@ -58,30 +57,30 @@ describe('27. dataTypeNumber2.js', function() {
         done();
       }
     );
-  })
+  });
 
   after('release connection', function(done) {
     connection.release( function(err) {
       should.not.exist(err);
       done();
     });
-  })
+  });
 
   describe('27.1 testing NUMBER(p, s) data', function() {
 
     before('create table, insert data',function(done) {
       assist.setUp(connection, tableName, numbers, done);
-    })
+    });
 
     after(function(done) {
       connection.execute(
-        "DROP table " + tableName,
+        "DROP table " + tableName + " PURGE",
         function(err) {
           should.not.exist(err);
           done();
         }
       );
-    })
+    });
 
     it('27.1.1 SELECT query', function(done) {
       connection.should.be.ok();
@@ -101,7 +100,7 @@ describe('27. dataTypeNumber2.js', function() {
           done();
         }
       );
-    }) // 27.1.1
+    }); // 27.1.1
 
     it('27.1.2 resultSet stores NUMBER(p, s) data correctly', function(done) {
       connection.should.be.ok();
@@ -125,7 +124,7 @@ describe('27. dataTypeNumber2.js', function() {
             for(var i = 0; i < rows.length; i++) {
               if(Math.abs( numbers[rows[i].NUM] ) == 0.00000123)
                 rows[i].CONTENT.should.be.exactly(0);
-             else
+              else
                rows[i].CONTENT.should.be.exactly(numbers[rows[i].NUM]);
             }
             return fetchRowsFromRS(rs);
@@ -141,14 +140,14 @@ describe('27. dataTypeNumber2.js', function() {
           }
         });
       }
-    })
+    });
 
-  }) // 27.1
+  }); // 27.1
 
   describe('27.2 stores null value correctly', function() {
     it('27.2.1 testing Null, Empty string and Undefined', function(done) {
       assist.verifyNullValues(connection, tableName, done);
-    })
-  })
+    });
+  });
 
-})
+});

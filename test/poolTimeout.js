@@ -62,7 +62,7 @@ describe('11. poolTimeout.js', function(){
         done();
       }
     );
-  })
+  });
 
   after(function(done){
     pool.terminate(function(err){
@@ -70,7 +70,7 @@ describe('11. poolTimeout.js', function(){
       //console.log("---- pool terminated.");
       done();
     });
-  })
+  });
 
   it('11.1 pool terminates idle connections after specify time', function(done){
     pool.should.be.ok();
@@ -183,6 +183,6 @@ describe('11. poolTimeout.js', function(){
       }
     ], done);
 
-  })
+  });
 
-})
+});
