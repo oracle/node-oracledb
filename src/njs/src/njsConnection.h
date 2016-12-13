@@ -678,7 +678,7 @@ private:
                                void **bufpp, void **alenpp, void **indpp,
                                unsigned short **rcode, unsigned char *piecep );
 
-  static void cbDynDefine ( void *octxp, unsigned long definePos,
+  static int  cbDynDefine ( void *octxp, unsigned long definePos,
                             unsigned long iter, unsigned long *prevIter,
                             void **bufpp, unsigned long **alenpp,
                             void **indpp, unsigned short **rcodepp );

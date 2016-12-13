@@ -1185,6 +1185,12 @@ void Connection::GetInBindParamsScalar(Local<Value> v8val, Bind* bind,
       /* This has to be allocated after stmt is initialized */
       bind->dttmarr = NULL ;
       bind->extvalue = (long double *) malloc (sizeof ( long double ) );
+      if ( !bind->extvalue )
+      {
+        executeBaton -> error = NJSMessages::getErrorMsg (
+                                                    errInsufficientMemory );
+        goto exitGetInBindParamsScalar;
+      }
       bind->value = NULL;
       bind->type = dpi::DpiTimestampLTZ;
       *(bind->len) = 0;
@@ -1478,6 +1484,12 @@ void Connection::GetInBindParamsArray(Local<Array> va8vals, Bind *bind,
       bufferSize       = static_cast<size_t>(arrayElementSize *
                                              bind->maxArraySize);
       buffer           = reinterpret_cast<char*>(malloc(bufferSize));
+      if ( !buffer )
+      {
+        executeBaton->error = NJSMessages::getErrorMsg (
+                                                errInsufficientMemory );
+        goto exitGetInBindParamsArray;
+      }
       bind->value      = buffer;
       break;
 
@@ -5373,6 +5385,12 @@ void Connection::cbDynBufferAllocate ( void *ctx, bool dmlReturning,
     else
     {
       bind->value = (void *)malloc ( (size_t)(bind->maxSize) * nRows ) ;
+      if ( !bind->value )
+      {
+        executeBaton->error = NJSMessages::getErrorMsg (
+                                                     errInsufficientMemory );
+        goto exitcbDynBufferAllocate;
+      }
       *(bind->len) = (unsigned int)bind->maxSize;
     }
     break;
@@ -5514,7 +5532,7 @@ int Connection::cbDynBufferGet ( void *ctx, DPI_SZ_TYPE nRows,
     rcodepp   (INOUT) - pointer to specify return code (NOT USED)
 
   RETURNS
-    -NONE-
+    0 on success and -1 on memory allocation failures.
     
   NOTE:
     The callback is called repeteatedly for the same row with iter (0 based)
@@ -5523,7 +5541,7 @@ int Connection::cbDynBufferGet ( void *ctx, DPI_SZ_TYPE nRows,
     is passed to the callback, new set of buffer(s) has to be provided and
     initialized.
 */
-void Connection::cbDynDefine ( void *octxp, unsigned long definePos,
+int Connection::cbDynDefine ( void *octxp, unsigned long definePos,
                                unsigned long iter, unsigned long *prevIter,
                                void **bufpp, unsigned long **alenpp,
                                void **indpp, unsigned short **rcodepp )
@@ -5532,6 +5550,8 @@ void Connection::cbDynDefine ( void *octxp, unsigned long definePos,
   Define *define       = &(executeBaton->defines[definePos]);
   unsigned long maxLen = 0;
   char **buf           = (char **)define->buf ;
+  char *tmp            = NULL ;  // to presever ptr for realloc
+  int ret              = 0;
 
   if ( *prevIter != iter )
   {
@@ -5545,16 +5565,28 @@ void Connection::cbDynDefine ( void *octxp, unsigned long definePos,
     maxLen = ( ( ( unsigned long ) (**alenpp ) ) + NJS_ITER_SIZE );
   }
 
+  tmp = buf[iter];  // preserve the current memory address
+
   // allocate or reallocate buffer
   buf[iter] = (char *) ( ( !buf[iter] ) ?
                          malloc ( maxLen ) : realloc ( buf[iter], maxLen ) ) ;
+  if ( !buf[iter] )
+  {
+    // If realloc fails, the IN parameter requires to be freed and untouched
+    // restore the pointer and return error.
+    buf[iter] = tmp ;
+    ret = -1;
+  }
+  else
+  {
+    define->len[iter] = maxLen;
+    define->ind[iter] = 0;                       // default value for indicator
 
-  define->len[iter] = maxLen;
-  define->ind[iter] = 0;                        // defalt value for indicator
-
-  *bufpp  = (void *) buf[iter];                       // memory for this iter
-  *alenpp = (unsigned long *) &(define->len[iter]) ;  // size for this iter
-  *indpp  = (void *) &(define->ind[iter]);            // indicator
+    *bufpp  = (void *) buf[iter];                       // memory for this iter
+    *alenpp = (unsigned long *) &(define->len[iter]) ;  // size for this iter
+    *indpp  = (void *) &(define->ind[iter]);            // indicator
+  }
+  return ret ;
 }
 
 

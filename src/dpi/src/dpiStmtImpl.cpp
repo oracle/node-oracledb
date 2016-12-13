@@ -747,15 +747,16 @@ sb4 StmtImpl::defineCallback ( void *ctxp, OCIDefine *definep, ub4 iter,
                            void **bufpp, ub4 **alenpp, ub1 *piecep,
                            void **indpp, ub2 **rcodepp )
 {
-  sb4 rc = OCI_CONTINUE;
+  sb4  rc = OCI_CONTINUE;
+  int  cbret = 0 ;
 
   DpiDefineCallbackCtx *ctx = (DpiDefineCallbackCtx *)ctxp;
 
-  ctx->callbackfn ( ctx->data, ctx->definePos, iter, &(ctx->prevIter), bufpp,
-                           (void **) alenpp, (void**)indpp, rcodepp );
+  cbret = ctx->callbackfn ( ctx->data, ctx->definePos, iter, &(ctx->prevIter),
+                            bufpp, (void **) alenpp, (void**)indpp, rcodepp );
   *piecep = OCI_NEXT_PIECE;  // always ask for next piece
 
-  if (!(*bufpp ))
+  if ( cbret )
   {
     /*
      * In case of memory allocation failures return error to OCI, which will
