@@ -132,13 +132,6 @@ typedef enum
   NJS_VALUETYPE_OBJECT,                                  /* JSON object type */
 } ValueType ;
 
-// Extended bind type
-typedef enum
-{
-  NJS_EXTBIND_REFCURSOR = 0,
-  NJS_EXTBIND_LOB       = 1,
-} ExtBindType;
-
 
 /*
  * This class used to increment LOB, ResultSet and connection operation

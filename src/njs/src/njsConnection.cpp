@@ -62,8 +62,13 @@ Nan::Persistent<FunctionTemplate> Connection::connectionTemplate_s;
 // default value for bind option maxSize
 #define NJS_MAX_OUT_BIND_SIZE 200
 
-// max number of bytes for data converted to string with fetchAsString or fetchInfo
-#define NJS_MAX_FETCH_AS_STRING_SIZE 200
+// max size for data converted to string with fetchInfo/fetchAsString
+// This size is used only for NUMBER and DATE/TIMESTAMP types.
+#define NJS_MAX_FETCH_AS_STRING_SIZE      200
+
+// Size of block allocated each time when callback is called for
+// for fetch-CLOB-as-STRING.  This constant is used only CLOB-as-STRING case
+#define NJS_ITER_SIZE 1048576
 
 // Max number of bytes allowed for PLSQL STRING/BUFFER arguments
 #define NJS_THRESHOLD_SIZE_PLSQL_STRING_ARG 32767
@@ -611,10 +616,10 @@ void Connection::ProcessOptions (Nan::NAN_METHOD_ARGS_TYPE args, unsigned int in
           unsigned int tmptype = 0xFFFFFFFF ;
 
           Local<String> temp = keys->Get (index).As<String>();
-          NJSString (fInfo[index].name, temp );
+          NJSString (fInfo[index].colName, temp );
 
           Local<Object> colInfo = fetchInfo->Get (Nan::New<v8::String>(
-                                     fInfo[index].name ).ToLocalChecked())->ToObject();
+                        fInfo[index].colName ).ToLocalChecked())->ToObject();
 
           NJS_GET_UINT_FROM_JSON (tmptype, executeBaton->error,
                                   colInfo, "type", 2, exitProcessOptions );
@@ -625,11 +630,11 @@ void Connection::ProcessOptions (Nan::NAN_METHOD_ARGS_TYPE args, unsigned int in
             goto exitProcessOptions;
           }
 
-          fInfo[index].type = (DataType) tmptype;
+          fInfo[index].njsType = (DataType) tmptype;
 
           // Only Conversion to STRING allowed now. Either STRING or DB type.
-          if ( ( fInfo[index].type != NJS_DATATYPE_DEFAULT ) &&
-               ( fInfo[index].type != NJS_DATATYPE_STR ) )
+          if ( ( fInfo[index].njsType != NJS_DATATYPE_DEFAULT ) &&
+               ( fInfo[index].njsType != NJS_DATATYPE_STR ) )
           {
             executeBaton->error = NJSMessages::getErrorMsg (
                                                errInvalidTypeForConversion );
@@ -1307,14 +1312,13 @@ void Connection::GetInBindParamsScalar(Local<Value> v8val, Bind* bind,
             *(bind->len)  = ( DPI_BUFLEN_TYPE ) 0;
             bind->maxSize = ( DPI_SZ_TYPE ) sizeof ( Descriptor * );
 
-            extBind = new ExtBind ();
+            extBind = new ExtBind ( NJS_EXTBIND_LOB );
             if ( !extBind )
             {
               executeBaton->error = NJSMessages::getErrorMsg
                                             ( errInsufficientMemory );
               goto exitGetInBindParamsScalar;
             }
-            executeBaton->njsconn->InitExtBind ( extBind, NJS_EXTBIND_LOB );
 
             // Store the reference to IN LOB object
             extBind->fields.extLob.value = (void *) iLob;
@@ -1891,15 +1895,13 @@ void Connection::Async_Execute (uv_work_t *req)
            ((dpi::Stmt *)(bind->value))->prefetchRows (
                                               executeBaton->prefetchRows ) ;
            // Get metaData and number of columns on valid cursor object
-           ExtBind* extBind = new ExtBind ();
+           ExtBind* extBind = new ExtBind ( NJS_EXTBIND_REFCURSOR );
            if ( !extBind )
            {
              executeBaton->error = NJSMessages::getErrorMsg
                                            ( errInsufficientMemory );
              goto exitAsyncExecute;
            }
-           executeBaton->njsconn->InitExtBind ( extBind,
-                                                NJS_EXTBIND_REFCURSOR );
 
            const MetaData* mData = ((Stmt*)bind->value)->getMetaData(
                                            executeBaton->extendedMetaData );
@@ -1982,7 +1984,7 @@ void Connection::Async_Execute (uv_work_t *req)
       if ( ( bind->type == DpiClob || bind->type == DpiBlob ) && bind->isInOut )
       {
         if ( executeBaton->extBinds[index] &&
-             executeBaton->extBinds[index]->type == NJS_EXTBIND_LOB &&
+             executeBaton->extBinds[index]->extBindType == NJS_EXTBIND_LOB &&
              !executeBaton->extBinds[index]->fields.extLob.isStringBuffer2LOB )
         {
           ILob *iLob = ( ILob * )
@@ -2010,7 +2012,7 @@ void Connection::Async_Execute (uv_work_t *req)
         // Free the temp LOB and allocated bind descriptors for
         // Clob/Blob As String/Buffer
         if ( executeBaton->extBinds[index] &&
-             executeBaton->extBinds[index]->type == NJS_EXTBIND_LOB &&
+             executeBaton->extBinds[index]->extBindType == NJS_EXTBIND_LOB &&
              executeBaton->extBinds[index]->fields.extLob.isStringBuffer2LOB )
         {
           // Free the temp LOB created  for IN bind
@@ -2297,7 +2299,7 @@ void Connection::Descr2StringOrBuffer ( eBaton* executeBaton )
       bind    = executeBaton->binds[b];
       extBind = executeBaton->extBinds[b];
       // Check to see if temp LOB conversion happened
-      if ( extBind && extBind->type == NJS_EXTBIND_LOB &&
+      if ( extBind && extBind->extBindType == NJS_EXTBIND_LOB &&
            extBind->fields.extLob.isStringBuffer2LOB )
       {
         // In case of non-NULL OUT Bind, read the data from LOB
@@ -2368,15 +2370,19 @@ void Connection::ConvertStringOrBuffer2LOB ( eBaton* executeBaton,
          ( bind->isInOut && bind->maxSize > NJS_THRESHOLD_SIZE_PLSQL_STRING_ARG
          ) ) )
   {
-    ExtBind* extBind = new ExtBind ();
+    // This block is only for BIND_IN case
+    ExtBind* extBind = new ExtBind ( NJS_EXTBIND_LOB );
     if ( !extBind )
     {
       executeBaton->error = NJSMessages::getErrorMsg
                                     ( errInsufficientMemory );
       goto exitConvertStringOrBuffer2LOB;
     }
-    executeBaton->njsconn->InitExtBind ( extBind, NJS_EXTBIND_LOB );
-    extBind->fields.extLob.maxSize = bind->maxSize;
+    // Set a flag to know that type conversion happened
+    // This helps in later steps to clean LOB resources
+    extBind->fields.extLob.isStringBuffer2LOB = true;
+    executeBaton->extBinds[index]             = extBind;
+    extBind->fields.extLob.maxSize            = bind->maxSize;
 
     if ( bind->type == DpiVarChar )
     {
@@ -2394,7 +2400,8 @@ void Connection::ConvertStringOrBuffer2LOB ( eBaton* executeBaton,
   else if ( ( bind->isOut || bind->isInOut ) &&
             bind->maxSize > NJS_THRESHOLD_SIZE_PLSQL_STRING_ARG )
   {
-    ExtBind* extBind = new ExtBind ();
+    // This block is only for BIND_OUT case
+    ExtBind* extBind = new ExtBind ( NJS_EXTBIND_LOB );
 
     if ( !extBind )
     {
@@ -2402,7 +2409,7 @@ void Connection::ConvertStringOrBuffer2LOB ( eBaton* executeBaton,
                                     ( errInsufficientMemory );
       goto exitConvertStringOrBuffer2LOB;
     }
-    executeBaton->njsconn->InitExtBind ( extBind, NJS_EXTBIND_LOB );
+
     extBind->fields.extLob.maxSize = bind->maxSize;
 
     // Set a flag to know that type conversion happened
@@ -2442,7 +2449,7 @@ void Connection::PrepareLOBsForBind ( eBaton* executeBaton, unsigned int index )
 
   // Don't process in case of CLOB/BLOB as String/Buffer
   if ( executeBaton->extBinds[index] &&
-       executeBaton->extBinds[index]->type == NJS_EXTBIND_LOB &&
+       executeBaton->extBinds[index]->extBindType == NJS_EXTBIND_LOB &&
        !executeBaton->extBinds[index]->fields.extLob.isStringBuffer2LOB )
   {
     ILob *iLob = ( ILob * )
@@ -2454,36 +2461,6 @@ void Connection::PrepareLOBsForBind ( eBaton* executeBaton, unsigned int index )
         executeBaton->dpienv->allocDescriptor ( LobDescriptorType );
     }
     iLob->doBind ( bind );
-  }
-}
-
-
-/****************************************************************************/
-/* NAME
- *   Connection::InitExtBind
- *
- * DESCRIPTION
- *   Initialize ExtBind variable since it has union with structures
- *
- * PARAMETERS
- *   extBind   - ExtBind struct to initialize
- *   fieldType - Type of the struct in the union to initialize
- *
- */
-void Connection::InitExtBind ( ExtBind *extBind, ExtBindType fieldType )
-{
-  extBind->type = fieldType;
-
-  if ( fieldType == NJS_EXTBIND_REFCURSOR )
-  {
-    extBind->fields.extRefCursor.numCols = 0;
-    extBind->fields.extRefCursor.mInfo   = NULL;
-  }
-  else
-  {
-    extBind->fields.extLob.value              = NULL;
-    extBind->fields.extLob.isStringBuffer2LOB = false;
-    extBind->fields.extLob.maxSize            = 0;
   }
 }
 
@@ -2501,6 +2478,7 @@ void Connection::PrepareAndBind (eBaton* executeBaton)
   executeBaton->dpistmt = executeBaton->dpiconn->getStmt(executeBaton->sql);
   executeBaton->st = executeBaton->dpistmt->stmtType ();
   executeBaton->stmtIsReturning = executeBaton->dpistmt->isReturning ();
+  ExtBind *extBind = NULL ;
 
   if(!executeBaton->binds.empty())
   {
@@ -2563,6 +2541,25 @@ void Connection::PrepareAndBind (eBaton* executeBaton)
                                         executeBaton->binds[index], 1 ) ;
         }
 
+        if ( executeBaton->stmtIsReturning &&
+             executeBaton->binds[index]->isOut )
+        {
+          extBind = new ExtBind ( NJS_EXTBIND_DMLRETCB ) ;
+
+          DpiBindCallbackCtx *ctx = extBind->fields.extDMLReturnCbCtx.ctx =
+             (DpiBindCallbackCtx *) malloc ( sizeof ( DpiBindCallbackCtx ) );
+          ctx->callbackfn = Connection::cbDynBufferGet;
+                                                    /* App specific callback */
+          ctx->data = (void *)executeBaton;
+                                           /* Data for App specific callback */
+          ctx->bndpos = index;     /* for callback, bind position zero based */
+          ctx->nrows = 0;             /* # of rows - will be filled in later */
+          ctx->iter = 0;            /* # iteration - will be filled in later */
+          ctx->dpistmt = executeBaton->dpistmt;      /* DPI Statement object */
+
+          executeBaton->extBinds[index] = extBind;
+        }
+
         // Bind by name
         executeBaton->dpistmt->bind(
               (const unsigned char*)executeBaton->binds[index]->key.c_str(),
@@ -2582,10 +2579,7 @@ void Connection::PrepareAndBind (eBaton* executeBaton)
                 &(executeBaton->binds[index]->curArraySize) : 0,
               (executeBaton->stmtIsReturning &&
                 executeBaton->binds[index]->isOut) ?
-              (void *)executeBaton : NULL,
-              (executeBaton->stmtIsReturning &&
-                executeBaton->binds[index]->isOut) ?
-              Connection::cbDynBufferGet : NULL);
+              extBind->fields.extDMLReturnCbCtx.ctx : NULL);
       }
     }
     else
@@ -2640,6 +2634,24 @@ void Connection::PrepareAndBind (eBaton* executeBaton)
                                         executeBaton->binds[index], 1 ) ;
         }
 
+        if ( executeBaton->stmtIsReturning &&
+             executeBaton->binds[index]->isOut )
+        {
+          extBind = new ExtBind ( NJS_EXTBIND_DMLRETCB );
+          DpiBindCallbackCtx *ctx = extBind->fields.extDMLReturnCbCtx.ctx =
+              (DpiBindCallbackCtx *) malloc ( sizeof ( DpiBindCallbackCtx ) );
+
+          ctx->callbackfn = Connection::cbDynBufferGet;
+                                                    /* App specific callback */
+          ctx->data = (void *)executeBaton;
+                                           /* Data for App specific callback */
+          ctx->bndpos = index;     /* for callback, bind position zero based */
+          ctx->nrows = 0;             /* # of rows - will be filled in later */
+          ctx->iter = 0;            /* # iteration - will be filled in later */
+          ctx->dpistmt = executeBaton->dpistmt;      /* DPI Statement object */
+          executeBaton->extBinds[index] = extBind;
+        }
+
         // Bind by position
         executeBaton->dpistmt->bind(
               index+1,executeBaton->binds[index]->type,
@@ -2656,11 +2668,8 @@ void Connection::PrepareAndBind (eBaton* executeBaton)
               (executeBaton->binds[index]->isArray) ?
                 &(executeBaton->binds[index]->curArraySize ) : 0,
               (executeBaton->stmtIsReturning &&
-                executeBaton->binds[index]->isOut ) ?
-                  (void *)executeBaton : NULL,
-              (executeBaton->stmtIsReturning &&
                 executeBaton->binds[index]->isOut) ?
-              Connection::cbDynBufferGet : NULL);
+              extBind->fields.extDMLReturnCbCtx.ctx : NULL);
       }
     }
   }
@@ -2708,6 +2717,7 @@ void Connection::CopyMetaData ( MetaInfo           *mInfo,
         mInfo[col].dpiFetchType = Connection::GetTargetType ( executeBaton,
                                                  mInfo[col].name,
                                                  dpi::DpiDouble );
+
         mInfo[col].njsFetchType =
                      ( mInfo[col].dpiFetchType == dpi::DpiVarChar ) ?
                                   NJS_DATATYPE_STR : NJS_DATATYPE_NUM;
@@ -2726,7 +2736,7 @@ void Connection::CopyMetaData ( MetaInfo           *mInfo,
       case dpi::DpiTimestampLTZ:
         mInfo[col].dpiFetchType = Connection::GetTargetType ( executeBaton,
                                                  mInfo[col].name,
-                                                 dpi::DpiTimestampLTZ );
+                                                 dpi::DpiTimestampLTZ);
         mInfo[col].njsFetchType =
                      ( mInfo[col].dpiFetchType == dpi::DpiVarChar ) ?
                                   NJS_DATATYPE_STR : NJS_DATATYPE_DATE;
@@ -2735,7 +2745,7 @@ void Connection::CopyMetaData ( MetaInfo           *mInfo,
       case dpi::DpiTimestampTZ:
         mInfo[col].dpiFetchType = Connection::GetTargetType ( executeBaton,
                                                  mInfo[col].name,
-                                                 dpi::DpiTimestampLTZ );
+                                                 dpi::DpiTimestampLTZ);
         mInfo[col].njsFetchType =
                      ( mInfo[col].dpiFetchType == dpi::DpiVarChar ) ?
                                   NJS_DATATYPE_STR : NJS_DATATYPE_UNKNOWN;
@@ -2747,8 +2757,12 @@ void Connection::CopyMetaData ( MetaInfo           *mInfo,
         break;
 
       case dpi::DpiClob:
-        mInfo[col].dpiFetchType = mData[col].dbType;
-        mInfo[col].njsFetchType = NJS_DATATYPE_CLOB;
+        mInfo[col].dpiFetchType = Connection::GetTargetType ( executeBaton,
+                                                      mInfo[col].name,
+                                                      dpi::DpiClob );
+        mInfo[col].njsFetchType =
+          ( mInfo[col].dpiFetchType == dpi::DpiVarChar ) ?
+               NJS_DATATYPE_STR : NJS_DATATYPE_CLOB;
         break;
 
       case dpi::DpiBlob:
@@ -2760,6 +2774,7 @@ void Connection::CopyMetaData ( MetaInfo           *mInfo,
         mInfo[col].dpiFetchType = Connection::GetTargetType ( executeBaton,
                                                  mInfo[col].name,
                                                  dpi::DpiRowid );
+
         mInfo[col].njsFetchType =
                      ( mInfo[col].dpiFetchType == dpi::DpiVarChar ) ?
                                   NJS_DATATYPE_STR : NJS_DATATYPE_UNKNOWN;
@@ -2851,17 +2866,18 @@ boolean Connection::MapByName ( eBaton *executeBaton, std::string &name,
           f ++ )
     {
       /* COLUMN name should match */
-      if ( executeBaton->fetchInfo[f].name.compare ( name ) == 0 )
+      if ( executeBaton->fetchInfo[f].colName.compare ( name ) == 0 )
       {
-        /* Only NJS_DATATYPE_STR & NJS_DATATYPE_DEFAULT allowed.  For NJS_DATATYPE_DEFAULT,
-         * the type is identified from metadata and is already set.
-         * In case of NJS_DATATYPE_STR, set the return value.
+        /* Only NJS_DATATYPE_STR & NJS_DATATYPE_DEFAULT allowed.
+         * For NJS_DATATYPE_DEFAULT, the type is identified from metadata
+         * and is already set. In case of NJS_DATATYPE_STR, set the
+         * return value.
          */
-        if ( executeBaton->fetchInfo[f].type == NJS_DATATYPE_STR )
+        if ( executeBaton->fetchInfo[f].njsType == NJS_DATATYPE_STR )
         {
           targetType = dpi::DpiVarChar;
         }
-        else if ( executeBaton->fetchInfo[f].type == NJS_DATATYPE_DEFAULT )
+        else if ( executeBaton->fetchInfo[f].njsType == NJS_DATATYPE_DEFAULT )
         {
           targetType = Connection::SourceDBType2TargetDBType ( targetType );
         }
@@ -2936,6 +2952,19 @@ boolean Connection::MapByType ( eBaton *executeBaton, unsigned short &dbType )
       }
       break;
 
+    case dpi::DpiClob:            /* CLOB Columns */
+      for ( unsigned int t = 0; !modified && ( t < count ) ; t ++ )
+      {
+        if ( executeBaton->fetchAsStringTypes[t] == NJS_DATATYPE_CLOB )
+        {
+          /* Convert all CLOB column values to STRING */
+          dbType = dpi::DpiVarChar;
+          modified = true;
+          break;
+        }
+      }
+      break;
+
     default:  /* Other data types no supported and is checked earlier */
       break;
     }
@@ -2960,8 +2989,8 @@ boolean Connection::MapByType ( eBaton *executeBaton, unsigned short &dbType )
                 be returned.
 */
 unsigned short Connection::GetTargetType ( eBaton *executeBaton,
-                                            std::string &name,
-                                unsigned short defaultType)
+                                           std::string &name,
+                                           unsigned short defaultType )
 {
   unsigned short dbType = defaultType;  // Start with DB Metadata type
 
@@ -3010,6 +3039,8 @@ void Connection::DoDefines ( eBaton* executeBaton )
   int          csratio  = executeBaton->dpiconn->getVarCharByteExpansionRatio();
   bool         error    = false;
 
+  executeBaton->extDefines.resize ( executeBaton->numCols, NULL );
+
   for (unsigned int col = 0; !error && ( col < numCols ); col++)
   {
     /*
@@ -3024,7 +3055,7 @@ void Connection::DoDefines ( eBaton* executeBaton )
         defines[col].fetchType = executeBaton->mInfo[col].dpiFetchType;
         /* For VARCHAR2 type, make sure sufficient buffer is available */
         defines[col].maxSize = ( defines[col].fetchType == dpi::DpiVarChar) ?
-                               NJS_MAX_FETCH_AS_STRING_SIZE : sizeof (double);
+                                NJS_MAX_FETCH_AS_STRING_SIZE : sizeof (double);
 
         if ( NJS_SIZE_T_OVERFLOW ( defines[col].maxSize,
                                        executeBaton->maxRows ) )
@@ -3153,8 +3184,10 @@ void Connection::DoDefines ( eBaton* executeBaton )
       case dpi::DpiClob:
       case dpi::DpiBlob:
       case dpi::DpiBfile:
-        defines[col].fetchType = executeBaton->mInfo[col].dbType;
-        defines[col].maxSize   = sizeof(Descriptor *);
+        defines[col].fetchType = executeBaton->mInfo[col].dpiFetchType;
+        defines[col].maxSize =
+          ( defines[col].fetchType == dpi::DpiVarChar ) ?
+              sizeof ( char *) : sizeof ( Descriptor *) ;
 
         if ( NJS_SIZE_T_OVERFLOW ( defines[col].maxSize,
                                        executeBaton->maxRows ) )
@@ -3179,8 +3212,16 @@ void Connection::DoDefines ( eBaton* executeBaton )
         {
           for (unsigned int j = 0; j < executeBaton->maxRows; j++)
           {
-            ((Descriptor **)(defines[col].buf))[j] =
-              executeBaton->dpienv->allocDescriptor(LobDescriptorType);
+            if ( defines[col].fetchType == dpi::DpiVarChar )
+            {
+              // Clob-Fetch-As-String - allocation happens in callback
+              ((char **)(defines[col].buf))[j] = NULL;
+            }
+            else
+            {
+              ((Descriptor **)(defines[col].buf))[j] =
+                executeBaton->dpienv->allocDescriptor(LobDescriptorType);
+            }
           }
         }
         break;
@@ -3236,9 +3277,36 @@ void Connection::DoDefines ( eBaton* executeBaton )
         error = true;
       }
 
+      void *buf = NULL ;
+      DpiDefineCallbackCtx *ctx = NULL ;
+      bool clobAsStr = false ;
+
+      if ( ( defines[col].fetchType == dpi::DpiVarChar ) &&
+           ( executeBaton->mInfo[col].dbType == dpi::DpiClob ) )
+      {
+        ctx = ( DpiDefineCallbackCtx * )malloc (
+                                        sizeof ( DpiDefineCallbackCtx ) );
+        ctx->callbackfn = (definecbtype ) Connection::cbDynDefine ;
+        ctx->data = (void *)executeBaton ;
+        ctx->definePos = col ;
+        ctx->prevIter = -1L ;  /* no row processed yet */
+        clobAsStr = true ;
+        executeBaton->extDefines[col] = new ExtDefine (
+                                                  NJS_EXTDEFINE_CLOBASSTR ) ;
+        executeBaton->extDefines[col]->fields.extClobAsStr.ctx = (void *) ctx;
+      }
+      else
+      {
+        buf = (defines[col].buf) ? defines[col].buf : defines[col].extbuf ;
+      }
+
       executeBaton->dpistmt->define(col+1, defines[col].fetchType,
-                   (defines[col].buf) ? defines[col].buf : defines[col].extbuf,
-                   defines[col].maxSize, defines[col].ind, defines[col].len);
+                                    buf,
+                                    clobAsStr ?
+                                      DPI_MAX_BUFLEN :defines[col].maxSize,
+                                    clobAsStr ? NULL : defines[col].ind,
+                                    clobAsStr ? NULL : defines[col].len,
+                                    ctx );
     }
   }
 }
@@ -3525,7 +3593,7 @@ void Connection::Async_AfterExecute(uv_work_t *req)
            ( !bind->isOut || bind->isInOut ) )
     {
       if ( executeBaton->extBinds[index] &&
-           executeBaton->extBinds[index]->type == NJS_EXTBIND_LOB &&
+           executeBaton->extBinds[index]->extBindType == NJS_EXTBIND_LOB &&
            !executeBaton->extBinds[index]->fields.extLob.isStringBuffer2LOB )
       {
         ILob *iLob = ( ILob * )
@@ -3845,14 +3913,24 @@ Local<Value> Connection::GetValue ( eBaton *executeBaton,
     // SELECT queries
     Define *define = &(executeBaton->defines[col]);
     long double *dblArr = (long double *)define->buf;
+    void * buf = NULL ;
+
+    if ( ( define->fetchType == dpi::DpiVarChar ) &&
+         ( executeBaton->mInfo[col].dbType == dpi::DpiClob ) )
+    {
+      buf = ((char **) (define->buf))[row];
+    }
+    else
+    {
+      buf = ((char *)(define->buf) + ( row * ( define->maxSize ) ) );
+    }
+
     Local<Value> value = Connection::GetValueCommon(
                            executeBaton,
                            define->ind[row],
                            define->fetchType,
                            (define->fetchType == DpiTimestampLTZ ) ?
-                             (void *) &dblArr[row] :
-                             (void *) ((char *)(define->buf) +
-                              ( row * (define->maxSize ))),
+                             (void *) &dblArr[row] : buf,
                            define->len[row] );
     return scope.Escape( value );
   }
@@ -3936,7 +4014,7 @@ Local<Value> Connection::GetValueRefCursor ( eBaton  *executeBaton,
                       Nan::New <FunctionTemplate>(
      ResultSet::resultSetTemplate_s )).ToLocalChecked () ) ).ToLocalChecked ();
 
-    if ( extBind && extBind->type == NJS_EXTBIND_REFCURSOR )
+    if ( extBind && extBind->extBindType == NJS_EXTBIND_REFCURSOR )
     {
       numCols = extBind->fields.extRefCursor.numCols;
       mInfo   = extBind->fields.extRefCursor.mInfo;
@@ -5333,7 +5411,7 @@ exitcbDynBufferAllocate:
 int Connection::cbDynBufferGet ( void *ctx, DPI_SZ_TYPE nRows,
                                  unsigned int bndpos,
                                  unsigned long iter, unsigned long index,
-                                 dvoid **bufpp, void **alenpp, void **indpp,
+                                 void **bufpp, void **alenpp, void **indpp,
                                  unsigned short **rcode, unsigned char *piecep)
 {
   eBaton *executeBaton = (eBaton *)ctx;
@@ -5419,6 +5497,65 @@ int Connection::cbDynBufferGet ( void *ctx, DPI_SZ_TYPE nRows,
   return ret;
 }
 
+
+
+/****************************************************************************/
+/*
+  DESCRIPTION
+    Callback function to allocate and identify block of memory
+
+  PARAMETERS
+    octxp     (IN)    - context for this callback
+    definepos (IN)    - 0-based column number
+    iter      (IN)    - iteration
+    bufpp     (INOUT) - pointer to specify buffer for data
+    alenpp    (INOUT) - pointer to specify length
+    indpp     (INOUT) - pointer to specify indicator
+    rcodepp   (INOUT) - pointer to specify return code (NOT USED)
+
+  RETURNS
+    -NONE-
+    
+  NOTE:
+    The callback is called repeteatedly for the same row with iter (0 based)
+    denoting the row number, if there is more data until it reaches end-of-lob
+    or max defined in OCIDefineByPos2 () API.  When new iter (row number) 
+    is passed to the callback, new set of buffer(s) has to be provided and
+    initialized.
+*/
+void Connection::cbDynDefine ( void *octxp, unsigned long definePos,
+                               unsigned long iter, unsigned long *prevIter,
+                               void **bufpp, unsigned long **alenpp,
+                               void **indpp, unsigned short **rcodepp )
+{
+  eBaton *executeBaton = (eBaton *) octxp ;
+  Define *define       = &(executeBaton->defines[definePos]);
+  unsigned long maxLen = 0;
+  char **buf           = (char **)define->buf ;
+
+  if ( *prevIter != iter )
+  {
+    // For next row, start from minimum buffer
+    maxLen = NJS_ITER_SIZE ;
+    *prevIter = iter;
+  }
+  else
+  {
+    // More data for same row, try with next incremental size
+    maxLen = ( ( ( unsigned long ) (**alenpp ) ) + NJS_ITER_SIZE );
+  }
+
+  // allocate or reallocate buffer
+  buf[iter] = (char *) ( ( !buf[iter] ) ?
+                         malloc ( maxLen ) : realloc ( buf[iter], maxLen ) ) ;
+
+  define->len[iter] = maxLen;
+  define->ind[iter] = 0;                        // defalt value for indicator
+
+  *bufpp  = (void *) buf[iter];                       // memory for this iter
+  *alenpp = (unsigned long *) &(define->len[iter]) ;  // size for this iter
+  *indpp  = (void *) &(define->ind[iter]);            // indicator
+}
 
 
 /*****************************************************************************/

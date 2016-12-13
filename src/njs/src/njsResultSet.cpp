@@ -70,7 +70,7 @@ Nan::Persistent<FunctionTemplate> ResultSet::resultSetTemplate_s;
      numCols      - number of columns
      mInfo        - an array of structs representing column info
 */
-void ResultSet::setResultSet ( dpi::Stmt          *stmt,   eBaton *executeBaton,
+void ResultSet::setResultSet ( dpi::Stmt *stmt,   eBaton *executeBaton,
                                const unsigned int numCols,
                                const MetaInfo     *mInfo )
 {
@@ -91,6 +91,7 @@ void ResultSet::setResultSet ( dpi::Stmt          *stmt,   eBaton *executeBaton,
   this->fetchRowCount_    = 0;
   this->rsEmpty_          = false;
   this->defineBuffers_    = NULL;
+  this->extDefines_.resize ( 0 ) ;
   this->extendedMetaData_ = executeBaton->extendedMetaData;
   this->mInfo_            = new MetaInfo [ this->numCols_ ];
 
@@ -353,6 +354,9 @@ void ResultSet::GetRowsCommon(rsBaton *getRowsBaton)
   ebaton->numCols            = njsRS->numCols_;
   ebaton->mInfo              = njsRS->mInfo_;
 
+  // No extended Define data yet
+  ebaton->extDefines.resize ( 0 ) ;
+
 exitGetRowsCommon:
   getRowsBaton->req.data  = (void *)getRowsBaton;
 
@@ -403,9 +407,7 @@ void ResultSet::Async_GetRows(uv_work_t *req)
     {
       if( njsRS->defineBuffers_ )
       {
-        ResultSet::clearFetchBuffer(njsRS->defineBuffers_, njsRS->numCols_,
-                                    njsRS->fetchRowCount_);
-        getRowsBaton-> njsRS-> defineBuffers_ = NULL;
+        njsRS -> clearFetchBuffer( njsRS->fetchRowCount_ );
       }
       Connection::DoDefines( ebaton );
       if ( !ebaton->error.empty () )
@@ -415,6 +417,12 @@ void ResultSet::Async_GetRows(uv_work_t *req)
       }
       njsRS->fetchRowCount_ = getRowsBaton->numRows;
       njsRS->defineBuffers_ = ebaton->defines;
+
+      njsRS->extDefines_.resize ( ebaton->numCols, NULL ) ;
+      for ( unsigned int col = 0 ; col < ebaton->numCols ; col ++ )
+      {
+        njsRS->extDefines_[col] = ebaton->extDefines[col];
+      }
     }
     else
     {
@@ -444,6 +452,11 @@ void ResultSet::Async_GetRows(uv_work_t *req)
       }
     }
     ebaton->defines      = njsRS->defineBuffers_;
+    ebaton->extDefines.resize ( ebaton->numCols, NULL ) ;
+    for ( unsigned int col = 0 ; col < ebaton->numCols ; col ++ )
+    {
+      ebaton->extDefines[col] = njsRS->extDefines_[col];
+    }
     Connection::DoFetch(ebaton);
     if ( !ebaton->error.empty () )
     {
@@ -613,13 +626,11 @@ void ResultSet::Async_Close(uv_work_t *req)
     closeBaton-> njsRS-> dpistmt_-> release ();
 
     Define* defineBuffers = closeBaton-> njsRS-> defineBuffers_;
-    unsigned int numCols  = closeBaton-> njsRS-> numCols_;
 
     if(defineBuffers)
     {
-      ResultSet::clearFetchBuffer(defineBuffers, numCols,
-                                  closeBaton-> njsRS-> fetchRowCount_);
-      closeBaton-> njsRS-> defineBuffers_ = NULL;
+      closeBaton -> njsRS -> clearFetchBuffer(
+                                   closeBaton-> njsRS-> fetchRowCount_);
     }
     if ( closeBaton-> njsRS-> mInfo_ )
     {
@@ -695,36 +706,43 @@ void ResultSet::Async_AfterClose(uv_work_t *req)
     defineBuffers    -  Define bufferes from njsResultSet,
     numCols          -  # of columns
 */
-void ResultSet::clearFetchBuffer( Define* defineBuffers, unsigned int numCols,
-                                  unsigned int numRows )
+void ResultSet::clearFetchBuffer( unsigned int numRows )
 {
-   for( unsigned int i=0; i<numCols; i++ )
+   for( unsigned int i=0; i<numCols_; i++ )
    {
-     if ( defineBuffers[i].dttmarr )
+     if ( defineBuffers_[i].dttmarr )
      {
-       defineBuffers[i].dttmarr->release ();
-       defineBuffers[i].extbuf = NULL;
+       defineBuffers_[i].dttmarr->release ();
+       defineBuffers_[i].extbuf = NULL;
      }
-     else if ( ( defineBuffers[i].fetchType == DpiClob ) ||
-                 ( defineBuffers[i].fetchType == DpiBlob ) ||
-                 ( defineBuffers[i].fetchType == DpiBfile ) )
+     else if ( ( defineBuffers_[i].fetchType == DpiClob ) ||
+                 ( defineBuffers_[i].fetchType == DpiBlob ) ||
+                 ( defineBuffers_[i].fetchType == DpiBfile ) )
      {
        for (unsigned int j = 0; j < numRows; j++)
        {
-         if (((Descriptor **)(defineBuffers[i].buf))[j])
+         if (((Descriptor **)(defineBuffers_[i].buf))[j])
          {
-           Env::freeDescriptor(((Descriptor **)(defineBuffers[i].buf))[j],
+           Env::freeDescriptor(((Descriptor **)(defineBuffers_[i].buf))[j],
                                LobDescriptorType);
          }
        }
      }
 
-     free(defineBuffers[i].buf);
-     free(defineBuffers[i].len);
-     free(defineBuffers[i].ind);
+     free(defineBuffers_[i].buf);
+     free(defineBuffers_[i].len);
+     free(defineBuffers_[i].ind);
+
+     if ( extDefines_[i] )
+     {
+       free ( extDefines_[i]->fields.extClobAsStr.ctx ) ;
+       delete ( extDefines_[i] );
+     }
+     extDefines_.resize ( 0 ) ;
    }
-   delete [] defineBuffers;
-   defineBuffers = NULL;
+   delete [] defineBuffers_;
+   defineBuffers_ = NULL;
+   extDefines_.clear ();
 }
 
 /* end of file njsPool.cpp */

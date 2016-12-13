@@ -244,6 +244,9 @@ void StmtImpl::prefetchRows (unsigned int prefetchRows)
     bufSize       - size of the buffer
     ind (OUT)     - indicator
     bufLen (OUT)  - size of data reutnred
+    maxarr_len    - max size of array in case of index-array bind (IN)
+    curelen       - current array length in case of array bind (IN)
+    ctx           - application speficied data for callback if specified.
 
   RETURNS
     -NONE-
@@ -251,32 +254,26 @@ void StmtImpl::prefetchRows (unsigned int prefetchRows)
 void StmtImpl::bind (unsigned int pos, unsigned short type, void *buf,
                      DPI_SZ_TYPE bufSize, short *ind, DPI_BUFLEN_TYPE *bufLen,
                      unsigned int maxarr_len, unsigned int *curelen,
-                     void *data, cbtype cb)
+                     DpiBindCallbackCtx *ctx)
 {
   OCIBind *b = (OCIBind *)0;
 
   ociCall (DPIBINDBYPOS (stmth_, &b, errh_, pos,
-                         (cb ? NULL : (type==DpiRSet) ?
+                         (ctx ? NULL : (type==DpiRSet) ?
                            (void *)&(((StmtImpl*)buf)->stmth_) : buf),
                          (type == DpiRSet) ? 0 : bufSize, type,
-                         (cb ? NULL : ind),
-                         (cb ? NULL : bufLen),
+                         (ctx ? NULL : ind),
+                         (ctx ? NULL : bufLen),
                          NULL, maxarr_len, curelen,
-                         (cb) ? OCI_DATA_AT_EXEC : OCI_DEFAULT),
+                         (ctx) ? OCI_DATA_AT_EXEC : OCI_DEFAULT),
            errh_);
 
-  if ( cb )
+  if ( ctx )
   {
-    DpiCallbackCtx *cbCtx = (DpiCallbackCtx *)malloc(sizeof(DpiCallbackCtx));
-    cbCtx->callbackfn = cb;                        /* App specific callback */
-    cbCtx->data       = data;             /* Data for app specific callback */
-    cbCtx->bndpos     = pos-1; /* for callback, bind position is zero based */
-    cbCtx->nrows      = 0;           /* # of rows - will be filled in later */
-    cbCtx->iter       = 0;           /* iteration - will be filled in later */
-    cbCtx->dpistmt    = this;        /* DPI Statement implementation object */
-
-    ociCall (OCIBindDynamic ( b, errh_, (void*)cbCtx,  StmtImpl::inbindCallback,
-                              (void*)cbCtx, StmtImpl::outbindCallback ),
+    // Register callback if app specified data provided.
+    ociCall (OCIBindDynamic ( b, errh_, (void*)ctx,
+                              StmtImpl::inbindCallback,
+                              (void*)ctx, StmtImpl::outbindCallback ),
              errh_ );
   }
 }
@@ -298,40 +295,31 @@ void StmtImpl::bind (unsigned int pos, unsigned short type, void *buf,
       bufLen       - returned buffer size
       maxarr_len   - max array len in case of PL/SQL array binds
       curelen      - current array len in case of PL/SQL array binds.
-      data         - if callback specified, data for callback
-      cb           - callback used in case of DML Returning.
+      ctx          - data for application specified callback
 */
 void StmtImpl::bind (const unsigned char *name, int nameLen,
                      unsigned int bndpos,
                      unsigned short type, void *buf, DPI_SZ_TYPE bufSize,
                      short *ind, DPI_BUFLEN_TYPE *bufLen,
                      unsigned int maxarr_len, unsigned int *curelen,
-                     void *data,
-                     cbtype cb)
+                     DpiBindCallbackCtx *ctx)
 {
   OCIBind *b = (OCIBind *)0;
 
   ociCall (DPIBINDBYNAME (stmth_, &b, errh_, name, nameLen,
-                          (cb ? NULL : (type == DpiRSet) ?
+                          (ctx ? NULL : (type == DpiRSet) ?
                             (void *)&((StmtImpl*)buf)->stmth_: buf),
                           (type == DpiRSet) ? 0 : bufSize, type,
-                          (cb ? NULL : ind),
-                          (cb ? NULL : bufLen),
+                          (ctx ? NULL : ind),
+                          (ctx ? NULL : bufLen),
                           NULL,
                           maxarr_len, curelen,
-                          (cb) ? OCI_DATA_AT_EXEC : OCI_DEFAULT), errh_);
-  if ( cb )
+                          (ctx) ? OCI_DATA_AT_EXEC : OCI_DEFAULT), errh_);
+  if ( ctx )
   {
-    DpiCallbackCtx *cbCtx = (DpiCallbackCtx *)malloc(sizeof(DpiCallbackCtx));
-    cbCtx->callbackfn = cb;                        /* App specific callback */
-    cbCtx->data       = data;             /* Data for app specific callback */
-    cbCtx->nrows      = 0;           /* # of rows - will be filled in later */
-    cbCtx->iter       = 0;           /* iteration - will be filled in later */
-    cbCtx->bndpos     = bndpos;               /* position in the bind array */
-    cbCtx->dpistmt    = this;        /* DPI Statement implementation object */
-
-    ociCall (OCIBindDynamic (b, errh_, (void*)cbCtx, StmtImpl::inbindCallback,
-                              (void *)cbCtx, StmtImpl::outbindCallback ),
+    // Register callback if app specified data provided.
+    ociCall (OCIBindDynamic (b, errh_, (void*)ctx, StmtImpl::inbindCallback,
+                             (void *)ctx, StmtImpl::outbindCallback ),
               errh_ );
   }
 }
@@ -400,17 +388,19 @@ void StmtImpl::release ()
     bufSize     - size of the buffer
     ind         - indicator
     bufLen      - returned buffer size
+    ctx         - application specified data for callbacks
 
   RETURNS
     -None-
 */
 void StmtImpl::define (unsigned int pos, unsigned short type, void *buf,
-                       DPI_SZ_TYPE bufSize, short *ind, DPI_BUFLEN_TYPE *bufLen)
+                       DPI_SZ_TYPE bufSize, short *ind,
+                       DPI_BUFLEN_TYPE *bufLen, DpiDefineCallbackCtx *ctx )
 {
   OCIDefine *d = (OCIDefine *)0;
   ociCall (DPIDEFINEBYPOS (stmth_, &d, errh_, pos, buf, bufSize, type,
                            (void *)ind, bufLen, NULL,
-                           OCI_DEFAULT),
+                           (ctx ? OCI_DYNAMIC_FETCH : OCI_DEFAULT) ),
            errh_);
 
   if ((type == DpiClob) || (type == DpiBlob) || (type == DpiBfile))
@@ -419,6 +409,13 @@ void StmtImpl::define (unsigned int pos, unsigned short type, void *buf,
 
     ociCall(OCIAttrSet(d, OCI_HTYPE_DEFINE, &isLobPrefetchLength, 0,
                        OCI_ATTR_LOBPREFETCH_LENGTH, errh_), errh_);
+  }
+
+  if ( ctx )
+  {
+    // Register for callback if application specified data provided
+    ociCall ( OCIDefineDynamic ( d, errh_, ctx, StmtImpl::defineCallback  ),
+              errh_ );
   }
 }
 
@@ -637,17 +634,17 @@ void StmtImpl::cleanup ()
     This function is a dummy function, the Dynamic bind concept is not used
     for IN binds, and so this function is dummy.
 */
-sb4 StmtImpl::inbindCallback ( dvoid *ctxp, OCIBind * /*bindp*/, ub4 /*iter*/,
-                               ub4 /*index*/, dvoid **bufpp, ub4 *alenpp,
-                               ub1 *piecep, dvoid **indpp )
+sb4 StmtImpl::inbindCallback ( void *ctxp, OCIBind * /*bindp*/, ub4 /*iter*/,
+                               ub4 /*index*/, void **bufpp, ub4 *alenpp,
+                               ub1 *piecep, void **indpp )
 {
-  DpiCallbackCtx *cbCtx = (DpiCallbackCtx *)ctxp;
+  DpiBindCallbackCtx *cbCtx = (DpiBindCallbackCtx *)ctxp;
 
   cbCtx->nullInd = -1; /* inbind callback for DML RETURNING myst return null */
 
-  *bufpp = (dvoid *)0;
+  *bufpp = (void *)0;
   *alenpp = 0;
-  *indpp = (dvoid *)&(cbCtx->nullInd);
+  *indpp = (void *)&(cbCtx->nullInd);
   *piecep = OCI_ONE_PIECE;
   return OCI_CONTINUE;
 }
@@ -676,11 +673,11 @@ sb4 StmtImpl::inbindCallback ( dvoid *ctxp, OCIBind * /*bindp*/, ub4 /*iter*/,
     of memory for each cell.  ctxp provides the application specific callback
     and maxrows.
 */
-sb4 StmtImpl::outbindCallback ( dvoid *ctxp, OCIBind *bindp, ub4 iter,
-                                ub4 index, dvoid **bufpp, ub4 **alenp,
-                                ub1 *piecep, dvoid **indpp, ub2 **rcodepp )
+sb4 StmtImpl::outbindCallback ( void *ctxp, OCIBind *bindp, ub4 iter,
+                                ub4 index, void **bufpp, ub4 **alenp,
+                                ub1 *piecep, void **indpp, ub2 **rcodepp )
 {
-  DpiCallbackCtx *cbCtx = (DpiCallbackCtx *)ctxp;
+  DpiBindCallbackCtx *cbCtx = (DpiBindCallbackCtx *)ctxp;
   ub4 rows  = 0;
   int cbret = 0;
 
@@ -691,11 +688,12 @@ sb4 StmtImpl::outbindCallback ( dvoid *ctxp, OCIBind *bindp, ub4 iter,
     OCIError *errh = NULL;
 
     rc = OCIAttrGet ( bindp, OCI_HTYPE_BIND, &rows, (ub4 *)&sz,
-                      OCI_ATTR_ROWS_RETURNED, cbCtx->dpistmt->errh_ ) ;
+                      OCI_ATTR_ROWS_RETURNED,
+                      ((StmtImpl *)cbCtx->dpistmt)->errh_ ) ;
 
     if ( rc != OCI_SUCCESS )
     {
-      errh = cbCtx->dpistmt->errh_ ;      // preserve err handle
+      errh = ((StmtImpl *)cbCtx->dpistmt)->errh_ ;      // preserve err handle
 
       // Cleanup
       free ( cbCtx ) ;
@@ -717,25 +715,58 @@ sb4 StmtImpl::outbindCallback ( dvoid *ctxp, OCIBind *bindp, ub4 iter,
                               iter, index, bufpp,
                               (void **)alenp, indpp, rcodepp, piecep );
 
-  /* callback Context was allocated for the life time of the callback,
-   * if this is the last index, de-allocate it
-   */
-  if ( ( index == ( cbCtx->nrows - 1 )) && (*piecep == OCI_ONE_PIECE ) )
-  {
-    free (cbCtx) ;
-    cbCtx = NULL;
-  }
-
-  // Cleanup in case of error from callback.
-  if ( cbret == -1 && cbCtx )
-  {
-    free ( cbCtx );
-    cbCtx = NULL;
-  }
-
   /* If the buffer is insufficient for varchar columns, error out */
   return (cbret == -1 ) ? OCI_ROWCBK_DONE : OCI_CONTINUE ;
 }
+
+
+/*****************************************************************************/
+/*
+  DESCRIPTION
+    Callback function for CLOB columns to fetch data as STRING
+    This is OCI specific callback
+
+  PARAMETERS
+    ctxp (IN)    - context for the callback
+    definep (IN) - OCIDefine pointer
+    iter (IN)    - iteration
+    bufpp (INOUT)- to provide application specified memory block
+    alenpp(INOUT)- length of buffer (IN provide max size and OUT data size)
+    piecep (OUT) - piece wise flag
+    indpp (INOUT)- to provide buffer for indicator
+    rcodepp(INOUT) - to provide buffer for return code pointer -NOT USED
+
+  RETURNS
+    OCI_CONTINUE
+
+  NOTES:
+    This function uses specified callback to allocate and identify blocks of
+    memory for each row.
+*/
+sb4 StmtImpl::defineCallback ( void *ctxp, OCIDefine *definep, ub4 iter,
+                           void **bufpp, ub4 **alenpp, ub1 *piecep,
+                           void **indpp, ub2 **rcodepp )
+{
+  sb4 rc = OCI_CONTINUE;
+
+  DpiDefineCallbackCtx *ctx = (DpiDefineCallbackCtx *)ctxp;
+
+  ctx->callbackfn ( ctx->data, ctx->definePos, iter, &(ctx->prevIter), bufpp,
+                           (void **) alenpp, (void**)indpp, rcodepp );
+  *piecep = OCI_NEXT_PIECE;  // always ask for next piece
+
+  if (!(*bufpp ))
+  {
+    /*
+     * In case of memory allocation failures return error to OCI, which will
+     * lead to ORA-24343 - user defined callback error.
+     */
+    rc = OCI_ERROR;
+  }
+
+  return rc;
+}
+
 
 /*****************************************************************************/
 /*

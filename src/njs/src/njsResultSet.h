@@ -137,8 +137,7 @@ private:
   // Define Setter Accessors to properties
   static NAN_SETTER(SetMetaData);
 
-  static void clearFetchBuffer( Define* defineBuffers,
-                                unsigned int numCols, unsigned int numRows );
+  void clearFetchBuffer( unsigned int numRows );
 
 
   dpi::Stmt                 *dpistmt_;
@@ -147,6 +146,7 @@ private:
   State                     state_;
   bool                      rsEmpty_;
   Define                    *defineBuffers_;
+  std::vector<ExtDefine*>   extDefines_;
   unsigned int              numCols_;
   unsigned int              fetchRowCount_;
   unsigned int              outFormat_;
