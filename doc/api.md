@@ -4662,10 +4662,12 @@ connection.execute(
   });
 ```
 
-For IN binds the direction must be `BIND_IN`.  The type can be
-`STRING`, `NUMBER`, `DATE` matching the data.  The type `BUFFER` can
-bind a Node.js Buffer to an Oracle Database `RAW` or `BLOB` type.  The
-type `CURSOR` cannot be used with IN binds.
+For IN binds the direction must be `BIND_IN`.  The bind type can be
+`STRING`, `NUMBER`, `DATE` matching the standard JavaScript types.
+The bind type can be `BLOB` and `CLOB` to pass in [Lob](#lobclass)
+instances.  The type `BUFFER` can bind a Node.js Buffer to an Oracle
+Database `RAW` or `BLOB` type.  The type `CURSOR` cannot be used with
+IN binds.
 
 ### <a name="outbind"></a> 13.2 OUT and IN OUT Bind Parameters
 
@@ -4679,7 +4681,7 @@ properties is used.  For
 The `dir` attribute should be `BIND_OUT` or `BIND_INOUT`.
 
 For `BIND_INOUT` parameters, the `type` attribute should be `STRING`,
-`NUMBER`, `DATE` or `BUFFER`.
+`NUMBER`, `DATE`, `BLOB`, `CLOB` or `BUFFER`.
 
 For `BIND_OUT` parameters the `type` attribute should be `STRING`,
 `NUMBER`, `DATE`, `CURSOR`, `BLOB`, `CLOB` or `BUFFER`.
