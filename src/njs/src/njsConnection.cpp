@@ -2054,7 +2054,8 @@ void Connection::CLOB2String ( eBaton* executeBaton, unsigned int index )
   unsigned long long byteAmount  = 0;
   // Set the charAmount to (maxSize + 1) to know whether given maxSize good
   // enough to store PLSQL OUT data
-  unsigned long long charAmount  = executeBaton->binds[index]->maxSize + 1;
+  unsigned long long charAmount  =
+                     executeBaton->extBinds[index]->fields.extLob.maxSize + 1;
 
   executeBaton->binds[index]->type = DpiVarChar;
   LOB2StringOrBuffer ( executeBaton, index, byteAmount, charAmount );
@@ -2078,7 +2079,8 @@ void Connection::BLOB2Buffer ( eBaton* executeBaton, unsigned int index )
 {
   // Set the charAmount to (maxSize + 1) to know whether given maxSize good
   // enough to store PLSQL OUT data
-  unsigned long long byteAmount  = executeBaton->binds[index]->maxSize + 1;
+  unsigned long long byteAmount  =
+                     executeBaton->extBinds[index]->fields.extLob.maxSize + 1;
   unsigned long long charAmount  = 0;
 
   executeBaton->binds[index]->type = DpiRaw;
@@ -2141,7 +2143,8 @@ void Connection::LOB2StringOrBuffer ( eBaton* executeBaton, unsigned int index,
    * of charAmount or byteAmount passed to Lob::read()
    * If there is more data in the LOB than the maxSize, set the error
    */
-  if ( byteAmount > ( unsigned long long ) bind->maxSize )
+  if ( byteAmount > ( unsigned long long )
+                    executeBaton->extBinds[index]->fields.extLob.maxSize )
   {
     executeBaton->error = NJSMessages::getErrorMsg(
                                           errInsufficientBufferForBinds);
@@ -2313,7 +2316,9 @@ void Connection::Descr2StringOrBuffer ( eBaton* executeBaton )
         }
         else
         {
-          if ( *bind->ind != -1 )
+          if ( Lob::isTempLob ( executeBaton->dpienv->envHandle(),
+               executeBaton->dpiconn->getErrh (),
+               *( Descriptor** ) bind->value ) )
           {
             Lob::freeTempLob ( executeBaton->dpiconn->getSvch (),
                                executeBaton->dpiconn->getErrh (),
@@ -2355,12 +2360,14 @@ void Connection::ConvertStringOrBuffer2LOB ( eBaton* executeBaton,
 {
   Bind *bind = executeBaton->binds[index];
 
-  // In case of IN bind convert string/buffer to LOB if input data
-  // is not NULL and data size more than 32k
-  if ( !bind->isOut && *bind->ind != -1  &&
-       ( bind->len && *bind->len > NJS_THRESHOLD_SIZE_PLSQL_STRING_ARG ) )
+  // In case of IN or INOUT bind convert string/buffer to LOB if input data
+  // is not NULL and input data size more than 32k for strict IN binds or
+  // maxSize more than 32k for INOUT binds
+  if ( ( ( !bind->isOut || bind->isInOut ) && *bind->ind != -1 ) &&
+       ( ( !bind->isOut && *bind->len > NJS_THRESHOLD_SIZE_PLSQL_STRING_ARG ) ||
+         ( bind->isInOut && bind->maxSize > NJS_THRESHOLD_SIZE_PLSQL_STRING_ARG
+         ) ) )
   {
-    // This block is only for BIND_IN case
     ExtBind* extBind = new ExtBind ();
     if ( !extBind )
     {
@@ -2369,25 +2376,24 @@ void Connection::ConvertStringOrBuffer2LOB ( eBaton* executeBaton,
       goto exitConvertStringOrBuffer2LOB;
     }
     executeBaton->njsconn->InitExtBind ( extBind, NJS_EXTBIND_LOB );
-    // Set a flag to know that type conversion happened
-    // This helps in later steps to clean LOB resources
-    extBind->fields.extLob.isStringBuffer2LOB = true;
-    executeBaton->extBinds[index]             = extBind;
+    extBind->fields.extLob.maxSize = bind->maxSize;
 
     if ( bind->type == DpiVarChar )
     {
-      // Convert String to CLOB
       String2CLOB ( executeBaton, index );
     }
     else
     {
-      // Convert Buffer to BLOB
       Buffer2BLOB ( executeBaton, index );
     }
+    // Set a flag to know that type conversion happened
+    // This helps in later steps to clean LOB resources
+    extBind->fields.extLob.isStringBuffer2LOB = true;
+    executeBaton->extBinds[index]             = extBind;
   }
-  else if ( bind->maxSize > NJS_THRESHOLD_SIZE_PLSQL_STRING_ARG )
+  else if ( ( bind->isOut || bind->isInOut ) &&
+            bind->maxSize > NJS_THRESHOLD_SIZE_PLSQL_STRING_ARG )
   {
-    // This block is only for BIND_OUT case
     ExtBind* extBind = new ExtBind ();
 
     if ( !extBind )
@@ -2397,6 +2403,7 @@ void Connection::ConvertStringOrBuffer2LOB ( eBaton* executeBaton,
       goto exitConvertStringOrBuffer2LOB;
     }
     executeBaton->njsconn->InitExtBind ( extBind, NJS_EXTBIND_LOB );
+    extBind->fields.extLob.maxSize = bind->maxSize;
 
     // Set a flag to know that type conversion happened
     // This helps in later steps for converting LOB to String/Buffer and
@@ -2476,6 +2483,7 @@ void Connection::InitExtBind ( ExtBind *extBind, ExtBindType fieldType )
   {
     extBind->fields.extLob.value              = NULL;
     extBind->fields.extLob.isStringBuffer2LOB = false;
+    extBind->fields.extLob.maxSize            = 0;
   }
 }
 
@@ -2514,9 +2522,8 @@ void Connection::PrepareAndBind (eBaton* executeBaton)
         if ( ( executeBaton->st == DpiStmtBegin ||
                executeBaton->st == DpiStmtDeclare ||
                executeBaton->st == DpiStmtCall ) &&
-             ( !executeBaton->binds[index]->isInOut &&
              ( executeBaton->binds[index]->type == DpiVarChar ||
-               executeBaton->binds[index]->type == DpiRaw ) ) )
+               executeBaton->binds[index]->type == DpiRaw ) )
         {
           ConvertStringOrBuffer2LOB ( executeBaton, index );
         }
@@ -2590,9 +2597,8 @@ void Connection::PrepareAndBind (eBaton* executeBaton)
         if ( ( executeBaton->st == DpiStmtBegin ||
                executeBaton->st == DpiStmtDeclare ||
                executeBaton->st == DpiStmtCall ) &&
-             ( !executeBaton->binds[index]->isInOut &&
              ( executeBaton->binds[index]->type == DpiVarChar ||
-               executeBaton->binds[index]->type == DpiRaw ) ) )
+               executeBaton->binds[index]->type == DpiRaw ) )
         {
           ConvertStringOrBuffer2LOB ( executeBaton, index );
         }

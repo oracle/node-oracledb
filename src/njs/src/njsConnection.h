@@ -165,6 +165,8 @@ typedef struct ExtBind
       void *value;             // Stores extra bind reference
       bool isStringBuffer2LOB; // Specifies whether string or buffer Converted
                                // to LOB or not
+      DPI_SZ_TYPE maxSize;     // Size for the OUT or IN OUT bind value
+
     } extLob;
   } fields;
 } ExtBind;

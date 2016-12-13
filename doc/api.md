@@ -1536,10 +1536,8 @@ the connection is still open.
 Open temporary LOB usage can be monitored using the view
 [`V$TEMPORARY_LOBS`](http://docs.oracle.com/database/122/ADLOB/managing-LOBs.htm#ADLOB45157).
 
-LOBs created with `createLob()` can be bound for IN and for OUT binds,
-but not for IN OUT binds.  This is to stop temporary LOB leaks where
-node-oracledb is unable to free resources held by the initial
-temporary LOB.
+LOBs created with `createLob()` can be bound for IN, IN OUT and OUT
+binds.
 
 See [Working with CLOB and BLOB Data](#lobhandling) and [LOB Bind Parameters](#lobbinds) for more information.
 
@@ -3971,10 +3969,7 @@ If the data is larger than can be handled as a String or Buffer in
 Node.js or node-oracledb, it will need to be streamed to
 a [Lob](#lobclass), as discussed later.
 See [LOB Bind Parameters](#lobbinds) for size considerations regarding
-LOB binds.  Note node-oracledb will internally use a temporary LOB to
-insert String or Buffer data larger than 32 KB.  This is transparent
-to the application but size limits on the JavaScript String or Buffer
-still apply.
+LOB binds.
 
 Given the table:
 
@@ -4167,11 +4162,6 @@ until [`lob.close()`](#lobclose) is called.  Database Administrators
 can track this usage by querying
 [`V$TEMPORARY_LOBS`](http://docs.oracle.com/database/122/ADLOB/managing-LOBs.htm#ADLOB45157).
 
-Temporary Lobs such as those created with `createLob()` can be bound
-as IN and as OUT binds, but not for IN OUT binds.  This is to stop
-temporary LOB leaks where node-oracledb is unable to free resources
-held by the initial temporary LOB.
-
 #### Passing a Lob Into PL/SQL
 
 The following insertion example is based on
@@ -4304,9 +4294,7 @@ If the data is larger than can be handled as a String or Buffer in
 Node.js or node-oracledb, it will need to be explicitly streamed to
 a [Lob](#lobclass), as discussed previously.
 See [LOB Bind Parameters](#lobbinds) for size considerations regarding
-LOB binds.  Note node-oracledb will internally use a temporary LOB to
-fetch String or Buffer data larger than 32 KB.  This is transparent to
-the application but size limits on the String or Buffer still apply.
+LOB binds.
 
 #### Selecting and Fetching Lob Instances
 
@@ -4975,13 +4963,8 @@ tables) or temporary LOBs (such as those created
 with [`createLob()`](#connectioncreatelob) or returned by some SQL and
 PL/SQL operations).
 
-Persistent LOBs can be bound with direction `BIND_IN`, `BIND_OUT` or
+LOBs can be bound with direction `BIND_IN`, `BIND_OUT` or
 `BIND_INOUT`, depending on context.
-
-Temporary LOBs can be bound with direction `BIND_IN` or `BIND_OUT`,
-but not with `BIND_INOUT`.  This is to prevent temporary LOB leaks
-where node-oracledb is unable to free resources held by the initial
-temporary LOB.
 
 Note that any PL/SQL OUT LOB parameter should be initialized in the
 PL/SQL block - even just to NULL - before the PL/SQL code
@@ -5001,32 +4984,23 @@ size used for these binds in the OUT direction is 200, so set
 See [Working with CLOB and BLOB Data](#lobhandling) for examples and
 more information on binding and working with LOBs.
 
-#### Theoretical Limits (Bytes) for Binding LOBs to Strings and Buffers
+#### Size Limits for Binding LOBs to Strings and Buffers
 
-DB Type | Bind Type       | Direction   | Oracle Client 12c Limit<sup>*</sup> | Oracle Client 11.2 Limit<sup>*</sup>
---------|-----------------|-------------|-------------------------|------------------------
-CLOB    | oracledb.STRING |BIND_IN      |  1 GB                   | 64 KB
-CLOB    | oracledb.STRING |BIND_OUT     |  1 GB                   | 64 KB
-CLOB    | oracledb.STRING |BIND_INOUT   | 32 KB                   | 32 KB
-BLOB    | oracledb.BUFFER |BIND_IN      |  1 GB                   | 64 KB
-BLOB    | oracledb.BUFFER |BIND_OUT     |  1 GB                   | 64 KB
-BLOB    | oracledb.BUFFER |BIND_INOUT   | 32 KB                   | 32 KB
+When CLOBs are bound as `oracledb.STRING`, and BLOBs are bound as
+`oracledb.BUFFER`, the theoretical maxium data length that can be
+bound is 2 bytes less than 1 GB.  When node-oracledb uses Oracle Client
+11.2 the limit is 1 byte less than 64 KB.
 
-<sup>*</sup>The largest usable data length is two bytes less than the
-size shown for 12c and one byte less for 11.2.
+In practice, the limitation on binding is the memory available to
+Node.js and the V8 engine.  For data larger than several megabytes, it
+is recommended to bind as `oracledb.CLOB` or `oracledb.BLOB` and
+use [Lob streaming](#streamsandlobs).  If you try to create large
+Strings or Buffers in Node.js you will see errors like *JavaScript
+heap out of memory*, or other space related messages.
 
-In practice, the limitation on binding IN or OUT is the memory
-available to Node.js and the V8 engine.  For data larger than several
-megabytes, it is recommended to bind as `oracledb.CLOB` or
-`oracledb.BLOB` and use [Lob streaming](#streamsandlobs).  If you try
-to create large Strings or Buffers in Node.js you will see errors like
-*JavaScript heap out of memory*, or other space related messages.
-
-Internally, for PL/SQL calls, node-oracledb uses temporary LOBs when
-binding Strings and Buffers larger than 32 KB.  Since temporary LOBs
-cannot be used for IN OUT binds, the data size in this case is
-restricted to 32 KB.  For SQL call no temporary LOBs are used.
-
+Internally, temporary LOBs are used when binding Strings and Buffers
+larger than 32 KB for PL/SQL calls.  For SQL calls no temporary LOBs
+are used.
 
 ### <a name="plsqlindexbybinds"></a> 13.6 PL/SQL Collection Associative Array (Index-by) Bind Parameters
 

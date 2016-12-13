@@ -424,7 +424,7 @@ describe("72. lobBind2.js", function() {
 
     }); // 72.1.6
 
-    it("72.1.7 Negative - BIND_INOUT, PL/SQL", function(done) {
+    it("72.1.7 BIND_INOUT, PL/SQL, IN LOB gets closed automatically", function(done) {
 
       var seq = 7;
       var outStr = "This is a out bind string.";
@@ -444,16 +444,6 @@ describe("72. lobBind2.js", function() {
           connection.createLob(oracledb.CLOB, function(err, lob) {
             should.not.exist(err);
 
-            lob.on("close", function(err) {
-              should.not.exist(err);
-
-              connection.commit(function(err) {
-                should.not.exist(err);
-
-                return cb();
-              });
-            }); // close event
-
             lob.on("error", function(err) {
               should.not.exist(err, "lob.on 'error' event.");
             });
@@ -465,16 +455,42 @@ describe("72. lobBind2.js", function() {
                   id: seq,
                   io: { type: oracledb.CLOB, dir: oracledb.BIND_INOUT, val: lob}
                 },
-                function(err) {
-                  should.exist(err);
-                  (err.message).should.startWith("NJS-049:");
-                  // NJS-049: cannot use bind direction IN OUT for temporary LOBs
-                  lob.close(function(err) {
+                { autoCommit: true },
+                function(err, result) {
+                  should.not.exist(err);
+                  // The IN LOB closed automatically after execute call, need
+                  // close the OUT LOB
+
+                  var lobout = result.outBinds.io;
+
+                  lobout.on("close", function(err) {
                     should.not.exist(err);
+
+                    return cb();
+                  }); // close event of lobout
+
+                  lobout.on("error", function(err) {
+                    should.not.exist(err, "lob.on 'error' event.");
                   });
+
+                  lobout.setEncoding("utf8");
+                  var clobData;
+                  lobout.on("data", function(chunk) {
+                    clobData += chunk;
+                  });
+
+                  lobout.on("finish", function() {
+
+                    should.strictEqual(clobData, outStr);
+
+                    lobout.close(function(err) {
+                      should.not.exist(err);
+                    });
+                  });
+
                 }
               );
-            }); // finish event
+            }); // finish event of lob
 
             var inStream = fs.createReadStream(inFileName);
 
@@ -485,6 +501,9 @@ describe("72. lobBind2.js", function() {
             inStream.pipe(lob);
           });
 
+        },
+        function(cb) {
+          verifyClobValue(seq, inFileName, cb);
         },
         function(cb) {
           var sql = "DROP PROCEDURE nodb_proc_clob_inout1";
@@ -881,6 +900,115 @@ describe("72. lobBind2.js", function() {
       ], done);
 
     }); // 72.2.6
+
+    it("72.2.7 BIND_INOUT, PL/SQL, needs to close out lob explicitly", function(done) {
+
+      var seq = 7, outLobId = 77;
+      var outFileName = './test/tree.jpg';
+      var proc = "CREATE OR REPLACE PROCEDURE nodb_proc_blob_inout1 \n" +
+                 "  (p_num IN NUMBER, p_from IN NUMBER, p_inout IN OUT BLOB) \n" +
+                 "AS \n" +
+                 "BEGIN \n" +
+                 "    insert into nodb_tab_blob72 (id, content) values (p_num, p_inout); \n" +
+                 "    select content into p_inout from nodb_tab_blob72 where id = p_from; \n" +
+                 "END nodb_proc_blob_inout1;";
+
+      var prepareOutBlob = function(callback) {
+
+        var buf = fs.readFileSync(outFileName);
+        connection.execute(
+          "INSERT INTO nodb_tab_blob72 (id, content) VALUES (:id, :b)",
+          { id: outLobId, b: buf },
+          { autoCommit: true },
+          function(err, result) {
+            should.not.exist(err);
+            (result.rowsAffected).should.be.exactly(1);
+            return callback();
+          }
+        );
+
+      };
+
+      var dotest = function(callback) {
+
+        connection.createLob(oracledb.BLOB, function(err, lob) {
+          should.not.exist(err);
+
+          lob.on('error', function(err) {
+            should.not.exist(err, "lob.on 'error' event.");
+          });
+
+          lob.on('finish', function() {
+
+            connection.execute(
+              "begin nodb_proc_blob_inout1(:id, :oid, :io); end;",
+              {
+                id: seq,
+                oid: outLobId,
+                io: { type: oracledb.BLOB, dir: oracledb.BIND_INOUT, val: lob }
+              },
+              { autoCommit: true },
+              function(err, result) {
+                should.not.exist(err);
+                var lobout = result.outBinds.io;
+
+                lobout.on('close', function(err) {
+                  should.not.exist(err);
+
+                  return callback();
+                });
+
+                lobout.on('error', function(err) {
+                  should.not.exist(err, "lob.on 'error' event.");
+                });
+
+                var blobData;
+                lobout.on('data', function(chunk) {
+                  blobData += chunk;
+                });
+
+                lobout.on('finish', function() {
+
+                  var buf = fs.readFileSync(outFileName);
+                  (blobData).should.eql(buf);
+
+                  lobout.close(function(err) {
+                    should.not.exist(err);
+                  });
+                });
+
+              }
+            );
+
+          }); // finish event of lob
+
+          var inStream = fs.createReadStream(jpgFileName);
+          inStream.pipe(lob);
+
+          inStream.on('error', function(err) {
+            should.not.exist(err, "inStream.on 'error' event.");
+          });
+
+        });
+
+      };
+
+      async.series([
+        function(cb) {
+          executeSQL(proc, cb);
+        },
+        prepareOutBlob,
+        dotest,
+        function(cb) {
+          verifyBlobValue(seq, jpgFileName, cb);
+        },
+        function(cb) {
+          var sql = "DROP PROCEDURE nodb_proc_blob_inout1";
+          executeSQL(sql, cb);
+        }
+      ], done);
+
+    }); // 72.2.7
 
   }); // 72.2
 

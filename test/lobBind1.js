@@ -580,7 +580,7 @@ describe('71. lobBind1.js', function() {
 
     }); // 71.1.6
 
-    it('71.1.7 BIND_INOUT, PL/SQL, A String. IN LOB gets auto closed.', function(done) {
+    it('71.1.7 BIND_INOUT, PL/SQL, A String. IN LOB gets closed automatically.', function(done) {
 
       var seq = 7;
       var inStr  = "I love the sunshine today!",
