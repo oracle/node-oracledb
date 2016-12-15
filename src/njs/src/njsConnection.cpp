@@ -5533,11 +5533,11 @@ int Connection::cbDynBufferGet ( void *ctx, DPI_SZ_TYPE nRows,
 
   RETURNS
     0 on success and -1 on memory allocation failures.
-    
+
   NOTE:
     The callback is called repeteatedly for the same row with iter (0 based)
     denoting the row number, if there is more data until it reaches end-of-lob
-    or max defined in OCIDefineByPos2 () API.  When new iter (row number) 
+    or max defined in OCIDefineByPos2 () API.  When new iter (row number)
     is passed to the callback, new set of buffer(s) has to be provided and
     initialized.
 */
