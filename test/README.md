@@ -116,10 +116,10 @@ This calls the `test` script defined in `oracledb/package.json`.
 
 ```
 cd <some-directory>/node_oracledb
-npm run-script testWindows
+npm run testwindows
 ```
 
-This calls the `testWindows` script defined in `oracledb/package.json`.
+This calls the `testwindows` script defined in `oracledb/package.json`.
 
 See [npm scripts](https://docs.npmjs.com/misc/scripts) for more information
 about how npm handles the "scripts" field of `package.json`.
