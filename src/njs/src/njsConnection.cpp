@@ -54,6 +54,7 @@
 #include "njsIntLob.h"
 #include <stdlib.h>
 #include <limits>
+
 using namespace std;
 
 // persistent Connection class handle
@@ -68,7 +69,11 @@ Nan::Persistent<FunctionTemplate> Connection::connectionTemplate_s;
 
 // Size of block allocated each time when callback is called for
 // for fetch-CLOB-as-STRING.  This constant is used only CLOB-as-STRING case
-#define NJS_ITER_SIZE 1048576
+#if OCI_MAJOR_VERSION >= 12
+  #define NJS_ITER_SIZE 524287  /* Use (512KB - 1) with 12c Clients */
+#else
+  #define NJS_ITER_SIZE 65535   /* Use (64KB - 1)  with 11g Clients */
+#endif
 
 // Max number of bytes allowed for PLSQL STRING/BUFFER arguments
 #define NJS_THRESHOLD_SIZE_PLSQL_STRING_ARG 32767
@@ -2560,6 +2565,13 @@ void Connection::PrepareAndBind (eBaton* executeBaton)
 
           DpiBindCallbackCtx *ctx = extBind->fields.extDMLReturnCbCtx.ctx =
              (DpiBindCallbackCtx *) malloc ( sizeof ( DpiBindCallbackCtx ) );
+          if ( !ctx )
+          {
+            executeBaton->error = NJSMessages::getErrorMsg (
+                                              errInsufficientMemory );
+            goto exitPrepareAndBind;
+          }
+
           ctx->callbackfn = Connection::cbDynBufferGet;
                                                     /* App specific callback */
           ctx->data = (void *)executeBaton;
@@ -2653,6 +2665,12 @@ void Connection::PrepareAndBind (eBaton* executeBaton)
           DpiBindCallbackCtx *ctx = extBind->fields.extDMLReturnCbCtx.ctx =
               (DpiBindCallbackCtx *) malloc ( sizeof ( DpiBindCallbackCtx ) );
 
+          if ( !ctx )
+          {
+            executeBaton->error = NJSMessages::getErrorMsg (
+                                                    errInsufficientMemory );
+            goto exitPrepareAndBind;
+          }
           ctx->callbackfn = Connection::cbDynBufferGet;
                                                     /* App specific callback */
           ctx->data = (void *)executeBaton;
@@ -3337,6 +3355,25 @@ void Connection::DoFetch (eBaton* executeBaton)
   NJSErrorType errNum = errSuccess;
   executeBaton->dpistmt->fetch ( executeBaton->maxRows );
   executeBaton->rowsFetched = executeBaton->dpistmt->rowsFetched();
+
+  for ( unsigned int col = 0; col < executeBaton->numCols; col ++ )
+  {
+    Define    *define    = &(executeBaton->defines[col] );
+    ExtDefine *extDefine = executeBaton->extDefines[col];
+
+    if ( extDefine && extDefine -> extDefType == NJS_EXTDEFINE_CLOBASSTR )
+    {
+      /* In case of fetch-clob-as-string, the last read operation has partial
+       * size read, and consolidated len is maintained in extDefine, add both
+       * and set it back to define->len[row] it can be used later
+       */
+      for ( unsigned int row = 0; row < executeBaton->rowsFetched ; row ++ )
+      {
+        define->len[row] += extDefine->fields.extClobAsStr.cLen ;
+      }
+    }
+  }
+
   errNum = Connection::Descr2Double ( executeBaton->defines,
                                       executeBaton->numCols,
                                       executeBaton->rowsFetched,
@@ -4116,7 +4153,7 @@ Local<Value> Connection::GetValueCommon ( eBaton *executeBaton,
      switch(type)
      {
        case (dpi::DpiVarChar) :
-          value = Nan::New<v8::String>((char*)val, len).ToLocalChecked();
+        value = Nan::New<v8::String>((char*)val, len).ToLocalChecked();
         break;
        case (dpi::DpiInteger) :
          value = Nan::New<v8::Integer>(*(int*)val);
@@ -5548,28 +5585,30 @@ int Connection::cbDynDefine ( void *octxp, unsigned long definePos,
 {
   eBaton *executeBaton = (eBaton *) octxp ;
   Define *define       = &(executeBaton->defines[definePos]);
-  unsigned long maxLen = 0;
+  ExtDefine *extDefine  = executeBaton->extDefines[definePos];
+  unsigned long maxLen = NJS_ITER_SIZE ;
   char **buf           = (char **)define->buf ;
   char *tmp            = NULL ;  // to presever ptr for realloc
   int ret              = 0;
 
   if ( *prevIter != iter )
   {
-    // For next row, start from minimum buffer
-    maxLen = NJS_ITER_SIZE ;
     *prevIter = iter;
+    extDefine->fields.extClobAsStr.cLen = 0;
   }
   else
   {
-    // More data for same row, try with next incremental size
-    maxLen = ( ( ( unsigned long ) (**alenpp ) ) + NJS_ITER_SIZE );
+    // maintain incremental size of clob
+    extDefine->fields.extClobAsStr.cLen += NJS_ITER_SIZE ;
   }
 
   tmp = buf[iter];  // preserve the current memory address
 
   // allocate or reallocate buffer
   buf[iter] = (char *) ( ( !buf[iter] ) ?
-                         malloc ( maxLen ) : realloc ( buf[iter], maxLen ) ) ;
+                         malloc ( maxLen ) :
+                         realloc ( buf[iter],
+                          maxLen + extDefine->fields.extClobAsStr.cLen ) ) ;
   if ( !buf[iter] )
   {
     // If realloc fails, the IN parameter requires to be freed and untouched
@@ -5582,7 +5621,7 @@ int Connection::cbDynDefine ( void *octxp, unsigned long definePos,
     define->len[iter] = maxLen;
     define->ind[iter] = 0;                       // default value for indicator
 
-    *bufpp  = (void *) buf[iter];                       // memory for this iter
+    *bufpp = (void *) (&buf[iter][extDefine->fields.extClobAsStr.cLen]);
     *alenpp = (unsigned long *) &(define->len[iter]) ;  // size for this iter
     *indpp  = (void *) &(define->ind[iter]);            // indicator
   }

@@ -239,6 +239,7 @@ typedef struct ExtDefine
     struct
     {
       void *ctx;                    /* Context pointer used by the call back */
+      DPI_BUFLEN_TYPE cLen;
     } extClobAsStr ;
   } fields;
 
@@ -248,6 +249,7 @@ typedef struct ExtDefine
       if ( type == NJS_EXTDEFINE_CLOBASSTR )
       {
         fields.extClobAsStr.ctx = NULL ;
+        fields.extClobAsStr.cLen = 0;
       }
   }
 } ExtDefine;
@@ -396,7 +398,7 @@ typedef struct eBaton
            case NJS_EXTBIND_DMLRETCB:
              if ( extBinds[index]->fields.extDMLReturnCbCtx.ctx )
              {
-               delete extBinds[index];
+               free ( extBinds[index]->fields.extDMLReturnCbCtx.ctx ) ;
              }
              break;
 
@@ -405,6 +407,7 @@ typedef struct eBaton
              break;
            }
          }
+         delete extBinds[index];
        }
        extBinds.clear ();
      }

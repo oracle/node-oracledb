@@ -77,3 +77,4 @@ test/lobBind2.js
 test/poolPing.js
 test/lobBindAsStringBuffer.js
 test/lobProperties2.js
+test/fetchClobAsString.js
