@@ -3110,6 +3110,12 @@ release the connection.
 Queries may optionally be streamed using the *Connection*
 [`queryStream()`](#querystream) method.
 
+Node-oracledb's [`execute()`](#execute)
+and [`queryStream()`](#querystream) methods
+use [Statement Caching](#stmtcache) to make re-execution of statements
+efficient.  This removes the need for a separate 'prepare' method to
+parse statements.
+
 Connections can handle one database operation at a time.  Other
 operations will block.  Structure your code to avoid starting parallel
 operations on connections.  For example, instead of using
@@ -5254,11 +5260,13 @@ statement is executed irrespective of the value of `autoCommit`.
 
 ## <a name="stmtcache"></a> 15. Statement Caching
 
-Node-oracledb's [`execute()`](#execute) method uses the
-[Oracle OCI statement cache](https://docs.oracle.com/database/122/LNOCI/oci-programming-advanced-topics.htm#LNOCI16655)
-to make re-execution of statements efficient.  This cache removes the
-need for a separate 'prepare' method which is sometimes seen in other
-Oracle APIs: there is no separate 'prepare' method in node-oracledb.
+Node-oracledb's [`execute()`](#execute)
+and [`queryStream()`](#querystream) methods use
+the
+[Oracle OCI statement cache](https://docs.oracle.com/database/122/LNOCI/oci-programming-advanced-topics.htm#LNOCI16655) to
+make re-execution of statements efficient.  This cache removes the
+need for the separate 'prepare' or 'parse' method which is sometimes
+seen in other Oracle APIs: there is no separate method in node-oracledb.
 
 Each non-pooled connection and each session in the connection pool has
 its own cache of statements with a default size of 30.  Statement
