@@ -733,9 +733,11 @@ void ResultSet::clearFetchBuffer( unsigned int numRows )
      free(defineBuffers_[i].len);
      free(defineBuffers_[i].ind);
 
-     if ( extDefines_[i] )
+     if ( extDefines_[i] &&
+          extDefines_[i]->extDefType == NJS_EXTDEFINE_CLOBASSTR )
      {
        free ( extDefines_[i]->fields.extClobAsStr.ctx ) ;
+       free ( extDefines_[i]->fields.extClobAsStr.len2 ) ;
        delete ( extDefines_[i] );
      }
      extDefines_.resize ( 0 ) ;

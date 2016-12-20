@@ -3324,6 +3324,17 @@ void Connection::DoDefines ( eBaton* executeBaton )
         executeBaton->extDefines[col] = new ExtDefine (
                                                   NJS_EXTDEFINE_CLOBASSTR ) ;
         executeBaton->extDefines[col]->fields.extClobAsStr.ctx = (void *) ctx;
+
+        executeBaton->extDefines[col]->fields.extClobAsStr.len2 =
+                ( unsigned int * ) malloc ( sizeof ( unsigned int ) *
+                                                     executeBaton->maxRows );
+        if( !executeBaton->extDefines[col]->fields.extClobAsStr.len2 )
+        {
+          executeBaton->error = NJSMessages::getErrorMsg (
+                                                errInsufficientMemory );
+          error = true;
+        }
+
       }
       else
       {
@@ -3369,6 +3380,8 @@ void Connection::DoFetch (eBaton* executeBaton)
        */
       for ( unsigned int row = 0; row < executeBaton->rowsFetched ; row ++ )
       {
+        define->len[row] = ( DPI_BUFLEN_TYPE )
+                           extDefine->fields.extClobAsStr.len2[row];
         define->len[row] += extDefine->fields.extClobAsStr.cLen ;
       }
     }
@@ -5579,8 +5592,8 @@ int Connection::cbDynBufferGet ( void *ctx, DPI_SZ_TYPE nRows,
     initialized.
 */
 int Connection::cbDynDefine ( void *octxp, unsigned long definePos,
-                               unsigned long iter, unsigned long *prevIter,
-                               void **bufpp, unsigned long **alenpp,
+                               unsigned int iter, unsigned long *prevIter,
+                               void **bufpp, unsigned int **alenpp,
                                void **indpp, unsigned short **rcodepp )
 {
   eBaton *executeBaton = (eBaton *) octxp ;
@@ -5618,11 +5631,14 @@ int Connection::cbDynDefine ( void *octxp, unsigned long definePos,
   }
   else
   {
-    define->len[iter] = maxLen;
+    extDefine->fields.extClobAsStr.len2[iter] = maxLen;
     define->ind[iter] = 0;                       // default value for indicator
 
     *bufpp = (void *) (&buf[iter][extDefine->fields.extClobAsStr.cLen]);
-    *alenpp = (unsigned long *) &(define->len[iter]) ;  // size for this iter
+
+    // size for this iter
+    *alenpp = (unsigned int *) &(extDefine->fields.extClobAsStr.len2[iter]) ;
+
     *indpp  = (void *) &(define->ind[iter]);            // indicator
   }
   return ret ;

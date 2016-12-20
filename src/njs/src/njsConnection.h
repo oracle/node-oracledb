@@ -240,6 +240,7 @@ typedef struct ExtDefine
     {
       void *ctx;                    /* Context pointer used by the call back */
       DPI_BUFLEN_TYPE cLen;
+      unsigned int    *len2;        /* Length of the buffer */
     } extClobAsStr ;
   } fields;
 
@@ -250,6 +251,7 @@ typedef struct ExtDefine
       {
         fields.extClobAsStr.ctx = NULL ;
         fields.extClobAsStr.cLen = 0;
+        fields.extClobAsStr.len2 = NULL;
       }
   }
 } ExtDefine;
@@ -488,6 +490,8 @@ typedef struct eBaton
            {
              free ( extDefines[i]->fields.extClobAsStr.ctx );
              extDefines[i]->fields.extClobAsStr.ctx = NULL ;
+             free ( extDefines[i]->fields.extClobAsStr.len2 );
+             extDefines[i]->fields.extClobAsStr.len2 = NULL ;
              delete extDefines[i];
            }
          }
@@ -682,8 +686,8 @@ private:
                                unsigned short **rcode, unsigned char *piecep );
 
   static int  cbDynDefine ( void *octxp, unsigned long definePos,
-                            unsigned long iter, unsigned long *prevIter,
-                            void **bufpp, unsigned long **alenpp,
+                            unsigned int iter, unsigned long *prevIter,
+                            void **bufpp, unsigned int **alenpp,
                             void **indpp, unsigned short **rcodepp );
 
   // Callback used in DML-Return SQL statements to
