@@ -180,12 +180,18 @@ limitations under the License.
 
 ## <a name="intro"></a> 1. Introduction
 
-The [*node-oracledb*](https://github.com/oracle/node-oracledb) add-on for Node.js powers high performance Oracle Database applications.
+The [*node-oracledb*](https://www.npmjs.com/package/oracledb) add-on for Node.js powers high performance Oracle Database applications.
 
 This document shows how to use node-oracledb.  The API reference is in
 sections 2 - 7 and the user guide in subsequent sections.
 
 For how to install node-oracledb, see [INSTALL](https://github.com/oracle/node-oracledb/blob/master/INSTALL.md).
+
+The node-oracledb API is a generic Oracle Database access layer.
+Almost all the functionality described here is common across all
+current Oracle Databases.  However the documentation may describe some
+database features that are in specific Oracle Database versions,
+editions, or require additional database options or packs.
 
 ### Example: Simple SELECT statement in Node.js with Callbacks
 
