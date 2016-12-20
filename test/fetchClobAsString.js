@@ -41,7 +41,7 @@ var should   = require('should');
 var dbConfig = require('./dbconfig.js');
 
 describe('76. fetchClobAsString.js', function() {
-  this.timeout(10000);
+  this.timeout(100000);
 
   var connection = null;
   var proc_create_table1 = "BEGIN \n" +
@@ -83,6 +83,7 @@ describe('76. fetchClobAsString.js', function() {
   var drop_table2 = "DROP TABLE nodb_clob2 PURGE";
 
   before('get one connection', function(done) {
+    oracledb.stmtCacheSize = 0;
     oracledb.getConnection(dbConfig, function(err, conn) {
       should.not.exist(err);
       connection = conn;
@@ -400,7 +401,7 @@ describe('76. fetchClobAsString.js', function() {
       ], done);
     }); // 76.1.7
 
-    it.skip('76.1.8 fetch clob using stream', function(done) {
+    it('76.1.8 fetch clob using stream', function(done) {
       var id = 8;
       var specialStr = '76.1.8';
       var contentLength = 40;
