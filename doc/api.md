@@ -546,9 +546,7 @@ See [Result Type Mapping](#typemap) for more discussion.
 
 The valid types that can be mapped to strings are
 [`DATE`](#oracledbconstantsnodbtype), [`NUMBER`](#oracledbconstantsnodbtype) and
-[`CLOB`](#oracledbconstantsnodbtype).  Columns of type `ROWID` and
-`TIMESTAMP WITH TIME ZONE` that cannot natively be fetched can also be
-mapped and fetched as strings.
+[`CLOB`](#oracledbconstantsnodbtype).
 
 For non-CLOB types, the maximum length of a string created by this
 mapping is 200 bytes.  Strings created for CLOB columns will generally
@@ -1694,13 +1692,15 @@ Object fetchInfo
 ```
 
 Object defining how query column data should be represented in JavaScript.
+It can be used in conjunction with, or instead of, the global
+setting [`fetchAsString`](#propdbfetchasstring).
 
 The `fetchInfo` property can be used to indicate that number and date
 columns in a query should be returned as strings instead of their
-native format.  It also indicates that CLOB columns should be returned
-as strings instead of [Lob](#lobclass) instances.  The property can be
-used in conjunction with, or instead of, the global
-setting [`fetchAsString`](#propdbfetchasstring).
+native format.  When used for CLOB columns, they are returned as
+strings instead of [Lob](#lobclass) instances.  Columns of type
+`ROWID` and `TIMESTAMP WITH TIME ZONE` that cannot natively be fetched
+can also be mapped and fetched as strings.
 
 For example:
 
