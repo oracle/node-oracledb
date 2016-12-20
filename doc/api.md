@@ -4066,8 +4066,10 @@ using [`oracledb.fetchAsString`](#propdbfetchasstring)
 or [`fetchInfo`](#propexecfetchinfo).  If the data is larger than can
 be handled as a String in Node.js or node-oracledb, it will need to be
 streamed from a [Lob](#lobclass), as discussed later
-in [Streams and Lobs](#streamsandlobs).  Queries that fetch BLOBs must
-stream the BLOBs.
+in [Streams and Lobs](#streamsandlobs).  Strings created from querying
+CLOBs have a theoretical limit of 2 bytes less than 1 GB (or 1 byte
+less than 64 KB when node-oracledb uses Oracle Client 11.2).  Queries
+that fetch BLOBs must stream the BLOBs.
 
 For example, to force every CLOB in the application to be returned as
 a string:
@@ -4133,12 +4135,12 @@ conn.execute(
 
 The fetched String and Buffer can be used directly in Node.js.
 
-If the data is larger than can be handled as a String or Buffer in
-Node.js or node-oracledb, it will need to be explicitly streamed to
-a [Lob](#lobclass), as discussed in [Streams and Lobs](#streamsandlobs).
+If data to be bound is larger than can be handled as a String or
+Buffer in Node.js or node-oracledb, it will need to be explicitly
+streamed to a [Lob](#lobclass), as discussed
+in [Streams and Lobs](#streamsandlobs).
 See [LOB Bind Parameters](#lobbinds) for size considerations regarding
 LOB binds.
-
 
 ### <a name="streamsandlobs"></a> 11.3 Streams and Lobs
 
