@@ -1,5 +1,7 @@
 # Change Log
 
+## node-oracledb v1.12.2 Development (DD Mon YYYY)
+
 ## node-oracledb v1.12.1 Development (16 Dec 2016)
 
 - Added support for fetching CLOBs as Strings, using `fetchAsString` and `fetchInfo`.
