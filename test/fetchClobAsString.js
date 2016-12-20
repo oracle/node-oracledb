@@ -761,7 +761,7 @@ describe('76. fetchClobAsString.js', function() {
 
   }); // 76.2
 
-  describe('76.3 fectch mutiple CLOBs', function() {
+  describe('76.3 fetch mutiple CLOBs', function() {
     before('create Table and populate', function(done) {
       connection.execute(
         proc_create_table2,
@@ -793,7 +793,7 @@ describe('76. fetchClobAsString.js', function() {
       done();
     }); // afterEach
 
-    it('76.3.1 fectch mutiple CLOB columns as string', function(done) {
+    it('76.3.1 fetch mutiple CLOB columns as string', function(done) {
       var id = 1;
       var specialStr_1 = '76.3.1_1';
       var contentLength_1 = 26;
@@ -830,7 +830,7 @@ describe('76. fetchClobAsString.js', function() {
 
     }); // 76.3.1
 
-    it('76.3.2 fectch two CLOB columns, one as string, another streamed', function(done) {
+    it('76.3.2 fetch two CLOB columns, one as string, another streamed', function(done) {
       var id = 2;
       var specialStr_1 = '76.3.2_1';
       var contentLength_1 = 30;

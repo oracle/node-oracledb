@@ -1230,7 +1230,7 @@ Overview of node-oracledb functional tests
        76.2.5 works with (64K - 1) value
      - 76.2.6 works with substr
        76.2.7 works with EMPTY_CLOB
-    76.3 fectch mutiple CLOBs
-       76.3.1 fectch mutiple CLOB columns as string
-       76.3.2 fectch two CLOB columns, one as string, another streamed
+    76.3 fetch mutiple CLOBs
+       76.3.1 fetch mutiple CLOB columns as string
+       76.3.2 fetch two CLOB columns, one as string, another streamed
 
