@@ -778,7 +778,7 @@ it is possible for un-usable connections to be returned by a pool
 to occur after `getConnection()` is called, applications should
 implement appropriate statement execution error checking.
 
-The default value is `60` seconds.  Possible values for `poolPingInterval` are:
+The default value is 60 seconds.  Possible values for `poolPingInterval` are:
 
 `poolPingInterval` Value     | Behavior of a Pool `getConnection()` Call
 ----------|------------------------------------------
@@ -1062,6 +1062,8 @@ Boolean externalAuth
 Indicate whether connections should be established using
 [External Authentication](#extauth).
 
+The default is *false*.
+
 This optional property overrides the
 [`oracledb.externalAuth`](#propdbisexternalauth) property.
 
@@ -1100,6 +1102,8 @@ Number poolIncrement
 The number of connections that are opened whenever a connection
 request exceeds the number of currently open connections.
 
+The default value is 1.
+
 This optional property overrides the
 [`oracledb.poolIncrement`](#propdbpoolincrement) property.
 
@@ -1108,6 +1112,8 @@ Number poolMax
 ```
 
 The maximum number of connections to which a connection pool can grow.
+
+The default value is 4.
 
 This optional property overrides the
 [`oracledb.poolMax`](#propdbpoolmax) property.
@@ -1118,6 +1124,8 @@ Number poolMin
 
 The minimum number of connections a connection pool maintains, even
 when there is no activity to the target database.
+
+The default value is 0.
 
 This optional property overrides the
 [`oracledb.poolMin`](#propdbpoolmin) property.
@@ -1135,8 +1143,12 @@ Note this attribute is ignored when node-oracledb is built with Oracle
 client 12.2, since this has its own lightweight, always-enabled
 connection check.
 
+The default value is 60.
+
 This optional property overrides the
 [`oracledb.poolPingInterval`](#propdbpoolpinginterval) property.
+
+See [Connection Pool Pinging](#connpoolpinging) for more discussion.
 
 ```
 Number poolTimeout
@@ -1144,8 +1156,9 @@ Number poolTimeout
 
 The number of seconds after which idle connections (unused in the
 pool) may be terminated.  Idle connections are terminated only when
-the pool is accessed.  If `poolTimeout` is set to 0, then idle
-connections are never terminated.
+the pool is accessed.
+
+The default value is 60.
 
 This optional property overrides the
 [`oracledb.poolTimeout`](#propdbpooltimeout) property.
@@ -1154,9 +1167,11 @@ This optional property overrides the
 Boolean queueRequests
 ```
 
-Indicate whether [`pool.getConnection()`](#getconnectionpool)
+Indicates whether [`pool.getConnection()`](#getconnectionpool)
 (or [`oracledb.getConnection()`](#getconnectiondb) calls that use a pool)
 should be queued when all available connections in the pool are currently in use.
+
+The default value is *true*.
 
 This optional property overrides the
 [`oracledb.queueRequests`](#propdbqueuerequests) property.
@@ -1168,6 +1183,8 @@ Number queueTimeout
 The number of milliseconds after which connection requests waiting in the
 connection request queue are terminated.  If `queueTimeout` is
 set to 0, then queued connection requests are never terminated.
+
+The default value is 60000.
 
 This optional property overrides the
 [`oracledb.queueTimeout`](#propdbqueuetimeout) property.
