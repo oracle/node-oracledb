@@ -695,11 +695,9 @@ describe('76. fetchClobAsString.js', function() {
           connection.execute(
            "SELECT ID, C AS C1, C AS C2 from nodb_clob1 where id = " + id_1 + " or id = " + id_2,
             { },
-            { fetchInfo :
-              {
-                C1 : { type : oracledb.STRING},
-                C2 : { type : oracledb.STRING}
-              }
+            { fetchInfo : {
+              C1 : { type : oracledb.STRING},
+              C2 : { type : oracledb.STRING} }
             },
             function(err, result){
               should.not.exist(err);
