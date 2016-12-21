@@ -155,7 +155,7 @@ describe('76. fetchClobAsString.js', function() {
     return str;
   };
 
-  describe('76.1 fetch clob columns by set oracledb.fetchAsString',  function() {
+  describe('76.1 fetch CLOB columns by setting oracledb.fetchAsString',  function() {
 
     before('create Table and populate', function(done) {
       connection.execute(
@@ -210,7 +210,7 @@ describe('76. fetchClobAsString.js', function() {
       ], done);
     }); // 76.1.1
 
-    it('76.1.2 works with small clob data, the length of string is 26', function(done) {
+    it('76.1.2 works with small CLOB data', function(done) {
       var id = 2;
       var specialStr = '76.1.2';
       var contentLength = 26;
@@ -238,26 +238,26 @@ describe('76. fetchClobAsString.js', function() {
       ], done);
     }); // 76.1.2
 
-    it('76.1.3 fetch multiple CLOB column as string', function(done) {
-      var id_1 = 1;
+    it('76.1.3 fetch multiple CLOB columns as String', function(done) {
+      var id_1 = 3;
       var specialStr_1 = '76.1.3_1';
       var contentLength_1 = 26;
       var content_1 = getRandomString(contentLength_1, specialStr_1);
-      var id_2 = 2;
+      var id_2 = 4;
       var specialStr_2 = '76.1.3_2';
       var contentLength_2 = 30;
       var content_2 = getRandomString(contentLength_2, specialStr_2);
 
       async.series([
         function(cb) {
-          updateClobTable1(id_1, content_1, cb);
+          insertIntoClobTable1(id_1, content_1, cb);
         },
         function(cb) {
-          updateClobTable1(id_2, content_2, cb);
+          insertIntoClobTable1(id_2, content_2, cb);
         },
         function(cb) {
           connection.execute(
-           "SELECT ID, C from nodb_clob1",
+           "SELECT ID, C from nodb_clob1 where id = " + id_1 + " or id = " +id_2,
             function(err, result){
               should.not.exist(err);
               var specialStrLen_1 = specialStr_1.length;
@@ -278,26 +278,26 @@ describe('76. fetchClobAsString.js', function() {
       ], done);
     }); // 76.1.3
 
-    it('76.1.4 fetch same CLOB column multiple times', function(done) {
-      var id_1 = 1;
+    it('76.1.4 fetch the same CLOB column multiple times', function(done) {
+      var id_1 = 5;
       var specialStr_1 = '76.1.4_1';
       var contentLength_1 = 20;
       var content_1 = getRandomString(contentLength_1, specialStr_1);
-      var id_2 = 2;
+      var id_2 = 6;
       var specialStr_2 = '76.1.4_2';
       var contentLength_2 = 36;
       var content_2 = getRandomString(contentLength_2, specialStr_2);
 
       async.series([
         function(cb) {
-          updateClobTable1(id_1, content_1, cb);
+          insertIntoClobTable1(id_1, content_1, cb);
         },
         function(cb) {
-          updateClobTable1(id_2, content_2, cb);
+          insertIntoClobTable1(id_2, content_2, cb);
         },
         function(cb) {
           connection.execute(
-           "SELECT ID, C AS C1, C AS C2 from nodb_clob1",
+           "SELECT ID, C AS C1, C AS C2 from nodb_clob1 where id = " + id_1 + " or id = " +id_2,
             function(err, result){
               should.not.exist(err);
               var specialStrLen_1 = specialStr_1.length;
@@ -325,7 +325,7 @@ describe('76. fetchClobAsString.js', function() {
     }); // 76.1.4
 
     it('76.1.5 works with (64K - 1) value', function(done) {
-      var id = 5;
+      var id = 7;
       var specialStr = '76.1.5';
       var contentLength = 65535;
       var content = getRandomString(contentLength, specialStr);
@@ -352,8 +352,8 @@ describe('76. fetchClobAsString.js', function() {
       ], done);
     }); // 76.1.5
 
-    it('76.1.6 fetch with substr', function(done) {
-      var id = 6;
+    it('76.1.6 fetch with substr()', function(done) {
+      var id = 8;
       var specialStr = '76.1.6';
       var specialStrLen = specialStr.length;
       var contentLength = 100;
@@ -379,9 +379,9 @@ describe('76. fetchClobAsString.js', function() {
       ], done);
     }); // 76.1.6
 
-    it('76.1.7 works with EMPTY_CLOB', function(done) {
-      var id = 7;
-      var content = "EMPTY_CLOB";
+    it('76.1.7 works with EMPTY_CLOB()', function(done) {
+      var id = 9;
+      var content = "EMPTY_CLOB()";
 
       async.series([
         function(cb) {
@@ -401,8 +401,8 @@ describe('76. fetchClobAsString.js', function() {
       ], done);
     }); // 76.1.7
 
-    it('76.1.8 fetch clob using stream', function(done) {
-      var id = 8;
+    it('76.1.8 fetch CLOB with stream', function(done) {
+      var id = 10;
       var specialStr = '76.1.8';
       var contentLength = 40;
       var content = getRandomString(contentLength, specialStr);
@@ -451,7 +451,7 @@ describe('76. fetchClobAsString.js', function() {
     }); // 76.1.8
 
     it('76.1.9 works with REF CURSOR', function(done) {
-      var id = 9;
+      var id = 11;
       var specialStr = '76.1.9';
       var contentLength = 26;
       var content = getRandomString(contentLength, specialStr);
@@ -510,9 +510,56 @@ describe('76. fetchClobAsString.js', function() {
       ], done);
     }); // 76.1.9
 
+    it('76.1.10 work with update', function(done) {
+      var id = 12;
+      var specialStr_1 = '76.1.10_1';
+      var contentLength_1 = 26;
+      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var specialStr_2 = '76.1.10_2';
+      var contentLength_2 = 30;
+      var content_2 = getRandomString(contentLength_2, specialStr_2);
+
+      async.series([
+        function(cb) {
+          insertIntoClobTable1(id, content_1, cb);
+        },
+        function(cb) {
+          connection.execute(
+           "SELECT ID, C from nodb_clob1 where id = " + id,
+            function(err, result){
+              should.not.exist(err);
+              var specialStrLen = specialStr_1.length;
+              var resultLen = result.rows[0][1].length;
+              should.equal(result.rows[0][1].length, contentLength_1);
+              should.strictEqual(result.rows[0][1].substring(0, specialStrLen), specialStr_1);
+              should.strictEqual(result.rows[0][1].substring(resultLen - specialStrLen, resultLen), specialStr_1);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          updateClobTable1(id, content_2, cb);
+        },
+        function(cb) {
+          connection.execute(
+           "SELECT ID, C from nodb_clob1 where id = " + id,
+            function(err, result){
+              should.not.exist(err);
+              var specialStrLen = specialStr_2.length;
+              var resultLen = result.rows[0][1].length;
+              should.equal(result.rows[0][1].length, contentLength_2);
+              should.strictEqual(result.rows[0][1].substring(0, specialStrLen), specialStr_2);
+              should.strictEqual(result.rows[0][1].substring(resultLen - specialStrLen, resultLen), specialStr_2);
+              cb();
+            }
+          );
+        }
+      ], done);
+    }); // 76.1.10
+
   }); // 76.1
 
-  describe('76.2 fetch CLOB columns by set fetchInfo option', function() {
+  describe('76.2 fetch CLOB columns by setting fetchInfo option', function() {
     before('create Table and populate', function(done) {
       connection.execute(
         proc_create_table1,
@@ -556,7 +603,7 @@ describe('76. fetchClobAsString.js', function() {
       ], done);
     }); // 76.2.1
 
-    it('76.2.2 works with small clob data, the length of string is 26', function(done) {
+    it('76.2.2 works with small CLOB data', function(done) {
       var id = 2;
       var specialStr = '76.2.2';
       var contentLength = 26;
@@ -585,26 +632,26 @@ describe('76. fetchClobAsString.js', function() {
       ], done);
     }); // 76.2.2
 
-    it('76.2.3 fetch multiple CLOB column as string', function(done) {
-      var id_1 = 1;
+    it('76.2.3 fetch multiple CLOB columns as String', function(done) {
+      var id_1 = 3;
       var specialStr_1 = '76.2.3_1';
       var contentLength_1 = 26;
       var content_1 = getRandomString(contentLength_1, specialStr_1);
-      var id_2 = 2;
+      var id_2 = 4;
       var specialStr_2 = '76.2.3_2';
       var contentLength_2 = 30;
       var content_2 = getRandomString(contentLength_2, specialStr_2);
 
       async.series([
         function(cb) {
-          updateClobTable1(id_1, content_1, cb);
+          insertIntoClobTable1(id_1, content_1, cb);
         },
         function(cb) {
-          updateClobTable1(id_2, content_2, cb);
+          insertIntoClobTable1(id_2, content_2, cb);
         },
         function(cb) {
           connection.execute(
-           "SELECT ID, C from nodb_clob1",
+           "SELECT ID, C from nodb_clob1 where id = " + id_1 + " or id = " + id_2,
             { },
             { fetchInfo : { C : { type : oracledb.STRING} } },
             function(err, result){
@@ -627,32 +674,32 @@ describe('76. fetchClobAsString.js', function() {
       ], done);
     }); // 76.2.3
 
-    it('76.2.4 fetch same CLOB column multiple times', function(done) {
-      var id_1 = 1;
+    it('76.2.4 fetch the same CLOB column multiple times', function(done) {
+      var id_1 = 5;
       var specialStr_1 = '76.2.4_1';
       var contentLength_1 = 20;
       var content_1 = getRandomString(contentLength_1, specialStr_1);
-      var id_2 = 2;
+      var id_2 = 6;
       var specialStr_2 = '76.2.4_2';
       var contentLength_2 = 36;
       var content_2 = getRandomString(contentLength_2, specialStr_2);
 
       async.series([
         function(cb) {
-          updateClobTable1(id_1, content_1, cb);
+          insertIntoClobTable1(id_1, content_1, cb);
         },
         function(cb) {
-          updateClobTable1(id_2, content_2, cb);
+          insertIntoClobTable1(id_2, content_2, cb);
         },
         function(cb) {
           connection.execute(
-           "SELECT ID, C AS C1, C AS C2 from nodb_clob1",
+           "SELECT ID, C AS C1, C AS C2 from nodb_clob1 where id = " + id_1 + " or id = " + id_2,
             { },
             { fetchInfo :
-            {
-              C1 : { type : oracledb.STRING},
-              C2 : { type : oracledb.STRING}
-            }
+              {
+                C1 : { type : oracledb.STRING},
+                C2 : { type : oracledb.STRING}
+              }
             },
             function(err, result){
               should.not.exist(err);
@@ -681,7 +728,7 @@ describe('76. fetchClobAsString.js', function() {
     }); // 76.2.4
 
     it('76.2.5 works with (64K - 1) value', function(done) {
-      var id = 5;
+      var id = 7;
       var specialStr = '76.2.5';
       var contentLength = 65535;
       var content = getRandomString(contentLength, specialStr);
@@ -709,8 +756,8 @@ describe('76. fetchClobAsString.js', function() {
       ], done);
     }); // 76.2.5
 
-    it('76.2.6 works with substr', function(done) {
-      var id = 6;
+    it('76.2.6 works with substr()', function(done) {
+      var id = 8;
       var specialStr = '76.2.6';
       var specialStrLen = specialStr.length;
       var contentLength = 100;
@@ -737,9 +784,9 @@ describe('76. fetchClobAsString.js', function() {
       ], done);
     }); // 76.2.6
 
-    it('76.2.7 works with EMPTY_CLOB', function(done) {
-      var id = 7;
-      var content = "EMPTY_CLOB";
+    it('76.2.7 works with EMPTY_CLOB()', function(done) {
+      var id = 9;
+      var content = "EMPTY_CLOB()";
 
       async.series([
         function(cb) {
@@ -760,9 +807,60 @@ describe('76. fetchClobAsString.js', function() {
       ], done);
     }); // 76.2.7
 
+    it('76.2.8 work with UPDATE statement', function(done) {
+      var id = 10;
+      var specialStr_1 = '76.2.10_1';
+      var contentLength_1 = 26;
+      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var specialStr_2 = '76.2.10_2';
+      var contentLength_2 = 30;
+      var content_2 = getRandomString(contentLength_2, specialStr_2);
+
+      async.series([
+        function(cb) {
+          insertIntoClobTable1(id, content_1, cb);
+        },
+        function(cb) {
+          connection.execute(
+           "SELECT ID, C from nodb_clob1 where id = :id",
+           { id : id },
+           { fetchInfo : { C : { type : oracledb.STRING} } },
+            function(err, result){
+              should.not.exist(err);
+              var specialStrLen = specialStr_1.length;
+              var resultLen = result.rows[0][1].length;
+              should.equal(result.rows[0][1].length, contentLength_1);
+              should.strictEqual(result.rows[0][1].substring(0, specialStrLen), specialStr_1);
+              should.strictEqual(result.rows[0][1].substring(resultLen - specialStrLen, resultLen), specialStr_1);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          updateClobTable1(id, content_2, cb);
+        },
+        function(cb) {
+          connection.execute(
+           "SELECT ID, C from nodb_clob1 where id = :id",
+           { id : id },
+           { fetchInfo : { C : { type : oracledb.STRING} } },
+            function(err, result){
+              should.not.exist(err);
+              var specialStrLen = specialStr_2.length;
+              var resultLen = result.rows[0][1].length;
+              should.equal(result.rows[0][1].length, contentLength_2);
+              should.strictEqual(result.rows[0][1].substring(0, specialStrLen), specialStr_2);
+              should.strictEqual(result.rows[0][1].substring(resultLen - specialStrLen, resultLen), specialStr_2);
+              cb();
+            }
+          );
+        }
+      ], done);
+    }); // 76.2.8
+
   }); // 76.2
 
-  describe('76.3 fetch mutiple CLOBs', function() {
+  describe('76.3 fetch multiple CLOBs', function() {
     before('create Table and populate', function(done) {
       connection.execute(
         proc_create_table2,
@@ -794,7 +892,7 @@ describe('76. fetchClobAsString.js', function() {
       done();
     }); // afterEach
 
-    it('76.3.1 fetch mutiple CLOB columns as string', function(done) {
+    it('76.3.1 fetch multiple CLOB columns as String', function(done) {
       var id = 1;
       var specialStr_1 = '76.3.1_1';
       var contentLength_1 = 26;

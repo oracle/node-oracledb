@@ -1212,25 +1212,26 @@ Overview of node-oracledb functional tests
        75.7.7 must be a number
 
 76. fetchClobAsString.js
-    76.1 fetch clob columns by set oracledb.fetchAsString
-       76.1.1 works with NULL value
-       76.1.2 works with small clob data, the length of string is 26
-       76.1.3 fetch multiple CLOB column as string
-       76.1.4 fetch same CLOB column multiple times
-       76.1.5 works with (64K - 1) value
-       76.1.6 fetch with substr
-       76.1.7 works with EMPTY_CLOB
-     - 76.1.8 fetch clob using stream
-       76.1.9 works with REF CURSOR (44ms)
-    76.2 fetch CLOB columns by set fetchInfo option
-       76.2.1 works with NULL value
-       76.2.2 works with small clob data, the length of string is 26
-       76.2.3 fetch multiple CLOB column as string
-       76.2.4 fetch same CLOB column multiple times
-       76.2.5 works with (64K - 1) value
-     - 76.2.6 works with substr
-       76.2.7 works with EMPTY_CLOB
-    76.3 fetch mutiple CLOBs
-       76.3.1 fetch mutiple CLOB columns as string
-       76.3.2 fetch two CLOB columns, one as string, another streamed
-
+    76.1 fetch CLOB columns by setting oracledb.fetchAsString
+        76.1.1 works with NULL value
+        76.1.2 works with small CLOB data
+        76.1.3 fetch multiple CLOB columns as String
+        76.1.4 fetch the same CLOB column multiple times
+        76.1.5 works with (64K - 1) value
+        76.1.6 fetch with substr()
+        76.1.7 works with EMPTY_CLOB()
+        76.1.8 fetch CLOB with stream
+        76.1.9 works with REF CURSOR
+        76.1.10 work with update
+    76.2 fetch CLOB columns by setting fetchInfo option
+        76.2.1 works with NULL value
+        76.2.2 works with small CLOB data
+        76.2.3 fetch multiple CLOB columns as String
+        76.2.4 fetch the same CLOB column multiple times
+        76.2.5 works with (64K - 1) value
+        76.2.6 works with substr()
+        76.2.7 works with EMPTY_CLOB()
+        76.2.8 work with UPDATE statement
+    76.3 fetch multiple CLOBs
+        76.3.1 fetch multiple CLOB columns as String
+        76.3.2 fetch two CLOB columns, one as string, another streamed
