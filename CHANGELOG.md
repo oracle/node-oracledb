@@ -1,5 +1,15 @@
 # Change Log
 
+## node-oracledb v1.12.2 (21 Dec 2016)
+
+- Fix memory allocation with Oracle 11g client libraries when querying CLOBs using `fetchAsString` and `fetchInfo`.
+
+## node-oracledb v1.12.1 Development (16 Dec 2016)
+
+- Added support for fetching CLOBs as Strings, using `fetchAsString` and `fetchInfo`.
+
+- Added `BIND_INOUT` support for temporary LOBs.
+
 ## node-oracledb v1.12.0 Development (3 Dec 2016)
 
 - Significantly enhanced LOB support:

@@ -61,7 +61,7 @@ var dorelease = function(conn) {
 // Cleanup anything other than lobinsert1.js demonstration data
 var docleanup = function (conn, cb) {
   conn.execute(
-    'delete from mylobs where id > 2',
+    'DELETE FROM mylobs WHERE id > 2',
     function(err) {
       return cb(err, conn);
     });
@@ -202,7 +202,7 @@ var query_plsql_inout = function (conn, cb) {
             function(err)
             {
               // console.log("clob2.on 'error' event");
-              cb(err);
+              return cb(err);
             });
           clob2.on(
             'end',
@@ -226,7 +226,7 @@ var query_plsql_inout = function (conn, cb) {
             function(err)
             {
               // console.log("outStream.on 'error' event");
-              cb(err);
+              return cb(err);
             });
 
           // Switch into flowing mode and push the LOB to the file
@@ -279,7 +279,7 @@ var plsql_out_inout = function (conn, cb) {
             function(err)
             {
               // console.log("clob2.on 'error' event");
-              cb(err);
+              return cb(err);
             });
           clob2.on(
             'end',
@@ -302,7 +302,7 @@ var plsql_out_inout = function (conn, cb) {
             function(err)
             {
               // console.log("outStream.on 'error' event");
-              cb(err);
+              return cb(err);
             });
 
           // Switch into flowing mode and push the LOB to the file
@@ -316,7 +316,7 @@ var plsql_out_inout = function (conn, cb) {
 var doshowvtemplob = function (conn, cb) {
   console.log('6. Query from V$TEMPORARY_LOBS:');
   conn.execute(
-    "select * from v$temporary_lobs",
+    "SELECT * FROM V$TEMPORARY_LOBS",
     [], { outFormat: oracledb.OBJECT },
     function (err, result) {
       if (err) {

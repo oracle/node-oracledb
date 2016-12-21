@@ -16,10 +16,12 @@
  * limitations under the License.
  *
  * NAME
- *   lobstream2.js
+ *   lobselect.js
  *
  * DESCRIPTION
- *   SELECTs a CLOB, streams it using 'data' events, and then displays it to the screen
+ *   SELECTs a CLOB and displays it to the screen.
+ *
+ *   'Large' CLOBs should be streamed as shown in lobstream1.js
  *
  *   Use demo.sql to create the required table or do:
  *     DROP TABLE mylobs;
@@ -32,6 +34,9 @@
 var async = require('async');
 var oracledb = require('oracledb');
 var dbConfig = require('./dbconfig.js');
+
+// force all CLOBs to be returned as Strings
+oracledb.fetchAsString = [ oracledb.CLOB ];
 
 var doconnect = function(cb) {
   oracledb.getConnection(
@@ -58,7 +63,10 @@ var dorelease = function(conn) {
 
 var doquery = function(conn, cb) {
   conn.execute(
-    "SELECT c FROM mylobs WHERE id = 1",
+    "SELECT c FROM mylobs WHERE id = :idbv",
+    [1],
+    // An alternative to oracledb.fetchAsString is to use fetchInfo on a column:
+    // { fetchInfo: {"C": {type: oracledb.STRING}} },
     function(err, result)
     {
       if (err) {
@@ -67,51 +75,9 @@ var doquery = function(conn, cb) {
       if (result.rows.length === 0) {
         return cb(new Error("No results.  Did you run lobinsert1.js?"), conn);
       }
-      var lob = result.rows[0][0];
-      if (lob === null) {
-        return cb(new Error("LOB was NULL"), conn);
-      }
-      return cb(null, conn, lob);
-    });
-};
-
-// Stream a CLOB and builds up a String piece-by-piece
-var  dostream = function(conn, clob, cb) {
-  clob.setEncoding('utf8');  // set the encoding so we get a 'string' not a 'buffer'
-  clob.on(
-    'error',
-    function(err)
-    {
-      console.log("clob.on 'error' event");
-      return cb(err, conn);
-    });
-
-  // node-oracledb's lob.pieceSize is the number of bytes retrieved
-  // for each readable 'data' event.  The default is lob.chunkSize.
-  // The recommendation is for it to be a multiple of chunkSize.
-  // clob.pieceSize = 100; // fetch smaller chunks to demonstrate repeated 'data' events
-
-  var myclob = ""; // or myblob = Buffer.alloc(0) for BLOBs
-  clob.on(
-    'data',
-    function(chunk)
-    {
-      console.log("clob.on 'data' event.  Got %d bytes of data", chunk.length);
-      // Build up the string.  For larger LOBs you might want to print or use each chunk separately
-      myclob += chunk; // or use Buffer.concat() for BLOBS
-    });
-  clob.on(
-    'end',
-    function()
-    {
-      console.log("clob.on 'end' event");
-      console.log(myclob);
-    });
-  clob.on(
-    'close',
-    function()
-    {
-      console.log("clob.on 'close' event");
+      var clob = result.rows[0][0];
+      console.log('The CLOB was: ');
+      console.log(clob);
       return cb(null, conn);
     });
 };
@@ -119,8 +85,7 @@ var  dostream = function(conn, clob, cb) {
 // Connect and call the CLOB example
 async.waterfall([
   doconnect,
-  doquery,
-  dostream
+  doquery
 ],
 function (err, conn) {
   if (err) { console.error("In waterfall error cb: ==>", err, "<=="); }

@@ -29,6 +29,7 @@ var dbConfig = require('./dbconfig.js');
 var addonVer, clientVer, serverVer;
 var major, minor, update, port, portUpdate;
 
+console.log("Run at: " + new Date());
 console.log("Node.js version: " + process.version);
 
 addonVer = oracledb.version;

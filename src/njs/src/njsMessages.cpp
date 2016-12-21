@@ -85,10 +85,9 @@ static const char *errMsg[] =
   "NJS-046: pool alias \"%s\" already exists in the connection pool cache", // errPoolWithAliasAlreadyExists
   "NJS-047: pool alias \"%s\" not found in the connection pool cache", // errPoolWithAliasNotFound
   "NJS-048: operation not permitted while Lob object is active in a bind operation", // errLOBBindActive
-  "NJS-049: cannot use bind direction IN OUT for temporary LOBs", // errTempLOBINOUTBind
-  "NJS-050: Temporary LOBs were open when the connection was closed", // errBusyConnTEMPLOB
-  "NJS-051: data must be shorter than %d", // errBindValueTooLarge
-  "NJS-052: \"%s\" must be less than %d", // errMaxValueTooLarge
+  "NJS-049: Temporary LOBs were open when the connection was closed", // errBusyConnTEMPLOB
+  "NJS-050: data must be shorter than %d", // errBindValueTooLarge
+  "NJS-051: \"%s\" must be less than %d", // errMaxValueTooLarge
 };
 
 string NJSMessages::getErrorMsg ( NJSErrorType err, ... )

@@ -66,6 +66,25 @@ using namespace dpi;
 class Connection;
 class ProtoILob;
 
+// Extended bind type
+typedef enum
+{
+  NJS_EXTBIND_DEFAULT   = 0,        /* Default case no data yet to determine */
+  NJS_EXTBIND_REFCURSOR = 1,                     /* REFCURSOR case, OUT Bind */
+  NJS_EXTBIND_LOB       = 2, /* LOB Bind IN case -large data - temp lob case */
+  NJS_EXTBIND_DMLRETCB  = 3, /* DML Returning case context used for callback */
+} ExtBindType;
+
+
+
+// Enumeration to identify which struct of union is used in ExtDefine.
+typedef enum
+{
+  NJS_EXTDEFINE_UNDEFINED = 0,                            /* Not defined yet */
+  NJS_EXTDEFINE_CLOBASSTR = 1,       /* Used as part of Fetch Clob As String */
+} ExtDefineType;
+
+
 
 /**
 * Structure used for binds
@@ -102,13 +121,13 @@ typedef struct Bind
 typedef struct Define
 {
 
-  unsigned short     fetchType;
-  DPI_SZ_TYPE        maxSize;
-  void               *buf;             // will have the values from DB
-  void               *extbuf;          // this field will be DPI calls
-  DPI_BUFLEN_TYPE    *len;
-  short              *ind;
-  dpi::DateTimeArray *dttmarr;   // DPI Date time array of descriptor
+  unsigned short       fetchType;
+  DPI_SZ_TYPE          maxSize;
+  void                 *buf;             // will have the values from DB
+  void                 *extbuf;          // this field will be DPI calls
+  DPI_BUFLEN_TYPE      *len;
+  short                *ind;
+  dpi::DateTimeArray   *dttmarr;   // DPI Date time array of descriptor
 
   Define () :fetchType(0), maxSize(0), buf(NULL), extbuf(NULL),
              len(0), ind(0), dttmarr(NULL)
@@ -143,31 +162,99 @@ typedef struct MetaInfo
   {}
 
 } MetaInfo;
-
 /**
  * This is a parallel structure to Bind and stores extended bind fields
  * in specific cases like refCursor
  **/
 typedef struct ExtBind
 {
-  ExtBindType type;
+  ExtBindType extBindType;
 
   union
   {
+    // Specific to REFCURSOR case
     struct
     {
       unsigned int numCols;            // number of columns
       MetaInfo     *mInfo;             // MetaInfo structure
     } extRefCursor;
 
+    // Specific to LOB case
     struct
     {
       void *value;             // Stores extra bind reference
       bool isStringBuffer2LOB; // Specifies whether string or buffer Converted
                                // to LOB or not
+      DPI_SZ_TYPE maxSize;     // Size for the OUT or IN OUT bind value
+
     } extLob;
+
+    // Specific to DML Returning case, callback ctx
+    struct
+    {
+      DpiBindCallbackCtx *ctx;
+    } extDMLReturnCbCtx;
+
   } fields;
+
+  ExtBind ( ExtBindType extbindType )
+  {
+    this->extBindType = extbindType;
+
+    switch ( extbindType )
+    {
+    case NJS_EXTBIND_REFCURSOR:
+      this -> fields.extRefCursor.numCols = 0;
+      this -> fields.extRefCursor.mInfo = 0 ;
+      break;
+
+    case NJS_EXTBIND_LOB:
+      this -> fields.extLob.value = NULL;
+      this -> fields.extLob.isStringBuffer2LOB = false;
+      break;
+
+    case NJS_EXTBIND_DMLRETCB:
+      this -> fields.extDMLReturnCbCtx.ctx = NULL;
+      break;
+
+    default:  // Should never hit here!
+      break;
+    }
+  }
 } ExtBind;
+
+
+/**
+ * Extension to Define struct - to store type specific data here and keep
+ * Define as generic as possible
+ */
+typedef struct ExtDefine
+{
+  ExtDefineType extDefType; /* which type of ext-define data used */
+
+  // containter for type specific data
+  union
+  {
+    // Fields required for Fetch-Clob-As-String case
+    struct
+    {
+      void *ctx;                    /* Context pointer used by the call back */
+      DPI_BUFLEN_TYPE cLen;
+      unsigned int    *len2;        /* Length of the buffer */
+    } extClobAsStr ;
+  } fields;
+
+  ExtDefine ( ExtDefineType type )
+  {
+      extDefType = type;
+      if ( type == NJS_EXTDEFINE_CLOBASSTR )
+      {
+        fields.extClobAsStr.ctx = NULL ;
+        fields.extClobAsStr.cLen = 0;
+        fields.extClobAsStr.len2 = NULL;
+      }
+  }
+} ExtDefine;
 
 
 /**
@@ -175,12 +262,12 @@ typedef struct ExtBind
  **/
 typedef struct fetchInfo
 {
-  std::string name;                     /* DB Column name or expression name */
-  DataType    type;                   /* Fetch this column as specfieid type */
+  std::string colName;                  /* DB Column name or expression name */
+  DataType    njsType;                /* Fetch this column as specfieid type */
 
   // Constructor to initialize member variables.
   fetchInfo ()
-    : name (""), type ( NJS_DATATYPE_DEFAULT )
+    : colName (""), njsType ( NJS_DATATYPE_DEFAULT )
   {
   }
 
@@ -228,6 +315,7 @@ typedef struct eBaton
   std::vector<ExtBind*>     extBinds;
   unsigned int              numOutBinds;    // # of out binds used for DML return
   Define                    *defines;
+  std::vector<ExtDefine*>   extDefines;
   unsigned int              fetchAsStringTypesCount;
   DataType                  *fetchAsStringTypes;  // Global by type settings
   unsigned int              fetchInfoCount;       // Conversion requested count
@@ -285,6 +373,7 @@ typedef struct eBaton
          {
            free ( binds[index]->len2 ) ;
          }
+
          delete binds[index];
        }
      }
@@ -294,18 +383,33 @@ typedef struct eBaton
        {
          if ( extBinds[index] )
          {
-           if ( extBinds[index]->type == NJS_EXTBIND_REFCURSOR &&
-                extBinds[index]->fields.extRefCursor.mInfo )
+           switch ( extBinds[index]->extBindType )
            {
-             delete [] extBinds[index]->fields.extRefCursor.mInfo;
+           case NJS_EXTBIND_REFCURSOR:
+             if ( extBinds[index]->fields.extRefCursor.mInfo )
+             {
+               delete [] extBinds[index]->fields.extRefCursor.mInfo;
+             }
+             break;
+           case NJS_EXTBIND_LOB:
+             if ( extBinds[index]->fields.extLob.value )
+             {
+               free ( extBinds[index]->fields.extLob.value );
+             }
+             break;
+           case NJS_EXTBIND_DMLRETCB:
+             if ( extBinds[index]->fields.extDMLReturnCbCtx.ctx )
+             {
+               free ( extBinds[index]->fields.extDMLReturnCbCtx.ctx ) ;
+             }
+             break;
+
+           case NJS_EXTBIND_DEFAULT:
+           default:
+             break;
            }
-           else if ( extBinds[index]->type == NJS_EXTBIND_LOB &&
-                     extBinds[index]->fields.extLob.value )
-           {
-             free ( extBinds[index]->fields.extLob.value );
-           }
-           delete extBinds[index];
          }
+         delete extBinds[index];
        }
        extBinds.clear ();
      }
@@ -341,11 +445,20 @@ typedef struct eBaton
          {
            for (unsigned int j = 0; j < maxRows; j++)
            {
-                 // free all those unused descriptors that were never fetched.
-
+             // free all those unused descriptors that were never fetched.
              if (((Descriptor **)(defines[i].buf))[j])
                Env::freeDescriptor(((Descriptor **)(defines[i].buf))[j],
                                    LobDescriptorType);
+           }
+         }
+
+         // If Clob data was fetched as String, deallocate each buffer
+         if ( (defines[i].fetchType == dpi::DpiVarChar) &&
+              mInfo[i].dbType == dpi::DpiClob )
+         {
+           for ( unsigned int j = 0 ; j < maxRows ; j ++ )
+           {
+             free ( ((char **)(defines[i].buf))[j] );
            }
          }
 
@@ -363,6 +476,26 @@ typedef struct eBaton
      if ( fetchAsStringTypes && !getRS )
      {
        free (fetchAsStringTypes);
+     }
+     // Clear the extended-define structures if non-resultset case
+     if ( extDefines.size() > 0  && !getRS )
+     {
+       for ( unsigned int i = 0 ; i < numCols ; i ++ )
+       {
+         // If not applicable the it will be NULL
+         if ( extDefines[i] )
+         {
+           // Fetch-Clob-As_string case
+           if ( extDefines[i]->extDefType == NJS_EXTDEFINE_CLOBASSTR )
+           {
+             free ( extDefines[i]->fields.extClobAsStr.ctx );
+             extDefines[i]->fields.extClobAsStr.ctx = NULL ;
+             free ( extDefines[i]->fields.extClobAsStr.len2 );
+             extDefines[i]->fields.extClobAsStr.len2 = NULL ;
+             delete extDefines[i];
+           }
+         }
+       }
      }
    }
 }eBaton;
@@ -479,18 +612,15 @@ private:
 
   static void PrepareLOBsForBind ( eBaton* executeBaton, unsigned int index );
 
-  static void InitExtBind ( ExtBind *extBind, ExtBindType fieldType );
-
   static unsigned short SourceDBType2TargetDBType ( unsigned srcType );
   static boolean MapByName ( eBaton *executeBaton,
                               std::string &name,
-                              unsigned short &targetType );
-
+                             unsigned short &targetType);
 
   static boolean MapByType ( eBaton *executeBaton, unsigned short &targetType);
 
   static unsigned short GetTargetType ( eBaton *executeBaton,
-                                         std::string &name,
+                                        std::string &name,
                                         unsigned short defaultType);
 
   static void ProcessBinds (Nan::NAN_METHOD_ARGS_TYPE args, unsigned int index,
@@ -552,15 +682,20 @@ private:
   static int  cbDynBufferGet ( void *ctx, DPI_SZ_TYPE nRows,
                                unsigned int bndpos,
                                unsigned long iter, unsigned long index,
-                               dvoid **bufpp, void **alenpp, void **indpp,
+                               void **bufpp, void **alenpp, void **indpp,
                                unsigned short **rcode, unsigned char *piecep );
+
+  static int  cbDynDefine ( void *octxp, unsigned long definePos,
+                            unsigned int iter, unsigned long *prevIter,
+                            void **bufpp, unsigned int **alenpp,
+                            void **indpp, unsigned short **rcodepp );
 
   // Callback used in DML-Return SQL statements to
   // identify block of memeory for each row.
   static int  cbNullInBind ( void *ctx, DPI_SZ_TYPE nRows,
                                unsigned int bndpos,
                                unsigned long iter, unsigned long index,
-                               dvoid **bufpp, void **alenpp, void **indpp,
+                               void **bufpp, void **alenpp, void **indpp,
                                unsigned short **rcode, unsigned char *piecep );
 
   // NewLob Method on Connection class

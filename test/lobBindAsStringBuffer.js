@@ -478,7 +478,7 @@ describe('74.lobBindAsStringBuffer.js', function() {
       executeSQL(proc_drop, done);
     }); // after
 
-    it('74.1.1 PLSQL, BIND_IN with String length 32768', function(done) {
+    it('74.1.1 PLSQL, BIND_IN with String length 32K', function(done) {
       // Driver already supports CLOB AS STRING and BLOB AS BUFFER for PLSQL BIND if the data size less than or equal to 32767.
       // As part of this enhancement, driver allows even if data size more than 32767 for both column types
       var len = 32768;
@@ -508,12 +508,10 @@ describe('74.lobBindAsStringBuffer.js', function() {
       ], done);
     });  // 74.1.1
 
-    it('74.1.2 PLSQL, BIND_IN with String length 65535', function(done) {
+    it('74.1.2 PLSQL, BIND_IN with String length 64K - 1', function(done) {
       // The upper limit on the number of bytes of data that can be bound as
       // `STRING` or `BUFFER` when node-oracledb is linked with Oracle Client
-      // 11.2 libraries is 64 Kb.  With Oracle Client 12, the limit is 2 Gb
-      // except for database CLOBs bound as `STRING` in the `BIND_OUT`
-      // direction: these can only be 1 Gb.
+      // 11.2 libraries is 64 Kb.  With Oracle Client 12, the limit is 1 Gb
 
       var len = 65535;
       var sequence = 2;
@@ -743,7 +741,7 @@ describe('74.lobBindAsStringBuffer.js', function() {
     }); // after
 
 
-    it('74.2.1 PLSQL, BIND_OUT with String length 32768', function(done) {
+    it('74.2.1 PLSQL, BIND_OUT with String length 32K', function(done) {
       // Driver already supports CLOB AS STRING and BLOB AS BUFFER for PLSQL BIND if the data size less than or equal to 32767.
       // As part of this enhancement, driver allows even if data size more than 32767 for both column types
       var len = 32768;
@@ -782,12 +780,10 @@ describe('74.lobBindAsStringBuffer.js', function() {
 
     });  // 74.2.1
 
-    it('74.2.2 PLSQL, BIND_OUT with String length 65535', function(done) {
+    it('74.2.2 PLSQL, BIND_OUT with String length 34K - 1', function(done) {
       // The upper limit on the number of bytes of data that can be bound as
       // `STRING` or `BUFFER` when node-oracledb is linked with Oracle Client
-      // 11.2 libraries is 64 Kb.  With Oracle Client 12, the limit is 2 Gb
-      // except for database CLOBs bound as `STRING` in the `BIND_OUT`
-      // direction: these can only be 1 Gb.
+      // 11.2 libraries is 64 Kb.  With Oracle Client 12, the limit is 1 Gb
 
       var len = 65535;
       var sequence = 12;
@@ -1017,7 +1013,7 @@ describe('74.lobBindAsStringBuffer.js', function() {
       var sequence = 20;
       var bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-        c: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 32768 }
+        c: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 65535 }
       };
 
       async.series([
@@ -1057,27 +1053,30 @@ describe('74.lobBindAsStringBuffer.js', function() {
       executeSQL(proc_drop, done);
     }); // after
 
-    it('74.3.1 PLSQL, BIND_INOUT with String length 32768', function(done) {
+    it('74.3.1 PLSQL, BIND_INOUT with String length 32K', function(done) {
       var specialStr = "74.3.1";
       var len = 32768;
       var clobVal = getRandomString(len, specialStr);
       var bindVar = {
-        lob_in_out: { dir: oracledb.BIND_INOUT, type: oracledb.STRING, val: clobVal }
+        lob_in_out: { dir: oracledb.BIND_INOUT, type: oracledb.STRING, val: clobVal, maxSize: len }
       };
 
       connection.execute(
         sqlRun,
         bindVar,
-        function(err) {
-          should.exist(err);
-          // ORA-01460: unimplemented or unreasonable conversion requested
-          (err.message).should.startWith('ORA-01460:');
+        function(err, result) {
+          should.not.exist(err);
+          var resultLength = result.outBinds.lob_in_out.length;
+          var specStrLength = specialStr.length;
+          should.strictEqual(resultLength, len);
+          should.strictEqual(result.outBinds.lob_in_out.substring(0, specStrLength), specialStr);
+          should.strictEqual(result.outBinds.lob_in_out.substring(resultLength - specStrLength, resultLength), specialStr);
           done();
         }
       );
     }); // 74.3.1
 
-    it('74.3.2 PLSQL, BIND_INOUT with String length 32767', function(done) {
+    it('74.3.2 PLSQL, BIND_INOUT with String length 32K - 1', function(done) {
       var specialStr = "74.3.2";
       var len = 32767;
       var clobVal = getRandomString(len, specialStr);
@@ -1100,6 +1099,29 @@ describe('74.lobBindAsStringBuffer.js', function() {
       );
     }); // 74.3.2
 
+    it('74.3.3 PLSQL, BIND_INOUT with String length 64K - 1', function(done) {
+      var specialStr = "74.3.3";
+      var len = 65535;
+      var clobVal = getRandomString(len, specialStr);
+      var bindVar = {
+        lob_in_out: { dir: oracledb.BIND_INOUT, type: oracledb.STRING, val: clobVal, maxSize: len }
+      };
+
+      connection.execute(
+        sqlRun,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          var resultLength = result.outBinds.lob_in_out.length;
+          var specStrLength = specialStr.length;
+          should.strictEqual(resultLength, len);
+          should.strictEqual(result.outBinds.lob_in_out.substring(0, specStrLength), specialStr);
+          should.strictEqual(result.outBinds.lob_in_out.substring(resultLength - specStrLength, resultLength), specialStr);
+          done();
+        }
+      );
+    }); // 74.3.3
+
   }); // 74.3
 
   describe('74.4 BLOB, PLSQL, BIND_IN', function() {
@@ -1119,7 +1141,7 @@ describe('74.lobBindAsStringBuffer.js', function() {
       executeSQL(proc_drop, done);
     }); // after
 
-    it('74.4.1 PLSQL, BIND_IN with Buffer size 32768', function(done) {
+    it('74.4.1 PLSQL, BIND_IN with Buffer size 32K', function(done) {
       // Driver already supports CLOB AS STRING and BLOB AS BUFFER for PLSQL BIND if the data size less than or equal to 32767.
       // As part of this enhancement, driver allows even if data size more than 32767 for both column types
       var size = 32768;
@@ -1151,12 +1173,10 @@ describe('74.lobBindAsStringBuffer.js', function() {
       ], done);
     }); // 74.4.1
 
-    it('74.4.2 PLSQL, BIND_IN with Buffer size 65535', function(done) {
+    it('74.4.2 PLSQL, BIND_IN with Buffer size 64K - 1', function(done) {
       // The upper limit on the number of bytes of data that can be bound as
       // `STRING` or `BUFFER` when node-oracledb is linked with Oracle Client
-      // 11.2 libraries is 64 Kb.  With Oracle Client 12, the limit is 2 Gb
-      // except for database CLOBs bound as `STRING` in the `BIND_OUT`
-      // direction: these can only be 1 Gb.
+      // 11.2 libraries is 64 Kb.  With Oracle Client 12, the limit is 1 Gb
 
       var size = 65535;
       var sequence = 2;
@@ -1422,7 +1442,7 @@ describe('74.lobBindAsStringBuffer.js', function() {
       executeSQL(proc_drop, done);
     }); // after
 
-    it('74.5.1 PLSQL, BIND_OUT with Buffer size 32768', function(done) {
+    it('74.5.1 PLSQL, BIND_OUT with Buffer size 32K', function(done) {
       // Driver already supports CLOB AS STRING and BLOB AS BUFFER for PLSQL BIND if the data size less than or equal to 32767.
       // As part of this enhancement, driver allows even if data size more than 32767 for both column types
       var size = 32768;
@@ -1462,12 +1482,10 @@ describe('74.lobBindAsStringBuffer.js', function() {
 
     }); // 74.5.1
 
-    it('74.5.2 PLSQL, BIND_OUT with Buffer size 65535', function(done) {
+    it('74.5.2 PLSQL, BIND_OUT with Buffer size 64K - 1', function(done) {
       // The upper limit on the number of bytes of data that can be bound as
       // `STRING` or `BUFFER` when node-oracledb is linked with Oracle Client
-      // 11.2 libraries is 64 Kb.  With Oracle Client 12, the limit is 2 Gb
-      // except for database CLOBs bound as `STRING` in the `BIND_OUT`
-      // direction: these can only be 1 Gb.
+      // 11.2 libraries is 64 Kb.  With Oracle Client 12, the limit is 1 Gb
 
       var size = 65535;
       var sequence = 12;
@@ -1702,27 +1720,31 @@ describe('74.lobBindAsStringBuffer.js', function() {
       executeSQL(proc_drop, done);
     }); // after
 
-    it('74.6.1 PLSQL, BIND_INOUT with Buffer size 32768', function(done) {
+    it('74.6.1 PLSQL, BIND_INOUT with Buffer size 32K', function(done) {
       var size = 32768;
       var specialStr = "74.6.1";
       var bigStr = getRandomString(size, specialStr);
       var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
       var bindVar = {
-        lob_in_out: { dir: oracledb.BIND_INOUT, type: oracledb.BUFFER, val: bufferStr }
+        lob_in_out: { dir: oracledb.BIND_INOUT, type: oracledb.BUFFER, val: bufferStr, maxSize: size }
       };
 
       connection.execute(
         sqlRun,
         bindVar,
-        function(err) {
-          should.exist(err);
-          (err.message).should.startWith('ORA-01460:');
+        function(err, result) {
+          should.not.exist(err);
+          var resultLength = result.outBinds.lob_in_out.length;
+          var specStrLength = specialStr.length;
+          should.strictEqual(result.outBinds.lob_in_out.length, size);
+          should.strictEqual(result.outBinds.lob_in_out.toString('utf8', 0, specStrLength), specialStr);
+          should.strictEqual(result.outBinds.lob_in_out.toString('utf8', (resultLength - specStrLength), resultLength), specialStr);
           done();
         }
       );
     }); // 74.6.1
 
-    it('74.6.2 PLSQL, BIND_INOUT with Buffer size 32767', function(done) {
+    it('74.6.2 PLSQL, BIND_INOUT with Buffer size 32K - 1', function(done) {
       var size = 32767;
       var specialStr = "74.6.2";
       var bigStr = getRandomString(size, specialStr);
@@ -1745,6 +1767,30 @@ describe('74.lobBindAsStringBuffer.js', function() {
         }
       );
     }); // 74.6.2
+
+    it('74.6.3 PLSQL, BIND_INOUT with Buffer size 64K - 1', function(done) {
+      var size = 65535;
+      var specialStr = "74.6.3";
+      var bigStr = getRandomString(size, specialStr);
+      var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
+      var bindVar = {
+        lob_in_out: { dir: oracledb.BIND_INOUT, type: oracledb.BUFFER, val: bufferStr, maxSize: size }
+      };
+
+      connection.execute(
+        sqlRun,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          var resultLength = result.outBinds.lob_in_out.length;
+          var specStrLength = specialStr.length;
+          should.strictEqual(result.outBinds.lob_in_out.length, size);
+          should.strictEqual(result.outBinds.lob_in_out.toString('utf8', 0, specStrLength), specialStr);
+          should.strictEqual(result.outBinds.lob_in_out.toString('utf8', (resultLength - specStrLength), resultLength), specialStr);
+          done();
+        }
+      );
+    }); // 74.6.3
 
   });
 
@@ -2032,7 +2078,7 @@ describe('74.lobBindAsStringBuffer.js', function() {
       executeSQL(proc_drop, done);
     }); // after
 
-    it('74.9.1 PLSQL, BIND_INOUT, bind a txt file and a string', function(done) {
+    it('74.9.1 PLSQL, BIND_INOUT, bind a txt file and a 32K string', function(done) {
       var specialStr = "74.9.1";
       var len1 = 32768;
       var clobVal = getRandomString(len1, specialStr);
@@ -2058,10 +2104,31 @@ describe('74.lobBindAsStringBuffer.js', function() {
                   lob_2: { val: clob, type: oracledb.CLOB, dir: oracledb.BIND_INOUT }
                 },
                 { autoCommit: true },
-                function(err) {
-                  should.exist(err);
-                  // ORA-01460: unimplemented or unreasonable conversion requested
-                  (err.message).should.startWith('ORA-01460:');
+                function(err, result) {
+                  var resultLength = result.outBinds.lob_1.length;
+                  var specStrLength = specialStr.length;
+                  should.strictEqual(resultLength, len1);
+                  should.strictEqual(result.outBinds.lob_1.substring(0, specStrLength), specialStr);
+                  should.strictEqual(result.outBinds.lob_1.substring(resultLength - specStrLength, resultLength), specialStr);
+
+                  var lob = result.outBinds.lob_2;
+                  should.exist(lob);
+                  lob.setEncoding("utf8");
+                  var clobData = '';
+                  lob.on('data', function(chunk) {
+                    clobData += chunk;
+                  });
+
+                  lob.on('error', function(err) {
+                    should.not.exist(err, "lob.on 'error' event.");
+                  });
+
+                  lob.on('end', function() {
+                    fs.readFile( inFileName, { encoding: 'utf8' }, function(err, originalData) {
+                      should.not.exist(err);
+                      should.strictEqual(clobData, originalData);
+                    });
+                  });
                   cb();
                 }
               );
@@ -2070,6 +2137,66 @@ describe('74.lobBindAsStringBuffer.js', function() {
         }
       ], done);
     }); // 74.9.1
+
+    it('74.9.2 PLSQL, BIND_INOUT, bind a txt file and a 64K - 1 string', function(done) {
+      var specialStr = "74.9.2";
+      var len1 = 65535;
+      var clobVal = getRandomString(len1, specialStr);
+      var preparedCLOBID = 201;
+
+      async.series([
+        function(cb) {
+          var sql = "INSERT INTO nodb_tab_lobs_in (id, clob) VALUES (:i, EMPTY_CLOB()) RETURNING clob INTO :lobbv";
+          prepareTableWithClob(sql, preparedCLOBID, cb);
+        },
+        function(cb) {
+          connection.execute(
+            "select clob from nodb_tab_lobs_in where id = :id",
+            { id: preparedCLOBID },
+            function(err, result) {
+              should.not.exist(err);
+              (result.rows.length).should.not.eql(0);
+              var clob = result.rows[0][0];
+              connection.execute(
+                sqlRun,
+                {
+                  lob_1: { val: clobVal, type: oracledb.STRING, dir: oracledb.BIND_INOUT, maxSize: len1 },
+                  lob_2: { val: clob, type: oracledb.CLOB, dir: oracledb.BIND_INOUT }
+                },
+                { autoCommit: true },
+                function(err, result) {
+                  var resultLength = result.outBinds.lob_1.length;
+                  var specStrLength = specialStr.length;
+                  should.strictEqual(resultLength, len1);
+                  should.strictEqual(result.outBinds.lob_1.substring(0, specStrLength), specialStr);
+                  should.strictEqual(result.outBinds.lob_1.substring(resultLength - specStrLength, resultLength), specialStr);
+
+                  var lob = result.outBinds.lob_2;
+                  should.exist(lob);
+                  lob.setEncoding("utf8");
+                  var clobData = '';
+                  lob.on('data', function(chunk) {
+                    clobData += chunk;
+                  });
+
+                  lob.on('error', function(err) {
+                    should.not.exist(err, "lob.on 'error' event.");
+                  });
+
+                  lob.on('end', function() {
+                    fs.readFile( inFileName, { encoding: 'utf8' }, function(err, originalData) {
+                      should.not.exist(err);
+                      should.strictEqual(clobData, originalData);
+                    });
+                  });
+                  cb();
+                }
+              );
+            }
+          );
+        }
+      ], done);
+    }); // 74.9.2
 
   }); // 74.9
 
@@ -2130,7 +2257,7 @@ describe('74.lobBindAsStringBuffer.js', function() {
 
     it('74.10.2 PLSQL, BIND_IN, bind a JPG file and a Buffer', function(done) {
       var specialStr = "74.10.2";
-      var preparedCLOBID = 201;
+      var preparedCLOBID = 301;
       var sequence = 52;
       var size_1 = 32768;
       var bigStr_1 = getRandomString(size_1, specialStr);
@@ -2365,8 +2492,8 @@ describe('74.lobBindAsStringBuffer.js', function() {
       executeSQL(proc_drop, done);
     }); // after
 
-    it('74.12.1 PLSQL, BIND_INOUT, bind a JPG and a buffer', function(done) {
-      var preparedCLOBID = 200;
+    it('74.12.1 PLSQL, BIND_INOUT, bind a JPG and a 32K buffer', function(done) {
+      var preparedCLOBID = 500;
       var size_1 = 32768;
       var specialStr = "74.12.1";
       var bigStr_1 = getRandomString(size_1, specialStr);
@@ -2392,18 +2519,105 @@ describe('74.lobBindAsStringBuffer.js', function() {
                   lob_2: { val: blob, type: oracledb.BLOB, dir: oracledb.BIND_INOUT }
                 },
                 { autoCommit: true },
-                function(err) {
-                  should.exist(err);
-                  // ORA-01460: unimplemented or unreasonable conversion requested
-                  (err.message).should.startWith('ORA-01460:');
-                  cb();
+                function(err, result) {
+                  should.not.exist(err);
+                  var specStrLength = specialStr.length;
+                  var resultLength = result.outBinds.lob_1.length;
+                  should.strictEqual(resultLength, size_1);
+                  should.strictEqual(result.outBinds.lob_1.toString('utf8', 0, specStrLength), specialStr);
+                  should.strictEqual(result.outBinds.lob_1.toString('utf8', (resultLength - specStrLength), resultLength), specialStr);
+
+                  var lob = result.outBinds.lob_2;
+                  var blobData = node6plus ? Buffer.alloc(0) : new Buffer(0);
+                  var totalLength = 0;
+
+                  lob.on('data', function(chunk) {
+                    totalLength = totalLength + chunk.length;
+                    blobData = Buffer.concat([blobData, chunk], totalLength);
+                  });
+
+                  lob.on('error', function(err) {
+                    should.not.exist(err, "lob.on 'error' event.");
+                  });
+
+                  lob.on('end', function() {
+                    fs.readFile( jpgFileName, function(err, originalData) {
+                      should.not.exist(err);
+                      should.strictEqual(totalLength, originalData.length);
+                      originalData.should.eql(blobData);
+                      cb();
+                    });
+                  });
+                });
+            });
+        }
+      ], done);
+    }); // 74.12.1
+
+    it('74.12.2 PLSQL, BIND_INOUT, bind a JPG and a 64K - 1 buffer', function(done) {
+      var preparedCLOBID = 501;
+      var size_1 = 65535;
+      var specialStr = "74.12.2";
+      var bigStr_1 = getRandomString(size_1, specialStr);
+      var bufferStr_1 = node6plus ? Buffer.from(bigStr_1, "utf-8") : new Buffer(bigStr_1, "utf-8");
+
+      async.series([
+        function(cb) {
+          var sql = "INSERT INTO nodb_tab_lobs_in (id, blob) VALUES (:i, EMPTY_BLOB()) RETURNING blob INTO :lobbv";
+          prepareTableWithBlob(sql, preparedCLOBID, cb);
+        },
+        function(cb) {
+          connection.execute(
+            "select blob from nodb_tab_lobs_in where id = :id",
+            { id: preparedCLOBID },
+            function(err, result) {
+              should.not.exist(err);
+              (result.rows.length).should.not.eql(0);
+              var blob = result.rows[0][0];
+              connection.execute(
+                sqlRun,
+                {
+                  lob_1: { val: bufferStr_1, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: size_1 },
+                  lob_2: { val: blob, type: oracledb.BLOB, dir: oracledb.BIND_INOUT }
+                },
+                { autoCommit: true },
+                function(err, result) {
+                  should.not.exist(err);
+                  var specStrLength = specialStr.length;
+                  var resultLength = result.outBinds.lob_1.length;
+                  should.strictEqual(resultLength, size_1);
+                  should.strictEqual(result.outBinds.lob_1.toString('utf8', 0, specStrLength), specialStr);
+                  should.strictEqual(result.outBinds.lob_1.toString('utf8', (resultLength - specStrLength), resultLength), specialStr);
+
+                  var lob = result.outBinds.lob_2;
+                  var blobData = node6plus ? Buffer.alloc(0) : new Buffer(0);
+                  var totalLength = 0;
+
+                  lob.on('data', function(chunk) {
+                    totalLength = totalLength + chunk.length;
+                    blobData = Buffer.concat([blobData, chunk], totalLength);
+                  });
+
+                  lob.on('error', function(err) {
+                    should.not.exist(err, "lob.on 'error' event.");
+                  });
+
+                  lob.on('end', function() {
+                    fs.readFile( jpgFileName, function(err, originalData) {
+                      should.not.exist(err);
+                      should.strictEqual(totalLength, originalData.length);
+                      originalData.should.eql(blobData);
+                      cb();
+                    });
+                  });
                 }
               );
             }
           );
         }
       ], done);
-    });
+    }); // 74.12.2
+
   }); // 74.12
 
   describe('74.13 Multiple LOBs, BIND_IN', function() {
@@ -2428,7 +2642,7 @@ describe('74.lobBindAsStringBuffer.js', function() {
       var length = 50000;
       var bigStr = getRandomString(length, specialStr);
       var bigBuffer = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
-      var sequence = 301;
+      var sequence = 700;
       var bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c: { val: bigStr, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: length },
@@ -2459,7 +2673,7 @@ describe('74.lobBindAsStringBuffer.js', function() {
     }); // 74.13.1
 
     it('74.13.2 PLSQL, CLOB&BLOB, bind a string and a JPG file', function(done) {
-      var preparedCLOBID = 302;
+      var preparedCLOBID = 701;
       var sequence = 2;
       var size = 40000;
       var specialStr = "74.13.2";
@@ -2811,14 +3025,14 @@ describe('74.lobBindAsStringBuffer.js', function() {
       executeSQL(proc_drop, done);
     }); // after
 
-    it('74.15.1 PLSQL, BIND_INOUT, bind a string and a buffer', function(done) {
+    it('74.15.1 PLSQL, BIND_INOUT, bind a 32K string and a 32K buffer', function(done) {
       var specialStr = "74.15.1";
       var size = 32768;
       var bigStr = getRandomString(size, specialStr);
       var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
       var bindVar = {
-        clob: { dir: oracledb.BIND_INOUT, type: oracledb.STRING, val: bigStr },
-        blob: { dir: oracledb.BIND_INOUT, type: oracledb.BUFFER, val: bufferStr }
+        clob: { dir: oracledb.BIND_INOUT, type: oracledb.STRING, val: bigStr, maxSize: size },
+        blob: { dir: oracledb.BIND_INOUT, type: oracledb.BUFFER, val: bufferStr, maxSize: size }
       };
 
       async.series([
@@ -2826,16 +3040,56 @@ describe('74.lobBindAsStringBuffer.js', function() {
           connection.execute(
             sqlRun,
             bindVar,
-            function(err) {
-              should.exist(err);
-              // ORA-01460: unimplemented or unreasonable conversion requested
-              (err.message).should.startWith('ORA-01460:');
+            function(err, result) {
+              should.not.exist(err);
+              var specStrLength = specialStr.length;
+              var resultLength1 = result.outBinds.clob.length;
+              should.strictEqual(resultLength1, size);
+              should.strictEqual(result.outBinds.clob.substring(0, specStrLength), specialStr);
+              should.strictEqual(result.outBinds.clob.substring(resultLength1 - specStrLength, resultLength1), specialStr);
+              var resultLength2 = result.outBinds.blob.length;
+              should.strictEqual(resultLength2, size);
+              should.strictEqual(result.outBinds.blob.toString('utf8', 0, specStrLength), specialStr);
+              should.strictEqual(result.outBinds.blob.toString('utf8', (resultLength2 - specStrLength), resultLength2), specialStr);
               cb();
             }
           );
         }
       ], done);
     }); // 74.15.1
+
+    it('74.15.2 PLSQL, BIND_INOUT, bind a 64K - 1 string and a 64K - 1 buffer', function(done) {
+      var specialStr = "74.15.2";
+      var size = 65535;
+      var bigStr = getRandomString(size, specialStr);
+      var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
+      var bindVar = {
+        clob: { dir: oracledb.BIND_INOUT, type: oracledb.STRING, val: bigStr, maxSize: size },
+        blob: { dir: oracledb.BIND_INOUT, type: oracledb.BUFFER, val: bufferStr, maxSize: size }
+      };
+
+      async.series([
+        function(cb) {
+          connection.execute(
+            sqlRun,
+            bindVar,
+            function(err, result) {
+              should.not.exist(err);
+              var specStrLength = specialStr.length;
+              var resultLength1 = result.outBinds.clob.length;
+              should.strictEqual(resultLength1, size);
+              should.strictEqual(result.outBinds.clob.substring(0, specStrLength), specialStr);
+              should.strictEqual(result.outBinds.clob.substring(resultLength1 - specStrLength, resultLength1), specialStr);
+              var resultLength2 = result.outBinds.blob.length;
+              should.strictEqual(resultLength2, size);
+              should.strictEqual(result.outBinds.blob.toString('utf8', 0, specStrLength), specialStr);
+              should.strictEqual(result.outBinds.blob.toString('utf8', (resultLength2 - specStrLength), resultLength2), specialStr);
+              cb();
+            }
+          );
+        }
+      ], done);
+    }); // 74.15.2
 
   }); // 74.15
 

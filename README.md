@@ -21,7 +21,7 @@ The node-oracledb project is open source and maintained by Oracle Corp.  The hom
 - [Oracle Database 12c JSON datatype](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#jsondatatype)
 - [Query results as JavaScript objects or arrays](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#queryoutputformats)
 - [Smart mapping between JavaScript and Oracle types with manual override available](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#typemap)
-- [Data binding using JavaScript objects or arrays](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#bind)
+- [Data binding using JavaScript types, objects or arrays](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#bind)
 - [Transaction Management](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#transactionmgt)
 - [Inbuilt Connection Pool with Queueing, Aliasing and Liveness checking](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#connpooling)
 - [Database Resident Connection Pooling (DRCP)](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#drcp)
@@ -60,7 +60,7 @@ See the
 [examples](https://github.com/oracle/node-oracledb/tree/master/examples) directory.
 Start
 with
-[examples/select1.js](https://github.com/oracle/node-oracledb/tree/master/examples/select1.js).
+[examples/select1.js](https://github.com/oracle/node-oracledb/blob/master/examples/select1.js#L35).
 
 ## <a name="doc"></a> Documentation
 

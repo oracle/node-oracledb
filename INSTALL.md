@@ -236,7 +236,8 @@ export OCI_LIB_DIR=/opt/oracle/instantclient
 export OCI_INC_DIR=/opt/oracle/instantclient/sdk/include
 ```
 
-These variables are only needed during installation.
+Use absolute paths for the variable values.  These variables are only
+needed during installation.
 
 If Instant Client is in the default location
 `/opt/oracle/instantclient` and you have no other Oracle software
@@ -341,7 +342,8 @@ export OCI_LIB_DIR=$ORACLE_HOME/lib
 export OCI_INC_DIR=$ORACLE_HOME/rdbms/public
 ```
 
-These variables are only needed during installation.
+Use absolute paths for the variable values.  These variables are only
+needed during installation.
 
 If you are behind a firewall you may need to set your proxy, for
 example:
@@ -494,7 +496,8 @@ export OCI_LIB_DIR=/opt/oracle/instantclient
 export OCI_INC_DIR=/opt/oracle/instantclient/sdk/include
 ```
 
-These variables are only needed during installation.
+Use absolute paths for the variable values.  These variables are only
+needed during installation.
 
 If Instant Client is the default location `/opt/oracle/instantclient`
 then these variables are not actually required.
@@ -619,7 +622,6 @@ Studio' which has environment variables already configured.
 
 Tell the installer where to locate the Oracle client libraries and
 header files by setting the `OCI_LIB_DIR` and `OCI_INC_DIR` variables.
-These variables are only needed during installation, not at run time.
 Do *not* add them to `PATH`.
 
 For Instant Client use:
@@ -628,6 +630,9 @@ For Instant Client use:
 set OCI_LIB_DIR=C:\oracle\instantclient\sdk\lib\msvc
 set OCI_INC_DIR=C:\oracle\instantclient\sdk\include
 ```
+
+Use absolute paths for the variable values.  These variables are only
+needed during installation.
 
 If you are installing with a local database or the full Oracle client,
 then locate the Oracle directory and set the node-oracle installer
@@ -767,7 +772,8 @@ export OCI_LIB_DIR=/opt/oracle/instantclient_12_1
 export OCI_INC_DIR=/opt/oracle/instantclient_12_1/sdk/include
 ```
 
-These variables are only needed during installation.
+Use absolute paths for the variable values.  These variables are only
+needed during installation.
 
 If you are behind a firewall you may need to set your proxy, for
 example:
@@ -862,7 +868,9 @@ Tell the installer where to find Instant Client:
 export OCI_LIB_DIR=/opt/oracle/instantclient_12_1
 export OCI_INC_DIR=/opt/oracle/instantclient_12_1/sdk/include
 ```
-These variables are only needed during installation.
+
+Use absolute paths for the variable values.  These variables are only
+needed during installation.
 
 If you are behind a firewall you may need to set your proxy, for
 example:

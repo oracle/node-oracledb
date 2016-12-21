@@ -84,7 +84,6 @@ typedef enum
   errPoolWithAliasAlreadyExists,
   errPoolWithAliasNotFound,
   errLOBBindActive,
-  errTempLOBINOUTBind,
   errBusyConnTEMPLOB,
   errBindValueTooLarge,
   errMaxValueTooLarge,

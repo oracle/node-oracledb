@@ -370,12 +370,7 @@ NJSErrorType ILob::preBind ( Bind *bind )
   {
     bind->type = this->dpiLobType_;
 
-    // Temp LOB INOUT bind not supported, check for it.
-    if ( this->isTempLob_ && bind->isInOut )
-    {
-      errNum = errTempLOBINOUTBind;
-    }
-    else if ( !this->isValid_ || this->state_ == NJS_ACTIVE )
+    if ( !this->isValid_ || this->state_ == NJS_ACTIVE )
     {
       errNum = this->getErrNumber ( true );
     }

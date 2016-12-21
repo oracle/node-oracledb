@@ -127,7 +127,7 @@ var doselect = function(conn, cb) {
       d.setDate(d.getDate() - 5);
       console.log(d);
 
-      cb(null, conn);
+      return cb(null, conn);
     });
 };
 

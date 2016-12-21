@@ -113,7 +113,7 @@ var dojsonfromrelational = function (conn, cb) {
     return cb(null, conn);
   } else {
     conn.execute(
-      "SELECT JSON_object ('deptId' IS d.department_id, 'name' IS d.department_name) department "
+      "SELECT JSON_OBJECT ('deptId' IS d.department_id, 'name' IS d.department_name) department "
       + "FROM departments d "
       + "WHERE department_id < :did",
       [50],

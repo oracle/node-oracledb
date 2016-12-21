@@ -74,32 +74,18 @@ var dojsonquery = function (conn, cb) {
   console.log('Selecting JSON stored in a CLOB column');
   conn.execute(
     "SELECT po_document FROM j_purchaseorder_c WHERE JSON_EXISTS (po_document, '$.location')",
+    [],
+    { fetchInfo: { "PO_DOCUMENT": { type: oracledb.STRING} } },  // Fetch as a String instead of a Stream
     function(err, result)
     {
-      if (err) { return cb(err, conn); }
-      if (result.rows.length === 0) { return cb(new Error('No results'), conn); }
+      if (err)
+        return cb(err, conn);
+      if (result.rows.length === 0)
+        return cb(new Error('No results'), conn);
 
-      var clob = '';
-      var lob = result.rows[0][0];  // just show first record
-      if (lob === null) { return cb(new Error('CLOB was NULL'), conn); }
-      lob.setEncoding('utf8');      // set the encoding so we get a 'string' not a 'buffer'
-      lob.on('data',
-             function(chunk)
-             {
-               clob += chunk;
-             });
-      lob.on('close',
-             function()
-             {
-               var js = JSON.parse(clob);
-               console.log('Query results: ', js);
-               return cb(null, conn);
-             });
-      lob.on('error',
-             function(err)
-             {
-               return cb(err, conn);
-             });
+      console.log('Query results:');
+      console.log(result.rows);
+      return cb(null, conn);
     });
 };
 
@@ -108,7 +94,7 @@ async.waterfall(
     doconnect,
     checkver,
     doinsert,
-    dojsonquery,
+    dojsonquery
   ],
   function (err, conn) {
     if (err) { console.error("In waterfall error cb: ==>", err, "<=="); }

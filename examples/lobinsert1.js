@@ -65,7 +65,7 @@ var dorelease = function(conn) {
 
 var docleanup = function (conn, cb) {
   conn.execute(
-    'delete from mylobs',
+    'DELETE FROM mylobs',
     function(err) {
       return cb(err, conn);
     });
@@ -85,7 +85,7 @@ var doclobinsert = function(conn, cb) {
         return cb(new Error('Error inserting CLOB'), conn);
       }
       console.log('CLOB inserted from ' + clobInFileName);
-      cb(null, conn);
+      return cb(null, conn);
     });
 };
 
@@ -103,7 +103,7 @@ var doblobinsert = function(conn, cb) {
         return cb(new Error('Error inserting BLOB'), conn);
       }
       console.log('BLOB inserted from ' + blobInFileName);
-      cb(null, conn);
+      return cb(null, conn);
     });
 };
 
