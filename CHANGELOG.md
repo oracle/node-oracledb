@@ -1,6 +1,6 @@
 # Change Log
 
-## node-oracledb v1.12.2 (DD Mon YYYY)
+## node-oracledb v1.12.2 (21 Dec 2016)
 
 - Fix memory allocation with Oracle 11g client libraries when querying CLOBs using `fetchAsString` and `fetchInfo`.
 
