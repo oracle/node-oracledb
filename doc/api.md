@@ -492,12 +492,12 @@ Boolean extendedMetaData
 Determines whether additional metadata is available for queries and
 for REF CURSORs returned from PL/SQL blocks.
 
-The default value for `extendedMetaData` is `false`. With this value,
+The default value for `extendedMetaData` is *false*. With this value,
 the [`result.metaData`](#execmetadata)
 [`result.resultSet.metaData`](#rsmetadata) objects only include column
 names.
 
-If `extendedMetaData` is `true` then `metaData` will contain
+If `extendedMetaData` is *true* then `metaData` will contain
 additional attributes.  These are listed in
 [Result Object Properties](#execmetadata).
 
@@ -666,10 +666,15 @@ console.log("Oracle client library version number is " + oracledb.oracleClientVe
 Number outFormat
 ```
 
-The format of rows fetched when using the [`execute()`](#execute)
-call. This can be either of the [Oracledb
-constants](#oracledbconstantsoutformat) `ARRAY` or `OBJECT`.  The default value
-is `ARRAY` which is more efficient.
+The format of query rows fetched when
+using [`connection.execute()`](#execute)
+or [`connection.queryStream()`](#querystream).  It affects
+both [ResultSet](#propexecresultset) and non-ResultSet queries.  It
+can be used for top level queries and REF CURSOR output.
+
+This can be either of
+the [Oracledb constants](#oracledbconstantsoutformat) `ARRAY` or
+`OBJECT`.  The default value is `ARRAY` which is more efficient.
 
 If specified as `ARRAY`, each row is fetched as an array of column
 values.
@@ -681,7 +686,9 @@ Oracle's standard name-casing rules.  It will commonly be uppercase,
 since most applications create tables using unquoted, case-insensitive
 names.
 
-This property may be overridden in an [`execute()`](#executeoptions) call.
+This property may be overridden in
+an [`execute()`](#executeoptions)
+or [`queryStream()`](#querystream) call.
 
 ##### Example
 
@@ -689,6 +696,8 @@ This property may be overridden in an [`execute()`](#executeoptions) call.
 var oracledb = require('oracledb');
 oracledb.outFormat = oracledb.ARRAY;
 ```
+
+See [Query Output Formats](#queryoutputformats) for more examples.
 
 #### <a name="propdbpoolincrement"></a> 3.2.10 `oracledb.poolIncrement`
 
@@ -1794,7 +1803,7 @@ Boolean resultSet
 
 Determines whether query results should be returned as a
 [`ResultSet`](#resultsetclass) object or directly.  The default is
-`false`.
+*false*.
 
 ##### <a name="executecallback"></a> 4.2.5.4 `execute()`: Callback Function
 
@@ -1824,7 +1833,7 @@ details of columns for the select list.  For non queries, this property is undef
 
 Each column's `name` is always given.  If the
 [`oracledb.extendedMetaData`](#propdbextendedmetadata) or `execute()` option
-[`extendedMetaData`](#propexecextendedmetadata) are `true` then
+[`extendedMetaData`](#propexecextendedmetadata) are *true* then
 additional information is included.
 
 - `name`: The column name follows Oracle's standard name-casing rules.  It will commonly be uppercase, since most applications create tables using unquoted, case-insensitive names.
@@ -1865,7 +1874,7 @@ Object resultSet
 ```
 
 For `SELECT` statements when the [`resultSet`](#executeoptions)
-option is `true`, use the `resultSet` object to fetch rows.  See
+option is *true*, use the `resultSet` object to fetch rows.  See
 [ResultSet Class](#resultsetclass).
 
 ###### <a name="execrows"></a> 4.2.5.4.4 `rows`
@@ -1875,7 +1884,7 @@ Array rows
 ```
 
 For `SELECT` statements where the [`resultSet`](#executeoptions) option is
-`false` or unspecified, `rows` contains an array of fetched rows.  It
+*false* or unspecified, `rows` contains an array of fetched rows.  It
 will be NULL if there is an error or the SQL statement was not a
 SELECT statement.  By default, the rows are in an array of column
 value arrays, but this can be changed to arrays of objects by setting
@@ -2344,7 +2353,7 @@ CURSOR columns.
 
 Each column's `name` is always given.  If the
 [`oracledb.extendedMetaData`](#propdbextendedmetadata) or `execute()` option
-[`extendedMetaData`](#propexecextendedmetadata) are `true` then
+[`extendedMetaData`](#propexecextendedmetadata) are *true* then
 additional information is included.
 
 See [`result.metaData`](#execmetadata) for the available attributes.
@@ -2861,7 +2870,7 @@ with [`connection.close()`](#connectionclose).  If `poolMax` has not
 been reached, then connections can be satisfied and are not queued.
 
 The pool queue can be disabled by setting the pool property
-[`queueRequests`](#propdbqueuerequests) to `false`.  When the queue is
+[`queueRequests`](#propdbqueuerequests) to *false*.  When the queue is
 disabled, `getConnection()` requests to a pool that cannot immediately be
 satisfied will return an error.
 
@@ -3184,7 +3193,7 @@ return a known small number of rows, non-Result Set queries may have
 less overhead.
 
 A Result Set is created when the `execute()` option property
-[`resultSet`](#executeoptions) is `true`.  Result Set rows can be
+[`resultSet`](#executeoptions) is *true*.  Result Set rows can be
 fetched using [`getRow()`](#getrow) or [`getRows()`](#getrows) on the
 `execute()` callback function's `result.resultSet` parameter property.
 
@@ -3450,7 +3459,7 @@ case-insensitive column names.
 
 More metadata is included when the
 [`oracledb.extendedMetaData`](#propdbextendedmetadata) or `connection.execute()` option
-[`extendedMetaData`](#propexecextendedmetadata) is `true`.  For
+[`extendedMetaData`](#propexecextendedmetadata) is *true*.  For
 example:
 
 ```javascript
