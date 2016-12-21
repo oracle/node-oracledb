@@ -149,6 +149,7 @@ limitations under the License.
          - 9.1.6.4 [Fetching Numbers and Dates as String](#fetchasstringhandling)
          - 9.1.6.5 [Mapping Custom Types](#customtypehandling)
      - 9.1.7 [Row Prefetching](#rowprefetching)
+  - 9.2 [Cursor Management](#cursors1000)
 10. [PL/SQL Execution](#plsqlexecution)
   - 10.1 [PL/SQL Stored Procedures](#plsqlproc)
   - 10.2 [PL/SQL Stored Functions](#plsqlfunc)
@@ -3809,6 +3810,82 @@ connection.execute(
      . . .
   });
 ```
+
+### <a name="cursors1000"></a> 9.2 Cursor Management
+
+Developers starting out with Node have to get to grips with the
+'different' programming style of JavaScript that seems to cause
+methods to be called when least expected!  While you are still in the
+initial hacking-around-with-node-oracledb phase you may sometimes
+encounter the error *ORA-01000: maximum open cursors exceeded*.  A
+cursor is a "handle for the session-specific private SQL area that
+holds a parsed SQL statement and other processing information".
+
+Here are things to do when you see an *ORA-1000*:
+
+- Avoid having too many incompletely processed statements open at one time:
+
+   - Make sure your application is handling connections and statements
+     in the order you expect.
+
+   - [Close ResultSets](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#close) before
+     releasing the connection.
+
+   - If cursors are opened with `DBMS_SQL.OPEN_CURSOR()` in a PL/SQL
+     block, close them before the block returns - except for REF
+     CURSORs being passed back to node-oracledb.
+
+- Choose the appropriate Statement Cache size.  Node-oracledb has a
+  statement cache per connection.  When node-oracledb internally
+  releases a statement it will be put into the statement cache of that
+  connection, and its cursor will remain open. This makes statement
+  re-execution very efficient.
+
+  The cache size is settable with the
+  [`oracle.stmtCacheSize`](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#propdbstmtcachesize) attribute.
+  The size you choose will depend on your knowledge of the
+  locality of the statements, and of the resources available to the
+  application.  Are statements re-executed?  Will they still be in the
+  cache when they get executed?  How many statements do you want to be
+  cached?  In rare cases when statements are not re-executed, or are
+  likely not to be in the cache, you might even want to disable the
+  cache to eliminate its management overheads.
+
+  Incorrectly sizing the statement cache will reduce application
+  efficiency.
+
+  To help set the cache size, you can turn on auto-tuning with Oracle
+  12.1 using an
+  [*oraaccess.xml*](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#oraaccess) file.
+
+  For more information, see the [Statement Caching](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#stmtcache) documentation.
+
+- Use bind variables otherwise each variant of the statement will have
+  its own statement cache entry and cursor.  With appropriate binding
+  only one entry and cursor will be needed.
+
+- Set the database's
+  [*open_cursors*](http://docs.oracle.com/database/122/REFRN/OPEN_CURSORS.htm#REFRN10137) parameter
+  appropriately.  This parameter specifies the maximum number of
+  cursors that each "session" (i.e each node-oracle connection) can
+  use.  When a connection exceeds the value, the *ORA-1000* error is
+  thrown.
+
+  Along with a cursor per entry in the connection's statement cache,
+  any new statements that a connection is currently executing, or
+  ResultSets that haven't been released (in neither situation are
+  these yet cached), will also consume a cursor.  Make sure that
+  *open_cursors* is large enough to accommodate the maximum open
+  cursors any connection may have.  The upper bound required is
+  *stmtCacheSize* + the maximum number of executing statements in a
+  connection.
+
+  Remember this is all per connection. Also cache management happens
+  when statements are internally released.  The majority of your
+  connections may use less than *open_cursors* cursors, but if one
+  connection is at the limit and it then tries to execute a new
+  statement, that connection will get *ORA-1000: maximum open cursors
+  exceeded*.
 
 ## <a name="plsqlexecution"></a> 10. PL/SQL Execution
 
