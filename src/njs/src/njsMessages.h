@@ -87,6 +87,7 @@ typedef enum
   errBusyConnTEMPLOB,
   errBindValueTooLarge,
   errMaxValueTooLarge,
+  errIncompatibleTypeArrayIndexBind,
 
   // New ones should be added here
 
