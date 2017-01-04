@@ -48,3 +48,11 @@ DROP FUNCTION mydofetch;
 DROP TABLE myraw;
 
 DROP TABLE waveheight;
+
+DROP PROCEDURE lob_out;
+
+DROP PROCEDURE lob_in_out;
+
+DROP PROCEDURE lobs_in;
+
+DROP PROCEDURE lobs_out;

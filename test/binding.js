@@ -52,14 +52,14 @@ describe('4. binding.js', function() {
         connection = conn;
         done();
       });
-    })
+    });
 
     after(function(done) {
       connection.release( function(err) {
         if(err) { console.error(err.message); return; }
         done();
       });
-    })
+    });
 
     it('4.1.1 VARCHAR2 binding, Object & Array formats', function(done) {
       async.series([
@@ -116,7 +116,7 @@ describe('4. binding.js', function() {
           );
         }
       ], done);
-    })
+    });
 
     it('4.1.2 NUMBER binding, Object & Array formats', function(done) {
       async.series([
@@ -235,7 +235,7 @@ describe('4. binding.js', function() {
           );
         }
       ], done);
-    })
+    });
 
     it('4.1.4 Multiple binding values, Change binding order', function(done) {
       async.series([
@@ -297,7 +297,7 @@ describe('4. binding.js', function() {
           );
         }
       ], done);
-    })
+    });
 
     it('4.1.5 default bind type - STRING', function(done) {
       connection.should.be.ok();
@@ -317,9 +317,9 @@ describe('4. binding.js', function() {
           done();
         }
       );
-    })
+    });
 
-  })
+  });
 
   describe('4.2 mixing named with positional binding', function() {
     var connection = null;
@@ -329,7 +329,7 @@ describe('4. binding.js', function() {
               e_table_missing EXCEPTION; \
               PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \
           BEGIN \
-              EXECUTE IMMEDIATE ('DROP TABLE nodb_binding1'); \
+              EXECUTE IMMEDIATE ('DROP TABLE nodb_binding1 PURGE'); \
           EXCEPTION \
               WHEN e_table_missing \
               THEN NULL; \
@@ -358,12 +358,12 @@ describe('4. binding.js', function() {
           }
         );
       });
-    })
+    });
 
     afterEach(function(done) {
       connection.should.be.ok();
       connection.execute(
-        "DROP TABLE nodb_binding1",
+        "DROP TABLE nodb_binding1 PURGE",
         function(err) {
           should.not.exist(err);
           connection.release(function(err) {
@@ -372,7 +372,7 @@ describe('4. binding.js', function() {
           });
         }
       );
-    })
+    });
 
     it('4.2.1 array binding is ok', function(done) {
       connection.execute(
@@ -398,7 +398,7 @@ describe('4. binding.js', function() {
           );
         }
       );
-    })
+    });
 
     it('4.2.2 array binding with mixing JSON should throw an error', function(done) {
       connection.execute(
@@ -409,6 +409,9 @@ describe('4. binding.js', function() {
           should.exist(err);
           (err.message).should.startWith('NJS-044');
           // NJS-044: named JSON object is not expected in this context
+
+          should.not.exist(result);
+
           connection.execute(
             "SELECT * FROM nodb_binding1 ORDER BY id",
             [],
@@ -421,11 +424,11 @@ describe('4. binding.js', function() {
           );
         }
       );
-    })
+    });
 
-  })
+  });
 
-  describe('4.3 insert with DATE column and DML returning', function(done) {
+  describe('4.3 insert with DATE column and DML returning', function() {
     var connection = null;
     var createTable =
       "BEGIN \
@@ -433,7 +436,7 @@ describe('4. binding.js', function() {
               e_table_missing EXCEPTION; \
               PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \
           BEGIN \
-              EXECUTE IMMEDIATE ('DROP TABLE nodb_binding2'); \
+              EXECUTE IMMEDIATE ('DROP TABLE nodb_binding2 PURGE'); \
           EXCEPTION \
               WHEN e_table_missing \
               THEN NULL; \
@@ -459,12 +462,12 @@ describe('4. binding.js', function() {
           }
         );
       });
-    })
+    });
 
     afterEach(function(done) {
       connection.should.be.ok();
       connection.execute(
-        "DROP TABLE nodb_binding2",
+        "DROP TABLE nodb_binding2 PURGE",
         function(err) {
           should.not.exist(err);
           connection.release(function(err) {
@@ -473,7 +476,7 @@ describe('4. binding.js', function() {
           });
         }
       );
-    })
+    });
 
     var insert1 = 'insert into nodb_binding2 (num, str, dt) values (:0, :1, :2)';
     var insert2 = 'insert into nodb_binding2 (num, str, dt) values (:0, :1, :2) returning num into :3';
@@ -496,7 +499,7 @@ describe('4. binding.js', function() {
             "SELECT * FROM nodb_binding2 ORDER BY num",
             [],
             options,
-            function(err, result) {
+            function(err) {
               should.not.exist(err);
               // console.log(result);
               done();
@@ -504,7 +507,7 @@ describe('4. binding.js', function() {
           );
         }
       );
-    })
+    });
 
     it('4.3.2 passes in object syntax with returning into', function(done) {
       connection.execute(
@@ -520,7 +523,7 @@ describe('4. binding.js', function() {
             "SELECT * FROM nodb_binding2 ORDER BY num",
             [],
             options,
-            function(err, result) {
+            function(err) {
               should.not.exist(err);
               // console.log(result);
               done();
@@ -528,7 +531,7 @@ describe('4. binding.js', function() {
           );
         }
       );
-    })
+    });
 
     it('4.3.3 passes in array syntax without returning into', function(done) {
       connection.execute(
@@ -543,7 +546,7 @@ describe('4. binding.js', function() {
             "SELECT * FROM nodb_binding2 ORDER BY num",
             [],
             options,
-            function(err, result) {
+            function(err) {
               should.not.exist(err);
               // console.log(result);
               done();
@@ -551,7 +554,7 @@ describe('4. binding.js', function() {
           );
         }
       );
-    })
+    });
 
     it ('4.3.4 should pass but fail in array syntax with returning into', function(done) {
       connection.execute(
@@ -567,7 +570,7 @@ describe('4. binding.js', function() {
             "SELECT * FROM nodb_binding2 ORDER BY num",
             [],
             options,
-            function(err, result) {
+            function(err) {
               should.not.exist(err);
               // console.log(result);
               done();
@@ -575,9 +578,9 @@ describe('4. binding.js', function() {
           );
         }
       );
-    })
+    });
 
-  })
+  });
 
   describe('4.4 test maxSize option', function() {
     var connection = null;
@@ -588,14 +591,14 @@ describe('4. binding.js', function() {
         connection = conn;
         done();
       });
-    })
+    });
 
     after(function(done) {
       connection.release( function(err) {
         if(err) { console.error(err.message); return; }
         done();
       });
-    })
+    });
 
     it('4.4.1 outBind & maxSize restriction', function(done) {
       async.series([
@@ -625,6 +628,7 @@ describe('4. binding.js', function() {
               // console.log(err.message);
               err.message.should.startWith('ORA-06502:');  // ORA-06502: PL/SQL: numeric or value error: character string buffer too small
               // console.log(result);
+              should.not.exist(result);
               callback();
             }
           );
@@ -639,6 +643,7 @@ describe('4. binding.js', function() {
               should.exist(err);
               // console.log(err.message);
               err.message.should.startWith('ORA-06502:');
+              should.not.exist(result);
               // console.log(result);
               callback();
             }
@@ -654,7 +659,7 @@ describe('4. binding.js', function() {
           );
         }
       ], done);
-    })
+    });
 
     it('4.4.2 default value is 200', function(done) {
       connection.execute(
@@ -666,7 +671,7 @@ describe('4. binding.js', function() {
           done();
         }
       );
-    })
+    });
 
     it('4.4.3 Negative - bind out data exceeds default length', function(done) {
       connection.execute(
@@ -677,22 +682,26 @@ describe('4. binding.js', function() {
            // ORA-06502: PL/SQL: numeric or value error
            err.message.should.startWith('ORA-06502:');
            // console.log(result.outBinds.o.length);
+           should.not.exist(result);
            done();
          }
       );
-    })
+    });
 
-    it.skip('4.4.4 maximum value is 32767', function(done) {
+    // known bug, ambiguous error message
+    it.skip('4.4.4 maximum value of maxSize option is 32767', function(done) {
       connection.execute(
         "BEGIN :o := lpad('A',32767,'x'); END;",
         { o: { type: oracledb.STRING, dir : oracledb.BIND_OUT, maxSize:50000 } },
         function(err, result) {
           should.exist(err);
+          // console.log(err);
+          should.not.exist(result);
           done();
         }
       );
-    })
-  }) // 4.4
+    });
+  }); // 4.4
 
   describe('4.5 The default direction for binding is BIND_IN', function() {
     var connection = null;
@@ -704,13 +713,13 @@ describe('4. binding.js', function() {
         connection = conn;
         assist.createTable(connection, tableName, done);
       });
-    })
+    });
 
     after(function(done) {
       async.series([
         function(callback) {
           connection.execute(
-            "DROP TABLE " + tableName,
+            "DROP TABLE " + tableName + " PURGE",
             function(err) {
               should.not.exist(err);
               callback();
@@ -724,26 +733,26 @@ describe('4. binding.js', function() {
           });
         }
       ], done);
-    })
+    });
 
 
     it('4.5.1 ',function(done) {
       connection.execute(
         "insert into nodb_raw (num) values (:id)",
         { id: { val: 1, type: oracledb.NUMBER } },
-        function(err, result) {
+        function(err) {
           should.not.exist(err);
           done();
         }
       );
-    })
-  }) // 4.5
+    });
+  }); // 4.5
 
   describe('4.6 PL/SQL block with empty outBinds', function() {
 
     it('4.6.1 ', function(done) {
 
-      var sql = "begin execute immediate 'drop table does_not_exist'; "
+      var sql = "begin execute immediate 'drop table does_not_exist purge'; "
         + "exception when others then "
         + "if sqlcode <> -942 then "
         + "raise; "
@@ -775,8 +784,8 @@ describe('4. binding.js', function() {
         }
       );
 
-    })
-  })
+    });
+  });
 
   // Test cases involving JSON value as input
   describe ('4.7 Value as JSON named/unamed test cases', function () {
@@ -800,7 +809,7 @@ describe('4. binding.js', function() {
                }
              );
            });
-      });
+       });
 
     it ( '4.7.2 Valid values when one of the value is passed as JSON ',
        function (done ) {
@@ -821,14 +830,14 @@ describe('4. binding.js', function() {
                  done ();
                } );
            });
-      });
+       });
 
     it ( '4.7.3 Valid test case when one of the value is passed as JSON ',
       function (done ) {
         var sql = "SELECT SYSDATE FROM DUAL WHERE :b = 1 and :c = 456 ";
         var binds = [ {val :  1}, 456 ];
 
-         oracledb.getConnection (
+        oracledb.getConnection (
            dbConfig,
            function (err, connection ){
 
@@ -849,7 +858,7 @@ describe('4. binding.js', function() {
         var sql = "SELECT SYSDATE FROM DUAL WHERE :b = 1 and :c = 456 ";
         var binds = [ {val : 1}, {val : 456 } ];
 
-         oracledb.getConnection (
+        oracledb.getConnection (
            dbConfig,
            function (err, connection ){
 
@@ -880,9 +889,10 @@ describe('4. binding.js', function() {
               function ( err, result ) {
                 should.exist ( err );
                 (err.message).should.startWith ( 'NJS-044:');
+                should.not.exist(result);
                 done ();
-             } );
-         });
+              } );
+          });
       });
 
     it ( '4.7.6 Invalid Test case when other-value is passed as named JSON',
@@ -900,9 +910,10 @@ describe('4. binding.js', function() {
               function ( err, result ) {
                 should.exist ( err );
                 (err.message).should.startWith ( 'NJS-044:');
+                should.not.exist(result);
                 done ();
               } );
-         });
+          });
       });
 
     it ( '4.7.7 Invalid Test case when all values is passed as named JSON',
@@ -920,6 +931,7 @@ describe('4. binding.js', function() {
               function ( err, result ) {
                 should.exist ( err );
                 (err.message).should.startWith ( 'NJS-044:');
+                should.not.exist(result);
                 done ();
               } );
           });
@@ -930,11 +942,23 @@ describe('4. binding.js', function() {
 
     var connection = null;
     before(function(done) {
-      oracledb.getConnection(dbConfig, function(err, conn) {
-        should.not.exist(err);
-        connection = conn;
-        done();
-      });
+      async.series([
+        function(cb) {
+          oracledb.getConnection(dbConfig, function(err, conn) {
+            should.not.exist(err);
+            connection = conn;
+            cb();
+          });
+        },
+        function(cb) {
+          connection.execute(
+            "alter session set time_zone='UTC'",
+            function(err) {
+              should.not.exist(err);
+              cb();
+            });
+        }
+      ],done);
     }); // before
 
     after(function(done) {
@@ -955,7 +979,7 @@ describe('4. binding.js', function() {
                      "AS \n" +
                      "BEGIN \n" +
                      "    p_out1 := SYSDATE + 10; \n" +
-                     "    p_out2 := TO_DATE('5-AUG-2016'); \n" +
+                     "    p_out2 := TO_DATE('2016-08-05', 'YYYY-MM-DD'); \n" +
                      "END;";
 
           connection.execute(
@@ -978,7 +1002,7 @@ describe('4. binding.js', function() {
               // console.log(result);
               (result.outBinds.o1).should.be.a.Date();
 
-              var vdate = new Date(2016, 7, 5);
+              var vdate = new Date( "2016-08-05T00:00:00.000Z" );
               (result.outBinds.o2).should.eql(vdate);
               cb();
             }
@@ -995,7 +1019,7 @@ describe('4. binding.js', function() {
               should.not.exist(err);
               (result.outBinds[0]).should.be.a.Date();
 
-              var vdate = new Date(2016, 7, 5);
+              var vdate = new Date( "2016-08-05T00:00:00.000Z" );
               (result.outBinds[1]).should.eql(vdate);
               cb();
             }
@@ -1036,7 +1060,7 @@ describe('4. binding.js', function() {
           );
         },
         function(cb) {
-          var vdate = new Date(2016, 7, 5);
+          var vdate = new Date( Date.UTC( 2016, 7, 5 ) );
           connection.execute(
             "BEGIN nodb_binddate2(:i, :o); END;",
             {
@@ -1045,7 +1069,7 @@ describe('4. binding.js', function() {
             },
             function(err, result) {
               should.not.exist(err);
-              // console.log(result);
+              var vdate = new Date( "2016-08-05T00:00:00.000Z" );
               (result.outBinds.o).should.eql(vdate);
               cb();
             }
@@ -1064,7 +1088,7 @@ describe('4. binding.js', function() {
 
     }); // 4.8.2
 
-    it.skip('4.8.3 BIND_INOUT', function(done) {
+    it('4.8.3 BIND_INOUT', function(done) {
 
       async.series([
         function(cb) {
@@ -1085,17 +1109,16 @@ describe('4. binding.js', function() {
           );
         },
         function(cb) {
-          var vdate = new Date(2016, 7, 5);
+          var vdate = new Date( Date.UTC( 2016, 7, 5 ) );
           connection.execute(
-
             "BEGIN nodb_binddate3(:io); END;",
             {
               io: { val: vdate, dir : oracledb.BIND_INOUT, type: oracledb.DATE }
             },
             function(err, result) {
               should.not.exist(err);
-              console.log(result);
-              (result.outBinds.o).should.eql(vdate);
+              var vdate = new Date( "2016-08-05T00:00:00.000Z" );
+              (result.outBinds.io).should.eql(vdate);
               cb();
             }
           );

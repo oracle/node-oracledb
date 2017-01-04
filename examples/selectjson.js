@@ -19,10 +19,12 @@
  *   selectjson.js
  *
  * DESCRIPTION
- *   Executes a query from a JSON table.
+ *   Shows some JSON features of Oracle Database 12c.
  *   Requires Oracle Database 12.1.0.2, which has extensive JSON datatype support.
- *   See http://docs.oracle.com/database/121/ADXDB/json.htm#CACGCBEG
- *   Use demo.sql to create the required table or do:
+ *   See http://docs.oracle.com/database/122/ADJSN/toc.htm
+ *
+ *   Uses Oracle's sample HR schema.
+ *   Also run demo.sql to create the required extra table or do:
  *
  *   DROP TABLE j_purchaseorder;
  *   CREATE TABLE j_purchaseorder
@@ -39,7 +41,7 @@ var doconnect = function(cb) {
 };
 
 var dorelease = function(conn) {
-  conn.release(function (err) {
+  conn.close(function (err) {
     if (err)
       console.error(err.message);
   });
@@ -70,7 +72,9 @@ var doinsert = function (conn, cb) {
     });
 };
 
+// 1. Selecting JSON stored in a VARCHAR2 column
 var dojsonquery = function (conn, cb) {
+  console.log('1. Selecting JSON stored in a VARCHAR2 column');
   conn.execute(
     "SELECT po_document FROM j_purchaseorder WHERE JSON_EXISTS (po_document, '$.location')",
     function(err, result)
@@ -85,7 +89,9 @@ var dojsonquery = function (conn, cb) {
     });
 };
 
+// 2. Using JSON_VALUE to extract a value from a JSON column
 var dorelationalquery = function (conn, cb) {
+  console.log('2. Using JSON_VALUE to extract a value from a JSON column');
   conn.execute(
     "SELECT JSON_VALUE(po_document, '$.location') FROM j_purchaseorder",
     function(err, result)
@@ -99,13 +105,39 @@ var dorelationalquery = function (conn, cb) {
     });
 };
 
+// 3. Using JSON_OBJECT to extract relational data as JSON
+var dojsonfromrelational = function (conn, cb) {
+  console.log('3. Using JSON_OBJECT to extract relational data as JSON');
+  if (conn.oracleServerVersion < 1202000000) { // JSON_OBJECT is new in Oracle Database 12.2
+    console.log('The JSON_OBJECT example only works with Oracle Database 12.2 or greater');
+    return cb(null, conn);
+  } else {
+    conn.execute(
+      "SELECT JSON_OBJECT ('deptId' IS d.department_id, 'name' IS d.department_name) department "
+      + "FROM departments d "
+      + "WHERE department_id < :did",
+      [50],
+      function(err, result)
+      {
+        if (err) {
+          return cb(err, conn);
+        } else {
+          for (var i = 0; i < result.rows.length; i++)
+            console.log(result.rows[i][0]);
+          return cb(null, conn);
+        }
+      });
+  }
+};
+
 async.waterfall(
   [
     doconnect,
     checkver,
     doinsert,
     dojsonquery,
-    dorelationalquery
+    dorelationalquery,
+    dojsonfromrelational
   ],
   function (err, conn) {
     if (err) { console.error("In waterfall error cb: ==>", err, "<=="); }

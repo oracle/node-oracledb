@@ -41,10 +41,10 @@ var dbConfig = require('./dbconfig.js');
 describe('1. connection.js', function(){
 
   var credentials = {
-                      user:          dbConfig.user,
-                      password:      dbConfig.password,
-                      connectString: dbConfig.connectString
-                    };
+    user:          dbConfig.user,
+    password:      dbConfig.password,
+    connectString: dbConfig.connectString
+  };
 
   describe('1.1 can run SQL query with different output formats', function(){
 
@@ -55,7 +55,7 @@ describe('1. connection.js', function(){
               e_table_missing EXCEPTION; \
               PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \
           BEGIN \
-              EXECUTE IMMEDIATE ('DROP TABLE nodb_conn_dept1'); \
+              EXECUTE IMMEDIATE ('DROP TABLE nodb_conn_dept1 PURGE'); \
           EXCEPTION \
               WHEN e_table_missing \
               THEN NULL; \
@@ -90,11 +90,11 @@ describe('1. connection.js', function(){
           });
         }
       );
-    })
+    });
 
     after(function(done){
       connection.execute(
-        'DROP TABLE nodb_conn_dept1',
+        'DROP TABLE nodb_conn_dept1 PURGE',
         function(err){
           if(err) { console.error(err.message); return; }
           connection.release( function(err) {
@@ -103,7 +103,7 @@ describe('1. connection.js', function(){
           });
         }
       );
-    })
+    });
 
     var query = "SELECT department_id, department_name " +
                 "FROM nodb_conn_dept1 " +
@@ -119,11 +119,11 @@ describe('1. connection.js', function(){
         (result.rows).should.eql([[ 40, 'Human Resources' ]]);
         done();
       });
-    })
+    });
 
     it('1.1.2 ARRAY format explicitly', function(done) {
       connection.should.be.ok();
-       connection.execute(
+      connection.execute(
          query, {id: 20}, {outFormat: oracledb.ARRAY},
          function(err, result){
            should.not.exist(err);
@@ -131,7 +131,7 @@ describe('1. connection.js', function(){
            done();
          }
        );
-    })
+    });
 
     it('1.1.3 OBJECT format', function(done){
       connection.should.be.ok();
@@ -143,7 +143,7 @@ describe('1. connection.js', function(){
           done();
         }
       );
-    })
+    });
 
     it('1.1.4 Negative test - invalid outFormat value', function(done){
       connection.should.be.ok();
@@ -153,11 +153,12 @@ describe('1. connection.js', function(){
           should.exist(err);
           (err.message).should.startWith('NJS-004:');
           // NJS-004: invalid value for property outFormat
+          should.not.exist(result);
           done();
         }
       );
-    })
-  })
+    });
+  });
 
   describe('1.2 limits the number of rows fetched', function(){
     var connection = false;
@@ -167,7 +168,7 @@ describe('1. connection.js', function(){
               e_table_missing EXCEPTION; \
               PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \
           BEGIN \
-              EXECUTE IMMEDIATE ('DROP TABLE nodb_conn_emp2'); \
+              EXECUTE IMMEDIATE ('DROP TABLE nodb_conn_emp2 PURGE'); \
           EXCEPTION \
               WHEN e_table_missing \
               THEN NULL; \
@@ -210,11 +211,11 @@ describe('1. connection.js', function(){
         }
       );
 
-    }) // before
+    }); // before
 
     after(function(done){
       connection.execute(
-        'DROP TABLE nodb_conn_emp2',
+        'DROP TABLE nodb_conn_emp2 PURGE',
         function(err){
           if(err) { console.error(err.message); return; }
           connection.release( function(err) {
@@ -223,7 +224,7 @@ describe('1. connection.js', function(){
           });
         }
       );
-    })
+    });
 
     it('1.2.1 by default, the number is 100', function(done){
       var defaultLimit = oracledb.maxRows;
@@ -240,7 +241,7 @@ describe('1. connection.js', function(){
           done();
         }
       );
-    })
+    });
 
     it('1.2.2 can also specify for each execution', function(done){
       connection.should.be.ok();
@@ -255,7 +256,7 @@ describe('1. connection.js', function(){
           done();
         }
       );
-    })
+    });
 
     it('1.2.3 can not set maxRows to be 0', function(done){
       connection.should.be.ok();
@@ -266,10 +267,11 @@ describe('1. connection.js', function(){
           should.exist(err);
           (err.message).should.startWith('NJS-026:');
           // NJS-026: maxRows must be greater than zero
+          should.not.exist(result);
           done();
         }
       );
-    })
+    });
 
     it('1.2.4 cannot set maxRows to be a negative number', function(done){
       connection.should.be.ok();
@@ -279,10 +281,11 @@ describe('1. connection.js', function(){
         function(err, result){
           should.exist(err);
           (err.message).should.startWith('NJS-007:');
+          should.not.exist(result);
           done();
         }
       );
-    })
+    });
 
     it('1.2.5 sets maxRows to be very large value', function(done) {
       connection.execute(
@@ -295,7 +298,7 @@ describe('1. connection.js', function(){
           done();
         }
       );
-    })
+    });
 
     it('1.2.6 shows 12c new way to limit the number of records fetched by queries', function(done) {
       connection.should.be.ok();
@@ -324,8 +327,8 @@ describe('1. connection.js', function(){
           done();
         }
       );
-    })
-  })
+    });
+  });
 
   describe('1.3 can call PL/SQL procedures', function(){
     var connection = false;
@@ -340,17 +343,17 @@ describe('1. connection.js', function(){
       oracledb.getConnection(credentials, function(err, conn) {
         if(err) { console.error(err.message); return; }
         connection = conn;
-        connection.execute(proc, function(err, result) {
+        connection.execute(proc, function(err) {
           if(err) { console.error(err.message); return; }
           done();
         });
       });
-    })
+    });
 
     after(function(done){
       connection.execute(
         "DROP PROCEDURE nodb_bindingtest",
-        function(err, result){
+        function(err){
           if(err) { console.error(err.message); return; }
           connection.release(function(err) {
             if(err) { console.error(err.message); return; }
@@ -358,7 +361,7 @@ describe('1. connection.js', function(){
           });
         }
       );
-    })
+    });
 
     it('1.3.1 bind parameters in various ways', function(done){
       var bindValues = {
@@ -377,8 +380,8 @@ describe('1. connection.js', function(){
           done();
         }
       );
-    })
-  })
+    });
+  });
 
   describe('1.4 statementCacheSize controls statement caching', function() {
     var makeTable =
@@ -387,7 +390,7 @@ describe('1. connection.js', function(){
                 e_table_missing EXCEPTION; \
                 PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \
             BEGIN \
-                EXECUTE IMMEDIATE ('DROP TABLE nodb_conn_emp4'); \
+                EXECUTE IMMEDIATE ('DROP TABLE nodb_conn_emp4 PURGE'); \
             EXCEPTION \
                 WHEN e_table_missing \
                 THEN NULL; \
@@ -430,12 +433,12 @@ describe('1. connection.js', function(){
           }
         );
       });
-    })
+    });
 
     afterEach('drop table and release connection', function(done) {
       oracledb.stmtCacheSize = defaultStmtCache;
       connection.execute(
-        "DROP TABLE nodb_conn_emp4",
+        "DROP TABLE nodb_conn_emp4 PURGE",
         function(err){
           if(err) { console.error(err.message); return; }
           connection.release( function(err){
@@ -444,7 +447,7 @@ describe('1. connection.js', function(){
           });
         }
       );
-    })
+    });
 
     it('1.4.1 stmtCacheSize = 0, which disable statement caching', function(done) {
       connection.should.be.ok();
@@ -485,7 +488,7 @@ describe('1. connection.js', function(){
           );
         }
       ], done);
-    })
+    });
 
     it('1.4.2 works well when statement cache enabled (stmtCacheSize > 0) ', function(done) {
       connection.should.be.ok();
@@ -526,9 +529,9 @@ describe('1. connection.js', function(){
           );
         }
       ], done);
-    })
+    });
 
-  })
+  });
 
   describe('1.5 Testing commit() & rollback() functions', function() {
     var makeTable =
@@ -537,7 +540,7 @@ describe('1. connection.js', function(){
                 e_table_missing EXCEPTION; \
                 PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \
             BEGIN \
-                EXECUTE IMMEDIATE ('DROP TABLE nodb_conn_emp5'); \
+                EXECUTE IMMEDIATE ('DROP TABLE nodb_conn_emp5 PURGE'); \
             EXCEPTION \
                 WHEN e_table_missing \
                 THEN NULL; \
@@ -591,7 +594,7 @@ describe('1. connection.js', function(){
           );
         }
       ], done);
-    })
+    });
 
     afterEach('drop table and release connections', function(done) {
       conn1.should.be.ok();
@@ -599,7 +602,7 @@ describe('1. connection.js', function(){
       async.series([
         function(callback) {
           conn2.execute(
-            "DROP TABLE nodb_conn_emp5",
+            "DROP TABLE nodb_conn_emp5 PURGE",
             function(err) {
               should.not.exist(err);
               callback();
@@ -619,7 +622,7 @@ describe('1. connection.js', function(){
           });
         }
       ], done);
-    })
+    });
 
 
     it('1.5.1 commit() function works well', function(done) {
@@ -672,7 +675,7 @@ describe('1. connection.js', function(){
         },
       ], done);
 
-    })
+    });
 
     it('1.5.2 rollback() function works well', function(done) {
       async.series([
@@ -723,8 +726,8 @@ describe('1. connection.js', function(){
           );
         },
       ], done);
-    })
-  })
+    });
+  });
 
   describe('1.6 Testing parameter assertions', function() {
     var conn1;
@@ -911,6 +914,28 @@ describe('1. connection.js', function(){
         });
       });
     });
+  }); // 1.7
+
+  describe('1.8 invalid credentials', function() {
+
+    it('1.8.1 cannot get connections with invalid credentials', function(done) {
+
+      oracledb.getConnection(
+        {
+          user: 'notexist',
+          password: 'nopass',
+          connectString: dbConfig.connectString
+        },
+        function(err, connection) {
+          should.exist(err);
+          (err.message).should.startWith('ORA-01017:');
+          should.not.exist(connection);
+          done();
+        }
+      );
+
+    });
+
   });
 
 });

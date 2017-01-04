@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -25,140 +25,127 @@
  *   TIMESTAMP WITH LOCAL TIMEZONE.  Similarly for queries, TIMESTAMP
  *   and DATE columns are fetched as TIMESTAMP WITH LOCAL TIMEZONE.
  *
- *   This demo also shows rollback.
- *
  *****************************************************************************///
 
+var async = require('async');
 var oracledb = require('oracledb');
 var dbConfig = require('./dbconfig.js');
-var connection;
 
-oracledb.getConnection(
-  {
-    user          : dbConfig.user,
-    password      : dbConfig.password,
-    connectString : dbConfig.connectString
-  },
-  createTable
-);
+var doconnect = function(cb) {
+  oracledb.getConnection(
+    {
+      user          : dbConfig.user,
+      password      : dbConfig.password,
+      connectString : dbConfig.connectString
+    },
+    cb);
+};
 
-function createTable(err, conn) {
-  var script;
+var dorelease = function(conn) {
+  conn.close(function (err) {
+    if (err)
+      console.error(err.message);
+  });
+};
 
-  if (err) {
-    console.error(err.message);
-    return;
-  }
+var docleanup = function (conn, cb) {
+  conn.execute(
+    "BEGIN " +
+      "  DECLARE" +
+      "    e_table_exists EXCEPTION;" +
+      "    PRAGMA EXCEPTION_INIT(e_table_exists, -00942);" +
+      "  BEGIN" +
+      "    EXECUTE IMMEDIATE ('DROP TABLE datetest');" +
+      "  EXCEPTION" +
+      "    WHEN e_table_exists" +
+      "    THEN NULL;" +
+      "  END; " +
+      "END;",
+    function(err) {
+      return cb(err, conn);
+    });
+};
 
-  connection = conn;
-  script = getCreateTableScript();
+var docreate = function(conn, cb) {
+  conn.execute(
+    "CREATE TABLE datetest(timestampcol TIMESTAMP, datecol DATE)",
+    function(err) {
+      return cb(err, conn);
+    });
+};
 
-  connection.execute(
-    script,
-    insertTestData
-  );
-}
+// Setting a local timezone in applications is recommended.
+// Note setting the environment variable ORA_SDTZ is an efficient alternative.
+var doalter = function(conn, cb) {
+  console.log('Altering session time zone');
+  conn.execute(
+    "ALTER SESSION SET TIME_ZONE='UTC'",
+    function(err) {
+      return cb(err, conn);
+    });
+};
 
-function insertTestData(err) {
-  var date;
-
-  if (err) {
-    console.error(err.message);
-    return;
-  }
-
-  date = new Date();
+// When bound, JavaScript Dates are inserted using TIMESTAMP WITH LOCAL TIMEZONE
+var doinsert = function(conn, cb) {
+  var date = new Date();
 
   console.log("Inserting JavaScript date: " + date);
 
-  // When bound, JavaScript Dates are inserted using TIMESTAMP WITH LOCAL TIMEZONE
-  connection.execute(
+  conn.execute(
     "INSERT INTO datetest (timestampcol, datecol) VALUES (:ts, :td)",
-    {
-      ts: date,
-      td: date
-    },
-    {autoCommit : false},
-    selectData
-  );
-}
+    { ts: date,
+      td: date },
+    function(err, result) {
+      if (err)
+        return cb(err, conn);
 
-function selectData(err, result) {
-  if (err) {
-    console.error(err.message);
-    return;
-  }
+      console.log('Rows inserted: ' + result.rowsAffected );
+      return cb(null, conn);
+    });
+};
 
-  console.log("----- Insertion Done --------");
-  console.log('rowsAffected = %d', result.rowsAffected);
 
-  connection.execute(
+// Fetch the dates
+var doselect = function(conn, cb) {
+  conn.execute(
     "SELECT timestampcol, datecol FROM datetest",
-    processResults
-  );
-}
+    function(err, result) {
+      if (err) {
+        return cb(err, conn);
+      }
 
-function processResults(err, result) {
-  var ts;
-  var d;
+      console.log("Query Results:");
+      console.log(result.rows);
 
-  if (err) {
-    console.error(err.message);
-    return;
-  }
+      // Show the queried dates are of type Date
+      console.log("Result Manipulation in JavaScript:");
+      var ts = result.rows[0][0];
+      ts.setDate(ts.getDate() + 5);
+      console.log(ts);
 
-  console.log("----- Query Results --------");
-  console.log(result.rows);
+      var d = result.rows[0][1];
+      d.setDate(d.getDate() - 5);
+      console.log(d);
 
-  console.log("----- JavaScript Date Manipulation --------");
-  // Show the queried dates are of type Date
-  ts = result.rows[0][0];
-  ts.setDate(ts.getDate() + 5);
-  console.log(ts);
+      return cb(null, conn);
+    });
+};
 
-  d = result.rows[0][1];
-  d.setDate(d.getDate() - 5);
-  console.log(d);
+// Main routine
+async.waterfall([
+  doconnect,
+  docleanup,
+  docreate,
+  doinsert,
 
-  connection.rollback(releaseConnection); // don't actually commit the new row on exit
-}
+  doselect,
+  doalter,
+  doselect,
 
-function releaseConnection(err) {
-  if (err) {
-    console.error(err.message);
-    return;
-  }
-
-  console.log("----- Rollback complete --------");
-  connection.release(logReleaseError); // close the connection
-}
-
-function logReleaseError(err) {
-  if (err) {
-    console.error(err.message);
-    return;
-  }
-}
-
-function getCreateTableScript() {
-  var script =
-    "BEGIN " +
-    "   DECLARE " +
-    "       e_table_exists EXCEPTION; " +
-    "       PRAGMA EXCEPTION_INIT(e_table_exists, -00942); " +
-    "   BEGIN " +
-    "       EXECUTE IMMEDIATE ('DROP TABLE datetest'); " +
-    "   EXCEPTION " +
-    "       WHEN e_table_exists " +
-    "       THEN NULL; " +
-    "   END; " +
-    "   EXECUTE IMMEDIATE (' " +
-    "       CREATE TABLE datetest ( " +
-    "           timestampcol TIMESTAMP, " +
-    "           datecol DATE " +
-    "       )" +
-    "   '); " +
-    "END; ";
-
-  return script;
-}
+  docleanup
+],
+function (err, conn) {
+  if (err) { console.error("In waterfall error cb: ==>", err, "<=="); }
+  if (conn)
+    dorelease(conn);
+});

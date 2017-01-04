@@ -52,9 +52,14 @@ describe('41. dataTypeBlob', function() {
   this.timeout(20000);
 
   var connection = null;
+  var nodever6   = false;
+
   var tableName = "nodb_myblobs";
 
   before('get one connection', function(done) {
+    if ( process.versions["node"].substring (0, 1) >= "6" )
+      nodever6 = true;
+
     oracledb.getConnection(
       {
         user:          dbConfig.user,
@@ -67,29 +72,29 @@ describe('41. dataTypeBlob', function() {
         done();
       }
     );
-  })
+  });
 
   after('release connection', function(done) {
     connection.release( function(err) {
       should.not.exist(err);
       done();
     });
-  })
+  });
 
   describe('41.1 testing BLOB data type', function() {
     before('create table', function(done) {
       assist.createTable(connection, tableName, done);
-    })
+    });
 
     after(function(done) {
       connection.execute(
-        "DROP table " + tableName,
+        "DROP table " + tableName + " PURGE",
         function(err) {
           should.not.exist(err);
           done();
         }
       );
-    })
+    });
 
     it('41.1.1 stores BLOB value correctly', function(done) {
       connection.should.be.ok();
@@ -98,7 +103,7 @@ describe('41. dataTypeBlob', function() {
 
           var lobFinishEventFired = false;
           setTimeout( function() {
-            lobFinishEventFired.should.equal(true, "lob does not call 'finish' event!")
+            lobFinishEventFired.should.equal(true, "lob does not call 'finish' event!");
             callback();
           }, 2000);
 
@@ -193,7 +198,7 @@ describe('41. dataTypeBlob', function() {
             function(err, result) {
               should.not.exist(err);
 
-              var blob = Buffer(0);
+              var blob = nodever6 ? Buffer.alloc(0) : new Buffer(0);
               var blobLength = 0;
               var lob = result.rows[0][0];
 
@@ -231,13 +236,13 @@ describe('41. dataTypeBlob', function() {
           });
         }
       ], done);
-    }) // 41.1.1
-  }) //41.1
+    }); // 41.1.1
+  }); //41.1
 
   describe('41.2 stores null value correctly', function() {
     it('41.2.1 testing Null, Empty string and Undefined', function(done) {
       assist.verifyNullValues(connection, tableName, done);
-    })
-  })
+    });
+  });
 
-})
+});

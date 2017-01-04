@@ -33,13 +33,14 @@
 # include <dpiConn.h>
 #endif
 
-
-using std::string;
-
-
+// Default value for poolPingInterval parameter, no pinging is done by default
+#define DPI_NO_PING_INTERVAL       -1
 
 namespace dpi
 {
+
+using std::string;
+
 
 
 /*---------------------------------------------------------------------------
@@ -57,14 +58,15 @@ class SPool
 
   virtual unsigned int connectionsInUse() const = 0;
 
+  virtual int          poolMax() const = 0 ;
 
                                 // methods
-  virtual Conn * getConnection( const std::string &connClass = "",
-                                const std::string &username = "",
-                                const std::string &password = "",
-                                const std::string &tag = "",
-                                const boolean any = false,
-                                const DBPrivileges dbPriv = dbPrivNONE ) = 0;
+  virtual Conn * getConnection( const std::string &connClass  = "",
+                                const std::string &username   = "",
+                                const std::string &password   = "",
+                                const std::string &tag        = "",
+                                const boolean     matchAnyTag = false,
+                                const DBPrivileges dbPriv     = dbPrivNONE) =0;
 
 
 protected:

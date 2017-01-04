@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -31,7 +31,12 @@ var async = require('async');
 var oracledb = require('oracledb');
 var dbConfig = require('./dbconfig.js');
 
-var buf = new Buffer([0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x2c, 0x20, 0x4f, 0x72, 0x61, 0x63, 0x6c, 0x65, 0x21], 'hex');
+var data = [0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x2c, 0x20, 0x4f, 0x72, 0x61, 0x63, 0x6c, 0x65, 0x21];
+var buf;
+if (Number(process.version.match(/^v(\d+\.\d+)/)[1]) < 4)
+  buf = new Buffer(data, 'hex');  // deprecated usage
+else
+  buf = Buffer.from(data);
 
 var insertRaw = function (conn, cb) {
   conn.execute(
@@ -74,6 +79,7 @@ async.waterfall(
   ],
   function (err, conn) {
     if (err) { console.error("In waterfall error cb: ==>", err, "<=="); }
-    conn.release(function (err) { if (err) console.error(err.message); });
+    if (conn)
+      conn.close(function (err) { if (err) console.error(err.message); });
   });
 

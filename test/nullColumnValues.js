@@ -48,7 +48,7 @@ describe('10. nullColumnValues.js', function() {
                 e_table_missing EXCEPTION; \
                 PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \
             BEGIN \
-                EXECUTE IMMEDIATE ('DROP TABLE nodb_nullcol_dept'); \
+                EXECUTE IMMEDIATE ('DROP TABLE nodb_nullcol_dept PURGE'); \
             EXCEPTION \
                 WHEN e_table_missing \
                 THEN NULL; \
@@ -95,11 +95,11 @@ describe('10. nullColumnValues.js', function() {
         );
       }
     );
-  })
+  });
 
   afterEach('drop table and release connection', function(done){
     connection.execute(
-      "DROP TABLE nodb_nullcol_dept",
+      "DROP TABLE nodb_nullcol_dept PURGE",
       function(err){
         if(err) { console.error(err.message); return; }
         connection.release( function(err){
@@ -108,7 +108,7 @@ describe('10. nullColumnValues.js', function() {
         });
       }
     );
-  })
+  });
 
   it('10.1 a simple query for null value', function(done) {
     connection.should.be.ok();
@@ -121,7 +121,7 @@ describe('10. nullColumnValues.js', function() {
         done();
       }
     );
-  })
+  });
 
   it('10.2 in-bind for null column value', function(done) {
     connection.should.be.ok();
@@ -161,7 +161,7 @@ describe('10. nullColumnValues.js', function() {
       }
     ], done);
 
-  })
+  });
 
   it('10.3 out-bind for null column value', function(done) {
     connection.should.be.ok();
@@ -204,7 +204,7 @@ describe('10. nullColumnValues.js', function() {
         );
       }
     ], done);
-  })
+  });
 
   it('10.4 DML Returning for null column value', function(done) {
     connection.should.be.ok();
@@ -214,14 +214,14 @@ describe('10. nullColumnValues.js', function() {
         manager_id = :mid WHERE department_id = :did \
         RETURNING department_id, department_name, manager_id INTO \
         :rdid, :rdname, :rmid",
-        {
-          dname: '',
-          mid: null,
-          did: 90,
-          rdid: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
-          rdname: { type: oracledb.STRING, dir: oracledb.BIND_OUT },
-          rmid: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
-        },
+      {
+        dname: '',
+        mid: null,
+        did: 90,
+        rdid: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+        rdname: { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+        rmid: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
+      },
         { autoCommit: true },
         function(err, result) {
           should.not.exist(err);
@@ -233,7 +233,7 @@ describe('10. nullColumnValues.js', function() {
           done();
         }
     );
-  })
+  });
 
   it('10.5 resultSet for null value', function(done) {
     connection.should.be.ok();
@@ -283,6 +283,6 @@ describe('10. nullColumnValues.js', function() {
         }
       }
     ], done);
-  })
+  });
 
-})
+});

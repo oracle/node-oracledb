@@ -29,9 +29,6 @@
 #include <exception>
 
 
-using std::exception;
-
-
 
 namespace dpi
 {
@@ -61,7 +58,7 @@ enum DpiError                          // error type
                      PUBLIC TYPES
   ----------------------------------------------------------------------------*/
 
-class Exception : public exception
+class Exception : public std::exception
 {
  public:
                                 // creation/termination

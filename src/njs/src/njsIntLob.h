@@ -82,6 +82,7 @@ typedef struct LobBaton
   char                      *writebuf;
   unsigned long long         writelen;
   RefCounter                 counter;
+  bool                       errOnActiveOrInvalid;
 
   Nan::Persistent<Function>  cb;
   Nan::Persistent<Object>    lobbuf;
@@ -90,7 +91,7 @@ typedef struct LobBaton
   LobBaton( unsigned int& count, Local<Function> callback,
             Local<Object> jsLobObj ):
     error(""), dpienv(NULL), dpiconn(NULL), iLob(NULL), writebuf(NULL),
-    writelen(0), counter( count )
+    writelen(0), counter( count ), errOnActiveOrInvalid(false)
   {
     cb.Reset( callback );
     jsLob.Reset ( jsLobObj );
@@ -99,7 +100,7 @@ typedef struct LobBaton
   LobBaton( unsigned int& count, Local<Object> buffer_obj,
             Local<Function> callback, Local<Object> jsLobObj ):
     error(""), dpienv(NULL), dpiconn(NULL), iLob(NULL), writebuf(NULL),
-    writelen(0), counter( count )
+    writelen(0), counter( count ), errOnActiveOrInvalid(false)
   {
     cb.Reset( callback );
     lobbuf.Reset(buffer_obj);
@@ -151,21 +152,42 @@ private:
   void cleanup();
 
   Descriptor        *lobLocator_;
-  unsigned short     fetchType_;
+  unsigned short     dpiLobType_;
   DpiHandle         *errh_;
   unsigned int       chunkSize_;
   unsigned long long length_;
+  bool               isTempLob_;
 };
 
 class ILob : public Nan::ObjectWrap
 {
  public:
-  void setILob(eBaton *executeBaton,  ProtoILob *protoILob);
+  void         setILob ( eBaton *executeBaton,  ProtoILob *protoILob,
+                         bool   tempLob );
 
+  /* Checks whether state and type are good for Bind and set the state to
+   * NJSBIND_ACTIVE. Check for temp LOB INOUT bind not supported
+   */
+  NJSErrorType preBind ( Bind *bind );
+
+  /*
+   * In case of BIND_INOUT, create a duplicate LOB locator and in case of
+   * BIND_IN initialize the LOB locator
+   */
+  void         doBind ( Bind *bind );
+
+  // Process LOB for BIND_IN or BIND_INOUT after passing it to the bind call
+  void         postBind ();
+
+  static bool  hasILobInstance ( Local<Object> obj );
                                 // Define ILob Constructor
   static Nan::Persistent<FunctionTemplate> iLobTemplate_s;
 
   static void Init(Handle<Object> target);
+
+  void cleanupDPI ();
+
+  void cleanupNJS ();
 
 
  private:
@@ -173,11 +195,15 @@ class ILob : public Nan::ObjectWrap
 
   ~ILob();
 
-  void cleanup();
+  inline NJSErrorType getErrNumber ( bool processBind );
 
   static NAN_METHOD(New);
 
   static NAN_METHOD(Release);
+
+  static NAN_METHOD(Close);
+  static void Async_Close(uv_work_t *req);
+  static void Async_AfterClose (uv_work_t *req);
 
   static void lobPropertyException(ILob *iLob, NJSErrorType err,
                                    string property);
@@ -189,6 +215,8 @@ class ILob : public Nan::ObjectWrap
   static NAN_GETTER(GetPieceSize);
   static NAN_GETTER(GetOffset);
   static NAN_GETTER(GetType);
+  static NAN_GETTER(GetIsAutoCloseLob);
+  static NAN_GETTER(GetIsValid);
 
 
                                 // Setters for properties
@@ -197,6 +225,8 @@ class ILob : public Nan::ObjectWrap
   static NAN_SETTER(SetPieceSize);
   static NAN_SETTER(SetOffset);
   static NAN_SETTER(SetType);
+  static NAN_SETTER(SetIsAutoCloseLob);
+  static NAN_SETTER(SetIsValid);
 
 
                                 // Read Method on ILob class
@@ -210,7 +240,7 @@ class ILob : public Nan::ObjectWrap
   static void Async_AfterWrite (uv_work_t *req);
 
   Descriptor               *lobLocator_;
-  unsigned short            fetchType_;
+  unsigned short            dpiLobType_;
 
   Connection               *njsconn_;
   dpi::Conn                *dpiconn_;
@@ -226,7 +256,10 @@ class ILob : public Nan::ObjectWrap
   unsigned long long        offset_;
   unsigned long             amountRead_;
   unsigned long long        amountWritten_;
-  unsigned int              type_;
+  unsigned int              njsLobType_;
+  bool                      isTempLob_;
+  unsigned int              *tempLobCount_;
+  bool                      isAutoCloseLob_;
   Nan::Persistent<Object>   jsParent_;
 };
 

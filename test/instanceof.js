@@ -30,7 +30,6 @@
  *****************************************************************************/
 'use strict';
 
-var oracledbCLib;
 var oracledb = require('oracledb');
 var should   = require('should');
 var dbConfig = require('./dbconfig.js');
@@ -141,14 +140,31 @@ describe('45. instanceof.js', function() {
 
             (result.rows[0][0] instanceof oracledb.Lob).should.be.true();
 
-            conn.release(function(err) {
+            var lob = result.rows[0][0];
+
+            lob.on("close", function(err) {
               should.not.exist(err);
 
-              done();
+              conn.release(function(err) {
+                should.not.exist(err);
+
+                done();
+              });
+
+            }); // lob close event
+
+            lob.on("error", function(err) {
+              should.not.exist(err, "lob.on 'error' event.");
             });
+
+            lob.close(function(err) {
+              should.not.exist(err);
+            });
+
           }
         );
       }
     );
-  });
+  }); // 45.5
+
 });

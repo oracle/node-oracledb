@@ -116,10 +116,10 @@ This calls the `test` script defined in `oracledb/package.json`.
 
 ```
 cd <some-directory>/node_oracledb
-npm run-script testWindows
+npm run testwindows
 ```
 
-This calls the `testWindows` script defined in `oracledb/package.json`.
+This calls the `testwindows` script defined in `oracledb/package.json`.
 
 See [npm scripts](https://docs.npmjs.com/misc/scripts) for more information
 about how npm handles the "scripts" field of `package.json`.
@@ -208,7 +208,7 @@ requests per second than the database is configured to handle.
 There are two solutions:
 
 - Solution 1: Change database `RATE_LIMIT` configuration. This parameter
-defines the connection count allowed per second. See [RATE_LIMIT](http://docs.oracle.com/database/121/NETRF/listener.htm#NETRF426)
+defines the connection count allowed per second. See [RATE_LIMIT](https://docs.oracle.com/database/122/NETRF/Oracle-Net-Listener-parameters-in-listener-ora-file.htm#NETRF426)
 for more information.
 
 - Solution 2: Set the `RETRY_COUNT` and `RETRY_DELAY` parameters in

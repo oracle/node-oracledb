@@ -38,10 +38,11 @@
 
 #include <string>
 
-using std::string;
-
 namespace dpi
 {
+
+using std::string;
+
 
 
 /*---------------------------------------------------------------------------
@@ -119,6 +120,7 @@ typedef enum
   #define  DPI_SZ_TYPE         sb8
   #define  DPI_USZ_TYPE        ub8
   #define  DPI_BUFLEN_TYPE     ub4
+  #define  DPI_MAX_BUFLEN    (1024*1024*1024 - 2)  // max for binding: 1GB-2
   #define  DPIBINDBYPOS    OCIBindByPos2
   #define  DPIBINDBYNAME   OCIBindByName2
   #define  DPIDEFINEBYPOS  OCIDefineByPos2
@@ -129,6 +131,7 @@ typedef enum
   #define  DPI_SZ_TYPE         sb4
   #define  DPI_USZ_TYPE        ub4
   #define  DPI_BUFLEN_TYPE     ub2
+  #define  DPI_MAX_BUFLEN      UB2MAXVAL
   #define  DPIBINDBYPOS    OCIBindByPos
   #define  DPIBINDBYNAME   OCIBindByName
   #define  DPIDEFINEBYPOS  OCIDefineByPos
@@ -136,6 +139,48 @@ typedef enum
   #define  DPILOBREAD      OCILobRead
   #define  DPILOBWRITE     OCILobWrite
 #endif
+
+
+// Forward declaration
+class Stmt;
+
+
+// Application (Driver) level callback function prototype
+typedef int (*bindcbtype) (void *ctx, DPI_SZ_TYPE nRows, unsigned int bndpos,
+                       unsigned long iter,
+                       unsigned long index, void **bufpp, void **alenp,
+                       void **indpp, unsigned short **rcodepp,
+                       unsigned char *piecep );
+
+// Application (Driver) level callback funciton prototype
+typedef int (*definecbtype) ( void *ctx, unsigned long definePos,
+                              unsigned long iter, unsigned long *prevIter,
+                              void **bufpp, void **alenp, void **indpp,
+                              unsigned short **rcodepp );
+
+
+
+// Bind-Dynamic Context structure  - used for DML RETURNING case.
+typedef struct
+{
+  bindcbtype    callbackfn;   /* Application specific callback */
+  void*         data;         /* Data for application specific callback */
+  unsigned long nrows;        /* number of rows affected by this DML */
+  unsigned long iter;         /* iteration - used in Array Bind */
+  unsigned int  bndpos;       /* position in the bind array */
+  short         nullInd;      /* DML RETURNING: to pass null from inbind cbk */
+  Stmt         *dpistmt;      /* DPI Statement Implementation */
+} DpiBindCallbackCtx;
+
+
+// Define-Dynamic Context structure - used for CLOB-as-STRING case
+typedef struct
+{
+  definecbtype  callbackfn;                /* Application specific callback */
+  void          *data;            /* data for application specific callback */
+  unsigned int  definePos;                /* 0-based define column position */
+  unsigned long prevIter;     /* earlier iter, used to detect iter changing */
+} DpiDefineCallbackCtx;
 
 
 typedef struct MetaData
@@ -155,12 +200,6 @@ typedef struct MetaData
 } MetaData;
 
 
-// Application (Driver) level callback function prototype
-typedef int (*cbtype) (void *ctx, DPI_SZ_TYPE nRows, unsigned int bndpos,
-                       unsigned long iter,
-                       unsigned long index, dvoid **bufpp, void **alenp,
-                       dvoid **indpp, unsigned short **rcodepp,
-                       unsigned char *piecep );
 
 class Stmt
 {
@@ -184,21 +223,21 @@ public:
   virtual void bind(unsigned int pos, unsigned short type, void  *buf,
                     DPI_SZ_TYPE bufSize, short *ind, DPI_BUFLEN_TYPE *bufLen,
                     unsigned int maxarr_len, unsigned int *curelen,
-                    void *data,
-                    cbtype cb = NULL ) = 0;
+                    DpiBindCallbackCtx *ctx = NULL) = 0;
 
   virtual void bind(const unsigned char *name, int nameLen,
                     unsigned int bndpos,
                     unsigned short type,  void *buf, DPI_SZ_TYPE  bufSize,
                     short *ind, DPI_BUFLEN_TYPE *bufLen,
                     unsigned int maxarr_len, unsigned int *curelen,
-                    void *data,
-                    cbtype cb = NULL ) = 0;
+                    DpiBindCallbackCtx *ctx = NULL ) = 0;
 
   virtual void execute ( int numIterations, bool autoCommit = false) = 0;
 
   virtual void define(unsigned int pos, unsigned short type, void *buf,
-                      DPI_SZ_TYPE bufSize, short *ind, DPI_BUFLEN_TYPE *bufLen) = 0;
+                      DPI_SZ_TYPE bufSize, short *ind,
+                      DPI_BUFLEN_TYPE *bufLen,
+                      DpiDefineCallbackCtx *ctx = NULL ) = 0;
 
   virtual void fetch(unsigned int numRows = 1) = 0;
 

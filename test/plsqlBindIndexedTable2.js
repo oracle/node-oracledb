@@ -19,7 +19,7 @@
  * See LICENSE.md for relevant licenses.
  *
  * NAME
- *   44. plsqlBinding2.js
+ *   44. plsqlBindIndexedTable2.js
  *
  * DESCRIPTION
  *   Testing PL/SQL indexed tables (associative arrays).
@@ -38,13 +38,13 @@ var should   = require('should');
 var async    = require('async');
 var dbConfig = require('./dbconfig.js');
 
-describe('44. plsqlBinding2.js', function() {
+describe('44. plsqlBindIndexedTable2.js', function() {
 
   var credentials = {
-                      user:          dbConfig.user,
-                      password:      dbConfig.password,
-                      connectString: dbConfig.connectString
-                    };
+    user:          dbConfig.user,
+    password:      dbConfig.password,
+    connectString: dbConfig.connectString
+  };
 
   var connection = null;
 
@@ -63,7 +63,7 @@ describe('44. plsqlBinding2.js', function() {
                     "    e_table_missing EXCEPTION; \n" +
                     "    PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n " +
                     "   BEGIN \n" +
-                    "     EXECUTE IMMEDIATE ('DROP TABLE nodb_waveheight'); \n" +
+                    "     EXECUTE IMMEDIATE ('DROP TABLE nodb_waveheight PURGE'); \n" +
                     "   EXCEPTION \n" +
                     "     WHEN e_table_missing \n" +
                     "     THEN NULL; \n" +
@@ -139,13 +139,13 @@ describe('44. plsqlBinding2.js', function() {
         });
       }
     ], done);
-  }) // before
+  }); // before
 
   afterEach(function(done) {
     async.series([
       function(callback) {
         connection.execute(
-          "DROP TABLE nodb_waveheight",
+          "DROP TABLE nodb_waveheight PURGE",
           function(err) {
             should.not.exist(err);
             callback();
@@ -168,7 +168,7 @@ describe('44. plsqlBinding2.js', function() {
         });
       },
     ], done);
-  }) // after
+  }); // after
 
   it('44.1 example case', function(done) {
     async.series([
@@ -178,12 +178,12 @@ describe('44. plsqlBinding2.js', function() {
           "BEGIN nodb_beachpkg.array_in(:beach_in, :depth_in); END;",
           {
             beach_in: { type: oracledb.STRING,
-                        dir:  oracledb.BIND_IN,
-                        val:  ["Malibu Beach", "Bondi Beach", "Waikiki Beach"] },
+              dir:  oracledb.BIND_IN,
+              val:  ["Malibu Beach", "Bondi Beach", "Waikiki Beach"] },
             depth_in: { type: oracledb.NUMBER,
-                        dir:  oracledb.BIND_IN,
-                        val:  [45, 30, 67]
-                      }
+              dir:  oracledb.BIND_IN,
+              val:  [45, 30, 67]
+            }
           },
           function(err) {
             should.not.exist(err);
@@ -197,11 +197,11 @@ describe('44. plsqlBinding2.js', function() {
           "BEGIN nodb_beachpkg.array_out(:beach_out, :depth_out); END;",
           {
             beach_out: { type: oracledb.STRING,
-                         dir:  oracledb.BIND_OUT,
-                         maxArraySize: 3 },
+              dir:  oracledb.BIND_OUT,
+              maxArraySize: 3 },
             depth_out: { type: oracledb.NUMBER,
-                         dir:  oracledb.BIND_OUT,
-                         maxArraySize: 3 }
+              dir:  oracledb.BIND_OUT,
+              maxArraySize: 3 }
           },
           function(err, result) {
             should.not.exist(err);
@@ -224,13 +224,13 @@ describe('44. plsqlBinding2.js', function() {
           "BEGIN nodb_beachpkg.array_inout(:beach_inout, :depth_inout); END;",
           {
             beach_inout: { type: oracledb.STRING,
-                           dir:  oracledb.BIND_INOUT,
-                           val:  ["Port Melbourne Beach", "Eighty Mile Beach", "Chesil Beach"],
-                           maxArraySize: 3},
+              dir:  oracledb.BIND_INOUT,
+              val:  ["Port Melbourne Beach", "Eighty Mile Beach", "Chesil Beach"],
+              maxArraySize: 3},
             depth_inout: { type: oracledb.NUMBER,
-                           dir:  oracledb.BIND_INOUT,
-                           val:  [8, 3, 70],
-                           maxArraySize: 3}
+              dir:  oracledb.BIND_INOUT,
+              val:  [8, 3, 70],
+              maxArraySize: 3}
           },
           function(err, result) {
             should.not.exist(err);
@@ -242,7 +242,7 @@ describe('44. plsqlBinding2.js', function() {
         );
       }
     ], done);
-  }) // 44.1
+  }); // 44.1
 
   it('44.2 example case binding by position', function(done) {
     async.series([
@@ -252,11 +252,11 @@ describe('44. plsqlBinding2.js', function() {
           "BEGIN nodb_beachpkg.array_in(:1, :2); END;",
           [
             { type: oracledb.STRING,
-               dir:  oracledb.BIND_IN,
-               val:  ["Malibu Beach", "Bondi Beach", "Waikiki Beach"] },
+              dir:  oracledb.BIND_IN,
+              val:  ["Malibu Beach", "Bondi Beach", "Waikiki Beach"] },
             { type: oracledb.NUMBER,
-               dir:  oracledb.BIND_IN,
-               val:  [45, 30, 67]
+              dir:  oracledb.BIND_IN,
+              val:  [45, 30, 67]
             }
           ],
           function(err) {
@@ -316,7 +316,7 @@ describe('44. plsqlBinding2.js', function() {
         );
       }
     ], done);
-  })
+  });
 
   it.skip('44.3 default binding type and direction with binding by name', function(done) {
     async.series([
@@ -327,11 +327,11 @@ describe('44. plsqlBinding2.js', function() {
           {
             beach_in: { //type: oracledb.STRING,
                         //dir:  oracledb.BIND_IN,
-                        val:  ["Malibu Beach", "Bondi Beach", "Waikiki Beach"] },
+              val:  ["Malibu Beach", "Bondi Beach", "Waikiki Beach"] },
             depth_in: { type: oracledb.NUMBER,
-                        dir:  oracledb.BIND_IN,
-                        val:  [45, 30, 67]
-                      }
+              dir:  oracledb.BIND_IN,
+              val:  [45, 30, 67]
+            }
           },
           function(err) {
             should.not.exist(err);
@@ -345,11 +345,11 @@ describe('44. plsqlBinding2.js', function() {
           "BEGIN nodb_beachpkg.array_out(:beach_out, :depth_out); END;",
           {
             beach_out: { type: oracledb.STRING,
-                         dir:  oracledb.BIND_OUT,
-                         maxArraySize: 3 },
+              dir:  oracledb.BIND_OUT,
+              maxArraySize: 3 },
             depth_out: { type: oracledb.NUMBER,
-                         dir:  oracledb.BIND_OUT,
-                         maxArraySize: 3 }
+              dir:  oracledb.BIND_OUT,
+              maxArraySize: 3 }
           },
           function(err, result) {
             should.not.exist(err);
@@ -372,13 +372,13 @@ describe('44. plsqlBinding2.js', function() {
           "BEGIN nodb_beachpkg.array_inout(:beach_inout, :depth_inout); END;",
           {
             beach_inout: { type: oracledb.STRING,
-                           dir:  oracledb.BIND_INOUT,
-                           val:  ["Port Melbourne Beach", "Eighty Mile Beach", "Chesil Beach"],
-                           maxArraySize: 3},
+              dir:  oracledb.BIND_INOUT,
+              val:  ["Port Melbourne Beach", "Eighty Mile Beach", "Chesil Beach"],
+              maxArraySize: 3},
             depth_inout: { type: oracledb.NUMBER,
-                           dir:  oracledb.BIND_INOUT,
-                           val:  [8, 3, 70],
-                           maxArraySize: 3}
+              dir:  oracledb.BIND_INOUT,
+              val:  [8, 3, 70],
+              maxArraySize: 3}
           },
           function(err, result) {
             should.not.exist(err);
@@ -390,7 +390,7 @@ describe('44. plsqlBinding2.js', function() {
         );
       }
     ], done);
-  }) // 44.3
+  }); // 44.3
 
   it('44.4 default binding type and direction with binding by position', function(done) {
     async.series([
@@ -401,10 +401,10 @@ describe('44. plsqlBinding2.js', function() {
           [
             { type: oracledb.STRING,
                // dir:  oracledb.BIND_IN,
-               val:  ["Malibu Beach", "Bondi Beach", "Waikiki Beach"] },
+              val:  ["Malibu Beach", "Bondi Beach", "Waikiki Beach"] },
             { type: oracledb.NUMBER,
-               dir:  oracledb.BIND_IN,
-               val:  [45, 30, 67]
+              dir:  oracledb.BIND_IN,
+              val:  [45, 30, 67]
             }
           ],
           function(err) {
@@ -464,7 +464,7 @@ describe('44. plsqlBinding2.js', function() {
         );
       }
     ], done);
-  })
+  });
 
   it('44.5 null elements in String and Number arrays', function(done) {
     async.series([
@@ -474,12 +474,12 @@ describe('44. plsqlBinding2.js', function() {
           "BEGIN nodb_beachpkg.array_in(:beach_in, :depth_in); END;",
           {
             beach_in: { type: oracledb.STRING,
-                        dir:  oracledb.BIND_IN,
-                        val:  ["Malibu Beach", "Bondi Beach", null, "Waikiki Beach", '', null] },
+              dir:  oracledb.BIND_IN,
+              val:  ["Malibu Beach", "Bondi Beach", null, "Waikiki Beach", '', null] },
             depth_in: { type: oracledb.NUMBER,
-                        dir:  oracledb.BIND_IN,
-                        val:  [null, null, 45, 30, 67, null, ]
-                      }
+              dir:  oracledb.BIND_IN,
+              val:  [null, null, 45, 30, 67, null, ]
+            }
           },
           function(err) {
             should.not.exist(err);
@@ -493,11 +493,11 @@ describe('44. plsqlBinding2.js', function() {
           "BEGIN nodb_beachpkg.array_out(:beach_out, :depth_out); END;",
           {
             beach_out: { type: oracledb.STRING,
-                         dir:  oracledb.BIND_OUT,
-                         maxArraySize: 10 },
+              dir:  oracledb.BIND_OUT,
+              maxArraySize: 10 },
             depth_out: { type: oracledb.NUMBER,
-                         dir:  oracledb.BIND_OUT,
-                         maxArraySize: 10 }
+              dir:  oracledb.BIND_OUT,
+              maxArraySize: 10 }
           },
           function(err, result) {
             should.not.exist(err);
@@ -520,13 +520,13 @@ describe('44. plsqlBinding2.js', function() {
           "BEGIN nodb_beachpkg.array_inout(:beach_inout, :depth_inout); END;",
           {
             beach_inout: { type: oracledb.STRING,
-                           dir:  oracledb.BIND_INOUT,
-                           val:  ["Port Melbourne Beach", "Eighty Mile Beach", '', "Chesil Beach", null, ''],
-                           maxArraySize: 10},
+              dir:  oracledb.BIND_INOUT,
+              val:  ["Port Melbourne Beach", "Eighty Mile Beach", '', "Chesil Beach", null, ''],
+              maxArraySize: 10},
             depth_inout: { type: oracledb.NUMBER,
-                           dir:  oracledb.BIND_INOUT,
-                           val:  [null, 8, null, 3, null, 70],
-                           maxArraySize: 10}
+              dir:  oracledb.BIND_INOUT,
+              val:  [null, 8, null, 3, null, 70],
+              maxArraySize: 10}
           },
           function(err, result) {
             should.not.exist(err);
@@ -538,7 +538,7 @@ describe('44. plsqlBinding2.js', function() {
         );
       }
     ], done);
-  }) // 44.5
+  }); // 44.5
 
   it('44.6 empty array for BIND_IN and BIND_INOUT', function(done) {
     async.series([
@@ -548,12 +548,12 @@ describe('44. plsqlBinding2.js', function() {
           "BEGIN nodb_beachpkg.array_in(:beach_in, :depth_in); END;",
           {
             beach_in: { type: oracledb.STRING,
-                        dir:  oracledb.BIND_IN,
-                        val:  [] },
+              dir:  oracledb.BIND_IN,
+              val:  [] },
             depth_in: { type: oracledb.NUMBER,
-                        dir:  oracledb.BIND_IN,
-                        val:  []
-                      }
+              dir:  oracledb.BIND_IN,
+              val:  []
+            }
           },
           function(err) {
             should.exist(err);
@@ -569,16 +569,16 @@ describe('44. plsqlBinding2.js', function() {
           "BEGIN nodb_beachpkg.array_inout(:beach_inout, :depth_inout); END;",
           {
             beach_inout: { type: oracledb.STRING,
-                           dir:  oracledb.BIND_INOUT,
-                           val:  [],
-                           maxArraySize: 0
-                         },
+              dir:  oracledb.BIND_INOUT,
+              val:  [],
+              maxArraySize: 0
+            },
             depth_inout: { type: oracledb.NUMBER,
-                           dir:  oracledb.BIND_INOUT,
-                           val:  [],
-                           maxArraySize: 3}
+              dir:  oracledb.BIND_INOUT,
+              val:  [],
+              maxArraySize: 3}
           },
-          function(err, result) {
+          function(err) {
             should.exist(err);
             (err.message).should.startWith('NJS-039:');
             callback();
@@ -586,7 +586,7 @@ describe('44. plsqlBinding2.js', function() {
         );
       }
     ], done);
-  }) // 44.6
+  }); // 44.6
 
   it('44.7 empty array for BIND_OUT', function(done) {
     async.series([
@@ -642,7 +642,7 @@ describe('44. plsqlBinding2.js', function() {
         );
       }
     ], done);
-  }) // 44.7
+  }); // 44.7
 
   it.skip('44.8 maxSize option applies to each elements of an array', function(done) {
     async.series([
@@ -652,12 +652,12 @@ describe('44. plsqlBinding2.js', function() {
           "BEGIN nodb_beachpkg.array_in(:beach_in, :depth_in); END;",
           {
             beach_in: { type: oracledb.STRING,
-                        dir:  oracledb.BIND_IN,
-                        val:  ["Malibu", "Bondi", "Waikiki"] },
+              dir:  oracledb.BIND_IN,
+              val:  ["Malibu", "Bondi", "Waikiki"] },
             depth_in: { type: oracledb.NUMBER,
-                        dir:  oracledb.BIND_IN,
-                        val:  [45, 30, 67]
-                      }
+              dir:  oracledb.BIND_IN,
+              val:  [45, 30, 67]
+            }
           },
           function(err) {
             should.not.exist(err);
@@ -671,14 +671,14 @@ describe('44. plsqlBinding2.js', function() {
           "BEGIN nodb_beachpkg.array_out(:beach_out, :depth_out); END;",
           {
             beach_out: { type: oracledb.STRING,
-                         dir:  oracledb.BIND_OUT,
-                         maxArraySize: 3,
-                         maxSize: 6 },
+              dir:  oracledb.BIND_OUT,
+              maxArraySize: 3,
+              maxSize: 6 },
             depth_out: { type: oracledb.NUMBER,
-                         dir:  oracledb.BIND_OUT,
-                         maxArraySize: 3 }
+              dir:  oracledb.BIND_OUT,
+              maxArraySize: 3 }
           },
-          function(err, result) {
+          function(err) {
             should.exist(err);
             (err.message).should.startWith('ORA-06502');
             // ORA-06502: PL/SQL: numeric or value error: host bind array too small
@@ -698,14 +698,14 @@ describe('44. plsqlBinding2.js', function() {
           "BEGIN nodb_beachpkg.array_inout(:beach_inout, :depth_inout); END;",
           {
             beach_inout: { type: oracledb.STRING,
-                           dir:  oracledb.BIND_INOUT,
-                           val:  ["Port Melbourne Beach", "Eighty Mile Beach", "Chesil Beach"],
-                           maxArraySize: 3,
-                           maxSize : 5},
+              dir:  oracledb.BIND_INOUT,
+              val:  ["Port Melbourne Beach", "Eighty Mile Beach", "Chesil Beach"],
+              maxArraySize: 3,
+              maxSize : 5},
             depth_inout: { type: oracledb.NUMBER,
-                           dir:  oracledb.BIND_INOUT,
-                           val:  [8, 3, 70],
-                           maxArraySize: 3}
+              dir:  oracledb.BIND_INOUT,
+              val:  [8, 3, 70],
+              maxArraySize: 3}
           },
           function(err, result) {
             should.not.exist(err);
@@ -717,6 +717,6 @@ describe('44. plsqlBinding2.js', function() {
         );
       }
     ], done);
-  }) // 44.8
+  }); // 44.8
 
-})
+});
