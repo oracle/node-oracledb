@@ -66,7 +66,7 @@ describe('13. stream1.js', function () {
                    "        e_table_missing EXCEPTION; \n" +
                    "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n " +
                    "    BEGIN \n" +
-                   "        EXECUTE IMMEDIATE ('DROP TABLE nodb_stream1'); \n" +
+                   "        EXECUTE IMMEDIATE ('DROP TABLE nodb_stream1 PURGE'); \n" +
                    "    EXCEPTION \n" +
                    "        WHEN e_table_missing \n" +
                    "        THEN NULL; \n" +
@@ -111,13 +111,13 @@ describe('13. stream1.js', function () {
         );
       }
     ], done);
-  }) // before
+  }); // before
 
   after(function(done) {
     async.series([
       function(callback) {
         connection.execute(
-          "DROP TABLE nodb_stream1",
+          "DROP TABLE nodb_stream1 PURGE",
           function(err) {
             should.not.exist(err);
             callback();
@@ -131,7 +131,7 @@ describe('13. stream1.js', function () {
         });
       },
     ], done);
-  }) // after
+  }); // after
 
   describe('13.1 Testing QueryStream', function () {
     it('13.1.1 stream results for oracle connection', function (done) {
@@ -489,7 +489,7 @@ describe('13. stream1.js', function () {
           should.equal(testDone, tests.length);
 
           done();
-        })
+        });
       });
     });
   });

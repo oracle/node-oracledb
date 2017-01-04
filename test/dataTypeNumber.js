@@ -57,49 +57,49 @@ describe('26. dataTypeNumber.js', function() {
         done();
       }
     );
-  })
+  });
 
   after('release connection', function(done) {
     connection.release( function(err) {
       should.not.exist(err);
       done();
     });
-  })
+  });
 
   describe('26.1 testing NUMBER data', function() {
 
     before('create table, insert data',function(done) {
       assist.setUp(connection, tableName, numbers, done);
-    })
+    });
 
     after(function(done) {
       connection.execute(
-        "DROP table " + tableName,
+        "DROP table " + tableName + " PURGE",
         function(err) {
           should.not.exist(err);
           done();
         }
       );
-    })
+    });
 
     it('26.1.1 SELECT query', function(done) {
       assist.dataTypeSupport(connection, tableName, numbers, done);
-    })
+    });
 
     it('26.1.2 resultSet stores NUMBER data correctly', function(done) {
       assist.verifyResultSet(connection, tableName, numbers, done);
-    })
+    });
 
     it('26.1.3 works well with REF Cursor', function(done) {
       assist.verifyRefCursor(connection, tableName, numbers, done);
-    })
+    });
 
-  })
+  });
 
   describe('26.2 stores null value correctly', function() {
     it('26.2.1 testing Null, Empty string and Undefined', function(done) {
       assist.verifyNullValues(connection, tableName, done);
-    })
-  })
+    });
+  });
 
-})
+});

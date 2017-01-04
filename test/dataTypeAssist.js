@@ -186,7 +186,7 @@ assist.data = {
     new Date('2015-07-23 22:00:00'),
     new Date('2015-07-23 23:00:00'),
     new Date('2015-07-24 00:00:00'),
-    new Date(2003, 09, 23, 11, 50, 30, 123)
+    new Date(2003, 9, 23, 11, 50, 30, 123)
   ]
 };
 
@@ -337,20 +337,20 @@ assist.content =
 
 
 var StringBuffer = function() {
-    this.buffer = [];
-    this.index = 0;
+  this.buffer = [];
+  this.index = 0;
 };
 
 StringBuffer.prototype = {
-    append: function(s) {
-      this.buffer[this.index] = s;
-      this.index += 1;
-      return this;
-    },
+  append: function(s) {
+    this.buffer[this.index] = s;
+    this.index += 1;
+    return this;
+  },
 
-    toString: function() {
-      return this.buffer.join("");
-    }
+  toString: function() {
+    return this.buffer.join("");
+  }
 };
 
 assist.createCharString = function(size) {
@@ -368,7 +368,7 @@ assist.createCharString = function(size) {
     }
   }
   return buffer.toString();
-}
+};
 
 assist.createBuffer = function(size) {
   var array = [];
@@ -377,7 +377,7 @@ assist.createBuffer = function(size) {
     array.push(b);
   }
   return new Buffer(array);
-}
+};
 
 assist.setUp = function(connection, tableName, array, done)
 {
@@ -389,7 +389,7 @@ assist.setUp = function(connection, tableName, array, done)
       assist.insertDataArray(connection, tableName, array, callback);
     }
   ], done);
-}
+};
 
 assist.setUp4sql = function(connection, tableName, array, done)
 {
@@ -401,7 +401,7 @@ assist.setUp4sql = function(connection, tableName, array, done)
       assist.insertData4sql(connection, tableName, array, callback);
     }
   ], done);
-}
+};
 
 assist.createTable = function(connection, tableName, done)
 {
@@ -413,7 +413,7 @@ assist.createTable = function(connection, tableName, done)
       done();
     }
   );
-}
+};
 
 assist.insertDataArray = function(connection, tableName, array, done)
 {
@@ -431,7 +431,7 @@ assist.insertDataArray = function(connection, tableName, array, done)
     should.not.exist(err);
     done();
   });
-}
+};
 
 assist.insertData4sql = function(connection, tableName, array, done)
 {
@@ -450,7 +450,7 @@ assist.insertData4sql = function(connection, tableName, array, done)
     should.not.exist(err);
     done();
   });
-}
+};
 
 assist.sqlCreateTable = function(tableName)
 {
@@ -460,7 +460,7 @@ assist.sqlCreateTable = function(tableName)
         "    e_table_missing EXCEPTION; " +
         "    PRAGMA EXCEPTION_INIT(e_table_missing, -00942); " +
         "   BEGIN " +
-        "     EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " '); " +
+        "     EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " PURGE'); " +
         "   EXCEPTION " +
         "     WHEN e_table_missing " +
         "     THEN NULL; " +
@@ -475,7 +475,7 @@ assist.sqlCreateTable = function(tableName)
         "END; ";
 
   return createTab;
-}
+};
 
 
 /************************* Functions for Verifiction *********************************/
@@ -504,7 +504,7 @@ assist.dataTypeSupport = function(connection, tableName, array, done) {
       done();
     }
   );
-}
+};
 
 assist.verifyResultSet = function(connection, tableName, array, done)
 {
@@ -519,7 +519,7 @@ assist.verifyResultSet = function(connection, tableName, array, done)
       fetchRowsFromRS(result.resultSet, array, done);
     }
   );
-}
+};
 
 assist.verifyRefCursor = function(connection, tableName, array, done)
 {
@@ -563,7 +563,7 @@ assist.verifyRefCursor = function(connection, tableName, array, done)
       );
     }
   ], done);
-}
+};
 
 var numRows = 3;  // number of rows to return from each call to getRows()
 function fetchRowsFromRS(rs, array, cb)
@@ -598,9 +598,10 @@ assist.selectOriginalData = function(connection, tableName, array, done)
     connection.execute(
       "SELECT * FROM " + tableName + " WHERE num = :no",
       { no: array.indexOf(element) },
-      function(err, result) {
+      function(err) {
         should.not.exist(err);
         // console.log(result.rows);
+
         cb();
       }
     );
@@ -608,7 +609,7 @@ assist.selectOriginalData = function(connection, tableName, array, done)
     should.not.exist(err);
     done();
   });
-}
+};
 
 /* Null value verfication */
 assist.verifyNullValues = function(connection, tableName, done)
@@ -696,7 +697,7 @@ assist.verifyNullValues = function(connection, tableName, done)
     },
     function dropTable(callback) {
       connection.execute(
-        "DROP table " + tableName,
+        "DROP table " + tableName + " PURGE",
         function(err) {
           should.not.exist(err);
           callback();
@@ -719,6 +720,6 @@ assist.verifyNullValues = function(connection, tableName, done)
     );
   }
 
-}
+};
 
 module.exports = assist;

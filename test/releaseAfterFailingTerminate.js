@@ -69,5 +69,5 @@ describe('54. releaseAfterFailingTerminate.js', function() {
         });
       }
     );
-  })
-})
+  });
+});

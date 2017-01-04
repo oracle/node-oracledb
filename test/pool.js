@@ -73,7 +73,7 @@ describe('2. pool.js', function() {
             should.not.exist(err);
             done();
           });
-      }
+        }
     );
 
     });
@@ -97,10 +97,12 @@ describe('2. pool.js', function() {
         function(err, pool){
           should.exist(err);
           (err.message).should.startWith('NJS-007:');
+
+          should.not.exist(pool);
           done();
         }
       );
-    })
+    });
 
     it('2.2.2 poolMin must be a Number', function(done){
       oracledb.createPool(
@@ -117,10 +119,12 @@ describe('2. pool.js', function() {
         function(err, pool){
           should.exist(err);
           (err.message).should.startWith('NJS-007:');
+
+          should.not.exist(pool);
           done();
         }
       );
-    })
+    });
 
     it('2.2.3 poolMin cannot equal to poolMax', function(done){
       oracledb.createPool(
@@ -137,10 +141,12 @@ describe('2. pool.js', function() {
         function(err, pool){
           should.exist(err);
           (err.message).should.startWith('ORA-24413:');
+
+          should.not.exist(pool);
           done();
         }
       );
-    })
+    });
 
     it('2.2.4 poolMin cannot greater than poolMax', function(done){
       oracledb.createPool(
@@ -157,10 +163,12 @@ describe('2. pool.js', function() {
         function(err, pool){
           should.exist(err);
           (err.message).should.startWith('ORA-24413:');
+
+          should.not.exist(pool);
           done();
         }
       );
-    })
+    });
 
     it('2.2.5 (poolMin + poolIncrement) cannot greater than poolMax', function(done){
       oracledb.createPool(
@@ -177,10 +185,12 @@ describe('2. pool.js', function() {
         function(err, pool){
           should.exist(err);
           (err.message).should.startWith('ORA-24413:');
+
+          should.not.exist(pool);
           done();
         }
       );
-    })
+    });
 
     it('2.2.6 (poolMin + poolIncrement) can equal to poolMax', function(done) {
 
@@ -208,7 +218,7 @@ describe('2. pool.js', function() {
         }
       );
 
-    })
+    });
 
   }); // 2.2
 
@@ -229,10 +239,12 @@ describe('2. pool.js', function() {
         function(err, pool){
           should.exist(err);
           (err.message).should.startWith('NJS-007:');
+
+          should.not.exist(pool);
           done();
         }
       );
-    })
+    });
 
     it('2.3.2 poolMax cannot be 0', function(done){
       oracledb.createPool(
@@ -249,10 +261,12 @@ describe('2. pool.js', function() {
         function(err, pool){
           should.exist(err);
           (err.message).should.startWith('ORA-24413:');
+
+          should.not.exist(pool);
           done();
         }
       );
-    })
+    });
 
     it('2.3.3 poolMax must be a number', function(done){
       oracledb.createPool(
@@ -269,10 +283,12 @@ describe('2. pool.js', function() {
         function(err, pool){
           should.exist(err);
           (err.message).should.startWith('NJS-008:');
+
+          should.not.exist(pool);
           done();
         }
       );
-    })
+    });
 
     it('2.3.4 poolMax limits the pool capacity', function(done){
       oracledb.createPool(
@@ -310,6 +326,8 @@ describe('2. pool.js', function() {
                 should.exist(err);
                 (err.message).should.startWith('ORA-24418:');
 
+                should.not.exist(conn3);
+
                 conn2.release( function(err){
                   should.not.exist(err);
                   conn1.release( function(err){
@@ -326,7 +344,7 @@ describe('2. pool.js', function() {
 
         }
       );
-    })
+    });
 
   }); // 2.3
 
@@ -347,10 +365,12 @@ describe('2. pool.js', function() {
           should.exist(err);
           (err.message).should.startWith('NJS-007:');
           // NJS-007: invalid value for
+
+          should.not.exist(pool);
           done();
         }
       );
-    })
+    });
 
     it('2.4.2 poolIncrement cannot be 0', function(done){
       oracledb.createPool(
@@ -367,10 +387,12 @@ describe('2. pool.js', function() {
         function(err, pool){
           should.exist(err);
           (err.message).should.startWith('ORA-24413:');
+
+          should.not.exist(pool);
           done();
         }
       );
-    })
+    });
 
     it('2.4.3 poolIncrement must be a Number', function(done){
       oracledb.createPool(
@@ -387,10 +409,12 @@ describe('2. pool.js', function() {
         function(err, pool){
           should.exist(err);
           (err.message).should.startWith('NJS-008:');
+
+          should.not.exist(pool);
           done();
         }
       );
-    })
+    });
 
     it('2.4.4 the amount of open connections equals to poolMax when (connectionsOpen + poolIncrement) > poolMax', function(done){
       oracledb.createPool(
@@ -454,9 +478,9 @@ describe('2. pool.js', function() {
           });
         }
       );
-    })
+    });
 
-  }) // 2.4
+  }); // 2.4
 
   describe('2.5 poolTimeout', function() {
 
@@ -476,10 +500,12 @@ describe('2. pool.js', function() {
           should.exist(err);
           (err.message).should.startWith('NJS-007:');
           // NJS-007: invalid value for
+
+          should.not.exist(pool);
           done();
         }
       );
-    })
+    });
 
     it('2.5.2 poolTimeout can be 0, which disables timeout feature', function(done){
       oracledb.createPool(
@@ -503,7 +529,7 @@ describe('2. pool.js', function() {
           });
         }
       );
-    })
+    });
 
     it('2.5.3 poolTimeout must be a number', function(done){
       oracledb.createPool(
@@ -521,12 +547,14 @@ describe('2. pool.js', function() {
           should.exist(err);
           (err.message).should.startWith('NJS-007:');
           // NJS-007: invalid value for
+
+          should.not.exist(pool);
           done();
         }
       );
-    })
+    });
 
-  })
+  });
 
   describe('2.6 stmtCacheSize', function() {
 
@@ -546,10 +574,12 @@ describe('2. pool.js', function() {
           should.exist(err);
           (err.message).should.startWith('NJS-007:');
           // NJS-007: invalid value for
+
+          should.not.exist(pool);
           done();
         }
       );
-    })
+    });
 
     it('2.6.2 stmtCacheSize can be 0', function(done){
       oracledb.createPool(
@@ -572,7 +602,7 @@ describe('2. pool.js', function() {
           });
         }
       );
-    })
+    });
 
     it('2.6.3 stmtCacheSize must be a Number', function(done){
       oracledb.createPool(
@@ -590,12 +620,14 @@ describe('2. pool.js', function() {
           should.exist(err);
           (err.message).should.startWith('NJS-007:');
           // NJS-007: invalid value for
+
+          should.not.exist(pool);
           done();
         }
       );
-    })
+    });
 
-  })
+  });
 
   describe('2.7 getConnection', function(){
     var pool1;
@@ -619,24 +651,7 @@ describe('2. pool.js', function() {
       );
     });
 
-    // This case was skipped. JavaScript layer conducts assertions for all public methods.
-    // The case used to throw NJS-002 error.
-    it('2.7.1 throws error if called after pool is terminated and a callback is not provided', function(done) {
-      pool1.terminate(function(err) {
-        should.not.exist(err);
-
-        try {
-          pool1.getConnection();
-        } catch (err) {
-          should.exist(err);
-          (err.message).should.startWith('NJS-009:');
-          // NJS-009: invalid number of parameters
-        }
-        done();
-      });
-    });
-
-    it('2.7.2 passes error in callback if called after pool is terminated and a callback is provided', function(done) {
+    it('2.7.1 passes error in callback if called after pool is terminated and a callback is provided', function(done) {
       pool1.terminate(function(err) {
         should.not.exist(err);
 
@@ -644,10 +659,13 @@ describe('2. pool.js', function() {
           should.exist(err);
           (err.message).should.startWith('NJS-002:');
           // NJS-002: invalid pool
+
+          should.not.exist(conn);
           done();
         });
       });
     });
+
   });
 
   describe('2.8 connection request queue (basic functionality)', function(){
@@ -691,10 +709,11 @@ describe('2. pool.js', function() {
                 pool.getConnection(function(err, conn) {
                   should.not.exist(err);
 
-                  conn.execute(getBlockingSql(3), function(err, result) {
+                  conn.execute(getBlockingSql(3), function(err) {
                     should.not.exist(err);
 
                     conn.release(function(err) {
+                      should.not.exist(err);
                       cb();
                     });
                   });
@@ -705,13 +724,17 @@ describe('2. pool.js', function() {
                 setTimeout(function() {
                   pool.getConnection(function(err, conn) {
                     should.exist(err);
-                    (err.message).should.startWith('ORA-24418: Cannot open further sessions');
+                    // ORA-24418: Cannot open further sessions
+                    (err.message).should.startWith('ORA-24418:');
+                    should.not.exist(conn);
                     cb();
                   });
                 }, 200);
               }
             ],
-            function(err, results){
+            function(err){
+              should.not.exist(err);
+
               pool.terminate(function(err) {
                 should.not.exist(err);
                 done();
@@ -743,10 +766,11 @@ describe('2. pool.js', function() {
                 pool.getConnection(function(err, conn) {
                   should.not.exist(err);
 
-                  conn.execute(getBlockingSql(3), function(err, result) {
+                  conn.execute(getBlockingSql(3), function(err) {
                     should.not.exist(err);
 
                     conn.release(function(err) {
+                      should.not.exist(err);
                       cb();
                     });
                   });
@@ -767,7 +791,8 @@ describe('2. pool.js', function() {
                 }, 100);
               }
             ],
-            function(err, results){
+            function(err){
+              should.not.exist(err);
               pool.terminate(function(err) {
                 should.not.exist(err);
                 done();
@@ -800,10 +825,11 @@ describe('2. pool.js', function() {
                 pool.getConnection(function(err, conn) {
                   should.not.exist(err);
 
-                  conn.execute(getBlockingSql(4), function(err, result) {
+                  conn.execute(getBlockingSql(4), function(err) {
                     should.not.exist(err);
 
                     conn.release(function(err) {
+                      should.not.exist(err);
                       cb();
                     });
                   });
@@ -815,12 +841,15 @@ describe('2. pool.js', function() {
                   pool.getConnection(function(err, conn) {
                     should.exist(err);
                     (err.message).should.equal('NJS-040: connection request timeout');
+
+                    should.not.exist(conn);
                     cb();
                   });
                 }, 100);
               }
             ],
-            function(err, results){
+            function(err){
+              should.not.exist(err);
               pool.terminate(function(err) {
                 should.not.exist(err);
                 done();
@@ -853,10 +882,11 @@ describe('2. pool.js', function() {
                 pool.getConnection(function(err, conn) {
                   should.not.exist(err);
 
-                  conn.execute(getBlockingSql(4), function(err, result) {
+                  conn.execute(getBlockingSql(4), function(err) {
                     should.not.exist(err);
 
                     conn.release(function(err) {
+                      should.not.exist(err);
                       cb();
                     });
                   });
@@ -869,13 +899,15 @@ describe('2. pool.js', function() {
                     should.not.exist(err);
 
                     conn.release(function(err) {
+                      should.not.exist(err);
                       cb();
                     });
                   });
                 }, 100);
               }
             ],
-            function(err, results){
+            function(err){
+              should.not.exist(err);
               pool.terminate(function(err) {
                 should.not.exist(err);
                 done();
@@ -907,7 +939,7 @@ describe('2. pool.js', function() {
           pool.getConnection(function(err, conn) {
             should.not.exist(err);
 
-            conn.execute('select 1 from dual', function(err, result) {
+            conn.execute('select 1 from dual', function(err) {
               should.not.exist(err);
 
               conn.release(function(err) {
@@ -957,5 +989,27 @@ describe('2. pool.js', function() {
       );
     });
   }); // 2.10
+
+  describe.skip('2.11 invalid credentials', function() {
+
+    it('2.11.1 cannot get connections with invalid credentials', function(done) {
+
+      oracledb.createPool(
+        {
+          user: 'notexist',
+          password: 'nopass',
+          connectString: 'inst1'
+        },
+        function(err, pool) {
+          should.exist(err);
+          console.log(err.message);
+          should.not.exist(pool);
+          done();
+        }
+      );
+
+    });
+
+  }); // 2.11
 
 });

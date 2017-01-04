@@ -38,7 +38,7 @@ var doconnect = function(cb) {
 };
 
 var dorelease = function(conn) {
-  conn.release(function (err) {
+  conn.close(function (err) {
     if (err)
       console.error(err.message);
   });
@@ -59,13 +59,14 @@ var doin = function (conn, cb) {
   conn.execute(
     "BEGIN beachpkg.array_in(:beach_in, :depth_in); END;",
     {
-      beach_in: { type : oracledb.STRING,
-                  dir: oracledb.BIND_IN,
-                  val: ["Malibu Beach", "Bondi Beach", "Waikiki Beach"] },
-      depth_in: { type : oracledb.NUMBER,
-                  dir: oracledb.BIND_IN,
-                  val: [45, 30, 67]
-                }
+      beach_in:
+      { type : oracledb.STRING,
+        dir: oracledb.BIND_IN,
+        val: ["Malibu Beach", "Bondi Beach", "Waikiki Beach"] },
+      depth_in:
+      { type : oracledb.NUMBER,
+        dir: oracledb.BIND_IN,
+        val: [45, 30, 67] }
     },
     function(err) {
       if (err) {
@@ -82,12 +83,14 @@ var doout = function (conn, cb) {
   conn.execute(
     "BEGIN beachpkg.array_out(:beach_out, :depth_out); END;",
     {
-      beach_out: { type: oracledb.STRING,
-                   dir: oracledb.BIND_OUT,
-                   maxArraySize: 3},
-      depth_out: { type: oracledb.NUMBER,
-                   dir: oracledb.BIND_OUT,
-                   maxArraySize: 3}
+      beach_out:
+      { type: oracledb.STRING,
+        dir: oracledb.BIND_OUT,
+        maxArraySize: 3 },
+      depth_out:
+      { type: oracledb.NUMBER,
+        dir: oracledb.BIND_OUT,
+        maxArraySize: 3 }
     },
     function (err, result) {
       if (err) {
@@ -106,14 +109,16 @@ var doinout = function (conn, cb) {
   conn.execute(
     "BEGIN beachpkg.array_inout(:beach_inout, :depth_inout); END;",
     {
-      beach_inout: { type: oracledb.STRING,
-                     dir: oracledb.BIND_INOUT,
-                     val: ["Port Melbourne Beach", "Eighty Mile Beach", "Chesil Beach"],
-                     maxArraySize: 3},
-      depth_inout: { type: oracledb.NUMBER,
-                     dir: oracledb.BIND_INOUT,
-                     val: [8, 3, 70],
-                     maxArraySize: 3}
+      beach_inout:
+      { type: oracledb.STRING,
+        dir: oracledb.BIND_INOUT,
+        val: ["Port Melbourne Beach", "Eighty Mile Beach", "Chesil Beach"],
+        maxArraySize: 3 },
+      depth_inout:
+      { type: oracledb.NUMBER,
+        dir: oracledb.BIND_INOUT,
+        val: [8, 3, 70],
+        maxArraySize: 3 }
     },
     function (err, result) {
       if (err) {

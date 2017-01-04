@@ -49,7 +49,7 @@ var doconnect = function(cb) {
 };
 
 var dorelease = function(conn) {
-  conn.release(function (err) {
+  conn.close(function (err) {
     if (err)
       console.error(err.message);
   });

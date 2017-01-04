@@ -59,12 +59,12 @@ static const char *errMsg[] =
   "NJS-020: empty array was specified to fetch values as string", // errEmptyArrayForFetchAs
   "NJS-021: invalid type for conversion specified", // errInvalidTypeForConversion
   "NJS-022: invalid Lob",                           // errInvalidLob
-  "NJS-023: concurrent operations on LOB are not allowed",  // errBusyLob
+  "NJS-023: concurrent operations on a Lob are not allowed",  // errBusyLob
   "NJS-024: memory allocation failed",  // errInsufficientMemory
-  "NJS-025: overflow when calculating results area size", // errResultsTooLarge
+  "NJS-025: overflow when calculating the result area size", // errResultsTooLarge
   "NJS-026: maxRows must be greater than zero",   // errInvalidmaxRows
   "NJS-027: unexpected SQL parsing error",        // errSQLSyntaxError
-  "NJS-028: raw database type is not supported with DML Returning statements", // errBufferReturningInvalid
+  "NJS-028: RAW database type is not supported with DML Returning statements", // errBufferReturningInvalid
   "NJS-029: invalid object from JavaScript",      // errInvalidJSObject
   "NJS-030: connection cannot be released because Lob operations are in progress",  // errBusyConnLOB
   "NJS-031: connection cannot be released because ResultSet operations are in progress", // errBusyConnRS
@@ -83,8 +83,12 @@ static const char *errMsg[] =
   "NJS-044: named JSON object is not expected in this context", // errNamedJSON
   "NJS-045: cannot load the oracledb add-on binary", // errCannotLoadBinary
   "NJS-046: pool alias \"%s\" already exists in the connection pool cache", // errPoolWithAliasAlreadyExists
-  "NJS-047: pool alias \"%s\" not found in connection pool cache", // errPoolWithAliasNotFound
-  "NJS-048: incompatible type of value provided for array bind at index %d", // errIncompatibleTypeArrayIndexBind
+  "NJS-047: pool alias \"%s\" not found in the connection pool cache", // errPoolWithAliasNotFound
+  "NJS-048: operation not permitted while Lob object is active in a bind operation", // errLOBBindActive
+  "NJS-049: Temporary LOBs were open when the connection was closed", // errBusyConnTEMPLOB
+  "NJS-050: data must be shorter than %d", // errBindValueTooLarge
+  "NJS-051: \"%s\" must be less than %d", // errMaxValueTooLarge
+  "NJS-052: incompatible type of value provided for array bind at index %d", // errIncompatibleTypeArrayIndexBind
 };
 
 string NJSMessages::getErrorMsg ( NJSErrorType err, ... )

@@ -78,5 +78,5 @@ describe('51. accessTerminatedPoolAttributes.js', function(){
       }
     );
 
-  })
-})
+  });
+});

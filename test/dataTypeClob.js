@@ -68,29 +68,29 @@ describe('40. dataTypeClob.js', function() {
         done();
       }
     );
-  })
+  });
 
   after('release connection', function(done) {
     connection.release( function(err) {
       should.not.exist(err);
       done();
     });
-  })
+  });
 
   describe('40.1 testing CLOB data type', function() {
     before('create table', function(done) {
       assist.createTable(connection, tableName, done);
-    })
+    });
 
     after(function(done) {
       connection.execute(
-        "DROP table " + tableName,
+        "DROP table " + tableName + " PURGE",
         function(err) {
           should.not.exist(err);
           done();
         }
       );
-    })
+    });
 
     it('40.1.1 stores CLOB value correctly', function(done) {
       connection.should.be.ok();
@@ -246,7 +246,7 @@ describe('40. dataTypeClob.js', function() {
 
               lob.on('data', function(chunk) {
                 lobDataEventFired = true;
-                clob += chunk;
+                clob = clob + chunk;
               });
 
               lob.on('end', function() {
@@ -267,14 +267,14 @@ describe('40. dataTypeClob.js', function() {
         }
       ], done);  // async
 
-    }) // 40.1.1
+    }); // 40.1.1
 
-  }) // 40.1
+  }); // 40.1
 
   describe('40.2 stores null value correctly', function() {
     it('40.2.1 testing Null, Empty string and Undefined', function(done) {
       assist.verifyNullValues(connection, tableName, done);
-    })
-  })
+    });
+  });
 
-})
+});

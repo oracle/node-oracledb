@@ -35,18 +35,18 @@ The [*node-oracledb*](https://github.com/oracle/node-oracledb) add-on for Node.j
 The steps below create a Node.js installation for testing.  Adjust the
 steps for your environment.
 
-This node-oracledb release has been tested with Node 0.10, 0.12, 4, 5
-and 6 on 64-bit Oracle Linux and Windows.  The add-on can also build
+This node-oracledb release has been tested with Node 0.12, 4,
+6 and 7 on 64-bit Oracle Linux and Windows.  The add-on can also build
 in some Mac OS X, 32-bit Linux, 32-bit Windows, Solaris and AIX
 environments, but these architectures have not been fully tested.
 
 ### <a name="prerequisites"></a> Prerequisites
 
-Installation requires Oracle 11.2 or 12.1 client libraries.
+Installation requires Oracle 11.2 or 12c client libraries.
 These are included in Oracle Instant Client RPMs or ZIPs, a full
 Oracle Client, or a database on the same machine.  Oracle's standard
 client-server network compatibility applies.  For example, with Oracle
-Client 12.1 you can connect to Oracle Database 10.2 or greater.  Use
+Client 12c you can connect to Oracle Database 10.2 or greater.  Use
 Oracle Client 11.2 if you need to connect to Oracle Database 9.2.
 
 A compiler is required.  Use Visual Studio on Windows, GCC on Linux or
@@ -63,7 +63,7 @@ the `--python` option to indicate the correct version.  For example:
 
 ### Which Instructions to Follow
 
-Instructions may need to be adjusted for your platform and environment.
+Instructions may need to be adjusted for your platform, environment and versions being used.
 
 I have ... | Follow this ...
 ----------|-----------------
@@ -74,7 +74,7 @@ Linux.  My database is on the same machine | [Node-oracledb Installation on Linu
 Linux. I have the full Oracle client (installed via `runInstaller`) on the same machine |  [Node-oracledb Installation on Linux with a Local Database](#instoh)
 Apple OS X | [Node-oracledb Installation on OS X with Instant Client](#instosx)
 Windows | [Node-oracledb Installation on Windows](#instwin)
-Another OS with Oracle Database 11.2 or 12.1, or client libraries available | Update binding.gyp and make any code changes required, sign the [OCA](https://www.oracle.com/technetwork/community/oca-486395.html), and submit a pull request with your patch.
+Another OS with Oracle Database 11.2 or 12c, or client libraries available | Update binding.gyp and make any code changes required, sign the [OCA](https://www.oracle.com/technetwork/community/oca-486395.html), and submit a pull request with your patch.
 
 ### Other Resources Useful for node-oracledb
 
@@ -92,19 +92,19 @@ install Oracle Linux yourself, it is free from
 
 ### 2.1 Install Node.js
 
-Download the
-[Node.js Linux 64-bit binaries](http://nodejs.org) and
-extract the file, for example into `/opt`:
+Download and extract the [Node.js "Linux Binaries"](http://nodejs.org)
+package.  For example, if you downloaded version 6.9.1 for 64-bit you
+could install Node.js into `/opt`:
 
 ```
 cd /opt
-tar -Jxf node-v4.2.3-linux-x64.tar.xz
+tar -Jxf node-v6.9.1-linux-x64.tar.xz
 ```
 
 Set PATH to include Node.js:
 
 ```
-export PATH=/opt/node-v4.2.3-linux-x64/bin:$PATH
+export PATH=/opt/node-v6.9.1-linux-x64/bin:$PATH
 ```
 
 ### 2.2 Install the free Oracle Instant Client 'Basic' and 'SDK' RPMs
@@ -159,7 +159,7 @@ Download the
 [example programs](https://github.com/oracle/node-oracledb/tree/master/examples) from GitHub.
 
 Edit `dbconfig.js` and set the database credentials to your
-environment.
+environment, for example:
 
 ```
 module.exports = {
@@ -179,19 +179,19 @@ node select1.js
 
 ### 3.1 Install Node.js
 
-Download the
-[Node.js Linux 64-bit binaries](http://nodejs.org/) and
-extract the file, for example into `/opt`:
+Download and extract the [Node.js "Linux Binaries"](http://nodejs.org)
+package.  For example, if you downloaded version 6.9.1 for 64-bit you
+could install Node.js into `/opt`:
 
 ```
 cd /opt
-tar -Jxf node-v4.2.3-linux-x64.tar.xz
+tar -Jxf node-v6.9.1-linux-x64.tar.xz
 ```
 
 Set PATH to include Node.js:
 
 ```
-export PATH=/opt/node-v4.2.3-linux-x64/bin:$PATH
+export PATH=/opt/node-v6.9.1-linux-x64/bin:$PATH
 ```
 
 ### 3.2 Install the free Oracle Instant Client 'Basic' and 'SDK' ZIPs
@@ -236,7 +236,8 @@ export OCI_LIB_DIR=/opt/oracle/instantclient
 export OCI_INC_DIR=/opt/oracle/instantclient/sdk/include
 ```
 
-These variables are only needed during installation.
+Use absolute paths for the variable values.  These variables are only
+needed during installation.
 
 If Instant Client is in the default location
 `/opt/oracle/instantclient` and you have no other Oracle software
@@ -269,7 +270,7 @@ Download the
 [example programs](https://github.com/oracle/node-oracledb/tree/master/examples) from GitHub.
 
 Edit `dbconfig.js` and set the database credentials to your
-environment:
+environment, for example:
 
 ```
 module.exports = {
@@ -300,19 +301,19 @@ Oracle Database.
 
 ### 4.1 Install Node.js
 
-Download the
-[Node.js Linux 64-bit binaries](http://nodejs.org/) and
-extract the file, for example into `/opt`:
+Download and extract the [Node.js "Linux Binaries"](http://nodejs.org)
+package.  For example, if you downloaded version 6.9.1 for 64-bit you
+could install Node.js into `/opt`:
 
 ```
 cd /opt
-tar -zxf node-v4.2.3-linux-x64.tar.gz
+tar -zxf node-v6.9.1-linux-x64.tar.gz
 ```
 
 Set your PATH variable to include Node.js:
 
 ```
-export PATH=/opt/node-v4.2.3-linux-x64/bin:$PATH
+export PATH=/opt/node-v6.9.1-linux-x64/bin:$PATH
 ```
 
 ### 4.2 Install the add-on
@@ -341,7 +342,8 @@ export OCI_LIB_DIR=$ORACLE_HOME/lib
 export OCI_INC_DIR=$ORACLE_HOME/rdbms/public
 ```
 
-These variables are only needed during installation.
+Use absolute paths for the variable values.  These variables are only
+needed during installation.
 
 If you are behind a firewall you may need to set your proxy, for
 example:
@@ -379,7 +381,7 @@ Download the
 [example programs](https://github.com/oracle/node-oracledb/tree/master/examples) from GitHub.
 
 Edit `dbconfig.js` and set the database credentials to your
-environment:
+environment, for example:
 
 ```
 module.exports = {
@@ -494,7 +496,8 @@ export OCI_LIB_DIR=/opt/oracle/instantclient
 export OCI_INC_DIR=/opt/oracle/instantclient/sdk/include
 ```
 
-These variables are only needed during installation.
+Use absolute paths for the variable values.  These variables are only
+needed during installation.
 
 If Instant Client is the default location `/opt/oracle/instantclient`
 then these variables are not actually required.
@@ -522,7 +525,7 @@ Download the
 [example programs](https://github.com/oracle/node-oracledb/tree/master/examples) from GitHub.
 
 Edit `dbconfig.js` and set the database credentials to your
-environment:
+environment, for example:
 
 ```
 module.exports = {
@@ -566,7 +569,7 @@ during build and run time.  Otherwise use a 64-bit Node.js with a
 
 ### 7.2 Install Node.js
 
-Install the 64-bit Node.js  MSI (e.g. node-v4.2.3-x64.msi) from
+Install the 64-bit Node.js  MSI (e.g. node-v6.9.1-x64.msi) from
 [nodejs.org](http://nodejs.org/).  Make sure the option to
 add the Node and npm directories to the path is selected.
 
@@ -619,7 +622,6 @@ Studio' which has environment variables already configured.
 
 Tell the installer where to locate the Oracle client libraries and
 header files by setting the `OCI_LIB_DIR` and `OCI_INC_DIR` variables.
-These variables are only needed during installation, not at run time.
 Do *not* add them to `PATH`.
 
 For Instant Client use:
@@ -628,6 +630,9 @@ For Instant Client use:
 set OCI_LIB_DIR=C:\oracle\instantclient\sdk\lib\msvc
 set OCI_INC_DIR=C:\oracle\instantclient\sdk\include
 ```
+
+Use absolute paths for the variable values.  These variables are only
+needed during installation.
 
 If you are installing with a local database or the full Oracle client,
 then locate the Oracle directory and set the node-oracle installer
@@ -660,7 +665,7 @@ Download the
 [example programs](https://github.com/oracle/node-oracledb/tree/master/examples) from GitHub.
 
 Edit `dbconfig.js` and set the database credentials to your
-environment:
+environment, for example:
 
 ```
 module.exports = {
@@ -712,13 +717,16 @@ if you see `MSVCR100.dll` then you need the VC++ 10 redistributable.
 
 Download [Node.js](https://nodejs.org/) for AIX on Power Systems.
 
-Execute the downloaded shell script.  It will prompt for the Install
-Folder and Link Folder.  Give the desired location, for example
-`/opt`, where the Node binary will be built:
+Execute the downloaded shell script.  For example, if you
+downloaded Node 4.2 then run:
 
 ```
 sh node-v4.2.1-aix-ppc64.bin
 ```
+
+It will prompt for the Install Folder and Link Folder.  Give the
+desired location, for example `/opt`, where the Node binary will be
+built.
 
 On completion, a success message will be displayed
 
@@ -734,7 +742,7 @@ For Node.js 0.10 and 0.12, set `LIBPATH` to include `libstdc++.a` and `libgcc_s.
 export LIBPATH=/opt/freeware/lib64
 ```
 
-This setting is not required for Node.js 4.x or later.
+This setting is not required for Node.js 4 or later.
 
 ### 9.2 Install the free Oracle Instant Client 'Basic' and 'SDK' ZIPs
 
@@ -764,7 +772,8 @@ export OCI_LIB_DIR=/opt/oracle/instantclient_12_1
 export OCI_INC_DIR=/opt/oracle/instantclient_12_1/sdk/include
 ```
 
-These variables are only needed during installation.
+Use absolute paths for the variable values.  These variables are only
+needed during installation.
 
 If you are behind a firewall you may need to set your proxy, for
 example:
@@ -792,7 +801,7 @@ Download the
 [example programs](https://github.com/oracle/node-oracledb/tree/master/examples) from GitHub.
 
 Edit `dbconfig.js` and set the database credentials to your
-environment:
+environment, for example:
 
 ```
 module.exports = {
@@ -859,7 +868,9 @@ Tell the installer where to find Instant Client:
 export OCI_LIB_DIR=/opt/oracle/instantclient_12_1
 export OCI_INC_DIR=/opt/oracle/instantclient_12_1/sdk/include
 ```
-These variables are only needed during installation.
+
+Use absolute paths for the variable values.  These variables are only
+needed during installation.
 
 If you are behind a firewall you may need to set your proxy, for
 example:
@@ -881,7 +892,7 @@ Download the
 [example programs](https://github.com/oracle/node-oracledb/tree/master/examples) from GitHub.
 
 Edit `dbconfig.js` and set the database credentials to your
-environment:
+environment, for example:
 
 ```
 module.exports = {

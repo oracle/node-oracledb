@@ -35,7 +35,6 @@
 'use strict';
 
 var oracledb = require('oracledb');
-var fs       = require('fs');
 var should   = require('should');
 var async    = require('async');
 var dbConfig = require('./dbconfig.js');
@@ -48,23 +47,24 @@ describe('58. properties.js', function() {
     var defaultValues = {};
 
     before('save the default values', function() {
-      defaultValues.poolMin         = oracledb.poolMin;
-      defaultValues.poolMax         = oracledb.poolMax;
-      defaultValues.poolIncrement   = oracledb.poolIncrement;
-      defaultValues.poolTimeout     = oracledb.poolTimeout;
-      defaultValues.maxRows         = oracledb.maxRows;
-      defaultValues.prefetchRows    = oracledb.prefetchRows;
-      defaultValues.autoCommit      = oracledb.autoCommit;
-      defaultValues.version         = oracledb.version;
-      defaultValues.connClass       = oracledb.connClass;
-      defaultValues.externalAuth    = oracledb.externalAuth;
-      defaultValues.fetchAsString   = oracledb.fetchAsString;
-      defaultValues.outFormat       = oracledb.outFormat;
-      defaultValues.lobPrefetchSize = oracledb.lobPrefetchSize;
-      defaultValues.queueRequests   = oracledb.queueRequests;
-      defaultValues.queueTimeout    = oracledb.queueTimeout;
-      defaultValues.stmtCacheSize   = oracledb.stmtCacheSize;
-    })
+      defaultValues.poolMin          = oracledb.poolMin;
+      defaultValues.poolMax          = oracledb.poolMax;
+      defaultValues.poolIncrement    = oracledb.poolIncrement;
+      defaultValues.poolTimeout      = oracledb.poolTimeout;
+      defaultValues.maxRows          = oracledb.maxRows;
+      defaultValues.prefetchRows     = oracledb.prefetchRows;
+      defaultValues.autoCommit       = oracledb.autoCommit;
+      defaultValues.version          = oracledb.version;
+      defaultValues.connClass        = oracledb.connClass;
+      defaultValues.externalAuth     = oracledb.externalAuth;
+      defaultValues.fetchAsString    = oracledb.fetchAsString;
+      defaultValues.outFormat        = oracledb.outFormat;
+      defaultValues.lobPrefetchSize  = oracledb.lobPrefetchSize;
+      defaultValues.queueRequests    = oracledb.queueRequests;
+      defaultValues.queueTimeout     = oracledb.queueTimeout;
+      defaultValues.stmtCacheSize    = oracledb.stmtCacheSize;
+      defaultValues.poolPingInterval = oracledb.poolPingInterval;
+    });
 
     after('restore the values', function() {
       oracledb.poolMin          = defaultValues.poolMin;
@@ -83,7 +83,8 @@ describe('58. properties.js', function() {
       oracledb.queueRequests    = defaultValues.queueRequests;
       oracledb.queueTimeout     = defaultValues.queueTimeout;
       oracledb.stmtCacheSize    = defaultValues.stmtCacheSize;
-    })
+      oracledb.poolPingInterval = defaultValues.poolPingInterval;
+    });
 
     it('58.1.1 poolMin', function() {
       var t = oracledb.poolMin;
@@ -91,7 +92,7 @@ describe('58. properties.js', function() {
 
       t.should.eql(defaultValues.poolMin);
       (oracledb.poolMin).should.eql(defaultValues.poolMin + 1);
-    })
+    });
 
     it('58.1.2 poolMax', function() {
       var t = oracledb.poolMax;
@@ -99,7 +100,7 @@ describe('58. properties.js', function() {
 
       t.should.eql(defaultValues.poolMax);
       (oracledb.poolMax).should.eql(defaultValues.poolMax + 1);
-    })
+    });
 
     it('58.1.3 poolIncrement', function() {
       var t = oracledb.poolIncrement;
@@ -107,7 +108,7 @@ describe('58. properties.js', function() {
 
       t.should.eql(defaultValues.poolIncrement);
       (oracledb.poolIncrement).should.eql(defaultValues.poolIncrement + 1);
-    })
+    });
 
     it('58.1.4 poolTimeout', function() {
       var t = oracledb.poolTimeout;
@@ -115,7 +116,7 @@ describe('58. properties.js', function() {
 
       t.should.eql(defaultValues.poolTimeout);
       (oracledb.poolTimeout).should.eql(defaultValues.poolTimeout + 1);
-    })
+    });
 
     it('58.1.5 maxRows', function() {
       var t = oracledb.maxRows;
@@ -123,7 +124,7 @@ describe('58. properties.js', function() {
 
       t.should.eql(defaultValues.maxRows);
       (oracledb.maxRows).should.eql(defaultValues.maxRows + 1);
-    })
+    });
 
     it('58.1.6 prefetchRows', function() {
       var t = oracledb.prefetchRows;
@@ -131,7 +132,7 @@ describe('58. properties.js', function() {
 
       t.should.eql(defaultValues.prefetchRows);
       (oracledb.prefetchRows).should.eql(defaultValues.prefetchRows + 1);
-    })
+    });
 
     it('58.1.7 autoCommit', function() {
       var t = oracledb.autoCommit;
@@ -140,7 +141,7 @@ describe('58. properties.js', function() {
       t.should.eql(defaultValues.autoCommit);
       (oracledb.autoCommit).should.eql( !defaultValues.autoCommit );
 
-    })
+    });
 
     it('58.1.8 version (read-only)', function() {
       (oracledb.version).should.be.a.Number();
@@ -152,12 +153,12 @@ describe('58. properties.js', function() {
         // console.log(err.message);
         (err.message).should.startWith('NJS-014:');
       }
-    })
+    });
 
     it('58.1.9 connClass', function() {
       oracledb.connClass = "cc";
       (oracledb.connClass).should.be.a.String();
-    })
+    });
 
     it('58.1.10 externalAuth', function() {
       var t = oracledb.externalAuth;
@@ -165,7 +166,7 @@ describe('58. properties.js', function() {
 
       t.should.eql(defaultValues.externalAuth);
       (oracledb.externalAuth).should.eql( !defaultValues.externalAuth );
-    })
+    });
 
     it('58.1.11 fetchAsString', function() {
       var t = oracledb.fetchAsString;
@@ -173,7 +174,7 @@ describe('58. properties.js', function() {
 
       t.should.eql(defaultValues.fetchAsString);
       (oracledb.fetchAsString).should.not.eql(defaultValues.fetchAsString);
-    })
+    });
 
     it('58.1.12 outFormat', function() {
       var t = oracledb.outFormat;
@@ -181,7 +182,7 @@ describe('58. properties.js', function() {
 
       t.should.eql(oracledb.ARRAY);
       (oracledb.outFormat).should.not.eql(defaultValues.outFormat);
-    })
+    });
 
     it('58.1.13 lobPrefetchSize', function() {
       var t = oracledb.lobPrefetchSize;
@@ -189,7 +190,7 @@ describe('58. properties.js', function() {
 
       t.should.eql(defaultValues.lobPrefetchSize);
       (oracledb.lobPrefetchSize).should.eql(defaultValues.lobPrefetchSize + 1);
-    })
+    });
 
     it('58.1.14 oracleClientVersion (read-only)', function () {
       var t = oracledb.oracleClientVersion ;
@@ -209,7 +210,7 @@ describe('58. properties.js', function() {
 
       should.equal(t, true);
       should.notEqual(t, oracledb.queueRequests);
-    })
+    });
 
     it('58.1.16 queueTimeout', function() {
       var t = oracledb.queueTimeout;
@@ -217,7 +218,7 @@ describe('58. properties.js', function() {
 
       should.equal(t, defaultValues.queueTimeout);
       should.notEqual(oracledb.queueTimeout, defaultValues.queueTimeout);
-    })
+    });
 
     it('58.1.17 stmtCacheSize', function() {
       var t = oracledb.stmtCacheSize;
@@ -225,9 +226,17 @@ describe('58. properties.js', function() {
 
       should.equal(t, defaultValues.stmtCacheSize);
       should.notEqual(oracledb.stmtCacheSize, defaultValues.stmtCacheSize);
-    })
+    });
 
-  }) // 58.1
+    it('58.1.18 poolPingInterval', function() {
+      var t = oracledb.poolPingInterval;
+      oracledb.poolPingInterval = t + 100;
+
+      should.equal(t, defaultValues.poolPingInterval);
+      should.notEqual(oracledb.poolPingInterval, defaultValues.poolPingInterval);
+    });
+
+  }); // 58.1
 
   describe('58.2 Pool Class', function() {
     var pool = null;
@@ -245,14 +254,14 @@ describe('58. properties.js', function() {
           done();
         }
       );
-    })
+    });
 
     after(function(done) {
       pool.terminate(function(err) {
         should.not.exist(err);
         done();
       });
-    })
+    });
 
     it('58.2.1 poolMin', function() {
       var t = pool.poolMin;
@@ -264,7 +273,7 @@ describe('58. properties.js', function() {
         should.exist(err);
         (err.message).should.startWith('NJS-014:');
       }
-    })
+    });
 
     it('58.2.2 poolMax', function() {
       var t = pool.poolMax;
@@ -276,7 +285,7 @@ describe('58. properties.js', function() {
         should.exist(err);
         (err.message).should.startWith('NJS-014:');
       }
-    })
+    });
 
     it('58.2.3 poolIncrement', function() {
       var t = pool.poolIncrement;
@@ -288,7 +297,7 @@ describe('58. properties.js', function() {
         should.exist(err);
         (err.message).should.startWith('NJS-014:');
       }
-    })
+    });
 
     it('58.2.4 poolTimeout', function() {
       var t = pool.poolTimeout;
@@ -300,7 +309,7 @@ describe('58. properties.js', function() {
         should.exist(err);
         (err.message).should.startWith('NJS-014:');
       }
-    })
+    });
 
     it('58.2.5 stmtCacheSize', function() {
       var t = pool.stmtCacheSize;
@@ -312,7 +321,7 @@ describe('58. properties.js', function() {
         should.exist(err);
         (err.message).should.startWith('NJS-014:');
       }
-    })
+    });
 
     it('58.2.6 connectionsInUse', function() {
       var t = pool.connectionsInUse;
@@ -324,7 +333,7 @@ describe('58. properties.js', function() {
         should.exist(err);
         (err.message).should.startWith('NJS-014:');
       }
-    })
+    });
 
     it('58.2.7 connectionsOpen', function() {
       var t = pool.connectionsOpen;
@@ -336,7 +345,7 @@ describe('58. properties.js', function() {
         should.exist(err);
         (err.message).should.startWith('NJS-014:');
       }
-    })
+    });
 
     it('58.2.8 queueRequests', function() {
       var t = pool.queueRequests;
@@ -348,7 +357,7 @@ describe('58. properties.js', function() {
         should.exist(err);
         (err.message).should.startWith('NJS-014:');
       }
-    })
+    });
 
     it('58.2.9 queueTimeout', function() {
       var t = pool.queueTimeout;
@@ -360,9 +369,21 @@ describe('58. properties.js', function() {
         should.exist(err);
         (err.message).should.startWith('NJS-014:');
       }
-    })
+    });
 
-  }) // 58.2
+    it('58.2.10 poolPingInterval', function() {
+      var t = pool.poolPingInterval;
+      t.should.be.a.Number();
+
+      try {
+        pool.poolPingInterval = t + 100;
+      } catch(err) {
+        should.exist(err);
+        (err.message).should.startWith('NJS-014:');
+      }
+    });
+
+  }); // 58.2
 
   describe('58.3 Connection Class', function() {
     var connection = null;
@@ -380,14 +401,14 @@ describe('58. properties.js', function() {
           done();
         }
       );
-    })
+    });
 
     after('release connection', function(done) {
       connection.release( function(err) {
         should.not.exist(err);
         done();
       });
-    })
+    });
 
     it('58.3.1 Connection object initial toString values', function() {
       connection.should.be.an.Object;
@@ -398,7 +419,7 @@ describe('58. properties.js', function() {
 
       (connection.stmtCacheSize).should.be.a.Number();
       (connection.stmtCacheSize).should.be.greaterThan(0);
-    })
+    });
 
     it('58.3.2 stmtCacheSize (read-only)', function() {
       var t = connection.stmtCacheSize;
@@ -410,11 +431,12 @@ describe('58. properties.js', function() {
         should.exist(err);
         (err.message).should.startWith('NJS-014:');
       }
-    })
+    });
 
     it('58.3.3 clientId (write-only)', function() {
       try {
         var t = connection.clientId;
+        should.not.exist(t);
       } catch(err) {
         should.exist(err);
         (err.message).should.startWith('NJS-015:'); // write-only
@@ -428,12 +450,13 @@ describe('58. properties.js', function() {
       }
 
       connection.clientId = "103.3";
-    })
+    });
 
     it('58.3.4 action (write-only)', function() {
 
       try {
         var t = connection.action;
+        should.not.exist(t);
       } catch(err) {
         should.exist(err);
         (err.message).should.startWith('NJS-015:');
@@ -447,12 +470,13 @@ describe('58. properties.js', function() {
       }
 
       connection.action = "103.3 action";
-    })
+    });
 
     it('58.3.5 module (write-only)', function() {
 
       try {
         var t = connection.module;
+        should.not.exist(t);
       } catch(err) {
         should.exist(err);
         (err.message).should.startWith('NJS-015:');
@@ -466,7 +490,7 @@ describe('58. properties.js', function() {
       }
 
       connection.module = "103.3 module";
-    })
+    });
 
     it('58.3.6 oracleServerVersion (read-only)', function () {
       var t = connection.oracleServerVersion;
@@ -481,7 +505,7 @@ describe('58. properties.js', function() {
       }
     });
 
-  }) // 58.3
+  }); // 58.3
 
   describe('58.4 ResultSet Class', function() {
 
@@ -522,11 +546,11 @@ describe('58. properties.js', function() {
           );
         }
       ], done);
-    })
+    });
 
     after( function(done) {
       connection.execute(
-        "DROP TABLE " + tableName,
+        "DROP TABLE " + tableName + " PURGE",
         function(err) {
           should.not.exist(err);
 
@@ -536,7 +560,7 @@ describe('58. properties.js', function() {
           });
         }
       );
-    })
+    });
 
     it('58.4.1 metaData (read-only)', function() {
       should.exist(resultSet.metaData);
@@ -549,7 +573,7 @@ describe('58. properties.js', function() {
         should.exist(err);
         (err.message).should.startWith('NJS-014:');
       }
-    })
+    });
 
-  }) // 58.5
-})
+  }); // 58.5
+});

@@ -46,12 +46,12 @@ oracledb.getConnection(
         console.log(result.metaData);
         console.log(result.rows);
 
-        return connection.release();
+        return connection.close();
       })
       .catch(function(err) {
         console.log(err.message);
 
-        return connection.release();
+        return connection.close();
       });
   })
   .catch(function(err) {

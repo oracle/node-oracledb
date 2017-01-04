@@ -54,14 +54,14 @@ describe('9. columnMetadata.js', function(){
         done();
       }
     );
-  })
+  });
 
   after('release the connection', function(done) {
     connection.release( function(err) {
       should.not.exist(err);
       done();
     });
-  })
+  });
 
   describe('9.1 tests with the same table', function() {
 
@@ -71,7 +71,7 @@ describe('9. columnMetadata.js', function(){
                  "        e_table_missing EXCEPTION; \n" +
                  "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n " +
                  "    BEGIN \n" +
-                 "        EXECUTE IMMEDIATE ('DROP TABLE nodb_cmd'); \n" +
+                 "        EXECUTE IMMEDIATE ('DROP TABLE nodb_cmd PURGE'); \n" +
                  "    EXCEPTION \n" +
                  "        WHEN e_table_missing \n" +
                  "        THEN NULL; \n" +
@@ -105,17 +105,17 @@ describe('9. columnMetadata.js', function(){
           done();
         }
       );
-    }) // before
+    }); // before
 
     after(function(done) {
       connection.execute(
-        "DROP TABLE nodb_cmd",
+        "DROP TABLE nodb_cmd PURGE",
         function(err) {
           should.not.exist(err);
           done();
         }
       );
-    }) // after
+    }); // after
 
     it('9.1.1 shows metaData correctly when retrieving 1 column from a 4-column table', function(done){
 
@@ -129,7 +129,7 @@ describe('9. columnMetadata.js', function(){
           done();
         }
       );
-    }) // 9.1.1
+    }); // 9.1.1
 
     it('9.1.2 shows metaData when retrieving 2 columns. MetaData is correct in content and sequence', function(done){
 
@@ -144,7 +144,7 @@ describe('9. columnMetadata.js', function(){
           done();
         }
       );
-    })
+    });
 
     it('9.1.3 shows metaData correctly when retrieve 3 columns', function(done){
 
@@ -160,7 +160,7 @@ describe('9. columnMetadata.js', function(){
           done();
         }
       );
-    })
+    });
 
     it('9.1.4 shows metaData correctly when retrieving all columns with [SELECT * FROM table] statement', function(done){
 
@@ -177,7 +177,7 @@ describe('9. columnMetadata.js', function(){
           done();
         }
       );
-    }) // 9.1.4
+    }); // 9.1.4
 
     it('9.1.5 works for SELECT count(*)', function(done){
 
@@ -191,7 +191,7 @@ describe('9. columnMetadata.js', function(){
           done();
         }
       );
-    }) // 9.1.5
+    }); // 9.1.5
 
     it('9.1.6 works when a query returns no rows', function(done){
 
@@ -208,7 +208,7 @@ describe('9. columnMetadata.js', function(){
           done();
         }
       );
-    }) // 9.1.6
+    }); // 9.1.6
 
     it('9.1.7 only works for SELECT statement, does not work for INSERT', function(done){
 
@@ -236,7 +236,7 @@ describe('9. columnMetadata.js', function(){
           );
         }
       );
-    }) // 9.1.7
+    }); // 9.1.7
 
     it('9.1.8 only works for SELECT statement, does not work for UPDATE', function(done){
 
@@ -261,7 +261,7 @@ describe('9. columnMetadata.js', function(){
           );
         }
       );
-    }) // 9.1.8
+    }); // 9.1.8
 
     it('9.1.9 works with a SQL WITH statement', function(done){
 
@@ -281,7 +281,7 @@ describe('9. columnMetadata.js', function(){
           done();
         }
       );
-    }) // 9.1.9
+    }); // 9.1.9
 
     it('9.1.10 displays metaData correctly with result set', function(done) {
       connection.execute(
@@ -297,9 +297,9 @@ describe('9. columnMetadata.js', function(){
           done();
         }
       );
-    })
+    });
 
-  }) // 9.1
+  }); // 9.1
 
   describe('9.2 case sensitive', function() {
     it('9.2.1 works for tables whose column names were created case sensitively', function(done){
@@ -312,7 +312,7 @@ describe('9. columnMetadata.js', function(){
                      "        e_table_missing EXCEPTION; \n" +
                      "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n " +
                      "    BEGIN \n" +
-                     "        EXECUTE IMMEDIATE ('DROP TABLE nodb_casesensitive'); \n" +
+                     "        EXECUTE IMMEDIATE ('DROP TABLE nodb_casesensitive PURGE'); \n" +
                      "    EXCEPTION \n" +
                      "        WHEN e_table_missing \n" +
                      "        THEN NULL; \n" +
@@ -347,7 +347,7 @@ describe('9. columnMetadata.js', function(){
         },
         function(callback){
           connection.execute(
-            "DROP TABLE nodb_casesensitive",
+            "DROP TABLE nodb_casesensitive PURGE",
             function(err){
               should.not.exist(err);
               callback();
@@ -355,8 +355,8 @@ describe('9. columnMetadata.js', function(){
           );
         }
       ], done);
-    }) // 9.2.1
-  })  // 9.2
+    }); // 9.2.1
+  });  // 9.2
 
   describe('9.3 Large number of columns', function() {
 
@@ -375,14 +375,14 @@ describe('9. columnMetadata.js', function(){
 
       var table_name = "nodb_large_columns";
       var sqlSelect = "SELECT * FROM " + table_name;
-      var sqlDrop = "DROP TABLE " + table_name;
+      var sqlDrop = "DROP TABLE " + table_name + " PURGE";
 
       var proc = "BEGIN \n" +
                  "    DECLARE \n" +
                  "        e_table_missing EXCEPTION; \n" +
                  "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n " +
                  "    BEGIN \n" +
-                 "        EXECUTE IMMEDIATE ('DROP TABLE nodb_large_columns'); \n" +
+                 "        EXECUTE IMMEDIATE ('DROP TABLE nodb_large_columns PURGE'); \n" +
                  "    EXCEPTION \n" +
                  "        WHEN e_table_missing \n" +
                  "        THEN NULL; \n" +
@@ -426,10 +426,10 @@ describe('9. columnMetadata.js', function(){
           );
         }
       ], done);
-    })
-  }) // 9.3
+    });
+  }); // 9.3
 
-  describe('9.4 single character column', function(done) {
+  describe('9.4 single character column', function() {
 
     it('9.4.1 works with column names consisting of single characters', function(done){
 
@@ -440,7 +440,7 @@ describe('9. columnMetadata.js', function(){
           "       e_table_missing EXCEPTION; \n" +
           "       PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
           "   BEGIN \n" +
-          "       EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " '); \n" +
+          "       EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " PURGE'); \n" +
           "   EXCEPTION \n" +
           "       WHEN e_table_missing \n" +
           "       THEN NULL; \n" +
@@ -453,7 +453,7 @@ describe('9. columnMetadata.js', function(){
           "   '); \n" +
           "END; \n";
       var sqlSelect = "SELECT * FROM " + tableName;
-      var sqlDrop = "DROP TABLE " + tableName;
+      var sqlDrop = "DROP TABLE " + tableName + " PURGE";
 
       async.series([
         function(callback) {
@@ -486,8 +486,8 @@ describe('9. columnMetadata.js', function(){
           );
         }
       ], done);
-    })
-  }) // 9.4
+    });
+  }); // 9.4
 
   describe('9.5 duplicate column alias', function() {
 
@@ -501,7 +501,7 @@ describe('9. columnMetadata.js', function(){
           done();
         }
       );
-    })
-  })
+    });
+  });
 
-})
+});

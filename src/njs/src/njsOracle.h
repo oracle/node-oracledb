@@ -69,8 +69,8 @@ using namespace v8;
 
 /* Keep the version in sync with package.json */
 #define NJS_NODE_ORACLEDB_MAJOR       1
-#define NJS_NODE_ORACLEDB_MINOR       11
-#define NJS_NODE_ORACLEDB_PATCH       0
+#define NJS_NODE_ORACLEDB_MINOR       12
+#define NJS_NODE_ORACLEDB_PATCH       2
 
 /* Used for Oracledb.version */
 #define NJS_NODE_ORACLEDB_VERSION   ( (NJS_NODE_ORACLEDB_MAJOR * 10000) + \
@@ -98,8 +98,7 @@ class Oracledb: public Nan::ObjectWrap
    unsigned int       getPoolTimeout () const      { return poolTimeout_; }
    unsigned int       getPrefetchRows () const     { return prefetchRows_; }
    const std::string& getConnectionClass () const  { return connClass_; }
-   bool               getExtendedMetaData () const { return extendedMetaData_; }
-
+   bool               getExtendedMetaData () const { return extendedMetaData_;}
    const DataType*    getFetchAsStringTypes () const;
 
    unsigned int       getFetchAsStringTypesCount () const
@@ -140,6 +139,7 @@ private:
    static NAN_GETTER(GetFetchAsString);
    static NAN_GETTER(GetLobPrefetchSize);
    static NAN_GETTER(GetOracleClientVersion);
+   static NAN_GETTER(GetPoolPingInterval);
 
    // Define Setter Accessors to Properties
    static NAN_SETTER(SetPoolMin);
@@ -158,6 +158,7 @@ private:
    static NAN_SETTER(SetFetchAsString);
    static NAN_SETTER(SetLobPrefetchSize);
    static NAN_SETTER(SetOracleClientVersion);
+   static NAN_SETTER(SetPoolPingInterval);
 
    Oracledb();
    ~Oracledb();
@@ -182,6 +183,7 @@ private:
    unsigned int fetchAsStringTypesCount_;
    unsigned int lobPrefetchSize_;
    unsigned int oraClientVer_;
+   int          poolPingInterval_;
 };
 
 /**
@@ -208,6 +210,7 @@ typedef struct connectionBaton
 
   unsigned int               maxRows;
   unsigned int               outFormat;
+  int                        poolPingInterval;
   Nan::Persistent<Function>  cb;
   dpi::Env*                  dpienv;
   dpi::Conn*                 dpiconn;
@@ -221,8 +224,8 @@ typedef struct connectionBaton
                       externalAuth(false), error(""),
                       poolMax(0), poolMin(0), poolIncrement(0),
                       poolTimeout(0), stmtCacheSize(0), maxRows(0),
-                      outFormat(0), dpienv(NULL),
-                      dpiconn(NULL), dpipool(NULL)
+                      outFormat(0), poolPingInterval(DPI_NO_PING_INTERVAL),
+                      dpienv(NULL), dpiconn(NULL), dpipool(NULL)
   {
     cb.Reset( callback );
     jsOradb.Reset ( jsOradbObj );

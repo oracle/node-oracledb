@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -55,23 +55,16 @@ oracledb.getConnection(
         // attributes.
         console.log("Use SQL*Plus as SYSTEM to execute:");
         console.log("SELECT username, client_identifier, action, module FROM v$session WHERE username = UPPER('" + dbConfig.user +"');");
-        sleep(10000);
-        doRelease(connection);
+        setTimeout(function() {
+          doRelease(connection);
+        }, 10000);
       });
   });
-
-// Sleep for t milliseconds
-function sleep(t) {
-  var start = new Date().getTime();
-  while(new Date().getTime() < start + t) {
-    // empty
-  }
-}
 
 // Release the connection
 function doRelease(connection)
 {
-  connection.release(
+  connection.close(
     function(err) {
       if (err) {
         console.error(err.message);

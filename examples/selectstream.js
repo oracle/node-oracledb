@@ -65,7 +65,7 @@ oracledb.getConnection(
 
     stream.on('end', function () {
       // console.log("stream 'end' event");
-      connection.release(
+      connection.close(
         function(err) {
           if (err) {
             console.error(err.message);

@@ -73,5 +73,5 @@ describe('53. poolValidityAfterFailingTernimate.js', function() {
         });
       }
     );
-  })
-})
+  });
+});

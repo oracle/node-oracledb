@@ -19,7 +19,7 @@
  * See LICENSE.md for relevant licenses.
  *
  * NAME
- *   62. lobProperties.js
+ *   62. lobProperties1.js
  *
  * DESCRIPTION
  *   Testing getters and setters for LOB class.
@@ -40,9 +40,9 @@ var should   = require('should');
 var async    = require('async');
 var dbConfig = require('./dbconfig.js');
 
-describe('62. lobProperties.js', function() {
+describe('62. lobProperties1.js', function() {
 
-  var tableName = "nodb_mylobprops";
+  var tableName = "nodb_tab_mylobprops";
   var connection = null;
   var sqlSelect = "SELECT * FROM " + tableName + " WHERE id = :i";
   var defaultChunkSize = null;
@@ -55,7 +55,7 @@ describe('62. lobProperties.js', function() {
       + "     e_table_missing EXCEPTION; "
       + "     PRAGMA EXCEPTION_INIT(e_table_missing, -00942); "
       + "   BEGIN "
-      + "     EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " '); "
+      + "     EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " PURGE'); "
       + "   EXCEPTION "
       + "     WHEN e_table_missing "
       + "     THEN NULL; "
@@ -71,11 +71,11 @@ describe('62. lobProperties.js', function() {
                      + " RETURNING c, b INTO :clob, :blob";
 
     var bindVar =
-       {
-         i: 1,
-         clob: { type: oracledb.CLOB, dir: oracledb.BIND_OUT },
-         blob: { type: oracledb.BLOB, dir: oracledb.BIND_OUT }
-       };
+      {
+        i: 1,
+        clob: { type: oracledb.CLOB, dir: oracledb.BIND_OUT },
+        blob: { type: oracledb.BLOB, dir: oracledb.BIND_OUT }
+      };
     var clobFileName = './test/clobexample.txt';
     var blobFileName = './test/fuzzydinosaur.jpg';
 
@@ -168,14 +168,14 @@ describe('62. lobProperties.js', function() {
         );
       }
     ], done);
-  }) // before
+  }); // before
 
   after(function(done) {
 
     async.series([
       function(cb) {
         connection.execute(
-          "DROP TABLE " + tableName,
+          "DROP TABLE " + tableName + " PURGE",
           function(err) {
             should.not.exist(err);
             cb();
@@ -189,7 +189,7 @@ describe('62. lobProperties.js', function() {
         });
       }
     ], done);
-  }) // after
+  }); // after
 
   it('62.1 chunkSize (read-only)', function(done) {
     connection.execute(
@@ -198,10 +198,10 @@ describe('62. lobProperties.js', function() {
       function(err, result) {
         should.not.exist(err);
         var clob = result.rows[0][1],
-            blob = result.rows[0][2];
+          blob = result.rows[0][2];
 
         var t1 = clob.chunkSize,
-            t2 = blob.chunkSize;
+          t2 = blob.chunkSize;
 
         t1.should.be.a.Number();
         t2.should.be.a.Number();
@@ -226,7 +226,7 @@ describe('62. lobProperties.js', function() {
         done();
       }
     );
-  }) // 62.1
+  }); // 62.1
 
   it('62.2 length (read-only)', function(done) {
     connection.execute(
@@ -235,10 +235,10 @@ describe('62. lobProperties.js', function() {
       function(err, result) {
         should.not.exist(err);
         var clob = result.rows[0][1],
-            blob = result.rows[0][2];
+          blob = result.rows[0][2];
 
         var t1 = clob.length,
-            t2 = blob.length;
+          t2 = blob.length;
 
         t1.should.be.a.Number();
         t2.should.be.a.Number();
@@ -262,7 +262,7 @@ describe('62. lobProperties.js', function() {
         done();
       }
     );
-  }) // 62.2
+  }); // 62.2
 
   it('62.3 pieceSize -default value is chunkSize', function(done) {
     connection.execute(
@@ -271,16 +271,16 @@ describe('62. lobProperties.js', function() {
       function(err, result) {
         should.not.exist(err);
         var clob = result.rows[0][1],
-            blob = result.rows[0][2];
+          blob = result.rows[0][2];
 
         var t1 = clob.pieceSize,
-            t2 = blob.pieceSize;
+          t2 = blob.pieceSize;
         t1.should.eql(defaultChunkSize);
         t2.should.eql(defaultChunkSize);
         done();
       }
     );
-  }) // 62.3
+  }); // 62.3
 
   it('62.4 pieceSize - can be increased', function(done) {
     connection.execute(
@@ -289,7 +289,7 @@ describe('62. lobProperties.js', function() {
       function(err, result) {
         should.not.exist(err);
         var clob = result.rows[0][1],
-            blob = result.rows[0][2];
+          blob = result.rows[0][2];
 
         var newValue = clob.pieceSize * 5;
 
@@ -306,7 +306,7 @@ describe('62. lobProperties.js', function() {
         done();
       }
     );
-  }) // 62.4
+  }); // 62.4
 
   it('62.5 pieceSize - can be decreased', function(done) {
     if (defaultChunkSize <= 500) {
@@ -319,7 +319,7 @@ describe('62. lobProperties.js', function() {
         function(err, result) {
           should.not.exist(err);
           var clob = result.rows[0][1],
-              blob = result.rows[0][2];
+            blob = result.rows[0][2];
 
           var newValue = clob.pieceSize - 500;
 
@@ -336,7 +336,7 @@ describe('62. lobProperties.js', function() {
         }
       );
     }
-  }) // 62.5
+  }); // 62.5
 
   it('62.6 pieceSize - can be zero', function(done) {
     connection.execute(
@@ -345,7 +345,7 @@ describe('62. lobProperties.js', function() {
       function(err, result) {
         should.not.exist(err);
         var clob = result.rows[0][1],
-            blob = result.rows[0][2];
+          blob = result.rows[0][2];
 
         clob.pieceSize = 0;
         blob.pieceSize = 0;
@@ -360,7 +360,7 @@ describe('62. lobProperties.js', function() {
         done();
       }
     );
-  }) // 62.6
+  }); // 62.6
 
   it('62.7 pieceSize - cannot be less than zero', function(done) {
     connection.execute(
@@ -369,7 +369,7 @@ describe('62. lobProperties.js', function() {
       function(err, result) {
         should.not.exist(err);
         var clob = result.rows[0][1],
-            blob = result.rows[0][2];
+          blob = result.rows[0][2];
 
         try {
           clob.pieceSize = -100;
@@ -386,7 +386,7 @@ describe('62. lobProperties.js', function() {
         done();
       }
     );
-  }) // 62.7
+  }); // 62.7
 
   it('62.8 pieceSize - cannot be null', function(done) {
     connection.execute(
@@ -395,7 +395,7 @@ describe('62. lobProperties.js', function() {
       function(err, result) {
         should.not.exist(err);
         var clob = result.rows[0][1],
-            blob = result.rows[0][2];
+          blob = result.rows[0][2];
 
         try {
           clob.pieceSize = null;
@@ -412,7 +412,7 @@ describe('62. lobProperties.js', function() {
         done();
       }
     );
-  }) // 62.8
+  }); // 62.8
 
   it('62.9 pieceSize - must be a number', function(done) {
     connection.execute(
@@ -421,7 +421,7 @@ describe('62. lobProperties.js', function() {
       function(err, result) {
         should.not.exist(err);
         var clob = result.rows[0][1],
-            blob = result.rows[0][2];
+          blob = result.rows[0][2];
 
         try {
           clob.pieceSize = NaN;
@@ -438,7 +438,7 @@ describe('62. lobProperties.js', function() {
         done();
       }
     );
-  }) // 62.9
+  }); // 62.9
 
   it('62.10 type (read-only)', function(done) {
     connection.execute(
@@ -447,10 +447,10 @@ describe('62. lobProperties.js', function() {
       function(err, result) {
         should.not.exist(err);
         var clob = result.rows[0][1],
-            blob = result.rows[0][2];
+          blob = result.rows[0][2];
 
         var t1 = clob.type,
-            t2 = blob.type;
+          t2 = blob.type;
 
         t1.should.eql(oracledb.CLOB);
         t2.should.eql(oracledb.BLOB);
@@ -474,5 +474,5 @@ describe('62. lobProperties.js', function() {
         done();
       }
     );
-  }) // 62.10
-})
+  }); // 62.10
+});

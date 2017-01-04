@@ -71,10 +71,11 @@ Pool::~Pool(){}
    DESCRIPTION
      Store the config in pool instance.
 */
-void Pool::setPool( dpi::SPool *dpipool, Oracledb* oracledb, unsigned int poolMax,
-                    unsigned int poolMin, unsigned int poolIncrement,
-                    unsigned int poolTimeout, unsigned stmtCacheSize,
-                    unsigned int lobPrefetchSize, Local<Object> jsOradb )
+void Pool::setPool( dpi::SPool *dpipool, Oracledb* oracledb,
+                    unsigned int poolMax, unsigned int poolMin,
+                    unsigned int poolIncrement, unsigned int poolTimeout,
+                    unsigned stmtCacheSize, unsigned int lobPrefetchSize,
+                    int pingInterval, Local<Object> jsOradb )
 {
   this->dpipool_         = dpipool;
   this->isValid_         = true;
@@ -85,6 +86,7 @@ void Pool::setPool( dpi::SPool *dpipool, Oracledb* oracledb, unsigned int poolMa
   this->poolTimeout_     = poolTimeout;
   this->stmtCacheSize_   = stmtCacheSize;
   this->lobPrefetchSize_ = lobPrefetchSize;
+  this->pingInterval_    = pingInterval;
 
   this->jsParent_.Reset ( jsOradb );
 }
@@ -134,6 +136,11 @@ void Pool::Init(Handle<Object> target)
     Nan::New<v8::String>("stmtCacheSize").ToLocalChecked(),
     Pool::GetStmtCacheSize,
     Pool::SetStmtCacheSize );
+  Nan::SetAccessor(temp->InstanceTemplate(),
+    Nan::New<v8::String>("poolPingInterval").ToLocalChecked(),
+    Pool::GetPoolPingInterval,
+    Pool::SetPoolPingInterval );
+
 
   poolTemplate_s.Reset( temp );
   Nan::Set(target, Nan::New<v8::String>("Pool").ToLocalChecked(),
@@ -175,6 +182,31 @@ Local<Primitive> Pool::getPoolProperty(Pool* njsPool, unsigned int poolProperty)
   }
   return scope.Escape ( Nan::Undefined() ) ;
 }
+
+
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Abstraction to all getter accessors of properties
+*/
+Local<Primitive> Pool::getPoolProperty(Pool* njsPool, int poolProperty)
+{
+  Nan::EscapableHandleScope scope;
+
+  if(!njsPool->isValid_)
+  {
+    string msg = NJSMessages::getErrorMsg(errInvalidPool);
+    NJS_SET_EXCEPTION ( msg.c_str() );
+    return scope.Escape ( Nan::Undefined() ) ;
+  }
+  else
+  {
+    return scope.Escape ( Nan::New<v8::Integer>(poolProperty) ) ;
+  }
+  return scope.Escape ( Nan::Undefined() ) ;
+}
+
 
 /*****************************************************************************/
 /*
@@ -294,6 +326,21 @@ NAN_GETTER(Pool::GetStmtCacheSize)
   info.GetReturnValue().Set(getPoolProperty( njsPool, njsPool->stmtCacheSize_));
 }
 
+
+/*****************************************************************************/
+/*
+  DESCRIPTION
+    GetAccessor of poolPingInterval property
+*/
+NAN_GETTER(Pool::GetPoolPingInterval)
+{
+  Pool *njsPool = Nan::ObjectWrap::Unwrap<Pool>( info.Holder() );
+  NJS_CHECK_OBJECT_VALID2(njsPool, info ) ;
+  info.GetReturnValue().Set(getPoolProperty (njsPool,
+                                             njsPool->pingInterval_));
+}
+
+
 /*****************************************************************************/
 /*
    DESCRIPTION
@@ -380,8 +427,23 @@ NAN_SETTER(Pool::SetConnectionsInUse)
 */
 NAN_SETTER(Pool::SetStmtCacheSize)
 {
-  setPoolProperty(Nan::ObjectWrap::Unwrap<Pool>(info.Holder()), "stmtCacheSize");
+  setPoolProperty(Nan::ObjectWrap::Unwrap<Pool>(info.Holder()),
+                  "stmtCacheSize");
 }
+
+
+/*****************************************************************************/
+/*
+  DESCRIPTION
+    Set Accessor of poolPingInterval property.
+*/
+NAN_SETTER(Pool::SetPoolPingInterval)
+{
+  setPoolProperty ( Nan::ObjectWrap::Unwrap<Pool>(info.Holder()),
+                    "poolPingInterval" );
+}
+
+
 
 /*****************************************************************************/
 /*
@@ -450,7 +512,7 @@ void Pool::Async_GetConnection(uv_work_t *req)
   try
   {
     connBaton->dpiconn = connBaton-> njspool -> dpipool_ ->
-                                  getConnection ( connBaton-> connClass);
+                         getConnection ( connBaton-> connClass );
     connBaton->dpiconn->lobPrefetchSize(connBaton->lobPrefetchSize);
   }
   catch (dpi::Exception &e)
@@ -491,12 +553,16 @@ void Pool::Async_AfterGetConnection(uv_work_t *req)
   else
   {
     argv[0] = Nan::Undefined();
-    Local<FunctionTemplate> lft = Nan::New(Connection::connectionTemplate_s);
-    Local<Object> connection = lft->GetFunction()-> NewInstance();
+    Local<Object> connection = Nan::NewInstance (
+                                 Local<Function>::Cast (
+                                   Nan::GetFunction (
+                                     Nan::New<FunctionTemplate> (
+   Connection::connectionTemplate_s )).ToLocalChecked () )).ToLocalChecked ();
+
     (Nan::ObjectWrap::Unwrap<Connection> (connection))->
                                  setConnection( connBaton->dpiconn,
                                                 connBaton->njspool->oracledb_,
-                                                Nan::New( connBaton->jsPool ) );
+                                               Nan::New( connBaton->jsPool ) );
     argv[1] = connection;
   }
 

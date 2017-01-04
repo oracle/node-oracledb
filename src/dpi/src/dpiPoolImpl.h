@@ -62,7 +62,8 @@ class PoolImpl : public SPool
            const string &user, const string &password,
            const string &connString,
            int poolMax, int poolMin, int poolIncrement, int poolTimeout,
-           bool externalAuth, int stmtCacheSize, bool homogeneous);
+           bool externalAuth, int stmtCacheSize, bool homogeneous,
+           int poolPingInterval );
 
   virtual ~PoolImpl();
 
@@ -73,13 +74,14 @@ class PoolImpl : public SPool
   virtual void stmtCacheSize( unsigned int stmtCacheSize );
   virtual unsigned int connectionsOpen() const;
   virtual unsigned int connectionsInUse() const;
+  virtual int          poolMax() const;
 
                                 // interface methods
   virtual Conn * getConnection( const std::string& connClass,
                                 const std::string& user,
                                 const std::string& password,
                                 const std::string& tag,
-                                const boolean any,
+                                const boolean matchAnyTag,
                                 const DBPrivileges dbPriv );
 
                                 // internal methods
@@ -89,14 +91,16 @@ class PoolImpl : public SPool
 
   void cleanup();
 
-  EnvImpl     *env_;            // parent Env object
-  bool         externalAuth_;   // doing external authentication
-  OCIEnv      *envh_;           // OCI enviornment handle
-  OCIError    *errh_;           // OCI error handle
-  OCISPool    *spoolh_;         // OCI session pool handle
-  OraText     *poolName_;       // pool name
-  ub4          poolNameLen_;    // pool name length
-  OCIAuthInfo *poolAuth_;       // pool Auth handle
+  EnvImpl     *env_;              // parent Env object
+  bool         externalAuth_;     // doing external authentication
+  OCIEnv      *envh_;             // OCI enviornment handle
+  OCIError    *errh_;             // OCI error handle
+  OCISPool    *spoolh_;           // OCI session pool handle
+  OraText     *poolName_;         // pool name
+  ub4          poolNameLen_;      // pool name length
+  OCIAuthInfo *poolAuth_;         // pool Auth handle
+  int          poolMax_;          // Maximum sessions in the pool
+  int          poolPingInterval_; // Pool Ping Interval
 };
 
 

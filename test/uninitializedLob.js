@@ -66,7 +66,7 @@ describe('65. uninitializedLob.js', function() {
                     "    e_table_missing EXCEPTION; \n" +
                     "    PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n " +
                     "   BEGIN \n" +
-                    "     EXECUTE IMMEDIATE ('DROP TABLE nodb_lobdpi'); \n" +
+                    "     EXECUTE IMMEDIATE ('DROP TABLE nodb_lobdpi PURGE'); \n" +
                     "   EXCEPTION \n" +
                     "     WHEN e_table_missing \n" +
                     "     THEN NULL; \n" +
@@ -156,7 +156,7 @@ describe('65. uninitializedLob.js', function() {
         );
       }
     ], done);
-  }) // before
+  }); // before
 
   after(function(done) {
     async.series([
@@ -171,7 +171,7 @@ describe('65. uninitializedLob.js', function() {
       },
       function(callback) {
         connection.execute(
-          "DROP TABLE nodb_lobdpi",
+          "DROP TABLE nodb_lobdpi PURGE",
           function(err) {
             should.not.exist(err);
             callback();
@@ -185,7 +185,7 @@ describe('65. uninitializedLob.js', function() {
         });
       }
     ], done);
-  }) // after
+  }); // after
 
   it('65.1 an uninitialized Lob is returned from a PL/SQL block', function(done) {
     // async's times applies a function n times in series.
@@ -225,10 +225,9 @@ describe('65. uninitializedLob.js', function() {
 
           if (result.outBinds.id == -1) {
             // a dup was found
-            return next(null)
+            return next(null);
           }
 
-          var randomBlob = new Buffer(0);
           crypto.randomBytes(16, function(ex, buf) {
             var passthrough = new stream.PassThrough();
             passthrough.on('error', function(err) {
@@ -237,7 +236,7 @@ describe('65. uninitializedLob.js', function() {
 
             result.outBinds.blob_1.on('error', function(err) {
               should.not.exist(err);
-            })
+            });
 
             result.outBinds.blob_1.on('finish',function(err) {
               next(err);
@@ -255,5 +254,5 @@ describe('65. uninitializedLob.js', function() {
       should.not.exist(err);
       done();
     });
-  }) //65.1
-})
+  }); //65.1
+});

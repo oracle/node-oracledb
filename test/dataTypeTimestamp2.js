@@ -57,72 +57,72 @@ describe('34. dataTypeTimestamp2.js', function() {
         done();
       }
     );
-  })
+  });
 
   after('release connection', function(done) {
     connection.release( function(err) {
       should.not.exist(err);
       done();
     });
-  })
+  });
 
   describe('34.1 Testing JavaScript Date with database TIMESTAMP(p)', function() {
     var dates = assist.data.dates;
 
     before('create table, insert data',function(done) {
       assist.setUp(connection, tableName, dates, done);
-    })
+    });
 
     after(function(done) {
       connection.execute(
-        "DROP table " + tableName,
+        "DROP table " + tableName + " PURGE",
         function(err) {
           should.not.exist(err);
           done();
         }
       );
-    })
+    });
 
     it('34.1.1 works well with SELECT query', function(done) {
       assist.dataTypeSupport(connection, tableName, dates, done);
-    })
+    });
 
     it('34.1.2 works well with result set', function(done) {
       assist.verifyResultSet(connection, tableName, dates, done);
-    })
+    });
 
     it('34.1.3 works well with REF Cursor', function(done) {
       assist.verifyRefCursor(connection, tableName, dates, done);
-    })
+    });
 
-  }) // end of 34.1 suite
+  }); // end of 34.1 suite
 
   describe('34.2 sotres null value correctly', function() {
     it('34.2.1 testing Null, Empty string and Undefined', function(done) {
       assist.verifyNullValues(connection, tableName, done);
-    })
-  })
+    });
+  });
 
-  describe('34.3 testing database TIMESTAMP(p)', function(done) {
+  describe('34.3 testing database TIMESTAMP(p)', function() {
     var timestamps = assist.TIMESTAMP_STRINGS;
 
     before(function(done) {
       assist.setUp4sql(connection, tableName, timestamps, done);
-    })
+    });
 
     after(function(done) {
       connection.execute(
-        "DROP table " + tableName,
+        "DROP table " + tableName + " PURGE",
         function(err) {
           should.not.exist(err);
           done();
         }
       );
-    }) // after
+    }); // after
 
     it('34.3.1 SELECT query - original data', function(done) {
       assist.selectOriginalData(connection, tableName, timestamps, done);
-    })
+    });
 
     it('34.3.2 SELECT query - formatted data for comparison', function(done) {
       async.forEach(timestamps, function(timestamp, cb) {
@@ -139,10 +139,10 @@ describe('34. dataTypeTimestamp2.js', function() {
           }
         );
       }, function(err) {
-          should.not.exist(err);
-          done();
+        should.not.exist(err);
+        done();
       });
-    })
+    });
 
-  }) // end of 34.3 suite
-})
+  }); // end of 34.3 suite
+});

@@ -48,8 +48,8 @@ test/dataTypeClob.js
 test/dataTypeBlob.js
 test/dataTypeRaw.js
 
-test/plsqlBinding1.js
-test/plsqlBinding2.js
+test/plsqlBindIndexedTable1.js
+test/plsqlBindIndexedTable2.js
 test/instanceof.js
 test/accessTerminatedPoolAttributes.js
 test/getConnAfterPoolTerminate.js
@@ -63,7 +63,7 @@ test/properties.js
 test/lobResultSet.js
 test/clobPlsqlString.js
 test/checkClassesTypes.js
-test/lobProperties.js
+test/lobProperties1.js
 test/autoCommit4nestedExecutes.js
 test/sqlWithWarnings.js
 test/uninitializedLob.js
@@ -71,3 +71,10 @@ test/writableProperties.js
 test/poolCache.js
 test/multipleLobInsertion.js
 test/driverName.js
+test/plsqlBindScalar.js
+test/lobBind1.js
+test/lobBind2.js
+test/poolPing.js
+test/lobBindAsStringBuffer.js
+test/lobProperties2.js
+test/fetchClobAsString.js

@@ -39,7 +39,6 @@
 var oracledb = require('oracledb');
 var should   = require('should');
 var async    = require('async');
-var assist   = require('./dataTypeAssist.js');
 var dbConfig = require('./dbconfig.js');
 
 describe('35. dataTypeTimestamp3.js', function() {
@@ -52,7 +51,7 @@ describe('35. dataTypeTimestamp3.js', function() {
            "       e_table_missing EXCEPTION; " +
            "       PRAGMA EXCEPTION_INIT(e_table_missing, -00942); " +
            "   BEGIN " +
-           "       EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " '); " +
+           "       EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " PURGE'); " +
            "   EXCEPTION " +
            "       WHEN e_table_missing " +
            "       THEN NULL; " +
@@ -64,7 +63,7 @@ describe('35. dataTypeTimestamp3.js', function() {
            "       )" +
            "   '); " +
            "END; ";
-  var sqlDrop = "DROP table " + tableName;
+  var sqlDrop = "DROP table " + tableName + " PURGE";
   before( function(done){
     oracledb.getConnection(
       {
@@ -83,7 +82,7 @@ describe('35. dataTypeTimestamp3.js', function() {
           }
         );
       });
-  })
+  });
 
   after( function(done){
     connection.execute(
@@ -96,16 +95,16 @@ describe('35. dataTypeTimestamp3.js', function() {
         });
       }
     );
-  })
+  });
 
   it('supports TIMESTAMP WITH TIME ZONE data type', function(done) {
     connection.should.be.ok();
 
     var timestamps = [
-        new Date(-100000000),
-        new Date(0),
-        new Date(10000000000),
-        new Date(100000000000)
+      new Date(-100000000),
+      new Date(0),
+      new Date(10000000000),
+      new Date(100000000000)
     ];
 
     var sqlInsert = "INSERT INTO " + tableName + " VALUES(:no, :bindValue)";
@@ -128,11 +127,12 @@ describe('35. dataTypeTimestamp3.js', function() {
         function(err, result) {
           should.exist(err);
           (err.message).should.startWith('NJS-010:'); // unsupported data type in select list
+          should.not.exist(result);
 
           done();
         }
       );
     });
-  })
+  });
 
-})
+});
