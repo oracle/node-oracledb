@@ -29,18 +29,30 @@
     "url": "git://github.com/oracle/node-oracledb.git"
   },
   "dependencies": {
+    "node-pre-gyp": "0.6.x",
     "nan": "~2.4.0"
   },
+  "bundledDependencies": [
+    "node-pre-gyp"
+  ],
   "devDependencies": {
       "mocha": "^2.4.5",
       "should": "^8.3.1",
       "async": "^1.5.0"
   },
   "scripts": {
+      "install": "node-pre-gyp install --fallback-to-build",
       "test": "mocha --opts test/opts/mocha.opts",
       "posttest": "node test/opts/versions.js",
       "testwindows": "mocha --opts test\\opts\\mocha.opts && npm run posttest"
   },
+  "binary": {
+      "module_name": "oracledb",
+      "module_path": "./build/Release",
+      "host": "https://raw.githubusercontent.com/bchr02/node-oracledb/prebuild_support/bin",
+      "remote_path": "",
+      "package_name": "{module_name}-v{version}-{node_abi}-{platform}-{arch}-{toolset}.tar.gz"
+},
   "engines": {
     "node": ">=0.10.28"
   },

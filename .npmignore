@@ -1,6 +1,7 @@
 .editorconfig
 INSTALL.md
 CONTRIBUTING.md
+/bin
 /doc
 /examples
 /test
