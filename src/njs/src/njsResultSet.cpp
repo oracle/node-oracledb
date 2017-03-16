@@ -711,6 +711,7 @@ void ResultSet::clearFetchBuffer( unsigned int numRows )
    {
      if ( defineBuffers_[i].dttmarr )
      {
+       /* Date/Timestamp columns */
        defineBuffers_[i].dttmarr->release ();
        defineBuffers_[i].extbuf = NULL;
      }
@@ -718,12 +719,28 @@ void ResultSet::clearFetchBuffer( unsigned int numRows )
                  ( defineBuffers_[i].fetchType == DpiBlob ) ||
                  ( defineBuffers_[i].fetchType == DpiBfile ) )
      {
+       /* Lob columns */
        for (unsigned int j = 0; j < numRows; j++)
        {
          if (((Descriptor **)(defineBuffers_[i].buf))[j])
          {
            Env::freeDescriptor(((Descriptor **)(defineBuffers_[i].buf))[j],
                                LobDescriptorType);
+         }
+       }
+     }
+     else if ( ( ( defineBuffers_[i].fetchType == dpi::DpiVarChar ) &&
+                 ( mInfo_[i].dbType == dpi::DpiClob ) ) ||
+               ( ( defineBuffers_[i].fetchType == dpi::DpiRaw ) &&
+                 ( mInfo_[i].dbType == dpi::DpiBlob ) ) )
+     {
+       /* CLOB-as-STRING or BLOB-as-BUFFER case */
+       for ( unsigned int j = 0 ; j < numRows ; j ++ )
+       {
+         if ( ( (char **)defineBuffers_[i].buf)[j] )
+         {
+           free ( ( (char **)defineBuffers_[i].buf)[j] );
+           ( ( char **)defineBuffers_[i].buf)[j] = NULL ;
          }
        }
      }

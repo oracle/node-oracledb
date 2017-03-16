@@ -483,6 +483,16 @@ typedef struct eBaton
            }
          }
 
+         // If Blob data was fetched as Buffer, deallocate each buffer
+         if ( (defines[i].fetchType == dpi::DpiRaw) &&
+              mInfo[i].dbType == dpi::DpiBlob )
+         {
+           for ( unsigned int j = 0 ; j < maxRows ; j ++ )
+           {
+             free ( ((char **)(defines[i].buf))[j] );
+           }
+         }
+
          /*
           * Buf and indicator will be allocated in all cases.
           * len will NOT be allocated for CLOB-as-STRING/BLOB-as-BUFFER
