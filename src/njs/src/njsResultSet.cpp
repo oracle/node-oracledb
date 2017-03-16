@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -734,10 +734,10 @@ void ResultSet::clearFetchBuffer( unsigned int numRows )
      free(defineBuffers_[i].ind);
 
      if ( extDefines_[i] &&
-          extDefines_[i]->extDefType == NJS_EXTDEFINE_CLOBASSTR )
+          extDefines_[i]->extDefType == NJS_EXTDEFINE_CONVERT_LOB )
      {
-       free ( extDefines_[i]->fields.extClobAsStr.ctx ) ;
-       free ( extDefines_[i]->fields.extClobAsStr.len2 ) ;
+       free ( extDefines_[i]->fields.extConvertLob.ctx ) ;
+       free ( extDefines_[i]->fields.extConvertLob.len2 ) ;
        delete ( extDefines_[i] );
      }
      extDefines_.resize ( 0 ) ;

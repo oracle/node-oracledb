@@ -82,3 +82,4 @@ test/clobDMLBindAsString.js
 test/blobDMLBindAsBuffer.js
 test/lobProperties2.js
 test/fetchClobAsString.js
+test/fetchBlobAsBuffer.js

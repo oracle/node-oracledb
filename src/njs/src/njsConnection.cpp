@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates.
+/* Copyright (c) 2015, 2017, Oracle and/or its affiliates.
    All rights reserved. */
 
 /******************************************************************************
@@ -68,7 +68,7 @@ Nan::Persistent<FunctionTemplate> Connection::connectionTemplate_s;
 #define NJS_MAX_FETCH_AS_STRING_SIZE      200
 
 // Size of block allocated each time when callback is called for
-// for fetch-CLOB-as-STRING.  This constant is used only CLOB-as-STRING case
+// for fetch-CLOB-as-STRING/fetch-BLOB-as-Buffer.
 #if OCI_MAJOR_VERSION >= 12
   #define NJS_ITER_SIZE 524287  /* Use (512KB - 1) with 12c Clients */
 #else
@@ -490,13 +490,16 @@ NAN_METHOD(Connection::Execute)
   executeBaton->outFormat          = connection->oracledb_->getOutFormat();
   executeBaton->autoCommit         = connection->oracledb_->getAutoCommit();
   executeBaton->dpienv             = connection->oracledb_->getDpiEnv();
+  executeBaton->dpiconn            = connection->dpiconn_;
+  executeBaton->njsconn            = connection;
   executeBaton->fetchAsStringTypes =
     (DataType*) connection->oracledb_->getFetchAsStringTypes ();
   executeBaton->fetchAsStringTypesCount =
     connection->oracledb_->getFetchAsStringTypesCount ();
-
-  executeBaton->dpiconn            = connection->dpiconn_;
-  executeBaton->njsconn            = connection;
+  executeBaton->fetchAsBufferTypes =
+    (DataType*)connection->oracledb_->getFetchAsBufferTypes ();
+  executeBaton->fetchAsBufferTypesCount =
+    connection->oracledb_->getFetchAsBufferTypesCount () ;
   executeBaton->extendedMetaData   =
                               connection->oracledb_->getExtendedMetaData ();
 
@@ -637,9 +640,11 @@ void Connection::ProcessOptions (Nan::NAN_METHOD_ARGS_TYPE args, unsigned int in
 
           fInfo[index].njsType = (DataType) tmptype;
 
-          // Only Conversion to STRING allowed now. Either STRING or DB type.
+          // Only Conversion to STRING/Buffer allowed now.
+          // Either STRING/BUFFER or DB type.
           if ( ( fInfo[index].njsType != NJS_DATATYPE_DEFAULT ) &&
-               ( fInfo[index].njsType != NJS_DATATYPE_STR ) )
+               ( fInfo[index].njsType != NJS_DATATYPE_STR ) &&
+               ( fInfo[index].njsType != NJS_DATATYPE_BUFFER) )
           {
             executeBaton->error = NJSMessages::getErrorMsg (
                                                errInvalidTypeForConversion );
@@ -2796,8 +2801,11 @@ void Connection::CopyMetaData ( MetaInfo           *mInfo,
         break;
 
       case dpi::DpiBlob:
-        mInfo[col].dpiFetchType = mData[col].dbType;
-        mInfo[col].njsFetchType = NJS_DATATYPE_BLOB;
+        mInfo[col].dpiFetchType = Connection::GetTargetType ( executeBaton,
+                                                              mInfo[col].name,
+                                                              dpi::DpiBlob );
+        mInfo[col].njsFetchType = ( mInfo[col].dpiFetchType == dpi::DpiRaw ) ?
+                                  NJS_DATATYPE_BUFFER : NJS_DATATYPE_BLOB ;
         break;
 
       case dpi::DpiRowid:
@@ -2907,6 +2915,10 @@ boolean Connection::MapByName ( eBaton *executeBaton, std::string &name,
         {
           targetType = dpi::DpiVarChar;
         }
+        else if ( executeBaton->fetchInfo[f].njsType == NJS_DATATYPE_BUFFER )
+        {
+          targetType = dpi::DpiRaw ;
+        }
         else if ( executeBaton->fetchInfo[f].njsType == NJS_DATATYPE_DEFAULT )
         {
           targetType = Connection::SourceDBType2TargetDBType ( targetType );
@@ -2939,7 +2951,7 @@ boolean Connection::MapByType ( eBaton *executeBaton, unsigned short &dbType )
   boolean modified = false;
   unsigned int count = 0 ;
 
-  /* If oracledb property is set map using that */
+  /* Process Fetch-As-string settings from global oracledb property first */
   if ( executeBaton->fetchAsStringTypes )
   {
     count = executeBaton->fetchAsStringTypesCount;
@@ -2997,6 +3009,26 @@ boolean Connection::MapByType ( eBaton *executeBaton, unsigned short &dbType )
 
     default:  /* Other data types no supported and is checked earlier */
       break;
+    }
+  }
+
+  /* Process fetch-blob-as-buffer from global oracledb property */
+  if ( !modified && executeBaton->fetchAsBufferTypes )
+  {
+    count = executeBaton->fetchAsBufferTypesCount;
+    switch ( dbType )
+    {
+    case dpi::DpiBlob:
+      for ( unsigned int t = 0 ; !modified && ( t < count ) ; t ++ )
+      {
+        if ( executeBaton->fetchAsBufferTypes[t] == NJS_DATATYPE_BLOB )
+        {
+          /* convert all BLOB column values to BUFFER */
+          dbType = dpi::DpiRaw;
+          modified = true;
+          break;
+        }
+      }
     }
   }
 
@@ -3215,9 +3247,17 @@ void Connection::DoDefines ( eBaton* executeBaton )
       case dpi::DpiBlob:
       case dpi::DpiBfile:
         defines[col].fetchType = executeBaton->mInfo[col].dpiFetchType;
-        defines[col].maxSize =
-          ( defines[col].fetchType == dpi::DpiVarChar ) ?
-              sizeof ( char *) : sizeof ( Descriptor *) ;
+        if ( executeBaton->mInfo[col].dbType == dpi::DpiClob )
+        {
+          defines[col].maxSize =
+            ( defines[col].fetchType == dpi::DpiVarChar ) ?
+            sizeof ( char *) : sizeof ( Descriptor *) ;
+        }
+        else if ( executeBaton->mInfo[col].dbType == dpi::DpiBlob )
+        {
+          defines[col].maxSize = ( defines[col].fetchType == dpi::DpiRaw ) ?
+                                 sizeof ( void *) : sizeof ( Descriptor * ) ;
+        }
 
         if ( NJS_SIZE_T_OVERFLOW ( defines[col].maxSize,
                                        executeBaton->maxRows ) )
@@ -3242,13 +3282,17 @@ void Connection::DoDefines ( eBaton* executeBaton )
         {
           for (unsigned int j = 0; j < executeBaton->maxRows; j++)
           {
-            if ( defines[col].fetchType == dpi::DpiVarChar )
+            switch ( defines[col].fetchType )
             {
+            case dpi::DpiVarChar:
               // Clob-Fetch-As-String - allocation happens in callback
               ((char **)(defines[col].buf))[j] = NULL;
-            }
-            else
-            {
+              break;
+            case dpi::DpiRaw:
+              // Blob-Fetch-As-Buffer - allocation happens in callback
+              ((void **)(defines[col].buf))[j] = NULL;
+              break;
+            default:
               ((Descriptor **)(defines[col].buf))[j] =
                 executeBaton->dpienv->allocDescriptor(LobDescriptorType);
             }
@@ -3309,32 +3353,34 @@ void Connection::DoDefines ( eBaton* executeBaton )
 
       void *buf = NULL ;
       DpiDefineCallbackCtx *ctx = NULL ;
-      bool clobAsStr = false ;
+      bool lobAs = false ;
 
-      if ( ( defines[col].fetchType == dpi::DpiVarChar ) &&
-           ( executeBaton->mInfo[col].dbType == dpi::DpiClob ) )
+      if ( ( ( defines[col].fetchType == dpi::DpiVarChar ) &&
+             ( executeBaton->mInfo[col].dbType == dpi::DpiClob ) ) ||
+           ( ( defines[col].fetchType == dpi::DpiRaw ) &&
+             ( executeBaton->mInfo[col].dbType == dpi::DpiBlob ) ) )
       {
+        /* Fetch Clob-As-String or Blob-As-Buffer case */
         ctx = ( DpiDefineCallbackCtx * )malloc (
                                         sizeof ( DpiDefineCallbackCtx ) );
         ctx->callbackfn = (definecbtype ) Connection::cbDynDefine ;
         ctx->data = (void *)executeBaton ;
         ctx->definePos = col ;
         ctx->prevIter = -1L ;  /* no row processed yet */
-        clobAsStr = true ;
+        lobAs = true ;
         executeBaton->extDefines[col] = new ExtDefine (
-                                                  NJS_EXTDEFINE_CLOBASSTR ) ;
-        executeBaton->extDefines[col]->fields.extClobAsStr.ctx = (void *) ctx;
+                                                  NJS_EXTDEFINE_CONVERT_LOB ) ;
+        executeBaton->extDefines[col]->fields.extConvertLob.ctx = (void *) ctx;
 
-        executeBaton->extDefines[col]->fields.extClobAsStr.len2 =
+        executeBaton->extDefines[col]->fields.extConvertLob.len2 =
                 ( unsigned int * ) malloc ( sizeof ( unsigned int ) *
                                                      executeBaton->maxRows );
-        if( !executeBaton->extDefines[col]->fields.extClobAsStr.len2 )
+        if( !executeBaton->extDefines[col]->fields.extConvertLob.len2 )
         {
           executeBaton->error = NJSMessages::getErrorMsg (
                                                 errInsufficientMemory );
           error = true;
         }
-
       }
       else
       {
@@ -3343,10 +3389,10 @@ void Connection::DoDefines ( eBaton* executeBaton )
 
       executeBaton->dpistmt->define(col+1, defines[col].fetchType,
                                     buf,
-                                    clobAsStr ?
+                                    lobAs ?
                                       DPI_MAX_BUFLEN :defines[col].maxSize,
-                                    clobAsStr ? NULL : defines[col].ind,
-                                    clobAsStr ? NULL : defines[col].len,
+                                    lobAs ? NULL : defines[col].ind,
+                                    lobAs ? NULL : defines[col].len,
                                     ctx );
     }
   }
@@ -3372,17 +3418,17 @@ void Connection::DoFetch (eBaton* executeBaton)
     Define    *define    = &(executeBaton->defines[col] );
     ExtDefine *extDefine = executeBaton->extDefines[col];
 
-    if ( extDefine && extDefine -> extDefType == NJS_EXTDEFINE_CLOBASSTR )
+    if ( extDefine && extDefine -> extDefType == NJS_EXTDEFINE_CONVERT_LOB )
     {
-      /* In case of fetch-clob-as-string, the last read operation has partial
+      /* In case of fetch-lob-as-xxx the last read operation has partial
        * size read, and consolidated len is maintained in extDefine, add both
        * and set it back to define->len[row] it can be used later
        */
       for ( unsigned int row = 0; row < executeBaton->rowsFetched ; row ++ )
       {
         define->len[row] = ( DPI_BUFLEN_TYPE )
-                           extDefine->fields.extClobAsStr.len2[row];
-        define->len[row] += extDefine->fields.extClobAsStr.cLen ;
+                           extDefine->fields.extConvertLob.len2[row];
+        define->len[row] += extDefine->fields.extConvertLob.cLen ;
       }
     }
   }
@@ -3981,6 +4027,11 @@ Local<Value> Connection::GetValue ( eBaton *executeBaton,
          ( executeBaton->mInfo[col].dbType == dpi::DpiClob ) )
     {
       buf = ((char **) (define->buf))[row];
+    }
+    else if ( ( define->fetchType == dpi::DpiRaw ) &&
+              ( executeBaton->mInfo[col].dbType == dpi::DpiBlob ) )
+    {
+      buf = ((void **) (define->buf))[row];
     }
     else
     {
@@ -5607,12 +5658,12 @@ int Connection::cbDynDefine ( void *octxp, unsigned long definePos,
   if ( *prevIter != iter )
   {
     *prevIter = iter;
-    extDefine->fields.extClobAsStr.cLen = 0;
+    extDefine->fields.extConvertLob.cLen = 0;
   }
   else
   {
     // maintain incremental size of clob
-    extDefine->fields.extClobAsStr.cLen += NJS_ITER_SIZE ;
+    extDefine->fields.extConvertLob.cLen += NJS_ITER_SIZE ;
   }
 
   tmp = buf[iter];  // preserve the current memory address
@@ -5621,7 +5672,7 @@ int Connection::cbDynDefine ( void *octxp, unsigned long definePos,
   buf[iter] = (char *) ( ( !buf[iter] ) ?
                          malloc ( maxLen ) :
                          realloc ( buf[iter],
-                          maxLen + extDefine->fields.extClobAsStr.cLen ) ) ;
+                          maxLen + extDefine->fields.extConvertLob.cLen ) ) ;
   if ( !buf[iter] )
   {
     // If realloc fails, the IN parameter requires to be freed and untouched
@@ -5631,13 +5682,13 @@ int Connection::cbDynDefine ( void *octxp, unsigned long definePos,
   }
   else
   {
-    extDefine->fields.extClobAsStr.len2[iter] = maxLen;
+    extDefine->fields.extConvertLob.len2[iter] = maxLen;
     define->ind[iter] = 0;                       // default value for indicator
 
-    *bufpp = (void *) (&buf[iter][extDefine->fields.extClobAsStr.cLen]);
+    *bufpp = (void *) (&buf[iter][extDefine->fields.extConvertLob.cLen]);
 
     // size for this iter
-    *alenpp = (unsigned int *) &(extDefine->fields.extClobAsStr.len2[iter]) ;
+    *alenpp = (unsigned int *) &(extDefine->fields.extConvertLob.len2[iter]) ;
 
     *indpp  = (void *) &(define->ind[iter]);            // indicator
   }

@@ -1267,48 +1267,395 @@ Overview of node-oracledb functional tests
        78.2.4 update empty buffer column
        78.2.5 update a column with empty buffer
        78.2.6 update a column with (10MB + 1) buffer
+       
+79. lobProperties2.js
+    79.1 CLOB: chunkSize (read-only)
+    79.2 BLOB: chunkSize (read-only)
+    79.3 CLOB: length (read-only)
+    79.4 BLOB: length (read-only)
+    79.5 CLOB: type (read-only)
+    79.6 BLOB: type (read-only)
+    79.7 pieceSize
+       79.7.1 default value is chunkSize
+       79.7.2 can be increased
+       79.7.3 can be decreased
+       79.7.4 can be zero
+       79.7.5 cannot be less than zero
+       79.7.6 cannot be null
+       79.7.7 must be a number
 
-77. lobProperties2.js
-    77.1 CLOB: chunkSize (read-only)
-    77.2 BLOB: chunkSize (read-only)
-    77.3 CLOB: length (read-only)
-    77.4 BLOB: length (read-only)
-    77.5 CLOB: type (read-only)
-    77.6 BLOB: type (read-only)
-    77.7 pieceSize
-       77.7.1 default value is chunkSize
-       77.7.2 can be increased
-       77.7.3 can be decreased
-       77.7.4 can be zero
-       77.7.5 cannot be less than zero
-       77.7.6 cannot be null
-       77.7.7 must be a number
+80. fetchClobAsString.js
+    80.1 fetch CLOB columns by setting oracledb.fetchAsString
+       80.1.1 works with NULL value
+       80.1.2 works with empty string
+       80.1.3 works with small CLOB data
+       80.1.4 works with (64K - 1) data
+       80.1.5 works with (64K + 1) data
+       80.1.6 works with (1MB + 1) data
+       80.1.7 works with (5MB + 1) data
+       80.1.8 works with (10MB + 1) data
+       80.1.9 fetch with substr()
+       80.1.10 works with EMPTY_CLOB()
+       80.1.11 fetch multiple CLOB columns as String
+       80.1.12 fetch the same CLOB column multiple times
+       80.1.13 works with update statement
+       80.1.14 works with REF CURSOR
+       80.1.15 fetch CLOB with stream
+       80.1.16 works with setting oracledb.maxRows < actual number of rows in the table
+       80.1.17 works with setting oracledb.maxRows > actual number of rows in the table
+       80.1.18 override oracledb.fetchAsString with fetchInfo set to oracledb.DEFAULT
+    80.2 fetch CLOB columns by setting oracledb.fetchAsString and outFormat = oracledb.OBJECT
+       80.2.1 works with NULL value
+       80.2.2 works with empty String
+       80.2.3 works with small value
+       80.2.4 works with (64K - 1) value
+       80.2.5 works with (64K + 1) value
+       80.2.6 works with (1MB + 1) data
+       80.2.7 works with (5MB + 1) data
+       80.2.8 works with (10MB + 1) data
+       80.2.9 works with dbms_lob.substr()
+       80.2.10 works with EMPTY_CLOB()
+       80.2.11 fetch multiple CLOB rows as String
+       80.2.12 fetch the same CLOB column multiple times
+       80.2.13 works with update statement
+       80.2.14 works with REF CURSOR
+       80.2.15 fetch CLOB with stream
+       80.2.16 works with setting oracledb.maxRows < actual number of rows in the table
+       80.2.17 works with setting oracledb.maxRows > actual number of rows in the table
+       80.2.18 override oracledb.fetchAsString with fetchInfo set to oracledb.DEFAULT
+    80.3 fetch CLOB columns by setting oracledb.fetchAsString, outFormat = oracledb.OBJECT and resultSet = true
+       80.3.1 works with NULL value
+       80.3.2 works with empty String
+       80.3.3 works with small value
+       80.3.4 works with (64K - 1) value
+       80.3.5 works with (64K + 1) value
+       80.3.6 works with (1MB + 1) data
+       80.3.7 works with (5MB + 1) data
+       80.3.8 works with (10MB + 1) data
+       80.3.9 works with dbms_lob.substr()
+       80.3.10 works with EMPTY_CLOB()
+       80.3.11 fetch multiple CLOB rows as String
+       80.3.12 fetch the same CLOB column multiple times
+       80.3.13 works with update statement
+       80.3.14 works with REF CURSOR
+       80.3.15 fetch CLOB with stream
+       80.3.16 works with setting oracledb.maxRows < actual number of rows in the table
+       80.3.17 works with setting oracledb.maxRows > actual number of rows in the table
+       80.3.18 override oracledb.fetchAsString with fetchInfo set to oracledb.DEFAULT
+    80.4 fetch CLOB columns by setting oracledb.fetchAsString and outFormat = oracledb.ARRAY
+       80.4.1 works with NULL value
+       80.4.2 works with empty String
+       80.4.3 works with small value
+       80.4.4 works with (64K - 1) value
+       80.4.5 works with (64K + 1) value
+       80.4.6 works with (1MB + 1) data
+       80.4.7 works with (5MB + 1) data
+       80.4.8 works with (10MB + 1) data
+       80.4.9 works with dbms_lob.substr()
+       80.4.10 works with EMPTY_CLOB()
+       80.4.11 fetch multiple CLOB rows as String
+       80.4.12 fetch the same CLOB column multiple times
+       80.4.13 works with update statement
+       80.4.14 works with REF CURSOR
+       80.4.15 fetch CLOB with stream
+       80.4.16 works with setting oracledb.maxRows < actual number of rows in the table
+       80.4.17 works with setting oracledb.maxRows < actual number of rows in the table
+       80.4.18 override oracledb.fetchAsString with fetchInfo set to oracledb.DEFAULT
+    80.5 fetch CLOB columns by setting oracledb.fetchAsString, outFormat = oracledb.ARRAY and resultSet = true
+       80.5.1 works with NULL value
+       80.5.2 works with empty String
+       80.5.3 works with small value
+       80.5.4 works with (64K - 1) value
+       80.5.5 works with (64K + 1) value
+       80.5.6 works with (1MB + 1) data
+       80.5.7 works with (5MB + 1) data
+       80.5.8 works with (10MB + 1) data
+       80.5.9 works with dbms_lob.substr()
+       80.5.10 works with EMPTY_CLOB()
+       80.5.11 fetch multiple CLOB rows as String
+       80.5.12 fetch the same CLOB column multiple times
+       80.5.13 works with update statement
+       80.5.14 works with REF CURSOR
+       80.5.15 fetch CLOB with stream
+       80.5.16 works with setting oracledb.maxRows < actual number of rows in the table
+       80.5.17 works with setting oracledb.maxRows > actual number of rows in the table
+       80.5.18 override oracledb.fetchAsString with fetchInfo set to oracledb.DEFAULT
+    80.6 fetch CLOB columns by setting fetchInfo option
+       80.6.1 works with NULL value
+       80.6.2 works with empty String
+       80.6.3 works with small value
+       80.6.4 works with (64K - 1) value
+       80.6.5 works with (64K + 1) value
+       80.6.6 works with (1MB + 1) value
+       80.6.7 works with (5MB + 1) value
+       80.6.8 works with (10MB + 1) value
+       80.6.9 works with dbms_lob.substr()
+       80.6.10 works with EMPTY_CLOB()
+       80.6.11 fetch multiple CLOB rows as String
+       80.6.12 fetch the same CLOB column multiple times
+       80.6.13 works with update statement
+       80.6.14 works with setting oracledb.maxRows < actual number of rows in the table
+       80.6.15 works with setting oracledb.maxRows > actual number of rows in the table
+    80.7 fetch CLOB columns by setting fetchInfo option and outFormat = oracledb.OBJECT
+       80.7.1 works with NULL value
+       80.7.2 works with empty buffer
+       80.7.3 works with small value
+       80.7.4 works with (64K - 1) value
+       80.7.5 works with (64K + 1) value
+       80.7.6 works with (1MB + 1) value
+       80.7.7 works with (5MB + 1) value
+       80.7.8 works with (10MB + 1) value
+       80.7.9 works with dbms_lob.substr()
+       80.7.10 works with EMPTY_CLOB()
+       80.7.11 fetch multiple CLOB rows as String
+       80.7.12 fetch the same CLOB column multiple times
+       80.7.13 works with update statement
+       80.7.14 works with setting oracledb.maxRows < actual number of rows in the table
+       80.7.15 works with setting oracledb.maxRows > actual number of rows in the table
+    80.8 fetch CLOB columns by setting fetchInfo option, outFormat = oracledb.OBJECT and resultSet = true
+       80.8.1 works with NULL value
+       80.8.2 works with empty buffer
+       80.8.3 works with small value
+       80.8.4 works with (64K - 1) value
+       80.8.5 works with (64K + 1) value
+       80.8.6 works with (1MB + 1) value
+       80.8.7 works with (5MB + 1) value
+       80.8.8 works with (10MB + 1) value
+       80.8.9 works with dbms_lob.substr()
+       80.8.10 works with EMPTY_CLOB()
+       80.8.11 fetch multiple CLOB rows as String
+       80.8.12 fetch the same CLOB column multiple times
+       80.8.13 works with update statement
+       80.8.14 works with setting oracledb.maxRows < actual number of rows in the table
+       80.8.15 works with setting oracledb.maxRows > actual number of rows in the table
+    80.9 fetch CLOB columns by setting fetchInfo option and outFormat = oracledb.ARRAY
+       80.9.1 works with NULL value
+       80.9.2 works with empty String
+       80.9.3 works with small value
+       80.9.4 works with (64K - 1) value
+       80.9.5 works with (64K + 1) value
+       80.9.6 works with (1MB + 1) value
+       80.9.7 works with (5MB + 1) value
+       80.9.8 works with (10MB + 1) value
+       80.9.9 works with dbms_lob.substr()
+       80.9.10 works with EMPTY_CLOB()
+       80.9.11 fetch multiple CLOB rows as String
+       80.9.12 fetch the same CLOB column multiple times
+       80.9.13 works with update statement
+       80.9.14 works with setting oracledb.maxRows < actual number of rows in the table
+       80.9.15 works with setting oracledb.maxRows > actual number of rows in the table
+    80.10 fetch CLOB columns by setting fetchInfo option, outFormat = oracledb.ARRAY and resultSet = true
+       80.10.1 works with NULL value
+       80.10.2 works with empty String
+       80.10.3 works with small value
+       80.10.4 works with (64K - 1) value
+       80.10.5 works with (64K + 1) value
+       80.10.6 works with (1MB + 1) value 
+       80.10.7 works with (5MB + 1) value
+       80.10.8 works with (10MB + 1) value
+       80.10.9 works with dbms_lob.substr()
+       80.10.10 works with EMPTY_CLOB()
+       80.10.11 fetch multiple CLOB rows as String
+       80.10.12 fetch the same CLOB column multiple times
+       80.10.13 works with update statement
+       80.10.14 works with setting oracledb.maxRows < actual number of rows in the table
+       80.10.15 works with setting oracledb.maxRows > actual number of rows in the table
+    80.11 fetch multiple CLOBs
+       80.11.1 fetch multiple CLOB columns as String
+       80.11.2 fetch two CLOB columns, one as string, another streamed
+    80.12 types support for fetchAsString property
+       80.12.1 String not supported in fetchAsString
+       80.12.2 BLOB not supported in fetchAsString
+       80.12.3 Cursor not supported in fetchAsString
+       80.12.4 Buffer not supported in fetchAsString
+       80.12.5 Number supported in fetchAsString
+       80.12.6 Date supported in fetchAsString
+       80.12.7 CLOB supported in fetchAsString
 
-78. fetchClobAsString.js
-    78.1 fetch CLOB columns by setting oracledb.fetchAsString
-       78.1.1 works with NULL value
-       78.1.2 works with small CLOB data
-       78.1.3 fetch multiple CLOB columns as String
-       78.1.4 fetch the same CLOB column multiple times
-       78.1.5 works with (64K - 1) value
-       78.1.6 fetch with substr()
-       78.1.7 works with EMPTY_CLOB()
-       78.1.8 fetch CLOB with stream
-       78.1.9 works with REF CURSOR
-       78.1.10 works with update statement
-       78.1.11 works with setting oracledb.maxRows < actual number of rows in the table
-       78.1.12 works with setting oracledb.maxRows > actual number of rows in the table
-    78.2 fetch CLOB columns by setting fetchInfo option
-       78.2.1 works with NULL value
-       78.2.2 works with small CLOB data
-       78.2.3 fetch multiple CLOB columns as String
-       78.2.4 fetch the same CLOB column multiple times
-       78.2.5 works with (64K - 1) value
-       78.2.6 works with substr()
-       78.2.7 works with EMPTY_CLOB()
-       78.2.8 works with UPDATE statement
-       78.2.9 works with setting oracledb.maxRows < actual number of rows in the table
-       78.2.10 works with setting oracledb.maxRows > actual number of rows in the table
-    78.3 fetch multiple CLOBs
-       78.3.1 fetch multiple CLOB columns as String
-       78.3.2 fetch two CLOB columns, one as string, another streamed
+81. fetchBlobAsBuffer.js
+  81.1 fetch BLOB columns by setting oracledb.fetchAsBuffer
+      81.1.1 works with NULL value
+      81.1.2 works with empty Buffer
+      81.1.3 works with small value
+      81.1.4 works with (64K - 1) value
+      81.1.5 works with (64K + 1) value
+      81.1.6 works with (1MB + 1) data
+      81.1.7 works with (5MB + 1) data
+      81.1.8 works with (10MB + 1) data
+      81.1.9 works with dbms_lob.substr()
+      81.1.10 works with EMPTY_BLOB()
+      81.1.11 fetch multiple BLOB rows as Buffer
+      81.1.12 fetch the same BLOB column multiple times
+      81.1.13 works with update statement
+      81.1.14 works with REF CURSOR
+      81.1.15 fetch BLOB with stream
+      81.1.16 works with setting oracledb.maxRows < actual number of rows in the table
+      81.1.17 works with setting oracledb.maxRows > actual number of rows in the table
+      81.1.18 override oracledb.fetchAsBuffer with fetchInfo set to oracledb.DEFAULT
+  81.2 fetch BLOB columns by setting oracledb.fetchAsBuffer and outFormat = oracledb.OBJECT
+      81.2.1 works with NULL value
+      81.2.2 works with empty Buffer
+      81.2.3 works with small value
+      81.2.4 works with (64K - 1) value
+      81.2.5 works with (64K + 1) value
+      81.2.6 works with (1MB + 1) data
+      81.2.7 works with (5MB + 1) data
+      81.2.8 works with (10MB + 1) data
+      81.2.9 works with dbms_lob.substr()
+      81.2.10 works with EMPTY_BLOB()
+      81.2.11 fetch multiple BLOB rows as Buffer
+      81.2.12 fetch the same BLOB column multiple times
+      81.2.13 works with update statement
+      81.2.14 works with REF CURSOR
+      81.2.15 fetch BLOB with stream
+      81.2.16 works with setting oracledb.maxRows < actual number of rows in the table
+      81.2.17 works with setting oracledb.maxRows > actual number of rows in the table
+      81.2.18 override oracledb.fetchAsBuffer with fetchInfo set to oracledb.DEFAULT
+  81.3 fetch BLOB columns by setting oracledb.fetchAsBuffer, outFormat = oracledb.OBJECT and resultSet = true
+      81.3.1 works with NULL value
+      81.3.2 works with empty Buffer
+      81.3.3 works with small value
+      81.3.4 works with (64K - 1) value
+      81.3.5 works with (64K + 1) value
+      81.3.6 works with (1MB + 1) data
+      81.3.7 works with (5MB + 1) data
+      81.3.8 works with (10MB + 1) data
+      81.3.9 works with dbms_lob.substr()
+      81.3.10 works with EMPTY_BLOB()
+      81.3.11 fetch multiple BLOB rows as Buffer
+      81.3.12 fetch the same BLOB column multiple times
+      81.3.13 works with update statement
+      81.3.14 works with REF CURSOR
+      81.3.15 fetch BLOB with stream
+      81.3.16 works with setting oracledb.maxRows < actual number of rows in the table
+      81.3.17 works with setting oracledb.maxRows > actual number of rows in the table
+      81.3.18 override oracledb.fetchAsBuffer with fetchInfo set to oracledb.DEFAULT
+  81.4 fetch BLOB columns by setting oracledb.fetchAsBuffer and outFormat = oracledb.ARRAY
+      81.4.1 works with NULL value
+      81.4.2 works with empty Buffer
+      81.4.3 works with small value
+      81.4.4 works with (64K - 1) value
+      81.4.5 works with (64K + 1) value
+      81.4.6 works with (1MB + 1) data
+      81.4.7 works with (5MB + 1) data
+      81.4.8 works with (10MB + 1) data
+      81.4.9 works with dbms_lob.substr()
+      81.4.10 works with EMPTY_BLOB()
+      81.4.11 fetch multiple BLOB rows as Buffer
+      81.4.12 fetch the same BLOB column multiple times
+      81.4.13 works with update statement
+      81.4.14 works with REF CURSOR
+      81.4.15 fetch BLOB with stream
+      81.4.16 works with setting oracledb.maxRows < actual number of rows in the table
+      81.4.17 works with setting oracledb.maxRows < actual number of rows in the table
+      81.4.18 override oracledb.fetchAsBuffer with fetchInfo set to oracledb.DEFAULT
+  81.5 fetch BLOB columns by setting oracledb.fetchAsBuffer, outFormat = oracledb.ARRAY and resultSet = true
+      81.5.1 works with NULL value
+      81.5.2 works with empty Buffer
+      81.5.3 works with small value
+      81.5.4 works with (64K - 1) value
+      81.5.5 works with (64K + 1) value
+      81.5.6 works with (1MB + 1) data
+      81.5.7 works with (5MB + 1) data
+      81.5.8 works with (10MB + 1) data
+      81.5.9 works with dbms_lob.substr()
+      81.5.10 works with EMPTY_BLOB()
+      81.5.11 fetch multiple BLOB rows as Buffer
+      81.5.12 fetch the same BLOB column multiple times
+      81.5.13 works with update statement
+      81.5.14 works with REF CURSOR
+      81.5.15 fetch BLOB with stream
+      81.5.16 works with setting oracledb.maxRows < actual number of rows in the table
+      81.5.17 works with setting oracledb.maxRows > actual number of rows in the table
+      81.5.18 override oracledb.fetchAsBuffer with fetchInfo set to oracledb.DEFAULT
+  81.6 fetch BLOB columns by setting fetchInfo option
+      81.6.1 works with NULL value
+      81.6.2 works with empty Buffer
+      81.6.3 works with small value
+      81.6.4 works with (64K - 1) value
+      81.6.5 works with (64K + 1) value
+      81.6.6 works with (1MB + 1) value
+      81.6.7 works with (5MB + 1) value
+      81.6.8 works with (10MB + 1) value
+      81.6.9 works with dbms_lob.substr()
+      81.6.10 works with EMPTY_BLOB()
+      81.6.11 fetch multiple BLOB rows as Buffer
+      81.6.12 fetch the same BLOB column multiple times
+      81.6.13 works with update statement
+      81.6.14 works with setting oracledb.maxRows < actual number of rows in the table
+      81.6.15 works with setting oracledb.maxRows > actual number of rows in the table
+  81.7 fetch BLOB columns by setting fetchInfo option and outFormat = oracledb.OBJECT
+      81.7.1 works with NULL value
+      81.7.2 works with empty buffer
+      81.7.3 works with small value
+      81.7.4 works with (64K - 1) value
+      81.7.5 works with (64K + 1) value
+      81.7.6 works with (1MB + 1) value
+      81.7.7 works with (5MB + 1) value
+      81.7.8 works with (10MB + 1) value
+      81.7.9 works with dbms_lob.substr()
+      81.7.10 works with EMPTY_BLOB()
+      81.7.11 fetch multiple BLOB rows as Buffer
+      81.7.12 fetch the same BLOB column multiple times
+      81.7.13 works with update statement
+      81.7.14 works with setting oracledb.maxRows < actual number of rows in the table
+      81.7.15 works with setting oracledb.maxRows > actual number of rows in the table
+  81.8 fetch BLOB columns by setting fetchInfo option, outFormat = oracledb.OBJECT and resultSet = true
+      81.8.1 works with NULL value
+      81.8.2 works with empty buffer
+      81.8.3 works with small value
+      81.8.4 works with (64K - 1) value
+      81.8.5 works with (64K + 1) value
+      81.8.6 works with (1MB + 1) value
+      81.8.7 works with (5MB + 1) value
+      81.8.8 works with (10MB + 1) value
+      81.8.9 works with dbms_lob.substr()
+      81.8.10 works with EMPTY_BLOB()
+      81.8.11 fetch multiple BLOB rows as Buffer
+      81.8.12 fetch the same BLOB column multiple times
+      81.8.13 works with update statement
+      81.8.14 works with setting oracledb.maxRows < actual number of rows in the table
+      81.8.15 works with setting oracledb.maxRows > actual number of rows in the table
+  81.9 fetch BLOB columns by setting fetchInfo option and outFormat = oracledb.ARRAY
+      81.9.1 works with NULL value
+      81.9.2 works with empty Buffer
+      81.9.3 works with small value
+      81.9.4 works with (64K - 1) value
+      81.9.5 works with (64K + 1) value
+      81.9.6 works with (1MB + 1) value
+      81.9.7 works with (5MB + 1) value
+      81.9.8 works with (10MB + 1) value
+      81.9.9 works with dbms_lob.substr()
+      81.9.10 works with EMPTY_BLOB()
+      81.9.11 fetch multiple BLOB rows as Buffer
+      81.9.12 fetch the same BLOB column multiple times
+      81.9.13 works with update statement
+      81.9.14 works with setting oracledb.maxRows < actual number of rows in the table
+      81.9.15 works with setting oracledb.maxRows > actual number of rows in the table
+  81.10 fetch BLOB columns by setting fetchInfo option, outFormat = oracledb.ARRAY and resultSet = true
+      81.10.1 works with NULL value
+      81.10.2 works with empty Buffer
+      81.10.3 works with small value
+      81.10.4 works with (64K - 1) value
+      81.10.5 works with (64K + 1) value
+      81.10.6 works with (1MB + 1) value
+      81.10.7 works with (5MB + 1) value
+      81.10.8 works with (10MB + 1) value
+      81.10.9 works with dbms_lob.substr()
+      81.10.10 works with EMPTY_BLOB()
+      81.10.11 fetch multiple BLOB rows as Buffer
+      81.10.12 fetch the same BLOB column multiple times
+      81.10.13 works with update statement
+      81.10.14 works with setting oracledb.maxRows < actual number of rows in the table
+      81.10.15 works with setting oracledb.maxRows > actual number of rows in the table
+  81.11 fetch multiple BLOBs
+      81.11.1 fetch multiple BLOB columns as Buffer
+      81.11.2 fetch two BLOB columns, one as string, another streamed
+  81.12 types support for fetchAsBuffer property
+      81.12.1 String not supported in fetchAsBuffer
+      81.12.2 CLOB not supported in fetchAsBuffer
+      81.12.3 Number not supported in fetchAsBuffer
+      81.12.4 Date not supported in fetchAsBuffer
+      81.12.5 Cursor not supported in fetchAsBuffer
+      81.12.6 Buffer not supported in fetchAsBuffer
+      81.12.7 BLOB supported in fetchAsBuffer

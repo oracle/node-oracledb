@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2017, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -19,7 +19,7 @@
  * See LICENSE.md for relevant licenses.
  *
  * NAME
- *   77. lobProperties2.js
+ *   79. lobProperties2.js
  *
  * DESCRIPTION
  *   Testing the properties of LOB that created by createLob().
@@ -38,7 +38,7 @@ var should   = require('should');
 var async    = require('async');
 var dbConfig = require('./dbconfig.js');
 
-describe("77. lobProperties2.js", function() {
+describe("79. lobProperties2.js", function() {
 
   var connection;
 
@@ -80,11 +80,11 @@ describe("77. lobProperties2.js", function() {
     });
   }; // checkChunkSize
 
-  it("77.1 CLOB: chunkSize (read-only)", function(done) {
+  it("79.1 CLOB: chunkSize (read-only)", function(done) {
     checkChunkSize(oracledb.CLOB, done);
   });
 
-  it("77.2 BLOB: chunkSize (read-only)", function(done) {
+  it("79.2 BLOB: chunkSize (read-only)", function(done) {
     checkChunkSize(oracledb.BLOB, done);
   });
 
@@ -110,11 +110,11 @@ describe("77. lobProperties2.js", function() {
     });
   }; // checkLength
 
-  it("77.3 CLOB: length (read-only)", function(done) {
+  it("79.3 CLOB: length (read-only)", function(done) {
     checkLength(oracledb.CLOB, done);
   });
 
-  it("77.4 BLOB: length (read-only)", function(done) {
+  it("79.4 BLOB: length (read-only)", function(done) {
     checkLength(oracledb.BLOB, done);
   });
 
@@ -140,15 +140,15 @@ describe("77. lobProperties2.js", function() {
     });
   }; // checkType
 
-  it("77.5 CLOB: type (read-only)", function(done) {
+  it("79.5 CLOB: type (read-only)", function(done) {
     checkType(oracledb.CLOB, done);
   });
 
-  it("77.6 BLOB: type (read-only)", function(done) {
+  it("79.6 BLOB: type (read-only)", function(done) {
     checkType(oracledb.CLOB, done);
   });
 
-  describe("77.7 pieceSize", function() {
+  describe("79.7 pieceSize", function() {
 
     var defaultChunkSize;
     var clob, blob;
@@ -186,7 +186,7 @@ describe("77. lobProperties2.js", function() {
       ], done);
     }); // after
 
-    it("77.7.1 default value is chunkSize", function(done) {
+    it("79.7.1 default value is chunkSize", function(done) {
       var t1 = clob.pieceSize,
         t2 = blob.pieceSize;
 
@@ -195,7 +195,7 @@ describe("77. lobProperties2.js", function() {
       done();
     });
 
-    it("77.7.2 can be increased", function(done) {
+    it("79.7.2 can be increased", function(done) {
       var newValue = clob.pieceSize * 5;
 
       clob.pieceSize = clob.pieceSize * 5;
@@ -210,7 +210,7 @@ describe("77. lobProperties2.js", function() {
       done();
     });
 
-    it("77.7.3 can be decreased", function(done) {
+    it("79.7.3 can be decreased", function(done) {
       if (defaultChunkSize <= 500) {
         console.log('As default chunkSize is too small, this case is not applicable');
       } else {
@@ -228,7 +228,7 @@ describe("77. lobProperties2.js", function() {
       return done();
     });
 
-    it("77.7.4 can be zero", function(done) {
+    it("79.7.4 can be zero", function(done) {
       clob.pieceSize = 0;
       blob.pieceSize = 0;
 
@@ -242,7 +242,7 @@ describe("77. lobProperties2.js", function() {
       done();
     });
 
-    it("77.7.5 cannot be less than zero", function(done) {
+    it("79.7.5 cannot be less than zero", function(done) {
       try {
         clob.pieceSize = -100;
       } catch(err) {
@@ -258,7 +258,7 @@ describe("77. lobProperties2.js", function() {
       done();
     });
 
-    it("77.7.6 cannot be null", function(done) {
+    it("79.7.6 cannot be null", function(done) {
       try {
         clob.pieceSize = null;
       } catch(err) {
@@ -274,7 +274,7 @@ describe("77. lobProperties2.js", function() {
       done();
     });
 
-    it("77.7.7 must be a number", function(done) {
+    it("79.7.7 must be a number", function(done) {
       try {
         clob.pieceSize = NaN;
       } catch(err) {
@@ -289,6 +289,6 @@ describe("77. lobProperties2.js", function() {
 
       done();
     });
-  }); // 77.7
+  }); // 79.7
 
 });

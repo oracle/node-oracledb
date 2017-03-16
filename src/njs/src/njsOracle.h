@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -100,9 +100,11 @@ class Oracledb: public Nan::ObjectWrap
    const std::string& getConnectionClass () const  { return connClass_; }
    bool               getExtendedMetaData () const { return extendedMetaData_;}
    const DataType*    getFetchAsStringTypes () const;
-
    unsigned int       getFetchAsStringTypesCount () const
    {  return fetchAsStringTypesCount_ ;   }
+   const DataType*    getFetchAsBufferTypes () const ;
+   unsigned int       getFetchAsBufferTypesCount () const
+   {  return fetchAsBufferTypesCount_ ;  }
 
 private:
    const string driverName() const;
@@ -137,6 +139,7 @@ private:
    static NAN_GETTER(GetExternalAuth);
    static NAN_GETTER(GetPrefetchRows);
    static NAN_GETTER(GetFetchAsString);
+   static NAN_GETTER(GetFetchAsBuffer);
    static NAN_GETTER(GetLobPrefetchSize);
    static NAN_GETTER(GetOracleClientVersion);
    static NAN_GETTER(GetPoolPingInterval);
@@ -156,6 +159,7 @@ private:
    static NAN_SETTER(SetExternalAuth);
    static NAN_SETTER(SetPrefetchRows);
    static NAN_SETTER(SetFetchAsString);
+   static NAN_SETTER(SetFetchAsBuffer);
    static NAN_SETTER(SetLobPrefetchSize);
    static NAN_SETTER(SetOracleClientVersion);
    static NAN_SETTER(SetPoolPingInterval);
@@ -181,6 +185,8 @@ private:
    bool         externalAuth_;
    DataType     *fetchAsStringTypes_;
    unsigned int fetchAsStringTypesCount_;
+   DataType     *fetchAsBufferTypes_;
+   unsigned int fetchAsBufferTypesCount_;
    unsigned int lobPrefetchSize_;
    unsigned int oraClientVer_;
    int          poolPingInterval_;

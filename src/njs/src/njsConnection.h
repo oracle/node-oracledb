@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates.
+/* Copyright (c) 2015, 2017, Oracle and/or its affiliates.
    All rights reserved. */
 
 /******************************************************************************
@@ -81,7 +81,7 @@ typedef enum
 typedef enum
 {
   NJS_EXTDEFINE_UNDEFINED = 0,                            /* Not defined yet */
-  NJS_EXTDEFINE_CLOBASSTR = 1,       /* Used as part of Fetch Clob As String */
+  NJS_EXTDEFINE_CONVERT_LOB = 1,     /* Used as part of lob As String/buffer */
 } ExtDefineType;
 
 
@@ -235,23 +235,23 @@ typedef struct ExtDefine
   // containter for type specific data
   union
   {
-    // Fields required for Fetch-Clob-As-String case
+    // Fields required for Fetch-Clob-As-String case or Fetch-Blob-As-Buffer
     struct
     {
       void *ctx;                    /* Context pointer used by the call back */
-      DPI_BUFLEN_TYPE cLen;
-      unsigned int    *len2;        /* Length of the buffer */
-    } extClobAsStr ;
+      DPI_BUFLEN_TYPE cLen;         /* cummulative length from each callback */
+      unsigned int    *len2;        /* size of the buffer for each row */
+    } extConvertLob ;
   } fields;
 
   ExtDefine ( ExtDefineType type )
   {
       extDefType = type;
-      if ( type == NJS_EXTDEFINE_CLOBASSTR )
+      if ( type == NJS_EXTDEFINE_CONVERT_LOB )
       {
-        fields.extClobAsStr.ctx = NULL ;
-        fields.extClobAsStr.cLen = 0;
-        fields.extClobAsStr.len2 = NULL;
+        fields.extConvertLob.ctx = NULL ;
+        fields.extConvertLob.cLen = 0;
+        fields.extConvertLob.len2 = NULL;
       }
   }
 } ExtDefine;
@@ -318,6 +318,8 @@ typedef struct eBaton
   std::vector<ExtDefine*>   extDefines;
   unsigned int              fetchAsStringTypesCount;
   DataType                  *fetchAsStringTypes;  // Global by type settings
+  unsigned int              fetchAsBufferTypesCount;
+  DataType                  *fetchAsBufferTypes;
   unsigned int              fetchInfoCount;       // Conversion requested count
   FetchInfo                 *fetchInfo;           // Conversion meta data
   Nan::Persistent<Function> cb;
@@ -337,6 +339,7 @@ typedef struct eBaton
              numCols(0), dpistmt(NULL), st(DpiStmtUnknown),
              stmtIsReturning (false), numOutBinds(0), defines(NULL),
              fetchAsStringTypesCount (0), fetchAsStringTypes(NULL),
+             fetchAsBufferTypesCount (0), fetchAsBufferTypes(NULL),
              fetchInfoCount(0), fetchInfo(NULL), counter ( count ),
              extendedMetaData(false), mInfo(NULL), lobInfo(NULL)
   {
@@ -486,12 +489,12 @@ typedef struct eBaton
          if ( extDefines[i] )
          {
            // Fetch-Clob-As_string case
-           if ( extDefines[i]->extDefType == NJS_EXTDEFINE_CLOBASSTR )
+           if ( extDefines[i]->extDefType == NJS_EXTDEFINE_CONVERT_LOB )
            {
-             free ( extDefines[i]->fields.extClobAsStr.ctx );
-             extDefines[i]->fields.extClobAsStr.ctx = NULL ;
-             free ( extDefines[i]->fields.extClobAsStr.len2 );
-             extDefines[i]->fields.extClobAsStr.len2 = NULL ;
+             free ( extDefines[i]->fields.extConvertLob.ctx );
+             extDefines[i]->fields.extConvertLob.ctx = NULL ;
+             free ( extDefines[i]->fields.extConvertLob.len2 );
+             extDefines[i]->fields.extConvertLob.len2 = NULL ;
              delete extDefines[i];
            }
          }

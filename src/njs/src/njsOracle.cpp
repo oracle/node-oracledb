@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -95,6 +95,8 @@ Oracledb::Oracledb()
   fetchAsStringTypes_      = NULL;
   fetchAsStringTypesCount_ = 0;
   lobPrefetchSize_         = NJS_LOB_PREFETCH_SIZE;
+  fetchAsBufferTypes_      = NULL;
+  fetchAsBufferTypesCount_ = 0;
   poolPingInterval_        = NJS_POOL_DEFAULT_PING_INTERVAL;
 }
 
@@ -108,8 +110,15 @@ Oracledb::~Oracledb()
   if ( fetchAsStringTypes_ )
   {
     free ( fetchAsStringTypes_ );
-    fetchAsStringTypes_ = NULL ;
+    fetchAsStringTypes_      = NULL ;
     fetchAsStringTypesCount_ = 0;
+  }
+
+  if ( fetchAsBufferTypes_ )
+  {
+    free ( fetchAsBufferTypes_ ) ;
+    fetchAsBufferTypes_      = NULL ;
+    fetchAsBufferTypesCount_ = 0 ;
   }
 
   if (this->dpienv_)
@@ -225,6 +234,10 @@ void Oracledb::Init(Handle<Object> target)
     Nan::New<v8::String>("fetchAsString").ToLocalChecked(),
     Oracledb::GetFetchAsString,
     Oracledb::SetFetchAsString);
+  Nan::SetAccessor ( temp->InstanceTemplate (),
+    Nan::New<v8::String>("fetchAsBuffer").ToLocalChecked(),
+    Oracledb::GetFetchAsBuffer,
+    Oracledb::SetFetchAsBuffer);
   Nan::SetAccessor(
     temp->InstanceTemplate(),
     Nan::New<v8::String>("lobPrefetchSize").ToLocalChecked(),
@@ -711,14 +724,119 @@ NAN_SETTER(Oracledb::SetFetchAsString)
   {
     DataType type = (DataType)
     Nan::To<int32_t> ( array->Get(t).As<v8::Integer>() ).FromJust ();
-    if ( ( type == NJS_DATATYPE_STR  ) || ( type == NJS_DATATYPE_DEFAULT ) )
+    switch ( type )
     {
+      /* Types that can be fetched as STRING */
+    case NJS_DATATYPE_NUM:
+    case NJS_DATATYPE_DATE:
+    case NJS_DATATYPE_CLOB:
+      oracledb->fetchAsStringTypes_[t] = type ;
+      break;
+
+    default:
       msg = NJSMessages::getErrorMsg ( errInvalidTypeForConversion );
       NJS_SET_EXCEPTION ( msg.c_str() );
+      break;
     }
-    oracledb->fetchAsStringTypes_[t] = type;
   }
 }
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Get Accessor of FetchAsString property
+*/
+NAN_GETTER(Oracledb::GetFetchAsBuffer)
+{
+  Oracledb* oracledb = Nan::ObjectWrap::Unwrap<Oracledb>(info.Holder());
+  Local<Array> typeArray = Nan::New <v8::Array>(0);
+
+  NJS_CHECK_OBJECT_VALID2(oracledb, info);
+  if ( oracledb->fetchAsBufferTypes_ )
+  {
+    typeArray = Nan::New<v8::Array>( oracledb->fetchAsBufferTypesCount_ );
+    for ( unsigned int t = 0; t < oracledb->fetchAsBufferTypesCount_ ; t ++ )
+    {
+      typeArray->Set (t,
+                      Nan::New<v8::Integer>(oracledb->fetchAsBufferTypes_[t]));
+    }
+  }
+
+  info.GetReturnValue().Set(typeArray);
+}
+
+
+/*****************************************************************************/
+/*
+   DESCRIPTION
+     Set Accessor of FetchAsBuffer property
+*/
+NAN_SETTER(Oracledb::SetFetchAsBuffer)
+{
+  Oracledb* oracledb = Nan::ObjectWrap::Unwrap<Oracledb>(info.Holder());
+  Local<Array> array;
+  string msg;
+
+  NJS_CHECK_OBJECT_VALID (oracledb);
+  if ( !value->IsArray () )
+  {
+    msg = NJSMessages::getErrorMsg ( errEmptyArrayForFetchAs );
+    NJS_SET_EXCEPTION ( msg.c_str() );
+  }
+
+  array = value.As<v8::Array> ();
+  if ( array->Length () == 0 )
+  {
+    if ( oracledb->fetchAsBufferTypes_ )
+    {
+      free ( oracledb->fetchAsBufferTypes_ ) ;
+      oracledb->fetchAsBufferTypesCount_ = 0 ;
+      oracledb->fetchAsBufferTypes_ = NULL ;
+    }
+    return;
+  }
+
+  // If already defined, clear the array.
+  if ( oracledb->fetchAsBufferTypes_ )
+  {
+    free ( oracledb->fetchAsBufferTypes_ );
+    oracledb->fetchAsBufferTypes_ = NULL ;
+    oracledb->fetchAsBufferTypesCount_ = 0 ;
+  }
+
+  oracledb->fetchAsBufferTypesCount_ = array->Length ();
+
+  // Overflow check is not required as number of fetchAsString is NOT expected
+  // to be huge.
+  oracledb->fetchAsBufferTypes_ = (DataType *)malloc (
+                                      array->Length() * sizeof ( DataType ) );
+  if ( !oracledb->fetchAsBufferTypes_ )
+  {
+    msg = NJSMessages::getErrorMsg ( errInsufficientMemory ) ;
+    NJS_SET_EXCEPTION ( msg.c_str () );
+  }
+
+  for ( unsigned int t = 0 ; t < array->Length () ; t ++ )
+  {
+    DataType type = (DataType)
+    Nan::To<int32_t> ( array->Get(t).As<v8::Integer>() ).FromJust ();
+    switch ( type )
+    {
+      /* Types that be fetched as v8::Buffer */
+      case NJS_DATATYPE_BLOB:
+        oracledb->fetchAsBufferTypes_[t] = type;
+        break;
+
+      default:
+        msg = NJSMessages::getErrorMsg ( errInvalidTypeForConversion );
+        NJS_SET_EXCEPTION ( msg.c_str() );
+        break;
+
+    }
+  }
+}
+
+
 
 /*****************************************************************************/
 /*
@@ -1144,7 +1262,7 @@ extern "C"
 /*
   DESCRIPTION
     To obtain Fetch-As-String-Types, a new array is allocated and types are
-    copied and retured and expected to be freed at the end of execution
+    copied and returned and expected to be freed at the end of execution
 
   PARAMETERS
     -NONE-
@@ -1167,6 +1285,42 @@ const DataType * Oracledb::getFetchAsStringTypes () const
       for ( unsigned int i = 0 ; i < count ; i ++ )
       {
         types[i] = fetchAsStringTypes_[i];
+      }
+    }
+  }
+
+  return types;
+}
+
+
+
+/*****************************************************************************/
+/*
+  DESCRIPTION
+    To obtain Fetch-As-Buffer-Types, a new array is allocated and types are
+    copied and retured and expected to be freed at the end of execution
+
+  PARAMETERS
+    -NONE-
+
+  RETURNS
+    array of DataType element to Fetch As Buffer
+*/
+const DataType * Oracledb::getFetchAsBufferTypes () const
+{
+  DataType *types = NULL;
+
+  if ( fetchAsBufferTypes_ )
+  {
+    unsigned int count = fetchAsBufferTypesCount_;
+
+    types = (DataType * )malloc ( sizeof ( DataType ) * count ) ;
+    // Memory allocation failure is reported to application by the caller.
+    if ( types )
+    {
+      for ( unsigned int i = 0 ; i < count ; i ++ )
+      {
+        types[i] = fetchAsBufferTypes_[i];
       }
     }
   }
