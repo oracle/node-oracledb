@@ -1180,16 +1180,16 @@ Overview of node-oracledb functional tests
     76.1 CLOB, PLSQL, BIND_INOUT
        76.1.1 works with EMPTY_CLOB
        76.1.2 works with EMPTY_CLOB and maxSize set to 1
-     - 76.1.3 works with EMPTY_CLOB and maxSize set to (64K - 1)
+       76.1.3 works with EMPTY_CLOB and maxSize set to (64K - 1)
        76.1.4 works with null
        76.1.5 works with null and maxSize set to 1
-     - 76.1.6 works with null and maxSize set to (64K - 1)
+       76.1.6 works with null and maxSize set to (64K - 1)
        76.1.7 works with empty string
        76.1.8 works with empty string and maxSize set to 1
-     - 76.1.9 works with empty string and maxSize set to (64K - 1)
+       76.1.9 works with empty string and maxSize set to (64K - 1)
        76.1.10 works with undefined
        76.1.11 works with undefined and maxSize set to 1
-     - 76.1.12 works with undefined and maxSize set to (64K - 1)
+       76.1.12 works with undefined and maxSize set to (64K - 1)
        76.1.13 works with NaN
        76.1.14 works with 0
        76.1.15 works with String length 32K

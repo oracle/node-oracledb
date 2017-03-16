@@ -2215,7 +2215,6 @@ exitLOB2StringOrBuffer:
  */
 void Connection::String2CLOB ( eBaton* executeBaton, unsigned int index )
 {
-  executeBaton->binds[index]->type = DpiClob;
   StringOrBuffer2LOB ( executeBaton, index, OCI_TEMP_CLOB );
 }
 
@@ -2235,7 +2234,6 @@ void Connection::String2CLOB ( eBaton* executeBaton, unsigned int index )
  */
 void Connection::Buffer2BLOB ( eBaton* executeBaton, unsigned int index )
 {
-  executeBaton->binds[index]->type = DpiBlob;
   StringOrBuffer2LOB ( executeBaton, index, OCI_TEMP_BLOB );
 }
 
@@ -2272,10 +2270,14 @@ void Connection::StringOrBuffer2LOB ( eBaton* executeBaton, unsigned int index,
                        executeBaton->dpiconn->getErrh (),
                        lobLocator, lobType );
 
-  Lob::write ( ( DpiHandle * ) executeBaton->dpiconn->getSvch (),
-               ( DpiHandle * ) executeBaton->dpiconn->getErrh (),
-               ( Descriptor * ) lobLocator, byteAmount, charAmount, offset,
-               bind->value, bufLen );
+  if ( byteAmount || charAmount )
+  {
+    // Write into Temp LOB only in case of non-empty inputs
+    Lob::write ( ( DpiHandle * ) executeBaton->dpiconn->getSvch (),
+                 ( DpiHandle * ) executeBaton->dpiconn->getErrh (),
+                 ( Descriptor * ) lobLocator, byteAmount, charAmount, offset,
+                 bind->value, bufLen );
+  }
 
   // Free the memory allocated to store js input string/buffer and
   // re-allocate to store lobLocator
@@ -2383,60 +2385,52 @@ void Connection::ConvertStringOrBuffer2LOB ( eBaton* executeBaton,
                                              unsigned int index )
 {
   Bind *bind = executeBaton->binds[index];
+  DPI_SZ_TYPE size = 0;
 
-  // In case of IN or INOUT bind convert string/buffer to LOB if input data
-  // is not NULL and input data size more than 32k for strict IN binds or
-  // maxSize more than 32k for INOUT binds
-  if ( ( ( !bind->isOut || bind->isInOut ) && *bind->ind != -1 ) &&
-       ( ( !bind->isOut && *bind->len > NJS_THRESHOLD_SIZE_PLSQL_STRING_ARG ) ||
-         ( bind->isInOut && bind->maxSize > NJS_THRESHOLD_SIZE_PLSQL_STRING_ARG
-         ) ) )
+  if ( !bind->isOut && !bind->isInOut )
   {
-    // This block is only for BIND_IN case
-    ExtBind* extBind = new ExtBind ( NJS_EXTBIND_LOB );
-    if ( !extBind )
-    {
-      executeBaton->error = NJSMessages::getErrorMsg
-                                    ( errInsufficientMemory );
-      goto exitConvertStringOrBuffer2LOB;
-    }
-    // Set a flag to know that type conversion happened
-    // This helps in later steps to clean LOB resources
-    extBind->fields.extLob.isStringBuffer2LOB = true;
-    executeBaton->extBinds[index]             = extBind;
-    extBind->fields.extLob.maxSize            = bind->maxSize;
-
-    if ( bind->type == DpiVarChar )
-    {
-      String2CLOB ( executeBaton, index );
-    }
-    else
-    {
-      Buffer2BLOB ( executeBaton, index );
-    }
-    // Set a flag to know that type conversion happened
-    // This helps in later steps to clean LOB resources
-    extBind->fields.extLob.isStringBuffer2LOB = true;
-    executeBaton->extBinds[index]             = extBind;
+    // Case for BIND_IN
+    size = *bind->len;
   }
-  else if ( ( bind->isOut || bind->isInOut ) &&
-            bind->maxSize > NJS_THRESHOLD_SIZE_PLSQL_STRING_ARG )
+  else if ( bind->isInOut )
   {
-    // This block is only for BIND_OUT case
-    ExtBind* extBind = new ExtBind ( NJS_EXTBIND_LOB );
+    // Case for BIND_INOUT
+    size = ( bind->maxSize >= *( bind->len ) ) ? bind->maxSize : *( bind->len );
+  }
+  else if ( bind->isOut && !bind->isInOut )
+  {
+    // Case for BIND_OUT
+    size = bind->maxSize;
+  }
 
+  if ( size > NJS_THRESHOLD_SIZE_PLSQL_STRING_ARG )
+  {
+    ExtBind* extBind = new ExtBind ( NJS_EXTBIND_LOB );
     if ( !extBind )
     {
       executeBaton->error = NJSMessages::getErrorMsg
                                     ( errInsufficientMemory );
       goto exitConvertStringOrBuffer2LOB;
     }
-
     extBind->fields.extLob.maxSize = bind->maxSize;
 
+    // Convert the input data into Temp LOB for IN and INOUT binds
+    if ( !bind->isOut || bind->isInOut )
+    {
+      switch ( bind->type )
+      {
+        case DpiVarChar:
+          String2CLOB ( executeBaton, index );
+          break;
+
+        case DpiRaw:
+          Buffer2BLOB ( executeBaton, index );
+          break;
+      }
+    }
+
     // Set a flag to know that type conversion happened
-    // This helps in later steps for converting LOB to String/Buffer and
-    // clean LOB resources
+    // This helps in later steps to clean LOB resources
     extBind->fields.extLob.isStringBuffer2LOB = true;
     executeBaton->extBinds[index]             = extBind;
 

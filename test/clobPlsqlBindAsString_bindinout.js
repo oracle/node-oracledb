@@ -313,7 +313,7 @@ describe('76.clobPlsqlBindAsString_bindinout.js', function() {
       ], done);
     }); // 76.1.2
 
-    it.skip('76.1.3 works with EMPTY_CLOB and maxSize set to (64K - 1)', function(done) {
+    it('76.1.3 works with EMPTY_CLOB and maxSize set to (64K - 1)', function(done) {
       var sequence = getID();
       var bindVar = {
         i: { val: sequence, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
@@ -353,7 +353,7 @@ describe('76.clobPlsqlBindAsString_bindinout.js', function() {
       plsqlBindInOut(sqlRun, bindVar, null, null, false, client11gPlus, done);
     }); // 76.1.5
 
-    it.skip('76.1.6 works with null and maxSize set to (64K - 1)', function(done) {
+    it('76.1.6 works with null and maxSize set to (64K - 1)', function(done) {
       var sequence = getID();
       var bindVar = {
         i: { val: sequence, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
@@ -383,7 +383,7 @@ describe('76.clobPlsqlBindAsString_bindinout.js', function() {
       plsqlBindInOut(sqlRun, bindVar, "", null, false, client11gPlus, done);
     }); // 76.1.8
 
-    it.skip('76.1.9 works with empty string and maxSize set to (64K - 1)', function(done) {
+    it('76.1.9 works with empty string and maxSize set to (64K - 1)', function(done) {
       var sequence = getID();
       var bindVar = {
         i: { val: sequence, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
@@ -413,7 +413,7 @@ describe('76.clobPlsqlBindAsString_bindinout.js', function() {
       plsqlBindInOut(sqlRun, bindVar, undefined, null, false, client11gPlus, done);
     }); // 76.1.11
 
-    it.skip('76.1.12 works with undefined and maxSize set to (64K - 1)', function(done) {
+    it('76.1.12 works with undefined and maxSize set to (64K - 1)', function(done) {
       var sequence = getID();
       var bindVar = {
         i: { val: sequence, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
