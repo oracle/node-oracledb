@@ -19,7 +19,7 @@
  * See LICENSE.md for relevant licenses.
  *
  * NAME
- *   75. blobPlsqlBindAsBuffer.js
+ *   77. blobPlsqlBindAsBuffer.js
  *
  * DESCRIPTION
  *   Testing BLOB binding as Buffer.
@@ -40,7 +40,7 @@ var dbConfig = require('./dbconfig.js');
 var fs = require('fs');
 var random = require('./random.js');
 
-describe('75.blobPlsqlBindAsBuffer.js', function() {
+describe('77.blobPlsqlBindAsBuffer.js', function() {
   var connection = null;
   var node6plus = false; // assume node runtime version is lower than 6
 
@@ -290,14 +290,14 @@ describe('75.blobPlsqlBindAsBuffer.js', function() {
     );
   };
 
-  describe('75.1 BLOB, PLSQL, BIND_IN', function() {
-    var proc = "CREATE OR REPLACE PROCEDURE nodb_blobs_in_751 (blob_id IN NUMBER, blob_in IN BLOB)\n" +
+  describe('77.1 BLOB, PLSQL, BIND_IN', function() {
+    var proc = "CREATE OR REPLACE PROCEDURE nodb_blobs_in_771 (blob_id IN NUMBER, blob_in IN BLOB)\n" +
                "AS \n" +
                "BEGIN \n" +
                "    insert into nodb_tab_blob_in (id, blob_1) values (blob_id, blob_in); \n" +
-               "END nodb_blobs_in_751; ";
-    var sqlRun = "BEGIN nodb_blobs_in_751 (:i, :b); END;";
-    var proc_drop = "DROP PROCEDURE nodb_blobs_in_751";
+               "END nodb_blobs_in_771; ";
+    var sqlRun = "BEGIN nodb_blobs_in_771 (:i, :b); END;";
+    var proc_drop = "DROP PROCEDURE nodb_blobs_in_771";
 
     before(function(done) {
       executeSQL(proc, done);
@@ -307,12 +307,12 @@ describe('75.blobPlsqlBindAsBuffer.js', function() {
       executeSQL(proc_drop, done);
     }); // after
 
-    it('75.1.1 PLSQL, BIND_IN with Buffer size 32K', function(done) {
+    it('77.1.1 PLSQL, BIND_IN with Buffer size 32K', function(done) {
       // Driver already supports CLOB AS STRING and BLOB AS BUFFER for PLSQL BIND if the data size less than or equal to 32767.
       // As part of this enhancement, driver allows even if data size more than 32767 for both column types
       var size = 32768;
       var sequence = 1;
-      var specialStr = "75.1.1";
+      var specialStr = "77.1.1";
       var bigStr = random.getRandomString(size, specialStr);
       var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
       var bindVar = {
@@ -337,16 +337,16 @@ describe('75.blobPlsqlBindAsBuffer.js', function() {
           verifyBlobValueWithBuffer(sql, bufferStr, specialStr, cb);
         }
       ], done);
-    }); // 75.1.1
+    }); // 77.1.1
 
-    it('75.1.2 PLSQL, BIND_IN with Buffer size 64K - 1', function(done) {
+    it('77.1.2 PLSQL, BIND_IN with Buffer size 64K - 1', function(done) {
       // The upper limit on the number of bytes of data that can be bound as
       // `STRING` or `BUFFER` when node-oracledb is linked with Oracle Client
       // 11.2 libraries is 64 Kb.  With Oracle Client 12, the limit is 1 Gb
 
       var size = 65535;
       var sequence = 2;
-      var specialStr = "75.1.2";
+      var specialStr = "77.1.2";
       var bigStr = random.getRandomString(size, specialStr);
       var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
       var bindVar = {
@@ -371,9 +371,9 @@ describe('75.blobPlsqlBindAsBuffer.js', function() {
           verifyBlobValueWithBuffer(sql, bufferStr, specialStr, cb);
         }
       ], done);
-    }); // 75.1.2
+    }); // 77.1.2
 
-    it('75.1.3 PLSQL, BIND_IN with null', function(done) {
+    it('77.1.3 PLSQL, BIND_IN with null', function(done) {
       var sequence = 3;
       var bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -397,9 +397,9 @@ describe('75.blobPlsqlBindAsBuffer.js', function() {
           verifyBlobValueWithBuffer(sql, null, null, cb);
         }
       ], done);
-    }); // 75.1.3
+    }); // 77.1.3
 
-    it('75.1.4 PLSQL, BIND_IN with empty string', function(done) {
+    it('77.1.4 PLSQL, BIND_IN with empty string', function(done) {
       var sequence = 4;
       var bufferStr = node6plus ? Buffer.from('', "utf-8") : new Buffer('', "utf-8");
       var bindVar = {
@@ -424,9 +424,9 @@ describe('75.blobPlsqlBindAsBuffer.js', function() {
           verifyBlobValueWithBuffer(sql, null, null, cb);
         }
       ], done);
-    }); // 75.1.4
+    }); // 77.1.4
 
-    it('75.1.5 PLSQL, BIND_IN with undefined', function(done) {
+    it('77.1.5 PLSQL, BIND_IN with undefined', function(done) {
       var sequence = 5;
       var bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -450,9 +450,9 @@ describe('75.blobPlsqlBindAsBuffer.js', function() {
           verifyBlobValueWithBuffer(sql, null, null, cb);
         }
       ], done);
-    }); // 75.1.5
+    }); // 77.1.5
 
-    it('75.1.6 PLSQL, BIND_IN with NaN', function(done) {
+    it('77.1.6 PLSQL, BIND_IN with NaN', function(done) {
       var sequence = 6;
       var bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -470,9 +470,9 @@ describe('75.blobPlsqlBindAsBuffer.js', function() {
           done();
         }
       );
-    }); // 75.1.6
+    }); // 77.1.6
 
-    it('75.1.7 PLSQL, BIND_IN with 0', function(done) {
+    it('77.1.7 PLSQL, BIND_IN with 0', function(done) {
       var sequence = 6;
       var bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -490,9 +490,9 @@ describe('75.blobPlsqlBindAsBuffer.js', function() {
           done();
         }
       );
-    }); // 75.1.7
+    }); // 77.1.7
 
-    it('75.1.8 PLSQL, BIND_IN bind value and type mismatch', function(done) {
+    it('77.1.8 PLSQL, BIND_IN bind value and type mismatch', function(done) {
       var sequence = 6;
       var bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -510,12 +510,12 @@ describe('75.blobPlsqlBindAsBuffer.js', function() {
           done();
         }
       );
-    }); // 75.1.8
+    }); // 77.1.8
 
-    it('75.1.9 PLSQL, BIND_IN mixing named with positional binding', function(done) {
+    it('77.1.9 PLSQL, BIND_IN mixing named with positional binding', function(done) {
       var size = 50000;
       var sequence = 6;
-      var specialStr = "75.1.9";
+      var specialStr = "77.1.9";
       var bigStr = random.getRandomString(size, specialStr);
       var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
       var bindVar = [ sequence, { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: size } ];
@@ -537,12 +537,12 @@ describe('75.blobPlsqlBindAsBuffer.js', function() {
           verifyBlobValueWithBuffer(sql, bufferStr, specialStr, cb);
         }
       ], done);
-    }); // 75.1.9
+    }); // 77.1.9
 
-    it('75.1.10 PLSQL, BIND_IN without maxSize', function(done) {
+    it('77.1.10 PLSQL, BIND_IN without maxSize', function(done) {
       var size = 65535;
       var sequence = 7;
-      var specialStr = "75.1.10";
+      var specialStr = "77.1.10";
       var bigStr = random.getRandomString(size, specialStr);
       var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
       var bindVar = {
@@ -567,9 +567,9 @@ describe('75.blobPlsqlBindAsBuffer.js', function() {
           verifyBlobValueWithBuffer(sql, bufferStr, specialStr, cb);
         }
       ], done);
-    }); // 75.1.10
+    }); // 77.1.10
 
-    it('75.1.11 PLSQL, BIND_IN with invalid BLOB', function(done) {
+    it('77.1.11 PLSQL, BIND_IN with invalid BLOB', function(done) {
       var sequence = 7;
       var bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -587,18 +587,18 @@ describe('75.blobPlsqlBindAsBuffer.js', function() {
           done();
         }
       );
-    }); // 75.1.11
+    }); // 77.1.11
 
-  }); // 75.1
+  }); // 77.1
 
-  describe('75.2 BLOB, PLSQL, BIND_OUT', function() {
-    var proc = "CREATE OR REPLACE PROCEDURE nodb_blobs_out_752 (blob_id IN NUMBER, blob_out OUT BLOB) \n" +
+  describe('77.2 BLOB, PLSQL, BIND_OUT', function() {
+    var proc = "CREATE OR REPLACE PROCEDURE nodb_blobs_out_772 (blob_id IN NUMBER, blob_out OUT BLOB) \n" +
                "AS \n" +
                "BEGIN \n" +
                "    select blob_1 into blob_out from nodb_tab_blob_in where id = blob_id; \n" +
-               "END nodb_blobs_out_752; ";
-    var sqlRun = "BEGIN nodb_blobs_out_752 (:i, :b); END;";
-    var proc_drop = "DROP PROCEDURE nodb_blobs_out_752";
+               "END nodb_blobs_out_772; ";
+    var sqlRun = "BEGIN nodb_blobs_out_772 (:i, :b); END;";
+    var proc_drop = "DROP PROCEDURE nodb_blobs_out_772";
 
     before(function(done) {
       executeSQL(proc, done);
@@ -608,12 +608,12 @@ describe('75.blobPlsqlBindAsBuffer.js', function() {
       executeSQL(proc_drop, done);
     }); // after
 
-    it('75.2.1 PLSQL, BIND_OUT with Buffer size 32K', function(done) {
+    it('77.2.1 PLSQL, BIND_OUT with Buffer size 32K', function(done) {
       // Driver already supports CLOB AS STRING and BLOB AS BUFFER for PLSQL BIND if the data size less than or equal to 32767.
       // As part of this enhancement, driver allows even if data size more than 32767 for both column types
       var size = 32768;
       var sequence = 11;
-      var specialStr = "75.2.1";
+      var specialStr = "77.2.1";
       var bigStr = random.getRandomString(size, specialStr);
       var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
       var bindVar = {
@@ -646,16 +646,16 @@ describe('75.blobPlsqlBindAsBuffer.js', function() {
         }
       ], done);
 
-    }); // 75.2.1
+    }); // 77.2.1
 
-    it('75.2.2 PLSQL, BIND_OUT with Buffer size 64K - 1', function(done) {
+    it('77.2.2 PLSQL, BIND_OUT with Buffer size 64K - 1', function(done) {
       // The upper limit on the number of bytes of data that can be bound as
       // `STRING` or `BUFFER` when node-oracledb is linked with Oracle Client
       // 11.2 libraries is 64 Kb.  With Oracle Client 12, the limit is 1 Gb
 
       var size = 65535;
       var sequence = 12;
-      var specialStr = "75.2.2";
+      var specialStr = "77.2.2";
       var bigStr = random.getRandomString(size, specialStr);
       var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
       var bindVar = {
@@ -687,9 +687,9 @@ describe('75.blobPlsqlBindAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 75.2.2
+    }); // 77.2.2
 
-    it('75.2.3 PLSQL, BIND_OUT with null', function(done) {
+    it('77.2.3 PLSQL, BIND_OUT with null', function(done) {
       var sequence = 13;
       var bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -713,9 +713,9 @@ describe('75.blobPlsqlBindAsBuffer.js', function() {
         }
       ], done);
 
-    }); // 75.2.3
+    }); // 77.2.3
 
-    it('75.2.4 PLSQL, BIND_OUT with empty buffer', function(done) {
+    it('77.2.4 PLSQL, BIND_OUT with empty buffer', function(done) {
       var sequence = 14;
       var bufferStr = node6plus ? Buffer.from("", "utf-8") : new Buffer("", "utf-8");
       var bindVar = {
@@ -739,9 +739,9 @@ describe('75.blobPlsqlBindAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 75.2.4
+    }); // 77.2.4
 
-    it('75.2.5 PLSQL, BIND_OUT with undefined', function(done) {
+    it('77.2.5 PLSQL, BIND_OUT with undefined', function(done) {
       var sequence = 15;
       var bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -764,12 +764,12 @@ describe('75.blobPlsqlBindAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 75.2.5
+    }); // 77.2.5
 
-    it('75.2.6 PLSQL, BIND_OUT mixing named with positional binding', function(done) {
+    it('77.2.6 PLSQL, BIND_OUT mixing named with positional binding', function(done) {
       var size = 50000;
       var sequence = 16;
-      var specialStr = "75.2.6";
+      var specialStr = "77.2.6";
       var bigStr = random.getRandomString(size, specialStr);
       var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
       var bindVar = [ sequence, { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: size } ];
@@ -799,12 +799,12 @@ describe('75.blobPlsqlBindAsBuffer.js', function() {
         }
       ], done);
 
-    }); // 75.2.6
+    }); // 77.2.6
 
-    it('75.2.7 PLSQL, BIND_OUT with limited maxSize', function(done) {
+    it('77.2.7 PLSQL, BIND_OUT with limited maxSize', function(done) {
       var size = 50000;
       var sequence = 17;
-      var specialStr = "75.2.7";
+      var specialStr = "77.2.7";
       var bigStr = random.getRandomString(size, specialStr);
       var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
       var bindVar = [ sequence, { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: size - 1 } ];
@@ -830,12 +830,12 @@ describe('75.blobPlsqlBindAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 75.2.7
+    }); // 77.2.7
 
-    it('75.2.8 PLSQL, BIND_OUT without maxSize', function(done) {
+    it('77.2.8 PLSQL, BIND_OUT without maxSize', function(done) {
       var size = 50000;
       var sequence = 18;
-      var specialStr = "75.2.8";
+      var specialStr = "77.2.8";
       var bigStr = random.getRandomString(size, specialStr);
       var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
       var bindVar = {
@@ -865,26 +865,26 @@ describe('75.blobPlsqlBindAsBuffer.js', function() {
         }
       ], done);
 
-    }); // 75.2.8
+    }); // 77.2.8
 
-  }); // 75.2
+  }); // 77.2
 
-  describe('75.3 BLOB, PLSQL, BIND_INOUT', function() {
-    var blob_proc_inout = "CREATE OR REPLACE PROCEDURE nodb_blob_in_out_753 (lob_in_out IN OUT BLOB) \n" +
+  describe('77.3 BLOB, PLSQL, BIND_INOUT', function() {
+    var blob_proc_inout = "CREATE OR REPLACE PROCEDURE nodb_blob_in_out_773 (lob_in_out IN OUT BLOB) \n" +
                           "AS \n" +
                           "BEGIN \n" +
                           "    lob_in_out := lob_in_out; \n" +
-                          "END nodb_blob_in_out_753;";
-    var sqlRun = "begin nodb_blob_in_out_753(lob_in_out => :lob_in_out); end;";
-    var proc_drop = "DROP PROCEDURE nodb_blob_in_out_753";
-    var blob_proc_inout_7531 = "CREATE OR REPLACE PROCEDURE nodb_blob_in_out_7531 (lob_id IN NUMBER, lob_in_out IN OUT RAW) \n" +
+                          "END nodb_blob_in_out_773;";
+    var sqlRun = "begin nodb_blob_in_out_773(lob_in_out => :lob_in_out); end;";
+    var proc_drop = "DROP PROCEDURE nodb_blob_in_out_773";
+    var blob_proc_inout_7731 = "CREATE OR REPLACE PROCEDURE nodb_blob_in_out_7731 (lob_id IN NUMBER, lob_in_out IN OUT RAW) \n" +
                                "AS \n" +
                                "BEGIN \n" +
                                "    insert into nodb_tab_blob_in (id, blob_1) values (lob_id, lob_in_out); \n" +
                                "    select blob_1 into lob_in_out from nodb_tab_blob_in where id = lob_id; \n" +
-                               "END nodb_blob_in_out_7531;";
-    var sqlRun_7531 = "begin nodb_blob_in_out_7531(:i, :io); end;";
-    var proc_drop_7531 = "DROP PROCEDURE nodb_blob_in_out_7531";
+                               "END nodb_blob_in_out_7731;";
+    var sqlRun_7731 = "begin nodb_blob_in_out_7731(:i, :io); end;";
+    var proc_drop_7731 = "DROP PROCEDURE nodb_blob_in_out_7731";
 
     before(function(done) {
       executeSQL(blob_proc_inout, done);
@@ -894,9 +894,9 @@ describe('75.blobPlsqlBindAsBuffer.js', function() {
       executeSQL(proc_drop, done);
     }); // after
 
-    it('75.3.1 PLSQL, BIND_INOUT with Buffer size 32K', function(done) {
+    it('77.3.1 PLSQL, BIND_INOUT with Buffer size 32K', function(done) {
       var size = 32768;
-      var specialStr = "75.3.1";
+      var specialStr = "77.3.1";
       var bigStr = random.getRandomString(size, specialStr);
       var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
       var bindVar = {
@@ -916,11 +916,11 @@ describe('75.blobPlsqlBindAsBuffer.js', function() {
           done();
         }
       );
-    }); // 75.3.1
+    }); // 77.3.1
 
-    it('75.3.2 PLSQL, BIND_INOUT with Buffer size 32K - 1', function(done) {
+    it('77.3.2 PLSQL, BIND_INOUT with Buffer size 32K - 1', function(done) {
       var size = 32767;
-      var specialStr = "75.3.2";
+      var specialStr = "77.3.2";
       var bigStr = random.getRandomString(size, specialStr);
       var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
       var bindVar = {
@@ -940,11 +940,11 @@ describe('75.blobPlsqlBindAsBuffer.js', function() {
           done();
         }
       );
-    }); // 75.3.2
+    }); // 77.3.2
 
-    it('75.3.3 PLSQL, BIND_INOUT with Buffer size 64K - 1', function(done) {
+    it('77.3.3 PLSQL, BIND_INOUT with Buffer size 64K - 1', function(done) {
       var size = 65535;
-      var specialStr = "75.3.3";
+      var specialStr = "77.3.3";
       var bigStr = random.getRandomString(size, specialStr);
       var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
       var bindVar = {
@@ -964,10 +964,10 @@ describe('75.blobPlsqlBindAsBuffer.js', function() {
           done();
         }
       );
-    }); // 75.3.3
+    }); // 77.3.3
 
-    it('75.3.4 PLSQL, BIND_INOUT with OUT data > maxSize', function(done) {
-      var specialStr = "75.3.4";
+    it('77.3.4 PLSQL, BIND_INOUT with OUT data > maxSize', function(done) {
+      var specialStr = "77.3.4";
       var len = 65535;
       var bigStr = random.getRandomString(len, specialStr);
       var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
@@ -985,27 +985,27 @@ describe('75.blobPlsqlBindAsBuffer.js', function() {
           done();
         }
       );
-    }); // 75.3.4
+    }); // 77.3.4
 
-    it('75.3.5 PLSQL, bind out to varchar2 with OUT data < maxSize', function(done) {
+    it('77.3.5 PLSQL, bind out to varchar2 with OUT data < maxSize', function(done) {
       var sequence = 30;
-      var specialStr = "75.3.5";
+      var specialStr = "77.3.5";
       var len = 300;
       var bigStr = random.getRandomString(len, specialStr);
       var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
 
       async.series([
         function(cb) {
-          executeSQL(blob_proc_inout_7531, cb);
+          executeSQL(blob_proc_inout_7731, cb);
         },
         function(cb) {
-          var bindVar_7531 = {
+          var bindVar_7731 = {
             i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
             io: { val:bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: len }
           };
           connection.execute(
-            sqlRun_7531,
-            bindVar_7531,
+            sqlRun_7731,
+            bindVar_7731,
             function(err, result) {
               should.not.exist(err);
               var resultVal = result.outBinds.io.toString('utf8');
@@ -1019,30 +1019,30 @@ describe('75.blobPlsqlBindAsBuffer.js', function() {
           );
         },
         function(cb) {
-          executeSQL(proc_drop_7531, cb);
+          executeSQL(proc_drop_7731, cb);
         }
       ], done);
-    }); // 75.3.5
+    }); // 77.3.5
 
-    it('75.3.6 PLSQL, bind out to varchar2 with OUT data > maxSize', function(done) {
+    it('77.3.6 PLSQL, bind out to varchar2 with OUT data > maxSize', function(done) {
       var sequence = 30;
-      var specialStr = "75.3.6";
+      var specialStr = "77.3.6";
       var len = 300;
       var bigStr = random.getRandomString(len, specialStr);
       var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
 
       async.series([
         function(cb) {
-          executeSQL(blob_proc_inout_7531, cb);
+          executeSQL(blob_proc_inout_7731, cb);
         },
         function(cb) {
-          var bindVar_7531 = {
+          var bindVar_7731 = {
             i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
             io: { val:bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: len - 1 }
           };
           connection.execute(
-            sqlRun_7531,
-            bindVar_7531,
+            sqlRun_7731,
+            bindVar_7731,
             function(err) {
               should.exist(err);
               // ORA-01460: unimplemented or unreasonable conversion requested
@@ -1052,21 +1052,21 @@ describe('75.blobPlsqlBindAsBuffer.js', function() {
           );
         },
         function(cb) {
-          executeSQL(proc_drop_7531, cb);
+          executeSQL(proc_drop_7731, cb);
         }
       ], done);
-    }); // 75.3.6
+    }); // 77.3.6
 
-  }); // 75.3
+  }); // 77.3
 
-  describe('75.4 Multiple BLOBs, BIND_IN', function() {
-    var proc = "CREATE OR REPLACE PROCEDURE nodb_blobs_in_754 (blob_id IN NUMBER, blob_1 IN BLOB, blob_2 IN BLOB)\n" +
+  describe('77.4 Multiple BLOBs, BIND_IN', function() {
+    var proc = "CREATE OR REPLACE PROCEDURE nodb_blobs_in_774 (blob_id IN NUMBER, blob_1 IN BLOB, blob_2 IN BLOB)\n" +
                "AS \n" +
                "BEGIN \n" +
                "    insert into nodb_tab_blob_in (id, blob_1, blob_2) values (blob_id, blob_1, blob_2); \n" +
-               "END nodb_blobs_in_754; ";
-    var sqlRun = "BEGIN nodb_blobs_in_754 (:i, :b1, :b2); END;";
-    var proc_drop = "DROP PROCEDURE nodb_blobs_in_754";
+               "END nodb_blobs_in_774; ";
+    var sqlRun = "BEGIN nodb_blobs_in_774 (:i, :b1, :b2); END;";
+    var proc_drop = "DROP PROCEDURE nodb_blobs_in_774";
 
     before(function(done) {
       executeSQL(proc, done);
@@ -1076,10 +1076,10 @@ describe('75.blobPlsqlBindAsBuffer.js', function() {
       executeSQL(proc_drop, done);
     }); // after
 
-    it('75.4.1 PLSQL, BIND_IN, bind two Buffer', function(done) {
+    it('77.4.1 PLSQL, BIND_IN, bind two Buffer', function(done) {
       var size_1 = 32768;
       var size_2 = 50000;
-      var specialStr = "75.4.1";
+      var specialStr = "77.4.1";
       var bigStr_1 = random.getRandomString(size_1, specialStr);
       var bigStr_2 = random.getRandomString(size_2, specialStr);
       var bufferStr_1 = node6plus ? Buffer.from(bigStr_1, "utf-8") : new Buffer(bigStr_1, "utf-8");
@@ -1112,10 +1112,10 @@ describe('75.blobPlsqlBindAsBuffer.js', function() {
           verifyBlobValueWithBuffer(sql_2, bufferStr_2, specialStr, cb);
         }
       ], done);
-    }); // 75.4.1
+    }); // 77.4.1
 
-    it('75.4.2 PLSQL, BIND_IN, bind a JPG file and a Buffer', function(done) {
-      var specialStr = "75.4.2";
+    it('77.4.2 PLSQL, BIND_IN, bind a JPG file and a Buffer', function(done) {
+      var specialStr = "77.4.2";
       var preparedCLOBID = 301;
       var sequence = 52;
       var size_1 = 32768;
@@ -1161,18 +1161,18 @@ describe('75.blobPlsqlBindAsBuffer.js', function() {
           verifyBlobValueWithFileData(sql_2, cb);
         }
       ], done);
-    }); // 75.4.2
+    }); // 77.4.2
 
-  }); // 75.4
+  }); // 77.4
 
-  describe('75.5 Multiple BLOBs, BIND_OUT', function() {
-    var proc = "CREATE OR REPLACE PROCEDURE nodb_lobs_out_755 (blob_id IN NUMBER, blob_1 OUT BLOB, blob_2 OUT BLOB) \n" +
+  describe('77.5 Multiple BLOBs, BIND_OUT', function() {
+    var proc = "CREATE OR REPLACE PROCEDURE nodb_lobs_out_775 (blob_id IN NUMBER, blob_1 OUT BLOB, blob_2 OUT BLOB) \n" +
                "AS \n" +
                "BEGIN \n" +
                "    select blob_1, blob_2 into blob_1, blob_2 from nodb_tab_blob_in where id = blob_id; \n" +
-               "END nodb_lobs_out_755; ";
-    var sqlRun = "BEGIN nodb_lobs_out_755 (:i, :b1, :b2); END;";
-    var proc_drop = "DROP PROCEDURE nodb_lobs_out_755";
+               "END nodb_lobs_out_775; ";
+    var sqlRun = "BEGIN nodb_lobs_out_775 (:i, :b1, :b2); END;";
+    var proc_drop = "DROP PROCEDURE nodb_lobs_out_775";
 
     before(function(done) {
       executeSQL(proc, done);
@@ -1201,8 +1201,8 @@ describe('75.blobPlsqlBindAsBuffer.js', function() {
         });
     };
 
-    it('75.5.1 PLSQL, BIND_OUT, bind two buffer', function(done) {
-      var specialStr = "75.5.1";
+    it('77.5.1 PLSQL, BIND_OUT, bind two buffer', function(done) {
+      var specialStr = "77.5.1";
       var size_1 = 32768;
       var size_2 = 50000;
       var sequence = 111;
@@ -1249,10 +1249,10 @@ describe('75.blobPlsqlBindAsBuffer.js', function() {
         }
       ], done);
 
-    }); // 75.5.1
+    }); // 77.5.1
 
-    it('75.5.2 PLSQL, BIND_OUT, bind a JPG file and a Buffer', function(done) {
-      var specialStr = "75.5.2";
+    it('77.5.2 PLSQL, BIND_OUT, bind a JPG file and a Buffer', function(done) {
+      var specialStr = "77.5.2";
       var size_1 = 32768;
       var bigStr_1 = random.getRandomString(size_1, specialStr);
       var bufferStr_1 = node6plus ? Buffer.from(bigStr_1, "utf-8") : new Buffer(bigStr_1, "utf-8");
@@ -1329,19 +1329,19 @@ describe('75.blobPlsqlBindAsBuffer.js', function() {
         }
       ], done);
 
-    }); // 75.5.2
+    }); // 77.5.2
 
-  }); // 75.5
+  }); // 77.5
 
-  describe('75.6 Multiple BLOBs, BIND_INOUT', function() {
-    var lobs_proc_inout = "CREATE OR REPLACE PROCEDURE nodb_lobs_in_out_756 (blob_1 IN OUT BLOB, blob_2 IN OUT BLOB) \n" +
+  describe('77.6 Multiple BLOBs, BIND_INOUT', function() {
+    var lobs_proc_inout = "CREATE OR REPLACE PROCEDURE nodb_lobs_in_out_776 (blob_1 IN OUT BLOB, blob_2 IN OUT BLOB) \n" +
                           "AS \n" +
                           "BEGIN \n" +
                           "    blob_1 := blob_1; \n" +
                           "    blob_2 := blob_2; \n" +
-                          "END nodb_lobs_in_out_756;";
-    var sqlRun = "begin nodb_lobs_in_out_756(:lob_1, :lob_2); end;";
-    var proc_drop = "DROP PROCEDURE nodb_lobs_in_out_756";
+                          "END nodb_lobs_in_out_776;";
+    var sqlRun = "begin nodb_lobs_in_out_776(:lob_1, :lob_2); end;";
+    var proc_drop = "DROP PROCEDURE nodb_lobs_in_out_776";
 
     before(function(done) {
       executeSQL(lobs_proc_inout, done);
@@ -1351,10 +1351,10 @@ describe('75.blobPlsqlBindAsBuffer.js', function() {
       executeSQL(proc_drop, done);
     }); // after
 
-    it('75.6.1 PLSQL, BIND_INOUT, bind a JPG and a 32K buffer', function(done) {
+    it('77.6.1 PLSQL, BIND_INOUT, bind a JPG and a 32K buffer', function(done) {
       var preparedCLOBID = 500;
       var size_1 = 32768;
-      var specialStr = "75.6.1";
+      var specialStr = "77.6.1";
       var bigStr_1 = random.getRandomString(size_1, specialStr);
       var bufferStr_1 = node6plus ? Buffer.from(bigStr_1, "utf-8") : new Buffer(bigStr_1, "utf-8");
 
@@ -1411,12 +1411,12 @@ describe('75.blobPlsqlBindAsBuffer.js', function() {
             });
         }
       ], done);
-    }); // 75.6.1
+    }); // 77.6.1
 
-    it('75.6.2 PLSQL, BIND_INOUT, bind a JPG and a 64K - 1 buffer', function(done) {
+    it('77.6.2 PLSQL, BIND_INOUT, bind a JPG and a 64K - 1 buffer', function(done) {
       var preparedCLOBID = 501;
       var size_1 = 65535;
-      var specialStr = "75.6.2";
+      var specialStr = "77.6.2";
       var bigStr_1 = random.getRandomString(size_1, specialStr);
       var bufferStr_1 = node6plus ? Buffer.from(bigStr_1, "utf-8") : new Buffer(bigStr_1, "utf-8");
 
@@ -1475,8 +1475,8 @@ describe('75.blobPlsqlBindAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 75.6.2
+    }); // 77.6.2
 
-  }); // 75.6
+  }); // 77.6
 
 });

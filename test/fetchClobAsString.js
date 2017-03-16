@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, 2017, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -19,7 +19,7 @@
  * See LICENSE.md for relevant licenses.
  *
  * NAME
- *   80. fetchClobAsString.js
+ *   82. fetchClobAsString.js
  *
  * DESCRIPTION
  *    Testing Oracle data type support - CLOB.
@@ -41,7 +41,7 @@ var should   = require('should');
 var fs = require('fs');
 var dbConfig = require('./dbconfig.js');
 
-describe('80. fetchClobAsString.js', function() {
+describe('82. fetchClobAsString.js', function() {
   this.timeout(100000);
   var connection = null;
   var client11gPlus = true; // assume instant client runtime version is greater than 11.2.0.4.0
@@ -288,7 +288,7 @@ describe('80. fetchClobAsString.js', function() {
     }
   };
 
-  describe('80.1 fetch CLOB columns by setting oracledb.fetchAsString',  function() {
+  describe('82.1 fetch CLOB columns by setting oracledb.fetchAsString',  function() {
 
     before('create Table and populate', function(done) {
       connection.execute(
@@ -321,7 +321,7 @@ describe('80. fetchClobAsString.js', function() {
       done();
     }); // afterEach
 
-    it('80.1.1 works with NULL value', function(done) {
+    it('82.1.1 works with NULL value', function(done) {
       var id = getID();
       var content = null;
 
@@ -341,9 +341,9 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.1.1
+    }); // 82.1.1
 
-    it('80.1.2 works with empty string', function(done) {
+    it('82.1.2 works with empty string', function(done) {
       var id = getID();
       var content = "";
 
@@ -363,11 +363,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.1.2
+    }); // 82.1.2
 
-    it('80.1.3 works with small CLOB data', function(done) {
+    it('82.1.3 works with small CLOB data', function(done) {
       var id = getID();
-      var specialStr = '80.1.3';
+      var specialStr = '82.1.3';
       var contentLength = 26;
       var content = getRandomString(contentLength, specialStr);
 
@@ -388,11 +388,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.1.3
+    }); // 82.1.3
 
-    it('80.1.4 works with (64K - 1) data', function(done) {
+    it('82.1.4 works with (64K - 1) data', function(done) {
       var id = getID();
-      var specialStr = '80.1.4';
+      var specialStr = '82.1.4';
       var contentLength = 65535;
       var content = getRandomString(contentLength, specialStr);
 
@@ -413,11 +413,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.1.4
+    }); // 82.1.4
 
-    it('80.1.5 works with (64K + 1) data', function(done) {
+    it('82.1.5 works with (64K + 1) data', function(done) {
       var id = getID();
-      var specialStr = '80.1.5';
+      var specialStr = '82.1.5';
       var contentLength = 65537;
       var content = getRandomString(contentLength, specialStr);
 
@@ -438,11 +438,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.1.5
+    }); // 82.1.5
 
-    it('80.1.6 works with (1MB + 1) data', function(done) {
+    it('82.1.6 works with (1MB + 1) data', function(done) {
       var id = getID();
-      var specialStr = '80.1.6';
+      var specialStr = '82.1.6';
       var contentLength = 1048577; // 1MB + 1
       var content = getRandomString(contentLength, specialStr);
 
@@ -463,11 +463,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.1.6
+    }); // 82.1.6
 
-    it('80.1.7 works with (5MB + 1) data', function(done) {
+    it('82.1.7 works with (5MB + 1) data', function(done) {
       var id = getID();
-      var specialStr = '80.1.7';
+      var specialStr = '82.1.7';
       var contentLength = 5242881; // 5MB + 1
       var content = getRandomString(contentLength, specialStr);
 
@@ -488,11 +488,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.1.7
+    }); // 82.1.7
 
-    it('80.1.8 works with (10MB + 1) data', function(done) {
+    it('82.1.8 works with (10MB + 1) data', function(done) {
       var id = getID();
-      var specialStr = '80.1.8';
+      var specialStr = '82.1.8';
       var contentLength = 10485761; // 10MB + 1
       var content = getRandomString(contentLength, specialStr);
 
@@ -513,11 +513,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.1.8
+    }); // 82.1.8
 
-    it('80.1.9 fetch with substr()', function(done) {
+    it('82.1.9 fetch with substr()', function(done) {
       var id = getID();
-      var specialStr = '80.1.9';
+      var specialStr = '82.1.9';
       var specialStrLen = specialStr.length;
       var contentLength = 100;
       var content = getRandomString(contentLength, specialStr);
@@ -539,9 +539,9 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.1.9
+    }); // 82.1.9
 
-    it('80.1.10 works with EMPTY_CLOB()', function(done) {
+    it('82.1.10 works with EMPTY_CLOB()', function(done) {
       var id = getID();
       var content = "EMPTY_CLOB()";
 
@@ -561,15 +561,15 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.1.10
+    }); // 82.1.10
 
-    it('80.1.11 fetch multiple CLOB columns as String', function(done) {
+    it('82.1.11 fetch multiple CLOB columns as String', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '80.1.11_1';
+      var specialStr_1 = '82.1.11_1';
       var contentLength_1 = 26;
       var content_1 = getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
-      var specialStr_2 = '80.1.11_2';
+      var specialStr_2 = '82.1.11_2';
       var contentLength_2 = 30;
       var content_2 = getRandomString(contentLength_2, specialStr_2);
 
@@ -594,15 +594,15 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.1.11
+    }); // 82.1.11
 
-    it('80.1.12 fetch the same CLOB column multiple times', function(done) {
+    it('82.1.12 fetch the same CLOB column multiple times', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '80.1.12_1';
+      var specialStr_1 = '82.1.12_1';
       var contentLength_1 = 20;
       var content_1 = getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
-      var specialStr_2 = '80.1.12_2';
+      var specialStr_2 = '82.1.12_2';
       var contentLength_2 = 36;
       var content_2 = getRandomString(contentLength_2, specialStr_2);
 
@@ -632,14 +632,14 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.1.12
+    }); // 82.1.12
 
-    it('80.1.13 works with update statement', function(done) {
+    it('82.1.13 works with update statement', function(done) {
       var id = getID();
-      var specialStr_1 = '80.1.13_1';
+      var specialStr_1 = '82.1.13_1';
       var contentLength_1 = 26;
       var content_1 = getRandomString(contentLength_1, specialStr_1);
-      var specialStr_2 = '80.1.13_2';
+      var specialStr_2 = '82.1.13_2';
       var contentLength_2 = 30;
       var content_2 = getRandomString(contentLength_2, specialStr_2);
 
@@ -673,11 +673,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.1.13
+    }); // 82.1.13
 
-    it('80.1.14 works with REF CURSOR', function(done) {
+    it('82.1.14 works with REF CURSOR', function(done) {
       var id = getID();
-      var specialStr = '80.1.14';
+      var specialStr = '82.1.14';
       var contentLength = 26;
       var content = getRandomString(contentLength, specialStr);
 
@@ -729,11 +729,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.1.14
+    }); // 82.1.14
 
-    it('80.1.15 fetch CLOB with stream', function(done) {
+    it('82.1.15 fetch CLOB with stream', function(done) {
       var id = getID();
-      var specialStr = '80.1.15';
+      var specialStr = '82.1.15';
       var contentLength = 40;
       var content = getRandomString(contentLength, specialStr);
 
@@ -774,15 +774,15 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.1.15
+    }); // 82.1.15
 
-    it('80.1.16 works with setting oracledb.maxRows < actual number of rows in the table', function(done) {
+    it('82.1.16 works with setting oracledb.maxRows < actual number of rows in the table', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '80.1.16_1';
+      var specialStr_1 = '82.1.16_1';
       var contentLength_1 = 26;
       var content_1 = getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
-      var specialStr_2 = '80.1.16_2';
+      var specialStr_2 = '82.1.16_2';
       var contentLength_2 = 30;
       var content_2 = getRandomString(contentLength_2, specialStr_2);
       var maxRowsBak = oracledb.maxRows;
@@ -809,15 +809,15 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.1.16
+    }); // 82.1.16
 
-    it('80.1.17 works with setting oracledb.maxRows > actual number of rows in the table', function(done) {
+    it('82.1.17 works with setting oracledb.maxRows > actual number of rows in the table', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '80.1.17_1';
+      var specialStr_1 = '82.1.17_1';
       var contentLength_1 = 26;
       var content_1 = getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
-      var specialStr_2 = '80.1.17_2';
+      var specialStr_2 = '82.1.17_2';
       var contentLength_2 = 30;
       var content_2 = getRandomString(contentLength_2, specialStr_2);
       var maxRowsBak = oracledb.maxRows;
@@ -845,11 +845,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.1.17
+    }); // 82.1.17
 
-    it('80.1.18 override oracledb.fetchAsString with fetchInfo set to oracledb.DEFAULT', function(done) {
+    it('82.1.18 override oracledb.fetchAsString with fetchInfo set to oracledb.DEFAULT', function(done) {
       var id = getID();
-      var specialStr = '80.1.18';
+      var specialStr = '82.1.18';
       var contentLength = 20;
       var content = getRandomString(contentLength, specialStr);
 
@@ -891,11 +891,189 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.1.18
+    }); // 82.1.18
 
-  }); // 80.1
+    it('82.1.19 works with connection.queryStream()', function(done) {
+      var id = getID();
+      var specialStr = '82.1.19';
+      var contentLength = 200;
+      var content = getRandomString(contentLength, specialStr);
 
-  describe('80.2 fetch CLOB columns by setting oracledb.fetchAsString and outFormat = oracledb.OBJECT', function() {
+      async.series([
+        function(cb) {
+          insertIntoClobTable1(id, content, cb, false);
+        },
+        function(cb) {
+          var sql = "SELECT ID, C from nodb_clob1 WHERE ID = " + id;
+          var stream = connection.queryStream(sql);
+          stream.on('error', function (error) {
+            should.fail(error, null, 'Error event should not be triggered');
+          });
+
+          var counter = 0;
+          stream.on('data', function(data) {
+            should.exist(data);
+            var result = data[1];
+            should.strictEqual(typeof result, "string");
+            compareStrings(result, specialStr, content, contentLength, false);
+            counter++;
+          });
+
+          stream.on('end', function () {
+            should.equal(counter, 1);
+            setTimeout(cb, 500);
+          });
+        }
+      ], done);
+    }); // 82.1.19
+
+    it('82.1.20 works with connection.queryStream() and oracledb.maxRows > actual number of rows in the table', function(done) {
+      var id_1 = getID();
+      var specialStr_1 = '82.1.20_1';
+      var contentLength_1 = 26;
+      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var id_2 = getID();
+      var specialStr_2 = '82.1.20_2';
+      var contentLength_2 = 30;
+      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var maxRowsBak = oracledb.maxRows;
+      oracledb.maxRows = 20;
+
+      async.series([
+        function(cb) {
+          insertIntoClobTable1(id_1, content_1, cb, false);
+        },
+        function(cb) {
+          insertIntoClobTable1(id_2, content_2, cb, false);
+        },
+        function(cb) {
+          var sql = "SELECT ID, C from nodb_clob1 WHERE ID = " + id_1 + " or id = " +id_2;
+          var stream = connection.queryStream(sql);
+          stream.on('error', function (error) {
+            should.fail(error, null, 'Error event should not be triggered');
+          });
+
+          var counter = 0;
+          stream.on('data', function(data) {
+            should.exist(data);
+            var result = data[1];
+            should.strictEqual(typeof result, "string");
+            counter++;
+            if(counter == 1) {
+              compareStrings(result, specialStr_1, content_1, contentLength_1, false);
+            } else {
+              compareStrings(result, specialStr_2, content_2, contentLength_2, false);
+            }
+          });
+
+          stream.on('end', function () {
+            should.equal(counter, 2);
+            oracledb.maxRows = maxRowsBak;
+            setTimeout(cb, 500);
+          });
+        }
+      ], done);
+    }); // 82.1.20
+
+    it('82.1.21 works with connection.queryStream() and oracledb.maxRows = actual number of rows in the table', function(done) {
+      var id_1 = getID();
+      var specialStr_1 = '82.1.21_1';
+      var contentLength_1 = 26;
+      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var id_2 = getID();
+      var specialStr_2 = '82.1.21_2';
+      var contentLength_2 = 30;
+      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var maxRowsBak = oracledb.maxRows;
+      oracledb.maxRows = 2;
+
+      async.series([
+        function(cb) {
+          insertIntoClobTable1(id_1, content_1, cb, false);
+        },
+        function(cb) {
+          insertIntoClobTable1(id_2, content_2, cb, false);
+        },
+        function(cb) {
+          var sql = "SELECT ID, C from nodb_clob1 WHERE ID = " + id_1 + " or id = " +id_2;
+          var stream = connection.queryStream(sql);
+          stream.on('error', function (error) {
+            should.fail(error, null, 'Error event should not be triggered');
+          });
+
+          var counter = 0;
+          stream.on('data', function(data) {
+            should.exist(data);
+            var result = data[1];
+            should.strictEqual(typeof result, "string");
+            counter++;
+            if(counter == 1) {
+              compareStrings(result, specialStr_1, content_1, contentLength_1, false);
+            } else {
+              compareStrings(result, specialStr_2, content_2, contentLength_2, false);
+            }
+          });
+
+          stream.on('end', function () {
+            should.equal(counter, 2);
+            oracledb.maxRows = maxRowsBak;
+            setTimeout(cb, 500);
+          });
+        }
+      ], done);
+    }); // 82.1.21
+
+    it.skip('82.1.22 works with connection.queryStream() and oracledb.maxRows < actual number of rows in the table', function(done) {
+      var id_1 = getID();
+      var specialStr_1 = '82.1.22_1';
+      var contentLength_1 = 26;
+      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var id_2 = getID();
+      var specialStr_2 = '82.1.22_2';
+      var contentLength_2 = 30;
+      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var maxRowsBak = oracledb.maxRows;
+      oracledb.maxRows = 1;
+
+      async.series([
+        function(cb) {
+          insertIntoClobTable1(id_1, content_1, cb, false);
+        },
+        function(cb) {
+          insertIntoClobTable1(id_2, content_2, cb, false);
+        },
+        function(cb) {
+          var sql = "SELECT ID, C from nodb_clob1 WHERE ID = " + id_1 + " or id = " +id_2;
+          var stream = connection.queryStream(sql);
+          stream.on('error', function (error) {
+            should.fail(error, null, 'Error event should not be triggered');
+          });
+
+          var counter = 0;
+          stream.on('data', function(data) {
+            should.exist(data);
+            var result = data[1];
+            should.strictEqual(typeof result, "string");
+            counter++;
+            if(counter == 1) {
+              compareStrings(result, specialStr_1, content_1, contentLength_1, false);
+            } else {
+              compareStrings(result, specialStr_2, content_2, contentLength_2, false);
+            }
+          });
+
+          stream.on('end', function () {
+            should.equal(counter, 2);
+            oracledb.maxRows = maxRowsBak;
+            setTimeout(cb, 500);
+          });
+        }
+      ], done);
+    }); // 82.1.22
+
+  }); // 82.1
+
+  describe('82.2 fetch CLOB columns by setting oracledb.fetchAsString and outFormat = oracledb.OBJECT', function() {
 
     before('Create table and populate', function(done) {
       connection.execute(
@@ -927,7 +1105,7 @@ describe('80. fetchClobAsString.js', function() {
       done();
     }); // afterEach
 
-    it('80.2.1 works with NULL value', function(done) {
+    it('82.2.1 works with NULL value', function(done) {
       var id = getID();
       var content = null;
 
@@ -949,9 +1127,9 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.2.1
+    }); // 82.2.1
 
-    it('80.2.2 works with empty String', function(done) {
+    it('82.2.2 works with empty String', function(done) {
       var id = getID();
       var content = "";
 
@@ -973,11 +1151,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.2.2
+    }); // 82.2.2
 
-    it('80.2.3 works with small value', function(done) {
+    it('82.2.3 works with small value', function(done) {
       var id = getID();
-      var specialStr = '80.2.3';
+      var specialStr = '82.2.3';
       var contentLength = 20;
       var content = getRandomString(contentLength, specialStr);
 
@@ -999,11 +1177,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.2.3
+    }); // 82.2.3
 
-    it('80.2.4 works with (64K - 1) value', function(done) {
+    it('82.2.4 works with (64K - 1) value', function(done) {
       var id = getID();
-      var specialStr = '80.2.4';
+      var specialStr = '82.2.4';
       var contentLength = 65535;
       var content = getRandomString(contentLength, specialStr);
 
@@ -1025,11 +1203,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.2.4
+    }); // 82.2.4
 
-    it('80.2.5 works with (64K + 1) value', function(done) {
+    it('82.2.5 works with (64K + 1) value', function(done) {
       var id = getID();
-      var specialStr = '80.2.5';
+      var specialStr = '82.2.5';
       var contentLength = 65537;
       var content = getRandomString(contentLength, specialStr);
 
@@ -1050,11 +1228,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.2.5
+    }); // 82.2.5
 
-    it('80.2.6 works with (1MB + 1) data', function(done) {
+    it('82.2.6 works with (1MB + 1) data', function(done) {
       var id = getID();
-      var specialStr = '80.2.6';
+      var specialStr = '82.2.6';
       var contentLength = 1048577; // 1MB + 1
       var content = getRandomString(contentLength, specialStr);
 
@@ -1075,11 +1253,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.2.6
+    }); // 82.2.6
 
-    it('80.2.7 works with (5MB + 1) data', function(done) {
+    it('82.2.7 works with (5MB + 1) data', function(done) {
       var id = getID();
-      var specialStr = '80.2.7';
+      var specialStr = '82.2.7';
       var contentLength = 5242881; // 5MB + 1
       var content = getRandomString(contentLength, specialStr);
 
@@ -1100,11 +1278,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.2.7
+    }); // 82.2.7
 
-    it('80.2.8 works with (10MB + 1) data', function(done) {
+    it('82.2.8 works with (10MB + 1) data', function(done) {
       var id = getID();
-      var specialStr = '80.2.8';
+      var specialStr = '82.2.8';
       var contentLength = 10485761; // 10MB + 1
       var content = getRandomString(contentLength, specialStr);
 
@@ -1125,11 +1303,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.2.8
+    }); // 82.2.8
 
-    it('80.2.9 works with dbms_lob.substr()', function(done) {
+    it('82.2.9 works with dbms_lob.substr()', function(done) {
       var id = getID();
-      var specialStr = '80.2.9';
+      var specialStr = '82.2.9';
       var contentLength = 200;
       var specialStrLength = specialStr.length;
       var content = getRandomString(contentLength, specialStr);
@@ -1152,9 +1330,9 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.2.9
+    }); // 82.2.9
 
-    it('80.2.10 works with EMPTY_CLOB()', function(done) {
+    it('82.2.10 works with EMPTY_CLOB()', function(done) {
       var id = getID();
       var content = "EMPTY_CLOB";
 
@@ -1175,15 +1353,15 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.2.10
+    }); // 82.2.10
 
-    it('80.2.11 fetch multiple CLOB rows as String', function(done) {
+    it('82.2.11 fetch multiple CLOB rows as String', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '80.2.11_1';
+      var specialStr_1 = '82.2.11_1';
       var contentLength_1 = 200;
       var content_1 = getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
-      var specialStr_2 = '80.2.11_2';
+      var specialStr_2 = '82.2.11_2';
       var contentLength_2 = 100;
       var content_2 = getRandomString(contentLength_2, specialStr_2);
 
@@ -1210,11 +1388,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.2.11
+    }); // 82.2.11
 
-    it('80.2.12 fetch the same CLOB column multiple times', function(done) {
+    it('82.2.12 fetch the same CLOB column multiple times', function(done) {
       var id = getID();
-      var specialStr = '80.2.12';
+      var specialStr = '82.2.12';
       var contentLength = 200;
       var content = getRandomString(contentLength, specialStr);
 
@@ -1238,14 +1416,14 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.2.12
+    }); // 82.2.12
 
-    it('80.2.13 works with update statement', function(done) {
+    it('82.2.13 works with update statement', function(done) {
       var id = getID();
-      var specialStr_1 = '80.2.13_1';
+      var specialStr_1 = '82.2.13_1';
       var contentLength_1 = 201;
       var content_1 = getRandomString(contentLength_1, specialStr_1);
-      var specialStr_2 = '80.2.13_2';
+      var specialStr_2 = '82.2.13_2';
       var contentLength_2 = 208;
       var content_2 = getRandomString(contentLength_2, specialStr_2);
 
@@ -1283,11 +1461,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.2.13
+    }); // 82.2.13
 
-    it('80.2.14 works with REF CURSOR', function(done) {
+    it('82.2.14 works with REF CURSOR', function(done) {
       var id = getID();
-      var specialStr = '80.2.14';
+      var specialStr = '82.2.14';
       var contentLength = 100;
       var content = getRandomString(contentLength, specialStr);
 
@@ -1339,11 +1517,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.2.14
+    }); // 82.2.14
 
-    it('80.2.15 fetch CLOB with stream', function(done) {
+    it('82.2.15 fetch CLOB with stream', function(done) {
       var id = getID();
-      var specialStr = '80.2.15';
+      var specialStr = '82.2.15';
       var contentLength = 200;
       var content = getRandomString(contentLength, specialStr);
 
@@ -1382,15 +1560,15 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.2.15
+    }); // 82.2.15
 
-    it('80.2.16 works with setting oracledb.maxRows < actual number of rows in the table', function(done) {
+    it('82.2.16 works with setting oracledb.maxRows < actual number of rows in the table', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '80.2.16_1';
+      var specialStr_1 = '82.2.16_1';
       var contentLength_1 = 200;
       var content_1 = getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
-      var specialStr_2 = '80.2.16_2';
+      var specialStr_2 = '82.2.16_2';
       var contentLength_2 = 100;
       var content_2 = getRandomString(contentLength_2, specialStr_2);
       var maxRowsBak = oracledb.maxRows;
@@ -1419,15 +1597,15 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.2.16
+    }); // 82.2.16
 
-    it('80.2.17 works with setting oracledb.maxRows > actual number of rows in the table', function(done) {
+    it('82.2.17 works with setting oracledb.maxRows > actual number of rows in the table', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '80.2.17_1';
+      var specialStr_1 = '82.2.17_1';
       var contentLength_1 = 200;
       var content_1 = getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
-      var specialStr_2 = '80.2.17_2';
+      var specialStr_2 = '82.2.17_2';
       var contentLength_2 = 100;
       var content_2 = getRandomString(contentLength_2, specialStr_2);
       var maxRowsBak = oracledb.maxRows;
@@ -1458,11 +1636,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.2.17
+    }); // 82.2.17
 
-    it('80.2.18 override oracledb.fetchAsString with fetchInfo set to oracledb.DEFAULT', function(done) {
+    it('82.2.18 override oracledb.fetchAsString with fetchInfo set to oracledb.DEFAULT', function(done) {
       var id = getID();
-      var specialStr = '80.2.18';
+      var specialStr = '82.2.18';
       var contentLength = 20;
       var content = getRandomString(contentLength, specialStr);
 
@@ -1504,11 +1682,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.2.18
+    }); // 82.2.18
 
-  }); // 80.2
+  }); // 82.2
 
-  describe('80.3 fetch CLOB columns by setting oracledb.fetchAsString, outFormat = oracledb.OBJECT and resultSet = true', function() {
+  describe('82.3 fetch CLOB columns by setting oracledb.fetchAsString, outFormat = oracledb.OBJECT and resultSet = true', function() {
 
     before('Create table and populate', function(done) {
       connection.execute(
@@ -1540,7 +1718,7 @@ describe('80. fetchClobAsString.js', function() {
       done();
     }); // afterEach
 
-    it('80.3.1 works with NULL value', function(done) {
+    it('82.3.1 works with NULL value', function(done) {
       var id = getID();
       var content = null;
 
@@ -1573,9 +1751,9 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.3.1
+    }); // 82.3.1
 
-    it('80.3.2 works with empty String', function(done) {
+    it('82.3.2 works with empty String', function(done) {
       var id = getID();
       var content = "";
 
@@ -1608,11 +1786,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.3.2
+    }); // 82.3.2
 
-    it('80.3.3 works with small value', function(done) {
+    it('82.3.3 works with small value', function(done) {
       var id = getID();
-      var specialStr = '80.3.3';
+      var specialStr = '82.3.3';
       var contentLength = 20;
       var content = getRandomString(contentLength, specialStr);
 
@@ -1645,11 +1823,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.3.3
+    }); // 82.3.3
 
-    it('80.3.4 works with (64K - 1) value', function(done) {
+    it('82.3.4 works with (64K - 1) value', function(done) {
       var id = getID();
-      var specialStr = '80.3.4';
+      var specialStr = '82.3.4';
       var contentLength = 65535;
       var content = getRandomString(contentLength, specialStr);
 
@@ -1682,11 +1860,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.3.4
+    }); // 82.3.4
 
-    it('80.3.5 works with (64K + 1) value', function(done) {
+    it('82.3.5 works with (64K + 1) value', function(done) {
       var id = getID();
-      var specialStr = '80.3.5';
+      var specialStr = '82.3.5';
       var contentLength = 65537;
       var content = getRandomString(contentLength, specialStr);
 
@@ -1718,11 +1896,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.3.5
+    }); // 82.3.5
 
-    it('80.3.6 works with (1MB + 1) data', function(done) {
+    it('82.3.6 works with (1MB + 1) data', function(done) {
       var id = getID();
-      var specialStr = '80.3.6';
+      var specialStr = '82.3.6';
       var contentLength = 1048577; // 1MB + 1
       var content = getRandomString(contentLength, specialStr);
 
@@ -1754,11 +1932,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.3.6
+    }); // 82.3.6
 
-    it('80.3.7 works with (5MB + 1) data', function(done) {
+    it('82.3.7 works with (5MB + 1) data', function(done) {
       var id = getID();
-      var specialStr = '80.3.7';
+      var specialStr = '82.3.7';
       var contentLength = 5242881; // 5MB + 1
       var content = getRandomString(contentLength, specialStr);
 
@@ -1790,11 +1968,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.3.7
+    }); // 82.3.7
 
-    it('80.3.8 works with (10MB + 1) data', function(done) {
+    it('82.3.8 works with (10MB + 1) data', function(done) {
       var id = getID();
-      var specialStr = '80.3.8';
+      var specialStr = '82.3.8';
       var contentLength = 10485761; // 10MB + 1
       var content = getRandomString(contentLength, specialStr);
 
@@ -1826,11 +2004,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.3.8
+    }); // 82.3.8
 
-    it('80.3.9 works with dbms_lob.substr()', function(done) {
+    it('82.3.9 works with dbms_lob.substr()', function(done) {
       var id = getID();
-      var specialStr = '80.3.9';
+      var specialStr = '82.3.9';
       var contentLength = 200;
       var specialStrLength = specialStr.length;
       var content = getRandomString(contentLength, specialStr);
@@ -1864,9 +2042,9 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.3.9
+    }); // 82.3.9
 
-    it('80.3.10 works with EMPTY_CLOB()', function(done) {
+    it('82.3.10 works with EMPTY_CLOB()', function(done) {
       var id = getID();
       var content = "EMPTY_CLOB";
 
@@ -1899,15 +2077,15 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.3.10
+    }); // 82.3.10
 
-    it('80.3.11 fetch multiple CLOB rows as String', function(done) {
+    it('82.3.11 fetch multiple CLOB rows as String', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '80.3.11_1';
+      var specialStr_1 = '82.3.11_1';
       var contentLength_1 = 200;
       var content_1 = getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
-      var specialStr_2 = '80.3.11_2';
+      var specialStr_2 = '82.3.11_2';
       var contentLength_2 = 100;
       var content_2 = getRandomString(contentLength_2, specialStr_2);
 
@@ -1947,11 +2125,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.3.11
+    }); // 82.3.11
 
-    it('80.3.12 fetch the same CLOB column multiple times', function(done) {
+    it('82.3.12 fetch the same CLOB column multiple times', function(done) {
       var id = getID();
-      var specialStr = '80.3.12';
+      var specialStr = '82.3.12';
       var contentLength = 200;
       var content = getRandomString(contentLength, specialStr);
 
@@ -1986,14 +2164,14 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.3.12
+    }); // 82.3.12
 
-    it('80.3.13 works with update statement', function(done) {
+    it('82.3.13 works with update statement', function(done) {
       var id = getID();
-      var specialStr_1 = '80.3.13_1';
+      var specialStr_1 = '82.3.13_1';
       var contentLength_1 = 200;
       var content_1 = getRandomString(contentLength_1, specialStr_1);
-      var specialStr_2 = '80.3.13_2';
+      var specialStr_2 = '82.3.13_2';
       var contentLength_2 = 208;
       var content_2 = getRandomString(contentLength_2, specialStr_2);
 
@@ -2053,11 +2231,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.3.13
+    }); // 82.3.13
 
-    it('80.3.14 works with REF CURSOR', function(done) {
+    it('82.3.14 works with REF CURSOR', function(done) {
       var id = getID();
-      var specialStr = '80.3.14';
+      var specialStr = '82.3.14';
       var contentLength = 100;
       var content = getRandomString(contentLength, specialStr);
 
@@ -2108,11 +2286,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.3.14
+    }); // 82.3.14
 
-    it('80.3.15 fetch CLOB with stream', function(done) {
+    it('82.3.15 fetch CLOB with stream', function(done) {
       var id = getID();
-      var specialStr = '80.3.15';
+      var specialStr = '82.3.15';
       var contentLength = 200;
       var content = getRandomString(contentLength, specialStr);
 
@@ -2151,15 +2329,15 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.3.15
+    }); // 82.3.15
 
-    it('80.3.16 works with setting oracledb.maxRows < actual number of rows in the table', function(done) {
+    it('82.3.16 works with setting oracledb.maxRows < actual number of rows in the table', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '80.3.16_1';
+      var specialStr_1 = '82.3.16_1';
       var contentLength_1 = 200;
       var content_1 = getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
-      var specialStr_2 = '80.3.16_2';
+      var specialStr_2 = '82.3.16_2';
       var contentLength_2 = 100;
       var content_2 = getRandomString(contentLength_2, specialStr_2);
       var maxRowsBak = oracledb.maxRows;
@@ -2203,15 +2381,15 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.3.16
+    }); // 82.3.16
 
-    it('80.3.17 works with setting oracledb.maxRows > actual number of rows in the table', function(done) {
+    it('82.3.17 works with setting oracledb.maxRows > actual number of rows in the table', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '80.3.17_1';
+      var specialStr_1 = '82.3.17_1';
       var contentLength_1 = 200;
       var content_1 = getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
-      var specialStr_2 = '80.3.17_2';
+      var specialStr_2 = '82.3.17_2';
       var contentLength_2 = 100;
       var content_2 = getRandomString(contentLength_2, specialStr_2);
       var maxRowsBak = oracledb.maxRows;
@@ -2255,11 +2433,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.3.17
+    }); // 82.3.17
 
-    it('80.3.18 override oracledb.fetchAsString with fetchInfo set to oracledb.DEFAULT', function(done) {
+    it('82.3.18 override oracledb.fetchAsString with fetchInfo set to oracledb.DEFAULT', function(done) {
       var id = getID();
-      var specialStr = '80.3.18';
+      var specialStr = '82.3.18';
       var contentLength = 20;
       var content = getRandomString(contentLength, specialStr);
 
@@ -2301,11 +2479,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.3.18
+    }); // 82.3.18
 
-  }); // 80.3
+  }); // 82.3
 
-  describe('80.4 fetch CLOB columns by setting oracledb.fetchAsString and outFormat = oracledb.ARRAY', function() {
+  describe('82.4 fetch CLOB columns by setting oracledb.fetchAsString and outFormat = oracledb.ARRAY', function() {
 
     before('Create table and populate', function(done) {
       connection.execute(
@@ -2337,7 +2515,7 @@ describe('80. fetchClobAsString.js', function() {
       done();
     }); // afterEach
 
-    it('80.4.1 works with NULL value', function(done) {
+    it('82.4.1 works with NULL value', function(done) {
       var id = getID();
       var content = null;
 
@@ -2359,9 +2537,9 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.4.1
+    }); // 82.4.1
 
-    it('80.4.2 works with empty String', function(done) {
+    it('82.4.2 works with empty String', function(done) {
       var id = getID();
       var content = "";
 
@@ -2383,11 +2561,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.4.2
+    }); // 82.4.2
 
-    it('80.4.3 works with small value', function(done) {
+    it('82.4.3 works with small value', function(done) {
       var id = getID();
-      var specialStr = '80.4.3';
+      var specialStr = '82.4.3';
       var contentLength = 20;
       var content = getRandomString(contentLength, specialStr);
 
@@ -2409,11 +2587,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.4.3
+    }); // 82.4.3
 
-    it('80.4.4 works with (64K - 1) value', function(done) {
+    it('82.4.4 works with (64K - 1) value', function(done) {
       var id = getID();
-      var specialStr = '80.4.4';
+      var specialStr = '82.4.4';
       var contentLength = 65535;
       var content = getRandomString(contentLength, specialStr);
 
@@ -2435,11 +2613,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.4.4
+    }); // 82.4.4
 
-    it('80.4.5 works with (64K + 1) value', function(done) {
+    it('82.4.5 works with (64K + 1) value', function(done) {
       var id = getID();
-      var specialStr = '80.4.5';
+      var specialStr = '82.4.5';
       var contentLength = 65537;
       var content = getRandomString(contentLength, specialStr);
 
@@ -2460,11 +2638,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.4.5
+    }); // 82.4.5
 
-    it('80.4.6 works with (1MB + 1) data', function(done) {
+    it('82.4.6 works with (1MB + 1) data', function(done) {
       var id = getID();
-      var specialStr = '80.4.6';
+      var specialStr = '82.4.6';
       var contentLength = 1048577; // 1MB + 1
       var content = getRandomString(contentLength, specialStr);
 
@@ -2485,11 +2663,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.4.6
+    }); // 82.4.6
 
-    it('80.4.7 works with (5MB + 1) data', function(done) {
+    it('82.4.7 works with (5MB + 1) data', function(done) {
       var id = getID();
-      var specialStr = '80.4.7';
+      var specialStr = '82.4.7';
       var contentLength = 5242881; // 5MB + 1
       var content = getRandomString(contentLength, specialStr);
 
@@ -2510,11 +2688,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.4.7
+    }); // 82.4.7
 
-    it('80.4.8 works with (10MB + 1) data', function(done) {
+    it('82.4.8 works with (10MB + 1) data', function(done) {
       var id = getID();
-      var specialStr = '80.4.8';
+      var specialStr = '82.4.8';
       var contentLength = 10485761; // 10MB + 1
       var content = getRandomString(contentLength, specialStr);
 
@@ -2535,11 +2713,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.4.8
+    }); // 82.4.8
 
-    it('80.4.9 works with dbms_lob.substr()', function(done) {
+    it('82.4.9 works with dbms_lob.substr()', function(done) {
       var id = getID();
-      var specialStr = '80.4.9';
+      var specialStr = '82.4.9';
       var contentLength = 200;
       var specialStrLength = specialStr.length;
       var content = getRandomString(contentLength, specialStr);
@@ -2562,9 +2740,9 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.4.9
+    }); // 82.4.9
 
-    it('80.4.10 works with EMPTY_CLOB()', function(done) {
+    it('82.4.10 works with EMPTY_CLOB()', function(done) {
       var id = getID();
       var content = "EMPTY_CLOB";
 
@@ -2585,15 +2763,15 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.4.10
+    }); // 82.4.10
 
-    it('80.4.11 fetch multiple CLOB rows as String', function(done) {
+    it('82.4.11 fetch multiple CLOB rows as String', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '80.4.11_1';
+      var specialStr_1 = '82.4.11_1';
       var contentLength_1 = 200;
       var content_1 = getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
-      var specialStr_2 = '80.4.11_2';
+      var specialStr_2 = '82.4.11_2';
       var contentLength_2 = 100;
       var content_2 = getRandomString(contentLength_2, specialStr_2);
 
@@ -2620,11 +2798,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.4.11
+    }); // 82.4.11
 
-    it('80.4.12 fetch the same CLOB column multiple times', function(done) {
+    it('82.4.12 fetch the same CLOB column multiple times', function(done) {
       var id = getID();
-      var specialStr = '80.4.12';
+      var specialStr = '82.4.12';
       var contentLength = 200;
       var content = getRandomString(contentLength, specialStr);
 
@@ -2648,14 +2826,14 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.4.12
+    }); // 82.4.12
 
-    it('80.4.13 works with update statement', function(done) {
+    it('82.4.13 works with update statement', function(done) {
       var id = getID();
-      var specialStr_1 = '80.4.13_1';
+      var specialStr_1 = '82.4.13_1';
       var contentLength_1 = 200;
       var content_1 = getRandomString(contentLength_1, specialStr_1);
-      var specialStr_2 = '80.4.13_2';
+      var specialStr_2 = '82.4.13_2';
       var contentLength_2 = 208;
       var content_2 = getRandomString(contentLength_2, specialStr_2);
 
@@ -2693,11 +2871,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.4.13
+    }); // 82.4.13
 
-    it('80.4.14 works with REF CURSOR', function(done) {
+    it('82.4.14 works with REF CURSOR', function(done) {
       var id = getID();
-      var specialStr = '80.4.14';
+      var specialStr = '82.4.14';
       var contentLength = 100;
       var content = getRandomString(contentLength, specialStr);
 
@@ -2748,11 +2926,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.4.14
+    }); // 82.4.14
 
-    it('80.4.15 fetch CLOB with stream', function(done) {
+    it('82.4.15 fetch CLOB with stream', function(done) {
       var id = getID();
-      var specialStr = '80.4.15';
+      var specialStr = '82.4.15';
       var contentLength = 200;
       var content = getRandomString(contentLength, specialStr);
 
@@ -2791,15 +2969,15 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.4.15
+    }); // 82.4.15
 
-    it('80.4.16 works with setting oracledb.maxRows < actual number of rows in the table', function(done) {
+    it('82.4.16 works with setting oracledb.maxRows < actual number of rows in the table', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '80.4.16_1';
+      var specialStr_1 = '82.4.16_1';
       var contentLength_1 = 200;
       var content_1 = getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
-      var specialStr_2 = '80.4.16_2';
+      var specialStr_2 = '82.4.16_2';
       var contentLength_2 = 100;
       var content_2 = getRandomString(contentLength_2, specialStr_2);
       var maxRowsBak = oracledb.maxRows;
@@ -2828,15 +3006,15 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.4.16
+    }); // 82.4.16
 
-    it('80.4.17 works with setting oracledb.maxRows < actual number of rows in the table', function(done) {
+    it('82.4.17 works with setting oracledb.maxRows < actual number of rows in the table', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '80.4.17_1';
+      var specialStr_1 = '82.4.17_1';
       var contentLength_1 = 200;
       var content_1 = getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
-      var specialStr_2 = '80.4.17_2';
+      var specialStr_2 = '82.4.17_2';
       var contentLength_2 = 100;
       var content_2 = getRandomString(contentLength_2, specialStr_2);
       var maxRowsBak = oracledb.maxRows;
@@ -2867,11 +3045,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.4.17
+    }); // 82.4.17
 
-    it('80.4.18 override oracledb.fetchAsString with fetchInfo set to oracledb.DEFAULT', function(done) {
+    it('82.4.18 override oracledb.fetchAsString with fetchInfo set to oracledb.DEFAULT', function(done) {
       var id = getID();
-      var specialStr = '80.4.18';
+      var specialStr = '82.4.18';
       var contentLength = 20;
       var content = getRandomString(contentLength, specialStr);
 
@@ -2913,11 +3091,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.4.18
+    }); // 82.4.18
 
-  }); // 80.4
+  }); // 82.4
 
-  describe('80.5 fetch CLOB columns by setting oracledb.fetchAsString, outFormat = oracledb.ARRAY and resultSet = true', function() {
+  describe('82.5 fetch CLOB columns by setting oracledb.fetchAsString, outFormat = oracledb.ARRAY and resultSet = true', function() {
 
     before('Create table and populate', function(done) {
       connection.execute(
@@ -2949,7 +3127,7 @@ describe('80. fetchClobAsString.js', function() {
       done();
     }); // afterEach
 
-    it('80.5.1 works with NULL value', function(done) {
+    it('82.5.1 works with NULL value', function(done) {
       var id = getID();
       var content = null;
 
@@ -2982,9 +3160,9 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.5.1
+    }); // 82.5.1
 
-    it('80.5.2 works with empty String', function(done) {
+    it('82.5.2 works with empty String', function(done) {
       var id = getID();
       var content = "";
 
@@ -3017,11 +3195,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.5.2
+    }); // 82.5.2
 
-    it('80.5.3 works with small value', function(done) {
+    it('82.5.3 works with small value', function(done) {
       var id = getID();
-      var specialStr = '80.5.3';
+      var specialStr = '82.5.3';
       var contentLength = 20;
       var content = getRandomString(contentLength, specialStr);
 
@@ -3054,11 +3232,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.5.3
+    }); // 82.5.3
 
-    it('80.5.4 works with (64K - 1) value', function(done) {
+    it('82.5.4 works with (64K - 1) value', function(done) {
       var id = getID();
-      var specialStr = '80.5.4';
+      var specialStr = '82.5.4';
       var contentLength = 65535;
       var content = getRandomString(contentLength, specialStr);
 
@@ -3091,11 +3269,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.5.4
+    }); // 82.5.4
 
-    it('80.5.5 works with (64K + 1) value', function(done) {
+    it('82.5.5 works with (64K + 1) value', function(done) {
       var id = getID();
-      var specialStr = '80.5.5';
+      var specialStr = '82.5.5';
       var contentLength = 65537;
       var content = getRandomString(contentLength, specialStr);
 
@@ -3127,11 +3305,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.5.5
+    }); // 82.5.5
 
-    it('80.5.6 works with (1MB + 1) data', function(done) {
+    it('82.5.6 works with (1MB + 1) data', function(done) {
       var id = getID();
-      var specialStr = '80.5.6';
+      var specialStr = '82.5.6';
       var contentLength = 1048577; // 1MB + 1
       var content = getRandomString(contentLength, specialStr);
 
@@ -3163,11 +3341,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.5.6
+    }); // 82.5.6
 
-    it('80.5.7 works with (5MB + 1) data', function(done) {
+    it('82.5.7 works with (5MB + 1) data', function(done) {
       var id = getID();
-      var specialStr = '80.5.7';
+      var specialStr = '82.5.7';
       var contentLength = 5242881; // 5MB + 1
       var content = getRandomString(contentLength, specialStr);
 
@@ -3199,11 +3377,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.5.7
+    }); // 82.5.7
 
-    it('80.5.8 works with (10MB + 1) data', function(done) {
+    it('82.5.8 works with (10MB + 1) data', function(done) {
       var id = getID();
-      var specialStr = '80.5.8';
+      var specialStr = '82.5.8';
       var contentLength = 10485761; // 10MB + 1
       var content = getRandomString(contentLength, specialStr);
 
@@ -3235,11 +3413,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.5.8
+    }); // 82.5.8
 
-    it('80.5.9 works with dbms_lob.substr()', function(done) {
+    it('82.5.9 works with dbms_lob.substr()', function(done) {
       var id = getID();
-      var specialStr = '80.5.9';
+      var specialStr = '82.5.9';
       var contentLength = 200;
       var specialStrLength = specialStr.length;
       var content = getRandomString(contentLength, specialStr);
@@ -3274,9 +3452,9 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.5.9
+    }); // 82.5.9
 
-    it('80.5.10 works with EMPTY_CLOB()', function(done) {
+    it('82.5.10 works with EMPTY_CLOB()', function(done) {
       var id = getID();
       var content = "EMPTY_CLOB";
 
@@ -3309,15 +3487,15 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.5.10
+    }); // 82.5.10
 
-    it('80.5.11 fetch multiple CLOB rows as String', function(done) {
+    it('82.5.11 fetch multiple CLOB rows as String', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '80.5.11_1';
+      var specialStr_1 = '82.5.11_1';
       var contentLength_1 = 200;
       var content_1 = getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
-      var specialStr_2 = '80.5.11_2';
+      var specialStr_2 = '82.5.11_2';
       var contentLength_2 = 100;
       var content_2 = getRandomString(contentLength_2, specialStr_2);
 
@@ -3357,11 +3535,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.5.11
+    }); // 82.5.11
 
-    it('80.5.12 fetch the same CLOB column multiple times', function(done) {
+    it('82.5.12 fetch the same CLOB column multiple times', function(done) {
       var id = getID();
-      var specialStr = '80.5.12';
+      var specialStr = '82.5.12';
       var contentLength = 200;
       var content = getRandomString(contentLength, specialStr);
 
@@ -3396,14 +3574,14 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.5.12
+    }); // 82.5.12
 
-    it('80.5.13 works with update statement', function(done) {
+    it('82.5.13 works with update statement', function(done) {
       var id = getID();
-      var specialStr_1 = '80.5.13_1';
+      var specialStr_1 = '82.5.13_1';
       var contentLength_1 = 208;
       var content_1 = getRandomString(contentLength_1, specialStr_1);
-      var specialStr_2 = '80.5.13_2';
+      var specialStr_2 = '82.5.13_2';
       var contentLength_2 = 208;
       var content_2 = getRandomString(contentLength_2, specialStr_2);
 
@@ -3463,11 +3641,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.5.13
+    }); // 82.5.13
 
-    it('80.5.14 works with REF CURSOR', function(done) {
+    it('82.5.14 works with REF CURSOR', function(done) {
       var id = getID();
-      var specialStr = '80.5.14';
+      var specialStr = '82.5.14';
       var contentLength = 100;
       var content = getRandomString(contentLength, specialStr);
 
@@ -3518,11 +3696,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.5.14
+    }); // 82.5.14
 
-    it('80.5.15 fetch CLOB with stream', function(done) {
+    it('82.5.15 fetch CLOB with stream', function(done) {
       var id = getID();
-      var specialStr = '80.5.15';
+      var specialStr = '82.5.15';
       var contentLength = 200;
       var content = getRandomString(contentLength, specialStr);
 
@@ -3561,15 +3739,15 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.5.15
+    }); // 82.5.15
 
-    it('80.5.16 works with setting oracledb.maxRows < actual number of rows in the table', function(done) {
+    it('82.5.16 works with setting oracledb.maxRows < actual number of rows in the table', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '80.5.16_1';
+      var specialStr_1 = '82.5.16_1';
       var contentLength_1 = 200;
       var content_1 = getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
-      var specialStr_2 = '80.5.16_2';
+      var specialStr_2 = '82.5.16_2';
       var contentLength_2 = 100;
       var content_2 = getRandomString(contentLength_2, specialStr_2);
       var maxRowsBak = oracledb.maxRows;
@@ -3613,15 +3791,15 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.5.16
+    }); // 82.5.16
 
-    it('80.5.17 works with setting oracledb.maxRows > actual number of rows in the table', function(done) {
+    it('82.5.17 works with setting oracledb.maxRows > actual number of rows in the table', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '80.5.17_1';
+      var specialStr_1 = '82.5.17_1';
       var contentLength_1 = 200;
       var content_1 = getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
-      var specialStr_2 = '80.5.17_2';
+      var specialStr_2 = '82.5.17_2';
       var contentLength_2 = 100;
       var content_2 = getRandomString(contentLength_2, specialStr_2);
       var maxRowsBak = oracledb.maxRows;
@@ -3665,11 +3843,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.5.17
+    }); // 82.5.17
 
-    it('80.5.18 override oracledb.fetchAsString with fetchInfo set to oracledb.DEFAULT', function(done) {
+    it('82.5.18 override oracledb.fetchAsString with fetchInfo set to oracledb.DEFAULT', function(done) {
       var id = getID();
-      var specialStr = '80.5.18';
+      var specialStr = '82.5.18';
       var contentLength = 20;
       var content = getRandomString(contentLength, specialStr);
 
@@ -3711,11 +3889,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.5.18
+    }); // 82.5.18
 
-  }); // 80.5
+  }); // 82.5
 
-  describe('80.6 fetch CLOB columns by setting fetchInfo option', function() {
+  describe('82.6 fetch CLOB columns by setting fetchInfo option', function() {
 
     before('Create table and populate', function(done) {
       connection.execute(
@@ -3739,7 +3917,7 @@ describe('80. fetchClobAsString.js', function() {
 
     insertID = 0;
 
-    it('80.6.1 works with NULL value', function(done) {
+    it('82.6.1 works with NULL value', function(done) {
       var id = getID();
       var content = null;
 
@@ -3763,9 +3941,9 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.6.1
+    }); // 82.6.1
 
-    it('80.6.2 works with empty String', function(done) {
+    it('82.6.2 works with empty String', function(done) {
       var id = getID();
       var content = "";
 
@@ -3789,11 +3967,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.6.2
+    }); // 82.6.2
 
-    it('80.6.3 works with small value', function(done) {
+    it('82.6.3 works with small value', function(done) {
       var id = getID();
-      var specialStr = '80.6.3';
+      var specialStr = '82.6.3';
       var contentLength = 20;
       var content = getRandomString(contentLength, specialStr);
 
@@ -3817,11 +3995,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.6.3
+    }); // 82.6.3
 
-    it('80.6.4 works with (64K - 1) value', function(done) {
+    it('82.6.4 works with (64K - 1) value', function(done) {
       var id = getID();
-      var specialStr = '80.6.4';
+      var specialStr = '82.6.4';
       var contentLength = 65535;
       var content = getRandomString(contentLength, specialStr);
 
@@ -3845,11 +4023,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.6.4
+    }); // 82.6.4
 
-    it('80.6.5 works with (64K + 1) value', function(done) {
+    it('82.6.5 works with (64K + 1) value', function(done) {
       var id = getID();
-      var specialStr = '80.6.5';
+      var specialStr = '82.6.5';
       var contentLength = 65537;
       var content = getRandomString(contentLength, specialStr);
 
@@ -3873,11 +4051,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.6.5
+    }); // 82.6.5
 
-    it('80.6.6 works with (1MB + 1) value', function(done) {
+    it('82.6.6 works with (1MB + 1) value', function(done) {
       var id = getID();
-      var specialStr = '80.6.6';
+      var specialStr = '82.6.6';
       var contentLength = 1048577; // 1MB + 1
       var content = getRandomString(contentLength, specialStr);
 
@@ -3901,11 +4079,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.6.6
+    }); // 82.6.6
 
-    it('80.6.7 works with (5MB + 1) value', function(done) {
+    it('82.6.7 works with (5MB + 1) value', function(done) {
       var id = getID();
-      var specialStr = '80.6.7';
+      var specialStr = '82.6.7';
       var contentLength = 5242881; // 5MB + 1
       var content = getRandomString(contentLength, specialStr);
 
@@ -3929,11 +4107,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.6.7
+    }); // 82.6.7
 
-    it('80.6.8 works with (10MB + 1) value', function(done) {
+    it('82.6.8 works with (10MB + 1) value', function(done) {
       var id = getID();
-      var specialStr = '80.6.8';
+      var specialStr = '82.6.8';
       var contentLength = 10485761; // 10MB + 1
       var content = getRandomString(contentLength, specialStr);
 
@@ -3957,11 +4135,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.6.8
+    }); // 82.6.8
 
-    it('80.6.9 works with dbms_lob.substr()', function(done) {
+    it('82.6.9 works with dbms_lob.substr()', function(done) {
       var id = getID();
-      var specialStr = '80.6.9';
+      var specialStr = '82.6.9';
       var contentLength = 200;
       var specialStrLength = specialStr.length;
       var content = getRandomString(contentLength, specialStr);
@@ -3987,9 +4165,9 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.6.9
+    }); // 82.6.9
 
-    it('80.6.10 works with EMPTY_CLOB()', function(done) {
+    it('82.6.10 works with EMPTY_CLOB()', function(done) {
       var id = getID();
       var content = "EMPTY_CLOB";
 
@@ -4012,15 +4190,15 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.6.10
+    }); // 82.6.10
 
-    it('80.6.11 fetch multiple CLOB rows as String', function(done) {
+    it('82.6.11 fetch multiple CLOB rows as String', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '80.6.11_1';
+      var specialStr_1 = '82.6.11_1';
       var contentLength_1 = 200;
       var content_1 = getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
-      var specialStr_2 = '80.6.11_2';
+      var specialStr_2 = '82.6.11_2';
       var contentLength_2 = 100;
       var content_2 = getRandomString(contentLength_2, specialStr_2);
 
@@ -4049,11 +4227,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.6.11
+    }); // 82.6.11
 
-    it('80.6.12 fetch the same CLOB column multiple times', function(done) {
+    it('82.6.12 fetch the same CLOB column multiple times', function(done) {
       var id = getID();
-      var specialStr = '80.6.12';
+      var specialStr = '82.6.12';
       var contentLength = 200;
       var content = getRandomString(contentLength, specialStr);
 
@@ -4081,14 +4259,14 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.6.12
+    }); // 82.6.12
 
-    it('80.6.13 works with update statement', function(done) {
+    it('82.6.13 works with update statement', function(done) {
       var id = getID();
-      var specialStr_1 = '80.6.13_1';
+      var specialStr_1 = '82.6.13_1';
       var contentLength_1 = 200;
       var content_1 = getRandomString(contentLength_1, specialStr_1);
-      var specialStr_2 = '80.6.13_2';
+      var specialStr_2 = '82.6.13_2';
       var contentLength_2 = 208;
       var content_2 = getRandomString(contentLength_2, specialStr_2);
 
@@ -4130,15 +4308,15 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.6.8
+    }); // 82.6.8
 
-    it('80.6.14 works with setting oracledb.maxRows < actual number of rows in the table', function(done) {
+    it('82.6.14 works with setting oracledb.maxRows < actual number of rows in the table', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '80.6.14_1';
+      var specialStr_1 = '82.6.14_1';
       var contentLength_1 = 200;
       var content_1 = getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
-      var specialStr_2 = '80.6.14_2';
+      var specialStr_2 = '82.6.14_2';
       var contentLength_2 = 100;
       var content_2 = getRandomString(contentLength_2, specialStr_2);
       var maxRowsBak = oracledb.maxRows;
@@ -4169,15 +4347,15 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.6.14
+    }); // 82.6.14
 
-    it('80.6.15 works with setting oracledb.maxRows > actual number of rows in the table', function(done) {
+    it('82.6.15 works with setting oracledb.maxRows > actual number of rows in the table', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '80.6.15_1';
+      var specialStr_1 = '82.6.15_1';
       var contentLength_1 = 200;
       var content_1 = getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
-      var specialStr_2 = '80.6.15_2';
+      var specialStr_2 = '82.6.15_2';
       var contentLength_2 = 100;
       var content_2 = getRandomString(contentLength_2, specialStr_2);
       var maxRowsBak = oracledb.maxRows;
@@ -4210,11 +4388,189 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.6.15
+    }); // 82.6.15
 
-  }); // 80.6
+    it('82.6.16 works with connection.queryStream()', function(done) {
+      var id = getID();
+      var specialStr = '82.6.16';
+      var contentLength = 200;
+      var content = getRandomString(contentLength, specialStr);
 
-  describe('80.7 fetch CLOB columns by setting fetchInfo option and outFormat = oracledb.OBJECT', function() {
+      async.series([
+        function(cb) {
+          insertIntoClobTable1(id, content, cb, false);
+        },
+        function(cb) {
+          var sql = "SELECT ID, C from nodb_clob1 WHERE ID = " + id;
+          var stream = connection.queryStream(sql, {}, { fetchInfo : { C : { type : oracledb.STRING } } });
+          stream.on('error', function (error) {
+            should.fail(error, null, 'Error event should not be triggered');
+          });
+
+          var counter = 0;
+          stream.on('data', function(data) {
+            should.exist(data);
+            var result = data[1];
+            should.strictEqual(typeof result, "string");
+            compareStrings(result, specialStr, content, contentLength, false);
+            counter++;
+          });
+
+          stream.on('end', function () {
+            should.equal(counter, 1);
+            setTimeout(cb, 500);
+          });
+        }
+      ], done);
+    }); // 82.6.16
+
+    it('82.6.17 works with connection.queryStream() and oracledb.maxRows > actual number of rows in the table', function(done) {
+      var id_1 = getID();
+      var specialStr_1 = '82.6.17_1';
+      var contentLength_1 = 26;
+      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var id_2 = getID();
+      var specialStr_2 = '82.6.17_2';
+      var contentLength_2 = 30;
+      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var maxRowsBak = oracledb.maxRows;
+      oracledb.maxRows = 20;
+
+      async.series([
+        function(cb) {
+          insertIntoClobTable1(id_1, content_1, cb, false);
+        },
+        function(cb) {
+          insertIntoClobTable1(id_2, content_2, cb, false);
+        },
+        function(cb) {
+          var sql = "SELECT ID, C from nodb_clob1 WHERE ID = " + id_1 + " or id = " +id_2;
+          var stream = connection.queryStream(sql, {}, { fetchInfo : { C : { type : oracledb.STRING } } });
+          stream.on('error', function (error) {
+            should.fail(error, null, 'Error event should not be triggered');
+          });
+
+          var counter = 0;
+          stream.on('data', function(data) {
+            should.exist(data);
+            var result = data[1];
+            should.strictEqual(typeof result, "string");
+            counter++;
+            if(counter == 1) {
+              compareStrings(result, specialStr_1, content_1, contentLength_1, false);
+            } else {
+              compareStrings(result, specialStr_2, content_2, contentLength_2, false);
+            }
+          });
+
+          stream.on('end', function () {
+            should.equal(counter, 2);
+            oracledb.maxRows = maxRowsBak;
+            setTimeout(cb, 500);
+          });
+        }
+      ], done);
+    }); // 82.6.17
+
+    it('82.6.18 works with connection.queryStream() and oracledb.maxRows = actual number of rows in the table', function(done) {
+      var id_1 = getID();
+      var specialStr_1 = '82.6.18_1';
+      var contentLength_1 = 26;
+      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var id_2 = getID();
+      var specialStr_2 = '82.6.18_2';
+      var contentLength_2 = 30;
+      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var maxRowsBak = oracledb.maxRows;
+      oracledb.maxRows = 2;
+
+      async.series([
+        function(cb) {
+          insertIntoClobTable1(id_1, content_1, cb, false);
+        },
+        function(cb) {
+          insertIntoClobTable1(id_2, content_2, cb, false);
+        },
+        function(cb) {
+          var sql = "SELECT ID, C from nodb_clob1 WHERE ID = " + id_1 + " or id = " +id_2;
+          var stream = connection.queryStream(sql, {}, { fetchInfo : { C : { type : oracledb.STRING } } });
+          stream.on('error', function (error) {
+            should.fail(error, null, 'Error event should not be triggered');
+          });
+
+          var counter = 0;
+          stream.on('data', function(data) {
+            should.exist(data);
+            var result = data[1];
+            should.strictEqual(typeof result, "string");
+            counter++;
+            if(counter == 1) {
+              compareStrings(result, specialStr_1, content_1, contentLength_1, false);
+            } else {
+              compareStrings(result, specialStr_2, content_2, contentLength_2, false);
+            }
+          });
+
+          stream.on('end', function () {
+            should.equal(counter, 2);
+            oracledb.maxRows = maxRowsBak;
+            setTimeout(cb, 500);
+          });
+        }
+      ], done);
+    }); // 82.6.18
+
+    it.skip('82.6.19 works with connection.queryStream() and oracledb.maxRows < actual number of rows in the table', function(done) {
+      var id_1 = getID();
+      var specialStr_1 = '82.6.19_1';
+      var contentLength_1 = 26;
+      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var id_2 = getID();
+      var specialStr_2 = '82.6.19_2';
+      var contentLength_2 = 30;
+      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var maxRowsBak = oracledb.maxRows;
+      oracledb.maxRows = 1;
+
+      async.series([
+        function(cb) {
+          insertIntoClobTable1(id_1, content_1, cb, false);
+        },
+        function(cb) {
+          insertIntoClobTable1(id_2, content_2, cb, false);
+        },
+        function(cb) {
+          var sql = "SELECT ID, C from nodb_clob1 WHERE ID = " + id_1 + " or id = " +id_2;
+          var stream = connection.queryStream(sql, {}, { fetchInfo : { C : { type : oracledb.STRING } } });
+          stream.on('error', function (error) {
+            should.fail(error, null, 'Error event should not be triggered');
+          });
+
+          var counter = 0;
+          stream.on('data', function(data) {
+            should.exist(data);
+            var result = data[1];
+            should.strictEqual(typeof result, "string");
+            counter++;
+            if(counter == 1) {
+              compareStrings(result, specialStr_1, content_1, contentLength_1, false);
+            } else {
+              compareStrings(result, specialStr_2, content_2, contentLength_2, false);
+            }
+          });
+
+          stream.on('end', function () {
+            should.equal(counter, 2);
+            oracledb.maxRows = maxRowsBak;
+            setTimeout(cb, 500);
+          });
+        }
+      ], done);
+    }); // 82.6.19
+
+  }); // 82.6
+
+  describe('82.7 fetch CLOB columns by setting fetchInfo option and outFormat = oracledb.OBJECT', function() {
 
     before('Create table and populate', function(done) {
       connection.execute(
@@ -4238,7 +4594,7 @@ describe('80. fetchClobAsString.js', function() {
 
     insertID = 0;
 
-    it('80.7.1 works with NULL value', function(done) {
+    it('82.7.1 works with NULL value', function(done) {
       var id = getID();
       var content = null;
 
@@ -4263,9 +4619,9 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.7.1
+    }); // 82.7.1
 
-    it('80.7.2 works with empty buffer', function(done) {
+    it('82.7.2 works with empty buffer', function(done) {
       var id = getID();
       var content = "";
 
@@ -4290,11 +4646,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.7.2
+    }); // 82.7.2
 
-    it('80.7.3 works with small value', function(done) {
+    it('82.7.3 works with small value', function(done) {
       var id = getID();
-      var specialStr = '80.7.3';
+      var specialStr = '82.7.3';
       var contentLength = 20;
       var content = getRandomString(contentLength, specialStr);
 
@@ -4319,11 +4675,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.7.3
+    }); // 82.7.3
 
-    it('80.7.4 works with (64K - 1) value', function(done) {
+    it('82.7.4 works with (64K - 1) value', function(done) {
       var id = getID();
-      var specialStr = '80.7.4';
+      var specialStr = '82.7.4';
       var contentLength = 65535;
       var content = getRandomString(contentLength, specialStr);
 
@@ -4348,11 +4704,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.7.4
+    }); // 82.7.4
 
-    it('80.7.5 works with (64K + 1) value', function(done) {
+    it('82.7.5 works with (64K + 1) value', function(done) {
       var id = getID();
-      var specialStr = '80.7.5';
+      var specialStr = '82.7.5';
       var contentLength = 65537;
       var content = getRandomString(contentLength, specialStr);
 
@@ -4377,11 +4733,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.7.5
+    }); // 82.7.5
 
-    it('80.7.6 works with (1MB + 1) value', function(done) {
+    it('82.7.6 works with (1MB + 1) value', function(done) {
       var id = getID();
-      var specialStr = '80.7.6';
+      var specialStr = '82.7.6';
       var contentLength = 1048577; // 1MB + 1
       var content = getRandomString(contentLength, specialStr);
 
@@ -4406,11 +4762,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.7.6
+    }); // 82.7.6
 
-    it('80.7.7 works with (5MB + 1) value', function(done) {
+    it('82.7.7 works with (5MB + 1) value', function(done) {
       var id = getID();
-      var specialStr = '80.7.7';
+      var specialStr = '82.7.7';
       var contentLength = 5242881; // 5MB + 1
       var content = getRandomString(contentLength, specialStr);
 
@@ -4435,11 +4791,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.7.7
+    }); // 82.7.7
 
-    it('80.7.8 works with (10MB + 1) value', function(done) {
+    it('82.7.8 works with (10MB + 1) value', function(done) {
       var id = getID();
-      var specialStr = '80.7.8';
+      var specialStr = '82.7.8';
       var contentLength = 10485761; // 10MB + 1
       var content = getRandomString(contentLength, specialStr);
 
@@ -4464,11 +4820,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.7.8
+    }); // 82.7.8
 
-    it('80.7.9 works with dbms_lob.substr()', function(done) {
+    it('82.7.9 works with dbms_lob.substr()', function(done) {
       var id = getID();
-      var specialStr = '80.7.9';
+      var specialStr = '82.7.9';
       var contentLength = 200;
       var specialStrLength = specialStr.length;
       var content = getRandomString(contentLength, specialStr);
@@ -4494,9 +4850,9 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.7.9
+    }); // 82.7.9
 
-    it('80.7.10 works with EMPTY_CLOB()', function(done) {
+    it('82.7.10 works with EMPTY_CLOB()', function(done) {
       var id = getID();
       var content = "EMPTY_CLOB";
 
@@ -4520,15 +4876,15 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.7.10
+    }); // 82.7.10
 
-    it('80.7.11 fetch multiple CLOB rows as String', function(done) {
+    it('82.7.11 fetch multiple CLOB rows as String', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '80.7.11_1';
+      var specialStr_1 = '82.7.11_1';
       var contentLength_1 = 200;
       var content_1 = getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
-      var specialStr_2 = '80.7.11_2';
+      var specialStr_2 = '82.7.11_2';
       var contentLength_2 = 100;
       var content_2 = getRandomString(contentLength_2, specialStr_2);
 
@@ -4558,11 +4914,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.7.11
+    }); // 82.7.11
 
-    it('80.7.12 fetch the same CLOB column multiple times', function(done) {
+    it('82.7.12 fetch the same CLOB column multiple times', function(done) {
       var id = getID();
-      var specialStr = '80.7.12';
+      var specialStr = '82.7.12';
       var contentLength = 200;
       var content = getRandomString(contentLength, specialStr);
 
@@ -4591,14 +4947,14 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.7.12
+    }); // 82.7.12
 
-    it('80.7.13 works with update statement', function(done) {
+    it('82.7.13 works with update statement', function(done) {
       var id = getID();
-      var specialStr_1 = '80.7.13_1';
+      var specialStr_1 = '82.7.13_1';
       var contentLength_1 = 200;
       var content_1 = getRandomString(contentLength_1, specialStr_1);
-      var specialStr_2 = '80.7.13_2';
+      var specialStr_2 = '82.7.13_2';
       var contentLength_2 = 202;
       var content_2 = getRandomString(contentLength_2, specialStr_2);
 
@@ -4642,15 +4998,15 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.7.13
+    }); // 82.7.13
 
-    it('80.7.14 works with setting oracledb.maxRows < actual number of rows in the table', function(done) {
+    it('82.7.14 works with setting oracledb.maxRows < actual number of rows in the table', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '80.7.14_1';
+      var specialStr_1 = '82.7.14_1';
       var contentLength_1 = 200;
       var content_1 = getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
-      var specialStr_2 = '80.7.14_2';
+      var specialStr_2 = '82.7.14_2';
       var contentLength_2 = 100;
       var content_2 = getRandomString(contentLength_2, specialStr_2);
       var maxRowsBak = oracledb.maxRows;
@@ -4682,15 +5038,15 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.7.14
+    }); // 82.7.14
 
-    it('80.7.15 works with setting oracledb.maxRows > actual number of rows in the table', function(done) {
+    it('82.7.15 works with setting oracledb.maxRows > actual number of rows in the table', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '80.7.15_1';
+      var specialStr_1 = '82.7.15_1';
       var contentLength_1 = 200;
       var content_1 = getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
-      var specialStr_2 = '80.7.15_2';
+      var specialStr_2 = '82.7.15_2';
       var contentLength_2 = 100;
       var content_2 = getRandomString(contentLength_2, specialStr_2);
       var maxRowsBak = oracledb.maxRows;
@@ -4724,11 +5080,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.7.15
+    }); // 82.7.15
 
-  }); // 80.7
+  }); // 82.7
 
-  describe('80.8 fetch CLOB columns by setting fetchInfo option, outFormat = oracledb.OBJECT and resultSet = true', function() {
+  describe('82.8 fetch CLOB columns by setting fetchInfo option, outFormat = oracledb.OBJECT and resultSet = true', function() {
 
     before('Create table and populate', function(done) {
       connection.execute(
@@ -4752,7 +5108,7 @@ describe('80. fetchClobAsString.js', function() {
 
     insertID = 0;
 
-    it('80.8.1 works with NULL value', function(done) {
+    it('82.8.1 works with NULL value', function(done) {
       var id = getID();
       var content = null;
 
@@ -4786,9 +5142,9 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.8.1
+    }); // 82.8.1
 
-    it('80.8.2 works with empty buffer', function(done) {
+    it('82.8.2 works with empty buffer', function(done) {
       var id = getID();
       var content = "";
 
@@ -4822,11 +5178,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.8.2
+    }); // 82.8.2
 
-    it('80.8.3 works with small value', function(done) {
+    it('82.8.3 works with small value', function(done) {
       var id = getID();
-      var specialStr = '80.8.3';
+      var specialStr = '82.8.3';
       var contentLength = 20;
       var content = getRandomString(contentLength, specialStr);
 
@@ -4860,11 +5216,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.8.3
+    }); // 82.8.3
 
-    it('80.8.4 works with (64K - 1) value', function(done) {
+    it('82.8.4 works with (64K - 1) value', function(done) {
       var id = getID();
-      var specialStr = '80.8.4';
+      var specialStr = '82.8.4';
       var contentLength = 65535;
       var content = getRandomString(contentLength, specialStr);
 
@@ -4898,11 +5254,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.8.4
+    }); // 82.8.4
 
-    it('80.8.5 works with (64K + 1) value', function(done) {
+    it('82.8.5 works with (64K + 1) value', function(done) {
       var id = getID();
-      var specialStr = '80.8.4';
+      var specialStr = '82.8.4';
       var contentLength = 65537;
       var content = getRandomString(contentLength, specialStr);
 
@@ -4935,11 +5291,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.8.5
+    }); // 82.8.5
 
-    it('80.8.6 works with (1MB + 1) value', function(done) {
+    it('82.8.6 works with (1MB + 1) value', function(done) {
       var id = getID();
-      var specialStr = '80.8.6';
+      var specialStr = '82.8.6';
       var contentLength = 1048577; // 1MB + 1
       var content = getRandomString(contentLength, specialStr);
 
@@ -4972,11 +5328,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.8.6
+    }); // 82.8.6
 
-    it('80.8.7 works with (5MB + 1) value', function(done) {
+    it('82.8.7 works with (5MB + 1) value', function(done) {
       var id = getID();
-      var specialStr = '80.8.7';
+      var specialStr = '82.8.7';
       var contentLength = 5242881; // 5MB + 1
       var content = getRandomString(contentLength, specialStr);
 
@@ -5009,11 +5365,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.8.7
+    }); // 82.8.7
 
-    it('80.8.8 works with (10MB + 1) value', function(done) {
+    it('82.8.8 works with (10MB + 1) value', function(done) {
       var id = getID();
-      var specialStr = '80.8.8';
+      var specialStr = '82.8.8';
       var contentLength = 10485761; // 10MB + 1
       var content = getRandomString(contentLength, specialStr);
 
@@ -5046,11 +5402,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.8.8
+    }); // 82.8.8
 
-    it('80.8.9 works with dbms_lob.substr()', function(done) {
+    it('82.8.9 works with dbms_lob.substr()', function(done) {
       var id = getID();
-      var specialStr = '80.8.9';
+      var specialStr = '82.8.9';
       var contentLength = 200;
       var specialStrLength = specialStr.length;
       var content = getRandomString(contentLength, specialStr);
@@ -5085,9 +5441,9 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.8.9
+    }); // 82.8.9
 
-    it('80.8.10 works with EMPTY_CLOB()', function(done) {
+    it('82.8.10 works with EMPTY_CLOB()', function(done) {
       var id = getID();
       var content = "EMPTY_CLOB";
 
@@ -5121,15 +5477,15 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.8.10
+    }); // 82.8.10
 
-    it('80.8.11 fetch multiple CLOB rows as String', function(done) {
+    it('82.8.11 fetch multiple CLOB rows as String', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '80.8.11_1';
+      var specialStr_1 = '82.8.11_1';
       var contentLength_1 = 200;
       var content_1 = getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
-      var specialStr_2 = '80.8.11_2';
+      var specialStr_2 = '82.8.11_2';
       var contentLength_2 = 100;
       var content_2 = getRandomString(contentLength_2, specialStr_2);
 
@@ -5170,11 +5526,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.8.11
+    }); // 82.8.11
 
-    it('80.8.12 fetch the same CLOB column multiple times', function(done) {
+    it('82.8.12 fetch the same CLOB column multiple times', function(done) {
       var id = getID();
-      var specialStr = '80.8.12';
+      var specialStr = '82.8.12';
       var contentLength = 200;
       var content = getRandomString(contentLength, specialStr);
 
@@ -5212,14 +5568,14 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.8.12
+    }); // 82.8.12
 
-    it('80.8.13 works with update statement', function(done) {
+    it('82.8.13 works with update statement', function(done) {
       var id = getID();
-      var specialStr_1 = '80.8.13_1';
+      var specialStr_1 = '82.8.13_1';
       var contentLength_1 = 200;
       var content_1 = getRandomString(contentLength_1, specialStr_1);
-      var specialStr_2 = '80.8.13_2';
+      var specialStr_2 = '82.8.13_2';
       var contentLength_2 = 202;
       var content_2 = getRandomString(contentLength_2, specialStr_2);
 
@@ -5281,15 +5637,15 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.8.13
+    }); // 82.8.13
 
-    it('80.8.14 works with setting oracledb.maxRows < actual number of rows in the table', function(done) {
+    it('82.8.14 works with setting oracledb.maxRows < actual number of rows in the table', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '80.8.14_1';
+      var specialStr_1 = '82.8.14_1';
       var contentLength_1 = 200;
       var content_1 = getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
-      var specialStr_2 = '80.8.14_2';
+      var specialStr_2 = '82.8.14_2';
       var contentLength_2 = 100;
       var content_2 = getRandomString(contentLength_2, specialStr_2);
       var maxRowsBak = oracledb.maxRows;
@@ -5334,15 +5690,15 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.8.14
+    }); // 82.8.14
 
-    it('80.8.15 works with setting oracledb.maxRows > actual number of rows in the table', function(done) {
+    it('82.8.15 works with setting oracledb.maxRows > actual number of rows in the table', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '80.8.15_1';
+      var specialStr_1 = '82.8.15_1';
       var contentLength_1 = 200;
       var content_1 = getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
-      var specialStr_2 = '80.8.15_2';
+      var specialStr_2 = '82.8.15_2';
       var contentLength_2 = 100;
       var content_2 = getRandomString(contentLength_2, specialStr_2);
       var maxRowsBak = oracledb.maxRows;
@@ -5387,11 +5743,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.8.15
+    }); // 82.8.15
 
-  }); // 80.8
+  }); // 82.8
 
-  describe('80.9 fetch CLOB columns by setting fetchInfo option and outFormat = oracledb.ARRAY', function() {
+  describe('82.9 fetch CLOB columns by setting fetchInfo option and outFormat = oracledb.ARRAY', function() {
 
     before('Create table and populate', function(done) {
       connection.execute(
@@ -5415,7 +5771,7 @@ describe('80. fetchClobAsString.js', function() {
 
     insertID = 0;
 
-    it('80.9.1 works with NULL value', function(done) {
+    it('82.9.1 works with NULL value', function(done) {
       var id = getID();
       var content = null;
 
@@ -5440,9 +5796,9 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.9.1
+    }); // 82.9.1
 
-    it('80.9.2 works with empty String', function(done) {
+    it('82.9.2 works with empty String', function(done) {
       var id = getID();
       var content = "";
 
@@ -5467,11 +5823,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.9.2
+    }); // 82.9.2
 
-    it('80.9.3 works with small value', function(done) {
+    it('82.9.3 works with small value', function(done) {
       var id = getID();
-      var specialStr = '80.9.3';
+      var specialStr = '82.9.3';
       var contentLength = 20;
       var content = getRandomString(contentLength, specialStr);
 
@@ -5496,11 +5852,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.9.3
+    }); // 82.9.3
 
-    it('80.9.4 works with (64K - 1) value', function(done) {
+    it('82.9.4 works with (64K - 1) value', function(done) {
       var id = getID();
-      var specialStr = '80.9.4';
+      var specialStr = '82.9.4';
       var contentLength = 65535;
       var content = getRandomString(contentLength, specialStr);
 
@@ -5525,11 +5881,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.9.4
+    }); // 82.9.4
 
-    it('80.9.5 works with (64K + 1) value', function(done) {
+    it('82.9.5 works with (64K + 1) value', function(done) {
       var id = getID();
-      var specialStr = '80.9.5';
+      var specialStr = '82.9.5';
       var contentLength = 65537;
       var content = getRandomString(contentLength, specialStr);
 
@@ -5554,11 +5910,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.9.5
+    }); // 82.9.5
 
-    it('80.9.6 works with (1MB + 1) value', function(done) {
+    it('82.9.6 works with (1MB + 1) value', function(done) {
       var id = getID();
-      var specialStr = '80.9.6';
+      var specialStr = '82.9.6';
       var contentLength = 1048577; // 1MB + 1
       var content = getRandomString(contentLength, specialStr);
 
@@ -5583,11 +5939,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.9.6
+    }); // 82.9.6
 
-    it('80.9.7 works with (5MB + 1) value', function(done) {
+    it('82.9.7 works with (5MB + 1) value', function(done) {
       var id = getID();
-      var specialStr = '80.9.7';
+      var specialStr = '82.9.7';
       var contentLength = 5242881; // 5MB + 1
       var content = getRandomString(contentLength, specialStr);
 
@@ -5612,11 +5968,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.9.7
+    }); // 82.9.7
 
-    it('80.9.8 works with (10MB + 1) value', function(done) {
+    it('82.9.8 works with (10MB + 1) value', function(done) {
       var id = getID();
-      var specialStr = '80.9.8';
+      var specialStr = '82.9.8';
       var contentLength = 10485761; // 10MB + 1
       var content = getRandomString(contentLength, specialStr);
 
@@ -5641,11 +5997,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.9.8
+    }); // 82.9.8
 
-    it('80.9.9 works with dbms_lob.substr()', function(done) {
+    it('82.9.9 works with dbms_lob.substr()', function(done) {
       var id = getID();
-      var specialStr = '80.9.9';
+      var specialStr = '82.9.9';
       var contentLength = 200;
       var specialStrLength = specialStr.length;
       var content = getRandomString(contentLength, specialStr);
@@ -5671,9 +6027,9 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.9.9
+    }); // 82.9.9
 
-    it('80.9.10 works with EMPTY_CLOB()', function(done) {
+    it('82.9.10 works with EMPTY_CLOB()', function(done) {
       var id = getID();
       var content = "EMPTY_CLOB";
 
@@ -5697,15 +6053,15 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.9.10
+    }); // 82.9.10
 
-    it('80.9.11 fetch multiple CLOB rows as String', function(done) {
+    it('82.9.11 fetch multiple CLOB rows as String', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '80.9.11_1';
+      var specialStr_1 = '82.9.11_1';
       var contentLength_1 = 200;
       var content_1 = getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
-      var specialStr_2 = '80.9.11_2';
+      var specialStr_2 = '82.9.11_2';
       var contentLength_2 = 100;
       var content_2 = getRandomString(contentLength_2, specialStr_2);
 
@@ -5735,11 +6091,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.9.11
+    }); // 82.9.11
 
-    it('80.9.12 fetch the same CLOB column multiple times', function(done) {
+    it('82.9.12 fetch the same CLOB column multiple times', function(done) {
       var id = getID();
-      var specialStr = '80.9.12';
+      var specialStr = '82.9.12';
       var contentLength = 200;
       var content = getRandomString(contentLength, specialStr);
 
@@ -5767,14 +6123,14 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.9.12
+    }); // 82.9.12
 
-    it('80.9.13 works with update statement', function(done) {
+    it('82.9.13 works with update statement', function(done) {
       var id = getID();
-      var specialStr_1 = '80.9.13_1';
+      var specialStr_1 = '82.9.13_1';
       var contentLength_1 = 200;
       var content_1 = getRandomString(contentLength_1, specialStr_1);
-      var specialStr_2 = '80.9.13_2';
+      var specialStr_2 = '82.9.13_2';
       var contentLength_2 = 208;
       var content_2 = getRandomString(contentLength_2, specialStr_2);
 
@@ -5818,15 +6174,15 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.9.8
+    }); // 82.9.8
 
-    it('80.9.14 works with setting oracledb.maxRows < actual number of rows in the table', function(done) {
+    it('82.9.14 works with setting oracledb.maxRows < actual number of rows in the table', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '80.9.14_1';
+      var specialStr_1 = '82.9.14_1';
       var contentLength_1 = 200;
       var content_1 = getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
-      var specialStr_2 = '80.9.14_2';
+      var specialStr_2 = '82.9.14_2';
       var contentLength_2 = 100;
       var content_2 = getRandomString(contentLength_2, specialStr_2);
       var maxRowsBak = oracledb.maxRows;
@@ -5858,15 +6214,15 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.9.14
+    }); // 82.9.14
 
-    it('80.9.15 works with setting oracledb.maxRows > actual number of rows in the table', function(done) {
+    it('82.9.15 works with setting oracledb.maxRows > actual number of rows in the table', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '80.9.15_1';
+      var specialStr_1 = '82.9.15_1';
       var contentLength_1 = 200;
       var content_1 = getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
-      var specialStr_2 = '80.9.15_2';
+      var specialStr_2 = '82.9.15_2';
       var contentLength_2 = 100;
       var content_2 = getRandomString(contentLength_2, specialStr_2);
       var maxRowsBak = oracledb.maxRows;
@@ -5900,11 +6256,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.9.15
+    }); // 82.9.15
 
-  }); // 80.9
+  }); // 82.9
 
-  describe('80.10 fetch CLOB columns by setting fetchInfo option, outFormat = oracledb.ARRAY and resultSet = true', function() {
+  describe('82.10 fetch CLOB columns by setting fetchInfo option, outFormat = oracledb.ARRAY and resultSet = true', function() {
 
     before('Create table and populate', function(done) {
       connection.execute(
@@ -5928,7 +6284,7 @@ describe('80. fetchClobAsString.js', function() {
 
     insertID = 0;
 
-    it('80.10.1 works with NULL value', function(done) {
+    it('82.10.1 works with NULL value', function(done) {
       var id = getID();
       var content = null;
 
@@ -5962,9 +6318,9 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.10.1
+    }); // 82.10.1
 
-    it('80.10.2 works with empty String', function(done) {
+    it('82.10.2 works with empty String', function(done) {
       var id = getID();
       var content = "";
 
@@ -5998,11 +6354,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.10.2
+    }); // 82.10.2
 
-    it('80.10.3 works with small value', function(done) {
+    it('82.10.3 works with small value', function(done) {
       var id = getID();
-      var specialStr = '80.10.3';
+      var specialStr = '82.10.3';
       var contentLength = 20;
       var content = getRandomString(contentLength, specialStr);
 
@@ -6036,11 +6392,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.10.3
+    }); // 82.10.3
 
-    it('80.10.4 works with (64K - 1) value', function(done) {
+    it('82.10.4 works with (64K - 1) value', function(done) {
       var id = getID();
-      var specialStr = '80.10.4';
+      var specialStr = '82.10.4';
       var contentLength = 65535;
       var content = getRandomString(contentLength, specialStr);
 
@@ -6074,11 +6430,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.10.4
+    }); // 82.10.4
 
-    it('80.10.5 works with (64K + 1) value', function(done) {
+    it('82.10.5 works with (64K + 1) value', function(done) {
       var id = getID();
-      var specialStr = '80.10.5';
+      var specialStr = '82.10.5';
       var contentLength = 65537;
       var content = getRandomString(contentLength, specialStr);
 
@@ -6111,11 +6467,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.10.5
+    }); // 82.10.5
 
-    it('80.10.6 works with (1MB + 1) value', function(done) {
+    it('82.10.6 works with (1MB + 1) value', function(done) {
       var id = getID();
-      var specialStr = '80.10.6';
+      var specialStr = '82.10.6';
       var contentLength = 1048577; // 1MB + 1
       var content = getRandomString(contentLength, specialStr);
 
@@ -6148,11 +6504,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.10.6
+    }); // 82.10.6
 
-    it('80.10.7 works with (5MB + 1) value', function(done) {
+    it('82.10.7 works with (5MB + 1) value', function(done) {
       var id = getID();
-      var specialStr = '80.10.7';
+      var specialStr = '82.10.7';
       var contentLength = 5242881; // 5MB + 1
       var content = getRandomString(contentLength, specialStr);
 
@@ -6185,11 +6541,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.10.7
+    }); // 82.10.7
 
-    it('80.10.8 works with (10MB + 1) value', function(done) {
+    it('82.10.8 works with (10MB + 1) value', function(done) {
       var id = getID();
-      var specialStr = '80.10.8';
+      var specialStr = '82.10.8';
       var contentLength = 10485761; // 10MB + 1
       var content = getRandomString(contentLength, specialStr);
 
@@ -6222,11 +6578,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.10.8
+    }); // 82.10.8
 
-    it('80.10.9 works with dbms_lob.substr()', function(done) {
+    it('82.10.9 works with dbms_lob.substr()', function(done) {
       var id = getID();
-      var specialStr = '80.10.9';
+      var specialStr = '82.10.9';
       var contentLength = 200;
       var specialStrLength = specialStr.length;
       var content = getRandomString(contentLength, specialStr);
@@ -6261,9 +6617,9 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.10.9
+    }); // 82.10.9
 
-    it('80.10.10 works with EMPTY_CLOB()', function(done) {
+    it('82.10.10 works with EMPTY_CLOB()', function(done) {
       var id = getID();
       var content = "EMPTY_CLOB";
 
@@ -6297,15 +6653,15 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.10.10
+    }); // 82.10.10
 
-    it('80.10.11 fetch multiple CLOB rows as String', function(done) {
+    it('82.10.11 fetch multiple CLOB rows as String', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '80.10.11_1';
+      var specialStr_1 = '82.10.11_1';
       var contentLength_1 = 200;
       var content_1 = getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
-      var specialStr_2 = '80.10.11_2';
+      var specialStr_2 = '82.10.11_2';
       var contentLength_2 = 100;
       var content_2 = getRandomString(contentLength_2, specialStr_2);
 
@@ -6347,11 +6703,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.10.11
+    }); // 82.10.11
 
-    it('80.10.12 fetch the same CLOB column multiple times', function(done) {
+    it('82.10.12 fetch the same CLOB column multiple times', function(done) {
       var id = getID();
-      var specialStr = '80.10.12';
+      var specialStr = '82.10.12';
       var contentLength = 200;
       var content = getRandomString(contentLength, specialStr);
 
@@ -6389,14 +6745,14 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.10.12
+    }); // 82.10.12
 
-    it('80.10.13 works with update statement', function(done) {
+    it('82.10.13 works with update statement', function(done) {
       var id = getID();
-      var specialStr_1 = '80.10.13_1';
+      var specialStr_1 = '82.10.13_1';
       var contentLength_1 = 200;
       var content_1 = getRandomString(contentLength_1, specialStr_1);
-      var specialStr_2 = '80.10.13_2';
+      var specialStr_2 = '82.10.13_2';
       var contentLength_2 = 208;
       var content_2 = getRandomString(contentLength_2, specialStr_2);
 
@@ -6458,15 +6814,15 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.10.13
+    }); // 82.10.13
 
-    it('80.10.14 works with setting oracledb.maxRows < actual number of rows in the table', function(done) {
+    it('82.10.14 works with setting oracledb.maxRows < actual number of rows in the table', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '80.10.14_1';
+      var specialStr_1 = '82.10.14_1';
       var contentLength_1 = 200;
       var content_1 = getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
-      var specialStr_2 = '80.10.14_2';
+      var specialStr_2 = '82.10.14_2';
       var contentLength_2 = 100;
       var content_2 = getRandomString(contentLength_2, specialStr_2);
       var maxRowsBak = oracledb.maxRows;
@@ -6511,15 +6867,15 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.10.14
+    }); // 82.10.14
 
-    it('80.10.15 works with setting oracledb.maxRows > actual number of rows in the table', function(done) {
+    it('82.10.15 works with setting oracledb.maxRows > actual number of rows in the table', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '80.10.15_1';
+      var specialStr_1 = '82.10.15_1';
       var contentLength_1 = 200;
       var content_1 = getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
-      var specialStr_2 = '80.10.15_2';
+      var specialStr_2 = '82.10.15_2';
       var contentLength_2 = 100;
       var content_2 = getRandomString(contentLength_2, specialStr_2);
       var maxRowsBak = oracledb.maxRows;
@@ -6564,11 +6920,11 @@ describe('80. fetchClobAsString.js', function() {
           );
         }
       ], done);
-    }); // 80.10.15
+    }); // 82.10.15
 
-  }); // 80.10
+  }); // 82.10
 
-  describe('80.11 fetch multiple CLOBs', function() {
+  describe('82.11 fetch multiple CLOBs', function() {
     before('create Table and populate', function(done) {
       connection.execute(
         proc_create_table2,
@@ -6600,12 +6956,12 @@ describe('80. fetchClobAsString.js', function() {
       done();
     }); // afterEach
 
-    it('80.11.1 fetch multiple CLOB columns as String', function(done) {
+    it('82.11.1 fetch multiple CLOB columns as String', function(done) {
       var id = 1;
-      var specialStr_1 = '80.11.1_1';
+      var specialStr_1 = '82.11.1_1';
       var contentLength_1 = 26;
       var content_1 = getRandomString(contentLength_1, specialStr_1);
-      var specialStr_2 = '80.11.1_2';
+      var specialStr_2 = '82.11.1_2';
       var contentLength_2 = 100;
       var content_2 = getRandomString(contentLength_2, specialStr_2);
 
@@ -6635,14 +6991,14 @@ describe('80. fetchClobAsString.js', function() {
         }
       ], done);
 
-    }); // 80.11.1
+    }); // 82.11.1
 
-    it('80.11.2 fetch two CLOB columns, one as string, another streamed', function(done) {
+    it('82.11.2 fetch two CLOB columns, one as string, another streamed', function(done) {
       var id = 2;
-      var specialStr_1 = '80.11.2_1';
+      var specialStr_1 = '82.11.2_1';
       var contentLength_1 = 30;
       var content_1 = getRandomString(contentLength_1, specialStr_1);
-      var specialStr_2 = '80.11.2_2';
+      var specialStr_2 = '82.11.2_2';
       var contentLength_2 = 50;
       var content_2 = getRandomString(contentLength_2, specialStr_2);
 
@@ -6704,18 +7060,18 @@ describe('80. fetchClobAsString.js', function() {
         }
       ], done);
 
-    }); // 80.11.2
+    }); // 82.11.2
 
-  }); // 80.11
+  }); // 82.11
 
-  describe('80.12 types support for fetchAsString property', function() {
+  describe('82.12 types support for fetchAsString property', function() {
 
     afterEach ('clear the by-type specification', function ( done ) {
       oracledb.fetchAsString = [];
       done ();
     });
 
-    it('80.12.1 String not supported in fetchAsString', function(done) {
+    it('82.12.1 String not supported in fetchAsString', function(done) {
       try {
         oracledb.fetchAsString = [ oracledb.STRING ];
       } catch(err) {
@@ -6724,9 +7080,9 @@ describe('80. fetchClobAsString.js', function() {
         (err.message).should.startWith ('NJS-021');
       }
       done();
-    }); // 80.12.1
+    }); // 82.12.1
 
-    it('80.12.2 BLOB not supported in fetchAsString', function(done) {
+    it('82.12.2 BLOB not supported in fetchAsString', function(done) {
       try {
         oracledb.fetchAsString = [ oracledb.BLOB ];
       } catch(err) {
@@ -6735,9 +7091,9 @@ describe('80. fetchClobAsString.js', function() {
         (err.message).should.startWith ('NJS-021');
       }
       done();
-    }); // 80.12.2
+    }); // 82.12.2
 
-    it('80.12.3 Cursor not supported in fetchAsString', function(done) {
+    it('82.12.3 Cursor not supported in fetchAsString', function(done) {
       try {
         oracledb.fetchAsString = [ oracledb.CURSOR ];
       } catch(err) {
@@ -6746,9 +7102,9 @@ describe('80. fetchClobAsString.js', function() {
         (err.message).should.startWith ('NJS-021');
       }
       done();
-    }); // 80.12.3
+    }); // 82.12.3
 
-    it('80.12.4 Buffer not supported in fetchAsString', function(done) {
+    it('82.12.4 Buffer not supported in fetchAsString', function(done) {
       try {
         oracledb.fetchAsString = [ oracledb.Buffer ];
       } catch(err) {
@@ -6757,9 +7113,9 @@ describe('80. fetchClobAsString.js', function() {
         (err.message).should.startWith ('NJS-021');
       }
       done();
-    }); // 80.12.4
+    }); // 82.12.4
 
-    it('80.12.5 Number supported in fetchAsString', function(done) {
+    it('82.12.5 Number supported in fetchAsString', function(done) {
       try {
         oracledb.fetchAsString = [ oracledb.NUMBER ];
       } catch(err) {
@@ -6768,9 +7124,9 @@ describe('80. fetchClobAsString.js', function() {
       should.strictEqual(oracledb.fetchAsString.length, 1);
       should.strictEqual(oracledb.fetchAsString[0], oracledb.NUMBER);
       done();
-    }); // 80.12.5
+    }); // 82.12.5
 
-    it('80.12.6 Date supported in fetchAsString', function(done) {
+    it('82.12.6 Date supported in fetchAsString', function(done) {
       try {
         oracledb.fetchAsString = [ oracledb.DATE ];
       } catch(err) {
@@ -6779,9 +7135,9 @@ describe('80. fetchClobAsString.js', function() {
       should.strictEqual(oracledb.fetchAsString.length, 1);
       should.strictEqual(oracledb.fetchAsString[0], oracledb.DATE);
       done();
-    }); // 80.12.6
+    }); // 82.12.6
 
-    it('80.12.7 CLOB supported in fetchAsString', function(done) {
+    it('82.12.7 CLOB supported in fetchAsString', function(done) {
       try {
         oracledb.fetchAsString = [ oracledb.CLOB ];
       } catch(err) {
@@ -6790,8 +7146,8 @@ describe('80. fetchClobAsString.js', function() {
       should.strictEqual(oracledb.fetchAsString.length, 1);
       should.strictEqual(oracledb.fetchAsString[0], oracledb.CLOB);
       done();
-    }); // 80.12.7
+    }); // 82.12.7
 
-  }); // 80.12
+  }); // 82.12
 
 });

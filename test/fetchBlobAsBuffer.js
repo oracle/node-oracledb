@@ -19,7 +19,7 @@
  * See LICENSE.md for relevant licenses.
  *
  * NAME
- *   81. fetchBlobAsBuffer.js
+ *   83. fetchBlobAsBuffer.js
  *
  * DESCRIPTION
  *    Testing Oracle data type support - BLOB.
@@ -40,7 +40,7 @@ var should   = require('should');
 var fs = require('fs');
 var dbConfig = require('./dbconfig.js');
 
-describe('81. fetchBlobAsBuffer.js', function() {
+describe('83. fetchBlobAsBuffer.js', function() {
   this.timeout(100000);
   var connection = null;
   var node6plus = false;  // assume node runtime version is lower than 6
@@ -290,7 +290,7 @@ describe('81. fetchBlobAsBuffer.js', function() {
     should.strictEqual(compareBuffer, true);
   };
 
-  describe('81.1 fetch BLOB columns by setting oracledb.fetchAsBuffer', function() {
+  describe('83.1 fetch BLOB columns by setting oracledb.fetchAsBuffer', function() {
 
     before('Create table and populate', function(done) {
       connection.execute(
@@ -322,7 +322,7 @@ describe('81. fetchBlobAsBuffer.js', function() {
       done();
     }); // afterEach
 
-    it('81.1.1 works with NULL value', function(done) {
+    it('83.1.1 works with NULL value', function(done) {
       var id = getID();
       var content = null;
 
@@ -343,9 +343,9 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.1.1
+    }); // 83.1.1
 
-    it('81.1.2 works with empty Buffer', function(done) {
+    it('83.1.2 works with empty Buffer', function(done) {
       var id = getID();
       var content = node6plus ? Buffer.from("", "utf-8") : new Buffer("", "utf-8");
 
@@ -366,11 +366,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.1.2
+    }); // 83.1.2
 
-    it('81.1.3 works with small value', function(done) {
+    it('83.1.3 works with small value', function(done) {
       var id = getID();
-      var specialStr = '81.1.3';
+      var specialStr = '83.1.3';
       var contentLength = 20;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -394,11 +394,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.1.3
+    }); // 83.1.3
 
-    it('81.1.4 works with (64K - 1) value', function(done) {
+    it('83.1.4 works with (64K - 1) value', function(done) {
       var id = getID();
-      var specialStr = '81.1.4';
+      var specialStr = '83.1.4';
       var contentLength = 65535;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -420,11 +420,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.1.4
+    }); // 83.1.4
 
-    it('81.1.5 works with (64K + 1) value', function(done) {
+    it('83.1.5 works with (64K + 1) value', function(done) {
       var id = getID();
-      var specialStr = '81.1.5';
+      var specialStr = '83.1.5';
       var contentLength = 65537;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -445,11 +445,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.1.5
+    }); // 83.1.5
 
-    it('81.1.6 works with (1MB + 1) data', function(done) {
+    it('83.1.6 works with (1MB + 1) data', function(done) {
       var id = getID();
-      var specialStr = '81.1.6';
+      var specialStr = '83.1.6';
       var contentLength = 1048577; // 1MB + 1
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -470,11 +470,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.1.6
+    }); // 83.1.6
 
-    it('81.1.7 works with (5MB + 1) data', function(done) {
+    it('83.1.7 works with (5MB + 1) data', function(done) {
       var id = getID();
-      var specialStr = '81.1.7';
+      var specialStr = '83.1.7';
       var contentLength = 5242881; // 5MB + 1
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -495,11 +495,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.1.7
+    }); // 83.1.7
 
-    it('81.1.8 works with (10MB + 1) data', function(done) {
+    it('83.1.8 works with (10MB + 1) data', function(done) {
       var id = getID();
-      var specialStr = '81.1.8';
+      var specialStr = '83.1.8';
       var contentLength = 10485761; // 10MB + 1
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -520,11 +520,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.1.8
+    }); // 83.1.8
 
-    it('81.1.9 works with dbms_lob.substr()', function(done) {
+    it('83.1.9 works with dbms_lob.substr()', function(done) {
       var id = getID();
-      var specialStr = '81.1.9';
+      var specialStr = '83.1.9';
       var contentLength = 200;
       var specialStrLength = specialStr.length;
       var strBuf = getRandomString(contentLength, specialStr);
@@ -548,9 +548,9 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.1.9
+    }); // 83.1.9
 
-    it('81.1.10 works with EMPTY_BLOB()', function(done) {
+    it('83.1.10 works with EMPTY_BLOB()', function(done) {
       var id = getID();
       var content = "EMPTY_BLOB";
 
@@ -570,16 +570,16 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.1.10
+    }); // 83.1.10
 
-    it('81.1.11 fetch multiple BLOB rows as Buffer', function(done) {
+    it('83.1.11 fetch multiple BLOB rows as Buffer', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '81.1.11_1';
+      var specialStr_1 = '83.1.11_1';
       var contentLength_1 = 200;
       var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
-      var specialStr_2 = '81.1.11_2';
+      var specialStr_2 = '83.1.11_2';
       var contentLength_2 = 100;
       var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
@@ -605,11 +605,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.1.11
+    }); // 83.1.11
 
-    it('81.1.12 fetch the same BLOB column multiple times', function(done) {
+    it('83.1.12 fetch the same BLOB column multiple times', function(done) {
       var id = getID();
-      var specialStr = '81.1.12';
+      var specialStr = '83.1.12';
       var contentLength = 200;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -632,15 +632,15 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.1.12
+    }); // 83.1.12
 
-    it('81.1.13 works with update statement', function(done) {
+    it('83.1.13 works with update statement', function(done) {
       var id = getID();
-      var specialStr_1 = '81.1.13_1';
+      var specialStr_1 = '83.1.13_1';
       var contentLength_1 = 208;
       var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
-      var specialStr_2 = '81.1.13_2';
+      var specialStr_2 = '83.1.13_2';
       var contentLength_2 = 200;
       var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
@@ -675,11 +675,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.1.13
+    }); // 83.1.13
 
-    it('81.1.14 works with REF CURSOR', function(done) {
+    it('83.1.14 works with REF CURSOR', function(done) {
       var id = getID();
-      var specialStr = '81.1.14';
+      var specialStr = '83.1.14';
       var contentLength = 100;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -731,11 +731,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.1.14
+    }); // 83.1.14
 
-    it('81.1.15 fetch BLOB with stream', function(done) {
+    it('83.1.15 fetch BLOB with stream', function(done) {
       var id = getID();
-      var specialStr = '81.1.15';
+      var specialStr = '83.1.15';
       var contentLength = 200;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -772,16 +772,16 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.1.15
+    }); // 83.1.15
 
-    it('81.1.16 works with setting oracledb.maxRows < actual number of rows in the table', function(done) {
+    it('83.1.16 works with setting oracledb.maxRows < actual number of rows in the table', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '81.1.16_1';
+      var specialStr_1 = '83.1.16_1';
       var contentLength_1 = 200;
       var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
-      var specialStr_2 = '81.1.16_2';
+      var specialStr_2 = '83.1.16_2';
       var contentLength_2 = 100;
       var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
@@ -809,16 +809,16 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.1.16
+    }); // 83.1.16
 
-    it('81.1.17 works with setting oracledb.maxRows > actual number of rows in the table', function(done) {
+    it('83.1.17 works with setting oracledb.maxRows > actual number of rows in the table', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '81.1.17_1';
+      var specialStr_1 = '83.1.17_1';
       var contentLength_1 = 200;
       var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
-      var specialStr_2 = '81.1.17_2';
+      var specialStr_2 = '83.1.17_2';
       var contentLength_2 = 100;
       var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
@@ -848,11 +848,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.1.17
+    }); // 83.1.17
 
-    it('81.1.18 override oracledb.fetchAsBuffer with fetchInfo set to oracledb.DEFAULT', function(done) {
+    it('83.1.18 override oracledb.fetchAsBuffer with fetchInfo set to oracledb.DEFAULT', function(done) {
       var id = getID();
-      var specialStr = '81.1.18';
+      var specialStr = '83.1.18';
       var contentLength = 20;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -892,11 +892,192 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.1.18
+    }); // 83.1.18
 
-  }); // 81.1
+    it('83.1.19 works with connection.queryStream()', function(done) {
+      var id = getID();
+      var specialStr = '83.1.19';
+      var contentLength = 200;
+      var strBuf = getRandomString(contentLength, specialStr);
+      var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
-  describe('81.2 fetch BLOB columns by setting oracledb.fetchAsBuffer and outFormat = oracledb.OBJECT', function() {
+      async.series([
+        function(cb) {
+          insertIntoBlobTable1(id, content, cb, false);
+        },
+        function(cb) {
+          var sql = "SELECT ID, B from nodb_blob1 WHERE ID = " + id;
+          var stream = connection.queryStream(sql);
+          stream.on('error', function (error) {
+            should.fail(error, null, 'Error event should not be triggered');
+          });
+
+          var counter = 0;
+          stream.on('data', function(data) {
+            should.exist(data);
+            var result = data[1];
+            compareBuffers(result, specialStr, content, contentLength);
+            counter++;
+          });
+
+          stream.on('end', function () {
+            should.equal(counter, 1);
+            setTimeout(cb, 500);
+          });
+        }
+      ], done);
+    }); // 83.1.19
+
+    it('83.1.20 works with connection.queryStream() and oracledb.maxRows > actual number of rows in the table', function(done) {
+      var id_1 = getID();
+      var specialStr_1 = '83.1.20_1';
+      var contentLength_1 = 26;
+      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
+      var id_2 = getID();
+      var specialStr_2 = '83.1.20_2';
+      var contentLength_2 = 30;
+      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
+      var maxRowsBak = oracledb.maxRows;
+      oracledb.maxRows = 20;
+
+      async.series([
+        function(cb) {
+          insertIntoBlobTable1(id_1, content_1, cb, false);
+        },
+        function(cb) {
+          insertIntoBlobTable1(id_2, content_2, cb, false);
+        },
+        function(cb) {
+          var sql = "SELECT ID, B from nodb_blob1 WHERE ID = " + id_1 + " or id = " +id_2;
+          var stream = connection.queryStream(sql);
+          stream.on('error', function (error) {
+            should.fail(error, null, 'Error event should not be triggered');
+          });
+
+          var counter = 0;
+          stream.on('data', function(data) {
+            should.exist(data);
+            var result = data[1];
+            counter++;
+            if(counter == 1) {
+              compareBuffers(result, specialStr_1, content_1, contentLength_1);
+            } else {
+              compareBuffers(result, specialStr_2, content_2, contentLength_2);
+            }
+          });
+
+          stream.on('end', function () {
+            should.equal(counter, 2);
+            oracledb.maxRows = maxRowsBak;
+            setTimeout(cb, 500);
+          });
+        }
+      ], done);
+    }); // 83.1.20
+
+    it('83.1.21 works with connection.queryStream() and oracledb.maxRows = actual number of rows in the table', function(done) {
+      var id_1 = getID();
+      var specialStr_1 = '83.1.21_1';
+      var contentLength_1 = 26;
+      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
+      var id_2 = getID();
+      var specialStr_2 = '83.1.21_2';
+      var contentLength_2 = 30;
+      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
+      var maxRowsBak = oracledb.maxRows;
+      oracledb.maxRows = 2;
+
+      async.series([
+        function(cb) {
+          insertIntoBlobTable1(id_1, content_1, cb, false);
+        },
+        function(cb) {
+          insertIntoBlobTable1(id_2, content_2, cb, false);
+        },
+        function(cb) {
+          var sql = "SELECT ID, B from nodb_blob1 WHERE ID = " + id_1 + " or id = " +id_2;
+          var stream = connection.queryStream(sql);
+          stream.on('error', function (error) {
+            should.fail(error, null, 'Error event should not be triggered');
+          });
+
+          var counter = 0;
+          stream.on('data', function(data) {
+            should.exist(data);
+            var result = data[1];
+            counter++;
+            if(counter == 1) {
+              compareBuffers(result, specialStr_1, content_1, contentLength_1);
+            } else {
+              compareBuffers(result, specialStr_2, content_2, contentLength_2);
+            }
+          });
+
+          stream.on('end', function () {
+            should.equal(counter, 2);
+            oracledb.maxRows = maxRowsBak;
+            setTimeout(cb, 500);
+          });
+        }
+      ], done);
+    }); // 83.1.21
+
+    it.skip('83.1.22 works with connection.queryStream() and oracledb.maxRows < actual number of rows in the table', function(done) {
+      var id_1 = getID();
+      var specialStr_1 = '83.1.22_1';
+      var contentLength_1 = 26;
+      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
+      var id_2 = getID();
+      var specialStr_2 = '83.1.21_2';
+      var contentLength_2 = 30;
+      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
+      var maxRowsBak = oracledb.maxRows;
+      oracledb.maxRows = 1;
+
+      async.series([
+        function(cb) {
+          insertIntoBlobTable1(id_1, content_1, cb, false);
+        },
+        function(cb) {
+          insertIntoBlobTable1(id_2, content_2, cb, false);
+        },
+        function(cb) {
+          var sql = "SELECT ID, B from nodb_blob1 WHERE ID = " + id_1 + " or id = " +id_2;
+          var stream = connection.queryStream(sql);
+          stream.on('error', function (error) {
+            should.fail(error, null, 'Error event should not be triggered');
+          });
+
+          var counter = 0;
+          stream.on('data', function(data) {
+            should.exist(data);
+            var result = data[1];
+            counter++;
+            if(counter == 1) {
+              compareBuffers(result, specialStr_1, content_1, contentLength_1);
+            } else {
+              compareBuffers(result, specialStr_2, content_2, contentLength_2);
+            }
+          });
+
+          stream.on('end', function () {
+            should.equal(counter, 2);
+            oracledb.maxRows = maxRowsBak;
+            setTimeout(cb, 500);
+          });
+        }
+      ], done);
+    }); // 83.1.22
+
+  }); // 83.1
+
+  describe('83.2 fetch BLOB columns by setting oracledb.fetchAsBuffer and outFormat = oracledb.OBJECT', function() {
 
     before('Create table and populate', function(done) {
       connection.execute(
@@ -928,7 +1109,7 @@ describe('81. fetchBlobAsBuffer.js', function() {
       done();
     }); // afterEach
 
-    it('81.2.1 works with NULL value', function(done) {
+    it('83.2.1 works with NULL value', function(done) {
       var id = getID();
       var content = null;
 
@@ -950,9 +1131,9 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.2.1
+    }); // 83.2.1
 
-    it('81.2.2 works with empty Buffer', function(done) {
+    it('83.2.2 works with empty Buffer', function(done) {
       var id = getID();
       var content = node6plus ? Buffer.from("", "utf-8") : new Buffer("", "utf-8");
 
@@ -974,11 +1155,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.2.2
+    }); // 83.2.2
 
-    it('81.2.3 works with small value', function(done) {
+    it('83.2.3 works with small value', function(done) {
       var id = getID();
-      var specialStr = '81.2.3';
+      var specialStr = '83.2.3';
       var contentLength = 20;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -1001,11 +1182,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.2.3
+    }); // 83.2.3
 
-    it('81.2.4 works with (64K - 1) value', function(done) {
+    it('83.2.4 works with (64K - 1) value', function(done) {
       var id = getID();
-      var specialStr = '81.2.4';
+      var specialStr = '83.2.4';
       var contentLength = 65535;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -1028,11 +1209,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.2.4
+    }); // 83.2.4
 
-    it('81.2.5 works with (64K + 1) value', function(done) {
+    it('83.2.5 works with (64K + 1) value', function(done) {
       var id = getID();
-      var specialStr = '81.2.5';
+      var specialStr = '83.2.5';
       var contentLength = 65537;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -1054,11 +1235,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.2.5
+    }); // 83.2.5
 
-    it('81.2.6 works with (1MB + 1) data', function(done) {
+    it('83.2.6 works with (1MB + 1) data', function(done) {
       var id = getID();
-      var specialStr = '81.2.6';
+      var specialStr = '83.2.6';
       var contentLength = 1048577; // 1MB + 1
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -1080,11 +1261,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.2.6
+    }); // 83.2.6
 
-    it('81.2.7 works with (5MB + 1) data', function(done) {
+    it('83.2.7 works with (5MB + 1) data', function(done) {
       var id = getID();
-      var specialStr = '81.2.7';
+      var specialStr = '83.2.7';
       var contentLength = 5242881; // 5MB + 1
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -1106,11 +1287,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.2.7
+    }); // 83.2.7
 
-    it('81.2.8 works with (10MB + 1) data', function(done) {
+    it('83.2.8 works with (10MB + 1) data', function(done) {
       var id = getID();
-      var specialStr = '81.2.8';
+      var specialStr = '83.2.8';
       var contentLength = 10485761; // 10MB + 1
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -1132,11 +1313,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.2.8
+    }); // 83.2.8
 
-    it('81.2.9 works with dbms_lob.substr()', function(done) {
+    it('83.2.9 works with dbms_lob.substr()', function(done) {
       var id = getID();
-      var specialStr = '81.2.9';
+      var specialStr = '83.2.9';
       var contentLength = 200;
       var specialStrLength = specialStr.length;
       var strBuf = getRandomString(contentLength, specialStr);
@@ -1161,9 +1342,9 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.2.9
+    }); // 83.2.9
 
-    it('81.2.10 works with EMPTY_BLOB()', function(done) {
+    it('83.2.10 works with EMPTY_BLOB()', function(done) {
       var id = getID();
       var content = "EMPTY_BLOB";
 
@@ -1184,16 +1365,16 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.2.10
+    }); // 83.2.10
 
-    it('81.2.11 fetch multiple BLOB rows as Buffer', function(done) {
+    it('83.2.11 fetch multiple BLOB rows as Buffer', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '81.2.11_1';
+      var specialStr_1 = '83.2.11_1';
       var contentLength_1 = 200;
       var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
-      var specialStr_2 = '81.2.11_2';
+      var specialStr_2 = '83.2.11_2';
       var contentLength_2 = 100;
       var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
@@ -1221,11 +1402,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.2.11
+    }); // 83.2.11
 
-    it('81.2.12 fetch the same BLOB column multiple times', function(done) {
+    it('83.2.12 fetch the same BLOB column multiple times', function(done) {
       var id = getID();
-      var specialStr = '81.2.12';
+      var specialStr = '83.2.12';
       var contentLength = 200;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -1250,15 +1431,15 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.2.12
+    }); // 83.2.12
 
-    it('81.2.13 works with update statement', function(done) {
+    it('83.2.13 works with update statement', function(done) {
       var id = getID();
-      var specialStr_1 = '81.2.13_1';
+      var specialStr_1 = '83.2.13_1';
       var contentLength_1 = 201;
       var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
-      var specialStr_2 = '81.2.13_2';
+      var specialStr_2 = '83.2.13_2';
       var contentLength_2 = 208;
       var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
@@ -1297,11 +1478,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.2.13
+    }); // 83.2.13
 
-    it('81.2.14 works with REF CURSOR', function(done) {
+    it('83.2.14 works with REF CURSOR', function(done) {
       var id = getID();
-      var specialStr = '81.2.14';
+      var specialStr = '83.2.14';
       var contentLength = 100;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -1353,11 +1534,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.2.14
+    }); // 83.2.14
 
-    it('81.2.15 fetch BLOB with stream', function(done) {
+    it('83.2.15 fetch BLOB with stream', function(done) {
       var id = getID();
-      var specialStr = '81.2.15';
+      var specialStr = '83.2.15';
       var contentLength = 200;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -1394,16 +1575,16 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.2.15
+    }); // 83.2.15
 
-    it('81.2.16 works with setting oracledb.maxRows < actual number of rows in the table', function(done) {
+    it('83.2.16 works with setting oracledb.maxRows < actual number of rows in the table', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '81.2.16_1';
+      var specialStr_1 = '83.2.16_1';
       var contentLength_1 = 200;
       var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
-      var specialStr_2 = '81.2.16_2';
+      var specialStr_2 = '83.2.16_2';
       var contentLength_2 = 100;
       var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
@@ -1433,16 +1614,16 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.2.16
+    }); // 83.2.16
 
-    it('81.2.17 works with setting oracledb.maxRows > actual number of rows in the table', function(done) {
+    it('83.2.17 works with setting oracledb.maxRows > actual number of rows in the table', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '81.2.17_1';
+      var specialStr_1 = '83.2.17_1';
       var contentLength_1 = 200;
       var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
-      var specialStr_2 = '81.2.17_2';
+      var specialStr_2 = '83.2.17_2';
       var contentLength_2 = 100;
       var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
@@ -1474,11 +1655,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.2.17
+    }); // 83.2.17
 
-    it('81.2.18 override oracledb.fetchAsBuffer with fetchInfo set to oracledb.DEFAULT', function(done) {
+    it('83.2.18 override oracledb.fetchAsBuffer with fetchInfo set to oracledb.DEFAULT', function(done) {
       var id = getID();
-      var specialStr = '81.2.18';
+      var specialStr = '83.2.18';
       var contentLength = 20;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -1518,11 +1699,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.2.18
+    }); // 83.2.18
 
-  }); // 81.2
+  }); // 83.2
 
-  describe('81.3 fetch BLOB columns by setting oracledb.fetchAsBuffer, outFormat = oracledb.OBJECT and resultSet = true', function() {
+  describe('83.3 fetch BLOB columns by setting oracledb.fetchAsBuffer, outFormat = oracledb.OBJECT and resultSet = true', function() {
 
     before('Create table and populate', function(done) {
       connection.execute(
@@ -1554,7 +1735,7 @@ describe('81. fetchBlobAsBuffer.js', function() {
       done();
     }); // afterEach
 
-    it('81.3.1 works with NULL value', function(done) {
+    it('83.3.1 works with NULL value', function(done) {
       var id = getID();
       var content = null;
 
@@ -1587,9 +1768,9 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.3.1
+    }); // 83.3.1
 
-    it('81.3.2 works with empty Buffer', function(done) {
+    it('83.3.2 works with empty Buffer', function(done) {
       var id = getID();
       var content = node6plus ? Buffer.from("", "utf-8") : new Buffer("", "utf-8");
 
@@ -1622,11 +1803,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.3.2
+    }); // 83.3.2
 
-    it('81.3.3 works with small value', function(done) {
+    it('83.3.3 works with small value', function(done) {
       var id = getID();
-      var specialStr = '81.3.3';
+      var specialStr = '83.3.3';
       var contentLength = 20;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -1660,11 +1841,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.3.3
+    }); // 83.3.3
 
-    it('81.3.4 works with (64K - 1) value', function(done) {
+    it('83.3.4 works with (64K - 1) value', function(done) {
       var id = getID();
-      var specialStr = '81.3.4';
+      var specialStr = '83.3.4';
       var contentLength = 65535;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -1698,11 +1879,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.3.4
+    }); // 83.3.4
 
-    it('81.3.5 works with (64K + 1) value', function(done) {
+    it('83.3.5 works with (64K + 1) value', function(done) {
       var id = getID();
-      var specialStr = '81.3.5';
+      var specialStr = '83.3.5';
       var contentLength = 65537;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -1735,11 +1916,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.3.5
+    }); // 83.3.5
 
-    it('81.3.6 works with (1MB + 1) data', function(done) {
+    it('83.3.6 works with (1MB + 1) data', function(done) {
       var id = getID();
-      var specialStr = '81.3.6';
+      var specialStr = '83.3.6';
       var contentLength = 1048577; // 1MB + 1
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -1772,11 +1953,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.3.6
+    }); // 83.3.6
 
-    it('81.3.7 works with (5MB + 1) data', function(done) {
+    it('83.3.7 works with (5MB + 1) data', function(done) {
       var id = getID();
-      var specialStr = '81.3.7';
+      var specialStr = '83.3.7';
       var contentLength = 5242881; // 5MB + 1
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -1809,11 +1990,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.3.7
+    }); // 83.3.7
 
-    it('81.3.8 works with (10MB + 1) data', function(done) {
+    it('83.3.8 works with (10MB + 1) data', function(done) {
       var id = getID();
-      var specialStr = '81.3.8';
+      var specialStr = '83.3.8';
       var contentLength = 10485761; // 10MB + 1
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -1846,11 +2027,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.3.8
+    }); // 83.3.8
 
-    it('81.3.9 works with dbms_lob.substr()', function(done) {
+    it('83.3.9 works with dbms_lob.substr()', function(done) {
       var id = getID();
-      var specialStr = '81.3.9';
+      var specialStr = '83.3.9';
       var contentLength = 200;
       var specialStrLength = specialStr.length;
       var strBuf = getRandomString(contentLength, specialStr);
@@ -1886,9 +2067,9 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.3.9
+    }); // 83.3.9
 
-    it('81.3.10 works with EMPTY_BLOB()', function(done) {
+    it('83.3.10 works with EMPTY_BLOB()', function(done) {
       var id = getID();
       var content = "EMPTY_BLOB";
 
@@ -1921,16 +2102,16 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.3.10
+    }); // 83.3.10
 
-    it('81.3.11 fetch multiple BLOB rows as Buffer', function(done) {
+    it('83.3.11 fetch multiple BLOB rows as Buffer', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '81.3.11_1';
+      var specialStr_1 = '83.3.11_1';
       var contentLength_1 = 200;
       var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
-      var specialStr_2 = '81.3.11_2';
+      var specialStr_2 = '83.3.11_2';
       var contentLength_2 = 100;
       var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
@@ -1971,11 +2152,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.3.11
+    }); // 83.3.11
 
-    it('81.3.12 fetch the same BLOB column multiple times', function(done) {
+    it('83.3.12 fetch the same BLOB column multiple times', function(done) {
       var id = getID();
-      var specialStr = '81.3.12';
+      var specialStr = '83.3.12';
       var contentLength = 200;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -2011,15 +2192,15 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.3.12
+    }); // 83.3.12
 
-    it('81.3.13 works with update statement', function(done) {
+    it('83.3.13 works with update statement', function(done) {
       var id = getID();
-      var specialStr_1 = '81.3.13_1';
+      var specialStr_1 = '83.3.13_1';
       var contentLength_1 = 200;
       var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
-      var specialStr_2 = '81.3.13_2';
+      var specialStr_2 = '83.3.13_2';
       var contentLength_2 = 208;
       var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
@@ -2080,11 +2261,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.3.13
+    }); // 83.3.13
 
-    it('81.3.14 works with REF CURSOR', function(done) {
+    it('83.3.14 works with REF CURSOR', function(done) {
       var id = getID();
-      var specialStr = '81.3.14';
+      var specialStr = '83.3.14';
       var contentLength = 100;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -2136,11 +2317,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.3.14
+    }); // 83.3.14
 
-    it('81.3.15 fetch BLOB with stream', function(done) {
+    it('83.3.15 fetch BLOB with stream', function(done) {
       var id = getID();
-      var specialStr = '81.3.15';
+      var specialStr = '83.3.15';
       var contentLength = 200;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -2177,16 +2358,16 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.3.15
+    }); // 83.3.15
 
-    it('81.3.16 works with setting oracledb.maxRows < actual number of rows in the table', function(done) {
+    it('83.3.16 works with setting oracledb.maxRows < actual number of rows in the table', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '81.3.16_1';
+      var specialStr_1 = '83.3.16_1';
       var contentLength_1 = 200;
       var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
-      var specialStr_2 = '81.3.16_2';
+      var specialStr_2 = '83.3.16_2';
       var contentLength_2 = 100;
       var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
@@ -2231,16 +2412,16 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.3.16
+    }); // 83.3.16
 
-    it('81.3.17 works with setting oracledb.maxRows > actual number of rows in the table', function(done) {
+    it('83.3.17 works with setting oracledb.maxRows > actual number of rows in the table', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '81.3.17_1';
+      var specialStr_1 = '83.3.17_1';
       var contentLength_1 = 200;
       var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
-      var specialStr_2 = '81.3.17_2';
+      var specialStr_2 = '83.3.17_2';
       var contentLength_2 = 100;
       var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
@@ -2285,11 +2466,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.3.17
+    }); // 83.3.17
 
-    it('81.3.18 override oracledb.fetchAsBuffer with fetchInfo set to oracledb.DEFAULT', function(done) {
+    it('83.3.18 override oracledb.fetchAsBuffer with fetchInfo set to oracledb.DEFAULT', function(done) {
       var id = getID();
-      var specialStr = '81.3.18';
+      var specialStr = '83.3.18';
       var contentLength = 20;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -2329,11 +2510,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.3.18
+    }); // 83.3.18
 
-  }); // 81.3
+  }); // 83.3
 
-  describe('81.4 fetch BLOB columns by setting oracledb.fetchAsBuffer and outFormat = oracledb.ARRAY', function() {
+  describe('83.4 fetch BLOB columns by setting oracledb.fetchAsBuffer and outFormat = oracledb.ARRAY', function() {
 
     before('Create table and populate', function(done) {
       connection.execute(
@@ -2365,7 +2546,7 @@ describe('81. fetchBlobAsBuffer.js', function() {
       done();
     }); // afterEach
 
-    it('81.4.1 works with NULL value', function(done) {
+    it('83.4.1 works with NULL value', function(done) {
       var id = getID();
       var content = null;
 
@@ -2387,9 +2568,9 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.4.1
+    }); // 83.4.1
 
-    it('81.4.2 works with empty Buffer', function(done) {
+    it('83.4.2 works with empty Buffer', function(done) {
       var id = getID();
       var content = node6plus ? Buffer.from("", "utf-8") : new Buffer("", "utf-8");
 
@@ -2411,11 +2592,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.4.2
+    }); // 83.4.2
 
-    it('81.4.3 works with small value', function(done) {
+    it('83.4.3 works with small value', function(done) {
       var id = getID();
-      var specialStr = '81.4.3';
+      var specialStr = '83.4.3';
       var contentLength = 20;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -2438,11 +2619,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.4.3
+    }); // 83.4.3
 
-    it('81.4.4 works with (64K - 1) value', function(done) {
+    it('83.4.4 works with (64K - 1) value', function(done) {
       var id = getID();
-      var specialStr = '81.4.4';
+      var specialStr = '83.4.4';
       var contentLength = 65535;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -2465,11 +2646,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.4.4
+    }); // 83.4.4
 
-    it('81.4.5 works with (64K + 1) value', function(done) {
+    it('83.4.5 works with (64K + 1) value', function(done) {
       var id = getID();
-      var specialStr = '81.4.5';
+      var specialStr = '83.4.5';
       var contentLength = 65537;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -2491,11 +2672,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.4.5
+    }); // 83.4.5
 
-    it('81.4.6 works with (1MB + 1) data', function(done) {
+    it('83.4.6 works with (1MB + 1) data', function(done) {
       var id = getID();
-      var specialStr = '81.4.6';
+      var specialStr = '83.4.6';
       var contentLength = 1048577; // 1MB + 1
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -2517,11 +2698,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.4.6
+    }); // 83.4.6
 
-    it('81.4.7 works with (5MB + 1) data', function(done) {
+    it('83.4.7 works with (5MB + 1) data', function(done) {
       var id = getID();
-      var specialStr = '81.4.7';
+      var specialStr = '83.4.7';
       var contentLength = 5242881; // 5MB + 1
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -2543,11 +2724,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.4.7
+    }); // 83.4.7
 
-    it('81.4.8 works with (10MB + 1) data', function(done) {
+    it('83.4.8 works with (10MB + 1) data', function(done) {
       var id = getID();
-      var specialStr = '81.4.8';
+      var specialStr = '83.4.8';
       var contentLength = 10485761; // 10MB + 1
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -2569,11 +2750,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.4.8
+    }); // 83.4.8
 
-    it('81.4.9 works with dbms_lob.substr()', function(done) {
+    it('83.4.9 works with dbms_lob.substr()', function(done) {
       var id = getID();
-      var specialStr = '81.4.9';
+      var specialStr = '83.4.9';
       var contentLength = 200;
       var specialStrLength = specialStr.length;
       var strBuf = getRandomString(contentLength, specialStr);
@@ -2598,9 +2779,9 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.4.9
+    }); // 83.4.9
 
-    it('81.4.10 works with EMPTY_BLOB()', function(done) {
+    it('83.4.10 works with EMPTY_BLOB()', function(done) {
       var id = getID();
       var content = "EMPTY_BLOB";
 
@@ -2621,16 +2802,16 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.4.10
+    }); // 83.4.10
 
-    it('81.4.11 fetch multiple BLOB rows as Buffer', function(done) {
+    it('83.4.11 fetch multiple BLOB rows as Buffer', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '81.4.11_1';
+      var specialStr_1 = '83.4.11_1';
       var contentLength_1 = 200;
       var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
-      var specialStr_2 = '81.4.11_2';
+      var specialStr_2 = '83.4.11_2';
       var contentLength_2 = 100;
       var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
@@ -2658,11 +2839,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.4.11
+    }); // 83.4.11
 
-    it('81.4.12 fetch the same BLOB column multiple times', function(done) {
+    it('83.4.12 fetch the same BLOB column multiple times', function(done) {
       var id = getID();
-      var specialStr = '81.4.12';
+      var specialStr = '83.4.12';
       var contentLength = 200;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -2687,15 +2868,15 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.4.12
+    }); // 83.4.12
 
-    it('81.4.13 works with update statement', function(done) {
+    it('83.4.13 works with update statement', function(done) {
       var id = getID();
-      var specialStr_1 = '81.4.13_1';
+      var specialStr_1 = '83.4.13_1';
       var contentLength_1 = 200;
       var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
-      var specialStr_2 = '81.4.13_2';
+      var specialStr_2 = '83.4.13_2';
       var contentLength_2 = 208;
       var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
@@ -2734,11 +2915,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.4.13
+    }); // 83.4.13
 
-    it('81.4.14 works with REF CURSOR', function(done) {
+    it('83.4.14 works with REF CURSOR', function(done) {
       var id = getID();
-      var specialStr = '81.4.14';
+      var specialStr = '83.4.14';
       var contentLength = 100;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -2790,11 +2971,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.4.14
+    }); // 83.4.14
 
-    it('81.4.15 fetch BLOB with stream', function(done) {
+    it('83.4.15 fetch BLOB with stream', function(done) {
       var id = getID();
-      var specialStr = '81.4.15';
+      var specialStr = '83.4.15';
       var contentLength = 200;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -2831,16 +3012,16 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.4.15
+    }); // 83.4.15
 
-    it('81.4.16 works with setting oracledb.maxRows < actual number of rows in the table', function(done) {
+    it('83.4.16 works with setting oracledb.maxRows < actual number of rows in the table', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '81.4.16_1';
+      var specialStr_1 = '83.4.16_1';
       var contentLength_1 = 200;
       var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
-      var specialStr_2 = '81.4.16_2';
+      var specialStr_2 = '83.4.16_2';
       var contentLength_2 = 100;
       var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
@@ -2870,16 +3051,16 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.4.16
+    }); // 83.4.16
 
-    it('81.4.17 works with setting oracledb.maxRows < actual number of rows in the table', function(done) {
+    it('83.4.17 works with setting oracledb.maxRows < actual number of rows in the table', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '81.4.17_1';
+      var specialStr_1 = '83.4.17_1';
       var contentLength_1 = 200;
       var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
-      var specialStr_2 = '81.4.17_2';
+      var specialStr_2 = '83.4.17_2';
       var contentLength_2 = 100;
       var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
@@ -2911,11 +3092,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.4.17
+    }); // 83.4.17
 
-    it('81.4.18 override oracledb.fetchAsBuffer with fetchInfo set to oracledb.DEFAULT', function(done) {
+    it('83.4.18 override oracledb.fetchAsBuffer with fetchInfo set to oracledb.DEFAULT', function(done) {
       var id = getID();
-      var specialStr = '81.4.18';
+      var specialStr = '83.4.18';
       var contentLength = 20;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -2955,11 +3136,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.4.18
+    }); // 83.4.18
 
-  }); // 81.4
+  }); // 83.4
 
-  describe('81.5 fetch BLOB columns by setting oracledb.fetchAsBuffer, outFormat = oracledb.ARRAY and resultSet = true', function() {
+  describe('83.5 fetch BLOB columns by setting oracledb.fetchAsBuffer, outFormat = oracledb.ARRAY and resultSet = true', function() {
 
     before('Create table and populate', function(done) {
       connection.execute(
@@ -2991,7 +3172,7 @@ describe('81. fetchBlobAsBuffer.js', function() {
       done();
     }); // afterEach
 
-    it('81.5.1 works with NULL value', function(done) {
+    it('83.5.1 works with NULL value', function(done) {
       var id = getID();
       var content = null;
 
@@ -3024,9 +3205,9 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.5.1
+    }); // 83.5.1
 
-    it('81.5.2 works with empty Buffer', function(done) {
+    it('83.5.2 works with empty Buffer', function(done) {
       var id = getID();
       var content = node6plus ? Buffer.from("", "utf-8") : new Buffer("", "utf-8");
 
@@ -3059,11 +3240,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.5.2
+    }); // 83.5.2
 
-    it('81.5.3 works with small value', function(done) {
+    it('83.5.3 works with small value', function(done) {
       var id = getID();
-      var specialStr = '81.5.3';
+      var specialStr = '83.5.3';
       var contentLength = 20;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -3097,11 +3278,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.5.3
+    }); // 83.5.3
 
-    it('81.5.4 works with (64K - 1) value', function(done) {
+    it('83.5.4 works with (64K - 1) value', function(done) {
       var id = getID();
-      var specialStr = '81.5.4';
+      var specialStr = '83.5.4';
       var contentLength = 65535;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -3135,11 +3316,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.5.4
+    }); // 83.5.4
 
-    it('81.5.5 works with (64K + 1) value', function(done) {
+    it('83.5.5 works with (64K + 1) value', function(done) {
       var id = getID();
-      var specialStr = '81.5.5';
+      var specialStr = '83.5.5';
       var contentLength = 65537;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -3172,11 +3353,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.5.5
+    }); // 83.5.5
 
-    it('81.5.6 works with (1MB + 1) data', function(done) {
+    it('83.5.6 works with (1MB + 1) data', function(done) {
       var id = getID();
-      var specialStr = '81.5.6';
+      var specialStr = '83.5.6';
       var contentLength = 1048577; // 1MB + 1
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -3209,11 +3390,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.5.6
+    }); // 83.5.6
 
-    it('81.5.7 works with (5MB + 1) data', function(done) {
+    it('83.5.7 works with (5MB + 1) data', function(done) {
       var id = getID();
-      var specialStr = '81.5.7';
+      var specialStr = '83.5.7';
       var contentLength = 5242881; // 5MB + 1
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -3246,11 +3427,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.5.7
+    }); // 83.5.7
 
-    it('81.5.8 works with (10MB + 1) data', function(done) {
+    it('83.5.8 works with (10MB + 1) data', function(done) {
       var id = getID();
-      var specialStr = '81.5.8';
+      var specialStr = '83.5.8';
       var contentLength = 10485761; // 10MB + 1
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -3283,11 +3464,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.5.8
+    }); // 83.5.8
 
-    it('81.5.9 works with dbms_lob.substr()', function(done) {
+    it('83.5.9 works with dbms_lob.substr()', function(done) {
       var id = getID();
-      var specialStr = '81.5.9';
+      var specialStr = '83.5.9';
       var contentLength = 200;
       var specialStrLength = specialStr.length;
       var strBuf = getRandomString(contentLength, specialStr);
@@ -3324,9 +3505,9 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.5.9
+    }); // 83.5.9
 
-    it('81.5.10 works with EMPTY_BLOB()', function(done) {
+    it('83.5.10 works with EMPTY_BLOB()', function(done) {
       var id = getID();
       var content = "EMPTY_BLOB";
 
@@ -3359,16 +3540,16 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.5.10
+    }); // 83.5.10
 
-    it('81.5.11 fetch multiple BLOB rows as Buffer', function(done) {
+    it('83.5.11 fetch multiple BLOB rows as Buffer', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '81.5.11_1';
+      var specialStr_1 = '83.5.11_1';
       var contentLength_1 = 200;
       var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
-      var specialStr_2 = '81.5.11_2';
+      var specialStr_2 = '83.5.11_2';
       var contentLength_2 = 100;
       var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
@@ -3409,11 +3590,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.5.11
+    }); // 83.5.11
 
-    it('81.5.12 fetch the same BLOB column multiple times', function(done) {
+    it('83.5.12 fetch the same BLOB column multiple times', function(done) {
       var id = getID();
-      var specialStr = '81.5.12';
+      var specialStr = '83.5.12';
       var contentLength = 200;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -3449,15 +3630,15 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.5.12
+    }); // 83.5.12
 
-    it('81.5.13 works with update statement', function(done) {
+    it('83.5.13 works with update statement', function(done) {
       var id = getID();
-      var specialStr_1 = '81.5.13_1';
+      var specialStr_1 = '83.5.13_1';
       var contentLength_1 = 208;
       var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
-      var specialStr_2 = '81.5.13_2';
+      var specialStr_2 = '83.5.13_2';
       var contentLength_2 = 208;
       var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
@@ -3518,11 +3699,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.5.13
+    }); // 83.5.13
 
-    it('81.5.14 works with REF CURSOR', function(done) {
+    it('83.5.14 works with REF CURSOR', function(done) {
       var id = getID();
-      var specialStr = '81.5.14';
+      var specialStr = '83.5.14';
       var contentLength = 100;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -3574,11 +3755,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.5.14
+    }); // 83.5.14
 
-    it('81.5.15 fetch BLOB with stream', function(done) {
+    it('83.5.15 fetch BLOB with stream', function(done) {
       var id = getID();
-      var specialStr = '81.5.15';
+      var specialStr = '83.5.15';
       var contentLength = 200;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -3615,16 +3796,16 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.5.15
+    }); // 83.5.15
 
-    it('81.5.16 works with setting oracledb.maxRows < actual number of rows in the table', function(done) {
+    it('83.5.16 works with setting oracledb.maxRows < actual number of rows in the table', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '81.5.16_1';
+      var specialStr_1 = '83.5.16_1';
       var contentLength_1 = 200;
       var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
-      var specialStr_2 = '81.5.16_2';
+      var specialStr_2 = '83.5.16_2';
       var contentLength_2 = 100;
       var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
@@ -3669,16 +3850,16 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.5.16
+    }); // 83.5.16
 
-    it('81.5.17 works with setting oracledb.maxRows > actual number of rows in the table', function(done) {
+    it('83.5.17 works with setting oracledb.maxRows > actual number of rows in the table', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '81.5.17_1';
+      var specialStr_1 = '83.5.17_1';
       var contentLength_1 = 200;
       var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
-      var specialStr_2 = '81.5.17_2';
+      var specialStr_2 = '83.5.17_2';
       var contentLength_2 = 100;
       var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
@@ -3723,11 +3904,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.5.17
+    }); // 83.5.17
 
-    it('81.5.18 override oracledb.fetchAsBuffer with fetchInfo set to oracledb.DEFAULT', function(done) {
+    it('83.5.18 override oracledb.fetchAsBuffer with fetchInfo set to oracledb.DEFAULT', function(done) {
       var id = getID();
-      var specialStr = '81.5.18';
+      var specialStr = '83.5.18';
       var contentLength = 20;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -3767,11 +3948,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.5.18
+    }); // 83.5.18
 
-  }); // 81.5
+  }); // 83.5
 
-  describe('81.6 fetch BLOB columns by setting fetchInfo option', function() {
+  describe('83.6 fetch BLOB columns by setting fetchInfo option', function() {
 
     before('Create table and populate', function(done) {
       connection.execute(
@@ -3795,7 +3976,7 @@ describe('81. fetchBlobAsBuffer.js', function() {
 
     insertID = 0;
 
-    it('81.6.1 works with NULL value', function(done) {
+    it('83.6.1 works with NULL value', function(done) {
       var id = getID();
       var content = null;
 
@@ -3819,9 +4000,9 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.6.1
+    }); // 83.6.1
 
-    it('81.6.2 works with empty Buffer', function(done) {
+    it('83.6.2 works with empty Buffer', function(done) {
       var id = getID();
       var content = node6plus ? Buffer.from("", "utf-8") : new Buffer("", "utf-8");
 
@@ -3845,11 +4026,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.6.2
+    }); // 83.6.2
 
-    it('81.6.3 works with small value', function(done) {
+    it('83.6.3 works with small value', function(done) {
       var id = getID();
-      var specialStr = '81.6.3';
+      var specialStr = '83.6.3';
       var contentLength = 20;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -3874,11 +4055,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.6.3
+    }); // 83.6.3
 
-    it('81.6.4 works with (64K - 1) value', function(done) {
+    it('83.6.4 works with (64K - 1) value', function(done) {
       var id = getID();
-      var specialStr = '81.6.4';
+      var specialStr = '83.6.4';
       var contentLength = 65535;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -3903,11 +4084,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.6.4
+    }); // 83.6.4
 
-    it('81.6.5 works with (64K + 1) value', function(done) {
+    it('83.6.5 works with (64K + 1) value', function(done) {
       var id = getID();
-      var specialStr = '81.6.5';
+      var specialStr = '83.6.5';
       var contentLength = 65537;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -3932,11 +4113,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.6.5
+    }); // 83.6.5
 
-    it('81.6.6 works with (1MB + 1) value', function(done) {
+    it('83.6.6 works with (1MB + 1) value', function(done) {
       var id = getID();
-      var specialStr = '81.6.6';
+      var specialStr = '83.6.6';
       var contentLength = 1048577; // 1MB + 1
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -3961,11 +4142,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.6.6
+    }); // 83.6.6
 
-    it('81.6.7 works with (5MB + 1) value', function(done) {
+    it('83.6.7 works with (5MB + 1) value', function(done) {
       var id = getID();
-      var specialStr = '81.6.7';
+      var specialStr = '83.6.7';
       var contentLength = 5242881; // 5MB + 1
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -3990,11 +4171,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.6.7
+    }); // 83.6.7
 
-    it('81.6.8 works with (10MB + 1) value', function(done) {
+    it('83.6.8 works with (10MB + 1) value', function(done) {
       var id = getID();
-      var specialStr = '81.6.8';
+      var specialStr = '83.6.8';
       var contentLength = 10485761; // 10MB + 1
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -4019,11 +4200,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.6.8
+    }); // 83.6.8
 
-    it('81.6.9 works with dbms_lob.substr()', function(done) {
+    it('83.6.9 works with dbms_lob.substr()', function(done) {
       var id = getID();
-      var specialStr = '81.6.9';
+      var specialStr = '83.6.9';
       var contentLength = 200;
       var specialStrLength = specialStr.length;
       var strBuf = getRandomString(contentLength, specialStr);
@@ -4051,9 +4232,9 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.6.9
+    }); // 83.6.9
 
-    it('81.6.10 works with EMPTY_BLOB()', function(done) {
+    it('83.6.10 works with EMPTY_BLOB()', function(done) {
       var id = getID();
       var content = "EMPTY_BLOB";
 
@@ -4076,16 +4257,16 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.6.10
+    }); // 83.6.10
 
-    it('81.6.11 fetch multiple BLOB rows as Buffer', function(done) {
+    it('83.6.11 fetch multiple BLOB rows as Buffer', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '81.6.11_1';
+      var specialStr_1 = '83.6.11_1';
       var contentLength_1 = 200;
       var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
-      var specialStr_2 = '81.6.11_2';
+      var specialStr_2 = '83.6.11_2';
       var contentLength_2 = 100;
       var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
@@ -4115,11 +4296,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.6.11
+    }); // 83.6.11
 
-    it('81.6.12 fetch the same BLOB column multiple times', function(done) {
+    it('83.6.12 fetch the same BLOB column multiple times', function(done) {
       var id = getID();
-      var specialStr = '81.6.12';
+      var specialStr = '83.6.12';
       var contentLength = 200;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -4148,15 +4329,15 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.6.12
+    }); // 83.6.12
 
-    it('81.6.13 works with update statement', function(done) {
+    it('83.6.13 works with update statement', function(done) {
       var id = getID();
-      var specialStr_1 = '81.6.13_1';
+      var specialStr_1 = '83.6.13_1';
       var contentLength_1 = 200;
       var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
-      var specialStr_2 = '81.6.13_2';
+      var specialStr_2 = '83.6.13_2';
       var contentLength_2 = 208;
       var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
@@ -4199,16 +4380,16 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.6.8
+    }); // 83.6.8
 
-    it('81.6.14 works with setting oracledb.maxRows < actual number of rows in the table', function(done) {
+    it('83.6.14 works with setting oracledb.maxRows < actual number of rows in the table', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '81.6.14_1';
+      var specialStr_1 = '83.6.14_1';
       var contentLength_1 = 200;
       var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
-      var specialStr_2 = '81.6.14_2';
+      var specialStr_2 = '83.6.14_2';
       var contentLength_2 = 100;
       var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
@@ -4240,16 +4421,16 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.6.14
+    }); // 83.6.14
 
-    it('81.6.15 works with setting oracledb.maxRows > actual number of rows in the table', function(done) {
+    it('83.6.15 works with setting oracledb.maxRows > actual number of rows in the table', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '81.6.15_1';
+      var specialStr_1 = '83.6.15_1';
       var contentLength_1 = 200;
       var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
-      var specialStr_2 = '81.6.15_2';
+      var specialStr_2 = '83.6.15_2';
       var contentLength_2 = 100;
       var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
@@ -4283,11 +4464,192 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.6.15
+    }); // 83.6.15
 
-  }); // 81.6
+    it('83.6.16 works with connection.queryStream()', function(done) {
+      var id = getID();
+      var specialStr = '83.6.16';
+      var contentLength = 200;
+      var strBuf = getRandomString(contentLength, specialStr);
+      var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
-  describe('81.7 fetch BLOB columns by setting fetchInfo option and outFormat = oracledb.OBJECT', function() {
+      async.series([
+        function(cb) {
+          insertIntoBlobTable1(id, content, cb, false);
+        },
+        function(cb) {
+          var sql = "SELECT ID, B from nodb_blob1 WHERE ID = " + id;
+          var stream = connection.queryStream(sql, {}, { fetchInfo : { B : { type : oracledb.BUFFER } } });
+          stream.on('error', function (error) {
+            should.fail(error, null, 'Error event should not be triggered');
+          });
+
+          var counter = 0;
+          stream.on('data', function(data) {
+            should.exist(data);
+            var result = data[1];
+            compareBuffers(result, specialStr, content, contentLength);
+            counter++;
+          });
+
+          stream.on('end', function () {
+            should.equal(counter, 1);
+            setTimeout(cb, 500);
+          });
+        }
+      ], done);
+    }); // 83.6.16
+
+    it('83.6.17 works with connection.queryStream() and oracledb.maxRows > actual number of rows in the table', function(done) {
+      var id_1 = getID();
+      var specialStr_1 = '83.6.17_1';
+      var contentLength_1 = 26;
+      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
+      var id_2 = getID();
+      var specialStr_2 = '83.6.17_2';
+      var contentLength_2 = 30;
+      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
+      var maxRowsBak = oracledb.maxRows;
+      oracledb.maxRows = 20;
+
+      async.series([
+        function(cb) {
+          insertIntoBlobTable1(id_1, content_1, cb, false);
+        },
+        function(cb) {
+          insertIntoBlobTable1(id_2, content_2, cb, false);
+        },
+        function(cb) {
+          var sql = "SELECT ID, B from nodb_blob1 WHERE ID = " + id_1 + " or id = " +id_2;
+          var stream = connection.queryStream(sql, {}, { fetchInfo : { B : { type : oracledb.BUFFER } } });
+          stream.on('error', function (error) {
+            should.fail(error, null, 'Error event should not be triggered');
+          });
+
+          var counter = 0;
+          stream.on('data', function(data) {
+            should.exist(data);
+            var result = data[1];
+            counter++;
+            if(counter == 1) {
+              compareBuffers(result, specialStr_1, content_1, contentLength_1);
+            } else {
+              compareBuffers(result, specialStr_2, content_2, contentLength_2);
+            }
+          });
+
+          stream.on('end', function () {
+            should.equal(counter, 2);
+            oracledb.maxRows = maxRowsBak;
+            setTimeout(cb, 500);
+          });
+        }
+      ], done);
+    }); // 83.6.17
+
+    it('83.6.18 works with connection.queryStream() and oracledb.maxRows = actual number of rows in the table', function(done) {
+      var id_1 = getID();
+      var specialStr_1 = '83.6.18_1';
+      var contentLength_1 = 26;
+      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
+      var id_2 = getID();
+      var specialStr_2 = '83.6.18_2';
+      var contentLength_2 = 30;
+      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
+      var maxRowsBak = oracledb.maxRows;
+      oracledb.maxRows = 2;
+
+      async.series([
+        function(cb) {
+          insertIntoBlobTable1(id_1, content_1, cb, false);
+        },
+        function(cb) {
+          insertIntoBlobTable1(id_2, content_2, cb, false);
+        },
+        function(cb) {
+          var sql = "SELECT ID, B from nodb_blob1 WHERE ID = " + id_1 + " or id = " +id_2;
+          var stream = connection.queryStream(sql, {}, { fetchInfo : { B : { type : oracledb.BUFFER } } });
+          stream.on('error', function (error) {
+            should.fail(error, null, 'Error event should not be triggered');
+          });
+
+          var counter = 0;
+          stream.on('data', function(data) {
+            should.exist(data);
+            var result = data[1];
+            counter++;
+            if(counter == 1) {
+              compareBuffers(result, specialStr_1, content_1, contentLength_1);
+            } else {
+              compareBuffers(result, specialStr_2, content_2, contentLength_2);
+            }
+          });
+
+          stream.on('end', function () {
+            should.equal(counter, 2);
+            oracledb.maxRows = maxRowsBak;
+            setTimeout(cb, 500);
+          });
+        }
+      ], done);
+    }); // 83.6.18
+
+    it.skip('83.6.19 works with connection.queryStream() and oracledb.maxRows < actual number of rows in the table', function(done) {
+      var id_1 = getID();
+      var specialStr_1 = '83.6.19_1';
+      var contentLength_1 = 26;
+      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
+      var id_2 = getID();
+      var specialStr_2 = '83.6.19_2';
+      var contentLength_2 = 30;
+      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
+      var maxRowsBak = oracledb.maxRows;
+      oracledb.maxRows = 1;
+
+      async.series([
+        function(cb) {
+          insertIntoBlobTable1(id_1, content_1, cb, false);
+        },
+        function(cb) {
+          insertIntoBlobTable1(id_2, content_2, cb, false);
+        },
+        function(cb) {
+          var sql = "SELECT ID, B from nodb_blob1 WHERE ID = " + id_1 + " or id = " +id_2;
+          var stream = connection.queryStream(sql, {}, { fetchInfo : { B : { type : oracledb.BUFFER } } });
+          stream.on('error', function (error) {
+            should.fail(error, null, 'Error event should not be triggered');
+          });
+
+          var counter = 0;
+          stream.on('data', function(data) {
+            should.exist(data);
+            var result = data[1];
+            counter++;
+            if(counter == 1) {
+              compareBuffers(result, specialStr_1, content_1, contentLength_1);
+            } else {
+              compareBuffers(result, specialStr_2, content_2, contentLength_2);
+            }
+          });
+
+          stream.on('end', function () {
+            should.equal(counter, 2);
+            oracledb.maxRows = maxRowsBak;
+            setTimeout(cb, 500);
+          });
+        }
+      ], done);
+    }); // 83.6.19
+
+  }); // 83.6
+
+  describe('83.7 fetch BLOB columns by setting fetchInfo option and outFormat = oracledb.OBJECT', function() {
 
     before('Create table and populate', function(done) {
       connection.execute(
@@ -4311,7 +4673,7 @@ describe('81. fetchBlobAsBuffer.js', function() {
 
     insertID = 0;
 
-    it('81.7.1 works with NULL value', function(done) {
+    it('83.7.1 works with NULL value', function(done) {
       var id = getID();
       var content = null;
 
@@ -4336,9 +4698,9 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.7.1
+    }); // 83.7.1
 
-    it('81.7.2 works with empty buffer', function(done) {
+    it('83.7.2 works with empty buffer', function(done) {
       var id = getID();
       var content = node6plus ? Buffer.from("", "utf-8") : new Buffer("", "utf-8");
 
@@ -4363,11 +4725,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.7.2
+    }); // 83.7.2
 
-    it('81.7.3 works with small value', function(done) {
+    it('83.7.3 works with small value', function(done) {
       var id = getID();
-      var specialStr = '81.7.3';
+      var specialStr = '83.7.3';
       var contentLength = 20;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -4393,11 +4755,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.7.3
+    }); // 83.7.3
 
-    it('81.7.4 works with (64K - 1) value', function(done) {
+    it('83.7.4 works with (64K - 1) value', function(done) {
       var id = getID();
-      var specialStr = '81.7.4';
+      var specialStr = '83.7.4';
       var contentLength = 65535;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -4423,11 +4785,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.7.4
+    }); // 83.7.4
 
-    it('81.7.5 works with (64K + 1) value', function(done) {
+    it('83.7.5 works with (64K + 1) value', function(done) {
       var id = getID();
-      var specialStr = '81.7.5';
+      var specialStr = '83.7.5';
       var contentLength = 65537;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -4453,11 +4815,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.7.5
+    }); // 83.7.5
 
-    it('81.7.6 works with (1MB + 1) value', function(done) {
+    it('83.7.6 works with (1MB + 1) value', function(done) {
       var id = getID();
-      var specialStr = '81.7.6';
+      var specialStr = '83.7.6';
       var contentLength = 1048577; // 1MB + 1
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -4483,11 +4845,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.7.6
+    }); // 83.7.6
 
-    it('81.7.7 works with (5MB + 1) value', function(done) {
+    it('83.7.7 works with (5MB + 1) value', function(done) {
       var id = getID();
-      var specialStr = '81.7.7';
+      var specialStr = '83.7.7';
       var contentLength = 5242881; // 5MB + 1
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -4513,11 +4875,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.7.7
+    }); // 83.7.7
 
-    it('81.7.8 works with (10MB + 1) value', function(done) {
+    it('83.7.8 works with (10MB + 1) value', function(done) {
       var id = getID();
-      var specialStr = '81.7.8';
+      var specialStr = '83.7.8';
       var contentLength = 10485761; // 10MB + 1
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -4543,11 +4905,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.7.8
+    }); // 83.7.8
 
-    it('81.7.9 works with dbms_lob.substr()', function(done) {
+    it('83.7.9 works with dbms_lob.substr()', function(done) {
       var id = getID();
-      var specialStr = '81.7.9';
+      var specialStr = '83.7.9';
       var contentLength = 200;
       var specialStrLength = specialStr.length;
       var strBuf = getRandomString(contentLength, specialStr);
@@ -4575,9 +4937,9 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.7.9
+    }); // 83.7.9
 
-    it('81.7.10 works with EMPTY_BLOB()', function(done) {
+    it('83.7.10 works with EMPTY_BLOB()', function(done) {
       var id = getID();
       var content = "EMPTY_BLOB";
 
@@ -4601,16 +4963,16 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.7.10
+    }); // 83.7.10
 
-    it('81.7.11 fetch multiple BLOB rows as Buffer', function(done) {
+    it('83.7.11 fetch multiple BLOB rows as Buffer', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '81.7.11_1';
+      var specialStr_1 = '83.7.11_1';
       var contentLength_1 = 200;
       var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
-      var specialStr_2 = '81.7.11_2';
+      var specialStr_2 = '83.7.11_2';
       var contentLength_2 = 100;
       var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
@@ -4641,11 +5003,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.7.11
+    }); // 83.7.11
 
-    it('81.7.12 fetch the same BLOB column multiple times', function(done) {
+    it('83.7.12 fetch the same BLOB column multiple times', function(done) {
       var id = getID();
-      var specialStr = '81.7.12';
+      var specialStr = '83.7.12';
       var contentLength = 200;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -4675,15 +5037,15 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.7.12
+    }); // 83.7.12
 
-    it('81.7.13 works with update statement', function(done) {
+    it('83.7.13 works with update statement', function(done) {
       var id = getID();
-      var specialStr_1 = '81.7.13_1';
+      var specialStr_1 = '83.7.13_1';
       var contentLength_1 = 200;
       var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
-      var specialStr_2 = '81.7.13_2';
+      var specialStr_2 = '83.7.13_2';
       var contentLength_2 = 202;
       var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
@@ -4728,16 +5090,16 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.7.13
+    }); // 83.7.13
 
-    it('81.7.14 works with setting oracledb.maxRows < actual number of rows in the table', function(done) {
+    it('83.7.14 works with setting oracledb.maxRows < actual number of rows in the table', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '81.7.14_1';
+      var specialStr_1 = '83.7.14_1';
       var contentLength_1 = 200;
       var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
-      var specialStr_2 = '81.7.14_2';
+      var specialStr_2 = '83.7.14_2';
       var contentLength_2 = 100;
       var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
@@ -4770,16 +5132,16 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.7.14
+    }); // 83.7.14
 
-    it('81.7.15 works with setting oracledb.maxRows > actual number of rows in the table', function(done) {
+    it('83.7.15 works with setting oracledb.maxRows > actual number of rows in the table', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '81.7.15_1';
+      var specialStr_1 = '83.7.15_1';
       var contentLength_1 = 200;
       var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
-      var specialStr_2 = '81.7.15_2';
+      var specialStr_2 = '83.7.15_2';
       var contentLength_2 = 100;
       var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
@@ -4814,11 +5176,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.7.15
+    }); // 83.7.15
 
-  }); // 81.7
+  }); // 83.7
 
-  describe('81.8 fetch BLOB columns by setting fetchInfo option, outFormat = oracledb.OBJECT and resultSet = true', function() {
+  describe('83.8 fetch BLOB columns by setting fetchInfo option, outFormat = oracledb.OBJECT and resultSet = true', function() {
 
     before('Create table and populate', function(done) {
       connection.execute(
@@ -4842,7 +5204,7 @@ describe('81. fetchBlobAsBuffer.js', function() {
 
     insertID = 0;
 
-    it('81.8.1 works with NULL value', function(done) {
+    it('83.8.1 works with NULL value', function(done) {
       var id = getID();
       var content = null;
 
@@ -4876,9 +5238,9 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.8.1
+    }); // 83.8.1
 
-    it('81.8.2 works with empty buffer', function(done) {
+    it('83.8.2 works with empty buffer', function(done) {
       var id = getID();
       var content = node6plus ? Buffer.from("", "utf-8") : new Buffer("", "utf-8");
 
@@ -4912,11 +5274,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.8.2
+    }); // 83.8.2
 
-    it('81.8.3 works with small value', function(done) {
+    it('83.8.3 works with small value', function(done) {
       var id = getID();
-      var specialStr = '81.8.3';
+      var specialStr = '83.8.3';
       var contentLength = 20;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -4951,11 +5313,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.8.3
+    }); // 83.8.3
 
-    it('81.8.4 works with (64K - 1) value', function(done) {
+    it('83.8.4 works with (64K - 1) value', function(done) {
       var id = getID();
-      var specialStr = '81.8.4';
+      var specialStr = '83.8.4';
       var contentLength = 65535;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -4990,11 +5352,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.8.4
+    }); // 83.8.4
 
-    it('81.8.5 works with (64K + 1) value', function(done) {
+    it('83.8.5 works with (64K + 1) value', function(done) {
       var id = getID();
-      var specialStr = '81.8.4';
+      var specialStr = '83.8.4';
       var contentLength = 65537;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -5028,11 +5390,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.8.5
+    }); // 83.8.5
 
-    it('81.8.6 works with (1MB + 1) value', function(done) {
+    it('83.8.6 works with (1MB + 1) value', function(done) {
       var id = getID();
-      var specialStr = '81.8.6';
+      var specialStr = '83.8.6';
       var contentLength = 1048577; // 1MB + 1
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -5066,11 +5428,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.8.6
+    }); // 83.8.6
 
-    it('81.8.7 works with (5MB + 1) value', function(done) {
+    it('83.8.7 works with (5MB + 1) value', function(done) {
       var id = getID();
-      var specialStr = '81.8.7';
+      var specialStr = '83.8.7';
       var contentLength = 5242881; // 5MB + 1
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -5104,11 +5466,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.8.7
+    }); // 83.8.7
 
-    it('81.8.8 works with (10MB + 1) value', function(done) {
+    it('83.8.8 works with (10MB + 1) value', function(done) {
       var id = getID();
-      var specialStr = '81.8.8';
+      var specialStr = '83.8.8';
       var contentLength = 10485761; // 10MB + 1
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -5142,11 +5504,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.8.8
+    }); // 83.8.8
 
-    it('81.8.9 works with dbms_lob.substr()', function(done) {
+    it('83.8.9 works with dbms_lob.substr()', function(done) {
       var id = getID();
-      var specialStr = '81.8.9';
+      var specialStr = '83.8.9';
       var contentLength = 200;
       var specialStrLength = specialStr.length;
       var strBuf = getRandomString(contentLength, specialStr);
@@ -5183,9 +5545,9 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.8.9
+    }); // 83.8.9
 
-    it('81.8.10 works with EMPTY_BLOB()', function(done) {
+    it('83.8.10 works with EMPTY_BLOB()', function(done) {
       var id = getID();
       var content = "EMPTY_BLOB";
 
@@ -5219,16 +5581,16 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.8.10
+    }); // 83.8.10
 
-    it('81.8.11 fetch multiple BLOB rows as Buffer', function(done) {
+    it('83.8.11 fetch multiple BLOB rows as Buffer', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '81.8.11_1';
+      var specialStr_1 = '83.8.11_1';
       var contentLength_1 = 200;
       var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
-      var specialStr_2 = '81.8.11_2';
+      var specialStr_2 = '83.8.11_2';
       var contentLength_2 = 100;
       var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
@@ -5270,11 +5632,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.8.11
+    }); // 83.8.11
 
-    it('81.8.12 fetch the same BLOB column multiple times', function(done) {
+    it('83.8.12 fetch the same BLOB column multiple times', function(done) {
       var id = getID();
-      var specialStr = '81.8.12';
+      var specialStr = '83.8.12';
       var contentLength = 200;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -5313,15 +5675,15 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.8.12
+    }); // 83.8.12
 
-    it('81.8.13 works with update statement', function(done) {
+    it('83.8.13 works with update statement', function(done) {
       var id = getID();
-      var specialStr_1 = '81.8.13_1';
+      var specialStr_1 = '83.8.13_1';
       var contentLength_1 = 200;
       var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
-      var specialStr_2 = '81.8.13_2';
+      var specialStr_2 = '83.8.13_2';
       var contentLength_2 = 202;
       var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
@@ -5384,16 +5746,16 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.8.13
+    }); // 83.8.13
 
-    it('81.8.14 works with setting oracledb.maxRows < actual number of rows in the table', function(done) {
+    it('83.8.14 works with setting oracledb.maxRows < actual number of rows in the table', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '81.8.14_1';
+      var specialStr_1 = '83.8.14_1';
       var contentLength_1 = 200;
       var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
-      var specialStr_2 = '81.8.14_2';
+      var specialStr_2 = '83.8.14_2';
       var contentLength_2 = 100;
       var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
@@ -5439,16 +5801,16 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.8.14
+    }); // 83.8.14
 
-    it('81.8.15 works with setting oracledb.maxRows > actual number of rows in the table', function(done) {
+    it('83.8.15 works with setting oracledb.maxRows > actual number of rows in the table', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '81.8.15_1';
+      var specialStr_1 = '83.8.15_1';
       var contentLength_1 = 200;
       var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
-      var specialStr_2 = '81.8.15_2';
+      var specialStr_2 = '83.8.15_2';
       var contentLength_2 = 100;
       var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
@@ -5494,11 +5856,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.8.15
+    }); // 83.8.15
 
-  }); // 81.8
+  }); // 83.8
 
-  describe('81.9 fetch BLOB columns by setting fetchInfo option and outFormat = oracledb.ARRAY', function() {
+  describe('83.9 fetch BLOB columns by setting fetchInfo option and outFormat = oracledb.ARRAY', function() {
 
     before('Create table and populate', function(done) {
       connection.execute(
@@ -5522,7 +5884,7 @@ describe('81. fetchBlobAsBuffer.js', function() {
 
     insertID = 0;
 
-    it('81.9.1 works with NULL value', function(done) {
+    it('83.9.1 works with NULL value', function(done) {
       var id = getID();
       var content = null;
 
@@ -5547,9 +5909,9 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.9.1
+    }); // 83.9.1
 
-    it('81.9.2 works with empty Buffer', function(done) {
+    it('83.9.2 works with empty Buffer', function(done) {
       var id = getID();
       var content = node6plus ? Buffer.from("", "utf-8") : new Buffer("", "utf-8");
 
@@ -5574,11 +5936,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.9.2
+    }); // 83.9.2
 
-    it('81.9.3 works with small value', function(done) {
+    it('83.9.3 works with small value', function(done) {
       var id = getID();
-      var specialStr = '81.9.3';
+      var specialStr = '83.9.3';
       var contentLength = 20;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -5604,11 +5966,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.9.3
+    }); // 83.9.3
 
-    it('81.9.4 works with (64K - 1) value', function(done) {
+    it('83.9.4 works with (64K - 1) value', function(done) {
       var id = getID();
-      var specialStr = '81.9.4';
+      var specialStr = '83.9.4';
       var contentLength = 65535;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -5634,11 +5996,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.9.4
+    }); // 83.9.4
 
-    it('81.9.5 works with (64K + 1) value', function(done) {
+    it('83.9.5 works with (64K + 1) value', function(done) {
       var id = getID();
-      var specialStr = '81.9.5';
+      var specialStr = '83.9.5';
       var contentLength = 65537;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -5664,11 +6026,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.9.5
+    }); // 83.9.5
 
-    it('81.9.6 works with (1MB + 1) value', function(done) {
+    it('83.9.6 works with (1MB + 1) value', function(done) {
       var id = getID();
-      var specialStr = '81.9.6';
+      var specialStr = '83.9.6';
       var contentLength = 1048577; // 1MB + 1
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -5694,11 +6056,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.9.6
+    }); // 83.9.6
 
-    it('81.9.7 works with (5MB + 1) value', function(done) {
+    it('83.9.7 works with (5MB + 1) value', function(done) {
       var id = getID();
-      var specialStr = '81.9.7';
+      var specialStr = '83.9.7';
       var contentLength = 5242881; // 5MB + 1
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -5724,11 +6086,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.9.7
+    }); // 83.9.7
 
-    it('81.9.8 works with (10MB + 1) value', function(done) {
+    it('83.9.8 works with (10MB + 1) value', function(done) {
       var id = getID();
-      var specialStr = '81.9.8';
+      var specialStr = '83.9.8';
       var contentLength = 10485761; // 10MB + 1
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -5754,11 +6116,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.9.8
+    }); // 83.9.8
 
-    it('81.9.9 works with dbms_lob.substr()', function(done) {
+    it('83.9.9 works with dbms_lob.substr()', function(done) {
       var id = getID();
-      var specialStr = '81.9.9';
+      var specialStr = '83.9.9';
       var contentLength = 200;
       var specialStrLength = specialStr.length;
       var strBuf = getRandomString(contentLength, specialStr);
@@ -5786,9 +6148,9 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.9.9
+    }); // 83.9.9
 
-    it('81.9.10 works with EMPTY_BLOB()', function(done) {
+    it('83.9.10 works with EMPTY_BLOB()', function(done) {
       var id = getID();
       var content = "EMPTY_BLOB";
 
@@ -5812,16 +6174,16 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.9.10
+    }); // 83.9.10
 
-    it('81.9.11 fetch multiple BLOB rows as Buffer', function(done) {
+    it('83.9.11 fetch multiple BLOB rows as Buffer', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '81.9.11_1';
+      var specialStr_1 = '83.9.11_1';
       var contentLength_1 = 200;
       var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
-      var specialStr_2 = '81.9.11_2';
+      var specialStr_2 = '83.9.11_2';
       var contentLength_2 = 100;
       var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
@@ -5852,11 +6214,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.9.11
+    }); // 83.9.11
 
-    it('81.9.12 fetch the same BLOB column multiple times', function(done) {
+    it('83.9.12 fetch the same BLOB column multiple times', function(done) {
       var id = getID();
-      var specialStr = '81.9.12';
+      var specialStr = '83.9.12';
       var contentLength = 200;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -5885,15 +6247,15 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.9.12
+    }); // 83.9.12
 
-    it('81.9.13 works with update statement', function(done) {
+    it('83.9.13 works with update statement', function(done) {
       var id = getID();
-      var specialStr_1 = '81.9.13_1';
+      var specialStr_1 = '83.9.13_1';
       var contentLength_1 = 200;
       var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
-      var specialStr_2 = '81.9.13_2';
+      var specialStr_2 = '83.9.13_2';
       var contentLength_2 = 208;
       var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
@@ -5938,16 +6300,16 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.9.8
+    }); // 83.9.8
 
-    it('81.9.14 works with setting oracledb.maxRows < actual number of rows in the table', function(done) {
+    it('83.9.14 works with setting oracledb.maxRows < actual number of rows in the table', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '81.9.14_1';
+      var specialStr_1 = '83.9.14_1';
       var contentLength_1 = 200;
       var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
-      var specialStr_2 = '81.9.14_2';
+      var specialStr_2 = '83.9.14_2';
       var contentLength_2 = 100;
       var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
@@ -5980,16 +6342,16 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.9.14
+    }); // 83.9.14
 
-    it('81.9.15 works with setting oracledb.maxRows > actual number of rows in the table', function(done) {
+    it('83.9.15 works with setting oracledb.maxRows > actual number of rows in the table', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '81.9.15_1';
+      var specialStr_1 = '83.9.15_1';
       var contentLength_1 = 200;
       var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
-      var specialStr_2 = '81.9.15_2';
+      var specialStr_2 = '83.9.15_2';
       var contentLength_2 = 100;
       var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
@@ -6024,11 +6386,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.9.15
+    }); // 83.9.15
 
-  }); // 81.9
+  }); // 83.9
 
-  describe('81.10 fetch BLOB columns by setting fetchInfo option, outFormat = oracledb.ARRAY and resultSet = true', function() {
+  describe('83.10 fetch BLOB columns by setting fetchInfo option, outFormat = oracledb.ARRAY and resultSet = true', function() {
 
     before('Create table and populate', function(done) {
       connection.execute(
@@ -6052,7 +6414,7 @@ describe('81. fetchBlobAsBuffer.js', function() {
 
     insertID = 0;
 
-    it('81.10.1 works with NULL value', function(done) {
+    it('83.10.1 works with NULL value', function(done) {
       var id = getID();
       var content = null;
 
@@ -6086,9 +6448,9 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.10.1
+    }); // 83.10.1
 
-    it('81.10.2 works with empty Buffer', function(done) {
+    it('83.10.2 works with empty Buffer', function(done) {
       var id = getID();
       var content = node6plus ? Buffer.from("", "utf-8") : new Buffer("", "utf-8");
 
@@ -6122,11 +6484,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.10.2
+    }); // 83.10.2
 
-    it('81.10.3 works with small value', function(done) {
+    it('83.10.3 works with small value', function(done) {
       var id = getID();
-      var specialStr = '81.10.3';
+      var specialStr = '83.10.3';
       var contentLength = 20;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -6161,11 +6523,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.10.3
+    }); // 83.10.3
 
-    it('81.10.4 works with (64K - 1) value', function(done) {
+    it('83.10.4 works with (64K - 1) value', function(done) {
       var id = getID();
-      var specialStr = '81.10.4';
+      var specialStr = '83.10.4';
       var contentLength = 65535;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -6200,11 +6562,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.10.4
+    }); // 83.10.4
 
-    it('81.10.5 works with (64K + 1) value', function(done) {
+    it('83.10.5 works with (64K + 1) value', function(done) {
       var id = getID();
-      var specialStr = '81.10.5';
+      var specialStr = '83.10.5';
       var contentLength = 65537;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -6238,11 +6600,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.10.5
+    }); // 83.10.5
 
-    it('81.10.6 works with (1MB + 1) value', function(done) {
+    it('83.10.6 works with (1MB + 1) value', function(done) {
       var id = getID();
-      var specialStr = '81.10.6';
+      var specialStr = '83.10.6';
       var contentLength = 1048577; // 1MB + 1
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -6276,11 +6638,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.10.6
+    }); // 83.10.6
 
-    it('81.10.7 works with (5MB + 1) value', function(done) {
+    it('83.10.7 works with (5MB + 1) value', function(done) {
       var id = getID();
-      var specialStr = '81.10.7';
+      var specialStr = '83.10.7';
       var contentLength = 5242881; // 5MB + 1
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -6314,11 +6676,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.10.7
+    }); // 83.10.7
 
-    it('81.10.8 works with (10MB + 1) value', function(done) {
+    it('83.10.8 works with (10MB + 1) value', function(done) {
       var id = getID();
-      var specialStr = '81.10.8';
+      var specialStr = '83.10.8';
       var contentLength = 10485761; // 10MB + 1
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -6352,11 +6714,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.10.8
+    }); // 83.10.8
 
-    it('81.10.9 works with dbms_lob.substr()', function(done) {
+    it('83.10.9 works with dbms_lob.substr()', function(done) {
       var id = getID();
-      var specialStr = '81.10.9';
+      var specialStr = '83.10.9';
       var contentLength = 200;
       var specialStrLength = specialStr.length;
       var strBuf = getRandomString(contentLength, specialStr);
@@ -6393,9 +6755,9 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.10.9
+    }); // 83.10.9
 
-    it('81.10.10 works with EMPTY_BLOB()', function(done) {
+    it('83.10.10 works with EMPTY_BLOB()', function(done) {
       var id = getID();
       var content = "EMPTY_BLOB";
 
@@ -6429,16 +6791,16 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.10.10
+    }); // 83.10.10
 
-    it('81.10.11 fetch multiple BLOB rows as Buffer', function(done) {
+    it('83.10.11 fetch multiple BLOB rows as Buffer', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '81.10.11_1';
+      var specialStr_1 = '83.10.11_1';
       var contentLength_1 = 200;
       var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
-      var specialStr_2 = '81.10.11_2';
+      var specialStr_2 = '83.10.11_2';
       var contentLength_2 = 100;
       var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
@@ -6481,11 +6843,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.10.11
+    }); // 83.10.11
 
-    it('81.10.12 fetch the same BLOB column multiple times', function(done) {
+    it('83.10.12 fetch the same BLOB column multiple times', function(done) {
       var id = getID();
-      var specialStr = '81.10.12';
+      var specialStr = '83.10.12';
       var contentLength = 200;
       var strBuf = getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
@@ -6524,15 +6886,15 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.10.12
+    }); // 83.10.12
 
-    it('81.10.13 works with update statement', function(done) {
+    it('83.10.13 works with update statement', function(done) {
       var id = getID();
-      var specialStr_1 = '81.10.13_1';
+      var specialStr_1 = '83.10.13_1';
       var contentLength_1 = 200;
       var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
-      var specialStr_2 = '81.10.13_2';
+      var specialStr_2 = '83.10.13_2';
       var contentLength_2 = 208;
       var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
@@ -6595,16 +6957,16 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.10.13
+    }); // 83.10.13
 
-    it('81.10.14 works with setting oracledb.maxRows < actual number of rows in the table', function(done) {
+    it('83.10.14 works with setting oracledb.maxRows < actual number of rows in the table', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '81.10.14_1';
+      var specialStr_1 = '83.10.14_1';
       var contentLength_1 = 200;
       var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
-      var specialStr_2 = '81.10.14_2';
+      var specialStr_2 = '83.10.14_2';
       var contentLength_2 = 100;
       var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
@@ -6650,16 +7012,16 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.10.14
+    }); // 83.10.14
 
-    it('81.10.15 works with setting oracledb.maxRows > actual number of rows in the table', function(done) {
+    it('83.10.15 works with setting oracledb.maxRows > actual number of rows in the table', function(done) {
       var id_1 = getID();
-      var specialStr_1 = '81.10.15_1';
+      var specialStr_1 = '83.10.15_1';
       var contentLength_1 = 200;
       var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
-      var specialStr_2 = '81.10.15_2';
+      var specialStr_2 = '83.10.15_2';
       var contentLength_2 = 100;
       var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
@@ -6705,11 +7067,11 @@ describe('81. fetchBlobAsBuffer.js', function() {
           );
         }
       ], done);
-    }); // 81.10.15
+    }); // 83.10.15
 
-  }); // 81.10
+  }); // 83.10
 
-  describe('81.11 fetch multiple BLOBs', function() {
+  describe('83.11 fetch multiple BLOBs', function() {
 
     before('create Table and populate', function(done) {
       connection.execute(
@@ -6741,13 +7103,13 @@ describe('81. fetchBlobAsBuffer.js', function() {
       done();
     }); // afterEach
 
-    it('81.11.1 fetch multiple BLOB columns as Buffer', function(done) {
+    it('83.11.1 fetch multiple BLOB columns as Buffer', function(done) {
       var id = getID();
-      var specialStr_1 = '81.11.1_1';
+      var specialStr_1 = '83.11.1_1';
       var contentLength_1 = 26;
       var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
-      var specialStr_2 = '81.11.1_2';
+      var specialStr_2 = '83.11.1_2';
       var contentLength_2 = 100;
       var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
@@ -6771,15 +7133,15 @@ describe('81. fetchBlobAsBuffer.js', function() {
         }
       ], done);
 
-    }); // 81.11.1
+    }); // 83.11.1
 
-    it('81.11.2 fetch two BLOB columns, one as string, another streamed', function(done) {
+    it('83.11.2 fetch two BLOB columns, one as string, another streamed', function(done) {
       var id = getID();
-      var specialStr_1 = '81.11.2_1';
+      var specialStr_1 = '83.11.2_1';
       var contentLength_1 = 30;
       var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
-      var specialStr_2 = '81.11.2_2';
+      var specialStr_2 = '83.11.2_2';
       var contentLength_2 = 50;
       var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
@@ -6839,18 +7201,18 @@ describe('81. fetchBlobAsBuffer.js', function() {
         }
       ], done);
 
-    }); // 81.11.2
+    }); // 83.11.2
 
-  }); // 81.11
+  }); // 83.11
 
-  describe('81.12 types support for fetchAsBuffer property', function() {
+  describe('83.12 types support for fetchAsBuffer property', function() {
 
     afterEach ('clear the by-type specification', function ( done ) {
       oracledb.fetchAsBuffer = [];
       done ();
     });
 
-    it('81.12.1 String not supported in fetchAsBuffer', function(done) {
+    it('83.12.1 String not supported in fetchAsBuffer', function(done) {
       try {
         oracledb.fetchAsBuffer = [ oracledb.STRING ];
       } catch(err) {
@@ -6859,9 +7221,9 @@ describe('81. fetchBlobAsBuffer.js', function() {
         (err.message).should.startWith ('NJS-021');
       }
       done();
-    }); // 81.12.1
+    }); // 83.12.1
 
-    it('81.12.2 CLOB not supported in fetchAsBuffer', function(done) {
+    it('83.12.2 CLOB not supported in fetchAsBuffer', function(done) {
       try {
         oracledb.fetchAsBuffer = [ oracledb.CLOB ];
       } catch(err) {
@@ -6870,9 +7232,9 @@ describe('81. fetchBlobAsBuffer.js', function() {
         (err.message).should.startWith ('NJS-021');
       }
       done();
-    }); // 81.12.2
+    }); // 83.12.2
 
-    it('81.12.3 Number not supported in fetchAsBuffer', function(done) {
+    it('83.12.3 Number not supported in fetchAsBuffer', function(done) {
       try {
         oracledb.fetchAsBuffer = [ oracledb.NUMBER ];
       } catch(err) {
@@ -6881,9 +7243,9 @@ describe('81. fetchBlobAsBuffer.js', function() {
         (err.message).should.startWith ('NJS-021');
       }
       done();
-    }); // 81.12.3
+    }); // 83.12.3
 
-    it('81.12.4 Date not supported in fetchAsBuffer', function(done) {
+    it('83.12.4 Date not supported in fetchAsBuffer', function(done) {
       try {
         oracledb.fetchAsBuffer = [ oracledb.DATE ];
       } catch(err) {
@@ -6892,9 +7254,9 @@ describe('81. fetchBlobAsBuffer.js', function() {
         (err.message).should.startWith ('NJS-021');
       }
       done();
-    }); // 81.12.4
+    }); // 83.12.4
 
-    it('81.12.5 Cursor not supported in fetchAsBuffer', function(done) {
+    it('83.12.5 Cursor not supported in fetchAsBuffer', function(done) {
       try {
         oracledb.fetchAsBuffer = [ oracledb.CURSOR ];
       } catch(err) {
@@ -6903,9 +7265,9 @@ describe('81. fetchBlobAsBuffer.js', function() {
         (err.message).should.startWith ('NJS-021');
       }
       done();
-    }); // 81.12.5
+    }); // 83.12.5
 
-    it('81.12.6 Buffer not supported in fetchAsBuffer', function(done) {
+    it('83.12.6 Buffer not supported in fetchAsBuffer', function(done) {
       try {
         oracledb.fetchAsBuffer = [ oracledb.BUFFER ];
       } catch(err) {
@@ -6914,9 +7276,9 @@ describe('81. fetchBlobAsBuffer.js', function() {
         (err.message).should.startWith ('NJS-021');
       }
       done();
-    }); // 81.12.6
+    }); // 83.12.6
 
-    it('81.12.7 BLOB supported in fetchAsBuffer', function(done) {
+    it('83.12.7 BLOB supported in fetchAsBuffer', function(done) {
       try {
         oracledb.fetchAsBuffer = [ oracledb.BLOB ];
       } catch(err) {
@@ -6925,8 +7287,8 @@ describe('81. fetchBlobAsBuffer.js', function() {
       should.strictEqual(oracledb.fetchAsBuffer.length, 1);
       should.strictEqual(oracledb.fetchAsBuffer[0], oracledb.BLOB);
       done();
-    }); // 81.12.7
+    }); // 83.12.7
 
-  }); // 81.12
+  }); // 83.12
 
 });
