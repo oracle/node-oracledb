@@ -45,9 +45,9 @@ Prerequisites:
 
 - [Python 2.7](https://www.python.org/downloads/)
 - C Compiler with support for C++ 11 (Xcode, gcc, Visual Studio or similar)
-- Oracle 11.2 or 12c client libraries.  Use the small, free [Oracle Instant Client](http://www.oracle.com/technetwork/database/features/instant-client/index-100365.html) "basic" and "SDK" packages if your database is remote.  Or use the libraries and headers from a locally installed database such as the free [Oracle XE](http://www.oracle.com/technetwork/database/database-technologies/express-edition/overview/index.html) release.
+- Oracle 11.2, 12.1 or 12.2 client libraries.  Use the small, free [Oracle Instant Client](http://www.oracle.com/technetwork/database/features/instant-client/index-100365.html) "basic" and "SDK" packages if your database is remote.  Or use the libraries and headers from a locally installed database such as the free [Oracle XE](http://www.oracle.com/technetwork/database/database-technologies/express-edition/overview/index.html) release.
 
-  Oracle's standard client-server network compatibility applies: Oracle Client 12c can connect to Oracle Database 10.2 or greater. Oracle Client 11.2 can connect to Oracle Database 9.2 or greater.
+  Oracle's standard client-server network compatibility applies: Oracle Client 12.2 can connect to Oracle Database 11.2 or greater. Oracle Client 12.1 can connect to Oracle Database 10.2 or greater. Oracle Client 11.2 can connect to Oracle Database 9.2 or greater.
 - Set `OCI_LIB_DIR` and `OCI_INC_DIR` during installation if the Oracle libraries and headers are in a non-default location
 
 Run `npm install oracledb` to install from the [npm registry](https://www.npmjs.com/package/oracledb).
@@ -88,7 +88,7 @@ Oracle gratefully acknowledges the contributions to node-oracledb that have been
 
 ## <a name="license"></a> License
 
-Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved.
+Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved.
 
 You may not use the identified files except in compliance with the Apache
 License, Version 2.0 (the "License.")

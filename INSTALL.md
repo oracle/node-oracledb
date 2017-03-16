@@ -1,6 +1,6 @@
 # Installing node-oracledb
 
-*Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved.*
+*Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved.*
 
 You may not use the identified files except in compliance with the Apache
 License, Version 2.0 (the "License.")
@@ -44,12 +44,16 @@ still be usable.
 
 ### <a name="prerequisites"></a> Prerequisites
 
-Installation requires Oracle 11.2 or 12c client libraries.
-These are included in Oracle Instant Client RPMs or ZIPs, a full
-Oracle Client, or a database on the same machine.  Oracle's standard
-client-server network compatibility applies.  For example, with Oracle
-Client 12c you can connect to Oracle Database 10.2 or greater.  Use
-Oracle Client 11.2 if you need to connect to Oracle Database 9.2.
+Installation requires Oracle 11.2, 12.1 or 12.2 client libraries.
+These are included
+in
+[Oracle Instant Client](http://www.oracle.com/technetwork/database/features/instant-client/index-097480.html) RPMs
+or ZIPs, a full Oracle Client, or a database on the same machine.
+Oracle's standard client-server network interoperability applies, see
+Oracle Support's Doc ID 207303.1.  In summary, Oracle Client 12.2 can
+connect to Oracle Database 11.2 or greater. Oracle Client 12.1 can
+connect to Oracle Database 10.2 or greater. Oracle Client 11.2 can
+connect to Oracle Database 9.2 or greater.
 
 A compiler is required.  Use Visual Studio on Windows, GCC on Linux or
 Xcode on macOS.  **When building with Node 4 onward, the compiler must
@@ -128,8 +132,8 @@ Download the free **Basic** and **SDK** RPMs from [Oracle Technology Network](ht
 [install them](http://www.oracle.com/technetwork/topics/linuxx86-64soft-092277.html#ic_x64_inst) as the root user:
 
 ```
-rpm -ivh oracle-instantclient12.1-basic-12.1.0.2.0-1.x86_64.rpm
-rpm -ivh oracle-instantclient12.1-devel-12.1.0.2.0-1.x86_64.rpm
+yum install oracle-instantclient12.2-basic-12.2.0.1.0-1.x86_64.rpm
+yum install oracle-instantclient12.2-devel-12.2.0.1.0-1.x86_64.rpm
 ```
 
 If you have a [ULN](https://linux.oracle.com) subscription, you can
@@ -163,7 +167,7 @@ If you have other Oracle software installed on the same machine, and
 the run time linker is configured to find this other software via
 `LD_LIBRARY_PATH` or `ldconfig`, then update the environment to use
 the Instant Client RPM libraries, for example
-`/usr/lib/oracle/12.1/client64/lib`.
+`/usr/lib/oracle/12.2/client64/lib`.
 
 Note: A compiler supporting C++11 is required when building with
 Node.js 4 or later, otherwise the NAN component will fail to build.
@@ -232,9 +236,9 @@ into the same directory:
 
 ```
 cd /opt/oracle
-unzip instantclient-basic-linux.x64-12.1.0.2.0.zip
-unzip instantclient-sdk-linux.x64-12.1.0.2.0.zip
-mv instantclient_12_1 instantclient
+unzip instantclient-basic-linux.x64-12.2.0.1.0.zip
+unzip instantclient-sdk-linux.x64-12.2.0.1.0.zip
+mv instantclient_12_2 instantclient
 cd instantclient
 ln -s libclntsh.so.12.1 libclntsh.so
 ```
@@ -455,8 +459,8 @@ require the node-oracledb installation variables `OCI_LIB_DIR` or
 `ldconfig` configuration for run time.  Installation is simply:
 
 ```
-rpm -ivh oracle-instantclient12.1-basic-12.1.0.2.0-1.x86_64.rpm
-rpm -ivh oracle-instantclient12.1-devel-12.1.0.2.0-1.x86_64.rpm
+yum install oracle-instantclient12.2-basic-12.2.0.1.0-1.x86_64.rpm
+yum install oracle-instantclient12.2-devel-12.2.0.1.0-1.x86_64.rpm
 npm install oracledb
 node example.js
 ```
@@ -480,11 +484,11 @@ If you want to use Instant Client RPMs without using rpath, then set
 `OCI_LIB_DIR` and `OCI_INC_DIR` prior to installation, for example:
 
 ```
-export OCI_LIB_DIR=/usr/lib/oracle/12.1/client64/lib
-export OCI_INC_DIR=/usr/include/oracle/12.1/client64
+export OCI_LIB_DIR=/usr/lib/oracle/12.2/client64/lib
+export OCI_INC_DIR=/usr/include/oracle/12.2/client64
 npm install oracledb
 unset OCI_LIB_DIR OCI_INC_DIR
-export LD_LIBRARY_PATH=/usr/lib/oracle/12.1/client64/lib:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=/usr/lib/oracle/12.2/client64/lib:$LD_LIBRARY_PATH
 node example.js
 ```
 
@@ -895,14 +899,14 @@ and install them into `/opt/oracle`.
 
 ```
 cd /opt/oracle
-unzip instantclient-basic-solaris.x64-12.1.0.2.0.zip
-unzip instantclient-sdk-solaris.x64-12.1.0.2.0.zip
+unzip instantclient-basic-solaris.x64-12.2.0.1.0.zip
+unzip instantclient-sdk-solaris.x64-12.2.0.1.0.zip
 ```
 
 To run applications, you will need to set the link path:
 
 ```
-export LD_LIBRARY_PATH_64=/opt/oracle/instantclient_12_1:$LD_LIBRARY_PATH_64
+export LD_LIBRARY_PATH_64=/opt/oracle/instantclient_12_2:$LD_LIBRARY_PATH_64
 ```
 
 ### 10.3 Install the add-on
@@ -910,8 +914,8 @@ export LD_LIBRARY_PATH_64=/opt/oracle/instantclient_12_1:$LD_LIBRARY_PATH_64
 Tell the installer where to find Instant Client:
 
 ```
-export OCI_LIB_DIR=/opt/oracle/instantclient_12_1
-export OCI_INC_DIR=/opt/oracle/instantclient_12_1/sdk/include
+export OCI_LIB_DIR=/opt/oracle/instantclient_12_2
+export OCI_INC_DIR=/opt/oracle/instantclient_12_2/sdk/include
 ```
 
 Use absolute paths for the variable values.  These variables are only
