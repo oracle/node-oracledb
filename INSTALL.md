@@ -54,8 +54,7 @@ Oracle Client 11.2 if you need to connect to Oracle Database 9.2.
 A compiler is required.  Use Visual Studio on Windows, GCC on Linux or
 Xcode on macOS.  **When building with Node 4 onward, the compiler must
 support C++11.**  Note the default compiler on Oracle Linux 6 and RHEL 6
-does not have the required support.  Install a
-[newer compiler](https://blogs.oracle.com/opal/entry/getting_a_c_11_compatible)
+does not have the required support.  Install [GCC 4.7 or later](https://blogs.oracle.com/opal/entry/getting_a_c_11_compatible)
 or upgrade to Oracle Linux 7.
 
 Python 2.7 is needed by node-gyp.  If another version of Python occurs
@@ -94,24 +93,36 @@ install Oracle Linux yourself, it is free from
 
 Questions and issues can be posted as [GitHub Issues](https://github.com/oracle/node-oracledb/issues).
 
-### 2.1 Install Node.js
+### 2.1 Install Prerequisites
+
+GCC 4.7 (or later) is needed to install because compiling for Node 4
+(or later) requires a C++11 compatible compiler.
+
+The default compiler on Oracle Linux 6 and RHEL 6 does not have the
+required C++11
+support. Install
+[GCC 4.7 or later](https://blogs.oracle.com/opal/entry/getting_a_c_11_compatible) or
+upgrade to Oracle Linux 7.
+
+
+### 2.2 Install Node.js
 
 Download and extract the [Node.js "Linux Binaries"](http://nodejs.org)
-package.  For example, if you downloaded version 6.9.1 for 64-bit you
+package.  For example, if you downloaded version 6.9.4 for 64-bit you
 could install Node.js into `/opt`:
 
 ```
 cd /opt
-tar -Jxf node-v6.9.1-linux-x64.tar.xz
+tar -Jxf node-v6.9.4-linux-x64.tar.xz
 ```
 
 Set PATH to include Node.js:
 
 ```
-export PATH=/opt/node-v6.9.1-linux-x64/bin:$PATH
+export PATH=/opt/node-v6.9.4-linux-x64/bin:$PATH
 ```
 
-### 2.2 Install the free Oracle Instant Client 'Basic' and 'SDK' RPMs
+### 2.3 Install the free Oracle Instant Client 'Basic' and 'SDK' RPMs
 
 Download the free **Basic** and **SDK** RPMs from [Oracle Technology Network](http://www.oracle.com/technetwork/topics/linuxx86-64soft-092277.html) and
 [install them](http://www.oracle.com/technetwork/topics/linuxx86-64soft-092277.html#ic_x64_inst) as the root user:
@@ -125,7 +136,7 @@ If you have a [ULN](https://linux.oracle.com) subscription, you can
 alternatively use `yum` to install these packages from the
 *Oracle Software for Oracle Linux* channel for your version of Linux.
 
-### 2.3 Install the add-on
+### 2.4 Install the add-on
 
 If you are behind a firewall you may need to set your proxy, for
 example:
@@ -157,7 +168,7 @@ the Instant Client RPM libraries, for example
 Note: A compiler supporting C++11 is required when building with
 Node.js 4 or later, otherwise the NAN component will fail to build.
 
-### 2.4 Run an example program
+### 2.5 Run an example program
 
 Download the
 [example programs](https://github.com/oracle/node-oracledb/tree/master/examples) from GitHub.
@@ -183,24 +194,35 @@ node select1.js
 
 Questions and issues can be posted as [GitHub Issues](https://github.com/oracle/node-oracledb/issues).
 
-### 3.1 Install Node.js
+### 3.1 Install Prerequisites
+
+GCC 4.7 (or later) is needed to install because compiling for Node 4
+(or later) requires a C++11 compatible compiler.
+
+The default compiler on Oracle Linux 6 and RHEL 6 does not have the
+required C++11
+support. Install
+[GCC 4.7 or later](https://blogs.oracle.com/opal/entry/getting_a_c_11_compatible) or
+upgrade to Oracle Linux 7.
+
+### 3.2 Install Node.js
 
 Download and extract the [Node.js "Linux Binaries"](http://nodejs.org)
-package.  For example, if you downloaded version 6.9.1 for 64-bit you
+package.  For example, if you downloaded version 6.9.4 for 64-bit you
 could install Node.js into `/opt`:
 
 ```
 cd /opt
-tar -Jxf node-v6.9.1-linux-x64.tar.xz
+tar -Jxf node-v6.9.4-linux-x64.tar.xz
 ```
 
 Set PATH to include Node.js:
 
 ```
-export PATH=/opt/node-v6.9.1-linux-x64/bin:$PATH
+export PATH=/opt/node-v6.9.4-linux-x64/bin:$PATH
 ```
 
-### 3.2 Install the free Oracle Instant Client 'Basic' and 'SDK' ZIPs
+### 3.3 Install the free Oracle Instant Client 'Basic' and 'SDK' ZIPs
 
 Download the free **Basic** and **SDK** ZIPs from
 [Oracle Technology Network](http://www.oracle.com/technetwork/topics/linuxx86-64soft-092277.html)
@@ -233,7 +255,7 @@ link path.  Do this on Linux by creating a file
 location `/opt/oracle/instantclient`, and then run `ldconfig` as
 the root user.
 
-### 3.3 Install the add-on
+### 3.4 Install the add-on
 
 Tell the installer where to find Instant Client:
 
@@ -267,10 +289,7 @@ npm install oracledb
 If you are installing with `sudo`, you may need to use `sudo -E` to
 preserve the environment variable values.
 
-Note: A compiler supporting C++11 is required when building with
-Node.js 4 or later, otherwise the NAN component will fail to build.
-
-### 3.4 Run an example program
+### 3.5 Run an example program
 
 Download the
 [example programs](https://github.com/oracle/node-oracledb/tree/master/examples) from GitHub.
@@ -296,6 +315,19 @@ node select1.js
 
 ## <a name="instoh"></a> 4. Node-oracledb installation on Linux with a Local Database
 
+Questions and issues can be posted as [GitHub Issues](https://github.com/oracle/node-oracledb/issues).
+
+### 4.1 Install Prerequisites
+
+GCC 4.7 (or later) is needed to install because compiling for Node 4
+(or later) requires a C++11 compatible compiler.
+
+The default compiler on Oracle Linux 6 and RHEL 6 does not have the
+required C++11
+support. Install
+[GCC 4.7 or later](https://blogs.oracle.com/opal/entry/getting_a_c_11_compatible) or
+upgrade to Oracle Linux 7.
+
 The `ORACLE_HOME` can be either a database home or a full Oracle
 client installation installed with Oracle's `runInstaller`.
 
@@ -305,26 +337,24 @@ version of the database is available on Linux.  Applications
 developed with XE may be immediately used with other editions of the
 Oracle Database.
 
-Questions and issues can be posted as [GitHub Issues](https://github.com/oracle/node-oracledb/issues).
-
-### 4.1 Install Node.js
+### 4.2 Install Node.js
 
 Download and extract the [Node.js "Linux Binaries"](http://nodejs.org)
-package.  For example, if you downloaded version 6.9.1 for 64-bit you
+package.  For example, if you downloaded version 6.9.4 for 64-bit you
 could install Node.js into `/opt`:
 
 ```
 cd /opt
-tar -zxf node-v6.9.1-linux-x64.tar.gz
+tar -zxf node-v6.9.4-linux-x64.tar.gz
 ```
 
 Set your PATH variable to include Node.js:
 
 ```
-export PATH=/opt/node-v6.9.1-linux-x64/bin:$PATH
+export PATH=/opt/node-v6.9.4-linux-x64/bin:$PATH
 ```
 
-### 4.2 Install the add-on
+### 4.3 Install the add-on
 
 Set required Oracle environment variables, such as `ORACLE_HOME` by
 executing:
@@ -370,10 +400,7 @@ npm install oracledb
 If you are installing with `sudo`, you may need to use `sudo -E` to
 preserve the environment variable values.
 
-Note: A compiler supporting C++11 is required when building with
-Node.js 4 or later, otherwise the NAN component will fail to build.
-
-### 4.3 Run an example program
+### 4.4 Run an example program
 
 Set `LD_LIBRARY_PATH` to the Oracle library directory, if it was not
 set by `oraenv` or `oracle_env.sh`:
@@ -474,9 +501,9 @@ Otherwise follow the instructions below for Instant Client 12.1.
 
 Questions and issues can be posted as [GitHub Issues](https://github.com/oracle/node-oracledb/issues).
 
-### 6.1 Install Xcode
+### 6.1 Install Prerequisites
 
-Building node-oracledb requires Xcode from the Mac App store.
+Install Xcode from the Mac App store.
 
 ### 6.2 Install Node.js
 
@@ -557,19 +584,25 @@ see
 
 ## <a name="instwin"></a> 7. Node-oracledb Installation on Windows
 
+Questions and issues can be posted as [GitHub Issues](https://github.com/oracle/node-oracledb/issues).
+
 **Note**: An Oracle Technology Network article
 [Installing node-oracledb on Microsoft Windows](https://community.oracle.com/docs/DOC-931127)
 has step-by-step Windows installation instructions that you can
 alternatively refer to.
 
-Questions and issues can be posted as [GitHub Issues](https://github.com/oracle/node-oracledb/issues).
-
-### 7.1 Install required tools
+### 7.1 Install Prerequisites
 
 Install a C/C++ build environment such as Microsoft Visual
-Studio 2012.  Compilers supported by Oracle libraries are found in
+Studio 2013.  To build with Node 6 or later, use VS 2015.  Compilers supported by Oracle libraries are found in
 [Oracle documentation](https://docs.oracle.com/en/database/) for each version, for example
 [Oracle Database Client Quick Installation Guide 12c Release 1 (12.1) for Microsoft Windows x64 (64-Bit)](https://docs.oracle.com/database/121/NXCQI/toc.htm#NXCQI108).
+
+The `PATH` variable needs to include the appropriate Visual Studio
+redistributables for the Oracle client.  This should be part of your VS
+install.  Specifically, if you use Oracle client 11.2 then
+the [Visual Studio 2005 redistributable](https://www.microsoft.com/en-us/download/details.aspx?id=18471) is required.  The Oracle client 12.1 requires the
+[Visual Studio 2010 redistributable](https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads#bookmark-vs2010).
 
 Install the Python 2.7 MSI from
 [www.python.org](https://www.python.org/downloads).  Select the
@@ -581,7 +614,7 @@ during build and run time.  Otherwise use a 64-bit Node.js with a
 
 ### 7.2 Install Node.js
 
-Install the 64-bit Node.js  MSI (e.g. node-v6.9.1-x64.msi) from
+Install the 64-bit Node.js  MSI (e.g. node-v6.9.4-x64.msi) from
 [nodejs.org](http://nodejs.org/).  Make sure the option to
 add the Node and npm directories to the path is selected.
 
@@ -804,10 +837,6 @@ npm install oracledb
 ```
 
 Note: The version of `make` should be GNU Make 4.1-1 or above.
-
-Note: A compiler supporting C++11 (such as GCC 4.8) is required when
-building with Node.js 4.x or later, otherwise the NAN component will
-fail to build.
 
 ### 9.4 Run an example program
 
