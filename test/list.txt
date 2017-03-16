@@ -1362,8 +1362,8 @@ Overview of node-oracledb functional tests
        82.1.17 works with setting oracledb.maxRows > actual number of rows in the table
        82.1.18 override oracledb.fetchAsString with fetchInfo set to oracledb.DEFAULT
        82.1.19 works with connection.queryStream()
-       82.1.20 works with connection.queryStream() and oracledb.maxRows > actual number of rows in the table (506ms)
-       82.1.21 works with connection.queryStream() and oracledb.maxRows = actual number of rows in the table (506ms)
+       82.1.20 works with connection.queryStream() and oracledb.maxRows > actual number of rows in the table
+       82.1.21 works with connection.queryStream() and oracledb.maxRows = actual number of rows in the table
      - 82.1.22 works with connection.queryStream() and oracledb.maxRows < actual number of rows in the table
     82.2 fetch CLOB columns by setting oracledb.fetchAsString and outFormat = oracledb.OBJECT
        82.2.1 works with NULL value

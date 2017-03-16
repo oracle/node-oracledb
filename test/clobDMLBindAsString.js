@@ -611,43 +611,36 @@ describe('79.clobDMLBindAsString.js', function() {
       var sql = "INSERT INTO nodb_dml_clob_1 (id, clob) VALUES (:i, EMPTY_CLOB()) RETURNING clob INTO :lobbv";
       var inFileName = './test/clobexample.txt';
 
-      async.series([
-        function(cb) {
-          connection.execute(
-            sql,
-            {
-              i: id,
-              lobbv: { type: oracledb.CLOB, dir: oracledb.BIND_OUT }
-            },
-            { autoCommit: true },
-            function(err, result) {
-              should.not.exist(err);
-              var inStream = fs.createReadStream(inFileName);
-              var lob = result.outBinds.lobbv[0];
+      connection.execute(
+        sql,
+        {
+          i: id,
+          lobbv: { type: oracledb.CLOB, dir: oracledb.BIND_OUT }
+        },
+        { autoCommit: true },
+        function(err, result) {
+          should.not.exist(err);
+          var inStream = fs.createReadStream(inFileName);
+          var lob = result.outBinds.lobbv[0];
 
-              lob.on('error', function(err) {
-                should.exist(err);
-                // ORA-22990: LOB locators cannot span transactions
-                (err.message).should.startWith('ORA-22990:');
-              });
+          lob.on('error', function(err) {
+            should.exist(err);
+            // ORA-22990: LOB locators cannot span transactions
+            (err.message).should.startWith('ORA-22990:');
+          });
 
-              inStream.on('error', function(err) {
-                should.not.exist(err, "inStream.on 'error' event");
-              });
+          inStream.on('error', function(err) {
+            should.not.exist(err, "inStream.on 'error' event");
+          });
 
-              lob.on('close', function(err) {
-                should.not.exist(err);
-                connection.commit( function(err) {
-                  should.not.exist(err);
-                  return cb();
-                });
-              });
+          lob.on('close', function(err) {
+            should.not.exist(err);
+            done();
+          });
 
-              inStream.pipe(lob); // copies the text to the CLOB
-            }
-          );
+          inStream.pipe(lob); // copies the text to the CLOB
         }
-      ], done);
+      );
     }); // 79.1.21
 
     it('79.1.22 works with bind in maxSize smaller than string length', function(done) {

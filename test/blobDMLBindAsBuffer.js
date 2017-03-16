@@ -597,24 +597,20 @@ describe('80.blobDMLBindAsBuffer.js', function() {
       var content = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
       var sql = "INSERT INTO nodb_dml_blob_1 (id, blob) VALUES (:i, :c) RETURNING blob INTO :lobbv";
 
-      async.series([
-        function(cb) {
-          connection.execute(
-            sql,
-            {
-              i: id,
-              c: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN },
-              lobbv: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: contentLength }
-            },
-            function(err) {
-              should.exist(err);
-              // NJS-028: RAW database type is not supported with DML Returning statements
-              (err.message).should.startWith('NJS-028:');
-              cb();
-            }
-          );
+      connection.execute(
+        sql,
+        {
+          i: id,
+          c: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN },
+          lobbv: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: contentLength }
+        },
+        function(err) {
+          should.exist(err);
+          // NJS-028: RAW database type is not supported with DML Returning statements
+          (err.message).should.startWith('NJS-028:');
+          done();
         }
-      ], done);
+      );
     }); // 80.1.20
 
     it('80.1.21 Negative: RETURNING INTO with autocommit on', function(done) {
@@ -622,43 +618,36 @@ describe('80.blobDMLBindAsBuffer.js', function() {
       var sql = "INSERT INTO nodb_dml_blob_1 (id, blob) VALUES (:i, EMPTY_BLOB()) RETURNING blob INTO :lobbv";
       var inFileName = './test/tree.jpg';
 
-      async.series([
-        function(cb) {
-          connection.execute(
-            sql,
-            {
-              i: id,
-              lobbv: { type: oracledb.BLOB, dir: oracledb.BIND_OUT }
-            },
-            { autoCommit: true },
-            function(err, result) {
-              should.not.exist(err);
-              var inStream = fs.createReadStream(inFileName);
-              var lob = result.outBinds.lobbv[0];
+      connection.execute(
+        sql,
+        {
+          i: id,
+          lobbv: { type: oracledb.BLOB, dir: oracledb.BIND_OUT }
+        },
+        { autoCommit: true },
+        function(err, result) {
+          should.not.exist(err);
+          var inStream = fs.createReadStream(inFileName);
+          var lob = result.outBinds.lobbv[0];
 
-              lob.on('error', function(err) {
-                should.exist(err);
-                // ORA-22990: LOB locators cannot span transactions
-                (err.message).should.startWith('ORA-22990:');
-              });
+          lob.on('error', function(err) {
+            should.exist(err);
+            // ORA-22990: LOB locators cannot span transactions
+            (err.message).should.startWith('ORA-22990:');
+          });
 
-              inStream.on('error', function(err) {
-                should.not.exist(err, "inStream.on 'error' event");
-              });
+          inStream.on('error', function(err) {
+            should.not.exist(err, "inStream.on 'error' event");
+          });
 
-              lob.on('close', function(err) {
-                should.not.exist(err);
-                connection.commit( function(err) {
-                  should.not.exist(err);
-                  return cb();
-                });
-              });
+          lob.on('close', function(err) {
+            should.not.exist(err);
+            done();
+          });
 
-              inStream.pipe(lob); // copies the text to the CLOB
-            }
-          );
+          inStream.pipe(lob); // copies the text to the CLOB
         }
-      ], done);
+      );
     }); // 80.1.21
 
     it('80.1.22 works with bind in maxSize smaller than buffer size', function(done) {
