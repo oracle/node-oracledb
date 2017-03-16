@@ -1111,7 +1111,7 @@ Overview of node-oracledb functional tests
     73.21 cannot surpass the upper limit at pool creation
     73.22 cannot surpass the lower limit at pool creation
 
- 74.lobBindAsStringBuffer.js
+74.clobPlsqlBindAsString.js
     74.1 CLOB, PLSQL, BIND_IN
        74.1.1 PLSQL, BIND_IN with String length 32K
        74.1.2 PLSQL, BIND_IN with String length 64K - 1
@@ -1138,100 +1138,107 @@ Overview of node-oracledb functional tests
        74.3.1 PLSQL, BIND_INOUT with String length 32K
        74.3.2 PLSQL, BIND_INOUT with String length 32K - 1
        74.3.3 PLSQL, BIND_INOUT with String length 64K - 1
-    74.4 BLOB, PLSQL, BIND_IN
-       74.4.1 PLSQL, BIND_IN with Buffer size 32K
-       74.4.2 PLSQL, BIND_IN with Buffer size 64K - 1
-       74.4.3 PLSQL, BIND_IN with null
-       74.4.4 PLSQL, BIND_IN with empty string
-       74.4.5 PLSQL, BIND_IN with undefined
-       74.4.6 PLSQL, BIND_IN with NaN
-       74.4.7 PLSQL, BIND_IN with 0
-       74.4.8 PLSQL, BIND_IN bind value and type mismatch
-       74.4.9 PLSQL, BIND_IN mixing named with positional binding
-       74.4.10 PLSQL, BIND_IN without maxSize
-       74.4.11 PLSQL, BIND_IN with invalid BLOB
-    74.5 BLOB, PLSQL, BIND_OUT
-       74.5.1 PLSQL, BIND_OUT with Buffer size 32K
-       74.5.2 PLSQL, BIND_OUT with Buffer size 64K - 1
-       74.5.3 PLSQL, BIND_OUT with null
-       74.5.4 PLSQL, BIND_OUT with empty buffer
-       74.5.5 PLSQL, BIND_OUT with undefined
-       74.5.6 PLSQL, BIND_OUT mixing named with positional binding
-       74.5.7 PLSQL, BIND_OUT with limited maxSize
-       74.5.8 PLSQL, BIND_OUT without maxSize
-    74.6 BLOB, PLSQL, BIND_INOUT
-       74.6.1 PLSQL, BIND_INOUT with Buffer size 32K
-       74.6.2 PLSQL, BIND_INOUT with Buffer size 32K - 1
-       74.6.3 PLSQL, BIND_INOUT with Buffer size 64K - 1
-       74.6.1 PLSQL, BIND_INOUT
-    74.7 Multiple CLOBs, BIND_IN
-       74.7.1 PLSQL, BIND_IN, bind two string
-       74.7.2 PLSQL, BIND_IN, bind a txt file and a string
-    74.8 Multiple CLOBs, BIND_OUT
-       74.8.1 PLSQL, BIND_OUT, bind two string
-       74.8.2 PLSQL, BIND_OUT, bind a txt file and a string
-    74.9 Multiple CLOBs, BIND INOUT
-       74.9.1 PLSQL, BIND_INOUT, bind a txt file and a 32K string
-       74.9.2 PLSQL, BIND_INOUT, bind a txt file and a 64K - 1 string
-    74.10 Multiple BLOBs, BIND_IN
-       74.10.1 PLSQL, BIND_IN, bind two Buffer
-       74.10.2 PLSQL, BIND_IN, bind a JPG file and a Buffer
-    74.11 Multiple BLOBs, BIND_OUT
-       74.11.1 PLSQL, BIND_OUT, bind two buffer
-       74.11.2 PLSQL, BIND_OUT, bind a JPG file and a Buffer
-    74.12 Multiple BLOBs, BIND_INOUT
-       74.12.1 PLSQL, BIND_INOUT, bind a JPG and a 32K buffer
-       74.12.2 PLSQL, BIND_INOUT, bind a JPG and a 64K - 1 buffer
-    74.13 Multiple LOBs, BIND_IN
-       74.13.1 PLSQL, CLOB&BLOB, bind a string and a buffer
-       74.13.2 PLSQL, CLOB&BLOB, bind a string and a JPG file
-       74.13.3 PLSQL, CLOB&BLOB, bind a txt file and a Buffer
-    74.14 Multiple LOBs, BIND_OUT
-       74.14.1 PLSQL, CLOB&BLOB, bind a string and a buffer
-       74.14.2 PLSQL, CLOB&BLOB, bind a string and a JPG file
-       74.14.3 PLSQL, CLOB&BLOB, bind a txt file and a buffer
-    74.15 Multiple LOBs, BIND_INOUT
-       74.15.1 PLSQL, BIND_INOUT, bind a 32K string and a 32K buffer
-       74.15.2 PLSQL, BIND_INOUT, bind a 64K - 1 string and a 64K - 1 buffer
-       74.15.1 PLSQL, BIND_INOUT, bind a string and a buffer
+    74.4 Multiple CLOBs, BIND_IN
+       74.4.1 PLSQL, BIND_IN, bind two string
+       74.4.2 PLSQL, BIND_IN, bind a txt file and a string
+    74.5 Multiple CLOBs, BIND_OUT
+       74.5.1 PLSQL, BIND_OUT, bind two string
+       74.5.2 PLSQL, BIND_OUT, bind a txt file and a string
+    74.6 Multiple CLOBs, BIND INOUT
+       74.6.1 PLSQL, BIND_INOUT, bind a txt file and a 32K string
+       74.6.2 PLSQL, BIND_INOUT, bind a txt file and a 64K - 1 string
 
-75. lobProperties2.js
-    75.1 CLOB: chunkSize (read-only)
-    75.2 BLOB: chunkSize (read-only)
-    75.3 CLOB: length (read-only)
-    75.4 BLOB: length (read-only)
-    75.5 CLOB: type (read-only)
-    75.6 BLOB: type (read-only)
-    75.7 pieceSize
-       75.7.1 default value is chunkSize
-       75.7.2 can be increased
-       75.7.3 can be decreased
-       75.7.4 can be zero
-       75.7.5 cannot be less than zero
-       75.7.6 cannot be null
-       75.7.7 must be a number
 
-76. fetchClobAsString.js
-    76.1 fetch CLOB columns by setting oracledb.fetchAsString
-        76.1.1 works with NULL value
-        76.1.2 works with small CLOB data
-        76.1.3 fetch multiple CLOB columns as String
-        76.1.4 fetch the same CLOB column multiple times
-        76.1.5 works with (64K - 1) value
-        76.1.6 fetch with substr()
-        76.1.7 works with EMPTY_CLOB()
-        76.1.8 fetch CLOB with stream
-        76.1.9 works with REF CURSOR
-        76.1.10 work with update
-    76.2 fetch CLOB columns by setting fetchInfo option
-        76.2.1 works with NULL value
-        76.2.2 works with small CLOB data
-        76.2.3 fetch multiple CLOB columns as String
-        76.2.4 fetch the same CLOB column multiple times
-        76.2.5 works with (64K - 1) value
-        76.2.6 works with substr()
-        76.2.7 works with EMPTY_CLOB()
-        76.2.8 work with UPDATE statement
-    76.3 fetch multiple CLOBs
-        76.3.1 fetch multiple CLOB columns as String
-        76.3.2 fetch two CLOB columns, one as string, another streamed
+75.blobPlsqlBindAsBuffer.js
+    75.1 BLOB, PLSQL, BIND_IN
+       75.1.1 PLSQL, BIND_IN with Buffer size 32K
+       75.1.2 PLSQL, BIND_IN with Buffer size 64K - 1
+       75.1.3 PLSQL, BIND_IN with null
+       75.1.4 PLSQL, BIND_IN with empty string
+       75.1.5 PLSQL, BIND_IN with undefined
+       75.1.6 PLSQL, BIND_IN with NaN
+       75.1.7 PLSQL, BIND_IN with 0
+       75.1.8 PLSQL, BIND_IN bind value and type mismatch
+       75.1.9 PLSQL, BIND_IN mixing named with positional binding
+       75.1.10 PLSQL, BIND_IN without maxSize
+       75.1.11 PLSQL, BIND_IN with invalid BLOB
+    75.2 BLOB, PLSQL, BIND_OUT
+       75.2.1 PLSQL, BIND_OUT with Buffer size 32K
+       75.2.2 PLSQL, BIND_OUT with Buffer size 64K - 1
+       75.2.3 PLSQL, BIND_OUT with null
+       75.2.4 PLSQL, BIND_OUT with empty buffer
+       75.2.5 PLSQL, BIND_OUT with undefined
+       75.2.6 PLSQL, BIND_OUT mixing named with positional binding
+       75.2.7 PLSQL, BIND_OUT with limited maxSize
+       75.2.8 PLSQL, BIND_OUT without maxSize
+    75.3 BLOB, PLSQL, BIND_INOUT
+       75.3.1 PLSQL, BIND_INOUT with Buffer size 32K
+       75.3.2 PLSQL, BIND_INOUT with Buffer size 32K - 1
+       75.3.3 PLSQL, BIND_INOUT with Buffer size 64K - 1
+    75.4 Multiple BLOBs, BIND_IN
+       75.4.1 PLSQL, BIND_IN, bind two Buffer
+       75.4.2 PLSQL, BIND_IN, bind a JPG file and a Buffer
+    75.5 Multiple BLOBs, BIND_OUT
+       75.5.1 PLSQL, BIND_OUT, bind two buffer
+       75.5.2 PLSQL, BIND_OUT, bind a JPG file and a Buffer
+    75.6 Multiple BLOBs, BIND_INOUT
+       75.6.1 PLSQL, BIND_INOUT, bind a JPG and a 32K buffer
+       75.6.2 PLSQL, BIND_INOUT, bind a JPG and a 64K - 1 buffer
+
+76.lobBindAsStringBuffer.js
+    76.1 Multiple LOBs, BIND_IN
+       76.1.1 PLSQL, CLOB&BLOB, bind a string and a buffer
+       76.1.2 PLSQL, CLOB&BLOB, bind a string and a JPG file
+       76.1.3 PLSQL, CLOB&BLOB, bind a txt file and a Buffer
+    76.2 Multiple LOBs, BIND_OUT
+       76.2.1 PLSQL, CLOB&BLOB, bind a string and a buffer
+       76.2.2 PLSQL, CLOB&BLOB, bind a string and a JPG file
+       76.2.3 PLSQL, CLOB&BLOB, bind a txt file and a buffer
+    76.3 Multiple LOBs, BIND_INOUT
+       76.3.1 PLSQL, BIND_INOUT, bind a 32K string and a 32K buffer
+       76.3.2 PLSQL, BIND_INOUT, bind a 64K - 1 string and a 64K - 1 buffer
+
+77. lobProperties2.js
+    77.1 CLOB: chunkSize (read-only)
+    77.2 BLOB: chunkSize (read-only)
+    77.3 CLOB: length (read-only)
+    77.4 BLOB: length (read-only)
+    77.5 CLOB: type (read-only)
+    77.6 BLOB: type (read-only)
+    77.7 pieceSize
+       77.7.1 default value is chunkSize
+       77.7.2 can be increased
+       77.7.3 can be decreased
+       77.7.4 can be zero
+       77.7.5 cannot be less than zero
+       77.7.6 cannot be null
+       77.7.7 must be a number
+
+78. fetchClobAsString.js
+    78.1 fetch CLOB columns by setting oracledb.fetchAsString
+       78.1.1 works with NULL value
+       78.1.2 works with small CLOB data
+       78.1.3 fetch multiple CLOB columns as String
+       78.1.4 fetch the same CLOB column multiple times
+       78.1.5 works with (64K - 1) value
+       78.1.6 fetch with substr()
+       78.1.7 works with EMPTY_CLOB()
+       78.1.8 fetch CLOB with stream
+       78.1.9 works with REF CURSOR
+       78.1.10 works with update statement
+       78.1.11 works with setting oracledb.maxRows < actual number of rows in the table
+       78.1.12 works with setting oracledb.maxRows > actual number of rows in the table
+    78.2 fetch CLOB columns by setting fetchInfo option
+       78.2.1 works with NULL value
+       78.2.2 works with small CLOB data
+       78.2.3 fetch multiple CLOB columns as String
+       78.2.4 fetch the same CLOB column multiple times
+       78.2.5 works with (64K - 1) value
+       78.2.6 works with substr()
+       78.2.7 works with EMPTY_CLOB()
+       78.2.8 works with UPDATE statement
+       78.2.9 works with setting oracledb.maxRows < actual number of rows in the table
+       78.2.10 works with setting oracledb.maxRows > actual number of rows in the table
+    78.3 fetch multiple CLOBs
+       78.3.1 fetch multiple CLOB columns as String
+       78.3.2 fetch two CLOB columns, one as string, another streamed
