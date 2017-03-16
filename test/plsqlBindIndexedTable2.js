@@ -680,7 +680,7 @@ describe('44. plsqlBindIndexedTable2.js', function() {
           },
           function(err) {
             should.exist(err);
-            (err.message).should.startWith('ORA-06502');
+            (err.message).should.startWith('ORA-06502:');
             // ORA-06502: PL/SQL: numeric or value error: host bind array too small
             callback();
           }

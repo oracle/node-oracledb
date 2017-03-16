@@ -229,7 +229,7 @@ describe('70. plsqlBindScalar.js', function() {
         function(err) {
           should.exist(err);
           // console.log(result);
-          (err.message).should.startWith('NJS-011');
+          (err.message).should.startWith('NJS-011:');
           done();
         }
       );
@@ -335,7 +335,7 @@ describe('70. plsqlBindScalar.js', function() {
         bindVar,
         function(err) {
           should.exist(err);
-          (err.message).should.startWith('NJS-011');
+          (err.message).should.startWith('NJS-011:');
           // console.log(result);
           done();
         }
@@ -3345,7 +3345,7 @@ describe('70. plsqlBindScalar.js', function() {
         function(err) {
           should.exist(err);
           //ORA-01839: date not valid for month specified
-          (err.message).should.startWith("ORA-01839");
+          (err.message).should.startWith("ORA-01839:");
           done();
         }
       );
@@ -4143,7 +4143,7 @@ describe('70. plsqlBindScalar.js', function() {
         function(err) {
           should.exist(err);
           //ORA-01839: date not valid for month specified
-          (err.message).should.startWith("ORA-01839");
+          (err.message).should.startWith("ORA-01839:");
           done();
         }
       );
@@ -4940,7 +4940,7 @@ describe('70. plsqlBindScalar.js', function() {
         function(err) {
           should.exist(err);
           //ORA-01839: date not valid for month specified
-          (err.message).should.startWith("ORA-01839");
+          (err.message).should.startWith("ORA-01839:");
           done();
         }
       );

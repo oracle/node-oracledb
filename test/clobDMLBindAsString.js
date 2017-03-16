@@ -19,7 +19,7 @@
  * See LICENSE.md for relevant licenses.
  *
  * NAME
- *   79. clobDMLBindAsString.js
+ *   81. clobDMLBindAsString.js
  *
  * DESCRIPTION
  *   Testing CLOB binding as String with DML.
@@ -36,15 +36,17 @@
 var oracledb = require('oracledb');
 var should   = require('should');
 var async    = require('async');
+var fs       = require('fs');
 var dbConfig = require('./dbconfig.js');
-var random = require('./random.js');
-var fs = require('fs');
+var random   = require('./random.js');
 
-describe('79.clobDMLBindAsString.js', function() {
+describe('81. clobDMLBindAsString.js', function() {
   this.timeout(100000);
 
   var connection = null;
   var client11gPlus = true; // assume instant client runtime version is greater than 11.2.0.4.0
+  var insertID = 1; // assume id for insert into db starts from 1
+
   var proc_clob_1 = "BEGIN \n" +
                     "    DECLARE \n" +
                     "        e_table_missing EXCEPTION; \n" +
@@ -207,14 +209,7 @@ describe('79.clobDMLBindAsString.js', function() {
     }
   };
 
-  // Generate id for insert clob into db
-  var insertID = 0;
-  var getID = function() {
-    insertID = insertID + 1;
-    return insertID;
-  };
-
-  describe('79.1 CLOB, INSERT', function() {
+  describe('81.1 CLOB, INSERT', function() {
     before(function(done) {
       executeSQL(proc_clob_1, done);
     });  // before
@@ -223,8 +218,8 @@ describe('79.clobDMLBindAsString.js', function() {
       executeSQL(sql2DropTable1, done);
     }); // after
 
-    it('79.1.1 works with EMPTY_CLOB', function(done) {
-      var id = getID();
+    it('81.1.1 works with EMPTY_CLOB', function(done) {
+      var id = insertID++;
       var content = "EMPTY_CLOB";
 
       async.series([
@@ -235,10 +230,10 @@ describe('79.clobDMLBindAsString.js', function() {
           checkInsertResult(id, content, null, false, cb);
         }
       ], done);
-    }); // 79.1.1
+    }); // 81.1.1
 
-    it('79.1.2 works with empty string', function(done) {
-      var id = getID();
+    it('81.1.2 works with empty string', function(done) {
+      var id = insertID++;
       var content = '';
 
       async.series([
@@ -249,10 +244,10 @@ describe('79.clobDMLBindAsString.js', function() {
           checkInsertResult(id, content, null, false, cb);
         }
       ], done);
-    }); // 79.1.2
+    }); // 81.1.2
 
-    it('79.1.3 works with empty string and bind in maxSize set to 32767', function(done) {
-      var id = getID();
+    it('81.1.3 works with empty string and bind in maxSize set to 32767', function(done) {
+      var id = insertID++;
       var content = "";
 
       async.series([
@@ -274,10 +269,10 @@ describe('79.clobDMLBindAsString.js', function() {
           checkInsertResult(id, content, null, false, cb);
         }
       ], done);
-    }); // 79.1.3
+    }); // 81.1.3
 
-    it('79.1.4 works with empty string and bind in maxSize set to 50000', function(done) {
-      var id = getID();
+    it('81.1.4 works with empty string and bind in maxSize set to 50000', function(done) {
+      var id = insertID++;
       var content = "";
 
       async.series([
@@ -299,10 +294,10 @@ describe('79.clobDMLBindAsString.js', function() {
           checkInsertResult(id, content, null, false, cb);
         }
       ], done);
-    }); // 79.1.4
+    }); // 81.1.4
 
-    it('79.1.5 works with undefined', function(done) {
-      var id = getID();
+    it('81.1.5 works with undefined', function(done) {
+      var id = insertID++;
       var content = undefined;
 
       async.series([
@@ -313,10 +308,10 @@ describe('79.clobDMLBindAsString.js', function() {
           checkInsertResult(id, content, null, false, cb);
         }
       ], done);
-    }); // 79.1.5
+    }); // 81.1.5
 
-    it('79.1.6 works with null', function(done) {
-      var id = getID();
+    it('81.1.6 works with null', function(done) {
+      var id = insertID++;
       var content = null;
 
       async.series([
@@ -327,10 +322,10 @@ describe('79.clobDMLBindAsString.js', function() {
           checkInsertResult(id, content, null, false, cb);
         }
       ], done);
-    }); // 79.1.6
+    }); // 81.1.6
 
-    it('79.1.7 works with null and bind in maxSize set to 32767', function(done) {
-      var id = getID();
+    it('81.1.7 works with null and bind in maxSize set to 32767', function(done) {
+      var id = insertID++;
       var content = null;
 
       async.series([
@@ -352,10 +347,10 @@ describe('79.clobDMLBindAsString.js', function() {
           checkInsertResult(id, content, null, false, cb);
         }
       ], done);
-    }); // 79.1.7
+    }); // 81.1.7
 
-    it('79.1.8 works with null and bind in maxSize set to 50000', function(done) {
-      var id = getID();
+    it('81.1.8 works with null and bind in maxSize set to 50000', function(done) {
+      var id = insertID++;
       var content = null;
 
       async.series([
@@ -377,10 +372,10 @@ describe('79.clobDMLBindAsString.js', function() {
           checkInsertResult(id, content, null, false, cb);
         }
       ], done);
-    }); // 79.1.8
+    }); // 81.1.8
 
-    it('79.1.9 works with NaN', function(done) {
-      var id = getID();
+    it('81.1.9 works with NaN', function(done) {
+      var id = insertID++;
       var content = NaN;
 
       connection.execute(
@@ -396,10 +391,10 @@ describe('79.clobDMLBindAsString.js', function() {
           done();
         }
       );
-    }); // 79.1.9
+    }); // 81.1.9
 
-    it('79.1.10 works with 0', function(done) {
-      var id = getID();
+    it('81.1.10 works with 0', function(done) {
+      var id = insertID++;
       var content = 0;
 
       connection.execute(
@@ -415,12 +410,12 @@ describe('79.clobDMLBindAsString.js', function() {
           done();
         }
       );
-    }); // 79.1.10
+    }); // 81.1.10
 
-    it('79.1.11 works with String length 32K', function(done) {
-      var id = getID();
+    it('81.1.11 works with String length 32K', function(done) {
+      var id = insertID++;
       var contentLength = 32768;
-      var specialStr = "79.1.11";
+      var specialStr = "81.1.11";
       var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
@@ -431,12 +426,12 @@ describe('79.clobDMLBindAsString.js', function() {
           checkInsertResult(id, content, specialStr, false, cb);
         }
       ], done);
-    }); // 79.1.11
+    }); // 81.1.11
 
-    it('79.1.12 works with String length (64K - 1)', function(done) {
-      var id = getID();
+    it('81.1.12 works with String length (64K - 1)', function(done) {
+      var id = insertID++;
       var contentLength = 65535;
-      var specialStr = "79.1.12";
+      var specialStr = "81.1.12";
       var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
@@ -447,12 +442,12 @@ describe('79.clobDMLBindAsString.js', function() {
           checkInsertResult(id, content, specialStr, false, cb);
         }
       ], done);
-    }); // 79.1.12
+    }); // 81.1.12
 
-    it('79.1.13 works with String length (64K + 1)', function(done) {
-      var id = getID();
+    it('81.1.13 works with String length (64K + 1)', function(done) {
+      var id = insertID++;
       var contentLength = 65537;
-      var specialStr = "79.1.13";
+      var specialStr = "81.1.13";
       var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
@@ -463,12 +458,12 @@ describe('79.clobDMLBindAsString.js', function() {
           checkInsertResult(id, content, specialStr, true, cb);
         }
       ], done);
-    }); // 79.1.13
+    }); // 81.1.13
 
-    it('79.1.14 works with String length (1MB + 1)', function(done) {
-      var id = getID();
+    it('81.1.14 works with String length (1MB + 1)', function(done) {
+      var id = insertID++;
       var contentLength = 1048577; // 1 * 1024 * 1024 + 1;
-      var specialStr = "79.1.14";
+      var specialStr = "81.1.14";
       var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
@@ -479,12 +474,12 @@ describe('79.clobDMLBindAsString.js', function() {
           checkInsertResult(id, content, specialStr, true, cb);
         }
       ], done);
-    }); // 79.1.14
+    }); // 81.1.14
 
-    it('79.1.15 works with String length (5MB + 1)', function(done) {
-      var id = getID();
+    it('81.1.15 works with String length (5MB + 1)', function(done) {
+      var id = insertID++;
       var contentLength = 5242881; // 5 * 1024 * 1024 + 1;
-      var specialStr = "79.1.15";
+      var specialStr = "81.1.15";
       var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
@@ -495,12 +490,12 @@ describe('79.clobDMLBindAsString.js', function() {
           checkInsertResult(id, content, specialStr, true, cb);
         }
       ], done);
-    }); // 79.1.15
+    }); // 81.1.15
 
-    it('79.1.16 works with String length (10MB + 1)', function(done) {
-      var id = getID();
+    it('81.1.16 works with String length (10MB + 1)', function(done) {
+      var id = insertID++;
       var contentLength = 10485761; // 10 * 1024 * 1024 + 1;
-      var specialStr = "79.1.16";
+      var specialStr = "81.1.16";
       var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
@@ -511,10 +506,10 @@ describe('79.clobDMLBindAsString.js', function() {
           checkInsertResult(id, content, specialStr, true, cb);
         }
       ], done);
-    }); // 79.1.16
+    }); // 81.1.16
 
-    it('79.1.17 bind value and type mismatch', function(done) {
-      var id = getID();
+    it('81.1.17 bind value and type mismatch', function(done) {
+      var id = insertID++;
       var content = 100;
 
       connection.execute(
@@ -530,12 +525,12 @@ describe('79.clobDMLBindAsString.js', function() {
           done();
         }
       );
-    }); // 79.1.17
+    }); // 81.1.17
 
-    it('79.1.18 mixing named with positional binding', function(done) {
-      var id = getID();
+    it('81.1.18 mixing named with positional binding', function(done) {
+      var id = insertID++;
       var contentLength = 40000;
-      var specialStr = "79.1.18";
+      var specialStr = "81.1.18";
       var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
@@ -556,10 +551,10 @@ describe('79.clobDMLBindAsString.js', function() {
           checkInsertResult(id, content, specialStr, true, cb);
         }
       ], done);
-    }); // 79.1.18
+    }); // 81.1.18
 
-    it('79.1.19 bind with invalid CLOB', function(done) {
-      var id = getID();
+    it('81.1.19 bind with invalid CLOB', function(done) {
+      var id = insertID++;
 
       connection.execute(
         "INSERT INTO nodb_dml_clob_1 VALUES (:1, :2)",
@@ -573,12 +568,12 @@ describe('79.clobDMLBindAsString.js', function() {
           done();
         }
       );
-    }); // 79.1.19
+    }); // 81.1.19
 
-    it('79.1.20 RETURNING INTO with bind type STRING', function(done) {
-      var id = getID();
+    it('81.1.20 RETURNING INTO with bind type STRING', function(done) {
+      var id = insertID++;
       var contentLength = 400;
-      var specialStr = "79.1.20";
+      var specialStr = "81.1.20";
       var content = random.getRandomString(contentLength, specialStr);
       var sql = "INSERT INTO nodb_dml_clob_1 (id, clob) VALUES (:i, :c) RETURNING clob INTO :lobbv";
 
@@ -604,10 +599,10 @@ describe('79.clobDMLBindAsString.js', function() {
           checkInsertResult(id, content, specialStr, false, cb);
         }
       ], done);
-    }); // 79.1.20
+    }); // 81.1.20
 
-    it('79.1.21 Negative: RETURNING INTO with autocommit on', function(done) {
-      var id = getID();
+    it('81.1.21 Negative: RETURNING INTO with autocommit on', function(done) {
+      var id = insertID++;
       var sql = "INSERT INTO nodb_dml_clob_1 (id, clob) VALUES (:i, EMPTY_CLOB()) RETURNING clob INTO :lobbv";
       var inFileName = './test/clobexample.txt';
 
@@ -641,12 +636,12 @@ describe('79.clobDMLBindAsString.js', function() {
           inStream.pipe(lob); // copies the text to the CLOB
         }
       );
-    }); // 79.1.21
+    }); // 81.1.21
 
-    it('79.1.22 works with bind in maxSize smaller than string length', function(done) {
-      var id = getID();
+    it('81.1.22 works with bind in maxSize smaller than string length', function(done) {
+      var id = insertID++;
       var contentLength = 32768;
-      var specialStr = "79.1.22";
+      var specialStr = "81.1.22";
       var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
@@ -668,11 +663,11 @@ describe('79.clobDMLBindAsString.js', function() {
           checkInsertResult(id, content, specialStr, false, cb);
         }
       ], done);
-    }); // 79.1.22
+    }); // 81.1.22
 
-  }); // 79.1
+  }); // 81.1
 
-  describe('79.2 CLOB, UPDATE', function() {
+  describe('81.2 CLOB, UPDATE', function() {
     insertID = 0;
 
     before(function(done) {
@@ -683,11 +678,11 @@ describe('79.clobDMLBindAsString.js', function() {
       executeSQL(sql2DropTable1, done);
     }); // after
 
-    it('79.2.1 update EMPTY_CLOB column', function(done) {
-      var id = getID();
+    it('81.2.1 update EMPTY_CLOB column', function(done) {
+      var id = insertID++;
       var content_1 = "EMPTY_CLOB";
       var contentLength_2 = 32768;
-      var specialStr_2 = "79.2.1";
+      var specialStr_2 = "81.2.1";
       var content_2 = random.getRandomString(contentLength_2, specialStr_2);
 
       async.series([
@@ -704,12 +699,12 @@ describe('79.clobDMLBindAsString.js', function() {
           checkInsertResult(id, content_2, specialStr_2, false, cb);
         }
       ], done);
-    }); // 79.2.1
+    }); // 81.2.1
 
-    it('79.2.2 update a cloumn with EMPTY_CLOB', function(done) {
-      var id = getID();
+    it('81.2.2 update a cloumn with EMPTY_CLOB', function(done) {
+      var id = insertID++;
       var contentLength_1 = 50000;
-      var specialStr_1 = "79.2.2";
+      var specialStr_1 = "81.2.2";
       var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_2 = "EMPTY_CLOB";
 
@@ -727,10 +722,10 @@ describe('79.clobDMLBindAsString.js', function() {
           checkInsertResult(id, content_2, null, false, cb);
         }
       ], done);
-    }); // 79.2.2
+    }); // 81.2.2
 
-    it('79.2.3 update EMPTY_CLOB column with empty string', function(done) {
-      var id = getID();
+    it('81.2.3 update EMPTY_CLOB column with empty string', function(done) {
+      var id = insertID++;
       var content_1 = "EMPTY_CLOB";
       var content_2 = "";
 
@@ -748,13 +743,13 @@ describe('79.clobDMLBindAsString.js', function() {
           checkInsertResult(id, content_2, null, false, cb);
         }
       ], done);
-    }); // 79.2.3
+    }); // 81.2.3
 
-    it('79.2.4 update empty string column', function(done) {
-      var id = getID();
+    it('81.2.4 update empty string column', function(done) {
+      var id = insertID++;
       var content_1 = "";
       var contentLength_2 = 54321;
-      var specialStr_2 = "79.2.4";
+      var specialStr_2 = "81.2.4";
       var content_2 = random.getRandomString(contentLength_2, specialStr_2);
 
       async.series([
@@ -771,12 +766,12 @@ describe('79.clobDMLBindAsString.js', function() {
           checkInsertResult(id, content_2, specialStr_2, false, cb);
         }
       ], done);
-    }); // 79.2.4
+    }); // 81.2.4
 
-    it('79.2.5 update a column with empty string', function(done) {
-      var id = getID();
+    it('81.2.5 update a column with empty string', function(done) {
+      var id = insertID++;
       var contentLength_1 = 50000;
-      var specialStr_1 = "79.2.2";
+      var specialStr_1 = "81.2.2";
       var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_2 = "";
 
@@ -794,15 +789,15 @@ describe('79.clobDMLBindAsString.js', function() {
           checkInsertResult(id, content_2, null, false, cb);
         }
       ], done);
-    }); // 79.2.5
+    }); // 81.2.5
 
-    it('79.2.6 update a column with (10MB + 1) string', function(done) {
-      var id = getID();
+    it('81.2.6 update a column with (10MB + 1) string', function(done) {
+      var id = insertID++;
       var contentLength_1 = 50000;
-      var specialStr_1 = "79.2.6_1";
+      var specialStr_1 = "81.2.6_1";
       var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var contentLength_2 = 10485761; // 10 * 1024 * 1024 + 1;
-      var specialStr_2 = "79.2.6_2";
+      var specialStr_2 = "81.2.6_2";
       var content_2 = random.getRandomString(contentLength_2, specialStr_2);
 
       async.series([
@@ -819,7 +814,7 @@ describe('79.clobDMLBindAsString.js', function() {
           checkInsertResult(id, content_2, specialStr_2, true, cb);
         }
       ], done);
-    }); // 79.2.6
+    }); // 81.2.6
 
-  }); // 79.2
+  }); // 81.2
 });

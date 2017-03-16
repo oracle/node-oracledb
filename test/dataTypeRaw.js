@@ -382,7 +382,7 @@ describe('42. dataTypeRaw.js', function() {
         function(err) {
           should.exist(err);
           // ORA-06502: PL/SQL: numeric or value error\nORA-06512: at line 1
-          (err.message).should.startWith('ORA-06502');
+          (err.message).should.startWith('ORA-06502:');
           done();
         }
       );
@@ -401,7 +401,7 @@ describe('42. dataTypeRaw.js', function() {
         function(err) {
           should.exist(err);
           // ORA-06502: PL/SQL: numeric or value error\nORA-06512: at line 1
-          (err.message).should.startWith('ORA-06502');
+          (err.message).should.startWith('ORA-06502:');
           done();
         }
       );

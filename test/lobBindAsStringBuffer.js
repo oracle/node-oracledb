@@ -19,7 +19,7 @@
  * See LICENSE.md for relevant licenses.
  *
  * NAME
- *   78. lobBindAsStringBuffer.js
+ *   80. lobBindAsStringBuffer.js
  *
  * DESCRIPTION
  *   Testing CLOB/BLOB binding as String/Buffer.
@@ -40,7 +40,7 @@ var dbConfig = require('./dbconfig.js');
 var fs = require('fs');
 var random = require('./random.js');
 
-describe('78.lobBindAsStringBuffer.js', function() {
+describe('80. lobBindAsStringBuffer.js', function() {
   var connection = null;
   var node6plus = false; // assume node runtime version is lower than 6
 
@@ -336,7 +336,7 @@ describe('78.lobBindAsStringBuffer.js', function() {
     );
   };
 
-  describe('78.1 Multiple LOBs, BIND_IN', function() {
+  describe('80.1 Multiple LOBs, BIND_IN', function() {
     var proc = "CREATE OR REPLACE PROCEDURE nodb_lobs_in_781 (id IN NUMBER, clob_in IN CLOB, blob_in IN BLOB)\n" +
                "AS \n" +
                "BEGIN \n" +
@@ -353,8 +353,8 @@ describe('78.lobBindAsStringBuffer.js', function() {
       executeSQL(proc_drop, done);
     }); // after
 
-    it('78.1.1 PLSQL, CLOB&BLOB, bind a string and a buffer', function(done) {
-      var specialStr = "78.1.1";
+    it('80.1.1 PLSQL, CLOB&BLOB, bind a string and a buffer', function(done) {
+      var specialStr = "80.1.1";
       var length = 50000;
       var bigStr = random.getRandomString(length, specialStr);
       var bigBuffer = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
@@ -386,13 +386,13 @@ describe('78.lobBindAsStringBuffer.js', function() {
           verifyBlobValueWithBuffer(sql_2, bigBuffer, specialStr, cb);
         }
       ], done);
-    }); // 78.1.1
+    }); // 80.1.1
 
-    it('78.1.2 PLSQL, CLOB&BLOB, bind a string and a JPG file', function(done) {
+    it('80.1.2 PLSQL, CLOB&BLOB, bind a string and a JPG file', function(done) {
       var preparedCLOBID = 701;
       var sequence = 2;
       var size = 40000;
-      var specialStr = "78.1.2";
+      var specialStr = "80.1.2";
       var bigStr = random.getRandomString(size, specialStr);
 
       async.series([
@@ -432,13 +432,13 @@ describe('78.lobBindAsStringBuffer.js', function() {
           verifyBlobValueWithFileData(sql_2, cb);
         }
       ], done);
-    }); // 78.1.2
+    }); // 80.1.2
 
-    it('78.1.3 PLSQL, CLOB&BLOB, bind a txt file and a Buffer', function(done) {
+    it('80.1.3 PLSQL, CLOB&BLOB, bind a txt file and a Buffer', function(done) {
       var preparedCLOBID = 200;
       var sequence = 303;
       var size = 40000;
-      var specialStr = "78.1.3";
+      var specialStr = "80.1.3";
       var bigStr = random.getRandomString(size, specialStr);
       var bigBuffer = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
 
@@ -481,11 +481,11 @@ describe('78.lobBindAsStringBuffer.js', function() {
           verifyBlobValueWithBuffer(sql_2, bigBuffer, specialStr,cb);
         }
       ], done);
-    }); // 78.1.3
+    }); // 80.1.3
 
-  }); // 78.1
+  }); // 80.1
 
-  describe('78.2 Multiple LOBs, BIND_OUT', function() {
+  describe('80.2 Multiple LOBs, BIND_OUT', function() {
     var proc = "CREATE OR REPLACE PROCEDURE nodb_lobs_out_782 (lob_id IN NUMBER, clob OUT CLOB, blob OUT BLOB) \n" +
                "AS \n" +
                "BEGIN \n" +
@@ -521,9 +521,9 @@ describe('78.lobBindAsStringBuffer.js', function() {
       );
     };
 
-    it('78.2.1 PLSQL, CLOB&BLOB, bind a string and a buffer', function(done) {
+    it('80.2.1 PLSQL, CLOB&BLOB, bind a string and a buffer', function(done) {
       var length = 50000;
-      var specialStr = "78.2.1";
+      var specialStr = "80.2.1";
       var sequence = 311;
       var bigStr = random.getRandomString(length, specialStr);
       var bigBuffer = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
@@ -565,11 +565,11 @@ describe('78.lobBindAsStringBuffer.js', function() {
         }
       ], done);
 
-    }); // 78.2.1
+    }); // 80.2.1
 
-    it('78.2.2 PLSQL, CLOB&BLOB, bind a string and a JPG file', function(done) {
+    it('80.2.2 PLSQL, CLOB&BLOB, bind a string and a JPG file', function(done) {
       var size = 40000;
-      var specialStr = "78.2.2";
+      var specialStr = "80.2.2";
       var bigStr = random.getRandomString(size, specialStr);
       var sequence = 312;
       var bindVar = {
@@ -644,11 +644,11 @@ describe('78.lobBindAsStringBuffer.js', function() {
         }
       ], done);
 
-    }); // 78.2.2
+    }); // 80.2.2
 
-    it('78.2.3 PLSQL, CLOB&BLOB, bind a txt file and a buffer', function(done) {
+    it('80.2.3 PLSQL, CLOB&BLOB, bind a txt file and a buffer', function(done) {
       var size = 40000;
-      var specialStr = "78.2.3";
+      var specialStr = "80.2.3";
       var bigStr = random.getRandomString(size, specialStr);
       var bigBuffer = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
       var sequence = 313;
@@ -719,11 +719,11 @@ describe('78.lobBindAsStringBuffer.js', function() {
               });
         }
       ], done);
-    }); // 78.2.3
+    }); // 80.2.3
 
-  }); // 78.2
+  }); // 80.2
 
-  describe('78.3 Multiple LOBs, BIND_INOUT', function() {
+  describe('80.3 Multiple LOBs, BIND_INOUT', function() {
     var lobs_proc_inout = "CREATE OR REPLACE PROCEDURE nodb_lobs_in_out_783 (clob IN OUT CLOB, blob IN OUT BLOB) \n" +
                           "AS \n" +
                           "BEGIN \n" +
@@ -741,8 +741,8 @@ describe('78.lobBindAsStringBuffer.js', function() {
       executeSQL(proc_drop, done);
     }); // after
 
-    it('78.3.1 PLSQL, BIND_INOUT, bind a 32K string and a 32K buffer', function(done) {
-      var specialStr = "78.3.1";
+    it('80.3.1 PLSQL, BIND_INOUT, bind a 32K string and a 32K buffer', function(done) {
+      var specialStr = "80.3.1";
       var size = 32768;
       var bigStr = random.getRandomString(size, specialStr);
       var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
@@ -772,10 +772,10 @@ describe('78.lobBindAsStringBuffer.js', function() {
           );
         }
       ], done);
-    }); // 78.3.1
+    }); // 80.3.1
 
-    it('78.3.2 PLSQL, BIND_INOUT, bind a (64K - 1) string and a (64K - 1) buffer', function(done) {
-      var specialStr = "78.3.2";
+    it('80.3.2 PLSQL, BIND_INOUT, bind a (64K - 1) string and a (64K - 1) buffer', function(done) {
+      var specialStr = "80.3.2";
       var size = 65535;
       var bigStr = random.getRandomString(size, specialStr);
       var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
@@ -805,8 +805,8 @@ describe('78.lobBindAsStringBuffer.js', function() {
           );
         }
       ], done);
-    }); // 78.3.2
+    }); // 80.3.2
 
-  }); // 78.3
+  }); // 80.3
 
 });

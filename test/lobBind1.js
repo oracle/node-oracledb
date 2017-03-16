@@ -824,7 +824,7 @@ describe('71. lobBind1.js', function() {
             function(err) {
               should.exist(err);
               // NJS-011: encountered bind value and type mismatch in parameter 2
-              (err.message).should.startWith('NJS-011');
+              (err.message).should.startWith('NJS-011:');
               cb();
             }
           );

@@ -212,7 +212,7 @@ describe('63. autoCommit4nestedExecutes.js', function() {
           function(err, result) {
             should.exist(err);
             // ORA-01036: illegal variable name/number
-            (err.message).should.startWith('ORA-01036');
+            (err.message).should.startWith('ORA-01036:');
             should.not.exist(result);
             cb();
           }

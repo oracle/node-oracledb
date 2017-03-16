@@ -19,7 +19,7 @@
  * See LICENSE.md for relevant licenses.
  *
  * NAME
- *   80. blobDMLBindAsBuffer.js
+ *   82. blobDMLBindAsBuffer.js
  *
  * DESCRIPTION
  *   Testing BLOB binding as Buffer with DML.
@@ -37,16 +37,18 @@ var oracledb = require('oracledb');
 var should   = require('should');
 var async    = require('async');
 var dbConfig = require('./dbconfig.js');
-var random = require('./random.js');
-var fs    = require('fs');
-var assist = require('./dataTypeAssist.js');
+var random   = require('./random.js');
+var fs       = require('fs');
+var assist   = require('./dataTypeAssist.js');
 
-describe('80.blobDMLBindAsBuffer.js', function() {
+describe('82.blobDMLBindAsBuffer.js', function() {
   this.timeout(100000);
 
   var connection = null;
   var client11gPlus = true; // assume instant client runtime version is greater than 11.2.0.4.0
   var node6plus = false; // assume node runtime version is lower than 6
+  var insertID = 1; // assume id for insert into db starts from 1
+
   var proc_blob_1 = "BEGIN \n" +
                     "    DECLARE \n" +
                     "        e_table_missing EXCEPTION; \n" +
@@ -212,14 +214,7 @@ describe('80.blobDMLBindAsBuffer.js', function() {
     }
   };
 
-  // Generate id for insert blob into db
-  var insertID = 0;
-  var getID = function() {
-    insertID = insertID + 1;
-    return insertID;
-  };
-
-  describe('80.1 BLOB, INSERT', function() {
+  describe('82.1 BLOB, INSERT', function() {
     before(function(done) {
       executeSQL(proc_blob_1, done);
     });  // before
@@ -228,8 +223,8 @@ describe('80.blobDMLBindAsBuffer.js', function() {
       executeSQL(sql2DropTable1, done);
     }); // after
 
-    it('80.1.1 works with EMPTY_BLOB', function(done) {
-      var id = getID();
+    it('82.1.1 works with EMPTY_BLOB', function(done) {
+      var id = insertID++;
       var content = "EMPTY_BLOB";
 
       async.series([
@@ -240,10 +235,10 @@ describe('80.blobDMLBindAsBuffer.js', function() {
           checkInsertResult(id, content, null, false, cb);
         }
       ], done);
-    }); // 80.1.1
+    }); // 82.1.1
 
-    it('80.1.2 works with empty buffer', function(done) {
-      var id = getID();
+    it('82.1.2 works with empty buffer', function(done) {
+      var id = insertID++;
       var bigStr = '';
       var content = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
 
@@ -255,10 +250,10 @@ describe('80.blobDMLBindAsBuffer.js', function() {
           checkInsertResult(id, content, null, false, cb);
         }
       ], done);
-    }); // 80.1.2
+    }); // 82.1.2
 
-    it('80.1.3 works with empty buffer and bind in maxSize set to 32767', function(done) {
-      var id = getID();
+    it('82.1.3 works with empty buffer and bind in maxSize set to 32767', function(done) {
+      var id = insertID++;
       var bigStr = '';
       var content = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
 
@@ -281,10 +276,10 @@ describe('80.blobDMLBindAsBuffer.js', function() {
           checkInsertResult(id, content, null, false, cb);
         }
       ], done);
-    }); // 80.1.3
+    }); // 82.1.3
 
-    it('80.1.4 works with empty buffer and bind in maxSize set to 50000', function(done) {
-      var id = getID();
+    it('82.1.4 works with empty buffer and bind in maxSize set to 50000', function(done) {
+      var id = insertID++;
       var bigStr = '';
       var content = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
 
@@ -307,10 +302,10 @@ describe('80.blobDMLBindAsBuffer.js', function() {
           checkInsertResult(id, content, null, false, cb);
         }
       ], done);
-    }); // 80.1.4
+    }); // 82.1.4
 
-    it('80.1.5 works with undefined', function(done) {
-      var id = getID();
+    it('82.1.5 works with undefined', function(done) {
+      var id = insertID++;
       var content = undefined;
 
       async.series([
@@ -321,10 +316,10 @@ describe('80.blobDMLBindAsBuffer.js', function() {
           checkInsertResult(id, content, null, false, cb);
         }
       ], done);
-    }); // 80.1.5
+    }); // 82.1.5
 
-    it('80.1.6 works with null', function(done) {
-      var id = getID();
+    it('82.1.6 works with null', function(done) {
+      var id = insertID++;
       var content = null;
 
       async.series([
@@ -335,10 +330,10 @@ describe('80.blobDMLBindAsBuffer.js', function() {
           checkInsertResult(id, content, null, false, cb);
         }
       ], done);
-    }); // 80.1.6
+    }); // 82.1.6
 
-    it('80.1.7 works with null and bind in maxSize set to 32767', function(done) {
-      var id = getID();
+    it('82.1.7 works with null and bind in maxSize set to 32767', function(done) {
+      var id = insertID++;
       var content = null;
 
       async.series([
@@ -360,10 +355,10 @@ describe('80.blobDMLBindAsBuffer.js', function() {
           checkInsertResult(id, content, null, false, cb);
         }
       ], done);
-    }); // 80.1.7
+    }); // 82.1.7
 
-    it('80.1.8 works with null and bind in maxSize set to 50000', function(done) {
-      var id = getID();
+    it('82.1.8 works with null and bind in maxSize set to 50000', function(done) {
+      var id = insertID++;
       var content = null;
 
       async.series([
@@ -385,10 +380,10 @@ describe('80.blobDMLBindAsBuffer.js', function() {
           checkInsertResult(id, content, null, false, cb);
         }
       ], done);
-    }); // 80.1.8
+    }); // 82.1.8
 
-    it('80.1.9 works with NaN', function(done) {
-      var id = getID();
+    it('82.1.9 works with NaN', function(done) {
+      var id = insertID++;
       var content = NaN;
 
       connection.execute(
@@ -404,10 +399,10 @@ describe('80.blobDMLBindAsBuffer.js', function() {
           done();
         }
       );
-    }); // 80.1.9
+    }); // 82.1.9
 
-    it('80.1.10 works with 0', function(done) {
-      var id = getID();
+    it('82.1.10 works with 0', function(done) {
+      var id = insertID++;
       var content = 0;
 
       connection.execute(
@@ -423,12 +418,12 @@ describe('80.blobDMLBindAsBuffer.js', function() {
           done();
         }
       );
-    }); // 80.1.10
+    }); // 82.1.10
 
-    it('80.1.11 works with Buffer length 32K', function(done) {
-      var id = getID();
+    it('82.1.11 works with Buffer length 32K', function(done) {
+      var id = insertID++;
       var contentLength = 32768;
-      var specialStr = "80.1.11";
+      var specialStr = "82.1.11";
       var bigStr = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
 
@@ -440,12 +435,12 @@ describe('80.blobDMLBindAsBuffer.js', function() {
           checkInsertResult(id, content, specialStr, false, cb);
         }
       ], done);
-    }); // 80.1.11
+    }); // 82.1.11
 
-    it('80.1.12 works with Buffer length (64K - 1)', function(done) {
-      var id = getID();
+    it('82.1.12 works with Buffer length (64K - 1)', function(done) {
+      var id = insertID++;
       var contentLength = 65535;
-      var specialStr = "80.1.12";
+      var specialStr = "82.1.12";
       var bigStr = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
 
@@ -457,12 +452,12 @@ describe('80.blobDMLBindAsBuffer.js', function() {
           checkInsertResult(id, content, specialStr, false, cb);
         }
       ], done);
-    }); // 80.1.12
+    }); // 82.1.12
 
-    it('80.1.13 works with Buffer length (64K + 1)', function(done) {
-      var id = getID();
+    it('82.1.13 works with Buffer length (64K + 1)', function(done) {
+      var id = insertID++;
       var contentLength = 65537;
-      var specialStr = "80.1.13";
+      var specialStr = "82.1.13";
       var bigStr = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
 
@@ -474,12 +469,12 @@ describe('80.blobDMLBindAsBuffer.js', function() {
           checkInsertResult(id, content, specialStr, true, cb);
         }
       ], done);
-    }); // 80.1.13
+    }); // 82.1.13
 
-    it('80.1.14 works with Buffer length (1MB + 1)', function(done) {
-      var id = getID();
+    it('82.1.14 works with Buffer length (1MB + 1)', function(done) {
+      var id = insertID++;
       var contentLength = 1048577; // 1 * 1024 * 1024 + 1;
-      var specialStr = "80.1.14";
+      var specialStr = "82.1.14";
       var bigStr = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
 
@@ -491,12 +486,12 @@ describe('80.blobDMLBindAsBuffer.js', function() {
           checkInsertResult(id, content, specialStr, true, cb);
         }
       ], done);
-    }); // 80.1.14
+    }); // 82.1.14
 
-    it('80.1.15 works with Buffer length (5MB + 1)', function(done) {
-      var id = getID();
+    it('82.1.15 works with Buffer length (5MB + 1)', function(done) {
+      var id = insertID++;
       var contentLength = 5242881; // 5 * 1024 * 1024 + 1;
-      var specialStr = "80.1.15";
+      var specialStr = "82.1.15";
       var bigStr = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
 
@@ -508,12 +503,12 @@ describe('80.blobDMLBindAsBuffer.js', function() {
           checkInsertResult(id, content, specialStr, true, cb);
         }
       ], done);
-    }); // 80.1.15
+    }); // 82.1.15
 
-    it('80.1.16 works with Buffer length (10MB + 1)', function(done) {
-      var id = getID();
+    it('82.1.16 works with Buffer length (10MB + 1)', function(done) {
+      var id = insertID++;
       var contentLength = 10485761; // 10 * 1024 * 1024 + 1;
-      var specialStr = "80.1.16";
+      var specialStr = "82.1.16";
       var bigStr = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
 
@@ -525,10 +520,10 @@ describe('80.blobDMLBindAsBuffer.js', function() {
           checkInsertResult(id, content, specialStr, true, cb);
         }
       ], done);
-    }); // 80.1.16
+    }); // 82.1.16
 
-    it('80.1.17 bind value and type mismatch', function(done) {
-      var id = getID();
+    it('82.1.17 bind value and type mismatch', function(done) {
+      var id = insertID++;
       var content = 100;
 
       connection.execute(
@@ -544,12 +539,12 @@ describe('80.blobDMLBindAsBuffer.js', function() {
           done();
         }
       );
-    }); // 80.1.17
+    }); // 82.1.17
 
-    it('80.1.18 mixing named with positional binding', function(done) {
-      var id = getID();
+    it('82.1.18 mixing named with positional binding', function(done) {
+      var id = insertID++;
       var contentLength = 40000;
-      var specialStr = "80.1.18";
+      var specialStr = "82.1.18";
       var bigStr = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
 
@@ -571,10 +566,10 @@ describe('80.blobDMLBindAsBuffer.js', function() {
           checkInsertResult(id, content, specialStr, true, cb);
         }
       ], done);
-    }); // 80.1.18
+    }); // 82.1.18
 
-    it('80.1.19 bind with invalid BLOB', function(done) {
-      var id = getID();
+    it('82.1.19 bind with invalid BLOB', function(done) {
+      var id = insertID++;
 
       connection.execute(
         "INSERT INTO nodb_dml_blob_1 VALUES (:1, :2)",
@@ -588,12 +583,12 @@ describe('80.blobDMLBindAsBuffer.js', function() {
           done();
         }
       );
-    }); // 80.1.19
+    }); // 82.1.19
 
-    it('80.1.20 Negative: RETURNING INTO with bind type BUFFER', function(done) {
-      var id = getID();
+    it('82.1.20 Negative: RETURNING INTO with bind type BUFFER', function(done) {
+      var id = insertID++;
       var contentLength = 400;
-      var specialStr = "80.1.20";
+      var specialStr = "82.1.20";
       var bigStr = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
       var sql = "INSERT INTO nodb_dml_blob_1 (id, blob) VALUES (:i, :c) RETURNING blob INTO :lobbv";
@@ -612,10 +607,10 @@ describe('80.blobDMLBindAsBuffer.js', function() {
           done();
         }
       );
-    }); // 80.1.20
+    }); // 82.1.20
 
-    it('80.1.21 Negative: RETURNING INTO with autocommit on', function(done) {
-      var id = getID();
+    it('82.1.21 Negative: RETURNING INTO with autocommit on', function(done) {
+      var id = insertID++;
       var sql = "INSERT INTO nodb_dml_blob_1 (id, blob) VALUES (:i, EMPTY_BLOB()) RETURNING blob INTO :lobbv";
       var inFileName = './test/tree.jpg';
 
@@ -649,12 +644,12 @@ describe('80.blobDMLBindAsBuffer.js', function() {
           inStream.pipe(lob); // copies the text to the CLOB
         }
       );
-    }); // 80.1.21
+    }); // 82.1.21
 
-    it('80.1.22 works with bind in maxSize smaller than buffer size', function(done) {
-      var id = getID();
+    it('82.1.22 works with bind in maxSize smaller than buffer size', function(done) {
+      var id = insertID++;
       var contentLength = 32768;
-      var specialStr = "80.1.22";
+      var specialStr = "82.1.22";
       var bigStr = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
 
@@ -677,11 +672,11 @@ describe('80.blobDMLBindAsBuffer.js', function() {
           checkInsertResult(id, content, specialStr, false, cb);
         }
       ], done);
-    }); // 80.1.22
+    }); // 82.1.22
 
-  }); // 80.1
+  }); // 82.1
 
-  describe('80.2 BLOB, UPDATE', function() {
+  describe('82.2 BLOB, UPDATE', function() {
     insertID = 0;
 
     before(function(done) {
@@ -692,11 +687,11 @@ describe('80.blobDMLBindAsBuffer.js', function() {
       executeSQL(sql2DropTable1, done);
     }); // after
 
-    it('80.2.1 update EMPTY_BLOB column', function(done) {
-      var id = getID();
+    it('82.2.1 update EMPTY_BLOB column', function(done) {
+      var id = insertID++;
       var content_1 = "EMPTY_BLOB";
       var contentLength_2 = 32768;
-      var specialStr_2 = "80.2.1";
+      var specialStr_2 = "82.2.1";
       var bigStr_2 = random.getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(bigStr_2, "utf-8") : new Buffer(bigStr_2, "utf-8");
 
@@ -714,12 +709,12 @@ describe('80.blobDMLBindAsBuffer.js', function() {
           checkInsertResult(id, content_2, specialStr_2, false, cb);
         }
       ], done);
-    }); // 80.2.1
+    }); // 82.2.1
 
-    it('80.2.2 update a cloumn with EMPTY_BLOB', function(done) {
-      var id = getID();
+    it('82.2.2 update a cloumn with EMPTY_BLOB', function(done) {
+      var id = insertID++;
       var contentLength_1 = 50000;
-      var specialStr_1 = "80.2.2";
+      var specialStr_1 = "82.2.2";
       var bigStr_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(bigStr_1, "utf-8") : new Buffer(bigStr_1, "utf-8");
       var content_2 = "EMPTY_BLOB";
@@ -738,10 +733,10 @@ describe('80.blobDMLBindAsBuffer.js', function() {
           checkInsertResult(id, content_2, null, false, cb);
         }
       ], done);
-    }); // 80.2.2
+    }); // 82.2.2
 
-    it('80.2.3 update EMPTY_BLOB column with empty buffer', function(done) {
-      var id = getID();
+    it('82.2.3 update EMPTY_BLOB column with empty buffer', function(done) {
+      var id = insertID++;
       var content_1 = "EMPTY_BLOB";
       var content_2 = "";
 
@@ -759,14 +754,14 @@ describe('80.blobDMLBindAsBuffer.js', function() {
           checkInsertResult(id, content_2, null, false, cb);
         }
       ], done);
-    }); // 80.2.3
+    }); // 82.2.3
 
-    it('80.2.4 update empty buffer column', function(done) {
-      var id = getID();
+    it('82.2.4 update empty buffer column', function(done) {
+      var id = insertID++;
       var bigStr_1 = "";
       var content_1 = node6plus ? Buffer.from(bigStr_1, "utf-8") : new Buffer(bigStr_1, "utf-8");
       var contentLength_2 = 54321;
-      var specialStr_2 = "80.2.4";
+      var specialStr_2 = "82.2.4";
       var bigStr_2 = random.getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(bigStr_2, "utf-8") : new Buffer(bigStr_2, "utf-8");
 
@@ -784,12 +779,12 @@ describe('80.blobDMLBindAsBuffer.js', function() {
           checkInsertResult(id, content_2, specialStr_2, false, cb);
         }
       ], done);
-    }); // 80.2.4
+    }); // 82.2.4
 
-    it('80.2.5 update a column with empty buffer', function(done) {
-      var id = getID();
+    it('82.2.5 update a column with empty buffer', function(done) {
+      var id = insertID++;
       var contentLength_1 = 50000;
-      var specialStr_1 = "80.2.2";
+      var specialStr_1 = "82.2.2";
       var bigStr_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(bigStr_1, "utf-8") : new Buffer(bigStr_1, "utf-8");
       var content_2 = "";
@@ -808,16 +803,16 @@ describe('80.blobDMLBindAsBuffer.js', function() {
           checkInsertResult(id, content_2, null, false, cb);
         }
       ], done);
-    }); // 80.2.5
+    }); // 82.2.5
 
-    it('80.2.6 update a column with (10MB + 1) buffer', function(done) {
-      var id = getID();
+    it('82.2.6 update a column with (10MB + 1) buffer', function(done) {
+      var id = insertID++;
       var contentLength_1 = 50000;
-      var specialStr_1 = "80.2.6_1";
+      var specialStr_1 = "82.2.6_1";
       var bigStr_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(bigStr_1, "utf-8") : new Buffer(bigStr_1, "utf-8");
       var contentLength_2 = 10485761; // 10 * 1024 * 1024 + 1;
-      var specialStr_2 = "80.2.6_2";
+      var specialStr_2 = "82.2.6_2";
       var bigStr_2 = random.getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(bigStr_2, "utf-8") : new Buffer(bigStr_2, "utf-8");
 
@@ -835,7 +830,7 @@ describe('80.blobDMLBindAsBuffer.js', function() {
           checkInsertResult(id, content_2, specialStr_2, true, cb);
         }
       ], done);
-    }); // 80.2.6
+    }); // 82.2.6
 
-  }); // 80.2
+  }); // 82.2
 });
