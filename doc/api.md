@@ -2557,7 +2557,7 @@ the syntax is:
 [//]host_name[:port][/service_name][:server_type][/instance_name]
 ```
 
-Note that old-school connection SIDs are not supported: only instance names can be used.
+Note that old-school connection SIDs are not supported: only service names can be used.
 
 For example, use *"localhost/XE"* to connect to the database *XE* on the local machine:
 
