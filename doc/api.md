@@ -5582,6 +5582,12 @@ the [`createPool()`](#createpool) method.
 With Oracle Database 12c, the statement cache size can be automatically tuned with the
 [External Configuration](#oraaccess) *oraaccess.xml* file.
 
+To manually tune the statement cache size, monitor general application
+load and the [AWR](http://docs.oracle.com/database/122/TGDBA/gathering-database-statistics.htm#TGDBA168)
+"bytes sent via SQL*Net to client" values.  The latter statistic
+should benefit from not shipping statement metadata to node-oracledb.
+Adjust the statement cache size to your satisfaction.
+
 ## <a name="oraaccess"></a> 16. External Configuration
 
 When node-oracledb is linked with Oracle Database 12c client libraries, the Oracle
