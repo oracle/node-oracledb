@@ -40,6 +40,7 @@ var should   = require('should');
 var fs = require('fs');
 var dbConfig = require('./dbconfig.js');
 var random = require('./random.js');
+var assist = require('./dataTypeAssist.js');
 
 describe('83. fetchBlobAsBuffer.js', function() {
   this.timeout(100000);
@@ -277,7 +278,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
   // compare two buffers
   var compareBuffers = function(resultVal, specialStr, content, contentLength) {
     should.equal(resultVal.length, contentLength);
-    var compareBuffer = resultVal.equals(content);
+    var compareBuffer = assist.compare2Buffers(resultVal, content);
     should.strictEqual(compareBuffer, true);
   };
 

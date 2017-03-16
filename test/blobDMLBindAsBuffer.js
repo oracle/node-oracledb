@@ -39,6 +39,7 @@ var async    = require('async');
 var dbConfig = require('./dbconfig.js');
 var random = require('./random.js');
 var fs    = require('fs');
+var assist = require('./dataTypeAssist.js');
 
 describe('80.blobDMLBindAsBuffer.js', function() {
   this.timeout(100000);
@@ -187,13 +188,13 @@ describe('80.blobDMLBindAsBuffer.js', function() {
           lob.on('end', function() {
             if(originalBuffer == "EMPTY_BLOB") {
               var nullBuffer = node6plus ? Buffer.from('', "utf-8") : new Buffer('', "utf-8");
-              should.strictEqual(blobData.equals(nullBuffer), true);
+              should.strictEqual(assist.compare2Buffers(blobData, nullBuffer), true);
             } else {
               should.strictEqual(totalLength, originalBuffer.length);
               var specStrLength = specialStr.length;
               should.strictEqual(blobData.toString('utf8', 0, specStrLength), specialStr);
               should.strictEqual(blobData.toString('utf8', (totalLength - specStrLength), totalLength), specialStr);
-              should.strictEqual(blobData.equals(originalBuffer), true);
+              should.strictEqual(assist.compare2Buffers(blobData, originalBuffer), true);
             }
             return callback();
           });

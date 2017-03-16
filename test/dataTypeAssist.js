@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -377,6 +377,21 @@ assist.createBuffer = function(size) {
     array.push(b);
   }
   return new Buffer(array);
+};
+
+assist.compare2Buffers = function(originalBuf, compareBuf) {
+  var node01113plus = true; // assume node runtime version is higher than 0.11.13
+  var nodeVer = process.versions["node"].split(".");
+  if(nodeVer[0] === "0" && nodeVer[1] === "11" && nodeVer[2] < "13") {
+    node01113plus = false;
+  } else if(nodeVer[0] === "0" && nodeVer[1] < "11"){
+    node01113plus = false;
+  }
+  if(node01113plus === true) {
+    return originalBuf.equals(compareBuf);
+  } else {
+    return (originalBuf.toString('utf8') === compareBuf.toString('utf8'));
+  }
 };
 
 assist.setUp = function(connection, tableName, array, done)
