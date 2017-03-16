@@ -67,13 +67,13 @@ Instructions may need to be adjusted for your platform, environment and versions
 
 I have ... | Follow this ...
 ----------|-----------------
-Linux.  My database is on another machine  | [Node-oracledb Installation on Linux with Instant Client RPMs](#instrpm), [Node-oracledb Installation on Linux with Instant Client ZIP files](#instzip)
+Windows | [Node-oracledb Installation on Windows](#instwin)
+Apple macOS | [Node-oracledb Installation on macOS with Instant Client](#instosx)
+Linux.  My database is on another machine  | [Node-oracledb Installation on Linux with Instant Client RPMs](#instrpm) or [Node-oracledb Installation on Linux with Instant Client ZIP files](#instzip)
+Linux.  My database is on the same machine | [Node-oracledb Installation on Linux with a Local Database](#instoh)
+Linux. I have the full Oracle client (installed via `runInstaller`) on the same machine | [Node-oracledb Installation on Linux with a Local Database](#instoh)
 AIX on Power Systems | [Node-oracledb Installation on AIX on Power Systems with Instant Client ZIP files](#instaix)
 Solaris x86-64 (64-Bit) | [Node-oracledb Installation on Oracle Solaris x86-64 (64-Bit) with Instant Client ZIP files](#instsolarisx8664)
-Linux.  My database is on the same machine | [Node-oracledb Installation on Linux with a Local Database](#instoh)
-Linux. I have the full Oracle client (installed via `runInstaller`) on the same machine |  [Node-oracledb Installation on Linux with a Local Database](#instoh)
-Apple macOS | [Node-oracledb Installation on macOS with Instant Client](#instosx)
-Windows | [Node-oracledb Installation on Windows](#instwin)
 Another OS with Oracle Database 11.2 or 12c, or client libraries available | Update binding.gyp and make any code changes required, sign the [OCA](https://www.oracle.com/technetwork/community/oca-486395.html), and submit a pull request with your patch.
 
 ### Other Resources Useful for node-oracledb
