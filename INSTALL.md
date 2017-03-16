@@ -35,10 +35,12 @@ The [*node-oracledb*](https://github.com/oracle/node-oracledb) add-on for Node.j
 The steps below create a Node.js installation for testing.  Adjust the
 steps for your environment.
 
-This node-oracledb release has been tested with Node 0.12, 4,
+This node-oracledb release has been tested with Node 4,
 6 and 7 on 64-bit Oracle Linux and Windows.  The add-on can also build
 in some macOS, 32-bit Linux, 32-bit Windows, Solaris and AIX
 environments, but these architectures have not been fully tested.
+Node 0.10 and 0.12 have been supported in the past and may
+still be usable.
 
 ### <a name="prerequisites"></a> Prerequisites
 
