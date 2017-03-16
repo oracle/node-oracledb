@@ -42,12 +42,14 @@
 #endif
 
 // Error numbers to set the drop_sess flag in sessionRelease()
+// Sessions are in an unusable state and needs to be dropped
 #define DPI_CONNERR_INVALID_SESS                  22
 #define DPI_CONNERR_SESS_KILLED                   28
 #define DPI_CONNERR_SESS_MARKED_KILL              31
 #define DPI_CONNERR_SESS_TERM_NO_REPLY            45
 #define DPI_CONNERR_ORA_NOT_LOGGED_ON             1012
 #define DPI_CONNERR_MAX_IDLE_TIMEOUT              2396
+#define DPI_CONNERR_DRCP_ILLEGAL_CALL             56600
 
 #define DPI_MAX_VERSION_SIZE                      512
 
@@ -559,6 +561,7 @@ void ConnImpl::setErrState ( int errNum )
       case DPI_CONNERR_SESS_TERM_NO_REPLY:
       case DPI_CONNERR_ORA_NOT_LOGGED_ON:
       case DPI_CONNERR_MAX_IDLE_TIMEOUT:
+      case DPI_CONNERR_DRCP_ILLEGAL_CALL:
         dropConn_ = true;
         break;
 
