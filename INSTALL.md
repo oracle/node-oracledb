@@ -22,7 +22,7 @@ limitations under the License.
 3. [Node-oracledb Installation on Linux with Instant Client ZIP files](#instzip)
 4. [Node-oracledb Installation on Linux with a Local Database](#instoh)
 5. [Advanced Installation on Linux](#linuxadv)
-6. [Node-oracledb Installation on OS X with Instant Client](#instosx)
+6. [Node-oracledb Installation on macOS with Instant Client](#instosx)
 7. [Node-oracledb Installation on Windows](#instwin)
 8. [Copying node-oracledb Binaries on Windows](#winbins)
 9. [Node-oracledb Installation on AIX on Power Systems with Instant Client ZIP files](#instaix)
@@ -37,7 +37,7 @@ steps for your environment.
 
 This node-oracledb release has been tested with Node 0.12, 4,
 6 and 7 on 64-bit Oracle Linux and Windows.  The add-on can also build
-in some Mac OS X, 32-bit Linux, 32-bit Windows, Solaris and AIX
+in some macOS, 32-bit Linux, 32-bit Windows, Solaris and AIX
 environments, but these architectures have not been fully tested.
 
 ### <a name="prerequisites"></a> Prerequisites
@@ -50,7 +50,7 @@ Client 12c you can connect to Oracle Database 10.2 or greater.  Use
 Oracle Client 11.2 if you need to connect to Oracle Database 9.2.
 
 A compiler is required.  Use Visual Studio on Windows, GCC on Linux or
-Xcode on OS X.  **When building with Node 4 onward, the compiler must
+Xcode on macOS.  **When building with Node 4 onward, the compiler must
 support C++11.**  Note the default compiler on Oracle Linux 6 and RHEL 6
 does not have the required support.  Install a
 [newer compiler](https://blogs.oracle.com/opal/entry/getting_a_c_11_compatible)
@@ -72,7 +72,7 @@ AIX on Power Systems | [Node-oracledb Installation on AIX on Power Systems with 
 Solaris x86-64 (64-Bit) | [Node-oracledb Installation on Oracle Solaris x86-64 (64-Bit) with Instant Client ZIP files](#instsolarisx8664)
 Linux.  My database is on the same machine | [Node-oracledb Installation on Linux with a Local Database](#instoh)
 Linux. I have the full Oracle client (installed via `runInstaller`) on the same machine |  [Node-oracledb Installation on Linux with a Local Database](#instoh)
-Apple OS X | [Node-oracledb Installation on OS X with Instant Client](#instosx)
+Apple macOS | [Node-oracledb Installation on macOS with Instant Client](#instosx)
 Windows | [Node-oracledb Installation on Windows](#instwin)
 Another OS with Oracle Database 11.2 or 12c, or client libraries available | Update binding.gyp and make any code changes required, sign the [OCA](https://www.oracle.com/technetwork/community/oca-486395.html), and submit a pull request with your patch.
 
@@ -463,7 +463,7 @@ This is useful if you will need to upgrade Oracle Instant Client RPMs
 to a new major or minor version (for example from 11.2 to 12.1)
 without re-installing node-oracledb.
 
-## <a name="instosx"></a> 6. Node-oracledb Installation on OS X with Instant Client
+## <a name="instosx"></a> 6. Node-oracledb Installation on macOS with Instant Client
 
 Note: If you use Instant Client 11.2 because you need to connect to
 Oracle Database 9.2, refer to
@@ -478,7 +478,7 @@ Building node-oracledb requires Xcode from the Mac App store.
 
 ### 6.2 Install Node.js
 
-Download the [Node.js package](http://nodejs.org) for OS X 64-bit and install it.
+Download the [Node.js package](http://nodejs.org) for macOS 64-bit and install it.
 
 ### 6.3 Install the free Oracle Instant Client 12.1 'Basic' and 'SDK' ZIPs
 
@@ -549,7 +549,7 @@ Run one of the examples:
 node select1.js
 ```
 
-To run a database on OS X, one option is to use VirtualBox,
+To run a database on macOS, one option is to use VirtualBox,
 see
 [The Easiest Way to Install Oracle Database on Mac OS X](https://blogs.oracle.com/opal/entry/the_easiest_way_to_enable).
 
