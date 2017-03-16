@@ -90,6 +90,8 @@ install Oracle Linux yourself, it is free from
 
 ## <a name="instrpm"></a> 2. Node-oracledb Installation on Linux with Instant Client RPMs
 
+Questions and issues can be posted as [GitHub Issues](https://github.com/oracle/node-oracledb/issues).
+
 ### 2.1 Install Node.js
 
 Download and extract the [Node.js "Linux Binaries"](http://nodejs.org)
@@ -176,6 +178,8 @@ node select1.js
 ```
 
 ## <a name="instzip"></a> 3. Node-oracledb Installation on Linux with Instant Client ZIP files
+
+Questions and issues can be posted as [GitHub Issues](https://github.com/oracle/node-oracledb/issues).
 
 ### 3.1 Install Node.js
 
@@ -298,6 +302,8 @@ For easy development, the free
 version of the database is available on Linux.  Applications
 developed with XE may be immediately used with other editions of the
 Oracle Database.
+
+Questions and issues can be posted as [GitHub Issues](https://github.com/oracle/node-oracledb/issues).
 
 ### 4.1 Install Node.js
 
@@ -464,6 +470,8 @@ Oracle Database 9.2, refer to
 [these older instructions](https://github.com/oracle/node-oracledb/blob/v1.9.3/INSTALL.md#instosx).
 Otherwise follow the instructions below for Instant Client 12.1.
 
+Questions and issues can be posted as [GitHub Issues](https://github.com/oracle/node-oracledb/issues).
+
 ### 6.1 Install Xcode
 
 Building node-oracledb requires Xcode from the Mac App store.
@@ -551,6 +559,8 @@ see
 [Installing node-oracledb on Microsoft Windows](https://community.oracle.com/docs/DOC-931127)
 has step-by-step Windows installation instructions that you can
 alternatively refer to.
+
+Questions and issues can be posted as [GitHub Issues](https://github.com/oracle/node-oracledb/issues).
 
 ### 7.1 Install required tools
 
@@ -713,6 +723,8 @@ if you see `MSVCR100.dll` then you need the VC++ 10 redistributable.
 
 ## <a name="instaix"></a> 9. Node-oracledb Installation on AIX on Power Systems with Instant Client ZIP files
 
+Questions and issues can be posted as [GitHub Issues](https://github.com/oracle/node-oracledb/issues).
+
 ### 9.1 Install Node.js
 
 Download [Node.js](https://nodejs.org/) for AIX on Power Systems.
@@ -818,6 +830,8 @@ node select1.js
 ```
 
 ## <a name="instsolarisx8664"></a> 10. Node-oracledb Installation on Oracle Solaris x86-64 (64-Bit) with Instant Client ZIP files
+
+Questions and issues can be posted as [GitHub Issues](https://github.com/oracle/node-oracledb/issues).
 
 ### 10.1 Install Node.js
 
