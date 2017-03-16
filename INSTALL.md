@@ -369,7 +369,7 @@ source /usr/local/bin/oraenv
 
 Or, if you are using Oracle XE, by executing:
 
-````
+```
 source /u01/app/oracle/product/11.2.0/xe/bin/oracle_env.sh
 ```
 
