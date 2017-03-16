@@ -1,4 +1,4 @@
-# node-oracledb 1.12: Documentation for the Oracle Database Node.js Add-on
+# node-oracledb 1.13: Documentation for the Oracle Database Node.js Add-on
 
 *Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved.*
 
