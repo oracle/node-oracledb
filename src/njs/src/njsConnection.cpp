@@ -3337,13 +3337,6 @@ void Connection::DoDefines ( eBaton* executeBaton )
         executeBaton->error = NJSMessages::getErrorMsg( errInsufficientMemory );
         error = true;
       }
-      defines[col].len = (DPI_BUFLEN_TYPE *)malloc(sizeof(DPI_BUFLEN_TYPE)*
-                                             executeBaton->maxRows);
-      if(!defines[col].len)
-      {
-        executeBaton->error = NJSMessages::getErrorMsg( errInsufficientMemory );
-        error = true;
-      }
 
       void *buf = NULL ;
       DpiDefineCallbackCtx *ctx = NULL ;
@@ -3354,18 +3347,16 @@ void Connection::DoDefines ( eBaton* executeBaton )
            ( ( defines[col].fetchType == dpi::DpiRaw ) &&
              ( executeBaton->mInfo[col].dbType == dpi::DpiBlob ) ) )
       {
-        /* Fetch Clob-As-String or Blob-As-Buffer case */
+        /* Fetch Clob-As-String or Blob-As-Buffer case context */
         ctx = ( DpiDefineCallbackCtx * )malloc (
                                         sizeof ( DpiDefineCallbackCtx ) );
         ctx->callbackfn = (definecbtype ) Connection::cbDynDefine ;
-        ctx->data = (void *)executeBaton ;
-        ctx->definePos = col ;
         ctx->prevIter = -1L ;  /* no row processed yet */
-        lobAs = true ;
+
+        /* Fetcb Clob-As-String or Blob-As-Buffer case Extended-data */
         executeBaton->extDefines[col] = new ExtDefine (
                                                   NJS_EXTDEFINE_CONVERT_LOB ) ;
-        executeBaton->extDefines[col]->fields.extConvertLob.ctx = (void *) ctx;
-
+        executeBaton->extDefines[col]->fields.extConvertLob.ctx = ctx;
         executeBaton->extDefines[col]->fields.extConvertLob.len2 =
                 ( unsigned int * ) malloc ( sizeof ( unsigned int ) *
                                                      executeBaton->maxRows );
@@ -3375,19 +3366,37 @@ void Connection::DoDefines ( eBaton* executeBaton )
                                                 errInsufficientMemory );
           error = true;
         }
+        else
+        {
+          ctx->data    = (void *) &(executeBaton->defines[col]);    // Define
+          ctx->extData = (void *)executeBaton->extDefines[col];  // ExtDefine
+          lobAs        = true ;         // Lob is fetched as a different type
+        }
       }
       else
       {
         buf = (defines[col].buf) ? defines[col].buf : defines[col].extbuf ;
+        defines[col].len = (DPI_BUFLEN_TYPE *)malloc(sizeof(DPI_BUFLEN_TYPE)*
+                                                     executeBaton->maxRows);
+        if(!defines[col].len)
+        {
+          executeBaton->error = NJSMessages::getErrorMsg(
+                                           errInsufficientMemory );
+          error = true;
+        }
       }
 
-      executeBaton->dpistmt->define(col+1, defines[col].fetchType,
-                                    buf,
-                                    lobAs ?
-                                      DPI_MAX_BUFLEN :defines[col].maxSize,
-                                    lobAs ? NULL : defines[col].ind,
-                                    lobAs ? NULL : defines[col].len,
-                                    ctx );
+      /* Provide the buffer, indicator, len fields to DPI only when no-error */
+      if ( !error )
+      {
+        executeBaton->dpistmt->define(col+1, defines[col].fetchType,
+                                      buf,
+                                      lobAs ?
+                                        DPI_MAX_BUFLEN :defines[col].maxSize,
+                                      lobAs ? NULL : defines[col].ind,
+                                      lobAs ? NULL : defines[col].len,
+                                      ctx );
+      }
     }
   }
 }
@@ -3407,22 +3416,19 @@ void Connection::DoFetch (eBaton* executeBaton)
   executeBaton->dpistmt->fetch ( executeBaton->maxRows );
   executeBaton->rowsFetched = executeBaton->dpistmt->rowsFetched();
 
-  for ( unsigned int col = 0; col < executeBaton->numCols; col ++ )
+  // update the size of CLOB/BLOB values based on last partial read
+  for ( unsigned int col = 0; col < executeBaton->numCols ; col ++ )
   {
-    Define    *define    = &(executeBaton->defines[col] );
     ExtDefine *extDefine = executeBaton->extDefines[col];
 
+    // Applicable only for CLOB/BLOB-as-STRING/BUFFER
     if ( extDefine && extDefine -> extDefType == NJS_EXTDEFINE_CONVERT_LOB )
     {
-      /* In case of fetch-lob-as-xxx the last read operation has partial
-       * size read, and consolidated len is maintained in extDefine, add both
-       * and set it back to define->len[row] it can be used later
-       */
       for ( unsigned int row = 0; row < executeBaton->rowsFetched ; row ++ )
       {
-        define->len[row] = ( DPI_BUFLEN_TYPE )
-                           extDefine->fields.extConvertLob.len2[row];
-        define->len[row] += extDefine->fields.extConvertLob.cLen ;
+        // Update the length field with last partial read & cummulative reads
+        extDefine->fields.extConvertLob.len2[row] +=
+          extDefine->fields.extConvertLob.cLen ;
       }
     }
   }
@@ -3939,7 +3945,7 @@ v8::Local<v8::Value> Connection::GetRows (eBaton* executeBaton)
         Local<Array> row = Nan::New<v8::Array>(executeBaton->numCols);
         for(unsigned int j = 0; j < executeBaton->numCols; j++)
         {
-          val = Connection::GetValue ( executeBaton, true, j, i );
+          val = Connection::ToV8Value ( executeBaton, true, j, i );
           if ( executeBaton->error.empty ())
           {
             Nan::Set(row, j, val);
@@ -3960,7 +3966,7 @@ v8::Local<v8::Value> Connection::GetRows (eBaton* executeBaton)
 
         for(unsigned int j = 0; j < executeBaton->numCols; j++)
         {
-          val = Connection::GetValue ( executeBaton, true, j, i );
+          val = Connection::ToV8Value ( executeBaton, true, j, i );
           if ( executeBaton->error.empty () )
           {
             Nan::Set(row,
@@ -4003,43 +4009,22 @@ v8::Local<v8::Value> Connection::GetRows (eBaton* executeBaton)
      Handle
 */
 
-Local<Value> Connection::GetValue ( eBaton *executeBaton,
+Local<Value> Connection::ToV8Value ( eBaton *executeBaton,
                                      bool isQuery,
                                      unsigned int col,
                                      unsigned int row )
 {
   Nan::EscapableHandleScope scope;
+  Local<Value> value;
 
   if(isQuery)
   {
     // SELECT queries
-    Define *define = &(executeBaton->defines[col]);
-    long double *dblArr = (long double *)define->buf;
-    void * buf = NULL ;
-
-    if ( ( define->fetchType == dpi::DpiVarChar ) &&
-         ( executeBaton->mInfo[col].dbType == dpi::DpiClob ) )
-    {
-      buf = ((char **) (define->buf))[row];
-    }
-    else if ( ( define->fetchType == dpi::DpiRaw ) &&
-              ( executeBaton->mInfo[col].dbType == dpi::DpiBlob ) )
-    {
-      buf = ((void **) (define->buf))[row];
-    }
-    else
-    {
-      buf = ((char *)(define->buf) + ( row * ( define->maxSize ) ) );
-    }
-
-    Local<Value> value = Connection::GetValueCommon(
-                           executeBaton,
-                           define->ind[row],
-                           define->fetchType,
-                           (define->fetchType == DpiTimestampLTZ ) ?
-                             (void *) &dblArr[row] : buf,
-                           define->len[row] );
-    return scope.Escape( value );
+    value = Connection::Define2V8Value ( executeBaton,
+                                         col,
+                                         row,
+                                         &(executeBaton->defines[col]),
+                                         executeBaton->extDefines[col] );
   }
   else
   {
@@ -4050,44 +4035,211 @@ Local<Value> Connection::GetValue ( eBaton *executeBaton,
     if(executeBaton->stmtIsReturning)
     {
       // SQL statement with RETURNING INTO clause, will return an array
-      Local<Value> value = Connection::GetArrayValue (
+      value = Connection::ToV8ArrayValue (
                                         executeBaton,
                                         executeBaton->binds[col],
                          (unsigned long)executeBaton->rowsAffected );
-      return scope.Escape(value);
     }
     else if ( bind->isArray )
     {
       // PL/SQL array bind
-      Local<Value> value = Connection::GetArrayValue(executeBaton,
+      value = Connection::ToV8ArrayValue(executeBaton,
                                                      bind,
                             static_cast<unsigned long>(bind->curArraySize));
-      return scope.Escape(value);
     }
     else if(bind->type == DpiRSet)
     {
-      return scope.Escape ( Connection::GetValueRefCursor (
-                                      executeBaton, bind, extBind ) );
+      value = Connection::RefCursor2V8Value ( executeBaton, bind, extBind );
     }
     else if (( bind->type == DpiClob ) ||
              ( bind->type == DpiBlob ) ||
              ( bind->type == DpiBfile))
     {
-      return scope.Escape ( Connection::GetValueLob (
-                                      executeBaton, bind ));
+      value = Connection::Lob2V8Value ( executeBaton, bind );
     }
     else
     {
-      return scope.Escape ( Connection::GetValueCommon (
-                                        executeBaton,
-                                        bind->ind[row],
-                                        bind->type,
-                                        (bind->type == DpiTimestampLTZ ) ?
-                                           bind->extvalue : bind->value,
-                                        bind->len[row] ));
+      value = Connection::Bind2V8Value ( executeBaton, bind, row ) ;
     }
   }
+  return scope.Escape ( value ) ;
 }
+
+
+/*****************************************************************************/
+/*
+  DESCRIPTION
+    Method to convert from Bind-struct-value to v8Value
+
+  PARAMETERS
+    executeBaton - eBaton struct
+    bind         - Bind struct
+    unsigned int - row number (0 based).
+
+  RETURNS
+    v8::Value
+
+  NOTES:
+    This function converts simple values (non-array), and row will always be 0.
+*/
+Local<Value> Connection::Bind2V8Value (
+                                      eBaton *executeBaton,
+                                      Bind *bind,
+                                      unsigned int row )
+{
+  Nan::EscapableHandleScope scope;
+  Local<Value>              value;
+  Local<Date>               date;
+
+  if ( bind->ind[row] == -1 )
+  {
+    value = Nan::Null () ;
+  }
+  else
+  {
+    switch ( bind->type )
+    {
+    case dpi::DpiVarChar:
+      value = Nan::New<v8::String> ((char *)bind->value,
+                                    bind->len[row]).ToLocalChecked ();
+      break;
+
+    case dpi::DpiInteger:
+      value = Nan::New<v8::Integer> ( *(int *)bind->value ) ;
+      break;
+
+    case dpi::DpiDouble:
+      value = Nan::New<v8::Number> ( *(double *)bind->value ) ;
+      break;
+
+    case dpi::DpiTimestampLTZ:
+      date = Nan::New<v8::Date> (*(long double *)
+                                 bind->extvalue ).ToLocalChecked ();
+      value = date;
+      break;
+
+    case dpi::DpiRaw:
+      value = Nan::CopyBuffer ( ( char *)bind->value,
+                                bind->len[row] ).ToLocalChecked () ;
+      break;
+
+    default:
+      break;
+    }
+  }
+  return scope.Escape ( value ) ;
+}
+
+
+/*****************************************************************************/
+/*
+  DESCRIPTION
+    Method to convert from Define-struct-value to v8Value
+
+  PARAMETERS
+    executeBaton - eBaton struct
+    bind         - Bind struct
+    unsigned int - row number (0 based).
+
+  RETURNS
+    v8::Value
+
+  NOTES:
+    This function converts (row,col) - single cell value
+*/
+Local<v8::Value> Connection::Define2V8Value (
+                                     eBaton *executeBaton,
+                                     unsigned int col,
+                                     unsigned int row,
+                                     Define *define,
+                                     ExtDefine *extDefine )
+{
+  Nan::EscapableHandleScope scope;
+  Local<Value>             value;
+  Local<Date>              date;
+  void                     *buf = NULL;
+
+  if ( ( define->fetchType == dpi::DpiVarChar ) &&
+       ( executeBaton->mInfo[col].dbType == dpi::DpiClob ) )
+  {
+    /* Fetch CLOB-as-STRING */
+    buf = ( ( char **) ( define->buf ) )[row];
+  }
+  else if ( ( define->fetchType == dpi::DpiRaw ) &&
+            ( executeBaton->mInfo[col].dbType == dpi::DpiBlob ) )
+  {
+    /* Fetch BLOB-as-BUFFER */
+    buf = ( ( void **) ( define->buf ) )[row];
+  }
+  else if ( define->fetchType == dpi::DpiTimestampLTZ )
+  {
+    /* Timestamp */
+    buf = (void *) &( ( long double * ) ( define->buf ))[row] ;
+  }
+  else
+  {
+    buf = ( ( char * ) ( define->buf ) + ( row * define->maxSize ) );
+  }
+
+  if ( define->ind[row] == -1 )
+  {
+    /* NULL value */
+    value = Nan::Null () ;
+  }
+  else
+  {
+    switch ( define->fetchType )
+    {
+    case dpi::DpiVarChar:
+      value = Nan::New<v8::String> (
+                ( char *) buf,
+                ( executeBaton->mInfo[col].dbType == dpi::DpiClob ) ?
+                   extDefine->fields.extConvertLob.len2[row] :
+                   define->len[row] ).ToLocalChecked () ;
+      break;
+
+    case dpi::DpiInteger:
+      value = Nan::New<v8::Integer> ( *( int * )buf ) ;
+      break;
+
+    case dpi::DpiDouble:
+      value = Nan::New<v8::Number> ( * ( double * ) buf ) ;
+      break;
+
+    case dpi::DpiTimestampLTZ:
+      date = Nan::New<v8::Date> ( * (long double *) buf ).ToLocalChecked ();
+      value = date;
+      break;
+
+    case dpi::DpiRaw:
+      // TODO: We could use NewBuffer to save memory and CPU, but it
+      // gets the ownership of buffer to itself (behaviour changed in Nan 2.0)
+      value = Nan::CopyBuffer ( ( char * )buf,
+                                ( define->len ) ?
+                                  define->len[row] :
+             extDefine->fields.extConvertLob.len2[row] ).ToLocalChecked ();
+      break;
+
+    case dpi::DpiClob:
+    case dpi::DpiBlob:
+    case dpi::DpiBfile:
+      {
+        ProtoILob *protoILob = *(static_cast<ProtoILob **>( buf ) );
+        value = NewLob ( executeBaton, protoILob ) ;
+        delete protoILob;
+
+        *(ProtoILob **)buf = NULL ;
+      }
+      break;
+
+    default:
+      break;
+    }
+  }
+  return scope.Escape ( value ) ;
+}
+
+
 
 /*****************************************************************************/
 /*
@@ -4102,7 +4254,7 @@ Local<Value> Connection::GetValue ( eBaton *executeBaton,
    RETURNS:
      Handle
 */
-Local<Value> Connection::GetValueRefCursor ( eBaton  *executeBaton,
+Local<Value> Connection::RefCursor2V8Value ( eBaton  *executeBaton,
                                              Bind    *bind,
                                              ExtBind *extBind )
 {
@@ -4159,7 +4311,7 @@ Local<Value> Connection::GetValueRefCursor ( eBaton  *executeBaton,
    RETURNS:
      Handle
 */
-Local<Value> Connection::GetValueLob ( eBaton *executeBaton,
+Local<Value> Connection::Lob2V8Value ( eBaton *executeBaton,
                                         Bind *bind )
 {
   Nan::EscapableHandleScope scope;
@@ -4183,75 +4335,6 @@ Local<Value> Connection::GetValueLob ( eBaton *executeBaton,
   return scope.Escape(value);
 }
 
-/*****************************************************************************/
-/*
-   DESCRIPTION
-     Method to create handle from C++ value for primitive types
-
-   PARAMETERS:
-     ind  - to validate the data,
-     type - data type of the value,
-     val  - value,
-     len  - length of the value
-
-   RETURNS:
-     Handle
-*/
-Local<Value> Connection::GetValueCommon ( eBaton *executeBaton,
-                                           short ind,
-                                           unsigned short type,
-                                           void* val, DPI_BUFLEN_TYPE len )
-{
-  Nan::EscapableHandleScope scope;
-  Local<Value> value;
-  Local<Date> date;
-
-  if(ind != -1)
-  {
-     switch(type)
-     {
-       case (dpi::DpiVarChar) :
-        value = Nan::New<v8::String>((char*)val, len).ToLocalChecked();
-        break;
-       case (dpi::DpiInteger) :
-         value = Nan::New<v8::Integer>(*(int*)val);
-         break;
-       case (dpi::DpiDouble) :
-         value = Nan::New<v8::Number>(*(double*)val);
-         break;
-       case (dpi::DpiTimestampLTZ) :
-         date = Nan::New<v8::Date>( *(long double*)val ).ToLocalChecked();
-         value = date;
-        break;
-       case (dpi::DpiRaw) :
-         // TODO: We could use NewBuffer to save memory and CPU, but it
-         // gets the ownership of buffer to itself (behaviour changed in
-         // Nan 2.0)
-         value = Nan::CopyBuffer((char*)val, len).ToLocalChecked();
-         break;
-        // The LOB types are hit only by the define code path
-        // The bind code path has its own Connection::GetValueLob method
-       case (dpi::DpiClob):
-       case (dpi::DpiBlob):
-       case (dpi::DpiBfile):
-       {
-         ProtoILob *protoILob = *(static_cast<ProtoILob **>(val));
-         value = NewLob(executeBaton, protoILob);
-         delete protoILob;
-         *(ProtoILob **)val = NULL;
-       }
-       break;
-       default :
-         break;
-    }
-  }
-  else
-  {
-    value = Nan::Null();
-  }
-  return scope.Escape(value);
-}
-
 
 /*****************************************************************************/
 /*
@@ -4266,7 +4349,7 @@ Local<Value> Connection::GetValueCommon ( eBaton *executeBaton,
   Returns
     v8::Value  - this will be an array (even for 1 row, array or 1).
 */
-v8::Local<v8::Value> Connection::GetArrayValue ( eBaton *executeBaton,
+v8::Local<v8::Value> Connection::ToV8ArrayValue ( eBaton *executeBaton,
                                                  Bind *binds,
                                                  unsigned long count )
 {
@@ -4394,7 +4477,7 @@ v8::Local<v8::Value> Connection::GetOutBindArray ( eBaton *executeBaton )
     if(binds[index]->isOut)
     {
       Local<Value> val ;
-      val = Connection::GetValue ( executeBaton, false, index );
+      val = Connection::ToV8Value ( executeBaton, false, index );
       if ( executeBaton->error.empty() )
       {
         Nan::Set(arrayBinds, it, val );
@@ -4436,7 +4519,7 @@ v8::Local<v8::Value> Connection::GetOutBindObject ( eBaton *executeBaton )
 
       binds[index]->key.erase(binds[index]->key.begin());
 
-      val = Connection::GetValue ( executeBaton, false, index );
+      val = Connection::ToV8Value ( executeBaton, false, index );
       if ( executeBaton->error.empty () )
       {
         Nan::Set( objectBinds,
@@ -5619,7 +5702,6 @@ int Connection::cbDynBufferGet ( void *ctx, DPI_SZ_TYPE nRows,
 
   PARAMETERS
     octxp     (IN)    - context for this callback
-    definepos (IN)    - 0-based column number
     iter      (IN)    - iteration
     bufpp     (INOUT) - pointer to specify buffer for data
     alenpp    (INOUT) - pointer to specify length
@@ -5636,37 +5718,36 @@ int Connection::cbDynBufferGet ( void *ctx, DPI_SZ_TYPE nRows,
     is passed to the callback, new set of buffer(s) has to be provided and
     initialized.
 */
-int Connection::cbDynDefine ( void *octxp, unsigned long definePos,
-                               unsigned int iter, unsigned long *prevIter,
-                               void **bufpp, unsigned int **alenpp,
-                               void **indpp, unsigned short **rcodepp )
+int Connection::cbDynDefine ( void *cbCtx, unsigned int iter,
+                              void **bufpp, unsigned int **alenpp,
+                              void **indpp, unsigned short **rcodepp )
 {
-  eBaton *executeBaton = (eBaton *) octxp ;
-  Define *define       = &(executeBaton->defines[definePos]);
-  ExtDefine *extDefine  = executeBaton->extDefines[definePos];
-  unsigned long maxLen = NJS_ITER_SIZE ;
-  char **buf           = (char **)define->buf ;
-  char *tmp            = NULL ;  // to presever ptr for realloc
-  int ret              = 0;
+  DpiDefineCallbackCtx *ctx = (DpiDefineCallbackCtx *) cbCtx;
+  Define *define            = (Define *) ctx->data ;
+  ExtDefine *extDefine      = (ExtDefine *) ctx->extData;
+  unsigned long maxLen      = NJS_ITER_SIZE ;
+  char **buf                = (char **)define->buf ;
+  char *tmp                 = NULL ;  // to presever ptr for realloc
+  int ret                   = 0;
 
-  if ( *prevIter != iter )
+  tmp = buf[iter];  // preserve the current memory address
+
+  if ( ctx->prevIter != iter )
   {
-    *prevIter = iter;
+    ctx->prevIter = iter;
     extDefine->fields.extConvertLob.cLen = 0;
+    if ( !buf[iter] )
+      buf[iter] = ( char *) malloc ( maxLen ) ;
   }
   else
   {
     // maintain incremental size of clob
     extDefine->fields.extConvertLob.cLen += NJS_ITER_SIZE ;
+    buf[iter] = (char *) realloc ( buf[iter],
+                                   maxLen +
+                                     extDefine->fields.extConvertLob.cLen ) ;
   }
 
-  tmp = buf[iter];  // preserve the current memory address
-
-  // allocate or reallocate buffer
-  buf[iter] = (char *) ( ( !buf[iter] ) ?
-                         malloc ( maxLen ) :
-                         realloc ( buf[iter],
-                          maxLen + extDefine->fields.extConvertLob.cLen ) ) ;
   if ( !buf[iter] )
   {
     // If realloc fails, the IN parameter requires to be freed and untouched

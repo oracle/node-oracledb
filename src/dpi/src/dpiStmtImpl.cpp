@@ -752,8 +752,8 @@ sb4 StmtImpl::defineCallback ( void *ctxp, OCIDefine *definep, ub4 iter,
 
   DpiDefineCallbackCtx *ctx = (DpiDefineCallbackCtx *)ctxp;
 
-  cbret = ctx->callbackfn ( ctx->data, ctx->definePos, iter, &(ctx->prevIter),
-                            bufpp, (void **) alenpp, (void**)indpp, rcodepp );
+  cbret = ctx->callbackfn ( ctx, iter, bufpp, (void **) alenpp, (void**)indpp,
+                            rcodepp );
   *piecep = OCI_NEXT_PIECE;  // always ask for next piece
 
   if ( cbret )

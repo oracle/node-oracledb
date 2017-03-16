@@ -257,6 +257,27 @@ typedef struct ExtDefine
 } ExtDefine;
 
 
+/*
+ * RESETEXTDEFINE4NEXTFETCH macro resets one field in ExtDefine struct
+ * allowing the struct to be reused for subsequent fetch calls.  The indexing
+ * starts with 0 for every fetch and the callback can be called multiple
+ * times for the same row, based on data-size, a scenario,
+ * where maxSize is set to 1, and using resultSet Interface (or queryStream),
+ * the state of extDefine gets confused without this reset
+ */
+#define RESETEXTDEFINE4NEXTFETCH(extDefine)                             \
+  {                                                                     \
+    if ( extDefine )                                                    \
+    {                                                                   \
+      DpiDefineCallbackCtx *ctx = (DpiDefineCallbackCtx *)              \
+                                  extDefine->fields.extConvertLob.ctx ; \
+      ctx->prevIter = -1;                                               \
+    }                                                                   \
+  }                                                                     \
+
+
+
+
 /**
  * FetchInfo structure
  **/
@@ -465,9 +486,23 @@ typedef struct eBaton
            }
          }
 
-         free(defines[i].buf);
-         free(defines[i].len);
-         free(defines[i].ind);
+         /*
+          * Buf and indicator will be allocated in all cases.
+          * len will NOT be allocated for CLOB-as-STRING/BLOB-as-BUFFER
+          * scenarios. For consistency check all fields before deallocating
+          */
+         if ( defines[i].buf )
+         {
+           free(defines[i].buf);
+         }
+         if ( defines[i].len )
+         {
+           free(defines[i].len);
+         }
+         if ( defines[i].ind )
+         {
+           free(defines[i].ind);
+         }
        }
        delete [] defines;
      }
@@ -652,24 +687,31 @@ private:
   static v8::Local<v8::Value> GetOutBinds (eBaton* executeBaton);
   static v8::Local<v8::Value> GetOutBindArray (eBaton* executeBaton);
   static v8::Local<v8::Value> GetOutBindObject (eBaton* executeBaton);
-  static v8::Local<v8::Value> GetArrayValue (eBaton *executeBaton,
+  static v8::Local<v8::Value> ToV8ArrayValue (eBaton *executeBaton,
                                               Bind *bind, unsigned long count);
   // to convert DB value to v8::Value
-  static v8::Local<v8::Value> GetValue (eBaton *executeBaton,
+  static v8::Local<v8::Value> ToV8Value (eBaton *executeBaton,
                                          bool isQuery,
                                          unsigned int index,
                                          unsigned int row = 0);
-  // for primitive types (Number, String and Date)
-  static v8::Local<v8::Value> GetValueCommon (eBaton *executeBaton,
-                                         short ind,
-                                         unsigned short type,
-                                         void* val, DPI_BUFLEN_TYPE len);
+
+  static v8::Local<v8::Value> Define2V8Value ( eBaton    *executeBaton,
+                                                   unsigned  int col,
+                                                   unsigned  int row,
+                                                   Define    *define,
+                                                   ExtDefine *extDefine );
+
+  static v8::Local<v8::Value> Bind2V8Value (
+                                             eBaton       *executeBaton,
+                                             Bind         *bind,
+                                             unsigned int row ) ;
+
   // for refcursor
-  static v8::Local<v8::Value> GetValueRefCursor ( eBaton  *executeBaton,
+  static v8::Local<v8::Value> RefCursor2V8Value ( eBaton  *executeBaton,
                                                   Bind    *bind,
                                                   ExtBind *extBinds );
   // for lobs
-  static v8::Local<v8::Value> GetValueLob (eBaton *executeBaton,
+  static v8::Local<v8::Value> Lob2V8Value (eBaton *executeBaton,
                                             Bind *bind);
   static void UpdateDateValue ( eBaton *executeBaton, Bind *bind, unsigned int nRows );
   static void v8Date2OraDate(v8::Local<v8::Value> val, Bind *bind);
@@ -688,8 +730,9 @@ private:
                                void **bufpp, void **alenpp, void **indpp,
                                unsigned short **rcode, unsigned char *piecep );
 
-  static int  cbDynDefine ( void *octxp, unsigned long definePos,
-                            unsigned int iter, unsigned long *prevIter,
+  // Callback used in CLOB-as-STRING/BLOB-as-BUFFER scenarios to dynamically
+  // allocate memory for each row (in chunks) of this column.
+  static int  cbDynDefine ( void *ctx, unsigned int iter,
                             void **bufpp, unsigned int **alenpp,
                             void **indpp, unsigned short **rcodepp );
 
@@ -702,7 +745,7 @@ private:
                                unsigned short **rcode, unsigned char *piecep );
 
   // NewLob Method on Connection class
-  static v8::Local<v8::Value> NewLob( eBaton*   executeBaton,
+   static v8::Local<v8::Value> NewLob( eBaton*   executeBaton,
                                       ProtoILob *protoILob,
                                       bool      isAutoCloseLob = true );
 

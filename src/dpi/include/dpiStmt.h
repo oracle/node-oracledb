@@ -153,8 +153,7 @@ typedef int (*bindcbtype) (void *ctx, DPI_SZ_TYPE nRows, unsigned int bndpos,
                        unsigned char *piecep );
 
 // Application (Driver) level callback funciton prototype
-typedef int (*definecbtype) ( void *ctx, unsigned long definePos,
-                              unsigned long iter, unsigned long *prevIter,
+typedef int (*definecbtype) ( void *ctx, unsigned long iter,
                               void **bufpp, void **alenp, void **indpp,
                               unsigned short **rcodepp );
 
@@ -177,8 +176,8 @@ typedef struct
 typedef struct
 {
   definecbtype  callbackfn;                /* Application specific callback */
-  void          *data;            /* data for application specific callback */
-  unsigned int  definePos;                /* 0-based define column position */
+  void          *data;                       /* Define data for this column */
+  void          *extData;    /* Extended data for this colum if any or NULL */
   unsigned long prevIter;     /* earlier iter, used to detect iter changing */
 } DpiDefineCallbackCtx;
 

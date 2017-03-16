@@ -279,6 +279,7 @@ NAN_METHOD(ResultSet::GetRows)
   Local<Function> callback;
   NJS_GET_CALLBACK ( callback, info );
 
+
   ResultSet *njsResultSet = Nan::ObjectWrap::Unwrap<ResultSet>(info.Holder());
 
   /* If njsResultSet is invalid from JS, then throw an exception */
@@ -353,9 +354,6 @@ void ResultSet::GetRowsCommon(rsBaton *getRowsBaton)
   ebaton->dpiconn            = njsRS->njsconn_->getDpiConn();
   ebaton->numCols            = njsRS->numCols_;
   ebaton->mInfo              = njsRS->mInfo_;
-
-  // No extended Define data yet
-  ebaton->extDefines.resize ( 0 ) ;
 
 exitGetRowsCommon:
   getRowsBaton->req.data  = (void *)getRowsBaton;
@@ -456,6 +454,7 @@ void ResultSet::Async_GetRows(uv_work_t *req)
     for ( unsigned int col = 0 ; col < ebaton->numCols ; col ++ )
     {
       ebaton->extDefines[col] = njsRS->extDefines_[col];
+      RESETEXTDEFINE4NEXTFETCH(ebaton->extDefines[col]);
     }
     Connection::DoFetch(ebaton);
     if ( !ebaton->error.empty () )
