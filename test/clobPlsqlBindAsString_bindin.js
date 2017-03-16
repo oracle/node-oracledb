@@ -932,6 +932,148 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
       ], done);
     }); // 74.1.26
 
+    it('74.1.27 bind error: NJS-037, bind by name 1', function(done) {
+      var bindVar = {
+        i: { val: ["sequence"], type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+        c: { val: "sequence", type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: 50000 }
+      };
+      connection.execute(
+        sqlRun,
+        bindVar,
+        { autoCommit: true },
+        function(err) {
+          should.exist(err);
+          // NJS-037: invalid data type at array index 0 for bind ":i"
+          (err.message).should.startWith('NJS-037:');
+          (err.message).should.match(/^NJS-037:.*\sindex\s0\s.*\sbind\s":i"$/);
+          done();
+        }
+      );
+    }); // 74.1.27
+
+    it('74.1.28 bind error: NJS-037, bind by name 2', function(done) {
+      var sequence = insertID++;
+      var bindVar = {
+        i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+        c: { val: [0], type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: 50000 }
+      };
+      connection.execute(
+        sqlRun,
+        bindVar,
+        { autoCommit: true },
+        function(err) {
+          should.exist(err);
+          // NJS-037: invalid data type at array index 0 for bind ":c"
+          (err.message).should.startWith('NJS-037:');
+          (err.message).should.match(/^NJS-037:.*\sindex\s0\s.*\sbind\s":c"$/);
+          done();
+        }
+      );
+    }); // 74.1.28
+
+    it('74.1.29 bind error: NJS-037, bind by name 3', function(done) {
+      var bindVar = {
+        i: { val: [1, "sequence"], type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+        c: { val: "sequence", type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: 50000 }
+      };
+      connection.execute(
+        sqlRun,
+        bindVar,
+        { autoCommit: true },
+        function(err) {
+          should.exist(err);
+          // NJS-037: invalid data type at array index 1 for bind ":i"
+          (err.message).should.startWith('NJS-037:');
+          (err.message).should.match(/^NJS-037:.*\sindex\s1\s.*\sbind\s":i"$/);
+          done();
+        }
+      );
+    }); // 74.1.29
+
+    it('74.1.30 bind error: NJS-037, bind by name 4', function(done) {
+      var bindVar = {
+        i: { val: [1, 2], type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+        c: { val: ["sequence", "ab", 3], type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: 50000 }
+      };
+      connection.execute(
+        sqlRun,
+        bindVar,
+        { autoCommit: true },
+        function(err) {
+          should.exist(err);
+          // NJS-037: invalid data type at array index 2 for bind ":c"
+          (err.message).should.startWith('NJS-037:');
+          (err.message).should.match(/^NJS-037:.*\sindex\s2\s.*\sbind\s":c"$/);
+          done();
+        }
+      );
+    }); // 74.1.30
+
+    it('74.1.31 bind error: NJS-052, bind by pos 1', function(done) {
+      var sequence = insertID++;
+      var bindVar = [ sequence, { val: [0], type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: 50000 } ] ;
+      connection.execute(
+        sqlRun,
+        bindVar,
+        { autoCommit: true },
+        function(err) {
+          should.exist(err);
+          // NJS-052: invalid data type at array index 0 for bind position 2
+          (err.message).should.startWith('NJS-052:');
+          (err.message).should.match(/^NJS-052:.*\sindex\s0\s.*\sposition\s2$/);
+          done();
+        }
+      );
+    }); // 74.1.31
+
+    it('74.1.32 bind error: NJS-052, bind by pos 2', function(done) {
+      var bindVar = [ { val: ["sequence"], type: oracledb.NUMBER, dir: oracledb.BIND_IN }, { val: "sequence", type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: 50000 } ] ;
+      connection.execute(
+        sqlRun,
+        bindVar,
+        { autoCommit: true },
+        function(err) {
+          should.exist(err);
+          // NJS-052: invalid data type at array index 0 for bind position 1
+          (err.message).should.startWith('NJS-052:');
+          (err.message).should.match(/^NJS-052:.*\sindex\s0\s.*\sposition\s1$/);
+          done();
+        }
+      );
+    }); // 74.1.32
+
+    it('74.1.33 bind error: NJS-052, bind by pos 3', function(done) {
+      var bindVar = [ { val: [1, 2, "sequence"], type: oracledb.NUMBER, dir: oracledb.BIND_IN }, { val: "sequence", type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: 50000 } ] ;
+      connection.execute(
+        sqlRun,
+        bindVar,
+        { autoCommit: true },
+        function(err) {
+          should.exist(err);
+          // NJS-052: invalid data type at array index 2 for bind position 1
+          (err.message).should.startWith('NJS-052:');
+          (err.message).should.match(/^NJS-052:.*\sindex\s2\s.*\sposition\s1$/);
+          done();
+        }
+      );
+    }); // 74.1.33
+
+    it('74.1.35 bind error: NJS-052, bind by pos 4', function(done) {
+      var bindVar = [ { val: [1, 2], type: oracledb.NUMBER, dir: oracledb.BIND_IN }, { val: ["sequence", 1], type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: 50000 } ] ;
+      connection.execute(
+        sqlRun,
+        bindVar,
+        { autoCommit: true },
+        function(err) {
+          should.exist(err);
+          // NJS-052: invalid data type at array index 1 for bind position 2
+          (err.message).should.startWith('NJS-052:');
+          (err.message).should.match(/^NJS-052:.*\sindex\s1\s.*\sposition\s2$/);
+          done();
+        }
+      );
+    }); // 74.1.35
+
   }); // 74.1
 
   describe('74.2 CLOB, PLSQL, BIND_IN to VARCHAR2', function() {

@@ -628,11 +628,15 @@ Overview of node-oracledb functional tests
         43.2.2 maxArraySize is mandatory for BIND_INOUT
         43.2.3 maxArraySize cannot smaller than the number of array elements
         43.2.4 DATE type indexed table has not been supported yet
-        43.2.5 negative case (string): incorrect type of array elements
-        43.2.6 negative case (number): incorrect type of array element
-        43.2.7 supports binding by position
-        43.2.8 negative case: incorrect type of array elements - bind by pos1
-        43.2.9 negative case: incorrect type of array elements - bind by pos2
+        43.2.5 negative case: incorrect type of array element - bind by name 1
+        43.2.6 negative case: incorrect type of array element - bind by name 2
+        43.2.7 negative case: incorrect type of array element - bind by name 3
+        43.2.8 negative case: incorrect type of array element - bind by name 4
+        43.2.9 supports binding by position
+        43.2.10 negative case: incorrect type of array elements - bind by pos 1
+        43.2.11 negative case: incorrect type of array elements - bind by pos 2
+        43.2.12 negative case: incorrect type of array elements - bind by pos 3
+        43.2.13 negative case: incorrect type of array elements - bind by pos 4
     43.3 binding PL/SQL scalar
         43.3.1 binding PL/SQL scalar IN
         43.3.2 binding PL/SQL scalar IN/OUT
@@ -1150,6 +1154,14 @@ Overview of node-oracledb functional tests
         74.1.24 works with bind in maxSize smaller than string length
         74.1.25 RETURN with bind type STRING
         74.1.26 works with UPDATE
+        74.1.27 bind error: NJS-037, bind by name 1
+        74.1.28 bind error: NJS-037, bind by name 2
+        74.1.29 bind error: NJS-037, bind by name 3
+        74.1.30 bind error: NJS-037, bind by name 4
+        74.1.31 bind error: NJS-052, bind by pos 1
+        74.1.32 bind error: NJS-052, bind by pos 2
+        74.1.33 bind error: NJS-052, bind by pos 3
+        74.1.35 bind error: NJS-052, bind by pos 4
     74.2 CLOB, PLSQL, BIND_IN to VARCHAR2
         74.2.1 works with EMPTY_CLOB
         74.2.2 works with EMPTY_CLOB and bind in maxSize set to 1

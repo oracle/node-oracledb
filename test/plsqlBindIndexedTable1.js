@@ -378,7 +378,7 @@ describe('43. plsqlBindIndexedTable1.js', function() {
                       "  PROCEDURE test1(p IN numbersType);\n" +
                       "  PROCEDURE test2(p IN OUT NOCOPY numbersType);\n" +
                       "  PROCEDURE test3(p IN datesType);\n" +
-                      "  PROCEDURE test4(p IN stringsType);\n" +
+                      "  PROCEDURE test4(id IN numbersType, p IN datesType);\n" +
                       "  PROCEDURE test5(p OUT stringsType);\n" +
                       "END;";
           connection.should.be.ok();
@@ -397,7 +397,7 @@ describe('43. plsqlBindIndexedTable1.js', function() {
                      "  PROCEDURE test1(p IN numbersType) IS BEGIN NULL; END;\n" +
                      "  PROCEDURE test2(p IN OUT NOCOPY numbersType) IS BEGIN NULL; END;\n" +
                      "  PROCEDURE test3(p IN datesType) IS BEGIN NULL; END;\n" +
-                     "  PROCEDURE test4(p IN stringsType) IS BEGIN NULL; END;\n" +
+                     "  PROCEDURE test4(id IN numbersType, p IN datesType) IS BEGIN NULL; END;\n" +
                      "  PROCEDURE test5(p OUT stringsType) IS BEGIN NULL; END;\n" +
                      "END;";
           connection.should.be.ok();
@@ -498,46 +498,88 @@ describe('43. plsqlBindIndexedTable1.js', function() {
       );
     });
 
-    it('43.2.5 negative case (string): incorrect type of array elements', function(done) {
+    it('43.2.5 negative case: incorrect type of array element - bind by name 1', function(done) {
       var bindvars = {
-        p:  {type: oracledb.STRING, dir: oracledb.BIND_IN, val: ['hello', 1]}
+        id: {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: ["1", 1]},
+        p:  {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: "hi"}
       };
       connection.execute(
-        "BEGIN nodb_plsqlbindpack21.test4(:p); END;",
+        "BEGIN nodb_plsqlbindpack21.test4(:id, :p); END;",
         bindvars,
         function(err, result) {
           should.exist(err);
           (err.message).should.startWith('NJS-037:');
-          // NJS-037: invalid data type at array index %d for bind \"%s\"
+          (err.message).should.match(/^NJS-037:.*\sindex\s0\s.*\sbind\s":id"$/);
+          // NJS-037: invalid data type at array index 0 for bind ":id"
           should.not.exist(result);
           done();
         }
       );
     });
 
-    it('43.2.6 negative case (number): incorrect type of array element', function(done) {
+    it('43.2.6 negative case: incorrect type of array element - bind by name 2', function(done) {
       var bindvars = {
+        id: {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: [1, 2, "hi"]},
         p:  {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: [1, 'hello']}
       };
       connection.execute(
-        "BEGIN nodb_plsqlbindpack21.test1(:p); END;",
+        "BEGIN nodb_plsqlbindpack21.test4(:id, :p); END;",
         bindvars,
         function(err, result) {
           should.exist(err);
           (err.message).should.startWith('NJS-037:');
-          // NJS-037: NJS-037: invalid data type at array index %d for bind \"%s\"
+          (err.message).should.match(/^NJS-037:.*\sindex\s2\s.*\sbind\s":id"$/);
+          // NJS-037: invalid data type at array index 2 for bind ":id"
           should.not.exist(result);
           done();
         }
       );
     });
 
-    it('43.2.7 supports binding by position', function(done) {
+    it('43.2.7 negative case: incorrect type of array element - bind by name 3', function(done) {
+      var bindvars = {
+        id: {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: [1, 2]},
+        p:  {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: ['hello', 1]}
+      };
+      connection.execute(
+        "BEGIN nodb_plsqlbindpack21.test4(:id, :p); END;",
+        bindvars,
+        function(err, result) {
+          should.exist(err);
+          (err.message).should.startWith('NJS-037:');
+          (err.message).should.match(/^NJS-037:.*\sindex\s0\s.*\sbind\s":p"$/);
+          // NJS-037: invalid data type at array index 0 for bind ":p"
+          should.not.exist(result);
+          done();
+        }
+      );
+    });
+
+    it('43.2.8 negative case: incorrect type of array element - bind by name 4', function(done) {
+      var bindvars = {
+        id: {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: [1, 2, 3]},
+        p:  {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: [1, 2, 'hello']}
+      };
+      connection.execute(
+        "BEGIN nodb_plsqlbindpack21.test4(:id, :p); END;",
+        bindvars,
+        function(err, result) {
+          should.exist(err);
+          (err.message).should.startWith('NJS-037:');
+          (err.message).should.match(/^NJS-037:.*\sindex\s2\s.*\sbind\s":p"$/);
+          // NJS-037: invalid data type at array index 2 for bind ":p"
+          should.not.exist(result);
+          done();
+        }
+      );
+    });
+
+    it('43.2.9 supports binding by position', function(done) {
       var bindvars = [
-        {type: oracledb.STRING, dir: oracledb.BIND_IN, val: ['hello', 'node.js']}
+        {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: [1, 2]}
       ];
       connection.execute(
-        "BEGIN nodb_plsqlbindpack21.test4(:1); END;",
+        "BEGIN nodb_plsqlbindpack21.test1(:1); END;",
         bindvars,
         function(err, result) {
           should.not.exist(err);
@@ -547,40 +589,89 @@ describe('43. plsqlBindIndexedTable1.js', function() {
       );
     });
 
-    it('43.2.8 negative case: incorrect type of array elements - bind by pos1',
-       function (done ){
-         var bindvars = [ { type : oracledb.STRING, dir: oracledb.BIND_IN, val : ['hello', 1] } ];
-         connection.execute (
-           "BEGIN nodb_plsqlbindpack21.test4 ( :1 ); END;",
-           bindvars,
-           function ( err, result ) {
-             should.exist ( err ) ;
-             (err.message).should.startWith ( 'NJS-052:');
-             // NJS-052: invalid data type at array index %d for bind position %d
-             should.not.exist ( result );
-             done ();
-           }
-         );
-       }
-     );
-
-    it('43.2.9 negative case: incorrect type of array elements - bind by pos2',
-      function ( done ) {
-        var bindvars = [ { type : oracledb.NUMBER, dir : oracledb.BIND_IN, val : [ 1, 'hello' ] }];
+    it('43.2.10 negative case: incorrect type of array elements - bind by pos 1',
+      function (done ){
+        var bindvars = [
+          { type : oracledb.NUMBER, dir: oracledb.BIND_IN, val : ['hello', 1] },
+          { type : oracledb.NUMBER, dir: oracledb.BIND_IN, val : "hi" }
+        ];
         connection.execute (
-          "BEGIN nodb_plsqlbindpack21.test1 ( :p ) ; END;",
+          "BEGIN nodb_plsqlbindpack21.test4 (:1, :2); END;",
           bindvars,
           function ( err, result ) {
             should.exist ( err ) ;
             (err.message).should.startWith ( 'NJS-052:');
-            // NJS-052:  NJS-037: invalid data type at array index %d for bind \"%s\"
-            should.not.exist ( result ) ;
-            done();
+            (err.message).should.match(/^NJS-052:.*\sindex\s0\s.*\sposition\s1$/);
+            // NJS-052: invalid data type at array index 0 for bind position 1
+            should.not.exist ( result );
+            done ();
           }
-       );
+        );
       }
     );
 
+    it('43.2.11 negative case: incorrect type of array elements - bind by pos 2',
+      function (done ){
+        var bindvars = [
+          { type : oracledb.NUMBER, dir: oracledb.BIND_IN, val : [1, 2, "hi"] },
+          { type : oracledb.NUMBER, dir: oracledb.BIND_IN, val : "hi" }
+        ];
+        connection.execute (
+          "BEGIN nodb_plsqlbindpack21.test4 (:1, :2); END;",
+          bindvars,
+          function ( err, result ) {
+            should.exist ( err ) ;
+            (err.message).should.startWith ( 'NJS-052:');
+            (err.message).should.match(/^NJS-052:.*\sindex\s2\s.*\sposition\s1$/);
+            // NJS-052: invalid data type at array index 2 for bind position 1
+            should.not.exist ( result );
+            done ();
+          }
+        );
+      }
+    );
+
+    it('43.2.12 negative case: incorrect type of array elements - bind by pos 3',
+      function (done ){
+        var bindvars = [
+          { type : oracledb.NUMBER, dir: oracledb.BIND_IN, val : [1, 2] },
+          { type : oracledb.NUMBER, dir: oracledb.BIND_IN, val : ["hi", 1] }
+        ];
+        connection.execute (
+          "BEGIN nodb_plsqlbindpack21.test4 (:1, :2); END;",
+          bindvars,
+          function ( err, result ) {
+            should.exist ( err ) ;
+            (err.message).should.startWith ( 'NJS-052:');
+            (err.message).should.match(/^NJS-052:.*\sindex\s0\s.*\sposition\s2$/);
+            // NJS-052: invalid data type at array index 0 for bind position 2
+            should.not.exist ( result );
+            done ();
+          }
+        );
+      }
+    );
+
+    it('43.2.13 negative case: incorrect type of array elements - bind by pos 4',
+      function (done ){
+        var bindvars = [
+          { type : oracledb.NUMBER, dir: oracledb.BIND_IN, val : [1, 2, 3] },
+          { type : oracledb.NUMBER, dir: oracledb.BIND_IN, val : [1, 2, "hi"] }
+        ];
+        connection.execute (
+          "BEGIN nodb_plsqlbindpack21.test4 (:1, :2); END;",
+          bindvars,
+          function ( err, result ) {
+            should.exist ( err ) ;
+            (err.message).should.startWith ( 'NJS-052:');
+            (err.message).should.match(/^NJS-052:.*\sindex\s2\s.*\sposition\s2$/);
+            // NJS-052: invalid data type at array index 2 for bind position 2
+            should.not.exist ( result );
+            done ();
+          }
+        );
+      }
+    );
   }); // 43.2
 
   describe('43.3 binding PL/SQL scalar', function() {
