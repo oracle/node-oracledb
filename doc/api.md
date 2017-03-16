@@ -1649,7 +1649,7 @@ promise = execute(String sql, [Object bindParams, [Object options]]);
 
 ##### Description
 
-This call executes a SQL or PL/SQL statement.
+This call executes a single SQL or PL/SQL statement.
 See [SQL Execution](#sqlexecution) for examples.  Also
 see [`queryStream()`](#querystream) for an alternative way of executing
 queries.
@@ -3284,7 +3284,7 @@ Encryption of data-at-rest in the database.
 
 ## <a name="sqlexecution"></a> 9. SQL Execution
 
-A SQL or PL/SQL statement may be executed using the *Connection*
+A single SQL or PL/SQL statement may be executed using the *Connection*
 [`execute()`](#execute) method.  Either the callback style shown
 below, or [promises](#promiseoverview) may be used.
 
