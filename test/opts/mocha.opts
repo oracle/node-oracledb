@@ -75,7 +75,9 @@ test/plsqlBindScalar.js
 test/lobBind1.js
 test/lobBind2.js
 test/poolPing.js
-test/clobPlsqlBindAsString.js
+test/clobPlsqlBindAsString_bindin.js
+test/clobPlsqlBindAsString_bindout.js
+test/clobPlsqlBindAsString_bindinout.js
 test/blobPlsqlBindAsBuffer.js
 test/lobBindAsStringBuffer.js
 test/clobDMLBindAsString.js
