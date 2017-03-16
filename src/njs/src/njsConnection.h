@@ -447,10 +447,7 @@ typedef struct eBaton
        }
        persistentRefs.clear ();
      }
-     if( mInfo && !getRS )
-     {
-        delete [] mInfo;
-     }
+
      if ( lobInfo )
      {
        if ( lobInfo->lobLocator )
@@ -534,6 +531,10 @@ typedef struct eBaton
            }
          }
        }
+     }
+     if( mInfo && !getRS )
+     {
+        delete [] mInfo;
      }
    }
 }eBaton;
