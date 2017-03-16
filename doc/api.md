@@ -1729,7 +1729,7 @@ control statement execution.
 If there are no bind variables in the SQL statement, then a null
 `bindParams`, for example *{}*, must be specified before `options`
 otherwise you will get an error like *ORA-01036: Illegal variable
-name/number* or *NJS-012: encountered invalid bind datatype*.
+name/number* or *NJS-012: encountered invalid bind data type in parameter*.
 
 The following properties can be set or overridden for the execution of
 a statement.
