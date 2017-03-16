@@ -135,6 +135,7 @@ limitations under the License.
      - 8.3.4 [Connection Pool Pinging](#connpoolpinging)
   - 8.4 [Database Resident Connection Pooling (DRCP)](#drcp)
   - 8.5 [External Authentication](#extauth)
+  - 8.6 [Securely Encrypting Network Traffic to Oracle Database](#securenetwork)
 9. [SQL Execution](#sqlexecution)
   - 9.1 [SELECT Statements](#select)
      - 9.1.1 [Fetching Rows](#fetchingrows)
@@ -3129,6 +3130,75 @@ always 1, regardless of the value of
 of open connections exceeds `poolMin` and connections are idle for
 more than the [`poolTimeout`](#propdbpooltimeout) seconds, then the
 number of open connections does not fall below `poolMin`.
+
+### <a name="securenetwork"></a> 8.6 Securely Encrypting Network Traffic to Oracle Database
+
+Data transferred between Oracle Database and the Oracle client
+libraries used by node-oracledb can be
+[encrypted](http://docs.oracle.com/database/122/DBSEG/configuring-network-data-encryption-and-integrity.htm#DBSEG020)
+so that unauthorized parties are not able to view plain text data as
+it passes over the network.  The easiest configuration is Oracle's
+native network encryption.  The standard SSL protocol can also be used
+if you have a PKI, but setup is necessarily more involved.
+
+With native network encryption, the client and database server
+negotiate a key using Diffie-Hellman key exchange.  There is
+protection against man-in-the-middle attacks.
+
+Native network encryption can be configured by editing Oracle Net's
+`sqlnet.ora` configuration files, on either the database server
+and/or on each node-oracledb 'client'.  Parameters control whether
+data integrity checking and encryption is required or just allowed,
+and which algorithms the client and server should consider for use.
+
+As an example, to ensure all connections to the database are checked
+for integrity and are also encrypted, create or edit the Oracle
+Database `$ORACLE_HOME/network/admin/sqlnet.ora` file.  Set the
+checksum negotiation to always validate a checksum and set the
+checksum type to your desired value.  The network encryption settings
+can similarly be set.  For example, to use the SHA512 checksum and
+AES256 encryption use:
+
+```
+SQLNET.CRYPTO_CHECKSUM_SERVER = required
+SQLNET.CRYPTO_CHECKSUM_TYPES_SERVER = (SHA512)
+SQLNET.ENCRYPTION_SERVER = required
+SQLNET.ENCRYPTION_TYPES_SERVER = (AES256)
+```
+
+If you definitely know that the database server enforces integrity and
+encryption, then you do not need to configure Node.js separately.
+However you can also, or alternatively, do so depending on your
+business needs.  To do this, before starting each Node.js process, set
+the environment variable `TNS_ADMIN` to your application configuration
+directory and create the file `$TNS_ADMIN/sqlnet.ora`:
+
+```
+SQLNET.CRYPTO_CHECKSUM_CLIENT = required
+SQLNET.CRYPTO_CHECKSUM_TYPES_CLIENT = (SHA512)
+SQLNET.ENCRYPTION_CLIENT = required
+SQLNET.ENCRYPTION_TYPES_CLIENT = (AES256)
+```
+
+The client and server sides can negoiate the protocols used if the
+settings indicate more than one value is accepted.
+
+Note these are example settings only.  You must review your security
+requirements and read the documentation for your Oracle version.  In
+particular review the available algorithms for security and
+performance.
+
+The `NETWORK_SERVICE_BANNER` column of the database view
+[`V$SESSION_CONNECT_INFO`](https://docs.oracle.com/database/122/REFRN/V-SESSION_CONNECT_INFO.htm#REFRN30224)
+can be used to verify the encryption status of a connection.
+
+For more information about Oracle Data Network Encryption and
+Integrity, and for information about configuring SSL network
+encryption, refer to the [Oracle Database Security
+Guide](http://docs.oracle.com/database/122/DBSEG/toc.htm).  This
+manual also contains information about other important security
+features that Oracle Database provides, such Transparent Data
+Encryption of data-at-rest in the database.
 
 ## <a name="sqlexecution"></a> 9. SQL Execution
 
