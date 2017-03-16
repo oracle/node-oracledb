@@ -38,6 +38,7 @@ var should   = require('should');
 var async    = require('async');
 var dbConfig = require('./dbconfig.js');
 var fs = require('fs');
+var random = require('./random.js');
 
 describe('76.lobBindAsStringBuffer.js', function() {
   var connection = null;
@@ -335,15 +336,6 @@ describe('76.lobBindAsStringBuffer.js', function() {
     );
   };
 
-  var getRandomString = function(length, specialStr) {
-    var str='';
-    var strLength = length - specialStr.length * 2;
-    for( ; str.length < strLength; str += Math.random().toString(36).slice(2));
-    str = str.substr(0, strLength);
-    str = specialStr + str + specialStr;
-    return str;
-  };
-
   describe('76.1 Multiple LOBs, BIND_IN', function() {
     var proc = "CREATE OR REPLACE PROCEDURE nodb_lobs_in_761 (id IN NUMBER, clob_in IN CLOB, blob_in IN BLOB)\n" +
                "AS \n" +
@@ -364,7 +356,7 @@ describe('76.lobBindAsStringBuffer.js', function() {
     it('76.1.1 PLSQL, CLOB&BLOB, bind a string and a buffer', function(done) {
       var specialStr = "76.1.1";
       var length = 50000;
-      var bigStr = getRandomString(length, specialStr);
+      var bigStr = random.getRandomString(length, specialStr);
       var bigBuffer = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
       var sequence = 700;
       var bindVar = {
@@ -401,7 +393,7 @@ describe('76.lobBindAsStringBuffer.js', function() {
       var sequence = 2;
       var size = 40000;
       var specialStr = "76.1.2";
-      var bigStr = getRandomString(size, specialStr);
+      var bigStr = random.getRandomString(size, specialStr);
 
       async.series([
         function(cb) {
@@ -447,7 +439,7 @@ describe('76.lobBindAsStringBuffer.js', function() {
       var sequence = 303;
       var size = 40000;
       var specialStr = "76.1.3";
-      var bigStr = getRandomString(size, specialStr);
+      var bigStr = random.getRandomString(size, specialStr);
       var bigBuffer = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
 
       async.series([
@@ -533,7 +525,7 @@ describe('76.lobBindAsStringBuffer.js', function() {
       var length = 50000;
       var specialStr = "76.2.1";
       var sequence = 311;
-      var bigStr = getRandomString(length, specialStr);
+      var bigStr = random.getRandomString(length, specialStr);
       var bigBuffer = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
       var bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -578,7 +570,7 @@ describe('76.lobBindAsStringBuffer.js', function() {
     it('76.2.2 PLSQL, CLOB&BLOB, bind a string and a JPG file', function(done) {
       var size = 40000;
       var specialStr = "76.2.2";
-      var bigStr = getRandomString(size, specialStr);
+      var bigStr = random.getRandomString(size, specialStr);
       var sequence = 312;
       var bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -657,7 +649,7 @@ describe('76.lobBindAsStringBuffer.js', function() {
     it('76.2.3 PLSQL, CLOB&BLOB, bind a txt file and a buffer', function(done) {
       var size = 40000;
       var specialStr = "76.2.3";
-      var bigStr = getRandomString(size, specialStr);
+      var bigStr = random.getRandomString(size, specialStr);
       var bigBuffer = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
       var sequence = 313;
       var bindVar = {
@@ -752,7 +744,7 @@ describe('76.lobBindAsStringBuffer.js', function() {
     it('76.3.1 PLSQL, BIND_INOUT, bind a 32K string and a 32K buffer', function(done) {
       var specialStr = "76.3.1";
       var size = 32768;
-      var bigStr = getRandomString(size, specialStr);
+      var bigStr = random.getRandomString(size, specialStr);
       var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
       var bindVar = {
         clob: { dir: oracledb.BIND_INOUT, type: oracledb.STRING, val: bigStr, maxSize: size },
@@ -785,7 +777,7 @@ describe('76.lobBindAsStringBuffer.js', function() {
     it('76.3.2 PLSQL, BIND_INOUT, bind a 64K - 1 string and a 64K - 1 buffer', function(done) {
       var specialStr = "76.3.2";
       var size = 65535;
-      var bigStr = getRandomString(size, specialStr);
+      var bigStr = random.getRandomString(size, specialStr);
       var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
       var bindVar = {
         clob: { dir: oracledb.BIND_INOUT, type: oracledb.STRING, val: bigStr, maxSize: size },

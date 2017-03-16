@@ -38,6 +38,7 @@ var should   = require('should');
 var async    = require('async');
 var dbConfig = require('./dbconfig.js');
 var fs = require('fs');
+var random = require('./random.js');
 
 describe('74.clobPlsqlBindAsString.js', function() {
   var connection = null;
@@ -289,15 +290,6 @@ describe('74.clobPlsqlBindAsString.js', function() {
     );
   };
 
-  var getRandomString = function(length, specialStr) {
-    var str='';
-    var strLength = length - specialStr.length * 2;
-    for( ; str.length < strLength; str += Math.random().toString(36).slice(2));
-    str = str.substr(0, strLength);
-    str = specialStr + str + specialStr;
-    return str;
-  };
-
   describe('74.1 CLOB, PLSQL, BIND_IN', function() {
     var proc = "CREATE OR REPLACE PROCEDURE nodb_clobs_in_741 (clob_id IN NUMBER, clob_in IN CLOB)\n" +
                "AS \n" +
@@ -321,7 +313,7 @@ describe('74.clobPlsqlBindAsString.js', function() {
       var len = 32768;
       var sequence = 1;
       var specialStr = "74.1.1";
-      var clobStr = getRandomString(len, specialStr);
+      var clobStr = random.getRandomString(len, specialStr);
       var bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c: { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: len }
@@ -353,7 +345,7 @@ describe('74.clobPlsqlBindAsString.js', function() {
       var len = 65535;
       var sequence = 2;
       var specialStr = "74.1.2";
-      var clobStr = getRandomString(len, specialStr);
+      var clobStr = random.getRandomString(len, specialStr);
       var bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c: { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: len }
@@ -517,7 +509,7 @@ describe('74.clobPlsqlBindAsString.js', function() {
       var len = 50000;
       var sequence = 6;
       var specialStr = "74.1.9";
-      var clobStr = getRandomString(len, specialStr);
+      var clobStr = random.getRandomString(len, specialStr);
       var bindVar = [ sequence, { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: 50000 } ];
 
       async.series([
@@ -584,7 +576,7 @@ describe('74.clobPlsqlBindAsString.js', function() {
       var len = 32768;
       var sequence = 11;
       var specialStr = "74.2.1";
-      var clobStr = getRandomString(len, specialStr);
+      var clobStr = random.getRandomString(len, specialStr);
       var bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: len }
@@ -617,7 +609,7 @@ describe('74.clobPlsqlBindAsString.js', function() {
 
     });  // 74.2.1
 
-    it('74.2.2 PLSQL, BIND_OUT with String length 34K - 1', function(done) {
+    it('74.2.2 PLSQL, BIND_OUT with String length 64K - 1', function(done) {
       // The upper limit on the number of bytes of data that can be bound as
       // `STRING` or `BUFFER` when node-oracledb is linked with Oracle Client
       // 11.2 libraries is 64 Kb.  With Oracle Client 12, the limit is 1 Gb
@@ -625,7 +617,7 @@ describe('74.clobPlsqlBindAsString.js', function() {
       var len = 65535;
       var sequence = 12;
       var specialStr = "74.2.2";
-      var clobStr = getRandomString(len, specialStr);
+      var clobStr = random.getRandomString(len, specialStr);
       var bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: len }
@@ -761,7 +753,7 @@ describe('74.clobPlsqlBindAsString.js', function() {
       var len = 50000;
       var sequence = 17;
       var specialStr = "74.2.7";
-      var clobStr = getRandomString(len, specialStr);
+      var clobStr = random.getRandomString(len, specialStr);
       var bindVar = [ sequence, { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: len } ];
 
       async.series([
@@ -795,7 +787,7 @@ describe('74.clobPlsqlBindAsString.js', function() {
       var len = 50000;
       var sequence = 18;
       var specialStr = "74.2.8";
-      var clobStr = getRandomString(len, specialStr);
+      var clobStr = random.getRandomString(len, specialStr);
       var bindVar = [ sequence, { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: len - 1 } ];
 
       async.series([
@@ -881,6 +873,14 @@ describe('74.clobPlsqlBindAsString.js', function() {
                           "END nodb_clob_in_out_743;";
     var sqlRun = "begin nodb_clob_in_out_743(lob_in_out => :lob_in_out); end;";
     var proc_drop = "DROP PROCEDURE nodb_clob_in_out_743";
+    var clob_proc_inout_7431 = "CREATE OR REPLACE PROCEDURE nodb_clob_in_out_7431 (lob_id IN NUMBER, lob_in_out IN OUT VARCHAR2) \n" +
+                               "AS \n" +
+                               "BEGIN \n" +
+                               "    insert into nodb_tab_clob_in (id, clob_1) values (lob_id, lob_in_out); \n" +
+                               "    select clob_1 into lob_in_out from nodb_tab_clob_in where id = lob_id; \n" +
+                               "END nodb_clob_in_out_7431;";
+    var sqlRun_7431 = "begin nodb_clob_in_out_7431(:i, :io); end;";
+    var proc_drop_7431 = "DROP PROCEDURE nodb_clob_in_out_7431";
 
     before(function(done) {
       executeSQL(clob_proc_inout, done);
@@ -893,7 +893,7 @@ describe('74.clobPlsqlBindAsString.js', function() {
     it('74.3.1 PLSQL, BIND_INOUT with String length 32K', function(done) {
       var specialStr = "74.3.1";
       var len = 32768;
-      var clobVal = getRandomString(len, specialStr);
+      var clobVal = random.getRandomString(len, specialStr);
       var bindVar = {
         lob_in_out: { dir: oracledb.BIND_INOUT, type: oracledb.STRING, val: clobVal, maxSize: len }
       };
@@ -916,7 +916,7 @@ describe('74.clobPlsqlBindAsString.js', function() {
     it('74.3.2 PLSQL, BIND_INOUT with String length 32K - 1', function(done) {
       var specialStr = "74.3.2";
       var len = 32767;
-      var clobVal = getRandomString(len, specialStr);
+      var clobVal = random.getRandomString(len, specialStr);
       var bindVar = {
         lob_in_out: { dir: oracledb.BIND_INOUT, type: oracledb.STRING, val: clobVal, maxSize: len }
       };
@@ -939,7 +939,7 @@ describe('74.clobPlsqlBindAsString.js', function() {
     it('74.3.3 PLSQL, BIND_INOUT with String length 64K - 1', function(done) {
       var specialStr = "74.3.3";
       var len = 65535;
-      var clobVal = getRandomString(len, specialStr);
+      var clobVal = random.getRandomString(len, specialStr);
       var bindVar = {
         lob_in_out: { dir: oracledb.BIND_INOUT, type: oracledb.STRING, val: clobVal, maxSize: len }
       };
@@ -958,6 +958,94 @@ describe('74.clobPlsqlBindAsString.js', function() {
         }
       );
     }); // 74.3.3
+
+    it('74.3.4 PLSQL, BIND_INOUT with OUT data > maxSize', function(done) {
+      var specialStr = "74.3.4";
+      var len = 65535;
+      var clobVal = random.getRandomString(len, specialStr);
+      var bindVar = {
+        lob_in_out: { dir: oracledb.BIND_INOUT, type: oracledb.STRING, val: clobVal, maxSize: len - 1 }
+      };
+
+      connection.execute(
+        sqlRun,
+        bindVar,
+        function(err) {
+          should.exist(err);
+          // NJS-016: buffer is too small for OUT binds
+          (err.message).should.startWith('NJS-016');
+          done();
+        }
+      );
+    }); // 74.3.4
+
+    it('74.3.5 PLSQL, bind out to varchar2 with OUT data < maxSize', function(done) {
+      var sequence = 30;
+      var specialStr = "74.3.5";
+      var len = 300;
+      var clobStr = random.getRandomString(len, specialStr);
+
+      async.series([
+        function(cb) {
+          executeSQL(clob_proc_inout_7431, cb);
+        },
+        function(cb) {
+          var bindVar_7431 = {
+            i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+            io: { val:clobStr, type: oracledb.STRING, dir: oracledb.BIND_INOUT, maxSize: len }
+          };
+          connection.execute(
+            sqlRun_7431,
+            bindVar_7431,
+            function(err, result) {
+              should.not.exist(err);
+              var resultVal = result.outBinds.io;
+              var resultLength = resultVal.length;
+              var specStrLength = specialStr.length;
+              should.strictEqual(resultLength, len);
+              should.strictEqual(resultVal.substring(0, specStrLength), specialStr);
+              should.strictEqual(resultVal.substring(resultLength - specStrLength, resultLength), specialStr);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          executeSQL(proc_drop_7431, cb);
+        }
+      ], done);
+    }); // 74.3.5
+
+    it('74.3.6 PLSQL, bind out to varchar2 with OUT data > maxSize', function(done) {
+      var sequence = 30;
+      var specialStr = "74.3.6";
+      var len = 300;
+      var clobStr = random.getRandomString(len, specialStr);
+
+      async.series([
+        function(cb) {
+          executeSQL(clob_proc_inout_7431, cb);
+        },
+        function(cb) {
+          var bindVar_7431 = {
+            i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+            io: { val:clobStr, type: oracledb.STRING, dir: oracledb.BIND_INOUT, maxSize: len - 1 }
+          };
+          connection.execute(
+            sqlRun_7431,
+            bindVar_7431,
+            function(err) {
+              should.exist(err);
+              // ORA-01460: unimplemented or unreasonable conversion requested
+              (err.message).should.startWith('ORA-01460');
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          executeSQL(proc_drop_7431, cb);
+        }
+      ], done);
+    }); // 74.3.6
 
   }); // 74.3
 
@@ -982,9 +1070,9 @@ describe('74.clobPlsqlBindAsString.js', function() {
       var specialStr = "74.4.1";
       var sequence = 100;
       var len1 = 50000;
-      var clobStr_1 = getRandomString(len1, specialStr);
+      var clobStr_1 = random.getRandomString(len1, specialStr);
       var len2 = 10000;
-      var clobStr_2 = getRandomString(len2, specialStr);
+      var clobStr_2 = random.getRandomString(len2, specialStr);
       var bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c1: { val: clobStr_1, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: len1 },
@@ -1018,7 +1106,7 @@ describe('74.clobPlsqlBindAsString.js', function() {
       var preparedCLOBID = 200;
       var len1 = 50000;
       var specialStr = "74.4.2";
-      var clobStr_1 = getRandomString(len1, specialStr);
+      var clobStr_1 = random.getRandomString(len1, specialStr);
 
       async.series([
         function(cb) {
@@ -1105,8 +1193,8 @@ describe('74.clobPlsqlBindAsString.js', function() {
       var sequence = 110;
       var len1 = 50000;
       var len2 = 10000;
-      var clobStr_1 = getRandomString(len1, specialStr);
-      var clobStr_2 = getRandomString(len2, specialStr);
+      var clobStr_1 = random.getRandomString(len1, specialStr);
+      var clobStr_2 = random.getRandomString(len2, specialStr);
       var bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c1: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: len1 },
@@ -1152,7 +1240,7 @@ describe('74.clobPlsqlBindAsString.js', function() {
       var specialStr = "74.5.2";
       var sequence = 111;
       var len1 = 50000;
-      var clobStr_1 = getRandomString(len1, specialStr);
+      var clobStr_1 = random.getRandomString(len1, specialStr);
       var bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c1: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: len1 },
@@ -1248,7 +1336,7 @@ describe('74.clobPlsqlBindAsString.js', function() {
     it('74.6.1 PLSQL, BIND_INOUT, bind a txt file and a 32K string', function(done) {
       var specialStr = "74.6.1";
       var len1 = 32768;
-      var clobVal = getRandomString(len1, specialStr);
+      var clobVal = random.getRandomString(len1, specialStr);
       var preparedCLOBID = 200;
 
       async.series([
@@ -1308,7 +1396,7 @@ describe('74.clobPlsqlBindAsString.js', function() {
     it('74.6.2 PLSQL, BIND_INOUT, bind a txt file and a 64K - 1 string', function(done) {
       var specialStr = "74.6.2";
       var len1 = 65535;
-      var clobVal = getRandomString(len1, specialStr);
+      var clobVal = random.getRandomString(len1, specialStr);
       var preparedCLOBID = 201;
 
       async.series([
