@@ -1444,7 +1444,7 @@ void Connection::GetInBindParamsArray(Local<Array> va8vals, Bind *bind,
             executeBaton->error = NJSMessages::getErrorMsg (
                                   errIncompatibleTypeArrayIndexBind,
                                   index,
-                                  executeBaton->binds.size() );
+                                  executeBaton->binds.size() + 1 );
           }
           goto exitGetInBindParamsArray;
         }
@@ -1475,7 +1475,7 @@ void Connection::GetInBindParamsArray(Local<Array> va8vals, Bind *bind,
             executeBaton->error = NJSMessages::getErrorMsg (
                                  errIncompatibleTypeArrayIndexBind,
                                  index,
-                                 executeBaton->binds.size ());
+                                 executeBaton->binds.size () + 1);
 
           }
           goto exitGetInBindParamsArray;
