@@ -1434,7 +1434,7 @@ void Connection::GetInBindParamsArray(Local<Array> va8vals, Bind *bind,
         {
           if ( !bind->key.empty () )
           {
-            executeBaton->error = NJSMessages::getErrorMsg ( 
+            executeBaton->error = NJSMessages::getErrorMsg (
                                                errIncompatibleTypeArrayBind,
                                                index,
                                                bind->key.c_str () );

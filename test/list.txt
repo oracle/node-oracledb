@@ -1527,7 +1527,7 @@ Overview of node-oracledb functional tests
         82.2.4 update empty buffer column
         82.2.5 update a column with empty buffer
         82.2.6 update a column with (10MB + 1) buffer
-       
+
 83. lobProperties2.js
     83.1 CLOB: chunkSize (read-only)
     83.2 BLOB: chunkSize (read-only)
@@ -1743,7 +1743,7 @@ Overview of node-oracledb functional tests
         86.2.5 Number supported in fetchAsString
         86.2.6 Date supported in fetchAsString
         86.2.7 CLOB supported in fetchAsString
-    
+
 87. fetchBlobAsBuffer.js
     87.1 fetch BLOB columns by setting oracledb.fetchAsBuffer
         87.1.1 works with NULL value
