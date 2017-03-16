@@ -18,10 +18,10 @@ Use a gist for screen output and logs: see https://gist.github.com/
 
 Review the install instructions at https://github.com/oracle/node-oracledb/blob/master/INSTALL.md
 
-Review your output and logs.  **Google any errors**
-Try to install in a different way.  Try some potential solutions.
+Use the `--verbose` option for `npm install oracledb`.  Review your output and logs.
+Try to install in a different way.  **Google anything that looks like an error.**  Try some potential solutions.
 
-For Node 4 onwards, you need a compiler with C++11 support.
+For Node 4 onwards, you need a compiler with C++11 support.  On Linux use GCC 4.7 or later.
 
 Did the error indicate a network connection issue?  Do you need to set `http_proxy`?
 
