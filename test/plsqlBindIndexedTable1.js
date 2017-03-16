@@ -508,7 +508,7 @@ describe('43. plsqlBindIndexedTable1.js', function() {
         function(err, result) {
           should.exist(err);
           (err.message).should.startWith('NJS-037:');
-          // NJS-037: incompatible type of value provided.
+          // NJS-037: invalid data type at array index %d for bind \"%s\"
           should.not.exist(result);
           done();
         }
@@ -525,7 +525,7 @@ describe('43. plsqlBindIndexedTable1.js', function() {
         function(err, result) {
           should.exist(err);
           (err.message).should.startWith('NJS-037:');
-          // NJS-037: incompatible type of value provided.
+          // NJS-037: NJS-037: invalid data type at array index %d for bind \"%s\"
           should.not.exist(result);
           done();
         }
@@ -546,6 +546,40 @@ describe('43. plsqlBindIndexedTable1.js', function() {
         }
       );
     });
+
+    it('43.2.8 negative case: incorrect type of array elements - bind by pos1',
+       function (done ){
+         var bindvars = [ { type : oracledb.STRING, dir: oracledb.BIND_IN, val : ['hello', 1] } ];
+         connection.execute (
+           "BEGIN nodb_plsqlbindpack21.test4 ( :1 ); END;",
+           bindvars,
+           function ( err, result ) {
+             should.exist ( err ) ;
+             (err.message).should.startWith ( 'NJS-052:');
+             // NJS-052: invalid data type at array index %d for bind position %d
+             should.not.exist ( result );
+             done ();
+           }
+         );
+       }
+     );
+
+    it('43.2.9 negative case: incorrect type of array elements - bind by pos2',
+      function ( done ) {
+        var bindvars = [ { type : oracledb.NUMBER, dir : oracledb.BIND_IN, val : [ 1, 'hello' ] }];
+        connection.execute (
+          "BEGIN nodb_plsqlbindpack21.test1 ( :p ) ; END;",
+          bindvars,
+          function ( err, result ) {
+            should.exist ( err ) ;
+            (err.message).should.startWith ( 'NJS-052:');
+            // NJS-052:  NJS-037: invalid data type at array index %d for bind \"%s\"
+            should.not.exist ( result ) ;
+            done();
+          }
+       );
+      }
+    );
 
   }); // 43.2
 
@@ -718,7 +752,7 @@ describe('43. plsqlBindIndexedTable1.js', function() {
       ], done);
     });
 
-    it('43.3.4 binding PL/SQL scalar OUT by postion', function(done) {
+    it('43.3.4 binding PL/SQL scalar OUT by position', function(done) {
       async.series([
         function(callback) {
           var proc = "CREATE OR REPLACE\n" +

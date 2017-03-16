@@ -73,7 +73,7 @@ static const char *errMsg[] =
   "NJS-034: data type is unsupported for array bind", // errInvalidTypeForArrayBind
   "NJS-035: maxArraySize is required for IN OUT array bind", // errReqdMaxArraySize
   "NJS-036: given array is of size greater than maxArraySize", // errInvalidArraySize
-  "NJS-037: incompatible type of value provided", // errIncompatibleTypeArrayBind
+  "NJS-037: invalid data type at array index %d for bind \"%s\"", // errIncompatibleTypeArrayBind
   "NJS-038: maxArraySize value should be greater than zero", // errInvalidValueArrayBind
   "NJS-039: empty array is not allowed for IN bind", // errEmptyArray
   "NJS-040: connection request timeout",  // errConnRequestTimeout
@@ -88,6 +88,7 @@ static const char *errMsg[] =
   "NJS-049: Temporary LOBs were open when the connection was closed", // errBusyConnTEMPLOB
   "NJS-050: data must be shorter than %d", // errBindValueTooLarge
   "NJS-051: \"%s\" must be less than %d", // errMaxValueTooLarge
+  "NJS-052: invalid data type at array index %d for bind position %d", // errIncompatibleTypeArrayIndexBind
 };
 
 string NJSMessages::getErrorMsg ( NJSErrorType err, ... )

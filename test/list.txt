@@ -617,19 +617,22 @@ Overview of node-oracledb functional tests
     42.4 in PL/SQL, the maximum size is 32767
       - 42.4.1 when data length is 200
 
-43. plsqlBindIndexedTable1.js.js
+43. plsqlBindIndexedTable1.js
     43.1 binding PL/SQL indexed table
-        43.1.1 binding PL/SQL indexed table IN
-        43.1.2 binding PL/SQL indexed table IN OUT
-        43.1.3 binding PL/SQL indexed table OUT
+        43.1.1 binding PL/SQL indexed table IN by name
+        43.1.2 binding PL/SQL indexed table IN by position
+        43.1.3 binding PL/SQL indexed table IN OUT
+        43.1.4 binding PL/SQL indexed table OUT
     43.2 test exceptions when using PL/SQL indexed table bindings
         43.2.1 maxArraySize is ignored when specifying BIND_IN
         43.2.2 maxArraySize is mandatory for BIND_INOUT
-        42.2.3 maxArraySize cannot smaller than the number of array elements
-        43.2.4 DATE type has not been supported yet
-        43.2.5 negative case (string): incorrect type of array element
+        43.2.3 maxArraySize cannot smaller than the number of array elements
+        43.2.4 DATE type indexed table has not been supported yet
+        43.2.5 negative case (string): incorrect type of array elements
         43.2.6 negative case (number): incorrect type of array element
         43.2.7 supports binding by position
+        43.2.8 negative case: incorrect type of array elements - bind by pos1
+        43.2.9 negative case: incorrect type of array elements - bind by pos2
     43.3 binding PL/SQL scalar
         43.3.1 binding PL/SQL scalar IN
         43.3.2 binding PL/SQL scalar IN/OUT
@@ -643,7 +646,7 @@ Overview of node-oracledb functional tests
       - 43.4.5 negative case: large value
         43.4.6 negative case: < 0
         43.4.7 negative case: = 0
-        43.4.8 negative case: assigning a string to it
+        43.4.8 negative case: assign a string to it
         43.4.9 negative case: NaN
 
 44. plsqlBindIndexedTable2.js.js

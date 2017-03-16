@@ -1367,6 +1367,7 @@ exitGetInBindParamsScalar:
   ;
 }
 
+
 /*****************************************************************************/
 /*
    DESCRIPTION
@@ -1431,8 +1432,20 @@ void Connection::GetInBindParamsArray(Local<Array> va8vals, Bind *bind,
       case NJS_DATATYPE_STR:
         if (vtype != NJS_VALUETYPE_NULL && vtype != NJS_VALUETYPE_STRING)
         {
-          executeBaton->error = NJSMessages::getErrorMsg(
-                                     errIncompatibleTypeArrayBind);
+          if ( !bind->key.empty () )
+          {
+            executeBaton->error = NJSMessages::getErrorMsg ( 
+                                               errIncompatibleTypeArrayBind,
+                                               index,
+                                               bind->key.c_str () );
+          }
+          else
+          {
+            executeBaton->error = NJSMessages::getErrorMsg (
+                                  errIncompatibleTypeArrayIndexBind,
+                                  index,
+                                  executeBaton->binds.size() );
+          }
           goto exitGetInBindParamsArray;
         }
         else
@@ -1450,8 +1463,21 @@ void Connection::GetInBindParamsArray(Local<Array> va8vals, Bind *bind,
         if (vtype != NJS_VALUETYPE_NULL && vtype != NJS_VALUETYPE_INTEGER &&
             vtype != NJS_VALUETYPE_UINTEGER && vtype != NJS_VALUETYPE_NUMBER)
         {
-          executeBaton->error = NJSMessages::getErrorMsg(
-                                          errIncompatibleTypeArrayBind);
+          if ( !bind->key.empty () )
+          {
+            executeBaton->error = NJSMessages::getErrorMsg (
+                                              errIncompatibleTypeArrayBind,
+                                              index,
+                                              bind->key.c_str () );
+          }
+          else
+          {
+            executeBaton->error = NJSMessages::getErrorMsg (
+                                 errIncompatibleTypeArrayIndexBind,
+                                 index,
+                                 executeBaton->binds.size ());
+
+          }
           goto exitGetInBindParamsArray;
         }
         break;
