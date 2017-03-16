@@ -1,5 +1,19 @@
 # Change Log
 
+## node-oracledb v1.13.0 (15 Mar 2017)
+
+- Added support for fetching BLOBs as Buffers, using `fetchAsBuffer` and `fetchInfo`.
+
+- Improved PL/SQL Index-by array binding error messages based on PR #470 (Hariprasad Kulkarni).
+
+- Fixed several crashes and a memory leak using CLOBs with `fetchAsString`.
+
+- Fixed several issues including a crash using NULLs and empty strings for LOB `BIND_INOUT` binds.
+
+- Automatically clean up sessions in the connection pool when they become unusable after an ORA-56600 occurs.
+
+- Updated NAN dependency from 2.4 to 2.5.
+
 ## node-oracledb v1.12.2 (21 Dec 2016)
 
 - Fix memory allocation with Oracle 11g client libraries when querying CLOBs using `fetchAsString` and `fetchInfo`.
