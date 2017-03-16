@@ -40,6 +40,7 @@ var async    = require('async');
 var should   = require('should');
 var fs = require('fs');
 var dbConfig = require('./dbconfig.js');
+var random = require('./random.js');
 
 describe('82. fetchClobAsString.js', function() {
   this.timeout(100000);
@@ -227,15 +228,6 @@ describe('82. fetchClobAsString.js', function() {
     );
   };
 
-  var getRandomString = function(length, specialStr) {
-    var str='';
-    var strLength = length - specialStr.length * 2;
-    for( ; str.length < strLength; str += Math.random().toString(36).slice(2));
-    str = str.substr(0, strLength);
-    str = specialStr + str + specialStr;
-    return str;
-  };
-
  // Generate id for insert clob into db
   var insertID = 0;
   var getID = function() {
@@ -369,7 +361,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.1.3';
       var contentLength = 26;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -394,7 +386,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.1.4';
       var contentLength = 65535;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -419,7 +411,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.1.5';
       var contentLength = 65537;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -444,7 +436,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.1.6';
       var contentLength = 1048577; // 1MB + 1
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -469,7 +461,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.1.7';
       var contentLength = 5242881; // 5MB + 1
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -494,7 +486,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.1.8';
       var contentLength = 10485761; // 10MB + 1
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -520,7 +512,7 @@ describe('82. fetchClobAsString.js', function() {
       var specialStr = '82.1.9';
       var specialStrLen = specialStr.length;
       var contentLength = 100;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -567,11 +559,11 @@ describe('82. fetchClobAsString.js', function() {
       var id_1 = getID();
       var specialStr_1 = '82.1.11_1';
       var contentLength_1 = 26;
-      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
       var specialStr_2 = '82.1.11_2';
       var contentLength_2 = 30;
-      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = random.getRandomString(contentLength_2, specialStr_2);
 
       async.series([
         function(cb) {
@@ -600,11 +592,11 @@ describe('82. fetchClobAsString.js', function() {
       var id_1 = getID();
       var specialStr_1 = '82.1.12_1';
       var contentLength_1 = 20;
-      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
       var specialStr_2 = '82.1.12_2';
       var contentLength_2 = 36;
-      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = random.getRandomString(contentLength_2, specialStr_2);
 
       async.series([
         function(cb) {
@@ -638,10 +630,10 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr_1 = '82.1.13_1';
       var contentLength_1 = 26;
-      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var specialStr_2 = '82.1.13_2';
       var contentLength_2 = 30;
-      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = random.getRandomString(contentLength_2, specialStr_2);
 
       async.series([
         function(cb) {
@@ -679,7 +671,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.1.14';
       var contentLength = 26;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -735,7 +727,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.1.15';
       var contentLength = 40;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -780,11 +772,11 @@ describe('82. fetchClobAsString.js', function() {
       var id_1 = getID();
       var specialStr_1 = '82.1.16_1';
       var contentLength_1 = 26;
-      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
       var specialStr_2 = '82.1.16_2';
       var contentLength_2 = 30;
-      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = random.getRandomString(contentLength_2, specialStr_2);
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 1;
 
@@ -815,11 +807,11 @@ describe('82. fetchClobAsString.js', function() {
       var id_1 = getID();
       var specialStr_1 = '82.1.17_1';
       var contentLength_1 = 26;
-      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
       var specialStr_2 = '82.1.17_2';
       var contentLength_2 = 30;
-      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = random.getRandomString(contentLength_2, specialStr_2);
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 20;
 
@@ -851,7 +843,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.1.18';
       var contentLength = 20;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -897,7 +889,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.1.19';
       var contentLength = 200;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -931,11 +923,11 @@ describe('82. fetchClobAsString.js', function() {
       var id_1 = getID();
       var specialStr_1 = '82.1.20_1';
       var contentLength_1 = 26;
-      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
       var specialStr_2 = '82.1.20_2';
       var contentLength_2 = 30;
-      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = random.getRandomString(contentLength_2, specialStr_2);
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 20;
 
@@ -979,11 +971,11 @@ describe('82. fetchClobAsString.js', function() {
       var id_1 = getID();
       var specialStr_1 = '82.1.21_1';
       var contentLength_1 = 26;
-      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
       var specialStr_2 = '82.1.21_2';
       var contentLength_2 = 30;
-      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = random.getRandomString(contentLength_2, specialStr_2);
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 2;
 
@@ -1027,11 +1019,11 @@ describe('82. fetchClobAsString.js', function() {
       var id_1 = getID();
       var specialStr_1 = '82.1.22_1';
       var contentLength_1 = 26;
-      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
       var specialStr_2 = '82.1.22_2';
       var contentLength_2 = 30;
-      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = random.getRandomString(contentLength_2, specialStr_2);
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 1;
 
@@ -1157,7 +1149,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.2.3';
       var contentLength = 20;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -1183,7 +1175,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.2.4';
       var contentLength = 65535;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -1209,7 +1201,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.2.5';
       var contentLength = 65537;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -1234,7 +1226,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.2.6';
       var contentLength = 1048577; // 1MB + 1
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -1259,7 +1251,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.2.7';
       var contentLength = 5242881; // 5MB + 1
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -1284,7 +1276,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.2.8';
       var contentLength = 10485761; // 10MB + 1
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -1310,7 +1302,7 @@ describe('82. fetchClobAsString.js', function() {
       var specialStr = '82.2.9';
       var contentLength = 200;
       var specialStrLength = specialStr.length;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -1359,11 +1351,11 @@ describe('82. fetchClobAsString.js', function() {
       var id_1 = getID();
       var specialStr_1 = '82.2.11_1';
       var contentLength_1 = 200;
-      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
       var specialStr_2 = '82.2.11_2';
       var contentLength_2 = 100;
-      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = random.getRandomString(contentLength_2, specialStr_2);
 
       async.series([
         function(cb) {
@@ -1394,7 +1386,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.2.12';
       var contentLength = 200;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -1422,10 +1414,10 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr_1 = '82.2.13_1';
       var contentLength_1 = 201;
-      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var specialStr_2 = '82.2.13_2';
       var contentLength_2 = 208;
-      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = random.getRandomString(contentLength_2, specialStr_2);
 
       async.series([
         function(cb) {
@@ -1467,7 +1459,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.2.14';
       var contentLength = 100;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -1523,7 +1515,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.2.15';
       var contentLength = 200;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -1566,11 +1558,11 @@ describe('82. fetchClobAsString.js', function() {
       var id_1 = getID();
       var specialStr_1 = '82.2.16_1';
       var contentLength_1 = 200;
-      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
       var specialStr_2 = '82.2.16_2';
       var contentLength_2 = 100;
-      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = random.getRandomString(contentLength_2, specialStr_2);
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 1;
 
@@ -1603,11 +1595,11 @@ describe('82. fetchClobAsString.js', function() {
       var id_1 = getID();
       var specialStr_1 = '82.2.17_1';
       var contentLength_1 = 200;
-      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
       var specialStr_2 = '82.2.17_2';
       var contentLength_2 = 100;
-      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = random.getRandomString(contentLength_2, specialStr_2);
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 10;
 
@@ -1642,7 +1634,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.2.18';
       var contentLength = 20;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -1792,7 +1784,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.3.3';
       var contentLength = 20;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -1829,7 +1821,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.3.4';
       var contentLength = 65535;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -1866,7 +1858,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.3.5';
       var contentLength = 65537;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -1902,7 +1894,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.3.6';
       var contentLength = 1048577; // 1MB + 1
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -1938,7 +1930,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.3.7';
       var contentLength = 5242881; // 5MB + 1
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -1974,7 +1966,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.3.8';
       var contentLength = 10485761; // 10MB + 1
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -2011,7 +2003,7 @@ describe('82. fetchClobAsString.js', function() {
       var specialStr = '82.3.9';
       var contentLength = 200;
       var specialStrLength = specialStr.length;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -2083,11 +2075,11 @@ describe('82. fetchClobAsString.js', function() {
       var id_1 = getID();
       var specialStr_1 = '82.3.11_1';
       var contentLength_1 = 200;
-      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
       var specialStr_2 = '82.3.11_2';
       var contentLength_2 = 100;
-      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = random.getRandomString(contentLength_2, specialStr_2);
 
       async.series([
         function(cb) {
@@ -2131,7 +2123,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.3.12';
       var contentLength = 200;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -2170,10 +2162,10 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr_1 = '82.3.13_1';
       var contentLength_1 = 200;
-      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var specialStr_2 = '82.3.13_2';
       var contentLength_2 = 208;
-      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = random.getRandomString(contentLength_2, specialStr_2);
 
       async.series([
         function(cb) {
@@ -2237,7 +2229,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.3.14';
       var contentLength = 100;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -2292,7 +2284,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.3.15';
       var contentLength = 200;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -2335,11 +2327,11 @@ describe('82. fetchClobAsString.js', function() {
       var id_1 = getID();
       var specialStr_1 = '82.3.16_1';
       var contentLength_1 = 200;
-      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
       var specialStr_2 = '82.3.16_2';
       var contentLength_2 = 100;
-      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = random.getRandomString(contentLength_2, specialStr_2);
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 1;
 
@@ -2387,11 +2379,11 @@ describe('82. fetchClobAsString.js', function() {
       var id_1 = getID();
       var specialStr_1 = '82.3.17_1';
       var contentLength_1 = 200;
-      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
       var specialStr_2 = '82.3.17_2';
       var contentLength_2 = 100;
-      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = random.getRandomString(contentLength_2, specialStr_2);
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 10;
 
@@ -2439,7 +2431,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.3.18';
       var contentLength = 20;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -2567,7 +2559,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.4.3';
       var contentLength = 20;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -2593,7 +2585,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.4.4';
       var contentLength = 65535;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -2619,7 +2611,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.4.5';
       var contentLength = 65537;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -2644,7 +2636,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.4.6';
       var contentLength = 1048577; // 1MB + 1
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -2669,7 +2661,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.4.7';
       var contentLength = 5242881; // 5MB + 1
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -2694,7 +2686,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.4.8';
       var contentLength = 10485761; // 10MB + 1
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -2720,7 +2712,7 @@ describe('82. fetchClobAsString.js', function() {
       var specialStr = '82.4.9';
       var contentLength = 200;
       var specialStrLength = specialStr.length;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -2769,11 +2761,11 @@ describe('82. fetchClobAsString.js', function() {
       var id_1 = getID();
       var specialStr_1 = '82.4.11_1';
       var contentLength_1 = 200;
-      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
       var specialStr_2 = '82.4.11_2';
       var contentLength_2 = 100;
-      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = random.getRandomString(contentLength_2, specialStr_2);
 
       async.series([
         function(cb) {
@@ -2804,7 +2796,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.4.12';
       var contentLength = 200;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -2832,10 +2824,10 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr_1 = '82.4.13_1';
       var contentLength_1 = 200;
-      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var specialStr_2 = '82.4.13_2';
       var contentLength_2 = 208;
-      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = random.getRandomString(contentLength_2, specialStr_2);
 
       async.series([
         function(cb) {
@@ -2877,7 +2869,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.4.14';
       var contentLength = 100;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -2932,7 +2924,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.4.15';
       var contentLength = 200;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -2975,11 +2967,11 @@ describe('82. fetchClobAsString.js', function() {
       var id_1 = getID();
       var specialStr_1 = '82.4.16_1';
       var contentLength_1 = 200;
-      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
       var specialStr_2 = '82.4.16_2';
       var contentLength_2 = 100;
-      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = random.getRandomString(contentLength_2, specialStr_2);
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 1;
 
@@ -3012,11 +3004,11 @@ describe('82. fetchClobAsString.js', function() {
       var id_1 = getID();
       var specialStr_1 = '82.4.17_1';
       var contentLength_1 = 200;
-      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
       var specialStr_2 = '82.4.17_2';
       var contentLength_2 = 100;
-      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = random.getRandomString(contentLength_2, specialStr_2);
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 10;
 
@@ -3051,7 +3043,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.4.18';
       var contentLength = 20;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -3201,7 +3193,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.5.3';
       var contentLength = 20;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -3238,7 +3230,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.5.4';
       var contentLength = 65535;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -3275,7 +3267,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.5.5';
       var contentLength = 65537;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -3311,7 +3303,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.5.6';
       var contentLength = 1048577; // 1MB + 1
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -3347,7 +3339,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.5.7';
       var contentLength = 5242881; // 5MB + 1
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -3383,7 +3375,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.5.8';
       var contentLength = 10485761; // 10MB + 1
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -3420,7 +3412,7 @@ describe('82. fetchClobAsString.js', function() {
       var specialStr = '82.5.9';
       var contentLength = 200;
       var specialStrLength = specialStr.length;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -3493,11 +3485,11 @@ describe('82. fetchClobAsString.js', function() {
       var id_1 = getID();
       var specialStr_1 = '82.5.11_1';
       var contentLength_1 = 200;
-      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
       var specialStr_2 = '82.5.11_2';
       var contentLength_2 = 100;
-      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = random.getRandomString(contentLength_2, specialStr_2);
 
       async.series([
         function(cb) {
@@ -3541,7 +3533,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.5.12';
       var contentLength = 200;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -3580,10 +3572,10 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr_1 = '82.5.13_1';
       var contentLength_1 = 208;
-      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var specialStr_2 = '82.5.13_2';
       var contentLength_2 = 208;
-      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = random.getRandomString(contentLength_2, specialStr_2);
 
       async.series([
         function(cb) {
@@ -3647,7 +3639,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.5.14';
       var contentLength = 100;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -3702,7 +3694,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.5.15';
       var contentLength = 200;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -3745,11 +3737,11 @@ describe('82. fetchClobAsString.js', function() {
       var id_1 = getID();
       var specialStr_1 = '82.5.16_1';
       var contentLength_1 = 200;
-      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
       var specialStr_2 = '82.5.16_2';
       var contentLength_2 = 100;
-      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = random.getRandomString(contentLength_2, specialStr_2);
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 1;
 
@@ -3797,11 +3789,11 @@ describe('82. fetchClobAsString.js', function() {
       var id_1 = getID();
       var specialStr_1 = '82.5.17_1';
       var contentLength_1 = 200;
-      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
       var specialStr_2 = '82.5.17_2';
       var contentLength_2 = 100;
-      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = random.getRandomString(contentLength_2, specialStr_2);
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 10;
 
@@ -3849,7 +3841,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.5.18';
       var contentLength = 20;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -3973,7 +3965,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.6.3';
       var contentLength = 20;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -4001,7 +3993,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.6.4';
       var contentLength = 65535;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -4029,7 +4021,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.6.5';
       var contentLength = 65537;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -4057,7 +4049,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.6.6';
       var contentLength = 1048577; // 1MB + 1
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -4085,7 +4077,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.6.7';
       var contentLength = 5242881; // 5MB + 1
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -4113,7 +4105,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.6.8';
       var contentLength = 10485761; // 10MB + 1
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -4142,7 +4134,7 @@ describe('82. fetchClobAsString.js', function() {
       var specialStr = '82.6.9';
       var contentLength = 200;
       var specialStrLength = specialStr.length;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -4196,11 +4188,11 @@ describe('82. fetchClobAsString.js', function() {
       var id_1 = getID();
       var specialStr_1 = '82.6.11_1';
       var contentLength_1 = 200;
-      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
       var specialStr_2 = '82.6.11_2';
       var contentLength_2 = 100;
-      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = random.getRandomString(contentLength_2, specialStr_2);
 
       async.series([
         function(cb) {
@@ -4233,7 +4225,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.6.12';
       var contentLength = 200;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -4265,10 +4257,10 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr_1 = '82.6.13_1';
       var contentLength_1 = 200;
-      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var specialStr_2 = '82.6.13_2';
       var contentLength_2 = 208;
-      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = random.getRandomString(contentLength_2, specialStr_2);
 
       async.series([
         function(cb) {
@@ -4314,11 +4306,11 @@ describe('82. fetchClobAsString.js', function() {
       var id_1 = getID();
       var specialStr_1 = '82.6.14_1';
       var contentLength_1 = 200;
-      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
       var specialStr_2 = '82.6.14_2';
       var contentLength_2 = 100;
-      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = random.getRandomString(contentLength_2, specialStr_2);
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 1;
 
@@ -4353,11 +4345,11 @@ describe('82. fetchClobAsString.js', function() {
       var id_1 = getID();
       var specialStr_1 = '82.6.15_1';
       var contentLength_1 = 200;
-      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
       var specialStr_2 = '82.6.15_2';
       var contentLength_2 = 100;
-      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = random.getRandomString(contentLength_2, specialStr_2);
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 10;
 
@@ -4394,7 +4386,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.6.16';
       var contentLength = 200;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -4428,11 +4420,11 @@ describe('82. fetchClobAsString.js', function() {
       var id_1 = getID();
       var specialStr_1 = '82.6.17_1';
       var contentLength_1 = 26;
-      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
       var specialStr_2 = '82.6.17_2';
       var contentLength_2 = 30;
-      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = random.getRandomString(contentLength_2, specialStr_2);
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 20;
 
@@ -4476,11 +4468,11 @@ describe('82. fetchClobAsString.js', function() {
       var id_1 = getID();
       var specialStr_1 = '82.6.18_1';
       var contentLength_1 = 26;
-      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
       var specialStr_2 = '82.6.18_2';
       var contentLength_2 = 30;
-      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = random.getRandomString(contentLength_2, specialStr_2);
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 2;
 
@@ -4524,11 +4516,11 @@ describe('82. fetchClobAsString.js', function() {
       var id_1 = getID();
       var specialStr_1 = '82.6.19_1';
       var contentLength_1 = 26;
-      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
       var specialStr_2 = '82.6.19_2';
       var contentLength_2 = 30;
-      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = random.getRandomString(contentLength_2, specialStr_2);
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 1;
 
@@ -4652,7 +4644,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.7.3';
       var contentLength = 20;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -4681,7 +4673,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.7.4';
       var contentLength = 65535;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -4710,7 +4702,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.7.5';
       var contentLength = 65537;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -4739,7 +4731,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.7.6';
       var contentLength = 1048577; // 1MB + 1
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -4768,7 +4760,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.7.7';
       var contentLength = 5242881; // 5MB + 1
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -4797,7 +4789,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.7.8';
       var contentLength = 10485761; // 10MB + 1
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -4827,7 +4819,7 @@ describe('82. fetchClobAsString.js', function() {
       var specialStr = '82.7.9';
       var contentLength = 200;
       var specialStrLength = specialStr.length;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -4882,11 +4874,11 @@ describe('82. fetchClobAsString.js', function() {
       var id_1 = getID();
       var specialStr_1 = '82.7.11_1';
       var contentLength_1 = 200;
-      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
       var specialStr_2 = '82.7.11_2';
       var contentLength_2 = 100;
-      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = random.getRandomString(contentLength_2, specialStr_2);
 
       async.series([
         function(cb) {
@@ -4920,7 +4912,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.7.12';
       var contentLength = 200;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -4953,10 +4945,10 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr_1 = '82.7.13_1';
       var contentLength_1 = 200;
-      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var specialStr_2 = '82.7.13_2';
       var contentLength_2 = 202;
-      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = random.getRandomString(contentLength_2, specialStr_2);
 
       async.series([
         function(cb) {
@@ -5004,11 +4996,11 @@ describe('82. fetchClobAsString.js', function() {
       var id_1 = getID();
       var specialStr_1 = '82.7.14_1';
       var contentLength_1 = 200;
-      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
       var specialStr_2 = '82.7.14_2';
       var contentLength_2 = 100;
-      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = random.getRandomString(contentLength_2, specialStr_2);
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 1;
 
@@ -5044,11 +5036,11 @@ describe('82. fetchClobAsString.js', function() {
       var id_1 = getID();
       var specialStr_1 = '82.7.15_1';
       var contentLength_1 = 200;
-      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
       var specialStr_2 = '82.7.15_2';
       var contentLength_2 = 100;
-      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = random.getRandomString(contentLength_2, specialStr_2);
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 10;
 
@@ -5184,7 +5176,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.8.3';
       var contentLength = 20;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -5222,7 +5214,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.8.4';
       var contentLength = 65535;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -5260,7 +5252,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.8.4';
       var contentLength = 65537;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -5297,7 +5289,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.8.6';
       var contentLength = 1048577; // 1MB + 1
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -5334,7 +5326,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.8.7';
       var contentLength = 5242881; // 5MB + 1
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -5371,7 +5363,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.8.8';
       var contentLength = 10485761; // 10MB + 1
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -5409,7 +5401,7 @@ describe('82. fetchClobAsString.js', function() {
       var specialStr = '82.8.9';
       var contentLength = 200;
       var specialStrLength = specialStr.length;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -5483,11 +5475,11 @@ describe('82. fetchClobAsString.js', function() {
       var id_1 = getID();
       var specialStr_1 = '82.8.11_1';
       var contentLength_1 = 200;
-      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
       var specialStr_2 = '82.8.11_2';
       var contentLength_2 = 100;
-      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = random.getRandomString(contentLength_2, specialStr_2);
 
       async.series([
         function(cb) {
@@ -5532,7 +5524,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.8.12';
       var contentLength = 200;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -5574,10 +5566,10 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr_1 = '82.8.13_1';
       var contentLength_1 = 200;
-      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var specialStr_2 = '82.8.13_2';
       var contentLength_2 = 202;
-      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = random.getRandomString(contentLength_2, specialStr_2);
 
       async.series([
         function(cb) {
@@ -5643,11 +5635,11 @@ describe('82. fetchClobAsString.js', function() {
       var id_1 = getID();
       var specialStr_1 = '82.8.14_1';
       var contentLength_1 = 200;
-      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
       var specialStr_2 = '82.8.14_2';
       var contentLength_2 = 100;
-      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = random.getRandomString(contentLength_2, specialStr_2);
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 1;
 
@@ -5696,11 +5688,11 @@ describe('82. fetchClobAsString.js', function() {
       var id_1 = getID();
       var specialStr_1 = '82.8.15_1';
       var contentLength_1 = 200;
-      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
       var specialStr_2 = '82.8.15_2';
       var contentLength_2 = 100;
-      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = random.getRandomString(contentLength_2, specialStr_2);
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 10;
 
@@ -5829,7 +5821,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.9.3';
       var contentLength = 20;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -5858,7 +5850,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.9.4';
       var contentLength = 65535;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -5887,7 +5879,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.9.5';
       var contentLength = 65537;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -5916,7 +5908,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.9.6';
       var contentLength = 1048577; // 1MB + 1
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -5945,7 +5937,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.9.7';
       var contentLength = 5242881; // 5MB + 1
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -5974,7 +5966,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.9.8';
       var contentLength = 10485761; // 10MB + 1
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -6004,7 +5996,7 @@ describe('82. fetchClobAsString.js', function() {
       var specialStr = '82.9.9';
       var contentLength = 200;
       var specialStrLength = specialStr.length;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -6059,11 +6051,11 @@ describe('82. fetchClobAsString.js', function() {
       var id_1 = getID();
       var specialStr_1 = '82.9.11_1';
       var contentLength_1 = 200;
-      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
       var specialStr_2 = '82.9.11_2';
       var contentLength_2 = 100;
-      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = random.getRandomString(contentLength_2, specialStr_2);
 
       async.series([
         function(cb) {
@@ -6097,7 +6089,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.9.12';
       var contentLength = 200;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -6129,10 +6121,10 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr_1 = '82.9.13_1';
       var contentLength_1 = 200;
-      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var specialStr_2 = '82.9.13_2';
       var contentLength_2 = 208;
-      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = random.getRandomString(contentLength_2, specialStr_2);
 
       async.series([
         function(cb) {
@@ -6180,11 +6172,11 @@ describe('82. fetchClobAsString.js', function() {
       var id_1 = getID();
       var specialStr_1 = '82.9.14_1';
       var contentLength_1 = 200;
-      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
       var specialStr_2 = '82.9.14_2';
       var contentLength_2 = 100;
-      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = random.getRandomString(contentLength_2, specialStr_2);
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 1;
 
@@ -6220,11 +6212,11 @@ describe('82. fetchClobAsString.js', function() {
       var id_1 = getID();
       var specialStr_1 = '82.9.15_1';
       var contentLength_1 = 200;
-      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
       var specialStr_2 = '82.9.15_2';
       var contentLength_2 = 100;
-      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = random.getRandomString(contentLength_2, specialStr_2);
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 10;
 
@@ -6360,7 +6352,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.10.3';
       var contentLength = 20;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -6398,7 +6390,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.10.4';
       var contentLength = 65535;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -6436,7 +6428,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.10.5';
       var contentLength = 65537;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -6473,7 +6465,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.10.6';
       var contentLength = 1048577; // 1MB + 1
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -6510,7 +6502,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.10.7';
       var contentLength = 5242881; // 5MB + 1
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -6547,7 +6539,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.10.8';
       var contentLength = 10485761; // 10MB + 1
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -6585,7 +6577,7 @@ describe('82. fetchClobAsString.js', function() {
       var specialStr = '82.10.9';
       var contentLength = 200;
       var specialStrLength = specialStr.length;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -6659,11 +6651,11 @@ describe('82. fetchClobAsString.js', function() {
       var id_1 = getID();
       var specialStr_1 = '82.10.11_1';
       var contentLength_1 = 200;
-      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
       var specialStr_2 = '82.10.11_2';
       var contentLength_2 = 100;
-      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = random.getRandomString(contentLength_2, specialStr_2);
 
       async.series([
         function(cb) {
@@ -6709,7 +6701,7 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr = '82.10.12';
       var contentLength = 200;
-      var content = getRandomString(contentLength, specialStr);
+      var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
         function(cb) {
@@ -6751,10 +6743,10 @@ describe('82. fetchClobAsString.js', function() {
       var id = getID();
       var specialStr_1 = '82.10.13_1';
       var contentLength_1 = 200;
-      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var specialStr_2 = '82.10.13_2';
       var contentLength_2 = 208;
-      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = random.getRandomString(contentLength_2, specialStr_2);
 
       async.series([
         function(cb) {
@@ -6820,11 +6812,11 @@ describe('82. fetchClobAsString.js', function() {
       var id_1 = getID();
       var specialStr_1 = '82.10.14_1';
       var contentLength_1 = 200;
-      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
       var specialStr_2 = '82.10.14_2';
       var contentLength_2 = 100;
-      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = random.getRandomString(contentLength_2, specialStr_2);
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 1;
 
@@ -6873,11 +6865,11 @@ describe('82. fetchClobAsString.js', function() {
       var id_1 = getID();
       var specialStr_1 = '82.10.15_1';
       var contentLength_1 = 200;
-      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var id_2 = getID();
       var specialStr_2 = '82.10.15_2';
       var contentLength_2 = 100;
-      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = random.getRandomString(contentLength_2, specialStr_2);
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 10;
 
@@ -6960,10 +6952,10 @@ describe('82. fetchClobAsString.js', function() {
       var id = 1;
       var specialStr_1 = '82.11.1_1';
       var contentLength_1 = 26;
-      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var specialStr_2 = '82.11.1_2';
       var contentLength_2 = 100;
-      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = random.getRandomString(contentLength_2, specialStr_2);
 
       async.series([
         function(cb) {
@@ -6997,10 +6989,10 @@ describe('82. fetchClobAsString.js', function() {
       var id = 2;
       var specialStr_1 = '82.11.2_1';
       var contentLength_1 = 30;
-      var content_1 = getRandomString(contentLength_1, specialStr_1);
+      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
       var specialStr_2 = '82.11.2_2';
       var contentLength_2 = 50;
-      var content_2 = getRandomString(contentLength_2, specialStr_2);
+      var content_2 = random.getRandomString(contentLength_2, specialStr_2);
 
       async.series([
         function(cb) {

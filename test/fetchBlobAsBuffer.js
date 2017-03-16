@@ -39,6 +39,7 @@ var async    = require('async');
 var should   = require('should');
 var fs = require('fs');
 var dbConfig = require('./dbconfig.js');
+var random = require('./random.js');
 
 describe('83. fetchBlobAsBuffer.js', function() {
   this.timeout(100000);
@@ -86,7 +87,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
                            "END; ";
   var drop_table2 = "DROP TABLE nodb_blob2 PURGE";
 
-  before('get one oonnection', function(done) {
+  before('get one connection', function(done) {
     async.series([
       function(cb) {
         oracledb.stmtCacheSize = 0;
@@ -232,16 +233,6 @@ describe('83. fetchBlobAsBuffer.js', function() {
     );
   };
 
-  // Create a random string of specified length
-  var getRandomString = function(length, specialStr) {
-    var str='';
-    var strLength = length - specialStr.length * 2;
-    for(; str.length < strLength; str += Math.random().toString(36).slice(2));
-    str = str.substr(0, strLength);
-    str = specialStr + str + specialStr;
-    return str;
-  };
-
   // Generate id for insert blob into db
   var insertID = 0;
   var getID = function() {
@@ -372,7 +363,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.1.3';
       var contentLength = 20;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -400,7 +391,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.1.4';
       var contentLength = 65535;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -426,7 +417,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.1.5';
       var contentLength = 65537;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -451,7 +442,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.1.6';
       var contentLength = 1048577; // 1MB + 1
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -476,7 +467,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.1.7';
       var contentLength = 5242881; // 5MB + 1
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -501,7 +492,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.1.8';
       var contentLength = 10485761; // 10MB + 1
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -527,7 +518,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var specialStr = '83.1.9';
       var contentLength = 200;
       var specialStrLength = specialStr.length;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -576,12 +567,12 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id_1 = getID();
       var specialStr_1 = '83.1.11_1';
       var contentLength_1 = 200;
-      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
       var specialStr_2 = '83.1.11_2';
       var contentLength_2 = 100;
-      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
 
       async.series([
@@ -611,7 +602,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.1.12';
       var contentLength = 200;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -638,11 +629,11 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr_1 = '83.1.13_1';
       var contentLength_1 = 208;
-      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var specialStr_2 = '83.1.13_2';
       var contentLength_2 = 200;
-      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
 
       async.series([
@@ -681,7 +672,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.1.14';
       var contentLength = 100;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -737,7 +728,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.1.15';
       var contentLength = 200;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -778,12 +769,12 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id_1 = getID();
       var specialStr_1 = '83.1.16_1';
       var contentLength_1 = 200;
-      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
       var specialStr_2 = '83.1.16_2';
       var contentLength_2 = 100;
-      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 1;
@@ -815,12 +806,12 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id_1 = getID();
       var specialStr_1 = '83.1.17_1';
       var contentLength_1 = 200;
-      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
       var specialStr_2 = '83.1.17_2';
       var contentLength_2 = 100;
-      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 10;
@@ -854,7 +845,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.1.18';
       var contentLength = 20;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -898,7 +889,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.1.19';
       var contentLength = 200;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -932,12 +923,12 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id_1 = getID();
       var specialStr_1 = '83.1.20_1';
       var contentLength_1 = 26;
-      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
       var specialStr_2 = '83.1.20_2';
       var contentLength_2 = 30;
-      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 20;
@@ -981,12 +972,12 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id_1 = getID();
       var specialStr_1 = '83.1.21_1';
       var contentLength_1 = 26;
-      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
       var specialStr_2 = '83.1.21_2';
       var contentLength_2 = 30;
-      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 2;
@@ -1030,12 +1021,12 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id_1 = getID();
       var specialStr_1 = '83.1.22_1';
       var contentLength_1 = 26;
-      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
       var specialStr_2 = '83.1.21_2';
       var contentLength_2 = 30;
-      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 1;
@@ -1161,7 +1152,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.2.3';
       var contentLength = 20;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -1188,7 +1179,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.2.4';
       var contentLength = 65535;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -1215,7 +1206,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.2.5';
       var contentLength = 65537;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -1241,7 +1232,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.2.6';
       var contentLength = 1048577; // 1MB + 1
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -1267,7 +1258,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.2.7';
       var contentLength = 5242881; // 5MB + 1
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -1293,7 +1284,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.2.8';
       var contentLength = 10485761; // 10MB + 1
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -1320,7 +1311,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var specialStr = '83.2.9';
       var contentLength = 200;
       var specialStrLength = specialStr.length;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -1371,12 +1362,12 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id_1 = getID();
       var specialStr_1 = '83.2.11_1';
       var contentLength_1 = 200;
-      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
       var specialStr_2 = '83.2.11_2';
       var contentLength_2 = 100;
-      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
 
       async.series([
@@ -1408,7 +1399,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.2.12';
       var contentLength = 200;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -1437,11 +1428,11 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr_1 = '83.2.13_1';
       var contentLength_1 = 201;
-      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var specialStr_2 = '83.2.13_2';
       var contentLength_2 = 208;
-      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
 
       async.series([
@@ -1484,7 +1475,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.2.14';
       var contentLength = 100;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -1540,7 +1531,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.2.15';
       var contentLength = 200;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -1581,12 +1572,12 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id_1 = getID();
       var specialStr_1 = '83.2.16_1';
       var contentLength_1 = 200;
-      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
       var specialStr_2 = '83.2.16_2';
       var contentLength_2 = 100;
-      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 1;
@@ -1620,12 +1611,12 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id_1 = getID();
       var specialStr_1 = '83.2.17_1';
       var contentLength_1 = 200;
-      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
       var specialStr_2 = '83.2.17_2';
       var contentLength_2 = 100;
-      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 10;
@@ -1661,7 +1652,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.2.18';
       var contentLength = 20;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -1809,7 +1800,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.3.3';
       var contentLength = 20;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -1847,7 +1838,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.3.4';
       var contentLength = 65535;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -1885,7 +1876,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.3.5';
       var contentLength = 65537;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -1922,7 +1913,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.3.6';
       var contentLength = 1048577; // 1MB + 1
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -1959,7 +1950,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.3.7';
       var contentLength = 5242881; // 5MB + 1
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -1996,7 +1987,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.3.8';
       var contentLength = 10485761; // 10MB + 1
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -2034,7 +2025,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var specialStr = '83.3.9';
       var contentLength = 200;
       var specialStrLength = specialStr.length;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -2108,12 +2099,12 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id_1 = getID();
       var specialStr_1 = '83.3.11_1';
       var contentLength_1 = 200;
-      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
       var specialStr_2 = '83.3.11_2';
       var contentLength_2 = 100;
-      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
 
       async.series([
@@ -2158,7 +2149,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.3.12';
       var contentLength = 200;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -2198,11 +2189,11 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr_1 = '83.3.13_1';
       var contentLength_1 = 200;
-      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var specialStr_2 = '83.3.13_2';
       var contentLength_2 = 208;
-      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
 
       async.series([
@@ -2267,7 +2258,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.3.14';
       var contentLength = 100;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -2323,7 +2314,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.3.15';
       var contentLength = 200;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -2364,12 +2355,12 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id_1 = getID();
       var specialStr_1 = '83.3.16_1';
       var contentLength_1 = 200;
-      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
       var specialStr_2 = '83.3.16_2';
       var contentLength_2 = 100;
-      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 1;
@@ -2418,12 +2409,12 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id_1 = getID();
       var specialStr_1 = '83.3.17_1';
       var contentLength_1 = 200;
-      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
       var specialStr_2 = '83.3.17_2';
       var contentLength_2 = 100;
-      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 10;
@@ -2472,7 +2463,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.3.18';
       var contentLength = 20;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -2598,7 +2589,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.4.3';
       var contentLength = 20;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -2625,7 +2616,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.4.4';
       var contentLength = 65535;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -2652,7 +2643,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.4.5';
       var contentLength = 65537;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -2678,7 +2669,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.4.6';
       var contentLength = 1048577; // 1MB + 1
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -2704,7 +2695,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.4.7';
       var contentLength = 5242881; // 5MB + 1
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -2730,7 +2721,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.4.8';
       var contentLength = 10485761; // 10MB + 1
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -2757,7 +2748,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var specialStr = '83.4.9';
       var contentLength = 200;
       var specialStrLength = specialStr.length;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -2808,12 +2799,12 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id_1 = getID();
       var specialStr_1 = '83.4.11_1';
       var contentLength_1 = 200;
-      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
       var specialStr_2 = '83.4.11_2';
       var contentLength_2 = 100;
-      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
 
       async.series([
@@ -2845,7 +2836,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.4.12';
       var contentLength = 200;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -2874,11 +2865,11 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr_1 = '83.4.13_1';
       var contentLength_1 = 200;
-      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var specialStr_2 = '83.4.13_2';
       var contentLength_2 = 208;
-      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
 
       async.series([
@@ -2921,7 +2912,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.4.14';
       var contentLength = 100;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -2977,7 +2968,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.4.15';
       var contentLength = 200;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -3018,12 +3009,12 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id_1 = getID();
       var specialStr_1 = '83.4.16_1';
       var contentLength_1 = 200;
-      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
       var specialStr_2 = '83.4.16_2';
       var contentLength_2 = 100;
-      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 1;
@@ -3057,12 +3048,12 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id_1 = getID();
       var specialStr_1 = '83.4.17_1';
       var contentLength_1 = 200;
-      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
       var specialStr_2 = '83.4.17_2';
       var contentLength_2 = 100;
-      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 10;
@@ -3098,7 +3089,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.4.18';
       var contentLength = 20;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -3246,7 +3237,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.5.3';
       var contentLength = 20;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -3284,7 +3275,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.5.4';
       var contentLength = 65535;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -3322,7 +3313,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.5.5';
       var contentLength = 65537;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -3359,7 +3350,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.5.6';
       var contentLength = 1048577; // 1MB + 1
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -3396,7 +3387,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.5.7';
       var contentLength = 5242881; // 5MB + 1
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -3433,7 +3424,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.5.8';
       var contentLength = 10485761; // 10MB + 1
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -3471,7 +3462,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var specialStr = '83.5.9';
       var contentLength = 200;
       var specialStrLength = specialStr.length;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -3546,12 +3537,12 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id_1 = getID();
       var specialStr_1 = '83.5.11_1';
       var contentLength_1 = 200;
-      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
       var specialStr_2 = '83.5.11_2';
       var contentLength_2 = 100;
-      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
 
       async.series([
@@ -3596,7 +3587,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.5.12';
       var contentLength = 200;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -3636,11 +3627,11 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr_1 = '83.5.13_1';
       var contentLength_1 = 208;
-      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var specialStr_2 = '83.5.13_2';
       var contentLength_2 = 208;
-      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
 
       async.series([
@@ -3705,7 +3696,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.5.14';
       var contentLength = 100;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -3761,7 +3752,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.5.15';
       var contentLength = 200;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -3802,12 +3793,12 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id_1 = getID();
       var specialStr_1 = '83.5.16_1';
       var contentLength_1 = 200;
-      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
       var specialStr_2 = '83.5.16_2';
       var contentLength_2 = 100;
-      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 1;
@@ -3856,12 +3847,12 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id_1 = getID();
       var specialStr_1 = '83.5.17_1';
       var contentLength_1 = 200;
-      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
       var specialStr_2 = '83.5.17_2';
       var contentLength_2 = 100;
-      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 10;
@@ -3910,7 +3901,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.5.18';
       var contentLength = 20;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -4032,7 +4023,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.6.3';
       var contentLength = 20;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -4061,7 +4052,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.6.4';
       var contentLength = 65535;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -4090,7 +4081,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.6.5';
       var contentLength = 65537;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -4119,7 +4110,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.6.6';
       var contentLength = 1048577; // 1MB + 1
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -4148,7 +4139,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.6.7';
       var contentLength = 5242881; // 5MB + 1
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -4177,7 +4168,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.6.8';
       var contentLength = 10485761; // 10MB + 1
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -4207,7 +4198,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var specialStr = '83.6.9';
       var contentLength = 200;
       var specialStrLength = specialStr.length;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -4263,12 +4254,12 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id_1 = getID();
       var specialStr_1 = '83.6.11_1';
       var contentLength_1 = 200;
-      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
       var specialStr_2 = '83.6.11_2';
       var contentLength_2 = 100;
-      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
 
       async.series([
@@ -4302,7 +4293,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.6.12';
       var contentLength = 200;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -4335,11 +4326,11 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr_1 = '83.6.13_1';
       var contentLength_1 = 200;
-      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var specialStr_2 = '83.6.13_2';
       var contentLength_2 = 208;
-      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
 
       async.series([
@@ -4386,12 +4377,12 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id_1 = getID();
       var specialStr_1 = '83.6.14_1';
       var contentLength_1 = 200;
-      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
       var specialStr_2 = '83.6.14_2';
       var contentLength_2 = 100;
-      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 1;
@@ -4427,12 +4418,12 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id_1 = getID();
       var specialStr_1 = '83.6.15_1';
       var contentLength_1 = 200;
-      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
       var specialStr_2 = '83.6.15_2';
       var contentLength_2 = 100;
-      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 10;
@@ -4470,7 +4461,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.6.16';
       var contentLength = 200;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -4504,12 +4495,12 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id_1 = getID();
       var specialStr_1 = '83.6.17_1';
       var contentLength_1 = 26;
-      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
       var specialStr_2 = '83.6.17_2';
       var contentLength_2 = 30;
-      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 20;
@@ -4553,12 +4544,12 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id_1 = getID();
       var specialStr_1 = '83.6.18_1';
       var contentLength_1 = 26;
-      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
       var specialStr_2 = '83.6.18_2';
       var contentLength_2 = 30;
-      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 2;
@@ -4602,12 +4593,12 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id_1 = getID();
       var specialStr_1 = '83.6.19_1';
       var contentLength_1 = 26;
-      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
       var specialStr_2 = '83.6.19_2';
       var contentLength_2 = 30;
-      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 1;
@@ -4731,7 +4722,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.7.3';
       var contentLength = 20;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -4761,7 +4752,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.7.4';
       var contentLength = 65535;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -4791,7 +4782,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.7.5';
       var contentLength = 65537;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -4821,7 +4812,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.7.6';
       var contentLength = 1048577; // 1MB + 1
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -4851,7 +4842,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.7.7';
       var contentLength = 5242881; // 5MB + 1
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -4881,7 +4872,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.7.8';
       var contentLength = 10485761; // 10MB + 1
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -4912,7 +4903,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var specialStr = '83.7.9';
       var contentLength = 200;
       var specialStrLength = specialStr.length;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -4969,12 +4960,12 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id_1 = getID();
       var specialStr_1 = '83.7.11_1';
       var contentLength_1 = 200;
-      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
       var specialStr_2 = '83.7.11_2';
       var contentLength_2 = 100;
-      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
 
       async.series([
@@ -5009,7 +5000,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.7.12';
       var contentLength = 200;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -5043,11 +5034,11 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr_1 = '83.7.13_1';
       var contentLength_1 = 200;
-      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var specialStr_2 = '83.7.13_2';
       var contentLength_2 = 202;
-      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
 
       async.series([
@@ -5096,12 +5087,12 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id_1 = getID();
       var specialStr_1 = '83.7.14_1';
       var contentLength_1 = 200;
-      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
       var specialStr_2 = '83.7.14_2';
       var contentLength_2 = 100;
-      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 1;
@@ -5138,12 +5129,12 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id_1 = getID();
       var specialStr_1 = '83.7.15_1';
       var contentLength_1 = 200;
-      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
       var specialStr_2 = '83.7.15_2';
       var contentLength_2 = 100;
-      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 10;
@@ -5280,7 +5271,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.8.3';
       var contentLength = 20;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -5319,7 +5310,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.8.4';
       var contentLength = 65535;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -5358,7 +5349,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.8.4';
       var contentLength = 65537;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -5396,7 +5387,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.8.6';
       var contentLength = 1048577; // 1MB + 1
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -5434,7 +5425,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.8.7';
       var contentLength = 5242881; // 5MB + 1
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -5472,7 +5463,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.8.8';
       var contentLength = 10485761; // 10MB + 1
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -5511,7 +5502,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var specialStr = '83.8.9';
       var contentLength = 200;
       var specialStrLength = specialStr.length;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -5587,12 +5578,12 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id_1 = getID();
       var specialStr_1 = '83.8.11_1';
       var contentLength_1 = 200;
-      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
       var specialStr_2 = '83.8.11_2';
       var contentLength_2 = 100;
-      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
 
       async.series([
@@ -5638,7 +5629,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.8.12';
       var contentLength = 200;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -5681,11 +5672,11 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr_1 = '83.8.13_1';
       var contentLength_1 = 200;
-      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var specialStr_2 = '83.8.13_2';
       var contentLength_2 = 202;
-      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
 
       async.series([
@@ -5752,12 +5743,12 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id_1 = getID();
       var specialStr_1 = '83.8.14_1';
       var contentLength_1 = 200;
-      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
       var specialStr_2 = '83.8.14_2';
       var contentLength_2 = 100;
-      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 1;
@@ -5807,12 +5798,12 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id_1 = getID();
       var specialStr_1 = '83.8.15_1';
       var contentLength_1 = 200;
-      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
       var specialStr_2 = '83.8.15_2';
       var contentLength_2 = 100;
-      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 10;
@@ -5942,7 +5933,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.9.3';
       var contentLength = 20;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -5972,7 +5963,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.9.4';
       var contentLength = 65535;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -6002,7 +5993,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.9.5';
       var contentLength = 65537;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -6032,7 +6023,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.9.6';
       var contentLength = 1048577; // 1MB + 1
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -6062,7 +6053,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.9.7';
       var contentLength = 5242881; // 5MB + 1
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -6092,7 +6083,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.9.8';
       var contentLength = 10485761; // 10MB + 1
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -6123,7 +6114,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var specialStr = '83.9.9';
       var contentLength = 200;
       var specialStrLength = specialStr.length;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -6180,12 +6171,12 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id_1 = getID();
       var specialStr_1 = '83.9.11_1';
       var contentLength_1 = 200;
-      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
       var specialStr_2 = '83.9.11_2';
       var contentLength_2 = 100;
-      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
 
       async.series([
@@ -6220,7 +6211,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.9.12';
       var contentLength = 200;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -6253,11 +6244,11 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr_1 = '83.9.13_1';
       var contentLength_1 = 200;
-      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var specialStr_2 = '83.9.13_2';
       var contentLength_2 = 208;
-      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
 
       async.series([
@@ -6306,12 +6297,12 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id_1 = getID();
       var specialStr_1 = '83.9.14_1';
       var contentLength_1 = 200;
-      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
       var specialStr_2 = '83.9.14_2';
       var contentLength_2 = 100;
-      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 1;
@@ -6348,12 +6339,12 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id_1 = getID();
       var specialStr_1 = '83.9.15_1';
       var contentLength_1 = 200;
-      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
       var specialStr_2 = '83.9.15_2';
       var contentLength_2 = 100;
-      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 10;
@@ -6490,7 +6481,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.10.3';
       var contentLength = 20;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -6529,7 +6520,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.10.4';
       var contentLength = 65535;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -6568,7 +6559,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.10.5';
       var contentLength = 65537;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -6606,7 +6597,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.10.6';
       var contentLength = 1048577; // 1MB + 1
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -6644,7 +6635,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.10.7';
       var contentLength = 5242881; // 5MB + 1
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -6682,7 +6673,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.10.8';
       var contentLength = 10485761; // 10MB + 1
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -6721,7 +6712,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var specialStr = '83.10.9';
       var contentLength = 200;
       var specialStrLength = specialStr.length;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -6797,12 +6788,12 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id_1 = getID();
       var specialStr_1 = '83.10.11_1';
       var contentLength_1 = 200;
-      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
       var specialStr_2 = '83.10.11_2';
       var contentLength_2 = 100;
-      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
 
       async.series([
@@ -6849,7 +6840,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr = '83.10.12';
       var contentLength = 200;
-      var strBuf = getRandomString(contentLength, specialStr);
+      var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
       async.series([
@@ -6892,11 +6883,11 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr_1 = '83.10.13_1';
       var contentLength_1 = 200;
-      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var specialStr_2 = '83.10.13_2';
       var contentLength_2 = 208;
-      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
 
       async.series([
@@ -6963,12 +6954,12 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id_1 = getID();
       var specialStr_1 = '83.10.14_1';
       var contentLength_1 = 200;
-      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
       var specialStr_2 = '83.10.14_2';
       var contentLength_2 = 100;
-      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 1;
@@ -7018,12 +7009,12 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id_1 = getID();
       var specialStr_1 = '83.10.15_1';
       var contentLength_1 = 200;
-      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var id_2 = getID();
       var specialStr_2 = '83.10.15_2';
       var contentLength_2 = 100;
-      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 10;
@@ -7107,11 +7098,11 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr_1 = '83.11.1_1';
       var contentLength_1 = 26;
-      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var specialStr_2 = '83.11.1_2';
       var contentLength_2 = 100;
-      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
 
       async.series([
@@ -7139,11 +7130,11 @@ describe('83. fetchBlobAsBuffer.js', function() {
       var id = getID();
       var specialStr_1 = '83.11.2_1';
       var contentLength_1 = 30;
-      var strBuf_1 = getRandomString(contentLength_1, specialStr_1);
+      var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
       var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
       var specialStr_2 = '83.11.2_2';
       var contentLength_2 = 50;
-      var strBuf_2 = getRandomString(contentLength_2, specialStr_2);
+      var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
 
       async.series([
