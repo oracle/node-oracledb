@@ -2680,8 +2680,8 @@ oracledb.getConnection(
 
 ### <a name="numberofthreads"></a> 8.2 Connections and Number of Threads
 
-If you use a large number of connections, such as via increasing
-[`poolMax`](#proppoolpoolmax), you may want to also increase the
+If you open more than four connections, such as via
+increasing [`poolMax`](#proppoolpoolmax), you should increase the
 number of threads available to node-oracledb.
 
 Node.js worker threads executing database statements on a connection will
@@ -2702,6 +2702,14 @@ can be increased to 10 by using the following command:
 ```
 $ UV_THREADPOOL_SIZE=10 node myapp.js
 ```
+
+The thread pool size should be at least equal to the maxiumum number
+of connections.  If the application does database and non-database
+work concurrently, extra threads could also be required for optimal
+throughput.
+
+Note the '[libuv](https://github.com/libuv/libuv)' library used by
+Node.js limits the number of threads to 128.
 
 ### <a name="connpooling"></a> 8.3 Connection Pooling
 
@@ -2769,6 +2777,15 @@ Pool attributes [`poolIncrement`](#proppoolpoolincrement),
 [`poolTimeout`](#proppoolpooltimeout).  Note that when External
 Authentication is used, the pool behavior is different, see
 [External Authentication](#extauth).
+
+The Oracle Real-World Performance Group's general recommendation for
+client connection pools is for the minimum and maximum number of
+connections to be the same.  This avoids connection storms which can
+decrease throughput.  They also recommend sizing connection pools so
+that the sum of all connections from all applications accessing a
+database gives 1-10 connections per database server CPU core.
+See
+[About Optimizing Real-World Performance with Static Connection Pools](http://docs.oracle.com/cd/E82638_01/JJUCP/optimizing-real-world-performance.htm#JJUCP-GUID-BC09F045-5D80-4AF5-93F5-FEF0531E0E1D).
 
 The Pool attribute [`stmtCacheSize`](#propconnstmtcachesize) can be
 used to set the statement cache size used by connections in the pool,
