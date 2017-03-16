@@ -760,9 +760,12 @@ The default value is 4.
 
 This property may be overridden when [creating a connection pool](#createpool).
 
-If you increase this value, you should increase the number of threads
+See [Connections and Number of Threads](#numberofthreads) for why you
+should not increase this value beyond 128.  Importantly, if you
+increase `poolMax` you should also increase the number of threads
 available to node-oracledb.
-See [Connections and Number of Threads](#numberofthreads).
+
+See [Connection Pooling](#connpooling) for other pool sizing guidelines.
 
 ##### Example
 
@@ -2682,17 +2685,22 @@ oracledb.getConnection(
 
 If you open more than four connections, such as via
 increasing [`poolMax`](#proppoolpoolmax), you should increase the
-number of threads available to node-oracledb.
+number of worker threads available to node-oracledb.
 
-Node.js worker threads executing database statements on a connection will
-commonly wait until round-trips between node-oracledb and the database
-are complete.  When an application handles a sustained number of user
-requests, and database operations take some time to execute or the
-network is slow, then the four default threads may all be held in
+The thread pool size should be at least equal to the maxiumum number
+of connections.  If the application does database and non-database
+work concurrently, extra threads could also be required for optimal
+throughput.
+
+Node.js worker threads executing database statements on a connection
+will commonly wait until round-trips between node-oracledb and the
+database are complete.  When an application handles a sustained number
+of user requests, and database operations take some time to execute or
+the network is slow, then the four default threads may all be held in
 use. This prevents other connections from beginning work and stops
 Node.js from handling more user load.  Increasing the number of worker
-threads may improve throughput.  Do this by setting the environment
-variable
+threads may improve throughput and prevent [deadlocks](https://github.com/oracle/node-oracledb/issues/603#issuecomment-277017313).  Do this by
+setting the environment variable
 [UV_THREADPOOL_SIZE](http://docs.libuv.org/en/v1.x/threadpool.html)
 before starting Node.
 
@@ -2703,13 +2711,15 @@ can be increased to 10 by using the following command:
 $ UV_THREADPOOL_SIZE=10 node myapp.js
 ```
 
-The thread pool size should be at least equal to the maxiumum number
-of connections.  If the application does database and non-database
-work concurrently, extra threads could also be required for optimal
-throughput.
+If the value is set inside the application with
+`process.env.UV_THREADPOOL_SIZE` ensure it is set prior to any
+asynchronous call that uses the thread pool otherwise the default size
+of 4 will be used.
 
 Note the '[libuv](https://github.com/libuv/libuv)' library used by
-Node.js limits the number of threads to 128.
+Node.js limits the number of threads to 128.  This implies the
+maxiumum number of connections opened, i.e. `poolMax`, should be less
+than 128.
 
 ### <a name="connpooling"></a> 8.3 Connection Pooling
 
@@ -3035,7 +3045,7 @@ One related environment variable is is shown by `_logStats()`:
 
 Environment Variable                                 | Description
 -----------------------------------------------------|-------------
-[`process.env.UV_THREADPOOL_SIZE`](#numberofthreads) | The number of worker threads for this process.
+[`process.env.UV_THREADPOOL_SIZE`](#numberofthreads) | The number of worker threads for this process.  Note, if this variable is set after the thread pool starts it will be ignored and the thread pool will still be restricted to the default size of 4.
 
 #### <a name="connpoolpinging"></a> 8.3.4 Connection Pool Pinging
 
