@@ -1018,7 +1018,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       ], done);
     }); // 83.1.21
 
-    it.skip('83.1.22 works with connection.queryStream() and oracledb.maxRows < actual number of rows in the table', function(done) {
+    it('83.1.22 works with connection.queryStream() and oracledb.maxRows < actual number of rows in the table', function(done) {
       var id_1 = getID();
       var specialStr_1 = '83.1.22_1';
       var contentLength_1 = 26;
@@ -4590,7 +4590,7 @@ describe('83. fetchBlobAsBuffer.js', function() {
       ], done);
     }); // 83.6.18
 
-    it.skip('83.6.19 works with connection.queryStream() and oracledb.maxRows < actual number of rows in the table', function(done) {
+    it('83.6.19 works with connection.queryStream() and oracledb.maxRows < actual number of rows in the table', function(done) {
       var id_1 = getID();
       var specialStr_1 = '83.6.19_1';
       var contentLength_1 = 26;

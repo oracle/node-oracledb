@@ -1364,7 +1364,7 @@ Overview of node-oracledb functional tests
        82.1.19 works with connection.queryStream()
        82.1.20 works with connection.queryStream() and oracledb.maxRows > actual number of rows in the table
        82.1.21 works with connection.queryStream() and oracledb.maxRows = actual number of rows in the table
-     - 82.1.22 works with connection.queryStream() and oracledb.maxRows < actual number of rows in the table
+       82.1.22 works with connection.queryStream() and oracledb.maxRows < actual number of rows in the table
     82.2 fetch CLOB columns by setting oracledb.fetchAsString and outFormat = oracledb.OBJECT
        82.2.1 works with NULL value
        82.2.2 works with empty String
@@ -1460,7 +1460,7 @@ Overview of node-oracledb functional tests
        82.6.16 works with connection.queryStream()
        82.6.17 works with connection.queryStream() and oracledb.maxRows > actual number of rows in the table
        82.6.18 works with connection.queryStream() and oracledb.maxRows = actual number of rows in the table
-     - 82.6.19 works with connection.queryStream() and oracledb.maxRows < actual number of rows in the table
+       82.6.19 works with connection.queryStream() and oracledb.maxRows < actual number of rows in the table
     82.7 fetch CLOB columns by setting fetchInfo option and outFormat = oracledb.OBJECT
        82.7.1 works with NULL value
        82.7.2 works with empty buffer
@@ -1560,7 +1560,7 @@ Overview of node-oracledb functional tests
       83.1.19 works with connection.queryStream()
       83.1.20 works with connection.queryStream() and oracledb.maxRows > actual number of rows in the table
       83.1.21 works with connection.queryStream() and oracledb.maxRows = actual number of rows in the table
-    - 83.1.22 works with connection.queryStream() and oracledb.maxRows < actual number of rows in the table
+      83.1.22 works with connection.queryStream() and oracledb.maxRows < actual number of rows in the table
   83.2 fetch BLOB columns by setting oracledb.fetchAsBuffer and outFormat = oracledb.OBJECT
       83.2.1 works with NULL value
       83.2.2 works with empty Buffer
@@ -1656,7 +1656,7 @@ Overview of node-oracledb functional tests
       83.6.16 works with connection.queryStream()
       83.6.17 works with connection.queryStream() and oracledb.maxRows > actual number of rows in the table
       83.6.18 works with connection.queryStream() and oracledb.maxRows = actual number of rows in the table
-    - 83.6.19 works with connection.queryStream() and oracledb.maxRows < actual number of rows in the table
+      83.6.19 works with connection.queryStream() and oracledb.maxRows < actual number of rows in the table
   83.7 fetch BLOB columns by setting fetchInfo option and outFormat = oracledb.OBJECT
       83.7.1 works with NULL value
       83.7.2 works with empty buffer
