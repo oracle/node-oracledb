@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -23,10 +23,6 @@
  *
  * DESCRIPTION
  *    Testing Oracle data type support - BINARY_DOUBLE.
- *
- * NOTE
- *   BINARY_DOUBLE support is still under enhancement.
- *   There is precision issue. This test is suspended.
  *
  * NUMBERING RULE
  *   Test numbers follow this numbering rule:
