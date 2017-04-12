@@ -62,17 +62,12 @@ Overview of node-oracledb functional tests
         2.6.3 stmtCacheSize must be a Number
     2.7 getConnection
         2.7.1 passes error in callback if called after pool is terminated and a callback is provided
-    2.8 connection request queue (basic functionality)
-        2.8.1 generates ORA-24418 when calling getConnection if queueing is disabled
-        2.8.2 does not generate ORA-24418 when calling getConnection if queueing is enabled
-        2.8.3 generates NJS-040 if request is queued and queueTimeout expires
-        2.8.4 does not generate NJS-040 if request is queued for less time than queueTimeout
-    2.9 connection request queue (_enableStats & _logStats functionality)_logStats must be called prior to terminating pool.
-        2.9.1 works after the pool as been terminated
-    2.10 Close method
-        2.10.1 close can be used as an alternative to release
-    2.11 invalid credentials
-      - 2.11.1 cannot get connections with invalid credentials
+    2.8 connection request queue (_enableStats & _logStats functionality)
+        2.8.1 does not works after the pool has been terminated
+    2.9 Close method
+        2.9.1 close can be used as an alternative to release
+    2.10 invalid credentials
+      - 2.10.1 cannot get connections with invalid credentials
 
 3. examples.js
     3.1 connect.js
@@ -1146,22 +1141,20 @@ Overview of node-oracledb functional tests
         74.1.16 works with String length (64K - 1)
         74.1.17 works with String length (64K + 1)
         74.1.18 works with String length (1MB + 1)
-        74.1.19 works with String length (5MB + 1)
-        74.1.20 works with String length (10MB + 1)
-        74.1.21 works with bind value and type mismatch
-        74.1.22 mixing named with positional binding
-        74.1.23 works with invalid CLOB
-        74.1.24 works with bind in maxSize smaller than string length
-        74.1.25 RETURN with bind type STRING
-        74.1.26 works with UPDATE
-        74.1.27 bind error: NJS-037, bind by name 1
-        74.1.28 bind error: NJS-037, bind by name 2
-        74.1.29 bind error: NJS-037, bind by name 3
-        74.1.30 bind error: NJS-037, bind by name 4
-        74.1.31 bind error: NJS-052, bind by pos 1
-        74.1.32 bind error: NJS-052, bind by pos 2
-        74.1.33 bind error: NJS-052, bind by pos 3
-        74.1.35 bind error: NJS-052, bind by pos 4
+        74.1.19 works with bind value and type mismatch
+        74.1.20 mixing named with positional binding
+        74.1.21 works with invalid CLOB
+        74.1.22 works with bind in maxSize smaller than string length
+        74.1.23 RETURN with bind type STRING
+        74.1.24 works with UPDATE
+        74.1.25 bind error: NJS-037, bind by name 1
+        74.1.26 bind error: NJS-037, bind by name 2
+        74.1.27 bind error: NJS-037, bind by name 3
+        74.1.28 bind error: NJS-037, bind by name 4
+        74.1.29 bind error: NJS-052, bind by pos 1
+        74.1.30 bind error: NJS-052, bind by pos 2
+        74.1.31 bind error: NJS-052, bind by pos 3
+        74.1.32 bind error: NJS-052, bind by pos 4
     74.2 CLOB, PLSQL, BIND_IN to VARCHAR2
         74.2.1 works with EMPTY_CLOB
         74.2.2 works with EMPTY_CLOB and bind in maxSize set to 1
@@ -1207,12 +1200,16 @@ Overview of node-oracledb functional tests
         75.1.16 works with String length (64K - 1)
         75.1.17 works with String length (64K + 1)
         75.1.18 works with String length (1MB + 1)
-        75.1.20 works with String length (10MB + 1)
-        75.1.21 works with bind value and type mismatch
-        75.1.22 mixing named with positional binding
-        75.1.23 works with bind out maxSize smaller than string length
-        75.1.24 works with UPDATE
-        75.1.25 works with substr
+        75.1.19 works with bind value and type mismatch
+        75.1.20 mixing named with positional binding
+        75.1.21 works with UPDATE
+        75.1.22 works with substr
+        75.1.23 named binging, bind out maxSize smaller than string length ( < 32K )
+        75.1.24 named binging, bind out maxSize smaller than string length ( > 32K )
+        75.1.25 named binging, bind out maxSize smaller than string length ( > 64K )
+        75.1.26 positional binging, bind out maxSize smaller than string length ( < 32K )
+        75.1.27 positional binging, bind out maxSize smaller than string length ( > 32K )
+        75.1.28 positional binging, bind out maxSize smaller than string length ( > 63K )
     75.2 CLOB, PLSQL, BIND_OUT to VARCHAR2
         75.2.1 works with EMPTY_LOB
         75.2.2 works with EMPTY_LOB and bind out maxSize set to 1
@@ -1258,14 +1255,17 @@ Overview of node-oracledb functional tests
         76.1.16 works with String length (64K - 1)
         76.1.17 works with String length (64K + 1)
         76.1.18 works with String length (1MB + 1)
-        76.1.19 works with String length (5MB + 1)
-        76.1.20 works with String length (10MB + 1)
-        76.1.21 works with bind value and type mismatch
-        76.1.22 mixing named with positional binding
-        76.1.23 works with bind out maxSize smaller than string length
-        76.1.24 works with UPDATE
-        76.1.25 works with invalid CLOB
-        76.1.26 works with substr
+        76.1.19 works with bind value and type mismatch
+        76.1.20 mixing named with positional binding
+        76.1.21 works with UPDATE
+        76.1.22 works with invalid CLOB
+        76.1.23 works with substr
+        76.1.24 named binding: maxSize smaller than string length( < 32K )
+        76.1.25 named binding: maxSize smaller than string length( > 32K )
+        76.1.26 named binding: maxSize smaller than string length( > 64K )
+        76.1.27 positional binding: maxSize smaller than string length( < 32K )
+        76.1.28 positional binding: maxSize smaller than string length( > 32K )
+        76.1.29 positional binding: maxSize smaller than string length( > 64K )
     76.2 CLOB, PLSQL, BIND_INOUT to VARCHAR2
         76.2.1 works with EMPTY_CLOB
         76.2.2 works with EMPTY_CLOB and maxSize set to 1
@@ -1312,14 +1312,12 @@ Overview of node-oracledb functional tests
         77.1.16 works with Buffer size (64K - 1)
         77.1.17 works with Buffer size (64K + 1)
         77.1.18 works with Buffer size (1MB + 1)
-        77.1.19 works with Buffer size (5MB + 1)
-        77.1.20 works with Buffer size (10MB + 1)
-        77.1.21 works with bind value and type mismatch
-        77.1.22 mixing named with positional binding
-        77.1.23 works with invalid BLOB
-        77.1.24 works without maxSize
-        77.1.25 works with bind in maxSize smaller than buffer size
-        77.1.26 works with UPDATE
+        77.1.19 works with bind value and type mismatch
+        77.1.20 mixing named with positional binding
+        77.1.21 works with invalid BLOB
+        77.1.22 works without maxSize
+        77.1.23 works with bind in maxSize smaller than buffer size
+        77.1.24 works with UPDATE
     77.2 BLOB, PLSQL, BIND_IN to RAW
         77.2.1 works with EMPTY_BLOB
         77.2.2 works with EMPTY_BLOB and bind in maxSize set to 1
@@ -1364,13 +1362,17 @@ Overview of node-oracledb functional tests
         78.1.14 works with Buffer size (64K - 1)
         78.1.15 works with Buffer size (64K + 1)
         78.1.16 works with Buffer size (1MB + 1)
-        78.1.17 works with Buffer size (5MB + 1)
-        78.1.18 works with Buffer size (10MB + 1)
-        78.1.19 mixing named with positional binding
-        78.1.20 works with bind out maxSize smaller than buffer size
-        78.1.21 bind out without maxSize
-        78.1.22 works with UPDATE
-        78.1.23 works with dbms_lob.substr()
+        78.1.17 mixing named with positional binding
+        78.1.18 works with UPDATE
+        78.1.19 works with dbms_lob.substr()
+        78.1.20 named binding: bind out maxSize smaller than buffer size( < 32K )
+        78.1.21 named binding: bind out maxSize smaller than buffer size( > 32K )
+        78.1.22 named binding: bind out maxSize smaller than buffer size( > 64K )
+        78.1.23 positional binding: bind out maxSize smaller than buffer size( < 32K )
+        78.1.24 positional binding: bind out maxSize smaller than buffer size( > 32K )
+        78.1.25 positional binding: bind out maxSize smaller than buffer size( > 64K )
+        78.1.26 bind out without maxSize
+        78.1.28 bind out without maxSize
     78.2 BLOB, PLSQL, BIND_OUT to RAW
         78.2.1 works with EMPTY_BLOB
         78.2.2 works with EMPTY_BLOB and bind out maxSize set to 1
@@ -1415,15 +1417,18 @@ Overview of node-oracledb functional tests
         79.1.16 works with buffer size (64K - 1)
         79.1.17 works with buffer size (64K + 1)
         79.1.18 works with buffer size (1MB + 1)
-        79.1.19 works with buffer size (5MB + 1)
-        79.1.20 works with buffer size (10MB + 1)
-        79.1.21 works with bind value and type mismatch
-        79.1.22 mixing named with positional binding
-        79.1.23 works with maxSize smaller than buffer size
-        79.1.24 works with invalid BLOB
-        79.1.25 works with substr
-        79.1.26 works with UPDATE
-        79.1.27 works without maxSize
+        79.1.19 works with bind value and type mismatch
+        79.1.20 mixing named with positional binding
+        79.1.21 works with invalid BLOB
+        79.1.22 works with substr
+        79.1.23 works with UPDATE
+        79.1.24 named binding: maxSize smaller than buffer size ( < 32K )
+        79.1.25 named binding: maxSize smaller than buffer size ( > 32K )
+        79.1.26 named binding: maxSize smaller than buffer size ( > 64K )
+        79.1.27 positional binding: maxSize smaller than buffer size ( < 32K )
+        79.1.28 positional binding: maxSize smaller than buffer size ( > 32K )
+        79.1.29 positional binding: maxSize smaller than buffer size ( > 64K )
+        79.1.30 bind without maxSize
     79.2 BLOB, PLSQL, BIND_INOUT to RAW
         79.2.1 works with EMPTY_BLOB
         79.2.2 works with EMPTY_BLOB and maxSize set to 1
@@ -1480,21 +1485,18 @@ Overview of node-oracledb functional tests
         81.1.12 works with String length (64K - 1)
         81.1.13 works with String length (64K + 1)
         81.1.14 works with String length (1MB + 1)
-        81.1.15 works with String length (5MB + 1)
-        81.1.16 works with String length (10MB + 1)
-        81.1.17 bind value and type mismatch
-        81.1.18 mixing named with positional binding
-        81.1.19 bind with invalid CLOB
-        81.1.20 RETURNING INTO with bind type STRING
-        81.1.21 Negative: RETURNING INTO with autocommit on
-        81.1.22 works with bind in maxSize smaller than string length
+        81.1.15 bind value and type mismatch
+        81.1.16 mixing named with positional binding
+        81.1.17 bind with invalid CLOB
+        81.1.18 RETURNING INTO with bind type STRING
+        81.1.19 Negative: RETURNING INTO with autocommit on
+        81.1.20 works with bind in maxSize smaller than string length
      81.2 CLOB, UPDATE
         81.2.1 update EMPTY_CLOB column
         81.2.2 update a cloumn with EMPTY_CLOB
         81.2.3 update EMPTY_CLOB column with empty string
         81.2.4 update empty string column
         81.2.5 update a column with empty string
-        81.2.6 update a column with (10MB + 1) string
 
 82. blobDMLBindAsBuffer.js
     82.1 BLOB, INSERT
@@ -1512,21 +1514,18 @@ Overview of node-oracledb functional tests
         82.1.12 works with Buffer length (64K - 1)
         82.1.13 works with Buffer length (64K + 1)
         82.1.14 works with Buffer length (1MB + 1)
-        82.1.15 works with Buffer length (5MB + 1)
-        82.1.16 works with Buffer length (10MB + 1)
-        82.1.17 bind value and type mismatch
-        82.1.18 mixing named with positional binding
-        82.1.19 bind with invalid BLOB
-        82.1.20 Negative: RETURNING INTO with bind type BUFFER
-        82.1.21 Negative: RETURNING INTO with autocommit on
-        82.1.22 works with bind in maxSize smaller than buffer size
+        82.1.15 bind value and type mismatch
+        82.1.16 mixing named with positional binding
+        82.1.17 bind with invalid BLOB
+        82.1.18 Negative: RETURNING INTO with bind type BUFFER
+        82.1.19 Negative: RETURNING INTO with autocommit on
+        82.1.20 works with bind in maxSize smaller than buffer size
     82.2 BLOB, UPDATE
         82.2.1 update EMPTY_BLOB column
         82.2.2 update a cloumn with EMPTY_BLOB
         82.2.3 update EMPTY_BLOB column with empty buffer
         82.2.4 update empty buffer column
         82.2.5 update a column with empty buffer
-        82.2.6 update a column with (10MB + 1) buffer
 
 83. lobProperties2.js
     83.1 CLOB: chunkSize (read-only)
@@ -1552,22 +1551,20 @@ Overview of node-oracledb functional tests
         84.1.4 works with (64K - 1) data
         84.1.5 works with (64K + 1) data
         84.1.6 works with (1MB + 1) data
-        84.1.7 works with (5MB + 1) data
-        84.1.8 works with (10MB + 1) data
-        84.1.9 fetch with substr()
-        84.1.10 works with EMPTY_CLOB()
-        84.1.11 fetch multiple CLOB columns as String
-        84.1.12 fetch the same CLOB column multiple times
-        84.1.13 works with update statement
-        84.1.14 works with REF CURSOR
-        84.1.15 fetch CLOB with stream
-        84.1.16 works with setting oracledb.maxRows < actual number of rows in the table
-        84.1.17 works with setting oracledb.maxRows > actual number of rows in the table
-        84.1.18 override oracledb.fetchAsString with fetchInfo set to oracledb.DEFAULT
-        84.1.19 works with connection.queryStream()
-        84.1.20 works with connection.queryStream() and oracledb.maxRows > actual number of rows in the table
-        84.1.21 works with connection.queryStream() and oracledb.maxRows = actual number of rows in the table
-        84.1.22 works with connection.queryStream() and oracledb.maxRows < actual number of rows in the table
+        84.1.7 fetch with substr()
+        84.1.8 works with EMPTY_CLOB()
+        84.1.9 fetch multiple CLOB columns as String
+        84.1.10 fetch the same CLOB column multiple times
+        84.1.11 works with update statement
+        84.1.12 works with REF CURSOR
+        84.1.13 fetch CLOB with stream
+        84.1.14 works with setting oracledb.maxRows < actual number of rows in the table
+        84.1.15 works with setting oracledb.maxRows > actual number of rows in the table
+        84.1.16 override oracledb.fetchAsString with fetchInfo set to oracledb.DEFAULT
+        84.1.17 works with connection.queryStream()
+        84.1.18 works with connection.queryStream() and oracledb.maxRows > actual number of rows in the table
+        84.1.19 works with connection.queryStream() and oracledb.maxRows = actual number of rows in the table
+        84.1.20 works with connection.queryStream() and oracledb.maxRows < actual number of rows in the table
     84.2 fetch CLOB columns by setting oracledb.fetchAsString and outFormat = oracledb.OBJECT
         84.2.1 works with NULL value
         84.2.2 works with empty String
@@ -1575,18 +1572,16 @@ Overview of node-oracledb functional tests
         84.2.4 works with (64K - 1) value
         84.2.5 works with (64K + 1) value
         84.2.6 works with (1MB + 1) data
-        84.2.7 works with (5MB + 1) data
-        84.2.8 works with (10MB + 1) data
-        84.2.9 works with dbms_lob.substr()
-        84.2.10 works with EMPTY_CLOB()
-        84.2.11 fetch multiple CLOB rows as String
-        84.2.12 fetch the same CLOB column multiple times
-        84.2.13 works with update statement
-        84.2.14 works with REF CURSOR
-        84.2.15 fetch CLOB with stream
-        84.2.16 works with setting oracledb.maxRows < actual number of rows in the table
-        84.2.17 works with setting oracledb.maxRows > actual number of rows in the table
-        84.2.18 override oracledb.fetchAsString with fetchInfo set to oracledb.DEFAULT
+        84.2.7 works with dbms_lob.substr()
+        84.2.8 works with EMPTY_CLOB()
+        84.2.9 fetch multiple CLOB rows as String
+        84.2.10 fetch the same CLOB column multiple times
+        84.2.11 works with update statement
+        84.2.12 works with REF CURSOR
+        84.2.13 fetch CLOB with stream
+        84.2.14 works with setting oracledb.maxRows < actual number of rows in the table
+        84.2.15 works with setting oracledb.maxRows > actual number of rows in the table
+        84.2.16 override oracledb.fetchAsString with fetchInfo set to oracledb.DEFAULT
     84.3 fetch CLOB columns by setting oracledb.fetchAsString, outFormat = oracledb.OBJECT and resultSet = true
         84.3.1 works with NULL value
         84.3.2 works with empty String
@@ -1594,18 +1589,16 @@ Overview of node-oracledb functional tests
         84.3.4 works with (64K - 1) value
         84.3.5 works with (64K + 1) value
         84.3.6 works with (1MB + 1) data
-        84.3.7 works with (5MB + 1) data
-        84.3.8 works with (10MB + 1) data
-        84.3.9 works with dbms_lob.substr()
-        84.3.10 works with EMPTY_CLOB()
-        84.3.11 fetch multiple CLOB rows as String
-        84.3.12 fetch the same CLOB column multiple times
-        84.3.13 works with update statement
-        84.3.14 works with REF CURSOR
-        84.3.15 fetch CLOB with stream
-        84.3.16 works with setting oracledb.maxRows < actual number of rows in the table
-        84.3.17 works with setting oracledb.maxRows > actual number of rows in the table
-        84.3.18 override oracledb.fetchAsString with fetchInfo set to oracledb.DEFAULT
+        84.3.7 works with dbms_lob.substr()
+        84.3.8 works with EMPTY_CLOB()
+        84.3.9 fetch multiple CLOB rows as String
+        84.3.10 fetch the same CLOB column multiple times
+        84.3.11 works with update statement
+        84.3.12 works with REF CURSOR
+        84.3.13 fetch CLOB with stream
+        84.3.14 works with setting oracledb.maxRows < actual number of rows in the table
+        84.3.15 works with setting oracledb.maxRows > actual number of rows in the table
+        84.3.16 override oracledb.fetchAsString with fetchInfo set to oracledb.DEFAULT
     84.4 fetch CLOB columns by setting oracledb.fetchAsString and outFormat = oracledb.ARRAY
         84.4.1 works with NULL value
         84.4.2 works with empty String
@@ -1613,18 +1606,16 @@ Overview of node-oracledb functional tests
         84.4.4 works with (64K - 1) value
         84.4.5 works with (64K + 1) value
         84.4.6 works with (1MB + 1) data
-        84.4.7 works with (5MB + 1) data
-        84.4.8 works with (10MB + 1) data
-        84.4.9 works with dbms_lob.substr()
-        84.4.10 works with EMPTY_CLOB()
-        84.4.11 fetch multiple CLOB rows as String
-        84.4.12 fetch the same CLOB column multiple times
-        84.4.13 works with update statement
-        84.4.14 works with REF CURSOR
-        84.4.15 fetch CLOB with stream
-        84.4.16 works with setting oracledb.maxRows < actual number of rows in the table
-        84.4.17 works with setting oracledb.maxRows < actual number of rows in the table
-        84.4.18 override oracledb.fetchAsString with fetchInfo set to oracledb.DEFAULT
+        84.4.7 works with dbms_lob.substr()
+        84.4.8 works with EMPTY_CLOB()
+        84.4.9 fetch multiple CLOB rows as String
+        84.4.10 fetch the same CLOB column multiple times
+        84.4.11 works with update statement
+        84.4.12 works with REF CURSOR
+        84.4.13 fetch CLOB with stream
+        84.4.14 works with setting oracledb.maxRows < actual number of rows in the table
+        84.4.15 works with setting oracledb.maxRows < actual number of rows in the table
+        84.4.16 override oracledb.fetchAsString with fetchInfo set to oracledb.DEFAULT
     84.5 fetch CLOB columns by setting oracledb.fetchAsString, outFormat = oracledb.ARRAY and resultSet = true
         84.5.1 works with NULL value
         84.5.2 works with empty String
@@ -1632,40 +1623,36 @@ Overview of node-oracledb functional tests
         84.5.4 works with (64K - 1) value
         84.5.5 works with (64K + 1) value
         84.5.6 works with (1MB + 1) data
-        84.5.7 works with (5MB + 1) data
-        84.5.8 works with (10MB + 1) data
-        84.5.9 works with dbms_lob.substr()
-        84.5.10 works with EMPTY_CLOB()
-        84.5.11 fetch multiple CLOB rows as String
-        84.5.12 fetch the same CLOB column multiple times
-        84.5.13 works with update statement
-        84.5.14 works with REF CURSOR
-        84.5.15 fetch CLOB with stream
-        84.5.16 works with setting oracledb.maxRows < actual number of rows in the table
-        84.5.17 works with setting oracledb.maxRows > actual number of rows in the table
-        84.5.18 override oracledb.fetchAsString with fetchInfo set to oracledb.DEFAULT
+        84.5.7 works with dbms_lob.substr()
+        84.5.8 works with EMPTY_CLOB()
+        84.5.9 fetch multiple CLOB rows as String
+        84.5.10 fetch the same CLOB column multiple times
+        84.5.11 works with update statement
+        84.5.12 works with REF CURSOR
+        84.5.13 fetch CLOB with stream
+        84.5.14 works with setting oracledb.maxRows < actual number of rows in the table
+        84.5.15 works with setting oracledb.maxRows > actual number of rows in the table
+        84.5.16 override oracledb.fetchAsString with fetchInfo set to oracledb.DEFAULT
 
 85. fetchClobAsString2.js
     85.1 fetch CLOB columns by setting fetchInfo option
-        85.1.1 works with NULL value
+        85.1.1 works with NULL value (62ms)
         85.1.2 works with empty String
         85.1.3 works with small value
         85.1.4 works with (64K - 1) value
         85.1.5 works with (64K + 1) value
         85.1.6 works with (1MB + 1) value
-        85.1.7 works with (5MB + 1) value
-        85.1.8 works with (10MB + 1) value
-        85.1.9 works with dbms_lob.substr()
-        85.1.10 works with EMPTY_CLOB()
-        85.1.11 fetch multiple CLOB rows as String
-        85.1.12 fetch the same CLOB column multiple times
-        85.1.13 works with update statement
-        85.1.14 works with setting oracledb.maxRows < actual number of rows in the table
-        85.1.15 works with setting oracledb.maxRows > actual number of rows in the table
-        85.1.16 works with connection.queryStream()
-        85.1.17 works with connection.queryStream() and oracledb.maxRows > actual number of rows in the table
-        85.1.18 works with connection.queryStream() and oracledb.maxRows = actual number of rows in the table
-        85.1.19 works with connection.queryStream() and oracledb.maxRows < actual number of rows in the table
+        85.1.7 works with dbms_lob.substr()
+        85.1.8 works with EMPTY_CLOB()
+        85.1.9 fetch multiple CLOB rows as String
+        85.1.10 fetch the same CLOB column multiple times
+        85.1.11 works with update statement
+        85.1.12 works with setting oracledb.maxRows < actual number of rows in the table
+        85.1.13 works with setting oracledb.maxRows > actual number of rows in the table
+        85.1.14 works with connection.queryStream()
+        85.1.15 works with connection.queryStream() and oracledb.maxRows > actual number of rows the table
+        85.1.16 works with connection.queryStream() and oracledb.maxRows = actual number of rows the table
+        85.1.17 works with connection.queryStream() and oracledb.maxRows < actual number of rows the table
     85.2 fetch CLOB columns by setting fetchInfo option and outFormat = oracledb.OBJECT
         85.2.1 works with NULL value
         85.2.2 works with empty buffer
@@ -1673,15 +1660,13 @@ Overview of node-oracledb functional tests
         85.2.4 works with (64K - 1) value
         85.2.5 works with (64K + 1) value
         85.2.6 works with (1MB + 1) value
-        85.2.7 works with (5MB + 1) value
-        85.2.8 works with (10MB + 1) value
-        85.2.9 works with dbms_lob.substr()
-        85.2.10 works with EMPTY_CLOB()
-        85.2.11 fetch multiple CLOB rows as String
-        85.2.12 fetch the same CLOB column multiple times
-        85.2.13 works with update statement
-        85.2.14 works with setting oracledb.maxRows < actual number of rows in the table
-        85.2.15 works with setting oracledb.maxRows > actual number of rows in the table
+        85.2.7 works with dbms_lob.substr()
+        85.2.8 works with EMPTY_CLOB()
+        85.2.9 fetch multiple CLOB rows as String
+        85.2.10 fetch the same CLOB column multiple times
+        85.2.11 works with update statement
+        85.2.12 works with setting oracledb.maxRows < actual number of rows in the table
+        85.2.13 works with setting oracledb.maxRows > actual number of rows in the table
     85.3 fetch CLOB columns by setting fetchInfo option, outFormat = oracledb.OBJECT and resultSet = true
         85.3.1 works with NULL value
         85.3.2 works with empty buffer
@@ -1689,15 +1674,13 @@ Overview of node-oracledb functional tests
         85.3.4 works with (64K - 1) value
         85.3.5 works with (64K + 1) value
         85.3.6 works with (1MB + 1) value
-        85.3.7 works with (5MB + 1) value
-        85.3.8 works with (10MB + 1) value
-        85.3.9 works with dbms_lob.substr()
-        85.3.10 works with EMPTY_CLOB()
-        85.3.11 fetch multiple CLOB rows as String
-        85.3.12 fetch the same CLOB column multiple times
-        85.3.13 works with update statement
-        85.3.14 works with setting oracledb.maxRows < actual number of rows in the table
-        85.3.15 works with setting oracledb.maxRows > actual number of rows in the table
+        85.3.7 works with dbms_lob.substr()
+        85.3.8 works with EMPTY_CLOB()
+        85.3.9 fetch multiple CLOB rows as String
+        85.3.10 fetch the same CLOB column multiple times
+        85.3.11 works with update statement
+        85.3.12 works with setting oracledb.maxRows < actual number of rows in the table
+        85.3.13 works with setting oracledb.maxRows > actual number of rows in the table
     85.4 fetch CLOB columns by setting fetchInfo option and outFormat = oracledb.ARRAY
         85.4.1 works with NULL value
         85.4.2 works with empty String
@@ -1705,15 +1688,13 @@ Overview of node-oracledb functional tests
         85.4.4 works with (64K - 1) value
         85.4.5 works with (64K + 1) value
         85.4.6 works with (1MB + 1) value
-        85.4.7 works with (5MB + 1) value
-        85.4.8 works with (10MB + 1) value
-        85.4.9 works with dbms_lob.substr()
-        85.4.10 works with EMPTY_CLOB()
-        85.4.11 fetch multiple CLOB rows as String
-        85.4.12 fetch the same CLOB column multiple times
-        85.4.13 works with update statement
-        85.4.14 works with setting oracledb.maxRows < actual number of rows in the table
-        85.4.15 works with setting oracledb.maxRows > actual number of rows in the table
+        85.4.7 works with dbms_lob.substr()
+        85.4.8 works with EMPTY_CLOB()
+        85.4.9 fetch multiple CLOB rows as String
+        85.4.10 fetch the same CLOB column multiple times
+        85.4.11 works with update statement
+        85.4.12 works with setting oracledb.maxRows < actual number of rows in the table
+        85.4.13 works with setting oracledb.maxRows > actual number of rows in the table
     85.5 fetch CLOB columns by setting fetchInfo option, outFormat = oracledb.ARRAY and resultSet = true
         85.5.1 works with NULL value
         85.5.2 works with empty String
@@ -1721,15 +1702,13 @@ Overview of node-oracledb functional tests
         85.5.4 works with (64K - 1) value
         85.5.5 works with (64K + 1) value
         85.5.6 works with (1MB + 1) value
-        85.5.7 works with (5MB + 1) value
-        85.5.8 works with (10MB + 1) value
-        85.5.9 works with dbms_lob.substr()
-        85.5.10 works with EMPTY_CLOB()
-        85.5.11 fetch multiple CLOB rows as String
-        85.5.12 fetch the same CLOB column multiple times
-        85.5.13 works with update statement
-        85.5.14 works with setting oracledb.maxRows < actual number of rows in the table
-        85.5.15 works with setting oracledb.maxRows > actual number of rows in the table
+        85.5.7 works with dbms_lob.substr()
+        85.5.8 works with EMPTY_CLOB()
+        85.5.9 fetch multiple CLOB rows as String
+        85.5.10 fetch the same CLOB column multiple times
+        85.5.11 works with update statement
+        85.5.12 works with setting oracledb.maxRows < actual number of rows in the table
+        85.5.13 works with setting oracledb.maxRows > actual number of rows in the table
 
 86. fetchClobAsString3.js
     86.1 fetch multiple CLOBs
@@ -1743,8 +1722,8 @@ Overview of node-oracledb functional tests
         86.2.5 Number supported in fetchAsString
         86.2.6 Date supported in fetchAsString
         86.2.7 CLOB supported in fetchAsString
-
-87. fetchBlobAsBuffer.js
+    
+87. fetchBlobAsBuffer1.js
     87.1 fetch BLOB columns by setting oracledb.fetchAsBuffer
         87.1.1 works with NULL value
         87.1.2 works with empty Buffer
@@ -1752,22 +1731,20 @@ Overview of node-oracledb functional tests
         87.1.4 works with (64K - 1) value
         87.1.5 works with (64K + 1) value
         87.1.6 works with (1MB + 1) data
-        87.1.7 works with (5MB + 1) data
-        87.1.8 works with (10MB + 1) data
-        87.1.9 works with dbms_lob.substr()
-        87.1.10 works with EMPTY_BLOB()
-        87.1.11 fetch multiple BLOB rows as Buffer
-        87.1.12 fetch the same BLOB column multiple times
-        87.1.13 works with update statement
-        87.1.14 works with REF CURSOR
-        87.1.15 fetch BLOB with stream
-        87.1.16 works with setting oracledb.maxRows < actual number of rows in the table
-        87.1.17 works with setting oracledb.maxRows > actual number of rows in the table
-        87.1.18 override oracledb.fetchAsBuffer with fetchInfo set to oracledb.DEFAULT
-        87.1.19 works with connection.queryStream()
-        87.1.20 works with connection.queryStream() and oracledb.maxRows > actual number of rows in the table
-        87.1.21 works with connection.queryStream() and oracledb.maxRows = actual number of rows in the table
-        87.1.22 works with connection.queryStream() and oracledb.maxRows < actual number of rows in the table
+        87.1.7 works with dbms_lob.substr()
+        87.1.8 works with EMPTY_BLOB()
+        87.1.9 fetch multiple BLOB rows as Buffer
+        87.1.10 fetch the same BLOB column multiple times
+        87.1.11 works with update statement
+        87.1.12 works with REF CURSOR
+        87.1.13 fetch BLOB with stream
+        87.1.14 works with setting oracledb.maxRows < actual number of rows in the table
+        87.1.15 works with setting oracledb.maxRows > actual number of rows in the table
+        87.1.16 override oracledb.fetchAsBuffer with fetchInfo set to oracledb.DEFAULT
+        87.1.17 works with connection.queryStream()
+        87.1.18 works with connection.queryStream() and oracledb.maxRows > actual number of rows in the table
+        87.1.19 works with connection.queryStream() and oracledb.maxRows = actual number of rows in the table
+        87.1.20 works with connection.queryStream() and oracledb.maxRows < actual number of rows in the table
     87.2 fetch BLOB columns by setting oracledb.fetchAsBuffer and outFormat = oracledb.OBJECT
         87.2.1 works with NULL value
         87.2.2 works with empty Buffer
@@ -1775,18 +1752,16 @@ Overview of node-oracledb functional tests
         87.2.4 works with (64K - 1) value
         87.2.5 works with (64K + 1) value
         87.2.6 works with (1MB + 1) data
-        87.2.7 works with (5MB + 1) data
-        87.2.8 works with (10MB + 1) data
-        87.2.9 works with dbms_lob.substr()
-        87.2.10 works with EMPTY_BLOB()
-        87.2.11 fetch multiple BLOB rows as Buffer
-        87.2.12 fetch the same BLOB column multiple times
-        87.2.13 works with update statement
-        87.2.14 works with REF CURSOR
-        87.2.15 fetch BLOB with stream
-        87.2.16 works with setting oracledb.maxRows < actual number of rows in the table
-        87.2.17 works with setting oracledb.maxRows > actual number of rows in the table
-        87.2.18 override oracledb.fetchAsBuffer with fetchInfo set to oracledb.DEFAULT
+        87.2.7 works with dbms_lob.substr()
+        87.2.8 works with EMPTY_BLOB()
+        87.2.9 fetch multiple BLOB rows as Buffer
+        87.2.10 fetch the same BLOB column multiple times
+        87.2.11 works with update statement
+        87.2.12 works with REF CURSOR
+        87.2.13 fetch BLOB with stream
+        87.2.14 works with setting oracledb.maxRows < actual number of rows in the table
+        87.2.15 works with setting oracledb.maxRows > actual number of rows in the table
+        87.2.16 override oracledb.fetchAsBuffer with fetchInfo set to oracledb.DEFAULT
     87.3 fetch BLOB columns by setting oracledb.fetchAsBuffer, outFormat = oracledb.OBJECT and resultSet = true
         87.3.1 works with NULL value
         87.3.2 works with empty Buffer
@@ -1794,18 +1769,16 @@ Overview of node-oracledb functional tests
         87.3.4 works with (64K - 1) value
         87.3.5 works with (64K + 1) value
         87.3.6 works with (1MB + 1) data
-        87.3.7 works with (5MB + 1) data
-        87.3.8 works with (10MB + 1) data
-        87.3.9 works with dbms_lob.substr()
-        87.3.10 works with EMPTY_BLOB()
-        87.3.11 fetch multiple BLOB rows as Buffer
-        87.3.12 fetch the same BLOB column multiple times
-        87.3.13 works with update statement
-        87.3.14 works with REF CURSOR
-        87.3.15 fetch BLOB with stream
-        87.3.16 works with setting oracledb.maxRows < actual number of rows in the table
-        87.3.17 works with setting oracledb.maxRows > actual number of rows in the table
-        87.3.18 override oracledb.fetchAsBuffer with fetchInfo set to oracledb.DEFAULT
+        87.3.7 works with dbms_lob.substr()
+        87.3.8 works with EMPTY_BLOB()
+        87.3.9 fetch multiple BLOB rows as Buffer
+        87.3.10 fetch the same BLOB column multiple times
+        87.3.11 works with update statement
+        87.3.12 works with REF CURSOR
+        87.3.13 fetch BLOB with stream
+        87.3.14 works with setting oracledb.maxRows < actual number of rows in the table
+        87.3.15 works with setting oracledb.maxRows > actual number of rows in the table
+        87.3.16 override oracledb.fetchAsBuffer with fetchInfo set to oracledb.DEFAULT
     87.4 fetch BLOB columns by setting oracledb.fetchAsBuffer and outFormat = oracledb.ARRAY
         87.4.1 works with NULL value
         87.4.2 works with empty Buffer
@@ -1813,18 +1786,16 @@ Overview of node-oracledb functional tests
         87.4.4 works with (64K - 1) value
         87.4.5 works with (64K + 1) value
         87.4.6 works with (1MB + 1) data
-        87.4.7 works with (5MB + 1) data
-        87.4.8 works with (10MB + 1) data
-        87.4.9 works with dbms_lob.substr()
-        87.4.10 works with EMPTY_BLOB()
-        87.4.11 fetch multiple BLOB rows as Buffer
-        87.4.12 fetch the same BLOB column multiple times
-        87.4.13 works with update statement
-        87.4.14 works with REF CURSOR
-        87.4.15 fetch BLOB with stream
-        87.4.16 works with setting oracledb.maxRows < actual number of rows in the table
-        87.4.17 works with setting oracledb.maxRows < actual number of rows in the table
-        87.4.18 override oracledb.fetchAsBuffer with fetchInfo set to oracledb.DEFAULT
+        87.4.7 works with dbms_lob.substr()
+        87.4.8 works with EMPTY_BLOB()
+        87.4.9 fetch multiple BLOB rows as Buffer
+        87.4.10 fetch the same BLOB column multiple times
+        87.4.11 works with update statement
+        87.4.12 works with REF CURSOR
+        87.4.13 fetch BLOB with stream
+        87.4.14 works with setting oracledb.maxRows < actual number of rows in the table
+        87.4.15 works with setting oracledb.maxRows < actual number of rows in the table
+        87.4.16 override oracledb.fetchAsBuffer with fetchInfo set to oracledb.DEFAULT
     87.5 fetch BLOB columns by setting oracledb.fetchAsBuffer, outFormat = oracledb.ARRAY and resultSet = true
         87.5.1 works with NULL value
         87.5.2 works with empty Buffer
@@ -1832,19 +1803,17 @@ Overview of node-oracledb functional tests
         87.5.4 works with (64K - 1) value
         87.5.5 works with (64K + 1) value
         87.5.6 works with (1MB + 1) data
-        87.5.7 works with (5MB + 1) data
-        87.5.8 works with (10MB + 1) data
-        87.5.9 works with dbms_lob.substr()
-        87.5.10 works with EMPTY_BLOB()
-        87.5.11 fetch multiple BLOB rows as Buffer
-        87.5.12 fetch the same BLOB column multiple times
-        87.5.13 works with update statement
-        87.5.14 works with REF CURSOR
-        87.5.15 fetch BLOB with stream
-        87.5.16 works with setting oracledb.maxRows < actual number of rows in the table
-        87.5.17 works with setting oracledb.maxRows > actual number of rows in the table
-        87.5.18 override oracledb.fetchAsBuffer with fetchInfo set to oracledb.DEFAULT
-
+        87.5.7 works with dbms_lob.substr()
+        87.5.8 works with EMPTY_BLOB()
+        87.5.9 fetch multiple BLOB rows as Buffer
+        87.5.10 fetch the same BLOB column multiple times
+        87.5.11 works with update statement
+        87.5.12 works with REF CURSOR
+        87.5.13 fetch BLOB with stream
+        87.5.14 works with setting oracledb.maxRows < actual number of rows in the table
+        87.5.15 works with setting oracledb.maxRows > actual number of rows in the table
+        87.5.16 override oracledb.fetchAsBuffer with fetchInfo set to oracledb.DEFAULT
+        
 88. fetchBlobAsBuffer2.js
     88.1 fetch BLOB columns by setting fetchInfo option
         88.1.1 works with NULL value
@@ -1852,20 +1821,18 @@ Overview of node-oracledb functional tests
         88.1.3 works with small value
         88.1.4 works with (64K - 1) value
         88.1.5 works with (64K + 1) value
-        88.1.6 works with (1MB + 1) value
-        88.1.7 works with (5MB + 1) value
-        88.1.8 works with (10MB + 1) value
-        88.1.9 works with dbms_lob.substr()
-        88.1.10 works with EMPTY_BLOB()
-        88.1.11 fetch multiple BLOB rows as Buffer
-        88.1.12 fetch the same BLOB column multiple times
-        88.1.13 works with update statement
-        88.1.14 works with setting oracledb.maxRows < actual number of rows in the table
-        88.1.15 works with setting oracledb.maxRows > actual number of rows in the table
-        88.1.16 works with connection.queryStream()
-        88.1.17 works with connection.queryStream() and oracledb.maxRows > actual number of rows in the table
-        88.1.18 works with connection.queryStream() and oracledb.maxRows = actual number of rows in the table
-        88.1.19 works with connection.queryStream() and oracledb.maxRows < actual number of rows in the table
+        88.1.6 works with (1MB + 1) value (121ms)
+        88.1.7 works with dbms_lob.substr()
+        88.1.8 works with EMPTY_BLOB()
+        88.1.9 fetch multiple BLOB rows as Buffer
+        88.1.10 fetch the same BLOB column multiple times
+        88.1.11 works with update statement
+        88.1.12 works with setting oracledb.maxRows < actual number of rows in the table
+        88.1.13 works with setting oracledb.maxRows > actual number of rows in the table
+        88.1.14 works with connection.queryStream()
+        88.1.15 works with connection.queryStream() and oracledb.maxRows > actual number of rows in the table
+        88.1.16 works with connection.queryStream() and oracledb.maxRows = actual number of rows in the table
+        88.1.17 works with connection.queryStream() and oracledb.maxRows < actual number of rows in the table
     88.2 fetch BLOB columns by setting fetchInfo option and outFormat = oracledb.OBJECT
         88.2.1 works with NULL value
         88.2.2 works with empty buffer
@@ -1873,31 +1840,27 @@ Overview of node-oracledb functional tests
         88.2.4 works with (64K - 1) value
         88.2.5 works with (64K + 1) value
         88.2.6 works with (1MB + 1) value
-        88.2.7 works with (5MB + 1) value
-        88.2.8 works with (10MB + 1) value
-        88.2.9 works with dbms_lob.substr()
-        88.2.10 works with EMPTY_BLOB()
-        88.2.11 fetch multiple BLOB rows as Buffer
-        88.2.12 fetch the same BLOB column multiple times
-        88.2.13 works with update statement
-        88.2.14 works with setting oracledb.maxRows < actual number of rows in the table
-        88.2.15 works with setting oracledb.maxRows > actual number of rows in the table
-    88.3 fetch BLOB columns by setting fetchInfo option, outFormat = oracledb.OBJECT and resultSet = true
+        88.2.7 works with dbms_lob.substr()
+        88.2.8 works with EMPTY_BLOB()
+        88.2.9 fetch multiple BLOB rows as Buffer
+        88.2.10 fetch the same BLOB column multiple times
+        88.2.11 works with update statement
+        88.2.12 works with setting oracledb.maxRows < actual number of rows in the table
+        88.2.13 works with setting oracledb.maxRows > actual number of rows in the table
+    88.3 fetch BLOB columns by setting fetchInfo option, outFormat = oracledb.OBJECT and resultSet =  true
         88.3.1 works with NULL value
         88.3.2 works with empty buffer
         88.3.3 works with small value
         88.3.4 works with (64K - 1) value
         88.3.5 works with (64K + 1) value
         88.3.6 works with (1MB + 1) value
-        88.3.7 works with (5MB + 1) value
-        88.3.8 works with (10MB + 1) value
-        88.3.9 works with dbms_lob.substr()
-        88.3.10 works with EMPTY_BLOB()
-        88.3.11 fetch multiple BLOB rows as Buffer
-        88.3.12 fetch the same BLOB column multiple times
-        88.3.13 works with update statement
-        88.3.14 works with setting oracledb.maxRows < actual number of rows in the table
-        88.3.15 works with setting oracledb.maxRows > actual number of rows in the table
+        88.3.7 works with dbms_lob.substr()
+        88.3.8 works with EMPTY_BLOB()
+        88.3.9 fetch multiple BLOB rows as Buffer
+        88.3.10 fetch the same BLOB column multiple times
+        88.3.11 works with update statement
+        88.3.12 works with setting oracledb.maxRows < actual number of rows in the table
+        88.3.13 works with setting oracledb.maxRows > actual number of rows in the table
     88.4 fetch BLOB columns by setting fetchInfo option and outFormat = oracledb.ARRAY
         88.4.1 works with NULL value
         88.4.2 works with empty Buffer
@@ -1905,15 +1868,13 @@ Overview of node-oracledb functional tests
         88.4.4 works with (64K - 1) value
         88.4.5 works with (64K + 1) value
         88.4.6 works with (1MB + 1) value
-        88.4.7 works with (5MB + 1) value
-        88.4.8 works with (10MB + 1) value
-        88.4.9 works with dbms_lob.substr()
-        88.4.10 works with EMPTY_BLOB()
-        88.4.11 fetch multiple BLOB rows as Buffer
-        88.4.12 fetch the same BLOB column multiple times
-        88.4.13 works with update statement
-        88.4.14 works with setting oracledb.maxRows < actual number of rows in the table
-        88.4.15 works with setting oracledb.maxRows > actual number of rows in the table
+        88.4.7 works with dbms_lob.substr()
+        88.4.8 works with EMPTY_BLOB()
+        88.4.9 fetch multiple BLOB rows as Buffer
+        88.4.10 fetch the same BLOB column multiple times
+        88.4.11 works with update statement
+        88.4.12 works with setting oracledb.maxRows < actual number of rows in the table
+        88.4.13 works with setting oracledb.maxRows > actual number of rows in the table
     88.5 fetch BLOB columns by setting fetchInfo option, outFormat = oracledb.ARRAY and resultSet = true
         88.5.1 works with NULL value
         88.5.2 works with empty Buffer
@@ -1921,15 +1882,13 @@ Overview of node-oracledb functional tests
         88.5.4 works with (64K - 1) value
         88.5.5 works with (64K + 1) value
         88.5.6 works with (1MB + 1) value
-        88.5.7 works with (5MB + 1) value
-        88.5.8 works with (10MB + 1) value
-        88.5.9 works with dbms_lob.substr()
-        88.5.10 works with EMPTY_BLOB()
-        88.5.11 fetch multiple BLOB rows as Buffer
-        88.5.12 fetch the same BLOB column multiple times
-        88.5.13 works with update statement
-        88.5.14 works with setting oracledb.maxRows < actual number of rows in the table
-        88.5.15 works with setting oracledb.maxRows > actual number of rows in the table
+        88.5.7 works with dbms_lob.substr()
+        88.5.8 works with EMPTY_BLOB()
+        88.5.9 fetch multiple BLOB rows as Buffer
+        88.5.10 fetch the same BLOB column multiple times
+        88.5.11 works with update statement
+        88.5.12 works with setting oracledb.maxRows < actual number of rows in the table
+        88.5.13 works with setting oracledb.maxRows > actual number of rows in the table
 
 89. fetchBlobAsBuffer3.js
     89.1 fetch multiple BLOBs

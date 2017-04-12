@@ -52,7 +52,7 @@ describe('11. poolTimeout.js', function(){
         poolMin         : 1,
         poolMax         : 5,
         poolIncrement   : 2,
-        poolTimeout     : 5,
+        poolTimeout     : 1,
         stmtCacheSize   : 23
       },
       function(err, pooling){
@@ -151,7 +151,7 @@ describe('11. poolTimeout.js', function(){
           pool.connectionsInUse.should.be.exactly(0);
           //console.log("-- 7s later");
           callback();
-        }, 7000);
+        }, 2000);
       },
       function(callback){
         pool.connectionsOpen.should.be.exactly(3);

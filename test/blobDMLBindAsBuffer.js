@@ -488,41 +488,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
       ], done);
     }); // 82.1.14
 
-    it('82.1.15 works with Buffer length (5MB + 1)', function(done) {
-      var id = insertID++;
-      var contentLength = 5242881; // 5 * 1024 * 1024 + 1;
-      var specialStr = "82.1.15";
-      var bigStr = random.getRandomString(contentLength, specialStr);
-      var content = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
-
-      async.series([
-        function(cb) {
-          insertIntoBlobTable1(id, content, cb, true);
-        },
-        function(cb) {
-          checkInsertResult(id, content, specialStr, true, cb);
-        }
-      ], done);
-    }); // 82.1.15
-
-    it('82.1.16 works with Buffer length (10MB + 1)', function(done) {
-      var id = insertID++;
-      var contentLength = 10485761; // 10 * 1024 * 1024 + 1;
-      var specialStr = "82.1.16";
-      var bigStr = random.getRandomString(contentLength, specialStr);
-      var content = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
-
-      async.series([
-        function(cb) {
-          insertIntoBlobTable1(id, content, cb, true);
-        },
-        function(cb) {
-          checkInsertResult(id, content, specialStr, true, cb);
-        }
-      ], done);
-    }); // 82.1.16
-
-    it('82.1.17 bind value and type mismatch', function(done) {
+    it('82.1.15 bind value and type mismatch', function(done) {
       var id = insertID++;
       var content = 100;
 
@@ -539,12 +505,12 @@ describe('82.blobDMLBindAsBuffer.js', function() {
           done();
         }
       );
-    }); // 82.1.17
+    }); // 82.1.15
 
-    it('82.1.18 mixing named with positional binding', function(done) {
+    it('82.1.16 mixing named with positional binding', function(done) {
       var id = insertID++;
       var contentLength = 40000;
-      var specialStr = "82.1.18";
+      var specialStr = "82.1.16";
       var bigStr = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
 
@@ -566,9 +532,9 @@ describe('82.blobDMLBindAsBuffer.js', function() {
           checkInsertResult(id, content, specialStr, true, cb);
         }
       ], done);
-    }); // 82.1.18
+    }); // 82.1.16
 
-    it('82.1.19 bind with invalid BLOB', function(done) {
+    it('82.1.17 bind with invalid BLOB', function(done) {
       var id = insertID++;
 
       connection.execute(
@@ -583,12 +549,12 @@ describe('82.blobDMLBindAsBuffer.js', function() {
           done();
         }
       );
-    }); // 82.1.19
+    }); // 82.1.17
 
-    it('82.1.20 Negative: RETURNING INTO with bind type BUFFER', function(done) {
+    it('82.1.18 Negative: RETURNING INTO with bind type BUFFER', function(done) {
       var id = insertID++;
       var contentLength = 400;
-      var specialStr = "82.1.20";
+      var specialStr = "82.1.18";
       var bigStr = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
       var sql = "INSERT INTO nodb_dml_blob_1 (id, blob) VALUES (:i, :c) RETURNING blob INTO :lobbv";
@@ -607,9 +573,9 @@ describe('82.blobDMLBindAsBuffer.js', function() {
           done();
         }
       );
-    }); // 82.1.20
+    }); // 82.1.18
 
-    it('82.1.21 Negative: RETURNING INTO with autocommit on', function(done) {
+    it('82.1.19 Negative: RETURNING INTO with autocommit on', function(done) {
       var id = insertID++;
       var sql = "INSERT INTO nodb_dml_blob_1 (id, blob) VALUES (:i, EMPTY_BLOB()) RETURNING blob INTO :lobbv";
       var inFileName = './test/tree.jpg';
@@ -644,12 +610,12 @@ describe('82.blobDMLBindAsBuffer.js', function() {
           inStream.pipe(lob); // copies the text to the CLOB
         }
       );
-    }); // 82.1.21
+    }); // 82.1.19
 
-    it('82.1.22 works with bind in maxSize smaller than buffer size', function(done) {
+    it('82.1.20 works with bind in maxSize smaller than buffer size', function(done) {
       var id = insertID++;
       var contentLength = 32768;
-      var specialStr = "82.1.22";
+      var specialStr = "82.1.20";
       var bigStr = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
 
@@ -672,7 +638,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
           checkInsertResult(id, content, specialStr, false, cb);
         }
       ], done);
-    }); // 82.1.22
+    }); // 82.1.20
 
   }); // 82.1
 
@@ -804,33 +770,6 @@ describe('82.blobDMLBindAsBuffer.js', function() {
         }
       ], done);
     }); // 82.2.5
-
-    it('82.2.6 update a column with (10MB + 1) buffer', function(done) {
-      var id = insertID++;
-      var contentLength_1 = 50000;
-      var specialStr_1 = "82.2.6_1";
-      var bigStr_1 = random.getRandomString(contentLength_1, specialStr_1);
-      var content_1 = node6plus ? Buffer.from(bigStr_1, "utf-8") : new Buffer(bigStr_1, "utf-8");
-      var contentLength_2 = 10485761; // 10 * 1024 * 1024 + 1;
-      var specialStr_2 = "82.2.6_2";
-      var bigStr_2 = random.getRandomString(contentLength_2, specialStr_2);
-      var content_2 = node6plus ? Buffer.from(bigStr_2, "utf-8") : new Buffer(bigStr_2, "utf-8");
-
-      async.series([
-        function(cb) {
-          insertIntoBlobTable1(id, content_1, cb, false);
-        },
-        function(cb) {
-          checkInsertResult(id, content_1, specialStr_1, false, cb);
-        },
-        function(cb) {
-          updateBlobTable1(id, content_2, true, cb);
-        },
-        function(cb) {
-          checkInsertResult(id, content_2, specialStr_2, true, cb);
-        }
-      ], done);
-    }); // 82.2.6
 
   }); // 82.2
 });

@@ -726,53 +726,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
       ], done);
     }); // 77.1.18
 
-    it('77.1.19 works with Buffer size (5MB + 1)', function(done) {
-      var size = 5242881; // 5 * 1024 * 1024 + 1;
-      var sequence = insertID++;
-      var specialStr = "77.1.19";
-      var bigStr = random.getRandomString(size, specialStr);
-      var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
-      var bindVar = {
-        i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-        b: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: size }
-      };
-      var option = { autoCommit: true };
-
-      async.series([
-        function(cb) {
-          plsqlBindIn(sqlRun, bindVar, option, true, client11gPlus, cb);
-        },
-        function(cb) {
-          var sql = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
-          compareBindInResult(sql, bufferStr, specialStr, true, client11gPlus, cb);
-        }
-      ], done);
-    }); // 77.1.19
-
-    it('77.1.20 works with Buffer size (10MB + 1)', function(done) {
-      var size = 10485761; // 10 * 1024 * 1024 + 1;
-      var sequence = insertID++;
-      var specialStr = "77.1.20";
-      var bigStr = random.getRandomString(size, specialStr);
-      var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
-      var bindVar = {
-        i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-        b: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: size }
-      };
-      var option = { autoCommit: true };
-
-      async.series([
-        function(cb) {
-          plsqlBindIn(sqlRun, bindVar, option, true, client11gPlus, cb);
-        },
-        function(cb) {
-          var sql = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
-          compareBindInResult(sql, bufferStr, specialStr, true, client11gPlus, cb);
-        }
-      ], done);
-    }); // 77.1.20
-
-    it('77.1.21 works with bind value and type mismatch', function(done) {
+    it('77.1.19 works with bind value and type mismatch', function(done) {
       var sequence = insertID++;
       var bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -790,12 +744,12 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
           done();
         }
       );
-    }); // 77.1.21
+    }); // 77.1.19
 
-    it('77.1.22 mixing named with positional binding', function(done) {
+    it('77.1.20 mixing named with positional binding', function(done) {
       var size = 50000;
       var sequence = insertID++;
-      var specialStr = "77.1.22";
+      var specialStr = "77.1.20";
       var bigStr = random.getRandomString(size, specialStr);
       var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
       var bindVar = [ sequence, { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: size } ];
@@ -811,9 +765,9 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
           compareBindInResult(sql, bufferStr, specialStr, false, client11gPlus, cb);
         }
       ], done);
-    }); // 77.1.22
+    }); // 77.1.20
 
-    it('77.1.23 works with invalid BLOB', function(done) {
+    it('77.1.21 works with invalid BLOB', function(done) {
       var sequence = insertID++;
       var bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -831,12 +785,12 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
           done();
         }
       );
-    }); // 77.1.23
+    }); // 77.1.21
 
-    it('77.1.24 works without maxSize', function(done) {
+    it('77.1.22 works without maxSize', function(done) {
       var size = 65535;
       var sequence = insertID++;
-      var specialStr = "77.1.24";
+      var specialStr = "77.1.22";
       var bigStr = random.getRandomString(size, specialStr);
       var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
       var bindVar = {
@@ -854,12 +808,12 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
           compareBindInResult(sql, bufferStr, specialStr, false, client11gPlus, cb);
         }
       ], done);
-    }); // 77.1.24
+    }); // 77.1.22
 
-    it('77.1.25 works with bind in maxSize smaller than buffer size', function(done) {
+    it('77.1.23 works with bind in maxSize smaller than buffer size', function(done) {
       var size = 65535;
       var sequence = insertID++;
-      var specialStr = "77.1.25";
+      var specialStr = "77.1.23";
       var bigStr = random.getRandomString(size, specialStr);
       var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
       var bindVar = {
@@ -877,9 +831,9 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
           compareBindInResult(sql, bufferStr, specialStr, false, client11gPlus, cb);
         }
       ], done);
-    }); // 77.1.25
+    }); // 77.1.23
 
-    it('77.1.26 works with UPDATE', function(done) {
+    it('77.1.24 works with UPDATE', function(done) {
       var proc_7726 = "CREATE OR REPLACE PROCEDURE nodb_blobs_in_7726 (blob_id IN NUMBER, blob_in IN BLOB, blob_update IN BLOB)\n" +
                       "AS \n" +
                       "BEGIN \n" +
@@ -890,11 +844,11 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
       var proc_drop_7726 = "DROP PROCEDURE nodb_blobs_in_7726";
       var sequence = insertID++;
       var size_1 = 65535;
-      var specialStr_1 = "77.1.26_1";
+      var specialStr_1 = "77.1.24_1";
       var bigStr_1 = random.getRandomString(size_1, specialStr_1);
       var bufferStr_1 = node6plus ? Buffer.from(bigStr_1, "utf-8") : new Buffer(bigStr_1, "utf-8");
       var size_2 = 30000;
-      var specialStr_2 = "77.1.26_2";
+      var specialStr_2 = "77.1.24_2";
       var bigStr_2 = random.getRandomString(size_2, specialStr_2);
       var bufferStr_2 = node6plus ? Buffer.from(bigStr_2, "utf-8") : new Buffer(bigStr_2, "utf-8");
       var bindVar = {
@@ -926,7 +880,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
           executeSQL(proc_drop_7726, cb);
         }
       ], done);
-    }); // 77.1.26
+    }); // 77.1.24
 
   }); // 77.1
 

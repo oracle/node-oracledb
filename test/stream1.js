@@ -39,7 +39,8 @@ var async    = require('async');
 var dbConfig = require('./dbconfig.js');
 
 describe('13. stream1.js', function () {
-  this.timeout(0);
+
+  this.timeout(100000);
 
   var connection = null;
   var rowsAmount = 217;

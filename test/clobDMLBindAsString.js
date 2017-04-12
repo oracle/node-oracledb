@@ -476,39 +476,7 @@ describe('81. clobDMLBindAsString.js', function() {
       ], done);
     }); // 81.1.14
 
-    it('81.1.15 works with String length (5MB + 1)', function(done) {
-      var id = insertID++;
-      var contentLength = 5242881; // 5 * 1024 * 1024 + 1;
-      var specialStr = "81.1.15";
-      var content = random.getRandomString(contentLength, specialStr);
-
-      async.series([
-        function(cb) {
-          insertIntoClobTable1(id, content, cb, true);
-        },
-        function(cb) {
-          checkInsertResult(id, content, specialStr, true, cb);
-        }
-      ], done);
-    }); // 81.1.15
-
-    it('81.1.16 works with String length (10MB + 1)', function(done) {
-      var id = insertID++;
-      var contentLength = 10485761; // 10 * 1024 * 1024 + 1;
-      var specialStr = "81.1.16";
-      var content = random.getRandomString(contentLength, specialStr);
-
-      async.series([
-        function(cb) {
-          insertIntoClobTable1(id, content, cb, true);
-        },
-        function(cb) {
-          checkInsertResult(id, content, specialStr, true, cb);
-        }
-      ], done);
-    }); // 81.1.16
-
-    it('81.1.17 bind value and type mismatch', function(done) {
+    it('81.1.15 bind value and type mismatch', function(done) {
       var id = insertID++;
       var content = 100;
 
@@ -525,12 +493,12 @@ describe('81. clobDMLBindAsString.js', function() {
           done();
         }
       );
-    }); // 81.1.17
+    }); // 81.1.15
 
-    it('81.1.18 mixing named with positional binding', function(done) {
+    it('81.1.16 mixing named with positional binding', function(done) {
       var id = insertID++;
       var contentLength = 40000;
-      var specialStr = "81.1.18";
+      var specialStr = "81.1.16";
       var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
@@ -551,9 +519,9 @@ describe('81. clobDMLBindAsString.js', function() {
           checkInsertResult(id, content, specialStr, true, cb);
         }
       ], done);
-    }); // 81.1.18
+    }); // 81.1.16
 
-    it('81.1.19 bind with invalid CLOB', function(done) {
+    it('81.1.17 bind with invalid CLOB', function(done) {
       var id = insertID++;
 
       connection.execute(
@@ -568,12 +536,12 @@ describe('81. clobDMLBindAsString.js', function() {
           done();
         }
       );
-    }); // 81.1.19
+    }); // 81.1.17
 
-    it('81.1.20 RETURNING INTO with bind type STRING', function(done) {
+    it('81.1.18 RETURNING INTO with bind type STRING', function(done) {
       var id = insertID++;
       var contentLength = 400;
-      var specialStr = "81.1.20";
+      var specialStr = "81.1.18";
       var content = random.getRandomString(contentLength, specialStr);
       var sql = "INSERT INTO nodb_dml_clob_1 (id, clob) VALUES (:i, :c) RETURNING clob INTO :lobbv";
 
@@ -599,9 +567,9 @@ describe('81. clobDMLBindAsString.js', function() {
           checkInsertResult(id, content, specialStr, false, cb);
         }
       ], done);
-    }); // 81.1.20
+    }); // 81.1.18
 
-    it('81.1.21 Negative: RETURNING INTO with autocommit on', function(done) {
+    it('81.1.19 Negative: RETURNING INTO with autocommit on', function(done) {
       var id = insertID++;
       var sql = "INSERT INTO nodb_dml_clob_1 (id, clob) VALUES (:i, EMPTY_CLOB()) RETURNING clob INTO :lobbv";
       var inFileName = './test/clobexample.txt';
@@ -636,12 +604,12 @@ describe('81. clobDMLBindAsString.js', function() {
           inStream.pipe(lob); // copies the text to the CLOB
         }
       );
-    }); // 81.1.21
+    }); // 81.1.19
 
-    it('81.1.22 works with bind in maxSize smaller than string length', function(done) {
+    it('81.1.20 works with bind in maxSize smaller than string length', function(done) {
       var id = insertID++;
       var contentLength = 32768;
-      var specialStr = "81.1.22";
+      var specialStr = "81.1.20";
       var content = random.getRandomString(contentLength, specialStr);
 
       async.series([
@@ -663,7 +631,7 @@ describe('81. clobDMLBindAsString.js', function() {
           checkInsertResult(id, content, specialStr, false, cb);
         }
       ], done);
-    }); // 81.1.22
+    }); // 81.1.20
 
   }); // 81.1
 
@@ -790,31 +758,6 @@ describe('81. clobDMLBindAsString.js', function() {
         }
       ], done);
     }); // 81.2.5
-
-    it('81.2.6 update a column with (10MB + 1) string', function(done) {
-      var id = insertID++;
-      var contentLength_1 = 50000;
-      var specialStr_1 = "81.2.6_1";
-      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
-      var contentLength_2 = 10485761; // 10 * 1024 * 1024 + 1;
-      var specialStr_2 = "81.2.6_2";
-      var content_2 = random.getRandomString(contentLength_2, specialStr_2);
-
-      async.series([
-        function(cb) {
-          insertIntoClobTable1(id, content_1, cb, false);
-        },
-        function(cb) {
-          checkInsertResult(id, content_1, specialStr_1, false, cb);
-        },
-        function(cb) {
-          updateClobTable1(id, content_2, true, cb);
-        },
-        function(cb) {
-          checkInsertResult(id, content_2, specialStr_2, true, cb);
-        }
-      ], done);
-    }); // 81.2.6
 
   }); // 81.2
 });

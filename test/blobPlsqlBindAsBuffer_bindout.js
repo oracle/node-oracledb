@@ -713,60 +713,10 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
       ], done);
     }); // 78.1.16
 
-    it('78.1.17 works with Buffer size (5MB + 1)', function(done) {
-      var size = 5242881; // 5 * 1024 * 1024 + 1;
-      var sequence = insertID++;
-      var specialStr = "78.1.17";
-      var bigStr = random.getRandomString(size, specialStr);
-      var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
-      var bindVar = {
-        i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-        b: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: size }
-      };
-
-      async.series([
-        function(cb) {
-          insertBlobWithbuffer(sequence, bufferStr, true, client11gPlus, cb);
-        },
-        function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, bufferStr, specialStr, true, client11gPlus, cb);
-        },
-        function(cb) {
-          file.delete(inFileStreamed);
-          cb();
-        }
-      ], done);
-    }); // 78.1.17
-
-    it('78.1.18 works with Buffer size (10MB + 1)', function(done) {
-      var size = 10485761; // 10 * 1024 * 1024 + 1;
-      var sequence = insertID++;
-      var specialStr = "78.1.18";
-      var bigStr = random.getRandomString(size, specialStr);
-      var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
-      var bindVar = {
-        i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-        b: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: size }
-      };
-
-      async.series([
-        function(cb) {
-          insertBlobWithbuffer(sequence, bufferStr, true, client11gPlus, cb);
-        },
-        function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, bufferStr, specialStr, true, client11gPlus, cb);
-        },
-        function(cb) {
-          file.delete(inFileStreamed);
-          cb();
-        }
-      ], done);
-    }); // 78.1.18
-
-    it('78.1.19 mixing named with positional binding', function(done) {
+    it('78.1.17 mixing named with positional binding', function(done) {
       var size = 50000;
       var sequence = insertID++;
-      var specialStr = "78.1.19";
+      var specialStr = "78.1.17";
       var bigStr = random.getRandomString(size, specialStr);
       var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
       var bindVar = [ sequence, { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: size } ];
@@ -788,63 +738,9 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
           );
         }
       ], done);
-    }); // 78.1.19
+    }); // 78.1.17
 
-    it('78.1.20 works with bind out maxSize smaller than buffer size', function(done) {
-      var size = 50000;
-      var sequence = insertID++;
-      var specialStr = "78.1.20";
-      var bigStr = random.getRandomString(size, specialStr);
-      var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
-      var bindVar = [ sequence, { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: size - 1 } ];
-
-      async.series([
-        function(cb) {
-          insertBlobWithbuffer(sequence, bufferStr, false, client11gPlus, cb);
-        },
-        function(cb) {
-          connection.execute(
-            sqlRun,
-            bindVar,
-            function(err) {
-              should.exist(err);
-              // NJS-016: buffer is too small for OUT binds
-              (err.message).should.startWith('NJS-016:');
-              cb();
-            }
-          );
-        }
-      ], done);
-    }); // 78.1.20
-
-    it('78.1.21 bind out without maxSize', function(done) {
-      var size = 50000;
-      var sequence = insertID++;
-      var specialStr = "78.1.21";
-      var bigStr = random.getRandomString(size, specialStr);
-      var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
-      var bindVar = [ sequence, { type: oracledb.BUFFER, dir: oracledb.BIND_OUT } ];
-
-      async.series([
-        function(cb) {
-          insertBlobWithbuffer(sequence, bufferStr, false, client11gPlus, cb);
-        },
-        function(cb) {
-          connection.execute(
-            sqlRun,
-            bindVar,
-            function(err) {
-              should.exist(err);
-              // ORA-06502: PL/SQL: numeric or value error
-              (err.message).should.startWith('ORA-06502:');
-              cb();
-            }
-          );
-        }
-      ], done);
-    }); // 78.1.21
-
-    it('78.1.22 works with UPDATE', function(done) {
+    it('78.1.18 works with UPDATE', function(done) {
       var proc_7821 = "CREATE OR REPLACE PROCEDURE nodb_blobs_out_7821 (blob_id IN NUMBER, blob_in IN BLOB, blob_out OUT BLOB) \n" +
                       "AS \n" +
                       "BEGIN \n" +
@@ -855,11 +751,11 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
       var proc_drop_7821 = "DROP PROCEDURE nodb_blobs_out_7821";
       var size_1 = 50000;
       var sequence = insertID++;
-      var specialStr_1 = "78.1.22_1";
+      var specialStr_1 = "78.1.18_1";
       var bigStr_1 = random.getRandomString(size_1, specialStr_1);
       var bufferStr_1 = node6plus ? Buffer.from(bigStr_1, "utf-8") : new Buffer(bigStr_1, "utf-8");
       var size_2 = 40000;
-      var specialStr_2 = "78.1.22_2";
+      var specialStr_2 = "78.1.18_2";
       var bigStr_2 = random.getRandomString(size_2, specialStr_2);
       var bufferStr_2 = node6plus ? Buffer.from(bigStr_2, "utf-8") : new Buffer(bigStr_2, "utf-8");
       var bindVar = {
@@ -891,9 +787,9 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
           executeSQL(proc_drop_7821, cb);
         }
       ], done);
-    }); // 78.1.22
+    }); // 78.1.18
 
-    it('78.1.23 works with dbms_lob.substr()', function(done) {
+    it('78.1.19 works with dbms_lob.substr()', function(done) {
       var size = 50000;
       var sequence = insertID++;
       var specialStr = "78.1.19";
@@ -935,7 +831,210 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
           executeSQL(proc_drop_78123, cb);
         }
       ], done);
+    }); // 78.1.19
+
+    it('78.1.20 named binding: bind out maxSize smaller than buffer size( < 32K )', function(done) {
+      var size = 3000;
+      var sequence = insertID++;
+      var specialStr = "78.1.20";
+      var bigStr = random.getRandomString(size, specialStr);
+      var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
+      var bindVar = {
+        i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+        b: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: size - 1 }
+      };
+
+      async.series([
+        function(cb) {
+          insertBlobWithbuffer(sequence, bufferStr, false, client11gPlus, cb);
+        },
+        function(cb) {
+          connection.execute(
+            sqlRun,
+            bindVar,
+            function(err) {
+              should.exist(err);
+              // ORA-06502: PL/SQL: numeric or value error: raw variable length too long
+              (err.message).should.startWith('ORA-06502:');
+              cb();
+            }
+          );
+        }
+      ], done);
+    }); // 78.1.20
+
+    it('78.1.21 named binding: bind out maxSize smaller than buffer size( > 32K )', function(done) {
+      var size = 50000;
+      var sequence = insertID++;
+      var specialStr = "78.1.21";
+      var bigStr = random.getRandomString(size, specialStr);
+      var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
+      var bindVar = {
+        i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+        b: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: size - 1 }
+      };
+
+      async.series([
+        function(cb) {
+          insertBlobWithbuffer(sequence, bufferStr, false, client11gPlus, cb);
+        },
+        function(cb) {
+          connection.execute(
+            sqlRun,
+            bindVar,
+            function(err) {
+              should.exist(err);
+              // NJS-016: buffer is too small for OUT binds
+              (err.message).should.startWith('NJS-016:');
+              cb();
+            }
+          );
+        }
+      ], done);
+    }); // 78.1.21
+
+    it('78.1.22 named binding: bind out maxSize smaller than buffer size( > 64K )', function(done) {
+      if (!client11gPlus) this.skip();
+      var size = 65540;
+      var sequence = insertID++;
+      var specialStr = "78.1.22";
+      var bigStr = random.getRandomString(size, specialStr);
+      var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
+      var bindVar = {
+        i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+        b: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: size - 1 }
+      };
+
+      async.series([
+        function(cb) {
+          insertBlobWithbuffer(sequence, bufferStr, false, client11gPlus, cb);
+        },
+        function(cb) {
+          connection.execute(
+            sqlRun,
+            bindVar,
+            function(err) {
+              should.exist(err);
+              // NJS-016: buffer is too small for OUT binds
+              (err.message).should.startWith('NJS-016:');
+              cb();
+            }
+          );
+        }
+      ], done);
+    }); // 78.1.22
+
+    it('78.1.23 positional binding: bind out maxSize smaller than buffer size( < 32K )', function(done) {
+      var size = 3000;
+      var sequence = insertID++;
+      var specialStr = "78.1.23";
+      var bigStr = random.getRandomString(size, specialStr);
+      var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
+      sqlRun = "BEGIN nodb_blobs_out_782 (:1, :2); END;";
+      var bindVar = [ sequence, { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: size - 1 } ];
+
+      async.series([
+        function(cb) {
+          insertBlobWithbuffer(sequence, bufferStr, false, client11gPlus, cb);
+        },
+        function(cb) {
+          connection.execute(
+            sqlRun,
+            bindVar,
+            function(err) {
+              should.exist(err);
+              // ORA-06502: PL/SQL: numeric or value error: raw variable length too long
+              (err.message).should.startWith('ORA-06502:');
+              cb();
+            }
+          );
+        }
+      ], done);
     }); // 78.1.23
+
+    it('78.1.24 positional binding: bind out maxSize smaller than buffer size( > 32K )', function(done) {
+      var size = 32769;
+      var sequence = insertID++;
+      var specialStr = "78.1.24";
+      var bigStr = random.getRandomString(size, specialStr);
+      var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
+      sqlRun = "BEGIN nodb_blobs_out_782 (:1, :2); END;";
+      var bindVar = [ sequence, { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: size - 1 } ];
+
+      async.series([
+        function(cb) {
+          insertBlobWithbuffer(sequence, bufferStr, false, client11gPlus, cb);
+        },
+        function(cb) {
+          connection.execute(
+            sqlRun,
+            bindVar,
+            function(err) {
+              should.exist(err);
+              // NJS-016: buffer is too small for OUT binds
+              (err.message).should.startWith('NJS-016:');
+              cb();
+            }
+          );
+        }
+      ], done);
+    }); // 78.1.24
+
+    it('78.1.25 positional binding: bind out maxSize smaller than buffer size( > 64K )', function(done) {
+      if (!client11gPlus) this.skip();
+      var size = 65538;
+      var sequence = insertID++;
+      var specialStr = "78.1.25";
+      var bigStr = random.getRandomString(size, specialStr);
+      var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
+      sqlRun = "BEGIN nodb_blobs_out_782 (:1, :2); END;";
+      var bindVar = [ sequence, { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: size - 1 } ];
+
+      async.series([
+        function(cb) {
+          insertBlobWithbuffer(sequence, bufferStr, true, client11gPlus, cb);
+        },
+        function(cb) {
+          connection.execute(
+            sqlRun,
+            bindVar,
+            function(err) {
+              should.exist(err);
+              // NJS-016: buffer is too small for OUT binds
+              (err.message).should.startWith('NJS-016:');
+              cb();
+            }
+          );
+        }
+      ], done);
+    }); // 78.1.25
+
+    it('78.1.26 bind out without maxSize', function(done) {
+      var size = 50000;
+      var sequence = insertID++;
+      var specialStr = "78.1.26";
+      var bigStr = random.getRandomString(size, specialStr);
+      var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
+      var bindVar = [ sequence, { type: oracledb.BUFFER, dir: oracledb.BIND_OUT } ];
+
+      async.series([
+        function(cb) {
+          insertBlobWithbuffer(sequence, bufferStr, false, client11gPlus, cb);
+        },
+        function(cb) {
+          connection.execute(
+            sqlRun,
+            bindVar,
+            function(err) {
+              should.exist(err);
+              // ORA-06502: PL/SQL: numeric or value error
+              (err.message).should.startWith('ORA-06502:');
+              cb();
+            }
+          );
+        }
+      ], done);
+    }); // 78.1.26
 
   }); // 78.1
 
