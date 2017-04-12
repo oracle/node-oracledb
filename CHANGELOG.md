@@ -1,5 +1,7 @@
 # Change Log
 
+## node-oracledb v1.13.1 (DD Mon YYYY)
+
 ## node-oracledb v1.13.0 (15 Mar 2017)
 
 - Added support for fetching BLOBs as Buffers, using `fetchAsBuffer` and `fetchInfo`.
