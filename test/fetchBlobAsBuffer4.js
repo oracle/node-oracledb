@@ -60,6 +60,7 @@ describe('91. fetchBlobAsBuffer4.js', function() {
                            "        CREATE TABLE nodb_blob_1 ( \n" +
                            "            num_1      NUMBER, \n" +
                            "            num_2      NUMBER, \n" +
+                           "            content    RAW(2000), \n" +
                            "            blob       BLOB \n" +
                            "        ) \n" +
                            "    '); \n" +
@@ -132,7 +133,7 @@ describe('91. fetchBlobAsBuffer4.js', function() {
   };
 
   describe('91.1 PLSQL FUNCTION RETURN BLOB to BUFFER', function() {
-    
+
     beforeEach('set oracledb.fetchAsBuffer', function(done) {
       oracledb.fetchAsBuffer = [ oracledb.BLOB ];
       done();
@@ -143,8 +144,8 @@ describe('91. fetchBlobAsBuffer4.js', function() {
       done();
     }); // afterEach
 
-    it.skip('91.1.1 bind by position', function(done) {
-      var proc = "CREATE OR REPLACE FUNCTION nodb_blobs_out_94 (ID_1 IN NUMBER, ID_2 IN NUMBER) RETURN BLOB \n" +
+    it.skip('91.1.1 bind by position - 1', function(done) {
+      var proc = "CREATE OR REPLACE FUNCTION nodb_blobs_out_94 (ID_1 IN NUMBER, ID_2 IN NUMBER, C IN RAW) RETURN BLOB \n" +
                  "IS \n" +
                  "    tmpLOB4 BLOB; \n" +
                  "BEGIN \n" +
@@ -165,18 +166,19 @@ describe('91. fetchBlobAsBuffer4.js', function() {
           executeSQL(proc, cb);
         },
         function(cb) {
-          var sql = "INSERT INTO nodb_blob_1 (num_1, num_2, blob) VALUES (:i1, :i2, :c)";
+          var sql = "INSERT INTO nodb_blob_1 (num_1, num_2, content, blob) VALUES (:i1, :i2, :c1, :c2)";
           var bindVar = {
             i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
             i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-            c: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: len },
+            c1: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: len },
+            c2: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: len }
           };
           insertTable(sql, bindVar, cb);
         },
         function(cb) {
           connection.execute(
             sqlRun,
-            [ sequence, null, { type: oracledb.BLOB, dir: oracledb.BIND_OUT } ],
+            [ sequence, null, content, { type: oracledb.BLOB, dir: oracledb.BIND_OUT } ],
             function(err, result) {
               should.not.exist(err);
               var resultVal = result.outBinds.output;
@@ -184,7 +186,7 @@ describe('91. fetchBlobAsBuffer4.js', function() {
               should.strictEqual(compareBuffer, true);
               cb();
             }
-          );          
+          );
         },
         function(cb) {
           executeSQL(proc_drop, cb);
@@ -192,15 +194,15 @@ describe('91. fetchBlobAsBuffer4.js', function() {
       ], done);
     }); // 91.1.1
 
-    it('91.1.2 bind by name', function(done) {
-      var proc = "CREATE OR REPLACE FUNCTION nodb_blobs_out_94 (ID_1 IN NUMBER, ID_2 IN NUMBER) RETURN BLOB \n" +
+    it('91.1.2 bind by name - 1', function(done) {
+      var proc = "CREATE OR REPLACE FUNCTION nodb_blobs_out_94 (ID_1 IN NUMBER, ID_2 IN NUMBER, C IN RAW) RETURN BLOB \n" +
                  "IS \n" +
                  "    tmpLOB4 BLOB; \n" +
                  "BEGIN \n" +
                  "    select blob into tmpLOB4 from nodb_blob_1 where num_1 = ID_1;\n" +
                  "    RETURN tmpLOB4; \n" +
                  "END;";
-      var sqlRun = "begin :output := nodb_blobs_out_94 (:i1, :i2); end;";
+      var sqlRun = "begin :output := nodb_blobs_out_94 (:i1, :i2, :c); end;";
       var proc_drop = "DROP FUNCTION nodb_blobs_out_94";
 
       var len = 400;
@@ -214,11 +216,117 @@ describe('91. fetchBlobAsBuffer4.js', function() {
           executeSQL(proc, cb);
         },
         function(cb) {
-          var sql = "INSERT INTO nodb_blob_1 (num_1, num_2, blob) VALUES (:i1, :i2, :c)";
+          var sql = "INSERT INTO nodb_blob_1 (num_1, num_2, content, blob) VALUES (:i1, :i2, :c1, :c2)";
           var bindVar = {
             i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
             i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-            c: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: len },
+            c1: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: len },
+            c2: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: len }
+          };
+          insertTable(sql, bindVar, cb);
+        },
+        function(cb) {
+          connection.execute(
+            sqlRun,
+            {
+              i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+              i2: { val: null, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+              c: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN },
+              output: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: len }
+            },
+            function(err, result) {
+              should.not.exist(err);
+              var resultVal = result.outBinds.output;
+              var compareBuffer = assist.compare2Buffers(resultVal, content);
+              should.strictEqual(compareBuffer, true);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          executeSQL(proc_drop, cb);
+        }
+      ], done);
+    }); // 91.1.2
+
+    it.skip('91.1.3 bind by position - 2', function(done) {
+      var proc = "CREATE OR REPLACE FUNCTION nodb_blobs_out_94 (ID_1 IN NUMBER, ID_2 IN NUMBER, C IN RAW) RETURN BLOB \n" +
+                 "IS \n" +
+                 "    tmpLOB4 BLOB; \n" +
+                 "BEGIN \n" +
+                 "    select blob into tmpLOB4 from nodb_blob_1 where num_1 = ID_1;\n" +
+                 "    RETURN tmpLOB4; \n" +
+                 "END;";
+      var sqlRun = "begin :output := nodb_blobs_out_94 (:i1, :i2); end;";
+      var proc_drop = "DROP FUNCTION nodb_blobs_out_94";
+
+      var len = 400;
+      var sequence = insertID++;
+      var specialStr = "91.1.3";
+      var strBuf = random.getRandomString(len, specialStr);
+      var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
+
+      async.series([
+        function(cb) {
+          executeSQL(proc, cb);
+        },
+        function(cb) {
+          var sql = "INSERT INTO nodb_blob_1 (num_1, num_2, content, blob) VALUES (:i1, :i2, :c1, :c2)";
+          var bindVar = {
+            i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+            i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+            c1: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: len },
+            c2: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: len }
+          };
+          insertTable(sql, bindVar, cb);
+        },
+        function(cb) {
+          connection.execute(
+            sqlRun,
+            [ sequence, sequence, null, { type: oracledb.BLOB, dir: oracledb.BIND_OUT } ],
+            function(err, result) {
+              should.not.exist(err);
+              var resultVal = result.outBinds.output;
+              var compareBuffer = assist.compare2Buffers(resultVal, content);
+              should.strictEqual(compareBuffer, true);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          executeSQL(proc_drop, cb);
+        }
+      ], done);
+    }); // 91.1.3
+
+    it('91.1.4 bind by name - 2', function(done) {
+      var proc = "CREATE OR REPLACE FUNCTION nodb_blobs_out_94 (ID_1 IN NUMBER, ID_2 IN NUMBER, C IN RAW) RETURN BLOB \n" +
+                 "IS \n" +
+                 "    tmpLOB4 BLOB; \n" +
+                 "BEGIN \n" +
+                 "    select blob into tmpLOB4 from nodb_blob_1 where num_1 = ID_1;\n" +
+                 "    RETURN tmpLOB4; \n" +
+                 "END;";
+      var sqlRun = "begin :output := nodb_blobs_out_94 (:i1, :i2, :c); end;";
+      var proc_drop = "DROP FUNCTION nodb_blobs_out_94";
+
+      var len = 400;
+      var sequence = insertID++;
+      var specialStr = "91.1.4";
+      var strBuf = random.getRandomString(len, specialStr);
+      var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
+
+      async.series([
+        function(cb) {
+          executeSQL(proc, cb);
+        },
+        function(cb) {
+          var sql = "INSERT INTO nodb_blob_1 (num_1, num_2, content, blob) VALUES (:i1, :i2, :c1, :c2)";
+          var bindVar = {
+            i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+            i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+            c1: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: len },
+            c2: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: len }
           };
           insertTable(sql, bindVar, cb);
         },
@@ -228,7 +336,8 @@ describe('91. fetchBlobAsBuffer4.js', function() {
             {
               i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
               i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-              output: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: len },
+              c: { val: null, type: oracledb.BUFFER, dir: oracledb.BIND_IN },
+              output: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: len }
             },
             function(err, result) {
               should.not.exist(err);
@@ -237,25 +346,25 @@ describe('91. fetchBlobAsBuffer4.js', function() {
               should.strictEqual(compareBuffer, true);
               cb();
             }
-          );          
+          );
         },
         function(cb) {
           executeSQL(proc_drop, cb);
         }
       ], done);
-    }); // 91.1.2
+    }); // 91.1.4
 
   }); // 91.1
 
   describe('91.2 PLSQL PROCEDURE BIND OUT BLOB to BUFFER', function() {
-    var proc = "CREATE OR REPLACE PROCEDURE nodb_blobs_out_92 (ID_1 IN NUMBER, ID_2 IN NUMBER, C OUT BLOB) \n" +
+    var proc = "CREATE OR REPLACE PROCEDURE nodb_blobs_out_92 (ID_1 IN NUMBER, ID_2 IN NUMBER, C1 IN RAW, C2 OUT BLOB) \n" +
                 "AS \n" +
                 "BEGIN \n" +
-                "    select blob into C from nodb_blob_1 where num_1 = ID_1;\n" +
+                "    select blob into C2 from nodb_blob_1 where num_1 = ID_1;\n" +
                 "END;";
-    var sqlRun = "begin nodb_blobs_out_92 (:i1, :i2, :c); end;";
+    var sqlRun = "begin nodb_blobs_out_92 (:i1, :i2, :c1, :c2); end;";
     var proc_drop = "DROP PROCEDURE nodb_blobs_out_92";
-    
+
     beforeEach('set oracledb.fetchAsBuffer', function(done) {
       oracledb.fetchAsBuffer = [ oracledb.BLOB ];
       done();
@@ -266,7 +375,7 @@ describe('91. fetchBlobAsBuffer4.js', function() {
       done();
     }); // afterEach
 
-    it.skip('91.2.1 bind by position', function(done) {
+    it.skip('91.2.1 bind by position - 1', function(done) {
       var len = 500;
       var sequence = insertID++;
       var specialStr = "91.2.1";
@@ -278,26 +387,27 @@ describe('91. fetchBlobAsBuffer4.js', function() {
           executeSQL(proc, cb);
         },
         function(cb) {
-          var sql = "INSERT INTO nodb_blob_1 (num_1, num_2, blob) VALUES (:i1, :i2, :c)";
+          var sql = "INSERT INTO nodb_blob_1 (num_1, num_2, content, blob) VALUES (:i1, :i2, :c1, :c2)";
           var bindVar = {
             i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
             i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-            c: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: len },
+            c1: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: len },
+            c2: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: len }
           };
           insertTable(sql, bindVar, cb);
         },
         function(cb) {
           connection.execute(
             sqlRun,
-            [ sequence, null, { type: oracledb.BLOB, dir: oracledb.BIND_OUT } ],
+            [ sequence, null, content, { type: oracledb.BLOB, dir: oracledb.BIND_OUT } ],
             function(err, result) {
               should.not.exist(err);
-              var resultVal = result.outBinds.c;
+              var resultVal = result.outBinds.c2;
               var compareBuffer = assist.compare2Buffers(resultVal, content);
               should.strictEqual(compareBuffer, true);
               cb();
             }
-          );          
+          );
         },
         function(cb) {
           executeSQL(proc_drop, cb);
@@ -305,7 +415,7 @@ describe('91. fetchBlobAsBuffer4.js', function() {
       ], done);
     }); // 91.2.1
 
-    it('91.2.2 bind by name', function(done) {
+    it('91.2.2 bind by name - 1', function(done) {
       var len = 400;
       var sequence = insertID++;
       var specialStr = "91.2.2";
@@ -317,11 +427,12 @@ describe('91. fetchBlobAsBuffer4.js', function() {
           executeSQL(proc, cb);
         },
         function(cb) {
-          var sql = "INSERT INTO nodb_blob_1 (num_1, num_2, blob) VALUES (:i1, :i2, :c)";
+          var sql = "INSERT INTO nodb_blob_1 (num_1, num_2, content, blob) VALUES (:i1, :i2, :c1, :c2)";
           var bindVar = {
             i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
             i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-            c: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: len },
+            c1: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: len },
+            c2: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: len }
           };
           insertTable(sql, bindVar, cb);
         },
@@ -331,16 +442,17 @@ describe('91. fetchBlobAsBuffer4.js', function() {
             {
               i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
               i2: { val: null, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-              c: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: len },
+              c1: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN },
+              c2: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: len }
             },
             function(err, result) {
               should.not.exist(err);
-              var resultVal = result.outBinds.c;
+              var resultVal = result.outBinds.c2;
               var compareBuffer = assist.compare2Buffers(resultVal, content);
               should.strictEqual(compareBuffer, true);
               cb();
             }
-          );          
+          );
         },
         function(cb) {
           executeSQL(proc_drop, cb);
@@ -348,17 +460,102 @@ describe('91. fetchBlobAsBuffer4.js', function() {
       ], done);
     }); // 91.2.2
 
+    it.skip('91.2.3 bind by position - 2', function(done) {
+      var len = 500;
+      var sequence = insertID++;
+      var specialStr = "91.2.3";
+      var strBuf = random.getRandomString(len, specialStr);
+      var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
+
+      async.series([
+        function(cb) {
+          executeSQL(proc, cb);
+        },
+        function(cb) {
+          var sql = "INSERT INTO nodb_blob_1 (num_1, num_2, content, blob) VALUES (:i1, :i2, :c1, :c2)";
+          var bindVar = {
+            i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+            i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+            c1: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: len },
+            c2: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: len }
+          };
+          insertTable(sql, bindVar, cb);
+        },
+        function(cb) {
+          connection.execute(
+            sqlRun,
+            [ sequence, sequence, null, { type: oracledb.BLOB, dir: oracledb.BIND_OUT } ],
+            function(err, result) {
+              should.not.exist(err);
+              var resultVal = result.outBinds.c2;
+              var compareBuffer = assist.compare2Buffers(resultVal, content);
+              should.strictEqual(compareBuffer, true);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          executeSQL(proc_drop, cb);
+        }
+      ], done);
+    }); // 91.2.3
+
+    it('91.2.4 bind by name - 2', function(done) {
+      var len = 400;
+      var sequence = insertID++;
+      var specialStr = "91.2.4";
+      var strBuf = random.getRandomString(len, specialStr);
+      var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
+
+      async.series([
+        function(cb) {
+          executeSQL(proc, cb);
+        },
+        function(cb) {
+          var sql = "INSERT INTO nodb_blob_1 (num_1, num_2, content, blob) VALUES (:i1, :i2, :c1, :c2)";
+          var bindVar = {
+            i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+            i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+            c1: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: len },
+            c2: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: len }
+          };
+          insertTable(sql, bindVar, cb);
+        },
+        function(cb) {
+          connection.execute(
+            sqlRun,
+            {
+              i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+              i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+              c1: { val: null, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: len },
+              c2: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: len }
+            },
+            function(err, result) {
+              should.not.exist(err);
+              var resultVal = result.outBinds.c2;
+              var compareBuffer = assist.compare2Buffers(resultVal, content);
+              should.strictEqual(compareBuffer, true);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          executeSQL(proc_drop, cb);
+        }
+      ], done);
+    }); // 91.2.4
+
   }); // 91.2
 
   describe('91.3 PLSQL FUNCTION RETURN BLOB to RAW', function() {
-    var proc = "CREATE OR REPLACE FUNCTION nodb_blobs_out_92 (ID_1 IN NUMBER, ID_2 IN NUMBER) RETURN RAW \n" +
+    var proc = "CREATE OR REPLACE FUNCTION nodb_blobs_out_92 (ID_1 IN NUMBER, ID_2 IN NUMBER, C IN VARCHAR2) RETURN RAW \n" +
                "IS \n" +
                "    tmpLOB2 BLOB; \n" +
                "BEGIN \n" +
                "    select blob into tmpLOB2 from nodb_blob_1 where num_1 = ID_1;\n" +
                "    RETURN tmpLOB2; \n" +
                "END;";
-    var sqlRun = "begin :output := nodb_blobs_out_92 (:i1, :i2); end;";
+    var sqlRun = "begin :output := nodb_blobs_out_92 (:i1, :i2, :c); end;";
     var proc_drop = "DROP FUNCTION nodb_blobs_out_92";
 
     before(function(done) {
@@ -379,7 +576,7 @@ describe('91. fetchBlobAsBuffer4.js', function() {
       done();
     }); // afterEach
 
-    it('91.3.1 bind by name', function(done) {
+    it('91.3.1 bind by name - 1', function(done) {
       var len = 1000;
       var sequence = insertID++;
       var specialStr = "91.3.1";
@@ -388,11 +585,12 @@ describe('91. fetchBlobAsBuffer4.js', function() {
 
       async.series([
         function(cb) {
-          var sql = "INSERT INTO nodb_blob_1 (num_1, num_2, blob) VALUES (:i1, :i2, :c)";
+          var sql = "INSERT INTO nodb_blob_1 (num_1, num_2, content, blob) VALUES (:i1, :i2, :c1, :c2)";
           var bindVar = {
             i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
             i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-            c: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: len },
+            c1: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: len },
+            c2: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: len }
           };
           insertTable(sql, bindVar, cb);
         },
@@ -402,6 +600,7 @@ describe('91. fetchBlobAsBuffer4.js', function() {
             {
               i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
               i2: { val: null, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+              c: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN },
               output: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: len }
             },
             function(err, result) {
@@ -411,12 +610,12 @@ describe('91. fetchBlobAsBuffer4.js', function() {
               should.strictEqual(compareBuffer, true);
               cb();
             }
-          );          
+          );
         }
       ], done);
     }); // 91.3.1
 
-    it.skip('91.3.2 bind by position', function(done) {
+    it.skip('91.3.2 bind by position - 1', function(done) {
       var len = 1000;
       var sequence = insertID++;
       var specialStr = "91.3.2";
@@ -425,11 +624,12 @@ describe('91. fetchBlobAsBuffer4.js', function() {
 
       async.series([
         function(cb) {
-          var sql = "INSERT INTO nodb_blob_1 (num_1, num_2, blob) VALUES (:i1, :i2, :c)";
+          var sql = "INSERT INTO nodb_blob_1 (num_1, num_2, content, blob) VALUES (:i1, :i2, :c1, :c2)";
           var bindVar = {
             i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
             i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-            c: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: len },
+            c1: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: len },
+            c2: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: len }
           };
           insertTable(sql, bindVar, cb);
         },
@@ -437,7 +637,7 @@ describe('91. fetchBlobAsBuffer4.js', function() {
           connection.execute(
             sqlRun,
             [
-              sequence, null, { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: len }
+              sequence, null, content, { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: len }
             ],
             function(err, result) {
               should.not.exist(err);
@@ -446,10 +646,85 @@ describe('91. fetchBlobAsBuffer4.js', function() {
               should.strictEqual(compareBuffer, true);
               cb();
             }
-          );          
+          );
         }
       ], done);
     }); // 91.3.2
+
+    it('91.3.3 bind by name - 2', function(done) {
+      var len = 1000;
+      var sequence = insertID++;
+      var specialStr = "91.3.3";
+      var strBuf = random.getRandomString(len, specialStr);
+      var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
+
+      async.series([
+        function(cb) {
+          var sql = "INSERT INTO nodb_blob_1 (num_1, num_2, content, blob) VALUES (:i1, :i2, :c1, :c2)";
+          var bindVar = {
+            i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+            i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+            c1: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: len },
+            c2: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: len }
+          };
+          insertTable(sql, bindVar, cb);
+        },
+        function(cb) {
+          connection.execute(
+            sqlRun,
+            {
+              i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+              i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+              c: { val: null, type: oracledb.BUFFER, dir: oracledb.BIND_IN },
+              output: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: len }
+            },
+            function(err, result) {
+              should.not.exist(err);
+              var resultVal = result.outBinds.output;
+              var compareBuffer = assist.compare2Buffers(resultVal, content);
+              should.strictEqual(compareBuffer, true);
+              cb();
+            }
+          );
+        }
+      ], done);
+    }); // 91.3.3
+
+    it.skip('91.3.4 bind by position - 2', function(done) {
+      var len = 1000;
+      var sequence = insertID++;
+      var specialStr = "91.3.4";
+      var strBuf = random.getRandomString(len, specialStr);
+      var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
+
+      async.series([
+        function(cb) {
+          var sql = "INSERT INTO nodb_blob_1 (num_1, num_2, content, blob) VALUES (:i1, :i2, :c1, :c2)";
+          var bindVar = {
+            i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+            i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+            c1: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: len },
+            c2: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: len }
+          };
+          insertTable(sql, bindVar, cb);
+        },
+        function(cb) {
+          connection.execute(
+            sqlRun,
+            [
+              sequence, sequence, null, { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: len }
+            ],
+            function(err, result) {
+              should.not.exist(err);
+              var resultVal = result.outBinds.output;
+              var compareBuffer = assist.compare2Buffers(resultVal, content);
+              should.strictEqual(compareBuffer, true);
+              cb();
+            }
+          );
+        }
+      ], done);
+    }); // 91.3.4
 
   }); // 91.3
 

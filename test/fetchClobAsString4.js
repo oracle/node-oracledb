@@ -58,6 +58,7 @@ describe('90. fetchClobAsString4.js', function() {
                            "        CREATE TABLE nodb_clob_1 ( \n" +
                            "            num_1      NUMBER, \n" +
                            "            num_2      NUMBER, \n" +
+                           "            content    VARCHAR(2000), \n" +
                            "            clob       CLOB \n" +
                            "        ) \n" +
                            "    '); \n" +
@@ -136,14 +137,14 @@ describe('90. fetchClobAsString4.js', function() {
   };
 
   describe('90.1 PLSQL FUNCTION RETURN CLOB to STRING', function() {
-    var proc = "CREATE OR REPLACE FUNCTION nodb_clobs_out_94 (ID_1 IN NUMBER, ID_2 IN NUMBER) RETURN CLOB \n" +
+    var proc = "CREATE OR REPLACE FUNCTION nodb_clobs_out_94 (ID_1 IN NUMBER, ID_2 IN NUMBER, C IN VARCHAR2) RETURN CLOB \n" +
                "IS \n" +
                "    tmpLOB4 CLOB; \n" +
                "BEGIN \n" +
                "    select clob into tmpLOB4 from nodb_clob_1 where num_1 = ID_1;\n" +
                "    RETURN tmpLOB4; \n" +
                "END;";
-    var sqlRun = "begin :output := nodb_clobs_out_94 (:i1, :i2); end;";
+    var sqlRun = "begin :output := nodb_clobs_out_94 (:i1, :i2, :c); end;";
     var proc_drop = "DROP FUNCTION nodb_clobs_out_94";
 
     before(function(done) {
@@ -153,7 +154,7 @@ describe('90. fetchClobAsString4.js', function() {
     after(function(done) {
       executeSQL(proc_drop, done);
     });
-    
+
     beforeEach('set oracledb.fetchAsString', function(done) {
       oracledb.fetchAsString = [ oracledb.CLOB ];
       done();
@@ -164,7 +165,7 @@ describe('90. fetchClobAsString4.js', function() {
       done();
     }); // afterEach
 
-    it.skip('90.1.1 bind by position', function(done) {
+    it.skip('90.1.1 bind by position - 1', function(done) {
       var len = 400;
       var sequence = insertID++;
       var specialStr = "90.1.1";
@@ -172,30 +173,31 @@ describe('90. fetchClobAsString4.js', function() {
 
       async.series([
         function(cb) {
-          var sql ="INSERT INTO nodb_clob_1 (num_1, num_2, clob) VALUES (:i1, :i2, :c)";
+          var sql ="INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
           var bindVar = {
             i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
             i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-            c: { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: len },
+            c1: { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: len },
+            c2: { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: len }
           };
           insertTable(sql, bindVar, cb);
         },
         function(cb) {
           connection.execute(
             sqlRun,
-            [ sequence, null, { type: oracledb.CLOB, dir: oracledb.BIND_OUT } ],
+            [ sequence, null, clobStr, { type: oracledb.CLOB, dir: oracledb.BIND_OUT } ],
             function(err, result) {
               should.not.exist(err);
               var resultVal = result.outBinds.output;
               verifyResult(resultVal, specialStr, clobStr);
               cb();
             }
-          );          
+          );
         }
       ], done);
     }); // 90.1.1
 
-    it('90.1.2 bind by name', function(done) {
+    it('90.1.2 bind by name - 1', function(done) {
       var len = 400;
       var sequence = insertID++;
       var specialStr = "90.1.2";
@@ -203,11 +205,12 @@ describe('90. fetchClobAsString4.js', function() {
 
       async.series([
         function(cb) {
-          var sql ="INSERT INTO nodb_clob_1 (num_1, num_2, clob) VALUES (:i1, :i2, :c)";
+          var sql ="INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
           var bindVar = {
             i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
             i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-            c: { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: len },
+            c1: { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: len },
+            c2: { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: len }
           };
           insertTable(sql, bindVar, cb);
         },
@@ -217,7 +220,8 @@ describe('90. fetchClobAsString4.js', function() {
             {
               i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
               i2: { val: null, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-              output: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: len },
+              c: { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN },
+              output: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: len }
             },
             function(err, result) {
               should.not.exist(err);
@@ -225,20 +229,89 @@ describe('90. fetchClobAsString4.js', function() {
               verifyResult(resultVal, specialStr, clobStr);
               cb();
             }
-          );          
+          );
         }
       ], done);
     }); // 90.1.2
 
+    it.skip('90.1.3 bind by position - 2', function(done) {
+      var len = 400;
+      var sequence = insertID++;
+      var specialStr = "90.1.2";
+      var clobStr = random.getRandomString(len, specialStr);
+
+      async.series([
+        function(cb) {
+          var sql ="INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
+          var bindVar = {
+            i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+            i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+            c1: { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: len },
+            c2: { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: len }
+          };
+          insertTable(sql, bindVar, cb);
+        },
+        function(cb) {
+          connection.execute(
+            sqlRun,
+            [ sequence, sequence, null, { type: oracledb.CLOB, dir: oracledb.BIND_OUT } ],
+            function(err, result) {
+              should.not.exist(err);
+              var resultVal = result.outBinds.output;
+              verifyResult(resultVal, specialStr, clobStr);
+              cb();
+            }
+          );
+        }
+      ], done);
+    }); // 90.1.3
+
+    it('90.1.4 bind by name - 2', function(done) {
+      var len = 400;
+      var sequence = insertID++;
+      var specialStr = "90.1.4";
+      var clobStr = random.getRandomString(len, specialStr);
+
+      async.series([
+        function(cb) {
+          var sql ="INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
+          var bindVar = {
+            i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+            i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+            c1: { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: len },
+            c2: { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: len }
+          };
+          insertTable(sql, bindVar, cb);
+        },
+        function(cb) {
+          connection.execute(
+            sqlRun,
+            {
+              i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+              i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+              c: { val: null, type: oracledb.STRING, dir: oracledb.BIND_IN },
+              output: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: len }
+            },
+            function(err, result) {
+              should.not.exist(err);
+              var resultVal = result.outBinds.output;
+              verifyResult(resultVal, specialStr, clobStr);
+              cb();
+            }
+          );
+        }
+      ], done);
+    }); // 90.1.4
+
   }); // 90.1
 
   describe('90.2 PLSQL PROCEDURE BIND OUT CLOB to STRING', function() {
-    var proc = "CREATE OR REPLACE PROCEDURE nodb_clobs_out_92 (ID_1 IN NUMBER, ID_2 IN NUMBER, C OUT CLOB) \n" +
+    var proc = "CREATE OR REPLACE PROCEDURE nodb_clobs_out_92 (ID_1 IN NUMBER, ID_2 IN NUMBER, C1 IN VARCHAR2, C2 OUT CLOB) \n" +
                 "AS \n" +
                 "BEGIN \n" +
-                "    select clob into C from nodb_clob_1 where num_1 = ID_1;\n" +
+                "    select clob into C2 from nodb_clob_1 where num_1 = ID_1;\n" +
                 "END;";
-    var sqlRun = "begin nodb_clobs_out_92 (:i1, :i2, :c); end;";
+    var sqlRun = "begin nodb_clobs_out_92 (:i1, :i2, :c1, :c2); end;";
     var proc_drop = "DROP PROCEDURE nodb_clobs_out_92";
 
     before(function(done) {
@@ -248,7 +321,7 @@ describe('90. fetchClobAsString4.js', function() {
     after(function(done) {
       executeSQL(proc_drop, done);
     });
-    
+
     beforeEach('set oracledb.fetchAsString', function(done) {
       oracledb.fetchAsString = [ oracledb.CLOB ];
       done();
@@ -259,7 +332,7 @@ describe('90. fetchClobAsString4.js', function() {
       done();
     }); // afterEach
 
-    it.skip('90.2.1 bind by position', function(done) {
+    it.skip('90.2.1 bind by position - 1', function(done) {
       var len = 500;
       var sequence = insertID++;
       var specialStr = "90.2.1";
@@ -267,30 +340,31 @@ describe('90. fetchClobAsString4.js', function() {
 
       async.series([
         function(cb) {
-          var sql ="INSERT INTO nodb_clob_1 (num_1, num_2, clob) VALUES (:i1, :i2, :c)";
+          var sql ="INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
           var bindVar = {
             i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
             i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-            c: { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: len },
+            c1: { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: len },
+            c2: { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: len }
           };
           insertTable(sql, bindVar, cb);
         },
         function(cb) {
           connection.execute(
             sqlRun,
-            [ sequence, null, { type: oracledb.CLOB, dir: oracledb.BIND_OUT } ],
+            [ sequence, null, clobStr, { type: oracledb.CLOB, dir: oracledb.BIND_OUT } ],
             function(err, result) {
               should.not.exist(err);
-              var resultVal = result.outBinds.output;
+              var resultVal = result.outBinds.c2;
               verifyResult(resultVal, specialStr, clobStr);
               cb();
             }
-          );          
+          );
         }
       ], done);
     }); // 90.2.1
 
-    it('90.2.2 bind by name', function(done) {
+    it('90.2.2 bind by name - 1', function(done) {
       var len = 400;
       var sequence = insertID++;
       var specialStr = "90.2.2";
@@ -298,11 +372,12 @@ describe('90. fetchClobAsString4.js', function() {
 
       async.series([
         function(cb) {
-          var sql ="INSERT INTO nodb_clob_1 (num_1, num_2, clob) VALUES (:i1, :i2, :c)";
+          var sql ="INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
           var bindVar = {
             i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
             i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-            c: { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: len },
+            c1: { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: len },
+            c2: { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: len }
           };
           insertTable(sql, bindVar, cb);
         },
@@ -312,30 +387,100 @@ describe('90. fetchClobAsString4.js', function() {
             {
               i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
               i2: { val: null, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-              C: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: len },
+              c1: { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN },
+              c2: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: len }
             },
             function(err, result) {
               should.not.exist(err);
-              var resultVal = result.outBinds.C;
+              var resultVal = result.outBinds.c2;
               verifyResult(resultVal, specialStr, clobStr);
               cb();
             }
-          );          
+          );
         }
       ], done);
     }); // 90.2.2
 
+    it.skip('90.2.3 bind by position - 2', function(done) {
+      var len = 500;
+      var sequence = insertID++;
+      var specialStr = "90.2.3";
+      var clobStr = random.getRandomString(len, specialStr);
+
+      async.series([
+        function(cb) {
+          var sql ="INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
+          var bindVar = {
+            i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+            i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+            c1: { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: len },
+            c2: { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: len }
+          };
+          insertTable(sql, bindVar, cb);
+        },
+        function(cb) {
+          connection.execute(
+            sqlRun,
+            [ sequence, sequence, null, { type: oracledb.CLOB, dir: oracledb.BIND_OUT } ],
+            function(err, result) {
+              should.not.exist(err);
+              var resultVal = result.outBinds.c2;
+              verifyResult(resultVal, specialStr, clobStr);
+              cb();
+            }
+          );
+        }
+      ], done);
+    }); // 90.2.3
+
+    it('90.2.4 bind by name - 2', function(done) {
+      var len = 400;
+      var sequence = insertID++;
+      var specialStr = "90.2.4";
+      var clobStr = random.getRandomString(len, specialStr);
+
+      async.series([
+        function(cb) {
+          var sql ="INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
+          var bindVar = {
+            i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+            i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+            c1: { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: len },
+            c2: { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: len }
+          };
+          insertTable(sql, bindVar, cb);
+        },
+        function(cb) {
+          connection.execute(
+            sqlRun,
+            {
+              i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+              i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+              c1: { val: null, type: oracledb.STRING, dir: oracledb.BIND_IN },
+              c2: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: len }
+            },
+            function(err, result) {
+              should.not.exist(err);
+              var resultVal = result.outBinds.c2;
+              verifyResult(resultVal, specialStr, clobStr);
+              cb();
+            }
+          );
+        }
+      ], done);
+    }); // 90.2.4
+
   }); // 90.2
 
   describe('90.3 PLSQL FUNCTION RETURN CLOB to VARCHAR2', function() {
-    var proc = "CREATE OR REPLACE FUNCTION nodb_clobs_out_92 (ID_1 IN NUMBER, ID_2 IN NUMBER) RETURN VARCHAR2 \n" +
+    var proc = "CREATE OR REPLACE FUNCTION nodb_clobs_out_92 (ID_1 IN NUMBER, ID_2 IN NUMBER, C IN VARCHAR2) RETURN VARCHAR2 \n" +
                "IS \n" +
                "    tmpLOB2 CLOB; \n" +
                "BEGIN \n" +
                "    select clob into tmpLOB2 from nodb_clob_1 where num_1 = ID_1;\n" +
                "    RETURN tmpLOB2; \n" +
                "END;";
-    var sqlRun = "begin :output := nodb_clobs_out_92 (:i1, :i2); end;";
+    var sqlRun = "begin :output := nodb_clobs_out_92 (:i1, :i2, :c); end;";
     var proc_drop = "DROP FUNCTION nodb_clobs_out_92";
 
     before(function(done) {
@@ -356,7 +501,7 @@ describe('90. fetchClobAsString4.js', function() {
       done();
     }); // afterEach
 
-    it('90.3.1 bind by name', function(done) {
+    it('90.3.1 bind by name - 1', function(done) {
       var len = 1000;
       var sequence = insertID++;
       var specialStr = "90.3.1";
@@ -364,11 +509,12 @@ describe('90. fetchClobAsString4.js', function() {
 
       async.series([
         function(cb) {
-          var sql ="INSERT INTO nodb_clob_1 (num_1, num_2, clob) VALUES (:i1, :i2, :c)";
+          var sql ="INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
           var bindVar = {
             i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
             i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-            c: { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: len },
+            c1: { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: len },
+            c2: { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: len }
           };
           insertTable(sql, bindVar, cb);
         },
@@ -378,6 +524,7 @@ describe('90. fetchClobAsString4.js', function() {
             {
               i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
               i2: { val: null, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+              c: { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN },
               output: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: len }
             },
             function(err, result) {
@@ -386,12 +533,12 @@ describe('90. fetchClobAsString4.js', function() {
               verifyResult(resultVal, specialStr, clobStr);
               cb();
             }
-          );          
+          );
         }
       ], done);
     }); // 90.3.1
 
-    it.skip('90.3.2 bind by position', function(done) {
+    it.skip('90.3.2 bind by position - 1', function(done) {
       var len = 1000;
       var sequence = insertID++;
       var specialStr = "90.3.1";
@@ -399,28 +546,98 @@ describe('90. fetchClobAsString4.js', function() {
 
       async.series([
         function(cb) {
-          var sql ="INSERT INTO nodb_clob_1 (num_1, num_2, clob) VALUES (:i1, :i2, :c)";
+          var sql ="INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
           var bindVar = {
             i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
             i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-            c: { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: len },
+            c1: { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: len },
+            c2: { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: len }
           };
           insertTable(sql, bindVar, cb);
         },
         function(cb) {
           connection.execute(
             sqlRun,
-            [ sequence, null, { type: oracledb.CLOB, dir: oracledb.BIND_OUT } ],
+            [ sequence, null, clobStr, { type: oracledb.CLOB, dir: oracledb.BIND_OUT } ],
             function(err, result) {
               should.not.exist(err);
               var resultVal = result.outBinds.output;
               verifyResult(resultVal, specialStr, clobStr);
               cb();
             }
-          );          
+          );
         }
       ], done);
     }); // 90.3.2
+
+    it('90.3.3 bind by name - 2', function(done) {
+      var len = 1000;
+      var sequence = insertID++;
+      var specialStr = "90.3.3";
+      var clobStr = random.getRandomString(len, specialStr);
+
+      async.series([
+        function(cb) {
+          var sql ="INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
+          var bindVar = {
+            i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+            i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+            c1: { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: len },
+            c2: { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: len }
+          };
+          insertTable(sql, bindVar, cb);
+        },
+        function(cb) {
+          connection.execute(
+            sqlRun,
+            {
+              i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+              i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+              c: { val: null, type: oracledb.STRING, dir: oracledb.BIND_IN },
+              output: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: len }
+            },
+            function(err, result) {
+              should.not.exist(err);
+              var resultVal = result.outBinds.output;
+              verifyResult(resultVal, specialStr, clobStr);
+              cb();
+            }
+          );
+        }
+      ], done);
+    }); // 90.3.3
+
+    it.skip('90.3.4 bind by position - 2', function(done) {
+      var len = 1000;
+      var sequence = insertID++;
+      var specialStr = "90.3.4";
+      var clobStr = random.getRandomString(len, specialStr);
+
+      async.series([
+        function(cb) {
+          var sql ="INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
+          var bindVar = {
+            i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+            i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+            c1: { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: len },
+            c2: { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: len }
+          };
+          insertTable(sql, bindVar, cb);
+        },
+        function(cb) {
+          connection.execute(
+            sqlRun,
+            [ sequence, sequence, null, { type: oracledb.CLOB, dir: oracledb.BIND_OUT } ],
+            function(err, result) {
+              should.not.exist(err);
+              var resultVal = result.outBinds.output;
+              verifyResult(resultVal, specialStr, clobStr);
+              cb();
+            }
+          );
+        }
+      ], done);
+    }); // 90.3.4
 
   }); // 90.3
 
