@@ -213,9 +213,6 @@ Overview of node-oracledb functional tests
     10.4 DML Returning for null column value
     10.5 resultSet for null value
 
-11. poolTimeout.js
-    11.1 pool terminates idle connections after specify time
-
 12. resultSet1.js
     12.1 Testing resultSet option
         12.1.1 when resultSet option = false, content of result is correct

@@ -15,7 +15,6 @@ test/autoCommitForSelect.js
 test/columnMetadata.js
 test/nullColumnValues.js
 
-test/poolTimeout.js
 test/resultSet1.js
 test/stream1.js
 test/stream2.js
