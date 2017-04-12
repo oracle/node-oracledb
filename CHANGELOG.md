@@ -1,6 +1,8 @@
 # Change Log
 
-## node-oracledb v1.13.1 (DD Mon YYYY)
+## node-oracledb v1.13.1 (12 Apr 2017)
+
+- Fix regression with NULL values to PL/SQL procedures with multiple parameters.
 
 ## node-oracledb v1.13.0 (15 Mar 2017)
 
