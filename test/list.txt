@@ -1899,3 +1899,25 @@ Overview of node-oracledb functional tests
        89.2.5 Cursor not supported in fetchAsBuffer
        89.2.6 Buffer not supported in fetchAsBuffer
        89.2.7 BLOB supported in fetchAsBuffer
+
+90. fetchClobAsString4.js
+    90.1 PLSQL FUNCTION RETURN CLOB to STRING
+      - 90.1.1 bind by position
+        90.1.2 bind by name
+    90.2 PLSQL PROCEDURE BIND OUT CLOB to STRING
+      - 90.2.1 bind by position
+        90.2.2 bind by name
+    90.3 PLSQL FUNCTION RETURN CLOB to VARCHAR2
+        90.3.1 bind by name
+      - 90.3.2 bind by position
+
+91. fetchBlobAsBuffer4.js
+    91.1 PLSQL FUNCTION RETURN BLOB to BUFFER
+      - 91.1.1 bind by position
+        91.1.2 bind by name
+    91.2 PLSQL PROCEDURE BIND OUT BLOB to BUFFER
+      - 91.2.1 bind by position
+        91.2.2 bind by name
+    91.3 PLSQL FUNCTION RETURN BLOB to RAW
+        91.3.1 bind by name
+      - 91.3.2 bind by position

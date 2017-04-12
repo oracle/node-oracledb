@@ -90,3 +90,5 @@ test/fetchClobAsString3.js
 test/fetchBlobAsBuffer1.js
 test/fetchBlobAsBuffer2.js
 test/fetchBlobAsBuffer3.js
+test/fetchClobAsString4.js
+test/fetchBlobAsBuffer4.js
