@@ -288,26 +288,6 @@ describe('19. fetchTimestampAsString.js', function() {
 
   }); // 19.3
   
-  function test9(table, want, callback) {
-    var sql = "select content from " + table + " order by num";
-    var stream = connection.queryStream(
-                   sql,
-                   [],
-                   { fetchInfo: { "CONTENT": { type: oracledb.STRING } } }
-                 );
-
-    var result = [];
-    stream.on('data', function(data) {
-      should.exist(data);
-      result.push(data);
-    });
-
-    stream.on('end', function() {
-      should.deepEqual(result, want);
-      setTimeout(callback, 100);
-    });
-  }
-
   // fetchInfo option
   function test1(table, want, callback) {
     connection.execute(
@@ -496,14 +476,24 @@ describe('19. fetchTimestampAsString.js', function() {
     );
   }
 
+  function test9(table, want, callback) {
+    var sql = "select content from " + table + " order by num";
+    var stream = connection.queryStream(
+                   sql,
+                   [],
+                   { fetchInfo: { "CONTENT": { type: oracledb.STRING } } }
+                 );
+
+    var result = [];
+    stream.on('data', function(data) {
+      should.exist(data);
+      result.push(data);
+    });
+
+    stream.on('end', function() {
+      should.deepEqual(result, want);
+      setTimeout(callback, 100);
+    });
+  }
+
 });
-
-
-
-
-
-
-
-
-
-
