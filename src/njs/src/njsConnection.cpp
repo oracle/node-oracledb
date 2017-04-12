@@ -75,9 +75,6 @@ Nan::Persistent<FunctionTemplate> Connection::connectionTemplate_s;
   #define NJS_ITER_SIZE 65535   /* Use (64KB - 1)  with 11g Clients */
 #endif
 
-// Max number of bytes allowed for PLSQL STRING/BUFFER arguments
-#define NJS_THRESHOLD_SIZE_PLSQL_STRING_ARG 32767
-
 // number of rows prefetched by non-ResultSet queries
 #define NJS_PREFETCH_NON_RESULTSET 2
 
@@ -1088,6 +1085,7 @@ void Connection::GetInBindParamsScalar(Local<Value> v8val, Bind* bind,
   {
     case NJS_VALUETYPE_NULL:
       bind->value = NULL;
+      *(bind->len) = 0;              /* NULL value provided, no buffer used */
       bind->type  = dpi::DpiVarChar;
       break;
 
@@ -2403,41 +2401,17 @@ void Connection::Descr2StringOrBuffer ( eBaton* executeBaton )
  *   index         - Index of the Bind vector
  *
  * NOTE:
- *  Bind enhancements for CLOB/BLOB As String/Buffer not supported for INOUT
- *  arguments
+ *  Bind type is expected only STRING and RAW
  *
  */
 void Connection::ConvertStringOrBuffer2LOB ( eBaton* executeBaton,
                                              unsigned int index )
 {
   Bind *bind = executeBaton->binds[index];
-  DPI_SZ_TYPE size = 0;
 
-  if ( !bind->isOut && !bind->isInOut )
+  ExtBind* extBind = new ExtBind ( NJS_EXTBIND_LOB );
+  if ( extBind )
   {
-    // Case for BIND_IN
-    size = *bind->len;
-  }
-  else if ( bind->isInOut )
-  {
-    // Case for BIND_INOUT
-    size = ( bind->maxSize >= *( bind->len ) ) ? bind->maxSize : *( bind->len );
-  }
-  else if ( bind->isOut && !bind->isInOut )
-  {
-    // Case for BIND_OUT
-    size = bind->maxSize;
-  }
-
-  if ( size > NJS_THRESHOLD_SIZE_PLSQL_STRING_ARG )
-  {
-    ExtBind* extBind = new ExtBind ( NJS_EXTBIND_LOB );
-    if ( !extBind )
-    {
-      executeBaton->error = NJSMessages::getErrorMsg
-                                    ( errInsufficientMemory );
-      goto exitConvertStringOrBuffer2LOB;
-    }
     extBind->fields.extLob.maxSize = bind->maxSize;
 
     // Convert the input data into Temp LOB for IN and INOUT binds
@@ -2462,9 +2436,13 @@ void Connection::ConvertStringOrBuffer2LOB ( eBaton* executeBaton,
 
     // Change the bind->type to LOB to handle more than 32k data
     bind->type = ( bind->type == DpiVarChar ) ? DpiClob : DpiBlob;
+
   }
-exitConvertStringOrBuffer2LOB:
-  ;
+  else
+  {
+    executeBaton->error = NJSMessages::getErrorMsg
+                          ( errInsufficientMemory );
+  }
 }
 
 
@@ -2517,98 +2495,104 @@ void Connection::PrepareLOBsForBind ( eBaton* executeBaton, unsigned int index )
  */
 void Connection::PrepareAndBind (eBaton* executeBaton)
 {
-  executeBaton->dpistmt = executeBaton->dpiconn->getStmt(executeBaton->sql);
-  executeBaton->st = executeBaton->dpistmt->stmtType ();
+  executeBaton->dpistmt         = executeBaton->dpiconn->
+                                              getStmt(executeBaton->sql);
+  executeBaton->st              = executeBaton->dpistmt->stmtType ();
   executeBaton->stmtIsReturning = executeBaton->dpistmt->isReturning ();
-  ExtBind *extBind = NULL ;
+  ExtBind *extBind              = NULL ;
 
   if(!executeBaton->binds.empty())
   {
-    if(!executeBaton->binds[0]->key.empty())
+    for(unsigned int index = 0 ;index < executeBaton->binds.size();
+        index++)
     {
-      for(unsigned int index = 0 ;index < executeBaton->binds.size();
-          index++)
+      if ( executeBaton->binds[index]->isOut &&
+           executeBaton->stmtIsReturning &&
+           executeBaton->binds[index]->type == dpi::DpiRSet )
       {
-        if ( executeBaton->binds[index]->isOut &&
-             executeBaton->stmtIsReturning &&
-             executeBaton->binds[index]->type == dpi::DpiRSet )
-        {
-          executeBaton->error = NJSMessages::getErrorMsg (
-                                                     errInvalidResultSet ) ;
-          goto exitPrepareAndBind;
-        }
+        executeBaton->error = NJSMessages::getErrorMsg (
+                                                   errInvalidResultSet ) ;
+        goto exitPrepareAndBind;
+      }
 
-        // Process bind enhancements CLOB/BLOB As String/Buffer for PL/SQL
-        if ( ( executeBaton->st == DpiStmtBegin ||
-               executeBaton->st == DpiStmtDeclare ||
-               executeBaton->st == DpiStmtCall ) &&
-             ( executeBaton->binds[index]->type == DpiVarChar ||
-               executeBaton->binds[index]->type == DpiRaw ) )
+      // Process bind enhancements CLOB/BLOB As String/Buffer for PL/SQL
+      /* Interested only in PL/SQL procedure calls */
+      if ( ( executeBaton->st == DpiStmtBegin ||
+             executeBaton->st == DpiStmtDeclare ||
+             executeBaton->st == DpiStmtCall ))
+      {
+        /* Interested only in STRING or RAW data type */
+        if ( executeBaton->binds[index]->type == DpiVarChar ||
+             executeBaton->binds[index]->type == DpiRaw )
         {
-          ConvertStringOrBuffer2LOB ( executeBaton, index );
+          if ( IsValue2TempLob ( executeBaton, index ) )
+          {
+            ConvertStringOrBuffer2LOB ( executeBaton, index ) ;
+          }
         }
+      }
+
+      // process LOB object for IN and INOUT bind
+      if ( ( executeBaton->binds[index]->isInOut ||
+             !executeBaton->binds[index]->isOut ) &&
+           ( *(executeBaton->binds[index]->ind) != -1 ) &&
+           ( executeBaton->binds[index]->type == DpiClob ||
+             executeBaton->binds[index]->type == DpiBlob ) )
+      {
+        PrepareLOBsForBind ( executeBaton, index );
+      }
+
+      // Allocate for OUT Binds
+      // For DML Returning, allocation happens through callback.
+      // binds->value is a pointer to a pointer in case of LOBs
+      if ( executeBaton->binds[index]->isOut &&
+           !executeBaton->stmtIsReturning &&
+           !executeBaton->binds[index]->value )
+      {
+        Connection::cbDynBufferAllocate ( executeBaton, false, 1, index );
 
         if ( !executeBaton->error.empty() )
         {
           goto exitPrepareAndBind;
         }
+      }
 
-        // process LOB object for IN and INOUT bind
-        if ( ( executeBaton->binds[index]->isInOut ||
-               !executeBaton->binds[index]->isOut ) &&
-             ( *(executeBaton->binds[index]->ind) != -1 ) &&
-             ( executeBaton->binds[index]->type == DpiClob ||
-               executeBaton->binds[index]->type == DpiBlob ) )
+      // Convert v8::Date to Oracle DB Type for IN and IN/OUT binds
+      if ( executeBaton->binds[index]->type == DpiTimestampLTZ &&
+           ( executeBaton->binds[index]->isInOut ||  // INOUT binds
+             !executeBaton->binds[index]->isOut ) )  // NOT OUT  && NOT INOUT
+      {
+        Connection::UpdateDateValue ( executeBaton,
+                                      executeBaton->binds[index], 1 ) ;
+      }
+
+      if ( executeBaton->stmtIsReturning && executeBaton->binds[index]->isOut )
+      {
+        extBind = new ExtBind ( NJS_EXTBIND_DMLRETCB ) ;
+
+        DpiBindCallbackCtx *ctx = extBind->fields.extDMLReturnCbCtx.ctx =
+           (DpiBindCallbackCtx *) malloc ( sizeof ( DpiBindCallbackCtx ) );
+        if ( !ctx )
         {
-          PrepareLOBsForBind ( executeBaton, index );
-        }
-
-        // Allocate for OUT Binds
-        // For DML Returning, allocation happens through callback.
-        // binds->value is a pointer to a pointer in case of LOBs
-        if ( executeBaton->binds[index]->isOut &&
-             !executeBaton->stmtIsReturning &&
-             !executeBaton->binds[index]->value )
-        {
-          Connection::cbDynBufferAllocate ( executeBaton,
-                                            false, 1, index );
-        }
-
-        // Convert v8::Date to Oracle DB Type for IN and IN/OUT binds
-        if ( executeBaton->binds[index]->type == DpiTimestampLTZ &&
-             ( executeBaton->binds[index]->isInOut ||  // INOUT binds
-               !executeBaton->binds[index]->isOut ) )  // NOT OUT  && NOT INOUT
-        {
-          Connection::UpdateDateValue ( executeBaton,
-                                        executeBaton->binds[index], 1 ) ;
-        }
-
-        if ( executeBaton->stmtIsReturning &&
-             executeBaton->binds[index]->isOut )
-        {
-          extBind = new ExtBind ( NJS_EXTBIND_DMLRETCB ) ;
-
-          DpiBindCallbackCtx *ctx = extBind->fields.extDMLReturnCbCtx.ctx =
-             (DpiBindCallbackCtx *) malloc ( sizeof ( DpiBindCallbackCtx ) );
-          if ( !ctx )
-          {
-            executeBaton->error = NJSMessages::getErrorMsg (
+          executeBaton->error = NJSMessages::getErrorMsg (
                                               errInsufficientMemory );
-            goto exitPrepareAndBind;
-          }
-
-          ctx->callbackfn = Connection::cbDynBufferGet;
-                                                    /* App specific callback */
-          ctx->data = (void *)executeBaton;
-                                           /* Data for App specific callback */
-          ctx->bndpos = index;     /* for callback, bind position zero based */
-          ctx->nrows = 0;             /* # of rows - will be filled in later */
-          ctx->iter = 0;            /* # iteration - will be filled in later */
-          ctx->dpistmt = executeBaton->dpistmt;      /* DPI Statement object */
-
-          executeBaton->extBinds[index] = extBind;
+          goto exitPrepareAndBind;
         }
 
+        ctx->callbackfn = Connection::cbDynBufferGet;
+                                                    /* App specific callback */
+        ctx->data = (void *)executeBaton;
+                                           /* Data for App specific callback */
+        ctx->bndpos = index;     /* for callback, bind position zero based */
+        ctx->nrows = 0;             /* # of rows - will be filled in later */
+        ctx->iter = 0;            /* # iteration - will be filled in later */
+        ctx->dpistmt = executeBaton->dpistmt;      /* DPI Statement object */
+
+        executeBaton->extBinds[index] = extBind;
+      }
+
+      if ( !executeBaton->binds[index]->key.empty () )
+      {
         // Bind by name
         executeBaton->dpistmt->bind(
               (const unsigned char*)executeBaton->binds[index]->key.c_str(),
@@ -2630,83 +2614,8 @@ void Connection::PrepareAndBind (eBaton* executeBaton)
                 executeBaton->binds[index]->isOut) ?
               extBind->fields.extDMLReturnCbCtx.ctx : NULL);
       }
-    }
-    else
-    {
-      for(unsigned int index = 0 ;index < executeBaton->binds.size();
-          index++)
+      else
       {
-        // Process bind enhancements CLOB/BLOB As String/Buffer for PL/SQL
-        if ( ( executeBaton->st == DpiStmtBegin ||
-               executeBaton->st == DpiStmtDeclare ||
-               executeBaton->st == DpiStmtCall ) &&
-             ( executeBaton->binds[index]->type == DpiVarChar ||
-               executeBaton->binds[index]->type == DpiRaw ) )
-        {
-          ConvertStringOrBuffer2LOB ( executeBaton, index );
-        }
-
-        if ( !executeBaton->error.empty() )
-        {
-          goto exitPrepareAndBind;
-        }
-
-        // process LOB object for IN and INOUT bind
-        if ( ( executeBaton->binds[index]->isInOut ||
-               !executeBaton->binds[index]->isOut ) &&
-             ( *(executeBaton->binds[index]->ind) != -1 ) &&
-             ( executeBaton->binds[index]->type == DpiClob ||
-               executeBaton->binds[index]->type == DpiBlob ) )
-        {
-          PrepareLOBsForBind ( executeBaton, index );
-        }
-
-        // Allocate for OUT Binds
-        // For DML Returning, allocation happens through callback
-        if ( executeBaton->binds[index]->isOut &&
-             !executeBaton->stmtIsReturning &&
-             !executeBaton->binds[index]->value )
-        {
-          Connection::cbDynBufferAllocate ( executeBaton,
-                                            false, 1, index );
-        }
-
-        // Convert v8::Date to Oracle DB Type for IN and IN/OUT binds
-        if ( executeBaton->binds[index]->type == DpiTimestampLTZ &&
-            // InOut bind
-            (executeBaton->binds[index]->isInOut ||
-            // In bind
-            (!executeBaton->binds[index]->isOut &&
-             !executeBaton->binds[index]->isInOut)))
-        {
-          Connection::UpdateDateValue ( executeBaton,
-                                        executeBaton->binds[index], 1 ) ;
-        }
-
-        if ( executeBaton->stmtIsReturning &&
-             executeBaton->binds[index]->isOut )
-        {
-          extBind = new ExtBind ( NJS_EXTBIND_DMLRETCB );
-          DpiBindCallbackCtx *ctx = extBind->fields.extDMLReturnCbCtx.ctx =
-              (DpiBindCallbackCtx *) malloc ( sizeof ( DpiBindCallbackCtx ) );
-
-          if ( !ctx )
-          {
-            executeBaton->error = NJSMessages::getErrorMsg (
-                                                    errInsufficientMemory );
-            goto exitPrepareAndBind;
-          }
-          ctx->callbackfn = Connection::cbDynBufferGet;
-                                                    /* App specific callback */
-          ctx->data = (void *)executeBaton;
-                                           /* Data for App specific callback */
-          ctx->bndpos = index;     /* for callback, bind position zero based */
-          ctx->nrows = 0;             /* # of rows - will be filled in later */
-          ctx->iter = 0;            /* # iteration - will be filled in later */
-          ctx->dpistmt = executeBaton->dpistmt;      /* DPI Statement object */
-          executeBaton->extBinds[index] = extBind;
-        }
-
         // Bind by position
         executeBaton->dpistmt->bind(
               index+1,executeBaton->binds[index]->type,

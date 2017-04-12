@@ -262,6 +262,11 @@ Overview of node-oracledb functional tests
     12.7 Testing maxRows
         12.7.1 maxRows option is ignored when resultSet option is true
         12.7.2 maxRows option is ignored with REF Cursor
+    12.8 Testing errInvalidResultSet
+        12.8.1 Negative: UPDATE BIND out with oracledb.CURSOR - bind by name
+        12.8.2 Negative: UPDATE BIND out with oracledb.CURSOR - bind by position
+        12.8.3 Negative: INSERT BIND out with oracledb.CURSOR - bind by name
+        12.8.4 Negative: INSERT BIND out with oracledb.CURSOR - bind by position
 
 13. stream1.js
     13.1 Testing QueryStream
@@ -1927,34 +1932,579 @@ Overview of node-oracledb functional tests
 
 90. fetchClobAsString4.js
     90.1 PLSQL FUNCTION RETURN CLOB to STRING
-     - 90.1.1 bind by position - 1
+       90.1.1 bind by position - 1
        90.1.2 bind by name - 1
-     - 90.1.3 bind by position - 2
+       90.1.3 bind by position - 2
        90.1.4 bind by name - 2
     90.2 PLSQL PROCEDURE BIND OUT CLOB to STRING
-     - 90.2.1 bind by position - 1
+       90.2.1 bind by position - 1
        90.2.2 bind by name - 1
-     - 90.2.3 bind by position - 2
+       90.2.3 bind by position - 2
        90.2.4 bind by name - 2
     90.3 PLSQL FUNCTION RETURN CLOB to VARCHAR2
        90.3.1 bind by name - 1
-     - 90.3.2 bind by position - 1
+       90.3.2 bind by position - 1
        90.3.3 bind by name - 2
-     - 90.3.4 bind by position - 2
+       90.3.4 bind by position - 2
 
 91. fetchBlobAsBuffer4.js
     91.1 PLSQL FUNCTION RETURN BLOB to BUFFER
-      - 91.1.1 bind by position - 1
+        91.1.1 bind by position - 1
         91.1.2 bind by name - 1
-      - 91.1.3 bind by position - 2
+        91.1.3 bind by position - 2
         91.1.4 bind by name - 2
     91.2 PLSQL PROCEDURE BIND OUT BLOB to BUFFER
-      - 91.2.1 bind by position - 1
+        91.2.1 bind by position - 1
         91.2.2 bind by name - 1
-      - 91.2.3 bind by position - 2
+        91.2.3 bind by position - 2
         91.2.4 bind by name - 2
     91.3 PLSQL FUNCTION RETURN BLOB to RAW
         91.3.1 bind by name - 1
-      - 91.3.2 bind by position - 1
+        91.3.2 bind by position - 1
         91.3.3 bind by name - 2
-      - 91.3.4 bind by position - 2
+        91.3.4 bind by position - 2
+
+92.binding_DMLInsert.js
+  92.1 insert small value of oracledb.STRING/BUFFER
+        92.1.1 oracledb.STRING <--> DB: NUMBER
+        92.1.2 oracledb.STRING <--> DB: CHAR
+        92.1.3 oracledb.STRING <--> DB: NCHAR
+        92.1.4 oracledb.STRING <--> DB: VARCHAR2
+        92.1.5 oracledb.STRING <--> DB: FLOAT
+        92.1.6 oracledb.STRING <--> DB: BINARY_FLOAT
+        92.1.7 oracledb.STRING <--> DB: BINARY_DOUBLE
+        92.1.8 oracledb.STRING <--> DB: DATE
+        92.1.9 oracledb.STRING <--> DB: TIMESTAMP
+        92.1.10 oracledb.STRING <--> DB: RAW
+        92.1.11 oracledb.STRING <--> DB: CLOB
+        92.1.12 oracledb.STRING <--> DB: BLOB
+        92.1.13 oracledb.BUFFER <--> DB: NUMBER
+        92.1.14 oracledb.BUFFER <--> DB: CHAR
+        92.1.15 oracledb.BUFFER <--> DB: NCHAR
+        92.1.16 oracledb.BUFFER <--> DB: VARCHAR2
+        92.1.17 oracledb.BUFFER <--> DB: FLOAT
+        92.1.18 oracledb.BUFFER <--> DB: BINARY_FLOAT
+        92.1.19 oracledb.BUFFER <--> DB: BINARY_DOUBLE
+        92.1.20 oracledb.BUFFER <--> DB: DATE
+        92.1.21 oracledb.BUFFER <--> DB: TIMESTAMP
+        92.1.22 oracledb.BUFFER <--> DB: RAW
+        92.1.23 oracledb.BUFFER <--> DB: CLOB
+        92.1.24 oracledb.BUFFER <--> DB: BLOB
+  92.2 insert null value of oracledb.STRING/BUFFER
+        92.2.1 oracledb.STRING <--> DB: NUMBER
+        92.2.2 oracledb.STRING <--> DB: CHAR
+        92.2.3 oracledb.STRING <--> DB: NCHAR
+        92.2.4 oracledb.STRING <--> DB: VARCHAR2
+        92.2.5 oracledb.STRING <--> DB: FLOAT
+        92.2.6 oracledb.STRING <--> DB: BINARY_FLOAT
+        92.2.7 oracledb.STRING <--> DB: BINARY_DOUBLE
+        92.2.8 oracledb.STRING <--> DB: DATE
+        92.2.9 oracledb.STRING <--> DB: TIMESTAMP
+        92.2.10 oracledb.STRING <--> DB: RAW
+        92.2.11 oracledb.STRING <--> DB: CLOB
+        92.2.12 oracledb.STRING <--> DB: BLOB
+        92.2.13 oracledb.BUFFER <--> DB: NUMBER
+        92.2.14 oracledb.BUFFER <--> DB: CHAR
+        92.2.15 oracledb.BUFFER <--> DB: NCHAR
+        92.2.16 oracledb.BUFFER <--> DB: VARCHAR2
+        92.2.17 oracledb.BUFFER <--> DB: FLOAT
+        92.2.18 oracledb.BUFFER <--> DB: BINARY_FLOAT
+        92.2.19 oracledb.BUFFER <--> DB: BINARY_DOUBLE
+        92.2.20 oracledb.BUFFER <--> DB: DATE
+        92.2.21 oracledb.BUFFER <--> DB: TIMESTAMP
+        92.2.22 oracledb.BUFFER <--> DB: RAW
+        92.2.23 oracledb.BUFFER <--> DB: CLOB
+        92.2.24 oracledb.BUFFER <--> DB: BLOB
+  92.3 insert large value of oracledb.STRING/BUFFER
+        92.3.1 oracledb.STRING <--> DB: NUMBER
+        92.3.2 oracledb.STRING <--> DB: CHAR
+        92.3.3 oracledb.STRING <--> DB: NCHAR
+        92.3.4 oracledb.STRING <--> DB: VARCHAR2
+        92.3.5 oracledb.STRING <--> DB: FLOAT
+        92.3.6 oracledb.STRING <--> DB: BINARY_FLOAT
+        92.3.7 oracledb.STRING <--> DB: BINARY_DOUBLE
+        92.3.8 oracledb.STRING <--> DB: DATE
+        92.3.9 oracledb.STRING <--> DB: TIMESTAMP
+        92.3.10 oracledb.STRING <--> DB: RAW
+        92.3.11 oracledb.STRING <--> DB: CLOB
+        92.3.12 oracledb.STRING <--> DB: BLOB
+        92.3.13 oracledb.BUFFER <--> DB: NUMBER
+        92.3.14 oracledb.BUFFER <--> DB: CHAR
+        92.3.15 oracledb.BUFFER <--> DB: NCHAR
+        92.3.16 oracledb.BUFFER <--> DB: VARCHAR2
+        92.3.17 oracledb.BUFFER <--> DB: FLOAT
+        92.3.18 oracledb.BUFFER <--> DB: BINARY_FLOAT
+        92.3.19 oracledb.BUFFER <--> DB: BINARY_DOUBLE
+        92.3.20 oracledb.BUFFER <--> DB: DATE
+        92.3.21 oracledb.BUFFER <--> DB: TIMESTAMP
+        92.3.22 oracledb.BUFFER <--> DB: RAW
+        92.3.23 oracledb.BUFFER <--> DB: CLOB
+        92.3.24 oracledb.BUFFER <--> DB: BLOB
+        
+93.binding_procedureBindIn.js
+  93.1 PLSQL procedure: bind in small value of oracledb.STRING/BUFFER
+        93.1.1 oracledb.STRING <--> DB: NUMBER
+        93.1.2 oracledb.STRING <--> DB: CHAR
+        93.1.3 oracledb.STRING <--> DB: NCHAR
+        93.1.4 oracledb.STRING <--> DB: VARCHAR2
+        93.1.5 oracledb.STRING <--> DB: FLOAT
+        93.1.6 oracledb.STRING <--> DB: BINARY_FLOAT
+        93.1.7 oracledb.STRING <--> DB: BINARY_DOUBLE
+        93.1.8 oracledb.STRING <--> DB: DATE
+        93.1.9 oracledb.STRING <--> DB: TIMESTAMP
+        93.1.10 oracledb.STRING <--> DB: RAW
+        93.1.11 oracledb.STRING <--> DB: CLOB
+        93.1.12 oracledb.STRING <--> DB: BLOB
+        93.1.13 oracledb.BUFFER <--> DB: NUMBER
+        93.1.14 oracledb.BUFFER <--> DB: CHAR
+        93.1.15 oracledb.BUFFER <--> DB: NCHAR
+        93.1.16 oracledb.BUFFER <--> DB: VARCHAR2
+        93.1.17 oracledb.BUFFER <--> DB: FLOAT
+        93.1.18 oracledb.BUFFER <--> DB: BINARY_FLOAT
+        93.1.19 oracledb.BUFFER <--> DB: BINARY_DOUBLE
+        93.1.20 oracledb.BUFFER <--> DB: DATE
+        93.1.21 oracledb.BUFFER <--> DB: TIMESTAMP
+        93.1.22 oracledb.BUFFER <--> DB: RAW
+        93.1.23 oracledb.BUFFER <--> DB: CLOB
+        93.1.24 oracledb.BUFFER <--> DB: BLOB
+  93.2 PLSQL procedure: bind in null value of oracledb.STRING/BUFFER
+        93.2.1 oracledb.STRING <--> DB: NUMBER
+        93.2.2 oracledb.STRING <--> DB: CHAR
+        93.2.3 oracledb.STRING <--> DB: NCHAR
+        93.2.4 oracledb.STRING <--> DB: VARCHAR2
+        93.2.5 oracledb.STRING <--> DB: FLOAT
+        93.2.6 oracledb.STRING <--> DB: BINARY_FLOAT
+        93.2.7 oracledb.STRING <--> DB: BINARY_DOUBLE
+        93.2.8 oracledb.STRING <--> DB: DATE
+        93.2.9 oracledb.STRING <--> DB: TIMESTAMP
+        93.2.10 oracledb.STRING <--> DB: RAW
+        93.2.11 oracledb.STRING <--> DB: CLOB
+        93.2.12 oracledb.STRING <--> DB: BLOB
+        93.2.13 oracledb.BUFFER <--> DB: NUMBER
+        93.2.14 oracledb.BUFFER <--> DB: CHAR
+        93.2.15 oracledb.BUFFER <--> DB: NCHAR
+        93.2.16 oracledb.BUFFER <--> DB: VARCHAR2
+        93.2.17 oracledb.BUFFER <--> DB: FLOAT
+        93.2.18 oracledb.BUFFER <--> DB: BINARY_FLOAT
+        93.2.19 oracledb.BUFFER <--> DB: BINARY_DOUBLE
+        93.2.20 oracledb.BUFFER <--> DB: DATE
+        93.2.21 oracledb.BUFFER <--> DB: TIMESTAMP
+        93.2.22 oracledb.BUFFER <--> DB: RAW
+        93.2.23 oracledb.BUFFER <--> DB: CLOB
+        93.2.24 oracledb.BUFFER <--> DB: BLOB
+
+94.binding_procedureBindInout.js
+  94.1 PLSQL procedure: bind inout small value of oracledb.STRING/BUFFER
+        94.1.1 oracledb.STRING <--> DB: NUMBER
+        94.1.2 oracledb.STRING <--> DB: CHAR
+        94.1.3 oracledb.STRING <--> DB: NCHAR
+        94.1.4 oracledb.STRING <--> DB: VARCHAR2
+        94.1.5 oracledb.STRING <--> DB: FLOAT
+        94.1.6 oracledb.STRING <--> DB: BINARY_FLOAT
+        94.1.7 oracledb.STRING <--> DB: BINARY_DOUBLE
+        94.1.8 oracledb.STRING <--> DB: DATE
+        94.1.9 oracledb.STRING <--> DB: TIMESTAMP
+        94.1.10 oracledb.STRING <--> DB: RAW
+        94.1.11 oracledb.STRING <--> DB: CLOB
+        94.1.12 oracledb.STRING <--> DB: BLOB
+        94.1.13 oracledb.BUFFER <--> DB: NUMBER
+        94.1.14 oracledb.BUFFER <--> DB: CHAR
+        94.1.15 oracledb.BUFFER <--> DB: NCHAR
+        94.1.16 oracledb.BUFFER <--> DB: VARCHAR2
+        94.1.17 oracledb.BUFFER <--> DB: FLOAT
+        94.1.18 oracledb.BUFFER <--> DB: BINARY_FLOAT
+        94.1.19 oracledb.BUFFER <--> DB: BINARY_DOUBLE
+        94.1.20 oracledb.BUFFER <--> DB: DATE
+        94.1.21 oracledb.BUFFER <--> DB: TIMESTAMP
+        94.1.22 oracledb.BUFFER <--> DB: RAW
+        94.1.23 oracledb.BUFFER <--> DB: CLOB
+        94.1.24 oracledb.BUFFER <--> DB: BLOB
+  94.2 PLSQL procedure: bind inout null value of oracledb.STRING/BUFFER
+        94.2.1 oracledb.STRING <--> DB: NUMBER
+        94.2.2 oracledb.STRING <--> DB: CHAR
+        94.2.3 oracledb.STRING <--> DB: NCHAR
+        94.2.4 oracledb.STRING <--> DB: VARCHAR2
+        94.2.5 oracledb.STRING <--> DB: FLOAT
+        94.2.6 oracledb.STRING <--> DB: BINARY_FLOAT
+        94.2.7 oracledb.STRING <--> DB: BINARY_DOUBLE
+        94.2.8 oracledb.STRING <--> DB: DATE
+        94.2.9 oracledb.STRING <--> DB: TIMESTAMP
+        94.2.10 oracledb.STRING <--> DB: RAW
+        94.2.11 oracledb.STRING <--> DB: CLOB
+        94.2.12 oracledb.STRING <--> DB: BLOB
+        94.2.13 oracledb.BUFFER <--> DB: NUMBER
+        94.2.14 oracledb.BUFFER <--> DB: CHAR
+        94.2.15 oracledb.BUFFER <--> DB: NCHAR
+        94.2.16 oracledb.BUFFER <--> DB: VARCHAR2
+        94.2.17 oracledb.BUFFER <--> DB: FLOAT
+        94.2.18 oracledb.BUFFER <--> DB: BINARY_FLOAT
+        94.2.19 oracledb.BUFFER <--> DB: BINARY_DOUBLE
+        94.2.20 oracledb.BUFFER <--> DB: DATE
+        94.2.21 oracledb.BUFFER <--> DB: TIMESTAMP
+        94.2.22 oracledb.BUFFER <--> DB: RAW
+        94.2.23 oracledb.BUFFER <--> DB: CLOB
+        94.2.24 oracledb.BUFFER <--> DB: BLOB
+
+95.binding_functionBindInout.js
+  95.1 PLSQL function: bind inout small value of oracledb.STRING/BUFFER
+        95.1.1 oracledb.STRING <--> DB: NUMBER
+        95.1.2 oracledb.STRING <--> DB: CHAR
+        95.1.3 oracledb.STRING <--> DB: NCHAR
+        95.1.4 oracledb.STRING <--> DB: VARCHAR2
+        95.1.5 oracledb.STRING <--> DB: FLOAT
+        95.1.6 oracledb.STRING <--> DB: BINARY_FLOAT
+        95.1.7 oracledb.STRING <--> DB: BINARY_DOUBLE
+        95.1.8 oracledb.STRING <--> DB: DATE
+        95.1.9 oracledb.STRING <--> DB: TIMESTAMP
+        95.1.10 oracledb.STRING <--> DB: RAW
+        95.1.11 oracledb.STRING <--> DB: CLOB
+        95.1.12 oracledb.STRING <--> DB: BLOB
+        95.1.13 oracledb.BUFFER <--> DB: NUMBER
+        95.1.14 oracledb.BUFFER <--> DB: CHAR
+        95.1.15 oracledb.BUFFER <--> DB: NCHAR
+        95.1.16 oracledb.BUFFER <--> DB: VARCHAR2
+        95.1.17 oracledb.BUFFER <--> DB: FLOAT
+        95.1.18 oracledb.BUFFER <--> DB: BINARY_FLOAT
+        95.1.19 oracledb.BUFFER <--> DB: BINARY_DOUBLE
+        95.1.20 oracledb.BUFFER <--> DB: DATE
+        95.1.21 oracledb.BUFFER <--> DB: TIMESTAMP
+        95.1.22 oracledb.BUFFER <--> DB: RAW
+        95.1.23 oracledb.BUFFER <--> DB: CLOB
+        95.1.24 oracledb.BUFFER <--> DB: BLOB
+  95.2 PLSQL function: bind inout null value of oracledb.STRING/BUFFER
+        95.2.1 oracledb.STRING <--> DB: NUMBER
+        95.2.2 oracledb.STRING <--> DB: CHAR
+        95.2.3 oracledb.STRING <--> DB: NCHAR
+        95.2.4 oracledb.STRING <--> DB: VARCHAR2
+        95.2.5 oracledb.STRING <--> DB: FLOAT
+        95.2.6 oracledb.STRING <--> DB: BINARY_FLOAT
+        95.2.7 oracledb.STRING <--> DB: BINARY_DOUBLE
+        95.2.8 oracledb.STRING <--> DB: DATE
+        95.2.9 oracledb.STRING <--> DB: TIMESTAMP
+        95.2.10 oracledb.STRING <--> DB: RAW
+        95.2.11 oracledb.STRING <--> DB: CLOB
+        95.2.12 oracledb.STRING <--> DB: BLOB
+        95.2.13 oracledb.BUFFER <--> DB: NUMBER
+        95.2.14 oracledb.BUFFER <--> DB: CHAR
+        95.2.15 oracledb.BUFFER <--> DB: NCHAR
+        95.2.16 oracledb.BUFFER <--> DB: VARCHAR2
+        95.2.17 oracledb.BUFFER <--> DB: FLOAT
+        95.2.18 oracledb.BUFFER <--> DB: BINARY_FLOAT
+        95.2.19 oracledb.BUFFER <--> DB: BINARY_DOUBLE
+        95.2.20 oracledb.BUFFER <--> DB: DATE
+        95.2.21 oracledb.BUFFER <--> DB: TIMESTAMP
+        95.2.22 oracledb.BUFFER <--> DB: RAW
+        95.2.23 oracledb.BUFFER <--> DB: CLOB
+        95.2.24 oracledb.BUFFER <--> DB: BLOB
+
+96.binding_procedureBindOut.js
+  96.1 PLSQL procedure: bind out small value to oracledb.STRING/BUFFER
+        96.1.1 oracledb.STRING <--> DB: NUMBER
+        96.1.2 oracledb.STRING <--> DB: CHAR
+        96.1.3 oracledb.STRING <--> DB: NCHAR
+        96.1.4 oracledb.STRING <--> DB: VARCHAR2
+        96.1.5 oracledb.STRING <--> DB: FLOAT
+        96.1.6 oracledb.STRING <--> DB: BINARY_FLOAT
+        96.1.7 oracledb.STRING <--> DB: BINARY_DOUBLE
+        96.1.8 oracledb.STRING <--> DB: DATE
+        96.1.9 oracledb.STRING <--> DB: TIMESTAMP
+        96.1.10 oracledb.STRING <--> DB: RAW
+        96.1.11 oracledb.STRING <--> DB: CLOB
+        96.1.12 oracledb.STRING <--> DB: BLOB
+        96.1.13 oracledb.BUFFER <--> DB: NUMBER
+        96.1.14 oracledb.BUFFER <--> DB: CHAR
+        96.1.15 oracledb.BUFFER <--> DB: NCHAR
+        96.1.16 oracledb.BUFFER <--> DB: VARCHAR2
+        96.1.17 oracledb.BUFFER <--> DB: FLOAT
+        96.1.18 oracledb.BUFFER <--> DB: BINARY_FLOAT
+        96.1.19 oracledb.BUFFER <--> DB: BINARY_DOUBLE
+        96.1.20 oracledb.BUFFER <--> DB: DATE
+        96.1.21 oracledb.BUFFER <--> DB: TIMESTAMP
+        96.1.22 oracledb.BUFFER <--> DB: RAW
+        96.1.23 oracledb.BUFFER <--> DB: CLOB
+        96.1.24 oracledb.BUFFER <--> DB: BLOB
+  96.2 PLSQL procedure: bind out null value to oracledb.STRING/BUFFER
+        96.2.1 oracledb.STRING <--> DB: NUMBER
+        96.2.2 oracledb.STRING <--> DB: CHAR
+        96.2.3 oracledb.STRING <--> DB: NCHAR
+        96.2.4 oracledb.STRING <--> DB: VARCHAR2
+        96.2.5 oracledb.STRING <--> DB: FLOAT
+        96.2.6 oracledb.STRING <--> DB: BINARY_FLOAT
+        96.2.7 oracledb.STRING <--> DB: BINARY_DOUBLE
+        96.2.8 oracledb.STRING <--> DB: DATE
+        96.2.9 oracledb.STRING <--> DB: TIMESTAMP
+        96.2.10 oracledb.STRING <--> DB: RAW
+        96.2.11 oracledb.STRING <--> DB: CLOB
+        96.2.12 oracledb.STRING <--> DB: BLOB
+        96.2.13 oracledb.BUFFER <--> DB: NUMBER
+        96.2.14 oracledb.BUFFER <--> DB: CHAR
+        96.2.15 oracledb.BUFFER <--> DB: NCHAR
+        96.2.16 oracledb.BUFFER <--> DB: VARCHAR2
+        96.2.17 oracledb.BUFFER <--> DB: FLOAT
+        96.2.18 oracledb.BUFFER <--> DB: BINARY_FLOAT
+        96.2.19 oracledb.BUFFER <--> DB: BINARY_DOUBLE
+        96.2.20 oracledb.BUFFER <--> DB: DATE
+        96.2.21 oracledb.BUFFER <--> DB: TIMESTAMP
+        96.2.22 oracledb.BUFFER <--> DB: RAW
+        96.2.23 oracledb.BUFFER <--> DB: CLOB
+        96.2.24 oracledb.BUFFER <--> DB: BLOB
+
+97.binding_functionBindOut.js
+  97.1 PLSQL function: bind out small value to oracledb.STRING/BUFFER
+        97.1.1 oracledb.STRING <--> DB: NUMBER
+        97.1.2 oracledb.STRING <--> DB: CHAR
+        97.1.3 oracledb.STRING <--> DB: NCHAR
+        97.1.4 oracledb.STRING <--> DB: VARCHAR2
+        97.1.5 oracledb.STRING <--> DB: FLOAT
+        97.1.6 oracledb.STRING <--> DB: BINARY_FLOAT
+        97.1.7 oracledb.STRING <--> DB: BINARY_DOUBLE
+        97.1.8 oracledb.STRING <--> DB: DATE
+        97.1.9 oracledb.STRING <--> DB: TIMESTAMP
+        97.1.10 oracledb.STRING <--> DB: RAW
+        97.1.11 oracledb.STRING <--> DB: CLOB
+        97.1.12 oracledb.STRING <--> DB: BLOB
+        97.1.13 oracledb.BUFFER <--> DB: NUMBER
+        97.1.14 oracledb.BUFFER <--> DB: CHAR
+        97.1.15 oracledb.BUFFER <--> DB: NCHAR
+        97.1.16 oracledb.BUFFER <--> DB: VARCHAR2
+        97.1.17 oracledb.BUFFER <--> DB: FLOAT
+        97.1.18 oracledb.BUFFER <--> DB: BINARY_FLOAT
+        97.1.19 oracledb.BUFFER <--> DB: BINARY_DOUBLE
+        97.1.20 oracledb.BUFFER <--> DB: DATE
+        97.1.21 oracledb.BUFFER <--> DB: TIMESTAMP
+        97.1.22 oracledb.BUFFER <--> DB: RAW
+        97.1.23 oracledb.BUFFER <--> DB: CLOB
+        97.1.24 oracledb.BUFFER <--> DB: BLOB
+  97.2 PLSQL function: bind out null value to oracledb.STRING/BUFFER
+        97.2.1 oracledb.STRING <--> DB: NUMBER
+        97.2.2 oracledb.STRING <--> DB: CHAR
+        97.2.3 oracledb.STRING <--> DB: NCHAR
+        97.2.4 oracledb.STRING <--> DB: VARCHAR2
+        97.2.5 oracledb.STRING <--> DB: FLOAT
+        97.2.6 oracledb.STRING <--> DB: BINARY_FLOAT
+        97.2.7 oracledb.STRING <--> DB: BINARY_DOUBLE
+        97.2.8 oracledb.STRING <--> DB: DATE
+        97.2.9 oracledb.STRING <--> DB: TIMESTAMP
+        97.2.10 oracledb.STRING <--> DB: RAW
+        97.2.11 oracledb.STRING <--> DB: CLOB
+        97.2.12 oracledb.STRING <--> DB: BLOB
+        97.2.13 oracledb.BUFFER <--> DB: NUMBER
+        97.2.14 oracledb.BUFFER <--> DB: CHAR
+        97.2.15 oracledb.BUFFER <--> DB: NCHAR
+        97.2.16 oracledb.BUFFER <--> DB: VARCHAR2
+        97.2.17 oracledb.BUFFER <--> DB: FLOAT
+        97.2.18 oracledb.BUFFER <--> DB: BINARY_FLOAT
+        97.2.19 oracledb.BUFFER <--> DB: BINARY_DOUBLE
+        97.2.20 oracledb.BUFFER <--> DB: DATE
+        97.2.21 oracledb.BUFFER <--> DB: TIMESTAMP
+        97.2.22 oracledb.BUFFER <--> DB: RAW
+        97.2.23 oracledb.BUFFER <--> DB: CLOB
+        97.2.24 oracledb.BUFFER <--> DB: BLOB
+
+98.binding_DMLReturningInto.js
+  98.1 bind out small value
+        98.1.1 oracledb.STRING <--> DB: NUMBER
+        98.1.2 oracledb.STRING <--> DB: CHAR
+        98.1.3 oracledb.STRING <--> DB: NCHAR
+        98.1.4 oracledb.STRING <--> DB: VARCHAR2
+        98.1.5 oracledb.STRING <--> DB: FLOAT
+        98.1.6 oracledb.STRING <--> DB: BINARY_FLOAT
+        98.1.7 oracledb.STRING <--> DB: BINARY_DOUBLE
+        98.1.8 oracledb.STRING <--> DB: DATE
+        98.1.9 oracledb.STRING <--> DB: TIMESTAMP
+        98.1.10 oracledb.STRING <--> DB: RAW
+        98.1.11 oracledb.STRING <--> DB: CLOB
+        98.1.12 oracledb.STRING <--> DB: BLOB
+        98.1.13 oracledb.BUFFER <--> DB: NUMBER
+        98.1.14 oracledb.BUFFER <--> DB: CHAR
+        98.1.15 oracledb.BUFFER <--> DB: NCHAR
+        98.1.16 oracledb.BUFFER <--> DB: VARCHAR2
+        98.1.17 oracledb.BUFFER <--> DB: FLOAT
+        98.1.18 oracledb.BUFFER <--> DB: BINARY_FLOAT
+        98.1.19 oracledb.BUFFER <--> DB: BINARY_DOUBLE
+        98.1.20 oracledb.BUFFER <--> DB: DATE
+        98.1.21 oracledb.BUFFER <--> DB: TIMESTAMP
+        98.1.22 oracledb.BUFFER <--> DB: RAW
+        98.1.23 oracledb.BUFFER <--> DB: CLOB
+        98.1.24 oracledb.BUFFER <--> DB: BLOB
+  98.2 bind out null value
+        98.2.1 oracledb.STRING <--> DB: NUMBER
+        98.2.2 oracledb.STRING <--> DB: CHAR
+        98.2.3 oracledb.STRING <--> DB: NCHAR
+        98.2.4 oracledb.STRING <--> DB: VARCHAR2
+        98.2.5 oracledb.STRING <--> DB: FLOAT
+        98.2.6 oracledb.STRING <--> DB: BINARY_FLOAT
+        98.2.7 oracledb.STRING <--> DB: BINARY_DOUBLE
+        98.2.8 oracledb.STRING <--> DB: DATE
+        98.2.9 oracledb.STRING <--> DB: TIMESTAMP
+        98.2.10 oracledb.STRING <--> DB: RAW
+        98.2.11 oracledb.STRING <--> DB: CLOB
+        98.2.12 oracledb.STRING <--> DB: BLOB
+        98.2.13 oracledb.BUFFER <--> DB: NUMBER
+        98.2.14 oracledb.BUFFER <--> DB: CHAR
+        98.2.15 oracledb.BUFFER <--> DB: NCHAR
+        98.2.16 oracledb.BUFFER <--> DB: VARCHAR2
+        98.2.17 oracledb.BUFFER <--> DB: FLOAT
+        98.2.18 oracledb.BUFFER <--> DB: BINARY_FLOAT
+        98.2.19 oracledb.BUFFER <--> DB: BINARY_DOUBLE
+        98.2.20 oracledb.BUFFER <--> DB: DATE
+        98.2.21 oracledb.BUFFER <--> DB: TIMESTAMP
+        98.2.22 oracledb.BUFFER <--> DB: RAW
+        98.2.23 oracledb.BUFFER <--> DB: CLOB
+        98.2.24 oracledb.BUFFER <--> DB: BLOB
+
+99.binding_functionBindIn.js
+  99.1 PLSQL function: bind in small value of oracledb.STRING/BUFFER
+        99.1.1 oracledb.STRING <--> DB: NUMBER
+        99.1.2 oracledb.STRING <--> DB: CHAR
+        99.1.3 oracledb.STRING <--> DB: NCHAR
+        99.1.4 oracledb.STRING <--> DB: VARCHAR2
+        99.1.5 oracledb.STRING <--> DB: FLOAT
+        99.1.6 oracledb.STRING <--> DB: BINARY_FLOAT
+        99.1.7 oracledb.STRING <--> DB: BINARY_DOUBLE
+        99.1.8 oracledb.STRING <--> DB: DATE
+        99.1.9 oracledb.STRING <--> DB: TIMESTAMP
+        99.1.10 oracledb.STRING <--> DB: RAW
+        99.1.11 oracledb.STRING <--> DB: CLOB
+        99.1.12 oracledb.STRING <--> DB: BLOB
+        99.1.13 oracledb.BUFFER <--> DB: NUMBER
+        99.1.14 oracledb.BUFFER <--> DB: CHAR
+        99.1.15 oracledb.BUFFER <--> DB: NCHAR
+        99.1.16 oracledb.BUFFER <--> DB: VARCHAR2
+        99.1.17 oracledb.BUFFER <--> DB: FLOAT
+        99.1.18 oracledb.BUFFER <--> DB: BINARY_FLOAT
+        99.1.19 oracledb.BUFFER <--> DB: BINARY_DOUBLE
+        99.1.20 oracledb.BUFFER <--> DB: DATE
+        99.1.21 oracledb.BUFFER <--> DB: TIMESTAMP
+        99.1.22 oracledb.BUFFER <--> DB: RAW
+        99.1.23 oracledb.BUFFER <--> DB: CLOB
+        99.1.24 oracledb.BUFFER <--> DB: BLOB
+  99.2 PLSQL function: bind in null value of oracledb.STRING/BUFFER
+        99.2.1 oracledb.STRING <--> DB: NUMBER
+        99.2.2 oracledb.STRING <--> DB: CHAR
+        99.2.3 oracledb.STRING <--> DB: NCHAR
+        99.2.4 oracledb.STRING <--> DB: VARCHAR2
+        99.2.5 oracledb.STRING <--> DB: FLOAT
+        99.2.6 oracledb.STRING <--> DB: BINARY_FLOAT
+        99.2.7 oracledb.STRING <--> DB: BINARY_DOUBLE
+        99.2.8 oracledb.STRING <--> DB: DATE
+        99.2.9 oracledb.STRING <--> DB: TIMESTAMP
+        99.2.10 oracledb.STRING <--> DB: RAW
+        99.2.11 oracledb.STRING <--> DB: CLOB
+        99.2.12 oracledb.STRING <--> DB: BLOB
+        99.2.13 oracledb.BUFFER <--> DB: NUMBER
+        99.2.14 oracledb.BUFFER <--> DB: CHAR
+        99.2.15 oracledb.BUFFER <--> DB: NCHAR
+        99.2.16 oracledb.BUFFER <--> DB: VARCHAR2
+        99.2.17 oracledb.BUFFER <--> DB: FLOAT
+        99.2.18 oracledb.BUFFER <--> DB: BINARY_FLOAT
+        99.2.19 oracledb.BUFFER <--> DB: BINARY_DOUBLE
+        99.2.20 oracledb.BUFFER <--> DB: DATE
+        99.2.21 oracledb.BUFFER <--> DB: TIMESTAMP
+        99.2.22 oracledb.BUFFER <--> DB: RAW
+        99.2.23 oracledb.BUFFER <--> DB: CLOB
+        99.2.24 oracledb.BUFFER <--> DB: BLOB
+    
+100.binding_defaultBindIn.js
+  100.1 PLSQL procedure: bind in null value with default type and dir
+        100.1.1 oracledb.STRING <--> DB: NUMBER
+        100.1.2 oracledb.STRING <--> DB: CHAR
+        100.1.3 oracledb.STRING <--> DB: NCHAR
+        100.1.4 oracledb.STRING <--> DB: VARCHAR2
+        100.1.5 oracledb.STRING <--> DB: FLOAT
+        100.1.6 oracledb.STRING <--> DB: BINARY_FLOAT
+        100.1.7 oracledb.STRING <--> DB: BINARY_DOUBLE
+        100.1.8 oracledb.STRING <--> DB: DATE
+        100.1.9 oracledb.STRING <--> DB: TIMESTAMP
+        100.1.10 oracledb.STRING <--> DB: RAW
+        100.1.11 oracledb.STRING <--> DB: CLOB
+        100.1.12 oracledb.STRING <--> DB: BLOB
+        100.1.13 oracledb.BUFFER <--> DB: NUMBER
+        100.1.14 oracledb.BUFFER <--> DB: CHAR
+        100.1.15 oracledb.BUFFER <--> DB: NCHAR
+        100.1.16 oracledb.BUFFER <--> DB: VARCHAR2
+        100.1.17 oracledb.BUFFER <--> DB: FLOAT
+        100.1.18 oracledb.BUFFER <--> DB: BINARY_FLOAT
+        100.1.19 oracledb.BUFFER <--> DB: BINARY_DOUBLE
+        100.1.20 oracledb.BUFFER <--> DB: DATE
+        100.1.21 oracledb.BUFFER <--> DB: TIMESTAMP
+        100.1.22 oracledb.BUFFER <--> DB: RAW
+        100.1.23 oracledb.BUFFER <--> DB: CLOB
+        100.1.24 oracledb.BUFFER <--> DB: BLOB
+  100.2 PLSQL function: bind in null value with default type and dir
+        100.2.1 oracledb.STRING <--> DB: NUMBER
+        100.2.2 oracledb.STRING <--> DB: CHAR
+        100.2.3 oracledb.STRING <--> DB: NCHAR
+        100.2.4 oracledb.STRING <--> DB: VARCHAR2
+        100.2.5 oracledb.STRING <--> DB: FLOAT
+        100.2.6 oracledb.STRING <--> DB: BINARY_FLOAT
+        100.2.7 oracledb.STRING <--> DB: BINARY_DOUBLE
+        100.2.8 oracledb.STRING <--> DB: DATE
+        100.2.9 oracledb.STRING <--> DB: TIMESTAMP
+        100.2.10 oracledb.STRING <--> DB: RAW
+        100.2.11 oracledb.STRING <--> DB: CLOB
+        100.2.12 oracledb.STRING <--> DB: BLOB
+        100.2.13 oracledb.BUFFER <--> DB: NUMBER
+        100.2.14 oracledb.BUFFER <--> DB: CHAR
+        100.2.15 oracledb.BUFFER <--> DB: NCHAR
+        100.2.16 oracledb.BUFFER <--> DB: VARCHAR2
+        100.2.17 oracledb.BUFFER <--> DB: FLOAT
+        100.2.18 oracledb.BUFFER <--> DB: BINARY_FLOAT
+        100.2.19 oracledb.BUFFER <--> DB: BINARY_DOUBLE
+        100.2.20 oracledb.BUFFER <--> DB: DATE
+        100.2.21 oracledb.BUFFER <--> DB: TIMESTAMP
+        100.2.22 oracledb.BUFFER <--> DB: RAW
+        100.2.23 oracledb.BUFFER <--> DB: CLOB
+        100.2.24 oracledb.BUFFER <--> DB: BLOB
+    
+101.binding_defaultBindInout.js
+  101.1 PLSQL procedure: bind out null value with default type and dir
+        101.1.1 oracledb.STRING <--> DB: NUMBER
+        101.1.2 oracledb.STRING <--> DB: CHAR
+        101.1.3 oracledb.STRING <--> DB: NCHAR
+        101.1.4 oracledb.STRING <--> DB: VARCHAR2
+        101.1.5 oracledb.STRING <--> DB: FLOAT
+        101.1.6 oracledb.STRING <--> DB: BINARY_FLOAT
+        101.1.7 oracledb.STRING <--> DB: BINARY_DOUBLE
+        101.1.8 oracledb.STRING <--> DB: DATE
+        101.1.9 oracledb.STRING <--> DB: TIMESTAMP
+        101.1.10 oracledb.STRING <--> DB: RAW
+        101.1.11 oracledb.STRING <--> DB: CLOB
+        101.1.12 oracledb.STRING <--> DB: BLOB
+        101.1.13 oracledb.BUFFER <--> DB: NUMBER
+        101.1.14 oracledb.BUFFER <--> DB: CHAR
+        101.1.15 oracledb.BUFFER <--> DB: NCHAR
+        101.1.16 oracledb.BUFFER <--> DB: VARCHAR2
+        101.1.17 oracledb.BUFFER <--> DB: FLOAT
+        101.1.18 oracledb.BUFFER <--> DB: BINARY_FLOAT
+        101.1.19 oracledb.BUFFER <--> DB: BINARY_DOUBLE
+        101.1.20 oracledb.BUFFER <--> DB: DATE
+        101.1.21 oracledb.BUFFER <--> DB: TIMESTAMP
+        101.1.22 oracledb.BUFFER <--> DB: RAW
+        101.1.23 oracledb.BUFFER <--> DB: CLOB
+        101.1.24 oracledb.BUFFER <--> DB: BLOB
+  101.2 PLSQL procedure bind out null value with default type and dir
+        101.2.1 oracledb.STRING <--> DB: NUMBER
+        101.2.2 oracledb.STRING <--> DB: CHAR
+        101.2.3 oracledb.STRING <--> DB: NCHAR
+        101.2.4 oracledb.STRING <--> DB: VARCHAR2
+        101.2.5 oracledb.STRING <--> DB: FLOAT
+        101.2.6 oracledb.STRING <--> DB: BINARY_FLOAT
+        101.2.7 oracledb.STRING <--> DB: BINARY_DOUBLE
+        101.2.8 oracledb.STRING <--> DB: DATE
+        101.2.9 oracledb.STRING <--> DB: TIMESTAMP
+        101.2.10 oracledb.STRING <--> DB: RAW
+        101.2.11 oracledb.STRING <--> DB: CLOB
+        101.2.12 oracledb.STRING <--> DB: BLOB
+        101.2.13 oracledb.BUFFER <--> DB: NUMBER
+        101.2.14 oracledb.BUFFER <--> DB: CHAR
+        101.2.15 oracledb.BUFFER <--> DB: NCHAR
+        101.2.16 oracledb.BUFFER <--> DB: VARCHAR2
+        101.2.17 oracledb.BUFFER <--> DB: FLOAT
+        101.2.18 oracledb.BUFFER <--> DB: BINARY_FLOAT
+        101.2.19 oracledb.BUFFER <--> DB: BINARY_DOUBLE
+        101.2.20 oracledb.BUFFER <--> DB: DATE
+        101.2.21 oracledb.BUFFER <--> DB: TIMESTAMP
+        101.2.22 oracledb.BUFFER <--> DB: RAW
+        101.2.23 oracledb.BUFFER <--> DB: CLOB
+        101.2.24 oracledb.BUFFER <--> DB: BLOB

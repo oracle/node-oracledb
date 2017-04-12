@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -1397,6 +1397,67 @@ describe('12. resultSet1.js', function() {
           }
         });
       }
+    });
+  });
+  describe('12.8 Testing errInvalidResultSet', function() {
+    it('12.8.1 Negative: UPDATE BIND out with oracledb.CURSOR - bind by name', function(done) {
+      var sql = "update nodb_rs1_emp set employees_name = 'abc' where employees_id = 1 RETURNING employees_name INTO :name";
+      connection.execute(
+        sql,
+        { name: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT } },
+        { resultSet: true},
+        function(err) {
+          // NJS-018: invalid ResultSet
+          (err.message).should.startWith('NJS-018:');
+          done();
+        }
+      )
+    });
+
+    it('12.8.2 Negative: UPDATE BIND out with oracledb.CURSOR - bind by position', function(done) {
+      var sql = "update nodb_rs1_emp set employees_name = 'abc' where employees_id = 1 RETURNING employees_name INTO :name";
+      connection.execute(
+        sql,
+        [ { type: oracledb.CURSOR, dir: oracledb.BIND_OUT } ],
+        { resultSet: true},
+        function(err) {
+          // NJS-018: invalid ResultSet
+          (err.message).should.startWith('NJS-018:');
+          done();
+        }
+      )
+    });
+
+    it('12.8.3 Negative: INSERT BIND out with oracledb.CURSOR - bind by name', function(done) {
+      var sql = "insert into nodb_rs1_emp (:id, :name) RETURNING employees_name INTO :out";
+      connection.execute(
+        sql,
+        {
+          id: { val:1000, type: oracledb.CURSOR, dir: oracledb.BIND_OUT },
+          name: { val:'hello', type: oracledb.STRING, dir: oracledb.BIND_IN },
+          out: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
+        },
+        { resultSet: true},
+        function(err) {
+          // NJS-018: invalid ResultSet
+          (err.message).should.startWith('NJS-018:');
+          done();
+        }
+      )
+    });
+
+    it('12.8.4 Negative: INSERT BIND out with oracledb.CURSOR - bind by position', function(done) {
+      var sql = "insert into nodb_rs1_emp (:id, :name) RETURNING employees_name INTO :out";
+      connection.execute(
+        sql,
+        [ 1001, 'hello', { type: oracledb.CURSOR, dir: oracledb.BIND_OUT } ],
+        { resultSet: true},
+        function(err) {
+          // NJS-018: invalid ResultSet
+          (err.message).should.startWith('NJS-018:');
+          done();
+        }
+      )
     });
   });
 

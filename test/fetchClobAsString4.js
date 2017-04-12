@@ -165,7 +165,7 @@ describe('90. fetchClobAsString4.js', function() {
       done();
     }); // afterEach
 
-    it.skip('90.1.1 bind by position - 1', function(done) {
+    it('90.1.1 bind by position - 1', function(done) {
       var len = 400;
       var sequence = insertID++;
       var specialStr = "90.1.1";
@@ -185,10 +185,10 @@ describe('90. fetchClobAsString4.js', function() {
         function(cb) {
           connection.execute(
             sqlRun,
-            [ sequence, null, clobStr, { type: oracledb.CLOB, dir: oracledb.BIND_OUT } ],
+            [ { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: len }, sequence, null, clobStr],
             function(err, result) {
               should.not.exist(err);
-              var resultVal = result.outBinds.output;
+              var resultVal = result.outBinds[0];
               verifyResult(resultVal, specialStr, clobStr);
               cb();
             }
@@ -234,7 +234,7 @@ describe('90. fetchClobAsString4.js', function() {
       ], done);
     }); // 90.1.2
 
-    it.skip('90.1.3 bind by position - 2', function(done) {
+    it('90.1.3 bind by position - 2', function(done) {
       var len = 400;
       var sequence = insertID++;
       var specialStr = "90.1.2";
@@ -254,10 +254,10 @@ describe('90. fetchClobAsString4.js', function() {
         function(cb) {
           connection.execute(
             sqlRun,
-            [ sequence, sequence, null, { type: oracledb.CLOB, dir: oracledb.BIND_OUT } ],
+            [ { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: len }, sequence, sequence, null ],
             function(err, result) {
               should.not.exist(err);
-              var resultVal = result.outBinds.output;
+              var resultVal = result.outBinds[0];
               verifyResult(resultVal, specialStr, clobStr);
               cb();
             }
@@ -332,7 +332,7 @@ describe('90. fetchClobAsString4.js', function() {
       done();
     }); // afterEach
 
-    it.skip('90.2.1 bind by position - 1', function(done) {
+    it('90.2.1 bind by position - 1', function(done) {
       var len = 500;
       var sequence = insertID++;
       var specialStr = "90.2.1";
@@ -352,10 +352,10 @@ describe('90. fetchClobAsString4.js', function() {
         function(cb) {
           connection.execute(
             sqlRun,
-            [ sequence, null, clobStr, { type: oracledb.CLOB, dir: oracledb.BIND_OUT } ],
+            [ sequence, null, { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN }, { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: len } ],
             function(err, result) {
               should.not.exist(err);
-              var resultVal = result.outBinds.c2;
+              var resultVal = result.outBinds[0];
               verifyResult(resultVal, specialStr, clobStr);
               cb();
             }
@@ -401,7 +401,7 @@ describe('90. fetchClobAsString4.js', function() {
       ], done);
     }); // 90.2.2
 
-    it.skip('90.2.3 bind by position - 2', function(done) {
+    it('90.2.3 bind by position - 2', function(done) {
       var len = 500;
       var sequence = insertID++;
       var specialStr = "90.2.3";
@@ -421,10 +421,10 @@ describe('90. fetchClobAsString4.js', function() {
         function(cb) {
           connection.execute(
             sqlRun,
-            [ sequence, sequence, null, { type: oracledb.CLOB, dir: oracledb.BIND_OUT } ],
+            [ sequence, sequence, null, { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: len } ],
             function(err, result) {
               should.not.exist(err);
-              var resultVal = result.outBinds.c2;
+              var resultVal = result.outBinds[0];
               verifyResult(resultVal, specialStr, clobStr);
               cb();
             }
@@ -538,7 +538,7 @@ describe('90. fetchClobAsString4.js', function() {
       ], done);
     }); // 90.3.1
 
-    it.skip('90.3.2 bind by position - 1', function(done) {
+    it('90.3.2 bind by position - 1', function(done) {
       var len = 1000;
       var sequence = insertID++;
       var specialStr = "90.3.1";
@@ -558,10 +558,10 @@ describe('90. fetchClobAsString4.js', function() {
         function(cb) {
           connection.execute(
             sqlRun,
-            [ sequence, null, clobStr, { type: oracledb.CLOB, dir: oracledb.BIND_OUT } ],
+            [ { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: len }, sequence, null, clobStr ],
             function(err, result) {
               should.not.exist(err);
-              var resultVal = result.outBinds.output;
+              var resultVal = result.outBinds[0];
               verifyResult(resultVal, specialStr, clobStr);
               cb();
             }
@@ -607,7 +607,7 @@ describe('90. fetchClobAsString4.js', function() {
       ], done);
     }); // 90.3.3
 
-    it.skip('90.3.4 bind by position - 2', function(done) {
+    it('90.3.4 bind by position - 2', function(done) {
       var len = 1000;
       var sequence = insertID++;
       var specialStr = "90.3.4";
@@ -627,10 +627,10 @@ describe('90. fetchClobAsString4.js', function() {
         function(cb) {
           connection.execute(
             sqlRun,
-            [ sequence, sequence, null, { type: oracledb.CLOB, dir: oracledb.BIND_OUT } ],
+            [ { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: len }, sequence, sequence, null ],
             function(err, result) {
               should.not.exist(err);
-              var resultVal = result.outBinds.output;
+              var resultVal = result.outBinds[0];
               verifyResult(resultVal, specialStr, clobStr);
               cb();
             }

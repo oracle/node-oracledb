@@ -66,6 +66,9 @@ using namespace dpi;
 class Connection;
 class ProtoILob;
 
+// Max number of bytes allowed for PLSQL STRING/BUFFER arguments
+#define NJS_THRESHOLD_SIZE_PLSQL_STRING_ARG 32767
+
 // Extended bind type
 typedef enum
 {
@@ -760,6 +763,9 @@ private:
                                       ProtoILob *protoILob,
                                       bool      isAutoCloseLob = true );
 
+  /*
+   * Inline function to identify v8 type from given v8::value
+   */
   static inline ValueType GetValueType ( v8::Local<v8::Value> v )
   {
     ValueType type = NJS_VALUETYPE_INVALID;
@@ -794,6 +800,46 @@ private:
     }
 
     return type;
+  }
+
+  /*
+   * large-value for PL/SQL procedure use tempLob if underling column type
+   * is LOB, whether to use that feature for this bind or not
+   */
+  static inline bool IsValue2TempLob ( eBaton *executeBaton,
+                                       unsigned int index )
+  {
+    bool ret = false;
+
+    Bind *bind = executeBaton->binds[index];
+
+    if ( !bind->isOut && !bind->isInOut )    // IN Bind case
+    {
+      // for non-NULL values with provided value len > threshold
+      if ( ( * ( bind-> ind ) != -1 )  &&
+           ( * ( bind-> len ) > NJS_THRESHOLD_SIZE_PLSQL_STRING_ARG ) )
+      ret = true;
+    }
+    else if ( bind->isOut && !bind->isInOut )  // OUT Bind case
+    {
+      // Expected size is greater than threshold
+      if ( bind -> maxSize > NJS_THRESHOLD_SIZE_PLSQL_STRING_ARG )
+      {
+        ret = true;
+      }
+    }
+    else if ( bind->isInOut )
+    {
+      // For INOUT bind, either the given value len or expected size is
+      // greater than threshold
+      if ( max ( ( DPI_SZ_TYPE ) *( bind->len ), bind->maxSize ) >
+           NJS_THRESHOLD_SIZE_PLSQL_STRING_ARG )
+      {
+        ret = true;
+      }
+    }
+
+    return ret;
   }
 
 

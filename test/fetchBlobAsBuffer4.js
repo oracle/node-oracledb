@@ -144,7 +144,7 @@ describe('91. fetchBlobAsBuffer4.js', function() {
       done();
     }); // afterEach
 
-    it.skip('91.1.1 bind by position - 1', function(done) {
+    it('91.1.1 bind by position - 1', function(done) {
       var proc = "CREATE OR REPLACE FUNCTION nodb_blobs_out_94 (ID_1 IN NUMBER, ID_2 IN NUMBER, C IN RAW) RETURN BLOB \n" +
                  "IS \n" +
                  "    tmpLOB4 BLOB; \n" +
@@ -152,7 +152,7 @@ describe('91. fetchBlobAsBuffer4.js', function() {
                  "    select blob into tmpLOB4 from nodb_blob_1 where num_1 = ID_1;\n" +
                  "    RETURN tmpLOB4; \n" +
                  "END;";
-      var sqlRun = "begin :output := nodb_blobs_out_94 (:i1, :i2); end;";
+      var sqlRun = "begin :output := nodb_blobs_out_94 (:i1, :i2, :i3); end;";
       var proc_drop = "DROP FUNCTION nodb_blobs_out_94";
 
       var len = 400;
@@ -178,11 +178,11 @@ describe('91. fetchBlobAsBuffer4.js', function() {
         function(cb) {
           connection.execute(
             sqlRun,
-            [ sequence, null, content, { type: oracledb.BLOB, dir: oracledb.BIND_OUT } ],
+            [ { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: len }, sequence, null, content ],
             function(err, result) {
               should.not.exist(err);
-              var resultVal = result.outBinds.output;
-              var compareBuffer = assist.compare2Buffers(resultVal, content);
+              var resultVal = result.outBinds[0];
+              var compareBuffer = assist.compare2Buffers(content, resultVal);
               should.strictEqual(compareBuffer, true);
               cb();
             }
@@ -249,7 +249,7 @@ describe('91. fetchBlobAsBuffer4.js', function() {
       ], done);
     }); // 91.1.2
 
-    it.skip('91.1.3 bind by position - 2', function(done) {
+    it('91.1.3 bind by position - 2', function(done) {
       var proc = "CREATE OR REPLACE FUNCTION nodb_blobs_out_94 (ID_1 IN NUMBER, ID_2 IN NUMBER, C IN RAW) RETURN BLOB \n" +
                  "IS \n" +
                  "    tmpLOB4 BLOB; \n" +
@@ -257,7 +257,7 @@ describe('91. fetchBlobAsBuffer4.js', function() {
                  "    select blob into tmpLOB4 from nodb_blob_1 where num_1 = ID_1;\n" +
                  "    RETURN tmpLOB4; \n" +
                  "END;";
-      var sqlRun = "begin :output := nodb_blobs_out_94 (:i1, :i2); end;";
+      var sqlRun = "begin :output := nodb_blobs_out_94 (:i1, :i2, :c); end;";
       var proc_drop = "DROP FUNCTION nodb_blobs_out_94";
 
       var len = 400;
@@ -283,10 +283,10 @@ describe('91. fetchBlobAsBuffer4.js', function() {
         function(cb) {
           connection.execute(
             sqlRun,
-            [ sequence, sequence, null, { type: oracledb.BLOB, dir: oracledb.BIND_OUT } ],
+            [ { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: len }, sequence, sequence, null ],
             function(err, result) {
               should.not.exist(err);
-              var resultVal = result.outBinds.output;
+              var resultVal = result.outBinds[0];
               var compareBuffer = assist.compare2Buffers(resultVal, content);
               should.strictEqual(compareBuffer, true);
               cb();
@@ -375,7 +375,7 @@ describe('91. fetchBlobAsBuffer4.js', function() {
       done();
     }); // afterEach
 
-    it.skip('91.2.1 bind by position - 1', function(done) {
+    it('91.2.1 bind by position - 1', function(done) {
       var len = 500;
       var sequence = insertID++;
       var specialStr = "91.2.1";
@@ -399,10 +399,10 @@ describe('91. fetchBlobAsBuffer4.js', function() {
         function(cb) {
           connection.execute(
             sqlRun,
-            [ sequence, null, content, { type: oracledb.BLOB, dir: oracledb.BIND_OUT } ],
+            [ sequence, null, content, { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: len } ],
             function(err, result) {
               should.not.exist(err);
-              var resultVal = result.outBinds.c2;
+              var resultVal = result.outBinds[0];
               var compareBuffer = assist.compare2Buffers(resultVal, content);
               should.strictEqual(compareBuffer, true);
               cb();
@@ -460,7 +460,7 @@ describe('91. fetchBlobAsBuffer4.js', function() {
       ], done);
     }); // 91.2.2
 
-    it.skip('91.2.3 bind by position - 2', function(done) {
+    it('91.2.3 bind by position - 2', function(done) {
       var len = 500;
       var sequence = insertID++;
       var specialStr = "91.2.3";
@@ -484,10 +484,10 @@ describe('91. fetchBlobAsBuffer4.js', function() {
         function(cb) {
           connection.execute(
             sqlRun,
-            [ sequence, sequence, null, { type: oracledb.BLOB, dir: oracledb.BIND_OUT } ],
+            [ sequence, sequence, null, { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: len } ],
             function(err, result) {
               should.not.exist(err);
-              var resultVal = result.outBinds.c2;
+              var resultVal = result.outBinds[0];
               var compareBuffer = assist.compare2Buffers(resultVal, content);
               should.strictEqual(compareBuffer, true);
               cb();
@@ -615,7 +615,7 @@ describe('91. fetchBlobAsBuffer4.js', function() {
       ], done);
     }); // 91.3.1
 
-    it.skip('91.3.2 bind by position - 1', function(done) {
+    it('91.3.2 bind by position - 1', function(done) {
       var len = 1000;
       var sequence = insertID++;
       var specialStr = "91.3.2";
@@ -637,11 +637,11 @@ describe('91. fetchBlobAsBuffer4.js', function() {
           connection.execute(
             sqlRun,
             [
-              sequence, null, content, { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: len }
+              { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: len }, sequence, null, content
             ],
             function(err, result) {
               should.not.exist(err);
-              var resultVal = result.outBinds.output;
+              var resultVal = result.outBinds[0];
               var compareBuffer = assist.compare2Buffers(resultVal, content);
               should.strictEqual(compareBuffer, true);
               cb();
@@ -690,7 +690,7 @@ describe('91. fetchBlobAsBuffer4.js', function() {
       ], done);
     }); // 91.3.3
 
-    it.skip('91.3.4 bind by position - 2', function(done) {
+    it('91.3.4 bind by position - 2', function(done) {
       var len = 1000;
       var sequence = insertID++;
       var specialStr = "91.3.4";
@@ -712,11 +712,11 @@ describe('91. fetchBlobAsBuffer4.js', function() {
           connection.execute(
             sqlRun,
             [
-              sequence, sequence, null, { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: len }
+              { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: len }, sequence, sequence, null
             ],
             function(err, result) {
               should.not.exist(err);
-              var resultVal = result.outBinds.output;
+              var resultVal = result.outBinds[0];
               var compareBuffer = assist.compare2Buffers(resultVal, content);
               should.strictEqual(compareBuffer, true);
               cb();

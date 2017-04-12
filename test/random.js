@@ -39,3 +39,10 @@ random.getRandomString = function (length, specialStr) {
   str = specialStr + str + specialStr;
   return str;
 };
+
+random.getRandomLenString = function (length) {
+  var str='';
+  for( ; str.length < length; str += Math.random().toString(36).slice(2));
+  str = str.substr(0, length);
+  return str;
+};
