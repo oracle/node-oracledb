@@ -206,9 +206,9 @@ NAN_GETTER(njsPool::GetConnectionsOpen)
     if (!pool)
         return;
     uint32_t value;
-    if (dpiPool_GetOpenCount(pool->dpiPoolHandle, &value) < 0) {
+    if (dpiPool_getOpenCount(pool->dpiPoolHandle, &value) < 0) {
         dpiErrorInfo errorInfo;
-        dpiPool_GetError(pool->dpiPoolHandle, &errorInfo);
+        dpiPool_getError(pool->dpiPoolHandle, &errorInfo);
         Nan::ThrowError(errorInfo.message);
         return;
     }
@@ -226,9 +226,9 @@ NAN_GETTER(njsPool::GetConnectionsInUse)
     if (!pool)
         return;
     uint32_t value;
-    if (dpiPool_GetBusyCount(pool->dpiPoolHandle, &value) < 0) {
+    if (dpiPool_getBusyCount(pool->dpiPoolHandle, &value) < 0) {
         dpiErrorInfo errorInfo;
-        dpiPool_GetError(pool->dpiPoolHandle, &errorInfo);
+        dpiPool_getError(pool->dpiPoolHandle, &errorInfo);
         Nan::ThrowError(errorInfo.message);
         return;
     }
@@ -352,7 +352,7 @@ NAN_METHOD(njsPool::GetConnection)
 //-----------------------------------------------------------------------------
 void njsPool::Async_GetConnection(njsBaton *baton)
 {
-    if (dpiPool_AcquireConnection(baton->dpiPoolHandle, NULL, 0, NULL, 0, NULL,
+    if (dpiPool_acquireConnection(baton->dpiPoolHandle, NULL, 0, NULL, 0, NULL,
             &baton->dpiConnHandle) < 0)
         baton->GetDPIPoolError(baton->dpiPoolHandle);
 }
@@ -400,7 +400,7 @@ NAN_METHOD(njsPool::Terminate)
 //-----------------------------------------------------------------------------
 void njsPool::Async_Terminate(njsBaton *baton)
 {
-    if (dpiPool_Close(baton->dpiPoolHandle, DPI_MODE_POOL_CLOSE_DEFAULT) < 0)
+    if (dpiPool_close(baton->dpiPoolHandle, DPI_MODE_POOL_CLOSE_DEFAULT) < 0)
         baton->GetDPIPoolError(baton->dpiPoolHandle);
 }
 

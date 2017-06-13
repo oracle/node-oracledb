@@ -64,7 +64,7 @@ using namespace v8;
 njsVariable::~njsVariable()
 {
     if (dpiVarHandle) {
-        dpiVar_Release(dpiVarHandle);
+        dpiVar_release(dpiVarHandle);
         dpiVarHandle = NULL;
         dpiVarData = NULL;
     }
@@ -175,19 +175,19 @@ njsBaton::~njsBaton()
     jsBuffer.Reset();
     jsRows.Reset();
     if (dpiPoolHandle) {
-        dpiPool_Release(dpiPoolHandle);
+        dpiPool_release(dpiPoolHandle);
         dpiPoolHandle = NULL;
     }
     if (dpiConnHandle) {
-        dpiConn_Release(dpiConnHandle);
+        dpiConn_release(dpiConnHandle);
         dpiConnHandle = NULL;
     }
     if (dpiStmtHandle) {
-        dpiStmt_Release(dpiStmtHandle);
+        dpiStmt_release(dpiStmtHandle);
         dpiStmtHandle = NULL;
     }
     if (dpiLobHandle) {
-        dpiLob_Release(dpiLobHandle);
+        dpiLob_release(dpiLobHandle);
         dpiLobHandle = NULL;
     }
     if (bindVars) {
@@ -320,7 +320,7 @@ void njsBaton::GetDPIConnError(dpiConn *handle)
 {
     dpiErrorInfo errorInfo;
 
-    dpiConn_GetError(handle, &errorInfo);
+    dpiConn_getError(handle, &errorInfo);
     error = std::string(errorInfo.message, errorInfo.messageLength);
 }
 
@@ -333,7 +333,7 @@ void njsBaton::GetDPILobError(dpiLob *handle)
 {
     dpiErrorInfo errorInfo;
 
-    dpiLob_GetError(handle, &errorInfo);
+    dpiLob_getError(handle, &errorInfo);
     error = std::string(errorInfo.message, errorInfo.messageLength);
 }
 
@@ -346,7 +346,7 @@ void njsBaton::GetDPIPoolError(dpiPool *handle)
 {
     dpiErrorInfo errorInfo;
 
-    dpiPool_GetError(handle, &errorInfo);
+    dpiPool_getError(handle, &errorInfo);
     error = std::string(errorInfo.message, errorInfo.messageLength);
 }
 
@@ -359,7 +359,7 @@ void njsBaton::GetDPIStmtError(dpiStmt *handle)
 {
     dpiErrorInfo errorInfo;
 
-    dpiStmt_GetError(handle, &errorInfo);
+    dpiStmt_getError(handle, &errorInfo);
     error = std::string(errorInfo.message, errorInfo.messageLength);
 }
 
@@ -372,7 +372,7 @@ void njsBaton::GetDPIVarError(dpiVar *handle)
 {
     dpiErrorInfo errorInfo;
 
-    dpiVar_GetError(handle, &errorInfo);
+    dpiVar_getError(handle, &errorInfo);
     error = std::string(errorInfo.message, errorInfo.messageLength);
 }
 
@@ -384,7 +384,7 @@ void njsBaton::GetDPIVarError(dpiVar *handle)
 //-----------------------------------------------------------------------------
 void njsBaton::SetDPIConnHandle(dpiConn *handle)
 {
-    if (dpiConn_AddRef(handle) < 0) {
+    if (dpiConn_addRef(handle) < 0) {
         GetDPIConnError(handle);
         dpiConnHandle = NULL;
     }
@@ -399,7 +399,7 @@ void njsBaton::SetDPIConnHandle(dpiConn *handle)
 //-----------------------------------------------------------------------------
 void njsBaton::SetDPIPoolHandle(dpiPool *handle)
 {
-    if (dpiPool_AddRef(handle) < 0) {
+    if (dpiPool_addRef(handle) < 0) {
         GetDPIPoolError(handle);
         dpiPoolHandle = NULL;
     }
@@ -414,7 +414,7 @@ void njsBaton::SetDPIPoolHandle(dpiPool *handle)
 //-----------------------------------------------------------------------------
 void njsBaton::SetDPIStmtHandle(dpiStmt *handle)
 {
-    if (dpiStmt_AddRef(handle) < 0) {
+    if (dpiStmt_addRef(handle) < 0) {
         GetDPIStmtError(handle);
         dpiStmtHandle = NULL;
     }
@@ -429,7 +429,7 @@ void njsBaton::SetDPIStmtHandle(dpiStmt *handle)
 //-----------------------------------------------------------------------------
 void njsBaton::SetDPILobHandle(dpiLob *handle)
 {
-    if (dpiLob_AddRef(handle) < 0) {
+    if (dpiLob_addRef(handle) < 0) {
         GetDPILobError(handle);
         dpiLobHandle = NULL;
     }

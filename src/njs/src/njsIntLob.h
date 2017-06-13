@@ -79,7 +79,7 @@ public:
     njsProtoILob() : dpiLobHandle(NULL) {}
     ~njsProtoILob() {
         if (dpiLobHandle) {
-            dpiLob_Release(dpiLobHandle);
+            dpiLob_release(dpiLobHandle);
             dpiLobHandle = NULL;
         }
     }
@@ -107,7 +107,7 @@ private:
     njsILob() : dpiLobHandle(NULL), bufferPtr(NULL) {}
     ~njsILob() {
         if (dpiLobHandle) {
-            dpiLob_Release(dpiLobHandle);
+            dpiLob_release(dpiLobHandle);
             dpiLobHandle = NULL;
         }
         if (bufferPtr) {

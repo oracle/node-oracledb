@@ -108,7 +108,7 @@ private:
     ~njsPool() {
         jsOracledb.Reset();
         if (dpiPoolHandle) {
-            dpiPool_Release(dpiPoolHandle);
+            dpiPool_release(dpiPoolHandle);
             dpiPoolHandle = NULL;
         }
     }

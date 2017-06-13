@@ -96,12 +96,12 @@ void njsOracledb::Init(Handle<Object> target)
     Nan::HandleScope scope;
     dpiErrorInfo errorInfo;
 
-    if (dpiGlobal_Init(DPI_API_VERSION, &errorInfo) < 0) {
+    if (dpiGlobal_init(DPI_API_VERSION, &errorInfo) < 0) {
         Nan::ThrowError(errorInfo.message);
         return;
     }
 
-    dpiGlobal_InitContextParams(&njsContextParams);
+    dpiGlobal_initContextParams(&njsContextParams);
     njsContextParams.createMode = DPI_MODE_CREATE_THREADED;
     njsContextParams.encoding = "UTF-8";
     njsContextParams.nencoding = "UTF-8";
@@ -180,7 +180,7 @@ NAN_METHOD(njsOracledb::New)
 {
     int majorVer, minorVer, updateVer, portVer, portUpdateVer;
 
-    dpiGlobal_GetClientVersion(&majorVer, &minorVer, &updateVer, &portVer,
+    dpiGlobal_getClientVersion(&majorVer, &minorVer, &updateVer, &portVer,
             &portUpdateVer);
     njsOracledb *oracledb = new njsOracledb();
     oracledb->oraClientVer = 100000000 * majorVer     +
@@ -600,7 +600,7 @@ NAN_GETTER(njsOracledb::GetOracleClientVersion)
     if (!oracledb)
         return;
 
-    dpiGlobal_GetClientVersion(&majorVer, &minorVer, &updateVer, &portVer,
+    dpiGlobal_getClientVersion(&majorVer, &minorVer, &updateVer, &portVer,
             &portUpdateVer);
 
     version = 100000000 * majorVer +
@@ -673,9 +673,9 @@ void njsOracledb::Async_GetConnection(njsBaton *baton)
     dpiErrorInfo errorInfo;
     dpiConnCreateParams params;
 
-    dpiGlobal_InitConnCreateParams(&params);
+    dpiGlobal_initConnCreateParams(&params);
     params.externalAuth = baton->externalAuth;
-    if (dpiConn_Create(baton->user.c_str(), baton->user.length(),
+    if (dpiConn_create(baton->user.c_str(), baton->user.length(),
             baton->password.c_str(), baton->password.length(),
             baton->connectString.c_str(), baton->connectString.length(),
             &njsContextParams, &params, &baton->dpiConnHandle, &errorInfo) < 0)
@@ -754,17 +754,17 @@ void njsOracledb::Async_CreatePool(njsBaton *baton)
     dpiErrorInfo errorInfo;
     dpiPoolCreateParams params;
 
-    dpiGlobal_InitPoolCreateParams(&params);
+    dpiGlobal_initPoolCreateParams(&params);
     params.minSessions = baton->poolMin;
     params.maxSessions = baton->poolMax;
     params.sessionIncrement = baton->poolIncrement;
     params.externalAuth = baton->externalAuth;
-    if (dpiPool_Create(baton->user.c_str(), baton->user.length(),
+    if (dpiPool_create(baton->user.c_str(), baton->user.length(),
             baton->password.c_str(), baton->password.length(),
             baton->connectString.c_str(), baton->connectString.length(),
             &njsContextParams, &params, &baton->dpiPoolHandle, &errorInfo) < 0)
         baton->error = std::string(errorInfo.message, errorInfo.messageLength);
-    else if (dpiPool_SetTimeout(baton->dpiPoolHandle, baton->poolTimeout) < 0)
+    else if (dpiPool_setTimeout(baton->dpiPoolHandle, baton->poolTimeout) < 0)
         baton->GetDPIPoolError(baton->dpiPoolHandle);
 }
 

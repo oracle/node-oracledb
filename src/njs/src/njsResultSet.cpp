@@ -78,7 +78,7 @@ njsResultSet::~njsResultSet()
         fetchAsStringTypes = NULL;
     }
     if (dpiStmtHandle) {
-        dpiStmt_Release(dpiStmtHandle);
+        dpiStmt_release(dpiStmtHandle);
         dpiStmtHandle = NULL;
     }
 }
@@ -164,7 +164,7 @@ bool njsResultSet::CreateFromRefCursor(njsBaton *baton, dpiStmt *dpiStmtHandle,
     lft = Nan::New<FunctionTemplate>(resultSetTemplate_s);
     obj = lft->GetFunction()->NewInstance();
     resultSet = Nan::ObjectWrap::Unwrap<njsResultSet>(obj);
-    if (dpiStmt_AddRef(dpiStmtHandle) < 0)
+    if (dpiStmt_addRef(dpiStmtHandle) < 0)
         return false;
     resultSet->dpiStmtHandle = dpiStmtHandle;
     resultSet->dpiConnHandle = baton->dpiConnHandle;
@@ -175,7 +175,7 @@ bool njsResultSet::CreateFromRefCursor(njsBaton *baton, dpiStmt *dpiStmtHandle,
     resultSet->activeBaton = NULL;
 
     // create query variables
-    if (dpiStmt_GetNumQueryColumns(dpiStmtHandle,
+    if (dpiStmt_getNumQueryColumns(dpiStmtHandle,
             &resultSet->numQueryVars) < 0) {
         baton->GetDPIStmtError(dpiStmtHandle);
         return false;
@@ -404,7 +404,7 @@ NAN_METHOD(njsResultSet::Close)
 //-----------------------------------------------------------------------------
 void njsResultSet::Async_Close(njsBaton *baton)
 {
-    if (dpiStmt_Close(baton->dpiStmtHandle, NULL, 0) < 0)
+    if (dpiStmt_close(baton->dpiStmtHandle, NULL, 0) < 0)
         baton->GetDPIStmtError(baton->dpiStmtHandle);
 }
 

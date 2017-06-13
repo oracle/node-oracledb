@@ -160,7 +160,7 @@ NAN_METHOD(njsILob::Release)
     njsILob *lob = (njsILob*) ValidateArgs(info, 0, 0);
     if (!lob)
         return;
-    dpiLob_Release(lob->dpiLobHandle);
+    dpiLob_release(lob->dpiLobHandle);
     lob->dpiLobHandle = NULL;
 }
 
@@ -312,7 +312,7 @@ NAN_METHOD(njsILob::Read)
         lob->activeBaton = baton;
         if (lob->dataType == NJS_DATATYPE_BLOB)
             baton->bufferSize = lob->pieceSize;
-        else if (dpiLob_GetBufferSize(lob->dpiLobHandle, lob->pieceSize,
+        else if (dpiLob_getBufferSize(lob->dpiLobHandle, lob->pieceSize,
                 &baton->bufferSize) < 0)
             baton->GetDPILobError(lob->dpiLobHandle);
         if (!lob->bufferPtr)
@@ -332,7 +332,7 @@ NAN_METHOD(njsILob::Read)
 //-----------------------------------------------------------------------------
 void njsILob::Async_Read(njsBaton *baton)
 {
-    if (dpiLob_ReadBytes(baton->dpiLobHandle, baton->lobOffset,
+    if (dpiLob_readBytes(baton->dpiLobHandle, baton->lobOffset,
             baton->lobAmount, baton->bufferPtr, &baton->bufferSize) < 0)
         baton->GetDPILobError(baton->dpiLobHandle);
 }
@@ -407,7 +407,7 @@ NAN_METHOD(njsILob::Write)
 //-----------------------------------------------------------------------------
 void njsILob::Async_Write(njsBaton *baton)
 {
-    if (dpiLob_WriteBytes(baton->dpiLobHandle, baton->lobOffset,
+    if (dpiLob_writeBytes(baton->dpiLobHandle, baton->lobOffset,
             baton->bufferPtr, baton->bufferSize) < 0)
         baton->GetDPILobError(baton->dpiLobHandle);
 }

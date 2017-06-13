@@ -84,7 +84,7 @@ private:
     ~njsConnection() {
         jsOracledb.Reset();
         if (dpiConnHandle) {
-            dpiConn_Release(dpiConnHandle);
+            dpiConn_release(dpiConnHandle);
             dpiConnHandle = NULL;
         }
     }
