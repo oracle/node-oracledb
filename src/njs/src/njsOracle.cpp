@@ -722,8 +722,6 @@ void njsOracledb::Async_CreatePool(njsBaton *baton)
 {
     dpiErrorInfo errorInfo;
     dpiCreateParams params;
-    uint32_t nameLength;
-    const char *name;
 
     dpiGlobal_InitializeCreateParams(&params);
     params.userName = baton->user.c_str();
@@ -736,8 +734,7 @@ void njsOracledb::Async_CreatePool(njsBaton *baton)
     params.maxSessions = baton->poolMax;
     params.sessionIncrement = baton->poolIncrement;
     params.externalAuth = baton->externalAuth;
-    if (dpiPool_Create(&params, &name, &nameLength, &baton->dpiPoolHandle,
-            &errorInfo) < 0)
+    if (dpiPool_Create(&params, &baton->dpiPoolHandle, &errorInfo) < 0)
         baton->error = std::string(errorInfo.message, errorInfo.messageLength);
     else if (dpiPool_SetAttributeUint(baton->dpiPoolHandle,
             DPI_ATTR_POOL_TIMEOUT, baton->poolTimeout) < 0)
