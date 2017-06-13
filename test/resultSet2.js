@@ -284,11 +284,13 @@ describe('55. resultSet2.js', function() {
         } else {
           conn2.release(function(err) {
             should.not.exist(err);
-            rs.close(function(err) {
+            try {
+              rs.close(function() {});
+            } catch (err) {
               should.exist(err);
-              err.message.should.startWith('NJS-003:'); // invalid connection
+              err.message.should.startWith('NJS-018:'); // invalid result set
               cb();
-            });
+            };
           });
         }
       });
@@ -726,20 +728,20 @@ describe('55. resultSet2.js', function() {
               should.not.exist(err);
               result.resultSet.close(function(err) {
                 should.not.exist(err);
-                fetchRowsFromRS(result.resultSet, numRows, done);
+                try {
+                  result.resultSet.getRows(numRows, function() {});
+                } catch (err) {
+                  should.exist(err);
+                  err.message.should.startWith('NJS-018:');
+                  // invalid result set
+                  done();
+                }
               });
             }
           );
         }
       );
 
-      function fetchRowsFromRS(rs, numRows, done) {
-        rs.getRows(numRows, function(err, rows) {
-          should.exist(err);
-          err.message.should.startWith('NJS-018:'); // invalid result set
-          done();
-        });
-      }
     })
   })
 

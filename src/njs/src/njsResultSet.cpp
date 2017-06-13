@@ -297,6 +297,11 @@ NAN_METHOD(njsResultSet::GetRows)
         return;
     if (!resultSet->GetUnsignedIntArg(info, 0, &maxRows))
         return;
+    if (maxRows == 0) {
+        string errMsg = njsMessages::Get(errInvalidParameterValue, 1);
+        Nan::ThrowError(errMsg.c_str());
+        return;
+    }
     baton = resultSet->CreateBaton(info);
     if (!baton)
         return;

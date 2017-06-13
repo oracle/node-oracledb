@@ -656,7 +656,9 @@ describe('12. resultSet1.js', function() {
       );
 
       function fetchRowFromRS(rs, numRows) {
-        rs.getRows(numRows, function(err, rows) {
+        try {
+          rs.getRows(numRows, function() {});
+        } catch (err) {
           should.exist(err);
           (err.message).should.startWith('NJS-005:');
           // NJS-005: invalid value for parameter 1
@@ -664,7 +666,7 @@ describe('12. resultSet1.js', function() {
             should.not.exist(err);
             done();
           });
-        });
+        };
       }
     })
 
@@ -683,7 +685,9 @@ describe('12. resultSet1.js', function() {
       );
 
       function fetchRowFromRS(rs, numRows) {
-        rs.getRows(numRows, function(err, rows) {
+        try {
+          rs.getRows(numRows, function() {});
+        } catch (err) {
           should.exist(err);
           (err.message).should.startWith('NJS-006:');
           // NJS-006: invalid type for parameter 1
@@ -691,7 +695,7 @@ describe('12. resultSet1.js', function() {
             should.not.exist(err);
             done();
           });
-        });
+        };
       }
     })
 
@@ -947,11 +951,13 @@ describe('12. resultSet1.js', function() {
             rs.close(function(err) {
               should.not.exist(err);
               accessCount.should.be.exactly(10);
-              rs.close(function(err) {
+              try {
+                rs.close(function(err) {});
+              } catch (err) {
                 should.exist(err);
                 (err.message).should.startWith('NJS-018:');
                 done();
-              });
+              };
             });
           }
         });
@@ -983,11 +989,13 @@ describe('12. resultSet1.js', function() {
           } else {
             rs.close(function(err) {
               should.not.exist(err);
-              rs.getRows(numRows, function(err, rows) {
+              try {
+                rs.getRows(numRows, function() {});
+              } catch (err) {
                 should.exist(err);
                 (err.message).should.startWith('NJS-018:');
                 done();
-              });
+              };
             });
           }
         });
