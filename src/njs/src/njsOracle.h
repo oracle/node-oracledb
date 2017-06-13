@@ -69,7 +69,7 @@ using namespace v8;
 // Keep the version in sync with package.json
 #define NJS_NODE_ORACLEDB_MAJOR       2
 #define NJS_NODE_ORACLEDB_MINOR       0
-#define NJS_NODE_ORACLEDB_PATCH       11
+#define NJS_NODE_ORACLEDB_PATCH       13
 
 // define stringified version and driver name
 #define NJS_STR_HELPER(x)       #x
