@@ -997,10 +997,6 @@ bool njsConnection::GetBindTypeAndSizeFromValue(Local<Value> value,
                 return false;
             if (*bindType == 0)
                 *bindType = elementBindType;
-            else if (*bindType != elementBindType) {
-                baton->error = njsMessages::Get(errIncompatibleTypeArrayBind);
-                return false;
-            }
             if (elementMaxSize > *maxSize)
                 *maxSize = elementMaxSize;
         }
