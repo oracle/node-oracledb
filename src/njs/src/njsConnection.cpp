@@ -869,7 +869,6 @@ bool njsConnection::ProcessScalarBindValue(Local<Value> value,
 {
     Nan::HandleScope scope;
     bool bindOk = false;
-    dpiBytes *bytes;
     dpiData *data;
 
     // initialization
@@ -886,10 +885,11 @@ bool njsConnection::ProcessScalarBindValue(Local<Value> value,
         bindOk = (var->varTypeNum == DPI_ORACLE_TYPE_VARCHAR);
         if (bindOk) {
             v8::String::Utf8Value utf8str(value);
-            bytes = &data->value.asBytes;
-            bytes->length = utf8str.length();
-            if (bytes->length)
-                memcpy((void*) bytes->ptr, *utf8str, bytes->length);
+            if (dpiVar_SetFromBytes(var->dpiVarHandle, pos, *utf8str,
+                    utf8str.length()) < 0) {
+                baton->GetDPIVarError(var->dpiVarHandle);
+                return false;
+            }
         }
 
     // value is an integer
@@ -926,10 +926,11 @@ bool njsConnection::ProcessScalarBindValue(Local<Value> value,
         bindOk = (var->varTypeNum == DPI_ORACLE_TYPE_RAW);
         if (bindOk) {
             Local<Object> obj = value->ToObject();
-            bytes = &data->value.asBytes;
-            bytes->length = Buffer::Length(obj);
-            if (bytes->length)
-                memcpy((void*) bytes->ptr, Buffer::Data(obj), bytes->length);
+            if (dpiVar_SetFromBytes(var->dpiVarHandle, pos, Buffer::Data(obj),
+                    Buffer::Length(obj)) < 0) {
+                baton->GetDPIVarError(var->dpiVarHandle);
+                return false;
+            }
         }
     }
 
