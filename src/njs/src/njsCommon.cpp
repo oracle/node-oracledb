@@ -174,7 +174,7 @@ void njsBaton::AsyncAfterWorkCallback(uv_work_t *req, int status)
     Nan::HandleScope scope;
     njsBaton *baton = (njsBaton*) req->data;
     Nan::TryCatch tc;
-    Local<Value> callbackArgs[baton->numCallbackArgs];
+    Local<Value> *callbackArgs = new Local<Value>[baton->numCallbackArgs];
     unsigned int i, numCallbackArgs = baton->numCallbackArgs;
 
     // set all parameters as undefined
@@ -217,6 +217,7 @@ void njsBaton::AsyncAfterWorkCallback(uv_work_t *req, int status)
     }
 
     // raise fatal exception if an exception was caught
+    delete callbackArgs;
     if (tc.HasCaught())
         Nan::FatalException(tc);
 }
