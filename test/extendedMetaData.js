@@ -918,7 +918,7 @@ describe('17. extendedMetaData.js', function() {
 
     });
 
-    it('17.3.20 LONG', function(done) {
+    it.skip('17.3.20 LONG *** NEW FUNCTIONALITY ***', function(done) {
 
       connection.execute(
         "SELECT ln FROM nodb_metadata",
