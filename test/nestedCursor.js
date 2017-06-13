@@ -209,7 +209,7 @@ describe('57. nestedCursor.js', function() {
           cb();
         });
       } else if(row) {
-        console.log(row);
+        // console.log(row);
         fetchOneRowFromRS(rs, cb);
       } else {
         rs.close(function(err) {
