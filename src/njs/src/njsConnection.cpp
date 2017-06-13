@@ -176,10 +176,11 @@ bool njsConnection::ProcessDefines(njsBaton *baton, dpiStmt *dpiStmtHandle,
         vars[i].dbTypeNum = queryInfo.oracleTypeNum;
         vars[i].varTypeNum = queryInfo.oracleTypeNum;
         vars[i].nativeTypeNum = queryInfo.defaultNativeTypeNum;
-        if (queryInfo.oracleTypeNum != DPI_ORACLE_TYPE_VARCHAR ||
-                queryInfo.oracleTypeNum != DPI_ORACLE_TYPE_NVARCHAR ||
-                queryInfo.oracleTypeNum != DPI_ORACLE_TYPE_CHAR ||
-                queryInfo.oracleTypeNum != DPI_ORACLE_TYPE_NCHAR) {
+        if (queryInfo.oracleTypeNum != DPI_ORACLE_TYPE_VARCHAR &&
+                queryInfo.oracleTypeNum != DPI_ORACLE_TYPE_NVARCHAR &&
+                queryInfo.oracleTypeNum != DPI_ORACLE_TYPE_CHAR &&
+                queryInfo.oracleTypeNum != DPI_ORACLE_TYPE_NCHAR &&
+                queryInfo.oracleTypeNum != DPI_ORACLE_TYPE_ROWID) {
             if (!njsConnection::MapByName(baton, &queryInfo,
                     vars[i].varTypeNum))
                 njsConnection::MapByType(baton, &queryInfo,
