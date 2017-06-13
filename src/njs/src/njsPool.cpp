@@ -207,9 +207,8 @@ NAN_GETTER(njsPool::GetConnectionsOpen)
         return;
     uint32_t value;
     if (dpiPool_getOpenCount(pool->dpiPoolHandle, &value) < 0) {
-        dpiErrorInfo errorInfo;
-        dpiPool_getError(pool->dpiPoolHandle, &errorInfo);
-        Nan::ThrowError(errorInfo.message);
+        std::string errMsg = njsOracledb::GetDPIError();
+        Nan::ThrowError(errMsg.c_str());
         return;
     }
     info.GetReturnValue().Set(value);
@@ -227,9 +226,8 @@ NAN_GETTER(njsPool::GetConnectionsInUse)
         return;
     uint32_t value;
     if (dpiPool_getBusyCount(pool->dpiPoolHandle, &value) < 0) {
-        dpiErrorInfo errorInfo;
-        dpiPool_getError(pool->dpiPoolHandle, &errorInfo);
-        Nan::ThrowError(errorInfo.message);
+        std::string errMsg = njsOracledb::GetDPIError();
+        Nan::ThrowError(errMsg.c_str());
         return;
     }
     info.GetReturnValue().Set(value);
@@ -354,7 +352,7 @@ void njsPool::Async_GetConnection(njsBaton *baton)
 {
     if (dpiPool_acquireConnection(baton->dpiPoolHandle, NULL, 0, NULL, 0, NULL,
             &baton->dpiConnHandle) < 0)
-        baton->GetDPIPoolError(baton->dpiPoolHandle);
+        baton->GetDPIError();
 }
 
 
@@ -402,5 +400,6 @@ void njsPool::Async_Terminate(njsBaton *baton)
 {
     if (dpiPool_close(baton->dpiPoolHandle, DPI_MODE_POOL_CLOSE_DEFAULT) < 0)
         baton->GetDPIPoolError(baton->dpiPoolHandle);
+        baton->GetDPIError();
 }
 

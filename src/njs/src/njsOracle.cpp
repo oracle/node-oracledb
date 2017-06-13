@@ -61,8 +61,11 @@
 // peristent Oracledb class handle
 Nan::Persistent<FunctionTemplate> njsOracledb::oracledbTemplate_s;
 
-// context parameters (fixed)
-dpiContextParams njsContextParams;
+// DPI context
+dpiContext *njsOracledb::globalDPIContext;
+
+// common pool/standalone connection creation parameters (fixed)
+dpiCommonCreateParams njsCommonCreateParams;
 
 
 //-----------------------------------------------------------------------------
@@ -96,17 +99,26 @@ void njsOracledb::Init(Handle<Object> target)
     Nan::HandleScope scope;
     dpiErrorInfo errorInfo;
 
-    if (dpiGlobal_init(DPI_API_VERSION, &errorInfo) < 0) {
+    // create DPI context
+    if (dpiContext_create(DPI_MAJOR_VERSION, DPI_MINOR_VERSION,
+            &globalDPIContext, &errorInfo) < 0) {
         Nan::ThrowError(errorInfo.message);
         return;
     }
 
-    dpiGlobal_initContextParams(&njsContextParams);
-    njsContextParams.createMode = DPI_MODE_CREATE_THREADED;
-    njsContextParams.encoding = "UTF-8";
-    njsContextParams.nencoding = "UTF-8";
-    njsContextParams.driverName = NJS_DRIVER_NAME;
-    njsContextParams.driverNameLength = strlen(njsContextParams.driverName);
+    // initialize common creation parameters for pools/standalone connections
+    if (dpiContext_initCommonCreateParams(globalDPIContext,
+            &njsCommonCreateParams) < 0) {
+        dpiContext_getError(globalDPIContext, &errorInfo);
+        Nan::ThrowError(errorInfo.message);
+        return;
+    }
+    njsCommonCreateParams.createMode = DPI_MODE_CREATE_THREADED;
+    njsCommonCreateParams.encoding = "UTF-8";
+    njsCommonCreateParams.nencoding = "UTF-8";
+    njsCommonCreateParams.driverName = NJS_DRIVER_NAME;
+    njsCommonCreateParams.driverNameLength =
+            strlen(njsCommonCreateParams.driverName);
 
     Local<FunctionTemplate> temp = Nan::New<FunctionTemplate>(New);
     temp->InstanceTemplate()->SetInternalFieldCount(1);
@@ -180,8 +192,12 @@ NAN_METHOD(njsOracledb::New)
 {
     int majorVer, minorVer, updateVer, portVer, portUpdateVer;
 
-    dpiGlobal_getClientVersion(&majorVer, &minorVer, &updateVer, &portVer,
-            &portUpdateVer);
+    if (dpiContext_getClientVersion(globalDPIContext, &majorVer, &minorVer,
+            &updateVer, &portVer, &portUpdateVer) < 0) {
+        std::string errMsg = GetDPIError();
+        Nan::ThrowError(errMsg.c_str());
+        return;
+    }
     njsOracledb *oracledb = new njsOracledb();
     oracledb->oraClientVer = 100000000 * majorVer     +
                                1000000 * minorVer     +
@@ -600,8 +616,12 @@ NAN_GETTER(njsOracledb::GetOracleClientVersion)
     if (!oracledb)
         return;
 
-    dpiGlobal_getClientVersion(&majorVer, &minorVer, &updateVer, &portVer,
-            &portUpdateVer);
+    if (dpiContext_getClientVersion(globalDPIContext, &majorVer, &minorVer,
+            &updateVer, &portVer, &portUpdateVer) < 0) {
+        std::string errMsg = GetDPIError();
+        Nan::ThrowError(errMsg.c_str());
+        return;
+    }
 
     version = 100000000 * majorVer +
                 1000000 * minorVer +
@@ -670,16 +690,19 @@ NAN_METHOD(njsOracledb::GetConnection)
 //-----------------------------------------------------------------------------
 void njsOracledb::Async_GetConnection(njsBaton *baton)
 {
-    dpiErrorInfo errorInfo;
     dpiConnCreateParams params;
 
-    dpiGlobal_initConnCreateParams(&params);
+    if (dpiContext_initConnCreateParams(globalDPIContext, &params) < 0) {
+        baton->GetDPIError();
+        return;
+    }
     params.externalAuth = baton->externalAuth;
-    if (dpiConn_create(baton->user.c_str(), baton->user.length(),
-            baton->password.c_str(), baton->password.length(),
-            baton->connectString.c_str(), baton->connectString.length(),
-            &njsContextParams, &params, &baton->dpiConnHandle, &errorInfo) < 0)
-        baton->error = std::string(errorInfo.message, errorInfo.messageLength);
+    if (dpiConn_create(globalDPIContext, baton->user.c_str(),
+            baton->user.length(), baton->password.c_str(),
+            baton->password.length(), baton->connectString.c_str(),
+            baton->connectString.length(), &njsCommonCreateParams, &params,
+            &baton->dpiConnHandle) < 0)
+        baton->GetDPIError();
 }
 
 
@@ -751,21 +774,24 @@ NAN_METHOD(njsOracledb::CreatePool)
 //-----------------------------------------------------------------------------
 void njsOracledb::Async_CreatePool(njsBaton *baton)
 {
-    dpiErrorInfo errorInfo;
     dpiPoolCreateParams params;
 
-    dpiGlobal_initPoolCreateParams(&params);
+    if (dpiContext_initPoolCreateParams(globalDPIContext, &params) < 0) {
+        baton->GetDPIError();
+        return;
+    }
     params.minSessions = baton->poolMin;
     params.maxSessions = baton->poolMax;
     params.sessionIncrement = baton->poolIncrement;
     params.externalAuth = baton->externalAuth;
-    if (dpiPool_create(baton->user.c_str(), baton->user.length(),
-            baton->password.c_str(), baton->password.length(),
-            baton->connectString.c_str(), baton->connectString.length(),
-            &njsContextParams, &params, &baton->dpiPoolHandle, &errorInfo) < 0)
-        baton->error = std::string(errorInfo.message, errorInfo.messageLength);
+    if (dpiPool_create(globalDPIContext, baton->user.c_str(),
+            baton->user.length(), baton->password.c_str(),
+            baton->password.length(), baton->connectString.c_str(),
+            baton->connectString.length(), &njsCommonCreateParams, &params,
+            &baton->dpiPoolHandle) < 0)
+        baton->GetDPIError();
     else if (dpiPool_setTimeout(baton->dpiPoolHandle, baton->poolTimeout) < 0)
-        baton->GetDPIPoolError(baton->dpiPoolHandle);
+        baton->GetDPIError();
 }
 
 
@@ -800,6 +826,19 @@ void njsOracledb::SetFetchAsStringTypesOnBaton(njsBaton *baton) const
         baton->fetchAsStringTypes[i] = 
                 (njsDataType) array->Get(i).As<Integer>()->ToInt32()->Value();
     }
+}
+
+
+//-----------------------------------------------------------------------------
+// njsOracledb::GetDPIError()
+//   Gets the error information from DPI and returns it.
+//-----------------------------------------------------------------------------
+std::string njsOracledb::GetDPIError(void)
+{
+    dpiErrorInfo errorInfo;
+
+    dpiContext_getError(globalDPIContext, &errorInfo);
+    return std::string(errorInfo.message, errorInfo.messageLength);
 }
 
 

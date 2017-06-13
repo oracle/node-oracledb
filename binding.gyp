@@ -11,6 +11,7 @@
              "src/njs/src/njsMessages.cpp",
              "src/njs/src/njsIntLob.cpp",
              "src/dpic/src/dpiConn.c",
+             "src/dpic/src/dpiContext.c",
              "src/dpic/src/dpiData.c",
              "src/dpic/src/dpiDeqOptions.c",
              "src/dpic/src/dpiEnqOptions.c",

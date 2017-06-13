@@ -177,7 +177,7 @@ bool njsResultSet::CreateFromRefCursor(njsBaton *baton, dpiStmt *dpiStmtHandle,
     // create query variables
     if (dpiStmt_getNumQueryColumns(dpiStmtHandle,
             &resultSet->numQueryVars) < 0) {
-        baton->GetDPIStmtError(dpiStmtHandle);
+        baton->GetDPIError();
         return false;
     }
     resultSet->queryVars = new njsVariable[resultSet->numQueryVars];
@@ -405,6 +405,6 @@ NAN_METHOD(njsResultSet::Close)
 void njsResultSet::Async_Close(njsBaton *baton)
 {
     if (dpiStmt_close(baton->dpiStmtHandle, NULL, 0) < 0)
-        baton->GetDPIStmtError(baton->dpiStmtHandle);
+        baton->GetDPIError();
 }
 

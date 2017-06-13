@@ -313,67 +313,12 @@ void njsBaton::AsyncAfterWorkCallback(uv_work_t *req, int status)
 
 
 //-----------------------------------------------------------------------------
-// njsBaton::GetDPIConnError()
+// njsBaton::GetDPIError()
 //   Gets the error information from DPI and stores it in the baton.
 //-----------------------------------------------------------------------------
-void njsBaton::GetDPIConnError(dpiConn *handle)
+void njsBaton::GetDPIError(void)
 {
-    dpiErrorInfo errorInfo;
-
-    dpiConn_getError(handle, &errorInfo);
-    error = std::string(errorInfo.message, errorInfo.messageLength);
-}
-
-
-//-----------------------------------------------------------------------------
-// njsBaton::GetDPILobError()
-//   Gets the error information from DPI and stores it in the baton.
-//-----------------------------------------------------------------------------
-void njsBaton::GetDPILobError(dpiLob *handle)
-{
-    dpiErrorInfo errorInfo;
-
-    dpiLob_getError(handle, &errorInfo);
-    error = std::string(errorInfo.message, errorInfo.messageLength);
-}
-
-
-//-----------------------------------------------------------------------------
-// njsBaton::GetDPIPoolError()
-//   Gets the error information from DPI and stores it in the baton.
-//-----------------------------------------------------------------------------
-void njsBaton::GetDPIPoolError(dpiPool *handle)
-{
-    dpiErrorInfo errorInfo;
-
-    dpiPool_getError(handle, &errorInfo);
-    error = std::string(errorInfo.message, errorInfo.messageLength);
-}
-
-
-//-----------------------------------------------------------------------------
-// njsBaton::GetDPIStmtError()
-//   Gets the error information from DPI and stores it in the baton.
-//-----------------------------------------------------------------------------
-void njsBaton::GetDPIStmtError(dpiStmt *handle)
-{
-    dpiErrorInfo errorInfo;
-
-    dpiStmt_getError(handle, &errorInfo);
-    error = std::string(errorInfo.message, errorInfo.messageLength);
-}
-
-
-//-----------------------------------------------------------------------------
-// njsBaton::GetDPIVarError()
-//   Gets the error information from DPI and stores it in the baton.
-//-----------------------------------------------------------------------------
-void njsBaton::GetDPIVarError(dpiVar *handle)
-{
-    dpiErrorInfo errorInfo;
-
-    dpiVar_getError(handle, &errorInfo);
-    error = std::string(errorInfo.message, errorInfo.messageLength);
+    error = njsOracledb::GetDPIError();
 }
 
 
@@ -385,7 +330,7 @@ void njsBaton::GetDPIVarError(dpiVar *handle)
 void njsBaton::SetDPIConnHandle(dpiConn *handle)
 {
     if (dpiConn_addRef(handle) < 0) {
-        GetDPIConnError(handle);
+        GetDPIError();
         dpiConnHandle = NULL;
     }
     dpiConnHandle = handle;
@@ -400,7 +345,7 @@ void njsBaton::SetDPIConnHandle(dpiConn *handle)
 void njsBaton::SetDPIPoolHandle(dpiPool *handle)
 {
     if (dpiPool_addRef(handle) < 0) {
-        GetDPIPoolError(handle);
+        GetDPIError();
         dpiPoolHandle = NULL;
     }
     dpiPoolHandle = handle;
@@ -415,7 +360,7 @@ void njsBaton::SetDPIPoolHandle(dpiPool *handle)
 void njsBaton::SetDPIStmtHandle(dpiStmt *handle)
 {
     if (dpiStmt_addRef(handle) < 0) {
-        GetDPIStmtError(handle);
+        GetDPIError();
         dpiStmtHandle = NULL;
     }
     dpiStmtHandle = handle;
@@ -430,7 +375,7 @@ void njsBaton::SetDPIStmtHandle(dpiStmt *handle)
 void njsBaton::SetDPILobHandle(dpiLob *handle)
 {
     if (dpiLob_addRef(handle) < 0) {
-        GetDPILobError(handle);
+        GetDPIError();
         dpiLobHandle = NULL;
     }
     dpiLobHandle = handle;

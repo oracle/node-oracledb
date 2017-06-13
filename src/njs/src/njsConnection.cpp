@@ -149,7 +149,7 @@ bool njsConnection::ProcessDefines(njsBaton *baton, dpiStmt *dpiStmtHandle,
 
     // set fetch array size to the max rows that we wish to retrieve
     if (dpiStmt_setFetchArraySize(dpiStmtHandle, baton->maxRows) < 0) {
-        baton->GetDPIStmtError(dpiStmtHandle);
+        baton->GetDPIError();
         return false;
     }
 
@@ -161,7 +161,7 @@ bool njsConnection::ProcessDefines(njsBaton *baton, dpiStmt *dpiStmtHandle,
         vars[i].isArray = false;
         vars[i].bindDir = NJS_BIND_OUT;
         if (dpiStmt_getQueryInfo(dpiStmtHandle, vars[i].pos, &queryInfo) < 0) {
-            baton->GetDPIStmtError(dpiStmtHandle);
+            baton->GetDPIError();
             return false;
         }
         vars[i].name = std::string(queryInfo.name, queryInfo.nameLength);
@@ -230,11 +230,11 @@ bool njsConnection::ProcessDefines(njsBaton *baton, dpiStmt *dpiStmtHandle,
                 vars[i].nativeTypeNum, vars[i].maxArraySize, vars[i].maxSize,
                 1, 0, queryInfo.objectType, &vars[i].dpiVarHandle,
                 &vars[i].dpiVarData) < 0) {
-            baton->GetDPIConnError(dpiConnHandle);
+            baton->GetDPIError();
             return false;
         }
         if (dpiStmt_define(dpiStmtHandle, i + 1, vars[i].dpiVarHandle) < 0) {
-            baton->GetDPIStmtError(dpiStmtHandle);
+            baton->GetDPIError();
             return false;
         }
 
@@ -254,7 +254,7 @@ bool njsConnection::ProcessFetch(njsBaton *baton)
 
     if (dpiStmt_fetchRows(baton->dpiStmtHandle, baton->maxRows,
             &baton->bufferRowIndex, &baton->rowsFetched, &moreRows) < 0) {
-        baton->GetDPIStmtError(baton->dpiStmtHandle);
+        baton->GetDPIError();
         return false;
     }
     baton->repeat = false;
@@ -300,7 +300,7 @@ bool njsConnection::ProcessLOBs(njsBaton *baton, njsVariable *vars,
         else {
             if (dpiVar_getNumElementsInArray(var->dpiVarHandle,
                     &numElements) < 0) {
-                baton->GetDPIVarError(var->dpiVarHandle);
+                baton->GetDPIError();
                 return false;
             }
         }
@@ -313,16 +313,16 @@ bool njsConnection::ProcessLOBs(njsBaton *baton, njsVariable *vars,
             if (data->isNull)
                 continue;
             if (dpiLob_addRef(data->value.asLOB) < 0) {
-                baton->GetDPILobError(lob->dpiLobHandle);
+                baton->GetDPIError();
                 return false;
             }
             lob->dpiLobHandle = data->value.asLOB;
             if (dpiLob_getChunkSize(lob->dpiLobHandle, &lob->chunkSize) < 0) {
-                baton->GetDPILobError(lob->dpiLobHandle);
+                baton->GetDPIError();
                 return false;
             }
             if (dpiLob_getSize(lob->dpiLobHandle, &lob->length) < 0) {
-                baton->GetDPILobError(lob->dpiLobHandle);
+                baton->GetDPIError();
                 return false;
             }
         }
@@ -405,14 +405,14 @@ bool njsConnection::PrepareAndBind(njsBaton *baton)
     // prepare DPI statement for use
     if (dpiConn_prepareStmt(baton->dpiConnHandle, 0, baton->sql.c_str(),
             baton->sql.length(), NULL, 0, &baton->dpiStmtHandle) < 0) {
-        baton->GetDPIConnError(baton->dpiConnHandle);
+        baton->GetDPIError();
         return false;
     }
 
     // determine statement information
     dpiStmtInfo stmtInfo;
     if (dpiStmt_getInfo(baton->dpiStmtHandle, &stmtInfo) < 0) {
-        baton->GetDPIStmtError(baton->dpiStmtHandle);
+        baton->GetDPIError();
         return false;
     }
     baton->isPLSQL = (stmtInfo.isPLSQL) ? true : false;
@@ -439,7 +439,7 @@ bool njsConnection::PrepareAndBind(njsBaton *baton)
         else status = dpiStmt_bindByName(baton->dpiStmtHandle,
                 var->name.c_str(), var->name.length(), var->dpiVarHandle);
         if (status < 0) {
-            baton->GetDPIStmtError(baton->dpiStmtHandle);
+            baton->GetDPIError();
             return false;
         }
     }
@@ -801,7 +801,7 @@ bool njsConnection::ProcessBind(Local<Value> val, njsVariable *var,
     if (dpiConn_newVar(baton->dpiConnHandle, var->varTypeNum,
             var->nativeTypeNum, var->maxArraySize, var->maxSize, 1,
             var->isArray, NULL, &var->dpiVarHandle, &var->dpiVarData) < 0) {
-        baton->GetDPIConnError(baton->dpiConnHandle);
+        baton->GetDPIError();
         return false;
     }
 
@@ -847,7 +847,7 @@ bool njsConnection::ProcessBindValue(Local<Value> value, njsVariable *var,
     Local<Array> arrayVal = Local<Array>::Cast(value);
     if (dpiVar_setNumElementsInArray(var->dpiVarHandle,
             arrayVal->Length()) < 0) {
-        baton->GetDPIVarError(var->dpiVarHandle);
+        baton->GetDPIError();
         return false;
     }
 
@@ -890,7 +890,7 @@ bool njsConnection::ProcessScalarBindValue(Local<Value> value,
             v8::String::Utf8Value utf8str(value);
             if (dpiVar_setFromBytes(var->dpiVarHandle, pos, *utf8str,
                     utf8str.length()) < 0) {
-                baton->GetDPIVarError(var->dpiVarHandle);
+                baton->GetDPIError();
                 return false;
             }
         }
@@ -931,7 +931,7 @@ bool njsConnection::ProcessScalarBindValue(Local<Value> value,
             Local<Object> obj = value->ToObject();
             if (dpiVar_setFromBytes(var->dpiVarHandle, pos, Buffer::Data(obj),
                     Buffer::Length(obj)) < 0) {
-                baton->GetDPIVarError(var->dpiVarHandle);
+                baton->GetDPIError();
                 return false;
             }
         }
@@ -1166,14 +1166,14 @@ bool njsConnection::GetValueFromVar(njsBaton *baton, njsVariable *var,
     if (baton->isReturning) {
         if (dpiVar_getData(var->dpiVarHandle, &var->maxArraySize,
                 &var->dpiVarData) < 0) {
-            baton->GetDPIVarError(var->dpiVarHandle);
+            baton->GetDPIError();
             return false;
         }
         numElements = baton->rowsAffected;
     } else {
         if (dpiVar_getNumElementsInArray(var->dpiVarHandle,
                 &numElements) < 0) {
-            baton->GetDPIVarError(var->dpiVarHandle);
+            baton->GetDPIError();
             return false;
         }
     }
@@ -1264,9 +1264,8 @@ void njsConnection::SetTextAttribute(Nan::NAN_SETTER_ARGS_TYPE args,
     }
     v8::String::Utf8Value utfstr(value->ToString());
     if ((*setter)(connection->dpiConnHandle, *utfstr, utfstr.length()) < 0) {
-        dpiErrorInfo errorInfo;
-        dpiConn_getError(connection->dpiConnHandle, &errorInfo);
-        Nan::ThrowError(errorInfo.message);
+        std::string errMsg = njsOracledb::GetDPIError();
+        Nan::ThrowError(errMsg.c_str());
     }
 }
 
@@ -1346,7 +1345,7 @@ void njsConnection::Async_Execute(njsBaton *baton)
             DPI_MODE_EXEC_DEFAULT;
     if (dpiStmt_execute(baton->dpiStmtHandle, mode,
             &baton->numQueryVars) < 0) {
-        baton->GetDPIStmtError(baton->dpiStmtHandle);
+        baton->GetDPIError();
         return;
     }
 
@@ -1374,7 +1373,7 @@ void njsConnection::Async_Execute(njsBaton *baton)
     } else {
         if (dpiStmt_getRowCount(baton->dpiStmtHandle,
                 &baton->rowsAffected) < 0) {
-            baton->GetDPIStmtError(baton->dpiStmtHandle);
+            baton->GetDPIError();
             return;
         }
         baton->bufferRowIndex = 0;
@@ -1386,7 +1385,7 @@ void njsConnection::Async_Execute(njsBaton *baton)
     // release it now
     if (!baton->getRS) {
         if (dpiStmt_release(baton->dpiStmtHandle) < 0)
-            baton->GetDPIStmtError(baton->dpiStmtHandle);
+            baton->GetDPIError();
         baton->dpiStmtHandle = NULL;
     }
 }
@@ -1523,7 +1522,7 @@ NAN_METHOD(njsConnection::Commit)
 void njsConnection::Async_Commit(njsBaton *baton)
 {
     if (dpiConn_commit(baton->dpiConnHandle) < 0)
-        baton->GetDPIConnError(baton->dpiConnHandle);
+        baton->GetDPIError();
 }
 
 
@@ -1557,7 +1556,7 @@ NAN_METHOD(njsConnection::Rollback)
 void njsConnection::Async_Rollback(njsBaton *baton)
 {
     if (dpiConn_rollback(baton->dpiConnHandle) < 0)
-        baton->GetDPIConnError(baton->dpiConnHandle);
+        baton->GetDPIError();
 }
 
 
@@ -1591,7 +1590,7 @@ NAN_METHOD(njsConnection::Break)
 void njsConnection::Async_Break(njsBaton *baton)
 {
     if (dpiConn_breakExecution(baton->dpiConnHandle) < 0)
-        baton->GetDPIConnError(baton->dpiConnHandle);
+        baton->GetDPIError();
 }
 
 
@@ -1606,9 +1605,8 @@ NAN_GETTER(njsConnection::GetStmtCacheSize)
         return;
     uint32_t cacheSize;
     if (dpiConn_getStmtCacheSize(connection->dpiConnHandle, &cacheSize) < 0) {
-        dpiErrorInfo errorInfo;
-        dpiConn_getError(connection->dpiConnHandle, &errorInfo);
-        Nan::ThrowError(errorInfo.message);
+        std::string errMsg = njsOracledb::GetDPIError();
+        Nan::ThrowError(errMsg.c_str());
         return;
     }
     info.GetReturnValue().Set(cacheSize);
@@ -1703,9 +1701,8 @@ NAN_GETTER(njsConnection::GetOracleServerVersion)
     if (dpiConn_getServerVersion(connection->dpiConnHandle, &releaseString,
             &releaseStringLength, &versionNum, &releaseNum, &updateNum,
             &portReleaseNum, &portUpdateNum) < 0) {
-        dpiErrorInfo errorInfo;
-        dpiConn_getError(connection->dpiConnHandle, &errorInfo);
-        Nan::ThrowError(errorInfo.message);
+        std::string errMsg = njsOracledb::GetDPIError();
+        Nan::ThrowError(errMsg.c_str());
         return;
     }
     uint32_t oracleServerVersion =

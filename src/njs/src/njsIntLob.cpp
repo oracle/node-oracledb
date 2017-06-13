@@ -314,7 +314,7 @@ NAN_METHOD(njsILob::Read)
             baton->bufferSize = lob->pieceSize;
         else if (dpiLob_getBufferSize(lob->dpiLobHandle, lob->pieceSize,
                 &baton->bufferSize) < 0)
-            baton->GetDPILobError(lob->dpiLobHandle);
+            baton->GetDPIError();
         if (!lob->bufferPtr)
             lob->bufferPtr = new char[baton->bufferSize];
         baton->bufferPtr = lob->bufferPtr;
@@ -334,7 +334,7 @@ void njsILob::Async_Read(njsBaton *baton)
 {
     if (dpiLob_readBytes(baton->dpiLobHandle, baton->lobOffset,
             baton->lobAmount, baton->bufferPtr, &baton->bufferSize) < 0)
-        baton->GetDPILobError(baton->dpiLobHandle);
+        baton->GetDPIError();
 }
 
 
@@ -409,7 +409,7 @@ void njsILob::Async_Write(njsBaton *baton)
 {
     if (dpiLob_writeBytes(baton->dpiLobHandle, baton->lobOffset,
             baton->bufferPtr, baton->bufferSize) < 0)
-        baton->GetDPILobError(baton->dpiLobHandle);
+        baton->GetDPIError();
 }
 
 

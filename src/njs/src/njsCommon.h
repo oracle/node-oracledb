@@ -291,11 +291,7 @@ public:
     njsCommon *GetCallingObj();
 
     // methods for getting DPI errors
-    void GetDPIConnError(dpiConn *handle);
-    void GetDPILobError(dpiLob *handle);
-    void GetDPIPoolError(dpiPool *handle);
-    void GetDPIStmtError(dpiStmt *handle);
-    void GetDPIVarError(dpiVar *dpiVarHandle);
+    void GetDPIError(void);
 
     // methods for setting DPI handles
     void SetDPIConnHandle(dpiConn *handle);

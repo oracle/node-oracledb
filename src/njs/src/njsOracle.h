@@ -120,6 +120,7 @@ public:
     bool               IsValid() const             { return true; }
     njsErrorType       GetInvalidErrorType() const { return errSuccess; }
     void SetFetchAsStringTypesOnBaton(njsBaton *baton) const;
+    static std::string GetDPIError(void);
 
 private:
 
@@ -194,6 +195,7 @@ private:
     unsigned int oraClientVer;
 
     static Nan::Persistent<FunctionTemplate> oracledbTemplate_s;
+    static dpiContext *globalDPIContext;
 
 };
 
