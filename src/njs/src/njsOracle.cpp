@@ -96,8 +96,8 @@ void njsOracledb::Init(Handle<Object> target)
     snprintf(driverName, sizeof(driverName), "%s : %d.%d.%d",
             NJS_DRIVERNAME_PREFIX, NJS_NODE_ORACLEDB_MAJOR,
             NJS_NODE_ORACLEDB_MINOR, NJS_NODE_ORACLEDB_PATCH);
-    if (dpiGlobal_Initialize(DPI_MODE_CREATE_THREADED, "UTF-8", "UTF-8",
-            driverName, &errorInfo) < 0) {
+    if (dpiGlobal_Init(DPI_MODE_CREATE_THREADED, "UTF-8", "UTF-8", driverName,
+            &errorInfo) < 0) {
         Nan::ThrowError(errorInfo.message);
         return;
     }
@@ -637,9 +637,9 @@ NAN_METHOD(njsOracledb::GetConnection)
 void njsOracledb::Async_GetConnection(njsBaton *baton)
 {
     dpiErrorInfo errorInfo;
-    dpiCreateParams params;
+    dpiConnCreateParams params;
 
-    dpiGlobal_InitializeCreateParams(&params);
+    dpiGlobal_InitConnCreateParams(&params);
     params.externalAuth = baton->externalAuth;
     if (dpiConn_Create(baton->user.c_str(), baton->user.length(),
             baton->password.c_str(), baton->password.length(),
@@ -718,9 +718,9 @@ NAN_METHOD(njsOracledb::CreatePool)
 void njsOracledb::Async_CreatePool(njsBaton *baton)
 {
     dpiErrorInfo errorInfo;
-    dpiCreateParams params;
+    dpiPoolCreateParams params;
 
-    dpiGlobal_InitializeCreateParams(&params);
+    dpiGlobal_InitPoolCreateParams(&params);
     params.minSessions = baton->poolMin;
     params.maxSessions = baton->poolMax;
     params.sessionIncrement = baton->poolIncrement;
