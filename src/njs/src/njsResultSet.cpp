@@ -164,6 +164,8 @@ bool njsResultSet::CreateFromRefCursor(njsBaton *baton, dpiStmt *dpiStmtHandle,
     lft = Nan::New<FunctionTemplate>(resultSetTemplate_s);
     obj = lft->GetFunction()->NewInstance();
     resultSet = Nan::ObjectWrap::Unwrap<njsResultSet>(obj);
+    if (dpiStmt_AddRef(dpiStmtHandle) < 0)
+        return false;
     resultSet->dpiStmtHandle = dpiStmtHandle;
     resultSet->dpiConnHandle = baton->dpiConnHandle;
     resultSet->jsOracledb.Reset(baton->jsOracledb);

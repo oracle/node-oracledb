@@ -145,9 +145,11 @@ class njsVariable {
 public:
     std::string name;
     uint32_t pos;
-    dpiVarTypeNum dbTypeNum;
-    dpiVarTypeNum varTypeNum;
+    dpiOracleTypeNum dbTypeNum;
+    dpiOracleTypeNum varTypeNum;
+    dpiNativeTypeNum nativeTypeNum;
     dpiVar *dpiVarHandle;
+    dpiData *dpiVarData;
     uint32_t bindDir;
     uint32_t maxArraySize;
     uint32_t maxSize;
@@ -158,7 +160,7 @@ public:
     bool isNullable;
     njsProtoILob *lobs;
 
-    njsVariable() : dpiVarHandle(NULL), lobs(NULL) {}
+    njsVariable() : dpiVarHandle(NULL), dpiVarData(NULL), lobs(NULL) {}
     ~njsVariable();
     njsDataType DataType();
     njsDBType DBType();

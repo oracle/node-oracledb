@@ -135,12 +135,10 @@ private:
             uint32_t pos, Local<Value> &value);
     static bool GetValueFromVar(njsBaton *baton, njsVariable *var,
             Local<Value> &value);
-    static bool InitializeDPIData(njsVariable *var, dpiData *data,
-            njsBaton *baton);
     static bool MapByName(njsBaton *baton, dpiQueryInfo *queryInfo,
-            dpiVarTypeNum &targetType);
+            dpiOracleTypeNum &targetType);
     static bool MapByType(njsBaton *baton, dpiQueryInfo *queryInfo,
-            dpiVarTypeNum &targetType);
+            dpiOracleTypeNum &targetType);
     static bool PrepareAndBind(njsBaton* baton);
     static bool ProcessBinds(Nan::NAN_METHOD_ARGS_TYPE args,
             unsigned int index, njsBaton *baton);
