@@ -298,7 +298,7 @@ bool njsConnection::ProcessLOBs(njsBaton *baton, njsVariable *vars,
                 continue;
         }
         if (baton->isReturning && var->bindDir == NJS_BIND_OUT)
-            numElements = baton->rowsAffected;
+            numElements = (uint32_t) baton->rowsAffected;
         else if (!var->isArray)
             numElements = baseNumElements;
         else {
@@ -408,7 +408,8 @@ bool njsConnection::PrepareAndBind(njsBaton *baton)
 {
     // prepare DPI statement for use
     if (dpiConn_prepareStmt(baton->dpiConnHandle, 0, baton->sql.c_str(),
-            baton->sql.length(), NULL, 0, &baton->dpiStmtHandle) < 0) {
+            (uint32_t) baton->sql.length(), NULL, 0,
+            &baton->dpiStmtHandle) < 0) {
         baton->GetDPIError();
         return false;
     }
@@ -441,7 +442,8 @@ bool njsConnection::PrepareAndBind(njsBaton *baton)
             status = dpiStmt_bindByPos(baton->dpiStmtHandle, var->pos,
                     var->dpiVarHandle);
         else status = dpiStmt_bindByName(baton->dpiStmtHandle,
-                var->name.c_str(), var->name.length(), var->dpiVarHandle);
+                var->name.c_str(), (uint32_t) var->name.length(),
+                var->dpiVarHandle);
         if (status < 0) {
             baton->GetDPIError();
             return false;
@@ -935,7 +937,7 @@ bool njsConnection::ProcessScalarBindValue(Local<Value> value,
         if (bindOk) {
             Local<Object> obj = value->ToObject();
             if (dpiVar_setFromBytes(var->dpiVarHandle, pos, Buffer::Data(obj),
-                    Buffer::Length(obj)) < 0) {
+                    (uint32_t) Buffer::Length(obj)) < 0) {
                 baton->GetDPIError();
                 return false;
             }
@@ -980,7 +982,7 @@ bool njsConnection::GetBindTypeAndSizeFromValue(Local<Value> value,
         *bindType = NJS_DATATYPE_DATE;
     } else if (value->IsObject() && Buffer::HasInstance(value->ToObject())) {
         *bindType = NJS_DATATYPE_BUFFER;
-        *maxSize = Buffer::Length(value->ToObject());
+        *maxSize = (uint32_t) Buffer::Length(value->ToObject());
     } else if (!scalarOnly && value->IsArray()) {
         Nan::HandleScope scope;
         Local<Array> arrayVal = Local<Array>::Cast(value);
@@ -1188,7 +1190,7 @@ bool njsConnection::GetValueFromVar(njsBaton *baton, njsVariable *var,
             baton->GetDPIError();
             return false;
         }
-        numElements = baton->rowsAffected;
+        numElements = (uint32_t) baton->rowsAffected;
     } else {
         if (dpiVar_getNumElementsInArray(var->dpiVarHandle,
                 &numElements) < 0) {
@@ -1251,7 +1253,7 @@ Local<Value> njsConnection::GetOutBinds(njsBaton *baton)
             Nan::Set(bindArray, arrayPos, val);
         else {
             Local<String> key = Nan::New<String>(var->name.c_str() + 1,
-                    var->name.length() - 1).ToLocalChecked();
+                    (int) var->name.length() - 1).ToLocalChecked();
             Nan::Set(bindObj, key, val);
         }
         arrayPos++;

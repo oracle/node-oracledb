@@ -352,12 +352,12 @@ void njsILob::Async_AfterRead(njsBaton *baton, Local<Value> argv[])
         argv[1] = scope.Escape(Nan::Null());
     else if (lob->dataType == NJS_DATATYPE_CLOB) {
         Local<String> strValue = Nan::New<String>(baton->bufferPtr,
-                baton->bufferSize).ToLocalChecked();
+                (int) baton->bufferSize).ToLocalChecked();
         lob->offset += strValue->ToString()->Length();
         argv[1] = scope.Escape(strValue);
     } else {
         Local<Value> bufferValue = Nan::CopyBuffer(baton->bufferPtr,
-                baton->bufferSize).ToLocalChecked();
+                (uint32_t) baton->bufferSize).ToLocalChecked();
         lob->offset += baton->bufferSize;
         argv[1] = scope.Escape(bufferValue);
     }

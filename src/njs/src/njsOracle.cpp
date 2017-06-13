@@ -118,7 +118,7 @@ void njsOracledb::Init(Handle<Object> target)
     njsCommonCreateParams.nencoding = "UTF-8";
     njsCommonCreateParams.driverName = NJS_DRIVER_NAME;
     njsCommonCreateParams.driverNameLength =
-            strlen(njsCommonCreateParams.driverName);
+            (uint32_t) strlen(njsCommonCreateParams.driverName);
 
     Local<FunctionTemplate> temp = Nan::New<FunctionTemplate>(New);
     temp->InstanceTemplate()->SetInternalFieldCount(1);
@@ -698,10 +698,10 @@ void njsOracledb::Async_GetConnection(njsBaton *baton)
     }
     params.externalAuth = baton->externalAuth;
     if (dpiConn_create(globalDPIContext, baton->user.c_str(),
-            baton->user.length(), baton->password.c_str(),
-            baton->password.length(), baton->connectString.c_str(),
-            baton->connectString.length(), &njsCommonCreateParams, &params,
-            &baton->dpiConnHandle) < 0)
+            (uint32_t) baton->user.length(), baton->password.c_str(),
+            (uint32_t) baton->password.length(), baton->connectString.c_str(),
+            (uint32_t) baton->connectString.length(), &njsCommonCreateParams,
+            &params, &baton->dpiConnHandle) < 0)
         baton->GetDPIError();
     else if (dpiConn_setStmtCacheSize(baton->dpiConnHandle,
             baton->stmtCacheSize) < 0)
@@ -788,10 +788,10 @@ void njsOracledb::Async_CreatePool(njsBaton *baton)
     params.sessionIncrement = baton->poolIncrement;
     params.externalAuth = baton->externalAuth;
     if (dpiPool_create(globalDPIContext, baton->user.c_str(),
-            baton->user.length(), baton->password.c_str(),
-            baton->password.length(), baton->connectString.c_str(),
-            baton->connectString.length(), &njsCommonCreateParams, &params,
-            &baton->dpiPoolHandle) < 0)
+            (uint32_t) baton->user.length(), baton->password.c_str(),
+            (uint32_t) baton->password.length(), baton->connectString.c_str(),
+            (uint32_t) baton->connectString.length(), &njsCommonCreateParams,
+            &params, &baton->dpiPoolHandle) < 0)
         baton->GetDPIError();
     else if (dpiPool_setTimeout(baton->dpiPoolHandle, baton->poolTimeout) < 0)
         baton->GetDPIError();
