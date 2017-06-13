@@ -259,7 +259,6 @@ public:
     bool autoCommit;
     bool extendedMetaData;
     bool fetchMultipleRows;
-    bool repeat;
     bool keepQueryInfo;
     bool isReturning;
     bool isPLSQL;
@@ -271,6 +270,7 @@ public:
     Nan::Persistent<Object> jsOracledb;
     Nan::Persistent<Object> jsBuffer;
     Nan::Persistent<Object> jsRows;
+    Nan::Persistent<Function> jsCallback;
 
     njsBaton(Local<Function> callback, Local<Object> callingObj) :
             dpiPoolHandle(NULL), dpiConnHandle(NULL), dpiStmtHandle(NULL),
@@ -311,7 +311,6 @@ public:
     void QueueWork(const char *methodName, void (*workCallback)(njsBaton*),
             void (*afterWorkCallback)(njsBaton*, Local<Value>[]),
             unsigned int numCallbackArgs);
-    void RequeueWork();
 
 private:
     uv_work_t req;
@@ -319,7 +318,6 @@ private:
     void (*workCallback)(njsBaton*);
     void (*afterWorkCallback)(njsBaton*, Local<Value> callbackArgs[]);
     unsigned int numCallbackArgs;
-    Nan::Persistent<Function> jsCallback;
 
     static void AsyncWorkCallback(uv_work_t *req);
     static void AsyncAfterWorkCallback(uv_work_t *req, int status);

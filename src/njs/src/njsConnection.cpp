@@ -260,11 +260,8 @@ bool njsConnection::ProcessFetch(njsBaton *baton)
         baton->GetDPIError();
         return false;
     }
-    baton->repeat = false;
-    if (baton->rowsFetched < baton->maxRows && moreRows) {
-        baton->repeat = true;
-        baton->maxRows -= baton->rowsFetched;
-    }
+    if (!moreRows && baton->rowsFetched < baton->maxRows)
+        baton->maxRows = baton->rowsFetched;
     return ProcessLOBs(baton, baton->queryVars, baton->numQueryVars,
             baton->rowsFetched);
 }

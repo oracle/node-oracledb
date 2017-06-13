@@ -358,13 +358,31 @@ void njsResultSet::Async_GetRows(njsBaton *baton)
 void njsResultSet::Async_AfterGetRows(njsBaton *baton, Local<Value> argv[])
 {
     Nan::EscapableHandleScope scope;
+    Local<Function> callback;
+    Local<Object> callingObj;
+    njsResultSet *resultSet;
+    njsBaton *newBaton;
 
+    // transform the rows into Javascript objects
     Local<Object> rows;
     if (!njsConnection::GetRows(baton, rows))
         return;
-    if (baton->repeat)
-        baton->jsRows.Reset(rows);
-    else {
+
+    // if more rows are needed (and available) requeue the work
+    if (baton->rowsFetched < baton->maxRows) {
+        callback = Nan::New<Function>(baton->jsCallback);
+        callingObj = Nan::New(baton->jsCallingObj);
+        newBaton = new njsBaton(callback, callingObj);
+        baton->jsCallback.Reset();
+        newBaton->maxRows = baton->maxRows - baton->rowsFetched;
+        newBaton->fetchMultipleRows = true;
+        newBaton->jsRows.Reset(rows);
+        resultSet = (njsResultSet*) baton->GetCallingObj();
+        resultSet->activeBaton = NULL;
+        resultSet->GetRowsCommon(newBaton);
+
+    // otherwise, set the arguments that will be passed to the callback
+    } else {
         if (baton->fetchMultipleRows)
             argv[1] = scope.Escape(rows);
         else argv[1] = scope.Escape(rows->Get(0));

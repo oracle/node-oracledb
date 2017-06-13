@@ -274,22 +274,17 @@ void njsBaton::AsyncAfterWorkCallback(uv_work_t *req, int status)
     if (baton->error.empty() && baton->afterWorkCallback)
         baton->afterWorkCallback(baton, callbackArgs);
 
-    // repeat work, if needed
-    if (baton->error.empty() && baton->repeat)
-        baton->RequeueWork();
-
     // if we have an error, set it as the first parameter
     // reset all remaining parameters as undefined
     if (!baton->error.empty()) {
-        baton->repeat = false;
         callbackArgs[0] = v8::Exception::Error(Nan::New<v8::String>(
                 baton->error.c_str()).ToLocalChecked());
         for (i = 1; i < numCallbackArgs; i++)
             callbackArgs[i] = Nan::Undefined();
     }
 
-    // if not repeating work, make JS callback
-    if (!baton->repeat) {
+    // if JS callback available, call it
+    if (!baton->jsCallback.IsEmpty()) {
         Local<Function> callback = Nan::New<Function>(baton->jsCallback);
 
         // if this baton is considered the active baton, clear it
@@ -297,16 +292,16 @@ void njsBaton::AsyncAfterWorkCallback(uv_work_t *req, int status)
         if (callingObj && baton == callingObj->activeBaton)
             callingObj->activeBaton = NULL;
 
-        // we no longer need the baton
-        delete baton;
-
         // make JS callback
         Nan::MakeCallback(Nan::GetCurrentContext()->Global(), callback,
                 numCallbackArgs, callbackArgs);
     }
 
-    // raise fatal exception if an exception was caught
+    // we no longer need the baton or callback args
+    delete baton;
     delete [] callbackArgs;
+
+    // raise fatal exception if an exception was caught
     if (tc.HasCaught())
         Nan::FatalException(tc);
 }
@@ -484,20 +479,6 @@ void njsBaton::QueueWork(const char *methodName,
                 methodName);
         Nan::ThrowError(errMsg.c_str());
     }
-}
-
-
-//-----------------------------------------------------------------------------
-// njsBaton::RequeueWork()
-//   Requeue work on a separate thread. It is assumed that the previous
-// execution saved anything it needed on the baton.
-//-----------------------------------------------------------------------------
-void njsBaton::RequeueWork()
-{
-    if (uv_queue_work(uv_default_loop(), &req, AsyncWorkCallback,
-            AsyncAfterWorkCallback))
-        error = njsMessages::Get(errInternalError, "uv_queue_work",
-                methodName);
 }
 
 
