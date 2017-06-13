@@ -126,7 +126,6 @@ njsDBType njsVariable::DBType()
         case DPI_ORACLE_TYPE_VARCHAR:
         case DPI_ORACLE_TYPE_NVARCHAR:
         case DPI_ORACLE_TYPE_LONG_VARCHAR:
-        case DPI_ORACLE_TYPE_LONG_NVARCHAR:
             return NJS_DB_TYPE_VARCHAR;
         case DPI_ORACLE_TYPE_CHAR:
         case DPI_ORACLE_TYPE_NCHAR:

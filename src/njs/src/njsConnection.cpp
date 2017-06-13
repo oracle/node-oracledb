@@ -215,7 +215,6 @@ bool njsConnection::ProcessDefines(njsBaton *baton, dpiStmt *dpiStmtHandle,
                     vars[i].maxSize = 32768;
                 break;
             case DPI_ORACLE_TYPE_LONG_VARCHAR:
-            case DPI_ORACLE_TYPE_LONG_NVARCHAR:
             case DPI_ORACLE_TYPE_LONG_RAW:
                 vars[i].maxSize = (uint32_t) -1;
                 break;
