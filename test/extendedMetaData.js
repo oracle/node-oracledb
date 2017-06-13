@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, 2017, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -1283,6 +1283,65 @@ describe('17. extendedMetaData.js', function() {
           done();
         }
       );
+
+    });
+
+    it('17.3.39 LONG RAW', function(done) {
+      var createtable = "BEGIN \n" +
+                        "    DECLARE \n" +
+                        "        e_table_missing EXCEPTION; \n" +
+                        "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
+                        "    BEGIN \n" +
+                        "        EXECUTE IMMEDIATE('DROP TABLE nodb_metadata_lr PURGE'); \n" +
+                        "    EXCEPTION \n" +
+                        "        WHEN e_table_missing \n" +
+                        "        THEN NULL; \n" +
+                        "    END; \n" +
+                        "    EXECUTE IMMEDIATE (' \n" +
+                        "        CREATE TABLE nodb_metadata_lr ( \n" +
+                        "            lraw        LONG RAW \n" +
+                        "        ) \n" +
+                        "    '); \n" +
+                        "END; ";
+
+      async.series([
+        function(cb) {
+          connection.execute(
+            createtable,
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          connection.execute(
+            "SELECT lraw FROM nodb_metadata_lr",
+            [],
+            { extendedMetaData: true },
+            function(err, result) {
+              should.not.exist(err);
+              (result.metaData).should.deepEqual(
+                [ { name: 'LRAW',
+                  fetchType: oracledb.BUFFER,
+                  dbType: oracledb.DB_TYPE_RAW,
+                  byteSize: 0,
+                  nullable: true } ]
+              );
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          connection.execute(
+            "DROP TABLE nodb_metadata_lr PURGE",
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        }
+      ], done);
 
     });
 

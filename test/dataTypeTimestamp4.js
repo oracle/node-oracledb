@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -22,7 +22,7 @@
  *   36. dataTypeTimestamp4.js
  *
  * DESCRIPTION
- *    Testing Oracle data type support - TIMESTAMP (2) WITH TIME ZONE.
+ *    Testing Oracle data type support - TIMESTAMP (4) WITH TIME ZONE.
  *
  * NOTE
  *   TIMESTAMP support is still under enhancement request. This test is suspended.
