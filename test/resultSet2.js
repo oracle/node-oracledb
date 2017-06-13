@@ -900,8 +900,8 @@ describe('55. resultSet2.js', function() {
           p : { type : oracledb.CURSOR, dir : oracledb.BIND_OUT }
         },
         function ( err, result) {
-          should.not.exist ( err );
-          fetchRowFromRS2 (result.outBinds.out, done);
+          should.exist ( err );
+          done();
         }
       );
 
