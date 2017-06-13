@@ -1138,12 +1138,12 @@ bool njsConnection::GetScalarValueFromVar(njsBaton *baton, njsVariable *var,
             else temp = Nan::New<Number>(data->value.asDouble);
             break;
         case DPI_NATIVE_TYPE_BYTES:
-            if (var->varTypeNum == DPI_ORACLE_TYPE_RAW ||
+            if (data->value.asBytes.length == 0)
+                temp = Nan::Null();
+            else if (var->varTypeNum == DPI_ORACLE_TYPE_RAW ||
                     var->varTypeNum == DPI_ORACLE_TYPE_LONG_RAW)
                 temp = Nan::CopyBuffer(data->value.asBytes.ptr,
                         data->value.asBytes.length).ToLocalChecked();
-            else if (data->value.asBytes.length == 0)
-                temp = Nan::Null();
             else temp = Nan::New<v8::String>(data->value.asBytes.ptr,
                     data->value.asBytes.length).ToLocalChecked();
             break;
