@@ -1336,8 +1336,8 @@ void njsConnection::Async_Execute(njsBaton *baton)
         return;
 
     // execute statement
-    mode = (baton->autoCommit) ? DPI_CONN_EXEC_COMMIT_ON_SUCCESS :
-            DPI_CONN_EXEC_DEFAULT;
+    mode = (baton->autoCommit) ? DPI_MODE_EXEC_COMMIT_ON_SUCCESS :
+            DPI_MODE_EXEC_DEFAULT;
     if (dpiStmt_Execute(baton->dpiStmtHandle, mode,
             &baton->numQueryVars) < 0) {
         baton->GetDPIStmtError(baton->dpiStmtHandle);
