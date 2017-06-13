@@ -28,6 +28,7 @@
              "src/dpic/src/dpiObjectType.c",
              "src/dpic/src/dpiOracleType.c",
              "src/dpic/src/dpiPool.c",
+             "src/dpic/src/dpiRowid.c",
              "src/dpic/src/dpiStmt.c",
              "src/dpic/src/dpiSubscr.c",
              "src/dpic/src/dpiUtils.c",

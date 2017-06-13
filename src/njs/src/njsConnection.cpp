@@ -196,8 +196,10 @@ bool njsConnection::ProcessDefines(njsBaton *baton, dpiStmt *dpiStmtHandle,
             case DPI_ORACLE_TYPE_CHAR:
             case DPI_ORACLE_TYPE_NCHAR:
             case DPI_ORACLE_TYPE_RAW:
-            case DPI_ORACLE_TYPE_ROWID:
                 vars[i].maxSize = queryInfo.clientSizeInBytes;
+                break;
+            case DPI_ORACLE_TYPE_ROWID:
+                vars[i].maxSize = 18;
                 break;
             case DPI_ORACLE_TYPE_DATE:
             case DPI_ORACLE_TYPE_TIMESTAMP:
