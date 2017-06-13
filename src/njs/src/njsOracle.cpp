@@ -703,6 +703,9 @@ void njsOracledb::Async_GetConnection(njsBaton *baton)
             baton->connectString.length(), &njsCommonCreateParams, &params,
             &baton->dpiConnHandle) < 0)
         baton->GetDPIError();
+    else if (dpiConn_setStmtCacheSize(baton->dpiConnHandle,
+            baton->stmtCacheSize) < 0)
+        baton->GetDPIError();
 }
 
 
