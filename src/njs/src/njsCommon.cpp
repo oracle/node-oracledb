@@ -504,7 +504,7 @@ bool njsBaton::GetUnsignedIntFromJSON(Local<Object> obj, const char *key,
     if (jsValue->IsUint32()) {
         *value = jsValue->ToUint32()->Value();
         return true;
-    } else if (jsValue->IsUndefined()) {
+    } else if (jsValue->IsUndefined() || jsValue->IsNull()) {
         return true;
     } else if (jsValue->IsNumber()) {
         error = njsMessages::Get(errInvalidPropertyValueInParam, key,
