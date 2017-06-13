@@ -17,15 +17,12 @@
         "variables" : {
           "dpi_inc_dir%" : "$(DPI_INC_DIR)",
           "dpi_lib_dir%" : "$(DPI_LIB_DIR)",
-          "oci_inc_dir%" : "<!(INSTURL=\"https://github.com/oracle/node-oracledb/blob/master/INSTALL.md\"; ERR=\"node-oracledb ERR! Error:\"; if [ -z $OCI_INC_DIR ]; then OCI_LIB_DIR=`ls -d /usr/lib/oracle/*/client*/lib/libclntsh.* 2> /dev/null | tail -1 | sed -e 's#/libclntsh[^/]*##'`; if [ -z $OCI_LIB_DIR ]; then if [ -z \"$ORACLE_HOME\" ]; then if [ -f /opt/oracle/instantclient/sdk/include/oci.h ]; then echo \"/opt/oracle/instantclient/sdk/include/\"; else echo \"$ERR Cannot find Oracle client header files.\" >&2; echo \"$ERR See $INSTURL\" >&2; echo \"\" >&2; fi; else if [ -f $ORACLE_HOME/rdbms/public/oci.h ]; then echo $ORACLE_HOME/rdbms/public; else echo \"$ERR Cannot find \$ORACLE_HOME/rdbms/public/oci.h\" >&2; echo \"$ERR See $INSTURL\" >&2; echo \"\" >&2; fi; fi; else OCI_INC_DIR=`echo $OCI_LIB_DIR | sed -e 's!^/usr/lib/oracle/\(.*\)/client\([64]*\)*/lib[/]*$!/usr/include/oracle/\\1/client\\2!'`; if [ -z $OCI_INC_DIR ]; then if [ -f /opt/oracle/instantclient/sdk/include/oci.h ]; then echo \"/opt/oracle/instantclient/sdk/include/\"; else echo \"$ERR Cannot find Oracle client header files.\" >&2; echo \"$ERR See $INSTURL\" >&2; echo \"\" >&2; fi; else if [ -f \"$OCI_INC_DIR/oci.h\" ]; then echo $OCI_INC_DIR; else echo \"$ERR Cannot find \$OCI_INC_DIR/oci.h\" >&2; echo \"$ERR See $INSTURL\" >&2; echo \"\" >&2; fi; fi; fi; else if [ -f \"$OCI_INC_DIR/oci.h\" ]; then echo $OCI_INC_DIR; else echo \"$ERR Cannot find \$OCI_INC_DIR/oci.h\" >&2; echo \"$ERR See $INSTURL\" >&2; echo \"\" >&2; fi; fi;)",
-          "oci_lib_dir%" : "<!(INSTURL=\"https://github.com/oracle/node-oracledb/blob/master/INSTALL.md\"; ERR=\"node-oracledb ERR! Error:\"; if [ -z $OCI_LIB_DIR ]; then OCI_LIB_DIR=`ls -d /usr/lib/oracle/*/client*/lib/libclntsh.* 2> /dev/null | tail -1 | sed -e 's#/libclntsh[^/]*##'`; if [ -z $OCI_LIB_DIR ]; then if [ -z \"$ORACLE_HOME\" ]; then if [ -f /opt/oracle/instantclient/libclntsh.so ]; then echo \"/opt/oracle/instantclient/\"; else echo \"$ERR Cannot find Oracle library libclntsh.so\" >&2; echo \"$ERR See $INSTURL\" >&2; echo \"\" >&2; fi; else if [ -f \"$ORACLE_HOME/lib/libclntsh.so\" ]; then echo $ORACLE_HOME/lib; else echo \"$ERR Cannot find \$ORACLE_HOME/lib/libclntsh.so\" >&2; echo \"$ERR See $INSTURL\" >&2; echo \"\" >&2; fi; fi; else if [ -f \"$OCI_LIB_DIR/libclntsh.so\" ]; then echo $OCI_LIB_DIR; else echo \"$ERR Cannot find \$OCI_LIB_DIR/libclntsh.so\" >&2; echo \"$ERR See $INSTURL\" >&2; echo \"\" >&2; fi; fi; else if [ -f \"$OCI_LIB_DIR/libclntsh.so\" ]; then echo $OCI_LIB_DIR; else echo \"$ERR Cannot find \$OCI_LIB_DIR/libclntsh.so\" >&2; echo \"$ERR See $INSTURL\" >&2; echo \"\" >&2; fi; fi;)",
-          "oci_rpath%"   : "<!(if [ -z $OCI_LIB_DIR ]; then OCI_LIB_DIR=`ls -d /usr/lib/oracle/*/client*/lib/libclntsh.* 2> /dev/null | tail -1 | sed -e 's#/libclntsh[^/]*##'`; if [ -z $OCI_LIB_DIR ]; then if [ -d \"$ORACLE_HOME\" ]; then if [ -z \"${FORCE_RPATH+x}\" ]; then echo \"\"; else echo \"-Wl,-rpath,$ORACLE_HOME/lib\"; fi; else if [ -z \"${FORCE_RPATH+x}\" ]; then echo \"\"; else echo \"-Wl,-rpath,/opt/oracle/instantclient\"; fi; fi; else echo \"-Wl,-rpath,$OCI_LIB_DIR\"; fi; else if [ -z \"${FORCE_RPATH+x}\" ]; then echo \"\"; else echo \"-Wl,-rpath,$OCI_LIB_DIR\"; fi; fi;)",
         },
         "cflags"        : ['-fexceptions'],
         "cflags_cc"     : ['-fexceptions'],
-        "libraries"     : ["-lclntsh", "-ldpi"],
+        "libraries"     : ["-ldpi"],
         "link_settings" : {
-           "libraries"  : ['-L<(oci_lib_dir) <(oci_rpath)', '-L<(dpi_lib_dir)']
+           "libraries"  : ['-L<(dpi_lib_dir)']
         }
       }
     ],
@@ -36,54 +33,54 @@
           "GCC_ENABLE_CPP_RTTI": "YES"
         },
         "variables" : {
-          "oci_inc_dir%" : "<!(INSTURL=\"https://github.com/oracle/node-oracledb/blob/master/INSTALL.md#instosx\"; ERR=\"node-oracledb ERR! Error:\"; if [ -z $OCI_INC_DIR ]; then if [ -f /opt/oracle/instantclient/sdk/include/oci.h ]; then echo \"/opt/oracle/instantclient/sdk/include/\"; else echo \"$ERR Cannot find Oracle client header files.\" >&2; echo \"$ERR See $INSTURL\" >&2; echo \"\" >&2; fi; else if [ -f \"$OCI_INC_DIR/oci.h\" ]; then echo $OCI_INC_DIR; else echo \"$ERR Cannot find \$OCI_INC_DIR/oci.h\" >&2; echo \"$ERR See $INSTURL\" >&2; echo \"\" >&2; fi; fi;)",
-          "oci_lib_dir%" : "<!(INSTURL=\"https://github.com/oracle/node-oracledb/blob/master/INSTALL.md#instosx\"; ERR=\"node-oracledb ERR! Error:\"; if [ -z $OCI_LIB_DIR ]; then if [ -f /opt/oracle/instantclient/libclntsh.dylib ]; then echo \"/opt/oracle/instantclient/\"; else echo \"$ERR Cannot find /opt/oracle/instantclient/libclntsh.dylib\" >&2; echo \"$ERR Do you need to run 'cd /opt/oracle/instantclient && ln -s libclntsh.dylib.* libclntsh.dylib'?\" >&2; echo \"$ERR See $INSTURL\" >&2; echo \"\" >&2; fi; else if [ -f \"$OCI_LIB_DIR/libclntsh.dylib\" ]; then echo $OCI_LIB_DIR; else echo \"$ERR Cannot find \$OCI_LIB_DIR/libclntsh.dylib\" >&2; echo \"$ERR Do you need to run 'cd \$OCI_LIB_DIR && ln -s libclntsh.dylib.* libclntsh.dylib'?\" >&2; echo \"$ERR See $INSTURL\" >&2; echo \"\" >&2; fi; fi;)",
+          "dpi_inc_dir%" : "$(DPI_INC_DIR)",
+          "dpi_lib_dir%" : "$(DPI_LIB_DIR)",
           },
           "cflags"        : ['-fexceptions'],
           "cflags_cc"     : ['-fexceptions'],
-          "libraries"     : ["-lclntsh"],
+          "libraries"     : ["-ldpi"],
           "link_settings" : {
-             "libraries"  : ['-L<(oci_lib_dir) -Wl,-rpath,<(oci_lib_dir)']
+             "libraries"  : ['-L<(dpi_lib_dir)']
         }
       }
     ],
     [
       'OS=="aix"', {
         "variables" : {
-          "oci_inc_dir%" : '<!(echo ${OCI_INC_DIR:="/opt/oracle/instantclient/sdk/include/"})',
-          "oci_lib_dir%" : '<!(echo ${OCI_LIB_DIR:="/opt/oracle/instantclient/"})',
+          "dpi_inc_dir%" : "$(DPI_INC_DIR)",
+          "dpi_lib_dir%" : "$(DPI_LIB_DIR)",
           },
-          "libraries"     : ["-lclntsh"],
+          "libraries"     : ["-ldpi"],
           "cflags"        : ['-fexceptions'],
           "cflags_cc"     : ['-fexceptions'],
           "link_settings" : {
-             "libraries"  : ['-L<(oci_lib_dir)']
+             "libraries"  : ['-L<(dpi_lib_dir)']
         }
       }
     ],
     [
       'OS=="solaris"', {
         "variables" : {
-          "oci_inc_dir%" : "<!(INSTURL=\"https://github.com/oracle/node-oracledb/blob/master/INSTALL.md\"; ERR=\"node-oracledb ERR! Error:\"; if [ -z $OCI_INC_DIR ]; then if [ -f /opt/oracle/instantclient/sdk/include/oci.h ]; then echo \"/opt/oracle/instantclient/sdk/include/\"; else echo \"$ERR Cannot find Oracle client header files.\" >&2; echo \"$ERR See $INSTURL\" >&2; echo \"\" >&2; fi; else if [ -f \"$OCI_INC_DIR/oci.h\" ]; then echo $OCI_INC_DIR; else echo \"$ERR Cannot find \$OCI_INC_DIR/oci.h\" >&2; echo \"$ERR See $INSTURL\" >&2; echo \"\" >&2; fi; fi;)",
-          "oci_lib_dir%" : "<!(INSTURL=\"https://github.com/oracle/node-oracledb/blob/master/INSTALL.md\"; ERR=\"node-oracledb ERR! Error:\"; if [ -z $OCI_LIB_DIR ]; then if [ -f /opt/oracle/instantclient/libclntsh.so ]; then echo \"/opt/oracle/instantclient/\"; else echo \"$ERR Cannot find /opt/oracle/instantclient/libclntsh.so\" >&2; echo \"$ERR Do you need to run 'cd /opt/oracle/instantclient && ln -s libclntsh.so.* libclntsh.so'?\" >&2; echo \"$ERR See $INSTURL\" >&2; echo \"\" >&2; fi; else if [ -f \"$OCI_LIB_DIR/libclntsh.so\" ];     then echo $OCI_LIB_DIR; else echo \"$ERR Cannot find \$OCI_LIB_DIR/libclntsh.so\" >&2; echo \"$ERR Do you need to run 'cd \$OCI_LIB_DIR && ln -s libclntsh.so.* libclntsh.so'?\" >&2; echo \"$ERR See $INSTURL\" >&2; echo \"\" >&2; fi; fi;)",
+          "dpi_inc_dir%" : "$(DPI_INC_DIR)",
+          "dpi_lib_dir%" : "$(DPI_LIB_DIR)",
           },
-          "libraries"     : ["-lclntsh"],
+          "libraries"     : ["-ldpi"],
           "cflags"        : ['-fexceptions'],
           "cflags_cc"     : ['-fexceptions'],
           "link_settings" : {
-             "libraries"  : ['-L<(oci_lib_dir)']
+             "libraries"  : ['-L<(dpi_lib_dir)']
         }
       }
     ],
     [
       "OS=='win'", {
         "variables" : {
-          "oci_lib_dir%": "<!(IF DEFINED OCI_LIB_DIR (echo %OCI_LIB_DIR%) ELSE (echo C:\oracle\instantclient\sdk\lib\msvc))",
-          "oci_inc_dir%": "<!(IF DEFINED OCI_INC_DIR (echo %OCI_INC_DIR%) ELSE (echo C:\oracle\instantclient\sdk\include))",
+          "dpi_inc_dir%" : "$(DPI_INC_DIR)",
+          "dpi_lib_dir%" : "$(DPI_LIB_DIR)",
         },
         "link_settings": {
              "libraries": [
-                 "-loci",
+                 "-ldpi",
              ]
          },
         "configurations" : {
@@ -118,7 +115,7 @@
                 "EnableCOMDATFolding": 2,
                 "LinkIncremental": 1,
                 "AdditionalLibraryDirectories": [
-                    "<(oci_lib_dir)"
+                    "<(dpi_lib_dir)"
                 ]
               }
             }
@@ -143,7 +140,7 @@
                       "LinkTimeCodeGeneration": 1,
                       "LinkIncremental": 1,
                       "AdditionalLibraryDirectories": [
-                          "<(oci_lib_dir)"
+                          "<(dpi_lib_dir)"
                       ]
                   }
               }
@@ -152,8 +149,7 @@
       }
     ],
   ],
-  "include_dirs"  : [ "<(oci_inc_dir)",
-                      "<(dpi_inc_dir)",
+  "include_dirs"  : [ "<(dpi_inc_dir)",
                       "<!(node -e \"require('nan')\")"
     ],
   }
