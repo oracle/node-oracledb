@@ -120,13 +120,9 @@ describe('36. dataTypeTimestamp4.js', function() {
         [],
         { outFormat: oracledb.OBJECT },
         function(err, result) {
-          should.exist(err);
-          (err.message).should.startWith('NJS-010:'); // unsupported data type in select list
-          /*
-          console.log(result);
+          should.not.exist(err);
           for(var j = 0; j < timestamps.length; j++)
             result.rows[j].CONTENT.toUTCString().should.eql(timestamps[result.rows[j].NUM].toUTCString());
-          */
           done();
         }
       );

@@ -743,7 +743,7 @@ describe('55. resultSet2.js', function() {
     })
   })
 
-  describe('55.11 result set with unsupported data types', function() {
+  describe.skip('55.11 result set with unsupported data types', function() {
 
     var sql2 = "SELECT dummy, rowid FROM dual";
 
@@ -774,7 +774,7 @@ describe('55. resultSet2.js', function() {
       });
     }
 
-    it('55.11.1 ROWID date type', function(done) {
+    it('55.11.1 ROWID data type', function(done) {
       connection.execute(
         sql2,
         [],

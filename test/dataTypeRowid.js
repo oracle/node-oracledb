@@ -42,7 +42,7 @@ var async    = require('async');
 var assist   = require('./dataTypeAssist.js');
 var dbConfig = require('./dbconfig.js');
 
-describe('39. dataTypeRowid.js', function() {
+describe.skip('39. dataTypeRowid.js', function() {
 
   var connection = null;
   var tableName = "nodb_rowid";
@@ -66,7 +66,7 @@ describe('39. dataTypeRowid.js', function() {
     before(function(done) {
       async.series([
         function makeTable(callback) {
-          assist.createTable(connection, tableName, done);
+          assist.createTable(connection, tableName, callback);
         },
         function insertOneRow(callback) {
           connection.execute(
@@ -99,13 +99,11 @@ describe('39. dataTypeRowid.js', function() {
       );
     })
 
-    it('39.1.1 is still unsupported data type', function(done) {
+    it('39.1.1 query rowid', function(done) {
       connection.execute(
         "SELECT * FROM " + tableName,
         function(err, result) {
-          should.exist(err);
-          (err.message).should.startWith('NJS-010:');
-          // unsupported data type in select list
+          should.not.exist(err);
           done();
         }
       );
