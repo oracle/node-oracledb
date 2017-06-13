@@ -1353,18 +1353,17 @@ void njsConnection::Async_Execute(njsBaton *baton)
                 baton->queryVars, baton->numQueryVars))
             return;
 
-        // ensure that initial fetch is complete so that bind variables can be
-        // destroyed safely
-        int moreRows;
-        if (dpiStmt_FetchRows(baton->dpiStmtHandle, &baton->rowsFetched,
-                &moreRows) < 0) {
-            baton->GetDPIStmtError(baton->dpiStmtHandle);
-            return;
+        // when not getting a result set, process fetch completely
+        if (!baton->getRS) {
+            int moreRows;
+            if (dpiStmt_FetchRows(baton->dpiStmtHandle, &baton->rowsFetched,
+                    &moreRows) < 0) {
+                baton->GetDPIStmtError(baton->dpiStmtHandle);
+                return;
+            }
+            if (!ProcessFetch(baton))
+                return;
         }
-
-        // if a result set is not desired, process fetch completely
-        if (!baton->getRS && !ProcessFetch(baton))
-            return;
 
     // for all other statements, determine the number of rows affected
     // and process any LOBS for out binds, as needed
