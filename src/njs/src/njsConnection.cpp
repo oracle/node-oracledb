@@ -886,7 +886,9 @@ bool njsConnection::ProcessScalarBindValue(Local<Value> value,
         bindOk = (var->varTypeNum == DPI_ORACLE_TYPE_VARCHAR);
         if (bindOk) {
             v8::String::Utf8Value utf8str(value);
-            if (dpiVar_setFromBytes(var->dpiVarHandle, pos, *utf8str,
+            if (utf8str.length() == 0)
+                data->isNull = 1;
+            else if (dpiVar_setFromBytes(var->dpiVarHandle, pos, *utf8str,
                     utf8str.length()) < 0) {
                 baton->GetDPIError();
                 return false;
@@ -1133,6 +1135,8 @@ bool njsConnection::GetScalarValueFromVar(njsBaton *baton, njsVariable *var,
             if (var->varTypeNum == DPI_ORACLE_TYPE_RAW)
                 temp = Nan::CopyBuffer(data->value.asBytes.ptr,
                         data->value.asBytes.length).ToLocalChecked();
+            else if (data->value.asBytes.length == 0)
+                temp = Nan::Null();
             else temp = Nan::New<v8::String>(data->value.asBytes.ptr,
                     data->value.asBytes.length).ToLocalChecked();
             break;
