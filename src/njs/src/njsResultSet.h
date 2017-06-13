@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -51,111 +51,71 @@
 #ifndef __NJSRESULTSET_H__
 #define __NJSRESULTSET_H__
 
-#include "dpi.h"
 #include <node.h>
 #include "nan.h"
 #include <v8.h>
 #include <string>
-#include "njsUtils.h"
+#include "njsOracle.h"
 #include "njsConnection.h"
 
 using namespace v8;
 using namespace node;
 
-class ResultSet;
-
-/**
-* Baton for Asynchronous ResultSet methods
-**/
-typedef struct rsBaton
-{
-  uv_work_t                 req;
-  std::string               error;
-  bool                      fetchMultiple; // set for getRows() method.
-  bool                      errOnActiveOrInvalid;
-                                           // set if going to exit upon already
-                                           // active or invalid
-  eBaton                    *ebaton;
-  unsigned int              numRows;       // rows to be fetched.
-  ResultSet*                njsRS;         // resultset object.
-  Nan::Persistent<Object>   jsRS;
-
-  rsBaton( unsigned int& count, Local<Function> callback,
-           Local<Object> jsRSObj, Local<Object> jsConn )
-    :  error(""), fetchMultiple(false), errOnActiveOrInvalid(false),
-       numRows(0), njsRS(NULL)
-  {
-    jsRS.Reset ( jsRSObj );
-    ebaton = new eBaton( count, callback, jsConn );
-  }
-
-  ~rsBaton()
-   {
-     jsRS.Reset ();
-     if(ebaton)
-     {
-       delete ebaton;
-     }
-   }
-
-}rsBaton;
-
-//ResultSet Class
-class ResultSet: public Nan::ObjectWrap {
+//-----------------------------------------------------------------------------
+// njsResultSet
+//   Class exposed to JS for handling result sets.
+//-----------------------------------------------------------------------------
+class njsResultSet: public njsCommon {
 public:
-   ResultSet(){}
-   ~ResultSet(){}
 
-   static void Init(Handle<Object> target);
-
-   void setResultSet ( dpi::Stmt *dpistmt, eBaton *executebaton );
-
-   // Define ResultSet Constructor
-   static Nan::Persistent<FunctionTemplate> resultSetTemplate_s ;
+    static void Init(Handle<Object> target);
+    bool IsValid() const;
+    njsErrorType GetInvalidErrorType() const { return errInvalidResultSet; }
+    static Local<Object> CreateFromBaton(njsBaton *baton);
+    static bool CreateFromRefCursor(njsBaton *baton, dpiStmt *dpiStmtHandle,
+            Local<Value> &value);
 
 private:
 
-   static NAN_METHOD(New);
+    njsResultSet() : dpiStmtHandle(NULL), numQueryVars(0), queryVars(NULL),
+            numFetchAsStringTypes(0), fetchAsStringTypes(NULL),
+            numFetchInfo(0), fetchInfo(NULL) {}
+    ~njsResultSet();
 
-   // Get Rows Methods
-   static NAN_METHOD(GetRow);
-   static NAN_METHOD(GetRows);
-   static void Async_GetRows(uv_work_t *req);
-   static void Async_AfterGetRows(uv_work_t  *req);
-   static void GetRowsCommon(rsBaton*);
+    static NAN_METHOD(New);
 
-   // Close Methods
-   static NAN_METHOD(Close);
-   static void Async_Close(uv_work_t *req);
-   static void Async_AfterClose(uv_work_t  *req);
+    // Get Rows Methods
+    static NAN_METHOD(GetRow);
+    static NAN_METHOD(GetRows);
+    static void Async_GetRows(njsBaton *baton);
+    static void Async_AfterGetRows(njsBaton *baton, Local<Value> argv[]);
 
-  // Define Getter Accessors to properties
-  static NAN_GETTER(GetMetaData);
+    // Close Methods
+    static NAN_METHOD(Close);
+    static void Async_Close(njsBaton *baton);
 
-  // Define Setter Accessors to properties
-  static NAN_SETTER(SetMetaData);
+    // Define Getter Accessors to properties
+    static NAN_GETTER(GetMetaData);
 
-  static void clearFetchBuffer( Define* defineBuffers,
-                                unsigned int numCols, unsigned int numRows );
+    // Define Setter Accessors to properties
+    static NAN_SETTER(SetMetaData);
 
+    // internal methods
+    void GetRowsCommon(njsBaton* baton);
 
-  dpi::Stmt                 *dpistmt_;
-  dpi::Env                  *dpienv_;
-  Connection                *njsconn_;
-  State                     state_;
-  bool                      rsEmpty_;
-  Define                    *defineBuffers_;
-  unsigned int              numCols_;
-  unsigned int              fetchRowCount_;
-  unsigned int              outFormat_;
-  const dpi::MetaData       *meta_;
-  DataType                  *fetchAsStringTypes_;
-  unsigned int              fetchAsStringTypesCount_;
-  FetchInfo                 *fetchInfo_;
-  unsigned int              fetchInfoCount_;
-  Nan::Persistent<Object>   jsParent_;
+    dpiStmt *dpiStmtHandle;
+    dpiConn *dpiConnHandle;
+    uint32_t numQueryVars;
+    njsVariable *queryVars;
+    uint32_t outFormat;
+    uint32_t numFetchAsStringTypes;
+    njsDataType *fetchAsStringTypes;
+    uint32_t numFetchInfo;
+    njsFetchInfo *fetchInfo;
+    Nan::Persistent<Object> jsOracledb;
+    Nan::Persistent<Object> jsConnection;
+
+    static Nan::Persistent<FunctionTemplate> resultSetTemplate_s;
 };
-
-
 
 #endif                                          /* __NJSRESULTSET_H__ */

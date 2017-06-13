@@ -60,180 +60,130 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "dpi.h"
-#include "njsUtils.h"
+#include "njsCommon.h"
 
 using namespace node;
 using namespace v8;
 
 
 /* Keep the version in sync with package.json */
-#define NJS_NODE_ORACLEDB_MAJOR       1
-#define NJS_NODE_ORACLEDB_MINOR       9
-#define NJS_NODE_ORACLEDB_PATCH       3
+#define NJS_NODE_ORACLEDB_MAJOR       2
+#define NJS_NODE_ORACLEDB_MINOR       0
+#define NJS_NODE_ORACLEDB_PATCH       0
 
 /* Used for Oracledb.version */
 #define NJS_NODE_ORACLEDB_VERSION   ( (NJS_NODE_ORACLEDB_MAJOR * 10000) + \
                                       (NJS_NODE_ORACLEDB_MINOR * 100) +   \
                                       (NJS_NODE_ORACLEDB_PATCH) )
 
+/* default values */
+#define NJS_MAX_ROWS            100
+#define NJS_STMT_CACHE_SIZE      30
+#define NJS_POOL_MIN              0
+#define NJS_POOL_MAX              4
+#define NJS_POOL_INCR             1
+#define NJS_POOL_TIMEOUT         60
+#define NJS_PREFETCH_ROWS       100
+#define NJS_LOB_PREFETCH_SIZE 16384
 
-class Oracledb: public Nan::ObjectWrap
+
+//-----------------------------------------------------------------------------
+// njsOracledb
+//   Class exposed to JS for the main module.
+//-----------------------------------------------------------------------------
+class njsOracledb: public njsCommon
 {
- public:
+public:
 
-  Nan::Persistent<Object> jsOracledb;
+    static void Init(Handle<Object> target);
 
-   // Oracledb class
-   static void Init(Handle<Object> target);
+    bool               getAutoCommit() const      { return autoCommit; }
+    unsigned int       getOutFormat() const       { return outFormat; }
+    unsigned int       getMaxRows()  const        { return maxRows; }
+    unsigned int       getStmtCacheSize()  const  { return stmtCacheSize; }
+    unsigned int       getPoolMin() const         { return poolMin; }
+    unsigned int       getPoolMax() const         { return poolMax; }
+    unsigned int       getPoolIncrement() const   { return poolIncrement; }
+    unsigned int       getPoolTimeout() const     { return poolTimeout; }
+    unsigned int       getPrefetchRows() const    { return prefetchRows; }
+    const std::string& getConnectionClass() const { return connClass; }
+    bool               IsValid() const            { return true; }
 
-   dpi::Env*          getDpiEnv () const          { return dpienv_; }
-   bool               getAutoCommit () const      { return autoCommit_; }
-   unsigned int       getOutFormat () const       { return outFormat_; }
-   unsigned int       getMaxRows ()  const        { return maxRows_; }
-   unsigned int       getStmtCacheSize ()  const  { return stmtCacheSize_; }
-   unsigned int       getPoolMin () const         { return poolMin_; }
-   unsigned int       getPoolMax () const         { return poolMax_; }
-   unsigned int       getPoolIncrement () const   { return poolIncrement_; }
-   unsigned int       getPoolTimeout () const     { return poolTimeout_; }
-   unsigned int       getPrefetchRows () const    { return prefetchRows_; }
-   const std::string& getConnectionClass () const { return connClass_; }
-
-   const DataType*    getFetchAsStringTypes () const;
-
-   unsigned int       getFetchAsStringTypesCount () const
-   {  return fetchAsStringTypesCount_ ;   }
+    njsErrorType       GetInvalidErrorType() const
+        { return errSuccess; }
+    void SetFetchAsStringTypesOnBaton(njsBaton *baton) const;
 
 private:
-   const string driverName() const;
 
-   // Define Oracledb Constructor
-   static Nan::Persistent<FunctionTemplate> oracledbTemplate_s;
+    static NAN_METHOD(New);
 
-   static NAN_METHOD(New);
+    // Get Connection Methods
+    static NAN_METHOD(GetConnection);
+    static void Async_GetConnection(njsBaton *baton);
+    static void Async_AfterGetConnection(njsBaton *baton, Local<Value> argv[]);
 
-   // Get Connection Methods
-   static NAN_METHOD(GetConnection);
-   static void Async_GetConnection(uv_work_t *req);
-   static void Async_AfterGetConnection(uv_work_t  *req);
+    // Create Pool Methods
+    static NAN_METHOD(CreatePool);
+    static void Async_CreatePool(njsBaton *baton);
+    static void Async_AfterCreatePool(njsBaton *baton, Local<Value> argv[]);
 
-   // Create Pool Methods
-   static NAN_METHOD(CreatePool);
-   static void Async_CreatePool (uv_work_t *req );
-   static void Async_AfterCreatePool (uv_work_t *req);
+    // Define Getter Accessors to Properties
+    static NAN_GETTER(GetPoolMin);
+    static NAN_GETTER(GetPoolMax);
+    static NAN_GETTER(GetPoolIncrement);
+    static NAN_GETTER(GetPoolTimeout);
+    static NAN_GETTER(GetStmtCacheSize);
+    static NAN_GETTER(GetAutoCommit);
+    static NAN_GETTER(GetMaxRows);
+    static NAN_GETTER(GetOutFormat);
+    static NAN_GETTER(GetVersion);
+    static NAN_GETTER(GetConnectionClass);
+    static NAN_GETTER(GetExternalAuth);
+    static NAN_GETTER(GetPrefetchRows);
+    static NAN_GETTER(GetFetchAsString);
+    static NAN_GETTER(GetLobPrefetchSize);
+    static NAN_GETTER(GetOracleClientVersion);
 
-   // Define Getter Accessors to Properties
-   static NAN_GETTER(GetPoolMin);
-   static NAN_GETTER(GetPoolMax);
-   static NAN_GETTER(GetPoolIncrement);
-   static NAN_GETTER(GetPoolTimeout);
-   static NAN_GETTER(GetStmtCacheSize);
-   static NAN_GETTER(GetAutoCommit);
-   static NAN_GETTER(GetMaxRows);
-   static NAN_GETTER(GetOutFormat);
-   static NAN_GETTER(GetVersion);
-   static NAN_GETTER(GetConnectionClass);
-   static NAN_GETTER(GetExternalAuth);
-   static NAN_GETTER(GetPrefetchRows);
-   static NAN_GETTER(GetFetchAsString);
-   static NAN_GETTER(GetLobPrefetchSize);
-   static NAN_GETTER(GetOracleClientVersion);
+    // Define Setter Accessors to Properties
+    static NAN_SETTER(SetPoolMin);
+    static NAN_SETTER(SetPoolMax);
+    static NAN_SETTER(SetPoolIncrement);
+    static NAN_SETTER(SetPoolTimeout);
+    static NAN_SETTER(SetStmtCacheSize);
+    static NAN_SETTER(SetAutoCommit);
+    static NAN_SETTER(SetMaxRows);
+    static NAN_SETTER(SetOutFormat);
+    static NAN_SETTER(SetVersion);
+    static NAN_SETTER(SetConnectionClass);
+    static NAN_SETTER(SetExternalAuth);
+    static NAN_SETTER(SetPrefetchRows);
+    static NAN_SETTER(SetFetchAsString);
+    static NAN_SETTER(SetLobPrefetchSize);
+    static NAN_SETTER(SetOracleClientVersion);
 
-   // Define Setter Accessors to Properties
-   static NAN_SETTER(SetPoolMin);
-   static NAN_SETTER(SetPoolMax);
-   static NAN_SETTER(SetPoolIncrement);
-   static NAN_SETTER(SetPoolTimeout);
-   static NAN_SETTER(SetStmtCacheSize);
-   static NAN_SETTER(SetAutoCommit);
-   static NAN_SETTER(SetMaxRows);
-   static NAN_SETTER(SetOutFormat);
-   static NAN_SETTER(SetVersion);
-   static NAN_SETTER(SetConnectionClass);
-   static NAN_SETTER(SetExternalAuth);
-   static NAN_SETTER(SetPrefetchRows);
-   static NAN_SETTER(SetFetchAsString);
-   static NAN_SETTER(SetLobPrefetchSize);
-   static NAN_SETTER(SetOracleClientVersion);
+    njsOracledb();
+    ~njsOracledb() { jsFetchAsStringTypes.Reset(); }
 
-   Oracledb();
-   ~Oracledb();
+    uint32_t outFormat;
+    bool autoCommit;
+    uint32_t maxRows;
 
-   dpi::Env* dpienv_;
-   unsigned int outFormat_;
-   bool         autoCommit_;
-   unsigned int maxRows_;
+    uint32_t stmtCacheSize;
+    uint32_t prefetchRows;
 
-   unsigned int stmtCacheSize_;
-   unsigned int prefetchRows_;
+    uint32_t poolMin;
+    uint32_t poolMax;
+    uint32_t poolIncrement;
+    uint32_t poolTimeout;
 
-   unsigned int poolMin_;
-   unsigned int poolMax_;
-   unsigned int poolIncrement_;
-   unsigned int poolTimeout_;
+    std::string connClass;
+    bool externalAuth;
+    Nan::Persistent<Array> jsFetchAsStringTypes;
+    uint32_t lobPrefetchSize;
+    unsigned int oraClientVer;
 
-   std::string  connClass_;
-   bool         externalAuth_;
-   DataType     *fetchAsStringTypes_;
-   unsigned int fetchAsStringTypesCount_;
-   unsigned int lobPrefetchSize_;
-   unsigned int oraClientVer_;
+    static Nan::Persistent<FunctionTemplate> oracledbTemplate_s;
 };
 
-/**
-* Baton for Asynchronous Get Connection Call
-**/
-class Pool;
-
-typedef struct connectionBaton
-{
-  uv_work_t                  req;
-  std::string                user;
-  std::string                pswrd;
-  std::string                connStr;
-  std::string                connClass;
-  bool                       externalAuth;
-  std::string error;
-
-  int                        poolMax;
-  int                        poolMin;
-  int                        poolIncrement;
-  int                        poolTimeout;
-  int                        stmtCacheSize;
-  unsigned int               lobPrefetchSize;
-
-  unsigned int               maxRows;
-  unsigned int               outFormat;
-  Nan::Persistent<Function>  cb;
-  dpi::Env*                  dpienv;
-  dpi::Conn*                 dpiconn;
-  dpi::SPool*                dpipool;
-  Nan::Persistent<Object>    jsOradb;
-
-  Oracledb *oracledb;
-
-  connectionBaton( Local<Function> callback, Local<Object> jsOradbObj ) :
-                      user(""), pswrd(""), connStr(""), connClass(""),
-                      externalAuth(false), error(""),
-                      poolMax(0), poolMin(0), poolIncrement(0),
-                      poolTimeout(0), stmtCacheSize(0), maxRows(0),
-                      outFormat(0), dpienv(NULL),
-                      dpiconn(NULL), dpipool(NULL)
-  {
-    cb.Reset( callback );
-    jsOradb.Reset ( jsOradbObj );
-  }
-
-  ~connectionBaton()
-   {
-     cb.Reset();
-     jsOradb.Reset ();
-   }
-
-}connectionBaton;
-
-
-
 #endif                                               /* __NJSORACLE_H__ */
-
 

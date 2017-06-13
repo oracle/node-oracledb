@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -54,180 +54,107 @@
 
 #include <node.h>
 #include <string>
-#include <vector>
-#include "dpi.h"
-#include "njsUtils.h"
 #include "njsOracle.h"
 #include "njsConnection.h"
 
 using namespace v8;
 using namespace node;
-using namespace dpi;
 
-class ILob;
+//-----------------------------------------------------------------------------
+// njsProtoILob
+//   This is a helper class for ILob's contents to be mostly created in the
+// worker thread. Basically, the njsProtoILob class is needed to create the
+// attributes of the njsILob object in the worker thread as network round trips
+// are required to get the length and the chunk size -- attributes which are
+// available on the ILob object -- and no network round trips should be
+// performed on the main thread (and Javascript objects cannot be created in
+// worker threads).
+//-----------------------------------------------------------------------------
 
-
-/**
-* Baton for Asynchronous ILob methods
-**/
-
-typedef struct LobBaton
-{
-  uv_work_t                  req;
-  std::string                error;
-  dpi::Env                  *dpienv;
-  dpi::Conn                 *dpiconn;
-
-  ILob                      *iLob;
-  char                      *writebuf;
-  unsigned long long         writelen;
-  RefCounter                 counter;
-
-  Nan::Persistent<Function>  cb;
-  Nan::Persistent<Object>    lobbuf;
-  Nan::Persistent<Object>    jsLob;
-
-  LobBaton( unsigned int& count, Local<Function> callback,
-            Local<Object> jsLobObj ):
-    error(""), dpienv(NULL), dpiconn(NULL), iLob(NULL), writebuf(NULL),
-    writelen(0), counter( count )
-  {
-    cb.Reset( callback );
-    jsLob.Reset ( jsLobObj );
-  }
-
-  LobBaton( unsigned int& count, Local<Object> buffer_obj,
-            Local<Function> callback, Local<Object> jsLobObj ):
-    error(""), dpienv(NULL), dpiconn(NULL), iLob(NULL), writebuf(NULL),
-    writelen(0), counter( count )
-  {
-    cb.Reset( callback );
-    lobbuf.Reset(buffer_obj);
-    jsLob.Reset ( jsLobObj );
-  }
-
-  ~LobBaton ()
-   {
-     cb.Reset();
-     lobbuf.Reset();
-     jsLob.Reset ();
-   }
-
-} LobBaton;
-
-
-
-
-/******************************************************************************
- *
- * This is a helper class for ILob's contents to be mostly created in the
- * worker thread.  Basically, the ProtoILob class is needed to create the
- * attributes of the ILob object in the worker thread as there may be some
- * issues in creating the ILob object itself in the worker thread.  From
- * earlier experience, the worker thread could not create JavaScript handles
- * which is what an ILob object is.
- *
- * We want the ProtoILob to be created in the worker thread because it
- * allocates the OCI error handle and make other OCI calls such as getting the
- * Lob chunk size and Lob length.
- *
- * If we switch to one OCI error handle per thread using Thread Local Storage
- * (TLS), and make getting of chunkSize and Lob length asynchronous calls
- * (using the three step procedure where the OCI calls are done in the worker
- * thread), then the ProtoILob will not be necessary.
- *
- ******************************************************************************/
-
-class ProtoILob
-{
+class njsProtoILob {
+friend class njsILob;
+friend class njsConnection;
 public:
-  friend class ILob;
 
-  ProtoILob(eBaton *executeBaton, Descriptor *lobLocator, unsigned short fetchType);
+    njsProtoILob() : dpiLobHandle(NULL) {}
+    ~njsProtoILob() {
+        if (dpiLobHandle) {
+            dpiLob_Release(dpiLobHandle);
+            dpiLobHandle = NULL;
+        }
+    }
 
-  ~ProtoILob();
-
-private:
-  void cleanup();
-
-  Descriptor        *lobLocator_;
-  unsigned short     fetchType_;
-  DpiHandle         *errh_;
-  unsigned int       chunkSize_;
-  unsigned long long length_;
+protected:
+    dpiLob *dpiLobHandle;
+    njsDataType dataType;
+    uint32_t chunkSize;
+    uint64_t length;
 };
 
-class ILob : public Nan::ObjectWrap
-{
- public:
-  void setILob(eBaton *executeBaton,  ProtoILob *protoILob);
 
-                                // Define ILob Constructor
-  static Nan::Persistent<FunctionTemplate> iLobTemplate_s;
+//-----------------------------------------------------------------------------
+// njsILob
+//   Class used for wrapping LOBs.
+//-----------------------------------------------------------------------------
+class njsILob : public njsCommon {
+public:
+    static void Init(Handle<Object> target);
+    static Local<Object> CreateFromProtoLob(njsProtoILob *protoLob);
+    bool IsValid() const { return (dpiLobHandle) ? true : false; }
+    njsErrorType GetInvalidErrorType() const { return errInvalidLob; }
 
-  static void Init(Handle<Object> target);
+private:
+    njsILob() : dpiLobHandle(NULL), bufferPtr(NULL) {}
+    ~njsILob() {
+        if (dpiLobHandle) {
+            dpiLob_Release(dpiLobHandle);
+            dpiLobHandle = NULL;
+        }
+        if (bufferPtr) {
+            delete [] bufferPtr;
+            bufferPtr = NULL;
+        }
+    }
 
+    static NAN_METHOD(New);
+    static NAN_METHOD(Release);
 
- private:
-  ILob();
+    // Read Method on ILob class
+    static NAN_METHOD(Read);
+    static void Async_Read(njsBaton *baton);
+    static void Async_AfterRead(njsBaton *baton, Local<Value> argv[]);
 
-  ~ILob();
+    // Write Method on ILob class
+    static NAN_METHOD(Write);
+    static void Async_Write(njsBaton *baton);
+    static void Async_AfterWrite(njsBaton *baton, Local<Value> argv[]);
 
-  void cleanup();
+    // Getters for properties
+    static NAN_GETTER(GetChunkSize);
+    static NAN_GETTER(GetLength);
+    static NAN_GETTER(GetPieceSize);
+    static NAN_GETTER(GetOffset);
+    static NAN_GETTER(GetType);
 
-  static NAN_METHOD(New);
+    // Setters for properties
+    static NAN_SETTER(SetChunkSize);
+    static NAN_SETTER(SetLength);
+    static NAN_SETTER(SetPieceSize);
+    static NAN_SETTER(SetOffset);
+    static NAN_SETTER(SetType);
 
-  static NAN_METHOD(Release);
+    // attributes
+    dpiLob *dpiLobHandle;
+    njsDataType dataType;
+    char *bufferPtr;
+    uint32_t pieceSize;
+    uint32_t chunkSize;
+    uint64_t length;
+    uint64_t offset;
 
-  static void lobPropertyException(ILob *iLob, NJSErrorType err,
-                                   string property);
+    // Define ILob Constructor
+    static Nan::Persistent<FunctionTemplate> iLobTemplate_s;
 
-
-                                // Getters for properties
-  static NAN_GETTER(GetChunkSize);
-  static NAN_GETTER(GetLength);
-  static NAN_GETTER(GetPieceSize);
-  static NAN_GETTER(GetOffset);
-  static NAN_GETTER(GetType);
-
-
-                                // Setters for properties
-  static NAN_SETTER(SetChunkSize);
-  static NAN_SETTER(SetLength);
-  static NAN_SETTER(SetPieceSize);
-  static NAN_SETTER(SetOffset);
-  static NAN_SETTER(SetType);
-
-
-                                // Read Method on ILob class
-  static NAN_METHOD(Read);
-  static void Async_Read (uv_work_t *req);
-  static void Async_AfterRead (uv_work_t *req);
-
-                                // Write Method on ILob class
-  static NAN_METHOD(Write);
-  static void Async_Write (uv_work_t *req);
-  static void Async_AfterWrite (uv_work_t *req);
-
-  Descriptor               *lobLocator_;
-  unsigned short            fetchType_;
-
-  Connection               *njsconn_;
-  dpi::Conn                *dpiconn_;
-  DpiHandle                *svch_;
-  DpiHandle                *errh_;
-  bool                      isValid_;
-  State                     state_;
-
-  char                     *buf_;
-  unsigned int              bufSize_;
-  unsigned int              chunkSize_;
-  unsigned long long        length_;
-  unsigned long long        offset_;
-  unsigned long             amountRead_;
-  unsigned long long        amountWritten_;
-  unsigned int              type_;
-  Nan::Persistent<Object>   jsParent_;
 };
 
 #endif                       /** __NJSILOB_H__ **/

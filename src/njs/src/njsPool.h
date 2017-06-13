@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -51,7 +51,7 @@
 #ifndef __NJSPOOL_H__
 #define __NJSPOOL_H__
 
-#include "dpi.h"
+#include "njsOracle.h"
 #include <node.h>
 #include "nan.h"
 #include <string>
@@ -60,97 +60,69 @@ using namespace v8;
 using namespace node;
 
 
-class Pool: public Nan::ObjectWrap {
+//-----------------------------------------------------------------------------
+// njsPool
+//   Class exposed to JS for handling session pools.
+//-----------------------------------------------------------------------------
+class njsPool: public njsCommon {
 public:
 
-   static void Init(Handle<Object> target);
-
-   void setPool ( dpi::SPool *, Oracledb* oracledb, unsigned int poolMax,
-                  unsigned int poolMin, unsigned int poolIncrement,
-                  unsigned int poolTimeout, unsigned stmtCacheSize,
-                  unsigned int lobPrefetchSize, Local<Object> jsOraDB );
-
-   // Define Pool Constructor
-   static Nan::Persistent<FunctionTemplate> poolTemplate_s ;
+    static void Init(Handle<Object> target);
+    static Local<Object> CreateFromBaton(njsBaton *baton);
+    bool IsValid() const { return (dpiPoolHandle) ? true : false; }
+    njsErrorType GetInvalidErrorType() const { return errInvalidPool; }
 
 private:
 
-   static NAN_METHOD(New);
+    static NAN_METHOD(New);
 
-   // Get Connection Methods
-   static NAN_METHOD(GetConnection);
-   static void Async_GetConnection(uv_work_t* req);
-   static void Async_AfterGetConnection(uv_work_t* req);
+    // Get Connection Methods
+    static NAN_METHOD(GetConnection);
+    static void Async_GetConnection(njsBaton *baton);
+    static void Async_AfterGetConnection(njsBaton *baton, Local<Value> argv[]);
 
-  // Terminate Methods
-   static NAN_METHOD(Terminate);
-   static void Async_Terminate(uv_work_t* req);
-   static void Async_AfterTerminate(uv_work_t* req);
+    // Terminate Methods
+    static NAN_METHOD(Terminate);
+    static void Async_Terminate(njsBaton *baton);
+    static void Async_AfterTerminate(njsBaton *baton, Local<Value> argv[]);
 
-  // Define Getter Accessors to properties
-  static NAN_GETTER(GetPoolMax);
-  static NAN_GETTER(GetPoolMin);
-  static NAN_GETTER(GetPoolIncrement);
-  static NAN_GETTER(GetPoolTimeout);
-  static NAN_GETTER(GetConnectionsOpen);
-  static NAN_GETTER(GetConnectionsInUse);
-  static NAN_GETTER(GetStmtCacheSize);
+    // Define Getter Accessors to properties
+    static NAN_GETTER(GetPoolMax);
+    static NAN_GETTER(GetPoolMin);
+    static NAN_GETTER(GetPoolIncrement);
+    static NAN_GETTER(GetPoolTimeout);
+    static NAN_GETTER(GetConnectionsOpen);
+    static NAN_GETTER(GetConnectionsInUse);
+    static NAN_GETTER(GetStmtCacheSize);
 
-  static Local<Primitive> getPoolProperty(Pool* njsPool, unsigned int poolProperty);
+    // Define Setter Accessors to properties
+    static NAN_SETTER(SetPoolMax);
+    static NAN_SETTER(SetPoolMin);
+    static NAN_SETTER(SetPoolIncrement);
+    static NAN_SETTER(SetPoolTimeout);
+    static NAN_SETTER(SetConnectionsOpen);
+    static NAN_SETTER(SetConnectionsInUse);
+    static NAN_SETTER(SetStmtCacheSize);
 
-  // Define Setter Accessors to properties
-  static NAN_SETTER(SetPoolMax);
-  static NAN_SETTER(SetPoolMin);
-  static NAN_SETTER(SetPoolIncrement);
-  static NAN_SETTER(SetPoolTimeout);
-  static NAN_SETTER(SetConnectionsOpen);
-  static NAN_SETTER(SetConnectionsInUse);
-  static NAN_SETTER(SetStmtCacheSize);
+    njsPool() : dpiPoolHandle(NULL) {}
+    ~njsPool() {
+        jsOracledb.Reset();
+        if (dpiPoolHandle) {
+            dpiPool_Release(dpiPoolHandle);
+            dpiPoolHandle = NULL;
+        }
+    }
 
-  static void setPoolProperty(Pool* njsPool, string property);
+    dpiPool *dpiPoolHandle;
+    Nan::Persistent<Object> jsOracledb;
+    uint32_t poolMin;
+    uint32_t poolMax;
+    uint32_t poolIncrement;
+    uint32_t poolTimeout;
+    uint32_t stmtCacheSize;
+    uint32_t lobPrefetchSize;
 
-   Pool();
-   ~Pool();
-
-   dpi::SPool *dpipool_;
-   bool isValid_;
-
-   Oracledb*                 oracledb_;
-   unsigned int              poolMin_;
-   unsigned int              poolMax_;
-   unsigned int              poolIncrement_;
-   unsigned int              poolTimeout_;
-   unsigned int              stmtCacheSize_;
-   unsigned int              lobPrefetchSize_;
-   Nan::Persistent<Object>   jsParent_;
+    static Nan::Persistent<FunctionTemplate> poolTemplate_s ;
 };
-
-typedef struct poolBaton
-{
-  uv_work_t                  req;
-  std::string                error;
-  std::string                connClass;
-  Nan::Persistent<Function>  cb;
-  dpi::Conn*                 dpiconn;
-  Pool*                      njspool;
-  unsigned int               lobPrefetchSize;
-  Nan::Persistent<Object>    jsPool;
-
-  poolBaton( Local<Function> callback, Local<Object> poolObj ) :
-                 error(""), connClass(""),
-                 dpiconn(NULL), njspool(NULL), lobPrefetchSize(0)
-  {
-    cb.Reset( callback );
-    jsPool.Reset ( poolObj );
-  }
-
-  ~poolBaton()
-   {
-     cb.Reset();
-     jsPool.Reset ();
-   }
-
-}poolBaton;
-
 
 #endif                                          /* __NJSPOOL_H__ */

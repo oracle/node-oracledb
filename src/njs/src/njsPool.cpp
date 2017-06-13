@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -55,577 +55,357 @@
 #include "njsOracle.h"
 #include "njsPool.h"
 #include "njsConnection.h"
-#include "njsUtils.h"
 
 using namespace std;
 using namespace node;
 using namespace v8;
-                                        //peristent Pool class handle
-Nan::Persistent<FunctionTemplate> Pool::poolTemplate_s;
 
-Pool::Pool(){}
-Pool::~Pool(){}
+// peristent Pool class handle
+Nan::Persistent<FunctionTemplate> njsPool::poolTemplate_s;
 
-/*****************************************************************************/
-/*
-   DESCRIPTION
-     Store the config in pool instance.
-*/
-void Pool::setPool( dpi::SPool *dpipool, Oracledb* oracledb, unsigned int poolMax,
-                    unsigned int poolMin, unsigned int poolIncrement,
-                    unsigned int poolTimeout, unsigned stmtCacheSize,
-                    unsigned int lobPrefetchSize, Local<Object> jsOradb )
+
+//-----------------------------------------------------------------------------
+// njsPool::Init()
+//   Initialization function of Pool class. Maps functions and properties
+// from JS to C++.
+//-----------------------------------------------------------------------------
+void njsPool::Init(Handle<Object> target)
 {
-  this->dpipool_         = dpipool;
-  this->isValid_         = true;
-  this->oracledb_        = oracledb;
-  this->poolMax_         = poolMax;
-  this->poolMin_         = poolMin;
-  this->poolIncrement_   = poolIncrement;
-  this->poolTimeout_     = poolTimeout;
-  this->stmtCacheSize_   = stmtCacheSize;
-  this->lobPrefetchSize_ = lobPrefetchSize;
-
-  this->jsParent_.Reset ( jsOradb );
-}
-
-/*****************************************************************************/
-/*
-   DESCRIPTION
-     Init function of the Pool class.
-     Initiates and maps the functions and properties of Pool class.
-*/
-void Pool::Init(Handle<Object> target)
-{
-  Nan::HandleScope scope;
-
-  Local<FunctionTemplate> temp = Nan::New<FunctionTemplate>(New);
-  temp->InstanceTemplate()->SetInternalFieldCount(1);
-  temp->SetClassName(Nan::New<v8::String>("Pool").ToLocalChecked());
-
-  Nan::SetPrototypeMethod(temp, "terminate", Terminate);
-  Nan::SetPrototypeMethod(temp, "getConnection", GetConnection);
-
-  Nan::SetAccessor(temp->InstanceTemplate(),
-    Nan::New<v8::String>("poolMax").ToLocalChecked(),
-    Pool::GetPoolMax,
-    Pool::SetPoolMax );
-  Nan::SetAccessor(temp->InstanceTemplate(),
-    Nan::New<v8::String>("poolMin").ToLocalChecked(),
-    Pool::GetPoolMin,
-    Pool::SetPoolMin );
-  Nan::SetAccessor(temp->InstanceTemplate(),
-    Nan::New<v8::String>("poolIncrement").ToLocalChecked(),
-    Pool::GetPoolIncrement,
-    Pool::SetPoolIncrement );
-  Nan::SetAccessor(temp->InstanceTemplate(),
-    Nan::New<v8::String>("poolTimeout").ToLocalChecked(),
-    Pool::GetPoolTimeout,
-    Pool::SetPoolTimeout );
-  Nan::SetAccessor(temp->InstanceTemplate(),
-    Nan::New<v8::String>("connectionsOpen").ToLocalChecked(),
-    Pool::GetConnectionsOpen,
-    Pool::SetConnectionsOpen );
-  Nan::SetAccessor(temp->InstanceTemplate(),
-    Nan::New<v8::String>("connectionsInUse").ToLocalChecked(),
-    Pool::GetConnectionsInUse,
-    Pool::SetConnectionsInUse );
-  Nan::SetAccessor(temp->InstanceTemplate(),
-    Nan::New<v8::String>("stmtCacheSize").ToLocalChecked(),
-    Pool::GetStmtCacheSize,
-    Pool::SetStmtCacheSize );
-
-  poolTemplate_s.Reset( temp );
-  Nan::Set(target, Nan::New<v8::String>("Pool").ToLocalChecked(), temp->GetFunction());
-}
-
-/*****************************************************************************/
-/*
-   DESCRIPTION
-     Invoked when new of pool is called from JS
-
-*/
-NAN_METHOD(Pool::New)
-{
-  Pool *njsPool = new Pool();
-  njsPool->Wrap(info.Holder());
-
-  info.GetReturnValue().Set(info.Holder());
-}
-
-/*****************************************************************************/
-/*
-   DESCRIPTION
-     Abstraction to all getter accessors of properties
-*/
-Local<Primitive> Pool::getPoolProperty(Pool* njsPool, unsigned int poolProperty)
-{
-  Nan::EscapableHandleScope scope;
-
-  if(!njsPool->isValid_)
-  {
-    string msg = NJSMessages::getErrorMsg(errInvalidPool);
-    NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
-    return scope.Escape ( Nan::Undefined() ) ;
-  }
-  else
-  {
-    return scope.Escape ( Nan::New<v8::Integer>(poolProperty) ) ;
-  }
-  return scope.Escape ( Nan::Undefined() ) ;
-}
-
-/*****************************************************************************/
-/*
-   DESCRIPTION
-     Get Accessor of poolMin Property
-*/
-NAN_GETTER(Pool::GetPoolMin)
-{
-  Pool* njsPool = Nan::ObjectWrap::Unwrap<Pool>(info.Holder());
-  NJS_CHECK_OBJECT_VALID2(njsPool, info);
-  info.GetReturnValue().Set(getPoolProperty( njsPool, njsPool->poolMin_));
-}
-
-/*****************************************************************************/
-/*
-   DESCRIPTION
-     Get Accessor of poolMax Property
-*/
-NAN_GETTER(Pool::GetPoolMax)
-{
-  Pool* njsPool = Nan::ObjectWrap::Unwrap<Pool>(info.Holder());
-  NJS_CHECK_OBJECT_VALID2(njsPool, info);
-  info.GetReturnValue().Set(getPoolProperty( njsPool, njsPool->poolMax_));
-}
-
-/*****************************************************************************/
-/*
-   DESCRIPTION
-     Get Accessor of poolIncrement Property
-*/
-NAN_GETTER(Pool::GetPoolIncrement)
-{
-  Pool* njsPool = Nan::ObjectWrap::Unwrap<Pool>(info.Holder());
-  NJS_CHECK_OBJECT_VALID2(njsPool, info);
-  info.GetReturnValue().Set(getPoolProperty( njsPool, njsPool->poolIncrement_));
-}
-
-/*****************************************************************************/
-/*
-   DESCRIPTION
-     Get Accessor of poolTimeout Property
-*/
-NAN_GETTER(Pool::GetPoolTimeout)
-{
-  Pool* njsPool = Nan::ObjectWrap::Unwrap<Pool>(info.Holder());
-  NJS_CHECK_OBJECT_VALID2(njsPool, info);
-  info.GetReturnValue().Set(getPoolProperty( njsPool, njsPool->poolTimeout_));
-}
-
-/*****************************************************************************/
-/*
-   DESCRIPTION
-     Get Accessor of connectionsOpen Property
-*/
-NAN_GETTER(Pool::GetConnectionsOpen)
-{
-  Pool* njsPool = Nan::ObjectWrap::Unwrap<Pool>(info.Holder());
-  NJS_CHECK_OBJECT_VALID2(njsPool, info);
-  if(!njsPool->isValid_)
-  {
-    string msg = NJSMessages::getErrorMsg(errInvalidPool);
-    NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
-    info.GetReturnValue().SetUndefined();
-    return;
-  }
-  try
-  {
-    info.GetReturnValue().Set(njsPool->dpipool_->connectionsOpen());
-    return;
-  }
-  catch(dpi::Exception &e)
-  {
-    NJS_SET_CONN_ERR_STATUS ( e.errnum(), NULL );
-    NJS_SET_EXCEPTION(e.what(), (int) strlen(e.what()));
-  }
-  info.GetReturnValue().SetUndefined();
-}
-
-/*****************************************************************************/
-/*
-   DESCRIPTION
-     Get Accessor of connectionsInUse Property
-*/
-NAN_GETTER(Pool::GetConnectionsInUse)
-{
-  Pool* njsPool = Nan::ObjectWrap::Unwrap<Pool>(info.Holder());
-  NJS_CHECK_OBJECT_VALID2(njsPool, info);
-  if(!njsPool->isValid_)
-  {
-    string error = NJSMessages::getErrorMsg ( errInvalidPool );
-    NJS_SET_EXCEPTION(error.c_str(), (int) error.length());
-    info.GetReturnValue().SetUndefined();
-    return;
-  }
-  try
-  {
-    info.GetReturnValue().Set(njsPool->dpipool_->connectionsInUse());
-    return;
-  }
-  catch(dpi::Exception &e)
-  {
-    NJS_SET_CONN_ERR_STATUS ( e.errnum(), NULL );
-    NJS_SET_EXCEPTION(e.what(), (int) strlen(e.what()));
-  }
-  info.GetReturnValue().SetUndefined();
-}
-
-/*****************************************************************************/
-/*
-   DESCRIPTION
-     Get Accessor of stmtCacheSize Property
-*/
-NAN_GETTER(Pool::GetStmtCacheSize)
-{
-  Pool* njsPool = Nan::ObjectWrap::Unwrap<Pool>(info.Holder());
-  NJS_CHECK_OBJECT_VALID2(njsPool, info);
-  info.GetReturnValue().Set(getPoolProperty( njsPool, njsPool->stmtCacheSize_));
-}
-
-/*****************************************************************************/
-/*
-   DESCRIPTION
-     Abstraction to all setter accessors of properties
-*/
-void Pool::setPoolProperty (Pool* njsPool, string property)
-{
-  Nan::HandleScope scope;
-
-  NJS_CHECK_OBJECT_VALID(njsPool);
-
-  string msg;
-  if(!njsPool->isValid_)
-    msg = NJSMessages::getErrorMsg(errInvalidPool);
-  else
-    msg = NJSMessages::getErrorMsg(errReadOnly, property.c_str());
-  NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
-}
-
-/*****************************************************************************/
-/*
-   DESCRIPTION
-     Set Accessor of poolMin Property - throws error
-*/
-NAN_SETTER(Pool::SetPoolMin)
-{
-  setPoolProperty(Nan::ObjectWrap::Unwrap<Pool>(info.Holder()), "poolMin");
-}
-
-/*****************************************************************************/
-/*
-   DESCRIPTION
-     Set Accessor of poolMax Property - throws error
-*/
-NAN_SETTER(Pool::SetPoolMax)
-{
-  setPoolProperty(Nan::ObjectWrap::Unwrap<Pool>(info.Holder()), "poolMax");
-}
-
-/*****************************************************************************/
-/*
-   DESCRIPTION
-     Set Accessor of poolIncrement Property - throws error
-*/
-NAN_SETTER(Pool::SetPoolIncrement)
-{
-  setPoolProperty(Nan::ObjectWrap::Unwrap<Pool>(info.Holder()), "poolIncrement");
-}
-
-/*****************************************************************************/
-/*
-   DESCRIPTION
-     Set Accessor of poolTimeout Property - throws error
-*/
-NAN_SETTER(Pool::SetPoolTimeout)
-{
-  setPoolProperty(Nan::ObjectWrap::Unwrap<Pool>(info.Holder()), "poolTimeout");
-}
-
-/*****************************************************************************/
-/*
-   DESCRIPTION
-     Set Accessor of connectionsOpen Property - throws error
-*/
-NAN_SETTER(Pool::SetConnectionsOpen)
-{
-  setPoolProperty(Nan::ObjectWrap::Unwrap<Pool>(info.Holder()), "connectionsOpen");
-}
-
-/*****************************************************************************/
-/*
-   DESCRIPTION
-     Set Accessor of connectionsInUse Property - throws error
-*/
-NAN_SETTER(Pool::SetConnectionsInUse)
-{
-  setPoolProperty(Nan::ObjectWrap::Unwrap<Pool>(info.Holder()), "connectionsInUse");
-}
-
-/*****************************************************************************/
-/*
-   DESCRIPTION
-     Set Accessor of stmtCacheSize Property - throws error
-*/
-NAN_SETTER(Pool::SetStmtCacheSize)
-{
-  setPoolProperty(Nan::ObjectWrap::Unwrap<Pool>(info.Holder()), "stmtCacheSize");
-}
-
-/*****************************************************************************/
-/*
-   DESCRIPTION
-     Get Connection method on Pool class.
-
-   PARAMETERS:
-     Arguments - Callback
-*/
-NAN_METHOD(Pool::GetConnection)
-{
-  Local<Function> callback;
-  NJS_GET_CALLBACK ( callback, info );
-
-  Pool *njsPool = Nan::ObjectWrap::Unwrap<Pool>(info.Holder());
-
-  poolBaton *connBaton = new poolBaton ( callback, info.Holder() );
-
-  NJS_CHECK_OBJECT_VALID3 ( njsPool, connBaton->error, exitGetConnection);
-  NJS_CHECK_NUMBER_OF_ARGS ( connBaton->error, info, 1, 1, exitGetConnection );
-
-  if(!njsPool->isValid_)
-  {
-    connBaton->error = NJSMessages::getErrorMsg ( errInvalidPool );
-    goto exitGetConnection;
-  }
-  connBaton->njspool   = njsPool;
-  connBaton->connClass = njsPool->oracledb_->getConnectionClass ();
-  connBaton->lobPrefetchSize =  njsPool->lobPrefetchSize_;
-
-exitGetConnection:
-  connBaton->req.data = (void *)connBaton;
-
-  int status = uv_queue_work(uv_default_loop(), &connBaton->req,
-               Async_GetConnection,
-               (uv_after_work_cb)Async_AfterGetConnection);
-  // delete the Baton if uv_queue_work fails
-  if ( status )
-  {
-    delete connBaton;
-    string error = NJSMessages::getErrorMsg ( errInternalError,
-                                              "uv_queue_work",
-                                              "GetConnection" );
-    NJS_SET_EXCEPTION(error.c_str(), error.length());
-  }
-
-  info.GetReturnValue().SetUndefined();
-}
-
-/*****************************************************************************/
-/*
-   DESCRIPTION
-     Worker function of Get Connection method
-
-   PARAMETERS:
-     UV queue work block
-
-   NOTES:
-     DPI call execution.
-*/
-void Pool::Async_GetConnection(uv_work_t *req)
-{
-  poolBaton *connBaton = (poolBaton *)req->data;
-  if(!(connBaton->error).empty()) goto exitAsyncGetConnection;
-
-  try
-  {
-    connBaton->dpiconn = connBaton-> njspool -> dpipool_ ->
-                                  getConnection ( connBaton-> connClass);
-    connBaton->dpiconn->lobPrefetchSize(connBaton->lobPrefetchSize);
-  }
-  catch (dpi::Exception &e)
-  {
-    NJS_SET_CONN_ERR_STATUS ( e.errnum(), NULL );
-    connBaton->error = std::string (e.what());
-  }
-  exitAsyncGetConnection:
-  ;
-}
-
-/*****************************************************************************/
-/*
-   DESCRIPTION
-     Callback function of Get Connection method
-
-   PARAMETERS:
-     UV queue work block
-     status - expected to be non-zero.
-
-   NOTES:
-     Connection handle is formed and handed over to JS.
-*/
-void Pool::Async_AfterGetConnection(uv_work_t *req)
-{
-  Nan::HandleScope scope;
-  poolBaton *connBaton = (poolBaton*)req->data;
-
-  Nan::TryCatch tc;
-  Local<Value> argv[2];
-
-  if(!(connBaton->error).empty())
-  {
-    argv[0] = v8::Exception::Error(Nan::New<v8::String>((connBaton->error).c_str()).ToLocalChecked());
-    argv[1] = Nan::Undefined();
-  }
-  else
-  {
-    argv[0] = Nan::Undefined();
-    Local<FunctionTemplate> lft = Nan::New(Connection::connectionTemplate_s);
-    Local<Object> connection = lft->GetFunction()-> NewInstance();
-    (Nan::ObjectWrap::Unwrap<Connection> (connection))->
-                                 setConnection( connBaton->dpiconn,
-                                                connBaton->njspool->oracledb_,
-                                                Nan::New( connBaton->jsPool ) );
-    argv[1] = connection;
-  }
-
-  Local<Function> callback = Nan::New<Function>(connBaton->cb);
-  delete connBaton;
-  Nan::MakeCallback( Nan::GetCurrentContext()->Global(),
-                      callback, 2, argv );
-
-  if(tc.HasCaught())
-  {
-    Nan::FatalException(tc);
-  }
-}
-
-/*****************************************************************************/
-/*
-   DESCRIPTION
-     Terminate method
-
-   PARAMETERS:
-     Arguments - Callback
-*/
-NAN_METHOD(Pool::Terminate)
-{
-  Local<Function> callback;
-  NJS_GET_CALLBACK ( callback, info );
-
-  Pool *njsPool = Nan::ObjectWrap::Unwrap<Pool>(info.Holder());
-
-  poolBaton *terminateBaton = new poolBaton ( callback, info.Holder() );
-
-  NJS_CHECK_OBJECT_VALID3 (njsPool, terminateBaton->error, exitTerminate);
-  NJS_CHECK_NUMBER_OF_ARGS ( terminateBaton->error, info, 1, 1, exitTerminate );
-
-  if(!njsPool->isValid_)
-  {
-    terminateBaton->error = NJSMessages::getErrorMsg( errInvalidPool );
-    goto exitTerminate;
-  }
-  terminateBaton->njspool      = njsPool;
-
-exitTerminate:
-  terminateBaton->req.data = (void *)terminateBaton;
-
-  int status = uv_queue_work(uv_default_loop(), &terminateBaton->req,
-               Async_Terminate,
-               (uv_after_work_cb)Async_AfterTerminate);
-  // delete the Baton if uv_queue_work fails
-  if ( status )
-  {
-    delete terminateBaton;
-    string error = NJSMessages::getErrorMsg ( errInternalError,
-                                              "uv_queue_work", "Terminate" );
-    NJS_SET_EXCEPTION(error.c_str(), error.length());
-  }
-
-  info.GetReturnValue().SetUndefined();
-}
-
-/*****************************************************************************/
-/*
-   DESCRIPTION
-     Worker function of terminate.
-
-   PARAMETERS:
-     UV queue work block
-
-   NOTES:
-     DPI call execution.
-*/
-void Pool::Async_Terminate(uv_work_t *req)
-{
-  poolBaton *terminateBaton = (poolBaton*)req->data;
-  if(!terminateBaton->error.empty()) goto exitAsyncTerminate;
-
-  try
-  {
-    terminateBaton-> njspool-> dpipool_-> terminate ();
-  }
-  catch(dpi::Exception& e)
-  {
-    NJS_SET_CONN_ERR_STATUS ( e.errnum(), NULL );
-    terminateBaton->error = std::string(e.what());
-  }
-  exitAsyncTerminate:
-  ;
-}
-
-/*****************************************************************************/
-/*
-   DESCRIPTION
-     Callback function of terminate
-
-   PARAMETERS:
-     UV queue work block
-*/
-void Pool::Async_AfterTerminate(uv_work_t *req)
-{
-  Nan::HandleScope scope;
-  poolBaton *terminateBaton = (poolBaton*)req->data;
-
-  Nan::TryCatch tc;
-
-  Local<Value> argv[1];
-
-  if(!(terminateBaton->error).empty())
-  {
-    argv[0] = v8::Exception::Error(Nan::New<v8::String>((terminateBaton->error).c_str()).ToLocalChecked());
-  }
-  else
-  {
-    argv[0] = Nan::Undefined();
-    // pool is not valid after terminate succeeds.
-    terminateBaton-> njspool-> isValid_ = false;
-  }
-
-  /*
-   * When we release the iLob, we have to clear the reference of
-   * its parent.
-   */
-  terminateBaton->njspool->jsParent_.Reset ();
-  Local<Function> callback = Nan::New<Function>(terminateBaton->cb);
-  delete terminateBaton;
-  Nan::MakeCallback( Nan::GetCurrentContext()->Global(),
-                      callback, 1, argv );
-  if(tc.HasCaught())
-  {
-    Nan::FatalException(tc);
-  }
+    Nan::HandleScope scope;
+
+    Local<FunctionTemplate> temp = Nan::New<FunctionTemplate>(New);
+    temp->InstanceTemplate()->SetInternalFieldCount(1);
+    temp->SetClassName(Nan::New<v8::String>("Pool").ToLocalChecked());
+
+    Nan::SetPrototypeMethod(temp, "terminate", Terminate);
+    Nan::SetPrototypeMethod(temp, "getConnection", GetConnection);
+
+    Nan::SetAccessor(temp->InstanceTemplate(),
+            Nan::New<v8::String>("poolMax").ToLocalChecked(),
+            njsPool::GetPoolMax, njsPool::SetPoolMax);
+    Nan::SetAccessor(temp->InstanceTemplate(),
+            Nan::New<v8::String>("poolMin").ToLocalChecked(),
+            njsPool::GetPoolMin, njsPool::SetPoolMin);
+    Nan::SetAccessor(temp->InstanceTemplate(),
+            Nan::New<v8::String>("poolIncrement").ToLocalChecked(),
+            njsPool::GetPoolIncrement, njsPool::SetPoolIncrement);
+    Nan::SetAccessor(temp->InstanceTemplate(),
+            Nan::New<v8::String>("poolTimeout").ToLocalChecked(),
+            njsPool::GetPoolTimeout, njsPool::SetPoolTimeout);
+    Nan::SetAccessor(temp->InstanceTemplate(),
+            Nan::New<v8::String>("connectionsOpen").ToLocalChecked(),
+            njsPool::GetConnectionsOpen, njsPool::SetConnectionsOpen);
+    Nan::SetAccessor(temp->InstanceTemplate(),
+            Nan::New<v8::String>("connectionsInUse").ToLocalChecked(),
+            njsPool::GetConnectionsInUse, njsPool::SetConnectionsInUse);
+    Nan::SetAccessor(temp->InstanceTemplate(),
+            Nan::New<v8::String>("stmtCacheSize").ToLocalChecked(),
+            njsPool::GetStmtCacheSize, njsPool::SetStmtCacheSize);
+
+    poolTemplate_s.Reset(temp);
+    Nan::Set(target, Nan::New<v8::String>("Pool").ToLocalChecked(),
+            temp->GetFunction());
 }
 
 
-/* end of file njsPool.cpp */
+//-----------------------------------------------------------------------------
+// njsPool::CreateFromBaton()
+//   Create a new pool from the baton.
+//-----------------------------------------------------------------------------
+Local<Object> njsPool::CreateFromBaton(njsBaton *baton)
+{
+    Nan::EscapableHandleScope scope;
+    Local<FunctionTemplate> lft;
+    Local<Object> obj;
+    njsPool *pool;
+
+    lft = Nan::New<FunctionTemplate>(poolTemplate_s);
+    obj = lft->GetFunction()->NewInstance();
+    pool = Nan::ObjectWrap::Unwrap<njsPool>(obj);
+    pool->dpiPoolHandle = baton->dpiPoolHandle;
+    baton->dpiPoolHandle = NULL;
+    pool->jsOracledb.Reset(baton->jsOracledb);
+    pool->poolMax = baton->poolMax;
+    pool->poolMin = baton->poolMin;
+    pool->poolIncrement = baton->poolIncrement;
+    pool->poolTimeout = baton->poolTimeout;
+    pool->stmtCacheSize = baton->stmtCacheSize;
+    pool->lobPrefetchSize = baton->lobPrefetchSize;
+    return scope.Escape(obj);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsPool::New()
+//   Create new object accesible from JS. This is always called from within
+// njsPool::CreateFromBaton() and never from any external JS.
+//-----------------------------------------------------------------------------
+NAN_METHOD(njsPool::New)
+{
+    njsPool *pool = new njsPool();
+    pool->Wrap(info.Holder());
+    info.GetReturnValue().Set(info.Holder());
+}
+
+
+//-----------------------------------------------------------------------------
+// njsPool::GetPoolMin()
+//   Get accessor of "poolMin" property.
+//-----------------------------------------------------------------------------
+NAN_GETTER(njsPool::GetPoolMin)
+{
+    njsPool *pool = (njsPool*) ValidateGetter(info);
+    if (pool)
+        info.GetReturnValue().Set(pool->poolMin);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsPool::GetPoolMax()
+//   Get accessor of "poolMax" property.
+//-----------------------------------------------------------------------------
+NAN_GETTER(njsPool::GetPoolMax)
+{
+    njsPool *pool = (njsPool*) ValidateGetter(info);
+    if (pool)
+        info.GetReturnValue().Set(pool->poolMax);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsPool::GetPoolIncrement()
+//   Get accessor of "poolIncrement" property.
+//-----------------------------------------------------------------------------
+NAN_GETTER(njsPool::GetPoolIncrement)
+{
+    njsPool *pool = (njsPool*) ValidateGetter(info);
+    if (pool)
+        info.GetReturnValue().Set(pool->poolIncrement);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsPool::GetPoolTimeout()
+//   Get accessor of "poolTimeout" property.
+//-----------------------------------------------------------------------------
+NAN_GETTER(njsPool::GetPoolTimeout)
+{
+    njsPool *pool = (njsPool*) ValidateGetter(info);
+    if (pool)
+        info.GetReturnValue().Set(pool->poolTimeout);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsPool::GetConnectionsOpen()
+//   Get accessor of "connectionsOpen" property.
+//-----------------------------------------------------------------------------
+NAN_GETTER(njsPool::GetConnectionsOpen)
+{
+    njsPool *pool = (njsPool*) ValidateGetter(info);
+    if (!pool)
+        return;
+    uint32_t value;
+    if (dpiPool_GetAttributeUint(pool->dpiPoolHandle, DPI_ATTR_POOL_OPEN_COUNT,
+            &value) < 0) {
+        dpiErrorInfo errorInfo;
+        dpiPool_GetError(pool->dpiPoolHandle, &errorInfo);
+        Nan::ThrowError(errorInfo.message);
+        return;
+    }
+    info.GetReturnValue().Set(value);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsPool::GetConnectionsInUse()
+//   Get accessor of "connectionsInUse" property.
+//-----------------------------------------------------------------------------
+NAN_GETTER(njsPool::GetConnectionsInUse)
+{
+    njsPool *pool = (njsPool*) ValidateGetter(info);
+    if (!pool)
+        return;
+    uint32_t value;
+    if (dpiPool_GetAttributeUint(pool->dpiPoolHandle, DPI_ATTR_POOL_BUSY_COUNT,
+            &value) < 0) {
+        dpiErrorInfo errorInfo;
+        dpiPool_GetError(pool->dpiPoolHandle, &errorInfo);
+        Nan::ThrowError(errorInfo.message);
+        return;
+    }
+    info.GetReturnValue().Set(value);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsPool::GetStmtCacheSize()
+//   Get accessor of "stmtCacheSize" property.
+//-----------------------------------------------------------------------------
+NAN_GETTER(njsPool::GetStmtCacheSize)
+{
+    njsPool *pool = (njsPool*) ValidateGetter(info);
+    if (pool)
+        info.GetReturnValue().Set(pool->stmtCacheSize);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsPool::SetPoolMin()
+//   Set accessor of "poolMin" property.
+//-----------------------------------------------------------------------------
+NAN_SETTER(njsPool::SetPoolMin)
+{
+    PropertyIsReadOnly("poolMin");
+}
+
+
+//-----------------------------------------------------------------------------
+// njsPool::SetPoolMax()
+//   Set accessor of "poolMax" property.
+//-----------------------------------------------------------------------------
+NAN_SETTER(njsPool::SetPoolMax)
+{
+    PropertyIsReadOnly("poolMax");
+}
+
+
+//-----------------------------------------------------------------------------
+// njsPool::SetPoolIncrement()
+//   Set accessor of "poolIncrement" property.
+//-----------------------------------------------------------------------------
+NAN_SETTER(njsPool::SetPoolIncrement)
+{
+    PropertyIsReadOnly("poolIncrement");
+}
+
+
+//-----------------------------------------------------------------------------
+// njsPool::SetPoolTimeout()
+//   Set accessor of "poolTimeout" property.
+//-----------------------------------------------------------------------------
+NAN_SETTER(njsPool::SetPoolTimeout)
+{
+    PropertyIsReadOnly("poolTimeout");
+}
+
+
+//-----------------------------------------------------------------------------
+// njsPool::SetConnectionsOpen()
+//   Set accessor of "connectionsOpen" property.
+//-----------------------------------------------------------------------------
+NAN_SETTER(njsPool::SetConnectionsOpen)
+{
+    PropertyIsReadOnly("connectionsOpen");
+}
+
+
+//-----------------------------------------------------------------------------
+// njsPool::SetConnectionsInUse()
+//   Set accessor of "connectionsInUse" property.
+//-----------------------------------------------------------------------------
+NAN_SETTER(njsPool::SetConnectionsInUse)
+{
+    PropertyIsReadOnly("connectionsInUse");
+}
+
+
+//-----------------------------------------------------------------------------
+// njsPool::SetStmtCacheSize()
+//   Set accessor of "stmtCacheSize" property.
+//-----------------------------------------------------------------------------
+NAN_SETTER(njsPool::SetStmtCacheSize)
+{
+    PropertyIsReadOnly("stmtCacheSize");
+}
+
+
+//-----------------------------------------------------------------------------
+// njsPool::GetConnection()
+//   Get a connection from the pool and return it.
+//
+// PARAMETERS
+//   - JS callback which will receive (error, connection)
+//-----------------------------------------------------------------------------
+NAN_METHOD(njsPool::GetConnection)
+{
+    njsBaton *baton;
+    njsPool *pool;
+
+    pool = (njsPool*) ValidateArgs(info, 1, 1);
+    if (!pool)
+        return;
+    baton = pool->CreateBaton(info);
+    if (!baton)
+        return;
+    baton->jsOracledb.Reset(pool->jsOracledb);
+    njsOracledb *oracledb = baton->GetOracledb();
+    baton->connClass = oracledb->getConnectionClass();
+    baton->lobPrefetchSize =  pool->lobPrefetchSize;
+    baton->SetDPIPoolHandle(pool->dpiPoolHandle);
+    baton->QueueWork("GetConnection", Async_GetConnection,
+            Async_AfterGetConnection, 2);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsPool::Async_GetConnection()
+//   Worker function for njsPool::GetConnection() method.
+//-----------------------------------------------------------------------------
+void njsPool::Async_GetConnection(njsBaton *baton)
+{
+    dpiCreateParams params;
+
+    dpiGlobal_InitializeCreateParams(&params);
+    if (dpiPool_AcquireConnection(baton->dpiPoolHandle,
+            &params, &baton->dpiConnHandle) < 0)
+        baton->GetDPIPoolError(baton->dpiPoolHandle);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsPool::Async_AfterGetConnection()
+//   Sets up the arguments for the callback to JS. The connection object is
+// created and passed as the second argument. The first argument is the error
+// and at this point it is known that no error has taken place.
+//-----------------------------------------------------------------------------
+void njsPool::Async_AfterGetConnection(njsBaton *baton, Local<Value> argv[])
+{
+    argv[1] = njsConnection::CreateFromBaton(baton);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsPool::Terminate()
+//   Terminate the pool.
+//
+// PARAMETERS
+//   - JS callback which will receive (error)
+//-----------------------------------------------------------------------------
+NAN_METHOD(njsPool::Terminate)
+{
+    njsBaton *baton;
+    njsPool *pool;
+
+    pool = (njsPool*) ValidateArgs(info, 1, 1);
+    if (!pool)
+        return;
+    baton = pool->CreateBaton(info);
+    if (!baton)
+        return;
+    baton->dpiPoolHandle = pool->dpiPoolHandle;
+    pool->dpiPoolHandle = NULL;
+    baton->QueueWork("Terminate", Async_Terminate, NULL, 1);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsPool::Async_Terminate()
+//   Worker function for njsPool::Terminate() method.
+//-----------------------------------------------------------------------------
+void njsPool::Async_Terminate(njsBaton *baton)
+{
+    if (dpiPool_Destroy(baton->dpiPoolHandle) < 0)
+        baton->GetDPIPoolError(baton->dpiPoolHandle);
+}
 

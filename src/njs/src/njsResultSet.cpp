@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -57,761 +57,345 @@
 using namespace std;
 using namespace node;
 using namespace v8;
-                                        //peristent ResultSet class handle
-Nan::Persistent<FunctionTemplate> ResultSet::resultSetTemplate_s;
-/*****************************************************************************/
-/*
-   DESCRIPTION
-     Store the config in pool instance.
 
-   PARAMETERS
-     stmt         -  dpi statement
-     executeBaton - eBaton structure
-*/
-void ResultSet::setResultSet ( dpi::Stmt *stmt, eBaton *executeBaton )
+// peristent ResultSet class handle
+Nan::Persistent<FunctionTemplate> njsResultSet::resultSetTemplate_s;
+
+//-----------------------------------------------------------------------------
+// njsResultSet::~njsResultSet()
+//   Destructor.
+//-----------------------------------------------------------------------------
+njsResultSet::~njsResultSet()
 {
-  this->dpistmt_       = stmt;
-  this->dpienv_        = executeBaton->dpienv;
-  this->njsconn_       = executeBaton->njsconn;
-  this->numCols_       = 0;    // numCols_ and meta_ are initialized as part
-  this->meta_          = NULL; // of the first call on RS
-
-  this->jsParent_.Reset ( executeBaton->jsConn );
-
-  /*
-   * stmt can be NULL in REFCURSOR case, when the stored procedure
-   * did not return a valid stmt handle
-   */
-  this->state_ = ( stmt ) ? NJS_INACTIVE : NJS_INVALID;
-
-  this->outFormat_     = executeBaton->outFormat;
-  this->fetchRowCount_ = 0;
-  this->rsEmpty_       = false;
-  this->defineBuffers_ = NULL;
-
-  /* (Deep) Copy by-type conversion rules if available for later use */
-  if ( executeBaton -> fetchAsStringTypes )
-  {
-    unsigned int count = executeBaton->fetchAsStringTypesCount;
-
-    this->fetchAsStringTypes_ = (DataType * ) malloc (
-                                                count * sizeof ( DataType ) );
-    if ( !this->fetchAsStringTypes_ )
-    {
-      executeBaton->error = NJSMessages::getErrorMsg ( errInsufficientMemory );
-      goto exitSetResultSet;
+    jsConnection.Reset();
+    jsOracledb.Reset();
+    if (queryVars) {
+        delete [] queryVars;
+        queryVars = NULL;
     }
-
-    for ( unsigned int i = 0 ; i < count ; i ++ )
-    {
-      this->fetchAsStringTypes_[i] = executeBaton->fetchAsStringTypes[i] ;
+    if (fetchAsStringTypes) {
+        delete [] fetchAsStringTypes;
+        fetchAsStringTypes = NULL;
     }
-    this->fetchAsStringTypesCount_ = count;
-  }
-  else
-  {
-    this->fetchAsStringTypes_      = NULL;
-    this->fetchAsStringTypesCount_ = 0;
-  }
-
-  /* (Deep) Copy by-name conversion rules if available for later use
-   * The by-name conversion rules are applicable only for ResultSet
-   * RefCursor require by-cursor definitions
-   */
-  if ( executeBaton->getRS && executeBaton->fetchInfo )
-  {
-    this->fetchInfo_ = new FetchInfo[executeBaton->fetchInfoCount];
-    if ( !this->fetchInfo_ )
-    {
-      executeBaton->error = NJSMessages::getErrorMsg ( errInsufficientMemory );
-      goto exitSetResultSet;
+    if (dpiStmtHandle) {
+        dpiStmt_Release(dpiStmtHandle);
+        dpiStmtHandle = NULL;
     }
-
-    for ( unsigned int i = 0; i < executeBaton->fetchInfoCount; i ++ )
-    {
-      this->fetchInfo_[i].type = executeBaton->fetchInfo[i].type;
-      this->fetchInfo_[i].name = executeBaton->fetchInfo[i].name;
-    }
-    this->fetchInfoCount_ = executeBaton->fetchInfoCount ;
-  }
-  else
-  {
-    this->fetchInfo_      = NULL;
-    this->fetchInfoCount_ = 0;
-  }
-
-exitSetResultSet:
-  if ( !executeBaton->error.empty () )
-  {
-    if ( this -> fetchAsStringTypes_ )
-    {
-      free ( this -> fetchAsStringTypes_ ) ;
-      this -> fetchAsStringTypes_ = NULL;
-    }
-
-    if ( this->fetchInfo_ )
-    {
-      delete [] this -> fetchInfo_ ;
-      this -> fetchInfo_ = NULL ;
-    }
-  }
 }
 
-/*****************************************************************************/
-/*
-   DESCRIPTION
-     Init function of the ResultSet class.
-     Initiates and maps the functions and properties of ResultSet class.
-*/
-void ResultSet::Init(Handle<Object> target)
+
+//-----------------------------------------------------------------------------
+// njsResultSet::Init()
+//   Initialization function of ResultSet class. Maps functions and properties
+// from JS to C++.
+//-----------------------------------------------------------------------------
+void njsResultSet::Init(Handle<Object> target)
 {
-  Nan::HandleScope scope;
-  Local<FunctionTemplate> temp = Nan::New<FunctionTemplate>(New);
-  temp->InstanceTemplate()->SetInternalFieldCount(1);
-  temp->SetClassName(Nan::New<v8::String>("ResultSet").ToLocalChecked());
+    Nan::HandleScope scope;
+    Local<FunctionTemplate> temp = Nan::New<FunctionTemplate>(New);
 
-  Nan::SetPrototypeMethod(temp, "close", Close);
-  Nan::SetPrototypeMethod(temp, "getRow", GetRow);
-  Nan::SetPrototypeMethod(temp, "getRows", GetRows);
+    temp->InstanceTemplate()->SetInternalFieldCount(1);
+    temp->SetClassName(Nan::New<v8::String>("ResultSet").ToLocalChecked());
 
-  Nan::SetAccessor(temp->InstanceTemplate(),
-    Nan::New<v8::String>("metaData").ToLocalChecked(),
-    ResultSet::GetMetaData,
-    ResultSet::SetMetaData );
+    Nan::SetPrototypeMethod(temp, "close", Close);
+    Nan::SetPrototypeMethod(temp, "getRow", GetRow);
+    Nan::SetPrototypeMethod(temp, "getRows", GetRows);
 
-  resultSetTemplate_s.Reset( temp);
-  Nan::Set(target, Nan::New<v8::String>("ResultSet").ToLocalChecked(), temp->GetFunction());
+    Nan::SetAccessor(temp->InstanceTemplate(),
+            Nan::New<v8::String>("metaData").ToLocalChecked(),
+            njsResultSet::GetMetaData, njsResultSet::SetMetaData);
+
+    resultSetTemplate_s.Reset(temp);
+    Nan::Set(target, Nan::New<v8::String>("ResultSet").ToLocalChecked(),
+            temp->GetFunction());
 }
 
-/*****************************************************************************/
-/*
-   DESCRIPTION
-     Invoked when new of connection is called from JS
-*/
-NAN_METHOD(ResultSet::New)
+
+//-----------------------------------------------------------------------------
+// njsResultSet::CreateFromBaton()
+//   Create a new result set from the baton (
+//-----------------------------------------------------------------------------
+Local<Object> njsResultSet::CreateFromBaton(njsBaton *baton)
 {
+    Nan::EscapableHandleScope scope;
+    Local<FunctionTemplate> lft;
+    njsResultSet *resultSet;
+    Local<Object> obj;
 
-  ResultSet *resultSet = new ResultSet();
-  resultSet->Wrap(info.Holder());
-
-  info.GetReturnValue().Set(info.Holder());
+    lft = Nan::New<FunctionTemplate>(resultSetTemplate_s);
+    obj = lft->GetFunction()->NewInstance();
+    resultSet = Nan::ObjectWrap::Unwrap<njsResultSet>(obj);
+    resultSet->dpiStmtHandle = baton->dpiStmtHandle;
+    baton->dpiStmtHandle = NULL;
+    resultSet->dpiConnHandle = baton->dpiConnHandle;
+    resultSet->jsOracledb.Reset(baton->jsOracledb);
+    resultSet->outFormat = baton->outFormat;
+    resultSet->numQueryVars = baton->numQueryVars;
+    resultSet->queryVars = baton->queryVars;
+    baton->queryVars = NULL;
+    resultSet->activeBaton = NULL;
+    resultSet->jsConnection.Reset(baton->jsCallingObj);
+    resultSet->fetchAsStringTypes = baton->fetchAsStringTypes;
+    baton->fetchAsStringTypes = NULL;
+    resultSet->numFetchAsStringTypes = baton->numFetchAsStringTypes;
+    baton->numFetchAsStringTypes = 0;
+    resultSet->fetchInfo = baton->fetchInfo;
+    baton->fetchInfo = NULL;
+    resultSet->numFetchInfo = baton->numFetchInfo;
+    baton->numFetchInfo = 0;
+    return scope.Escape(obj);
 }
 
-/*****************************************************************************/
-/*
-   DESCRIPTION
-     Get Accessor of metaData Property
-*/
-NAN_GETTER(ResultSet::GetMetaData)
-{
-  ResultSet* njsResultSet  = Nan::ObjectWrap::Unwrap<ResultSet>(info.Holder());
-  string msg;
 
-  NJS_CHECK_OBJECT_VALID2(njsResultSet, info);
-  if(!njsResultSet->njsconn_->isValid())
-  {
-    msg = NJSMessages::getErrorMsg ( errInvalidConnection );
-    NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
-    info.GetReturnValue().SetUndefined();
-    return;
-  }
-  else if(njsResultSet->state_ == NJS_INVALID)
-  {
-    msg = NJSMessages::getErrorMsg ( errInvalidResultSet );
-    NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
-    info.GetReturnValue().SetUndefined();
-    return;
-  }
-  if ( !njsResultSet->meta_ )
-  {
-    try
-    {
-      njsResultSet->meta_    = njsResultSet->dpistmt_->getMetaData();
-      njsResultSet->numCols_ = njsResultSet->dpistmt_->numCols();
+//-----------------------------------------------------------------------------
+// njsResultSet::CreateFromRefCursor()
+//   Create a new result set from the baton (
+//-----------------------------------------------------------------------------
+bool njsResultSet::CreateFromRefCursor(njsBaton *baton, dpiStmt *dpiStmtHandle,
+        Local<Value> &value)
+{
+    Nan::EscapableHandleScope scope;
+    Local<FunctionTemplate> lft;
+    njsResultSet *resultSet;
+    Local<Object> obj;
+
+    // basic initialization
+    lft = Nan::New<FunctionTemplate>(resultSetTemplate_s);
+    obj = lft->GetFunction()->NewInstance();
+    resultSet = Nan::ObjectWrap::Unwrap<njsResultSet>(obj);
+    resultSet->dpiStmtHandle = dpiStmtHandle;
+    resultSet->dpiConnHandle = baton->dpiConnHandle;
+    resultSet->jsOracledb.Reset(baton->jsOracledb);
+    resultSet->jsConnection.Reset(baton->jsCallingObj);
+    resultSet->outFormat = baton->outFormat;
+    resultSet->activeBaton = NULL;
+
+    // create query variables
+    if (dpiStmt_GetNumQueryColumns(dpiStmtHandle,
+            &resultSet->numQueryVars) < 0) {
+        baton->GetDPIStmtError(dpiStmtHandle);
+        return false;
     }
-    catch(dpi::Exception &e)
-    {
-      NJS_SET_CONN_ERR_STATUS ( e.errnum(), NULL );
-      NJS_SET_EXCEPTION(e.what(), (int) strlen(e.what()));
-      info.GetReturnValue().SetUndefined();
-      return;
-    }
-  }
-  std::string *columnNames = new std::string[njsResultSet->numCols_];
-  Connection::CopyMetaData ( columnNames, njsResultSet->meta_,
-                             njsResultSet->numCols_ );
-  Local<Value> meta;
-  meta = Connection::GetMetaData( columnNames,
-                                  njsResultSet->numCols_ );
-  delete [] columnNames;
-  columnNames = NULL;
+    resultSet->queryVars = new njsVariable[resultSet->numQueryVars];
+    if (!njsConnection::ProcessDefines(baton, dpiStmtHandle,
+            baton->dpiConnHandle, resultSet->queryVars,
+            resultSet->numQueryVars))
+        return false;
 
-  info.GetReturnValue().Set(meta);
-}
-
-/*****************************************************************************/
-/*
-   DESCRIPTION
-     Set Accessor of metaData Property - throws error
-*/
-NAN_SETTER(ResultSet::SetMetaData)
-{
-  ResultSet* njsResultSet = Nan::ObjectWrap::Unwrap<ResultSet>(info.Holder());
-  string msg;
-
-  NJS_CHECK_OBJECT_VALID(njsResultSet);
-  if(!njsResultSet->njsconn_->isValid())
-    msg = NJSMessages::getErrorMsg ( errInvalidConnection );
-  else if(njsResultSet->state_ == NJS_INVALID)
-    msg = NJSMessages::getErrorMsg(errInvalidResultSet);
-  else
-    msg = NJSMessages::getErrorMsg(errReadOnly, "metaData");
-  NJS_SET_EXCEPTION(msg.c_str(), (int) msg.length());
-}
-
-/*****************************************************************************/
-/*
-   DESCRIPTION
-     Get Row method on Result Set class.
-
-   PARAMETERS:
-     info - callback
-*/
-NAN_METHOD(ResultSet::GetRow)
-{
-
-  Local<Function> callback;
-  NJS_GET_CALLBACK ( callback, info );
-
-  ResultSet *njsResultSet = Nan::ObjectWrap::Unwrap<ResultSet>(info.Holder());
-
-  /* If njsResultSet is invalid from JS, then throw an exception */
-  NJS_CHECK_OBJECT_VALID2 ( njsResultSet, info );
-
-  Local<Object> jsConn = Nan::New ( njsResultSet->jsParent_ );
-  rsBaton   *getRowsBaton = new rsBaton ( njsResultSet->njsconn_->RSCount (),
-                                          callback, info.Holder(), jsConn );
-  getRowsBaton->njsRS = njsResultSet;
-
-  if(njsResultSet->state_ == NJS_INVALID)
-  {
-    getRowsBaton->error = NJSMessages::getErrorMsg ( errInvalidResultSet );
-    // donot alter the state while exiting
-    getRowsBaton->errOnActiveOrInvalid = true;
-    goto exitGetRow;
-  }
-  if(njsResultSet->state_ == NJS_ACTIVE)
-  {
-    getRowsBaton->error = NJSMessages::getErrorMsg ( errBusyResultSet );
-    // donot alter the state while exiting
-    getRowsBaton->errOnActiveOrInvalid = true;
-    goto exitGetRow;
-  }
-  njsResultSet->state_  = NJS_ACTIVE;
-
-  NJS_CHECK_NUMBER_OF_ARGS ( getRowsBaton->error, info, 1, 1, exitGetRow );
-
-  getRowsBaton->numRows = 1;
-
-exitGetRow:
-  ResultSet::GetRowsCommon(getRowsBaton);
-  info.GetReturnValue().SetUndefined();
-}
-
-/*****************************************************************************/
-/*
-   DESCRIPTION
-     Get Rows method on Result Set class.
-
-   PARAMETERS:
-     info - numRows, callback
-*/
-NAN_METHOD(ResultSet::GetRows)
-{
-
-  Local<Function> callback;
-  NJS_GET_CALLBACK ( callback, info );
-
-  ResultSet *njsResultSet = Nan::ObjectWrap::Unwrap<ResultSet>(info.Holder());
-
-  /* If njsResultSet is invalid from JS, then throw an exception */
-  NJS_CHECK_OBJECT_VALID2 ( njsResultSet, info );
-
-  Local<Object> jsConn = Nan::New ( njsResultSet->jsParent_ );
-  rsBaton   *getRowsBaton = new rsBaton ( njsResultSet->njsconn_->RSCount (),
-                                          callback, info.Holder(), jsConn );
-  getRowsBaton->njsRS = njsResultSet;
-
-  if(njsResultSet->state_ == NJS_INVALID)
-  {
-    getRowsBaton->error = NJSMessages::getErrorMsg ( errInvalidResultSet );
-    // donot alter the state while exiting
-    getRowsBaton->errOnActiveOrInvalid = true;
-    goto exitGetRows;
-  }
-  else if(njsResultSet->state_ == NJS_ACTIVE)
-  {
-    getRowsBaton->error = NJSMessages::getErrorMsg ( errBusyResultSet );
-    // donot alter the state while exiting
-    getRowsBaton->errOnActiveOrInvalid = true;
-    goto exitGetRows;
-  }
-  njsResultSet->state_  = NJS_ACTIVE;
-
-  NJS_CHECK_NUMBER_OF_ARGS ( getRowsBaton->error, info, 2, 2, exitGetRows );
-  NJS_GET_ARG_V8UINT ( getRowsBaton->numRows, getRowsBaton->error,
-                       info, 0, exitGetRows );
-  if(!getRowsBaton->numRows)
-  {
-    getRowsBaton->error = NJSMessages::getErrorMsg (
-                                     errInvalidParameterValue, 1);
-    goto exitGetRows;
-  }
-
-  getRowsBaton->fetchMultiple = true;
-exitGetRows:
-  ResultSet::GetRowsCommon(getRowsBaton);
-  info.GetReturnValue().SetUndefined();
-}
-
-/*****************************************************************************/
-/*
-   DESCRIPTION
-     Common method for GetRow and GetRows method
-
-   PARAMETERS:
-     getRowsBaton - resultset baton
-*/
-void ResultSet::GetRowsCommon(rsBaton *getRowsBaton)
-{
-  ResultSet *njsRS;
-  eBaton    *ebaton;
-
-  if(!(getRowsBaton->error).empty()) goto exitGetRowsCommon;
-
-  if(!getRowsBaton->njsRS->njsconn_->isValid())
-  {
-    getRowsBaton->error = NJSMessages::getErrorMsg ( errInvalidConnection );
-    goto exitGetRowsCommon;
-  }
-
-  ebaton                     = getRowsBaton->ebaton;
-  njsRS                      = getRowsBaton->njsRS;
-  ebaton->maxRows            = getRowsBaton->numRows;
-  ebaton->dpistmt            = njsRS->dpistmt_;
-  ebaton->getRS              = true;
-  ebaton->dpienv             = njsRS->njsconn_->oracledb_->getDpiEnv();
-  ebaton->outFormat          = njsRS->outFormat_;
-  ebaton->njsconn            = njsRS->njsconn_;
-  ebaton->dpiconn            = njsRS->njsconn_->getDpiConn();
-
-  if ( njsRS->fetchAsStringTypesCount_ )
-  {
-    ebaton->fetchAsStringTypes = njsRS->fetchAsStringTypes_;
-    ebaton->fetchAsStringTypesCount = njsRS->fetchAsStringTypesCount_;
-  }
-  else
-  {
-    ebaton->fetchAsStringTypes = NULL;
-    ebaton->fetchAsStringTypesCount = 0;
-  }
-
-  /* Copy by-name conversion rules */
-  ebaton->fetchInfoCount   = njsRS->fetchInfoCount_;
-  if ( ebaton->fetchInfoCount )
-  {
-    ebaton->fetchInfo = njsRS->fetchInfo_;
-  }
-  else
-  {
-    ebaton->fetchInfo = NULL;
-  }
-
-exitGetRowsCommon:
-  getRowsBaton->req.data  = (void *)getRowsBaton;
-
-  int status = uv_queue_work(uv_default_loop(), &getRowsBaton->req,
-               Async_GetRows, (uv_after_work_cb)Async_AfterGetRows);
-  // delete the Baton if uv_queue_work fails
-  if ( status )
-  {
-    delete getRowsBaton;
-    string error = NJSMessages::getErrorMsg ( errInternalError,
-                                              "uv_queue_work",
-                                              "GetRowsCommon" );
-    NJS_SET_EXCEPTION(error.c_str(), error.length());
-  }
-
-}
-
-/*****************************************************************************/
-/*
-   DESCRIPTION
-     Worker function of GetRows method
-
-   PARAMETERS:
-     req - UV queue work block
-
-   NOTES:
-     DPI call execution.
-*/
-void ResultSet::Async_GetRows(uv_work_t *req)
-{
-  rsBaton *getRowsBaton = (rsBaton*)req->data;
-  ResultSet *njsRS      = getRowsBaton->njsRS;
-  eBaton    *ebaton     = getRowsBaton->ebaton;
-
-  if(!(getRowsBaton->error).empty()) goto exitAsyncGetRows;
-
-  if(njsRS->rsEmpty_)
-  {
-    ebaton->rowsFetched = 0;
-    goto exitAsyncGetRows;
-  }
-
-  try
-  {
-    if ( !njsRS->meta_ )
-    {
-      njsRS->meta_    = njsRS->dpistmt_->getMetaData();
-      njsRS->numCols_ = njsRS->dpistmt_->numCols();
-    }
-    ebaton->columnNames        = new std::string[njsRS->numCols_];
-    Connection::CopyMetaData ( ebaton->columnNames, njsRS->meta_,
-                               njsRS->numCols_ );
-    ebaton->numCols      = njsRS->numCols_;
-
-    // Allocate if not already done, or need more buffer
-    if( !njsRS->defineBuffers_ ||
-        njsRS->fetchRowCount_  < getRowsBaton->numRows )
-    {
-      if( njsRS->defineBuffers_ )
-      {
-        ResultSet::clearFetchBuffer(njsRS->defineBuffers_, njsRS->numCols_,
-                                    njsRS->fetchRowCount_);
-        getRowsBaton-> njsRS-> defineBuffers_ = NULL;
-      }
-      Connection::DoDefines(ebaton, njsRS->meta_, njsRS->numCols_);
-      if ( !ebaton->error.empty () )
-      {
-        getRowsBaton->error = ebaton->error;
-        goto exitAsyncGetRows;
-      }
-      njsRS->fetchRowCount_ = getRowsBaton->numRows;
-      njsRS->defineBuffers_ = ebaton->defines;
-    }
-    else
-    {
-      // Buffers are reused except for LOB columns
-      for (unsigned int col = 0; col < njsRS->numCols_; col++)
-      {
-       // In case of LOB column, descriptor would have been wrapped by
-       // ProtoILob & njsIntLob and set the element to NULL, so reallocate
-        switch(njsRS->meta_[col].dbType)
-        {
-        case dpi::DpiClob:
-        case dpi::DpiBlob:
-        case dpi::DpiBfile:
-          for (unsigned int j = 0; j < ebaton->maxRows; j++)
-          {
-            if ( !( ((Descriptor **)(njsRS->defineBuffers_[col].buf))[j] ) )
-            {
-              ((Descriptor **)(njsRS->defineBuffers_[col].buf))[j] =
-                ebaton->dpienv->allocDescriptor(LobDescriptorType);
-            }
-          }
-          break;
-
-        default:
-          break;
-        }
-      }
-    }
-    ebaton->defines      = njsRS->defineBuffers_;
-    Connection::DoFetch(ebaton);
-    if ( !ebaton->error.empty () )
-    {
-      getRowsBaton->error = ebaton->error;
-      goto exitAsyncGetRows;
+    // duplicate fetch as string types, if needed
+    if (baton->fetchAsStringTypes) {
+        resultSet->fetchAsStringTypes =
+                new njsDataType[baton->numFetchAsStringTypes];
+        for (uint32_t i = 0; i < baton->numFetchAsStringTypes; i++)
+            resultSet->fetchAsStringTypes[i] = baton->fetchAsStringTypes[i];
+        resultSet->numFetchAsStringTypes = baton->numFetchAsStringTypes;
     }
 
-    if(ebaton->rowsFetched != getRowsBaton->numRows)
-      njsRS->rsEmpty_ = true;
-  }
-  catch (dpi::Exception &e)
-  {
-    NJS_SET_CONN_ERR_STATUS ( e.errnum(), njsRS->njsconn_->getDpiConn() );
-    getRowsBaton->error = std::string (e.what());
-  }
-  exitAsyncGetRows:
-  ;
+    value = scope.Escape(obj);
+    return true;
 }
 
-/*****************************************************************************/
-/*
-   DESCRIPTION
-     Callback function of GetRows method
 
-   PARAMETERS:
-     req - UV queue work block
-*/
-void ResultSet::Async_AfterGetRows(uv_work_t *req)
+//-----------------------------------------------------------------------------
+// njsResultSet::IsValid()
+//   Returns whether the result set is valid.
+//-----------------------------------------------------------------------------
+bool njsResultSet::IsValid() const
 {
-  Nan::HandleScope scope;
+    // no DPI statement implies result set is not valid
+    if (!dpiStmtHandle)
+        return false;
 
-  rsBaton *getRowsBaton = (rsBaton*)req->data;
-  Nan::TryCatch tc;
-  Local<Value> argv[2];
-
-  if(!(getRowsBaton->error).empty())
-  {
-    argv[0] = v8::Exception::Error(Nan::New<v8::String>((getRowsBaton->error).c_str()).ToLocalChecked());
-    argv[1] = Nan::Undefined();
-  }
-  else
-  {
-    argv[0]           = Nan::Undefined();
-
-    eBaton* ebaton               = getRowsBaton->ebaton;
-    ebaton->outFormat            = getRowsBaton->njsRS->outFormat_;
-    Local<Value> rowsArray       = Nan::New<v8::Array>(0),
-                 rowsArrayValue  = Nan::Null();
-
-    if(ebaton->rowsFetched)
-    {
-      rowsArray = Connection::GetRows(ebaton);
-      if(!(ebaton->error).empty())
-      {
-        argv[0] = v8::Exception::Error(Nan::New<v8::String>((ebaton->error).c_str()).ToLocalChecked());
-        argv[1] = Nan::Undefined();
-        goto exitAsyncAfterGetRows;
-      }
-      rowsArrayValue =  Local<Array>::Cast(rowsArray)->Get(0);
-    }
-    argv[1] = (getRowsBaton->fetchMultiple) ? rowsArray : rowsArrayValue;
-  }
-
-  exitAsyncAfterGetRows:
-  if(!getRowsBaton->errOnActiveOrInvalid)
-  {
-    getRowsBaton->njsRS->state_ = NJS_INACTIVE;
-  }
-
-  Local<Function> callback = Nan::New(getRowsBaton->ebaton->cb);
-  delete getRowsBaton;
-  Nan::MakeCallback(Nan::GetCurrentContext()->Global(),
-                  callback, 2, argv);
-  if(tc.HasCaught())
-  {
-    Nan::FatalException(tc);
-  }
+    // otherwise, check to see if the connection is valid
+    Nan::HandleScope scope;
+    Local<Object> obj = Nan::New(jsConnection);
+    njsConnection *connection = Nan::ObjectWrap::Unwrap<njsConnection>(obj);
+    if (!connection)
+        return false;
+    return connection->IsValid();
 }
 
-/*****************************************************************************/
-/*
-   DESCRIPTION
-     Close method
 
-   PARAMETERS:
-     info - Callback
-*/
-NAN_METHOD(ResultSet::Close)
+//-----------------------------------------------------------------------------
+// njsResultSet::New()
+//   Create new object accesible from JS. This is always called from within
+// njsResultSet::CreateFromBaton() and never from any external JS.
+//-----------------------------------------------------------------------------
+NAN_METHOD(njsResultSet::New)
 {
-
-  Local<Function> callback;
-  NJS_GET_CALLBACK ( callback, info );
-
-  ResultSet *njsResultSet = Nan::ObjectWrap::Unwrap<ResultSet>(info.Holder());
-
-  /* If njsResultSet is invalid from JS, then throw an exception */
-  NJS_CHECK_OBJECT_VALID2 ( njsResultSet, info );
-
-  Local<Object> jsConn = Nan::New ( njsResultSet->jsParent_ );
-  rsBaton   *closeBaton = new rsBaton ( njsResultSet->njsconn_->RSCount (),
-                                        callback, info.Holder(), jsConn );
-  closeBaton->njsRS = njsResultSet;
-
-  if(njsResultSet->state_ == NJS_INVALID)
-  {
-    closeBaton->error = NJSMessages::getErrorMsg ( errInvalidResultSet );
-    // donot alter the state while exiting
-    closeBaton->errOnActiveOrInvalid = true;
-    goto exitClose;
-  }
-  else if(njsResultSet->state_ == NJS_ACTIVE)
-  {
-    closeBaton->error = NJSMessages::getErrorMsg ( errBusyResultSet );
-    // donot alter the state while exiting
-    closeBaton->errOnActiveOrInvalid = true;
-    goto exitClose;
-  }
-  njsResultSet->state_ = NJS_ACTIVE;
-
-  NJS_CHECK_NUMBER_OF_ARGS ( closeBaton->error, info, 1, 1, exitClose );
-
-  if(!njsResultSet->njsconn_->isValid())
-  {
-    closeBaton->error = NJSMessages::getErrorMsg ( errInvalidConnection );
-    goto exitClose;
-  }
-
-
-exitClose:
-  closeBaton->req.data = (void *)closeBaton;
-
-  int status = uv_queue_work(uv_default_loop(), &closeBaton->req,
-               Async_Close, (uv_after_work_cb)Async_AfterClose);
-  // delete the Baton if uv_queue_work fails
-  if ( status )
-  {
-    delete closeBaton;
-    string error = NJSMessages::getErrorMsg ( errInternalError,
-                                              "uv_queue_work",
-                                              "ResultSetClose" );
-    NJS_SET_EXCEPTION(error.c_str(), error.length());
-  }
-
-  info.GetReturnValue().SetUndefined();
+    njsResultSet *resultSet = new njsResultSet();
+    resultSet->Wrap(info.Holder());
+    info.GetReturnValue().Set(info.Holder());
 }
 
-/*****************************************************************************/
-/*
-   DESCRIPTION
-     Worker function of close.
 
-   PARAMETERS:
-     req - UV queue work block
-
-   NOTES:
-     DPI call execution.
-*/
-void ResultSet::Async_Close(uv_work_t *req)
+//-----------------------------------------------------------------------------
+// ResulSet::GetMetaData()
+//   Get accessor of "metaData" property.
+//-----------------------------------------------------------------------------
+NAN_GETTER(njsResultSet::GetMetaData)
 {
-  rsBaton *closeBaton = (rsBaton*)req->data;
-  if(!closeBaton->error.empty()) goto exitAsyncClose;
-
-  try
-  {
-    closeBaton-> njsRS-> dpistmt_-> release ();
-
-    Define* defineBuffers = closeBaton-> njsRS-> defineBuffers_;
-    unsigned int numCols  = closeBaton-> njsRS-> numCols_;
-    if(defineBuffers)
-    {
-      ResultSet::clearFetchBuffer(defineBuffers, numCols,
-                                  closeBaton-> njsRS-> fetchRowCount_);
-      closeBaton-> njsRS-> defineBuffers_ = NULL;
-    }
-
-    if ( closeBaton->njsRS->fetchAsStringTypes_ )
-    {
-      free ( closeBaton->njsRS->fetchAsStringTypes_ ) ;
-      closeBaton->njsRS->fetchAsStringTypes_ = NULL;
-    }
-    if ( closeBaton->njsRS->fetchInfo_ )
-    {
-      delete [] closeBaton->njsRS->fetchInfo_;
-      closeBaton->njsRS->fetchInfo_ = NULL;
-    }
-  }
-  catch(dpi::Exception& e)
-  {
-    NJS_SET_CONN_ERR_STATUS ( e.errnum(),
-                          closeBaton->njsRS->njsconn_->getDpiConn() );
-    closeBaton->error = std::string(e.what());
-  }
-  exitAsyncClose:
-  ;
+    njsResultSet *resultSet = (njsResultSet*) ValidateGetter(info);
+    if (!resultSet)
+        return;
+    Local<Value> meta = njsConnection::GetMetaData(resultSet->queryVars,
+            resultSet->numQueryVars);
+    info.GetReturnValue().Set(meta);
 }
 
-/*****************************************************************************/
-/*
-   DESCRIPTION
-     Callback function of close
 
-   PARAMETERS:
-     req - UV queue work block
-*/
-void ResultSet::Async_AfterClose(uv_work_t *req)
+//-----------------------------------------------------------------------------
+// njsResultSet::SetMetaData()
+//   Set accessor of "metaData" property.
+//-----------------------------------------------------------------------------
+NAN_SETTER(njsResultSet::SetMetaData)
 {
-  Nan::HandleScope scope;
-  rsBaton *closeBaton = (rsBaton*)req->data;
-
-  Nan::TryCatch tc;
-
-  Local<Value> argv[1];
-
-  if(!(closeBaton->error).empty())
-  {
-    argv[0] = v8::Exception::Error(Nan::New<v8::String>((closeBaton->error).c_str()).ToLocalChecked());
-    if(!closeBaton->errOnActiveOrInvalid)
-    {
-      closeBaton->njsRS->state_ = NJS_INACTIVE;
-    }
-  }
-  else
-  {
-    argv[0] = Nan::Undefined();
-    // resultset is not valid after close succeeds.
-    closeBaton-> njsRS-> state_ = NJS_INVALID;
-  }
-
-  /*
-   * When we close the resultSet, we have to clear the reference of
-   * its parent.
-   */
-  closeBaton->njsRS->jsParent_.Reset ();
-
-  Local<Function> callback = Nan::New(closeBaton->ebaton->cb);
-  delete closeBaton;
-
-  Nan::MakeCallback( Nan::GetCurrentContext()->Global(), callback, 1, argv );
-  if(tc.HasCaught())
-  {
-    Nan::FatalException(tc);
-  }
+    PropertyIsReadOnly("metaData");
 }
 
-/*****************************************************************************/
-/*
-   DESCRIPTION
-    Free FetchBuffers
 
-   PARAMETERS:
-    defineBuffers    -  Define bufferes from njsResultSet,
-    numCols          -  # of columns
-*/
-void ResultSet::clearFetchBuffer( Define* defineBuffers, unsigned int numCols,
-                                  unsigned int numRows )
+//-----------------------------------------------------------------------------
+// njsResultSet::GetRow()
+//   Get a row from the result set.
+//
+// PARAMETERS
+//   - JS callback which will receive (error, row)
+//-----------------------------------------------------------------------------
+NAN_METHOD(njsResultSet::GetRow)
 {
-   for( unsigned int i=0; i<numCols; i++ )
-   {
-     if ( defineBuffers[i].dttmarr )
-     {
-       defineBuffers[i].dttmarr->release ();
-       defineBuffers[i].extbuf = NULL;
-     }
-     else if ( ( defineBuffers[i].fetchType == DpiClob ) ||
-                 ( defineBuffers[i].fetchType == DpiBlob ) ||
-                 ( defineBuffers[i].fetchType == DpiBfile ) )
-     {
-       for (unsigned int j = 0; j < numRows; j++)
-       {
-         if (((Descriptor **)(defineBuffers[i].buf))[j])
-         {
-           Env::freeDescriptor(((Descriptor **)(defineBuffers[i].buf))[j],
-                               LobDescriptorType);
-         }
-       }
-     }
+    njsResultSet *resultSet;
+    njsBaton *baton;
 
-     free(defineBuffers[i].buf);
-     free(defineBuffers[i].len);
-     free(defineBuffers[i].ind);
-   }
-   delete [] defineBuffers;
-   defineBuffers = NULL;
+    resultSet = (njsResultSet*) ValidateArgs(info, 1, 1);
+    if (!resultSet)
+        return;
+    baton = resultSet->CreateBaton(info);
+    if (!baton)
+        return;
+    baton->maxRows = 1;
+    baton->fetchMultipleRows = false;
+    resultSet->GetRowsCommon(baton);
 }
 
-/* end of file njsPool.cpp */
+
+//-----------------------------------------------------------------------------
+// njsResultSet::GetRows()
+//   Get a number of rows from the result set.
+//
+// PARAMETERS
+//   - max number of rows to fetch at this time
+//   - JS callback which will receive (error, row)
+//-----------------------------------------------------------------------------
+NAN_METHOD(njsResultSet::GetRows)
+{
+    njsResultSet *resultSet;
+    uint32_t maxRows;
+    njsBaton *baton;
+
+    resultSet = (njsResultSet*) ValidateArgs(info, 2, 2);
+    if (!resultSet)
+        return;
+    if (!resultSet->GetUnsignedIntArg(info, 0, &maxRows))
+        return;
+    baton = resultSet->CreateBaton(info);
+    if (!baton)
+        return;
+    baton->maxRows = maxRows;
+    baton->fetchMultipleRows = true;
+    resultSet->GetRowsCommon(baton);
+}
+
+
+//-----------------------------------------------------------------------------
+// ResulSet::GetRowsCommon()
+//   Common method for getting rows from the result set.
+//-----------------------------------------------------------------------------
+void njsResultSet::GetRowsCommon(njsBaton *baton)
+{
+    if (activeBaton)
+        baton->error = njsMessages::Get(errBusyResultSet);
+    else {
+        activeBaton = baton;
+        baton->SetDPIStmtHandle(dpiStmtHandle);
+        baton->SetDPIConnHandle(dpiConnHandle);
+        baton->outFormat = outFormat;
+        baton->queryVars = queryVars;
+        baton->numQueryVars = numQueryVars;
+        baton->fetchAsStringTypes = fetchAsStringTypes;
+        baton->numFetchAsStringTypes = numFetchAsStringTypes;
+        baton->keepQueryInfo = true;
+        baton->jsOracledb.Reset(jsOracledb);
+    }
+    baton->QueueWork("GetRowsCommon", Async_GetRows, Async_AfterGetRows, 2);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsResultSet::Async_GetRows()
+//   Worker function for njsResultSet::GetRowsCommon() method.
+//-----------------------------------------------------------------------------
+void njsResultSet::Async_GetRows(njsBaton *baton)
+{
+    njsConnection::ProcessFetch(baton);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsResultSet::Async_AfterGetRows()
+//   Returns result to JS by invoking JS callback.
+//-----------------------------------------------------------------------------
+void njsResultSet::Async_AfterGetRows(njsBaton *baton, Local<Value> argv[])
+{
+    Nan::EscapableHandleScope scope;
+
+    Local<Object> rows;
+    if (!njsConnection::GetRows(baton, rows))
+        return;
+    if (baton->repeat)
+        baton->jsRows.Reset(rows);
+    else {
+        if (baton->fetchMultipleRows)
+            argv[1] = scope.Escape(rows);
+        else argv[1] = scope.Escape(rows->Get(0));
+    }
+}
+
+
+//-----------------------------------------------------------------------------
+// njsResultSet::Close()
+//   Close the result set.
+//
+// PARAMETERS
+//   - JS callback which will receive (error)
+//-----------------------------------------------------------------------------
+NAN_METHOD(njsResultSet::Close)
+{
+    njsResultSet *resultSet;
+    njsBaton *baton;
+
+    resultSet = (njsResultSet*) ValidateArgs(info, 1, 1);
+    if (!resultSet)
+        return;
+    baton = resultSet->CreateBaton(info);
+    if (!baton)
+        return;
+    if (resultSet->activeBaton)
+        baton->error = njsMessages::Get(errBusyResultSet);
+    else {
+        baton->dpiStmtHandle = resultSet->dpiStmtHandle;
+        resultSet->dpiStmtHandle = NULL;
+    }
+    baton->QueueWork("Close", Async_Close, NULL, 1);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsResultSet::Async_Close()
+//   Worker function for njsResultSet::Close() method.
+//-----------------------------------------------------------------------------
+void njsResultSet::Async_Close(njsBaton *baton)
+{
+    if (dpiStmt_Close(baton->dpiStmtHandle, NULL, 0) < 0)
+        baton->GetDPIStmtError(baton->dpiStmtHandle);
+}
 
