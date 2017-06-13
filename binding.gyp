@@ -11,19 +11,18 @@
              "src/njs/src/njsMessages.cpp",
              "src/njs/src/njsIntLob.cpp"
     ],
+    "include_dirs"  : [ "src/dpic/include",
+                      "<!(node -e \"require('nan')\")"
+    ],
+    "libraries" : ['-ldpi'],
     "conditions" : [
     [
       'OS=="linux"', {
-        "variables" : {
-          "dpi_inc_dir%" : "$(DPI_INC_DIR)",
-          "dpi_lib_dir%" : "$(DPI_LIB_DIR)",
-        },
         "cflags"        : ['-fexceptions'],
         "cflags_cc"     : ['-fexceptions'],
-        "libraries"     : ["-ldpi"],
         "link_settings" : {
-           "libraries"  : ['-L<(dpi_lib_dir)']
-        }
+            "libraries" : [ '-L $(srcdir)/src/dpic/src' ]
+        },
       }
     ],
     [
@@ -32,52 +31,36 @@
           "GCC_ENABLE_CPP_EXCEPTIONS": "YES",
           "GCC_ENABLE_CPP_RTTI": "YES"
         },
-        "variables" : {
-          "dpi_inc_dir%" : "$(DPI_INC_DIR)",
-          "dpi_lib_dir%" : "$(DPI_LIB_DIR)",
-          },
-          "cflags"        : ['-fexceptions'],
-          "cflags_cc"     : ['-fexceptions'],
-          "libraries"     : ["-ldpi"],
-          "link_settings" : {
-             "libraries"  : ['-L<(dpi_lib_dir)']
+	"cflags"        : ['-fexceptions'],
+        "cflags_cc"     : ['-fexceptions'],
+        "libraries"     : ["-ldpi"],
+        "link_settings" : {
+           "libraries"  : ['-L $(srcdir)/src/dpic/src']
         }
       }
     ],
     [
       'OS=="aix"', {
-        "variables" : {
-          "dpi_inc_dir%" : "$(DPI_INC_DIR)",
-          "dpi_lib_dir%" : "$(DPI_LIB_DIR)",
-          },
           "libraries"     : ["-ldpi"],
           "cflags"        : ['-fexceptions'],
           "cflags_cc"     : ['-fexceptions'],
           "link_settings" : {
-             "libraries"  : ['-L<(dpi_lib_dir)']
+          "libraries"     : ['-L $(srcdir)/src/dpic/src']
         }
       }
     ],
     [
       'OS=="solaris"', {
-        "variables" : {
-          "dpi_inc_dir%" : "$(DPI_INC_DIR)",
-          "dpi_lib_dir%" : "$(DPI_LIB_DIR)",
-          },
           "libraries"     : ["-ldpi"],
           "cflags"        : ['-fexceptions'],
           "cflags_cc"     : ['-fexceptions'],
           "link_settings" : {
-             "libraries"  : ['-L<(dpi_lib_dir)']
+             "libraries"  : ['-L $(srcdir)/src/dpic/src']
         }
       }
     ],
     [
       "OS=='win'", {
-        "variables" : {
-          "dpi_inc_dir%" : "$(DPI_INC_DIR)",
-          "dpi_lib_dir%" : "$(DPI_LIB_DIR)",
-        },
         "link_settings": {
              "libraries": [
                  "-ldpi",
@@ -115,7 +98,7 @@
                 "EnableCOMDATFolding": 2,
                 "LinkIncremental": 1,
                 "AdditionalLibraryDirectories": [
-                    "<(dpi_lib_dir)"
+                    "$(srcdir)/src/dpic/src"
                 ]
               }
             }
@@ -140,7 +123,7 @@
                       "LinkTimeCodeGeneration": 1,
                       "LinkIncremental": 1,
                       "AdditionalLibraryDirectories": [
-                          "<(dpi_lib_dir)"
+                          "$(srcdir)/src/dpic/src"
                       ]
                   }
               }
@@ -149,9 +132,6 @@
       }
     ],
   ],
-  "include_dirs"  : [ "<(dpi_inc_dir)",
-                      "<!(node -e \"require('nan')\")"
-    ],
   }
   ]
 }
