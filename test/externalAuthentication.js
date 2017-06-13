@@ -81,7 +81,8 @@ describe('5. externalAuthentication.js', function() {
       },
       function(err, conn){
         should.exist(err);
-        err.message.should.eql('DPI-006: user and password should not be set when using external authentication');
+        err.message.should.startWith('DPI-1032:');
+        // user/password cannot be set when using external authentication
         done();
       }
     );
