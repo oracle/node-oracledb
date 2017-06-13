@@ -1329,12 +1329,16 @@ NAN_METHOD(njsConnection::Execute)
 //-----------------------------------------------------------------------------
 void njsConnection::Async_Execute(njsBaton *baton)
 {
+    uint32_t mode;
+
     // prepare statement and perform any binds that are needed
     if (!PrepareAndBind(baton))
         return;
 
     // execute statement
-    if (dpiStmt_Execute(baton->dpiStmtHandle, baton->autoCommit,
+    mode = (baton->autoCommit) ? DPI_CONN_EXEC_COMMIT_ON_SUCCESS :
+            DPI_CONN_EXEC_DEFAULT;
+    if (dpiStmt_Execute(baton->dpiStmtHandle, mode,
             &baton->numQueryVars) < 0) {
         baton->GetDPIStmtError(baton->dpiStmtHandle);
         return;
