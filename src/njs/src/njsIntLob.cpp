@@ -312,8 +312,8 @@ NAN_METHOD(njsILob::Read)
         lob->activeBaton = baton;
         if (lob->dataType == NJS_DATATYPE_BLOB)
             baton->bufferSize = lob->pieceSize;
-        else if (dpiLob_GetBufferSize(lob->dpiLobHandle, DPI_ORACLE_TYPE_CLOB,
-                lob->pieceSize, &baton->bufferSize) < 0)
+        else if (dpiLob_GetBufferSize(lob->dpiLobHandle, lob->pieceSize,
+                &baton->bufferSize) < 0)
             baton->GetDPILobError(lob->dpiLobHandle);
         if (!lob->bufferPtr)
             lob->bufferPtr = new char[baton->bufferSize];
