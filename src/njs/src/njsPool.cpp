@@ -402,7 +402,7 @@ NAN_METHOD(njsPool::Terminate)
 //-----------------------------------------------------------------------------
 void njsPool::Async_Terminate(njsBaton *baton)
 {
-    if (dpiPool_Close(baton->dpiPoolHandle) < 0)
+    if (dpiPool_Close(baton->dpiPoolHandle, DPI_MODE_POOL_CLOSE_DEFAULT) < 0)
         baton->GetDPIPoolError(baton->dpiPoolHandle);
 }
 
