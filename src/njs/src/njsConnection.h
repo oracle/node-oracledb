@@ -146,7 +146,7 @@ private:
     static bool ProcessBindsByName(Handle<Object> bindObj, njsBaton *baton);
     static bool ProcessBindsByPos(Handle<Array> bindarray, njsBaton *baton);
     static bool ProcessBind(Local<Value> bindTypes, njsVariable *var,
-            njsBaton *baton);
+            bool byPosition, njsBaton *baton);
     static bool ProcessBindValue(Local<Value> bindValue, njsVariable *var,
             njsBaton *baton);
     static bool ProcessScalarBindValue(Local<Value> bindValue,

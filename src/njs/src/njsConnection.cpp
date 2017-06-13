@@ -569,7 +569,7 @@ bool njsConnection::ProcessBindsByName(Handle<Object> bindObj, njsBaton *baton)
         var->name = ":" + str;
         var->pos = i + 1;
         Local<Value> val = bindObj->Get(temp);
-        if (!ProcessBind(val, var, baton))
+        if (!ProcessBind(val, var, false, baton))
             return false;
     }
 
@@ -591,7 +591,7 @@ bool njsConnection::ProcessBindsByPos(Handle<Array> binds, njsBaton *baton)
         njsVariable *var = &baton->bindVars[i];
         var->pos = i + 1;
         Local<Value> val = binds->Get(i);
-        if (!ProcessBind(val, var, baton))
+        if (!ProcessBind(val, var, true, baton))
             return false;
     }
 
@@ -604,7 +604,7 @@ bool njsConnection::ProcessBindsByPos(Handle<Array> binds, njsBaton *baton)
 //   Process bind variable from JS.
 //-----------------------------------------------------------------------------
 bool njsConnection::ProcessBind(Local<Value> val, njsVariable *var,
-        njsBaton *baton)
+        bool byPosition, njsBaton *baton)
 {
     Nan::HandleScope scope;
     Local<Value> bindValue;
@@ -620,6 +620,34 @@ bool njsConnection::ProcessBind(Local<Value> val, njsVariable *var,
     // value is an object, get information on the bind variable from it
     if (val->IsObject() && !val->IsDate() && !Buffer::HasInstance(val)) {
         Local<Object> bindUnit = val->ToObject();
+
+        // In case of positional binds, JSON objects are expected to be
+        // unnamed.  Named JSON objects gets confused as we look for "dir",
+        // "type", and "maxSize" key words, but "name" will not match
+        // Array (positional) binds syntax
+        //    [ id, name, {type : oracledb.STRING, dir : oracledb.BIND_OUT}]
+        // the 3rd parameter is unnamed JSON object.
+        // [ id, n, { a: { type : oracledb.STRING, dir : oracledb.BIND_OUT} }]
+        // will fail now.
+        if (byPosition) {
+            Local<Array> keys = bindUnit->GetOwnPropertyNames();
+            bool valid = false;
+            for (uint32_t i = 0; i < keys->Length(); i++) {
+                Local<String> temp = keys->Get(i).As<String>();
+                v8::String::Utf8Value utf8str(temp->ToString());
+                std::string key = std::string(*utf8str, utf8str.length());
+                if (key.compare("dir") == 0 || key.compare("type") == 0 ||
+                        key.compare("maxSize") == 0) {
+                    valid = true;
+                    break;
+                }
+            }
+            if (!valid) {
+                baton->error = njsMessages::Get(errNamedJSON);
+                return false;
+            }
+        }
+
         if (!baton->GetUnsignedIntFromJSON(bindUnit, "dir", 1, &var->bindDir))
             return false;
         if (!baton->GetUnsignedIntFromJSON(bindUnit, "type", 1, &bindType))
