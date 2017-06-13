@@ -249,30 +249,15 @@ bool njsConnection::ProcessFetch(njsBaton *baton)
 {
     int moreRows;
 
-    // determine how many rows are available in the buffers
-    if (dpiStmt_FetchRows(baton->dpiStmtHandle, &baton->rowsFetched,
-            &moreRows) < 0) {
+    if (dpiStmt_FetchRows(baton->dpiStmtHandle, baton->maxRows,
+            &baton->bufferRowIndex, &baton->rowsFetched, &moreRows) < 0) {
         baton->GetDPIStmtError(baton->dpiStmtHandle);
         return false;
     }
     baton->repeat = false;
-    if (baton->rowsFetched > baton->maxRows)
-        baton->rowsFetched = baton->maxRows;
-    else if (baton->rowsFetched < baton->maxRows && moreRows) {
+    if (baton->rowsFetched < baton->maxRows && moreRows) {
         baton->repeat = true;
         baton->maxRows -= baton->rowsFetched;
-    }
-
-    // process these rows
-    uint32_t bufferRowIndex;
-    int found;
-    for (uint32_t row = 0; row < baton->rowsFetched; row++) {
-        if (dpiStmt_Fetch(baton->dpiStmtHandle, &found, &bufferRowIndex) < 0) {
-            baton->GetDPIStmtError(baton->dpiStmtHandle);
-            return false;
-        }
-        if (row == 0)
-            baton->bufferRowIndex = bufferRowIndex;
     }
     return ProcessLOBs(baton, baton->queryVars, baton->numQueryVars,
             baton->rowsFetched);
@@ -1376,12 +1361,6 @@ void njsConnection::Async_Execute(njsBaton *baton)
 
         // when not getting a result set, process fetch completely
         if (!baton->getRS) {
-            int moreRows;
-            if (dpiStmt_FetchRows(baton->dpiStmtHandle, &baton->rowsFetched,
-                    &moreRows) < 0) {
-                baton->GetDPIStmtError(baton->dpiStmtHandle);
-                return;
-            }
             if (!ProcessFetch(baton))
                 return;
         }
