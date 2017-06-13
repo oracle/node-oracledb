@@ -199,9 +199,6 @@ bool njsConnection::ProcessDefines(njsBaton *baton, dpiStmt *dpiStmtHandle,
             case DPI_ORACLE_TYPE_RAW:
                 vars[i].maxSize = queryInfo.clientSizeInBytes;
                 break;
-            case DPI_ORACLE_TYPE_ROWID:
-                vars[i].maxSize = 18;
-                break;
             case DPI_ORACLE_TYPE_DATE:
             case DPI_ORACLE_TYPE_TIMESTAMP:
             case DPI_ORACLE_TYPE_TIMESTAMP_TZ:
@@ -222,6 +219,7 @@ bool njsConnection::ProcessDefines(njsBaton *baton, dpiStmt *dpiStmtHandle,
             case DPI_ORACLE_TYPE_NATIVE_DOUBLE:
             case DPI_ORACLE_TYPE_BLOB:
             case DPI_ORACLE_TYPE_STMT:
+            case DPI_ORACLE_TYPE_ROWID:
                 break;
             default:
                 baton->error = njsMessages::Get(errUnsupportedDatType);
@@ -1144,6 +1142,17 @@ bool njsConnection::GetScalarValueFromVar(njsBaton *baton, njsVariable *var,
             if (!njsResultSet::CreateFromRefCursor(baton, data->value.asStmt,
                     temp))
                 return false;
+            break;
+        case DPI_NATIVE_TYPE_ROWID:
+            uint32_t rowidValueLength;
+            const char *rowidValue;
+            if (dpiRowid_getStringValue(data->value.asRowid, &rowidValue,
+                    &rowidValueLength) < 0) {
+                baton->GetDPIError();
+                return false;
+            }
+            temp = Nan::New<v8::String>(rowidValue,
+                    rowidValueLength).ToLocalChecked();
             break;
         default:
             break;
