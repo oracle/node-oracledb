@@ -92,7 +92,7 @@ describe.skip('35. dataTypeTimestamp3.js', function() {
     );
   })
 
-  it('supports TIMESTAMP WITH TIME ZONE data type', function(done) {
+  it('supports TIMESTAMP WITH TIME ZONE data type [*** NEW FUNCTIONALITY ***]', function(done) {
     connection.should.be.ok;
 
     var timestamps = [

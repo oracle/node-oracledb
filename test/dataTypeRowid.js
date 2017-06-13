@@ -99,7 +99,7 @@ describe.skip('39. dataTypeRowid.js', function() {
       );
     })
 
-    it('39.1.1 query rowid', function(done) {
+    it('39.1.1 query rowid [*** NEW FUNCTIONALITY ***]', function(done) {
       connection.execute(
         "SELECT * FROM " + tableName,
         function(err, result) {
