@@ -208,12 +208,15 @@ bool njsConnection::ProcessDefines(njsBaton *baton, dpiStmt *dpiStmtHandle,
                     vars[i].nativeTypeNum = DPI_NATIVE_TYPE_DOUBLE;
                 }
                 break;
+            case DPI_ORACLE_TYPE_CLOB:
+            case DPI_ORACLE_TYPE_NCLOB:
+                if (vars[i].varTypeNum == DPI_ORACLE_TYPE_VARCHAR)
+                    vars[i].maxSize = 32768;
+                break;
             case DPI_ORACLE_TYPE_NUMBER:
             case DPI_ORACLE_TYPE_NATIVE_INT:
             case DPI_ORACLE_TYPE_NATIVE_FLOAT:
             case DPI_ORACLE_TYPE_NATIVE_DOUBLE:
-            case DPI_ORACLE_TYPE_CLOB:
-            case DPI_ORACLE_TYPE_NCLOB:
             case DPI_ORACLE_TYPE_BLOB:
             case DPI_ORACLE_TYPE_STMT:
                 break;
