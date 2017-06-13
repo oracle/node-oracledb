@@ -795,6 +795,9 @@ void njsOracledb::Async_CreatePool(njsBaton *baton)
         baton->GetDPIError();
     else if (dpiPool_setTimeout(baton->dpiPoolHandle, baton->poolTimeout) < 0)
         baton->GetDPIError();
+    else if (dpiPool_setStmtCacheSize(baton->dpiPoolHandle,
+            baton->stmtCacheSize) < 0)
+        baton->GetDPIError();
 }
 
 
