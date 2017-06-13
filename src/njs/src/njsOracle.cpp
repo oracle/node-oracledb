@@ -640,14 +640,11 @@ void njsOracledb::Async_GetConnection(njsBaton *baton)
     dpiCreateParams params;
 
     dpiGlobal_InitializeCreateParams(&params);
-    params.userName = baton->user.c_str();
-    params.userNameLength = baton->user.length();
-    params.password = baton->password.c_str();
-    params.passwordLength = baton->password.length();
-    params.connectString = baton->connectString.c_str();
-    params.connectStringLength = baton->connectString.length();
     params.externalAuth = baton->externalAuth;
-    if (dpiConn_Create(&params, &baton->dpiConnHandle, &errorInfo) < 0)
+    if (dpiConn_Create(baton->user.c_str(), baton->user.length(),
+            baton->password.c_str(), baton->password.length(),
+            baton->connectString.c_str(), baton->connectString.length(),
+            &params, &baton->dpiConnHandle, &errorInfo) < 0)
         baton->error = std::string(errorInfo.message, errorInfo.messageLength);
 }
 
@@ -724,17 +721,14 @@ void njsOracledb::Async_CreatePool(njsBaton *baton)
     dpiCreateParams params;
 
     dpiGlobal_InitializeCreateParams(&params);
-    params.userName = baton->user.c_str();
-    params.userNameLength = baton->user.length();
-    params.password = baton->password.c_str();
-    params.passwordLength = baton->password.length();
-    params.connectString = baton->connectString.c_str();
-    params.connectStringLength = baton->connectString.length();
     params.minSessions = baton->poolMin;
     params.maxSessions = baton->poolMax;
     params.sessionIncrement = baton->poolIncrement;
     params.externalAuth = baton->externalAuth;
-    if (dpiPool_Create(&params, &baton->dpiPoolHandle, &errorInfo) < 0)
+    if (dpiPool_Create(baton->user.c_str(), baton->user.length(),
+            baton->password.c_str(), baton->password.length(),
+            baton->connectString.c_str(), baton->connectString.length(),
+            &params, &baton->dpiPoolHandle, &errorInfo) < 0)
         baton->error = std::string(errorInfo.message, errorInfo.messageLength);
     else if (dpiPool_SetAttributeUint(baton->dpiPoolHandle,
             DPI_ATTR_POOL_TIMEOUT, baton->poolTimeout) < 0)

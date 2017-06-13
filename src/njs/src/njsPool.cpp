@@ -354,11 +354,8 @@ NAN_METHOD(njsPool::GetConnection)
 //-----------------------------------------------------------------------------
 void njsPool::Async_GetConnection(njsBaton *baton)
 {
-    dpiCreateParams params;
-
-    dpiGlobal_InitializeCreateParams(&params);
-    if (dpiPool_AcquireConnection(baton->dpiPoolHandle,
-            &params, &baton->dpiConnHandle) < 0)
+    if (dpiPool_AcquireConnection(baton->dpiPoolHandle, NULL, 0, NULL, 0, NULL,
+            &baton->dpiConnHandle) < 0)
         baton->GetDPIPoolError(baton->dpiPoolHandle);
 }
 
