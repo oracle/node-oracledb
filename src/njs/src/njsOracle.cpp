@@ -844,6 +844,8 @@ std::string njsOracledb::GetDPIError(void)
     dpiErrorInfo errorInfo;
 
     dpiContext_getError(globalDPIContext, &errorInfo);
+    if (errorInfo.code == 1406)
+        return njsMessages::Get(errInsufficientBufferForBinds);
     return std::string(errorInfo.message, errorInfo.messageLength);
 }
 
