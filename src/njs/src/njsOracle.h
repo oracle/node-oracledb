@@ -66,17 +66,26 @@ using namespace node;
 using namespace v8;
 
 
-/* Keep the version in sync with package.json */
+// Keep the version in sync with package.json
 #define NJS_NODE_ORACLEDB_MAJOR       2
 #define NJS_NODE_ORACLEDB_MINOR       0
-#define NJS_NODE_ORACLEDB_PATCH       10
+#define NJS_NODE_ORACLEDB_PATCH       11
 
-/* Used for Oracledb.version */
+// define stringified version and driver name
+#define NJS_STR_HELPER(x)       #x
+#define NJS_STR(x)              NJS_STR_HELPER(x)
+#define NJS_VERSION_STRING  \
+        NJS_STR(NJS_NODE_ORACLEDB_MAJOR) "." \
+        NJS_STR(NJS_NODE_ORACLEDB_MINOR) "." \
+        NJS_STR(NJS_NODE_ORACLEDB_PATCH)
+#define NJS_DRIVER_NAME "node-oracledb : " NJS_VERSION_STRING
+
+// Used for Oracledb.version
 #define NJS_NODE_ORACLEDB_VERSION   ( (NJS_NODE_ORACLEDB_MAJOR * 10000) + \
                                       (NJS_NODE_ORACLEDB_MINOR * 100) +   \
                                       (NJS_NODE_ORACLEDB_PATCH) )
 
-/* default values */
+// default values
 #define NJS_MAX_ROWS            100
 #define NJS_STMT_CACHE_SIZE      30
 #define NJS_POOL_MIN              0
@@ -185,6 +194,7 @@ private:
     unsigned int oraClientVer;
 
     static Nan::Persistent<FunctionTemplate> oracledbTemplate_s;
+
 };
 
 #endif                                               /* __NJSORACLE_H__ */

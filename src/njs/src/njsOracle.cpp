@@ -57,10 +57,13 @@
 #include "njsMessages.h"
 #include "njsIntLob.h"
 #include <sstream>
-                                        //peristent Oracledb class handle
+
+// peristent Oracledb class handle
 Nan::Persistent<FunctionTemplate> njsOracledb::oracledbTemplate_s;
 
-#define NJS_DRIVERNAME_PREFIX "node-oracledb"
+// context parameters (fixed)
+dpiContextParams njsContextParams;
+
 
 //-----------------------------------------------------------------------------
 // njsOracledb::njsOracledb()
@@ -92,16 +95,18 @@ void njsOracledb::Init(Handle<Object> target)
 {
     Nan::HandleScope scope;
     dpiErrorInfo errorInfo;
-    char driverName[30];
 
-    snprintf(driverName, sizeof(driverName), "%s : %d.%d.%d",
-            NJS_DRIVERNAME_PREFIX, NJS_NODE_ORACLEDB_MAJOR,
-            NJS_NODE_ORACLEDB_MINOR, NJS_NODE_ORACLEDB_PATCH);
-    if (dpiGlobal_Init(DPI_MODE_CREATE_THREADED, "UTF-8", "UTF-8", driverName,
-            &errorInfo) < 0) {
+    if (dpiGlobal_Init(DPI_API_VERSION, &errorInfo) < 0) {
         Nan::ThrowError(errorInfo.message);
         return;
     }
+
+    dpiGlobal_InitContextParams(&njsContextParams);
+    njsContextParams.createMode = DPI_MODE_CREATE_THREADED;
+    njsContextParams.encoding = "UTF-8";
+    njsContextParams.nencoding = "UTF-8";
+    njsContextParams.driverName = NJS_DRIVER_NAME;
+    njsContextParams.driverNameLength = strlen(njsContextParams.driverName);
 
     Local<FunctionTemplate> temp = Nan::New<FunctionTemplate>(New);
     temp->InstanceTemplate()->SetInternalFieldCount(1);
@@ -673,7 +678,7 @@ void njsOracledb::Async_GetConnection(njsBaton *baton)
     if (dpiConn_Create(baton->user.c_str(), baton->user.length(),
             baton->password.c_str(), baton->password.length(),
             baton->connectString.c_str(), baton->connectString.length(),
-            &params, &baton->dpiConnHandle, &errorInfo) < 0)
+            &njsContextParams, &params, &baton->dpiConnHandle, &errorInfo) < 0)
         baton->error = std::string(errorInfo.message, errorInfo.messageLength);
 }
 
@@ -757,7 +762,7 @@ void njsOracledb::Async_CreatePool(njsBaton *baton)
     if (dpiPool_Create(baton->user.c_str(), baton->user.length(),
             baton->password.c_str(), baton->password.length(),
             baton->connectString.c_str(), baton->connectString.length(),
-            &params, &baton->dpiPoolHandle, &errorInfo) < 0)
+            &njsContextParams, &params, &baton->dpiPoolHandle, &errorInfo) < 0)
         baton->error = std::string(errorInfo.message, errorInfo.messageLength);
     else if (dpiPool_SetAttributeUint(baton->dpiPoolHandle,
             DPI_ATTR_POOL_TIMEOUT, baton->poolTimeout) < 0)
