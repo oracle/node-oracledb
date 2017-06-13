@@ -96,7 +96,7 @@ void njsOracledb::Init(Handle<Object> target)
     snprintf(driverName, sizeof(driverName), "%s : %d.%d.%d",
             NJS_DRIVERNAME_PREFIX, NJS_NODE_ORACLEDB_MAJOR,
             NJS_NODE_ORACLEDB_MINOR, NJS_NODE_ORACLEDB_PATCH);
-    if (dpiGlobal_Initialize(DPI_CONN_PARAMS_MODE_THREADED, "UTF-8", "UTF-8",
+    if (dpiGlobal_Initialize(DPI_CREATE_PARAMS_MODE_THREADED, "UTF-8", "UTF-8",
             driverName, &errorInfo) < 0) {
         Nan::ThrowError(errorInfo.message);
         return;
