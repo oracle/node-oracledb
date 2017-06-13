@@ -52,11 +52,11 @@ describe('2. pool.js', function() {
         var defaultTimeout = 60;
         var defaultStmtCacheSize = 30;
 
-        pool.poolMin.should.be.exactly(defaultMin).and.be.a.Number;
-        pool.poolMax.should.be.exactly(defaultMax).and.be.a.Number;
-        pool.poolIncrement.should.be.exactly(defaultIncrement).and.be.a.Number;
-        pool.poolTimeout.should.be.exactly(defaultTimeout).and.be.a.Number;
-        pool.stmtCacheSize.should.be.exactly(defaultStmtCacheSize).and.be.a.Number;
+        pool.poolMin.should.be.exactly(defaultMin).and.be.a.Number();
+        pool.poolMax.should.be.exactly(defaultMax).and.be.a.Number();
+        pool.poolIncrement.should.be.exactly(defaultIncrement).and.be.a.Number();
+        pool.poolTimeout.should.be.exactly(defaultTimeout).and.be.a.Number();
+        pool.stmtCacheSize.should.be.exactly(defaultStmtCacheSize).and.be.a.Number();
 
         pool.connectionsOpen.should.equal(0);
         pool.connectionsInUse.should.equal(0);

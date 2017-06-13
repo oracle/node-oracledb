@@ -71,6 +71,7 @@ njsOracledb::njsOracledb()
     outFormat               = NJS_ROWS_ARRAY;
     maxRows                 = NJS_MAX_ROWS;
     autoCommit              = false;
+    extendedMetaData        = false;
     stmtCacheSize           = NJS_STMT_CACHE_SIZE;
     poolMax                 = NJS_POOL_MAX;
     poolMin                 = NJS_POOL_MIN;
@@ -130,6 +131,10 @@ void njsOracledb::Init(Handle<Object> target)
     Nan::SetAccessor(temp->InstanceTemplate(),
             Nan::New<v8::String>("autoCommit").ToLocalChecked(),
             njsOracledb::GetAutoCommit, njsOracledb::SetAutoCommit);
+    Nan::SetAccessor(temp->InstanceTemplate(),
+            Nan::New<v8::String>("extendedMetaData").ToLocalChecked(),
+            njsOracledb::GetExtendedMetaData,
+            njsOracledb::SetExtendedMetaData);
     Nan::SetAccessor(temp->InstanceTemplate(),
             Nan::New<v8::String>("maxRows").ToLocalChecked(),
             njsOracledb::GetMaxRows, njsOracledb::SetMaxRows);
@@ -400,6 +405,30 @@ NAN_SETTER(njsOracledb::SetAutoCommit)
     njsOracledb *oracledb = (njsOracledb*) ValidateSetter(info);
     if (oracledb)
         oracledb->autoCommit = value->ToBoolean()->Value();
+}
+
+
+//-----------------------------------------------------------------------------
+// njsOracledb::GetExtendedMetaData()
+//   Get accessor of "extendedMetaData" property.
+//-----------------------------------------------------------------------------
+NAN_GETTER(njsOracledb::GetExtendedMetaData)
+{
+    njsOracledb *oracledb = (njsOracledb*) ValidateGetter(info);
+    if (oracledb)
+        info.GetReturnValue().Set(oracledb->extendedMetaData);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsOracledb::SetExtendedMetaData()
+//   Set accessor of "extendedMetaData" property.
+//-----------------------------------------------------------------------------
+NAN_SETTER(njsOracledb::SetExtendedMetaData)
+{
+    njsOracledb *oracledb = (njsOracledb*) ValidateSetter(info);
+    if (oracledb)
+        oracledb->extendedMetaData = value->ToBoolean()->Value();
 }
 
 

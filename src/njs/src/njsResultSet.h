@@ -112,6 +112,7 @@ private:
     njsDataType *fetchAsStringTypes;
     uint32_t numFetchInfo;
     njsFetchInfo *fetchInfo;
+    bool extendedMetaData;
     Nan::Persistent<Object> jsOracledb;
     Nan::Persistent<Object> jsConnection;
 

@@ -115,6 +115,29 @@ typedef enum {
 
 
 //-----------------------------------------------------------------------------
+// njsDBType
+//   Database types used for extended meta data
+//-----------------------------------------------------------------------------
+typedef enum {
+    NJS_DB_TYPE_UNKNOWN        = -1,
+    NJS_DB_TYPE_DEFAULT        = 0,
+    NJS_DB_TYPE_VARCHAR        = 1,
+    NJS_DB_TYPE_NUMBER         = 2,
+    NJS_DB_TYPE_DATE           = 12,
+    NJS_DB_TYPE_RAW            = 23,
+    NJS_DB_TYPE_CHAR           = 96,
+    NJS_DB_TYPE_BINARY_FLOAT   = 100,
+    NJS_DB_TYPE_BINARY_DOUBLE  = 101,
+    NJS_DB_TYPE_ROWID          = 104,
+    NJS_DB_TYPE_CLOB           = 112,
+    NJS_DB_TYPE_BLOB           = 113,
+    NJS_DB_TYPE_TIMESTAMP      = 187,
+    NJS_DB_TYPE_TIMESTAMP_TZ   = 188,
+    NJS_DB_TYPE_TIMESTAMP_LTZ  = 232
+} njsDBType;
+
+
+//-----------------------------------------------------------------------------
 // njsVariable
 //   Class used for keeping track of variables used for fetching data.
 //-----------------------------------------------------------------------------
@@ -122,15 +145,23 @@ class njsVariable {
 public:
     std::string name;
     uint32_t pos;
+    dpiVarTypeNum dbTypeNum;
     dpiVarTypeNum varTypeNum;
     dpiVar *dpiVarHandle;
     uint32_t bindDir;
     uint32_t maxArraySize;
     uint32_t maxSize;
+    uint32_t dbSizeInBytes;
+    int16_t precision;
+    int8_t scale;
     bool isArray;
+    bool isNullable;
     njsProtoILob *lobs;
+
     njsVariable() : dpiVarHandle(NULL), lobs(NULL) {}
     ~njsVariable();
+    njsDataType DataType();
+    njsDBType DBType();
 };
 
 
@@ -224,6 +255,7 @@ public:
     bool externalAuth;
     bool getRS;
     bool autoCommit;
+    bool extendedMetaData;
     bool fetchMultipleRows;
     bool repeat;
     bool keepQueryInfo;

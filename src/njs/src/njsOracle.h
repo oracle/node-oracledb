@@ -97,20 +97,19 @@ public:
 
     static void Init(Handle<Object> target);
 
-    bool               getAutoCommit() const      { return autoCommit; }
-    unsigned int       getOutFormat() const       { return outFormat; }
-    unsigned int       getMaxRows()  const        { return maxRows; }
-    unsigned int       getStmtCacheSize()  const  { return stmtCacheSize; }
-    unsigned int       getPoolMin() const         { return poolMin; }
-    unsigned int       getPoolMax() const         { return poolMax; }
-    unsigned int       getPoolIncrement() const   { return poolIncrement; }
-    unsigned int       getPoolTimeout() const     { return poolTimeout; }
-    unsigned int       getPrefetchRows() const    { return prefetchRows; }
-    const std::string& getConnectionClass() const { return connClass; }
-    bool               IsValid() const            { return true; }
-
-    njsErrorType       GetInvalidErrorType() const
-        { return errSuccess; }
+    bool               getAutoCommit() const       { return autoCommit; }
+    unsigned int       getOutFormat() const        { return outFormat; }
+    unsigned int       getMaxRows()  const         { return maxRows; }
+    unsigned int       getStmtCacheSize()  const   { return stmtCacheSize; }
+    unsigned int       getPoolMin() const          { return poolMin; }
+    unsigned int       getPoolMax() const          { return poolMax; }
+    unsigned int       getPoolIncrement() const    { return poolIncrement; }
+    unsigned int       getPoolTimeout() const      { return poolTimeout; }
+    unsigned int       getPrefetchRows() const     { return prefetchRows; }
+    const std::string& getConnectionClass() const  { return connClass; }
+    bool               getExtendedMetaData() const { return extendedMetaData; }
+    bool               IsValid() const             { return true; }
+    njsErrorType       GetInvalidErrorType() const { return errSuccess; }
     void SetFetchAsStringTypesOnBaton(njsBaton *baton) const;
 
 private:
@@ -134,6 +133,7 @@ private:
     static NAN_GETTER(GetPoolTimeout);
     static NAN_GETTER(GetStmtCacheSize);
     static NAN_GETTER(GetAutoCommit);
+    static NAN_GETTER(GetExtendedMetaData);
     static NAN_GETTER(GetMaxRows);
     static NAN_GETTER(GetOutFormat);
     static NAN_GETTER(GetVersion);
@@ -151,6 +151,7 @@ private:
     static NAN_SETTER(SetPoolTimeout);
     static NAN_SETTER(SetStmtCacheSize);
     static NAN_SETTER(SetAutoCommit);
+    static NAN_SETTER(SetExtendedMetaData);
     static NAN_SETTER(SetMaxRows);
     static NAN_SETTER(SetOutFormat);
     static NAN_SETTER(SetVersion);
@@ -166,6 +167,7 @@ private:
 
     uint32_t outFormat;
     bool autoCommit;
+    bool extendedMetaData;
     uint32_t maxRows;
 
     uint32_t stmtCacheSize;

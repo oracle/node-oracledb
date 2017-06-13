@@ -75,6 +75,94 @@ njsVariable::~njsVariable()
 
 
 //-----------------------------------------------------------------------------
+// njsVariable::DataType()
+//   Return the data type that is being used by the variable. This is an
+// enumeration that is publicly available in the oracledb module.
+//-----------------------------------------------------------------------------
+njsDataType njsVariable::DataType()
+{
+    switch (varTypeNum) {
+        case DPI_VARTYPE_VARCHAR:
+        case DPI_VARTYPE_NVARCHAR:
+        case DPI_VARTYPE_CHAR:
+        case DPI_VARTYPE_NCHAR:
+        case DPI_VARTYPE_ROWID:
+        case DPI_VARTYPE_RAW:
+        case DPI_VARTYPE_LONG_VARCHAR:
+        case DPI_VARTYPE_LONG_NVARCHAR:
+        case DPI_VARTYPE_LONG_RAW:
+            return NJS_DATATYPE_STR;
+        case DPI_VARTYPE_NATIVE_FLOAT:
+        case DPI_VARTYPE_NATIVE_DOUBLE:
+        case DPI_VARTYPE_NATIVE_INT:
+        case DPI_VARTYPE_NUMBER:
+            return NJS_DATATYPE_NUM;
+        case DPI_VARTYPE_DATE:
+        case DPI_VARTYPE_TIMESTAMP:
+        case DPI_VARTYPE_TIMESTAMP_TZ:
+        case DPI_VARTYPE_TIMESTAMP_LTZ:
+            return NJS_DATATYPE_DATE;
+        case DPI_VARTYPE_CLOB:
+        case DPI_VARTYPE_NCLOB:
+            return NJS_DATATYPE_CLOB;
+        case DPI_VARTYPE_BLOB:
+            return NJS_DATATYPE_BLOB;
+        default:
+            break;
+    }
+    return NJS_DATATYPE_UNKNOWN;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsVariable::DBType()
+//   Return the database data type that the variable represents. This is an
+// enumeration that is publicly available in the oracledb module.
+//-----------------------------------------------------------------------------
+njsDBType njsVariable::DBType()
+{
+    switch (dbTypeNum) {
+        case DPI_VARTYPE_VARCHAR:
+        case DPI_VARTYPE_NVARCHAR:
+        case DPI_VARTYPE_LONG_VARCHAR:
+        case DPI_VARTYPE_LONG_NVARCHAR:
+            return NJS_DB_TYPE_VARCHAR;
+        case DPI_VARTYPE_CHAR:
+        case DPI_VARTYPE_NCHAR:
+            return NJS_DB_TYPE_CHAR;
+        case DPI_VARTYPE_ROWID:
+            return NJS_DB_TYPE_ROWID;
+        case DPI_VARTYPE_RAW:
+        case DPI_VARTYPE_LONG_RAW:
+            return NJS_DB_TYPE_RAW;
+        case DPI_VARTYPE_NATIVE_FLOAT:
+            return NJS_DB_TYPE_BINARY_FLOAT;
+        case DPI_VARTYPE_NATIVE_DOUBLE:
+            return NJS_DB_TYPE_BINARY_DOUBLE;
+        case DPI_VARTYPE_NATIVE_INT:
+        case DPI_VARTYPE_NUMBER:
+            return NJS_DB_TYPE_NUMBER;
+        case DPI_VARTYPE_DATE:
+            return NJS_DB_TYPE_DATE;
+        case DPI_VARTYPE_TIMESTAMP:
+            return NJS_DB_TYPE_TIMESTAMP;
+        case DPI_VARTYPE_TIMESTAMP_TZ:
+            return NJS_DB_TYPE_TIMESTAMP_TZ;
+        case DPI_VARTYPE_TIMESTAMP_LTZ:
+            return NJS_DB_TYPE_TIMESTAMP_LTZ;
+        case DPI_VARTYPE_CLOB:
+        case DPI_VARTYPE_NCLOB:
+            return NJS_DB_TYPE_CLOB;
+        case DPI_VARTYPE_BLOB:
+            return NJS_DB_TYPE_BLOB;
+        default:
+            break;
+    }
+    return NJS_DB_TYPE_UNKNOWN;
+}
+
+
+//-----------------------------------------------------------------------------
 // njsBaton::~njsBaton()
 //   Destructor.
 //-----------------------------------------------------------------------------

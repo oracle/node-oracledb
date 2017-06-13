@@ -143,7 +143,7 @@ describe('58. properties.js', function() {
     })
 
     it('58.1.8 version (read-only)', function() {
-      (oracledb.version).should.be.a.Number;
+      (oracledb.version).should.be.a.Number();
 
       try {
         oracledb.version = 5;
@@ -156,7 +156,7 @@ describe('58. properties.js', function() {
 
     it('58.1.9 connClass', function() {
       oracledb.connClass = "cc";
-      (oracledb.connClass).should.be.a.String;
+      (oracledb.connClass).should.be.a.String();
     })
 
     it('58.1.10 externalAuth', function() {
@@ -193,7 +193,7 @@ describe('58. properties.js', function() {
 
     it('58.1.14 oracleClientVersion (read-only)', function () {
       var t = oracledb.oracleClientVersion ;
-      t.should.be.a.Number;
+      t.should.be.a.Number();
 
       try {
         oracledb.oracleClientVersion = t + 1;
@@ -252,7 +252,7 @@ describe('58. properties.js', function() {
 
     it('58.2.1 poolMin', function() {
       var t = pool.poolMin;
-      t.should.be.a.Number;
+      t.should.be.a.Number();
 
       try {
         pool.poolMin = t + 1;
@@ -264,7 +264,7 @@ describe('58. properties.js', function() {
 
     it('58.2.2 poolMax', function() {
       var t = pool.poolMax;
-      t.should.be.a.Number;
+      t.should.be.a.Number();
 
       try {
         pool.poolMax = t + 1;
@@ -276,7 +276,7 @@ describe('58. properties.js', function() {
 
     it('58.2.3 poolIncrement', function() {
       var t = pool.poolIncrement;
-      t.should.be.a.Number;
+      t.should.be.a.Number();
 
       try {
         pool.poolIncrement = t + 1;
@@ -288,7 +288,7 @@ describe('58. properties.js', function() {
 
     it('58.2.4 poolTimeout', function() {
       var t = pool.poolTimeout;
-      t.should.be.a.Number;
+      t.should.be.a.Number();
 
       try {
         pool.poolTimeout = t + 1;
@@ -300,7 +300,7 @@ describe('58. properties.js', function() {
 
     it('58.2.5 stmtCacheSize', function() {
       var t = pool.stmtCacheSize;
-      t.should.be.a.Number;
+      t.should.be.a.Number();
 
       try {
         pool.stmtCacheSize = t + 1;
@@ -312,7 +312,7 @@ describe('58. properties.js', function() {
 
     it('58.2.6 connectionsInUse', function() {
       var t = pool.connectionsInUse;
-      t.should.be.a.Number;
+      t.should.be.a.Number();
 
       try {
         pool.connectionsInUse = t + 1;
@@ -324,7 +324,7 @@ describe('58. properties.js', function() {
 
     it('58.2.7 connectionsOpen', function() {
       var t = pool.connectionsOpen;
-      t.should.be.a.Number;
+      t.should.be.a.Number();
 
       try {
         pool.connectionsOpen = t + 1;
@@ -348,7 +348,7 @@ describe('58. properties.js', function() {
 
     it.skip('58.2.9 queueTimeout', function() {
       var t = pool.queueTimeout;
-      t.should.be.a.Number;
+      t.should.be.a.Number();
 
       try {
         pool.queueTimeout = t + 1000;
@@ -385,13 +385,13 @@ describe('58. properties.js', function() {
       should.equal(connection.module, null);
       should.equal(connection.clientId, null);
 
-      (connection.stmtCacheSize).should.be.a.Number;
+      (connection.stmtCacheSize).should.be.a.Number();
       (connection.stmtCacheSize).should.be.greaterThan(0);
     })
 
     it('58.3.2 stmtCacheSize (read-only)', function() {
       var t = connection.stmtCacheSize;
-      t.should.be.a.Number;
+      t.should.be.a.Number();
 
       try {
         connection.stmtCacheSize = t + 1;
@@ -459,7 +459,7 @@ describe('58. properties.js', function() {
 
     it('58.3.6 oracleServerVersion (read-only)', function () {
       var t = connection.oracleServerVersion;
-      t.should.be.a.Number;
+      t.should.be.a.Number();
 
       try {
         connection.oracleServerVersion = t + 1;

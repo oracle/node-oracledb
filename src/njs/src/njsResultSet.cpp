@@ -143,6 +143,7 @@ Local<Object> njsResultSet::CreateFromBaton(njsBaton *baton)
     baton->fetchInfo = NULL;
     resultSet->numFetchInfo = baton->numFetchInfo;
     baton->numFetchInfo = 0;
+    resultSet->extendedMetaData = baton->extendedMetaData;
     return scope.Escape(obj);
 }
 
@@ -168,6 +169,7 @@ bool njsResultSet::CreateFromRefCursor(njsBaton *baton, dpiStmt *dpiStmtHandle,
     resultSet->jsOracledb.Reset(baton->jsOracledb);
     resultSet->jsConnection.Reset(baton->jsCallingObj);
     resultSet->outFormat = baton->outFormat;
+    resultSet->extendedMetaData = baton->extendedMetaData;
     resultSet->activeBaton = NULL;
 
     // create query variables
@@ -239,7 +241,7 @@ NAN_GETTER(njsResultSet::GetMetaData)
     if (!resultSet)
         return;
     Local<Value> meta = njsConnection::GetMetaData(resultSet->queryVars,
-            resultSet->numQueryVars);
+            resultSet->numQueryVars, resultSet->extendedMetaData);
     info.GetReturnValue().Set(meta);
 }
 

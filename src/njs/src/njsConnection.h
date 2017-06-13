@@ -69,7 +69,8 @@ class Connection;
 class njsConnection: public njsCommon {
 public:
     static Local<Object> CreateFromBaton(njsBaton *baton);
-    static Local<Value> GetMetaData(njsVariable *vars, uint32_t numVars);
+    static Local<Value> GetMetaData(njsVariable *vars, uint32_t numVars,
+            bool extendedMetaData);
     static bool GetRows(njsBaton* baton, Local<Object> &rows);
     static bool ProcessFetch(njsBaton* baton);
     static bool ProcessDefines(njsBaton* baton, dpiStmt *dpiStmtHandle,

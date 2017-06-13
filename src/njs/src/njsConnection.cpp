@@ -166,8 +166,13 @@ bool njsConnection::ProcessDefines(njsBaton *baton, dpiStmt *dpiStmtHandle,
         }
         vars[i].name = std::string(queryInfo.name, queryInfo.nameLength);
         vars[i].maxArraySize = baton->maxRows;
+        vars[i].dbSizeInBytes = queryInfo.dbSizeInBytes;
+        vars[i].precision = queryInfo.precision;
+        vars[i].scale = queryInfo.scale;
+        vars[i].isNullable = queryInfo.nullOk;
 
         // determine the type of data
+        vars[i].dbTypeNum = queryInfo.typeNum;
         vars[i].varTypeNum = queryInfo.typeNum;
         if (queryInfo.typeNum != DPI_VARTYPE_VARCHAR ||
                 queryInfo.typeNum != DPI_VARTYPE_NVARCHAR ||
@@ -193,11 +198,13 @@ bool njsConnection::ProcessDefines(njsBaton *baton, dpiStmt *dpiStmtHandle,
             case DPI_VARTYPE_NUMBER:
             case DPI_VARTYPE_NATIVE_INT:
             case DPI_VARTYPE_NATIVE_FLOAT:
+            case DPI_VARTYPE_NATIVE_DOUBLE:
                 if (vars[i].varTypeNum == DPI_VARTYPE_VARCHAR)
                     vars[i].maxSize = NJS_MAX_FETCH_AS_STRING_SIZE;
                 break;
             case DPI_VARTYPE_DATE:
             case DPI_VARTYPE_TIMESTAMP:
+            case DPI_VARTYPE_TIMESTAMP_TZ:
             case DPI_VARTYPE_TIMESTAMP_LTZ:
                 if (vars[i].varTypeNum == DPI_VARTYPE_VARCHAR)
                     vars[i].maxSize = NJS_MAX_FETCH_AS_STRING_SIZE;
@@ -206,7 +213,6 @@ bool njsConnection::ProcessDefines(njsBaton *baton, dpiStmt *dpiStmtHandle,
             case DPI_VARTYPE_CLOB:
             case DPI_VARTYPE_NCLOB:
             case DPI_VARTYPE_BLOB:
-            case DPI_VARTYPE_BFILE:
                 break;
             case DPI_VARTYPE_STMT:
                 break;
@@ -292,7 +298,6 @@ bool njsConnection::ProcessLOBs(njsBaton *baton, njsVariable *vars,
                 dataType = NJS_DATATYPE_CLOB;
                 break;
             case DPI_VARTYPE_BLOB:
-            case DPI_VARTYPE_BFILE:
                 dataType = NJS_DATATYPE_BLOB;
                 break;
             default:
@@ -374,6 +379,7 @@ bool njsConnection::MapByType(njsBaton *baton, dpiQueryInfo *queryInfo,
         switch (queryInfo->typeNum) {
             case DPI_VARTYPE_NUMBER:
             case DPI_VARTYPE_NATIVE_FLOAT:
+            case DPI_VARTYPE_NATIVE_DOUBLE:
             case DPI_VARTYPE_NATIVE_INT:
                 for (uint32_t i = 0; i < baton->numFetchAsStringTypes; i++) {
                     if (baton->fetchAsStringTypes[i] == NJS_DATATYPE_NUM) {
@@ -382,6 +388,9 @@ bool njsConnection::MapByType(njsBaton *baton, dpiQueryInfo *queryInfo,
                     }
                 }
                 break;
+            case DPI_VARTYPE_DATE:
+            case DPI_VARTYPE_TIMESTAMP:
+            case DPI_VARTYPE_TIMESTAMP_TZ:
             case DPI_VARTYPE_TIMESTAMP_LTZ:
                 for (uint32_t i = 0; i < baton->numFetchAsStringTypes; i++) {
                     if (baton->fetchAsStringTypes[i] == NJS_DATATYPE_DATE) {
@@ -454,7 +463,8 @@ bool njsConnection::PrepareAndBind(njsBaton *baton)
 // njsConnection::GetMetaData()
 //   Populate array of metadata for JS from list of variables.
 //-----------------------------------------------------------------------------
-Local<Value> njsConnection::GetMetaData(njsVariable *vars, uint32_t numVars)
+Local<Value> njsConnection::GetMetaData(njsVariable *vars, uint32_t numVars,
+        bool extendedMetaData)
 {
     Nan::EscapableHandleScope scope;
     Local<Array> metaArray = Nan::New<Array>(numVars);
@@ -464,6 +474,44 @@ Local<Value> njsConnection::GetMetaData(njsVariable *vars, uint32_t numVars)
         Local<Object> column = Nan::New<Object>();
         Nan::Set(column, Nan::New<v8::String>("name").ToLocalChecked(),
                 Nan::New<v8::String>(var->name.c_str()).ToLocalChecked());
+        if (extendedMetaData) {
+            njsDBType dbType = var->DBType();
+            Nan::Set(column,
+                    Nan::New<v8::String>("fetchType").ToLocalChecked(),
+                    Nan::New<v8::Number>(var->DataType()));
+            Nan::Set(column,
+                    Nan::New<v8::String>("dbType").ToLocalChecked(),
+                    Nan::New<v8::Number>(dbType));
+            Nan::Set(column,
+                    Nan::New<v8::String>("nullable").ToLocalChecked(),
+                    Nan::New<v8::Boolean>(var->isNullable));
+            switch (dbType) {
+                case NJS_DB_TYPE_VARCHAR:
+                case NJS_DB_TYPE_CHAR:
+                case NJS_DB_TYPE_RAW:
+                    Nan::Set(column,
+                            Nan::New<v8::String>("byteSize").ToLocalChecked(),
+                            Nan::New<v8::Number>(var->dbSizeInBytes));
+                    break;
+                case NJS_DB_TYPE_NUMBER:
+                    Nan::Set(column,
+                            Nan::New<v8::String>("precision").ToLocalChecked(),
+                            Nan::New<v8::Number>(var->precision));
+                    Nan::Set(column,
+                            Nan::New<v8::String>("scale").ToLocalChecked(),
+                            Nan::New<v8::Number>(var->scale) );
+                    break;
+                case NJS_DB_TYPE_TIMESTAMP:
+                case NJS_DB_TYPE_TIMESTAMP_TZ:
+                case NJS_DB_TYPE_TIMESTAMP_LTZ:
+                    Nan::Set(column,
+                            Nan::New<v8::String>("precision").ToLocalChecked(),
+                            Nan::New<v8::Number>(var->scale));
+                    break;
+                default:
+                    break;
+            }
+        }
         Nan::Set(metaArray, i, column);
     }
     return scope.Escape(metaArray);
@@ -997,6 +1045,9 @@ bool njsConnection::ProcessOptions(Nan::NAN_METHOD_ARGS_TYPE args,
         return false;
     if (!baton->GetBoolFromJSON(options, "autoCommit", 2, &baton->autoCommit))
         return false;
+    if (!baton->GetBoolFromJSON(options, "extendedMetaData", 2,
+            &baton->extendedMetaData))
+        return false;
 
     // process the fetchAs specifications, if applicable
     Local<Value> key = Nan::New<v8::String>("fetchInfo").ToLocalChecked();
@@ -1084,6 +1135,9 @@ bool njsConnection::GetScalarValueFromVar(njsBaton *baton, njsVariable *var,
         case DPI_XFERTYPE_INT64:
             temp = Nan::New<v8::Integer>( (int) data.value.asInt64);
             break;
+        case DPI_XFERTYPE_FLOAT:
+            temp = Nan::New<Number>(data.value.asFloat);
+            break;
         case DPI_XFERTYPE_DOUBLE:
             if (var->varTypeNum == DPI_VARTYPE_TIMESTAMP_LTZ)
                 temp = Nan::New<Date>(data.value.asDouble).ToLocalChecked();
@@ -1164,9 +1218,13 @@ bool njsConnection::InitializeDPIData(njsVariable *var, dpiData *data,
             data->typeNum = DPI_XFERTYPE_BYTES;
             break;
         case DPI_VARTYPE_NATIVE_FLOAT:
+            data->typeNum = DPI_XFERTYPE_FLOAT;
+            break;
+        case DPI_VARTYPE_NATIVE_DOUBLE:
         case DPI_VARTYPE_NUMBER:
         case DPI_VARTYPE_DATE:
         case DPI_VARTYPE_TIMESTAMP:
+        case DPI_VARTYPE_TIMESTAMP_TZ:
         case DPI_VARTYPE_TIMESTAMP_LTZ:
             data->typeNum = DPI_XFERTYPE_DOUBLE;
             break;
@@ -1313,6 +1371,7 @@ NAN_METHOD(njsConnection::Execute)
     oracledb->SetFetchAsStringTypesOnBaton(baton);
     baton->outFormat = oracledb->getOutFormat();
     baton->autoCommit = oracledb->getAutoCommit();
+    baton->extendedMetaData = oracledb->getExtendedMetaData();
     baton->getRS = false;
     bool ok = true;
     if (info.Length() > 2)
@@ -1412,7 +1471,8 @@ void njsConnection::Async_AfterExecute(njsBaton *baton, Local<Value> argv[])
 
         // assign metadata
         Nan::Set(result, Nan::New<v8::String>("metaData").ToLocalChecked(),
-                GetMetaData(baton->queryVars, baton->numQueryVars));
+                GetMetaData(baton->queryVars, baton->numQueryVars,
+                        baton->extendedMetaData));
 
         // return result set, if requested to do so
         if (baton->getRS) {

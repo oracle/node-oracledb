@@ -55,7 +55,7 @@ describe('3. examples.js', function(){
 
   describe('3.2 version.js', function(){
     it('3.2.1 shows the oracledb version attribute', function(){
-      (oracledb.version).should.be.a.Number;
+      (oracledb.version).should.be.a.Number();
       (oracledb.version).should.be.greaterThan(0);
       // console.log("Driver version number is " + oracledb.version);
 

@@ -196,8 +196,8 @@ describe('62. lobProperties.js', function() {
         var t1 = clob.chunkSize,
             t2 = blob.chunkSize;
 
-        t1.should.be.a.Number;
-        t2.should.be.a.Number;
+        t1.should.be.a.Number();
+        t2.should.be.a.Number();
         t1.should.eql(t2);
         defaultChunkSize = clob.chunkSize;
 
@@ -233,8 +233,8 @@ describe('62. lobProperties.js', function() {
         var t1 = clob.length,
             t2 = blob.length;
 
-        t1.should.be.a.Number;
-        t2.should.be.a.Number;
+        t1.should.be.a.Number();
+        t2.should.be.a.Number();
         t1.should.not.eql(t2);
 
         try {
