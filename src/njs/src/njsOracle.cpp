@@ -90,13 +90,17 @@ njsOracledb::njsOracledb()
 void njsOracledb::Init(Handle<Object> target)
 {
     Nan::HandleScope scope;
+    dpiErrorInfo errorInfo;
     char driverName[30];
 
     snprintf(driverName, sizeof(driverName), "%s : %d.%d.%d",
             NJS_DRIVERNAME_PREFIX, NJS_NODE_ORACLEDB_MAJOR,
             NJS_NODE_ORACLEDB_MINOR, NJS_NODE_ORACLEDB_PATCH);
-    dpiGlobal_Initialize(DPI_CONN_PARAMS_MODE_THREADED, "UTF-8", "UTF-8",
-            driverName);
+    if (dpiGlobal_Initialize(DPI_CONN_PARAMS_MODE_THREADED, "UTF-8", "UTF-8",
+            driverName, &errorInfo) < 0) {
+        Nan::ThrowError(errorInfo.message);
+        return;
+    }
 
     Local<FunctionTemplate> temp = Nan::New<FunctionTemplate>(New);
     temp->InstanceTemplate()->SetInternalFieldCount(1);

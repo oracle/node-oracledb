@@ -412,17 +412,16 @@ bool njsConnection::PrepareAndBind(njsBaton *baton)
     }
 
     // determine statement information
-    int isReturning, isQuery, isPLSQL;
-    if (dpiStmt_GetStatementInfo(baton->dpiStmtHandle, &isQuery, &isPLSQL,
-            &isReturning) < 0) {
+    dpiStmtInfo stmtInfo;
+    if (dpiStmt_GetInfo(baton->dpiStmtHandle, &stmtInfo) < 0) {
         baton->GetDPIStmtError(baton->dpiStmtHandle);
         return false;
     }
-    baton->isPLSQL = (isPLSQL) ? true : false;
-    baton->isReturning = (isReturning) ? true : false;
+    baton->isPLSQL = (stmtInfo.isPLSQL) ? true : false;
+    baton->isReturning = (stmtInfo.isReturning) ? true : false;
 
     // result sets are incompatible with non-queries
-    if (!isQuery && baton->getRS) {
+    if (!stmtInfo.isQuery && baton->getRS) {
         baton->error = njsMessages::Get(errInvalidNonQueryExecution);
         return false;
     }
@@ -431,7 +430,7 @@ bool njsConnection::PrepareAndBind(njsBaton *baton)
     for (uint32_t i = 0; i < baton->numBindVars; i++) {
         int status;
         njsVariable *var = &baton->bindVars[i];
-        if (isReturning && var->bindDir == NJS_BIND_OUT &&
+        if (stmtInfo.isReturning && var->bindDir == NJS_BIND_OUT &&
                 var->varTypeNum == DPI_VARTYPE_RAW) {
             baton->error = njsMessages::Get(errBufferReturningInvalid);
             return false;
