@@ -206,8 +206,7 @@ NAN_GETTER(njsPool::GetConnectionsOpen)
     if (!pool)
         return;
     uint32_t value;
-    if (dpiPool_GetAttributeUint(pool->dpiPoolHandle, DPI_ATTR_POOL_OPEN_COUNT,
-            &value) < 0) {
+    if (dpiPool_GetOpenCount(pool->dpiPoolHandle, &value) < 0) {
         dpiErrorInfo errorInfo;
         dpiPool_GetError(pool->dpiPoolHandle, &errorInfo);
         Nan::ThrowError(errorInfo.message);
@@ -227,8 +226,7 @@ NAN_GETTER(njsPool::GetConnectionsInUse)
     if (!pool)
         return;
     uint32_t value;
-    if (dpiPool_GetAttributeUint(pool->dpiPoolHandle, DPI_ATTR_POOL_BUSY_COUNT,
-            &value) < 0) {
+    if (dpiPool_GetBusyCount(pool->dpiPoolHandle, &value) < 0) {
         dpiErrorInfo errorInfo;
         dpiPool_GetError(pool->dpiPoolHandle, &errorInfo);
         Nan::ThrowError(errorInfo.message);

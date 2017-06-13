@@ -764,8 +764,7 @@ void njsOracledb::Async_CreatePool(njsBaton *baton)
             baton->connectString.c_str(), baton->connectString.length(),
             &njsContextParams, &params, &baton->dpiPoolHandle, &errorInfo) < 0)
         baton->error = std::string(errorInfo.message, errorInfo.messageLength);
-    else if (dpiPool_SetAttributeUint(baton->dpiPoolHandle,
-            DPI_ATTR_POOL_TIMEOUT, baton->poolTimeout) < 0)
+    else if (dpiPool_SetTimeout(baton->dpiPoolHandle, baton->poolTimeout) < 0)
         baton->GetDPIPoolError(baton->dpiPoolHandle);
 }
 

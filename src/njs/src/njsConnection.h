@@ -155,9 +155,8 @@ private:
     static bool ProcessOptions(Nan::NAN_METHOD_ARGS_TYPE args,
             unsigned int index, njsBaton *baton);
     static void SetTextAttribute(Nan::NAN_SETTER_ARGS_TYPE args,
-            const char *attributeName, dpiConnAttribute attribute,
-            Local<Value> value);
-
+            const char *attributeName, Local<Value> value,
+            int (*setter)(dpiConn*, const char*, uint32_t));
     static Nan::Persistent<FunctionTemplate> connectionTemplate_s;
 
     dpiConn *dpiConnHandle;

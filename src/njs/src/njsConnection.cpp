@@ -1261,8 +1261,8 @@ Local<Value> njsConnection::GetOutBinds(njsBaton *baton)
 // first validating the connection.
 //-----------------------------------------------------------------------------
 void njsConnection::SetTextAttribute(Nan::NAN_SETTER_ARGS_TYPE args,
-        const char *attributeName, dpiConnAttribute attribute,
-        Local<Value> value)
+        const char *attributeName, Local<Value> value,
+        int (*setter)(dpiConn*, const char *, uint32_t))
 {
     njsConnection *connection = (njsConnection*) ValidateSetter(args);
     if (!connection)
@@ -1274,8 +1274,7 @@ void njsConnection::SetTextAttribute(Nan::NAN_SETTER_ARGS_TYPE args,
         return;
     }
     v8::String::Utf8Value utfstr(value->ToString());
-    if (dpiConn_SetAttributeText(connection->dpiConnHandle, attribute,
-            *utfstr, utfstr.length()) < 0) {
+    if ((*setter)(connection->dpiConnHandle, *utfstr, utfstr.length()) < 0) {
         dpiErrorInfo errorInfo;
         dpiConn_GetError(connection->dpiConnHandle, &errorInfo);
         Nan::ThrowError(errorInfo.message);
@@ -1660,7 +1659,7 @@ NAN_GETTER(njsConnection::GetClientId)
 //-----------------------------------------------------------------------------
 NAN_SETTER(njsConnection::SetClientId)
 {
-    SetTextAttribute(info, "clientId", DPI_ATTR_CONN_CLIENT_IDENTIFIER, value);
+    SetTextAttribute(info, "clientId", value, dpiConn_SetClientIdentifier);
 }
 
 
@@ -1681,7 +1680,7 @@ NAN_GETTER(njsConnection::GetModule)
 //-----------------------------------------------------------------------------
 NAN_SETTER(njsConnection::SetModule)
 {
-    SetTextAttribute(info, "module", DPI_ATTR_CONN_MODULE, value);
+    SetTextAttribute(info, "module", value, dpiConn_SetModule);
 }
 
 
@@ -1702,7 +1701,7 @@ NAN_GETTER(njsConnection::GetAction)
 //-----------------------------------------------------------------------------
 NAN_SETTER(njsConnection::SetAction)
 {
-    SetTextAttribute(info, "action", DPI_ATTR_CONN_ACTION, value);
+    SetTextAttribute(info, "action", value, dpiConn_SetAction);
 }
 
 
