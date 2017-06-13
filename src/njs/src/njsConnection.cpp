@@ -118,12 +118,13 @@ void njsConnection::Init(Handle<Object> target)
 Local<Object> njsConnection::CreateFromBaton(njsBaton *baton)
 {
     Nan::EscapableHandleScope scope;
-    Local<FunctionTemplate> lft;
     njsConnection *connection;
+    Local<Function> func;
     Local<Object> obj;
 
-    lft = Nan::New<FunctionTemplate>(connectionTemplate_s);
-    obj = lft->GetFunction()->NewInstance();
+    func = Nan::GetFunction(
+            Nan::New<FunctionTemplate>(connectionTemplate_s)).ToLocalChecked();
+    obj = Nan::NewInstance(func).ToLocalChecked();
     connection = Nan::ObjectWrap::Unwrap<njsConnection>(obj);
     connection->dpiConnHandle = baton->dpiConnHandle;
     baton->dpiConnHandle = NULL;
@@ -901,12 +902,13 @@ bool njsConnection::ProcessScalarBindValue(Local<Value> value,
         if (bindOk) {
             if (var->nativeTypeNum == DPI_NATIVE_TYPE_INT64) {
                 if (value->IsInt32())
-                    data->value.asInt64 = value->ToInt32()->Value();
-                else data->value.asInt64 = value->ToUint32()->Value();
+                    data->value.asInt64 = Nan::To<int32_t>(value).FromJust();
+                else data->value.asInt64 = Nan::To<uint32_t>(value).FromJust();
             } else {
                 if (value->IsInt32())
-                    data->value.asDouble = value->ToInt32()->Value();
-                else data->value.asDouble = value->ToUint32()->Value();
+                    data->value.asDouble = Nan::To<int32_t>(value).FromJust();
+                else data->value.asDouble =
+                        Nan::To<uint32_t>(value).FromJust();
             }
         }
 

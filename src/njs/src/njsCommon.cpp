@@ -306,7 +306,7 @@ void njsBaton::AsyncAfterWorkCallback(uv_work_t *req, int status)
     }
 
     // raise fatal exception if an exception was caught
-    delete callbackArgs;
+    delete [] callbackArgs;
     if (tc.HasCaught())
         Nan::FatalException(tc);
 }
@@ -447,7 +447,7 @@ bool njsBaton::GetUnsignedIntFromJSON(Local<Object> obj, const char *key,
         return false;
     jsValue = obj->Get(Nan::New<v8::String>(key).ToLocalChecked());
     if (jsValue->IsUint32()) {
-        *value = jsValue->ToUint32()->Value();
+        *value = Nan::To<uint32_t>(jsValue).FromJust();
         return true;
     } else if (jsValue->IsUndefined() || jsValue->IsNull()) {
         return true;
@@ -574,7 +574,7 @@ bool njsCommon::GetUnsignedIntArg(Nan::NAN_METHOD_ARGS_TYPE args,
         Nan::ThrowError(errMsg.c_str());
         return false;
     }
-    *value = args[index]->ToUint32()->Value();
+    *value = Nan::To<uint32_t>(args[index]).FromJust();
     return true;
 }
 
@@ -592,7 +592,7 @@ bool njsCommon::SetPropUnsignedInt(Local<Value> value, uint32_t *valuePtr,
         Nan::ThrowError(errMsg.c_str());
         return false;
     }
-    *valuePtr = value->ToUint32()->Value();
+    *valuePtr = Nan::To<uint32_t>(value).FromJust();
     return true;
 }
 

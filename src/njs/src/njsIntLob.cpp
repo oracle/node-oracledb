@@ -115,12 +115,13 @@ void njsILob::Init(Handle<Object> target)
 Local<Object> njsILob::CreateFromProtoLob(njsProtoILob *protoLob)
 {
     Nan::EscapableHandleScope scope;
-    Local<FunctionTemplate> lft;
+    Local<Function> func;
     Local<Object> obj;
     njsILob *lob;
 
-    lft = Nan::New<FunctionTemplate>(iLobTemplate_s);
-    obj = lft->GetFunction()->NewInstance();
+    func = Nan::GetFunction(
+            Nan::New<FunctionTemplate>(iLobTemplate_s)).ToLocalChecked();
+    obj = Nan::NewInstance(func).ToLocalChecked();
     lob = Nan::ObjectWrap::Unwrap<njsILob>(obj);
     lob->dpiLobHandle = protoLob->dpiLobHandle;
     protoLob->dpiLobHandle = NULL;

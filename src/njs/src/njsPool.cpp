@@ -115,12 +115,13 @@ void njsPool::Init(Handle<Object> target)
 Local<Object> njsPool::CreateFromBaton(njsBaton *baton)
 {
     Nan::EscapableHandleScope scope;
-    Local<FunctionTemplate> lft;
+    Local<Function> func;
     Local<Object> obj;
     njsPool *pool;
 
-    lft = Nan::New<FunctionTemplate>(poolTemplate_s);
-    obj = lft->GetFunction()->NewInstance();
+    func = Nan::GetFunction(
+            Nan::New<FunctionTemplate>(poolTemplate_s)).ToLocalChecked();
+    obj = Nan::NewInstance(func).ToLocalChecked();
     pool = Nan::ObjectWrap::Unwrap<njsPool>(obj);
     pool->dpiPoolHandle = baton->dpiPoolHandle;
     baton->dpiPoolHandle = NULL;

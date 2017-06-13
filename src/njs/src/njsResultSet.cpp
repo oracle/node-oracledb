@@ -118,12 +118,13 @@ void njsResultSet::Init(Handle<Object> target)
 Local<Object> njsResultSet::CreateFromBaton(njsBaton *baton)
 {
     Nan::EscapableHandleScope scope;
-    Local<FunctionTemplate> lft;
     njsResultSet *resultSet;
+    Local<Function> func;
     Local<Object> obj;
 
-    lft = Nan::New<FunctionTemplate>(resultSetTemplate_s);
-    obj = lft->GetFunction()->NewInstance();
+    func = Nan::GetFunction(
+            Nan::New<FunctionTemplate>(resultSetTemplate_s)).ToLocalChecked();
+    obj = Nan::NewInstance(func).ToLocalChecked();
     resultSet = Nan::ObjectWrap::Unwrap<njsResultSet>(obj);
     resultSet->dpiStmtHandle = baton->dpiStmtHandle;
     baton->dpiStmtHandle = NULL;
@@ -156,13 +157,14 @@ bool njsResultSet::CreateFromRefCursor(njsBaton *baton, dpiStmt *dpiStmtHandle,
         Local<Value> &value)
 {
     Nan::EscapableHandleScope scope;
-    Local<FunctionTemplate> lft;
     njsResultSet *resultSet;
+    Local<Function> func;
     Local<Object> obj;
 
     // basic initialization
-    lft = Nan::New<FunctionTemplate>(resultSetTemplate_s);
-    obj = lft->GetFunction()->NewInstance();
+    func = Nan::GetFunction(
+            Nan::New<FunctionTemplate>(resultSetTemplate_s)).ToLocalChecked();
+    obj = Nan::NewInstance(func).ToLocalChecked();
     resultSet = Nan::ObjectWrap::Unwrap<njsResultSet>(obj);
     if (dpiStmt_addRef(dpiStmtHandle) < 0)
         return false;
