@@ -188,7 +188,7 @@ bool njsConnection::ProcessDefines(njsBaton *baton, dpiStmt *dpiStmtHandle,
             case DPI_VARTYPE_NCHAR:
             case DPI_VARTYPE_RAW:
             case DPI_VARTYPE_ROWID:
-                vars[i].maxSize = queryInfo.sizeInBytes;
+                vars[i].maxSize = queryInfo.clientSizeInBytes;
                 break;
             case DPI_VARTYPE_NUMBER:
             case DPI_VARTYPE_NATIVE_INT:
