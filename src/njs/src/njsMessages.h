@@ -77,7 +77,6 @@ typedef enum {
     errInvalidArraySize,
     errIncompatibleTypeArrayBind,
     errInvalidValueArrayBind,
-    errEmptyArray,
     errConnRequestTimeout,
     errCannotConvertRsToStream,
     errCannotInvokeRsMethods,

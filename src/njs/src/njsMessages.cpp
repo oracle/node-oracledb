@@ -74,7 +74,6 @@ static const char *errMsg[] = {
     "NJS-036: given array is of size greater than maxArraySize", // errInvalidArraySize
     "NJS-037: incompatible type of value provided", // errIncompatibleTypeArrayBind
     "NJS-038: maxArraySize value should be greater than 0", // errInvalidValueArrayBind
-    "NJS-039: empty array is not allowed for IN bind", // errEmptyArray
     "NJS-040: connection request timeout",  // errConnRequestTimeout
     "NJS-041: cannot convert ResultSet to QueryStream after invoking methods", // errCannotConvertRsToStream
     "NJS-042: cannot invoke ResultSet methods after converting to QueryStream", // errCannotInvokeRsMethods

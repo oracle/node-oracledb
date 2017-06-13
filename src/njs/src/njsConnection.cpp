@@ -739,13 +739,11 @@ bool njsConnection::ProcessBind(Local<Value> val, njsVariable *var,
     if (bindValue->IsArray()) {
         var->isArray = true;
         Local<Array> arrayVal = Local<Array>::Cast(bindValue);
-        if (var->bindDir != NJS_BIND_OUT && arrayVal->Length() == 0) {
-            baton->error = njsMessages::Get(errEmptyArray);
-            return false;
-        }
-        if (var->bindDir == NJS_BIND_IN)
+        if (var->bindDir == NJS_BIND_IN) {
             var->maxArraySize = arrayVal->Length();
-        else if (!var->maxArraySize) {
+            if (var->maxArraySize == 0)
+                var->maxArraySize = 1;
+        } else if (!var->maxArraySize) {
             baton->error = njsMessages::Get(errReqdMaxArraySize);
             return false;
         }
