@@ -190,20 +190,19 @@ void njsOracledb::Init(Handle<Object> target)
 //-----------------------------------------------------------------------------
 NAN_METHOD(njsOracledb::New)
 {
-    int majorVer, minorVer, updateVer, portVer, portUpdateVer;
+    dpiVersionInfo versionInfo;
 
-    if (dpiContext_getClientVersion(globalDPIContext, &majorVer, &minorVer,
-            &updateVer, &portVer, &portUpdateVer) < 0) {
+    if (dpiContext_getClientVersion(globalDPIContext, &versionInfo) < 0) {
         std::string errMsg = GetDPIError();
         Nan::ThrowError(errMsg.c_str());
         return;
     }
     njsOracledb *oracledb = new njsOracledb();
-    oracledb->oraClientVer = 100000000 * majorVer     +
-                               1000000 * minorVer     +
-                                 10000 * updateVer    +
-                                   100 * portVer      +
-                                         portUpdateVer;
+    oracledb->oraClientVer = 100000000 * versionInfo.versionNum     +
+                               1000000 * versionInfo.releaseNum     +
+                                 10000 * versionInfo.updateNum    +
+                                   100 * versionInfo.portReleaseNum      +
+                                         versionInfo.portUpdateNum;
     oracledb->Wrap(info.Holder());
     info.GetReturnValue().Set(info.Holder());
 }
@@ -609,25 +608,24 @@ NAN_SETTER(njsOracledb::SetFetchAsString)
 //-----------------------------------------------------------------------------
 NAN_GETTER(njsOracledb::GetOracleClientVersion)
 {
-    int majorVer, minorVer, updateVer, portVer, portUpdateVer;
+    dpiVersionInfo versionInfo;
     unsigned int version;
 
     njsOracledb *oracledb = (njsOracledb*) ValidateGetter(info);
     if (!oracledb)
         return;
 
-    if (dpiContext_getClientVersion(globalDPIContext, &majorVer, &minorVer,
-            &updateVer, &portVer, &portUpdateVer) < 0) {
+    if (dpiContext_getClientVersion(globalDPIContext, &versionInfo) < 0) {
         std::string errMsg = GetDPIError();
         Nan::ThrowError(errMsg.c_str());
         return;
     }
 
-    version = 100000000 * majorVer +
-                1000000 * minorVer +
-                  10000 * updateVer +
-                    100 * portVer +
-                          portUpdateVer;
+    version = 100000000 * versionInfo.versionNum +
+                1000000 * versionInfo.releaseNum +
+                  10000 * versionInfo.updateNum +
+                    100 * versionInfo.portReleaseNum +
+                          versionInfo.portUpdateNum;
 
     info.GetReturnValue().Set(version);
 }

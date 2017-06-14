@@ -1710,19 +1710,19 @@ NAN_GETTER(njsConnection::GetOracleServerVersion)
     njsConnection *connection = (njsConnection*) ValidateGetter(info);
     if (!connection)
         return;
-    int versionNum, releaseNum, updateNum, portReleaseNum, portUpdateNum;
+    dpiVersionInfo versionInfo;
     uint32_t releaseStringLength;
     const char *releaseString;
     if (dpiConn_getServerVersion(connection->dpiConnHandle, &releaseString,
-            &releaseStringLength, &versionNum, &releaseNum, &updateNum,
-            &portReleaseNum, &portUpdateNum) < 0) {
+            &releaseStringLength, &versionInfo) < 0) {
         std::string errMsg = njsOracledb::GetDPIError();
         Nan::ThrowError(errMsg.c_str());
         return;
     }
     uint32_t oracleServerVersion =
-            100000000 * versionNum + 1000000 * releaseNum + 10000 * updateNum +
-            100 * portReleaseNum + portUpdateNum;
+            100000000 * versionInfo.versionNum +
+            1000000 * versionInfo.releaseNum + 10000 * versionInfo.updateNum +
+            100 * versionInfo.portReleaseNum + versionInfo.portUpdateNum;
     info.GetReturnValue().Set(oracleServerVersion);
 }
 
