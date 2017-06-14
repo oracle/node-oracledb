@@ -19,11 +19,12 @@
  * See LICENSE.md for relevant licenses.
  *
  * NAME
- *   106. fetchRowidAsString.js
+ *   116. fetchUrowidAsString.js
  *
  * DESCRIPTION
- *    Testing Oracle data type support - ROWID.
- *    To fetch ROWID columns as strings.
+ *    Testing Oracle data type support - UROWID.
+ *    To fetch UROWID columns as strings.
+ *    Test insert and fetch ROWID in an UROWID db column.
  *
  * NUMBERING RULE
  *   Test numbers follow this numbering rule:
@@ -40,7 +41,7 @@ var should   = require('should');
 var dbConfig = require('./dbconfig.js');
 var random   = require('./random.js');
 
-describe('106. fetchRowidAsString.js', function() {
+describe('116. fetchUrowidAsString.js', function() {
 
   var connection = null;
   var tableName = "nodb_rowid";
@@ -48,22 +49,22 @@ describe('106. fetchRowidAsString.js', function() {
   var numRows = array.length;  // number of rows to return from each call to getRows()
 
   var proc_create_table = "BEGIN \n" +
-                           "  DECLARE \n" +
-                           "    e_table_missing EXCEPTION; \n" +
-                           "    PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n" +
-                           "    BEGIN \n" +
-                           "      EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " PURGE' ); \n" +
-                           "    EXCEPTION \n" +
-                           "      WHEN e_table_missing \n" +
-                           "      THEN NULL; \n" +
-                           "    END; \n" +
-                           "    EXECUTE IMMEDIATE ( ' \n" +
-                           "      CREATE TABLE " + tableName + " ( \n" +
-                           "        num      NUMBER, \n" +
-                           "        content  ROWID \n" +
-                           "      ) \n" +
-                           "    '); \n" +
-                           "END;  ";
+                          "    DECLARE \n" +
+                          "        e_table_missing EXCEPTION; \n" +
+                          "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n" +
+                          "        BEGIN \n" +
+                          "            EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " PURGE' ); \n" +
+                          "        EXCEPTION \n" +
+                          "            WHEN e_table_missing \n" +
+                          "            THEN NULL; \n" +
+                          "        END; \n" +
+                          "        EXECUTE IMMEDIATE ( ' \n" +
+                          "            CREATE TABLE " + tableName + " ( \n" +
+                          "                num      NUMBER, \n" +
+                          "                content  UROWID \n" +
+                          "            ) \n" +
+                          "        '); \n" +
+                          "END;  ";
   var drop_table = "DROP TABLE " + tableName + " PURGE";
 
   before('get one connection', function(done) {
@@ -113,7 +114,7 @@ describe('106. fetchRowidAsString.js', function() {
     });
   };
 
-  describe('106.1 works with fetchInfo option', function() {
+  describe('116.1 works with fetchInfo option', function() {
     var maxRowBak = oracledb.maxRows;
     var option = { fetchInfo: { "CONTENT": { type: oracledb.STRING } } };
     before(function(done) {
@@ -147,52 +148,51 @@ describe('106. fetchRowidAsString.js', function() {
       );
     });
 
-    it('106.1.1 fetchInfo', function(done) {
-      test1(option, false, done);
+    it('116.1.1 fetchInfo', function(done) {
+      test1(option, false, false, done);
     });
 
-    it('106.1.2 fetchInfo, and oracledb.maxRows < actual number of rows', function(done) {
+    it('116.1.2 fetchInfo, and oracledb.maxRows < actual number of rows', function(done) {
       oracledb.maxRows = numRows - 1;
       testMaxRow(option, done);
     });
 
-    it('106.1.3 fetchInfo, and oracledb.maxRows = actual number of rows', function(done) {
+    it('116.1.3 fetchInfo, and oracledb.maxRows = actual number of rows', function(done) {
       oracledb.maxRows = numRows;
       testMaxRow(option, done);
     });
 
-    it('106.1.4 fetchInfo, and oracledb.maxRows > actual number of rows', function(done) {
+    it('116.1.4 fetchInfo, and oracledb.maxRows > actual number of rows', function(done) {
       oracledb.maxRows = numRows + 1;
       testMaxRow(option, done);
     });
 
-    it('106.1.5 fetchInfo, queryStream() and oracledb.maxRows < actual number of rows', function(done) {
+    it('116.1.5 fetchInfo, queryStream() and oracledb.maxRows < actual number of rows', function(done) {
       oracledb.maxRows = numRows - 1;
       testQueryStream(option, done);
     });
 
-    it('106.1.6 fetchInfo, queryStream() and oracledb.maxRows = actual number of rows', function(done) {
+    it('116.1.6 fetchInfo, queryStream() and oracledb.maxRows = actual number of rows', function(done) {
       oracledb.maxRows = numRows;
       testQueryStream(option, done);
     });
 
-    it('106.1.7 fetchInfo, queryStream() and oracledb.maxRows > actual number of rows', function(done) {
+    it('116.1.7 fetchInfo, queryStream() and oracledb.maxRows > actual number of rows', function(done) {
       oracledb.maxRows = numRows + 1;
       testQueryStream(option, done);
     });
 
-    it('106.1.8 fetchInfo, resultSet = true', function(done) {
+    it('116.1.8 fetchInfo, resultSet = true', function(done) {
       var option_rs = {
         resultSet: true,
-        outFormat: oracledb.OBJECT,
         fetchInfo: { "CONTENT": { type: oracledb.STRING } }
       };
-      test2(option_rs, true, done);
+      test2(option_rs, false, false, done);
     });
 
   });
 
-  describe('106.2 works with fetchInfo and outFormat = OBJECT', function() {
+  describe('116.2 works with fetchInfo and outFormat = OBJECT', function() {
     var maxRowBak = oracledb.maxRows;
     var option = {
       outFormat: oracledb.OBJECT,
@@ -228,54 +228,54 @@ describe('106. fetchRowidAsString.js', function() {
       );
     });
 
-    it('106.2.1 fetchInfo with outFormat = OBJECT', function(done) {
-      test1(option, true, done);
+    it('116.2.1 fetchInfo with outFormat = OBJECT', function(done) {
+      test1(option, true, false, done);
     });
 
-    it('106.2.2 fetchInfo, outFormat = OBJECT, and resultSet = true', function(done) {
+    it('116.2.2 fetchInfo, outFormat = OBJECT, and resultSet = true', function(done) {
       var option_rs = {
         resultSet: true,
         outFormat: oracledb.OBJECT,
         fetchInfo: { "CONTENT": { type: oracledb.STRING } }
       };
-      test2(option_rs, true, done);
+      test2(option_rs, true, false, done);
     });
 
-    it('106.2.3 fetchInfo, outFormat = OBJECT, and oracledb.maxRows < actual number of rows', function(done) {
+    it('116.2.3 fetchInfo, outFormat = OBJECT, and oracledb.maxRows < actual number of rows', function(done) {
       oracledb.maxRows = numRows - 1;
       testMaxRow(option, done);
     });
 
-    it('106.2.4 fetchInfo, outFormat = OBJECT, and oracledb.maxRows = actual number of rows', function(done) {
+    it('116.2.4 fetchInfo, outFormat = OBJECT, and oracledb.maxRows = actual number of rows', function(done) {
       oracledb.maxRows = numRows;
       testMaxRow(option, done);
     });
 
-    it('106.2.5 fetchInfo, outFormat = OBJECT, and oracledb.maxRows > actual number of rows', function(done) {
+    it('116.2.5 fetchInfo, outFormat = OBJECT, and oracledb.maxRows > actual number of rows', function(done) {
       oracledb.maxRows = numRows + 1;
       testMaxRow(option, done);
     });
 
-    it('106.2.6 fetchInfo, outFormat = OBJECT, queryStream() and oracledb.maxRows < actual number of rows', function(done) {
+    it('116.2.6 fetchInfo, outFormat = OBJECT, queryStream() and oracledb.maxRows < actual number of rows', function(done) {
       oracledb.maxRows = numRows - 1;
       testQueryStream(option, done);
     });
 
-    it('106.2.7 fetchInfo, outFormat = OBJECT, queryStream() and oracledb.maxRows = actual number of rows', function(done) {
+    it('116.2.7 fetchInfo, outFormat = OBJECT, queryStream() and oracledb.maxRows = actual number of rows', function(done) {
       oracledb.maxRows = numRows;
       testQueryStream(option, done);
     });
 
-    it('106.2.8 fetchInfo, outFormat = OBJECT, queryStream() and oracledb.maxRows > actual number of rows', function(done) {
+    it('116.2.8 fetchInfo, outFormat = OBJECT, queryStream() and oracledb.maxRows > actual number of rows', function(done) {
       oracledb.maxRows = numRows + 1;
       testQueryStream(option, done);
     });
   });
 
-  describe('106.3 works with fetchInfo and outFormat = ARRAY', function() {
+  describe('116.3 works with fetchInfo and outFormat = ARRAY', function() {
     var maxRowBak = oracledb.maxRows;
     var option = {
-      outFormat: oracledb.ARRAY,
+      outFormat: oracledb.OBJECT,
       fetchInfo: { "CONTENT": { type: oracledb.STRING } }
     };
     before(function(done) {
@@ -308,51 +308,50 @@ describe('106. fetchRowidAsString.js', function() {
       );
     });
 
-    it('106.3.1 fetchInfo', function(done) {
-      test1(option, false, done);
+    it('116.3.1 fetchInfo', function(done) {
+      test1(option, false, true, done);
     });
 
-    it('106.3.2 fetchInfo, and oracledb.maxRows < actual number of rows', function(done) {
+    it('116.3.2 fetchInfo, and oracledb.maxRows < actual number of rows', function(done) {
       oracledb.maxRows = numRows - 1;
       testMaxRow(option, done);
     });
 
-    it('106.3.3 fetchInfo, and oracledb.maxRows = actual number of rows', function(done) {
+    it('116.3.3 fetchInfo, and oracledb.maxRows = actual number of rows', function(done) {
       oracledb.maxRows = numRows;
       testMaxRow(option, done);
     });
 
-    it('106.3.4 fetchInfo, and oracledb.maxRows > actual number of rows', function(done) {
+    it('116.3.4 fetchInfo, and oracledb.maxRows > actual number of rows', function(done) {
       oracledb.maxRows = numRows + 1;
       testMaxRow(option, done);
     });
 
-    it('106.3.5 fetchInfo, queryStream() and oracledb.maxRows < actual number of rows', function(done) {
+    it('116.3.5 fetchInfo, queryStream() and oracledb.maxRows < actual number of rows', function(done) {
       oracledb.maxRows = numRows - 1;
       testQueryStream(option, done);
     });
 
-    it('106.3.6 fetchInfo, queryStream() and oracledb.maxRows = actual number of rows', function(done) {
+    it('116.3.6 fetchInfo, queryStream() and oracledb.maxRows = actual number of rows', function(done) {
       oracledb.maxRows = numRows;
       testQueryStream(option, done);
     });
 
-    it('106.3.7 fetchInfo, queryStream() and oracledb.maxRows > actual number of rows', function(done) {
+    it('116.3.7 fetchInfo, queryStream() and oracledb.maxRows > actual number of rows', function(done) {
       oracledb.maxRows = numRows + 1;
       testQueryStream(option, done);
     });
 
-    it('106.3.8 fetchInfo, resultSet = true', function(done) {
+    it('116.3.8 fetchInfo, resultSet = true', function(done) {
       var option_rs = {
         resultSet: true,
-        outFormat: oracledb.ARRAY,
         fetchInfo: { "CONTENT": { type: oracledb.STRING } }
       };
-      test2(option_rs, false, done);
+      test2(option_rs, false, true, done);
     });
   });
 
-  describe('106.4 fetch as string by default', function() {
+  describe('116.4 fetch as string by default', function() {
     var maxRowBak = oracledb.maxRows;
     var option = {};
     before(function(done) {
@@ -386,50 +385,50 @@ describe('106. fetchRowidAsString.js', function() {
 
     });
 
-    it('106.4.1 fetch by default', function(done) {
-      test1(option, false, done);
+    it('116.4.1 fetch by default', function(done) {
+      test1(option, false, false, done);
     });
 
-    it('106.4.2 oracledb.maxRows < actual number of rows', function(done) {
+    it('116.4.2 oracledb.maxRows < actual number of rows', function(done) {
       oracledb.maxRows = numRows - 1;
       testMaxRow(option, done);
     });
 
-    it('106.4.3 oracledb.maxRows = actual number of rows', function(done) {
+    it('116.4.3 oracledb.maxRows = actual number of rows', function(done) {
       oracledb.maxRows = numRows;
       testMaxRow(option, done);
     });
 
-    it('106.4.4 oracledb.maxRows > actual number of rows', function(done) {
+    it('116.4.4 oracledb.maxRows > actual number of rows', function(done) {
       oracledb.maxRows = numRows + 1;
       testMaxRow(option, done);
     });
 
-    it('106.4.5 queryStream() and oracledb.maxRows < actual number of rows', function(done) {
+    it('116.4.5 queryStream() and oracledb.maxRows < actual number of rows', function(done) {
       oracledb.maxRows = numRows - 1;
       testQueryStream(option, done);
     });
 
-    it('106.4.6 queryStream() and oracledb.maxRows = actual number of rows', function(done) {
+    it('116.4.6 queryStream() and oracledb.maxRows = actual number of rows', function(done) {
       oracledb.maxRows = numRows;
       testQueryStream(option, done);
     });
 
-    it('106.4.7 queryStream() and oracledb.maxRows > actual number of rows', function(done) {
+    it('116.4.7 queryStream() and oracledb.maxRows > actual number of rows', function(done) {
       oracledb.maxRows = numRows + 1;
       testQueryStream(option, done);
     });
 
-    it('106.4.8 resultSet = true', function(done) {
+    it('116.4.8 resultSet = true', function(done) {
       var option_rs = {
         resultSet: true,
       };
-      test2(option_rs, false, done);
+      test2(option_rs, false, false, done);
     });
 
   });
 
-  describe('106.5 fetch as string by default with outFormat = OBJECT', function() {
+  describe('116.5 fetch as string by default with outFormat = OBJECT', function() {
     var maxRowBak = oracledb.maxRows;
     var option = { outFormat: oracledb.OBJECT };
     before(function(done) {
@@ -463,53 +462,52 @@ describe('106. fetchRowidAsString.js', function() {
 
     });
 
-    it('106.5.1 fetch by default', function(done) {
-      test1(option, true, done);
+    it('116.5.1 fetch by default', function(done) {
+      test1(option, true, false, done);
     });
 
-    it('106.5.2 oracledb.maxRows < actual number of rows', function(done) {
+    it('116.5.2 oracledb.maxRows < actual number of rows', function(done) {
       oracledb.maxRows = numRows - 1;
       testMaxRow(option, done);
     });
 
-    it('106.5.3 oracledb.maxRows = actual number of rows', function(done) {
+    it('116.5.3 oracledb.maxRows = actual number of rows', function(done) {
       oracledb.maxRows = numRows;
       testMaxRow(option, done);
     });
 
-    it('106.5.4 oracledb.maxRows > actual number of rows', function(done) {
+    it('116.5.4 oracledb.maxRows > actual number of rows', function(done) {
       oracledb.maxRows = numRows + 1;
       testMaxRow(option, done);
     });
 
-    it('106.5.5 queryStream() and oracledb.maxRows < actual number of rows', function(done) {
+    it('116.5.5 queryStream() and oracledb.maxRows < actual number of rows', function(done) {
       oracledb.maxRows = numRows - 1;
       testQueryStream(option, done);
     });
 
-    it('106.5.6 queryStream() and oracledb.maxRows = actual number of rows', function(done) {
+    it('116.5.6 queryStream() and oracledb.maxRows = actual number of rows', function(done) {
       oracledb.maxRows = numRows;
       testQueryStream(option, done);
     });
 
-    it('106.5.7 queryStream() and oracledb.maxRows > actual number of rows', function(done) {
+    it('116.5.7 queryStream() and oracledb.maxRows > actual number of rows', function(done) {
       oracledb.maxRows = numRows + 1;
       testQueryStream(option, done);
     });
 
-    it('106.5.8 resultSet = true', function(done) {
+    it('116.5.8 resultSet = true', function(done) {
       var option_rs = {
-        outFormat: oracledb.OBJECT,
-        resultSet: true
+        resultSet: true,
       };
-      test2(option_rs, true, done);
+      test2(option_rs, true, false, done);
     });
 
   });
 
-  describe('106.6 fetch as string by default with outFormat = ARRAY', function() {
+  describe('116.6 fetch as string by default with outFormat = ARRAY', function() {
     var maxRowBak = oracledb.maxRows;
-    var option = { outFormat: oracledb.ARRAY };
+    var option = { outFormat: oracledb.OBJECT };
     before(function(done) {
       async.series([
         function makeTable(callback) {
@@ -541,51 +539,50 @@ describe('106. fetchRowidAsString.js', function() {
 
     });
 
-    it('106.6.1 fetch by default', function(done) {
-      test1(option, false, done);
+    it('116.6.1 fetch by default', function(done) {
+      test1(option, false, true, done);
     });
 
-    it('106.6.2 oracledb.maxRows < actual number of rows', function(done) {
+    it('116.6.2 oracledb.maxRows < actual number of rows', function(done) {
       oracledb.maxRows = numRows - 1;
       testMaxRow(option, done);
     });
 
-    it('106.6.3 oracledb.maxRows = actual number of rows', function(done) {
+    it('116.6.3 oracledb.maxRows = actual number of rows', function(done) {
       oracledb.maxRows = numRows;
       testMaxRow(option, done);
     });
 
-    it('106.6.4 oracledb.maxRows > actual number of rows', function(done) {
+    it('116.6.4 oracledb.maxRows > actual number of rows', function(done) {
       oracledb.maxRows = numRows + 1;
       testMaxRow(option, done);
     });
 
-    it('106.6.5 queryStream() and oracledb.maxRows < actual number of rows', function(done) {
+    it('116.6.5 queryStream() and oracledb.maxRows < actual number of rows', function(done) {
       oracledb.maxRows = numRows - 1;
       testQueryStream(option, done);
     });
 
-    it('106.6.6 queryStream() and oracledb.maxRows = actual number of rows', function(done) {
+    it('116.6.6 queryStream() and oracledb.maxRows = actual number of rows', function(done) {
       oracledb.maxRows = numRows;
       testQueryStream(option, done);
     });
 
-    it('106.6.7 queryStream() and oracledb.maxRows > actual number of rows', function(done) {
+    it('116.6.7 queryStream() and oracledb.maxRows > actual number of rows', function(done) {
       oracledb.maxRows = numRows + 1;
       testQueryStream(option, done);
     });
 
-    it('106.6.8 resultSet = true', function(done) {
+    it('116.6.8 resultSet = true', function(done) {
       var option_rs = {
         resultSet: true,
-        outFormat: oracledb.ARRAY
       };
-      test2(option_rs, false, done);
+      test2(option_rs, false, false, done);
     });
 
   });
 
-  function test1(option, object, callback) {
+  function test1(option, object, array, callback) {
     async.forEach(array, function(element, cb) {
       var sql = "select content,rowid from " + tableName + " where num = " + element;
       connection.execute(
@@ -600,6 +597,10 @@ describe('106. fetchRowidAsString.js', function() {
               resultVal_1 = result.rows[0].CONTENT;
               resultVal_2 = result.rows[0].ROWID;
             }
+            if(array === true) {
+              resultVal_1 = result.outBinds.CONTENT;
+              resultVal_2 = result.outBinds.ROWID;
+            }
             should.strictEqual(typeof resultVal_1, "string");
             should.strictEqual(resultVal_1, resultVal_2);
             cb();
@@ -611,7 +612,7 @@ describe('106. fetchRowidAsString.js', function() {
     });
   }
 
-  function test2(option, object, callback) {
+  function test2(option, object, array, callback) {
     async.forEach(array, function(element, cb) {
       var sql = "select content,rowid from " + tableName + " where num = " + element;
       connection.execute(
@@ -627,6 +628,10 @@ describe('106. fetchRowidAsString.js', function() {
               if(object === true) {
                 resultVal_1 = row.CONTENT;
                 resultVal_2 = row.ROWID;
+              }
+              if(array === true) {
+                resultVal_1 = row.outBinds.CONTENT;
+                resultVal_2 = row.outBinds.ROWID;
               }
               should.strictEqual(typeof resultVal_1, "string");
               should.strictEqual(resultVal_1, resultVal_2);
