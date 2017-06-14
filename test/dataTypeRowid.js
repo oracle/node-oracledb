@@ -24,9 +24,6 @@
  * DESCRIPTION
  *    Testing Oracle data type support - ROWID.
  *
- * NOTE
- *   Native ROWID support is still under enhancement request.
- *
  * NUMBERING RULE
  *   Test numbers follow this numbering rule:
  *     1  - 20  are reserved for basic functional tests

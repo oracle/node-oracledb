@@ -19,7 +19,7 @@
  * See LICENSE.md for relevant licenses.
  *
  * NAME
- *   51. poolTerminate.js
+ *   51. poolClose.js
  *
  * DESCRIPTION
  *   Negative cases about pool.terminate().
@@ -38,7 +38,7 @@ var should   = require('should');
 var async    = require('async');
 var dbConfig = require('./dbconfig.js');
 
-describe('51. poolTerminate.js', function(){
+describe('51. poolClose.js', function(){
 
   it('51.1 can not get/set the attributes of terminated pool', function(done) {
     var pMin = 2;
@@ -116,7 +116,7 @@ describe('51. poolTerminate.js', function(){
     ); // createPool()
   }); // 51.2
 
-  it.skip('51.3 can not terminate the same pool multiple times', function(done) {
+  it('51.3 can not terminate the same pool multiple times', function(done) {
     oracledb.createPool(
       dbConfig,
       function(err, pool) {
@@ -137,7 +137,7 @@ describe('51. poolTerminate.js', function(){
     ); // createPool()
   }); // 51.3
 
-  it.skip('51.4 can not close the same pool multiple times', function(done) {
+  it('51.4 can not close the same pool multiple times', function(done) {
     oracledb.createPool(
       dbConfig,
       function(err, pool) {

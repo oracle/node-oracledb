@@ -19,10 +19,12 @@
  * See LICENSE.md for relevant licenses.
  *
  * NAME
- *   107. rowidDMLBindAsString.js
+ *   114. urowidDMLBindAsString.js
  *
  * DESCRIPTION
- *   Testing rowid binding as String with DML.
+ *   Testing urowid binding as String with DML.
+ *   The Universal ROWID (UROWID) is a datatype that can store both logical and physical rowids of Oracle tables. Logical rowids are primary key-based logical identifiers for the rows of Index-Organized Tables (IOTs).
+ *   To use columns of the UROWID datatype, the value of the COMPATIBLE initialization parameter must be set to 8.1 or higher.
  *
  * NUMBERING RULE
  *   Test numbers follow this numbering rule:
@@ -39,9 +41,9 @@ var async    = require('async');
 var dbConfig = require('./dbconfig.js');
 var sql      = require('./sql.js');
 
-describe('107. rowidDMLBindAsString.js', function() {
+describe('114. urowidDMLBindAsString.js', function() {
   var connection = null;
-  var tableName = "nodb_bind_rowid";
+  var tableName = "nodb_bind_urowid";
   var insertID = 1;
 
   var proc_create_table = "BEGIN \n" +
@@ -57,7 +59,7 @@ describe('107. rowidDMLBindAsString.js', function() {
                           "    EXECUTE IMMEDIATE ( ' \n" +
                           "        CREATE TABLE " + tableName + " ( \n" +
                           "            ID       NUMBER, \n" +
-                          "            content  ROWID \n" +
+                          "            content  UROWID(4000) \n" +
                           "        ) \n" +
                           "      '); \n" +
                           "END;  ";
@@ -97,9 +99,9 @@ describe('107. rowidDMLBindAsString.js', function() {
     done();
   });
 
-  describe('107.1 INSERT & SELECT', function() {
+  describe('114.1 INSERT & SELECT', function() {
 
-    it('107.1.1 works with null', function(done) {
+    it('114.1.1 works with null', function(done) {
       var content = null;
       var bindVar = {
         i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
@@ -108,7 +110,7 @@ describe('107. rowidDMLBindAsString.js', function() {
       dmlInsert(bindVar, content, done);
     });
 
-    it('107.1.2 works with empty string', function(done) {
+    it('114.1.2 works with empty string', function(done) {
       var content = "";
       var expected = null;
       var bindVar = {
@@ -118,9 +120,7 @@ describe('107. rowidDMLBindAsString.js', function() {
       dmlInsert(bindVar, expected, done);
     });
 
-    it('107.1.3 works with extended rowid', function(done) {
-      // Extended rowids use a base 64 encoding of the physical address for each row selected.
-      // The encoding characters are A-Z, a-z, 0-9, +, and /
+    it('114.1.3 works with extended rowid', function(done) {
       var content = "AAABoqAADAAAAwPAAA";
       var bindVar = {
         i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
@@ -129,7 +129,7 @@ describe('107. rowidDMLBindAsString.js', function() {
       dmlInsert(bindVar, content, done);
     });
 
-    it('107.1.4 works with restricted rowid', function(done) {
+    it('114.1.4 works with restricted rowid', function(done) {
       var content = "00000DD5.0000.0001";
       var bindVar = {
         i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
@@ -138,7 +138,7 @@ describe('107. rowidDMLBindAsString.js', function() {
       dmlInsert(bindVar, content, done);
     });
 
-    it('107.1.5 throws error with number 0', function(done) {
+    it('114.1.5 throws error with number 0', function(done) {
       var content = 0;
       var sql_insert = "insert into " + tableName + "(id, content) values (:i, CHARTOROWID(:c))";
       var bindVar = {
@@ -157,7 +157,7 @@ describe('107. rowidDMLBindAsString.js', function() {
       );
     });
 
-    it('107.1.6 works with string 0', function(done) {
+    it('114.1.6 works with string 0', function(done) {
       var content = "0";
       var expected = "00000000.0000.0000";
       var bindVar = {
@@ -167,12 +167,12 @@ describe('107. rowidDMLBindAsString.js', function() {
       dmlInsert(bindVar, expected, done);
     });
 
-    it('107.1.7 works with substr', function(done) {
+    it('114.1.7 works with substr', function(done) {
       var content = "AAAA8+AALAAAAQ/AAA";
       dmlInsert_substr(content, done);
     });
 
-    it('107.1.8 bind null with default type/dir - named bind', function(done) {
+    it('114.1.8 bind null with default type/dir - named bind', function(done) {
       var content = null;
       var bindVar_1 = {
         i: insertID,
@@ -181,13 +181,13 @@ describe('107. rowidDMLBindAsString.js', function() {
       dmlInsert(bindVar_1, content, done);
     });
 
-    it('107.1.9 bind null with default type/dir - positional bind', function(done) {
+    it('114.1.9 bind null with default type/dir - positional bind', function(done) {
       var content = null;
       var bindVar_1 = [ insertID, content ];
       dmlInsert(bindVar_1, content, done);
     });
 
-    it('107.1.10 bind extented rowid with default type/dir - named bind', function(done) {
+    it('114.1.10 bind extented rowid with default type/dir - named bind', function(done) {
       var content = "AAAA8+AALAAAAQ/AAA";
       var bindVar_1 = {
         i: insertID,
@@ -196,13 +196,13 @@ describe('107. rowidDMLBindAsString.js', function() {
       dmlInsert(bindVar_1, content, done);
     });
 
-    it('107.1.11 bind extented rowid with default type/dir - positional bind', function(done) {
+    it('114.1.11 bind extented rowid with default type/dir - positional bind', function(done) {
       var content = "AAAA8+AALAAAAQ/AAA";
       var bindVar_1 = [ insertID, content ];
       dmlInsert(bindVar_1, content, done);
     });
 
-    it('107.1.12 works with undefined', function(done) {
+    it('114.1.12 works with undefined', function(done) {
       var content = undefined;
       var bindVar = {
         i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
@@ -211,7 +211,7 @@ describe('107. rowidDMLBindAsString.js', function() {
       dmlInsert(bindVar, null, done);
     });
 
-    it('107.1.13 bind undefined with default type/dir - named bind', function(done) {
+    it('114.1.13 bind undefined with default type/dir - named bind', function(done) {
       var content = undefined;
       var bindVar_1 = {
         i: insertID,
@@ -220,13 +220,13 @@ describe('107. rowidDMLBindAsString.js', function() {
       dmlInsert(bindVar_1, null, done);
     });
 
-    it('107.1.14 bind undefined with default type/dir - positional bind', function(done) {
+    it('114.1.14 bind undefined with default type/dir - positional bind', function(done) {
       var content = undefined;
       var bindVar_1 = [ insertID, content ];
       dmlInsert(bindVar_1, null, done);
     });
 
-    it('107.1.15 works with NaN', function(done) {
+    it('114.1.15 works with NaN', function(done) {
       var content = NaN;
       var sql_insert = "insert into " + tableName + "(id, content) values (:i, CHARTOROWID(:c))";
       var bindVar = {
@@ -247,29 +247,29 @@ describe('107. rowidDMLBindAsString.js', function() {
 
   });
 
-  describe('107.2 UPDATE', function() {
+  describe('114.2 UPDATE', function() {
 
-    it('107.2.1 UPDATE null column', function(done) {
+    it('114.2.1 UPDATE null column', function(done) {
       var content_insert = null;
       var content_update = "AAABiqAADAAAAwPAAA";
       dmlUpdate(content_insert, content_update, content_update, done);
     });
 
-    it('107.2.1 UPDATE extented rowid with restricted rowid', function(done) {
+    it('114.2.1 UPDATE extented rowid with restricted rowid', function(done) {
       var content_insert = "AAABioAADAAAAwPAAA";
       var content_update = "00000DD5.0010.0001";
       dmlUpdate(content_insert, content_update, content_update, done);
     });
 
-    it('107.2.3 UPDATE restricted rowid with null', function(done) {
+    it('114.2.3 UPDATE restricted rowid with null', function(done) {
       var content_insert = "00000DD5.0010.0002";
       var content_update = null;
       dmlUpdate(content_insert, content_update, content_update, done);
     });
   });
 
-  describe('107.3 RETURNING INTO', function() {
-    it('107.3.1 INSERT null', function(done) {
+  describe('114.3 RETURNING INTO', function() {
+    it('114.3.1 INSERT null', function(done) {
       var content = null;
       var bindVar = {
         i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
@@ -279,7 +279,7 @@ describe('107. rowidDMLBindAsString.js', function() {
       insert_returning(bindVar, content, done);
     });
 
-    it('107.3.2 INSERT extented rowid', function(done) {
+    it('114.3.2 INSERT extented rowid', function(done) {
       var content = "AAAA++AALAAAAQ/AAA";
       var bindVar = {
         i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
@@ -289,7 +289,7 @@ describe('107. rowidDMLBindAsString.js', function() {
       insert_returning(bindVar, content, done);
     });
 
-    it('107.3.3 INSERT restricted rowid', function(done) {
+    it('114.3.3 INSERT restricted rowid', function(done) {
       var content = "00000000.0100.0100";
       var bindVar = {
         i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
@@ -299,7 +299,7 @@ describe('107. rowidDMLBindAsString.js', function() {
       insert_returning(bindVar, content, done);
     });
 
-    it('107.3.7 UPDATE null with extented rowid', function(done) {
+    it('114.3.7 UPDATE null with extented rowid', function(done) {
       var content_insert = null;
       var content_update = "AAABiqAADAAAAwPAAA";
       var bindVar_update = {
@@ -310,7 +310,7 @@ describe('107. rowidDMLBindAsString.js', function() {
       update_returning(content_insert, bindVar_update, content_update, done);
     });
 
-    it('107.3.8 UPDATE extented rowid with null', function(done) {
+    it('114.3.8 UPDATE extented rowid with null', function(done) {
       var content_insert = "AAABiqAADAAAAwPAAA";
       var content_update = null;
       var bindVar_update = {
@@ -321,7 +321,7 @@ describe('107. rowidDMLBindAsString.js', function() {
       update_returning(content_insert, bindVar_update, content_update, done);
     });
 
-    it('107.3.9 UPDATE restricted rowid with empty string', function(done) {
+    it('114.3.9 UPDATE restricted rowid with empty string', function(done) {
       var content_insert = "00000000.0100.0100";
       var content_update = "";
       var bindVar_update = {
@@ -332,7 +332,7 @@ describe('107. rowidDMLBindAsString.js', function() {
       update_returning(content_insert, bindVar_update, null, done);
     });
 
-    it('107.3.10 UPDATE restricted rowid with extented rowid', function(done) {
+    it('114.3.10 UPDATE restricted rowid with extented rowid', function(done) {
       var content_insert = "00000000.0100.0100";
       var content_update = "AAABiqAADAAAAwPAAA";
       var bindVar_update = {
@@ -343,7 +343,7 @@ describe('107. rowidDMLBindAsString.js', function() {
       update_returning(content_insert, bindVar_update, content_update, done);
     });
 
-    it('107.3.11 INSERT with default type/dir - named bind', function(done) {
+    it('114.3.11 INSERT with default type/dir - named bind', function(done) {
       var content = "00000000.0100.0100";
       var bindVar = {
         i: insertID,
@@ -353,13 +353,13 @@ describe('107. rowidDMLBindAsString.js', function() {
       insert_returning(bindVar, content, done);
     });
 
-    it('107.3.12 INSERT with default type/dir - positional bind', function(done) {
+    it('114.3.12 INSERT with default type/dir - positional bind', function(done) {
       var content = "00000000.0100.0100";
       var bindVar = [ insertID, content, { dir : oracledb.BIND_OUT, type : oracledb.STRING } ];
       insert_returning(bindVar, content, done);
     });
 
-    it('107.3.13 UPDATE with default type/dir - named bind', function(done) {
+    it('114.3.13 UPDATE with default type/dir - named bind', function(done) {
       var content_insert = "00000000.0100.0100";
       var content_update = "AAABiqAADAAAAwPAAA";
       var bindVar_update = {
@@ -370,7 +370,7 @@ describe('107. rowidDMLBindAsString.js', function() {
       update_returning(content_insert, bindVar_update, content_update, done);
     });
 
-    it('107.3.14 UPDATE with default type/dir - positional bind', function(done) {
+    it('114.3.14 UPDATE with default type/dir - positional bind', function(done) {
       var content_insert = "00000000.0100.0100";
       var content_update = "AAABiqAADAAAAwPAAA";
       var bindVar_update = [ content_update, insertID, { dir : oracledb.BIND_OUT, type : oracledb.STRING } ];
@@ -569,45 +569,46 @@ describe('107. rowidDMLBindAsString.js', function() {
     async.series([
       function(cb) {
         connection.execute(
-            "insert into " + tableName + " T (ID) values (" + insertID + ")",
-            function(err, result) {
-              should.not.exist(err);
-              (result.rowsAffected).should.be.exactly(1);
-              cb();
-            }
-          );
+          "insert into " + tableName + " T (ID) values (" + insertID + ")",
+          function(err, result) {
+            should.not.exist(err);
+            (result.rowsAffected).should.be.exactly(1);
+            cb();
+          }
+        )
       },
       function(cb) {
         connection.execute(
-            "UPDATE " + tableName + " T SET content = T.ROWID where ID = " + insertID,
-            function(err, result) {
-              should.not.exist(err);
-              (result.rowsAffected).should.be.exactly(1);
-              cb();
-            }
-          );
+          "UPDATE " + tableName + " T SET content = T.ROWID where ID = " + insertID,
+          function(err, result) {
+            should.not.exist(err);
+            (result.rowsAffected).should.be.exactly(1);
+            cb();
+          }
+        )
       },
       function(cb) {
         connection.execute(
-            "select content from " + tableName + " where ID = " + insertID,
-            function(err, result) {
-              should.not.exist(err);
-              var resultVal = result.rows[0][0];
-              connection.execute(
-                "select * from " + tableName + " where ROWID = CHARTOROWID(:c)",
-                { c: { val: resultVal, dir : oracledb.BIND_IN, type : oracledb.STRING } },
-                function(err_1, result_1) {
-                  should.not.exist(err_1);
-                  var resultVal_1 = result_1.rows[0][0];
-                  var resultVal_2 = result_1.rows[0][1];
-                  should.strictEqual(resultVal_1, insertID);
-                  should.strictEqual(resultVal_2, resultVal);
-                  cb();
-                }
-              );
-            }
-          );
+          "select content from " + tableName + " where ID = " + insertID,
+          function(err, result) {
+            should.not.exist(err);
+            var resultVal = result.rows[0][0];
+            connection.execute(
+              "select * from " + tableName + " where ROWID = CHARTOROWID(:c)",
+              { c: { val: resultVal, dir : oracledb.BIND_IN, type : oracledb.STRING } },
+              function(err_1, result_1) {
+                should.not.exist(err_1);
+                var resultVal_1 = result_1.rows[0][0];
+                var resultVal_2 = result_1.rows[0][1];
+                should.strictEqual(resultVal_1, insertID);
+                should.strictEqual(resultVal_2, resultVal);
+                cb();
+              }
+            )
+          }
+        )
       }
     ], callback);
   };
+
 });

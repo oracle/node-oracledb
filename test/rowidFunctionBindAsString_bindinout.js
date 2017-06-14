@@ -39,7 +39,7 @@ var async    = require('async');
 var dbConfig = require('./dbconfig.js');
 var sql      = require('./sql.js');
 
-describe.skip('112. rowidFunctionBindAsString_bindinout.js', function() {
+describe('112. rowidFunctionBindAsString_bindinout.js', function() {
   var connection = null;
   var tableName = "nodb_rowid_plsql_inout";
   var insertID = 1;
@@ -98,13 +98,13 @@ describe.skip('112. rowidFunctionBindAsString_bindinout.js', function() {
   });
 
   describe('112.1 FUNCTION BIND_INOUT as rowid', function() {
-    var fun_create = "CREATE OR REPLACE FUNCTION nodb_rowid_bind_inout_1121 (id IN NUMBER, content IN OUT ROWID) RETURN ROWID\n" +
+    var fun_create = "CREATE OR REPLACE FUNCTION nodb_rowid_bind_inout_1121 (id_in IN NUMBER, content_inout IN OUT ROWID) RETURN ROWID\n" +
                      "IS \n" +
                      "    tmp rowid; \n" +
                      "BEGIN \n" +
-                     "    insert into " + tableName + " (id, content) values (id, CHARTOROWID(content)); \n" +
-                     "    select content into tmp from " + tableName + " where id = id; \n" +
-                     "    select CHARTOROWID('AAACiZAAFAAAAJEAAA') into content from dual; \n" +
+                     "    insert into " + tableName + " (id, content) values (id_in, CHARTOROWID(content_inout)); \n" +
+                     "    select content into tmp from " + tableName + " where id = id_in; \n" +
+                     "    select CHARTOROWID('AAACiZAAFAAAAJEAAA') into content_inout from dual; \n" +
                      "    return tmp; \n" +
                      "END; ";
     var fun_execute = "BEGIN :o := nodb_rowid_bind_inout_1121 (:i, :c); END;";
@@ -168,7 +168,7 @@ describe.skip('112. rowidFunctionBindAsString_bindinout.js', function() {
         c: { val: content, type: oracledb.STRING, dir: oracledb.BIND_INOUT },
         o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
       };
-      sql.executeSqlWithErr(connection, fun_create, bindVar, {}, function(err) {
+      sql.executeSqlWithErr(connection, fun_execute, bindVar, {}, function(err) {
         should.strictEqual(err.message, 'NJS-011: encountered bind value and type mismatch');
         done();
       });
@@ -176,40 +176,40 @@ describe.skip('112. rowidFunctionBindAsString_bindinout.js', function() {
 
     it('112.1.9 works with default bind type/dir - extended rowid', function(done) {
       var content = "AAAB1+AADAAAAwPAAA";
-      funBindInOut_default(fun_create, content, content, done);
+      funBindInOut_default(fun_execute, content, content, done);
     });
 
     it('112.1.10 works with default bind type/dir - null value', function(done) {
       var content = null;
-      funBindInOut_default(fun_create, content, content, done);
+      funBindInOut_default(fun_execute, content, content, done);
     });
 
     it('112.1.11 works with default bind type/dir - empty string', function(done) {
       var content = "";
-      funBindInOut_default(fun_create, content, null, done);
+      funBindInOut_default(fun_execute, content, null, done);
     });
 
     it('112.1.12 works with default bind type/dir - undefined', function(done) {
       var content = undefined;
-      funBindInOut_default(fun_create, content, null, done);
+      funBindInOut_default(fun_execute, content, null, done);
     });
 
     it('112.1.13 bind error: NJS-037', function(done) {
       var bindVar = {
         i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-        c: { val: [0], type: oracledb.STRING, dir: oracledb.BIND_INOUT },
+        c: { val: [0], type: oracledb.STRING, dir: oracledb.BIND_INOUT, maxArraySize: 1000 },
         o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
       };
-      sql.executeSqlWithErr(connection, fun_create, bindVar, {}, function(err) {
+      sql.executeSqlWithErr(connection, fun_execute, bindVar, {}, function(err) {
         should.strictEqual(err.message, 'NJS-037: invalid data type at array index 0 for bind ":c"');
         done();
       });
     });
 
     it('112.1.14 bind error: NJS-052', function(done) {
-      var bindVar = [ { type: oracledb.STRING, dir: oracledb.BIND_OUT }, insertID, { val: [0], type: oracledb.STRING, dir: oracledb.BIND_INOUT } ];
-      sql.executeSqlWithErr(connection, fun_create, bindVar, {}, function(err) {
-        should.strictEqual(err.message, 'NJS-052: invalid data type at array index 0 for bind position 2');
+      var bindVar = [ { type: oracledb.STRING, dir: oracledb.BIND_OUT }, insertID, { val: [0], type: oracledb.STRING, dir: oracledb.BIND_INOUT, maxArraySize: 1000 } ];
+      sql.executeSqlWithErr(connection, fun_execute, bindVar, {}, function(err) {
+        should.strictEqual(err.message, 'NJS-052: invalid data type at array index 0 for bind position 3');
         done();
       });
     });
@@ -217,13 +217,13 @@ describe.skip('112. rowidFunctionBindAsString_bindinout.js', function() {
   });
 
   describe('112.2 FUNCTION BIND_INOUT as string', function() {
-    var fun_create = "CREATE OR REPLACE FUNCTION nodb_rowid_bind_inout_1121 (id IN NUMBER, content IN OUT VARCHAR2) RETURN ROWID\n" +
+    var fun_create = "CREATE OR REPLACE FUNCTION nodb_rowid_bind_inout_1121 (id_in IN NUMBER, content_inout IN OUT VARCHAR2) RETURN ROWID\n" +
                      "IS \n" +
                      "    tmp rowid; \n" +
                      "BEGIN \n" +
-                     "    insert into " + tableName + " (id, content) values (id, CHARTOROWID(content)); \n" +
-                     "    select content into tmp from " + tableName + " where id = id; \n" +
-                     "    select CHARTOROWID('AAACiZAAFAAAAJEAAA') into content from dual; \n" +
+                     "    insert into " + tableName + " (id, content) values (id_in, CHARTOROWID(content_inout)); \n" +
+                     "    select content into tmp from " + tableName + " where id = id_in; \n" +
+                     "    select CHARTOROWID('AAACiZAAFAAAAJEAAA') into content_inout from dual; \n" +
                      "    return tmp; \n" +
                      "END; ";
     var fun_execute = "BEGIN :o := nodb_rowid_bind_inout_1121 (:i, :c); END;";
@@ -259,7 +259,7 @@ describe.skip('112. rowidFunctionBindAsString_bindinout.js', function() {
         c: { val: content, type: oracledb.STRING, dir: oracledb.BIND_INOUT },
         o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
       };
-      sql.executeSqlWithErr(connection, fun_create, bindVar, {}, function(err) {
+      sql.executeSqlWithErr(connection, fun_execute, bindVar, {}, function(err) {
         should.strictEqual(err.message, 'NJS-011: encountered bind value and type mismatch');
         done();
       });
@@ -287,7 +287,7 @@ describe.skip('112. rowidFunctionBindAsString_bindinout.js', function() {
         c: { val: content, type: oracledb.STRING, dir: oracledb.BIND_INOUT },
         o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
       };
-      sql.executeSqlWithErr(connection, fun_create, bindVar, {}, function(err) {
+      sql.executeSqlWithErr(connection, fun_execute, bindVar, {}, function(err) {
         should.strictEqual(err.message, 'NJS-011: encountered bind value and type mismatch');
         done();
       });
@@ -295,40 +295,40 @@ describe.skip('112. rowidFunctionBindAsString_bindinout.js', function() {
 
     it('112.2.9 works with default bind type/dir - extended rowid', function(done) {
       var content = "AAAB1+AADAAAAwPAAA";
-      funBindInOut_default(fun_create, content, content, done);
+      funBindInOut_default(fun_execute, content, content, done);
     });
 
     it('112.2.10 works with default bind type/dir - null value', function(done) {
       var content = null;
-      funBindInOut_default(fun_create, content, content, done);
+      funBindInOut_default(fun_execute, content, content, done);
     });
 
     it('112.2.11 works with default bind type/dir - empty string', function(done) {
       var content = "";
-      funBindInOut_default(fun_create, content, null, done);
+      funBindInOut_default(fun_execute, content, null, done);
     });
 
     it('112.2.12 works with default bind type/dir - undefined', function(done) {
       var content = undefined;
-      funBindInOut_default(fun_create, content, null, done);
+      funBindInOut_default(fun_execute, content, null, done);
     });
 
     it('112.2.13 bind error: NJS-037', function(done) {
       var bindVar = {
         i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-        c: { val: [0], type: oracledb.STRING, dir: oracledb.BIND_INOUT },
+        c: { val: [0], type: oracledb.STRING, dir: oracledb.BIND_INOUT, maxArraySize: 1000 },
         o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
       };
-      sql.executeSqlWithErr(connection, fun_create, bindVar, {}, function(err) {
+      sql.executeSqlWithErr(connection, fun_execute, bindVar, {}, function(err) {
         should.strictEqual(err.message, 'NJS-037: invalid data type at array index 0 for bind ":c"');
         done();
       });
     });
 
     it('112.2.14 bind error: NJS-052', function(done) {
-      var bindVar = [ { type: oracledb.STRING, dir: oracledb.BIND_OUT }, insertID, { val: [0], type: oracledb.STRING, dir: oracledb.BIND_INOUT } ];
-      sql.executeSqlWithErr(connection, fun_create, bindVar, {}, function(err) {
-        should.strictEqual(err.message, 'NJS-052: invalid data type at array index 0 for bind position 2');
+      var bindVar = [ { type: oracledb.STRING, dir: oracledb.BIND_OUT }, insertID, { val: [0], type: oracledb.STRING, dir: oracledb.BIND_INOUT, maxArraySize: 1000 } ];
+      sql.executeSqlWithErr(connection, fun_execute, bindVar, {}, function(err) {
+        should.strictEqual(err.message, 'NJS-052: invalid data type at array index 0 for bind position 3');
         done();
       });
     });
@@ -336,16 +336,16 @@ describe.skip('112. rowidFunctionBindAsString_bindinout.js', function() {
   });
 
   describe('112.3 FUNCTION BIND_INOUT, UPDATE', function() {
-    var fun_create = "CREATE OR REPLACE FUNCTION nodb_rowid_bind_1083 (id IN NUMBER, content_1 IN OUT STRING, content_2 INOUT ROWID) RETURN rowid\n" +
-                      "IS \n" +
-                      "    tmp rowid; \n" +
-                      "BEGIN \n" +
-                      "    insert into " + tableName + " (id, content) values (id, CHARTOROWID(content_1)); \n" +
-                      "    update " + tableName + " set content = content_2 where id = id; \n" +
-                      "    select content into tmp from " + tableName + " where id = id; \n" +
-                      "    select CHARTOROWID('AAACiZAAFAAAAJEAAA') into content_1 from dual; \n" +
-                      "    return tmp; \n" +
-                      "END; ";
+    var fun_create = "CREATE OR REPLACE FUNCTION nodb_rowid_bind_1083 (id_in IN NUMBER, content_1 IN OUT VARCHAR2, content_2 IN OUT ROWID) RETURN ROWID\n" +
+                     "IS \n" +
+                     "    tmp rowid; \n" +
+                     "BEGIN \n" +
+                     "    insert into " + tableName + " (id, content) values (id_in, CHARTOROWID(content_1)); \n" +
+                     "    update " + tableName + " set content = content_2 where id = id_in; \n" +
+                     "    select content into tmp from " + tableName + " where id = id_in; \n" +
+                     "    select CHARTOROWID('AAACiZAAFAAAAJEAAA') into content_1 from dual; \n" +
+                     "    return tmp; \n" +
+                     "END; ";
     var fun_execute = "BEGIN :o := nodb_rowid_bind_1083 (:i, :c1, :c2); END;";
     var fun_drop = "DROP FUNCTION nodb_rowid_bind_1083";
 

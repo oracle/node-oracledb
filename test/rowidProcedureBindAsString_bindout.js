@@ -39,7 +39,7 @@ var async    = require('async');
 var dbConfig = require('./dbconfig.js');
 var sql      = require('./sql.js');
 
-describe.skip('110. rowidProcedureBindAsString_bindout.js', function() {
+describe('110. rowidProcedureBindAsString_bindout.js', function() {
   var connection = null;
   var tableName = "nodb_rowid_plsql_out";
   var insertID = 1;
@@ -98,11 +98,11 @@ describe.skip('110. rowidProcedureBindAsString_bindout.js', function() {
   });
 
   describe('110.1 PROCEDURE BIND_OUT as rowid', function() {
-    var proc_create = "CREATE OR REPLACE PROCEDURE nodb_rowid_bind_out (id IN NUMBER, content_in IN ROWID, content_out OUT ROWID)\n" +
+    var proc_create = "CREATE OR REPLACE PROCEDURE nodb_rowid_bind_out (id_in IN NUMBER, content_in IN ROWID, content_out OUT ROWID)\n" +
                       "AS \n" +
                       "BEGIN \n" +
-                      "    insert into " + tableName + " (id, content) values (id, CHARTOROWID(content_in)); \n" +
-                      "    select content into content_out from " + tableName + " where id = id; \n" +
+                      "    insert into " + tableName + " (id, content) values (id_in, CHARTOROWID(content_in)); \n" +
+                      "    select content into content_out from " + tableName + " where id = id_in; \n" +
                       "END nodb_rowid_bind_out; ";
     var proc_execute = "BEGIN nodb_rowid_bind_out (:i, :c, :o); END;";
     var proc_drop = "DROP PROCEDURE nodb_rowid_bind_out";
@@ -214,11 +214,11 @@ describe.skip('110. rowidProcedureBindAsString_bindout.js', function() {
   });
 
   describe('110.2 PROCEDURE BIND_OUT as string', function() {
-    var proc_create = "CREATE OR REPLACE PROCEDURE nodb_rowid_bind_out (id IN NUMBER, content_in IN ROWID, content_out OUT VARCHAR2)\n" +
+    var proc_create = "CREATE OR REPLACE PROCEDURE nodb_rowid_bind_out (id_in IN NUMBER, content_in IN ROWID, content_out OUT VARCHAR2)\n" +
                       "AS \n" +
                       "BEGIN \n" +
-                      "    insert into " + tableName + " (id, content) values (id, CHARTOROWID(content_in)); \n" +
-                      "    select content into content_out from " + tableName + " where id = id; \n" +
+                      "    insert into " + tableName + " (id, content) values (id_in, CHARTOROWID(content_in)); \n" +
+                      "    select content into content_out from " + tableName + " where id = id_in; \n" +
                       "END nodb_rowid_bind_out; ";
     var proc_execute = "BEGIN nodb_rowid_bind_out (:i, :c, :o); END;";
     var proc_drop = "DROP PROCEDURE nodb_rowid_bind_out";
@@ -330,12 +330,12 @@ describe.skip('110. rowidProcedureBindAsString_bindout.js', function() {
   });
 
   describe('110.3 PROCEDURE BIND_IN, UPDATE', function() {
-    var proc_create = "CREATE OR REPLACE PROCEDURE nodb_rowid_bind_1083 (id IN NUMBER, content_1 IN STRING, content_2 IN ROWID, content_out OUT ROWID)\n" +
+    var proc_create = "CREATE OR REPLACE PROCEDURE nodb_rowid_bind_1083 (id_in IN NUMBER, content_1 IN STRING, content_2 IN ROWID, content_out OUT ROWID)\n" +
                       "AS \n" +
                       "BEGIN \n" +
-                      "    insert into " + tableName + " (id, content) values (id, CHARTOROWID(content_1)); \n" +
-                      "    update " + tableName + " set content = content_2 where id = id; \n" +
-                      "    select content into content_out from " + tableName + " where id = id; \n" +
+                      "    insert into " + tableName + " (id, content) values (id_in, CHARTOROWID(content_1)); \n" +
+                      "    update " + tableName + " set content = content_2 where id = id_in; \n" +
+                      "    select content into content_out from " + tableName + " where id = id_in; \n" +
                       "END nodb_rowid_bind_1083; ";
     var proc_execute = "BEGIN nodb_rowid_bind_1083 (:i, :c1, :c2, :o); END;";
     var proc_drop = "DROP PROCEDURE nodb_rowid_bind_1083";

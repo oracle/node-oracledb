@@ -60,6 +60,7 @@ assist.allDataTypeNames =
   "nodb_timestamp5"   : "TIMESTAMP WITH LOCAL TIME ZONE",
   "nodb_timestamp6"   : "TIMESTAMP (9) WITH LOCAL TIME ZONE",
   "nodb_rowid"        : "ROWID",
+  "nodb_urowid"       : "UROWID",
   "nodb_myclobs"      : "CLOB",
   "nodb_myblobs"      : "BLOB",
   "nodb_raw"          : "RAW(2000)"
