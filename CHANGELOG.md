@@ -1,5 +1,155 @@
 # Change Log
 
+## node-oracledb v2.0.13 Development (DD Mon YYYY)
+
+## node-oracledb v1.13.1 (12 Apr 2017)
+
+- Fix regression with NULL values to PL/SQL procedures with multiple parameters.
+
+## node-oracledb v1.13.0 (15 Mar 2017)
+
+- Added support for fetching BLOBs as Buffers, using `fetchAsBuffer` and `fetchInfo`.
+
+- Improved PL/SQL Index-by array binding error messages based on PR #470 (Hariprasad Kulkarni).
+
+- Fixed several crashes and a memory leak using CLOBs with `fetchAsString`.
+
+- Fixed several issues including a crash using NULLs and empty strings for LOB `BIND_INOUT` binds.
+
+- Automatically clean up sessions in the connection pool when they become unusable after an ORA-56600 occurs.
+
+- Updated NAN dependency from 2.4 to 2.5.
+
+## node-oracledb v1.12.2 (21 Dec 2016)
+
+- Fix memory allocation with Oracle 11g client libraries when querying CLOBs using `fetchAsString` and `fetchInfo`.
+
+## node-oracledb v1.12.1 Development (16 Dec 2016)
+
+- Added support for fetching CLOBs as Strings, using `fetchAsString` and `fetchInfo`.
+
+- Added `BIND_INOUT` support for temporary LOBs.
+
+## node-oracledb v1.12.0 Development (3 Dec 2016)
+
+- Significantly enhanced LOB support:
+   - Added `BIND_IN` support for DML
+   - Added `BIND_IN`, `BIND_OUT`, `BIND_INOUT` support for PL/SQL
+   - Added a `connection.createLob()` method to create temporary LOBs
+   - Added a `lob.close()` method
+   - Made enhancements to allow binding String or Buffer data as `STRING` or `BUFFER` to LOB database types
+   - Writeable LOB Streams now conclude with a 'close' event
+
+- Added a connection pool 'ping' feature controlled with
+  `oracledb.poolPingInterval` and a corresponding `createPool()`
+  option. This validates pooled connections when they are returned
+  from a `getConnection()` call.  Values are
+
+     - zero: always ping for every pooled `getConnection()`
+     - negative: never ping
+     - positive: time in seconds the connection must be idle in the pool before `getConnection()` does a ping.  Default is 60 seconds
+
+  The setting is a no-op when node-oracledb is built with Oracle
+  Database 12.2 client libraries, where a new, lower-level OCI feature
+  provides an always-on, lightweight connection check.
+
+- Upgraded NAN dependency from 2.3 to 2.4.
+
+- Stated compatibility is now for Node.js 0.12, 4, 6 and 7.
+
+- Fixed return value of the DATE type bound as `BIND_INOUT`.
+
+- Fixed passing NULL values bound as `BIND_INOUT` for several data types.
+
+- Fixed compilation warnings with newer Node.js versions due to V8 deprecations.
+
+- Fixed some Windows and OS X compilation warnings.
+
+- Linted JavaScript files, standardizing code, example and test files.
+
+- Updated various examples and created new ones.
+
+- Updated README.md and api.md introductory examples, based on a patch proposed by [Leigh Schrandt](https://github.com/stealthybox).
+
+- Updated README.md thanks to [Nick Heiner](https://github.com/NickHeiner).
+
+- Updated documentation links to point to the Oracle Database 12.2 documentation.
+
+- Made some internal changes to the DPI layer to avoid name space collisions
+  and fix session tagging.  These are not visible / exposed through
+  node-oracledb.
+
+## node-oracledb v1.11.0 (19 Aug 2016)
+
+- Added a connection pool cache feature allowing pools to have aliases and be more easily used.
+
+- Improved the bootstrap error message when the node-oracledb binary cannot be loaded.
+
+- Fixed memory leaks with `DATE` and `TIMESTAMP` bind values.
+
+- Fixed external authentication which broke in 1.10.
+
+- Fixed metadata `scale` and `precision` values on AIX.
+
+- Made an internal change to replace `std::string.data()` with `std::string.c_str()`.
+
+- Made an internal change to remove an unused parameter from the `NJS_SET_EXCEPTION` macro.
+
+## node-oracledb v1.10.1 (21 Jul 2016)
+
+- Fixed a bug that prevented a null value being passed from JavaScript into an IN OUT bind.
+
+- Fixed a memory leak introduced in 1.10 with REF CURSORs.
+
+- Fixed a memory leak in error handling paths when using REF CURSORs.
+
+- Made an internal change for queries selecting unsupported column types allowing them to report an error earlier.
+
+- Made an internal change to use `std::string&` for string lengths.
+
+- Fixed a compilation warning on Windows.
+
+- Added a mocha configuration file for the test suite.
+
+## node-oracledb v1.10.0 (8 Jul 2016)
+
+- Enhanced query and REF CURSOR metadata is available when a new
+  `oracledb.extendedMetaData` or `execute()` option `extendedMetaData`
+  property is `true`. (Leonardo Olmi).
+
+- Fixed an issue preventing the garbage collector cleaning up when a
+  query with LOBs is executed but LOB data isn't actually streamed.
+
+- Fixed a bug where an error event could have been emitted on a
+  QueryStream instance prior to the underlying ResultSet having been
+  closed.  This would cause problems if the user tried to close the
+  connection in the error event handler as the ResultSet could have
+  prevented it.
+
+- Fixed a bug where the public `close()` method was invoked on the
+  ResultSet instance that underlies the QueryStream instance if an
+  error occurred during a call to `getRows()`. The public method would
+  have thrown an error had the QueryStream instance been created from
+  a ResultSet instance via the `toQueryStream()` method. Now the
+  underlying C++ layer's `close()` method is invoked directly.
+
+- Updated `Pool._logStats()` to throw an error instead of printing to
+  the console if the pool is not valid.
+
+- Report an error earlier when a named bind object is used in a
+  bind-by-position context.  A new error NJS-044 is returned.
+  Previously errors like ORA-06502 were given.
+
+- Added GitHub Issue and Pull Request templates.
+
+- Some enhancements were made to the underlying DPI data access layer.
+  **These are not exposed to node-oracledb users.**
+
+   - Allow <code>SYSDBA</code> connections
+   - Allow session tagging
+   - Allow the character set and national character set to be specified via parameters to the DPI layer.
+   - Support heterogeneous pools (in addition to existing homogeneous pools)
+
 ## node-oracledb v1.9.3 (24 May 2016)
 
 - Fix error with `OCI_ERROR_MAXMSG_SIZE2` when building with Oracle client 11.2.0.1 and 11.2.0.2.
