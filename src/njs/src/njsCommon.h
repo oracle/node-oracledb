@@ -208,6 +208,9 @@ protected:
             std::string &value);
     bool GetUnsignedIntArg(Nan::NAN_METHOD_ARGS_TYPE args, int index,
             uint32_t *value);
+    bool SetPropBool(Local<Value> value, bool *valuePtr, const char *name);
+    bool SetPropString(Local<Value> value, std::string *valuePtr,
+            const char *name);
     bool SetPropUnsignedInt(Local<Value> value, uint32_t *valuePtr,
             const char *name);
 

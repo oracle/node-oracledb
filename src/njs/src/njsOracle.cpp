@@ -424,7 +424,7 @@ NAN_SETTER(njsOracledb::SetAutoCommit)
 {
     njsOracledb *oracledb = (njsOracledb*) ValidateSetter(info);
     if (oracledb)
-        oracledb->autoCommit = value->ToBoolean()->Value();
+        oracledb->SetPropBool(value, &oracledb->autoCommit, "autoCommit");
 }
 
 
@@ -494,10 +494,9 @@ NAN_GETTER(njsOracledb::GetConnectionClass)
 NAN_SETTER(njsOracledb::SetConnectionClass)
 {
     njsOracledb *oracledb = (njsOracledb*) ValidateSetter(info);
-    if (!oracledb)
-        return;
-    v8::String::Utf8Value utfstr (value->ToString());
-    oracledb->connClass = std::string (*utfstr, utfstr.length());
+    if (oracledb)
+        oracledb->SetPropString(value, &oracledb->connClass,
+                "connectionClass");
 }
 
 

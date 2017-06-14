@@ -552,8 +552,8 @@ bool njsCommon::GetStringArg(Nan::NAN_METHOD_ARGS_TYPE args,
 
 //-----------------------------------------------------------------------------
 // njsCommon::GetUnsignedIntArg()
-//   Gets a string from the list of arguments. If the argument is not a
-// string, an error is raised and false is returned.
+//   Gets a unsigned integer from the list of arguments. If the argument is not
+// a string, an error is raised and false is returned.
 //-----------------------------------------------------------------------------
 bool njsCommon::GetUnsignedIntArg(Nan::NAN_METHOD_ARGS_TYPE args,
         int index, uint32_t *value)
@@ -569,9 +569,28 @@ bool njsCommon::GetUnsignedIntArg(Nan::NAN_METHOD_ARGS_TYPE args,
 
 
 //-----------------------------------------------------------------------------
+// njsCommon::SetPropString()
+//   Sets a property to a string value. If the value is not a string, an error
+// is raised and false is returned.
+//-----------------------------------------------------------------------------
+bool njsCommon::SetPropString(Local<Value> value, std::string *valuePtr,
+        const char *name)
+{
+    if (!value->IsString()) {
+        string errMsg = njsMessages::Get(errInvalidPropertyValue, name);
+        Nan::ThrowError(errMsg.c_str());
+        return false;
+    }
+    v8::String::Utf8Value utfstr(value->ToString());
+    *valuePtr = std::string(*utfstr, utfstr.length());
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
 // njsCommon::SetPropUnsignedInt()
-//   Gets a string from the list of arguments. If the argument is not a
-// string, an error is raised and false is returned.
+//   Sets a property to an unsigned integer value. If the value is not an
+// unsigned integer, an error is raised and false is returned.
 //-----------------------------------------------------------------------------
 bool njsCommon::SetPropUnsignedInt(Local<Value> value, uint32_t *valuePtr,
         const char *name)
@@ -677,3 +696,22 @@ void njsCommon::PropertyIsReadOnly(const char *name)
     Nan::ThrowError(errMsg.c_str());
 }
 
+ //-----------------------------------------------------------------------------
+// njsCommon::SetPropBool()
+//   Sets a property to a boolean value. If the value is not a boolean, an
+// error is raised and false is returned.
+//-----------------------------------------------------------------------------
+bool njsCommon::SetPropBool(Local<Value> value, bool *valuePtr,
+        const char *name)
+{
+    if (!value->IsBoolean()) {
+        string errMsg = njsMessages::Get(errInvalidPropertyValue, name);
+        Nan::ThrowError(errMsg.c_str());
+        return false;
+    }
+    *valuePtr = value->ToBoolean()->Value();
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
