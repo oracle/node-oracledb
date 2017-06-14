@@ -575,7 +575,7 @@ describe('114. urowidDMLBindAsString.js', function() {
             (result.rowsAffected).should.be.exactly(1);
             cb();
           }
-        )
+        );
       },
       function(cb) {
         connection.execute(
@@ -585,7 +585,7 @@ describe('114. urowidDMLBindAsString.js', function() {
             (result.rowsAffected).should.be.exactly(1);
             cb();
           }
-        )
+        );
       },
       function(cb) {
         connection.execute(
@@ -604,9 +604,9 @@ describe('114. urowidDMLBindAsString.js', function() {
                 should.strictEqual(resultVal_2, resultVal);
                 cb();
               }
-            )
+            );
           }
-        )
+        );
       }
     ], callback);
   };
