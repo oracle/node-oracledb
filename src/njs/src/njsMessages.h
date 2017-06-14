@@ -82,6 +82,10 @@ typedef enum {
     errCannotInvokeRsMethods,
     errResultSetAlreadyConverted,
     errNamedJSON,
+    errCannotLoadBinary,
+    errPoolWithAliasAlreadyExists,
+    errPoolWithAliasNotFound,
+    errIncompatibleTypeArrayIndexBind,
 
     // New ones should be added here
 

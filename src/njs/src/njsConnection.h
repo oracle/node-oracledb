@@ -113,6 +113,11 @@ private:
     static NAN_METHOD(Break);
     static void Async_Break(njsBaton *baton);
 
+    // CreateLob Method on Connection class
+    static NAN_METHOD(CreateLob);
+    static void Async_CreateLob(njsBaton *baton);
+    static void Async_AfterCreateLob(njsBaton *baton, Local<Value> argv[]);
+
     // Define Getter Accessors to properties
     static NAN_GETTER(GetStmtCacheSize);
     static NAN_GETTER(GetClientId);
@@ -128,9 +133,9 @@ private:
     static NAN_SETTER(SetOracleServerVersion);
 
     // internal methods
-    static bool GetBindTypeAndSizeFromValue(Local<Value> value,
-            uint32_t *bindType, uint32_t *maxSize, njsBaton *baton,
-            bool scalarOnly = false);
+    static bool GetBindTypeAndSizeFromValue(njsVariable *var,
+            Local<Value> value, uint32_t *bindType, uint32_t *maxSize,
+            njsBaton *baton, bool scalarOnly = false);
     static Local<Value> GetOutBinds(njsBaton *baton);
     static bool GetScalarValueFromVar(njsBaton *baton, njsVariable *var,
             uint32_t pos, Local<Value> &value);

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2017 Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -86,14 +86,15 @@ using namespace v8;
                                       (NJS_NODE_ORACLEDB_PATCH) )
 
 // default values
-#define NJS_MAX_ROWS            100
-#define NJS_STMT_CACHE_SIZE      30
-#define NJS_POOL_MIN              0
-#define NJS_POOL_MAX              4
-#define NJS_POOL_INCR             1
-#define NJS_POOL_TIMEOUT         60
-#define NJS_PREFETCH_ROWS       100
-#define NJS_LOB_PREFETCH_SIZE 16384
+#define NJS_MAX_ROWS                    100
+#define NJS_STMT_CACHE_SIZE             30
+#define NJS_POOL_MIN                    0
+#define NJS_POOL_MAX                    4
+#define NJS_POOL_INCR                   1
+#define NJS_POOL_TIMEOUT                60
+#define NJS_PREFETCH_ROWS               100
+#define NJS_LOB_PREFETCH_SIZE           16384
+#define NJS_POOL_DEFAULT_PING_INTERVAL  60
 
 
 //-----------------------------------------------------------------------------
@@ -120,6 +121,7 @@ public:
     bool               IsValid() const             { return true; }
     njsErrorType       GetInvalidErrorType() const { return errSuccess; }
     void SetFetchAsStringTypesOnBaton(njsBaton *baton) const;
+    void SetFetchAsBufferTypesOnBaton(njsBaton *baton) const;
     static std::string GetDPIError(void);
 
 private:
@@ -151,8 +153,10 @@ private:
     static NAN_GETTER(GetExternalAuth);
     static NAN_GETTER(GetPrefetchRows);
     static NAN_GETTER(GetFetchAsString);
+    static NAN_GETTER(GetFetchAsBuffer);
     static NAN_GETTER(GetLobPrefetchSize);
     static NAN_GETTER(GetOracleClientVersion);
+    static NAN_GETTER(GetPoolPingInterval);
 
     // Define Setter Accessors to Properties
     static NAN_SETTER(SetPoolMin);
@@ -169,12 +173,16 @@ private:
     static NAN_SETTER(SetExternalAuth);
     static NAN_SETTER(SetPrefetchRows);
     static NAN_SETTER(SetFetchAsString);
+    static NAN_SETTER(SetFetchAsBuffer);
     static NAN_SETTER(SetLobPrefetchSize);
     static NAN_SETTER(SetOracleClientVersion);
+    static NAN_SETTER(SetPoolPingInterval);
 
     njsOracledb();
-    ~njsOracledb() { jsFetchAsStringTypes.Reset(); }
-
+    ~njsOracledb() {
+        jsFetchAsStringTypes.Reset();
+        jsFetchAsBufferTypes.Reset();
+    }
     uint32_t outFormat;
     bool autoCommit;
     bool extendedMetaData;
@@ -191,8 +199,10 @@ private:
     std::string connClass;
     bool externalAuth;
     Nan::Persistent<Array> jsFetchAsStringTypes;
+    Nan::Persistent<Array> jsFetchAsBufferTypes;
     uint32_t lobPrefetchSize;
     unsigned int oraClientVer;
+    int32_t poolPingInterval;
 
     static Nan::Persistent<FunctionTemplate> oracledbTemplate_s;
     static dpiContext *globalDPIContext;

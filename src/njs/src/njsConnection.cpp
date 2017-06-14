@@ -87,6 +87,7 @@ void njsConnection::Init(Handle<Object> target)
     Nan::SetPrototypeMethod(tpl, "commit", Commit);
     Nan::SetPrototypeMethod(tpl, "rollback", Rollback);
     Nan::SetPrototypeMethod(tpl, "break", Break);
+    Nan::SetPrototypeMethod(tpl, "createLob", CreateLob);
 
     Nan::SetAccessor(tpl->InstanceTemplate(),
             Nan::New<v8::String>("stmtCacheSize").ToLocalChecked(),
@@ -188,7 +189,8 @@ bool njsConnection::ProcessDefines(njsBaton *baton, dpiStmt *dpiStmtHandle,
         }
 
         // validate data type and determine size
-        if (vars[i].varTypeNum == DPI_ORACLE_TYPE_VARCHAR) {
+        if (vars[i].varTypeNum == DPI_ORACLE_TYPE_VARCHAR ||
+                vars[i].varTypeNum == DPI_ORACLE_TYPE_RAW) {
             vars[i].maxSize = NJS_MAX_FETCH_AS_STRING_SIZE;
             vars[i].nativeTypeNum = DPI_NATIVE_TYPE_BYTES;
         } else vars[i].maxSize = 0;
@@ -212,7 +214,11 @@ bool njsConnection::ProcessDefines(njsBaton *baton, dpiStmt *dpiStmtHandle,
             case DPI_ORACLE_TYPE_CLOB:
             case DPI_ORACLE_TYPE_NCLOB:
                 if (vars[i].varTypeNum == DPI_ORACLE_TYPE_VARCHAR)
-                    vars[i].maxSize = 32768;
+                    vars[i].maxSize = (uint32_t) -1;
+                break;
+            case DPI_ORACLE_TYPE_BLOB:
+                if (vars[i].varTypeNum == DPI_ORACLE_TYPE_RAW)
+                    vars[i].maxSize = (uint32_t) -1;
                 break;
             case DPI_ORACLE_TYPE_LONG_VARCHAR:
             case DPI_ORACLE_TYPE_LONG_RAW:
@@ -222,7 +228,6 @@ bool njsConnection::ProcessDefines(njsBaton *baton, dpiStmt *dpiStmtHandle,
             case DPI_ORACLE_TYPE_NATIVE_INT:
             case DPI_ORACLE_TYPE_NATIVE_FLOAT:
             case DPI_ORACLE_TYPE_NATIVE_DOUBLE:
-            case DPI_ORACLE_TYPE_BLOB:
             case DPI_ORACLE_TYPE_ROWID:
                 break;
             default:
@@ -310,23 +315,13 @@ bool njsConnection::ProcessLOBs(njsBaton *baton, njsVariable *vars,
         for (uint32_t row = 0; row < numElements; row++) {
             njsProtoILob *lob = &var->lobs[row];
             lob->dataType = dataType;
+            lob->isAutoClose = true;
             uint32_t elementIndex = baton->bufferRowIndex + row;
             dpiData *data = &var->dpiVarData[elementIndex];
             if (data->isNull)
                 continue;
-            if (dpiLob_addRef(data->value.asLOB) < 0) {
-                baton->GetDPIError();
+            if (!lob->PopulateFromDPI(baton, data->value.asLOB, true))
                 return false;
-            }
-            lob->dpiLobHandle = data->value.asLOB;
-            if (dpiLob_getChunkSize(lob->dpiLobHandle, &lob->chunkSize) < 0) {
-                baton->GetDPIError();
-                return false;
-            }
-            if (dpiLob_getSize(lob->dpiLobHandle, &lob->length) < 0) {
-                baton->GetDPIError();
-                return false;
-            }
         }
     }
 
@@ -348,6 +343,8 @@ bool njsConnection::MapByName(njsBaton *baton, dpiQueryInfo *queryInfo,
             if (baton->fetchInfo[i].name.compare(name) == 0) {
                 if (baton->fetchInfo[i].type == NJS_DATATYPE_STR)
                     targetType = DPI_ORACLE_TYPE_VARCHAR;
+                else if (baton->fetchInfo[i].type == NJS_DATATYPE_BUFFER)
+                    targetType = DPI_ORACLE_TYPE_RAW;
                 else if (baton->fetchInfo[i].type == NJS_DATATYPE_DEFAULT)
                     targetType = queryInfo->oracleTypeNum;
                 return true;
@@ -366,7 +363,7 @@ bool njsConnection::MapByName(njsBaton *baton, dpiQueryInfo *queryInfo,
 bool njsConnection::MapByType(njsBaton *baton, dpiQueryInfo *queryInfo,
         dpiOracleTypeNum &targetType)
 {
-    if (baton->fetchAsStringTypes) {
+    if (baton->fetchAsStringTypes || baton->fetchAsBufferTypes) {
         switch (queryInfo->oracleTypeNum) {
             case DPI_ORACLE_TYPE_NUMBER:
             case DPI_ORACLE_TYPE_NATIVE_FLOAT:
@@ -386,6 +383,23 @@ bool njsConnection::MapByType(njsBaton *baton, dpiQueryInfo *queryInfo,
                 for (uint32_t i = 0; i < baton->numFetchAsStringTypes; i++) {
                     if (baton->fetchAsStringTypes[i] == NJS_DATATYPE_DATE) {
                         targetType = DPI_ORACLE_TYPE_VARCHAR;
+                        return true;
+                    }
+                }
+                break;
+            case DPI_ORACLE_TYPE_CLOB:
+            case DPI_ORACLE_TYPE_NCLOB:
+                for (uint32_t i = 0; i < baton->numFetchAsStringTypes; i++) {
+                    if (baton->fetchAsStringTypes[i] == NJS_DATATYPE_CLOB) {
+                        targetType = DPI_ORACLE_TYPE_VARCHAR;
+                        return true;
+                    }
+                }
+                break;
+            case DPI_ORACLE_TYPE_BLOB:
+                for (uint32_t i = 0; i < baton->numFetchAsBufferTypes; i++) {
+                    if (baton->fetchAsBufferTypes[i] == NJS_DATATYPE_BLOB) {
+                        targetType = DPI_ORACLE_TYPE_RAW;
                         return true;
                     }
                 }
@@ -466,7 +480,7 @@ Local<Value> njsConnection::GetMetaData(njsVariable *vars, uint32_t numVars,
         njsVariable *var = &vars[i];
         Local<Object> column = Nan::New<Object>();
         Nan::Set(column, Nan::New<v8::String>("name").ToLocalChecked(),
-                Nan::New<v8::String>(var->name.c_str()).ToLocalChecked());
+                Nan::New<v8::String>(var->name).ToLocalChecked());
         if (extendedMetaData) {
             njsDBType dbType = var->DBType();
             Nan::Set(column,
@@ -552,8 +566,7 @@ bool njsConnection::GetRows(njsBaton *baton, Local<Object> &rows)
             if (baton->outFormat == NJS_ROWS_ARRAY)
                 Nan::Set(rowAsArray, col, val);
             else {
-                keyVal = Nan::New<String>(var->name.c_str(),
-                    var->name.length()).ToLocalChecked();
+                keyVal = Nan::New<String>(var->name).ToLocalChecked();
                 Nan::Set(rowAsObj, keyVal, val);
             }
         }
@@ -658,17 +671,19 @@ bool njsConnection::ProcessBind(Local<Value> val, njsVariable *var,
     bindType = 0;
 
     // value is an object, get information on the bind variable from it
-    if (val->IsObject() && !val->IsDate() && !Buffer::HasInstance(val)) {
+    if (val->IsObject() && !val->IsDate() && !Buffer::HasInstance(val) &&
+            !njsILob::HasInstance(val)) {
         Local<Object> bindUnit = val->ToObject();
 
-        // In case of positional binds, JSON objects are expected to be
-        // unnamed.  Named JSON objects gets confused as we look for "dir",
-        // "type", and "maxSize" key words, but "name" will not match
+        // In case of bind-by-position, JSON objects are expected to be
+        // unnamed. If JSON object is provided, we look for "dir", "type",
+        // "maxSize" and "val" key names. If not found, an error is reported.
         // Array (positional) binds syntax
         //    [ id, name, {type : oracledb.STRING, dir : oracledb.BIND_OUT}]
         // the 3rd parameter is unnamed JSON object.
         // [ id, n, { a: { type : oracledb.STRING, dir : oracledb.BIND_OUT} }]
-        // will fail now.
+        // will fail now. In this example the third parameter JSON object has
+        // a key name "a" and value as another JSON. This is incorrect syntax.
         if (byPosition) {
             Local<Array> keys = bindUnit->GetOwnPropertyNames();
             bool valid = false;
@@ -676,8 +691,10 @@ bool njsConnection::ProcessBind(Local<Value> val, njsVariable *var,
                 Local<String> temp = keys->Get(i).As<String>();
                 v8::String::Utf8Value utf8str(temp->ToString());
                 std::string key = std::string(*utf8str, utf8str.length());
-                if (key.compare("dir") == 0 || key.compare("type") == 0 ||
-                        key.compare("maxSize") == 0) {
+                if (key.compare("dir") == 0 ||
+                        key.compare("type") == 0 ||
+                        key.compare("maxSize") == 0 ||
+                        key.compare("val") == 0) {
                     valid = true;
                     break;
                 }
@@ -692,11 +709,12 @@ bool njsConnection::ProcessBind(Local<Value> val, njsVariable *var,
             return false;
         if (!baton->GetUnsignedIntFromJSON(bindUnit, "type", 1, &bindType))
             return false;
-        if (var->bindDir != NJS_BIND_IN)
+        if (var->bindDir != NJS_BIND_IN) {
             var->maxSize = NJS_MAX_OUT_BIND_SIZE;
-        if (!baton->GetUnsignedIntFromJSON(bindUnit, "maxSize", 1,
-                &var->maxSize))
-            return false;
+            if (!baton->GetUnsignedIntFromJSON(bindUnit, "maxSize", 1,
+                    &var->maxSize))
+                return false;
+        }
         if (!baton->GetUnsignedIntFromJSON(bindUnit, "maxArraySize", 1,
                 &var->maxArraySize))
             return false;
@@ -725,14 +743,14 @@ bool njsConnection::ProcessBind(Local<Value> val, njsVariable *var,
     }
 
     // validate bind type
-    if (!bindType || !var->maxSize) {
+    if (!bindType || !var->maxSize || var->maxSize == NJS_MAX_OUT_BIND_SIZE) {
         uint32_t defaultMaxSize = 0, defaultBindType = 0;
-        if (!GetBindTypeAndSizeFromValue(bindValue, &defaultBindType,
+        if (!GetBindTypeAndSizeFromValue(var, bindValue, &defaultBindType,
                 &defaultMaxSize, baton))
             return false;
         if (!bindType)
             bindType = defaultBindType;
-        if (!var->maxSize)
+        if (defaultMaxSize > var->maxSize)
             var->maxSize = defaultMaxSize;
     }
 
@@ -793,7 +811,7 @@ bool njsConnection::ProcessBind(Local<Value> val, njsVariable *var,
             var->nativeTypeNum = DPI_NATIVE_TYPE_LOB;
             break;
         default:
-            baton->error= njsMessages::Get(errInvalidBindDataType);
+            baton->error= njsMessages::Get(errInvalidBindDataType, 2);
             return false;
     }
 
@@ -940,15 +958,49 @@ bool njsConnection::ProcessScalarBindValue(Local<Value> value,
                 return false;
             }
         }
+
+    // value is a LOB
+    } else if (njsILob::HasInstance(value)) {
+        bindOk = (var->varTypeNum == DPI_ORACLE_TYPE_CLOB ||
+                var->varTypeNum == DPI_ORACLE_TYPE_BLOB);
+        if (bindOk) {
+            njsILob *lob = njsILob::GetInstance(value);
+            dpiLob *lobHandle = lob->GetDPILobHandle();
+            dpiLob *tempLobHandle = NULL;
+
+            // for INOUT binds a copy of the LOB is made and the copy bound
+            // the original IN value is also closed
+            if (var->bindDir == NJS_BIND_INOUT) {
+                if (dpiLob_copy(lobHandle, &tempLobHandle) < 0) {
+                    baton->GetDPIError();
+                    return false;
+                }
+                if (!lob->ClearDPILobHandle(baton))
+                    return false;
+                lobHandle = tempLobHandle;
+            }
+
+            // perform the bind
+            if (dpiVar_setFromLob(var->dpiVarHandle, pos, lobHandle) < 0) {
+                baton->GetDPIError();
+                if (tempLobHandle)
+                    dpiLob_release(tempLobHandle);
+                return false;
+            }
+            if (tempLobHandle)
+                dpiLob_release(tempLobHandle);
+        }
     }
 
     // check bind was successful
     if (!bindOk) {
-        njsErrorType errNum;
-        if (var->isArray)
-            errNum = errIncompatibleTypeArrayBind;
-        else errNum = errBindValueAndTypeMismatch;
-        baton->error = njsMessages::Get(errNum);
+        if (var->isArray && !var->name.empty())
+            baton->error = njsMessages::Get(errIncompatibleTypeArrayBind,
+                    pos, var->name.c_str());
+        else if (var->isArray)
+            baton->error = njsMessages::Get(errIncompatibleTypeArrayIndexBind,
+                    pos, var->pos);
+        else baton->error = njsMessages::Get(errBindValueAndTypeMismatch);
         return false;
     }
 
@@ -961,9 +1013,9 @@ bool njsConnection::ProcessScalarBindValue(Local<Value> value,
 //   Get the bind type from the value that has been passed in. If no bind type
 // is supported at this point, 0 is returned.
 //-----------------------------------------------------------------------------
-bool njsConnection::GetBindTypeAndSizeFromValue(Local<Value> value,
-        uint32_t *bindType, uint32_t *maxSize, njsBaton *baton,
-        bool scalarOnly)
+bool njsConnection::GetBindTypeAndSizeFromValue(njsVariable *var,
+        Local<Value> value, uint32_t *bindType, uint32_t *maxSize,
+        njsBaton *baton, bool scalarOnly)
 {
     if (value->IsUndefined() || value->IsNull()) {
         *bindType = NJS_DATATYPE_STR;
@@ -978,9 +1030,6 @@ bool njsConnection::GetBindTypeAndSizeFromValue(Local<Value> value,
         *bindType = NJS_DATATYPE_NUM;
     } else if (value->IsDate()) {
         *bindType = NJS_DATATYPE_DATE;
-    } else if (value->IsObject() && Buffer::HasInstance(value->ToObject())) {
-        *bindType = NJS_DATATYPE_BUFFER;
-        *maxSize = (uint32_t) Buffer::Length(value->ToObject());
     } else if (!scalarOnly && value->IsArray()) {
         Nan::HandleScope scope;
         Local<Array> arrayVal = Local<Array>::Cast(value);
@@ -990,7 +1039,7 @@ bool njsConnection::GetBindTypeAndSizeFromValue(Local<Value> value,
             element = arrayVal->Get(i);
             if (element->IsUndefined() || element->IsNull())
                 continue;
-            if (!GetBindTypeAndSizeFromValue(element, &elementBindType,
+            if (!GetBindTypeAndSizeFromValue(var, element, &elementBindType,
                     &elementMaxSize, baton, true))
                 return false;
             if (*bindType == 0)
@@ -998,8 +1047,16 @@ bool njsConnection::GetBindTypeAndSizeFromValue(Local<Value> value,
             if (elementMaxSize > *maxSize)
                 *maxSize = elementMaxSize;
         }
+    } else if (value->IsObject()) {
+        if (Buffer::HasInstance(value)) {
+            *bindType = NJS_DATATYPE_BUFFER;
+            *maxSize = (uint32_t) Buffer::Length(value->ToObject());
+        } else if (njsILob::HasInstance(value)) {
+            njsILob *lob = njsILob::GetInstance(value);
+            *bindType = lob->GetDataType();
+        }
     } else {
-        baton->error= njsMessages::Get(errInvalidBindDataType);
+        baton->error= njsMessages::Get(errInvalidBindDataType, 2);
         return false;
     }
     return true;
@@ -1069,7 +1126,8 @@ bool njsConnection::ProcessOptions(Nan::NAN_METHOD_ARGS_TYPE args,
                 baton->error = njsMessages::Get(errNoTypeForConversion);
                 return false;
             } else if (tempType != NJS_DATATYPE_DEFAULT &&
-                    tempType != NJS_DATATYPE_STR) {
+                    tempType != NJS_DATATYPE_STR &&
+                    tempType != NJS_DATATYPE_BUFFER) {
                 baton->error = njsMessages::Get(errInvalidTypeForConversion);
                 return false;
             }
@@ -1132,6 +1190,10 @@ bool njsConnection::GetScalarValueFromVar(njsBaton *baton, njsVariable *var,
             else temp = Nan::New<Number>(data->value.asDouble);
             break;
         case DPI_NATIVE_TYPE_BYTES:
+            if (data->value.asBytes.length > var->maxSize) {
+                baton->error = njsMessages::Get(errInsufficientBufferForBinds);
+                return false;
+            }
             if (data->value.asBytes.length == 0)
                 temp = Nan::Null();
             else if (var->varTypeNum == DPI_ORACLE_TYPE_RAW ||
@@ -1330,6 +1392,7 @@ NAN_METHOD(njsConnection::Execute)
     baton->maxRows = oracledb->getMaxRows();
     baton->prefetchRows = oracledb->getPrefetchRows();
     oracledb->SetFetchAsStringTypesOnBaton(baton);
+    oracledb->SetFetchAsBufferTypesOnBaton(baton);
     baton->outFormat = oracledb->getOutFormat();
     baton->autoCommit = oracledb->getAutoCommit();
     baton->extendedMetaData = oracledb->getExtendedMetaData();
@@ -1349,7 +1412,7 @@ NAN_METHOD(njsConnection::Execute)
 //-----------------------------------------------------------------------------
 void njsConnection::Async_Execute(njsBaton *baton)
 {
-    uint32_t mode;
+    dpiExecMode mode;
 
     // prepare statement and perform any binds that are needed
     if (!PrepareAndBind(baton))
@@ -1626,6 +1689,76 @@ void njsConnection::Async_Break(njsBaton *baton)
 {
     if (dpiConn_breakExecution(baton->dpiConnHandle) < 0)
         baton->GetDPIError();
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection::CreateLob()
+//   Create a new temporary LOB and return it for use by the application.
+//
+// PARAMETERS
+//   - JS callback which will receive (error)
+//-----------------------------------------------------------------------------
+NAN_METHOD(njsConnection::CreateLob)
+{
+    njsConnection *connection;
+    uint32_t lobType;
+    njsBaton *baton;
+
+    connection = (njsConnection*) ValidateArgs(info, 2, 2);
+    if (!connection)
+        return;
+    baton = connection->CreateBaton(info);
+    if (!baton)
+        return;
+    if (!connection->GetUnsignedIntArg(info, 0, &lobType))
+        return;
+    if (lobType != NJS_DATATYPE_CLOB && lobType != NJS_DATATYPE_BLOB) {
+        string errMsg = njsMessages::Get(errInvalidParameterValue, 1);
+        Nan::ThrowError(errMsg.c_str());
+        return;
+    }
+    baton->jsOracledb.Reset(connection->jsOracledb);
+    baton->SetDPIConnHandle(connection->dpiConnHandle);
+    baton->protoILob = new njsProtoILob();
+    baton->protoILob->dataType = (njsDataType) lobType;
+    baton->QueueWork("CreateLob", Async_CreateLob, Async_AfterCreateLob, 2);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection::Async_CreateLob()
+//   Worker function for njsConnection::CreateLob() method.
+//-----------------------------------------------------------------------------
+void njsConnection::Async_CreateLob(njsBaton *baton)
+{
+    dpiOracleTypeNum typeNum;
+    dpiLob *tempLob;
+
+    typeNum = (baton->protoILob->dataType == NJS_DATATYPE_CLOB) ?
+            DPI_ORACLE_TYPE_CLOB : DPI_ORACLE_TYPE_BLOB;
+    if (dpiConn_newTempLob(baton->dpiConnHandle, typeNum, &tempLob) < 0)
+        baton->GetDPIError();
+    baton->protoILob->PopulateFromDPI(baton, tempLob, false);
+    baton->protoILob->isAutoClose = false;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection::Async_AfterCreateLob()
+//   Returns result to JS by invoking JS callback.
+//-----------------------------------------------------------------------------
+void njsConnection::Async_AfterCreateLob(njsBaton *baton, Local<Value> argv[])
+{
+    Nan::EscapableHandleScope scope;
+    Local<Value> tempArgv[1];
+
+    tempArgv[0] = njsILob::CreateFromProtoLob(baton->protoILob);
+    Local<Value> key = Nan::New<String>("newLob").ToLocalChecked();
+    Local<Object> jsOracledb = Nan::New(baton->jsOracledb);
+    Local<Function> fn = Local<Function>::Cast(jsOracledb->Get(key));
+    Local<Value> temp = fn->Call(jsOracledb, 1, tempArgv);
+    argv[1] = scope.Escape(temp);
 }
 
 

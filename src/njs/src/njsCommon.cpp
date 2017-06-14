@@ -83,30 +83,30 @@ njsVariable::~njsVariable()
 njsDataType njsVariable::DataType()
 {
     switch (varTypeNum) {
-        case DPI_ORACLE_VARTYPE_VARCHAR:
-        case DPI_ORACLE_VARTYPE_NVARCHAR:
-        case DPI_ORACLE_VARTYPE_CHAR:
-        case DPI_ORACLE_VARTYPE_NCHAR:
-        case DPI_ORACLE_VARTYPE_ROWID:
-        case DPI_ORACLE_VARTYPE_RAW:
-        case DPI_ORACLE_VARTYPE_LONG_VARCHAR:
-        case DPI_ORACLE_VARTYPE_LONG_NVARCHAR:
-        case DPI_ORACLE_VARTYPE_LONG_RAW:
+        case DPI_ORACLE_TYPE_VARCHAR:
+        case DPI_ORACLE_TYPE_NVARCHAR:
+        case DPI_ORACLE_TYPE_CHAR:
+        case DPI_ORACLE_TYPE_NCHAR:
+        case DPI_ORACLE_TYPE_ROWID:
+        case DPI_ORACLE_TYPE_LONG_VARCHAR:
             return NJS_DATATYPE_STR;
-        case DPI_ORACLE_VARTYPE_NATIVE_FLOAT:
-        case DPI_ORACLE_VARTYPE_NATIVE_DOUBLE:
-        case DPI_ORACLE_VARTYPE_NATIVE_INT:
-        case DPI_ORACLE_VARTYPE_NUMBER:
+        case DPI_ORACLE_TYPE_RAW:
+        case DPI_ORACLE_TYPE_LONG_RAW:
+            return NJS_DATATYPE_BUFFER;
+        case DPI_ORACLE_TYPE_NATIVE_FLOAT:
+        case DPI_ORACLE_TYPE_NATIVE_DOUBLE:
+        case DPI_ORACLE_TYPE_NATIVE_INT:
+        case DPI_ORACLE_TYPE_NUMBER:
             return NJS_DATATYPE_NUM;
-        case DPI_ORACLE_VARTYPE_DATE:
-        case DPI_ORACLE_VARTYPE_TIMESTAMP:
-        case DPI_ORACLE_VARTYPE_TIMESTAMP_TZ:
-        case DPI_ORACLE_VARTYPE_TIMESTAMP_LTZ:
+        case DPI_ORACLE_TYPE_DATE:
+        case DPI_ORACLE_TYPE_TIMESTAMP:
+        case DPI_ORACLE_TYPE_TIMESTAMP_TZ:
+        case DPI_ORACLE_TYPE_TIMESTAMP_LTZ:
             return NJS_DATATYPE_DATE;
-        case DPI_ORACLE_VARTYPE_CLOB:
-        case DPI_ORACLE_VARTYPE_NCLOB:
+        case DPI_ORACLE_TYPE_CLOB:
+        case DPI_ORACLE_TYPE_NCLOB:
             return NJS_DATATYPE_CLOB;
-        case DPI_ORACLE_VARTYPE_BLOB:
+        case DPI_ORACLE_TYPE_BLOB:
             return NJS_DATATYPE_BLOB;
         default:
             break;
@@ -195,6 +195,10 @@ njsBaton::~njsBaton()
         delete [] bindVars;
         bindVars = NULL;
     }
+    if (protoILob) {
+        delete protoILob;
+        protoILob = NULL;
+    }
     if (!keepQueryInfo) {
         if (queryVars) {
             delete [] queryVars;
@@ -207,6 +211,10 @@ njsBaton::~njsBaton()
         if (fetchAsStringTypes) {
             delete [] fetchAsStringTypes;
             fetchAsStringTypes = NULL;
+        }
+        if (fetchAsBufferTypes) {
+            delete [] fetchAsBufferTypes;
+            fetchAsBufferTypes = NULL;
         }
     }
 }
@@ -267,7 +275,7 @@ void njsBaton::AsyncAfterWorkCallback(uv_work_t *req, int status)
     // reset all remaining parameters as undefined
     if (!baton->error.empty()) {
         callbackArgs[0] = v8::Exception::Error(Nan::New<v8::String>(
-                baton->error.c_str()).ToLocalChecked());
+                baton->error).ToLocalChecked());
         for (i = 1; i < numCallbackArgs; i++)
             callbackArgs[i] = Nan::Undefined();
     }
@@ -392,6 +400,36 @@ bool njsBaton::GetBoolFromJSON(Local<Object> obj, const char *key, int index,
     if (!jsValue->IsUndefined())
         *value = jsValue->ToBoolean()->Value();
     return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsBaton::GetIntFromJSON()
+//   Gets a signed integer value from the JSON object for the given key, if
+// possible.  If undefined, leave value alone and do not set error; otherwise,
+// set error. Index is the argument index in the caller.
+//-----------------------------------------------------------------------------
+bool njsBaton::GetIntFromJSON(Local<Object> obj, const char *key,
+        int index, int32_t *value)
+{
+    Nan::HandleScope scope;
+    Local<Value> jsValue;
+
+    if (!error.empty())
+        return false;
+    jsValue = obj->Get(Nan::New<v8::String>(key).ToLocalChecked());
+    if (jsValue->IsInt32()) {
+        *value = Nan::To<int32_t>(jsValue).FromJust();
+        return true;
+    } else if (jsValue->IsUndefined() || jsValue->IsNull()) {
+        return true;
+    } else if (jsValue->IsNumber()) {
+        error = njsMessages::Get(errInvalidPropertyValueInParam, key,
+                index + 1);
+        return false;
+    }
+    error = njsMessages::Get(errInvalidPropertyTypeInParam, key, index + 1);
+    return false;
 }
 
 
@@ -556,6 +594,42 @@ bool njsCommon::GetUnsignedIntArg(Nan::NAN_METHOD_ARGS_TYPE args,
 
 
 //-----------------------------------------------------------------------------
+// njsCommon::SetPropBool()
+//   Sets a property to a boolean value. If the value is not a boolean, an
+// error is raised and false is returned.
+//-----------------------------------------------------------------------------
+bool njsCommon::SetPropBool(Local<Value> value, bool *valuePtr,
+        const char *name)
+{
+    if (!value->IsBoolean()) {
+        string errMsg = njsMessages::Get(errInvalidPropertyValue, name);
+        Nan::ThrowError(errMsg.c_str());
+        return false;
+    }
+    *valuePtr = value->ToBoolean()->Value();
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsCommon::SetPropInt()
+//   Sets a property to an integer value. If the value is not an integer, an
+// error is raised and false is returned.
+//-----------------------------------------------------------------------------
+bool njsCommon::SetPropInt(Local<Value> value, int32_t *valuePtr,
+        const char *name)
+{
+    if (!value->IsInt32()) {
+        string errMsg = njsMessages::Get(errInvalidPropertyValue, name);
+        Nan::ThrowError(errMsg.c_str());
+        return false;
+    }
+    *valuePtr = Nan::To<int32_t>(value).FromJust();
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
 // njsCommon::SetPropString()
 //   Sets a property to a string value. If the value is not a string, an error
 // is raised and false is returned.
@@ -683,22 +757,3 @@ void njsCommon::PropertyIsReadOnly(const char *name)
     Nan::ThrowError(errMsg.c_str());
 }
 
- //-----------------------------------------------------------------------------
-// njsCommon::SetPropBool()
-//   Sets a property to a boolean value. If the value is not a boolean, an
-// error is raised and false is returned.
-//-----------------------------------------------------------------------------
-bool njsCommon::SetPropBool(Local<Value> value, bool *valuePtr,
-        const char *name)
-{
-    if (!value->IsBoolean()) {
-        string errMsg = njsMessages::Get(errInvalidPropertyValue, name);
-        Nan::ThrowError(errMsg.c_str());
-        return false;
-    }
-    *valuePtr = value->ToBoolean()->Value();
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------

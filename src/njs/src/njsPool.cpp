@@ -101,6 +101,9 @@ void njsPool::Init(Handle<Object> target)
     Nan::SetAccessor(temp->InstanceTemplate(),
             Nan::New<v8::String>("stmtCacheSize").ToLocalChecked(),
             njsPool::GetStmtCacheSize, njsPool::SetStmtCacheSize);
+    Nan::SetAccessor(temp->InstanceTemplate(),
+            Nan::New<v8::String>("poolPingInterval").ToLocalChecked(),
+            njsPool::GetPoolPingInterval, njsPool::SetPoolPingInterval);
 
     poolTemplate_s.Reset(temp);
     Nan::Set(target, Nan::New<v8::String>("Pool").ToLocalChecked(),
@@ -130,6 +133,7 @@ Local<Object> njsPool::CreateFromBaton(njsBaton *baton)
     pool->poolMin = baton->poolMin;
     pool->poolIncrement = baton->poolIncrement;
     pool->poolTimeout = baton->poolTimeout;
+    pool->poolPingInterval = baton->poolPingInterval;
     pool->stmtCacheSize = baton->stmtCacheSize;
     pool->lobPrefetchSize = baton->lobPrefetchSize;
     return scope.Escape(obj);
@@ -236,6 +240,18 @@ NAN_GETTER(njsPool::GetConnectionsInUse)
 
 
 //-----------------------------------------------------------------------------
+// njsPool::GetPoolPingInterval()
+//   Get accessor of "poolPingInterval" property.
+//-----------------------------------------------------------------------------
+NAN_GETTER(njsPool::GetPoolPingInterval)
+{
+    njsPool *pool = (njsPool*) ValidateGetter(info);
+    if (pool)
+        info.GetReturnValue().Set(pool->poolPingInterval);
+}
+
+
+//-----------------------------------------------------------------------------
 // njsPool::GetStmtCacheSize()
 //   Get accessor of "stmtCacheSize" property.
 //-----------------------------------------------------------------------------
@@ -304,6 +320,16 @@ NAN_SETTER(njsPool::SetConnectionsOpen)
 NAN_SETTER(njsPool::SetConnectionsInUse)
 {
     PropertyIsReadOnly("connectionsInUse");
+}
+
+
+//-----------------------------------------------------------------------------
+// njsPool::SetPoolPingInterval()
+//   Set accessor of "stmtCacheSize" property.
+//-----------------------------------------------------------------------------
+NAN_SETTER(njsPool::SetPoolPingInterval)
+{
+    PropertyIsReadOnly("poolPingInterval");
 }
 
 
@@ -397,12 +423,17 @@ NAN_METHOD(njsPool::Terminate)
 
 //-----------------------------------------------------------------------------
 // njsPool::Async_Terminate()
-//   Worker function for njsPool::Terminate() method.
+//   Worker function for njsPool::Terminate() method. If the attempt to
+// terminate the pool fails, the reference to the DPI handle is transferred
+// back from the baton to the pool.
 //-----------------------------------------------------------------------------
 void njsPool::Async_Terminate(njsBaton *baton)
 {
-    if (dpiPool_close(baton->dpiPoolHandle, DPI_MODE_POOL_CLOSE_DEFAULT) < 0)
-        baton->GetDPIPoolError(baton->dpiPoolHandle);
+    if (dpiPool_close(baton->dpiPoolHandle, DPI_MODE_POOL_CLOSE_DEFAULT) < 0) {
         baton->GetDPIError();
+        njsPool *pool = (njsPool*) baton->callingObj;
+        pool->dpiPoolHandle = baton->dpiPoolHandle;
+        baton->dpiPoolHandle = NULL;
+    }
 }
 

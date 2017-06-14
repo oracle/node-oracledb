@@ -79,6 +79,7 @@ void njsILob::Init(Handle<Object> target)
     tpl->SetClassName(Nan::New<v8::String>("ILob").ToLocalChecked());
 
     Nan::SetPrototypeMethod(tpl, "release", Release);
+    Nan::SetPrototypeMethod(tpl, "close", Close);
     Nan::SetPrototypeMethod(tpl, "read", Read);
     Nan::SetPrototypeMethod(tpl, "write", Write);
 
@@ -101,6 +102,14 @@ void njsILob::Init(Handle<Object> target)
     Nan::SetAccessor(tpl->InstanceTemplate(),
             Nan::New<v8::String>("type").ToLocalChecked(),
             njsILob::GetType, njsILob::SetType);
+
+    Nan::SetAccessor(tpl->InstanceTemplate(),
+            Nan::New<v8::String>("autoCloseLob").ToLocalChecked(),
+            njsILob::GetIsAutoClose, njsILob::SetIsAutoClose);
+
+    Nan::SetAccessor(tpl->InstanceTemplate(),
+            Nan::New<v8::String>("valid").ToLocalChecked(),
+            njsILob::GetIsValid, njsILob::SetIsValid);
 
     iLobTemplate_s.Reset(tpl);
     Nan::Set(target, Nan::New<v8::String>("ILob").ToLocalChecked(),
@@ -129,9 +138,60 @@ Local<Object> njsILob::CreateFromProtoLob(njsProtoILob *protoLob)
     lob->pieceSize = protoLob->chunkSize;
     lob->length = protoLob->length;
     lob->dataType = protoLob->dataType;
+    lob->isAutoClose = protoLob->isAutoClose;
     lob->activeBaton = NULL;
     lob->offset = 1;
     return scope.Escape(obj);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsILob::GetInstance()
+//   Return the instance associated with the value, or NULL if there is no
+// instance associated with the value. Javascript code provides the stream;
+// this extracts the member iLob instance which is used internally.
+//-----------------------------------------------------------------------------
+njsILob *njsILob::GetInstance(Local<Value> val)
+{
+    Nan::HandleScope scope;
+    Local<Object> obj = val->ToObject();
+    Local <String> key = Nan::New<v8::String>("iLob").ToLocalChecked();
+    Local<Value> v8Value = obj->Get(key);
+
+    if (v8Value->IsObject()) {
+        Local<Object> obj = v8Value->ToObject();
+        if (Nan::New(iLobTemplate_s)->HasInstance(obj))
+            return Nan::ObjectWrap::Unwrap<njsILob>(obj);
+    }
+    return NULL;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsILob::HasInstance()
+//   Return boolean indicating if the specified V8 object refers to an ILob
+// instance or not.
+//-----------------------------------------------------------------------------
+bool njsILob::HasInstance(Local<Value> val)
+{
+    njsILob *lob = GetInstance(val);
+    return (lob) ? true : false;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsILob::ClearDPILobHandle()
+//   Clear the DPI LOB handle. This is done for the IN side of an IN/OUT bind
+// once the LOB has been successfully cloned.
+//-----------------------------------------------------------------------------
+bool njsILob::ClearDPILobHandle(njsBaton *baton)
+{
+    if (dpiLob_close(dpiLobHandle) < 0) {
+        baton->GetDPIError();
+        return false;
+    }
+    dpiLobHandle = NULL;
+    return true;
 }
 
 
@@ -290,6 +350,56 @@ NAN_SETTER(njsILob::SetType)
 
 
 //-----------------------------------------------------------------------------
+// njsILob::GetIsAutoClose()
+//   Get accessor of "autoCloseLob" property.
+//-----------------------------------------------------------------------------
+NAN_GETTER(njsILob::GetIsAutoClose)
+{
+    njsILob *lob = (njsILob*) ValidateGetter(info);
+    if (lob)
+        info.GetReturnValue().Set(lob->isAutoClose);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsILob::SetIsAutoClose()
+//   Set accessor of "autoCloseLob" property.
+//-----------------------------------------------------------------------------
+NAN_SETTER(njsILob::SetIsAutoClose)
+{
+    PropertyIsReadOnly("autoCloseLob");
+}
+
+
+//-----------------------------------------------------------------------------
+// njsILob::GetIsValid()
+//   Get accessor of "valid" property.
+//-----------------------------------------------------------------------------
+NAN_GETTER(njsILob::GetIsValid)
+{
+    njsILob *lob;
+
+    lob = (njsILob*) Nan::ObjectWrap::Unwrap<njsCommon>(info.Holder());
+    if (!lob) {
+        std::string errMsg = njsMessages::Get(errInvalidJSObject);
+        Nan::ThrowError(errMsg.c_str());
+        return;
+    }
+    info.GetReturnValue().Set(lob->IsValid());
+}
+
+
+//-----------------------------------------------------------------------------
+// njsILob::SetIsValid()
+//   Set accessor of "valid" property.
+//-----------------------------------------------------------------------------
+NAN_SETTER(njsILob::SetIsValid)
+{
+    PropertyIsReadOnly("valid");
+}
+
+
+//-----------------------------------------------------------------------------
 // njsILob::Read()
 //   Read some data from the LOB.
 //
@@ -336,6 +446,53 @@ void njsILob::Async_Read(njsBaton *baton)
     if (dpiLob_readBytes(baton->dpiLobHandle, baton->lobOffset,
             baton->lobAmount, baton->bufferPtr, &baton->bufferSize) < 0)
         baton->GetDPIError();
+}
+
+
+//-----------------------------------------------------------------------------
+// njsILob::Close()
+//   Close the LOB. The reference to the DPI handle is transferred to the baton
+// so that it will be cleared automatically upon success and so that the LOB
+// is marked as invalid immediately.
+//
+// PARAMETERS
+//   - JS callback which will receive (error)
+//-----------------------------------------------------------------------------
+NAN_METHOD(njsILob::Close)
+{
+    njsBaton *baton;
+    njsILob *lob;
+
+    lob = (njsILob*) ValidateArgs(info, 1, 1);
+    if (!lob)
+        return;
+    baton = lob->CreateBaton(info);
+    if (!baton)
+        return;
+    if (lob->activeBaton)
+        baton->error = njsMessages::Get(errBusyLob);
+    else {
+        baton->dpiLobHandle = lob->dpiLobHandle;
+        lob->dpiLobHandle = NULL;
+    }
+    baton->QueueWork("Close", Async_Close, NULL, 1);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsILob::Async_Close()
+//   Worker function for njsILob::Close() method. If the attempt to close
+// fails, the reference to the DPI handle is transferred back from the baton to
+// the LOB.
+//-----------------------------------------------------------------------------
+void njsILob::Async_Close(njsBaton *baton)
+{
+    if (dpiLob_close(baton->dpiLobHandle) < 0) {
+        baton->GetDPIError();
+        njsILob *lob = (njsILob*) baton->callingObj;
+        lob->dpiLobHandle = baton->dpiLobHandle;
+        baton->dpiLobHandle = NULL;
+    }
 }
 
 
@@ -422,5 +579,29 @@ void njsILob::Async_AfterWrite(njsBaton *baton, Local<Value> argv[])
 {
     njsILob *lob = (njsILob*) baton->callingObj;
     lob->offset += baton->lobAmount;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsProtoILob::PopulateFromDPI()
+//   Populate the proto internal LOB from DPI.
+//-----------------------------------------------------------------------------
+bool njsProtoILob::PopulateFromDPI(njsBaton *baton, dpiLob *dpiLobHandle,
+        bool addRef)
+{
+    if (addRef && dpiLob_addRef(dpiLobHandle) < 0) {
+        baton->GetDPIError();
+        return false;
+    }
+    this->dpiLobHandle = dpiLobHandle;
+    if (dpiLob_getChunkSize(dpiLobHandle, &this->chunkSize) < 0) {
+        baton->GetDPIError();
+        return false;
+    }
+    if (dpiLob_getSize(dpiLobHandle, &this->length) < 0) {
+        baton->GetDPIError();
+        return false;
+    }
+    return true;
 }
 

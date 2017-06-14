@@ -32,7 +32,7 @@ using namespace std;
 #include "njsMessages.h"
 
 // Maximum buffer size to compose error message
-#define MAX_ERROR_MSG_LEN 1024
+#define NJS_MAX_ERROR_MSG_LEN 1024
 
 static const char *errMsg[] = {
     "NJS-000: success",                              // errSuccess
@@ -47,7 +47,7 @@ static const char *errMsg[] = {
     "NJS-009: invalid number of parameters",         // errInvalidNumberOfParameters
     "NJS-010: unsupported data type in select list", // errUnsupportedDatType
     "NJS-011: encountered bind value and type mismatch", // errBindValueAndTypeMismatch
-    "NJS-012: invalid bind datatype",                // errInvalidBindDataType
+    "NJS-012: encountered invalid bind data type in parameter %d", // errInvalidBindDataType
     "NJS-013: invalid bind direction",               // errInvalidBindDirection
     "NJS-014: %s is a read-only property",           // errReadOnly
     "NJS-015: type was not specified for conversion", // errNoTypeForConversion
@@ -72,13 +72,17 @@ static const char *errMsg[] = {
     "NJS-034: data type is unsupported for array bind", // errInvalidTypeForArrayBind
     "NJS-035: maxArraySize is required for IN OUT array bind", // errReqdMaxArraySize
     "NJS-036: given array is of size greater than maxArraySize", // errInvalidArraySize
-    "NJS-037: incompatible type of value provided", // errIncompatibleTypeArrayBind
-    "NJS-038: maxArraySize value should be greater than 0", // errInvalidValueArrayBind
+    "NJS-037: invalid data type at array index %d for bind \"%s\"", // errIncompatibleTypeArrayBind
+    "NJS-038: maxArraySize value should be greater than zero", // errInvalidValueArrayBind
     "NJS-040: connection request timeout",  // errConnRequestTimeout
     "NJS-041: cannot convert ResultSet to QueryStream after invoking methods", // errCannotConvertRsToStream
     "NJS-042: cannot invoke ResultSet methods after converting to QueryStream", // errCannotInvokeRsMethods
     "NJS-043: ResultSet already converted to QueryStream", // errResultSetAlreadyConverted
     "NJS-044: named JSON object is not expected in this context", // errNamedJSON
+    "NJS-045: cannot load the oracledb add-on binary", // errCannotLoadBinary
+    "NJS-046: pool alias \"%s\" already exists in the connection pool cache", // errPoolWithAliasAlreadyExists
+    "NJS-047: pool alias \"%s\" not found in connection pool cache", // errPoolWithAliasNotFound
+    "NJS-052: invalid data type at array index %d for bind position %d", // errIncompatibleTypeArrayIndexBind
 };
 
 
@@ -90,13 +94,13 @@ static const char *errMsg[] = {
 //-----------------------------------------------------------------------------
 string njsMessages::Get(njsErrorType err, ...)
 {
-    char msg[MAX_ERROR_MSG_LEN + 1];
+    char msg[NJS_MAX_ERROR_MSG_LEN + 1];
     va_list vlist;
     std::string str;
 
     if ( err > 0 && err < errMaxErrors ) {
         va_start (vlist, err);
-        if (vsnprintf(msg, MAX_ERROR_MSG_LEN, errMsg[err], vlist) <= 0)
+        if (vsnprintf(msg, NJS_MAX_ERROR_MSG_LEN, errMsg[err], vlist) <= 0)
             msg[0] = '\0';
         va_end (vlist);
         str = msg;

@@ -84,11 +84,14 @@ public:
         }
     }
 
+    bool PopulateFromDPI(njsBaton *baton, dpiLob *dpiLobHandle, bool addRef);
+
 protected:
     dpiLob *dpiLobHandle;
     njsDataType dataType;
     uint32_t chunkSize;
     uint64_t length;
+    bool isAutoClose;
 };
 
 
@@ -102,6 +105,11 @@ public:
     static Local<Object> CreateFromProtoLob(njsProtoILob *protoLob);
     bool IsValid() const { return (dpiLobHandle) ? true : false; }
     njsErrorType GetInvalidErrorType() const { return errInvalidLob; }
+    njsDataType GetDataType() const { return dataType; }
+    dpiLob *GetDPILobHandle() const { return dpiLobHandle; }
+    bool ClearDPILobHandle(njsBaton *baton);
+    static njsILob *GetInstance(Local<Value> val);
+    static bool HasInstance(Local<Value> val);
 
 private:
     njsILob() : dpiLobHandle(NULL), bufferPtr(NULL) {}
@@ -129,12 +137,18 @@ private:
     static void Async_Write(njsBaton *baton);
     static void Async_AfterWrite(njsBaton *baton, Local<Value> argv[]);
 
+    // Close Method on ILob class
+    static NAN_METHOD(Close);
+    static void Async_Close(njsBaton *baton);
+
     // Getters for properties
     static NAN_GETTER(GetChunkSize);
     static NAN_GETTER(GetLength);
     static NAN_GETTER(GetPieceSize);
     static NAN_GETTER(GetOffset);
     static NAN_GETTER(GetType);
+    static NAN_GETTER(GetIsAutoClose);
+    static NAN_GETTER(GetIsValid);
 
     // Setters for properties
     static NAN_SETTER(SetChunkSize);
@@ -142,11 +156,14 @@ private:
     static NAN_SETTER(SetPieceSize);
     static NAN_SETTER(SetOffset);
     static NAN_SETTER(SetType);
+    static NAN_SETTER(SetIsAutoClose);
+    static NAN_SETTER(SetIsValid);
 
     // attributes
     dpiLob *dpiLobHandle;
     njsDataType dataType;
     char *bufferPtr;
+    bool isAutoClose;
     uint32_t pieceSize;
     uint32_t chunkSize;
     uint64_t length;

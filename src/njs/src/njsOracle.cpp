@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2017 Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -87,6 +87,7 @@ njsOracledb::njsOracledb()
     connClass               = "";
     externalAuth            = false;
     lobPrefetchSize         = NJS_LOB_PREFETCH_SIZE;
+    poolPingInterval        = NJS_POOL_DEFAULT_PING_INTERVAL;
 }
 
 
@@ -171,12 +172,19 @@ void njsOracledb::Init(Handle<Object> target)
             Nan::New<v8::String>("fetchAsString").ToLocalChecked(),
             njsOracledb::GetFetchAsString, njsOracledb::SetFetchAsString);
     Nan::SetAccessor(temp->InstanceTemplate(),
+            Nan::New<v8::String>("fetchAsBuffer").ToLocalChecked(),
+            njsOracledb::GetFetchAsBuffer, njsOracledb::SetFetchAsBuffer);
+    Nan::SetAccessor(temp->InstanceTemplate(),
             Nan::New<v8::String>("lobPrefetchSize").ToLocalChecked(),
             njsOracledb::GetLobPrefetchSize, njsOracledb::SetLobPrefetchSize);
     Nan::SetAccessor(temp->InstanceTemplate (),
             Nan::New<v8::String>("oracleClientVersion").ToLocalChecked(),
             njsOracledb::GetOracleClientVersion,
             njsOracledb::SetOracleClientVersion);
+    Nan::SetAccessor(temp->InstanceTemplate (),
+            Nan::New<v8::String>("poolPingInterval").ToLocalChecked(),
+            njsOracledb::GetPoolPingInterval,
+            njsOracledb::SetPoolPingInterval);
 
     oracledbTemplate_s.Reset(temp);
     Nan::Set(target, Nan::New<v8::String>("Oracledb").ToLocalChecked(),
@@ -282,6 +290,32 @@ NAN_SETTER(njsOracledb::SetPoolIncrement)
 
 
 //-----------------------------------------------------------------------------
+// njsOracledb::GetPoolPingInterval()
+//   Get accessor of "poolPingInterval" property.
+//-----------------------------------------------------------------------------
+NAN_GETTER(njsOracledb::GetPoolPingInterval)
+{
+    njsOracledb *oracledb = (njsOracledb*) ValidateGetter(info);
+    if (oracledb)
+        info.GetReturnValue().Set(oracledb->poolPingInterval);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsOracledb::SetPoolPingInterval()
+//   Set accessor of "poolPingInterval" property.
+//-----------------------------------------------------------------------------
+NAN_SETTER(njsOracledb::SetPoolPingInterval)
+{
+    njsOracledb *oracledb = (njsOracledb*) ValidateSetter(info);
+    if (oracledb)
+        oracledb->SetPropInt(value, &oracledb->poolPingInterval,
+                "poolPingInterval");
+}
+
+
+
+//-----------------------------------------------------------------------------
 // njsOracledb::GetPoolTimeout()
 //   Get accessor of "poolTimeout" property.
 //-----------------------------------------------------------------------------
@@ -325,8 +359,17 @@ NAN_GETTER(njsOracledb::GetMaxRows)
 NAN_SETTER(njsOracledb::SetMaxRows)
 {
     njsOracledb *oracledb = (njsOracledb*) ValidateSetter(info);
-    if (oracledb)
-        oracledb->SetPropUnsignedInt(value, &oracledb->maxRows, "maxRows");
+    if (!oracledb)
+        return;
+    unsigned int tempMaxRows;
+    if (!oracledb->SetPropUnsignedInt(value, &tempMaxRows, "maxRows"))
+        return;
+    if (tempMaxRows == 0) {
+        string errMsg = njsMessages::Get(errInvalidmaxRows);
+        Nan::ThrowError(errMsg.c_str());
+        return;
+    }
+    oracledb->maxRows = tempMaxRows;
 }
 
 
@@ -481,8 +524,8 @@ NAN_GETTER(njsOracledb::GetConnectionClass)
     njsOracledb *oracledb = (njsOracledb*) ValidateGetter(info);
     if (!oracledb)
         return;
-    Local<String> value = Nan::New<v8::String>(oracledb->connClass.c_str(),
-            (int) oracledb->connClass.length ()).ToLocalChecked();
+    Local<String> value =
+            Nan::New<v8::String>(oracledb->connClass).ToLocalChecked();
     info.GetReturnValue().Set(value);
 }
 
@@ -588,8 +631,65 @@ NAN_SETTER(njsOracledb::SetFetchAsString)
     Local<Array> array = value.As<Array>();
     for (uint32_t i = 0; i < array->Length(); i++) {
         njsDataType type = (njsDataType)
-                array->Get(i).As<Integer>()->ToInt32()->Value();
-        if (type == NJS_DATATYPE_STR || type == NJS_DATATYPE_DEFAULT) {
+                Nan::To<int32_t>(array->Get(i).As<v8::Integer>()).FromJust();
+        switch (type) {
+            case NJS_DATATYPE_NUM:
+            case NJS_DATATYPE_DATE:
+            case NJS_DATATYPE_CLOB:
+                break;
+            default:
+                errMsg = njsMessages::Get(errInvalidTypeForConversion);
+                Nan::ThrowError(errMsg.c_str());
+                return;
+        }
+    }
+
+    // retain value
+    oracledb->jsFetchAsStringTypes.Reset(array);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsOracledb::GetFetchAsBuffer()
+//   Get accessor of "fetchAsBuffer" property.
+//-----------------------------------------------------------------------------
+NAN_GETTER(njsOracledb::GetFetchAsBuffer)
+{
+    njsOracledb *oracledb = (njsOracledb*) ValidateGetter(info);
+    if (oracledb) {
+        Local<Value> val = Nan::New(oracledb->jsFetchAsBufferTypes);
+        if (val.IsEmpty())
+            val = Nan::New<Array>(0);
+        info.GetReturnValue().Set(val);
+    }
+}
+
+
+//-----------------------------------------------------------------------------
+// njsOracledb::SetFetchAsBuffer()
+//   Set accessor of "fetchAsBuffer" property.
+//-----------------------------------------------------------------------------
+NAN_SETTER(njsOracledb::SetFetchAsBuffer)
+{
+    string errMsg;
+
+    njsOracledb *oracledb = (njsOracledb*) ValidateSetter(info);
+    if (!oracledb)
+        return;
+
+    // make sure we have an array
+    if (!value->IsArray()) {
+        errMsg = njsMessages::Get(errEmptyArrayForFetchAs);
+        Nan::ThrowError(errMsg.c_str());
+        return;
+    }
+
+    // validate values in array
+    Local<Array> array = value.As<Array>();
+    for (uint32_t i = 0; i < array->Length(); i++) {
+        njsDataType type = (njsDataType)
+                Nan::To<int32_t>(array->Get(i).As<v8::Integer>()).FromJust();
+        if (type != NJS_DATATYPE_BLOB) {
             errMsg = njsMessages::Get(errInvalidTypeForConversion);
             Nan::ThrowError(errMsg.c_str());
             return;
@@ -597,7 +697,7 @@ NAN_SETTER(njsOracledb::SetFetchAsString)
     }
 
     // retain value
-    oracledb->jsFetchAsStringTypes.Reset(array);
+    oracledb->jsFetchAsBufferTypes.Reset(array);
 }
 
 
@@ -658,7 +758,7 @@ NAN_METHOD(njsOracledb::GetConnection)
     oracledb = (njsOracledb*) ValidateArgs(info, 2, 2);
     if (!oracledb)
         return;
-    if (oracledb->GetObjectArg(info, 0, connProps) < 0)
+    if (!oracledb->GetObjectArg(info, 0, connProps))
         return;
     baton = oracledb->CreateBaton(info);
     if (!baton)
@@ -737,7 +837,7 @@ NAN_METHOD(njsOracledb::CreatePool)
     oracledb = (njsOracledb*) ValidateArgs(info, 2, 2);
     if (!oracledb)
         return;
-    if (oracledb->GetObjectArg(info, 0, poolProps) < 0)
+    if (!oracledb->GetObjectArg(info, 0, poolProps))
         return;
     baton = oracledb->CreateBaton(info);
     if (!baton)
@@ -750,6 +850,7 @@ NAN_METHOD(njsOracledb::CreatePool)
     baton->poolMin =  oracledb->poolMin;
     baton->poolIncrement = oracledb->poolIncrement;
     baton->poolTimeout = oracledb->poolTimeout;
+    baton->poolPingInterval = oracledb->poolPingInterval;
     baton->stmtCacheSize = oracledb->stmtCacheSize;
     baton->externalAuth = oracledb->externalAuth;
     baton->GetUnsignedIntFromJSON(poolProps, "poolMax", 0, &baton->poolMax);
@@ -760,6 +861,8 @@ NAN_METHOD(njsOracledb::CreatePool)
             &baton->poolTimeout);
     baton->GetUnsignedIntFromJSON(poolProps, "stmtCacheSize", 0,
             &baton->stmtCacheSize);
+    baton->GetIntFromJSON(poolProps, "poolPingInterval", 0,
+            &baton->poolPingInterval);
     baton->GetBoolFromJSON(poolProps, "externalAuth", 0, &baton->externalAuth);
     baton->lobPrefetchSize = oracledb->lobPrefetchSize;
     baton->jsOracledb.Reset(info.Holder());
@@ -786,6 +889,7 @@ void njsOracledb::Async_CreatePool(njsBaton *baton)
     params.externalAuth = baton->externalAuth;
     if (params.externalAuth)
         params.homogeneous = 0;
+    params.pingInterval = baton->poolPingInterval;
     if (dpiPool_create(globalDPIContext, baton->user.c_str(),
             (uint32_t) baton->user.length(), baton->password.c_str(),
             (uint32_t) baton->password.length(), baton->connectString.c_str(),
@@ -828,8 +932,30 @@ void njsOracledb::SetFetchAsStringTypesOnBaton(njsBaton *baton) const
     baton->numFetchAsStringTypes = array->Length();
     baton->fetchAsStringTypes = new njsDataType[baton->numFetchAsStringTypes];
     for (uint32_t i = 0; i < baton->numFetchAsStringTypes; i++) {
-        baton->fetchAsStringTypes[i] = 
-                (njsDataType) array->Get(i).As<Integer>()->ToInt32()->Value();
+        baton->fetchAsStringTypes[i] = (njsDataType)
+                Nan::To<int32_t>(array->Get(i).As<v8::Integer>()).FromJust();
+    }
+}
+
+
+//-----------------------------------------------------------------------------
+// njsOracledb::SetFetchAsBufferTypesOnBaton()
+//   Store information about the fetch as buffer types from the oracledb
+// module. Note that these are copied since the value may change after this
+// code has completed.
+//-----------------------------------------------------------------------------
+void njsOracledb::SetFetchAsBufferTypesOnBaton(njsBaton *baton) const
+{
+    Nan::HandleScope scope;
+
+    Local<Array> array = Nan::New(jsFetchAsBufferTypes);
+    if (array.IsEmpty())
+        return;
+    baton->numFetchAsBufferTypes = array->Length();
+    baton->fetchAsBufferTypes = new njsDataType[baton->numFetchAsBufferTypes];
+    for (uint32_t i = 0; i < baton->numFetchAsBufferTypes; i++) {
+        baton->fetchAsBufferTypes[i] = (njsDataType)
+                Nan::To<int32_t>(array->Get(i).As<v8::Integer>()).FromJust();
     }
 }
 

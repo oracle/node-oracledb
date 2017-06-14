@@ -89,6 +89,7 @@ private:
     static NAN_GETTER(GetPoolMax);
     static NAN_GETTER(GetPoolMin);
     static NAN_GETTER(GetPoolIncrement);
+    static NAN_GETTER(GetPoolPingInterval);
     static NAN_GETTER(GetPoolTimeout);
     static NAN_GETTER(GetConnectionsOpen);
     static NAN_GETTER(GetConnectionsInUse);
@@ -98,6 +99,7 @@ private:
     static NAN_SETTER(SetPoolMax);
     static NAN_SETTER(SetPoolMin);
     static NAN_SETTER(SetPoolIncrement);
+    static NAN_SETTER(SetPoolPingInterval);
     static NAN_SETTER(SetPoolTimeout);
     static NAN_SETTER(SetConnectionsOpen);
     static NAN_SETTER(SetConnectionsInUse);
@@ -120,6 +122,7 @@ private:
     uint32_t poolTimeout;
     uint32_t stmtCacheSize;
     uint32_t lobPrefetchSize;
+    int32_t poolPingInterval;
 
     static Nan::Persistent<FunctionTemplate> poolTemplate_s ;
 };

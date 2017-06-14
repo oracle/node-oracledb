@@ -209,6 +209,7 @@ protected:
     bool GetUnsignedIntArg(Nan::NAN_METHOD_ARGS_TYPE args, int index,
             uint32_t *value);
     bool SetPropBool(Local<Value> value, bool *valuePtr, const char *name);
+    bool SetPropInt(Local<Value> value, int32_t *valuePtr, const char *name);
     bool SetPropString(Local<Value> value, std::string *valuePtr,
             const char *name);
     bool SetPropUnsignedInt(Local<Value> value, uint32_t *valuePtr,
@@ -239,6 +240,7 @@ public:
     uint32_t poolMax;
     uint32_t poolIncrement;
     uint32_t poolTimeout;
+    int32_t poolPingInterval;
     dpiPool *dpiPoolHandle;
     dpiConn *dpiConnHandle;
     dpiStmt *dpiStmtHandle;
@@ -259,6 +261,9 @@ public:
     njsFetchInfo *fetchInfo;
     uint32_t numFetchAsStringTypes;
     njsDataType *fetchAsStringTypes;
+    uint32_t numFetchAsBufferTypes;
+    njsDataType *fetchAsBufferTypes;
+    njsProtoILob *protoILob;
     bool externalAuth;
     bool getRS;
     bool autoCommit;
@@ -282,19 +287,20 @@ public:
             dpiPoolHandle(NULL), dpiConnHandle(NULL), dpiStmtHandle(NULL),
             dpiLobHandle(NULL), numQueryVars(0), queryVars(NULL),
             numBindVars(0), bindVars(NULL), numFetchInfo(0), fetchInfo(NULL),
-            numFetchAsStringTypes(0), fetchAsStringTypes(NULL), repeat(false),
-            keepQueryInfo(false), isReturning(false), bufferSize(0),
-            bufferPtr(NULL)
+            numFetchAsStringTypes(0), fetchAsStringTypes(NULL),
+            numFetchAsBufferTypes(0), fetchAsBufferTypes(NULL),
+            protoILob(NULL), keepQueryInfo(false), isReturning(false),
+            bufferSize(0), bufferPtr(NULL), lobOffset(0), lobAmount(0)
     {
-        jsCallback.Reset(callback);
-        jsCallingObj.Reset(callingObj);
+        this->jsCallback.Reset(callback);
+        this->jsCallingObj.Reset(callingObj);
+        this->callingObj = Nan::ObjectWrap::Unwrap<njsCommon>(callingObj);
         req.data = this;
     }
     ~njsBaton();
 
     // methods for getting information from JS objects stored on baton
     njsOracledb *GetOracledb();
-    njsCommon *GetCallingObj();
 
     // methods for getting DPI errors
     void GetDPIError(void);
@@ -310,6 +316,8 @@ public:
             bool *value);
     bool GetStringFromJSON(Local<Object> obj, const char *key, int index,
             string &value);
+    bool GetIntFromJSON(Local<Object> obj, const char *key, int index,
+            int32_t *value);
     bool GetUnsignedIntFromJSON(Local<Object> obj, const char *key, int index,
             uint32_t *value);
 
