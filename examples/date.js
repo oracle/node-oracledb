@@ -59,7 +59,7 @@ var docleanup = function (conn, cb) {
        EXCEPTION
          WHEN e_table_exists
          THEN NULL;
-       END; 
+       END;
      END;`,
     function(err) {
       return cb(err, conn);

@@ -1500,7 +1500,7 @@ void njsConnection::Async_AfterExecute(njsBaton *baton, Local<Value> argv[])
             Nan::Set(result, Nan::New<String>("resultSet").ToLocalChecked(),
                     resultSet);
 
-        // otherwise, return rows 
+        // otherwise, return rows
         } else {
             Local<Object> rows;
             if (!GetRows(baton, rows))

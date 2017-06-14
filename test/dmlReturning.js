@@ -166,7 +166,7 @@ describe('6. dmlReturning.js', function(){
         function(err, result) {
           should.exist(err);
           should.strictEqual(
-            err.message, 
+            err.message,
             "NJS-016: buffer is too small for OUT binds"
           );
           should.not.exist(result);

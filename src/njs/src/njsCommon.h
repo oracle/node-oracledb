@@ -101,7 +101,7 @@ typedef enum {
 //   User defined data types for binds and defines.
 //-----------------------------------------------------------------------------
 typedef enum {
-    NJS_DATATYPE_UNKNOWN  = -1, 
+    NJS_DATATYPE_UNKNOWN  = -1,
     NJS_DATATYPE_DEFAULT  = 0,  // Used in FetchInfo Context only (use DB type)
     NJS_DATATYPE_STR      = 2001,
     NJS_DATATYPE_NUM      = 2002,

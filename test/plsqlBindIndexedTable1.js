@@ -1044,7 +1044,7 @@ describe('43. plsqlBindIndexedTable1.js', function() {
         function(err) {
           should.exist(err);
           should.strictEqual(
-            err.message, 
+            err.message,
             "DPI-1015: array size of 987654321 is too large"
           );
           done();

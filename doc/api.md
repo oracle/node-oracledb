@@ -3332,7 +3332,7 @@ parallel operations on a connection.  For example, instead of using
 `async.parallel` or `async.each()` which calls each of its items in
 parallel, use `async.series` or `async.eachSeries()`.  Also
 see [Connections and Number of Threads](#numberofthreads).
-  
+
 ### <a name="select"></a> 9.1 SELECT Statements
 
 #### <a name="fetchingrows"></a> 9.1.1 Fetching Rows
@@ -4994,7 +4994,7 @@ containing the XML, or use a temporary LOB, depending on the data
 length.
 
 ```javascript
-var myxml = 
+var myxml =
     `<Warehouse>
     <WarehouseId>1</WarehouseId>
     <WarehouseName>Melbourne, Australia</WarehouseName>
@@ -5010,7 +5010,7 @@ var myxml =
 
     connection.execute(
       "INSERT INTO xwarehouses (warehouse_id, warehouse_spec) VALUES (:id, XMLType(:bv))",
-      { id: 1, bv: myxml }, 
+      { id: 1, bv: myxml },
       . . .
 ```
 
@@ -5151,7 +5151,7 @@ name in the statement when scanned left to right.
 
 If a bind variable name is repeated in the SQL string
 then [bind by name](#bindbyname) syntax should be used.
-   
+
 #### Data Type Notes
 
 When binding a JavaScript Date value in an `INSERT` statement, it is
