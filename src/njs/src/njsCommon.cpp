@@ -284,8 +284,12 @@ void njsBaton::AsyncAfterWorkCallback(uv_work_t *req, int status)
             callbackArgs[i] = Nan::Undefined();
     }
 
-    // if JS callback available, call it
-    if (!baton->jsCallback.IsEmpty()) {
+    // if no JS callback available, just delete the baton
+    if (baton->jsCallback.IsEmpty())
+        delete baton;
+
+    // otherwise, call the JS callback
+    else {
         Local<Function> callback = Nan::New<Function>(baton->jsCallback);
 
         // if this baton is considered the active baton, clear it
@@ -293,13 +297,16 @@ void njsBaton::AsyncAfterWorkCallback(uv_work_t *req, int status)
         if (callingObj && baton == callingObj->activeBaton)
             callingObj->activeBaton = NULL;
 
+        // delete the baton before the callback is made so any unnecessary
+        // ODPI-C handles are released as soon as possible
+        delete baton;
+
         // make JS callback
         Nan::MakeCallback(Nan::GetCurrentContext()->Global(), callback,
                 numCallbackArgs, callbackArgs);
     }
 
-    // we no longer need the baton or callback args
-    delete baton;
+    // we no longer need the callback args
     delete [] callbackArgs;
 
     // raise fatal exception if an exception was caught
