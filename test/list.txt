@@ -689,16 +689,21 @@ Overview of node-oracledb functional tests
         55.13.1 
 
 56. fetchAs.js
-    56.1 property value check
-    56.2 Fetch DATE column values as STRING - by-Column name
-    56.3 Fetch DATE, NUMBER column values STRING - by Column-name
-    56.4 Fetch DATE, NUMBER as STRING by-time configuration and by-name
-    56.5 Fetch DATE, NUMBER column as STRING by-type and override at execute time
-    56.6 Fetch ROWID column values STRING - non-ResultSet
-    56.7 Fetch ROWID column values STRING - ResultSet
-    56.8 large numbers with fetchInfo
-    56.9 large numbers with setting fetchAsString property
-    56.10 invalid syntax for type should result in error
+      56.1 property value check
+      56.2 Fetch DATE column values as STRING - by-Column name
+      56.3 Fetch DATE, NUMBER column values STRING - by Column-name
+      56.4 Fetch DATE, NUMBER as STRING by-time configuration and by-name
+      56.5 Fetch DATE, NUMBER column as STRING by-type and override at execute time
+      56.6 Fetch ROWID column values STRING - non-ResultSet
+      56.7 Fetch ROWID column values STRING - ResultSet
+      56.8 large numbers with fetchInfo
+      56.9 large numbers with setting fetchAsString property
+      56.10 invalid syntax for type should result in error
+      56.11 Negative - empty string
+      56.12 Negative - null
+      56.13 Negative - undefined
+      56.14 Negative - NaN
+      56.xx Negative - invalid type of value
 
 57. nestedCursor.js
     57.1 testing nested cursor support - result set
@@ -714,7 +719,7 @@ Overview of node-oracledb functional tests
         58.1.6 prefetchRows
         58.1.7 autoCommit
         58.1.8 version (read-only)
-        58.1.9 connClass
+        58.1.9 connectionClass
         58.1.10 externalAuth
         58.1.11 fetchAsString
         58.1.12 outFormat
@@ -724,6 +729,7 @@ Overview of node-oracledb functional tests
         58.1.16 queueTimeout
         58.1.17 stmtCacheSize
         58.1.18 poolPingInterval
+        58.1.19 Negative - connectionClass
     58.2 Pool Class
         58.2.1 poolMin
         58.2.2 poolMax
