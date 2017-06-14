@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -19,7 +19,11 @@
  *   dmlrupd2.js
  *
  * DESCRIPTION
- *   Example of 'DML Returning' with multiple rows matched
+ *   Example of 'DML Returning' with multiple rows matched.
+ *   The ROWIDs of the changed records are returned.  This is how to get
+ *   the 'last insert id'.
+ *   Bind names cannot be reused in the DML section and the RETURNING section.
+ *
  *   Use demo.sql to create the required table or do:
  *     DROP TABLE dmlrupdtab;
  *     CREATE TABLE dmlrupdtab (id NUMBER, name VARCHAR2(40));
@@ -47,11 +51,13 @@ oracledb.getConnection(
     }
 
     connection.execute(
-      "UPDATE DMLRUPDTAB SET NAME = :name RETURNING ID, NAME INTO :RID, :RNAME",
+      "UPDATE dmlrupdtab SET name = :name WHERE id IN (:id1, :id2) RETURNING id, ROWID INTO :ids, :rids",
       {
+        id1:   1001,
+        id2:   1002,
         name:  "Chris",
-        rid:   { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
-        rname: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
+        ids:   { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+        rids:  { type: oracledb.STRING, dir: oracledb.BIND_OUT }
       },
       { autoCommit: true },
       function(err, result)

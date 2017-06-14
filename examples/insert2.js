@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -43,7 +43,7 @@ var doconnect = function(cb) {
 };
 
 var dorelease = function(conn) {
-  conn.release(function (err) {
+  conn.close(function (err) {
     if (err)
       console.error(err.message);
   });
@@ -51,13 +51,13 @@ var dorelease = function(conn) {
 
 var dodrop = function (conn, cb) {
   conn.execute(
-    "BEGIN "
-  + "  EXECUTE IMMEDIATE 'DROP TABLE test'; "
-  + "  EXCEPTION WHEN OTHERS THEN "
-  + "  IF SQLCODE <> -942 THEN "
-  + "    RAISE; "
-  + "  END IF; "
-  + "END;",
+    `BEGIN
+       EXECUTE IMMEDIATE 'DROP TABLE test';
+       EXCEPTION WHEN OTHERS THEN
+       IF SQLCODE <> -942 THEN
+         RAISE;
+       END IF;
+     END;`,
     function(err)
     {
       if (err) {
@@ -144,7 +144,7 @@ var doquery = function (conn, cb) {
           // Uncomment the autoCommit option above and you will see both rows
           console.log(result.rows);
 
-          connection2.release(
+          connection2.close(
             function(err)
             {
               if (err) {

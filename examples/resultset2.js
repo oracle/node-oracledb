@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -49,10 +49,10 @@ oracledb.getConnection(
   {
     if (err) { console.error(err.message); return; }
     connection.execute(
-      "SELECT employee_id, last_name " +
-        "FROM   employees " +
-        "WHERE ROWNUM < 25 " +
-        "ORDER BY employee_id",
+      `SELECT employee_id, last_name
+       FROM   employees
+       WHERE ROWNUM < 25
+       ORDER BY employee_id`,
       [], // no bind variables
       {
         resultSet: true, // return a result set.  Default is false
@@ -94,7 +94,7 @@ function fetchRowsFromRS(connection, resultSet, numRows)
 
 function doRelease(connection)
 {
-  connection.release(
+  connection.close(
     function(err)
     {
       if (err) { console.error(err.message); }

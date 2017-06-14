@@ -32,10 +32,20 @@ var async = require('async');
 var oracledb = require('oracledb');
 var dbConfig = require('./dbconfig.js');
 
-// Properties are applicable to all connections and SQL executions.
-// They can also be set or overridden at the individual execute() call level
+// Oracledb properties are applicable to all connections and SQL
+// executions.  They can also be set or overridden at the individual
+// execute() call level
+
+// The default value for maxRows is 100 meaning only 100 rows will be
+// fetched.  Rows after this will not be fetched.  No error will
+// occur.  Increasing maxRows will increase memory usage so when the
+// number of query rows is large, or not known, it is recommended to
+// use a ResultSet (see resultset1.js) or Stream (see selectstream.js).
 //
+// oracledb.maxRows = 100;
+
 // This script sets outFormat in the execute() call but it could be set here instead:
+//
 // oracledb.outFormat = oracledb.OBJECT;
 
 var doconnect = function(cb) {
@@ -49,7 +59,7 @@ var doconnect = function(cb) {
 };
 
 var dorelease = function(conn) {
-  conn.release(function (err) {
+  conn.close(function (err) {
     if (err)
       console.error(err.message);
   });

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -19,7 +19,11 @@
  *   dmlrupd1.js
  *
  * DESCRIPTION
- *   Example of 'DML Returning' with a single row match
+ *   Example of 'DML Returning' with a single row match.
+ *   The ROWID of the changed record is returned.  This is how to get
+ *   the 'last insert id'.
+ *   Bind names cannot be reused in the DML section and the RETURNING section.
+ *
  *   Use demo.sql to create the required table or do:
  *     DROP TABLE dmlrupdtab;
  *     CREATE TABLE dmlrupdtab (id NUMBER, name VARCHAR2(40));
@@ -47,12 +51,11 @@ oracledb.getConnection(
     }
 
     connection.execute(
-      "UPDATE DMLRUPDTAB SET NAME = :name WHERE ID = :id RETURNING ID, NAME INTO :RID, :RNAME",
+      "UPDATE dmlrupdtab SET name = :name WHERE id = :id RETURNING ROWID INTO :rid",
       {
         id:    1001,
         name:  "Krishna",
-        rid:   { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
-        rname: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
+        rid:   { type: oracledb.STRING, dir: oracledb.BIND_OUT }
       },
       { autoCommit: true },
       function(err, result)

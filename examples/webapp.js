@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -45,11 +45,18 @@ function init() {
     {
       user: dbConfig.user,
       password: dbConfig.password,
-      connectString: dbConfig.connectString,
-      poolMax: 4, // maximum size of the pool
-      poolMin: 0, // let the pool shrink completely
-      poolIncrement: 1, // only grow the pool by one connection at a time
-      poolTimeout: 0  // never terminate idle connections
+      connectString: dbConfig.connectString
+      // Default values shown below
+      // externalAuth: false, // whether connections should be established using External Authentication
+      // poolMax: 4, // maximum size of the pool. Increase UV_THREADPOOL_SIZE if you increase poolMax
+      // poolMin: 0, // start with no connections; let the pool shrink completely
+      // poolIncrement: 1, // only grow the pool by one connection at a time
+      // poolTimeout: 60, // terminate connections that are idle in the pool for 60 seconds
+      // poolPingInterval: 60, // check aliveness of connection if in the pool for 60 seconds
+      // queueRequests: true, // let Node.js queue new getConnection() requests if all pool connections are in use
+      // queueTimeout: 60000, // terminate getConnection() calls in the queue longer than 60000 milliseconds
+      // poolAlias: 'myalias' // could set an alias to allow access to the pool via a name
+      // stmtCacheSize: 30 // number of statements that are cached in the statement cache of each connection
     },
     function(err, pool) {
       if (err) {
@@ -62,7 +69,7 @@ function init() {
         .createServer(function(request, response) {
           handleRequest(request, response, pool);
         })
-        .listen(httpPort, "localhost");
+        .listen(httpPort);
 
       console.log("Server running at http://localhost:" + httpPort);
     }
@@ -78,6 +85,11 @@ function handleRequest(request, response, pool) {
     "Oracle Database Driver for Node.js",
     "Example using node-oracledb driver"
   );
+
+  if (deptid == 'favicon.ico') {
+    htmlFooter(response);
+    return;
+  }
 
   if (deptid != parseInt(deptid)) {
     handleError(
@@ -100,13 +112,13 @@ function handleRequest(request, response, pool) {
     // console.log("Connections in use: " + pool.connectionsInUse);
 
     connection.execute(
-      "SELECT employee_id, first_name, last_name " +
-      "FROM employees " +
-      "WHERE department_id = :id",
+      `SELECT employee_id, first_name, last_name
+       FROM employees
+       WHERE department_id = :id`,
       [deptid], // bind variable value
       function(err, result) {
         if (err) {
-          connection.release(function(err) {
+          connection.close(function(err) {
             if (err) {
               // Just logging because handleError call below will have already
               // ended the response.
@@ -120,7 +132,7 @@ function handleRequest(request, response, pool) {
         displayResults(response, result, deptid);
 
         /* Release the connection back to the connection pool */
-        connection.release(function(err) {
+        connection.close(function(err) {
           if (err) {
             handleError(response, "normal release() error", err);
           } else {
@@ -135,7 +147,7 @@ function handleRequest(request, response, pool) {
 // Report an error
 function handleError(response, text, err) {
   if (err) {
-    text += err.message;
+    text += ": " + err.message;
   }
   console.error(text);
   response.write("<p>Error: " + text + "</p>");
@@ -150,7 +162,7 @@ function displayResults(response, result, deptid) {
   // Column Title
   response.write("<tr>");
   for (var col = 0; col < result.metaData.length; col++) {
-    response.write("<td>" + result.metaData[col].name + "</td>");
+    response.write("<th>" + result.metaData[col].name + "</th>");
   }
   response.write("</tr>");
 
@@ -175,7 +187,7 @@ function htmlHeader(response, title, caption) {
     "body {background:#FFFFFF;color:#000000;font-family:Arial,sans-serif;margin:40px;padding:10px;font-size:12px;text-align:center;}" +
     "h1 {margin:0px;margin-bottom:12px;background:#FF0000;text-align:center;color:#FFFFFF;font-size:28px;}" +
     "table {border-collapse: collapse;   margin-left:auto; margin-right:auto;}" +
-    "td {padding:8px;border-style:solid}" +
+    "td, th {padding:8px;border-style:solid}" +
     "</style>\n");
   response.write("<title>" + caption + "</title>");
   response.write("</head>");
