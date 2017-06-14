@@ -125,7 +125,6 @@ njsDBType njsVariable::DBType()
     switch (dbTypeNum) {
         case DPI_ORACLE_TYPE_VARCHAR:
         case DPI_ORACLE_TYPE_NVARCHAR:
-        case DPI_ORACLE_TYPE_LONG_VARCHAR:
             return NJS_DB_TYPE_VARCHAR;
         case DPI_ORACLE_TYPE_CHAR:
         case DPI_ORACLE_TYPE_NCHAR:
@@ -133,7 +132,6 @@ njsDBType njsVariable::DBType()
         case DPI_ORACLE_TYPE_ROWID:
             return NJS_DB_TYPE_ROWID;
         case DPI_ORACLE_TYPE_RAW:
-        case DPI_ORACLE_TYPE_LONG_RAW:
             return NJS_DB_TYPE_RAW;
         case DPI_ORACLE_TYPE_NATIVE_FLOAT:
             return NJS_DB_TYPE_BINARY_FLOAT;
@@ -155,6 +153,10 @@ njsDBType njsVariable::DBType()
             return NJS_DB_TYPE_CLOB;
         case DPI_ORACLE_TYPE_BLOB:
             return NJS_DB_TYPE_BLOB;
+        case DPI_ORACLE_TYPE_LONG_VARCHAR:
+            return NJS_DB_TYPE_LONG;
+        case DPI_ORACLE_TYPE_LONG_RAW:
+            return NJS_DB_TYPE_LONG_RAW;
         default:
             break;
     }

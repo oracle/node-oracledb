@@ -1324,8 +1324,7 @@ describe('17. extendedMetaData.js', function() {
               (result.metaData).should.deepEqual(
                 [ { name: 'LRAW',
                   fetchType: oracledb.BUFFER,
-                  dbType: oracledb.DB_TYPE_RAW,
-                  byteSize: 0,
+                  dbType: oracledb.DB_TYPE_LONG_RAW,
                   nullable: true } ]
               );
               cb();
