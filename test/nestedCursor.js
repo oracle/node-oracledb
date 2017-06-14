@@ -237,9 +237,11 @@ describe('57. nestedCursor.js', function() {
       [],
       { resultSet: true },
       function(err, result) {
-        should.not.exist(err);
-        should.exist(result.resultSet);
-        fetchOneRowFromRS(result.resultSet, done);
+        should.exist(err);
+        (err.message).should.startWith('NJS-010:');
+        // NJS-010: unsupported data type in select list
+        should.not.exist(result);
+        done();
       }
     );
 

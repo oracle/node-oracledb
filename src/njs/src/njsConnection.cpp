@@ -223,7 +223,6 @@ bool njsConnection::ProcessDefines(njsBaton *baton, dpiStmt *dpiStmtHandle,
             case DPI_ORACLE_TYPE_NATIVE_FLOAT:
             case DPI_ORACLE_TYPE_NATIVE_DOUBLE:
             case DPI_ORACLE_TYPE_BLOB:
-            case DPI_ORACLE_TYPE_STMT:
             case DPI_ORACLE_TYPE_ROWID:
                 break;
             default:
