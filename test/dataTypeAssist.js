@@ -63,7 +63,9 @@ assist.allDataTypeNames =
   "nodb_urowid"       : "UROWID",
   "nodb_myclobs"      : "CLOB",
   "nodb_myblobs"      : "BLOB",
-  "nodb_raw"          : "RAW(2000)"
+  "nodb_raw"          : "RAW(2000)",
+  "nodb_long"         : "LONG",
+  "nodb_longraw"      : "LONG RAW"
 };
 
 assist.data = {
