@@ -1,4 +1,4 @@
-Overview of node-oracledb functional tests
+>Overview of node-oracledb functional tests
 
 1. connection.js
     1.1 can run SQL query with different output formats
@@ -241,6 +241,11 @@ Overview of node-oracledb functional tests
     12.7 Testing maxRows
         12.7.1 maxRows option is ignored when resultSet option is true
         12.7.2 maxRows option is ignored with REF Cursor
+    12.8 Testing errInvalidResultSet
+      - 12.8.1 Negative: UPDATE BIND out with oracledb.CURSOR - bind by name
+      - 12.8.2 Negative: UPDATE BIND out with oracledb.CURSOR - bind by position
+      - 12.8.3 Negative: INSERT BIND out with oracledb.CURSOR - bind by name
+      - 12.8.4 Negative: INSERT BIND out with oracledb.CURSOR - bind by position
 
 13. stream1.js
     13.1 Testing QueryStream
@@ -649,12 +654,12 @@ Overview of node-oracledb functional tests
     45.5 instanceof works for lob instances
 
 51. poolTerminate.js
-    51.1 can not get/set the attributes of terminated pool
+  - 51.1 can not get/set the attributes of terminated pool
     51.2 can not get connections from the terminated pool
-    51.3 can not terminate the same pool multiple times
-    51.4 can not close the same pool multiple times
+  - 51.3 can not terminate the same pool multiple times
+  - 51.4 can not close the same pool multiple times
     51.5 pool is still available after the failing close
-    51.6 can not close the same connection multiple times
+  - 51.6 can not close the same connection multiple times
 
 55. resultSet2.js
     55.1 query a RDBMS function

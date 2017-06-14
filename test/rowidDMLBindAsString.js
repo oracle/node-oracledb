@@ -78,7 +78,7 @@ describe('107. rowidDMLBindAsString.js', function() {
             should.not.exist(err);
             cb();
           }
-        )
+        );
       }
     ], done);
   });
@@ -92,7 +92,7 @@ describe('107. rowidDMLBindAsString.js', function() {
             should.not.exist(err);
             cb();
           }
-        )
+        );
       },
       function(cb) {
         connection.release( function(err) {
@@ -165,7 +165,7 @@ describe('107. rowidDMLBindAsString.js', function() {
           (err.message).should.equal("NJS-011: encountered bind value and type mismatch");
           done();
         }
-      )
+      );
     });
 
     it('107.1.6 works with string 0', function(done) {
@@ -359,7 +359,7 @@ describe('107. rowidDMLBindAsString.js', function() {
             (result.rowsAffected).should.be.exactly(1);
             cb();
           }
-        )
+        );
       },
       function(cb) {
         connection.execute(
@@ -372,7 +372,7 @@ describe('107. rowidDMLBindAsString.js', function() {
             should.strictEqual(typeof resultVal, "string");
             cb();
           }
-        )
+        );
       }
     ], callback);
   };
@@ -392,7 +392,7 @@ describe('107. rowidDMLBindAsString.js', function() {
             (result.rowsAffected).should.be.exactly(1);
             cb();
           }
-        )
+        );
       },
       function(cb) {
         connection.execute(
@@ -416,7 +416,7 @@ describe('107. rowidDMLBindAsString.js', function() {
             should.strictEqual(resultVal_row, content.substring(15, 18));
             cb();
           }
-        )
+        );
       }
     ], callback);
   };
@@ -443,7 +443,7 @@ describe('107. rowidDMLBindAsString.js', function() {
             (result.rowsAffected).should.be.exactly(1);
             cb();
           }
-        )
+        );
       },
       function(cb) {
         connection.execute(
@@ -454,7 +454,7 @@ describe('107. rowidDMLBindAsString.js', function() {
             (result.rowsAffected).should.be.exactly(1);
             cb();
           }
-        )
+        );
       },
       function(cb) {
         connection.execute(
@@ -467,7 +467,7 @@ describe('107. rowidDMLBindAsString.js', function() {
             should.strictEqual(typeof resultVal, "string");
             cb();
           }
-        )
+        );
       }
     ], callback);
   };
@@ -486,7 +486,7 @@ describe('107. rowidDMLBindAsString.js', function() {
         should.strictEqual(typeof resultVal, "string");
         callback();
       }
-    )
+    );
   };
 
   var update_returning = function(content_insert, bindVar_update, expected, callback) {
@@ -506,7 +506,7 @@ describe('107. rowidDMLBindAsString.js', function() {
             (result.rowsAffected).should.be.exactly(1);
             cb();
           }
-        )
+        );
       },
       function(cb) {
         connection.execute(
@@ -521,7 +521,7 @@ describe('107. rowidDMLBindAsString.js', function() {
             should.strictEqual(typeof resultVal, "string");
             cb();
           }
-        )
+        );
       }
     ], callback);
   };
