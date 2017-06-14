@@ -167,7 +167,7 @@ describe('19. fetchTimestampAsString.js', function() {
         }
       );
     }); // after
-   
+
     afterEach(function() {
       oracledb.fetchAsString = [];
     });
@@ -215,7 +215,7 @@ describe('19. fetchTimestampAsString.js', function() {
       var ref = assist.content.timestamp_3_2;
       test8(tableName, ref, done);
     });
-    
+
   }); // 19.2
 
   describe('19.3 testing maxRows setttings and queryStream() to fetch as string', function() {
@@ -246,7 +246,7 @@ describe('19. fetchTimestampAsString.js', function() {
     afterEach(function() {
       oracledb.maxRows = defaultLimit;
     });
-   
+
     it('19.3.1 works well when setting oracledb.maxRows > actual number of rows', function(done) {
       oracledb.maxRows = inData.length * 2;
       var ref = assist.content.timestamp_3_1;

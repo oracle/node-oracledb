@@ -81,7 +81,7 @@ describe('106. fetchRowidAsString.js', function() {
     });
   });
 
-  var insertData = function(connection, tableName, callback) {    
+  var insertData = function(connection, tableName, callback) {
     async.forEach(array, function(element, cb) {
       var sql = "INSERT INTO " + tableName + "(num) VALUES(" + element + ")";
       connection.execute(
@@ -169,17 +169,17 @@ describe('106. fetchRowidAsString.js', function() {
     it('106.1.5 fetchInfo, queryStream() and oracledb.maxRows < actual number of rows', function(done) {
       oracledb.maxRows = numRows - 1;
       testQueryStream(option, done);
-    });  
+    });
 
     it('106.1.6 fetchInfo, queryStream() and oracledb.maxRows = actual number of rows', function(done) {
       oracledb.maxRows = numRows;
       testQueryStream(option, done);
-    });  
+    });
 
     it('106.1.7 fetchInfo, queryStream() and oracledb.maxRows > actual number of rows', function(done) {
       oracledb.maxRows = numRows + 1;
       testQueryStream(option, done);
-    }); 
+    });
 
     it('106.1.8 fetchInfo, resultSet = true', function(done) {
       var option_rs = {
@@ -187,7 +187,7 @@ describe('106. fetchRowidAsString.js', function() {
         fetchInfo: { "CONTENT": { type: oracledb.STRING } }
       };
       test2(option_rs, false, false, done);
-    });   
+    });
 
   });
 
@@ -229,7 +229,7 @@ describe('106. fetchRowidAsString.js', function() {
 
     it('106.2.1 fetchInfo with outFormat = OBJECT', function(done) {
       test1(option, true, false, done);
-    });    
+    });
 
     it('106.2.2 fetchInfo, outFormat = OBJECT, and resultSet = true', function(done) {
       var option_rs = {
@@ -248,12 +248,12 @@ describe('106. fetchRowidAsString.js', function() {
     it('106.2.4 fetchInfo, outFormat = OBJECT, and oracledb.maxRows = actual number of rows', function(done) {
       oracledb.maxRows = numRows;
       testMaxRow(option, done);
-    }); 
+    });
 
     it('106.2.5 fetchInfo, outFormat = OBJECT, and oracledb.maxRows > actual number of rows', function(done) {
       oracledb.maxRows = numRows + 1;
       testMaxRow(option, done);
-    }); 
+    });
 
     it('106.2.6 fetchInfo, outFormat = OBJECT, queryStream() and oracledb.maxRows < actual number of rows', function(done) {
       oracledb.maxRows = numRows - 1;
@@ -263,19 +263,19 @@ describe('106. fetchRowidAsString.js', function() {
     it('106.2.7 fetchInfo, outFormat = OBJECT, queryStream() and oracledb.maxRows = actual number of rows', function(done) {
       oracledb.maxRows = numRows;
       testQueryStream(option, done);
-    }); 
+    });
 
     it('106.2.8 fetchInfo, outFormat = OBJECT, queryStream() and oracledb.maxRows > actual number of rows', function(done) {
       oracledb.maxRows = numRows + 1;
       testQueryStream(option, done);
-    }); 
+    });
   });
 
   describe('106.3 works with fetchInfo and outFormat = ARRAY', function() {
     var maxRowBak = oracledb.maxRows;
-    var option = { 
+    var option = {
       outFormat: oracledb.OBJECT,
-      fetchInfo: { "CONTENT": { type: oracledb.STRING } } 
+      fetchInfo: { "CONTENT": { type: oracledb.STRING } }
     };
     before(function(done) {
       async.series([
@@ -329,17 +329,17 @@ describe('106. fetchRowidAsString.js', function() {
     it('106.3.5 fetchInfo, queryStream() and oracledb.maxRows < actual number of rows', function(done) {
       oracledb.maxRows = numRows - 1;
       testQueryStream(option, done);
-    });  
+    });
 
     it('106.3.6 fetchInfo, queryStream() and oracledb.maxRows = actual number of rows', function(done) {
       oracledb.maxRows = numRows;
       testQueryStream(option, done);
-    });  
+    });
 
     it('106.3.7 fetchInfo, queryStream() and oracledb.maxRows > actual number of rows', function(done) {
       oracledb.maxRows = numRows + 1;
       testQueryStream(option, done);
-    }); 
+    });
 
     it('106.3.8 fetchInfo, resultSet = true', function(done) {
       var option_rs = {
@@ -347,7 +347,7 @@ describe('106. fetchRowidAsString.js', function() {
         fetchInfo: { "CONTENT": { type: oracledb.STRING } }
       };
       test2(option_rs, false, true, done);
-    });   
+    });
   });
 
   describe('106.4 fetch as string by default', function() {
@@ -406,24 +406,24 @@ describe('106. fetchRowidAsString.js', function() {
     it('106.4.5 queryStream() and oracledb.maxRows < actual number of rows', function(done) {
       oracledb.maxRows = numRows - 1;
       testQueryStream(option, done);
-    });  
+    });
 
     it('106.4.6 queryStream() and oracledb.maxRows = actual number of rows', function(done) {
       oracledb.maxRows = numRows;
       testQueryStream(option, done);
-    });  
+    });
 
     it('106.4.7 queryStream() and oracledb.maxRows > actual number of rows', function(done) {
       oracledb.maxRows = numRows + 1;
       testQueryStream(option, done);
-    }); 
+    });
 
     it('106.4.8 resultSet = true', function(done) {
       var option_rs = {
         resultSet: true,
       };
       test2(option_rs, false, false, done);
-    });   
+    });
 
   });
 
@@ -483,24 +483,24 @@ describe('106. fetchRowidAsString.js', function() {
     it('106.5.5 queryStream() and oracledb.maxRows < actual number of rows', function(done) {
       oracledb.maxRows = numRows - 1;
       testQueryStream(option, done);
-    });  
+    });
 
     it('106.5.6 queryStream() and oracledb.maxRows = actual number of rows', function(done) {
       oracledb.maxRows = numRows;
       testQueryStream(option, done);
-    });  
+    });
 
     it('106.5.7 queryStream() and oracledb.maxRows > actual number of rows', function(done) {
       oracledb.maxRows = numRows + 1;
       testQueryStream(option, done);
-    }); 
+    });
 
     it('106.5.8 resultSet = true', function(done) {
       var option_rs = {
         resultSet: true,
       };
       test2(option_rs, true, false, done);
-    });   
+    });
 
   });
 
@@ -560,24 +560,24 @@ describe('106. fetchRowidAsString.js', function() {
     it('106.6.5 queryStream() and oracledb.maxRows < actual number of rows', function(done) {
       oracledb.maxRows = numRows - 1;
       testQueryStream(option, done);
-    });  
+    });
 
     it('106.6.6 queryStream() and oracledb.maxRows = actual number of rows', function(done) {
       oracledb.maxRows = numRows;
       testQueryStream(option, done);
-    });  
+    });
 
     it('106.6.7 queryStream() and oracledb.maxRows > actual number of rows', function(done) {
       oracledb.maxRows = numRows + 1;
       testQueryStream(option, done);
-    }); 
+    });
 
     it('106.6.8 resultSet = true', function(done) {
       var option_rs = {
         resultSet: true,
       };
       test2(option_rs, false, false, done);
-    });   
+    });
 
   });
 
@@ -608,7 +608,7 @@ describe('106. fetchRowidAsString.js', function() {
     }, function(err) {
       should.not.exist(err);
       callback();
-    });     
+    });
   }
 
   function test2(option, object, array, callback) {
@@ -645,7 +645,7 @@ describe('106. fetchRowidAsString.js', function() {
     }, function(err) {
       should.not.exist(err);
       callback();
-    });     
+    });
   }
 
   function testMaxRow(option, callback) {
@@ -660,7 +660,7 @@ describe('106. fetchRowidAsString.js', function() {
         should.strictEqual(result.rows.length, rowExpected);
         callback();
       }
-    );    
+    );
   }
 
   function testQueryStream(option, callback) {
@@ -681,5 +681,5 @@ describe('106. fetchRowidAsString.js', function() {
       should.strictEqual(result.length, numRows);
       setTimeout(callback, 100);
     });
-  }  
+  }
 });

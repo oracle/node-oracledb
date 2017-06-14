@@ -952,12 +952,12 @@ describe('12. resultSet1.js', function() {
               should.not.exist(err);
               accessCount.should.be.exactly(10);
               try {
-                rs.close(function(err) {});
+                rs.close(function() {});
               } catch (err) {
                 should.exist(err);
                 (err.message).should.startWith('NJS-018:');
                 done();
-              };
+              }
             });
           }
         });
@@ -995,7 +995,7 @@ describe('12. resultSet1.js', function() {
                 should.exist(err);
                 (err.message).should.startWith('NJS-018:');
                 done();
-              };
+              }
             });
           }
         });

@@ -1046,10 +1046,10 @@ describe('17. extendedMetaData.js', function() {
           should.not.exist(err);
           (result.metaData).should.deepEqual(
             [ { name: 'TS3',
-                fetchType: oracledb.DATE,
-                dbType: oracledb.DB_TYPE_TIMESTAMP_TZ,
-                precision: 6,
-                nullable: true } ]
+              fetchType: oracledb.DATE,
+              dbType: oracledb.DB_TYPE_TIMESTAMP_TZ,
+              precision: 6,
+              nullable: true } ]
           );
           done();
         }
@@ -1067,10 +1067,10 @@ describe('17. extendedMetaData.js', function() {
           should.not.exist(err);
           (result.metaData).should.deepEqual(
             [ { name: 'TS4',
-                fetchType: oracledb.DATE,
-                dbType: oracledb.DB_TYPE_TIMESTAMP_TZ,
-                precision: 2,
-                nullable: true } ]
+              fetchType: oracledb.DATE,
+              dbType: oracledb.DB_TYPE_TIMESTAMP_TZ,
+              precision: 2,
+              nullable: true } ]
           );
           done();
         }
@@ -1160,9 +1160,9 @@ describe('17. extendedMetaData.js', function() {
           should.not.exist(err);
           (result.metaData).should.deepEqual(
             [ { name: 'RID',
-                fetchType: oracledb.STRING,
-                dbType: oracledb.DB_TYPE_ROWID,
-                nullable: true } ]
+              fetchType: oracledb.STRING,
+              dbType: oracledb.DB_TYPE_ROWID,
+              nullable: true } ]
           );
           done();
         }
@@ -1180,9 +1180,9 @@ describe('17. extendedMetaData.js', function() {
           should.not.exist(err);
           (result.metaData).should.deepEqual(
             [ { name: 'URID',
-                fetchType: oracledb.STRING,
-                dbType: oracledb.DB_TYPE_ROWID,
-                nullable: true } ]
+              fetchType: oracledb.STRING,
+              dbType: oracledb.DB_TYPE_ROWID,
+              nullable: true } ]
           );
           done();
         }
