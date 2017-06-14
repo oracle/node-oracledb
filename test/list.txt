@@ -29,6 +29,8 @@ Overview of node-oracledb functional tests
         1.6.6 wrong type for param 4 should throw an error
     1.7 Close method
         1.7.1 close can be used as an alternative to release
+    1.8 invalid credentials
+        1.8.1 cannot get connections with invalid credentials
 
 2. pool.js
     2.1 default values
@@ -59,18 +61,18 @@ Overview of node-oracledb functional tests
         2.6.2 stmtCacheSize can be 0
         2.6.3 stmtCacheSize must be a Number
     2.7 getConnection
-        2.7.1 throws error if called after pool is terminated and a callback is not provided
-        2.7.2 passes error in callback if called after pool is terminated and a callback is provided
+        2.7.1 passes error in callback if called after pool is terminated and a callback is provided
     2.8 connection request queue (basic functionality)
         2.8.1 generates ORA-24418 when calling getConnection if queueing is disabled
         2.8.2 does not generate ORA-24418 when calling getConnection if queueing is enabled
         2.8.3 generates NJS-040 if request is queued and queueTimeout expires
         2.8.4 does not generate NJS-040 if request is queued for less time than queueTimeout
     2.9 connection request queue (_enableStats & _logStats functionality)_logStats must be called prior to terminating pool.
-        2.9.1 works after the pool as been terminated
+        2.9.1 does not work after the pool as been terminated
     2.10 Close method
         2.10.1 close can be used as an alternative to release
-
+    2.11 invalid credentials
+      - 2.11.1 cannot get connections with invalid credentials
 
 3. examples.js
     3.1 connect.js
@@ -109,7 +111,7 @@ Overview of node-oracledb functional tests
         4.1.5 default bind type - STRING
     4.2 mixing named with positional binding
         4.2.1 array binding is ok
-      - 4.2.2 array binding with mixing JSON should throw an error
+        4.2.2 array binding with mixing JSON should throw an error
     4.3 insert with DATE column and DML returning
         4.3.1 passes in object syntax without returning into
         4.3.2 passes in object syntax with returning into
@@ -121,19 +123,44 @@ Overview of node-oracledb functional tests
         4.4.3 Negative - bind out data exceeds default length
       - 4.4.4 maximum value is 32767
     4.5 The default direction for binding is BIND_IN
-      - 4.5.1
+        4.5.1 DML default bind
+        4.5.2 negative DML invalid bind direction
+    4.6 PL/SQL block with empty outBinds
+        4.6.1
+    4.7 Value as JSON named/unamed test cases
+        4.7.1 valid case when numeric values are passed as it is
+        4.7.2 Valid values when one of the value is passed as JSON
+        4.7.3 Valid test case when one of the value is passed as JSON
+        4.7.4 Valid Test case when both values are passed as JSON
+        4.7.5 Invalid Test case when value is passed as named JSON
+        4.7.6 Invalid Test case when other-value is passed as named JSON
+        4.7.7 Invalid Test case when all values is passed as named JSON
+    4.8 bind DATE
+        4.8.1 binding out in Object & Array formats
+        4.8.2 BIND_IN
+      - 4.8.3 BIND_INOUT
 
-5. externalAuthentication.js
-    5.1 connection should succeed when setting externalAuth to be false and providing user/password
-    5.2 error should be thrown when setting externalAuth to be true and providing user/password
-    5.3 can get connection from oracledb
-    5.4 can create pool
+5. externalAuth.js
+    5.1 tests that work both when DB has configured externalAuth and not configured
+        5.1.1 can get connection from oracledb with correct user/password when externalAuth is disabled
+        5.1.2 throws error when getting connection from oracledb with correct user/password when externalAuth is enabled
+        5.1.3 throws error when gettting connection from oracledb given only 'user' when externalAuth is enabled
+        5.1.4 throws error when gettting connection from oracledb given only 'password' when externalAuth is enabled
+        5.1.5 can get pool from oracledb with user/password when externalAuth is disabled
+        5.1.6 throws error when getting pool from oracledb given user/password when externalAuth is enabled
+        5.1.7 throws error when getting pool from oracledb only given username when externalAuth is enabled
+        5.1.8 throws error when getting pool from oracledb only given password when externalAuth is enabled
+    5.2 tests only work when externalAuth is configured on DB
+        5.2.1 can get connection from oracledb with external authentication
+        5.2.2 can get pool from oracledb with external authentication
+        5.2.3 gets multiple connections from oracledb
+        5.2.4 gets multiple pools from oracledb
 
 6. dmlReturning.js
     6.1 NUMBER & STRING driver data type
         6.1.1 INSERT statement with Object binding
         6.1.2 INSERT statement with Array binding
-      - 6.1.3 INSERT statement with small maxSize restriction
+        6.1.3 INSERT statement with small maxSize restriction
         6.1.4 UPDATE statement with single row matched
         6.1.5 UPDATE statement with single row matched & Array binding
         6.1.6 UPDATE statements with multiple rows matched
@@ -207,7 +234,7 @@ Overview of node-oracledb functional tests
         12.2.1 cannot set prefetchRows to be a negative value
         12.2.2 cannot set prefetchRows to be a random string
         12.2.3 cannot set prefetchRows to be NaN
-        12.2.4 cannot set prefetchRows to be null
+        12.2.4 prefetchRows can be set to null
         12.2.5 prefetchRows can be set to 0
     12.3 Testing function getRows()
         12.3.1 retrieved set is exactly the size of result
@@ -269,18 +296,26 @@ Overview of node-oracledb functional tests
         13.3.2 should default to 100 if oracledb.maxRows is false
 
 14. stream2.js
-    14.1 meta data event
-    14.2 Bind by position and return an array
-    14.3 Bind by name and return an array
-    14.4 Bind by position and return an object
-    14.5 Bind by name and return an object
-    14.6 explicitly setting resultSet option to be false takes no effect
-    14.7 maxRows option is ignored as expect
-    14.8 Negative - queryStream() has no parameters
-    14.9 Negative - give invalid SQL as first parameter
-    14.10 Negatvie - give non-query SQL
+    14.1 Bind by position and return an array
+    14.2 Bind by name and return an array
+    14.3 Bind by position and return an object
+    14.4 Bind by name and return an object
+    14.5 explicitly setting resultSet option to be false takes no effect
+    14.6 maxRows option is ignored as expect
+    14.7 Negative - queryStream() has no parameters
+    14.8 Negative - give invalid SQL as first parameter
+    14.9 Negatvie - give non-query SQL
+    14.10 metadata event - single column
+    14.11 metadata event - multiple columns
+    14.12 metadata event - all column names occurring
+    14.13 metadata event - no return rows
+    14.14 metadata event - negative: non-query SQL
+    14.15 metadata event - case sensitive columns
+    14.16 metadata event - large number of columns
+    14.17 metadata event - single character column
+    14.18 metadata event - duplicate column alias
 
-15. resultsetToQueryStream.js
+15. resultsetToStream.js
     15.1 Testing ResultSet.toQueryStream
         15.1.1 should allow resultsets to be converted to streams
     15.2 Testing ResultSet/QueryStream conversion errors
@@ -392,7 +427,39 @@ Overview of node-oracledb functional tests
     17.11 basic stress test
         17.11.1 large number of columns
 
-21. datatypeAssist.js
+18. constants.js
+      18.1 dbTypes maps correctly between names and numbers
+      18.2 jsTypes maps correctly
+      18.3 binding contants maps correctly
+
+19. fetchTimestampAsString.js
+    19.1 TIMESTAMP
+        19.1.1 fetchInfo option
+        19.1.2 fetchInfo option, outFormat is OBJECT
+        19.1.3 fetchInfo option, enables resultSet
+        19.1.4 fetchInfo option, resultSet and OBJECT outFormat
+        19.1.5 fetchAsString property
+        19.1.6 fetchAsString property and OBJECT outFormat
+        19.1.7 fetchAsString property, resultSet
+        19.1.8 fetchAsString property, resultSet and OBJECT outFormat
+    19.2 TIMESTAMP WITH TIME ZONE
+        19.2.1 fetchInfo option
+        19.2.2 fetchInfo option, outFormat is OBJECT
+        19.2.3 fetchInfo option, enables resultSet
+        19.2.4 fetchInfo option, resultSet and OBJECT outFormat
+        19.2.5 fetchAsString property
+        19.2.6 fetchAsString property and OBJECT outFormat
+        19.2.7 fetchAsString property, resultSet
+        19.2.8 fetchAsString property, resultSet and OBJECT outFormat
+    19.3 testing maxRows setttings and queryStream() to fetch as string
+        19.3.1 works well when setting oracledb.maxRows > actual number of rows
+        19.3.2 maxRows = actual num of rows
+        19.3.3 works when oracledb.maxRows < actual number of rows
+        19.3.4 uses queryStream() and maxRows > actual number of rows
+        19.3.5 uses queryStream() and maxRows = actual number of rows
+        19.3.6 maxRows < actual rows. maxRows does not restrict queryStream()
+
+21. dataTypeAssist.js
 
 22. dataTypeChar.js
     22.1 testing CHAR data in various lengths
@@ -415,11 +482,6 @@ Overview of node-oracledb functional tests
         23.1.3 works well with REF Cursor
     23.2 stores null value correctly
         23.2.1 testing Null, Empty string and Undefined
-
-24. dataTypeVarchar2.js
-    24.1 supports VARCHAR2 data in various lengths
-    24.2 resultSet stores VARCHAR2 data correctly
-    24.3 stores null value correctly
 
 24. dataTypeVarchar2.js
     24.1 testing VARCHAR2 data in various lengths
@@ -476,7 +538,7 @@ Overview of node-oracledb functional tests
     30.2 stores null value correctly
         30.2.1 testing Null, Empty string and Undefined
     30.3 testing floating-point numbers which cannot be precisely represent
-        30.3.1 rounding numbers
+      - 30.3.1 rounding numbers
 
 31. dataTypeBinaryDouble.js
     31.1 testing BINARY_DOUBLE data
@@ -485,8 +547,8 @@ Overview of node-oracledb functional tests
         31.1.3 works well with REF Cursor
     31.2 stores null value correctly
         31.2.1 testing Null, Empty string and Undefined
-    31.3 testing floating-point numbers which cannot be precisely represent
-        31.3.1 rounding numbers
+    31.3 testing floating-point numbers which can be precisely represent
+        31.3.1 testing floating-point numbers
 
 32. dataTypeDate.js
     32.1 Testing JavaScript Date data
@@ -610,24 +672,42 @@ Overview of node-oracledb functional tests
         42.3.6 DELETE statement with single row matching
         42.3.7 DELETE statement with multiple rows matching
     42.4 in PL/SQL, the maximum size is 32767
-      - 42.4.1 when data length is 200
+        42.4.1 when data length is less than maxSize
+        42.4.2 when data length is 32767
+        42.4.3 when data length greater than maxSize
+        42.4.4 when maxSize is greater than 32767
+    45.5 INSERT and SELECT
+        45.5.1 works with data size 100
+        45.5.2 works with data size 2000
+        45.5.3 works with default type/dir
+    45.6 UPDATE
+        45.6.1 works with data size 100
+        45.6.2 works with data size 2000
+        45.6.3 works with default type/dir
 
-43. plsqlBinding1.js
+43. plsqlBindIndexedTable1.js
     43.1 binding PL/SQL indexed table
-        43.1.1 binding PL/SQL indexed table IN
-        43.1.2 binding PL/SQL indexed table IN OUT
-        43.1.3 binding PL/SQL indexed table OUT
+        43.1.1 binding PL/SQL indexed table IN by name
+        43.1.2 binding PL/SQL indexed table IN by position
+        43.1.3 binding PL/SQL indexed table IN OUT
+        43.1.4 binding PL/SQL indexed table OUT
     43.2 test exceptions when using PL/SQL indexed table bindings
         43.2.1 maxArraySize is ignored when specifying BIND_IN
         43.2.2 maxArraySize is mandatory for BIND_INOUT
-        42.2.3 maxArraySize cannot smaller than the number of array elements
-        42.2.4 DATE type has not been supported yet
-        42.2.5 negative case (string): incorrect type of array element
-        42.2.6 negative case (number): incorrect type of array element
-        42.2.7 supports binding by position
+        43.2.3 maxArraySize cannot smaller than the number of array elements
+        43.2.4 DATE type indexed table has not been supported yet
+        43.2.5 negative case: incorrect type of array element - bind by name 1
+        43.2.6 negative case: incorrect type of array element - bind by name 2
+        43.2.7 negative case: incorrect type of array element - bind by name 3
+        43.2.8 negative case: incorrect type of array element - bind by name 4
+        43.2.9 supports binding by position
+        43.2.10 negative case: incorrect type of array elements - bind by pos 1
+        43.2.11 negative case: incorrect type of array elements - bind by pos 2
+        43.2.12 negative case: incorrect type of array elements - bind by pos 3
+        43.2.13 negative case: incorrect type of array elements - bind by pos 4
     43.3 binding PL/SQL scalar
         43.3.1 binding PL/SQL scalar IN
-      - 43.3.2 binding PL/SQL scalar IN/OUT
+        43.3.2 binding PL/SQL scalar IN/OUT
         43.3.3 binding PL/SQL scalar OUT by name
         43.3.4 binding PL/SQL scalar OUT by position
     43.4 test attribute - maxArraySize
@@ -638,13 +718,13 @@ Overview of node-oracledb functional tests
       - 43.4.5 negative case: large value
         43.4.6 negative case: < 0
         43.4.7 negative case: = 0
-        43.4.8 negative case: assigning a string to it
+        43.4.8 negative case: assign a string to it
         43.4.9 negative case: NaN
 
-44. plsqlBinding2.js
+44. plsqlBindIndexedTable2.js.js
     44.1 example case
     44.2 example case binding by position
-  - 44.3 default binding type and direction with binding by name
+    44.3 default binding type and direction with binding by name
     44.4 default binding type and direction with binding by position
     44.5 null elements in String and Number arrays
     44.6 empty array for BIND_IN and BIND_INOUT
@@ -658,13 +738,32 @@ Overview of node-oracledb functional tests
     45.4 instanceof works for resultset instances
     45.5 instanceof works for lob instances
 
-51. poolTerminate.js
-  - 51.1 can not get/set the attributes of terminated pool
+51. poolClose.js
+    51.1 can not get/set the attributes of terminated pool
     51.2 can not get connections from the terminated pool
-  - 51.3 can not terminate the same pool multiple times
-  - 51.4 can not close the same pool multiple times
+    51.3 can not terminate the same pool multiple times
+    51.4 can not close the same pool multiple times
     51.5 pool is still available after the failing close
-  - 51.6 can not close the same connection multiple times
+    51.6 can not close the same connection multiple times
+    51.7 can not get connection in promise version from the terminated pool
+
+52. connClose.js
+    52.1 can not set property value after connection closes
+    52.2 can not get property value after connection closes
+    52.3 can not set clientId property value
+    52.4 can not set module property value
+    52.5 can not set action property value
+    52.6 can not get oracleServerVersion property value
+    52.7 can not call execute() method
+    52.8 can not get metaData property after connection closes
+
+53. resultSetClose.js
+    53.1 can not get metaData property
+    53.2 can not call close() again
+    53.3 can not call getRow()
+    53.4 can not call getRows()
+    53.5 can not call toQueryStream()
+    53.6 can call getRow() again in the callback of getRow()
 
 55. resultSet2.js
     55.1 query a RDBMS function
@@ -696,25 +795,31 @@ Overview of node-oracledb functional tests
     55.12 bind a cursor BIND_INOUT
         55.12.1 has not supported binding a cursor with BIND_INOUT
     55.13 Invalid Ref Cursor
-        55.13.1 
+        55.13.1
 
 56. fetchAs.js
-      56.1 property value check
-      56.2 Fetch DATE column values as STRING - by-Column name
-      56.3 Fetch DATE, NUMBER column values STRING - by Column-name
-      56.4 Fetch DATE, NUMBER as STRING by-time configuration and by-name
-      56.5 Fetch DATE, NUMBER column as STRING by-type and override at execute time
-      56.6 Fetch ROWID column values STRING - non-ResultSet
-      56.7 Fetch ROWID column values STRING - ResultSet
-      56.8 large numbers with fetchInfo
-      56.9 large numbers with setting fetchAsString property
-      56.10 invalid syntax for type should result in error
-      56.11 Negative - empty string
-      56.12 Negative - null
-      56.13 Negative - undefined
-      56.14 Negative - NaN
-      56.15 Negative - invalid type of value, number
-      56.16 Negative - invalid type of value, string
+    56.1 property value check
+    56.2 Fetch DATE column values as STRING - by-Column name
+    56.3 Fetch DATE, NUMBER column values STRING - by Column-name
+    56.4 Fetch DATE, NUMBER as STRING by-time configuration and by-name
+    56.5 Fetch DATE, NUMBER column as STRING by-type and override at execute time
+    56.6 Fetch ROWID column values STRING - non-ResultSet
+    56.7 Fetch ROWID column values STRING - ResultSet
+    56.8 large numbers with fetchInfo
+    56.9 large numbers with setting fetchAsString property
+    56.10 invalid syntax for type should result in error
+    56.11 assigns an empty array to fetchAsString
+  - 56.12 Negative - empty string
+  - 56.13 Negative - null
+  - 56.14 Negative - undefined
+  - 56.15 Negative - NaN
+  - 56.16 Negative - invalid type of value, number
+  - 56.17 Negative - invalid type of value, string
+    56.18 Negative - passing oracledb.DATE type to fetchInfo
+    56.19 Negative - passing empty JSON to fetchInfo
+    56.20 Negative - passing oracledb.NUMBER type to fetchInfo
+  - 56.21 Negative - passing Date for fetchAsString
+  - 56.22 Negative - passing Buffer for fetchAsstring
 
 57. nestedCursor.js
     57.1 testing nested cursor support - result set
@@ -740,7 +845,11 @@ Overview of node-oracledb functional tests
         58.1.16 queueTimeout
         58.1.17 stmtCacheSize
         58.1.18 poolPingInterval
-        58.1.19 Negative - connectionClass
+        58.1.19 fetchAsBuffer
+        58.1.20 Negative - connectionClass
+        58.1.21 Negative - autoCommit
+        58.1.22 Negative - outFormat
+        58.1.23 Negative - externalAuth
     58.2 Pool Class
         58.2.1 poolMin
         58.2.2 poolMax
@@ -765,6 +874,14 @@ Overview of node-oracledb functional tests
 59. lobResultSet.js
     59.1 CLOB data
         59.1.1 reads clob data one by one row from result set
+        59.1.2 works with oracledb.maxRows > actual number of rows fetched
+        59.1.3 works with oracledb.maxRows = actual number of rows fetched
+        59.1.4 works with oracledb.maxRows < actual number of rows fetched
+    59.2 BLOB data
+        59.2.1 reads blob data one by one row from result set
+        59.2.2 works with oracledb.maxRows > actual number of rows fetched
+        59.2.3 works with oracledb.maxRows = actual number of rows fetched
+        59.2.4 works with oracledb.maxRows < actual number of rows fetched
 
 60. clobPlsqlString.js
     60.1 BIND OUT as STRING
@@ -780,7 +897,7 @@ Overview of node-oracledb functional tests
     61.4 Pool Class
     61.5 ResultSet Class
 
-62. lobProperties.js
+62. lobProperties1.js
     62.1 chunkSize (read-only)
     62.2 length (read-only)
     62.3 pieceSize -default value is chunkSize
@@ -810,5 +927,2482 @@ Overview of node-oracledb functional tests
     66.3 allows overwriting of public methods on resultset instances
     66.4 allows overwriting of public methods on lob instances
 
-67. utf8MultibyteCharacter.js
-    67.1 works with UTF-8 multibyte characters
+67. poolCache.js
+    67.1 basic functional tests
+        67.1.1 caches pool as default if pool is created when cache is empty
+        67.1.2 removes the pool from the cache on terminate
+        67.1.3 can cache and retrieve an aliased pool
+        67.1.4 throws an error if the poolAlias already exists in the cache
+        67.1.5 does not throw an error if multiple pools are created without an alias
+        67.1.6 throws an error if poolAttrs.poolAlias is not a string
+        67.1.7 makes poolAttrs.poolAlias a read-only attribute on the pool named alias
+        67.1.8 retrieves the default pool, even after an aliased pool is created
+        67.1.9 retrieves the right pool, even after multiple pools are created
+        67.1.10 throws an error if the pool specified in getPool doesn't exist
+        67.1.11 does not throw an error if multiple pools are created without a poolAlias in the same call stack
+        67.1.12 uses callback syntax function(err) instead of function(err,pool)
+        67.1.13 Negative: callback is called with function(err)
+        67.1.14 a named pool does not also create a default pool
+    67.2 oracledb.getConnection functional tests
+        67.2.1 gets a connection from the default pool
+        67.2.2 gets a connection from the pool with the specified alias when no alias is specified
+        67.2.3 throws an error if an attempt is made to use the default pool when it does not exist
+        67.2.4 throws an error if an attempt is made to use a poolAlias for a pool that is not in the cache
+        67.2.5 gets a connection from the default pool, even after an aliased pool is created
+        67.2.6 uses the right pool, even after multiple pools are created
+        67.2.7 gets a connection from the default pool with callback function(err)
+    67.3 poolAlias attribute
+        67.3.1 throws an error if poolAttrs.poolAlias is an object
+        67.3.2 throws an error if poolAttrs.poolAlias is an array
+        67.3.3 throws an error if poolAttrs.poolAlias is a number
+        67.3.4 throws an error if poolAttrs.poolAlias is a boolean
+        67.3.5 throws an error if poolAttrs.poolAlias is null
+        67.3.6 throws an error if poolAttrs.poolAlias is an empty string
+        67.3.7 throws an error if poolAttrs.poolAlias is NaN
+        67.3.8 works if poolAttrs.poolAlias is undefined
+
+68. multipleLobInsertion.js
+    68.1 inserts multiple BLOBs
+    68.2 inserts multiple CLOBs
+
+69. driverName.js
+    69.1 checks the driver name
+
+70. plsqlBindScalar.js
+    70.1 PL/SQL bind scalar, dir: BIND_IN and BIND_OUT, type: STRING
+        70.1.1 basic case: a simple string
+        70.1.2 negative: bind in value and type mismatch
+        70.1.3 val: null
+        70.1.4 val: empty string
+        70.1.5 val: undefined
+        70.1.6 tests default dir & type
+        70.1.7 val: NaN
+    70.2 dir: BIND_IN and BIND_OUT, type: NUMBER
+        70.2.1 basic case
+        70.2.2 auto detect number type
+        70.2.3 val: null
+        70.2.4 Negative: bind value and type mismatch - val: empty string
+        70.2.5 val: 0
+        70.2.6 val: undefined
+        70.2.7 val: NaN
+        70.2.8 val: -1
+      - 70.2.9 val: maxval
+    70.3 dir: BIND_IN and BIND_OUT, type: DATE
+        70.3.1 basic case
+        70.3.2 auto detect Date type
+        70.3.3 val: null
+        70.3.4 val: empty string, negative - bind value and type mismatch
+        70.3.5 val: undefined
+        70.3.6 val: NaN
+        70.3.7 val: invalid Date Value: Feb 30, 2016
+        70.3.8 val: 1969-12-31
+        70.3.9 val: epoc date 1970-1-1
+        70.3.10 val: create Date value using numeric value: new Date(number)
+        70.3.11 val: create Date value using numeric value: new Date(7 number)
+        70.3.12 val: create Date value using numeric value: 0
+    70.4 dir: BIND_IN and BIND_OUT, type: BUFFER
+        70.4.1 basic case
+        70.4.2 auto detect Buffer type
+        70.4.3 val: null
+        70.4.4 val: empty string
+        70.4.5 val: undefined
+        70.4.6 val: NaN
+    70.5 dir: BIND_INOUT, type: STRING
+        70.5.1 basic case: a simple string
+        70.5.2 tests default type
+        70.5.3 negative: bind value and type mismatch
+        70.5.4 val: null
+        70.5.5 val: empty string
+        70.5.6 val: undefined
+        70.5.7 val: NaN
+        70.5.8 NULL IN and NON-NULL out
+        70.5.9 NON-NULL IN and NULL OUT
+        70.5.10 n Length IN and 2n OUT
+        70.5.11 2n Length IN and n OUT
+    70.6 dir: BIND_INOUT, type: NUMBER
+        70.6.1 basic case
+        70.6.2 auto detect number type
+        70.6.3 negative: bind value and type mismatch - val: empty string
+        70.6.4 val: null
+        70.6.5 val: undefined
+      - 70.6.6 val: NaN
+        70.6.7 val: 0
+        70.6.8 val: -1
+      - 70.6.9 val: maxval
+        70.6.10 NULL IN and NON-NULL out
+        70.6.11 NON-NULL IN and NULL OUT
+    70.7 dir: BIND_INOUT, type: DATE
+        70.7.1 basic case
+        70.7.2 auto detect Date type
+        70.7.3 val: null
+        70.7.4 val: empty string, negative - bind value and type mismatch
+        70.7.5 val: undefined
+        70.7.6 val: NaN
+        70.7.7 val: invalid Date Value: Feb 30, 2016
+        70.7.8 val: 1969-12-31
+        70.7.9 val: epoc date 1970-1-1
+        70.7.10 NULL IN and NON-NULL out
+        70.7.11 NON-NULL IN and NULL OUT
+    70.8 dir: BIND_INOUT, type: BUFFER
+        70.8.1 basic case
+        70.8.2 auto detect BUFFER type
+        70.8.3 val: null
+        70.8.4 val: empty string
+        70.8.5 val: undefined
+        70.8.6 val: NaN
+    70.9 Query the binded data by SQL
+        70.9.1 basic case
+        70.9.2 dir: BIND_INOUT, val: null
+        70.9.3 dir: BIND_IN, val: null
+        70.9.4 dir: BIND_INOUT, val: undefined
+        70.9.5 dir: BIND_IN, val: undefined
+    70.10 Check the bind-in values in PL/SQL
+        70.10.1 STRING, basic
+        70.10.2 STRING, null, empty string, undefined
+        70.10.3 NUMBER, null values
+        70.10.4 DATE, null values
+        70.10.5 BUFFER
+        70.10.6 TIMESTAMP, null values
+        70.10.7 TIMESTAMP WITH TIME ZONE, null values
+        70.10.8 TIMESTAMP WITH LOCAL TIME ZONE, null values
+    70.11 dir: BIND_IN and BIND_OUT, type: TIMESTAMP(convert STRING to TIMESTAMP)
+        70.11.1 basic case
+        70.11.2 val: null
+        70.11.3 val: empty string
+        70.11.4 val: undefined
+        70.11.5 val: NaN
+        70.11.7 val: invalid Date Value: Feb 30, 2016
+        70.11.8 val: 1969-12-31
+        70.11.9 val: epoch date 1970-1-1
+    70.12 dir: BIND_IN and BIND_OUT, type: TIMESTAMP(WITH VARCHAR2 RETURN)
+        70.12.1 basic case
+        70.12.2 val: null
+        70.12.3 val: empty string
+        70.12.4 val: undefined
+        70.12.5 val: NaN
+        70.12.7 val: invalid Date Value: Feb 30, 2016
+        70.12.8 val: 1969-12-31
+        70.12.9 val: epoch date 1970-1-1
+        70.12.10 val: create Date value using numeric value: new Date(number)
+        70.12.11 val: create Date value using numeric value: 0
+    70.13 dir: BIND_IN and BIND_OUT, type: TIMESTAMP
+        70.13.1 val: empty string
+        70.13.2 val: undefined
+        70.13.3 val: NaN
+    70.14 dir: BIND_INOUT, type:TIMESTAMP
+        70.14.1 basic case
+        70.14.2 auto detect data type
+        70.14.3 val: null
+        70.14.4 val: empty string
+        70.14.5 val: undefined
+        70.14.6 val: NaN
+        70.14.7 val: invalid Date Value: Feb 30, 2016
+        70.14.8 val: 1969-12-31
+        70.14.9 val: epoch date 1970-1-1
+        70.14.10 NULL IN and NON-NULL out
+        70.14.11 NON-NULL IN and NULL OUT
+    70.15 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE(convert STRING to TIMESTAMP)
+        70.15.1 basic case
+        70.15.2 val: null
+        70.15.3 val: empty string
+        70.15.4 val: undefined
+        70.15.5 val: NaN
+        70.15.7 val: invalid Date Value: Feb 30, 2016
+        70.15.8 val: 1969-12-31
+        70.15.9 val: epoch date 1970-1-1
+    70.16 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE(WITH VARCHAR2 RETURN)
+        70.16.1 basic case
+        70.16.2 val: null
+        70.16.3 val: empty string
+        70.16.4 val: undefined
+        70.16.5 val: NaN
+        70.16.7 val: invalid Date Value: Feb 30, 2016
+        70.16.8 val: 1969-12-31
+        70.16.9 val: epoch date 1970-1-1
+        70.16.10 val: create Date value using numeric value: new Date(number)
+        70.16.11 val: create Date value using numeric value: 0
+    70.17 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH TIME ZONE
+        70.17.1 val: empty string
+        70.17.2 val: undefined
+        70.17.3 val: NaN
+    70.18 dir: BIND_INOUT, type:TIMESTAMP WITH TIME ZONE
+        70.18.1 basic case
+        70.18.2 auto detect data type
+        70.18.3 val: null
+        70.18.4 val: empty string
+        70.18.5 val: undefined
+        70.18.6 val: NaN
+        70.18.7 val: invalid Date Value: Feb 30, 2016
+        70.18.8 val: 1969-12-31
+        70.18.9 val: epoch date 1970-1-1
+        70.18.10 NULL IN and NON-NULL out
+        70.18.11 NON-NULL IN and NULL OUT
+    70.19 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH LOCAL TIME ZONE(convert STRING to TIMESTAMP)
+        70.19.1 basic case
+        70.19.2 val: null
+        70.19.3 val: empty string
+        70.19.4 val: undefined
+        70.19.5 val: NaN
+        70.19.7 val: invalid Date Value: Feb 30, 2016
+        70.19.8 val: 1969-12-31
+        70.19.9 val: epoch date 1970-1-1
+    70.20 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH LOCAL TIME ZONE(WITH VARCHAR2 RETURN)
+        70.20.1 basic case
+        70.20.2 val: null
+        70.20.3 val: empty string
+        70.20.4 val: undefined
+        70.20.5 val: NaN
+        70.20.7 val: invalid Date Value: Feb 30, 2016
+        70.20.8 val: 1969-12-31
+        70.20.9 val: epoch date 1970-1-1
+        70.20.10 val: create Date value using numeric value: new Date(number)
+        70.20.11 val: create Date value using numeric value: 0
+    70.21 dir: BIND_IN and BIND_OUT, type: TIMESTAMP WITH LOCAL TIME ZONE
+        70.21.1 val: empty string
+        70.21.2 val: undefined
+        70.21.3 val: NaN
+    70.22 dir: BIND_INOUT, type:TIMESTAMP WITH LOCAL TIME ZONE
+        70.22.1 basic case
+        70.22.2 auto detect data type
+        70.22.3 val: null
+        70.22.4 val: empty string
+        70.22.5 val: undefined
+        70.22.6 val: NaN
+        70.22.7 val: invalid Date Value: Feb 30, 2016
+        70.22.8 val: 1969-12-31
+        70.22.9 val: epoch date 1970-1-1
+        70.22.10 NULL IN and NON-NULL OUT
+        70.22.11 NON-NULL IN and NULL OUT
+
+71. lobBind1.js
+    71.1 persistent CLOB
+        71.1.1 BIND_IN, DML, a String variable
+        71.1.2 BIND_IN, DML, null
+        71.1.3 BIND_IN, DML, a txt file
+        71.1.4 BIND_IN, PL/SQL, a txt file
+        71.1.5 BIND_OUT, PL/SQL, a string
+        71.1.6 BIND_OUT, PL/SQL, a txt file
+        71.1.7 BIND_INOUT, PL/SQL, A String. IN LOB gets closed automatically.
+        71.1.8 BIND_INOUT, PL/SQL, a txt file
+        71.1.9 Negative: BIND_INOUT, PL/SQL, String as bind IN Value
+    71.2 persistent BLOB
+        71.2.1 BIND_IN, DML, a Buffer value
+        71.2.2 BIND_IN, DML, null
+        71.2.3 BIND_IN, DML, a jpg file
+        71.2.4 BIND_IN, PL/SQL, a jpg file
+        71.2.5 BIND_OUT, PL/SQL, a Buffer value
+        71.2.6 BIND_OUT, PL/SQL, a jpg file
+        71.2.7 BIND_INOUT, PL/SQL, a Buffer value
+        71.2.8 BIND_INOUT, PL/SQL, a jpg file
+        71.2.9 Negative: BIND_INOUT, PL/SQL, Buffer as bind IN value
+
+72. lobBind2.js
+    72.1 CLOB
+        72.1.1 BIND_IN, DML, a txt file
+        72.1.2 BIND_IN, PL/SQL, a txt file
+        72.1.3 Negative - invalid type
+        72.1.4 Negative - invalid value
+        72.1.5 DML - UPDATE statement
+        72.1.6 promise test of createLob()
+        72.1.7 BIND_INOUT, PL/SQL, IN LOB gets closed automatically
+    72.2 BLOB
+        72.2.1 BIND_IN, DML, a jpg file
+        72.2.2 BIND_IN, PL/SQL, a jpg file
+        72.2.3 Negative - inconsistent datatypes
+        72.2.4 Negative - not providing first parameter
+        72.2.5 promise test of createLob()
+        72.2.6 call lob.close() multiple times sequentially
+        72.2.7 BIND_INOUT, PL/SQL, needs to close out lob explicitly
+
+73. poolPing.js
+    73.1 the default value of poolPingInterval is 60
+    73.2 does not change after the pool has been created
+    73.3 can not be changed on pool object
+    73.4 can not be accessed on connection object
+    73.5 can be set to 0, means always ping
+    73.6 can be set to negative values, means never ping
+    73.7 Negative: Number.MAX_SAFE_INTEGER
+    73.8 cannot surpass the upper limit
+    73.9 cannot surpass the lower Limit
+    73.10 Negative: null
+    73.11 Negative: NaN
+    73.12 Negative: undefined
+    73.13 Negative: 'random-string'
+    73.14 can be set at pool creation, e.g. positive value 1234
+    73.15 can be set at pool creation, e.g. negative value -4321
+    73.16 can be set at pool creation, e.g. 0 means always ping
+    73.17 Setting to 'null' will use current value from oracledb
+    73.18 Setting to 'undefined' will use current value from oracledb
+    73.19 can be set at pool creation. Negative: NaN
+    73.20 can be set at pool creation. Negative: 'random-string'
+    73.21 cannot surpass the upper limit at pool creation
+    73.22 cannot surpass the lower limit at pool creation
+
+74. clobPlsqlBindAsString_bindin.js
+    74.1 CLOB, PLSQL, BIND_IN
+        74.1.1 works with EMPTY_CLOB
+        74.1.2 works with EMPTY_CLOB and bind in maxSize set to 1
+        74.1.3 works with EMPTY_CLOB and bind in maxSize set to (64K - 1)
+        74.1.4 works with null
+        74.1.5 works with null and bind in maxSize set to 1
+        74.1.6 works with null and bind in maxSize set to (64K - 1)
+        74.1.7 works with empty string
+        74.1.8 works with empty string and bind in maxSize set to 1
+        74.1.9 works with empty string and bind in maxSize set to (64K - 1)
+        74.1.10 works with undefined
+        74.1.11 works with undefined and bind in maxSize set to 1
+        74.1.12 works with undefined and bind in maxSize set to (64K - 1)
+        74.1.13 works with NaN
+        74.1.14 works with 0
+        74.1.15 works with String length 32K
+        74.1.16 works with String length (64K - 1)
+        74.1.17 works with String length (64K + 1)
+        74.1.18 works with String length (1MB + 1)
+        74.1.19 works with bind value and type mismatch
+        74.1.20 mixing named with positional binding
+        74.1.21 works with invalid CLOB
+        74.1.22 works with bind in maxSize smaller than string length
+        74.1.23 RETURN with bind type STRING
+        74.1.24 works with UPDATE
+        74.1.25 bind error: NJS-037, bind by name 1
+        74.1.26 bind error: NJS-037, bind by name 2
+        74.1.27 bind error: NJS-037, bind by name 3
+        74.1.28 bind error: NJS-037, bind by name 4
+        74.1.29 bind error: NJS-052, bind by pos 1
+        74.1.30 bind error: NJS-052, bind by pos 2
+        74.1.31 bind error: NJS-052, bind by pos 3
+        74.1.32 bind error: NJS-052, bind by pos 4
+    74.2 CLOB, PLSQL, BIND_IN to VARCHAR2
+        74.2.1 works with EMPTY_CLOB
+        74.2.2 works with EMPTY_CLOB and bind in maxSize set to 1
+        74.2.3 works with EMPTY_CLOB and bind in maxSize set to (64K - 1)
+        74.2.4 works with null
+        74.2.5 works with null and bind in maxSize set to 1
+        74.2.6 works with null and bind in maxSize set to (64K - 1)
+        74.2.7 works with empty string
+        74.2.8 works with empty string and bind in maxSize set to 1
+        74.2.9 works with empty string and bind in maxSize set to (64K - 1)
+        74.2.10 works with undefined
+        74.2.11 works with undefined and bind in maxSize set to 1
+        74.2.12 works with undefined and bind in maxSize set to (64K - 1)
+        74.2.13 works with NaN
+        74.2.14 works with 0
+        74.2.15 works with String length (32K - 1)
+        74.2.16 works with String length 32K
+        74.2.17 works with invalid CLOB
+        74.2.18 works with bind in maxSize smaller than string length
+        74.2.19 works with UPDATE
+    74.3 Multiple CLOBs, BIND_IN
+        74.3.1 bind two string
+        74.3.2 bind a txt file and a string
+        74.3.3 bind two string, one > (64K - 1)
+
+75. clobPlsqlBindAsString_bindout.js
+    75.1 CLOB, PLSQL, BIND_OUT
+        75.1.1 works with EMPTY_LOB
+        75.1.2 works with EMPTY_LOB and bind out maxSize set to 1
+        75.1.3 works with EMPTY_LOB and bind out maxSize set to (64k - 1)
+        75.1.4 works with null
+        75.1.5 works with null and bind out maxSize set to 1
+        75.1.6 works with null and bind out maxSize set to (64k - 1)
+        75.1.7 works with empty string
+        75.1.8 works with empty string and bind out maxSize set to 1
+        75.1.9 works with empty string and bind out maxSize set to (64K - 1)
+        75.1.10 works with undefined
+        75.1.11 works with undefined and bind out maxSize set to 1
+        75.1.12 works with undefined and bind out maxSize set to (64K - 1)
+        75.1.13 works with NaN
+        75.1.14 works with 0
+        75.1.15 works with String length 32K
+        75.1.16 works with String length (64K - 1)
+        75.1.17 works with String length (64K + 1)
+        75.1.18 works with String length (1MB + 1)
+        75.1.19 works with bind value and type mismatch
+        75.1.20 mixing named with positional binding
+        75.1.21 works with UPDATE
+        75.1.22 works with substr
+        75.1.23 named binging, bind out maxSize smaller than string length ( < 32K )
+        75.1.24 named binging, bind out maxSize smaller than string length ( > 32K )
+        75.1.25 named binging, bind out maxSize smaller than string length ( > 64K )
+        75.1.26 positional binging, bind out maxSize smaller than string length ( < 32K )
+        75.1.27 positional binging, bind out maxSize smaller than string length ( > 32K )
+        75.1.28 positional binging, bind out maxSize smaller than string length ( > 63K )
+    75.2 CLOB, PLSQL, BIND_OUT to VARCHAR2
+        75.2.1 works with EMPTY_LOB
+        75.2.2 works with EMPTY_LOB and bind out maxSize set to 1
+        75.2.3 works with EMPTY_LOB and bind out maxSize set to (64k - 1)
+        75.2.4 works with null
+        75.2.5 works with null and bind out maxSize set to 1
+        75.2.6 works with null and bind out maxSize set to (64k - 1)
+        75.2.7 works with empty string
+        75.2.8 works with empty string and bind out maxSize set to 1
+        75.2.9 works with empty string and bind out maxSize set to (64K - 1)
+        75.2.10 works with undefined
+        75.2.11 works with undefined and bind out maxSize set to 1
+        75.2.12 works with undefined and bind out maxSize set to (64K - 1)
+        75.2.13 works with NaN
+        75.2.14 works with 0
+        75.2.15 works with String length (32K - 1)
+        75.2.16 works with String length 32K
+        75.2.17 works with bind out maxSize smaller than string length
+        75.2.18 works with UPDATE
+        75.2.19 works with substr
+    75.3 Multiple CLOBs, BIND_OUT
+        75.3.1 bind two string
+        75.3.2 bind a txt file and a string
+        75.3.3 bind two string, one > (64K - 1)
+
+76. clobPlsqlBindAsString_bindinout.js
+    76.1 CLOB, PLSQL, BIND_INOUT
+        76.1.1 works with EMPTY_CLOB
+        76.1.2 works with EMPTY_CLOB and maxSize set to 1
+        76.1.3 works with EMPTY_CLOB and maxSize set to (64K - 1)
+        76.1.4 works with null
+        76.1.5 works with null and maxSize set to 1
+        76.1.6 works with null and maxSize set to (64K - 1)
+        76.1.7 works with empty string
+        76.1.8 works with empty string and maxSize set to 1
+        76.1.9 works with empty string and maxSize set to (64K - 1)
+        76.1.10 works with undefined
+        76.1.11 works with undefined and maxSize set to 1
+        76.1.12 works with undefined and maxSize set to (64K - 1)
+        76.1.13 works with NaN
+        76.1.14 works with 0
+        76.1.15 works with String length 32K
+        76.1.16 works with String length (64K - 1)
+        76.1.17 works with String length (64K + 1)
+        76.1.18 works with String length (1MB + 1)
+        76.1.19 works with bind value and type mismatch
+        76.1.20 mixing named with positional binding
+        76.1.21 works with UPDATE
+        76.1.22 works with invalid CLOB
+        76.1.23 works with substr
+      - 76.1.24 named binding: maxSize smaller than string length( < 32K )
+        76.1.25 named binding: maxSize smaller than string length( > 32K )
+        76.1.26 named binding: maxSize smaller than string length( > 64K )
+      - 76.1.27 positional binding: maxSize smaller than string length( < 32K )
+        76.1.28 positional binding: maxSize smaller than string length( > 32K )
+        76.1.29 positional binding: maxSize smaller than string length( > 64K )
+    76.2 CLOB, PLSQL, BIND_INOUT to VARCHAR2
+        76.2.1 works with EMPTY_CLOB
+        76.2.2 works with EMPTY_CLOB and maxSize set to 1
+        76.2.3 works with EMPTY_CLOB and maxSize set to (64K - 1)
+        76.2.4 works with null
+        76.2.5 works with null and maxSize set to 1
+        76.2.6 works with null and maxSize set to (64K - 1)
+        76.2.7 works with empty string
+        76.2.8 works with empty string and maxSize set to 1
+        76.2.9 works with empty string and maxSize set to (64K - 1)
+        76.2.10 works with undefined
+        76.2.11 works with undefined and maxSize set to 1
+        76.2.12 works with undefined and maxSize set to (64K - 1)
+        76.2.13 works with NaN
+        76.2.14 works with 0
+        76.2.15 works with String length (32K - 1)
+        76.2.16 works with String length 32K
+        76.2.17 works with bind out maxSize smaller than string length
+        76.2.18 works with UPDATE
+        76.2.19 works with invalid CLOB
+        76.2.20 works with substr
+    76.3 Multiple CLOBs, BIND INOUT
+        76.3.1 bind a txt file and a 32K string
+        76.3.2 bind a txt file and a (64K - 1) string
+        76.3.3 bind a txt file and a (64K + 1) string
+
+77. blobPlsqlBindAsBuffer_bindin.js
+    77.1 BLOB, PLSQL, BIND_IN
+        77.1.1 works with EMPTY_BLOB
+        77.1.2 works with EMPTY_BLOB and bind in maxSize set to 1
+        77.1.3 works with EMPTY_BLOB and bind in maxSize set to (64K - 1)
+        77.1.4 works with null
+        77.1.5 works with null and bind in maxSize set to 1
+        77.1.6 works with null and bind in maxSize set to (64K - 1)
+        77.1.7 works with empty buffer
+        77.1.8 works with empty buffer and bind in maxSize set to 1
+        77.1.9 works with empty buffer and bind in maxSize set to (64K - 1)
+        77.1.10 works with undefined
+        77.1.11 works with undefined and bind in maxSize set to 1
+        77.1.12 works with undefined and bind in maxSize set to (64K - 1)
+        77.1.13 works with NaN
+        77.1.14 works with 0
+        77.1.15 works with Buffer size 32K
+        77.1.16 works with Buffer size (64K - 1)
+        77.1.17 works with Buffer size (64K + 1)
+        77.1.18 works with Buffer size (1MB + 1)
+        77.1.19 works with bind value and type mismatch
+        77.1.20 mixing named with positional binding
+        77.1.21 works with invalid BLOB
+        77.1.22 works without maxSize
+        77.1.23 works with bind in maxSize smaller than buffer size
+        77.1.24 works with UPDATE
+    77.2 BLOB, PLSQL, BIND_IN to RAW
+        77.2.1 works with EMPTY_BLOB
+        77.2.2 works with EMPTY_BLOB and bind in maxSize set to 1
+        77.2.3 works with EMPTY_BLOB and bind in maxSize set to (64K - 1)
+        77.2.4 works with null
+        77.2.5 works with null and bind in maxSize set to 1
+        77.2.6 works with null and bind in maxSize set to (64K - 1)
+        77.2.7 works with empty buffer
+        77.2.8 works with empty buffer and bind in maxSize set to 1
+        77.2.9 works with empty buffer and bind in maxSize set to (64K - 1)
+        77.2.10 works with undefined
+        77.2.11 works with undefined and bind in maxSize set to 1
+        77.2.12 works with undefined and bind in maxSize set to (64K - 1)
+        77.2.13 works with NaN
+        77.2.14 works with 0
+        77.2.15 works with Buffer size (32K - 1)
+        77.2.16 works with Buffer size 32K
+        77.2.17 works with invalid BLOB
+        77.2.18 works without maxSize
+        77.2.19 works with bind in maxSize smaller than buffer size
+        77.2.20 works with UPDATE
+    77.3 Multiple BLOBs, BIND_IN
+        77.3.1 bind two Buffer
+        77.3.2 bind a JPG file and a Buffer
+        77.3.3 bind two Buffer, one > (64K - 1)
+
+78. blobPlsqlBindAsBuffer_bindout.js
+    78.1 BLOB, PLSQL, BIND_OUT
+        78.1.1 works with EMPTY_BLOB
+        78.1.2 works with EMPTY_BLOB and bind out maxSize set to 1
+        78.1.3 works with EMPTY_BLOB and bind out maxSize set to (64K - 1)
+        78.1.4 works with null
+        78.1.5 works with null and bind out maxSize set to 1
+        78.1.6 works with null and bind out maxSize set to (64K - 1)
+        78.1.7 works with empty buffer
+        78.1.8 works with empty buffer and bind out maxSize set to 1
+        78.1.9 works with empty buffer and bind out maxSize set to (64K - 1)
+        78.1.10 works with undefined
+        78.1.11 works with undefined and bind out maxSize set to 1
+        78.1.12 works with undefined and bind out maxSize set to (64K - 1)
+        78.1.13 works with Buffer size 32K
+        78.1.14 works with Buffer size (64K - 1)
+        78.1.15 works with Buffer size (64K + 1)
+        78.1.16 works with Buffer size (1MB + 1)
+        78.1.17 mixing named with positional binding
+        78.1.18 works with UPDATE
+        78.1.19 works with dbms_lob.substr()
+        78.1.20 named binding: bind out maxSize smaller than buffer size( < 32K )
+        78.1.21 named binding: bind out maxSize smaller than buffer size( > 32K )
+        78.1.22 named binding: bind out maxSize smaller than buffer size( > 64K )
+        78.1.23 positional binding: bind out maxSize smaller than buffer size( < 32K )
+        78.1.24 positional binding: bind out maxSize smaller than buffer size( > 32K )
+        78.1.25 positional binding: bind out maxSize smaller than buffer size( > 64K )
+        78.1.26 bind out without maxSize
+        78.1.28 bind out without maxSize
+    78.2 BLOB, PLSQL, BIND_OUT to RAW
+        78.2.1 works with EMPTY_BLOB
+        78.2.2 works with EMPTY_BLOB and bind out maxSize set to 1
+        78.2.3 works with EMPTY_BLOB and bind out maxSize set to (64K - 1)
+        78.2.4 works with null
+        78.2.5 works with null and bind out maxSize set to 1
+        78.2.6 works with null and bind out maxSize set to (64K - 1)
+        78.2.7 works with empty buffer
+        78.2.8 works with empty buffer and bind out maxSize set to 1
+        78.2.9 works with empty buffer and bind out maxSize set to (64K - 1)
+        78.2.10 works with undefined
+        78.2.11 works with undefined and bind out maxSize set to 1
+        78.2.12 works with undefined and bind out maxSize set to (64K - 1)
+        78.2.13 works with Buffer size (32K - 1)
+        78.2.14 works with Buffer size 32K
+        78.2.15 works with bind out maxSize smaller than buffer size
+        78.2.16 bind out without maxSize
+        78.2.17 works with UPDATE
+        78.2.18 works with dbms_lob.substr()
+    78.3 Multiple BLOBs, BIND_OUT
+        78.3.1 bind two buffer
+        78.3.2 PLSQL, BIND_OUT, bind a JPG file and a Buffer
+        78.3.3 bind two buffer, one > (64K - 1)
+
+79. blobPlsqlBindAsBuffer_inout.js
+    79.1 BLOB, PLSQL, BIND_INOUT
+        79.1.1 works with EMPTY_BLOB
+        79.1.2 works with EMPTY_BLOB and maxSize set to 1
+        79.1.3 works with EMPTY_BLOB and maxSize set to (64K - 1)
+        79.1.4 works with null
+        79.1.5 works with null and maxSize set to 1
+        79.1.6 works with null and maxSize set to (64K - 1)
+        79.1.7 works with empty buffer
+        79.1.8 works with empty buffer and maxSize set to 1
+        79.1.9 works with empty buffer and maxSize set to (64K - 1)
+        79.1.10 works with undefined
+        79.1.11 works with undefined and maxSize set to 1
+        79.1.12 works with undefined and maxSize set to (64K - 1)
+        79.1.13 works with NaN
+        79.1.14 works with 0
+        79.1.15 works with buffer size 32K
+        79.1.16 works with buffer size (64K - 1)
+        79.1.17 works with buffer size (64K + 1)
+        79.1.18 works with buffer size (1MB + 1)
+        79.1.19 works with bind value and type mismatch
+        79.1.20 mixing named with positional binding
+        79.1.21 works with invalid BLOB
+        79.1.22 works with substr
+        79.1.23 works with UPDATE
+      - 79.1.24 named binding: maxSize smaller than buffer size ( < 32K )
+        79.1.25 named binding: maxSize smaller than buffer size ( > 32K )
+        79.1.26 named binding: maxSize smaller than buffer size ( > 64K )
+      - 79.1.27 positional binding: maxSize smaller than buffer size ( < 32K )
+        79.1.28 positional binding: maxSize smaller than buffer size ( > 32K )
+        79.1.29 positional binding: maxSize smaller than buffer size ( > 64K )
+        79.1.30 bind without maxSize
+    79.2 BLOB, PLSQL, BIND_INOUT to RAW
+        79.2.1 works with EMPTY_BLOB
+        79.2.2 works with EMPTY_BLOB and maxSize set to 1
+        79.2.3 works with EMPTY_BLOB and maxSize set to (64K - 1)
+        79.2.4 works with null
+        79.2.5 works with null and maxSize set to 1
+        79.2.6 works with null and maxSize set to (64K - 1)
+        79.2.7 works with empty buffer
+        79.2.8 works with empty buffer and maxSize set to 1
+        79.2.9 works with empty buffer and maxSize set to (64K - 1)
+        79.2.10 works with undefined
+        79.2.11 works with undefined and maxSize set to 1
+        79.2.12 works with undefined and maxSize set to (64K - 1)
+        79.2.13 works with NaN
+        79.2.14 works with 0
+        79.2.15 works with buffer size (32K - 1)
+        79.2.16 works with buffer size 32K
+        79.2.17 works with buffer size > maxSize
+        79.2.18 works with invalid BLOB
+        79.2.19 works with substr
+        79.2.20 works with UPDATE
+        79.2.21 works without maxSize
+    79.3 Multiple BLOBs, BIND_INOUT
+        79.3.1 bind a JPG and a 32K buffer
+        79.3.2 bind two buffers
+        79.3.3 bind two buffers, one > (64K - 1)
+
+80. lobBindAsStringBuffer.js
+    80.1 Multiple LOBs, BIND_IN
+        80.1.1 PLSQL, CLOB&BLOB, bind a string and a buffer
+        80.1.2 PLSQL, CLOB&BLOB, bind a string and a JPG file
+        80.1.3 PLSQL, CLOB&BLOB, bind a txt file and a Buffer
+    80.2 Multiple LOBs, BIND_OUT
+        80.2.1 PLSQL, CLOB&BLOB, bind a string and a buffer
+        80.2.2 PLSQL, CLOB&BLOB, bind a string and a JPG file
+        80.2.3 PLSQL, CLOB&BLOB, bind a txt file and a buffer
+    80.3 Multiple LOBs, BIND_INOUT
+        80.3.1 PLSQL, BIND_INOUT, bind a 32K string and a 32K buffer
+        80.3.2 PLSQL, BIND_INOUT, bind a (64K - 1) string and a (64K - 1) buffer
+
+81. clobDMLBindAsString.js
+    81.1 CLOB, INSERT
+        81.1.1 works with EMPTY_CLOB
+        81.1.2 works with empty string
+        81.1.3 works with empty string and bind in maxSize set to 32767
+        81.1.4 works with empty string and bind in maxSize set to 50000
+        81.1.5 works with undefined
+        81.1.6 works with null
+        81.1.7 works with null and bind in maxSize set to 32767
+        81.1.8 works with null and bind in maxSize set to 50000
+        81.1.9 works with NaN
+        81.1.10 works with 0
+        81.1.11 works with String length 32K
+        81.1.12 works with String length (64K - 1)
+        81.1.13 works with String length (64K + 1)
+        81.1.14 works with String length (1MB + 1)
+        81.1.15 bind value and type mismatch
+        81.1.16 mixing named with positional binding
+        81.1.17 bind with invalid CLOB
+        81.1.18 RETURNING INTO with bind type STRING
+        81.1.19 Negative: RETURNING INTO with autocommit on
+        81.1.20 works with bind in maxSize smaller than string length
+     81.2 CLOB, UPDATE
+        81.2.1 update EMPTY_CLOB column
+        81.2.2 update a cloumn with EMPTY_CLOB
+        81.2.3 update EMPTY_CLOB column with empty string
+        81.2.4 update empty string column
+        81.2.5 update a column with empty string
+
+82. blobDMLBindAsBuffer.js
+    82.1 BLOB, INSERT
+        82.1.1 works with EMPTY_BLOB
+        82.1.2 works with empty buffer
+        82.1.3 works with empty buffer and bind in maxSize set to 32767
+        82.1.4 works with empty buffer and bind in maxSize set to 50000
+        82.1.5 works with undefined
+        82.1.6 works with null
+        82.1.7 works with null and bind in maxSize set to 32767
+        82.1.8 works with null and bind in maxSize set to 50000
+        82.1.9 works with NaN
+        82.1.10 works with 0
+        82.1.11 works with Buffer length 32K
+        82.1.12 works with Buffer length (64K - 1)
+        82.1.13 works with Buffer length (64K + 1)
+        82.1.14 works with Buffer length (1MB + 1)
+        82.1.15 bind value and type mismatch
+        82.1.16 mixing named with positional binding
+        82.1.17 bind with invalid BLOB
+        82.1.18 Negative: RETURNING INTO with bind type BUFFER
+        82.1.19 Negative: RETURNING INTO with autocommit on
+        82.1.20 works with bind in maxSize smaller than buffer size
+    82.2 BLOB, UPDATE
+        82.2.1 update EMPTY_BLOB column
+        82.2.2 update a cloumn with EMPTY_BLOB
+        82.2.3 update EMPTY_BLOB column with empty buffer
+        82.2.4 update empty buffer column
+        82.2.5 update a column with empty buffer
+
+83. lobProperties2.js
+    83.1 CLOB: chunkSize (read-only)
+    83.2 BLOB: chunkSize (read-only)
+    83.3 CLOB: length (read-only)
+    83.4 BLOB: length (read-only)
+    83.5 CLOB: type (read-only)
+    83.6 BLOB: type (read-only)
+    83.7 pieceSize
+        83.7.1 default value is chunkSize
+        83.7.2 can be increased
+        83.7.3 can be decreased
+        83.7.4 can be zero
+        83.7.5 cannot be less than zero
+        83.7.6 cannot be null
+        83.7.7 must be a number
+
+84. fetchClobAsString1.js
+    84.1 fetch CLOB columns by setting oracledb.fetchAsString
+        84.1.1 works with NULL value
+        84.1.2 works with empty string
+        84.1.3 works with small CLOB data
+        84.1.4 works with (64K - 1) data
+        84.1.5 works with (64K + 1) data
+        84.1.6 works with (1MB + 1) data
+        84.1.7 fetch with substr()
+        84.1.8 works with EMPTY_CLOB()
+        84.1.9 fetch multiple CLOB columns as String
+        84.1.10 fetch the same CLOB column multiple times
+        84.1.11 works with update statement
+        84.1.12 works with REF CURSOR
+        84.1.13 fetch CLOB with stream
+        84.1.14 works with setting oracledb.maxRows < actual number of rows in the table
+        84.1.15 works with setting oracledb.maxRows > actual number of rows in the table
+        84.1.16 override oracledb.fetchAsString with fetchInfo set to oracledb.DEFAULT
+        84.1.17 works with connection.queryStream()
+        84.1.18 works with connection.queryStream() and oracledb.maxRows > actual number of rows in the table
+        84.1.19 works with connection.queryStream() and oracledb.maxRows = actual number of rows in the table
+        84.1.20 works with connection.queryStream() and oracledb.maxRows < actual number of rows in the table
+    84.2 fetch CLOB columns by setting oracledb.fetchAsString and outFormat = oracledb.OBJECT
+        84.2.1 works with NULL value
+        84.2.2 works with empty String
+        84.2.3 works with small value
+        84.2.4 works with (64K - 1) value
+        84.2.5 works with (64K + 1) value
+        84.2.6 works with (1MB + 1) data
+        84.2.7 works with dbms_lob.substr()
+        84.2.8 works with EMPTY_CLOB()
+        84.2.9 fetch multiple CLOB rows as String
+        84.2.10 fetch the same CLOB column multiple times
+        84.2.11 works with update statement
+        84.2.12 works with REF CURSOR
+        84.2.13 fetch CLOB with stream
+        84.2.14 works with setting oracledb.maxRows < actual number of rows in the table
+        84.2.15 works with setting oracledb.maxRows > actual number of rows in the table
+        84.2.16 override oracledb.fetchAsString with fetchInfo set to oracledb.DEFAULT
+    84.3 fetch CLOB columns by setting oracledb.fetchAsString, outFormat = oracledb.OBJECT and resultSet = true
+        84.3.1 works with NULL value
+        84.3.2 works with empty String
+        84.3.3 works with small value
+        84.3.4 works with (64K - 1) value
+        84.3.5 works with (64K + 1) value
+        84.3.6 works with (1MB + 1) data
+        84.3.7 works with dbms_lob.substr()
+        84.3.8 works with EMPTY_CLOB()
+        84.3.9 fetch multiple CLOB rows as String
+        84.3.10 fetch the same CLOB column multiple times
+        84.3.11 works with update statement
+        84.3.12 works with REF CURSOR
+        84.3.13 fetch CLOB with stream
+        84.3.14 works with setting oracledb.maxRows < actual number of rows in the table
+        84.3.15 works with setting oracledb.maxRows > actual number of rows in the table
+        84.3.16 override oracledb.fetchAsString with fetchInfo set to oracledb.DEFAULT
+    84.4 fetch CLOB columns by setting oracledb.fetchAsString and outFormat = oracledb.ARRAY
+        84.4.1 works with NULL value
+        84.4.2 works with empty String
+        84.4.3 works with small value
+        84.4.4 works with (64K - 1) value
+        84.4.5 works with (64K + 1) value
+        84.4.6 works with (1MB + 1) data
+        84.4.7 works with dbms_lob.substr()
+        84.4.8 works with EMPTY_CLOB()
+        84.4.9 fetch multiple CLOB rows as String
+        84.4.10 fetch the same CLOB column multiple times
+        84.4.11 works with update statement
+        84.4.12 works with REF CURSOR
+        84.4.13 fetch CLOB with stream
+        84.4.14 works with setting oracledb.maxRows < actual number of rows in the table
+        84.4.15 works with setting oracledb.maxRows < actual number of rows in the table
+        84.4.16 override oracledb.fetchAsString with fetchInfo set to oracledb.DEFAULT
+    84.5 fetch CLOB columns by setting oracledb.fetchAsString, outFormat = oracledb.ARRAY and resultSet = true
+        84.5.1 works with NULL value
+        84.5.2 works with empty String
+        84.5.3 works with small value
+        84.5.4 works with (64K - 1) value
+        84.5.5 works with (64K + 1) value
+        84.5.6 works with (1MB + 1) data
+        84.5.7 works with dbms_lob.substr()
+        84.5.8 works with EMPTY_CLOB()
+        84.5.9 fetch multiple CLOB rows as String
+        84.5.10 fetch the same CLOB column multiple times
+        84.5.11 works with update statement
+        84.5.12 works with REF CURSOR
+        84.5.13 fetch CLOB with stream
+        84.5.14 works with setting oracledb.maxRows < actual number of rows in the table
+        84.5.15 works with setting oracledb.maxRows > actual number of rows in the table
+        84.5.16 override oracledb.fetchAsString with fetchInfo set to oracledb.DEFAULT
+
+85. fetchClobAsString2.js
+    85.1 fetch CLOB columns by setting fetchInfo option
+        85.1.1 works with NULL value (62ms)
+        85.1.2 works with empty String
+        85.1.3 works with small value
+        85.1.4 works with (64K - 1) value
+        85.1.5 works with (64K + 1) value
+        85.1.6 works with (1MB + 1) value
+        85.1.7 works with dbms_lob.substr()
+        85.1.8 works with EMPTY_CLOB()
+        85.1.9 fetch multiple CLOB rows as String
+        85.1.10 fetch the same CLOB column multiple times
+        85.1.11 works with update statement
+        85.1.12 works with setting oracledb.maxRows < actual number of rows in the table
+        85.1.13 works with setting oracledb.maxRows > actual number of rows in the table
+        85.1.14 works with connection.queryStream()
+        85.1.15 works with connection.queryStream() and oracledb.maxRows > actual number of rows the table
+        85.1.16 works with connection.queryStream() and oracledb.maxRows = actual number of rows the table
+        85.1.17 works with connection.queryStream() and oracledb.maxRows < actual number of rows the table
+    85.2 fetch CLOB columns by setting fetchInfo option and outFormat = oracledb.OBJECT
+        85.2.1 works with NULL value
+        85.2.2 works with empty buffer
+        85.2.3 works with small value
+        85.2.4 works with (64K - 1) value
+        85.2.5 works with (64K + 1) value
+        85.2.6 works with (1MB + 1) value
+        85.2.7 works with dbms_lob.substr()
+        85.2.8 works with EMPTY_CLOB()
+        85.2.9 fetch multiple CLOB rows as String
+        85.2.10 fetch the same CLOB column multiple times
+        85.2.11 works with update statement
+        85.2.12 works with setting oracledb.maxRows < actual number of rows in the table
+        85.2.13 works with setting oracledb.maxRows > actual number of rows in the table
+    85.3 fetch CLOB columns by setting fetchInfo option, outFormat = oracledb.OBJECT and resultSet = true
+        85.3.1 works with NULL value
+        85.3.2 works with empty buffer
+        85.3.3 works with small value
+        85.3.4 works with (64K - 1) value
+        85.3.5 works with (64K + 1) value
+        85.3.6 works with (1MB + 1) value
+        85.3.7 works with dbms_lob.substr()
+        85.3.8 works with EMPTY_CLOB()
+        85.3.9 fetch multiple CLOB rows as String
+        85.3.10 fetch the same CLOB column multiple times
+        85.3.11 works with update statement
+        85.3.12 works with setting oracledb.maxRows < actual number of rows in the table
+        85.3.13 works with setting oracledb.maxRows > actual number of rows in the table
+    85.4 fetch CLOB columns by setting fetchInfo option and outFormat = oracledb.ARRAY
+        85.4.1 works with NULL value
+        85.4.2 works with empty String
+        85.4.3 works with small value
+        85.4.4 works with (64K - 1) value
+        85.4.5 works with (64K + 1) value
+        85.4.6 works with (1MB + 1) value
+        85.4.7 works with dbms_lob.substr()
+        85.4.8 works with EMPTY_CLOB()
+        85.4.9 fetch multiple CLOB rows as String
+        85.4.10 fetch the same CLOB column multiple times
+        85.4.11 works with update statement
+        85.4.12 works with setting oracledb.maxRows < actual number of rows in the table
+        85.4.13 works with setting oracledb.maxRows > actual number of rows in the table
+    85.5 fetch CLOB columns by setting fetchInfo option, outFormat = oracledb.ARRAY and resultSet = true
+        85.5.1 works with NULL value
+        85.5.2 works with empty String
+        85.5.3 works with small value
+        85.5.4 works with (64K - 1) value
+        85.5.5 works with (64K + 1) value
+        85.5.6 works with (1MB + 1) value
+        85.5.7 works with dbms_lob.substr()
+        85.5.8 works with EMPTY_CLOB()
+        85.5.9 fetch multiple CLOB rows as String
+        85.5.10 fetch the same CLOB column multiple times
+        85.5.11 works with update statement
+        85.5.12 works with setting oracledb.maxRows < actual number of rows in the table
+        85.5.13 works with setting oracledb.maxRows > actual number of rows in the table
+
+86. fetchClobAsString3.js
+    86.1 fetch multiple CLOBs
+        86.1.1 fetch multiple CLOB columns as String
+        86.1.2 fetch two CLOB columns, one as string, another streamed
+    86.2 types support for fetchAsString property
+        86.2.1 String not supported in fetchAsString
+        86.2.2 BLOB not supported in fetchAsString
+        86.2.3 Cursor not supported in fetchAsString
+        86.2.4 Buffer not supported in fetchAsString
+        86.2.5 Number supported in fetchAsString
+        86.2.6 Date supported in fetchAsString
+        86.2.7 CLOB supported in fetchAsString
+
+87. fetchBlobAsBuffer1.js
+    87.1 fetch BLOB columns by setting oracledb.fetchAsBuffer
+        87.1.1 works with NULL value
+        87.1.2 works with empty Buffer
+        87.1.3 works with small value
+        87.1.4 works with (64K - 1) value
+        87.1.5 works with (64K + 1) value
+        87.1.6 works with (1MB + 1) data
+        87.1.7 works with dbms_lob.substr()
+        87.1.8 works with EMPTY_BLOB()
+        87.1.9 fetch multiple BLOB rows as Buffer
+        87.1.10 fetch the same BLOB column multiple times
+        87.1.11 works with update statement
+        87.1.12 works with REF CURSOR
+        87.1.13 fetch BLOB with stream
+        87.1.14 works with setting oracledb.maxRows < actual number of rows in the table
+        87.1.15 works with setting oracledb.maxRows > actual number of rows in the table
+        87.1.16 override oracledb.fetchAsBuffer with fetchInfo set to oracledb.DEFAULT
+        87.1.17 works with connection.queryStream()
+        87.1.18 works with connection.queryStream() and oracledb.maxRows > actual number of rows in the table
+        87.1.19 works with connection.queryStream() and oracledb.maxRows = actual number of rows in the table
+        87.1.20 works with connection.queryStream() and oracledb.maxRows < actual number of rows in the table
+    87.2 fetch BLOB columns by setting oracledb.fetchAsBuffer and outFormat = oracledb.OBJECT
+        87.2.1 works with NULL value
+        87.2.2 works with empty Buffer
+        87.2.3 works with small value
+        87.2.4 works with (64K - 1) value
+        87.2.5 works with (64K + 1) value
+        87.2.6 works with (1MB + 1) data
+        87.2.7 works with dbms_lob.substr()
+        87.2.8 works with EMPTY_BLOB()
+        87.2.9 fetch multiple BLOB rows as Buffer
+        87.2.10 fetch the same BLOB column multiple times
+        87.2.11 works with update statement
+        87.2.12 works with REF CURSOR
+        87.2.13 fetch BLOB with stream
+        87.2.14 works with setting oracledb.maxRows < actual number of rows in the table
+        87.2.15 works with setting oracledb.maxRows > actual number of rows in the table
+        87.2.16 override oracledb.fetchAsBuffer with fetchInfo set to oracledb.DEFAULT
+    87.3 fetch BLOB columns by setting oracledb.fetchAsBuffer, outFormat = oracledb.OBJECT and resultSet = true
+        87.3.1 works with NULL value
+        87.3.2 works with empty Buffer
+        87.3.3 works with small value
+        87.3.4 works with (64K - 1) value
+        87.3.5 works with (64K + 1) value
+        87.3.6 works with (1MB + 1) data
+        87.3.7 works with dbms_lob.substr()
+        87.3.8 works with EMPTY_BLOB()
+        87.3.9 fetch multiple BLOB rows as Buffer
+        87.3.10 fetch the same BLOB column multiple times
+        87.3.11 works with update statement
+        87.3.12 works with REF CURSOR
+        87.3.13 fetch BLOB with stream
+        87.3.14 works with setting oracledb.maxRows < actual number of rows in the table
+        87.3.15 works with setting oracledb.maxRows > actual number of rows in the table
+        87.3.16 override oracledb.fetchAsBuffer with fetchInfo set to oracledb.DEFAULT
+    87.4 fetch BLOB columns by setting oracledb.fetchAsBuffer and outFormat = oracledb.ARRAY
+        87.4.1 works with NULL value
+        87.4.2 works with empty Buffer
+        87.4.3 works with small value
+        87.4.4 works with (64K - 1) value
+        87.4.5 works with (64K + 1) value
+        87.4.6 works with (1MB + 1) data
+        87.4.7 works with dbms_lob.substr()
+        87.4.8 works with EMPTY_BLOB()
+        87.4.9 fetch multiple BLOB rows as Buffer
+        87.4.10 fetch the same BLOB column multiple times
+        87.4.11 works with update statement
+        87.4.12 works with REF CURSOR
+        87.4.13 fetch BLOB with stream
+        87.4.14 works with setting oracledb.maxRows < actual number of rows in the table
+        87.4.15 works with setting oracledb.maxRows < actual number of rows in the table
+        87.4.16 override oracledb.fetchAsBuffer with fetchInfo set to oracledb.DEFAULT
+    87.5 fetch BLOB columns by setting oracledb.fetchAsBuffer, outFormat = oracledb.ARRAY and resultSet = true
+        87.5.1 works with NULL value
+        87.5.2 works with empty Buffer
+        87.5.3 works with small value
+        87.5.4 works with (64K - 1) value
+        87.5.5 works with (64K + 1) value
+        87.5.6 works with (1MB + 1) data
+        87.5.7 works with dbms_lob.substr()
+        87.5.8 works with EMPTY_BLOB()
+        87.5.9 fetch multiple BLOB rows as Buffer
+        87.5.10 fetch the same BLOB column multiple times
+        87.5.11 works with update statement
+        87.5.12 works with REF CURSOR
+        87.5.13 fetch BLOB with stream
+        87.5.14 works with setting oracledb.maxRows < actual number of rows in the table
+        87.5.15 works with setting oracledb.maxRows > actual number of rows in the table
+        87.5.16 override oracledb.fetchAsBuffer with fetchInfo set to oracledb.DEFAULT
+
+88. fetchBlobAsBuffer2.js
+    88.1 fetch BLOB columns by setting fetchInfo option
+        88.1.1 works with NULL value
+        88.1.2 works with empty Buffer
+        88.1.3 works with small value
+        88.1.4 works with (64K - 1) value
+        88.1.5 works with (64K + 1) value
+        88.1.6 works with (1MB + 1) value (121ms)
+        88.1.7 works with dbms_lob.substr()
+        88.1.8 works with EMPTY_BLOB()
+        88.1.9 fetch multiple BLOB rows as Buffer
+        88.1.10 fetch the same BLOB column multiple times
+        88.1.11 works with update statement
+        88.1.12 works with setting oracledb.maxRows < actual number of rows in the table
+        88.1.13 works with setting oracledb.maxRows > actual number of rows in the table
+        88.1.14 works with connection.queryStream()
+        88.1.15 works with connection.queryStream() and oracledb.maxRows > actual number of rows in the table
+        88.1.16 works with connection.queryStream() and oracledb.maxRows = actual number of rows in the table
+        88.1.17 works with connection.queryStream() and oracledb.maxRows < actual number of rows in the table
+    88.2 fetch BLOB columns by setting fetchInfo option and outFormat = oracledb.OBJECT
+        88.2.1 works with NULL value
+        88.2.2 works with empty buffer
+        88.2.3 works with small value
+        88.2.4 works with (64K - 1) value
+        88.2.5 works with (64K + 1) value
+        88.2.6 works with (1MB + 1) value
+        88.2.7 works with dbms_lob.substr()
+        88.2.8 works with EMPTY_BLOB()
+        88.2.9 fetch multiple BLOB rows as Buffer
+        88.2.10 fetch the same BLOB column multiple times
+        88.2.11 works with update statement
+        88.2.12 works with setting oracledb.maxRows < actual number of rows in the table
+        88.2.13 works with setting oracledb.maxRows > actual number of rows in the table
+    88.3 fetch BLOB columns by setting fetchInfo option, outFormat = oracledb.OBJECT and resultSet =  true
+        88.3.1 works with NULL value
+        88.3.2 works with empty buffer
+        88.3.3 works with small value
+        88.3.4 works with (64K - 1) value
+        88.3.5 works with (64K + 1) value
+        88.3.6 works with (1MB + 1) value
+        88.3.7 works with dbms_lob.substr()
+        88.3.8 works with EMPTY_BLOB()
+        88.3.9 fetch multiple BLOB rows as Buffer
+        88.3.10 fetch the same BLOB column multiple times
+        88.3.11 works with update statement
+        88.3.12 works with setting oracledb.maxRows < actual number of rows in the table
+        88.3.13 works with setting oracledb.maxRows > actual number of rows in the table
+    88.4 fetch BLOB columns by setting fetchInfo option and outFormat = oracledb.ARRAY
+        88.4.1 works with NULL value
+        88.4.2 works with empty Buffer
+        88.4.3 works with small value
+        88.4.4 works with (64K - 1) value
+        88.4.5 works with (64K + 1) value
+        88.4.6 works with (1MB + 1) value
+        88.4.7 works with dbms_lob.substr()
+        88.4.8 works with EMPTY_BLOB()
+        88.4.9 fetch multiple BLOB rows as Buffer
+        88.4.10 fetch the same BLOB column multiple times
+        88.4.11 works with update statement
+        88.4.12 works with setting oracledb.maxRows < actual number of rows in the table
+        88.4.13 works with setting oracledb.maxRows > actual number of rows in the table
+    88.5 fetch BLOB columns by setting fetchInfo option, outFormat = oracledb.ARRAY and resultSet = true
+        88.5.1 works with NULL value
+        88.5.2 works with empty Buffer
+        88.5.3 works with small value
+        88.5.4 works with (64K - 1) value
+        88.5.5 works with (64K + 1) value
+        88.5.6 works with (1MB + 1) value
+        88.5.7 works with dbms_lob.substr()
+        88.5.8 works with EMPTY_BLOB()
+        88.5.9 fetch multiple BLOB rows as Buffer
+        88.5.10 fetch the same BLOB column multiple times
+        88.5.11 works with update statement
+        88.5.12 works with setting oracledb.maxRows < actual number of rows in the table
+        88.5.13 works with setting oracledb.maxRows > actual number of rows in the table
+
+89. fetchBlobAsBuffer3.js
+    89.1 fetch multiple BLOBs
+       89.1.1 fetch multiple BLOB columns as Buffer
+       89.1.2 fetch two BLOB columns, one as string, another streamed
+    89.2 types support for fetchAsBuffer property
+       89.2.1 String not supported in fetchAsBuffer
+       89.2.2 CLOB not supported in fetchAsBuffer
+       89.2.3 Number not supported in fetchAsBuffer
+       89.2.4 Date not supported in fetchAsBuffer
+       89.2.5 Cursor not supported in fetchAsBuffer
+       89.2.6 Buffer not supported in fetchAsBuffer
+       89.2.7 BLOB supported in fetchAsBuffer
+     - 89.2.8 negative - null value for fetchAsBuffer
+     - 89.2.9 negative - undefined value for fetchAsBuffer
+     - 89.2.10 negative - numeric value for fetchAsBuffer
+     - 89.2.11 negative - empty string value for fetchAsBuffer
+     - 89.2.12 negative - arbitary string value for fetchAsBuffer
+     - 89.2.13 negative - date value for fetchAsBuffer
+     - 89.2.14 negative - buffer value for fetchAsBuffer
+
+90. fetchClobAsString4.js
+    90.1 PLSQL FUNCTION RETURN CLOB to STRING
+       90.1.1 bind by position - 1
+       90.1.2 bind by name - 1
+       90.1.3 bind by position - 2
+       90.1.4 bind by name - 2
+    90.2 PLSQL PROCEDURE BIND OUT CLOB to STRING
+       90.2.1 bind by position - 1
+       90.2.2 bind by name - 1
+       90.2.3 bind by position - 2
+       90.2.4 bind by name - 2
+    90.3 PLSQL FUNCTION RETURN CLOB to VARCHAR2
+       90.3.1 bind by name - 1
+       90.3.2 bind by position - 1
+       90.3.3 bind by name - 2
+       90.3.4 bind by position - 2
+
+91. fetchBlobAsBuffer4.js
+    91.1 PLSQL FUNCTION RETURN BLOB to BUFFER
+        91.1.1 bind by position - 1
+        91.1.2 bind by name - 1
+        91.1.3 bind by position - 2
+        91.1.4 bind by name - 2
+    91.2 PLSQL PROCEDURE BIND OUT BLOB to BUFFER
+        91.2.1 bind by position - 1
+        91.2.2 bind by name - 1
+        91.2.3 bind by position - 2
+        91.2.4 bind by name - 2
+    91.3 PLSQL FUNCTION RETURN BLOB to RAW
+        91.3.1 bind by name - 1
+        91.3.2 bind by position - 1
+        91.3.3 bind by name - 2
+        91.3.4 bind by position - 2
+
+92.binding_DMLInsert.js
+  92.1 insert small value of oracledb.STRING/BUFFER
+        92.1.1 oracledb.STRING <--> DB: NUMBER
+        92.1.2 oracledb.STRING <--> DB: CHAR
+        92.1.3 oracledb.STRING <--> DB: NCHAR
+        92.1.4 oracledb.STRING <--> DB: VARCHAR2
+        92.1.5 oracledb.STRING <--> DB: FLOAT
+        92.1.6 oracledb.STRING <--> DB: BINARY_FLOAT
+        92.1.7 oracledb.STRING <--> DB: BINARY_DOUBLE
+        92.1.8 oracledb.STRING <--> DB: DATE
+        92.1.9 oracledb.STRING <--> DB: TIMESTAMP
+        92.1.10 oracledb.STRING <--> DB: RAW
+        92.1.11 oracledb.STRING <--> DB: CLOB
+        92.1.12 oracledb.STRING <--> DB: BLOB
+        92.1.13 oracledb.BUFFER <--> DB: NUMBER
+        92.1.14 oracledb.BUFFER <--> DB: CHAR
+        92.1.15 oracledb.BUFFER <--> DB: NCHAR
+        92.1.16 oracledb.BUFFER <--> DB: VARCHAR2
+        92.1.17 oracledb.BUFFER <--> DB: FLOAT
+        92.1.18 oracledb.BUFFER <--> DB: BINARY_FLOAT
+        92.1.19 oracledb.BUFFER <--> DB: BINARY_DOUBLE
+        92.1.20 oracledb.BUFFER <--> DB: DATE
+        92.1.21 oracledb.BUFFER <--> DB: TIMESTAMP
+        92.1.22 oracledb.BUFFER <--> DB: RAW
+        92.1.23 oracledb.BUFFER <--> DB: CLOB
+        92.1.24 oracledb.BUFFER <--> DB: BLOB
+  92.2 insert null value of oracledb.STRING/BUFFER
+        92.2.1 oracledb.STRING <--> DB: NUMBER
+        92.2.2 oracledb.STRING <--> DB: CHAR
+        92.2.3 oracledb.STRING <--> DB: NCHAR
+        92.2.4 oracledb.STRING <--> DB: VARCHAR2
+        92.2.5 oracledb.STRING <--> DB: FLOAT
+        92.2.6 oracledb.STRING <--> DB: BINARY_FLOAT
+        92.2.7 oracledb.STRING <--> DB: BINARY_DOUBLE
+        92.2.8 oracledb.STRING <--> DB: DATE
+        92.2.9 oracledb.STRING <--> DB: TIMESTAMP
+        92.2.10 oracledb.STRING <--> DB: RAW
+        92.2.11 oracledb.STRING <--> DB: CLOB
+        92.2.12 oracledb.STRING <--> DB: BLOB
+        92.2.13 oracledb.BUFFER <--> DB: NUMBER
+        92.2.14 oracledb.BUFFER <--> DB: CHAR
+        92.2.15 oracledb.BUFFER <--> DB: NCHAR
+        92.2.16 oracledb.BUFFER <--> DB: VARCHAR2
+        92.2.17 oracledb.BUFFER <--> DB: FLOAT
+        92.2.18 oracledb.BUFFER <--> DB: BINARY_FLOAT
+        92.2.19 oracledb.BUFFER <--> DB: BINARY_DOUBLE
+        92.2.20 oracledb.BUFFER <--> DB: DATE
+        92.2.21 oracledb.BUFFER <--> DB: TIMESTAMP
+        92.2.22 oracledb.BUFFER <--> DB: RAW
+        92.2.23 oracledb.BUFFER <--> DB: CLOB
+        92.2.24 oracledb.BUFFER <--> DB: BLOB
+  92.3 insert large value of oracledb.STRING/BUFFER
+        92.3.1 oracledb.STRING <--> DB: NUMBER
+        92.3.2 oracledb.STRING <--> DB: CHAR
+        92.3.3 oracledb.STRING <--> DB: NCHAR
+        92.3.4 oracledb.STRING <--> DB: VARCHAR2
+        92.3.5 oracledb.STRING <--> DB: FLOAT
+        92.3.6 oracledb.STRING <--> DB: BINARY_FLOAT
+        92.3.7 oracledb.STRING <--> DB: BINARY_DOUBLE
+        92.3.8 oracledb.STRING <--> DB: DATE
+        92.3.9 oracledb.STRING <--> DB: TIMESTAMP
+        92.3.10 oracledb.STRING <--> DB: RAW
+        92.3.11 oracledb.STRING <--> DB: CLOB
+        92.3.12 oracledb.STRING <--> DB: BLOB
+        92.3.13 oracledb.BUFFER <--> DB: NUMBER
+        92.3.14 oracledb.BUFFER <--> DB: CHAR
+        92.3.15 oracledb.BUFFER <--> DB: NCHAR
+        92.3.16 oracledb.BUFFER <--> DB: VARCHAR2
+        92.3.17 oracledb.BUFFER <--> DB: FLOAT
+        92.3.18 oracledb.BUFFER <--> DB: BINARY_FLOAT
+        92.3.19 oracledb.BUFFER <--> DB: BINARY_DOUBLE
+        92.3.20 oracledb.BUFFER <--> DB: DATE
+        92.3.21 oracledb.BUFFER <--> DB: TIMESTAMP
+        92.3.22 oracledb.BUFFER <--> DB: RAW
+        92.3.23 oracledb.BUFFER <--> DB: CLOB
+        92.3.24 oracledb.BUFFER <--> DB: BLOB
+
+93.binding_procedureBindIn.js
+  93.1 PLSQL procedure: bind in small value of oracledb.STRING/BUFFER
+        93.1.1 oracledb.STRING <--> DB: NUMBER
+        93.1.2 oracledb.STRING <--> DB: CHAR
+        93.1.3 oracledb.STRING <--> DB: NCHAR
+        93.1.4 oracledb.STRING <--> DB: VARCHAR2
+        93.1.5 oracledb.STRING <--> DB: FLOAT
+        93.1.6 oracledb.STRING <--> DB: BINARY_FLOAT
+        93.1.7 oracledb.STRING <--> DB: BINARY_DOUBLE
+        93.1.8 oracledb.STRING <--> DB: DATE
+        93.1.9 oracledb.STRING <--> DB: TIMESTAMP
+        93.1.10 oracledb.STRING <--> DB: RAW
+        93.1.11 oracledb.STRING <--> DB: CLOB
+        93.1.12 oracledb.STRING <--> DB: BLOB
+        93.1.13 oracledb.BUFFER <--> DB: NUMBER
+        93.1.14 oracledb.BUFFER <--> DB: CHAR
+        93.1.15 oracledb.BUFFER <--> DB: NCHAR
+        93.1.16 oracledb.BUFFER <--> DB: VARCHAR2
+        93.1.17 oracledb.BUFFER <--> DB: FLOAT
+        93.1.18 oracledb.BUFFER <--> DB: BINARY_FLOAT
+        93.1.19 oracledb.BUFFER <--> DB: BINARY_DOUBLE
+        93.1.20 oracledb.BUFFER <--> DB: DATE
+        93.1.21 oracledb.BUFFER <--> DB: TIMESTAMP
+        93.1.22 oracledb.BUFFER <--> DB: RAW
+        93.1.23 oracledb.BUFFER <--> DB: CLOB
+        93.1.24 oracledb.BUFFER <--> DB: BLOB
+  93.2 PLSQL procedure: bind in null value of oracledb.STRING/BUFFER
+        93.2.1 oracledb.STRING <--> DB: NUMBER
+        93.2.2 oracledb.STRING <--> DB: CHAR
+        93.2.3 oracledb.STRING <--> DB: NCHAR
+        93.2.4 oracledb.STRING <--> DB: VARCHAR2
+        93.2.5 oracledb.STRING <--> DB: FLOAT
+        93.2.6 oracledb.STRING <--> DB: BINARY_FLOAT
+        93.2.7 oracledb.STRING <--> DB: BINARY_DOUBLE
+        93.2.8 oracledb.STRING <--> DB: DATE
+        93.2.9 oracledb.STRING <--> DB: TIMESTAMP
+        93.2.10 oracledb.STRING <--> DB: RAW
+        93.2.11 oracledb.STRING <--> DB: CLOB
+        93.2.12 oracledb.STRING <--> DB: BLOB
+        93.2.13 oracledb.BUFFER <--> DB: NUMBER
+        93.2.14 oracledb.BUFFER <--> DB: CHAR
+        93.2.15 oracledb.BUFFER <--> DB: NCHAR
+        93.2.16 oracledb.BUFFER <--> DB: VARCHAR2
+        93.2.17 oracledb.BUFFER <--> DB: FLOAT
+        93.2.18 oracledb.BUFFER <--> DB: BINARY_FLOAT
+        93.2.19 oracledb.BUFFER <--> DB: BINARY_DOUBLE
+        93.2.20 oracledb.BUFFER <--> DB: DATE
+        93.2.21 oracledb.BUFFER <--> DB: TIMESTAMP
+        93.2.22 oracledb.BUFFER <--> DB: RAW
+        93.2.23 oracledb.BUFFER <--> DB: CLOB
+        93.2.24 oracledb.BUFFER <--> DB: BLOB
+
+94.binding_procedureBindInout.js
+  94.1 PLSQL procedure: bind inout small value of oracledb.STRING/BUFFER
+        94.1.1 oracledb.STRING <--> DB: NUMBER
+        94.1.2 oracledb.STRING <--> DB: CHAR
+        94.1.3 oracledb.STRING <--> DB: NCHAR
+        94.1.4 oracledb.STRING <--> DB: VARCHAR2
+        94.1.5 oracledb.STRING <--> DB: FLOAT
+        94.1.6 oracledb.STRING <--> DB: BINARY_FLOAT
+        94.1.7 oracledb.STRING <--> DB: BINARY_DOUBLE
+        94.1.8 oracledb.STRING <--> DB: DATE
+        94.1.9 oracledb.STRING <--> DB: TIMESTAMP
+        94.1.10 oracledb.STRING <--> DB: RAW
+        94.1.11 oracledb.STRING <--> DB: CLOB
+        94.1.12 oracledb.STRING <--> DB: BLOB
+        94.1.13 oracledb.BUFFER <--> DB: NUMBER
+        94.1.14 oracledb.BUFFER <--> DB: CHAR
+        94.1.15 oracledb.BUFFER <--> DB: NCHAR
+        94.1.16 oracledb.BUFFER <--> DB: VARCHAR2
+        94.1.17 oracledb.BUFFER <--> DB: FLOAT
+        94.1.18 oracledb.BUFFER <--> DB: BINARY_FLOAT
+        94.1.19 oracledb.BUFFER <--> DB: BINARY_DOUBLE
+        94.1.20 oracledb.BUFFER <--> DB: DATE
+        94.1.21 oracledb.BUFFER <--> DB: TIMESTAMP
+        94.1.22 oracledb.BUFFER <--> DB: RAW
+        94.1.23 oracledb.BUFFER <--> DB: CLOB
+        94.1.24 oracledb.BUFFER <--> DB: BLOB
+  94.2 PLSQL procedure: bind inout null value of oracledb.STRING/BUFFER
+        94.2.1 oracledb.STRING <--> DB: NUMBER
+        94.2.2 oracledb.STRING <--> DB: CHAR
+        94.2.3 oracledb.STRING <--> DB: NCHAR
+        94.2.4 oracledb.STRING <--> DB: VARCHAR2
+        94.2.5 oracledb.STRING <--> DB: FLOAT
+        94.2.6 oracledb.STRING <--> DB: BINARY_FLOAT
+        94.2.7 oracledb.STRING <--> DB: BINARY_DOUBLE
+        94.2.8 oracledb.STRING <--> DB: DATE
+        94.2.9 oracledb.STRING <--> DB: TIMESTAMP
+        94.2.10 oracledb.STRING <--> DB: RAW
+        94.2.11 oracledb.STRING <--> DB: CLOB
+        94.2.12 oracledb.STRING <--> DB: BLOB
+        94.2.13 oracledb.BUFFER <--> DB: NUMBER
+        94.2.14 oracledb.BUFFER <--> DB: CHAR
+        94.2.15 oracledb.BUFFER <--> DB: NCHAR
+        94.2.16 oracledb.BUFFER <--> DB: VARCHAR2
+        94.2.17 oracledb.BUFFER <--> DB: FLOAT
+        94.2.18 oracledb.BUFFER <--> DB: BINARY_FLOAT
+        94.2.19 oracledb.BUFFER <--> DB: BINARY_DOUBLE
+        94.2.20 oracledb.BUFFER <--> DB: DATE
+        94.2.21 oracledb.BUFFER <--> DB: TIMESTAMP
+        94.2.22 oracledb.BUFFER <--> DB: RAW
+        94.2.23 oracledb.BUFFER <--> DB: CLOB
+        94.2.24 oracledb.BUFFER <--> DB: BLOB
+
+95.binding_functionBindInout.js
+  95.1 PLSQL function: bind inout small value of oracledb.STRING/BUFFER
+        95.1.1 oracledb.STRING <--> DB: NUMBER
+        95.1.2 oracledb.STRING <--> DB: CHAR
+        95.1.3 oracledb.STRING <--> DB: NCHAR
+        95.1.4 oracledb.STRING <--> DB: VARCHAR2
+        95.1.5 oracledb.STRING <--> DB: FLOAT
+        95.1.6 oracledb.STRING <--> DB: BINARY_FLOAT
+        95.1.7 oracledb.STRING <--> DB: BINARY_DOUBLE
+        95.1.8 oracledb.STRING <--> DB: DATE
+        95.1.9 oracledb.STRING <--> DB: TIMESTAMP
+        95.1.10 oracledb.STRING <--> DB: RAW
+        95.1.11 oracledb.STRING <--> DB: CLOB
+        95.1.12 oracledb.STRING <--> DB: BLOB
+        95.1.13 oracledb.BUFFER <--> DB: NUMBER
+        95.1.14 oracledb.BUFFER <--> DB: CHAR
+        95.1.15 oracledb.BUFFER <--> DB: NCHAR
+        95.1.16 oracledb.BUFFER <--> DB: VARCHAR2
+        95.1.17 oracledb.BUFFER <--> DB: FLOAT
+        95.1.18 oracledb.BUFFER <--> DB: BINARY_FLOAT
+        95.1.19 oracledb.BUFFER <--> DB: BINARY_DOUBLE
+        95.1.20 oracledb.BUFFER <--> DB: DATE
+        95.1.21 oracledb.BUFFER <--> DB: TIMESTAMP
+        95.1.22 oracledb.BUFFER <--> DB: RAW
+        95.1.23 oracledb.BUFFER <--> DB: CLOB
+        95.1.24 oracledb.BUFFER <--> DB: BLOB
+  95.2 PLSQL function: bind inout null value of oracledb.STRING/BUFFER
+        95.2.1 oracledb.STRING <--> DB: NUMBER
+        95.2.2 oracledb.STRING <--> DB: CHAR
+        95.2.3 oracledb.STRING <--> DB: NCHAR
+        95.2.4 oracledb.STRING <--> DB: VARCHAR2
+        95.2.5 oracledb.STRING <--> DB: FLOAT
+        95.2.6 oracledb.STRING <--> DB: BINARY_FLOAT
+        95.2.7 oracledb.STRING <--> DB: BINARY_DOUBLE
+        95.2.8 oracledb.STRING <--> DB: DATE
+        95.2.9 oracledb.STRING <--> DB: TIMESTAMP
+        95.2.10 oracledb.STRING <--> DB: RAW
+        95.2.11 oracledb.STRING <--> DB: CLOB
+        95.2.12 oracledb.STRING <--> DB: BLOB
+        95.2.13 oracledb.BUFFER <--> DB: NUMBER
+        95.2.14 oracledb.BUFFER <--> DB: CHAR
+        95.2.15 oracledb.BUFFER <--> DB: NCHAR
+        95.2.16 oracledb.BUFFER <--> DB: VARCHAR2
+        95.2.17 oracledb.BUFFER <--> DB: FLOAT
+        95.2.18 oracledb.BUFFER <--> DB: BINARY_FLOAT
+        95.2.19 oracledb.BUFFER <--> DB: BINARY_DOUBLE
+        95.2.20 oracledb.BUFFER <--> DB: DATE
+        95.2.21 oracledb.BUFFER <--> DB: TIMESTAMP
+        95.2.22 oracledb.BUFFER <--> DB: RAW
+        95.2.23 oracledb.BUFFER <--> DB: CLOB
+        95.2.24 oracledb.BUFFER <--> DB: BLOB
+
+96.binding_procedureBindOut.js
+  96.1 PLSQL procedure: bind out small value to oracledb.STRING/BUFFER
+        96.1.1 oracledb.STRING <--> DB: NUMBER
+        96.1.2 oracledb.STRING <--> DB: CHAR
+        96.1.3 oracledb.STRING <--> DB: NCHAR
+        96.1.4 oracledb.STRING <--> DB: VARCHAR2
+        96.1.5 oracledb.STRING <--> DB: FLOAT
+        96.1.6 oracledb.STRING <--> DB: BINARY_FLOAT
+        96.1.7 oracledb.STRING <--> DB: BINARY_DOUBLE
+        96.1.8 oracledb.STRING <--> DB: DATE
+        96.1.9 oracledb.STRING <--> DB: TIMESTAMP
+        96.1.10 oracledb.STRING <--> DB: RAW
+        96.1.11 oracledb.STRING <--> DB: CLOB
+        96.1.12 oracledb.STRING <--> DB: BLOB
+        96.1.13 oracledb.BUFFER <--> DB: NUMBER
+        96.1.14 oracledb.BUFFER <--> DB: CHAR
+        96.1.15 oracledb.BUFFER <--> DB: NCHAR
+        96.1.16 oracledb.BUFFER <--> DB: VARCHAR2
+        96.1.17 oracledb.BUFFER <--> DB: FLOAT
+        96.1.18 oracledb.BUFFER <--> DB: BINARY_FLOAT
+        96.1.19 oracledb.BUFFER <--> DB: BINARY_DOUBLE
+        96.1.20 oracledb.BUFFER <--> DB: DATE
+        96.1.21 oracledb.BUFFER <--> DB: TIMESTAMP
+        96.1.22 oracledb.BUFFER <--> DB: RAW
+        96.1.23 oracledb.BUFFER <--> DB: CLOB
+        96.1.24 oracledb.BUFFER <--> DB: BLOB
+  96.2 PLSQL procedure: bind out null value to oracledb.STRING/BUFFER
+        96.2.1 oracledb.STRING <--> DB: NUMBER
+        96.2.2 oracledb.STRING <--> DB: CHAR
+        96.2.3 oracledb.STRING <--> DB: NCHAR
+        96.2.4 oracledb.STRING <--> DB: VARCHAR2
+        96.2.5 oracledb.STRING <--> DB: FLOAT
+        96.2.6 oracledb.STRING <--> DB: BINARY_FLOAT
+        96.2.7 oracledb.STRING <--> DB: BINARY_DOUBLE
+        96.2.8 oracledb.STRING <--> DB: DATE
+        96.2.9 oracledb.STRING <--> DB: TIMESTAMP
+        96.2.10 oracledb.STRING <--> DB: RAW
+        96.2.11 oracledb.STRING <--> DB: CLOB
+        96.2.12 oracledb.STRING <--> DB: BLOB
+        96.2.13 oracledb.BUFFER <--> DB: NUMBER
+        96.2.14 oracledb.BUFFER <--> DB: CHAR
+        96.2.15 oracledb.BUFFER <--> DB: NCHAR
+        96.2.16 oracledb.BUFFER <--> DB: VARCHAR2
+        96.2.17 oracledb.BUFFER <--> DB: FLOAT
+        96.2.18 oracledb.BUFFER <--> DB: BINARY_FLOAT
+        96.2.19 oracledb.BUFFER <--> DB: BINARY_DOUBLE
+        96.2.20 oracledb.BUFFER <--> DB: DATE
+        96.2.21 oracledb.BUFFER <--> DB: TIMESTAMP
+        96.2.22 oracledb.BUFFER <--> DB: RAW
+        96.2.23 oracledb.BUFFER <--> DB: CLOB
+        96.2.24 oracledb.BUFFER <--> DB: BLOB
+
+97.binding_functionBindOut.js
+  97.1 PLSQL function: bind out small value to oracledb.STRING/BUFFER
+        97.1.1 oracledb.STRING <--> DB: NUMBER
+        97.1.2 oracledb.STRING <--> DB: CHAR
+        97.1.3 oracledb.STRING <--> DB: NCHAR
+        97.1.4 oracledb.STRING <--> DB: VARCHAR2
+        97.1.5 oracledb.STRING <--> DB: FLOAT
+        97.1.6 oracledb.STRING <--> DB: BINARY_FLOAT
+        97.1.7 oracledb.STRING <--> DB: BINARY_DOUBLE
+        97.1.8 oracledb.STRING <--> DB: DATE
+        97.1.9 oracledb.STRING <--> DB: TIMESTAMP
+        97.1.10 oracledb.STRING <--> DB: RAW
+        97.1.11 oracledb.STRING <--> DB: CLOB
+        97.1.12 oracledb.STRING <--> DB: BLOB
+        97.1.13 oracledb.BUFFER <--> DB: NUMBER
+        97.1.14 oracledb.BUFFER <--> DB: CHAR
+        97.1.15 oracledb.BUFFER <--> DB: NCHAR
+        97.1.16 oracledb.BUFFER <--> DB: VARCHAR2
+        97.1.17 oracledb.BUFFER <--> DB: FLOAT
+        97.1.18 oracledb.BUFFER <--> DB: BINARY_FLOAT
+        97.1.19 oracledb.BUFFER <--> DB: BINARY_DOUBLE
+        97.1.20 oracledb.BUFFER <--> DB: DATE
+        97.1.21 oracledb.BUFFER <--> DB: TIMESTAMP
+        97.1.22 oracledb.BUFFER <--> DB: RAW
+        97.1.23 oracledb.BUFFER <--> DB: CLOB
+        97.1.24 oracledb.BUFFER <--> DB: BLOB
+  97.2 PLSQL function: bind out null value to oracledb.STRING/BUFFER
+        97.2.1 oracledb.STRING <--> DB: NUMBER
+        97.2.2 oracledb.STRING <--> DB: CHAR
+        97.2.3 oracledb.STRING <--> DB: NCHAR
+        97.2.4 oracledb.STRING <--> DB: VARCHAR2
+        97.2.5 oracledb.STRING <--> DB: FLOAT
+        97.2.6 oracledb.STRING <--> DB: BINARY_FLOAT
+        97.2.7 oracledb.STRING <--> DB: BINARY_DOUBLE
+        97.2.8 oracledb.STRING <--> DB: DATE
+        97.2.9 oracledb.STRING <--> DB: TIMESTAMP
+        97.2.10 oracledb.STRING <--> DB: RAW
+        97.2.11 oracledb.STRING <--> DB: CLOB
+        97.2.12 oracledb.STRING <--> DB: BLOB
+        97.2.13 oracledb.BUFFER <--> DB: NUMBER
+        97.2.14 oracledb.BUFFER <--> DB: CHAR
+        97.2.15 oracledb.BUFFER <--> DB: NCHAR
+        97.2.16 oracledb.BUFFER <--> DB: VARCHAR2
+        97.2.17 oracledb.BUFFER <--> DB: FLOAT
+        97.2.18 oracledb.BUFFER <--> DB: BINARY_FLOAT
+        97.2.19 oracledb.BUFFER <--> DB: BINARY_DOUBLE
+        97.2.20 oracledb.BUFFER <--> DB: DATE
+        97.2.21 oracledb.BUFFER <--> DB: TIMESTAMP
+        97.2.22 oracledb.BUFFER <--> DB: RAW
+        97.2.23 oracledb.BUFFER <--> DB: CLOB
+        97.2.24 oracledb.BUFFER <--> DB: BLOB
+
+98.binding_DMLReturningInto.js
+  98.1 bind out small value
+        98.1.1 oracledb.STRING <--> DB: NUMBER
+        98.1.2 oracledb.STRING <--> DB: CHAR
+        98.1.3 oracledb.STRING <--> DB: NCHAR
+        98.1.4 oracledb.STRING <--> DB: VARCHAR2
+        98.1.5 oracledb.STRING <--> DB: FLOAT
+        98.1.6 oracledb.STRING <--> DB: BINARY_FLOAT
+        98.1.7 oracledb.STRING <--> DB: BINARY_DOUBLE
+        98.1.8 oracledb.STRING <--> DB: DATE
+        98.1.9 oracledb.STRING <--> DB: TIMESTAMP
+        98.1.10 oracledb.STRING <--> DB: RAW
+        98.1.11 oracledb.STRING <--> DB: CLOB
+        98.1.12 oracledb.STRING <--> DB: BLOB
+        98.1.13 oracledb.BUFFER <--> DB: NUMBER
+        98.1.14 oracledb.BUFFER <--> DB: CHAR
+        98.1.15 oracledb.BUFFER <--> DB: NCHAR
+        98.1.16 oracledb.BUFFER <--> DB: VARCHAR2
+        98.1.17 oracledb.BUFFER <--> DB: FLOAT
+        98.1.18 oracledb.BUFFER <--> DB: BINARY_FLOAT
+        98.1.19 oracledb.BUFFER <--> DB: BINARY_DOUBLE
+        98.1.20 oracledb.BUFFER <--> DB: DATE
+        98.1.21 oracledb.BUFFER <--> DB: TIMESTAMP
+        98.1.22 oracledb.BUFFER <--> DB: RAW
+        98.1.23 oracledb.BUFFER <--> DB: CLOB
+        98.1.24 oracledb.BUFFER <--> DB: BLOB
+  98.2 bind out null value
+        98.2.1 oracledb.STRING <--> DB: NUMBER
+        98.2.2 oracledb.STRING <--> DB: CHAR
+        98.2.3 oracledb.STRING <--> DB: NCHAR
+        98.2.4 oracledb.STRING <--> DB: VARCHAR2
+        98.2.5 oracledb.STRING <--> DB: FLOAT
+        98.2.6 oracledb.STRING <--> DB: BINARY_FLOAT
+        98.2.7 oracledb.STRING <--> DB: BINARY_DOUBLE
+        98.2.8 oracledb.STRING <--> DB: DATE
+        98.2.9 oracledb.STRING <--> DB: TIMESTAMP
+        98.2.10 oracledb.STRING <--> DB: RAW
+        98.2.11 oracledb.STRING <--> DB: CLOB
+        98.2.12 oracledb.STRING <--> DB: BLOB
+        98.2.13 oracledb.BUFFER <--> DB: NUMBER
+        98.2.14 oracledb.BUFFER <--> DB: CHAR
+        98.2.15 oracledb.BUFFER <--> DB: NCHAR
+        98.2.16 oracledb.BUFFER <--> DB: VARCHAR2
+        98.2.17 oracledb.BUFFER <--> DB: FLOAT
+        98.2.18 oracledb.BUFFER <--> DB: BINARY_FLOAT
+        98.2.19 oracledb.BUFFER <--> DB: BINARY_DOUBLE
+        98.2.20 oracledb.BUFFER <--> DB: DATE
+        98.2.21 oracledb.BUFFER <--> DB: TIMESTAMP
+        98.2.22 oracledb.BUFFER <--> DB: RAW
+        98.2.23 oracledb.BUFFER <--> DB: CLOB
+        98.2.24 oracledb.BUFFER <--> DB: BLOB
+
+99.binding_functionBindIn.js
+  99.1 PLSQL function: bind in small value of oracledb.STRING/BUFFER
+        99.1.1 oracledb.STRING <--> DB: NUMBER
+        99.1.2 oracledb.STRING <--> DB: CHAR
+        99.1.3 oracledb.STRING <--> DB: NCHAR
+        99.1.4 oracledb.STRING <--> DB: VARCHAR2
+        99.1.5 oracledb.STRING <--> DB: FLOAT
+        99.1.6 oracledb.STRING <--> DB: BINARY_FLOAT
+        99.1.7 oracledb.STRING <--> DB: BINARY_DOUBLE
+        99.1.8 oracledb.STRING <--> DB: DATE
+        99.1.9 oracledb.STRING <--> DB: TIMESTAMP
+        99.1.10 oracledb.STRING <--> DB: RAW
+        99.1.11 oracledb.STRING <--> DB: CLOB
+        99.1.12 oracledb.STRING <--> DB: BLOB
+        99.1.13 oracledb.BUFFER <--> DB: NUMBER
+        99.1.14 oracledb.BUFFER <--> DB: CHAR
+        99.1.15 oracledb.BUFFER <--> DB: NCHAR
+        99.1.16 oracledb.BUFFER <--> DB: VARCHAR2
+        99.1.17 oracledb.BUFFER <--> DB: FLOAT
+        99.1.18 oracledb.BUFFER <--> DB: BINARY_FLOAT
+        99.1.19 oracledb.BUFFER <--> DB: BINARY_DOUBLE
+        99.1.20 oracledb.BUFFER <--> DB: DATE
+        99.1.21 oracledb.BUFFER <--> DB: TIMESTAMP
+        99.1.22 oracledb.BUFFER <--> DB: RAW
+        99.1.23 oracledb.BUFFER <--> DB: CLOB
+        99.1.24 oracledb.BUFFER <--> DB: BLOB
+  99.2 PLSQL function: bind in null value of oracledb.STRING/BUFFER
+        99.2.1 oracledb.STRING <--> DB: NUMBER
+        99.2.2 oracledb.STRING <--> DB: CHAR
+        99.2.3 oracledb.STRING <--> DB: NCHAR
+        99.2.4 oracledb.STRING <--> DB: VARCHAR2
+        99.2.5 oracledb.STRING <--> DB: FLOAT
+        99.2.6 oracledb.STRING <--> DB: BINARY_FLOAT
+        99.2.7 oracledb.STRING <--> DB: BINARY_DOUBLE
+        99.2.8 oracledb.STRING <--> DB: DATE
+        99.2.9 oracledb.STRING <--> DB: TIMESTAMP
+        99.2.10 oracledb.STRING <--> DB: RAW
+        99.2.11 oracledb.STRING <--> DB: CLOB
+        99.2.12 oracledb.STRING <--> DB: BLOB
+        99.2.13 oracledb.BUFFER <--> DB: NUMBER
+        99.2.14 oracledb.BUFFER <--> DB: CHAR
+        99.2.15 oracledb.BUFFER <--> DB: NCHAR
+        99.2.16 oracledb.BUFFER <--> DB: VARCHAR2
+        99.2.17 oracledb.BUFFER <--> DB: FLOAT
+        99.2.18 oracledb.BUFFER <--> DB: BINARY_FLOAT
+        99.2.19 oracledb.BUFFER <--> DB: BINARY_DOUBLE
+        99.2.20 oracledb.BUFFER <--> DB: DATE
+        99.2.21 oracledb.BUFFER <--> DB: TIMESTAMP
+        99.2.22 oracledb.BUFFER <--> DB: RAW
+        99.2.23 oracledb.BUFFER <--> DB: CLOB
+        99.2.24 oracledb.BUFFER <--> DB: BLOB
+
+100.binding_defaultBindIn.js
+  100.1 PLSQL procedure: bind in null value with default type and dir
+        100.1.1 oracledb.STRING <--> DB: NUMBER
+        100.1.2 oracledb.STRING <--> DB: CHAR
+        100.1.3 oracledb.STRING <--> DB: NCHAR
+        100.1.4 oracledb.STRING <--> DB: VARCHAR2
+        100.1.5 oracledb.STRING <--> DB: FLOAT
+        100.1.6 oracledb.STRING <--> DB: BINARY_FLOAT
+        100.1.7 oracledb.STRING <--> DB: BINARY_DOUBLE
+        100.1.8 oracledb.STRING <--> DB: DATE
+        100.1.9 oracledb.STRING <--> DB: TIMESTAMP
+        100.1.10 oracledb.STRING <--> DB: RAW
+        100.1.11 oracledb.STRING <--> DB: CLOB
+        100.1.12 oracledb.STRING <--> DB: BLOB
+        100.1.13 oracledb.BUFFER <--> DB: NUMBER
+        100.1.14 oracledb.BUFFER <--> DB: CHAR
+        100.1.15 oracledb.BUFFER <--> DB: NCHAR
+        100.1.16 oracledb.BUFFER <--> DB: VARCHAR2
+        100.1.17 oracledb.BUFFER <--> DB: FLOAT
+        100.1.18 oracledb.BUFFER <--> DB: BINARY_FLOAT
+        100.1.19 oracledb.BUFFER <--> DB: BINARY_DOUBLE
+        100.1.20 oracledb.BUFFER <--> DB: DATE
+        100.1.21 oracledb.BUFFER <--> DB: TIMESTAMP
+        100.1.22 oracledb.BUFFER <--> DB: RAW
+        100.1.23 oracledb.BUFFER <--> DB: CLOB
+        100.1.24 oracledb.BUFFER <--> DB: BLOB
+  100.2 PLSQL function: bind in null value with default type and dir
+        100.2.1 oracledb.STRING <--> DB: NUMBER
+        100.2.2 oracledb.STRING <--> DB: CHAR
+        100.2.3 oracledb.STRING <--> DB: NCHAR
+        100.2.4 oracledb.STRING <--> DB: VARCHAR2
+        100.2.5 oracledb.STRING <--> DB: FLOAT
+        100.2.6 oracledb.STRING <--> DB: BINARY_FLOAT
+        100.2.7 oracledb.STRING <--> DB: BINARY_DOUBLE
+        100.2.8 oracledb.STRING <--> DB: DATE
+        100.2.9 oracledb.STRING <--> DB: TIMESTAMP
+        100.2.10 oracledb.STRING <--> DB: RAW
+        100.2.11 oracledb.STRING <--> DB: CLOB
+        100.2.12 oracledb.STRING <--> DB: BLOB
+        100.2.13 oracledb.BUFFER <--> DB: NUMBER
+        100.2.14 oracledb.BUFFER <--> DB: CHAR
+        100.2.15 oracledb.BUFFER <--> DB: NCHAR
+        100.2.16 oracledb.BUFFER <--> DB: VARCHAR2
+        100.2.17 oracledb.BUFFER <--> DB: FLOAT
+        100.2.18 oracledb.BUFFER <--> DB: BINARY_FLOAT
+        100.2.19 oracledb.BUFFER <--> DB: BINARY_DOUBLE
+        100.2.20 oracledb.BUFFER <--> DB: DATE
+        100.2.21 oracledb.BUFFER <--> DB: TIMESTAMP
+        100.2.22 oracledb.BUFFER <--> DB: RAW
+        100.2.23 oracledb.BUFFER <--> DB: CLOB
+        100.2.24 oracledb.BUFFER <--> DB: BLOB
+
+101.binding_defaultBindInout.js
+  101.1 PLSQL procedure: bind out null value with default type and dir
+        101.1.1 oracledb.STRING <--> DB: NUMBER
+        101.1.2 oracledb.STRING <--> DB: CHAR
+        101.1.3 oracledb.STRING <--> DB: NCHAR
+        101.1.4 oracledb.STRING <--> DB: VARCHAR2
+        101.1.5 oracledb.STRING <--> DB: FLOAT
+        101.1.6 oracledb.STRING <--> DB: BINARY_FLOAT
+        101.1.7 oracledb.STRING <--> DB: BINARY_DOUBLE
+        101.1.8 oracledb.STRING <--> DB: DATE
+        101.1.9 oracledb.STRING <--> DB: TIMESTAMP
+        101.1.10 oracledb.STRING <--> DB: RAW
+        101.1.11 oracledb.STRING <--> DB: CLOB
+        101.1.12 oracledb.STRING <--> DB: BLOB
+        101.1.13 oracledb.BUFFER <--> DB: NUMBER
+        101.1.14 oracledb.BUFFER <--> DB: CHAR
+        101.1.15 oracledb.BUFFER <--> DB: NCHAR
+        101.1.16 oracledb.BUFFER <--> DB: VARCHAR2
+        101.1.17 oracledb.BUFFER <--> DB: FLOAT
+        101.1.18 oracledb.BUFFER <--> DB: BINARY_FLOAT
+        101.1.19 oracledb.BUFFER <--> DB: BINARY_DOUBLE
+        101.1.20 oracledb.BUFFER <--> DB: DATE
+        101.1.21 oracledb.BUFFER <--> DB: TIMESTAMP
+        101.1.22 oracledb.BUFFER <--> DB: RAW
+        101.1.23 oracledb.BUFFER <--> DB: CLOB
+        101.1.24 oracledb.BUFFER <--> DB: BLOB
+  101.2 PLSQL procedure bind out null value with default type and dir
+        101.2.1 oracledb.STRING <--> DB: NUMBER
+        101.2.2 oracledb.STRING <--> DB: CHAR
+        101.2.3 oracledb.STRING <--> DB: NCHAR
+        101.2.4 oracledb.STRING <--> DB: VARCHAR2
+        101.2.5 oracledb.STRING <--> DB: FLOAT
+        101.2.6 oracledb.STRING <--> DB: BINARY_FLOAT
+        101.2.7 oracledb.STRING <--> DB: BINARY_DOUBLE
+        101.2.8 oracledb.STRING <--> DB: DATE
+        101.2.9 oracledb.STRING <--> DB: TIMESTAMP
+        101.2.10 oracledb.STRING <--> DB: RAW
+        101.2.11 oracledb.STpRING <--> DB: CLOB
+        101.2.12 oracledb.STRING <--> DB: BLOB
+        101.2.13 oracledb.BUFFER <--> DB: NUMBER
+        101.2.14 oracledb.BUFFER <--> DB: CHAR
+        101.2.15 oracledb.BUFFER <--> DB: NCHAR
+        101.2.16 oracledb.BUFFER <--> DB: VARCHAR2
+        101.2.17 oracledb.BUFFER <--> DB: FLOAT
+        101.2.18 oracledb.BUFFER <--> DB: BINARY_FLOAT
+        101.2.19 oracledb.BUFFER <--> DB: BINARY_DOUBLE
+        101.2.20 oracledb.BUFFER <--> DB: DATE
+        101.2.21 oracledb.BUFFER <--> DB: TIMESTAMP
+        101.2.22 oracledb.BUFFER <--> DB: RAW
+        101.2.23 oracledb.BUFFER <--> DB: CLOB
+        101.2.24 oracledb.BUFFER <--> DB: BLOB
+
+102. bindTimestamp.js
+      102.1 DML, IN bind, bind by name
+      102.2 DML, IN bind, bind by position
+      102.3 DML, IN bind, Null
+      102.4 Negative - IN bind, value and type mismatch
+      102.5 DML, OUT bind, bind by position
+      102.6 DML, OUT bind, bind by name
+      102.7 Negative - OUB bind, value and type mismatch
+      102.8 DML, INOUT bind, bind by position
+      102.9 DML, INOUT bind, bind by name
+      102.10 Negative - INOUT bind, in bind value and type mismatch
+      102.11 Negative - INOUT bind, out bind value and type mismatch
+      102.12 DML, INOUT bind, Null values
+    PL/SQL, IN bind
+        102.13 PL/SQL, IN bind, bind by name
+        102.14 PL/SQL, IN bind, bind by position
+        102.15 PL/SQL, IN bind, Null
+        102.16 Negative - PL/SQL, IN bind, value and type mismatch
+        102.17 Negative - type and value mismatch, BLOB
+        102.18 Negative - type and value mismatch, BUFFER
+        102.19 Negative - type and value mismatch, CLOB
+        102.20 Negative - type and value mismatch, CURSOR
+      - 102.21 Negative - type and value mismatch, DEFAULT
+        102.22 Negative - type and value mismatch, NUMBER
+        102.23 Negative - type and value mismatch, STRING
+      - 102.24 Negative - type and value mismatch, NOTEXIST
+    PL/SQL, OUT bind
+        102.25 PL/SQL, OUT bind, bind by position
+        102.26 PL/SQL, OUT bind, bind by name
+        102.27 PL/SQL, OUT bind, Null
+        102.28 Negative - PL/SQL, OUT bind, value and type mismatch
+        102.29 Negative - type and value mismatch, BLOB
+      - 102.30 Negative - type and value mismatch, BUFFER
+        102.31 Negative - type and value mismatch, CLOB
+      - 102.32 Negative - type and value mismatch, CURSOR
+        102.33 Negative - type and value mismatch, DEFAULT
+        102.34 Negative - type and value mismatch, NUMBER
+      - 102.35 Negative - type and value mismatch, STRING
+      - 102.36 Negative - type and value mismatch, NOTEXIST
+    PL/SQL, IN OUT bind
+        102.37 PL/SQL, IN OUT bind, bind by name
+        102.38 PL/SQL, IN OUT bind, bind by position
+        102.39 PL/SQL, IN OUT bind, Null
+        102.40 Negative - value and type mismatch
+        102.41 Negative - type and value mismatch, BLOB
+        102.42 Negative - type and value mismatch, BUFFER
+        102.43 Negative - type and value mismatch, CLOB
+        102.44 Negative - type and value mismatch, CURSOR
+      - 102.45 Negative - type and value mismatch, DEFAULT
+        102.46 Negative - type and value mismatch, NUMBER
+        102.47 Negative - type and value mismatch, STRING
+
+103. dataTypeLong.js
+    103.1 LONG data type support
+        103.1.1 SELECT query
+        103.1.2 works well with result set
+        103.1.3 works well with REF Cursor
+    103.2 stores null values correctly
+        103.2.1 testing Null, Empty string and Undefined
+
+104. dataTypeLongRaw.js
+    104.1 LONG RAW data type support
+        104.1.1 SELECT query
+        104.1.2 works well with result set
+        104.1.3 works well with REF Cursor
+    104.2 stores null values correctly
+        104.2.1 testing Null, Empty string and Undefined
+
+106. fetchRowidAsString.js
+    106.1 works with fetchInfo option
+        106.1.1 fetchInfo
+        106.1.2 fetchInfo, and oracledb.maxRows < actual number of rows
+        106.1.3 fetchInfo, and oracledb.maxRows = actual number of rows
+        106.1.4 fetchInfo, and oracledb.maxRows > actual number of rows
+        106.1.5 fetchInfo, queryStream() and oracledb.maxRows < actual number of rows
+        106.1.6 fetchInfo, queryStream() and oracledb.maxRows = actual number of rows
+        106.1.7 fetchInfo, queryStream() and oracledb.maxRows > actual number of rows
+        106.1.8 fetchInfo, resultSet = true
+    106.2 works with fetchInfo and outFormat = OBJECT
+        106.2.1 fetchInfo with outFormat = OBJECT
+        106.2.2 fetchInfo, outFormat = OBJECT, and resultSet = true
+        106.2.3 fetchInfo, outFormat = OBJECT, and oracledb.maxRows < actual number of rows
+        106.2.4 fetchInfo, outFormat = OBJECT, and oracledb.maxRows = actual number of rows
+        106.2.5 fetchInfo, outFormat = OBJECT, and oracledb.maxRows > actual number of rows
+        106.2.6 fetchInfo, outFormat = OBJECT, queryStream() and oracledb.maxRows < actual number of rows
+        106.2.7 fetchInfo, outFormat = OBJECT, queryStream() and oracledb.maxRows = actual number of rows
+        106.2.8 fetchInfo, outFormat = OBJECT, queryStream() and oracledb.maxRows > actual number of rows
+    106.3 works with fetchInfo and outFormat = ARRAY
+        106.3.1 fetchInfo
+        106.3.2 fetchInfo, and oracledb.maxRows < actual number of rows
+        106.3.3 fetchInfo, and oracledb.maxRows = actual number of rows
+        106.3.4 fetchInfo, and oracledb.maxRows > actual number of rows
+        106.3.5 fetchInfo, queryStream() and oracledb.maxRows < actual number of rows
+        106.3.6 fetchInfo, queryStream() and oracledb.maxRows = actual number of rows
+        106.3.7 fetchInfo, queryStream() and oracledb.maxRows > actual number of rows
+        106.3.8 fetchInfo, resultSet = true
+    106.4 fetch as string by default
+        106.4.1 fetch by default
+        106.4.2 oracledb.maxRows < actual number of rows
+        106.4.3 oracledb.maxRows = actual number of rows
+        106.4.4 oracledb.maxRows > actual number of rows
+        106.4.5 queryStream() and oracledb.maxRows < actual number of rows
+        106.4.6 queryStream() and oracledb.maxRows = actual number of rows
+        106.4.7 queryStream() and oracledb.maxRows > actual number of rows
+        106.4.8 resultSet = true
+    106.5 fetch as string by default with outFormat = OBJECT
+        106.5.1 fetch by default
+        106.5.2 oracledb.maxRows < actual number of rows
+        106.5.3 oracledb.maxRows = actual number of rows
+        106.5.4 oracledb.maxRows > actual number of rows
+        106.5.5 queryStream() and oracledb.maxRows < actual number of rows
+        106.5.6 queryStream() and oracledb.maxRows = actual number of rows
+        106.5.7 queryStream() and oracledb.maxRows > actual number of rows
+        106.5.8 resultSet = true
+    106.6 fetch as string by default with outFormat = ARRAY
+        106.6.1 fetch by default
+        106.6.2 oracledb.maxRows < actual number of rows
+        106.6.3 oracledb.maxRows = actual number of rows
+        106.6.4 oracledb.maxRows > actual number of rows
+        106.6.5 queryStream() and oracledb.maxRows < actual number of rows
+        106.6.6 queryStream() and oracledb.maxRows = actual number of rows
+        106.6.7 queryStream() and oracledb.maxRows > actual number of rows
+        106.6.8 resultSet = true
+
+107. rowidDMLBindAsString.js
+    107.1 INSERT & SELECT
+        107.1.1 works with null
+        107.1.2 works with empty string
+        107.1.3 works with extended rowid
+        107.1.4 works with restricted rowid
+        107.1.5 throws error with number 0
+        107.1.6 works with string 0
+        107.1.7 works with substr
+        107.1.8 bind null with default type/dir - named bind
+        107.1.9 bind null with default type/dir - positional bind
+        107.1.10 bind extented rowid with default type/dir - named bind
+        107.1.11 bind extented rowid with default type/dir - positional bind
+        107.1.12 works with undefined
+        107.1.13 bind undefined with default type/dir - named bind
+        107.1.14 bind undefined with default type/dir - positional bind
+        107.1.15 works with NaN
+    107.2 UPDATE
+        107.2.1 UPDATE null column
+        107.2.1 UPDATE extented rowid with restricted rowid
+        107.2.3 UPDATE restricted rowid with null
+    107.3 RETURNING INTO
+        107.3.1 INSERT null
+        107.3.2 INSERT extented rowid
+        107.3.3 INSERT restricted rowid
+        107.3.7 UPDATE null with extented rowid
+        107.3.8 UPDATE extented rowid with null
+        107.3.9 UPDATE restricted rowid with empty string
+        107.3.10 UPDATE restricted rowid with extented rowid
+        107.3.11 INSERT with default type/dir - named bind
+        107.3.12 INSERT with default type/dir - positional bind
+        107.3.13 UPDATE with default type/dir - named bind
+        107.3.14 UPDATE with default type/dir - positional bind
+    107.4 WHERE
+        107.4.1 can bind in WHERE clause
+
+
+108. rowidProcedureBindAsString_bindin.js
+    108.1 PROCEDURE BIND_IN as rowid
+        108.1.1 works with null
+        108.1.2 works with empty string
+        108.1.3 works with undefined
+        108.1.4 works with NaN
+        108.1.5 works with extended rowid
+        108.1.6 works with restricted rowid
+        108.1.7 works with string 0
+        108.1.8 works with number 0
+        108.1.9 works with default bind type/dir - extended rowid
+        108.1.10 works with default bind type/dir - null value
+        108.1.11 works with default bind type/dir - empty string
+        108.1.12 works with default bind type/dir - undefined
+        108.1.13 bind error: NJS-037
+        108.1.14 bind error: NJS-052
+    108.2 PROCEDURE BIND_IN as string
+        108.2.1 works with null
+        108.2.2 works with empty string
+        108.2.3 works with undefined
+        108.2.4 works with NaN
+        108.2.5 works with extended rowid
+        108.2.6 works with restricted rowid
+        108.2.7 works with string 0
+        108.2.8 works with number 0
+        108.2.9 works with default bind type/dir - extended rowid
+        108.2.10 works with default bind type/dir - null value
+        108.2.11 works with default bind type/dir - empty string
+        108.2.12 works with default bind type/dir - undefined
+        108.2.13 bind error: NJS-037
+        108.2.14 bind error: NJS-052
+    108.3 PROCEDURE BIND_IN, UPDATE
+        108.3.1 update null with rowid
+        108.3.2 update empty string with rowid
+        108.3.3 update undefined with rowid
+        108.3.4 works with default bind type/dir
+        108.3.5 works with default bind type/dir - null value
+        108.3.6 works with default bind type/dir - empty string
+        108.3.7 works with default bind type/dir - undefined
+
+109. rowidFunctionBindAsString_bind.js
+    109.1 FUNCTION BIND_IN/OUT as rowid
+        109.1.1 works with null
+        109.1.2 works with empty string
+        109.1.3 works with undefined
+        109.1.4 works with NaN
+        109.1.5 works with extended rowid
+        109.1.6 works with restricted rowid
+        109.1.7 works with string 0
+        109.1.8 works with number 0
+        109.1.9 works with default bind type/dir - extended rowid
+        109.1.10 works with default bind type/dir - null value
+        109.1.11 works with default bind type/dir - empty string
+        109.1.12 works with default bind type/dir - undefined
+        109.1.13 bind error: NJS-037
+        109.1.14 bind error: NJS-052
+    109.2 FUNCTION BIND_IN/OUT as string
+        109.2.1 works with null
+        109.2.2 works with empty string
+        109.2.3 works with undefined
+        109.2.4 works with NaN
+        109.2.5 works with extended rowid
+        109.2.6 works with restricted rowid
+        109.2.7 works with string 0
+        109.2.8 works with number 0
+        109.2.9 works with default bind type/dir - extended rowid
+        109.2.10 works with default bind type/dir - null value
+        109.2.11 works with default bind type/dir - empty string
+        109.2.12 works with default bind type/dir - undefined
+        109.2.13 bind error: NJS-037
+        109.2.14 bind error: NJS-052
+    109.3 FUNCTION BIND_IN, UPDATE
+        109.3.1 update null with rowid
+        109.3.2 update empty string with rowid
+        109.3.3 update undefined with rowid
+        109.3.4 works with default bind type/dir
+        109.3.5 works with default bind type/dir - null value
+        109.3.6 works with default bind type/dir - empty string
+        109.3.7 works with default bind type/dir - undefined
+
+110. rowidProcedureBindAsString_bindout.js
+    110.1 PROCEDURE BIND_OUT as rowid
+        110.1.1 works with null
+        110.1.2 works with empty string
+        110.1.3 works with undefined
+        110.1.4 works with NaN
+        110.1.5 works with extended rowid
+        110.1.6 works with restricted rowid
+        110.1.7 works with string 0
+        110.1.8 works with number 0
+        110.1.9 works with default bind type/dir - extended rowid
+        110.1.10 works with default bind type/dir - null value
+        110.1.11 works with default bind type/dir - empty string
+        110.1.12 works with default bind type/dir - undefined
+        110.1.13 bind error: NJS-037
+        110.1.14 bind error: NJS-052
+    110.2 PROCEDURE BIND_OUT as string
+        110.2.1 works with null
+        110.2.2 works with empty string
+        110.2.3 works with undefined
+        110.2.4 works with NaN
+        110.2.5 works with extended rowid
+        110.2.6 works with restricted rowid
+        110.2.7 works with string 0
+        110.2.8 works with number 0
+        110.2.9 works with default bind type/dir - extended rowid
+        110.2.10 works with default bind type/dir - null value
+        110.2.11 works with default bind type/dir - empty string
+        110.2.12 works with default bind type/dir - undefined
+        110.2.13 bind error: NJS-037
+        110.2.14 bind error: NJS-052
+    110.3 PROCEDURE BIND_IN, UPDATE
+        110.3.1 update null with rowid
+        110.3.2 update empty string with rowid
+        110.3.3 update undefined with rowid
+        110.3.4 works with default bind type/dir
+        110.3.5 works with default bind type/dir - null value
+        110.3.6 works with default bind type/dir - empty string
+        110.3.7 works with default bind type/dir - undefined
+
+111. rowidProcedureBindAsString_bindinout.js
+    111.1 PROCEDURE BIND_INOUT as rowid
+        111.1.1 works with null
+        111.1.2 works with empty string
+        111.1.3 works with undefined
+        111.1.4 works with NaN
+        111.1.5 works with extended rowid
+        111.1.6 works with restricted rowid
+        111.1.7 works with string 0
+        111.1.8 works with number 0
+        111.1.9 works with default bind type/dir - extended rowid
+        111.1.10 works with default bind type/dir - null value
+        111.1.11 works with default bind type/dir - empty string
+        111.1.12 works with default bind type/dir - undefined
+        111.1.13 bind error: NJS-037
+        111.1.14 bind error: NJS-052
+    111.2 PROCEDURE BIND_INOUT as string
+        111.2.1 works with null
+        111.2.2 works with empty string
+        111.2.3 works with undefined
+        111.2.4 works with NaN
+        111.2.5 works with extended rowid
+        111.2.6 works with restricted rowid
+        111.2.7 works with string 0
+        111.2.8 works with number 0
+        111.2.9 works with default bind type/dir - extended rowid
+        111.2.10 works with default bind type/dir - null value
+        111.2.11 works with default bind type/dir - empty string
+        111.2.12 works with default bind type/dir - undefined
+        111.2.13 bind error: NJS-037
+        111.2.14 bind error: NJS-052
+    111.3 PROCEDURE BIND_IN, UPDATE
+        111.3.1 update null with rowid
+        111.3.2 update empty string with rowid
+        111.3.3 update undefined with rowid
+        111.3.4 works with default bind type/dir
+        111.3.5 works with default bind type/dir - null value
+        111.3.6 works with default bind type/dir - empty string
+        111.3.7 works with default bind type/dir - undefined
+
+112. rowidFunctionBindAsString_bindinout.js
+    112.1 FUNCTION BIND_INOUT as rowid
+        112.1.1 works with null
+        112.1.2 works with empty string
+        112.1.3 works with undefined
+        112.1.4 works with NaN
+        112.1.5 works with extended rowid
+        112.1.6 works with restricted rowid
+        112.1.7 works with string 0
+        112.1.8 works with number 0
+        112.1.9 works with default bind type/dir - extended rowid
+        112.1.10 works with default bind type/dir - null value
+        112.1.11 works with default bind type/dir - empty string
+        112.1.12 works with default bind type/dir - undefined
+        112.1.13 bind error: NJS-037
+        112.1.14 bind error: NJS-052
+    112.2 FUNCTION BIND_INOUT as string
+        112.2.1 works with null
+        112.2.2 works with empty string
+        112.2.3 works with undefined
+        112.2.4 works with NaN
+        112.2.5 works with extended rowid
+        112.2.6 works with restricted rowid
+        112.2.7 works with string 0
+        112.2.8 works with number 0
+        112.2.9 works with default bind type/dir - extended rowid
+        112.2.10 works with default bind type/dir - null value
+        112.2.11 works with default bind type/dir - empty string
+        112.2.12 works with default bind type/dir - undefined
+        112.2.13 bind error: NJS-037
+        112.2.14 bind error: NJS-052
+    112.3 FUNCTION BIND_INOUT, UPDATE
+        112.3.1 update null with rowid
+        112.3.2 update empty string with rowid
+        112.3.3 update undefined with rowid
+        112.3.4 works with default bind type/dir
+        112.3.5 works with default bind type/dir - null value
+        112.3.6 works with default bind type/dir - empty string
+        112.3.7 works with default bind type/dir - undefined
+
+113. dataTypeUrowid.js
+    113.1 testing ROWID data type
+        113.1.1 query rowid
+        113.1.2 works well with result set
+        113.1.3 works well with REF Cursor
+    113.2 stores null value correctly
+        113.2.1 testing Null, Empty string and Undefined
+
+ 114. urowidDMLBindAsString.js
+    114.1 INSERT & SELECT
+        114.1.1 works with null
+        114.1.2 works with empty string
+        114.1.3 works with extended rowid
+        114.1.4 works with restricted rowid
+        114.1.5 throws error with number 0
+        114.1.6 works with string 0
+        114.1.7 works with substr
+        114.1.8 bind null with default type/dir - named bind
+        114.1.9 bind null with default type/dir - positional bind
+        114.1.10 bind extented rowid with default type/dir - named bind
+        114.1.11 bind extented rowid with default type/dir - positional bind
+        114.1.12 works with undefined
+        114.1.13 bind undefined with default type/dir - named bind
+        114.1.14 bind undefined with default type/dir - positional bind
+        114.1.15 works with NaN
+    114.2 UPDATE
+        114.2.1 UPDATE null column
+        114.2.1 UPDATE extented rowid with restricted rowid
+        114.2.3 UPDATE restricted rowid with null
+    114.3 RETURNING INTO
+        114.3.1 INSERT null
+        114.3.2 INSERT extented rowid
+        114.3.3 INSERT restricted rowid
+        114.3.7 UPDATE null with extented rowid
+        114.3.8 UPDATE extented rowid with null
+        114.3.9 UPDATE restricted rowid with empty string
+        114.3.10 UPDATE restricted rowid with extented rowid
+        114.3.11 INSERT with default type/dir - named bind
+        114.3.12 INSERT with default type/dir - positional bind
+        114.3.13 UPDATE with default type/dir - named bind
+        114.3.14 UPDATE with default type/dir - positional bind
+    107.4 WHERE
+        107.4.1 can bind in WHERE clause
+
+115. urowidDMLBindAsString_indexed.js
+    115.1 INSERT & SELECT
+        115.1.1 works with urowid length > 200
+        115.1.2 works with urowid length > 500
+      - 115.1.3 get error when urowid length > 4000
+    115.2 UPDATE
+        115.2.1 update null with urowid length > 200
+        115.2.2 update enpty string with urowid length > 500
+        115.2.3 update with urowid length > 500
+      - 115.2.4 update with urowid length > 4000
+    115.3 RETURNING INTO
+        115.3.1 urowid length > 200
+        115.3.2 urowid length > 500
+      - 115.3.3 urowid length > 4000
+    115.4 WHERE
+        115.4.1 urowid length > 200
+        115.4.2 urowid length > 500
+      - 115.4.3 urowid length > 4000
+    115.5 queryStream() and oracledb.maxRows = actual rows
+        115.5.1 urowid length > 200
+        115.5.2 urowid length > 500
+      - 115.5.3 urowid length > 4000
+    115.6 queryStream() and oracledb.maxRows > actual rows
+        115.6.1 urowid length > 200
+        115.6.2 urowid length > 500
+      - 115.6.3 urowid length > 4000
+    115.7 queryStream() and oracledb.maxRows < actual rows
+        115.7.1 urowid length > 200
+        115.7.2 urowid length > 500
+      - 115.7.3 urowid length > 4000
+
+116. fetchUrowidAsString.js
+    116.1 works with fetchInfo option
+        116.1.1 fetchInfo
+        116.1.2 fetchInfo, and oracledb.maxRows < actual number of rows
+        116.1.3 fetchInfo, and oracledb.maxRows = actual number of rows
+        116.1.4 fetchInfo, and oracledb.maxRows > actual number of rows
+        116.1.5 fetchInfo, queryStream() and oracledb.maxRows < actual number of rows
+        116.1.6 fetchInfo, queryStream() and oracledb.maxRows = actual number of rows
+        116.1.7 fetchInfo, queryStream() and oracledb.maxRows > actual number of rows
+        116.1.8 fetchInfo, resultSet = true
+    116.2 works with fetchInfo and outFormat = OBJECT
+        116.2.1 fetchInfo with outFormat = OBJECT
+        116.2.2 fetchInfo, outFormat = OBJECT, and resultSet = true
+        116.2.3 fetchInfo, outFormat = OBJECT, and oracledb.maxRows < actual number of rows
+        116.2.4 fetchInfo, outFormat = OBJECT, and oracledb.maxRows = actual number of rows
+        116.2.5 fetchInfo, outFormat = OBJECT, and oracledb.maxRows > actual number of rows
+        116.2.6 fetchInfo, outFormat = OBJECT, queryStream() and oracledb.maxRows < actual number of rows
+        116.2.7 fetchInfo, outFormat = OBJECT, queryStream() and oracledb.maxRows = actual number of rows
+        116.2.8 fetchInfo, outFormat = OBJECT, queryStream() and oracledb.maxRows > actual number of rows
+    116.3 works with fetchInfo and outFormat = ARRAY
+        116.3.1 fetchInfo
+        116.3.2 fetchInfo, and oracledb.maxRows < actual number of rows
+        116.3.3 fetchInfo, and oracledb.maxRows = actual number of rows
+        116.3.4 fetchInfo, and oracledb.maxRows > actual number of rows
+        116.3.5 fetchInfo, queryStream() and oracledb.maxRows < actual number of rows
+        116.3.6 fetchInfo, queryStream() and oracledb.maxRows = actual number of rows
+        116.3.7 fetchInfo, queryStream() and oracledb.maxRows > actual number of rows
+        116.3.8 fetchInfo, resultSet = true
+    116.4 fetch as string by default
+        116.4.1 fetch by default
+        116.4.2 oracledb.maxRows < actual number of rows
+        116.4.3 oracledb.maxRows = actual number of rows
+        116.4.4 oracledb.maxRows > actual number of rows
+        116.4.5 queryStream() and oracledb.maxRows < actual number of rows
+        116.4.6 queryStream() and oracledb.maxRows = actual number of rows
+        116.4.7 queryStream() and oracledb.maxRows > actual number of rows
+        116.4.8 resultSet = true
+    116.5 fetch as string by default with outFormat = OBJECT
+        116.5.1 fetch by default
+        116.5.2 oracledb.maxRows < actual number of rows
+        116.5.3 oracledb.maxRows = actual number of rows
+        116.5.4 oracledb.maxRows > actual number of rows
+        116.5.5 queryStream() and oracledb.maxRows < actual number of rows
+        116.5.6 queryStream() and oracledb.maxRows = actual number of rows
+        116.5.7 queryStream() and oracledb.maxRows > actual number of rows
+        116.5.8 resultSet = true
+    116.6 fetch as string by default with outFormat = ARRAY
+        116.6.1 fetch by default
+        116.6.2 oracledb.maxRows < actual number of rows
+        116.6.3 oracledb.maxRows = actual number of rows
+        116.6.4 oracledb.maxRows > actual number of rows
+        116.6.5 queryStream() and oracledb.maxRows < actual number of rows
+        116.6.6 queryStream() and oracledb.maxRows = actual number of rows
+        116.6.7 queryStream() and oracledb.maxRows > actual number of rows
+        116.6.8 resultSet = true
+
+117. fetchUrowidAsString_indexed.js
+    117.1 works with fetchInfo option and urowid length > 200/500/4000
+        117.1.1 fetchInfo
+        117.1.2 oracledb.maxRows < actual number of rows
+        117.1.3 oracledb.maxRows = actual number of rows
+        117.1.4 oracledb.maxRows > actual number of rows
+        117.1.5 resultSet = true
+        117.1.6 queryStream() and oracledb.maxRows < actual number of rows
+        117.1.7 queryStream() and oracledb.maxRows = actual number of rows
+        117.1.8 queryStream() and oracledb.maxRows > actual number of rows
+    117.2 works with fetchInfo and outFormat = OBJECT, urowid length > 200/500/4000
+        117.2.1 fetchInfo
+        117.2.2 oracledb.maxRows < actual number of rows
+        117.2.3 oracledb.maxRows = actual number of rows
+        117.2.4 oracledb.maxRows > actual number of rows
+        117.2.5 resultSet = true
+        117.2.6 queryStream() and oracledb.maxRows < actual number of rows
+        117.2.7 queryStream() and oracledb.maxRows = actual number of rows
+        117.2.8 queryStream() and oracledb.maxRows > actual number of rows
+    117.3 works with fetchInfo and outFormat = ARRAY, urowid length > 200/500/4000
+        117.3.1 fetchInfo
+        117.3.2 oracledb.maxRows < actual number of rows
+        117.3.3 oracledb.maxRows = actual number of rows
+        117.3.4 oracledb.maxRows > actual number of rows
+        117.3.5 resultSet = true
+        117.3.6 queryStream() and oracledb.maxRows < actual number of rows
+        117.3.7 queryStream() and oracledb.maxRows = actual number of rows
+        117.3.8 queryStream() and oracledb.maxRows > actual number of rows
+    117.4 fetch as string by default, urowid length > 200/500/4000
+        117.4.1 fetchInfo
+        117.4.2 oracledb.maxRows < actual number of rows
+        117.4.3 oracledb.maxRows = actual number of rows
+        117.4.4 oracledb.maxRows > actual number of rows
+        117.4.5 resultSet = true
+        117.4.6 queryStream() and oracledb.maxRows < actual number of rows
+        117.4.7 queryStream() and oracledb.maxRows = actual number of rows
+        117.4.8 queryStream() and oracledb.maxRows > actual number of rows
+    117.5 fetch as string by default with outFormat = OBJECT, urowid length > 200/500/4000
+        117.5.1 fetchInfo
+        117.5.2 oracledb.maxRows < actual number of rows
+        117.5.3 oracledb.maxRows = actual number of rows
+        117.5.4 oracledb.maxRows > actual number of rows
+        117.5.5 resultSet = true
+        117.5.6 queryStream() and oracledb.maxRows < actual number of rows
+        117.5.7 queryStream() and oracledb.maxRows = actual number of rows
+        117.5.8 queryStream() and oracledb.maxRows > actual number of rows
+    117.6 fetch as string by default with outFormat = ARRAY, urowid length > 200/500/4000
+        117.6.1 fetchInfo
+        117.6.2 oracledb.maxRows < actual number of rows
+        117.6.3 oracledb.maxRows = actual number of rows
+        117.6.4 oracledb.maxRows > actual number of rows
+        117.6.5 resultSet = true
+        117.6.6 queryStream() and oracledb.maxRows < actual number of rows
+        117.6.7 queryStream() and oracledb.maxRows = actual number of rows
+        117.6.8 queryStream() and oracledb.maxRows > actual number of rows
+
+118. urowidProcedureBindAsString_bindin.js
+    118.1 PROCEDURE BIND_IN as UROWID
+        118.1.1 works with null
+        118.1.2 works with empty string
+        118.1.3 works with undefined
+        118.1.4 works with NaN
+        118.1.5 works with extended ROWID
+        118.1.6 works with restricted ROWID
+      - 118.1.7 works with string 0
+        118.1.8 works with number 0
+        118.1.9 works with default bind type/dir - extended ROWID
+        118.1.10 works with default bind type/dir - null value
+        118.1.11 works with default bind type/dir - empty string
+        118.1.12 works with default bind type/dir - undefined
+        118.1.13 bind error: NJS-037
+        118.1.14 bind error: NJS-052
+    118.2 PROCEDURE BIND_IN as string
+        118.2.1 works with null
+        118.2.2 works with empty string
+        118.2.3 works with undefined
+        118.2.4 works with NaN
+        118.2.5 works with extended ROWID
+        118.2.6 works with restricted ROWID
+        118.2.7 works with string 0
+        118.2.8 works with number 0
+        118.2.9 works with default bind type/dir - extended ROWID
+        118.2.10 works with default bind type/dir - null value
+        118.2.11 works with default bind type/dir - empty string
+        118.2.12 works with default bind type/dir - undefined
+        118.2.13 bind error: NJS-037
+        118.2.14 bind error: NJS-052
+    118.3 PROCEDURE BIND_IN, UPDATE
+        118.3.1 update null with UROWID
+        118.3.2 update empty string with UROWID
+        118.3.3 update undefined with UROWID
+      - 118.3.4 works with default bind type/dir
+        118.3.5 works with default bind type/dir - null value
+        118.3.6 works with default bind type/dir - empty string
+        118.3.7 works with default bind type/dir - undefined
+
+119. urowidProcedureBindAsString_bindout.js
+    119.1 PROCEDURE BIND_OUT as UROWID
+        119.1.1 works with null
+        119.1.2 works with empty string
+        119.1.3 works with undefined
+        119.1.4 works with NaN
+        119.1.5 works with extended ROWID
+        119.1.6 works with restricted ROWID
+      - 119.1.7 works with string 0
+        119.1.8 works with number 0
+        119.1.9 works with default bind type/dir - extended ROWID
+        119.1.10 works with default bind type/dir - null value
+        119.1.11 works with default bind type/dir - empty string
+        119.1.12 works with default bind type/dir - undefined
+        119.1.13 bind error: NJS-037
+        119.1.14 bind error: NJS-052
+    119.2 PROCEDURE BIND_OUT as string
+        119.2.1 works with null
+        119.2.2 works with empty string
+        119.2.3 works with undefined
+        119.2.4 works with NaN
+        119.2.5 works with extended ROWID
+        119.2.6 works with restricted ROWID
+      - 119.2.7 works with string 0
+        119.2.8 works with number 0
+        119.2.9 works with default bind type/dir - extended ROWID
+        119.2.10 works with default bind type/dir - null value
+        119.2.11 works with default bind type/dir - empty string
+        119.2.12 works with default bind type/dir - undefined
+        119.2.13 bind error: NJS-037
+        119.2.14 bind error: NJS-052
+    119.3 PROCEDURE BIND_IN, UPDATE
+        119.3.1 update null with UROWID
+        119.3.2 update empty string with UROWID
+        119.3.3 update undefined with UROWID
+      - 119.3.4 works with default bind type/dir
+        119.3.5 works with default bind type/dir - null value
+        119.3.6 works with default bind type/dir - empty string
+        119.3.7 works with default bind type/dir - undefined
+
+120. urowidProcedureBindAsString_bindinout.js
+    120.1 PROCEDURE BIND_INOUT as UROWID
+        120.1.1 works with null
+        120.1.2 works with empty string
+        120.1.3 works with undefined
+        120.1.4 works with NaN
+        120.1.5 works with extended ROWID
+        120.1.6 works with restricted ROWID
+      - 120.1.7 works with string 0
+        120.1.8 works with number 0
+        120.1.9 works with default bind type/dir - extended ROWID
+        120.1.10 works with default bind type/dir - null value
+        120.1.11 works with default bind type/dir - empty string
+        120.1.12 works with default bind type/dir - undefined
+        120.1.13 bind error: NJS-037
+        120.1.14 bind error: NJS-052
+    120.2 PROCEDURE BIND_INOUT as string
+        120.2.1 works with null
+        120.2.2 works with empty string
+        120.2.3 works with undefined
+        120.2.4 works with NaN
+        120.2.5 works with extended ROWID
+        120.2.6 works with restricted ROWID
+        120.2.7 works with string 0
+        120.2.8 works with number 0
+        120.2.9 works with default bind type/dir - extended ROWID
+        120.2.10 works with default bind type/dir - null value
+        120.2.11 works with default bind type/dir - empty string
+        120.2.12 works with default bind type/dir - undefined
+        120.2.13 bind error: NJS-037
+        120.2.14 bind error: NJS-052
+    120.3 PROCEDURE BIND_IN, UPDATE
+        120.3.1 update null with UROWID
+        120.3.2 update empty string with UROWID
+        120.3.3 update undefined with UROWID
+      - 120.3.4 works with default bind type/dir
+        120.3.5 works with default bind type/dir - null value
+        120.3.6 works with default bind type/dir - empty string
+        120.3.7 works with default bind type/dir - undefined
+
+121. urowidFunctionBindAsString_bind.js
+    121.1 FUNCTION BIND_IN/OUT as UROWID
+        121.1.1 works with null
+        121.1.2 works with empty string
+        121.1.3 works with undefined
+        121.1.4 works with NaN
+        121.1.5 works with extended ROWID
+        121.1.6 works with restricted ROWID
+      - 121.1.7 works with string 0
+        121.1.8 works with number 0
+        121.1.9 works with default bind type/dir - extended ROWID
+        121.1.10 works with default bind type/dir - null value
+        121.1.11 works with default bind type/dir - empty string
+        121.1.12 works with default bind type/dir - undefined
+        121.1.13 bind error: NJS-037
+        121.1.14 bind error: NJS-052
+    121.2 FUNCTION BIND_IN/OUT as string
+        121.2.1 works with null
+        121.2.2 works with empty string
+        121.2.3 works with undefined
+        121.2.4 works with NaN
+        121.2.5 works with extended ROWID
+        121.2.6 works with restricted ROWID
+      - 121.2.7 works with string 0
+        121.2.8 works with number 0
+        121.2.9 works with default bind type/dir - extended ROWID
+        121.2.10 works with default bind type/dir - null value
+        121.2.11 works with default bind type/dir - empty string
+        121.2.12 works with default bind type/dir - undefined
+        121.2.13 bind error: NJS-037
+        121.2.14 bind error: NJS-052
+    121.3 FUNCTION BIND_IN, UPDATE
+        121.3.1 update null with UROWID
+        121.3.2 update empty string with UROWID
+        121.3.3 update undefined with UROWID
+      - 121.3.4 works with default bind type/dir
+        121.3.5 works with default bind type/dir - null value
+        121.3.6 works with default bind type/dir - empty string
+        121.3.7 works with default bind type/dir - undefined
+
+122. urowidFunctionBindAsString_bindinout.js
+    122.1 FUNCTION BIND_INOUT as UROWID
+        122.1.1 works with null
+        122.1.2 works with empty string
+        122.1.3 works with undefined
+        122.1.4 works with NaN
+        122.1.5 works with extended ROWID
+        122.1.6 works with restricted ROWID
+      - 122.1.7 works with string 0
+        122.1.8 works with number 0
+        122.1.9 works with default bind type/dir - extended ROWID
+        122.1.10 works with default bind type/dir - null value
+        122.1.11 works with default bind type/dir - empty string
+        122.1.12 works with default bind type/dir - undefined
+        122.1.13 bind error: NJS-037
+        122.1.14 bind error: NJS-052
+    122.2 FUNCTION BIND_INOUT as string
+        122.2.1 works with null
+        122.2.2 works with empty string
+        122.2.3 works with undefined
+        122.2.4 works with NaN
+        122.2.5 works with extended ROWID
+        122.2.6 works with restricted ROWID
+        122.2.7 works with string 0
+        122.2.8 works with number 0
+        122.2.9 works with default bind type/dir - extended ROWID
+        122.2.10 works with default bind type/dir - null value
+        122.2.11 works with default bind type/dir - empty string
+        122.2.12 works with default bind type/dir - undefined
+        122.2.13 bind error: NJS-037
+        122.2.14 bind error: NJS-052
+    122.3 FUNCTION BIND_INOUT, UPDATE
+        122.3.1 update null with UROWID
+        122.3.2 update empty string with UROWID
+        122.3.3 update undefined with UROWID
+      - 122.3.4 works with default bind type/dir
+        122.3.5 works with default bind type/dir - null value
+        122.3.6 works with default bind type/dir - empty string
+        122.3.7 works with default bind type/dir - undefined
+
+123. dataTypeNclob.js
+    123.1 insert and stream out
+        123.1.1 works with data size 100
+        123.1.2 works with data size 3000
+    123.2 insert and fetch as string with fetchInfo
+        123.2.1 works with data size 100
+        123.2.2 works with data size 3000
+        123.2.3 works with resultSet
+    123.3 insert and fetch as string with oracledb.fetchAsString
+        123.3.1 works with data size 100
+        123.3.2 works with data size 3000
+        123.3.2 works with resultSet
+    123.4 ref cursor
+        123.4.1 works with ref cursor
+    123.5 stores null value correctly
+        123.5.1 works with Null, Empty string and Undefined
+
+124. nclobDMLBindAsString.js
+    124.1 DML binding
+        124.1.1 bind in via INSERT
+        124.1.2 bind out via RETURNING INTO
+        124.1.3 bind in via UPDATE
+        124.1.3 bind in via WHERE
+
+125. longDMLBind.js
+    125.1 INSERT and SELECT
+        125.1.1 works with data size 64K - 1
+        125.1.2 works with data size 64K
+        125.1.3 works with data size 64K + 1
+        125.1.4 works with data size 1MB + 1
+    125.2 UPDATE
+        125.2.1 works with data size 64K - 1
+        125.2.2 works with data size 64K
+        125.2.3 works with data size 64K + 1
+        125.2.4 works with data size 1MB + 1
+    125.3 RETURNING INTO
+        125.3.1 do not support in returning into
+
+126. longrawDMLBind.js
+    126.1 INSERT and SELECT
+        126.1.1 works with data size 64K - 1
+        126.1.2 works with data size 64K
+        126.1.3 works with data size 64K + 1
+        126.1.4 works with data size 1MB + 1
+        126.1.5 works with data size 100
+    126.2 UPDATE
+        126.2.1 works with data size 64K - 1
+        126.2.2 works with data size 64K
+        126.2.3 works with data size 64K + 1
+        126.2.4 works with data size 1MB + 1
+    126.3 RETURNING INTO
+        126.3.1 do not support in returning into

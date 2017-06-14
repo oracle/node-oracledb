@@ -54,7 +54,11 @@ describe('60. clobPlsqlString.js', function() {
     async.series([
       function(callback) {
         oracledb.getConnection(
-          dbConfig,
+          {
+            user: dbConfig.user,
+            password: dbConfig.password,
+            connectString: dbConfig.connectString
+          },
           function(err, conn) {
             should.not.exist(err);
             connection = conn;
@@ -66,13 +70,13 @@ describe('60. clobPlsqlString.js', function() {
         assist.createTable(connection, tableName, callback);
       }
     ], done);
-  }) // before
+  }); // before
 
   after('release connection', function(done) {
     async.series([
       function(callback) {
         connection.execute(
-          "DROP TABLE nodb_myclobs",
+          "DROP TABLE nodb_myclobs purge",
           function(err) {
             should.not.exist(err);
             callback();
@@ -86,7 +90,7 @@ describe('60. clobPlsqlString.js', function() {
         });
       }
     ], done);
-  }) // after
+  }); // after
 
   describe('60.1 BIND OUT as STRING', function() {
     before('insert data', function(done) {
@@ -97,7 +101,7 @@ describe('60. clobPlsqlString.js', function() {
           done();
         }
       );
-    }) // before
+    }); // before
 
     it('60.1.1 PL/SQL OUT CLOB parameters can also be bound as STRING', function(done) {
       connection.execute(
@@ -113,7 +117,7 @@ describe('60. clobPlsqlString.js', function() {
           done();
         }
       );
-    }) // 60.1.1
+    }); // 60.1.1
 
     it('60.1.2 The returned length is limited to the maximum size', function(done) {
       connection.execute(
@@ -125,11 +129,12 @@ describe('60. clobPlsqlString.js', function() {
         function(err, result) {
           should.exist(err);
           (err.message).should.startWith('ORA-06502'); // PL/SQL: numeric or value error
+          should.not.exist(result);
           done();
         }
       );
-    }) // 60.1.2
-  }) // 60.1
+    }); // 60.1.2
+  }); // 60.1
 
   describe('60.2 BIND OUT as CLOB', function() {
     var dataLength = 1000000;
@@ -201,7 +206,7 @@ describe('60. clobPlsqlString.js', function() {
           );
         }
       ], done);
-    })
-  }) // 60.2
+    });
+  }); // 60.2
 
-})
+});

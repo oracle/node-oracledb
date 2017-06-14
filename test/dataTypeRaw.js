@@ -38,11 +38,14 @@ var should   = require('should');
 var async    = require('async');
 var assist   = require('./dataTypeAssist.js');
 var dbConfig = require('./dbconfig.js');
+var random   = require('./random.js');
 
 describe('42. dataTypeRaw.js', function() {
 
   var connection = null;
   var tableName = "nodb_raw";
+  var node6plus = false; // assume node runtime version is lower than 6
+  var insertID = 1;
 
   var bufLen = [10 ,100, 1000, 2000]; // buffer length
   var bufs = [];
@@ -50,47 +53,57 @@ describe('42. dataTypeRaw.js', function() {
     bufs[i] = assist.createBuffer(bufLen[i]);
 
   before('get one connection', function(done) {
-    oracledb.getConnection(dbConfig, function(err, conn) {
-      should.not.exist(err);
-      connection = conn;
-      done();
-    });
-  })
+    oracledb.getConnection(
+      {
+        user:          dbConfig.user,
+        password:      dbConfig.password,
+        connectString: dbConfig.connectString
+      },
+      function(err, conn) {
+        should.not.exist(err);
+        connection = conn;
+        if (process.versions["node"].substring (0, 1) >= "6") {
+          node6plus = true;
+        }
+        done();
+      }
+    );
+  });
 
   after('release connection', function(done) {
     connection.release( function(err) {
       should.not.exist(err);
       done();
     });
-  })
+  });
 
   describe('42.1 testing RAW data in various lengths', function() {
 
     before('create table, insert data', function(done) {
       assist.setUp(connection, tableName, bufs, done);
-    })
+    });
 
     after(function(done) {
       connection.execute(
-        "DROP table " + tableName,
+        "DROP table " + tableName + " PURGE",
         function(err) {
           should.not.exist(err);
           done();
         }
       );
-    })
+    });
 
     it('42.1.1 SELECT query', function(done) {
       assist.dataTypeSupport(connection, tableName, bufs, done);
-    })
+    });
 
     it('42.1.2 resultSet stores RAW data correctly', function(done) {
       assist.verifyResultSet(connection, tableName, bufs, done);
-    })
+    });
 
     it('42.1.3 works well with REF Cursor', function(done) {
       assist.verifyRefCursor(connection, tableName, bufs, done);
-    })
+    });
 
     it('42.1.4 result set getRow() function works well with RAW', function(done) {
 
@@ -119,44 +132,45 @@ describe('42. dataTypeRaw.js', function() {
           }
         });
       }
-    }) // 42.1.4
+    }); // 42.1.4
 
     it('42.1.5 a negative case which hits NJS-011 error', function(done) {
       connection.execute(
         "INSERT INTO " + tableName + " (content ) VALUES (:c)",
          { c : { val: 1234, type: oracledb.BUFFER, dir:oracledb.BIND_IN } },
          function(err, result) {
-          should.exist(err);
+           should.exist(err);
           // NJS-011: encountered bind value and type mismatch
-          (err.message).should.startWith('NJS-011:');
-          done();
+           (err.message).should.startWith('NJS-011:');
+           should.not.exist(result);
+           done();
          }
       );
-    })
+    });
 
-  })
+  });
 
   describe('42.2 stores null value correctly', function() {
     it('42.2.1 testing Null, Empty string and Undefined', function(done) {
       assist.verifyNullValues(connection, tableName, done);
-    })
-  })
+    });
+  });
 
   describe('42.3 DML Returning - Currently not support RAW', function() {
 
     before('create table', function(done) {
       assist.createTable(connection, tableName, done);
-    })
+    });
 
     after(function(done) {
       connection.execute(
-        "DROP table " + tableName,
+        "DROP table " + tableName + " PURGE",
         function(err) {
           should.not.exist(err);
           done();
         }
       );
-    })
+    });
 
     it('42.3.1 INSERT statement with Object binding', function(done) {
       var seq = 1;
@@ -176,10 +190,11 @@ describe('42. dataTypeRaw.js', function() {
           should.exist(err);
           (err.message).should.startWith('NJS-028:');
           // NJS-028: raw database type is not supported with DML Returning statements
+          should.not.exist(result);
           done();
         }
       );
-    })  // 42.3.1
+    });  // 42.3.1
 
     it('42.3.2 INSERT statement with ARRAY binding', function(done) {
       var seq = 2;
@@ -198,10 +213,11 @@ describe('42. dataTypeRaw.js', function() {
         function(err, result) {
           should.exist(err);
           (err.message).should.startWith('NJS-028:');
+          should.not.exist(result);
           done();
         }
       );
-    }) // 42.3.2
+    }); // 42.3.2
 
     it('42.3.3 INSERT statement with exact maxSize restriction', function(done) {
       var seq = 3;
@@ -220,10 +236,11 @@ describe('42. dataTypeRaw.js', function() {
         function(err, result) {
           should.exist(err);
           (err.message).should.startWith('NJS-028:');
+          should.not.exist(result);
           done();
         }
       );
-    })
+    });
 
     it('42.3.4 UPDATE statement', function(done) {
       var seq = 2;
@@ -242,10 +259,11 @@ describe('42. dataTypeRaw.js', function() {
         function(err, result) {
           should.exist(err);
           (err.message).should.startWith('NJS-028:');
+          should.not.exist(result);
           done();
         }
       );
-    }) // 42.3.4
+    }); // 42.3.4
 
     it('42.3.6 DELETE statement with single row matching', function(done) {
       var seq = 1;
@@ -261,10 +279,11 @@ describe('42. dataTypeRaw.js', function() {
         function(err, result) {
           should.exist(err);
           (err.message).should.startWith('NJS-028:');
+          should.not.exist(result);
           done();
         }
       );
-    })
+    });
 
     it('42.3.7 DELETE statement with multiple rows matching', function(done) {
       var seq = 1;
@@ -280,12 +299,13 @@ describe('42. dataTypeRaw.js', function() {
         function(err, result) {
           should.exist(err);
           (err.message).should.startWith('NJS-028:');
+          should.not.exist(result);
           done();
         }
       );
-    })
+    });
 
-  }) // 42.3
+  }); // 42.3
 
   describe('42.4 in PL/SQL, the maximum size is 32767', function() {
 
@@ -304,7 +324,7 @@ describe('42. dataTypeRaw.js', function() {
           done();
         }
       );
-    })
+    });
 
     after(function(done) {
       connection.execute(
@@ -314,7 +334,7 @@ describe('42. dataTypeRaw.js', function() {
           done();
         }
       );
-    })
+    });
 
     it('42.4.1 when data length is less than maxSize', function(done) {
       var size = 5;
@@ -334,7 +354,7 @@ describe('42. dataTypeRaw.js', function() {
           done();
         }
       );
-    })
+    });
 
     it('42.4.2 when data length is 32767', function(done) {
       var size = 32767;
@@ -354,7 +374,7 @@ describe('42. dataTypeRaw.js', function() {
           done();
         }
       );
-    })
+    });
 
     it('42.4.3 when data length greater than maxSize', function(done) {
       var size = 32800;
@@ -364,16 +384,16 @@ describe('42. dataTypeRaw.js', function() {
         "BEGIN nodb_testraw(:i, :o); END;",
         {
           i: { type: oracledb.BUFFER, dir: oracledb.BIND_IN, val: buf },
-          o: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: 32767}
+          o: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: size }
         },
-        function(err, result) {
+        function(err) {
           should.exist(err);
-          // ORA-01460: unimplemented or unreasonable conversion requested
-          (err.message).should.startWith('ORA-01460');
+          // ORA-06502: PL/SQL: numeric or value error\nORA-06512: at line 1
+          (err.message).should.startWith('ORA-06502:');
           done();
         }
       );
-    })
+    });
 
     it('42.4.4 when maxSize is greater than 32767', function(done) {
       var size = 32800;
@@ -385,14 +405,230 @@ describe('42. dataTypeRaw.js', function() {
           i: { type: oracledb.BUFFER, dir: oracledb.BIND_IN, val: buf },
           o: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: 40000}
         },
-        function(err, result) {
+        function(err) {
           should.exist(err);
-          // ORA-01460: unimplemented or unreasonable conversion requested
-          (err.message).should.startWith('ORA-01460');
+          // ORA-06502: PL/SQL: numeric or value error\nORA-06512: at line 1
+          (err.message).should.startWith('ORA-06502:');
           done();
         }
       );
-    })
-  }) // 42.4
+    });
+  }); // 42.4
 
-})
+  describe('45.5 INSERT and SELECT', function() {
+    before(function(done) {
+      assist.createTable(connection, tableName, done);
+    });
+
+    after(function(done) {
+      connection.execute(
+        "DROP table " + tableName + " PURGE",
+        function(err) {
+          should.not.exist(err);
+          done();
+        }
+      );
+    });
+
+    beforeEach(function(done) {
+      insertID++;
+      done();
+    });
+
+    it('45.5.1 works with data size 100', function(done) {
+      var insertedStr = random.getRandomLengthString(100);
+      var insertedBuf = node6plus ? new Buffer(insertedStr) : Buffer.from(insertedStr);
+      test1(insertedBuf, done);
+    });
+
+    it('45.5.2 works with data size 2000', function(done) {
+      var insertedStr = random.getRandomLengthString(2000);
+      var insertedBuf = node6plus ? new Buffer(insertedStr) : Buffer.from(insertedStr);
+      test1(insertedBuf, done);
+    });
+
+    it('45.5.3 works with default type/dir', function(done) {
+      var insertedStr = random.getRandomLengthString(2000);
+      var insertedBuf = node6plus ? new Buffer(insertedStr) : Buffer.from(insertedStr);
+      test1_default(insertedBuf, done);
+    });
+
+  }); // 45.5
+
+  describe('45.6 UPDATE', function() {
+    before(function(done) {
+      assist.createTable(connection, tableName, done);
+    });
+
+    after(function(done) {
+      connection.execute(
+        "DROP table " + tableName + " PURGE",
+        function(err) {
+          should.not.exist(err);
+          done();
+        }
+      );
+    });
+
+    beforeEach(function(done) {
+      insertID++;
+      done();
+    });
+
+    it('45.6.1 works with data size 100', function(done) {
+      var insertedStr = random.getRandomLengthString(20);
+      var updateStr = random.getRandomLengthString(100);
+      var insertedBuf = node6plus ? new Buffer(insertedStr) : Buffer.from(insertedStr);
+      var updateBuf = node6plus ? new Buffer(updateStr) : Buffer.from(updateStr);
+      test2(insertedBuf, updateBuf, done);
+    });
+
+    it('45.6.2 works with data size 2000', function(done) {
+      var insertedStr = random.getRandomLengthString(30);
+      var updateStr = random.getRandomLengthString(2000);
+      var insertedBuf = node6plus ? new Buffer(insertedStr) : Buffer.from(insertedStr);
+      var updateBuf = node6plus ? new Buffer(updateStr) : Buffer.from(updateStr);
+      test2(insertedBuf, updateBuf, done);
+    });
+
+    it('45.6.3 works with default type/dir', function(done) {
+      var insertedStr = random.getRandomLengthString(30);
+      var updateStr = random.getRandomLengthString(2000);
+      var insertedBuf = node6plus ? new Buffer(insertedStr) : Buffer.from(insertedStr);
+      var updateBuf = node6plus ? new Buffer(updateStr) : Buffer.from(updateStr);
+      test2_default(insertedBuf, updateBuf, done);
+    });
+
+  }); // 45.6
+
+  var test1 = function(content, callback) {
+    async.series([
+      function(cb) {
+        insert(content, cb);
+      },
+      function(cb) {
+        fetch(content, cb);
+      }
+    ], callback);
+  };
+
+  var test1_default = function(content, callback) {
+    async.series([
+      function(cb) {
+        insert_default(content, cb);
+      },
+      function(cb) {
+        fetch(content, cb);
+      }
+    ], callback);
+  };
+
+  var test2 = function(insertedStr, updateStr, callback) {
+    async.series([
+      function(cb) {
+        insert(insertedStr, cb);
+      },
+      function(cb) {
+        update(updateStr, cb);
+      },
+      function(cb) {
+        fetch(updateStr, cb);
+      }
+    ], callback);
+  };
+
+  var test2_default = function(insertedStr, updateStr, callback) {
+    async.series([
+      function(cb) {
+        insert(insertedStr, cb);
+      },
+      function(cb) {
+        update_default(updateStr, cb);
+      },
+      function(cb) {
+        fetch(updateStr, cb);
+      }
+    ], callback);
+  };
+
+  var insert = function(content, callback) {
+    var sql = "insert into " + tableName + " (num, content) values (:i, :c)";
+    var bindVar = {
+      i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
+      c: { val: content, dir: oracledb.BIND_IN, type: oracledb.BUFFER }
+    };
+    connection.execute(
+      sql,
+      bindVar,
+      function(err, result) {
+        should.not.exist(err);
+        (result.rowsAffected).should.be.exactly(1);
+        callback();
+      }
+    );
+  };
+
+  var insert_default = function(content, callback) {
+    var sql = "insert into " + tableName + " (num, content) values (:i, :c)";
+    var bindVar = {
+      i: insertID,
+      c: content
+    };
+    connection.execute(
+      sql,
+      bindVar,
+      function(err, result) {
+        should.not.exist(err);
+        (result.rowsAffected).should.be.exactly(1);
+        callback();
+      }
+    );
+  };
+
+  var update = function(content, callback) {
+    var sql = "update " + tableName + " set content = :c where num = :i";
+    var bindVar = {
+      i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
+      c: { val: content, dir: oracledb.BIND_IN, type: oracledb.BUFFER }
+    };
+    connection.execute(
+      sql,
+      bindVar,
+      function(err, result) {
+        should.not.exist(err);
+        (result.rowsAffected).should.be.exactly(1);
+        callback();
+      }
+    );
+  };
+
+  var update_default = function(content, callback) {
+    var sql = "update " + tableName + " set content = :c where num = :i";
+    var bindVar = {
+      i: insertID,
+      c: content
+    };
+    connection.execute(
+      sql,
+      bindVar,
+      function(err, result) {
+        should.not.exist(err);
+        (result.rowsAffected).should.be.exactly(1);
+        callback();
+      }
+    );
+  };
+
+  var fetch = function(expected, callback) {
+    var sql = "select content from " + tableName + " where num = " + insertID;
+    connection.execute(
+      sql,
+      function(err, result) {
+        should.not.exist(err);
+        assist.compare2Buffers(result.rows[0][0], expected);
+        callback();
+      }
+    );
+  };
+
+});

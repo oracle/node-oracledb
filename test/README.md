@@ -75,16 +75,15 @@ vi <some-directory>/node-oracledb/test/dbconfig.js
 module.exports = {
   user          : process.env.NODE_ORACLEDB_USER || "hr",
   password      : process.env.NODE_ORACLEDB_PASSWORD || "welcome",
-  connectString : process.env.NODE_ORACLEDB_CONNECTIONSTRING || "localhost/orcl",
-  externalAuth  : process.env.NODE_ORACLEDB_EXTERNALAUTH ? true : false
+  connectString : process.env.NODE_ORACLEDB_CONNECTIONSTRING || "localhost/orcl"
 };
 ```
 
-To use external authentication, set the `externalAuth` property to
-`true`.  Also make sure Oracle Database and the authentication service
-have been appropriately configured.  See
+To enable external authentication tests, please make sure Oracle Database
+and the authentication service have been appropriately configured.  See
 [Documentation for External Authentication](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#extauth)
-for more details.
+for more details. And then, set the environment variable `NODE_ORACLEDB_EXTERNALAUTH`
+to be `true`.
 
 Note: the test suite requires a schema with these privileges:
 
@@ -117,10 +116,10 @@ This calls the `test` script defined in `oracledb/package.json`.
 
 ```
 cd <some-directory>/node_oracledb
-npm run-script testWindows
+npm run testwindows
 ```
 
-This calls the `testWindows` script defined in `oracledb/package.json`.
+This calls the `testwindows` script defined in `oracledb/package.json`.
 
 See [npm scripts](https://docs.npmjs.com/misc/scripts) for more information
 about how npm handles the "scripts" field of `package.json`.
@@ -135,6 +134,7 @@ cd <some-directory>/node_oracledb
 See [mochajs.org](http://mochajs.org/) for more information on running tests with mocha.
 
 ## 3. Add Tests
+
 See [CONTRIBUTING](https://github.com/oracle/node-oracledb/blob/master/CONTRIBUTING.md)
 for general information on contribution requirements.
 
@@ -145,6 +145,82 @@ assigned a number. The following number ranges have been chosen:
 - 21 - 50  are reserved for data type supporting tests
 - 51 onwards are for other tests
 
-## 4. Test Index
+In order to include your tests in the suite, add each new test file
+name to [`test/opts/mocha.opts`](https://github.com/oracle/node-oracledb/blob/master/test/opts/mocha.opts).
 
-See [`test/list.txt`](https://github.com/oracle/node-oracledb/blob/master/test/list.txt) for the list of existing tests.
+Please also add a description of each individual test to the Test
+List.
+
+## 4. Test List
+
+See [`test/list.txt`](https://github.com/oracle/node-oracledb/blob/master/test/list.txt)
+for the list of existing tests.
+
+## 5. Tests Compatibility
+
+- We conduct base testing with Instant Client 11.2.0.4 and 12.1.0.2 on Linux X64
+and Windows 7.
+
+- Users of 11.2.0.1 and 11.2.0.2 clients may see failures with poolTimeout.js
+and dataTypeDouble.js.
+
+- Slow networks may cause some tests to timeout.
+
+## 6. Troubleshooting
+
+You may encounter some troubles when running the test suite. These troubles
+might be caused by the concurrency issue of Mocha framework, network latencies,
+or database server issues. This section gives some issues that we ever saw
+and our solutions.
+
+### 6.1 ORA-00054: resource busy and acquire with NOWAIT specified or timeout expired
+
+This error occurs when Node.js programs try to change database objects which
+hold locks. The workaround would be:
+
+(1) Use unique DB object names for each test to avoid interference between
+test files.
+(2) Try not to use 'beforeEach' blocks for object operations to avoid
+the interference between cases.
+
+### 6.2 ORA-00018: maximum number of sessions exceeded
+
+This error occurs when the test suite takes up more sessions than the
+configured limit. You can alter the session limit on the database server side.
+If you do not have access to change the database session setting, you could
+use the below script to deliberately add an interval between tests.
+
+```Bash
+arr=$(ls test/*js)
+for case in ${arr[@]}
+do
+  var="$NODE_PATH/../node_modules/.bin/mocha --timeout 10000 $case"
+  eval $var
+  sleep 1
+done
+```
+
+### 6.3 ORA-28865: SSL connection closed
+
+You may encounter this error when the test suite sends more connection
+requests per second than the database is configured to handle.
+
+There are two solutions:
+
+- Solution 1: Change database `RATE_LIMIT` configuration. This parameter
+defines the connection count allowed per second. See [RATE_LIMIT](https://docs.oracle.com/database/122/NETRF/Oracle-Net-Listener-parameters-in-listener-ora-file.htm#NETRF426)
+for more information.
+
+- Solution 2: Set the `RETRY_COUNT` and `RETRY_DELAY` parameters in
+connectString.
+
+For example, below is the connectString which could be defined in
+`tnsnames.ora` file.
+
+```
+dbaccess = (description=(RETRY_COUNT=20)(RETRY_DELAY=3)
+          (address=(protocol=tcps)(port=1521)(host=<db-host>))
+          (connect_data=(service_name=<service-name>))
+          (security=(my_wallet_directory=<wallet-location>)(ssl_server_cert_dn=<ssl-server-cert-dn>))
+       )
+```

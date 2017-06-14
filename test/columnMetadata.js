@@ -42,35 +42,42 @@ describe('9. columnMetadata.js', function(){
 
   var connection = null;
   before('get a connection', function(done) {
-    oracledb.getConnection(dbConfig, function(err, conn) {
-      should.not.exist(err);
-      connection = conn;
-      done();
-    });
-  })
+    oracledb.getConnection(
+      {
+        user:          dbConfig.user,
+        password:      dbConfig.password,
+        connectString: dbConfig.connectString
+      },
+      function(err, conn) {
+        should.not.exist(err);
+        connection = conn;
+        done();
+      }
+    );
+  });
 
   after('release the connection', function(done) {
     connection.release( function(err) {
       should.not.exist(err);
       done();
     });
-  })
+  });
 
   describe('9.1 tests with the same table', function() {
 
-    beforeEach('create the table', function(done) {
+    before('create the table', function(done) {
       var proc = "BEGIN \n" +
                  "    DECLARE \n" +
-                 "        e_table_exists EXCEPTION; \n" +
-                 "        PRAGMA EXCEPTION_INIT(e_table_exists, -00942);\n " +
+                 "        e_table_missing EXCEPTION; \n" +
+                 "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n " +
                  "    BEGIN \n" +
-                 "        EXECUTE IMMEDIATE ('DROP TABLE nodb_departments'); \n" +
+                 "        EXECUTE IMMEDIATE ('DROP TABLE nodb_cmd PURGE'); \n" +
                  "    EXCEPTION \n" +
-                 "        WHEN e_table_exists \n" +
+                 "        WHEN e_table_missing \n" +
                  "        THEN NULL; \n" +
                  "    END; \n" +
                  "    EXECUTE IMMEDIATE (' \n" +
-                 "        CREATE TABLE nodb_departments ( \n" +
+                 "        CREATE TABLE nodb_cmd ( \n" +
                  "            department_id NUMBER,  \n" +
                  "            department_name VARCHAR2(20), \n" +
                  "            manager_id NUMBER, \n" +
@@ -78,15 +85,15 @@ describe('9. columnMetadata.js', function(){
                  "        ) \n" +
                  "    '); \n" +
                  "    EXECUTE IMMEDIATE (' \n" +
-                 "        INSERT INTO nodb_departments VALUES \n" +
+                 "        INSERT INTO nodb_cmd VALUES \n" +
                  "        (40,''Human Resources'', 203, 2400) \n" +
                  "    '); \n" +
                  "    EXECUTE IMMEDIATE (' \n" +
-                 "        INSERT INTO nodb_departments VALUES \n" +
+                 "        INSERT INTO nodb_cmd VALUES \n" +
                  "        (50,''Shipping'', 121, 1500) \n" +
                  "    '); \n" +
                  "    EXECUTE IMMEDIATE (' \n" +
-                 "        INSERT INTO nodb_departments VALUES \n" +
+                 "        INSERT INTO nodb_cmd VALUES \n" +
                  "        (90, ''Executive'', 100, 1700) \n" +
                  "    '); \n" +
                  "END; ";
@@ -98,22 +105,22 @@ describe('9. columnMetadata.js', function(){
           done();
         }
       );
-    }) // beforeEach
+    }); // before
 
-    afterEach(function(done) {
+    after(function(done) {
       connection.execute(
-        "DROP TABLE nodb_departments",
+        "DROP TABLE nodb_cmd PURGE",
         function(err) {
           should.not.exist(err);
           done();
         }
       );
-    }) // afterEach
+    }); // after
 
     it('9.1.1 shows metaData correctly when retrieving 1 column from a 4-column table', function(done){
 
       connection.execute(
-        "SELECT location_id FROM nodb_departments WHERE department_id = :did",
+        "SELECT location_id FROM nodb_cmd WHERE department_id = :did",
         [50],
         function(err, result){
           should.not.exist(err);
@@ -122,12 +129,12 @@ describe('9. columnMetadata.js', function(){
           done();
         }
       );
-    }) // 9.1.1
+    }); // 9.1.1
 
     it('9.1.2 shows metaData when retrieving 2 columns. MetaData is correct in content and sequence', function(done){
 
       connection.execute(
-        "SELECT department_id, department_name FROM nodb_departments WHERE location_id = :lid",
+        "SELECT department_id, department_name FROM nodb_cmd WHERE location_id = :lid",
         [1700],
         function(err, result){
           should.not.exist(err);
@@ -137,12 +144,12 @@ describe('9. columnMetadata.js', function(){
           done();
         }
       );
-    })
+    });
 
     it('9.1.3 shows metaData correctly when retrieve 3 columns', function(done){
 
       connection.execute(
-        "SELECT department_id, department_name, manager_id FROM nodb_departments WHERE location_id = :lid",
+        "SELECT department_id, department_name, manager_id FROM nodb_cmd WHERE location_id = :lid",
         [2400],
         function(err, result){
           should.not.exist(err);
@@ -153,12 +160,12 @@ describe('9. columnMetadata.js', function(){
           done();
         }
       );
-    })
+    });
 
     it('9.1.4 shows metaData correctly when retrieving all columns with [SELECT * FROM table] statement', function(done){
 
       connection.execute(
-        "SELECT * FROM nodb_departments ORDER BY department_id",
+        "SELECT * FROM nodb_cmd ORDER BY department_id",
         function(err, result){
           should.not.exist(err);
           result.rows.length.should.be.exactly(3);
@@ -170,26 +177,26 @@ describe('9. columnMetadata.js', function(){
           done();
         }
       );
-    }) // 9.1.4
+    }); // 9.1.4
 
     it('9.1.5 works for SELECT count(*)', function(done){
 
       connection.execute(
-        "SELECT count(*) FROM nodb_departments",
+        "SELECT count(*) FROM nodb_cmd",
         function(err, result){
           should.not.exist(err);
           result.rows[0][0].should.be.exactly(3);
-          result.metaData.should.be.ok;
+          result.metaData.should.be.ok();
           result.metaData[0].name.should.eql('COUNT(*)');
           done();
         }
       );
-    }) // 9.1.5
+    }); // 9.1.5
 
     it('9.1.6 works when a query returns no rows', function(done){
 
       connection.execute(
-        "SELECT * FROM nodb_departments WHERE department_id = :did",
+        "SELECT * FROM nodb_cmd WHERE department_id = :did",
         [100],
         function(err, result){
           should.not.exist(err);
@@ -201,23 +208,23 @@ describe('9. columnMetadata.js', function(){
           done();
         }
       );
-    }) // 9.1.6
+    }); // 9.1.6
 
     it('9.1.7 only works for SELECT statement, does not work for INSERT', function(done){
 
       connection.execute(
-        "INSERT INTO nodb_departments VALUES (99, 'FACILITY', 456, 1700)",
+        "INSERT INTO nodb_cmd VALUES (99, 'FACILITY', 456, 1700)",
         function(err, result){
           should.not.exist(err);
           (result.rowsAffected).should.be.exactly(1);
           should.not.exist(result.metaData);
 
           connection.execute(
-            'SELECT * FROM nodb_departments WHERE department_id = :1',
+            'SELECT * FROM nodb_cmd WHERE department_id = :1',
             [99],
             function(err, result){
               should.not.exist(err);
-              result.metaData.should.be.ok;
+              result.metaData.should.be.ok();
               result.metaData.length.should.be.exactly(4);
               result.metaData[0].name.should.eql('DEPARTMENT_ID');
               result.metaData[1].name.should.eql('DEPARTMENT_NAME');
@@ -229,12 +236,12 @@ describe('9. columnMetadata.js', function(){
           );
         }
       );
-    }) // 9.1.7
+    }); // 9.1.7
 
     it('9.1.8 only works for SELECT statement, does not work for UPDATE', function(done){
 
       connection.execute(
-        "UPDATE nodb_departments SET department_name = 'Finance' WHERE department_id = :did",
+        "UPDATE nodb_cmd SET department_name = 'Finance' WHERE department_id = :did",
         { did: 40 },
         function(err, result){
           should.not.exist(err);
@@ -242,11 +249,11 @@ describe('9. columnMetadata.js', function(){
           should.not.exist(result.metaData);
 
           connection.execute(
-            "SELECT department_name FROM nodb_departments WHERE department_id = :1",
+            "SELECT department_name FROM nodb_cmd WHERE department_id = :1",
             [40],
             function(err, result){
               should.not.exist(err);
-              result.metaData.should.be.ok;
+              result.metaData.should.be.ok();
               result.metaData[0].name.should.eql('DEPARTMENT_NAME');
               result.rows[0][0].should.eql('Finance');
               done();
@@ -254,12 +261,12 @@ describe('9. columnMetadata.js', function(){
           );
         }
       );
-    }) // 9.1.8
+    }); // 9.1.8
 
     it('9.1.9 works with a SQL WITH statement', function(done){
 
       var sqlWith = "WITH nodb_dep AS " +
-                    "(SELECT * FROM nodb_departments WHERE location_id < 2000) " +
+                    "(SELECT * FROM nodb_cmd WHERE location_id < 2000) " +
                     "SELECT * FROM nodb_dep WHERE department_id > 50 ORDER BY department_id";
 
       connection.execute(
@@ -274,11 +281,11 @@ describe('9. columnMetadata.js', function(){
           done();
         }
       );
-    }) // 9.1.9
+    }); // 9.1.9
 
     it('9.1.10 displays metaData correctly with result set', function(done) {
       connection.execute(
-        "SELECT * FROM nodb_departments ORDER BY department_id",
+        "SELECT * FROM nodb_cmd ORDER BY department_id",
         [],
         { resultSet: true },
         function(err, result) {
@@ -290,9 +297,9 @@ describe('9. columnMetadata.js', function(){
           done();
         }
       );
-    })
+    });
 
-  }) // 9.1
+  }); // 9.1
 
   describe('9.2 case sensitive', function() {
     it('9.2.1 works for tables whose column names were created case sensitively', function(done){
@@ -302,12 +309,12 @@ describe('9. columnMetadata.js', function(){
 
           var proc = "BEGIN \n" +
                      "    DECLARE \n" +
-                     "        e_table_exists EXCEPTION; \n" +
-                     "        PRAGMA EXCEPTION_INIT(e_table_exists, -00942);\n " +
+                     "        e_table_missing EXCEPTION; \n" +
+                     "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n " +
                      "    BEGIN \n" +
-                     "        EXECUTE IMMEDIATE ('DROP TABLE nodb_casesensitive'); \n" +
+                     "        EXECUTE IMMEDIATE ('DROP TABLE nodb_casesensitive PURGE'); \n" +
                      "    EXCEPTION \n" +
-                     "        WHEN e_table_exists \n" +
+                     "        WHEN e_table_missing \n" +
                      "        THEN NULL; \n" +
                      "    END; \n" +
                      "    EXECUTE IMMEDIATE (' \n" +
@@ -340,7 +347,7 @@ describe('9. columnMetadata.js', function(){
         },
         function(callback){
           connection.execute(
-            "DROP TABLE nodb_casesensitive",
+            "DROP TABLE nodb_casesensitive PURGE",
             function(err){
               should.not.exist(err);
               callback();
@@ -348,8 +355,8 @@ describe('9. columnMetadata.js', function(){
           );
         }
       ], done);
-    }) // 9.2.1
-  })  // 9.2
+    }); // 9.2.1
+  });  // 9.2
 
   describe('9.3 Large number of columns', function() {
 
@@ -367,14 +374,30 @@ describe('9. columnMetadata.js', function(){
       }
 
       var table_name = "nodb_large_columns";
-      var sqlCreate = "CREATE TABLE " + table_name + " ( " + columns_string + " )";
       var sqlSelect = "SELECT * FROM " + table_name;
-      var sqlDrop = "DROP TABLE " + table_name;
+      var sqlDrop = "DROP TABLE " + table_name + " PURGE";
+
+      var proc = "BEGIN \n" +
+                 "    DECLARE \n" +
+                 "        e_table_missing EXCEPTION; \n" +
+                 "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n " +
+                 "    BEGIN \n" +
+                 "        EXECUTE IMMEDIATE ('DROP TABLE nodb_large_columns PURGE'); \n" +
+                 "    EXCEPTION \n" +
+                 "        WHEN e_table_missing \n" +
+                 "        THEN NULL; \n" +
+                 "    END; \n" +
+                 "    EXECUTE IMMEDIATE (' \n" +
+                 "        CREATE TABLE nodb_large_columns ( \n" +
+                 columns_string +
+                 "        ) \n" +
+                 "    '); \n" +
+                 "END; ";
 
       async.series([
         function(callback) {
           connection.execute(
-            sqlCreate,
+            proc,
             function(err){
               should.not.exist(err);
               callback();
@@ -403,10 +426,10 @@ describe('9. columnMetadata.js', function(){
           );
         }
       ], done);
-    })
-  }) // 9.3
+    });
+  }); // 9.3
 
-  describe('9.4 single character column', function(done) {
+  describe('9.4 single character column', function() {
 
     it('9.4.1 works with column names consisting of single characters', function(done){
 
@@ -414,12 +437,12 @@ describe('9. columnMetadata.js', function(){
       var sqlCreate =
           "BEGIN \n" +
           "   DECLARE \n" +
-          "       e_table_exists EXCEPTION; \n" +
-          "       PRAGMA EXCEPTION_INIT(e_table_exists, -00942); \n" +
+          "       e_table_missing EXCEPTION; \n" +
+          "       PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
           "   BEGIN \n" +
-          "       EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " '); \n" +
+          "       EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " PURGE'); \n" +
           "   EXCEPTION \n" +
-          "       WHEN e_table_exists \n" +
+          "       WHEN e_table_missing \n" +
           "       THEN NULL; \n" +
           "   END; \n" +
           "   EXECUTE IMMEDIATE (' \n" +
@@ -430,7 +453,7 @@ describe('9. columnMetadata.js', function(){
           "   '); \n" +
           "END; \n";
       var sqlSelect = "SELECT * FROM " + tableName;
-      var sqlDrop = "DROP TABLE " + tableName;
+      var sqlDrop = "DROP TABLE " + tableName + " PURGE";
 
       async.series([
         function(callback) {
@@ -463,14 +486,14 @@ describe('9. columnMetadata.js', function(){
           );
         }
       ], done);
-    })
-  }) // 9.4
+    });
+  }); // 9.4
 
   describe('9.5 duplicate column alias', function() {
 
     it('9.5.1 works when using duplicate column alias', function(done) {
       connection.execute(
-        "SELECT 1 a, 'abc' a from dual",
+        "SELECT 1 a, 'abc' a FROM dual",
         function(err, result) {
           should.not.exist(err);
           result.metaData[0].name.should.eql('A');
@@ -478,7 +501,7 @@ describe('9. columnMetadata.js', function(){
           done();
         }
       );
-    })
-  })
+    });
+  });
 
-})
+});

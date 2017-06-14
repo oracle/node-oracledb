@@ -46,61 +46,68 @@ describe('22. dataTypeChar.js', function(){
 
   var strLen = [100, 1000, 2000];  // char string length
   var strs =
-  [
-    assist.createCharString(strLen[0]),
-    assist.createCharString(strLen[1]),
-    assist.createCharString(strLen[2]),
-  ];
+    [
+      assist.createCharString(strLen[0]),
+      assist.createCharString(strLen[1]),
+      assist.createCharString(strLen[2]),
+    ];
 
   before('get one connection', function(done) {
-    oracledb.getConnection(dbConfig, function(err, conn) {
-      should.not.exist(err);
-      connection = conn;
-      done();
-    });
-  })
+    oracledb.getConnection(
+      {
+        user:          dbConfig.user,
+        password:      dbConfig.password,
+        connectString: dbConfig.connectString
+      },
+      function(err, conn) {
+        should.not.exist(err);
+        connection = conn;
+        done();
+      }
+    );
+  });
 
   after('release connection', function(done) {
     connection.release( function(err) {
       should.not.exist(err);
       done();
     });
-  })
+  });
 
   describe('22.1 testing CHAR data in various lengths', function() {
 
     before('create table, insert data',function(done) {
       assist.setUp(connection, tableName, strs, done);
-    })
+    });
 
     after(function(done) {
       connection.execute(
-        "DROP table " + tableName,
+        "DROP table " + tableName + " PURGE",
         function(err) {
           should.not.exist(err);
           done();
         }
       );
-    })
+    });
 
     it('22.1.1 works well with SELECT query', function(done) {
       assist.dataTypeSupport(connection, tableName, strs, done);
-    })
+    });
 
     it('22.1.2 works well with result set', function(done) {
       assist.verifyResultSet(connection, tableName, strs, done);
-    })
+    });
 
     it('22.1.3 works well with REF Cursor', function(done) {
       assist.verifyRefCursor(connection, tableName, strs, done);
-    })
-  })
+    });
+  });
 
   describe('22.2 stores null value correctly', function() {
     it('22.2.1 testing Null, Empty string and Undefined', function(done) {
       assist.verifyNullValues(connection, tableName, done);
-    })
-  })
+    });
+  });
 
   describe('22.3 PL/SQL binding scalar', function() {
 
@@ -113,7 +120,7 @@ describe('22. dataTypeChar.js', function(){
                      "BEGIN\n" +
                      "  RETURN 'Hello ' || stringValue || ' world!';\n" +
                      "END testchar;";
-          connection.should.be.ok;
+          connection.should.be.ok();
           connection.execute(
             proc,
             function(err) {
@@ -130,7 +137,7 @@ describe('22. dataTypeChar.js', function(){
           connection.execute(
             "BEGIN :result := testchar(:stringValue); END;",
             bindvars,
-            function(err, result) {
+            function(err) {
               should.not.exist(err);
               // console.log(result);
               callback();
@@ -147,7 +154,7 @@ describe('22. dataTypeChar.js', function(){
           );
         }
       ], done);
-    }) // 22.3.1
+    }); // 22.3.1
 
     it('22.3.2 bind scalar values INOUT', function(done) {
       async.series([
@@ -175,6 +182,8 @@ describe('22. dataTypeChar.js', function(){
               should.exist(err);
               // Error: ORA-06502: PL/SQL: numeric or value error: character string buffer too small
               // For SQL*PLUS driver, the behavior is the same
+
+              should.not.exist(result);
               callback();
             }
           );
@@ -189,7 +198,7 @@ describe('22. dataTypeChar.js', function(){
           );
         }
       ], done);
-    }) // 22.3.2
+    }); // 22.3.2
 
     it('22.3.3 bind scalar values OUT', function(done) {
       async.series([
@@ -232,8 +241,8 @@ describe('22. dataTypeChar.js', function(){
           );
         }
       ], done);
-    }) // 22.3.3
-  }) // 22.3
+    }); // 22.3.3
+  }); // 22.3
 
   describe('22.4 PL/SQL binding indexed tables', function() {
 
@@ -246,7 +255,7 @@ describe('22. dataTypeChar.js', function(){
                       "  TYPE stringsType IS TABLE OF CHAR(30) INDEX BY BINARY_INTEGER;\n" +
                       "  FUNCTION test(strings IN stringsType) RETURN CHAR;\n" +
                       "END;";
-          connection.should.be.ok;
+          connection.should.be.ok();
           connection.execute(
             proc,
             function(err) {
@@ -303,6 +312,6 @@ describe('22. dataTypeChar.js', function(){
           );
         }
       ], done);
-    })
-  })
-})
+    });
+  });
+});

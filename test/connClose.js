@@ -55,7 +55,7 @@ describe('52. connClose.js', function() {
             function() {
               connection.stmtCacheSize = 10;
             },
-            /NJS-003: invalid connection/
+            /NJS-014: stmtCacheSize is a read-only property/
           );
           done();
         });
@@ -175,18 +175,14 @@ describe('52. connClose.js', function() {
 
         connection.release(function(err) {
           should.not.exist(err);
-          connection.execute(
-            "select sysdate from dual",
-            function(err, result) {
-              should.not.exist(result);
-              should.exist(err);
-              should.strictEqual(
-                err.message,
-                "NJS-003: invalid connection"
-              );
-              done();
-            }
+          should.throws(
+            function() {
+              var sql = "select sysdate from dual";
+              connection.execute(sql, function() {});
+            },
+            /NJS-003: invalid connection/
           );
+          done();
         });
       }
     );
@@ -243,7 +239,7 @@ describe('52. connClose.js', function() {
             mdata = resultSet.metaData;
             should.not.exist(mdata);
           },
-          /NJS-003: invalid connection/
+          /NJS-018: invalid ResultSet/
         );
         callback();
       },

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -190,7 +190,7 @@ assist.data = {
     new Date('2015-07-23 22:00:00'),
     new Date('2015-07-23 23:00:00'),
     new Date('2015-07-24 00:00:00'),
-    new Date(2003, 09, 23, 11, 50, 30, 123)
+    new Date(2003, 9, 23, 11, 50, 30, 123)
   ]
 };
 
@@ -497,20 +497,20 @@ assist.content =
 
 
 var StringBuffer = function() {
-    this.buffer = [];
-    this.index = 0;
+  this.buffer = [];
+  this.index = 0;
 };
 
 StringBuffer.prototype = {
-    append: function(s) {
-      this.buffer[this.index] = s;
-      this.index += 1;
-      return this;
-    },
+  append: function(s) {
+    this.buffer[this.index] = s;
+    this.index += 1;
+    return this;
+  },
 
-    toString: function() {
-      return this.buffer.join("");
-    }
+  toString: function() {
+    return this.buffer.join("");
+  }
 };
 
 assist.createCharString = function(size) {
@@ -528,7 +528,7 @@ assist.createCharString = function(size) {
     }
   }
   return buffer.toString();
-}
+};
 
 assist.createBuffer = function(size) {
   var array = [];
@@ -537,7 +537,22 @@ assist.createBuffer = function(size) {
     array.push(b);
   }
   return new Buffer(array);
-}
+};
+
+assist.compare2Buffers = function(originalBuf, compareBuf) {
+  var node01113plus = true; // assume node runtime version is higher than 0.11.13
+  var nodeVer = process.versions["node"].split(".");
+  if(nodeVer[0] === "0" && nodeVer[1] === "11" && nodeVer[2] < "13") {
+    node01113plus = false;
+  } else if(nodeVer[0] === "0" && nodeVer[1] < "11"){
+    node01113plus = false;
+  }
+  if(node01113plus === true) {
+    return originalBuf.equals(compareBuf);
+  } else {
+    return (originalBuf.toString('utf8') === compareBuf.toString('utf8'));
+  }
+};
 
 assist.setUp = function(connection, tableName, array, done)
 {
@@ -549,7 +564,7 @@ assist.setUp = function(connection, tableName, array, done)
       assist.insertDataArray(connection, tableName, array, callback);
     }
   ], done);
-}
+};
 
 assist.setUp4sql = function(connection, tableName, array, done)
 {
@@ -561,7 +576,7 @@ assist.setUp4sql = function(connection, tableName, array, done)
       assist.insertData4sql(connection, tableName, array, callback);
     }
   ], done);
-}
+};
 
 assist.createTable = function(connection, tableName, done)
 {
@@ -573,7 +588,7 @@ assist.createTable = function(connection, tableName, done)
       done();
     }
   );
-}
+};
 
 assist.insertDataArray = function(connection, tableName, array, done)
 {
@@ -591,7 +606,7 @@ assist.insertDataArray = function(connection, tableName, array, done)
     should.not.exist(err);
     done();
   });
-}
+};
 
 assist.insertData4sql = function(connection, tableName, array, done)
 {
@@ -610,19 +625,19 @@ assist.insertData4sql = function(connection, tableName, array, done)
     should.not.exist(err);
     done();
   });
-}
+};
 
 assist.sqlCreateTable = function(tableName)
 {
   var createTab =
         "BEGIN " +
         "  DECLARE " +
-        "    e_table_exists EXCEPTION; " +
-        "    PRAGMA EXCEPTION_INIT(e_table_exists, -00942); " +
+        "    e_table_missing EXCEPTION; " +
+        "    PRAGMA EXCEPTION_INIT(e_table_missing, -00942); " +
         "   BEGIN " +
-        "     EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " '); " +
+        "     EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " PURGE'); " +
         "   EXCEPTION " +
-        "     WHEN e_table_exists " +
+        "     WHEN e_table_missing " +
         "     THEN NULL; " +
         "   END; " +
         "   EXECUTE IMMEDIATE (' " +
@@ -635,13 +650,13 @@ assist.sqlCreateTable = function(tableName)
         "END; ";
 
   return createTab;
-}
+};
 
 
 /************************* Functions for Verifiction *********************************/
 
 assist.dataTypeSupport = function(connection, tableName, array, done) {
-  connection.should.be.ok;
+  connection.should.be.ok();
   connection.execute(
     "SELECT * FROM " + tableName + " ORDER BY num",
     [],
@@ -664,7 +679,7 @@ assist.dataTypeSupport = function(connection, tableName, array, done) {
       done();
     }
   );
-}
+};
 
 assist.verifyResultSet = function(connection, tableName, array, done)
 {
@@ -679,7 +694,7 @@ assist.verifyResultSet = function(connection, tableName, array, done)
       fetchRowsFromRS(result.resultSet, array, done);
     }
   );
-}
+};
 
 assist.verifyRefCursor = function(connection, tableName, array, done)
 {
@@ -723,7 +738,7 @@ assist.verifyRefCursor = function(connection, tableName, array, done)
       );
     }
   ], done);
-}
+};
 
 var numRows = 3;  // number of rows to return from each call to getRows()
 function fetchRowsFromRS(rs, array, cb)
@@ -758,9 +773,10 @@ assist.selectOriginalData = function(connection, tableName, array, done)
     connection.execute(
       "SELECT * FROM " + tableName + " WHERE num = :no",
       { no: array.indexOf(element) },
-      function(err, result) {
+      function(err) {
         should.not.exist(err);
         // console.log(result.rows);
+
         cb();
       }
     );
@@ -768,14 +784,14 @@ assist.selectOriginalData = function(connection, tableName, array, done)
     should.not.exist(err);
     done();
   });
-}
+};
 
 /* Null value verfication */
 assist.verifyNullValues = function(connection, tableName, done)
 {
   var sqlInsert = "INSERT INTO " + tableName + " VALUES(:no, :bindValue)";
 
-  connection.should.be.ok;
+  connection.should.be.ok();
   async.series([
     function createTable(callback) {
       var sqlCreate = assist.sqlCreateTable(tableName);
@@ -856,7 +872,7 @@ assist.verifyNullValues = function(connection, tableName, done)
     },
     function dropTable(callback) {
       connection.execute(
-        "DROP table " + tableName,
+        "DROP table " + tableName + " PURGE",
         function(err) {
           should.not.exist(err);
           callback();
@@ -879,6 +895,24 @@ assist.verifyNullValues = function(connection, tableName, done)
     );
   }
 
-}
+};
+
+assist.compareNodejsVersion = function(nowVersion, comparedVersion) {
+  // return true if nowVersion > or = comparedVersion;
+  // else return false;
+  var now = nowVersion.split(".");
+  var compare = comparedVersion.split(".");
+  if(now[0] > compare[0]) {
+    return true;
+  } else if(now[0] === compare[0] && now[1] > compare[1]) {
+    return true;
+  } else if(now[0] === compare[0] && now[1] === compare[1] && now[2] > compare[2]) {
+    return true;
+  } else if (now[0] === compare[0] && now[1] === compare[1] && now[2] === compare[2]){
+    return true;
+  } else {
+    return false;
+  }
+};
 
 module.exports = assist;

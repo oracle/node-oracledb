@@ -35,7 +35,6 @@
 
 var oracledb = require('oracledb');
 var should   = require('should');
-var async    = require('async');
 var dbConfig = require('./dbconfig.js');
 
 // Need to skip these tests if Promises are not supported
@@ -50,7 +49,7 @@ describe('16. promises.js', function(){
 
     promise
       .then(function(conn) {
-        conn.should.be.ok;
+        conn.should.be.ok();
         conn.release(function(err) {
           if (err)
             return done(err);
@@ -59,9 +58,10 @@ describe('16. promises.js', function(){
         });
       })
       .catch(function(err) {
-        return done(err);
+        should.not.exist(err);
+        return done();
       });
-  })
+  });
 
   it('16.2 returns a promise from oracledb.createPool', function(done) {
     var promise = oracledb.createPool(dbConfig);
@@ -70,7 +70,7 @@ describe('16. promises.js', function(){
 
     promise
       .then(function(pool) {
-        pool.should.be.ok;
+        pool.should.be.ok();
         pool.terminate(function(err) {
           if (err)
             return done(err);
@@ -79,14 +79,15 @@ describe('16. promises.js', function(){
         });
       })
       .catch(function(err) {
-        return done(err);
+        should.not.exist(err);
+        return done();
       });
-  })
+  });
 
   it('16.3 returns a promise from pool.terminate', function(done) {
     oracledb.createPool(dbConfig)
       .then(function(pool) {
-        pool.should.be.ok;
+        pool.should.be.ok();
         var promise = pool.terminate();
         promise.should.be.an.instanceof(oracledb.Promise);
         return promise;
@@ -95,14 +96,15 @@ describe('16. promises.js', function(){
         return done();
       })
       .catch(function(err) {
-        return done(err);
+        should.not.exist(err);
+        return done();
       });
-  })
+  });
 
   it('16.4 returns a promise from pool.getConnection', function(done) {
     oracledb.createPool(dbConfig)
       .then(function(pool) {
-        pool.should.be.ok;
+        pool.should.be.ok();
         var getConnPromise = pool.getConnection();
         getConnPromise.should.be.an.instanceof(oracledb.Promise);
         getConnPromise
@@ -123,14 +125,15 @@ describe('16. promises.js', function(){
           });
       })
       .catch(function(err) {
-        return done(err);
+        should.not.exist(err);
+        return done();
       });
-  })
+  });
 
   it('16.5 returns a promise from connection.release', function(done) {
     oracledb.getConnection(dbConfig)
       .then(function(conn) {
-        conn.should.be.ok;
+        conn.should.be.ok();
         var promise = conn.release();
         promise.should.be.an.instanceof(oracledb.Promise);
         return promise;
@@ -139,14 +142,15 @@ describe('16. promises.js', function(){
         return done();
       })
       .catch(function(err) {
-        return done(err);
+        should.not.exist(err);
+        return done();
       });
-  })
+  });
 
   it('16.6 returns a promise from connection.execute', function(done) {
     oracledb.getConnection(dbConfig)
       .then(function(conn) {
-        conn.should.be.ok;
+        conn.should.be.ok();
         var executePromise = conn.execute('select 1 from dual');
         executePromise.should.be.an.instanceof(oracledb.Promise);
         return executePromise
@@ -158,15 +162,16 @@ describe('16. promises.js', function(){
           });
       })
       .catch(function(err) {
-        return done(err);
+        should.not.exist(err);
+        return done();
       });
-  })
+  });
 
   it('16.7 returns a promise from connection.commit', function(done) {
     oracledb.getConnection(dbConfig)
       .then(function(conn) {
         var commitPromise;
-        conn.should.be.ok;
+        conn.should.be.ok();
         commitPromise = conn.commit();
         commitPromise.should.be.an.instanceof(oracledb.Promise);
 
@@ -177,15 +182,16 @@ describe('16. promises.js', function(){
           });
       })
       .catch(function(err) {
-        return done(err);
+        should.not.exist(err);
+        return done();
       });
-  })
+  });
 
   it('16.8 returns a promise form connection.rollback', function(done) {
     oracledb.getConnection(dbConfig)
       .then(function(conn) {
         var rollbackPromise;
-        conn.should.be.ok;
+        conn.should.be.ok();
         rollbackPromise = conn.rollback();
         rollbackPromise.should.be.an.instanceof(oracledb.Promise);
 
@@ -196,14 +202,15 @@ describe('16. promises.js', function(){
           });
       })
       .catch(function(err) {
-        return done(err);
+        should.not.exist(err);
+        return done();
       });
-  })
+  });
 
   it('16.9 returns a promise from resultSet.close', function(done) {
     oracledb.getConnection(dbConfig)
       .then(function(conn) {
-        conn.should.be.ok;
+        conn.should.be.ok();
 
         return conn.execute('select 1 from dual', [], {resultSet: true})
           .then(function(result) {
@@ -219,9 +226,10 @@ describe('16. promises.js', function(){
           });
       })
       .catch(function(err) {
-        return done(err);
+        should.not.exist(err);
+        return done();
       });
-  })
+  });
 
   it('16.10 returns a promise from resultSet.getRow', function(done) {
 
@@ -229,7 +237,7 @@ describe('16. promises.js', function(){
       return resultSet.close()
         .then(function() {
           conn.release();
-        })
+        });
     }
 
     function processResultSet(conn, resultSet) {
@@ -264,7 +272,7 @@ describe('16. promises.js', function(){
 
     oracledb.getConnection(dbConfig)
       .then(function(conn) {
-        conn.should.be.ok;
+        conn.should.be.ok();
 
         return conn.execute('select 1 from dual', [], {resultSet: true})
           .then(function(result) {
@@ -275,10 +283,11 @@ describe('16. promises.js', function(){
           });
       })
       .catch(function(err) {
-        return done(err);
-       });
+        should.not.exist(err);
+        return done();
+      });
 
-  }) // 16.10
+  }); // 16.10
 
   it('16.11 returns a promise from resultSet.getRows', function(done) {
     function finishProcessing(conn, resultSet) {
@@ -321,7 +330,7 @@ describe('16. promises.js', function(){
 
     oracledb.getConnection(dbConfig)
       .then(function(conn) {
-        conn.should.be.ok;
+        conn.should.be.ok();
 
         return conn.execute('select 1 from dual union select 2 from dual', [], {resultSet: true})
           .then(function(result) {
@@ -332,8 +341,9 @@ describe('16. promises.js', function(){
           });
       })
       .catch(function(err) {
-        return done(err);
+        should.not.exist(err);
+        return done();
       });
-  }) // 16.11
+  }); // 16.11
 
-})
+});

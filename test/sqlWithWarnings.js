@@ -36,7 +36,6 @@
 "use strict";
 
 var oracledb = require('oracledb');
-var fs       = require('fs');
 var should   = require('should');
 var async    = require('async');
 var dbConfig = require('./dbconfig.js');
@@ -45,19 +44,26 @@ describe('64. sqlWithWarnings.js', function() {
 
   var connection = null;
   before('get one connection', function(done) {
-    oracledb.getConnection(dbConfig, function(err, conn) {
-      should.not.exist(err);
-      connection = conn;
-      done();
-    });
-  })
+    oracledb.getConnection(
+      {
+        user:          dbConfig.user,
+        password:      dbConfig.password,
+        connectString: dbConfig.connectString
+      },
+      function(err, conn) {
+        should.not.exist(err);
+        connection = conn;
+        done();
+      }
+    );
+  });
 
   after('release connection', function(done) {
     connection.release( function(err) {
       should.not.exist(err);
       done();
     });
-  })
+  });
 
   describe('64.1 test case offered by GitHub user', function() {
 
@@ -67,12 +73,12 @@ describe('64. sqlWithWarnings.js', function() {
       var sqlCreateTab =
         "BEGIN " +
         "  DECLARE " +
-        "    e_table_exists EXCEPTION; " +
-        "    PRAGMA EXCEPTION_INIT(e_table_exists, -00942); " +
+        "    e_table_missing EXCEPTION; " +
+        "    PRAGMA EXCEPTION_INIT(e_table_missing, -00942); " +
         "   BEGIN " +
-        "     EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " '); " +
+        "     EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " PURGE'); " +
         "   EXCEPTION " +
-        "     WHEN e_table_exists " +
+        "     WHEN e_table_missing " +
         "     THEN NULL; " +
         "   END; " +
         "   EXECUTE IMMEDIATE (' " +
@@ -117,31 +123,31 @@ describe('64. sqlWithWarnings.js', function() {
           });
         }
       ], done);
-    }) // before
+    }); // before
 
     after(function(done) {
       connection.execute(
-        "DROP TABLE " + tableName,
+        "DROP TABLE " + tableName + " PURGE",
         function(err) {
           should.not.exist(err);
           done();
         }
       );
-    })
+    });
 
     it('64.1.1 Executes an aggregate query which causes warnings', function(done) {
       connection.execute(
         "SELECT MAX(NUM_COL) AS NUM_COL FROM " + tableName,
         [],
         { maxRows: 1 },
-        function(err, result) {
+        function(err) {
           should.not.exist(err);
           done();
         }
       );
-    })
+    });
 
-  }) // 64.1
+  }); // 64.1
 
   describe('64.2 PL/SQL - Success With Info', function() {
 
@@ -149,20 +155,20 @@ describe('64. sqlWithWarnings.js', function() {
       " CREATE OR REPLACE PROCEDURE get_emp_rs_inout " +
       "   (p_in IN NUMBER, p_out OUT SYS_REFCURSOR ) AS " +
       "  BEGIN " +
-      "    OPEN p_out FOR SELECT * FROM nodb_employees " +
-      "  END;"
+      "    OPEN p_out FOR SELECT * FROM nodb_sql_emp " +
+      "  END;";
 
     it('64.2.1 Execute SQL Statement to create PLSQL procedure with warnings', function(done) {
       connection.should.be.an.Object;
       connection.execute (
         plsqlWithWarning,
-        function ( err, result ) {
+        function (err) {
           should.not.exist ( err );
           done();
         }
       );
-    })
+    });
 
-  }) // 64.2
+  }); // 64.2
 
-})
+});

@@ -122,15 +122,14 @@ describe('51. poolClose.js', function(){
       function(err, pool) {
         should.not.exist(err);
         pool.should.be.ok();
-
         pool.terminate(function(err) {
           should.not.exist(err);
-
-          pool.terminate(function(err) {
-            should.exist(err);
-            should.strictEqual(err.message, "NJS-002: invalid pool");
-          });
-
+          should.throws(
+            function() {
+              pool.terminate(function() {});
+            },
+            /NJS-002: invalid pool/
+          );
           done();
         }); // terminate()
       }
@@ -143,15 +142,14 @@ describe('51. poolClose.js', function(){
       function(err, pool) {
         should.not.exist(err);
         pool.should.be.ok();
-
         pool.close(function(err) {
           should.not.exist(err);
-
-          pool.close(function(err) {
-            should.exist(err);
-            should.strictEqual(err.message, "NJS-002: invalid pool");
-          });
-
+          should.throws(
+            function() {
+              pool.close(function() {});
+            },
+            /NJS-002: invalid pool/
+          );
           done();
         }); // terminate()
       }
@@ -218,11 +216,13 @@ describe('51. poolClose.js', function(){
         });
       },
       function close2(cb) {
-        conn.close(function(err) {
-          should.exist(err);
-          should.strictEqual(err.message, 'NJS-003: invalid connection');
-          cb();
-        });
+        should.throws(
+          function() {
+            conn.close(function() {});
+          },
+          /NJS-003: invalid connection/
+        );
+        cb();
       },
       function(cb) {
         pool.terminate(function(err) {

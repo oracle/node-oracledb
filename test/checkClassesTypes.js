@@ -43,17 +43,23 @@ var assist   = require('./dataTypeAssist.js');
 
 describe('61. checkClassesTypes.js', function() {
 
+  var credentials = {
+    user: dbConfig.user,
+    password: dbConfig.password,
+    connectString: dbConfig.connectString
+  };
+
   it('61.1 Oracledb class', function() {
     var type = Object.prototype.toString.call(oracledb);
     type.should.eql('[object Oracledb]');
-  })
+  });
 
   it('61.2 Connection class', function(done) {
     async.waterfall(
       [
         function(callback)
         {
-          oracledb.getConnection(dbConfig, callback);
+          oracledb.getConnection(credentials, callback);
         },
         function(connection, callback)
         {
@@ -72,7 +78,7 @@ describe('61. checkClassesTypes.js', function() {
         done();
       }
     );
-  })
+  });
 
   it('61.3 Lob Class', function(done) {
     var connection = null;
@@ -80,7 +86,7 @@ describe('61. checkClassesTypes.js', function() {
 
     async.series([
       function getConn(callback) {
-        oracledb.getConnection(dbConfig, function(err, conn) {
+        oracledb.getConnection(credentials, function(err, conn) {
           should.not.exist(err);
           connection = conn;
           callback();
@@ -105,7 +111,7 @@ describe('61. checkClassesTypes.js', function() {
             var clobStream = fs.createReadStream(clobFileName);
 
             clobStream.on('error', function(err) {
-              should.not.exist();
+              should.not.exist(err);
             });
 
             lob.on('error', function(err) {
@@ -141,7 +147,7 @@ describe('61. checkClassesTypes.js', function() {
       },
       function dropTab(callback) {
         connection.execute(
-          "DROP TABLE " + clobTableName,
+          "DROP TABLE " + clobTableName + " PURGE",
           function(err) {
             should.not.exist(err);
             callback();
@@ -155,13 +161,13 @@ describe('61. checkClassesTypes.js', function() {
         });
       }
     ], done);
-  }) // 61.3
+  }); // 61.3
 
   it('61.4 Pool Class', function(done) {
     async.waterfall(
       [
         function(callback) {
-          oracledb.createPool(dbConfig, callback);
+          oracledb.createPool(credentials, callback);
         },
         function(pool, callback) {
           var type = Object.prototype.toString.call(pool);
@@ -178,13 +184,13 @@ describe('61. checkClassesTypes.js', function() {
         done();
       }
     );
-  }) // 61.4
+  }); // 61.4
 
   it('61.5 ResultSet Class', function(done) {
     async.waterfall(
       [
         function(callback) {
-          oracledb.getConnection(dbConfig, callback);
+          oracledb.getConnection(credentials, callback);
         },
         function(connection, callback) {
           connection.execute(
@@ -211,6 +217,6 @@ describe('61. checkClassesTypes.js', function() {
         done();
       }
     );
-  }) // 61.5
+  }); // 61.5
 
-})
+});

@@ -45,36 +45,43 @@ describe('32. dataTypeDate.js', function() {
   var tableName = "nodb_date";
 
   before('get one connection', function(done) {
-    oracledb.getConnection(dbConfig, function(err, conn) {
-      should.not.exist(err);
-      connection = conn;
-      done();
-    });
-  })
+    oracledb.getConnection(
+      {
+        user:          dbConfig.user,
+        password:      dbConfig.password,
+        connectString: dbConfig.connectString
+      },
+      function(err, conn) {
+        should.not.exist(err);
+        connection = conn;
+        done();
+      }
+    );
+  });
 
   after('release connection', function(done) {
     connection.release( function(err) {
       should.not.exist(err);
       done();
     });
-  })
+  });
 
   describe('32.1 Testing JavaScript Date data', function() {
     var dates = assist.data.dates;
 
     before('create table, insert data',function(done) {
       assist.setUp(connection, tableName, dates, done);
-    })
+    });
 
     after(function(done) {
       connection.execute(
-        "DROP table " + tableName,
+        "DROP table " + tableName + " PURGE",
         function(err) {
           should.not.exist(err);
           done();
         }
       );
-    })
+    });
 
     it('32.1.1 works well with SELECT query', function(done) {
       var arrayLength = dates.length;
@@ -84,44 +91,44 @@ describe('32. dataTypeDate.js', function() {
       }
 
       assist.dataTypeSupport(connection, tableName, dates, done);
-    })
+    });
 
     it('32.1.2 works well with result set', function(done) {
       assist.verifyResultSet(connection, tableName, dates, done);
-    })
+    });
 
     it('32.1.3 works well with REF Cursor', function(done) {
       assist.verifyRefCursor(connection, tableName, dates, done);
-    })
+    });
 
-  }) // 32.1 suite
+  }); // 32.1 suite
 
   describe('32.2 stores null value correctly', function() {
     it('32.2.1 testing Null, Empty string and Undefined', function(done) {
       assist.verifyNullValues(connection, tableName, done);
-    })
-  })
+    });
+  });
 
-  describe('32.3 insert SQL Date data', function(done) {
+  describe('32.3 insert SQL Date data', function() {
     var dates = assist.DATE_STRINGS;
 
     before(function(done) {
       assist.setUp4sql(connection, tableName, dates, done);
-    })
+    });
 
     after(function(done) {
       connection.execute(
-        "DROP table " + tableName,
+        "DROP table " + tableName + " PURGE",
         function(err) {
           should.not.exist(err);
           done();
         }
       );
-    })
+    });
 
     it('32.3.1 SELECT query - original data', function(done) {
       assist.selectOriginalData(connection, tableName, dates, done);
-    })
+    });
 
     it('32.3.2 SELECT query - formatted data for comparison', function(done) {
       async.forEach(dates, function(date, cb) {
@@ -138,11 +145,11 @@ describe('32. dataTypeDate.js', function() {
           }
         );
       }, function(err) {
-          should.not.exist(err);
-          done();
+        should.not.exist(err);
+        done();
       });
-    })
+    });
 
-  }) // end of 32.3 suite
+  }); // end of 32.3 suite
 
-})
+});

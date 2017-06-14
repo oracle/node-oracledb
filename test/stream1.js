@@ -40,31 +40,40 @@ var dbConfig = require('./dbconfig.js');
 
 describe('13. stream1.js', function () {
 
+  this.timeout(100000);
+
   var connection = null;
   var rowsAmount = 217;
 
   before(function(done) {
     async.series([
       function getConn(cb) {
-        oracledb.getConnection(dbConfig, function(err, conn) {
-          should.not.exist(err);
-          connection = conn;
-          cb();
-        });
+        oracledb.getConnection(
+          {
+            user:          dbConfig.user,
+            password:      dbConfig.password,
+            connectString: dbConfig.connectString
+          },
+          function(err, conn) {
+            should.not.exist(err);
+            connection = conn;
+            cb();
+          }
+        );
       },
       function createTab(cb) {
         var proc = "BEGIN \n" +
                    "    DECLARE \n" +
-                   "        e_table_exists EXCEPTION; \n" +
-                   "        PRAGMA EXCEPTION_INIT(e_table_exists, -00942);\n " +
+                   "        e_table_missing EXCEPTION; \n" +
+                   "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n " +
                    "    BEGIN \n" +
-                   "        EXECUTE IMMEDIATE ('DROP TABLE nodb_employees'); \n" +
+                   "        EXECUTE IMMEDIATE ('DROP TABLE nodb_stream1 PURGE'); \n" +
                    "    EXCEPTION \n" +
-                   "        WHEN e_table_exists \n" +
+                   "        WHEN e_table_missing \n" +
                    "        THEN NULL; \n" +
                    "    END; \n" +
                    "    EXECUTE IMMEDIATE (' \n" +
-                   "        CREATE TABLE nodb_employees ( \n" +
+                   "        CREATE TABLE nodb_stream1 ( \n" +
                    "            employee_id NUMBER, \n" +
                    "            employee_name VARCHAR2(20), \n" +
                    "            employee_history CLOB \n" +
@@ -89,7 +98,7 @@ describe('13. stream1.js', function () {
                    "    FOR i IN 1..217 LOOP \n" +
                    "        x := x + 1; \n" +
                    "        n := 'staff ' || x; \n" +
-                   "        INSERT INTO nodb_employees VALUES (x, n, EMPTY_CLOB()) RETURNING employee_history INTO clobData; \n" +
+                   "        INSERT INTO nodb_stream1 VALUES (x, n, EMPTY_CLOB()) RETURNING employee_history INTO clobData; \n" +
                    "        DBMS_LOB.WRITE(clobData, 20, 1, '12345678901234567890'); \n" +
                    "    END LOOP; \n" +
                    "end; ";
@@ -103,13 +112,13 @@ describe('13. stream1.js', function () {
         );
       }
     ], done);
-  }) // before
+  }); // before
 
   after(function(done) {
     async.series([
       function(callback) {
         connection.execute(
-          "DROP TABLE nodb_employees",
+          "DROP TABLE nodb_stream1 PURGE",
           function(err) {
             should.not.exist(err);
             callback();
@@ -123,13 +132,13 @@ describe('13. stream1.js', function () {
         });
       },
     ], done);
-  }) // after
+  }); // after
 
   describe('13.1 Testing QueryStream', function () {
     it('13.1.1 stream results for oracle connection', function (done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
 
-      var stream = connection.queryStream('SELECT employee_name FROM nodb_employees ORDER BY employee_name');
+      var stream = connection.queryStream('SELECT employee_name FROM nodb_stream1 ORDER BY employee_name');
 
       stream.on('error', function (error) {
         should.fail(error, null, 'Error event should not be triggered');
@@ -149,9 +158,9 @@ describe('13. stream1.js', function () {
     });
 
     it('13.1.2 stream results for oracle connection (outFormat: oracledb.OBJECT)', function (done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
 
-      var stream = connection.queryStream('SELECT employee_name FROM nodb_employees ORDER BY employee_name', {}, {
+      var stream = connection.queryStream('SELECT employee_name FROM nodb_stream1 ORDER BY employee_name', {}, {
         outFormat: oracledb.OBJECT
       });
 
@@ -173,9 +182,9 @@ describe('13. stream1.js', function () {
     });
 
     it('13.1.3 errors in query', function (done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
 
-      var stream = connection.queryStream('SELECT no_such_column FROM nodb_employees');
+      var stream = connection.queryStream('SELECT no_such_column FROM nodb_stream1');
 
       stream.on('error', function (error) {
         should.exist(error);
@@ -188,9 +197,9 @@ describe('13. stream1.js', function () {
     });
 
     it('13.1.4 no result', function (done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
 
-      var stream = connection.queryStream('SELECT * FROM nodb_employees WHERE employee_name = :name', {
+      var stream = connection.queryStream('SELECT * FROM nodb_stream1 WHERE employee_name = :name', {
         name: 'TEST_NO_RESULT'
       });
 
@@ -211,9 +220,9 @@ describe('13. stream1.js', function () {
     });
 
     it('13.1.5 single row', function (done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
 
-      var stream = connection.queryStream('SELECT employee_name FROM nodb_employees WHERE employee_name = :name', {
+      var stream = connection.queryStream('SELECT employee_name FROM nodb_stream1 WHERE employee_name = :name', {
         name: 'staff 10'
       });
 
@@ -237,9 +246,9 @@ describe('13. stream1.js', function () {
     });
 
     it('13.1.6 multiple row', function (done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
 
-      var stream = connection.queryStream('SELECT employee_name FROM nodb_employees WHERE employee_id <= :maxId ORDER BY employee_id', {
+      var stream = connection.queryStream('SELECT employee_name FROM nodb_stream1 WHERE employee_id <= :maxId ORDER BY employee_id', {
         maxId: 10
       }, {
         outFormat: oracledb.OBJECT
@@ -267,9 +276,9 @@ describe('13. stream1.js', function () {
     });
 
     it('13.1.7 invalid SQL', function (done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
 
-      var stream = connection.queryStream('UPDATE nodb_employees SET employee_name = :name WHERE employee_id = :id', {
+      var stream = connection.queryStream('UPDATE nodb_stream1 SET employee_name = :name WHERE employee_id = :id', {
         id: 10,
         name: 'test_update'
       }, {
@@ -288,9 +297,9 @@ describe('13. stream1.js', function () {
     });
 
     it('13.1.8 Read CLOBs', function (done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
 
-      var stream = connection.queryStream('SELECT employee_name, employee_history FROM nodb_employees where employee_id <= :maxId ORDER BY employee_id', {
+      var stream = connection.queryStream('SELECT employee_name, employee_history FROM nodb_stream1 where employee_id <= :maxId ORDER BY employee_id', {
         maxId: 10
       }, {
         outFormat: oracledb.OBJECT
@@ -340,11 +349,9 @@ describe('13. stream1.js', function () {
     });
 
     it('13.1.9 Read CLOBs after stream close', function (done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
 
-      this.timeout(10000);
-
-      var stream = connection.queryStream('SELECT employee_name, employee_history FROM nodb_employees where employee_id <= :maxId ORDER BY employee_id', {
+      var stream = connection.queryStream('SELECT employee_name, employee_history FROM nodb_stream1 where employee_id <= :maxId ORDER BY employee_id', {
         maxId: 10
       }, {
         outFormat: oracledb.OBJECT
@@ -398,9 +405,9 @@ describe('13. stream1.js', function () {
     });
 
     it('13.1.10 meta data', function (done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
 
-      var stream = connection.queryStream('SELECT employee_name FROM nodb_employees WHERE employee_name = :name', {
+      var stream = connection.queryStream('SELECT employee_name FROM nodb_stream1 WHERE employee_name = :name', {
         name: 'staff 10'
       });
 
@@ -430,11 +437,10 @@ describe('13. stream1.js', function () {
     });
 
     it('13.1.11 stream stress test', function (done) {
-      this.timeout(30000);
 
-      connection.should.be.ok;
+      connection.should.be.ok();
 
-      var stream = connection.queryStream('SELECT employee_name FROM nodb_employees ORDER BY employee_name');
+      var stream = connection.queryStream('SELECT employee_name FROM nodb_stream1 ORDER BY employee_name');
 
       stream.on('error', function (error) {
         should.fail(error, null, 'Error event should not be triggered');
@@ -453,7 +459,7 @@ describe('13. stream1.js', function () {
 
         var testDone = 0;
         var subTest = function (callback) {
-          var query = connection.queryStream('SELECT employee_name FROM nodb_employees ORDER BY employee_name');
+          var query = connection.queryStream('SELECT employee_name FROM nodb_stream1 ORDER BY employee_name');
 
           query.on('error', function (error) {
             should.fail(error, null, 'Error event should not be triggered');
@@ -484,16 +490,16 @@ describe('13. stream1.js', function () {
           should.equal(testDone, tests.length);
 
           done();
-        })
+        });
       });
     });
   });
 
   describe('13.2 Testing QueryStream._close', function () {
     it('13.2.1 should be able to stop the stream early with _close', function (done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
 
-      var stream = connection.queryStream('SELECT employee_name FROM nodb_employees ORDER BY employee_name');
+      var stream = connection.queryStream('SELECT employee_name FROM nodb_stream1 ORDER BY employee_name');
 
       stream.on('data', function () {
         stream.pause();
@@ -514,9 +520,9 @@ describe('13. stream1.js', function () {
     });
 
     it('13.2.2 should be able to stop the stream before any data', function (done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
 
-      var stream = connection.queryStream('SELECT employee_name FROM nodb_employees ORDER BY employee_name');
+      var stream = connection.queryStream('SELECT employee_name FROM nodb_stream1 ORDER BY employee_name');
 
       stream.on('close', function() {
         done();
@@ -539,9 +545,9 @@ describe('13. stream1.js', function () {
     });
 
     it('13.2.3 should invoke an optional callback passed to _close', function (done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
 
-      var stream = connection.queryStream('SELECT employee_name FROM nodb_employees ORDER BY employee_name');
+      var stream = connection.queryStream('SELECT employee_name FROM nodb_stream1 ORDER BY employee_name');
 
       stream._close(function() {
         done();
@@ -566,13 +572,13 @@ describe('13. stream1.js', function () {
       var defaultMaxRows;
       var testMaxRows = 9;
 
-      connection.should.be.ok;
+      connection.should.be.ok();
 
       defaultMaxRows = oracledb.maxRows;
 
       oracledb.maxRows = testMaxRows;
 
-      var stream = connection.queryStream('SELECT employee_name FROM nodb_employees ORDER BY employee_name');
+      var stream = connection.queryStream('SELECT employee_name FROM nodb_stream1 ORDER BY employee_name');
 
       stream.on('data', function () {
         stream.pause();
@@ -596,38 +602,23 @@ describe('13. stream1.js', function () {
       });
     });
 
-    it('13.3.2 should default to 100 if oracledb.maxRows is false', function (done) {
+    it('13.3.2 Negative - should fail with NJS-026 if oracledb.maxRows is zero', function (done) {
       var defaultMaxRows;
       var testMaxRows = 0;
 
-      connection.should.be.ok;
+      connection.should.be.ok();
 
       defaultMaxRows = oracledb.maxRows;
 
-      oracledb.maxRows = testMaxRows;
-
-      var stream = connection.queryStream('SELECT employee_name FROM nodb_employees ORDER BY employee_name');
-
-      stream.on('data', function () {
-        stream.pause();
-
-        // Using the internal/private caches to validate
-        should.equal(stream._fetchedRows.length, (99 - stream._readableState.buffer.length));
-        stream._close();
-      });
-
-      stream.on('close', function() {
+      try {
+        oracledb.maxRows = testMaxRows;
+      } catch (err) {
+        should.exist(err);
+        (err.message).should.startWith('NJS-026:');
+        // NJS-026: maxRows must be greater than zero
         oracledb.maxRows = defaultMaxRows;
         done();
-      });
-
-      stream.on('end', function () {
-        done(new Error('Reached the end of the stream'));
-      });
-
-      stream.on('error', function (err) {
-        done(err);
-      });
+      }
     });
   });
 });

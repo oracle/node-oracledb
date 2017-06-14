@@ -40,18 +40,24 @@ var dbConfig = require('./dbconfig.js');
 
 describe('3. examples.js', function(){
 
+  var credentials = {
+    user:          dbConfig.user,
+    password:      dbConfig.password,
+    connectString: dbConfig.connectString
+  };
+
   describe('3.1 connect.js', function(){
     it('3.1.1 tests a basic connection to the database', function(done){
-      oracledb.getConnection(dbConfig, function(error, connection){
+      oracledb.getConnection(credentials, function(error, connection){
         should.not.exist(error);
-        connection.should.be.ok;
+        connection.should.be.ok();
         connection.release( function(err){
           should.not.exist(err);
           done();
         });
       });
-    })
-  })
+    });
+  });
 
   describe('3.2 version.js', function(){
     it('3.2.1 shows the oracledb version attribute', function(){
@@ -62,55 +68,59 @@ describe('3. examples.js', function(){
       var major = Math.floor(oracledb.version/10000);
       var minor = Math.floor(oracledb.version/100) % 100;
       var patch = oracledb.version % 100;
+
+      (major).should.be.a.Number();
+      (minor).should.be.a.Number();
+      (patch).should.be.a.Number();
       // console.log("Driver version text is " + major + "." + minor + "." + patch);
-    })
-  })
+    });
+  });
 
   describe('3.3 select1.js & select2.js', function(){
     var connection = false;
 
     before(function(done){
-      oracledb.getConnection(dbConfig, function(err, conn) {
+      oracledb.getConnection(credentials, function(err, conn) {
         if(err) { console.error(err.message); return; }
         connection = conn;
         done();
       });
-    })
+    });
 
     after(function(done){
       if(connection){
         connection.release( function(err){
-        if(err) { console.error(err.message); return; }
-        done();
+          if(err) { console.error(err.message); return; }
+          done();
         });
       }
-    })
+    });
 
     it('3.3.1. execute a basic query', function(done){
       var script1 =
         "BEGIN \
             DECLARE \
-                e_table_exists EXCEPTION; \
-                PRAGMA EXCEPTION_INIT(e_table_exists, -00942); \
+                e_table_missing EXCEPTION; \
+                PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \
             BEGIN \
-                EXECUTE IMMEDIATE ('DROP TABLE nodb_departments'); \
+                EXECUTE IMMEDIATE ('DROP TABLE nodb_eg_dept PURGE'); \
             EXCEPTION \
-                WHEN e_table_exists \
+                WHEN e_table_missing \
                 THEN NULL; \
             END; \
             EXECUTE IMMEDIATE (' \
-                CREATE TABLE nodb_departments ( \
+                CREATE TABLE nodb_eg_dept ( \
                     department_id NUMBER,  \
                     department_name VARCHAR2(20) \
                 ) \
             '); \
             EXECUTE IMMEDIATE (' \
-              INSERT INTO nodb_departments  \
+              INSERT INTO nodb_eg_dept  \
                    (department_id, department_name) VALUES \
                    (40,''Human Resources'') \
             '); \
             EXECUTE IMMEDIATE (' \
-              INSERT INTO nodb_departments  \
+              INSERT INTO nodb_eg_dept  \
                    (department_id, department_name) VALUES \
                    (180, ''Construction'') \
             '); \
@@ -126,30 +136,30 @@ describe('3. examples.js', function(){
         function(callback){
           connection.execute(
               "SELECT department_id, department_name "
-            + "FROM nodb_departments "
+            + "FROM nodb_eg_dept "
             + "WHERE department_id = :did",
             [180],
             function(err, result) {
               should.not.exist(err);
               (result.rows).should.eql([[ 180, 'Construction' ]]);
-               callback();
+              callback();
             }
           );
         }
       ], done);
 
-    })
+    });
 
     it('3.3.2. execute queries to show array and object formats', function(done){
       var script2 =
         "BEGIN \
             DECLARE \
-                e_table_exists EXCEPTION; \
-                PRAGMA EXCEPTION_INIT(e_table_exists, -00942); \
+                e_table_missing EXCEPTION; \
+                PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \
             BEGIN \
-                EXECUTE IMMEDIATE ('DROP TABLE nodb_locations'); \
+                EXECUTE IMMEDIATE ('DROP TABLE nodb_locations PURGE'); \
             EXCEPTION \
-                WHEN e_table_exists \
+                WHEN e_table_missing \
                 THEN NULL; \
             END; \
             EXECUTE IMMEDIATE (' \
@@ -218,28 +228,28 @@ describe('3. examples.js', function(){
         }
       ], done);
 
-    })
+    });
 
-  })
+  });
 
   /* Oracle Database 12.1.0.2 has extensive JSON datatype support */
   describe('3.4 selectjson.js - 12.1.0.2 feature', function(){
     var connection = false;
 
     before(function(done){
-      oracledb.getConnection(dbConfig, function(err, conn){
+      oracledb.getConnection(credentials, function(err, conn){
         if(err) { console.error(err.message); return; }
         connection = conn;
         done();
       });
-    })
+    });
 
     after(function(done){
       connection.release( function(err){
         if(err) { console.error(err.message); return; }
         done();
       });
-    })
+    });
 
     it('3.4.1 executes a query from a JSON table', function(done){
       if (connection.oracleServerVersion < 1201000200)
@@ -254,12 +264,12 @@ describe('3. examples.js', function(){
         var script =
           "BEGIN " +
           "   DECLARE " +
-          "       e_table_exists EXCEPTION; " +
-          "       PRAGMA EXCEPTION_INIT(e_table_exists, -00942); " +
+          "       e_table_missing EXCEPTION; " +
+          "       PRAGMA EXCEPTION_INIT(e_table_missing, -00942); " +
           "   BEGIN " +
-          "       EXECUTE IMMEDIATE ('DROP TABLE nodb_purchaseorder'); " +
+          "       EXECUTE IMMEDIATE ('DROP TABLE nodb_purchaseorder PURGE'); " +
           "   EXCEPTION " +
-          "       WHEN e_table_exists " +
+          "       WHEN e_table_missing " +
           "       THEN NULL; " +
           "   END; " +
           "   EXECUTE IMMEDIATE (' " +
@@ -269,7 +279,7 @@ describe('3. examples.js', function(){
           "   '); " +
           "END; ";
 
-        connection.should.be.ok;
+        connection.should.be.ok();
         async.series([
           function(callback){
             connection.execute(
@@ -307,7 +317,7 @@ describe('3. examples.js', function(){
           },
           function(callback){
             connection.execute(
-              "DROP TABLE nodb_purchaseorder",
+              "DROP TABLE nodb_purchaseorder PURGE",
               function(err){
                 should.not.exist(err);
                 callback();
@@ -318,25 +328,25 @@ describe('3. examples.js', function(){
 
       } // else
 
-    })
+    });
 
-  })
+  });
 
   describe('3.5 date.js', function(){
     var connection = false;
     var script =
       "BEGIN " +
       "   DECLARE " +
-      "       e_table_exists EXCEPTION; " +
-      "       PRAGMA EXCEPTION_INIT(e_table_exists, -00942); " +
+      "       e_table_missing EXCEPTION; " +
+      "       PRAGMA EXCEPTION_INIT(e_table_missing, -00942); " +
       "   BEGIN " +
-      "       EXECUTE IMMEDIATE ('DROP TABLE nodb_testdate'); " +
+      "       EXECUTE IMMEDIATE ('DROP TABLE nodb_eg_testdate PURGE'); " +
       "   EXCEPTION " +
-      "       WHEN e_table_exists " +
+      "       WHEN e_table_missing " +
       "       THEN NULL; " +
       "   END; " +
       "   EXECUTE IMMEDIATE (' " +
-      "       CREATE TABLE nodb_testdate ( " +
+      "       CREATE TABLE nodb_eg_testdate ( " +
       "           timestampcol TIMESTAMP, " +
       "           datecol DATE " +
       "       )" +
@@ -346,19 +356,19 @@ describe('3. examples.js', function(){
     var date = new Date();
 
     before(function(done){
-      oracledb.getConnection(dbConfig, function(err, conn){
+      oracledb.getConnection(credentials, function(err, conn){
         if(err) { console.error(err.message); return; }
         connection = conn;
         done();
       });
-    })
+    });
 
     after(function(done){
       connection.release( function(err){
         if(err) { console.error(err.message); return; }
         done();
       });
-    })
+    });
 
     it('3.5.1 inserts and query DATE and TIMESTAMP columns', function(done){
       async.series([
@@ -373,7 +383,7 @@ describe('3. examples.js', function(){
         },
         function(callback){   // insert data
           connection.execute(
-            "INSERT INTO nodb_testdate (timestampcol, datecol) VALUES (:ts, :td)",
+            "INSERT INTO nodb_eg_testdate (timestampcol, datecol) VALUES (:ts, :td)",
             { ts: date, td: date },
             { autoCommit: false },
             function(err){
@@ -384,7 +394,7 @@ describe('3. examples.js', function(){
         },
         function(callback){    // select data
           connection.execute(
-            "SELECT timestampcol, datecol FROM nodb_testdate",
+            "SELECT timestampcol, datecol FROM nodb_eg_testdate",
             function(err, result){
               should.not.exist(err);
               var ts = result.rows[0][0];
@@ -406,7 +416,7 @@ describe('3. examples.js', function(){
         },
         function(callback){
           connection.execute(
-            "DROP TABLE nodb_testdate",
+            "DROP TABLE nodb_eg_testdate PURGE",
             function(err){
               should.not.exist(err);
               callback();
@@ -414,9 +424,9 @@ describe('3. examples.js', function(){
           );
         }
       ], done);
-    })
+    });
 
-  })
+  });
 
   describe('3.6 rowlimit.js', function(){
     var connection = false;
@@ -424,16 +434,16 @@ describe('3. examples.js', function(){
     var createTable =
       "BEGIN \
           DECLARE \
-              e_table_exists EXCEPTION; \
-              PRAGMA EXCEPTION_INIT(e_table_exists, -00942); \
+              e_table_missing EXCEPTION; \
+              PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \
           BEGIN \
-              EXECUTE IMMEDIATE ('DROP TABLE nodb_employees'); \
+              EXECUTE IMMEDIATE ('DROP TABLE nodb_eg_emp6 PURGE'); \
           EXCEPTION \
-              WHEN e_table_exists \
+              WHEN e_table_missing \
               THEN NULL; \
           END; \
           EXECUTE IMMEDIATE (' \
-              CREATE TABLE nodb_employees ( \
+              CREATE TABLE nodb_eg_emp6 ( \
                   employees_id NUMBER,  \
                   employees_name VARCHAR2(20) \
               ) \
@@ -448,12 +458,12 @@ describe('3. examples.js', function(){
           FOR i IN 1..107 LOOP \
              x := x + 1; \
              n := 'staff ' || x; \
-             INSERT INTO nodb_employees VALUES (x, n); \
+             INSERT INTO nodb_eg_emp6 VALUES (x, n); \
           END LOOP; \
        END; ";
 
     before(function(done){
-      oracledb.getConnection(dbConfig, function(err, conn){
+      oracledb.getConnection(credentials, function(err, conn){
         if(err) { console.error(err.message); return; }
         connection = conn;
         connection.execute(createTable, function(err){
@@ -464,11 +474,11 @@ describe('3. examples.js', function(){
           });
         });
       });
-    })
+    });
 
     after(function(done){
       connection.execute(
-        'DROP TABLE nodb_employees',
+        'DROP TABLE nodb_eg_emp6 PURGE',
         function(err){
           if(err) { console.error(err.message); return; }
           connection.release( function(err){
@@ -477,15 +487,15 @@ describe('3. examples.js', function(){
           });
         }
       );
-    })
+    });
 
     it('3.6.1 by default, the number is 100', function(done){
       var defaultLimit = oracledb.maxRows;
       defaultLimit.should.be.exactly(100);
 
-      connection.should.be.ok;
+      connection.should.be.ok();
       connection.execute(
-        "SELECT * FROM nodb_employees ORDER BY employees_id",
+        "SELECT * FROM nodb_eg_emp6 ORDER BY employees_id",
         function(err, result){
           should.not.exist(err);
           should.exist(result);
@@ -494,12 +504,12 @@ describe('3. examples.js', function(){
           done();
         }
       );
-    })
+    });
 
     it('3.6.2 can also specify for each execution', function(done){
-      connection.should.be.ok;
+      connection.should.be.ok();
       connection.execute(
-        "SELECT * FROM nodb_employees ORDER BY employees_id",
+        "SELECT * FROM nodb_eg_emp6 ORDER BY employees_id",
         {}, {maxRows: 25},
         function(err, result){
           should.not.exist(err);
@@ -509,31 +519,31 @@ describe('3. examples.js', function(){
           done();
         }
       );
-    })
+    });
 
-  })
+  });
 
   describe('3.7 plsql.js', function(){
     var connection = false;
 
     before(function(done){
-      oracledb.getConnection(dbConfig, function(err, conn){
+      oracledb.getConnection(credentials, function(err, conn){
         if(err) { console.error(err.message); return; }
         connection = conn;
         done();
       });
-    })
+    });
 
     after(function(done){
       connection.release( function(err){
         if(err) { console.error(err.message); return; }
         done();
       });
-    })
+    });
 
     it('3.7.1 can call PL/SQL procedure and binding parameters in various ways', function(done){
       var proc =
-        "CREATE OR REPLACE PROCEDURE nodb_testproc (p_in IN VARCHAR2, p_inout IN OUT VARCHAR2, p_out OUT NUMBER) \
+        "CREATE OR REPLACE PROCEDURE nodb_eg_proc7 (p_in IN VARCHAR2, p_inout IN OUT VARCHAR2, p_out OUT NUMBER) \
            AS \
            BEGIN \
              p_inout := p_in || p_inout; \
@@ -543,7 +553,7 @@ describe('3. examples.js', function(){
         i:  'Chris',  // bind type is determined from the data type
         io: { val: 'Jones', dir : oracledb.BIND_INOUT },
         o:  { type: oracledb.NUMBER, dir : oracledb.BIND_OUT }
-      }
+      };
 
       async.series([
         function(callback){
@@ -557,7 +567,7 @@ describe('3. examples.js', function(){
         },
         function(callback){
           connection.execute(
-            "BEGIN nodb_testproc(:i, :io, :o); END;",
+            "BEGIN nodb_eg_proc7(:i, :io, :o); END;",
             bindVars,
             function(err, result){
               should.not.exist(err);
@@ -569,19 +579,19 @@ describe('3. examples.js', function(){
         },
         function(callback){
           connection.execute(
-            "DROP PROCEDURE nodb_testproc",
-            function(err, result){
+            "DROP PROCEDURE nodb_eg_proc7",
+            function(err){
               should.not.exist(err);
               callback();
             }
           );
         }
       ], done);
-    })
+    });
 
     it('3.7.2 can call PL/SQL function', function(done) {
       var proc =
-        "CREATE OR REPLACE FUNCTION nodb_testfunc (p1_in IN VARCHAR2, p2_in IN VARCHAR2) RETURN VARCHAR2 \
+        "CREATE OR REPLACE FUNCTION nodb_eg_func7 (p1_in IN VARCHAR2, p2_in IN VARCHAR2) RETURN VARCHAR2 \
            AS \
            BEGIN \
              return p1_in || p2_in; \
@@ -604,7 +614,7 @@ describe('3. examples.js', function(){
         },
         function(callback){
           connection.execute(
-            "BEGIN :ret := nodb_testfunc(:p1, :p2); END;",
+            "BEGIN :ret := nodb_eg_func7(:p1, :p2); END;",
             bindVars,
             function(err, result){
               should.not.exist(err);
@@ -616,33 +626,33 @@ describe('3. examples.js', function(){
         },
         function(callback){
           connection.execute(
-            "DROP FUNCTION nodb_testfunc",
-            function(err, result){
+            "DROP FUNCTION nodb_eg_func7",
+            function(err){
               should.not.exist(err);
               callback();
             }
           );
         }
       ], done);
-    })
+    });
 
-  })
+  });
 
   describe('3.8 insert1.js', function(){
     var connection = false;
     var script =
       "BEGIN " +
       "   DECLARE " +
-      "       e_table_exists EXCEPTION; " +
-      "       PRAGMA EXCEPTION_INIT(e_table_exists, -00942); " +
+      "       e_table_missing EXCEPTION; " +
+      "       PRAGMA EXCEPTION_INIT(e_table_missing, -00942); " +
       "   BEGIN " +
-      "       EXECUTE IMMEDIATE ('DROP TABLE nodb_testinsert'); " +
+      "       EXECUTE IMMEDIATE ('DROP TABLE nodb_eg_insert8 PURGE'); " +
       "   EXCEPTION " +
-      "       WHEN e_table_exists " +
+      "       WHEN e_table_missing " +
       "       THEN NULL; " +
       "   END; " +
       "   EXECUTE IMMEDIATE (' " +
-      "       CREATE TABLE nodb_testinsert ( " +
+      "       CREATE TABLE nodb_eg_insert8 ( " +
       "           id NUMBER,  " +
       "           name VARCHAR2(20) " +
       "       )" +
@@ -650,19 +660,19 @@ describe('3. examples.js', function(){
       "END; ";
 
     before(function(done){
-      oracledb.getConnection(dbConfig, function(err, conn){
+      oracledb.getConnection(credentials, function(err, conn){
         if(err) { console.error(err.message); return; }
         connection = conn;
         done();
       });
-    })
+    });
 
     after(function(done){
       connection.release( function(err){
         if(err) { console.error(err.message); return; }
         done();
       });
-    })
+    });
 
     it('3.8.1 creates a table and inserts data', function(done){
       async.series([
@@ -677,7 +687,7 @@ describe('3. examples.js', function(){
         },
         function(callback){
           connection.execute(
-            "INSERT INTO nodb_testinsert VALUES (:id, :nm)",
+            "INSERT INTO nodb_eg_insert8 VALUES (:id, :nm)",
             [1, 'Chris'],  // Bind values
             function(err, result){
               should.not.exist(err);
@@ -688,7 +698,7 @@ describe('3. examples.js', function(){
         },
         function(callback){
           connection.execute(
-            "INSERT INTO nodb_testinsert VALUES (:id, :nm)",
+            "INSERT INTO nodb_eg_insert8 VALUES (:id, :nm)",
             [2, 'Alison'],  // Bind values
             function(err, result){
               should.not.exist(err);
@@ -699,7 +709,7 @@ describe('3. examples.js', function(){
         },
         function(callback){
           connection.execute(
-            "UPDATE nodb_testinsert SET name = 'Bambi'",
+            "UPDATE nodb_eg_insert8 SET name = 'Bambi'",
             function(err, result){
               should.not.exist(err);
               (result.rowsAffected).should.be.exactly(2);
@@ -709,7 +719,7 @@ describe('3. examples.js', function(){
         },
         function(callback){
           connection.execute(
-            "DROP TABLE nodb_testinsert",
+            "DROP TABLE nodb_eg_insert8 PURGE",
             function(err){
               should.not.exist(err);
               callback();
@@ -717,8 +727,8 @@ describe('3. examples.js', function(){
           );
         }
       ], done);
-    })
-  })
+    });
+  });
 
   describe('3.9 insert2.js', function(){
     var conn1 = false;
@@ -726,16 +736,16 @@ describe('3. examples.js', function(){
     var script =
       "BEGIN " +
       "   DECLARE " +
-      "       e_table_exists EXCEPTION; " +
-      "       PRAGMA EXCEPTION_INIT(e_table_exists, -00942); " +
+      "       e_table_missing EXCEPTION; " +
+      "       PRAGMA EXCEPTION_INIT(e_table_missing, -00942); " +
       "   BEGIN " +
-      "       EXECUTE IMMEDIATE ('DROP TABLE nodb_testcommit'); " +
+      "       EXECUTE IMMEDIATE ('DROP TABLE nodb_eg_commit9 PURGE'); " +
       "   EXCEPTION " +
-      "       WHEN e_table_exists " +
+      "       WHEN e_table_missing " +
       "       THEN NULL; " +
       "   END; " +
       "   EXECUTE IMMEDIATE (' " +
-      "       CREATE TABLE nodb_testcommit ( " +
+      "       CREATE TABLE nodb_eg_commit9 ( " +
       "           id NUMBER,  " +
       "           name VARCHAR2(20) " +
       "       )" +
@@ -743,16 +753,16 @@ describe('3. examples.js', function(){
       "END; ";
 
     before(function(done){
-      oracledb.getConnection(dbConfig, function(err, conn){
+      oracledb.getConnection(credentials, function(err, conn){
         if(err) { console.error(err.message); return; }
         conn1 = conn;
-        oracledb.getConnection(dbConfig, function(err, conn){
+        oracledb.getConnection(credentials, function(err, conn){
           if(err) { console.error(err.message); return; }
           conn2 = conn;
           done();
         });
       });
-    })
+    });
 
     after(function(done){
       conn1.release( function(err){
@@ -762,7 +772,7 @@ describe('3. examples.js', function(){
           done();
         });
       });
-    })
+    });
 
     it('3.9.1 tests the auto commit behavior', function(done){
       async.series([
@@ -777,7 +787,7 @@ describe('3. examples.js', function(){
         },
         function(callback){
           conn1.execute(
-            "INSERT INTO nodb_testcommit VALUES (:id, :nm)",
+            "INSERT INTO nodb_eg_commit9 VALUES (:id, :nm)",
             [1, 'Chris'],  // Bind values
             { autoCommit: true },
             function(err, result){
@@ -789,7 +799,7 @@ describe('3. examples.js', function(){
         },
         function(callback){
           conn1.execute(
-            "INSERT INTO nodb_testcommit VALUES (:id, :nm)",
+            "INSERT INTO nodb_eg_commit9 VALUES (:id, :nm)",
             [2, 'Alison'],  // Bind values
             // { autoCommit: true },
             function(err, result){
@@ -801,7 +811,7 @@ describe('3. examples.js', function(){
         },
         function(callback){
           conn2.execute(
-            "SELECT * FROM nodb_testcommit  ORDER BY id",
+            "SELECT * FROM nodb_eg_commit9  ORDER BY id",
             function(err, result){
               should.not.exist(err);
               // This will only show 'Chris' because inserting 'Alison' is not commited by default.
@@ -814,7 +824,7 @@ describe('3. examples.js', function(){
         },
         function(callback){
           conn1.execute(
-            "DROP TABLE nodb_testcommit",
+            "DROP TABLE nodb_eg_commit9 PURGE",
             function(err){
               should.not.exist(err);
               callback();
@@ -823,8 +833,8 @@ describe('3. examples.js', function(){
         }
       ], done);
 
-    })
-  })
+    });
+  });
 
   describe('3.10 resultset.js', function() {
     var connection = false;
@@ -832,16 +842,16 @@ describe('3. examples.js', function(){
     var createTable =
       "BEGIN \
           DECLARE \
-              e_table_exists EXCEPTION; \
-              PRAGMA EXCEPTION_INIT(e_table_exists, -00942); \
+              e_table_missing EXCEPTION; \
+              PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \
           BEGIN \
-              EXECUTE IMMEDIATE ('DROP TABLE nodb_employees'); \
+              EXECUTE IMMEDIATE ('DROP TABLE nodb_eg_emp10 PURGE'); \
           EXCEPTION \
-              WHEN e_table_exists \
+              WHEN e_table_missing \
               THEN NULL; \
           END; \
           EXECUTE IMMEDIATE (' \
-              CREATE TABLE nodb_employees ( \
+              CREATE TABLE nodb_eg_emp10 ( \
                   employees_id NUMBER,  \
                   employees_name VARCHAR2(20) \
               ) \
@@ -856,12 +866,12 @@ describe('3. examples.js', function(){
           FOR i IN 1..207 LOOP \
              x := x + 1; \
              n := 'staff ' || x; \
-             INSERT INTO nodb_employees VALUES (x, n); \
+             INSERT INTO nodb_eg_emp10 VALUES (x, n); \
           END LOOP; \
        END; ";
 
     before(function(done){
-      oracledb.getConnection(dbConfig, function(err, conn){
+      oracledb.getConnection(credentials, function(err, conn){
         if(err) { console.error(err.message); return; }
         connection = conn;
         connection.execute(createTable, function(err){
@@ -872,11 +882,11 @@ describe('3. examples.js', function(){
           });
         });
       });
-    })
+    });
 
     after(function(done){
       connection.execute(
-        'DROP TABLE nodb_employees',
+        'DROP TABLE nodb_eg_emp10 PURGE',
         function(err){
           if(err) { console.error(err.message); return; }
           connection.release( function(err){
@@ -885,14 +895,14 @@ describe('3. examples.js', function(){
           });
         }
       );
-    })
+    });
 
     it('3.10.1 resultset1.js - getRow() function', function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
       var rowCount = 1;
 
       connection.execute(
-        "SELECT employees_name FROM nodb_employees",
+        "SELECT employees_name FROM nodb_eg_emp10",
         [],
         { resultSet: true, prefetchRows: 50 },
         function(err, result) {
@@ -919,14 +929,14 @@ describe('3. examples.js', function(){
           }
         });
       }
-    })
+    });
 
     it('3.10.2 resultset2.js - getRows() function', function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
       var numRows = 10;  // number of rows to return from each call to getRows()
 
       connection.execute(
-        "SELECT * FROM nodb_employees ORDER BY employees_id",
+        "SELECT * FROM nodb_eg_emp10 ORDER BY employees_id",
         [],
         { resultSet: true, prefetchRows: 110 },
         function(err, result) {
@@ -954,68 +964,68 @@ describe('3. examples.js', function(){
           }
         });
       }
-    })
+    });
 
-  })
+  });
 
   describe('3.11 refcursor.js', function() {
     var connection = false;
     var script =
         "BEGIN \
             DECLARE \
-                e_table_exists EXCEPTION; \
-                PRAGMA EXCEPTION_INIT(e_table_exists, -00942); \
+                e_table_missing EXCEPTION; \
+                PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \
             BEGIN \
-                EXECUTE IMMEDIATE ('DROP TABLE nodb_employees'); \
+                EXECUTE IMMEDIATE ('DROP TABLE nodb_eg_emp11 PURGE'); \
             EXCEPTION \
-                WHEN e_table_exists \
+                WHEN e_table_missing \
                 THEN NULL; \
             END; \
             EXECUTE IMMEDIATE (' \
-                CREATE TABLE nodb_employees ( \
+                CREATE TABLE nodb_eg_emp11 ( \
                     name VARCHAR2(40),  \
                     salary NUMBER, \
                     hire_date DATE \
                 ) \
             '); \
             EXECUTE IMMEDIATE (' \
-              INSERT INTO nodb_employees  \
+              INSERT INTO nodb_eg_emp11  \
                    (name, salary, hire_date) VALUES \
                    (''Steven'',24000, TO_DATE(''20030617'', ''yyyymmdd'')) \
             '); \
             EXECUTE IMMEDIATE (' \
-              INSERT INTO nodb_employees  \
+              INSERT INTO nodb_eg_emp11  \
                    (name, salary, hire_date) VALUES \
                    (''Neena'',17000, TO_DATE(''20050921'', ''yyyymmdd'')) \
             '); \
             EXECUTE IMMEDIATE (' \
-              INSERT INTO nodb_employees  \
+              INSERT INTO nodb_eg_emp11  \
                    (name, salary, hire_date) VALUES \
                    (''Lex'',17000, TO_DATE(''20010112'', ''yyyymmdd'')) \
             '); \
             EXECUTE IMMEDIATE (' \
-              INSERT INTO nodb_employees  \
+              INSERT INTO nodb_eg_emp11  \
                    (name, salary, hire_date) VALUES \
                    (''Nancy'',12008, TO_DATE(''20020817'', ''yyyymmdd'')) \
             '); \
             EXECUTE IMMEDIATE (' \
-              INSERT INTO nodb_employees  \
+              INSERT INTO nodb_eg_emp11  \
                    (name, salary, hire_date) VALUES \
                    (''Karen'',14000, TO_DATE(''20050104'', ''yyyymmdd'')) \
             '); \
             EXECUTE IMMEDIATE (' \
-              INSERT INTO nodb_employees  \
+              INSERT INTO nodb_eg_emp11  \
                    (name, salary, hire_date) VALUES \
                    (''Peter'',9000, TO_DATE(''20100525'', ''yyyymmdd'')) \
             '); \
         END; ";
 
     var proc =
-        "CREATE OR REPLACE PROCEDURE get_emp_rs (p_sal IN NUMBER, p_recordset OUT SYS_REFCURSOR) \
+        "CREATE OR REPLACE PROCEDURE get_emp_rs11 (p_sal IN NUMBER, p_recordset OUT SYS_REFCURSOR) \
            AS \
            BEGIN \
              OPEN p_recordset FOR  \
-               SELECT * FROM nodb_employees\
+               SELECT * FROM nodb_eg_emp11\
                WHERE salary > p_sal; \
            END; ";
 
@@ -1023,7 +1033,7 @@ describe('3. examples.js', function(){
       async.series([
         function(callback) {
           oracledb.getConnection(
-            dbConfig,
+            credentials,
             function(err, conn) {
               should.not.exist(err);
               connection = conn;
@@ -1050,27 +1060,45 @@ describe('3. examples.js', function(){
           );
         }
       ], done);
-    })
+    });
 
     after(function(done){
-      connection.execute(
-        'DROP TABLE nodb_employees',
-        function(err){
-          if(err) { console.error(err.message); return; }
-          connection.release( function(err){
-            if(err) { console.error(err.message); return; }
-            done();
+
+      async.series([
+        function(cb) {
+          connection.execute(
+            "DROP PROCEDURE get_emp_rs11",
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          connection.execute(
+            'DROP TABLE nodb_eg_emp11 PURGE',
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          connection.release( function(err) {
+            should.not.exist(err);
+            cb();
           });
         }
-      );
-    })
+      ], done);
+
+    }); // after
 
     it('3.11.1 REF CURSOR', function(done) {
-      connection.should.be.ok;
+      connection.should.be.ok();
       var numRows = 100;  // number of rows to return from each call to getRows()
 
       connection.execute(
-        "BEGIN get_emp_rs(:sal, :cursor); END;",
+        "BEGIN get_emp_rs11(:sal, :cursor); END;",
         {
           sal: 12000,
           cursor: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
@@ -1103,7 +1131,7 @@ describe('3. examples.js', function(){
           }
         );
       }
-    })
-  })
+    });
+  });
 
-})
+});

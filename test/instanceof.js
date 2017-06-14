@@ -30,7 +30,6 @@
  *****************************************************************************/
 'use strict';
 
-var oracledbCLib;
 var oracledb = require('oracledb');
 var should   = require('should');
 var dbConfig = require('./dbconfig.js');
@@ -38,7 +37,7 @@ var dbConfig = require('./dbconfig.js');
 describe('45. instanceof.js', function() {
 
   it('45.1 instanceof works for the oracledb instance', function(done) {
-    (oracledb instanceof oracledb.Oracledb).should.be.true;
+    (oracledb instanceof oracledb.Oracledb).should.be.true();
 
     done();
   });
@@ -46,7 +45,6 @@ describe('45. instanceof.js', function() {
   it('45.2 instanceof works for pool instances', function(done) {
     oracledb.createPool(
       {
-        externalAuth    : dbConfig.externalAuth,
         user              : dbConfig.user,
         password          : dbConfig.password,
         connectString     : dbConfig.connectString,
@@ -57,7 +55,7 @@ describe('45. instanceof.js', function() {
       function(err, pool){
         should.not.exist(err);
 
-        (pool instanceof oracledb.Pool).should.be.true;
+        (pool instanceof oracledb.Pool).should.be.true();
 
         pool.terminate(function(err) {
           should.not.exist(err);
@@ -69,66 +67,104 @@ describe('45. instanceof.js', function() {
   });
 
   it('45.3 instanceof works for connection instances', function(done) {
-    oracledb.getConnection(dbConfig, function(err, conn) {
-      should.not.exist(err);
-
-      (conn instanceof oracledb.Connection).should.be.true;
-
-      conn.release(function(err) {
+    oracledb.getConnection(
+      {
+        user:          dbConfig.user,
+        password:      dbConfig.password,
+        connectString: dbConfig.connectString
+      },
+      function(err, conn) {
         should.not.exist(err);
 
-        done();
-      });
-    });
+        (conn instanceof oracledb.Connection).should.be.true();
+
+        conn.release(function(err) {
+          should.not.exist(err);
+
+          done();
+        });
+      }
+    );
   });
 
   it('45.4 instanceof works for resultset instances', function(done) {
-    oracledb.getConnection(dbConfig, function(err, conn) {
-      should.not.exist(err);
+    oracledb.getConnection(
+      {
+        user:          dbConfig.user,
+        password:      dbConfig.password,
+        connectString: dbConfig.connectString
+      },
+      function(err, conn) {
+        should.not.exist(err);
 
-      conn.execute(
-        'select 1 from dual union select 2 from dual',
-        [], // no binds
-        {
-          resultSet: true
-        },
-        function(err, result) {
-          should.not.exist(err);
-
-          (result.resultSet instanceof oracledb.ResultSet).should.be.true;
-
-          result.resultSet.close(function(err) {
+        conn.execute(
+          'select 1 from dual union select 2 from dual',
+          [], // no binds
+          {
+            resultSet: true
+          },
+          function(err, result) {
             should.not.exist(err);
 
-            conn.release(function(err) {
+            (result.resultSet instanceof oracledb.ResultSet).should.be.true();
+
+            result.resultSet.close(function(err) {
               should.not.exist(err);
 
-              done();
+              conn.release(function(err) {
+                should.not.exist(err);
+
+                done();
+              });
             });
-          });
-        }
-       );
-    });
+          }
+        );
+      }
+    );
   });
 
   it('45.5 instanceof works for lob instances', function(done) {
-    oracledb.getConnection(dbConfig, function(err, conn) {
-      should.not.exist(err);
+    oracledb.getConnection(
+      {
+        user:          dbConfig.user,
+        password:      dbConfig.password,
+        connectString: dbConfig.connectString
+      },
+      function(err, conn) {
+        should.not.exist(err);
 
-      conn.execute(
-        'select to_clob(dummy) from dual',
-        function(err, result) {
-          should.not.exist(err);
-
-          (result.rows[0][0] instanceof oracledb.Lob).should.be.true;
-
-          conn.release(function(err) {
+        conn.execute(
+          'select to_clob(dummy) from dual',
+          function(err, result) {
             should.not.exist(err);
 
-            done();
-          });
-        }
-       );
-    });
-  });
+            (result.rows[0][0] instanceof oracledb.Lob).should.be.true();
+
+            var lob = result.rows[0][0];
+
+            lob.on("close", function(err) {
+              should.not.exist(err);
+
+              conn.release(function(err) {
+                should.not.exist(err);
+
+                done();
+              });
+
+            }); // lob close event
+
+            lob.on("error", function(err) {
+              should.not.exist(err, "lob.on 'error' event.");
+            });
+
+            lob.close(function(err) {
+              should.not.exist(err);
+            });
+
+          }
+        );
+      }
+    );
+  }); // 45.5
+
 });

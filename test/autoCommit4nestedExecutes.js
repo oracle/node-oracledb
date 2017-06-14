@@ -54,12 +54,12 @@ describe('63. autoCommit4nestedExecutes.js', function() {
     var sqlCreateTab =
         " BEGIN "
       + "   DECLARE "
-      + "     e_table_exists EXCEPTION; "
-      + "     PRAGMA EXCEPTION_INIT(e_table_exists, -00942); "
+      + "     e_table_missing EXCEPTION; "
+      + "     PRAGMA EXCEPTION_INIT(e_table_missing, -00942); "
       + "   BEGIN "
-      + "     EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " '); "
+      + "     EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " PURGE'); "
       + "   EXCEPTION "
-      + "     WHEN e_table_exists "
+      + "     WHEN e_table_missing "
       + "     THEN NULL; "
       + "   END;  "
       + "   EXECUTE IMMEDIATE (' "
@@ -109,7 +109,7 @@ describe('63. autoCommit4nestedExecutes.js', function() {
         );
       }
     ], done);
-  }) // before
+  }); // before
 
   after('drop table and procedure', function(done) {
     async.series([
@@ -124,7 +124,7 @@ describe('63. autoCommit4nestedExecutes.js', function() {
       },
       function(cb) {
         connection.execute(
-          "DROP TABLE " + tableName,
+          "DROP TABLE " + tableName + " PURGE",
           function(err) {
             should.not.exist(err);
             cb();
@@ -132,36 +132,16 @@ describe('63. autoCommit4nestedExecutes.js', function() {
         );
       }
     ], done);
-  }) // after
+  }); // after
 
   it('63.1 nested execute() functions', function(done) {
 
     var pool = null,
-        conn = null;
+      conn = null;
     // sql will be the same for both execute calls
     var procSql = "BEGIN " + procName + "(p_iname=>:p_iname, p_short_name=>:p_short_name, "
                   + " p_comments=>:p_comments, p_new_id=>:p_new_id, p_status=>:p_status, "
                   + " p_description=>:p_description); END;";
-
-    // Two execute() uses the same bindVar which conflicts occur
-    var bindVar =
-        {
-          p_iname: "Test iname",
-          p_short_name: "TST",
-          p_comments: "Test comments",
-          p_new_id: {
-            type: oracledb.NUMBER,
-            dir: oracledb.BIND_OUT
-          },
-          p_status: {
-            type: oracledb.NUMBER,
-            dir: oracledb.BIND_OUT
-          },
-          p_description: {
-            type: oracledb.STRING,
-            dir: oracledb.BIND_OUT
-          }
-        };
 
     async.series([
       function getPool(cb) {
@@ -202,7 +182,7 @@ describe('63. autoCommit4nestedExecutes.js', function() {
             }
           },
           { autoCommit: false },
-          function(err, result) {
+          function(err) {
             should.not.exist(err);
             cb();
           }
@@ -232,7 +212,8 @@ describe('63. autoCommit4nestedExecutes.js', function() {
           function(err, result) {
             should.exist(err);
             // ORA-01036: illegal variable name/number
-            (err.message).should.startWith('ORA-01036');
+            (err.message).should.startWith('ORA-01036:');
+            should.not.exist(result);
             cb();
           }
         );
@@ -262,6 +243,6 @@ describe('63. autoCommit4nestedExecutes.js', function() {
         );
       }
     ], done);
-  })
+  });
 
-})
+});

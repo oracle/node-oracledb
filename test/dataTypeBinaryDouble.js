@@ -35,7 +35,6 @@
 
 var oracledb = require('oracledb');
 var should   = require('should');
-var async    = require('async');
 var assist   = require('./dataTypeAssist.js');
 var dbConfig = require('./dbconfig.js');
 
@@ -45,19 +44,26 @@ describe('31. dataTypeBinaryDouble.js', function() {
   var tableName = "nodb_double";
 
   before('get one connection', function(done) {
-    oracledb.getConnection(dbConfig, function(err, conn) {
-      should.not.exist(err);
-      connection = conn;
-      done();
-    });
-  })
+    oracledb.getConnection(
+      {
+        user:          dbConfig.user,
+        password:      dbConfig.password,
+        connectString: dbConfig.connectString
+      },
+      function(err, conn) {
+        should.not.exist(err);
+        connection = conn;
+        done();
+      }
+    );
+  });
 
   after('release connection', function(done) {
     connection.release( function(err) {
       should.not.exist(err);
       done();
     });
-  })
+  });
 
   describe('31.1 testing BINARY_DOUBLE data', function() {
 
@@ -65,36 +71,74 @@ describe('31. dataTypeBinaryDouble.js', function() {
 
     before('create table, insert data',function(done) {
       assist.setUp(connection, tableName, numbers, done);
-    })
+    });
 
     after(function(done) {
       connection.execute(
-        "DROP table " + tableName,
+        "DROP table " + tableName + " PURGE",
         function(err) {
           should.not.exist(err);
           done();
         }
       );
-    })
+    });
 
     it('31.1.1 works well with SELECT query', function(done) {
       assist.dataTypeSupport(connection, tableName, numbers, done);
-    })
+    });
 
     it('31.1.2 works well with result set', function(done) {
       assist.verifyResultSet(connection, tableName, numbers, done);
-    })
+    });
 
     it('31.1.3 works well with REF Cursor', function(done) {
       assist.verifyRefCursor(connection, tableName, numbers, done);
-    })
+    });
 
-  })
+  });
 
   describe('31.2 stores null value correctly', function() {
     it('31.2.1 testing Null, Empty string and Undefined', function(done) {
       assist.verifyNullValues(connection, tableName, done);
-    })
-  })
+    });
+  });
 
-})
+  describe('31.3 testing floating-point numbers which can be precisely represent', function() {
+    var nums =
+      [
+        0.0000000000000000000123,
+        98.7654321
+      ];
+
+    before('create table, insert data',function(done) {
+      assist.setUp(connection, tableName, nums, done);
+    });
+
+    after(function(done) {
+      connection.execute(
+        "DROP table " + tableName + " PURGE",
+        function(err) {
+          should.not.exist(err);
+          done();
+        }
+      );
+    });
+
+    it('31.3.1 testing floating-point numbers', function(done) {
+      connection.execute(
+        "SELECT * FROM " + tableName,
+        [],
+        { outFormat: oracledb.OBJECT },
+        function(err, result) {
+          should.not.exist(err);
+
+          for(var i = 0; i < nums.length; i++) {
+            result.rows[i].CONTENT.should.be.exactly(nums[ result.rows[i].NUM ]);
+          }
+          done();
+        }
+      );
+    });
+
+  }); // 31.3
+});
