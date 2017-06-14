@@ -36,34 +36,45 @@
     "conditions" : [
     [
       'OS=="linux"', {
-        "cflags"        : ['-fexceptions'],
-        "cflags_cc"     : ['-fexceptions'],
-        "libraries"     : ["-ldl"]
+        "variables" : {
+          "dpi_debug%"    : "<!(if [ -z \"${DPI_DEBUG_LEVEL+x}\" ]; then echo \"\"; else echo \"-DDPI_DEBUG_LEVEL=${DPI_DEBUG_LEVEL}\"; fi;)"
+        },
+	"cflags"        : ['-fexceptions', '<(dpi_debug)'],
+	"cflags_cc"     : ['-fexceptions', '<(dpi_debug)'],
+	"libraries"     : ['-ldl'],
       }
     ],
     [
       'OS=="mac"', {
+        "variables" : {
+          "dpi_debug%"    : "<!(if [ -z \"${DPI_DEBUG_LEVEL+x}\" ]; then echo \"\"; else echo \"-DDPI_DEBUG_LEVEL=${DPI_DEBUG_LEVEL}\"; fi;)"
+        },
         "xcode_settings": {
           "GCC_ENABLE_CPP_EXCEPTIONS": "YES",
-          "GCC_ENABLE_CPP_RTTI": "YES"
+          "GCC_ENABLE_CPP_RTTI": "YES",
+          'OTHER_CFLAGS': ['<(dpi_debug)'],
         },
-          "cflags"        : ['-fexceptions'],
-          "cflags_cc"     : ['-fexceptions'],
-          "libraries"     : ["-ldl"]
+          "libraries"     : ['-ldl']
       }
     ],
     [
       'OS=="aix"', {
-          "libraries"     : ["-ldl"],
-          "cflags"        : ['-fexceptions'],
-          "cflags_cc"     : ['-fexceptions'],
+        "variables" : {
+          "dpi_debug%"    : "<!(if [ -z \"${DPI_DEBUG_LEVEL+x}\" ]; then echo \"\"; else echo \"-DDPI_DEBUG_LEVEL=${DPI_DEBUG_LEVEL}\"; fi;)"
+        },
+	"cflags"        : ['-fexceptions', '-fsigned-char', '<(dpi_debug)'],
+	"cflags_cc"     : ['-fexceptions', '-fsigned-char', '<(dpi_debug)'],
+	"libraries"     : ['-ldl'],
       }
     ],
     [
       'OS=="solaris"', {
-          "libraries"     : ["-ldl"],
-          "cflags"        : ['-fexceptions'],
-          "cflags_cc"     : ['-fexceptions']
+        "variables" : {
+          "dpi_debug%"    : "<!(if [ -z \"${DPI_DEBUG_LEVEL+x}\" ]; then echo \"\"; else echo \"-DDPI_DEBUG_LEVEL=${DPI_DEBUG_LEVEL}\"; fi;)"
+        },
+	"cflags"        : ['-fexceptions', '<(dpi_debug)'],
+	"cflags_cc"     : ['-fexceptions', '<(dpi_debug)'],
+	"libraries"     : ['-ldl'],
       }
     ],
     [
