@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015-2017, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -398,7 +398,7 @@ NAN_METHOD(njsILob::Write)
         lob->activeBaton = baton;
         baton->SetDPILobHandle(lob->dpiLobHandle);
     }
-    baton->QueueWork("Write", Async_Write, NULL, 1);
+    baton->QueueWork("Write", Async_Write, Async_AfterWrite, 1);
 }
 
 
