@@ -99,6 +99,7 @@ private:
     // Release Method on Connection class
     static NAN_METHOD(Release);
     static void Async_Release(njsBaton *baton);
+    static void Async_AfterRelease(njsBaton *baton, Local<Value> argv[]);
 
     // Commit Method on Connection class
     static NAN_METHOD(Commit);

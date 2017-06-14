@@ -371,7 +371,9 @@ void njsPool::Async_AfterGetConnection(njsBaton *baton, Local<Value> argv[])
 
 //-----------------------------------------------------------------------------
 // njsPool::Terminate()
-//   Terminate the pool.
+//   Terminate the pool. The reference to the DPI handle is transferred to the
+// baton so that it will cleared automatically upon success and so that the
+// pool is marked as invalid immediately.
 //
 // PARAMETERS
 //   - JS callback which will receive (error)

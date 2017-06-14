@@ -93,6 +93,7 @@ private:
     // Close Methods
     static NAN_METHOD(Close);
     static void Async_Close(njsBaton *baton);
+    static void Async_AfterClose(njsBaton *baton, Local<Value> argv[]);
 
     // Define Getter Accessors to properties
     static NAN_GETTER(GetMetaData);

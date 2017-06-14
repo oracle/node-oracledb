@@ -213,18 +213,6 @@ njsBaton::~njsBaton()
 
 
 //-----------------------------------------------------------------------------
-// njsBaton::GetCallingObj()
-//   Return the C++ object stored in the baton as the JS calling object.
-//-----------------------------------------------------------------------------
-njsCommon *njsBaton::GetCallingObj()
-{
-    Nan::HandleScope scope;
-    Local<Object> obj = Nan::New(jsCallingObj);
-    return Nan::ObjectWrap::Unwrap<njsCommon>(obj);
-}
-
-
-//-----------------------------------------------------------------------------
 // njsBaton::GetOracledb()
 //   Return the Oracledb object stored in the baton as a JS object.
 //-----------------------------------------------------------------------------
@@ -293,9 +281,8 @@ void njsBaton::AsyncAfterWorkCallback(uv_work_t *req, int status)
         Local<Function> callback = Nan::New<Function>(baton->jsCallback);
 
         // if this baton is considered the active baton, clear it
-        njsCommon *callingObj = baton->GetCallingObj();
-        if (callingObj && baton == callingObj->activeBaton)
-            callingObj->activeBaton = NULL;
+        if (baton->callingObj && baton == baton->callingObj->activeBaton)
+            baton->callingObj->activeBaton = NULL;
 
         // delete the baton before the callback is made so any unnecessary
         // ODPI-C handles are released as soon as possible

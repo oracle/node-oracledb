@@ -346,7 +346,7 @@ void njsILob::Async_Read(njsBaton *baton)
 void njsILob::Async_AfterRead(njsBaton *baton, Local<Value> argv[])
 {
     Nan::EscapableHandleScope scope;
-    njsILob *lob = (njsILob*) baton->GetCallingObj();
+    njsILob *lob = (njsILob*) baton->callingObj;
 
     if (!baton->bufferSize)
         argv[1] = scope.Escape(Nan::Null());
@@ -420,7 +420,7 @@ void njsILob::Async_Write(njsBaton *baton)
 //-----------------------------------------------------------------------------
 void njsILob::Async_AfterWrite(njsBaton *baton, Local<Value> argv[])
 {
-    njsILob *lob = (njsILob*) baton->GetCallingObj();
+    njsILob *lob = (njsILob*) baton->callingObj;
     lob->offset += baton->lobAmount;
 }
 

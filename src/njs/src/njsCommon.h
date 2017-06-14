@@ -271,6 +271,7 @@ public:
     char *bufferPtr;
     uint64_t lobOffset;
     uint64_t lobAmount;
+    njsCommon *callingObj;
     Nan::Persistent<Object> jsCallingObj;
     Nan::Persistent<Object> jsOracledb;
     Nan::Persistent<Object> jsBuffer;

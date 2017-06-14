@@ -377,7 +377,7 @@ void njsResultSet::Async_AfterGetRows(njsBaton *baton, Local<Value> argv[])
         newBaton->maxRows = baton->maxRows - baton->rowsFetched;
         newBaton->fetchMultipleRows = true;
         newBaton->jsRows.Reset(rows);
-        resultSet = (njsResultSet*) baton->GetCallingObj();
+        resultSet = (njsResultSet*) baton->callingObj;
         resultSet->activeBaton = NULL;
         resultSet->GetRowsCommon(newBaton);
 
@@ -392,7 +392,9 @@ void njsResultSet::Async_AfterGetRows(njsBaton *baton, Local<Value> argv[])
 
 //-----------------------------------------------------------------------------
 // njsResultSet::Close()
-//   Close the result set.
+//   Close the result set. The reference to the DPI handle is transferred to
+// the baton so that it will be cleared automatically upon success and so that
+// the result set is marked as invalid immediately.
 //
 // PARAMETERS
 //   - JS callback which will receive (error)
@@ -414,17 +416,46 @@ NAN_METHOD(njsResultSet::Close)
         baton->dpiStmtHandle = resultSet->dpiStmtHandle;
         resultSet->dpiStmtHandle = NULL;
     }
-    baton->QueueWork("Close", Async_Close, NULL, 1);
+    baton->QueueWork("Close", Async_Close, Async_AfterClose, 1);
 }
 
 
 //-----------------------------------------------------------------------------
 // njsResultSet::Async_Close()
-//   Worker function for njsResultSet::Close() method.
+//   Worker function for njsResultSet::Close() method. If the attempt to close
+// the statement fails, the reference to the DPI handle is transferred back
+// from the baton to the result set.
 //-----------------------------------------------------------------------------
 void njsResultSet::Async_Close(njsBaton *baton)
 {
-    if (dpiStmt_close(baton->dpiStmtHandle, NULL, 0) < 0)
+    if (dpiStmt_close(baton->dpiStmtHandle, NULL, 0) < 0) {
         baton->GetDPIError();
+        njsResultSet *resultSet = (njsResultSet*) baton->callingObj;
+        resultSet->dpiStmtHandle = baton->dpiStmtHandle;
+        baton->dpiStmtHandle = NULL;
+    }
+}
+
+
+//-----------------------------------------------------------------------------
+// njsResultSet::Async_AfterClose()
+//   Finishes close by transferring variables and fetch as types to the baton
+// where they will be freed.
+//-----------------------------------------------------------------------------
+void njsResultSet::Async_AfterClose(njsBaton *baton, Local<Value> argv[])
+{
+    njsResultSet *resultSet = (njsResultSet*) baton->callingObj;
+
+    resultSet->jsConnection.Reset();
+    resultSet->jsOracledb.Reset();
+    baton->keepQueryInfo = false;
+    baton->queryVars = resultSet->queryVars;
+    baton->numQueryVars = resultSet->numQueryVars;
+    resultSet->queryVars = NULL;
+    resultSet->numQueryVars = 0;
+    baton->numFetchAsStringTypes = resultSet->numFetchAsStringTypes;
+    baton->fetchAsStringTypes = resultSet->fetchAsStringTypes;
+    resultSet->fetchAsStringTypes = NULL;
+    resultSet->numFetchAsStringTypes = 0;
 }
 

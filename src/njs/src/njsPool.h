@@ -84,7 +84,6 @@ private:
     // Terminate Methods
     static NAN_METHOD(Terminate);
     static void Async_Terminate(njsBaton *baton);
-    static void Async_AfterTerminate(njsBaton *baton, Local<Value> argv[]);
 
     // Define Getter Accessors to properties
     static NAN_GETTER(GetPoolMax);
