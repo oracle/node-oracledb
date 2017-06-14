@@ -45,7 +45,7 @@
       "testWindows": "mocha -R spec --timeout 0 test\\*.js"
   },
   "engines": {
-    "node": ">=0.10.28 <7"
+    "node": ">=4"
   },
   "maintainers": [
     {
