@@ -784,6 +784,8 @@ void njsOracledb::Async_CreatePool(njsBaton *baton)
     params.maxSessions = baton->poolMax;
     params.sessionIncrement = baton->poolIncrement;
     params.externalAuth = baton->externalAuth;
+    if (params.externalAuth)
+        params.homogeneous = 0;
     if (dpiPool_create(globalDPIContext, baton->user.c_str(),
             (uint32_t) baton->user.length(), baton->password.c_str(),
             (uint32_t) baton->password.length(), baton->connectString.c_str(),
