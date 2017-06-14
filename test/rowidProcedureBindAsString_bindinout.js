@@ -405,10 +405,10 @@ describe.skip('111. rowidProcedureBindAsString_bindinout.js', function() {
 
   var procedureBindInout_default = function(proc_execute, content_in, expected, callback) {
     var bindVar_out = {
-        i: insertID,
-        c: { val: content_in, type: oracledb.STRING, dir: oracledb.BIND_INOUT }
-      };
-      connection.execute(
+      i: insertID,
+      c: { val: content_in, type: oracledb.STRING, dir: oracledb.BIND_INOUT }
+    };
+    connection.execute(
         proc_execute,
         bindVar_out,
         function(err, result) {

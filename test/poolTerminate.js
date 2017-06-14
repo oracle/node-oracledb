@@ -77,7 +77,7 @@ describe('51. poolTerminate.js', function(){
             function() {
               pool.poolMin = 20;
             },
-            /NJS-002: invalid pool/
+            /NJS-014: poolMin is a read-only property/
           );
 
           var inUse;
