@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -75,7 +75,7 @@ describe('58. properties.js', function() {
       oracledb.prefetchRows     = defaultValues.prefetchRows;
       oracledb.autoCommit       = defaultValues.autoCommit;
       // oracledb.version          = defaultValues.version;         // version is a read-only property. it needn't to restore.
-      oracledb.connClass        = defaultValues.connClass;
+      oracledb.connectionClass  = defaultValues.connectionClass;
       oracledb.externalAuth     = defaultValues.externalAuth;
       oracledb.fetchAsString    = defaultValues.fetchAsString;
       oracledb.outFormat        = defaultValues.outFormat;
@@ -195,13 +195,13 @@ describe('58. properties.js', function() {
       var t = oracledb.oracleClientVersion ;
       t.should.be.a.Number();
 
-      try {
-        oracledb.oracleClientVersion = t + 1;
-      } catch(err) {
-        should.exist(err);
-        (err.message).should.startWith('NJS-014:');
-      }
-    } );
+      should.throws(
+        function() {
+          oracledb.oracleClientVersion = t + 1;
+        },
+        /NJS-014: [\w]+ is a read-only property/
+      );
+    });
 
     it('58.1.15 queueRequests', function() {
       var t = oracledb.queueRequests;

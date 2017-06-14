@@ -648,17 +648,13 @@ Overview of node-oracledb functional tests
     45.4 instanceof works for resultset instances
     45.5 instanceof works for lob instances
 
-51. accessTerminatedPoolAttributes.js
-    can not access attributes of terminated pool
-
-52. getConnAfterPoolTerminate.js
-    can not get connections from pool after pool is terminated
-
-53. poolValidityAfterFailingTernimate.js
-    pool should be available after failing terminate
-
-54. releaseAfterFailingTerminate.js
-    can still release connections after failing pool termination
+51. poolTerminate.js
+    51.1 can not get/set the attributes of terminated pool
+    51.2 can not get connections from the terminated pool
+    51.3 can not terminate the same pool multiple times
+    51.4 can not close the same pool multiple times
+    51.5 pool is still available after the failing close
+    51.6 can not close the same connection multiple times
 
 55. resultSet2.js
     55.1 query a RDBMS function
