@@ -369,7 +369,7 @@ Overview of node-oracledb functional tests
         17.3.36 NCLOB
         17.3.37 BFILE
         17.3.38 RAW(2000)
-        17.3.39 LONG RAW 
+        17.3.39 LONG RAW
     17.4 result set
         17.4.1 default settings
         17.4.2 extendedMetaData option of execute()
@@ -602,7 +602,7 @@ Overview of node-oracledb functional tests
         42.1.5 a negative case which hits NJS-011 error
     42.2 stores null value correctly
         42.2.1 testing Null, Empty string and Undefined
-    42.3 DML Returning
+    42.3 DML Returning - Currently not support RAW
         42.3.1 INSERT statement with Object binding
         42.3.2 INSERT statement with ARRAY binding
         42.3.3 INSERT statement with exact maxSize restriction

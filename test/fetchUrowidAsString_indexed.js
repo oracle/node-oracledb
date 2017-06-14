@@ -145,7 +145,7 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
 
     it('117.1.1 fetchInfo', function(done) {
       test1(option, false, false, done);
-    });    
+    });
 
     it('117.1.2 oracledb.maxRows < actual number of rows', function(done) {
       oracledb.maxRows = 1;
@@ -572,7 +572,7 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
     it('117.6.5 resultSet = true', function(done) {
       var option_rs = {
         resultSet: true,
-        outFormat: oracledb.ARRAY 
+        outFormat: oracledb.ARRAY
       };
       test1(option_rs, false, true, done);
     });
