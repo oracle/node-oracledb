@@ -1,20 +1,20 @@
 {
   "name": "oracledb",
-  "version": "2.0.10",
+  "version": "2.0.13",
   "description": "Oracle Database driver by Oracle Corp.",
   "license": "Apache-2.0",
   "homepage": "http://www.oracle.com/technetwork/database/database-technologies/scripting-languages/node_js/",
   "keywords": [
-    "oracledb",
-    "dboracle",
-    "Node.js",
+    "Oracle",
+    "Database",
+    "official",
+    "DB",
     "SQL",
+    "JSON",
     "PL/SQL",
-    "connection",
-    "connectivity",
     "OCI",
+    "API",
     "client",
-    "plugin",
     "library",
     "driver",
     "add-on",
@@ -22,11 +22,7 @@
     "binding",
     "interface",
     "adapter",
-    "module",
-    "DB",
-    "official",
-    "Database",
-    "Oracle"
+    "module"
   ],
   "repository": {
     "type": "git",
@@ -41,8 +37,9 @@
       "async": "^1.5.0"
   },
   "scripts": {
-      "test": "mocha -R spec --timeout 10000 test/*.js",
-      "testWindows": "mocha -R spec --timeout 0 test\\*.js"
+      "test": "mocha --opts test/opts/mocha.opts",
+      "posttest": "node test/opts/versions.js",
+      "testwindows": "mocha --opts test\\opts\\mocha.opts && npm run posttest"
   },
   "engines": {
     "node": ">=4"
