@@ -19,10 +19,10 @@
  * See LICENSE.md for relevant licenses.
  *
  * NAME
- *   110. rowidProcedureBindAsString_bindout.js
+ *   120. urowidProcedureBindAsString_bindinout.js
  *
  * DESCRIPTION
- *   Testing rowid plsql bind as String.
+ *   Testing UROWID(< 200 bytes) plsql procedure bind inout as String.
  *
  * NUMBERING RULE
  *   Test numbers follow this numbering rule:
@@ -39,9 +39,9 @@ var async    = require('async');
 var dbConfig = require('./dbconfig.js');
 var sql      = require('./sql.js');
 
-describe('110. rowidProcedureBindAsString_bindout.js', function() {
+describe('120. urowidProcedureBindAsString_bindinout.js', function() {
   var connection = null;
-  var tableName = "nodb_rowid_plsql_out";
+  var tableName = "nodb_rowid_plsql_inout";
   var insertID = 1;
 
   var proc_create_table = "BEGIN \n" +
@@ -57,7 +57,7 @@ describe('110. rowidProcedureBindAsString_bindout.js', function() {
                           "    EXECUTE IMMEDIATE ( ' \n" +
                           "        CREATE TABLE " + tableName + " ( \n" +
                           "            ID       NUMBER, \n" +
-                          "            content  ROWID \n" +
+                          "            content  UROWID \n" +
                           "        ) \n" +
                           "    '); \n" +
                           "END;  ";
@@ -97,15 +97,15 @@ describe('110. rowidProcedureBindAsString_bindout.js', function() {
     done();
   });
 
-  describe('110.1 PROCEDURE BIND_OUT as rowid', function() {
-    var proc_create = "CREATE OR REPLACE PROCEDURE nodb_rowid_bind_out (id_in IN NUMBER, content_in IN ROWID, content_out OUT ROWID)\n" +
+  describe('120.1 PROCEDURE BIND_INOUT as UROWID', function() {
+    var proc_create = "CREATE OR REPLACE PROCEDURE nodb_rowid_bind_inout (id_in IN NUMBER, content IN OUT UROWID)\n" +
                       "AS \n" +
                       "BEGIN \n" +
-                      "    insert into " + tableName + " (id, content) values (id_in, CHARTOROWID(content_in)); \n" +
-                      "    select content into content_out from " + tableName + " where id = id_in; \n" +
-                      "END nodb_rowid_bind_out; ";
-    var proc_execute = "BEGIN nodb_rowid_bind_out (:i, :c, :o); END;";
-    var proc_drop = "DROP PROCEDURE nodb_rowid_bind_out";
+                      "    insert into " + tableName + " (id, content) values (id_in, CHARTOROWID(content)); \n" +
+                      "    select content into content from " + tableName + " where id = id_in; \n" +
+                      "END nodb_rowid_bind_inout; ";
+    var proc_execute = "BEGIN nodb_rowid_bind_inout (:i, :c); END;";
+    var proc_drop = "DROP PROCEDURE nodb_rowid_bind_inout";
 
     before('create procedure', function(done) {
       sql.executeSql(connection, proc_create, {}, {}, done);
@@ -115,27 +115,26 @@ describe('110. rowidProcedureBindAsString_bindout.js', function() {
       sql.executeSql(connection, proc_drop, {}, {}, done);
     });
 
-    it('110.1.1 works with null', function(done) {
+    it('120.1.1 works with null', function(done) {
       var content = null;
-      procedureBindOut(proc_execute, content, content, done);
+      procedureBindInout(proc_execute, content, content, done);
     });
 
-    it('110.1.2 works with empty string', function(done) {
+    it('120.1.2 works with empty string', function(done) {
       var content = "";
-      procedureBindOut(proc_execute, content, null, done);
+      procedureBindInout(proc_execute, content, null, done);
     });
 
-    it('110.1.3 works with undefined', function(done) {
+    it('120.1.3 works with undefined', function(done) {
       var content = undefined;
-      procedureBindOut(proc_execute, content, null, done);
+      procedureBindInout(proc_execute, content, null, done);
     });
 
-    it('110.1.4 works with NaN', function(done) {
+    it('120.1.4 works with NaN', function(done) {
       var content = NaN;
       var bindVar = {
         i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-        c: { val: content, type: oracledb.STRING, dir: oracledb.BIND_IN },
-        o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
+        c: { val: content, type: oracledb.STRING, dir: oracledb.BIND_INOUT, maxSize: 1000 }
       };
       sql.executeSqlWithErr(connection, proc_execute, bindVar, {}, function(err) {
         should.strictEqual(err.message, 'NJS-011: encountered bind value and type mismatch');
@@ -143,27 +142,26 @@ describe('110. rowidProcedureBindAsString_bindout.js', function() {
       });
     });
 
-    it('110.1.5 works with extended rowid', function(done) {
+    it('120.1.5 works with extended ROWID', function(done) {
       var content = "AAAB12AADAAAAwPAAA";
-      procedureBindOut(proc_execute, content, content, done);
+      procedureBindInout(proc_execute, content, content, done);
     });
 
-    it('110.1.6 works with restricted rowid', function(done) {
+    it('120.1.6 works with restricted ROWID', function(done) {
       var content = "00000DD5.0000.0101";
-      procedureBindOut(proc_execute, content, content, done);
+      procedureBindInout(proc_execute, content, content, done);
     });
 
-    it('110.1.7 works with string 0', function(done) {
+    it.skip('120.1.7 works with string 0', function(done) {
       var content = "0";
-      procedureBindOut(proc_execute, content, "00000000.0000.0000", done);
+      procedureBindInout(proc_execute, content, "00000000.0000.0000", done);
     });
 
-    it('110.1.8 works with number 0', function(done) {
+    it('120.1.8 works with number 0', function(done) {
       var content = 0;
       var bindVar = {
         i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-        c: { val: content, type: oracledb.STRING, dir: oracledb.BIND_IN },
-        o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
+        c: { val: content, type: oracledb.STRING, dir: oracledb.BIND_INOUT, maxSize: 1000 }
       };
       sql.executeSqlWithErr(connection, proc_execute, bindVar, {}, function(err) {
         should.strictEqual(err.message, 'NJS-011: encountered bind value and type mismatch');
@@ -171,31 +169,30 @@ describe('110. rowidProcedureBindAsString_bindout.js', function() {
       });
     });
 
-    it('110.1.9 works with default bind type/dir - extended rowid', function(done) {
+    it('120.1.9 works with default bind type/dir - extended ROWID', function(done) {
       var content = "AAAB1+AADAAAAwPAAA";
-      procedureBindOut_default(proc_execute, content, content, done);
+      procedureBindInout_default(proc_execute, content, content, done);
     });
 
-    it('110.1.10 works with default bind type/dir - null value', function(done) {
+    it('120.1.10 works with default bind type/dir - null value', function(done) {
       var content = null;
-      procedureBindOut_default(proc_execute, content, content, done);
+      procedureBindInout_default(proc_execute, content, content, done);
     });
 
-    it('110.1.11 works with default bind type/dir - empty string', function(done) {
+    it('120.1.11 works with default bind type/dir - empty string', function(done) {
       var content = "";
-      procedureBindOut_default(proc_execute, content, null, done);
+      procedureBindInout_default(proc_execute, content, null, done);
     });
 
-    it('110.1.12 works with default bind type/dir - undefined', function(done) {
+    it('120.1.12 works with default bind type/dir - undefined', function(done) {
       var content = undefined;
-      procedureBindOut_default(proc_execute, content, null, done);
+      procedureBindInout_default(proc_execute, content, null, done);
     });
 
-    it('110.1.13 bind error: NJS-037', function(done) {
+    it('120.1.13 bind error: NJS-037', function(done) {
       var bindVar = {
         i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-        c: { val: [0], type: oracledb.STRING, dir: oracledb.BIND_IN },
-        o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
+        c: { val: [0], type: oracledb.STRING, dir: oracledb.BIND_INOUT, maxArraySize: 1000  }
       };
       sql.executeSqlWithErr(connection, proc_execute, bindVar, {}, function(err) {
         should.strictEqual(err.message, 'NJS-037: invalid data type at array index 0 for bind ":c"');
@@ -203,8 +200,8 @@ describe('110. rowidProcedureBindAsString_bindout.js', function() {
       });
     });
 
-    it('110.1.14 bind error: NJS-052', function(done) {
-      var bindVar = [ insertID, { val: [0], type: oracledb.STRING, dir: oracledb.BIND_IN }, { type: oracledb.STRING, dir: oracledb.BIND_OUT } ];
+    it('120.1.14 bind error: NJS-052', function(done) {
+      var bindVar = [ insertID, { val: [0], type: oracledb.STRING, dir: oracledb.BIND_INOUT, maxArraySize: 1000  }];
       sql.executeSqlWithErr(connection, proc_execute, bindVar, {}, function(err) {
         should.strictEqual(err.message, 'NJS-052: invalid data type at array index 0 for bind position 2');
         done();
@@ -213,15 +210,15 @@ describe('110. rowidProcedureBindAsString_bindout.js', function() {
 
   });
 
-  describe('110.2 PROCEDURE BIND_OUT as string', function() {
-    var proc_create = "CREATE OR REPLACE PROCEDURE nodb_rowid_bind_out (id_in IN NUMBER, content_in IN ROWID, content_out OUT VARCHAR2)\n" +
+  describe('120.2 PROCEDURE BIND_INOUT as string', function() {
+    var proc_create = "CREATE OR REPLACE PROCEDURE nodb_rowid_bind_inout (id_in IN NUMBER, content IN OUT VARCHAR2)\n" +
                       "AS \n" +
                       "BEGIN \n" +
-                      "    insert into " + tableName + " (id, content) values (id_in, CHARTOROWID(content_in)); \n" +
-                      "    select content into content_out from " + tableName + " where id = id_in; \n" +
-                      "END nodb_rowid_bind_out; ";
-    var proc_execute = "BEGIN nodb_rowid_bind_out (:i, :c, :o); END;";
-    var proc_drop = "DROP PROCEDURE nodb_rowid_bind_out";
+                      "    insert into " + tableName + " (id, content) values (id_in, CHARTOROWID(content)); \n" +
+                      "    select content into content from " + tableName + " where id = id_in; \n" +
+                      "END nodb_rowid_bind_inout; ";
+    var proc_execute = "BEGIN nodb_rowid_bind_inout (:i, :c); END;";
+    var proc_drop = "DROP PROCEDURE nodb_rowid_bind_inout";
 
     before('create procedure', function(done) {
       sql.executeSql(connection, proc_create, {}, {}, done);
@@ -231,27 +228,26 @@ describe('110. rowidProcedureBindAsString_bindout.js', function() {
       sql.executeSql(connection, proc_drop, {}, {}, done);
     });
 
-    it('110.2.1 works with null', function(done) {
+    it('120.2.1 works with null', function(done) {
       var content = null;
-      procedureBindOut(proc_execute, content, content, done);
+      procedureBindInout(proc_execute, content, content, done);
     });
 
-    it('110.2.2 works with empty string', function(done) {
+    it('120.2.2 works with empty string', function(done) {
       var content = "";
-      procedureBindOut(proc_execute, content, null, done);
+      procedureBindInout(proc_execute, content, null, done);
     });
 
-    it('110.2.3 works with undefined', function(done) {
+    it('120.2.3 works with undefined', function(done) {
       var content = undefined;
-      procedureBindOut(proc_execute, content, null, done);
+      procedureBindInout(proc_execute, content, null, done);
     });
 
-    it('110.2.4 works with NaN', function(done) {
+    it('120.2.4 works with NaN', function(done) {
       var content = NaN;
       var bindVar = {
         i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-        c: { val: content, type: oracledb.STRING, dir: oracledb.BIND_IN },
-        o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
+        c: { val: content, type: oracledb.STRING, dir: oracledb.BIND_INOUT }
       };
       sql.executeSqlWithErr(connection, proc_execute, bindVar, {}, function(err) {
         should.strictEqual(err.message, 'NJS-011: encountered bind value and type mismatch');
@@ -259,27 +255,26 @@ describe('110. rowidProcedureBindAsString_bindout.js', function() {
       });
     });
 
-    it('110.2.5 works with extended rowid', function(done) {
+    it('120.2.5 works with extended ROWID', function(done) {
       var content = "AAAB12AADAAAAwPAAA";
-      procedureBindOut(proc_execute, content, content, done);
+      procedureBindInout(proc_execute, content, content, done);
     });
 
-    it('110.2.6 works with restricted rowid', function(done) {
+    it('120.2.6 works with restricted ROWID', function(done) {
       var content = "00000DD5.0000.0101";
-      procedureBindOut(proc_execute, content, content, done);
+      procedureBindInout(proc_execute, content, content, done);
     });
 
-    it('110.2.7 works with string 0', function(done) {
+    it('120.2.7 works with string 0', function(done) {
       var content = "0";
-      procedureBindOut(proc_execute, content, "00000000.0000.0000", done);
+      procedureBindInout(proc_execute, content, "00000000.0000.0000", done);
     });
 
-    it('110.2.8 works with number 0', function(done) {
+    it('120.2.8 works with number 0', function(done) {
       var content = 0;
       var bindVar = {
         i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-        c: { val: content, type: oracledb.STRING, dir: oracledb.BIND_IN },
-        o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
+        c: { val: content, type: oracledb.STRING, dir: oracledb.BIND_INOUT }
       };
       sql.executeSqlWithErr(connection, proc_execute, bindVar, {}, function(err) {
         should.strictEqual(err.message, 'NJS-011: encountered bind value and type mismatch');
@@ -287,31 +282,30 @@ describe('110. rowidProcedureBindAsString_bindout.js', function() {
       });
     });
 
-    it('110.2.9 works with default bind type/dir - extended rowid', function(done) {
+    it('120.2.9 works with default bind type/dir - extended ROWID', function(done) {
       var content = "AAAB1+AADAAAAwPAAA";
-      procedureBindOut_default(proc_execute, content, content, done);
+      procedureBindInout_default(proc_execute, content, content, done);
     });
 
-    it('110.2.10 works with default bind type/dir - null value', function(done) {
+    it('120.2.10 works with default bind type/dir - null value', function(done) {
       var content = null;
-      procedureBindOut_default(proc_execute, content, content, done);
+      procedureBindInout_default(proc_execute, content, content, done);
     });
 
-    it('110.2.11 works with default bind type/dir - empty string', function(done) {
+    it('120.2.11 works with default bind type/dir - empty string', function(done) {
       var content = "";
-      procedureBindOut_default(proc_execute, content, null, done);
+      procedureBindInout_default(proc_execute, content, null, done);
     });
 
-    it('110.2.12 works with default bind type/dir - undefined', function(done) {
+    it('120.2.12 works with default bind type/dir - undefined', function(done) {
       var content = undefined;
-      procedureBindOut_default(proc_execute, content, null, done);
+      procedureBindInout_default(proc_execute, content, null, done);
     });
 
-    it('110.2.13 bind error: NJS-037', function(done) {
+    it('120.2.13 bind error: NJS-037', function(done) {
       var bindVar = {
         i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-        c: { val: [0], type: oracledb.STRING, dir: oracledb.BIND_IN },
-        o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
+        c: { val: [0], type: oracledb.STRING, dir: oracledb.BIND_INOUT, maxArraySize: 1000  }
       };
       sql.executeSqlWithErr(connection, proc_execute, bindVar, {}, function(err) {
         should.strictEqual(err.message, 'NJS-037: invalid data type at array index 0 for bind ":c"');
@@ -319,8 +313,8 @@ describe('110. rowidProcedureBindAsString_bindout.js', function() {
       });
     });
 
-    it('110.2.14 bind error: NJS-052', function(done) {
-      var bindVar = [ insertID, { val: [0], type: oracledb.STRING, dir: oracledb.BIND_IN }, { type: oracledb.STRING, dir: oracledb.BIND_OUT } ];
+    it('120.2.14 bind error: NJS-052', function(done) {
+      var bindVar = [ insertID, { val: [0], type: oracledb.STRING, dir: oracledb.BIND_INOUT, maxArraySize: 1000  }];
       sql.executeSqlWithErr(connection, proc_execute, bindVar, {}, function(err) {
         should.strictEqual(err.message, 'NJS-052: invalid data type at array index 0 for bind position 2');
         done();
@@ -329,15 +323,15 @@ describe('110. rowidProcedureBindAsString_bindout.js', function() {
 
   });
 
-  describe('110.3 PROCEDURE BIND_IN, UPDATE', function() {
-    var proc_create = "CREATE OR REPLACE PROCEDURE nodb_rowid_bind_1083 (id_in IN NUMBER, content_1 IN STRING, content_2 IN ROWID, content_out OUT ROWID)\n" +
+  describe('120.3 PROCEDURE BIND_IN, UPDATE', function() {
+    var proc_create = "CREATE OR REPLACE PROCEDURE nodb_rowid_bind_1083 (id_in IN NUMBER, content_1 IN OUT UROWID, content_2 IN OUT UROWID)\n" +
                       "AS \n" +
                       "BEGIN \n" +
                       "    insert into " + tableName + " (id, content) values (id_in, CHARTOROWID(content_1)); \n" +
                       "    update " + tableName + " set content = content_2 where id = id_in; \n" +
-                      "    select content into content_out from " + tableName + " where id = id_in; \n" +
+                      "    select content into content_1 from " + tableName + " where id = id_in; \n" +
                       "END nodb_rowid_bind_1083; ";
-    var proc_execute = "BEGIN nodb_rowid_bind_1083 (:i, :c1, :c2, :o); END;";
+    var proc_execute = "BEGIN nodb_rowid_bind_1083 (:i, :c1, :c2); END;";
     var proc_drop = "DROP PROCEDURE nodb_rowid_bind_1083";
 
     before('create procedure', function(done) {
@@ -348,118 +342,114 @@ describe('110. rowidProcedureBindAsString_bindout.js', function() {
       sql.executeSql(connection, proc_drop, {}, {}, done);
     });
 
-    it('110.3.1 update null with rowid', function(done) {
+    it('120.3.1 update null with UROWID', function(done) {
       var content_1 = null;
       var content_2 = "AAAB12AADAAAAwPAAA";
-      procedureBindOut_update(proc_execute, content_1, content_2, content_2, done);
+      procedureBindInout_update(proc_execute, content_1, content_2, content_2, done);
     });
 
-    it('110.3.2 update empty string with rowid', function(done) {
+    it('120.3.2 update empty string with UROWID', function(done) {
       var content_1 = "";
       var content_2 = "AAAB12AADAAAAwPAAA";
-      procedureBindOut_update(proc_execute, content_1, content_2, content_2, done);
+      procedureBindInout_update(proc_execute, content_1, content_2, content_2, done);
     });
 
-    it('110.3.3 update undefined with rowid', function(done) {
+    it('120.3.3 update undefined with UROWID', function(done) {
       var content_1 = undefined;
       var content_2 = "AAAB12AADAAAAwPAAA";
-      procedureBindOut_update(proc_execute, content_1, content_2, content_2, done);
+      procedureBindInout_update(proc_execute, content_1, content_2, content_2, done);
     });
 
-    it('110.3.4 works with default bind type/dir', function(done) {
+    it.skip('120.3.4 works with default bind type/dir', function(done) {
       var content_1 = "AAAB1+AADAAAAwPAAA";
       var content_2 = "0";
-      procedureBindOut_update(proc_execute, content_1, content_2, "00000000.0000.0000", done);
+      procedureBindInout_update(proc_execute, content_1, content_2, "0", done);
     });
 
-    it('110.3.5 works with default bind type/dir - null value', function(done) {
+    it('120.3.5 works with default bind type/dir - null value', function(done) {
       var content_1 = "AAAB12AADAAAAwPAAA";
       var content_2 = null;
-      procedureBindOut_update_default(proc_execute, content_1, content_2, null, done);
+      procedureBindInout_update_default(proc_execute, content_1, content_2, null, done);
     });
 
-    it('110.3.6 works with default bind type/dir - empty string', function(done) {
+    it('120.3.6 works with default bind type/dir - empty string', function(done) {
       var content_1 = "AAAB12AADAAAAwPAAA";
       var content_2 = "";
-      procedureBindOut_update_default(proc_execute, content_1, content_2, null, done);
+      procedureBindInout_update_default(proc_execute, content_1, content_2, null, done);
     });
 
-    it('110.3.7 works with default bind type/dir - undefined', function(done) {
+    it('120.3.7 works with default bind type/dir - undefined', function(done) {
       var content_1 = "AAAB12AADAAAAwPAAA";
       var content_2 = undefined;
-      procedureBindOut_update_default(proc_execute, content_1, content_2, null, done);
+      procedureBindInout_update_default(proc_execute, content_1, content_2, null, done);
     });
 
   });
 
-  var procedureBindOut = function(proc_execute, content_in, expected, callback) {
+  var procedureBindInout = function(proc_execute, content_in, expected, callback) {
     var bindVar_out = {
       i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-      c: { val: content_in, type: oracledb.STRING, dir: oracledb.BIND_IN },
-      o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
+      c: { val: content_in, type: oracledb.STRING, dir: oracledb.BIND_INOUT, maxSize: 1000 }
     };
     connection.execute(
       proc_execute,
       bindVar_out,
       function(err, result) {
         should.not.exist(err);
-        var resultVal = result.outBinds.o;
+        var resultVal = result.outBinds.c;
         should.strictEqual(resultVal, expected);
         callback();
       }
     );
   };
 
-  var procedureBindOut_default = function(proc_execute, content_in, expected, callback) {
+  var procedureBindInout_default = function(proc_execute, content_in, expected, callback) {
     var bindVar_out = {
       i: insertID,
-      c: content_in,
-      o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
+      c: { val: content_in, type: oracledb.STRING, dir: oracledb.BIND_INOUT, maxSize: 1000  }
     };
     connection.execute(
         proc_execute,
         bindVar_out,
         function(err, result) {
           should.not.exist(err);
-          var resultVal = result.outBinds.o;
+          var resultVal = result.outBinds.c;
           should.strictEqual(resultVal, expected);
           callback();
         }
       );
   };
 
-  var procedureBindOut_update = function(proc_execute, content_1, content_2, expected, callback) {
+  var procedureBindInout_update = function(proc_execute, content_1, content_2, expected, callback) {
     var bindVar_in = {
       i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-      c1: { val: content_1, type: oracledb.STRING, dir: oracledb.BIND_IN },
-      c2: { val: content_2, type: oracledb.STRING, dir: oracledb.BIND_IN },
-      o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
+      c1: { val: content_1, type: oracledb.STRING, dir: oracledb.BIND_INOUT, maxSize: 1000  },
+      c2: { val: content_2, type: oracledb.STRING, dir: oracledb.BIND_INOUT, maxSize: 1000  }
     };
     connection.execute(
       proc_execute,
       bindVar_in,
       function(err, result) {
         should.not.exist(err);
-        var resultVal = result.outBinds.o;
+        var resultVal = result.outBinds.c2;
         should.strictEqual(resultVal, expected);
         callback();
       }
     );
   };
 
-  var procedureBindOut_update_default = function(proc_execute, content_1, content_2, expected, callback) {
+  var procedureBindInout_update_default = function(proc_execute, content_1, content_2, expected, callback) {
     var bindVar_in = {
       i: insertID,
-      c1: content_1,
-      c2: content_2,
-      o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
+      c1: { val: content_1, type: oracledb.STRING, dir: oracledb.BIND_INOUT, maxSize: 1000  },
+      c2: { val: content_2, type: oracledb.STRING, dir: oracledb.BIND_INOUT, maxSize: 1000  }
     };
     connection.execute(
       proc_execute,
       bindVar_in,
       function(err, result) {
         should.not.exist(err);
-        var resultVal = result.outBinds.o;
+        var resultVal = result.outBinds.c2;
         should.strictEqual(resultVal, expected);
         callback();
       }

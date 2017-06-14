@@ -79,7 +79,7 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
                      "    EXECUTE IMMEDIATE ( ' \n" +
                      "        CREATE TABLE " + tableName_normal + " ( \n" +
                      "            id       NUMBER, \n" +
-                     "            content  UROWID(4000) \n" +
+                     "            content  UROWID \n" +
                      "        ) \n" +
                      "      '); \n" +
                      "END;  ";

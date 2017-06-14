@@ -19,10 +19,10 @@
  * See LICENSE.md for relevant licenses.
  *
  * NAME
- *   109. rowidFunctionBindAsString_bind.js
+ *   121. urowidFunctionBindAsString_bind.js
  *
  * DESCRIPTION
- *   Testing rowid plsql bind as String.
+ *   Testing UROWID(< 200 bytes) plsql function bind in/out as String.
  *
  * NUMBERING RULE
  *   Test numbers follow this numbering rule:
@@ -39,27 +39,27 @@ var async    = require('async');
 var dbConfig = require('./dbconfig.js');
 var sql      = require('./sql.js');
 
-describe('109. rowidFunctionBindAsString_bind.js', function() {
+describe('121. urowidFunctionBindAsString_bind.js', function() {
   var connection = null;
   var tableName = "nodb_rowid_plsql_in";
   var insertID = 1;
 
   var fun_create_table = "BEGIN \n" +
-                         "    DECLARE \n" +
-                         "        e_table_missing EXCEPTION; \n" +
-                         "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n" +
-                         "    BEGIN \n" +
-                         "        EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " PURGE' ); \n" +
-                         "    EXCEPTION \n" +
-                         "        WHEN e_table_missing \n" +
-                         "        THEN NULL; \n" +
-                         "    END; \n" +
-                         "    EXECUTE IMMEDIATE ( ' \n" +
-                         "        CREATE TABLE " + tableName + " ( \n" +
-                         "            ID       NUMBER, \n" +
-                         "            content  ROWID \n" +
-                         "        ) \n" +
-                         "    '); \n" +
+                          "    DECLARE \n" +
+                          "        e_table_missing EXCEPTION; \n" +
+                          "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n" +
+                          "    BEGIN \n" +
+                          "        EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " PURGE' ); \n" +
+                          "    EXCEPTION \n" +
+                          "        WHEN e_table_missing \n" +
+                          "        THEN NULL; \n" +
+                          "    END; \n" +
+                          "    EXECUTE IMMEDIATE ( ' \n" +
+                          "        CREATE TABLE " + tableName + " ( \n" +
+                          "            ID       NUMBER, \n" +
+                          "            content  UROWID \n" +
+                          "        ) \n" +
+                          "    '); \n" +
                           "END;  ";
   var drop_table = "DROP TABLE " + tableName + " PURGE";
 
@@ -97,10 +97,10 @@ describe('109. rowidFunctionBindAsString_bind.js', function() {
     done();
   });
 
-  describe('109.1 FUNCTION BIND_IN/OUT as rowid', function() {
-    var fun_create = "CREATE OR REPLACE FUNCTION nodb_rowid_bind (ID_in IN NUMBER, content_in IN ROWID) RETURN ROWID\n" +
+  describe('121.1 FUNCTION BIND_IN/OUT as UROWID', function() {
+    var fun_create = "CREATE OR REPLACE FUNCTION nodb_rowid_bind (ID_in IN NUMBER, content_in IN UROWID) RETURN UROWID\n" +
                      "IS \n" +
-                     "    tmp rowid; \n" +
+                     "    tmp UROWID; \n" +
                      "BEGIN \n" +
                      "    insert into " + tableName + " (id, content) values (ID_in, CHARTOROWID(content_in)); \n" +
                      "    select content into tmp from " + tableName + " where id = ID_in; \n" +
@@ -117,22 +117,22 @@ describe('109. rowidFunctionBindAsString_bind.js', function() {
       sql.executeSql(connection, fun_drop, {}, {}, done);
     });
 
-    it('109.1.1 works with null', function(done) {
+    it('121.1.1 works with null', function(done) {
       var content = null;
       funBindOut(fun_execute, content, content, done);
     });
 
-    it('109.1.2 works with empty string', function(done) {
+    it('121.1.2 works with empty string', function(done) {
       var content = "";
       funBindOut(fun_execute, content, null, done);
     });
 
-    it('109.1.3 works with undefined', function(done) {
+    it('121.1.3 works with undefined', function(done) {
       var content = undefined;
       funBindOut(fun_execute, content, null, done);
     });
 
-    it('109.1.4 works with NaN', function(done) {
+    it('121.1.4 works with NaN', function(done) {
       var content = NaN;
       var bindVar = {
         i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -145,22 +145,22 @@ describe('109. rowidFunctionBindAsString_bind.js', function() {
       });
     });
 
-    it('109.1.5 works with extended rowid', function(done) {
+    it('121.1.5 works with extended ROWID', function(done) {
       var content = "AAAB12AADAAAAwPAAA";
       funBindOut(fun_execute, content, content, done);
     });
 
-    it('109.1.6 works with restricted rowid', function(done) {
+    it('121.1.6 works with restricted ROWID', function(done) {
       var content = "00000DD5.0000.0101";
       funBindOut(fun_execute, content, content, done);
     });
 
-    it('109.1.7 works with string 0', function(done) {
+    it.skip('121.1.7 works with string 0', function(done) {
       var content = "0";
       funBindOut(fun_execute, content, "00000000.0000.0000", done);
     });
 
-    it('109.1.8 works with number 0', function(done) {
+    it('121.1.8 works with number 0', function(done) {
       var content = 0;
       var bindVar = {
         i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -173,27 +173,27 @@ describe('109. rowidFunctionBindAsString_bind.js', function() {
       });
     });
 
-    it('109.1.9 works with default bind type/dir - extended rowid', function(done) {
+    it('121.1.9 works with default bind type/dir - extended ROWID', function(done) {
       var content = "AAAB1+AADAAAAwPAAA";
       funBindOut_default(fun_execute, content, content, done);
     });
 
-    it('109.1.10 works with default bind type/dir - null value', function(done) {
+    it('121.1.10 works with default bind type/dir - null value', function(done) {
       var content = null;
       funBindOut_default(fun_execute, content, content, done);
     });
 
-    it('109.1.11 works with default bind type/dir - empty string', function(done) {
+    it('121.1.11 works with default bind type/dir - empty string', function(done) {
       var content = "";
       funBindOut_default(fun_execute, content, null, done);
     });
 
-    it('109.1.12 works with default bind type/dir - undefined', function(done) {
+    it('121.1.12 works with default bind type/dir - undefined', function(done) {
       var content = undefined;
       funBindOut_default(fun_execute, content, null, done);
     });
 
-    it('109.1.13 bind error: NJS-037', function(done) {
+    it('121.1.13 bind error: NJS-037', function(done) {
       var bindVar = {
         i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c: { val: [0], type: oracledb.STRING, dir: oracledb.BIND_IN },
@@ -205,7 +205,7 @@ describe('109. rowidFunctionBindAsString_bind.js', function() {
       });
     });
 
-    it('109.1.14 bind error: NJS-052', function(done) {
+    it('121.1.14 bind error: NJS-052', function(done) {
       var bindVar = [ { type: oracledb.STRING, dir: oracledb.BIND_OUT }, insertID, { val: [0], type: oracledb.STRING, dir: oracledb.BIND_IN } ];
       sql.executeSqlWithErr(connection, fun_execute, bindVar, {}, function(err) {
         should.strictEqual(err.message, 'NJS-052: invalid data type at array index 0 for bind position 3');
@@ -215,10 +215,10 @@ describe('109. rowidFunctionBindAsString_bind.js', function() {
 
   });
 
-  describe('109.2 FUNCTION BIND_IN/OUT as string', function() {
-    var fun_create = "CREATE OR REPLACE FUNCTION nodb_rowid_bind (id_in IN NUMBER, content_in IN ROWID) RETURN VARCHAR2\n" +
+  describe('121.2 FUNCTION BIND_IN/OUT as string', function() {
+    var fun_create = "CREATE OR REPLACE FUNCTION nodb_rowid_bind (id_in IN NUMBER, content_in IN UROWID) RETURN VARCHAR2\n" +
                      "IS \n" +
-                     "    tmp rowid; \n" +
+                     "    tmp UROWID; \n" +
                      "BEGIN \n" +
                      "    insert into " + tableName + " (id, content) values (id_in, CHARTOROWID(content_in)); \n" +
                      "    select content into tmp from " + tableName + " where id = id_in; \n" +
@@ -235,22 +235,22 @@ describe('109. rowidFunctionBindAsString_bind.js', function() {
       sql.executeSql(connection, fun_drop, {}, {}, done);
     });
 
-    it('109.2.1 works with null', function(done) {
+    it('121.2.1 works with null', function(done) {
       var content = null;
       funBindOut(fun_execute, content, content, done);
     });
 
-    it('109.2.2 works with empty string', function(done) {
+    it('121.2.2 works with empty string', function(done) {
       var content = "";
       funBindOut(fun_execute, content, null, done);
     });
 
-    it('109.2.3 works with undefined', function(done) {
+    it('121.2.3 works with undefined', function(done) {
       var content = undefined;
       funBindOut(fun_execute, content, null, done);
     });
 
-    it('109.2.4 works with NaN', function(done) {
+    it('121.2.4 works with NaN', function(done) {
       var content = NaN;
       var bindVar = {
         i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -263,22 +263,22 @@ describe('109. rowidFunctionBindAsString_bind.js', function() {
       });
     });
 
-    it('109.2.5 works with extended rowid', function(done) {
+    it('121.2.5 works with extended ROWID', function(done) {
       var content = "AAAB12AADAAAAwPAAA";
       funBindOut(fun_execute, content, content, done);
     });
 
-    it('109.2.6 works with restricted rowid', function(done) {
+    it('121.2.6 works with restricted ROWID', function(done) {
       var content = "00000DD5.0000.0101";
       funBindOut(fun_execute, content, content, done);
     });
 
-    it('109.2.7 works with string 0', function(done) {
+    it.skip('121.2.7 works with string 0', function(done) {
       var content = "0";
       funBindOut(fun_execute, content, "00000000.0000.0000", done);
     });
 
-    it('109.2.8 works with number 0', function(done) {
+    it('121.2.8 works with number 0', function(done) {
       var content = 0;
       var bindVar = {
         i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -291,27 +291,27 @@ describe('109. rowidFunctionBindAsString_bind.js', function() {
       });
     });
 
-    it('109.2.9 works with default bind type/dir - extended rowid', function(done) {
+    it('121.2.9 works with default bind type/dir - extended ROWID', function(done) {
       var content = "AAAB1+AADAAAAwPAAA";
       funBindOut_default(fun_execute, content, content, done);
     });
 
-    it('109.2.10 works with default bind type/dir - null value', function(done) {
+    it('121.2.10 works with default bind type/dir - null value', function(done) {
       var content = null;
       funBindOut_default(fun_execute, content, content, done);
     });
 
-    it('109.2.11 works with default bind type/dir - empty string', function(done) {
+    it('121.2.11 works with default bind type/dir - empty string', function(done) {
       var content = "";
       funBindOut_default(fun_execute, content, null, done);
     });
 
-    it('109.2.12 works with default bind type/dir - undefined', function(done) {
+    it('121.2.12 works with default bind type/dir - undefined', function(done) {
       var content = undefined;
       funBindOut_default(fun_execute, content, null, done);
     });
 
-    it('109.2.13 bind error: NJS-037', function(done) {
+    it('121.2.13 bind error: NJS-037', function(done) {
       var bindVar = {
         i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c: { val: [0], type: oracledb.STRING, dir: oracledb.BIND_IN },
@@ -323,7 +323,7 @@ describe('109. rowidFunctionBindAsString_bind.js', function() {
       });
     });
 
-    it('109.2.14 bind error: NJS-052', function(done) {
+    it('121.2.14 bind error: NJS-052', function(done) {
       var bindVar = [ { type: oracledb.STRING, dir: oracledb.BIND_OUT }, insertID, { val: [0], type: oracledb.STRING, dir: oracledb.BIND_IN } ];
       sql.executeSqlWithErr(connection, fun_execute, bindVar, {}, function(err) {
         should.strictEqual(err.message, 'NJS-052: invalid data type at array index 0 for bind position 3');
@@ -333,10 +333,10 @@ describe('109. rowidFunctionBindAsString_bind.js', function() {
 
   });
 
-  describe('109.3 FUNCTION BIND_IN, UPDATE', function() {
-    var fun_create = "CREATE OR REPLACE FUNCTION nodb_rowid_bind_1083 (id_in IN NUMBER, content_1 IN STRING, content_2 IN ROWID) RETURN ROWID\n" +
+  describe('121.3 FUNCTION BIND_IN, UPDATE', function() {
+    var fun_create = "CREATE OR REPLACE FUNCTION nodb_rowid_bind_1083 (id_in IN NUMBER, content_1 IN STRING, content_2 IN UROWID) RETURN UROWID\n" +
                      "IS \n" +
-                     "    tmp rowid; \n" +
+                     "    tmp UROWID; \n" +
                      "BEGIN \n" +
                      "    insert into " + tableName + " (id, content) values (id_in, CHARTOROWID(content_1)); \n" +
                      "    update " + tableName + " set content = content_2 where id = id_in; \n" +
@@ -354,43 +354,43 @@ describe('109. rowidFunctionBindAsString_bind.js', function() {
       sql.executeSql(connection, fun_drop, {}, {}, done);
     });
 
-    it('109.3.1 update null with rowid', function(done) {
+    it('121.3.1 update null with UROWID', function(done) {
       var content_1 = null;
       var content_2 = "AAAB12AADAAAAwPAAA";
       funBindOut_update(fun_exec, content_1, content_2, content_2, done);
     });
 
-    it('109.3.2 update empty string with rowid', function(done) {
+    it('121.3.2 update empty string with UROWID', function(done) {
       var content_1 = "";
       var content_2 = "AAAB12AADAAAAwPAAA";
       funBindOut_update(fun_exec, content_1, content_2, content_2, done);
     });
 
-    it('109.3.3 update undefined with rowid', function(done) {
+    it('121.3.3 update undefined with UROWID', function(done) {
       var content_1 = undefined;
       var content_2 = "AAAB12AADAAAAwPAAA";
       funBindOut_update(fun_exec, content_1, content_2, content_2, done);
     });
 
-    it('109.3.4 works with default bind type/dir', function(done) {
+    it.skip('121.3.4 works with default bind type/dir', function(done) {
       var content_1 = "AAAB1+AADAAAAwPAAA";
       var content_2 = "0";
       funBindOut_update(fun_exec, content_1, content_2, "00000000.0000.0000", done);
     });
 
-    it('109.3.5 works with default bind type/dir - null value', function(done) {
+    it('121.3.5 works with default bind type/dir - null value', function(done) {
       var content_1 = "AAAB12AADAAAAwPAAA";
       var content_2 = null;
       funBindOut_update_default(fun_exec, content_1, content_2, null, done);
     });
 
-    it('109.3.6 works with default bind type/dir - empty string', function(done) {
+    it('121.3.6 works with default bind type/dir - empty string', function(done) {
       var content_1 = "AAAB12AADAAAAwPAAA";
       var content_2 = "";
       funBindOut_update_default(fun_exec, content_1, content_2, null, done);
     });
 
-    it('109.3.7 works with default bind type/dir - undefined', function(done) {
+    it('121.3.7 works with default bind type/dir - undefined', function(done) {
       var content_1 = "AAAB12AADAAAAwPAAA";
       var content_2 = undefined;
       funBindOut_update_default(fun_exec, content_1, content_2, null, done);

@@ -232,4 +232,27 @@ describe('51. poolClose.js', function(){
       }
     ], done);
   }); // 51.6
+
+  it.skip('51.7 can not get connection in promise version from the terminated pool', function(done) {
+    oracledb.createPool(
+      dbConfig,
+      function(err, pool) {
+        should.not.exist(err);
+        pool.should.be.ok();
+
+        pool.terminate(function(err) {
+          should.not.exist(err);
+
+          try {
+            var conn = pool.getConnection();
+            should.strictEqual(Object.prototype.toString.call(conn), "[object Promise]");
+          } catch(err) {
+            should.exist(err);
+            should.strictEqual(err.message, "NJS-002: invalid pool");
+          }
+          done();
+        }); // terminate()
+      }
+    ); // createPool()
+  }); // 51.7
 });

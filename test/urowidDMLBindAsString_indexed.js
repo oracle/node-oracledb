@@ -64,7 +64,7 @@ describe('115. urowidDMLBindAsString_indexed.js', function() {
                       "            c2    VARCHAR2(3000), \n" +
                       "            primary key(c1, c2) \n" +
                       "        ) organization index \n" +
-                      "      '); \n" +
+                      "    '); \n" +
                       "END;  ";
 
   var table_normal = "BEGIN \n" +
@@ -82,7 +82,7 @@ describe('115. urowidDMLBindAsString_indexed.js', function() {
                      "            ID       NUMBER, \n" +
                      "            content  UROWID(4000) \n" +
                      "        ) \n" +
-                     "      '); \n" +
+                     "    '); \n" +
                      "END;  ";
 
   var drop_table_indexed = "DROP TABLE " + tableName_indexed + " PURGE";

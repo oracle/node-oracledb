@@ -694,7 +694,7 @@ Overview of node-oracledb functional tests
     55.11 result set with unsupported data types
         55.11.1 INTERVAL YEAR TO MONTH data type
     55.12 bind a cursor BIND_INOUT
-      - 55.12.1 does not work currently due to known bug
+        55.12.1 has not supported binding a cursor with BIND_INOUT
     55.13 Invalid Ref Cursor
         55.13.1 
 

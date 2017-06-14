@@ -45,20 +45,20 @@ describe('111. rowidProcedureBindAsString_bindinout.js', function() {
   var insertID = 1;
 
   var proc_create_table = "BEGIN \n" +
-                          "  DECLARE \n" +
-                          "    e_table_missing EXCEPTION; \n" +
-                          "    PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n" +
+                          "    DECLARE \n" +
+                          "        e_table_missing EXCEPTION; \n" +
+                          "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n" +
                           "    BEGIN \n" +
-                          "      EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " PURGE' ); \n" +
+                          "        EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " PURGE' ); \n" +
                           "    EXCEPTION \n" +
-                          "      WHEN e_table_missing \n" +
-                          "      THEN NULL; \n" +
+                          "        WHEN e_table_missing \n" +
+                          "        THEN NULL; \n" +
                           "    END; \n" +
                           "    EXECUTE IMMEDIATE ( ' \n" +
-                          "      CREATE TABLE " + tableName + " ( \n" +
-                          "        ID       NUMBER, \n" +
-                          "        content  ROWID \n" +
-                          "      ) \n" +
+                          "        CREATE TABLE " + tableName + " ( \n" +
+                          "            ID       NUMBER, \n" +
+                          "            content  ROWID \n" +
+                          "        ) \n" +
                           "    '); \n" +
                           "END;  ";
   var drop_table = "DROP TABLE " + tableName + " PURGE";
