@@ -1472,9 +1472,9 @@ void njsConnection::Async_AfterExecute(njsBaton *baton, Local<Value> argv[])
 
 //-----------------------------------------------------------------------------
 // njsConnection::Release()
-//   Releases the connection from use by JS. LOBs and result sets that are
-// still in use will keep the connection open, however, until they have
-// completed their work.
+//   Releases the connection from use by JS. This releases the connection back
+// to the pool or closes the standalone connection so further use is not
+// possible.
 //
 // PARAMETERS
 //   - JS callback which will receive (error)
@@ -1502,8 +1502,9 @@ NAN_METHOD(njsConnection::Release)
 //-----------------------------------------------------------------------------
 void njsConnection::Async_Release(njsBaton *baton)
 {
-    dpiConn_release(baton->dpiConnHandle);
-    baton->dpiConnHandle = NULL;
+    if (dpiConn_close(baton->dpiConnHandle, DPI_MODE_CONN_CLOSE_DEFAULT, NULL,
+            0) < 0)
+        baton->GetDPIError();
 }
 
 
