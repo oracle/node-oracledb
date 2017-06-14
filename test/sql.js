@@ -113,11 +113,25 @@ sql.createAllTable = function(tableName, dataTypeArray) {
   return sql;
 };
 
-sql.executeSql = function(connection, sql) {
+sql.executeSql = function(connection, sql, bindVar, option, callback) {
   connection.execute(
     sql,
+    bindVar,
+    option,
     function(err) {
       should.not.exist(err);
+      callback();
+    }
+  );
+};
+sql.executeSqlWithErr = function(connection, sql, bindVar, option, callback) {
+  connection.execute(
+    sql,
+    bindVar,
+    option,
+    function(err) {
+      should.exist(err);
+      callback(err);
     }
   );
 };

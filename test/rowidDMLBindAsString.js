@@ -44,22 +44,22 @@ describe('107. rowidDMLBindAsString.js', function() {
   var insertID = 1;
 
   var proc_create_table = "BEGIN \n" +
-                           "  DECLARE \n" +
-                           "    e_table_missing EXCEPTION; \n" +
-                           "    PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n" +
-                           "    BEGIN \n" +
-                           "      EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " PURGE' ); \n" +
-                           "    EXCEPTION \n" +
-                           "      WHEN e_table_missing \n" +
-                           "      THEN NULL; \n" +
-                           "    END; \n" +
-                           "    EXECUTE IMMEDIATE ( ' \n" +
-                           "      CREATE TABLE " + tableName + " ( \n" +
-                           "        ID       NUMBER, \n" +
-                           "        content  ROWID \n" +
-                           "      ) \n" +
-                           "    '); \n" +
-                           "END;  ";
+                          "  DECLARE \n" +
+                          "    e_table_missing EXCEPTION; \n" +
+                          "    PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n" +
+                          "    BEGIN \n" +
+                          "      EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " PURGE' ); \n" +
+                          "    EXCEPTION \n" +
+                          "      WHEN e_table_missing \n" +
+                          "      THEN NULL; \n" +
+                          "    END; \n" +
+                          "    EXECUTE IMMEDIATE ( ' \n" +
+                          "      CREATE TABLE " + tableName + " ( \n" +
+                          "        ID       NUMBER, \n" +
+                          "        content  ROWID \n" +
+                          "      ) \n" +
+                          "    '); \n" +
+                          "END;  ";
   var drop_table = "DROP TABLE " + tableName + " PURGE";
 
   before('get connection and create table', function(done) {
@@ -110,7 +110,7 @@ describe('107. rowidDMLBindAsString.js', function() {
 
   describe('107.1 INSERT & SELECT', function() {
 
-    it.skip('107.1.1 works with null', function(done) {
+    it('107.1.1 works with null', function(done) {
       var content = null;
       var bindVar = {
         i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
@@ -119,7 +119,7 @@ describe('107. rowidDMLBindAsString.js', function() {
       dmlInsert(bindVar, content, done);
     });
 
-    it.skip('107.1.2 works with empty string', function(done) {
+    it('107.1.2 works with empty string', function(done) {
       var content = "";
       var expected = null;
       var bindVar = {
@@ -183,7 +183,7 @@ describe('107. rowidDMLBindAsString.js', function() {
       dmlInsert_substr(content, done);
     });
 
-    it.skip('107.1.8 bind null with default type/dir - named bind', function(done) {
+    it('107.1.8 bind null with default type/dir - named bind', function(done) {
       var content = null;
       var bindVar_1 = {
         i: insertID,
@@ -192,7 +192,7 @@ describe('107. rowidDMLBindAsString.js', function() {
       dmlInsert(bindVar_1, content, done);
     });
 
-    it.skip('107.1.9 bind null with default type/dir - positional bind', function(done) {
+    it('107.1.9 bind null with default type/dir - positional bind', function(done) {
       var content = null;
       var bindVar_1 = [ insertID, content ];
       dmlInsert(bindVar_1, content, done);
@@ -213,6 +213,49 @@ describe('107. rowidDMLBindAsString.js', function() {
       dmlInsert(bindVar_1, content, done);
     });
 
+    it('107.1.12 works with undefined', function(done) {
+      var content = undefined;
+      var bindVar = {
+        i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
+        c: { val : content, dir : oracledb.BIND_IN, type : oracledb.STRING }
+      };
+      dmlInsert(bindVar, null, done);
+    });
+
+    it('107.1.13 bind undefined with default type/dir - named bind', function(done) {
+      var content = undefined;
+      var bindVar_1 = {
+        i: insertID,
+        c: content
+      };
+      dmlInsert(bindVar_1, null, done);
+    });
+
+    it('107.1.14 bind undefined with default type/dir - positional bind', function(done) {
+      var content = undefined;
+      var bindVar_1 = [ insertID, content ];
+      dmlInsert(bindVar_1, null, done);
+    });
+
+    it('107.1.15 works with NaN', function(done) {
+      var content = NaN;
+      var sql_insert = "insert into " + tableName + "(id, content) values (:i, CHARTOROWID(:c))";
+      var bindVar = {
+        i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
+        c: { val : content, dir : oracledb.BIND_IN, type : oracledb.STRING }
+      };
+
+      connection.execute(
+        sql_insert,
+        bindVar,
+        function(err) {
+          should.exist(err);
+          (err.message).should.equal("NJS-011: encountered bind value and type mismatch");
+          done();
+        }
+      );
+    });
+
   });
 
   describe('107.2 UPDATE', function() {
@@ -229,7 +272,7 @@ describe('107. rowidDMLBindAsString.js', function() {
       dmlUpdate(content_insert, content_update, content_update, done);
     });
 
-    it.skip('107.2.3 UPDATE restricted rowid with null', function(done) {
+    it('107.2.3 UPDATE restricted rowid with null', function(done) {
       var content_insert = "00000DD5.0010.0002";
       var content_update = null;
       dmlUpdate(content_insert, content_update, content_update, done);
@@ -237,7 +280,7 @@ describe('107. rowidDMLBindAsString.js', function() {
   });
 
   describe('107.3 RETURNING INTO', function() {
-    it.skip('107.3.1 INSERT null', function(done) {
+    it('107.3.1 INSERT null', function(done) {
       var content = null;
       var bindVar = {
         i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
@@ -278,7 +321,7 @@ describe('107. rowidDMLBindAsString.js', function() {
       update_returning(content_insert, bindVar_update, content_update, done);
     });
 
-    it.skip('107.3.8 UPDATE extented rowid with null', function(done) {
+    it('107.3.8 UPDATE extented rowid with null', function(done) {
       var content_insert = "AAABiqAADAAAAwPAAA";
       var content_update = null;
       var bindVar_update = {
@@ -289,7 +332,7 @@ describe('107. rowidDMLBindAsString.js', function() {
       update_returning(content_insert, bindVar_update, content_update, done);
     });
 
-    it.skip('107.3.9 UPDATE restricted rowid with empty string', function(done) {
+    it('107.3.9 UPDATE restricted rowid with empty string', function(done) {
       var content_insert = "00000000.0100.0100";
       var content_update = "";
       var bindVar_update = {
@@ -369,7 +412,7 @@ describe('107. rowidDMLBindAsString.js', function() {
             should.not.exist(err);
             var resultVal = result.rows[0][1];
             should.strictEqual(resultVal, expected);
-            should.strictEqual(typeof resultVal, "string");
+            // should.strictEqual(typeof resultVal, "string");
             cb();
           }
         );
@@ -464,7 +507,7 @@ describe('107. rowidDMLBindAsString.js', function() {
             should.not.exist(err);
             var resultVal = result.rows[0][1];
             should.strictEqual(resultVal, expected);
-            should.strictEqual(typeof resultVal, "string");
+            // should.strictEqual(typeof resultVal, "string");
             cb();
           }
         );
@@ -483,7 +526,7 @@ describe('107. rowidDMLBindAsString.js', function() {
         if (typeof (result.outBinds.o) === 'undefined') resultVal = result.outBinds[0][0];
         else resultVal = result.outBinds.o[0];
         should.strictEqual(resultVal, expected);
-        should.strictEqual(typeof resultVal, "string");
+        // should.strictEqual(typeof resultVal, "string");
         callback();
       }
     );
@@ -518,7 +561,7 @@ describe('107. rowidDMLBindAsString.js', function() {
             if (typeof (result.outBinds.o) === 'undefined') resultVal = result.outBinds[0][0];
             else resultVal = result.outBinds.o[0];
             should.strictEqual(resultVal, expected);
-            should.strictEqual(typeof resultVal, "string");
+            // should.strictEqual(typeof resultVal, "string");
             cb();
           }
         );
