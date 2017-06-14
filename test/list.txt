@@ -565,7 +565,11 @@ Overview of node-oracledb functional tests
 
 39. dataTypeRowid.js
     39.1 testing ROWID data type
-       39.1.1 is still unsupported data type
+        39.1.1 query rowid
+        39.1.2 works well with result set
+        39.1.3 works well with REF Cursor
+    39.2 stores null value correctly
+        39.2.1 testing Null, Empty string and Undefined
 
 40. dataTypeClob.js
     40.1 testing CLOB data type
