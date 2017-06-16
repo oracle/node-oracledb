@@ -325,7 +325,7 @@ void njsResultSet::GetRowsCommon(njsBaton *baton)
 {
     if (activeBaton)
         baton->error = njsMessages::Get(errBusyResultSet);
-    else {
+    else if (baton->error.empty()) {
         activeBaton = baton;
         baton->SetDPIStmtHandle(dpiStmtHandle);
         baton->SetDPIConnHandle(dpiConnHandle);

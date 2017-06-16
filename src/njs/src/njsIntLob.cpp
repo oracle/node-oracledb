@@ -419,7 +419,7 @@ NAN_METHOD(njsILob::Read)
         return;
     if (lob->activeBaton)
         baton->error = njsMessages::Get(errBusyLob);
-    else {
+    else if (baton->error.empty()) {
         lob->activeBaton = baton;
         if (lob->dataType == NJS_DATATYPE_BLOB)
             baton->bufferSize = lob->pieceSize;
@@ -544,7 +544,7 @@ NAN_METHOD(njsILob::Write)
         return;
     if (lob->activeBaton)
         baton->error = njsMessages::Get(errBusyLob);
-    else {
+    else if (baton->error.empty()) {
         baton->jsBuffer.Reset(jsBuffer);
         baton->bufferPtr = Buffer::Data(jsBuffer);
         baton->bufferSize = Buffer::Length(jsBuffer);

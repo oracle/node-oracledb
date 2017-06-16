@@ -361,11 +361,13 @@ NAN_METHOD(njsPool::GetConnection)
     baton = pool->CreateBaton(info);
     if (!baton)
         return;
-    baton->jsOracledb.Reset(pool->jsOracledb);
-    njsOracledb *oracledb = baton->GetOracledb();
-    baton->connClass = oracledb->getConnectionClass();
-    baton->lobPrefetchSize =  pool->lobPrefetchSize;
-    baton->SetDPIPoolHandle(pool->dpiPoolHandle);
+    if (baton->error.empty()) {
+        baton->jsOracledb.Reset(pool->jsOracledb);
+        njsOracledb *oracledb = baton->GetOracledb();
+        baton->connClass = oracledb->getConnectionClass();
+        baton->lobPrefetchSize =  pool->lobPrefetchSize;
+        baton->SetDPIPoolHandle(pool->dpiPoolHandle);
+    }
     baton->QueueWork("GetConnection", Async_GetConnection,
             Async_AfterGetConnection, 2);
 }

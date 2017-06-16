@@ -135,7 +135,12 @@ typedef enum {
     NJS_DB_TYPE_BLOB           = 113,
     NJS_DB_TYPE_TIMESTAMP      = 187,
     NJS_DB_TYPE_TIMESTAMP_TZ   = 188,
-    NJS_DB_TYPE_TIMESTAMP_LTZ  = 232
+    NJS_DB_TYPE_TIMESTAMP_LTZ  = 232,
+
+    /* Pseudo types */
+    NJS_DB_TYPE_NCHAR          = 1096,
+    NJS_DB_TYPE_NVARCHAR       = 1001,
+    NJS_DB_TYPE_NCLOB          = 1112,
 } njsDBType;
 
 

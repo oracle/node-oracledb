@@ -124,11 +124,13 @@ njsDBType njsVariable::DBType()
 {
     switch (dbTypeNum) {
         case DPI_ORACLE_TYPE_VARCHAR:
-        case DPI_ORACLE_TYPE_NVARCHAR:
             return NJS_DB_TYPE_VARCHAR;
+        case DPI_ORACLE_TYPE_NVARCHAR:
+            return NJS_DB_TYPE_NVARCHAR;
         case DPI_ORACLE_TYPE_CHAR:
-        case DPI_ORACLE_TYPE_NCHAR:
             return NJS_DB_TYPE_CHAR;
+        case DPI_ORACLE_TYPE_NCHAR:
+          return NJS_DB_TYPE_NCHAR;
         case DPI_ORACLE_TYPE_ROWID:
             return NJS_DB_TYPE_ROWID;
         case DPI_ORACLE_TYPE_RAW:
@@ -149,8 +151,9 @@ njsDBType njsVariable::DBType()
         case DPI_ORACLE_TYPE_TIMESTAMP_LTZ:
             return NJS_DB_TYPE_TIMESTAMP_LTZ;
         case DPI_ORACLE_TYPE_CLOB:
-        case DPI_ORACLE_TYPE_NCLOB:
             return NJS_DB_TYPE_CLOB;
+        case DPI_ORACLE_TYPE_NCLOB:
+          return NJS_DB_TYPE_NCLOB;
         case DPI_ORACLE_TYPE_BLOB:
             return NJS_DB_TYPE_BLOB;
         case DPI_ORACLE_TYPE_LONG_VARCHAR:
@@ -516,7 +519,7 @@ void njsBaton::QueueWork(const char *methodName,
 
 
 //-----------------------------------------------------------------------------
-// njsCommon::CreatnjsBaton()
+// njsCommon::CreateBaton()
 //   Creates a baton for use in asynchronous methods. In each of these cases
 // the last argument passed in from JS is expected to be a JS callback. NULL is
 // returned and an exception raised for JS if this is not the case.
@@ -525,6 +528,7 @@ njsBaton *njsCommon::CreateBaton(Nan::NAN_METHOD_ARGS_TYPE args)
 {
     Nan::HandleScope scope;
     Local<Function> callback;
+    njsBaton *baton;
 
     if (!args.Length() || !args[(args.Length() - 1)]->IsFunction()) {
         string errMsg = njsMessages::Get(errMissingCallback);
@@ -532,7 +536,12 @@ njsBaton *njsCommon::CreateBaton(Nan::NAN_METHOD_ARGS_TYPE args)
         return NULL;
     }
     callback = Local<Function>::Cast(args[args.Length() - 1]);
-    return new njsBaton(callback, args.Holder());
+    baton = new njsBaton(callback, args.Holder());
+    if (!IsValid()) {
+        njsErrorType errNum = GetInvalidErrorType();
+        baton->error = njsMessages::Get(errNum);
+    }
+    return baton;
 }
 
 
@@ -735,8 +744,11 @@ njsCommon *njsCommon::ValidateArgs(Nan::NAN_METHOD_ARGS_TYPE args,
     string errMsg;
 
     obj = Nan::ObjectWrap::Unwrap<njsCommon>(args.Holder());
-    if (!Validate(obj))
+    if (!obj) {
+        errMsg = njsMessages::Get(errInvalidJSObject);
+        Nan::ThrowError(errMsg.c_str());
         return NULL;
+    }
     if (args.Length() < minArgs || args.Length() > maxArgs) {
         errMsg = njsMessages::Get(errInvalidNumberOfParameters);
         Nan::ThrowError(errMsg.c_str());

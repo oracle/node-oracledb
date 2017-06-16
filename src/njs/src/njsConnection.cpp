@@ -1385,20 +1385,22 @@ NAN_METHOD(njsConnection::Execute)
     baton = connection->CreateBaton(info);
     if (!baton)
         return;
-    baton->sql = sql;
-    baton->SetDPIConnHandle(connection->dpiConnHandle);
-    baton->jsOracledb.Reset(connection->jsOracledb);
-    oracledb = baton->GetOracledb();
-    baton->maxRows = oracledb->getMaxRows();
-    baton->prefetchRows = oracledb->getPrefetchRows();
-    oracledb->SetFetchAsStringTypesOnBaton(baton);
-    oracledb->SetFetchAsBufferTypesOnBaton(baton);
-    baton->outFormat = oracledb->getOutFormat();
-    baton->autoCommit = oracledb->getAutoCommit();
-    baton->extendedMetaData = oracledb->getExtendedMetaData();
-    baton->getRS = false;
-    bool ok = true;
-    if (info.Length() > 2)
+    bool ok = baton->error.empty();
+    if (ok) {
+        baton->sql = sql;
+        baton->SetDPIConnHandle(connection->dpiConnHandle);
+        baton->jsOracledb.Reset(connection->jsOracledb);
+        oracledb = baton->GetOracledb();
+        baton->maxRows = oracledb->getMaxRows();
+        baton->prefetchRows = oracledb->getPrefetchRows();
+        oracledb->SetFetchAsStringTypesOnBaton(baton);
+        oracledb->SetFetchAsBufferTypesOnBaton(baton);
+        baton->outFormat = oracledb->getOutFormat();
+        baton->autoCommit = oracledb->getAutoCommit();
+        baton->extendedMetaData = oracledb->getExtendedMetaData();
+        baton->getRS = false;
+    }
+    if (ok && info.Length() > 2)
         ok = ProcessBinds(info, 1, baton);
     if (ok && info.Length() > 3)
         ProcessOptions(info, 2, baton);
@@ -1608,7 +1610,8 @@ NAN_METHOD(njsConnection::Commit)
     baton = connection->CreateBaton(info);
     if (!baton)
         return;
-    baton->SetDPIConnHandle(connection->dpiConnHandle);
+    if (baton->error.empty())
+        baton->SetDPIConnHandle(connection->dpiConnHandle);
     baton->QueueWork("Commit", Async_Commit, NULL, 1);
 }
 
@@ -1642,7 +1645,8 @@ NAN_METHOD(njsConnection::Rollback)
     baton = connection->CreateBaton(info);
     if (!baton)
         return;
-    baton->SetDPIConnHandle(connection->dpiConnHandle);
+    if (baton->error.empty())
+        baton->SetDPIConnHandle(connection->dpiConnHandle);
     baton->QueueWork("Rollback", Async_Rollback, NULL, 1);
 }
 
@@ -1676,7 +1680,8 @@ NAN_METHOD(njsConnection::Break)
     baton = connection->CreateBaton(info);
     if (!baton)
         return;
-    baton->SetDPIConnHandle(connection->dpiConnHandle);
+    if (baton->error.empty())
+        baton->SetDPIConnHandle(connection->dpiConnHandle);
     baton->QueueWork("Break", Async_Break, NULL, 1);
 }
 
@@ -1718,10 +1723,12 @@ NAN_METHOD(njsConnection::CreateLob)
         Nan::ThrowError(errMsg.c_str());
         return;
     }
-    baton->jsOracledb.Reset(connection->jsOracledb);
-    baton->SetDPIConnHandle(connection->dpiConnHandle);
-    baton->protoILob = new njsProtoILob();
-    baton->protoILob->dataType = (njsDataType) lobType;
+    if (baton->error.empty()) {
+        baton->jsOracledb.Reset(connection->jsOracledb);
+        baton->SetDPIConnHandle(connection->dpiConnHandle);
+        baton->protoILob = new njsProtoILob();
+        baton->protoILob->dataType = (njsDataType) lobType;
+    }
     baton->QueueWork("CreateLob", Async_CreateLob, Async_AfterCreateLob, 2);
 }
 
