@@ -34,17 +34,17 @@
  *     51 onwards are for other tests
  *
  *****************************************************************************/
- "use strict";
+"use strict";
 
- var oracledb = require('oracledb');
- var should   = require('should');
- var async    = require('async');
- var dbConfig = require('./dbconfig.js');
+var oracledb = require('oracledb');
+var should   = require('should');
+var async    = require('async');
+var dbConfig = require('./dbconfig.js');
 
- describe('57. nestedCursor.js', function() {
+describe('57. nestedCursor.js', function() {
 
-   var connection = null;
-   var createParentTable =
+  var connection = null;
+  var createParentTable =
       "BEGIN \
           DECLARE \
               e_table_missing EXCEPTION; \
@@ -79,7 +79,7 @@
           '); \
       END; ";
 
-   var createChildTable =
+  var createChildTable =
       "BEGIN \
           DECLARE \
               e_table_missing EXCEPTION; \
@@ -131,78 +131,78 @@
           '); \
       END; ";
 
-   before(function(done) {
-     async.series([
-       function(callback) {
-         oracledb.getConnection(
-           {
-             user: dbConfig.user,
-             password: dbConfig.password,
-             connectString: dbConfig.connectString
-           },
+  before(function(done) {
+    async.series([
+      function(callback) {
+        oracledb.getConnection(
+          {
+            user: dbConfig.user,
+            password: dbConfig.password,
+            connectString: dbConfig.connectString
+          },
           function(err, conn) {
             connection = conn;
             callback();
           }
         );
-       },
-       function(callback) {
-         connection.should.be.ok();
-         connection.execute(
+      },
+      function(callback) {
+        connection.should.be.ok();
+        connection.execute(
           createParentTable,
           function(err) {
             should.not.exist(err);
             callback();
           }
         );
-       },
-       function(callback) {
-         connection.should.be.ok();
-         connection.execute(
+      },
+      function(callback) {
+        connection.should.be.ok();
+        connection.execute(
           createChildTable,
           function(err) {
             should.not.exist(err);
             callback();
           }
         );
-       }
-     ], done);
+      }
+    ], done);
 
-   });
+  });
 
-   after(function(done) {
-     async.series([
-       function(callback) {
-         connection.execute(
+  after(function(done) {
+    async.series([
+      function(callback) {
+        connection.execute(
           "DROP TABLE nodb_child_tab PURGE",
           function(err) {
             should.not.exist(err);
             callback();
           }
         );
-       },
-       function(callback) {
-         connection.execute(
+      },
+      function(callback) {
+        connection.execute(
           "DROP TABLE nodb_parent_tab PURGE",
           function(err) {
             should.not.exist(err);
             callback();
           }
         );
-       },
-       function(callback) {
-         connection.release( function(err) {
-           should.not.exist(err);
-           callback();
-         });
-       }
-     ], done);
-   });
+      },
+      function(callback) {
+        connection.release( function(err) {
+          should.not.exist(err);
+          callback();
+        });
+      }
+    ], done);
+  });
 
-   it('57.1 testing nested cursor support - result set', function(done) {
-     connection.should.be.ok();
+  it('57.1 testing nested cursor support - result set', function(done) {
+    connection.should.be.ok();
 
-     var sql =
+    var sql =
         "SELECT p.description, \
              CURSOR( \
                SELECT c.description   \
@@ -211,7 +211,7 @@
              ) children  \
          FROM nodb_parent_tab p";
 
-     connection.execute(
+    connection.execute(
       sql,
       [],
       { resultSet: true },
@@ -224,10 +224,10 @@
       }
     );
 
-   }); // 57.1
+  }); // 57.1
 
-   it('57.2 testing nested cursor support - REF Cursor', function(done) {
-     var testproc =
+  it('57.2 testing nested cursor support - REF Cursor', function(done) {
+    var testproc =
         "CREATE OR REPLACE PROCEDURE nodb_get_family_tree(p_out OUT SYS_REFCURSOR)  \
            AS \
            BEGIN \
@@ -241,22 +241,22 @@
                FROM nodb_parent_tab p;  \
            END; ";
 
-     async.series([
-       function(callback) {
-         connection.execute(
+    async.series([
+      function(callback) {
+        connection.execute(
           testproc,
           function(err) {
             should.not.exist(err);
             callback();
           }
         );
-       },
-       function(callback){
-         connection.execute(
+      },
+      function(callback){
+        connection.execute(
           "BEGIN nodb_get_family_tree(:out); END;",
-           {
-             out: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
-           },
+          {
+            out: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
+          },
           function(err, result) {
             should.exist(err);
             (err.message).should.startWith('NJS-010:');
@@ -265,17 +265,17 @@
             callback();
           }
         );
-       },
-       function(callback) {
-         connection.execute(
+      },
+      function(callback) {
+        connection.execute(
           "DROP PROCEDURE nodb_get_family_tree",
           function(err) {
             should.not.exist(err);
             callback();
           }
         );
-       }
-     ], done);
-   }); // 57.2
+      }
+    ], done);
+  }); // 57.2
 
- });
+});

@@ -409,15 +409,15 @@ describe('111. rowidProcedureBindAsString_bindinout.js', function() {
       c: { val: content_in, type: oracledb.STRING, dir: oracledb.BIND_INOUT, maxSize: 1000  }
     };
     connection.execute(
-        proc_execute,
-        bindVar_out,
-        function(err, result) {
-          should.not.exist(err);
-          var resultVal = result.outBinds.c;
-          should.strictEqual(resultVal, expected);
-          callback();
-        }
-      );
+      proc_execute,
+      bindVar_out,
+      function(err, result) {
+        should.not.exist(err);
+        var resultVal = result.outBinds.c;
+        should.strictEqual(resultVal, expected);
+        callback();
+      }
+    );
   };
 
   var procedureBindInout_update = function(proc_execute, content_1, content_2, expected, callback) {

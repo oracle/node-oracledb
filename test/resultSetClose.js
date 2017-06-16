@@ -119,32 +119,40 @@ describe('53. resultSetClose.js', function() {
     );
   }); // 53.1
 
-  it('53.2 can not call close() again', function() {
-    should.throws(
-      function() {
-        resultSet.close(function() {});
-      },
-      /NJS-018: invalid ResultSet/
-    );
+  it('53.2 can not call close() again', function(done) {
+    resultSet.close(function(err) {
+      should.exist(err);
+      should.strictEqual(
+        err.message,
+        'NJS-018: invalid ResultSet'
+      );
+      done();
+    });
   }); // 53.2
 
-  it('53.3 can not call getRow()', function() {
-    should.throws(
-      function() {
-        resultSet.getRow(function() {});
-      },
-      /NJS-018: invalid ResultSet/
-    );
+  it('53.3 can not call getRow()', function(done) {
+    resultSet.getRow(function(err, row) {
+      should.exist(err);
+      should.not.exist(row);
+      should.strictEqual(
+        err.message,
+        'NJS-018: invalid ResultSet'
+      );
+      done();
+    });
   }); // 53.3
 
-  it('53.4 can not call getRows()', function() {
-    should.throws(
-      function() {
-        var numRows = 3;
-        resultSet.getRows(numRows, function() {});
-      },
-      /NJS-018: invalid ResultSet/
-    );
+  it('53.4 can not call getRows()', function(done) {
+    var numRows = 3;
+    resultSet.getRows(numRows, function(err, rows) {
+      should.exist(err);
+      should.not.exist(rows);
+      should.strictEqual(
+        err.message,
+        'NJS-018: invalid ResultSet'
+      );
+      done();
+    });
   }); // 53.4
 
   it('53.5 can not call toQueryStream()', function() {

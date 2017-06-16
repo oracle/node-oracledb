@@ -45,8 +45,8 @@ describe('116. fetchUrowidAsString.js', function() {
 
   var connection = null;
   var tableName = "nodb_rowid";
-  var array = random.getRandomNumArray(30);
-  var numRows = array.length;  // number of rows to return from each call to getRows()
+  var dataArray = random.getRandomNumArray(30);
+  var numRows = dataArray.length;  // number of rows to return from each call to getRows()
 
   var proc_create_table = "BEGIN \n" +
                           "    DECLARE \n" +
@@ -83,7 +83,7 @@ describe('116. fetchUrowidAsString.js', function() {
   });
 
   var insertData = function(connection, tableName, callback) {
-    async.forEach(array, function(element, cb) {
+    async.forEach(dataArray, function(element, cb) {
       var sql = "INSERT INTO " + tableName + "(num) VALUES(" + element + ")";
       connection.execute(
         sql,
@@ -99,7 +99,7 @@ describe('116. fetchUrowidAsString.js', function() {
   };
 
   var updateDate = function(connection, tableName, callback) {
-    async.forEach(array, function(element, cb) {
+    async.forEach(dataArray, function(element, cb) {
       var sql = "UPDATE " + tableName + " T SET content = T.ROWID where num = " + element;
       connection.execute(
         sql,
@@ -275,7 +275,7 @@ describe('116. fetchUrowidAsString.js', function() {
   describe('116.3 works with fetchInfo and outFormat = ARRAY', function() {
     var maxRowBak = oracledb.maxRows;
     var option = {
-      outFormat: oracledb.OBJECT,
+      outFormat: oracledb.ARRAY,
       fetchInfo: { "CONTENT": { type: oracledb.STRING } }
     };
     before(function(done) {
@@ -345,6 +345,7 @@ describe('116. fetchUrowidAsString.js', function() {
     it('116.3.8 fetchInfo, resultSet = true', function(done) {
       var option_rs = {
         resultSet: true,
+        outFormat: oracledb.ARRAY,
         fetchInfo: { "CONTENT": { type: oracledb.STRING } }
       };
       test2(option_rs, false, true, done);
@@ -499,6 +500,7 @@ describe('116. fetchUrowidAsString.js', function() {
     it('116.5.8 resultSet = true', function(done) {
       var option_rs = {
         resultSet: true,
+        outFormat: oracledb.OBJECT
       };
       test2(option_rs, true, false, done);
     });
@@ -507,7 +509,7 @@ describe('116. fetchUrowidAsString.js', function() {
 
   describe('116.6 fetch as string by default with outFormat = ARRAY', function() {
     var maxRowBak = oracledb.maxRows;
-    var option = { outFormat: oracledb.OBJECT };
+    var option = { outFormat: oracledb.ARRAY };
     before(function(done) {
       async.series([
         function makeTable(callback) {
@@ -576,6 +578,7 @@ describe('116. fetchUrowidAsString.js', function() {
     it('116.6.8 resultSet = true', function(done) {
       var option_rs = {
         resultSet: true,
+        outFormat: oracledb.ARRAY,
       };
       test2(option_rs, false, false, done);
     });
@@ -583,29 +586,25 @@ describe('116. fetchUrowidAsString.js', function() {
   });
 
   function test1(option, object, array, callback) {
-    async.forEach(array, function(element, cb) {
+    async.forEach(dataArray, function(element, cb) {
       var sql = "select content,rowid from " + tableName + " where num = " + element;
       connection.execute(
-          sql,
-          [],
-          option,
-          function(err, result) {
-            should.not.exist(err);
-            var resultVal_1 = result.rows[0][0];
-            var resultVal_2 = result.rows[0][1];
-            if(object === true) {
-              resultVal_1 = result.rows[0].CONTENT;
-              resultVal_2 = result.rows[0].ROWID;
-            }
-            if(array === true) {
-              resultVal_1 = result.outBinds.CONTENT;
-              resultVal_2 = result.outBinds.ROWID;
-            }
-            should.strictEqual(typeof resultVal_1, "string");
-            should.strictEqual(resultVal_1, resultVal_2);
-            cb();
+        sql,
+        [],
+        option,
+        function(err, result) {
+          should.not.exist(err);
+          var resultVal_1 = result.rows[0][0];
+          var resultVal_2 = result.rows[0][1];
+          if(object === true) {
+            resultVal_1 = result.rows[0].CONTENT;
+            resultVal_2 = result.rows[0].ROWID;
           }
-        );
+          should.strictEqual(typeof resultVal_1, "string");
+          should.strictEqual(resultVal_1, resultVal_2);
+          cb();
+        }
+      );
     }, function(err) {
       should.not.exist(err);
       callback();
@@ -613,7 +612,7 @@ describe('116. fetchUrowidAsString.js', function() {
   }
 
   function test2(option, object, array, callback) {
-    async.forEach(array, function(element, cb) {
+    async.forEach(dataArray, function(element, cb) {
       var sql = "select content,rowid from " + tableName + " where num = " + element;
       connection.execute(
         sql,
@@ -628,10 +627,6 @@ describe('116. fetchUrowidAsString.js', function() {
               if(object === true) {
                 resultVal_1 = row.CONTENT;
                 resultVal_2 = row.ROWID;
-              }
-              if(array === true) {
-                resultVal_1 = row.outBinds.CONTENT;
-                resultVal_2 = row.outBinds.ROWID;
               }
               should.strictEqual(typeof resultVal_1, "string");
               should.strictEqual(resultVal_1, resultVal_2);
@@ -667,10 +662,10 @@ describe('116. fetchUrowidAsString.js', function() {
   function testQueryStream(option, callback) {
     var sql = "select CONTENT from " + tableName;
     var stream = connection.queryStream(
-                 sql,
-                 [],
-                 option
-               );
+      sql,
+      [],
+      option
+    );
 
     var result = [];
     stream.on('data', function(data) {

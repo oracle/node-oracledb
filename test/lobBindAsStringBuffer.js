@@ -688,35 +688,35 @@ describe('80. lobBindAsStringBuffer.js', function() {
         },
         function(cb) {
           connection.execute(
-              sqlRun,
-              bindVar,
-              function(err, result) {
-                should.not.exist(err);
-                var specStrLength = specialStr.length;
-                var resultLength1 = result.outBinds.b.length;
-                should.strictEqual(resultLength1, size);
-                should.strictEqual(result.outBinds.b.toString('utf8', 0, specStrLength), specialStr);
-                should.strictEqual(result.outBinds.b.toString('utf8', (resultLength1 - specStrLength), resultLength1), specialStr);
-                var lob = result.outBinds.c;
-                should.exist(lob);
-                lob.setEncoding("utf8");
-                var clobData = '';
-                lob.on('data', function(chunk) {
-                  clobData += chunk;
-                });
+            sqlRun,
+            bindVar,
+            function(err, result) {
+              should.not.exist(err);
+              var specStrLength = specialStr.length;
+              var resultLength1 = result.outBinds.b.length;
+              should.strictEqual(resultLength1, size);
+              should.strictEqual(result.outBinds.b.toString('utf8', 0, specStrLength), specialStr);
+              should.strictEqual(result.outBinds.b.toString('utf8', (resultLength1 - specStrLength), resultLength1), specialStr);
+              var lob = result.outBinds.c;
+              should.exist(lob);
+              lob.setEncoding("utf8");
+              var clobData = '';
+              lob.on('data', function(chunk) {
+                clobData += chunk;
+              });
 
-                lob.on('error', function(err) {
-                  should.not.exist(err, "lob.on 'error' event.");
-                });
+              lob.on('error', function(err) {
+                should.not.exist(err, "lob.on 'error' event.");
+              });
 
-                lob.on('end', function() {
-                  fs.readFile( inFileName, { encoding: 'utf8' }, function(err, originalData) {
-                    should.not.exist(err);
-                    should.strictEqual(clobData, originalData);
-                    cb();
-                  });
+              lob.on('end', function() {
+                fs.readFile( inFileName, { encoding: 'utf8' }, function(err, originalData) {
+                  should.not.exist(err);
+                  should.strictEqual(clobData, originalData);
+                  cb();
                 });
               });
+            });
         }
       ], done);
     }); // 80.2.3

@@ -417,15 +417,15 @@ describe('110. rowidProcedureBindAsString_bindout.js', function() {
       o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
     };
     connection.execute(
-        proc_execute,
-        bindVar_out,
-        function(err, result) {
-          should.not.exist(err);
-          var resultVal = result.outBinds.o;
-          should.strictEqual(resultVal, expected);
-          callback();
-        }
-      );
+      proc_execute,
+      bindVar_out,
+      function(err, result) {
+        should.not.exist(err);
+        var resultVal = result.outBinds.o;
+        should.strictEqual(resultVal, expected);
+        callback();
+      }
+    );
   };
 
   var procedureBindOut_update = function(proc_execute, content_1, content_2, expected, callback) {

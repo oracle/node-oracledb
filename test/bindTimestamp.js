@@ -257,7 +257,7 @@ describe('102. bindTimestamp.js', function() {
         connection.execute(
           "insert into nodb_tab_tsbind values (:1, :2, :3) returning id, tstz into :4, :5",
           [id, bv, bv, { type: oracledb.NUMBER, dir: oracledb.BIND_OUT},
-             { type: oracledb.DATE, dir: oracledb.BIND_OUT} ],
+            { type: oracledb.DATE, dir: oracledb.BIND_OUT} ],
           { autoCommit: true},
           function(err, result) {
             should.not.exist(err);
@@ -330,7 +330,7 @@ describe('102. bindTimestamp.js', function() {
         connection.execute(
           "insert into nodb_tab_tsbind values (:1, :2, :3) returning id, tstz into :4, :5",
           [id, bv, bv, { type: oracledb.NUMBER, dir: oracledb.BIND_OUT},
-             { type: oracledb.NUMBER, dir: oracledb.BIND_OUT} ],
+            { type: oracledb.NUMBER, dir: oracledb.BIND_OUT} ],
           { autoCommit: true},
           function(err) {
             should.exist(err);

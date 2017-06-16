@@ -144,12 +144,12 @@ describe('124. nclobDMLBindAsString.js', function() {
   var insertData = function(tableName, insertStr, callback) {
     var sql = "INSERT INTO " + tableName + "(num, content) VALUES(" + insertID + ", TO_NCLOB('" + insertStr + "'))";
     connection.execute(
-        sql,
-        function(err) {
-          should.not.exist(err);
-          callback();
-        }
-      );
+      sql,
+      function(err) {
+        should.not.exist(err);
+        callback();
+      }
+    );
   };
 
   var bindIn = function(tableName, insertStr, callback) {

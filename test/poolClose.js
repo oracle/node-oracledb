@@ -81,12 +81,10 @@ describe('51. poolClose.js', function(){
           );
 
           var inUse;
-          should.throws(
-            function() {
-              inUse = pool.connectionsInUse;
-            },
-            /NJS-002: invalid pool/
-          );
+          pool.terminate(function(err) {
+            should.exist(err);
+            should.strictEqual(err.message, "NJS-002: invalid pool");
+          });
           should.not.exist(inUse);
 
           done();
@@ -122,14 +120,15 @@ describe('51. poolClose.js', function(){
       function(err, pool) {
         should.not.exist(err);
         pool.should.be.ok();
+
         pool.terminate(function(err) {
           should.not.exist(err);
-          should.throws(
-            function() {
-              pool.terminate(function() {});
-            },
-            /NJS-002: invalid pool/
-          );
+
+          pool.terminate(function(err) {
+            should.exist(err);
+            should.strictEqual(err.message, "NJS-002: invalid pool");
+          });
+
           done();
         }); // terminate()
       }
@@ -142,14 +141,15 @@ describe('51. poolClose.js', function(){
       function(err, pool) {
         should.not.exist(err);
         pool.should.be.ok();
+
         pool.close(function(err) {
           should.not.exist(err);
-          should.throws(
-            function() {
-              pool.close(function() {});
-            },
-            /NJS-002: invalid pool/
-          );
+
+          pool.close(function(err) {
+            should.exist(err);
+            should.strictEqual(err.message, "NJS-002: invalid pool");
+          });
+
           done();
         }); // terminate()
       }
@@ -216,13 +216,11 @@ describe('51. poolClose.js', function(){
         });
       },
       function close2(cb) {
-        should.throws(
-          function() {
-            conn.close(function() {});
-          },
-          /NJS-003: invalid connection/
-        );
-        cb();
+        conn.close(function(err) {
+          should.exist(err);
+          should.strictEqual(err.message, 'NJS-003: invalid connection');
+          cb();
+        });
       },
       function(cb) {
         pool.terminate(function(err) {
@@ -233,7 +231,7 @@ describe('51. poolClose.js', function(){
     ], done);
   }); // 51.6
 
-  it.skip('51.7 can not get connection in promise version from the terminated pool', function(done) {
+  it('51.7 can not get connection in promise version from the terminated pool', function(done) {
     oracledb.createPool(
       dbConfig,
       function(err, pool) {
@@ -243,16 +241,22 @@ describe('51. poolClose.js', function(){
         pool.terminate(function(err) {
           should.not.exist(err);
 
-          try {
-            var conn = pool.getConnection();
-            should.strictEqual(Object.prototype.toString.call(conn), "[object Promise]");
-          } catch(err) {
-            should.exist(err);
-            should.strictEqual(err.message, "NJS-002: invalid pool");
-          }
-          done();
+          var promise = pool.getConnection();
+
+          promise
+            .then(function(conn) {
+              should.not.exist(conn);
+            })
+            .catch(function(err) {
+              should.exist(err);
+              should.strictEqual(err.message, "NJS-002: invalid pool");
+            })
+            .then(function() {
+              done();
+            });
         }); // terminate()
       }
     ); // createPool()
   }); // 51.7
+
 });

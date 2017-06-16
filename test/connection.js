@@ -124,13 +124,13 @@ describe('1. connection.js', function(){
     it('1.1.2 ARRAY format explicitly', function(done) {
       connection.should.be.ok();
       connection.execute(
-         query, {id: 20}, {outFormat: oracledb.ARRAY},
-         function(err, result){
-           should.not.exist(err);
-           (result.rows).should.eql([[ 20, 'Marketing' ]]);
-           done();
-         }
-       );
+        query, {id: 20}, {outFormat: oracledb.ARRAY},
+        function(err, result){
+          should.not.exist(err);
+          (result.rows).should.eql([[ 20, 'Marketing' ]]);
+          done();
+        }
+      );
     });
 
     it('1.1.3 OBJECT format', function(done){

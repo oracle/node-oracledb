@@ -589,22 +589,22 @@ describe('106. fetchRowidAsString.js', function() {
     async.forEach(array, function(element, cb) {
       var sql = "select content,rowid from " + tableName + " where num = " + element;
       connection.execute(
-          sql,
-          [],
-          option,
-          function(err, result) {
-            should.not.exist(err);
-            var resultVal_1 = result.rows[0][0];
-            var resultVal_2 = result.rows[0][1];
-            if(object === true) {
-              resultVal_1 = result.rows[0].CONTENT;
-              resultVal_2 = result.rows[0].ROWID;
-            }
-            should.strictEqual(typeof resultVal_1, "string");
-            should.strictEqual(resultVal_1, resultVal_2);
-            cb();
+        sql,
+        [],
+        option,
+        function(err, result) {
+          should.not.exist(err);
+          var resultVal_1 = result.rows[0][0];
+          var resultVal_2 = result.rows[0][1];
+          if(object === true) {
+            resultVal_1 = result.rows[0].CONTENT;
+            resultVal_2 = result.rows[0].ROWID;
           }
-        );
+          should.strictEqual(typeof resultVal_1, "string");
+          should.strictEqual(resultVal_1, resultVal_2);
+          cb();
+        }
+      );
     }, function(err) {
       should.not.exist(err);
       callback();
@@ -662,10 +662,10 @@ describe('106. fetchRowidAsString.js', function() {
   function testQueryStream(option, callback) {
     var sql = "select CONTENT from " + tableName;
     var stream = connection.queryStream(
-                 sql,
-                 [],
-                 option
-               );
+      sql,
+      [],
+      option
+    );
 
     var result = [];
     stream.on('data', function(data) {

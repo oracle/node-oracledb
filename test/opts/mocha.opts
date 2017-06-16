@@ -1,3 +1,4 @@
+
 --require should
 --require async
 --reporter spec
@@ -124,5 +125,7 @@ test/urowidFunctionBindAsString_bind.js
 test/urowidFunctionBindAsString_bindinout.js
 test/dataTypeNclob.js
 test/nclobDMLBindAsString.js
+test/blobStream.js
+test/clobStream.js
 test/longDMLBind.js
 test/longrawDMLBind.js

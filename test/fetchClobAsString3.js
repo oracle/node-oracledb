@@ -140,7 +140,7 @@ describe('86. fetchClobAsString3.js', function() {
         },
         function(cb) {
           connection.execute(
-           "SELECT ID, C1, C2 from nodb_clob2",
+            "SELECT ID, C1, C2 from nodb_clob2",
             function(err, result){
               should.not.exist(err);
               var specialStrLen_1 = specialStr_1.length;
@@ -177,7 +177,7 @@ describe('86. fetchClobAsString3.js', function() {
         },
         function(cb) {
           connection.execute(
-           "SELECT ID, C1 from nodb_clob2 where ID = :id",
+            "SELECT ID, C1 from nodb_clob2 where ID = :id",
             { id: id },
             function(err, result){
               should.not.exist(err);
@@ -194,7 +194,7 @@ describe('86. fetchClobAsString3.js', function() {
           oracledb.fetchAsString = [];
 
           connection.execute(
-           "SELECT C2 from nodb_clob2 where ID = :id",
+            "SELECT C2 from nodb_clob2 where ID = :id",
             { id: id },
             function(err, result){
               should.not.exist(err);

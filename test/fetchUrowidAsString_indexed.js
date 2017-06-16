@@ -24,7 +24,7 @@
  * DESCRIPTION
  *    Testing Oracle data type support - UROWID.
  *    To fetch UROWID columns as strings.
- *    Test UROWID greater than 200/500/4000 bytes.
+ *    Test UROWID greater than 200/500 bytes.
  *
  * NUMBERING RULE
  *   Test numbers follow this numbering rule:
@@ -107,7 +107,7 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
     done();
   });
 
-  describe('117.1 works with fetchInfo option and urowid length > 200/500/4000', function() {
+  describe('117.1 works with fetchInfo option and urowid length > 200/500', function() {
     var option = { fetchInfo: { "content": { type: oracledb.STRING } } };
     var maxRowBak;
 
@@ -187,7 +187,7 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
 
   });
 
-  describe('117.2 works with fetchInfo and outFormat = OBJECT, urowid length > 200/500/4000', function() {
+  describe('117.2 works with fetchInfo and outFormat = OBJECT, urowid length > 200/500', function() {
     var option = {
       outFormat: oracledb.OBJECT,
       fetchInfo: { "content": { type: oracledb.STRING } }
@@ -271,7 +271,7 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
 
   });
 
-  describe('117.3 works with fetchInfo and outFormat = ARRAY, urowid length > 200/500/4000', function() {
+  describe('117.3 works with fetchInfo and outFormat = ARRAY, urowid length > 200/500', function() {
     var option = {
       outFormat: oracledb.ARRAY,
       fetchInfo: { "content": { type: oracledb.STRING } }
@@ -355,7 +355,7 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
 
   });
 
-  describe('117.4 fetch as string by default, urowid length > 200/500/4000', function() {
+  describe('117.4 fetch as string by default, urowid length > 200/500', function() {
     var option = {};
     var maxRowBak;
 
@@ -434,7 +434,7 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
 
   });
 
-  describe('117.5 fetch as string by default with outFormat = OBJECT, urowid length > 200/500/4000', function() {
+  describe('117.5 fetch as string by default with outFormat = OBJECT, urowid length > 200/500', function() {
     var option = { outFormat: oracledb.OBJECT };
     var maxRowBak;
 
@@ -514,7 +514,7 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
 
   });
 
-  describe('117.6 fetch as string by default with outFormat = ARRAY, urowid length > 200/500/4000', function() {
+  describe('117.6 fetch as string by default with outFormat = ARRAY, urowid length > 200/500', function() {
     var option = { outFormat: oracledb.ARRAY  };
     var maxRowBak;
 
@@ -609,13 +609,6 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
         var id = insertID++;
         if(rsFlag === true) fetchRowid_rs(id, strLength, rowidLenExpected, option, object, cb);
         else fetchRowid(id, strLength, rowidLenExpected, option, object, cb);
-      },
-      function(cb) {
-        var strLength = 3000;
-        var rowidLenExpected = 4000;
-        var id = insertID++;
-        if(rsFlag === true) fetchRowid_rs(id, strLength, rowidLenExpected, option, object, cb);
-        else fetchRowid(id, strLength, rowidLenExpected, option, object, cb);
       }
     ], callback);
   }
@@ -646,27 +639,19 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
           option,
           function(err, result) {
             should.not.exist(err);
-            if(rowidLenExpected < 4000) {
-              urowid_2 = result.rows[0][0];
-              if(object === true) {
-                urowid_2 = result.rows[0].CONTENT;
-              }
-              should.strictEqual(typeof urowid_2, "string");
-            } else {
-              should.strictEqual(typeof urowid_2, "undefined");
+            urowid_2 = result.rows[0][0];
+            if(object === true) {
+              urowid_2 = result.rows[0].CONTENT;
             }
+            should.strictEqual(typeof urowid_2, "string");
             cb();
           }
         );
       },
       function(cb) {
-        if(rowidLenExpected < 4000) {
-          urowid_1.length.should.above(rowidLenExpected);
-          urowid_2.length.should.above(rowidLenExpected);
-          should.strictEqual(urowid_1, urowid_2);
-        } else {
-          urowid_1.length.should.above(rowidLenExpected);
-        }
+        urowid_1.length.should.above(rowidLenExpected);
+        urowid_2.length.should.above(rowidLenExpected);
+        should.strictEqual(urowid_1, urowid_2);
         cb();
       }
     ], callback);
@@ -701,15 +686,11 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
             result.resultSet.getRow(
               function(error, row) {
                 should.not.exist(error);
-                if(rowidLenExpected < 4000) {
-                  urowid_2 = row[0];
-                  if(object === true) {
-                    urowid_2 = row.CONTENT;
-                  }
-                  should.strictEqual(typeof urowid_2, "string");
-                } else {
-                  should.strictEqual(typeof urowid_2, "undefined");
+                urowid_2 = row[0];
+                if(object === true) {
+                  urowid_2 = row.CONTENT;
                 }
+                should.strictEqual(typeof urowid_2, "string");
                 result.resultSet.close(function(err) {
                   should.not.exist(err);
                   cb();
@@ -720,13 +701,9 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
         );
       },
       function(cb) {
-        if(rowidLenExpected < 4000) {
-          urowid_1.length.should.above(rowidLenExpected);
-          urowid_2.length.should.above(rowidLenExpected);
-          should.strictEqual(urowid_1, urowid_2);
-        } else {
-          urowid_1.length.should.above(rowidLenExpected);
-        }
+        urowid_1.length.should.above(rowidLenExpected);
+        urowid_2.length.should.above(rowidLenExpected);
+        should.strictEqual(urowid_1, urowid_2);
         cb();
       }
     ], callback);
@@ -889,13 +866,8 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
         connection.execute(
           "insert into " + tableName_normal + " (id, content) values (" + id + ", '" + urowid + "')",
           function(err, result) {
-            if(urowidLen > 4000) {
-              should.exist(err);
-              should.strictEqual(err.message, "ORA-01704: string literal too long");
-            } else {
-              should.not.exist(err);
-              (result.rowsAffected).should.be.exactly(1);
-            }
+            should.not.exist(err);
+            (result.rowsAffected).should.be.exactly(1);
             cb();
           }
         );

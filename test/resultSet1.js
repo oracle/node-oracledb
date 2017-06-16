@@ -961,13 +961,11 @@ describe('12. resultSet1.js', function() {
             rs.close(function(err) {
               should.not.exist(err);
               accessCount.should.be.exactly(10);
-              try {
-                rs.close(function() {});
-              } catch (err) {
+              rs.close(function(err) {
                 should.exist(err);
                 (err.message).should.startWith('NJS-018:');
                 done();
-              }
+              });
             });
           }
         });
@@ -997,13 +995,11 @@ describe('12. resultSet1.js', function() {
           } else {
             rs.close(function(err) {
               should.not.exist(err);
-              try {
-                rs.getRows(numRows, function() {});
-              } catch (err) {
+              rs.getRows(numRows, function(err) {
                 should.exist(err);
                 (err.message).should.startWith('NJS-018:');
                 done();
-              }
+              });
             });
           }
         });
@@ -1418,7 +1414,7 @@ describe('12. resultSet1.js', function() {
           should.strictEqual(
             err.message,
             'NJS-019: ResultSet cannot be returned for non-query statements'
-        );
+          );
           done();
         }
       );

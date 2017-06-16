@@ -569,44 +569,44 @@ describe('107. rowidDMLBindAsString.js', function() {
     async.series([
       function(cb) {
         connection.execute(
-            "insert into " + tableName + " T (ID) values (" + insertID + ")",
-            function(err, result) {
-              should.not.exist(err);
-              (result.rowsAffected).should.be.exactly(1);
-              cb();
-            }
-          );
+          "insert into " + tableName + " T (ID) values (" + insertID + ")",
+          function(err, result) {
+            should.not.exist(err);
+            (result.rowsAffected).should.be.exactly(1);
+            cb();
+          }
+        );
       },
       function(cb) {
         connection.execute(
-            "UPDATE " + tableName + " T SET content = T.ROWID where ID = " + insertID,
-            function(err, result) {
-              should.not.exist(err);
-              (result.rowsAffected).should.be.exactly(1);
-              cb();
-            }
-          );
+          "UPDATE " + tableName + " T SET content = T.ROWID where ID = " + insertID,
+          function(err, result) {
+            should.not.exist(err);
+            (result.rowsAffected).should.be.exactly(1);
+            cb();
+          }
+        );
       },
       function(cb) {
         connection.execute(
-            "select content from " + tableName + " where ID = " + insertID,
-            function(err, result) {
-              should.not.exist(err);
-              var resultVal = result.rows[0][0];
-              connection.execute(
-                "select * from " + tableName + " where ROWID = CHARTOROWID(:c)",
-                { c: { val: resultVal, dir : oracledb.BIND_IN, type : oracledb.STRING } },
-                function(err_1, result_1) {
-                  should.not.exist(err_1);
-                  var resultVal_1 = result_1.rows[0][0];
-                  var resultVal_2 = result_1.rows[0][1];
-                  should.strictEqual(resultVal_1, insertID);
-                  should.strictEqual(resultVal_2, resultVal);
-                  cb();
-                }
-              );
-            }
-          );
+          "select content from " + tableName + " where ID = " + insertID,
+          function(err, result) {
+            should.not.exist(err);
+            var resultVal = result.rows[0][0];
+            connection.execute(
+              "select * from " + tableName + " where ROWID = CHARTOROWID(:c)",
+              { c: { val: resultVal, dir : oracledb.BIND_IN, type : oracledb.STRING } },
+              function(err_1, result_1) {
+                should.not.exist(err_1);
+                var resultVal_1 = result_1.rows[0][0];
+                var resultVal_2 = result_1.rows[0][1];
+                should.strictEqual(resultVal_1, insertID);
+                should.strictEqual(resultVal_2, resultVal);
+                cb();
+              }
+            );
+          }
+        );
       }
     ], callback);
   };

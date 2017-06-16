@@ -74,7 +74,7 @@ describe('2. pool.js', function() {
             done();
           });
         }
-    );
+      );
 
     });
 

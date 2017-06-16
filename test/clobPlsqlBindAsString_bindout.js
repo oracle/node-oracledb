@@ -1283,7 +1283,7 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
             bindVar,
             function(err) {
               should.exist(err);
-               // ORA-06502: PL/SQL: numeric or value error
+              // ORA-06502: PL/SQL: numeric or value error
               (err.message).should.startWith('ORA-06502:');
               cb();
             }

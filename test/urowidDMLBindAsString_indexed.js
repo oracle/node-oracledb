@@ -142,10 +142,10 @@ describe('115. urowidDMLBindAsString_indexed.js', function() {
       testBigUROWID(strLength, rowidLenExpected, done);
     });
 
-    it.skip('115.1.3 get error when urowid length > 4000', function(done) {
-      var strLength = 3000;
-      var rowidLenExpected = 4000;
-      testBigUROWID(strLength, rowidLenExpected, done);
+    it('115.1.3 works with maxSize < 200', function(done) {
+      var strLength = 300;
+      var rowidLenExpected = 200;
+      testBigUROWID_maxSize(strLength, rowidLenExpected, done);
     });
   });
 
@@ -170,11 +170,11 @@ describe('115. urowidDMLBindAsString_indexed.js', function() {
       testBigUROWID_update(rowid_org, strLength, rowidLenExpected, done);
     });
 
-    it.skip('115.2.4 update with urowid length > 4000', function(done) {
-      var strLength = 3000;
-      var rowidLenExpected = 4000;
+    it('115.2.4 works with maxSize < 200', function(done) {
+      var strLength = 300;
+      var rowidLenExpected = 200;
       var rowid_org = "00000DD5.0000.0001";
-      testBigUROWID_update(rowid_org, strLength, rowidLenExpected, done);
+      testBigUROWID_update_maxSize(rowid_org, strLength, rowidLenExpected, done);
     });
 
   });
@@ -190,12 +190,6 @@ describe('115. urowidDMLBindAsString_indexed.js', function() {
     it('115.3.2 urowid length > 500', function(done) {
       var strLength = 600;
       var rowidLenExpected = 500;
-      testBigUROWID_returning(strLength, rowidLenExpected, done);
-    });
-
-    it.skip('115.3.3 urowid length > 4000', function(done) {
-      var strLength = 3000;
-      var rowidLenExpected = 4000;
       testBigUROWID_returning(strLength, rowidLenExpected, done);
     });
 
@@ -215,12 +209,6 @@ describe('115. urowidDMLBindAsString_indexed.js', function() {
       testBigUROWID_where(strLength, rowidLenExpected, done);
     });
 
-    it.skip('115.4.3 urowid length > 4000', function(done) {
-      var strLength = 3000;
-      var rowidLenExpected = 4000;
-      testBigUROWID_where(strLength, rowidLenExpected, done);
-    });
-
   });
 
   describe('115.5 queryStream() and oracledb.maxRows = actual rows', function() {
@@ -235,13 +223,6 @@ describe('115. urowidDMLBindAsString_indexed.js', function() {
     it('115.5.2 urowid length > 500', function(done) {
       var strLength = 600;
       var rowidLenExpected = 500;
-      var maxRows = 2;
-      testBigUROWID_stream(maxRows, strLength, rowidLenExpected, done);
-    });
-
-    it.skip('115.5.3 urowid length > 4000', function(done) {
-      var strLength = 3000;
-      var rowidLenExpected = 4000;
       var maxRows = 2;
       testBigUROWID_stream(maxRows, strLength, rowidLenExpected, done);
     });
@@ -264,13 +245,6 @@ describe('115. urowidDMLBindAsString_indexed.js', function() {
       testBigUROWID_stream(maxRows, strLength, rowidLenExpected, done);
     });
 
-    it.skip('115.6.3 urowid length > 4000', function(done) {
-      var strLength = 3000;
-      var rowidLenExpected = 4000;
-      var maxRows = 10;
-      testBigUROWID_stream(maxRows, strLength, rowidLenExpected, done);
-    });
-
   });
 
   describe('115.7 queryStream() and oracledb.maxRows < actual rows', function() {
@@ -285,13 +259,6 @@ describe('115. urowidDMLBindAsString_indexed.js', function() {
     it('115.7.2 urowid length > 500', function(done) {
       var strLength = 600;
       var rowidLenExpected = 500;
-      var maxRows = 1;
-      testBigUROWID_stream(maxRows, strLength, rowidLenExpected, done);
-    });
-
-    it.skip('115.7.3 urowid length > 4000', function(done) {
-      var strLength = 3000;
-      var rowidLenExpected = 4000;
       var maxRows = 1;
       testBigUROWID_stream(maxRows, strLength, rowidLenExpected, done);
     });
@@ -323,6 +290,91 @@ describe('115. urowidDMLBindAsString_indexed.js', function() {
         var bindVar = {
           i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
           c: { val : urowid, dir : oracledb.BIND_IN, type : oracledb.STRING }
+        };
+        connection.execute(
+          "insert into " + tableName_normal + " (ID, content) values (:i, :c)",
+          bindVar,
+          function(err, result) {
+            if(urowidLen > 4000) {
+              should.exist(err);
+              should.strictEqual(err.message, "ORA-01704: string literal too long");
+            } else {
+              should.not.exist(err);
+              (result.rowsAffected).should.be.exactly(1);
+            }
+            cb();
+          }
+        );
+      },
+      function(cb) {
+        connection.execute(
+          "select * from " + tableName_normal + " where ID = " + insertID,
+          function(err, result) {
+            if(urowidLen < 4000) {
+              should.not.exist(err);
+              var resultVal = result.rows[0][1];
+              should.strictEqual(resultVal, urowid);
+            }
+            cb();
+          }
+        );
+      },
+      function(cb) {
+        insertID++;
+        connection.execute(
+          "insert into " + tableName_normal + " (ID, content) values (" + insertID + ", '" + urowid + "')",
+          function(err, result) {
+            if(urowidLen > 4000) {
+              should.exist(err);
+              should.strictEqual(err.message, "ORA-01704: string literal too long");
+            } else {
+              should.not.exist(err);
+              (result.rowsAffected).should.be.exactly(1);
+            }
+            cb();
+          }
+        );
+      },
+      function(cb) {
+        connection.execute(
+          "select * from " + tableName_normal + " where ID = " + insertID,
+          function(err, result) {
+            if(urowidLen < 4000) {
+              should.not.exist(err);
+              var resultVal = result.rows[0][1];
+              should.strictEqual(resultVal, urowid);
+            }
+            cb();
+          }
+        );
+      }
+    ], callback);
+  };
+
+  var testBigUROWID_maxSize = function(strLength, rowidLenExpected, callback) {
+    var str = random.getRandomLengthString(strLength);
+    var urowid, urowidLen;
+    async.series([
+      function(cb) {
+        var sql_insert = "insert into " + tableName_indexed + " values (" + insertID + ", '" + str + "')";
+        sql.executeInsert(connection, sql_insert, {}, {}, cb);
+      },
+      function(cb) {
+        connection.execute(
+          "select ROWID from " + tableName_indexed + " where c1 = " + insertID,
+          function(err, result) {
+            should.not.exist(err);
+            urowid = result.rows[0][0];
+            urowidLen = urowid.length;
+            urowidLen.should.be.above(rowidLenExpected);
+            cb();
+          }
+        );
+      },
+      function(cb) {
+        var bindVar = {
+          i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
+          c: { val : urowid, dir : oracledb.BIND_IN, type : oracledb.STRING, maxSize: 100 }
         };
         connection.execute(
           "insert into " + tableName_normal + " (ID, content) values (:i, :c)",
@@ -486,6 +538,96 @@ describe('115. urowidDMLBindAsString_indexed.js', function() {
     ], callback);
   };
 
+  var testBigUROWID_update_maxSize = function(rowid_org, strLength, rowidLenExpected, callback) {
+    var str = random.getRandomLengthString(strLength);
+    var urowid, urowidLen;
+    var id_1 = insertID++;
+    var id_2 = insertID++;
+    async.series([
+      function(cb) {
+        var sql_insert = "insert into " + tableName_normal + " (ID, content) values (:i, :c)";
+        var bindVar = {
+          i: { val : id_1, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
+          c: { val : rowid_org, dir : oracledb.BIND_IN, type : oracledb.STRING }
+        };
+        sql.executeInsert(connection, sql_insert, bindVar, {}, cb);
+      },
+      function(cb) {
+        var sql_insert = "insert into " + tableName_normal + " (ID, content) values (:i, :c)";
+        var bindVar = {
+          i: { val : id_2, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
+          c: { val : rowid_org, dir : oracledb.BIND_IN, type : oracledb.STRING }
+        };
+        sql.executeInsert(connection, sql_insert, bindVar, {}, cb);
+      },
+      function(cb) {
+        var sql_insert = "insert into " + tableName_indexed + " values (" + insertID + ", '" + str + "')";
+        sql.executeInsert(connection, sql_insert, {}, {}, cb);
+      },
+      function(cb) {
+        connection.execute(
+          "select ROWID from " + tableName_indexed + " where c1 = " + insertID,
+          function(err, result) {
+            should.not.exist(err);
+            urowid = result.rows[0][0];
+            urowidLen = urowid.length;
+            urowidLen.should.be.above(rowidLenExpected);
+            cb();
+          }
+        );
+      },
+      function(cb) {
+        var bindVar = {
+          c: { val : urowid, dir : oracledb.BIND_IN, type : oracledb.STRING },
+          i: { val : id_1, dir : oracledb.BIND_IN, type : oracledb.NUMBER, maxSize: 100 }
+        };
+        connection.execute(
+          "update " + tableName_normal + " set content = :c where ID = :i",
+          bindVar,
+          function(err, result) {
+            should.not.exist(err);
+            (result.rowsAffected).should.be.exactly(1);
+            cb();
+          }
+        );
+      },
+      function(cb) {
+        connection.execute(
+          "select * from " + tableName_normal + " where ID = " + id_1,
+          function(err, result) {
+            if(urowidLen < 4000) {
+              should.not.exist(err);
+              var resultVal = result.rows[0][1];
+              should.strictEqual(resultVal, urowid);
+            }
+            cb();
+          }
+        );
+      },
+      function(cb) {
+        connection.execute(
+          "update " + tableName_normal + " set content = '" + urowid + "' where ID = " + id_2,
+          function(err, result) {
+            should.not.exist(err);
+            (result.rowsAffected).should.be.exactly(1);
+            cb();
+          }
+        );
+      },
+      function(cb) {
+        connection.execute(
+          "select * from " + tableName_normal + " where ID = " + id_2,
+          function(err, result) {
+            should.not.exist(err);
+            var resultVal = result.rows[0][1];
+            should.strictEqual(resultVal, urowid);
+            cb();
+          }
+        );
+      }
+    ], callback);
+  };
+
   var testBigUROWID_returning = function(strLength, rowidLenExpected, callback) {
     var str = random.getRandomLengthString(strLength);
     var urowid, urowidLen;
@@ -516,16 +658,27 @@ describe('115. urowidDMLBindAsString_indexed.js', function() {
           "insert into " + tableName_normal + " (ID, content) values (:i, :c) returning content into :o",
           bindVar,
           function(err, result) {
-            if(urowidLen > 4000) {
-              should.exist(err);
-              should.strictEqual(err.message, "ORA-01704: string literal too long");
-            } else {
-              should.not.exist(err);
-              var resultVal;
-              if (typeof (result.outBinds.o) === 'undefined') resultVal = result.outBinds[0][0];
-              else resultVal = result.outBinds.o[0];
-              should.strictEqual(resultVal, urowid);
-            }
+            should.not.exist(err);
+            var resultVal;
+            if (typeof (result.outBinds.o) === 'undefined') resultVal = result.outBinds[0][0];
+            else resultVal = result.outBinds.o[0];
+            should.strictEqual(resultVal, urowid);
+            cb();
+          }
+        );
+      },
+      function(cb) {
+        var bindVar = {
+          i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
+          c: { val : urowid, dir : oracledb.BIND_IN, type : oracledb.STRING },
+          o: { dir : oracledb.BIND_OUT, type : oracledb.STRING, maxSize: 100 }
+        };
+        connection.execute(
+          "insert into " + tableName_normal + " (ID, content) values (:i, :c) returning content into :o",
+          bindVar,
+          function(err) {
+            should.exist(err);
+            should.strictEqual(err.message, "NJS-016: buffer is too small for OUT binds");
             cb();
           }
         );
@@ -556,6 +709,21 @@ describe('115. urowidDMLBindAsString_indexed.js', function() {
       function(cb) {
         var bindVar = {
           c: { val : urowid, dir : oracledb.BIND_IN, type : oracledb.STRING }
+        };
+        connection.execute(
+          "select * from " + tableName_indexed + " where ROWID = :c",
+          bindVar,
+          function(err, result) {
+            should.not.exist(err);
+            should.strictEqual(result.rows[0][0], insertID);
+            should.strictEqual(result.rows[0][1], str);
+            cb();
+          }
+        );
+      },
+      function(cb) {
+        var bindVar = {
+          c: { val : urowid, dir : oracledb.BIND_IN, type : oracledb.STRING, maxSize: 100 }
         };
         connection.execute(
           "select * from " + tableName_indexed + " where ROWID = :c",

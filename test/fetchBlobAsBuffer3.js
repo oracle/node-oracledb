@@ -161,7 +161,7 @@ describe('89. fetchBlobAsBuffer3.js', function() {
         },
         function(cb) {
           connection.execute(
-           "SELECT ID, B1, B2 from nodb_blob2",
+            "SELECT ID, B1, B2 from nodb_blob2",
             function(err, result){
               should.not.exist(err);
               var resultVal = result.rows[0][1];
@@ -193,7 +193,7 @@ describe('89. fetchBlobAsBuffer3.js', function() {
         },
         function(cb) {
           connection.execute(
-           "SELECT ID, B1 from nodb_blob2 where ID = :id",
+            "SELECT ID, B1 from nodb_blob2 where ID = :id",
             { id : id },
             function(err, result){
               should.not.exist(err);
@@ -207,7 +207,7 @@ describe('89. fetchBlobAsBuffer3.js', function() {
           oracledb.fetchAsBuffer = [];
 
           connection.execute(
-           "SELECT B2 from nodb_blob2 where ID = :id",
+            "SELECT B2 from nodb_blob2 where ID = :id",
             { id : id },
             function(err, result){
               should.not.exist(err);

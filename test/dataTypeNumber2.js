@@ -125,7 +125,7 @@ describe('27. dataTypeNumber2.js', function() {
               if(Math.abs( numbers[rows[i].NUM] ) == 0.00000123)
                 rows[i].CONTENT.should.be.exactly(0);
               else
-               rows[i].CONTENT.should.be.exactly(numbers[rows[i].NUM]);
+                rows[i].CONTENT.should.be.exactly(numbers[rows[i].NUM]);
             }
             return fetchRowsFromRS(rs);
           } else if(rows.length == 0) {

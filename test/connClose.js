@@ -175,14 +175,18 @@ describe('52. connClose.js', function() {
 
         connection.release(function(err) {
           should.not.exist(err);
-          should.throws(
-            function() {
-              var sql = "select sysdate from dual";
-              connection.execute(sql, function() {});
-            },
-            /NJS-003: invalid connection/
+          connection.execute(
+            "select sysdate from dual",
+            function(err, result) {
+              should.not.exist(result);
+              should.exist(err);
+              should.strictEqual(
+                err.message,
+                "NJS-003: invalid connection"
+              );
+              done();
+            }
           );
-          done();
         });
       }
     );

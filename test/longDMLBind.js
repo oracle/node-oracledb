@@ -103,23 +103,23 @@ describe('125. longDMLBind.js', function() {
 
     it('125.1.1 works with data size 64K - 1', function(done) {
       var insertedStr = random.getRandomLengthString(65535);
-      test1(insertedStr, done);
+      test1(insertedStr, 65535, done);
     });
 
     it('125.1.2 works with data size 64K', function(done) {
       var insertedStr = random.getRandomLengthString(65536);
-      test1(insertedStr, done);
+      test1(insertedStr, 65536, done);
     });
 
     it('125.1.3 works with data size 64K + 1', function(done) {
       var insertedStr = random.getRandomLengthString(65537);
-      test1(insertedStr, done);
+      test1(insertedStr, 65537, done);
     });
 
     it('125.1.4 works with data size 1MB + 1', function(done) {
       var size = 1 * 1024 * 1024 + 1;
       var insertedStr = random.getRandomLengthString(size);
-      test1(insertedStr, done);
+      test1(insertedStr, size, done);
     });
 
   }); // 125.1
@@ -129,26 +129,26 @@ describe('125. longDMLBind.js', function() {
     it('125.2.1 works with data size 64K - 1', function(done) {
       var insertedStr = random.getRandomLengthString(100);
       var updateStr = random.getRandomLengthString(65535);
-      test2(insertedStr, updateStr, done);
+      test2(insertedStr, updateStr, 65535, done);
     });
 
     it('125.2.2 works with data size 64K', function(done) {
       var insertedStr = random.getRandomLengthString(200);
       var updateStr = random.getRandomLengthString(65536);
-      test2(insertedStr, updateStr, done);
+      test2(insertedStr, updateStr, 65536, done);
     });
 
     it('125.2.3 works with data size 64K + 1', function(done) {
       var insertedStr = random.getRandomLengthString(10);
       var updateStr = random.getRandomLengthString(65537);
-      test2(insertedStr, updateStr, done);
+      test2(insertedStr, updateStr, 65537, done);
     });
 
     it('125.2.4 works with data size 1MB + 1', function(done) {
       var size = 1 * 1024 * 1024 + 1;
       var insertedStr = random.getRandomLengthString(65536);
       var updateStr = random.getRandomLengthString(size);
-      test2(insertedStr, updateStr, done);
+      test2(insertedStr, updateStr, size, done);
     });
 
   }); // 125.3
@@ -163,10 +163,10 @@ describe('125. longDMLBind.js', function() {
 
   }); // 125.3
 
-  var test1 = function(content, callback) {
+  var test1 = function(content, maxsize, callback) {
     async.series([
       function(cb) {
-        insert(content, cb);
+        insert(content, maxsize, cb);
       },
       function(cb) {
         fetch(content, cb);
@@ -174,13 +174,13 @@ describe('125. longDMLBind.js', function() {
     ], callback);
   };
 
-  var test2 = function(insertedStr, updateStr, callback) {
+  var test2 = function(insertedStr, updateStr, maxsize, callback) {
     async.series([
       function(cb) {
-        insert(insertedStr, cb);
+        insert(insertedStr, insertedStr.length, cb);
       },
       function(cb) {
-        update(updateStr, cb);
+        update(updateStr, maxsize, cb);
       },
       function(cb) {
         fetch(updateStr, cb);
@@ -191,7 +191,7 @@ describe('125. longDMLBind.js', function() {
   var test3 = function(insertedStr, updateStr, callback) {
     async.series([
       function(cb) {
-        insert(insertedStr, cb);
+        insert(insertedStr, insertedStr.length, cb);
       },
       function(cb) {
         returning(updateStr, cb);
@@ -199,11 +199,11 @@ describe('125. longDMLBind.js', function() {
     ], callback);
   };
 
-  var insert = function(content, callback) {
+  var insert = function(content, maxsize, callback) {
     var sql = "insert into " + tableName + " (id, content) values (:i, :c)";
     var bindVar = {
       i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
-      c: { val: content, dir: oracledb.BIND_IN, type: oracledb.STRING }
+      c: { val: content, dir: oracledb.BIND_IN, type: oracledb.STRING, maxSize: maxsize }
     };
     connection.execute(
       sql,
@@ -216,11 +216,11 @@ describe('125. longDMLBind.js', function() {
     );
   };
 
-  var update = function(content, callback) {
+  var update = function(content, maxsize, callback) {
     var sql = "update " + tableName + " set content = :c where id = :i";
     var bindVar = {
       i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
-      c: { val: content, dir: oracledb.BIND_IN, type: oracledb.STRING }
+      c: { val: content, dir: oracledb.BIND_IN, type: oracledb.STRING, maxSize: maxsize }
     };
     connection.execute(
       sql,
@@ -245,7 +245,8 @@ describe('125. longDMLBind.js', function() {
       bindVar,
       function(err) {
         should.exist(err);
-        should.strictEqual(err.message, "ORA-22816: unsupported feature with RETURNING clause");
+        // ORA-22816: unsupported feature with RETURNING clause
+        (err.message).should.startWith("ORA-22816:");
         callback();
       }
     );

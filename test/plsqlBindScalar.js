@@ -1029,12 +1029,12 @@ describe('70. plsqlBindScalar.js', function() {
       async.series([
         function(cb) {
           connection.execute(
-             proc508,
-             function(err) {
-               should.not.exist(err);
-               cb();
-             }
-            );
+            proc508,
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
         },
         function(cb) {
           connection.execute(
@@ -1079,12 +1079,12 @@ describe('70. plsqlBindScalar.js', function() {
       async.series([
         function(cb) {
           connection.execute(
-             proc509,
-             function(err) {
-               should.not.exist(err);
-               cb();
-             }
-            );
+            proc509,
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
         },
         function(cb) {
           connection.execute(
@@ -1129,12 +1129,12 @@ describe('70. plsqlBindScalar.js', function() {
       async.series([
         function(cb) {
           connection.execute(
-             proc510,
-             function(err) {
-               should.not.exist(err);
-               cb();
-             }
-            );
+            proc510,
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
         },
         function(cb) {
           connection.execute(
@@ -1180,35 +1180,35 @@ describe('70. plsqlBindScalar.js', function() {
       async.series([
         function(cb) {
           connection.execute(
-               proc511,
-               function(err) {
-                 should.not.exist(err);
-                 cb();
-               }
-              );
+            proc511,
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
         },
         function(cb) {
           connection.execute(
-              sqlrun511,
-              bindVar,
-              function(err, result) {
-                should.not.exist(err);
-                // console.log(result);
-                var resultVar = "Pack my bag with fiv";
-                //var resultVar=strVar.substr(0,(strVar.length-1)/2);
-                should.strictEqual(result.outBinds.p_inout, resultVar);
-                cb();
-              }
-            );
+            sqlrun511,
+            bindVar,
+            function(err, result) {
+              should.not.exist(err);
+              // console.log(result);
+              var resultVar = "Pack my bag with fiv";
+              //var resultVar=strVar.substr(0,(strVar.length-1)/2);
+              should.strictEqual(result.outBinds.p_inout, resultVar);
+              cb();
+            }
+          );
         },
         function(cb) {
           connection.execute(
-              sqldrop,
-              function(err) {
-                should.not.exist(err);
-                cb();
-              }
-            );
+            sqldrop,
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
         }
       ], done);
     }); // 70.5.11
@@ -1452,12 +1452,12 @@ describe('70. plsqlBindScalar.js', function() {
       async.series([
         function(cb) {
           connection.execute(
-             proc610,
-             function(err) {
-               should.not.exist(err);
-               cb();
-             }
-            );
+            proc610,
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
         },
         function(cb) {
           connection.execute(
@@ -1502,12 +1502,12 @@ describe('70. plsqlBindScalar.js', function() {
       async.series([
         function(cb) {
           connection.execute(
-             proc611,
-             function(err) {
-               should.not.exist(err);
-               cb();
-             }
-            );
+            proc611,
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
         },
         function(cb) {
           connection.execute(
@@ -1774,12 +1774,12 @@ describe('70. plsqlBindScalar.js', function() {
       async.series([
         function(cb) {
           connection.execute(
-             proc710,
-             function(err) {
-               should.not.exist(err);
-               cb();
-             }
-            );
+            proc710,
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
         },
         function(cb) {
           connection.execute(
@@ -1824,12 +1824,12 @@ describe('70. plsqlBindScalar.js', function() {
       async.series([
         function(cb) {
           connection.execute(
-             proc711,
-             function(err) {
-               should.not.exist(err);
-               cb();
-             }
-            );
+            proc711,
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
         },
         function(cb) {
           connection.execute(
@@ -3430,15 +3430,15 @@ describe('70. plsqlBindScalar.js', function() {
       };
 
       connection.execute(
-         sqlrun_dt,
-         bindVar,
-         function(err, result) {
-           should.not.exist(err);
-           var expectDate = "2016-09-10 14:10:10.123000000";
-           (result.outBinds.output).should.eql(expectDate);
-           done();
-         }
-     );
+        sqlrun_dt,
+        bindVar,
+        function(err, result) {
+          should.not.exist(err);
+          var expectDate = "2016-09-10 14:10:10.123000000";
+          (result.outBinds.output).should.eql(expectDate);
+          done();
+        }
+      );
     }); // 70.12.1
 
     it('70.12.2 val: null', function(done) {
@@ -3929,12 +3929,12 @@ describe('70. plsqlBindScalar.js', function() {
       async.series([
         function(cb) {
           connection.execute(
-             proc71410,
-             function(err) {
-               should.not.exist(err);
-               cb();
-             }
-            );
+            proc71410,
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
         },
         function(cb) {
           connection.execute(
@@ -3978,12 +3978,12 @@ describe('70. plsqlBindScalar.js', function() {
       async.series([
         function(cb) {
           connection.execute(
-             proc71411,
-             function(err) {
-               should.not.exist(err);
-               cb();
-             }
-            );
+            proc71411,
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
         },
         function(cb) {
           connection.execute(
@@ -4726,12 +4726,12 @@ describe('70. plsqlBindScalar.js', function() {
       async.series([
         function(cb) {
           connection.execute(
-             proc71810,
-             function(err) {
-               should.not.exist(err);
-               cb();
-             }
-            );
+            proc71810,
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
         },
         function(cb) {
           connection.execute(
@@ -4775,12 +4775,12 @@ describe('70. plsqlBindScalar.js', function() {
       async.series([
         function(cb) {
           connection.execute(
-             proc71811,
-             function(err) {
-               should.not.exist(err);
-               cb();
-             }
-            );
+            proc71811,
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
         },
         function(cb) {
           connection.execute(
@@ -5525,12 +5525,12 @@ describe('70. plsqlBindScalar.js', function() {
       async.series([
         function(cb) {
           connection.execute(
-             proc72210,
-             function(err) {
-               should.not.exist(err);
-               cb();
-             }
-            );
+            proc72210,
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
         },
         function(cb) {
           connection.execute(
@@ -5574,12 +5574,12 @@ describe('70. plsqlBindScalar.js', function() {
       async.series([
         function(cb) {
           connection.execute(
-             proc72211,
-             function(err) {
-               should.not.exist(err);
-               cb();
-             }
-            );
+            proc72211,
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
         },
         function(cb) {
           connection.execute(

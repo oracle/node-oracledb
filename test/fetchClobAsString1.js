@@ -312,7 +312,7 @@ describe('84. fetchClobAsString1.js', function() {
         },
         function(cb) {
           connection.execute(
-           "SELECT ID, C from nodb_clob1 where id = " + id_1 + " or id = " +id_2,
+            "SELECT ID, C from nodb_clob1 where id = " + id_1 + " or id = " +id_2,
             function(err, result){
               should.not.exist(err);
               var resultVal = result.rows[0][1];
@@ -345,7 +345,7 @@ describe('84. fetchClobAsString1.js', function() {
         },
         function(cb) {
           connection.execute(
-           "SELECT ID, C AS C1, C AS C2 from nodb_clob1 where id = " + id_1 + " or id = " +id_2,
+            "SELECT ID, C AS C1, C AS C2 from nodb_clob1 where id = " + id_1 + " or id = " +id_2,
             function(err, result){
               should.not.exist(err);
               var resultVal = result.rows[0][1];
@@ -382,7 +382,7 @@ describe('84. fetchClobAsString1.js', function() {
         },
         function(cb) {
           connection.execute(
-           "SELECT ID, C from nodb_clob1 where id = " + id,
+            "SELECT ID, C from nodb_clob1 where id = " + id,
             function(err, result){
               should.not.exist(err);
               var resultVal = result.rows[0][1];
@@ -518,7 +518,7 @@ describe('84. fetchClobAsString1.js', function() {
         },
         function(cb) {
           connection.execute(
-           "SELECT ID, C from nodb_clob1 where id = " + id_1 + " or id = " +id_2,
+            "SELECT ID, C from nodb_clob1 where id = " + id_1 + " or id = " +id_2,
             function(err, result){
               should.not.exist(err);
               result.rows.length.should.eql(1);
@@ -553,7 +553,7 @@ describe('84. fetchClobAsString1.js', function() {
         },
         function(cb) {
           connection.execute(
-           "SELECT ID, C from nodb_clob1 where id = " + id_1 + " or id = " +id_2,
+            "SELECT ID, C from nodb_clob1 where id = " + id_1 + " or id = " +id_2,
             function(err, result){
               should.not.exist(err);
               var resultVal = result.rows[0][1];

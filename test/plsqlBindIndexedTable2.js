@@ -326,7 +326,7 @@ describe('44. plsqlBindIndexedTable2.js', function() {
           "BEGIN nodb_beachpkg.array_in(:beach_in, :depth_in); END;",
           {
             beach_in: { //type: oracledb.STRING,
-                        //dir:  oracledb.BIND_IN,
+              //dir:  oracledb.BIND_IN,
               val:  ["Malibu Beach", "Bondi Beach", "Waikiki Beach"] },
             depth_in: { type: oracledb.NUMBER,
               dir:  oracledb.BIND_IN,
@@ -400,7 +400,7 @@ describe('44. plsqlBindIndexedTable2.js', function() {
           "BEGIN nodb_beachpkg.array_in(:1, :2); END;",
           [
             { type: oracledb.STRING,
-               // dir:  oracledb.BIND_IN,
+              // dir:  oracledb.BIND_IN,
               val:  ["Malibu Beach", "Bondi Beach", "Waikiki Beach"] },
             { type: oracledb.NUMBER,
               dir:  oracledb.BIND_IN,
