@@ -1,6 +1,81 @@
 # Change Log
 
-## node-oracledb v2.0.13 Development (DD Mon YYYY)
+## node-oracledb v2.0.13 Development (19 Jun 2017)
+
+- Node-oracledb now uses the [ODPI-C](https://github.com/oracle/odpi)
+  database abstraction library.
+
+- Installation instructions have changed.  Refer to
+  [INSTALL.md](https://github.com/oracle/node-oracledb/blob/master/INSTALL.md).
+  Distribution is still via source code.
+
+  Oracle header files are no longer needed.  The `OCI_LIB_DIR` and
+  `OCI_INC_DIR` environment variables are not needed.
+
+  At run time, Oracle 11.2, 12.1 or 12.2 client libraries must still be
+  in `PATH` (for Windows) or `LD_LIBRARY_PATH` (for Linux) or similar
+  platform library loading path.  Users of macOS must put the Oracle
+  client libraries in `~/lib` or `/usr/local/lib`.  Linux users of
+  Instant Client RPMs must always set `LD_LIBRARY_PATH` or use
+  ldconfig - the previous RPATH linking option is not available.
+
+  A single node-oracledb binary now works with any of the Oracle
+  client 11.2, 12.1 or 12.2 libraries.  This improves portability when
+  node-oracledb builds are copied between machines.
+
+- `Lob.close()` now marks LOBs invalid immediately rather than during
+  the asynchronous portion of the `close()` method, so that all other
+  attempts are no-ops.
+
+- Incorrect application logic in version 1 that attempted to close a
+  connection while certain LOB, ResultSet or other database operations
+  were still occurring gave an NJS-030, NJS-031 or NJS-032 "connection
+  cannot be released" error.  Now in version 2 the connection will be
+  closed but any operation that relied on the connection being open
+  will fail.
+
+- Some NJS and DPI error messages and numbers have changed.  This is
+  particularly true of DPI errors due to the use of ODPI-C.
+
+- Stated compatibility is now for Node.js 4, 6 and 8.
+
+- Added support for fetching columns types LONG (as String) and LONG
+  RAW (as Buffer).  There is no support for streaming these types, so
+  the value stored in the DB may not be able to be completely fetched
+  if Node.js and V8 memory limits are reached.
+
+- Added support for TIMESTAMP WITH TIME ZONE date type.  These are
+  mapped to a Date object in node-oracledb using LOCAL TIME ZONE.
+  The TIME ZONE component is not available in the Date object.
+
+- Added support for ROWID data type.  Data is fetched as a String.
+
+- Added support for UROWID data type. Data is fetched as a String.
+
+- Added query support for NCHAR and NVARCHAR2 columns.  Binding for
+  DML may not insert data correctly, depending on the database
+  character set and the database national character set.
+
+- Added query support for NCLOB columns.  NCLOB data can be streamed
+  or fetched as String.  Binding for DML may not insert data
+  correctly, depending on the database character set and the database
+  national character set.
+
+- Removed node-oracledb size restrictions on LOB `fetchAsString` and
+  `fetchAsBuffer` queries, and also on LOB binds.  Node.js and V8
+  memory restrictions will still prevent large LOBs being manipulated
+  in single chunks.
+
+- Statements that generate errors are now dropped from the statement
+  cache.  Applications running while table definitions change will no
+  longer end up with unusable SQL statements due to stale cache
+  entries.  Note that Oracle best-practice is never to change table
+  definitions while applications are executing.
+
+- Empty arrays can now be used in PL/SQL Collection Associative Array
+  (Index-by) binds.
+
+- Upgraded NAN dependency from 2.5 to 2.6.
 
 ## node-oracledb v1.13.1 (12 Apr 2017)
 
