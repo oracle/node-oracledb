@@ -36,7 +36,7 @@ The steps below create a Node.js installation for testing.  Adjust the
 steps for your environment.
 
 This node-oracledb release has been tested with Node 4,
-6 and 7 on 64-bit Oracle Linux and Windows.  The add-on can also build
+6 and 8 on 64-bit Oracle Linux and Windows.  The add-on can also build
 on macOS, and some 32-bit Linux, 32-bit Windows, Solaris and AIX
 environments, but these architectures have not been fully tested.
 
@@ -554,7 +554,7 @@ alternatively refer to.
 ### <a name="winprereqs"></a> 7.1 Install Prerequisites
 
 Install a C/C++ build environment such as Microsoft Visual
-Studio 2013.  To build with Node 6 or later, use VS 2015.  Compilers supported by Oracle libraries are found in
+Studio 2015.  Compilers supported by Oracle libraries are found in
 [Oracle documentation](https://docs.oracle.com/en/database/) for each version, for example
 [Oracle Database Client Installation Guide 12c Release 2 (12.2) for Microsoft Windows](https://docs.oracle.com/database/122/NTCLI/toc.htm).
 
@@ -575,7 +575,7 @@ instructions below use a 64-bit stack.
 
 ### 7.2 Install Node.js
 
-Install the 64-bit Node.js  MSI (e.g. node-v6.9.4-x64.msi) from
+Install the 64-bit Node.js  MSI (e.g. node-v6.11.0-x64.msi) from
 [nodejs.org](http://nodejs.org/).  Make sure the option to
 add the Node and npm directories to the path is selected.
 
@@ -725,6 +725,12 @@ example:
 
 ```
 export http_proxy=http://my-proxy.example.com:80/
+```
+
+Set the compiler to GCC:
+
+```
+export CC=gcc
 ```
 
 Install node-oracledb from the
