@@ -27,7 +27,7 @@ limitations under the License.
      - 3.1.2 [Node-oracledb Type Constants](#oracledbconstantsnodbtype)
         - [`BLOB`](#oracledbconstantsnodbtype), [`BUFFER`](#oracledbconstantsnodbtype), [`CLOB`](#oracledbconstantsnodbtype), [`CURSOR`](#oracledbconstantsnodbtype), [`DATE`](#oracledbconstantsnodbtype), [`DEFAULT`](#oracledbconstantsnodbtype), [`NUMBER`](#oracledbconstantsnodbtype), [`STRING`](#oracledbconstantsnodbtype)
      - 3.1.3 [Oracle Database Type Constants](#oracledbconstantsdbtype)
-        - [`DB_TYPE_BINARY_DOUBLE`](#oracledbconstantsdbtype), [`DB_TYPE_BINARY_FLOAT`](#oracledbconstantsdbtype), [`DB_TYPE_BLOB`](#oracledbconstantsdbtype), [`DB_TYPE_CLOB`](#oracledbconstantsdbtype), [`DB_TYPE_DATE`](#oracledbconstantsdbtype), [`DB_TYPE_CHAR`](#oracledbconstantsdbtype), [`DB_TYPE_LONG`](#oracledbconstantsdbtype), [`DB_TYPE_LONG_RAW`](#oracledbconstantsdbtype), [`DB_TYPE_NUMBER`](#oracledbconstantsdbtype), [`DB_TYPE_RAW`](#oracledbconstantsdbtype), [`DB_TYPE_ROWID`](#oracledbconstantsdbtype), [`DB_TYPE_TIMESTAMP_LTZ`](#oracledbconstantsdbtype), [`DB_TYPE_TIMESTAMP_TZ`](#oracledbconstantsdbtype), [`DB_TYPE_TIMESTAMP`](#oracledbconstantsdbtype), [`DB_TYPE_VARCHAR`](#oracledbconstantsdbtype)
+        - [`DB_TYPE_BINARY_DOUBLE`](#oracledbconstantsdbtype), [`DB_TYPE_BINARY_FLOAT`](#oracledbconstantsdbtype), [`DB_TYPE_BLOB`](#oracledbconstantsdbtype), [`DB_TYPE_CHAR`](#oracledbconstantsdbtype), [`DB_TYPE_CLOB`](#oracledbconstantsdbtype), [`DB_TYPE_DATE`](#oracledbconstantsdbtype), [`DB_TYPE_LONG`](#oracledbconstantsdbtype), [`DB_TYPE_LONG_RAW`](#oracledbconstantsdbtype), [`DB_TYPE_NCHAR`](#oracledbconstantsdbtype), [`DB_TYPE_NCLOB`](#oracledbconstantsdbtype), [`DB_TYPE_NUMBER`](#oracledbconstantsdbtype), [`DB_TYPE_NVARCHAR`](#oracledbconstantsdbtype), [`DB_TYPE_RAW`](#oracledbconstantsdbtype), [`DB_TYPE_ROWID`](#oracledbconstantsdbtype), [`DB_TYPE_TIMESTAMP`](#oracledbconstantsdbtype), [`DB_TYPE_TIMESTAMP_LTZ`](#oracledbconstantsdbtype), [`DB_TYPE_TIMESTAMP_TZ`](#oracledbconstantsdbtype), [`DB_TYPE_VARCHAR`](#oracledbconstantsdbtype)
      - 3.1.4 [Execute Bind Direction Constants](#oracledbconstantsbinddir)
         - [`BIND_IN`](#oracledbconstantsbinddir), [`BIND_INOUT`](#oracledbconstantsbinddir), [`BIND_OUT`](#oracledbconstantsbinddir)
   - 3.2 [Oracledb Properties](#oracledbproperties)
@@ -373,7 +373,7 @@ oracledb.STRING                 // (2001) Bind as JavaScript String type.  Can b
 
 #### <a name="oracledbconstantsdbtype"></a> 3.1.3 Oracle Database Type Constants
 
-These values of these types are shown
+The values of these types are shown
 in [extended metadata](#propdbextendedmetadata) for queries and REF
 CURSORS.  They indicate the Oracle Database type.
 
@@ -394,7 +394,13 @@ oracledb.DB_TYPE_LONG           // (8) LONG
 
 oracledb.DB_TYPE_LONG_RAW       // (24) LONG RAW
 
+oracledb.DB_TYPE_NCHAR          // (1096) NCHAR
+
+oracledb.DB_TYPE_NCLOB          // (1112) NCLOB
+
 oracledb.DB_TYPE_NUMBER         // (2) NUMBER or FLOAT
+
+oracledb.DB_TYPE_NVARCHAR       // (1001) NVARCHAR
 
 oracledb.DB_TYPE_RAW            // (23) RAW
 
@@ -1701,23 +1707,23 @@ may contain bind variables.
 Object bindParams
 ```
 
-This `execute()` function parameter is needed if there are bind
-variables in the statement, or if [`options`](#executeoptions) are
-used.  It can be either an object that associates values or JavaScript
-variables to the statement's bind variables by name, or an array of
-values or JavaScript variables that associate to the statement's bind
-variables by their relative positions.  See
-[Bind Parameters for Prepared Statements](#bind) for more details on
-binding.
+The `execute()` function `bindParams` parameter is needed if there are
+bind variables in the statement, or if [`options`](#executeoptions)
+are used.  It can be either an object that associates values or
+JavaScript variables to the statement's bind variables by name, or an
+array of values or JavaScript variables that associate to the
+statement's bind variables by their relative positions.
+See [Bind Parameters for Prepared Statements](#bind) for more details
+on binding.
 
 If a bind value is an object it may have the following properties:
 
 Bind Property | Description
 ---------------|------------
-`dir` | The direction of the bind.  One of the [Oracledb Constants](#oracledbconstantsbinddir) `oracledb.BIND_IN`, `oracledb.BIND_INOUT`, or `oracledb.BIND_OUT`.
-`maxArraySize` | The number of array elements to be allocated for a PL/SQL Collection INDEX BY associative array OUT or IN OUT array bind variable.  For IN binds, the value of `maxArraySize` is ignored.
+`dir` | The direction of the bind.  One of the [Oracledb Constants](#oracledbconstantsbinddir) `oracledb.BIND_IN`, `oracledb.BIND_INOUT`, or `oracledb.BIND_OUT`. The default is `oracledb.BIND_IN`.
+`maxArraySize` | The number of array elements to be allocated for a PL/SQL Collection INDEX BY associative array OUT or IN OUT array bind variable.  For IN binds, the value of `maxArraySize` is ignored.  See [PL/SQL Collection Associative Array (Index-by) Bind Parameters](plsqlindexbybinds).
 `maxSize` | The maximum number of bytes that an OUT or IN OUT bind variable of type `oracledb.STRING` or `oracledb.BUFFER` can use to get data. The default value is 200. The maximum limit depends on the database type, see below.  When binding IN OUT, then `maxSize` refers to the size of the returned  value: the input value can be smaller or bigger.  For IN binds, `maxSize` is ignored.
-`type` | The data type to be bound.  One of the [Oracledb Constants](#oracledbconstantsbinddir) `oracledb.BLOB`, `oracledb.BUFFER`, `oracledb.CLOB`, `oracledb.CURSOR`, `oracledb.DATE`, `oracledb.NUMBER`, or `oracledb.STRING`.  With IN OUT binds the type can be explicitly set with `type` or it will default to the type of the input data value.  With OUT binds, the type defaults to `oracledb.STRING` whenever `type` is not specified.
+`type` | The node-oracledb or JavaScript data type to be bound.  One of the [Oracledb Constants](#oracledbconstantsbinddir) `oracledb.BLOB`, `oracledb.BUFFER`, `oracledb.CLOB`, `oracledb.CURSOR`, `oracledb.DATE`, `oracledb.NUMBER`, or `oracledb.STRING`.  With IN or IN OUT binds the type can be explicitly set with `type` or it will default to the type of the input data value.  With OUT binds, the type defaults to `oracledb.STRING` whenever `type` is not specified.
 `val` | The input value or variable to be used for an IN or IN OUT bind variable.
 
 The limit for `maxSize` when binding as `oracledb.BUFFER` is 2000
@@ -1726,9 +1732,13 @@ Oracle Database 12c and the database initialization parameter
 `MAX_STRING_SIZE` has a value of `EXTENDED`.  In this case the limit
 is 32767 bytes.
 
-When binding Oracle LOBs as `oracledb.STRING` or `oracledb.BUFFER`, the value of
-`maxSize` can be much larger, see the limits
+When binding Oracle LOBs as `oracledb.STRING` or `oracledb.BUFFER`,
+the value of `maxSize` can be much larger, see the limits
 in [LOB Bind Parameters](#lobbinds).
+
+When binding to get a UROWID value from the database, note that
+UROWIDs can take up to 5267 bytes when fetched from the database so
+`maxSize` should be set to at least this value.
 
 Note `oracledb.CURSOR` bind variables can be used only for PL/SQL OUT binds.
 
@@ -1914,10 +1924,10 @@ See [Query Column Metadata](#querymeta) for examples.
 Array/object outBinds
 ```
 
-This is either an array or an object containing OUT and IN OUT bind
-values. If [`bindParams`](#executebindParams) is passed as an array,
-then `outBinds` is returned as an array. If `bindParams` is passed as
-an object, then `outBinds` is returned as an object.
+This contains the output values of OUT and IN OUT binds.
+If [`bindParams`](#executebindParams) is passed as an array, then
+`outBinds` is returned as an array.  If `bindParams` is passed as an
+object, then `outBinds` is returned as an object.
 
 ###### <a name="execresultset"></a> 4.2.5.4.3 `resultSet`
 
@@ -3699,6 +3709,10 @@ Details are in the following sections.
 Columns of database type CHAR, VARCHAR2, NCHAR and NVARCHAR are
 returned from queries as JavaScript strings.
 
+Note that binding NCHAR and NVARCHAR for DML is not supported and may
+cause unexpected character set translation,
+see [Bind Data Type Notes](#binddatatypenotes).
+
 ##### <a name="numberhandling"></a> 9.1.6.2 Fetching Numbers
 
 By default all numeric columns are mapped to JavaScript numbers.
@@ -3887,15 +3901,19 @@ $ export NLS_NUMERIC_CHARACTERS='.,'
 Note this environment variable is not used unless the `NLS_LANG`
 environment variable is also set.
 
-##### <a name="fetchlob"></a> 9.1.6.5 Fetching BLOB and CLOB
+##### <a name="fetchlob"></a> 9.1.6.5 Fetching BLOB, CLOB and NCLOB
 
-By default BLOB and CLOB columns are fetched into [Lob](#lobclass)
+By default BLOB, CLOB and NCLOB columns are fetched into [Lob](#lobclass)
 instances.  For small LOBs it can be more convenient to fetch them
 directly into Buffers or Strings by using the
 global [`fetchAsBuffer`](#propdbfetchasbuffer)
 or [`fetchAsString`](#propdbfetchasstring) settings, or the
 per-column [`fetchInfo`](#propexecfetchinfo) setting.  See the
 section [Working with CLOB and BLOB Data](#lobhandling).
+
+Note that binding NCLOB for DML is not supported and may cause
+unexpected character set translation,
+see [Bind Data Type Notes](#binddatatypenotes).
 
 ##### <a name="fetchlong"></a> 9.1.6.6 Fetching LONG and LONG RAW
 
@@ -5021,10 +5039,12 @@ section [Working with CLOB and BLOB Data](#lobhandling).
 
 SQL and PL/SQL statements may contain bind parameters, indicated by
 colon-prefixed identifiers or numerals.  These indicate where
-separately specified values are substituted when the statement is
-executed.  Bind variables can be used to substitute data but not the
-text of the statement.  Bind parameters are also called bind
-variables.
+separately specified values are substituted in a statement when it is
+executed, or where values are to be returned after execution.
+
+IN binds are values passed into the database.  OUT binds are used to
+retrieve data.  IN OUT binds are passed in, and may return a different
+value after the statement executes.
 
 Using bind parameters is recommended in preference to constructing SQL
 or PL/SQL statements by string concatenation or template literals.
@@ -5035,30 +5055,29 @@ the statement text.  It can never be executed directly.  This means
 there is no need to escape bound data inserted into the database.
 
 If a statement is executed more than once with different values for
-the bind parameters, Oracle can re-use context from the initial
-execution, thus improving performance.  However, if similar statements
-contain hard coded values instead of bind parameters, Oracle sees the
-statement text is different and would be less efficient.
+the bind parameters, then Oracle can re-use context from the initial
+execution, generally improving performance.  However, if similar
+statements contain hard coded values instead of bind parameters,
+Oracle sees the statement text is different and will be less
+efficient.
 
-IN binds are values passed into the database.  OUT binds are used to
-retrieve data.  IN OUT binds are passed in, and may return a different
-value after the statement executes.  IN OUT binds can be used for
-PL/SQL calls, but not for SQL.
-
-OUT bind parameters for `RETURNING INTO` clauses will always return an
-array of values. See [DML RETURNING Bind Parameters](#dmlreturn).
+Bind parameters can be used to substitute data but not the text of the
+statement.
 
 ### <a name="inbind"></a> 14.1 IN Bind Parameters
 
-For IN binds, the bound data value, or current value of a JavaScript
-variable, is passed into the database and used during execution of a
-SQL or PL/SQL statement.
+For IN binds, a data value is passed into the database and substituted
+into the statement during execution of SQL or PL/SQL.
 
 #### <a name="bindbyname"></a> Bind by Name
 
-To bind a data value, construct an object with attributes for the bind
-value (`val`), data type (`type`), and bind direction (`dir`).  The
-object name must match the statement's bind parameter name:
+To bind data values, the [`bindParams`](#executebindParams) argument
+of `execute()` should contain bind variable objects
+with
+[`dir`](#executebindParams),
+[`val`](#executebindParams), [`type`](#executebindParams) properties.
+Each bind variable object name must match the statement's bind
+parameter name:
 
 ```javascript
 var oracledb = require('oracledb');
@@ -5066,8 +5085,8 @@ var oracledb = require('oracledb');
 connection.execute(
   "INSERT INTO countries VALUES (:country_id, :country_name)",
   {
-    country_id: { val: 90, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-    country_name: { val: "Tonga", type:oracledb.STRING, dir: oracledb.BIND_IN }
+    country_id: { dir: oracledb.BIND_IN, val: 90, type: oracledb.NUMBER },
+    country_name: { dir: oracledb.BIND_IN, val: "Tonga", type:oracledb.STRING }
   },
   function(err, result)
   {
@@ -5078,18 +5097,23 @@ connection.execute(
   });
 ```
 
-For IN binds the direction is `oracledb.BIND_IN`, which is the default when `dir`
-is not specified.
+For IN binds:
 
-The bind `type` can be `oracledb.STRING`, `oracledb.NUMBER`, `oracledb.DATE` or `oracledb.BUFFER` matching
-the standard Node.js types.  Use a bind type of `oracledb.BLOB` or `oracledb.CLOB` to
-pass in [Lob](#lobclass) instances.  The type `oracledb.BUFFER` can bind a
-Node.js Buffer to an Oracle Database RAW, LONG RAW or BLOB type.  If
-`type` is omitted for IN binds, it is inferred from the bind data
-value.
+- The direction `dir` is `oracledb.BIND_IN`, which is the default when `dir`
+  is not specified.
+
+- The `val` attribute may be a constant or a JavaScript variable.
+
+- If `type` is omitted, it is inferred from the bind data value.  If
+  `type` is set, it can be `oracledb.STRING`, `oracledb.NUMBER`,
+  `oracledb.DATE` or `oracledb.BUFFER` matching the standard Node.js
+  type of the data being passed into the database.  Use a bind type of
+  `oracledb.BLOB` or `oracledb.CLOB` to pass in [Lob](#lobclass)
+  instances.  The type `oracledb.BUFFER` can bind a Node.js Buffer to
+  an Oracle Database RAW, LONG RAW or BLOB type.
 
 Since `dir` and `type` have defaults, these attributes are sometimes
-omitted.  Binds can be like:
+omitted for IN binds.  Binds can be like:
 
 ```javascript
 connection.execute(
@@ -5104,22 +5128,22 @@ connection.execute(
   });
 ```
 
-When a bind variable name is used more than once in the SQL statement,
+When a bind parameter name is used more than once in the SQL statement,
 it should only occur once in the bind object:
 
 ```javascript
 connection.execute(
-  "SELECT first_name, last_name FROM employees WHERE first_name LIKE :nmbv OR last_name LIKE :nmbv",
-  {nmbv: '%iv%'},
+  "SELECT first_name, last_name FROM employees WHERE first_name = :nmbv OR last_name = :nmbv",
+  {nmbv: 'Christopher'},
   function(err, result)
   . . .
 ```
 
-#### <a name="bindbypos"></a>  Bind by Position
+#### <a name="bindbypos"></a> Bind by Position
 
-Instead of using named bind variables, values can also be bound
-directly in an array.  In this example, JavaScript array values are
-bound to the SQL bind parameters `:country_id` and `:country_name`:
+Instead of using named bind parameters, the data can alternatively be
+in an array.  In this example, values are bound to the SQL bind
+parameters `:country_id` and `:country_name`:
 
 ```javascript
 connection.execute(
@@ -5130,8 +5154,8 @@ connection.execute(
 ```
 
 The position of the array values corresponds to the position of the
-SQL bind variables as they occur in the statement, regardless of their
-names.  This is still true even if the bind variables are named like
+SQL bind parameters as they occur in the statement, regardless of their
+names.  This is still true even if the bind parameters are named like
 `:0`, `:1`, etc.  The following snippet will fail because the country
 name needs to be the second entry of the array so it becomes the
 second value in the `INSERT` statement
@@ -5149,73 +5173,94 @@ statement. However, in the context of PL/SQL statements the position
 'n' in the bind call indicates a binding for the n'th unique parameter
 name in the statement when scanned left to right.
 
-If a bind variable name is repeated in the SQL string
+If a bind parameter name is repeated in the SQL string
 then [bind by name](#bindbyname) syntax should be used.
 
-#### Data Type Notes
+#### <a name="binddatatypenotes"></a> Bind Data Type Notes
 
 When binding a JavaScript Date value in an `INSERT` statement, it is
-inserted as if it represented a TIMESTAMP WITH LOCAL TIME ZONE
-value.  In the database, TIMESTAMP WITH LOCAL TIME ZONE dates are
-normalized to the database time zone, or to the time zone specified
-for TIMESTAMP WITH TIME ZONE columns.  If later queried, they are
-returned in the session time zone.
-See [Fetching Date and Timestamps](datehandling) for information on
-setting the session time zone.
+inserted as if it represented a TIMESTAMP WITH LOCAL TIME ZONE value.
+In the database, TIMESTAMP WITH LOCAL TIME ZONE dates are normalized
+to the database time zone, or to the time zone specified for TIMESTAMP
+WITH TIME ZONE columns.  If later queried, they are returned in the
+session time zone.  See [Fetching Date and Timestamps](datehandling)
+for more information.
 
 The type `oracledb.CURSOR` cannot be used with IN binds.
 
-Binding NCHAR and NVARCHAR for DML may result in incorrect character
-mapping, depending on the database character set and the database
-national character set.  It may work in the case where the database
-character set can safely convert to the database national character
-set.
+Binding NCHAR, NVARCHAR or NCLOB for DML may result in incorrect
+character mapping, depending on the database character set and the
+database national character set.  It may work in the case where the
+database character set can safely convert to the database national
+character set.
 
 ### <a name="outbind"></a> 14.2 OUT and IN OUT Bind Parameters
 
-For each OUT and IN OUT bind parameter, a bind value object containing
-[`val`](#executebindParams), [`dir`](#executebindParams),
-[`type`](#executebindParams) and [`maxSize`](#executebindParams)
-properties is used.  For
-[PL/SQL Associative Array binds](#plsqlindexbybinds) a
-[`maxArraySize`](#executebindParams) property is required.
+OUT binds are used to retrieve data from the database.  IN OUT binds
+are passed in, and may return a different value after the statement
+executes.  IN OUT binds can be used for PL/SQL calls, but not for SQL.
 
-The `dir` attribute should be `oracledb.BIND_OUT` or `oracledb.BIND_INOUT`.
+For each OUT and IN OUT bind parameter
+in [`bindParams`](#executebindParams), a bind variable object
+containing
+[`dir`](#executebindParams),
+[`val`](#executebindParams), [`type`](#executebindParams),
+and [`maxSize`](#executebindParams) properties is used:
 
-For `oracledb.BIND_INOUT` parameters, the `type` attribute should be `oracledb.STRING`,
-`oracledb.NUMBER`, `oracledb.DATE`, `oracledb.BLOB`, `oracledb.CLOB` or `oracledb.BUFFER`.
+- The `dir` attribute should be `oracledb.BIND_OUT` or
+  `oracledb.BIND_INOUT`, depending on whether data is only to be
+  returned from the database or additionally passed into the
+  database.
 
-For `oracledb.BIND_OUT` parameters the `type` attribute should be `oracledb.STRING`,
-`oracledb.NUMBER`, `oracledb.DATE`, `oracledb.CURSOR`, `oracledb.BLOB`, `oracledb.CLOB` or `oracledb.BUFFER`.
+- The `val` parameter in needed when binding IN OUT to pass a value
+  into the database.  It is not used for OUT binds.
 
-The type `oracledb.BUFFER` is used to bind an Oracle Database RAW, LONG RAW or
-BLOB to a Node.js Buffer.
+- For `oracledb.BIND_INOUT` parameters, the `type` attribute is
+  inferred from the input data type.  Alternatively it can be
+  explicitly set to `oracledb.STRING`, `oracledb.NUMBER`,
+  `oracledb.DATE`, `oracledb.BLOB`, `oracledb.CLOB` or
+  `oracledb.BUFFER`, matching the data type of the Node.js value or
+  variable.  The output data type will always be the same as the the
+  input data type.
 
-If `type` is not specified then `oracledb.STRING` is assumed.
+  For `oracledb.BIND_OUT` parameters the `type` attribute will be the
+  node-oracledb or Node.js data type that data will be returned as.
+  It should be `oracledb.STRING`, `oracledb.NUMBER`, `oracledb.DATE`,
+  `oracledb.BUFFER`, `oracledb.CURSOR`, `oracledb.BLOB`, or
+  `oracledb.CLOB`.  If `type` is not specified for OUT binds then
+  `oracledb.STRING` is assumed.
 
-ROWID and UROWID data can be bound with `type` of `oracledb.STRING`.  Note
-that a string representing a UROWID may be up to 5267 bytes long.
+  Oracle Database RAW, LONG RAW or BLOB data can be bound with a
+  `type` of `oracledb.BUFFER` to return a Node.js Buffer.
 
-A `maxSize` should be set for `oracledb.STRING` or `oracledb.BUFFER` OUT or IN OUT
-binds.  This is the maximum number of bytes the bind parameter will
-return.  If the output value does not fit in `maxSize` bytes, then an
-error such *ORA-06502: PL/SQL: numeric or value error: character
-string buffer too small* or *NJS-016: buffer is too small for OUT
-binds* occurs.
+  Oracle Database LONG, ROWID and UROWID data can be bound with a
+  `type` of `oracledb.STRING` to return a JavaScript String.
 
-A default value of 200 bytes is used when `maxSize` is not provided
-for OUT binds of type `oracledb.STRING` or `oracledb.BUFFER`.
+- A `maxSize` attribute should be set for `oracledb.STRING` or
+  `oracledb.BUFFER` OUT or IN OUT binds.  This is the maximum number
+  of bytes the bind parameter will return.  If the output value does
+  not fit in `maxSize` bytes, then an error such *ORA-06502: PL/SQL:
+  numeric or value error: character string buffer too small* or
+  *NJS-016: buffer is too small for OUT binds* occurs.
 
-The `results` parameter of the `execute()` callback contains an
-`outBinds` property that has the returned OUT and IN OUT binds as
-either array elements or property values.  This depends on whether an
-array or object was initially passed as the `bindParams` parameter to
-the `execute()` call.  That is, if bind-by-name is done by passing an
-object with keys matching the bind variable names, then the OUT bind is
-also returned as an object with the same keys.  Similarly, if
-bind-by-position is done by passing an array of bind values, then the
-OUT and IN OUT binds are in an array with the bind positions in the
-same order.
+  A default value of 200 bytes is used when `maxSize` is not provided
+  for OUT binds of type `oracledb.STRING` or `oracledb.BUFFER`.
+
+  A string representing a UROWID may be up to 5267 bytes long in
+  node-oracledb.
+
+For [PL/SQL Associative Array binds](#plsqlindexbybinds)
+a [`maxArraySize`](#executebindParams) property is also required
+
+#### <a name="outbinds"></a> Accessing OUT Bind Values
+
+The [`results`](#executecallback) parameter of the `execute()`
+callback contains an [`outBinds`](#execoutbinds) property with the
+returned OUT and IN OUT bind values.
+If [`bindParams`](#executebindParams) was passed as an array, then
+`outBinds` is returned as an array, with the same order as the binds
+in the statement.  If `bindParams` was passed as an object, then
+`outBinds` is returned as an object.
 
 Here is an example program showing the use of binds:
 
@@ -5272,8 +5317,8 @@ will throw an error:
 
 ```javascript
 var bindVars = [
-  'Chris',
-  { val: 'Jones', dir: oracledb.BIND_INOUT },
+  'Chris',                                                  // valid
+  { val: 'Jones', dir: oracledb.BIND_INOUT },               // valid
   { o: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT } }  // invalid
 ];
 ```
@@ -5302,7 +5347,7 @@ Note that a string representing a UROWID may be up to 5267 bytes
 long.
 
 No duplicate binds are allowed in a DML statement with a `RETURNING`
-clause, and no duplication is allowed between bind variables in the
+clause, and no duplication is allowed between bind parameters in the
 DML section and the `RETURNING` section of the statement.
 
 One common use case is to return an 'auto incremented' key values.
@@ -5726,9 +5771,9 @@ But a common use case for a query `WHERE IN` clause is for multiple
 values, for example when a web user selects multiple check-box options
 and the query should match all chosen values.
 
-Trying to associate multiple data values with a single bind variable
+Trying to associate multiple data values with a single bind parameter
 won't work.  To use a fixed, small number of values in an `WHERE IN`
-bind clause, the SQL query should have individual bind variables, for
+bind clause, the SQL query should have individual bind parameters, for
 example:
 
 ```javascript
