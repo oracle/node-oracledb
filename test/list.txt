@@ -676,14 +676,14 @@ Overview of node-oracledb functional tests
         42.4.2 when data length is 32767
         42.4.3 when data length greater than maxSize
         42.4.4 when maxSize is greater than 32767
-    45.5 INSERT and SELECT
-        45.5.1 works with data size 100
-        45.5.2 works with data size 2000
-        45.5.3 works with default type/dir
-    45.6 UPDATE
-        45.6.1 works with data size 100
-        45.6.2 works with data size 2000
-        45.6.3 works with default type/dir
+    42.5 INSERT and SELECT
+        42.5.1 works with data size 100
+        42.5.2 works with data size 2000
+        42.5.3 works with default type/dir
+    42.6 UPDATE
+        42.6.1 works with data size 100
+        42.6.2 works with data size 2000
+        42.6.3 works with default type/dir
 
 43. plsqlBindIndexedTable1.js
     43.1 binding PL/SQL indexed table
@@ -3015,32 +3015,27 @@ Overview of node-oracledb functional tests
     115.1 INSERT & SELECT
         115.1.1 works with urowid length > 200
         115.1.2 works with urowid length > 500
-      - 115.1.3 get error when urowid length > 4000
+        115.1.3 works with maxSize < 200
     115.2 UPDATE
         115.2.1 update null with urowid length > 200
         115.2.2 update enpty string with urowid length > 500
         115.2.3 update with urowid length > 500
-      - 115.2.4 update with urowid length > 4000
+        115.2.4 works with maxSize < 200
     115.3 RETURNING INTO
         115.3.1 urowid length > 200
         115.3.2 urowid length > 500
-      - 115.3.3 urowid length > 4000
     115.4 WHERE
         115.4.1 urowid length > 200
         115.4.2 urowid length > 500
-      - 115.4.3 urowid length > 4000
     115.5 queryStream() and oracledb.maxRows = actual rows
         115.5.1 urowid length > 200
         115.5.2 urowid length > 500
-      - 115.5.3 urowid length > 4000
     115.6 queryStream() and oracledb.maxRows > actual rows
         115.6.1 urowid length > 200
         115.6.2 urowid length > 500
-      - 115.6.3 urowid length > 4000
     115.7 queryStream() and oracledb.maxRows < actual rows
         115.7.1 urowid length > 200
         115.7.2 urowid length > 500
-      - 115.7.3 urowid length > 4000
 
 116. fetchUrowidAsString.js
     116.1 works with fetchInfo option
@@ -3099,7 +3094,7 @@ Overview of node-oracledb functional tests
         116.6.8 resultSet = true
 
 117. fetchUrowidAsString_indexed.js
-    117.1 works with fetchInfo option and urowid length > 200/500/4000
+    117.1 works with fetchInfo option and urowid length > 200/500
         117.1.1 fetchInfo
         117.1.2 oracledb.maxRows < actual number of rows
         117.1.3 oracledb.maxRows = actual number of rows
@@ -3108,7 +3103,7 @@ Overview of node-oracledb functional tests
         117.1.6 queryStream() and oracledb.maxRows < actual number of rows
         117.1.7 queryStream() and oracledb.maxRows = actual number of rows
         117.1.8 queryStream() and oracledb.maxRows > actual number of rows
-    117.2 works with fetchInfo and outFormat = OBJECT, urowid length > 200/500/4000
+    117.2 works with fetchInfo and outFormat = OBJECT, urowid length > 200/500
         117.2.1 fetchInfo
         117.2.2 oracledb.maxRows < actual number of rows
         117.2.3 oracledb.maxRows = actual number of rows
@@ -3117,7 +3112,7 @@ Overview of node-oracledb functional tests
         117.2.6 queryStream() and oracledb.maxRows < actual number of rows
         117.2.7 queryStream() and oracledb.maxRows = actual number of rows
         117.2.8 queryStream() and oracledb.maxRows > actual number of rows
-    117.3 works with fetchInfo and outFormat = ARRAY, urowid length > 200/500/4000
+    117.3 works with fetchInfo and outFormat = ARRAY, urowid length > 200/500
         117.3.1 fetchInfo
         117.3.2 oracledb.maxRows < actual number of rows
         117.3.3 oracledb.maxRows = actual number of rows
@@ -3126,7 +3121,7 @@ Overview of node-oracledb functional tests
         117.3.6 queryStream() and oracledb.maxRows < actual number of rows
         117.3.7 queryStream() and oracledb.maxRows = actual number of rows
         117.3.8 queryStream() and oracledb.maxRows > actual number of rows
-    117.4 fetch as string by default, urowid length > 200/500/4000
+    117.4 fetch as string by default, urowid length > 200/500
         117.4.1 fetchInfo
         117.4.2 oracledb.maxRows < actual number of rows
         117.4.3 oracledb.maxRows = actual number of rows
@@ -3135,7 +3130,7 @@ Overview of node-oracledb functional tests
         117.4.6 queryStream() and oracledb.maxRows < actual number of rows
         117.4.7 queryStream() and oracledb.maxRows = actual number of rows
         117.4.8 queryStream() and oracledb.maxRows > actual number of rows
-    117.5 fetch as string by default with outFormat = OBJECT, urowid length > 200/500/4000
+    117.5 fetch as string by default with outFormat = OBJECT, urowid length > 200/500
         117.5.1 fetchInfo
         117.5.2 oracledb.maxRows < actual number of rows
         117.5.3 oracledb.maxRows = actual number of rows
@@ -3144,7 +3139,7 @@ Overview of node-oracledb functional tests
         117.5.6 queryStream() and oracledb.maxRows < actual number of rows
         117.5.7 queryStream() and oracledb.maxRows = actual number of rows
         117.5.8 queryStream() and oracledb.maxRows > actual number of rows
-    117.6 fetch as string by default with outFormat = ARRAY, urowid length > 200/500/4000
+    117.6 fetch as string by default with outFormat = ARRAY, urowid length > 200/500
         117.6.1 fetchInfo
         117.6.2 oracledb.maxRows < actual number of rows
         117.6.3 oracledb.maxRows = actual number of rows
@@ -3399,10 +3394,26 @@ Overview of node-oracledb functional tests
         126.1.3 works with data size 64K + 1
         126.1.4 works with data size 1MB + 1
         126.1.5 works with data size 100
+        126.1.6 set maxSize to 2000
+        126.1.7 set maxSize to 4GB
     126.2 UPDATE
         126.2.1 works with data size 64K - 1
         126.2.2 works with data size 64K
         126.2.3 works with data size 64K + 1
         126.2.4 works with data size 1MB + 1
+        126.2.5 set maxSize to 2000
+        126.2.6 set maxSize to 4GB
     126.3 RETURNING INTO
         126.3.1 do not support in returning into
+
+127.blobStream.js
+    127.1 stream txt file into BLOB column
+        127.1.1 works with 64K txt file
+        127.1.2 works with 64K+1 txt file
+        127.1.3 works with 1MB+1 txt file
+
+128.clobStream.js
+    128.1 stream txt file into CLOB column
+        128.1.1 works with 64KB txt file
+        128.1.2 works with 64KB+1 txt file
+        128.1.3 works with 1MB+1 txt file
