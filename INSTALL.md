@@ -170,6 +170,7 @@ example:
 
 ```
 export http_proxy=http://my-proxy.example.com:80/
+export https_proxy=http://my-proxy.example.com:80/
 ```
 
 Install node-oracledb from the
@@ -280,6 +281,7 @@ example:
 
 ```
 export http_proxy=http://my-proxy.example.com:80/
+export https_proxy=http://my-proxy.example.com:80/
 ```
 
 Install node-oracledb from the
@@ -399,6 +401,7 @@ example:
 
 ```
 export http_proxy=http://my-proxy.example.com:80/
+export https_proxy=http://my-proxy.example.com:80/
 ```
 
 Install node-oracledb from the
@@ -475,6 +478,7 @@ example:
 
 ```
 export http_proxy=http://my-proxy.example.com:80/
+export https_proxy=http://my-proxy.example.com:80/
 ```
 
 Install node-oracledb from the
@@ -604,6 +608,7 @@ example:
 
 ```
 set http_proxy=http://my-proxy.example.com:80/
+set https_proxy=http://my-proxy.example.com:80/
 ```
 
 Install node-oracledb from the
@@ -725,6 +730,7 @@ example:
 
 ```
 export http_proxy=http://my-proxy.example.com:80/
+export https_proxy=http://my-proxy.example.com:80/
 ```
 
 Set the compiler to GCC:
@@ -817,6 +823,7 @@ example:
 
 ```
 export http_proxy=http://my-proxy.example.com:80/
+export https_proxy=http://my-proxy.example.com:80/
 ```
 
 Install node-oracledb from the
