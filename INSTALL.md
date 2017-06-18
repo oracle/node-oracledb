@@ -1,4 +1,4 @@
-# Installing node-oracledb
+# Installing node-oracledb Version 2
 
 *Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved.*
 
@@ -71,10 +71,11 @@ support C++11.**  Note the default compiler on Oracle Linux 6 and RHEL 6
 does not have the required support.  Install [GCC 4.7 or later](https://blogs.oracle.com/opal/getting-a-c11-compiler-for-node-4,-5-and-6-on-oracle-linux-6)
 or upgrade to Oracle Linux 7.
 
-Python 2.7 is needed by node-gyp.  If another version of Python occurs
-first in your binary path then, when you install node-oracledb, use
-the `--python` option to indicate the correct version.  For example:
-`npm install --python=/whereever/python-2.7/bin/python oracledb`.
+Python 2.7 is needed by node-gyp, which is invoked by npm.  If another
+version of Python occurs first in your binary path then, when you
+install node-oracledb, use the `--python` option to indicate the
+correct version.  For example: `npm install
+--python=/whereever/python-2.7/bin/python oracledb`.
 
 ### Which Instructions to Follow
 
@@ -157,7 +158,7 @@ cd /opt
 tar -Jxf node-v6.9.4-linux-x64.tar.xz
 ```
 
-Set PATH to include Node.js:
+Set `PATH` to include Node.js:
 
 ```
 export PATH=/opt/node-v6.9.4-linux-x64/bin:$PATH
@@ -268,7 +269,7 @@ cd /opt
 tar -Jxf node-v6.9.4-linux-x64.tar.xz
 ```
 
-Set PATH to include Node.js:
+Set `PATH` to include Node.js:
 
 ```
 export PATH=/opt/node-v6.9.4-linux-x64/bin:$PATH
@@ -388,7 +389,7 @@ cd /opt
 tar -zxf node-v6.9.4-linux-x64.tar.gz
 ```
 
-Set your PATH variable to include Node.js:
+Set `PATH` to include Node.js:
 
 ```
 export PATH=/opt/node-v6.9.4-linux-x64/bin:$PATH
@@ -696,34 +697,36 @@ if you see `MSVCR100.dll` then you need the VC++ 10 redistributable.
 
 ## <a name="instaix"></a> 9. Node-oracledb Installation on AIX on Power Systems with Instant Client ZIP files
 
-**THIS SECTION HAS NOT BEEN VERIFIED FOR NODE-ORACLEDB 2.x**
-
 Questions and issues can be posted as [GitHub Issues](https://github.com/oracle/node-oracledb/issues).
 
-### 9.1 Install Node.js
+### <a name="aixprereqs"></a> 9.1 Install Prerequisites
 
-Download [Node.js](https://nodejs.org/) for AIX on Power Systems.
+The GCC compiler is needed.  GCC 4.7 (or later) is needed to install
+because compiling for Node 4 (or later) requires a C++11 compatible
+compiler.
 
-Execute the downloaded shell script.  For example, if you
-downloaded Node 4.2 then run:
+Use GNU Make 4.1-1 or above.
 
-```
-sh node-v4.2.1-aix-ppc64.bin
-```
+Python 2.7 is needed by node-gyp.
 
-It will prompt for the Install Folder and Link Folder.  Give the
-desired location, for example `/opt`, where the Node binary will be
-built.
+### 9.2 Install Node.js
 
-On completion, a success message will be displayed
-
-Set `PATH` to include the Node.js and Node-gyp binaries:
+Download [Node.js](https://nodejs.org/) for AIX on Power Systems.  For
+example, if you downloaded version 6.11.0 you could install Node.js
+into `/opt`:
 
 ```
-export PATH=/opt/node-v4.2.1/bin:/opt/node-v4.2.1/lib/node_modules/npm/bin/node-gyp-bin:$PATH
+cd /opt
+gunzip -c node-v6.11.0-aix-ppc64.tar.gz | tar xvf -
 ```
 
-### 9.2 Install the add-on
+Set `PATH` to include Node.js:
+
+```
+export PATH=/opt/node-v6.11.0-aix-ppc64/bin:$PATH
+```
+
+### 9.3 Install the add-on
 
 If you are behind a firewall you may need to set your proxy, for
 example:
@@ -746,26 +749,25 @@ Install node-oracledb from the
 npm install oracledb
 ```
 
-Note: The version of `make` should be GNU Make 4.1-1 or above.
-
-### 9.3 Install the free Oracle Instant Client 'Basic' and 'SDK' ZIPs
+### 9.4 Install the free Oracle Instant Client 'Basic' ZIP file
 
 Download the **Basic** ZIP file from
 [Oracle Technology Network]( http://www.oracle.com/technetwork/topics/aix5lsoft-098883.html)
 and extract it into a directory that is accessible to your application, for example `/opt/oracle`:
 
 ```
-cd /opt/oracle
-unzip instantclient-basic-aix.ppc64-12.1.0.2.0.zip
+unzip instantclient-basic-aix.ppc64-12.2.0.1.0.zip
+mkdir -p /opt/oracle
+mv instantclient_12_2 /opt/oracle
 ```
 
 To run applications, you will need to set the link path:
 
 ```
-export LIBPATH=/opt/oracle/instantclient_12_1:$LIBPATH
+export LIBPATH=/opt/oracle/instantclient_12_2:$LIBPATH
 ```
 
-### 9.4 Run an example program
+### 9.5 Run an example program
 
 Download the
 [example programs](https://github.com/oracle/node-oracledb/tree/master/examples) from GitHub.
