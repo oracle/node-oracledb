@@ -543,7 +543,7 @@ describe('17. extendedMetaData.js', function() {
           (result.metaData).should.deepEqual(
             [ { name: 'NVCH',
               fetchType: oracledb.STRING,
-              dbType: oracledb.DB_TYPE_VARCHAR,
+              dbType: oracledb.DB_TYPE_NVARCHAR,
               byteSize: 4000,
               nullable: true } ]
           );
@@ -577,15 +577,15 @@ describe('17. extendedMetaData.js', function() {
     it('17.3.4 NCHAR', function(done) {
 
       connection.execute(
-        "SELECT ch FROM nodb_metadata",
+        "SELECT nch FROM nodb_metadata",
         [],
         { extendedMetaData: true },
         function(err, result) {
           should.not.exist(err);
           (result.metaData).should.deepEqual(
-            [ { name: 'CH',
+            [ { name: 'NCH',
               fetchType: oracledb.STRING,
-              dbType: oracledb.DB_TYPE_CHAR,
+              dbType: oracledb.DB_TYPE_NCHAR,
               byteSize: 2000,
               nullable: true } ]
           );
@@ -1254,7 +1254,7 @@ describe('17. extendedMetaData.js', function() {
           (result.metaData).should.deepEqual(
             [ { name: 'NCLB',
               fetchType: oracledb.CLOB,
-              dbType: oracledb.DB_TYPE_CLOB,
+              dbType: oracledb.DB_TYPE_NCLOB,
               nullable: true } ]
           );
           done();

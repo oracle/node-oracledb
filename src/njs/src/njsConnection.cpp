@@ -494,7 +494,9 @@ Local<Value> njsConnection::GetMetaData(njsVariable *vars, uint32_t numVars,
                     Nan::New<v8::Boolean>(var->isNullable));
             switch (dbType) {
                 case NJS_DB_TYPE_VARCHAR:
+                case NJS_DB_TYPE_NVARCHAR:
                 case NJS_DB_TYPE_CHAR:
+                case NJS_DB_TYPE_NCHAR:
                 case NJS_DB_TYPE_RAW:
                     Nan::Set(column,
                             Nan::New<v8::String>("byteSize").ToLocalChecked(),
