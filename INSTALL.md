@@ -43,7 +43,7 @@ environments, but these architectures have not been fully tested.
 **Note**: Installation steps have changed significantly between
 node-oracledb 1.x and node-oracledb 2.x.  Installation no longer
 requires Oracle header files.  Node-oracledb environment variables
-`OCI_INC_DIR` and `OCI_LIB_DIR` are no longer required.  At runtime,
+`OCI_INC_DIR` and `OCI_LIB_DIR` are no longer required.  At run time,
 the Oracle libraries must be in the default library search path, such
 as `PATH` or `LD_LIBRARY_PATH` because the Oracle client libraries are
 dynamically loaded at run time. 'Rpath' linking is no longer performed
@@ -75,7 +75,7 @@ Python 2.7 is needed by node-gyp, which is invoked by npm.  If another
 version of Python occurs first in your binary path then, when you
 install node-oracledb, use the `--python` option to indicate the
 correct version.  For example: `npm install
---python=/whereever/python-2.7/bin/python oracledb`.
+--python=/wherever/python-2.7/bin/python oracledb`.
 
 ### Which Instructions to Follow
 
@@ -256,7 +256,7 @@ upgrade to Oracle Linux 7.
 Python 2.7 is needed by node-gyp.  If another version of Python occurs
 first in your binary path then, when you install node-oracledb, use
 the `--python` option to indicate the correct version.  For example:
-`npm install --python=/whereever/python-2.7/bin/python oracledb`.
+`npm install --python=/wherever/python-2.7/bin/python oracledb`.
 
 ### 4.2 Install Node.js
 
@@ -367,7 +367,7 @@ upgrade to Oracle Linux 7.
 Python 2.7 is needed by node-gyp.  If another version of Python occurs
 first in your binary path then, when you install node-oracledb, use
 the `--python` option to indicate the correct version.  For example:
-`npm install --python=/whereever/python-2.7/bin/python oracledb`.
+`npm install --python=/wherever/python-2.7/bin/python oracledb`.
 
 The `ORACLE_HOME` can be either a database home or a full Oracle
 client installation installed with Oracle's `runInstaller`.
@@ -568,7 +568,7 @@ redistributables for the Oracle client.  This should be part of your VS
 install.  Specifically:
 - The Oracle client 11.2 requires the [Visual Studio 2005 redistributable](https://www.microsoft.com/en-us/download/details.aspx?id=18471).
 - The Oracle client 12.1 requires the [Visual Studio 2010 redistributable](https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads#bookmark-vs2010).
-- The Oracle client 12.2, requires ththe [Visual Studio 2013 redistributable](https://support.microsoft.com/en-us/kb/2977003#bookmark-vs2013).
+- The Oracle client 12.2, requires the [Visual Studio 2013 redistributable](https://support.microsoft.com/en-us/kb/2977003#bookmark-vs2013).
 
 Install the Python 2.7 MSI from
 [www.python.org](https://www.python.org/downloads).  Select the
@@ -717,7 +717,7 @@ into `/opt`:
 
 ```
 cd /opt
-gunzip -c node-v6.11.0-aix-ppc64.tar.gz | tar xvf -
+gunzip -c node-v6.11.0-aix-ppc64.tar.gz | tar -xvf -
 ```
 
 Set `PATH` to include Node.js:
