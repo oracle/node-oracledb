@@ -555,7 +555,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
       );
     }); // 82.1.18
 
-    it('82.1.19 Negative: RETURNING INTO with autocommit on', function(done) {
+    it.skip('82.1.19 Negative: RETURNING INTO with autocommit on', function(done) {
       var id = insertID++;
       var sql = "INSERT INTO nodb_dml_blob_1 (id, blob) VALUES (:i, EMPTY_BLOB()) RETURNING blob INTO :lobbv";
       var inFileName = './test/tree.jpg';

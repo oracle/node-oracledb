@@ -749,15 +749,15 @@ describe('55. resultSet2.js', function() {
         }
       );
 
-       function fetchRowsFromRS(rs, numRows, done) {
-         rs.getRows(numRows, function(err) {
-           should.exist(err);
-           err.message.should.startWith('NJS-018:'); // invalid result set
-           done();
-         });
-       }
-     });
-   });
+      function fetchRowsFromRS(rs, numRows, done) {
+        rs.getRows(numRows, function(err) {
+          should.exist(err);
+          err.message.should.startWith('NJS-018:'); // invalid result set
+          done();
+        });
+      }
+    });
+  });
 
   describe('55.11 result set with unsupported data types', function() {
     it('55.11.1 INTERVAL YEAR TO MONTH data type', function(done) {

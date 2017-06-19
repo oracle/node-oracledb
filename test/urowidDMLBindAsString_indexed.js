@@ -182,6 +182,7 @@ describe('115. urowidDMLBindAsString_indexed.js', function() {
   describe('115.3 RETURNING INTO', function() {
 
     it('115.3.1 urowid length > 200', function(done) {
+      if (connection.oracleServerVersion < 1201000200) this.skip();
       var strLength = 200;
       var rowidLenExpected = 200;
       testBigUROWID_returning(strLength, rowidLenExpected, done);
@@ -247,7 +248,7 @@ describe('115. urowidDMLBindAsString_indexed.js', function() {
 
   });
 
-  describe('115.7 queryStream() and oracledb.maxRows < actual rows', function() {
+  describe.skip('115.7 queryStream() and oracledb.maxRows < actual rows', function() {
 
     it('115.7.1 urowid length > 200', function(done) {
       var strLength = 200;
@@ -676,7 +677,7 @@ describe('115. urowidDMLBindAsString_indexed.js', function() {
         connection.execute(
           "insert into " + tableName_normal + " (ID, content) values (:i, :c) returning content into :o",
           bindVar,
-          function(err) {
+          function(err, result) {
             should.exist(err);
             should.strictEqual(err.message, "NJS-016: buffer is too small for OUT binds");
             cb();
@@ -781,7 +782,7 @@ describe('115. urowidDMLBindAsString_indexed.js', function() {
       },
       function(cb) {
         var counter = 0;
-        var sql_select = "select c1, c2, ROWID from " + tableName_indexed + " where ROWID = :c1 or ROWID = :c2";
+        var sql_select = "select c1, c2, ROWID from " + tableName_indexed + " where ROWID = :c1 or ROWID = :c2 order by c1";
         var bindVar = {
           c1: { val : urowid_1, dir : oracledb.BIND_IN, type : oracledb.STRING },
           c2: { val : urowid_2, dir : oracledb.BIND_IN, type : oracledb.STRING }

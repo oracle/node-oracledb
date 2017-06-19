@@ -200,6 +200,7 @@ describe('94.binding_procedureBindInout.js', function() {
     });
 
     it('94.1.2 oracledb.STRING <--> DB: CHAR', function(done) {
+      if (connection.oracleServerVersion < 1201000200) this.skip();
       index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;
@@ -211,6 +212,7 @@ describe('94.binding_procedureBindInout.js', function() {
     });
 
     it('94.1.3 oracledb.STRING <--> DB: NCHAR', function(done) {
+      if (connection.oracleServerVersion < 1201000200) this.skip();
       index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;

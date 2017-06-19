@@ -73,6 +73,7 @@ describe('96.binding_procedureBindOut.js', function() {
   var doTest = function(table_name, procName, bindType, dbColType, content, sequence, nullBind, callback) {
     async.series([
       function(cb) {
+        procName = procName + "_1";
         var bindVar = {
           i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
           c: { val: content, type: bindType, dir: oracledb.BIND_OUT, maxSize: 1000 }
@@ -80,6 +81,7 @@ describe('96.binding_procedureBindOut.js', function() {
         inBind(table_name, procName, sequence, dbColType, bindVar, bindType, nullBind, cb);
       },
       function(cb) {
+        procName = procName + "_2";
         var bindVar =[ sequence, { val: content, type: bindType, dir: oracledb.BIND_OUT, maxSize: 1000 } ];
         inBind(table_name, procName, sequence, dbColType, bindVar, bindType, nullBind, cb);
       }
@@ -117,7 +119,6 @@ describe('96.binding_procedureBindOut.js', function() {
                "END " + proc_name + "; ";
     var sqlRun = "BEGIN " + proc_name + " (:i, :c); END;";
     var proc_drop = "DROP PROCEDURE " + proc_name;
-    // console.log(proc);
     var inserted = getInsertVal(dbColType, nullBind);
     var insertSql = "insert into " + table_name + " (id, content) values (:c1, :c2)";
     async.series([
@@ -215,6 +216,7 @@ describe('96.binding_procedureBindOut.js', function() {
     });
 
     it('96.1.2 oracledb.STRING <--> DB: CHAR', function(done) {
+      if (connection.oracleServerVersion < 1201000200) this.skip();
       index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;
@@ -226,6 +228,7 @@ describe('96.binding_procedureBindOut.js', function() {
     });
 
     it('96.1.3 oracledb.STRING <--> DB: NCHAR', function(done) {
+      if (connection.oracleServerVersion < 1201000200) this.skip();
       index++;
       var table_name = tableNamePre + index;
       var proc_name = procPre + index;

@@ -804,10 +804,19 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
           connection.execute(
             sqlRun,
             bindVar,
-            function(err) {
-              should.exist(err);
-              // ORA-06502: PL/SQL: numeric or value error: character string buffer too small
-              (err.message).should.startWith('ORA-06502:');
+            function(err, result) {
+              if (connection.oracleServerVersion < 1201000200) {
+                should.not.exist(err);
+                var resultVal = result.outBinds.c;
+                var resultLength = resultVal.length;
+                var specStrLength = specialStr.length;
+                should.strictEqual(resultLength, (len - 1));
+                should.strictEqual(resultVal.substring(0, specStrLength), specialStr);
+              } else {
+                should.exist(err);
+                // ORA-06502: PL/SQL: numeric or value error: character string buffer too small
+                (err.message).should.startWith('ORA-06502:');
+              }
               cb();
             }
           );
@@ -889,10 +898,19 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
           connection.execute(
             sqlRun,
             bindVar,
-            function(err) {
-              should.exist(err);
-              // ORA-06502: PL/SQL: numeric or value error: character string buffer too small
-              (err.message).should.startWith('ORA-06502:');
+            function(err, result) {
+              if (connection.oracleServerVersion < 1201000200) {
+                should.not.exist(err);
+                var resultVal = result.outBinds[0];
+                var resultLength = resultVal.length;
+                var specStrLength = specialStr.length;
+                should.strictEqual(resultLength, (len - 1));
+                should.strictEqual(resultVal.substring(0, specStrLength), specialStr);
+              } else {
+                should.exist(err);
+                // ORA-06502: PL/SQL: numeric or value error: character string buffer too small
+                (err.message).should.startWith('ORA-06502:');
+              }
               cb();
             }
           );
@@ -1281,10 +1299,19 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
           connection.execute(
             sqlRun,
             bindVar,
-            function(err) {
-              should.exist(err);
-              // ORA-06502: PL/SQL: numeric or value error
-              (err.message).should.startWith('ORA-06502:');
+            function(err, result) {
+              if (connection.oracleServerVersion < 1201000200) {
+                should.not.exist(err);
+                var resultVal = result.outBinds[0];
+                var resultLength = resultVal.length;
+                var specStrLength = specialStr.length;
+                should.strictEqual(resultLength, (len - 1));
+                should.strictEqual(resultVal.substring(0, specStrLength), specialStr);
+              } else {
+                should.exist(err);
+                // ORA-06502: PL/SQL: numeric or value error
+                (err.message).should.startWith('ORA-06502:');
+              }
               cb();
             }
           );
