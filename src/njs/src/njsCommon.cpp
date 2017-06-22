@@ -760,7 +760,7 @@ njsCommon *njsCommon::ValidateArgs(Nan::NAN_METHOD_ARGS_TYPE args,
 
 
 //-----------------------------------------------------------------------------
-// njsCommon::ValidateArgs()
+// njsCommon::PropertyIsReadOnly()
 //   Raises an exception indicating that the given property is read only.
 //-----------------------------------------------------------------------------
 void njsCommon::PropertyIsReadOnly(const char *name)
