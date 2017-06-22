@@ -1,5 +1,13 @@
 # Change Log
 
+## node-oracledb v2.0.14 Development (DD Mon YYYY)
+
+Note: 2.0.14-Development is a work in progress
+
+- Fixed crash with LOB out binds in DML RETURNING statements when the
+  number of rows returned exceeds the number of rows originally
+  allocated internally.
+
 ## node-oracledb v2.0.13 Development (19 Jun 2017)
 
 - Node-oracledb now uses the [ODPI-C](https://github.com/oracle/odpi)
