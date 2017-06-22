@@ -300,11 +300,23 @@ bool njsConnection::ProcessLOBs(njsBaton *baton, njsVariable *vars,
             default:
                 continue;
         }
-        if (baton->isReturning && var->bindDir == NJS_BIND_OUT)
+
+        // for DML returning statements, the number of rows returned may have
+        // exceeded the maxArraySize of the variable, requiring ODPI-C to
+        // free the original buffers and allocate new ones; this call gets the
+        // buffers and maxArraySize value for the variable just in case that
+        // has taken place
+        if (baton->isReturning && var->bindDir == NJS_BIND_OUT) {
+            if (dpiVar_getData(var->dpiVarHandle, &var->maxArraySize,
+                    &var->dpiVarData) < 0) {
+                baton->GetDPIError();
+                return false;
+            }
             numElements = (uint32_t) baton->rowsAffected;
-        else if (!var->isArray)
+
+        } else if (!var->isArray) {
             numElements = baseNumElements;
-        else {
+        } else {
             if (dpiVar_getNumElementsInArray(var->dpiVarHandle,
                     &numElements) < 0) {
                 baton->GetDPIError();
