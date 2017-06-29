@@ -46,11 +46,7 @@ describe('15. resultsetToStream.js', function () {
     async.series([
       function getConn(cb) {
         oracledb.getConnection(
-          {
-            user:          dbConfig.user,
-            password:      dbConfig.password,
-            connectString: dbConfig.connectString
-          },
+          dbConfig,
           function(err, conn) {
             should.not.exist(err);
             connection = conn;
@@ -158,8 +154,7 @@ describe('15. resultsetToStream.js', function () {
 
           stream.on('end', function () {
             should.equal(counter, rowsAmount);
-
-            setTimeout(done, 500);
+            done();
           });
         }
       );

@@ -501,7 +501,7 @@ describe('85. fetchClobAsString2.js', function() {
 
           stream.on('end', function () {
             should.equal(counter, 1);
-            setTimeout(cb, 500);
+            cb();
           });
         }
       ], done);
@@ -549,7 +549,7 @@ describe('85. fetchClobAsString2.js', function() {
           stream.on('end', function () {
             should.equal(counter, 2);
             oracledb.maxRows = maxRowsBak;
-            setTimeout(cb, 500);
+            cb();
           });
         }
       ], done);
@@ -597,7 +597,7 @@ describe('85. fetchClobAsString2.js', function() {
           stream.on('end', function () {
             should.equal(counter, 2);
             oracledb.maxRows = maxRowsBak;
-            setTimeout(cb, 500);
+            cb();
           });
         }
       ], done);
@@ -645,7 +645,7 @@ describe('85. fetchClobAsString2.js', function() {
           stream.on('end', function () {
             should.equal(counter, 2);
             oracledb.maxRows = maxRowsBak;
-            setTimeout(cb, 500);
+            cb();
           });
         }
       ], done);

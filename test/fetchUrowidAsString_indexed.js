@@ -810,7 +810,7 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
             rowid_1 = result[0].CONTENT;
             rowid_2 = result[1].CONTENT;
           }
-          setTimeout(cb, 100);
+          cb();
         });
       },
       function(cb) {

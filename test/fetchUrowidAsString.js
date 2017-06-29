@@ -675,7 +675,7 @@ describe('116. fetchUrowidAsString.js', function() {
 
     stream.on('end', function() {
       should.strictEqual(result.length, numRows);
-      setTimeout(callback, 100);
+      callback();
     });
   }
 });
