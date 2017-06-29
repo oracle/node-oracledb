@@ -58,8 +58,8 @@ test/resultSetClose.js
 test/resultSet2.js
 test/fetchAs.js
 test/nestedCursor.js
-
 test/properties.js
+
 test/lobResultSet.js
 test/clobPlsqlString.js
 test/checkClassesTypes.js
@@ -70,6 +70,7 @@ test/uninitializedLob.js
 test/writableProperties.js
 test/poolCache.js
 test/multipleLobInsertion.js
+
 test/driverName.js
 test/plsqlBindScalar.js
 test/lobBind1.js
@@ -80,6 +81,7 @@ test/clobPlsqlBindAsString_bindout.js
 test/clobPlsqlBindAsString_bindinout.js
 test/blobPlsqlBindAsBuffer_bindin.js
 test/blobPlsqlBindAsBuffer_bindout.js
+
 test/blobPlsqlBindAsBuffer_bindinout.js
 test/lobBindAsStringBuffer.js
 test/clobDMLBindAsString.js
@@ -90,6 +92,7 @@ test/fetchClobAsString2.js
 test/fetchClobAsString3.js
 test/fetchBlobAsBuffer1.js
 test/fetchBlobAsBuffer2.js
+
 test/fetchBlobAsBuffer3.js
 test/fetchClobAsString4.js
 test/fetchBlobAsBuffer4.js
@@ -100,6 +103,7 @@ test/binding_functionBindInout.js
 test/binding_procedureBindOut.js
 test/binding_functionBindOut.js
 test/binding_DMLReturningInto.js
+
 test/binding_functionBindIn.js
 test/binding_defaultBindIn.js
 test/binding_defaultBindInout.js
@@ -110,6 +114,7 @@ test/fetchRowidAsString.js
 test/rowidDMLBindAsString.js
 test/rowidProcedureBindAsString_bindin.js
 test/rowidFunctionBindAsString_bind.js
+
 test/rowidProcedureBindAsString_bindout.js
 test/rowidProcedureBindAsString_bindinout.js
 test/rowidFunctionBindAsString_bindinout.js
@@ -120,12 +125,17 @@ test/fetchUrowidAsString.js
 test/fetchUrowidAsString_indexed.js
 test/urowidProcedureBindAsString_bindin.js
 test/urowidProcedureBindAsString_bindout.js
+
 test/urowidProcedureBindAsString_bindinout.js
 test/urowidFunctionBindAsString_bind.js
 test/urowidFunctionBindAsString_bindinout.js
 test/dataTypeNclob.js
 test/nclobDMLBindAsString.js
-test/blobStream.js
-test/clobStream.js
 test/longDMLBind.js
 test/longrawDMLBind.js
+test/blobStream.js
+test/clobStream.js
+test/longProcedureBind_inout.js
+
+test/longProcedureBind_out.js
+test/longProcedureBind_in.js

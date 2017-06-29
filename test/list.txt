@@ -3417,3 +3417,57 @@ Overview of node-oracledb functional tests
         128.1.1 works with 64KB txt file
         128.1.2 works with 64KB+1 txt file
         128.1.3 works with 1MB+1 txt file
+
+129. longProcedureBind_inout.js
+    129.1 PLSQL PROCEDURE BIND IN OUT AS LONG
+        129.1.1 works with NULL
+        129.1.2 works with undefined
+        129.1.3 works with empty string
+        129.1.4 works with data size 4000
+        129.1.5 works with data size (32K - 1)
+        129.1.6 set maxSize to size (32K - 1)
+        129.1.7 set maxSize to size 1GB
+    129.2 PLSQL PROCEDURE BIND IN OUT AS STRING
+        129.2.1 works with NULL
+        129.2.2 works with undefined
+        129.2.3 works with empty string
+        129.2.4 works with data size 4000
+        129.2.5 works with data size (32K - 1)
+        129.2.6 set maxSize to size (32K - 1)
+        129.2.7 set maxSize to size 1GB
+
+130. longProcedureBind_out.js
+    130.1 PLSQL PROCEDURE BIND OUT AS LONG
+        130.1.1 works with NULL
+        130.1.2 works with undefined
+        130.1.3 works with empty string
+        130.1.4 works with data size 4000
+        130.1.5 works with data size (32K - 1)
+        130.1.6 set maxSize to size (32K - 1)
+        130.1.7 set maxSize to size 1GB
+    130.2 PLSQL PROCEDURE BIND OUT AS STRING
+        130.2.1 works with NULL
+        130.2.2 works with undefined
+        130.2.3 works with empty string
+        130.2.4 works with data size 4000
+        130.2.5 works with data size (32K - 1)
+        130.2.6 set maxSize to size (32K - 1)
+        130.2.7 set maxSize to size 1GB
+
+131. longProcedureBind_in.js
+    131.1 PLSQL PROCEDURE BIND IN AS LONG
+        131.1.1 works with NULL
+        131.1.2 works with undefined
+        131.1.3 works with empty string
+        131.1.4 works with data size 4000
+        131.1.5 works with data size (32K - 1)
+        131.1.6 set maxSize to size (32K - 1)
+        131.1.7 set maxSize to size 1GB
+    131.2 PLSQL PROCEDURE BIND IN AS STRING
+        131.2.1 works with NULL
+        131.2.2 works with undefined
+        131.2.3 works with empty string
+        131.2.4 works with data size 4000
+        131.2.5 works with data size (32K - 1)
+        131.2.6 set maxSize to size (32K - 1)
+        131.2.7 set maxSize to size 1GB

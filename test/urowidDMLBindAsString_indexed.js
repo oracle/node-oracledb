@@ -678,6 +678,7 @@ describe('115. urowidDMLBindAsString_indexed.js', function() {
           "insert into " + tableName_normal + " (ID, content) values (:i, :c) returning content into :o",
           bindVar,
           function(err, result) {
+            should.not.exist(result);
             should.exist(err);
             should.strictEqual(err.message, "NJS-016: buffer is too small for OUT binds");
             cb();
