@@ -4,9 +4,15 @@
 
 Note: 2.0.14-Development is a work in progress
 
+- Fix duplicate 'close' event for error conditions when streaming Lobs
+  in Node 8.
+
 - Fixed crash with LOB out binds in DML RETURNING statements when the
   number of rows returned exceeds the number of rows originally
   allocated internally.
+
+- Improve handling of invalid `externalAuth`, `fetchAsString`, and
+  `fetchAsBuffer` attribute values.
 
 ## node-oracledb v2.0.13 Development (19 Jun 2017)
 
