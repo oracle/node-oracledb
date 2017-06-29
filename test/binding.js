@@ -633,22 +633,6 @@ describe('4. binding.js', function() {
             }
           );
         },
-        /*function(callback) {
-          connection.execute(
-            "BEGIN nodb_bindproc4(:o); END;",
-            [
-              { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize:22 }
-            ],
-            function(err, result) {
-              should.exist(err);
-              // console.log(err.message);
-              err.message.should.startWith('ORA-06502:');
-              should.not.exist(result);
-              // console.log(result);
-              callback();
-            }
-          );
-        },*/
         function(callback) {
           connection.execute(
             "DROP PROCEDURE nodb_bindproc4",
@@ -678,16 +662,11 @@ describe('4. binding.js', function() {
         "BEGIN :o := lpad('A',201,'x'); END;",
         { o: { type: oracledb.STRING, dir : oracledb.BIND_OUT } },
         function (err, result) {
-          if (connection.oracleServerVersion < 1201000200) {
-            should.not.exist(err);
-            (result.outBinds.o.length).should.be.exactly(200);
-          } else {
-            should.exist(err);
-            // ORA-06502: PL/SQL: numeric or value error
-            err.message.should.startWith('ORA-06502:');
-            // console.log(result.outBinds.o.length);
-            should.not.exist(result);
-          }
+          should.exist(err);
+          // ORA-06502: PL/SQL: numeric or value error
+          err.message.should.startWith('ORA-06502:');
+          // console.log(result.outBinds.o.length);
+          should.not.exist(result);
           done();
         }
       );
