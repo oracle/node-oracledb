@@ -101,7 +101,7 @@ steps in the
 [version 1.x INSTALL guide](https://github.com/oracle/node-oracledb/blob/node-oracledb-v1/INSTALL.md).
 To get the old add-on you must explictly use its version when installing:
 
-````
+```
 npm install oracledb@1.13.1
 ```
 
