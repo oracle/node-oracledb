@@ -47,18 +47,11 @@ describe('14. stream2.js', function() {
   before(function(done) {
     async.series([
       function getConn(cb) {
-        oracledb.getConnection(
-          {
-            user:          dbConfig.user,
-            password:      dbConfig.password,
-            connectString: dbConfig.connectString
-          },
-          function(err, conn) {
-            should.not.exist(err);
-            connection = conn;
-            cb();
-          }
-        );
+        oracledb.getConnection(dbConfig, function(err, conn) {
+          should.not.exist(err);
+          connection = conn;
+          cb();
+        });
       },
       function createTab(cb) {
         var proc = "BEGIN \n" +
@@ -146,9 +139,7 @@ describe('14. stream2.js', function() {
       data.should.eql(['staff 40']);
     });
 
-    stream.on('end', function() {
-      setTimeout(done, 500);
-    });
+    stream.on('end', done);
   });
 
   it('14.2 Bind by name and return an array', function(done) {
@@ -164,9 +155,7 @@ describe('14. stream2.js', function() {
       data.should.eql(['staff 40']);
     });
 
-    stream.on('end', function() {
-      setTimeout(done, 500);
-    });
+    stream.on('end', done);
   });
 
   it('14.3 Bind by position and return an object', function(done) {
@@ -182,9 +171,7 @@ describe('14. stream2.js', function() {
       (data.EMPLOYEE_NAME).should.eql('staff 40');
     });
 
-    stream.on('end', function() {
-      setTimeout(done, 500);
-    });
+    stream.on('end', done);
   });
 
   it('14.4 Bind by name and return an object', function(done) {
@@ -200,9 +187,7 @@ describe('14. stream2.js', function() {
       (data.EMPLOYEE_NAME).should.eql('staff 40');
     });
 
-    stream.on('end', function() {
-      setTimeout(done, 500);
-    });
+    stream.on('end', done);
   });
 
   it('14.5 explicitly setting resultSet option to be false takes no effect', function(done) {
@@ -218,14 +203,12 @@ describe('14. stream2.js', function() {
       data.should.eql(['staff 40']);
     });
 
-    stream.on('end', function() {
-      setTimeout(done, 500);
-    });
+    stream.on('end', done);
   });
 
   it('14.6 maxRows option is ignored as expect', function(done) {
     var sql = 'SELECT employee_name FROM nodb_stream2 ORDER BY employee_name';
-    var stream = connection.queryStream(sql, [], {maxRows: 50});
+    var stream = connection.queryStream(sql, [], {maxRows: 40});
 
     stream.on('error', function(error) {
       should.not.exist(error);
@@ -239,31 +222,31 @@ describe('14. stream2.js', function() {
 
     stream.on('end', function() {
       rowCount.should.eql(rowsAmount);
-      setTimeout(done, 500);
+      done();
     });
 
   });
 
   it('14.7 Negative - queryStream() has no parameters', function(done) {
-
-    try {
-      connection.queryStream();
-    } catch (err) {
-      should.exist(err);
-      (err.message).should.startWith('NJS-009:');
-      // NJS-009: invalid number of parameters
-      done();
-    }
+    should.throws(
+      function() {
+        connection.queryStream();
+      },
+      /NJS-009: invalid number of parameters/
+    );
+    done();
   });
 
   it('14.8 Negative - give invalid SQL as first parameter', function(done) {
     var stream = connection.queryStream('foobar');
 
-    stream.on('error', function(error) {
-      should.exist(error);
-      (error.message).should.startWith('NJS-019:');
-      // NJS-019: resultSet cannot be returned for non-query statements
-      setTimeout(done, 500);
+    stream.on('error', function(err) {
+      should.exist(err);
+      should.strictEqual(
+        err.message,
+        "NJS-019: ResultSet cannot be returned for non-query statements"
+      );
+      done();
     });
 
     stream.on('data', function(data) {
@@ -275,11 +258,13 @@ describe('14. stream2.js', function() {
     var sql = "INSERT INTO nodb_stream2 VALUES (300, 'staff 300', EMPTY_CLOB())";
     var stream = connection.queryStream(sql);
 
-    stream.on('error', function(error) {
-      should.exist(error);
-      (error.message).should.startWith('NJS-019:');
-      // NJS-019: resultSet cannot be returned for non-query statements
-      setTimeout(done, 500);
+    stream.on('error', function(err) {
+      should.exist(err);
+      should.strictEqual(
+        err.message,
+        "NJS-019: ResultSet cannot be returned for non-query statements"
+      );
+      done();
     });
 
     stream.on('data', function(data) {
@@ -309,9 +294,7 @@ describe('14. stream2.js', function() {
       should.equal(metaDataRead, true);
     });
 
-    stream.on('end', function() {
-      setTimeout(done, 500);
-    });
+    stream.on('end', done);
   });
 
   it('14.11 metadata event - multiple columns', function(done) {
@@ -337,14 +320,12 @@ describe('14. stream2.js', function() {
       should.equal(metaDataRead, true);
     });
 
-    stream.on('end', function() {
-      setTimeout(done, 500);
-    });
+    stream.on('end', done);
   });
 
   it('14.12 metadata event - all column names occurring', function(done) {
-    var sql = 'SELECT * FROM nodb_stream2 ORDER BY employee_id';
-    var stream = connection.queryStream(sql);
+    var sql = 'SELECT * FROM nodb_stream2 WHERE employee_id = :id';
+    var stream = connection.queryStream(sql, { id: 40 });
 
     var metaDataRead = false;
     stream.on('metadata', function(metaData) {
@@ -366,9 +347,7 @@ describe('14. stream2.js', function() {
       should.equal(metaDataRead, true);
     });
 
-    stream.on('end', function() {
-      setTimeout(done, 500);
-    });
+    stream.on('end', done);
   });
 
   it('14.13 metadata event - no return rows', function(done) {
@@ -393,9 +372,7 @@ describe('14. stream2.js', function() {
       should.equal(metaDataRead, true);
     });
 
-    stream.on('end', function() {
-      setTimeout(done, 500);
-    });
+    stream.on('end', done);
   });
 
   it('14.14 metadata event - negative: non-query SQL', function(done) {
@@ -407,13 +384,14 @@ describe('14. stream2.js', function() {
       metaDataRead = true;
     });
 
-    stream.on('error', function(error) {
-      should.exist(error);
-      (error.message).should.startWith('NJS-019:');
-      // NJS-019: resultSet cannot be returned for non-query statements
-
-      should.equal(metaDataRead, false);
-      setTimeout(done, 500);
+    stream.on('error', function(err) {
+      should.exist(err);
+      should.strictEqual(
+        err.message,
+        "NJS-019: ResultSet cannot be returned for non-query statements"
+      );
+      should.strictEqual(metaDataRead, false);
+      done();
     });
 
     stream.on('data', function(data) {
@@ -488,7 +466,7 @@ describe('14. stream2.js', function() {
             resultArray,
             [ [ 'Changjie' ], [ 'Nancy' ], [ 'Chris' ] ]
           );
-          setTimeout(cb, 500);
+          cb();
         });
 
       },
@@ -568,9 +546,7 @@ describe('14. stream2.js', function() {
           should.equal(metaDataRead, true);
         });
 
-        stream.on('end', function() {
-          setTimeout(cb, 500);
-        });
+        stream.on('end', cb);
 
       },
       function(cb) {
@@ -639,9 +615,7 @@ describe('14. stream2.js', function() {
           should.equal(metaDataRead, true);
         });
 
-        stream.on('end', function() {
-          setTimeout(cb, 500);
-        });
+        stream.on('end', cb);
       },
       function(cb) {
         connection.execute(
@@ -678,8 +652,6 @@ describe('14. stream2.js', function() {
       should.equal(metaDataRead, true);
     });
 
-    stream.on('end', function() {
-      setTimeout(done, 500);
-    });
+    stream.on('end', done);
   });
 });
