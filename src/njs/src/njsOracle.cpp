@@ -794,6 +794,10 @@ void njsOracledb::Async_GetConnection(njsBaton *baton)
         return;
     }
     params.externalAuth = baton->externalAuth;
+    if (!baton->connClass.empty()) {
+        params.connectionClass = baton->connClass.c_str();
+        params.connectionClassLength = baton->connClass.length();
+    }
     if (dpiConn_create(globalDPIContext, baton->user.c_str(),
             (uint32_t) baton->user.length(), baton->password.c_str(),
             (uint32_t) baton->password.length(), baton->connectString.c_str(),

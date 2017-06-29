@@ -123,6 +123,7 @@ public:
     void SetFetchAsStringTypesOnBaton(njsBaton *baton) const;
     void SetFetchAsBufferTypesOnBaton(njsBaton *baton) const;
     static std::string GetDPIError(void);
+    static dpiContext *GetDPIContext()             { return globalDPIContext; }
 
 private:
 

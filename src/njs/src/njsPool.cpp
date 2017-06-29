@@ -379,8 +379,20 @@ NAN_METHOD(njsPool::GetConnection)
 //-----------------------------------------------------------------------------
 void njsPool::Async_GetConnection(njsBaton *baton)
 {
-    if (dpiPool_acquireConnection(baton->dpiPoolHandle, NULL, 0, NULL, 0, NULL,
-            &baton->dpiConnHandle) < 0)
+    dpiConnCreateParams params;
+    dpiContext *context;
+
+    context = njsOracledb::GetDPIContext();
+    if (dpiContext_initConnCreateParams(context, &params) < 0) {
+        baton->GetDPIError();
+        return;
+    }
+    if (!baton->connClass.empty()) {
+        params.connectionClass = baton->connClass.c_str();
+        params.connectionClassLength = baton->connClass.length();
+    }
+    if (dpiPool_acquireConnection(baton->dpiPoolHandle, NULL, 0, NULL, 0,
+            &params, &baton->dpiConnHandle) < 0)
         baton->GetDPIError();
 }
 
