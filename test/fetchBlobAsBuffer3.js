@@ -331,7 +331,7 @@ describe('89. fetchBlobAsBuffer3.js', function() {
     }); // 89.2.7
 
 
-    it.skip('89.2.8 negative null value for fetchAsBuffer', function(done) {
+    it('89.2.8 negative null value for fetchAsBuffer', function(done) {
       should.throws(
         function() {
           oracledb.fetchAsBuffer = null;
@@ -342,7 +342,7 @@ describe('89. fetchBlobAsBuffer3.js', function() {
     }); // 89.2.8
 
 
-    it.skip('89.2.9 negative undefined value for fetchAsBuffer', function(done) {
+    it('89.2.9 negative undefined value for fetchAsBuffer', function(done) {
       should.throws(
         function() {
           oracledb.fetchAsBuffer = undefined;
@@ -353,7 +353,7 @@ describe('89. fetchBlobAsBuffer3.js', function() {
     }); // 89.2.9
 
 
-    it.skip('89.2.10 negative numeric value for fetchAsBuffer', function(done) {
+    it('89.2.10 negative numeric value for fetchAsBuffer', function(done) {
       should.throws(
         function() {
           oracledb.fetchAsBuffer = 89210;
@@ -364,7 +364,7 @@ describe('89. fetchBlobAsBuffer3.js', function() {
     }); // 89.2.10
 
 
-    it.skip('89.2.11 negative emtpy string value for fetchAsBuffer', function(done) {
+    it('89.2.11 negative emtpy string value for fetchAsBuffer', function(done) {
       should.throws(
         function() {
           oracledb.fetchAsBuffer = ' ';
@@ -375,7 +375,7 @@ describe('89. fetchBlobAsBuffer3.js', function() {
     }); // 89.2.11
 
 
-    it.skip('89.2.12 negative arbitary string value for fetchAsBuffer', function(done) {
+    it('89.2.12 negative arbitary string value for fetchAsBuffer', function(done) {
       should.throws(
         function() {
           oracledb.fetchAsBuffer = "89.2.12";
@@ -386,7 +386,7 @@ describe('89. fetchBlobAsBuffer3.js', function() {
     }); // 89.2.12
 
 
-    it.skip('89.2.13 negative date value for fetchAsBuffer', function(done) {
+    it('89.2.13 negative date value for fetchAsBuffer', function(done) {
       should.throws(
         function() {
           var dt = new Date ();
@@ -398,7 +398,7 @@ describe('89. fetchBlobAsBuffer3.js', function() {
     }); // 89.2.13
 
 
-    it.skip('89.2.14 negative arbitary buffer value for fetchAsBuffer', function(done) {
+    it('89.2.14 negative arbitary buffer value for fetchAsBuffer', function(done) {
       should.throws(
         function() {
           var buf = assist.createBuffer ( 10 ) ;

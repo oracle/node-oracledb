@@ -300,7 +300,7 @@ describe('56. fetchAs.js', function() {
     (oracledb.fetchAsString).should.eql([]);
   });
 
-  it.skip('56.12 Negative - empty string', function() {
+  it('56.12 Negative - empty string', function() {
     should.throws(
       function() {
         oracledb.fetchAsString = '';
@@ -309,7 +309,7 @@ describe('56. fetchAs.js', function() {
     );
   });
 
-  it.skip('56.13 Negative - null', function() {
+  it('56.13 Negative - null', function() {
     should.throws(
       function() {
         oracledb.fetchAsString = null;
@@ -318,7 +318,7 @@ describe('56. fetchAs.js', function() {
     );
   });
 
-  it.skip('56.14 Negative - undefined', function() {
+  it('56.14 Negative - undefined', function() {
     should.throws(
       function() {
         oracledb.fetchAsString = undefined;
@@ -327,7 +327,7 @@ describe('56. fetchAs.js', function() {
     );
   });
 
-  it.skip('56.15 Negative - NaN', function() {
+  it('56.15 Negative - NaN', function() {
     should.throws(
       function() {
         oracledb.fetchAsString = NaN;
@@ -336,7 +336,7 @@ describe('56. fetchAs.js', function() {
     );
   });
 
-  it.skip('56.16 Negative - invalid type of value, number', function() {
+  it('56.16 Negative - invalid type of value, number', function() {
     should.throws(
       function() {
         oracledb.fetchAsString = 10;
@@ -345,7 +345,7 @@ describe('56. fetchAs.js', function() {
     );
   });
 
-  it.skip('56.17 Negative - invalid type of value, string', function() {
+  it('56.17 Negative - invalid type of value, string', function() {
     should.throws(
       function() {
         oracledb.fetchAsString = 'abc';
@@ -411,7 +411,7 @@ describe('56. fetchAs.js', function() {
     );
   });
 
-  it.skip('56.21 Negative - invalid type of value, Date', function() {
+  it('56.21 Negative - invalid type of value, Date', function() {
     should.throws(
       function() {
         var dt = new Date ();
@@ -421,7 +421,7 @@ describe('56. fetchAs.js', function() {
     );
   });
 
-  it.skip('56.22 Negative - invalid type of value, Buffer', function() {
+  it('56.22 Negative - invalid type of value, Buffer', function() {
     should.throws(
       function() {
         var buf = assist.createBuffer ( 10 ) ;  // arbitary sized buffer

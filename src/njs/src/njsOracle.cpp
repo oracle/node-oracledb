@@ -563,7 +563,7 @@ NAN_SETTER(njsOracledb::SetExternalAuth)
 {
     njsOracledb *oracledb = (njsOracledb*) ValidateSetter(info);
     if (oracledb)
-        oracledb->externalAuth = value->ToBoolean()->Value();
+        oracledb->SetPropBool(value, &oracledb->externalAuth, "externalAuth" );
 }
 
 
@@ -622,7 +622,7 @@ NAN_SETTER(njsOracledb::SetFetchAsString)
 
     // make sure we have an array
     if (!value->IsArray()) {
-        errMsg = njsMessages::Get(errEmptyArrayForFetchAs);
+        errMsg = njsMessages::Get(errInvalidPropertyValue, "fetchAsString");
         Nan::ThrowError(errMsg.c_str());
         return;
     }
@@ -679,7 +679,7 @@ NAN_SETTER(njsOracledb::SetFetchAsBuffer)
 
     // make sure we have an array
     if (!value->IsArray()) {
-        errMsg = njsMessages::Get(errEmptyArrayForFetchAs);
+        errMsg = njsMessages::Get(errInvalidPropertyValue, "fetchAsBuffer");
         Nan::ThrowError(errMsg.c_str());
         return;
     }

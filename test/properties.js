@@ -275,7 +275,7 @@ describe('58. properties.js', function() {
       );
     });
 
-    it.skip('58.1.23 Negative - externalAuth', function() {
+    it('58.1.23 Negative - externalAuth', function() {
       should.throws(
         function() {
           oracledb.externalAuth = 2017;
