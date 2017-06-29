@@ -30,7 +30,7 @@ var addonVer, clientVer, serverVer;
 var major, minor, update, port, portUpdate;
 
 console.log("Run at: " + new Date());
-console.log("Node.js version: " + process.version);
+console.log("Node.js version: " + process.version + " (" + process.arch + ")");
 
 addonVer = oracledb.version;
 major  = Math.floor(addonVer / 10000);

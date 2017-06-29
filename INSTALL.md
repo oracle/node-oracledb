@@ -27,6 +27,7 @@ limitations under the License.
 8. [Copying node-oracledb Binaries on Windows](#winbins)
 9. [Node-oracledb Installation on AIX on Power Systems with Instant Client ZIP files](#instaix)
 10. [Node-oracledb Installation on Oracle Solaris x86-64 (64-Bit) with Instant Client ZIP files](#instsolarisx8664)
+11. [Troubleshooting Installation Problems](#troubleshooting)
 
 ## <a name="overview"></a> 1. Overview
 
@@ -551,36 +552,22 @@ see
 
 Questions and issues can be posted as [GitHub Issues](https://github.com/oracle/node-oracledb/issues).
 
-**Note**: An Oracle Technology Network article
-[Installing node-oracledb on Microsoft Windows](https://community.oracle.com/docs/DOC-931127)
-has step-by-step Windows installation instructions that you can
-alternatively refer to.
-
 ### <a name="winprereqs"></a> 7.1 Install Prerequisites
+
+You may need Administrator privileges.
 
 Install a C/C++ build environment such as Microsoft Visual
 Studio 2015.  Compilers supported by Oracle libraries are found in
 [Oracle documentation](https://docs.oracle.com/en/database/) for each version, for example
 [Oracle Database Client Installation Guide 12c Release 2 (12.2) for Microsoft Windows](https://docs.oracle.com/database/122/NTCLI/toc.htm).
 
-The `PATH` variable needs to include the appropriate Visual Studio
-redistributables for the Oracle client.  This should be part of your VS
-install.  Specifically:
-- The Oracle client 11.2 requires the [Visual Studio 2005 redistributable](https://www.microsoft.com/en-us/download/details.aspx?id=18471).
-- The Oracle client 12.1 requires the [Visual Studio 2010 redistributable](https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads#bookmark-vs2010).
-- The Oracle client 12.2, requires the [Visual Studio 2013 redistributable](https://support.microsoft.com/en-us/kb/2977003#bookmark-vs2013).
-
 Install the Python 2.7 MSI from
 [www.python.org](https://www.python.org/downloads).  Select the
 customization option to "Add python.exe to Path".
 
-If you use a 32-bit Node.js, make sure to use a 32-bit Oracle client.
-Otherwise use a 64-bit Node.js with a 64-bit Oracle client.  The
-instructions below use a 64-bit stack.
-
 ### 7.2 Install Node.js
 
-Install the 64-bit Node.js  MSI (e.g. node-v6.11.0-x64.msi) from
+Install the 64-bit Node.js MSI (e.g. node-v6.11.0-x64.msi) from
 [nodejs.org](http://nodejs.org/).  Make sure the option to
 add the Node and npm directories to the path is selected.
 
@@ -588,7 +575,7 @@ add the Node and npm directories to the path is selected.
 
 Start Visual Studio and open a Developer Command Prompt within it.
 
-Use `set PATH` in the shell to confirm the Python, Node.js and Oracle
+Use `set PATH` in the shell to confirm the Python and Node.js
 directories are correctly set.  If they are not, then set `PATH`
 manually in the shell, or set it in the System Properties panel and
 restart the command shell.
@@ -599,10 +586,6 @@ Studio paths.  If they are not set, use vcvars64.bat (or vcvars.bat if
 you building with 32-bit binaries) to set the environment.
 Alternatively you can open the 'Developer Command Prompt for Visual
 Studio' which has environment variables already configured.
-
-If you are installing with a local database or the full Oracle client,
-make sure that `PATH` contains the correct binary directory, for
-example `C:\oracle\product\12.1.0\dbhome_1\bin`.
 
 If you are behind a firewall you may need to set your proxy, for
 example:
@@ -624,17 +607,25 @@ npm install oracledb
 Building and running node-oracledb needs appropriate Oracle client
 libraries installed first.  These libraries:
 
-- are included in (i) Oracle database, or (ii) in the full Oracle client, or (iii) in Oracle Instant Client.  You need one of these.
+- are included in (i) Oracle Database, or (ii) in the full Oracle client, or (iii) in Oracle Instant Client.  You need one of these installed.
 - must be version 11.2 or greater
-- must match the Node.js 32-bit or 64-bit architecture
+- must match the Node.js architecture.  Run `node -p "process.arch"`.  If you have a 32-bit Node.js, make sure to use a 32-bit Oracle client. Otherwise use a 64-bit Node.js with a 64-bit Oracle client.
 
-If you need appropriate Oracle client libraries, then download the
-free Instant Client **Basic** ZIP file from
+If you are installing with a local database or the full Oracle client,
+make sure that `PATH` contains the correct binary directory, for
+example `C:\oracle\product\12.1.0\dbhome_1\bin`.
+
+Alternatively, if you need appropriate Oracle client libraries, then
+download the free 64-bit Instant Client **Basic** ZIP file
+from
 [Oracle Technology Network](http://www.oracle.com/technetwork/topics/winx64soft-089540.html).
+(The 32-bit Instant Client
+is
+[here](http://www.oracle.com/technetwork/topics/winsoft-085727.html)).
 
-Extract `instantclient-basic-windows.x64-12.2.0.1.0.zip`
+- Extract `instantclient-basic-windows.x64-12.2.0.1.0.zip`
 
-Add the directory to `PATH`.  For example on Windows 7, update `PATH`
+- Add the directory to `PATH`.  For example on Windows 7, update `PATH`
 in Control Panel -> System -> Advanced System Settings -> Advanced ->
 Environment Variables -> System variables -> `PATH` and add your path,
 such as `C:\oracle\instantclient_12_2`.
@@ -642,7 +633,26 @@ such as `C:\oracle\instantclient_12_2`.
 If you have multiple versions of Oracle libraries installed, make sure
 the desired version occurs first in the path.
 
-### 7.5 Run an example program
+### 7.5 Install the Visual Studio Redistributable
+
+The `PATH` variable needs to include the appropriate Visual Studio
+redistributable:
+- Oracle client 12.2 requires the [Visual Studio 2013 redistributable](https://support.microsoft.com/en-us/kb/2977003#bookmark-vs2013).
+- Oracle client 12.1 requires the [Visual Studio 2010 redistributable](https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads#bookmark-vs2010).
+- Oracle client 11.2 requires the [Visual Studio 2005 redistributable](https://www.microsoft.com/en-us/download/details.aspx?id=18471).
+
+You can also find out the version required by locating the library
+`OCI.DLL` and running:
+
+```
+dumpbin /dependents oci.dll
+```
+
+If you see `MSVCR120.dll` then you need the VS 2013 redistributable.
+If you see `MSVCR100.dll` then you need the VS 2010 redistributable.
+If you see `MSVCR80.dll` then you need the VS 2005 redistributable.
+
+### 7.6 Run an example program
 
 Download the
 [example programs](https://github.com/oracle/node-oracledb/tree/master/examples) from GitHub.
@@ -668,32 +678,34 @@ node select1.js
 
 Node-oracledb binaries can be copied between compatible Windows systems.
 
-Both computers must also have the same version and architecture of Node.js.
-
-Oracle client libraries of the same architecture and the same version
-used for building node-oracledb should be in the destination
-computer's `PATH`.
-
 After node-oracle has been built on the source computer, copy the
 `node_modules\oracledb` directory to the destination computer's
 `node_module` directory.
 
-The destination computer's `PATH` needs to include Visual Studio
-redistributables.  If you used Oracle client 11.2 then the Visual
-Studio 2005 redistributable is required.  For Oracle client 12.1, use
-the Visual Studio 2010 redistributable.  For Oracle client 12.2, use
-the Visual Studio 2013 redistributable.
+Both computers must have the same version and architecture (32-bit or
+64-bit) of Node.js.
 
-You can also find out the version required by locating the library
-`OCI.DLL` on the source computer and running:
+Oracle client libraries of the same architecture as Node.js should be
+in the destination computer's `PATH`.  Note the Oracle client library
+versions do not have to be the same on different computers, but
+node-oracledb behavior and features may then differ.
+
+The destination computer's `PATH` needs to include Visual Studio
+redistributables.  If you have Oracle client 12.2, install the Visual
+Studio 2013 redistributable.  For Oracle client 12.1 install the Visual
+Studio 2010 redistributable.  For Oracle client 11.2 install the Visual
+Studio 2005 redistributable.
+
+You can also find out the redistributable required by locating the
+library `OCI.DLL` on the source computer and running:
 
 ```
 dumpbin /dependents oci.dll
 ```
 
-The version of `MSVC*.DLL` in the output indicates which
-redistributable is required on the destination computer.  For example,
-if you see `MSVCR100.dll` then you need the VC++ 10 redistributable.
+If you see `MSVCR120.dll` then you need the VS 2013 redistributable.
+If you see `MSVCR100.dll` then you need the VS 2010 redistributable.
+If you see `MSVCR80.dll` then you need the VS 2005 redistributable.
 
 ## <a name="instaix"></a> 9. Node-oracledb Installation on AIX on Power Systems with Instant Client ZIP files
 
@@ -873,3 +885,36 @@ Run one of the examples:
 ```
 node select1.js
 ```
+
+
+## <a name="troubleshooting"></a> 11. Troubleshooting Installation Problems
+
+- Review the install instructions above
+
+- Use `npm install --verbose oracledb`.  Review your output and logs.
+Try to install in a different way.  **Google anything that looks like an error.**  Try some potential solutions.
+
+- Did an error indicate a network connection issue?  Do you need to set `http_proxy` and/or `https_proxy`?
+
+- For Node 4 onwards, you need a compiler with C++11 support, such as VS 2013 or GCC 4.7.
+
+- Does your Node.js architecture (32-bit or 64-bit) match the Oracle client architecture?
+  Run `node -p "process.arch"` and compare with the 'Client Shared Library' description in the Instant Client BASIC_README.
+
+- On Windows, do you have the correct VS Redistributable?  Review the [Windows install instructions](#instwin).
+
+- On Windows, is your `PATH` set correctly?
+
+- Did you need the right system privileges, e.g. an elevated command prompt on Windows?
+
+- Do you have multiple copies of Node.js installed?  Did the correct `npm` and `node-gyp` get invoked?
+
+- Do you have an old version of `node-gyp` installed?  Try updating it.  Also try deleting `$HOME/.node-gyp` or equivalent.
+
+- Do you have multiple copies of Oracle libraries installed?  Is the
+  expected version first in `PATH` (on Windows) or
+  `LD_LIBRARY_PATH` (on Linux)?
+
+- On macOS, did you install Oracle Instant Client in `~/lib` or `/usr/local/lib`?
+
+- Try running `npm cache clean -f` and deleting the `node_modules/oracledb` directory.
