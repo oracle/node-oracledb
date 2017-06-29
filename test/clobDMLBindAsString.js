@@ -548,7 +548,7 @@ describe('81. clobDMLBindAsString.js', function() {
       ], done);
     }); // 81.1.18
 
-    it.skip('81.1.19 Negative: RETURNING INTO with autocommit on', function(done) {
+    it('81.1.19 Negative: RETURNING INTO with autocommit on', function(done) {
       var id = insertID++;
       var sql = "INSERT INTO nodb_dml_clob_1 (id, clob) VALUES (:i, EMPTY_CLOB()) RETURNING clob INTO :lobbv";
       var inFileName = './test/clobexample.txt';

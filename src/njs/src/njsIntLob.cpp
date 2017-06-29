@@ -78,7 +78,6 @@ void njsILob::Init(Handle<Object> target)
     tpl->InstanceTemplate()->SetInternalFieldCount(1);
     tpl->SetClassName(Nan::New<v8::String>("ILob").ToLocalChecked());
 
-    Nan::SetPrototypeMethod(tpl, "release", Release);
     Nan::SetPrototypeMethod(tpl, "close", Close);
     Nan::SetPrototypeMethod(tpl, "read", Read);
     Nan::SetPrototypeMethod(tpl, "write", Write);
@@ -205,24 +204,6 @@ NAN_METHOD(njsILob::New)
     njsILob *iLob = new njsILob();
     iLob->Wrap(info.Holder());
     info.GetReturnValue().Set(info.Holder());
-}
-
-
-//-----------------------------------------------------------------------------
-// njsILob::Release()
-//   Release the LOB handle immediately instead of when the object is garbage
-// collected.
-//
-// PARAMETERS
-//   - none
-//-----------------------------------------------------------------------------
-NAN_METHOD(njsILob::Release)
-{
-    njsILob *lob = (njsILob*) ValidateArgs(info, 0, 0);
-    if (!lob)
-        return;
-    dpiLob_release(lob->dpiLobHandle);
-    lob->dpiLobHandle = NULL;
 }
 
 
@@ -446,6 +427,16 @@ void njsILob::Async_Read(njsBaton *baton)
     if (dpiLob_readBytes(baton->dpiLobHandle, baton->lobOffset,
             baton->lobAmount, baton->bufferPtr, &baton->bufferSize) < 0)
         baton->GetDPIError();
+
+    // if an error occurs or the end of the LOB has been reached, and the LOB
+    // is marked as one that should be automatically closed, close and release
+    // it, ignoring any further errors that occur during the attempt to close
+    njsILob *lob = (njsILob*) baton->callingObj;
+    if (lob->isAutoClose && (!baton->bufferSize || !baton->error.empty())) {
+        dpiLob_close(lob->dpiLobHandle);
+        dpiLob_release(lob->dpiLobHandle);
+        lob->dpiLobHandle = NULL;
+    }
 }
 
 
@@ -566,8 +557,19 @@ NAN_METHOD(njsILob::Write)
 void njsILob::Async_Write(njsBaton *baton)
 {
     if (dpiLob_writeBytes(baton->dpiLobHandle, baton->lobOffset,
-            baton->bufferPtr, baton->bufferSize) < 0)
+            baton->bufferPtr, baton->bufferSize) < 0) {
         baton->GetDPIError();
+
+        // if an error occurs and the LOB is marked as one that should be
+        // automatically closed, close and release it, ignoring any further
+        // errors that occur during the attempt to close
+        njsILob *lob = (njsILob*) baton->callingObj;
+        if (lob->isAutoClose) {
+            dpiLob_close(lob->dpiLobHandle);
+            dpiLob_release(lob->dpiLobHandle);
+            lob->dpiLobHandle = NULL;
+        }
+    }
 }
 
 

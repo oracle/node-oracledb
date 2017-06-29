@@ -4590,6 +4590,7 @@ At the conclusion of streaming into a Writeable Lob, the `close` event
 will occur.  It is recommended to put logic such as committing and
 releasing connections in this event (or after it occurs).  See
 [lobinsert2.js](https://github.com/oracle/node-oracledb/tree/master/examples/lobinsert2.js).
+It is also recommended for persistent LOBs not use the `finish` event handler for cleanup.
 
 ### <a name="lobinsertdiscussion"></a> 11.4 Using RETURNING INTO to Insert into LOBs
 

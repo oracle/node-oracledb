@@ -125,7 +125,6 @@ private:
     }
 
     static NAN_METHOD(New);
-    static NAN_METHOD(Release);
 
     // Read Method on ILob class
     static NAN_METHOD(Read);
