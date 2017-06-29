@@ -94,6 +94,17 @@ Solaris x86-64 (64-Bit) | [Node-oracledb Installation on Oracle Solaris x86-64 (
 Another OS with Oracle Database 11.2 or 12c, or client libraries available | Update binding.gyp and make any code changes required, sign the [OCA](https://www.oracle.com/technetwork/community/oca-486395.html), and submit a pull request with your patch.
 Source code from GitHub | Start with [Installing or Working with node-oracledb from GitHub](#github) and then follow relevant platform instructions.
 
+### Installing node-oracledb 1.x
+
+If you need to install the previous node-oracledb 1.x add-on, refer to the
+steps in the
+[version 1.x INSTALL guide](https://github.com/oracle/node-oracledb/blob/node-oracledb-v1/INSTALL.md).
+To get the old add-on you must explictly use its version when installing:
+
+````
+npm install oracledb@1.13.1
+```
+
 ### Other Resources Useful for node-oracledb
 
 Node-oracledb can be installed on the pre-built
