@@ -19,7 +19,7 @@
  *   resultset1.js
  *
  * DESCRIPTION
- *   Executes a query and uses a result set to fetch rows with getRow().
+ *   Executes a query and uses a ResultSet to fetch rows with getRow().
  *   Uses Oracle's sample HR schema.
  *
  *****************************************************************************/
@@ -44,7 +44,7 @@ oracledb.getConnection(
        WHERE ROWNUM < 11
        ORDER BY employee_id`,
       [], // no bind variables
-      { resultSet: true }, // return a result set.  Default is false
+      { resultSet: true }, // return a ResultSet.  Default is false
       function(err, result)
       {
         if (err) {
@@ -64,9 +64,9 @@ function fetchOneRowFromRS(connection, resultSet)
     {
       if (err) {
         console.error(err.message);
-        doClose(connection, resultSet); // always close the result set
+        doClose(connection, resultSet); // always close the ResultSet
       } else if (!row) {                // no rows, or no more rows
-        doClose(connection, resultSet); // always close the result set
+        doClose(connection, resultSet); // always close the ResultSet
       } else {
         rowCount++;
         console.log("fetchOneRowFromRS(): row " + rowCount);

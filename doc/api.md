@@ -140,7 +140,7 @@ limitations under the License.
 9. [SQL Execution](#sqlexecution)
   - 9.1 [SELECT Statements](#select)
      - 9.1.1 [Fetching Rows](#fetchingrows)
-     - 9.1.2 [Result Set Handling](#resultsethandling)
+     - 9.1.2 [Working with Result Sets](#resultsethandling)
      - 9.1.3 [Streaming Query Results](#streamingresults)
      - 9.1.4 [Query Output Formats](#queryoutputformats)
      - 9.1.5 [Query Column Metadata](#querymeta)
@@ -655,7 +655,7 @@ Number maxRows
 ```
 
 The maximum number of rows that are fetched by the `execute()` call of the *Connection*
-object when *not* using a [`ResultSet`](#resultsetclass).  Rows beyond
+object when *not* using a [ResultSet](#resultsetclass).  Rows beyond
 this limit are not fetched from the database.
 
 The default value is 100.
@@ -675,10 +675,10 @@ Adjust `maxRows` as required by each application or query.  Values
 that are larger than required can result in sub-optimal memory usage.
 
 `maxRows` is ignored when fetching rows with a
-[`ResultSet`](#resultsetclass).
+[ResultSet](#resultsetclass).
 
 When the number of query rows is relatively big, or can't be
-predicted, it is recommended to use a [`ResultSet`](#resultsetclass).
+predicted, it is recommended to use a [ResultSet](#resultsetclass).
 This prevents query results being unexpectedly truncated by the
 `maxRows` limit and removes the need to oversize `maxRows` to avoid
 such truncation.
@@ -892,7 +892,7 @@ affect when, or how many, rows are returned by node-oracledb to the
 application.  The cache management is transparently handled by the
 Oracle client libraries.
 
-`prefetchRows` is ignored unless a [`ResultSet`](#resultsetclass) is used.
+`prefetchRows` is ignored unless a [ResultSet](#resultsetclass) is used.
 It is also ignored when the query involves a LOB.
 
 The default value is 100.
@@ -1864,7 +1864,7 @@ Boolean resultSet
 ```
 
 Determines whether query results should be returned as a
-[`ResultSet`](#resultsetclass) object or directly.  The default is
+[ResultSet](#resultsetclass) object or directly.  The default is
 *false*.
 
 ##### <a name="executecallback"></a> 4.2.5.4 `execute()`: Callback Function
@@ -1911,7 +1911,7 @@ simply a NUMBER.  If `precision` is nonzero and `scale` is `-127`,
 then the column is a FLOAT.  Otherwise, it is a NUMBER(precision,
 scale).
 
-Metadata for Result Sets and REF CURSORS is available in a
+Metadata for ResultSets and REF CURSORS is available in a
 [ResultSet property](#rsmetadata).  For Lobs, a
 [Lob type property](#proplobtype) also indicates whether the object is
 a BLOB or CLOB.
@@ -1935,9 +1935,14 @@ object, then `outBinds` is returned as an object.
 Object resultSet
 ```
 
-For `SELECT` statements when the [`resultSet`](#executeoptions)
-option is *true*, use the `resultSet` object to fetch rows.  See
-[ResultSet Class](#resultsetclass).
+For `SELECT` statements when the [`resultSet`](#executeoptions) option
+is *true*, use the `resultSet` object to fetch rows.
+See [ResultSet Class](#resultsetclass)
+and [Working with Result Sets](#resultsethandling).
+
+When using this option, [`resultSet.close()`](#close) must be called
+when the ResultSet is no longer needed.  This is true whether or not
+rows have been fetched from the ResultSet.
 
 ###### <a name="execrows"></a> 4.2.5.4.4 `rows`
 
@@ -2380,12 +2385,12 @@ An alias for [pool.close()](#poolclose).
 
 ## <a name="resultsetclass"></a> 7. ResultSet Class
 
-Result Sets allow query results to fetched from the database one at a
+ResultSets allow query results to fetched from the database one at a
 time, or in groups of rows.  They can also be converted to Readable
-Streams.  Result Sets enable applications to process very large data
+Streams.  ResultSets enable applications to process very large data
 sets.
 
-Result Sets should also be used where the number of query rows cannot
+ResultSets should also be used where the number of query rows cannot
 be predicted and may be larger than a sensible
 [`maxRows`](#propdbmaxrows) size.
 
@@ -2396,9 +2401,9 @@ node-oracledb when binding as type [`oracledb.CURSOR`](#oracledbconstantsnodbtyp
 PL/SQL REF CURSOR bind parameter.
 
 The value of [`prefetchRows`](#propdbprefetchrows) can be adjusted to
-tune the performance of Result Sets.
+tune the performance of ResultSets.
 
-See [ResultSet Handling](#resultsethandling) for more information on Result Sets.
+See [Working with Result Sets](#resultsethandling) for more information on ResultSets.
 
 ### <a name="resultsetproperties"></a> 7.1 ResultSet Properties
 
@@ -2437,8 +2442,9 @@ promise = close();
 
 ##### Description
 
-Closes a `ResultSet`.  Applications should always call this at the end
-of fetch or when no more rows are needed.
+Closes a ResultSet.  Applications should always call this at the end
+of fetch or when no more rows are needed.  It should also be called if
+no rows are ever going to be fetched from the ResultSet.
 
 #### <a name="getrow"></a> 7.2.2 `resultset.getRow()`
 
@@ -2455,9 +2461,9 @@ promise = getRow();
 
 ##### Description
 
-This call fetches one row of the Result Set as an object or an array of column values, depending on the value of [outFormat](#propdboutformat).
+This call fetches one row of the ResultSet as an object or an array of column values, depending on the value of [outFormat](#propdboutformat).
 
-At the end of fetching, the `ResultSet` should be freed by calling [`close()`](#close).
+At the end of fetching, the ResultSet should be freed by calling [`close()`](#close).
 
 #### <a name="getrows"></a> 7.2.3 `resultset.getRows()`
 
@@ -2474,9 +2480,9 @@ promise = getRows(Number numRows);
 
 ##### Description
 
-This call fetches `numRows` rows of the Result Set as an object or an array of column values, depending on the value of [outFormat](#propdboutformat).
+This call fetches `numRows` rows of the ResultSet as an object or an array of column values, depending on the value of [outFormat](#propdboutformat).
 
-At the end of fetching, the `ResultSet` should be freed by calling [`close()`](#close).
+At the end of fetching, the ResultSet should be freed by calling [`close()`](#close).
 
 #### <a name="toquerystream"></a> 7.2.4 `resultset.toQueryStream()`
 
@@ -2686,7 +2692,7 @@ and there is no service name available:
 jdbc:oracle:thin:@hostname:port:sid
 ```
 
-then consider creating a `tnsnames.ora` entry, for example:
+then consider creating a [`tnsnames.ora`](#tnsnames) entry, for example:
 
 ```
 finance =
@@ -2756,8 +2762,8 @@ prevent
 
 As well as correctly setting the thread pool size, structure your code
 to avoid starting parallel operations on a connection.  For example,
-instead of using `async.parallel` or `async.each()` which calls each
-of its items in parallel, use `async.series` or `async.eachSeries()`.
+instead of using `async.parallel` or `async.each()` which call each
+of their items in parallel, use `async.series` or `async.eachSeries()`.
 When you use parallel calls on a connection, the queuing ends up being
 done in the C layer via a mutex.  However libuv isn't aware that a
 connection can only do one thing at a time - it only knows when it has
@@ -3094,7 +3100,7 @@ One related environment variable is is shown by `_logStats()`:
 
 Environment Variable                                 | Description
 -----------------------------------------------------|-------------
-[`process.env.UV_THREADPOOL_SIZE`](#numberofthreads) | The number of worker threads for this process.  Note, if this variable is set after the thread pool starts it will be ignored and the thread pool will still be restricted to the default size of 4.
+[`process.env.UV_THREADPOOL_SIZE`](#numberofthreads) | The number of worker threads for this process.  Note this shows the value of the variable.  However if this variable was set after the thread pool starts, the thread pool will actually be the default size of 4.
 
 #### <a name="connpoolpinging"></a> 8.3.4 Connection Pool Pinging
 
@@ -3106,7 +3112,7 @@ during [pool creation](#createpool).  The default ping interval is
 `60` seconds.
 
 Without pinging, when connections are idle in a connection pool, there
-is the possibility that a network or Database instance failure makes
+is the possibility that a network or database instance failure makes
 those connections unusable.  A `getConnection()` call will happily
 return a connection from the pool but an error will occur when the
 application later uses the connection.
@@ -3368,32 +3374,33 @@ restricted to [`maxRows`](#propdbmaxrows):
 
 Any rows beyond the `maxRows` limit are not returned.
 
-#### <a name="resultsethandling"></a> 9.1.2 Result Set Handling
+#### <a name="resultsethandling"></a> 9.1.2 Working with Result Sets
 
 When the number of query rows is relatively big, or can't be
-predicted, it is recommended to use a [`ResultSet`](#resultsetclass)
+predicted, it is recommended to use a [ResultSet](#resultsetclass)
 with callbacks, as described in this section, or via the ResultSet
 stream wrapper, as described [later](#streamingresults).  This
 prevents query results being unexpectedly truncated by the
 [`maxRows`](#propdbmaxrows) limit and removes the need to oversize
 `maxRows` to avoid such truncation.  Otherwise, for queries that
-return a known small number of rows, non-Result Set queries may have
+return a known small number of rows, non-ResultSet queries may have
 less overhead.
 
-A Result Set is created when the `execute()` option property
-[`resultSet`](#executeoptions) is *true*.  Result Set rows can be
+A ResultSet is created when the `execute()` option property
+[`resultSet`](#executeoptions) is *true*.  ResultSet rows can be
 fetched using [`getRow()`](#getrow) or [`getRows()`](#getrows) on the
 `execute()` callback function's `result.resultSet` parameter property.
 
-For Result Sets, the [`maxRows`](#propdbmaxrows) limit is ignored.  All
+For ResultSets, the [`maxRows`](#propdbmaxrows) limit is ignored.  All
 rows can be fetched.
 
 When all rows have been fetched, or the application does not want to
-continue getting more rows, then the Result Set should be freed using
-[`close()`](#close).
+continue getting more rows, then the ResultSet should be freed
+using [`close()`](#close).  The ResultSet should also be explicitly
+closed in the cases where no rows will be fetched from it.
 
 REF CURSORS returned from a PL/SQL block via an `oracledb.CURSOR` OUT
-binds are also available as a `ResultSet`. See
+binds are also available as a ResultSet. See
 [REF CURSOR Bind Parameters](#refcursors).
 
 The format of each row will be an array or object, depending on the
@@ -3410,7 +3417,7 @@ To fetch one row at a time use `getRow()` :
 connection.execute(
   "SELECT employee_id, last_name FROM employees ORDER BY employee_id",
   [], // no bind variables
-  { resultSet: true }, // return a Result Set.  Default is false
+  { resultSet: true }, // return a ResultSet.  Default is false
   function(err, result)
   {
     if (err) { . . . }
@@ -3424,9 +3431,9 @@ function fetchOneRowFromRS(connection, resultSet)
     function (err, row)
     {
       if (err) {
-         . . .           // close the Result Set and release the connection
+         . . .           // close the ResultSet and release the connection
       } else if (!row) { // no rows, or no more rows
-        . . .            // close the Result Set and release the connection
+        . . .            // close the ResultSet and release the connection
       } else {
         console.log(row);
         fetchOneRowFromRS(connection, resultSet);  // get next row
@@ -3443,7 +3450,7 @@ var numRows = 10;  // number of rows to return from each call to getRows()
 connection.execute(
   "SELECT employee_id, last_name FROM employees ORDER BY employee_id",
   [], // no bind variables
-  { resultSet: true }, // return a Result Set.  Default is false
+  { resultSet: true }, // return a ResultSet.  Default is false
   function(err, result)
   {
     if (err) { . . . }
@@ -3458,15 +3465,15 @@ function fetchRowsFromRS(connection, resultSet, numRows)
     function (err, rows)
     {
       if (err) {
-         . . .                        // close the Result Set and release the connection
+         . . .                        // close the ResultSet and release the connection
       } else if (rows.length > 0) {   // got some rows
         console.log(rows);            // process rows
         if (rows.length === numRows)  // might be more rows
           fetchRowsFromRS(connection, resultSet, numRows);
         else                          // got fewer rows than requested so must be at end
-          . . .                       // close the Result Set and release the connection
+          . . .                       // close the ResultSet and release the connection
       } else {                        // else no rows
-          . . .                       // close the Result Set and release the connection
+          . . .                       // close the ResultSet and release the connection
       }
     });
 }
@@ -3481,7 +3488,7 @@ Use [`connection.queryStream()`](#querystream) to create a stream from
 a top level query and listen for events.  You can also call
 [`connection.execute()`](#execute) and use
 [`toQueryStream()`](#toquerystream) to return a stream from the
-returned [`ResultSet`](#resultsetclass) or OUT bind REF CURSOR
+returned [ResultSet](#resultsetclass) or OUT bind REF CURSOR
 ResultSet.
 
 With streaming, each row is returned as a `data` event.  Query
@@ -3629,7 +3636,7 @@ connection.execute(
   });
 ```
 
-When using a [`ResultSet`](#resultsetclass), metadata is also
+When using a [ResultSet](#resultsetclass), metadata is also
 available in [`result.resultSet.metaData`](#rsmetadata).  For queries
 using [`queryStream()`](#querystream), metadata is available via the
 `metadata` event.
@@ -4013,13 +4020,13 @@ you may want to bind using `type: oracledb.STRING`.  Output would be:
 is a query tuning feature allowing resource usage to be
 optimized.  It allows multiple rows to be returned in each network
 trip from Oracle Database to node-oracledb when a
-[`ResultSet`](#resultsetclass) is used for query or REF CURSOR data.
+[ResultSet](#resultsetclass) is used for query or REF CURSOR data.
 The prefetch size does not affect when, or how many, rows are returned
 by node-oracledb to the application.  The buffering of rows is handled
 by Oracle's underlying client libraries.
 
 By default [`prefetchRows`](#propdbprefetchrows) is 100 for
-[`ResultSet`](#resultsetclass) fetches.  The application can choose a
+[ResultSet](#resultsetclass) fetches.  The application can choose a
 different default prefetch size or change it for each query, as
 determined by user bench-marking.
 
@@ -4036,7 +4043,7 @@ value is 2.  This value lets node-oracledb fetch one row and check for
 end-of-fetch at the same time.
 
 The value of `prefetchRows` size is ignored when *not* using a
-`ResultSet`.
+ResultSet.
 
 Prefetching from REF CURSORS requires Oracle Database 11.2 or
 greater.
@@ -5433,16 +5440,16 @@ If the `WHERE` clause matches no rows, the output would be:
 
 Oracle REF CURSORS can be fetched in node-oracledb by binding a
 `oracledb.CURSOR` to a PL/SQL call.  The resulting bind variable becomes a
-[`ResultSet`](#resultsetclass), allowing rows to be fetched using
+[ResultSet](#resultsetclass), allowing rows to be fetched using
 [`getRow()`](#getrow) or [`getRows()`](#getrows).  The ResultSet can
 also be converted to a Readable Stream by using
 [`toQueryStream()`](#toquerystream).
 
-If using `getRow()` or `getRows()` the Result Set must be freed using
+If using `getRow()` or `getRows()` the ResultSet must be freed using
 [`close()`](#close) when all rows have been fetched, or when the
 application does not want to continue getting more rows.  If the REF
 CURSOR is set to NULL or is not set in the PL/SQL procedure then the
-returned `ResultSet` is invalid and methods like `getRows()` will
+returned ResultSet is invalid and methods like `getRows()` will
 return an error when invoked.
 
 When using Oracle Database 11.2 or greater, then
@@ -5493,15 +5500,15 @@ function fetchRowsFromRS(connection, resultSet, numRows)
     function (err, rows)
     {
       if (err) {
-         . . .                        // close the Result Set and release the connection
+         . . .                        // close the ResultSet and release the connection
       } else if (rows.length > 0) {   // got some rows
         console.log(rows);            // process rows
         if (rows.length === numRows)  // might be more rows
           fetchRowsFromRS(connection, resultSet, numRows);
         else                          // got fewer rows than requested so must be at end
-          . . .                       // close the Result Set and release the connection
+          . . .                       // close the ResultSet and release the connection
       } else {                        // else no rows
-          . . .                       // close the Result Set and release the connection
+          . . .                       // close the ResultSet and release the connection
       }
     });
 }
@@ -6069,6 +6076,25 @@ node-oracledb attributes are set.  Applications can also find the
 current values by querying the Oracle data dictionary or using PL/SQL
 procedures such as `DBMS_APPLICATION_INFO.READ_MODULE()` with the
 understanding that these require round-trips to the database.
+
+#### The Add-on Name
+
+For every connection, the Oracle Database `V$SESSION_CONNECT_INFO`
+view shows the version of node-oracledb in use.  This allows DBAs to
+verify that applications are using the desired add-on version.  For
+example, a DBA might see:
+
+```
+SQL> SELECT UNIQUE sid, client_driver
+     FROM v$session_connect_info
+     WHERE client_driver LIKE 'node-oracledb%'
+     ORDER BY sid;
+
+       SID CLIENT_DRIVER
+---------- ------------------------------
+        16 node-oracledb : 2.0.14
+        33 node-oracledb : 2.0.14
+```
 
 ## <a name="promiseoverview"></a> 20. Promises in node-oracledb
 

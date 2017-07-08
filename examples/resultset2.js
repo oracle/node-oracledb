@@ -19,7 +19,7 @@
  *   resultset2.js
  *
  * DESCRIPTION
- *   Executes a query and uses a result set to fetch batches of rows
+ *   Executes a query and uses a ResultSet to fetch batches of rows
  *   with getRows().  Also shows setting the prefetch size.
  *   Uses Oracle's sample HR schema.
  *
@@ -29,7 +29,7 @@ var oracledb = require('oracledb');
 var dbConfig = require('./dbconfig.js');
 
 // Prefetching is a tuning feature for optimizing row transfer from
-// the Oracle Database to node-oracledb with Result Sets.  The default
+// the Oracle Database to node-oracledb with ResultSets.  The default
 // prefetch size is 100.  The prefetch size does not affect how, or
 // when, rows are returned by node-oracledb to the application.
 // Buffering is handled by the underlying Oracle client libraries.
@@ -55,7 +55,7 @@ oracledb.getConnection(
        ORDER BY employee_id`,
       [], // no bind variables
       {
-        resultSet: true, // return a result set.  Default is false
+        resultSet: true, // return a ResultSet.  Default is false
         prefetchRows: 25 // the prefetch size can be set for each query
       },
       function(err, result)
@@ -78,16 +78,16 @@ function fetchRowsFromRS(connection, resultSet, numRows)
     {
       if (err) {
         console.error(err);
-        doClose(connection, resultSet); // always close the result set
+        doClose(connection, resultSet);   // always close the ResultSet
       } else if (rows.length > 0) {
         console.log("fetchRowsFromRS(): Got " + rows.length + " rows");
         console.log(rows);
-        if (rows.length === numRows) // might be more rows
+        if (rows.length === numRows)      // might be more rows
           fetchRowsFromRS(connection, resultSet, numRows);
         else
-          doClose(connection, resultSet); // always close the result set
+          doClose(connection, resultSet); // always close the ResultSet
       } else { // no rows
-        doClose(connection, resultSet); // always close the result set
+        doClose(connection, resultSet);   // always close the ResultSet
       }
     });
 }
