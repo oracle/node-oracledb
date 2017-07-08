@@ -1514,7 +1514,7 @@ Overview of node-oracledb functional tests
         78.3.2 PLSQL, BIND_OUT, bind a JPG file and a Buffer
         78.3.3 bind two buffer, one > (64K - 1)
 
-79. blobPlsqlBindAsBuffer_inout.js
+79. blobPlsqlBindAsBuffer_bindinout.js
     79.1 BLOB, PLSQL, BIND_INOUT
         79.1.1 works with EMPTY_BLOB
         79.1.2 works with EMPTY_BLOB and maxSize set to 1
@@ -1831,6 +1831,7 @@ Overview of node-oracledb functional tests
     86.1 fetch multiple CLOBs
         86.1.1 fetch multiple CLOB columns as String
         86.1.2 fetch two CLOB columns, one as string, another streamed
+        86.1.3 works with Restult Set
     86.2 types support for fetchAsString property
         86.2.1 String not supported in fetchAsString
         86.2.2 BLOB not supported in fetchAsString
@@ -3525,3 +3526,13 @@ Overview of node-oracledb functional tests
         134.2.5 works with data size 32760
         134.2.6 set maxSize to size (32K - 1)
         134.2.7 set maxSize to size 1GB
+
+135. clobDMLReturning.js
+    135.1 CLOB, UPDATE
+      - 135.1.1 works with stream
+        135.1.2 fetch as string
+
+136. blobDMLReturning.js
+    136.1 BLOB, UPDATE
+      - 136.1.1 works with stream
+        136.1.2 fetch as string

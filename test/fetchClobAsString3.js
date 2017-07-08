@@ -93,7 +93,7 @@ describe('86. fetchClobAsString3.js', function() {
     );
   };
 
-  describe('86.1 fetch multiple CLOBs', function() {
+  describe('86.1 fetch multiple CLOBs and result set', function() {
     before('create Table and populate', function(done) {
       connection.execute(
         proc_create_table2,
@@ -230,6 +230,75 @@ describe('86. fetchClobAsString3.js', function() {
       ], done);
 
     }); // 86.1.2
+
+    it('86.1.3 works with Restult Set', function(done) {
+      var id = insertID++;
+      var specialStr_1 = '86.1.3';
+      var contentLength_1 = 387;
+      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
+
+      async.series([
+        function(cb) {
+          var sql = "insert into nodb_clob2(id, c1) values (:i, :c)";
+          connection.execute(
+            sql,
+            {
+              i: id,
+              c: content_1
+            },
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          connection.execute(
+            "select c1 from nodb_clob2 where id = :1",
+            [id],
+            { resultSet: true },
+            function(err, result) {
+              should.not.exist(err);
+              fetchOneRowFromRS(result.resultSet, cb);
+            }
+          );
+        }
+      ], done);
+
+      var fetchOneRowFromRS = function(rs, callback) {
+        rs.getRow(
+          function(err, row) {
+            if (err) {
+              should.not.exist(err);
+              doClose(rs, callback);
+            } else if (!row) {
+              doClose(rs, callback);
+            } else {
+              var specialStrLen_1 = specialStr_1.length;
+              var resultLen_1 = row[0].length;
+              should.equal(row[0].length, contentLength_1);
+              should.strictEqual(
+                row[0].substring(0, specialStrLen_1),
+                specialStr_1
+              );
+              should.strictEqual(
+                row[0].substring(resultLen_1 - specialStrLen_1, resultLen_1),
+                specialStr_1
+              );
+              fetchOneRowFromRS(rs, callback);
+            }
+          }
+        );
+      };
+
+      var doClose = function(rs, callback) {
+        rs.close(function(err) {
+          should.not.exist(err);
+          callback();
+        });
+      };
+
+    }); // 86.1.3
 
   }); // 86.1
 

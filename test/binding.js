@@ -48,7 +48,7 @@ describe('4. binding.js', function() {
     var connection = null;
     before(function(done) {
       oracledb.getConnection(dbConfig, function(err, conn) {
-        if(err) { console.error(err.message); return; }
+        should.not.exist(err);
         connection = conn;
         done();
       });
@@ -56,7 +56,7 @@ describe('4. binding.js', function() {
 
     after(function(done) {
       connection.release( function(err) {
-        if(err) { console.error(err.message); return; }
+        should.not.exist(err);
         done();
       });
     });
@@ -587,7 +587,7 @@ describe('4. binding.js', function() {
 
     before(function(done) {
       oracledb.getConnection(dbConfig, function(err, conn) {
-        if(err) { console.error(err.message); return; }
+        should.not.exist(err);
         connection = conn;
         done();
       });
@@ -595,7 +595,7 @@ describe('4. binding.js', function() {
 
     after(function(done) {
       connection.release( function(err) {
-        if(err) { console.error(err.message); return; }
+        should.not.exist(err);
         done();
       });
     });

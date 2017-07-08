@@ -142,3 +142,6 @@ test/longProcedureBind_in.js
 test/longrawProcedureBind_in.js
 test/longrawProcedureBind_inout.js
 test/longrawProcedureBind_out.js
+
+test/clobDMLReturning.js
+test/blobDMLReturning.js

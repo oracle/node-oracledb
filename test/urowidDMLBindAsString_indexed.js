@@ -248,7 +248,7 @@ describe('115. urowidDMLBindAsString_indexed.js', function() {
 
   });
 
-  describe.skip('115.7 queryStream() and oracledb.maxRows < actual rows', function() {
+  describe('115.7 queryStream() and oracledb.maxRows < actual rows', function() {
 
     it('115.7.1 urowid length > 200', function(done) {
       var strLength = 200;
@@ -783,10 +783,10 @@ describe('115. urowidDMLBindAsString_indexed.js', function() {
       },
       function(cb) {
         var counter = 0;
-        var sql_select = "select c1, c2, ROWID from " + tableName_indexed + " where ROWID = :c1 or ROWID = :c2 order by c1";
+        var sql_select = "select c1, c2, ROWID from " + tableName_indexed + " where ROWID = :i1 or ROWID = :i2 order by c1";
         var bindVar = {
-          c1: { val : urowid_1, dir : oracledb.BIND_IN, type : oracledb.STRING },
-          c2: { val : urowid_2, dir : oracledb.BIND_IN, type : oracledb.STRING }
+          i1: { val : urowid_1, dir : oracledb.BIND_IN, type : oracledb.STRING },
+          i2: { val : urowid_2, dir : oracledb.BIND_IN, type : oracledb.STRING }
         };
         var stream = connection.queryStream(sql_select, bindVar);
         stream.on('error', function (error) {
@@ -796,7 +796,8 @@ describe('115. urowidDMLBindAsString_indexed.js', function() {
         stream.on('data', function(data) {
           should.exist(data);
           counter++;
-          if(counter == 1) {
+          var result_id = data[0];
+          if(result_id === id_1) {
             (data).should.deepEqual([ id_1, str, urowid_1 ]);
           } else {
             (data).should.deepEqual([ id_2, str, urowid_2 ]);

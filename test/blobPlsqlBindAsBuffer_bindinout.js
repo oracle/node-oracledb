@@ -19,7 +19,7 @@
  * See LICENSE.md for relevant licenses.
  *
  * NAME
- *   79. blobPlsqlBindAsBuffer_inout.js
+ *   79. blobPlsqlBindAsBuffer_bindinout.js
  *
  * DESCRIPTION
  *   Testing BLOB binding inout as Buffer.
@@ -41,7 +41,7 @@ var dbConfig = require('./dbconfig.js');
 var random   = require('./random.js');
 var assist   = require('./dataTypeAssist.js');
 
-describe('79. blobPlsqlBindAsBuffer_inout.js', function() {
+describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
   this.timeout(100000);
   var connection = null;
   var node6plus = false; // assume node runtime version is lower than 6
