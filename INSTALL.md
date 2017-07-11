@@ -19,7 +19,7 @@ limitations under the License.
 
 1. [Node-oracledb Overview](#overview)
 2. [Node-oracledb Installation Quick Start](#quickstart)
-3. [Installation Instructions](#instructions)
+3. [Node-oracledb Installation Instructions](#instructions)
   - 3.1 [Node-oracledb Installation from GitHub](#github)
   - 3.2 [Node-oracledb Installation on Linux with Instant Client RPMs](#instrpm)
   - 3.3 [Node-oracledb Installation on Linux with Instant Client ZIP files](#instzip)
@@ -31,7 +31,7 @@ limitations under the License.
   - 3.9 [Node-oracledb Installation on Oracle Solaris x86-64 (64-Bit) with Instant Client ZIP files](#instsolarisx8664)
 4. [Installing Node-oracledb 1.x](#installingv1)
 5. [Useful Resources for Node-oracledb](#otherresources)
-6. [Troubleshooting Installation Problems](#troubleshooting)
+6. [Troubleshooting Node-oracledb Installation Problems](#troubleshooting)
 
 ## <a name="overview"></a> 1. Node-oracledb Overview
 
@@ -64,7 +64,7 @@ time. 'Rpath' linking is no longer performed on Linux or macOS.
 
 - Run `npm install oracledb` to install from the [npm registry](https://www.npmjs.com/package/oracledb).
 
-## 3. <a name="instructions"></a> Installation Instructions
+## 3. <a name="instructions"></a> Node-oracledb Installation Instructions
 
 ### <a name="prerequisites"></a> Prerequisites
 
@@ -935,9 +935,11 @@ place to learn SQL and test statements without needing your own
 database.  Any questions about SQL or PL/SQL can be asked
 at [AskTom](https://asktom.oracle.com/).
 
-## <a name="troubleshooting"></a> 6. Troubleshooting Installation Problems
+## <a name="troubleshooting"></a> 6. Troubleshooting Node-oracledb Installation Problems
 
-- Review the [Installation Instructions](#instructions).
+**Review the [Node-oracledb Installation Instructions](#instructions)**.
+
+If `npm install oracledb` fails:
 
 - Use `npm install --verbose oracledb`.  Review your output and logs.
 Try to install in a different way.  **Google anything that looks like
@@ -946,25 +948,36 @@ an error.** Try some potential solutions.
 - Was there a network connection error?  Do you need to set
   `http_proxy` and/or `https_proxy`?
 
-- For Node 4 onwards, you need a compiler with C++11 support, such as
-  VS 2013 or GCC 4.7.
+- Does your compiler have C++11 support, e.g. use VS 2013 or GCC 4.7.
+
+- Do you have Python 2.7?  Run `python --version`.
+
+- Do you have an old version of `node-gyp` installed?  Try updating
+  it.  Also try deleting `$HOME/.node-gyp` or equivalent.
+
+- Try running `npm cache clean -f` and deleting the
+  `node_modules/oracledb` directory.
+
+If `require('oracledb')` fails, for example with **DPI-1047: Oracle
+Client library cannot be loaded**:
 
 - Does your Node.js architecture (32-bit or 64-bit) match the Oracle
-  client architecture?  Run `node -p 'process.arch'` and compare with,
-  for example, `dumpbin /headers oci.dll` (on Windows), `file
-  libclntsh.dylib` (macOS) or `file libclntsh.so.*` (Linux).
+  client library architecture?  Run `node -p 'process.arch'` and
+  compare with, for example, `dumpbin /headers oci.dll` (on Windows),
+  `file libclntsh.dylib` (macOS) or `file libclntsh.so.*` (Linux).
 
 - On Windows, do you have the correct VS Redistributable?  Review
   the [Windows install instructions](#winredists).
 
 - On Windows, is your `PATH` set correctly to include the Oracle client libraries?
 
-- Do you need system privileges to set, or preserve, variables,
-  e.g. an elevated command prompt on Windows, or `sudo -E` on Linux?
+- Do you need system privileges to set, or preserve, variables like
+  `PATH`, e.g. an elevated command prompt on Windows, or `sudo -E` on
+  Linux?
 
 - On Windows try a dependency walker.  Check your
-  `node_modules/oraclebd/build/Release/oracledb.node` binary has a
-  matching Oracle client and VS Redistributable.
+  `node_modules/oraclebd/build/Release/oracledb.node` binary can
+  locate the Oracle client libraries and VS Redistributable.
 
 - Do you have multiple copies of Oracle libraries installed?  Is the
   expected version first in `PATH` (on Windows) or `LD_LIBRARY_PATH`
@@ -975,9 +988,3 @@ an error.** Try some potential solutions.
 
 - Do you have multiple copies of Node.js installed?  Did the correct
   `npm` and `node-gyp` get invoked?
-
-- Do you have an old version of `node-gyp` installed?  Try updating
-  it.  Also try deleting `$HOME/.node-gyp` or equivalent.
-
-- Try running `npm cache clean -f` and deleting the
-  `node_modules/oracledb` directory.
