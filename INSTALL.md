@@ -23,7 +23,7 @@ limitations under the License.
   - 3.1 [Node-oracledb Installation from GitHub](#github)
   - 3.2 [Node-oracledb Installation on Linux with Instant Client RPMs](#instrpm)
   - 3.3 [Node-oracledb Installation on Linux with Instant Client ZIP files](#instzip)
-  - 3.4 [Node-oracledb Installation on Linux with a Local Database](#instoh)
+  - 3.4 [Node-oracledb Installation on Linux with a Local Database or Full Client](#instoh)
   - 3.5 [Node-oracledb Installation on macOS with Instant Client](#instosx)
   - 3.6 [Node-oracledb Installation on Windows](#instwin)
   - 3.7 [Copying node-oracledb Binaries on Windows](#winbins)
@@ -122,8 +122,8 @@ I have ... | Follow this ...
 Windows | [Node-oracledb Installation on Windows](#instwin)
 Apple macOS | [Node-oracledb Installation on macOS with Instant Client](#instosx)
 Linux.  My database is on another machine  | [Node-oracledb Installation on Linux with Instant Client RPMs](#instrpm) or [Node-oracledb Installation on Linux with Instant Client ZIP files](#instzip)
-Linux.  My database is on the same machine | [Node-oracledb Installation on Linux with a Local Database](#instoh)
-Linux. I have the full Oracle client (installed via `runInstaller`) on the same machine | [Node-oracledb Installation on Linux with a Local Database](#instoh)
+Linux.  My database is on the same machine | [Node-oracledb Installation on Linux with a Local Database or Full Client](#instoh)
+Linux. I have the full Oracle client (installed via `runInstaller`) on the same machine | [Node-oracledb Installation on Linux with a Local Database or Full Client](#instoh)
 AIX on Power Systems | [Node-oracledb Installation on AIX on Power Systems with Instant Client ZIP files](#instaix)
 Solaris x86-64 (64-Bit) | [Node-oracledb Installation on Oracle Solaris x86-64 (64-Bit) with Instant Client ZIP files](#instsolarisx8664)
 Another OS with Oracle Database 11.2 or 12c, or client libraries available | Update binding.gyp and make any code changes required, sign the [OCA](https://www.oracle.com/technetwork/community/oca-486395.html), and submit a pull request with your patch.
@@ -373,7 +373,7 @@ node select1.js
 
 *Note:* Remember to set `LD_LIBRARY_PATH` or equivalent first.
 
-## <a name="instoh"></a> 3.4 Node-oracledb installation on Linux with a Local Database
+## <a name="instoh"></a> 3.4 Node-oracledb installation on Linux with a Local Database or Full Client
 
 Questions and issues can be posted as [GitHub Issues](https://github.com/oracle/node-oracledb/issues).
 
@@ -821,8 +821,6 @@ node select1.js
 
 ## <a name="instsolarisx8664"></a> 3.9 Node-oracledb Installation on Oracle Solaris x86-64 (64-Bit) with Instant Client ZIP files
 
-**THIS SECTION HAS NOT BEEN VERIFIED FOR NODE-ORACLEDB 2.x**
-
 Questions and issues can be posted as [GitHub Issues](https://github.com/oracle/node-oracledb/issues).
 
 ### 3.9.1 Install Node.js
@@ -862,6 +860,7 @@ Install node-oracledb from the
 [npm registry](https://www.npmjs.com/package/oracledb):
 
 ```
+export MAKE=gmake
 npm install oracledb
 ```
 
