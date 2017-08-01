@@ -186,8 +186,9 @@ limitations under the License.
 17. [External Configuration](#oraaccess)
 18. [Globalization and National Language Support (NLS)](#nls)
 19. [End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend)
-20. [Promises in node-oracledb](#promiseoverview)
+20. [Promises and node-oracledb](#promiseoverview)
   - 20.1 [Custom Promise Libraries](#custompromises)
+21. [Async/Await and node-oracledb](#asyncawaitoverview)
 
 ## <a name="intro"></a> 1. Introduction
 
@@ -918,7 +919,7 @@ Node-oracledb supports Promises on all methods.  The standard Promise
 library is used in Node.js 0.12 and greater.  Promise support is not
 enabled by default in Node.js 0.10.
 
-See [Promises in node-oracledb](#promiseoverview) for a discussion of
+See [Promises and node-oracledb](#promiseoverview) for a discussion of
 using Promises.
 
 This property can be set to override or disable the Promise
@@ -6096,7 +6097,7 @@ SQL> SELECT UNIQUE sid, client_driver
         33 node-oracledb : 2.0.14
 ```
 
-## <a name="promiseoverview"></a> 20. Promises in node-oracledb
+## <a name="promiseoverview"></a> 20. Promises and node-oracledb
 
 Node-oracledb supports Promises with all asynchronous methods.  The native Promise
 implementation is used in Node.js 0.12 and greater.  Promise support is not
@@ -6190,6 +6191,8 @@ Unhandled Rejection at:  Promise {
 ]
 ```
 
+For more information, see [How to get, use, and close a DB connection using promises](https://jsao.io/2017/06/how-to-get-use-and-close-a-db-connection-using-promises/).
+
 ### <a name="custompromises"></a> 20.1 Custom Promise Libraries
 
 The Promise implementation is designed to be overridden, allowing a
@@ -6234,3 +6237,61 @@ using Node.js 0.10, the callback API is expected.  The error stack trace
 indicates that line 10 of `mypromiseapp.js` forgot to pass the
 callback.  Either install your own Promise library or use the callback
 programming style.
+
+## <a name="asyncawaitoverview"></a> 21. Async/Await and node-oracledb
+
+Node.js 7.6 supports async functions, also known as Async/Await.  These
+can be used with node-oracledb.  For example:
+
+```javascript
+const oracledb = require('oracledb');
+
+function getEmployee(empid) {
+  return new Promise(async function(resolve, reject) {
+    let conn;
+
+    try {
+      conn = await oracledb.getConnection({
+        user          : "hr",
+        password      : "welcome",
+        connectString : "localhost/XE"
+      });
+
+      let result = await conn.execute(
+        'SELECT * FROM employees WHERE employee_id = :bv',
+        [empid]
+      );
+      resolve(result.rows);
+
+    } catch (err) { // catches errors in getConnection and the query
+      reject(err);
+    } finally {
+      if (conn) {   // the conn assignment worked, must release
+        try {
+          await conn.release();
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+  });
+}
+
+async function run() {
+  try {
+    let res = await getEmployee(101);
+    console.log(res);
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+run();
+```
+
+If you are using [Lob instances](#lobclass) for LOB data instead of
+working with the data directly as Strings or Buffers, then the Lobs
+must be streamed since there is no Promisified interface for them.
+
+For more information, see
+[How to get, use, and close a DB connection using async functions](https://jsao.io/2017/07/how-to-get-use-and-close-a-db-connection-using-async-functions/).

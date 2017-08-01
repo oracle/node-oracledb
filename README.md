@@ -14,7 +14,7 @@ The node-oracledb project is open source and maintained by Oracle Corp.  The hom
 
 ### Node-oracledb supports:
 
-- [Promises](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#promiseoverview), [Callbacks](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#intro) and [Streams](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#querystream)
+- [Async/Await](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#asyncawaitoverview), [Promises](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#promiseoverview), [Callbacks](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#intro) and [Streams](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#querystream)
 - [SQL and PL/SQL execution](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#sqlexecution)
 - [REF CURSORs](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#refcursors)
 - [Large Objects: CLOBs and BLOBs as Streams or Strings and Buffers](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#lobhandling)
