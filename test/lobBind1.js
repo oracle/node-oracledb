@@ -286,7 +286,7 @@ describe('71. lobBind1.js', function() {
                 function(err) {
                   should.not.exist(err);
                   // console.log(result2);
-                  cb();
+                  lob.close(cb);
                 }
               );
             }
@@ -395,7 +395,7 @@ describe('71. lobBind1.js', function() {
                 { autoCommit: true },
                 function(err) {
                   should.not.exist(err);
-                  return cb();
+                  lob.close(cb);
                 }
               );
             }
@@ -450,7 +450,7 @@ describe('71. lobBind1.js', function() {
                 { autoCommit: true },
                 function(err) {
                   should.not.exist(err);
-                  return cb();
+                  lob.close(cb);
                 }
 
               );
@@ -973,6 +973,7 @@ describe('71. lobBind1.js', function() {
             { autoCommit: true },
             function(err) {
               should.not.exist(err);
+              if (lob) return lob.close(callback);
               callback();
             }
           );
@@ -1168,7 +1169,7 @@ describe('71. lobBind1.js', function() {
                 { autoCommit: true },
                 function(err) {
                   should.not.exist(err);
-                  cb();
+                  lob.close(cb);
                 }
               );
             }

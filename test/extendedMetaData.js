@@ -1372,7 +1372,7 @@ describe('17. extendedMetaData.js', function() {
         function(err, result) {
           should.not.exist(err);
           verifyResult(false, result.resultSet.metaData);
-          done();
+          result.resultSet.close(done);
         }
       );
 
@@ -1387,7 +1387,7 @@ describe('17. extendedMetaData.js', function() {
         function(err, result) {
           should.not.exist(err);
           verifyResult(true, result.resultSet.metaData);
-          done();
+          result.resultSet.close(done);
         }
       );
 
@@ -1409,7 +1409,7 @@ describe('17. extendedMetaData.js', function() {
             function(err, result) {
               should.not.exist(err);
               verifyResult(true, result.resultSet.metaData);
-              cb();
+              result.resultSet.close(cb);
             }
           );
         },
@@ -1451,7 +1451,7 @@ describe('17. extendedMetaData.js', function() {
             function(err, result) {
               should.not.exist(err);
               verifyResult(true, result.outBinds.out.metaData);
-              cb();
+              result.outBinds.out.close(cb);
             }
           );
         },

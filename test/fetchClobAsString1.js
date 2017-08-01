@@ -432,7 +432,7 @@ describe('84. fetchClobAsString1.js', function() {
                 var resultVal = rows[0][0];
                 should.strictEqual(typeof resultVal, 'string');
                 compareClientFetchResult(err, resultVal, specialStr, content, contentLength);
-                cb();
+                result.outBinds.c.close(cb);
               });
             }
           );
@@ -1068,7 +1068,7 @@ describe('84. fetchClobAsString1.js', function() {
                 var resultVal = rows[0][0];
                 should.strictEqual(typeof resultVal, 'string');
                 compareClientFetchResult(err, resultVal, specialStr, content, contentLength);
-                cb();
+                result.outBinds.c.close(cb);
               });
             }
           );
@@ -1585,7 +1585,7 @@ describe('84. fetchClobAsString1.js', function() {
               result.outBinds.c.getRows(3, function(err, rows) {
                 var resultVal = rows[0][0];
                 compareClientFetchResult(err, resultVal, specialStr, content, contentLength);
-                cb();
+                result.outBinds.c.close(cb);
               });
             }
           );
@@ -2071,7 +2071,7 @@ describe('84. fetchClobAsString1.js', function() {
               result.outBinds.c.getRows(3, function(err, rows) {
                 var resultVal = rows[0][0];
                 compareClientFetchResult(err, resultVal, specialStr, content, contentLength);
-                cb();
+                result.outBinds.c.close(cb);
               });
             }
           );
@@ -2589,7 +2589,7 @@ describe('84. fetchClobAsString1.js', function() {
               result.outBinds.c.getRows(3, function(err, rows) {
                 var resultVal = rows[0][0];
                 compareClientFetchResult(err, resultVal, specialStr, content, contentLength);
-                cb();
+                result.outBinds.c.close(cb);
               });
             }
           );

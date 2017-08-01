@@ -1542,7 +1542,7 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
                 { autoCommit: true },
                 function(err) {
                   should.not.exist(err);
-                  cb();
+                  clob.close(cb);
                 }
               );
             }

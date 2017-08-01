@@ -228,7 +228,7 @@ describe('52. connClose.js', function() {
         should.exist(resultSet.metaData);
         var t = resultSet.metaData;
         t.should.eql( [ { name: 'NUM' }, { name: 'CONTENT' } ] );
-        callback();
+        resultSet.close(callback);
       },
       function closeConn(callback) {
         connection.release(function(err) {

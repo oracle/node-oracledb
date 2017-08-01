@@ -141,7 +141,7 @@ describe('12. resultSet1.js', function() {
 
           should.not.exist(result.rows);
           should.exist(result.resultSet);
-          done();
+          result.resultSet.close(done);
         }
       );
     });
@@ -231,7 +231,7 @@ describe('12. resultSet1.js', function() {
 
           should.not.exist(result.rows);
           should.exist(result.resultSet);
-          done();
+          result.resultSet.close(done);
         }
       );
     });
@@ -248,7 +248,7 @@ describe('12. resultSet1.js', function() {
 
           should.not.exist(result.rows);
           should.exist(result.resultSet);
-          done();
+          result.resultSet.close(done);
         }
       );
     });
@@ -265,7 +265,7 @@ describe('12. resultSet1.js', function() {
 
           should.not.exist(result.rows);
           should.exist(result.resultSet);
-          done();
+          result.resultSet.close(done);
         }
       );
     });
@@ -328,10 +328,9 @@ describe('12. resultSet1.js', function() {
         "SELECT employees_name FROM nodb_rs1_emp",
         [],
         { resultSet: true, prefetchRows: null, maxRows: 1000 },
-        function(err) {
+        function(err, result) {
           should.not.exist(err);
-
-          done();
+          result.resultSet.close(done);
         }
       );
     });
@@ -343,9 +342,9 @@ describe('12. resultSet1.js', function() {
         "SELECT employees_name FROM nodb_rs1_emp",
         [],
         { resultSet: true, prefetchRows: 0, maxRows: 1000 },
-        function(err) {
+        function(err, result) {
           should.not.exist(err);
-          done();
+          result.resultSet.close(done);
         }
       );
     });
@@ -929,7 +928,7 @@ describe('12. resultSet1.js', function() {
             return fetchRowFromRS(rs, numRows);
           } else {
             accessCount.should.be.exactly(10);
-            done();
+            rs.close(done);
           }
         });
       }
@@ -1118,7 +1117,7 @@ describe('12. resultSet1.js', function() {
               for(var i = 0; i < columnsAmount; i++) {
                 (result.resultSet.metaData[i].name).should.be.exactly('C' + i);
               }
-              callback();
+              result.resultSet.close(callback);
             }
           );
         },
@@ -1176,7 +1175,7 @@ describe('12. resultSet1.js', function() {
               // console.log(result.resultSet.metaData);
               (result.resultSet.metaData[0].name).should.be.exactly('c');
               (result.resultSet.metaData[1].name).should.be.exactly('C');
-              callback();
+              result.resultSet.close(callback);
             }
           );
         },
@@ -1234,7 +1233,7 @@ describe('12. resultSet1.js', function() {
               // console.log(result.resultSet.metaData);
               (result.resultSet.metaData[0].name).should.be.exactly("c'");
               (result.resultSet.metaData[1].name).should.be.exactly('c');
-              callback();
+              result.resultSet.close(callback);
             }
           );
         },
@@ -1292,7 +1291,7 @@ describe('12. resultSet1.js', function() {
               // console.log(result.resultSet.metaData);
               (result.resultSet.metaData[0].name).should.be.exactly("c_");
               (result.resultSet.metaData[1].name).should.be.exactly('c__');
-              callback();
+              result.resultSet.close(callback);
             }
           );
         },

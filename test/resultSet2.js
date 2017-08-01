@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -271,34 +271,33 @@ describe('55. resultSet2.js', function() {
       clearUp(connection, tableName, done);
     });
 
+    var testConn = null;
     beforeEach(function(done) {
       oracledb.getConnection(
-        {
-          user:          dbConfig.user,
-          password:      dbConfig.password,
-          connectString: dbConfig.connectString
-        },
+        dbConfig,
         function(err, conn) {
           should.not.exist(err);
-          conn2 = conn;
+          testConn = conn;
           done();
         }
       );
     });
 
-    var conn2 = false;
     function fetchRowFromRS(rs, cb) {
 
       rs.getRow(function(err, row) {
         if(row) {
           return fetchRowFromRS(rs, cb);
         } else {
-          conn2.release(function(err) {
-            should.not.exist(err);
+          testConn.release(function(err) {
+            should.exist(err);
+            should.strictEqual(
+              err.message,
+              "DPI-1054: connection cannot be closed when open statements or LOBs exist"
+            );
             rs.close(function(err) {
-              should.exist(err);
-              err.message.should.startWith('NJS-018:'); // invalid result set
-              cb();
+              should.not.exist(err);
+              testConn.release(cb);
             });
           });
         }
@@ -306,8 +305,8 @@ describe('55. resultSet2.js', function() {
     }
 
     it('55.4.1 result set', function(done) {
-      conn2.should.be.ok();
-      conn2.execute(
+      testConn.should.be.ok();
+      testConn.execute(
         "SELECT * FROM nodb_rs2_emp ORDER BY employees_id",
         [],
         { resultSet: true },
@@ -319,9 +318,8 @@ describe('55. resultSet2.js', function() {
     });
 
     it('55.4.2 REF Cursor', function(done) {
-      conn2.should.be.ok();
-
-      conn2.execute(
+      testConn.should.be.ok();
+      testConn.execute(
         "BEGIN nodb_rs2_get_emp(:in, :out); END;",
         {
           in: 200,
@@ -416,7 +414,7 @@ describe('55. resultSet2.js', function() {
           if(rows.length > 0) {
             return fetchRowsFromRS(resultset, callback);
           } else {
-            return callback();
+            return resultset.close(callback);
           }
         }
       });
@@ -455,13 +453,6 @@ describe('55. resultSet2.js', function() {
 
             cb();
           });
-        },
-        function(cb) {
-
-          rset.close(function() {
-            return cb();
-          });
-
         }
       ], done);
 
@@ -501,13 +492,6 @@ describe('55. resultSet2.js', function() {
 
             cb();
           });
-        },
-        function(cb) {
-
-          rcur.close(function() {
-            return cb();
-          });
-
         }
       ], done);
 

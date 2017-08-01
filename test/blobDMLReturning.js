@@ -100,11 +100,11 @@ describe('136. blobDMLReturning.js', function() {
     });
 
     it.skip('136.1.1 works with stream', function(done) {
-      updateReturning_stream(done);      
+      updateReturning_stream(done);
     }); // 136.1.1
 
     it('136.1.2 fetch as string', function(done) {
-      updateReturning_buffer(done);      
+      updateReturning_buffer(done);
     }); // 136.1.1
 
   }); // 136.1
@@ -131,7 +131,7 @@ describe('136. blobDMLReturning.js', function() {
     var sql_update = "UPDATE " + tableName + " set id = id+10 RETURNING id, blob into :num, :lobou";
     connection.execute(
       sql_update,
-      { 
+      {
         num: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
         lobou: { type: oracledb.BLOB, dir: oracledb.BIND_OUT }
       },
@@ -161,18 +161,18 @@ describe('136. blobDMLReturning.js', function() {
             should.not.exist(err);
             var expected = node6plus ? Buffer.from(String(id), "utf-8") : new Buffer(String(id-10), "utf-8");
             should.strictEqual(assist.compare2Buffers(blobData, expected), true);
-          });          
+          });
         }
         callback();
       }
-    );    
+    );
   };
 
   var updateReturning_buffer = function(callback) {
     var sql_update = "UPDATE " + tableName + " set id = id+10 RETURNING id, blob into :num, :lobou";
     connection.execute(
       sql_update,
-      { 
+      {
         num: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
         lobou: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT }
       },
@@ -181,7 +181,7 @@ describe('136. blobDMLReturning.js', function() {
         should.strictEqual((err.message), "NJS-028: raw database type is not supported with DML Returning statements");
         callback();
       }
-    );    
-  }; 
+    );
+  };
 
 });

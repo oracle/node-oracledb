@@ -419,7 +419,7 @@ describe('80. lobBindAsStringBuffer.js', function() {
                 { autoCommit: true },
                 function(err) {
                   should.not.exist(err);
-                  cb();
+                  blob.close(cb);
                 });
             });
         },
@@ -466,7 +466,7 @@ describe('80. lobBindAsStringBuffer.js', function() {
                 { autoCommit: true },
                 function(err) {
                   should.not.exist(err);
-                  cb();
+                  clob.close(cb);
                 }
               );
             }

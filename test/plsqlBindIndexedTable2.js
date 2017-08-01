@@ -677,7 +677,7 @@ describe('44. plsqlBindIndexedTable2.js', function() {
               maxArraySize: 3 }
           },
           function(err) {
-            if (connection.oracleServerVersion < 1201000200) {
+            if (connection.oracleServerVersion < 1201000100) {
               should.not.exist(err);
             } else {
               should.exist(err);

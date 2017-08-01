@@ -71,8 +71,9 @@ Overview of node-oracledb functional tests
         2.9.1 does not work after the pool as been terminated
     2.10 Close method
         2.10.1 close can be used as an alternative to release
-    2.11 invalid credentials
-      - 2.11.1 cannot get connections with invalid credentials
+    2.11 Invalid Credential
+        2.11.1 error occurs at creating pool when poolMin >= 1
+        2.11.2 error occurs at getConnection() when poolMin is the default value 1
 
 3. examples.js
     3.1 connect.js
@@ -809,17 +810,17 @@ Overview of node-oracledb functional tests
     56.9 large numbers with setting fetchAsString property
     56.10 invalid syntax for type should result in error
     56.11 assigns an empty array to fetchAsString
-  - 56.12 Negative - empty string
-  - 56.13 Negative - null
-  - 56.14 Negative - undefined
-  - 56.15 Negative - NaN
-  - 56.16 Negative - invalid type of value, number
-  - 56.17 Negative - invalid type of value, string
+    56.12 Negative - empty string
+    56.13 Negative - null
+    56.14 Negative - undefined
+    56.15 Negative - NaN
+    56.16 Negative - invalid type of value, number
+    56.17 Negative - invalid type of value, string
     56.18 Negative - passing oracledb.DATE type to fetchInfo
     56.19 Negative - passing empty JSON to fetchInfo
     56.20 Negative - passing oracledb.NUMBER type to fetchInfo
-  - 56.21 Negative - passing Date for fetchAsString
-  - 56.22 Negative - passing Buffer for fetchAsstring
+    56.21 Negative - passing Date for fetchAsString
+    56.22 Negative - passing Buffer for fetchAsstring
 
 57. nestedCursor.js
     57.1 testing nested cursor support - result set
@@ -2020,13 +2021,13 @@ Overview of node-oracledb functional tests
        89.2.5 Cursor not supported in fetchAsBuffer
        89.2.6 Buffer not supported in fetchAsBuffer
        89.2.7 BLOB supported in fetchAsBuffer
-     - 89.2.8 negative - null value for fetchAsBuffer
-     - 89.2.9 negative - undefined value for fetchAsBuffer
-     - 89.2.10 negative - numeric value for fetchAsBuffer
-     - 89.2.11 negative - empty string value for fetchAsBuffer
-     - 89.2.12 negative - arbitary string value for fetchAsBuffer
-     - 89.2.13 negative - date value for fetchAsBuffer
-     - 89.2.14 negative - buffer value for fetchAsBuffer
+       89.2.8 negative - null value for fetchAsBuffer
+       89.2.9 negative - undefined value for fetchAsBuffer
+       89.2.10 negative - numeric value for fetchAsBuffer
+       89.2.11 negative - empty string value for fetchAsBuffer
+       89.2.12 negative - arbitary string value for fetchAsBuffer
+       89.2.13 negative - date value for fetchAsBuffer
+       89.2.14 negative - buffer value for fetchAsBuffer
 
 90. fetchClobAsString4.js
     90.1 PLSQL FUNCTION RETURN CLOB to STRING

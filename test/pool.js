@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -990,25 +990,50 @@ describe('2. pool.js', function() {
     });
   }); // 2.10
 
-  describe.skip('2.11 invalid credentials', function() {
+  describe('2.11 Invalid Credential', function() {
 
-    it('2.11.1 cannot get connections with invalid credentials', function(done) {
-
+    it('2.11.1 error occurs at creating pool when poolMin >= 1', function(done) {
       oracledb.createPool(
         {
           user: 'notexist',
           password: 'nopass',
-          connectString: 'inst1'
+          connectString: dbConfig.connectString,
+          poolMin: 5
         },
         function(err, pool) {
           should.exist(err);
-          console.log(err.message);
+          (err.message).should.startWith('ORA-24413: ');
+          // ORA-24413: Invalid number of sessions specified
           should.not.exist(pool);
           done();
         }
       );
+    }); // 2.11.1
 
-    });
+    it('2.11.2 error occurs at getConnection() when poolMin is the default value 1', function(done) {
+      oracledb.createPool(
+        {
+          user: 'notexist',
+          password: 'nopass',
+          connectString: dbConfig.connectString
+        },
+        function(err, pool) {
+          should.exist(pool);
+          pool.getConnection(function(err, conn) {
+            should.exist(err);
+            (err.message).should.startWith('ORA-01017: ');
+            // ORA-01017: invalid username/password; logon denied
+            should.not.exist(conn);
+
+            pool.close(function(err) {
+              should.not.exist(err);
+              done();
+            });
+
+          });
+        }
+      );
+    }); // 2.11.2
 
   }); // 2.11
 

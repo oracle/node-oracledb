@@ -604,7 +604,7 @@ describe('58. properties.js', function() {
       );
     });
 
-    it('58.4.1 metaData (read-only)', function() {
+    it('58.4.1 metaData (read-only)', function(done) {
       should.exist(resultSet.metaData);
       var t = resultSet.metaData;
       t.should.eql( [ { name: 'NUM' }, { name: 'CONTENT' } ] );
@@ -615,6 +615,7 @@ describe('58. properties.js', function() {
         },
         /NJS-014: [\w]+ is a read-only property/
       );
+      resultSet.close(done);
     });
 
   }); // 58.4

@@ -805,7 +805,7 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
             sqlRun,
             bindVar,
             function(err, result) {
-              if (connection.oracleServerVersion < 1201000200) {
+              if (connection.oracleServerVersion < 1201000100) {
                 should.not.exist(err);
                 var resultVal = result.outBinds.c;
                 var resultLength = resultVal.length;
@@ -899,7 +899,7 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
             sqlRun,
             bindVar,
             function(err, result) {
-              if (connection.oracleServerVersion < 1201000200) {
+              if (connection.oracleServerVersion < 1201000100) {
                 should.not.exist(err);
                 var resultVal = result.outBinds[0];
                 var resultLength = resultVal.length;
@@ -1300,7 +1300,7 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
             sqlRun,
             bindVar,
             function(err, result) {
-              if (connection.oracleServerVersion < 1201000200) {
+              if (connection.oracleServerVersion < 1201000100) {
                 should.not.exist(err);
                 var resultVal = result.outBinds[0];
                 var resultLength = resultVal.length;

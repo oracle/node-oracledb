@@ -84,7 +84,7 @@ describe('135. clobDMLReturning.js', function() {
   });
 
   describe('135.1 CLOB, UPDATE', function() {
-    before(function(done) {      
+    before(function(done) {
       sql.executeSql(connection, clob_table_create, {}, {}, done);
     });
     after(function(done) {
@@ -92,11 +92,11 @@ describe('135. clobDMLReturning.js', function() {
     });
 
     it.skip('135.1.1 works with stream', function(done) {
-      updateReturning_stream(done);      
+      updateReturning_stream(done);
     }); // 135.1.1
 
     it('135.1.2 fetch as string', function(done) {
-      updateReturning_string(done);      
+      updateReturning_string(done);
     }); // 135.1.1
 
   }); // 135.1
@@ -105,7 +105,7 @@ describe('135. clobDMLReturning.js', function() {
     var sql_update = "UPDATE " + tableName + " set id = id+10 RETURNING id, clob into :num, :lobou";
     connection.execute(
       sql_update,
-      { 
+      {
         num: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
         lobou: { type: oracledb.CLOB, dir: oracledb.BIND_OUT }
       },
@@ -131,21 +131,21 @@ describe('135. clobDMLReturning.js', function() {
           lob.on('end', function(err) {
             should.not.exist(err);
             should.strictEqual(clobData, (id-10));
-          });   
+          });
           lob.on('close', function(err) {
             should.not.exist(err);
-          });       
+          });
         }
         callback();
       }
-    );    
+    );
   };
 
   var updateReturning_string = function(callback) {
     var sql_update = "UPDATE " + tableName + " set id = id+10 RETURNING id, clob into :num, :lobou";
     connection.execute(
       sql_update,
-      { 
+      {
         num: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
         lobou: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
       },
@@ -162,7 +162,7 @@ describe('135. clobDMLReturning.js', function() {
           }
         }
       }
-    );    
-  }; 
+    );
+  };
 
 });

@@ -161,9 +161,13 @@ describe('62. lobProperties1.js', function() {
           function(err, result) {
             should.not.exist(err);
             var clob = result.rows[0][1];
+            var blob = result.rows[0][2];
 
             defaultChunkSize = clob.chunkSize;
-            cb();
+            blob.close(function(err) {
+              if (err) return cb(err);
+              clob.close(cb);
+            });
           }
         );
       }
@@ -223,7 +227,10 @@ describe('62. lobProperties1.js', function() {
           // console.log(err.message);
           // Cannot assign to read only property 'chunkSize' of #<Lob>
         }
-        done();
+        clob.close(function(err) {
+          if (err) return done(err);
+          blob.close(done);
+        });
       }
     );
   }); // 62.1
@@ -259,7 +266,10 @@ describe('62. lobProperties1.js', function() {
           //console.log(err.message);
           // Cannot set property length of #<Lob> which has only a getter
         }
-        done();
+        clob.close(function(err) {
+          if (err) return done(err);
+          blob.close(done);
+        });
       }
     );
   }); // 62.2
@@ -277,7 +287,10 @@ describe('62. lobProperties1.js', function() {
           t2 = blob.pieceSize;
         t1.should.eql(defaultChunkSize);
         t2.should.eql(defaultChunkSize);
-        done();
+        clob.close(function(err) {
+          if (err) return done(err);
+          blob.close(done);
+        });
       }
     );
   }); // 62.3
@@ -303,7 +316,10 @@ describe('62. lobProperties1.js', function() {
         clob.pieceSize = defaultChunkSize;
         blob.pieceSize = defaultChunkSize;
 
-        done();
+        clob.close(function(err) {
+          if (err) return done(err);
+          blob.close(done);
+        });
       }
     );
   }); // 62.4
@@ -332,7 +348,10 @@ describe('62. lobProperties1.js', function() {
           clob.pieceSize = defaultChunkSize;
           blob.pieceSize = defaultChunkSize;
 
-          done();
+          clob.close(function(err) {
+            if (err) return done(err);
+            blob.close(done);
+          });
         }
       );
     }
@@ -357,7 +376,10 @@ describe('62. lobProperties1.js', function() {
         clob.pieceSize = defaultChunkSize;
         blob.pieceSize = defaultChunkSize;
 
-        done();
+        clob.close(function(err) {
+          if (err) return done(err);
+          blob.close(done);
+        });
       }
     );
   }); // 62.6
@@ -383,7 +405,10 @@ describe('62. lobProperties1.js', function() {
         clob.pieceSize = defaultChunkSize;
         blob.pieceSize = defaultChunkSize;
 
-        done();
+        clob.close(function(err) {
+          if (err) return done(err);
+          blob.close(done);
+        });
       }
     );
   }); // 62.7
@@ -409,7 +434,10 @@ describe('62. lobProperties1.js', function() {
         clob.pieceSize = defaultChunkSize;
         blob.pieceSize = defaultChunkSize;
 
-        done();
+        clob.close(function(err) {
+          if (err) return done(err);
+          blob.close(done);
+        });
       }
     );
   }); // 62.8
@@ -435,7 +463,10 @@ describe('62. lobProperties1.js', function() {
         clob.pieceSize = defaultChunkSize;
         blob.pieceSize = defaultChunkSize;
 
-        done();
+        clob.close(function(err) {
+          if (err) return done(err);
+          blob.close(done);
+        });
       }
     );
   }); // 62.9
@@ -471,7 +502,10 @@ describe('62. lobProperties1.js', function() {
           // [TypeError: Cannot set property type of #<Lob> which has only a getter]
         }
 
-        done();
+        clob.close(function(err) {
+          if (err) return done(err);
+          blob.close(done);
+        });
       }
     );
   }); // 62.10

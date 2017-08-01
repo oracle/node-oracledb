@@ -180,13 +180,18 @@ bool njsResultSet::CreateFromRefCursor(njsBaton *baton, dpiStmt *dpiStmtHandle,
     if (dpiStmt_getNumQueryColumns(dpiStmtHandle,
             &resultSet->numQueryVars) < 0) {
         baton->GetDPIError();
+        dpiStmt_release(dpiStmtHandle);
         return false;
     }
     resultSet->queryVars = new njsVariable[resultSet->numQueryVars];
     if (!njsConnection::ProcessDefines(baton, dpiStmtHandle,
             baton->dpiConnHandle, resultSet->queryVars,
-            resultSet->numQueryVars))
+            resultSet->numQueryVars)) {
+        delete [] resultSet->queryVars;
+        resultSet->queryVars = NULL;
+        dpiStmt_release(dpiStmtHandle);
         return false;
+    }
 
     // duplicate fetch as string types, if needed
     if (baton->fetchAsStringTypes) {

@@ -503,8 +503,11 @@ describe('13. stream1.js', function () {
         done();
       });
 
-      // Close is synchronous so it needs to be called after the close listener is added.
-      stream._close();
+      // must wait for stream to be open before attempting to close it
+      // otherwise, the result set will remain open until garbage collected
+      stream.on('open', function() {
+        stream._close();
+      });
 
       stream.on('data', function () {
         done(new Error('Received data'));
@@ -523,8 +526,10 @@ describe('13. stream1.js', function () {
 
       var stream = connection.queryStream('SELECT employee_name FROM nodb_stream1 ORDER BY employee_name');
 
-      stream._close(function() {
-        done();
+      // must wait for stream to be open before attempting to close it
+      // otherwise, the result set will remain open until garbage collected
+      stream.on('open', function() {
+        stream._close(done);
       });
 
       stream.on('data', function () {

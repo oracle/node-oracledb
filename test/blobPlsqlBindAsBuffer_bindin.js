@@ -1425,7 +1425,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
                 { autoCommit: true },
                 function(err) {
                   should.not.exist(err);
-                  cb();
+                  blob.close(cb);
                 }
               );
             }

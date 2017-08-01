@@ -239,7 +239,7 @@ describe('128.clobStream.js', function() {
           { autoCommit: true },
           function(err) {
             should.not.exist(err);
-            cb();
+            lob.close(cb);
           }
         );
       },

@@ -317,6 +317,7 @@ describe('14. stream2.js', function() {
 
     stream.on('data', function(data) {
       should.exist(data);
+      data[1].close();
       should.equal(metaDataRead, true);
     });
 
@@ -344,6 +345,7 @@ describe('14. stream2.js', function() {
 
     stream.on('data', function(data) {
       should.exist(data);
+      data[2].close();
       should.equal(metaDataRead, true);
     });
 
@@ -484,7 +486,7 @@ describe('14. stream2.js', function() {
 
   it('14.16 metadata event - large number of columns', function(done) {
 
-    var column_size = 100;
+    var column_size = 10;
     var columns_string = genColumns(column_size);
 
     function genColumns(size) {

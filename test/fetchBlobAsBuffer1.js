@@ -433,7 +433,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
               result.outBinds.b.getRows(3, function(err, rows) {
                 var resultVal = rows[0][0];
                 compareClientFetchResult(err, resultVal, specialStr, content, contentLength);
-                cb();
+                result.outBinds.b.close(cb);
               });
             }
           );
@@ -1080,7 +1080,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
               result.outBinds.b.getRows(3, function(err, rows) {
                 var resultVal = rows[0][0];
                 compareClientFetchResult(err, resultVal, specialStr, content, contentLength);
-                cb();
+                result.outBinds.b.close(cb);
               });
             }
           );
@@ -1607,7 +1607,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
               result.outBinds.b.getRows(3, function(err, rows) {
                 var resultVal = rows[0][0];
                 compareClientFetchResult(err, resultVal, specialStr, content, contentLength);
-                cb();
+                result.outBinds.b.close(cb);
               });
             }
           );
@@ -2105,7 +2105,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
               result.outBinds.b.getRows(3, function(err, rows) {
                 var resultVal = rows[0][0];
                 compareClientFetchResult(err, resultVal, specialStr, content, contentLength);
-                cb();
+                result.outBinds.b.close(cb);
               });
             }
           );
@@ -2634,7 +2634,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
               result.outBinds.b.getRows(3, function(err, rows) {
                 var resultVal = rows[0][0];
                 compareClientFetchResult(err, resultVal, specialStr, content, contentLength);
-                cb();
+                result.outBinds.b.close(cb);
               });
             }
           );

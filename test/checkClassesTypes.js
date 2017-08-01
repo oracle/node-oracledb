@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -141,7 +141,7 @@ describe('61. checkClassesTypes.js', function() {
             var type = Object.prototype.toString.call(lob);
             type.should.eql('[object Object]');
 
-            callback();
+            lob.close(callback);
           }
         );
       },
@@ -203,7 +203,9 @@ describe('61. checkClassesTypes.js', function() {
               else {
                 var type = Object.prototype.toString.call(result.resultSet);
                 type.should.eql('[object ResultSet]');
-                return callback(null, connection);
+                result.resultSet.close(function(err) {
+                  return callback(err, connection);
+                });
               }
             }
           );

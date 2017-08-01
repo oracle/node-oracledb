@@ -68,7 +68,8 @@ var doit = function(pool) {
       enableDbmsOutput,
       createDbmsOutput,
       fetchDbmsOutput,
-      printDbmsOutput
+      printDbmsOutput,
+      closeRS
     ],
     function (err, conn) {
       if (err) { console.error("In waterfall error cb: ==>", err, "<=="); }
@@ -118,12 +119,18 @@ var fetchRowsFromRS = function(conn, resultSet, numRows, cb) {
     numRows,
     function (err, rows) {
       if (err) {
-        return cb(err, conn);
+        return cb(err, conn, resultSet);
       } else if (rows.length > 0) {
         console.log(rows);
         return fetchRowsFromRS(conn, resultSet, numRows, cb);
       } else {
-        return cb(null, conn);
+        return cb(null, conn, resultSet);
       }
     });
 };
+
+var closeRS = function(conn, resultSet, cb) {
+  resultSet.close(function(err) {
+    return cb(err, conn);
+  });
+}
