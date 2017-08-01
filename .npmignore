@@ -10,3 +10,10 @@ CONTRIBUTING.md
 /.github
 oracledb-*.tgz
 .npmignore
+/odpi/Makefile
+/odpi/doc
+/odpi/samples
+/odpi/test
+/odpi/.npmignore
+/odpi/.github
+/odpi/.gitattributes
