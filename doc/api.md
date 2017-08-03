@@ -137,6 +137,8 @@ limitations under the License.
   - 8.4 [Database Resident Connection Pooling (DRCP)](#drcp)
   - 8.5 [External Authentication](#extauth)
   - 8.6 [Securely Encrypting Network Traffic to Oracle Database](#securenetwork)
+  - 8.7 [Connections and High Availability](#connectionha)
+
 9. [SQL Execution](#sqlexecution)
   - 9.1 [SELECT Statements](#select)
      - 9.1.1 [Fetching Rows](#fetchingrows)
@@ -3323,6 +3325,27 @@ Guide](http://docs.oracle.com/database/122/DBSEG/toc.htm).  This
 manual also contains information about other important security
 features that Oracle Database provides, such Transparent Data
 Encryption of data-at-rest in the database.
+
+### <a name="connectionha"></a> 8.7 Connections and High Availability
+
+For applications that need to be highly available, you may want to
+configure your OS network settings and Oracle Net (which handles
+communication between node-oracledb and the database).
+
+For Oracle Net configuration, set the environment variable `TNS_ADMIN`
+to your application configuration directory and create the file
+`$TNS_ADMIN/sqlnet.ora`.  In this file you can configure settings like
+[`SQLNET.OUTBOUND_CONNECT_TIMEOUT`](http://docs.oracle.com/database/122/NETRF/parameters-for-the-sqlnet-ora-file.htm#NETRF427),
+[`SQLNET.RECV_TIMEOUT`](http://docs.oracle.com/database/122/NETRF/parameters-for-the-sqlnet-ora-file.htm#NETRF227)
+and
+[`SQLNET.SEND_TIMEOUT`](http://docs.oracle.com/database/122/NETRF/parameters-for-the-sqlnet-ora-file.htm#NETRF228).
+You may also want to use a [`tnsnames.ora`](#tnsnames) file to
+configure the database service setting
+['ENABLE=BROKEN'](http://docs.oracle.com/database/122/NETRF/local-naming-parameters-in-tnsnames-ora-file.htm#NETRF431).
+
+Other [Oracle Net](http://docs.oracle.com/database/122/NETRF/toc.htm)
+options may also be useful for high availability and performance
+tuning.
 
 ## <a name="sqlexecution"></a> 9. SQL Execution
 
