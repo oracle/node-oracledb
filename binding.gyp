@@ -92,7 +92,8 @@
                 "EnableIntrinsicFunctions": "true",
                 "RuntimeTypeInfo": "false",
                 "PreprocessorDefinitions": [
-                  "WIN32_LEAN_AND_MEAN"
+                  "WIN32_LEAN_AND_MEAN",
+                  "DPI_DISABLE_THREAD_CLEANUP"
                 ],
                 "ExceptionHandling": "0",
                 "AdditionalOptions": [
@@ -116,7 +117,8 @@
               "msvs_settings": {
                   "VCCLCompilerTool": {
                     "PreprocessorDefinitions": [
-                      "WIN32_LEAN_AND_MEAN"
+                      "WIN32_LEAN_AND_MEAN",
+                      "DPI_DISABLE_THREAD_CLEANUP"
                     ],
                     "ExceptionHandling": "0",
                     "AdditionalOptions": [
