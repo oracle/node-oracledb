@@ -4,6 +4,22 @@
 
 Note: 2.0.14-Development is a work in progress
 
+- Tighten up checking on in-use ResultSets and Lobs to avoid leaks and
+  threading issues by making sure the application has closed them
+  before connections can be closed.  The error DPI-1054 may now be
+  seen if connections are attempted to be closed too early.
+
+- On Windows, disable ODPI-C thread cleanup to resolve a thread timing
+  issue, since Node.js creates all threads at startup and never
+  terminates them.
+
+- Added extra message text to NJS-045 to give potential causes for
+  `require('oracledb')` failures when the ODPI-C layer can't detect
+  the issue.
+
+- Updated ODPI-C submodule: various changes including improved
+  initialization error messages, and runtime-enabled debug tracing.
+
 - Fix duplicate 'close' event for error conditions when streaming Lobs
   in Node 8.
 
