@@ -957,8 +957,11 @@ an error.** Try some potential solutions.
 - Try running `npm cache clean -f` and deleting the
   `node_modules/oracledb` directory.
 
-If `require('oracledb')` fails, for example with **DPI-1047: Oracle
-Client library cannot be loaded**:
+If `require('oracledb')` fails:
+
+- If you got **DPI-1047: Oracle Client library cannot be loaded** or
+  **NJS-045: cannot load the oracledb add-on binary for Node.js**,
+  then review any messages and the installation instructions.
 
 - Does your Node.js architecture (32-bit or 64-bit) match the Oracle
   client library architecture?  Run `node -p 'process.arch'` and
@@ -987,3 +990,7 @@ Client library cannot be loaded**:
 
 - Do you have multiple copies of Node.js installed?  Did the correct
   `npm` and `node-gyp` get invoked?
+
+- Did you get **Error: Module version mismatch** or **Error: Module
+  did not self-register**?  You must rebuild node-oracledb when you
+  upgrade Node.js.
