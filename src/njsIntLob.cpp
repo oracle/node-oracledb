@@ -407,12 +407,14 @@ NAN_METHOD(njsILob::Read)
         else if (dpiLob_getBufferSize(lob->dpiLobHandle, lob->pieceSize,
                 &baton->bufferSize) < 0)
             baton->GetDPIError();
-        if (!lob->bufferPtr)
-            lob->bufferPtr = new char[baton->bufferSize];
-        baton->bufferPtr = lob->bufferPtr;
-        baton->SetDPILobHandle(lob->dpiLobHandle);
-        baton->lobAmount = lob->pieceSize;
-        baton->lobOffset = lob->offset;
+        if (baton->error.empty()) {
+            if (!lob->bufferPtr)
+                lob->bufferPtr = new char[baton->bufferSize];
+            baton->bufferPtr = lob->bufferPtr;
+            baton->SetDPILobHandle(lob->dpiLobHandle);
+            baton->lobAmount = lob->pieceSize;
+            baton->lobOffset = lob->offset;
+        }
     }
     baton->QueueWork("Read", Async_Read, Async_AfterRead, 2);
 }
@@ -479,10 +481,10 @@ NAN_METHOD(njsILob::Close)
 void njsILob::Async_Close(njsBaton *baton)
 {
     if (dpiLob_close(baton->dpiLobHandle) < 0) {
-        baton->GetDPIError();
         njsILob *lob = (njsILob*) baton->callingObj;
         lob->dpiLobHandle = baton->dpiLobHandle;
         baton->dpiLobHandle = NULL;
+        baton->GetDPIError();
     }
 }
 

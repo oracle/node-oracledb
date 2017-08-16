@@ -166,8 +166,11 @@ public:
     bool isArray;
     bool isNullable;
     njsProtoILob *lobs;
+    uint32_t numQueryVars;
+    njsVariable *queryVars;
 
-    njsVariable() : dpiVarHandle(NULL), dpiVarData(NULL), lobs(NULL) {}
+    njsVariable() : dpiVarHandle(NULL), dpiVarData(NULL), lobs(NULL),
+            queryVars(NULL) {}
     ~njsVariable();
     njsDataType DataType();
     njsDBType DBType();
@@ -309,6 +312,9 @@ public:
 
     // methods for getting DPI errors
     void GetDPIError(void);
+
+    // clear all data used in asynchronous operations
+    void ClearAsyncData(void);
 
     // methods for setting DPI handles
     void SetDPIConnHandle(dpiConn *handle);

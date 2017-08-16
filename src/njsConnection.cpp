@@ -146,6 +146,7 @@ bool njsConnection::ProcessDefines(njsBaton *baton, dpiStmt *dpiStmtHandle,
     // maxRows must be greater than zero in case of non-result set
     if (baton->maxRows == 0) {
         baton->error = njsMessages::Get(errInvalidmaxRows);
+        baton->ClearAsyncData();
         return false;
     }
 
@@ -168,20 +169,21 @@ bool njsConnection::ProcessDefines(njsBaton *baton, dpiStmt *dpiStmtHandle,
         }
         vars[i].name = std::string(queryInfo.name, queryInfo.nameLength);
         vars[i].maxArraySize = baton->maxRows;
-        vars[i].dbSizeInBytes = queryInfo.dbSizeInBytes;
-        vars[i].precision = queryInfo.precision;
-        vars[i].scale = queryInfo.scale;
+        vars[i].dbSizeInBytes = queryInfo.typeInfo.dbSizeInBytes;
+        vars[i].precision = queryInfo.typeInfo.precision +
+                queryInfo.typeInfo.fsPrecision;
+        vars[i].scale = queryInfo.typeInfo.scale;
         vars[i].isNullable = queryInfo.nullOk;
 
         // determine the type of data
-        vars[i].dbTypeNum = queryInfo.oracleTypeNum;
-        vars[i].varTypeNum = queryInfo.oracleTypeNum;
-        vars[i].nativeTypeNum = queryInfo.defaultNativeTypeNum;
-        if (queryInfo.oracleTypeNum != DPI_ORACLE_TYPE_VARCHAR &&
-                queryInfo.oracleTypeNum != DPI_ORACLE_TYPE_NVARCHAR &&
-                queryInfo.oracleTypeNum != DPI_ORACLE_TYPE_CHAR &&
-                queryInfo.oracleTypeNum != DPI_ORACLE_TYPE_NCHAR &&
-                queryInfo.oracleTypeNum != DPI_ORACLE_TYPE_ROWID) {
+        vars[i].dbTypeNum = queryInfo.typeInfo.oracleTypeNum;
+        vars[i].varTypeNum = queryInfo.typeInfo.oracleTypeNum;
+        vars[i].nativeTypeNum = queryInfo.typeInfo.defaultNativeTypeNum;
+        if (queryInfo.typeInfo.oracleTypeNum != DPI_ORACLE_TYPE_VARCHAR &&
+                queryInfo.typeInfo.oracleTypeNum != DPI_ORACLE_TYPE_NVARCHAR &&
+                queryInfo.typeInfo.oracleTypeNum != DPI_ORACLE_TYPE_CHAR &&
+                queryInfo.typeInfo.oracleTypeNum != DPI_ORACLE_TYPE_NCHAR &&
+                queryInfo.typeInfo.oracleTypeNum != DPI_ORACLE_TYPE_ROWID) {
             if (!njsConnection::MapByName(baton, &queryInfo,
                     vars[i].varTypeNum))
                 njsConnection::MapByType(baton, &queryInfo,
@@ -194,13 +196,13 @@ bool njsConnection::ProcessDefines(njsBaton *baton, dpiStmt *dpiStmtHandle,
             vars[i].maxSize = NJS_MAX_FETCH_AS_STRING_SIZE;
             vars[i].nativeTypeNum = DPI_NATIVE_TYPE_BYTES;
         } else vars[i].maxSize = 0;
-        switch (queryInfo.oracleTypeNum) {
+        switch (queryInfo.typeInfo.oracleTypeNum) {
             case DPI_ORACLE_TYPE_VARCHAR:
             case DPI_ORACLE_TYPE_NVARCHAR:
             case DPI_ORACLE_TYPE_CHAR:
             case DPI_ORACLE_TYPE_NCHAR:
             case DPI_ORACLE_TYPE_RAW:
-                vars[i].maxSize = queryInfo.clientSizeInBytes;
+                vars[i].maxSize = queryInfo.typeInfo.clientSizeInBytes;
                 break;
             case DPI_ORACLE_TYPE_DATE:
             case DPI_ORACLE_TYPE_TIMESTAMP:
@@ -232,13 +234,14 @@ bool njsConnection::ProcessDefines(njsBaton *baton, dpiStmt *dpiStmtHandle,
                 break;
             default:
                 baton->error = njsMessages::Get(errUnsupportedDatType);
+                baton->ClearAsyncData();
                 return false;
         }
 
         // create variable and define it
         if (dpiConn_newVar(dpiConnHandle, vars[i].varTypeNum,
                 vars[i].nativeTypeNum, vars[i].maxArraySize, vars[i].maxSize,
-                1, 0, queryInfo.objectType, &vars[i].dpiVarHandle,
+                1, 0, queryInfo.typeInfo.objectType, &vars[i].dpiVarHandle,
                 &vars[i].dpiVarData) < 0) {
             baton->GetDPIError();
             return false;
@@ -269,20 +272,23 @@ bool njsConnection::ProcessFetch(njsBaton *baton)
     }
     if (!moreRows && baton->rowsFetched < baton->maxRows)
         baton->maxRows = baton->rowsFetched;
-    return ProcessLOBs(baton, baton->queryVars, baton->numQueryVars,
+    return ProcessVars(baton, baton->queryVars, baton->numQueryVars,
             baton->rowsFetched);
 }
 
 
 //-----------------------------------------------------------------------------
-// njsConnection::ProcessLOBs()
-//   Process LOBs. This needs to take place in the worker thread since network
-// round trips are possible.
+// njsConnection::ProcessVars()
+//   Process variables used during binding or fetching. REF cursors must have
+// their query variables defined and LOBs must be initially processed in order
+// to have as much work as possible done in the worker thread and to avoid any
+// round trips.
 //-----------------------------------------------------------------------------
-bool njsConnection::ProcessLOBs(njsBaton *baton, njsVariable *vars,
+bool njsConnection::ProcessVars(njsBaton *baton, njsVariable *vars,
         uint32_t numVars, uint32_t baseNumElements)
 {
     uint32_t numElements;
+    dpiStmt *stmt;
 
     for (uint32_t col = 0; col < numVars; col++) {
         njsVariable *var = &vars[col];
@@ -297,6 +303,17 @@ bool njsConnection::ProcessLOBs(njsBaton *baton, njsVariable *vars,
             case DPI_ORACLE_TYPE_BLOB:
                 dataType = NJS_DATATYPE_BLOB;
                 break;
+            case DPI_ORACLE_TYPE_STMT:
+                stmt = var->dpiVarData->value.asStmt;
+                if (dpiStmt_getNumQueryColumns(stmt, &var->numQueryVars) < 0) {
+                    baton->GetDPIError();
+                    return false;
+                }
+                var->queryVars = new njsVariable[var->numQueryVars];
+                if (!ProcessDefines(baton, stmt, baton->dpiConnHandle,
+                        var->queryVars, var->numQueryVars))
+                    return false;
+                continue;
             default:
                 continue;
         }
@@ -358,7 +375,7 @@ bool njsConnection::MapByName(njsBaton *baton, dpiQueryInfo *queryInfo,
                 else if (baton->fetchInfo[i].type == NJS_DATATYPE_BUFFER)
                     targetType = DPI_ORACLE_TYPE_RAW;
                 else if (baton->fetchInfo[i].type == NJS_DATATYPE_DEFAULT)
-                    targetType = queryInfo->oracleTypeNum;
+                    targetType = queryInfo->typeInfo.oracleTypeNum;
                 return true;
             }
         }
@@ -376,7 +393,7 @@ bool njsConnection::MapByType(njsBaton *baton, dpiQueryInfo *queryInfo,
         dpiOracleTypeNum &targetType)
 {
     if (baton->fetchAsStringTypes || baton->fetchAsBufferTypes) {
-        switch (queryInfo->oracleTypeNum) {
+        switch (queryInfo->typeInfo.oracleTypeNum) {
             case DPI_ORACLE_TYPE_NUMBER:
             case DPI_ORACLE_TYPE_NATIVE_FLOAT:
             case DPI_ORACLE_TYPE_NATIVE_DOUBLE:
@@ -450,6 +467,7 @@ bool njsConnection::PrepareAndBind(njsBaton *baton)
     // result sets are incompatible with non-queries
     if (!stmtInfo.isQuery && baton->getRS) {
         baton->error = njsMessages::Get(errInvalidNonQueryExecution);
+        baton->ClearAsyncData();
         return false;
     }
 
@@ -460,6 +478,7 @@ bool njsConnection::PrepareAndBind(njsBaton *baton)
         if (stmtInfo.isReturning && var->bindDir == NJS_BIND_OUT &&
                 var->varTypeNum == DPI_ORACLE_TYPE_RAW) {
             baton->error = njsMessages::Get(errBufferReturningInvalid);
+            baton->ClearAsyncData();
             return false;
         }
         if (var->name.empty())
@@ -527,7 +546,7 @@ Local<Value> njsConnection::GetMetaData(njsVariable *vars, uint32_t numVars,
                 case NJS_DB_TYPE_TIMESTAMP_LTZ:
                     Nan::Set(column,
                             Nan::New<v8::String>("precision").ToLocalChecked(),
-                            Nan::New<v8::Number>(var->scale));
+                            Nan::New<v8::Number>(var->precision));
                     break;
                 default:
                     break;
@@ -1219,8 +1238,10 @@ bool njsConnection::GetScalarValueFromVar(njsBaton *baton, njsVariable *var,
             break;
         case DPI_NATIVE_TYPE_STMT:
             if (!njsResultSet::CreateFromRefCursor(baton, data->value.asStmt,
-                    temp))
+                    var->queryVars, var->numQueryVars, temp))
                 return false;
+            var->queryVars = NULL;
+            var->numQueryVars = 0;
             break;
         case DPI_NATIVE_TYPE_ROWID:
             uint32_t rowidValueLength;
@@ -1471,7 +1492,7 @@ void njsConnection::Async_Execute(njsBaton *baton)
             return;
         }
         baton->bufferRowIndex = 0;
-        if (!ProcessLOBs(baton, baton->bindVars, baton->numBindVars, 1))
+        if (!ProcessVars(baton, baton->bindVars, baton->numBindVars, 1))
             return;
     }
 
@@ -1587,10 +1608,10 @@ void njsConnection::Async_Release(njsBaton *baton)
 {
     if (dpiConn_close(baton->dpiConnHandle, DPI_MODE_CONN_CLOSE_DEFAULT, NULL,
             0) < 0) {
-        baton->GetDPIError();
         njsConnection *connection = (njsConnection*) baton->callingObj;
         connection->dpiConnHandle = baton->dpiConnHandle;
         baton->dpiConnHandle = NULL;
+        baton->GetDPIError();
     }
 }
 

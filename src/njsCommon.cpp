@@ -72,6 +72,10 @@ njsVariable::~njsVariable()
         delete [] lobs;
         lobs = NULL;
     }
+    if (queryVars) {
+        delete [] queryVars;
+        queryVars = NULL;
+    }
 }
 
 
@@ -178,6 +182,17 @@ njsBaton::~njsBaton()
     jsOracledb.Reset();
     jsBuffer.Reset();
     jsRows.Reset();
+    ClearAsyncData();
+}
+
+
+//-----------------------------------------------------------------------------
+// njsBaton::ClearAsyncData()
+//   Clear the baton of everything except for the JavaScript references which
+// must be reset in the main thread.
+//-----------------------------------------------------------------------------
+void njsBaton::ClearAsyncData()
+{
     if (dpiPoolHandle) {
         dpiPool_release(dpiPoolHandle);
         dpiPoolHandle = NULL;
@@ -197,6 +212,7 @@ njsBaton::~njsBaton()
     if (bindVars) {
         delete [] bindVars;
         bindVars = NULL;
+        numBindVars = 0;
     }
     if (protoILob) {
         delete protoILob;
@@ -206,18 +222,22 @@ njsBaton::~njsBaton()
         if (queryVars) {
             delete [] queryVars;
             queryVars = NULL;
+            numQueryVars = 0;
         }
         if (fetchInfo) {
             delete [] fetchInfo;
             fetchInfo = NULL;
+            numFetchInfo = 0;
         }
         if (fetchAsStringTypes) {
             delete [] fetchAsStringTypes;
             fetchAsStringTypes = NULL;
+            numFetchAsStringTypes = 0;
         }
         if (fetchAsBufferTypes) {
             delete [] fetchAsBufferTypes;
             fetchAsBufferTypes = NULL;
+            numFetchAsBufferTypes = 0;
         }
     }
 }
@@ -315,11 +335,14 @@ void njsBaton::AsyncAfterWorkCallback(uv_work_t *req, int status)
 
 //-----------------------------------------------------------------------------
 // njsBaton::GetDPIError()
-//   Gets the error information from DPI and stores it in the baton.
+//   Gets the error information from DPI and stores it in the baton. It then
+// clears all information from the baton. This is done here so that there are
+// no possible race conditions when errors take place.
 //-----------------------------------------------------------------------------
 void njsBaton::GetDPIError(void)
 {
     error = njsOracledb::GetDPIError();
+    ClearAsyncData();
 }
 
 
@@ -330,11 +353,9 @@ void njsBaton::GetDPIError(void)
 //-----------------------------------------------------------------------------
 void njsBaton::SetDPIConnHandle(dpiConn *handle)
 {
-    if (dpiConn_addRef(handle) < 0) {
+    if (dpiConn_addRef(handle) < 0)
         GetDPIError();
-        dpiConnHandle = NULL;
-    }
-    dpiConnHandle = handle;
+    else dpiConnHandle = handle;
 }
 
 
@@ -345,11 +366,9 @@ void njsBaton::SetDPIConnHandle(dpiConn *handle)
 //-----------------------------------------------------------------------------
 void njsBaton::SetDPIPoolHandle(dpiPool *handle)
 {
-    if (dpiPool_addRef(handle) < 0) {
+    if (dpiPool_addRef(handle) < 0)
         GetDPIError();
-        dpiPoolHandle = NULL;
-    }
-    dpiPoolHandle = handle;
+    else dpiPoolHandle = handle;
 }
 
 
@@ -360,11 +379,9 @@ void njsBaton::SetDPIPoolHandle(dpiPool *handle)
 //-----------------------------------------------------------------------------
 void njsBaton::SetDPIStmtHandle(dpiStmt *handle)
 {
-    if (dpiStmt_addRef(handle) < 0) {
+    if (dpiStmt_addRef(handle) < 0)
         GetDPIError();
-        dpiStmtHandle = NULL;
-    }
-    dpiStmtHandle = handle;
+    else dpiStmtHandle = handle;
 }
 
 
@@ -375,11 +392,9 @@ void njsBaton::SetDPIStmtHandle(dpiStmt *handle)
 //-----------------------------------------------------------------------------
 void njsBaton::SetDPILobHandle(dpiLob *handle)
 {
-    if (dpiLob_addRef(handle) < 0) {
+    if (dpiLob_addRef(handle) < 0)
         GetDPIError();
-        dpiLobHandle = NULL;
-    }
-    dpiLobHandle = handle;
+    else dpiLobHandle = handle;
 }
 
 

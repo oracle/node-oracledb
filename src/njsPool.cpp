@@ -444,10 +444,10 @@ NAN_METHOD(njsPool::Terminate)
 void njsPool::Async_Terminate(njsBaton *baton)
 {
     if (dpiPool_close(baton->dpiPoolHandle, DPI_MODE_POOL_CLOSE_DEFAULT) < 0) {
-        baton->GetDPIError();
         njsPool *pool = (njsPool*) baton->callingObj;
         pool->dpiPoolHandle = baton->dpiPoolHandle;
         baton->dpiPoolHandle = NULL;
+        baton->GetDPIError();
     }
 }
 

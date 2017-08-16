@@ -73,13 +73,12 @@ public:
     njsErrorType GetInvalidErrorType() const { return errInvalidResultSet; }
     static Local<Object> CreateFromBaton(njsBaton *baton);
     static bool CreateFromRefCursor(njsBaton *baton, dpiStmt *dpiStmtHandle,
+            njsVariable *queryVars, uint32_t numQueryVars,
             Local<Value> &value);
 
 private:
 
-    njsResultSet() : dpiStmtHandle(NULL), numQueryVars(0), queryVars(NULL),
-            numFetchAsStringTypes(0), fetchAsStringTypes(NULL),
-            numFetchInfo(0), fetchInfo(NULL) {}
+    njsResultSet() : dpiStmtHandle(NULL), numQueryVars(0), queryVars(NULL) {}
     ~njsResultSet();
 
     static NAN_METHOD(New);
@@ -109,10 +108,6 @@ private:
     uint32_t numQueryVars;
     njsVariable *queryVars;
     uint32_t outFormat;
-    uint32_t numFetchAsStringTypes;
-    njsDataType *fetchAsStringTypes;
-    uint32_t numFetchInfo;
-    njsFetchInfo *fetchInfo;
     bool extendedMetaData;
     Nan::Persistent<Object> jsOracledb;
     Nan::Persistent<Object> jsConnection;

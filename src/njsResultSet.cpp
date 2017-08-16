@@ -73,10 +73,6 @@ njsResultSet::~njsResultSet()
         delete [] queryVars;
         queryVars = NULL;
     }
-    if (fetchAsStringTypes) {
-        delete [] fetchAsStringTypes;
-        fetchAsStringTypes = NULL;
-    }
     if (dpiStmtHandle) {
         dpiStmt_release(dpiStmtHandle);
         dpiStmtHandle = NULL;
@@ -136,14 +132,6 @@ Local<Object> njsResultSet::CreateFromBaton(njsBaton *baton)
     baton->queryVars = NULL;
     resultSet->activeBaton = NULL;
     resultSet->jsConnection.Reset(baton->jsCallingObj);
-    resultSet->fetchAsStringTypes = baton->fetchAsStringTypes;
-    baton->fetchAsStringTypes = NULL;
-    resultSet->numFetchAsStringTypes = baton->numFetchAsStringTypes;
-    baton->numFetchAsStringTypes = 0;
-    resultSet->fetchInfo = baton->fetchInfo;
-    baton->fetchInfo = NULL;
-    resultSet->numFetchInfo = baton->numFetchInfo;
-    baton->numFetchInfo = 0;
     resultSet->extendedMetaData = baton->extendedMetaData;
     return scope.Escape(obj);
 }
@@ -154,14 +142,13 @@ Local<Object> njsResultSet::CreateFromBaton(njsBaton *baton)
 //   Create a new result set from the baton (
 //-----------------------------------------------------------------------------
 bool njsResultSet::CreateFromRefCursor(njsBaton *baton, dpiStmt *dpiStmtHandle,
-        Local<Value> &value)
+        njsVariable *queryVars, uint32_t numQueryVars, Local<Value> &value)
 {
     Nan::EscapableHandleScope scope;
     njsResultSet *resultSet;
     Local<Function> func;
     Local<Object> obj;
 
-    // basic initialization
     func = Nan::GetFunction(
             Nan::New<FunctionTemplate>(resultSetTemplate_s)).ToLocalChecked();
     obj = Nan::NewInstance(func).ToLocalChecked();
@@ -175,33 +162,8 @@ bool njsResultSet::CreateFromRefCursor(njsBaton *baton, dpiStmt *dpiStmtHandle,
     resultSet->outFormat = baton->outFormat;
     resultSet->extendedMetaData = baton->extendedMetaData;
     resultSet->activeBaton = NULL;
-
-    // create query variables
-    if (dpiStmt_getNumQueryColumns(dpiStmtHandle,
-            &resultSet->numQueryVars) < 0) {
-        baton->GetDPIError();
-        dpiStmt_release(dpiStmtHandle);
-        return false;
-    }
-    resultSet->queryVars = new njsVariable[resultSet->numQueryVars];
-    if (!njsConnection::ProcessDefines(baton, dpiStmtHandle,
-            baton->dpiConnHandle, resultSet->queryVars,
-            resultSet->numQueryVars)) {
-        delete [] resultSet->queryVars;
-        resultSet->queryVars = NULL;
-        dpiStmt_release(dpiStmtHandle);
-        return false;
-    }
-
-    // duplicate fetch as string types, if needed
-    if (baton->fetchAsStringTypes) {
-        resultSet->fetchAsStringTypes =
-                new njsDataType[baton->numFetchAsStringTypes];
-        for (uint32_t i = 0; i < baton->numFetchAsStringTypes; i++)
-            resultSet->fetchAsStringTypes[i] = baton->fetchAsStringTypes[i];
-        resultSet->numFetchAsStringTypes = baton->numFetchAsStringTypes;
-    }
-
+    resultSet->queryVars = queryVars;
+    resultSet->numQueryVars = numQueryVars;
     value = scope.Escape(obj);
     return true;
 }
@@ -337,8 +299,6 @@ void njsResultSet::GetRowsCommon(njsBaton *baton)
         baton->outFormat = outFormat;
         baton->queryVars = queryVars;
         baton->numQueryVars = numQueryVars;
-        baton->fetchAsStringTypes = fetchAsStringTypes;
-        baton->numFetchAsStringTypes = numFetchAsStringTypes;
         baton->keepQueryInfo = true;
         baton->jsOracledb.Reset(jsOracledb);
     }
@@ -434,10 +394,10 @@ NAN_METHOD(njsResultSet::Close)
 void njsResultSet::Async_Close(njsBaton *baton)
 {
     if (dpiStmt_close(baton->dpiStmtHandle, NULL, 0) < 0) {
-        baton->GetDPIError();
         njsResultSet *resultSet = (njsResultSet*) baton->callingObj;
         resultSet->dpiStmtHandle = baton->dpiStmtHandle;
         baton->dpiStmtHandle = NULL;
+        baton->GetDPIError();
     }
 }
 
@@ -458,9 +418,5 @@ void njsResultSet::Async_AfterClose(njsBaton *baton, Local<Value> argv[])
     baton->numQueryVars = resultSet->numQueryVars;
     resultSet->queryVars = NULL;
     resultSet->numQueryVars = 0;
-    baton->numFetchAsStringTypes = resultSet->numFetchAsStringTypes;
-    baton->fetchAsStringTypes = resultSet->fetchAsStringTypes;
-    resultSet->fetchAsStringTypes = NULL;
-    resultSet->numFetchAsStringTypes = 0;
 }
 

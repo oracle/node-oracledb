@@ -156,7 +156,7 @@ private:
             njsBaton *baton);
     static bool ProcessScalarBindValue(Local<Value> bindValue,
             njsVariable *var, uint32_t pos, njsBaton *baton);
-    static bool ProcessLOBs(njsBaton *baton, njsVariable *vars,
+    static bool ProcessVars(njsBaton *baton, njsVariable *vars,
             uint32_t numVars, uint32_t numElements);
     static bool ProcessOptions(Nan::NAN_METHOD_ARGS_TYPE args,
             unsigned int index, njsBaton *baton);
