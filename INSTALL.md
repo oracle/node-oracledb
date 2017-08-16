@@ -941,8 +941,8 @@ at [AskTom](https://asktom.oracle.com/).
 If `npm install oracledb` fails:
 
 - Use `npm install --verbose oracledb`.  Review your output and logs.
-Try to install in a different way.  **Google anything that looks like
-an error.** Try some potential solutions.
+  Try to install in a different way.  **Google anything that looks like
+  an error.** Try some potential solutions.
 
 - Was there a network connection error?  Do you need to set
   `http_proxy` and/or `https_proxy`?
@@ -971,7 +971,9 @@ If `require('oracledb')` fails:
 - On Windows, do you have the correct VS Redistributable?  Review
   the [Windows install instructions](#winredists).
 
-- On Windows, is your `PATH` set correctly to include the Oracle client libraries?
+- On Windows, check the `PATH` environment variable includes the
+  Oracle client libraries.  Ensure that you have restarted your
+  command prompt after you modified any environment variables.
 
 - Do you need system privileges to set, or preserve, variables like
   `PATH`, e.g. an elevated command prompt on Windows, or `sudo -E` on
