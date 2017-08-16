@@ -4,6 +4,25 @@
 
 Note: 2.0.14-Development is a work in progress
 
+- Changed default sample connect string to `"localhost/orclpdb"` which
+  is the Oracle Database 12.2 default for pluggable databases.
+
+- Moved NJS code from `/src/njs/src` to `/src` to remove obsolete
+  directory nesting.
+
+- Perform error cleanup as soon as possible in order to avoid possible
+  race conditions when errors take place.
+
+- Move operations on REF CURSORS out of the main thread in order to
+  improve performance and memory usage.
+
+- Relaxed the restriction preventing `oracledb.connnectionClass` being
+  used with dedicated connections; it previously gave ORA-56609.  Now
+  DRCP can now be used with dedicated connections but the
+  `CLIENT_DRIVER` value in `V$SESSION_CONNECT_INFO` will not be set in
+  this case.  The recommendation is still to use a session pool when
+  using DRCP.
+
 - Tighten up checking on in-use ResultSets and Lobs to avoid leaks and
   threading issues by making sure the application has closed them
   before connections can be closed.  The error DPI-1054 may now be
@@ -46,12 +65,16 @@ Note: 2.0.14-Development is a work in progress
   Oracle header files are no longer needed.  The `OCI_LIB_DIR` and
   `OCI_INC_DIR` environment variables are not needed.
 
-  At run time, Oracle 11.2, 12.1 or 12.2 client libraries must still be
-  in `PATH` (for Windows) or `LD_LIBRARY_PATH` (for Linux) or similar
-  platform library loading path.  Users of macOS must put the Oracle
-  client libraries in `~/lib` or `/usr/local/lib`.  Linux users of
-  Instant Client RPMs must always set `LD_LIBRARY_PATH` or use
+  At run time, Oracle 11.2, 12.1 or 12.2 client libraries should still
+  be in `PATH` (for Windows) or `LD_LIBRARY_PATH` (for Linux) or
+  similar platform library loading path.  Users of macOS must put the
+  Oracle client libraries in `~/lib` or `/usr/local/lib`.  Linux users
+  of Instant Client RPMs must always set `LD_LIBRARY_PATH` or use
   ldconfig - the previous RPATH linking option is not available.
+
+  On non-Windows platforms, if Oracle client libraries are not located
+  in the system library search path (e.g. `LD_LIBRARY_PATH`), then
+  look in `$ORACLE_HOME/lib`.
 
   A single node-oracledb binary now works with any of the Oracle
   client 11.2, 12.1 or 12.2 libraries.  This improves portability when
