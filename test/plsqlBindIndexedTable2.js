@@ -677,13 +677,9 @@ describe('44. plsqlBindIndexedTable2.js', function() {
               maxArraySize: 3 }
           },
           function(err) {
-            if (connection.oracleServerVersion < 1201000100) {
-              should.not.exist(err);
-            } else {
-              should.exist(err);
-              (err.message).should.startWith('ORA-06502:');
-              // ORA-06502: PL/SQL: numeric or value error: host bind array too small
-            }
+            should.exist(err);
+            (err.message).should.startWith('ORA-06502:');
+            // ORA-06502: PL/SQL: numeric or value error: host bind array too small
             callback();
           }
         );

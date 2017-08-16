@@ -122,7 +122,7 @@ Overview of node-oracledb functional tests
         4.4.1 outBind & maxSize restriction
         4.4.2 default value is 200
         4.4.3 Negative - bind out data exceeds default length
-      - 4.4.4 maximum value is 32767
+        4.4.4 maximum value is 32767
     4.5 The default direction for binding is BIND_IN
         4.5.1 DML default bind
         4.5.2 negative DML invalid bind direction
@@ -139,7 +139,7 @@ Overview of node-oracledb functional tests
     4.8 bind DATE
         4.8.1 binding out in Object & Array formats
         4.8.2 BIND_IN
-      - 4.8.3 BIND_INOUT
+        4.8.3 BIND_INOUT
 
 5. externalAuth.js
     5.1 tests that work both when DB has configured externalAuth and not configured
@@ -673,10 +673,10 @@ Overview of node-oracledb functional tests
         42.3.6 DELETE statement with single row matching
         42.3.7 DELETE statement with multiple rows matching
     42.4 in PL/SQL, the maximum size is 32767
-        42.4.1 when data length is less than maxSize
-        42.4.2 when data length is 32767
-        42.4.3 when data length greater than maxSize
-        42.4.4 when maxSize is greater than 32767
+        42.4.1 works well when the length of data is less than maxSize
+        42.4.2 works well when the length of data is exactly 32767
+        42.4.3 throws error when the length of data is greater than maxSize
+        42.4.4 throws error when both data and maxSize are greater than 32767
     42.5 INSERT and SELECT
         42.5.1 works with data size 100
         42.5.2 works with data size 2000
@@ -716,7 +716,7 @@ Overview of node-oracledb functional tests
         43.4.2 maxArraySize is mandatory for BIND_INOUT
         43.4.3 maxArraySize cannot smaller than the number of array elements
         43.4.4 maxArraySize can be equal to the number of array elements
-      - 43.4.5 negative case: large value
+        43.4.5 negative case: large value
         43.4.6 negative case: < 0
         43.4.7 negative case: = 0
         43.4.8 negative case: assign a string to it
@@ -730,7 +730,7 @@ Overview of node-oracledb functional tests
     44.5 null elements in String and Number arrays
     44.6 empty array for BIND_IN and BIND_INOUT
     44.7 empty array for BIND_OUT
-  - 44.8 maxSize option applies to each elements of an array
+    44.8 maxSize option applies to each elements of an array
 
 45. instanceof.js
     45.1 instanceof works for the oracledb instance
@@ -2676,6 +2676,9 @@ Overview of node-oracledb functional tests
     104.2 stores null values correctly
         104.2.1 testing Null, Empty string and Undefined
 
+105. streamErrorEvent.js
+    105.1 triggers stream error event
+
 106. fetchRowidAsString.js
     106.1 works with fetchInfo option
         106.1.1 fetchInfo
@@ -3528,12 +3531,18 @@ Overview of node-oracledb functional tests
         134.2.6 set maxSize to size (32K - 1)
         134.2.7 set maxSize to size 1GB
 
-135. clobDMLReturning.js
+135. clobDMLReturningAsStream.js
     135.1 CLOB, UPDATE
-      - 135.1.1 works with stream
-        135.1.2 fetch as string
+        135.1.1 works with stream
 
-136. blobDMLReturning.js
-    136.1 BLOB, UPDATE
-      - 136.1.1 works with stream
-        136.1.2 fetch as string
+136. clobDMLReturningAsString.js
+    136.1 CLOB, UPDATE
+        136.1.1 fetch as string
+
+137. blobDMLReturningAsStream.js
+    137.1 BLOB, UPDATE
+        137.1.1 works with stream
+
+138. blobDMLReturningAsBuffer.js
+    138.1 BLOB, UPDATE
+        138.1.1 fetch as string

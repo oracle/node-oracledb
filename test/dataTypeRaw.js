@@ -336,7 +336,7 @@ describe('42. dataTypeRaw.js', function() {
       );
     });
 
-    it('42.4.1 when data length is less than maxSize', function(done) {
+    it('42.4.1 works well when the length of data is less than maxSize', function(done) {
       var size = 5;
       var buf = assist.createBuffer(size);
 
@@ -344,7 +344,7 @@ describe('42. dataTypeRaw.js', function() {
         "BEGIN nodb_testraw(:i, :o); END;",
         {
           i: { type: oracledb.BUFFER, dir: oracledb.BIND_IN, val: buf },
-          o: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: 10}
+          o: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: 32800}
         },
         function(err, result) {
           should.not.exist(err);
@@ -356,7 +356,7 @@ describe('42. dataTypeRaw.js', function() {
       );
     });
 
-    it('42.4.2 when data length is 32767', function(done) {
+    it('42.4.2 works well when the length of data is exactly 32767', function(done) {
       var size = 32767;
       var buf = assist.createBuffer(size);
 
@@ -376,15 +376,15 @@ describe('42. dataTypeRaw.js', function() {
       );
     });
 
-    it('42.4.3 when data length greater than maxSize', function(done) {
-      var size = 32800;
+    it('42.4.3 throws error when the length of data is greater than maxSize', function(done) {
+      var size = 32700;
       var buf = assist.createBuffer(size);
 
       connection.execute(
         "BEGIN nodb_testraw(:i, :o); END;",
         {
           i: { type: oracledb.BUFFER, dir: oracledb.BIND_IN, val: buf },
-          o: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: size }
+          o: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: (size-100) }
         },
         function(err) {
           should.exist(err);
@@ -395,7 +395,7 @@ describe('42. dataTypeRaw.js', function() {
       );
     });
 
-    it('42.4.4 when maxSize is greater than 32767', function(done) {
+    it('42.4.4 throws error when both data and maxSize are greater than 32767', function(done) {
       var size = 32800;
       var buf = assist.createBuffer(size);
 

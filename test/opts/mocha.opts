@@ -110,11 +110,12 @@ test/binding_defaultBindInout.js
 test/bindTimestamp.js
 test/dataTypeLong.js
 test/dataTypeLongRaw.js
+test/streamErrorEvent.js
 test/fetchRowidAsString.js
 test/rowidDMLBindAsString.js
 test/rowidProcedureBindAsString_bindin.js
-test/rowidFunctionBindAsString_bind.js
 
+test/rowidFunctionBindAsString_bind.js
 test/rowidProcedureBindAsString_bindout.js
 test/rowidProcedureBindAsString_bindinout.js
 test/rowidFunctionBindAsString_bindinout.js
@@ -124,8 +125,8 @@ test/urowidDMLBindAsString_indexed.js
 test/fetchUrowidAsString.js
 test/fetchUrowidAsString_indexed.js
 test/urowidProcedureBindAsString_bindin.js
-test/urowidProcedureBindAsString_bindout.js
 
+test/urowidProcedureBindAsString_bindout.js
 test/urowidProcedureBindAsString_bindinout.js
 test/urowidFunctionBindAsString_bind.js
 test/urowidFunctionBindAsString_bindinout.js
@@ -135,13 +136,15 @@ test/longDMLBind.js
 test/longrawDMLBind.js
 test/blobStream.js
 test/clobStream.js
-test/longProcedureBind_inout.js
 
+test/longProcedureBind_inout.js
 test/longProcedureBind_out.js
 test/longProcedureBind_in.js
 test/longrawProcedureBind_in.js
 test/longrawProcedureBind_inout.js
 test/longrawProcedureBind_out.js
 
-test/clobDMLReturning.js
-test/blobDMLReturning.js
+test/clobDMLReturningAsStream.js
+test/clobDMLReturningAsString.js
+test/blobDMLReturningAsStream.js
+test/blobDMLReturningAsBuffer.js
