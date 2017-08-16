@@ -19,10 +19,10 @@
  * See LICENSE.md for relevant licenses.
  *
  * NAME
- *   136. blobDMLReturning.js
+ *   137. blobDMLReturningAsStream.js
  *
  * DESCRIPTION
- *   Testing BLOB dml returning multiple rows.
+ *   Testing BLOB DML returning multiple rows as stream.
  *
  * NUMBERING RULE
  *   Test numbers follow this numbering rule:
@@ -37,14 +37,13 @@ var oracledb = require('oracledb');
 var should   = require('should');
 var async    = require('async');
 var dbConfig = require('./dbconfig.js');
-var random   = require('./random.js');
 var sql      = require('./sql.js');
 var assist   = require('./dataTypeAssist.js');
 
-describe('136. blobDMLReturning.js', function() {
+describe('137. blobDMLReturningAsStream.js', function() {
 
   var connection = null;
-  var tableName = "nodb_dml_blob_136";
+  var tableName = "nodb_dml_blob_137";
   var node6plus = false; // assume node runtime version is lower than 6
 
   var blob_table_create = "BEGIN \n" +
@@ -59,8 +58,8 @@ describe('136. blobDMLReturning.js', function() {
                           "    END; \n" +
                           "    EXECUTE IMMEDIATE (' \n" +
                           "        CREATE TABLE " + tableName + " ( \n" +
-                          "            id      NUMBER, \n" +
-                          "            blob    BLOB \n" +
+                          "            num      NUMBER, \n" +
+                          "            blob     BLOB \n" +
                           "        ) \n" +
                           "    '); \n" +
                           "END; ";
@@ -83,15 +82,14 @@ describe('136. blobDMLReturning.js', function() {
     });
   });
 
-  describe('136.1 BLOB, UPDATE', function() {
+  describe('137.1 BLOB, UPDATE', function() {
     before(function(done) {
       async.series([
         function(cb) {
           sql.executeSql(connection, blob_table_create, {}, {}, cb);
         },
         function(cb) {
-          insertData();
-          cb();
+          async.times(10, insertData, cb);
         }
       ], done);
     });
@@ -99,36 +97,30 @@ describe('136. blobDMLReturning.js', function() {
       sql.executeSql(connection, blob_table_drop, {}, {}, done);
     });
 
-    it.skip('136.1.1 works with stream', function(done) {
+    it('137.1.1 works with stream', function(done) {
       updateReturning_stream(done);
-    }); // 136.1.1
+    }); // 137.1.1
 
-    it('136.1.2 fetch as string', function(done) {
-      updateReturning_buffer(done);
-    }); // 136.1.1
+  }); // 137.1
 
-  }); // 136.1
-
-  var insertData = function() {
-    for(var i=0; i<10; i++) {
-      var str = random.getRandomLengthString(i+10);
-      var blob = node6plus ? Buffer.from(str, "utf-8") : new Buffer(str, "utf-8");
-      connection.execute(
-        "insert into " + tableName + " values (:id, :b)",
-        {
-          id: {val: i, dir: oracledb.BIND_IN, type: oracledb.NUMBER},
-          b: {val: blob, dir: oracledb.BIND_IN, type: oracledb.BUFFER}
-        },
-        function(err, result) {
-          should.not.exist(err);
-          (result.rowsAffected).should.be.exactly(1);
-        }
-      );
-    }
+  var insertData = function(i, cb) {
+    var blob = node6plus ? Buffer.from(String(i), "utf-8") : new Buffer(String(i), "utf-8");
+    connection.execute(
+      "insert into " + tableName + " values (:id, :b)",
+      {
+        id: {val: i, dir: oracledb.BIND_IN, type: oracledb.NUMBER},
+        b: {val: blob, dir: oracledb.BIND_IN, type: oracledb.BUFFER}
+      },
+      function(err, result) {
+        should.not.exist(err);
+        (result.rowsAffected).should.be.exactly(1);
+        cb(err);
+      }
+    );
   };
 
   var updateReturning_stream = function(callback) {
-    var sql_update = "UPDATE " + tableName + " set id = id+10 RETURNING id, blob into :num, :lobou";
+    var sql_update = "UPDATE " + tableName + " set num = num+10 RETURNING num, blob into :num, :lobou";
     connection.execute(
       sql_update,
       {
@@ -136,52 +128,43 @@ describe('136. blobDMLReturning.js', function() {
         lobou: { type: oracledb.BLOB, dir: oracledb.BIND_OUT }
       },
       function(err, result) {
-        console.log(sql_update);
         should.not.exist(err);
         var numLobs = result.outBinds.lobou.length;
         should.strictEqual(numLobs, 10);
-        for (var index = 0; index < result.outBinds.lobou.length; index++) {
-          var lob = result.outBinds.lobou[index];
-          var id = result.outBinds.num[index];
-          should.exist(lob);
-          var blobData = 0;
-          var totalLength = 0;
-          blobData = node6plus ? Buffer.alloc(0) : new Buffer(0);
-
-          lob.on('data', function(chunk) {
-            totalLength = totalLength + chunk.length;
-            blobData = Buffer.concat([blobData, chunk], totalLength);
-          });
-
-          lob.on('error', function(err) {
-            should.not.exist(err, "lob.on 'error' event.");
-          });
-
-          lob.on('end', function(err) {
-            should.not.exist(err);
-            var expected = node6plus ? Buffer.from(String(id), "utf-8") : new Buffer(String(id-10), "utf-8");
-            should.strictEqual(assist.compare2Buffers(blobData, expected), true);
-          });
-        }
-        callback();
+        async.times(
+          numLobs,
+          function(n, next) {
+            verifyLob( n, result, function(err, result) { next(err, result); } );
+          },
+          callback
+        );
       }
     );
   };
 
-  var updateReturning_buffer = function(callback) {
-    var sql_update = "UPDATE " + tableName + " set id = id+10 RETURNING id, blob into :num, :lobou";
-    connection.execute(
-      sql_update,
-      {
-        num: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
-        lobou: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT }
-      },
-      function(err) {
-        should.exist(err);
-        should.strictEqual((err.message), "NJS-028: raw database type is not supported with DML Returning statements");
-        callback();
-      }
-    );
+  var verifyLob = function(n, result, cb) {
+    var lob = result.outBinds.lobou[n];
+    var id = result.outBinds.num[n];
+    should.exist(lob);
+    var blobData = 0;
+    var totalLength = 0;
+    blobData = node6plus ? Buffer.alloc(0) : new Buffer(0);
+
+    lob.on('data', function(chunk) {
+      totalLength = totalLength + chunk.length;
+      blobData = Buffer.concat([blobData, chunk], totalLength);
+    });
+
+    lob.on('error', function(err) {
+      should.not.exist(err, "lob.on 'error' event.");
+    });
+
+    lob.on('end', function(err) {
+      should.not.exist(err);
+      var expected = node6plus ? Buffer.from(String(id-10), "utf-8") : new Buffer(String(id-10), "utf-8");
+      should.strictEqual(assist.compare2Buffers(blobData, expected), true);
+      cb(err, result);
+    });
   };
 
 });

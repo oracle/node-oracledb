@@ -19,10 +19,10 @@
  * See LICENSE.md for relevant licenses.
  *
  * NAME
- *   135. clobDMLReturning.js
+ *   135. clobDMLReturningAsStream.js
  *
  * DESCRIPTION
- *   Testing CLOB dml returning multiple rows.
+ *   Testing CLOB DML returning multiple rows as stream.
  *
  * NUMBERING RULE
  *   Test numbers follow this numbering rule:
@@ -35,10 +35,12 @@
 
 var oracledb = require('oracledb');
 var should   = require('should');
+var async    = require('async');
 var dbConfig = require('./dbconfig.js');
 var sql      = require('./sql.js');
 
-describe('135. clobDMLReturning.js', function() {
+describe('135. clobDMLReturningAsStream.js', function() {
+  this.timeout(10000);
 
   var connection = null;
   var tableName = "nodb_dml_clob_135";
@@ -55,8 +57,8 @@ describe('135. clobDMLReturning.js', function() {
                           "    END; \n" +
                           "    EXECUTE IMMEDIATE (' \n" +
                           "        CREATE TABLE " + tableName + " ( \n" +
-                          "            id      NUMBER, \n" +
-                          "            clob    CLOB \n" +
+                          "            num      NUMBER, \n" +
+                          "            clob     CLOB \n" +
                           "        ) \n" +
                           "    '); \n" +
                           "    FOR i IN 1..10 LOOP \n" +
@@ -91,18 +93,14 @@ describe('135. clobDMLReturning.js', function() {
       sql.executeSql(connection, clob_table_drop, {}, {}, done);
     });
 
-    it.skip('135.1.1 works with stream', function(done) {
+    it('135.1.1 works with stream', function(done) {
       updateReturning_stream(done);
-    }); // 135.1.1
-
-    it('135.1.2 fetch as string', function(done) {
-      updateReturning_string(done);
     }); // 135.1.1
 
   }); // 135.1
 
   var updateReturning_stream = function(callback) {
-    var sql_update = "UPDATE " + tableName + " set id = id+10 RETURNING id, clob into :num, :lobou";
+    var sql_update = "UPDATE " + tableName + " set num = num+10 RETURNING num, clob into :num, :lobou";
     connection.execute(
       sql_update,
       {
@@ -113,56 +111,40 @@ describe('135. clobDMLReturning.js', function() {
         should.not.exist(err);
         var numLobs = result.outBinds.lobou.length;
         should.strictEqual(numLobs, 10);
-        for (var index = 0; index < result.outBinds.lobou.length; index++) {
-          var lob = result.outBinds.lobou[index];
-          var id = result.outBinds.num[index];
-          should.exist(lob);
-          lob.setEncoding('utf8');
-          var clobData = '';
-
-          lob.on('data', function(chunk) {
-            clobData += chunk;
-          });
-
-          lob.on('error', function(err) {
-            should.not.exist(err);
-          });
-
-          lob.on('end', function(err) {
-            should.not.exist(err);
-            should.strictEqual(clobData, (id-10));
-          });
-          lob.on('close', function(err) {
-            should.not.exist(err);
-          });
-        }
-        callback();
+        async.times(
+          numLobs,
+          function(n, next) {
+            verifyLob( n, result, function(err, result) { next(err, result); } );
+          },
+          callback
+        );
       }
     );
   };
 
-  var updateReturning_string = function(callback) {
-    var sql_update = "UPDATE " + tableName + " set id = id+10 RETURNING id, clob into :num, :lobou";
-    connection.execute(
-      sql_update,
-      {
-        num: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
-        lobou: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
-      },
-      function(err, result) {
-        should.not.exist(err);
-        var numLobs = result.outBinds.lobou.length;
-        should.strictEqual(numLobs, 10);
-        for (var index = 0; index < result.outBinds.lobou.length; index++) {
-          var lob = result.outBinds.lobou[index];
-          var id = result.outBinds.num[index];
-          should.strictEqual(lob, String(id-10));
-          if(id === 20) {
-            callback();
-          }
-        }
-      }
-    );
+  var verifyLob = function(n, result, cb) {
+    var lob = result.outBinds.lobou[n];
+    var id = result.outBinds.num[n];
+    should.exist(lob);
+    lob.setEncoding('utf8');
+    var clobData = '';
+
+    lob.on('data', function(chunk) {
+      clobData += chunk;
+    });
+
+    lob.on('error', function(err) {
+      should.not.exist(err);
+    });
+
+    lob.on('end', function(err) {
+      should.not.exist(err);
+      should.strictEqual(clobData, (id-10).toString());
+    });
+    lob.on('close', function(err) {
+      should.not.exist(err);
+      cb(err, result);
+    });
   };
 
 });
