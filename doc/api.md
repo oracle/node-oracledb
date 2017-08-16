@@ -501,6 +501,11 @@ Order Entry system.  Users will only be given sessions of the
 appropriate class, allowing maximal reuse of resources in each case,
 and preventing any session information leaking between the two systems.
 
+If `connectionClass` is set for a non-pooled connection, the driver
+name is not recorded in `V$` views.
+See
+[End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend).
+
 ##### Example
 
 ```javascript
@@ -2599,9 +2604,6 @@ oracledb.getConnection(
   . . .
 ```
 
-Applications that request [DRCP](#drcp) connections, for example with
-`myhost/XE:pooled`, must use local [Connection Pooling](#connpooling).
-
 For more information on Easy Connect strings see
 [Understanding the Easy Connect Naming Method](https://docs.oracle.com/database/122/NETAG/configuring-naming-methods.htm#NETAG255)
 in the Oracle documentation.
@@ -2659,10 +2661,6 @@ oracledb.getConnection(
   },
   . . .
 ```
-
-Applications that request [DRCP](#drcp) connections, for example where
-the connection description contains `(SERVER=POOLED)`, must use
-local [Connection Pooling](#connpooling).
 
 #### <a name="notjdbc"></a> 8.1.3 JDBC and Node-oracledb Connection Strings Compared
 
@@ -3182,15 +3180,11 @@ works on it for a relatively short duration, and then releases it.
 To use DRCP in node-oracledb:
 
 1. The DRCP pool must be started in the database: `SQL> execute dbms_connection_pool.start_pool();`
-2. The [`connectionClass`](#propdbconclass) should be set by the node-oracledb application.  If it is not set, the pooled server session memory will not be reused optimally.
+2. The [`connectionClass`](#propdbconclass) should be set by the node-oracledb application.  If it is not set, the pooled server session memory will not be reused optimally, and the statistic views will record large values for `NUM_MISSES`.
 3. The `getConnection()` property `connectString` must specify to use a pooled server, either by the Easy Connect syntax like `myhost/sales:POOLED`, or by using a `tnsnames.ora` alias for a connection that contains `(SERVER=POOLED)`.
 
-DRCP connections can only be used with node-oracledb's local
-[connection pool](#poolclass).  If a standalone (non-local pool)
-connection is created with
-[`oracledb.getConnection()`](#getconnectiondb) and the `connectString`
-indicates a DRCP server should be used, then an error *ORA-56609:
-Usage not supported with DRCP* occurs.
+For efficiency, it is recommended that DRCP connections should be used
+with node-oracledb's local [connection pool](#poolclass).
 
 The DRCP 'Purity' is SELF for DRCP connections.  This allows reuse of
 both the pooled server process and session memory, giving maximum benefit
@@ -3232,7 +3226,7 @@ var oracledb = require('oracledb');
 oracledb.getConnection(
   {
     externalAuth: true,
-    connectString: "localhost/orcl"
+    connectString: "localhost/orclpdb"
   },
   . . .
 ```
@@ -6040,7 +6034,7 @@ oracledb.getConnection(
   {
     user          : "hr",
     password      : "welcome",
-    connectString : "localhost/orcl"
+    connectString : "localhost/orclpdb"
   },
   function(err, connection)
   {
@@ -6103,10 +6097,9 @@ understanding that these require round-trips to the database.
 
 #### The Add-on Name
 
-For every connection, the Oracle Database `V$SESSION_CONNECT_INFO`
-view shows the version of node-oracledb in use.  This allows DBAs to
-verify that applications are using the desired add-on version.  For
-example, a DBA might see:
+The Oracle Database `V$SESSION_CONNECT_INFO` view shows the version of
+node-oracledb in use.  This allows DBAs to verify that applications
+are using the desired add-on version.  For example, a DBA might see:
 
 ```
 SQL> SELECT UNIQUE sid, client_driver
@@ -6119,6 +6112,10 @@ SQL> SELECT UNIQUE sid, client_driver
         16 node-oracledb : 2.0.14
         33 node-oracledb : 2.0.14
 ```
+
+Note if [`oracledb.connectionClass`](#propdbconclass) is set for a
+non-pooled connection, the `CLIENT_DRIVER` value will not be set for
+that connection.
 
 ## <a name="promiseoverview"></a> 20. Promises and node-oracledb
 

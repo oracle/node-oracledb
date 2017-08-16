@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -34,7 +34,7 @@
  *     [//]host_name[:port][/service_name][:server_type][/instance_name]
  *
  *   Commonly just the host_name and service_name are needed
- *   e.g. "localhost/orcl" or "localhost/XE"
+ *   e.g. "localhost/orclpdb" or "localhost/XE"
  *
  *   If using a tnsnames.ora file, the file can be in a default
  *   location such as $ORACLE_HOME/network/admin/tnsnames.ora or
@@ -76,7 +76,7 @@ module.exports = {
 
   // For information on connection strings see:
   // https://github.com/oracle/node-oracledb/blob/master/doc/api.md#connectionstrings
-  connectString : process.env.NODE_ORACLEDB_CONNECTIONSTRING || "localhost/orcl",
+  connectString : process.env.NODE_ORACLEDB_CONNECTIONSTRING || "localhost/orclpdb",
 
   // Setting externalAuth is optional.  It defaults to false.  See:
   // https://github.com/oracle/node-oracledb/blob/master/doc/api.md#extauth
