@@ -182,7 +182,6 @@ limitations under the License.
   - 14.5 [LOB Bind Parameters](#lobbinds)
   - 14.6 [PL/SQL Collection Associative Array (Index-by) Bind Parameters](#plsqlindexbybinds)
   - 14.7 [Binding Multiple Values to a SQL `WHERE IN` Clause](#sqlwherein)
-  - 14.8 [Tracing Bind Values](#bindtrace)
 15. [Transaction Management](#transactionmgt)
 16. [Statement Caching](#stmtcache)
 17. [External Configuration](#oraaccess)
@@ -191,6 +190,7 @@ limitations under the License.
 20. [Promises and node-oracledb](#promiseoverview)
   - 20.1 [Custom Promise Libraries](#custompromises)
 21. [Async/Await and node-oracledb](#asyncawaitoverview)
+22. [Tracing SQL Statements](#tracingsql)
 
 ## <a name="intro"></a> 1. Introduction
 
@@ -5861,18 +5861,6 @@ in
 in
 [this StackOverflow answer](http://stackoverflow.com/a/43330282/4799035).
 
-### <a name="bindtrace"></a> 14.8 Tracing Bind Values
-
-Sometimes it is useful to trace the bind data values that have been
-used when executing statements.  Several methods are available.  The
-Oracle Database
-view
-[`V$SQL_BIND_CAPTURE`](http://docs.oracle.com/database/122/REFRN/V-SQL_BIND_CAPTURE.htm#REFRN30310) can
-capture bind information.  Tracing with Oracle
-DB's
-[`dbms_monitor.session_trace_enable()`](https://docs.oracle.com/database/122/ARPLS/DBMS_MONITOR.htm#ARPLS67178) may
-also be useful.
-
 ## <a name="transactionmgt"></a> 15. Transaction Management
 
 By default,
@@ -6315,3 +6303,40 @@ must be streamed since there is no Promisified interface for them.
 
 For more information, see
 [How to get, use, and close a DB connection using async functions](https://jsao.io/2017/07/how-to-get-use-and-close-a-db-connection-using-async-functions/).
+
+## <a name="bindtrace"></a> <a name="tracingsql"></a> 22. Tracing SQL Statements
+
+Applications that have implemented [End-to-end Tracing](#endtoend)
+calls such as [action](#propconnaction) and [module](#propconnmodule),
+will make it easier in database monitoring tools to identify SQL
+statement execution.
+
+In node-oracledb itself, the [ODPI-C tracing
+capability](https://oracle.github.io/odpi/doc/user_guide/debugging.html)
+can be used to log executed statements to the standard error stream.
+Before executing Node.js, set the environment variable
+`DPI_DEBUG_LEVEL` to 16.  For example, on Linux:
+
+```
+export DPI_DEBUG_LEVEL=16
+node myapp.js 2> log.txt
+```
+
+For an application that does a single query, the log file might
+contain:
+
+```
+ODPI [123145386143744] 2017/08/23 09:05:09.441: SQL select sysdate from dual where :b = 1
+```
+
+Sometimes it is useful to trace the bind data values that have been
+used when executing statements.  Several methods are available.
+
+In the Oracle Database, the view
+[`V$SQL_BIND_CAPTURE`](http://docs.oracle.com/database/122/REFRN/V-SQL_BIND_CAPTURE.htm#REFRN30310)
+can capture bind information.  Tracing with Oracle Database's
+[`dbms_monitor.session_trace_enable()`](https://docs.oracle.com/database/122/ARPLS/DBMS_MONITOR.htm#ARPLS67178)
+may also be useful.
+
+You can also write your own wrapper around `execute()` and log any
+parameters.
