@@ -1686,7 +1686,7 @@ using either an object or an array.
 A callback function returns a [`result`](#executecallback) object, containing any fetched
 rows, the values of any OUT and IN OUT bind variables, and the number
 of rows affected by the execution of
-[DML](https://docs.oracle.com/database/122/CNCPT/sql.htm#GUID-90EA5D9B-76F2-4916-9F7E-CF0D8AA1A09D)
+[DML](https://docs.oracle.com/database/122/CNCPT/sql.htm#CNCPT516)
 statements.
 
 ##### Parameters
@@ -1886,7 +1886,7 @@ The parameters of the `execute()` callback function are:
 Callback function parameter | Description
 ----------------------------|-------------
 *Error error* | If `execute()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
-*Object result* | The [`result`](#resultobject) object, described below. For DDL statements and DML where the application only checks `error` for success or failure, the `result` parameter can be omitted.
+*Object result* | The [`result`](#resultobject) object, described below.  The `result` parameter can be omitted for [DDL](https://docs.oracle.com/database/122/CNCPT/sql.htm#CNCPT1732) and [DML](https://docs.oracle.com/database/122/CNCPT/sql.htm#CNCPT516) statements where the application only checks `error` for success or failure.
 
 ##### <a name="resultobject"></a> Result Object Properties
 
@@ -1976,7 +1976,7 @@ Number rowsAffected
 ```
 
 For
-[DML](https://docs.oracle.com/database/122/CNCPT/sql.htm#GUID-90EA5D9B-76F2-4916-9F7E-CF0D8AA1A09D)
+[DML](https://docs.oracle.com/database/122/CNCPT/sql.htm#CNCPT516)
 statements (including SELECT FOR UPDATE) this contains the number of
 rows affected, for example the number of rows inserted. For non-DML
 statements such as queries, or if no rows are affected, then
@@ -3715,9 +3715,10 @@ Details are in the following sections.
 Columns of database type CHAR, VARCHAR2, NCHAR and NVARCHAR are
 returned from queries as JavaScript strings.
 
-Note that binding NCHAR and NVARCHAR for DML is not supported and may
-cause unexpected character set translation,
-see [Bind Data Type Notes](#binddatatypenotes).
+Note that binding NCHAR and NVARCHAR for
+[DML](https://docs.oracle.com/database/122/CNCPT/sql.htm#CNCPT516) is
+not supported and may cause unexpected character set translation, see
+[Bind Data Type Notes](#binddatatypenotes).
 
 ##### <a name="numberhandling"></a> 9.1.6.2 Fetching Numbers
 
@@ -3917,9 +3918,10 @@ or [`fetchAsString`](#propdbfetchasstring) settings, or the
 per-column [`fetchInfo`](#propexecfetchinfo) setting.  See the
 section [Working with CLOB and BLOB Data](#lobhandling).
 
-Note that binding NCLOB for DML is not supported and may cause
-unexpected character set translation,
-see [Bind Data Type Notes](#binddatatypenotes).
+Note that binding NCLOB for
+[DML](https://docs.oracle.com/database/122/CNCPT/sql.htm#CNCPT516) is
+not supported and may cause unexpected character set translation, see
+[Bind Data Type Notes](#binddatatypenotes).
 
 ##### <a name="fetchlong"></a> 9.1.6.6 Fetching LONG and LONG RAW
 
@@ -5071,6 +5073,10 @@ efficient.
 Bind parameters can be used to substitute data but not the text of the
 statement.
 
+Bind variables cannot be used in
+[DDL](https://docs.oracle.com/database/122/CNCPT/sql.htm#CNCPT1732)
+statements, for example `CREATE TABLE` or `ALTER` commands.
+
 ### <a name="inbind"></a> 14.1 IN Bind Parameters
 
 For IN binds, a data value is passed into the database and substituted
@@ -5195,11 +5201,12 @@ for more information.
 
 The type `oracledb.CURSOR` cannot be used with IN binds.
 
-Binding NCHAR, NVARCHAR or NCLOB for DML may result in incorrect
-character mapping, depending on the database character set and the
-database national character set.  It may work in the case where the
-database character set can safely convert to the database national
-character set.
+Binding NCHAR, NVARCHAR or NCLOB for
+[DML](https://docs.oracle.com/database/122/CNCPT/sql.htm#CNCPT516) may
+result in incorrect character mapping, depending on the database
+character set and the database national character set.  It may work in
+the case where the database character set can safely convert to the
+database national character set.
 
 ### <a name="outbind"></a> 14.2 OUT and IN OUT Bind Parameters
 
@@ -5331,6 +5338,9 @@ var bindVars = [
 ```
 
 ### <a name="dmlreturn"></a> 14.3 DML RETURNING Bind Parameters
+
+[DML](https://docs.oracle.com/database/122/CNCPT/sql.htm#CNCPT516)
+statements query or manipulate data in existing schema objects.
 
 Bind parameters from "DML RETURNING" statements (such as `INSERT
 ... RETURNING ... INTO ...`) can use `oracledb.BLOB`, `oracledb.CLOB`, `oracledb.STRING`,
@@ -5845,7 +5855,7 @@ in
 ## <a name="transactionmgt"></a> 15. Transaction Management
 
 By default,
-[DML](https://docs.oracle.com/database/122/CNCPT/sql.htm#GUID-90EA5D9B-76F2-4916-9F7E-CF0D8AA1A09D)
+[DML](https://docs.oracle.com/database/122/CNCPT/sql.htm#CNCPT516)
 statements are not committed in node-oracledb.
 
 The node-oracledb add-on implements [`commit()`](#commit) and
@@ -5870,7 +5880,7 @@ When an application ends, any uncommitted transaction on a connection
 will be rolled back.
 
 Note: Oracle Database will implicitly commit when a
-[DDL](https://docs.oracle.com/database/122/CNCPT/sql.htm#GUID-C25B548B-363A-4FE5-B4EE-784502BAAD08)
+[DDL](https://docs.oracle.com/database/122/CNCPT/sql.htm#CNCPT1732)
 statement is executed irrespective of the value of `autoCommit`.
 
 ## <a name="stmtcache"></a> 16. Statement Caching
