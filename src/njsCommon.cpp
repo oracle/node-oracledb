@@ -492,6 +492,8 @@ bool njsBaton::GetUnsignedIntFromJSON(Local<Object> obj, const char *key,
     if (!error.empty())
         return false;
     jsValue = obj->Get(Nan::New<v8::String>(key).ToLocalChecked());
+    if (jsValue.IsEmpty())
+        return false;
     if (jsValue->IsUint32()) {
         *value = Nan::To<uint32_t>(jsValue).FromJust();
         return true;

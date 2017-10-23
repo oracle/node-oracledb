@@ -654,7 +654,10 @@ bool njsConnection::ProcessBindsByName(Handle<Object> bindObj, njsBaton *baton)
         std::string str = std::string(*v8str, v8str.length());
         var->name = ":" + str;
         var->pos = i + 1;
+
         Local<Value> val = bindObj->Get(temp);
+        if (val.IsEmpty ())
+            return false;
         if (!ProcessBind(val, var, false, baton))
             return false;
     }
@@ -677,6 +680,8 @@ bool njsConnection::ProcessBindsByPos(Handle<Array> binds, njsBaton *baton)
         njsVariable *var = &baton->bindVars[i];
         var->pos = i + 1;
         Local<Value> val = binds->Get(i);
+        if (val.IsEmpty ())
+            return false;
         if (!ProcessBind(val, var, true, baton))
             return false;
     }
@@ -1138,6 +1143,8 @@ bool njsConnection::ProcessOptions(Nan::NAN_METHOD_ARGS_TYPE args,
     // process the fetchAs specifications, if applicable
     Local<Value> key = Nan::New<v8::String>("fetchInfo").ToLocalChecked();
     Local<Value> val = options->Get(key);
+    if (val.IsEmpty ())
+        return false;
     if (!val->IsUndefined() && !val->IsNull()) {
         Local<Object> jsFetchInfo = val->ToObject();
         Local<Array> keys = jsFetchInfo->GetOwnPropertyNames();
