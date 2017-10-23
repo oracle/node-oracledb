@@ -73,8 +73,7 @@ var query_bind_insert = function (conn, cb) {
   conn.execute(
     "SELECT c FROM mylobs WHERE id = :id",
     { id: 1 },
-    function(err, result)
-    {
+    function(err, result) {
       if (err) {
         return cb(err, conn);
       }
@@ -127,8 +126,7 @@ var plsql_in_as_str_buf = function (conn, cb) {
     { id: 20,
       c: {val: bigStr, type: oracledb.STRING, dir: oracledb.BIND_IN},
       b: {val: bigBuf, type: oracledb.BUFFER, dir: oracledb.BIND_IN} },
-    function (err)
-    {
+    function (err) {
       if (err) {
         return cb(err, conn);
       }
@@ -145,8 +143,7 @@ var plsql_out_as_str_buf = function (conn, cb) {
     { id: 20,
       c: {type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 50000},
       b: {type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: 50000} },
-    function (err /*, result */)
-    {
+    function (err /*, result */) {
       if (err) {
         return cb(err, conn);
       }
@@ -165,8 +162,7 @@ var query_plsql_inout = function (conn, cb) {
   conn.execute(
     "SELECT c FROM mylobs WHERE id = :id",
     { id: 1 },
-    function(err, result)
-    {
+    function(err, result) {
       if (err) {
         return cb(err, conn);
       }
@@ -201,8 +197,7 @@ var query_plsql_inout = function (conn, cb) {
           clob2.setEncoding('utf8');  // set the encoding so we get a 'string' not a 'buffer'
           clob2.on(
             'error',
-            function(err)
-            {
+            function(err) {
               // console.log("clob2.on 'error' event");
               if (!errorHandled) {
                 errorHandled = true;
@@ -211,14 +206,12 @@ var query_plsql_inout = function (conn, cb) {
             });
           clob2.on(
             'end',
-            function()
-            {
+            function() {
               // console.log("clob2.on 'end' event");
             });
           clob2.on(
             'close',
-            function()
-            {
+            function() {
               // console.log("clob2.on 'close' event");
 
               console.log ("   Completed");
@@ -230,8 +223,7 @@ var query_plsql_inout = function (conn, cb) {
           var outStream = fs.createWriteStream(clobOutFileName1);
           outStream.on(
             'error',
-            function(err)
-            {
+            function(err) {
               // console.log("outStream.on 'error' event");
               if (!errorHandled) {
                 errorHandled = true;
@@ -254,8 +246,7 @@ var plsql_out_inout = function (conn, cb) {
     { idbv: 1,
       cobv: {type: oracledb.CLOB, dir: oracledb.BIND_OUT},
       bobv: {type: oracledb.BLOB, dir: oracledb.BIND_OUT} }, // not used in this demo; it will be NULL anyway
-    function(err, result)
-    {
+    function(err, result) {
       if (err) {
         return cb(err, conn);
       }
@@ -276,6 +267,8 @@ var plsql_out_inout = function (conn, cb) {
             return cb(err, conn);
           }
 
+          var errorHandled = false;
+
           var clob2 = result.outBinds.ciobv;
           if (clob2 === null) {
             return cb(new Error('plsql_out_inout(): NULL clob2 found'), conn);
@@ -286,33 +279,37 @@ var plsql_out_inout = function (conn, cb) {
           clob2.setEncoding('utf8');  // set the encoding so we get a 'string' not a 'buffer'
           clob2.on(
             'error',
-            function(err)
-            {
+            function(err) {
               // console.log("clob2.on 'error' event");
-              return cb(err);
+              if (!errorHandled) {
+                errorHandled = true;
+                return cb(err);
+              }
             });
           clob2.on(
             'end',
-            function()
-            {
+            function() {
               // console.log("clob2.on 'end' event");
             });
           clob2.on(
             'close',
-            function()
-            {
+            function() {
               // console.log("clob2.on 'close' event");
-              console.log ("   Completed");
-              return cb(null, conn);
+              if (!errorHandled) {
+                console.log ("   Completed");
+                return cb(null, conn);
+              }
             });
 
           var outStream = fs.createWriteStream(clobOutFileName2);
           outStream.on(
             'error',
-            function(err)
-            {
+            function(err) {
               // console.log("outStream.on 'error' event");
-              return cb(err);
+              if (!errorHandled) {
+                errorHandled = true;
+                return cb(err);
+              }
             });
 
           // Switch into flowing mode and push the LOB to the file
