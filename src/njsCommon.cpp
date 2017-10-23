@@ -187,6 +187,24 @@ njsBaton::~njsBaton()
 
 
 //-----------------------------------------------------------------------------
+// njsBaton::CheckJSException()
+//   Check for a JavaScript exception in the TryCatch variable. If one is
+// found, acquire the message and store it in the baton error so that it will
+// be propagated to the callback, then reset the exception so that it will not
+// be raised in JavaScript once the C++ method has completed its work.
+//-----------------------------------------------------------------------------
+void njsBaton::CheckJSException(Nan::TryCatch *tryCatch)
+{
+    if (tryCatch->HasCaught()) {
+        Local<String> message = tryCatch->Message()->Get();
+        v8::String::Utf8Value v8str(message->ToString());
+        error = std::string(*v8str, v8str.length());
+        tryCatch->Reset();
+    }
+}
+
+
+//-----------------------------------------------------------------------------
 // njsBaton::ClearAsyncData()
 //   Clear the baton of everything except for the JavaScript references which
 // must be reset in the main thread.

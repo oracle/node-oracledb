@@ -313,6 +313,9 @@ public:
     // methods for getting DPI errors
     void GetDPIError(void);
 
+    // method for checking for a JavaScript exception
+    void CheckJSException(Nan::TryCatch *tryCatch);
+
     // clear all data used in asynchronous operations
     void ClearAsyncData(void);
 

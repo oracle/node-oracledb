@@ -1427,6 +1427,7 @@ NAN_METHOD(njsConnection::Execute)
     baton = connection->CreateBaton(info);
     if (!baton)
         return;
+    Nan::TryCatch tryCatch;
     bool ok = baton->error.empty();
     if (ok) {
         baton->sql = sql;
@@ -1446,6 +1447,7 @@ NAN_METHOD(njsConnection::Execute)
         ok = ProcessBinds(info, 1, baton);
     if (ok && info.Length() > 3)
         ProcessOptions(info, 2, baton);
+    baton->CheckJSException(&tryCatch);
     baton->QueueWork("Execute", Async_Execute, Async_AfterExecute, 2);
 }
 
