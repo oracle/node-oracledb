@@ -13,6 +13,7 @@
              "odpi/src/dpiConn.c",
              "odpi/src/dpiContext.c",
              "odpi/src/dpiData.c",
+	     "odpi/src/dpiDebug.c",
              "odpi/src/dpiDeqOptions.c",
              "odpi/src/dpiEnqOptions.c",
              "odpi/src/dpiEnv.c",
@@ -41,7 +42,7 @@
         },
 	"cflags"        : ['-fexceptions'],
 	"cflags_cc"     : ['-fexceptions'],
-	"libraries"     : ['-ldl'],
+	"libraries"     : ['-ldl', '-lpthread'],
       }
     ],
     [
@@ -53,7 +54,7 @@
           "GCC_ENABLE_CPP_EXCEPTIONS": "YES",
           "GCC_ENABLE_CPP_RTTI": "YES"
         },
-          "libraries"     : ['-ldl']
+          "libraries"     : ['-ldl', '-lpthread']
       }
     ],
     [
@@ -63,7 +64,7 @@
         },
 	"cflags"        : ['-fexceptions', '-fsigned-char'],
 	"cflags_cc"     : ['-fexceptions', '-fsigned-char'],
-	"libraries"     : ['-ldl'],
+	"libraries"     : ['-ldl', '-lpthread'],
       }
     ],
     [
@@ -73,7 +74,7 @@
         },
 	"cflags"        : ['-fexceptions'],
 	"cflags_cc"     : ['-fexceptions'],
-	"libraries"     : ['-ldl'],
+	"libraries"     : ['-ldl', '-lpthread'],
       }
     ],
     [
