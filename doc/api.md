@@ -6296,7 +6296,8 @@ In node-oracledb itself, the [ODPI-C tracing
 capability](https://oracle.github.io/odpi/doc/user_guide/debugging.html)
 can be used to log executed statements to the standard error stream.
 Before executing Node.js, set the environment variable
-`DPI_DEBUG_LEVEL` to 16.  For example, on Linux:
+`DPI_DEBUG_LEVEL` to 16.  At a Windows command prompt, this could be
+done with `set DPI_DEBUG_LEVEL=16`.  On Linux, you might use:
 
 ```
 export DPI_DEBUG_LEVEL=16
@@ -6304,10 +6305,11 @@ node myapp.js 2> log.txt
 ```
 
 For an application that does a single query, the log file might
-contain:
+contain a tracing line consisting of the prefix 'ODPI', a thread
+identifier, a timestamp, and the SQL statement executed:
 
 ```
-ODPI [123145386143744] 2017/08/23 09:05:09.441: SQL select sysdate from dual where :b = 1
+ODPI [123145574764544] 2017/08/28 14:26:24.952: SQL select sysdate from dual where :b = 1
 ```
 
 Sometimes it is useful to trace the bind data values that have been
