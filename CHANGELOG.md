@@ -4,6 +4,32 @@
 
 Note: 2.0.14-Development is a work in progress
 
+- Upgraded NAN dependency from 2.5 to 2.7.
+
+- Updated ODPI-C submodule:
+  - Fix valgrind byte overrun when loading `libclntsh` from `$ORACLE_HOME`.
+  - Do not prevent connections from being explicitly closed when a fatal error has taken place.
+  - Eliminate race condition on initialization.  Add finalization code.
+  - Eliminate use of OCI wrappers for use of mutexes, which improves performance (now uses native threading, e.g. pthreads).
+  - Prevent use of NaN with Oracle numbers to avoid data corruption.
+  - Prevent ORA-1010 during connection ping to pre 10g Oracle Database.
+  - Improve debug trace output format.
+  - Prevent crash for DML RETURNING of variables that require dynamic binding.
+
+- Updated examples to avoid "DPI-1054: connection cannot be closed
+  when open statements or LOBs exist" and to avoid duplicate callbacks
+  on stream errors.
+
+- Check for JavaScript exceptions and if one is found, ensure that the
+  error is passed correctly to the callback and is not raised when the
+  C++ method has finished.
+
+- Added code to handle invalid object properties.
+
+- Make sure 'close' is the very last event, and doesn't occur before
+  an 'error' event.  Also emit 'close' after 'error' event for
+  `querystream()`
+
 - Changed default sample connect string to `"localhost/orclpdb"` which
   is the Oracle Database 12.2 default for pluggable databases.
 
@@ -74,7 +100,7 @@ Note: 2.0.14-Development is a work in progress
 
   On non-Windows platforms, if Oracle client libraries are not located
   in the system library search path (e.g. `LD_LIBRARY_PATH`), then
-  look in `$ORACLE_HOME/lib`.
+  node-oracledb attempts to use libraries in `$ORACLE_HOME/lib`.
 
   A single node-oracledb binary now works with any of the Oracle
   client 11.2, 12.1 or 12.2 libraries.  This improves portability when
