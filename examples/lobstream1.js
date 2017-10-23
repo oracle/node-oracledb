@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -75,8 +75,7 @@ var  dostream = function(lob, cb) {
 
   lob.on(
     'error',
-    function(err)
-    {
+    function(err) {
       // console.log("lob.on 'error' event");
       if (!errorHandled) {
         errorHandled = true;
@@ -87,14 +86,12 @@ var  dostream = function(lob, cb) {
     });
   lob.on(
     'end',
-    function()
-    {
+    function() {
       // console.log("lob.on 'end' event");
     });
   lob.on(
     'close',
-    function()
-    {
+    function() {
       // console.log("lob.on 'close' event");
       if (!errorHandled) {
         return cb(null);
@@ -104,8 +101,7 @@ var  dostream = function(lob, cb) {
   var outStream = fs.createWriteStream(outFileName);
   outStream.on(
     'error',
-    function(err)
-    {
+    function(err) {
       // console.log("outStream.on 'error' event");
       if (!errorHandled) {
         errorHandled = true;
@@ -116,14 +112,14 @@ var  dostream = function(lob, cb) {
     });
 
   // Switch into flowing mode and push the LOB to the file
+
   lob.pipe(outStream);
 };
 
 var doquery = function(cb) {
   conn.execute(
     sql,
-    function(err, result)
-    {
+    function(err, result) {
       if (err) {
         return cb(err);
       }
