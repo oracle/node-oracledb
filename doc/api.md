@@ -2518,29 +2518,10 @@ See [Streaming Query Results](#streamingresults) for more information.
 
 ## <a name="connectionhandling"></a> 8. Connection Handling
 
-In applications which use connections infrequently, create a connection
-with [`oracledb.getConnection()`](#getconnectiondb):
-
-```javascript
-var oracledb = require('oracledb');
-
-oracledb.getConnection(
-  {
-    user          : "hr",
-    password      : "welcome",
-    connectString : "localhost/XE"
-  },
-  function(err, connection)
-  {
-    if (err) { console.error(err.message); return; }
-
-    . . . // use connection
-
-  });
-```
-
-Connections should be released with [`connection.close()`](#connectionclose) when no
-longer needed:
+In applications which use connections infrequently, create a
+connection with [`oracledb.getConnection()`](#getconnectiondb).
+Connections should be released with
+[`connection.close()`](#connectionclose) when no longer needed:
 
 ```javascript
 var oracledb = require('oracledb');
