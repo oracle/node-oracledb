@@ -190,7 +190,7 @@ limitations under the License.
 20. [Promises and node-oracledb](#promiseoverview)
   - 20.1 [Custom Promise Libraries](#custompromises)
 21. [Async/Await and node-oracledb](#asyncawaitoverview)
-22. [Tracing SQL Statements](#tracingsql)
+22. [Tracing SQL and PL/SQL Statements](#tracingsql)
 
 ## <a name="intro"></a> 1. Introduction
 
@@ -6304,7 +6304,7 @@ must be streamed since there is no Promisified interface for them.
 For more information, see
 [How to get, use, and close a DB connection using async functions](https://jsao.io/2017/07/how-to-get-use-and-close-a-db-connection-using-async-functions/).
 
-## <a name="bindtrace"></a> <a name="tracingsql"></a> 22. Tracing SQL Statements
+## <a name="bindtrace"></a> <a name="tracingsql"></a> 22. Tracing SQL and PL/SQL Statements
 
 Applications that have implemented [End-to-end Tracing](#endtoend)
 calls such as [action](#propconnaction) and [module](#propconnmodule),
@@ -6340,3 +6340,6 @@ may also be useful.
 
 You can also write your own wrapper around `execute()` and log any
 parameters.
+
+PL/SQL users may be interested in using
+[PL/Scope](http://docs.oracle.com/database/122/ADFNS/plscope.htm).
