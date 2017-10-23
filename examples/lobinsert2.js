@@ -72,11 +72,11 @@ oracledb.getConnection(
                     console.error(err);
                   } else {
                     console.log("Text inserted successfully.");
-                    connection.close(function(err) {
-                      if (err)
-                        console.error(err);
-                    });
                   }
+                  connection.close(function(err) {
+                    if (err)
+                      console.error(err);
+                  });
                 }
               });
           });
@@ -91,10 +91,6 @@ oracledb.getConnection(
                 if (err) {
                   console.error(err.message);
                 }
-                connection.close(function(err) {
-                  if (err)
-                    console.error(err.message);
-                });
               });
             }
           });
@@ -108,11 +104,9 @@ oracledb.getConnection(
             if (!errorHandled) {
               errorHandled = true;
               console.error(err);
-              connection.close(function(err) {
-                if (err)
-                  console.error(err.message);
-              });
             }
           });
+
+        inStream.pipe(lob);  // copies the text to the LOB
       });
   });
