@@ -6319,7 +6319,7 @@ contain a tracing line consisting of the prefix 'ODPI', a thread
 identifier, a timestamp, and the SQL statement executed:
 
 ```
-ODPI [123145574764544] 2017/08/28 14:26:24.952: SQL select sysdate from dual where :b = 1
+ODPI [6905309] 2017-09-13 09:02:46.140: SQL select sysdate from dual where :b = 1
 ```
 
 Sometimes it is useful to trace the bind data values that have been
