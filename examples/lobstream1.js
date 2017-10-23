@@ -76,7 +76,7 @@ var  dostream = function(lob, cb) {
   lob.on(
     'error',
     function(err) {
-      // console.log("lob.on 'error' event");
+      console.log("lob.on 'error' event");
       if (!errorHandled) {
         errorHandled = true;
         lob.close(function() {
@@ -87,7 +87,7 @@ var  dostream = function(lob, cb) {
   lob.on(
     'end',
     function() {
-      // console.log("lob.on 'end' event");
+      console.log("lob.on 'end' event");
     });
   lob.on(
     'close',
@@ -102,7 +102,7 @@ var  dostream = function(lob, cb) {
   outStream.on(
     'error',
     function(err) {
-      // console.log("outStream.on 'error' event");
+      console.log("outStream.on 'error' event");
       if (!errorHandled) {
         errorHandled = true;
         lob.close(function() {
