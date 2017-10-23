@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -58,6 +58,8 @@ oracledb.getConnection(
           return;
         }
 
+        var errorHandled = false;
+
         var lob = result.outBinds.lobbv[0];
         lob.on(
           'close',
@@ -67,13 +69,18 @@ oracledb.getConnection(
             connection.commit(
               function(err)
               {
-                if (err)
-                  console.error(err.message);
-                else
-                  console.log("Text inserted successfully.");
-                connection.close(function(err) {
-                  if (err) console.error(err);
-                });
+                if (!errorHandled) {
+                  errorHandled = true;
+                  if (err) {
+                    console.error(err);
+                  } else {
+                    console.log("Text inserted successfully.");
+                    connection.close(function(err) {
+                      if (err)
+                        console.error(err);
+                    });
+                  }
+                }
               });
           });
         lob.on(
@@ -81,10 +88,16 @@ oracledb.getConnection(
           function(err)
           {
             console.log("lob.on 'error' event");
-            console.error(err);
-            connection.close(function(err) {
-              if (err) console.error(err.message);
-            });
+            if (!errorHandled) {
+              errorHandled = true;
+              console.error(err);
+              lob.close(function(err) {
+                connection.close(function(err) {
+                  if (err)
+                    console.error(err.message);
+                });
+              });
+            }
           });
 
         console.log('Reading from ' + inFileName);
@@ -94,9 +107,14 @@ oracledb.getConnection(
           function(err)
           {
             console.log("inStream.on 'error' event");
-            if (err) console.error(err);
+            if (!errorHandled) {
+              errorHandled = true;
+              console.error(err);
+              connection.close(function(err) {
+                if (err)
+                  console.error(err.message);
+              });
+            }
           });
-
-        inStream.pipe(lob);  // copies the text to the LOB
       });
   });

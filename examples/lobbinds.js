@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, 2017, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -189,6 +189,8 @@ var query_plsql_inout = function (conn, cb) {
             return cb(err, conn);
           }
 
+          var errorHandled = false;
+
           var clob2 = result.outBinds.ciobv;
           if (clob2 === null) {
             return cb(new Error('plsql_out_inout(): NULL clob2 found'), conn);
@@ -202,7 +204,10 @@ var query_plsql_inout = function (conn, cb) {
             function(err)
             {
               // console.log("clob2.on 'error' event");
-              return cb(err);
+              if (!errorHandled) {
+                errorHandled = true;
+                return cb(err);
+              }
             });
           clob2.on(
             'end',
@@ -217,7 +222,9 @@ var query_plsql_inout = function (conn, cb) {
               // console.log("clob2.on 'close' event");
 
               console.log ("   Completed");
-              return cb(null, conn);
+              if (!errorHandled) {
+                return cb(null, conn);
+              }
             });
 
           var outStream = fs.createWriteStream(clobOutFileName1);
@@ -226,7 +233,10 @@ var query_plsql_inout = function (conn, cb) {
             function(err)
             {
               // console.log("outStream.on 'error' event");
-              return cb(err);
+              if (!errorHandled) {
+                errorHandled = true;
+                return cb(err);
+              }
             });
 
           // Switch into flowing mode and push the LOB to the file

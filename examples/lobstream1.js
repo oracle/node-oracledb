@@ -70,12 +70,20 @@ var  dostream = function(lob, cb) {
   } else {
     console.log('Writing a BLOB to ' + outFileName);
   }
+
+  var errorHandled = false;
+
   lob.on(
     'error',
     function(err)
     {
       // console.log("lob.on 'error' event");
-      return cb(err);
+      if (!errorHandled) {
+        errorHandled = true;
+        lob.close(function() {
+          return cb(err);
+        });
+      }
     });
   lob.on(
     'end',
@@ -88,7 +96,9 @@ var  dostream = function(lob, cb) {
     function()
     {
       // console.log("lob.on 'close' event");
-      return cb(null);
+      if (!errorHandled) {
+        return cb(null);
+      }
     });
 
   var outStream = fs.createWriteStream(outFileName);
@@ -97,7 +107,12 @@ var  dostream = function(lob, cb) {
     function(err)
     {
       // console.log("outStream.on 'error' event");
-      return cb(err);
+      if (!errorHandled) {
+        errorHandled = true;
+        lob.close(function() {
+          return cb(err);
+        });
+      }
     });
 
   // Switch into flowing mode and push the LOB to the file

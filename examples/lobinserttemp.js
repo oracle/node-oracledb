@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, 2017, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -75,6 +75,9 @@ var docreatetemplob = function (conn, cb) {
 
 var doloadtemplob = function (conn, templob, cb) {
   console.log('Streaming from the text file into the temporary LOB');
+
+  var errorHandled = false;
+
   templob.on(
     'close',
     function()
@@ -87,7 +90,10 @@ var doloadtemplob = function (conn, templob, cb) {
     function(err)
     {
       console.log("templob.on 'error' event");
-      return cb(err);
+      if (!errorHandled) {
+        errorHandled = true;
+        return cb(err);
+      }
     });
 
   templob.on(
@@ -96,7 +102,9 @@ var doloadtemplob = function (conn, templob, cb) {
     {
       console.log("templob.on 'finish' event");
       // The data was loaded into the temporary LOB
-      return cb(null, conn, templob);
+      if (!errorHandled) {
+        return cb(null, conn, templob);
+      }
     });
 
   console.log('Reading from ' + inFileName);
@@ -106,7 +114,10 @@ var doloadtemplob = function (conn, templob, cb) {
     function(err)
     {
       console.log("inStream.on 'error' event");
-      return cb(err);
+      if (!errorHandled) {
+        errorHandled = true;
+        return cb(err);
+      }
     });
 
   inStream.pipe(templob);  // copies the text to the temporary LOB
