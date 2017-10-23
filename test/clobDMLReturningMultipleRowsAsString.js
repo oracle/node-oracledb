@@ -19,10 +19,10 @@
  * See LICENSE.md for relevant licenses.
  *
  * NAME
- *   137. blobDMLReturningAsStream.js
+ *   136. clobDMLReturningMultipleRowsAsString.js
  *
  * DESCRIPTION
- *   Testing BLOB DML returning multiple rows as stream.
+ *   Testing CLOB DML returning multiple rows as String.
  *
  * NUMBERING RULE
  *   Test numbers follow this numbering rule:
@@ -35,18 +35,15 @@
 
 var oracledb = require('oracledb');
 var should   = require('should');
-var async    = require('async');
 var dbConfig = require('./dbconfig.js');
 var sql      = require('./sql.js');
-var assist   = require('./dataTypeAssist.js');
 
-describe('137. blobDMLReturningAsStream.js', function() {
+describe('136. clobDMLReturningMultipleRowsAsString.js', function() {
 
   var connection = null;
-  var tableName = "nodb_dml_blob_137";
-  var node6plus = false; // assume node runtime version is lower than 6
+  var tableName = "nodb_dml_clob_136";
 
-  var blob_table_create = "BEGIN \n" +
+  var clob_table_create = "BEGIN \n" +
                           "    DECLARE \n" +
                           "        e_table_missing EXCEPTION; \n" +
                           "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
@@ -59,18 +56,22 @@ describe('137. blobDMLReturningAsStream.js', function() {
                           "    EXECUTE IMMEDIATE (' \n" +
                           "        CREATE TABLE " + tableName + " ( \n" +
                           "            num      NUMBER, \n" +
-                          "            blob     BLOB \n" +
+                          "            clob     CLOB \n" +
                           "        ) \n" +
                           "    '); \n" +
+                          "    FOR i IN 1..10 LOOP \n" +
+                          "        EXECUTE IMMEDIATE ( \n" +
+                          "            'insert into " + tableName + " values (' || \n" +
+                          "            to_char(i) || ', ' || to_char(i) || ')'); \n" +
+                          "    END LOOP; \n" +
+                          "    commit; \n" +
                           "END; ";
-  var blob_table_drop = "DROP TABLE " + tableName + " PURGE";
+  var clob_table_drop = "DROP TABLE " + tableName + " PURGE";
 
   before(function(done) {
     oracledb.getConnection(dbConfig, function(err, conn) {
       should.not.exist(err);
       connection = conn;
-      if ( process.versions["node"].substring (0, 1) >= "6")
-        node6plus = true;
       done();
     });
   });
@@ -82,89 +83,40 @@ describe('137. blobDMLReturningAsStream.js', function() {
     });
   });
 
-  describe('137.1 BLOB, UPDATE', function() {
+  describe('136.1 CLOB DML returning multiple rows as String', function() {
     before(function(done) {
-      async.series([
-        function(cb) {
-          sql.executeSql(connection, blob_table_create, {}, {}, cb);
-        },
-        function(cb) {
-          async.times(10, insertData, cb);
-        }
-      ], done);
+      sql.executeSql(connection, clob_table_create, {}, {}, done);
     });
     after(function(done) {
-      sql.executeSql(connection, blob_table_drop, {}, {}, done);
+      sql.executeSql(connection, clob_table_drop, {}, {}, done);
     });
 
-    it('137.1.1 works with stream', function(done) {
-      updateReturning_stream(done);
-    }); // 137.1.1
+    it('136.1.1 CLOB DML returning multiple rows as String', function(done) {
+      updateReturning_string(done);
+    });
 
-  }); // 137.1
+  });
 
-  var insertData = function(i, cb) {
-    var blob = node6plus ? Buffer.from(String(i), "utf-8") : new Buffer(String(i), "utf-8");
-    connection.execute(
-      "insert into " + tableName + " values (:id, :b)",
-      {
-        id: {val: i, dir: oracledb.BIND_IN, type: oracledb.NUMBER},
-        b: {val: blob, dir: oracledb.BIND_IN, type: oracledb.BUFFER}
-      },
-      function(err, result) {
-        should.not.exist(err);
-        (result.rowsAffected).should.be.exactly(1);
-        cb(err);
-      }
-    );
-  };
-
-  var updateReturning_stream = function(callback) {
-    var sql_update = "UPDATE " + tableName + " set num = num+10 RETURNING num, blob into :num, :lobou";
+  var updateReturning_string = function(callback) {
+    var sql_update = "UPDATE " + tableName + " set num = num+10 RETURNING num, clob into :num, :lobou";
     connection.execute(
       sql_update,
       {
         num: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
-        lobou: { type: oracledb.BLOB, dir: oracledb.BIND_OUT }
+        lobou: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
       },
       function(err, result) {
         should.not.exist(err);
         var numLobs = result.outBinds.lobou.length;
         should.strictEqual(numLobs, 10);
-        async.times(
-          numLobs,
-          function(n, next) {
-            verifyLob( n, result, function(err, result) { next(err, result); } );
-          },
-          callback
-        );
+        for (var index = 0; index < result.outBinds.lobou.length; index++) {
+          var lob = result.outBinds.lobou[index];
+          var id = result.outBinds.num[index];
+          should.strictEqual(lob, String(id-10));
+        }
+        callback();
       }
     );
-  };
-
-  var verifyLob = function(n, result, cb) {
-    var lob = result.outBinds.lobou[n];
-    var id = result.outBinds.num[n];
-    should.exist(lob);
-    var blobData = 0;
-    var totalLength = 0;
-    blobData = node6plus ? Buffer.alloc(0) : new Buffer(0);
-
-    lob.on('data', function(chunk) {
-      totalLength = totalLength + chunk.length;
-      blobData = Buffer.concat([blobData, chunk], totalLength);
-    });
-
-    lob.on('error', function(err) {
-      should.not.exist(err, "lob.on 'error' event.");
-    });
-
-    lob.on('end', function(err) {
-      should.not.exist(err);
-      var expected = node6plus ? Buffer.from(String(id-10), "utf-8") : new Buffer(String(id-10), "utf-8");
-      should.strictEqual(assist.compare2Buffers(blobData, expected), true);
-      cb(err, result);
-    });
   };
 
 });

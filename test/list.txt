@@ -3531,18 +3531,35 @@ Overview of node-oracledb functional tests
         134.2.6 set maxSize to size (32K - 1)
         134.2.7 set maxSize to size 1GB
 
-135. clobDMLReturningAsStream.js
-    135.1 CLOB, UPDATE
-        135.1.1 works with stream
+135. clobDMLReturningMultipleRowsAsStream.js
+    135.1 CLOB DML returning multiple rows as stream
+        135.1.1 CLOB DML returning multiple rows as stream
 
-136. clobDMLReturningAsString.js
-    136.1 CLOB, UPDATE
-        136.1.1 fetch as string
+136. clobDMLReturningMultipleRowsAsString.js
+    136.1 CLOB DML returning multiple rows as String
+        136.1.1 CLOB DML returning multiple rows as String
 
-137. blobDMLReturningAsStream.js
-    137.1 BLOB, UPDATE
-        137.1.1 works with stream
+137. blobDMLReturningMultipleRowsAsBuffer.js
+    137.1 BLOB DML returning multiple rows as buffer
+        137.1.1 BLOB DML returning multiple rows as buffer
 
-138. blobDMLReturningAsBuffer.js
-    138.1 BLOB, UPDATE
-        138.1.1 fetch as string
+138. blobDMLReturningMultipleRowsAsStream.js
+    138.1 BLOB DML returning multiple rows as stream
+        138.1.1 BLOB DML returning multiple rows as stream
+
+139. fetchAsStringWithRefCursor.js
+    139.1 columns fetched from REF CURSORS can be mapped by fetchInfo settings
+    139.2 fetchAsString takes effect as well
+
+140. v8Getter.js
+    140.1 Negative: overwrite the getter() function of bind in objects
+        140.1.1 ProcessBindsByName()
+        140.1.2 ProcessBindsByPos()
+    140.2 Negative (ProcessBind): OUT bind with properties altered
+        140.2.1
+    140.3 Negative: PL/SQL Indexed Table
+        140.3.1 bind an element being altered-JSON object
+        140.3.2 GetBindTypeAndSizeFromValue()
+    140.4 Negative: fetchInfo
+        140.4.1 changes getter() of fetchInfo itself
+        140.4.2 changes getter() of the value of fetchInfo object

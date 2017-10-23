@@ -19,7 +19,7 @@
  * See LICENSE.md for relevant licenses.
  *
  * NAME
- *   138. blobDMLReturningAsBuffer.js
+ *   137. blobDMLReturningMultipleRowsAsBuffer.js
  *
  * DESCRIPTION
  *   Testing BLOB DML returning multiple rows as buffer.
@@ -40,10 +40,10 @@ var dbConfig = require('./dbconfig.js');
 var random   = require('./random.js');
 var sql      = require('./sql.js');
 
-describe('138. blobDMLReturningAsBuffer.js', function() {
+describe('137. blobDMLReturningMultipleRowsAsBuffer.js', function() {
 
   var connection = null;
-  var tableName = "nodb_dml_blob_138";
+  var tableName = "nodb_dml_blob_137";
   var node6plus = false; // assume node runtime version is lower than 6
 
   var blob_table_create = "BEGIN \n" +
@@ -82,7 +82,7 @@ describe('138. blobDMLReturningAsBuffer.js', function() {
     });
   });
 
-  describe('138.1 BLOB, UPDATE', function() {
+  describe('137.1 BLOB DML returning multiple rows as buffer', function() {
     before(function(done) {
       async.series([
         function(cb) {
@@ -97,11 +97,11 @@ describe('138. blobDMLReturningAsBuffer.js', function() {
       sql.executeSql(connection, blob_table_drop, {}, {}, done);
     });
 
-    it('138.1.1 fetch as string', function(done) {
+    it('137.1.1 BLOB DML returning multiple rows as buffer', function(done) {
       updateReturning_buffer(done);
-    }); // 138.1.1
+    });
 
-  }); // 138.1
+  });
 
   var insertData = function(i, cb) {
     var str = random.getRandomLengthString(i+10);

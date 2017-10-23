@@ -22,7 +22,7 @@
  *   105. streamErrorEvent.js
  *
  * DESCRIPTION
- *    Testing Stream on 'error' event. 
+ *    Testing Stream on 'error' event.
  *    It tries to stream LOB into a read-only file which triggers error.
  *
  * NUMBERING RULE
@@ -129,15 +129,14 @@ describe('105. streamErrorEvent.js', function() {
             lob.on('error', function(err) {
               should.not.exist(err);
             });
-            
+
             lob.on('close', callback); // Here it returns.
 
             var outStream = fs.createWriteStream(rofile);
             outStream.on('error', function(err) {
               should.exist(err);
-              should.strictEqual(err.errno, -13);
+              should.strictEqual(err.syscall, 'open');
             });
-
             lob.pipe(outStream);
           }
         );

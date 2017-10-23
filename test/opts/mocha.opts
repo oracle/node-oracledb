@@ -144,7 +144,9 @@ test/longrawProcedureBind_in.js
 test/longrawProcedureBind_inout.js
 test/longrawProcedureBind_out.js
 
-test/clobDMLReturningAsStream.js
-test/clobDMLReturningAsString.js
-test/blobDMLReturningAsStream.js
-test/blobDMLReturningAsBuffer.js
+test/clobDMLReturningMultipleRowsAsStream.js
+test/clobDMLReturningMultipleRowsAsString.js
+test/blobDMLReturningMultipleRowsAsBuffer.js
+test/blobDMLReturningMultipleRowsAsStream.js
+test/fetchAsStringWithRefCursor.js
+test/v8Getter.js
