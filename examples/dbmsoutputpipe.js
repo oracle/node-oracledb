@@ -133,4 +133,4 @@ var closeRS = function(conn, resultSet, cb) {
   resultSet.close(function(err) {
     return cb(err, conn);
   });
-}
+};

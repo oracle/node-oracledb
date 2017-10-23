@@ -42,16 +42,14 @@ oracledb.getConnection(
     password      : dbConfig.password,
     connectString : dbConfig.connectString
   },
-  function(err, connection)
-  {
+  function(err, connection) {
     if (err) { console.error(err.message); return; }
 
     connection.execute(
       "INSERT INTO mylobs (id, c) VALUES (:id, EMPTY_CLOB()) RETURNING c INTO :lobbv",
       { id: 4, lobbv: {type: oracledb.CLOB, dir: oracledb.BIND_OUT} },
       { autoCommit: false },  // a transaction needs to span the INSERT and pipe()
-      function(err, result)
-      {
+      function(err, result) {
         if (err) { console.error(err.message); return; }
         if (result.rowsAffected != 1 || result.outBinds.lobbv.length != 1) {
           console.error('Error getting a LOB locator');
@@ -63,8 +61,7 @@ oracledb.getConnection(
         var lob = result.outBinds.lobbv[0];
         lob.on(
           'close',
-          function()
-          {
+          function() {
             console.log("lob.on 'close' event");
             connection.commit(
               function(err)
@@ -85,13 +82,15 @@ oracledb.getConnection(
           });
         lob.on(
           'error',
-          function(err)
-          {
+          function(err) {
             console.log("lob.on 'error' event");
             if (!errorHandled) {
               errorHandled = true;
               console.error(err);
               lob.close(function(err) {
+                if (err) {
+                  console.error(err.message);
+                }
                 connection.close(function(err) {
                   if (err)
                     console.error(err.message);
@@ -104,8 +103,7 @@ oracledb.getConnection(
         var inStream = fs.createReadStream(inFileName);
         inStream.on(
           'error',
-          function(err)
-          {
+          function(err) {
             console.log("inStream.on 'error' event");
             if (!errorHandled) {
               errorHandled = true;

@@ -112,7 +112,6 @@ var  dostream = function(lob, cb) {
     });
 
   // Switch into flowing mode and push the LOB to the file
-
   lob.pipe(outStream);
 };
 
