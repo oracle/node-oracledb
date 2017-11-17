@@ -146,7 +146,7 @@ describe('12. resultSet1.js', function() {
       );
     });
 
-    it('12.1.3 when resultSet option = 0, it behaves like false', function(done) {
+    it('12.1.3 negative - 0', function(done) {
       connection.should.be.ok();
 
       connection.execute(
@@ -154,18 +154,15 @@ describe('12. resultSet1.js', function() {
         [],
         { resultSet: 0, prefetchRows: 100, maxRows: 1000 },
         function(err, result) {
-          should.not.exist(err);
-
-          should.exist(result.rows);
-          result.rows.length.should.be.exactly(rowsAmount);
-          // console.log(result.rows);
-          should.not.exist(result.resultSet);
+          should.not.exist(result);
+          should.exist(err);
+          should.strictEqual(err.message, "NJS-007: invalid value for \"resultSet\" in parameter 3");
           done();
         }
       );
     });
 
-    it('12.1.4 when resultSet option = null, it behaves like false',function(done) {
+    it('12.1.4 negative - null',function(done) {
       connection.should.be.ok();
 
       connection.execute(
@@ -173,11 +170,9 @@ describe('12. resultSet1.js', function() {
         [],
         { resultSet: null, prefetchRows: 100, maxRows: 1000 },
         function(err, result) {
-          should.not.exist(err);
-
-          should.exist(result.rows);
-          result.rows.length.should.be.exactly(rowsAmount);
-          should.not.exist(result.resultSet);
+          should.not.exist(result);
+          should.exist(err);
+          should.strictEqual(err.message, "NJS-007: invalid value for \"resultSet\" in parameter 3");
           done();
         }
       );
@@ -201,7 +196,7 @@ describe('12. resultSet1.js', function() {
       );
     });
 
-    it('12.1.6 when resultSet option = NaN, it behaves like false', function(done) {
+    it('12.1.6 negative - NaN', function(done) {
       connection.should.be.ok();
 
       connection.execute(
@@ -209,17 +204,15 @@ describe('12. resultSet1.js', function() {
         [],
         { resultSet: NaN, prefetchRows: 100, maxRows: 1000 },
         function(err, result) {
-          should.not.exist(err);
-
-          should.exist(result.rows);
-          result.rows.length.should.be.exactly(rowsAmount);
-          should.not.exist(result.resultSet);
+          should.not.exist(result);
+          should.exist(err);
+          should.strictEqual(err.message, "NJS-007: invalid value for \"resultSet\" in parameter 3");
           done();
         }
       );
     });
 
-    it('12.1.7 when resultSet option = 1, it behaves like true', function(done) {
+    it('12.1.7 negative - 1', function(done) {
       connection.should.be.ok();
 
       connection.execute(
@@ -227,16 +220,15 @@ describe('12. resultSet1.js', function() {
         [],
         { resultSet: 1, prefetchRows: 100, maxRows: 1000 },
         function(err, result) {
-          should.not.exist(err);
-
-          should.not.exist(result.rows);
-          should.exist(result.resultSet);
-          result.resultSet.close(done);
+          should.not.exist(result);
+          should.exist(err);
+          should.strictEqual(err.message, "NJS-007: invalid value for \"resultSet\" in parameter 3");
+          done();
         }
       );
     });
 
-    it('12.1.8 when resultSet option = -1, it behaves like true', function(done) {
+    it('12.1.8 negative - (-1)', function(done) {
       connection.should.be.ok();
 
       connection.execute(
@@ -244,16 +236,15 @@ describe('12. resultSet1.js', function() {
         [],
         { resultSet: -1, prefetchRows: 100, maxRows: 1000 },
         function(err, result) {
-          should.not.exist(err);
-
-          should.not.exist(result.rows);
-          should.exist(result.resultSet);
-          result.resultSet.close(done);
+          should.not.exist(result);
+          should.exist(err);
+          should.strictEqual(err.message, "NJS-007: invalid value for \"resultSet\" in parameter 3");
+          done();
         }
       );
     });
 
-    it('12.1.9 when resultSet option is a random string, it behaves like true', function(done) {
+    it('12.1.9 negative - random string', function(done) {
       connection.should.be.ok();
 
       connection.execute(
@@ -261,11 +252,10 @@ describe('12. resultSet1.js', function() {
         [],
         { resultSet: 'foo', prefetchRows: 100, maxRows: 1000 },
         function(err, result) {
-          should.not.exist(err);
-
-          should.not.exist(result.rows);
-          should.exist(result.resultSet);
-          result.resultSet.close(done);
+          should.not.exist(result);
+          should.exist(err);
+          should.strictEqual(err.message, "NJS-007: invalid value for \"resultSet\" in parameter 3");
+          done();
         }
       );
     });
@@ -273,7 +263,7 @@ describe('12. resultSet1.js', function() {
   });
 
   describe('12.2 Testing prefetchRows option', function() {
-    it('12.2.1 cannot set prefetchRows to be a negative value', function(done) {
+    it('12.2.1 negative - negative value', function(done) {
       connection.should.be.ok();
 
       connection.execute(
@@ -289,7 +279,7 @@ describe('12. resultSet1.js', function() {
       );
     });
 
-    it('12.2.2 cannot set prefetchRows to be a random string', function(done) {
+    it('12.2.2 negative - random string', function(done) {
       connection.should.be.ok();
 
       connection.execute(
@@ -305,7 +295,7 @@ describe('12. resultSet1.js', function() {
       );
     });
 
-    it('12.2.3 cannot set prefetchRows to be NaN', function(done) {
+    it('12.2.3 negative - NaN', function(done) {
       connection.should.be.ok();
 
       connection.execute(
@@ -321,7 +311,7 @@ describe('12. resultSet1.js', function() {
       );
     });
 
-    it('12.2.4 prefetchRows can be set to null', function(done) {
+    it('12.2.4 negative - null', function(done) {
       connection.should.be.ok();
 
       connection.execute(
@@ -329,8 +319,10 @@ describe('12. resultSet1.js', function() {
         [],
         { resultSet: true, prefetchRows: null, maxRows: 1000 },
         function(err, result) {
-          should.not.exist(err);
-          result.resultSet.close(done);
+          should.not.exist(result);
+          should.exist(err);
+          should.strictEqual(err.message, "NJS-007: invalid value for \"prefetchRows\" in parameter 3");
+          done();
         }
       );
     });

@@ -86,6 +86,7 @@ typedef enum {
     errPoolWithAliasAlreadyExists,
     errPoolWithAliasNotFound,
     errIncompatibleTypeArrayIndexBind,
+    errNonArrayProvided,
 
     // New ones should be added here
 

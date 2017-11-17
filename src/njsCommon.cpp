@@ -432,9 +432,23 @@ bool njsBaton::GetBoolFromJSON(Local<Object> obj, const char *key, int index,
 
     if (!error.empty())
         return false;
+
     jsValue = obj->Get(Nan::New<v8::String>(key).ToLocalChecked());
-    if (!jsValue->IsUndefined())
-        *value = jsValue->ToBoolean()->Value();
+
+    /* Undefined implies value not provided or equivalent */
+    if (!jsValue->IsUndefined()) {
+        if(jsValue->IsBoolean()) {
+            // Get the boolean value
+            *value = jsValue->ToBoolean()->Value();
+        }
+        else {
+            // Non-Boolean value provided, report error
+            error = njsMessages::Get ( errInvalidPropertyValueInParam, key,
+                                       index + 1 ) ;
+            return false;
+        }
+    }
+
     return true;
 }
 
@@ -457,15 +471,17 @@ bool njsBaton::GetIntFromJSON(Local<Object> obj, const char *key,
     if (jsValue->IsInt32()) {
         *value = Nan::To<int32_t>(jsValue).FromJust();
         return true;
-    } else if (jsValue->IsUndefined() || jsValue->IsNull()) {
+    } else if (jsValue->IsUndefined()) {
         return true;
-    } else if (jsValue->IsNumber()) {
+    } else if (jsValue->IsNumber() || jsValue->IsNull()) {
         error = njsMessages::Get(errInvalidPropertyValueInParam, key,
                 index + 1);
         return false;
+    } else {
+        error = njsMessages::Get(errInvalidPropertyTypeInParam, key,
+                                 index + 1);
+        return false;
     }
-    error = njsMessages::Get(errInvalidPropertyTypeInParam, key, index + 1);
-    return false;
 }
 
 
@@ -488,10 +504,17 @@ bool njsBaton::GetStringFromJSON(Local<Object> obj, const char *key, int index,
         v8::String::Utf8Value utf8str(jsValue->ToString());
         value = std::string(*utf8str, utf8str.length());
         return true;
-    } else if (jsValue->IsUndefined() || jsValue->IsNull())
+    } else if (jsValue->IsUndefined()) {
         return true;
-    error = njsMessages::Get(errInvalidPropertyTypeInParam, key, index + 1);
-    return false;
+    } else if ( jsValue->IsNull()) {
+        error = njsMessages::Get(errInvalidPropertyValueInParam, key,
+                               index + 1 );
+        return false;
+    } else  {
+        error = njsMessages::Get(errInvalidPropertyTypeInParam, key,
+                                 index + 1);
+        return false;
+    }
 }
 
 
@@ -515,15 +538,17 @@ bool njsBaton::GetUnsignedIntFromJSON(Local<Object> obj, const char *key,
     if (jsValue->IsUint32()) {
         *value = Nan::To<uint32_t>(jsValue).FromJust();
         return true;
-    } else if (jsValue->IsUndefined() || jsValue->IsNull()) {
+    } else if (jsValue->IsUndefined()) {
         return true;
-    } else if (jsValue->IsNumber()) {
+    } else if (jsValue->IsNumber() || jsValue->IsNull()) {
         error = njsMessages::Get(errInvalidPropertyValueInParam, key,
                 index + 1);
         return false;
+    } else {
+        error = njsMessages::Get(errInvalidPropertyTypeInParam, key,
+                                 index + 1);
+        return false;
     }
-    error = njsMessages::Get(errInvalidPropertyTypeInParam, key, index + 1);
-    return false;
 }
 
 

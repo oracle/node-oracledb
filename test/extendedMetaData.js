@@ -167,29 +167,31 @@ describe('17. extendedMetaData.js', function() {
       );
     });
 
-    it("17.1.4 works as 'false' when setting to 0", function(done) {
+    it("17.1.4 negative - 0", function(done) {
 
       connection.execute(
         "SELECT * FROM nodb_md",
         [],
         { extendedMetaData: 0 },
         function(err, result) {
-          should.not.exist(err);
-          (result.metaData).should.deepEqual([ { name: 'NUM' }, { name: 'VCH' }, { name: 'DT' } ]);
+          should.not.exist(result);
+          should.exist(err);
+          should.strictEqual(err.message, "NJS-007: invalid value for \"extendedMetaData\" in parameter 3");
           done();
         }
       );
     });
 
-    it("17.1.5 works as 'false' when setting to 'null'", function(done) {
+    it("17.1.5 negative - null", function(done) {
 
       connection.execute(
         "SELECT * FROM nodb_md",
         [],
         { extendedMetaData: null },
         function(err, result) {
-          should.not.exist(err);
-          (result.metaData).should.deepEqual([ { name: 'NUM' }, { name: 'VCH' }, { name: 'DT' } ]);
+          should.not.exist(result);
+          should.exist(err);
+          should.strictEqual(err.message, "NJS-007: invalid value for \"extendedMetaData\" in parameter 3");
           done();
         }
       );
@@ -209,57 +211,61 @@ describe('17. extendedMetaData.js', function() {
       );
     });
 
-    it("17.1.7 works as 'false' when setting to 'NaN'", function(done) {
+    it("17.1.7 negative - NaN", function(done) {
 
       connection.execute(
         "SELECT * FROM nodb_md",
         [],
         { extendedMetaData: NaN },
         function(err, result) {
-          should.not.exist(err);
-          (result.metaData).should.deepEqual([ { name: 'NUM' }, { name: 'VCH' }, { name: 'DT' } ]);
+          should.not.exist(result);
+          should.exist(err);
+          should.strictEqual(err.message, "NJS-007: invalid value for \"extendedMetaData\" in parameter 3");
           done();
         }
       );
     });
 
-    it("17.1.8 works as 'true' when setting to a positive number", function(done) {
+    it("17.1.8 negative - positive number", function(done) {
 
       connection.execute(
         "SELECT dt FROM nodb_md",
         [],
         { extendedMetaData: 9 },
         function(err, result) {
-          should.not.exist(err);
-          (result.metaData).should.deepEqual( [ { name: 'DT', fetchType: oracledb.DATE, dbType: oracledb.DB_TYPE_DATE, nullable: true } ] );
+          should.not.exist(result);
+          should.exist(err);
+          should.strictEqual(err.message, "NJS-007: invalid value for \"extendedMetaData\" in parameter 3");
           done();
         }
       );
     });
 
-    it("17.1.9 works as 'true' when setting to a negative number", function(done) {
+    it("17.1.9 negative - negative number", function(done) {
 
       connection.execute(
         "SELECT dt FROM nodb_md",
         [],
         { extendedMetaData: -55 },
         function(err, result) {
-          should.not.exist(err);
-          (result.metaData).should.deepEqual( [ { name: 'DT', fetchType: oracledb.DATE, dbType: oracledb.DB_TYPE_DATE, nullable: true } ] );
+          should.not.exist(result);
+          should.exist(err);
+          should.strictEqual(err.message, "NJS-007: invalid value for \"extendedMetaData\" in parameter 3");
           done();
         }
       );
     });
 
-    it("17.1.10 works as 'true' when setting to a string", function(done) {
+    it("17.1.10 negative - random string", function(done) {
 
       connection.execute(
         "SELECT dt FROM nodb_md",
         [],
         { extendedMetaData: 'foobar' },
         function(err, result) {
-          should.not.exist(err);
-          (result.metaData).should.deepEqual( [ { name: 'DT', fetchType: oracledb.DATE, dbType: oracledb.DB_TYPE_DATE, nullable: true } ] );
+          should.not.exist(result);
+          should.exist(err);
+          should.strictEqual(err.message, "NJS-007: invalid value for \"extendedMetaData\" in parameter 3");
           done();
         }
       );
@@ -307,14 +313,8 @@ describe('17. extendedMetaData.js', function() {
           callback();
         },
         function test(callback) {
-          if (!expect) {
-            (oracledb.extendedMetaData).should.be.false();
-            verifyFalse(callback);
-          }
-          else {
-            (oracledb.extendedMetaData).should.be.true();
-            verifyTrue(callback);
-          } // else
+          (oracledb.extendedMetaData).should.be.true();
+          verifyTrue(callback);
         },
         function restore(callback) {
           oracledb.extendedMetaData = false;
@@ -324,17 +324,14 @@ describe('17. extendedMetaData.js', function() {
       ], done);
     }; // verify()
 
-    var verifyFalse = function(cb) {
-      connection.execute(
-        "SELECT * FROM nodb_md",
-        function(err, result) {
-          should.not.exist(err);
-          (result.metaData).should.deepEqual([
-            { name: 'NUM' }, { name: 'VCH' }, { name: 'DT' }
-          ]);
-          cb();
-        }
+    var verifyFalse = function(setValue, cb) {
+      should.throws(
+        function() {
+          oracledb.extendedMetaData = setValue;
+        },
+        /NJS-004: invalid value for property extendedMetaData/
       );
+      cb();
     };
 
     var verifyTrue = function(cb) {
@@ -367,39 +364,48 @@ describe('17. extendedMetaData.js', function() {
 
     it("17.2.1 default value is 'false'", function(done) {
       (oracledb.extendedMetaData).should.be.false();
-      verifyFalse(done);
+      connection.execute(
+        "SELECT * FROM nodb_md",
+        function(err, result) {
+          should.not.exist(err);
+          (result.metaData).should.deepEqual([
+            { name: 'NUM' }, { name: 'VCH' }, { name: 'DT' }
+          ]);
+          done();
+        }
+      );
     });
 
     it("17.2.2 sets to be 'true'", function(done) {
       verify(true, true, done);
     });
 
-    it("17.2.3 works as 'false' when setting to 0", function(done) {
-      verify(0, false, done);
+    it("17.2.3 negative - 0", function(done) {
+      verifyFalse(0, done);
     });
 
-    it("17.2.4 works as 'false' when setting to 'null'", function(done) {
-      verify(null, false, done);
+    it("17.2.4 negative - 'null'", function(done) {
+      verifyFalse(null, done);
     });
 
-    it("17.2.5 works as 'false' when setting to 'undefined'", function(done) {
-      verify(undefined, false, done);
+    it("17.2.5 negative - 'undefined'", function(done) {
+      verifyFalse(undefined, done);
     });
 
-    it("17.2.6 works as 'false' when setting to 'NaN'", function(done) {
-      verify(NaN, false, done);
+    it("17.2.6 negative - 'NaN'", function(done) {
+      verifyFalse(NaN, done);
     });
 
-    it("17.2.7 works as 'true' when setting to a positive number", function(done) {
-      verify(20, true, done);
+    it("17.2.7 negative - positive number", function(done) {
+      verifyFalse(20, done);
     });
 
-    it("17.2.8 works as 'true' when setting to a negative number", function(done) {
-      verify(-2333, true, done);
+    it("17.2.8 negative - negative number", function(done) {
+      verifyFalse(-2333, done);
     });
 
-    it("17.2.9 works as 'true' when setting to a string", function(done) {
-      verify("foobar", true, done);
+    it("17.2.9 negative - string", function(done) {
+      verifyFalse("foobar", done);
     });
 
     it("17.2.10 can be overrided by execute() option", function(done) {

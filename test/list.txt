@@ -186,6 +186,18 @@ Overview of node-oracledb functional tests
     7.1 autoCommit takes effect when setting oracledb.autoCommit before connecting
     7.2 autoCommit takes effect when setting oracledb.autoCommit after connecting
     7.3 autoCommit setting does not affect previous SQL result
+    7.4 global option - oracledb.autoCommit
+        7.4.1 Negative - 0
+        7.4.2 Negative - negative number
+        7.4.3 Negative - positive number
+        7.4.4 Negative - NaN
+        7.4.5 Negative - undefined
+    7.5 set autoCommit as an execute() option
+        7.5.1 Negative - 0
+        7.5.2 Negative - negative number
+        7.5.3 Negative - positive number
+        7.5.4 Negative - NaN
+        7.5.5 works as 'false' when setting to 'undefined'
 
 8. autoCommitForSelect.js
     8.1 should return previous value when autoCommit is false
@@ -224,18 +236,18 @@ Overview of node-oracledb functional tests
     12.1 Testing resultSet option
         12.1.1 when resultSet option = false, content of result is correct
         12.1.2 when resultSet option = true, content of result is correct
-        12.1.3 when resultSet option = 0, it behaves like false
-        12.1.4 when resultSet option = null, it behaves like false
+        12.1.3 negative - 0
+        12.1.4 negative - null
         12.1.5 when resultSet option = undefined, it behaves like false
-        12.1.6 when resultSet option = NaN, it behaves like false
-        12.1.7 when resultSet option = 1, it behaves like true
-        12.1.8 when resultSet option = -1, it behaves like true
-        12.1.9 when resultSet option is a random string, it behaves like true
+        12.1.6 negative - NaN
+        12.1.7 negative - 1
+        12.1.8 negative - (-1)
+        12.1.9 negative - random string
     12.2 Testing prefetchRows option
-        12.2.1 cannot set prefetchRows to be a negative value
-        12.2.2 cannot set prefetchRows to be a random string
-        12.2.3 cannot set prefetchRows to be NaN
-        12.2.4 prefetchRows can be set to null
+        12.2.1 negative - negative value
+        12.2.2 negative - random string
+        12.2.3 negative - NaN
+        12.2.4 negative - null
         12.2.5 prefetchRows can be set to 0
     12.3 Testing function getRows()
         12.3.1 retrieved set is exactly the size of result
@@ -251,7 +263,7 @@ Overview of node-oracledb functional tests
         12.3.11 Negative - set the 1st parameter of getRows() to be -5
         12.3.12 Negative - set the 1st parameter of getRows() to be null
     12.4 Testing function getRow()
-        12.4.1 works well with all correct setting
+        12.4.1 works well with all correct setting (39ms)
         12.4.2 data in resultSet is array when setting outFormat ARRAY
         12.4.3 data in resultSet is object when setting outFormat OBJECT
         12.4.4 query 0 row
@@ -346,25 +358,25 @@ Overview of node-oracledb functional tests
         17.1.1 default value is 'false' when not setting
         17.1.2 sets to be 'false' explicitly
         17.1.3 sets to be 'true' to enable extended metadata display
-        17.1.4 works as 'false' when setting to 0
-        17.1.5 works as 'false' when setting to 'null'
+        17.1.4 negative - 0
+        17.1.5 negative - null
         17.1.6 works as 'false' when setting to 'undefined'
-        17.1.7 works as 'false' when setting to 'NaN'
-        17.1.8 works as 'true' when setting to a positive number
-        17.1.9 works as 'true' when setting to a negative number
-        17.1.10 works as 'true' when setting to a string
+        17.1.7 negative - NaN
+        17.1.8 negative - positive number
+        17.1.9 negative - negative number
+        17.1.10 negative - random string
         17.1.11 the option is case-sensitive
         17.1.12 only works with SELECT query
     17.2 global option - oracledb.extendedMetaData
         17.2.1 default value is 'false'
         17.2.2 sets to be 'true'
-        17.2.3 works as 'false' when setting to 0
-        17.2.4 works as 'false' when setting to 'null'
-        17.2.5 works as 'false' when setting to 'undefined'
-        17.2.6 works as 'false' when setting to 'NaN'
-        17.2.7 works as 'true' when setting to a positive number
-        17.2.8 works as 'true' when setting to a negative number
-        17.2.9 works as 'true' when setting to a string
+        17.2.3 negative - 0
+        17.2.4 negative - 'null'
+        17.2.5 negative - 'undefined'
+        17.2.6 negative - 'NaN'
+        17.2.7 negative - positive number
+        17.2.8 negative - negative number
+        17.2.9 negative - string
         17.2.10 can be overrided by execute() option
     17.3 data types
         17.3.1 VARCHAR2
@@ -393,7 +405,7 @@ Overview of node-oracledb functional tests
         17.3.24 TIMESTAMP
         17.3.25 TIMESTAMP(5)
         17.3.26 TIMESTAMP WITH TIME ZONE
-        17.3.27 TIMESTAMP (9) WITH TIME ZONE
+        17.3.27 TIMESTAMP (2) WITH TIME ZONE
         17.3.28 TIMESTAMP WITH LOCAL TIME ZONE
         17.3.29 TIMESTAMP (9) WITH LOCAL TIME ZONE
         17.3.30 INTERVAL YEAR TO MONTH
@@ -408,7 +420,7 @@ Overview of node-oracledb functional tests
         17.3.39 LONG RAW
     17.4 result set
         17.4.1 default settings
-        17.4.2 extendedMetaData option of execute()
+        17.4.2 extendedMetaData option of execute() 
         17.4.3 global option
         17.4.4 REF Cursor
     17.5 metadata event
@@ -1232,7 +1244,7 @@ Overview of node-oracledb functional tests
     73.14 can be set at pool creation, e.g. positive value 1234
     73.15 can be set at pool creation, e.g. negative value -4321
     73.16 can be set at pool creation, e.g. 0 means always ping
-    73.17 Setting to 'null' will use current value from oracledb
+    73.17 Negative: null
     73.18 Setting to 'undefined' will use current value from oracledb
     73.19 can be set at pool creation. Negative: NaN
     73.20 can be set at pool creation. Negative: 'random-string'

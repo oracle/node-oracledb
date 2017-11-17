@@ -378,19 +378,27 @@ describe("73. poolPing.js", function() {
             poolPingInterval: userSetInterval
           },
           function(err, pooling) {
-            should.not.exist(err);
-            pool = pooling;
+            if(userSetInterval === null) {
+              should.not.exist(pooling);
+              should.exist(err);
+              should.strictEqual(err.message, "NJS-007: invalid value for \"poolPingInterval\" in parameter 1");
+            } else {
+              should.not.exist(err);
+              pool = pooling;
 
-            should.strictEqual(pool.poolPingInterval, expectedValue);
+              should.strictEqual(pool.poolPingInterval, expectedValue);
+            }
             cb();
           }
         );
       },
       function(cb) {
-        pool.close(function(err) {
-          should.not.exist(err);
-          cb();
-        });
+        if(userSetInterval != null) {
+          pool.close(function(err) {
+            should.not.exist(err);
+          });
+        }
+        cb();
       }
     ], callback);
 
@@ -417,7 +425,7 @@ describe("73. poolPing.js", function() {
 
   });
 
-  it("73.17 Setting to 'null' will use current value from oracledb", function(done) {
+  it("73.17 Negative: null", function(done) {
 
     oracledb.poolPingInterval = 789;
     var userSetValue = null;

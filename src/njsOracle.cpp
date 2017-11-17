@@ -491,7 +491,8 @@ NAN_SETTER(njsOracledb::SetExtendedMetaData)
 {
     njsOracledb *oracledb = (njsOracledb*) ValidateSetter(info);
     if (oracledb)
-        oracledb->extendedMetaData = value->ToBoolean()->Value();
+        oracledb->SetPropBool ( value, &oracledb->extendedMetaData,
+                            "extendedMetaData" ) ;
 }
 
 

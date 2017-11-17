@@ -914,6 +914,12 @@ bool njsConnection::ProcessBindValue(Local<Value> value, njsVariable *var,
         return false;
     }
 
+    /* Expecting an array value here */
+    if ( !value->IsArray ()) {
+        baton->error = njsMessages::Get ( errNonArrayProvided ) ;
+        return false;
+    }
+
     // set the number of actual elements in the variable
     Nan::HandleScope scope;
     Local<Array> arrayVal = Local<Array>::Cast(value);
