@@ -5951,7 +5951,7 @@ Adjust the statement cache size to your satisfaction.
 
 When node-oracledb is linked with Oracle Database 12c client libraries, the Oracle
 client-side configuration file
-[oraaccess.xml](https://docs.oracle.com/database/122/LNOCI/more-oci-advanced-topics.htm#LNOCI73052)
+[oraaccess.xml](https://docs.oracle.com/database/122/LNOCI/more-oci-advanced-topics.htm#LNOCI-GUID-CD599644-135A-4116-8B3B-40A9BA172E5C)
 can be used to configure some behaviors of node-oracledb.
 
 For example, oraaccess.xml can be used to:
@@ -5961,7 +5961,7 @@ For example, oraaccess.xml can be used to:
 - turn on [Client Statement Cache Auto-tuning](https://docs.oracle.com/database/122/LNOCI/more-oci-advanced-topics.htm#LNOCI73051)
 
 Other features can also be enabled.  Refer to the
-[oraaccess.xml documentation](https://docs.oracle.com/database/122/LNOCI/more-oci-advanced-topics.htm#LNOCI73052)
+[oraaccess.xml documentation](https://docs.oracle.com/database/122/LNOCI/more-oci-advanced-topics.htm#LNOCI-GUID-CD599644-135A-4116-8B3B-40A9BA172E5C)
 
 ## <a name="nls"></a> 18. Globalization and National Language Support (NLS)
 
