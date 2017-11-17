@@ -360,7 +360,7 @@ NAN_GETTER(njsILob::GetIsValid)
 {
     njsILob *lob;
 
-    lob = (njsILob*) Nan::ObjectWrap::Unwrap<njsCommon>(info.Holder());
+    lob = Nan::ObjectWrap::Unwrap<njsILob>(info.Holder());
     if (!lob) {
         std::string errMsg = njsMessages::Get(errInvalidJSObject);
         Nan::ThrowError(errMsg.c_str());
