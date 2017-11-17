@@ -354,6 +354,8 @@ bool njsConnection::ProcessVars(njsBaton *baton, njsVariable *vars,
                 return false;
             }
         }
+        if (var->lobs)
+            delete [] var->lobs;
         var->lobs = new njsProtoILob[numElements];
         for (uint32_t row = 0; row < numElements; row++) {
             njsProtoILob *lob = &var->lobs[row];
