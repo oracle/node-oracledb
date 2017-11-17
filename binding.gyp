@@ -20,6 +20,7 @@
              "odpi/src/dpiError.c",
              "odpi/src/dpiGen.c",
              "odpi/src/dpiGlobal.c",
+             "odpi/src/dpiHandlePool.c",
              "odpi/src/dpiLob.c",
              "odpi/src/dpiMsgProps.c",
              "odpi/src/dpiObjectAttr.c",
@@ -93,8 +94,7 @@
                 "EnableIntrinsicFunctions": "true",
                 "RuntimeTypeInfo": "false",
                 "PreprocessorDefinitions": [
-                  "WIN32_LEAN_AND_MEAN",
-                  "DPI_DISABLE_THREAD_CLEANUP"
+                  "WIN32_LEAN_AND_MEAN"
                 ],
                 "ExceptionHandling": "0",
                 "AdditionalOptions": [
@@ -118,8 +118,7 @@
               "msvs_settings": {
                   "VCCLCompilerTool": {
                     "PreprocessorDefinitions": [
-                      "WIN32_LEAN_AND_MEAN",
-                      "DPI_DISABLE_THREAD_CLEANUP"
+                      "WIN32_LEAN_AND_MEAN"
                     ],
                     "ExceptionHandling": "0",
                     "AdditionalOptions": [
