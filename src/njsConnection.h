@@ -73,8 +73,8 @@ public:
             bool extendedMetaData);
     static bool GetRows(njsBaton* baton, Local<Object> &rows);
     static bool ProcessFetch(njsBaton* baton);
-    static bool ProcessDefines(njsBaton* baton, dpiStmt *dpiStmtHandle,
-            dpiConn *dpiConnHandle, njsVariable *vars, uint32_t numVars);
+    static bool ProcessQueryVars(njsBaton* baton, dpiStmt *dpiStmtHandle,
+            njsVariable *vars, uint32_t numVars);
     static void Init(Handle<Object> target);
     bool IsValid() const { return (dpiConnHandle) ? true : false; }
     njsErrorType GetInvalidErrorType() const { return errInvalidConnection; }

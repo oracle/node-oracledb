@@ -135,11 +135,13 @@ Local<Object> njsConnection::CreateFromBaton(njsBaton *baton)
 
 
 //-----------------------------------------------------------------------------
-// njsConnection::ProcessDefines()
-//   Perform defines on all of the columns in the query.
+// njsConnection::ProcessQueryVars()
+//   Process query variables on all of the columns in the query. The actual
+// ODPI-C variable will not be created at this point, nor will it be defined.
+// This is deferred until just prior to the fetch.
 //-----------------------------------------------------------------------------
-bool njsConnection::ProcessDefines(njsBaton *baton, dpiStmt *dpiStmtHandle,
-        dpiConn *dpiConnHandle, njsVariable *vars, uint32_t numVars)
+bool njsConnection::ProcessQueryVars(njsBaton *baton, dpiStmt *dpiStmtHandle,
+        njsVariable *vars, uint32_t numVars)
 {
     dpiQueryInfo queryInfo;
 
@@ -150,18 +152,13 @@ bool njsConnection::ProcessDefines(njsBaton *baton, dpiStmt *dpiStmtHandle,
         return false;
     }
 
-    // set fetch array size to the max rows that we wish to retrieve
-    if (dpiStmt_setFetchArraySize(dpiStmtHandle, baton->maxRows) < 0) {
-        baton->GetDPIError();
-        return false;
-    }
-
-    // perform defines
+    // populate variables with query metadata
     for (uint32_t i = 0; i < numVars; i++) {
 
         // get query information for the specified column
         vars[i].pos = i + 1;
         vars[i].isArray = false;
+        vars[i].maxArraySize = 0;
         vars[i].bindDir = NJS_BIND_OUT;
         if (dpiStmt_getQueryInfo(dpiStmtHandle, vars[i].pos, &queryInfo) < 0) {
             baton->GetDPIError();
@@ -238,19 +235,6 @@ bool njsConnection::ProcessDefines(njsBaton *baton, dpiStmt *dpiStmtHandle,
                 return false;
         }
 
-        // create variable and define it
-        if (dpiConn_newVar(dpiConnHandle, vars[i].varTypeNum,
-                vars[i].nativeTypeNum, vars[i].maxArraySize, vars[i].maxSize,
-                1, 0, queryInfo.typeInfo.objectType, &vars[i].dpiVarHandle,
-                &vars[i].dpiVarData) < 0) {
-            baton->GetDPIError();
-            return false;
-        }
-        if (dpiStmt_define(dpiStmtHandle, i + 1, vars[i].dpiVarHandle) < 0) {
-            baton->GetDPIError();
-            return false;
-        }
-
     }
 
     return true;
@@ -263,8 +247,38 @@ bool njsConnection::ProcessDefines(njsBaton *baton, dpiStmt *dpiStmtHandle,
 //-----------------------------------------------------------------------------
 bool njsConnection::ProcessFetch(njsBaton *baton)
 {
-    int moreRows;
+    int moreRows, setFetchArraySize = 0;
+    njsVariable *var;
+    uint32_t i;
 
+    // create ODPI-C variables and define them, if necessary
+    for (i = 0; i < baton->numQueryVars; i++) {
+        var = &baton->queryVars[i];
+        if (var->dpiVarHandle)
+            continue;
+        if (!setFetchArraySize) {
+            setFetchArraySize = 1;
+            if (dpiStmt_setFetchArraySize(baton->dpiStmtHandle,
+                    baton->maxRows) < 0) {
+                baton->GetDPIError();
+                return false;
+            }
+        }
+        if (dpiConn_newVar(baton->dpiConnHandle, var->varTypeNum,
+                var->nativeTypeNum, baton->maxRows, var->maxSize, 1, 0, NULL,
+                &var->dpiVarHandle, &var->dpiVarData) < 0) {
+            baton->GetDPIError();
+            return false;
+        }
+        var->maxArraySize = baton->maxRows;
+        if (dpiStmt_define(baton->dpiStmtHandle, i + 1,
+                var->dpiVarHandle) < 0) {
+            baton->GetDPIError();
+            return false;
+        }
+    }
+
+    // perform fetch
     if (dpiStmt_fetchRows(baton->dpiStmtHandle, baton->maxRows,
             &baton->bufferRowIndex, &baton->rowsFetched, &moreRows) < 0) {
         baton->GetDPIError();
@@ -310,8 +324,8 @@ bool njsConnection::ProcessVars(njsBaton *baton, njsVariable *vars,
                     return false;
                 }
                 var->queryVars = new njsVariable[var->numQueryVars];
-                if (!ProcessDefines(baton, stmt, baton->dpiConnHandle,
-                        var->queryVars, var->numQueryVars))
+                if (!ProcessQueryVars(baton, stmt, var->queryVars,
+                        var->numQueryVars))
                     return false;
                 continue;
             default:
@@ -1482,8 +1496,8 @@ void njsConnection::Async_Execute(njsBaton *baton)
 
         // perform defines
         baton->queryVars = new njsVariable[baton->numQueryVars];
-        if (!ProcessDefines(baton, baton->dpiStmtHandle, baton->dpiConnHandle,
-                baton->queryVars, baton->numQueryVars))
+        if (!ProcessQueryVars(baton, baton->dpiStmtHandle, baton->queryVars,
+                baton->numQueryVars))
             return;
 
         // when not getting a result set, process fetch completely
