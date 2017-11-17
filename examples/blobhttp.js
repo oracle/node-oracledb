@@ -57,10 +57,10 @@ function init() {
 
       // Create HTTP server and listen on port 'httpPort'
       http
-      .createServer(function(request, response) {
-        handleRequest(request, response);
-      })
-      .listen(httpPort);
+        .createServer(function(request, response) {
+          handleRequest(request, response);
+        })
+        .listen(httpPort);
 
       console.log("Server running.  Try requesting: http://localhost:" + httpPort + "/getimage");
     });
@@ -140,13 +140,13 @@ function handleRequest(request, response) {
 }
 
 process
-.on('SIGTERM', function() {
-  console.log("\nTerminating");
-  process.exit(0);
-})
-.on('SIGINT', function() {
-  console.log("\nTerminating");
-  process.exit(0);
-});
+  .on('SIGTERM', function() {
+    console.log("\nTerminating");
+    process.exit(0);
+  })
+  .on('SIGINT', function() {
+    console.log("\nTerminating");
+    process.exit(0);
+  });
 
 init();

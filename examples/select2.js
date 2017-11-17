@@ -86,7 +86,7 @@ var doquery_object = function (conn, cb) {
   conn.execute(
     "SELECT location_id, city FROM locations WHERE city LIKE 'S%' ORDER BY city",
     {}, // A bind variable parameter is needed to disambiguate the following options parameter
-        // otherwise you will get Error: ORA-01036: illegal variable name/number
+    // otherwise you will get Error: ORA-01036: illegal variable name/number
     { outFormat: oracledb.OBJECT }, // outFormat can be OBJECT or ARRAY.  The default is ARRAY
     function(err, result)
     {
