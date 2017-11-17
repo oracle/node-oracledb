@@ -39,7 +39,7 @@
     [
       'OS=="linux"', {
         "variables" : {
-          "dpi_check%"    : "<!(INSTURL=\"https://github.com/oracle/node-oracledb/blob/master/INSTALL.md#github\"; ERR=\"node-oracledb ERR! Error:\"; if [ -f odpi/include/dpi.h ]; then echo \"Has dpi.h\"; else echo \"$ERR Cannot find odpi/include/dpi.h.  For GitHub ZIP downloads you must separately download the odpi subdirectory from GitHub.\" >&2; echo \"$ERR See $INSTURL\" >&2; echo \"\" >&2; fi;)"
+          "dpi_check%"    : "<!(INSTURL=\"https://github.com/oracle/node-oracledb/blob/master/INSTALL.md#github\"; ERR=\"oracledb ERR! Error:\"; if [ -f odpi/include/dpi.h ]; then echo \"Has dpi.h\"; else echo \"$ERR Cannot find odpi/include/dpi.h.  For GitHub ZIP downloads you must separately download the odpi subdirectory from GitHub.\" >&2; echo \"$ERR See $INSTURL\" >&2; echo \"\" >&2; fi;)"
         },
         "cflags"        : ['-fexceptions'],
         "cflags_cc"     : ['-fexceptions'],
@@ -49,7 +49,7 @@
     [
       'OS=="mac"', {
         "variables" : {
-          "dpi_check%"    : "<!(INSTURL=\"https://github.com/oracle/node-oracledb/blob/master/INSTALL.md#github\"; ERR=\"node-oracledb ERR! Error:\"; if [ -f odpi/include/dpi.h ]; then echo \"Has dpi.h\"; else echo \"$ERR Cannot find odpi/include/dpi.h.  For GitHub ZIP downloads you must separately download the odpi subdirectory from GitHub.\" >&2; echo \"$ERR See $INSTURL\" >&2; echo \"\" >&2; fi;)"
+          "dpi_check%"    : "<!(INSTURL=\"https://github.com/oracle/node-oracledb/blob/master/INSTALL.md#github\"; ERR=\"oracledb ERR! Error:\"; if [ -f odpi/include/dpi.h ]; then echo \"Has dpi.h\"; else echo \"$ERR Cannot find odpi/include/dpi.h.  For GitHub ZIP downloads you must separately download the odpi subdirectory from GitHub.\" >&2; echo \"$ERR See $INSTURL\" >&2; echo \"\" >&2; fi;)"
         },
         "xcode_settings": {
           "GCC_ENABLE_CPP_EXCEPTIONS": "YES",
@@ -61,7 +61,7 @@
     [
       'OS=="aix"', {
         "variables" : {
-          "dpi_check%"    : "<!(INSTURL=\"https://github.com/oracle/node-oracledb/blob/master/INSTALL.md#github\"; ERR=\"node-oracledb ERR! Error:\"; if [ -f odpi/include/dpi.h ]; then echo \"Has dpi.h\"; else echo \"$ERR Cannot find odpi/include/dpi.h.  For GitHub ZIP downloads you must separately download the odpi subdirectory from GitHub.\" >&2; echo \"$ERR See $INSTURL\" >&2; echo \"\" >&2; fi;)"
+          "dpi_check%"    : "<!(INSTURL=\"https://github.com/oracle/node-oracledb/blob/master/INSTALL.md#github\"; ERR=\"oracledb ERR! Error:\"; if [ -f odpi/include/dpi.h ]; then echo \"Has dpi.h\"; else echo \"$ERR Cannot find odpi/include/dpi.h.  For GitHub ZIP downloads you must separately download the odpi subdirectory from GitHub.\" >&2; echo \"$ERR See $INSTURL\" >&2; echo \"\" >&2; fi;)"
         },
         "cflags"        : ['-fexceptions', '-fsigned-char'],
         "cflags_cc"     : ['-fexceptions', '-fsigned-char'],
@@ -71,7 +71,7 @@
     [
       'OS=="solaris"', {
         "variables" : {
-          "dpi_check%"    : "<!(INSTURL=\"https://github.com/oracle/node-oracledb/blob/master/INSTALL.md#github\"; ERR=\"node-oracledb ERR! Error:\"; if [ -f odpi/include/dpi.h ]; then echo \"Has dpi.h\"; else echo \"$ERR Cannot find odpi/include/dpi.h.  For GitHub ZIP downloads you must separately download the odpi subdirectory from GitHub.\" >&2; echo \"$ERR See $INSTURL\" >&2; echo \"\" >&2; fi;)"
+          "dpi_check%"    : "<!(INSTURL=\"https://github.com/oracle/node-oracledb/blob/master/INSTALL.md#github\"; ERR=\"oracledb ERR! Error:\"; if [ -f odpi/include/dpi.h ]; then echo \"Has dpi.h\"; else echo \"$ERR Cannot find odpi/include/dpi.h.  For GitHub ZIP downloads you must separately download the odpi subdirectory from GitHub.\" >&2; echo \"$ERR See $INSTURL\" >&2; echo \"\" >&2; fi;)"
         },
         "cflags"        : ['-fexceptions'],
         "cflags_cc"     : ['-fexceptions'],
