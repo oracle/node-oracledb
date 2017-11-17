@@ -14,6 +14,9 @@ node_modules
 /examples/lobselectout.jpg
 /examples/lobbindsout1.txt
 /examples/lobbindsout2.txt
+/package/SHASUMS256.txt
+/package/*.gz
+package-lock.json
 
 # Oracle Ignores
 sqlnet.log

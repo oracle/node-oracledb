@@ -84,6 +84,7 @@ static const char *errMsg[] = {
     "NJS-047: pool alias \"%s\" not found in connection pool cache", // errPoolWithAliasNotFound
     "NJS-052: invalid data type at array index %d for bind position %d", // errIncompatibleTypeArrayIndexBind
     "NJS-053: array value expected, a non-array value provided", //errNonArrayProvided
+    "NJS-054: Binary build/Release/oracledb.node was not installed from %s", // errNoBinaryInstalled
 };
 
 
