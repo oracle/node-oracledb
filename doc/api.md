@@ -194,12 +194,12 @@ limitations under the License.
 
 ## <a name="intro"></a> 1. Introduction
 
-The [*node-oracledb*](https://www.npmjs.com/package/oracledb) add-on for Node.js powers high performance Oracle Database applications.
+The [*node-oracledb*][1] add-on for Node.js powers high performance Oracle Database applications.
 
 This document shows how to use node-oracledb.  The API reference is in
 sections 2 - 7 and the user guide in subsequent sections.
 
-For how to install node-oracledb, see [INSTALL](https://github.com/oracle/node-oracledb/blob/master/INSTALL.md).
+For how to install node-oracledb, see [INSTALL][2].
 
 The node-oracledb API is a generic Oracle Database access layer.
 Almost all the functionality described here is common across all
@@ -259,12 +259,10 @@ With Oracle's sample HR schema, the output is:
 
 Node-oracledb can also use [Promises](#promiseoverview).
 
-There are more node-oracledb examples in the
-[examples](https://github.com/oracle/node-oracledb/tree/master/examples)
-directory.
+There are more node-oracledb examples in the [examples][3] directory.
 
 Scripts to create Oracle's sample schemas can be found at
-[github.com/oracle/db-sample-schemas](https://github.com/oracle/db-sample-schemas).
+[github.com/oracle/db-sample-schemas][4].
 
 ## <a name="errorobj"></a> 2. Errors
 
@@ -673,11 +671,10 @@ This property may be overridden in an [`execute()`](#executeoptions) call.
 This property is also used by [`queryStream()`](#querystream) as an
 internal buffer size tuning parameter.
 
-To improve database efficiency, SQL queries should use a row
-limiting clause like [OFFSET /
-FETCH](https://docs.oracle.com/database/122/SQLRF/SELECT.htm#GUID-CFA006CA-6FF1-4972-821E-6996142A51C6__BABEAACC)
-or equivalent. The `maxRows` property can be used to stop badly coded
-queries from returning unexpectedly large numbers of rows.
+To improve database efficiency, SQL queries should use a row limiting
+clause like [OFFSET / FETCH][5] or equivalent. The `maxRows` property
+can be used to stop badly coded queries from returning unexpectedly
+large numbers of rows.
 
 Adjust `maxRows` as required by each application or query.  Values
 that are larger than required can result in sub-optimal memory usage.
@@ -1059,9 +1056,8 @@ promise = createPool(Object poolAttrs);
 This method creates a pool of connections with the specified username,
 password and connection string.
 
-Internally, `createPool()` creates an [OCI Session
-Pool](https://docs.oracle.com/database/122/LNOCI/oci-programming-advanced-topics.htm#LNOCI16617)
-for each Pool object.
+Internally, `createPool()` creates an [OCI Session Pool][6] for each
+Pool object.
 
 The default properties may be overridden by specifying new properties
 in the `poolAttrs` parameter.
@@ -1101,10 +1097,9 @@ The properties of `poolAttrs` are described below.
 String user
 ```
 
-The database user name.  Can be a simple user name or a proxy of the form *alison[fred]*. See the
-[Client Access Through a Proxy](https://docs.oracle.com/database/122/LNOCI/oci-programming-basics.htm#GUID-D77D0D4A-7483-423A-9767-CBB5854A15CC)
-section in the OCI manual for more details about proxy
-authentication.
+The database user name.  Can be a simple user name or a proxy of the
+form *alison[fred]*. See the [Client Access Through a Proxy][7]
+section in the OCI manual for more details about proxy authentication.
 
 ```
 String password
@@ -1334,10 +1329,9 @@ The properties of the `connAttrs` object are described below.
 String user
 ```
 
-The database user name.  Can be a simple user name or a proxy of the form *alison[fred]*. See the
-[Client Access Through Proxy](https://docs.oracle.com/cd/B19306_01/appdev.102/b14250/oci02bas.htm#LNOCI13341)
-section in the OCI manual for more details about proxy
-authentication.
+The database user name.  Can be a simple user name or a proxy of the
+form *alison[fred]*. See ther [Client Access Thgrough Proxy][8] section
+in the OCI manual for more details about proxy authentication.
 
 ```
 String password
@@ -1432,8 +1426,7 @@ The properties of a *Connection* object are listed below.
 writeonly String action
 ```
 
-The [action](https://docs.oracle.com/database/122/LNOCI/managing-scalable-platforms.htm#LNOCI-GUID-624A4771-58C5-4E2B-8131-E3389F58A0D6)
-attribute for end-to-end application tracing.
+The [action][9] attribute for end-to-end application tracing.
 
 This is a write-only property.  Displaying a Connection object will
 show a value of `null` for this attribute.  See
@@ -1445,10 +1438,9 @@ show a value of `null` for this attribute.  See
 writeonly String clientId
 ```
 
-The [client
-identifier](https://docs.oracle.com/database/122/LNOCI/managing-scalable-platforms.htm#LNOCI-GUID-8A9F1295-4360-4AC6-99A4-050C5C82E0B0)
-for end-to-end application tracing, use with mid-tier authentication,
-and with [Virtual Private Databases](https://docs.oracle.com/database/122/CNCPT/topics-for-database-administrators-and-developers.htm#GUID-89DB0C3C-A36F-4254-8C82-020F5F6DE31F).
+The [client identifier][10] for end-to-end application tracing, use
+with mid-tier authentication, and with [Virtual Private
+Databases][11].
 
 This is a write-only property.  Displaying a Connection object will
 show a value of `null` for this attribute.  See
@@ -1460,8 +1452,7 @@ show a value of `null` for this attribute.  See
 writeonly String module
 ```
 
-The [module](https://docs.oracle.com/database/122/LNOCI/managing-scalable-platforms.htm#LNOCI-GUID-624A4771-58C5-4E2B-8131-E3389F58A0D6)
-attribute for end-to-end application tracing.
+The [module][9] attribute for end-to-end application tracing.
 
 This is a write-only property.  Displaying a Connection object will
 show a value of `null` for this attribute.  See
@@ -1616,10 +1607,9 @@ promise = createLob(Number type);
 
 ##### Description
 
-Creates a [Lob](#lobclass) as an Oracle
-[temporary LOB](http://docs.oracle.com/database/122/ADLOB/introduction-to-large-objects.htm#ADLOB45120).
-The LOB is initially empty.  Data can be streamed to the LOB, which
-can then be passed into PL/SQL blocks, or inserted into the database.
+Creates a [Lob](#lobclass) as an Oracle [temporary LOB][12].  The LOB
+is initially empty.  Data can be streamed to the LOB, which can then
+be passed into PL/SQL blocks, or inserted into the database.
 
 When no longer required, Lobs created with `createLob()` should be
 closed with [`lob.close()`](#lobclose) because Oracle Database
@@ -1632,7 +1622,7 @@ temporary tablespace storage is also freed at end of scope, as long as
 the connection is still open.
 
 Open temporary LOB usage can be monitored using the view
-[`V$TEMPORARY_LOBS`](http://docs.oracle.com/database/122/ADLOB/managing-LOBs.htm#ADLOB45157).
+[`V$TEMPORARY_LOBS`][13].
 
 LOBs created with `createLob()` can be bound for IN, IN OUT and OUT
 binds.
@@ -1683,11 +1673,10 @@ The statement to be executed may contain [IN binds](#inbind),
 [OUT or IN OUT](#outbind) bind values or variables, which are bound
 using either an object or an array.
 
-A callback function returns a [`result`](#executecallback) object, containing any fetched
-rows, the values of any OUT and IN OUT bind variables, and the number
-of rows affected by the execution of
-[DML](https://docs.oracle.com/database/122/CNCPT/sql.htm#CNCPT516)
-statements.
+A callback function returns a [`result`](#executecallback) object,
+containing any fetched rows, the values of any OUT and IN OUT bind
+variables, and the number of rows affected by the execution of
+[DML][14] statements.
 
 ##### Parameters
 
@@ -1886,7 +1875,7 @@ The parameters of the `execute()` callback function are:
 Callback function parameter | Description
 ----------------------------|-------------
 *Error error* | If `execute()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
-*Object result* | The [`result`](#resultobject) object, described below.  The `result` parameter can be omitted for [DDL](https://docs.oracle.com/database/122/CNCPT/sql.htm#CNCPT1732) and [DML](https://docs.oracle.com/database/122/CNCPT/sql.htm#CNCPT516) statements where the application only checks `error` for success or failure.
+*Object result* | The [`result`](#resultobject) object, described below.  The `result` parameter can be omitted for [DDL][15] and [DML][14] statements where the application only checks `error` for success or failure.
 
 ##### <a name="resultobject"></a> Result Object Properties
 
@@ -1975,12 +1964,10 @@ any `execute()` call.
 Number rowsAffected
 ```
 
-For
-[DML](https://docs.oracle.com/database/122/CNCPT/sql.htm#CNCPT516)
-statements (including SELECT FOR UPDATE) this contains the number of
-rows affected, for example the number of rows inserted. For non-DML
-statements such as queries, or if no rows are affected, then
-`rowsAffected` will appear as undefined.
+For [DML][14] statements (including SELECT FOR UPDATE) this contains
+the number of rows affected, for example the number of rows
+inserted. For non-DML statements such as queries, or if no rows are
+affected, then `rowsAffected` will appear as undefined.
 
 #### <a name="querystream"></a> 4.2.6 `connection.queryStream()`
 
@@ -1992,8 +1979,7 @@ queryStream(String sql, [Object bindParams, [Object options]]);
 
 ##### Return Value
 
-This method will return a
-[Readable Stream](https://nodejs.org/api/stream.html) for queries.
+This method will return a [Readable Stream][16] for queries.
 
 ##### Description
 
@@ -2059,8 +2045,7 @@ Callback function parameter | Description
 
 Lob objects can be used to access Oracle Database CLOB and BLOB data.
 
-A Lob object implements the
-[Node.js Stream](https://nodejs.org/api/stream.html) interface.
+A Lob object implements the [Node.js Stream][16] interface.
 
 See [Working with CLOB and BLOB Data](#lobhandling) and [LOB Bind Parameters](#lobbinds) for more information.
 
@@ -2147,8 +2132,7 @@ completion or used as the source for an IN OUT bind.  If you try to
 close a Lob being used for streaming you will get the error *NJS-023:
 concurrent operations on a Lob are not allowed*.
 
-The `lob.close()` method emits
-the [Node.js Stream](https://nodejs.org/api/stream.html) 'close' event
+The `lob.close()` method emits the [Node.js Stream][16] 'close' event
 unless the Lob has already been explicitly or automatically closed.
 
 The connection must be open when calling `lob.close()` on a temporary
@@ -2177,8 +2161,7 @@ A connection *Pool* object is created by calling the
 
 The *Pool* object obtains connections to the Oracle database using the
 `getConnection()` method to "check them out" from the pool. Internally
-[OCI Session Pooling](https://docs.oracle.com/database/122/LNOCI/oci-programming-advanced-topics.htm#LNOCI16617)
-is used.
+[OCI Session Pooling][6] is used.
 
 After the application finishes using a connection pool, it should
 release all connections and terminate the connection pool by calling
@@ -2502,8 +2485,7 @@ toQueryStream();
 
 ##### Return Value
 
-This method will return a
-[Readable Stream](https://nodejs.org/api/stream.html).
+This method will return a [Readable Stream][16].
 
 ##### Description
 
@@ -2585,9 +2567,8 @@ oracledb.getConnection(
   . . .
 ```
 
-For more information on Easy Connect strings see
-[Understanding the Easy Connect Naming Method](https://docs.oracle.com/database/122/NETAG/configuring-naming-methods.htm#NETAG255)
-in the Oracle documentation.
+For more information on Easy Connect strings see [Understanding the
+Easy Connect Naming Method][17] in the Oracle documentation.
 
 #### <a name="tnsnames"></a> 8.1.2 Net Service Names for Connection Strings
 
@@ -2624,9 +2605,8 @@ The `tnsnames.ora` file can be in a default location such as
 `$ORACLE_HOME/network/admin/tnsnames.ora` or
 `/etc/tnsnames.ora`. Alternatively set the `TNS_ADMIN` environment
 variable and put the file in `$TNS_ADMIN/tnsnames.ora`.  For more
-information on `tnsnames.ora` files see
-[General Syntax of tnsnames.ora](https://docs.oracle.com/database/122/NETRF/local-naming-parameters-in-tnsnames-ora-file.htm#NETRF1361) in
-the Oracle documentation.
+information on `tnsnames.ora` files see [General Syntax of
+tnsnames.ora][18] in the Oracle documentation.
 
 
 Full connection strings can be embedded in applications:
@@ -2667,8 +2647,7 @@ oracledb.getConnection(
 ```
 
 Alternatively, if a JDBC connection string uses an old-style
-[SID](https://docs.oracle.com/database/122/NETRF/glossary.htm#GUID-145065A5-C9C7-4E77-9BBB-8028960D005E),
-and there is no service name available:
+[SID][19], and there is no service name available:
 
 ```
 jdbc:oracle:thin:@hostname:port:sid
@@ -2709,12 +2688,10 @@ size should be at least equal to the maxiumum number of connections.
 If the application does database and non-database work concurrently,
 extra threads could also be required for optimal throughput.
 
-Increase the thread pool size by setting the environment
-variable
-[UV_THREADPOOL_SIZE](http://docs.libuv.org/en/v1.x/threadpool.html)
-before starting Node.  For example, in a Linux terminal, the number of
-Node.js worker threads can be increased to 10 by using the following
-command:
+Increase the thread pool size by setting the environment variable
+[UV_THREADPOOL_SIZE][20] before starting Node.  For example, in a
+Linux terminal, the number of Node.js worker threads can be increased
+to 10 by using the following command:
 
 ```
 $ UV_THREADPOOL_SIZE=10 node myapp.js
@@ -2725,22 +2702,19 @@ If the value is set inside the application with
 asynchronous call that uses the thread pool otherwise the default size
 of 4 will still be used.
 
-Note the '[libuv](https://github.com/libuv/libuv)' library used by
-Node.js limits the number of threads to 128.  This implies the
-maxiumum number of connections opened, i.e. `poolMax`, should be less
-than 128.
+Note the '[libuv][21]' library used by Node.js limits the number of
+threads to 128.  This implies the maxiumum number of connections
+opened, i.e. `poolMax`, should be less than 128.
 
 Connections can handle one database operation at a time.  Node.js
 worker threads executing database statements on a connection will wait
 until round-trips between node-oracledb and the database are complete.
 When an application handles a sustained number of user requests, and
 database operations take some time to execute or the network is slow,
-then all available threads may be held in use.  This prevents
-other connections from beginning work and stops Node.js from handling
-more user load.  Increasing the number of worker threads may improve
-throughput and
-prevent
-[deadlocks](https://github.com/oracle/node-oracledb/issues/603#issuecomment-277017313).
+then all available threads may be held in use.  This prevents other
+connections from beginning work and stops Node.js from handling more
+user load.  Increasing the number of worker threads may improve
+throughput and prevent [deadlocks][22].
 
 As well as correctly setting the thread pool size, structure your code
 to avoid starting parallel operations on a connection.  For example,
@@ -2774,9 +2748,8 @@ and (iii) the number of those connections is less than the pool's
 `poolMax` setting.
 
 A pool is created by calling the
-[`oracledb.createPool()`](#createpool) method. Internally
-[OCI Session Pooling](https://docs.oracle.com/database/122/LNOCI/oci-programming-advanced-topics.htm#LNOCI16617)
-is used.
+[`oracledb.createPool()`](#createpool) method. Internally [OCI Session
+Pooling][6] is used.
 
 A connection is returned with the
 [`pool.getConnection()`](#getconnectionpool) function:
@@ -2830,9 +2803,9 @@ client connection pools is for the minimum and maximum number of
 connections to be the same.  This avoids connection storms which can
 decrease throughput.  They also recommend sizing connection pools so
 that the sum of all connections from all applications accessing a
-database gives 1-10 connections per database server CPU core.
-See
-[About Optimizing Real-World Performance with Static Connection Pools](http://docs.oracle.com/cd/E82638_01/JJUCP/optimizing-real-world-performance.htm#JJUCP-GUID-BC09F045-5D80-4AF5-93F5-FEF0531E0E1D).
+database gives 1-10 connections per database server CPU core.  See
+[About Optimizing Real-World Performance with Static Connection
+Pools][23].
 
 The Pool attribute [`stmtCacheSize`](#propconnstmtcachesize) can be
 used to set the statement cache size used by connections in the pool,
@@ -3147,11 +3120,10 @@ requirements.
 
 ### <a name="drcp"></a> 8.4 Database Resident Connection Pooling (DRCP)
 
-[Database Resident Connection Pooling](https://docs.oracle.com/database/122/ADFNS/performance-and-scalability.htm#ADFNS228) (DRCP)
-enables database resource sharing for applications that run in
-multiple client processes or run on multiple middle-tier application
-servers.  DRCP reduces the overall number of connections that a
-database must handle.
+[Database Resident Connection Pooling][24] (DRCP) enables database
+resource sharing for applications that run in multiple client
+processes or run on multiple middle-tier application servers.  DRCP
+reduces the overall number of connections that a database must handle.
 
 DRCP is useful for applications which share the same database credentials, have
 similar session settings (for example date format settings and PL/SQL
@@ -3168,31 +3140,25 @@ For efficiency, it is recommended that DRCP connections should be used
 with node-oracledb's local [connection pool](#poolclass).
 
 The DRCP 'Purity' is SELF for DRCP connections.  This allows reuse of
-both the pooled server process and session memory, giving maximum benefit
-from DRCP.  See the Oracle documentation on
-[benefiting from scalability](https://docs.oracle.com/database/122/ADFNS/performance-and-scalability.htm#ADFNS1428).
+both the pooled server process and session memory, giving maximum
+benefit from DRCP.  See the Oracle documentation on [benefiting from
+scalability][25].
 
-The
-[Oracle DRCP documentation](https://docs.oracle.com/database/122/ADFNS/performance-and-scalability.htm#ADFNS228)
-has more details, including when to use, and when not to use DRCP.
+The [Oracle DRCP documentation][24] has more details, including when
+to use, and when not to use DRCP.
 
 There are a number of Oracle Database `V$` views that can be used to
-monitor DRCP.  These are discussed in the Oracle documentation and in the
-Oracle white paper
-[PHP Scalability and High Availability](http://www.oracle.com/technetwork/topics/php/php-scalability-ha-twp-128842.pdf).
+monitor DRCP.  These are discussed in the Oracle documentation and in
+the Oracle white paper [PHP Scalability and High Availability][26].
 This paper also gives more detail on configuring DRCP.
 
 ### <a name="extauth"></a> 8.5 External Authentication
 
 External Authentication allows applications to use an external
-password store (such as
-[Oracle Wallet](https://docs.oracle.com/database/122/DBIMI/using-oracle-wallet-manager.htm#DBIMI162)),
-the
-[Secure Socket Layer](https://docs.oracle.com/database/122/DBSEG/configuring-secure-sockets-layer-authentication.htm#DBSEG070)
-(SSL), or the
-[operating system](https://docs.oracle.com/database/122/DBSEG/configuring-authentication.htm#DBSEG30035)
-to validate user access.  One of the benefits is that database
-credentials do not need to be hard coded in the application.
+password store (such as [Oracle Wallet][27]), the [Secure Socket
+Layer][28] (SSL), or the [operating system][29] to validate user
+access.  One of the benefits is that database credentials do not need
+to be hard coded in the application.
 
 To use external authentication, set the
 [`oracledb.externalAuth`](#propdbisexternalauth) property to *true*.  This property can
@@ -3235,12 +3201,11 @@ number of open connections does not fall below `poolMin`.
 ### <a name="securenetwork"></a> 8.6 Securely Encrypting Network Traffic to Oracle Database
 
 Data transferred between Oracle Database and the Oracle client
-libraries used by node-oracledb can be
-[encrypted](http://docs.oracle.com/database/122/DBSEG/configuring-network-data-encryption-and-integrity.htm#DBSEG020)
-so that unauthorized parties are not able to view plain text data as
-it passes over the network.  The easiest configuration is Oracle's
-native network encryption.  The standard SSL protocol can also be used
-if you have a PKI, but setup is necessarily more involved.
+libraries used by node-oracledb can be [encrypted][30] so that
+unauthorized parties are not able to view plain text data as it passes
+over the network.  The easiest configuration is Oracle's native
+network encryption.  The standard SSL protocol can also be used if you
+have a PKI, but setup is necessarily more involved.
 
 With native network encryption, the client and database server
 negotiate a key using Diffie-Hellman key exchange.  There is
@@ -3290,13 +3255,12 @@ particular review the available algorithms for security and
 performance.
 
 The `NETWORK_SERVICE_BANNER` column of the database view
-[`V$SESSION_CONNECT_INFO`](https://docs.oracle.com/database/122/REFRN/V-SESSION_CONNECT_INFO.htm#REFRN30224)
-can be used to verify the encryption status of a connection.
+[`V$SESSION_CONNECT_INFO`][31] can be used to verify the encryption
+status of a connection.
 
 For more information about Oracle Data Network Encryption and
 Integrity, and for information about configuring SSL network
-encryption, refer to the [Oracle Database Security
-Guide](http://docs.oracle.com/database/122/DBSEG/toc.htm).  This
+encryption, refer to the [Oracle Database Security Guide][32].  This
 manual also contains information about other important security
 features that Oracle Database provides, such Transparent Data
 Encryption of data-at-rest in the database.
@@ -3310,17 +3274,13 @@ communication between node-oracledb and the database).
 For Oracle Net configuration, set the environment variable `TNS_ADMIN`
 to your application configuration directory and create the file
 `$TNS_ADMIN/sqlnet.ora`.  In this file you can configure settings like
-[`SQLNET.OUTBOUND_CONNECT_TIMEOUT`](http://docs.oracle.com/database/122/NETRF/parameters-for-the-sqlnet-ora-file.htm#NETRF427),
-[`SQLNET.RECV_TIMEOUT`](http://docs.oracle.com/database/122/NETRF/parameters-for-the-sqlnet-ora-file.htm#NETRF227)
-and
-[`SQLNET.SEND_TIMEOUT`](http://docs.oracle.com/database/122/NETRF/parameters-for-the-sqlnet-ora-file.htm#NETRF228).
-You may also want to use a [`tnsnames.ora`](#tnsnames) file to
-configure the database service setting
-['ENABLE=BROKEN'](http://docs.oracle.com/database/122/NETRF/local-naming-parameters-in-tnsnames-ora-file.htm#NETRF431).
+[`SQLNET.OUTBOUND_CONNECT_TIMEOUT`][33], [`SQLNET.RECV_TIMEOUT`][34]
+and [`SQLNET.SEND_TIMEOUT`][35].  You may also want to use a
+[`tnsnames.ora`](#tnsnames) file to configure the database service
+setting ['ENABLE=BROKEN'][36].
 
-Other [Oracle Net](http://docs.oracle.com/database/122/NETRF/toc.htm)
-options may also be useful for high availability and performance
-tuning.
+Other [Oracle Net][37] options may also be useful for high
+availability and performance tuning.
 
 ## <a name="sqlexecution"></a> 9. SQL Execution
 
@@ -3405,9 +3365,7 @@ binds are also available as a ResultSet. See
 The format of each row will be an array or object, depending on the
 value of [outFormat](#propdboutformat).
 
-See [resultset1.js](https://github.com/oracle/node-oracledb/tree/master/examples/resultset1.js),
-[resultset2.js](https://github.com/oracle/node-oracledb/tree/master/examples/resultset2.js)
-and [refcursor.js](https://github.com/oracle/node-oracledb/tree/master/examples/refcursor.js)
+See [resultset1.js][38], [resultset2.js][39] and [refcursor.js][40]
 for full examples.
 
 To fetch one row at a time use `getRow()` :
@@ -3540,9 +3498,8 @@ stream.on('metadata', function (metadata) {
 // listen to any other standard stream events...
 ```
 
-See
-[selectstream.js](https://github.com/oracle/node-oracledb/tree/master/examples/selectstream.js)
-for a runnable example using `connection.queryStream()`.
+See [selectstream.js][41] for a runnable example using
+`connection.queryStream()`.
 
 The [REF CURSOR Bind Parameters](#refcursors) section shows using
 `toQueryStream()` to return a stream for a REF CURSOR.
@@ -3715,10 +3672,9 @@ Details are in the following sections.
 Columns of database type CHAR, VARCHAR2, NCHAR and NVARCHAR are
 returned from queries as JavaScript strings.
 
-Note that binding NCHAR and NVARCHAR for
-[DML](https://docs.oracle.com/database/122/CNCPT/sql.htm#CNCPT516) is
-not supported and may cause unexpected character set translation, see
-[Bind Data Type Notes](#binddatatypenotes).
+Note that binding NCHAR and NVARCHAR for [DML][14] is not supported
+and may cause unexpected character set translation, see [Bind Data
+Type Notes](#binddatatypenotes).
 
 ##### <a name="numberhandling"></a> 9.1.6.2 Fetching Numbers
 
@@ -3764,12 +3720,10 @@ Oracle INTERVAL types are not supported.
 Note that JavaScript Date has millisecond precision therefore
 timestamps will lose any sub-millisecond fractional part when fetched.
 
-To make applications more portable, it is recommended to always set the
-session time zone to a pre-determined value, such as UTC.  This can be
-done by setting the environment
-variable
-[`ORA_SDTZ`](http://docs.oracle.com/database/122/NLSPG/datetime-data-types-and-time-zone-support.htm#NLSPG263) before
-starting Node.js, for example:
+To make applications more portable, it is recommended to always set
+the session time zone to a pre-determined value, such as UTC.  This
+can be done by setting the environment variable [`ORA_SDTZ`][42]
+before starting Node.js, for example:
 
 ```
 $ export ORA_SDTZ='UTC'
@@ -3798,9 +3752,8 @@ BEGIN
 END;
 ```
 
-See
-[Working with Dates Using the Node.js Driver](https://jsao.io/2016/09/working-with-dates-using-the-nodejs-driver/) for
-more discussion of date handling.
+See [Working with Dates Using the Node.js Driver][43] for more
+discussion of date handling.
 
 ##### <a name="fetchasstringhandling"></a> 9.1.6.4 Fetching Numbers and Dates as String
 
@@ -3918,10 +3871,9 @@ or [`fetchAsString`](#propdbfetchasstring) settings, or the
 per-column [`fetchInfo`](#propexecfetchinfo) setting.  See the
 section [Working with CLOB and BLOB Data](#lobhandling).
 
-Note that binding NCLOB for
-[DML](https://docs.oracle.com/database/122/CNCPT/sql.htm#CNCPT516) is
-not supported and may cause unexpected character set translation, see
-[Bind Data Type Notes](#binddatatypenotes).
+Note that binding NCLOB for [DML][14] is not supported and may cause
+unexpected character set translation, see [Bind Data Type
+Notes](#binddatatypenotes).
 
 ##### <a name="fetchlong"></a> 9.1.6.6 Fetching LONG and LONG RAW
 
@@ -3932,11 +3884,9 @@ Unlike for LOBs, there is no support for streaming LONG types.  Oracle
 Database allows values 2 GB in length, but Node.js and V8 memory
 limitations typically only allow memory chunks in the order of tens of
 megabytes.  This means complete data may not be able to fetched from
-the database.  The SQL
-function
-[`TO_LOB`](https://docs.oracle.com/database/122/SQLRF/TO_LOB.htm) can
-be used to migrate data to LOB columns which can be streamed to
-node-oracledb, however `TO_LOB` cannot be used directly in a `SELECT`.
+the database.  The SQL function [`TO_LOB`][44] can be used to migrate
+data to LOB columns which can be streamed to node-oracledb, however
+`TO_LOB` cannot be used directly in a `SELECT`.
 
 ##### <a name="fetchrowid"></a> 9.1.6.7 Fetching ROWID and UROWID
 
@@ -3960,7 +3910,7 @@ type components to scalar values, or use a pipelined table.
 
 For example, consider a `CUSTOMERS` table having a `CUST_GEO_LOCATION`
 column of type `SDO_GEOMETRY`, as created in this [example
-schema](https://docs.oracle.com/cd/E17781_01/appdev.112/e18750/xe_locator.htm#XELOC560):
+schema][45]:
 
 ```sql
 CREATE TABLE customers (
@@ -4017,7 +3967,7 @@ you may want to bind using `type: oracledb.STRING`.  Output would be:
 
 #### <a name="rowprefetching"></a> 9.1.7 Row Prefetching
 
-[Prefetching](https://docs.oracle.com/database/122/LNOCI/using-sql_statements-in-oci.htm#LNOCI16355)
+[Prefetching]([46])
 is a query tuning feature allowing resource usage to be
 optimized.  It allows multiple rows to be returned in each network
 trip from Oracle Database to node-oracledb when a
@@ -4123,12 +4073,10 @@ Here are things to do when you see an *ORA-1000*:
   its own statement cache entry and cursor.  With appropriate binding
   only one entry and cursor will be needed.
 
-- Set the database's
-  [*open_cursors*](http://docs.oracle.com/database/122/REFRN/OPEN_CURSORS.htm#REFRN10137) parameter
-  appropriately.  This parameter specifies the maximum number of
-  cursors that each "session" (i.e each node-oracle connection) can
-  use.  When a connection exceeds the value, the *ORA-1000* error is
-  thrown.
+- Set the database's [*open_cursors*][47] parameter appropriately.
+  This parameter specifies the maximum number of cursors that each
+  "session" (i.e each node-oracle connection) can use.  When a
+  connection exceeds the value, the *ORA-1000* error is thrown.
 
   Along with a cursor per entry in the connection's statement cache,
   any new statements that a connection is currently executing, or
@@ -4254,13 +4202,12 @@ See [Bind Parameters for Prepared Statements](#bind) for information on binding.
 
 ### <a name="dbmsoutput"></a> 10.4 Using DBMS_OUTPUT
 
-The
-[DBMS_OUTPUT](https://docs.oracle.com/database/122/ARPLS/DBMS_OUTPUT.htm#ARPLS67300)
-package is the standard way to "print" output from PL/SQL.  The way
-DBMS_OUTPUT works is like a buffer.  Your Node.js application code
-must first turn on DBMS_OUTPUT buffering for the current connection by
-calling the PL/SQL procedure `DBMS_OUTPUT.ENABLE(NULL)`.  Then any
-PL/SQL executed by the connection can put text into the buffer using
+The [DBMS_OUTPUT][48] package is the standard way to "print" output
+from PL/SQL.  The way DBMS_OUTPUT works is like a buffer.  Your
+Node.js application code must first turn on DBMS_OUTPUT buffering for
+the current connection by calling the PL/SQL procedure
+`DBMS_OUTPUT.ENABLE(NULL)`.  Then any PL/SQL executed by the
+connection can put text into the buffer using
 `DBMS_OUTPUT.PUT_LINE()`.  Finally `DBMS_OUTPUT.GET_LINE()` is used to
 fetch from that buffer.  Note, any PL/SQL code that uses DBMS_OUTPUT
 runs to completion before any output is available to the user.  Also,
@@ -4270,7 +4217,7 @@ A basic way to fetch DBMS_OUTPUT with node-oracledb is to bind an
 output string when calling the PL/SQL `DBMS_OUTPUT.GET_LINE()`
 procedure, print the string, and then repeat until there is no more
 data.  The following snippet is based on the example
-[dbmsoutputgetline.js](https://github.com/oracle/node-oracledb/tree/master/examples/dbmsoutputgetline.js):
+[dbmsoutputgetline.js][49]:
 
 ```javascript
 function fetchDbmsOutputLine(connection, cb) {
@@ -4293,7 +4240,7 @@ function fetchDbmsOutputLine(connection, cb) {
 
 Another way is to wrap the `DBMS_OUTPUT.GET_LINE()` call into a
 pipelined function and fetch the output using a SQL query.  See
-[dbmsoutputpipe.js](https://github.com/oracle/node-oracledb/tree/master/examples/dbmsoutputpipe.js) for the full example.
+[dbmsoutputpipe.js][50] for the full example.
 
 The pipelined function could be created like:
 
@@ -4337,9 +4284,7 @@ type is used for character data and the BLOB type is used for binary
 data.  In node-oracledb, LOBs can be represented by instances of
 the [Lob](#lobclass) class or as Strings and Buffers.
 
-There are runnable LOB examples in the GitHub
-[examples](https://github.com/oracle/node-oracledb/tree/master/examples)
-directory.
+There are runnable LOB examples in the GitHub [examples][3] directory.
 
 ### <a name="basiclobinsert"></a> 11.1 Simple Insertion of LOBs
 
@@ -4538,10 +4483,9 @@ LOB binds.
 
 ### <a name="streamsandlobs"></a> 11.3 Streams and Lobs
 
-The [Lob Class](#lobclass) in node-oracledb implements
-the [Node.js Stream](https://nodejs.org/api/stream.html) interface to
-provide streaming access to CLOB and BLOB database columns and to
-PL/SQL bind parameters.
+The [Lob Class](#lobclass) in node-oracledb implements the [Node.js
+Stream][16] interface to provide streaming access to CLOB and BLOB
+database columns and to PL/SQL bind parameters.
 
 Node-oracledb Lobs can represent persistent LOBs (those permanently
 stored in the database) or temporary LOBs (such as those created
@@ -4590,15 +4534,14 @@ can be called successively, with the last piece being written by the
 resources.  If the Lob is being piped into, then the `write()` and
 `end()` methods are automatically called.
 
-Writeable Lobs also have events, see
-the [Node.js Stream](https://nodejs.org/api/stream.html)
+Writeable Lobs also have events, see the [Node.js Stream][16]
 documentation.
 
 At the conclusion of streaming into a Writeable Lob, the `close` event
 will occur.  It is recommended to put logic such as committing and
 releasing connections in this event (or after it occurs).  See
-[lobinsert2.js](https://github.com/oracle/node-oracledb/tree/master/examples/lobinsert2.js).
-It is also recommended that persistent LOBs not use the `finish` event handler for cleanup.
+[lobinsert2.js][51].  It is also recommended that persistent LOBs not
+use the `finish` event handler for cleanup.
 
 ### <a name="lobinsertdiscussion"></a> 11.4 Using RETURNING INTO to Insert into LOBs
 
@@ -4646,8 +4589,7 @@ This example streams from a file into the table.  When the data has
 been completely streamed, the Lob is automatically closed and the
 'close' event triggered.  At this point the data can be committed.
 
-See [lobinsert2.js](https://github.com/oracle/node-oracledb/tree/master/examples/lobinsert2.js) for
-the full example.
+See [lobinsert2.js][51] for the full example.
 
 ### <a name="loboutstream"></a> 11.5 Getting LOBs as Streams from Oracle Database
 
@@ -4660,10 +4602,9 @@ be [`oracledb.BLOB`](#oracledbconstantsnodbtype)
 or [`oracledb.CLOB`](#oracledbconstantsnodbtype), depending on the
 column or PL/SQL parameter type.
 
-Returned Lobs can be used
-as [Readable Streams](https://nodejs.org/api/stream.html).  Data can
-be streamed from each Lob, for example to a file.  At the conclusion
-of the stream, persistent LOBs are automatically closed.
+Returned Lobs can be used as [Readable Streams][16].  Data can be
+streamed from each Lob, for example to a file.  At the conclusion of
+the stream, persistent LOBs are automatically closed.
 
 Lobs returned from the database that are not streamed can be passed
 back to the database as IN binds for PL/SQL blocks, for `INSERT`, or
@@ -4784,7 +4725,7 @@ This sets the number of bytes (for BLOBs) or characters (for CLOBs).
 The default is [`lob.chunkSize`](#proplobchunksize).  The
 recommendation is for it to be a multiple of `chunkSize`.
 
-See [lobbinds.js](https://github.com/oracle/node-oracledb/tree/master/examples/lobbinds.js) for a full example.
+See [lobbinds.js][52] for a full example.
 
 ### <a name="templobdiscussion"></a> 11.6 Using `createLob()` for PL/SQL IN Binds
 
@@ -4799,14 +4740,12 @@ method shown above will be more efficient.
 
 Lobs from `createLob()` will use space in the temporary tablespace
 until [`lob.close()`](#lobclose) is called.  Database Administrators
-can track this usage by querying
-[`V$TEMPORARY_LOBS`](http://docs.oracle.com/database/122/ADLOB/managing-LOBs.htm#ADLOB45157).
+can track this usage by querying [`V$TEMPORARY_LOBS`][13].
 
 #### Passing a Lob Into PL/SQL
 
-The following insertion example is based on
-[lobplsqltemp.js](https://github.com/oracle/node-oracledb/tree/master/examples/lobplsqltemp.js).
-It creates an empty LOB, populates it, and then passes it to a PL/SQL
+The following insertion example is based on [lobplsqltemp.js][53].  It
+creates an empty LOB, populates it, and then passes it to a PL/SQL
 procedure.
 
 A temporary LOB can be created
@@ -4899,8 +4838,7 @@ created with `lob.createLob()` or returned from the database, perhaps
 as the result of a SQL operation like `substr()` on a Lob column.
 Persistent LOBs can be closed without the connection being open.
 
-The `lob.close()` method emits
-the [Node.js Stream](https://nodejs.org/api/stream.html) 'close' event
+The `lob.close()` method emits the [Node.js Stream][16] 'close' event
 unless the Lob has already been closed explicitly or automatically.
 
 ## <a name="jsondatatype"></a> 12. Oracle Database 12c JSON Data type
@@ -4970,9 +4908,8 @@ After the previous `INSERT` example, this query would display:
 { customerId: 100, item: 1234, quantity: 2 }
 ```
 
-In Oracle Database 12.2 the
-[`JSON_OBJECT` ](https://docs.oracle.com/cloud/latest/db122/ADJSN/generation.htm#ADJSN-GUID-1084A518-A44A-4654-A796-C1DD4D8EC2AA) function
-is a great way to convert relational table data to JSON:
+In Oracle Database 12.2 the [`JSON_OBJECT` ][54] function is a great
+way to convert relational table data to JSON:
 
 ```javascript
 conn.execute(
@@ -4997,12 +4934,11 @@ This produces:
 {"deptId":40,"name":"Human Resources"}
 ```
 
-See [selectjson.js](https://github.com/oracle/node-oracledb/tree/master/examples/selectjson.js)
-and [selectjsonblob.js](https://github.com/oracle/node-oracledb/tree/master/examples/selectjsonblob.js)
-for runnable examples.
+See [selectjson.js][55] and [selectjsonblob.js][56] for runnable
+examples.
 
 For more information about using JSON in Oracle Database see the
-[Database JSON Developer's Guide](https://docs.oracle.com/database/122/ADJSN/toc.htm).
+[Database JSON Developer's Guide]([57]).
 
 ## <a name="xmltype"></a> 13. Working with XMLType
 
@@ -5073,9 +5009,8 @@ efficient.
 Bind parameters can be used to substitute data but not the text of the
 statement.
 
-Bind variables cannot be used in
-[DDL](https://docs.oracle.com/database/122/CNCPT/sql.htm#CNCPT1732)
-statements, for example `CREATE TABLE` or `ALTER` commands.
+Bind variables cannot be used in [DDL][15] statements, for example
+`CREATE TABLE` or `ALTER` commands.
 
 ### <a name="inbind"></a> 14.1 IN Bind Parameters
 
@@ -5201,12 +5136,11 @@ for more information.
 
 The type `oracledb.CURSOR` cannot be used with IN binds.
 
-Binding NCHAR, NVARCHAR or NCLOB for
-[DML](https://docs.oracle.com/database/122/CNCPT/sql.htm#CNCPT516) may
-result in incorrect character mapping, depending on the database
-character set and the database national character set.  It may work in
-the case where the database character set can safely convert to the
-database national character set.
+Binding NCHAR, NVARCHAR or NCLOB for [DML][14] may result in incorrect
+character mapping, depending on the database character set and the
+database national character set.  It may work in the case where the
+database character set can safely convert to the database national
+character set.
 
 ### <a name="outbind"></a> 14.2 OUT and IN OUT Bind Parameters
 
@@ -5339,8 +5273,8 @@ var bindVars = [
 
 ### <a name="dmlreturn"></a> 14.3 DML RETURNING Bind Parameters
 
-[DML](https://docs.oracle.com/database/122/CNCPT/sql.htm#CNCPT516)
-statements query or manipulate data in existing schema objects.
+[DML][14] statements query or manipulate data in existing schema
+objects.
 
 Bind parameters from "DML RETURNING" statements (such as `INSERT
 ... RETURNING ... INTO ...`) can use `oracledb.BLOB`, `oracledb.CLOB`, `oracledb.STRING`,
@@ -5523,8 +5457,7 @@ function fetchRowsFromRS(connection, resultSet, numRows)
 }
 ```
 
-See [refcursor.js](https://github.com/oracle/node-oracledb/tree/master/examples/refcursor.js)
-for a complete example.
+See [refcursor.js][40] for a complete example.
 
 To convert the REF CURSOR ResultSet to a stream, use
 [`toQueryStream()`](#toquerystream).  With the PL/SQL and bind values
@@ -5770,9 +5703,7 @@ See [Oracledb Constants](#oracledbconstants) and
 [execute(): Bind Parameters](#executebindParams) for more information
 about binding.
 
-See
-[plsqlarray.js](https://github.com/oracle/node-oracledb/tree/master/examples/plsqlarray.js)
-for a runnable example.
+See [plsqlarray.js][58] for a runnable example.
 
 ### <a name="sqlwherein"></a> 14.7 Binding Multiple Values to a SQL `WHERE IN` Clause
 
@@ -5846,17 +5777,12 @@ The easiest way to do the `<something that returns a list of rows>`
 will depend on how the data is initially represented and the number of
 items.  You might look at using `CONNECT BY` or nested tables.  Or,
 for really large numbers of items, you might prefer to use a global
-temporary table.  Some solutions are given
-in
-[On Cursors, SQL, and Analytics](http://www.oracle.com/technetwork/issue-archive/2007/07-mar/o27asktom-084983.html) and
-in
-[this StackOverflow answer](http://stackoverflow.com/a/43330282/4799035).
+temporary table.  Some solutions are given in [On Cursors, SQL, and
+Analytics][59] and in [this StackOverflow answer][60].
 
 ## <a name="transactionmgt"></a> 15. Transaction Management
 
-By default,
-[DML](https://docs.oracle.com/database/122/CNCPT/sql.htm#CNCPT516)
-statements are not committed in node-oracledb.
+By default, [DML][14] statements are not committed in node-oracledb.
 
 The node-oracledb add-on implements [`commit()`](#commit) and
 [`rollback()`](#rollback) methods that can be used to explicitly
@@ -5879,19 +5805,17 @@ always in a new transaction.
 When an application ends, any uncommitted transaction on a connection
 will be rolled back.
 
-Note: Oracle Database will implicitly commit when a
-[DDL](https://docs.oracle.com/database/122/CNCPT/sql.htm#CNCPT1732)
+Note: Oracle Database will implicitly commit when a [DDL][15]
 statement is executed irrespective of the value of `autoCommit`.
 
 ## <a name="stmtcache"></a> 16. Statement Caching
 
-Node-oracledb's [`execute()`](#execute)
-and [`queryStream()`](#querystream) methods use
-the
-[Oracle OCI statement cache](https://docs.oracle.com/database/122/LNOCI/oci-programming-advanced-topics.htm#LNOCI16655) to
-make re-execution of statements efficient.  This cache removes the
-need for the separate 'prepare' or 'parse' method which is sometimes
-seen in other Oracle APIs: there is no separate method in node-oracledb.
+Node-oracledb's [`execute()`](#execute) and
+[`queryStream()`](#querystream) methods use the [Oracle OCI statement
+cache][61] to make re-execution of statements efficient.  This cache
+removes the need for the separate 'prepare' or 'parse' method which is
+sometimes seen in other Oracle APIs: there is no separate method in
+node-oracledb.
 
 Each non-pooled connection and each session in the connection pool has
 its own cache of statements with a default size of 30.  Statement
@@ -5942,31 +5866,30 @@ With Oracle Database 12c, the statement cache size can be automatically tuned wi
 [External Configuration](#oraaccess) *oraaccess.xml* file.
 
 To manually tune the statement cache size, monitor general application
-load and the [AWR](http://docs.oracle.com/database/122/TGDBA/gathering-database-statistics.htm#TGDBA168)
-"bytes sent via SQL*Net to client" values.  The latter statistic
-should benefit from not shipping statement metadata to node-oracledb.
-Adjust the statement cache size to your satisfaction.
+load and the [AWR][62] "bytes sent via SQL*Net to client" values.  The
+latter statistic should benefit from not shipping statement metadata
+to node-oracledb.  Adjust the statement cache size to your
+satisfaction.
 
 ## <a name="oraaccess"></a> 17. External Configuration
 
-When node-oracledb is linked with Oracle Database 12c client libraries, the Oracle
-client-side configuration file
-[oraaccess.xml](https://docs.oracle.com/database/122/LNOCI/more-oci-advanced-topics.htm#LNOCI-GUID-CD599644-135A-4116-8B3B-40A9BA172E5C)
-can be used to configure some behaviors of node-oracledb.
+When node-oracledb is linked with Oracle Database 12c client
+libraries, the Oracle client-side configuration file
+[oraaccess.xml][63] can be used to configure some behaviors of
+node-oracledb.
 
 For example, oraaccess.xml can be used to:
 
-- turn on [Fast Application Notification](https://docs.oracle.com/database/122/ADFNS/high-availability.htm#ADFNS538) (FAN) events to enable FAN notifications and [Runtime Load Balancing](https://docs.oracle.com/database/122/ADFNS/connection_strategies.htm#ADFNS515) (RLB)
-- configure [Client Result Caching](https://docs.oracle.com/database/122/ADFNS/performance-and-scalability.htm#ADFNS464) parameters
-- turn on [Client Statement Cache Auto-tuning](https://docs.oracle.com/database/122/LNOCI/more-oci-advanced-topics.htm#LNOCI73051)
+- turn on [Fast Application Notification][64] (FAN) events to enable FAN notifications and [Runtime Load Balancing][65] (RLB)
+- configure [Client Result Caching][66] parameters
+- turn on [Client Statement Cache Auto-tuning][67]
 
-Other features can also be enabled.  Refer to the
-[oraaccess.xml documentation](https://docs.oracle.com/database/122/LNOCI/more-oci-advanced-topics.htm#LNOCI-GUID-CD599644-135A-4116-8B3B-40A9BA172E5C)
+Other features can also be enabled.  Refer to the [oraaccess.xml
+documentation][63]
 
 ## <a name="nls"></a> 18. Globalization and National Language Support (NLS)
 
-Node-oracledb can use Oracle's
-[National Language Support (NLS)](https://docs.oracle.com/database/122/NLSPG/toc.htm)
+Node-oracledb can use Oracle's [National Language Support (NLS)][68]
 to assist in globalizing applications.
 
 Node-oracledb always uses Oracle's AL32UTF8 character set internally.
@@ -5977,28 +5900,26 @@ configure the Oracle client language and territory only.
 
 Oracle NLS environment variables, or statements like `ALTER SESSION`,
 can be used to configure further aspects of node-oracledb data access
-globalization. Examples are `NLS_NUMERIC_CHARACTERS` (discussed
-in [Fetching Numbers](#numberhandling)), and `NLS_DATE_FORMAT`
-(discussed in [Fetching Numbers and Dates as String](#fetchasstringhandling)).
-Refer to [NLS Documentation](https://docs.oracle.com/database/122/NLSPG/setting-up-globalization-support-environment.htm#NLSPG003) for
-others.
+globalization. Examples are `NLS_NUMERIC_CHARACTERS` (discussed in
+[Fetching Numbers](#numberhandling)), and `NLS_DATE_FORMAT` (discussed
+in [Fetching Numbers and Dates as String](#fetchasstringhandling)).
+Refer to [NLS Documentation][69] for others.
 
 ## <a name="endtoend"></a> 19. End-to-end Tracing, Mid-tier Authentication, and Auditing
 
 The Connection properties [action](#propconnaction),
 [module](#propconnmodule), and [clientId](#propconnclientid) set
-metadata for
-[end-to-end tracing](https://docs.oracle.com/database/122/TGSQL/performing-application-tracing.htm#TGSQL792).
-The values can be tracked in database views, shown in audit trails,
-and seen in tools such as Enterprise Manager.
+metadata for [end-to-end tracing][70].  The values can be tracked in
+database views, shown in audit trails, and seen in tools such as
+Enterprise Manager.
 
 The `clientId` property can also be used by applications that do their
 own mid-tier authentication but connect to the database using the one
 database schema.  By setting `clientId` to the application's
 authenticated username, the database is aware of who the actual end
-user is.  This can, for example, be used by Oracle
-[Virtual Private Database](https://docs.oracle.com/database/122/CNCPT/topics-for-database-administrators-and-developers.htm#GUID-89DB0C3C-A36F-4254-8C82-020F5F6DE31F)
-policies to automatically restrict data access by that user.
+user is.  This can, for example, be used by Oracle [Virtual Private
+Database][11] policies to automatically restrict data access by that
+user.
 
 Applications should set the properties because they can greatly help
 to identify and resolve unnecessary database resource usage, or
@@ -6040,10 +5961,9 @@ HR         Chris                Query departments    End-to-end example
 ```
 
 The values can also be manually set by calling
-[`DBMS_APPLICATION_INFO`](https://docs.oracle.com/cd/B19306_01/appdev.102/b14258/d_appinf.htm#CHECEIEB)
-procedures or
-[`DBMS_SESSION.SET_IDENTIFIER`](https://docs.oracle.com/cd/B19306_01/appdev.102/b14258/d_sessio.htm#SET_IDENTIFIER),
-however these cause explicit round-trips, reducing scalability.
+[`DBMS_APPLICATION_INFO`][71] procedures or
+[`DBMS_SESSION.SET_IDENTIFIER`][72], however these cause explicit
+round-trips, reducing scalability.
 
 In general, applications should be consistent about how, and when,
 they set the end-to-end tracing attributes so that current values are
@@ -6190,7 +6110,8 @@ Unhandled Rejection at:  Promise {
 ]
 ```
 
-For more information, see [How to get, use, and close a DB connection using promises](https://jsao.io/2017/06/how-to-get-use-and-close-a-db-connection-using-promises/).
+For more information, see [How to get, use, and close a DB connection
+using promises][73].
 
 ### <a name="custompromises"></a> 20.1 Custom Promise Libraries
 
@@ -6292,8 +6213,8 @@ If you are using [Lob instances](#lobclass) for LOB data instead of
 working with the data directly as Strings or Buffers, then the Lobs
 must be streamed since there is no Promisified interface for them.
 
-For more information, see
-[How to get, use, and close a DB connection using async functions](https://jsao.io/2017/07/how-to-get-use-and-close-a-db-connection-using-async-functions/).
+For more information, see [How to get, use, and close a DB connection
+using async functions][74].
 
 ## <a name="bindtrace"></a> <a name="tracingsql"></a> 22. Tracing SQL and PL/SQL Statements
 
@@ -6302,12 +6223,11 @@ calls such as [action](#propconnaction) and [module](#propconnmodule),
 will make it easier in database monitoring tools to identify SQL
 statement execution.
 
-In node-oracledb itself, the [ODPI-C tracing
-capability](https://oracle.github.io/odpi/doc/user_guide/debugging.html)
-can be used to log executed statements to the standard error stream.
-Before executing Node.js, set the environment variable
-`DPI_DEBUG_LEVEL` to 16.  At a Windows command prompt, this could be
-done with `set DPI_DEBUG_LEVEL=16`.  On Linux, you might use:
+In node-oracledb itself, the [ODPI-C tracing capability][75] can be
+used to log executed statements to the standard error stream.  Before
+executing Node.js, set the environment variable `DPI_DEBUG_LEVEL`
+to 16.  At a Windows command prompt, this could be done with `set
+DPI_DEBUG_LEVEL=16`.  On Linux, you might use:
 
 ```
 export DPI_DEBUG_LEVEL=16
@@ -6325,14 +6245,90 @@ ODPI [6905309] 2017-09-13 09:02:46.140: SQL select sysdate from dual where :b = 
 Sometimes it is useful to trace the bind data values that have been
 used when executing statements.  Several methods are available.
 
-In the Oracle Database, the view
-[`V$SQL_BIND_CAPTURE`](http://docs.oracle.com/database/122/REFRN/V-SQL_BIND_CAPTURE.htm#REFRN30310)
-can capture bind information.  Tracing with Oracle Database's
-[`dbms_monitor.session_trace_enable()`](https://docs.oracle.com/database/122/ARPLS/DBMS_MONITOR.htm#ARPLS67178)
-may also be useful.
+In the Oracle Database, the view [`V$SQL_BIND_CAPTURE`][76] can
+capture bind information.  Tracing with Oracle Database's
+[`dbms_monitor.session_trace_enable()`][77] may also be useful.
 
 You can also write your own wrapper around `execute()` and log any
 parameters.
 
-PL/SQL users may be interested in using
-[PL/Scope](http://docs.oracle.com/database/122/ADFNS/plscope.htm).
+PL/SQL users may be interested in using [PL/Scope][78].
+
+[1]: https://www.npmjs.com/package/oracledb
+[2]: https://github.com/oracle/node-oracledb/blob/master/INSTALL.md
+[3]: https://github.com/oracle/node-oracledb/tree/master/examples
+[4]: https://github.com/oracle/db-sample-schemas
+[5]: https://docs.oracle.com/database/122/SQLRF/SELECT.htm#GUID-CFA006CA-6FF1-4972-821E-6996142A51C6__BABEAACC
+[6]: https://docs.oracle.com/database/122/LNOCI/oci-programming-advanced-topics.htm#LNOCI16617
+[7]: https://docs.oracle.com/database/122/LNOCI/oci-programming-basics.htm#GUID-D77D0D4A-7483-423A-9767-CBB5854A15CC
+[8]: https://docs.oracle.com/cd/B19306_01/appdev.102/b14250/oci02bas.htm#LNOCI13341
+[9]: https://docs.oracle.com/database/122/LNOCI/managing-scalable-platforms.htm#LNOCI-GUID-624A4771-58C5-4E2B-8131-E3389F58A0D6
+[10]: https://docs.oracle.com/database/122/LNOCI/managing-scalable-platforms.htm#LNOCI-GUID-8A9F1295-4360-4AC6-99A4-050C5C82E0B0
+[11]: https://docs.oracle.com/database/122/CNCPT/topics-for-database-administrators-and-developers.htm#GUID-89DB0C3C-A36F-4254-8C82-020F5F6DE31F
+[12]: http://docs.oracle.com/database/122/ADLOB/introduction-to-large-objects.htm#ADLOB45120
+[13]: http://docs.oracle.com/database/122/ADLOB/managing-LOBs.htm#ADLOB45157
+[14]: https://docs.oracle.com/database/122/CNCPT/sql.htm#CNCPT516
+[15]: https://docs.oracle.com/database/122/CNCPT/sql.htm#CNCPT1732
+[16]: https://nodejs.org/api/stream.html
+[17]: https://docs.oracle.com/database/122/NETAG/configuring-naming-methods.htm#NETAG255
+[18]: https://docs.oracle.com/database/122/NETRF/local-naming-parameters-in-tnsnames-ora-file.htm#NETRF1361
+[19]: https://docs.oracle.com/database/122/NETRF/glossary.htm#GUID-145065A5-C9C7-4E77-9BBB-8028960D005E
+[20]: http://docs.libuv.org/en/v1.x/threadpool.html
+[21]: https://github.com/libuv/libuv
+[22]: https://github.com/oracle/node-oracledb/issues/603#issuecomment-277017313
+[23]: http://docs.oracle.com/cd/E82638_01/JJUCP/optimizing-real-world-performance.htm#JJUCP-GUID-BC09F045-5D80-4AF5-93F5-FEF0531E0E1D
+[24]: https://docs.oracle.com/database/122/ADFNS/performance-and-scalability.htm#ADFNS228
+[25]: https://docs.oracle.com/database/122/ADFNS/performance-and-scalability.htm#ADFNS1428
+[26]: http://www.oracle.com/technetwork/topics/php/php-scalability-ha-twp-128842.pdf
+[27]: https://docs.oracle.com/database/122/DBIMI/using-oracle-wallet-manager.htm#DBIMI162
+[28]: https://docs.oracle.com/database/122/DBSEG/configuring-secure-sockets-layer-authentication.htm#DBSEG070
+[29]: https://docs.oracle.com/database/122/DBSEG/configuring-authentication.htm#DBSEG30035
+[30]: http://docs.oracle.com/database/122/DBSEG/configuring-network-data-encryption-and-integrity.htm#DBSEG020
+[31]: https://docs.oracle.com/database/122/REFRN/V-SESSION_CONNECT_INFO.htm#REFRN30224
+[32]: http://docs.oracle.com/database/122/DBSEG/toc.htm
+[33]: http://docs.oracle.com/database/122/NETRF/parameters-for-the-sqlnet-ora-file.htm#NETRF427
+[34]: http://docs.oracle.com/database/122/NETRF/parameters-for-the-sqlnet-ora-file.htm#NETRF227
+[35]: http://docs.oracle.com/database/122/NETRF/parameters-for-the-sqlnet-ora-file.htm#NETRF228
+[36]: http://docs.oracle.com/database/122/NETRF/local-naming-parameters-in-tnsnames-ora-file.htm#NETRF431
+[37]: http://docs.oracle.com/database/122/NETRF/toc.htm
+[38]: https://github.com/oracle/node-oracledb/tree/master/examples/resultset1.js
+[39]: https://github.com/oracle/node-oracledb/tree/master/examples/resultset2.js
+[40]: https://github.com/oracle/node-oracledb/tree/master/examples/refcursor.js
+[41]: https://github.com/oracle/node-oracledb/tree/master/examples/selectstream.js
+[42]: http://docs.oracle.com/database/122/NLSPG/datetime-data-types-and-time-zone-support.htm#NLSPG263
+[43]: https://jsao.io/2016/09/working-with-dates-using-the-nodejs-driver/
+[44]: https://docs.oracle.com/database/122/SQLRF/TO_LOB.htm
+[45]: https://docs.oracle.com/cd/E17781_01/appdev.112/e18750/xe_locator.htm#XELOC560
+[46]: https://docs.oracle.com/database/122/LNOCI/using-sql_statements-in-oci.htm#LNOCI16355g
+[47]: http://docs.oracle.com/database/122/REFRN/OPEN_CURSORS.htm#REFRN10137
+[48]: https://docs.oracle.com/database/122/ARPLS/DBMS_OUTPUT.htm#ARPLS67300
+[49]: https://github.com/oracle/node-oracledb/tree/master/examples/dbmsoutputgetline.js
+[50]: https://github.com/oracle/node-oracledb/tree/master/examples/dbmsoutputpipe.js
+[51]: https://github.com/oracle/node-oracledb/tree/master/examples/lobinsert2.js
+[52]: https://github.com/oracle/node-oracledb/tree/master/examples/lobbinds.js
+[53]: https://github.com/oracle/node-oracledb/tree/master/examples/lobplsqltemp.js
+[54]: https://docs.oracle.com/cloud/latest/db122/ADJSN/generation.htm#ADJSN-GUID-1084A518-A44A-4654-A796-C1DD4D8EC2AA
+[55]: https://github.com/oracle/node-oracledb/tree/master/examples/selectjson.js
+[56]: https://github.com/oracle/node-oracledb/tree/master/examples/selectjsonblob.js
+[57]: https://docs.oracle.com/database/122/ADJSN/toc.htm
+[58]: https://github.com/oracle/node-oracledb/tree/master/examples/plsqlarray.js
+[59]: http://www.oracle.com/technetwork/issue-archive/2007/07-mar/o27asktom-084983.html
+[60]: http://stackoverflow.com/a/43330282/4799035
+[61]: https://docs.oracle.com/database/122/LNOCI/oci-programming-advanced-topics.htm#LNOCI16655
+[62]: http://docs.oracle.com/database/122/TGDBA/gathering-database-statistics.htm#TGDBA168
+[63]: https://docs.oracle.com/database/122/LNOCI/more-oci-advanced-topics.htm#LNOCI-GUID-CD599644-135A-4116-8B3B-40A9BA172E5C
+[64]: https://docs.oracle.com/database/122/ADFNS/high-availability.htm#ADFNS538
+[65]: https://docs.oracle.com/database/122/ADFNS/connection_strategies.htm#ADFNS515
+[66]: https://docs.oracle.com/database/122/ADFNS/performance-and-scalability.htm#ADFNS464
+[67]: https://docs.oracle.com/database/122/LNOCI/more-oci-advanced-topics.htm#LNOCI73051
+[68]: https://docs.oracle.com/database/122/NLSPG/toc.htm
+[69]: https://docs.oracle.com/database/122/NLSPG/setting-up-globalization-support-environment.htm#NLSPG003
+[70]: https://docs.oracle.com/database/122/TGSQL/performing-application-tracing.htm#TGSQL792
+[71]: https://docs.oracle.com/cd/B19306_01/appdev.102/b14258/d_appinf.htm#CHECEIEB
+[72]: https://docs.oracle.com/cd/B19306_01/appdev.102/b14258/d_sessio.htm#SET_IDENTIFIER
+[73]: https://jsao.io/2017/06/how-to-get-use-and-close-a-db-connection-using-promises/
+[74]: https://jsao.io/2017/07/how-to-get-use-and-close-a-db-connection-using-async-functions/
+[75]: https://oracle.github.io/odpi/doc/user_guide/debugging.html
+[76]: http://docs.oracle.com/database/122/REFRN/V-SQL_BIND_CAPTURE.htm#REFRN30310
+[77]: https://docs.oracle.com/database/122/ARPLS/DBMS_MONITOR.htm#ARPLS67178
+[78]: http://docs.oracle.com/database/122/ADFNS/plscope.htm
