@@ -957,7 +957,8 @@ bool njsConnection::ProcessScalarBindValue(Local<Value> value,
 
     // value is a string, variable type should be a string
     } else if (value->IsString()) {
-        bindOk = (var->varTypeNum == DPI_ORACLE_TYPE_VARCHAR);
+        bindOk = (var->varTypeNum == DPI_ORACLE_TYPE_VARCHAR ||
+                var->varTypeNum == DPI_ORACLE_TYPE_CLOB);
         if (bindOk) {
             v8::String::Utf8Value utf8str(value);
             if (utf8str.length() == 0)
@@ -1001,7 +1002,8 @@ bool njsConnection::ProcessScalarBindValue(Local<Value> value,
 
     // value is a buffer
     } else if (Buffer::HasInstance(value)) {
-        bindOk = (var->varTypeNum == DPI_ORACLE_TYPE_RAW);
+        bindOk = (var->varTypeNum == DPI_ORACLE_TYPE_RAW ||
+                var->varTypeNum == DPI_ORACLE_TYPE_BLOB);
         if (bindOk) {
             Local<Object> obj = value->ToObject();
             if (dpiVar_setFromBytes(var->dpiVarHandle, pos, Buffer::Data(obj),
