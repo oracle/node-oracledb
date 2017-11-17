@@ -99,7 +99,7 @@ typedef enum {
 //-----------------------------------------------------------------------------
 class njsMessages {
 public:
-    static string Get(njsErrorType err, ...);
+    static string Get(int err, ...);
 };
 
 #endif                                             /* __NJSMESSAGES_H__ */

@@ -92,7 +92,7 @@ static const char *errMsg[] = {
 // error number doesn't fall within the valid error number range, an empty
 // string is returned.
 //-----------------------------------------------------------------------------
-string njsMessages::Get(njsErrorType err, ...)
+string njsMessages::Get(int err, ...)
 {
     char msg[NJS_MAX_ERROR_MSG_LEN + 1];
     va_list vlist;
