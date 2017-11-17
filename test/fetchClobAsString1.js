@@ -65,6 +65,7 @@ describe('84. fetchClobAsString1.js', function() {
                           "    '); \n" +
                           "END; ";
   var drop_table1 = "DROP TABLE nodb_clob1 PURGE";
+  var defaultStmtCache = oracledb.stmtCacheSize;
 
   before('get one connection', function(done) {
     async.series([
@@ -87,6 +88,7 @@ describe('84. fetchClobAsString1.js', function() {
   after('release connection', function(done) {
     async.series([
       function(cb) {
+        oracledb.stmtCacheSize = defaultStmtCache;
         connection.release(function(err) {
           should.not.exist(err);
           cb();
@@ -1063,9 +1065,10 @@ describe('84. fetchClobAsString1.js', function() {
           connection.execute(
             sql,
             bindVar,
+            { outFormat : oracledb.OBJECT },
             function(err, result) {
               result.outBinds.c.getRows(3, function(err, rows) {
-                var resultVal = rows[0][0];
+                var resultVal = rows[0].C;
                 should.strictEqual(typeof resultVal, 'string');
                 compareClientFetchResult(err, resultVal, specialStr, content, contentLength);
                 result.outBinds.c.close(cb);
@@ -1581,12 +1584,15 @@ describe('84. fetchClobAsString1.js', function() {
           connection.execute(
             sql,
             bindVar,
-            function(err, result) {
-              result.outBinds.c.getRows(3, function(err, rows) {
-                var resultVal = rows[0][0];
-                compareClientFetchResult(err, resultVal, specialStr, content, contentLength);
-                result.outBinds.c.close(cb);
-              });
+            {
+              outFormat : oracledb.OBJECT,
+              resultSet : true
+            },
+            function(err) {
+              // NJS-019: ResultSet cannot be returned for non-query statements
+              should.exist(err);
+              (err.message).should.startWith("NJS-019:");
+              cb();
             }
           );
         },
@@ -2067,6 +2073,7 @@ describe('84. fetchClobAsString1.js', function() {
           connection.execute(
             sql,
             bindVar,
+            { outFormat : oracledb.ARRAY },
             function(err, result) {
               result.outBinds.c.getRows(3, function(err, rows) {
                 var resultVal = rows[0][0];
@@ -2585,12 +2592,15 @@ describe('84. fetchClobAsString1.js', function() {
           connection.execute(
             sql,
             bindVar,
-            function(err, result) {
-              result.outBinds.c.getRows(3, function(err, rows) {
-                var resultVal = rows[0][0];
-                compareClientFetchResult(err, resultVal, specialStr, content, contentLength);
-                result.outBinds.c.close(cb);
-              });
+            {
+              outFormat : oracledb.ARRAY,
+              resultSet : true
+            },
+            function(err) {
+              // NJS-019: ResultSet cannot be returned for non-query statements
+              should.exist(err);
+              (err.message).should.startWith("NJS-019:");
+              cb();
             }
           );
         },

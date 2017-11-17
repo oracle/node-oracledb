@@ -48,6 +48,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
   var node6plus = false;  // assume node runtime version is lower than 6
   var insertID = 1; // assume id for insert into db starts from 1
   var inFileName = './test/blobTmpFile.txt';
+  var defaultStmtCache = oracledb.stmtCacheSize;
 
   var proc_create_table1 = "BEGIN \n" +
                            "  DECLARE \n" +
@@ -91,6 +92,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
   after('release connection', function(done) {
     async.series([
       function(cb) {
+        oracledb.stmtCacheSize = defaultStmtCache;
         connection.release(function(err) {
           should.not.exist(err);
           cb();

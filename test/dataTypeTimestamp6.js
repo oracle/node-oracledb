@@ -77,6 +77,7 @@ describe('38. dataTypeTimestamp6.js', function() {
     });
 
     after(function(done) {
+      oracledb.fetchAsString = [];
       connection.execute(
         "DROP table " + tableName + " PURGE",
         function(err) {
@@ -96,6 +97,15 @@ describe('38. dataTypeTimestamp6.js', function() {
 
     it('38.1.3 works well with REF Cursor', function(done) {
       assist.verifyRefCursor(connection, tableName, dates, done);
+    });
+
+    it('38.1.4 columns fetched from REF CURSORS can be mapped by fetchInfo settings', function(done) {
+      assist.verifyRefCursorWithFetchInfo(connection, tableName, dates, done);
+    });
+
+    it('38.1.5 columns fetched from REF CURSORS can be mapped by oracledb.fetchAsString', function(done) {
+      oracledb.fetchAsString = [ oracledb.DATE ];
+      assist.verifyRefCursorWithFetchAsString(connection, tableName, dates, done);
     });
 
   }); // end of 37.1 suite

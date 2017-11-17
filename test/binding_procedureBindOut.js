@@ -76,13 +76,13 @@ describe('96.binding_procedureBindOut.js', function() {
         procName = procName + "_1";
         var bindVar = {
           i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-          c: { val: content, type: bindType, dir: oracledb.BIND_OUT, maxSize: 1000 }
+          c: { type: bindType, dir: oracledb.BIND_OUT, maxSize: 1000 }
         };
         inBind(table_name, procName, sequence, dbColType, bindVar, bindType, nullBind, cb);
       },
       function(cb) {
         procName = procName + "_2";
-        var bindVar =[ sequence, { val: content, type: bindType, dir: oracledb.BIND_OUT, maxSize: 1000 } ];
+        var bindVar =[ sequence, { type: bindType, dir: oracledb.BIND_OUT, maxSize: 1000 } ];
         inBind(table_name, procName, sequence, dbColType, bindVar, bindType, nullBind, cb);
       }
     ], callback);

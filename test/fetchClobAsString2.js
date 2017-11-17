@@ -65,6 +65,7 @@ describe('85. fetchClobAsString2.js', function() {
                           "    '); \n" +
                           "END; ";
   var drop_table1 = "DROP TABLE nodb_clob1 PURGE";
+  var defaultStmtCache = oracledb.stmtCacheSize;
 
   before('get one connection', function(done) {
     async.series([
@@ -87,6 +88,7 @@ describe('85. fetchClobAsString2.js', function() {
   after('release connection', function(done) {
     async.series([
       function(cb) {
+        oracledb.stmtCacheSize = defaultStmtCache;
         connection.release(function(err) {
           should.not.exist(err);
           cb();
@@ -651,6 +653,63 @@ describe('85. fetchClobAsString2.js', function() {
       ], done);
     }); // 85.1.17
 
+    it('85.1.18 works with REF CURSOR', function(done) {
+      var id = insertID++;
+      var specialStr = '85.1.18';
+      var contentLength = 26;
+      var content = random.getRandomString(contentLength, specialStr);
+
+      async.series([
+        function(cb) {
+          insertIntoClobTable1(id, content, cb);
+        },
+        function(cb) {
+          var ref_proc = "CREATE OR REPLACE PROCEDURE nodb_ref(clob_cursor OUT SYS_REFCURSOR)\n" +
+                         "AS \n" +
+                         "BEGIN \n" +
+                         "    OPEN clob_cursor FOR \n" +
+                         "        SELECT C from nodb_clob1 WHERE ID = " + id + "; \n" +
+                         "END;";
+          connection.execute(
+            ref_proc,
+            function(err){
+              should.not.exist(err);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          var sql = "BEGIN nodb_ref(:c); END;";
+          var bindVar = {
+            c: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
+          };
+          connection.execute(
+            sql,
+            bindVar,
+            { fetchInfo : { C : { type : oracledb.STRING } } },
+            function(err, result) {
+              result.outBinds.c.getRows(3, function(err, rows) {
+                var resultVal = rows[0][0];
+                should.strictEqual(typeof resultVal, 'string');
+                compareClientFetchResult(err, resultVal, specialStr, content, contentLength);
+                result.outBinds.c.close(cb);
+              });
+            }
+          );
+        },
+        function(cb) {
+          var ref_proc_drop = "DROP PROCEDURE nodb_ref";
+          connection.execute(
+            ref_proc_drop,
+            function(err){
+              should.not.exist(err);
+              cb();
+            }
+          );
+        }
+      ], done);
+    });
+
   }); // 85.1
 
   describe('85.2 fetch CLOB columns by setting fetchInfo option and outFormat = oracledb.OBJECT', function() {
@@ -978,6 +1037,66 @@ describe('85. fetchClobAsString2.js', function() {
         }
       ], done);
     }); // 85.2.13
+
+    it('85.2.14 works with REF CURSOR', function(done) {
+      var id = insertID++;
+      var specialStr = '85.2.14';
+      var contentLength = 26;
+      var content = random.getRandomString(contentLength, specialStr);
+
+      async.series([
+        function(cb) {
+          insertIntoClobTable1(id, content, cb);
+        },
+        function(cb) {
+          var ref_proc = "CREATE OR REPLACE PROCEDURE nodb_ref(clob_cursor OUT SYS_REFCURSOR)\n" +
+                         "AS \n" +
+                         "BEGIN \n" +
+                         "    OPEN clob_cursor FOR \n" +
+                         "        SELECT C from nodb_clob1 WHERE ID = " + id + "; \n" +
+                         "END;";
+          connection.execute(
+            ref_proc,
+            function(err){
+              should.not.exist(err);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          var sql = "BEGIN nodb_ref(:c); END;";
+          var bindVar = {
+            c: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
+          };
+          connection.execute(
+            sql,
+            bindVar,
+            {
+              outFormat : oracledb.OBJECT,
+              fetchInfo : { C : { type : oracledb.STRING } }
+            },
+            function(err, result) {
+              result.outBinds.c.getRows(3, function(err, rows) {
+                var resultVal = rows[0].C;
+                should.strictEqual(typeof resultVal, 'string');
+                compareClientFetchResult(err, resultVal, specialStr, content, contentLength);
+                result.outBinds.c.close(cb);
+              });
+            }
+          );
+        },
+        function(cb) {
+          var ref_proc_drop = "DROP PROCEDURE nodb_ref";
+          connection.execute(
+            ref_proc_drop,
+            function(err){
+              should.not.exist(err);
+              cb();
+            }
+          );
+        }
+      ], done);
+    });
 
   }); // 85.2
 
@@ -1379,6 +1498,65 @@ describe('85. fetchClobAsString2.js', function() {
       ], done);
     }); // 85.3.13
 
+    it('85.3.14 works with REF CURSOR', function(done) {
+      var id = insertID++;
+      var specialStr = '85.3.14';
+      var contentLength = 100;
+      var content = random.getRandomString(contentLength, specialStr);
+
+      async.series([
+        function(cb) {
+          insertIntoClobTable1(id, content, cb);
+        },
+        function(cb) {
+          var ref_proc = "CREATE OR REPLACE PROCEDURE nodb_ref(clob_cursor OUT SYS_REFCURSOR)\n" +
+                         "AS \n" +
+                         "BEGIN \n" +
+                         "    OPEN clob_cursor FOR \n" +
+                         "        SELECT C from nodb_clob1 WHERE ID = " + id + "; \n" +
+                         "END;";
+          connection.execute(
+            ref_proc,
+            function(err){
+              should.not.exist(err);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          var sql = "BEGIN nodb_ref(:c); END;";
+          var bindVar = {
+            c: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
+          };
+          connection.execute(
+            sql,
+            bindVar,
+            {
+              outFormat : oracledb.OBJECT,
+              fetchInfo : { C : { type : oracledb.STRING } },
+              resultSet : true
+            },
+            function(err) {
+              // NJS-019: ResultSet cannot be returned for non-query statements
+              should.exist(err);
+              (err.message).should.startWith("NJS-019:");
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          var ref_proc_drop = "DROP PROCEDURE nodb_ref";
+          connection.execute(
+            ref_proc_drop,
+            function(err){
+              should.not.exist(err);
+              cb();
+            }
+          );
+        }
+      ], done);
+    });
+
   }); // 85.3
 
   describe('85.4 fetch CLOB columns by setting fetchInfo option and outFormat = oracledb.ARRAY', function() {
@@ -1705,6 +1883,65 @@ describe('85. fetchClobAsString2.js', function() {
         }
       ], done);
     }); // 85.4.13
+
+    it('85.4.14 works with REF CURSOR', function(done) {
+      var id = insertID++;
+      var specialStr = '85.4.14';
+      var contentLength = 100;
+      var content = random.getRandomString(contentLength, specialStr);
+
+      async.series([
+        function(cb) {
+          insertIntoClobTable1(id, content, cb);
+        },
+        function(cb) {
+          var ref_proc = "CREATE OR REPLACE PROCEDURE nodb_ref(clob_cursor OUT SYS_REFCURSOR)\n" +
+                         "AS \n" +
+                         "BEGIN \n" +
+                         "    OPEN clob_cursor FOR \n" +
+                         "        SELECT C from nodb_clob1 WHERE ID = " + id + "; \n" +
+                         "END;";
+          connection.execute(
+            ref_proc,
+            function(err){
+              should.not.exist(err);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          var sql = "BEGIN nodb_ref(:c); END;";
+          var bindVar = {
+            c: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
+          };
+          connection.execute(
+            sql,
+            bindVar,
+            {
+              outFormat : oracledb.ARRAY,
+              fetchInfo : { C : { type : oracledb.STRING } }
+            },
+            function(err, result) {
+              result.outBinds.c.getRows(3, function(err, rows) {
+                var resultVal = rows[0][0];
+                compareClientFetchResult(err, resultVal, specialStr, content, contentLength);
+                result.outBinds.c.close(cb);
+              });
+            }
+          );
+        },
+        function(cb) {
+          var ref_proc_drop = "DROP PROCEDURE nodb_ref";
+          connection.execute(
+            ref_proc_drop,
+            function(err){
+              should.not.exist(err);
+              cb();
+            }
+          );
+        }
+      ], done);
+    });
 
   }); // 85.4
 
@@ -2106,6 +2343,65 @@ describe('85. fetchClobAsString2.js', function() {
         }
       ], done);
     }); // 85.5.13
+
+    it('85.5.14 works with REF CURSOR', function(done) {
+      var id = insertID++;
+      var specialStr = '85.5.14';
+      var contentLength = 100;
+      var content = random.getRandomString(contentLength, specialStr);
+
+      async.series([
+        function(cb) {
+          insertIntoClobTable1(id, content, cb);
+        },
+        function(cb) {
+          var ref_proc = "CREATE OR REPLACE PROCEDURE nodb_ref(clob_cursor OUT SYS_REFCURSOR)\n" +
+                         "AS \n" +
+                         "BEGIN \n" +
+                         "    OPEN clob_cursor FOR \n" +
+                         "        SELECT C from nodb_clob1 WHERE ID = " + id + "; \n" +
+                         "END;";
+          connection.execute(
+            ref_proc,
+            function(err){
+              should.not.exist(err);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          var sql = "BEGIN nodb_ref(:c); END;";
+          var bindVar = {
+            c: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
+          };
+          connection.execute(
+            sql,
+            bindVar,
+            {
+              outFormat : oracledb.ARRAY,
+              fetchInfo : { C : { type : oracledb.STRING } },
+              resultSet : true
+            },
+            function(err) {
+              // NJS-019: ResultSet cannot be returned for non-query statements
+              should.exist(err);
+              (err.message).should.startWith("NJS-019:");
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          var ref_proc_drop = "DROP PROCEDURE nodb_ref";
+          connection.execute(
+            ref_proc_drop,
+            function(err){
+              should.not.exist(err);
+              cb();
+            }
+          );
+        }
+      ], done);
+    });
 
   }); // 85.5
 });

@@ -70,7 +70,7 @@ describe('97.binding_functionBindOut.js', function() {
     });
   });
 
-  var doTest = function(table_name, procPre, bindType, dbColType, content, sequence, nullBind, callback) {
+  var doTest = function(table_name, proc_name, bindType, dbColType, content, sequence, nullBind, callback) {
     async.series([
       function(cb) {
         var bindVar = {
@@ -78,11 +78,11 @@ describe('97.binding_functionBindOut.js', function() {
           c: { type: bindType, dir: oracledb.BIND_OUT, maxSize: 1000 },
           output: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT, maxSize: 1000 }
         };
-        inBind(table_name, procPre, sequence, dbColType, bindVar, bindType, nullBind, cb);
+        inBind(table_name, proc_name, sequence, dbColType, bindVar, bindType, nullBind, cb);
       },
       function(cb) {
         var bindVar =[ { type: oracledb.NUMBER, dir: oracledb.BIND_OUT, maxSize: 1000 }, sequence, { type: bindType, dir: oracledb.BIND_OUT, maxSize: 1000 } ];
-        inBind(table_name, procPre, sequence, dbColType, bindVar, bindType, nullBind, cb);
+        inBind(table_name, proc_name, sequence, dbColType, bindVar, bindType, nullBind, cb);
       }
     ], callback);
   };

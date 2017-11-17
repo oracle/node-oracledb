@@ -387,9 +387,13 @@ describe('70. plsqlBindScalar.js', function() {
       connection.execute(
         sqlrun,
         bindVar,
-        function(err) {
-          should.not.exist(err);
-
+        function(err, result) {
+          should.exist(err);
+          should.strictEqual(
+            err.message,
+            "DPI-1055: value is not a number (NaN) and cannot be used in Oracle numbers"
+          );
+          should.not.exist(result);
           done();
         }
       );
@@ -1350,7 +1354,7 @@ describe('70. plsqlBindScalar.js', function() {
       );
     }); // 70.6.5
 
-    it.skip('70.6.6 val: NaN', function(done) {
+    it('70.6.6 val: NaN', function(done) {
       var bindVar = {
         p_inout : {
           dir:  oracledb.BIND_INOUT,
@@ -1363,9 +1367,12 @@ describe('70. plsqlBindScalar.js', function() {
         sqlrun,
         bindVar,
         function(err, result) {
-          should.not.exist(err);
-          // console.log(result);
-          should.strictEqual(result.outBinds.p_inout, null);
+          should.exist(err);
+          should.strictEqual(
+            err.message,
+            "DPI-1055: value is not a number (NaN) and cannot be used in Oracle numbers"
+          );
+          should.not.exist(result);
           done();
         }
       );

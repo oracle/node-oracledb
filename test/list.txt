@@ -2,7 +2,7 @@ Overview of node-oracledb functional tests
 
 1. connection.js
     1.1 can run SQL query with different output formats
-        1.1.1 ARRAY format by default
+        1.1.1 ARRAY format by defaul
         1.1.2 ARRAY format explicitly
         1.1.3 OBJECT format
         1.1.4 Negative test - invalid outFormat value
@@ -420,7 +420,7 @@ Overview of node-oracledb functional tests
         17.3.39 LONG RAW
     17.4 result set
         17.4.1 default settings
-        17.4.2 extendedMetaData option of execute() 
+        17.4.2 extendedMetaData option of execute()
         17.4.3 global option
         17.4.4 REF Cursor
     17.5 metadata event
@@ -479,6 +479,7 @@ Overview of node-oracledb functional tests
         22.1.1 works well with SELECT query
         22.1.2 works well with result set
         22.1.3 works well with REF Cursor
+        22.1.4 columns fetched from REF CURSORS can be mapped by fetchInfo settings
     22.2 stores null value correctly
         22.2.1 testing Null, Empty string and Undefined
      22.3 PL/SQL binding scalar
@@ -493,6 +494,7 @@ Overview of node-oracledb functional tests
         23.1.1 SELECT query
         23.1.2 resultSet stores NCHAR data correctly
         23.1.3 works well with REF Cursor
+        23.1.4 columns fetched from REF CURSORS can be mapped by fetchInfo settings
     23.2 stores null value correctly
         23.2.1 testing Null, Empty string and Undefined
 
@@ -501,6 +503,7 @@ Overview of node-oracledb functional tests
         24.1.1 SELECT query
         24.1.2 resultSet stores VARCHAR2 data correctly
         24.1.3 works well with REF Cursor
+        24.1.4 columns fetched from REF CURSORS can be mapped by fetchInfo settings
     24.2 stores null value correctly
         24.2.1 testing Null, Empty string and Undefined
 
@@ -509,6 +512,7 @@ Overview of node-oracledb functional tests
         25.1.1 SELECT query
         25.1.2 resultSet stores NVARCHAR2 data correctly
         25.1.3 works well with REF Cursor
+        25.1.4 columns fetched from REF CURSORS can be mapped by fetchInfo settings
     25.2 stores null value correctly
         25.2.1 testing Null, Empty string and Undefined
 
@@ -517,6 +521,8 @@ Overview of node-oracledb functional tests
         26.1.1 SELECT query
         26.1.2 resultSet stores NUMBER data correctly
         26.1.3 works well with REF Cursor
+        26.1.4 columns fetched from REF CURSORS can be mapped by fetchInfo settings
+        26.1.5 columns fetched from REF CURSORS can be mapped by oracledb.fetchAsString
     26.2 stores null value correctly
         26.2.1 testing Null, Empty string and Undefined
 
@@ -532,6 +538,8 @@ Overview of node-oracledb functional tests
         28.1.1 works well with SELECT query
         28.1.2 works well with result set
         28.1.3 works well with REF Cursor
+        28.1.4 columns fetched from REF CURSORS can be mapped by fetchInfo settings
+        28.1.5 columns fetched from REF CURSORS can be mapped by oracledb.fetchAsString
     28.2 stores null value correctly
         28.2.1 testing Null, Empty string and Undefined
 
@@ -540,6 +548,8 @@ Overview of node-oracledb functional tests
         29.1.1 works well with SELECT query
         29.1.2 works well with result set
         29.1.3 works well with REF Cursor
+        29.1.4 columns fetched from REF CURSORS can be mapped by fetchInfo settings
+        29.1.5 columns fetched from REF CURSORS can be mapped by oracledb.fetchAsString
     29.2 stores null value correctly
         29.2.1 testing Null, Empty string and Undefined
 
@@ -548,16 +558,20 @@ Overview of node-oracledb functional tests
         30.1.1 works well with SELECT query
         30.1.2 works well with result set
         30.1.3 works well with REF Cursor
+        30.1.4 columns fetched from REF CURSORS can be mapped by fetchInfo settings
+        30.1.5 columns fetched from REF CURSORS can be mapped by oracledb.fetchAsString
     30.2 stores null value correctly
         30.2.1 testing Null, Empty string and Undefined
     30.3 testing floating-point numbers which cannot be precisely represent
-      - 30.3.1 rounding numbers
+        30.3.1 rounding numbers
 
 31. dataTypeBinaryDouble.js
     31.1 testing BINARY_DOUBLE data
         31.1.1 works well with SELECT query
         31.1.2 works well with result set
         31.1.3 works well with REF Cursor
+        31.1.4 columns fetched from REF CURSORS can be mapped by fetchInfo settings
+        31.1.5 columns fetched from REF CURSORS can be mapped by oracledb.fetchAsString
     31.2 stores null value correctly
         31.2.1 testing Null, Empty string and Undefined
     31.3 testing floating-point numbers which can be precisely represent
@@ -568,6 +582,8 @@ Overview of node-oracledb functional tests
         32.1.1 works well with SELECT query
         32.1.2 works well with result set
         32.1.3 works well with REF Cursor
+        32.1.4 columns fetched from REF CURSORS can be mapped by fetchInfo settings
+        32.1.5 columns fetched from REF CURSORS can be mapped by oracledb.fetchAsString
     32.2 stores null value correctly
         32.2.1 testing Null, Empty string and Undefined
     32.3 insert SQL Date data
@@ -580,6 +596,8 @@ Overview of node-oracledb functional tests
         33.1.1 works well with SELECT query
         33.1.2 works well with result set
         33.1.3 works well with REF Cursor
+        33.1.4 columns fetched from REF CURSORS can be mapped by fetchInfo settings
+        33.1.5 columns fetched from REF CURSORS can be mapped by oracledb.fetchAsString
     33.2 stores null value correctly
         33.2.1 testing Null, Empty string and Undefined
     33.3 testing TIMESTAMP without TIME ZONE
@@ -591,6 +609,8 @@ Overview of node-oracledb functional tests
         34.1.1 works well with SELECT query
         34.1.2 works well with result set
         34.1.3 works well with REF Cursor
+        34.1.4 columns fetched from REF CURSORS can be mapped by fetchInfo settings
+        34.1.5 columns fetched from REF CURSORS can be mapped by oracledb.fetchAsString
     34.2 sotres null value correctly
         34.2.1 testing Null, Empty string and Undefined
     34.3 testing database TIMESTAMP(p)
@@ -602,6 +622,8 @@ Overview of node-oracledb functional tests
         35.1.1 works well with SELECT query
         35.1.2 works well with result set
         35.1.3 works well with REF Cursor
+        35.1.4 columns fetched from REF CURSORS can be mapped by fetchInfo settings
+        35.1.5 columns fetched from REF CURSORS can be mapped by oracledb.fetchAsString
     35.2 stores null value correctly
         35.2.1 testing Null, Empty string and Undefined
     35.3 testing TIMESTAMP WITH TIME ZONE
@@ -614,6 +636,8 @@ Overview of node-oracledb functional tests
         36.1.1 works well with SELECT query
         36.1.2 works well with result set
         36.1.3 works well with REF Cursor
+        36.1.4 columns fetched from REF CURSORS can be mapped by fetchInfo settings
+        36.1.5 columns fetched from REF CURSORS can be mapped by oracledb.fetchAsString
     36.2 stores null value correctly
         36.2.1 testing Null, Empty string and Undefined
     36.3 testing TIMESTAMP (4) WITH TIME ZONE
@@ -626,6 +650,8 @@ Overview of node-oracledb functional tests
         37.1.1 works well with SELECT query
         37.1.2 works well with result set
         37.1.3 works well with REF Cursor
+        37.1.4 columns fetched from REF CURSORS can be mapped by fetchInfo settings
+        37.1.5 columns fetched from REF CURSORS can be mapped by oracledb.fetchAsString
     37.2 stores null value correctly
         37.2.1 testing Null, Empty string and Undefined
     37.3 testing TIMESTAMP WITH LOCAL TIME ZONE
@@ -637,6 +663,8 @@ Overview of node-oracledb functional tests
         38.1.1 works well with SELECT query
         38.1.2 works well with result set
         38.1.3 works well with REF Cursor
+        38.1.4 columns fetched from REF CURSORS can be mapped by fetchInfo settings
+        38.1.5 columns fetched from REF CURSORS can be mapped by oracledb.fetchAsString
     38.2 stores null value correctly
         38.2.1 testing Null, Empty string and Undefined
     38.3 testing TIMESTAMP WITH LOCAL TIME ZONE
@@ -653,6 +681,7 @@ Overview of node-oracledb functional tests
         39.1.6 can get data block number correctly
         39.1.7 can get row number correctly
         39.1.8 works well with REF Cursor
+        39.1.9 columns fetched from REF CURSORS can be mapped by fetchInfo settings
     39.2 stores null value correctly
         39.2.1 testing Null, Empty string and Undefined
 
@@ -1038,7 +1067,7 @@ Overview of node-oracledb functional tests
         70.6.3 negative: bind value and type mismatch - val: empty string
         70.6.4 val: null
         70.6.5 val: undefined
-      - 70.6.6 val: NaN
+        70.6.6 val: NaN
         70.6.7 val: 0
         70.6.8 val: -1
       - 70.6.9 val: maxval
@@ -1766,7 +1795,7 @@ Overview of node-oracledb functional tests
 
 85. fetchClobAsString2.js
     85.1 fetch CLOB columns by setting fetchInfo option
-        85.1.1 works with NULL value (62ms)
+        85.1.1 works with NULL value
         85.1.2 works with empty String
         85.1.3 works with small value
         85.1.4 works with (64K - 1) value
@@ -1780,9 +1809,10 @@ Overview of node-oracledb functional tests
         85.1.12 works with setting oracledb.maxRows < actual number of rows in the table
         85.1.13 works with setting oracledb.maxRows > actual number of rows in the table
         85.1.14 works with connection.queryStream()
-        85.1.15 works with connection.queryStream() and oracledb.maxRows > actual number of rows the table
-        85.1.16 works with connection.queryStream() and oracledb.maxRows = actual number of rows the table
-        85.1.17 works with connection.queryStream() and oracledb.maxRows < actual number of rows the table
+        85.1.15 works with connection.queryStream() and oracledb.maxRows > actual number of rows in the table
+        85.1.16 works with connection.queryStream() and oracledb.maxRows = actual number of rows in the table
+        85.1.17 works with connection.queryStream() and oracledb.maxRows < actual number of rows in the table
+        85.1.18 works with REF CURSOR
     85.2 fetch CLOB columns by setting fetchInfo option and outFormat = oracledb.OBJECT
         85.2.1 works with NULL value
         85.2.2 works with empty buffer
@@ -1797,6 +1827,7 @@ Overview of node-oracledb functional tests
         85.2.11 works with update statement
         85.2.12 works with setting oracledb.maxRows < actual number of rows in the table
         85.2.13 works with setting oracledb.maxRows > actual number of rows in the table
+        85.2.14 works with REF CURSOR
     85.3 fetch CLOB columns by setting fetchInfo option, outFormat = oracledb.OBJECT and resultSet = true
         85.3.1 works with NULL value
         85.3.2 works with empty buffer
@@ -1811,6 +1842,7 @@ Overview of node-oracledb functional tests
         85.3.11 works with update statement
         85.3.12 works with setting oracledb.maxRows < actual number of rows in the table
         85.3.13 works with setting oracledb.maxRows > actual number of rows in the table
+        85.3.14 works with REF CURSOR
     85.4 fetch CLOB columns by setting fetchInfo option and outFormat = oracledb.ARRAY
         85.4.1 works with NULL value
         85.4.2 works with empty String
@@ -1825,6 +1857,7 @@ Overview of node-oracledb functional tests
         85.4.11 works with update statement
         85.4.12 works with setting oracledb.maxRows < actual number of rows in the table
         85.4.13 works with setting oracledb.maxRows > actual number of rows in the table
+        85.4.14 works with REF CURSOR
     85.5 fetch CLOB columns by setting fetchInfo option, outFormat = oracledb.ARRAY and resultSet = true
         85.5.1 works with NULL value
         85.5.2 works with empty String
@@ -1839,6 +1872,7 @@ Overview of node-oracledb functional tests
         85.5.11 works with update statement
         85.5.12 works with setting oracledb.maxRows < actual number of rows in the table
         85.5.13 works with setting oracledb.maxRows > actual number of rows in the table
+        85.5.14 works with REF CURSOR
 
 86. fetchClobAsString3.js
     86.1 fetch multiple CLOBs
@@ -2989,10 +3023,11 @@ Overview of node-oracledb functional tests
         113.1.1 query rowid
         113.1.2 works well with result set
         113.1.3 works well with REF Cursor
+        113.1.4 columns fetched from REF CURSORS can be mapped by fetchInfo settings
     113.2 stores null value correctly
         113.2.1 testing Null, Empty string and Undefined
 
- 114. urowidDMLBindAsString.js
+ 114. urowidDMLBindAsString1.js
     114.1 INSERT & SELECT
         114.1.1 works with null
         114.1.2 works with empty string
@@ -3028,7 +3063,7 @@ Overview of node-oracledb functional tests
     107.4 WHERE
         107.4.1 can bind in WHERE clause
 
-115. urowidDMLBindAsString_indexed.js
+115. urowidDMLBindAsString2.js
     115.1 INSERT & SELECT
         115.1.1 works with urowid length > 200
         115.1.2 works with urowid length > 500
@@ -3166,7 +3201,7 @@ Overview of node-oracledb functional tests
         117.6.7 queryStream() and oracledb.maxRows = actual number of rows
         117.6.8 queryStream() and oracledb.maxRows > actual number of rows
 
-118. urowidProcedureBindAsString_bindin.js
+118. urowidProcedureBindAsString1.js
     118.1 PROCEDURE BIND_IN as UROWID
         118.1.1 works with null
         118.1.2 works with empty string
@@ -3206,7 +3241,7 @@ Overview of node-oracledb functional tests
         118.3.6 works with default bind type/dir - empty string
         118.3.7 works with default bind type/dir - undefined
 
-119. urowidProcedureBindAsString_bindout.js
+119. urowidProcedureBindAsString2.js
     119.1 PROCEDURE BIND_OUT as UROWID
         119.1.1 works with null
         119.1.2 works with empty string
@@ -3246,7 +3281,7 @@ Overview of node-oracledb functional tests
         119.3.6 works with default bind type/dir - empty string
         119.3.7 works with default bind type/dir - undefined
 
-120. urowidProcedureBindAsString_bindinout.js
+120. urowidProcedureBindAsString3.js
     120.1 PROCEDURE BIND_INOUT as UROWID
         120.1.1 works with null
         120.1.2 works with empty string
@@ -3286,7 +3321,7 @@ Overview of node-oracledb functional tests
         120.3.6 works with default bind type/dir - empty string
         120.3.7 works with default bind type/dir - undefined
 
-121. urowidFunctionBindAsString_bind.js
+121. urowidFunctionBindAsString1.js
     121.1 FUNCTION BIND_IN/OUT as UROWID
         121.1.1 works with null
         121.1.2 works with empty string
@@ -3326,7 +3361,7 @@ Overview of node-oracledb functional tests
         121.3.6 works with default bind type/dir - empty string
         121.3.7 works with default bind type/dir - undefined
 
-122. urowidFunctionBindAsString_bindinout.js
+122. urowidFunctionBindAsString2.js
     122.1 FUNCTION BIND_INOUT as UROWID
         122.1.1 works with null
         122.1.2 works with empty string
@@ -3379,7 +3414,8 @@ Overview of node-oracledb functional tests
         123.3.2 works with data size 3000
         123.3.2 works with resultSet
     123.4 ref cursor
-        123.4.1 works with ref cursor
+        123.4.1 columns fetched from REF CURSORS can be mapped by fetchInfo settings
+        123.4.2 columns fetched from REF CURSORS can be mapped by oracledb.fetchAsString
     123.5 stores null value correctly
         123.5.1 works with Null, Empty string and Undefined
 
@@ -3575,3 +3611,54 @@ Overview of node-oracledb functional tests
     140.4 Negative: fetchInfo
         140.4.1 changes getter() of fetchInfo itself
         140.4.2 changes getter() of the value of fetchInfo object
+
+141. insertNaNToNumber.js
+    141.1 SQL, stores NaN
+        141.1.1 insert NaN to NUMBER column will report ORA-00984
+        141.1.2 binding in NaN by name into Oracle NUMBER column throws DPI-1055
+        141.1.3 binding in NaN by position into Oracle NUMBER column throws DPI-1055
+    141.2 PL/SQL, Function, bind NaN
+        141.2.1 binding in NaN by name into Oracle NUMBER column throws DPI-1055
+        141.2.2 binding in NaN by position into Oracle NUMBER column throws DPI-1055
+        141.2.3 binding inout NaN by name into Oracle NUMBER column throws DPI-1055
+        141.2.4 binding inout NaN by position into Oracle NUMBER column throws DPI-1055
+    141.3 PL/SQL, Procedure, bind NaN
+        141.3.1 binding in NaN by name into Oracle NUMBER column throws DPI-1055
+        141.3.2 binding in NaN by position into Oracle NUMBER column throws DPI-1055
+        141.3.3 binding inout NaN by name into Oracle NUMBER column throws DPI-1055
+        141.3.4 binding inout NaN by position into Oracle NUMBER column throws DPI-1055
+    141.4 PL/SQL, Procedure, bind NaN, indexed table
+        141.4.1 binding in NaN by name into Oracle NUMBER column throws DPI-1055
+        141.4.2 binding in NaN by position into Oracle NUMBER column throws DPI-1055
+        141.4.3 binding inout NaN by name into Oracle NUMBER column throws DPI-1055
+        141.4.4 binding inout NaN by position into Oracle NUMBER column throws DPI-1055
+
+142. urowidFunctionBindAsString3.js
+    142.1 FUNCTION BIND_IN/OUT as UROWID
+        142.1.1 urowid length > 50
+        142.1.2 urowid length > 100
+      - 142.1.3 urowid length > 200
+    142.2 FUNCTION BIND_IN/OUT as string
+        142.2.1 urowid length > 50
+        142.2.2 urowid length > 100
+      - 142.2.3 urowid length > 200
+    142.3 FUNCTION BIND_IN, UPDATE
+        142.3.1 update with UROWID > 50
+        142.3.2 update with UROWID > 100
+      - 142.3.3 update with UROWID > 200
+
+143. urowidFunctionBindAsString4.js
+    143.1 FUNCTION BIND_INOUT as UROWID
+        143.1.1 urowid length > 50
+        143.1.2 urowid length > 100
+      - 143.1.3 urowid length > 200
+      - 143.1.4 urowid length > 500
+    143.2 FUNCTION BIND_INOUT as string
+        143.2.1 urowid length > 50
+        143.2.2 urowid length > 100
+      - 143.2.3 urowid length > 200
+      - 143.2.4 urowid length > 500
+    143.3 FUNCTION BIND_INOUT, UPDATE
+        143.3.1 update with UROWID > 50
+        143.3.2 update with UROWID > 100
+      - 143.3.3 update with UROWID > 200

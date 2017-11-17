@@ -740,7 +740,6 @@ assist.verifyRefCursor = function(connection, tableName, array, done)
   ], done);
 };
 
-var numRows = 3;  // number of rows to return from each call to getRows()
 function fetchRowsFromRS(rs, array, cb)
 {
   rs.getRows(numRows, function(err, rows) {
@@ -914,5 +913,133 @@ assist.compareNodejsVersion = function(nowVersion, comparedVersion) {
     return false;
   }
 };
+
+assist.verifyRefCursorWithFetchInfo = function(connection, tableName, array, done){
+  var createProc =
+        "CREATE OR REPLACE PROCEDURE testproc (p_out OUT SYS_REFCURSOR) " +
+        "AS " +
+        "BEGIN " +
+        "  OPEN p_out FOR " +
+        "SELECT * FROM " + tableName  + "; " +
+        "END; ";
+  async.series([
+    function createProcedure(callback) {
+      connection.execute(
+        createProc,
+        function(err) {
+          should.not.exist(err);
+          callback();
+        }
+      );
+    },
+    function verify(callback) {
+      connection.execute(
+        "begin testproc(:out); end;",
+        {
+          out: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
+        },
+        {
+          outFormat: oracledb.OBJECT,
+          fetchInfo:
+          {
+            "CONTENT": { type: oracledb.STRING }
+          }
+        },
+        function(err, result) {
+          should.not.exist(err);
+          fetchRowsFromRS_fetchas(connection, result.outBinds.out, array, tableName, callback);
+        }
+      );
+    },
+    function dropProcedure(callback) {
+      connection.execute(
+        "DROP PROCEDURE testproc",
+        function(err) {
+          should.not.exist(err);
+          callback();
+        }
+      );
+    }
+  ], done);
+};
+
+assist.verifyRefCursorWithFetchAsString = function(connection, tableName, array, done){
+  var createProc =
+        "CREATE OR REPLACE PROCEDURE testproc (p_out OUT SYS_REFCURSOR) " +
+        "AS " +
+        "BEGIN " +
+        "  OPEN p_out FOR " +
+        "SELECT * FROM " + tableName  + "; " +
+        "END; ";
+  async.series([
+    function createProcedure(callback) {
+      connection.execute(
+        createProc,
+        function(err) {
+          should.not.exist(err);
+          callback();
+        }
+      );
+    },
+    function verify(callback) {
+      connection.execute(
+        "begin testproc(:out); end;",
+        {
+          out: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
+        },
+        { outFormat: oracledb.OBJECT },
+        function(err, result) {
+          should.not.exist(err);
+          fetchRowsFromRS_fetchas(connection, result.outBinds.out, array, tableName, callback);
+        }
+      );
+    },
+    function dropProcedure(callback) {
+      connection.execute(
+        "DROP PROCEDURE testproc",
+        function(err) {
+          should.not.exist(err);
+          callback();
+        }
+      );
+    }
+  ], done);
+};
+
+var numRows = 3;  // number of rows to return from each call to getRows()
+
+function fetchRowsFromRS_fetchas(connection, rs, array, tableName, cb) {
+  rs.getRows(numRows, function(err, rsrows) {
+    if(rsrows.length > 0) {
+      for(var i = 0; i < rsrows.length; i++) {
+        (rsrows[i].CONTENT).should.be.a.String();
+        verifyFetchValues(connection, rsrows, i, array, tableName);
+      }
+      return fetchRowsFromRS_fetchas(connection, rs, array, tableName, cb);
+    } else {
+      rs.close(function(err) {
+        should.not.exist(err);
+        cb();
+      });
+    }
+  });
+}
+
+function verifyFetchValues(connection, rsrows, i, array, tableName){
+  connection.execute(
+    "select CONTENT from " + tableName + " where NUM = " + rsrows[i].NUM,
+    [],
+    {
+      fetchInfo:
+      {
+        "CONTENT": { type: oracledb.STRING }
+      }
+    },
+    function(err, result) {
+      should.not.exist(err);
+      rsrows[i].CONTENT.should.eql(result.rows[0][0]);
+    }
+  );
+}
 
 module.exports = assist;

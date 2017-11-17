@@ -19,7 +19,7 @@
  * See LICENSE.md for relevant licenses.
  *
  * NAME
- *   118. urowidProcedureBindAsString_bindin.js
+ *   118. urowidProcedureBindAsString1.js
  *
  * DESCRIPTION
  *   Testing UROWID(< 200 bytes) plsql procedure bind in as String.
@@ -39,7 +39,7 @@ var async    = require('async');
 var dbConfig = require('./dbconfig.js');
 var sql      = require('./sql.js');
 
-describe('118. urowidProcedureBindAsString_bindin.js', function() {
+describe('118. urowidProcedureBindAsString1.js', function() {
   var connection = null;
   var tableName = "nodb_urowid_plsql_in";
   var insertID = 1;

@@ -19,7 +19,7 @@
  * See LICENSE.md for relevant licenses.
  *
  * NAME
- *   114. urowidDMLBindAsString.js
+ *   114. urowidDMLBindAsString1.js
  *
  * DESCRIPTION
  *   Testing urowid binding as String with DML.
@@ -41,7 +41,7 @@ var async    = require('async');
 var dbConfig = require('./dbconfig.js');
 var sql      = require('./sql.js');
 
-describe('114. urowidDMLBindAsString.js', function() {
+describe('114. urowidDMLBindAsString1.js', function() {
   var connection = null;
   var tableName = "nodb_bind_urowid";
   var insertID = 1;

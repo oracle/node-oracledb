@@ -19,7 +19,7 @@
  * See LICENSE.md for relevant licenses.
  *
  * NAME
- *   122. urowidFunctionBindAsString_bindinout.js
+ *   122. urowidFunctionBindAsString2.js
  *
  * DESCRIPTION
  *   Testing UROWID(< 200 bytes) plsql function bind inout as String.
@@ -39,7 +39,7 @@ var async    = require('async');
 var dbConfig = require('./dbconfig.js');
 var sql      = require('./sql.js');
 
-describe('122. urowidFunctionBindAsString_bindinout.js', function() {
+describe('122. urowidFunctionBindAsString2.js', function() {
   var connection = null;
   var tableName = "nodb_rowid_plsql_inout";
   var insertID = 1;

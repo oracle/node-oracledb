@@ -60,6 +60,7 @@ describe('34. dataTypeTimestamp2.js', function() {
   });
 
   after('release connection', function(done) {
+    oracledb.fetchAsString = [];
     connection.release( function(err) {
       should.not.exist(err);
       done();
@@ -93,6 +94,15 @@ describe('34. dataTypeTimestamp2.js', function() {
 
     it('34.1.3 works well with REF Cursor', function(done) {
       assist.verifyRefCursor(connection, tableName, dates, done);
+    });
+
+    it('34.1.4 columns fetched from REF CURSORS can be mapped by fetchInfo settings', function(done) {
+      assist.verifyRefCursorWithFetchInfo(connection, tableName, dates, done);
+    });
+
+    it('34.1.5 columns fetched from REF CURSORS can be mapped by oracledb.fetchAsString', function(done) {
+      oracledb.fetchAsString = [ oracledb.DATE ];
+      assist.verifyRefCursorWithFetchAsString(connection, tableName, dates, done);
     });
 
   }); // end of 34.1 suite

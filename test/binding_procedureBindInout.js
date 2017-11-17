@@ -70,18 +70,18 @@ describe('94.binding_procedureBindInout.js', function() {
     });
   });
 
-  var doTest = function(table_name, procPre, bindType, dbColType, content, sequence, nullBind, callback) {
+  var doTest = function(table_name, proc_name, bindType, dbColType, content, sequence, nullBind, callback) {
     async.series([
       function(cb) {
         var bindVar = {
           i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
           c: { val: content, type: bindType, dir: oracledb.BIND_INOUT, maxSize: 1000 }
         };
-        inBind(table_name, procPre, dbColType, bindVar, bindType, nullBind, cb);
+        inBind(table_name, proc_name, dbColType, bindVar, bindType, nullBind, cb);
       },
       function(cb) {
         var bindVar =[ sequence, { val: content, type: bindType, dir: oracledb.BIND_INOUT, maxSize: 1000 } ];
-        inBind(table_name, procPre, dbColType, bindVar, bindType, nullBind, cb);
+        inBind(table_name, proc_name, dbColType, bindVar, bindType, nullBind, cb);
       }
     ], callback);
   };

@@ -66,6 +66,7 @@ describe('89. fetchBlobAsBuffer3.js', function() {
                            "    '); \n" +
                            "END; ";
   var drop_table2 = "DROP TABLE nodb_blob2 PURGE";
+  var defaultStmtCache = oracledb.stmtCacheSize;
 
   before('get one connection', function(done) {
     oracledb.stmtCacheSize = 0;
@@ -81,6 +82,7 @@ describe('89. fetchBlobAsBuffer3.js', function() {
   }); // before
 
   after('release connection', function(done) {
+    oracledb.stmtCacheSize = defaultStmtCache;
     connection.release(function(err) {
       should.not.exist(err);
       done();

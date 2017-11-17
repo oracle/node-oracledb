@@ -178,6 +178,10 @@ describe('39. dataTypeRowid.js', function() {
     it('39.1.8 works well with REF Cursor', function(done) {
       verifyRefCursor(connection, tableName, done);
     });
+
+    it('39.1.9 columns fetched from REF CURSORS can be mapped by fetchInfo settings', function(done) {
+      verifyRefCursorWithFetchInfo(connection, tableName, done);
+    });
   });
 
   describe('39.2 stores null value correctly', function() {
@@ -261,6 +265,56 @@ describe('39. dataTypeRowid.js', function() {
       }
     ], done);
   };
+
+  var verifyRefCursorWithFetchInfo = function(connection, tableName, done) {
+    var createProc =
+          "CREATE OR REPLACE PROCEDURE testproc (p_out OUT SYS_REFCURSOR) " +
+          "AS " +
+          "BEGIN " +
+          "    OPEN p_out FOR " +
+          "    SELECT * FROM " + tableName  + "; " +
+          "END; ";
+    async.series([
+      function createProcedure(callback) {
+        connection.execute(
+          createProc,
+          function(err) {
+            should.not.exist(err);
+            callback();
+          }
+        );
+      },
+      function verify(callback) {
+        connection.execute(
+          "BEGIN testproc(:o); END;",
+          [
+            { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
+          ],
+          {
+            outFormat: oracledb.OBJECT,
+            fetchInfo:
+            {
+              "CONTENT": { type: oracledb.STRING }
+            }
+          },
+          function(err, result) {
+            should.not.exist(err);
+            fetchRowsFromRS_fetchas(result.outBinds[0], callback);
+          }
+        );
+      },
+      function dropProcedure(callback) {
+        connection.execute(
+          "DROP PROCEDURE testproc",
+          function(err) {
+            should.not.exist(err);
+            callback();
+          }
+        );
+      }
+    ], done);
+  };
+
   var fetchRowsFromRS = function(rs, cb) {
     rs.getRows(numRows, function(err, rows) {
       if(rows.length > 0) {
@@ -278,5 +332,35 @@ describe('39. dataTypeRowid.js', function() {
       }
     });
   };
+
+  var fetchRowsFromRS_fetchas = function(rs, cb) {
+    rs.getRows(numRows, function(err, rsrows) {
+      if(rsrows.length > 0) {
+        for(var i = 0; i < rsrows.length; i++) {
+          var resultVal = rsrows[i].CONTENT;
+          resultVal.should.not.be.null;
+          resultVal.should.be.a.String();
+          should.exist(resultVal);
+          verifyFetchValues(connection, rsrows[i].NUM, rsrows[i].CONTENT, tableName);
+        }
+        return fetchRowsFromRS_fetchas(rs, cb);
+      } else {
+        rs.close(function(err) {
+          should.not.exist(err);
+          cb();
+        });
+      }
+    });
+  };
+
+  function verifyFetchValues(connection, num, content, tableName){
+    connection.execute(
+      "select ROWID from " + tableName + " where num = " + num,
+      function(err, result) {
+        should.not.exist(err);
+        content.should.eql(result.rows[0][0]);
+      }
+    );
+  }
 
 });

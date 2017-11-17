@@ -233,11 +233,13 @@ describe('123. dataTypeNclob.js', function() {
   });
 
   describe('123.4 ref cursor', function() {
+
     before('create table', function(done) {
       assist.createTable(connection, tableName, done);
     });
 
     after(function(done) {
+      oracledb.fetchAsString = [];
       connection.execute(
         "DROP table " + tableName + " PURGE",
         function(err) {
@@ -247,7 +249,7 @@ describe('123. dataTypeNclob.js', function() {
       );
     });
 
-    it('123.4.1 works with ref cursor', function(done) {
+    it('123.4.1 columns fetched from REF CURSORS can be mapped by fetchInfo settings', function(done) {
       var insertLength = 3000;
       var insertStr = random.getRandomLengthString(insertLength);
       async.series([
@@ -255,7 +257,22 @@ describe('123. dataTypeNclob.js', function() {
           insertData(tableName, insertStr, cb);
         },
         function(cb) {
-          verifyRefCursor(tableName, insertStr, cb);
+          verifyRefCursor_fetchInfo(tableName, insertStr, cb);
+        }
+      ], done);
+    });
+
+    it('123.4.2 columns fetched from REF CURSORS can be mapped by oracledb.fetchAsString', function(done) {
+      var insertLength = 3000;
+      var insertStr = random.getRandomLengthString(insertLength);
+      oracledb.fetchAsString = [ oracledb.CLOB ];
+
+      async.series([
+        function(cb) {
+          insertData(tableName, insertStr, cb);
+        },
+        function(cb) {
+          verifyRefCursor_fetchas(tableName, insertStr, cb);
         }
       ], done);
     });
@@ -376,7 +393,7 @@ describe('123. dataTypeNclob.js', function() {
     });
   };
 
-  var verifyRefCursor = function(tableName, originalStr, done) {
+  var verifyRefCursor_fetchInfo = function(tableName, originalStr, done) {
     var createProc =
           "CREATE OR REPLACE PROCEDURE testproc (p_out OUT SYS_REFCURSOR) " +
           "AS " +
@@ -401,6 +418,48 @@ describe('123. dataTypeNclob.js', function() {
             { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
           ],
           { fetchInfo : { CONTENT : { type : oracledb.STRING } } },
+          function(err, result) {
+            should.not.exist(err);
+            fetchRowFromRS(result.outBinds[0], originalStr, callback);
+          }
+        );
+      },
+      function dropProcedure(callback) {
+        connection.execute(
+          "DROP PROCEDURE testproc",
+          function(err) {
+            should.not.exist(err);
+            callback();
+          }
+        );
+      }
+    ], done);
+  };
+
+  var verifyRefCursor_fetchas = function(tableName, originalStr, done) {
+    var createProc =
+          "CREATE OR REPLACE PROCEDURE testproc (p_out OUT SYS_REFCURSOR) " +
+          "AS " +
+          "BEGIN " +
+          "    OPEN p_out FOR " +
+          "        SELECT content FROM " + tableName  + " where num = " + insertID + "; " +
+          "END; ";
+    async.series([
+      function createProcedure(callback) {
+        connection.execute(
+          createProc,
+          function(err) {
+            should.not.exist(err);
+            callback();
+          }
+        );
+      },
+      function verify(callback) {
+        connection.execute(
+          "BEGIN testproc(:o); END;",
+          [
+            { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
+          ],
           function(err, result) {
             should.not.exist(err);
             fetchRowFromRS(result.outBinds[0], originalStr, callback);
