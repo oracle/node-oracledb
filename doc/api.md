@@ -686,7 +686,7 @@ that are larger than required can result in sub-optimal memory usage.
 When the number of query rows is relatively big, or can't be
 predicted, it is recommended to use a [ResultSet](#resultsetclass).
 This prevents query results being unexpectedly truncated by the
-`maxRows` limit and removes the need to oversize `maxRows` to avoid
+`maxRows` limit and removes the need to over-size `maxRows` to avoid
 such truncation.
 
 ##### Example
@@ -1331,7 +1331,7 @@ String user
 ```
 
 The database user name.  Can be a simple user name or a proxy of the
-form *alison[fred]*. See ther [Client Access Thgrough Proxy][8] section
+form *alison[fred]*. See the [Client Access Through a Proxy][7] section
 in the OCI manual for more details about proxy authentication.
 
 ```
@@ -1637,7 +1637,7 @@ Number type
 ```
 
 One of the constants [`oracledb.CLOB`](#oracledbconstantsnodbtype)
-or [`oracledb.BLOB`](#oracledbconstantsnodbtype.
+or [`oracledb.BLOB`](#oracledbconstantsnodbtype).
 
 ```
 function(Error error)
@@ -2700,7 +2700,7 @@ oracledb.getConnection(
 If you open more than four connections, such as via
 increasing [`poolMax`](#proppoolpoolmax), you should increase the
 number of worker threads available to node-oracledb.  The thread pool
-size should be at least equal to the maxiumum number of connections.
+size should be at least equal to the maximum number of connections.
 If the application does database and non-database work concurrently,
 extra threads could also be required for optimal throughput.
 
@@ -3262,7 +3262,7 @@ SQLNET.ENCRYPTION_CLIENT = required
 SQLNET.ENCRYPTION_TYPES_CLIENT = (AES256)
 ```
 
-The client and server sides can negoiate the protocols used if the
+The client and server sides can negotiate the protocols used if the
 settings indicate more than one value is accepted.
 
 Note these are example settings only.  You must review your security
@@ -3356,7 +3356,7 @@ predicted, it is recommended to use a [ResultSet](#resultsetclass)
 with callbacks, as described in this section, or via the ResultSet
 stream wrapper, as described [later](#streamingresults).  This
 prevents query results being unexpectedly truncated by the
-[`maxRows`](#propdbmaxrows) limit and removes the need to oversize
+[`maxRows`](#propdbmaxrows) limit and removes the need to over-size
 `maxRows` to avoid such truncation.  Otherwise, for queries that
 return a known small number of rows, non-ResultSet queries may have
 less overhead.
@@ -6277,12 +6277,11 @@ PL/SQL users may be interested in using [PL/Scope][78].
 [5]: https://docs.oracle.com/database/122/SQLRF/SELECT.htm#GUID-CFA006CA-6FF1-4972-821E-6996142A51C6__BABEAACC
 [6]: https://docs.oracle.com/database/122/LNOCI/oci-programming-advanced-topics.htm#LNOCI16617
 [7]: https://docs.oracle.com/database/122/LNOCI/oci-programming-basics.htm#GUID-D77D0D4A-7483-423A-9767-CBB5854A15CC
-[8]: https://docs.oracle.com/cd/B19306_01/appdev.102/b14250/oci02bas.htm#LNOCI13341
 [9]: https://docs.oracle.com/database/122/LNOCI/managing-scalable-platforms.htm#LNOCI-GUID-624A4771-58C5-4E2B-8131-E3389F58A0D6
 [10]: https://docs.oracle.com/database/122/LNOCI/managing-scalable-platforms.htm#LNOCI-GUID-8A9F1295-4360-4AC6-99A4-050C5C82E0B0
 [11]: https://docs.oracle.com/database/122/CNCPT/topics-for-database-administrators-and-developers.htm#GUID-89DB0C3C-A36F-4254-8C82-020F5F6DE31F
-[12]: http://docs.oracle.com/database/122/ADLOB/introduction-to-large-objects.htm#ADLOB45120
-[13]: http://docs.oracle.com/database/122/ADLOB/managing-LOBs.htm#ADLOB45157
+[12]: https://docs.oracle.com/database/122/ADLOB/introduction-to-large-objects.htm#ADLOB45120
+[13]: https://docs.oracle.com/database/122/ADLOB/managing-LOBs.htm#ADLOB45157
 [14]: https://docs.oracle.com/database/122/CNCPT/sql.htm#CNCPT516
 [15]: https://docs.oracle.com/database/122/CNCPT/sql.htm#CNCPT1732
 [16]: https://nodejs.org/api/stream.html
@@ -6292,31 +6291,31 @@ PL/SQL users may be interested in using [PL/Scope][78].
 [20]: http://docs.libuv.org/en/v1.x/threadpool.html
 [21]: https://github.com/libuv/libuv
 [22]: https://github.com/oracle/node-oracledb/issues/603#issuecomment-277017313
-[23]: http://docs.oracle.com/cd/E82638_01/JJUCP/optimizing-real-world-performance.htm#JJUCP-GUID-BC09F045-5D80-4AF5-93F5-FEF0531E0E1D
+[23]: https://docs.oracle.com/database/122/JJUCP/optimizing-real-world-performance.htm#GUID-BC09F045-5D80-4AF5-93F5-FEF0531E0E1D
 [24]: https://docs.oracle.com/database/122/ADFNS/performance-and-scalability.htm#ADFNS228
 [25]: https://docs.oracle.com/database/122/ADFNS/performance-and-scalability.htm#ADFNS1428
 [26]: http://www.oracle.com/technetwork/topics/php/php-scalability-ha-twp-128842.pdf
 [27]: https://docs.oracle.com/database/122/DBIMI/using-oracle-wallet-manager.htm#DBIMI162
 [28]: https://docs.oracle.com/database/122/DBSEG/configuring-secure-sockets-layer-authentication.htm#DBSEG070
 [29]: https://docs.oracle.com/database/122/DBSEG/configuring-authentication.htm#DBSEG30035
-[30]: http://docs.oracle.com/database/122/DBSEG/configuring-network-data-encryption-and-integrity.htm#DBSEG020
+[30]: https://docs.oracle.com/database/122/DBSEG/configuring-network-data-encryption-and-integrity.htm#DBSEG020
 [31]: https://docs.oracle.com/database/122/REFRN/V-SESSION_CONNECT_INFO.htm#REFRN30224
-[32]: http://docs.oracle.com/database/122/DBSEG/toc.htm
-[33]: http://docs.oracle.com/database/122/NETRF/parameters-for-the-sqlnet-ora-file.htm#NETRF427
-[34]: http://docs.oracle.com/database/122/NETRF/parameters-for-the-sqlnet-ora-file.htm#NETRF227
-[35]: http://docs.oracle.com/database/122/NETRF/parameters-for-the-sqlnet-ora-file.htm#NETRF228
-[36]: http://docs.oracle.com/database/122/NETRF/local-naming-parameters-in-tnsnames-ora-file.htm#NETRF431
-[37]: http://docs.oracle.com/database/122/NETRF/toc.htm
+[32]: https://docs.oracle.com/database/122/DBSEG/toc.htm
+[33]: https://docs.oracle.com/database/122/NETRF/parameters-for-the-sqlnet-ora-file.htm#NETRF427
+[34]: https://docs.oracle.com/database/122/NETRF/parameters-for-the-sqlnet-ora-file.htm#NETRF227
+[35]: https://docs.oracle.com/database/122/NETRF/parameters-for-the-sqlnet-ora-file.htm#NETRF228
+[36]: https://docs.oracle.com/database/122/NETRF/local-naming-parameters-in-tnsnames-ora-file.htm#NETRF431
+[37]: https://docs.oracle.com/database/122/NETRF/toc.htm
 [38]: https://github.com/oracle/node-oracledb/tree/master/examples/resultset1.js
 [39]: https://github.com/oracle/node-oracledb/tree/master/examples/resultset2.js
 [40]: https://github.com/oracle/node-oracledb/tree/master/examples/refcursor.js
 [41]: https://github.com/oracle/node-oracledb/tree/master/examples/selectstream.js
-[42]: http://docs.oracle.com/database/122/NLSPG/datetime-data-types-and-time-zone-support.htm#NLSPG263
+[42]: https://docs.oracle.com/database/122/NLSPG/datetime-data-types-and-time-zone-support.htm#NLSPG263
 [43]: https://jsao.io/2016/09/working-with-dates-using-the-nodejs-driver/
 [44]: https://docs.oracle.com/database/122/SQLRF/TO_LOB.htm
 [45]: https://docs.oracle.com/cd/E17781_01/appdev.112/e18750/xe_locator.htm#XELOC560
 [46]: https://docs.oracle.com/database/122/LNOCI/using-sql_statements-in-oci.htm#LNOCI16355g
-[47]: http://docs.oracle.com/database/122/REFRN/OPEN_CURSORS.htm#REFRN10137
+[47]: https://docs.oracle.com/database/122/REFRN/OPEN_CURSORS.htm#REFRN10137
 [48]: https://docs.oracle.com/database/122/ARPLS/DBMS_OUTPUT.htm#ARPLS67300
 [49]: https://github.com/oracle/node-oracledb/tree/master/examples/dbmsoutputgetline.js
 [50]: https://github.com/oracle/node-oracledb/tree/master/examples/dbmsoutputpipe.js
@@ -6331,7 +6330,7 @@ PL/SQL users may be interested in using [PL/Scope][78].
 [59]: http://www.oracle.com/technetwork/issue-archive/2007/07-mar/o27asktom-084983.html
 [60]: http://stackoverflow.com/a/43330282/4799035
 [61]: https://docs.oracle.com/database/122/LNOCI/oci-programming-advanced-topics.htm#LNOCI16655
-[62]: http://docs.oracle.com/database/122/TGDBA/gathering-database-statistics.htm#TGDBA168
+[62]: https://docs.oracle.com/database/122/TGDBA/gathering-database-statistics.htm#TGDBA168
 [63]: https://docs.oracle.com/database/122/LNOCI/more-oci-advanced-topics.htm#LNOCI-GUID-CD599644-135A-4116-8B3B-40A9BA172E5C
 [64]: https://docs.oracle.com/database/122/ADFNS/high-availability.htm#ADFNS538
 [65]: https://docs.oracle.com/database/122/ADFNS/connection_strategies.htm#ADFNS515
@@ -6340,11 +6339,11 @@ PL/SQL users may be interested in using [PL/Scope][78].
 [68]: https://docs.oracle.com/database/122/NLSPG/toc.htm
 [69]: https://docs.oracle.com/database/122/NLSPG/setting-up-globalization-support-environment.htm#NLSPG003
 [70]: https://docs.oracle.com/database/122/TGSQL/performing-application-tracing.htm#TGSQL792
-[71]: https://docs.oracle.com/cd/B19306_01/appdev.102/b14258/d_appinf.htm#CHECEIEB
-[72]: https://docs.oracle.com/cd/B19306_01/appdev.102/b14258/d_sessio.htm#SET_IDENTIFIER
+[71]: https://docs.oracle.com/database/122/ARPLS/DBMS_APPLICATION_INFO.htm#ARPLS003
+[72]: https://docs.oracle.com/database/122/ARPLS/DBMS_SESSION.htm#ARPLS68063
 [73]: https://jsao.io/2017/06/how-to-get-use-and-close-a-db-connection-using-promises/
 [74]: https://jsao.io/2017/07/how-to-get-use-and-close-a-db-connection-using-async-functions/
 [75]: https://oracle.github.io/odpi/doc/user_guide/debugging.html
-[76]: http://docs.oracle.com/database/122/REFRN/V-SQL_BIND_CAPTURE.htm#REFRN30310
+[76]: https://docs.oracle.com/database/122/REFRN/V-SQL_BIND_CAPTURE.htm#REFRN30310
 [77]: https://docs.oracle.com/database/122/ARPLS/DBMS_MONITOR.htm#ARPLS67178
-[78]: http://docs.oracle.com/database/122/ADFNS/plscope.htm
+[78]: https://docs.oracle.com/database/122/ADFNS/plscope.htm
