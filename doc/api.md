@@ -127,7 +127,8 @@ limitations under the License.
   - 8.1 [Connection Strings](#connectionstrings)
      - 8.1.1 [Easy Connect Syntax for Connection Strings](#easyconnect)
      - 8.1.2 [Net Service Names for Connection Strings](#tnsnames)
-     - 8.1.3 [JDBC and Node-oracledb Connection Strings Compared](#notjdbc)
+     - 8.1.3 [Embedded Connection Strings](#embedtns)
+     - 8.1.4 [JDBC and Node-oracledb Connection Strings Compared](#notjdbc)
   - 8.2 [Connections and Number of Threads](#numberofthreads)
   - 8.3 [Connection Pooling](#connpooling)
      - 8.3.1 [Connection Pool Cache](#connpoolcache)
@@ -2608,6 +2609,21 @@ variable and put the file in `$TNS_ADMIN/tnsnames.ora`.  For more
 information on `tnsnames.ora` files see [General Syntax of
 tnsnames.ora][18] in the Oracle documentation.
 
+Some older databases may use a 'SID' instead of a 'Service Name'.  A
+connection string for these databases could look like:
+
+```
+sales =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)(HOST = mymachine.example.com)(PORT = 1521))
+    (CONNECT_DATA =
+      (SERVER = DEDICATED)
+      (SID = orcl)
+    )
+  )
+```
+
+#### <a name="embedtns"></a> 8.1.3 Embedded Connection Strings
 
 Full connection strings can be embedded in applications:
 
@@ -2623,7 +2639,7 @@ oracledb.getConnection(
   . . .
 ```
 
-#### <a name="notjdbc"></a> 8.1.3 JDBC and Node-oracledb Connection Strings Compared
+#### <a name="notjdbc"></a> 8.1.4 JDBC and Node-oracledb Connection Strings Compared
 
 Developers familiar with Java connection strings that reference a
 service name like:
