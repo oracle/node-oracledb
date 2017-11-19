@@ -32,7 +32,7 @@ using namespace std;
 #include "njsMessages.h"
 
 // Maximum buffer size to compose error message
-#define NJS_MAX_ERROR_MSG_LEN 1024
+#define NJS_MAX_ERROR_MSG_LEN 256
 
 static const char *errMsg[] = {
     "NJS-000: success",                              // errSuccess
