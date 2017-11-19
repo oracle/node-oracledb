@@ -15,6 +15,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
+ * NAME
+ *   extractpackage.js
+ *
+ * DESCRIPTION
+ *   This script is a command-line interface to extract node-oracledb
+ *   binaries from an available binary package, see INSTALL.md.
+ *
+ * USAGE
+ *   Run this script like:
+ *     node extractpackage.js path=oracledb-vX.Y.Z-node-vNN-platform-architecture.gz
+ *   For example:
+ *     node extractpackage.js path=oracledb-v2.0.14-node-v57-darwin-x64.gz
+ *
+ *   The extracted binary can be manually moved to the correct directory.
+ *
  *****************************************************************************/
 
 'use strict';

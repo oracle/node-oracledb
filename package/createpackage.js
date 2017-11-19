@@ -15,6 +15,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
+ * NAME
+ *   createpackage.js
+ *
+ * DESCRIPTION
+ *   Creates a binary package for the current node-oracledb binary.  A
+ *   custom package format is used.  The package uses a custom format
+ *   with three components: length bytes (giving the length of the
+ *   license file), the license file, and then the node-oracledb
+ *   binary.  The package is gzipped.
+ *
  *****************************************************************************/
 
 'use strict';

@@ -44,15 +44,18 @@ Installation is described in [INSTALL](../INSTALL.md).
   [npm](https://www.npmjs.com/package/oracledb).
 
     - `make npmpackage` makes the main node-oracledb package
-      containing the JavaScript files.
+      containing the general node-oracledb JavaScript files and the
+      package.json in this directory.  This is the package that an
+      `npm install oracledb` will initially install.
 
     - `make binarypackage` makes a binary package for the current
-      Node.js/node-oracledb/platform and generates a SHA256 for the
-      binary.
+      Node.js-node / oracledb / platform combination and generates a
+      SHA256 for the binary.
 
-- The `package.json` in this directory invokes an install script that
-  downloads a binary package from GitHub.  This variant of
-  `package.json` is the copy bundled for the npm release..
+- As part of `npm install`, the `package.json` in this directory
+  invokes `oracledbinstall.js` that downloads the appropriate binary
+  package from GitHub.  This variant of `package.json` is the copy
+  bundled for the npm release.
 
   The parent file `../package.json` doesn't have the install target
   meaning that node-gyp will be invoked to compile node-oracledb.  This

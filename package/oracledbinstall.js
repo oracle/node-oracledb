@@ -15,6 +15,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
+ * NAME
+ *   oracledbinstall.js
+ *
+ * DESCRIPTION
+ *   This script is included in the npm bundle of node-oracledb.  It
+ *   is invoked by package.json during npm install.  It downloads a
+ *   pre-built node-oracleb binary if one is available, or gives a
+ *   message on how to compile from source code.
+ *
  *****************************************************************************/
 
 'use strict';
@@ -52,7 +61,6 @@ try {
 
 const PACKAGE_HOSTNAME = 'github.com';
 const PACKAGE_PATH_REMOTE = '/oracle/node-oracledb/releases/download/' + packageUtil.dynamicProps.GITHUB_TAG + '/' + packageUtil.dynamicProps.PACKAGE_FILE_NAME;
-const SHA_HOSTNAME = PACKAGE_HOSTNAME;
 const SHA_PATH_REMOTE = '/oracle/node-oracledb/releases/download/' + packageUtil.dynamicProps.GITHUB_TAG + '/' + packageUtil.SHA_FILE_NAME;
 const PORT = 443;
 
@@ -130,7 +138,7 @@ function verifyBinary() {
       .then((sha) => {
         binarySha = sha;
 
-        return getRemoteFileReadStream(SHA_HOSTNAME, SHA_PATH_REMOTE);
+        return getRemoteFileReadStream(PACKAGE_HOSTNAME, SHA_PATH_REMOTE);
       })
       .then(readStream => {
         return new Promise((resolve, reject) => {
@@ -191,7 +199,7 @@ function getFileReadStreamByProxy(hostname, path, proxyHostname, proxyPort) {
       host: proxyHostname,
       port: proxyPort,
       method: 'CONNECT',
-      path: hostname + ':443'
+      path: hostname + ':' + PORT
     });
 
     req.on('error', reject);
