@@ -19,7 +19,7 @@
  *   version.js
  *
  * DESCRIPTION
- *   Shows the oracledb version attributes
+ *   Shows the node-oracledb version attributes
  *
  *****************************************************************************/
 
@@ -30,7 +30,7 @@ var addonVer, clientVer, serverVer;
 var major, minor, update, port, portUpdate;
 
 console.log("Run at: " + new Date());
-console.log("Node.js version: " + process.version + " (" + process.arch + ")");
+console.log("Node.js version: " + process.version + " (" + process.platform, process.arch + ")");
 
 addonVer = oracledb.version;
 major  = Math.floor(addonVer / 10000);
