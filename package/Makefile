@@ -19,11 +19,10 @@ PAT=$(shell grep '\#define \+NJS_NODE_ORACLEDB_PATCH' ../src/njsOracle.h | sed -
 VER=$(MAJ).$(MIN).$(PAT)
 
 # The staging-oracledb-X.Y.Z.tgz package will try to download binaries from
-# https://$NODE_ORACLEDB_PACKAGE_HOSTNAME/$NODE_ORACLEDB_PACKAGE_URL_PATH/
+# https://$NODE_ORACLEDB_PACKAGE_HOSTNAME/$NODE_ORACLEDB_PACKAGE_URL_PATH/vX.Y.Z/
 ifndef NODE_ORACLEDB_PACKAGE_HOSTNAME
 	NODE_ORACLEDB_PACKAGE_HOSTNAME='your-staging-server.example.com'
 endif
-
 ifndef NODE_ORACLEDB_PACKAGE_URL_PATH
 	NODE_ORACLEDB_PACKAGE_URL_PATH='/your-url-path-to-directory/'
 endif

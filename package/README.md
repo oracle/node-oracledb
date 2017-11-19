@@ -70,21 +70,24 @@ Installation is described in [INSTALL](../INSTALL.md).
     `NODE_ORACLEDB_PACKAGE_URL_PATH` (e.g. "/yourpath/") which must be set
     before running `make`.
 
-  You can use `staging-oracledb-X.Y.Z.tgz` to host binaries on your
-  own network.  Copy `staging-oracledb-X.Y.Z.tgz`, the binary packages
-  for each desired architectures, and a single SHASUMS256.txt file
-  (with one line per available binary package) to an HTTPS-enabled web
-  server.  Note if the web server has a self-signed certificate, then
-  before running `npm install
-  https://your.example.com/yourpath/staging-oracledb-X.Y.X.tgz` you
-  may need to set:
+- The`staging-oracledb-X.Y.Z.tgz` package can be used to host binaries
+  on internal networks.  Copy `staging-oracledb-X.Y.Z.tgz`, the binary
+  packages for each desired architectures, and a single SHASUMS256.txt
+  file (with one line per available binary package) to an
+  HTTPS-enabled web server to the directory that
+  https://your.example.com/yourpath/vX.Y.Z/ resolves to.  Note if the
+  web server has a self-signed certificate, then you you may need to
+  bypass some npm checks:
 
   ```
   export NODE_TLS_REJECT_UNAUTHORIZED=0
   npm config set strict-ssl false
+
+  npm install https://your.example.com/yourpath/vX.Y.Z/staging-oracledb-X.Y.X.tgz
   ```
 
-  Remember to do `npm config delete strict-ssl` when not testing.
+  Remember to do `npm config delete strict-ssl` and unset the
+  environment variable when not testing.
 
 - At install time, setting the environment variable
   `NODE_ORACLEDB_TRACE_INSTALL` to `TRUE` will cause `npm install` to
