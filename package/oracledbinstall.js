@@ -94,8 +94,14 @@ function getProxyConfig(hostname) {
     process.env.no_PROXY ||
     process.env.no_proxy;
 
-  if (noProxy && noProxy !== '*') {
+  if (noProxy === '*') {
+    packageUtil.trace('noProxy wildcard');
+    proxyConfig.useProxy = false;
+    proxyConfig.hostname = undefined;
+    proxyConfig.hostname = undefined;
+  } else if (noProxy) {
     const noProxies = noProxy.toLowerCase().split(',');
+    packageUtil.trace('noProxy', noProxies);
 
     if (noProxies.indexOf(hostname.toLowerCase()) > -1) {
       proxyConfig.useProxy = false;
@@ -112,7 +118,7 @@ function getProxyConfig(hostname) {
 function verifyBinary() {
   return new Promise((resolve, reject) => {
     packageUtil.trace('In verifyBinary');
-    packageUtil.trace('Checking for binary at ', packageUtil.BINARY_PATH_LOCAL);
+    packageUtil.trace('Checking for binary at', packageUtil.BINARY_PATH_LOCAL);
     packageUtil.log('Verifying installation');
 
     if (!fs.existsSync(packageUtil.BINARY_PATH_LOCAL)) {
@@ -226,7 +232,7 @@ function getFileReadStreamByProxy(hostname, path, proxyHostname, proxyPort) {
 // file read stream.
 function getFileReadStreamBase(hostname, path, socket, agent) {
   return new Promise((resolve, reject) => {
-    packageUtil.trace('In getFileReadStreamBase', hostname, path, socket, agent);
+    packageUtil.trace('In getFileReadStreamBase', hostname, path);
 
     let settled = false;
 
@@ -417,7 +423,7 @@ function install() {
 
   packageUtil.log('Beginning installation');
 
-  verifyBinary()
+  verifyBinary()  // check if download is necessary for 'npm rebuild'
     .then((valid) => {
       if (valid) {
         done(null, true);
