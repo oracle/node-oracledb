@@ -128,8 +128,6 @@ function verifyBinary() {
       return;
     }
 
-    packageUtil.log('Binary found');
-
     let remoteShaFile = '';
     let binarySha;
 
@@ -428,7 +426,7 @@ function install() {
       if (valid) {
         done(null, true);
       } else {
-        packageUtil.log('Continuing with installation');
+        packageUtil.log('Continuing installation');
 
         return new Promise((resolve, reject) => {
           installBinary()
