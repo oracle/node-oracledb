@@ -21,10 +21,10 @@ VER=$(MAJ).$(MIN).$(PAT)
 # The staging-oracledb-X.Y.Z.tgz package will try to download binaries from
 # https://$NODE_ORACLEDB_PACKAGE_HOSTNAME/$NODE_ORACLEDB_PACKAGE_URL_PATH/vX.Y.Z/
 ifndef NODE_ORACLEDB_PACKAGE_HOSTNAME
-	NODE_ORACLEDB_PACKAGE_HOSTNAME='your-staging-server.example.com'
+	NODE_ORACLEDB_PACKAGE_HOSTNAME=your-staging-server.example.com
 endif
 ifndef NODE_ORACLEDB_PACKAGE_URL_PATH
-	NODE_ORACLEDB_PACKAGE_URL_PATH='/your-url-path-to-directory/'
+	NODE_ORACLEDB_PACKAGE_URL_PATH=/your-url-path-to-directory/
 endif
 
 # Create a package containing the binary and license files.
@@ -45,8 +45,8 @@ oracledb-$(VER).tgz:
 	mkdir -m 755 bundle/package
 	cp ./oracledbinstall.js ./extractpackage.js ./util.js bundle/package/
 	(cd bundle && tar -czvf ../oracledb-$(VER).tgz ./*)
-	perl -p -i -e "s#'github.com'#'$(NODE_ORACLEDB_PACKAGE_HOSTNAME)'#" bundle/package/oracledbinstall.js
-	perl -p -i -e "s#'/oracle/node-oracledb/releases/download/'#'$(NODE_ORACLEDB_PACKAGE_URL_PATH)'#" bundle/package/oracledbinstall.js
+	sed -e "s#'github.com'#'$(NODE_ORACLEDB_PACKAGE_HOSTNAME)'#" bundle/package/oracledbinstall.js > bundle/package/oracledbinstall.js.tmp && mv bundle/package/oracledbinstall.js.tmp bundle/package/oracledbinstall.js
+	sed -e "s#'/oracle/node-oracledb/releases/download/'#'$(NODE_ORACLEDB_PACKAGE_URL_PATH)'#" bundle/package/oracledbinstall.js > bundle/package/oracledbinstall.js.tmp && mv bundle/package/oracledbinstall.js.tmp bundle/package/oracledbinstall.js
 	(cd bundle && tar -czvf ../staging-oracledb-$(VER).tgz ./*)
 	rm -rf ./bundle/
 
