@@ -1,12 +1,29 @@
 # Change Log
 
-## node-oracledb v2.0.14 Development (DD Mon YYYY)
+## node-oracledb v2.0.14 Development (20 Nov 2017)
 
-Note: 2.0.14-Development is a work in progress
+- Added infrastructure to /packge for creating binary installs.
+  Updated INSTALL.md.
 
-- Upgraded NAN dependency from 2.5 to 2.7.
+- Improved validation for invalid attribute and parameter values.
+
+- In LOB binds, the bind "val" can now be a String when "type" is
+  CLOB, and "val" can now be a Buffer when "type" is BLOB.
+
+- Changed binding.gyp message prefix from 'node-oracledb' to 'oracledb'.
+
+- Fix compiler warning with va_start
+
+- Eliminate memory leak when processing result sets containing LOBs
+  that require more than one fetch operation (regression from v1).
+
+- Move fetch buffer allocation to reduce memory use for Result Sets
+  (regression from v1).
+
+- Upgraded NAN dependency from 2.5 to 2.8.
 
 - Updated ODPI-C submodule:
+  - Reinstate safe size limit for LOB bind to PL/SQL (node-oracledb regression from v1).
   - Fix valgrind byte overrun when loading `libclntsh` from `$ORACLE_HOME`.
   - Do not prevent connections from being explicitly closed when a fatal error has taken place.
   - Eliminate race condition on initialization.  Add finalization code.
@@ -157,6 +174,8 @@ Note: 2.0.14-Development is a work in progress
 
 - Empty arrays can now be used in PL/SQL Collection Associative Array
   (Index-by) binds.
+
+- Database errors no longer have an extra newline.
 
 - Upgraded NAN dependency from 2.5 to 2.6.
 
