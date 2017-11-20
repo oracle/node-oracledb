@@ -21,25 +21,16 @@
  * DESCRIPTION
  *   This script is included in the npm bundle of node-oracledb.  It
  *   is invoked by package.json during npm install.  It downloads a
- *   pre-built node-oracleb binary if one is available, or gives a
- *   message on how to compile from source code.
+ *   pre-built node-oracleb binary from GitHub if one is available, or
+ *   gives a message on how to compile one from source code.
  *
+ * MAINTENANCE NOTES
+ *   - This file should run with Node 4 or later.
+ *   - This file should only ever 'require' packages included in core Node.js.
+*
  *****************************************************************************/
 
 'use strict';
-
-/* Install script for the oracledb add-on.
- *
- * This script downloads an oracledb.node binary over HTTPS.
- *
- * Maintenance note:
- * - This file should only ever 'require' packages included in core Node.js.
- * - This file should run with Node 4 or later.
- *
- * When a GitHub 'release' is made, binaries can be uploaded to
- * GitHub.  They will be located in:
- *   https://github.com/oracle/node-oracledb/releases/download/<tag>/<filename>
- */
 
 const http = require('http');
 const https = require('https');
@@ -59,6 +50,8 @@ try {
   return;
 }
 
+// Note: the Makefile uses these hostname and path values for the npm
+// package but will substitute them for the staging package
 const PACKAGE_HOSTNAME = 'github.com';
 const PACKAGE_PATH_REMOTE = '/oracle/node-oracledb/releases/download/' + packageUtil.dynamicProps.GITHUB_TAG + '/' + packageUtil.dynamicProps.PACKAGE_FILE_NAME;
 const SHA_PATH_REMOTE = '/oracle/node-oracledb/releases/download/' + packageUtil.dynamicProps.GITHUB_TAG + '/' + packageUtil.SHA_FILE_NAME;
@@ -358,16 +351,17 @@ function done(err, alreadyInstalled) {
       arch = '32-bit';
     }
 
-    console.log('\n********************************************************************************');
+    packageUtil.log('');
+    packageUtil.log('********************************************************************************');
 
     if (alreadyInstalled) {
-      console.log('** Node-oracledb ' + packageUtil.dynamicProps.PACKAGE_JSON_VERSION + ' was already installed for Node.js '  + process.versions.node + ' (' + process.platform + ', ' + process.arch +')');
+      packageUtil.log('** Node-oracledb ' + packageUtil.dynamicProps.PACKAGE_JSON_VERSION + ' was already installed for Node.js '  + process.versions.node + ' (' + process.platform + ', ' + process.arch +')');
     } else {
-      console.log('** Node-oracledb ' + packageUtil.dynamicProps.PACKAGE_JSON_VERSION + ' installation complete for Node.js ' + process.versions.node + ' (' + process.platform + ', ' + process.arch +')');
+      packageUtil.log('** Node-oracledb ' + packageUtil.dynamicProps.PACKAGE_JSON_VERSION + ' installation complete for Node.js ' + process.versions.node + ' (' + process.platform + ', ' + process.arch +')');
     }
 
-    console.log('**');
-    console.log('** To use the installed node-oracledb:');
+    packageUtil.log('**');
+    packageUtil.log('** To use the installed node-oracledb:');
 
     if (process.platform === 'linux') {
       if (process.arch === 'x64') {
@@ -376,14 +370,14 @@ function done(err, alreadyInstalled) {
         clientUrl = 'http://www.oracle.com/technetwork/topics/linuxsoft-082809.html';
       }
 
-      console.log('** - You must have ' + arch + ' Oracle client libraries in LD_LIBRARY_PATH, or configured with ldconfig');
-      console.log('** - If you do not already have libraries, install the Instant Client Basic or Basic Light package from ');
-      console.log('**   ' + clientUrl);
+      packageUtil.log('** - You must have ' + arch + ' Oracle client libraries in LD_LIBRARY_PATH, or configured with ldconfig');
+      packageUtil.log('** - If you do not already have libraries, install the Instant Client Basic or Basic Light package from ');
+      packageUtil.log('**   ' + clientUrl);
     } else if (process.platform === 'darwin') {
       clientUrl = 'http://www.oracle.com/technetwork/topics/intel-macsoft-096467.html';
 
-      console.log('** - You need to have the Oracle Instant Client Basic or Basic Light package in ~/lib or /usr/local/lib');
-      console.log('**   Download from ' + clientUrl);
+      packageUtil.log('** - You need to have the Oracle Instant Client Basic or Basic Light package in ~/lib or /usr/local/lib');
+      packageUtil.log('**   Download from ' + clientUrl);
     } else if (process.platform === 'win32') {
       if (process.arch === 'x64') {
         clientUrl = 'http://www.oracle.com/technetwork/topics/winx64soft-089540.html';
@@ -391,22 +385,22 @@ function done(err, alreadyInstalled) {
         clientUrl = 'http://www.oracle.com/technetwork/topics/winsoft-085727.html';
       }
 
-      console.log('** - You must have ' + arch + ' Oracle client libraries in your PATH environment variable');
-      console.log('** - If you do not already have libraries, install the Instant Client Basic or Basic Light package from');
-      console.log('**   ' + clientUrl);
-      console.log('** - A Microsoft Visual Studio Redistributable suitable for your Oracle client library version must be available');
-      console.log('**   Check ' + installUrl + ' for details');
+      packageUtil.log('** - You must have ' + arch + ' Oracle client libraries in your PATH environment variable');
+      packageUtil.log('** - If you do not already have libraries, install the Instant Client Basic or Basic Light package from');
+      packageUtil.log('**   ' + clientUrl);
+      packageUtil.log('** - A Microsoft Visual Studio Redistributable suitable for your Oracle client library version must be available');
+      packageUtil.log('**   Check ' + installUrl + ' for details');
     } else {
       clientUrl = 'http://www.oracle.com/technetwork/database/features/instant-client/index-100365.html';
 
-      console.log('** - You must have ' + arch + ' Oracle client libraries in your operating system library search path');
-      console.log('** - If you do not already have libraries, install an Instant Client Basic or Basic Light package from: ');
-      console.log('**   ' + clientUrl);
+      packageUtil.log('** - You must have ' + arch + ' Oracle client libraries in your operating system library search path');
+      packageUtil.log('** - If you do not already have libraries, install an Instant Client Basic or Basic Light package from: ');
+      packageUtil.log('**   ' + clientUrl);
     }
 
-    console.log('**');
-    console.log('** Node-oracledb installation instructions: ' + installUrl);
-    console.log('********************************************************************************\n');
+    packageUtil.log('**');
+    packageUtil.log('** Node-oracledb installation instructions: ' + installUrl);
+    packageUtil.log('********************************************************************************\n');
   }
 }
 
