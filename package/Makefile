@@ -53,10 +53,13 @@ endif
 # Create the generic 'npm install' package with a package.json that
 # invokes oracledbinstall.js at install time
 npmpackage:
+	$(ECHO) "$(GITSHA) $(BUILDDATE)" > ../lib/rel.txt
+	$(NPM) pack .. && $(MV) oracledb-$(VER).tgz oracledb-src-$(VER).tgz
+	@$(ECHO) "==> Created generic GitHub source package for node-oracledb $(VER)"
+
 	$(SED) -e "s#'github.com'#'$(NODE_ORACLEDB_PACKAGE_HOSTNAME)'#" oracledbinstall.js > oracledbinstall.js.tmp && $(MV) oracledbinstall.js.tmp oracledbinstall.js
 	$(SED) -e "s#'/oracle/node-oracledb/releases/download/'#'$(NODE_ORACLEDB_PACKAGE_URL_PATH)'#" oracledbinstall.js > oracledbinstall.js.tmp && $(MV) oracledbinstall.js.tmp oracledbinstall.js
 	$(CP) package.json ../package.json
-	$(ECHO) "$(GITSHA) $(BUILDDATE)" > ../lib/rel.txt
 	$(NPM) pack .. && $(MV) oracledb-$(VER).tgz staging-oracledb-$(VER).tgz
 	@$(ECHO) "==> Created generic npm staging package for node-oracledb $(VER)"
 
