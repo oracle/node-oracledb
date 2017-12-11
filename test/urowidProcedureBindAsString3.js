@@ -323,7 +323,7 @@ describe('120. urowidProcedureBindAsString3.js', function() {
 
   });
 
-  describe('120.3 PROCEDURE BIND_IN, UPDATE', function() {
+  describe('120.3 PROCEDURE BIND_INOUT, UPDATE', function() {
     var proc_create = "CREATE OR REPLACE PROCEDURE nodb_rowid_bind_1083 (id_in IN NUMBER, content_1 IN OUT UROWID, content_2 IN OUT UROWID)\n" +
                       "AS \n" +
                       "BEGIN \n" +

@@ -151,3 +151,6 @@ test/v8Getter.js
 test/insertNaNToNumber.js
 test/urowidFunctionBindAsString3.js
 test/urowidFunctionBindAsString4.js
+test/urowidProcedureBindAsString4.js
+test/urowidProcedureBindAsString5.js
+test/urowidProcedureBindAsString6.js

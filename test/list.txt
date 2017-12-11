@@ -3660,3 +3660,41 @@ Overview of node-oracledb functional tests
         143.3.1 update with UROWID > 200
         143.3.2 update with UROWID > 500
         143.3.3 update with UROWID > 2000
+
+144. urowidProcedureBindAsString4.js
+    144.1 PROCEDURE BIND_IN as UROWID
+        144.1.1 urowid length > 500
+        144.1.2 urowid length > 1000
+        144.1.3 urowid length > 2000
+    144.2 PROCEDURE BIND_IN as string
+        144.2.1 urowid length > 500
+        144.2.2 urowid length > 1000
+        144.2.3 urowid length > 2000
+    144.3 PROCEDURE BIND_IN, UPDATE
+        144.3.1 update with urowid length > 500
+        144.3.2 update with urowid length > 1000
+        144.3.3 update with urowid length > 2000
+
+145. urowidProcedureBindAsString5.js
+    145.1 PROCEDURE BIND_OUT as UROWID
+        145.1.1 urowid length > 500
+        145.1.2 urowid length > 1000
+        145.1.3 urowid length > 2000
+    145.2 PROCEDURE BIND_OUT as STRING
+        145.2.1 urowid length > 500
+        145.2.2 urowid length > 1000
+        145.2.3 urowid length > 2000
+
+146. urowidProcedureBindAsString6.js
+    146.1 PROCEDURE BIND_INOUT as UROWID
+        146.1.1 urowid length > 500
+        146.1.2 urowid length > 1000
+        146.1.3 urowid length > 2000
+    146.2 PROCEDURE BIND_INOUT as string
+        146.2.1 urowid length > 500
+        146.2.2 urowid length > 1000
+        146.2.3 urowid length > 2000
+    146.3 PROCEDURE BIND_INOUT, UPDATE
+        146.3.1 update with urowid length > 500
+        146.3.2 update with urowid length > 1000
+        146.3.3 update with urowid length > 2000
