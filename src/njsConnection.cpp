@@ -142,13 +142,6 @@ bool njsConnection::ProcessQueryVars(njsBaton *baton, dpiStmt *dpiStmtHandle,
 {
     dpiQueryInfo queryInfo;
 
-    // maxRows must be greater than zero in case of non-result set
-    if (baton->maxRows == 0) {
-        baton->error = njsMessages::Get(errInvalidmaxRows);
-        baton->ClearAsyncData();
-        return false;
-    }
-
     // populate variables with query metadata
     for (uint32_t i = 0; i < numVars; i++) {
 
@@ -247,18 +240,28 @@ bool njsConnection::ProcessFetch(njsBaton *baton)
     njsVariable *var;
     int moreRows;
 
+    // determine how many rows to fetch; use fetchArraySize unless it is less
+    // than maxRows (no need to waste memory!)
+    numRowsToFetch = baton->fetchArraySize;
+    if (baton->maxRows > 0 && baton->maxRows < baton->fetchArraySize)
+        numRowsToFetch = baton->maxRows;
+
     // create ODPI-C variables and define them, if necessary
     for (i = 0; i < baton->numQueryVars; i++) {
         var = &baton->queryVars[i];
-        if (var->dpiVarHandle)
+        if (var->dpiVarHandle && var->maxArraySize >= numRowsToFetch)
             continue;
+        if (var->dpiVarHandle) {
+            dpiVar_release(var->dpiVarHandle);
+            var->dpiVarHandle = NULL;
+        }
         if (dpiConn_newVar(baton->dpiConnHandle, var->varTypeNum,
-                var->nativeTypeNum, baton->fetchArraySize, var->maxSize, 1, 0,
+                var->nativeTypeNum, numRowsToFetch, var->maxSize, 1, 0,
                 NULL, &var->dpiVarHandle, &var->dpiVarData) < 0) {
             baton->GetDPIError();
             return false;
         }
-        var->maxArraySize = baton->fetchArraySize;
+        var->maxArraySize = numRowsToFetch;
         if (dpiStmt_define(baton->dpiStmtHandle, i + 1,
                 var->dpiVarHandle) < 0) {
             baton->GetDPIError();
@@ -266,15 +269,19 @@ bool njsConnection::ProcessFetch(njsBaton *baton)
         }
     }
 
-    // perform fetch, but do not fetch more rows than requested at this time
-    numRowsToFetch = (baton->fetchArraySize < baton->maxRows) ?
-            baton->fetchArraySize : baton->maxRows;
+    // set fetch array size as requested
+    if (dpiStmt_setFetchArraySize(baton->dpiStmtHandle, numRowsToFetch) < 0) {
+        baton->GetDPIError();
+        return false;
+    }
+
+    // perform fetch
     if (dpiStmt_fetchRows(baton->dpiStmtHandle, numRowsToFetch,
             &baton->bufferRowIndex, &baton->rowsFetched, &moreRows) < 0) {
         baton->GetDPIError();
         return false;
     }
-    if (!moreRows && baton->rowsFetched < baton->maxRows)
+    if (!moreRows)
         baton->maxRows = baton->rowsFetched;
     return ProcessVars(baton, baton->queryVars, baton->numQueryVars,
             baton->rowsFetched);
@@ -310,11 +317,6 @@ bool njsConnection::ProcessVars(njsBaton *baton, njsVariable *vars,
             case DPI_ORACLE_TYPE_STMT:
                 stmt = var->dpiVarData->value.asStmt;
                 if (dpiStmt_getNumQueryColumns(stmt, &var->numQueryVars) < 0) {
-                    baton->GetDPIError();
-                    return false;
-                }
-                if (dpiStmt_setFetchArraySize(stmt,
-                        baton->fetchArraySize) < 0) {
                     baton->GetDPIError();
                     return false;
                 }
@@ -588,6 +590,16 @@ bool njsConnection::GetRows(njsBaton *baton, Local<Object> &rows)
         rowOffset = 0;
         tempRows = Nan::New<Array>(baton->rowsFetched);
     } else {
+
+        // if no rows fetched, just return previous invocation's array as there
+        // is no need to concatenate!
+        if (baton->rowsFetched == 0) {
+            rows = scope.Escape(origRowsObj);
+            return true;
+        }
+
+        // create a new array that can contain the previous invocation's array
+        // and the new rows fetched this invocation
         Local<Array> origRows = Local<Array>::Cast(origRowsObj);
         uint32_t numRows = baton->rowsFetched + origRows->Length();
         tempRows = Nan::New<Array>(numRows);
@@ -598,7 +610,7 @@ bool njsConnection::GetRows(njsBaton *baton, Local<Object> &rows)
         rowOffset = origRows->Length();
     }
 
-    // populate rows
+    // populate rows fetched this invocation
     for (uint32_t row = 0; row < baton->rowsFetched; row++) {
         if (baton->outFormat == NJS_ROWS_ARRAY)
             rowAsArray = Nan::New<Array>(baton->numQueryVars);
@@ -1495,16 +1507,6 @@ void njsConnection::Async_Execute(njsBaton *baton)
     // for queries, perform defines and ensure that rows have been fetched
     if (baton->numQueryVars > 0) {
 
-        // adjust fetch array size downward if it exceeds maxRows for basic
-        // fetches (no need to waste memory!)
-        if (!baton->getRS && baton->maxRows < baton->fetchArraySize)
-            baton->fetchArraySize = baton->maxRows;
-        if (dpiStmt_setFetchArraySize(baton->dpiStmtHandle,
-                baton->fetchArraySize) < 0) {
-            baton->GetDPIError();
-            return;
-        }
-
         // perform defines
         baton->queryVars = new njsVariable[baton->numQueryVars];
         if (!ProcessQueryVars(baton, baton->dpiStmtHandle, baton->queryVars,
@@ -1556,14 +1558,15 @@ void njsConnection::Async_AfterExecute(njsBaton *baton, Local<Value> argv[])
     if (baton->queryVars && !baton->getRS) {
         if (!njsConnection::GetRows(baton, rows))
             return;
-        if (baton->rowsFetched < baton->maxRows) {
+        if (baton->rowsFetched > 0 &&
+            (baton->maxRows == 0 || baton->rowsFetched < baton->maxRows)) {
             callback = Nan::New<Function>(baton->jsCallback);
             callingObj = Nan::New(baton->jsCallingObj);
             newBaton = new njsBaton(callback, callingObj);
             baton->jsCallback.Reset();
             newBaton->fetchArraySize = baton->fetchArraySize;
-            newBaton->maxRows = baton->maxRows - baton->rowsFetched;
-            newBaton->fetchMultipleRows = true;
+            if (baton->maxRows > 0)
+                newBaton->maxRows = baton->maxRows - baton->rowsFetched;
             newBaton->jsRows.Reset(rows);
             newBaton->dpiStmtHandle = baton->dpiStmtHandle;
             baton->dpiStmtHandle = NULL;

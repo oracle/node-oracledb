@@ -94,7 +94,6 @@ void njsResultSet::Init(Handle<Object> target)
     temp->SetClassName(Nan::New<v8::String>("ResultSet").ToLocalChecked());
 
     Nan::SetPrototypeMethod(temp, "close", Close);
-    Nan::SetPrototypeMethod(temp, "getRow", GetRow);
     Nan::SetPrototypeMethod(temp, "getRows", GetRows);
 
     Nan::SetAccessor(temp->InstanceTemplate(),
@@ -129,7 +128,6 @@ Local<Object> njsResultSet::CreateFromBaton(njsBaton *baton)
     resultSet->outFormat = baton->outFormat;
     resultSet->numQueryVars = baton->numQueryVars;
     resultSet->queryVars = baton->queryVars;
-    resultSet->fetchArraySize = baton->fetchArraySize;
     baton->queryVars = NULL;
     resultSet->activeBaton = NULL;
     resultSet->jsConnection.Reset(baton->jsCallingObj);
@@ -165,7 +163,6 @@ bool njsResultSet::CreateFromRefCursor(njsBaton *baton, dpiStmt *dpiStmtHandle,
     resultSet->activeBaton = NULL;
     resultSet->queryVars = queryVars;
     resultSet->numQueryVars = numQueryVars;
-    resultSet->fetchArraySize = baton->fetchArraySize;
     value = scope.Escape(obj);
     return true;
 }
@@ -230,30 +227,6 @@ NAN_SETTER(njsResultSet::SetMetaData)
 
 
 //-----------------------------------------------------------------------------
-// njsResultSet::GetRow()
-//   Get a row from the result set.
-//
-// PARAMETERS
-//   - JS callback which will receive (error, row)
-//-----------------------------------------------------------------------------
-NAN_METHOD(njsResultSet::GetRow)
-{
-    njsResultSet *resultSet;
-    njsBaton *baton;
-
-    resultSet = (njsResultSet*) ValidateArgs(info, 1, 1);
-    if (!resultSet)
-        return;
-    baton = resultSet->CreateBaton(info);
-    if (!baton)
-        return;
-    baton->maxRows = 1;
-    baton->fetchMultipleRows = false;
-    resultSet->GetRowsCommon(baton);
-}
-
-
-//-----------------------------------------------------------------------------
 // njsResultSet::GetRows()
 //   Get a number of rows from the result set.
 //
@@ -280,30 +253,19 @@ NAN_METHOD(njsResultSet::GetRows)
     baton = resultSet->CreateBaton(info);
     if (!baton)
         return;
-    baton->maxRows = maxRows;
-    baton->fetchMultipleRows = true;
-    resultSet->GetRowsCommon(baton);
-}
-
-
-//-----------------------------------------------------------------------------
-// ResulSet::GetRowsCommon()
-//   Common method for getting rows from the result set.
-//-----------------------------------------------------------------------------
-void njsResultSet::GetRowsCommon(njsBaton *baton)
-{
-    if (activeBaton)
+    if (resultSet->activeBaton)
         baton->error = njsMessages::Get(errBusyResultSet);
     else if (baton->error.empty()) {
-        activeBaton = baton;
-        baton->SetDPIStmtHandle(dpiStmtHandle);
-        baton->SetDPIConnHandle(dpiConnHandle);
-        baton->outFormat = outFormat;
-        baton->queryVars = queryVars;
-        baton->numQueryVars = numQueryVars;
+        resultSet->activeBaton = baton;
+        baton->SetDPIStmtHandle(resultSet->dpiStmtHandle);
+        baton->SetDPIConnHandle(resultSet->dpiConnHandle);
+        baton->outFormat = resultSet->outFormat;
+        baton->queryVars = resultSet->queryVars;
+        baton->numQueryVars = resultSet->numQueryVars;
         baton->keepQueryInfo = true;
-        baton->jsOracledb.Reset(jsOracledb);
-        baton->fetchArraySize = fetchArraySize;
+        baton->jsOracledb.Reset(resultSet->jsOracledb);
+        baton->maxRows = maxRows;
+        baton->fetchArraySize = maxRows;
     }
     baton->QueueWork("GetRowsCommon", Async_GetRows, Async_AfterGetRows, 2);
 }
@@ -326,35 +288,11 @@ void njsResultSet::Async_GetRows(njsBaton *baton)
 void njsResultSet::Async_AfterGetRows(njsBaton *baton, Local<Value> argv[])
 {
     Nan::EscapableHandleScope scope;
-    Local<Function> callback;
-    Local<Object> callingObj;
-    njsResultSet *resultSet;
-    njsBaton *newBaton;
 
-    // transform the rows into Javascript objects
     Local<Object> rows;
     if (!njsConnection::GetRows(baton, rows))
         return;
-
-    // if more rows are needed (and available) requeue the work
-    if (baton->rowsFetched < baton->maxRows) {
-        callback = Nan::New<Function>(baton->jsCallback);
-        callingObj = Nan::New(baton->jsCallingObj);
-        newBaton = new njsBaton(callback, callingObj);
-        baton->jsCallback.Reset();
-        newBaton->maxRows = baton->maxRows - baton->rowsFetched;
-        newBaton->fetchMultipleRows = true;
-        newBaton->jsRows.Reset(rows);
-        resultSet = (njsResultSet*) baton->callingObj;
-        resultSet->activeBaton = NULL;
-        resultSet->GetRowsCommon(newBaton);
-
-    // otherwise, set the arguments that will be passed to the callback
-    } else {
-        if (baton->fetchMultipleRows)
-            argv[1] = scope.Escape(rows);
-        else argv[1] = scope.Escape(rows->Get(0));
-    }
+    argv[1] = scope.Escape(rows);
 }
 
 

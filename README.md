@@ -5,83 +5,93 @@
 The node-oracledb add-on for Node.js powers high performance Oracle
 Database applications.
 
-Use node-oracledb to connect Node.js 4, 6, and 8 to Oracle Database.
+Use node-oracledb to connect Node.js 4, 6, 8 and 9 to Oracle Database.
 
 The add-on is stable, well documented, and has a comprehensive test suite.
 
 The node-oracledb project is open source and maintained by Oracle Corp.  The home page is on the
-[Oracle Technology Network](http://www.oracle.com/technetwork/database/database-technologies/scripting-languages/node_js/).
+[Oracle Technology Network][1].
 
 ### Node-oracledb supports:
 
-- [Async/Await](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#asyncawaitoverview), [Promises](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#promiseoverview), [Callbacks](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#intro) and [Streams](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#querystream)
-- [SQL and PL/SQL execution](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#sqlexecution)
-- [REF CURSORs](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#refcursors)
-- [Large Objects: CLOBs and BLOBs as Streams or Strings and Buffers](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#lobhandling)
-- [Oracle Database 12c JSON datatype](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#jsondatatype)
-- [Query results as JavaScript objects or arrays](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#queryoutputformats)
-- [Smart mapping between JavaScript and Oracle types with manual override available](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#typemap)
-- [Data binding using JavaScript types, objects or arrays](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#bind)
-- [Transaction Management](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#transactionmgt)
-- [Inbuilt Connection Pool with Queueing, Aliasing and Liveness checking](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#connpooling)
-- [Database Resident Connection Pooling (DRCP)](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#drcp)
-- [External Authentication](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#extauth)
-- [Row Prefetching](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#rowprefetching)
-- [Statement Caching](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#stmtcache)
-- [Client Result Caching](https://docs.oracle.com/database/122/ADFNS/performance-and-scalability.htm#ADFNS464)
-- [End-to-end Tracing, Mid-tier Authentication, and Auditing](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#endtoend)
+- [Async/Await][2], [Promises][3], [Callbacks][4] and [Streams][5]
+- [SQL and PL/SQL execution][6]
+- [REF CURSORs][7]
+- [Large Objects: CLOBs and BLOBs as Streams or Strings and Buffers][8]
+- [Oracle Database 12c JSON datatype][9]
+- [Query results as JavaScript objects or arrays][10]
+- [Smart mapping between JavaScript and Oracle types with manual override available][11]
+- [Data binding using JavaScript types, objects or arrays][12]
+- [Transaction Management][13]
+- [Inbuilt Connection Pool with Queueing, Aliasing and Liveness checking][14]
+- [Database Resident Connection Pooling (DRCP)][15]
+- [External Authentication][16]
+- [Array Fetches][17]
+- [Statement Caching][18]
+- [Client Result Caching][19]
+- [End-to-end Tracing, Mid-tier Authentication, and Auditing][20]
 - Oracle High Availability Features
-  - [Fast Application Notification (FAN)](https://docs.oracle.com/database/122/ADFNS/high-availability.htm#ADFNS538)
-  - [Runtime Load Balancing (RLB)](https://docs.oracle.com/database/122/ADFNS/connection_strategies.htm#ADFNS515)
-  - [Transparent Application Failover (TAF)](https://docs.oracle.com/database/122/ADFNS/high-availability.htm#ADFNS-GUID-96599425-9BDA-483C-9BA2-4A4D13013A37)
+  - [Fast Application Notification (FAN)][21]
+  - [Runtime Load Balancing (RLB)][22]
+  - [Transparent Application Failover (TAF)][23]
 
 We are actively working on supporting the best Oracle Database
-features, and on functionality requests from
-[users involved in the project](https://github.com/oracle/node-oracledb/issues).
+features, and on functionality requests from [users involved in the
+project][24].
 
 ## <a name="installation"></a> Installation
 
-Prerequisites:
+- Run `npm install oracledb` to install from the [npm registry][25].
 
-- [Python 2.7](https://www.python.org/downloads/)
-- C Compiler with support for C++ 11 (Xcode, gcc, Visual Studio or similar)
-- The client libraries for Oracle Database 12.2, 12.1 or 11.2 in your OS library search path, such as `PATH` on Windows, or `LD_LIBRARY_PATH` on Linux, or in `~/lib` on macOS. On Windows, Visual Studio [redistributables are required](https://github.com/oracle/node-oracledb/tree/master/INSTALL.md#winprereqs). If your database is remote, use the client libraries from the free [Oracle Instant Client](http://www.oracle.com/technetwork/database/features/instant-client/index-100365.html) "Basic" package.  Or use the client libraries from a locally installed database such as the free [Oracle XE](http://www.oracle.com/technetwork/database/database-technologies/express-edition/overview/index.html) release.  Version 12.2 client libraries can connect to Oracle Database 11.2 or greater. Version 12.1 client libraries can connect to Oracle Database 10.2 or greater. Version 11.2 client libraries can connect to Oracle Database 9.2 or greater.
+- Add Oracle 12.2, 12.1 or 11.2 client libraries to your OS library
+  search path, such as `PATH` on Windows, or `LD_LIBRARY_PATH` on
+  Linux, or in `~/lib` on macOS.
 
-Run `npm install oracledb` to install from the [npm registry](https://www.npmjs.com/package/oracledb).
+  - If your database is remote, then download and unzip the client
+    libraries from the free [Oracle Instant Client][26] "Basic" or
+    "Basic Light" package for your operating system architecture.  On
+    Windows, [Visual Studio redistributables][27] are also required.
 
-See [INSTALL](https://github.com/oracle/node-oracledb/tree/master/INSTALL.md) for details.
+  - Alternatively use the client libraries already available in a
+    locally installed database such as the free [Oracle XE][28]
+    release.
+
+  Version 12.2 client libraries can connect to Oracle Database 11.2 or
+  greater. Version 12.1 client libraries can connect to Oracle Database
+  10.2 or greater. Version 11.2 client libraries can connect to Oracle
+  Database 9.2 or greater.
+
+See [INSTALL][29] for details.
 
 ## <a name="examples"></a> Examples
 
-See the
-[examples](https://github.com/oracle/node-oracledb/tree/master/examples) directory.
-Start
-with
-[examples/select1.js](https://github.com/oracle/node-oracledb/blob/master/examples/select1.js#L35).
+See the [examples][30] directory.  Start with
+[examples/select1.js][31].
 
 ## <a name="doc"></a> Documentation
 
-See [Documentation for the Oracle Database Node.js Add-on](https://github.com/oracle/node-oracledb/tree/master/doc/api.md).
+See [Documentation for the Oracle Database Node.js Add-on][32].
 
 ## <a name="help"></a> Help
 
-Issues and questions can be raised with the node-oracledb community on [GitHub](https://github.com/oracle/node-oracledb/issues).
+Issues and questions can be raised with the node-oracledb community on
+[GitHub][24].
 
 ## <a name="changes"></a> Changes
 
-See [CHANGELOG](https://github.com/oracle/node-oracledb/tree/master/CHANGELOG.md).
+See [CHANGELOG][33].
 
 ## <a name="testing"></a> Tests
 
-To run the test suite see [test/README](https://github.com/oracle/node-oracledb/tree/master/test/README.md).
+To run the test suite see [test/README][34].
 
 ## <a name="contrib"></a> Contributing
 
-Node-oracledb is an open source project. See
-[CONTRIBUTING](https://github.com/oracle/node-oracledb/tree/master/CONTRIBUTING.md)
-for details.
+Node-oracledb is an open source project. See [CONTRIBUTING][35] for
+details.
 
-Oracle gratefully acknowledges the contributions to node-oracledb that have been made by the community.
+Oracle gratefully acknowledges the contributions to node-oracledb that
+have been made by the community.
 
 ## <a name="license"></a> License
 
@@ -91,11 +101,49 @@ You may not use the identified files except in compliance with the Apache
 License, Version 2.0 (the "License.")
 
 You may obtain a copy of the License at
-http://www.apache.org/licenses/LICENSE-2.0.
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+[http://www.apache.org/licenses/LICENSE-2.0][36].  Unless required by
+applicable law or agreed to in writing, software distributed under the
+License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+CONDITIONS OF ANY KIND, either express or implied.
 
 See the License for the specific language governing permissions and
 limitations under the License.
+
+
+
+[1]: http://www.oracle.com/technetwork/database/database-technologies/scripting-languages/node_js/
+[2]: https://github.com/oracle/node-oracledb/blob/master/doc/api.md#asyncawaitoverview
+[3]: https://github.com/oracle/node-oracledb/blob/master/doc/api.md#promiseoverview
+[4]: https://github.com/oracle/node-oracledb/blob/master/doc/api.md#intro
+[5]: https://github.com/oracle/node-oracledb/blob/master/doc/api.md#querystream
+[6]: https://github.com/oracle/node-oracledb/blob/master/doc/api.md#sqlexecution
+[7]: https://github.com/oracle/node-oracledb/blob/master/doc/api.md#refcursors
+[8]: https://github.com/oracle/node-oracledb/blob/master/doc/api.md#lobhandling
+[9]: https://github.com/oracle/node-oracledb/blob/master/doc/api.md#jsondatatype
+[10]: https://github.com/oracle/node-oracledb/blob/master/doc/api.md#queryoutputformats
+[11]: https://github.com/oracle/node-oracledb/blob/master/doc/api.md#typemap
+[12]: https://github.com/oracle/node-oracledb/blob/master/doc/api.md#bind
+[13]: https://github.com/oracle/node-oracledb/blob/master/doc/api.md#transactionmgt
+[14]: https://github.com/oracle/node-oracledb/blob/master/doc/api.md#connpooling
+[15]: https://github.com/oracle/node-oracledb/blob/master/doc/api.md#drcp
+[16]: https://github.com/oracle/node-oracledb/blob/master/doc/api.md#extauth
+[17]: https://github.com/oracle/node-oracledb/blob/master/doc/api.md#propdbfetcharraysize
+[18]: https://github.com/oracle/node-oracledb/blob/master/doc/api.md#stmtcache
+[19]: https://docs.oracle.com/database/122/ADFNS/performance-and-scalability.htm#ADFNS464
+[20]: https://github.com/oracle/node-oracledb/blob/master/doc/api.md#endtoend
+[21]: https://docs.oracle.com/database/122/ADFNS/high-availability.htm#ADFNS538
+[22]: https://docs.oracle.com/database/122/ADFNS/connection_strategies.htm#ADFNS515
+[23]: https://docs.oracle.com/database/122/ADFNS/high-availability.htm#ADFNS-GUID-96599425-9BDA-483C-9BA2-4A4D13013A37
+[24]: https://github.com/oracle/node-oracledb/issues
+[25]: https://www.npmjs.com/package/oracledb
+[26]: http://www.oracle.com/technetwork/database/features/instant-client/index-100365.html
+[27]: https://github.com/oracle/node-oracledb/blob/master/INSTALL.md#winredists
+[28]: http://www.oracle.com/technetwork/database/database-technologies/express-edition/overview/index.html
+[29]: https://github.com/oracle/node-oracledb/blob/master/INSTALL.md
+[30]: https://github.com/oracle/node-oracledb/blob/master/examples
+[31]: https://github.com/oracle/node-oracledb/blob/master/examples/select1.js#L35
+[32]: https://github.com/oracle/node-oracledb/blob/master/doc/api.md
+[33]: https://github.com/oracle/node-oracledb/blob/master/CHANGELOG.md
+[34]: https://github.com/oracle/node-oracledb/blob/master/test/README.md
+[35]: https://github.com/oracle/node-oracledb/blob/master/CONTRIBUTING.md
+[36]: http://www.apache.org/licenses/LICENSE-2.0

@@ -44,7 +44,7 @@ The [*node-oracledb*][1] add-on for Node.js powers high performance Oracle Datab
 The steps below create a Node.js installation for testing.  Adjust the
 steps for your environment.
 
-This node-oracledb release has been tested with Node 4, 6 and 8 on
+This node-oracledb release has been tested with Node 4, 6, 8 and 9 on
 64-bit Oracle Linux, Windows and macOS.  The add-on can also build on
 some 32-bit Linux, 32-bit Windows, Solaris and AIX environments, but
 these architectures have not been fully tested.
@@ -54,7 +54,7 @@ these architectures have not been fully tested.
 In node-oracledb 2.x, pre-built binaries are available as a
 convenience for common architectures.  Note the operating systems and
 versions of Node.js that the binaries are compatibile with will change
-as the Node.js project evolves, and are not guaranteed.
+as the Node.js project evolves, and are not guaranteed to stay the same.
 
 Building from source code has improved significantly in 2.x The Oracle
 header files and node-oracledb environment variables `OCI_INC_DIR` and
@@ -69,6 +69,10 @@ Node-oracledb 2.x binaries will run with any of the Oracle client
 11.2, 12.1 or 12.2 libraries without needing recompilation.  Note the
 available Oracle functionality will vary with different Oracle Client
 versions.
+
+See the [CHANGELOG][43] and [Migrating from node-oracledb 1.13 to
+node-oracledb 2.0][42] for more information about node-oracledb
+version 2.
 
 ## <a name="quickstart"></a> 2. Quick Start Node-oracledb Installation
 
@@ -1604,3 +1608,5 @@ If `require('oracledb')` fails:
 [39]: https://asktom.oracle.com/
 [40]: https://github.com/oracle/node-oracledb/tags
 [41]: https://github.com/oracle/node-oracledb/releases
+[42]: https://github.com/oracle/node-oracledb/blob/master/doc/api.md#migratev1v2
+[43]: https://github.com/oracle/node-oracledb/blob/master/CHANGELOG.md

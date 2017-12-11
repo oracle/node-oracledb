@@ -32,18 +32,6 @@ var dbConfig = require('./dbconfig.js');
 // Number of rows to return from each call to getRows()
 var numRows = 10;
 
-// fetchArraySize can be adjusted to tune data transfer from the
-// Oracle Database to node-oracledb.  The value of fetchArraySize does
-// not affect how, or when, rows are returned by node-oracledb to the
-// application.  Buffering is handled by node-oracledb.  Benchmark to
-// choose the optimal size for each application or query.
-//
-// For small values of numRows, use the same value for fetchArraySize.
-// For large values of numRows use a factor of that value for
-// fetchArraySize.
-
-oracledb.fetchArraySize = 10;
-
 oracledb.getConnection(
   {
     user          : dbConfig.user,
@@ -61,7 +49,6 @@ oracledb.getConnection(
       [], // no bind variables
       {
         resultSet: true        // return a ResultSet.  Default is false
-        //, fetchArraySize: 10 // this can also be set per statement
       },
       function(err, result)
       {

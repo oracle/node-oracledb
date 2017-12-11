@@ -84,7 +84,6 @@ private:
     static NAN_METHOD(New);
 
     // Get Rows Methods
-    static NAN_METHOD(GetRow);
     static NAN_METHOD(GetRows);
     static void Async_GetRows(njsBaton *baton);
     static void Async_AfterGetRows(njsBaton *baton, Local<Value> argv[]);
@@ -100,13 +99,9 @@ private:
     // Define Setter Accessors to properties
     static NAN_SETTER(SetMetaData);
 
-    // internal methods
-    void GetRowsCommon(njsBaton* baton);
-
     dpiStmt *dpiStmtHandle;
     dpiConn *dpiConnHandle;
     uint32_t numQueryVars;
-    uint32_t fetchArraySize;
     njsVariable *queryVars;
     uint32_t outFormat;
     bool extendedMetaData;

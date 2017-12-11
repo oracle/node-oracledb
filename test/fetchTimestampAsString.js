@@ -224,7 +224,7 @@ describe('19. fetchTimestampAsString.js', function() {
     var defaultLimit = oracledb.maxRows;
 
     before(function(done) {
-      should.strictEqual(defaultLimit, 100);
+      should.strictEqual(defaultLimit, 0);
       assist.setUp4sql(connection, tableName, inData, done);
     });
 

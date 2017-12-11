@@ -86,7 +86,7 @@ using namespace v8;
                                       (NJS_NODE_ORACLEDB_PATCH) )
 
 // default values
-#define NJS_MAX_ROWS                    100
+#define NJS_MAX_ROWS                    0
 #define NJS_STMT_CACHE_SIZE             30
 #define NJS_POOL_MIN                    0
 #define NJS_POOL_MAX                    4

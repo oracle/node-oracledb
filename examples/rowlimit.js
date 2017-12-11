@@ -25,13 +25,11 @@
  *   Scripts to create the HR schema can be found at:
  *   https://github.com/oracle/db-sample-schemas/releases
  *
- *   By default, node-oracledb has a maxRows attribute that limits the
- *   number of records fetched from a query to 100.  Although
- *   adjusting maxRows can be used to control the number of rows
- *   available to the application, it is more efficient for the
+ *   Although adjusting maxRows can be used to control the number of
+ *   rows available to the application, it is more efficient for the
  *   database if the SQL query syntax limits the number of rows
  *   returned from the database.  Use maxRows only to prevent badly
- *   coded queries from consuming too many Node.js resources.
+ *   coded queries from over-consuming Node.js resources.
  *
  *****************************************************************************/
 
@@ -45,7 +43,7 @@ var mymaxnumrows = 6;  // number of rows to fetch
 // They can also be set or overridden at the individual execute() call level
 //
 // This script sets maxRows in the execute() call but it could be set here instead
-// oracledb.maxRows = 150;   // Note the default value is 100 and EMPLOYEES has 107 rows
+// oracledb.maxRows = 150;   // Note the default value is 0, meaning unlimited
 
 oracledb.getConnection(
   {

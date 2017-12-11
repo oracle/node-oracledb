@@ -226,7 +226,7 @@ describe('1. connection.js', function(){
       );
     });
 
-    it('1.2.1 by default, the number is 100', function(done){
+    it.skip('1.2.1 by default, the number is 100', function(done){
       var defaultLimit = oracledb.maxRows;
       defaultLimit.should.be.exactly(100);
 
@@ -258,7 +258,7 @@ describe('1. connection.js', function(){
       );
     });
 
-    it('1.2.3 can not set maxRows to be 0', function(done){
+    it.skip('1.2.3 can not set maxRows to be 0', function(done){
       connection.should.be.ok();
       connection.execute(
         "SELECT * FROM nodb_conn_emp2 ORDER BY employee_id",

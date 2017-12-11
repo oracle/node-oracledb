@@ -278,7 +278,6 @@ public:
     bool getRS;
     bool autoCommit;
     bool extendedMetaData;
-    bool fetchMultipleRows;
     bool keepQueryInfo;
     bool isReturning;
     bool isPLSQL;
@@ -295,7 +294,7 @@ public:
 
     njsBaton(Local<Function> callback, Local<Object> callingObj) :
             dpiPoolHandle(NULL), dpiConnHandle(NULL), dpiStmtHandle(NULL),
-            dpiLobHandle(NULL), numQueryVars(0), queryVars(NULL),
+            dpiLobHandle(NULL), maxRows(0), numQueryVars(0), queryVars(NULL),
             numBindVars(0), bindVars(NULL), numFetchInfo(0), fetchInfo(NULL),
             numFetchAsStringTypes(0), fetchAsStringTypes(NULL),
             numFetchAsBufferTypes(0), fetchAsBufferTypes(NULL),

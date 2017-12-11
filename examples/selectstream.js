@@ -48,7 +48,7 @@ oracledb.getConnection(
     var stream = connection.queryStream(
       'SELECT first_name, last_name FROM employees ORDER BY employee_id',
       [],  // no binds
-      { fetchArraySize: 100 }  // internal buffer size for performance tuning
+      { fetchArraySize: 150 }  // internal buffer size for performance tuning
     );
 
     stream.on('error', function (error) {

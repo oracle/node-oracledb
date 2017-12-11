@@ -26,7 +26,7 @@
  *   Scripts to create the HR schema can be found at:
  *   https://github.com/oracle/db-sample-schemas
  *
- *  *****************************************************************************/
+ ******************************************************************************/
 
 var async = require('async');
 var oracledb = require('oracledb');
@@ -36,20 +36,13 @@ var dbConfig = require('./dbconfig.js');
 // executions.  They can also be set or overridden at the individual
 // execute() call level
 
-// Use maxRows to limit the number of rows returned.  Rows after this
-// will not be fetched.  No error will occur.  It is prefereable to
-// use a row limiting SQL clause such as OFFSET / FETCH so the
-// database does not process extra rows unnecessarily.
+// fetchArraySize can be adjusted to tune the internal data transfer
+// from the Oracle Database to node-oracledb.  The value does not
+// affect how, or when, rows are returned by node-oracledb to the
+// application.  Buffering is handled internally by node-oracledb.
+// Benchmark to choose the optimal size for each application or query.
 //
-// oracledb.maxRows = 100;  // default value is 100
-
-// fetchArraySize can be adjusted to tune data transfer from the
-// Oracle Database to node-oracledb.  The value of fetchArraySize does
-// not affect how, or when, rows are returned by node-oracledb to the
-// application.  Buffering is handled by node-oracledb.  Benchmark to
-// choose the optimal size for each application or query.
-//
-//oracledb.fetchArraySize = 100;  // default value is 100
+// oracledb.fetchArraySize = 100;  // default value is 100
 
 // This script sets outFormat in the execute() call but it could be set here instead:
 //

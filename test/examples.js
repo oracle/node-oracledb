@@ -489,7 +489,7 @@ describe('3. examples.js', function(){
       );
     });
 
-    it('3.6.1 by default, the number is 100', function(done){
+    it.skip('3.6.1 by default, the number is 100', function(done){
       var defaultLimit = oracledb.maxRows;
       defaultLimit.should.be.exactly(100);
 

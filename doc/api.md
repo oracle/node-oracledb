@@ -142,11 +142,10 @@ limitations under the License.
   - 8.6 [Securely Encrypting Network Traffic to Oracle Database](#securenetwork)
   - 8.7 [Connections and High Availability](#connectionha)
   - 8.8 [Optional Client Configuration Files](#tnsadmin)
-
 9. [SQL Execution](#sqlexecution)
   - 9.1 [SELECT Statements](#select)
-     - 9.1.1 [Fetching Rows](#fetchingrows)
-     - 9.1.2 [Working with Result Sets](#resultsethandling)
+     - 9.1.1 [Fetching Rows with Direct Fetches](#fetchingrows)
+     - 9.1.2 [Fetching Rows with Result Sets](#resultsethandling)
      - 9.1.3 [Query Streaming](#streamingresults)
      - 9.1.4 [Query Output Formats](#queryoutputformats)
      - 9.1.5 [Query Column Metadata](#querymeta)
@@ -580,22 +579,33 @@ application.
 
 The default value is 100.
 
-The property is used for ResultSet and non-ResultSet queries, and also
-for query streaming.
+The property is used during the default [direct
+fetches](#fetchingrows), during ResultSet [`getRow()`](#getrow) calls,
+and for [`queryStream()`](#querystream).  It is not used for
+[`getRows()`](#getrows).
 
 Increasing this value reduces the number of round trips to the
-database but increases memory usage.  For queries that return a large
-number of rows, higher values of `fetchArraySize` may give better
-performance.  For queries that only return a few rows, reduce the
-value of `fetchArraySize` to minimize the amount of memory management
-during data fetches.
+database but increases memory usage for each data fetch.  For queries
+that return a large number of rows, higher values of `fetchArraySize`
+may give better performance.  For queries that only return a few rows,
+reduce the value of `fetchArraySize` to minimize the amount of memory
+management during data fetches.  JavaScript memory fragmentation may
+occur in some cases, see [Fetching Rows with Direct
+Fetches](#fetchingrows).
 
-For direct queries (with `execute()` option [`resultSet:
+For direct fetches (those using `execute()` option [`resultSet:
 false`](#propexecresultset)), the internal buffer size will be based
 on the lesser of [`maxRows`](#propdbmaxrows) and `fetchArraySize`.
 
-In node-oracledb version 2, `oracledb.fetchArraySize` replaces
+The property was introduced in node-oracledb version 2.  It replaces
 [`prefetchRows`](#propdbprefetchrows).
+
+##### Example
+
+```javascript
+var oracledb = require('oracledb');
+oracledb.fetchArraySize = 100;
+```
 
 #### <a name="propdbfetchasbuffer"></a> 3.2.6 `oracledb.fetchAsBuffer`
 
@@ -699,9 +709,9 @@ Number maxRows
 The maximum number of rows that are fetched by a query with
 [`connection.execute()`](#execute) when *not* using a
 [ResultSet](#resultsetclass).  Rows beyond this limit are not fetched
-from the database.
+from the database.  A value of 0 means there is no limit.
 
-The default value is 100.
+The default value is 0, meaning unlimited.
 
 This property may be overridden in an [`execute()`](#executeoptions)
 call.
@@ -716,19 +726,15 @@ predicted, it is recommended to use a [ResultSet](#resultsetclass) or
 [`queryStream()`](#querystream).  This allows applications to process
 rows in smaller chunks or individually, preventing the Node.js memory
 limit being exceeded or query results being unexpectedly truncated by
-the `maxRows` limit.
+a `maxRows` limit.
 
-Note a future version of node-oracle may change the default `maxRows`
-value to be unlimited.  If you are using the current default `maxRows`
-value to truncate the result set to 100 rows, you should use [OFFSET /
-FETCH](#pagingdata) or explicitly set `maxRows` to 100 in your
-application.
+In version 1, the default value was 100.
 
 ##### Example
 
 ```javascript
 var oracledb = require('oracledb');
-oracledb.maxRows = 100;
+oracledb.maxRows = 0;
 ```
 
 #### <a name="propdboracleClientVersion"></a> 3.2.10 `oracledb.oracleClientVersion`
@@ -1976,7 +1982,7 @@ Object resultSet
 For `SELECT` statements when the [`resultSet`](#executeoptions) option
 is *true*, use the `resultSet` object to fetch rows.
 See [ResultSet Class](#resultsetclass)
-and [Working with Result Sets](#resultsethandling).
+and [Fetching Rows with Result Sets](#resultsethandling).
 
 When using this option, [`resultSet.close()`](#close) must be called
 when the ResultSet is no longer needed.  This is true whether or not
@@ -1988,16 +1994,19 @@ rows have been fetched from the ResultSet.
 Array rows
 ```
 
-For `SELECT` statements where the [`resultSet`](#executeoptions) option is
-*false* or unspecified, `rows` contains an array of fetched rows.  It
-will be NULL if there is an error or the SQL statement was not a
-SELECT statement.  By default, the rows are in an array of column
-value arrays, but this can be changed to arrays of objects by setting
-[`outFormat`](#propdboutformat) to `oracledb.OBJECT`.  If a single row is
-fetched, then `rows` is an array that contains one single row.  The
-number of rows returned is limited to the `maxRows` configuration
-property of the *Oracledb* object, although this may be overridden in
-any `execute()` call.
+For `SELECT` statements using [direct fetches](#fetchingrows), `rows`
+contains an array of fetched rows.  It will be NULL if there is an
+error or the SQL statement was not a SELECT statement.  By default,
+the rows are in an array of column value arrays, but this can be
+changed to arrays of objects by setting
+[`outFormat`](#propdboutformat) to `oracledb.OBJECT`.  If a single row
+is fetched, then `rows` is an array that contains one single row.
+
+The number of rows returned is limited by
+[`oracledb.maxRows`](#propdbmaxrows) or the
+[`maxRows`](#propexecmaxrows) option in an `execute()` call.  If
+`maxRows` is 0, then the number of rows is limited by Node.js memory
+constraints.
 
 ###### <a name="execrowsaffected"></a> 4.2.5.4.5 `rowsAffected`
 
@@ -2425,8 +2434,8 @@ Streams.  ResultSets enable applications to process very large data
 sets.
 
 ResultSets should also be used where the number of query rows cannot
-be predicted and may be larger than a sensible
-[`maxRows`](#propdbmaxrows) size.
+be predicted and may be larger than Node.js can handle in a single
+array.
 
 A *ResultSet* object is obtained by setting `resultSet: true` in the
 `options` parameter of the *Connection* [`execute()`](#execute) method
@@ -2434,7 +2443,7 @@ when executing a query.  A *ResultSet* is also returned to
 node-oracledb when binding as type [`oracledb.CURSOR`](#oracledbconstantsnodbtype) to a
 PL/SQL REF CURSOR bind parameter.
 
-See [Working with Result Sets](#resultsethandling) for more information on ResultSets.
+See [Fetching Rows with Result Sets](#resultsethandling) for more information on ResultSets.
 
 ### <a name="resultsetproperties"></a> 7.1 ResultSet Properties
 
@@ -2522,18 +2531,15 @@ promise = getRows(Number numRows);
 
 ##### Description
 
-This call fetches `numRows` rows of the ResultSet as an object or an array of column values, depending on the value of [outFormat](#propdboutformat).
+This call fetches `numRows` rows of the ResultSet as an object or an
+array of column values, depending on the value of [outFormat](#propdboutformat).
 
 At the end of fetching, the ResultSet should be freed by calling [`close()`](#close).
 
-Performance of `getRows()` can be tuned by adjusting the value of
-`numRows` and [`oracledb.fetchArraySize`](#propdbfetcharraysize) (or
-equivalent `execute()` option
-[`fetchArraySize`](#propexecfetcharraysize)).  For any given value of
-`numRows`, node-oracledb overheads will be reduced when the applicable
-`fetchArraySize` also has the same value.  However this may not be
-optimal for data transfers from Oracle Database.  If `numRows` is big,
-consider making `fetchArraySize` a factor of `numRows`.
+Different values of `numRows` may alter the time needed for fetching
+data from Oracle Database.  The value of
+[`fetchArraySize`](#propdbfetcharraysize) has no effect on `getRows()`
+performance or internal buffering.
 
 #### <a name="toquerystream"></a> 7.2.4 `resultset.toQueryStream()`
 
@@ -2935,7 +2941,7 @@ oracledb.createPool (
   },
   function(err, pool) {
     console.log(pool.poolAlias); // 'default'
-	. . . // use pool
+    . . . // use pool
   }
 );
 ```
@@ -3422,12 +3428,11 @@ release the connection.
 
 ### <a name="select"></a> 9.1 SELECT Statements
 
-#### <a name="fetchingrows"></a> 9.1.1 Fetching Rows
+#### <a name="fetchingrows"></a> 9.1.1 Fetching Rows with Direct Fetches
 
-By default, query results are returned all at once in the `rows`
-property of `result` parameter to the *Connection*
-[`execute()`](#execute) callback.  The number of rows returned is
-restricted to [`maxRows`](#propdbmaxrows):
+By default, queries are handled as 'direct fetches', meaning all
+results are returned in the callback [`result.rows`](#execrows)
+property:
 
 ```javascript
     connection.execute(
@@ -3435,7 +3440,7 @@ restricted to [`maxRows`](#propdbmaxrows):
        FROM departments
        WHERE department_id = :did`,
       [180],
-      { maxRows: 10 },  // a maximum of 10 rows will be returned.  Default limit is 100
+      { maxRows: 10 },  // a maximum of 10 rows will be returned
       function(err, result)
       {
         if (err) { console.error(err.message); return; }
@@ -3443,22 +3448,35 @@ restricted to [`maxRows`](#propdbmaxrows):
       });
 ```
 
-Any rows beyond the `maxRows` limit are not returned.
+Any rows beyond the `maxRows` limit are not returned.  If `maxRows` is
+0, then the number of rows is only limited by Node.js memory.
 
 To improve database efficiency, SQL queries should use a row limiting
 clause like [OFFSET / FETCH](#pagingdata) or equivalent. The `maxRows`
 property can be used to stop badly coded queries from returning
 unexpectedly large numbers of rows.
 
+Internally, rows are fetched from Oracle Database in batches.  The
+internal batch size is based on the lesser of `fetchArraySize` and
+`maxRows`.  Each batch is concatenated into the array returned to the
+application.
+
 For queries expected to return a small number of rows, reduce
 `maxRows` or [`fetchArraySize`](#propexecfetcharraysize) to reduce
-internal memory overhead by node-oracledb.  The lesser of the two
-values is used for the internal buffer size calculation.
+internal memory overhead by node-oracledb.
 
-Note a future version of node-oracle may change the default `maxRows`
-value to be unlimited.  If you are using the current default `maxRows`
-value to truncate the result set to 100 rows, you should explicitly
-set `maxRows` to 100 in your application.
+For direct fetches, JavaScript memory can become a limitation in two
+cases:
+
+- the absolute amount of data returned is simply too large for
+  JavaScript to hold in a single array.
+
+- the JavaScript heap can be exceeded, or become fragmented, due to
+  concatenation of the buffers of records fetched from the database.
+  To minimize this, use a `fetchArraySize` value determined by tuning.
+
+In both cases, use a [ResultSet](#resultsethandling) or [Query
+Stream](#streamingresults) instead of a direct fetch.
 
 #### <a name="resultsethandling"></a> 9.1.2 Working with Result Sets
 
@@ -3466,9 +3484,10 @@ When the number of query rows is relatively big, or can't be
 predicted, it is recommended to use a [ResultSet](#resultsetclass)
 with callbacks, as described in this section, or via query streaming,
 as described [later](#streamingresults).  This prevents query results
-being unexpectedly truncated by the [`maxRows`](#propdbmaxrows) limit.
-Otherwise, for queries that return a known small number of rows,
-non-ResultSet queries may have less overhead.
+being unexpectedly truncated by the [`maxRows`](#propdbmaxrows) limit,
+or exceeding Node.js memory constraints.  Otherwise, for queries that
+return a known small number of rows, non-ResultSet queries may have
+less overhead.
 
 A ResultSet is created when the `execute()` option property
 [`resultSet`](#executeoptions) is *true*.  ResultSet rows can be
@@ -3527,7 +3546,7 @@ function fetchOneRowFromRS(connection, resultSet)
 }
 ```
 
-It is generally more efficient to fetch multiple rows at a time using `getRows()1:
+To fetch multiple rows at a time, use `getRows()`:
 
 
 ```javascript
@@ -4098,7 +4117,7 @@ you may want to bind using `type: oracledb.STRING`.  Output would be:
 
 Query data is commonly broken into small sets for two reasons:
 
-- 'web pagination' that allows moving from one set of rows to a next,
+- 'Web pagination' that allows moving from one set of rows to a next,
   or previous, set.
 
 - Fetching of consectitive small sets of data for processing.  This
@@ -4135,16 +4154,17 @@ See [rowlimit.js][84].
 You can use a basic [`execute()`](#execute) or a
 [ResultSet](#resultsetclass), or [`queryStream()`](#querystream) with
 your query.  For basic `execute()` fetches, make sure that
-`oracledb.maxRows` is greater than the value bound to `:maxnumrows`.
+`oracledb.maxRows` is greater than the value bound to `:maxnumrows`,
+or set to 0 (meaning unlimited).
 
 In applications where the SQL query is not known in advance, this
 method sometimes involves appending the `OFFSET` clause to the 'real'
 user query. Be very careful to avoid SQL injection security issues.
 
 As an anti-example, another way to limit the number of rows returned
-involves setting `maxRows`.  However it is more efficient to let
-Oracle Database do the row selection in the SQL query and only return
-the exact number of rows required to node-oracledb.
+involves setting [`maxRows`](#propdbmaxrows).  However it is more
+efficient to let Oracle Database do the row selection in the SQL query
+and only return the exact number of rows required to node-oracledb.
 
 For Oracle Database 11g and earlier there are several alternative ways
 to limit the number of rows returned.  Refer to [Oracle Magazine][85]
@@ -4516,8 +4536,7 @@ connection.execute(
   . . .
 ```
 
-The query rows can be handled using a
-[ResultSet](#resultsethandling).
+The query rows can be handled using a [ResultSet](#resultsethandling).
 
 Remember to first enable output using `DBMS_OUTPUT.ENABLE(NULL)`.
 
@@ -6513,17 +6532,23 @@ When upgrading from node-oracledb version 1.13 to version 2.0:
   also replaces the overloaded use of `maxRows` for
   [`queryStream()`](#querystream).  To upgrade scripts:
 
-  - Replace `prefetchRows` with `fetchArraySize` and make sure all
-    values are greater than 0.
+  - Replace the property `prefetchRows` with `fetchArraySize` and make
+    sure all values are greater than 0.
 
   - Tune `fetchArraySize` instead of `maxRows` for `queryStream()`.
 
-  - Optionally tune `fetchArraySize` for non-ResultSet fetches.
+  - For [direct fetches](#fetchingrows), optionally tune
+    `fetchArraySize`.
 
-- For non-ResultSet fetches that rely on the default value of
-  [`maxRows`](#propdbmaxrows) to limit the number of rows returned, it
-  is recommended to use an [OFFSET / FETCH](#pagingdata) query clause,
-  or explicitly set `maxRows` to 100 for future portability.
+  - For [direct fetches](#fetchingrows), optionally replace enormously
+    over-sized `maxRows` values with 0, meaning an unlimited number of
+    rows can be returned.
+
+- For [direct fetches](#fetchingrows) that relied on the version 1
+  default value of [`maxRows`](#propdbmaxrows) to limit the number of
+  returned rows to 100, it is recommended to use an [OFFSET /
+  FETCH](#pagingdata) query clause.  Alternatively explicitly set
+  `maxRows` to 100.
 
 - Review and update code that checks for specific *NJS-XXX* or
   *DPI-XXX* error messages.

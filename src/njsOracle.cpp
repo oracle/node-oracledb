@@ -359,17 +359,8 @@ NAN_GETTER(njsOracledb::GetMaxRows)
 NAN_SETTER(njsOracledb::SetMaxRows)
 {
     njsOracledb *oracledb = (njsOracledb*) ValidateSetter(info);
-    if (!oracledb)
-        return;
-    unsigned int tempMaxRows;
-    if (!oracledb->SetPropUnsignedInt(value, &tempMaxRows, "maxRows"))
-        return;
-    if (tempMaxRows == 0) {
-        string errMsg = njsMessages::Get(errInvalidmaxRows);
-        Nan::ThrowError(errMsg.c_str());
-        return;
-    }
-    oracledb->maxRows = tempMaxRows;
+    if (oracledb)
+        oracledb->SetPropUnsignedInt(value, &oracledb->maxRows, "maxRows");
 }
 
 
