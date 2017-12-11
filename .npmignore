@@ -9,6 +9,8 @@ CONTRIBUTING.md
 /build
 /node_modules
 /oracle_private
+/package/*.gz
+/package/SHASUMS256.*
 oracledb-*.tgz
 staging-oracledb-*.tgz
 .npmignore
