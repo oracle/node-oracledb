@@ -32,7 +32,7 @@
 
 'use strict';
 
-const http = require('http');
+const http = require('http'); // Fails in old Node.js. Use Node 4+
 const https = require('https');
 const fs = require('fs');
 const url = require('url');
