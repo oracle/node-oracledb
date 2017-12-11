@@ -177,6 +177,8 @@
 - Empty arrays can now be used in PL/SQL Collection Associative Array
   (Index-by) binds.
 
+- `connection.createLob()` now uses OCI's underlying 'cache' mode.
+
 - Database errors no longer have an extra newline.
 
 - Upgraded NAN dependency from 2.5 to 2.6.
