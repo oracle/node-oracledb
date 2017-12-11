@@ -80,7 +80,7 @@ from source code:
 
 - Install a C Compiler with support for C++ 11 (Xcode, gcc 4.7, Visual Studio 2013, or similar)
 
-- Run `npm install oracle/node-oracledb.git#v2.0.14` (substitute your [desired tag][40]).
+- Run `npm install oracle/node-oracledb.git#v2.0.15` (substitute your [desired tag][40]).
 
 - Install [Oracle Instant Client][3] 12.2, 12.1 or 11.2. Put the
   libraries in your OS library search path, such as `PATH` on Windows,
@@ -231,10 +231,10 @@ If a pre-built node-oracledb binary is not installable, the binary can
 be built from source code.
 
 Locate the [GitHub tag][40] of the desired node-oracledb version, for
-example `v2.0.14`, and use it in the install command like:
+example `v2.0.15`, and use it in the install command like:
 
 ```
-npm install oracle/node-oracledb.git#v2.0.14
+npm install oracle/node-oracledb.git#v2.0.15
 ```
 
 *Note:* GCC 4.7 (or later) is required when building with Node.js 4 or
@@ -386,10 +386,10 @@ If a pre-built node-oracledb binary is not installable, the binary can
 be built from source code.
 
 Locate the [GitHub tag][40] of the desired node-oracledb version, for
-example `v2.0.14`, and use it in the install command like:
+example `v2.0.15`, and use it in the install command like:
 
 ```
-npm install oracle/node-oracledb.git#v2.0.14
+npm install oracle/node-oracledb.git#v2.0.15
 ```
 
 *Note:* GCC 4.7 (or later) is required when building with Node.js 4 or
@@ -542,10 +542,10 @@ If a pre-built node-oracledb binary is not installable, the binary can
 be built from source code.
 
 Locate the [GitHub tag][40] of the desired node-oracledb version, for
-example `v2.0.14`, and use it in the install command like:
+example `v2.0.15`, and use it in the install command like:
 
 ```
-npm install oracle/node-oracledb.git#v2.0.14
+npm install oracle/node-oracledb.git#v2.0.15
 ```
 
 *Note:* GCC 4.7 (or later) is required when building with Node.js 4 or
@@ -647,10 +647,10 @@ If a pre-built node-oracledb binary is not installable, the binary can
 be built from source code.
 
 Locate the [GitHub tag][40] of the desired node-oracledb version, for
-example `v2.0.14`, and use it in the install command like:
+example `v2.0.15`, and use it in the install command like:
 
 ```
-npm install oracle/node-oracledb.git#v2.0.14
+npm install oracle/node-oracledb.git#v2.0.15
 ```
 
 #### 3.5.4 Install the free Oracle Instant Client 'Basic' ZIP file
@@ -800,10 +800,10 @@ Alternatively you can open the 'Developer Command Prompt for Visual
 Studio' which has environment variables already configured.
 
 Locate the [GitHub tag][40] of the desired node-oracledb version, for
-example `v2.0.14`, and use it in the install command like:
+example `v2.0.15`, and use it in the install command like:
 
 ```
-npm install oracle/node-oracledb.git#v2.0.14
+npm install oracle/node-oracledb.git#v2.0.15
 ```
 
 #### 3.6.4 Install the free Oracle Instant Client ZIP
@@ -958,10 +958,10 @@ be built from source code.
   Studio' which has environment variables already configured.
 
 - Locate the [GitHub tag][40] of the desired node-oracledb version, for
-  example `v2.0.14`, and use it in the install command like:
+  example `v2.0.15`, and use it in the install command like:
 
   ```
-  npm install oracle/node-oracledb.git#v2.0.14
+  npm install oracle/node-oracledb.git#v2.0.15
   ```
 
 #### 3.7.4 The default Oracle Client configuration directory
@@ -1078,10 +1078,10 @@ export CC=gcc
 ```
 
 Locate the [GitHub tag][40] of the desired node-oracledb version, for
-example `v2.0.14`, and use it in the install command like:
+example `v2.0.15`, and use it in the install command like:
 
 ```
-npm install oracle/node-oracledb.git#v2.0.14
+npm install oracle/node-oracledb.git#v2.0.15
 ```
 
 #### 3.9.4 Install the free Oracle Instant Client 'Basic' ZIP file
@@ -1189,10 +1189,10 @@ export MAKE=gmake
 ```
 
 Locate the [GitHub tag][40] of the desired node-oracledb version, for
-example `v2.0.14`, and use it in the install command like:
+example `v2.0.15`, and use it in the install command like:
 
 ```
-npm install oracle/node-oracledb.git#v2.0.14
+npm install oracle/node-oracledb.git#v2.0.15
 ```
 
 #### 3.10.4 Install the free Oracle Instant Client 'Basic' ZIP file
@@ -1317,10 +1317,10 @@ of Node.js and operating system, you can install manually:
   [GitHub Release][41] page.
 
   Download the release's main node-oracledb package, for example
-  `oracledb-2.0.14.tgz`.
+  `oracledb-2.0.15.tgz`.
 
   Also download the appropriate binary package, for example
-  `oracledb-v2.0.14-node-v57-darwin-x64.gz`. To determine the correct
+  `oracledb-v2.0.15-node-v57-darwin-x64.gz`. To determine the correct
   binary package, find your Node.js module version, platform and
   architecture using:
 
@@ -1328,10 +1328,10 @@ of Node.js and operating system, you can install manually:
   - `node -p 'process.platform'`
   - `node -p 'process.arch'`
 
-  For example, when installing node-oracledb 2.0.14 on macOS with
+  For example, when installing node-oracledb 2.0.15 on macOS with
   Node.js 8, these commands will show the module version is '57', the
   platform is 'darwin' and the architecture is 'x64'.  The package to
-  download is `oracledb-v2.0.14-node-v57-darwin-x64.gz`
+  download is `oracledb-v2.0.15-node-v57-darwin-x64.gz`
 
   If an appropriate package is not available, follow the
   [Node-oracledb Installation Instructions](#instructions) for your
@@ -1343,7 +1343,7 @@ of Node.js and operating system, you can install manually:
   ```
   mkdir node_modules/oracledb
   cd node_modules/oracledb
-  tar -xzf oracledb-2.0.14.tgz
+  tar -xzf oracledb-2.0.15.tgz
   ```
 
   The node_modules directory will contain:
@@ -1363,7 +1363,7 @@ of Node.js and operating system, you can install manually:
        |-- |-- querystream.js
        |-- |-- resultset.js
        |-- |-- util.js
-       |-- oracledb-2.0.14.tgz
+       |-- oracledb-2.0.15.tgz
        |-- package
        |-- |-- extractpackage.js
        |-- |-- oracledbinstall.js
@@ -1375,7 +1375,7 @@ of Node.js and operating system, you can install manually:
   to unarchive the binary package, for example:
 
   ```
-  node extractpackage.js path=oracledb-v2.0.14-node-v57-darwin-x64.gz
+  node extractpackage.js path=oracledb-v2.0.15-node-v57-darwin-x64.gz
   ```
 
 - Create the subdirectory `node_modules/oracledb/build/Release` and
