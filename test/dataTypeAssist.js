@@ -742,6 +742,7 @@ assist.verifyRefCursor = function(connection, tableName, array, done)
 
 function fetchRowsFromRS(rs, array, cb)
 {
+  var numRows = 3;
   rs.getRows(numRows, function(err, rows) {
     if(rows.length > 0) {
       for(var i = 0; i < rows.length; i++) {
@@ -947,7 +948,7 @@ assist.verifyRefCursorWithFetchInfo = function(connection, tableName, array, don
         },
         function(err, result) {
           should.not.exist(err);
-          fetchRowsFromRS_fetchas(connection, result.outBinds.out, array, tableName, callback);
+          _verifyFetchedValues(connection, result.outBinds.out, array, tableName, callback);
         }
       );
     },
@@ -990,7 +991,7 @@ assist.verifyRefCursorWithFetchAsString = function(connection, tableName, array,
         { outFormat: oracledb.OBJECT },
         function(err, result) {
           should.not.exist(err);
-          fetchRowsFromRS_fetchas(connection, result.outBinds.out, array, tableName, callback);
+          _verifyFetchedValues(connection, result.outBinds.out, array, tableName, callback);
         }
       );
     },
@@ -1006,40 +1007,34 @@ assist.verifyRefCursorWithFetchAsString = function(connection, tableName, array,
   ], done);
 };
 
-var numRows = 3;  // number of rows to return from each call to getRows()
-
-function fetchRowsFromRS_fetchas(connection, rs, array, tableName, cb) {
-  rs.getRows(numRows, function(err, rsrows) {
-    if(rsrows.length > 0) {
-      for(var i = 0; i < rsrows.length; i++) {
-        (rsrows[i].CONTENT).should.be.a.String();
-        verifyFetchValues(connection, rsrows, i, array, tableName);
-      }
-      return fetchRowsFromRS_fetchas(connection, rs, array, tableName, cb);
-    } else {
-      rs.close(function(err) {
+var _verifyFetchedValues = function(connection, rs, array, tableName, cb) {
+  var amount = array.length;
+  rs.getRows(amount, function(err, rows) {
+    async.each(
+      rows, 
+      queryAndCompare, 
+      function(err) {
         should.not.exist(err);
-        cb();
-      });
-    }
-  });
-}
-
-function verifyFetchValues(connection, rsrows, i, array, tableName){
-  connection.execute(
-    "select CONTENT from " + tableName + " where NUM = " + rsrows[i].NUM,
-    [],
-    {
-      fetchInfo:
-      {
-        "CONTENT": { type: oracledb.STRING }
+        rs.close(function(err) {
+          should.not.exist(err);
+          return cb();
+        });
       }
-    },
-    function(err, result) {
-      should.not.exist(err);
-      rsrows[i].CONTENT.should.eql(result.rows[0][0]);
-    }
-  );
-}
+    );
+  });
+
+  var queryAndCompare = function(row, callback) {
+    var sql = "select content from " + tableName + " where num = " + row.NUM;
+    connection.execute(
+      sql,
+      [],
+      { fetchInfo: { "CONTENT": { type: oracledb.STRING } } },
+      function(err, result) {
+        should.strictEqual(row.CONTENT, result.rows[0][0]);
+        return callback(err);
+      }
+    );
+  };
+}; // _verifyFetchedValues()
 
 module.exports = assist;

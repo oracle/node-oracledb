@@ -75,6 +75,7 @@ describe('34. dataTypeTimestamp2.js', function() {
     });
 
     after(function(done) {
+      oracledb.fetchAsString = [];
       connection.execute(
         "DROP table " + tableName + " PURGE",
         function(err) {
