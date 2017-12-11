@@ -52,7 +52,7 @@ describe('58. properties.js', function() {
       defaultValues.poolIncrement    = oracledb.poolIncrement;
       defaultValues.poolTimeout      = oracledb.poolTimeout;
       defaultValues.maxRows          = oracledb.maxRows;
-      defaultValues.prefetchRows     = oracledb.prefetchRows;
+      defaultValues.fetchArraySize   = oracledb.fetchArraySize;
       defaultValues.autoCommit       = oracledb.autoCommit;
       defaultValues.version          = oracledb.version;
       defaultValues.connectionClass  = oracledb.connectionClass;
@@ -73,7 +73,7 @@ describe('58. properties.js', function() {
       oracledb.poolIncrement    = defaultValues.poolIncrement;
       oracledb.poolTimeout      = defaultValues.poolTimeout;
       oracledb.maxRows          = defaultValues.maxRows;
-      oracledb.prefetchRows     = defaultValues.prefetchRows;
+      oracledb.fetchArraySize   = defaultValues.fetchArraySize;
       oracledb.autoCommit       = defaultValues.autoCommit;
       // oracledb.version          = defaultValues.version;         // version is a read-only property. it needn't to restore.
       oracledb.connectionClass  = defaultValues.connectionClass;
@@ -128,12 +128,12 @@ describe('58. properties.js', function() {
       (oracledb.maxRows).should.eql(defaultValues.maxRows + 1);
     });
 
-    it('58.1.6 prefetchRows', function() {
-      var t = oracledb.prefetchRows;
-      oracledb.prefetchRows = t + 1;
+    it('58.1.6 fetchArraySize', function() {
+      var t = oracledb.fetchArraySize;
+      oracledb.fetchArraySize = t + 1;
 
-      t.should.eql(defaultValues.prefetchRows);
-      (oracledb.prefetchRows).should.eql(defaultValues.prefetchRows + 1);
+      t.should.eql(defaultValues.fetchArraySize);
+      (oracledb.fetchArraySize).should.eql(defaultValues.fetchArraySize + 1);
     });
 
     it('58.1.7 autoCommit', function() {

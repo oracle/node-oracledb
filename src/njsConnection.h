@@ -95,6 +95,7 @@ private:
     static NAN_METHOD(Execute);
     static void Async_Execute(njsBaton *baton);
     static void Async_AfterExecute(njsBaton *baton, Local<Value> argv[]);
+    static void Async_ExecuteGetMoreRows(njsBaton *baton);
 
     // Release Method on Connection class
     static NAN_METHOD(Release);

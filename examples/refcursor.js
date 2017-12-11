@@ -40,14 +40,13 @@
 var oracledb = require('oracledb');
 var dbConfig = require('./dbconfig.js');
 
-// Prefetching is a tuning feature for optimizing row transfer from
-// the Oracle Database to node-oracledb with ResultSets.  The default
-// prefetch size is 100.  The prefetch size does not affect how, or
-// when, rows are returned by node-oracledb to the application.
-// Buffering is handled by the underlying Oracle client libraries.
-// Benchmark to choose the optimal size for each application or query.
+// fetchArraySize can be adjusted to tune data transfer from the
+// Oracle Database to node-oracledb.  The value of fetchArraySize does
+// not affect how, or when, rows are returned by node-oracledb to the
+// application.  Buffering is handled by node-oracledb.  Benchmark to
+// choose the optimal size for each application or query.
 //
-//oracledb.prefetchRows = 100;
+//oracledb.fetchArraySize = 100;  // default value is 100
 
 var numRows = 10;  // number of rows to return from each call to getRows()
 

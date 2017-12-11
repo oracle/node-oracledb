@@ -218,6 +218,8 @@ protected:
             uint32_t *value);
     bool SetPropBool(Local<Value> value, bool *valuePtr, const char *name);
     bool SetPropInt(Local<Value> value, int32_t *valuePtr, const char *name);
+    bool SetPropPositiveInt(Local<Value> value, uint32_t *valuePtr,
+            const char *name);
     bool SetPropString(Local<Value> value, std::string *valuePtr,
             const char *name);
     bool SetPropUnsignedInt(Local<Value> value, uint32_t *valuePtr,
@@ -256,7 +258,7 @@ public:
     uint32_t stmtCacheSize;
     uint32_t lobPrefetchSize;
     uint32_t maxRows;
-    uint32_t prefetchRows;
+    uint32_t fetchArraySize;
     uint32_t rowsFetched;
     uint32_t bufferRowIndex;
     uint64_t rowsAffected;
@@ -330,6 +332,8 @@ public:
             bool *value);
     bool GetStringFromJSON(Local<Object> obj, const char *key, int index,
             string &value);
+    bool GetPositiveIntFromJSON(Local<Object> obj, const char *key, int index,
+            uint32_t *value);
     bool GetIntFromJSON(Local<Object> obj, const char *key, int index,
             int32_t *value);
     bool GetUnsignedIntFromJSON(Local<Object> obj, const char *key, int index,

@@ -486,6 +486,29 @@ bool njsBaton::GetIntFromJSON(Local<Object> obj, const char *key,
 
 
 //-----------------------------------------------------------------------------
+// njsBaton::GetPositiveIntFromJSON()
+//   Gets a positive integer value from the JSON object for the given key, if
+// possible.  If undefined, leave value alone and do not set error; otherwise,
+// set error. Index is the argument index in the caller.
+//-----------------------------------------------------------------------------
+bool njsBaton::GetPositiveIntFromJSON(Local<Object> obj, const char *key,
+        int index, uint32_t *value)
+{
+    uint32_t tempValue = *value;
+
+    if (!GetUnsignedIntFromJSON(obj, key, index, &tempValue))
+        return false;
+    if (tempValue == 0) {
+        error = njsMessages::Get(errInvalidPropertyValueInParam, key,
+                index + 1);
+        return false;
+    }
+    *value = tempValue;
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
 // njsBaton::GetStringFromJSON()
 //   Gets a string value from the JSON object for the given key, if possible.
 // If null or undefined, leave value alone and do not set error; otherwise, set
@@ -694,6 +717,28 @@ bool njsCommon::SetPropInt(Local<Value> value, int32_t *valuePtr,
         return false;
     }
     *valuePtr = Nan::To<int32_t>(value).FromJust();
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsCommon::SetPropPositiveInt()
+//   Sets a property to a positive integer value. If the value is not a
+// positive integer, an error is raised and false is returned.
+//-----------------------------------------------------------------------------
+bool njsCommon::SetPropPositiveInt(Local<Value> value, uint32_t *valuePtr,
+        const char *name)
+{
+    uint32_t tempValue = *valuePtr;
+
+    if (!SetPropUnsignedInt(value, &tempValue, name))
+        return false;
+    if (tempValue == 0) {
+        string errMsg = njsMessages::Get(errInvalidPropertyValue, name);
+        Nan::ThrowError(errMsg.c_str());
+        return false;
+    }
+    *valuePtr = tempValue;
     return true;
 }
 

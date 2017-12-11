@@ -35,23 +35,24 @@ limitations under the License.
      - 3.2.2 [`connectionClass`](#propdbconclass)
      - 3.2.3 [`extendedMetaData`](#propdbextendedmetadata)
      - 3.2.4 [`externalAuth`](#propdbisexternalauth)
-     - 3.2.5 [`fetchAsBuffer`](#propdbfetchasbuffer)
-     - 3.2.6 [`fetchAsString`](#propdbfetchasstring)
-     - 3.2.7 [`lobPrefetchSize`](#propdblobprefetchsize)
-     - 3.2.8 [`maxRows`](#propdbmaxrows)
-     - 3.2.9 [`oracleClientVersion`](#propdboracleClientVersion)
-     - 3.2.10 [`outFormat`](#propdboutformat)
-     - 3.2.11 [`poolIncrement`](#propdbpoolincrement)
-     - 3.2.12 [`poolMax`](#propdbpoolmax)
-     - 3.2.13 [`poolMin`](#propdbpoolmin)
-     - 3.2.14 [`poolPingInterval`](#propdbpoolpinginterval)
-     - 3.2.15 [`poolTimeout`](#propdbpooltimeout)
-     - 3.2.16 [`prefetchRows`](#propdbprefetchrows)
-     - 3.2.17 [`Promise`](#propdbpromise)
-     - 3.2.18 [`queueRequests`](#propdbqueuerequests)
-     - 3.2.19 [`queueTimeout`](#propdbqueuetimeout)
-     - 3.2.20 [`stmtCacheSize`](#propdbstmtcachesize)
-     - 3.2.21 [`version`](#propdbversion)
+     - 3.2.5 [`fetchArraySize`](#propdbfetcharraysize)
+     - 3.2.6 [`fetchAsBuffer`](#propdbfetchasbuffer)
+     - 3.2.7 [`fetchAsString`](#propdbfetchasstring)
+     - 3.2.8 [`lobPrefetchSize`](#propdblobprefetchsize)
+     - 3.2.9 [`maxRows`](#propdbmaxrows)
+     - 3.2.10 [`oracleClientVersion`](#propdboracleClientVersion)
+     - 3.2.11 [`outFormat`](#propdboutformat)
+     - 3.2.12 [`poolIncrement`](#propdbpoolincrement)
+     - 3.2.13 [`poolMax`](#propdbpoolmax)
+     - 3.2.14 [`poolMin`](#propdbpoolmin)
+     - 3.2.15 [`poolPingInterval`](#propdbpoolpinginterval)
+     - 3.2.16 [`poolTimeout`](#propdbpooltimeout)
+     - 3.2.17 [`prefetchRows`](#propdbprefetchrows)
+     - 3.2.18 [`Promise`](#propdbpromise)
+     - 3.2.19 [`queueRequests`](#propdbqueuerequests)
+     - 3.2.20 [`queueTimeout`](#propdbqueuetimeout)
+     - 3.2.21 [`stmtCacheSize`](#propdbstmtcachesize)
+     - 3.2.22 [`version`](#propdbversion)
   - 3.3 [Oracledb Methods](#oracledbmethods)
      - 3.3.1 [`createPool()`](#createpool)
      - 3.3.2 [`getConnection()`](#getconnectiondb)
@@ -75,11 +76,12 @@ limitations under the License.
          - 4.2.5.3 [`execute()`: Options](#executeoptions)
              - 4.2.5.3.1 [`autoCommit`](#propexecautocommit)
              - 4.2.5.3.2 [`extendedMetaData`](#propexecextendedmetadata)
-             - 4.2.5.3.3 [`fetchInfo`](#propexecfetchinfo)
-             - 4.2.5.3.4 [`maxRows`](#propexecmaxrows)
-             - 4.2.5.3.5 [`outFormat`](#propexecoutformat)
-             - 4.2.5.3.6 [`prefetchRows`](#propexecprefetchrows)
-             - 4.2.5.3.7 [`resultSet`](#propexecresultset)
+             - 4.2.5.3.3 [`fetchArraySize`](#propexecfetcharraysize)
+             - 4.2.5.3.4 [`fetchInfo`](#propexecfetchinfo)
+             - 4.2.5.3.5 [`maxRows`](#propexecmaxrows)
+             - 4.2.5.3.6 [`outFormat`](#propexecoutformat)
+             - 4.2.5.3.7 [`prefetchRows`](#propexecprefetchrows)
+             - 4.2.5.3.8 [`resultSet`](#propexecresultset)
          - 4.2.5.4 [`execute()`: Callback Function](#executecallback)
              - 4.2.5.4.1 [`metaData`](#execmetadata)
                  -  [`name`](#execmetadata), [`fetchType`](#execmetadata), [`dbType`](#execmetadata), [`byteSize`](#execmetadata), [`precision`](#execmetadata), [`scale`](#execmetadata), [`nullable`](#execmetadata)
@@ -139,12 +141,13 @@ limitations under the License.
   - 8.5 [External Authentication](#extauth)
   - 8.6 [Securely Encrypting Network Traffic to Oracle Database](#securenetwork)
   - 8.7 [Connections and High Availability](#connectionha)
+  - 8.8 [Optional Client Configuration Files](#tnsadmin)
 
 9. [SQL Execution](#sqlexecution)
   - 9.1 [SELECT Statements](#select)
      - 9.1.1 [Fetching Rows](#fetchingrows)
      - 9.1.2 [Working with Result Sets](#resultsethandling)
-     - 9.1.3 [Streaming Query Results](#streamingresults)
+     - 9.1.3 [Query Streaming](#streamingresults)
      - 9.1.4 [Query Output Formats](#queryoutputformats)
      - 9.1.5 [Query Column Metadata](#querymeta)
      - 9.1.6 [Query Result Type Mapping](#typemap)
@@ -158,7 +161,8 @@ limitations under the License.
          - 9.1.6.8 [Fetching XMLType](#fetchxml)
          - 9.1.6.9 [Fetching RAW](#fetchraw)
          - 9.1.6.10 [Mapping Custom Types](#customtypehandling)
-     - 9.1.7 [Row Prefetching](#rowprefetching)
+     - 9.1.7 [Limiting Rows and Creating Paged Datasets](#pagingdata)
+     - 9.1.8 [Auto-Increment Columns](#autoincrement)
   - 9.2 [Cursor Management](#cursors1000)
 10. [PL/SQL Execution](#plsqlexecution)
   - 10.1 [PL/SQL Stored Procedures](#plsqlproc)
@@ -192,6 +196,7 @@ limitations under the License.
   - 20.1 [Custom Promise Libraries](#custompromises)
 21. [Async/Await and node-oracledb](#asyncawaitoverview)
 22. [Tracing SQL and PL/SQL Statements](#tracingsql)
+23. [Migrating from node-oracledb 1.13 to node-oracledb 2.0](#migratev1v2)
 
 ## <a name="intro"></a> 1. Introduction
 
@@ -562,7 +567,37 @@ var oracledb = require('oracledb');
 oracledb.externalAuth = false;
 ```
 
-#### <a name="propdbfetchasbuffer"></a> 3.2.5 `oracledb.fetchAsBuffer`
+#### <a name="propdbfetcharraysize"></a> 3.2.5 `oracledb.fetchArraySize`
+
+```
+Number fetchArraySize
+```
+
+This property sets the size of an internal buffer used for fetching
+query rows from Oracle Database.  Changing it may affect query
+performance but does not affect how many rows are returned to the
+application.
+
+The default value is 100.
+
+The property is used for ResultSet and non-ResultSet queries, and also
+for query streaming.
+
+Increasing this value reduces the number of round trips to the
+database but increases memory usage.  For queries that return a large
+number of rows, higher values of `fetchArraySize` may give better
+performance.  For queries that only return a few rows, reduce the
+value of `fetchArraySize` to minimize the amount of memory management
+during data fetches.
+
+For direct queries (with `execute()` option [`resultSet:
+false`](#propexecresultset)), the internal buffer size will be based
+on the lesser of [`maxRows`](#propdbmaxrows) and `fetchArraySize`.
+
+In node-oracledb version 2, `oracledb.fetchArraySize` replaces
+[`prefetchRows`](#propdbprefetchrows).
+
+#### <a name="propdbfetchasbuffer"></a> 3.2.6 `oracledb.fetchAsBuffer`
 
 ```
 Array fetchAsBuffer
@@ -589,7 +624,7 @@ var oracledb = require('oracledb');
 oracledb.fetchAsBuffer = [ oracledb.BLOB ];
 ```
 
-#### <a name="propdbfetchasstring"></a> 3.2.6 `oracledb.fetchAsString`
+#### <a name="propdbfetchasstring"></a> 3.2.7 `oracledb.fetchAsString`
 
 ```
 Array fetchAsString
@@ -629,7 +664,7 @@ var oracledb = require('oracledb');
 oracledb.fetchAsString = [ oracledb.DATE, oracledb.NUMBER ];
 ```
 
-#### <a name="propdblobprefetchsize"></a> 3.2.7 `oracledb.lobPrefetchSize`
+#### <a name="propdblobprefetchsize"></a> 3.2.8 `oracledb.lobPrefetchSize`
 
 ```
 Number lobPrefetchSize
@@ -655,39 +690,39 @@ var oracledb = require('oracledb');
 oracledb.lobPrefetchSize = 16384;
 ```
 
-#### <a name="propdbmaxrows"></a> 3.2.8 `oracledb.maxRows`
+#### <a name="propdbmaxrows"></a> 3.2.9 `oracledb.maxRows`
 
 ```
 Number maxRows
 ```
 
-The maximum number of rows that are fetched by the `execute()` call of the *Connection*
-object when *not* using a [ResultSet](#resultsetclass).  Rows beyond
-this limit are not fetched from the database.
+The maximum number of rows that are fetched by a query with
+[`connection.execute()`](#execute) when *not* using a
+[ResultSet](#resultsetclass).  Rows beyond this limit are not fetched
+from the database.
 
 The default value is 100.
 
-This property may be overridden in an [`execute()`](#executeoptions) call.
-
-This property is also used by [`queryStream()`](#querystream) as an
-internal buffer size tuning parameter.
+This property may be overridden in an [`execute()`](#executeoptions)
+call.
 
 To improve database efficiency, SQL queries should use a row limiting
-clause like [OFFSET / FETCH][5] or equivalent. The `maxRows` property
-can be used to stop badly coded queries from returning unexpectedly
-large numbers of rows.
-
-Adjust `maxRows` as required by each application or query.  Values
-that are larger than required can result in sub-optimal memory usage.
-
-`maxRows` is ignored when fetching rows with a
-[ResultSet](#resultsetclass).
+clause like [OFFSET / FETCH](#pagingdata) or equivalent. The `maxRows`
+property can be used to stop badly coded queries from returning
+unexpectedly large numbers of rows.
 
 When the number of query rows is relatively big, or can't be
-predicted, it is recommended to use a [ResultSet](#resultsetclass).
-This prevents query results being unexpectedly truncated by the
-`maxRows` limit and removes the need to over-size `maxRows` to avoid
-such truncation.
+predicted, it is recommended to use a [ResultSet](#resultsetclass) or
+[`queryStream()`](#querystream).  This allows applications to process
+rows in smaller chunks or individually, preventing the Node.js memory
+limit being exceeded or query results being unexpectedly truncated by
+the `maxRows` limit.
+
+Note a future version of node-oracle may change the default `maxRows`
+value to be unlimited.  If you are using the current default `maxRows`
+value to truncate the result set to 100 rows, you should use [OFFSET /
+FETCH](#pagingdata) or explicitly set `maxRows` to 100 in your
+application.
 
 ##### Example
 
@@ -696,7 +731,7 @@ var oracledb = require('oracledb');
 oracledb.maxRows = 100;
 ```
 
-#### <a name="propdboracleClientVersion"></a> 3.2.9 `oracledb.oracleClientVersion`
+#### <a name="propdboracleClientVersion"></a> 3.2.10 `oracledb.oracleClientVersion`
 
 ```
 readonly Number oracleClientVersion
@@ -712,7 +747,7 @@ var oracledb = require('oracledb');
 console.log("Oracle client library version number is " + oracledb.oracleClientVersion);
 ```
 
-#### <a name="propdboutformat"></a> 3.2.10 `oracledb.outFormat`
+#### <a name="propdboutformat"></a> 3.2.11 `oracledb.outFormat`
 
 ```
 Number outFormat
@@ -751,7 +786,7 @@ oracledb.outFormat = oracledb.ARRAY;
 
 See [Query Output Formats](#queryoutputformats) for more examples.
 
-#### <a name="propdbpoolincrement"></a> 3.2.11 `oracledb.poolIncrement`
+#### <a name="propdbpoolincrement"></a> 3.2.12 `oracledb.poolIncrement`
 
 ```
 Number poolIncrement
@@ -771,7 +806,7 @@ var oracledb = require('oracledb');
 oracledb.poolIncrement = 1;
 ```
 
-#### <a name="propdbpoolmax"></a> 3.2.12 `oracledb.poolMax`
+#### <a name="propdbpoolmax"></a> 3.2.13 `oracledb.poolMax`
 
 ```
 Number poolMax
@@ -797,7 +832,7 @@ var oracledb = require('oracledb');
 oracledb.poolMax = 4;
 ```
 
-#### <a name="propdbpoolmin"></a> 3.2.13 `oracledb.poolMin`
+#### <a name="propdbpoolmin"></a> 3.2.14 `oracledb.poolMin`
 
 ```
 Number poolMin
@@ -817,7 +852,7 @@ var oracledb = require('oracledb');
 oracledb.poolMin = 0;
 ```
 
-#### <a name="propdbpoolpinginterval"></a> 3.2.14 `oracledb.poolPingInterval`
+#### <a name="propdbpoolpinginterval"></a> 3.2.15 `oracledb.poolPingInterval`
 
 ```
 Number poolPingInterval
@@ -861,7 +896,7 @@ var oracledb = require('oracledb');
 oracledb.poolPingInterval = 60;     // seconds
 ```
 
-#### <a name="propdbpooltimeout"></a> 3.2.15 `oracledb.poolTimeout`
+#### <a name="propdbpooltimeout"></a> 3.2.16 `oracledb.poolTimeout`
 
 ```
 Number poolTimeout
@@ -883,29 +918,15 @@ var oracledb = require('oracledb');
 oracledb.poolTimeout = 60;
 ```
 
-#### <a name="propdbprefetchrows"></a> 3.2.16 `oracledb.prefetchRows`
+#### <a name="propdbprefetchrows"></a> 3.2.17 `oracledb.prefetchRows`
 
 ```
 Number prefetchRows
 ```
 
-The number of additional rows the underlying Oracle client library
-fetches whenever node-oracledb requests query data from the database.
-
-Prefetching is a tuning option to maximize data transfer efficiency and
-minimize round-trips to the database.  The prefetch size does not
-affect when, or how many, rows are returned by node-oracledb to the
-application.  The cache management is transparently handled by the
-Oracle client libraries.
-
-`prefetchRows` is ignored unless a [ResultSet](#resultsetclass) is used.
-It is also ignored when the query involves a LOB.
-
-The default value is 100.
-
-This property may be overridden in an [`execute()`](#execute) call.
-
-See [Row Prefetching](#rowprefetching) for examples.
+This attribute is no longer used in node-oracledb version 2 and has no
+effect on applications.  Use
+[`oracledb.fetchArraySize`](#propdbfetcharraysize) instead.
 
 ##### Example
 
@@ -914,7 +935,7 @@ var oracledb = require('oracledb');
 oracledb.prefetchRows = 100;
 ```
 
-#### <a name="propdbpromise"></a> 3.2.17 `oracledb.Promise`
+#### <a name="propdbpromise"></a> 3.2.18 `oracledb.Promise`
 
 ```
 Promise Promise
@@ -943,7 +964,7 @@ Promises can be completely disabled by setting
 oracledb.Promise = null;
 ```
 
-#### <a name="propdbqueuerequests"></a> 3.2.18 `oracledb.queueRequests`
+#### <a name="propdbqueuerequests"></a> 3.2.19 `oracledb.queueRequests`
 
 ```
 Boolean queueRequests
@@ -972,7 +993,7 @@ oracledb.queueRequests = false;
 
 See [Connection Pool Queue](#connpoolqueue) for more information.
 
-#### <a name="propdbqueuetimeout"></a> 3.2.19 `oracledb.queueTimeout`
+#### <a name="propdbqueuetimeout"></a> 3.2.20 `oracledb.queueTimeout`
 
 ```
 Number queueTimeout
@@ -995,7 +1016,7 @@ oracledb.queueTimeout = 3000; // 3 seconds
 
 See [Connection Pool Queue](#connpoolqueue) for more information.
 
-#### <a name="propdbstmtcachesize"></a> 3.2.20 `oracledb.stmtCacheSize`
+#### <a name="propdbstmtcachesize"></a> 3.2.21 `oracledb.stmtCacheSize`
 
 ```
 Number stmtCacheSize
@@ -1022,7 +1043,7 @@ var oracledb = require('oracledb');
 oracledb.stmtCacheSize = 30;
 ```
 
-#### <a name="propdbversion"></a> 3.2.21 `oracledb.version`
+#### <a name="propdbversion"></a> 3.2.22 `oracledb.version`
 ```
 readonly Number version
 ```
@@ -1057,8 +1078,8 @@ promise = createPool(Object poolAttrs);
 This method creates a pool of connections with the specified username,
 password and connection string.
 
-Internally, `createPool()` creates an [OCI Session Pool][6] for each
-Pool object.
+Internally, `createPool()` creates an [Oracle Call Interface Session
+Pool][6] for each Pool object.
 
 The default properties may be overridden by specifying new properties
 in the `poolAttrs` parameter.
@@ -1100,7 +1121,8 @@ String user
 
 The database user name.  Can be a simple user name or a proxy of the
 form *alison[fred]*. See the [Client Access Through a Proxy][7]
-section in the OCI manual for more details about proxy authentication.
+section in the Oracle Call Interface manual for more details about
+proxy authentication.
 
 ```
 String password
@@ -1331,8 +1353,9 @@ String user
 ```
 
 The database user name.  Can be a simple user name or a proxy of the
-form *alison[fred]*. See the [Client Access Through a Proxy][7] section
-in the OCI manual for more details about proxy authentication.
+form *alison[fred]*. See the [Client Access Through a Proxy][7]
+section in the Oracle Call Interface manual for more details about
+proxy authentication.
 
 ```
 String password
@@ -1774,7 +1797,15 @@ Boolean extendedMetaData
 
 Overrides [`oracledb.extendedMetaData`](#propdbextendedmetadata).
 
-###### <a name="propfetchinfo"></a> <a name="propexecfetchinfo"></a> 4.2.5.3.3 `fetchInfo`
+###### <a name="propexecfetcharraysize"></a> 4.2.5.3.3 `fetchArraySize`
+
+```
+Number fetchArraySize
+```
+
+Overrides [`oracledb.fetchArraySize`](#propdbfetcharraysize).
+
+###### <a name="propfetchinfo"></a> <a name="propexecfetchinfo"></a> 4.2.5.3.4 `fetchInfo`
 
 ```
 Object fetchInfo
@@ -1832,7 +1863,7 @@ or [`fetchAsBuffer`](#propdbfetchasbuffer) settings instead.
 See [Query Result Type Mapping](#typemap) for more information on query type
 mapping.
 
-###### <a name="propexecmaxrows"></a> 4.2.5.3.4 `maxRows`
+###### <a name="propexecmaxrows"></a> 4.2.5.3.5 `maxRows`
 
 ```
 Number maxRows
@@ -1840,7 +1871,7 @@ Number maxRows
 
 Overrides [`oracledb.maxRows`](#propdbmaxrows).
 
-###### <a name="propexecoutformat"></a> 4.2.5.3.5 `outFormat`
+###### <a name="propexecoutformat"></a> 4.2.5.3.6 `outFormat`
 
 ```
 String outFormat
@@ -1848,15 +1879,17 @@ String outFormat
 
 Overrides [`oracledb.outFormat`](#propdboutformat).
 
-###### <a name="propexecprefetchrows"></a> 4.2.5.3.6 `prefetchRows`
+###### <a name="propexecprefetchrows"></a> 4.2.5.3.7 `prefetchRows`
 
 ```
 Number prefetchRows
 ```
 
-Overrides [`oracledb.prefetchRows`](#propdbprefetchrows).
+This attribute is no longer supported in node-oracledb version 2 and
+has no effect on applications.  Use
+[`fetchArraySize`](#propexecfetcharraysize) instead.
 
-###### <a name="propexecresultset"></a> 4.2.5.3.7 `resultSet`
+###### <a name="propexecresultset"></a> 4.2.5.3.8 `resultSet`
 
 ```
 Boolean resultSet
@@ -1914,6 +1947,12 @@ Metadata for ResultSets and REF CURSORS is available in a
 [ResultSet property](#rsmetadata).  For Lobs, a
 [Lob type property](#proplobtype) also indicates whether the object is
 a BLOB or CLOB.
+
+To get query metadata without fetching rows, use a
+[ResultSet](#resultsetclass).  Access
+[`resultset.metaData`](#rsmetadata) and then close the ResultSet.  Do
+not call `getRow()` or `getRows()`.  Preferably use a query clause
+such as `WHERE 1 = 0` so the database does minimal work.
 
 See [Query Column Metadata](#querymeta) for examples.
 
@@ -1997,13 +2036,11 @@ Query results must be fetched to completion to avoid resource leaks.
 
 The connection must remain open until the stream is completely read.
 
-For tuning purposes the [`oracledb.maxRows`](#propdbmaxrows) property
-can be used to size an internal buffer used by `queryStream()`.  Note
-it does not limit the number of rows returned by the stream.  The
-[`oracledb.prefetchRows`](#propdbprefetchrows) value will also affect
-performance.
+For tuning, adjust the value of
+[`oracledb.fetchArraySize`](#propdbfetcharraysize) or the `execute()`
+option [`fetchArraySize`](#propexecfetcharraysize).
 
-See [Streaming Query Results](#streamingresults) for more information.
+See [Query Streaming](#streamingresults) for more information.
 
 ##### Parameters
 
@@ -2167,7 +2204,7 @@ A connection *Pool* object is created by calling the
 
 The *Pool* object obtains connections to the Oracle database using the
 `getConnection()` method to "check them out" from the pool. Internally
-[OCI Session Pooling][6] is used.
+[Oracle Call Interface Session Pooling][6] is used.
 
 After the application finishes using a connection pool, it should
 release all connections and terminate the connection pool by calling
@@ -2397,9 +2434,6 @@ when executing a query.  A *ResultSet* is also returned to
 node-oracledb when binding as type [`oracledb.CURSOR`](#oracledbconstantsnodbtype) to a
 PL/SQL REF CURSOR bind parameter.
 
-The value of [`prefetchRows`](#propdbprefetchrows) can be adjusted to
-tune the performance of ResultSets.
-
 See [Working with Result Sets](#resultsethandling) for more information on ResultSets.
 
 ### <a name="resultsetproperties"></a> 7.1 ResultSet Properties
@@ -2462,9 +2496,16 @@ promise = getRow();
 
 ##### Description
 
-This call fetches one row of the ResultSet as an object or an array of column values, depending on the value of [outFormat](#propdboutformat).
+This call fetches one row of the ResultSet as an object or an array of
+column values, depending on the value of
+[outFormat](#propdboutformat).
 
-At the end of fetching, the ResultSet should be freed by calling [`close()`](#close).
+At the end of fetching, the ResultSet should be freed by calling
+[`close()`](#close).
+
+Performance of `getRow()` can be tuned by adjusting the value of
+[`oracledb.fetchArraySize`](#propdbfetcharraysize) or the `execute()`
+option [`fetchArraySize`](#propexecfetcharraysize).
 
 #### <a name="getrows"></a> 7.2.3 `resultset.getRows()`
 
@@ -2484,6 +2525,15 @@ promise = getRows(Number numRows);
 This call fetches `numRows` rows of the ResultSet as an object or an array of column values, depending on the value of [outFormat](#propdboutformat).
 
 At the end of fetching, the ResultSet should be freed by calling [`close()`](#close).
+
+Performance of `getRows()` can be tuned by adjusting the value of
+`numRows` and [`oracledb.fetchArraySize`](#propdbfetcharraysize) (or
+equivalent `execute()` option
+[`fetchArraySize`](#propexecfetcharraysize)).  For any given value of
+`numRows`, node-oracledb overheads will be reduced when the applicable
+`fetchArraySize` also has the same value.  However this may not be
+optimal for data transfers from Oracle Database.  If `numRows` is big,
+consider making `fetchArraySize` a factor of `numRows`.
 
 #### <a name="toquerystream"></a> 7.2.4 `resultset.toQueryStream()`
 
@@ -2506,7 +2556,14 @@ CURSOR bind variables streamable.  To make top-level queries
 streamable, the alternative [`connection.queryStream()`](#querystream)
 method may be easier to use.
 
-See [Streaming Query Results](#streamingresults) for more information.
+To change the behavior of `toQueryStream()`, such as setting the
+[query output Format](#queryoutputformats) or the internal buffer size
+for performance, adjust global attributes such as
+[oracledb.outFormat](#propdboutformat) and
+[`oracledb.fetchArraySize`](#propdbfetcharraysize) before calling
+[`execute()`](#execute).
+
+See [Query Streaming](#streamingresults) for more information.
 
 ## <a name="connectionhandling"></a> 8. Connection Handling
 
@@ -2543,11 +2600,12 @@ use a [Connection Pool](#connpooling).
 
 ### <a name="connectionstrings"></a> 8.1 Connection Strings
 
-The `connectString` parameter for [`oracledb.getConnection()`](#getconnectiondb) and
-[`pool.getConnection()`](#getconnectionpool) can be an Easy
-Connect string, or a Net Service Name from a local `tnsnames.ora` file
-or external naming service, or it can be the SID of a local Oracle
-database instance.
+The `connectString` parameter for
+[`oracledb.getConnection()`](#getconnectiondb) and
+[`pool.getConnection()`](#getconnectionpool) can be an [Easy
+Connect](#easyconnect) string, or a Net Service Name from a local
+[`tnsnames.ora`](#tnsnames) file or external naming service, or it can
+be the SID of a local Oracle database instance.
 
 If `connectString` is not specified, the empty string "" is used which
 indicates to connect to the local, default database.
@@ -2611,15 +2669,6 @@ sales =
   )
 ```
 
-The `tnsnames.ora` file can be in a default location such as
-`/opt/oracle/instantclient_12_2/network/admin` (if Instant Client is
-in `/opt/oracle/instantclient_12_2`), in
-`$ORACLE_HOME/network/admin/tnsnames.ora` or
-`/etc/tnsnames.ora`. Alternatively set the [`TNS_ADMIN`][8]
-environment variable and put the file in `$TNS_ADMIN/tnsnames.ora`.
-For more information on `tnsnames.ora` files see [General Syntax of
-tnsnames.ora][18] in the Oracle documentation.
-
 Some older databases may use a 'SID' instead of a 'Service Name'.  A
 connection string for these databases could look like:
 
@@ -2633,6 +2682,12 @@ sales =
     )
   )
 ```
+
+See [Optional Client Configuration Files](#tnsadmin) for where
+`tnsnames.ora` files can be located.
+
+For more information on `tnsnames.ora` files and contents see [General
+Syntax of tnsnames.ora][18] in the Oracle documentation.
 
 #### <a name="embedtns"></a> 8.1.3 Embedded Connection Strings
 
@@ -2775,8 +2830,8 @@ and (iii) the number of those connections is less than the pool's
 `poolMax` setting.
 
 A pool is created by calling the
-[`oracledb.createPool()`](#createpool) method. Internally [OCI Session
-Pooling][6] is used.
+[`oracledb.createPool()`](#createpool) method. Internally [Oracle Call
+Interface Session Pooling][6] is used.
 
 A connection is returned with the
 [`pool.getConnection()`](#getconnectionpool) function:
@@ -2880,6 +2935,7 @@ oracledb.createPool (
   },
   function(err, pool) {
     console.log(pool.poolAlias); // 'default'
+	. . . // use pool
   }
 );
 ```
@@ -3082,7 +3138,7 @@ One related environment variable is is shown by `_logStats()`:
 
 Environment Variable                                 | Description
 -----------------------------------------------------|-------------
-[`process.env.UV_THREADPOOL_SIZE`](#numberofthreads) | The number of worker threads for this process.  Note this shows the value of the variable.  However if this variable was set after the thread pool starts, the thread pool will actually be the default size of 4.
+[`process.env.UV_THREADPOOL_SIZE`](#numberofthreads) | The number of worker threads for this process.  Note this shows the value of the variable, however if this variable was set after the thread pool starts, the thread pool will actually be the default size of 4.
 
 #### <a name="connpoolpinging"></a> 8.3.4 Connection Pool Pinging
 
@@ -3161,7 +3217,7 @@ To use DRCP in node-oracledb:
 
 1. The DRCP pool must be started in the database: `SQL> execute dbms_connection_pool.start_pool();`
 2. The [`connectionClass`](#propdbconclass) should be set by the node-oracledb application.  If it is not set, the pooled server session memory will not be reused optimally, and the statistic views will record large values for `NUM_MISSES`.
-3. The `getConnection()` property `connectString` must specify to use a pooled server, either by the Easy Connect syntax like `myhost/sales:POOLED`, or by using a `tnsnames.ora` alias for a connection that contains `(SERVER=POOLED)`.
+3. The `getConnection()` property `connectString` must specify to use a pooled server, either by the Easy Connect syntax like [`myhost/sales:POOLED`](#easyconnect), or by using a [`tnsnames.ora`](#tnsnames) alias for a connection that contains `(SERVER=POOLED)`.
 
 For efficiency, it is recommended that DRCP connections should be used
 with node-oracledb's local [connection pool](#poolclass).
@@ -3239,7 +3295,7 @@ negotiate a key using Diffie-Hellman key exchange.  There is
 protection against man-in-the-middle attacks.
 
 Native network encryption can be configured by editing Oracle Net's
-`sqlnet.ora` configuration files, on either the database server
+optional `sqlnet.ora` configuration files, on either the database server
 and/or on each node-oracledb 'client'.  Parameters control whether
 data integrity checking and encryption is required or just allowed,
 and which algorithms the client and server should consider for use.
@@ -3262,9 +3318,8 @@ SQLNET.ENCRYPTION_TYPES_SERVER = (AES256)
 If you definitely know that the database server enforces integrity and
 encryption, then you do not need to configure Node.js separately.
 However you can also, or alternatively, do so depending on your
-business needs.  To do this, before starting each Node.js process, set
-the environment variable `TNS_ADMIN` to your application configuration
-directory and create the file `$TNS_ADMIN/sqlnet.ora`:
+business needs.  Create a `sqlnet.ora` and locate it with other
+[Optional Client Configuration Files](#tnsadmin):
 
 ```
 SQLNET.CRYPTO_CHECKSUM_CLIENT = required
@@ -3298,29 +3353,46 @@ For applications that need to be highly available, you may want to
 configure your OS network settings and Oracle Net (which handles
 communication between node-oracledb and the database).
 
-For Oracle Net configuration, set the environment variable `TNS_ADMIN`
-to your application configuration directory and create the file
-`$TNS_ADMIN/sqlnet.ora`.  In this file you can configure settings like
+For Oracle Net configuration, create a `sqlnet.ora` file.  See
+[Optional Client Configuration Files](#tnsadmin) for where to place
+this.  In this file you can configure settings like
 [`SQLNET.OUTBOUND_CONNECT_TIMEOUT`][33], [`SQLNET.RECV_TIMEOUT`][34]
 and [`SQLNET.SEND_TIMEOUT`][35].  You may also want to use a
 [`tnsnames.ora`](#tnsnames) file to configure the database service
 setting ['ENABLE=BROKEN'][36].
 
-Other [Oracle Net][37] options may also be useful for high
-availability and performance tuning.
+Other [Oracle Network Services][37] options may also be useful for
+high availability and performance tuning.
+
+### <a name="tnsadmin"></a> 8.8 Optional Client Configuration Files
+
+Optional Oracle Client configuration files are read when node-oracledb
+is loaded.  These files affect connections and applications.  Common
+files include `tnsnames.ora`, `sqlnet.ora`, `ldap.ora`, and
+`oraaccess.xml`.
+
+Default locations for these files include:
+
+- `/opt/oracle/instantclient_12_2/network/admin` if Instant Client is in `/opt/oracle/instantclient_12_2`.
+- `/usr/lib/oracle/12.2/client64/lib/network/admin` if Oracle 12.2 Instant Client RPMs are used on Linux.
+- `$ORACLE_HOME/network/admin` if node-oracledb is using libraries from the database installation.
+
+Alternatively, Oracle Client configuration files can be put in
+another, accessible directory.  Then set the environment variable
+[`TNS_ADMIN`][8] to that directory name.  For example, if the file
+`/etc/my-oracle-config/tnsnames.ora` is being used, set `TNS_ADMIN` to
+`/etc/my-oracle-config`.
 
 ## <a name="sqlexecution"></a> 9. SQL Execution
 
-A single SQL or PL/SQL statement may be executed using the *Connection*
-[`execute()`](#execute) method.  Either the callback style shown
-below, or [promises](#promiseoverview) may be used.
+A single SQL or PL/SQL statement may be executed using the
+*Connection* [`execute()`](#execute) method.  The callback style shown
+below, or [promises](#promiseoverview), or
+[Async/Await](#asyncawaitoverview) may be used.
 
-After all database calls on the connection complete, the application
-should use the [`connection.close()`](#connectionclose) call to
-release the connection.
-
-Queries may optionally be streamed using the *Connection*
-[`queryStream()`](#querystream) method.
+Results may be returned in a single array, or fetched in batches with
+a [ResultSet](#resultsetclass).  Queries may optionally be streamed
+using the [`connection.queryStream()`](#querystream) method.
 
 Node-oracledb's [`execute()`](#execute)
 and [`queryStream()`](#querystream) methods
@@ -3328,12 +3400,25 @@ use [Statement Caching](#stmtcache) to make re-execution of statements
 efficient.  This removes the need for a separate 'prepare' method to
 parse statements.
 
+For queries that return a large number of rows, the network traffic
+for fetching data from Oracle Database can be optimized by increasing
+[`oracledb.fetchArraySize`](#propdbfetcharraysize).  For queries that
+are known to return a small set of rows, reduce
+[`fetchArraySize`](#propdbfetcharraysize) to avoid unnecessary memory
+allocation.  The `execute()` option
+[`fetchArraySize`](#propexecfetcharraysize) can be used to override
+the global property for individual queries.
+
 Connections can handle one database operation at a time.  Other
 database operations will block.  Structure your code to avoid starting
 parallel operations on a connection.  For example, instead of using
 `async.parallel` or `async.each()` which calls each of its items in
 parallel, use `async.series` or `async.eachSeries()`.  Also
 see [Connections and Number of Threads](#numberofthreads).
+
+After all database calls on the connection complete, the application
+should use the [`connection.close()`](#connectionclose) call to
+release the connection.
 
 ### <a name="select"></a> 9.1 SELECT Statements
 
@@ -3360,22 +3445,35 @@ restricted to [`maxRows`](#propdbmaxrows):
 
 Any rows beyond the `maxRows` limit are not returned.
 
+To improve database efficiency, SQL queries should use a row limiting
+clause like [OFFSET / FETCH](#pagingdata) or equivalent. The `maxRows`
+property can be used to stop badly coded queries from returning
+unexpectedly large numbers of rows.
+
+For queries expected to return a small number of rows, reduce
+`maxRows` or [`fetchArraySize`](#propexecfetcharraysize) to reduce
+internal memory overhead by node-oracledb.  The lesser of the two
+values is used for the internal buffer size calculation.
+
+Note a future version of node-oracle may change the default `maxRows`
+value to be unlimited.  If you are using the current default `maxRows`
+value to truncate the result set to 100 rows, you should explicitly
+set `maxRows` to 100 in your application.
+
 #### <a name="resultsethandling"></a> 9.1.2 Working with Result Sets
 
 When the number of query rows is relatively big, or can't be
 predicted, it is recommended to use a [ResultSet](#resultsetclass)
-with callbacks, as described in this section, or via the ResultSet
-stream wrapper, as described [later](#streamingresults).  This
-prevents query results being unexpectedly truncated by the
-[`maxRows`](#propdbmaxrows) limit and removes the need to over-size
-`maxRows` to avoid such truncation.  Otherwise, for queries that
-return a known small number of rows, non-ResultSet queries may have
-less overhead.
+with callbacks, as described in this section, or via query streaming,
+as described [later](#streamingresults).  This prevents query results
+being unexpectedly truncated by the [`maxRows`](#propdbmaxrows) limit.
+Otherwise, for queries that return a known small number of rows,
+non-ResultSet queries may have less overhead.
 
 A ResultSet is created when the `execute()` option property
 [`resultSet`](#executeoptions) is *true*.  ResultSet rows can be
 fetched using [`getRow()`](#getrow) or [`getRows()`](#getrows) on the
-`execute()` callback function's `result.resultSet` parameter property.
+`execute()` callback function's `result.resultSet` property.
 
 For ResultSets, the [`maxRows`](#propdbmaxrows) limit is ignored.  All
 rows can be fetched.
@@ -3398,13 +3496,13 @@ value of [outFormat](#propdboutformat).
 See [resultset1.js][38], [resultset2.js][39] and [refcursor.js][40]
 for full examples.
 
-To fetch one row at a time use `getRow()` :
+To fetch one row at a time use getRow() :
 
 ```javascript
 connection.execute(
   "SELECT employee_id, last_name FROM employees ORDER BY employee_id",
   [], // no bind variables
-  { resultSet: true }, // return a ResultSet.  Default is false
+  { resultSet: true }, // return a Result Set.  Default is false
   function(err, result)
   {
     if (err) { . . . }
@@ -3418,9 +3516,9 @@ function fetchOneRowFromRS(connection, resultSet)
     function (err, row)
     {
       if (err) {
-         . . .           // close the ResultSet and release the connection
+         . . .           // close the Result Set and release the connection
       } else if (!row) { // no rows, or no more rows
-        . . .            // close the ResultSet and release the connection
+        . . .            // close the Result Set and release the connection
       } else {
         console.log(row);
         fetchOneRowFromRS(connection, resultSet);  // get next row
@@ -3429,7 +3527,8 @@ function fetchOneRowFromRS(connection, resultSet)
 }
 ```
 
-It is generally more efficient to fetch multiple rows at a time using `getRows()`:
+It is generally more efficient to fetch multiple rows at a time using `getRows()1:
+
 
 ```javascript
 var numRows = 10;  // number of rows to return from each call to getRows()
@@ -3466,7 +3565,7 @@ function fetchRowsFromRS(connection, resultSet, numRows)
 }
 ```
 
-#### <a name="streamingresults"></a> 9.1.3 Streaming Query Results
+#### <a name="streamingresults"></a> 9.1.3 Query Streaming
 
 Streaming query results allows data to be piped to other streams, for
 example when dealing with HTTP responses.
@@ -3484,16 +3583,16 @@ indicates the end of the query results.
 
 The connection must remain open until the stream is completely read.
 
-The query stream implementation is a wrapper over the
-[ResultSet Class](#resultsetclass).  In particular, calls to
+The query stream implementation is a wrapper over the [ResultSet
+Class](#resultsetclass).  In particular, calls to
 [getRows()](#getrows) are made internally to fetch each successive
 subset of data, each row of which will generate a `data` event.  The
 number of rows fetched from the database by each `getRows()` call is
-set to the value of [`oracledb.maxRows`](#propdbmaxrows).  This value
+set to the value of [`oracledb.fetchArraySize`](#propdbfetcharraysize)
+or the option [`fetchArraySize`](#propexecfetcharraysize).  This value
 does not alter the number of rows returned by the stream since
 `getRows()` will be called each time more rows are needed.  However
-the value can be used to tune performance, as also can the value of
-[`oracledb.prefetchRows`](#propdbprefetchrows).
+the value can be used to tune performance.
 
 Query results must be fetched to completion to avoid resource leaks.
 The ResultSet `close()` call for streaming query results will be
@@ -3995,60 +4094,175 @@ you may want to bind using `type: oracledb.STRING`.  Output would be:
 { x: '-71.48923', y: '42.72347' }
 ```
 
-#### <a name="rowprefetching"></a> 9.1.7 Row Prefetching
+#### <a name="pagingdata"></a> 9.1.7 Limiting Rows and Creating Paged Datasets
 
-[Prefetching]([46])
-is a query tuning feature allowing resource usage to be
-optimized.  It allows multiple rows to be returned in each network
-trip from Oracle Database to node-oracledb when a
-[ResultSet](#resultsetclass) is used for query or REF CURSOR data.
-The prefetch size does not affect when, or how many, rows are returned
-by node-oracledb to the application.  The buffering of rows is handled
-by Oracle's underlying client libraries.
+Query data is commonly broken into small sets for two reasons:
 
-By default [`prefetchRows`](#propdbprefetchrows) is 100 for
-[ResultSet](#resultsetclass) fetches.  The application can choose a
-different default prefetch size or change it for each query, as
-determined by user bench-marking.
+- 'web pagination' that allows moving from one set of rows to a next,
+  or previous, set.
 
-The default prefetch size was heuristically chosen to give decent
-performance for developers who do not read documentation.  Skilled
-developers should benchmark their applications and adjust the prefetch
-value of each query for optimum performance, memory use, and network
-utilization.
+- Fetching of consectitive small sets of data for processing.  This
+  happens because the number of records is too large for Node.js to
+  handle at the same time.
 
-For queries returning small sets of rows, reduce the default prefetch
-to avoid unnecessary memory allocation and initialization.  For
-queries that return only a single row the minimum recommended prefetch
-value is 2.  This value lets node-oracledb fetch one row and check for
-end-of-fetch at the same time.
+The latter can be handled by [ResultSets](#resultsethandling) or
+[`queryStream()`](#querystream) with one execution of the SQL query as
+discsussed in those links.
 
-The value of `prefetchRows` size is ignored when *not* using a
-ResultSet.
+How to do 'web pagination' is discussed in this section.  For each
+'page' of results, a SQL query is executed to get the appropriate set
+of rows from a table.  Since the query will be executed more than
+once, make sure to use bind variables for row numbers and row limits.
 
-Prefetching from REF CURSORS requires Oracle Database 11.2 or
-greater.
-
-Prefetching can be disabled by setting `prefetchRows` to 0.
-
-The prefetch size can be changed for the whole application:
+Oracle Database 12c SQL has an [OFFSET / FETCH][5] clause, which is
+similar to the LIMIT keyword of MySQL.
 
 ```javascript
-var oracledb = require('oracledb');
-oracledb.prefetchRows = 2;
+var myoffset = 0;       // don't skip any rows (start at row 1)
+var mymaxnumrows = 20;  // get 20 rows
+
+connection.execute(
+  `SELECT last_name
+   FROM employees
+   ORDER BY last_name
+   OFFSET :offset ROWS FETCH NEXT :maxnumrows ROWS ONLY`,
+  {offset: myoffset, maxnumrows: mymaxnumrows},
+. . .
 ```
 
-Alternatively the prefetch size can be changed for individual queries
-in the `execute()` [`options`](#executeoptions) parameter:
+See [rowlimit.js][84].
+
+You can use a basic [`execute()`](#execute) or a
+[ResultSet](#resultsetclass), or [`queryStream()`](#querystream) with
+your query.  For basic `execute()` fetches, make sure that
+`oracledb.maxRows` is greater than the value bound to `:maxnumrows`.
+
+In applications where the SQL query is not known in advance, this
+method sometimes involves appending the `OFFSET` clause to the 'real'
+user query. Be very careful to avoid SQL injection security issues.
+
+As an anti-example, another way to limit the number of rows returned
+involves setting `maxRows`.  However it is more efficient to let
+Oracle Database do the row selection in the SQL query and only return
+the exact number of rows required to node-oracledb.
+
+For Oracle Database 11g and earlier there are several alternative ways
+to limit the number of rows returned.  Refer to [Oracle Magazine][85]
+for details.
+
+The old, canonical paging query is:
+
+```SQL
+SELECT *
+FROM (SELECT a.*, ROWNUM AS rnum
+      FROM (YOUR_QUERY_GOES_HERE -- including the order by) a
+      WHERE ROWNUM <= MAX_ROW)
+WHERE rnum >= MIN_ROW
+```
+
+Here, `MIN_ROW` is the row number of first row and `MAX_ROW` is the
+row number of the last row to return.  For example:
+
+```SQL
+SELECT *
+FROM (SELECT a.*, ROWNUM AS rnum
+      FROM (SELECT last_name FROM employees ORDER BY last_name) a
+      WHERE ROWNUM <= 20)
+WHERE rnum >= 1
+```
+
+This always has an 'extra' column, here called RNUM.
+
+An alternative and preferred query syntax for Oracle Database 11g uses
+the analytic `ROW_NUMBER()` function. For example to get the 1st to
+20th names the query is:
+
+```SQL
+SELECT last_name FROM
+(SELECT last_name,
+        ROW_NUMBER() OVER (ORDER BY last_name) AS myr
+        FROM employees)
+WHERE myr BETWEEN 1 and 20
+```
+
+#### <a name="autoincrement"></a> 9.1.8 Auto-Increment Columns
+
+In Oracle Database 12c you can create tables with auto-incremented
+values.  This is useful to generate unique primary keys for your data
+when ROWID or UROWID are not preferred.
+
+In SQL*Plus execute:
+
+```SQL
+CREATE TABLE mytable
+  (myid NUMBER(11) GENERATED BY DEFAULT ON NULL AS IDENTITY (START WITH 1),
+   mydata VARCHAR2(20)
+  )
+```
+
+Refer to the [CREATE TABLE identity column documentation][86].
+
+If you already have a sequence `myseq` you can use values from it to
+auto-increment a column value like this:
+
+```SQL
+CREATE TABLE mytable
+  (myid NUMBER DEFAULT myseq.NEXTVAL,
+   mydata VARCHAR2(20)
+  )
+```
+
+This also requires Oracle Database 12c.
+
+Prior to Oracle Database 12c, auto-increment columns in Oracle
+Database can be created using a sequence generator and a trigger.
+
+Sequence generators are defined in the database and return Oracle
+numbers.  Sequence numbers are generated independently of tables.
+Therefore, the same sequence generator can be used for more than one
+table or anywhere that you want to use a unique number.  You can get a
+new value from a sequence generator using the NEXTVAL operator in a
+SQL statement.  This gives the next available number and increments
+the generator.  The similar CURRVAL operator returns the current value
+of a sequence without incrementing the generator.
+
+A trigger is a PL/SQL procedure that is automatically invoked at a
+predetermined point.  In this example a trigger is invoked whenever an
+insert is made to a table.
+
+In SQL*Plus run:
+
+```SQL
+CREATE SEQUENCE myseq;
+CREATE TABLE mytable (myid NUMBER PRIMARY KEY, mydata VARCHAR2(20));
+CREATE TRIGGER mytrigger BEFORE INSERT ON mytable FOR EACH ROW
+BEGIN
+  :new.myid := myseq.NEXTVAL;
+END;
+/
+```
+
+Prior to Oracle Database 11g replace the trigger assignment with a
+SELECT like:
+
+```SQL
+SELECT myseq.NEXTVAL INTO :new.myid FROM dual;
+```
+
+##### Getting the Last Insert ID
+
+To get the automatically inserted identifier in node-oracledb, use a
+[DML RETURNING](#dmlreturn) clause:
 
 ```javascript
+. . .
 connection.execute(
-  "SELECT last_name FROM employees",
-  [],
-  {resultSet: true, prefetchRows: 2},
-  function(err, result)
+  "INSERT INTO mytable (mydata) VALUES ('Hello') RETURN myid INTO :id",
+  {id : {type: oracledb.NUMEBR, dir: oracledb.BIND_OUT } },
+  function (err, result)
   {
-     . . .
+    if (err) { console.error(err.message); return; }
+    console.log(result.outBinds.id);  // print the ID of the inserted row
   });
 ```
 
@@ -5329,44 +5543,10 @@ No duplicate binds are allowed in a DML statement with a `RETURNING`
 clause, and no duplication is allowed between bind parameters in the
 DML section and the `RETURNING` section of the statement.
 
-One common use case is to return an 'auto incremented' key values.
-Given a table:
+One common use case is to return an 'auto incremented' key values, see
+[Auto-Increment Columns](#autoincrement).
 
-```sql
-CREATE TABLE itinerary (
-    id NUMBER(11) GENERATED BY DEFAULT ON NULL AS IDENTITY(START WITH 1),
-    city VARCHAR2(40))
-```
-
-Note: versions of Oracle Database prior to 12.1 use a SEQUENCE and
-PL/SQL TRIGGER to auto generate key values.
-
-The auto-generated key values can be returned like:
-
-```javascript
-var oracledb = require('oracledb');
-. . .
-connection.execute(
-   "INSERT INTO itinerary (city) VALUES (:cbv)"
- + "RETURNING id INTO :idbv",
-  {
-    cbv:  "Melbourne",
-    idbv: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
-  },
-  function(err, result)
-  {
-    if (err) { console.error(err); return; }
-    console.log(result.outBinds);
-  });
-```
-
-This would produce output similar to:
-
-```
-{ idbv: [ 1 ] }
-```
-
-A second example of DML RETURNING binds is:
+An example of DML RETURNING binds is:
 
 ```javascript
 var oracledb = require('oracledb');
@@ -5422,10 +5602,6 @@ application does not want to continue getting more rows.  If the REF
 CURSOR is set to NULL or is not set in the PL/SQL procedure then the
 returned ResultSet is invalid and methods like `getRows()` will
 return an error when invoked.
-
-When using Oracle Database 11.2 or greater, then
-[`prefetchRows`](#propdbprefetchrows) can be used to tune the
-performance of fetching REF CURSORS.
 
 Given a PL/SQL procedure defined as:
 
@@ -5839,11 +6015,11 @@ statement is executed irrespective of the value of `autoCommit`.
 ## <a name="stmtcache"></a> 16. Statement Caching
 
 Node-oracledb's [`execute()`](#execute) and
-[`queryStream()`](#querystream) methods use the [Oracle OCI statement
-cache][61] to make re-execution of statements efficient.  This cache
-removes the need for the separate 'prepare' or 'parse' method which is
-sometimes seen in other Oracle APIs: there is no separate method in
-node-oracledb.
+[`queryStream()`](#querystream) methods use the [Oracle Call Interface
+statement cache][61] to make re-execution of statements efficient.
+This cache removes the need for the separate 'prepare' or 'parse'
+method which is sometimes seen in other Oracle APIs: there is no
+separate method in node-oracledb.
 
 Each non-pooled connection and each session in the connection pool has
 its own cache of statements with a default size of 30.  Statement
@@ -5901,19 +6077,50 @@ satisfaction.
 
 ## <a name="oraaccess"></a> 17. External Configuration
 
-When node-oracledb is linked with Oracle Database 12c client
-libraries, the Oracle client-side configuration file
-[oraaccess.xml][63] can be used to configure some behaviors of
-node-oracledb.
+The optional Oracle client-side configuration file [oraaccess.xml][63]
+can be used to configure some behaviors of node-oracledb.  See
+[Optional Client Configuration Files](#tnsadmin).
 
-For example, oraaccess.xml can be used to:
+An oraaccess.xml file is only used when node-oracledb is linked with
+Oracle Database 12c client libraries.
 
-- turn on [Fast Application Notification][64] (FAN) events to enable FAN notifications and [Runtime Load Balancing][65] (RLB)
-- configure [Client Result Caching][66] parameters
-- turn on [Client Statement Cache Auto-tuning][67]
+The following oraaccess.xml file sets the Oracle client
+['prefetch'][79] value to 100 rows.  This value affects every SQL
+query in the application:
 
-Other features can also be enabled.  Refer to the [oraaccess.xml
-documentation][63]
+```
+<?xml version="1.0"?>
+ <oraaccess xmlns="http://xmlns.oracle.com/oci/oraaccess"
+  xmlns:oci="http://xmlns.oracle.com/oci/oraaccess"
+  schemaLocation="http://xmlns.oracle.com/oci/oraaccess
+  http://xmlns.oracle.com/oci/oraaccess.xsd">
+  <default_parameters>
+    <prefetch>
+      <rows>100</rows>
+    </prefetch>
+  </default_parameters>
+</oraaccess>
+```
+
+Prefetching is the number of additional rows the underlying Oracle
+client library fetches whenever node-oracledb requests query data from
+the database.  Prefetching is a tuning option to maximize data
+transfer efficiency and minimize round-trips to the database.  The
+prefetch size does not affect when, or how many, rows are returned by
+node-oracledb to the application.  The cache management is
+transparently handled by the Oracle client libraries. Note, standard
+node-oracledb fetch tuning is via
+[`fetchArraySize`](#propdbfetcharraysize), but changing the prefetch
+value can be useful in some cases such as when modifying the
+application is not feasible.
+
+The oraaccess.xml file has other uses including:
+
+- Turning on [Fast Application Notification][64] (FAN) events to enable FAN notifications and [Runtime Load Balancing][65] (RLB)
+- Configuring [Client Result Caching][66] parameters
+- Turning on [Client Statement Cache Auto-tuning][67]
+
+Refer to the [oraaccess.xml documentation][63].
 
 ## <a name="nls"></a> 18. Globalization and National Language Support (NLS)
 
@@ -6282,6 +6489,57 @@ parameters.
 
 PL/SQL users may be interested in using [PL/Scope][78].
 
+## <a name="migratev1v2"></a> 23. Migrating from node-oracledb 1.13 to node-oracledb 2.0
+
+When upgrading from node-oracledb version 1.13 to version 2.0:
+
+- Review the [CHANGELOG][83].
+
+- Installation has changed.  Pre-built binaries are available for
+  common platforms.  To build from source code, change your
+  package.json dependency to install from GitHub.  Refer to
+  [INSTALL][80].
+
+- Users of Instant Client RPMs must now always have the Instant Client
+  libraries in the library search path.  Refer to [INSTALL][81].
+
+- Users of macOS must now always have the Instant Client
+  libraries in `~/lib` or `/usr/local/lib`.  Refer to [INSTALL][82].
+
+- For queries and REF CURSORS, the internal buffer sizing and tuning
+  of round-trips to Oracle Database is now done with
+  [`fetchArraySize`](#propdbfetcharraysize).  This replaces
+  [`prefetchRows`](#propdbprefetchrows), which is no longer used.  It
+  also replaces the overloaded use of `maxRows` for
+  [`queryStream()`](#querystream).  To upgrade scripts:
+
+  - Replace `prefetchRows` with `fetchArraySize` and make sure all
+    values are greater than 0.
+
+  - Tune `fetchArraySize` instead of `maxRows` for `queryStream()`.
+
+  - Optionally tune `fetchArraySize` for non-ResultSet fetches.
+
+- For non-ResultSet fetches that rely on the default value of
+  [`maxRows`](#propdbmaxrows) to limit the number of rows returned, it
+  is recommended to use an [OFFSET / FETCH](#pagingdata) query clause,
+  or explicitly set `maxRows` to 100 for future portability.
+
+- Review and update code that checks for specific *NJS-XXX* or
+  *DPI-XXX* error messages.
+
+- Ensure that all [ResultSets](#resultsetclass) and [LOBs](#lobclass)
+  are closed prior to calling
+  [`connection.close()`](#connectionclose). Otherwise you will get the
+  error *DPI-1054: connection cannot be closed when open statements or
+  LOBs exist*.
+
+- Test applications to check if changes such as the improved property
+  validation uncover latent problems in your code.
+
+
+
+
 [1]: https://www.npmjs.com/package/oracledb
 [2]: https://github.com/oracle/node-oracledb/blob/master/INSTALL.md
 [3]: https://github.com/oracle/node-oracledb/tree/master/examples
@@ -6360,3 +6618,11 @@ PL/SQL users may be interested in using [PL/Scope][78].
 [76]: https://docs.oracle.com/database/122/REFRN/V-SQL_BIND_CAPTURE.htm#REFRN30310
 [77]: https://docs.oracle.com/database/122/ARPLS/DBMS_MONITOR.htm#ARPLS67178
 [78]: https://docs.oracle.com/database/122/ADFNS/plscope.htm
+[79]: https://docs.oracle.com/database/122/LNOCI/using-sql_statements-in-oci.htm#GUID-7AE9DBE2-5316-4802-99D1-969B72823F02
+[80]: https://github.com/oracle/node-oracledb/blob/master/INSTALL.md#github
+[81]: https://github.com/oracle/node-oracledb/blob/master/INSTALL.md#instrpm
+[82]: https://github.com/oracle/node-oracledb/blob/master/INSTALL.md#instosx
+[83]: https://github.com/oracle/node-oracledb/blob/master/CHANGELOG.md
+[84]: https://github.com/oracle/node-oracledb/tree/master/examples/rowlimit.js
+[85]: http://www.oracle.com/technetwork/issue-archive/2007/07-jan/o17asktom-093877.html
+[86]: http://docs.oracle.com/database/121/SQLRF/statements_7002.htm#CJAHCAFF

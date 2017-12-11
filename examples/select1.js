@@ -59,10 +59,13 @@ oracledb.getConnection(
 
       // execute() options argument.  Since the query only returns one
       // row, we can optimize memory usage by reducing the default
-      // maxRows value.  Other options such as the query result format
-      // or whether to get extra metadata could be used:
-      //   { maxRows: 1, outFormat: oracledb.OBJECT, extendedMetaData: true },
-      { maxRows: 1 },
+      // maxRows value.  For the complete list of other options see
+      // the documentation.
+      { maxRows: 1
+        //, outFormat: oracledb.OBJECT  // query result format
+        //, extendedMetaData: true      // get extra metadata
+        //, fetchArraySize: 100         // internal buffer allocation size for tuning
+      },
 
       // The callback function handles the SQL execution results
       function(err, result)

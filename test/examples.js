@@ -904,7 +904,7 @@ describe('3. examples.js', function(){
       connection.execute(
         "SELECT employees_name FROM nodb_eg_emp10",
         [],
-        { resultSet: true, prefetchRows: 50 },
+        { resultSet: true, fetchArraySize: 50 },
         function(err, result) {
           should.not.exist(err);
           (result.resultSet.metaData[0]).name.should.eql('EMPLOYEES_NAME');
@@ -938,7 +938,7 @@ describe('3. examples.js', function(){
       connection.execute(
         "SELECT * FROM nodb_eg_emp10 ORDER BY employees_id",
         [],
-        { resultSet: true, prefetchRows: 110 },
+        { resultSet: true, fetchArraySize: 110 },
         function(err, result) {
           should.not.exist(err);
           (result.resultSet.metaData[0]).name.should.eql('EMPLOYEES_ID');

@@ -83,7 +83,7 @@ njsOracledb::njsOracledb()
     poolMin                 = NJS_POOL_MIN;
     poolIncrement           = NJS_POOL_INCR;
     poolTimeout             = NJS_POOL_TIMEOUT;
-    prefetchRows            = NJS_PREFETCH_ROWS;
+    fetchArraySize          = DPI_DEFAULT_FETCH_ARRAY_SIZE;
     connClass               = "";
     externalAuth            = false;
     lobPrefetchSize         = NJS_LOB_PREFETCH_SIZE;
@@ -144,8 +144,8 @@ void njsOracledb::Init(Handle<Object> target)
             Nan::New<v8::String>("stmtCacheSize").ToLocalChecked(),
             njsOracledb::GetStmtCacheSize, njsOracledb::SetStmtCacheSize);
     Nan::SetAccessor(temp->InstanceTemplate(),
-            Nan::New<v8::String>("prefetchRows").ToLocalChecked(),
-            njsOracledb::GetPrefetchRows, njsOracledb::SetPrefetchRows);
+            Nan::New<v8::String>("fetchArraySize").ToLocalChecked(),
+            njsOracledb::GetFetchArraySize, njsOracledb::SetFetchArraySize);
     Nan::SetAccessor(temp->InstanceTemplate(),
             Nan::New<v8::String>("autoCommit").ToLocalChecked(),
             njsOracledb::GetAutoCommit, njsOracledb::SetAutoCommit);
@@ -423,27 +423,27 @@ NAN_SETTER(njsOracledb::SetStmtCacheSize)
 
 
 //-----------------------------------------------------------------------------
-// njsOracledb::GetPrefetchRows()
-//   Get accessor of "prefetchRows" property.
+// njsOracledb::GetFetchArraySize()
+//   Get accessor of "fetchArraySize" property.
 //-----------------------------------------------------------------------------
-NAN_GETTER(njsOracledb::GetPrefetchRows)
+NAN_GETTER(njsOracledb::GetFetchArraySize)
 {
     njsOracledb *oracledb = (njsOracledb*) ValidateGetter(info);
     if (oracledb)
-        info.GetReturnValue().Set(oracledb->prefetchRows);
+        info.GetReturnValue().Set(oracledb->fetchArraySize);
 }
 
 
 //-----------------------------------------------------------------------------
-// njsOracledb::SetPrefetchRows()
-//   Set accessor of "prefetchRows" property.
+// njsOracledb::SetFetchArraySize()
+//   Set accessor of "fetchArraySize" property.
 //-----------------------------------------------------------------------------
-NAN_SETTER(njsOracledb::SetPrefetchRows)
+NAN_SETTER(njsOracledb::SetFetchArraySize)
 {
     njsOracledb *oracledb = (njsOracledb*) ValidateSetter(info);
     if (oracledb)
-        oracledb->SetPropUnsignedInt(value, &oracledb->prefetchRows,
-                "prefetchRows");
+        oracledb->SetPropPositiveInt(value, &oracledb->fetchArraySize,
+                "fetchArraySize");
 }
 
 

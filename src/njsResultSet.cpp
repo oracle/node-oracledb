@@ -129,6 +129,7 @@ Local<Object> njsResultSet::CreateFromBaton(njsBaton *baton)
     resultSet->outFormat = baton->outFormat;
     resultSet->numQueryVars = baton->numQueryVars;
     resultSet->queryVars = baton->queryVars;
+    resultSet->fetchArraySize = baton->fetchArraySize;
     baton->queryVars = NULL;
     resultSet->activeBaton = NULL;
     resultSet->jsConnection.Reset(baton->jsCallingObj);
@@ -164,6 +165,7 @@ bool njsResultSet::CreateFromRefCursor(njsBaton *baton, dpiStmt *dpiStmtHandle,
     resultSet->activeBaton = NULL;
     resultSet->queryVars = queryVars;
     resultSet->numQueryVars = numQueryVars;
+    resultSet->fetchArraySize = baton->fetchArraySize;
     value = scope.Escape(obj);
     return true;
 }
@@ -301,6 +303,7 @@ void njsResultSet::GetRowsCommon(njsBaton *baton)
         baton->numQueryVars = numQueryVars;
         baton->keepQueryInfo = true;
         baton->jsOracledb.Reset(jsOracledb);
+        baton->fetchArraySize = fetchArraySize;
     }
     baton->QueueWork("GetRowsCommon", Async_GetRows, Async_AfterGetRows, 2);
 }

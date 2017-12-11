@@ -66,9 +66,6 @@ Nan::Persistent<FunctionTemplate> njsConnection::connectionTemplate_s;
 // max number of bytes for data converted to string with fetchAsString or fetchInfo
 #define NJS_MAX_FETCH_AS_STRING_SIZE 200
 
-// number of rows prefetched by non-ResultSet queries
-#define NJS_PREFETCH_NON_RESULTSET 2
-
 //-----------------------------------------------------------------------------
 // njsConnection::Init()
 //   Initialization function of Connection class. Maps functions and properties
@@ -158,14 +155,13 @@ bool njsConnection::ProcessQueryVars(njsBaton *baton, dpiStmt *dpiStmtHandle,
         // get query information for the specified column
         vars[i].pos = i + 1;
         vars[i].isArray = false;
-        vars[i].maxArraySize = 0;
         vars[i].bindDir = NJS_BIND_OUT;
         if (dpiStmt_getQueryInfo(dpiStmtHandle, vars[i].pos, &queryInfo) < 0) {
             baton->GetDPIError();
             return false;
         }
         vars[i].name = std::string(queryInfo.name, queryInfo.nameLength);
-        vars[i].maxArraySize = baton->maxRows;
+        vars[i].maxArraySize = baton->fetchArraySize;
         vars[i].dbSizeInBytes = queryInfo.typeInfo.dbSizeInBytes;
         vars[i].precision = queryInfo.typeInfo.precision +
                 queryInfo.typeInfo.fsPrecision;
@@ -247,30 +243,22 @@ bool njsConnection::ProcessQueryVars(njsBaton *baton, dpiStmt *dpiStmtHandle,
 //-----------------------------------------------------------------------------
 bool njsConnection::ProcessFetch(njsBaton *baton)
 {
-    int moreRows, setFetchArraySize = 0;
+    uint32_t i, numRowsToFetch;
     njsVariable *var;
-    uint32_t i;
+    int moreRows;
 
     // create ODPI-C variables and define them, if necessary
     for (i = 0; i < baton->numQueryVars; i++) {
         var = &baton->queryVars[i];
         if (var->dpiVarHandle)
             continue;
-        if (!setFetchArraySize) {
-            setFetchArraySize = 1;
-            if (dpiStmt_setFetchArraySize(baton->dpiStmtHandle,
-                    baton->maxRows) < 0) {
-                baton->GetDPIError();
-                return false;
-            }
-        }
         if (dpiConn_newVar(baton->dpiConnHandle, var->varTypeNum,
-                var->nativeTypeNum, baton->maxRows, var->maxSize, 1, 0, NULL,
-                &var->dpiVarHandle, &var->dpiVarData) < 0) {
+                var->nativeTypeNum, baton->fetchArraySize, var->maxSize, 1, 0,
+                NULL, &var->dpiVarHandle, &var->dpiVarData) < 0) {
             baton->GetDPIError();
             return false;
         }
-        var->maxArraySize = baton->maxRows;
+        var->maxArraySize = baton->fetchArraySize;
         if (dpiStmt_define(baton->dpiStmtHandle, i + 1,
                 var->dpiVarHandle) < 0) {
             baton->GetDPIError();
@@ -278,8 +266,10 @@ bool njsConnection::ProcessFetch(njsBaton *baton)
         }
     }
 
-    // perform fetch
-    if (dpiStmt_fetchRows(baton->dpiStmtHandle, baton->maxRows,
+    // perform fetch, but do not fetch more rows than requested at this time
+    numRowsToFetch = (baton->fetchArraySize < baton->maxRows) ?
+            baton->fetchArraySize : baton->maxRows;
+    if (dpiStmt_fetchRows(baton->dpiStmtHandle, numRowsToFetch,
             &baton->bufferRowIndex, &baton->rowsFetched, &moreRows) < 0) {
         baton->GetDPIError();
         return false;
@@ -320,6 +310,11 @@ bool njsConnection::ProcessVars(njsBaton *baton, njsVariable *vars,
             case DPI_ORACLE_TYPE_STMT:
                 stmt = var->dpiVarData->value.asStmt;
                 if (dpiStmt_getNumQueryColumns(stmt, &var->numQueryVars) < 0) {
+                    baton->GetDPIError();
+                    return false;
+                }
+                if (dpiStmt_setFetchArraySize(stmt,
+                        baton->fetchArraySize) < 0) {
                     baton->GetDPIError();
                     return false;
                 }
@@ -1145,8 +1140,8 @@ bool njsConnection::ProcessOptions(Nan::NAN_METHOD_ARGS_TYPE args,
     Local<Object> options = args[index]->ToObject();
     if (!baton->GetUnsignedIntFromJSON(options, "maxRows", 2, &baton->maxRows))
         return false;
-    if (!baton->GetUnsignedIntFromJSON(options, "prefetchRows", 2,
-            &baton->prefetchRows))
+    if (!baton->GetPositiveIntFromJSON(options, "fetchArraySize", 2,
+            &baton->fetchArraySize))
         return false;
     if (!baton->GetUnsignedIntFromJSON(options, "outFormat", 2,
             &baton->outFormat))
@@ -1459,7 +1454,7 @@ NAN_METHOD(njsConnection::Execute)
         baton->jsOracledb.Reset(connection->jsOracledb);
         oracledb = baton->GetOracledb();
         baton->maxRows = oracledb->getMaxRows();
-        baton->prefetchRows = oracledb->getPrefetchRows();
+        baton->fetchArraySize = oracledb->getFetchArraySize();
         oracledb->SetFetchAsStringTypesOnBaton(baton);
         oracledb->SetFetchAsBufferTypesOnBaton(baton);
         baton->outFormat = oracledb->getOutFormat();
@@ -1500,9 +1495,15 @@ void njsConnection::Async_Execute(njsBaton *baton)
     // for queries, perform defines and ensure that rows have been fetched
     if (baton->numQueryVars > 0) {
 
-        // for result sets, use the default array size, if value is zero
-        if (baton->getRS && baton->maxRows == 0)
-            baton->maxRows = NJS_MAX_ROWS;
+        // adjust fetch array size downward if it exceeds maxRows for basic
+        // fetches (no need to waste memory!)
+        if (!baton->getRS && baton->maxRows < baton->fetchArraySize)
+            baton->fetchArraySize = baton->maxRows;
+        if (dpiStmt_setFetchArraySize(baton->dpiStmtHandle,
+                baton->fetchArraySize) < 0) {
+            baton->GetDPIError();
+            return;
+        }
 
         // perform defines
         baton->queryVars = new njsVariable[baton->numQueryVars];
@@ -1529,9 +1530,9 @@ void njsConnection::Async_Execute(njsBaton *baton)
             return;
     }
 
-    // if not getting a result set, we no longer require the statement so
-    // release it now
-    if (!baton->getRS) {
+    // if not getting a result set and there are no more rows to fetch, we no
+    // longer require the statement so release it now
+    if (!baton->getRS && baton->rowsFetched == baton->maxRows) {
         if (dpiStmt_release(baton->dpiStmtHandle) < 0)
             baton->GetDPIError();
         baton->dpiStmtHandle = NULL;
@@ -1547,6 +1548,38 @@ void njsConnection::Async_AfterExecute(njsBaton *baton, Local<Value> argv[])
 {
     Nan::EscapableHandleScope scope;
     Local<Object> result = Nan::New<v8::Object>();
+    Local<Object> callingObj, rows;
+    Local<Function> callback;
+    njsBaton *newBaton;
+
+    // for direct fetch, first check to see if more round trips are required
+    if (baton->queryVars && !baton->getRS) {
+        if (!njsConnection::GetRows(baton, rows))
+            return;
+        if (baton->rowsFetched < baton->maxRows) {
+            callback = Nan::New<Function>(baton->jsCallback);
+            callingObj = Nan::New(baton->jsCallingObj);
+            newBaton = new njsBaton(callback, callingObj);
+            baton->jsCallback.Reset();
+            newBaton->fetchArraySize = baton->fetchArraySize;
+            newBaton->maxRows = baton->maxRows - baton->rowsFetched;
+            newBaton->fetchMultipleRows = true;
+            newBaton->jsRows.Reset(rows);
+            newBaton->dpiStmtHandle = baton->dpiStmtHandle;
+            baton->dpiStmtHandle = NULL;
+            newBaton->dpiConnHandle = baton->dpiConnHandle;
+            baton->dpiConnHandle = NULL;
+            newBaton->jsOracledb.Reset(baton->jsOracledb);
+            newBaton->queryVars = baton->queryVars;
+            newBaton->numQueryVars = baton->numQueryVars;
+            newBaton->outFormat = baton->outFormat;
+            newBaton->getRS = false;
+            baton->keepQueryInfo = true;
+            newBaton->QueueWork("Execute", Async_ExecuteGetMoreRows,
+                    Async_AfterExecute, 2);
+            return;
+        }
+    }
 
     // handle queries
     if (baton->queryVars) {
@@ -1572,9 +1605,6 @@ void njsConnection::Async_AfterExecute(njsBaton *baton, Local<Value> argv[])
 
         // otherwise, return rows
         } else {
-            Local<Object> rows;
-            if (!GetRows(baton, rows))
-                return;
             Nan::Set(result, Nan::New<v8::String>("rows").ToLocalChecked(),
                     rows);
             Nan::Set(result,
@@ -1601,6 +1631,17 @@ void njsConnection::Async_AfterExecute(njsBaton *baton, Local<Value> argv[])
                 Nan::Undefined());
     }
     argv[1] = scope.Escape(result);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection::Async_ExecuteGetMoreRows()
+//   Worker function for njsConnection::Execute() method called when additional
+// round trips to the database are required.
+//-----------------------------------------------------------------------------
+void njsConnection::Async_ExecuteGetMoreRows(njsBaton *baton)
+{
+    ProcessFetch(baton);
 }
 
 

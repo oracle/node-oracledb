@@ -106,6 +106,7 @@ private:
     dpiStmt *dpiStmtHandle;
     dpiConn *dpiConnHandle;
     uint32_t numQueryVars;
+    uint32_t fetchArraySize;
     njsVariable *queryVars;
     uint32_t outFormat;
     bool extendedMetaData;

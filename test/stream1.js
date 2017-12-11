@@ -546,25 +546,25 @@ describe('13. stream1.js', function () {
     });
   });
 
-  describe('13.3 Testing QueryStream\'s maxRows control', function () {
-    it('13.3.1 should use oracledb.maxRows for fetching', function (done) {
-      var defaultMaxRows;
-      var testMaxRows = 9;
+  describe('13.3 Testing QueryStream\'s fetchArraySize option', function () {
+    it('13.3.1 should use oracledb.fetchArraySize for fetching', function (done) {
+      var defaultFetchArraySize;
+      var testFetchArraySize = 9;
 
-      defaultMaxRows = oracledb.maxRows;
-      oracledb.maxRows = testMaxRows;
+      defaultFetchArraySize = oracledb.fetchArraySize;
+      oracledb.fetchArraySize = testFetchArraySize;
       var stream = connection.queryStream('SELECT employee_name FROM nodb_stream1 ORDER BY employee_name');
 
       stream.on('data', function () {
         stream.pause();
 
         // Using the internal/private caches to validate
-        should.equal(stream._fetchedRows.length, testMaxRows - (1 + stream._readableState.buffer.length));
+        should.equal(stream._fetchedRows.length, testFetchArraySize - (1 + stream._readableState.buffer.length));
         stream._close();
       });
 
       stream.on('close', function() {
-        oracledb.maxRows = defaultMaxRows;
+        oracledb.fetchArraySize = defaultFetchArraySize;
         done();
       });
 
@@ -576,20 +576,5 @@ describe('13. stream1.js', function () {
         done(err);
       });
     });
-
-    it('13.3.2 Negative - should fail with NJS-026 if oracledb.maxRows is zero', function (done) {
-      var defaultMaxRows;
-      var testMaxRows = 0;
-
-      defaultMaxRows = oracledb.maxRows;
-      should.throws(
-        function() {
-          oracledb.maxRows = testMaxRows;
-        },
-        /NJS-026: maxRows must be greater than zero/
-      );
-      oracledb.maxRows = defaultMaxRows;
-      done();
-    }); // 13.3.2
   });
 });

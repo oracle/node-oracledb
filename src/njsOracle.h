@@ -92,7 +92,6 @@ using namespace v8;
 #define NJS_POOL_MAX                    4
 #define NJS_POOL_INCR                   1
 #define NJS_POOL_TIMEOUT                60
-#define NJS_PREFETCH_ROWS               100
 #define NJS_LOB_PREFETCH_SIZE           16384
 #define NJS_POOL_DEFAULT_PING_INTERVAL  60
 
@@ -115,7 +114,7 @@ public:
     unsigned int       getPoolMax() const          { return poolMax; }
     unsigned int       getPoolIncrement() const    { return poolIncrement; }
     unsigned int       getPoolTimeout() const      { return poolTimeout; }
-    unsigned int       getPrefetchRows() const     { return prefetchRows; }
+    unsigned int       getFetchArraySize() const   { return fetchArraySize; }
     const std::string& getConnectionClass() const  { return connClass; }
     bool               getExtendedMetaData() const { return extendedMetaData; }
     bool               IsValid() const             { return true; }
@@ -152,7 +151,7 @@ private:
     static NAN_GETTER(GetVersion);
     static NAN_GETTER(GetConnectionClass);
     static NAN_GETTER(GetExternalAuth);
-    static NAN_GETTER(GetPrefetchRows);
+    static NAN_GETTER(GetFetchArraySize);
     static NAN_GETTER(GetFetchAsString);
     static NAN_GETTER(GetFetchAsBuffer);
     static NAN_GETTER(GetLobPrefetchSize);
@@ -172,7 +171,7 @@ private:
     static NAN_SETTER(SetVersion);
     static NAN_SETTER(SetConnectionClass);
     static NAN_SETTER(SetExternalAuth);
-    static NAN_SETTER(SetPrefetchRows);
+    static NAN_SETTER(SetFetchArraySize);
     static NAN_SETTER(SetFetchAsString);
     static NAN_SETTER(SetFetchAsBuffer);
     static NAN_SETTER(SetLobPrefetchSize);
@@ -190,7 +189,7 @@ private:
     uint32_t maxRows;
 
     uint32_t stmtCacheSize;
-    uint32_t prefetchRows;
+    uint32_t fetchArraySize;
 
     uint32_t poolMin;
     uint32_t poolMax;

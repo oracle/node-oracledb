@@ -36,13 +36,20 @@ var dbConfig = require('./dbconfig.js');
 // executions.  They can also be set or overridden at the individual
 // execute() call level
 
-// The default value for maxRows is 100 meaning only 100 rows will be
-// fetched.  Rows after this will not be fetched.  No error will
-// occur.  Increasing maxRows will increase memory usage so when the
-// number of query rows is large, or not known, it is recommended to
-// use a ResultSet (see resultset1.js) or Stream (see selectstream.js).
+// Use maxRows to limit the number of rows returned.  Rows after this
+// will not be fetched.  No error will occur.  It is prefereable to
+// use a row limiting SQL clause such as OFFSET / FETCH so the
+// database does not process extra rows unnecessarily.
 //
-// oracledb.maxRows = 100;
+// oracledb.maxRows = 100;  // default value is 100
+
+// fetchArraySize can be adjusted to tune data transfer from the
+// Oracle Database to node-oracledb.  The value of fetchArraySize does
+// not affect how, or when, rows are returned by node-oracledb to the
+// application.  Buffering is handled by node-oracledb.  Benchmark to
+// choose the optimal size for each application or query.
+//
+//oracledb.fetchArraySize = 100;  // default value is 100
 
 // This script sets outFormat in the execute() call but it could be set here instead:
 //

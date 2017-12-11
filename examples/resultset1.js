@@ -22,10 +22,21 @@
  *   Executes a query and uses a ResultSet to fetch rows with getRow().
  *   Uses Oracle's sample HR schema.
  *
+ *   Note using queryStream() or getRows() is recommended instead of
+ *   getRow().
+ *
  *****************************************************************************/
 
 var oracledb = require('oracledb');
 var dbConfig = require('./dbconfig.js');
+
+// fetchArraySize can be adjusted to tune data transfer from the
+// Oracle Database to node-oracledb.  The value of fetchArraySize does
+// not affect how, or when, rows are returned by node-oracledb to the
+// application.  Buffering is handled by node-oracledb.  Benchmark to
+// choose the optimal size for each application or query.
+//
+//oracledb.fetchArraySize = 100;  // default value is 100
 
 var rowCount = 0;
 
