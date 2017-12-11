@@ -9,8 +9,7 @@ Use node-oracledb to connect Node.js 4, 6, 8 and 9 to Oracle Database.
 
 The add-on is stable, well documented, and has a comprehensive test suite.
 
-The node-oracledb project is open source and maintained by Oracle Corp.  The home page is on the
-[Oracle Technology Network][1].
+The node-oracledb project is open source and maintained by Oracle Corp.
 
 ### Node-oracledb supports:
 
@@ -23,7 +22,7 @@ The node-oracledb project is open source and maintained by Oracle Corp.  The hom
 - [Smart mapping between JavaScript and Oracle types with manual override available][11]
 - [Data binding using JavaScript types, objects or arrays][12]
 - [Transaction Management][13]
-- [Inbuilt Connection Pool with Queueing, Aliasing and Liveness checking][14]
+- [Inbuilt Connection Pool with Queuing, Aliasing and Liveness checking][14]
 - [Database Resident Connection Pooling (DRCP)][15]
 - [External Authentication][16]
 - [Array Fetches][17]
@@ -39,29 +38,13 @@ We are actively working on supporting the best Oracle Database
 features, and on functionality requests from [users involved in the
 project][24].
 
+## <a name="start"></a> Getting Started
+
+See [Getting Started with Node-oracledb][1].
+
 ## <a name="installation"></a> Installation
 
-- Run `npm install oracledb` to install from the [npm registry][25].
-
-- Add Oracle 12.2, 12.1 or 11.2 client libraries to your OS library
-  search path, such as `PATH` on Windows, or `LD_LIBRARY_PATH` on
-  Linux, or in `~/lib` on macOS.
-
-  - If your database is remote, then download and unzip the client
-    libraries from the free [Oracle Instant Client][26] "Basic" or
-    "Basic Light" package for your operating system architecture.  On
-    Windows, [Visual Studio redistributables][27] are also required.
-
-  - Alternatively use the client libraries already available in a
-    locally installed database such as the free [Oracle XE][28]
-    release.
-
-  Version 12.2 client libraries can connect to Oracle Database 11.2 or
-  greater. Version 12.1 client libraries can connect to Oracle Database
-  10.2 or greater. Version 11.2 client libraries can connect to Oracle
-  Database 9.2 or greater.
-
-See [INSTALL][29] for details.
+See [Quick Start Node-oracledb Installation][37].
 
 ## <a name="examples"></a> Examples
 
@@ -111,7 +94,7 @@ limitations under the License.
 
 
 
-[1]: http://www.oracle.com/technetwork/database/database-technologies/scripting-languages/node_js/
+[1]: https://github.com/oracle/node-oracledb/blob/master/doc/api.md#getstarted
 [2]: https://github.com/oracle/node-oracledb/blob/master/doc/api.md#asyncawaitoverview
 [3]: https://github.com/oracle/node-oracledb/blob/master/doc/api.md#promiseoverview
 [4]: https://github.com/oracle/node-oracledb/blob/master/doc/api.md#intro
@@ -147,3 +130,4 @@ limitations under the License.
 [34]: https://github.com/oracle/node-oracledb/blob/master/test/README.md
 [35]: https://github.com/oracle/node-oracledb/blob/master/CONTRIBUTING.md
 [36]: http://www.apache.org/licenses/LICENSE-2.0
+[37]: https://github.com/oracle/node-oracledb/blob/master/INSTALL.md#quickstart

@@ -18,6 +18,7 @@ limitations under the License.
 ## Contents
 
 1. [Introduction](#intro)
+  - 1.1 [Getting Started with Node-oracledb](#getstarted)
 2. [Errors](#errorobj)
   - 2.1 [Error Properties](#properror)
 3. [Oracledb Class](#oracledbclass)
@@ -204,17 +205,44 @@ The [*node-oracledb*][1] add-on for Node.js powers high performance Oracle Datab
 This document shows how to use node-oracledb.  The API reference is in
 sections 2 - 7 and the user guide in subsequent sections.
 
-For how to install node-oracledb, see [INSTALL][2].
-
 The node-oracledb API is a generic Oracle Database access layer.
 Almost all the functionality described here is common across all
 current Oracle Databases.  However the documentation may describe some
 database features that are in specific Oracle Database versions,
 editions, or require additional database options or packs.
 
-### Example: Simple SELECT statement in Node.js with Callbacks
+### <a name="getstarted"></a> 1.1 Getting Started with Node-oracledb
+
+Install Node.js from [nodejs.org][88].
+
+Install node-oracledb using the [Quick Start Node-oracledb
+Installation][87] steps.
+
+Download node-oracledb [examples][3] or create a script like the one
+below.  As well as callbacks, node-oracledb can also use
+[Promises](#promiseoverview) and [Async/Await](#asyncawaitoverview)
+functions.
+
+Locate your Oracle Database username and password, and the database
+[connection string](#connectionstrings).  The connection string is
+commonly of the format `hostname/servicename`, using the hostname
+where the database is running and the Oracle Database service name of
+the database instance.
+
+Substitute your username, password and connection string in the code.
+For downloaded examples, put these in [`dbconfig.js`][89].
+
+Run the script, for example:
+
+```
+node myscript.js
+```
+
+#### Example: Simple SELECT statement in Node.js with Callbacks
 
 ```javascript
+// myscript.js
+
 var oracledb = require('oracledb');
 
 oracledb.getConnection(
@@ -261,10 +289,6 @@ With Oracle's sample HR schema, the output is:
 ```
 [ [ 60, 'IT' ], [ 90, 'Executive' ], [ 100, 'Finance' ] ]
 ```
-
-Node-oracledb can also use [Promises](#promiseoverview).
-
-There are more node-oracledb examples in the [examples][3] directory.
 
 Scripts to create Oracle's sample schemas can be found at
 [github.com/oracle/db-sample-schemas][4].
@@ -6651,3 +6675,6 @@ When upgrading from node-oracledb version 1.13 to version 2.0:
 [84]: https://github.com/oracle/node-oracledb/tree/master/examples/rowlimit.js
 [85]: http://www.oracle.com/technetwork/issue-archive/2007/07-jan/o17asktom-093877.html
 [86]: http://docs.oracle.com/database/121/SQLRF/statements_7002.htm#CJAHCAFF
+[87]: https://github.com/oracle/node-oracledb/blob/master/INSTALL.md#quickstart
+[88]: https://nodejs.org/en/download/
+[89]: https://github.com/oracle/node-oracledb/tree/master/examples/dbconfig.js
