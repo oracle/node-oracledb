@@ -230,9 +230,16 @@ describe("149. fetchArraySize2.js", function() {
       basicFetch(fetchArraySizeVal, maxRowsVal, affectedID, done);
     });
 
-    it("149.1.11 maxRows =0, fetchArraySize = table size ", function(done) {
+    it("149.1.11 maxRows = 0, fetchArraySize = table size ", function(done) {
       var fetchArraySizeVal = 1000;
       var maxRowsVal = 0;
+      var affectedID = 0;
+      basicFetch(fetchArraySizeVal, maxRowsVal, affectedID, done);
+    });
+
+    it("149.1.12 maxRows = 9999999, fetchArraySize = table size ", function(done) {
+      var fetchArraySizeVal = 1000;
+      var maxRowsVal = 9999999;
       var affectedID = 0;
       basicFetch(fetchArraySizeVal, maxRowsVal, affectedID, done);
     });
@@ -531,6 +538,13 @@ describe("149. fetchArraySize2.js", function() {
     it("149.3.11 maxRows = 0, fetchArraySize = table size", function(done) {
       var fetchArraySizeVal = 1000;
       var maxRowsVal = 0;
+      var affectedID = 0;
+      testQueryStream(fetchArraySizeVal, maxRowsVal, affectedID, done);
+    });
+
+    it("149.3.12 maxRows = 9999999, fetchArraySize = table size", function(done) {
+      var fetchArraySizeVal = 1000;
+      var maxRowsVal = 9999999;
       var affectedID = 0;
       testQueryStream(fetchArraySizeVal, maxRowsVal, affectedID, done);
     });

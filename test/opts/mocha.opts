@@ -163,3 +163,5 @@ test/fetchArraySize4.js
 test/fetchArraySize5.js
 test/fetchArraySize6.js
 test/fetchArraySize7.js
+test/fetchArraySize8.js
+test/fetchArraySize9.js
