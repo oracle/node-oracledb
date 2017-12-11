@@ -157,7 +157,8 @@ additional tools to build from source code:
   `python --version` to find the version you have.
 
   If another version of Python occurs first in your binary path then,
-  when you install node-oracledb, use the `--python` option to
+  when you install node-oracledb, then run `npm config set python
+  /wherever/python-2.7/bin/python` or use the `--python` option to
   indicate the correct version.  For example: `npm install
   --python=/wherever/python-2.7/bin/python oracledb`.
 
@@ -179,7 +180,8 @@ If source code is being compiled you need:
   4.7 or later][5] or upgrade to Oracle Linux 7.
 
 - Python 2.7 for node-gyp.  If another version of Python occurs first
-  in your binary path then, when you install node-oracledb, use the
+  in your binary path then, when you install node-oracledb, then run
+  `npm config set python /wherever/python-2.7/bin/python` or use the
   `--python` option to indicate the correct version.  For example:
   `npm install --python=/whereever/python-2.7/bin/python oracledb`.
 
@@ -334,7 +336,8 @@ If source code is being compiled you need:
   4.7 or later][5] or upgrade to Oracle Linux 7.
 
 - Python 2.7 for node-gyp.  If another version of Python occurs first
-  in your binary path then, when you install node-oracledb, use the
+  in your binary path then, when you install node-oracledb, then run
+  `npm config set python /wherever/python-2.7/bin/python` or use the
   `--python` option to indicate the correct version.  For example:
   `npm install --python=/whereever/python-2.7/bin/python oracledb`.
 
@@ -490,7 +493,8 @@ If source code is being compiled you need:
   4.7 or later][5] or upgrade to Oracle Linux 7.
 
 - Python 2.7 for node-gyp.  If another version of Python occurs first
-  in your binary path then, when you install node-oracledb, use the
+  in your binary path then, when you install node-oracledb, then run
+  `npm config set python /wherever/python-2.7/bin/python` or use the
   `--python` option to indicate the correct version.  For example:
   `npm install --python=/whereever/python-2.7/bin/python oracledb`.
 
