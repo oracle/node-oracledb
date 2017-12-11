@@ -304,8 +304,10 @@ void njsBaton::AsyncAfterWorkCallback(uv_work_t *req, int status)
     Local<Value> *callbackArgs = new Local<Value>[baton->numCallbackArgs];
     unsigned int i, numCallbackArgs = baton->numCallbackArgs;
 
-    // set all parameters as undefined
-    for (i = 0; i < numCallbackArgs; i++)
+    // set all parameters but the first as undefined; the first parameter is
+    // always expected to be the error and should be null
+    callbackArgs[0] = Nan::Null();
+    for (i = 1; i < numCallbackArgs; i++)
         callbackArgs[i] = Nan::Undefined();
 
     // if no error so far, call the after work callback, if needed
