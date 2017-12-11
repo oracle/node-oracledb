@@ -160,3 +160,6 @@ test/fetchArraySize1.js
 test/fetchArraySize2.js
 test/fetchArraySize3.js
 test/fetchArraySize4.js
+test/fetchArraySize5.js
+test/fetchArraySize6.js
+test/fetchArraySize7.js
