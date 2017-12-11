@@ -24,6 +24,8 @@
  *   pre-built node-oracleb binary from GitHub if one is available, or
  *   gives a message on how to compile one from source code.
  *
+ *   Set NODE_ORACLEDB_TRACE_INSTALL=TRUE for installation trace output.
+ *
  * MAINTENANCE NOTES
  *   - This file should run with Node 4 or later.
  *   - This file should only ever 'require' packages included in core Node.js.
@@ -216,7 +218,7 @@ function getFileReadStreamByProxy(hostname, path, proxyHostname, proxyPort) {
         reject(new Error('Error: HTTP proxy request for ' + hostname + path + ' failed with code ' + res.statusCode));
         return;
       } else {
-        getFileReadStreamBase(hostname, path, socket, false)
+        getFileReadStreamBase(hostname, path, socket)
           .then(fileReadStream => {
             resolve(fileReadStream);
           })
@@ -228,7 +230,7 @@ function getFileReadStreamByProxy(hostname, path, proxyHostname, proxyPort) {
 
 // The getFileReadStreamBase function is the main function that retrieves a remote
 // file read stream.
-function getFileReadStreamBase(hostname, path, socket, agent) {
+function getFileReadStreamBase(hostname, path, socket) {
   return new Promise((resolve, reject) => {
     packageUtil.trace('In getFileReadStreamBase', hostname, path);
 
@@ -238,8 +240,7 @@ function getFileReadStreamBase(hostname, path, socket, agent) {
       {
         host: hostname,
         path: path,
-        socket: socket,
-        agent: agent
+        socket: socket
       },
       function(res) {
         packageUtil.trace('HTTP statusCode =', res.statusCode);
