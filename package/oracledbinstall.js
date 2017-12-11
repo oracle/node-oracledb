@@ -198,7 +198,10 @@ function getFileReadStreamByProxy(hostname, path, proxyHostname, proxyPort) {
       host: proxyHostname,
       port: proxyPort,
       method: 'CONNECT',
-      path: hostname + ':' + PORT
+      path: hostname + ':' + PORT,
+      headers: {
+        'host': hostname + PORT,
+      }
     });
 
     req.on('error', reject);
