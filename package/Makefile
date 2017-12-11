@@ -28,9 +28,10 @@ GIT=git
 NODE=node
 NPM=npm
 
-GITSHA=$(shell $(GIT) rev-parse --short HEAD)
+GITSHA=$(shell $(GIT) rev-parse HEAD)
+SUBMOD=$(shell $(CD) ../odpi && $(GIT) rev-parse HEAD)
+NODEVER=$(shell $(NODE) --version)
 BUILDDATE=$(shell $(DATE))
-SUBMOD="$(shell $(CD) .. && $(GIT) submodule)"  # Old git needs to run this in toplevel
 
 # createpackage.js assumes these paths
 BINARY_PATH_LOCAL=../build/Release/oracledb.node
@@ -58,8 +59,10 @@ endif
 # invokes oracledbinstall.js at install time
 npmpackage:
 	@$(RMDIR) $(TMPDIR)
-	$(MKDIR) -m 755 $(TMPDIR) && $(CP) ./package.json ../index.js ../README.md $(LICENSE_PATH_LOCAL) ../CHANGELOG.md $(TMPDIR) && (echo "NJS SHA: $(GITSHA)" && echo "Package date: $(BUILDDATE)" ) >> $(TMPDIR)/LICENSE.md
-	$(MKDIR) -m 755 $(TMPDIR)/lib && $(CP) ../lib/*.js $(TMPDIR)/lib
+	$(MKDIR) -m 755 $(TMPDIR) && $(CP) ./package.json ../index.js ../README.md $(LICENSE_PATH_LOCAL) ../CHANGELOG.md ../binding.gyp $(TMPDIR)
+	$(MKDIR) -m 755 $(TMPDIR)/lib && $(CP) ../lib/*.js $(TMPDIR)/lib && $(ECHO) "$(GITSHA) $(BUILDDATE)" > $(TMPDIR)/lib/rel.txt
+	$(MKDIR) -m 755 $(TMPDIR)/src && $(CP) ../src/* $(TMPDIR)/src
+	$(MKDIR) -m 755 $(TMPDIR)/odpi && $(MKDIR) -m 755 $(TMPDIR)/odpi/src && $(MKDIR) -m 755 $(TMPDIR)/odpi/include && $(CP) ../odpi/src/* $(TMPDIR)/odpi/src && $(CP) ../odpi/include/* $(TMPDIR)/odpi/include
 	$(MKDIR) -m 755 $(TMPDIR)/package && $(CP) oracledbinstall.js extractpackage.js util.js $(TMPDIR)/package
 	($(CD) $(TMPDIR) && $(TAR) -czf ../oracledb-$(VER).tgz ./*)
 	@$(ECHO) "==> Created generic npm production package for node-oracledb $(VER)"
@@ -73,7 +76,8 @@ npmpackage:
 # Create a package containing (i) the license file and (ii) the
 # node-oracledb binary for the current environment
 binarypackage: $(BINARY_PATH_LOCAL) $(LICENSE_PATH_LOCAL)
-	$(CP) $(LICENSE_PATH_LOCAL) $(LICENSE_PATH_LOCAL).bk && (echo "NJS SHA: $(GITSHA)" && echo $(SUBMOD) && echo "Package date: $(BUILDDATE)") >> $(LICENSE_PATH_LOCAL)
+	$(GIT) checkout $(LICENSE_PATH_LOCAL)
+	$(CP) $(LICENSE_PATH_LOCAL) $(LICENSE_PATH_LOCAL).bk && $(ECHO) "$(GITSHA) $(SUBMOD) $(NODEVER) $(BUILDDATE)" >> $(LICENSE_PATH_LOCAL)
 	$(NODE) createpackage.js
 	$(MV) $(LICENSE_PATH_LOCAL).bk $(LICENSE_PATH_LOCAL)
 	@$(ECHO) "==> Created binary package for Node.js `$(NODE) --version`"

@@ -317,6 +317,7 @@ function installBinary() {
       .then(compressedReadstream => {
         return packageUtil.extract({
           licenseDest: packageUtil.LICENSE_PATH_LOCAL,
+          writeLicense: true,
           binaryDest: packageUtil.BINARY_PATH_LOCAL,
           compressedReadstream: compressedReadstream
         });

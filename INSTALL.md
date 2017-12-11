@@ -1292,29 +1292,28 @@ installing.
 
 ### <a name="offline"></a> 3.12 Node-oracledb Installation Without Internet Access
 
-There are two ways to install node-oracledb on computers that do not
-have internet access or do not have access to the [npm registry][4].
-You can either do a normal install on another machine, or manually
-extract the node-oracledb packages.
+There are several ways to install node-oracledb on computers that do
+not have internet access, or have no access to either the [npm
+registry][4] or [github.com][1].
 
-#### 3.12.1 Normal Install on an Intermediary Machine
+#### 3.12.1 Installing on an Intermediary Machine
 
-On an identical machine that does have access, install node-oracle
-following the [Node-oracledb Installation Instructions](#instructions)
-for that operating system.
+On an identical machine that has access to the internet, install
+node-oracle following the [Node-oracledb Installation
+Instructions](#instructions) for that operating system.
 
 Then copy `node_modules/oracledb` and Oracle client libraries to the
 offline computer.  Windows users should see [Copying node-oracledb
 Binaries on Windows](#winbins) and make sure the correct Visual Studio
 Redistributable is also installed.
 
-#### 3.12.2 Manual Install Using Pre-built Binaries
+#### 3.12.2 Manually Extracting Pre-built Binaries
 
 If pre-built node-oracledb binaries are available for your version
 of Node.js and operating system, you can install manually:
 
-- On a computer that has internet access, navigate to a release on the
-  [GitHub Release][41] page.
+- On a computer that has access to github.com, navigate to a release
+  on the [GitHub Release][41] page.
 
   Download the release's main node-oracledb package, for example
   `oracledb-2.0.15.tgz`.
@@ -1354,21 +1353,25 @@ of Node.js and operating system, you can install manually:
        |-- CHANGELOG.md
        |-- LICENSE.md
        |-- README.md
+       |-- binding.gyp
        |-- index.js
        |-- lib
-       |-- |-- connection.js
-       |-- |-- lob.js
-       |-- |-- oracledb.js
-       |-- |-- pool.js
-       |-- |-- querystream.js
-       |-- |-- resultset.js
-       |-- |-- util.js
-       |-- oracledb-2.0.15.tgz
+       |   |-- connection.js
+       |   |-- lob.js
+       |   |-- oracledb.js
+       |   |-- pool.js
+       |   |-- querystream.js
+       |   |-- resultset.js
+       |   |-- util.js
+       |-- odpi
+       |   |-- . . .
        |-- package
-       |-- |-- extractpackage.js
-       |-- |-- oracledbinstall.js
-       |-- |-- util.js
+       |   |-- extractpackage.js
+       |   |-- oracledbinstall.js
+       |   |-- util.js
        |-- package.json
+       |-- src
+           |-- . . .
   ```
 
 - Locate `node_modules/oracledb/package/extractpackage.js` and use it
@@ -1387,6 +1390,57 @@ of Node.js and operating system, you can install manually:
   Binaries on Windows](#winbins) and make sure the correct Visual
   Studio Redistributable is also installed.
 
+#### 3.12.3 Installing node-oracledb without GitHub Access
+
+Some companies block access to github.com so `npm install oracledb`
+will fail to download binaries, as will installing source code from
+GitHub with `npm install oracle/node-oracledb.git#v2.0.15`.
+
+
+To install node-oracledb in this case, compile the source code
+included in the npm package:
+
+- Use `npm install -verbose oracledb` and locate the URL it uses to
+  download the node-oracledb package, for example
+  `https://registry.npmjs.org/oracledb/-/oracledb-2.0.15.tgz`
+
+  Download and save the package.
+
+- Create a directory such as `oracledb_build` and extract the package
+  inside it:
+
+  ```
+  mkdir oracledb_build
+  mv oracledb-2.0.15.tgz oracledb_build
+  cd oracledb_build
+  tar -xzf oracledb-2.0.15.tgz
+  ```
+
+  The directory contents will be the same as shown in the previous
+  section.
+
+- Edit `package.json` and delete the line that invokes the binary
+  download script:
+
+  ```
+  "install": "node package/oracledbinstall.js",
+  ```
+
+- Either add a dependency on [nan](https://www.npmjs.com/package/nan)
+  to `package.json`, or manually install it:
+
+  ```
+  npm install nan
+  ```
+
+- Install the build prerequisites for compilation, following the
+  [Node-oracledb Installation Instructions](#instructions).
+
+- Build node-oracledb from outside the directory:
+
+  ```
+  npm install ./oracledb_build
+  ```
 
 ## <a name="installingv1"></a> 4. Installing Node-oracledb 1.x
 
@@ -1397,6 +1451,8 @@ add-on you must explictly use its version when installing:
 ```
 npm install oracledb@1.13.1
 ```
+
+This version always requires compilation.
 
 ## <a name="otherresources"></a> 5. Useful Resources for Node-oracledb
 
