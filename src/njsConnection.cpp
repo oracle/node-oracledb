@@ -1583,17 +1583,18 @@ void njsConnection::Async_AfterExecute(njsBaton *baton, Local<Value> argv[])
         }
 
     } else {
-        Nan::ForceSet(result,
+        Nan::DefineOwnProperty (result,
                 Nan::New<v8::String>("outBinds").ToLocalChecked(),
                 GetOutBinds(baton), v8::ReadOnly);
         if (baton->isPLSQL)
             Nan::Set(result,
                     Nan::New<v8::String>("rowsAffected").ToLocalChecked(),
                     Nan::Undefined());
-        else Nan::ForceSet(result,
+        else Nan::DefineOwnProperty(result,
                 Nan::New<v8::String>("rowsAffected").ToLocalChecked(),
                 Nan::New<v8::Integer>( (unsigned int) baton->rowsAffected),
                 v8::ReadOnly);
+
         Nan::Set(result, Nan::New<v8::String>("rows").ToLocalChecked(),
                 Nan::Undefined());
         Nan::Set(result, Nan::New<v8::String>("metaData").ToLocalChecked(),
