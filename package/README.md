@@ -10,7 +10,8 @@ instead of using `npm`).
 The binary install process requires two kinds of package:
 
 - a gzipped tar file like `oracledb-X.Y.Z.tgz` containing JavaScript
-  and ancillary files suitable for npm to install.
+  and ancillary files suitable for npm to install.  This is a generic
+  file used on all platforms.
 
 - a gzipped package like `oracledb-vZ.Y.Z-node-v57-darwin-x64.gz`
   containing the binary add-on.  The package uses a custom format with
@@ -49,7 +50,7 @@ Installation is described in [INSTALL](../INSTALL.md).
       `npm install oracledb` will initially install.
 
     - `make binarypackage` makes a binary package for the current
-      Node.js-node / oracledb / platform combination and generates a
+      Node.js / node-oracledb / platform combination and generates a
       SHA256 for the binary.
 
 - As part of `npm install`, the `package.json` in this directory
@@ -79,7 +80,7 @@ Installation is described in [INSTALL](../INSTALL.md).
   file (with one line per available binary package) to an
   HTTPS-enabled web server to the directory that
   https://your.example.com/yourpath/vX.Y.Z/ resolves to.  Note if the
-  web server has a self-signed certificate, then you you may need to
+  web server has a self-signed certificate, then you may need to
   bypass some npm checks:
 
   ```
