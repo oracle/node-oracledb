@@ -2612,10 +2612,12 @@ sales =
 ```
 
 The `tnsnames.ora` file can be in a default location such as
+`/opt/oracle/instantclient_12_2/network/admin` (if Instant Client is
+in `/opt/oracle/instantclient_12_2`), in
 `$ORACLE_HOME/network/admin/tnsnames.ora` or
-`/etc/tnsnames.ora`. Alternatively set the `TNS_ADMIN` environment
-variable and put the file in `$TNS_ADMIN/tnsnames.ora`.  For more
-information on `tnsnames.ora` files see [General Syntax of
+`/etc/tnsnames.ora`. Alternatively set the [`TNS_ADMIN`][8]
+environment variable and put the file in `$TNS_ADMIN/tnsnames.ora`.
+For more information on `tnsnames.ora` files see [General Syntax of
 tnsnames.ora][18] in the Oracle documentation.
 
 Some older databases may use a 'SID' instead of a 'Service Name'.  A
@@ -6287,6 +6289,7 @@ PL/SQL users may be interested in using [PL/Scope][78].
 [5]: https://docs.oracle.com/database/122/SQLRF/SELECT.htm#GUID-CFA006CA-6FF1-4972-821E-6996142A51C6__BABEAACC
 [6]: https://docs.oracle.com/database/122/LNOCI/oci-programming-advanced-topics.htm#LNOCI16617
 [7]: https://docs.oracle.com/database/122/LNOCI/oci-programming-basics.htm#GUID-D77D0D4A-7483-423A-9767-CBB5854A15CC
+[8]: https://docs.oracle.com/database/122/NETRF/local-naming-parameters-in-tnsnames-ora-file.htm#NETRF260
 [9]: https://docs.oracle.com/database/122/LNOCI/managing-scalable-platforms.htm#LNOCI-GUID-624A4771-58C5-4E2B-8131-E3389F58A0D6
 [10]: https://docs.oracle.com/database/122/LNOCI/managing-scalable-platforms.htm#LNOCI-GUID-8A9F1295-4360-4AC6-99A4-050C5C82E0B0
 [11]: https://docs.oracle.com/database/122/CNCPT/topics-for-database-administrators-and-developers.htm#GUID-89DB0C3C-A36F-4254-8C82-020F5F6DE31F
