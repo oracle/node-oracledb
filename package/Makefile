@@ -26,8 +26,8 @@ GIT=git
 NODE=node
 NPM=npm
 
-GITSHA=$(shell $(GIT) rev-parse HEAD)
-SUBMOD=$(shell $(CD) ../odpi && $(GIT) rev-parse HEAD)
+GITSHA=$(shell $(GIT) --git-dir=../.git rev-parse --verify HEAD)
+SUBMOD=$(shell $(GIT) --git-dir=../odpi/.git rev-parse --verify HEAD)
 NODEVER=$(shell $(NODE) --version)
 BUILDDATE=$(shell $(DATE))
 
