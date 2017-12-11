@@ -1542,6 +1542,10 @@ pool running out of connections.
 When a connection is released, any ongoing transaction on the
 connection is rolled back.
 
+If ResultSets are not released or LOBs are still open when
+`connection.close()` is called, then an error *DPI-1054: connection
+cannot be closed when open statements or LOBs exist* will occur.
+
 After releasing a connection to a pool, there is no
 guarantee a subsequent `getConnection()` call gets back the same
 database connection.  The application must redo any ALTER SESSION
@@ -1614,13 +1618,10 @@ be passed into PL/SQL blocks, or inserted into the database.
 
 When no longer required, Lobs created with `createLob()` should be
 closed with [`lob.close()`](#lobclose) because Oracle Database
-resources will be held open if temporary LOBs are not closed.  If the
-application does not explicitly call `lob.close()`, then the temporary
-tablespace storage for LOBs created with `createLob()` is freed when a
-non-pooled connection is closed, or when a pooled connection is
-removed from a pool due to pool shrinkage or pool termination.  The
-temporary tablespace storage is also freed at end of scope, as long as
-the connection is still open.
+resources are held open if temporary LOBs are not closed.  If LOBs are
+still open when `connection.close()` is called, then an error
+*DPI-1054: connection cannot be closed when open statements or LOBs
+exist* will occur.
 
 Open temporary LOB usage can be monitored using the view
 [`V$TEMPORARY_LOBS`][13].
@@ -2141,6 +2142,10 @@ LOB, such as those created by `createLob()`.
 
 Once a Lob is closed, it cannot be bound.
 
+If LOBs are still open when `connection.close()` is called, then an
+error *DPI-1054: connection cannot be closed when open statements or
+LOBs exist* will occur.
+
 See [Closing Lobs](#closinglobs) for more discussion.
 
 ##### Parameters
@@ -2437,6 +2442,10 @@ promise = close();
 Closes a ResultSet.  Applications should always call this at the end
 of fetch or when no more rows are needed.  It should also be called if
 no rows are ever going to be fetched from the ResultSet.
+
+If you try to close a connection without closing a ResultSet then an
+error *DPI-1054: connection cannot be closed when open statements or
+LOBs exist* will occur.
 
 #### <a name="getrow"></a> 7.2.2 `resultset.getRow()`
 
@@ -3370,9 +3379,12 @@ For ResultSets, the [`maxRows`](#propdbmaxrows) limit is ignored.  All
 rows can be fetched.
 
 When all rows have been fetched, or the application does not want to
-continue getting more rows, then the ResultSet should be freed
-using [`close()`](#close).  The ResultSet should also be explicitly
-closed in the cases where no rows will be fetched from it.
+continue getting more rows, then the ResultSet should be freed using
+[`close()`](#close).  The ResultSet should also be explicitly closed
+in the cases where no rows will be fetched from it.  If you try to
+close a connection without closing a ResultSet then an error
+*DPI-1054: connection cannot be closed when open statements or LOBs
+exist* will occur.
 
 REF CURSORS returned from a PL/SQL block via an `oracledb.CURSOR` OUT
 binds are also available as a ResultSet. See
@@ -4826,12 +4838,7 @@ tablespace storage used by a temporary LOB is released.  Once a Lob is
 closed, it can no longer be bound or used for streaming.
 
 Lobs created with [`createLob()`](#connectioncreatelob) should be
-explicitly closed with [`lob.close()`](#lobclose).  If not explicitly
-closed, these Lobs are closed when the connection is closed (for
-non-pooled connections), or when a pooled connection is removed from a
-pool due to planned pool shrinkage or pool termination.  If
-connections are never removed from the pool, you will have 'LOB leaks'
-and the temporary tablespace will fill up.
+explicitly closed with [`lob.close()`](#lobclose).
 
 Persistent or temporary Lobs returned from the database should be
 closed with `lob.close()` unless they have been automatically closed.
@@ -4841,18 +4848,21 @@ Automatic closing of returned Lobs occurs when:
   - a stream error occurs
   - the Lob was used as the source for an IN OUT bind
 
-If you try to close a Lob
-being used for streaming you will get the error *NJS-023: concurrent
-operations on a Lob are not allowed*.
+If you try to close a Lob being used for streaming you will get the
+error *NJS-023: concurrent operations on a Lob are not allowed*.
 
 The connection must be open when calling `lob.close()` on a temporary
-LOB.  If the connection is closed and temporary LOBs are still open,
-the warning *NJS-049: Temporary LOBs were open when the connection was
-closed* will occur. You should review the application logic and
-explicitly close any open Lobs.  These temporary Lobs will have been
-created with `lob.createLob()` or returned from the database, perhaps
-as the result of a SQL operation like `substr()` on a Lob column.
-Persistent LOBs can be closed without the connection being open.
+LOB.
+
+If you try to close a connection without closing an open Lob, then an
+error *DPI-1054: connection cannot be closed when open statements or
+LOBs exist* will occur.  The error helps prevent 'Temporary LOB leaks'
+that would cause the temporary tablespace to fill up.  You should
+review the application logic and explicitly close any open Lobs.
+These temporary Lobs will have been created with `lob.createLob()` or
+returned from the database, perhaps as the result of a SQL operation
+like `substr()` on a Lob column.  Persistent LOBs can be closed
+without the connection being open.
 
 The `lob.close()` method emits the [Node.js Stream][16] 'close' event
 unless the Lob has already been closed explicitly or automatically.
