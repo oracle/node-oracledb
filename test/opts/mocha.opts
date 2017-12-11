@@ -154,3 +154,9 @@ test/urowidFunctionBindAsString4.js
 test/urowidProcedureBindAsString4.js
 test/urowidProcedureBindAsString5.js
 test/urowidProcedureBindAsString6.js
+
+test/prefetchRows.js
+test/fetchArraySize1.js
+test/fetchArraySize2.js
+test/fetchArraySize3.js
+test/fetchArraySize4.js
