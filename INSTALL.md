@@ -1445,8 +1445,8 @@ If `npm install oracledb` fails:
 
 If `require('oracledb')` fails:
 
-- If you got **DPI-1047: Oracle Client library cannot be loaded** or
-  **NJS-045: cannot load the oracledb add-on binary for Node.js**,
+- If you got **NJS-045: cannot load the oracledb add-on binary for
+  Node.js** or **DPI-1047: Oracle Client library cannot be loaded**,
   then review any messages and the installation instructions.
 
 - Does your Node.js architecture (32-bit or 64-bit) match the Oracle
