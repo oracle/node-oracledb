@@ -202,7 +202,7 @@ function getFileReadStreamByProxy(hostname, path, proxyHostname, proxyPort) {
     req.on('error', reject);
 
     // When this ends, the transfer will be complete
-    req.end('end', function() {});
+    req.end();
 
     req.on('connect', function(res, socket) {
       if (res.statusCode >= 300 && res.statusCode < 400) {  // warning: proxy redirection code is untested
