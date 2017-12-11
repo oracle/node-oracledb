@@ -16,14 +16,12 @@
 CP=cp
 MV=mv
 CD=cd
-MKDIR=mkdir
 ECHO=echo
 DATE=date -u
 SED=sed
 GREP=grep
 RMDIR=rm -rf
 RMALL=rm -f
-TAR=tar
 GIT=git
 NODE=node
 NPM=npm
@@ -43,9 +41,6 @@ MIN=$(shell $(GREP) '\#define \+NJS_NODE_ORACLEDB_MINOR' ../src/njsOracle.h | $(
 PAT=$(shell $(GREP) '\#define \+NJS_NODE_ORACLEDB_PATCH' ../src/njsOracle.h | $(SED) -e 's/[^0-9]*//')
 VER=$(MAJ).$(MIN).$(PAT)
 
-# This must be relative to this directory
-TMPDIR=tmpdir
-
 # The staging-oracledb-X.Y.Z.tgz package will try to download binaries from
 # https://$NODE_ORACLEDB_PACKAGE_HOSTNAME/$NODE_ORACLEDB_PACKAGE_URL_PATH/vX.Y.Z/
 ifndef NODE_ORACLEDB_PACKAGE_HOSTNAME
@@ -58,20 +53,17 @@ endif
 # Create the generic 'npm install' package with a package.json that
 # invokes oracledbinstall.js at install time
 npmpackage:
-	@$(RMDIR) $(TMPDIR)
-	$(MKDIR) -m 755 $(TMPDIR) && $(CP) ./package.json ../index.js ../README.md $(LICENSE_PATH_LOCAL) ../CHANGELOG.md ../binding.gyp $(TMPDIR)
-	$(MKDIR) -m 755 $(TMPDIR)/lib && $(CP) ../lib/*.js $(TMPDIR)/lib && $(ECHO) "$(GITSHA) $(BUILDDATE)" > $(TMPDIR)/lib/rel.txt
-	$(MKDIR) -m 755 $(TMPDIR)/src && $(CP) ../src/* $(TMPDIR)/src
-	$(MKDIR) -m 755 $(TMPDIR)/odpi && $(MKDIR) -m 755 $(TMPDIR)/odpi/src && $(MKDIR) -m 755 $(TMPDIR)/odpi/include && $(CP) ../odpi/src/* $(TMPDIR)/odpi/src && $(CP) ../odpi/include/* $(TMPDIR)/odpi/include
-	$(MKDIR) -m 755 $(TMPDIR)/package && $(CP) oracledbinstall.js extractpackage.js util.js $(TMPDIR)/package
-	($(CD) $(TMPDIR) && $(TAR) -czf ../oracledb-$(VER).tgz ./*)
-	@$(ECHO) "==> Created generic npm production package for node-oracledb $(VER)"
-
-	$(SED) -e "s#'github.com'#'$(NODE_ORACLEDB_PACKAGE_HOSTNAME)'#" $(TMPDIR)/package/oracledbinstall.js > $(TMPDIR)/package/oracledbinstall.js.tmp && $(MV) $(TMPDIR)/package/oracledbinstall.js.tmp $(TMPDIR)/package/oracledbinstall.js
-	$(SED) -e "s#'/oracle/node-oracledb/releases/download/'#'$(NODE_ORACLEDB_PACKAGE_URL_PATH)'#" $(TMPDIR)/package/oracledbinstall.js > $(TMPDIR)/package/oracledbinstall.js.tmp && $(MV) $(TMPDIR)/package/oracledbinstall.js.tmp $(TMPDIR)/package/oracledbinstall.js
-	($(CD) $(TMPDIR) && $(TAR) -czf ../staging-oracledb-$(VER).tgz ./*)
+	$(SED) -e "s#'github.com'#'$(NODE_ORACLEDB_PACKAGE_HOSTNAME)'#" oracledbinstall.js > oracledbinstall.js.tmp && $(MV) oracledbinstall.js.tmp oracledbinstall.js
+	$(SED) -e "s#'/oracle/node-oracledb/releases/download/'#'$(NODE_ORACLEDB_PACKAGE_URL_PATH)'#" oracledbinstall.js > oracledbinstall.js.tmp && $(MV) oracledbinstall.js.tmp oracledbinstall.js
+	$(CP) package.json ../package.json
+	$(ECHO) "$(GITSHA) $(BUILDDATE)" > ../lib/rel.txt
+	$(NPM) pack .. && $(MV) oracledb-$(VER).tgz staging-oracledb-$(VER).tgz
 	@$(ECHO) "==> Created generic npm staging package for node-oracledb $(VER)"
-	@$(RMDIR) $(TMPDIR)
+
+	$(GIT) checkout oracledbinstall.js && $(NPM) pack ..
+	$(GIT) checkout ../package.json
+	@$(RMALL) ../lib/rel.txt
+	@$(ECHO) "==> Created generic npm production package for node-oracledb $(VER)"
 
 # Create a package containing (i) the license file and (ii) the
 # node-oracledb binary for the current environment
@@ -87,7 +79,6 @@ $(BINARY_PATH_LOCAL): cleanbinary
 	($(CD) .. && $(NPM) install)
 
 clean: cleanbinary
-	$(RMDIR) $(TMPDIR)
 	$(RMALL) ../package-lock.json
 	$(RMALL) oracledb-$(VER).tgz staging-oracledb-$(VER).tgz SHASUMS256.txt oracledb-v*-node-*.gz
 
