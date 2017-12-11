@@ -76,7 +76,8 @@ friend class njsILob;
 friend class njsConnection;
 public:
 
-    njsProtoILob() : dpiLobHandle(NULL) {}
+    njsProtoILob() : dpiLobHandle(NULL), dataType(NJS_DATATYPE_DEFAULT),
+            chunkSize(0), length(0), isAutoClose(false) {}
     ~njsProtoILob() {
         if (dpiLobHandle) {
             dpiLob_release(dpiLobHandle);
@@ -112,7 +113,9 @@ public:
     static bool HasInstance(Local<Value> val);
 
 private:
-    njsILob() : dpiLobHandle(NULL), bufferPtr(NULL) {}
+    njsILob() : dpiLobHandle(NULL), dataType(NJS_DATATYPE_DEFAULT),
+            bufferPtr(NULL), isAutoClose(false), pieceSize(0), chunkSize(0),
+            length(0), offset(0) {}
     ~njsILob() {
         if (dpiLobHandle) {
             dpiLob_release(dpiLobHandle);

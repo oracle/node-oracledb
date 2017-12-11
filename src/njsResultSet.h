@@ -78,7 +78,8 @@ public:
 
 private:
 
-    njsResultSet() : dpiStmtHandle(NULL), numQueryVars(0), queryVars(NULL) {}
+    njsResultSet() : dpiStmtHandle(NULL), dpiConnHandle(NULL), numQueryVars(0),
+            queryVars(NULL), outFormat(0), extendedMetaData(false) {}
     ~njsResultSet();
 
     static NAN_METHOD(New);

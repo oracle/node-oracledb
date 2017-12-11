@@ -105,7 +105,9 @@ private:
     static NAN_SETTER(SetConnectionsInUse);
     static NAN_SETTER(SetStmtCacheSize);
 
-    njsPool() : dpiPoolHandle(NULL) {}
+    njsPool() : dpiPoolHandle(NULL), poolMin(0), poolMax(0), poolIncrement(0),
+            poolTimeout(0), stmtCacheSize(0), lobPrefetchSize(0),
+            poolPingInterval(0) {}
     ~njsPool() {
         jsOracledb.Reset();
         if (dpiPoolHandle) {

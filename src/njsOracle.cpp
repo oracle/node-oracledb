@@ -62,7 +62,7 @@
 Nan::Persistent<FunctionTemplate> njsOracledb::oracledbTemplate_s;
 
 // DPI context
-dpiContext *njsOracledb::globalDPIContext;
+dpiContext *njsOracledb::globalDPIContext = NULL;
 
 // common pool/standalone connection creation parameters (fixed)
 dpiCommonCreateParams njsCommonCreateParams;
@@ -88,6 +88,7 @@ njsOracledb::njsOracledb()
     externalAuth            = false;
     lobPrefetchSize         = NJS_LOB_PREFETCH_SIZE;
     poolPingInterval        = NJS_POOL_DEFAULT_PING_INTERVAL;
+    oraClientVer            = 0;
 }
 
 

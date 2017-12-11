@@ -169,8 +169,12 @@ public:
     uint32_t numQueryVars;
     njsVariable *queryVars;
 
-    njsVariable() : dpiVarHandle(NULL), dpiVarData(NULL), lobs(NULL),
-            queryVars(NULL) {}
+    njsVariable() : pos(0), dbTypeNum(DPI_ORACLE_TYPE_VARCHAR),
+            varTypeNum(DPI_ORACLE_TYPE_VARCHAR),
+            nativeTypeNum(DPI_NATIVE_TYPE_BYTES), dpiVarHandle(NULL),
+            dpiVarData(NULL), bindDir(0), maxArraySize(0), maxSize(0),
+            dbSizeInBytes(0), precision(0), scale(0), isArray(false),
+            isNullable(false), lobs(NULL), numQueryVars(0), queryVars(NULL) {}
     ~njsVariable();
     njsDataType DataType();
     njsDBType DBType();
@@ -293,14 +297,18 @@ public:
     Nan::Persistent<Function> jsCallback;
 
     njsBaton(Local<Function> callback, Local<Object> callingObj) :
-            dpiPoolHandle(NULL), dpiConnHandle(NULL), dpiStmtHandle(NULL),
-            dpiLobHandle(NULL), maxRows(0), numQueryVars(0), queryVars(NULL),
-            numBindVars(0), bindVars(NULL), numFetchInfo(0), fetchInfo(NULL),
-            numFetchAsStringTypes(0), fetchAsStringTypes(NULL),
-            numFetchAsBufferTypes(0), fetchAsBufferTypes(NULL),
-            protoILob(NULL), keepQueryInfo(false), isReturning(false),
-            bufferSize(0), bufferPtr(NULL), lobOffset(0), lobAmount(0)
-    {
+            poolMin(0), poolMax(0), poolIncrement(0), poolTimeout(0),
+            poolPingInterval(0), dpiPoolHandle(NULL), dpiConnHandle(NULL),
+            dpiStmtHandle(NULL), dpiLobHandle(NULL), stmtCacheSize(0),
+            lobPrefetchSize(0), maxRows(0), fetchArraySize(0), rowsFetched(0),
+            bufferRowIndex(0), rowsAffected(0), outFormat(0), numQueryVars(0),
+            queryVars(NULL), numBindVars(0), bindVars(NULL), numFetchInfo(0),
+            fetchInfo(NULL), numFetchAsStringTypes(0),
+            fetchAsStringTypes(NULL), numFetchAsBufferTypes(0),
+            fetchAsBufferTypes(NULL), protoILob(NULL), externalAuth(false),
+            getRS(false), autoCommit(false), extendedMetaData(false),
+            keepQueryInfo(false), isReturning(false), isPLSQL(false),
+            bufferSize(0), bufferPtr(NULL), lobOffset(0), lobAmount(0) {
         this->jsCallback.Reset(callback);
         this->jsCallingObj.Reset(callingObj);
         this->callingObj = Nan::ObjectWrap::Unwrap<njsCommon>(callingObj);
