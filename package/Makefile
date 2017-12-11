@@ -13,10 +13,37 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-MAJ=$(shell grep '\#define \+NJS_NODE_ORACLEDB_MAJOR' ../src/njsOracle.h | sed -e 's/[^0-9]*//')
-MIN=$(shell grep '\#define \+NJS_NODE_ORACLEDB_MINOR' ../src/njsOracle.h | sed -e 's/[^0-9]*//')
-PAT=$(shell grep '\#define \+NJS_NODE_ORACLEDB_PATCH' ../src/njsOracle.h | sed -e 's/[^0-9]*//')
+CP=cp
+MV=mv
+CD=cd
+MKDIR=mkdir
+ECHO=echo
+DATE=date -u
+SED=sed
+GREP=grep
+RMDIR=rm -rf
+RMALL=rm -f
+TAR=tar
+GIT=git
+NODE=node
+NPM=npm
+
+GITSHA=$(shell $(GIT) rev-parse --short HEAD)
+BUILDDATE=$(shell $(DATE))
+SUBMOD="$(shell $(CD) .. && $(GIT) submodule)"  # Old git needs to run this in toplevel
+
+# createpackage.js assumes these paths
+BINARY_PATH_LOCAL=../build/Release/oracledb.node
+LICENSE_PATH_LOCAL=../LICENSE.md
+
+# Find the node-oracledb version number
+MAJ=$(shell $(GREP) '\#define \+NJS_NODE_ORACLEDB_MAJOR' ../src/njsOracle.h | $(SED) -e 's/[^0-9]*//')
+MIN=$(shell $(GREP) '\#define \+NJS_NODE_ORACLEDB_MINOR' ../src/njsOracle.h | $(SED) -e 's/[^0-9]*//')
+PAT=$(shell $(GREP) '\#define \+NJS_NODE_ORACLEDB_PATCH' ../src/njsOracle.h | $(SED) -e 's/[^0-9]*//')
 VER=$(MAJ).$(MIN).$(PAT)
+
+# This must be relative to this directory
+TMPDIR=tmpdir
 
 # The staging-oracledb-X.Y.Z.tgz package will try to download binaries from
 # https://$NODE_ORACLEDB_PACKAGE_HOSTNAME/$NODE_ORACLEDB_PACKAGE_URL_PATH/vX.Y.Z/
@@ -27,28 +54,38 @@ ifndef NODE_ORACLEDB_PACKAGE_URL_PATH
 	NODE_ORACLEDB_PACKAGE_URL_PATH=/your-url-path-to-directory/
 endif
 
-# Create a package containing the binary and license files.
-binarypackage:
-	(cd .. && rm -f package-lock.json && npm install)
-	node createpackage.js
-	@echo "==> Created package for Node.js `node --version`"
+# Create the generic 'npm install' package with a package.json that
+# invokes oracledbinstall.js at install time
+npmpackage:
+	@$(RMDIR) $(TMPDIR)
+	$(MKDIR) -m 755 $(TMPDIR) && $(CP) ./package.json ../index.js ../README.md $(LICENSE_PATH_LOCAL) ../CHANGELOG.md $(TMPDIR) && (echo "NJS SHA: $(GITSHA)" && echo "Package date: $(BUILDDATE)" ) >> $(TMPDIR)/LICENSE.md
+	$(MKDIR) -m 755 $(TMPDIR)/lib && $(CP) ../lib/*.js $(TMPDIR)/lib
+	$(MKDIR) -m 755 $(TMPDIR)/package && $(CP) oracledbinstall.js extractpackage.js util.js $(TMPDIR)/package
+	($(CD) $(TMPDIR) && $(TAR) -czf ../oracledb-$(VER).tgz ./*)
+	@$(ECHO) "==> Created generic npm production package for node-oracledb $(VER)"
 
-npmpackage: oracledb-$(VER).tgz
+	$(SED) -e "s#'github.com'#'$(NODE_ORACLEDB_PACKAGE_HOSTNAME)'#" $(TMPDIR)/package/oracledbinstall.js > $(TMPDIR)/package/oracledbinstall.js.tmp && $(MV) $(TMPDIR)/package/oracledbinstall.js.tmp $(TMPDIR)/package/oracledbinstall.js
+	$(SED) -e "s#'/oracle/node-oracledb/releases/download/'#'$(NODE_ORACLEDB_PACKAGE_URL_PATH)'#" $(TMPDIR)/package/oracledbinstall.js > $(TMPDIR)/package/oracledbinstall.js.tmp && $(MV) $(TMPDIR)/package/oracledbinstall.js.tmp $(TMPDIR)/package/oracledbinstall.js
+	($(CD) $(TMPDIR) && $(TAR) -czf ../staging-oracledb-$(VER).tgz ./*)
+	@$(ECHO) "==> Created generic npm staging package for node-oracledb $(VER)"
+	@$(RMDIR) $(TMPDIR)
 
-# Create the npm package with a package.json that invokes oracledbinstall.js at install time
-oracledb-$(VER).tgz:
-	rm -rf ./bundle/
-	mkdir -m 755 bundle
-	cp ./package.json ../index.js ../README.md ../LICENSE.md ../CHANGELOG.md bundle/
-	mkdir -m 755 bundle/lib
-	cp ../lib/*.js bundle/lib/
-	mkdir -m 755 bundle/package
-	cp ./oracledbinstall.js ./extractpackage.js ./util.js bundle/package/
-	(cd bundle && tar -czvf ../oracledb-$(VER).tgz ./*)
-	sed -e "s#'github.com'#'$(NODE_ORACLEDB_PACKAGE_HOSTNAME)'#" bundle/package/oracledbinstall.js > bundle/package/oracledbinstall.js.tmp && mv bundle/package/oracledbinstall.js.tmp bundle/package/oracledbinstall.js
-	sed -e "s#'/oracle/node-oracledb/releases/download/'#'$(NODE_ORACLEDB_PACKAGE_URL_PATH)'#" bundle/package/oracledbinstall.js > bundle/package/oracledbinstall.js.tmp && mv bundle/package/oracledbinstall.js.tmp bundle/package/oracledbinstall.js
-	(cd bundle && tar -czvf ../staging-oracledb-$(VER).tgz ./*)
-	rm -rf ./bundle/
+# Create a package containing (i) the license file and (ii) the
+# node-oracledb binary for the current environment
+binarypackage: $(BINARY_PATH_LOCAL) $(LICENSE_PATH_LOCAL)
+	$(CP) $(LICENSE_PATH_LOCAL) $(LICENSE_PATH_LOCAL).bk && (echo "NJS SHA: $(GITSHA)" && echo $(SUBMOD) && echo "Package date: $(BUILDDATE)") >> $(LICENSE_PATH_LOCAL)
+	$(NODE) createpackage.js
+	$(MV) $(LICENSE_PATH_LOCAL).bk $(LICENSE_PATH_LOCAL)
+	@$(ECHO) "==> Created binary package for Node.js `$(NODE) --version`"
 
-clean:
-	rm -rf oracledb-$(VER).tgz staging-oracledb-$(VER).tgz SHASUMS256.txt oracledb-v*-node-*.gz ../package-lock.json ./bundle/
+# Build the node-oracledb binary
+$(BINARY_PATH_LOCAL): cleanbinary
+	($(CD) .. && $(NPM) install)
+
+clean: cleanbinary
+	$(RMDIR) $(TMPDIR)
+	$(RMALL) ../package-lock.json
+	$(RMALL) oracledb-$(VER).tgz staging-oracledb-$(VER).tgz SHASUMS256.txt oracledb-v*-node-*.gz
+
+cleanbinary:
+	$(RMALL) $(BINARY_PATH_LOCAL)
