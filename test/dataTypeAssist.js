@@ -71,7 +71,7 @@ assist.allDataTypeNames =
 
 assist.data = {
   specialChars: [
-    '\"',
+    '"',
     ' ',
     '\'',
     '%',
@@ -1011,8 +1011,8 @@ var _verifyFetchedValues = function(connection, rs, array, tableName, cb) {
   var amount = array.length;
   rs.getRows(amount, function(err, rows) {
     async.each(
-      rows, 
-      queryAndCompare, 
+      rows,
+      queryAndCompare,
       function(err) {
         should.not.exist(err);
         rs.close(function(err) {
