@@ -22,7 +22,7 @@
  *   143. urowidFunctionBindAsString4.js
  *
  * DESCRIPTION
- *   Testing UROWID(> 50 bytes) plsql function bind inout as String.
+ *   Testing UROWID(> 200 bytes) plsql function bind inout as String.
  *
  * NUMBERING RULE
  *   Test numbers follow this numbering rule:
@@ -59,7 +59,7 @@ describe('143. urowidFunctionBindAsString4.js', function() {
                       "    EXECUTE IMMEDIATE ( ' \n" +
                       "        CREATE TABLE " + tableName_indexed + " ( \n" +
                       "            c1    NUMBER, \n" +
-                      "            c2    VARCHAR2(3000), \n" +
+                      "            c2    VARCHAR2(3189), \n" +
                       "            primary key(c1, c2) \n" +
                       "        ) organization index \n" +
                       "    '); \n" +
@@ -147,23 +147,18 @@ describe('143. urowidFunctionBindAsString4.js', function() {
       sql.executeSql(connection, fun_drop, {}, {}, done);
     });
 
-    it('143.1.1 urowid length > 50', function(done) {
-      var exceptedLen = 50;
-      funBindInOut(fun_execute, exceptedLen, done);
-    });
-
-    it('143.1.2 urowid length > 100', function(done) {
-      var exceptedLen = 100;
-      funBindInOut(fun_execute, exceptedLen, done);
-    });
-
-    it.skip('143.1.3 urowid length > 200', function(done) {
+    it('143.1.1 urowid length > 200', function(done) {
       var exceptedLen = 200;
       funBindInOut(fun_execute, exceptedLen, done);
     });
 
-    it.skip('143.1.4 urowid length > 500', function(done) {
+    it('143.1.2 urowid length > 500', function(done) {
       var exceptedLen = 500;
+      funBindInOut(fun_execute, exceptedLen, done);
+    });
+
+    it('143.1.3 urowid length > 2000', function(done) {
+      var exceptedLen = 2000;
       funBindInOut(fun_execute, exceptedLen, done);
     });
 
@@ -190,23 +185,18 @@ describe('143. urowidFunctionBindAsString4.js', function() {
       sql.executeSql(connection, fun_drop, {}, {}, done);
     });
 
-    it('143.2.1 urowid length > 50', function(done) {
-      var exceptedLen = 50;
-      funBindInOut(fun_execute, exceptedLen, done);
-    });
-
-    it('143.2.2 urowid length > 100', function(done) {
-      var exceptedLen = 100;
-      funBindInOut(fun_execute, exceptedLen, done);
-    });
-
-    it.skip('143.2.3 urowid length > 200', function(done) {
+    it('143.2.1 urowid length > 200', function(done) {
       var exceptedLen = 200;
       funBindInOut(fun_execute, exceptedLen, done);
     });
 
-    it.skip('143.2.4 urowid length > 500', function(done) {
+    it('143.2.2 urowid length > 500', function(done) {
       var exceptedLen = 500;
+      funBindInOut(fun_execute, exceptedLen, done);
+    });
+
+    it('143.2.3 urowid length > 2000', function(done) {
+      var exceptedLen = 2000;
       funBindInOut(fun_execute, exceptedLen, done);
     });
 
@@ -221,6 +211,7 @@ describe('143. urowidFunctionBindAsString4.js', function() {
                      "    update " + tableName_normal + " set content = content_2 where id = id_in; \n" +
                      "    select content into tmp from " + tableName_normal + " where id = id_in; \n" +
                      "    select content into content_1 from " + tableName_normal + " where id = id_in; \n" +
+                     "    select content into content_2 from " + tableName_normal + " where id = id_in; \n" +
                      "    return tmp; \n" +
                      "END; ";
     var fun_execute = "BEGIN :o := nodb_rowid_bind_1443 (:i, :c1, :c2); END;";
@@ -234,21 +225,21 @@ describe('143. urowidFunctionBindAsString4.js', function() {
       sql.executeSql(connection, fun_drop, {}, {}, done);
     });
 
-    it('143.3.1 update with UROWID > 50', function(done) {
+    it('143.3.1 update with UROWID > 200', function(done) {
       var contentLen_1 = 10;
-      var contentLen_2 = 50;
-      funBindOut_update(fun_execute, contentLen_1, contentLen_2, done);
-    });
-
-    it('143.3.2 update with UROWID > 100', function(done) {
-      var contentLen_1 = 50;
-      var contentLen_2 = 100;
-      funBindOut_update(fun_execute, contentLen_1, contentLen_2, done);
-    });
-
-    it.skip('143.3.3 update with UROWID > 200', function(done) {
-      var contentLen_1 = 50;
       var contentLen_2 = 200;
+      funBindOut_update(fun_execute, contentLen_1, contentLen_2, done);
+    });
+
+    it('143.3.2 update with UROWID > 500', function(done) {
+      var contentLen_1 = 50;
+      var contentLen_2 = 500;
+      funBindOut_update(fun_execute, contentLen_1, contentLen_2, done);
+    });
+
+    it('143.3.3 update with UROWID > 2000', function(done) {
+      var contentLen_1 = 50;
+      var contentLen_2 = 2000;
       funBindOut_update(fun_execute, contentLen_1, contentLen_2, done);
     });
 
@@ -277,24 +268,20 @@ describe('143. urowidFunctionBindAsString4.js', function() {
       function(cb) {
         var bindVar_in = {
           i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-          c: { val: urowid, type: oracledb.STRING, dir: oracledb.BIND_INOUT },
-          o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
+          c: { val: urowid, type: oracledb.STRING, dir: oracledb.BIND_INOUT, maxSize: 5000 },
+          o: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 5000 }
         };
         connection.execute(
           fun_execute,
           bindVar_in,
           function(err, result) {
-            if(urowidLen > 200) {
-              should.exist(err);
-              // ORA-06502: PL/SQL: numeric or value error: character string buffer too small
-              (err.message).should.startWith('ORA-06502:');
-            } else {
-              should.not.exist(err);
-              var resultVal_1 = result.outBinds.c;
-              var resultVal_2 = result.outBinds.o;
-              should.strictEqual(resultVal_1, urowid);
-              should.strictEqual(resultVal_2, urowid);
-            }
+            should.not.exist(err);
+            var resultVal_1 = result.outBinds.c;
+            var resultVal_2 = result.outBinds.o;
+            should.strictEqual(resultVal_1.length, urowidLen);
+            should.strictEqual(resultVal_2.length, urowidLen);
+            should.strictEqual(resultVal_1, urowid);
+            should.strictEqual(resultVal_2, urowid);
             cb();
           }
         );
@@ -305,7 +292,7 @@ describe('143. urowidFunctionBindAsString4.js', function() {
   var funBindOut_update = function(fun_exec, contentLen_1, contentLen_2, callback) {
     var str_1 = random.getRandomLengthString(contentLen_1);
     var str_2 = random.getRandomLengthString(contentLen_2);
-    var urowid_1, urowid_2, urowidLen_2, id_1, id_2;
+    var urowid_1, urowid_2, urowidLen_1, urowidLen_2, id_1, id_2;
     async.series([
       function(cb) {
         id_1 = insertID;
@@ -318,12 +305,14 @@ describe('143. urowidFunctionBindAsString4.js', function() {
           function(err, result) {
             should.not.exist(err);
             urowid_1 = result.rows[0][0];
+            urowidLen_1 = urowid_1.length;
+            urowidLen_1.should.be.above(contentLen_1);
             cb();
           }
         );
       },
       function(cb) {
-        id_2 = insertID++;
+        id_2 = insertID + 1;
         var sql_insert = "insert into " + tableName_indexed + " values (" + id_2 + ", '" + str_2 + "')";
         sql.executeInsert(connection, sql_insert, {}, {}, cb);
       },
@@ -334,6 +323,7 @@ describe('143. urowidFunctionBindAsString4.js', function() {
             should.not.exist(err);
             urowid_2 = result.rows[0][0];
             urowidLen_2 = urowid_2.length;
+            urowidLen_2.should.be.above(contentLen_2);
             cb();
           }
         );
@@ -341,25 +331,25 @@ describe('143. urowidFunctionBindAsString4.js', function() {
       function(cb) {
         var bindVar_in = {
           i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-          c1: { val: urowid_1, type: oracledb.STRING, dir: oracledb.BIND_INOUT },
-          c2: { val: urowid_2, type: oracledb.STRING, dir: oracledb.BIND_INOUT },
-          o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
+          c1: { val: urowid_1, type: oracledb.STRING, dir: oracledb.BIND_INOUT, maxSize: 5000 },
+          c2: { val: urowid_2, type: oracledb.STRING, dir: oracledb.BIND_INOUT, maxSize: 5000 },
+          o: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 5000 }
         };
         connection.execute(
           fun_exec,
           bindVar_in,
           function(err, result) {
-            if(urowidLen_2 > 200) {
-              should.exist(err);
-              // ORA-06502: PL/SQL: numeric or value error
-              (err.message).should.startWith('ORA-06502:');
-            } else {
-              should.not.exist(err);
-              var resultVal_1 = result.outBinds.c1;
-              var resultVal_2 = result.outBinds.o;
-              should.strictEqual(resultVal_2, urowid_2);
-              should.strictEqual(resultVal_1, urowid_2);
-            }
+            should.not.exist(err);
+            var resultVal_1 = result.outBinds.c1;
+            var resultVal_2 = result.outBinds.c2;
+            var resultVal_3 = result.outBinds.o;
+            should.strictEqual(resultVal_1.length, urowidLen_2);
+            should.strictEqual(resultVal_2.length, urowidLen_2);
+            should.strictEqual(resultVal_3.length, urowidLen_2);
+            should.strictEqual(resultVal_2, urowid_2);
+            should.strictEqual(resultVal_1, urowid_2);
+            should.strictEqual(resultVal_3, urowid_2);
+            insertID = insertID + 10;
             cb();
           }
         );

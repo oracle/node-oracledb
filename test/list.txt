@@ -3635,30 +3635,28 @@ Overview of node-oracledb functional tests
 
 142. urowidFunctionBindAsString3.js
     142.1 FUNCTION BIND_IN/OUT as UROWID
-        142.1.1 urowid length > 50
-        142.1.2 urowid length > 100
-      - 142.1.3 urowid length > 200
+        142.1.1 urowid length > 200
+        142.1.2 urowid length > 500
+        142.1.3 urowid length > 2000
     142.2 FUNCTION BIND_IN/OUT as string
-        142.2.1 urowid length > 50
-        142.2.2 urowid length > 100
-      - 142.2.3 urowid length > 200
+        142.2.1 urowid length > 200
+        142.2.2 urowid length > 500
+        142.2.3 urowid length > 2000
     142.3 FUNCTION BIND_IN, UPDATE
-        142.3.1 update with UROWID > 50
-        142.3.2 update with UROWID > 100
-      - 142.3.3 update with UROWID > 200
+        142.3.1 update with UROWID > 200
+        142.3.2 update with UROWID > 500
+        142.3.3 update with UROWID > 2000
 
 143. urowidFunctionBindAsString4.js
     143.1 FUNCTION BIND_INOUT as UROWID
-        143.1.1 urowid length > 50
-        143.1.2 urowid length > 100
-      - 143.1.3 urowid length > 200
-      - 143.1.4 urowid length > 500
+        143.1.1 urowid length > 200
+        143.1.2 urowid length > 500
+        143.1.3 urowid length > 2000
     143.2 FUNCTION BIND_INOUT as string
-        143.2.1 urowid length > 50
-        143.2.2 urowid length > 100
-      - 143.2.3 urowid length > 200
-      - 143.2.4 urowid length > 500
+        143.2.1 urowid length > 200
+        143.2.2 urowid length > 500
+        143.2.3 urowid length > 2000
     143.3 FUNCTION BIND_INOUT, UPDATE
-        143.3.1 update with UROWID > 50
-        143.3.2 update with UROWID > 100
-      - 143.3.3 update with UROWID > 200
+        143.3.1 update with UROWID > 200
+        143.3.2 update with UROWID > 500
+        143.3.3 update with UROWID > 2000
