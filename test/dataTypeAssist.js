@@ -1010,7 +1010,7 @@ assist.verifyRefCursorWithFetchAsString = function(connection, tableName, array,
 var _verifyFetchedValues = function(connection, rs, array, tableName, cb) {
   var amount = array.length;
   rs.getRows(amount, function(err, rows) {
-    async.each(
+    async.eachSeries(
       rows,
       queryAndCompare,
       function(err) {
