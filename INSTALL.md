@@ -660,14 +660,14 @@ mkdir ~/lib
 cp instantclient_12_2/{libclntsh.dylib.12.1,libclntshcore.dylib.12.1,libons.dylib,libnnz12.dylib,libociei.dylib} ~/lib/
 ```
 
-For Instant Client 11.2, the OCI libraries must be copied. For example::
+For Instant Client 11.2, the OCI libraries must be copied. For example:
 
 ```
 mkdir ~/lib
 cp /opt/oracle/instantclient_11_2/{libclntsh.dylib.11.1,libnnz11.dylib,libociei.dylib} ~/lib/
 ```
 
-#### 3.2.5 Optionally create the default Oracle Client configuration directory
+#### 3.5.5 Optionally create the default Oracle Client configuration directory
 
 If you intend to co-locate optional Oracle configuration files such as
 [`tnsnames.ora`][15], [`sqlnet.ora`][16], [`ldap.ora`][17], or
@@ -771,7 +771,7 @@ Environment Variables -> System variables -> `PATH` and add your path,
 such as `C:\oracle\instantclient_12_2`.
 
 If you have multiple versions of Oracle libraries installed, make sure
-the desired version occurs first in the path before Node.js is run.
+the desired version occurs first in the path before you run Node.js.
 
 #### 3.6.5 Optionally create the default Oracle Client configuration directory
 
