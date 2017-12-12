@@ -27,7 +27,7 @@ REM ****************************************************************************
 REM
 REM usage: MAKEPKG.BAT [<cmd>]
 REM      : Possible values for <cmd> are: CLEANUP and CREATEBINARY
-REM 
+REM
 REM expected to run this batch file from package sub-directory,
 REM where a fresh clone is created.
 REM

@@ -3736,7 +3736,7 @@ Overview of node-oracledb functional tests
 
 149. fetchArraySize2.js
     149.1 basic fetch with different maxRows and oracledb.fetchArraySize
-        149.1.1 maxRows > table size > oracledb.fetchArraySize 
+        149.1.1 maxRows > table size > oracledb.fetchArraySize
         149.1.2 maxRows > oracledb.fetchArraySize > table size
         149.1.3 table size > maxRows > oracledb.fetchArraySize
         149.1.4 table size > oracledb.fetchArraySize > maxRow
@@ -3746,42 +3746,42 @@ Overview of node-oracledb functional tests
         149.1.8 maxRows = oracledb.fetchArraySize/10
         149.1.9 maxRows = 10 * oracledb.fetchArraySize
         149.1.10 maxRows > fetchArraySize, fetchArraySize = (table size)/10
-        149.1.11 maxRows = 0, fetchArraySize = table size 
-        149.1.12 maxRows = 9999999, fetchArraySize = table size 
-        149.1.13 maxRows = (table size - 1), fetchArraySize = table size 
-        149.1.14 fetchArraySize = (table size - 1), maxRows = table size 
+        149.1.11 maxRows = 0, fetchArraySize = table size
+        149.1.12 maxRows = 9999999, fetchArraySize = table size
+        149.1.13 maxRows = (table size - 1), fetchArraySize = table size
+        149.1.14 fetchArraySize = (table size - 1), maxRows = table size
     149.2 REF CURSORS with different numRows and oracledb.fetchArraySize
-        149.2.1 numRows > table size > oracledb.fetchArraySize 
-        149.2.2 numRows > oracledb.fetchArraySize > table size 
-        149.2.3 table size > numRows > oracledb.fetchArraySize 
+        149.2.1 numRows > table size > oracledb.fetchArraySize
+        149.2.2 numRows > oracledb.fetchArraySize > table size
+        149.2.3 table size > numRows > oracledb.fetchArraySize
         149.2.4 table size > oracledb.fetchArraySize > maxRow
         149.2.5 numRows = oracledb.fetchArraySize < table size
         149.2.6 numRows = oracledb.fetchArraySize = table size
-        149.2.7 numRows = oracledb.fetchArraySize > table size 
+        149.2.7 numRows = oracledb.fetchArraySize > table size
         149.2.8 numRows = oracledb.fetchArraySize/10
         149.2.9 numRows = 10 * oracledb.fetchArraySize
         149.2.10 numRows > fetchArraySize, fetchArraySize = (table size)/10
-        149.2.11 numRows = (table size - 1), fetchArraySize = table size 
-        149.2.12 fetchArraySize = (table size - 1), numRows = table size 
+        149.2.11 numRows = (table size - 1), fetchArraySize = table size
+        149.2.12 fetchArraySize = (table size - 1), numRows = table size
     149.3 queryStream() with different maxRows and oracledb.fetchArraySize
-        149.3.1 maxRows > table size > oracledb.fetchArraySize 
-        149.3.2 maxRows > oracledb.fetchArraySize > table size 
-        149.3.3 table size > maxRows > oracledb.fetchArraySize 
-        149.3.4 table size > oracledb.fetchArraySize > maxRow 
-        149.3.5 maxRows = oracledb.fetchArraySize < table size 
-        149.3.6 maxRows = oracledb.fetchArraySize = table size 
-        149.3.7 maxRows = oracledb.fetchArraySize > table size 
-        149.3.8 maxRows = oracledb.fetchArraySize/10 
-        149.3.9 maxRows = 10 * oracledb.fetchArraySize 
-        149.3.10 maxRows > fetchArraySize, fetchArraySize = (table size)/10 
-        149.3.11 maxRows = 0, fetchArraySize = table size 
-        149.3.12 maxRows = 9999999, fetchArraySize = table size 
-        149.3.13 maxRows = (table size - 1), fetchArraySize = table size  
+        149.3.1 maxRows > table size > oracledb.fetchArraySize
+        149.3.2 maxRows > oracledb.fetchArraySize > table size
+        149.3.3 table size > maxRows > oracledb.fetchArraySize
+        149.3.4 table size > oracledb.fetchArraySize > maxRow
+        149.3.5 maxRows = oracledb.fetchArraySize < table size
+        149.3.6 maxRows = oracledb.fetchArraySize = table size
+        149.3.7 maxRows = oracledb.fetchArraySize > table size
+        149.3.8 maxRows = oracledb.fetchArraySize/10
+        149.3.9 maxRows = 10 * oracledb.fetchArraySize
+        149.3.10 maxRows > fetchArraySize, fetchArraySize = (table size)/10
+        149.3.11 maxRows = 0, fetchArraySize = table size
+        149.3.12 maxRows = 9999999, fetchArraySize = table size
+        149.3.13 maxRows = (table size - 1), fetchArraySize = table size
         149.3.14 fetchArraySize = (table size - 1), maxRows = table size
 
 150. fetchArraySize3.js
     150.1 DML binding
-        150.1.1 oracledb.fetchArraySize = 1 
+        150.1.1 oracledb.fetchArraySize = 1
         150.1.2 oracledb.fetchArraySize = 50
         150.1.3 oracledb.fetchArraySize = 100
         150.1.4 oracledb.fetchArraySize = 1000
@@ -3792,7 +3792,7 @@ Overview of node-oracledb functional tests
         150.2.3 Bind OUT with oracledb.fetchArraySize = 100
         150.2.4 Bind OUT with oracledb.fetchArraySize = 1000
         150.2.5 Bind OUT with oracledb.fetchArraySize = (table size - 1)
-        150.2.6 Bind IN OUT with oracledb.fetchArraySize = 1 
+        150.2.6 Bind IN OUT with oracledb.fetchArraySize = 1
         150.2.7 Bind IN OUT with oracledb.fetchArraySize = 50
         150.2.8 Bind IN OUT with oracledb.fetchArraySize = 100
         150.2.9 Bind IN OUT with oracledb.fetchArraySize = 1000
@@ -3802,8 +3802,8 @@ Overview of node-oracledb functional tests
         150.3.2 Bind OUT with oracledb.fetchArraySize = 50
         150.3.3 Bind OUT with oracledb.fetchArraySize = 100
         150.3.4 Bind OUT with oracledb.fetchArraySize = 1000
-        150.3.5 Bind OUT with oracledb.fetchArraySize = (table size - 1)、
-        150.3.6 Bind IN OUT with oracledb.fetchArraySize = 1 
+        150.3.5 Bind OUT with oracledb.fetchArraySize = (table size - 1)
+        150.3.6 Bind IN OUT with oracledb.fetchArraySize = 1
         150.3.7 Bind IN OUT with oracledb.fetchArraySize = 50
         150.3.8 Bind IN OUT with oracledb.fetchArraySize = 100
         150.3.9 Bind IN OUT with oracledb.fetchArraySize = 1000
@@ -3813,7 +3813,7 @@ Overview of node-oracledb functional tests
     151.1 getRows() of resultSet = true
         151.1.1 numRows > table size > oracledb.fetchArraySize
         151.1.2 numRows > oracledb.fetchArraySize > table size
-        151.1.3 table size > numRows > oracledb.fetchArraySize 
+        151.1.3 table size > numRows > oracledb.fetchArraySize
         151.1.4 table size > oracledb.fetchArraySize > maxRow
         151.1.5 numRows = oracledb.fetchArraySize < table size
         151.1.6 numRows = oracledb.fetchArraySize = table size
@@ -3824,7 +3824,7 @@ Overview of node-oracledb functional tests
         151.1.11 numRows = (table size - 1), fetchArraySize = table size
         151.1.12 fetchArraySize = (table size - 1), numRows = table size
     151.2 getRow() of resultSet = true
-        151.2.1 oracledb.fetchArraySize = 1 
+        151.2.1 oracledb.fetchArraySize = 1
         151.2.2 oracledb.fetchArraySize = 20
         151.2.3 oracledb.fetchArraySize = 50
         151.2.4 oracledb.fetchArraySize = 100
@@ -3832,7 +3832,7 @@ Overview of node-oracledb functional tests
         151.2.6 oracledb.fetchArraySize = 1000
         151.2.7 oracledb.fetchArraySize = (table size - 1)
     151.3 interleaved calls to getRow() and getRows()
-        151.3.1 oracledb.fetchArraySize = 1 
+        151.3.1 oracledb.fetchArraySize = 1
         151.3.2 oracledb.fetchArraySize = 20
         151.3.3 oracledb.fetchArraySize = 50
         151.3.4 oracledb.fetchArraySize = 100
@@ -3852,40 +3852,40 @@ Overview of node-oracledb functional tests
         152.1.8 maxRows = fetchArraySize/10
         152.1.9 maxRows = 10 * fetchArraySize
         152.1.10 maxRows > fetchArraySize, fetchArraySize = (table size)/10
-        152.1.11 maxRows = 0, fetchArraySize = table size 
-        152.1.12 maxRows = (table size - 1), fetchArraySize = table size 
-        152.1.13 fetchArraySize = (table size - 1), maxRows = table size 
+        152.1.11 maxRows = 0, fetchArraySize = table size
+        152.1.12 maxRows = (table size - 1), fetchArraySize = table size
+        152.1.13 fetchArraySize = (table size - 1), maxRows = table size
     152.2 REF CURSORS with different numRows and fetchArraySize
-        152.2.1 numRows > table size > fetchArraySize 
-        152.2.2 numRows > fetchArraySize > table size 
-        152.2.3 table size > numRows > fetchArraySize 
+        152.2.1 numRows > table size > fetchArraySize
+        152.2.2 numRows > fetchArraySize > table size
+        152.2.3 table size > numRows > fetchArraySize
         152.2.4 table size > fetchArraySize > maxRow
         152.2.5 numRows = fetchArraySize < table size
-        152.2.6 numRows = fetchArraySize = table size 
-        152.2.7 numRows = fetchArraySize > table size 
+        152.2.6 numRows = fetchArraySize = table size
+        152.2.7 numRows = fetchArraySize > table size
         152.2.8 numRows = fetchArraySize/10
         152.2.9 numRows = 10 * fetchArraySize
         152.2.10 numRows > fetchArraySize, fetchArraySize = (table size)/10
-        152.2.11 numRows = (table size - 1), fetchArraySize = table size 
+        152.2.11 numRows = (table size - 1), fetchArraySize = table size
         152.2.12 fetchArraySize = (table size - 1), numRows = table size
     152.3 queryStream() with different maxRows and fetchArraySize
-        152.3.1 maxRows > table size > fetchArraySize 
-        152.3.2 maxRows > fetchArraySize > table size 
-        152.3.3 table size > maxRows > fetchArraySize 
-        152.3.4 table size > fetchArraySize > maxRow 
-        152.3.5 maxRows = fetchArraySize < table size 
-        152.3.6 maxRows = fetchArraySize = table size 
-        152.3.7 maxRows = fetchArraySize > table size 
-        152.3.8 maxRows = fetchArraySize/10 
-        152.3.9 maxRows = 10 * fetchArraySize 
-        152.3.10 maxRows > fetchArraySize, fetchArraySize = (table size)/10 
-        152.3.11 maxRows = 0, fetchArraySize = table size 
-        152.3.12 maxRows = (table size - 1), fetchArraySize = table size 
-        152.3.13 fetchArraySize = (table size - 1), maxRows = table size 
+        152.3.1 maxRows > table size > fetchArraySize
+        152.3.2 maxRows > fetchArraySize > table size
+        152.3.3 table size > maxRows > fetchArraySize
+        152.3.4 table size > fetchArraySize > maxRow
+        152.3.5 maxRows = fetchArraySize < table size
+        152.3.6 maxRows = fetchArraySize = table size
+        152.3.7 maxRows = fetchArraySize > table size
+        152.3.8 maxRows = fetchArraySize/10
+        152.3.9 maxRows = 10 * fetchArraySize
+        152.3.10 maxRows > fetchArraySize, fetchArraySize = (table size)/10
+        152.3.11 maxRows = 0, fetchArraySize = table size
+        152.3.12 maxRows = (table size - 1), fetchArraySize = table size
+        152.3.13 fetchArraySize = (table size - 1), maxRows = table size
 
 153. fetchArraySize6.js
     153.1 DML binding
-        153.1.1 fetchArraySize = 1 
+        153.1.1 fetchArraySize = 1
         153.1.2 fetchArraySize = 50
         153.1.3 fetchArraySize = 100
         153.1.4 fetchArraySize = 1000
@@ -3896,7 +3896,7 @@ Overview of node-oracledb functional tests
         153.2.3 Bind OUT with fetchArraySize = 100
         153.2.4 Bind OUT with fetchArraySize = 1000
         153.2.5 Bind OUT with fetchArraySize = (table size - 1)
-        153.2.6 Bind IN OUT with fetchArraySize = 1 
+        153.2.6 Bind IN OUT with fetchArraySize = 1
         153.2.7 Bind IN OUT with fetchArraySize = 50
         153.2.8 Bind IN OUT with fetchArraySize = 100
         153.2.9 Bind IN OUT with fetchArraySize = 1000
@@ -3907,7 +3907,7 @@ Overview of node-oracledb functional tests
         153.3.3 Bind OUT with fetchArraySize = 100
         153.3.4 Bind OUT with fetchArraySize = 1000
         153.3.5 Bind OUT with fetchArraySize = (table size - 1)
-        153.3.6 Bind IN OUT with fetchArraySize = 1 
+        153.3.6 Bind IN OUT with fetchArraySize = 1
         153.3.7 Bind IN OUT with fetchArraySize = 50
         153.3.8 Bind IN OUT with fetchArraySize = 100
         153.3.9 Bind IN OUT with fetchArraySize = 1000
@@ -3917,7 +3917,7 @@ Overview of node-oracledb functional tests
     154.1 getRows() of resultSet = true
         154.1.1 numRows > table size > fetchArraySize
         154.1.2 numRows > fetchArraySize > table size
-        154.1.3 table size > numRows > fetchArraySize 
+        154.1.3 table size > numRows > fetchArraySize
         154.1.4 table size > fetchArraySize > maxRow
         154.1.5 numRows = fetchArraySize < table size
         154.1.6 numRows = fetchArraySize = table size
@@ -3928,7 +3928,7 @@ Overview of node-oracledb functional tests
         154.1.11 numRows = (table size - 1), fetchArraySize = table size
         154.1.12 fetchArraySize = (table size - 1), numRows = table size
     154.2 getRow() of resultSet = true
-        154.2.1 fetchArraySize = 1 
+        154.2.1 fetchArraySize = 1
         154.2.2 fetchArraySize = 20
         154.2.3 fetchArraySize = 50
         154.2.4 fetchArraySize = 100
@@ -3936,7 +3936,7 @@ Overview of node-oracledb functional tests
         154.2.6 fetchArraySize = 1000
         154.2.7 fetchArraySize = (table size - 1)
     154.3 interleaved calls to getRow() and getRows()
-        154.3.1 fetchArraySize = 1 
+        154.3.1 fetchArraySize = 1
         154.3.2 fetchArraySize = 20
         154.3.3 fetchArraySize = 50
         154.3.4 fetchArraySize = 100
@@ -3946,60 +3946,60 @@ Overview of node-oracledb functional tests
 
 155. fetchArraySize8.js
     155.1 Streaming clobs with different oracledb.fetchArraySize
-        155.1.1 maxRows > table size > oracledb.fetchArraySize 
-        155.1.2 maxRows > oracledb.fetchArraySize > table size 
-        155.1.3 table size > maxRows > oracledb.fetchArraySize 
-        155.1.4 table size > oracledb.fetchArraySize > maxRow 
-        155.1.5 maxRows = oracledb.fetchArraySize < table size 
-        155.1.6 maxRows = oracledb.fetchArraySize = table size 
-        155.1.7 maxRows = oracledb.fetchArraySize > table size 
-        155.1.8 maxRows = oracledb.fetchArraySize/10 
-        155.1.9 maxRows = 10 * oracledb.fetchArraySize 
-        155.1.10 maxRows > fetchArraySize, fetchArraySize = (table size)/10 
-        155.1.11 maxRows = 0, fetchArraySize = table size  
-        155.1.12 maxRows = (table size - 1), fetchArraySize = table size  
-        155.1.13 fetchArraySize = (table size - 1), maxRows = table size  
+        155.1.1 maxRows > table size > oracledb.fetchArraySize
+        155.1.2 maxRows > oracledb.fetchArraySize > table size
+        155.1.3 table size > maxRows > oracledb.fetchArraySize
+        155.1.4 table size > oracledb.fetchArraySize > maxRow
+        155.1.5 maxRows = oracledb.fetchArraySize < table size
+        155.1.6 maxRows = oracledb.fetchArraySize = table size
+        155.1.7 maxRows = oracledb.fetchArraySize > table size
+        155.1.8 maxRows = oracledb.fetchArraySize/10
+        155.1.9 maxRows = 10 * oracledb.fetchArraySize
+        155.1.10 maxRows > fetchArraySize, fetchArraySize = (table size)/10
+        155.1.11 maxRows = 0, fetchArraySize = table size
+        155.1.12 maxRows = (table size - 1), fetchArraySize = table size
+        155.1.13 fetchArraySize = (table size - 1), maxRows = table size
     155.2 Streaming clobs with different execute() option fetchArraySize
-        155.2.1 maxRows > table size > oracledb.fetchArraySize 
-        155.2.2 maxRows > oracledb.fetchArraySize > table size 
-        155.2.3 table size > maxRows > oracledb.fetchArraySize 
-        155.2.4 table size > oracledb.fetchArraySize > maxRow 
-        155.2.5 maxRows = oracledb.fetchArraySize < table size 
-        155.2.6 maxRows = oracledb.fetchArraySize = table size 
-        155.2.7 maxRows = oracledb.fetchArraySize > table size 
-        155.2.8 maxRows = oracledb.fetchArraySize/10 
-        155.2.9 maxRows = 10 * oracledb.fetchArraySize 
-        155.2.10 maxRows > fetchArraySize, fetchArraySize = (table size)/10 
-        155.2.11 maxRows = 0, fetchArraySize = table size  
-        155.2.12 maxRows = (table size - 1), fetchArraySize = table size  
-        155.2.13 fetchArraySize = (table size - 1), maxRows = table size  
+        155.2.1 maxRows > table size > oracledb.fetchArraySize
+        155.2.2 maxRows > oracledb.fetchArraySize > table size
+        155.2.3 table size > maxRows > oracledb.fetchArraySize
+        155.2.4 table size > oracledb.fetchArraySize > maxRow
+        155.2.5 maxRows = oracledb.fetchArraySize < table size
+        155.2.6 maxRows = oracledb.fetchArraySize = table size
+        155.2.7 maxRows = oracledb.fetchArraySize > table size
+        155.2.8 maxRows = oracledb.fetchArraySize/10
+        155.2.9 maxRows = 10 * oracledb.fetchArraySize
+        155.2.10 maxRows > fetchArraySize, fetchArraySize = (table size)/10
+        155.2.11 maxRows = 0, fetchArraySize = table size
+        155.2.12 maxRows = (table size - 1), fetchArraySize = table size
+        155.2.13 fetchArraySize = (table size - 1), maxRows = table size
 
 156. fetchArraySize9.js
     156.1 Streaming blobs with different oracledb.fetchArraySize
-        156.1.1 maxRows > table size > oracledb.fetchArraySize 
-        156.1.2 maxRows > oracledb.fetchArraySize > table size 
-        156.1.3 table size > maxRows > oracledb.fetchArraySize 
-        156.1.4 table size > oracledb.fetchArraySize > maxRow 
-        156.1.5 maxRows = oracledb.fetchArraySize < table size 
-        156.1.6 maxRows = oracledb.fetchArraySize = table size 
-        156.1.7 maxRows = oracledb.fetchArraySize > table size 
-        156.1.8 maxRows = oracledb.fetchArraySize/10 
-        156.1.9 maxRows = 10 * oracledb.fetchArraySize 
-        156.1.10 maxRows > fetchArraySize, fetchArraySize = (table size)/10 
-        156.1.11 maxRows = 0, fetchArraySize = table size  
-        156.1.12 maxRows = (table size - 1), fetchArraySize = table size  
-        156.1.13 fetchArraySize = (table size - 1), maxRows = table size  
+        156.1.1 maxRows > table size > oracledb.fetchArraySize
+        156.1.2 maxRows > oracledb.fetchArraySize > table size
+        156.1.3 table size > maxRows > oracledb.fetchArraySize
+        156.1.4 table size > oracledb.fetchArraySize > maxRow
+        156.1.5 maxRows = oracledb.fetchArraySize < table size
+        156.1.6 maxRows = oracledb.fetchArraySize = table size
+        156.1.7 maxRows = oracledb.fetchArraySize > table size
+        156.1.8 maxRows = oracledb.fetchArraySize/10
+        156.1.9 maxRows = 10 * oracledb.fetchArraySize
+        156.1.10 maxRows > fetchArraySize, fetchArraySize = (table size)/10
+        156.1.11 maxRows = 0, fetchArraySize = table size
+        156.1.12 maxRows = (table size - 1), fetchArraySize = table size
+        156.1.13 fetchArraySize = (table size - 1), maxRows = table size
     156.2 Streaming blobs with different execute() option fetchArraySize
-        156.2.1 maxRows > table size > oracledb.fetchArraySize 
-        156.2.2 maxRows > oracledb.fetchArraySize > table size 
-        156.2.3 table size > maxRows > oracledb.fetchArraySize 
-        156.2.4 table size > oracledb.fetchArraySize > maxRow 
-        156.2.5 maxRows = oracledb.fetchArraySize < table size 
-        156.2.6 maxRows = oracledb.fetchArraySize = table size 
-        156.2.7 maxRows = oracledb.fetchArraySize > table size 
-        156.2.8 maxRows = oracledb.fetchArraySize/10 
-        156.2.9 maxRows = 10 * oracledb.fetchArraySize 
-        156.2.10 maxRows > fetchArraySize, fetchArraySize = (table size)/10 
-        156.2.11 maxRows = 0, fetchArraySize = table size  
-        156.2.12 maxRows = (table size - 1), fetchArraySize = table size  
-        156.2.13 fetchArraySize = (table size - 1), maxRows = table size  
+        156.2.1 maxRows > table size > oracledb.fetchArraySize
+        156.2.2 maxRows > oracledb.fetchArraySize > table size
+        156.2.3 table size > maxRows > oracledb.fetchArraySize
+        156.2.4 table size > oracledb.fetchArraySize > maxRow
+        156.2.5 maxRows = oracledb.fetchArraySize < table size
+        156.2.6 maxRows = oracledb.fetchArraySize = table size
+        156.2.7 maxRows = oracledb.fetchArraySize > table size
+        156.2.8 maxRows = oracledb.fetchArraySize/10
+        156.2.9 maxRows = 10 * oracledb.fetchArraySize
+        156.2.10 maxRows > fetchArraySize, fetchArraySize = (table size)/10
+        156.2.11 maxRows = 0, fetchArraySize = table size
+        156.2.12 maxRows = (table size - 1), fetchArraySize = table size
+        156.2.13 fetchArraySize = (table size - 1), maxRows = table size
