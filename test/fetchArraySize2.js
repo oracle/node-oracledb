@@ -132,32 +132,25 @@ describe("149. fetchArraySize2.js", function() {
           var resultLenExpected = maxRowsVal > (1000-affectedID) ? (1000-affectedID) : maxRowsVal;
           if(maxRowsVal === 0) resultLenExpected = 1000 - affectedID;
           should.strictEqual(result.rows.length, resultLenExpected);
-          verifyResult(result.rows, cb);
+          verifyResult(result.rows, affectedID, cb);
         }
       );
     };
 
-    var verifyResult = function(rows, cb) {
-      async.each(
-        rows,
-        verifyEachRow,
-        function(err) {
-          should.not.exist(err);
-          return cb();
-        }
-      );
+    var verifyResult = function(result, affectedID, callback) {
+      async.forEach(result, function(element, cb) {
+        var index = result.indexOf(element);
+        verifyEachRow(index+1+affectedID, element);
+        cb();
+      }, function(err) {
+        should.not.exist(err);
+        callback();
+      });
     };
 
-    var verifyEachRow = function(row, cb) {
-      var querySql = "select * from " + tableName + " where id = " + row[0];
-      connection.execute(
-        querySql,
-        function(err, result){
-          should.strictEqual(row[1], result.rows[0][1]);
-          should.strictEqual(row[0], result.rows[0][0]);
-          return cb(err);
-        }
-      );
+    var verifyEachRow = function(index, element) {
+      should.strictEqual(element[1], String(index));
+      should.strictEqual(element[0], index);
     };
 
     it("149.1.1 maxRows > table size > oracledb.fetchArraySize", function(done) {
@@ -240,6 +233,20 @@ describe("149. fetchArraySize2.js", function() {
     it("149.1.12 maxRows = 9999999, fetchArraySize = table size ", function(done) {
       var fetchArraySizeVal = 1000;
       var maxRowsVal = 9999999;
+      var affectedID = 0;
+      basicFetch(fetchArraySizeVal, maxRowsVal, affectedID, done);
+    });
+
+    it("149.1.13 maxRows = (table size - 1), fetchArraySize = table size ", function(done) {
+      var fetchArraySizeVal = 1000;
+      var maxRowsVal = 999;
+      var affectedID = 0;
+      basicFetch(fetchArraySizeVal, maxRowsVal, affectedID, done);
+    });
+
+    it("149.1.14 fetchArraySize = (table size - 1), maxRows = table size ", function(done) {
+      var fetchArraySizeVal = 999;
+      var maxRowsVal = 1000;
       var affectedID = 0;
       basicFetch(fetchArraySizeVal, maxRowsVal, affectedID, done);
     });
@@ -400,6 +407,18 @@ describe("149. fetchArraySize2.js", function() {
       var numRowsVal = 210;
       testRefCursor(fetchArraySizeVal, numRowsVal, done);
     });
+
+    it("149.2.11 numRows = (table size - 1), fetchArraySize = table size", function(done) {
+      var fetchArraySizeVal = 1000;
+      var numRowsVal = 999;
+      testRefCursor(fetchArraySizeVal, numRowsVal, done);
+    });
+
+    it("149.2.12 fetchArraySize = (table size - 1), numRows = table size", function(done) {
+      var fetchArraySizeVal = 999;
+      var numRowsVal = 1000;
+      testRefCursor(fetchArraySizeVal, numRowsVal, done);
+    });
   });
 
   describe("149.3 queryStream() with different maxRows and oracledb.fetchArraySize", function() {
@@ -434,7 +453,7 @@ describe("149. fetchArraySize2.js", function() {
       oracledb.fetchArraySize = fetchArraySizeVal;
       oracledb.maxRows = maxRowsVal;
       var resultLenExpected = 1000-affectedID;
-      var querySql = "select * from " + tableName + " where id > " + affectedID + "order by id";
+      var querySql = "select * from " + tableName + " where id > " + affectedID + " order by id";
       var stream = connection.queryStream(querySql);
 
       stream.on('error', function (error) {
@@ -445,7 +464,7 @@ describe("149. fetchArraySize2.js", function() {
       stream.on('data', function(data) {
         should.exist(data);
         counter = counter + 1;
-        verifyResult(data);
+        verifyResult(data, counter, affectedID);
       });
 
       stream.on('end', function() {
@@ -454,15 +473,9 @@ describe("149. fetchArraySize2.js", function() {
       });
     };
 
-    var verifyResult = function(data) {
-      connection.execute(
-        "select * from " + tableName + " where id = " + data[0],
-        function(err, result) {
-          should.not.exist(err);
-          should.strictEqual(data[0], result.rows[0][0]);
-          should.strictEqual(data[1], result.rows[0][1]);
-        }
-      );
+    var verifyResult = function(data, counter, affectedID) {
+      should.strictEqual(data[0], counter + affectedID);
+      should.strictEqual(data[1], String(counter + affectedID));
     };
 
     it("149.3.1 maxRows > table size > oracledb.fetchArraySize", function(done) {
@@ -545,6 +558,20 @@ describe("149. fetchArraySize2.js", function() {
     it("149.3.12 maxRows = 9999999, fetchArraySize = table size", function(done) {
       var fetchArraySizeVal = 1000;
       var maxRowsVal = 9999999;
+      var affectedID = 0;
+      testQueryStream(fetchArraySizeVal, maxRowsVal, affectedID, done);
+    });
+
+    it("149.3.13 maxRows = (table size - 1), fetchArraySize = table size ", function(done) {
+      var fetchArraySizeVal = 1000;
+      var maxRowsVal = 999;
+      var affectedID = 0;
+      testQueryStream(fetchArraySizeVal, maxRowsVal, affectedID, done);
+    });
+
+    it("149.3.14 fetchArraySize = (table size - 1), maxRows = table size ", function(done) {
+      var fetchArraySizeVal = 999;
+      var maxRowsVal = 1000;
       var affectedID = 0;
       testQueryStream(fetchArraySizeVal, maxRowsVal, affectedID, done);
     });

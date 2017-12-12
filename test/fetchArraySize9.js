@@ -222,6 +222,22 @@ describe("156. fetchArraySize9.js", function() {
       var affectedID = 0;
       basicFetchWithGlobalOption(tableSize, fetchArraySizeVal, maxRowsVal, affectedID, done);
     });
+
+    it("156.1.12 maxRows = (table size - 1), fetchArraySize = table size ", function(done) {
+      var tableSize = 100;
+      var fetchArraySizeVal = 100;
+      var maxRowsVal = 99;
+      var affectedID = 0;
+      basicFetchWithGlobalOption(tableSize, fetchArraySizeVal, maxRowsVal, affectedID, done);
+    });
+
+    it("156.1.13 fetchArraySize = (table size - 1), maxRows = table size ", function(done) {
+      var tableSize = 100;
+      var fetchArraySizeVal = 99;
+      var maxRowsVal = 100;
+      var affectedID = 0;
+      basicFetchWithGlobalOption(tableSize, fetchArraySizeVal, maxRowsVal, affectedID, done);
+    });
   });
 
   describe("156.2 Streaming blobs with different execute() option fetchArraySize", function() {
@@ -361,6 +377,22 @@ describe("156. fetchArraySize9.js", function() {
       var affectedID = 0;
       basicFetchWithExecOption(tableSize, fetchArraySizeVal, maxRowsVal, affectedID, done);
     });
+
+    it("156.2.12 maxRows = (table size - 1), fetchArraySize = table size ", function(done) {
+      var tableSize = 100;
+      var fetchArraySizeVal = 100;
+      var maxRowsVal = 99;
+      var affectedID = 0;
+      basicFetchWithExecOption(tableSize, fetchArraySizeVal, maxRowsVal, affectedID, done);
+    });
+
+    it("156.2.13 fetchArraySize = (table size - 1), maxRows = table size ", function(done) {
+      var tableSize = 100;
+      var fetchArraySizeVal = 99;
+      var maxRowsVal = 100;
+      var affectedID = 0;
+      basicFetchWithExecOption(tableSize, fetchArraySizeVal, maxRowsVal, affectedID, done);
+    });
   });
 
   var insertData = function(i, cb) {
@@ -380,7 +412,7 @@ describe("156. fetchArraySize9.js", function() {
   };
 
   var verifyResult = function(rows, cb) {
-    async.each(
+    async.eachSeries(
       rows,
       verifyEachRow,
       function(err) {

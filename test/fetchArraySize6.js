@@ -145,7 +145,7 @@ describe("153. fetchArraySize6.js", function() {
             function(err, result) {
               should.not.exist(err);
               should.strictEqual(result.rows.length, 1000 - affectedRowId);
-              verifyResult(result.rows);
+              verifyResult(result.rows, affectedRowId);
               callback();
             }
           );
@@ -153,10 +153,10 @@ describe("153. fetchArraySize6.js", function() {
       ], cb);
     };
 
-    var verifyResult = function(result) {
+    var verifyResult = function(result, affectedRowId) {
       async.forEach(result, function(element, cb) {
         var index = result.indexOf(element);
-        should.strictEqual(element[0], index+50+1);
+        should.strictEqual(element[0], index+affectedRowId+1);
         should.strictEqual(element[1], "something");
         cb();
       }, function(err) {
@@ -169,15 +169,19 @@ describe("153. fetchArraySize6.js", function() {
     });
 
     it("153.1.2 fetchArraySize = 50", function(done) {
-      dmlBinding(50, 50, done);
+      dmlBinding(50, 51, done);
     });
 
     it("153.1.3 fetchArraySize = 100", function(done) {
-      dmlBinding(100, 50, done);
+      dmlBinding(100, 2, done);
     });
 
     it("153.1.4 fetchArraySize = 1000", function(done) {
-      dmlBinding(1000, 50, done);
+      dmlBinding(1000, 38, done);
+    });
+
+    it("153.1.5 fetchArraySize = (table size - 1)", function(done) {
+      dmlBinding(1000, 0, done);
     });
 
   });
@@ -347,31 +351,44 @@ describe("153. fetchArraySize6.js", function() {
       proc_query_out(maxArraySizeVal, fetchArraySizeVal, done);
     });
 
-    it("153.2.5 Bind IN OUT with fetchArraySize = 1", function(done) {
+    it("153.2.5 Bind OUT with fetchArraySize = (table size - 1)", function(done) {
+      var maxArraySizeVal = 2000;
+      var fetchArraySizeVal = 999;
+      proc_query_out(maxArraySizeVal, fetchArraySizeVal, done);
+    });
+
+    it("153.2.6 Bind IN OUT with fetchArraySize = 1", function(done) {
       var updateFromId = 20;
       var maxArraySizeVal = 1000;
       var fetchArraySizeVal = 1;
       proc_query_inout(updateFromId, maxArraySizeVal, fetchArraySizeVal, done);
     });
 
-    it("153.2.6 Bind IN OUT with fetchArraySize = 50", function(done) {
+    it("153.2.7 Bind IN OUT with fetchArraySize = 50", function(done) {
       var updateFromId = 20;
       var maxArraySizeVal = 1000;
       var fetchArraySizeVal = 50;
       proc_query_inout(updateFromId, maxArraySizeVal, fetchArraySizeVal, done);
     });
 
-    it("153.2.7 Bind IN OUT with fetchArraySize = 100", function(done) {
+    it("153.2.8 Bind IN OUT with fetchArraySize = 100", function(done) {
       var updateFromId = 10;
       var maxArraySizeVal = 2000;
       var fetchArraySizeVal = 100;
       proc_query_inout(updateFromId, maxArraySizeVal, fetchArraySizeVal, done);
     });
 
-    it("153.2.8 Bind IN OUT with fetchArraySize = 1000", function(done) {
+    it("153.2.9 Bind IN OUT with fetchArraySize = 1000", function(done) {
       var updateFromId = 5;
       var maxArraySizeVal = 2000;
       var fetchArraySizeVal = 1000;
+      proc_query_inout(updateFromId, maxArraySizeVal, fetchArraySizeVal, done);
+    });
+
+    it("153.2.10 Bind IN OUT with fetchArraySize = (table size - 1)", function(done) {
+      var updateFromId = 0;
+      var maxArraySizeVal = 2000;
+      var fetchArraySizeVal = 999;
       proc_query_inout(updateFromId, maxArraySizeVal, fetchArraySizeVal, done);
     });
 
@@ -553,37 +570,51 @@ describe("153. fetchArraySize6.js", function() {
     });
 
     it("153.3.4 Bind OUT with fetchArraySize = 1000", function(done) {
-      var affectFromId = 100;
+      var affectFromId = 29;
       var maxArraySizeVal = 10000;
       var fetchArraySizeVal = 1000;
       fun_query_out(affectFromId, maxArraySizeVal, fetchArraySizeVal, done);
     });
 
-    it("153.3.5 Bind IN OUT with fetchArraySize = 1", function(done) {
+    it("153.3.5 Bind OUT with fetchArraySize = (table size - 1)", function(done) {
+      var affectFromId = 0;
+      var maxArraySizeVal = 10000;
+      var fetchArraySizeVal = 999;
+      fun_query_out(affectFromId, maxArraySizeVal, fetchArraySizeVal, done);
+    });
+
+    it("153.3.6 Bind IN OUT with fetchArraySize = 1", function(done) {
       var updateFromId = 20;
       var maxArraySizeVal = 1000;
       var fetchArraySizeVal = 1;
       fun_query_inout(updateFromId, maxArraySizeVal, fetchArraySizeVal, done);
     });
 
-    it("153.3.6 Bind IN OUT with fetchArraySize = 50", function(done) {
+    it("153.3.7 Bind IN OUT with fetchArraySize = 50", function(done) {
       var updateFromId = 20;
       var maxArraySizeVal = 1000;
       var fetchArraySizeVal = 50;
       fun_query_inout(updateFromId, maxArraySizeVal, fetchArraySizeVal, done);
     });
 
-    it("153.3.7 Bind IN OUT with fetchArraySize = 100", function(done) {
+    it("153.3.8 Bind IN OUT with fetchArraySize = 100", function(done) {
       var updateFromId = 10;
       var maxArraySizeVal = 2000;
       var fetchArraySizeVal = 100;
       fun_query_inout(updateFromId, maxArraySizeVal, fetchArraySizeVal, done);
     });
 
-    it("153.3.8 Bind IN OUT with fetchArraySize = 1000", function(done) {
+    it("153.3.9 Bind IN OUT with fetchArraySize = 1000", function(done) {
       var updateFromId = 5;
       var maxArraySizeVal = 2000;
       var fetchArraySizeVal = 1000;
+      fun_query_inout(updateFromId, maxArraySizeVal, fetchArraySizeVal, done);
+    });
+
+    it("153.3.10 Bind IN OUT with fetchArraySize = (table size - 1)", function(done) {
+      var updateFromId = 0;
+      var maxArraySizeVal = 2000;
+      var fetchArraySizeVal = 999;
       fun_query_inout(updateFromId, maxArraySizeVal, fetchArraySizeVal, done);
     });
 

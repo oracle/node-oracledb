@@ -215,6 +215,18 @@ describe("154. fetchArraySize7.js", function() {
       testGetRow(fetchArraySizeVal, numRowsVal, done);
     });
 
+    it("154.1.11 numRows = (table size - 1), fetchArraySize = table size", function(done) {
+      var fetchArraySizeVal = 1000;
+      var numRowsVal = 999;
+      testGetRow(fetchArraySizeVal, numRowsVal, done);
+    });
+
+    it("154.1.12 fetchArraySize = (table size - 1), numRows = table size", function(done) {
+      var fetchArraySizeVal = 999;
+      var numRowsVal = 1000;
+      testGetRow(fetchArraySizeVal, numRowsVal, done);
+    });
+
   });
 
   describe("154.2 getRow() of resultSet = true", function() {
@@ -302,6 +314,10 @@ describe("154. fetchArraySize7.js", function() {
 
     it("154.2.6 fetchArraySize = 1000", function(done) {
       testGetRows(1000, done);
+    });
+
+    it("154.2.7 fetchArraySize = (table size - 1)", function(done) {
+      testGetRows(999, done);
     });
 
   });
@@ -448,6 +464,13 @@ describe("154. fetchArraySize7.js", function() {
     it("154.3.6 fetchArraySize = 1000", function(done) {
       var fetchArraySizeVal = 1000;
       numRowsVal_1 = 15;
+      numRowsVal_2 = 1000;
+      testRS(fetchArraySizeVal, done);
+    });
+
+    it("154.3.7 fetchArraySize = (table size - 1)", function(done) {
+      var fetchArraySizeVal = 999;
+      numRowsVal_1 = 999;
       numRowsVal_2 = 1000;
       testRS(fetchArraySizeVal, done);
     });
