@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, 2017, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -77,21 +77,27 @@ var doquery = function(conn, cb) {
 
 // Stream a CLOB and builds up a String piece-by-piece
 var  dostream = function(conn, clob, cb) {
-  clob.setEncoding('utf8');  // set the encoding so we get a 'string' not a 'buffer'
-  clob.on(
-    'error',
-    function(err)
-    {
-      console.log("clob.on 'error' event");
-      return cb(err, conn);
-    });
+  var errorHandled = false;
+  var myclob = ""; // or myblob = Buffer.alloc(0) for BLOBs
 
   // node-oracledb's lob.pieceSize is the number of bytes retrieved
   // for each readable 'data' event.  The default is lob.chunkSize.
   // The recommendation is for it to be a multiple of chunkSize.
   // clob.pieceSize = 100; // fetch smaller chunks to demonstrate repeated 'data' events
 
-  var myclob = ""; // or myblob = Buffer.alloc(0) for BLOBs
+  clob.setEncoding('utf8');  // set the encoding so we get a 'string' not a 'buffer'
+  clob.on(
+    'error',
+    function(err)
+    {
+      console.log("clob.on 'error' event");
+      if (!errorHandled) {
+        errorHandled = true;
+        clob.close(function() {
+          return cb(err, conn);
+        });
+      }
+    });
   clob.on(
     'data',
     function(chunk)
@@ -112,7 +118,9 @@ var  dostream = function(conn, clob, cb) {
     function()
     {
       console.log("clob.on 'close' event");
-      return cb(null, conn);
+      if (!errorHandled) {
+        return cb(null, conn);
+      }
     });
 };
 

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -35,25 +35,20 @@
 
 var oracledb = require ('oracledb');
 var should   = require ('should');
-var async    = require('async');
+var async    = require ('async');
 var dbConfig = require ('./dbconfig.js');
+var assist   = require ('./dataTypeAssist.js');
+
 
 describe('56. fetchAs.js', function() {
 
   var connection = null;
   beforeEach('get one connection', function(done) {
-    oracledb.getConnection(
-      {
-        user:          dbConfig.user,
-        password:      dbConfig.password,
-        connectString: dbConfig.connectString
-      },
-      function(err, conn) {
-        should.not.exist(err);
-        connection = conn;
-        done();
-      }
-    );
+    oracledb.getConnection(dbConfig, function(err, conn) {
+      should.not.exist(err);
+      connection = conn;
+      done();
+    });
   });
 
   afterEach('release connection, reset fetchAsString property', function(done) {
@@ -287,17 +282,153 @@ describe('56. fetchAs.js', function() {
     });
   });
 
-  // FetchInfo format should <columName> : {type : oracledb.<type>
-  it ('56.10 invalid syntax for type should result in error', function (done){
+  // FetchInfo format should <columName> : {type : oracledb.<type> }
+  it('56.10 invalid syntax for type should result in error', function (done){
     connection.execute (
       "SELECT SYSDATE AS THE_DATE FROM DUAL",
       { },
       { fetchInfo : { "THE_DATE" : oracledb.STRING }},
       function ( err ) {
         should.exist ( err ) ;
-        (err.message).should.startWith ('NJS-015:');
+        should.strictEqual(err.message, 'NJS-015: type was not specified for conversion');
         done ();
       } );
+  });
+
+  it('56.11 assigns an empty array to fetchAsString', function() {
+    oracledb.fetchAsString = [];
+    (oracledb.fetchAsString).should.eql([]);
+  });
+
+  it('56.12 Negative - empty string', function() {
+    should.throws(
+      function() {
+        oracledb.fetchAsString = '';
+      },
+      /NJS-004: invalid value for property fetchAsString/
+    );
+  });
+
+  it('56.13 Negative - null', function() {
+    should.throws(
+      function() {
+        oracledb.fetchAsString = null;
+      },
+      /NJS-004: invalid value for property fetchAsString/
+    );
+  });
+
+  it('56.14 Negative - undefined', function() {
+    should.throws(
+      function() {
+        oracledb.fetchAsString = undefined;
+      },
+      /NJS-004: invalid value for property fetchAsString/
+    );
+  });
+
+  it('56.15 Negative - NaN', function() {
+    should.throws(
+      function() {
+        oracledb.fetchAsString = NaN;
+      },
+      /NJS-004: invalid value for property fetchAsString/
+    );
+  });
+
+  it('56.16 Negative - invalid type of value, number', function() {
+    should.throws(
+      function() {
+        oracledb.fetchAsString = 10;
+      },
+      /NJS-004: invalid value for property fetchAsString/
+    );
+  });
+
+  it('56.17 Negative - invalid type of value, string', function() {
+    should.throws(
+      function() {
+        oracledb.fetchAsString = 'abc';
+      },
+      /NJS-004: invalid value for property fetchAsString/
+    );
+  });
+
+  it('56.18 Negative - passing oracledb.DATE type to fetchInfo', function(done) {
+    connection.execute(
+      "select sysdate as ts_date from dual",
+      { },
+      {
+        fetchInfo: { ts_date: { type: oracledb.DATE } }
+      },
+      function(err, result) {
+        should.exist(err);
+        should.strictEqual(
+          err.message,
+          'NJS-021: invalid type for conversion specified'
+        );
+        should.not.exist(result);
+        done();
+      }
+    );
+  });
+
+  it('56.19 Negative - passing empty JSON to fetchInfo', function(done) {
+    connection.execute(
+      "select sysdate as ts_date from dual",
+      { },
+      {
+        fetchInfo: { }
+      },
+      function(err, result) {
+        should.exist(err);
+        should.strictEqual(
+          err.message,
+          'NJS-020: empty array was specified to fetch values as string'
+        );
+        should.not.exist(result);
+        done();
+      }
+    );
+  });
+
+  it('56.20 Negative - passing oracledb.NUMBER type to fetchInfo', function(done) {
+    connection.execute(
+      "select sysdate as ts_date from dual",
+      { },
+      {
+        fetchInfo: { ts_date: { type: oracledb.NUMBER } }
+      },
+      function(err, result) {
+        should.exist(err);
+        should.strictEqual(
+          err.message,
+          'NJS-021: invalid type for conversion specified'
+        );
+        should.not.exist(result);
+        done();
+      }
+    );
+  });
+
+  it('56.21 Negative - invalid type of value, Date', function() {
+    should.throws(
+      function() {
+        var dt = new Date ();
+        oracledb.fetchAsString = dt;
+      },
+      /NJS-004: invalid value for property fetchAsString/
+    );
+  });
+
+  it('56.22 Negative - invalid type of value, Buffer', function() {
+    should.throws(
+      function() {
+        var buf = assist.createBuffer ( 10 ) ;  // arbitary sized buffer
+        oracledb.fetchAsString = buf;
+      },
+      /NJS-004: invalid value for property fetchAsString/
+    );
   });
 
 });

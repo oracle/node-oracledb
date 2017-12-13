@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -24,10 +24,9 @@
  *
  *   "Small" amounts of data can be bound directly for INSERT into LOB
  *   columns.  Larger amounts should be streamed, see lobinssert2.js.
- *   The boundary between 'small' and 'large' has a hard limit
- *   determined by the version of the Oracle client libraries, and a
- *   soft limit restricted by available memory.  See node-oracledb
- *   documentation.
+ *   The boundary between 'small' and 'large' depends on how Node.js
+ *   and V8 handle large data in memory, and on your streaming and
+ *   performance requirements.
  *
  *   Create clobexample.txt and fuzzydinosaur.jpg before running this example.
  *   Use demo.sql to create the required table or do:

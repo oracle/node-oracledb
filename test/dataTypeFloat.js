@@ -60,6 +60,7 @@ describe('28. dataTypeFloat.js', function() {
   });
 
   after('release connection', function(done) {
+    oracledb.fetchAsString = [];
     connection.release( function(err) {
       should.not.exist(err);
       done();
@@ -92,6 +93,15 @@ describe('28. dataTypeFloat.js', function() {
 
     it('28.1.3 works well with REF Cursor', function(done) {
       assist.verifyRefCursor(connection, tableName, numbers, done);
+    });
+
+    it('28.1.4 columns fetched from REF CURSORS can be mapped by fetchInfo settings', function(done) {
+      assist.verifyRefCursorWithFetchInfo(connection, tableName, numbers, done);
+    });
+
+    it('28.1.5 columns fetched from REF CURSORS can be mapped by oracledb.fetchAsString', function(done) {
+      oracledb.fetchAsString = [ oracledb.NUMBER ];
+      assist.verifyRefCursorWithFetchAsString(connection, tableName, numbers, done);
     });
   });
 

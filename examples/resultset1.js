@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -19,13 +19,25 @@
  *   resultset1.js
  *
  * DESCRIPTION
- *   Executes a query and uses a result set to fetch rows with getRow().
+ *   Executes a query and uses a ResultSet to fetch rows with getRow().
  *   Uses Oracle's sample HR schema.
+ *
+ *   Note using queryStream() or getRows() is recommended instead of
+ *   getRow().
  *
  *****************************************************************************/
 
 var oracledb = require('oracledb');
 var dbConfig = require('./dbconfig.js');
+
+// For getRow(), the fetchArraySize property can be adjusted to tune
+// data transfer from the Oracle Database to node-oracledb.  The value
+// of fetchArraySize does not affect how, or when, rows are returned
+// by node-oracledb to the application.  Buffering is handled by
+// node-oracledb.  Benchmark to choose the optimal size for each
+// application or query.
+//
+// oracledb.fetchArraySize = 100;  // default value is 100
 
 var rowCount = 0;
 
@@ -39,12 +51,12 @@ oracledb.getConnection(
   {
     if (err) { console.error(err.message); return; }
     connection.execute(
-      "SELECT employee_id, last_name " +
-        "FROM   employees " +
-        "WHERE ROWNUM < 11 " +
-        "ORDER BY employee_id",
+      `SELECT employee_id, last_name
+       FROM   employees
+       WHERE ROWNUM < 11
+       ORDER BY employee_id`,
       [], // no bind variables
-      { resultSet: true }, // return a result set.  Default is false
+      { resultSet: true }, // return a ResultSet.  Default is false
       function(err, result)
       {
         if (err) {
@@ -64,9 +76,9 @@ function fetchOneRowFromRS(connection, resultSet)
     {
       if (err) {
         console.error(err.message);
-        doClose(connection, resultSet); // always close the result set
+        doClose(connection, resultSet); // always close the ResultSet
       } else if (!row) {                // no rows, or no more rows
-        doClose(connection, resultSet); // always close the result set
+        doClose(connection, resultSet); // always close the ResultSet
       } else {
         rowCount++;
         console.log("fetchOneRowFromRS(): row " + rowCount);

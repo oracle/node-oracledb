@@ -45,7 +45,6 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
   this.timeout(100000);
 
   var connection = null;
-  var client11gPlus = true; // assume instant client runtime version is greater than 11.2.0.4.0
   var insertID = 1; // assume id for insert into db starts from 1
   var proc_clob_in_tab = "BEGIN \n" +
                          "    DECLARE \n" +
@@ -90,10 +89,6 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
         oracledb.getConnection(dbConfig, function(err, conn) {
           should.not.exist(err);
           connection = conn;
-          // Check whether instant client runtime version is smaller than 12.1.0.2
-          if(oracledb.oracleClientVersion < 1201000200)
-            client11gPlus = false;
-
           cb();
         });
       },
@@ -175,7 +170,7 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
     );
   };
 
-  var insertClobWithString = function(id, insertStr, case64KPlus, client11gPlus, callback) {
+  var insertClobWithString = function(id, insertStr, callback) {
     var sql = "INSERT INTO nodb_tab_clob_in (id, clob_1) VALUES (:i, :c)";
     var bindVar = {
       i: { val: id, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
@@ -192,57 +187,14 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
       sql,
       bindVar,
       function(err, result) {
-        if(client11gPlus === false && case64KPlus === true){
-          should.exist(err);
-          // NJS-050: data must be shorter than 65535
-          (err.message).should.startWith('NJS-050:');
-          streamedIntoClobTable1(id, insertStr, callback);
-        } else {
-          should.not.exist(err);
-          should.strictEqual(result.rowsAffected, 1);
-          callback();
-        }
+        should.not.exist(err);
+        should.strictEqual(result.rowsAffected, 1);
+        callback();
       }
     );
   };
 
   var inFileStreamed = './test/clobTmpFile.txt';
-  // Generate a file and streamed into clob column
-  var streamedIntoClobTable1 = function(id, content, callback) {
-    file.write(inFileStreamed, content);
-    setTimeout(function(){
-      connection.execute(
-        "INSERT INTO nodb_tab_clob_in (id, clob_1, clob_2) VALUES (:i, EMPTY_CLOB(), EMPTY_CLOB()) RETURNING clob_1 INTO :lobbv",
-        { i: id, lobbv: { type: oracledb.CLOB, dir: oracledb.BIND_OUT } },
-        { autoCommit: false },
-        function(err, result) {
-          should.not.exist(err);
-          (result.rowsAffected).should.be.exactly(1);
-          (result.outBinds.lobbv.length).should.be.exactly(1);
-
-          var inStream = fs.createReadStream(inFileStreamed);
-          var lob = result.outBinds.lobbv[0];
-
-          lob.on('error', function(err) {
-            should.not.exist(err, "lob.on 'error' event");
-          });
-
-          inStream.on('error', function(err) {
-            should.not.exist(err, "inStream.on 'error' event");
-          });
-
-          lob.on('close', function() {
-            connection.commit( function(err) {
-              should.not.exist(err);
-              callback();
-            });
-          });
-
-          inStream.pipe(lob); // copies the text to the CLOB
-        }
-      );
-    }, 3000);
-  };
 
   var preparedInFileName = './test/clobexample.txt';
 
@@ -321,7 +273,7 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
     should.strictEqual(resultVal.substring(resultLength - specStrLength, resultLength), specialStr);
   };
 
-  var verifyBindOutResult = function(sqlRun, bindVar, originalStr, specialStr, case64KPlus, client11gPlus, callback) {
+  var verifyBindOutResult = function(sqlRun, bindVar, originalStr, specialStr, callback) {
     connection.execute(
       sqlRun,
       bindVar,
@@ -331,16 +283,10 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
           should.strictEqual(result.outBinds.c, null);
           callback();
         } else {
-          if(client11gPlus === false && case64KPlus === true){
-            // NJS-051: "maxSize" must be less than 65535
-            (err.message).should.startWith('NJS-051:');
-            callback();
-          } else {
-            should.not.exist(err);
-            var resultVal = result.outBinds.c;
-            compareResultStrAndOriginal(resultVal, originalStr, specialStr);
-            callback();
-          }
+          should.not.exist(err);
+          var resultVal = result.outBinds.c;
+          compareResultStrAndOriginal(resultVal, originalStr, specialStr);
+          callback();
         }
       }
     );
@@ -372,10 +318,10 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertClobWithString(sequence, "EMPTY_LOB", false, client11gPlus, cb);
+          insertClobWithString(sequence, "EMPTY_LOB", cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, "EMPTY_LOB", null, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, "EMPTY_LOB", null, cb);
         }
       ], done);
     }); // 75.1.1
@@ -389,10 +335,10 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertClobWithString(sequence, "EMPTY_LOB", false, client11gPlus, cb);
+          insertClobWithString(sequence, "EMPTY_LOB", cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, "EMPTY_LOB", null, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, "EMPTY_LOB", null, cb);
         }
       ], done);
     }); // 75.1.2
@@ -406,10 +352,10 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertClobWithString(sequence, "EMPTY_LOB", false, client11gPlus, cb);
+          insertClobWithString(sequence, "EMPTY_LOB", cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, "EMPTY_LOB", null, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, "EMPTY_LOB", null, cb);
         }
       ], done);
     }); // 75.1.3
@@ -423,10 +369,10 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertClobWithString(sequence, null, false, client11gPlus, cb);
+          insertClobWithString(sequence, null, cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, null, null, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, null, null, cb);
         }
       ], done);
     }); // 75.1.4
@@ -440,10 +386,10 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertClobWithString(sequence, null, false, client11gPlus, cb);
+          insertClobWithString(sequence, null, cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, null, null, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, null, null, cb);
         }
       ], done);
     }); // 75.1.5
@@ -457,10 +403,10 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertClobWithString(sequence, null, false, client11gPlus, cb);
+          insertClobWithString(sequence, null, cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, null, null, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, null, null, cb);
         }
       ], done);
     }); // 75.1.6
@@ -474,10 +420,10 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertClobWithString(sequence, "", false, client11gPlus, cb);
+          insertClobWithString(sequence, "", cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, "", null, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, "", null, cb);
         }
       ], done);
     }); // 75.1.7
@@ -491,10 +437,10 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertClobWithString(sequence, "", false, client11gPlus, cb);
+          insertClobWithString(sequence, "", cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, "", null, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, "", null, cb);
         }
       ], done);
     }); // 75.1.8
@@ -508,10 +454,10 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertClobWithString(sequence, "", false, client11gPlus, cb);
+          insertClobWithString(sequence, "", cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, "", null, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, "", null, cb);
         }
       ], done);
     }); // 75.1.9
@@ -525,10 +471,10 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertClobWithString(sequence, undefined, false, client11gPlus, cb);
+          insertClobWithString(sequence, undefined, cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, undefined, null, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, undefined, null, cb);
         }
       ], done);
     }); // 75.1.10
@@ -542,10 +488,10 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertClobWithString(sequence, undefined, false, client11gPlus, cb);
+          insertClobWithString(sequence, undefined, cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, undefined, null, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, undefined, null, cb);
         }
       ], done);
     }); // 75.1.11
@@ -559,10 +505,10 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertClobWithString(sequence, undefined, false, client11gPlus, cb);
+          insertClobWithString(sequence, undefined, cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, undefined, null, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, undefined, null, cb);
         }
       ], done);
     }); // 75.1.12
@@ -621,10 +567,10 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertClobWithString(sequence, clobStr, false, client11gPlus, cb);
+          insertClobWithString(sequence, clobStr, cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, clobStr, specialStr, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, clobStr, specialStr, cb);
         }
       ], done);
     }); // 75.1.15
@@ -645,10 +591,10 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertClobWithString(sequence, clobStr, false, client11gPlus, cb);
+          insertClobWithString(sequence, clobStr, cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, clobStr, specialStr, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, clobStr, specialStr, cb);
         }
       ], done);
     }); // 75.1.16
@@ -665,10 +611,10 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertClobWithString(sequence, clobStr, true, client11gPlus, cb);
+          insertClobWithString(sequence, clobStr, cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, clobStr, specialStr, true, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, clobStr, specialStr, cb);
         },
         function(cb) {
           file.delete(inFileStreamed);
@@ -689,10 +635,10 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertClobWithString(sequence, clobStr, true, client11gPlus, cb);
+          insertClobWithString(sequence, clobStr, cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, clobStr, specialStr, true, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, clobStr, specialStr, cb);
         },
         function(cb) {
           file.delete(inFileStreamed);
@@ -730,7 +676,7 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertClobWithString(sequence, clobStr, false, client11gPlus, cb);
+          insertClobWithString(sequence, clobStr, cb);
         },
         function(cb) {
           connection.execute(
@@ -771,7 +717,7 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertClobWithString(sequence, clobStr_1, false, client11gPlus, cb);
+          insertClobWithString(sequence, clobStr_1, cb);
         },
         function(cb) {
           executeSQL(proc_7412, cb);
@@ -813,7 +759,7 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertClobWithString(sequence, clobStr, false, client11gPlus, cb);
+          insertClobWithString(sequence, clobStr, cb);
         },
         function(cb) {
           executeSQL(proc_7415, cb);
@@ -852,16 +798,17 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertClobWithString(sequence, clobStr, false, client11gPlus, cb);
+          insertClobWithString(sequence, clobStr, cb);
         },
         function(cb) {
           connection.execute(
             sqlRun,
             bindVar,
-            function(err) {
+            function(err, result) {
               should.exist(err);
               // ORA-06502: PL/SQL: numeric or value error: character string buffer too small
               (err.message).should.startWith('ORA-06502:');
+              should.not.exist(result);
               cb();
             }
           );
@@ -881,7 +828,7 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertClobWithString(sequence, clobStr, false, client11gPlus, cb);
+          insertClobWithString(sequence, clobStr, cb);
         },
         function(cb) {
           connection.execute(
@@ -899,7 +846,6 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
     }); // 75.1.24
 
     it('75.1.25 named binging, bind out maxSize smaller than string length ( > 64K )', function(done) {
-      if (!client11gPlus) this.skip();
       var len = 50000;
       var sequence = insertID++;
       var specialStr = "75.1.25";
@@ -911,7 +857,7 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertClobWithString(sequence, clobStr, true, client11gPlus, cb);
+          insertClobWithString(sequence, clobStr, cb);
         },
         function(cb) {
           connection.execute(
@@ -938,16 +884,17 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertClobWithString(sequence, clobStr, false, client11gPlus, cb);
+          insertClobWithString(sequence, clobStr, cb);
         },
         function(cb) {
           connection.execute(
             sqlRun,
             bindVar,
-            function(err) {
+            function(err, result) {
               should.exist(err);
               // ORA-06502: PL/SQL: numeric or value error: character string buffer too small
               (err.message).should.startWith('ORA-06502:');
+              should.not.exist(result);
               cb();
             }
           );
@@ -965,7 +912,7 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertClobWithString(sequence, clobStr, false, client11gPlus, cb);
+          insertClobWithString(sequence, clobStr, cb);
         },
         function(cb) {
           connection.execute(
@@ -982,8 +929,7 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
       ], done);
     }); // 75.1.27
 
-    it('75.1.28 positional binging, bind out maxSize smaller than string length ( > 63K )', function(done) {
-      if (!client11gPlus) this.skip();
+    it('75.1.28 positional binging, bind out maxSize smaller than string length ( > 64K )', function(done) {
       var len = 65539;
       var sequence = insertID++;
       var specialStr = "75.1.28";
@@ -993,7 +939,7 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertClobWithString(sequence, clobStr, true, client11gPlus, cb);
+          insertClobWithString(sequence, clobStr, cb);
         },
         function(cb) {
           connection.execute(
@@ -1038,10 +984,10 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertClobWithString(sequence, "EMPTY_LOB", false, client11gPlus, cb);
+          insertClobWithString(sequence, "EMPTY_LOB", cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, "EMPTY_LOB", null, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, "EMPTY_LOB", null, cb);
         }
       ], done);
     }); // 75.2.1
@@ -1055,10 +1001,10 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertClobWithString(sequence, "EMPTY_LOB", false, client11gPlus, cb);
+          insertClobWithString(sequence, "EMPTY_LOB", cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, "EMPTY_LOB", null, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, "EMPTY_LOB", null, cb);
         }
       ], done);
     }); // 75.2.2
@@ -1072,10 +1018,10 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertClobWithString(sequence, "EMPTY_LOB", false, client11gPlus, cb);
+          insertClobWithString(sequence, "EMPTY_LOB", cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, "EMPTY_LOB", null, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, "EMPTY_LOB", null, cb);
         }
       ], done);
     }); // 75.2.3
@@ -1089,10 +1035,10 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertClobWithString(sequence, null, false, client11gPlus, cb);
+          insertClobWithString(sequence, null, cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, null, null, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, null, null, cb);
         }
       ], done);
     }); // 75.2.4
@@ -1106,10 +1052,10 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertClobWithString(sequence, null, false, client11gPlus, cb);
+          insertClobWithString(sequence, null, cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, null, null, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, null, null, cb);
         }
       ], done);
     }); // 75.2.5
@@ -1123,10 +1069,10 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertClobWithString(sequence, null, false, client11gPlus, cb);
+          insertClobWithString(sequence, null, cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, null, null, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, null, null, cb);
         }
       ], done);
     }); // 75.2.6
@@ -1140,10 +1086,10 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertClobWithString(sequence, "", false, client11gPlus, cb);
+          insertClobWithString(sequence, "", cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, "", null, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, "", null, cb);
         }
       ], done);
     }); // 75.2.7
@@ -1157,10 +1103,10 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertClobWithString(sequence, "", false, client11gPlus, cb);
+          insertClobWithString(sequence, "", cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, "", null, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, "", null, cb);
         }
       ], done);
     }); // 75.2.8
@@ -1174,10 +1120,10 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertClobWithString(sequence, "", false, client11gPlus, cb);
+          insertClobWithString(sequence, "", cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, "", null, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, "", null, cb);
         }
       ], done);
     }); // 75.2.9
@@ -1191,10 +1137,10 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertClobWithString(sequence, undefined, false, client11gPlus, cb);
+          insertClobWithString(sequence, undefined, cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, undefined, null, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, undefined, null, cb);
         }
       ], done);
     }); // 75.2.10
@@ -1208,10 +1154,10 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertClobWithString(sequence, undefined, false, client11gPlus, cb);
+          insertClobWithString(sequence, undefined, cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, undefined, null, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, undefined, null, cb);
         }
       ], done);
     }); // 75.2.11
@@ -1225,10 +1171,10 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertClobWithString(sequence, undefined, false, client11gPlus, cb);
+          insertClobWithString(sequence, undefined, cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, undefined, null, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, undefined, null, cb);
         }
       ], done);
     }); // 75.2.12
@@ -1285,10 +1231,10 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertClobWithString(sequence, clobStr, false, client11gPlus, cb);
+          insertClobWithString(sequence, clobStr, cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, clobStr, specialStr, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, clobStr, specialStr, cb);
         }
       ], done);
     }); // 75.2.15
@@ -1305,7 +1251,7 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertClobWithString(sequence, clobStr, false, client11gPlus, cb);
+          insertClobWithString(sequence, clobStr, cb);
         },
         function(cb) {
           connection.execute(
@@ -1331,16 +1277,17 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertClobWithString(sequence, clobStr, false, client11gPlus, cb);
+          insertClobWithString(sequence, clobStr, cb);
         },
         function(cb) {
           connection.execute(
             sqlRun,
             bindVar,
-            function(err) {
+            function(err, result) {
               should.exist(err);
-               // ORA-06502: PL/SQL: numeric or value error
+              // ORA-06502: PL/SQL: numeric or value error
               (err.message).should.startWith('ORA-06502:');
+              should.not.exist(result);
               cb();
             }
           );
@@ -1372,7 +1319,7 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertClobWithString(sequence, clobStr_1, false, client11gPlus, cb);
+          insertClobWithString(sequence, clobStr_1, cb);
         },
         function(cb) {
           executeSQL(proc_7518, cb);
@@ -1414,7 +1361,7 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertClobWithString(sequence, clobStr, false, client11gPlus, cb);
+          insertClobWithString(sequence, clobStr, cb);
         },
         function(cb) {
           executeSQL(proc_7519, cb);
@@ -1460,7 +1407,7 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
       executeSQL(proc_drop, done);
     }); // after
 
-    var insertTwoClobWithString = function(id, insertStr1, insertStr2, case64KPlus, client11gPlus, callback) {
+    var insertTwoClobWithString = function(id, insertStr1, insertStr2, callback) {
       var sql = "INSERT INTO nodb_tab_clob_in (id, clob_1, clob_2) VALUES (:i, :c1, :c2)";
       var bindVar = {
         i: { val: id, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
@@ -1472,14 +1419,8 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
         sql,
         bindVar,
         function(err, result) {
-          if(case64KPlus === true  && client11gPlus === false) {
-            should.exist(err);
-            // NJS-050: data must be shorter than 65535
-            (err.message).should.startWith('NJS-050:');
-          } else {
-            should.not.exist(err);
-            should.strictEqual(result.rowsAffected, 1);
-          }
+          should.not.exist(err);
+          should.strictEqual(result.rowsAffected, 1);
           callback();
         }
       );
@@ -1501,7 +1442,7 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertTwoClobWithString(sequence, clobStr_1, clobStr_2, false, client11gPlus, cb);
+          insertTwoClobWithString(sequence, clobStr_1, clobStr_2, cb);
         },
         function(cb) {
           connection.execute(
@@ -1607,25 +1548,21 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertTwoClobWithString(sequence, clobStr_1, clobStr_2, true, client11gPlus, cb);
+          insertTwoClobWithString(sequence, clobStr_1, clobStr_2, cb);
         },
         function(cb) {
-          if(client11gPlus === false){
-            cb();
-          } else {
-            connection.execute(
-              sqlRun,
-              bindVar,
-              function(err, result) {
-                should.not.exist(err);
-                var resultVal = result.outBinds.c1;
-                compareResultStrAndOriginal(resultVal, clobStr_1, specialStr_1);
-                resultVal = result.outBinds.c2;
-                compareResultStrAndOriginal(resultVal, clobStr_2, specialStr_2);
-                cb();
-              }
-            );
-          }
+          connection.execute(
+            sqlRun,
+            bindVar,
+            function(err, result) {
+              should.not.exist(err);
+              var resultVal = result.outBinds.c1;
+              compareResultStrAndOriginal(resultVal, clobStr_1, specialStr_1);
+              resultVal = result.outBinds.c2;
+              compareResultStrAndOriginal(resultVal, clobStr_2, specialStr_2);
+              cb();
+            }
+          );
         }
       ], done);
 

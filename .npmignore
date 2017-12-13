@@ -1,4 +1,6 @@
+.github
 .editorconfig
+.gitmodules
 INSTALL.md
 CONTRIBUTING.md
 /doc
@@ -7,6 +9,16 @@ CONTRIBUTING.md
 /build
 /node_modules
 /oracle_private
-/.github
+/package/*.gz
+/package/SHASUMS256.*
 oracledb-*.tgz
+staging-oracledb-*.tgz
 .npmignore
+/odpi/Makefile
+/odpi/Makefile.win32
+/odpi/doc
+/odpi/samples
+/odpi/test
+/odpi/.git
+/odpi/.github
+/odpi/.gitattributes

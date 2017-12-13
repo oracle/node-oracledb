@@ -64,6 +64,7 @@ describe('86. fetchClobAsString3.js', function() {
                           "    '); \n" +
                           "END; ";
   var drop_table2 = "DROP TABLE nodb_clob2 PURGE";
+  var defaultStmtCache = oracledb.stmtCacheSize;
 
   before('get one connection', function(done) {
     oracledb.stmtCacheSize = 0;
@@ -75,6 +76,7 @@ describe('86. fetchClobAsString3.js', function() {
   }); // before
 
   after('release connection', function(done) {
+    oracledb.stmtCacheSize = defaultStmtCache;
     connection.release(function(err) {
       should.not.exist(err);
       done();
@@ -93,7 +95,7 @@ describe('86. fetchClobAsString3.js', function() {
     );
   };
 
-  describe('86.1 fetch multiple CLOBs', function() {
+  describe('86.1 fetch multiple CLOBs and result set', function() {
     before('create Table and populate', function(done) {
       connection.execute(
         proc_create_table2,
@@ -140,7 +142,7 @@ describe('86. fetchClobAsString3.js', function() {
         },
         function(cb) {
           connection.execute(
-           "SELECT ID, C1, C2 from nodb_clob2",
+            "SELECT ID, C1, C2 from nodb_clob2",
             function(err, result){
               should.not.exist(err);
               var specialStrLen_1 = specialStr_1.length;
@@ -177,7 +179,7 @@ describe('86. fetchClobAsString3.js', function() {
         },
         function(cb) {
           connection.execute(
-           "SELECT ID, C1 from nodb_clob2 where ID = :id",
+            "SELECT ID, C1 from nodb_clob2 where ID = :id",
             { id: id },
             function(err, result){
               should.not.exist(err);
@@ -194,7 +196,7 @@ describe('86. fetchClobAsString3.js', function() {
           oracledb.fetchAsString = [];
 
           connection.execute(
-           "SELECT C2 from nodb_clob2 where ID = :id",
+            "SELECT C2 from nodb_clob2 where ID = :id",
             { id: id },
             function(err, result){
               should.not.exist(err);
@@ -231,6 +233,75 @@ describe('86. fetchClobAsString3.js', function() {
 
     }); // 86.1.2
 
+    it('86.1.3 works with Restult Set', function(done) {
+      var id = insertID++;
+      var specialStr_1 = '86.1.3';
+      var contentLength_1 = 387;
+      var content_1 = random.getRandomString(contentLength_1, specialStr_1);
+
+      async.series([
+        function(cb) {
+          var sql = "insert into nodb_clob2(id, c1) values (:i, :c)";
+          connection.execute(
+            sql,
+            {
+              i: id,
+              c: content_1
+            },
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          connection.execute(
+            "select c1 from nodb_clob2 where id = :1",
+            [id],
+            { resultSet: true },
+            function(err, result) {
+              should.not.exist(err);
+              fetchOneRowFromRS(result.resultSet, cb);
+            }
+          );
+        }
+      ], done);
+
+      var fetchOneRowFromRS = function(rs, callback) {
+        rs.getRow(
+          function(err, row) {
+            if (err) {
+              should.not.exist(err);
+              doClose(rs, callback);
+            } else if (!row) {
+              doClose(rs, callback);
+            } else {
+              var specialStrLen_1 = specialStr_1.length;
+              var resultLen_1 = row[0].length;
+              should.equal(row[0].length, contentLength_1);
+              should.strictEqual(
+                row[0].substring(0, specialStrLen_1),
+                specialStr_1
+              );
+              should.strictEqual(
+                row[0].substring(resultLen_1 - specialStrLen_1, resultLen_1),
+                specialStr_1
+              );
+              fetchOneRowFromRS(rs, callback);
+            }
+          }
+        );
+      };
+
+      var doClose = function(rs, callback) {
+        rs.close(function(err) {
+          should.not.exist(err);
+          callback();
+        });
+      };
+
+    }); // 86.1.3
+
   }); // 86.1
 
   describe('86.2 types support for fetchAsString property', function() {
@@ -241,77 +312,73 @@ describe('86. fetchClobAsString3.js', function() {
     });
 
     it('86.2.1 String not supported in fetchAsString', function(done) {
-      try {
-        oracledb.fetchAsString = [ oracledb.STRING ];
-      } catch(err) {
-        should.exist(err);
-        // NJS-021: invalid type for conversion specified
-        (err.message).should.startWith ('NJS-021:');
-      }
+      should.throws(
+        function() {
+          oracledb.fetchAsString = [ oracledb.STRING ];
+        },
+        /NJS-021: invalid type for conversion specified/
+      );
       done();
     }); // 86.2.1
 
     it('86.2.2 BLOB not supported in fetchAsString', function(done) {
-      try {
-        oracledb.fetchAsString = [ oracledb.BLOB ];
-      } catch(err) {
-        should.exist(err);
-        // NJS-021: invalid type for conversion specified
-        (err.message).should.startWith ('NJS-021:');
-      }
+      should.throws(
+        function() {
+          oracledb.fetchAsString = [ oracledb.BLOB ];
+        },
+        /NJS-021: invalid type for conversion specified/
+      );
       done();
     }); // 86.2.2
 
     it('86.2.3 Cursor not supported in fetchAsString', function(done) {
-      try {
-        oracledb.fetchAsString = [ oracledb.CURSOR ];
-      } catch(err) {
-        should.exist(err);
-        // NJS-021: invalid type for conversion specified
-        (err.message).should.startWith ('NJS-021:');
-      }
+      should.throws(
+        function() {
+          oracledb.fetchAsString = [ oracledb.CURSOR ];
+        },
+        /NJS-021: invalid type for conversion specified/
+      );
       done();
     }); // 86.2.3
 
     it('86.2.4 Buffer not supported in fetchAsString', function(done) {
-      try {
-        oracledb.fetchAsString = [ oracledb.Buffer ];
-      } catch(err) {
-        should.exist(err);
-        // NJS-021: invalid type for conversion specified
-        (err.message).should.startWith ('NJS-021:');
-      }
+      should.throws(
+        function() {
+          oracledb.fetchAsString = [ oracledb.Buffer ];
+        },
+        /NJS-021: invalid type for conversion specified/
+      );
       done();
     }); // 86.2.4
 
     it('86.2.5 Number supported in fetchAsString', function(done) {
-      try {
-        oracledb.fetchAsString = [ oracledb.NUMBER ];
-      } catch(err) {
-        should.not.exist(err);
-      }
+      should.doesNotThrow(
+        function() {
+          oracledb.fetchAsString = [ oracledb.NUMBER ];
+        }
+      );
       should.strictEqual(oracledb.fetchAsString.length, 1);
       should.strictEqual(oracledb.fetchAsString[0], oracledb.NUMBER);
       done();
     }); // 86.2.5
 
     it('86.2.6 Date supported in fetchAsString', function(done) {
-      try {
-        oracledb.fetchAsString = [ oracledb.DATE ];
-      } catch(err) {
-        should.not.exist(err);
-      }
+      should.doesNotThrow(
+        function() {
+          oracledb.fetchAsString = [ oracledb.DATE ];
+        }
+      );
       should.strictEqual(oracledb.fetchAsString.length, 1);
       should.strictEqual(oracledb.fetchAsString[0], oracledb.DATE);
       done();
     }); // 86.2.6
 
     it('86.2.7 CLOB supported in fetchAsString', function(done) {
-      try {
-        oracledb.fetchAsString = [ oracledb.CLOB ];
-      } catch(err) {
-        should.not.exist(err);
-      }
+      should.doesNotThrow(
+        function() {
+          oracledb.fetchAsString = [ oracledb.CLOB ];
+        }
+      );
       should.strictEqual(oracledb.fetchAsString.length, 1);
       should.strictEqual(oracledb.fetchAsString[0], oracledb.CLOB);
       done();

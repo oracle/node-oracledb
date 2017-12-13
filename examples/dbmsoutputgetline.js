@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -65,10 +65,10 @@ var enableDbmsOutput = function (conn, cb) {
 
 var createDbmsOutput = function (conn, cb) {
   conn.execute(
-    "BEGIN " +
-      "DBMS_OUTPUT.PUT_LINE('Hello, Oracle!');" +
-      "DBMS_OUTPUT.PUT_LINE('Hello, Node!');" +
-      "END;",
+    `BEGIN
+       DBMS_OUTPUT.PUT_LINE('Hello, Oracle!');
+       DBMS_OUTPUT.PUT_LINE('Hello, Node!');
+     END;`,
     function(err) { return cb(err, conn); });
 };
 

@@ -689,7 +689,7 @@ describe('92.binding_DMLInsert.js', function() {
     it('92.3.1 oracledb.STRING <--> DB: NUMBER', function(done) {
       index++;
       var table_name = tableNamePre + index;
-      var content = random.getRandomLenString(2000);
+      var content = random.getRandomLengthString(2000);
       var bindType = oracledb.STRING;
       var dbColType = "NUMBER";
       var nullBind = false;
@@ -699,7 +699,7 @@ describe('92.binding_DMLInsert.js', function() {
     it('92.3.2 oracledb.STRING <--> DB: CHAR', function(done) {
       index++;
       var table_name = tableNamePre + index;
-      var content = random.getRandomLenString(2000);
+      var content = random.getRandomLengthString(2000);
       var bindType = oracledb.STRING;
       var dbColType = "CHAR";
       var nullBind = false;
@@ -709,7 +709,7 @@ describe('92.binding_DMLInsert.js', function() {
     it('92.3.3 oracledb.STRING <--> DB: NCHAR', function(done) {
       index++;
       var table_name = tableNamePre + index;
-      var content = random.getRandomLenString(2000);
+      var content = random.getRandomLengthString(2000);
       var bindType = oracledb.STRING;
       var dbColType = "NCHAR";
       var nullBind = false;
@@ -719,7 +719,7 @@ describe('92.binding_DMLInsert.js', function() {
     it('92.3.4 oracledb.STRING <--> DB: VARCHAR2', function(done) {
       index++;
       var table_name = tableNamePre + index;
-      var content = random.getRandomLenString(2000);
+      var content = random.getRandomLengthString(2000);
       var bindType = oracledb.STRING;
       var dbColType = "VARCHAR2";
       var nullBind = false;
@@ -729,7 +729,7 @@ describe('92.binding_DMLInsert.js', function() {
     it('92.3.5 oracledb.STRING <--> DB: FLOAT', function(done) {
       index++;
       var table_name = tableNamePre + index;
-      var content = random.getRandomLenString(2000);
+      var content = random.getRandomLengthString(2000);
       var bindType = oracledb.STRING;
       var dbColType = "FLOAT";
       var nullBind = false;
@@ -739,7 +739,7 @@ describe('92.binding_DMLInsert.js', function() {
     it('92.3.6 oracledb.STRING <--> DB: BINARY_FLOAT', function(done) {
       index++;
       var table_name = tableNamePre + index;
-      var content = random.getRandomLenString(2000);
+      var content = random.getRandomLengthString(2000);
       var bindType = oracledb.STRING;
       var dbColType = "BINARY_FLOAT";
       var nullBind = false;
@@ -749,7 +749,7 @@ describe('92.binding_DMLInsert.js', function() {
     it('92.3.7 oracledb.STRING <--> DB: BINARY_DOUBLE', function(done) {
       index++;
       var table_name = tableNamePre + index;
-      var content = random.getRandomLenString(2000);
+      var content = random.getRandomLengthString(2000);
       var bindType = oracledb.STRING;
       var dbColType = "BINARY_DOUBLE";
       var nullBind = false;
@@ -759,7 +759,7 @@ describe('92.binding_DMLInsert.js', function() {
     it('92.3.8 oracledb.STRING <--> DB: DATE', function(done) {
       index++;
       var table_name = tableNamePre + index;
-      var content = "abc" + random.getRandomLenString(1997);
+      var content = "abc" + random.getRandomLengthString(1997);
       var bindType = oracledb.STRING;
       var dbColType = "DATE";
       var nullBind = false;
@@ -769,7 +769,7 @@ describe('92.binding_DMLInsert.js', function() {
     it('92.3.9 oracledb.STRING <--> DB: TIMESTAMP', function(done) {
       index++;
       var table_name = tableNamePre + index;
-      var content = random.getRandomLenString(2000);
+      var content = random.getRandomLengthString(2000);
       var bindType = oracledb.STRING;
       var dbColType = "TIMESTAMP";
       var nullBind = false;
@@ -779,7 +779,7 @@ describe('92.binding_DMLInsert.js', function() {
     it('92.3.10 oracledb.STRING <--> DB: RAW', function(done) {
       index++;
       var table_name = tableNamePre + index;
-      var content = random.getRandomLenString(2000);
+      var content = random.getRandomLengthString(2000);
       var bindType = oracledb.STRING;
       var dbColType = "RAW";
       var nullBind = false;
@@ -789,7 +789,7 @@ describe('92.binding_DMLInsert.js', function() {
     it('92.3.11 oracledb.STRING <--> DB: CLOB', function(done) {
       index++;
       var table_name = tableNamePre + index;
-      var content = random.getRandomLenString(2000);
+      var content = random.getRandomLengthString(2000);
       var bindType = oracledb.STRING;
       var dbColType = "CLOB";
       var nullBind = false;
@@ -799,7 +799,7 @@ describe('92.binding_DMLInsert.js', function() {
     it('92.3.12 oracledb.STRING <--> DB: BLOB', function(done) {
       index++;
       var table_name = tableNamePre + index;
-      var content = random.getRandomLenString(2000);
+      var content = random.getRandomLengthString(2000);
       var bindType = oracledb.STRING;
       var dbColType = "BLOB";
       var nullBind = false;

@@ -48,7 +48,7 @@ describe('4. binding.js', function() {
     var connection = null;
     before(function(done) {
       oracledb.getConnection(dbConfig, function(err, conn) {
-        if(err) { console.error(err.message); return; }
+        should.not.exist(err);
         connection = conn;
         done();
       });
@@ -56,7 +56,7 @@ describe('4. binding.js', function() {
 
     after(function(done) {
       connection.release( function(err) {
-        if(err) { console.error(err.message); return; }
+        should.not.exist(err);
         done();
       });
     });
@@ -587,7 +587,7 @@ describe('4. binding.js', function() {
 
     before(function(done) {
       oracledb.getConnection(dbConfig, function(err, conn) {
-        if(err) { console.error(err.message); return; }
+        should.not.exist(err);
         connection = conn;
         done();
       });
@@ -595,7 +595,7 @@ describe('4. binding.js', function() {
 
     after(function(done) {
       connection.release( function(err) {
-        if(err) { console.error(err.message); return; }
+        should.not.exist(err);
         done();
       });
     });
@@ -635,22 +635,6 @@ describe('4. binding.js', function() {
         },
         function(callback) {
           connection.execute(
-            "BEGIN nodb_bindproc4(:o); END;",
-            [
-              { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize:22 }
-            ],
-            function(err, result) {
-              should.exist(err);
-              // console.log(err.message);
-              err.message.should.startWith('ORA-06502:');
-              should.not.exist(result);
-              // console.log(result);
-              callback();
-            }
-          );
-        },
-        function(callback) {
-          connection.execute(
             "DROP PROCEDURE nodb_bindproc4",
             function(err) {
               should.not.exist(err);
@@ -676,27 +660,25 @@ describe('4. binding.js', function() {
     it('4.4.3 Negative - bind out data exceeds default length', function(done) {
       connection.execute(
         "BEGIN :o := lpad('A',201,'x'); END;",
-         { o: { type: oracledb.STRING, dir : oracledb.BIND_OUT } },
-         function (err, result) {
-           should.exist(err);
-           // ORA-06502: PL/SQL: numeric or value error
-           err.message.should.startWith('ORA-06502:');
-           // console.log(result.outBinds.o.length);
-           should.not.exist(result);
-           done();
-         }
+        { o: { type: oracledb.STRING, dir : oracledb.BIND_OUT } },
+        function (err, result) {
+          should.exist(err);
+          // ORA-06502: PL/SQL: numeric or value error
+          err.message.should.startWith('ORA-06502:');
+          // console.log(result.outBinds.o.length);
+          should.not.exist(result);
+          done();
+        }
       );
     });
 
-    // known bug, ambiguous error message
-    it.skip('4.4.4 maximum value of maxSize option is 32767', function(done) {
+    it('4.4.4 maximum value of maxSize option is 32767', function(done) {
       connection.execute(
         "BEGIN :o := lpad('A',32767,'x'); END;",
         { o: { type: oracledb.STRING, dir : oracledb.BIND_OUT, maxSize:50000 } },
         function(err, result) {
-          should.exist(err);
-          // console.log(err);
-          should.not.exist(result);
+          should.not.exist(err);
+          should.strictEqual(result.outBinds.o.length, 32767);
           done();
         }
       );
@@ -736,7 +718,7 @@ describe('4. binding.js', function() {
     });
 
 
-    it('4.5.1 ',function(done) {
+    it('4.5.1 DML default bind',function(done) {
       connection.execute(
         "insert into nodb_raw (num) values (:id)",
         { id: { val: 1, type: oracledb.NUMBER } },
@@ -746,6 +728,23 @@ describe('4. binding.js', function() {
         }
       );
     });
+
+
+    it('4.5.2 negative - DML invalid bind direction',function(done) {
+      connection.execute(
+        "insert into nodb_raw (num) values (:id)",
+        { id: { val: 1, type: oracledb.NUMBER, dir : 0 } },
+        function(err, result ) {
+          should.exist(err);
+          (err.message).should.startWith ( 'NJS-013' );
+          should.not.exist ( result );
+          done();
+        }
+      );
+    });
+
+
+
   }); // 4.5
 
   describe('4.6 PL/SQL block with empty outBinds', function() {
@@ -790,47 +789,47 @@ describe('4. binding.js', function() {
   // Test cases involving JSON value as input
   describe ('4.7 Value as JSON named/unamed test cases', function () {
     it ( '4.7.1 valid case when numeric values are passed as it is',
-       function (done ) {
-         var sql = "SELECT SYSDATE FROM DUAL WHERE :b = 1 and :c = 456 ";
-         var binds = [ 1, 456 ];
+      function (done ) {
+        var sql = "SELECT SYSDATE FROM DUAL WHERE :b = 1 and :c = 456 ";
+        var binds = [ 1, 456 ];
 
-         oracledb.getConnection (
-           dbConfig,
-           function (err, connection ){
+        oracledb.getConnection (
+          dbConfig,
+          function (err, connection ){
 
-             should.not.exist ( err ) ;
-             connection.execute (
-               sql,
-               binds,
-               function ( err, result ) {
-                 (result.rows[0][0]).should.be.a.Date();
-                 should.not.exist ( err );
-                 done ();
-               }
-             );
-           });
-       });
+            should.not.exist ( err ) ;
+            connection.execute (
+              sql,
+              binds,
+              function ( err, result ) {
+                (result.rows[0][0]).should.be.a.Date();
+                should.not.exist ( err );
+                done ();
+              }
+            );
+          });
+      });
 
     it ( '4.7.2 Valid values when one of the value is passed as JSON ',
-       function (done ) {
-         var sql = "SELECT SYSDATE FROM DUAL WHERE :b = 1 and :c = 456 ";
-         var binds = [ 1, { val : 456 } ];
+      function (done ) {
+        var sql = "SELECT SYSDATE FROM DUAL WHERE :b = 1 and :c = 456 ";
+        var binds = [ 1, { val : 456 } ];
 
-         oracledb.getConnection (
-           dbConfig,
-           function (err, connection ){
+        oracledb.getConnection (
+          dbConfig,
+          function (err, connection ){
 
-             should.not.exist ( err ) ;
-             connection.execute (
-               sql,
-               binds,
-               function ( err, result ) {
-                 (result.rows[0][0]).should.be.a.Date();
-                 should.not.exist ( err );
-                 done ();
-               } );
-           });
-       });
+            should.not.exist ( err ) ;
+            connection.execute (
+              sql,
+              binds,
+              function ( err, result ) {
+                (result.rows[0][0]).should.be.a.Date();
+                should.not.exist ( err );
+                done ();
+              } );
+          });
+      });
 
     it ( '4.7.3 Valid test case when one of the value is passed as JSON ',
       function (done ) {
@@ -838,19 +837,19 @@ describe('4. binding.js', function() {
         var binds = [ {val :  1}, 456 ];
 
         oracledb.getConnection (
-           dbConfig,
-           function (err, connection ){
+          dbConfig,
+          function (err, connection ){
 
-             should.not.exist ( err ) ;
-             connection.execute (
-               sql,
-               binds,
-               function ( err, result ) {
-                 (result.rows[0][0]).should.be.a.Date();
-                 should.not.exist ( err );
-                 done ();
-               } );
-           });
+            should.not.exist ( err ) ;
+            connection.execute (
+              sql,
+              binds,
+              function ( err, result ) {
+                (result.rows[0][0]).should.be.a.Date();
+                should.not.exist ( err );
+                done ();
+              } );
+          });
       });
 
     it ( '4.7.4 Valid Test case when both values are passed as JSON',
@@ -859,19 +858,19 @@ describe('4. binding.js', function() {
         var binds = [ {val : 1}, {val : 456 } ];
 
         oracledb.getConnection (
-           dbConfig,
-           function (err, connection ){
+          dbConfig,
+          function (err, connection ){
 
-             should.not.exist ( err ) ;
-             connection.execute (
-               sql,
-               binds,
-               function ( err, result ) {
-                 (result.rows[0][0]).should.be.a.Date();
-                 should.not.exist ( err );
-                 done ();
-               } );
-           });
+            should.not.exist ( err ) ;
+            connection.execute (
+              sql,
+              binds,
+              function ( err, result ) {
+                (result.rows[0][0]).should.be.a.Date();
+                should.not.exist ( err );
+                done ();
+              } );
+          });
       });
 
     it ( '4.7.5 Invalid Test case when value is passed as named JSON',

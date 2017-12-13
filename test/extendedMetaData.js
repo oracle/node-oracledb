@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, 2017, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -167,29 +167,31 @@ describe('17. extendedMetaData.js', function() {
       );
     });
 
-    it("17.1.4 works as 'false' when setting to 0", function(done) {
+    it("17.1.4 negative - 0", function(done) {
 
       connection.execute(
         "SELECT * FROM nodb_md",
         [],
         { extendedMetaData: 0 },
         function(err, result) {
-          should.not.exist(err);
-          (result.metaData).should.deepEqual([ { name: 'NUM' }, { name: 'VCH' }, { name: 'DT' } ]);
+          should.not.exist(result);
+          should.exist(err);
+          should.strictEqual(err.message, "NJS-007: invalid value for \"extendedMetaData\" in parameter 3");
           done();
         }
       );
     });
 
-    it("17.1.5 works as 'false' when setting to 'null'", function(done) {
+    it("17.1.5 negative - null", function(done) {
 
       connection.execute(
         "SELECT * FROM nodb_md",
         [],
         { extendedMetaData: null },
         function(err, result) {
-          should.not.exist(err);
-          (result.metaData).should.deepEqual([ { name: 'NUM' }, { name: 'VCH' }, { name: 'DT' } ]);
+          should.not.exist(result);
+          should.exist(err);
+          should.strictEqual(err.message, "NJS-007: invalid value for \"extendedMetaData\" in parameter 3");
           done();
         }
       );
@@ -209,57 +211,61 @@ describe('17. extendedMetaData.js', function() {
       );
     });
 
-    it("17.1.7 works as 'false' when setting to 'NaN'", function(done) {
+    it("17.1.7 negative - NaN", function(done) {
 
       connection.execute(
         "SELECT * FROM nodb_md",
         [],
         { extendedMetaData: NaN },
         function(err, result) {
-          should.not.exist(err);
-          (result.metaData).should.deepEqual([ { name: 'NUM' }, { name: 'VCH' }, { name: 'DT' } ]);
+          should.not.exist(result);
+          should.exist(err);
+          should.strictEqual(err.message, "NJS-007: invalid value for \"extendedMetaData\" in parameter 3");
           done();
         }
       );
     });
 
-    it("17.1.8 works as 'true' when setting to a positive number", function(done) {
+    it("17.1.8 negative - positive number", function(done) {
 
       connection.execute(
         "SELECT dt FROM nodb_md",
         [],
         { extendedMetaData: 9 },
         function(err, result) {
-          should.not.exist(err);
-          (result.metaData).should.deepEqual( [ { name: 'DT', fetchType: oracledb.DATE, dbType: oracledb.DB_TYPE_DATE, nullable: true } ] );
+          should.not.exist(result);
+          should.exist(err);
+          should.strictEqual(err.message, "NJS-007: invalid value for \"extendedMetaData\" in parameter 3");
           done();
         }
       );
     });
 
-    it("17.1.9 works as 'true' when setting to a negative number", function(done) {
+    it("17.1.9 negative - negative number", function(done) {
 
       connection.execute(
         "SELECT dt FROM nodb_md",
         [],
         { extendedMetaData: -55 },
         function(err, result) {
-          should.not.exist(err);
-          (result.metaData).should.deepEqual( [ { name: 'DT', fetchType: oracledb.DATE, dbType: oracledb.DB_TYPE_DATE, nullable: true } ] );
+          should.not.exist(result);
+          should.exist(err);
+          should.strictEqual(err.message, "NJS-007: invalid value for \"extendedMetaData\" in parameter 3");
           done();
         }
       );
     });
 
-    it("17.1.10 works as 'true' when setting to a string", function(done) {
+    it("17.1.10 negative - random string", function(done) {
 
       connection.execute(
         "SELECT dt FROM nodb_md",
         [],
         { extendedMetaData: 'foobar' },
         function(err, result) {
-          should.not.exist(err);
-          (result.metaData).should.deepEqual( [ { name: 'DT', fetchType: oracledb.DATE, dbType: oracledb.DB_TYPE_DATE, nullable: true } ] );
+          should.not.exist(result);
+          should.exist(err);
+          should.strictEqual(err.message, "NJS-007: invalid value for \"extendedMetaData\" in parameter 3");
           done();
         }
       );
@@ -307,14 +313,8 @@ describe('17. extendedMetaData.js', function() {
           callback();
         },
         function test(callback) {
-          if (!expect) {
-            (oracledb.extendedMetaData).should.be.false();
-            verifyFalse(callback);
-          }
-          else {
-            (oracledb.extendedMetaData).should.be.true();
-            verifyTrue(callback);
-          } // else
+          (oracledb.extendedMetaData).should.be.true();
+          verifyTrue(callback);
         },
         function restore(callback) {
           oracledb.extendedMetaData = false;
@@ -324,17 +324,14 @@ describe('17. extendedMetaData.js', function() {
       ], done);
     }; // verify()
 
-    var verifyFalse = function(cb) {
-      connection.execute(
-        "SELECT * FROM nodb_md",
-        function(err, result) {
-          should.not.exist(err);
-          (result.metaData).should.deepEqual([
-            { name: 'NUM' }, { name: 'VCH' }, { name: 'DT' }
-          ]);
-          cb();
-        }
+    var verifyFalse = function(setValue, cb) {
+      should.throws(
+        function() {
+          oracledb.extendedMetaData = setValue;
+        },
+        /NJS-004: invalid value for property extendedMetaData/
       );
+      cb();
     };
 
     var verifyTrue = function(cb) {
@@ -367,39 +364,48 @@ describe('17. extendedMetaData.js', function() {
 
     it("17.2.1 default value is 'false'", function(done) {
       (oracledb.extendedMetaData).should.be.false();
-      verifyFalse(done);
+      connection.execute(
+        "SELECT * FROM nodb_md",
+        function(err, result) {
+          should.not.exist(err);
+          (result.metaData).should.deepEqual([
+            { name: 'NUM' }, { name: 'VCH' }, { name: 'DT' }
+          ]);
+          done();
+        }
+      );
     });
 
     it("17.2.2 sets to be 'true'", function(done) {
       verify(true, true, done);
     });
 
-    it("17.2.3 works as 'false' when setting to 0", function(done) {
-      verify(0, false, done);
+    it("17.2.3 negative - 0", function(done) {
+      verifyFalse(0, done);
     });
 
-    it("17.2.4 works as 'false' when setting to 'null'", function(done) {
-      verify(null, false, done);
+    it("17.2.4 negative - 'null'", function(done) {
+      verifyFalse(null, done);
     });
 
-    it("17.2.5 works as 'false' when setting to 'undefined'", function(done) {
-      verify(undefined, false, done);
+    it("17.2.5 negative - 'undefined'", function(done) {
+      verifyFalse(undefined, done);
     });
 
-    it("17.2.6 works as 'false' when setting to 'NaN'", function(done) {
-      verify(NaN, false, done);
+    it("17.2.6 negative - 'NaN'", function(done) {
+      verifyFalse(NaN, done);
     });
 
-    it("17.2.7 works as 'true' when setting to a positive number", function(done) {
-      verify(20, true, done);
+    it("17.2.7 negative - positive number", function(done) {
+      verifyFalse(20, done);
     });
 
-    it("17.2.8 works as 'true' when setting to a negative number", function(done) {
-      verify(-2333, true, done);
+    it("17.2.8 negative - negative number", function(done) {
+      verifyFalse(-2333, done);
     });
 
-    it("17.2.9 works as 'true' when setting to a string", function(done) {
-      verify("foobar", true, done);
+    it("17.2.9 negative - string", function(done) {
+      verifyFalse("foobar", done);
     });
 
     it("17.2.10 can be overrided by execute() option", function(done) {
@@ -543,7 +549,7 @@ describe('17. extendedMetaData.js', function() {
           (result.metaData).should.deepEqual(
             [ { name: 'NVCH',
               fetchType: oracledb.STRING,
-              dbType: oracledb.DB_TYPE_VARCHAR,
+              dbType: oracledb.DB_TYPE_NVARCHAR,
               byteSize: 4000,
               nullable: true } ]
           );
@@ -577,15 +583,15 @@ describe('17. extendedMetaData.js', function() {
     it('17.3.4 NCHAR', function(done) {
 
       connection.execute(
-        "SELECT ch FROM nodb_metadata",
+        "SELECT nch FROM nodb_metadata",
         [],
         { extendedMetaData: true },
         function(err, result) {
           should.not.exist(err);
           (result.metaData).should.deepEqual(
-            [ { name: 'CH',
+            [ { name: 'NCH',
               fetchType: oracledb.STRING,
-              dbType: oracledb.DB_TYPE_CHAR,
+              dbType: oracledb.DB_TYPE_NCHAR,
               byteSize: 2000,
               nullable: true } ]
           );
@@ -932,10 +938,13 @@ describe('17. extendedMetaData.js', function() {
         [],
         { extendedMetaData: true },
         function(err, result) {
-          should.exist(err);
-          (err.message).should.startWith('NJS-010:');
-          // NJS-010: unsupported data type in select list
-          should.not.exist(result);
+          should.not.exist(err);
+          (result.metaData).should.deepEqual(
+            [ { name: 'LN',
+              fetchType: oracledb.STRING,
+              dbType: oracledb.DB_TYPE_LONG,
+              nullable: true } ]
+          );
           done();
         }
       );
@@ -1051,9 +1060,14 @@ describe('17. extendedMetaData.js', function() {
         [],
         { extendedMetaData: true },
         function(err, result) {
-          (err.message).should.startWith('NJS-010:');
-          // NJS-010: unsupported data type in select list
-          should.not.exist(result);
+          should.not.exist(err);
+          (result.metaData).should.deepEqual(
+            [ { name: 'TS3',
+              fetchType: oracledb.DATE,
+              dbType: oracledb.DB_TYPE_TIMESTAMP_TZ,
+              precision: 6,
+              nullable: true } ]
+          );
           done();
         }
       );
@@ -1067,9 +1081,14 @@ describe('17. extendedMetaData.js', function() {
         [],
         { extendedMetaData: true },
         function(err, result) {
-          (err.message).should.startWith('NJS-010:');
-          // NJS-010: unsupported data type in select list
-          should.not.exist(result);
+          should.not.exist(err);
+          (result.metaData).should.deepEqual(
+            [ { name: 'TS4',
+              fetchType: oracledb.DATE,
+              dbType: oracledb.DB_TYPE_TIMESTAMP_TZ,
+              precision: 2,
+              nullable: true } ]
+          );
           done();
         }
       );
@@ -1157,9 +1176,13 @@ describe('17. extendedMetaData.js', function() {
         [],
         { extendedMetaData: true },
         function(err, result) {
-          (err.message).should.startWith('NJS-010:');
-          // NJS-010: unsupported data type in select list
-          should.not.exist(result);
+          should.not.exist(err);
+          (result.metaData).should.deepEqual(
+            [ { name: 'RID',
+              fetchType: oracledb.STRING,
+              dbType: oracledb.DB_TYPE_ROWID,
+              nullable: true } ]
+          );
           done();
         }
       );
@@ -1173,9 +1196,13 @@ describe('17. extendedMetaData.js', function() {
         [],
         { extendedMetaData: true },
         function(err, result) {
-          (err.message).should.startWith('NJS-010:');
-          // NJS-010: unsupported data type in select list
-          should.not.exist(result);
+          should.not.exist(err);
+          (result.metaData).should.deepEqual(
+            [ { name: 'URID',
+              fetchType: oracledb.STRING,
+              dbType: oracledb.DB_TYPE_ROWID,
+              nullable: true } ]
+          );
           done();
         }
       );
@@ -1233,7 +1260,7 @@ describe('17. extendedMetaData.js', function() {
           (result.metaData).should.deepEqual(
             [ { name: 'NCLB',
               fetchType: oracledb.CLOB,
-              dbType: oracledb.DB_TYPE_CLOB,
+              dbType: oracledb.DB_TYPE_NCLOB,
               nullable: true } ]
           );
           done();
@@ -1280,6 +1307,64 @@ describe('17. extendedMetaData.js', function() {
 
     });
 
+    it('17.3.39 LONG RAW', function(done) {
+      var createtable = "BEGIN \n" +
+                        "    DECLARE \n" +
+                        "        e_table_missing EXCEPTION; \n" +
+                        "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
+                        "    BEGIN \n" +
+                        "        EXECUTE IMMEDIATE('DROP TABLE nodb_metadata_lr PURGE'); \n" +
+                        "    EXCEPTION \n" +
+                        "        WHEN e_table_missing \n" +
+                        "        THEN NULL; \n" +
+                        "    END; \n" +
+                        "    EXECUTE IMMEDIATE (' \n" +
+                        "        CREATE TABLE nodb_metadata_lr ( \n" +
+                        "            lraw        LONG RAW \n" +
+                        "        ) \n" +
+                        "    '); \n" +
+                        "END; ";
+
+      async.series([
+        function(cb) {
+          connection.execute(
+            createtable,
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          connection.execute(
+            "SELECT lraw FROM nodb_metadata_lr",
+            [],
+            { extendedMetaData: true },
+            function(err, result) {
+              should.not.exist(err);
+              (result.metaData).should.deepEqual(
+                [ { name: 'LRAW',
+                  fetchType: oracledb.BUFFER,
+                  dbType: oracledb.DB_TYPE_LONG_RAW,
+                  nullable: true } ]
+              );
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          connection.execute(
+            "DROP TABLE nodb_metadata_lr PURGE",
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        }
+      ], done);
+
+    });
+
   }); // 17.3
 
   describe('17.4 result set', function() {
@@ -1293,7 +1378,7 @@ describe('17. extendedMetaData.js', function() {
         function(err, result) {
           should.not.exist(err);
           verifyResult(false, result.resultSet.metaData);
-          done();
+          result.resultSet.close(done);
         }
       );
 
@@ -1308,7 +1393,7 @@ describe('17. extendedMetaData.js', function() {
         function(err, result) {
           should.not.exist(err);
           verifyResult(true, result.resultSet.metaData);
-          done();
+          result.resultSet.close(done);
         }
       );
 
@@ -1330,7 +1415,7 @@ describe('17. extendedMetaData.js', function() {
             function(err, result) {
               should.not.exist(err);
               verifyResult(true, result.resultSet.metaData);
-              cb();
+              result.resultSet.close(cb);
             }
           );
         },
@@ -1372,7 +1457,7 @@ describe('17. extendedMetaData.js', function() {
             function(err, result) {
               should.not.exist(err);
               verifyResult(true, result.outBinds.out.metaData);
-              cb();
+              result.outBinds.out.close(cb);
             }
           );
         },

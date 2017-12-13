@@ -30,6 +30,8 @@
 var oracledb = require('oracledb');
 var dbConfig = require('./dbconfig.js');
 
+var rowcount = 0;
+
 oracledb.getConnection(
   {
     user          : dbConfig.user,
@@ -44,7 +46,9 @@ oracledb.getConnection(
     }
 
     var stream = connection.queryStream(
-      'SELECT first_name, last_name FROM employees ORDER BY employee_id'
+      'SELECT first_name, last_name FROM employees ORDER BY employee_id',
+      [],  // no binds
+      { fetchArraySize: 150 }  // internal buffer size for performance tuning
     );
 
     stream.on('error', function (error) {
@@ -61,10 +65,12 @@ oracledb.getConnection(
     stream.on('data', function (data) {
       // console.log("stream 'data' event");
       console.log(data);
+      rowcount++;
     });
 
     stream.on('end', function () {
       // console.log("stream 'end' event");
+      console.log('Rows selected: ' + rowcount);
       connection.close(
         function(err) {
           if (err) {

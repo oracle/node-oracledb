@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -22,7 +22,7 @@
  *   36. dataTypeTimestamp4.js
  *
  * DESCRIPTION
- *    Testing Oracle data type support - TIMESTAMP (2) WITH TIME ZONE.
+ *    Testing Oracle data type support - TIMESTAMP (4) WITH TIME ZONE.
  *
  * NOTE
  *   TIMESTAMP support is still under enhancement request. This test is suspended.
@@ -40,104 +40,133 @@ var oracledb = require('oracledb');
 var should   = require('should');
 var async    = require('async');
 var dbConfig = require('./dbconfig.js');
+var assist   = require('./dataTypeAssist.js');
 
 describe('36. dataTypeTimestamp4.js', function() {
 
   var connection = null;
-  var tableName = "nodb_datatype_timestamp";
-  var sqlCreate =
-        "BEGIN " +
-           "   DECLARE " +
-           "       e_table_missing EXCEPTION; " +
-           "       PRAGMA EXCEPTION_INIT(e_table_missing, -00942); " +
-           "   BEGIN " +
-           "       EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " PURGE'); " +
-           "   EXCEPTION " +
-           "       WHEN e_table_missing " +
-           "       THEN NULL; " +
-           "   END; " +
-           "   EXECUTE IMMEDIATE (' " +
-           "       CREATE TABLE " + tableName +" ( " +
-           "           num NUMBER, " +
-           "           content TIMESTAMP(2) WITH TIME ZONE "  +
-           "       )" +
-           "   '); " +
-           "END; ";
-  var sqlDrop = "DROP table " + tableName + " PURGE";
-  before( function(done){
-    oracledb.getConnection(
-      {
-        user:          dbConfig.user,
-        password:      dbConfig.password,
-        connectString: dbConfig.connectString
-      },
-      function(err, conn){
-        should.not.exist(err);
-        connection = conn;
-        connection.execute(
-          sqlCreate,
-          function(err) {
-            should.not.exist(err);
-            done();
-          }
-        );
-      }
+  var tableName = "nodb_timestamp4";
+  before('get one connection', function(done) {
+    oracledb.getConnection(dbConfig, function(err, conn) {
+      should.not.exist(err);
+      connection = conn;
+      done();
+    }
     );
   });
 
-  after( function(done){
-    connection.execute(
-      sqlDrop,
-      function(err) {
-        if(err) { console.error(err.message); return; }
-        connection.release( function(err) {
-          if(err) { console.error(err.message); return; }
-          done();
-        });
-      }
-    );
+  after('release connection', function(done) {
+    connection.release( function(err) {
+      should.not.exist(err);
+      done();
+    });
   });
 
-  it('supports TIMESTAMP WITH TIME ZONE data type', function(done) {
-    connection.should.be.ok();
+  describe('36.1 Testing JavaScript Date with database TIMESTAMP (4) WITH TIME ZONE', function() {
+    var dates = assist.data.dates;
 
-    var timestamps = [
-      new Date(-100000000),
-      new Date(0),
-      new Date(10000000000),
-      new Date(100000000000)
-    ];
+    before('create table, insert data',function(done) {
+      assist.setUp(connection, tableName, dates, done);
+    });
 
-    var sqlInsert = "INSERT INTO " + tableName + " VALUES(:no, :bindValue)";
-
-    async.forEach(timestamps, function(timestamp, callback) {
+    after(function(done) {
+      oracledb.fetchAsString = [];
       connection.execute(
-        sqlInsert,
-        { no: timestamps.indexOf(timestamp), bindValue: timestamp },
+        "DROP table " + tableName + " PURGE",
         function(err) {
           should.not.exist(err);
-          callback();
-        }
-      );
-    }, function(err) {
-      should.not.exist(err);
-      connection.execute(
-        "SELECT * FROM " + tableName,
-        [],
-        { outFormat: oracledb.OBJECT },
-        function(err, result) {
-          should.exist(err);
-          (err.message).should.startWith('NJS-010:'); // unsupported data type in select list
-          should.not.exist(result);
-          /*
-          console.log(result);
-          for(var j = 0; j < timestamps.length; j++)
-            result.rows[j].CONTENT.toUTCString().should.eql(timestamps[result.rows[j].NUM].toUTCString());
-          */
           done();
         }
       );
     });
+
+    it('36.1.1 works well with SELECT query', function(done) {
+      assist.dataTypeSupport(connection, tableName, dates, done);
+    });
+
+    it('36.1.2 works well with result set', function(done) {
+      assist.verifyResultSet(connection, tableName, dates, done);
+    });
+
+    it('36.1.3 works well with REF Cursor', function(done) {
+      assist.verifyRefCursor(connection, tableName, dates, done);
+    });
+
+    it('36.1.4 columns fetched from REF CURSORS can be mapped by fetchInfo settings', function(done) {
+      assist.verifyRefCursorWithFetchInfo(connection, tableName, dates, done);
+    });
+
+    it('36.1.5 columns fetched from REF CURSORS can be mapped by oracledb.fetchAsString', function(done) {
+      oracledb.fetchAsString = [ oracledb.DATE ];
+      assist.verifyRefCursorWithFetchAsString(connection, tableName, dates, done);
+    });
+
+  }); // end of 36.1 suite
+
+  describe('36.2 stores null value correctly', function() {
+    it('36.2.1 testing Null, Empty string and Undefined', function(done) {
+      assist.verifyNullValues(connection, tableName, done);
+    });
+  });
+
+  describe('36.3 testing TIMESTAMP (4) WITH TIME ZONE', function() {
+    var timestamps = assist.TIMESTAMP_TZ_STRINGS_1;
+
+    before(function(done) {
+      assist.setUp4sql(connection, tableName, timestamps, done);
+    });
+
+    after(function(done) {
+      connection.execute(
+        "DROP table " + tableName + " PURGE",
+        function(err) {
+          should.not.exist(err);
+          done();
+        }
+      );
+    }); // after
+
+    it('32.3.1 SELECT query - original data', function(done) {
+      assist.selectOriginalData(connection, tableName, timestamps, done);
+    });
+
+    it('36.3.2 SELECT query - formatted data for comparison', function(done) {
+      async.forEach(timestamps, function(timestamp, cb) {
+        var bv = timestamps.indexOf(timestamp);
+        connection.execute(
+          "SELECT num, TO_CHAR(content, 'DD-MM-YYYY HH24:MI:SS.FF TZH:TZM') AS TS_DATA FROM " + tableName + " WHERE num = :no",
+          { no: bv },
+          { outFormat: oracledb.OBJECT },
+          function(err, result) {
+            should.not.exist(err);
+            (result.rows[0].TS_DATA).should.equal(assist.content.timestamps4[bv]);
+            cb();
+          }
+        );
+      }, function(err) {
+        should.not.exist(err);
+        done();
+      });
+    });
+
+    it('36.3.3 returns scalar types from PL/SQL block', function(done) {
+      var sql = "BEGIN SELECT systimestamp into :bv from dual; END;";
+      var binds = { bv: { dir: oracledb.BIND_OUT, type: oracledb.STRING } };
+      var options = { outFormat: oracledb.OBJECT };
+
+      connection.execute(
+        sql,
+        binds,
+        options,
+        function(err, result) {
+          should.not.exist(err);
+          (result.outBinds.bv).should.be.a.String();
+          done();
+        }
+      );
+
+    });
+
   });
 
 });

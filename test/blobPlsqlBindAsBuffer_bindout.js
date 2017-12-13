@@ -46,7 +46,6 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
   this.timeout(100000);
   var connection = null;
   var node6plus = false; // assume node runtime version is lower than 6
-  var client11gPlus = true; // assume instant client runtime version is greater than 11.2.0.4.0
   var insertID = 1; // assume id for insert into db starts from 1
 
   var proc_blob_in_tab = "BEGIN \n" +
@@ -96,10 +95,6 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
           // Check whether node runtime version is >= 6 or not
           if ( process.versions["node"].substring (0, 1) >= "6")
             node6plus = true;
-          // Check whether instant client runtime version is smaller than 12.1.0.2
-          if(oracledb.oracleClientVersion < 1201000200)
-            client11gPlus = false;
-
           cb();
         });
       },
@@ -177,7 +172,7 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
     );
   };
 
-  var insertBlobWithbuffer = function(id, insertBuffer, case64KPlus, client11gPlus, callback) {
+  var insertBlobWithbuffer = function(id, insertBuffer, callback) {
     var sql = "INSERT INTO nodb_tab_blob_in (id, blob_1) VALUES (:i, :b)";
     var bindVar = {
       i: { val: id, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
@@ -194,58 +189,13 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
       sql,
       bindVar,
       function(err, result) {
-        if(client11gPlus === false && case64KPlus === true){
-          should.exist(err);
-          // NJS-050: data must be shorter than 65535
-          (err.message).should.startWith('NJS-050:');
-          streamedIntoBlobTable1(id, insertBuffer, callback);
-        } else {
-          should.not.exist(err);
-          should.strictEqual(result.rowsAffected, 1);
-          callback();
-        }
+        should.not.exist(err);
+        should.strictEqual(result.rowsAffected, 1);
+        callback();
       });
   };
 
-  // Generate a file and streamed into blob column
   var inFileStreamed = './test/blobTmpFile.txt';
-  var streamedIntoBlobTable1 = function(id, content, callback) {
-    file.write(inFileStreamed, content);
-    setTimeout(function(){
-      var sql = "INSERT INTO nodb_tab_blob_in (id, blob_1) VALUES (:i, EMPTY_BLOB()) RETURNING blob_1 INTO :lobbv";
-      var bindVar = { i: id, lobbv: { type: oracledb.BLOB, dir: oracledb.BIND_OUT } };
-      connection.execute(
-        sql,
-        bindVar,
-        { autoCommit: false },
-        function(err, result) {
-          should.not.exist(err);
-          (result.rowsAffected).should.be.exactly(1);
-          (result.outBinds.lobbv.length).should.be.exactly(1);
-
-          var inStream = fs.createReadStream(inFileStreamed);
-          var lob = result.outBinds.lobbv[0];
-
-          lob.on('error', function(err) {
-            should.not.exist(err, "lob.on 'error' event");
-          });
-
-          inStream.on('error', function(err) {
-            should.not.exist(err, "inStream.on 'error' event");
-          });
-
-          lob.on('close', function() {
-            connection.commit( function(err) {
-              should.not.exist(err);
-              callback();
-            });
-          });
-
-          inStream.pipe(lob); // copies the text to the BLOB
-        }
-      );
-    }, 3000);
-  };
 
   var jpgFileName = './test/fuzzydinosaur.jpg';
 
@@ -362,7 +312,7 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
     should.strictEqual(assist.compare2Buffers(resultVal, originalBuffer), true);
   };
 
-  var verifyBindOutResult = function(sqlRun, bindVar, originalBuf, specialStr, case64KPlus, client11gPlus, callback) {
+  var verifyBindOutResult = function(sqlRun, bindVar, originalBuf, specialStr, callback) {
     connection.execute(
       sqlRun,
       bindVar,
@@ -372,16 +322,10 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
           should.strictEqual(result.outBinds.b, null);
           callback();
         } else {
-          if(client11gPlus === false && case64KPlus === true){
-            // NJS-051: "maxSize" must be less than 65535
-            (err.message).should.startWith('NJS-051:');
-            callback();
-          } else {
-            should.not.exist(err);
-            var resultVal = result.outBinds.b;
-            compareResultBufAndOriginal(resultVal, originalBuf, specialStr);
-            callback();
-          }
+          should.not.exist(err);
+          var resultVal = result.outBinds.b;
+          compareResultBufAndOriginal(resultVal, originalBuf, specialStr);
+          callback();
         }
       }
     );
@@ -413,10 +357,10 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertBlobWithbuffer(sequence, "EMPTY_LOB", false, client11gPlus, cb);
+          insertBlobWithbuffer(sequence, "EMPTY_LOB", cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, "EMPTY_LOB", null, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, "EMPTY_LOB", null, cb);
         }
       ], done);
     }); // 78.1.1
@@ -430,10 +374,10 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertBlobWithbuffer(sequence, "EMPTY_LOB", false, client11gPlus, cb);
+          insertBlobWithbuffer(sequence, "EMPTY_LOB", cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, "EMPTY_LOB", null, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, "EMPTY_LOB", null, cb);
         }
       ], done);
     }); // 78.1.2
@@ -447,10 +391,10 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertBlobWithbuffer(sequence, "EMPTY_LOB", false, client11gPlus, cb);
+          insertBlobWithbuffer(sequence, "EMPTY_LOB", cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, "EMPTY_LOB", null, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, "EMPTY_LOB", null, cb);
         }
       ], done);
     }); // 78.1.3
@@ -464,10 +408,10 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertBlobWithbuffer(sequence, null, false, client11gPlus, cb);
+          insertBlobWithbuffer(sequence, null, cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, null, null, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, null, null, cb);
         }
       ], done);
     }); // 78.1.4
@@ -481,10 +425,10 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertBlobWithbuffer(sequence, null, false, client11gPlus, cb);
+          insertBlobWithbuffer(sequence, null, cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, null, null, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, null, null, cb);
         }
       ], done);
     }); // 78.1.5
@@ -498,10 +442,10 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertBlobWithbuffer(sequence, null, false, client11gPlus, cb);
+          insertBlobWithbuffer(sequence, null, cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, null, null, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, null, null, cb);
         }
       ], done);
     }); // 78.1.6
@@ -516,10 +460,10 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertBlobWithbuffer(sequence, bufferStr, false, client11gPlus, cb);
+          insertBlobWithbuffer(sequence, bufferStr, cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, bufferStr, null, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, bufferStr, null, cb);
         }
       ], done);
     }); // 78.1.7
@@ -534,10 +478,10 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertBlobWithbuffer(sequence, bufferStr, false, client11gPlus, cb);
+          insertBlobWithbuffer(sequence, bufferStr, cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, bufferStr, null, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, bufferStr, null, cb);
         }
       ], done);
     }); // 78.1.8
@@ -552,10 +496,10 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertBlobWithbuffer(sequence, bufferStr, false, client11gPlus, cb);
+          insertBlobWithbuffer(sequence, bufferStr, cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, bufferStr, null, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, bufferStr, null, cb);
         }
       ], done);
     }); // 78.1.9
@@ -569,10 +513,10 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertBlobWithbuffer(sequence, undefined, false, client11gPlus, cb);
+          insertBlobWithbuffer(sequence, undefined, cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, undefined, null, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, undefined, null, cb);
         }
       ], done);
     }); // 78.1.10
@@ -586,10 +530,10 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertBlobWithbuffer(sequence, undefined, false, client11gPlus, cb);
+          insertBlobWithbuffer(sequence, undefined, cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, undefined, null, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, undefined, null, cb);
         }
       ], done);
     }); // 78.1.11
@@ -603,10 +547,10 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertBlobWithbuffer(sequence, undefined, false, client11gPlus, cb);
+          insertBlobWithbuffer(sequence, undefined, cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, undefined, null, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, undefined, null, cb);
         }
       ], done);
     }); // 78.1.12
@@ -626,14 +570,14 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertBlobWithbuffer(sequence, bufferStr, false, client11gPlus, cb);
+          insertBlobWithbuffer(sequence, bufferStr, cb);
         },
         function(cb) {
           var sql = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
           verifyBlobValueWithBuffer(sql, bufferStr, specialStr, cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, bufferStr, specialStr, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, bufferStr, specialStr, cb);
         }
       ], done);
     }); // 78.1.13
@@ -651,14 +595,14 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertBlobWithbuffer(sequence, bufferStr, false, client11gPlus, cb);
+          insertBlobWithbuffer(sequence, bufferStr, cb);
         },
         function(cb) {
           var sql = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
           verifyBlobValueWithBuffer(sql, bufferStr, specialStr, cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, bufferStr, specialStr, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, bufferStr, specialStr, cb);
         }
       ], done);
     }); // 78.1.14
@@ -676,10 +620,10 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertBlobWithbuffer(sequence, bufferStr, true, client11gPlus, cb);
+          insertBlobWithbuffer(sequence, bufferStr, cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, bufferStr, specialStr, true, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, bufferStr, specialStr, cb);
         },
         function(cb) {
           file.delete(inFileStreamed);
@@ -701,10 +645,10 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertBlobWithbuffer(sequence, bufferStr, true, client11gPlus, cb);
+          insertBlobWithbuffer(sequence, bufferStr, cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, bufferStr, specialStr, true, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, bufferStr, specialStr, cb);
         },
         function(cb) {
           file.delete(inFileStreamed);
@@ -723,7 +667,7 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertBlobWithbuffer(sequence, bufferStr, false, client11gPlus, cb);
+          insertBlobWithbuffer(sequence, bufferStr, cb);
         },
         function(cb) {
           connection.execute(
@@ -766,7 +710,7 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertBlobWithbuffer(sequence, bufferStr_1, false, client11gPlus, cb);
+          insertBlobWithbuffer(sequence, bufferStr_1, cb);
         },
         function(cb) {
           executeSQL(proc_7821, cb);
@@ -809,7 +753,7 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertBlobWithbuffer(sequence, bufferStr, false, client11gPlus, cb);
+          insertBlobWithbuffer(sequence, bufferStr, cb);
         },
         function(cb) {
           executeSQL(proc_78123, cb);
@@ -846,7 +790,7 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertBlobWithbuffer(sequence, bufferStr, false, client11gPlus, cb);
+          insertBlobWithbuffer(sequence, bufferStr, cb);
         },
         function(cb) {
           connection.execute(
@@ -876,7 +820,7 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertBlobWithbuffer(sequence, bufferStr, false, client11gPlus, cb);
+          insertBlobWithbuffer(sequence, bufferStr, cb);
         },
         function(cb) {
           connection.execute(
@@ -894,7 +838,6 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
     }); // 78.1.21
 
     it('78.1.22 named binding: bind out maxSize smaller than buffer size( > 64K )', function(done) {
-      if (!client11gPlus) this.skip();
       var size = 65540;
       var sequence = insertID++;
       var specialStr = "78.1.22";
@@ -907,7 +850,7 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertBlobWithbuffer(sequence, bufferStr, false, client11gPlus, cb);
+          insertBlobWithbuffer(sequence, bufferStr, cb);
         },
         function(cb) {
           connection.execute(
@@ -935,7 +878,7 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertBlobWithbuffer(sequence, bufferStr, false, client11gPlus, cb);
+          insertBlobWithbuffer(sequence, bufferStr, cb);
         },
         function(cb) {
           connection.execute(
@@ -963,7 +906,7 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertBlobWithbuffer(sequence, bufferStr, false, client11gPlus, cb);
+          insertBlobWithbuffer(sequence, bufferStr, cb);
         },
         function(cb) {
           connection.execute(
@@ -981,7 +924,6 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
     }); // 78.1.24
 
     it('78.1.25 positional binding: bind out maxSize smaller than buffer size( > 64K )', function(done) {
-      if (!client11gPlus) this.skip();
       var size = 65538;
       var sequence = insertID++;
       var specialStr = "78.1.25";
@@ -992,7 +934,7 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertBlobWithbuffer(sequence, bufferStr, true, client11gPlus, cb);
+          insertBlobWithbuffer(sequence, bufferStr, cb);
         },
         function(cb) {
           connection.execute(
@@ -1019,7 +961,7 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertBlobWithbuffer(sequence, bufferStr, false, client11gPlus, cb);
+          insertBlobWithbuffer(sequence, bufferStr, cb);
         },
         function(cb) {
           connection.execute(
@@ -1064,10 +1006,10 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertBlobWithbuffer(sequence, "EMPTY_LOB", false, client11gPlus, cb);
+          insertBlobWithbuffer(sequence, "EMPTY_LOB", cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, "EMPTY_LOB", null, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, "EMPTY_LOB", null, cb);
         }
       ], done);
     }); // 78.2.1
@@ -1081,10 +1023,10 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertBlobWithbuffer(sequence, "EMPTY_LOB", false, client11gPlus, cb);
+          insertBlobWithbuffer(sequence, "EMPTY_LOB", cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, "EMPTY_LOB", null, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, "EMPTY_LOB", null, cb);
         }
       ], done);
     }); // 78.2.2
@@ -1098,10 +1040,10 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertBlobWithbuffer(sequence, "EMPTY_LOB", false, client11gPlus, cb);
+          insertBlobWithbuffer(sequence, "EMPTY_LOB", cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, "EMPTY_LOB", null, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, "EMPTY_LOB", null, cb);
         }
       ], done);
     }); // 78.2.3
@@ -1115,10 +1057,10 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertBlobWithbuffer(sequence, null, false, client11gPlus, cb);
+          insertBlobWithbuffer(sequence, null, cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, null, null, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, null, null, cb);
         }
       ], done);
     }); // 78.2.4
@@ -1132,10 +1074,10 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertBlobWithbuffer(sequence, null, false, client11gPlus, cb);
+          insertBlobWithbuffer(sequence, null, cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, null, null, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, null, null, cb);
         }
       ], done);
     }); // 78.2.5
@@ -1149,10 +1091,10 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertBlobWithbuffer(sequence, null, false, client11gPlus, cb);
+          insertBlobWithbuffer(sequence, null, cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, null, null, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, null, null, cb);
         }
       ], done);
     }); // 78.2.6
@@ -1167,10 +1109,10 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertBlobWithbuffer(sequence, bufferStr, false, client11gPlus, cb);
+          insertBlobWithbuffer(sequence, bufferStr, cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, bufferStr, null, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, bufferStr, null, cb);
         }
       ], done);
     }); // 78.2.7
@@ -1185,10 +1127,10 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertBlobWithbuffer(sequence, bufferStr, false, client11gPlus, cb);
+          insertBlobWithbuffer(sequence, bufferStr, cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, bufferStr, null, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, bufferStr, null, cb);
         }
       ], done);
     }); // 78.2.8
@@ -1203,10 +1145,10 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertBlobWithbuffer(sequence, bufferStr, false, client11gPlus, cb);
+          insertBlobWithbuffer(sequence, bufferStr, cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, bufferStr, null, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, bufferStr, null, cb);
         }
       ], done);
     }); // 78.2.9
@@ -1220,10 +1162,10 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertBlobWithbuffer(sequence, undefined, false, client11gPlus, cb);
+          insertBlobWithbuffer(sequence, undefined, cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, undefined, null, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, undefined, null, cb);
         }
       ], done);
     }); // 78.2.10
@@ -1237,10 +1179,10 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertBlobWithbuffer(sequence, undefined, false, client11gPlus, cb);
+          insertBlobWithbuffer(sequence, undefined, cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, undefined, null, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, undefined, null, cb);
         }
       ], done);
     }); // 78.2.11
@@ -1254,10 +1196,10 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertBlobWithbuffer(sequence, undefined, false, client11gPlus, cb);
+          insertBlobWithbuffer(sequence, undefined, cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, undefined, null, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, undefined, null, cb);
         }
       ], done);
     }); // 78.2.12
@@ -1275,14 +1217,14 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertBlobWithbuffer(sequence, bufferStr, false, client11gPlus, cb);
+          insertBlobWithbuffer(sequence, bufferStr, cb);
         },
         function(cb) {
           var sql = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
           verifyBlobValueWithBuffer(sql, bufferStr, specialStr, cb);
         },
         function(cb) {
-          verifyBindOutResult(sqlRun, bindVar, bufferStr, specialStr, false, client11gPlus, cb);
+          verifyBindOutResult(sqlRun, bindVar, bufferStr, specialStr, cb);
         }
       ], done);
     }); // 78.2.13
@@ -1300,7 +1242,7 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertBlobWithbuffer(sequence, bufferStr, false, client11gPlus, cb);
+          insertBlobWithbuffer(sequence, bufferStr, cb);
         },
         function(cb) {
           connection.execute(
@@ -1330,7 +1272,7 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertBlobWithbuffer(sequence, bufferStr, false, client11gPlus, cb);
+          insertBlobWithbuffer(sequence, bufferStr, cb);
         },
         function(cb) {
           connection.execute(
@@ -1357,7 +1299,7 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertBlobWithbuffer(sequence, bufferStr, false, client11gPlus, cb);
+          insertBlobWithbuffer(sequence, bufferStr, cb);
         },
         function(cb) {
           connection.execute(
@@ -1400,7 +1342,7 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertBlobWithbuffer(sequence, bufferStr_1, false, client11gPlus, cb);
+          insertBlobWithbuffer(sequence, bufferStr_1, cb);
         },
         function(cb) {
           executeSQL(proc_7821, cb);
@@ -1443,7 +1385,7 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertBlobWithbuffer(sequence, bufferStr, false, client11gPlus, cb);
+          insertBlobWithbuffer(sequence, bufferStr, cb);
         },
         function(cb) {
           executeSQL(proc_78223, cb);
@@ -1486,7 +1428,7 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
       executeSQL(proc_drop, done);
     }); // after
 
-    var insertTwoBlobWithbuffer = function(id, insertBuffer1, insertBuffer2, case64KPlus, client11gPlus, callback) {
+    var insertTwoBlobWithbuffer = function(id, insertBuffer1, insertBuffer2, callback) {
       var sql = "INSERT INTO nodb_tab_blob_in (id, blob_1, blob_2) VALUES (:i, :b1, :b2)";
       var bindVar = {
         i: { val: id, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
@@ -1498,14 +1440,8 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
         sql,
         bindVar,
         function(err, result) {
-          if(case64KPlus === true  && client11gPlus === false) {
-            should.exist(err);
-            // NJS-050: data must be shorter than 65535
-            (err.message).should.startWith('NJS-050:');
-          } else {
-            should.not.exist(err);
-            should.strictEqual(result.rowsAffected, 1);
-          }
+          should.not.exist(err);
+          should.strictEqual(result.rowsAffected, 1);
           callback();
         }
       );
@@ -1529,7 +1465,7 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertTwoBlobWithbuffer(sequence, bufferStr_1, bufferStr_2, false, client11gPlus, cb);
+          insertTwoBlobWithbuffer(sequence, bufferStr_1, bufferStr_2, cb);
         },
         function(cb) {
           var sql = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
@@ -1650,25 +1586,21 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
 
       async.series([
         function(cb) {
-          insertTwoBlobWithbuffer(sequence, bufferStr_1, bufferStr_2, true, client11gPlus, cb);
+          insertTwoBlobWithbuffer(sequence, bufferStr_1, bufferStr_2, cb);
         },
         function(cb) {
-          if(client11gPlus === false){
-            cb();
-          } else {
-            connection.execute(
-              sqlRun,
-              bindVar,
-              function(err, result) {
-                should.not.exist(err);
-                var resultVal = result.outBinds.b1;
-                compareResultBufAndOriginal(resultVal, bufferStr_1, specialStr_1);
-                resultVal = result.outBinds.b2;
-                compareResultBufAndOriginal(resultVal, bufferStr_2, specialStr_2);
-                cb();
-              }
-            );
-          }
+          connection.execute(
+            sqlRun,
+            bindVar,
+            function(err, result) {
+              should.not.exist(err);
+              var resultVal = result.outBinds.b1;
+              compareResultBufAndOriginal(resultVal, bufferStr_1, specialStr_1);
+              resultVal = result.outBinds.b2;
+              compareResultBufAndOriginal(resultVal, bufferStr_2, specialStr_2);
+              cb();
+            }
+          );
         }
       ], done);
     }); // 78.3.3

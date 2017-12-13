@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -392,6 +392,91 @@ describe('7. autoCommit.js', function() {
         });
       }
     ], done);
+  });
+
+  describe('7.4 global option - oracledb.autoCommit', function() {
+    var defaultValue;
+    beforeEach(function() {
+      defaultValue = oracledb.autoCommit;
+    });
+    afterEach(function() {
+      oracledb.autoCommit = defaultValue;
+    });
+
+    it('7.4.1 Negative - 0', function(done) {
+      setAsGlobalOption(0, done);
+    });
+
+    it('7.4.2 Negative - negative number', function(done) {
+      setAsGlobalOption(-1, done);
+    });
+
+    it('7.4.3 Negative - positive number', function(done) {
+      setAsGlobalOption(-1, done);
+    });
+
+    it('7.4.4 Negative - NaN', function(done) {
+      setAsGlobalOption(NaN, done);
+    });
+
+    it('7.4.5 Negative - undefined', function(done) {
+      setAsGlobalOption(undefined, done);
+    });
+
+    var setAsGlobalOption = function(setValue, callback) {
+      should.throws(
+        function() {
+          oracledb.autoCommit = setValue;
+        },
+        /NJS-004: invalid value for property autoCommit/
+      );
+      callback();
+    };
+  });
+
+  describe('7.5 set autoCommit as an execute() option', function() {
+
+    it('7.5.1 Negative - 0', function(done) {
+      setAsExecOption(0, done);
+    });
+
+    it('7.5.2 Negative - negative number', function(done) {
+      setAsExecOption(-1, done);
+    });
+
+    it('7.5.3 Negative - positive number', function(done) {
+      setAsExecOption(-1, done);
+    });
+
+    it('7.5.4 Negative - NaN', function(done) {
+      setAsExecOption(NaN, done);
+    });
+
+    it("7.5.5 works as 'false' when setting to 'undefined'", function(done) {
+      connection.execute(
+        "select user from dual",
+        [],
+        { autoCommit: undefined },
+        function(err, result) {
+          should.not.exist(err);
+          should.exist(result);
+          done();
+        }
+      );
+    });
+
+    var setAsExecOption = function(setValue, callback) {
+      connection.execute(
+        "select user from dual",
+        {},
+        { autoCommit: setValue },
+        function(err, result) {
+          should.not.exist(result);
+          should.exist(err);
+          should.strictEqual(err.message, "NJS-007: invalid value for \"autoCommit\" in parameter 3");
+          callback();
+        });
+    };
   });
 
 });

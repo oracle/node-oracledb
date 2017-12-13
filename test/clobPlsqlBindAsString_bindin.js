@@ -44,7 +44,6 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
   this.timeout(100000);
 
   var connection = null;
-  var client11gPlus = true; // assume instant client runtime version is greater than 11.2.0.4.0
   var insertID = 1; // assume id for insert into db starts from 1
   var proc_clob_in_tab = "BEGIN \n" +
                          "    DECLARE \n" +
@@ -89,10 +88,6 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
         oracledb.getConnection(dbConfig, function(err, conn) {
           should.not.exist(err);
           connection = conn;
-          // Check whether instant client runtime version is smaller than 12.1.0.2
-          if(oracledb.oracleClientVersion < 1201000200)
-            client11gPlus = false;
-
           cb();
         });
       },
@@ -238,16 +233,12 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
   };
 
   // check the plsql bind in value
-  var compareBindInResult = function(selectSql, originalString, specialStr, case64KPlus, client11gPlus, callback) {
-    if(client11gPlus === false && case64KPlus === true){
-      callback();
-    } else {
-      verifyClobValueWithString(selectSql, originalString, specialStr, case64KPlus, client11gPlus, callback);
-    }
+  var compareBindInResult = function(selectSql, originalString, specialStr, callback) {
+    verifyClobValueWithString(selectSql, originalString, specialStr, callback);
   };
 
   // compare the selected value from DB with the inserted string
-  var verifyClobValueWithString = function(selectSql, originalString, specialStr, case64KPlus, client11gPlus, callback) {
+  var verifyClobValueWithString = function(selectSql, originalString, specialStr, callback) {
     connection.execute(
       selectSql,
       function(err, result) {
@@ -295,19 +286,13 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
   };
 
   // execute the bind in plsql procedure
-  var plsqlBindIn = function(sqlRun, bindVar, option, case64KPlus, client11gPlus, callback) {
+  var plsqlBindIn = function(sqlRun, bindVar, option, callback) {
     connection.execute(
       sqlRun,
       bindVar,
       option,
       function(err) {
-        if(case64KPlus === true  && client11gPlus === false) {
-          should.exist(err);
-          // NJS-050: data must be shorter than 65535
-          (err.message).should.startWith('NJS-050:');
-        } else {
-          should.not.exist(err);
-        }
+        should.not.exist(err);
         callback();
       });
   };
@@ -349,11 +334,11 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
           executeSQL(proc_7411, cb);
         },
         function(cb) {
-          plsqlBindIn(sqlRun_7411, bindVar, option, false, client11gPlus, cb);
+          plsqlBindIn(sqlRun_7411, bindVar, option, cb);
         },
         function(cb) {
           var sql = "select clob_1 from nodb_tab_clob_in where id = " + sequence;
-          compareBindInResult(sql, "", null, false, client11gPlus, cb);
+          compareBindInResult(sql, "", null, cb);
         },
         function(cb) {
           executeSQL(proc_drop_7411, cb);
@@ -374,11 +359,11 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
           executeSQL(proc_7411, cb);
         },
         function(cb) {
-          plsqlBindIn(sqlRun_7411, bindVar, option, false, client11gPlus, cb);
+          plsqlBindIn(sqlRun_7411, bindVar, option, cb);
         },
         function(cb) {
           var sql = "select clob_1 from nodb_tab_clob_in where id = " + sequence;
-          compareBindInResult(sql, "", null, false, client11gPlus, cb);
+          compareBindInResult(sql, "", null, cb);
         },
         function(cb) {
           executeSQL(proc_drop_7411, cb);
@@ -399,11 +384,11 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
           executeSQL(proc_7411, cb);
         },
         function(cb) {
-          plsqlBindIn(sqlRun_7411, bindVar, option, false, client11gPlus, cb);
+          plsqlBindIn(sqlRun_7411, bindVar, option, cb);
         },
         function(cb) {
           var sql = "select clob_1 from nodb_tab_clob_in where id = " + sequence;
-          compareBindInResult(sql, "", null, false, client11gPlus, cb);
+          compareBindInResult(sql, "", null, cb);
         },
         function(cb) {
           executeSQL(proc_drop_7411, cb);
@@ -421,11 +406,11 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
 
       async.series([
         function(cb) {
-          plsqlBindIn(sqlRun, bindVar, option, false, client11gPlus, cb);
+          plsqlBindIn(sqlRun, bindVar, option, cb);
         },
         function(cb) {
           var sql = "select clob_1 from nodb_tab_clob_in where id = " + sequence;
-          compareBindInResult(sql, null, null, false, client11gPlus, cb);
+          compareBindInResult(sql, null, null, cb);
         }
       ], done);
     }); // 74.1.4
@@ -440,11 +425,11 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
 
       async.series([
         function(cb) {
-          plsqlBindIn(sqlRun, bindVar, option, false, client11gPlus, cb);
+          plsqlBindIn(sqlRun, bindVar, option, cb);
         },
         function(cb) {
           var sql = "select clob_1 from nodb_tab_clob_in where id = " + sequence;
-          compareBindInResult(sql, null, null, false, client11gPlus, cb);
+          compareBindInResult(sql, null, null, cb);
         }
       ], done);
     }); // 74.1.5
@@ -459,11 +444,11 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
 
       async.series([
         function(cb) {
-          plsqlBindIn(sqlRun, bindVar, option, false, client11gPlus, cb);
+          plsqlBindIn(sqlRun, bindVar, option, cb);
         },
         function(cb) {
           var sql = "select clob_1 from nodb_tab_clob_in where id = " + sequence;
-          compareBindInResult(sql, null, null, false, client11gPlus, cb);
+          compareBindInResult(sql, null, null, cb);
         }
       ], done);
     }); // 74.1.6
@@ -478,11 +463,11 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
 
       async.series([
         function(cb) {
-          plsqlBindIn(sqlRun, bindVar, option, false, client11gPlus, cb);
+          plsqlBindIn(sqlRun, bindVar, option, cb);
         },
         function(cb) {
           var sql = "select clob_1 from nodb_tab_clob_in where id = " + sequence;
-          compareBindInResult(sql, null, null, false, client11gPlus, cb);
+          compareBindInResult(sql, null, null, cb);
         }
       ], done);
     }); // 74.1.7
@@ -497,11 +482,11 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
 
       async.series([
         function(cb) {
-          plsqlBindIn(sqlRun, bindVar, option, false, client11gPlus, cb);
+          plsqlBindIn(sqlRun, bindVar, option, cb);
         },
         function(cb) {
           var sql = "select clob_1 from nodb_tab_clob_in where id = " + sequence;
-          compareBindInResult(sql, null, null, false, client11gPlus, cb);
+          compareBindInResult(sql, null, null, cb);
         }
       ], done);
     }); // 74.1.8
@@ -516,11 +501,11 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
 
       async.series([
         function(cb) {
-          plsqlBindIn(sqlRun, bindVar, option, false, client11gPlus, cb);
+          plsqlBindIn(sqlRun, bindVar, option, cb);
         },
         function(cb) {
           var sql = "select clob_1 from nodb_tab_clob_in where id = " + sequence;
-          compareBindInResult(sql, null, null, false, client11gPlus, cb);
+          compareBindInResult(sql, null, null, cb);
         }
       ], done);
     }); // 74.1.9
@@ -535,11 +520,11 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
 
       async.series([
         function(cb) {
-          plsqlBindIn(sqlRun, bindVar, option, false, client11gPlus, cb);
+          plsqlBindIn(sqlRun, bindVar, option, cb);
         },
         function(cb) {
           var sql = "select clob_1 from nodb_tab_clob_in where id = " + sequence;
-          compareBindInResult(sql, null, null, false, client11gPlus, cb);
+          compareBindInResult(sql, null, null, cb);
         }
       ], done);
     }); // 74.1.10
@@ -554,11 +539,11 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
 
       async.series([
         function(cb) {
-          plsqlBindIn(sqlRun, bindVar, option, false, client11gPlus, cb);
+          plsqlBindIn(sqlRun, bindVar, option, cb);
         },
         function(cb) {
           var sql = "select clob_1 from nodb_tab_clob_in where id = " + sequence;
-          compareBindInResult(sql, null, null, false, client11gPlus, cb);
+          compareBindInResult(sql, null, null, cb);
         }
       ], done);
     }); // 74.1.11
@@ -573,11 +558,11 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
 
       async.series([
         function(cb) {
-          plsqlBindIn(sqlRun, bindVar, option, false, client11gPlus, cb);
+          plsqlBindIn(sqlRun, bindVar, option, cb);
         },
         function(cb) {
           var sql = "select clob_1 from nodb_tab_clob_in where id = " + sequence;
-          compareBindInResult(sql, null, null, false, client11gPlus, cb);
+          compareBindInResult(sql, null, null, cb);
         }
       ], done);
     }); // 74.1.12
@@ -637,11 +622,11 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
 
       async.series([
         function(cb) {
-          plsqlBindIn(sqlRun, bindVar, option, false, client11gPlus, cb);
+          plsqlBindIn(sqlRun, bindVar, option, cb);
         },
         function(cb) {
           var sql = "select clob_1 from nodb_tab_clob_in where id = " + sequence;
-          compareBindInResult(sql, clobStr, specialStr, false, client11gPlus, cb);
+          compareBindInResult(sql, clobStr, specialStr, cb);
         }
       ], done);
     }); // 74.1.15
@@ -663,11 +648,11 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
 
       async.series([
         function(cb) {
-          plsqlBindIn(sqlRun, bindVar, option, false, client11gPlus, cb);
+          plsqlBindIn(sqlRun, bindVar, option, cb);
         },
         function(cb) {
           var sql = "select clob_1 from nodb_tab_clob_in where id = " + sequence;
-          compareBindInResult(sql, clobStr, specialStr, false, client11gPlus, cb);
+          compareBindInResult(sql, clobStr, specialStr, cb);
         }
       ], done);
     }); // 74.1.16
@@ -685,11 +670,11 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
 
       async.series([
         function(cb) {
-          plsqlBindIn(sqlRun, bindVar, option, true, client11gPlus, cb);
+          plsqlBindIn(sqlRun, bindVar, option, cb);
         },
         function(cb) {
           var sql = "select clob_1 from nodb_tab_clob_in where id = " + sequence;
-          compareBindInResult(sql, clobStr, specialStr, true, client11gPlus, cb);
+          compareBindInResult(sql, clobStr, specialStr, cb);
         }
       ], done);
     }); // 74.1.17
@@ -707,11 +692,11 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
 
       async.series([
         function(cb) {
-          plsqlBindIn(sqlRun, bindVar, option, true, client11gPlus, cb);
+          plsqlBindIn(sqlRun, bindVar, option, cb);
         },
         function(cb) {
           var sql = "select clob_1 from nodb_tab_clob_in where id = " + sequence;
-          compareBindInResult(sql, clobStr, specialStr, true, client11gPlus, cb);
+          compareBindInResult(sql, clobStr, specialStr, cb);
         }
       ], done);
     }); // 74.1.18
@@ -747,11 +732,11 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
 
       async.series([
         function(cb) {
-          plsqlBindIn(sqlRun_7419, bindVar, option, false, client11gPlus, cb);
+          plsqlBindIn(sqlRun_7419, bindVar, option, cb);
         },
         function(cb) {
           var sql = "select clob_1 from nodb_tab_clob_in where id = " + sequence;
-          compareBindInResult(sql, clobStr, specialStr, false, client11gPlus, cb);
+          compareBindInResult(sql, clobStr, specialStr, cb);
         }
       ], done);
     }); // 74.1.20
@@ -769,8 +754,8 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
         { autoCommit: true },
         function(err) {
           should.exist(err);
-          // NJS-012: encountered invalid bind datatype in parameter 2
-          (err.message).should.startWith('NJS-012:');
+          // NJS-011: encountered bind value and type mismatch in parameter 2
+          (err.message).should.startWith('NJS-011:');
           done();
         }
       );
@@ -789,11 +774,11 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
 
       async.series([
         function(cb) {
-          plsqlBindIn(sqlRun, bindVar, option, false, client11gPlus, cb);
+          plsqlBindIn(sqlRun, bindVar, option, cb);
         },
         function(cb) {
           var sql = "select clob_1 from nodb_tab_clob_in where id = " + sequence;
-          compareBindInResult(sql, clobStr, specialStr, false, client11gPlus, cb);
+          compareBindInResult(sql, clobStr, specialStr, cb);
         }
       ], done);
     }); // 74.1.22
@@ -880,7 +865,7 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
         },
         function(cb) {
           var sql = "select clob_1 from nodb_tab_clob_in where id = " + sequence;
-          compareBindInResult(sql, clobStr_2, specialStr_2, false, client11gPlus, cb);
+          compareBindInResult(sql, clobStr_2, specialStr_2, cb);
         },
         function(cb) {
           executeSQL(proc_drop_74124, cb);
@@ -1069,11 +1054,11 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
           executeSQL(proc_7411, cb);
         },
         function(cb) {
-          plsqlBindIn(sqlRun_7411, bindVar, option, false, client11gPlus, cb);
+          plsqlBindIn(sqlRun_7411, bindVar, option, cb);
         },
         function(cb) {
           var sql = "select clob_1 from nodb_tab_clob_in where id = " + sequence;
-          compareBindInResult(sql, "", null, false, client11gPlus, cb);
+          compareBindInResult(sql, "", null, cb);
         },
         function(cb) {
           executeSQL(proc_drop_7411, cb);
@@ -1094,11 +1079,11 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
           executeSQL(proc_7411, cb);
         },
         function(cb) {
-          plsqlBindIn(sqlRun_7411, bindVar, option, false, client11gPlus, cb);
+          plsqlBindIn(sqlRun_7411, bindVar, option, cb);
         },
         function(cb) {
           var sql = "select clob_1 from nodb_tab_clob_in where id = " + sequence;
-          compareBindInResult(sql, "", null, false, client11gPlus, cb);
+          compareBindInResult(sql, "", null, cb);
         },
         function(cb) {
           executeSQL(proc_drop_7411, cb);
@@ -1119,11 +1104,11 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
           executeSQL(proc_7411, cb);
         },
         function(cb) {
-          plsqlBindIn(sqlRun_7411, bindVar, option, false, client11gPlus, cb);
+          plsqlBindIn(sqlRun_7411, bindVar, option, cb);
         },
         function(cb) {
           var sql = "select clob_1 from nodb_tab_clob_in where id = " + sequence;
-          compareBindInResult(sql, "", null, false, client11gPlus, cb);
+          compareBindInResult(sql, "", null, cb);
         },
         function(cb) {
           executeSQL(proc_drop_7411, cb);
@@ -1141,11 +1126,11 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
 
       async.series([
         function(cb) {
-          plsqlBindIn(sqlRun, bindVar, option, false, client11gPlus, cb);
+          plsqlBindIn(sqlRun, bindVar, option, cb);
         },
         function(cb) {
           var sql = "select clob_1 from nodb_tab_clob_in where id = " + sequence;
-          compareBindInResult(sql, null, null, false, client11gPlus, cb);
+          compareBindInResult(sql, null, null, cb);
         }
       ], done);
     }); // 74.2.4
@@ -1160,11 +1145,11 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
 
       async.series([
         function(cb) {
-          plsqlBindIn(sqlRun, bindVar, option, false, client11gPlus, cb);
+          plsqlBindIn(sqlRun, bindVar, option, cb);
         },
         function(cb) {
           var sql = "select clob_1 from nodb_tab_clob_in where id = " + sequence;
-          compareBindInResult(sql, null, null, false, client11gPlus, cb);
+          compareBindInResult(sql, null, null, cb);
         }
       ], done);
     }); // 74.2.5
@@ -1179,11 +1164,11 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
 
       async.series([
         function(cb) {
-          plsqlBindIn(sqlRun, bindVar, option, false, client11gPlus, cb);
+          plsqlBindIn(sqlRun, bindVar, option, cb);
         },
         function(cb) {
           var sql = "select clob_1 from nodb_tab_clob_in where id = " + sequence;
-          compareBindInResult(sql, null, null, false, client11gPlus, cb);
+          compareBindInResult(sql, null, null, cb);
         }
       ], done);
     }); // 74.2.6
@@ -1198,11 +1183,11 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
 
       async.series([
         function(cb) {
-          plsqlBindIn(sqlRun, bindVar, option, false, client11gPlus, cb);
+          plsqlBindIn(sqlRun, bindVar, option, cb);
         },
         function(cb) {
           var sql = "select clob_1 from nodb_tab_clob_in where id = " + sequence;
-          compareBindInResult(sql, null, null, false, client11gPlus, cb);
+          compareBindInResult(sql, null, null, cb);
         }
       ], done);
     }); // 74.2.7
@@ -1217,11 +1202,11 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
 
       async.series([
         function(cb) {
-          plsqlBindIn(sqlRun, bindVar, option, false, client11gPlus, cb);
+          plsqlBindIn(sqlRun, bindVar, option, cb);
         },
         function(cb) {
           var sql = "select clob_1 from nodb_tab_clob_in where id = " + sequence;
-          compareBindInResult(sql, null, null, false, client11gPlus, cb);
+          compareBindInResult(sql, null, null, cb);
         }
       ], done);
     }); // 74.2.8
@@ -1236,11 +1221,11 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
 
       async.series([
         function(cb) {
-          plsqlBindIn(sqlRun, bindVar, option, false, client11gPlus, cb);
+          plsqlBindIn(sqlRun, bindVar, option, cb);
         },
         function(cb) {
           var sql = "select clob_1 from nodb_tab_clob_in where id = " + sequence;
-          compareBindInResult(sql, null, null, false, client11gPlus, cb);
+          compareBindInResult(sql, null, null, cb);
         }
       ], done);
     }); // 74.2.9
@@ -1255,11 +1240,11 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
 
       async.series([
         function(cb) {
-          plsqlBindIn(sqlRun, bindVar, option, false, client11gPlus, cb);
+          plsqlBindIn(sqlRun, bindVar, option, cb);
         },
         function(cb) {
           var sql = "select clob_1 from nodb_tab_clob_in where id = " + sequence;
-          compareBindInResult(sql, null, null, false, client11gPlus, cb);
+          compareBindInResult(sql, null, null, cb);
         }
       ], done);
     }); // 74.2.10
@@ -1274,11 +1259,11 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
 
       async.series([
         function(cb) {
-          plsqlBindIn(sqlRun, bindVar, option, false, client11gPlus, cb);
+          plsqlBindIn(sqlRun, bindVar, option, cb);
         },
         function(cb) {
           var sql = "select clob_1 from nodb_tab_clob_in where id = " + sequence;
-          compareBindInResult(sql, null, null, false, client11gPlus, cb);
+          compareBindInResult(sql, null, null, cb);
         }
       ], done);
     }); // 74.2.11
@@ -1293,11 +1278,11 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
 
       async.series([
         function(cb) {
-          plsqlBindIn(sqlRun, bindVar, option, false, client11gPlus, cb);
+          plsqlBindIn(sqlRun, bindVar, option, cb);
         },
         function(cb) {
           var sql = "select clob_1 from nodb_tab_clob_in where id = " + sequence;
-          compareBindInResult(sql, null, null, false, client11gPlus, cb);
+          compareBindInResult(sql, null, null, cb);
         }
       ], done);
     }); // 74.2.12
@@ -1355,11 +1340,11 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
 
       async.series([
         function(cb) {
-          plsqlBindIn(sqlRun, bindVar, option, false, client11gPlus, cb);
+          plsqlBindIn(sqlRun, bindVar, option, cb);
         },
         function(cb) {
           var sql = "select clob_1 from nodb_tab_clob_in where id = " + sequence;
-          compareBindInResult(sql, clobStr, specialStr, false, client11gPlus, cb);
+          compareBindInResult(sql, clobStr, specialStr, cb);
         }
       ], done);
     }); // 74.2.15
@@ -1401,8 +1386,8 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
         { autoCommit: true },
         function(err) {
           should.exist(err);
-          // NJS-012: encountered invalid bind datatype in parameter 2
-          (err.message).should.startWith('NJS-012:');
+          // NJS-011: encountered bind value and type mismatch
+          (err.message).should.startWith('NJS-011:');
           done();
         }
       );
@@ -1421,11 +1406,11 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
 
       async.series([
         function(cb) {
-          plsqlBindIn(sqlRun, bindVar, option, false, client11gPlus, cb);
+          plsqlBindIn(sqlRun, bindVar, option, cb);
         },
         function(cb) {
           var sql = "select clob_1 from nodb_tab_clob_in where id = " + sequence;
-          compareBindInResult(sql, clobStr, specialStr, false, client11gPlus, cb);
+          compareBindInResult(sql, clobStr, specialStr, cb);
         }
       ], done);
     }); // 74.2.18
@@ -1469,7 +1454,7 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
         },
         function(cb) {
           var sql = "select clob_1 from nodb_tab_clob_in where id = " + sequence;
-          compareBindInResult(sql, clobStr_2, specialStr_2, false, client11gPlus, cb);
+          compareBindInResult(sql, clobStr_2, specialStr_2, cb);
         },
         function(cb) {
           executeSQL(proc_drop_74219, cb);
@@ -1513,15 +1498,15 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
 
       async.series([
         function(cb) {
-          plsqlBindIn(sqlRun, bindVar, option, false, client11gPlus, cb);
+          plsqlBindIn(sqlRun, bindVar, option, cb);
         },
         function(cb) {
           var sql_1 = "select clob_1 from nodb_tab_clob_in where id = " + sequence;
-          compareBindInResult(sql_1, clobStr_1, specialStr_1, false, client11gPlus, cb);
+          compareBindInResult(sql_1, clobStr_1, specialStr_1, cb);
         },
         function(cb) {
           var sql_2 = "select clob_2 from nodb_tab_clob_in where id = " + sequence;
-          compareBindInResult(sql_2, clobStr_2, specialStr_2, false, client11gPlus, cb);
+          compareBindInResult(sql_2, clobStr_2, specialStr_2, cb);
         }
       ], done);
     }); // 74.3.1
@@ -1557,7 +1542,7 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
                 { autoCommit: true },
                 function(err) {
                   should.not.exist(err);
-                  cb();
+                  clob.close(cb);
                 }
               );
             }
@@ -1565,7 +1550,7 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
         },
         function(cb) {
           var sql_1 = "select clob_1 from nodb_tab_clob_in where id = " + sequence;
-          compareBindInResult(sql_1, clobStr_1, specialStr_1, false, client11gPlus, cb);
+          compareBindInResult(sql_1, clobStr_1, specialStr_1, cb);
         },
         function(cb) {
           var sql_2 = "select clob_2 from nodb_tab_clob_in where id = " + sequence;
@@ -1591,15 +1576,15 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
 
       async.series([
         function(cb) {
-          plsqlBindIn(sqlRun, bindVar, option, true, client11gPlus, cb);
+          plsqlBindIn(sqlRun, bindVar, option, cb);
         },
         function(cb) {
           var sql_1 = "select clob_1 from nodb_tab_clob_in where id = " + sequence;
-          compareBindInResult(sql_1, clobStr_1, specialStr_1, true, client11gPlus, cb);
+          compareBindInResult(sql_1, clobStr_1, specialStr_1, cb);
         },
         function(cb) {
           var sql_2 = "select clob_2 from nodb_tab_clob_in where id = " + sequence;
-          compareBindInResult(sql_2, clobStr_2, specialStr_2, true, client11gPlus, cb);
+          compareBindInResult(sql_2, clobStr_2, specialStr_2, cb);
         }
       ], done);
     }); // 74.3.3

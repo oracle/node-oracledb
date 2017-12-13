@@ -1,6 +1,6 @@
 {
   "name": "oracledb",
-  "version": "1.13.1",
+  "version": "2.0.15",
   "description": "Oracle Database driver by Oracle Corp.",
   "license": "Apache-2.0",
   "homepage": "http://www.oracle.com/technetwork/database/database-technologies/scripting-languages/node_js/",
@@ -29,20 +29,20 @@
     "url": "git://github.com/oracle/node-oracledb.git"
   },
   "dependencies": {
-    "nan": "~2.5.0"
+    "nan": "~2.8.0"
   },
   "devDependencies": {
-      "mocha": "^2.4.5",
-      "should": "^8.3.1",
-      "async": "^1.5.0"
+    "mocha": "^2.4.5",
+    "should": "^8.3.1",
+    "async": "^1.5.0"
   },
   "scripts": {
-      "test": "mocha --opts test/opts/mocha.opts",
-      "posttest": "node test/opts/versions.js",
-      "testwindows": "mocha --opts test\\opts\\mocha.opts && npm run posttest"
+    "test": "mocha --opts test/opts/mocha.opts",
+    "posttest": "node test/opts/versions.js",
+    "testwindows": "mocha --opts test\\opts\\mocha.opts && npm run posttest"
   },
   "engines": {
-    "node": ">=0.10.28"
+    "node": ">=4"
   },
   "maintainers": [
     {

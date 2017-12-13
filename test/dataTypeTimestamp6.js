@@ -77,6 +77,7 @@ describe('38. dataTypeTimestamp6.js', function() {
     });
 
     after(function(done) {
+      oracledb.fetchAsString = [];
       connection.execute(
         "DROP table " + tableName + " PURGE",
         function(err) {
@@ -98,6 +99,15 @@ describe('38. dataTypeTimestamp6.js', function() {
       assist.verifyRefCursor(connection, tableName, dates, done);
     });
 
+    it('38.1.4 columns fetched from REF CURSORS can be mapped by fetchInfo settings', function(done) {
+      assist.verifyRefCursorWithFetchInfo(connection, tableName, dates, done);
+    });
+
+    it('38.1.5 columns fetched from REF CURSORS can be mapped by oracledb.fetchAsString', function(done) {
+      oracledb.fetchAsString = [ oracledb.DATE ];
+      assist.verifyRefCursorWithFetchAsString(connection, tableName, dates, done);
+    });
+
   }); // end of 37.1 suite
 
   describe('38.2 stores null value correctly', function() {
@@ -107,7 +117,7 @@ describe('38. dataTypeTimestamp6.js', function() {
   });
 
   describe('38.3 testing TIMESTAMP WITH LOCAL TIME ZONE', function() {
-    var timestamps = assist.TIMESTAMP_TZ_STRINGS;
+    var timestamps = assist.TIMESTAMP_TZ_STRINGS_2;
 
     before(function(done) {
       assist.setUp4sql(connection, tableName, timestamps, done);

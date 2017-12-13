@@ -155,7 +155,7 @@ describe('66. writableProperties.js', function() {
             });
           });
         }
-       );
+      );
     });
   });
 
@@ -211,7 +211,7 @@ describe('66. writableProperties.js', function() {
           });
 
         }
-       );
+      );
     });
   }); // 66.4
 

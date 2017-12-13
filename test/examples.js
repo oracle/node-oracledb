@@ -135,7 +135,7 @@ describe('3. examples.js', function(){
         },
         function(callback){
           connection.execute(
-              "SELECT department_id, department_name "
+            "SELECT department_id, department_name "
             + "FROM nodb_eg_dept "
             + "WHERE department_id = :did",
             [180],
@@ -194,7 +194,7 @@ describe('3. examples.js', function(){
         },
         function(callback){
           connection.execute(
-              "SELECT location_id, city "
+            "SELECT location_id, city "
             + "FROM nodb_locations "
             + "WHERE city LIKE 'S%' "
             + "ORDER BY city",
@@ -209,7 +209,7 @@ describe('3. examples.js', function(){
         },
         function(callback){
           connection.execute(
-              "SELECT location_id, city "
+            "SELECT location_id, city "
             + "FROM nodb_locations "
             + "WHERE city LIKE 'S%' "
             + "ORDER BY city",
@@ -489,7 +489,7 @@ describe('3. examples.js', function(){
       );
     });
 
-    it('3.6.1 by default, the number is 100', function(done){
+    it.skip('3.6.1 by default, the number is 100', function(done){
       var defaultLimit = oracledb.maxRows;
       defaultLimit.should.be.exactly(100);
 
@@ -904,7 +904,7 @@ describe('3. examples.js', function(){
       connection.execute(
         "SELECT employees_name FROM nodb_eg_emp10",
         [],
-        { resultSet: true, prefetchRows: 50 },
+        { resultSet: true, fetchArraySize: 50 },
         function(err, result) {
           should.not.exist(err);
           (result.resultSet.metaData[0]).name.should.eql('EMPLOYEES_NAME');
@@ -938,7 +938,7 @@ describe('3. examples.js', function(){
       connection.execute(
         "SELECT * FROM nodb_eg_emp10 ORDER BY employees_id",
         [],
-        { resultSet: true, prefetchRows: 110 },
+        { resultSet: true, fetchArraySize: 110 },
         function(err, result) {
           should.not.exist(err);
           (result.resultSet.metaData[0]).name.should.eql('EMPLOYEES_ID');

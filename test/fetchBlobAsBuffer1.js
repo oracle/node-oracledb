@@ -37,7 +37,6 @@
 var oracledb = require('oracledb');
 var async    = require('async');
 var should   = require('should');
-var fs       = require('fs');
 var file     = require('./file.js');
 var dbConfig = require('./dbconfig.js');
 var random   = require('./random.js');
@@ -47,9 +46,9 @@ describe('87. fetchBlobAsBuffer1.js', function() {
   this.timeout(100000);
   var connection = null;
   var node6plus = false;  // assume node runtime version is lower than 6
-  var client11gPlus = true; // assume instant client runtime version is greater than 11.2.0.4.0
   var insertID = 1; // assume id for insert into db starts from 1
   var inFileName = './test/blobTmpFile.txt';
+  var defaultStmtCache = oracledb.stmtCacheSize;
 
   var proc_create_table1 = "BEGIN \n" +
                            "  DECLARE \n" +
@@ -79,9 +78,6 @@ describe('87. fetchBlobAsBuffer1.js', function() {
           connection = conn;
           if(process.versions["node"].substring(0,1) >= "6")
             node6plus = true;
-          if(oracledb.oracleClientVersion < 1201000200)
-            client11gPlus = false;
-
           cb();
         });
       },
@@ -96,6 +92,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
   after('release connection', function(done) {
     async.series([
       function(cb) {
+        oracledb.stmtCacheSize = defaultStmtCache;
         connection.release(function(err) {
           should.not.exist(err);
           cb();
@@ -109,7 +106,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
   });  // after
 
   // Generic function to insert a single row given ID, and data
-  var insertIntoBlobTable1 = function(id, content, callback, case64KPlus) {
+  var insertIntoBlobTable1 = function(id, content, callback) {
     if(content == "EMPTY_BLOB") {
       connection.execute(
         "INSERT INTO nodb_blob1 VALUES (:ID, EMPTY_BLOB())",
@@ -128,58 +125,12 @@ describe('87. fetchBlobAsBuffer1.js', function() {
           B : { val : content, dir : oracledb.BIND_IN, type : oracledb.BUFFER }
         },
         function(err, result) {
-          if(case64KPlus === true  && client11gPlus === false) {
-            should.exist(err);
-            // NJS-050: data must be shorter than 65535
-            (err.message).should.startWith('NJS-050:');
-            streamedIntoBlobTable1(id, content, callback);
-          } else {
-            should.not.exist(err);
-            should.strictEqual(result.rowsAffected, 1);
-            callback();
-          }
+          should.not.exist(err);
+          should.strictEqual(result.rowsAffected, 1);
+          callback();
         }
       );
     }
-  };
-
-  // Generate a file and streamed into blob column
-  var streamedIntoBlobTable1 = function(id, content, callback) {
-    file.write(inFileName, content);
-    setTimeout(function(){
-      var sql = "INSERT INTO nodb_blob1 (ID, B) VALUES (:i, EMPTY_BLOB()) RETURNING B INTO :lobbv";
-      var bindVar = { i: id, lobbv: { type: oracledb.BLOB, dir: oracledb.BIND_OUT } };
-      connection.execute(
-        sql,
-        bindVar,
-        { autoCommit: false },
-        function(err, result) {
-          should.not.exist(err);
-          (result.rowsAffected).should.be.exactly(1);
-          (result.outBinds.lobbv.length).should.be.exactly(1);
-
-          var inStream = fs.createReadStream(inFileName);
-          var lob = result.outBinds.lobbv[0];
-
-          lob.on('error', function(err) {
-            should.not.exist(err, "lob.on 'error' event");
-          });
-
-          inStream.on('error', function(err) {
-            should.not.exist(err, "inStream.on 'error' event");
-          });
-
-          lob.on('close', function() {
-            connection.commit( function(err) {
-              should.not.exist(err);
-              callback();
-            });
-          });
-
-          inStream.pipe(lob); // copies the text to the BLOB
-        }
-      );
-    }, 3000);
   };
 
   var updateBlobTable1 = function(id, content, callback) {
@@ -195,37 +146,9 @@ describe('87. fetchBlobAsBuffer1.js', function() {
   };
 
   // compare fetch result
-  var compareClientFetchResult = function(err, resultVal, specialStr, content, contentLength, case64KPlus) {
-    // if test buffer size greater than 64K
-    if(case64KPlus === true) {
-      // if client version 12.1.0.2
-      if(client11gPlus === true) {
-        should.not.exist(err);
-        compareBuffers(resultVal, specialStr, content, contentLength);
-      } else {
-        // if client version 11.2.0.4
-        should.not.exist(err);
-        content = content.slice(0, 65535);
-        compareBuffers(resultVal, specialStr, content, 65535);
-      }
-    } else {
-      // if test buffer size smaller than 64K
-      should.not.exist(err);
-      compareBuffers(resultVal, specialStr, content, contentLength);
-    }
-  };
-
-  var compare64KPlusResultSetResult = function(err, resultVal, specialStr, content, contentLength) {
-    if(client11gPlus === true) {
-      // if client version 12.1.0.2
-      should.not.exist(err);
-      compareBuffers(resultVal, specialStr, content, contentLength, true);
-    } else {
-        // if client version 11.2.0.4
-      should.exist(err);
-        // ORA-01406: fetched column value was truncated
-      (err.message).should.startWith('ORA-01406:');
-    }
+  var compareClientFetchResult = function(err, resultVal, specialStr, content, contentLength) {
+    should.not.exist(err);
+    compareBuffers(resultVal, specialStr, content, contentLength);
   };
 
   // compare two buffers
@@ -257,10 +180,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       );
     }); // after
 
-    var insertAndFetch = function(id, specialStr, insertContent, insertContentLength, case64KPlus, callback) {
+    var insertAndFetch = function(id, specialStr, insertContent, insertContentLength, callback) {
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id, insertContent, cb, case64KPlus);
+          insertIntoBlobTable1(id, insertContent, cb);
         },
         function(cb) {
           connection.execute(
@@ -272,7 +195,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
                 should.not.exist(err);
                 should.equal(resultVal, null);
               } else {
-                compareClientFetchResult(err, resultVal, specialStr, insertContent, insertContentLength, case64KPlus);
+                compareClientFetchResult(err, resultVal, specialStr, insertContent, insertContentLength);
               }
               cb();
             }
@@ -295,14 +218,14 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       var id = insertID++;
       var content = null;
 
-      insertAndFetch(id, null, content, null, false, done);
+      insertAndFetch(id, null, content, null, done);
     }); // 87.1.1
 
     it('87.1.2 works with empty Buffer', function(done) {
       var id = insertID++;
       var content = node6plus ? Buffer.from("", "utf-8") : new Buffer("", "utf-8");
 
-      insertAndFetch(id, null, content, null, false, done);
+      insertAndFetch(id, null, content, null, done);
     }); // 87.1.2
 
     it('87.1.3 works with small value', function(done) {
@@ -312,7 +235,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
-      insertAndFetch(id, specialStr, content, contentLength, false, done);
+      insertAndFetch(id, specialStr, content, contentLength, done);
     }); // 87.1.3
 
     it('87.1.4 works with (64K - 1) value', function(done) {
@@ -322,7 +245,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
-      insertAndFetch(id, specialStr, content, contentLength, false, done);
+      insertAndFetch(id, specialStr, content, contentLength, done);
     }); // 87.1.4
 
     it('87.1.5 works with (64K + 1) value', function(done) {
@@ -332,7 +255,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
-      insertAndFetch(id, specialStr, content, contentLength, true, done);
+      insertAndFetch(id, specialStr, content, contentLength, done);
     }); // 87.1.5
 
     it('87.1.6 works with (1MB + 1) data', function(done) {
@@ -342,7 +265,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
-      insertAndFetch(id, specialStr, content, contentLength, true, done);
+      insertAndFetch(id, specialStr, content, contentLength, done);
     }); // 87.1.6
 
     it('87.1.7 works with dbms_lob.substr()', function(done) {
@@ -355,7 +278,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id, content, cb, false);
+          insertIntoBlobTable1(id, content, cb);
         },
         function(cb) {
           connection.execute(
@@ -365,7 +288,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
               should.not.exist(err);
               var resultVal = result.rows[0][0];
               var buffer2Compare = node6plus ? Buffer.from(specialStr, "utf-8") : new Buffer(specialStr, "utf-8");
-              compareClientFetchResult(err, resultVal, specialStr, buffer2Compare, specialStrLength, false);
+              compareClientFetchResult(err, resultVal, specialStr, buffer2Compare, specialStrLength);
               cb();
             }
           );
@@ -377,7 +300,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       var id = insertID++;
       var content = "EMPTY_BLOB";
 
-      insertAndFetch(id, null, content, null, false, done);
+      insertAndFetch(id, null, content, null, done);
     }); // 87.1.8
 
     it('87.1.9 fetch multiple BLOB rows as Buffer', function(done) {
@@ -394,10 +317,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id_1, content_1, cb, false);
+          insertIntoBlobTable1(id_1, content_1, cb);
         },
         function(cb) {
-          insertIntoBlobTable1(id_2, content_2, cb, false);
+          insertIntoBlobTable1(id_2, content_2, cb);
         },
         function(cb) {
           connection.execute(
@@ -405,9 +328,9 @@ describe('87. fetchBlobAsBuffer1.js', function() {
             function(err, result) {
               should.not.exist(err);
               var resultVal = result.rows[0][1];
-              compareClientFetchResult(err, resultVal, specialStr_1, content_1, contentLength_1, false);
+              compareClientFetchResult(err, resultVal, specialStr_1, content_1, contentLength_1);
               resultVal = result.rows[1][1];
-              compareClientFetchResult(err, resultVal, specialStr_2, content_2, contentLength_2, false);
+              compareClientFetchResult(err, resultVal, specialStr_2, content_2, contentLength_2);
               cb();
             }
           );
@@ -424,7 +347,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id, content, cb, false);
+          insertIntoBlobTable1(id, content, cb);
         },
         function(cb) {
           connection.execute(
@@ -432,9 +355,9 @@ describe('87. fetchBlobAsBuffer1.js', function() {
             function(err, result) {
               should.not.exist(err);
               var resultVal = result.rows[0][1];
-              compareClientFetchResult(err, resultVal, specialStr, content, contentLength, false);
+              compareClientFetchResult(err, resultVal, specialStr, content, contentLength);
               resultVal = result.rows[0][2];
-              compareClientFetchResult(err, resultVal, specialStr, content, contentLength, false);
+              compareClientFetchResult(err, resultVal, specialStr, content, contentLength);
               cb();
             }
           );
@@ -455,7 +378,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       async.series([
         function(cb) {
-          insertAndFetch(id, specialStr_1, content_1, contentLength_1, false, cb);
+          insertAndFetch(id, specialStr_1, content_1, contentLength_1, cb);
         },
         function(cb) {
           updateBlobTable1(id, content_2, cb);
@@ -466,7 +389,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
             function(err, result) {
               should.not.exist(err);
               var resultVal = result.rows[0][1];
-              compareClientFetchResult(err, resultVal, specialStr_2, content_2, contentLength_2, false);
+              compareClientFetchResult(err, resultVal, specialStr_2, content_2, contentLength_2);
               cb();
             }
           );
@@ -483,7 +406,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id, content, cb, false);
+          insertIntoBlobTable1(id, content, cb);
         },
         function(cb) {
           var ref_proc = "CREATE OR REPLACE PROCEDURE nodb_ref(blob_cursor OUT SYS_REFCURSOR)\n" +
@@ -511,8 +434,8 @@ describe('87. fetchBlobAsBuffer1.js', function() {
             function(err, result) {
               result.outBinds.b.getRows(3, function(err, rows) {
                 var resultVal = rows[0][0];
-                compareClientFetchResult(err, resultVal, specialStr, content, contentLength, false);
-                cb();
+                compareClientFetchResult(err, resultVal, specialStr, content, contentLength);
+                result.outBinds.b.close(cb);
               });
             }
           );
@@ -539,7 +462,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id, content, cb, false);
+          insertIntoBlobTable1(id, content, cb);
         },
         function(cb) {
           oracledb.fetchAsBuffer = [];
@@ -562,7 +485,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
               });
 
               lob.on('end', function() {
-                compareClientFetchResult(err, blobData, specialStr, content, contentLength, false);
+                compareClientFetchResult(err, blobData, specialStr, content, contentLength);
                 cb();
               });
             }
@@ -587,10 +510,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id_1, content_1, cb, false);
+          insertIntoBlobTable1(id_1, content_1, cb);
         },
         function(cb) {
-          insertIntoBlobTable1(id_2, content_2, cb, false);
+          insertIntoBlobTable1(id_2, content_2, cb);
         },
         function(cb) {
           connection.execute(
@@ -599,7 +522,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
               should.not.exist(err);
               result.rows.length.should.eql(1);
               var resultVal = result.rows[0][1];
-              compareClientFetchResult(err, resultVal, specialStr_1, content_1, contentLength_1, false);
+              compareClientFetchResult(err, resultVal, specialStr_1, content_1, contentLength_1);
               oracledb.maxRows = maxRowsBak;
               cb();
             }
@@ -624,10 +547,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id_1, content_1, cb, false);
+          insertIntoBlobTable1(id_1, content_1, cb);
         },
         function(cb) {
-          insertIntoBlobTable1(id_2, content_2, cb, false);
+          insertIntoBlobTable1(id_2, content_2, cb);
         },
         function(cb) {
           connection.execute(
@@ -636,9 +559,9 @@ describe('87. fetchBlobAsBuffer1.js', function() {
               should.not.exist(err);
               result.rows.length.should.eql(2);
               var resultVal = result.rows[0][1];
-              compareClientFetchResult(err, resultVal, specialStr_1, content_1, contentLength_1, false);
+              compareClientFetchResult(err, resultVal, specialStr_1, content_1, contentLength_1);
               resultVal = result.rows[1][1];
-              compareClientFetchResult(err, resultVal, specialStr_2, content_2, contentLength_2, false);
+              compareClientFetchResult(err, resultVal, specialStr_2, content_2, contentLength_2);
               oracledb.maxRows = maxRowsBak;
               cb();
             }
@@ -656,7 +579,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id, content, cb, false);
+          insertIntoBlobTable1(id, content, cb);
         },
         function(cb) {
           connection.execute(
@@ -682,7 +605,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
               });
 
               lob.on('end', function() {
-                compareClientFetchResult(err, blobData, specialStr, content, contentLength, false);
+                compareClientFetchResult(err, blobData, specialStr, content, contentLength);
                 cb();
               });
             }
@@ -700,7 +623,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id, content, cb, false);
+          insertIntoBlobTable1(id, content, cb);
         },
         function(cb) {
           var sql = "SELECT ID, B from nodb_blob1 WHERE ID = " + id;
@@ -719,7 +642,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
           stream.on('end', function () {
             should.equal(counter, 1);
-            setTimeout(cb, 500);
+            cb();
           });
         }
       ], done);
@@ -741,10 +664,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id_1, content_1, cb, false);
+          insertIntoBlobTable1(id_1, content_1, cb);
         },
         function(cb) {
-          insertIntoBlobTable1(id_2, content_2, cb, false);
+          insertIntoBlobTable1(id_2, content_2, cb);
         },
         function(cb) {
           var sql = "SELECT ID, B from nodb_blob1 WHERE ID = " + id_1 + " or id = " +id_2;
@@ -768,7 +691,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
           stream.on('end', function () {
             should.equal(counter, 2);
             oracledb.maxRows = maxRowsBak;
-            setTimeout(cb, 500);
+            cb();
           });
         }
       ], done);
@@ -790,10 +713,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id_1, content_1, cb, false);
+          insertIntoBlobTable1(id_1, content_1, cb);
         },
         function(cb) {
-          insertIntoBlobTable1(id_2, content_2, cb, false);
+          insertIntoBlobTable1(id_2, content_2, cb);
         },
         function(cb) {
           var sql = "SELECT ID, B from nodb_blob1 WHERE ID = " + id_1 + " or id = " +id_2;
@@ -817,7 +740,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
           stream.on('end', function () {
             should.equal(counter, 2);
             oracledb.maxRows = maxRowsBak;
-            setTimeout(cb, 500);
+            cb();
           });
         }
       ], done);
@@ -839,10 +762,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id_1, content_1, cb, false);
+          insertIntoBlobTable1(id_1, content_1, cb);
         },
         function(cb) {
-          insertIntoBlobTable1(id_2, content_2, cb, false);
+          insertIntoBlobTable1(id_2, content_2, cb);
         },
         function(cb) {
           var sql = "SELECT ID, B from nodb_blob1 WHERE ID = " + id_1 + " or id = " +id_2;
@@ -866,7 +789,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
           stream.on('end', function () {
             should.equal(counter, 2);
             oracledb.maxRows = maxRowsBak;
-            setTimeout(cb, 500);
+            cb();
           });
         }
       ], done);
@@ -906,10 +829,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       done();
     }); // afterEach
 
-    var insertAndFetch = function(id, specialStr, insertContent, insertContentLength, case64KPlus, callback) {
+    var insertAndFetch = function(id, specialStr, insertContent, insertContentLength, callback) {
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id, insertContent, cb, case64KPlus);
+          insertIntoBlobTable1(id, insertContent, cb);
         },
         function(cb) {
           connection.execute(
@@ -922,7 +845,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
                 should.not.exist(err);
                 should.equal(resultVal, null);
               } else {
-                compareClientFetchResult(err, resultVal, specialStr, insertContent, insertContentLength, case64KPlus);
+                compareClientFetchResult(err, resultVal, specialStr, insertContent, insertContentLength);
               }
               cb();
             }
@@ -935,14 +858,14 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       var id = insertID++;
       var content = null;
 
-      insertAndFetch(id, null, content, null, false, done);
+      insertAndFetch(id, null, content, null, done);
     }); // 87.2.1
 
     it('87.2.2 works with empty Buffer', function(done) {
       var id = insertID++;
       var content = node6plus ? Buffer.from("", "utf-8") : new Buffer("", "utf-8");
 
-      insertAndFetch(id, null, content, null, false, done);
+      insertAndFetch(id, null, content, null, done);
     }); // 87.2.2
 
     it('87.2.3 works with small value', function(done) {
@@ -952,7 +875,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
-      insertAndFetch(id, specialStr, content, contentLength, false, done);
+      insertAndFetch(id, specialStr, content, contentLength, done);
     }); // 87.2.3
 
     it('87.2.4 works with (64K - 1) value', function(done) {
@@ -962,7 +885,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
-      insertAndFetch(id, specialStr, content, contentLength, false, done);
+      insertAndFetch(id, specialStr, content, contentLength, done);
     }); // 87.2.4
 
     it('87.2.5 works with (64K + 1) value', function(done) {
@@ -972,7 +895,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
-      insertAndFetch(id, specialStr, content, contentLength, true, done);
+      insertAndFetch(id, specialStr, content, contentLength, done);
     }); // 87.2.5
 
     it('87.2.6 works with (1MB + 1) data', function(done) {
@@ -982,7 +905,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
-      insertAndFetch(id, specialStr, content, contentLength, true, done);
+      insertAndFetch(id, specialStr, content, contentLength, done);
     }); // 87.2.6
 
     it('87.2.7 works with dbms_lob.substr()', function(done) {
@@ -995,7 +918,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id, content, cb, false);
+          insertIntoBlobTable1(id, content, cb);
         },
         function(cb) {
           connection.execute(
@@ -1006,7 +929,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
               should.not.exist(err);
               var resultVal = result.rows[0].B1;
               var buffer2Compare = node6plus ? Buffer.from(specialStr, "utf-8") : new Buffer(specialStr, "utf-8");
-              compareClientFetchResult(err, resultVal, specialStr, buffer2Compare, specialStrLength, false);
+              compareClientFetchResult(err, resultVal, specialStr, buffer2Compare, specialStrLength);
               cb();
             }
           );
@@ -1018,7 +941,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       var id = insertID++;
       var content = "EMPTY_BLOB";
 
-      insertAndFetch(id, null, content, null, false, done);
+      insertAndFetch(id, null, content, null, done);
     }); // 87.2.8
 
     it('87.2.9 fetch multiple BLOB rows as Buffer', function(done) {
@@ -1035,10 +958,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id_1, content_1, cb, false);
+          insertIntoBlobTable1(id_1, content_1, cb);
         },
         function(cb) {
-          insertIntoBlobTable1(id_2, content_2, cb, false);
+          insertIntoBlobTable1(id_2, content_2, cb);
         },
         function(cb) {
           connection.execute(
@@ -1048,9 +971,9 @@ describe('87. fetchBlobAsBuffer1.js', function() {
             function(err, result) {
               should.not.exist(err);
               var resultVal = result.rows[0].B;
-              compareClientFetchResult(err, resultVal, specialStr_1, content_1, contentLength_1, false);
+              compareClientFetchResult(err, resultVal, specialStr_1, content_1, contentLength_1);
               resultVal = result.rows[1].B;
-              compareClientFetchResult(err, resultVal, specialStr_2, content_2, contentLength_2, false);
+              compareClientFetchResult(err, resultVal, specialStr_2, content_2, contentLength_2);
               cb();
             }
           );
@@ -1067,7 +990,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id, content, cb, false);
+          insertIntoBlobTable1(id, content, cb);
         },
         function(cb) {
           connection.execute(
@@ -1077,9 +1000,9 @@ describe('87. fetchBlobAsBuffer1.js', function() {
             function(err, result) {
               should.not.exist(err);
               var resultVal = result.rows[0].B1;
-              compareClientFetchResult(err, resultVal, specialStr, content, contentLength, false);
+              compareClientFetchResult(err, resultVal, specialStr, content, contentLength);
               resultVal = result.rows[0].B2;
-              compareClientFetchResult(err, resultVal, specialStr, content, contentLength, false);
+              compareClientFetchResult(err, resultVal, specialStr, content, contentLength);
               cb();
             }
           );
@@ -1100,7 +1023,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       async.series([
         function(cb) {
-          insertAndFetch(id, specialStr_1, content_1, contentLength_1, false, cb);
+          insertAndFetch(id, specialStr_1, content_1, contentLength_1, cb);
         },
         function(cb) {
           updateBlobTable1(id, content_2, cb);
@@ -1113,7 +1036,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
             function(err, result) {
               should.not.exist(err);
               var resultVal = result.rows[0].B;
-              compareClientFetchResult(err, resultVal, specialStr_2, content_2, contentLength_2, false);
+              compareClientFetchResult(err, resultVal, specialStr_2, content_2, contentLength_2);
               cb();
             }
           );
@@ -1130,7 +1053,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id, content, cb, false);
+          insertIntoBlobTable1(id, content, cb);
         },
         function(cb) {
           var ref_proc = "CREATE OR REPLACE PROCEDURE nodb_ref(blob_cursor OUT SYS_REFCURSOR)\n" +
@@ -1158,8 +1081,8 @@ describe('87. fetchBlobAsBuffer1.js', function() {
             function(err, result) {
               result.outBinds.b.getRows(3, function(err, rows) {
                 var resultVal = rows[0][0];
-                compareClientFetchResult(err, resultVal, specialStr, content, contentLength, false);
-                cb();
+                compareClientFetchResult(err, resultVal, specialStr, content, contentLength);
+                result.outBinds.b.close(cb);
               });
             }
           );
@@ -1186,7 +1109,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id, content, cb, false);
+          insertIntoBlobTable1(id, content, cb);
         },
         function(cb) {
           oracledb.fetchAsBuffer = [];
@@ -1209,7 +1132,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
               });
 
               lob.on('end', function() {
-                compareClientFetchResult(err, blobData, specialStr, content, contentLength, false);
+                compareClientFetchResult(err, blobData, specialStr, content, contentLength);
                 cb();
               });
             }
@@ -1234,10 +1157,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id_1, content_1, cb, false);
+          insertIntoBlobTable1(id_1, content_1, cb);
         },
         function(cb) {
-          insertIntoBlobTable1(id_2, content_2, cb, false);
+          insertIntoBlobTable1(id_2, content_2, cb);
         },
         function(cb) {
           connection.execute(
@@ -1248,7 +1171,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
               should.not.exist(err);
               result.rows.length.should.eql(1);
               var resultVal = result.rows[0].B;
-              compareClientFetchResult(err, resultVal, specialStr_1, content_1, contentLength_1, false);
+              compareClientFetchResult(err, resultVal, specialStr_1, content_1, contentLength_1);
               oracledb.maxRows = maxRowsBak;
               cb();
             }
@@ -1273,10 +1196,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id_1, content_1, cb, false);
+          insertIntoBlobTable1(id_1, content_1, cb);
         },
         function(cb) {
-          insertIntoBlobTable1(id_2, content_2, cb, false);
+          insertIntoBlobTable1(id_2, content_2, cb);
         },
         function(cb) {
           connection.execute(
@@ -1287,9 +1210,9 @@ describe('87. fetchBlobAsBuffer1.js', function() {
               should.not.exist(err);
               result.rows.length.should.eql(2);
               var resultVal = result.rows[0].B;
-              compareClientFetchResult(err, resultVal, specialStr_1, content_1, contentLength_1, false);
+              compareClientFetchResult(err, resultVal, specialStr_1, content_1, contentLength_1);
               resultVal = result.rows[1].B;
-              compareClientFetchResult(err, resultVal, specialStr_2, content_2, contentLength_2, false);
+              compareClientFetchResult(err, resultVal, specialStr_2, content_2, contentLength_2);
               oracledb.maxRows = maxRowsBak;
               cb();
             }
@@ -1307,7 +1230,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id, content, cb, false);
+          insertIntoBlobTable1(id, content, cb);
         },
         function(cb) {
           connection.execute(
@@ -1333,7 +1256,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
               });
 
               lob.on('end', function() {
-                compareClientFetchResult(err, blobData, specialStr, content, contentLength, false);
+                compareClientFetchResult(err, blobData, specialStr, content, contentLength);
                 cb();
               });
             }
@@ -1376,10 +1299,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       done();
     }); // afterEach
 
-    var insertAndFetch = function(id, specialStr, insertContent, insertContentLength, case64KPlus, callback) {
+    var insertAndFetch = function(id, specialStr, insertContent, insertContentLength, callback) {
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id, insertContent, cb, case64KPlus);
+          insertIntoBlobTable1(id, insertContent, cb);
         },
         function(cb) {
           connection.execute(
@@ -1394,16 +1317,11 @@ describe('87. fetchBlobAsBuffer1.js', function() {
               result.resultSet.getRow(
                 function(err, row) {
                   var resultVal;
-                  if(case64KPlus === true) {
-                    resultVal = client11gPlus ? row.B : null;
-                    compare64KPlusResultSetResult(err, resultVal, specialStr, insertContent, insertContentLength);
+                  resultVal = row.B;
+                  if(specialStr === null) {
+                    should.equal(resultVal, null);
                   } else {
-                    resultVal = row.B;
-                    if(specialStr === null) {
-                      should.equal(resultVal, null);
-                    } else {
-                      compareClientFetchResult(err, resultVal, specialStr, insertContent, insertContentLength, case64KPlus);
-                    }
+                    compareClientFetchResult(err, resultVal, specialStr, insertContent, insertContentLength);
                   }
                   result.resultSet.close(function(err) {
                     should.not.exist(err);
@@ -1421,14 +1339,14 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       var id = insertID++;
       var content = null;
 
-      insertAndFetch(id, null, content, null, false, done);
+      insertAndFetch(id, null, content, null, done);
     }); // 87.3.1
 
     it('87.3.2 works with empty Buffer', function(done) {
       var id = insertID++;
       var content = node6plus ? Buffer.from("", "utf-8") : new Buffer("", "utf-8");
 
-      insertAndFetch(id, null, content, null, false, done);
+      insertAndFetch(id, null, content, null, done);
     }); // 87.3.2
 
     it('87.3.3 works with small value', function(done) {
@@ -1438,7 +1356,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
-      insertAndFetch(id, specialStr, content, contentLength, false, done);
+      insertAndFetch(id, specialStr, content, contentLength, done);
     }); // 87.3.3
 
     it('87.3.4 works with (64K - 1) value', function(done) {
@@ -1448,7 +1366,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
-      insertAndFetch(id, specialStr, content, contentLength, false, done);
+      insertAndFetch(id, specialStr, content, contentLength, done);
     }); // 87.3.4
 
     it('87.3.5 works with (64K + 1) value', function(done) {
@@ -1458,7 +1376,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
-      insertAndFetch(id, specialStr, content, contentLength, true, done);
+      insertAndFetch(id, specialStr, content, contentLength, done);
     }); // 87.3.5
 
     it('87.3.6 works with (1MB + 1) data', function(done) {
@@ -1468,7 +1386,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
-      insertAndFetch(id, specialStr, content, contentLength, true, done);
+      insertAndFetch(id, specialStr, content, contentLength, done);
     }); // 87.3.6
 
     it('87.3.7 works with dbms_lob.substr()', function(done) {
@@ -1481,7 +1399,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id, content, cb, false);
+          insertIntoBlobTable1(id, content, cb);
         },
         function(cb) {
           connection.execute(
@@ -1498,7 +1416,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
                   should.not.exist(err);
                   var resultVal = row.B1;
                   var buffer2Compare = node6plus ? Buffer.from(specialStr, "utf-8") : new Buffer(specialStr, "utf-8");
-                  compareClientFetchResult(err, resultVal, specialStr, buffer2Compare, specialStrLength, false);
+                  compareClientFetchResult(err, resultVal, specialStr, buffer2Compare, specialStrLength);
                   result.resultSet.close(function(err) {
                     should.not.exist(err);
                     cb();
@@ -1515,7 +1433,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       var id = insertID++;
       var content = "EMPTY_BLOB";
 
-      insertAndFetch(id, null, content, null, false, done);
+      insertAndFetch(id, null, content, null, done);
     }); // 87.3.8
 
     it('87.3.9 fetch multiple BLOB rows as Buffer', function(done) {
@@ -1532,10 +1450,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id_1, content_1, cb, false);
+          insertIntoBlobTable1(id_1, content_1, cb);
         },
         function(cb) {
-          insertIntoBlobTable1(id_2, content_2, cb, false);
+          insertIntoBlobTable1(id_2, content_2, cb);
         },
         function(cb) {
           var rowNumFetched = 2;
@@ -1553,9 +1471,9 @@ describe('87. fetchBlobAsBuffer1.js', function() {
                 function(err, row) {
                   should.not.exist(err);
                   var resultVal = row[0].B;
-                  compareClientFetchResult(err, resultVal, specialStr_1, content_1, contentLength_1, false);
+                  compareClientFetchResult(err, resultVal, specialStr_1, content_1, contentLength_1);
                   resultVal = row[1].B;
-                  compareClientFetchResult(err, resultVal, specialStr_2, content_2, contentLength_2, false);
+                  compareClientFetchResult(err, resultVal, specialStr_2, content_2, contentLength_2);
                   result.resultSet.close(function(err) {
                     should.not.exist(err);
                     cb();
@@ -1577,7 +1495,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id, content, cb, false);
+          insertIntoBlobTable1(id, content, cb);
         },
         function(cb) {
           connection.execute(
@@ -1593,9 +1511,9 @@ describe('87. fetchBlobAsBuffer1.js', function() {
                 function(err, row) {
                   should.not.exist(err);
                   var resultVal = row.B1;
-                  compareClientFetchResult(err, resultVal, specialStr, content, contentLength, false);
+                  compareClientFetchResult(err, resultVal, specialStr, content, contentLength);
                   resultVal = row.B2;
-                  compareClientFetchResult(err, resultVal, specialStr, content, contentLength, false);
+                  compareClientFetchResult(err, resultVal, specialStr, content, contentLength);
                   result.resultSet.close(function(err) {
                     should.not.exist(err);
                     cb();
@@ -1621,7 +1539,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       async.series([
         function(cb) {
-          insertAndFetch(id, specialStr_1, content_1, contentLength_1, false, cb);
+          insertAndFetch(id, specialStr_1, content_1, contentLength_1, cb);
         },
         function(cb) {
           updateBlobTable1(id, content_2, cb);
@@ -1640,7 +1558,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
                 function(err, row) {
                   should.not.exist(err);
                   var resultVal = row.B;
-                  compareClientFetchResult(err, resultVal, specialStr_2, content_2, contentLength_2, false);
+                  compareClientFetchResult(err, resultVal, specialStr_2, content_2, contentLength_2);
                   result.resultSet.close(function(err) {
                     should.not.exist(err);
                     cb();
@@ -1662,7 +1580,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id, content, cb, false);
+          insertIntoBlobTable1(id, content, cb);
         },
         function(cb) {
           var ref_proc = "CREATE OR REPLACE PROCEDURE nodb_ref(blob_cursor OUT SYS_REFCURSOR)\n" +
@@ -1690,8 +1608,8 @@ describe('87. fetchBlobAsBuffer1.js', function() {
             function(err, result) {
               result.outBinds.b.getRows(3, function(err, rows) {
                 var resultVal = rows[0][0];
-                compareClientFetchResult(err, resultVal, specialStr, content, contentLength, false);
-                cb();
+                compareClientFetchResult(err, resultVal, specialStr, content, contentLength);
+                result.outBinds.b.close(cb);
               });
             }
           );
@@ -1718,7 +1636,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id, content, cb, false);
+          insertIntoBlobTable1(id, content, cb);
         },
         function(cb) {
           oracledb.fetchAsBuffer = [];
@@ -1741,7 +1659,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
               });
 
               lob.on('end', function() {
-                compareClientFetchResult(err, blobData, specialStr, content, contentLength, false);
+                compareClientFetchResult(err, blobData, specialStr, content, contentLength);
                 cb();
               });
             }
@@ -1766,10 +1684,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id_1, content_1, cb, false);
+          insertIntoBlobTable1(id_1, content_1, cb);
         },
         function(cb) {
-          insertIntoBlobTable1(id_2, content_2, cb, false);
+          insertIntoBlobTable1(id_2, content_2, cb);
         },
         function(cb) {
           var rowNumFetched = 2;
@@ -1788,9 +1706,9 @@ describe('87. fetchBlobAsBuffer1.js', function() {
                   should.not.exist(err);
                   should.strictEqual(row.length, 2);
                   var resultVal = row[0].B;
-                  compareClientFetchResult(err, resultVal, specialStr_1, content_1, contentLength_1, false);
+                  compareClientFetchResult(err, resultVal, specialStr_1, content_1, contentLength_1);
                   resultVal = row[1].B;
-                  compareClientFetchResult(err, resultVal, specialStr_2, content_2, contentLength_2, false);
+                  compareClientFetchResult(err, resultVal, specialStr_2, content_2, contentLength_2);
                   oracledb.maxRows =maxRowsBak;
                   result.resultSet.close(function(err) {
                     should.not.exist(err);
@@ -1820,10 +1738,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id_1, content_1, cb, false);
+          insertIntoBlobTable1(id_1, content_1, cb);
         },
         function(cb) {
-          insertIntoBlobTable1(id_2, content_2, cb, false);
+          insertIntoBlobTable1(id_2, content_2, cb);
         },
         function(cb) {
           var rowNumFetched = 2;
@@ -1842,9 +1760,9 @@ describe('87. fetchBlobAsBuffer1.js', function() {
                   should.not.exist(err);
                   should.strictEqual(row.length, 2);
                   var resultVal = row[0].B;
-                  compareClientFetchResult(err, resultVal, specialStr_1, content_1, contentLength_1, false);
+                  compareClientFetchResult(err, resultVal, specialStr_1, content_1, contentLength_1);
                   resultVal = row[1].B;
-                  compareClientFetchResult(err, resultVal, specialStr_2, content_2, contentLength_2, false);
+                  compareClientFetchResult(err, resultVal, specialStr_2, content_2, contentLength_2);
                   oracledb.maxRows =maxRowsBak;
                   result.resultSet.close(function(err) {
                     should.not.exist(err);
@@ -1867,7 +1785,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id, content, cb, false);
+          insertIntoBlobTable1(id, content, cb);
         },
         function(cb) {
           connection.execute(
@@ -1893,7 +1811,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
               });
 
               lob.on('end', function() {
-                compareClientFetchResult(err, blobData, specialStr, content, contentLength, false);
+                compareClientFetchResult(err, blobData, specialStr, content, contentLength);
                 cb();
               });
             }
@@ -1936,10 +1854,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       done();
     }); // afterEach
 
-    var insertAndFetch = function(id, specialStr, insertContent, insertContentLength, case64KPlus, callback) {
+    var insertAndFetch = function(id, specialStr, insertContent, insertContentLength, callback) {
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id, insertContent, cb, case64KPlus);
+          insertIntoBlobTable1(id, insertContent, cb);
         },
         function(cb) {
           connection.execute(
@@ -1952,7 +1870,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
                 should.not.exist(err);
                 should.equal(resultVal, null);
               } else {
-                compareClientFetchResult(err, resultVal, specialStr, insertContent, insertContentLength, case64KPlus);
+                compareClientFetchResult(err, resultVal, specialStr, insertContent, insertContentLength);
               }
               cb();
             }
@@ -1965,14 +1883,14 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       var id = insertID++;
       var content = null;
 
-      insertAndFetch(id, null, content, null, false, done);
+      insertAndFetch(id, null, content, null, done);
     }); // 87.4.1
 
     it('87.4.2 works with empty Buffer', function(done) {
       var id = insertID++;
       var content = node6plus ? Buffer.from("", "utf-8") : new Buffer("", "utf-8");
 
-      insertAndFetch(id, null, content, null, false, done);
+      insertAndFetch(id, null, content, null, done);
     }); // 87.4.2
 
     it('87.4.3 works with small value', function(done) {
@@ -1982,7 +1900,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
-      insertAndFetch(id, specialStr, content, contentLength, false, done);
+      insertAndFetch(id, specialStr, content, contentLength, done);
     }); // 87.4.3
 
     it('87.4.4 works with (64K - 1) value', function(done) {
@@ -1992,7 +1910,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
-      insertAndFetch(id, specialStr, content, contentLength, false, done);
+      insertAndFetch(id, specialStr, content, contentLength, done);
     }); // 87.4.4
 
     it('87.4.5 works with (64K + 1) value', function(done) {
@@ -2002,7 +1920,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
-      insertAndFetch(id, specialStr, content, contentLength, true, done);
+      insertAndFetch(id, specialStr, content, contentLength, done);
     }); // 87.4.5
 
     it('87.4.6 works with (1MB + 1) data', function(done) {
@@ -2012,7 +1930,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
-      insertAndFetch(id, specialStr, content, contentLength, true, done);
+      insertAndFetch(id, specialStr, content, contentLength, done);
     }); // 87.4.6
 
     it('87.4.7 works with dbms_lob.substr()', function(done) {
@@ -2025,7 +1943,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id, content, cb, false);
+          insertIntoBlobTable1(id, content, cb);
         },
         function(cb) {
           connection.execute(
@@ -2036,7 +1954,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
               should.not.exist(err);
               var resultVal = result.rows[0][0];
               var buffer2Compare = node6plus ? Buffer.from(specialStr, "utf-8") : new Buffer(specialStr, "utf-8");
-              compareClientFetchResult(err, resultVal, specialStr, buffer2Compare, specialStrLength, false);
+              compareClientFetchResult(err, resultVal, specialStr, buffer2Compare, specialStrLength);
               cb();
             }
           );
@@ -2048,7 +1966,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       var id = insertID++;
       var content = "EMPTY_BLOB";
 
-      insertAndFetch(id, null, content, null, false, done);
+      insertAndFetch(id, null, content, null, done);
     }); // 87.4.8
 
     it('87.4.9 fetch multiple BLOB rows as Buffer', function(done) {
@@ -2065,10 +1983,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id_1, content_1, cb, false);
+          insertIntoBlobTable1(id_1, content_1, cb);
         },
         function(cb) {
-          insertIntoBlobTable1(id_2, content_2, cb, false);
+          insertIntoBlobTable1(id_2, content_2, cb);
         },
         function(cb) {
           connection.execute(
@@ -2078,9 +1996,9 @@ describe('87. fetchBlobAsBuffer1.js', function() {
             function(err, result) {
               should.not.exist(err);
               var resultVal = result.rows[0][1];
-              compareClientFetchResult(err, resultVal, specialStr_1, content_1, contentLength_1, false);
+              compareClientFetchResult(err, resultVal, specialStr_1, content_1, contentLength_1);
               resultVal = result.rows[1][1];
-              compareClientFetchResult(err, resultVal, specialStr_2, content_2, contentLength_2, false);
+              compareClientFetchResult(err, resultVal, specialStr_2, content_2, contentLength_2);
               cb();
             }
           );
@@ -2097,7 +2015,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id, content, cb, false);
+          insertIntoBlobTable1(id, content, cb);
         },
         function(cb) {
           connection.execute(
@@ -2107,9 +2025,9 @@ describe('87. fetchBlobAsBuffer1.js', function() {
             function(err, result) {
               should.not.exist(err);
               var resultVal = result.rows[0][1];
-              compareClientFetchResult(err, resultVal, specialStr, content, contentLength, false);
+              compareClientFetchResult(err, resultVal, specialStr, content, contentLength);
               resultVal = result.rows[0][2];
-              compareClientFetchResult(err, resultVal, specialStr, content, contentLength, false);
+              compareClientFetchResult(err, resultVal, specialStr, content, contentLength);
               cb();
             }
           );
@@ -2130,7 +2048,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       async.series([
         function(cb) {
-          insertAndFetch(id, specialStr_1, content_1, contentLength_1, false, cb);
+          insertAndFetch(id, specialStr_1, content_1, contentLength_1, cb);
         },
         function(cb) {
           updateBlobTable1(id, content_2, cb);
@@ -2143,7 +2061,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
             function(err, result) {
               should.not.exist(err);
               var resultVal = result.rows[0][1];
-              compareClientFetchResult(err, resultVal, specialStr_2, content_2, contentLength_2, false);
+              compareClientFetchResult(err, resultVal, specialStr_2, content_2, contentLength_2);
               cb();
             }
           );
@@ -2160,7 +2078,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id, content, cb, false);
+          insertIntoBlobTable1(id, content, cb);
         },
         function(cb) {
           var ref_proc = "CREATE OR REPLACE PROCEDURE nodb_ref(blob_cursor OUT SYS_REFCURSOR)\n" +
@@ -2188,8 +2106,8 @@ describe('87. fetchBlobAsBuffer1.js', function() {
             function(err, result) {
               result.outBinds.b.getRows(3, function(err, rows) {
                 var resultVal = rows[0][0];
-                compareClientFetchResult(err, resultVal, specialStr, content, contentLength, false);
-                cb();
+                compareClientFetchResult(err, resultVal, specialStr, content, contentLength);
+                result.outBinds.b.close(cb);
               });
             }
           );
@@ -2216,7 +2134,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id, content, cb, false);
+          insertIntoBlobTable1(id, content, cb);
         },
         function(cb) {
           oracledb.fetchAsBuffer = [];
@@ -2239,7 +2157,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
               });
 
               lob.on('end', function() {
-                compareClientFetchResult(err, blobData, specialStr, content, contentLength, false);
+                compareClientFetchResult(err, blobData, specialStr, content, contentLength);
                 cb();
               });
             }
@@ -2264,10 +2182,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id_1, content_1, cb, false);
+          insertIntoBlobTable1(id_1, content_1, cb);
         },
         function(cb) {
-          insertIntoBlobTable1(id_2, content_2, cb, false);
+          insertIntoBlobTable1(id_2, content_2, cb);
         },
         function(cb) {
           connection.execute(
@@ -2278,7 +2196,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
               should.not.exist(err);
               result.rows.length.should.eql(1);
               var resultVal = result.rows[0][1];
-              compareClientFetchResult(err, resultVal, specialStr_1, content_1, contentLength_1, false);
+              compareClientFetchResult(err, resultVal, specialStr_1, content_1, contentLength_1);
               oracledb.maxRows = maxRowsBak;
               cb();
             }
@@ -2303,10 +2221,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id_1, content_1, cb, false);
+          insertIntoBlobTable1(id_1, content_1, cb);
         },
         function(cb) {
-          insertIntoBlobTable1(id_2, content_2, cb, false);
+          insertIntoBlobTable1(id_2, content_2, cb);
         },
         function(cb) {
           connection.execute(
@@ -2317,9 +2235,9 @@ describe('87. fetchBlobAsBuffer1.js', function() {
               should.not.exist(err);
               result.rows.length.should.eql(2);
               var resultVal = result.rows[0][1];
-              compareClientFetchResult(err, resultVal, specialStr_1, content_1, contentLength_1, false);
+              compareClientFetchResult(err, resultVal, specialStr_1, content_1, contentLength_1);
               resultVal = result.rows[1][1];
-              compareClientFetchResult(err, resultVal, specialStr_2, content_2, contentLength_2, false);
+              compareClientFetchResult(err, resultVal, specialStr_2, content_2, contentLength_2);
               oracledb.maxRows = maxRowsBak;
               cb();
             }
@@ -2337,7 +2255,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id, content, cb, false);
+          insertIntoBlobTable1(id, content, cb);
         },
         function(cb) {
           connection.execute(
@@ -2363,7 +2281,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
               });
 
               lob.on('end', function() {
-                compareClientFetchResult(err, blobData, specialStr, content, contentLength, false);
+                compareClientFetchResult(err, blobData, specialStr, content, contentLength);
                 cb();
               });
             }
@@ -2406,10 +2324,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       done();
     }); // afterEach
 
-    var insertAndFetch = function(id, specialStr, insertContent, insertContentLength, case64KPlus, callback) {
+    var insertAndFetch = function(id, specialStr, insertContent, insertContentLength, callback) {
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id, insertContent, cb, case64KPlus);
+          insertIntoBlobTable1(id, insertContent, cb);
         },
         function(cb) {
           connection.execute(
@@ -2424,17 +2342,12 @@ describe('87. fetchBlobAsBuffer1.js', function() {
               result.resultSet.getRow(
                 function(err, row) {
                   var resultVal;
-                  if(case64KPlus === true) {
-                    resultVal = client11gPlus ? row[1] : null;
-                    compare64KPlusResultSetResult(err, resultVal, specialStr, insertContent, insertContentLength);
+                  resultVal = row[1];
+                  if(specialStr === null) {
+                    should.not.exist(err);
+                    should.equal(resultVal, null);
                   } else {
-                    resultVal = row[1];
-                    if(specialStr === null) {
-                      should.not.exist(err);
-                      should.equal(resultVal, null);
-                    } else {
-                      compareClientFetchResult(err, resultVal, specialStr, insertContent, insertContentLength, case64KPlus);
-                    }
+                    compareClientFetchResult(err, resultVal, specialStr, insertContent, insertContentLength);
                   }
                   result.resultSet.close(function(err) {
                     should.not.exist(err);
@@ -2452,14 +2365,14 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       var id = insertID++;
       var content = null;
 
-      insertAndFetch(id, null, content, null, false, done);
+      insertAndFetch(id, null, content, null, done);
     }); // 87.5.1
 
     it('87.5.2 works with empty Buffer', function(done) {
       var id = insertID++;
       var content = node6plus ? Buffer.from("", "utf-8") : new Buffer("", "utf-8");
 
-      insertAndFetch(id, null, content, null, false, done);
+      insertAndFetch(id, null, content, null, done);
     }); // 87.5.2
 
     it('87.5.3 works with small value', function(done) {
@@ -2469,7 +2382,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
-      insertAndFetch(id, specialStr, content, contentLength, false, done);
+      insertAndFetch(id, specialStr, content, contentLength, done);
     }); // 87.5.3
 
     it('87.5.4 works with (64K - 1) value', function(done) {
@@ -2479,7 +2392,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
-      insertAndFetch(id, specialStr, content, contentLength, false, done);
+      insertAndFetch(id, specialStr, content, contentLength, done);
     }); // 87.5.4
 
     it('87.5.5 works with (64K + 1) value', function(done) {
@@ -2489,7 +2402,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
-      insertAndFetch(id, specialStr, content, contentLength, true, done);
+      insertAndFetch(id, specialStr, content, contentLength, done);
     }); // 87.5.5
 
     it('87.5.6 works with (1MB + 1) data', function(done) {
@@ -2499,7 +2412,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       var strBuf = random.getRandomString(contentLength, specialStr);
       var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
 
-      insertAndFetch(id, specialStr, content, contentLength, true, done);
+      insertAndFetch(id, specialStr, content, contentLength, done);
     }); // 87.5.6
 
     it('87.5.7 works with dbms_lob.substr()', function(done) {
@@ -2512,7 +2425,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id, content, cb, false);
+          insertIntoBlobTable1(id, content, cb);
         },
         function(cb) {
           connection.execute(
@@ -2530,7 +2443,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
                   should.not.exist(err);
                   var resultVal = row[0];
                   var buffer2Compare = node6plus ? Buffer.from(specialStr, "utf-8") : new Buffer(specialStr, "utf-8");
-                  compareClientFetchResult(err, resultVal, specialStr, buffer2Compare, specialStrLength, false);
+                  compareClientFetchResult(err, resultVal, specialStr, buffer2Compare, specialStrLength);
                   result.resultSet.close(function(err) {
                     should.not.exist(err);
                     cb();
@@ -2547,7 +2460,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       var id = insertID++;
       var content = "EMPTY_BLOB";
 
-      insertAndFetch(id, null, content, null, false, done);
+      insertAndFetch(id, null, content, null, done);
     }); // 87.5.8
 
     it('87.5.9 fetch multiple BLOB rows as Buffer', function(done) {
@@ -2564,10 +2477,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id_1, content_1, cb, false);
+          insertIntoBlobTable1(id_1, content_1, cb);
         },
         function(cb) {
-          insertIntoBlobTable1(id_2, content_2, cb, false);
+          insertIntoBlobTable1(id_2, content_2, cb);
         },
         function(cb) {
           var rowNumFetched = 2;
@@ -2585,9 +2498,9 @@ describe('87. fetchBlobAsBuffer1.js', function() {
                 function(err, row) {
                   should.not.exist(err);
                   var resultVal = row[0][1];
-                  compareClientFetchResult(err, resultVal, specialStr_1, content_1, contentLength_1, false);
+                  compareClientFetchResult(err, resultVal, specialStr_1, content_1, contentLength_1);
                   resultVal = row[1][1];
-                  compareClientFetchResult(err, resultVal, specialStr_2, content_2, contentLength_2, false);
+                  compareClientFetchResult(err, resultVal, specialStr_2, content_2, contentLength_2);
                   result.resultSet.close(function(err) {
                     should.not.exist(err);
                     cb();
@@ -2609,7 +2522,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id, content, cb, false);
+          insertIntoBlobTable1(id, content, cb);
         },
         function(cb) {
           connection.execute(
@@ -2625,9 +2538,9 @@ describe('87. fetchBlobAsBuffer1.js', function() {
                 function(err, row) {
                   should.not.exist(err);
                   var resultVal = row[1];
-                  compareClientFetchResult(err, resultVal, specialStr, content, contentLength, false);
+                  compareClientFetchResult(err, resultVal, specialStr, content, contentLength);
                   resultVal = row[2];
-                  compareClientFetchResult(err, resultVal, specialStr, content, contentLength, false);
+                  compareClientFetchResult(err, resultVal, specialStr, content, contentLength);
                   result.resultSet.close(function(err) {
                     should.not.exist(err);
                     cb();
@@ -2653,7 +2566,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       async.series([
         function(cb) {
-          insertAndFetch(id, specialStr_1, content_1, contentLength_1, false, cb);
+          insertAndFetch(id, specialStr_1, content_1, contentLength_1, cb);
         },
         function(cb) {
           updateBlobTable1(id, content_2, cb);
@@ -2672,7 +2585,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
                 function(err, row) {
                   should.not.exist(err);
                   var resultVal = row[1];
-                  compareClientFetchResult(err, resultVal, specialStr_2, content_2, contentLength_2, false);
+                  compareClientFetchResult(err, resultVal, specialStr_2, content_2, contentLength_2);
                   result.resultSet.close(function(err) {
                     should.not.exist(err);
                     cb();
@@ -2694,7 +2607,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id, content, cb, false);
+          insertIntoBlobTable1(id, content, cb);
         },
         function(cb) {
           var ref_proc = "CREATE OR REPLACE PROCEDURE nodb_ref(blob_cursor OUT SYS_REFCURSOR)\n" +
@@ -2722,8 +2635,8 @@ describe('87. fetchBlobAsBuffer1.js', function() {
             function(err, result) {
               result.outBinds.b.getRows(3, function(err, rows) {
                 var resultVal = rows[0][0];
-                compareClientFetchResult(err, resultVal, specialStr, content, contentLength, false);
-                cb();
+                compareClientFetchResult(err, resultVal, specialStr, content, contentLength);
+                result.outBinds.b.close(cb);
               });
             }
           );
@@ -2750,7 +2663,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id, content, cb, false);
+          insertIntoBlobTable1(id, content, cb);
         },
         function(cb) {
           oracledb.fetchAsBuffer = [];
@@ -2773,7 +2686,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
               });
 
               lob.on('end', function() {
-                compareClientFetchResult(err, blobData, specialStr, content, contentLength, false);
+                compareClientFetchResult(err, blobData, specialStr, content, contentLength);
                 cb();
               });
             }
@@ -2798,10 +2711,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id_1, content_1, cb, false);
+          insertIntoBlobTable1(id_1, content_1, cb);
         },
         function(cb) {
-          insertIntoBlobTable1(id_2, content_2, cb, false);
+          insertIntoBlobTable1(id_2, content_2, cb);
         },
         function(cb) {
           var rowNumFetched = 2;
@@ -2820,9 +2733,9 @@ describe('87. fetchBlobAsBuffer1.js', function() {
                   should.not.exist(err);
                   should.strictEqual(row.length, 2);
                   var resultVal = row[0][1];
-                  compareClientFetchResult(err, resultVal, specialStr_1, content_1, contentLength_1, false);
+                  compareClientFetchResult(err, resultVal, specialStr_1, content_1, contentLength_1);
                   resultVal = row[1][1];
-                  compareClientFetchResult(err, resultVal, specialStr_2, content_2, contentLength_2, false);
+                  compareClientFetchResult(err, resultVal, specialStr_2, content_2, contentLength_2);
                   oracledb.maxRows =maxRowsBak;
                   result.resultSet.close(function(err) {
                     should.not.exist(err);
@@ -2852,10 +2765,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id_1, content_1, cb, false);
+          insertIntoBlobTable1(id_1, content_1, cb);
         },
         function(cb) {
-          insertIntoBlobTable1(id_2, content_2, cb, false);
+          insertIntoBlobTable1(id_2, content_2, cb);
         },
         function(cb) {
           var rowNumFetched = 2;
@@ -2874,9 +2787,9 @@ describe('87. fetchBlobAsBuffer1.js', function() {
                   should.not.exist(err);
                   should.strictEqual(row.length, 2);
                   var resultVal = row[0][1];
-                  compareClientFetchResult(err, resultVal, specialStr_1, content_1, contentLength_1, false);
+                  compareClientFetchResult(err, resultVal, specialStr_1, content_1, contentLength_1);
                   resultVal = row[1][1];
-                  compareClientFetchResult(err, resultVal, specialStr_2, content_2, contentLength_2, false);
+                  compareClientFetchResult(err, resultVal, specialStr_2, content_2, contentLength_2);
                   oracledb.maxRows =maxRowsBak;
                   result.resultSet.close(function(err) {
                     should.not.exist(err);
@@ -2899,7 +2812,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id, content, cb, false);
+          insertIntoBlobTable1(id, content, cb);
         },
         function(cb) {
           connection.execute(
@@ -2925,7 +2838,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
               });
 
               lob.on('end', function() {
-                compareClientFetchResult(err, blobData, specialStr, content, contentLength, false);
+                compareClientFetchResult(err, blobData, specialStr, content, contentLength);
                 cb();
               });
             }

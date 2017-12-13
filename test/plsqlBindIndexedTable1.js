@@ -1034,9 +1034,7 @@ describe('43. plsqlBindIndexedTable1.js', function() {
       );
     });
 
-    // known bug
-    // The maximum safe integer in JavaScript is (2^53 - 1).
-    it.skip('43.4.5 negative case: large value', function(done) {
+    it('43.4.5 negative case: large value', function(done) {
       var bindvars = {
         p:  {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: [1, 2, 3], maxArraySize: 987654321}
       };
@@ -1044,7 +1042,11 @@ describe('43. plsqlBindIndexedTable1.js', function() {
         "BEGIN nodb_plsqlbindpack41.test2(:p); END;",
         bindvars,
         function(err) {
-          should.not.exist(err);
+          should.exist(err);
+          should.strictEqual(
+            err.message,
+            "DPI-1015: array size of 987654321 is too large"
+          );
           done();
         }
       );

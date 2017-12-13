@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, 2017, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -43,9 +43,9 @@ oracledb.getConnection(
     }
 
     connection.execute(
-      "BEGIN"
-    + "  OPEN :cursor FOR SELECT department_id, department_name FROM departments;"
-    + "END;",
+      `BEGIN
+         OPEN :cursor FOR SELECT department_id, department_name FROM departments;
+       END;`,
       {
         cursor:  { type: oracledb.CURSOR, dir : oracledb.BIND_OUT }
       },

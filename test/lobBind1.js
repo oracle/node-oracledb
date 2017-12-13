@@ -39,7 +39,6 @@ var should   = require('should');
 var async    = require('async');
 var dbConfig = require('./dbconfig.js');
 var assist   = require('./dataTypeAssist.js');
-var devnull  = require('./devnull');
 
 describe('71. lobBind1.js', function() {
 
@@ -287,7 +286,7 @@ describe('71. lobBind1.js', function() {
                 function(err) {
                   should.not.exist(err);
                   // console.log(result2);
-                  cb();
+                  lob.close(cb);
                 }
               );
             }
@@ -396,7 +395,7 @@ describe('71. lobBind1.js', function() {
                 { autoCommit: true },
                 function(err) {
                   should.not.exist(err);
-                  return cb();
+                  lob.close(cb);
                 }
               );
             }
@@ -451,7 +450,7 @@ describe('71. lobBind1.js', function() {
                 { autoCommit: true },
                 function(err) {
                   should.not.exist(err);
-                  return cb();
+                  lob.close(cb);
                 }
 
               );
@@ -657,15 +656,15 @@ describe('71. lobBind1.js', function() {
                     },
                     function verifyIN(callback) {
 
-                      lobin.pipe(devnull());
-
-                      lobin.on('error', function(err) {
+                      try {
+                        lobin.length;
+                      } catch (err) {
                         should.exist(err);
                         (err.message).should.startWith('NJS-022:');
                         // Error: NJS-022: invalid Lob
 
                         return callback();
-                      });
+                      }
 
                     }
                   ], function(err) {
@@ -793,11 +792,11 @@ describe('71. lobBind1.js', function() {
 
     }); // 71.1.8
 
-    it('71.1.9 Negative: BIND_INOUT, PL/SQL, String as bind IN Value', function(done) {
+    it('71.1.9 BIND_INOUT, PL/SQL, a String as the bind IN Value', function(done) {
 
       var seq = 9;
-      var inStr = "I love the sunshine today!",
-        outStr = "A new day has come.";
+      var inStr = "I love the sunshine today!";
+      var outStr = "A new day has come.";
 
       var proc = "CREATE OR REPLACE PROCEDURE nodb_proc_clob_inout3 \n" +
                  "  (p_num IN NUMBER, p_inout IN OUT CLOB) \n" +
@@ -821,11 +820,26 @@ describe('71. lobBind1.js', function() {
               io: { val: inStr, type: oracledb.CLOB, dir: oracledb.BIND_INOUT }
             },
             { autoCommit: true },
-            function(err) {
-              should.exist(err);
-              // NJS-011: encountered bind value and type mismatch in parameter 2
-              (err.message).should.startWith('NJS-011:');
-              cb();
+            function(err, result) {
+              should.not.exist(err);
+              should.exist(result);
+              var lobout = result.outBinds.io;
+
+              lobout.setEncoding("utf8");
+              var clobData = '';
+
+              lobout.on('data', function(chunk) {
+                clobData += chunk;
+              });
+
+              lobout.on('error',function(err) {
+                should.not.exist(err, "lob.on 'error' event!");
+              });
+
+              lobout.on('end', function() {
+                should.strictEqual(clobData, outStr);
+                return cb();
+              });
             }
           );
         },
@@ -974,6 +988,7 @@ describe('71. lobBind1.js', function() {
             { autoCommit: true },
             function(err) {
               should.not.exist(err);
+              if (lob) return lob.close(callback);
               callback();
             }
           );
@@ -1169,7 +1184,7 @@ describe('71. lobBind1.js', function() {
                 { autoCommit: true },
                 function(err) {
                   should.not.exist(err);
-                  cb();
+                  lob.close(cb);
                 }
               );
             }
@@ -1541,7 +1556,7 @@ describe('71. lobBind1.js', function() {
 
     }); // 71.2.8
 
-    it('71.2.9 Negative: BIND_INOUT, PL/SQL, Buffer as bind IN value', function(done) {
+    it('71.2.9 BIND_INOUT, PL/SQL, a Buffer as the bind IN value', function(done) {
 
       var seq = 9;
       var inBuf  = assist.createBuffer(10);
@@ -1573,12 +1588,32 @@ describe('71. lobBind1.js', function() {
             sql,
             bindvar,
             { autoCommit: true },
-            function(err) {
-              should.exist(err);
-              (err.message).should.startWith('NJS-011:');
-              // NJS-011: encountered bind value and type mismatch in parameter 2
+            function(err, result) {
+              should.not.exist(err);
+              should.exist(result);
+              var lob = result.outBinds.io;
+              should.exist(lob);
 
-              cb();
+              var blobData, totalLength = 0;
+              blobData = node6plus ? Buffer.alloc(0) : new Buffer(0);
+
+              lob.on('data', function(chunk) {
+                totalLength = totalLength + chunk.length;
+                blobData = Buffer.concat([blobData, chunk], totalLength);
+              });
+
+              lob.on('error', function(err) {
+                should.not.exist(err, "lob.on 'error' event.");
+              });
+
+              lob.on('end', function() {
+                fs.readFile(jpgFileName, function(err, originalData) {
+                  should.not.exist(err);
+                  should.strictEqual(totalLength, originalData.length);
+                  return cb();
+                });
+              });
+
             }
           );
         },

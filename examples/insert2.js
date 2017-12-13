@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -51,13 +51,13 @@ var dorelease = function(conn) {
 
 var dodrop = function (conn, cb) {
   conn.execute(
-    "BEGIN "
-  + "  EXECUTE IMMEDIATE 'DROP TABLE test'; "
-  + "  EXCEPTION WHEN OTHERS THEN "
-  + "  IF SQLCODE <> -942 THEN "
-  + "    RAISE; "
-  + "  END IF; "
-  + "END;",
+    `BEGIN
+       EXECUTE IMMEDIATE 'DROP TABLE test';
+       EXCEPTION WHEN OTHERS THEN
+       IF SQLCODE <> -942 THEN
+         RAISE;
+       END IF;
+     END;`,
     function(err)
     {
       if (err) {

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -35,7 +35,7 @@ DROP PACKAGE beachpkg;
 
 DROP TABLE j_purchaseorder;
 
-DROP TABLE j_purchaseorder_c;
+DROP TABLE j_purchaseorder_b;
 
 DROP TABLE dmlrupdtab;
 
@@ -48,8 +48,6 @@ DROP FUNCTION mydofetch;
 DROP TABLE myraw;
 
 DROP TABLE waveheight;
-
-DROP PROCEDURE lob_out;
 
 DROP PROCEDURE lob_in_out;
 

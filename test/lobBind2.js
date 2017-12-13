@@ -272,29 +272,34 @@ describe("72. lobBind2.js", function() {
 
     it("72.1.3 Negative - invalid type", function(done) {
 
-      connection.createLob('CLOB', function(err, lob) {
+      try {
+        connection.createLob('CLOB', function(err, lob) {
+          should.exist(err);
+          should.not.exist(lob);
+          done();
+        });
+      } catch (err) {
         should.exist(err);
         (err.message).should.startWith('NJS-006:');
         // NJS-006: invalid type for parameter 1
-
-        should.not.exist(lob);
-
         done();
-      });
-
+      }
     }); // 72.1.3
 
     it("72.1.4 Negative - invalid value", function(done) {
 
-      connection.createLob(oracledb.STRING, function(err, lob) {
+      try {
+        connection.createLob(oracledb.STRING, function(err, lob) {
+          should.exist(err);
+          should.not.exist(lob);
+          done();
+        });
+      } catch (err) {
         should.exist(err);
         (err.message).should.startWith('NJS-005:');
         // NJS-005: invalid value for parameter 1
-
-        should.not.exist(lob);
-
         done();
-      });
+      }
 
     }); // 72.1.4
 

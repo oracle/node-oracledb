@@ -19,7 +19,7 @@
  * See LICENSE.md for relevant licenses.
  *
  * NAME
- *   79. blobPlsqlBindAsBuffer_inout.js
+ *   79. blobPlsqlBindAsBuffer_bindinout.js
  *
  * DESCRIPTION
  *   Testing BLOB binding inout as Buffer.
@@ -41,11 +41,10 @@ var dbConfig = require('./dbconfig.js');
 var random   = require('./random.js');
 var assist   = require('./dataTypeAssist.js');
 
-describe('79. blobPlsqlBindAsBuffer_inout.js', function() {
+describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
   this.timeout(100000);
   var connection = null;
   var node6plus = false; // assume node runtime version is lower than 6
-  var client11gPlus = true; // assume instant client runtime version is greater than 11.2.0.4.0
   var insertID = 1; // assume id for insert into db starts from 1
 
   var proc_blob_in_tab = "BEGIN \n" +
@@ -95,10 +94,6 @@ describe('79. blobPlsqlBindAsBuffer_inout.js', function() {
           // Check whether node runtime version is >= 6 or not
           if ( process.versions["node"].substring (0, 1) >= "6")
             node6plus = true;
-          // Check whether instant client runtime version is smaller than 12.1.0.2
-          if(oracledb.oracleClientVersion < 1201000200)
-            client11gPlus = false;
-
           cb();
         });
       },
@@ -225,26 +220,19 @@ describe('79. blobPlsqlBindAsBuffer_inout.js', function() {
   };
 
   // execute plsql bind in out procedure, and verify the plsql bind out buffer
-  var plsqlBindInOut = function(sqlRun, bindVar, originalBuf, specialStr, case64KPlus, client11gPlus, callback) {
+  var plsqlBindInOut = function(sqlRun, bindVar, originalBuf, specialStr, callback) {
     connection.execute(
       sqlRun,
       bindVar,
       function(err, result) {
-        if(client11gPlus === false && case64KPlus === true){
-          should.exist(err);
-          // NJS-051: "maxSize" must be less than 65535
-          (err.message).should.startWith('NJS-051:');
-          callback();
+        should.not.exist(err);
+        var resultVal = result.outBinds.io;
+        if(originalBuf == 'EMPTY_BLOB' || originalBuf == null || originalBuf == undefined || originalBuf == "") {
+          should.strictEqual(resultVal, null);
         } else {
-          should.not.exist(err);
-          var resultVal = result.outBinds.io;
-          if(originalBuf == 'EMPTY_BLOB' || originalBuf == null || originalBuf == undefined || originalBuf == "") {
-            should.strictEqual(resultVal, null);
-          } else {
-            compareResultBufAndOriginal(resultVal, originalBuf, specialStr);
-          }
-          callback();
+          compareResultBufAndOriginal(resultVal, originalBuf, specialStr);
         }
+        callback();
       }
     );
   };
@@ -287,7 +275,7 @@ describe('79. blobPlsqlBindAsBuffer_inout.js', function() {
           executeSQL(blob_proc_inout_7911, cb);
         },
         function(cb) {
-          plsqlBindInOut(sqlRun_7911, bindVar, "EMPTY_BLOB", null, false, client11gPlus, cb);
+          plsqlBindInOut(sqlRun_7911, bindVar, "EMPTY_BLOB", null, cb);
         },
         function(cb) {
           executeSQL(proc_drop_7911, cb);
@@ -307,7 +295,7 @@ describe('79. blobPlsqlBindAsBuffer_inout.js', function() {
           executeSQL(blob_proc_inout_7911, cb);
         },
         function(cb) {
-          plsqlBindInOut(sqlRun_7911, bindVar, "EMPTY_BLOB", null, false, client11gPlus, cb);
+          plsqlBindInOut(sqlRun_7911, bindVar, "EMPTY_BLOB", null, cb);
         },
         function(cb) {
           executeSQL(proc_drop_7911, cb);
@@ -327,7 +315,7 @@ describe('79. blobPlsqlBindAsBuffer_inout.js', function() {
           executeSQL(blob_proc_inout_7911, cb);
         },
         function(cb) {
-          plsqlBindInOut(sqlRun_7911, bindVar, "EMPTY_BLOB", null, false, client11gPlus, cb);
+          plsqlBindInOut(sqlRun_7911, bindVar, "EMPTY_BLOB", null, cb);
         },
         function(cb) {
           executeSQL(proc_drop_7911, cb);
@@ -342,7 +330,7 @@ describe('79. blobPlsqlBindAsBuffer_inout.js', function() {
         io: { type: oracledb.BUFFER, dir: oracledb.BIND_INOUT }
       };
 
-      plsqlBindInOut(sqlRun, bindVar, null, null, false, client11gPlus, done);
+      plsqlBindInOut(sqlRun, bindVar, null, null, done);
     }); // 79.1.4
 
     it('79.1.5 works with null and maxSize set to 1', function(done) {
@@ -352,7 +340,7 @@ describe('79. blobPlsqlBindAsBuffer_inout.js', function() {
         io: { type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: 1 }
       };
 
-      plsqlBindInOut(sqlRun, bindVar, null, null, false, client11gPlus, done);
+      plsqlBindInOut(sqlRun, bindVar, null, null, done);
     }); // 79.1.5
 
     it('79.1.6 works with null and maxSize set to (64K - 1)', function(done) {
@@ -362,7 +350,7 @@ describe('79. blobPlsqlBindAsBuffer_inout.js', function() {
         io: { type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: 65535 }
       };
 
-      plsqlBindInOut(sqlRun, bindVar, null, null, false, client11gPlus, done);
+      plsqlBindInOut(sqlRun, bindVar, null, null, done);
     }); // 79.1.6
 
     it('79.1.7 works with empty buffer', function(done) {
@@ -373,7 +361,7 @@ describe('79. blobPlsqlBindAsBuffer_inout.js', function() {
         io: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT }
       };
 
-      plsqlBindInOut(sqlRun, bindVar, bufferStr, null, false, client11gPlus, done);
+      plsqlBindInOut(sqlRun, bindVar, bufferStr, null, done);
     }); // 79.1.7
 
     it('79.1.8 works with empty buffer and maxSize set to 1', function(done) {
@@ -384,7 +372,7 @@ describe('79. blobPlsqlBindAsBuffer_inout.js', function() {
         io: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: 1 }
       };
 
-      plsqlBindInOut(sqlRun, bindVar, bufferStr, null, false, client11gPlus, done);
+      plsqlBindInOut(sqlRun, bindVar, bufferStr, null, done);
     }); // 79.1.8
 
     it('79.1.9 works with empty buffer and maxSize set to (64K - 1)', function(done) {
@@ -395,7 +383,7 @@ describe('79. blobPlsqlBindAsBuffer_inout.js', function() {
         io: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: 65535 }
       };
 
-      plsqlBindInOut(sqlRun, bindVar, bufferStr, null, false, client11gPlus, done);
+      plsqlBindInOut(sqlRun, bindVar, bufferStr, null, done);
     }); // 79.1.9
 
     it('79.1.10 works with undefined', function(done) {
@@ -405,7 +393,7 @@ describe('79. blobPlsqlBindAsBuffer_inout.js', function() {
         io: { val: undefined, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT }
       };
 
-      plsqlBindInOut(sqlRun, bindVar, undefined, null, false, client11gPlus, done);
+      plsqlBindInOut(sqlRun, bindVar, undefined, null, done);
     }); // 79.1.7
 
     it('79.1.11 works with undefined and maxSize set to 1', function(done) {
@@ -415,7 +403,7 @@ describe('79. blobPlsqlBindAsBuffer_inout.js', function() {
         io: { val: undefined, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: 1 }
       };
 
-      plsqlBindInOut(sqlRun, bindVar, undefined, null, false, client11gPlus, done);
+      plsqlBindInOut(sqlRun, bindVar, undefined, null, done);
     }); // 79.1.11
 
     it('79.1.12 works with undefined and maxSize set to (64K - 1)', function(done) {
@@ -425,7 +413,7 @@ describe('79. blobPlsqlBindAsBuffer_inout.js', function() {
         io: { val: undefined, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: 65535 }
       };
 
-      plsqlBindInOut(sqlRun, bindVar, undefined, null, false, client11gPlus, done);
+      plsqlBindInOut(sqlRun, bindVar, undefined, null, done);
     }); // 79.1.12
 
     it('79.1.13 works with NaN', function(done) {
@@ -477,7 +465,7 @@ describe('79. blobPlsqlBindAsBuffer_inout.js', function() {
         io: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: size }
       };
 
-      plsqlBindInOut(sqlRun, bindVar, bufferStr, specialStr, false, client11gPlus, done);
+      plsqlBindInOut(sqlRun, bindVar, bufferStr, specialStr, done);
     }); // 79.1.15
 
     it('79.1.16 works with buffer size (64K - 1)', function(done) {
@@ -491,7 +479,7 @@ describe('79. blobPlsqlBindAsBuffer_inout.js', function() {
         io: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: size }
       };
 
-      plsqlBindInOut(sqlRun, bindVar, bufferStr, specialStr, false, client11gPlus, done);
+      plsqlBindInOut(sqlRun, bindVar, bufferStr, specialStr, done);
     }); // 79.1.16
 
     it('79.1.17 works with buffer size (64K + 1)', function(done) {
@@ -505,7 +493,7 @@ describe('79. blobPlsqlBindAsBuffer_inout.js', function() {
         io: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: size }
       };
 
-      plsqlBindInOut(sqlRun, bindVar, bufferStr, specialStr, true, client11gPlus, done);
+      plsqlBindInOut(sqlRun, bindVar, bufferStr, specialStr, done);
     }); // 79.1.17
 
     it('79.1.18 works with buffer size (1MB + 1)', function(done) {
@@ -519,7 +507,7 @@ describe('79. blobPlsqlBindAsBuffer_inout.js', function() {
         io: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: size }
       };
 
-      plsqlBindInOut(sqlRun, bindVar, bufferStr, specialStr, true, client11gPlus, done);
+      plsqlBindInOut(sqlRun, bindVar, bufferStr, specialStr, done);
     }); // 79.1.18
 
     it('79.1.19 works with bind value and type mismatch', function(done) {
@@ -573,8 +561,8 @@ describe('79. blobPlsqlBindAsBuffer_inout.js', function() {
         bindVar,
         function(err) {
           should.exist(err);
-          // NJS-012: encountered invalid bind datatype in parameter 2
-          (err.message).should.startWith('NJS-012:');
+          // NJS-011: encountered bind value and type mismatch
+          (err.message).should.startWith('NJS-011:');
           done();
         }
       );
@@ -605,7 +593,7 @@ describe('79. blobPlsqlBindAsBuffer_inout.js', function() {
         },
         function(cb) {
           var comparedBuf = node6plus ? Buffer.from(specialStr, "utf-8") : new Buffer(specialStr, "utf-8");
-          plsqlBindInOut(sqlRun_79125, bindVar, comparedBuf, specialStr, false, client11gPlus, cb);
+          plsqlBindInOut(sqlRun_79125, bindVar, comparedBuf, specialStr, cb);
         },
         function(cb) {
           executeSQL(proc_drop_79125, cb);
@@ -643,7 +631,7 @@ describe('79. blobPlsqlBindAsBuffer_inout.js', function() {
           executeSQL(proc_79125, cb);
         },
         function(cb) {
-          plsqlBindInOut(sqlRun_79125, bindVar, bufferStr_1, specialStr_1, false, client11gPlus, cb);
+          plsqlBindInOut(sqlRun_79125, bindVar, bufferStr_1, specialStr_1, cb);
         },
         function(cb) {
           executeSQL(proc_drop_79125, cb);
@@ -651,7 +639,7 @@ describe('79. blobPlsqlBindAsBuffer_inout.js', function() {
       ], done);
     }); // 79.1.23
 
-    it('79.1.24 named binding: maxSize smaller than buffer size ( < 32K )', function(done) {
+    it.skip('79.1.24 named binding: maxSize smaller than buffer size ( < 32K )', function(done) {
       var sequence = insertID++;
       var size = 5000;
       var specialStr = "79.1.24";
@@ -698,7 +686,6 @@ describe('79. blobPlsqlBindAsBuffer_inout.js', function() {
     }); // 79.1.25
 
     it('79.1.26 named binding: maxSize smaller than buffer size ( > 64K )', function(done) {
-      if (!client11gPlus) this.skip();
       var sequence = insertID++;
       var size = 65539;
       var specialStr = "79.1.26";
@@ -721,7 +708,7 @@ describe('79. blobPlsqlBindAsBuffer_inout.js', function() {
       );
     }); // 79.1.26
 
-    it('79.1.27 positional binding: maxSize smaller than buffer size ( < 32K )', function(done) {
+    it.skip('79.1.27 positional binding: maxSize smaller than buffer size ( < 32K )', function(done) {
       var sequence = insertID++;
       var size = 500;
       var specialStr = "79.1.27";
@@ -762,7 +749,6 @@ describe('79. blobPlsqlBindAsBuffer_inout.js', function() {
     }); // 79.1.28
 
     it('79.1.29 positional binding: maxSize smaller than buffer size ( > 64K )', function(done) {
-      if (!client11gPlus) this.skip();
       var sequence = insertID++;
       var size = 65539;
       var specialStr = "79.1.29";
@@ -797,9 +783,7 @@ describe('79. blobPlsqlBindAsBuffer_inout.js', function() {
         sqlRun,
         bindVar,
         function(err) {
-          should.exist(err);
-          // NJS-016: buffer is too small for OUT binds
-          (err.message).should.startWith('NJS-016');
+          should.not.exist(err);
           done();
         }
       );
@@ -845,7 +829,7 @@ describe('79. blobPlsqlBindAsBuffer_inout.js', function() {
           executeSQL(blob_proc_inout_7921, cb);
         },
         function(cb) {
-          plsqlBindInOut(sqlRun_7921, bindVar, "EMPTY_BLOB", null, false, client11gPlus, cb);
+          plsqlBindInOut(sqlRun_7921, bindVar, "EMPTY_BLOB", null, cb);
         },
         function(cb) {
           executeSQL(proc_drop_7921, cb);
@@ -865,7 +849,7 @@ describe('79. blobPlsqlBindAsBuffer_inout.js', function() {
           executeSQL(blob_proc_inout_7921, cb);
         },
         function(cb) {
-          plsqlBindInOut(sqlRun_7921, bindVar, "EMPTY_BLOB", null, false, client11gPlus, cb);
+          plsqlBindInOut(sqlRun_7921, bindVar, "EMPTY_BLOB", null, cb);
         },
         function(cb) {
           executeSQL(proc_drop_7921, cb);
@@ -885,7 +869,7 @@ describe('79. blobPlsqlBindAsBuffer_inout.js', function() {
           executeSQL(blob_proc_inout_7921, cb);
         },
         function(cb) {
-          plsqlBindInOut(sqlRun_7921, bindVar, "EMPTY_BLOB", null, false, client11gPlus, cb);
+          plsqlBindInOut(sqlRun_7921, bindVar, "EMPTY_BLOB", null, cb);
         },
         function(cb) {
           executeSQL(proc_drop_7921, cb);
@@ -900,7 +884,7 @@ describe('79. blobPlsqlBindAsBuffer_inout.js', function() {
         io: { type: oracledb.BUFFER, dir: oracledb.BIND_INOUT }
       };
 
-      plsqlBindInOut(sqlRun, bindVar, null, null, false, client11gPlus, done);
+      plsqlBindInOut(sqlRun, bindVar, null, null, done);
     }); // 79.2.4
 
     it('79.2.5 works with null and maxSize set to 1', function(done) {
@@ -910,7 +894,7 @@ describe('79. blobPlsqlBindAsBuffer_inout.js', function() {
         io: { type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: 1 }
       };
 
-      plsqlBindInOut(sqlRun, bindVar, null, null, false, client11gPlus, done);
+      plsqlBindInOut(sqlRun, bindVar, null, null, done);
     }); // 79.2.5
 
     it('79.2.6 works with null and maxSize set to (64K - 1)', function(done) {
@@ -920,7 +904,7 @@ describe('79. blobPlsqlBindAsBuffer_inout.js', function() {
         io: { type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: 65535 }
       };
 
-      plsqlBindInOut(sqlRun, bindVar, null, null, false, client11gPlus, done);
+      plsqlBindInOut(sqlRun, bindVar, null, null, done);
     }); // 79.2.6
 
     it('79.2.7 works with empty buffer', function(done) {
@@ -931,7 +915,7 @@ describe('79. blobPlsqlBindAsBuffer_inout.js', function() {
         io: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT }
       };
 
-      plsqlBindInOut(sqlRun, bindVar, bufferStr, null, false, client11gPlus, done);
+      plsqlBindInOut(sqlRun, bindVar, bufferStr, null, done);
     }); // 79.2.7
 
     it('79.2.8 works with empty buffer and maxSize set to 1', function(done) {
@@ -942,7 +926,7 @@ describe('79. blobPlsqlBindAsBuffer_inout.js', function() {
         io: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: 1 }
       };
 
-      plsqlBindInOut(sqlRun, bindVar, bufferStr, null, false, client11gPlus, done);
+      plsqlBindInOut(sqlRun, bindVar, bufferStr, null, done);
     }); // 79.2.8
 
     it('79.2.9 works with empty buffer and maxSize set to (64K - 1)', function(done) {
@@ -953,7 +937,7 @@ describe('79. blobPlsqlBindAsBuffer_inout.js', function() {
         io: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: 65535 }
       };
 
-      plsqlBindInOut(sqlRun, bindVar, bufferStr, null, false, client11gPlus, done);
+      plsqlBindInOut(sqlRun, bindVar, bufferStr, null, done);
     }); // 79.2.9
 
     it('79.2.10 works with undefined', function(done) {
@@ -963,7 +947,7 @@ describe('79. blobPlsqlBindAsBuffer_inout.js', function() {
         io: { val: undefined, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT }
       };
 
-      plsqlBindInOut(sqlRun, bindVar, undefined, null, false, client11gPlus, done);
+      plsqlBindInOut(sqlRun, bindVar, undefined, null, done);
     }); // 79.2.7
 
     it('79.2.11 works with undefined and maxSize set to 1', function(done) {
@@ -973,7 +957,7 @@ describe('79. blobPlsqlBindAsBuffer_inout.js', function() {
         io: { val: undefined, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: 1 }
       };
 
-      plsqlBindInOut(sqlRun, bindVar, undefined, null, false, client11gPlus, done);
+      plsqlBindInOut(sqlRun, bindVar, undefined, null, done);
     }); // 79.2.11
 
     it('79.2.12 works with undefined and maxSize set to (64K - 1)', function(done) {
@@ -983,7 +967,7 @@ describe('79. blobPlsqlBindAsBuffer_inout.js', function() {
         io: { val: undefined, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: 65535 }
       };
 
-      plsqlBindInOut(sqlRun, bindVar, undefined, null, false, client11gPlus, done);
+      plsqlBindInOut(sqlRun, bindVar, undefined, null, done);
     }); // 79.2.12
 
     it('79.2.13 works with NaN', function(done) {
@@ -1035,7 +1019,7 @@ describe('79. blobPlsqlBindAsBuffer_inout.js', function() {
         io: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: size }
       };
 
-      plsqlBindInOut(sqlRun, bindVar, bufferStr, specialStr, false, client11gPlus, done);
+      plsqlBindInOut(sqlRun, bindVar, bufferStr, specialStr, done);
     }); // 79.2.15
 
     it('79.2.16 works with buffer size 32K', function(done) {
@@ -1077,8 +1061,8 @@ describe('79. blobPlsqlBindAsBuffer_inout.js', function() {
         bindVar,
         function(err) {
           should.exist(err);
-          // ORA-01460: unimplemented or unreasonable conversion requested
-          (err.message).should.startWith('ORA-01460');
+          // DPI-1019: buffer size is too small
+          (err.message).should.startWith('DPI-1019:');
           done();
         }
       );
@@ -1096,8 +1080,8 @@ describe('79. blobPlsqlBindAsBuffer_inout.js', function() {
         bindVar,
         function(err) {
           should.exist(err);
-          // NJS-012: encountered invalid bind datatype in parameter 2
-          (err.message).should.startWith('NJS-012:');
+          // NJS-011: encountered bind value and type mismatch
+          (err.message).should.startWith('NJS-011:');
           done();
         }
       );
@@ -1128,7 +1112,7 @@ describe('79. blobPlsqlBindAsBuffer_inout.js', function() {
         },
         function(cb) {
           var comparedBuf = node6plus ? Buffer.from(specialStr, "utf-8") : new Buffer(specialStr, "utf-8");
-          plsqlBindInOut(sqlRun_79219, bindVar, comparedBuf, specialStr, false, client11gPlus, cb);
+          plsqlBindInOut(sqlRun_79219, bindVar, comparedBuf, specialStr, cb);
         },
         function(cb) {
           executeSQL(proc_drop_79219, cb);
@@ -1166,7 +1150,7 @@ describe('79. blobPlsqlBindAsBuffer_inout.js', function() {
           executeSQL(proc_79220, cb);
         },
         function(cb) {
-          plsqlBindInOut(sqlRun_79220, bindVar, bufferStr_1, specialStr_1, false, client11gPlus, cb);
+          plsqlBindInOut(sqlRun_79220, bindVar, bufferStr_1, specialStr_1, cb);
         },
         function(cb) {
           executeSQL(proc_drop_79220, cb);
@@ -1189,9 +1173,7 @@ describe('79. blobPlsqlBindAsBuffer_inout.js', function() {
         sqlRun,
         bindVar,
         function(err) {
-          should.exist(err);
-          // ORA-01460: unimplemented or unreasonable conversion requested
-          (err.message).should.startWith('ORA-01460:');
+          should.not.exist(err);
           done();
         }
       );
@@ -1218,24 +1200,17 @@ describe('79. blobPlsqlBindAsBuffer_inout.js', function() {
     }); // after
 
     // execute plsql bind in out procedure, and verify the plsql bind out buffer
-    var plsqlBindInOut = function(sqlRun, bindVar, originalBuf1, specialStr1, originalBuf2, specialStr2, case64KPlus, client11gPlus, callback) {
+    var plsqlBindInOut = function(sqlRun, bindVar, originalBuf1, specialStr1, originalBuf2, specialStr2, callback) {
       connection.execute(
         sqlRun,
         bindVar,
         function(err, result) {
-          if(client11gPlus === false && case64KPlus === true){
-            should.exist(err);
-            // NJS-051: "maxSize" must be less than 65535
-            (err.message).should.startWith('NJS-051:');
-            callback();
-          } else {
-            should.not.exist(err);
-            var resultVal = result.outBinds.lob_1;
-            compareResultBufAndOriginal(resultVal, originalBuf1, specialStr1);
-            resultVal = result.outBinds.lob_2;
-            compareResultBufAndOriginal(resultVal, originalBuf2, specialStr2);
-            callback();
-          }
+          should.not.exist(err);
+          var resultVal = result.outBinds.lob_1;
+          compareResultBufAndOriginal(resultVal, originalBuf1, specialStr1);
+          resultVal = result.outBinds.lob_2;
+          compareResultBufAndOriginal(resultVal, originalBuf2, specialStr2);
+          callback();
         }
       );
     };
@@ -1316,7 +1291,7 @@ describe('79. blobPlsqlBindAsBuffer_inout.js', function() {
         lob_2: { val: bufferStr_2, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: size_2 }
       };
 
-      plsqlBindInOut(sqlRun, bindVar, bufferStr_1, specialStr_1, bufferStr_2, specialStr_2, false, client11gPlus, done);
+      plsqlBindInOut(sqlRun, bindVar, bufferStr_1, specialStr_1, bufferStr_2, specialStr_2, done);
     }); // 79.3.2
 
     it('79.3.3 bind two buffers, one > (64K - 1)', function(done) {
@@ -1335,7 +1310,7 @@ describe('79. blobPlsqlBindAsBuffer_inout.js', function() {
         lob_2: { val: bufferStr_2, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: size_2 }
       };
 
-      plsqlBindInOut(sqlRun, bindVar, bufferStr_1, specialStr_1, bufferStr_2, specialStr_2, true, client11gPlus, done);
+      plsqlBindInOut(sqlRun, bindVar, bufferStr_1, specialStr_1, bufferStr_2, specialStr_2, done);
     }); // 79.3.3
 
   }); // 79.3

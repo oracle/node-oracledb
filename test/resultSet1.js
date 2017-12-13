@@ -116,7 +116,7 @@ describe('12. resultSet1.js', function() {
       connection.execute(
         "SELECT employees_name FROM nodb_rs1_emp",
         [],
-        { resultSet: false, prefetchRows: 100, maxRows: 1000 },
+        { resultSet: false, fetchArraySize: 100, maxRows: 1000 },
         function(err, result) {
           should.not.exist(err);
 
@@ -135,49 +135,44 @@ describe('12. resultSet1.js', function() {
       connection.execute(
         "SELECT employees_name FROM nodb_rs1_emp",
         [],
-        { resultSet: true, prefetchRows: 100, maxRows: 1000 },
+        { resultSet: true, fetchArraySize: 100, maxRows: 1000 },
         function(err, result) {
           should.not.exist(err);
 
           should.not.exist(result.rows);
           should.exist(result.resultSet);
-          done();
+          result.resultSet.close(done);
         }
       );
     });
 
-    it('12.1.3 when resultSet option = 0, it behaves like false', function(done) {
+    it('12.1.3 negative - 0', function(done) {
       connection.should.be.ok();
 
       connection.execute(
         "SELECT employees_name FROM nodb_rs1_emp",
         [],
-        { resultSet: 0, prefetchRows: 100, maxRows: 1000 },
+        { resultSet: 0, fetchArraySize: 100, maxRows: 1000 },
         function(err, result) {
-          should.not.exist(err);
-
-          should.exist(result.rows);
-          result.rows.length.should.be.exactly(rowsAmount);
-          // console.log(result.rows);
-          should.not.exist(result.resultSet);
+          should.not.exist(result);
+          should.exist(err);
+          should.strictEqual(err.message, "NJS-007: invalid value for \"resultSet\" in parameter 3");
           done();
         }
       );
     });
 
-    it('12.1.4 when resultSet option = null, it behaves like false',function(done) {
+    it('12.1.4 negative - null',function(done) {
       connection.should.be.ok();
 
       connection.execute(
         "SELECT employees_name FROM nodb_rs1_emp",
         [],
-        { resultSet: null, prefetchRows: 100, maxRows: 1000 },
+        { resultSet: null, fetchArraySize: 100, maxRows: 1000 },
         function(err, result) {
-          should.not.exist(err);
-
-          should.exist(result.rows);
-          result.rows.length.should.be.exactly(rowsAmount);
-          should.not.exist(result.resultSet);
+          should.not.exist(result);
+          should.exist(err);
+          should.strictEqual(err.message, "NJS-007: invalid value for \"resultSet\" in parameter 3");
           done();
         }
       );
@@ -189,7 +184,7 @@ describe('12. resultSet1.js', function() {
       connection.execute(
         "SELECT employees_name FROM nodb_rs1_emp",
         [],
-        { resultSet: undefined, prefetchRows: 100, maxRows: 1000 },
+        { resultSet: undefined, fetchArraySize: 100, maxRows: 1000 },
         function(err, result) {
           should.not.exist(err);
 
@@ -201,70 +196,65 @@ describe('12. resultSet1.js', function() {
       );
     });
 
-    it('12.1.6 when resultSet option = NaN, it behaves like false', function(done) {
+    it('12.1.6 negative - NaN', function(done) {
       connection.should.be.ok();
 
       connection.execute(
         "SELECT employees_name FROM nodb_rs1_emp",
         [],
-        { resultSet: NaN, prefetchRows: 100, maxRows: 1000 },
+        { resultSet: NaN, fetchArraySize: 100, maxRows: 1000 },
         function(err, result) {
-          should.not.exist(err);
-
-          should.exist(result.rows);
-          result.rows.length.should.be.exactly(rowsAmount);
-          should.not.exist(result.resultSet);
+          should.not.exist(result);
+          should.exist(err);
+          should.strictEqual(err.message, "NJS-007: invalid value for \"resultSet\" in parameter 3");
           done();
         }
       );
     });
 
-    it('12.1.7 when resultSet option = 1, it behaves like true', function(done) {
+    it('12.1.7 negative - 1', function(done) {
       connection.should.be.ok();
 
       connection.execute(
         "SELECT employees_name FROM nodb_rs1_emp",
         [],
-        { resultSet: 1, prefetchRows: 100, maxRows: 1000 },
+        { resultSet: 1, fetchArraySize: 100, maxRows: 1000 },
         function(err, result) {
-          should.not.exist(err);
-
-          should.not.exist(result.rows);
-          should.exist(result.resultSet);
+          should.not.exist(result);
+          should.exist(err);
+          should.strictEqual(err.message, "NJS-007: invalid value for \"resultSet\" in parameter 3");
           done();
         }
       );
     });
 
-    it('12.1.8 when resultSet option = -1, it behaves like true', function(done) {
+    it('12.1.8 negative - (-1)', function(done) {
       connection.should.be.ok();
 
       connection.execute(
         "SELECT employees_name FROM nodb_rs1_emp",
         [],
-        { resultSet: -1, prefetchRows: 100, maxRows: 1000 },
+        { resultSet: -1, fetchArraySize: 100, maxRows: 1000 },
         function(err, result) {
-          should.not.exist(err);
-
-          should.not.exist(result.rows);
-          should.exist(result.resultSet);
+          should.not.exist(result);
+          should.exist(err);
+          should.strictEqual(err.message, "NJS-007: invalid value for \"resultSet\" in parameter 3");
           done();
         }
       );
     });
 
-    it('12.1.9 when resultSet option is a random string, it behaves like true', function(done) {
+    it('12.1.9 negative - random string', function(done) {
       connection.should.be.ok();
 
       connection.execute(
         "SELECT employees_name FROM nodb_rs1_emp",
         [],
-        { resultSet: 'foo', prefetchRows: 100, maxRows: 1000 },
+        { resultSet: 'foo', fetchArraySize: 100, maxRows: 1000 },
         function(err, result) {
-          should.not.exist(err);
-
-          should.not.exist(result.rows);
-          should.exist(result.resultSet);
+          should.not.exist(result);
+          should.exist(err);
+          should.strictEqual(err.message, "NJS-007: invalid value for \"resultSet\" in parameter 3");
           done();
         }
       );
@@ -272,79 +262,82 @@ describe('12. resultSet1.js', function() {
 
   });
 
-  describe('12.2 Testing prefetchRows option', function() {
-    it('12.2.1 cannot set prefetchRows to be a negative value', function(done) {
+  describe('12.2 Testing fetchArraySize option', function() {
+    it('12.2.1 negative - negative value', function(done) {
       connection.should.be.ok();
 
       connection.execute(
         "SELECT employees_name FROM nodb_rs1_emp",
         [],
-        { resultSet: true, prefetchRows: -10, maxRows: 1000 },
+        { resultSet: true, fetchArraySize: -10, maxRows: 1000 },
         function(err) {
           should.exist(err);
           (err.message).should.startWith('NJS-007:');
-          // NJS-007: invalid value for "prefetchRows"
+          // NJS-007: invalid value for "fetchArraySize"
           done();
         }
       );
     });
 
-    it('12.2.2 cannot set prefetchRows to be a random string', function(done) {
+    it('12.2.2 negative - random string', function(done) {
       connection.should.be.ok();
 
       connection.execute(
         "SELECT employees_name FROM nodb_rs1_emp",
         [],
-        { resultSet: true, prefetchRows: 'bar', maxRows: 1000 },
+        { resultSet: true, fetchArraySize: 'bar', maxRows: 1000 },
         function(err) {
           should.exist(err);
           (err.message).should.startWith('NJS-008:');
-          // NJS-008: invalid type for "prefetchRows"
+          // NJS-008: invalid type for "fetchArraySize"
           done();
         }
       );
     });
 
-    it('12.2.3 cannot set prefetchRows to be NaN', function(done) {
+    it('12.2.3 negative - NaN', function(done) {
       connection.should.be.ok();
 
       connection.execute(
         "SELECT employees_name FROM nodb_rs1_emp",
         [],
-        { resultSet: true, prefetchRows: NaN, maxRows: 1000 },
+        { resultSet: true, fetchArraySize: NaN, maxRows: 1000 },
         function(err) {
           should.exist(err);
           (err.message).should.startWith('NJS-007:');
-          // NJS-007: invalid value for "prefetchRows"
+          // NJS-007: invalid value for "fetchArraySize"
           done();
         }
       );
     });
 
-    it('12.2.4 prefetchRows can be set to null', function(done) {
+    it('12.2.4 negative - null', function(done) {
       connection.should.be.ok();
 
       connection.execute(
         "SELECT employees_name FROM nodb_rs1_emp",
         [],
-        { resultSet: true, prefetchRows: null, maxRows: 1000 },
-        function(err) {
-          should.not.exist(err);
-
+        { resultSet: true, fetchArraySize: null, maxRows: 1000 },
+        function(err, result) {
+          should.not.exist(result);
+          should.exist(err);
+          should.strictEqual(err.message, "NJS-007: invalid value for \"fetchArraySize\" in parameter 3");
           done();
         }
       );
     });
 
-    it('12.2.5 prefetchRows can be set to 0', function(done) {
+    it('12.2.5 negative - zero value', function(done) {
       connection.should.be.ok();
 
       connection.execute(
         "SELECT employees_name FROM nodb_rs1_emp",
         [],
-        { resultSet: true, prefetchRows: 0, maxRows: 1000 },
-        function(err) {
-          should.not.exist(err);
+        { resultSet: true, fetchArraySize: 0, maxRows: 1000 },
+        function(err, result) {
+          should.not.exist(result);
+          should.exist(err);
+          should.strictEqual(err.message, "NJS-007: invalid value for \"fetchArraySize\" in parameter 3");
           done();
         }
       );
@@ -361,7 +354,7 @@ describe('12. resultSet1.js', function() {
       connection.execute(
         "SELECT employees_name FROM nodb_rs1_emp",
         [],
-        { resultSet: true, prefetchRows: 100 },
+        { resultSet: true, fetchArraySize: 100 },
         function(err, result) {
           should.not.exist(err);
           fetchRowFromRS(result.resultSet, nRows);
@@ -394,7 +387,7 @@ describe('12. resultSet1.js', function() {
       connection.execute(
         "SELECT employees_name FROM nodb_rs1_emp",
         [],
-        { resultSet: true, prefetchRows: 100 },
+        { resultSet: true, fetchArraySize: 100 },
         function(err, result) {
           should.not.exist(err);
           fetchRowFromRS(result.resultSet, nRows);
@@ -427,7 +420,7 @@ describe('12. resultSet1.js', function() {
       connection.execute(
         "SELECT employees_name FROM nodb_rs1_emp",
         [],
-        { resultSet: true, prefetchRows: 100 },
+        { resultSet: true, fetchArraySize: 100 },
         function(err, result) {
           should.not.exist(err);
           fetchRowFromRS(result.resultSet, nRows);
@@ -460,7 +453,7 @@ describe('12. resultSet1.js', function() {
       connection.execute(
         "SELECT employees_name FROM nodb_rs1_emp",
         [],
-        { resultSet: true, prefetchRows: 100 },
+        { resultSet: true, fetchArraySize: 100 },
         function(err, result) {
           should.not.exist(err);
           fetchRowFromRS(result.resultSet, nRows);
@@ -493,7 +486,7 @@ describe('12. resultSet1.js', function() {
       connection.execute(
         "SELECT employees_name FROM nodb_rs1_emp",
         [],
-        { resultSet: true, prefetchRows: 100, outFormat: oracledb.ARRAY },
+        { resultSet: true, fetchArraySize: 100, outFormat: oracledb.ARRAY },
         function(err, result) {
           should.not.exist(err);
           fetchRowFromRS(result.resultSet, nRows);
@@ -529,7 +522,7 @@ describe('12. resultSet1.js', function() {
       connection.execute(
         "SELECT employees_name FROM nodb_rs1_emp",
         [],
-        { resultSet: true, prefetchRows: 100, outFormat: oracledb.OBJECT },
+        { resultSet: true, fetchArraySize: 100, outFormat: oracledb.OBJECT },
         function(err, result) {
           should.not.exist(err);
           fetchRowFromRS(result.resultSet, nRows);
@@ -565,7 +558,7 @@ describe('12. resultSet1.js', function() {
       connection.execute(
         "SELECT employees_name FROM nodb_rs1_emp",
         [],
-        { resultSet: true, prefetchRows: 100 },
+        { resultSet: true, fetchArraySize: 100 },
         function(err, result) {
           should.not.exist(err);
           fetchRowFromRS(result.resultSet, nRows);
@@ -629,7 +622,7 @@ describe('12. resultSet1.js', function() {
       connection.execute(
         "SELECT employees_name FROM nodb_rs1_emp",
         [],
-        { resultSet: true, prefetchRows: 100 },
+        { resultSet: true, fetchArraySize: 100 },
         function(err, result) {
           should.not.exist(err);
           fetchRowFromRS(result.resultSet);
@@ -658,7 +651,7 @@ describe('12. resultSet1.js', function() {
       connection.execute(
         "SELECT employees_name FROM nodb_rs1_emp",
         [],
-        { resultSet: true, prefetchRows: 100 },
+        { resultSet: true, fetchArraySize: 100 },
         function(err, result) {
           should.not.exist(err);
           fetchRowFromRS(result.resultSet, nRows);
@@ -666,7 +659,9 @@ describe('12. resultSet1.js', function() {
       );
 
       function fetchRowFromRS(rs, numRows) {
-        rs.getRows(numRows, function(err) {
+        try {
+          rs.getRows(numRows, function() {});
+        } catch (err) {
           should.exist(err);
           (err.message).should.startWith('NJS-005:');
           // NJS-005: invalid value for parameter 1
@@ -674,7 +669,7 @@ describe('12. resultSet1.js', function() {
             should.not.exist(err);
             done();
           });
-        });
+        }
       }
     });
 
@@ -685,7 +680,7 @@ describe('12. resultSet1.js', function() {
       connection.execute(
         "SELECT employees_name FROM nodb_rs1_emp",
         [],
-        { resultSet: true, prefetchRows: 100 },
+        { resultSet: true, fetchArraySize: 100 },
         function(err, result) {
           should.not.exist(err);
           fetchRowFromRS(result.resultSet, nRows);
@@ -693,7 +688,9 @@ describe('12. resultSet1.js', function() {
       );
 
       function fetchRowFromRS(rs, numRows) {
-        rs.getRows(numRows, function(err) {
+        try {
+          rs.getRows(numRows, function() {});
+        } catch (err) {
           should.exist(err);
           (err.message).should.startWith('NJS-006:');
           // NJS-006: invalid type for parameter 1
@@ -701,7 +698,7 @@ describe('12. resultSet1.js', function() {
             should.not.exist(err);
             done();
           });
-        });
+        }
       }
     });
 
@@ -712,7 +709,7 @@ describe('12. resultSet1.js', function() {
       connection.execute(
         "SELECT employees_name FROM nodb_rs1_emp",
         [],
-        { resultSet: true, prefetchRows: 100 },
+        { resultSet: true, fetchArraySize: 100 },
         function(err, result) {
           should.not.exist(err);
           fetchRowFromRS(result.resultSet, nRows);
@@ -743,7 +740,7 @@ describe('12. resultSet1.js', function() {
       connection.execute(
         "SELECT employees_name FROM nodb_rs1_emp",
         [],
-        { resultSet: true, prefetchRows: 100 },
+        { resultSet: true, fetchArraySize: 100 },
         function(err, result) {
           should.not.exist(err);
           fetchRowFromRS(result.resultSet);
@@ -776,7 +773,7 @@ describe('12. resultSet1.js', function() {
       connection.execute(
         "SELECT employees_name FROM nodb_rs1_emp",
         [],
-        { resultSet: true, prefetchRows: 100, outFormat: oracledb.ARRAY },
+        { resultSet: true, fetchArraySize: 100, outFormat: oracledb.ARRAY },
         function(err, result) {
           should.not.exist(err);
           fetchRowFromRS(result.resultSet);
@@ -810,7 +807,7 @@ describe('12. resultSet1.js', function() {
       connection.execute(
         "SELECT employees_name FROM nodb_rs1_emp",
         [],
-        { resultSet: true, prefetchRows: 100, outFormat: oracledb.OBJECT },
+        { resultSet: true, fetchArraySize: 100, outFormat: oracledb.OBJECT },
         function(err, result) {
           should.not.exist(err);
           fetchRowFromRS(result.resultSet);
@@ -876,7 +873,7 @@ describe('12. resultSet1.js', function() {
       connection.execute(
         "SELECT employees_name FROM nodb_rs1_emp",
         [],
-        { resultSet: true, prefetchRows: 100 },
+        { resultSet: true, fetchArraySize: 100 },
         function(err, result) {
           should.not.exist(err);
           fetchRowFromRS(result.resultSet, nRows);
@@ -909,7 +906,7 @@ describe('12. resultSet1.js', function() {
       connection.execute(
         "SELECT employees_name FROM nodb_rs1_emp",
         [],
-        { resultSet: true, prefetchRows: 100 },
+        { resultSet: true, fetchArraySize: 100 },
         function(err, result) {
           should.not.exist(err);
           fetchRowFromRS(result.resultSet, nRows);
@@ -925,7 +922,7 @@ describe('12. resultSet1.js', function() {
             return fetchRowFromRS(rs, numRows);
           } else {
             accessCount.should.be.exactly(10);
-            done();
+            rs.close(done);
           }
         });
       }
@@ -939,7 +936,7 @@ describe('12. resultSet1.js', function() {
       connection.execute(
         "SELECT employees_name FROM nodb_rs1_emp",
         [],
-        { resultSet: true, prefetchRows: 100 },
+        { resultSet: true, fetchArraySize: 100 },
         function(err, result) {
           should.not.exist(err);
           fetchRowFromRS(result.resultSet, nRows);
@@ -975,7 +972,7 @@ describe('12. resultSet1.js', function() {
       connection.execute(
         "SELECT employees_name FROM nodb_rs1_emp",
         [],
-        { resultSet: true, prefetchRows: 100 },
+        { resultSet: true, fetchArraySize: 100 },
         function(err, result) {
           should.not.exist(err);
           fetchRowFromRS(result.resultSet, nRows);
@@ -1012,7 +1009,7 @@ describe('12. resultSet1.js', function() {
           connection.execute(
             "SELECT employees_name FROM nodb_rs1_emp",
             [],
-            { resultSet: true, prefetchRows: 100 },
+            { resultSet: true, fetchArraySize: 100 },
             function(err, result) {
               should.not.exist(err);
               fetchRowFromRS(result.resultSet, nRows, callback);
@@ -1024,7 +1021,7 @@ describe('12. resultSet1.js', function() {
           connection.execute(
             "SELECT * FROM nodb_rs1_emp",
             [],
-            { resultSet: true, prefetchRows: 100 },
+            { resultSet: true, fetchArraySize: 100 },
             function(err, result) {
               should.not.exist(err);
               fetchRowFromRS(result.resultSet, nRows, callback);
@@ -1114,7 +1111,7 @@ describe('12. resultSet1.js', function() {
               for(var i = 0; i < columnsAmount; i++) {
                 (result.resultSet.metaData[i].name).should.be.exactly('C' + i);
               }
-              callback();
+              result.resultSet.close(callback);
             }
           );
         },
@@ -1172,7 +1169,7 @@ describe('12. resultSet1.js', function() {
               // console.log(result.resultSet.metaData);
               (result.resultSet.metaData[0].name).should.be.exactly('c');
               (result.resultSet.metaData[1].name).should.be.exactly('C');
-              callback();
+              result.resultSet.close(callback);
             }
           );
         },
@@ -1230,7 +1227,7 @@ describe('12. resultSet1.js', function() {
               // console.log(result.resultSet.metaData);
               (result.resultSet.metaData[0].name).should.be.exactly("c'");
               (result.resultSet.metaData[1].name).should.be.exactly('c');
-              callback();
+              result.resultSet.close(callback);
             }
           );
         },
@@ -1288,7 +1285,7 @@ describe('12. resultSet1.js', function() {
               // console.log(result.resultSet.metaData);
               (result.resultSet.metaData[0].name).should.be.exactly("c_");
               (result.resultSet.metaData[1].name).should.be.exactly('c__');
-              callback();
+              result.resultSet.close(callback);
             }
           );
         },
@@ -1407,11 +1404,13 @@ describe('12. resultSet1.js', function() {
         { name: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT } },
         { resultSet: true},
         function(err) {
-          // NJS-018: invalid ResultSet
-          (err.message).should.startWith('NJS-018:');
+          should.strictEqual(
+            err.message,
+            'NJS-019: ResultSet cannot be returned for non-query statements'
+          );
           done();
         }
-      )
+      );
     });
 
     it('12.8.2 Negative: UPDATE BIND out with oracledb.CURSOR - bind by position', function(done) {
@@ -1421,11 +1420,13 @@ describe('12. resultSet1.js', function() {
         [ { type: oracledb.CURSOR, dir: oracledb.BIND_OUT } ],
         { resultSet: true},
         function(err) {
-          // NJS-018: invalid ResultSet
-          (err.message).should.startWith('NJS-018:');
+          should.strictEqual(
+            err.message,
+            'NJS-019: ResultSet cannot be returned for non-query statements'
+          );
           done();
         }
-      )
+      );
     });
 
     it('12.8.3 Negative: INSERT BIND out with oracledb.CURSOR - bind by name', function(done) {
@@ -1439,11 +1440,13 @@ describe('12. resultSet1.js', function() {
         },
         { resultSet: true},
         function(err) {
-          // NJS-018: invalid ResultSet
-          (err.message).should.startWith('NJS-018:');
+          should.strictEqual(
+            err.message,
+            'NJS-019: ResultSet cannot be returned for non-query statements'
+          );
           done();
         }
-      )
+      );
     });
 
     it('12.8.4 Negative: INSERT BIND out with oracledb.CURSOR - bind by position', function(done) {
@@ -1453,11 +1456,13 @@ describe('12. resultSet1.js', function() {
         [ 1001, 'hello', { type: oracledb.CURSOR, dir: oracledb.BIND_OUT } ],
         { resultSet: true},
         function(err) {
-          // NJS-018: invalid ResultSet
-          (err.message).should.startWith('NJS-018:');
+          should.strictEqual(
+            err.message,
+            'NJS-019: ResultSet cannot be returned for non-query statements'
+          );
           done();
         }
-      )
+      );
     });
   });
 

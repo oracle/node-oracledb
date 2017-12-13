@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -50,17 +50,17 @@ var dorelease = function(conn) {
 
 var docleanup = function (conn, cb) {
   conn.execute(
-    "BEGIN " +
-      "  DECLARE" +
-      "    e_table_exists EXCEPTION;" +
-      "    PRAGMA EXCEPTION_INIT(e_table_exists, -00942);" +
-      "  BEGIN" +
-      "    EXECUTE IMMEDIATE ('DROP TABLE datetest');" +
-      "  EXCEPTION" +
-      "    WHEN e_table_exists" +
-      "    THEN NULL;" +
-      "  END; " +
-      "END;",
+    `BEGIN
+       DECLARE
+         e_table_exists EXCEPTION;
+         PRAGMA EXCEPTION_INIT(e_table_exists, -00942);
+       BEGIN
+         EXECUTE IMMEDIATE ('DROP TABLE datetest');
+       EXCEPTION
+         WHEN e_table_exists
+         THEN NULL;
+       END;
+     END;`,
     function(err) {
       return cb(err, conn);
     });

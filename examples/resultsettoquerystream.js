@@ -43,8 +43,7 @@ oracledb.getConnection(
       sql,
       [],
       {
-        resultSet: true,
-        prefetchRows: 25
+        resultSet: true
       },
       function(err, result)
       {

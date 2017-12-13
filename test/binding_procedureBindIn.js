@@ -74,11 +74,11 @@ describe('93.binding_procedureBindIn.js', function() {
     async.series([
       function(cb) {
         var bindVar = { c: { val: content, type: bindType, dir: oracledb.BIND_IN } };
-        inBind(table_name, procPre, dbColType, bindVar, bindType, nullBind, cb);
+        inBind(table_name, proc_name, dbColType, bindVar, bindType, nullBind, cb);
       },
       function(cb) {
         var bindVar =[ { val: content, type: bindType, dir: oracledb.BIND_IN } ];
-        inBind(table_name, procPre, dbColType, bindVar, bindType, nullBind, cb);
+        inBind(table_name, proc_name, dbColType, bindVar, bindType, nullBind, cb);
       }
     ], callback);
   };

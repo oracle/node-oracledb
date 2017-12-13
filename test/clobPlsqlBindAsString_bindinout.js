@@ -44,7 +44,6 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
   this.timeout(100000);
 
   var connection = null;
-  var client11gPlus = true; // assume instant client runtime version is greater than 11.2.0.4.0
   var insertID = 1; // assume id for insert into db starts from 1
   var proc_clob_in_tab = "BEGIN \n" +
                          "    DECLARE \n" +
@@ -89,10 +88,6 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
         oracledb.getConnection(dbConfig, function(err, conn) {
           should.not.exist(err);
           connection = conn;
-          // Check whether instant client runtime version is smaller than 12.1.0.2
-          if(oracledb.oracleClientVersion < 1201000200)
-            client11gPlus = false;
-
           cb();
         });
       },
@@ -217,26 +212,19 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
   };
 
   // execute plsql bind in out procedure, and verify the plsql bind out string
-  var plsqlBindInOut = function(sqlRun, bindVar, originalStr, specialStr, case64KPlus, client11gPlus, callback) {
+  var plsqlBindInOut = function(sqlRun, bindVar, originalStr, specialStr, callback) {
     connection.execute(
       sqlRun,
       bindVar,
       function(err, result) {
-        if(client11gPlus === false && case64KPlus === true){
-          should.exist(err);
-          // NJS-051: "maxSize" must be less than 65535
-          (err.message).should.startWith('NJS-051:');
-          callback();
+        should.not.exist(err);
+        var resultVal = result.outBinds.io;
+        if(originalStr == 'EMPTY_CLOB' || originalStr == null || originalStr == "" || originalStr == undefined) {
+          should.strictEqual(resultVal, null);
         } else {
-          should.not.exist(err);
-          var resultVal = result.outBinds.io;
-          if(originalStr == 'EMPTY_CLOB' || originalStr == null || originalStr == "" || originalStr == undefined) {
-            should.strictEqual(resultVal, null);
-          } else {
-            compareResultStrAndOriginal(resultVal, originalStr, specialStr);
-          }
-          callback();
+          compareResultStrAndOriginal(resultVal, originalStr, specialStr);
         }
+        callback();
       }
     );
   };
@@ -279,7 +267,7 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
           executeSQL(proc_7431, cb);
         },
         function(cb) {
-          plsqlBindInOut(sqlRun_7431, bindVar, 'EMPTY_CLOB', null, false, client11gPlus, cb);
+          plsqlBindInOut(sqlRun_7431, bindVar, 'EMPTY_CLOB', null, cb);
         },
         function(cb) {
           executeSQL(proc_drop_7431, cb);
@@ -299,7 +287,7 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
           executeSQL(proc_7431, cb);
         },
         function(cb) {
-          plsqlBindInOut(sqlRun_7431, bindVar, 'EMPTY_CLOB', null, false, client11gPlus, cb);
+          plsqlBindInOut(sqlRun_7431, bindVar, 'EMPTY_CLOB', null, cb);
         },
         function(cb) {
           executeSQL(proc_drop_7431, cb);
@@ -319,7 +307,7 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
           executeSQL(proc_7431, cb);
         },
         function(cb) {
-          plsqlBindInOut(sqlRun_7431, bindVar, 'EMPTY_CLOB', null, false, client11gPlus, cb);
+          plsqlBindInOut(sqlRun_7431, bindVar, 'EMPTY_CLOB', null, cb);
         },
         function(cb) {
           executeSQL(proc_drop_7431, cb);
@@ -334,7 +322,7 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
         io: { val: null, dir: oracledb.BIND_INOUT, type: oracledb.STRING }
       };
 
-      plsqlBindInOut(sqlRun, bindVar, null, null, false, client11gPlus, done);
+      plsqlBindInOut(sqlRun, bindVar, null, null, done);
     }); // 76.1.4
 
     it('76.1.5 works with null and maxSize set to 1', function(done) {
@@ -344,7 +332,7 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
         io: { val: null, dir: oracledb.BIND_INOUT, type: oracledb.STRING, maxSize: 1 }
       };
 
-      plsqlBindInOut(sqlRun, bindVar, null, null, false, client11gPlus, done);
+      plsqlBindInOut(sqlRun, bindVar, null, null, done);
     }); // 76.1.5
 
     it('76.1.6 works with null and maxSize set to (64K - 1)', function(done) {
@@ -354,7 +342,7 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
         io: { val: null, dir: oracledb.BIND_INOUT, type: oracledb.STRING, maxSize: 65535 }
       };
 
-      plsqlBindInOut(sqlRun, bindVar, null, null, false, client11gPlus, done);
+      plsqlBindInOut(sqlRun, bindVar, null, null, done);
     }); // 76.1.6
 
     it('76.1.7 works with empty string', function(done) {
@@ -364,7 +352,7 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
         io: { val: "", dir: oracledb.BIND_INOUT, type: oracledb.STRING }
       };
 
-      plsqlBindInOut(sqlRun, bindVar, "", null, false, client11gPlus, done);
+      plsqlBindInOut(sqlRun, bindVar, "", null, done);
     }); // 76.1.7
 
     it('76.1.8 works with empty string and maxSize set to 1', function(done) {
@@ -374,7 +362,7 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
         io: { val: "", dir: oracledb.BIND_INOUT, type: oracledb.STRING, maxSize: 1 }
       };
 
-      plsqlBindInOut(sqlRun, bindVar, "", null, false, client11gPlus, done);
+      plsqlBindInOut(sqlRun, bindVar, "", null, done);
     }); // 76.1.8
 
     it('76.1.9 works with empty string and maxSize set to (64K - 1)', function(done) {
@@ -384,7 +372,7 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
         io: { val: "", dir: oracledb.BIND_INOUT, type: oracledb.STRING, maxSize: 65535 }
       };
 
-      plsqlBindInOut(sqlRun, bindVar, "", null, false, client11gPlus, done);
+      plsqlBindInOut(sqlRun, bindVar, "", null, done);
     }); // 76.1.9
 
     it('76.1.10 works with undefined', function(done) {
@@ -394,7 +382,7 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
         io: { val: undefined, dir: oracledb.BIND_INOUT, type: oracledb.STRING }
       };
 
-      plsqlBindInOut(sqlRun, bindVar, undefined, null, false, client11gPlus, done);
+      plsqlBindInOut(sqlRun, bindVar, undefined, null, done);
     }); // 76.1.10
 
     it('76.1.11 works with undefined and maxSize set to 1', function(done) {
@@ -404,7 +392,7 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
         io: { val: undefined, dir: oracledb.BIND_INOUT, type: oracledb.STRING, maxSize: 1 }
       };
 
-      plsqlBindInOut(sqlRun, bindVar, undefined, null, false, client11gPlus, done);
+      plsqlBindInOut(sqlRun, bindVar, undefined, null, done);
     }); // 76.1.11
 
     it('76.1.12 works with undefined and maxSize set to (64K - 1)', function(done) {
@@ -414,7 +402,7 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
         io: { val: undefined, dir: oracledb.BIND_INOUT, type: oracledb.STRING, maxSize: 65535 }
       };
 
-      plsqlBindInOut(sqlRun, bindVar, undefined, null, false, client11gPlus, done);
+      plsqlBindInOut(sqlRun, bindVar, undefined, null, done);
     }); // 76.1.12
 
     it('76.1.13 works with NaN', function(done) {
@@ -465,7 +453,7 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
         io: { val: clobVal, dir: oracledb.BIND_INOUT, type: oracledb.STRING, maxSize: len }
       };
 
-      plsqlBindInOut(sqlRun, bindVar, clobVal, specialStr, false, client11gPlus, done);
+      plsqlBindInOut(sqlRun, bindVar, clobVal, specialStr, done);
     }); // 76.1.15
 
     it('76.1.16 works with String length (64K - 1)', function(done) {
@@ -478,7 +466,7 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
         io: { val: clobVal, dir: oracledb.BIND_INOUT, type: oracledb.STRING, maxSize: len }
       };
 
-      plsqlBindInOut(sqlRun, bindVar, clobVal, specialStr, false, client11gPlus, done);
+      plsqlBindInOut(sqlRun, bindVar, clobVal, specialStr, done);
     }); // 76.1.16
 
     it('76.1.17 works with String length (64K + 1)', function(done) {
@@ -491,7 +479,7 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
         io: { val: clobVal, dir: oracledb.BIND_INOUT, type: oracledb.STRING, maxSize: len }
       };
 
-      plsqlBindInOut(sqlRun, bindVar, clobVal, specialStr, true, client11gPlus, done);
+      plsqlBindInOut(sqlRun, bindVar, clobVal, specialStr, done);
     }); // 76.1.17
 
     it('76.1.18 works with String length (1MB + 1)', function(done) {
@@ -504,7 +492,7 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
         io: { val: clobVal, dir: oracledb.BIND_INOUT, type: oracledb.STRING, maxSize: len }
       };
 
-      plsqlBindInOut(sqlRun, bindVar, clobVal, specialStr, true, client11gPlus, done);
+      plsqlBindInOut(sqlRun, bindVar, clobVal, specialStr, done);
     }); // 76.1.18
 
     it('76.1.19 works with bind value and type mismatch', function(done) {
@@ -574,7 +562,7 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
           executeSQL(proc_74324, cb);
         },
         function(cb) {
-          plsqlBindInOut(sqlRun_74324, bindVar, clobVal_2, specialStr_2, false, client11gPlus, cb);
+          plsqlBindInOut(sqlRun_74324, bindVar, clobVal_2, specialStr_2, cb);
         },
         function(cb) {
           executeSQL(proc_drop_74324, cb);
@@ -594,8 +582,8 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
         bindVar,
         function(err) {
           should.exist(err);
-          // NJS-012: encountered invalid bind datatype in parameter 2
-          (err.message).should.startWith('NJS-012:');
+          // NJS-011: encountered bind value and type mismatch
+          (err.message).should.startWith('NJS-011:');
           done();
         }
       );
@@ -645,7 +633,7 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
       ], done);
     }); // 76.1.23
 
-    it('76.1.24 named binding: maxSize smaller than string length( < 32K )', function(done) {
+    it.skip('76.1.24 named binding: maxSize smaller than string length( < 32K )', function(done) {
       var sequence = insertID++;
       var specialStr = "76.1.24";
       var len = 300;
@@ -660,6 +648,7 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
         bindVar,
         function(err) {
           should.exist(err);
+          console.log(err);
           // ORA-01460: unimplemented or unreasonable conversion requested
           (err.message).should.startWith('ORA-01460:');
           done();
@@ -690,7 +679,6 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
     }); // 76.1.25
 
     it('76.1.26 named binding: maxSize smaller than string length( > 64K )', function(done) {
-      if (!client11gPlus) this.skip();
       var sequence = insertID++;
       var specialStr = "76.1.26";
       var len = 65539;
@@ -712,7 +700,7 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
       );
     }); // 76.1.26
 
-    it('76.1.27 positional binding: maxSize smaller than string length( < 32K )', function(done) {
+    it.skip('76.1.27 positional binding: maxSize smaller than string length( < 32K )', function(done) {
       var sequence = insertID++;
       var specialStr = "76.1.27";
       var len = 300;
@@ -753,7 +741,6 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
     }); // 76.1.28
 
     it('76.1.29 positional binding: maxSize smaller than string length( > 64K )', function(done) {
-      if (!client11gPlus) this.skip();
       var sequence = insertID++;
       var specialStr = "76.1.29";
       var len = 65539;
@@ -813,7 +800,7 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
           executeSQL(proc_7421, cb);
         },
         function(cb) {
-          plsqlBindInOut(sqlRun_7421, bindVar, 'EMPTY_CLOB', null, false, client11gPlus, cb);
+          plsqlBindInOut(sqlRun_7421, bindVar, 'EMPTY_CLOB', null, cb);
         },
         function(cb) {
           executeSQL(proc_drop_7421, cb);
@@ -833,7 +820,7 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
           executeSQL(proc_7421, cb);
         },
         function(cb) {
-          plsqlBindInOut(sqlRun_7421, bindVar, 'EMPTY_CLOB', null, false, client11gPlus, cb);
+          plsqlBindInOut(sqlRun_7421, bindVar, 'EMPTY_CLOB', null, cb);
         },
         function(cb) {
           executeSQL(proc_drop_7421, cb);
@@ -853,7 +840,7 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
           executeSQL(proc_7421, cb);
         },
         function(cb) {
-          plsqlBindInOut(sqlRun_7421, bindVar, 'EMPTY_CLOB', null, false, client11gPlus, cb);
+          plsqlBindInOut(sqlRun_7421, bindVar, 'EMPTY_CLOB', null, cb);
         },
         function(cb) {
           executeSQL(proc_drop_7421, cb);
@@ -868,7 +855,7 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
         io: { val: null, dir: oracledb.BIND_INOUT, type: oracledb.STRING }
       };
 
-      plsqlBindInOut(sqlRun, bindVar, null, null, false, client11gPlus, done);
+      plsqlBindInOut(sqlRun, bindVar, null, null, done);
     }); // 76.2.4
 
     it('76.2.5 works with null and maxSize set to 1', function(done) {
@@ -878,7 +865,7 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
         io: { val: null, dir: oracledb.BIND_INOUT, type: oracledb.STRING, maxSize: 1 }
       };
 
-      plsqlBindInOut(sqlRun, bindVar, null, null, false, client11gPlus, done);
+      plsqlBindInOut(sqlRun, bindVar, null, null, done);
     }); // 76.2.5
 
     it('76.2.6 works with null and maxSize set to (64K - 1)', function(done) {
@@ -888,7 +875,7 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
         io: { val: null, dir: oracledb.BIND_INOUT, type: oracledb.STRING, maxSize: 65535 }
       };
 
-      plsqlBindInOut(sqlRun, bindVar, null, null, false, client11gPlus, done);
+      plsqlBindInOut(sqlRun, bindVar, null, null, done);
     }); // 76.2.6
 
     it('76.2.7 works with empty string', function(done) {
@@ -898,7 +885,7 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
         io: { val: "", dir: oracledb.BIND_INOUT, type: oracledb.STRING }
       };
 
-      plsqlBindInOut(sqlRun, bindVar, "", null, false, client11gPlus, done);
+      plsqlBindInOut(sqlRun, bindVar, "", null, done);
     }); // 76.2.7
 
     it('76.2.8 works with empty string and maxSize set to 1', function(done) {
@@ -908,7 +895,7 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
         io: { val: "", dir: oracledb.BIND_INOUT, type: oracledb.STRING, maxSize: 1 }
       };
 
-      plsqlBindInOut(sqlRun, bindVar, "", null, false, client11gPlus, done);
+      plsqlBindInOut(sqlRun, bindVar, "", null, done);
     }); // 76.2.8
 
     it('76.2.9 works with empty string and maxSize set to (64K - 1)', function(done) {
@@ -918,7 +905,7 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
         io: { val: "", dir: oracledb.BIND_INOUT, type: oracledb.STRING, maxSize: 65535 }
       };
 
-      plsqlBindInOut(sqlRun, bindVar, "", null, false, client11gPlus, done);
+      plsqlBindInOut(sqlRun, bindVar, "", null, done);
     }); // 76.2.9
 
     it('76.2.10 works with undefined', function(done) {
@@ -928,7 +915,7 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
         io: { val: undefined, dir: oracledb.BIND_INOUT, type: oracledb.STRING }
       };
 
-      plsqlBindInOut(sqlRun, bindVar, undefined, null, false, client11gPlus, done);
+      plsqlBindInOut(sqlRun, bindVar, undefined, null, done);
     }); // 76.2.10
 
     it('76.2.11 works with undefined and maxSize set to 1', function(done) {
@@ -938,7 +925,7 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
         io: { val: undefined, dir: oracledb.BIND_INOUT, type: oracledb.STRING, maxSize: 1 }
       };
 
-      plsqlBindInOut(sqlRun, bindVar, undefined, null, false, client11gPlus, done);
+      plsqlBindInOut(sqlRun, bindVar, undefined, null, done);
     }); // 76.2.11
 
     it('76.2.12 works with undefined and maxSize set to (64K - 1)', function(done) {
@@ -948,7 +935,7 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
         io: { val: undefined, dir: oracledb.BIND_INOUT, type: oracledb.STRING, maxSize: 65535 }
       };
 
-      plsqlBindInOut(sqlRun, bindVar, undefined, null, false, client11gPlus, done);
+      plsqlBindInOut(sqlRun, bindVar, undefined, null, done);
     }); // 76.2.12
 
     it('76.2.13 works with NaN', function(done) {
@@ -999,7 +986,7 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
         io: { val: clobVal, dir: oracledb.BIND_INOUT, type: oracledb.STRING, maxSize: len }
       };
 
-      plsqlBindInOut(sqlRun, bindVar, clobVal, specialStr, false, client11gPlus, done);
+      plsqlBindInOut(sqlRun, bindVar, clobVal, specialStr, done);
     }); // 76.2.15
 
     it('76.2.16 works with String length 32K', function(done) {
@@ -1039,8 +1026,8 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
         bindVar,
         function(err) {
           should.exist(err);
-          // ORA-01460: unimplemented or unreasonable conversion requested
-          (err.message).should.startWith('ORA-01460:');
+          // DPI-1019: buffer size is too small
+          (err.message).should.startWith('DPI-1019:');
           done();
         }
       );
@@ -1075,7 +1062,7 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
           executeSQL(proc_74218, cb);
         },
         function(cb) {
-          plsqlBindInOut(sqlRun_74218, bindVar, clobVal_2, specialStr_2, false, client11gPlus, cb);
+          plsqlBindInOut(sqlRun_74218, bindVar, clobVal_2, specialStr_2, cb);
         },
         function(cb) {
           executeSQL(proc_drop_74218, cb);
@@ -1095,8 +1082,8 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
         bindVar,
         function(err) {
           should.exist(err);
-          // NJS-012: encountered invalid bind datatype in parameter 2
-          (err.message).should.startWith('NJS-012:');
+          // NJS-011: encountered bind value and type mismatch
+          (err.message).should.startWith('NJS-011:');
           done();
         }
       );
@@ -1315,33 +1302,27 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
                 },
                 { autoCommit: true },
                 function(err, result) {
-                  if(client11gPlus === false){
-                    should.exist(err);
-                    // NJS-051: "maxSize" must be less than 65535
-                    (err.message).should.startWith('NJS-051:');
-                  } else {
-                    var resultVal = result.outBinds.io1;
-                    compareResultStrAndOriginal(resultVal, clobVal, specialStr);
+                  var resultVal = result.outBinds.io1;
+                  compareResultStrAndOriginal(resultVal, clobVal, specialStr);
 
-                    var lob = result.outBinds.io2;
-                    should.exist(lob);
-                    lob.setEncoding("utf8");
-                    var clobData = '';
-                    lob.on('data', function(chunk) {
-                      clobData += chunk;
-                    });
+                  var lob = result.outBinds.io2;
+                  should.exist(lob);
+                  lob.setEncoding("utf8");
+                  var clobData = '';
+                  lob.on('data', function(chunk) {
+                    clobData += chunk;
+                  });
 
-                    lob.on('error', function(err) {
-                      should.not.exist(err, "lob.on 'error' event.");
-                    });
+                  lob.on('error', function(err) {
+                    should.not.exist(err, "lob.on 'error' event.");
+                  });
 
-                    lob.on('end', function() {
-                      fs.readFile( inFileName, { encoding: 'utf8' }, function(err, originalData) {
-                        should.not.exist(err);
-                        should.strictEqual(clobData, originalData);
-                      });
+                  lob.on('end', function() {
+                    fs.readFile( inFileName, { encoding: 'utf8' }, function(err, originalData) {
+                      should.not.exist(err);
+                      should.strictEqual(clobData, originalData);
                     });
-                  }
+                  });
                   cb();
                 }
               );

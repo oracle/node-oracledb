@@ -222,16 +222,16 @@ describe('10. nullColumnValues.js', function() {
         rdname: { type: oracledb.STRING, dir: oracledb.BIND_OUT },
         rmid: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
       },
-        { autoCommit: true },
-        function(err, result) {
-          should.not.exist(err);
-          //console.log(result);
-          result.outBinds.should.eql({rdid: [90], rdname: [null], rmid: [null]});
-          result.outBinds.rdid.should.eql( [90] );
-          should.not.exist(result.outBinds.rdname[0]); // null
-          should.not.exist(result.outBinds.rmid[0]);  // null
-          done();
-        }
+      { autoCommit: true },
+      function(err, result) {
+        should.not.exist(err);
+        //console.log(result);
+        result.outBinds.should.eql({rdid: [90], rdname: [null], rmid: [null]});
+        result.outBinds.rdid.should.eql( [90] );
+        should.not.exist(result.outBinds.rdname[0]); // null
+        should.not.exist(result.outBinds.rmid[0]);  // null
+        done();
+      }
     );
   });
 

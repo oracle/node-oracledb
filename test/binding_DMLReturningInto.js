@@ -143,7 +143,7 @@ describe('98.binding_DMLReturningInto.js', function() {
     } else {
       should.not.exist(err);
     }
-  }
+  };
 
   var tableNamePre = "table_981";
   var index = 0;

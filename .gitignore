@@ -14,7 +14,9 @@ node_modules
 /examples/lobselectout.jpg
 /examples/lobbindsout1.txt
 /examples/lobbindsout2.txt
-/odpi
+/package/SHASUMS256.txt
+/package/*.gz
+package-lock.json
 
 # Oracle Ignores
 sqlnet.log
@@ -24,3 +26,4 @@ oraaccess.xml
 instantclient
 instantclient_11_2
 instantclient_12_1
+instantclient_12_2

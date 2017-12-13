@@ -613,7 +613,7 @@ describe('67. poolCache.js', function() {
     });
   }); // 67.2
 
-// This suite extends 67.1.6 case with various types
+  // This suite extends 67.1.6 case with various types
   describe('67.3 poolAlias attribute', function() {
 
     it('67.3.1 throws an error if poolAttrs.poolAlias is an object', function(done) {

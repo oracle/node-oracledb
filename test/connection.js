@@ -124,13 +124,13 @@ describe('1. connection.js', function(){
     it('1.1.2 ARRAY format explicitly', function(done) {
       connection.should.be.ok();
       connection.execute(
-         query, {id: 20}, {outFormat: oracledb.ARRAY},
-         function(err, result){
-           should.not.exist(err);
-           (result.rows).should.eql([[ 20, 'Marketing' ]]);
-           done();
-         }
-       );
+        query, {id: 20}, {outFormat: oracledb.ARRAY},
+        function(err, result){
+          should.not.exist(err);
+          (result.rows).should.eql([[ 20, 'Marketing' ]]);
+          done();
+        }
+      );
     });
 
     it('1.1.3 OBJECT format', function(done){
@@ -160,124 +160,149 @@ describe('1. connection.js', function(){
     });
   });
 
-  describe('1.2 limits the number of rows fetched', function(){
-    var connection = false;
-    var createTable =
-      "BEGIN \
-          DECLARE \
-              e_table_missing EXCEPTION; \
-              PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \
-          BEGIN \
-              EXECUTE IMMEDIATE ('DROP TABLE nodb_conn_emp2 PURGE'); \
-          EXCEPTION \
-              WHEN e_table_missing \
-              THEN NULL; \
-          END; \
-          EXECUTE IMMEDIATE (' \
-              CREATE TABLE nodb_conn_emp2 ( \
-                  employee_id NUMBER,  \
-                  employee_name VARCHAR2(20) \
-              ) \
-          '); \
-      END; ";
-
-    var insertRows =
-      "DECLARE \
-          x NUMBER := 0; \
-          n VARCHAR2(20); \
-       BEGIN \
-          FOR i IN 1..107 LOOP \
-             x := x + 1; \
-             n := 'staff ' || x; \
-             INSERT INTO nodb_conn_emp2 VALUES (x, n); \
-          END LOOP; \
-       END; ";
-    var rowsAmount = 107;
+  describe("1.2 'maxRows' property limits the number of fetched rows", function(){
+    var connection = null;
+    var totalAmount = 107;
 
     before(function(done) {
-
-      oracledb.getConnection(
-        credentials,
-        function(err, conn) {
-          should.not.exist(err);
-          connection = conn;
-          connection.execute(createTable, function(err) {
+      async.series([
+        function getConn(cb) {
+          oracledb.getConnection(dbConfig, function(err, conn) {
             should.not.exist(err);
-            connection.execute(insertRows, function(err) {
+            connection = conn;
+            cb();
+          });
+        },
+        function createTab(cb) {
+          var proc = "BEGIN \n" +
+                     "    DECLARE \n" +
+                     "        e_table_missing EXCEPTION; \n" +
+                     "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
+                     "    BEGIN \n" +
+                     "        EXECUTE IMMEDIATE('DROP TABLE nodb_tab_conn_emp2 PURGE'); \n" +
+                     "    EXCEPTION \n" +
+                     "        WHEN e_table_missing \n" +
+                     "        THEN NULL; \n" +
+                     "    END; \n" +
+                     "    EXECUTE IMMEDIATE (' \n" +
+                     "        CREATE TABLE nodb_tab_conn_emp2 ( \n" +
+                     "            id       NUMBER NOT NULL, \n" +
+                     "            name     VARCHAR2(20) \n" +
+                     "        ) \n" +
+                     "    '); \n" +
+                     "END; ";
+
+          connection.execute(
+            proc,
+            function(err) {
               should.not.exist(err);
-              done();
-            });
+              cb();
+            }
+          );
+        },
+        function insertData(cb) {
+          var proc = "DECLARE \n" +
+                     "    x NUMBER := 0; \n" +
+                     "    n VARCHAR2(20); \n" +
+                     "BEGIN \n" +
+                     "    FOR i IN 1..107 LOOP \n" +
+                     "        x := x + 1; \n" +
+                     "        n := 'staff ' || x; \n" +
+                     "        INSERT INTO nodb_tab_conn_emp2 VALUES (x, n); \n" +
+                     "    END LOOP; \n" +
+                     "END; ";
+
+          connection.execute(
+            proc,
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        }
+      ], done);
+    }); // before()
+
+    after(function(done) {
+      async.series([
+        function(cb) {
+          connection.execute(
+            "DROP TABLE nodb_tab_conn_emp2 PURGE",
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          connection.close(function(err) {
+            should.not.exist(err);
+            cb();
           });
         }
-      );
+      ], done);
+    }); // after()
 
-    }); // before
+    var verifyRows = function(rows, amount) {
+      for (var i = 0; i < amount; i++) {
+        should.strictEqual(rows[i][0], (i + 1));
+        should.strictEqual(rows[i][1], ("staff " + String(i + 1)) );
+      }
+    };
 
-    after(function(done){
+    var sqlQuery = "SELECT * FROM nodb_tab_conn_emp2 ORDER BY id";
+
+    it('1.2.1 Default maxRows == 0, which means unlimited', function(done){
+      should.strictEqual(oracledb.maxRows, 0);
+
       connection.execute(
-        'DROP TABLE nodb_conn_emp2 PURGE',
-        function(err){
-          if(err) { console.error(err.message); return; }
-          connection.release( function(err) {
-            if(err) { console.error(err.message); return; }
-            done();
-          });
-        }
-      );
-    });
-
-    it('1.2.1 by default, the number is 100', function(done){
-      var defaultLimit = oracledb.maxRows;
-      defaultLimit.should.be.exactly(100);
-
-      connection.should.be.ok();
-      connection.execute(
-        "SELECT * FROM nodb_conn_emp2 ORDER BY employee_id",
+        sqlQuery,
         function(err, result){
           should.not.exist(err);
           should.exist(result);
-          // Return 100 records although the table has 107 rows.
-          (result.rows).should.have.length(100);
+          should.strictEqual(result.rows.length, totalAmount);
+          verifyRows(result.rows, totalAmount);
           done();
         }
       );
     });
 
-    it('1.2.2 can also specify for each execution', function(done){
-      connection.should.be.ok();
+    it('1.2.2 can be specified for at execution', function(done){
+      var fetchAmount = 25;
       connection.execute(
-        "SELECT * FROM nodb_conn_emp2 ORDER BY employee_id",
-        {}, { maxRows: 25 },
+        sqlQuery,
+        {},
+        { maxRows: fetchAmount },
         function(err, result){
           should.not.exist(err);
           should.exist(result);
-          // Return 25 records according to execution setting
-          (result.rows).should.have.length(25);
+          should.strictEqual(result.rows.length, fetchAmount);
+          verifyRows(result.rows, fetchAmount);
           done();
         }
       );
     });
 
-    it('1.2.3 can not set maxRows to be 0', function(done){
-      connection.should.be.ok();
+    it('1.2.3 maxRows == amount of rows) means unlimited', function(done){
       connection.execute(
-        "SELECT * FROM nodb_conn_emp2 ORDER BY employee_id",
-        {}, { maxRows: 0 },
+        sqlQuery,
+        {},
+        { maxRows: totalAmount },
         function(err, result){
-          should.exist(err);
-          (err.message).should.startWith('NJS-026:');
-          // NJS-026: maxRows must be greater than zero
-          should.not.exist(result);
+          should.not.exist(err);
+          should.exist(result);
+          should.strictEqual(result.rows.length, totalAmount);
+          verifyRows(result.rows, totalAmount);
           done();
         }
       );
     });
 
     it('1.2.4 cannot set maxRows to be a negative number', function(done){
-      connection.should.be.ok();
       connection.execute(
-        "SELECT * FROM nodb_conn_emp2 ORDER BY employee_id",
-        {}, {maxRows: -5},
+        sqlQuery,
+        {},
+        { maxRows: -5 },
         function(err, result){
           should.exist(err);
           (err.message).should.startWith('NJS-007:');
@@ -287,14 +312,15 @@ describe('1. connection.js', function(){
       );
     });
 
-    it('1.2.5 sets maxRows to be very large value', function(done) {
+    it('1.2.5 sets maxRows to be large value', function(done) {
       connection.execute(
-        "SELECT * FROM nodb_conn_emp2 ORDER BY employee_id",
+        sqlQuery,
         {},
-        {maxRows: 500000},
+        { maxRows: 500000 },
         function(err, result){
           should.not.exist(err);
-          (result.rows.length).should.eql(rowsAmount);
+          should.exist(result);
+          verifyRows(result.rows, totalAmount);
           done();
         }
       );
@@ -305,7 +331,7 @@ describe('1. connection.js', function(){
 
       var myoffset     = 2;  // number of rows to skip
       var mymaxnumrows = 6;  // number of rows to fetch
-      var sql = "SELECT employee_id, employee_name FROM nodb_conn_emp2 ORDER BY employee_id";
+      var sql = "SELECT * FROM nodb_tab_conn_emp2 ORDER BY id";
 
       if (connection.oracleServerVersion >= 1201000000) {
         // 12c row-limiting syntax

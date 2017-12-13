@@ -137,12 +137,12 @@ describe('8. autoCommitForSelect.js', function(){
 
   afterEach(function(done){
     connection.execute(
-        'DROP TABLE nodb_commit4_dept purge',
-        function(err){
-          if(err) { console.error(err.message); return; }
-          done();
-        }
-      );
+      'DROP TABLE nodb_commit4_dept purge',
+      function(err){
+        if(err) { console.error(err.message); return; }
+        done();
+      }
+    );
   });
 
   it('8.1 should return previous value when autoCommit is false', function(done){

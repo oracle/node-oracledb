@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -46,13 +46,13 @@ var dorelease = function(conn) {
 
 var dodrop = function (conn, cb) {
   conn.execute(
-    "BEGIN "
-  + "  EXECUTE IMMEDIATE 'DROP TABLE test'; "
-  + "  EXCEPTION WHEN OTHERS THEN "
-  + "  IF SQLCODE <> -942 THEN "
-  + "    RAISE; "
-  + "  END IF; "
-  + "END;",
+    `BEGIN
+       EXECUTE IMMEDIATE 'DROP TABLE test';
+       EXCEPTION WHEN OTHERS THEN
+       IF SQLCODE <> -942 THEN
+         RAISE;
+       END IF;
+     END;`,
     function(err)
     {
       if (err) {
@@ -81,7 +81,7 @@ var docreate = function (conn, cb) {
 var doinsert1 = function (conn, cb) {
   conn.execute(
     "INSERT INTO test VALUES (:id, :nm)",
-    [1, 'Chris'],  // Bind values
+    { id : {val: 1 }, nm : {val: 'Chris'} },  // 'bind by name' syntax
     function(err, result)
     {
       if (err) {
@@ -96,7 +96,7 @@ var doinsert1 = function (conn, cb) {
 var doinsert2 = function (conn, cb) {
   conn.execute(
     "INSERT INTO test VALUES (:id, :nm)",
-    [2, 'Alison'],  // Bind values
+    [2, 'Alison'],  // 'bind by position' syntax
     function(err, result)
     {
       if (err) {
@@ -110,7 +110,9 @@ var doinsert2 = function (conn, cb) {
 
 var doupdate = function (conn, cb) {
   conn.execute(
-    "UPDATE test SET name = 'Bambi'",
+    "UPDATE test SET name = :nm",
+    ['Bambi'],
+    { autoCommit: true },  // commit once for all DML in the script
     function(err, result)
     {
       if (err) {
@@ -130,7 +132,7 @@ async.waterfall(
     doinsert1,
     doinsert2,
     doupdate,
-    dodrop
+    dodrop  // comment this out if you want to verify the data later
   ],
   function (err, conn) {
     if (err) { console.error("In waterfall error cb: ==>", err, "<=="); }

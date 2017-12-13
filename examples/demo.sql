@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -60,7 +60,9 @@ END;
 SHOW ERRORS
 
 -- For plsqlarray.js example for PL/SQL 'INDEX BY' array binds
-DROP TABLE waveheight;
+BEGIN EXECUTE IMMEDIATE 'DROP TABLE waveheight'; EXCEPTION WHEN OTHERS THEN IF SQLCODE <> -942 THEN RAISE; END IF; END;
+/
+
 CREATE TABLE waveheight (beach VARCHAR2(50), depth NUMBER);
 
 CREATE OR REPLACE PACKAGE beachpkg IS
@@ -107,24 +109,29 @@ END;
 SHOW ERRORS
 
 -- For selectjson.js example of JSON datatype. Requires Oracle Database 12.1.0.2
-DROP TABLE j_purchaseorder;
+BEGIN EXECUTE IMMEDIATE 'DROP TABLE j_purchaseorder'; EXCEPTION WHEN OTHERS THEN IF SQLCODE <> -942 THEN RAISE; END IF; END;
+/
+
 -- Note if your applications always insert valid JSON, you may delete
 -- the IS JSON check to remove its additional validation overhead.
 CREATE TABLE j_purchaseorder (po_document VARCHAR2(4000) CHECK (po_document IS JSON));
 
--- For selectjsonclob.js example of JSON datatype.  Requires Oracle Database 12.1.0.2
-DROP TABLE j_purchaseorder_c;
-CREATE TABLE j_purchaseorder_c (po_document CLOB CHECK (po_document IS JSON));
+-- For selectjsonblob.js example of JSON datatype.  Requires Oracle Database 12.1.0.2
+BEGIN EXECUTE IMMEDIATE 'DROP TABLE j_purchaseorder_b'; EXCEPTION WHEN OTHERS THEN IF SQLCODE <> -942 THEN RAISE; END IF; END;
+/
+CREATE TABLE j_purchaseorder_b (po_document BLOB CHECK (po_document IS JSON)) LOB (po_document) STORE AS (CACHE);
 
 -- For DML RETURNING aka RETURNING INTO examples
-DROP TABLE dmlrupdtab;
+BEGIN EXECUTE IMMEDIATE 'DROP TABLE dmlrupdtab'; EXCEPTION WHEN OTHERS THEN IF SQLCODE <> -942 THEN RAISE; END IF; END;
+/
 CREATE TABLE dmlrupdtab (id NUMBER, name VARCHAR2(40));
 INSERT INTO dmlrupdtab VALUES (1001, 'Venkat');
 INSERT INTO dmlrupdtab VALUES (1002, 'Neeharika');
 COMMIT;
 
 -- For LOB examples
-DROP TABLE mylobs;
+BEGIN EXECUTE IMMEDIATE 'DROP TABLE mylobs'; EXCEPTION WHEN OTHERS THEN IF SQLCODE <> -942 THEN RAISE; END IF; END;
+/
 CREATE TABLE mylobs (id NUMBER, c CLOB, b BLOB);
 
 -- For lobbinds.js: Procedure to show IN bind support for LOBs
@@ -173,5 +180,6 @@ END;
 SHOW ERRORS
 
 -- For raw1.js
-DROP TABLE myraw;
+BEGIN EXECUTE IMMEDIATE 'DROP TABLE myraw'; EXCEPTION WHEN OTHERS THEN IF SQLCODE <> -942 THEN RAISE; END IF; END;
+/
 CREATE TABLE myraw (r RAW(64));

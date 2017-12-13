@@ -93,8 +93,8 @@ describe('5. externalAuth.js', function() {
         },
         function(err, conn){
           should.exist(err);
-          (err.message).should.startWith("DPI-006:");
-          // DPI-006: user and password should not be set when using external authentication
+          (err.message).should.startWith("DPI-1032:");
+          // DPI-1032: user and password should not be set when using external authentication
           should.not.exist(conn);
           done();
         }
@@ -112,8 +112,8 @@ describe('5. externalAuth.js', function() {
         },
         function(err, conn){
           should.exist(err);
-          (err.message).should.startWith("DPI-006:");
-          // DPI-006: user and password should not be set when using external authentication
+          (err.message).should.startWith("DPI-1032:");
+          // DPI-1032: user and password should not be set when using external authentication
           should.not.exist(conn);
           done();
         }
@@ -131,8 +131,8 @@ describe('5. externalAuth.js', function() {
         },
         function(err, conn){
           should.exist(err);
-          (err.message).should.startWith("DPI-006:");
-          // DPI-006: user and password should not be set when using external authentication
+          (err.message).should.startWith("DPI-1032:");
+          // DPI-1032: user and password should not be set when using external authentication
 
           should.not.exist(conn);
           done();
@@ -195,8 +195,8 @@ describe('5. externalAuth.js', function() {
         },
         function(err, pool) {
           should.exist(err);
-          (err.message).should.startWith("DPI-006:");
-          // DPI-006: user and password should not be set when using external authentication
+          (err.message).should.startWith("DPI-1032:");
+          // DPI-1032: user and password should not be set when using external authentication
           should.not.exist(pool);
           done();
         }
@@ -214,7 +214,7 @@ describe('5. externalAuth.js', function() {
         },
         function(err, pool) {
           should.exist(err);
-          (err.message).should.startWith("DPI-006:");
+          (err.message).should.startWith("DPI-1032:");
           should.not.exist(pool);
           done();
         }
@@ -232,7 +232,7 @@ describe('5. externalAuth.js', function() {
         },
         function(err, pool) {
           should.exist(err);
-          (err.message).should.startWith("DPI-006:");
+          (err.message).should.startWith("DPI-1032:");
           should.not.exist(pool);
           done();
         }

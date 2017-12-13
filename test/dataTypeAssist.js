@@ -60,14 +60,18 @@ assist.allDataTypeNames =
   "nodb_timestamp5"   : "TIMESTAMP WITH LOCAL TIME ZONE",
   "nodb_timestamp6"   : "TIMESTAMP (9) WITH LOCAL TIME ZONE",
   "nodb_rowid"        : "ROWID",
+  "nodb_urowid"       : "UROWID",
+  "nodb_nclob"        : "NCLOB",
   "nodb_myclobs"      : "CLOB",
   "nodb_myblobs"      : "BLOB",
-  "nodb_raw"          : "RAW(2000)"
+  "nodb_raw"          : "RAW(2000)",
+  "nodb_long"         : "LONG",
+  "nodb_longraw"      : "LONG RAW"
 };
 
 assist.data = {
   specialChars: [
-    '\"',
+    '"',
     ' ',
     '\'',
     '%',
@@ -736,9 +740,9 @@ assist.verifyRefCursor = function(connection, tableName, array, done)
   ], done);
 };
 
-var numRows = 3;  // number of rows to return from each call to getRows()
 function fetchRowsFromRS(rs, array, cb)
 {
+  var numRows = 3;
   rs.getRows(numRows, function(err, rows) {
     if(rows.length > 0) {
       for(var i = 0; i < rows.length; i++) {
@@ -892,5 +896,145 @@ assist.verifyNullValues = function(connection, tableName, done)
   }
 
 };
+
+assist.compareNodejsVersion = function(nowVersion, comparedVersion) {
+  // return true if nowVersion > or = comparedVersion;
+  // else return false;
+  var now = nowVersion.split(".");
+  var compare = comparedVersion.split(".");
+  if(now[0] > compare[0]) {
+    return true;
+  } else if(now[0] === compare[0] && now[1] > compare[1]) {
+    return true;
+  } else if(now[0] === compare[0] && now[1] === compare[1] && now[2] > compare[2]) {
+    return true;
+  } else if (now[0] === compare[0] && now[1] === compare[1] && now[2] === compare[2]){
+    return true;
+  } else {
+    return false;
+  }
+};
+
+assist.verifyRefCursorWithFetchInfo = function(connection, tableName, array, done){
+  var createProc =
+        "CREATE OR REPLACE PROCEDURE testproc (p_out OUT SYS_REFCURSOR) " +
+        "AS " +
+        "BEGIN " +
+        "  OPEN p_out FOR " +
+        "SELECT * FROM " + tableName  + "; " +
+        "END; ";
+  async.series([
+    function createProcedure(callback) {
+      connection.execute(
+        createProc,
+        function(err) {
+          should.not.exist(err);
+          callback();
+        }
+      );
+    },
+    function verify(callback) {
+      connection.execute(
+        "begin testproc(:out); end;",
+        {
+          out: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
+        },
+        {
+          outFormat: oracledb.OBJECT,
+          fetchInfo:
+          {
+            "CONTENT": { type: oracledb.STRING }
+          }
+        },
+        function(err, result) {
+          should.not.exist(err);
+          _verifyFetchedValues(connection, result.outBinds.out, array, tableName, callback);
+        }
+      );
+    },
+    function dropProcedure(callback) {
+      connection.execute(
+        "DROP PROCEDURE testproc",
+        function(err) {
+          should.not.exist(err);
+          callback();
+        }
+      );
+    }
+  ], done);
+};
+
+assist.verifyRefCursorWithFetchAsString = function(connection, tableName, array, done){
+  var createProc =
+        "CREATE OR REPLACE PROCEDURE testproc (p_out OUT SYS_REFCURSOR) " +
+        "AS " +
+        "BEGIN " +
+        "  OPEN p_out FOR " +
+        "SELECT * FROM " + tableName  + "; " +
+        "END; ";
+  async.series([
+    function createProcedure(callback) {
+      connection.execute(
+        createProc,
+        function(err) {
+          should.not.exist(err);
+          callback();
+        }
+      );
+    },
+    function verify(callback) {
+      connection.execute(
+        "begin testproc(:out); end;",
+        {
+          out: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
+        },
+        { outFormat: oracledb.OBJECT },
+        function(err, result) {
+          should.not.exist(err);
+          _verifyFetchedValues(connection, result.outBinds.out, array, tableName, callback);
+        }
+      );
+    },
+    function dropProcedure(callback) {
+      connection.execute(
+        "DROP PROCEDURE testproc",
+        function(err) {
+          should.not.exist(err);
+          callback();
+        }
+      );
+    }
+  ], done);
+};
+
+var _verifyFetchedValues = function(connection, rs, array, tableName, cb) {
+  var amount = array.length;
+  rs.getRows(amount, function(err, rows) {
+    async.eachSeries(
+      rows,
+      queryAndCompare,
+      function(err) {
+        should.not.exist(err);
+        rs.close(function(err) {
+          should.not.exist(err);
+          return cb();
+        });
+      }
+    );
+  });
+
+  var queryAndCompare = function(row, callback) {
+    var sql = "select content from " + tableName + " where num = " + row.NUM;
+    connection.execute(
+      sql,
+      [],
+      { fetchInfo: { "CONTENT": { type: oracledb.STRING } } },
+      function(err, result) {
+        should.strictEqual(row.CONTENT, result.rows[0][0]);
+        return callback(err);
+      }
+    );
+  };
+}; // _verifyFetchedValues()
 
 module.exports = assist;

@@ -27,6 +27,7 @@
 'use strict';
 var should   = require('should');
 var fs       = require('fs');
+var random   = require('./random.js');
 
 var file = exports;
 module.exports = file;
@@ -47,4 +48,11 @@ file.delete = function(filePath) {
       should.not.exist(err);
     });
   }
+};
+
+file.createFileInKB = function(fileName, length, specialStr) {
+  var bigStr = random.getRandomString(length, specialStr);
+  var stream = fs.createWriteStream(fileName, { flags: 'w', defaultEncoding: 'utf8', autoClose: true });
+  stream.write(bigStr);
+  stream.end();
 };

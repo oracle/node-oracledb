@@ -45,7 +45,6 @@ describe('82.blobDMLBindAsBuffer.js', function() {
   this.timeout(100000);
 
   var connection = null;
-  var client11gPlus = true; // assume instant client runtime version is greater than 11.2.0.4.0
   var node6plus = false; // assume node runtime version is lower than 6
   var insertID = 1; // assume id for insert into db starts from 1
 
@@ -72,9 +71,6 @@ describe('82.blobDMLBindAsBuffer.js', function() {
     oracledb.getConnection(dbConfig, function(err, conn) {
       should.not.exist(err);
       connection = conn;
-      // Check whether instant client runtime version is smaller than 12.1.0.2
-      if(oracledb.oracleClientVersion < 1201000200)
-        client11gPlus = false;
       // Check whether node runtime version is >= 6 or not
       if ( process.versions["node"].substring (0, 1) >= "6")
         node6plus = true;
@@ -100,7 +96,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
     );
   };
 
-  var insertIntoBlobTable1 = function(id, content, callback, case64KPlus) {
+  var insertIntoBlobTable1 = function(id, content, callback) {
     if(content == "EMPTY_BLOB") {
       connection.execute(
         "INSERT INTO nodb_dml_blob_1 VALUES (:ID, EMPTY_BLOB())",
@@ -119,21 +115,15 @@ describe('82.blobDMLBindAsBuffer.js', function() {
           C : { val : content, dir : oracledb.BIND_IN, type : oracledb.BUFFER }
         },
         function(err, result) {
-          if(case64KPlus === true  && client11gPlus === false) {
-            should.exist(err);
-            // NJS-050: data must be shorter than 65535
-            (err.message).should.startWith('NJS-050:');
-          } else {
-            should.not.exist(err);
-            should.strictEqual(result.rowsAffected, 1);
-          }
+          should.not.exist(err);
+          should.strictEqual(result.rowsAffected, 1);
           callback();
         }
       );
     }
   };
 
-  var updateBlobTable1 = function(id, content, case64KPlus, callback) {
+  var updateBlobTable1 = function(id, content, callback) {
     if(content == "EMPTY_BLOB") {
       connection.execute(
         "UPDATE nodb_dml_blob_1 set blob = EMPTY_BLOB() where id = :ID",
@@ -149,14 +139,8 @@ describe('82.blobDMLBindAsBuffer.js', function() {
         "UPDATE nodb_dml_blob_1 set blob = :C where id = :ID",
         { ID: id, C: content },
         function(err, result){
-          if(case64KPlus === true  && client11gPlus === false) {
-            should.exist(err);
-            // NJS-050: data must be shorter than 65535
-            (err.message).should.startWith('NJS-050:');
-          } else {
-            should.not.exist(err);
-            should.strictEqual(result.rowsAffected, 1);
-          }
+          should.not.exist(err);
+          should.strictEqual(result.rowsAffected, 1);
           callback();
         }
       );
@@ -205,13 +189,9 @@ describe('82.blobDMLBindAsBuffer.js', function() {
     );
   };
 
-  var checkInsertResult = function(id, content, specialStr, case64KPlus, callback) {
-    if(case64KPlus === true  && client11gPlus === false) {
-      callback();
-    } else {
-      var sql = "select blob from nodb_dml_blob_1 where id = " + id;
-      verifyBlobValueWithBuffer(sql, content, specialStr, callback);
-    }
+  var checkInsertResult = function(id, content, specialStr, callback) {
+    var sql = "select blob from nodb_dml_blob_1 where id = " + id;
+    verifyBlobValueWithBuffer(sql, content, specialStr, callback);
   };
 
   describe('82.1 BLOB, INSERT', function() {
@@ -229,10 +209,10 @@ describe('82.blobDMLBindAsBuffer.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id, content, cb, false);
+          insertIntoBlobTable1(id, content, cb);
         },
         function(cb) {
-          checkInsertResult(id, content, null, false, cb);
+          checkInsertResult(id, content, null, cb);
         }
       ], done);
     }); // 82.1.1
@@ -244,10 +224,10 @@ describe('82.blobDMLBindAsBuffer.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id, content, cb, false);
+          insertIntoBlobTable1(id, content, cb);
         },
         function(cb) {
-          checkInsertResult(id, content, null, false, cb);
+          checkInsertResult(id, content, null, cb);
         }
       ], done);
     }); // 82.1.2
@@ -273,7 +253,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
           );
         },
         function(cb) {
-          checkInsertResult(id, content, null, false, cb);
+          checkInsertResult(id, content, null, cb);
         }
       ], done);
     }); // 82.1.3
@@ -299,7 +279,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
           );
         },
         function(cb) {
-          checkInsertResult(id, content, null, false, cb);
+          checkInsertResult(id, content, null, cb);
         }
       ], done);
     }); // 82.1.4
@@ -310,10 +290,10 @@ describe('82.blobDMLBindAsBuffer.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id, content, cb, false);
+          insertIntoBlobTable1(id, content, cb);
         },
         function(cb) {
-          checkInsertResult(id, content, null, false, cb);
+          checkInsertResult(id, content, null, cb);
         }
       ], done);
     }); // 82.1.5
@@ -324,10 +304,10 @@ describe('82.blobDMLBindAsBuffer.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id, content, cb, false);
+          insertIntoBlobTable1(id, content, cb);
         },
         function(cb) {
-          checkInsertResult(id, content, null, false, cb);
+          checkInsertResult(id, content, null, cb);
         }
       ], done);
     }); // 82.1.6
@@ -352,7 +332,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
           );
         },
         function(cb) {
-          checkInsertResult(id, content, null, false, cb);
+          checkInsertResult(id, content, null, cb);
         }
       ], done);
     }); // 82.1.7
@@ -377,7 +357,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
           );
         },
         function(cb) {
-          checkInsertResult(id, content, null, false, cb);
+          checkInsertResult(id, content, null, cb);
         }
       ], done);
     }); // 82.1.8
@@ -429,10 +409,10 @@ describe('82.blobDMLBindAsBuffer.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id, content, cb, false);
+          insertIntoBlobTable1(id, content, cb);
         },
         function(cb) {
-          checkInsertResult(id, content, specialStr, false, cb);
+          checkInsertResult(id, content, specialStr, cb);
         }
       ], done);
     }); // 82.1.11
@@ -446,10 +426,10 @@ describe('82.blobDMLBindAsBuffer.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id, content, cb, false);
+          insertIntoBlobTable1(id, content, cb);
         },
         function(cb) {
-          checkInsertResult(id, content, specialStr, false, cb);
+          checkInsertResult(id, content, specialStr, cb);
         }
       ], done);
     }); // 82.1.12
@@ -463,10 +443,10 @@ describe('82.blobDMLBindAsBuffer.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id, content, cb, true);
+          insertIntoBlobTable1(id, content, cb);
         },
         function(cb) {
-          checkInsertResult(id, content, specialStr, true, cb);
+          checkInsertResult(id, content, specialStr, cb);
         }
       ], done);
     }); // 82.1.13
@@ -480,10 +460,10 @@ describe('82.blobDMLBindAsBuffer.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id, content, cb, true);
+          insertIntoBlobTable1(id, content, cb);
         },
         function(cb) {
-          checkInsertResult(id, content, specialStr, true, cb);
+          checkInsertResult(id, content, specialStr, cb);
         }
       ], done);
     }); // 82.1.14
@@ -529,7 +509,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
           );
         },
         function(cb) {
-          checkInsertResult(id, content, specialStr, true, cb);
+          checkInsertResult(id, content, specialStr, cb);
         }
       ], done);
     }); // 82.1.16
@@ -544,8 +524,8 @@ describe('82.blobDMLBindAsBuffer.js', function() {
         ],
         function(err) {
           should.exist(err);
-          // NJS-012: encountered invalid bind datatype in parameter 2
-          (err.message).should.startWith('NJS-012:');
+          // NJS-011: encountered bind value and type mismatch in parameter 2
+          (err.message).should.startWith('NJS-011:');
           done();
         }
       );
@@ -635,7 +615,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
           );
         },
         function(cb) {
-          checkInsertResult(id, content, specialStr, false, cb);
+          checkInsertResult(id, content, specialStr, cb);
         }
       ], done);
     }); // 82.1.20
@@ -663,16 +643,16 @@ describe('82.blobDMLBindAsBuffer.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id, content_1, cb, false);
+          insertIntoBlobTable1(id, content_1, cb);
         },
         function(cb) {
-          checkInsertResult(id, content_1, null, false, cb);
+          checkInsertResult(id, content_1, null, cb);
         },
         function(cb) {
-          updateBlobTable1(id, content_2, false, cb);
+          updateBlobTable1(id, content_2, cb);
         },
         function(cb) {
-          checkInsertResult(id, content_2, specialStr_2, false, cb);
+          checkInsertResult(id, content_2, specialStr_2, cb);
         }
       ], done);
     }); // 82.2.1
@@ -687,16 +667,16 @@ describe('82.blobDMLBindAsBuffer.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id, content_1, cb, false);
+          insertIntoBlobTable1(id, content_1, cb);
         },
         function(cb) {
-          checkInsertResult(id, content_1, specialStr_1, false, cb);
+          checkInsertResult(id, content_1, specialStr_1, cb);
         },
         function(cb) {
-          updateBlobTable1(id, content_2, false, cb);
+          updateBlobTable1(id, content_2, cb);
         },
         function(cb) {
-          checkInsertResult(id, content_2, null, false, cb);
+          checkInsertResult(id, content_2, null, cb);
         }
       ], done);
     }); // 82.2.2
@@ -708,16 +688,16 @@ describe('82.blobDMLBindAsBuffer.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id, content_1, cb, false);
+          insertIntoBlobTable1(id, content_1, cb);
         },
         function(cb) {
-          checkInsertResult(id, content_1, null, false, cb);
+          checkInsertResult(id, content_1, null, cb);
         },
         function(cb) {
-          updateBlobTable1(id, content_2, false, cb);
+          updateBlobTable1(id, content_2, cb);
         },
         function(cb) {
-          checkInsertResult(id, content_2, null, false, cb);
+          checkInsertResult(id, content_2, null, cb);
         }
       ], done);
     }); // 82.2.3
@@ -733,16 +713,16 @@ describe('82.blobDMLBindAsBuffer.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id, content_1, cb, false);
+          insertIntoBlobTable1(id, content_1, cb);
         },
         function(cb) {
-          checkInsertResult(id, content_1, null, false, cb);
+          checkInsertResult(id, content_1, null, cb);
         },
         function(cb) {
-          updateBlobTable1(id, content_2, false, cb);
+          updateBlobTable1(id, content_2, cb);
         },
         function(cb) {
-          checkInsertResult(id, content_2, specialStr_2, false, cb);
+          checkInsertResult(id, content_2, specialStr_2, cb);
         }
       ], done);
     }); // 82.2.4
@@ -757,16 +737,16 @@ describe('82.blobDMLBindAsBuffer.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoBlobTable1(id, content_1, cb, false);
+          insertIntoBlobTable1(id, content_1, cb);
         },
         function(cb) {
-          checkInsertResult(id, content_1, specialStr_1, false, cb);
+          checkInsertResult(id, content_1, specialStr_1, cb);
         },
         function(cb) {
-          updateBlobTable1(id, content_2, false, cb);
+          updateBlobTable1(id, content_2, cb);
         },
         function(cb) {
-          checkInsertResult(id, content_2, null, false, cb);
+          checkInsertResult(id, content_2, null, cb);
         }
       ], done);
     }); // 82.2.5

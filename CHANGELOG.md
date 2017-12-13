@@ -1,5 +1,372 @@
 # Change Log
 
+## node-oracledb v2.0.15 (15 Dec 2017) changes since node-oracledb version 1
+
+- Release testing is now done for Node.js 4, 6, 8 and 9.
+
+- Node-oracledb now uses the [ODPI-C](https://github.com/oracle/odpi)
+  database abstraction library.
+
+- Upgraded [NAN](https://github.com/nodejs/nan) build dependency to 2.8.
+
+- Installation has significantly improved.  Some pre-built binaries
+  are available for convenience, or the add-on can be continue to built
+  from source code.  Refer to
+  [INSTALL.md](https://github.com/oracle/node-oracledb/blob/master/INSTALL.md).
+
+    - Added utilities to /package for building binaries for
+      distribution, and for installing them.
+
+    - When building from source code:
+        - Oracle header files are no longer needed.
+        - The `OCI_LIB_DIR` and `OCI_INC_DIR` environment variables are not needed.
+
+    - A single node-oracledb binary now works with any of the Oracle
+      11.2, 12.1 or 12.2 clients.  This improves portability when the
+      node-oracledb add-on is copied between machines.  Applications
+      should be tested with their target environment to make sure
+      expected Oracle functionality is available.
+
+    - At run time, users of macOS must put the Oracle client libraries
+      in `~/lib` or `/usr/local/lib`.  Linux users of Instant Client
+      RPMs must always set `LD_LIBRARY_PATH` or use ldconfig - the
+      previous RPATH linking option is not available.  Other Linux users
+      should continue to use `LD_LIBRARY_PATH` or ldconfig.  Windows
+      users should continue to put Oracle client libraries in `PATH`.
+
+    - On non-Windows platforms, if Oracle client libraries are not
+      located in the system library search path
+      (e.g. `LD_LIBRARY_PATH`), then node-oracledb attempts to use
+      libraries in `$ORACLE_HOME/lib`.
+
+    - A new [Troubleshooting
+      section](https://github.com/oracle/node-oracledb/blob/master/INSTALL.md#troubleshooting)
+      was add to INSTALL.
+
+    - Improvements were made to `require('oracledb')` failure messages
+      to help users resolve problems.
+
+    - Changed the installation message prefix in binding.gyp from
+      'node-oracledb' to 'oracledb'.
+
+- Improved query handling:
+
+    - Enhanced direct fetches to allow an unlimited number of rows to be
+      fetched.  This occurs when `oracledb.maxRows = 0`
+
+    - Changed the default value of `oracledb.maxRows` to 0, meaning
+      unlimited.
+
+    - Replaced `prefetchRows` (used for internal fetch buffering and
+      tuning) with a new property `fetchArraySize`.  This affects direct
+      fetches, ResultSet `getRow()` and `queryStream()`.
+
+    - `getRows(numRows,...)` internal fetch buffering is now only tuned
+      by the `numRows` value.
+
+    - Implemented `getRow()` in JavaScript for better performance.
+
+- Tightened up checking on in-use ResultSets and Lobs to avoid leaks
+  and threading issues by making sure the application has closed them
+  before connections can be closed.  The error DPI-1054 may now be
+  seen if connections are attempted to be closed too early.
+
+- Added support for fetching columns types LONG (as String) and LONG
+  RAW (as Buffer).  There is no support for streaming these types, so
+  the value stored in the database may not be able to be completely
+  fetched if Node.js and V8 memory limits are reached.
+
+- Added support for TIMESTAMP WITH TIME ZONE date type.  These are
+  mapped to a Date object in node-oracledb using LOCAL TIME ZONE.
+  The TIME ZONE component is not available in the Date object.
+
+- Added support for ROWID data type.  Data is fetched as a String.
+
+- Added support for UROWID data type. Data is fetched as a String.
+
+- Added query support for NCHAR and NVARCHAR2 columns.  Note binding
+  these types for DML may not insert data correctly, depending on the
+  database character set and the database national character set.
+
+- Added query support for NCLOB columns.  NCLOB data can be streamed
+  or fetched as String.  Note binding NCLOB for DML may not insert
+  data correctly, depending on the database character set and the
+  database national character set.
+
+- Removed node-oracledb size restrictions on LOB `fetchAsString` and
+  `fetchAsBuffer` queries, and also on LOB binds.  Node.js memory
+  restrictions will still prevent large LOBs being manipulated in
+  single chunks.
+
+- In LOB binds, the bind `val` can now be a String when `type` is
+  CLOB, and `val` can now be a Buffer when `type` is BLOB.
+
+- Improved validation for invalid attribute and parameter values.
+
+- The error parameter of function callbacks is now always null if no
+  error occurred.
+
+- Database error messages no longer have an extra newline.
+
+- Statements that generate errors are now dropped from the statement
+  cache.  Applications running while table definitions change will no
+  longer end up with unusable SQL statements due to stale cache
+  entries.  Note that Oracle best-practice is never to change table
+  definitions while applications are executing.
+
+- Prevent use of NaN with Oracle numbers to avoid data corruption.
+
+- For LOB streaming, make sure 'close' is the very last event, and
+  doesn't occur before an 'error' event.
+
+- Fix duplicate 'close' event for error conditions when streaming LOBs
+  in Node 8.
+
+- `connection.createLob()` now uses Oracle Call Interface's (OCI)
+  underlying 'cache' mode.
+
+- `Lob.close()` now marks LOBs invalid immediately rather than during
+  the asynchronous portion of the `close()` method, so that all other
+  attempts are no-ops.
+
+- Relaxed the restriction preventing `oracledb.connnectionClass` being
+  used with dedicated connections; it previously gave ORA-56609.  Now
+  DRCP can now be used with dedicated connections but the
+  `CLIENT_DRIVER` value in `V$SESSION_CONNECT_INFO` will not be set in
+  this case.  The recommendation is still to use a session pool when
+  using DRCP.
+
+- Fixed a crash with LOB out binds in DML RETURNING statements when the
+  number of rows returned exceeds the number of rows originally
+  allocated internally.
+
+- Empty arrays can now be used in PL/SQL Collection Associative Array
+  (Index-by) binds.
+
+- Some NJS and DPI error messages and numbers have changed.  This is
+  particularly true of DPI errors due to the use of ODPI-C.
+
+- Many new tests have been created.
+
+- Updated examples for new functionality.
+
+- Documentation has been updated and improved.
+
+## node-oracledb v2.0.15 (15 Dec 2017)
+
+- The stated compatibility is now for Node.js 4, 6, 8 and 9.
+
+- Improved query handling:
+
+  - Enhanced direct fetches to allow an unlimited number of rows to be
+    fetched.  This occurs when `oracledb.maxRows = 0`
+
+  - Changed the default value of `oracledb.maxRows` to 0, meaning
+    unlimited.
+
+  - Replaced `prefetchRows` (used for internal fetch buffering and
+    tuning) with a new property `fetchArraySize`.  This affects direct
+    fetches, ResultSet `getRow()` and `queryStream()`.
+
+  - `getRows(numRows,...)` internal fetch buffering is now only tuned
+    by the `numRows` value.
+
+  - Implemented `getRow()` in JavaScript for better performance.
+
+  - Moved operations on REF CURSORS out of the main thread in order to
+    improve performance and memory usage.
+
+- Fixed proxy support in the binary installer.
+
+- Ensured the callback error parameter is null, not undefined, when no
+  error occurred.
+
+- Improvements were made to `require('oracledb')` failure messages to
+  help users resolve installation and usage problems.
+
+- Fixed compiler deprecation warnings regarding `Nan::ForceSet`.
+
+## node-oracledb v2.0.14 Development (20 Nov 2017)
+
+- Added infrastructure to /package for creating binary installs.
+  Updated INSTALL.md.
+
+- Improved validation for invalid attribute and parameter values.
+
+- In LOB binds, the bind "val" can now be a String when "type" is
+  CLOB, and "val" can now be a Buffer when "type" is BLOB.
+
+- Changed binding.gyp message prefix from 'node-oracledb' to 'oracledb'.
+
+- Fix compiler warning with va_start
+
+- Eliminate memory leak when processing result sets containing LOBs
+  that require more than one fetch operation (regression from v1).
+
+- Move fetch buffer allocation to reduce memory use for Result Sets
+  (regression from v1).
+
+- Upgraded NAN dependency from 2.5 to 2.8.
+
+- Updated ODPI-C submodule:
+  - Reinstate safe size limit for LOB bind to PL/SQL (node-oracledb regression from v1).
+  - Fix valgrind byte overrun when loading `libclntsh` from `$ORACLE_HOME`.
+  - Do not prevent connections from being explicitly closed when a fatal error has taken place.
+  - Eliminate race condition on initialization.  Add finalization code.
+  - Eliminate use of OCI wrappers for use of mutexes, which improves performance (now uses native threading, e.g. pthreads).
+  - Prevent use of NaN with Oracle numbers to avoid data corruption.
+  - Prevent ORA-1010 during connection ping to pre 10g Oracle Database.
+  - Improve debug trace output format.
+  - Prevent crash for DML RETURNING of variables that require dynamic binding.
+
+- Updated examples to avoid "DPI-1054: connection cannot be closed
+  when open statements or LOBs exist" and to avoid duplicate callbacks
+  on stream errors.
+
+- Check for JavaScript exceptions and if one is found, ensure that the
+  error is passed correctly to the callback and is not raised when the
+  C++ method has finished.
+
+- Added code to handle invalid object properties.
+
+- Make sure 'close' is the very last event, and doesn't occur before
+  an 'error' event.  Also emit 'close' after 'error' event for
+  `queryStream()`
+
+- Changed default sample connect string to `"localhost/orclpdb"` which
+  is the Oracle Database 12.2 default for pluggable databases.
+
+- Moved NJS code from `/src/njs/src` to `/src` to remove obsolete
+  directory nesting.
+
+- Perform error cleanup as soon as possible in order to avoid possible
+  race conditions when errors take place.
+
+- Move operations on REF CURSORS out of the main thread in order to
+  improve performance and memory usage.
+
+- Relaxed the restriction preventing `oracledb.connnectionClass` being
+  used with dedicated connections; it previously gave ORA-56609.  Now
+  DRCP can now be used with dedicated connections but the
+  `CLIENT_DRIVER` value in `V$SESSION_CONNECT_INFO` will not be set in
+  this case.  The recommendation is still to use a session pool when
+  using DRCP.
+
+- Tighten up checking on in-use ResultSets and Lobs to avoid leaks and
+  threading issues by making sure the application has closed them
+  before connections can be closed.  The error DPI-1054 may now be
+  seen if connections are attempted to be closed too early.
+
+- On Windows, disable ODPI-C thread cleanup to resolve a thread timing
+  issue, since Node.js creates all threads at startup and never
+  terminates them.
+
+- Added extra message text to NJS-045 to give potential causes for
+  `require('oracledb')` failures when the ODPI-C layer can't detect
+  the issue.
+
+- Updated ODPI-C submodule: various changes including improved
+  initialization error messages, and runtime-enabled debug tracing.
+
+- Fix duplicate 'close' event for error conditions when streaming Lobs
+  in Node 8.
+
+- Fix LOB streaming 'close' and 'end' event order (regression from v1).
+
+- Fixed crash with LOB out binds in DML RETURNING statements when the
+  number of rows returned exceeds the number of rows originally
+  allocated internally.
+
+- Improve handling of invalid `externalAuth`, `fetchAsString`, and
+  `fetchAsBuffer` attribute values.
+
+- Fix support for `connectionClass` (regression from v1).
+
+## node-oracledb v2.0.13 Development (19 Jun 2017)
+
+- Node-oracledb now uses the [ODPI-C](https://github.com/oracle/odpi)
+  database abstraction library.
+
+- Installation instructions have changed.  Refer to
+  [INSTALL.md](https://github.com/oracle/node-oracledb/blob/master/INSTALL.md).
+  Distribution is still via source code.
+
+  Oracle header files are no longer needed.  The `OCI_LIB_DIR` and
+  `OCI_INC_DIR` environment variables are not needed.
+
+  At run time, Oracle 11.2, 12.1 or 12.2 client libraries should still
+  be in `PATH` (for Windows) or `LD_LIBRARY_PATH` (for Linux) or
+  similar platform library loading path.  Users of macOS must put the
+  Oracle client libraries in `~/lib` or `/usr/local/lib`.  Linux users
+  of Instant Client RPMs must always set `LD_LIBRARY_PATH` or use
+  ldconfig - the previous RPATH linking option is not available.
+
+  On non-Windows platforms, if Oracle client libraries are not located
+  in the system library search path (e.g. `LD_LIBRARY_PATH`), then
+  node-oracledb attempts to use libraries in `$ORACLE_HOME/lib`.
+
+  A single node-oracledb binary now works with any of the Oracle
+  client 11.2, 12.1 or 12.2 libraries.  This improves portability when
+  node-oracledb builds are copied between machines.
+
+- `Lob.close()` now marks LOBs invalid immediately rather than during
+  the asynchronous portion of the `close()` method, so that all other
+  attempts are no-ops.
+
+- Incorrect application logic in version 1 that attempted to close a
+  connection while certain LOB, ResultSet or other database operations
+  were still occurring gave an NJS-030, NJS-031 or NJS-032 "connection
+  cannot be released" error.  Now in version 2 the connection will be
+  closed but any operation that relied on the connection being open
+  will fail.
+
+- Some NJS and DPI error messages and numbers have changed.  This is
+  particularly true of DPI errors due to the use of ODPI-C.
+
+- Stated compatibility is now for Node.js 4, 6 and 8.
+
+- Added support for fetching columns types LONG (as String) and LONG
+  RAW (as Buffer).  There is no support for streaming these types, so
+  the value stored in the DB may not be able to be completely fetched
+  if Node.js and V8 memory limits are reached.
+
+- Added support for TIMESTAMP WITH TIME ZONE date type.  These are
+  mapped to a Date object in node-oracledb using LOCAL TIME ZONE.
+  The TIME ZONE component is not available in the Date object.
+
+- Added support for ROWID data type.  Data is fetched as a String.
+
+- Added support for UROWID data type. Data is fetched as a String.
+
+- Added query support for NCHAR and NVARCHAR2 columns.  Binding for
+  DML may not insert data correctly, depending on the database
+  character set and the database national character set.
+
+- Added query support for NCLOB columns.  NCLOB data can be streamed
+  or fetched as String.  Binding for DML may not insert data
+  correctly, depending on the database character set and the database
+  national character set.
+
+- Removed node-oracledb size restrictions on LOB `fetchAsString` and
+  `fetchAsBuffer` queries, and also on LOB binds.  Node.js and V8
+  memory restrictions will still prevent large LOBs being manipulated
+  in single chunks.
+
+- Statements that generate errors are now dropped from the statement
+  cache.  Applications running while table definitions change will no
+  longer end up with unusable SQL statements due to stale cache
+  entries.  Note that Oracle best-practice is never to change table
+  definitions while applications are executing.
+
+- Empty arrays can now be used in PL/SQL Collection Associative Array
+  (Index-by) binds.
+
+- `connection.createLob()` now uses OCI's underlying 'cache' mode.
+
+- Database errors no longer have an extra newline.
+
+- Upgraded NAN dependency from 2.5 to 2.6.
+
 ## node-oracledb v1.13.1 (12 Apr 2017)
 
 - Fix regression with NULL values to PL/SQL procedures with multiple parameters.

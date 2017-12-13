@@ -73,14 +73,16 @@ describe('96.binding_procedureBindOut.js', function() {
   var doTest = function(table_name, procName, bindType, dbColType, content, sequence, nullBind, callback) {
     async.series([
       function(cb) {
+        procName = procName + "_1";
         var bindVar = {
           i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-          c: { val: content, type: bindType, dir: oracledb.BIND_OUT, maxSize: 1000 }
+          c: { type: bindType, dir: oracledb.BIND_OUT, maxSize: 1000 }
         };
         inBind(table_name, procName, sequence, dbColType, bindVar, bindType, nullBind, cb);
       },
       function(cb) {
-        var bindVar =[ sequence, { val: content, type: bindType, dir: oracledb.BIND_OUT, maxSize: 1000 } ];
+        procName = procName + "_2";
+        var bindVar =[ sequence, { type: bindType, dir: oracledb.BIND_OUT, maxSize: 1000 } ];
         inBind(table_name, procName, sequence, dbColType, bindVar, bindType, nullBind, cb);
       }
     ], callback);
@@ -117,7 +119,6 @@ describe('96.binding_procedureBindOut.js', function() {
                "END " + proc_name + "; ";
     var sqlRun = "BEGIN " + proc_name + " (:i, :c); END;";
     var proc_drop = "DROP PROCEDURE " + proc_name;
-    // console.log(proc);
     var inserted = getInsertVal(dbColType, nullBind);
     var insertSql = "insert into " + table_name + " (id, content) values (:c1, :c2)";
     async.series([

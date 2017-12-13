@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, 2017, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -37,9 +37,9 @@ oracledb.getConnection(
   })
   .then(function(connection) {
     return connection.execute(
-      "SELECT department_id, department_name " +
-        "FROM departments " +
-        "WHERE department_id = :did",
+      `SELECT department_id, department_name
+       FROM departments
+       WHERE department_id = :did`,
       [180]
     )
       .then(function(result) {

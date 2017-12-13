@@ -44,7 +44,6 @@ describe('81. clobDMLBindAsString.js', function() {
   this.timeout(100000);
 
   var connection = null;
-  var client11gPlus = true; // assume instant client runtime version is greater than 11.2.0.4.0
   var insertID = 1; // assume id for insert into db starts from 1
 
   var proc_clob_1 = "BEGIN \n" +
@@ -70,10 +69,6 @@ describe('81. clobDMLBindAsString.js', function() {
     oracledb.getConnection(dbConfig, function(err, conn) {
       should.not.exist(err);
       connection = conn;
-      // Check whether instant client runtime version is smaller than 12.1.0.2
-      if(oracledb.oracleClientVersion < 1201000200)
-        client11gPlus = false;
-
       done();
     });
   }); // before
@@ -95,7 +90,7 @@ describe('81. clobDMLBindAsString.js', function() {
     );
   };
 
-  var insertIntoClobTable1 = function(id, content, callback, case64KPlus) {
+  var insertIntoClobTable1 = function(id, content, callback) {
     if(content == "EMPTY_CLOB") {
       connection.execute(
         "INSERT INTO nodb_dml_clob_1 VALUES (:ID, EMPTY_CLOB())",
@@ -114,21 +109,15 @@ describe('81. clobDMLBindAsString.js', function() {
           C : { val : content, dir : oracledb.BIND_IN, type : oracledb.STRING }
         },
         function(err, result) {
-          if(case64KPlus === true  && client11gPlus === false) {
-            should.exist(err);
-            // NJS-050: data must be shorter than 65535
-            (err.message).should.startWith('NJS-050:');
-          } else {
-            should.not.exist(err);
-            should.strictEqual(result.rowsAffected, 1);
-          }
+          should.not.exist(err);
+          should.strictEqual(result.rowsAffected, 1);
           callback();
         }
       );
     }
   };
 
-  var updateClobTable1 = function(id, content, case64KPlus, callback) {
+  var updateClobTable1 = function(id, content, callback) {
     if(content == "EMPTY_CLOB") {
       connection.execute(
         "UPDATE nodb_dml_clob_1 set clob = EMPTY_CLOB() where id = :ID",
@@ -144,14 +133,8 @@ describe('81. clobDMLBindAsString.js', function() {
         "UPDATE nodb_dml_clob_1 set clob = :C where id = :ID",
         { ID: id, C: content },
         function(err, result){
-          if(case64KPlus === true  && client11gPlus === false) {
-            should.exist(err);
-            // NJS-050: data must be shorter than 65535
-            (err.message).should.startWith('NJS-050:');
-          } else {
-            should.not.exist(err);
-            should.strictEqual(result.rowsAffected, 1);
-          }
+          should.not.exist(err);
+          should.strictEqual(result.rowsAffected, 1);
           callback();
         }
       );
@@ -200,13 +183,9 @@ describe('81. clobDMLBindAsString.js', function() {
     );
   };
 
-  var checkInsertResult = function(id, content, specialStr, case64KPlus, callback) {
-    if(case64KPlus === true  && client11gPlus === false) {
-      callback();
-    } else {
-      var sql = "select clob from nodb_dml_clob_1 where id = " + id;
-      verifyClobValueWithString(sql, content, specialStr, callback);
-    }
+  var checkInsertResult = function(id, content, specialStr, callback) {
+    var sql = "select clob from nodb_dml_clob_1 where id = " + id;
+    verifyClobValueWithString(sql, content, specialStr, callback);
   };
 
   describe('81.1 CLOB, INSERT', function() {
@@ -224,10 +203,10 @@ describe('81. clobDMLBindAsString.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoClobTable1(id, content, cb, false);
+          insertIntoClobTable1(id, content, cb);
         },
         function(cb) {
-          checkInsertResult(id, content, null, false, cb);
+          checkInsertResult(id, content, null, cb);
         }
       ], done);
     }); // 81.1.1
@@ -238,10 +217,10 @@ describe('81. clobDMLBindAsString.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoClobTable1(id, content, cb, false);
+          insertIntoClobTable1(id, content, cb);
         },
         function(cb) {
-          checkInsertResult(id, content, null, false, cb);
+          checkInsertResult(id, content, null, cb);
         }
       ], done);
     }); // 81.1.2
@@ -266,7 +245,7 @@ describe('81. clobDMLBindAsString.js', function() {
           );
         },
         function(cb) {
-          checkInsertResult(id, content, null, false, cb);
+          checkInsertResult(id, content, null, cb);
         }
       ], done);
     }); // 81.1.3
@@ -291,7 +270,7 @@ describe('81. clobDMLBindAsString.js', function() {
           );
         },
         function(cb) {
-          checkInsertResult(id, content, null, false, cb);
+          checkInsertResult(id, content, null, cb);
         }
       ], done);
     }); // 81.1.4
@@ -302,10 +281,10 @@ describe('81. clobDMLBindAsString.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoClobTable1(id, content, cb, false);
+          insertIntoClobTable1(id, content, cb);
         },
         function(cb) {
-          checkInsertResult(id, content, null, false, cb);
+          checkInsertResult(id, content, null, cb);
         }
       ], done);
     }); // 81.1.5
@@ -316,10 +295,10 @@ describe('81. clobDMLBindAsString.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoClobTable1(id, content, cb, false);
+          insertIntoClobTable1(id, content, cb);
         },
         function(cb) {
-          checkInsertResult(id, content, null, false, cb);
+          checkInsertResult(id, content, null, cb);
         }
       ], done);
     }); // 81.1.6
@@ -344,7 +323,7 @@ describe('81. clobDMLBindAsString.js', function() {
           );
         },
         function(cb) {
-          checkInsertResult(id, content, null, false, cb);
+          checkInsertResult(id, content, null, cb);
         }
       ], done);
     }); // 81.1.7
@@ -369,7 +348,7 @@ describe('81. clobDMLBindAsString.js', function() {
           );
         },
         function(cb) {
-          checkInsertResult(id, content, null, false, cb);
+          checkInsertResult(id, content, null, cb);
         }
       ], done);
     }); // 81.1.8
@@ -420,10 +399,10 @@ describe('81. clobDMLBindAsString.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoClobTable1(id, content, cb, false);
+          insertIntoClobTable1(id, content, cb);
         },
         function(cb) {
-          checkInsertResult(id, content, specialStr, false, cb);
+          checkInsertResult(id, content, specialStr, cb);
         }
       ], done);
     }); // 81.1.11
@@ -436,10 +415,10 @@ describe('81. clobDMLBindAsString.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoClobTable1(id, content, cb, false);
+          insertIntoClobTable1(id, content, cb);
         },
         function(cb) {
-          checkInsertResult(id, content, specialStr, false, cb);
+          checkInsertResult(id, content, specialStr, cb);
         }
       ], done);
     }); // 81.1.12
@@ -452,10 +431,10 @@ describe('81. clobDMLBindAsString.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoClobTable1(id, content, cb, true);
+          insertIntoClobTable1(id, content, cb);
         },
         function(cb) {
-          checkInsertResult(id, content, specialStr, true, cb);
+          checkInsertResult(id, content, specialStr, cb);
         }
       ], done);
     }); // 81.1.13
@@ -468,10 +447,10 @@ describe('81. clobDMLBindAsString.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoClobTable1(id, content, cb, true);
+          insertIntoClobTable1(id, content, cb);
         },
         function(cb) {
-          checkInsertResult(id, content, specialStr, true, cb);
+          checkInsertResult(id, content, specialStr, cb);
         }
       ], done);
     }); // 81.1.14
@@ -516,7 +495,7 @@ describe('81. clobDMLBindAsString.js', function() {
           );
         },
         function(cb) {
-          checkInsertResult(id, content, specialStr, true, cb);
+          checkInsertResult(id, content, specialStr, cb);
         }
       ], done);
     }); // 81.1.16
@@ -531,8 +510,8 @@ describe('81. clobDMLBindAsString.js', function() {
         ],
         function(err) {
           should.exist(err);
-          // NJS-012: encountered invalid bind datatype in parameter 2
-          (err.message).should.startWith('NJS-012:');
+          // NJS-011: encountered bind value and type mismatch
+          (err.message).should.startWith('NJS-011:');
           done();
         }
       );
@@ -564,7 +543,7 @@ describe('81. clobDMLBindAsString.js', function() {
           );
         },
         function(cb) {
-          checkInsertResult(id, content, specialStr, false, cb);
+          checkInsertResult(id, content, specialStr, cb);
         }
       ], done);
     }); // 81.1.18
@@ -628,7 +607,7 @@ describe('81. clobDMLBindAsString.js', function() {
           );
         },
         function(cb) {
-          checkInsertResult(id, content, specialStr, false, cb);
+          checkInsertResult(id, content, specialStr, cb);
         }
       ], done);
     }); // 81.1.20
@@ -655,16 +634,16 @@ describe('81. clobDMLBindAsString.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoClobTable1(id, content_1, cb, false);
+          insertIntoClobTable1(id, content_1, cb);
         },
         function(cb) {
-          checkInsertResult(id, content_1, null, false, cb);
+          checkInsertResult(id, content_1, null, cb);
         },
         function(cb) {
-          updateClobTable1(id, content_2, false, cb);
+          updateClobTable1(id, content_2, cb);
         },
         function(cb) {
-          checkInsertResult(id, content_2, specialStr_2, false, cb);
+          checkInsertResult(id, content_2, specialStr_2, cb);
         }
       ], done);
     }); // 81.2.1
@@ -678,16 +657,16 @@ describe('81. clobDMLBindAsString.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoClobTable1(id, content_1, cb, false);
+          insertIntoClobTable1(id, content_1, cb);
         },
         function(cb) {
-          checkInsertResult(id, content_1, specialStr_1, false, cb);
+          checkInsertResult(id, content_1, specialStr_1, cb);
         },
         function(cb) {
-          updateClobTable1(id, content_2, false, cb);
+          updateClobTable1(id, content_2, cb);
         },
         function(cb) {
-          checkInsertResult(id, content_2, null, false, cb);
+          checkInsertResult(id, content_2, null, cb);
         }
       ], done);
     }); // 81.2.2
@@ -699,16 +678,16 @@ describe('81. clobDMLBindAsString.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoClobTable1(id, content_1, cb, false);
+          insertIntoClobTable1(id, content_1, cb);
         },
         function(cb) {
-          checkInsertResult(id, content_1, null, false, cb);
+          checkInsertResult(id, content_1, null, cb);
         },
         function(cb) {
-          updateClobTable1(id, content_2, false, cb);
+          updateClobTable1(id, content_2, cb);
         },
         function(cb) {
-          checkInsertResult(id, content_2, null, false, cb);
+          checkInsertResult(id, content_2, null, cb);
         }
       ], done);
     }); // 81.2.3
@@ -722,16 +701,16 @@ describe('81. clobDMLBindAsString.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoClobTable1(id, content_1, cb, false);
+          insertIntoClobTable1(id, content_1, cb);
         },
         function(cb) {
-          checkInsertResult(id, content_1, null, false, cb);
+          checkInsertResult(id, content_1, null, cb);
         },
         function(cb) {
-          updateClobTable1(id, content_2, false, cb);
+          updateClobTable1(id, content_2, cb);
         },
         function(cb) {
-          checkInsertResult(id, content_2, specialStr_2, false, cb);
+          checkInsertResult(id, content_2, specialStr_2, cb);
         }
       ], done);
     }); // 81.2.4
@@ -745,16 +724,16 @@ describe('81. clobDMLBindAsString.js', function() {
 
       async.series([
         function(cb) {
-          insertIntoClobTable1(id, content_1, cb, false);
+          insertIntoClobTable1(id, content_1, cb);
         },
         function(cb) {
-          checkInsertResult(id, content_1, specialStr_1, false, cb);
+          checkInsertResult(id, content_1, specialStr_1, cb);
         },
         function(cb) {
-          updateClobTable1(id, content_2, false, cb);
+          updateClobTable1(id, content_2, cb);
         },
         function(cb) {
-          checkInsertResult(id, content_2, null, false, cb);
+          checkInsertResult(id, content_2, null, cb);
         }
       ], done);
     }); // 81.2.5

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -113,9 +113,9 @@ var dojsonfromrelational = function (conn, cb) {
     return cb(null, conn);
   } else {
     conn.execute(
-      "SELECT JSON_OBJECT ('deptId' IS d.department_id, 'name' IS d.department_name) department "
-      + "FROM departments d "
-      + "WHERE department_id < :did",
+      `SELECT JSON_OBJECT ('deptId' IS d.department_id, 'name' IS d.department_name) department
+       FROM departments d
+       WHERE department_id < :did`,
       [50],
       function(err, result)
       {

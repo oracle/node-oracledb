@@ -74,6 +74,7 @@ describe('31. dataTypeBinaryDouble.js', function() {
     });
 
     after(function(done) {
+      oracledb.fetchAsString = [];
       connection.execute(
         "DROP table " + tableName + " PURGE",
         function(err) {
@@ -95,6 +96,15 @@ describe('31. dataTypeBinaryDouble.js', function() {
       assist.verifyRefCursor(connection, tableName, numbers, done);
     });
 
+    it('31.1.4 columns fetched from REF CURSORS can be mapped by fetchInfo settings', function(done) {
+      assist.verifyRefCursorWithFetchInfo(connection, tableName, numbers, done);
+    });
+
+    it('31.1.5 columns fetched from REF CURSORS can be mapped by oracledb.fetchAsString', function(done) {
+      oracledb.fetchAsString = [ oracledb.NUMBER ];
+      assist.verifyRefCursorWithFetchAsString(connection, tableName, numbers, done);
+    });
+
   });
 
   describe('31.2 stores null value correctly', function() {
@@ -103,10 +113,10 @@ describe('31. dataTypeBinaryDouble.js', function() {
     });
   });
 
-  describe('31.3 testing floating-point numbers which cannot be precisely represent', function() {
+  describe('31.3 testing floating-point numbers which can be precisely represent', function() {
     var nums =
       [
-        0.00000123,
+        0.0000000000000000000123,
         98.7654321
       ];
 
@@ -124,7 +134,7 @@ describe('31. dataTypeBinaryDouble.js', function() {
       );
     });
 
-    it('31.3.1 rounding numbers', function(done) {
+    it('31.3.1 testing floating-point numbers', function(done) {
       connection.execute(
         "SELECT * FROM " + tableName,
         [],
@@ -133,19 +143,14 @@ describe('31. dataTypeBinaryDouble.js', function() {
           should.not.exist(err);
 
           for(var i = 0; i < nums.length; i++) {
-            result.rows[i].CONTENT.should.not.be.exactly(nums[ result.rows[i].NUM ]);
-            approxeq(result.rows[i].CONTENT, nums[ result.rows[i].NUM ]).should.be.ok();
+            result.rows[i].CONTENT.should.be.exactly(nums[ result.rows[i].NUM ]);
           }
           done();
         }
       );
     });
 
-    function approxeq(v1, v2)
-    {
-      var precision = 0.001;
-      return Math.abs(v1 - v2) < precision;
-    }
   }); // 31.3
+
 
 });

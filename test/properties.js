@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -52,10 +52,10 @@ describe('58. properties.js', function() {
       defaultValues.poolIncrement    = oracledb.poolIncrement;
       defaultValues.poolTimeout      = oracledb.poolTimeout;
       defaultValues.maxRows          = oracledb.maxRows;
-      defaultValues.prefetchRows     = oracledb.prefetchRows;
+      defaultValues.fetchArraySize   = oracledb.fetchArraySize;
       defaultValues.autoCommit       = oracledb.autoCommit;
       defaultValues.version          = oracledb.version;
-      defaultValues.connClass        = oracledb.connClass;
+      defaultValues.connectionClass  = oracledb.connectionClass;
       defaultValues.externalAuth     = oracledb.externalAuth;
       defaultValues.fetchAsString    = oracledb.fetchAsString;
       defaultValues.outFormat        = oracledb.outFormat;
@@ -64,6 +64,7 @@ describe('58. properties.js', function() {
       defaultValues.queueTimeout     = oracledb.queueTimeout;
       defaultValues.stmtCacheSize    = oracledb.stmtCacheSize;
       defaultValues.poolPingInterval = oracledb.poolPingInterval;
+      defaultValues.fetchAsBuffer    = oracledb.fetchAsBuffer;
     });
 
     after('restore the values', function() {
@@ -72,10 +73,10 @@ describe('58. properties.js', function() {
       oracledb.poolIncrement    = defaultValues.poolIncrement;
       oracledb.poolTimeout      = defaultValues.poolTimeout;
       oracledb.maxRows          = defaultValues.maxRows;
-      oracledb.prefetchRows     = defaultValues.prefetchRows;
+      oracledb.fetchArraySize   = defaultValues.fetchArraySize;
       oracledb.autoCommit       = defaultValues.autoCommit;
       // oracledb.version          = defaultValues.version;         // version is a read-only property. it needn't to restore.
-      oracledb.connClass        = defaultValues.connClass;
+      oracledb.connectionClass  = defaultValues.connectionClass;
       oracledb.externalAuth     = defaultValues.externalAuth;
       oracledb.fetchAsString    = defaultValues.fetchAsString;
       oracledb.outFormat        = defaultValues.outFormat;
@@ -84,6 +85,7 @@ describe('58. properties.js', function() {
       oracledb.queueTimeout     = defaultValues.queueTimeout;
       oracledb.stmtCacheSize    = defaultValues.stmtCacheSize;
       oracledb.poolPingInterval = defaultValues.poolPingInterval;
+      oracledb.fetchAsBuffer    = defaultValues.fetchAsBuffer;
     });
 
     it('58.1.1 poolMin', function() {
@@ -126,12 +128,12 @@ describe('58. properties.js', function() {
       (oracledb.maxRows).should.eql(defaultValues.maxRows + 1);
     });
 
-    it('58.1.6 prefetchRows', function() {
-      var t = oracledb.prefetchRows;
-      oracledb.prefetchRows = t + 1;
+    it('58.1.6 fetchArraySize', function() {
+      var t = oracledb.fetchArraySize;
+      oracledb.fetchArraySize = t + 1;
 
-      t.should.eql(defaultValues.prefetchRows);
-      (oracledb.prefetchRows).should.eql(defaultValues.prefetchRows + 1);
+      t.should.eql(defaultValues.fetchArraySize);
+      (oracledb.fetchArraySize).should.eql(defaultValues.fetchArraySize + 1);
     });
 
     it('58.1.7 autoCommit', function() {
@@ -145,19 +147,21 @@ describe('58. properties.js', function() {
 
     it('58.1.8 version (read-only)', function() {
       (oracledb.version).should.be.a.Number();
-
-      try {
-        oracledb.version = 5;
-      } catch(err) {
-        should.exist(err);
-        // console.log(err.message);
-        (err.message).should.startWith('NJS-014:');
-      }
+      should.throws(
+        function() {
+          oracledb.version = 5;
+        },
+        /NJS-014: [\w]+ is a read-only property/
+      );
     });
 
-    it('58.1.9 connClass', function() {
-      oracledb.connClass = "cc";
-      (oracledb.connClass).should.be.a.String();
+    it('58.1.9 connectionClass', function() {
+      var t = oracledb.connectionClass;
+      oracledb.connectionClass = 'DEVPOOL';
+      var cclass = oracledb.connectionClass;
+
+      should.equal(t, '');
+      should.strictEqual(cclass, 'DEVPOOL');
     });
 
     it('58.1.10 externalAuth', function() {
@@ -196,13 +200,13 @@ describe('58. properties.js', function() {
       var t = oracledb.oracleClientVersion ;
       t.should.be.a.Number();
 
-      try {
-        oracledb.oracleClientVersion = t + 1;
-      } catch(err) {
-        should.exist(err);
-        (err.message).should.startWith('NJS-014:');
-      }
-    } );
+      should.throws(
+        function() {
+          oracledb.oracleClientVersion = t + 1;
+        },
+        /NJS-014: [\w]+ is a read-only property/
+      );
+    });
 
     it('58.1.15 queueRequests', function() {
       var t = oracledb.queueRequests;
@@ -236,6 +240,50 @@ describe('58. properties.js', function() {
       should.notEqual(oracledb.poolPingInterval, defaultValues.poolPingInterval);
     });
 
+    it('58.1.19 fetchAsBuffer', function() {
+      var t = oracledb.fetchAsBuffer;
+      oracledb.fetchAsBuffer = [ oracledb.BLOB ];
+
+      t.should.eql(defaultValues.fetchAsBuffer);
+      (oracledb.fetchAsBuffer).should.not.eql(defaultValues.fetchAsBuffer);
+    });
+
+    it('58.1.20 Negative - connectionClass ', function() {
+      should.throws(
+        function() {
+          oracledb.connectionClass = NaN;
+        },
+        /NJS-004: invalid value for property [\w]/
+      );
+    });
+
+    it('58.1.21 Negative - autoCommit', function() {
+      should.throws(
+        function() {
+          oracledb.autoCommit = 2017;
+        },
+        /NJS-004: invalid value for property [\w]/
+      );
+    });
+
+    it('58.1.22 Negative - outFormat', function() {
+      should.throws(
+        function() {
+          oracledb.outFormat = 'abc';
+        },
+        /NJS-004: invalid value for property [\w]/
+      );
+    });
+
+    it('58.1.23 Negative - externalAuth', function() {
+      should.throws(
+        function() {
+          oracledb.externalAuth = 2017;
+        },
+        /NJS-004: invalid value for property [\w]/
+      );
+    });
+
   }); // 58.1
 
   describe('58.2 Pool Class', function() {
@@ -267,120 +315,120 @@ describe('58. properties.js', function() {
       var t = pool.poolMin;
       t.should.be.a.Number();
 
-      try {
-        pool.poolMin = t + 1;
-      } catch(err) {
-        should.exist(err);
-        (err.message).should.startWith('NJS-014:');
-      }
+      should.throws(
+        function() {
+          pool.poolMin = t + 1;
+        },
+        /NJS-014: [\w]+ is a read-only property/
+      );
     });
 
     it('58.2.2 poolMax', function() {
       var t = pool.poolMax;
       t.should.be.a.Number();
 
-      try {
-        pool.poolMax = t + 1;
-      } catch(err) {
-        should.exist(err);
-        (err.message).should.startWith('NJS-014:');
-      }
+      should.throws(
+        function() {
+          pool.poolMax = t + 1;
+        },
+        /NJS-014: [\w]+ is a read-only property/
+      );
     });
 
     it('58.2.3 poolIncrement', function() {
       var t = pool.poolIncrement;
       t.should.be.a.Number();
 
-      try {
-        pool.poolIncrement = t + 1;
-      } catch(err) {
-        should.exist(err);
-        (err.message).should.startWith('NJS-014:');
-      }
+      should.throws(
+        function() {
+          pool.poolIncrement = t + 1;
+        },
+        /NJS-014: [\w]+ is a read-only property/
+      );
     });
 
     it('58.2.4 poolTimeout', function() {
       var t = pool.poolTimeout;
       t.should.be.a.Number();
 
-      try {
-        pool.poolTimeout = t + 1;
-      } catch(err) {
-        should.exist(err);
-        (err.message).should.startWith('NJS-014:');
-      }
+      should.throws(
+        function() {
+          pool.poolTimeout = t + 1;
+        },
+        /NJS-014: [\w]+ is a read-only property/
+      );
     });
 
     it('58.2.5 stmtCacheSize', function() {
       var t = pool.stmtCacheSize;
       t.should.be.a.Number();
 
-      try {
-        pool.stmtCacheSize = t + 1;
-      } catch(err) {
-        should.exist(err);
-        (err.message).should.startWith('NJS-014:');
-      }
+      should.throws(
+        function() {
+          pool.stmtCacheSize = t + 1;
+        },
+        /NJS-014: [\w]+ is a read-only property/
+      );
     });
 
     it('58.2.6 connectionsInUse', function() {
       var t = pool.connectionsInUse;
       t.should.be.a.Number();
 
-      try {
-        pool.connectionsInUse = t + 1;
-      } catch(err) {
-        should.exist(err);
-        (err.message).should.startWith('NJS-014:');
-      }
+      should.throws(
+        function() {
+          pool.connectionsInUse = t + 1;
+        },
+        /NJS-014: [\w]+ is a read-only property/
+      );
     });
 
     it('58.2.7 connectionsOpen', function() {
       var t = pool.connectionsOpen;
       t.should.be.a.Number();
 
-      try {
-        pool.connectionsOpen = t + 1;
-      } catch(err) {
-        should.exist(err);
-        (err.message).should.startWith('NJS-014:');
-      }
+      should.throws(
+        function() {
+          pool.connectionsOpen = t + 1;
+        },
+        /NJS-014: [\w]+ is a read-only property/
+      );
     });
 
     it('58.2.8 queueRequests', function() {
       var t = pool.queueRequests;
       t.should.be.a.Boolean;
 
-      try {
-        pool.queueRequests = !t;
-      } catch(err) {
-        should.exist(err);
-        (err.message).should.startWith('NJS-014:');
-      }
+      should.throws(
+        function() {
+          pool.queueRequests = !t;
+        },
+        /NJS-014: [\w]+ is a read-only property/
+      );
     });
 
     it('58.2.9 queueTimeout', function() {
       var t = pool.queueTimeout;
       t.should.be.a.Number();
 
-      try {
-        pool.queueTimeout = t + 1000;
-      } catch(err) {
-        should.exist(err);
-        (err.message).should.startWith('NJS-014:');
-      }
+      should.throws(
+        function() {
+          pool.queueTimeout = t + 1000;
+        },
+        /NJS-014: [\w]+ is a read-only property/
+      );
     });
 
     it('58.2.10 poolPingInterval', function() {
       var t = pool.poolPingInterval;
       t.should.be.a.Number();
 
-      try {
-        pool.poolPingInterval = t + 100;
-      } catch(err) {
-        should.exist(err);
-        (err.message).should.startWith('NJS-014:');
-      }
+      should.throws(
+        function() {
+          pool.poolPingInterval = t + 100;
+        },
+        /NJS-014: [\w]+ is a read-only property/
+      );
     });
 
   }); // 58.2
@@ -425,84 +473,78 @@ describe('58. properties.js', function() {
       var t = connection.stmtCacheSize;
       t.should.be.a.Number();
 
-      try {
-        connection.stmtCacheSize = t + 1;
-      } catch(err) {
-        should.exist(err);
-        (err.message).should.startWith('NJS-014:');
-      }
+      should.throws(
+        function() {
+          connection.stmtCacheSize = t + 1;
+        },
+        /NJS-014: [\w]+ is a read-only property/
+      );
     });
 
     it('58.3.3 clientId (write-only)', function() {
-      try {
-        var t = connection.clientId;
-        should.not.exist(t);
-      } catch(err) {
-        should.exist(err);
-        (err.message).should.startWith('NJS-015:'); // write-only
-      }
+      var t = connection.clientId;
+      should.strictEqual(t, null);
 
-      try {
-        connection.clientId = 4;
-      } catch(err) {
-        should.exist(err);
-        (err.message).should.startWith('NJS-004:');  // invalid value
-      }
+      should.throws(
+        function() {
+          connection.clientId = 4;
+        },
+        /NJS-004: invalid value for property [\w]/
+      );
 
-      connection.clientId = "103.3";
+      should.doesNotThrow(
+        function() {
+          connection.clientId = "103.3";
+        }
+      );
     });
 
     it('58.3.4 action (write-only)', function() {
+      var t = connection.action;
+      should.strictEqual(t, null);
 
-      try {
-        var t = connection.action;
-        should.not.exist(t);
-      } catch(err) {
-        should.exist(err);
-        (err.message).should.startWith('NJS-015:');
-      }
+      should.throws(
+        function() {
+          connection.action = 4;
+        },
+        /NJS-004: invalid value for property [\w]/
+      );
 
-      try {
-        connection.action = 4;
-      } catch(err) {
-        should.exist(err);
-        (err.message).should.startWith('NJS-004:');  // invalid value
-      }
-
-      connection.action = "103.3 action";
+      should.doesNotThrow(
+        function() {
+          connection.action = "103.3 action";
+        }
+      );
     });
 
     it('58.3.5 module (write-only)', function() {
+      var t = connection.module;
+      should.strictEqual(t, null);
 
-      try {
-        var t = connection.module;
-        should.not.exist(t);
-      } catch(err) {
-        should.exist(err);
-        (err.message).should.startWith('NJS-015:');
-      }
+      should.throws(
+        function() {
+          connection.module = 4;
+        },
+        /NJS-004: invalid value for property [\w]/
+      );
 
-      try {
-        connection.module = 4;
-      } catch(err) {
-        should.exist(err);
-        (err.message).should.startWith('NJS-004:');  // invalid value
-      }
-
-      connection.module = "103.3 module";
+      should.doesNotThrow(
+        function() {
+          connection.clientId = "103.3 module";
+        }
+      );
     });
 
     it('58.3.6 oracleServerVersion (read-only)', function () {
       var t = connection.oracleServerVersion;
       t.should.be.a.Number();
 
-      try {
-        connection.oracleServerVersion = t + 1;
-      }
-      catch (err) {
-        should.exist ( err );
-        (err.message).should.startWith('NJS-014:');
-      }
+      should.throws(
+        function() {
+          connection.oracleServerVersion = t + 1;
+        },
+        /NJS-014: [\w]+ is a read-only property/
+      );
     });
 
   }); // 58.3
@@ -562,18 +604,19 @@ describe('58. properties.js', function() {
       );
     });
 
-    it('58.4.1 metaData (read-only)', function() {
+    it('58.4.1 metaData (read-only)', function(done) {
       should.exist(resultSet.metaData);
       var t = resultSet.metaData;
       t.should.eql( [ { name: 'NUM' }, { name: 'CONTENT' } ] );
 
-      try {
-        resultSet.metaData = {"foo": "bar"};
-      } catch(err) {
-        should.exist(err);
-        (err.message).should.startWith('NJS-014:');
-      }
+      should.throws(
+        function() {
+          resultSet.metaData = {"foo": "bar"};
+        },
+        /NJS-014: [\w]+ is a read-only property/
+      );
+      resultSet.close(done);
     });
 
-  }); // 58.5
+  }); // 58.4
 });

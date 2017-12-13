@@ -46,7 +46,6 @@ describe('89. fetchBlobAsBuffer3.js', function() {
   var connection = null;
   var node6plus = false;  // assume node runtime version is lower than 6
   var insertID = 1; // assume id for insert into db starts from 1
-  var client11gPlus = true; // assume instant client runtime version is greater than 11.2.0.4.0
 
   var proc_create_table2 = "BEGIN \n" +
                            "    DECLARE \n" +
@@ -67,6 +66,7 @@ describe('89. fetchBlobAsBuffer3.js', function() {
                            "    '); \n" +
                            "END; ";
   var drop_table2 = "DROP TABLE nodb_blob2 PURGE";
+  var defaultStmtCache = oracledb.stmtCacheSize;
 
   before('get one connection', function(done) {
     oracledb.stmtCacheSize = 0;
@@ -75,8 +75,6 @@ describe('89. fetchBlobAsBuffer3.js', function() {
       connection = conn;
       if(process.versions["node"].substring(0,1) >= "6")
         node6plus = true;
-      if(oracledb.oracleClientVersion < 1201000200)
-        client11gPlus = false;
 
       done();
     });
@@ -84,6 +82,7 @@ describe('89. fetchBlobAsBuffer3.js', function() {
   }); // before
 
   after('release connection', function(done) {
+    oracledb.stmtCacheSize = defaultStmtCache;
     connection.release(function(err) {
       should.not.exist(err);
       done();
@@ -103,24 +102,9 @@ describe('89. fetchBlobAsBuffer3.js', function() {
   };
 
   // compare fetch result
-  var compareClientFetchResult = function(err, resultVal, specialStr, content, contentLength, case64KPlus) {
-    // if test buffer size greater than 64K
-    if(case64KPlus === true) {
-      // if client version 12.1.0.2
-      if(client11gPlus === true) {
-        should.not.exist(err);
-        compareBuffers(resultVal, specialStr, content, contentLength);
-      } else {
-        // if client version 11.2.0.4
-        should.not.exist(err);
-        content = content.slice(0, 65535);
-        compareBuffers(resultVal, specialStr, content, 65535);
-      }
-    } else {
-      // if test buffer size smaller than 64K
-      should.not.exist(err);
-      compareBuffers(resultVal, specialStr, content, contentLength);
-    }
+  var compareClientFetchResult = function(err, resultVal, specialStr, content, contentLength) {
+    should.not.exist(err);
+    compareBuffers(resultVal, specialStr, content, contentLength);
   };
 
   // compare two buffers
@@ -152,7 +136,7 @@ describe('89. fetchBlobAsBuffer3.js', function() {
       );
     }); // after
 
-    beforeEach('set oracledb.fetchAsString', function(done) {
+    beforeEach('set oracledb.fetchAsBuffer', function(done) {
       oracledb.fetchAsBuffer = [ oracledb.BLOB ];
       done();
     }); // beforeEach
@@ -179,13 +163,13 @@ describe('89. fetchBlobAsBuffer3.js', function() {
         },
         function(cb) {
           connection.execute(
-           "SELECT ID, B1, B2 from nodb_blob2",
+            "SELECT ID, B1, B2 from nodb_blob2",
             function(err, result){
               should.not.exist(err);
               var resultVal = result.rows[0][1];
-              compareClientFetchResult(err, resultVal, specialStr_1, content_1, contentLength_1, false);
+              compareClientFetchResult(err, resultVal, specialStr_1, content_1, contentLength_1);
               resultVal = result.rows[0][2];
-              compareClientFetchResult(err, resultVal, specialStr_2, content_2, contentLength_2, false);
+              compareClientFetchResult(err, resultVal, specialStr_2, content_2, contentLength_2);
               cb();
             }
           );
@@ -211,12 +195,12 @@ describe('89. fetchBlobAsBuffer3.js', function() {
         },
         function(cb) {
           connection.execute(
-           "SELECT ID, B1 from nodb_blob2 where ID = :id",
+            "SELECT ID, B1 from nodb_blob2 where ID = :id",
             { id : id },
             function(err, result){
               should.not.exist(err);
               var resultVal = result.rows[0][1];
-              compareClientFetchResult(err, resultVal, specialStr_1, content_1, contentLength_1, false);
+              compareClientFetchResult(err, resultVal, specialStr_1, content_1, contentLength_1);
               cb();
             }
           );
@@ -225,7 +209,7 @@ describe('89. fetchBlobAsBuffer3.js', function() {
           oracledb.fetchAsBuffer = [];
 
           connection.execute(
-           "SELECT B2 from nodb_blob2 where ID = :id",
+            "SELECT B2 from nodb_blob2 where ID = :id",
             { id : id },
             function(err, result){
               should.not.exist(err);
@@ -272,81 +256,160 @@ describe('89. fetchBlobAsBuffer3.js', function() {
     });
 
     it('89.2.1 String not supported in fetchAsBuffer', function(done) {
-      try {
-        oracledb.fetchAsBuffer = [ oracledb.STRING ];
-      } catch(err) {
-        should.exist(err);
-        // NJS-021: invalid type for conversion specified
-        (err.message).should.startWith ('NJS-021:');
-      }
+      should.throws(
+        function() {
+          oracledb.fetchAsBuffer = [ oracledb.STRING ];
+        },
+        /NJS-021: invalid type for conversion specified/
+      );
       done();
     }); // 89.2.1
 
+
     it('89.2.2 CLOB not supported in fetchAsBuffer', function(done) {
-      try {
-        oracledb.fetchAsBuffer = [ oracledb.CLOB ];
-      } catch(err) {
-        should.exist(err);
-        // NJS-021: invalid type for conversion specified
-        (err.message).should.startWith ('NJS-021:');
-      }
+      should.throws(
+        function() {
+          oracledb.fetchAsBuffer = [ oracledb.CLOB ];
+        },
+        /NJS-021: invalid type for conversion specified/
+      );
       done();
     }); // 89.2.2
 
+
     it('89.2.3 Number not supported in fetchAsBuffer', function(done) {
-      try {
-        oracledb.fetchAsBuffer = [ oracledb.NUMBER ];
-      } catch(err) {
-        should.exist(err);
-        // NJS-021: invalid type for conversion specified
-        (err.message).should.startWith ('NJS-021:');
-      }
+      should.throws(
+        function() {
+          oracledb.fetchAsBuffer = [ oracledb.NUMBER ];
+        },
+        /NJS-021: invalid type for conversion specified/
+      );
       done();
     }); // 89.2.3
 
+
     it('89.2.4 Date not supported in fetchAsBuffer', function(done) {
-      try {
-        oracledb.fetchAsBuffer = [ oracledb.DATE ];
-      } catch(err) {
-        should.exist(err);
-        // NJS-021: invalid type for conversion specified
-        (err.message).should.startWith ('NJS-021:');
-      }
+      should.throws(
+        function() {
+          oracledb.fetchAsBuffer = [ oracledb.DATE ];
+        },
+        /NJS-021: invalid type for conversion specified/
+      );
       done();
     }); // 89.2.4
 
+
     it('89.2.5 Cursor not supported in fetchAsBuffer', function(done) {
-      try {
-        oracledb.fetchAsBuffer = [ oracledb.CURSOR ];
-      } catch(err) {
-        should.exist(err);
-        // NJS-021: invalid type for conversion specified
-        (err.message).should.startWith ('NJS-021:');
-      }
+      should.throws(
+        function() {
+          oracledb.fetchAsBuffer = [ oracledb.CURSOR ];
+        },
+        /NJS-021: invalid type for conversion specified/
+      );
       done();
     }); // 89.2.5
 
+
     it('89.2.6 Buffer not supported in fetchAsBuffer', function(done) {
-      try {
-        oracledb.fetchAsBuffer = [ oracledb.BUFFER ];
-      } catch(err) {
-        should.exist(err);
-        // NJS-021: invalid type for conversion specified
-        (err.message).should.startWith ('NJS-021:');
-      }
+      should.throws(
+        function() {
+          oracledb.fetchAsBuffer = [ oracledb.BUFFER ];
+        },
+        /NJS-021: invalid type for conversion specified/
+      );
       done();
     }); // 89.2.6
 
+
     it('89.2.7 BLOB supported in fetchAsBuffer', function(done) {
-      try {
-        oracledb.fetchAsBuffer = [ oracledb.BLOB ];
-      } catch(err) {
-        should.not.exist(err);
-      }
+      should.doesNotThrow(
+        function() {
+          oracledb.fetchAsBuffer = [ oracledb.BLOB ];
+        }
+      );
       should.strictEqual(oracledb.fetchAsBuffer.length, 1);
       should.strictEqual(oracledb.fetchAsBuffer[0], oracledb.BLOB);
       done();
     }); // 89.2.7
+
+
+    it('89.2.8 negative null value for fetchAsBuffer', function(done) {
+      should.throws(
+        function() {
+          oracledb.fetchAsBuffer = null;
+        },
+        /NJS-004: invalid value for property [\w]/
+      );
+      done();
+    }); // 89.2.8
+
+
+    it('89.2.9 negative undefined value for fetchAsBuffer', function(done) {
+      should.throws(
+        function() {
+          oracledb.fetchAsBuffer = undefined;
+        },
+        /NJS-004: invalid value for property [\w]/
+      );
+      done();
+    }); // 89.2.9
+
+
+    it('89.2.10 negative numeric value for fetchAsBuffer', function(done) {
+      should.throws(
+        function() {
+          oracledb.fetchAsBuffer = 89210;
+        },
+        /NJS-004: invalid value for property [\w]/
+      );
+      done();
+    }); // 89.2.10
+
+
+    it('89.2.11 negative emtpy string value for fetchAsBuffer', function(done) {
+      should.throws(
+        function() {
+          oracledb.fetchAsBuffer = ' ';
+        },
+        /NJS-004: invalid value for property [\w]/
+      );
+      done();
+    }); // 89.2.11
+
+
+    it('89.2.12 negative arbitary string value for fetchAsBuffer', function(done) {
+      should.throws(
+        function() {
+          oracledb.fetchAsBuffer = "89.2.12";
+        },
+        /NJS-004: invalid value for property [\w]/
+      );
+      done();
+    }); // 89.2.12
+
+
+    it('89.2.13 negative date value for fetchAsBuffer', function(done) {
+      should.throws(
+        function() {
+          var dt = new Date ();
+          oracledb.fetchAsBuffer = dt;
+        },
+        /NJS-004: invalid value for property [\w]/
+      );
+      done();
+    }); // 89.2.13
+
+
+    it('89.2.14 negative arbitary buffer value for fetchAsBuffer', function(done) {
+      should.throws(
+        function() {
+          var buf = assist.createBuffer ( 10 ) ;
+          oracledb.fetchAsBuffer = buf;
+        },
+        /NJS-004: invalid value for property [\w]/
+      );
+      done();
+    }); // 89.2.14
 
   }); // 89.2
 

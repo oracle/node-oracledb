@@ -318,7 +318,7 @@ describe('44. plsqlBindIndexedTable2.js', function() {
     ], done);
   });
 
-  it.skip('44.3 default binding type and direction with binding by name', function(done) {
+  it('44.3 default binding type and direction with binding by name', function(done) {
     async.series([
       // Pass arrays of values to a PL/SQL procedure
       function(callback) {
@@ -326,7 +326,7 @@ describe('44. plsqlBindIndexedTable2.js', function() {
           "BEGIN nodb_beachpkg.array_in(:beach_in, :depth_in); END;",
           {
             beach_in: { //type: oracledb.STRING,
-                        //dir:  oracledb.BIND_IN,
+              //dir:  oracledb.BIND_IN,
               val:  ["Malibu Beach", "Bondi Beach", "Waikiki Beach"] },
             depth_in: { type: oracledb.NUMBER,
               dir:  oracledb.BIND_IN,
@@ -400,7 +400,7 @@ describe('44. plsqlBindIndexedTable2.js', function() {
           "BEGIN nodb_beachpkg.array_in(:1, :2); END;",
           [
             { type: oracledb.STRING,
-               // dir:  oracledb.BIND_IN,
+              // dir:  oracledb.BIND_IN,
               val:  ["Malibu Beach", "Bondi Beach", "Waikiki Beach"] },
             { type: oracledb.NUMBER,
               dir:  oracledb.BIND_IN,
@@ -556,9 +556,7 @@ describe('44. plsqlBindIndexedTable2.js', function() {
             }
           },
           function(err) {
-            should.exist(err);
-            (err.message).should.startWith('NJS-039:');
-            // NJS-039: empty array is not allowed for IN bind
+            should.not.exist(err);
             callback();
           }
         );
@@ -580,7 +578,7 @@ describe('44. plsqlBindIndexedTable2.js', function() {
           },
           function(err) {
             should.exist(err);
-            (err.message).should.startWith('NJS-039:');
+            (err.message).should.startWith('NJS-035:');
             callback();
           }
         );
@@ -644,7 +642,7 @@ describe('44. plsqlBindIndexedTable2.js', function() {
     ], done);
   }); // 44.7
 
-  it.skip('44.8 maxSize option applies to each elements of an array', function(done) {
+  it('44.8 maxSize option applies to each elements of an array', function(done) {
     async.series([
       // Pass arrays of values to a PL/SQL procedure
       function(callback) {
@@ -707,11 +705,12 @@ describe('44. plsqlBindIndexedTable2.js', function() {
               val:  [8, 3, 70],
               maxArraySize: 3}
           },
-          function(err, result) {
-            should.not.exist(err);
-            //console.log(result.outBinds);
-            (result.outBinds.beach_inout).should.eql([ 'Chesil Beach', 'Eighty Mile Beach', 'Port Melbourne Beach' ]);
-            (result.outBinds.depth_inout).should.eql([ 70, 3, 8 ]);
+          function(err) {
+            should.exist(err);
+            should.strictEqual(
+              err.message,
+              "DPI-1019: buffer size of 5 is too small"
+            );
             callback();
           }
         );

@@ -294,7 +294,7 @@ describe('9. columnMetadata.js', function(){
           (result.metaData[1].name).should.eql('DEPARTMENT_NAME');
           (result.metaData[2].name).should.eql('MANAGER_ID');
           (result.metaData[3].name).should.eql('LOCATION_ID');
-          done();
+          result.resultSet.close(done);
         }
       );
     });

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -26,16 +26,26 @@
  *   Scripts to create the HR schema can be found at:
  *   https://github.com/oracle/db-sample-schemas
  *
- *  *****************************************************************************/
+ ******************************************************************************/
 
 var async = require('async');
 var oracledb = require('oracledb');
 var dbConfig = require('./dbconfig.js');
 
-// Properties are applicable to all connections and SQL executions.
-// They can also be set or overridden at the individual execute() call level
+// Oracledb properties are applicable to all connections and SQL
+// executions.  They can also be set or overridden at the individual
+// execute() call level
+
+// fetchArraySize can be adjusted to tune the internal data transfer
+// from the Oracle Database to node-oracledb.  The value does not
+// affect how, or when, rows are returned by node-oracledb to the
+// application.  Buffering is handled internally by node-oracledb.
+// Benchmark to choose the optimal size for each application or query.
 //
+// oracledb.fetchArraySize = 100;  // default value is 100
+
 // This script sets outFormat in the execute() call but it could be set here instead:
+//
 // oracledb.outFormat = oracledb.OBJECT;
 
 var doconnect = function(cb) {
@@ -76,7 +86,7 @@ var doquery_object = function (conn, cb) {
   conn.execute(
     "SELECT location_id, city FROM locations WHERE city LIKE 'S%' ORDER BY city",
     {}, // A bind variable parameter is needed to disambiguate the following options parameter
-        // otherwise you will get Error: ORA-01036: illegal variable name/number
+    // otherwise you will get Error: ORA-01036: illegal variable name/number
     { outFormat: oracledb.OBJECT }, // outFormat can be OBJECT or ARRAY.  The default is ARRAY
     function(err, result)
     {

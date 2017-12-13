@@ -97,6 +97,10 @@ describe('25. dataTypeNvarchar2.js', function() {
     it('25.1.3 works well with REF Cursor', function(done) {
       assist.verifyRefCursor(connection, tableName, strs, done);
     });
+
+    it('25.1.4 columns fetched from REF CURSORS can be mapped by fetchInfo settings', function(done) {
+      assist.verifyRefCursorWithFetchInfo(connection, tableName, strs, done);
+    });
   });
 
   describe('25.2 stores null value correctly', function() {

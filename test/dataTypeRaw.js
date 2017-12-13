@@ -35,13 +35,17 @@
 
 var oracledb = require('oracledb');
 var should   = require('should');
+var async    = require('async');
 var assist   = require('./dataTypeAssist.js');
 var dbConfig = require('./dbconfig.js');
+var random   = require('./random.js');
 
 describe('42. dataTypeRaw.js', function() {
 
   var connection = null;
   var tableName = "nodb_raw";
+  var node6plus = false; // assume node runtime version is lower than 6
+  var insertID = 1;
 
   var bufLen = [10 ,100, 1000, 2000]; // buffer length
   var bufs = [];
@@ -58,6 +62,9 @@ describe('42. dataTypeRaw.js', function() {
       function(err, conn) {
         should.not.exist(err);
         connection = conn;
+        if (process.versions["node"].substring (0, 1) >= "6") {
+          node6plus = true;
+        }
         done();
       }
     );
@@ -130,14 +137,14 @@ describe('42. dataTypeRaw.js', function() {
     it('42.1.5 a negative case which hits NJS-011 error', function(done) {
       connection.execute(
         "INSERT INTO " + tableName + " (content ) VALUES (:c)",
-         { c : { val: 1234, type: oracledb.BUFFER, dir:oracledb.BIND_IN } },
-         function(err, result) {
-           should.exist(err);
+        { c : { val: 1234, type: oracledb.BUFFER, dir:oracledb.BIND_IN } },
+        function(err, result) {
+          should.exist(err);
           // NJS-011: encountered bind value and type mismatch
-           (err.message).should.startWith('NJS-011:');
-           should.not.exist(result);
-           done();
-         }
+          (err.message).should.startWith('NJS-011:');
+          should.not.exist(result);
+          done();
+        }
       );
     });
 
@@ -329,7 +336,7 @@ describe('42. dataTypeRaw.js', function() {
       );
     });
 
-    it('42.4.1 when data length is less than maxSize', function(done) {
+    it('42.4.1 works well when the length of data is less than maxSize', function(done) {
       var size = 5;
       var buf = assist.createBuffer(size);
 
@@ -337,7 +344,7 @@ describe('42. dataTypeRaw.js', function() {
         "BEGIN nodb_testraw(:i, :o); END;",
         {
           i: { type: oracledb.BUFFER, dir: oracledb.BIND_IN, val: buf },
-          o: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: 10}
+          o: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: 32800}
         },
         function(err, result) {
           should.not.exist(err);
@@ -349,7 +356,7 @@ describe('42. dataTypeRaw.js', function() {
       );
     });
 
-    it('42.4.2 when data length is 32767', function(done) {
+    it('42.4.2 works well when the length of data is exactly 32767', function(done) {
       var size = 32767;
       var buf = assist.createBuffer(size);
 
@@ -369,15 +376,15 @@ describe('42. dataTypeRaw.js', function() {
       );
     });
 
-    it('42.4.3 when data length greater than maxSize', function(done) {
-      var size = 32800;
+    it('42.4.3 throws error when the length of data is greater than maxSize', function(done) {
+      var size = 32700;
       var buf = assist.createBuffer(size);
 
       connection.execute(
         "BEGIN nodb_testraw(:i, :o); END;",
         {
           i: { type: oracledb.BUFFER, dir: oracledb.BIND_IN, val: buf },
-          o: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: 32767}
+          o: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: (size-100) }
         },
         function(err) {
           should.exist(err);
@@ -388,7 +395,7 @@ describe('42. dataTypeRaw.js', function() {
       );
     });
 
-    it('42.4.4 when maxSize is greater than 32767', function(done) {
+    it('42.4.4 throws error when both data and maxSize are greater than 32767', function(done) {
       var size = 32800;
       var buf = assist.createBuffer(size);
 
@@ -407,5 +414,221 @@ describe('42. dataTypeRaw.js', function() {
       );
     });
   }); // 42.4
+
+  describe('42.5 INSERT and SELECT', function() {
+    before(function(done) {
+      assist.createTable(connection, tableName, done);
+    });
+
+    after(function(done) {
+      connection.execute(
+        "DROP table " + tableName + " PURGE",
+        function(err) {
+          should.not.exist(err);
+          done();
+        }
+      );
+    });
+
+    beforeEach(function(done) {
+      insertID++;
+      done();
+    });
+
+    it('42.5.1 works with data size 100', function(done) {
+      var insertedStr = random.getRandomLengthString(100);
+      var insertedBuf = node6plus ? Buffer.from(insertedStr) : new Buffer(insertedStr);
+      test1(insertedBuf, done);
+    });
+
+    it('42.5.2 works with data size 2000', function(done) {
+      var insertedStr = random.getRandomLengthString(2000);
+      var insertedBuf = node6plus ? Buffer.from(insertedStr) : new Buffer(insertedStr);
+      test1(insertedBuf, done);
+    });
+
+    it('42.5.3 works with default type/dir', function(done) {
+      var insertedStr = random.getRandomLengthString(2000);
+      var insertedBuf = node6plus ? Buffer.from(insertedStr) : new Buffer(insertedStr);
+      test1_default(insertedBuf, done);
+    });
+
+  }); // 42.5
+
+  describe('42.6 UPDATE', function() {
+    before(function(done) {
+      assist.createTable(connection, tableName, done);
+    });
+
+    after(function(done) {
+      connection.execute(
+        "DROP table " + tableName + " PURGE",
+        function(err) {
+          should.not.exist(err);
+          done();
+        }
+      );
+    });
+
+    beforeEach(function(done) {
+      insertID++;
+      done();
+    });
+
+    it('42.6.1 works with data size 100', function(done) {
+      var insertedStr = random.getRandomLengthString(20);
+      var updateStr = random.getRandomLengthString(100);
+      var insertedBuf = node6plus ? Buffer.from(insertedStr) : new Buffer(insertedStr);
+      var updateBuf = node6plus ? Buffer.from(updateStr) : new Buffer(updateStr);
+      test2(insertedBuf, updateBuf, done);
+    });
+
+    it('42.6.2 works with data size 2000', function(done) {
+      var insertedStr = random.getRandomLengthString(30);
+      var updateStr = random.getRandomLengthString(2000);
+      var insertedBuf = node6plus ? Buffer.from(insertedStr) : new Buffer(insertedStr);
+      var updateBuf = node6plus ? Buffer.from(updateStr) : new Buffer(updateStr);
+      test2(insertedBuf, updateBuf, done);
+    });
+
+    it('42.6.3 works with default type/dir', function(done) {
+      var insertedStr = random.getRandomLengthString(30);
+      var updateStr = random.getRandomLengthString(2000);
+      var insertedBuf = node6plus ? Buffer.from(insertedStr) : new Buffer(insertedStr);
+      var updateBuf = node6plus ? Buffer.from(updateStr) : new Buffer(updateStr);
+      test2_default(insertedBuf, updateBuf, done);
+    });
+
+  }); // 42.6
+
+  var test1 = function(content, callback) {
+    async.series([
+      function(cb) {
+        insert(content, cb);
+      },
+      function(cb) {
+        fetch(content, cb);
+      }
+    ], callback);
+  };
+
+  var test1_default = function(content, callback) {
+    async.series([
+      function(cb) {
+        insert_default(content, cb);
+      },
+      function(cb) {
+        fetch(content, cb);
+      }
+    ], callback);
+  };
+
+  var test2 = function(insertedStr, updateStr, callback) {
+    async.series([
+      function(cb) {
+        insert(insertedStr, cb);
+      },
+      function(cb) {
+        update(updateStr, cb);
+      },
+      function(cb) {
+        fetch(updateStr, cb);
+      }
+    ], callback);
+  };
+
+  var test2_default = function(insertedStr, updateStr, callback) {
+    async.series([
+      function(cb) {
+        insert(insertedStr, cb);
+      },
+      function(cb) {
+        update_default(updateStr, cb);
+      },
+      function(cb) {
+        fetch(updateStr, cb);
+      }
+    ], callback);
+  };
+
+  var insert = function(content, callback) {
+    var sql = "insert into " + tableName + " (num, content) values (:i, :c)";
+    var bindVar = {
+      i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
+      c: { val: content, dir: oracledb.BIND_IN, type: oracledb.BUFFER }
+    };
+    connection.execute(
+      sql,
+      bindVar,
+      function(err, result) {
+        should.not.exist(err);
+        (result.rowsAffected).should.be.exactly(1);
+        callback();
+      }
+    );
+  };
+
+  var insert_default = function(content, callback) {
+    var sql = "insert into " + tableName + " (num, content) values (:i, :c)";
+    var bindVar = {
+      i: insertID,
+      c: content
+    };
+    connection.execute(
+      sql,
+      bindVar,
+      function(err, result) {
+        should.not.exist(err);
+        (result.rowsAffected).should.be.exactly(1);
+        callback();
+      }
+    );
+  };
+
+  var update = function(content, callback) {
+    var sql = "update " + tableName + " set content = :c where num = :i";
+    var bindVar = {
+      i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
+      c: { val: content, dir: oracledb.BIND_IN, type: oracledb.BUFFER }
+    };
+    connection.execute(
+      sql,
+      bindVar,
+      function(err, result) {
+        should.not.exist(err);
+        (result.rowsAffected).should.be.exactly(1);
+        callback();
+      }
+    );
+  };
+
+  var update_default = function(content, callback) {
+    var sql = "update " + tableName + " set content = :c where num = :i";
+    var bindVar = {
+      i: insertID,
+      c: content
+    };
+    connection.execute(
+      sql,
+      bindVar,
+      function(err, result) {
+        should.not.exist(err);
+        (result.rowsAffected).should.be.exactly(1);
+        callback();
+      }
+    );
+  };
+
+  var fetch = function(expected, callback) {
+    var sql = "select content from " + tableName + " where num = " + insertID;
+    connection.execute(
+      sql,
+      function(err, result) {
+        should.not.exist(err);
+        assist.compare2Buffers(result.rows[0][0], expected);
+        callback();
+      }
+    );
+  };
 
 });

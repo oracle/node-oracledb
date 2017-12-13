@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -50,16 +50,22 @@ oracledb.getConnection(
     }
     connection.execute(
       // The statement to execute
-      "SELECT department_id, department_name " +
-        "FROM departments " +
-        "WHERE department_id = :id",
+      `SELECT department_id, department_name
+       FROM departments
+       WHERE department_id = :id`,
 
-      // The "bind value" 180 for the "bind variable" :id
+      // The "bind value" 180 for the bind variable ":id"
       [180],
 
-      // Optional execute options argument, such as the query result format
-      // or whether to get extra metadata
-      // { outFormat: oracledb.OBJECT, extendedMetaData: true },
+      // execute() options argument.  Since the query only returns one
+      // row, we can optimize memory usage by reducing the default
+      // maxRows value.  For the complete list of other options see
+      // the documentation.
+      { maxRows: 1
+        //, outFormat: oracledb.OBJECT  // query result format
+        //, extendedMetaData: true      // get extra metadata
+        //, fetchArraySize: 100         // internal buffer allocation size for tuning
+      },
 
       // The callback function handles the SQL execution results
       function(err, result)

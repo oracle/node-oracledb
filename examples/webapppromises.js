@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -105,9 +105,9 @@ function handleRequest(request, response, pool) {
       // console.log("Connections in use: " + pool.connectionsInUse);
 
       connection.execute(
-        "SELECT employee_id, first_name, last_name " +
-        "FROM employees " +
-        "WHERE department_id = :id",
+        `SELECT employee_id, first_name, last_name
+         FROM employees
+         WHERE department_id = :id`,
         [deptid] // bind variable value
       )
         .then(function(result) {

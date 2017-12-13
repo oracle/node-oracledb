@@ -81,6 +81,7 @@ describe('22. dataTypeChar.js', function(){
     });
 
     after(function(done) {
+      oracledb.fetchAsString = [];
       connection.execute(
         "DROP table " + tableName + " PURGE",
         function(err) {
@@ -101,6 +102,11 @@ describe('22. dataTypeChar.js', function(){
     it('22.1.3 works well with REF Cursor', function(done) {
       assist.verifyRefCursor(connection, tableName, strs, done);
     });
+
+    it('22.1.4 columns fetched from REF CURSORS can be mapped by fetchInfo settings', function(done) {
+      assist.verifyRefCursorWithFetchInfo(connection, tableName, strs, done);
+    });
+
   });
 
   describe('22.2 stores null value correctly', function() {

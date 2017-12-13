@@ -102,7 +102,7 @@ sql.createAllTable = function(tableName, dataTypeArray) {
     }
     isLast = (index == (length - 1)) ? true : false;
     sql = appendSql(sql, col_name, element, isLast);
-    // cb();
+    cb();
   }, function(err) {
     should.not.exist(err);
   });
@@ -113,11 +113,58 @@ sql.createAllTable = function(tableName, dataTypeArray) {
   return sql;
 };
 
-sql.executeSql = function(connection, sql) {
+sql.executeSql = function(connection, sql, bindVar, option, callback) {
   connection.execute(
     sql,
+    bindVar,
+    option,
     function(err) {
       should.not.exist(err);
+      callback();
+    }
+  );
+};
+
+sql.executeInsert = function(connection, sql, bindVar, option, callback) {
+  connection.execute(
+    sql,
+    bindVar,
+    option,
+    function(err, result) {
+      should.not.exist(err);
+      (result.rowsAffected).should.be.exactly(1);
+      callback();
+    }
+  );
+};
+
+sql.executeSqlWithErr = function(connection, sql, bindVar, option, callback) {
+  connection.execute(
+    sql,
+    bindVar,
+    option,
+    function(err) {
+      should.exist(err);
+      callback(err);
+    }
+  );
+};
+
+sql.createRowid = function(connection, rowid_type, object_number, relative_fno, block_number, row_number, callback) {
+// Parameter       Description
+// rowid_type      Type (restricted or extended), set the rowid_type parameter to 0 for a restricted ROWID. Set it to 1 to create an extended ROWID.
+//                 If you specify rowid_type as 0, then the required object_number parameter is ignored, and ROWID_CREATE returns a restricted ROWID.
+// object_number   The data object number for the ROWID. For a restricted ROWID, use the ROWID_OBJECT_UNDEFINED constant.
+// relative_fno    The relative file number for the ROWID.
+// block_number    The block number for the ROWID.
+// row_number      The row number for the ROWID.
+  var myRowid = "";
+  connection.execute(
+    "select DBMS_ROWID.ROWID_CREATE(" + rowid_type + ", " + object_number + ", " + relative_fno + ", " + block_number + ", " + row_number + ") create_rowid from dual",
+    function(err, result) {
+      should.not.exist(err);
+      myRowid = result.rows[0][0];
+      callback(myRowid);
     }
   );
 };

@@ -167,7 +167,7 @@ describe('19. fetchTimestampAsString.js', function() {
         }
       );
     }); // after
-   
+
     afterEach(function() {
       oracledb.fetchAsString = [];
     });
@@ -215,7 +215,7 @@ describe('19. fetchTimestampAsString.js', function() {
       var ref = assist.content.timestamp_3_2;
       test8(tableName, ref, done);
     });
-    
+
   }); // 19.2
 
   describe('19.3 testing maxRows setttings and queryStream() to fetch as string', function() {
@@ -224,7 +224,7 @@ describe('19. fetchTimestampAsString.js', function() {
     var defaultLimit = oracledb.maxRows;
 
     before(function(done) {
-      should.strictEqual(defaultLimit, 100);
+      should.strictEqual(defaultLimit, 0);
       assist.setUp4sql(connection, tableName, inData, done);
     });
 
@@ -246,7 +246,7 @@ describe('19. fetchTimestampAsString.js', function() {
     afterEach(function() {
       oracledb.maxRows = defaultLimit;
     });
-   
+
     it('19.3.1 works well when setting oracledb.maxRows > actual number of rows', function(done) {
       oracledb.maxRows = inData.length * 2;
       var ref = assist.content.timestamp_3_1;
@@ -287,7 +287,7 @@ describe('19. fetchTimestampAsString.js', function() {
 
 
   }); // 19.3
-  
+
   // fetchInfo option
   function test1(table, want, callback) {
     connection.execute(
@@ -479,10 +479,10 @@ describe('19. fetchTimestampAsString.js', function() {
   function test9(table, want, callback) {
     var sql = "select content from " + table + " order by num";
     var stream = connection.queryStream(
-                   sql,
-                   [],
-                   { fetchInfo: { "CONTENT": { type: oracledb.STRING } } }
-                 );
+      sql,
+      [],
+      { fetchInfo: { "CONTENT": { type: oracledb.STRING } } }
+    );
 
     var result = [];
     stream.on('data', function(data) {
@@ -492,7 +492,7 @@ describe('19. fetchTimestampAsString.js', function() {
 
     stream.on('end', function() {
       should.deepEqual(result, want);
-      setTimeout(callback, 100);
+      callback();
     });
   }
 
