@@ -22,7 +22,7 @@
  *   3. examples.js
  *
  * DESCRIPTION
- *   Testing the example programs in examples directory.
+ *   Test the example programs in examples/ directory.
  *
  * NUMBERING RULE
  *   Test numbers follow this numbering rule:
@@ -38,41 +38,51 @@ var should   = require('should');
 var async    = require('async');
 var dbConfig = require('./dbconfig.js');
 
-describe('3. examples.js', function(){
+describe('3. examples.js', function() {
 
-  var credentials = {
-    user:          dbConfig.user,
-    password:      dbConfig.password,
-    connectString: dbConfig.connectString
-  };
-
-  describe('3.1 connect.js', function(){
+  describe('3.1 connect.js', function() {
     it('3.1.1 tests a basic connection to the database', function(done){
-      oracledb.getConnection(credentials, function(error, connection){
-        should.not.exist(error);
-        connection.should.be.ok();
-        connection.release( function(err){
+      oracledb.getConnection(
+        dbConfig,
+        function(err, connection){
           should.not.exist(err);
-          done();
+          connection.should.be.ok();
+          connection.release( function(err){
+            should.not.exist(err);
+            done();
+          });
         });
-      });
     });
-  });
+  }); // 3.1
 
   describe('3.2 version.js', function(){
-    it('3.2.1 shows the oracledb version attribute', function(){
-      (oracledb.version).should.be.a.Number();
-      (oracledb.version).should.be.greaterThan(0);
-      // console.log("Driver version number is " + oracledb.version);
+    it('3.2.1 shows the node-oracledb version attributes', function(done){
 
-      var major = Math.floor(oracledb.version/10000);
-      var minor = Math.floor(oracledb.version/100) % 100;
-      var patch = oracledb.version % 100;
+      var addonVer, clientVer, serverVer;
 
-      (major).should.be.a.Number();
-      (minor).should.be.a.Number();
-      (patch).should.be.a.Number();
-      // console.log("Driver version text is " + major + "." + minor + "." + patch);
+      addonVer = oracledb.version;
+      (addonVer).should.be.a.Number();
+      (addonVer).should.be.greaterThan(0);
+
+      clientVer = oracledb.oracleClientVersion;
+      (clientVer).should.be.a.Number();
+      (clientVer).should.be.greaterThan(0);
+
+      oracledb.getConnection(
+        dbConfig,
+        function(err, connection) {
+          should.not.exist(err);
+
+          serverVer = connection.oracleServerVersion;
+          (serverVer).should.be.a.Number();
+
+          connection.close(function(err) {
+            should.not.exist(err);
+            done();
+          });
+        }
+      );
+
     });
   });
 
@@ -80,20 +90,21 @@ describe('3. examples.js', function(){
     var connection = false;
 
     before(function(done){
-      oracledb.getConnection(credentials, function(err, conn) {
-        if(err) { console.error(err.message); return; }
-        connection = conn;
-        done();
-      });
+      oracledb.getConnection(
+        dbConfig,
+        function(err, conn) {
+          should.not.exist(err);
+          connection = conn;
+          done();
+        }
+      );
     });
 
     after(function(done){
-      if(connection){
-        connection.release( function(err){
-          if(err) { console.error(err.message); return; }
-          done();
-        });
-      }
+      connection.close(function(err) {
+        should.not.exist(err);
+        done();
+      });
     });
 
     it('3.3.1. execute a basic query', function(done){
@@ -234,301 +245,429 @@ describe('3. examples.js', function(){
 
   /* Oracle Database 12.1.0.2 has extensive JSON datatype support */
   describe('3.4 selectjson.js - 12.1.0.2 feature', function(){
-    var connection = false;
 
-    before(function(done){
-      oracledb.getConnection(credentials, function(err, conn){
-        if(err) { console.error(err.message); return; }
-        connection = conn;
-        done();
-      });
-    });
+    var connection = null;
+    var testData = { "userId": 1, "userName": "Chris", "location": "Australia" };
+    var featureAvailable = true;
 
-    after(function(done){
-      connection.release( function(err){
-        if(err) { console.error(err.message); return; }
-        done();
-      });
-    });
+    before(function(done) {
+      async.series([
+        function(cb) {
+          oracledb.getConnection(dbConfig, function(err, conn) {
+            should.not.exist(err);
+            connection = conn;
+            if (connection.oracleServerVersion < 1201000200)
+              featureAvailable = false;
 
-    it('3.4.1 executes a query from a JSON table', function(done){
-      if (connection.oracleServerVersion < 1201000200)
-      {
-        // This example only works with Oracle Database 12.1.0.2 or greater
-        done();
-      }
-      else
-      {
-        var data = { "userId": 1, "userName": "Chris" };
-        var s = JSON.stringify(data);
-        var script =
-          "BEGIN " +
-          "   DECLARE " +
-          "       e_table_missing EXCEPTION; " +
-          "       PRAGMA EXCEPTION_INIT(e_table_missing, -00942); " +
-          "   BEGIN " +
-          "       EXECUTE IMMEDIATE ('DROP TABLE nodb_purchaseorder PURGE'); " +
-          "   EXCEPTION " +
-          "       WHEN e_table_missing " +
-          "       THEN NULL; " +
-          "   END; " +
-          "   EXECUTE IMMEDIATE (' " +
-          "       CREATE TABLE nodb_purchaseorder ( " +
-          "           po_document VARCHAR2(4000) CONSTRAINT ensure_json CHECK (po_document IS JSON) " +
-          "       )" +
-          "   '); " +
-          "END; ";
-
-        connection.should.be.ok();
-        async.series([
-          function(callback){
+            cb();
+          });
+        },
+        function createTable(cb) {
+          if (!featureAvailable) {
+            cb();
+          } else {
+            var sql = "BEGIN \n" +
+                      "   DECLARE \n" +
+                      "       e_table_missing EXCEPTION; \n" +
+                      "       PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
+                      "   BEGIN \n" +
+                      "       EXECUTE IMMEDIATE ('DROP TABLE nodb_purchaseorder PURGE'); \n" +
+                      "   EXCEPTION \n" +
+                      "       WHEN e_table_missing \n" +
+                      "       THEN NULL; \n" +
+                      "   END; \n" +
+                      "   EXECUTE IMMEDIATE (' \n" +
+                      "       CREATE TABLE nodb_purchaseorder ( \n" +
+                      "           po_document VARCHAR2(4000) CONSTRAINT ensure_json CHECK (po_document IS JSON) \n" +
+                      "       ) \n" +
+                      "   '); \n" +
+                      "END; ";
             connection.execute(
-              script,
-              function(err){
+              sql,
+              function(err) {
                 should.not.exist(err);
-                callback();
-              }
-            );
-          },
-          function(callback){
-            connection.execute(
-              "INSERT INTO nodb_purchaseorder (po_document) VALUES (:bv)",
-              [s],
-              function(err, result){
-                should.not.exist(err);
-                (result.rowsAffected).should.be.exactly(1);
-                callback();
-              }
-            );
-          },
-          function(callback){
-            connection.execute(
-              "SELECT po_document FROM nodb_purchaseorder",
-              function(err, result){
-                should.not.exist(err);
-
-                var js = JSON.parse(result.rows[0][0]);
-                // console.log(js);
-                js.should.eql(data);
-
-                callback();
-              }
-            );
-          },
-          function(callback){
-            connection.execute(
-              "DROP TABLE nodb_purchaseorder PURGE",
-              function(err){
-                should.not.exist(err);
-                callback();
+                cb();
               }
             );
           }
-        ], done);
+        },
+        function insertData(cb) {
+          if (!featureAvailable) {
+            cb();
+          } else {
+            var s = JSON.stringify(testData);
+            var sql = "INSERT INTO nodb_purchaseorder (po_document) VALUES (:bv)";
+            connection.execute(
+              sql,
+              [s],
+              function(err, result) {
+                should.not.exist(err);
+                should.exist(result);
+                should.strictEqual(result.rowsAffected, 1);
+                cb();
+              }
+            );
+          }
+        }
+      ], done);
+    }); // before
 
-      } // else
+    after(function(done) {
+      async.series([
+        function(cb) {
+          if (!featureAvailable) {
+            cb();
+          } else {
+            var sql = "DROP TABLE nodb_purchaseorder PURGE";
+            connection.execute(
+              sql,
+              function(err) {
+                should.not.exist(err);
+                cb();
+              }
+            );
+          }
+        },
+        function(cb) {
+          connection.close(function(err) {
+            should.not.exist(err);
+            cb();
+          });
+        }
+      ], done);
+    }); // after
 
+    it('3.4.1 Selecting JSON stored in a VARCHAR2 column', function(done) {
+
+      if (!featureAvailable) {
+        done();
+      } else {
+        var sql = "SELECT po_document FROM nodb_purchaseorder WHERE JSON_EXISTS (po_document, '$.location')";
+        connection.execute(
+          sql,
+          function(err, result) {
+            should.not.exist(err);
+            var js = JSON.parse(result.rows[0][0]);  // just show first record
+            //console.log('Query results: ', js);
+            should.deepEqual(js, testData);
+            done();
+          }
+        );
+      }
+    });
+
+    it('3.4.2 Using JSON_VALUE to extract a value from a JSON column', function(done) {
+
+      if (!featureAvailable) {
+        done();
+      } else {
+        var sql = "SELECT JSON_VALUE(po_document, '$.location') FROM nodb_purchaseorder";
+        connection.execute(
+          sql,
+          function(err, result) {
+            should.not.exist(err);
+            //console.log('Query results: ', result.rows[0][0]);
+            should.strictEqual(result.rows[0][0], "Australia");
+            done();
+          }
+        );
+      }
+    });
+
+    it('3.4.3 Using JSON_OBJECT to extract relational data as JSON', function(done) {
+      // JSON_OBJECT is new in Oracle Database 12.2
+      if (connection.oracleServerVersion < 1202000000) {
+        done();
+      } else {
+        var sql = "SELECT JSON_OBJECT ('doc' IS d.po_document) department \n" +
+                  "FROM nodb_purchaseorder d";
+        connection.execute(
+          sql,
+          function(err, result) {
+            should.not.exist(err);
+            //console.log(result.rows[0][0]);
+            var js = JSON.parse(result.rows[0][0]);
+            should.deepEqual(js.doc, testData);
+            done();
+          }
+        );
+      }
     });
 
   });
 
-  describe('3.5 date.js', function(){
-    var connection = false;
-    var script =
-      "BEGIN " +
-      "   DECLARE " +
-      "       e_table_missing EXCEPTION; " +
-      "       PRAGMA EXCEPTION_INIT(e_table_missing, -00942); " +
-      "   BEGIN " +
-      "       EXECUTE IMMEDIATE ('DROP TABLE nodb_eg_testdate PURGE'); " +
-      "   EXCEPTION " +
-      "       WHEN e_table_missing " +
-      "       THEN NULL; " +
-      "   END; " +
-      "   EXECUTE IMMEDIATE (' " +
-      "       CREATE TABLE nodb_eg_testdate ( " +
-      "           timestampcol TIMESTAMP, " +
-      "           datecol DATE " +
-      "       )" +
-      "   '); " +
-      "END; ";
-
-    var date = new Date();
-
-    before(function(done){
-      oracledb.getConnection(credentials, function(err, conn){
-        if(err) { console.error(err.message); return; }
-        connection = conn;
-        done();
-      });
-    });
-
-    after(function(done){
-      connection.release( function(err){
-        if(err) { console.error(err.message); return; }
-        done();
-      });
-    });
+  describe('3.5 date.js', function() {
 
     it('3.5.1 inserts and query DATE and TIMESTAMP columns', function(done){
-      async.series([
-        function(callback){  // create table
-          connection.execute(
-            script,
-            function(err){
-              should.not.exist(err);
-              callback();
-            }
-          );
-        },
-        function(callback){   // insert data
-          connection.execute(
-            "INSERT INTO nodb_eg_testdate (timestampcol, datecol) VALUES (:ts, :td)",
-            { ts: date, td: date },
-            { autoCommit: false },
-            function(err){
-              should.not.exist(err);
-              callback();
-            }
-          );
-        },
-        function(callback){    // select data
-          connection.execute(
-            "SELECT timestampcol, datecol FROM nodb_eg_testdate",
-            function(err, result){
-              should.not.exist(err);
-              var ts = result.rows[0][0];
-              ts.setDate(ts.getDate() + 5);
-              // console.log(ts);
+      var conn = null;
 
-              var d = result.rows[0][1];
-              d.setDate(d.getDate() - 5);
-              // console.log(d);
-              callback();
-            }
-          );
-        },
-        function(callback){
-          connection.rollback( function(err){
+      var doConnect = function(cb) {
+        oracledb.getConnection(
+          dbConfig,
+          function(err, connection) {
             should.not.exist(err);
-            callback();
+            conn = connection;
+            cb();
+          }
+        );
+      };
+
+      var doRelease = function(cb) {
+        conn.close( function(err) {
+          should.not.exist(err);
+          cb();
+        });
+      };
+
+      var doCreateTable = function(cb) {
+
+        var sql = "BEGIN \n" +
+                  "   DECLARE \n" +
+                  "       e_table_missing EXCEPTION; \n" +
+                  "       PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
+                  "   BEGIN \n" +
+                  "       EXECUTE IMMEDIATE ('DROP TABLE nodb_eg_testdate PURGE'); \n" +
+                  "   EXCEPTION \n" +
+                  "       WHEN e_table_missing \n" +
+                  "       THEN NULL; \n" +
+                  "   END; \n" +
+                  "   EXECUTE IMMEDIATE (' \n" +
+                  "       CREATE TABLE nodb_eg_testdate ( \n" +
+                  "           timestampcol TIMESTAMP, \n" +
+                  "           datecol DATE \n" +
+                  "       ) \n" +
+                  "   '); \n" +
+                  "END; \n";
+
+        conn.execute(
+          sql,
+          function(err) {
+            should.not.exist(err);
+            cb();
+          }
+        );
+      };
+
+      var doDropTable = function(cb) {
+        var sql = "DROP TABLE nodb_eg_testdate PURGE";
+        conn.execute(
+          sql,
+          function(err) {
+            should.not.exist(err);
+            cb();
+          }
+        );
+      };
+
+      // Setting a local timezone in applications is recommended.
+      // Note setting the environment variable ORA_SDTZ is an efficient alternative.
+      var doAlter = function(cb) {
+        //console.log('Altering session time zone');
+        conn.execute(
+          "ALTER SESSION SET TIME_ZONE='UTC'",
+          function(err) {
+            should.not.exist(err);
+            cb();
           });
-        },
-        function(callback){
-          connection.execute(
-            "DROP TABLE nodb_eg_testdate PURGE",
-            function(err){
-              should.not.exist(err);
-              callback();
-            }
-          );
-        }
+      };
+
+      var doInsert = function(cb) {
+        var date = new Date();
+        //console.log("Inserting JavaScript date: " + date);
+
+        var sql = "INSERT INTO nodb_eg_testdate (timestampcol, datecol) VALUES (:ts, :td)";
+        conn.execute(
+          sql,
+          { ts: date, td: date },
+          function(err, result) {
+            should.not.exist(err);
+            should.strictEqual(result.rowsAffected, 1);
+            cb();
+          }
+        );
+      };
+
+      var doselect = function(cb) {
+        var sql = "SELECT timestampcol, datecol FROM nodb_eg_testdate";
+        conn.execute(
+          sql,
+          function(err, result) {
+            should.not.exist(err);
+            //console.log("Query Results:");
+            //console.log(result.rows);
+
+            // Show the queried dates are of type Date
+            //console.log("Result Manipulation in JavaScript:");
+            var ts = result.rows[0][0];
+            ts.setDate(ts.getDate() + 5);
+            //console.log(ts);
+
+            var d = result.rows[0][1];
+            d.setDate(d.getDate() - 5);
+            //console.log(d);
+
+            cb();
+          }
+        );
+      };
+
+      async.series([
+        doConnect,
+        doCreateTable,
+        doInsert,
+        doselect,
+        doAlter,
+        doselect,
+        doDropTable,
+        doRelease
       ], done);
     });
 
   });
 
-  describe('3.6 rowlimit.js', function(){
-    var connection = false;
+  describe('3.6 rowlimit.js', function() {
 
-    var createTable =
-      "BEGIN \
-          DECLARE \
-              e_table_missing EXCEPTION; \
-              PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \
-          BEGIN \
-              EXECUTE IMMEDIATE ('DROP TABLE nodb_eg_emp6 PURGE'); \
-          EXCEPTION \
-              WHEN e_table_missing \
-              THEN NULL; \
-          END; \
-          EXECUTE IMMEDIATE (' \
-              CREATE TABLE nodb_eg_emp6 ( \
-                  employees_id NUMBER,  \
-                  employees_name VARCHAR2(20) \
-              ) \
-          '); \
-      END; ";
+    it("3.6.1 shows ways to limit the number of records fetched by queries", function(done) {
 
-    var insertRows =
-      "DECLARE \
-          x NUMBER := 0; \
-          n VARCHAR2(20); \
-       BEGIN \
-          FOR i IN 1..107 LOOP \
-             x := x + 1; \
-             n := 'staff ' || x; \
-             INSERT INTO nodb_eg_emp6 VALUES (x, n); \
-          END LOOP; \
-       END; ";
+      var conn;
+      var doConnect = function(cb) {
+        oracledb.getConnection(
+          dbConfig,
+          function(err, connection) {
+            should.not.exist(err);
+            conn = connection;
+            cb();
+          }
+        );
+      };
 
-    before(function(done){
-      oracledb.getConnection(credentials, function(err, conn){
-        if(err) { console.error(err.message); return; }
-        connection = conn;
-        connection.execute(createTable, function(err){
-          if(err) { console.error(err.message); return; }
-          connection.execute(insertRows, function(err){
-            if(err) { console.error(err.message); return; }
-            done();
-          });
+      var doRelease = function(cb) {
+        conn.close( function(err) {
+          should.not.exist(err);
+          cb();
         });
-      });
-    });
+      };
 
-    after(function(done){
-      connection.execute(
-        'DROP TABLE nodb_eg_emp6 PURGE',
-        function(err){
-          if(err) { console.error(err.message); return; }
-          connection.release( function(err){
-            if(err) { console.error(err.message); return; }
-            done();
-          });
+      var doCreateTable = function(cb) {
+        var sql = "BEGIN \n" +
+                  "   DECLARE \n" +
+                  "       e_table_missing EXCEPTION; \n" +
+                  "       PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
+                  "   BEGIN \n" +
+                  "       EXECUTE IMMEDIATE ('DROP TABLE nodb_eg_emp6 PURGE'); \n" +
+                  "   EXCEPTION \n" +
+                  "       WHEN e_table_missing \n" +
+                  "       THEN NULL; \n" +
+                  "   END; \n" +
+                  "   EXECUTE IMMEDIATE (' \n" +
+                  "       CREATE TABLE nodb_eg_emp6 ( \n" +
+                  "           id NUMBER, \n" +
+                  "           name VARCHAR2(20) \n" +
+                  "       ) \n" +
+                  "   '); \n" +
+                  "END; \n";
+
+        conn.execute(
+          sql,
+          function(err) {
+            should.not.exist(err);
+            cb();
+          }
+        );
+      };
+
+      var doDropTable = function(cb) {
+        var sql = "DROP TABLE nodb_eg_emp6 PURGE";
+        conn.execute(
+          sql,
+          function(err) {
+            should.not.exist(err);
+            cb();
+          }
+        );
+      };
+
+      var doInsert = function(cb) {
+        var sql = "DECLARE \n" +
+                  "    x NUMBER := 0; \n" +
+                  "    n VARCHAR2(20); \n" +
+                  "BEGIN \n" +
+                  "    FOR i IN 1..107 LOOP \n" +
+                  "        x := x +1; \n" +
+                  "        n := 'staff ' || x; \n" +
+                  "        INSERT INTO nodb_eg_emp6 VALUES (x, n); \n" +
+                  "    END LOOP; \n" +
+                  "END; ";
+        conn.execute(
+          sql,
+          function(err) {
+            should.not.exist(err);
+            cb();
+          }
+        );
+      };
+
+      var doSelect = function(cb) {
+
+        var myoffset     = 2;  // number of rows to skip
+        var mymaxnumrows = 6;  // number of rows to fetch
+
+        var sql = "SELECT id, name FROM nodb_eg_emp6 ORDER BY id";
+        if (conn.oracleServerVersion >= 1201000000) {
+          // 12c row-limiting syntax
+          sql += " OFFSET :offset ROWS FETCH NEXT :maxnumrows ROWS ONLY";
+        } else {
+          // Pre-12c syntax [could also customize the original query and use row_number()]
+          sql = "SELECT * FROM (SELECT A.*, ROWNUM AS MY_RNUM FROM"
+              + "(" + sql + ") A "
+              + "WHERE ROWNUM <= :maxnumrows + :offset) WHERE MY_RNUM > :offset";
         }
-      );
-    });
 
-    it.skip('3.6.1 by default, the number is 100', function(done){
-      var defaultLimit = oracledb.maxRows;
-      defaultLimit.should.be.exactly(100);
+        conn.execute(
+          sql,
+          { offset: myoffset, maxnumrows: mymaxnumrows },
+          { maxRows: 25 },
+          function(err, result) {
+            should.not.exist(err);
+            //console.log("Executed: " + sql);
+            //console.log("Number of rows returned: " + result.rows.length);
+            //console.log(result.rows);
 
-      connection.should.be.ok();
-      connection.execute(
-        "SELECT * FROM nodb_eg_emp6 ORDER BY employees_id",
-        function(err, result){
-          should.not.exist(err);
-          should.exist(result);
-          // Return 100 records although the table has 107 rows.
-          (result.rows).should.have.length(100);
-          done();
-        }
-      );
-    });
+            should.strictEqual(result.rows.length, 6);
+            should.deepEqual(
+              result.rows,
+              [ [ 3, 'staff 3' ],
+                [ 4, 'staff 4' ],
+                [ 5, 'staff 5' ],
+                [ 6, 'staff 6' ],
+                [ 7, 'staff 7' ],
+                [ 8, 'staff 8' ] ]
+            );
+            cb();
+          }
+        );
 
-    it('3.6.2 can also specify for each execution', function(done){
-      connection.should.be.ok();
-      connection.execute(
-        "SELECT * FROM nodb_eg_emp6 ORDER BY employees_id",
-        {}, {maxRows: 25},
-        function(err, result){
-          should.not.exist(err);
-          should.exist(result);
-          // Return 25 records according to execution setting
-          (result.rows).should.have.length(25);
-          done();
-        }
-      );
-    });
+      };
 
-  });
+      async.series([
+        doConnect,
+        doCreateTable,
+        doInsert,
+        doSelect,
+        doDropTable,
+        doRelease
+      ], done);
 
-  describe('3.7 plsql.js', function(){
+    }); // 3.6.1
+  }); // 3.6
+
+  describe('3.7 plsqlproc.js and plsqlfun.js', function(){
+
     var connection = false;
 
     before(function(done){
-      oracledb.getConnection(credentials, function(err, conn){
-        if(err) { console.error(err.message); return; }
+      oracledb.getConnection(dbConfig, function(err, conn){
+        should.not.exist(err);
         connection = conn;
         done();
       });
@@ -536,19 +675,19 @@ describe('3. examples.js', function(){
 
     after(function(done){
       connection.release( function(err){
-        if(err) { console.error(err.message); return; }
+        should.not.exist(err);
         done();
       });
     });
 
-    it('3.7.1 can call PL/SQL procedure and binding parameters in various ways', function(done){
-      var proc =
-        "CREATE OR REPLACE PROCEDURE nodb_eg_proc7 (p_in IN VARCHAR2, p_inout IN OUT VARCHAR2, p_out OUT NUMBER) \
-           AS \
-           BEGIN \
-             p_inout := p_in || p_inout; \
-             p_out := 101; \
-           END; ";
+    it('3.7.1 calling PL/SQL procedure and binding parameters in various ways', function(done){
+
+      var proc = "CREATE OR REPLACE PROCEDURE nodb_eg_proc7 (p_in IN VARCHAR2, p_inout IN OUT VARCHAR2, p_out OUT NUMBER) \n" +
+                 "    AS \n" +
+                 "    BEGIN \n" +
+                 "        p_inout := p_in || p_inout; \n" +
+                 "        p_out := 101; \n" +
+                 "    END; ";
       var bindVars = {
         i:  'Chris',  // bind type is determined from the data type
         io: { val: 'Jones', dir : oracledb.BIND_INOUT },
@@ -589,13 +728,13 @@ describe('3. examples.js', function(){
       ], done);
     });
 
-    it('3.7.2 can call PL/SQL function', function(done) {
-      var proc =
-        "CREATE OR REPLACE FUNCTION nodb_eg_func7 (p1_in IN VARCHAR2, p2_in IN VARCHAR2) RETURN VARCHAR2 \
-           AS \
-           BEGIN \
-             return p1_in || p2_in; \
-           END; ";
+    it('3.7.2 calling PL/SQL function', function(done) {
+
+      var proc = "CREATE OR REPLACE FUNCTION nodb_eg_func7 (p1_in IN VARCHAR2, p2_in IN VARCHAR2) RETURN VARCHAR2 \n" +
+                 "AS \n" +
+                 "BEGIN \n" +
+                 "   return p1_in || p2_in; \n" +
+                 "END; ";
       var bindVars = {
         p1: 'Chris',
         p2: 'Jones',
@@ -660,7 +799,7 @@ describe('3. examples.js', function(){
       "END; ";
 
     before(function(done){
-      oracledb.getConnection(credentials, function(err, conn){
+      oracledb.getConnection(dbConfig, function(err, conn){
         if(err) { console.error(err.message); return; }
         connection = conn;
         done();
@@ -753,10 +892,10 @@ describe('3. examples.js', function(){
       "END; ";
 
     before(function(done){
-      oracledb.getConnection(credentials, function(err, conn){
+      oracledb.getConnection(dbConfig, function(err, conn){
         if(err) { console.error(err.message); return; }
         conn1 = conn;
-        oracledb.getConnection(credentials, function(err, conn){
+        oracledb.getConnection(dbConfig, function(err, conn){
           if(err) { console.error(err.message); return; }
           conn2 = conn;
           done();
@@ -871,7 +1010,7 @@ describe('3. examples.js', function(){
        END; ";
 
     before(function(done){
-      oracledb.getConnection(credentials, function(err, conn){
+      oracledb.getConnection(dbConfig, function(err, conn){
         if(err) { console.error(err.message); return; }
         connection = conn;
         connection.execute(createTable, function(err){
@@ -1033,7 +1172,7 @@ describe('3. examples.js', function(){
       async.series([
         function(callback) {
           oracledb.getConnection(
-            credentials,
+            dbConfig,
             function(err, conn) {
               should.not.exist(err);
               connection = conn;

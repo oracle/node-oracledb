@@ -26,7 +26,7 @@
 var oracledb = require('oracledb');
 var dbConfig = require('../dbconfig.js');
 
-var addonVer, clientVer, serverVer;
+var clientVer, serverVer;
 var major, minor, update, port, portUpdate;
 
 console.log("Run at: " + new Date());
