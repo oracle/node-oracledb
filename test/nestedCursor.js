@@ -216,9 +216,10 @@ describe('57. nestedCursor.js', function() {
       [],
       { resultSet: true },
       function(err, result) {
-        should.exist(err);
-        (err.message).should.startWith('NJS-010:');
-        // NJS-010: unsupported data type in select list
+        should.strictEqual(
+          err.message,
+          "NJS-010: unsupported data type 2021 in column 2"
+        );
         should.not.exist(result);
         done();
       }
@@ -258,9 +259,10 @@ describe('57. nestedCursor.js', function() {
             out: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
           },
           function(err, result) {
-            should.exist(err);
-            (err.message).should.startWith('NJS-010:');
-            // NJS-010: unsupported data type in select list
+            should.strictEqual(
+              err.message,
+              "NJS-010: unsupported data type 2021 in column 2"
+            );
             should.not.exist(result);
             callback();
           }

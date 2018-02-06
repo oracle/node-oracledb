@@ -48,7 +48,7 @@ typedef enum {
     errInvalidPropertyValueInParam,
     errInvalidPropertyTypeInParam,
     errInvalidNumberOfParameters,
-    errUnsupportedDatType,
+    errUnsupportedDataType,
     errBindValueAndTypeMismatch,
     errInvalidBindDataType,
     errInvalidBindDirection,

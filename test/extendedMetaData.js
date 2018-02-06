@@ -1140,12 +1140,14 @@ describe('17. extendedMetaData.js', function() {
     it('17.3.30 INTERVAL YEAR TO MONTH', function(done) {
 
       connection.execute(
-        "SELECT iym FROM nodb_metadata",
+        "SELECT vch, iym FROM nodb_metadata",
         [],
         { extendedMetaData: true },
         function(err, result) {
-          (err.message).should.startWith('NJS-010:');
-          // NJS-010: unsupported data type in select list
+          should.strictEqual(
+            err.message,
+            "NJS-010: unsupported data type 2016 in column 2"
+          );
           should.not.exist(result);
           done();
         }
@@ -1160,8 +1162,10 @@ describe('17. extendedMetaData.js', function() {
         [],
         { extendedMetaData: true },
         function(err, result) {
-          (err.message).should.startWith('NJS-010:');
-          // NJS-010: unsupported data type in select list
+          should.strictEqual(
+            err.message,
+            "NJS-010: unsupported data type 2015 in column 1"
+          );
           should.not.exist(result);
           done();
         }
@@ -1276,9 +1280,10 @@ describe('17. extendedMetaData.js', function() {
         [],
         { extendedMetaData: true },
         function(err, result) {
-          (err.message).should.startWith('NJS-010:');
-          // NJS-010: unsupported data type in select list
-
+          should.strictEqual(
+            err.message,
+            "NJS-010: unsupported data type 2020 in column 1"
+          );
           should.not.exist(result);
           done();
         }

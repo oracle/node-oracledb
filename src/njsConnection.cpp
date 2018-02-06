@@ -219,7 +219,8 @@ bool njsConnection::ProcessQueryVars(njsBaton *baton, dpiStmt *dpiStmtHandle,
             case DPI_ORACLE_TYPE_ROWID:
                 break;
             default:
-                baton->error = njsMessages::Get(errUnsupportedDatType);
+                baton->error = njsMessages::Get(errUnsupportedDataType,
+                        queryInfo.typeInfo.oracleTypeNum, i + 1);
                 baton->ClearAsyncData();
                 return false;
         }

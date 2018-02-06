@@ -45,7 +45,7 @@ static const char *errMsg[] = {
     "NJS-007: invalid value for \"%s\" in parameter %d", // errInvalidPropertyValueInParam
     "NJS-008: invalid type for \"%s\" in parameter %d",  // errInvalidPropertyTypeInParam
     "NJS-009: invalid number of parameters",         // errInvalidNumberOfParameters
-    "NJS-010: unsupported data type in select list", // errUnsupportedDatType
+    "NJS-010: unsupported data type %d in column %u", // errUnsupportedDataType
     "NJS-011: encountered bind value and type mismatch", // errBindValueAndTypeMismatch
     "NJS-012: encountered invalid bind data type in parameter %d", // errInvalidBindDataType
     "NJS-013: invalid bind direction",               // errInvalidBindDirection

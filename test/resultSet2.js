@@ -750,9 +750,10 @@ describe('55. resultSet2.js', function() {
         [],
         { resultSet: true },
         function(err, result) {
-          should.exist(err);
-          (err.message).should.startWith('NJS-010:');
-          // NJS-010: unsupported data type in select list
+          should.strictEqual(
+            err.message,
+            "NJS-010: unsupported data type 2016 in column 2"
+          );
           should.not.exist(result);
           done();
         }
