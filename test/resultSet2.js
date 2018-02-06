@@ -290,14 +290,14 @@ describe('55. resultSet2.js', function() {
           return fetchRowFromRS(rs, cb);
         } else {
           testConn.release(function(err) {
-            should.exist(err);
-            should.strictEqual(
-              err.message,
-              "DPI-1054: connection cannot be closed when open statements or LOBs exist"
-            );
+            should.not.exist(err);
             rs.close(function(err) {
-              should.not.exist(err);
-              testConn.release(cb);
+              should.exist(err);
+              should.strictEqual(
+                err.message,
+                "NJS-018: invalid ResultSet"
+              );
+              cb();
             });
           });
         }

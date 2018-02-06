@@ -20,6 +20,7 @@
              "odpi/src/dpiError.c",
              "odpi/src/dpiGen.c",
              "odpi/src/dpiGlobal.c",
+             "odpi/src/dpiHandleList.c",
              "odpi/src/dpiHandlePool.c",
              "odpi/src/dpiLob.c",
              "odpi/src/dpiMsgProps.c",
