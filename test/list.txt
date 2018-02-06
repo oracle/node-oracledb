@@ -295,12 +295,20 @@ Overview of node-oracledb functional tests
         13.1.9 Read CLOBs after stream close
         13.1.10 meta data
         13.1.11 stream stress test
-    13.2 Testing QueryStream._close
-        13.2.1 should be able to stop the stream early with _close
+        13.1.12 should emit events in the correct order
+    13.2 Testing QueryStream.destroy
+        13.2.1 should be able to stop the stream early with destroy
         13.2.2 should be able to stop the stream before any data
-        13.2.3 should invoke an optional callback passed to _close
+        13.2.3 should invoke an optional callback passed to destroy
+        13.2.4 should work if querystream is destroyed before resultset is opened
+        13.2.5 should work if querystream is destroyed after end event
+        13.2.6 should emit the error passed in
     13.3 Testing QueryStream's fetchArraySize option
         13.3.1 should use oracledb.fetchArraySize for fetching
+        13.3.2 should use execute option fetchArraySize for fetching
+    13.4 Testing QueryStream other race conditions
+        13.4.1 queryStream from toQueryStream should get open event
+        13.4.2 queryStream from toQueryStream should get metadata event
 
 14. stream2.js
     14.1 Bind by position and return an array

@@ -231,6 +231,7 @@ limitations under the License.
 21. [Async/Await and node-oracledb](#asyncawaitoverview)
 22. [Tracing SQL and PL/SQL Statements](#tracingsql)
 23. [Migrating from node-oracledb 1.13 to node-oracledb 2.0](#migratev1v2)
+24. [Migrating from node-oracledb 2.0 to node-oracledb 2.1](#migratev20v21)
 
 ## <a name="intro"></a> 1. Introduction
 
@@ -3783,7 +3784,7 @@ function fetchRowsFromRS(connection, resultSet, numRows)
 
 #### <a name="streamingresults"></a> 9.1.3 Query Streaming
 
-Streaming query results allows data to be piped to other streams, for
+Streaming of query results allows data to be piped to other streams, for
 example when dealing with HTTP responses.
 
 Use [`connection.queryStream()`](#querystream) to create a stream from
@@ -3797,27 +3798,21 @@ With streaming, each row is returned as a `data` event.  Query
 metadata is available via a `metadata` event.  The `end` event
 indicates the end of the query results.
 
+Query results should be fetched to completion to avoid resource leaks,
+or (from Node.js 8 onwards) the Stream [`destroy()`][92] method can be
+used to terminate a stream early.  For older Node.js versions use a
+[ResultSet with callbacks](#resultsethandling) if you need to stop a
+query before retrieving all data.  Note the previous, experimental
+`_close()` method no longer emits a 'close' event.
+
 The connection must remain open until the stream is completely read.
 
 The query stream implementation is a wrapper over the [ResultSet
-Class](#resultsetclass).  In particular, calls to
-[getRows()](#getrows) are made internally to fetch each successive
-subset of data, each row of which will generate a `data` event.  The
-number of rows fetched from the database by each `getRows()` call is
-set to the value of [`oracledb.fetchArraySize`](#propdbfetcharraysize)
-or the option [`fetchArraySize`](#propexecfetcharraysize).  This value
-does not alter the number of rows returned by the stream since
-`getRows()` will be called each time more rows are needed.  However
-the value can be used to tune performance.
-
-Query results must be fetched to completion to avoid resource leaks.
-The ResultSet `close()` call for streaming query results will be
-executed internally when all data has been fetched.  If you need to be
-able to stop a query before retrieving all data, use a
-[ResultSet with callbacks](#resultsethandling).  (Note: An
-experimental `querystream._close()` method exists to terminate a
-stream early.  It is under evaluation, may changed or be removed, and
-should not be used in production.)
+Class](#resultsetclass).  In particular, successive calls to
+[getRow()](#getrow) are made internally.  Each row will generate a
+`data` event.  For tuning, adjust the value of
+[`oracledb.fetchArraySize`](#propdbfetcharraysize) or the `execute()`
+option [`fetchArraySize`](#propexecfetcharraysize).
 
 An example of streaming query results is:
 
@@ -6759,8 +6754,16 @@ When upgrading from node-oracledb version 1.13 to version 2.0:
 - Test applications to check if changes such as the improved property
   validation uncover latent problems in your code.
 
+## <a name="migratev20v21"></a> 24. Migrating from node-oracledb 2.0 to node-oracledb 2.1
 
+When upgrading from node-oracledb version 2.0 to version 2.1:
 
+- If using the experimental `_close` method with [Query
+  Streaming](#streamingresults) in Node 8 or later:
+
+  - Change the method name from `_close()` to [`destroy()`][92].
+  - Stop passing a callback.
+  - Optionally pass an error.
 
 [1]: https://www.npmjs.com/package/oracledb
 [2]: https://github.com/oracle/node-oracledb/blob/master/INSTALL.md
@@ -6853,3 +6856,4 @@ When upgrading from node-oracledb version 1.13 to version 2.0:
 [89]: https://github.com/oracle/node-oracledb/tree/master/examples/dbconfig.js
 [90]: https://docs.oracle.com/en/database/oracle/oracle-database/12.2/admin/getting-started-with-database-administration.html#GUID-5F1E393E-97B8-43BC-BD68-3595251A6F7C
 [91]: https://www.youtube.com/watch?v=WDJacg0NuLo
+[92]: https://nodejs.org/api/stream.html#stream_readable_destroy_error

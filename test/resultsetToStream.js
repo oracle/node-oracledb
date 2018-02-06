@@ -272,7 +272,8 @@ describe('15. resultsetToStream.js', function () {
             // NJS-042: cannot invoke methods after converting to stream
 
             // Closing cursor via stream._close because the cursor.close method
-            // is not invokable after conversion to stream.
+            // is not invokable after conversion to stream and destroy wasn't
+            // available till Node.js v8+.
             stream._close(function(err) {
               should.not.exist(err);
               done();
@@ -300,7 +301,8 @@ describe('15. resultsetToStream.js', function () {
             (err.message).should.startWith('NJS-042:');
 
             // Closing cursor via stream._close because the cursor.close method
-            // is not invokable after conversion to stream.
+            // is not invokable after conversion to stream and destroy wasn't
+            // available till Node.js v8+.
             stream._close(function(err) {
               should.not.exist(err);
               done();
@@ -328,7 +330,8 @@ describe('15. resultsetToStream.js', function () {
             (err.message).should.startWith('NJS-042:');
 
             // Closing cursor via stream._close because the cursor.close method
-            // is not invokable after conversion to stream.
+            // is not invokable after conversion to stream and destroy wasn't
+            // available till Node.js v8+.
             stream._close(function(err) {
               should.not.exist(err);
               done();
@@ -360,6 +363,9 @@ describe('15. resultsetToStream.js', function () {
           } catch (err) {
             (err.message).should.startWith('NJS-043:');
 
+            // Closing cursor via stream._close because the cursor.close method
+            // is not invokable after conversion to stream and destroy wasn't
+            // available till Node.js v8+.
             stream._close(function(err) {
               should.not.exist(err);
               done();

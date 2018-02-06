@@ -38,6 +38,9 @@ var should   = require('should');
 var async    = require('async');
 var dbConfig = require('./dbconfig.js');
 
+// Need to skip some tests if Node.js version is < 8
+var nodeMajorVersion = Number(process.versions.node.split('.')[0]);
+
 describe('13. stream1.js', function () {
 
   this.timeout(100000);
@@ -470,16 +473,52 @@ describe('13. stream1.js', function () {
         });
       });
     });
+
+    it('13.1.12 should emit events in the correct order', function (done) {
+      var stream = connection.queryStream('SELECT employee_name FROM nodb_stream1 WHERE rownum = 1');
+      var events = [];
+
+      stream.on('open', function() {
+        events.push('open');
+      });
+
+      stream.on('metadata', function() {
+        events.push('metadata');
+      });
+
+      stream.on('data', function () {
+        events.push('data');
+      });
+
+      stream.on('end', function () {
+        events.push('end');
+      });
+
+      stream.on('close', function() {
+        events[0].should.equal('open');
+        events[1].should.equal('metadata');
+        events[2].should.equal('data');
+        events[3].should.equal('end');
+        // This is close so no need to check
+
+        done();
+      });
+
+      stream.on('error', function () {
+        done(new Error('Test should not have thrown an error'));
+      });
+    });
   });
 
-  describe('13.2 Testing QueryStream._close', function () {
-    it('13.2.1 should be able to stop the stream early with _close', function (done) {
+  describe('13.2 Testing QueryStream.destroy', function () {
+    var it = (nodeMajorVersion >= 8) ? global.it : global.it.skip;
 
+    it('13.2.1 should be able to stop the stream early with destroy', function (done) {
       var stream = connection.queryStream('SELECT employee_name FROM nodb_stream1 ORDER BY employee_name');
 
       stream.on('data', function () {
         stream.pause();
-        stream._close();
+        stream.destroy();
       });
 
       stream.on('close', function() {
@@ -496,17 +535,14 @@ describe('13. stream1.js', function () {
     });
 
     it('13.2.2 should be able to stop the stream before any data', function (done) {
-
       var stream = connection.queryStream('SELECT employee_name FROM nodb_stream1 ORDER BY employee_name');
 
       stream.on('close', function() {
         done();
       });
 
-      // must wait for stream to be open before attempting to close it
-      // otherwise, the result set will remain open until garbage collected
       stream.on('open', function() {
-        stream._close();
+        stream.destroy();
       });
 
       stream.on('data', function () {
@@ -522,14 +558,11 @@ describe('13. stream1.js', function () {
       });
     });
 
-    it('13.2.3 should invoke an optional callback passed to _close', function (done) {
-
+    it('13.2.3 should invoke an optional callback passed to destroy', function (done) {
       var stream = connection.queryStream('SELECT employee_name FROM nodb_stream1 ORDER BY employee_name');
 
-      // must wait for stream to be open before attempting to close it
-      // otherwise, the result set will remain open until garbage collected
       stream.on('open', function() {
-        stream._close(done);
+        stream.destroy(null, done); // Not documented, but the second param can be a callback
       });
 
       stream.on('data', function () {
@@ -542,6 +575,69 @@ describe('13. stream1.js', function () {
 
       stream.on('error', function (err) {
         done(err);
+      });
+    });
+
+    it('13.2.4 should work if querystream is destroyed before resultset is opened', function (done) {
+      var stream = connection.queryStream('SELECT employee_name FROM nodb_stream1');
+
+      stream.destroy();
+
+      stream.on('data', function () {
+        done(new Error('Received a row'));
+      });
+
+      stream.on('end', function () {
+        done(new Error('Reached the end of the stream'));
+      });
+
+      stream.on('error', function (err) {
+        done(err);
+      });
+
+      stream.on('close', function() {
+        done();
+      });
+    });
+
+    it('13.2.5 should work if querystream is destroyed after end event', function (done) {
+      var stream = connection.queryStream('SELECT employee_name FROM nodb_stream1');
+
+      stream.on('data', function () {});
+
+      stream.on('end', function () {
+        stream.destroy();
+      });
+
+      stream.on('error', function (err) {
+        done(err);
+      });
+
+      stream.on('close', function() {
+        done();
+      });
+    });
+
+    it('13.2.6 should emit the error passed in', function (done) {
+      var stream = connection.queryStream('SELECT employee_name FROM nodb_stream1 ORDER BY employee_name');
+      var customError = new Error('Ouch!');
+
+      stream.on('open', function() {
+        stream.destroy(customError);
+      });
+
+      stream.on('data', function () {
+        done(new Error('Received data'));
+      });
+
+      stream.on('end', function () {
+        done(new Error('Reached the end of the stream'));
+      });
+
+      stream.on('error', function (err) {
+        err.should.be.equal(customError);
+
+        done();
       });
     });
   });
@@ -559,13 +655,13 @@ describe('13. stream1.js', function () {
         stream.pause();
 
         // Using the internal/private caches to validate
-        should.equal(stream._fetchedRows.length, testFetchArraySize - (1 + stream._readableState.buffer.length));
-        stream._close();
-      });
+        should.equal(stream._resultSet._rowCache.length, testFetchArraySize - (1 + stream._readableState.buffer.length));
 
-      stream.on('close', function() {
-        oracledb.fetchArraySize = defaultFetchArraySize;
-        done();
+        // Using internal close method for Node.js versions < 8
+        stream._close(function() {
+          oracledb.fetchArraySize = defaultFetchArraySize;
+          done();
+        });
       });
 
       stream.on('end', function () {
@@ -575,6 +671,107 @@ describe('13. stream1.js', function () {
       stream.on('error', function (err) {
         done(err);
       });
+    });
+
+    it('13.3.2 should use execute options fetchArraySize for fetching', function (done) {
+      var testFetchArraySize = 8;
+      var stream = connection.queryStream('SELECT employee_name FROM nodb_stream1 ORDER BY employee_name', [], {fetchArraySize: testFetchArraySize});
+
+      stream.on('data', function () {
+        stream.pause();
+
+        // Using the internal/private caches to validate
+        should.equal(stream._resultSet._rowCache.length, testFetchArraySize - (1 + stream._readableState.buffer.length));
+
+        // Using internal close method for Node.js versions < 8
+        stream._close(function() {
+          done();
+        });
+      });
+
+      stream.on('end', function () {
+        done(new Error('Reached the end of the stream'));
+      });
+
+      stream.on('error', function (err) {
+        done(err);
+      });
+    });
+  });
+
+  describe('13.4 Testing QueryStream race conditions', function () {
+    it('13.4.1 queryStream from toQueryStream should get open event', function (done) {
+      connection.execute(
+        'SELECT employee_name FROM nodb_stream1',
+        [],
+        {
+          resultSet: true
+        },
+        function(err, result) {
+          if (err) {
+            done(err);
+            return;
+          }
+
+          var stream = result.resultSet.toQueryStream();
+          var receivedEvent = false;
+
+          stream.on('open', function() {
+            receivedEvent = true;
+          });
+
+          stream.on('data', function () {});
+
+          stream.on('error', function (err) {
+            done(err);
+          });
+
+          stream.on('close', function() {
+            if (receivedEvent) {
+              done();
+            } else {
+              done(new Error('Did not receive event'));
+            }
+          });
+        }
+      );
+    });
+
+    it('13.4.2 queryStream from toQueryStream should get metadata event', function (done) {
+      connection.execute(
+        'SELECT employee_name FROM nodb_stream1',
+        [],
+        {
+          resultSet: true
+        },
+        function(err, result) {
+          if (err) {
+            done(err);
+            return;
+          }
+
+          var stream = result.resultSet.toQueryStream();
+          var receivedEvent = false;
+
+          stream.on('metadata', function() {
+            receivedEvent = true;
+          });
+
+          stream.on('data', function () {});
+
+          stream.on('error', function (err) {
+            done(err);
+          });
+
+          stream.on('close', function() {
+            if (receivedEvent) {
+              done();
+            } else {
+              done(new Error('Did not receive event'));
+            }
+          });
+        }
+      );
     });
   });
 });
