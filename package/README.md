@@ -51,7 +51,8 @@ Installation is described in [INSTALL](../INSTALL.md).
 
     - `make binarypackage` makes a binary package for the current
       Node.js / node-oracledb / platform combination and generates a
-      SHA256 for the binary.
+      SHA256 for the binary.  A Windows batch file does the same for
+      Windows.
 
 - As part of `npm install`, the `package.json` in this directory
   invokes `oracledbinstall.js` that downloads the appropriate binary
@@ -63,7 +64,7 @@ Installation is described in [INSTALL](../INSTALL.md).
   allows installation from source code (via GitHub) when no suitable
   pre-built binary is available.
 
-- The `make npmpackage` command creates two variants of the JavaScript bundle:
+- The `make npmpackage` command creates three variants of the JavaScript bundle:
 
   - `oracledb-X.Y.Z.tgz` which downloads binaries from the
     node-oracledb GitHub release page.
@@ -73,6 +74,10 @@ Installation is described in [INSTALL](../INSTALL.md).
     `NODE_ORACLEDB_PACKAGE_HOSTNAME` (e.g. "your.example.com") and
     `NODE_ORACLEDB_PACKAGE_URL_PATH` (e.g. "/yourpath/") which must be set
     before running `make`.
+
+  - `oracledb-src-X.Y.Z.tgz` which is the complete source code, mainly
+    created because older npm's (e.g. with Node 4) do not download the
+    opdi submodule code when installing from a GitHub tag or branch.
 
 - The`staging-oracledb-X.Y.Z.tgz` package can be used to host binaries
   on internal networks.  Copy `staging-oracledb-X.Y.Z.tgz`, the binary
