@@ -83,7 +83,9 @@ version 2.0.
 
 - Install Node.js from [nodejs.org][11].
 
-- Install node-oracledb.
+- Install node-oracledb using the `npm` package manager, which is
+  included in Node.js.  If you are behind a firewall, you may need to
+  set the environment variable `https_proxy` first.
 
     - Many users will be able to use a pre-built node-oracledb binary:
 
@@ -247,9 +249,13 @@ export http_proxy=http://my-proxy.example.com:80/
 export https_proxy=http://my-proxy.example.com:80/
 ```
 
+The node-oracledb binary installer cannot use the `npm config set
+https-proxy` value.
+
 ##### To install a pre-built binary:
 
-Install node-oracledb using:
+Install node-oracledb using the `npm` package manager, which is
+included in Node.js:
 
 ```
 npm install oracledb
@@ -384,9 +390,13 @@ export http_proxy=http://my-proxy.example.com:80/
 export https_proxy=http://my-proxy.example.com:80/
 ```
 
+The node-oracledb binary installer cannot use the `npm config set
+https-proxy` value.
+
 ##### To install a pre-built binary:
 
-Install node-oracledb using:
+Install node-oracledb using the `npm` package manager, which is
+included in Node.js:
 
 ```
 npm install oracledb
@@ -519,9 +529,13 @@ export http_proxy=http://my-proxy.example.com:80/
 export https_proxy=http://my-proxy.example.com:80/
 ```
 
+The node-oracledb binary installer cannot use the `npm config set
+https-proxy` value.
+
 ##### To install a pre-built binary:
 
-Install node-oracledb using:
+Install node-oracledb using the `npm` package manager, which is
+included in Node.js:
 
 ```
 npm install oracledb
@@ -618,9 +632,13 @@ export http_proxy=http://my-proxy.example.com:80/
 export https_proxy=http://my-proxy.example.com:80/
 ```
 
+The node-oracledb binary installer cannot use the `npm config set
+https-proxy` value.
+
 ##### To install a pre-built binary:
 
-Install node-oracledb using:
+Install node-oracledb using the `npm` package manager, which is
+included in Node.js:
 
 ```
 npm install oracledb
@@ -740,9 +758,13 @@ set http_proxy=http://my-proxy.example.com:80/
 set https_proxy=http://my-proxy.example.com:80/
 ```
 
+The node-oracledb binary installer cannot use the `npm config set
+https-proxy` value.
+
 ##### To install a pre-built binary:
 
-Install node-oracledb using:
+Install node-oracledb using the `npm` package manager, which is
+included in Node.js:
 
 ```
 npm install oracledb
@@ -867,9 +889,13 @@ set http_proxy=http://my-proxy.example.com:80/
 set https_proxy=http://my-proxy.example.com:80/
 ```
 
+The node-oracledb binary installer cannot use the `npm config set
+https-proxy` value.
+
 ##### To install a pre-built binary:
 
-Install node-oracledb using:
+Install node-oracledb using the `npm` package manager, which is
+included in Node.js:
 
 ```
 npm install oracledb
@@ -991,6 +1017,9 @@ export http_proxy=http://my-proxy.example.com:80/
 export https_proxy=http://my-proxy.example.com:80/
 ```
 
+The node-oracledb binary installer cannot use the `npm config set
+https-proxy` value.
+
 Set the compiler to GCC:
 
 ```
@@ -998,7 +1027,10 @@ export CC=gcc
 ```
 
 Locate the [GitHub tag][40] of the desired node-oracledb version, for
-example `v2.0.15`.  If you have the `git` utility, you can install with:
+example `v2.0.15`, and use the `npm` package manager (which is
+included in Node.js) to install it.
+
+If you have the `git` utility, you can install with:
 
 ```
 npm install oracle/node-oracledb.git#v2.0.15
@@ -1108,6 +1140,9 @@ export http_proxy=http://my-proxy.example.com:80/
 export https_proxy=http://my-proxy.example.com:80/
 ```
 
+The node-oracledb binary installer cannot use the `npm config set
+https-proxy` value.
+
 Use the GNU `gmake` utility:
 
 ```
@@ -1115,7 +1150,10 @@ export MAKE=gmake
 ```
 
 Locate the [GitHub tag][40] of the desired node-oracledb version, for
-example `v2.0.15`.  If you have the `git` utility, you can install with:
+example `v2.0.15`, and use the `npm` package manager (which is
+included in Node.js) to install it.
+
+If you have the `git` utility, you can install with:
 
 ```
 npm install oracle/node-oracledb.git#v2.0.15
