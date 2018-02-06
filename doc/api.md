@@ -34,6 +34,8 @@ limitations under the License.
         - [`DB_TYPE_BINARY_DOUBLE`](#oracledbconstantsdbtype), [`DB_TYPE_BINARY_FLOAT`](#oracledbconstantsdbtype), [`DB_TYPE_BLOB`](#oracledbconstantsdbtype), [`DB_TYPE_CHAR`](#oracledbconstantsdbtype), [`DB_TYPE_CLOB`](#oracledbconstantsdbtype), [`DB_TYPE_DATE`](#oracledbconstantsdbtype), [`DB_TYPE_LONG`](#oracledbconstantsdbtype), [`DB_TYPE_LONG_RAW`](#oracledbconstantsdbtype), [`DB_TYPE_NCHAR`](#oracledbconstantsdbtype), [`DB_TYPE_NCLOB`](#oracledbconstantsdbtype), [`DB_TYPE_NUMBER`](#oracledbconstantsdbtype), [`DB_TYPE_NVARCHAR`](#oracledbconstantsdbtype), [`DB_TYPE_RAW`](#oracledbconstantsdbtype), [`DB_TYPE_ROWID`](#oracledbconstantsdbtype), [`DB_TYPE_TIMESTAMP`](#oracledbconstantsdbtype), [`DB_TYPE_TIMESTAMP_LTZ`](#oracledbconstantsdbtype), [`DB_TYPE_TIMESTAMP_TZ`](#oracledbconstantsdbtype), [`DB_TYPE_VARCHAR`](#oracledbconstantsdbtype)
      - 3.1.4 [Execute Bind Direction Constants](#oracledbconstantsbinddir)
         - [`BIND_IN`](#oracledbconstantsbinddir), [`BIND_INOUT`](#oracledbconstantsbinddir), [`BIND_OUT`](#oracledbconstantsbinddir)
+     - 3.1.5 [Privileged Connection Constants](#oracledbconstantsprivilege)
+        - [`SYSDBA`](#oracledbconstantsprivilege), [`SYSOPER`](#oracledbconstantsprivilege), [`SYSASM`](#oracledbconstantsprivilege), [`SYSBACKUP`](#oracledbconstantsprivilege), [`SYSDG`](#oracledbconstantsprivilege), [`SYSKM`](#oracledbconstantsprivilege), [`SYSRAC`](#oracledbconstantsprivilege)
   - 3.2 [Oracledb Properties](#oracledbproperties)
      - 3.2.1 [`autoCommit`](#propdbisautocommit)
      - 3.2.2 [`connectionClass`](#propdbconclass)
@@ -489,6 +491,30 @@ oracledb.BIND_IN                // (3001) Direction for IN binds
 oracledb.BIND_INOUT             // (3002) Direction for IN OUT binds
 
 oracledb.BIND_OUT               // (3003) Direction for OUT binds
+```
+
+#### <a name="oracledbconstantsprivilege"></a> 3.1.5 Privileged Connection Constants
+
+Constants for [`getConnection()`](#getconnectiondb) `privilege`
+properties.
+
+These specify what privileges should be used by the connection that is being
+established.
+
+```
+oracledb.SYSDBA                 // (2) SYSDBA privileges
+
+oracledb.SYSOPER                // (4) SYSOPER privileges
+
+oracledb.SYSASM                 // (32768) SYSASM privileges
+
+oracledb.SYSBACKUP              // (131072) SYSBACKUP privileges
+
+oracledb.SYSDG                  // (262144) SYSDG privileges
+
+oracledb.SYSKM                  // (524288) SYSKM privileges
+
+oracledb.SYSRAC                 // (1048576) SYSRAC privileges
 ```
 
 ### <a name="oracledbproperties"></a> 3.2 Oracledb Properties
@@ -1460,6 +1486,14 @@ The Oracle database instance to connect to.  The string can be an Easy Connect s
 Net Service Name from a `tnsnames.ora` file, or the name of a local
 Oracle database instance.  See
 [Connection Strings](#connectionstrings) for examples.
+
+```
+Number privilege
+```
+
+The privilege to use when establishing the connection to the database. This
+optional property should be one of the
+[privileged connection constants](#oracledbconstantsprivilege).
 
 ```
 Boolean externalAuth

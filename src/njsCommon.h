@@ -263,6 +263,7 @@ public:
     uint32_t lobPrefetchSize;
     uint32_t maxRows;
     uint32_t fetchArraySize;
+    uint32_t privilege;
     uint32_t rowsFetched;
     uint32_t bufferRowIndex;
     uint64_t rowsAffected;
@@ -300,10 +301,10 @@ public:
             poolMin(0), poolMax(0), poolIncrement(0), poolTimeout(0),
             poolPingInterval(0), dpiPoolHandle(NULL), dpiConnHandle(NULL),
             dpiStmtHandle(NULL), dpiLobHandle(NULL), stmtCacheSize(0),
-            lobPrefetchSize(0), maxRows(0), fetchArraySize(0), rowsFetched(0),
-            bufferRowIndex(0), rowsAffected(0), outFormat(0), numQueryVars(0),
-            queryVars(NULL), numBindVars(0), bindVars(NULL), numFetchInfo(0),
-            fetchInfo(NULL), numFetchAsStringTypes(0),
+            lobPrefetchSize(0), maxRows(0), fetchArraySize(0), privilege(0),
+            rowsFetched(0), bufferRowIndex(0), rowsAffected(0), outFormat(0),
+            numQueryVars(0), queryVars(NULL), numBindVars(0), bindVars(NULL),
+            numFetchInfo(0), fetchInfo(NULL), numFetchAsStringTypes(0),
             fetchAsStringTypes(NULL), numFetchAsBufferTypes(0),
             fetchAsBufferTypes(NULL), protoILob(NULL), externalAuth(false),
             getRS(false), autoCommit(false), extendedMetaData(false),

@@ -818,6 +818,8 @@ NAN_METHOD(njsOracledb::GetConnection)
     baton->externalAuth = oracledb->externalAuth;
     baton->GetUnsignedIntFromJSON(connProps, "stmtCacheSize", 0,
             &baton->stmtCacheSize);
+    baton->GetUnsignedIntFromJSON(connProps, "privilege", 0,
+            &baton->privilege);
     baton->GetBoolFromJSON(connProps, "externalAuth", 0, &baton->externalAuth);
     baton->lobPrefetchSize = oracledb->lobPrefetchSize;
     baton->QueueWork("GetConnection", Async_GetConnection,
@@ -838,6 +840,8 @@ void njsOracledb::Async_GetConnection(njsBaton *baton)
         baton->GetDPIError();
         return;
     }
+    if (baton->privilege)
+        params.authMode = (dpiAuthMode) baton->privilege;
     params.externalAuth = baton->externalAuth;
     if (!baton->connClass.empty()) {
         params.connectionClass = baton->connClass.c_str();
