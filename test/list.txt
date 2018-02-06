@@ -3777,37 +3777,37 @@ Overview of node-oracledb functional tests
 
 150. fetchArraySize3.js
     150.1 DML binding
-        150.1.1 oracledb.fetchArraySize = 1
-        150.1.2 oracledb.fetchArraySize = 50
-        150.1.3 oracledb.fetchArraySize = 100
-        150.1.4 oracledb.fetchArraySize = 1000
+        150.1.1 oracledb.fetchArraySize = 1 
+        150.1.2 oracledb.fetchArraySize = tableSize/20
+        150.1.3 oracledb.fetchArraySize = tableSize/10
+        150.1.4 oracledb.fetchArraySize = tableSize
         150.1.5 oracledb.fetchArraySize = (table size - 1)
     150.2 procedure binding
         150.2.1 Bind OUT with oracledb.fetchArraySize = 1
-        150.2.2 Bind OUT with oracledb.fetchArraySize = 50
-        150.2.3 Bind OUT with oracledb.fetchArraySize = 100
-        150.2.4 Bind OUT with oracledb.fetchArraySize = 1000
+        150.2.2 Bind OUT with oracledb.fetchArraySize = tableSize/20
+        150.2.3 Bind OUT with oracledb.fetchArraySize = tableSize/10
+        150.2.4 Bind OUT with oracledb.fetchArraySize = tableSize
         150.2.5 Bind OUT with oracledb.fetchArraySize = (table size - 1)
-        150.2.6 Bind IN OUT with oracledb.fetchArraySize = 1
-        150.2.7 Bind IN OUT with oracledb.fetchArraySize = 50
-        150.2.8 Bind IN OUT with oracledb.fetchArraySize = 100
-        150.2.9 Bind IN OUT with oracledb.fetchArraySize = 1000
+        150.2.6 Bind IN OUT with oracledb.fetchArraySize = 1 
+        150.2.7 Bind IN OUT with oracledb.fetchArraySize = tableSize/20
+        150.2.8 Bind IN OUT with oracledb.fetchArraySize = tableSize/10
+        150.2.9 Bind IN OUT with oracledb.fetchArraySize = tableSize
         150.2.10 Bind IN OUT with oracledb.fetchArraySize = (table size - 1)
     150.3 function binding
         150.3.1 Bind OUT with oracledb.fetchArraySize = 1
-        150.3.2 Bind OUT with oracledb.fetchArraySize = 50
-        150.3.3 Bind OUT with oracledb.fetchArraySize = 100
-        150.3.4 Bind OUT with oracledb.fetchArraySize = 1000
+        150.3.2 Bind OUT with oracledb.fetchArraySize = tableSize/20
+        150.3.3 Bind OUT with oracledb.fetchArraySize = tableSize/10
+        150.3.4 Bind OUT with oracledb.fetchArraySize = tableSize
         150.3.5 Bind OUT with oracledb.fetchArraySize = (table size - 1)
-        150.3.6 Bind IN OUT with oracledb.fetchArraySize = 1
-        150.3.7 Bind IN OUT with oracledb.fetchArraySize = 50
-        150.3.8 Bind IN OUT with oracledb.fetchArraySize = 100
-        150.3.9 Bind IN OUT with oracledb.fetchArraySize = 1000
+        150.3.6 Bind IN OUT with oracledb.fetchArraySize = 1 
+        150.3.7 Bind IN OUT with oracledb.fetchArraySize = tableSize/20
+        150.3.8 Bind IN OUT with oracledb.fetchArraySize = tableSize/10
+        150.3.9 Bind IN OUT with oracledb.fetchArraySize = tableSize
         150.3.10 Bind IN OUT with oracledb.fetchArraySize = (table size - 1)
 
 151. fetchArraySize4.js
     151.1 getRows() of resultSet = true
-        151.1.1 numRows > table size > oracledb.fetchArraySize
+        151.1.1 numRows > table size > oracledb.fetchArraySize 
         151.1.2 numRows > oracledb.fetchArraySize > table size
         151.1.3 table size > numRows > oracledb.fetchArraySize
         151.1.4 table size > oracledb.fetchArraySize > maxRow
@@ -3820,20 +3820,20 @@ Overview of node-oracledb functional tests
         151.1.11 numRows = (table size - 1), fetchArraySize = table size
         151.1.12 fetchArraySize = (table size - 1), numRows = table size
     151.2 getRow() of resultSet = true
-        151.2.1 oracledb.fetchArraySize = 1
-        151.2.2 oracledb.fetchArraySize = 20
-        151.2.3 oracledb.fetchArraySize = 50
-        151.2.4 oracledb.fetchArraySize = 100
-        151.2.5 oracledb.fetchArraySize = 200
-        151.2.6 oracledb.fetchArraySize = 1000
+        151.2.1 oracledb.fetchArraySize = 1 
+        151.2.2 oracledb.fetchArraySize = tableSize/50
+        151.2.3 oracledb.fetchArraySize = tableSize/20
+        151.2.4 oracledb.fetchArraySize = tableSize/10
+        151.2.5 oracledb.fetchArraySize = tableSize/5
+        151.2.6 oracledb.fetchArraySize = tableSize
         151.2.7 oracledb.fetchArraySize = (table size - 1)
     151.3 interleaved calls to getRow() and getRows()
         151.3.1 oracledb.fetchArraySize = 1
-        151.3.2 oracledb.fetchArraySize = 20
-        151.3.3 oracledb.fetchArraySize = 50
-        151.3.4 oracledb.fetchArraySize = 100
-        151.3.5 oracledb.fetchArraySize = 200
-        151.3.6 oracledb.fetchArraySize = 1000
+        151.3.2 oracledb.fetchArraySize = tableSize/50
+        151.3.3 oracledb.fetchArraySize = tableSize/20
+        151.3.4 oracledb.fetchArraySize = tableSize/10
+        151.3.5 oracledb.fetchArraySize = tableSize/5
+        151.3.6 oracledb.fetchArraySize = tableSize
         151.3.6 oracledb.fetchArraySize = (table size - 1)
 
 152. fetchArraySize5.js
@@ -3881,37 +3881,37 @@ Overview of node-oracledb functional tests
 
 153. fetchArraySize6.js
     153.1 DML binding
-        153.1.1 fetchArraySize = 1
-        153.1.2 fetchArraySize = 50
-        153.1.3 fetchArraySize = 100
-        153.1.4 fetchArraySize = 1000
+        153.1.1 fetchArraySize = 1 
+        153.1.2 fetchArraySize = tableSize/20
+        153.1.3 fetchArraySize = tableSize/10
+        153.1.4 fetchArraySize = tableSize
         153.1.5 fetchArraySize = (table size - 1)
     153.2 procedure binding
         153.2.1 Bind OUT with fetchArraySize = 1
-        153.2.2 Bind OUT with fetchArraySize = 50
-        153.2.3 Bind OUT with fetchArraySize = 100
-        153.2.4 Bind OUT with fetchArraySize = 1000
+        153.2.2 Bind OUT with fetchArraySize = tableSize/20
+        153.2.3 Bind OUT with fetchArraySize = tableSize/10
+        153.2.4 Bind OUT with fetchArraySize = tableSize
         153.2.5 Bind OUT with fetchArraySize = (table size - 1)
-        153.2.6 Bind IN OUT with fetchArraySize = 1
-        153.2.7 Bind IN OUT with fetchArraySize = 50
-        153.2.8 Bind IN OUT with fetchArraySize = 100
-        153.2.9 Bind IN OUT with fetchArraySize = 1000
+        153.2.6 Bind IN OUT with fetchArraySize = 1 
+        153.2.7 Bind IN OUT with fetchArraySize = tableSize/20
+        153.2.8 Bind IN OUT with fetchArraySize = tableSize/10
+        153.2.9 Bind IN OUT with fetchArraySize = tableSize
         153.2.10 Bind IN OUT with fetchArraySize = (table size - 1)
     153.3 function binding
         153.3.1 Bind OUT with fetchArraySize = 1
-        153.3.2 Bind OUT with fetchArraySize = 50
-        153.3.3 Bind OUT with fetchArraySize = 100
-        153.3.4 Bind OUT with fetchArraySize = 1000
+        153.3.2 Bind OUT with fetchArraySize = tableSize/20
+        153.3.3 Bind OUT with fetchArraySize = tableSize/10
+        153.3.4 Bind OUT with fetchArraySize = tableSize
         153.3.5 Bind OUT with fetchArraySize = (table size - 1)
-        153.3.6 Bind IN OUT with fetchArraySize = 1
-        153.3.7 Bind IN OUT with fetchArraySize = 50
-        153.3.8 Bind IN OUT with fetchArraySize = 100
-        153.3.9 Bind IN OUT with fetchArraySize = 1000
+        153.3.6 Bind IN OUT with fetchArraySize = 1 
+        153.3.7 Bind IN OUT with fetchArraySize = tableSize/20
+        153.3.8 Bind IN OUT with fetchArraySize = tableSize/10
+        153.3.9 Bind IN OUT with fetchArraySize = tableSize
         153.3.10 Bind IN OUT with fetchArraySize = (table size - 1)
-
+        
 154. fetchArraySize7.js
     154.1 getRows() of resultSet = true
-        154.1.1 numRows > table size > fetchArraySize
+        154.1.1 numRows > table size > fetchArraySize 
         154.1.2 numRows > fetchArraySize > table size
         154.1.3 table size > numRows > fetchArraySize
         154.1.4 table size > fetchArraySize > maxRow
@@ -3924,21 +3924,21 @@ Overview of node-oracledb functional tests
         154.1.11 numRows = (table size - 1), fetchArraySize = table size
         154.1.12 fetchArraySize = (table size - 1), numRows = table size
     154.2 getRow() of resultSet = true
-        154.2.1 fetchArraySize = 1
-        154.2.2 fetchArraySize = 20
-        154.2.3 fetchArraySize = 50
-        154.2.4 fetchArraySize = 100
-        154.2.5 fetchArraySize = 200
-        154.2.6 fetchArraySize = 1000
+        154.2.1 fetchArraySize = 1 
+        154.2.2 fetchArraySize = tableSize/50
+        154.2.3 fetchArraySize = tableSize/20
+        154.2.4 fetchArraySize = tableSize/10
+        154.2.5 fetchArraySize = tableSize/5
+        154.2.6 fetchArraySize = tableSize
         154.2.7 fetchArraySize = (table size - 1)
     154.3 interleaved calls to getRow() and getRows()
         154.3.1 fetchArraySize = 1
-        154.3.2 fetchArraySize = 20
-        154.3.3 fetchArraySize = 50
-        154.3.4 fetchArraySize = 100
-        154.3.5 fetchArraySize = 200
-        154.3.6 fetchArraySize = 1000
-        154.3.7 fetchArraySize = (table size - 1)
+        154.3.2 fetchArraySize = tableSize/50
+        154.3.3 fetchArraySize = tableSize/20
+        154.3.4 fetchArraySize = tableSize/10
+        154.3.5 fetchArraySize = tableSize/5
+        154.3.6 fetchArraySize = tableSize
+        154.3.7 fetchArraySize = (tableSize - 1)
 
 155. fetchArraySize8.js
     155.1 Streaming clobs with different oracledb.fetchArraySize

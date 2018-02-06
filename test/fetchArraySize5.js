@@ -50,6 +50,7 @@ describe("152. fetchArraySize5.js", function() {
   var connection = null;
   var default_maxRows = oracledb.maxRows;
   var tableName = "nodb_fetchArraySize_152";
+  var tableSize = 1000;
 
   var create_table = "BEGIN \n" +
                      "    DECLARE \n" +
@@ -67,7 +68,7 @@ describe("152. fetchArraySize5.js", function() {
                      "            content    VARCHAR(2000) \n" +
                      "        ) \n" +
                      "    '); \n" +
-                     "    FOR i IN 1..1000 LOOP \n" +
+                     "    FOR i IN 1.." + tableSize + " LOOP \n" +
                      "         EXECUTE IMMEDIATE (' \n" +
                      "             insert into " + tableName + " values (' || i || ',' || to_char(i) ||') \n" +
                      "        '); \n" +
@@ -130,8 +131,8 @@ describe("152. fetchArraySize5.js", function() {
         },
         function(err, result) {
           should.not.exist(err);
-          var resultLenExpected = maxRowsVal > (1000-affectedID) ? (1000-affectedID) : maxRowsVal;
-          if(maxRowsVal === 0) resultLenExpected = 1000 - affectedID;
+          var resultLenExpected = maxRowsVal > (tableSize-affectedID) ? (tableSize-affectedID) : maxRowsVal;
+          if(maxRowsVal === 0) resultLenExpected = tableSize - affectedID;
           should.strictEqual(result.rows.length, resultLenExpected);
           verifyResult(result.rows, affectedID, cb);
         }
@@ -155,57 +156,57 @@ describe("152. fetchArraySize5.js", function() {
     };
 
     it("152.1.1 maxRows > table size > fetchArraySize", function(done) {
-      var fetchArraySizeVal = 50;
-      var maxRowsVal = 10000;
+      var fetchArraySizeVal = tableSize - 50;
+      var maxRowsVal = tableSize + 10000;
       var affectedID = 20;
       basicFetch(fetchArraySizeVal, maxRowsVal, affectedID, done);
     });
 
     it("152.1.2 maxRows > fetchArraySize > table size", function(done) {
-      var fetchArraySizeVal = 1001;
-      var maxRowsVal = 10000;
+      var fetchArraySizeVal = tableSize + 1001;
+      var maxRowsVal = tableSize + 10000;
       var affectedID = 20;
       basicFetch(fetchArraySizeVal, maxRowsVal, affectedID, done);
     });
 
     it("152.1.3 table size > maxRows > fetchArraySize", function(done) {
-      var fetchArraySizeVal = 1;
-      var maxRowsVal = 2;
-      var affectedID = 10;
+      var fetchArraySizeVal = tableSize - 11;
+      var maxRowsVal = tableSize - 2;
+      var affectedID = 0;
       basicFetch(fetchArraySizeVal, maxRowsVal, affectedID, done);
     });
 
     it("152.1.4 table size > fetchArraySize > maxRow", function(done) {
-      var fetchArraySizeVal = 90;
-      var maxRowsVal = 150;
+      var fetchArraySizeVal = tableSize - 90;
+      var maxRowsVal = tableSize - 150;
       var affectedID = 50;
       basicFetch(fetchArraySizeVal, maxRowsVal, affectedID, done);
     });
 
     it("152.1.5 maxRows = fetchArraySize < table size", function(done) {
-      var fetchArraySizeVal = 110;
-      var maxRowsVal = 110;
+      var fetchArraySizeVal = tableSize - 110;
+      var maxRowsVal = tableSize - 110;
       var affectedID = 20;
       basicFetch(fetchArraySizeVal, maxRowsVal, affectedID, done);
     });
 
     it("152.1.6 maxRows = fetchArraySize = table size", function(done) {
-      var fetchArraySizeVal = 1000;
-      var maxRowsVal = 1000;
+      var fetchArraySizeVal = tableSize;
+      var maxRowsVal = tableSize;
       var affectedID = 0;
       basicFetch(fetchArraySizeVal, maxRowsVal, affectedID, done);
     });
 
     it("152.1.7 maxRows = fetchArraySize > table size", function(done) {
-      var fetchArraySizeVal = 9999;
-      var maxRowsVal = 9999;
+      var fetchArraySizeVal = tableSize + 9999;
+      var maxRowsVal = tableSize + 9999;
       var affectedID = 10;
       basicFetch(fetchArraySizeVal, maxRowsVal, affectedID, done);
     });
 
     it("152.1.8 maxRows = fetchArraySize/10", function(done) {
-      var fetchArraySizeVal = 1000;
-      var maxRowsVal = 100;
+      var fetchArraySizeVal = tableSize/10 + 1;
+      var maxRowsVal = tableSize/10;
       var affectedID = 7;
       basicFetch(fetchArraySizeVal, maxRowsVal, affectedID, done);
     });
@@ -218,22 +219,22 @@ describe("152. fetchArraySize5.js", function() {
     });
 
     it("152.1.10 maxRows > fetchArraySize, fetchArraySize = (table size)/10", function(done) {
-      var fetchArraySizeVal = 100;
-      var maxRowsVal = 210;
+      var fetchArraySizeVal = tableSize/10;
+      var maxRowsVal = tableSize/10 + 1;
       var affectedID = 50;
       basicFetch(fetchArraySizeVal, maxRowsVal, affectedID, done);
     });
 
     it("152.1.11 maxRows = 0, fetchArraySize = table size ", function(done) {
-      var fetchArraySizeVal = 1000;
+      var fetchArraySizeVal = tableSize;
       var maxRowsVal = 0;
       var affectedID = 0;
       basicFetch(fetchArraySizeVal, maxRowsVal, affectedID, done);
     });
 
     it("152.1.12 maxRows = (table size - 1), fetchArraySize = table size ", function(done) {
-      var fetchArraySizeVal = 1000;
-      var maxRowsVal = 999;
+      var fetchArraySizeVal = tableSize;
+      var maxRowsVal = tableSize - 1;
       var affectedID = 0;
       basicFetch(fetchArraySizeVal, maxRowsVal, affectedID, done);
     });
@@ -334,7 +335,7 @@ describe("152. fetchArraySize5.js", function() {
           }
           return fetchRowsFromRS(rs, numRowsVal, rowCount, cb);
         } else {
-          should.strictEqual(rowCount, 1000);
+          should.strictEqual(rowCount, tableSize);
           rs.close(function(err) {
             should.not.exist(err);
             cb();
@@ -344,50 +345,50 @@ describe("152. fetchArraySize5.js", function() {
     }
 
     it("152.2.1 numRows > table size > fetchArraySize", function(done) {
-      var fetchArraySizeVal = 50;
-      var numRowsVal = 10000;
+      var fetchArraySizeVal = tableSize - 50;
+      var numRowsVal = tableSize + 10000;
       testRefCursor(fetchArraySizeVal, numRowsVal, done);
     });
 
     it("152.2.2 numRows > fetchArraySize > table size", function(done) {
-      var fetchArraySizeVal = 1200;
-      var numRowsVal = 10000;
+      var fetchArraySizeVal = tableSize + 1200;
+      var numRowsVal = tableSize + 10000;
       testRefCursor(fetchArraySizeVal, numRowsVal, done);
     });
 
     it("152.2.3 table size > numRows > fetchArraySize", function(done) {
-      var fetchArraySizeVal = 1;
-      var numRowsVal = 2;
+      var fetchArraySizeVal = tableSize - 21;
+      var numRowsVal = tableSize - 2;
       testRefCursor(fetchArraySizeVal, numRowsVal, done);
     });
 
     it("152.2.4 table size > fetchArraySize > maxRow", function(done) {
-      var fetchArraySizeVal = 90;
-      var numRowsVal = 150;
+      var fetchArraySizeVal = tableSize - 90;
+      var numRowsVal = tableSize - 150;
       testRefCursor(fetchArraySizeVal, numRowsVal, done);
     });
 
     it("152.2.5 numRows = fetchArraySize < table size", function(done) {
-      var fetchArraySizeVal = 110;
-      var numRowsVal = 110;
+      var fetchArraySizeVal = tableSize - 110;
+      var numRowsVal = tableSize - 110;
       testRefCursor(fetchArraySizeVal, numRowsVal, done);
     });
 
     it("152.2.6 numRows = fetchArraySize = table size", function(done) {
-      var fetchArraySizeVal = 1000;
-      var numRowsVal = 1000;
+      var fetchArraySizeVal = tableSize;
+      var numRowsVal = tableSize;
       testRefCursor(fetchArraySizeVal, numRowsVal, done);
     });
 
     it("152.2.7 numRows = fetchArraySize > table size", function(done) {
-      var fetchArraySizeVal = 9999;
-      var numRowsVal = 9999;
+      var fetchArraySizeVal = tableSize + 9999;
+      var numRowsVal = tableSize + 9999;
       testRefCursor(fetchArraySizeVal, numRowsVal, done);
     });
 
     it("152.2.8 numRows = fetchArraySize/10", function(done) {
-      var fetchArraySizeVal = 1000;
-      var numRowsVal = 100;
+      var fetchArraySizeVal = tableSize/10 + 1;
+      var numRowsVal = tableSize/10;
       testRefCursor(fetchArraySizeVal, numRowsVal, done);
     });
 
@@ -398,20 +399,20 @@ describe("152. fetchArraySize5.js", function() {
     });
 
     it("152.2.10 numRows > fetchArraySize, fetchArraySize = (table size)/10", function(done) {
-      var fetchArraySizeVal = 100;
-      var numRowsVal = 210;
+      var fetchArraySizeVal = tableSize/10;
+      var numRowsVal = tableSize/10 + 1;
       testRefCursor(fetchArraySizeVal, numRowsVal, done);
     });
 
     it("152.2.11 numRows = (table size - 1), fetchArraySize = table size", function(done) {
-      var fetchArraySizeVal = 1000;
-      var numRowsVal = 999;
+      var fetchArraySizeVal = tableSize;
+      var numRowsVal = tableSize - 1;
       testRefCursor(fetchArraySizeVal, numRowsVal, done);
     });
 
     it("152.2.12 fetchArraySize = (table size - 1), numRows = table size", function(done) {
-      var fetchArraySizeVal = 999;
-      var numRowsVal = 1000;
+      var fetchArraySizeVal = tableSize - 1;
+      var numRowsVal = tableSize;
       testRefCursor(fetchArraySizeVal, numRowsVal, done);
     });
   });
@@ -445,7 +446,7 @@ describe("152. fetchArraySize5.js", function() {
 
     var testQueryStream = function(fetchArraySizeVal, maxRowsVal, affectedID, cb) {
       oracledb.maxRows = maxRowsVal;
-      var resultLenExpected = 1000-affectedID;
+      var resultLenExpected = tableSize-affectedID;
       var querySql = "select * from " + tableName + " where id > " + affectedID + " order by id";
       var stream = connection.queryStream(querySql, [], {fetchArraySize: fetchArraySizeVal});
 
@@ -472,58 +473,58 @@ describe("152. fetchArraySize5.js", function() {
     };
 
     it("152.3.1 maxRows > table size > fetchArraySize", function(done) {
-      var fetchArraySizeVal = 50;
-      var maxRowsVal = 10000;
+      var fetchArraySizeVal = tableSize - 50;
+      var maxRowsVal = tableSize + 10000;
       var affectedID = 20;
       testQueryStream(fetchArraySizeVal, maxRowsVal, affectedID, done);
     });
 
     it("152.3.2 maxRows > fetchArraySize > table size", function(done) {
-      var fetchArraySizeVal = 1001;
-      var maxRowsVal = 10000;
+      var fetchArraySizeVal = tableSize + 1001;
+      var maxRowsVal = tableSize + 10000;
       var affectedID = 20;
       testQueryStream(fetchArraySizeVal, maxRowsVal, affectedID, done);
     });
 
     it("152.3.3 table size > maxRows > fetchArraySize", function(done) {
-      var fetchArraySizeVal = 1;
-      var maxRowsVal = 2;
+      var fetchArraySizeVal = tableSize - 31;
+      var maxRowsVal = tableSize - 2;
       var affectedID = 10;
       testQueryStream(fetchArraySizeVal, maxRowsVal, affectedID, done);
     });
 
     it("152.3.4 table size > fetchArraySize > maxRow", function(done) {
-      var fetchArraySizeVal = 90;
-      var maxRowsVal = 150;
+      var fetchArraySizeVal = tableSize - 90;
+      var maxRowsVal = tableSize - 150;
       var affectedID = 50;
       testQueryStream(fetchArraySizeVal, maxRowsVal, affectedID, done);
     });
 
     it("152.3.5 maxRows = fetchArraySize < table size", function(done) {
-      var fetchArraySizeVal = 110;
-      var maxRowsVal = 110;
+      var fetchArraySizeVal = tableSize - 110;
+      var maxRowsVal = tableSize- 110;
       var affectedID = 20;
       testQueryStream(fetchArraySizeVal, maxRowsVal, affectedID, done);
     });
 
     it("152.3.6 maxRows = fetchArraySize = table size", function(done) {
-      var fetchArraySizeVal = 1000;
-      var maxRowsVal = 1000;
+      var fetchArraySizeVal = tableSize;
+      var maxRowsVal = tableSize;
       var affectedID = 0;
       testQueryStream(fetchArraySizeVal, maxRowsVal, affectedID, done);
     });
 
     it("152.3.7 maxRows = fetchArraySize > table size", function(done) {
-      var fetchArraySizeVal = 9999;
-      var maxRowsVal = 9999;
+      var fetchArraySizeVal = tableSize + 9999;
+      var maxRowsVal = tableSize + 9999;
       var affectedID = 10;
       testQueryStream(fetchArraySizeVal, maxRowsVal, affectedID, done);
     });
 
     it("152.3.8 maxRows = fetchArraySize/10", function(done) {
-      var fetchArraySizeVal = 1000;
-      var maxRowsVal = 100;
-      var affectedID = 7;
+      var fetchArraySizeVal = tableSize/10 + 1;
+      var maxRowsVal = tableSize/10;
+      var affectedID = 0;
       testQueryStream(fetchArraySizeVal, maxRowsVal, affectedID, done);
     });
 
@@ -535,29 +536,29 @@ describe("152. fetchArraySize5.js", function() {
     });
 
     it("152.3.10 maxRows > fetchArraySize, fetchArraySize = (table size)/10", function(done) {
-      var fetchArraySizeVal = 100;
-      var maxRowsVal = 210;
-      var affectedID = 50;
+      var fetchArraySizeVal = tableSize/10;
+      var maxRowsVal = tableSize/10 + 1;
+      var affectedID = 0;
       testQueryStream(fetchArraySizeVal, maxRowsVal, affectedID, done);
     });
 
     it("152.3.11 maxRows = 0, fetchArraySize = table size", function(done) {
-      var fetchArraySizeVal = 1000;
+      var fetchArraySizeVal = tableSize;
       var maxRowsVal = 0;
       var affectedID = 0;
       testQueryStream(fetchArraySizeVal, maxRowsVal, affectedID, done);
     });
 
     it("152.3.12 maxRows = (table size - 1), fetchArraySize = table size", function(done) {
-      var fetchArraySizeVal = 1000;
-      var maxRowsVal = 999;
+      var fetchArraySizeVal = tableSize;
+      var maxRowsVal = tableSize - 1;
       var affectedID = 0;
       testQueryStream(fetchArraySizeVal, maxRowsVal, affectedID, done);
     });
 
     it("152.3.13 fetchArraySize = (table size - 1), maxRows = table size", function(done) {
-      var fetchArraySizeVal = 999;
-      var maxRowsVal = 1000;
+      var fetchArraySizeVal = tableSize - 1;
+      var maxRowsVal = tableSize;
       var affectedID = 0;
       testQueryStream(fetchArraySizeVal, maxRowsVal, affectedID, done);
     });
