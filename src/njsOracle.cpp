@@ -788,7 +788,7 @@ NAN_GETTER(njsOracledb::GetOracleClientVersion)
 //-----------------------------------------------------------------------------
 NAN_SETTER(njsOracledb::SetOracleClientVersion)
 {
-    PropertyIsReadOnly("version");
+    PropertyIsReadOnly("oracleClientVersion");
 }
 
 
