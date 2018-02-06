@@ -1769,10 +1769,6 @@ pool running out of connections.
 When a connection is released, any ongoing transaction on the
 connection is rolled back.
 
-If ResultSets are not released or LOBs are still open when
-`connection.close()` is called, then an error *DPI-1054: connection
-cannot be closed when open statements or LOBs exist* will occur.
-
 After releasing a connection to a pool, there is no
 guarantee a subsequent `getConnection()` call gets back the same
 database connection.  The application must redo any ALTER SESSION
@@ -1845,10 +1841,7 @@ be passed into PL/SQL blocks, or inserted into the database.
 
 When no longer required, Lobs created with `createLob()` should be
 closed with [`lob.close()`](#lobclose) because Oracle Database
-resources are held open if temporary LOBs are not closed.  If LOBs are
-still open when `connection.close()` is called, then an error
-*DPI-1054: connection cannot be closed when open statements or LOBs
-exist* will occur.
+resources are held open if temporary LOBs are not closed.
 
 Open temporary LOB usage can be monitored using the view
 [`V$TEMPORARY_LOBS`][13].
@@ -2386,10 +2379,6 @@ LOB, such as those created by `createLob()`.
 
 Once a Lob is closed, it cannot be bound.
 
-If LOBs are still open when `connection.close()` is called, then an
-error *DPI-1054: connection cannot be closed when open statements or
-LOBs exist* will occur.
-
 See [Closing Lobs](#closinglobs) for more discussion.
 
 ##### Parameters
@@ -2683,10 +2672,6 @@ promise = close();
 Closes a ResultSet.  Applications should always call this at the end
 of fetch or when no more rows are needed.  It should also be called if
 no rows are ever going to be fetched from the ResultSet.
-
-If you try to close a connection without closing a ResultSet then an
-error *DPI-1054: connection cannot be closed when open statements or
-LOBs exist* will occur.
 
 #### <a name="getrow"></a> 7.2.2 `resultset.getRow()`
 
@@ -3698,10 +3683,7 @@ rows can be fetched.
 When all rows have been fetched, or the application does not want to
 continue getting more rows, then the ResultSet should be freed using
 [`close()`](#close).  The ResultSet should also be explicitly closed
-in the cases where no rows will be fetched from it.  If you try to
-close a connection without closing a ResultSet then an error
-*DPI-1054: connection cannot be closed when open statements or LOBs
-exist* will occur.
+in the cases where no rows will be fetched from it.
 
 REF CURSORS returned from a PL/SQL block via an `oracledb.CURSOR` OUT
 binds are also available as a ResultSet. See
@@ -5281,16 +5263,6 @@ error *NJS-023: concurrent operations on a Lob are not allowed*.
 The connection must be open when calling `lob.close()` on a temporary
 LOB.
 
-If you try to close a connection without closing an open Lob, then an
-error *DPI-1054: connection cannot be closed when open statements or
-LOBs exist* will occur.  The error helps prevent 'Temporary LOB leaks'
-that would cause the temporary tablespace to fill up.  You should
-review the application logic and explicitly close any open Lobs.
-These temporary Lobs will have been created with `lob.createLob()` or
-returned from the database, perhaps as the result of a SQL operation
-like `substr()` on a Lob column.  Persistent LOBs can be closed
-without the connection being open.
-
 The `lob.close()` method emits the [Node.js Stream][16] 'close' event
 unless the Lob has already been closed explicitly or automatically.
 
@@ -6749,7 +6721,7 @@ When upgrading from node-oracledb version 1.13 to version 2.0:
   are closed prior to calling
   [`connection.close()`](#connectionclose). Otherwise you will get the
   error *DPI-1054: connection cannot be closed when open statements or
-  LOBs exist*.
+  LOBs exist*.  (*Note*: this limitation was removed in node-oracledb 2.1)
 
 - Test applications to check if changes such as the improved property
   validation uncover latent problems in your code.
