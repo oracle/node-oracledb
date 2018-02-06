@@ -15,7 +15,7 @@ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-## Contents
+##  <a name="contents"></a> Contents
 
 1. [Introduction](#intro)
   - 1.1 [Getting Started with Node-oracledb](#getstarted)
@@ -63,8 +63,35 @@ limitations under the License.
      - 3.2.24 [`versionSuffix`](#propdbversionsuffix)
   - 3.3 [Oracledb Methods](#oracledbmethods)
      - 3.3.1 [`createPool()`](#createpool)
+         - 3.3.1.1 [`createPool()`: Parameters and Attributes](#createpoolpoolattrs)
+             - 3.3.1.1.1 [`user`](#createpoolpoolattrsuser)
+             - 3.3.1.1.2 [`password`](#createpoolpoolattrspassword)
+             - 3.3.1.1.3 [`connectString`](#createpoolpoolattrsconnectstring)
+             - 3.3.1.1.4 [`externalAuth`](#createpoolpoolattrsexternalauth)
+             - 3.3.1.1.5 [`stmtCacheSize`](#createpoolpoolattrsstmtcachesize)
+             - 3.3.1.1.6 [`poolAlias`](#createpoolpoolattrspoolalias)
+             - 3.3.1.1.7 [`poolIncrement`](#createpoolpoolattrspoolincrement)
+             - 3.3.1.1.8 [`poolMax`](#createpoolpoolattrspoolmax)
+             - 3.3.1.1.9 [`poolMin`](#createpoolpoolattrspoolmin)
+             - 3.3.1.1.10 [`poolPingInterval`](#createpoolpoolattrspoolpinginterval)
+             - 3.3.1.1.11 [`poolTimeout`](#createpoolpoolattrspooltimeout)
+             - 3.3.1.1.12 [`queueRequests`](#createpoolpoolattrsqueuerequests)
+             - 3.3.1.1.13 [`queueTimeout`](#createpoolpoolattrsqueuetimeout)
+         - 3.3.1.2 [`createPool()`: Callback Function](#createpoolpoolcallback)
      - 3.3.2 [`getConnection()`](#getconnectiondb)
+         - 3.3.2.1 [`getConnection()`: Parameters](#getconnectiondbattrs)
+             - 3.3.2.1.1 [Pool Alias](#getconnectiondbattrspoolalias)
+             - 3.3.2.1.2 [Connection Attributes](#getconnectiondbattrsconnattrs)
+                 - 3.3.2.1.2.1 [`user`](#getconnectiondbattrsuser)
+                 - 3.3.2.1.2.2 [`password`](#getconnectiondbattrspassword)
+                 - 3.3.2.1.2.3 [`connectString`](#getconnectiondbattrsconnectstring)
+                 - 3.3.2.1.2.4 [`privilege`](#getconnectiondbattrsprivilege)
+                 - 3.3.2.1.2.5 [`externalAuth`](#getconnectiondbattrsexternalauth)
+                 - 3.3.2.1.2.6 [`stmtCacheSize`](#getconnectiondbattrsstmtcachesize)
+         - 3.3.2.2 [`getConnection()`: Callback Function](#getconnectiondbcallback)
      - 3.3.3 [`getPool()`](#getpool)
+         - 3.3.3.1 [`getPool()`: Parameters](#getpoolattrs)
+             - 3.3.3.1.1 [`poolAlias`](#getpoolattrsalias)
 4. [Connection Class](#connectionclass)
   - 4.1 [Connection Properties](#connectionproperties)
      - 4.1.1 [`action`](#propconnaction)
@@ -1206,13 +1233,13 @@ See [Connection Pool Cache](#connpoolcache) for more details.
 A pool should be terminated with the [`pool.close()`](#poolclose)
 call, but only after all connections have been released.
 
-##### Parameters
-<a name="createpoolpoolattrs"></a>
+###### <a name="createpoolpoolattrs"></a> 3.3.1.1 `createPool()`: Parameters and Attributes
+
 ```
 Object poolAttrs
 ```
 
-The `poolAttrs` parameter provides connection credentials and
+The `poolAttrs` parameter object provides connection credentials and
 pool-specific configuration properties, such as the maximum or minimum
 number of connections for the pool, or the statement cache size for
 the connections.
@@ -1228,6 +1255,7 @@ ignored.
 
 The properties of `poolAttrs` are described below.
 
+###### <a name="createpoolpoolattrsuser"></a> 3.3.1.1.1 `user`
 
 ```
 String user
@@ -1238,12 +1266,16 @@ form *alison[fred]*. See the [Client Access Through a Proxy][7]
 section in the Oracle Call Interface manual for more details about
 proxy authentication.
 
+###### <a name="createpoolpoolattrspassword"></a> 3.3.1.1.2 `password`
+
 ```
 String password
 ```
 
 The password of the database user. A password is also necessary if a
 proxy user is specified.
+
+###### <a name="createpoolpoolattrsconnectstring"></a> 3.3.1.1.3 `connectString`
 
 ```
 String connectString
@@ -1253,6 +1285,8 @@ The Oracle database instance to connect to.  The string can be an Easy
 Connect string, or a Net Service Name from a `tnsnames.ora` file, or the
 name of a local Oracle database instance.  See
 [Connection Strings](#connectionstrings) for examples.
+
+###### <a name="createpoolpoolattrsexternalauth"></a> 3.3.1.1.4 `externalAuth`
 
 ```
 Boolean externalAuth
@@ -1272,6 +1306,8 @@ The `user` and `password` properties should not be set when
 Note prior to node-oracledb 0.5 this property was called
 `isExternalAuth`.
 
+###### <a name="createpoolpoolattrsstmtcachesize"></a> 3.3.1.1.5 `stmtCacheSize`
+
 ```
 Number stmtCacheSize
 ```
@@ -1281,6 +1317,9 @@ The number of statements to be cached in the
 
 This optional property overrides the
 [`oracledb.stmtCacheSize`](#propdbstmtcachesize) property.
+
+###### <a name="createpoolpoolattrspoolalias"></a> 3.3.1.1.6 `poolAlias`
+
 <a name="createpoolpoolattrspoolalias"></a>
 ```
 String poolAlias
@@ -1294,6 +1333,8 @@ that utilize the connection pool cache, such as [`oracledb.getPool()`](#getpool)
 
 See [Connection Pool Cache](#connpoolcache) for details and examples.
 
+###### <a name="createpoolpoolattrspoolincrement"></a> 3.3.1.1.7 `poolIncrement`
+
 ```
 Number poolIncrement
 ```
@@ -1306,6 +1347,8 @@ The default value is 1.
 This optional property overrides the
 [`oracledb.poolIncrement`](#propdbpoolincrement) property.
 
+###### <a name="createpoolpoolattrspoolmax"></a> 3.3.1.1.8 `poolMax`
+
 ```
 Number poolMax
 ```
@@ -1316,6 +1359,8 @@ The default value is 4.
 
 This optional property overrides the
 [`oracledb.poolMax`](#propdbpoolmax) property.
+
+###### <a name="createpoolpoolattrspoolmin"></a> 3.3.1.1.9 `poolMin`
 
 ```
 Number poolMin
@@ -1328,6 +1373,8 @@ The default value is 0.
 
 This optional property overrides the
 [`oracledb.poolMin`](#propdbpoolmin) property.
+
+###### <a name="createpoolpoolattrspoolpinginterval"></a> 3.3.1.1.10 `poolPingInterval`
 
 ```
 Number poolPingInterval
@@ -1349,6 +1396,8 @@ This optional property overrides the
 
 See [Connection Pool Pinging](#connpoolpinging) for more discussion.
 
+###### <a name="createpoolpoolattrspooltimeout"></a> 3.3.1.1.11 `poolTimeout`
+
 ```
 Number poolTimeout
 ```
@@ -1361,6 +1410,8 @@ The default value is 60.
 
 This optional property overrides the
 [`oracledb.poolTimeout`](#propdbpooltimeout) property.
+
+###### <a name="createpoolpoolattrsqueuerequests"></a> 3.3.1.1.12 `queueRequests`
 
 ```
 Boolean queueRequests
@@ -1375,6 +1426,8 @@ The default value is *true*.
 This optional property overrides the
 [`oracledb.queueRequests`](#propdbqueuerequests) property.
 
+###### <a name="createpoolpoolattrsqueuetimeout"></a> 3.3.1.1.13 `queueTimeout`
+
 ```
 Number queueTimeout
 ```
@@ -1387,6 +1440,8 @@ The default value is 60000.
 
 This optional property overrides the
 [`oracledb.queueTimeout`](#propdbqueuetimeout) property.
+
+#### <a name="createpoolpoolcallback"></a> 3.3.1.2 `createPool()`: Callback Function
 
 ```
 function(Error error, Pool pool)
@@ -1440,7 +1495,9 @@ Note if the application opens a number of connections, you should
 increase the number of threads available to node-oracledb.
 See [Connections and Number of Threads](#numberofthreads).
 
-##### Parameters
+##### <a name="getconnectiondbattrs"></a> 3.3.2.1 `getConnection()`: Parameters
+
+###### <a name="getconnectiondbattrspoolalias"></a> 3.3.2.1.1 Pool Alias
 
 ```
 String poolAlias
@@ -1449,18 +1506,21 @@ String poolAlias
 The `poolAlias` parameter is used to specify which pool in the connection pool
 cache to use to obtain the connection.
 
+###### <a name="getconnectiondbattrsconnattrs"></a> 3.3.2.1.2 Connection Attributes
+
 ```
 Object connAttrs
 ```
 
-The `connAttrs` parameter provides connection credentials and
-connection-specific configuration properties, such as `stmtCacheSize`.
+The `connAttrs` parameter object provides connection credentials and
+connection-specific configuration properties.
 
-Note that the `connAttrs` object may have configuration
-properties that are not used by the `getConnection()` method.  These
-are ignored.
+Any `connAttrs` properties that are not used by the `getConnection()`
+method are ignored.
 
 The properties of the `connAttrs` object are described below.
+
+###### <a name="getconnectiondbattrsuser"></a> 3.3.2.1.2.1 `user`
 
 ```
 String user
@@ -1471,12 +1531,16 @@ form *alison[fred]*. See the [Client Access Through a Proxy][7]
 section in the Oracle Call Interface manual for more details about
 proxy authentication.
 
+###### <a name="getconnectiondbattrspassword"></a> 3.3.2.1.2.2 `password`
+
 ```
 String password
 ```
 
 The password of the database user. A password is also necessary if a
 proxy user is specified.
+
+###### <a name="getconnectiondbattrsconnectstring"></a> 3.3.2.1.2.3 `connectString`
 
 ```
 String connectString
@@ -1486,6 +1550,8 @@ The Oracle database instance to connect to.  The string can be an Easy Connect s
 Net Service Name from a `tnsnames.ora` file, or the name of a local
 Oracle database instance.  See
 [Connection Strings](#connectionstrings) for examples.
+
+###### <a name="getconnectiondbattrsprivilege"></a> 3.3.2.1.2.4 `privilege`
 
 ```
 Number privilege
@@ -1499,6 +1565,8 @@ Note only non-pooled connections can be privileged.
 
 See the [Database Administrators Guide][90] for information on
 administrative privileges.
+
+###### <a name="getconnectiondbattrsexternalauth"></a> 3.3.2.1.2.5 `externalAuth`
 
 ```
 Boolean externalAuth
@@ -1516,6 +1584,8 @@ The `user` and `password` properties should not be set when
 Note prior to node-oracledb 0.5 this property was called
 `isExternalAuth`.
 
+###### <a name="getconnectiondbattrsstmtcachesize"></a> 3.3.2.1.2.6 `stmtCacheSize`
+
 ```
 Number stmtCacheSize
 ```
@@ -1524,6 +1594,8 @@ The number of statements to be cached in the
 [statement cache](#stmtcache) of each connection.  This optional
 property may be used to override the
 [`oracledb.stmtCacheSize`](#propdbstmtcachesize) property.
+
+##### <a name="getconnectiondbcallback"></a> 3.3.2.2 `getConnection()`: Callback Function
 
 ```
 function(Error error, Connection conn)
@@ -1546,17 +1618,19 @@ getPool([String poolAlias]);
 
 ##### Description
 
-Retrieves a pool from the [connection pool cache](#connpoolcache). Note that this is a synchronous
-method.
+Retrieves a previously created pool from the [connection pool
+cache](#connpoolcache). Note that this is a synchronous method.
 
-##### Parameters
+##### <a name="getpoolattrs"></a> 3.3.3.1 Parameters
+
+###### <a name="getpoolattrsalias"></a> 3.3.3.1.1 `alias`
 
 ```
 String poolAlias
 ```
 
 The pool alias of the pool to retrieve from the connection pool cache. The default
-value is 'default' which will retrieve the default pool.
+value is 'default' which will retrieve the default pool from the cache.
 
 ## <a name="connectionclass"></a> 4. Connection Class
 
