@@ -1491,9 +1491,14 @@ Oracle database instance.  See
 Number privilege
 ```
 
-The privilege to use when establishing the connection to the database. This
+The privilege to use when establishing connection to the database. This
 optional property should be one of the
 [privileged connection constants](#oracledbconstantsprivilege).
+
+Note only non-pooled connections can be privileged.
+
+See the [Database Administrators Guide][90] for information on
+administrative privileges.
 
 ```
 Boolean externalAuth
@@ -6770,3 +6775,4 @@ When upgrading from node-oracledb version 1.13 to version 2.0:
 [87]: https://github.com/oracle/node-oracledb/blob/master/INSTALL.md#quickstart
 [88]: https://nodejs.org/en/download/
 [89]: https://github.com/oracle/node-oracledb/tree/master/examples/dbconfig.js
+[90]: https://docs.oracle.com/en/database/oracle/oracle-database/12.2/admin/getting-started-with-database-administration.html#GUID-5F1E393E-97B8-43BC-BD68-3595251A6F7C
