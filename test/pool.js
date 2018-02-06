@@ -1010,7 +1010,7 @@ describe('2. pool.js', function() {
       );
     }); // 2.11.1
 
-    it('2.11.2 error occurs at getConnection() when poolMin is the default value 1', function(done) {
+    it('2.11.2 error occurs at getConnection() when poolMin is the default value 0', function(done) {
       oracledb.createPool(
         {
           user: 'notexist',
@@ -1075,6 +1075,7 @@ describe('2. pool.js', function() {
         },
         function(err, pool) {
           should.exist(err);
+          should.not.exist(pool);
 
           oracledb.createPool(
             {

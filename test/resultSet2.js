@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -262,7 +262,7 @@ describe('55. resultSet2.js', function() {
     });
   });
 
-  describe('55.4 release connection before close resultSet', function() {
+  describe('55.4 automatically close result sets and LOBs when the connection is closed', function() {
     before(function(done){
       setUp(connection, tableName, done);
     });
@@ -304,7 +304,7 @@ describe('55. resultSet2.js', function() {
       });
     }
 
-    it('55.4.1 result set', function(done) {
+    it('55.4.1 resultSet gets closed automatically', function(done) {
       testConn.should.be.ok();
       testConn.execute(
         "SELECT * FROM nodb_rs2_emp ORDER BY employees_id",
@@ -317,7 +317,7 @@ describe('55. resultSet2.js', function() {
       );
     });
 
-    it('55.4.2 REF Cursor', function(done) {
+    it('55.4.2 REF Cursor gets closed automatically', function(done) {
       testConn.should.be.ok();
       testConn.execute(
         "BEGIN nodb_rs2_get_emp(:in, :out); END;",
@@ -873,6 +873,7 @@ describe('55. resultSet2.js', function() {
         },
         function ( err ) {
           should.exist ( err );
+          // ORA-24338: statement handle not executed
           done();
         }
       );

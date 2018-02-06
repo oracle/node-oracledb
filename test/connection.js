@@ -798,8 +798,10 @@ describe('1. connection.js', function(){
           connectString: 'this is wrong',
           connectionString: dbConfig.connectString
         },
-        function(err, connection) {
+        function(err, conn) {
           should.exist(err);
+          // ORA-12154: TNS:could not resolve the connect identifier specified
+          should.not.exist(conn);
 
           oracledb.getConnection(
             {

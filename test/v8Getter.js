@@ -544,7 +544,14 @@ describe('140. v8Getter.js', function() {
           throw 'Nope';
         }
       });
-      dotest(cred, done);
+
+      should.throws(
+        function() {
+          oracledb.createPool(cred, function() {});
+        },
+        /Nope/
+      );
+      done();
     });
 
     it('140.7.4 poolMin', function(done) {

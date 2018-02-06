@@ -70,7 +70,7 @@ Overview of node-oracledb functional tests
         2.10.1 close can be used as an alternative to release
     2.11 Invalid Credential
         2.11.1 error occurs at creating pool when poolMin >= 1
-        2.11.2 error occurs at getConnection() when poolMin is the default value 1
+        2.11.2 error occurs at getConnection() when poolMin is the default value 0
     2.12 connectionString alias
         2.12.1 allows connectionString to be used as an alias for connectString
         2.12.2 favors connectString if both connectString and connectionString are passed
@@ -824,6 +824,7 @@ Overview of node-oracledb functional tests
     54.1 can access properties of closed LOB without error
     54.2 can not call close() multiple times
     54.3 verify closed LOB
+    54.4 automatically close result sets and LOBs when the connection is closed
 
 55. resultSet2.js
     55.1 query a RDBMS function
@@ -833,9 +834,9 @@ Overview of node-oracledb functional tests
     55.3 alternating getRow() & getRows() function
         55.3.1 result set
         55.3.2 REF Cursor
-    55.4 release connection before close resultSet
-        55.4.1 result set
-        55.4.2 REF Cursor
+    55.4 automatically close result sets and LOBs when the connection is closed
+        55.4.1 resultSet gets closed automatically
+        55.4.2 REF Cursor gets closed automatically
     55.5 the content of resultSet should be consistent
         55.5.1 (1) get RS (2) modify data in that table and commit (3) check RS
     55.6 access resultSet simultaneously
