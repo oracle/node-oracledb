@@ -539,6 +539,14 @@ Overview of node-oracledb functional tests
         26.1.5 columns fetched from REF CURSORS can be mapped by oracledb.fetchAsString
     26.2 stores null value correctly
         26.2.1 testing Null, Empty string and Undefined
+    26.3 large integers that cannot fit inside a 32-bit integer
+        26.3.1 original case
+    26.4 Large number, edge cases
+        26.4.1 maximum safe integer, (2^53 - 1)
+        26.4.2 Negative - maximum safe integer + 1
+        26.4.3 minimum safe integer
+        26.4.4 Negative - minimum safe integer - 1
+        26.4.5 gets correct number via fetching as string
 
 27. dataTypeNumber2.js
     27.1 testing NUMBER(p, s) data
