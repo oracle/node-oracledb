@@ -1,5 +1,7 @@
 # Change Log
 
+## node-oracledb v2.1.0 (DD Mon YYYY)
+
 ## node-oracledb v2.0.15 (15 Dec 2017) changes since node-oracledb version 1
 
 - Release testing is now done for Node.js 4, 6, 8 and 9.

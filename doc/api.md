@@ -6290,8 +6290,8 @@ SQL> SELECT UNIQUE sid, client_driver
 
        SID CLIENT_DRIVER
 ---------- ------------------------------
-        16 node-oracledb : 2.0.14
-        33 node-oracledb : 2.0.14
+        16 node-oracledb : 2.1.0
+        33 node-oracledb : 2.1.0
 ```
 
 Note if [`oracledb.connectionClass`](#propdbconclass) is set for a
