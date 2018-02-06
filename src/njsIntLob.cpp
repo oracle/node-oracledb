@@ -155,7 +155,7 @@ njsILob *njsILob::GetInstance(Local<Value> val)
     Nan::HandleScope scope;
     Local<Object> obj = val->ToObject();
     Local <String> key = Nan::New<v8::String>("iLob").ToLocalChecked();
-    Local<Value> v8Value = obj->Get(key);
+    Local<Value> v8Value = Nan::Get(obj, key).ToLocalChecked();
 
     if (v8Value->IsObject()) {
         Local<Object> obj = v8Value->ToObject();

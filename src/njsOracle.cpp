@@ -212,11 +212,12 @@ NAN_METHOD(njsOracledb::New)
         return;
     }
     njsOracledb *oracledb = new njsOracledb();
-    oracledb->oraClientVer = 100000000 * versionInfo.versionNum     +
+    oracledb->oraClientVer = static_cast<unsigned int> (
+                             100000000 * versionInfo.versionNum     +
                                1000000 * versionInfo.releaseNum     +
-                                 10000 * versionInfo.updateNum    +
-                                   100 * versionInfo.portReleaseNum      +
-                                         versionInfo.portUpdateNum;
+                                 10000 * versionInfo.updateNum      +
+                                   100 * versionInfo.portReleaseNum +
+                                         versionInfo.portUpdateNum  );
     oracledb->Wrap(info.Holder());
     info.GetReturnValue().Set(info.Holder());
 }
@@ -676,8 +677,10 @@ NAN_SETTER(njsOracledb::SetFetchAsString)
     // validate values in array
     Local<Array> array = value.As<Array>();
     for (uint32_t i = 0; i < array->Length(); i++) {
-        njsDataType type = (njsDataType)
-                Nan::To<int32_t>(array->Get(i).As<v8::Integer>()).FromJust();
+        int32_t dataType = Nan::To<int32_t>
+                           (Nan::Get(array,
+                             i).ToLocalChecked().As<Integer>()).FromJust();
+        njsDataType type = static_cast<njsDataType>(dataType);
         switch (type) {
             case NJS_DATATYPE_NUM:
             case NJS_DATATYPE_DATE:
@@ -733,8 +736,11 @@ NAN_SETTER(njsOracledb::SetFetchAsBuffer)
     // validate values in array
     Local<Array> array = value.As<Array>();
     for (uint32_t i = 0; i < array->Length(); i++) {
-        njsDataType type = (njsDataType)
-                Nan::To<int32_t>(array->Get(i).As<v8::Integer>()).FromJust();
+        int32_t dataType = Nan::To<int32_t>(
+                             Nan::Get(array, i).
+                               ToLocalChecked().As<v8::Integer>()).FromJust();
+        njsDataType type = static_cast<njsDataType>(dataType);
+
         if (type != NJS_DATATYPE_BLOB) {
             errMsg = njsMessages::Get(errInvalidTypeForConversion);
             Nan::ThrowError(errMsg.c_str());
@@ -765,11 +771,12 @@ NAN_GETTER(njsOracledb::GetOracleClientVersion)
         return;
     }
 
-    version = 100000000 * versionInfo.versionNum +
-                1000000 * versionInfo.releaseNum +
-                  10000 * versionInfo.updateNum +
+    version = static_cast <unsigned int> (
+              100000000 * versionInfo.versionNum     +
+                1000000 * versionInfo.releaseNum     +
+                  10000 * versionInfo.updateNum      +
                     100 * versionInfo.portReleaseNum +
-                          versionInfo.portUpdateNum;
+                          versionInfo.portUpdateNum );
 
     info.GetReturnValue().Set(version);
 }
@@ -809,6 +816,7 @@ NAN_METHOD(njsOracledb::GetConnection)
     if (!baton)
         return;
     baton->jsOracledb.Reset(info.Holder());
+
     baton->GetStringFromJSON(connProps, "user", 0, baton->user);
     baton->GetStringFromJSON(connProps, "password", 0, baton->password);
     baton->GetStringFromJSON(connProps, "connectString", 0,
@@ -822,6 +830,7 @@ NAN_METHOD(njsOracledb::GetConnection)
             &baton->privilege);
     baton->GetBoolFromJSON(connProps, "externalAuth", 0, &baton->externalAuth);
     baton->lobPrefetchSize = oracledb->lobPrefetchSize;
+
     baton->QueueWork("GetConnection", Async_GetConnection,
             Async_AfterGetConnection, 2);
 }
@@ -895,6 +904,7 @@ NAN_METHOD(njsOracledb::CreatePool)
     baton = oracledb->CreateBaton(info);
     if (!baton)
         return;
+
     baton->GetStringFromJSON(poolProps, "user", 0, baton->user);
     baton->GetStringFromJSON(poolProps, "password", 0, baton->password);
     baton->GetStringFromJSON(poolProps, "connectString", 0,
@@ -919,6 +929,7 @@ NAN_METHOD(njsOracledb::CreatePool)
     baton->GetBoolFromJSON(poolProps, "externalAuth", 0, &baton->externalAuth);
     baton->lobPrefetchSize = oracledb->lobPrefetchSize;
     baton->jsOracledb.Reset(info.Holder());
+
     baton->QueueWork("CreatePool", Async_CreatePool, Async_AfterCreatePool, 2);
 }
 
@@ -985,8 +996,9 @@ void njsOracledb::SetFetchAsStringTypesOnBaton(njsBaton *baton) const
     baton->numFetchAsStringTypes = array->Length();
     baton->fetchAsStringTypes = new njsDataType[baton->numFetchAsStringTypes];
     for (uint32_t i = 0; i < baton->numFetchAsStringTypes; i++) {
-        baton->fetchAsStringTypes[i] = (njsDataType)
-                Nan::To<int32_t>(array->Get(i).As<v8::Integer>()).FromJust();
+      int32_t dataType = Nan::To<int32_t>(Nan::Get(array, i).
+                           ToLocalChecked().As<v8::Integer>()).FromJust();
+      baton->fetchAsStringTypes[i] = static_cast<njsDataType>(dataType);
     }
 }
 
@@ -1007,8 +1019,9 @@ void njsOracledb::SetFetchAsBufferTypesOnBaton(njsBaton *baton) const
     baton->numFetchAsBufferTypes = array->Length();
     baton->fetchAsBufferTypes = new njsDataType[baton->numFetchAsBufferTypes];
     for (uint32_t i = 0; i < baton->numFetchAsBufferTypes; i++) {
-        baton->fetchAsBufferTypes[i] = (njsDataType)
-                Nan::To<int32_t>(array->Get(i).As<v8::Integer>()).FromJust();
+    int32_t dataType = Nan::To<int32_t>(Nan::Get (array, i).
+                         ToLocalChecked().As<v8::Integer>()).FromJust();
+    baton->fetchAsBufferTypes[i] = static_cast<njsDataType>(dataType);
     }
 }
 

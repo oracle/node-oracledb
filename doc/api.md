@@ -1512,6 +1512,7 @@ cache](#connpoolcache) to use to obtain the connection.
 
 ###### <a name="getconnectiondbattrsconnattrs"></a> 3.3.2.1.2 Connection Attributes
 
+
 ```
 Object connAttrs
 ```

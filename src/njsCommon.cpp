@@ -197,7 +197,7 @@ void njsBaton::CheckJSException(Nan::TryCatch *tryCatch)
     if (tryCatch->HasCaught()) {
         Local<String> message = tryCatch->Message()->Get();
         v8::String::Utf8Value v8str(message->ToString());
-        error = std::string(*v8str, v8str.length());
+        error = std::string(*v8str, static_cast<size_t>(v8str.length()));
         tryCatch->Reset();
     }
 }
@@ -340,7 +340,7 @@ void njsBaton::AsyncAfterWorkCallback(uv_work_t *req, int status)
 
     // make JS callback
     Nan::MakeCallback(Nan::GetCurrentContext()->Global(), callback,
-            numCallbackArgs, callbackArgs);
+                      static_cast<int>(numCallbackArgs), callbackArgs);
 
     // we no longer need the callback args
     delete [] callbackArgs;
@@ -439,7 +439,9 @@ bool njsBaton::GetBoolFromJSON(Local<Object> obj, const char *key, int index,
     if (!error.empty())
         return false;
 
-    jsValue = obj->Get(Nan::New<v8::String>(key).ToLocalChecked());
+    MaybeLocal<Value> mval = Nan::Get (obj, Nan::New(key).ToLocalChecked());
+    if(!mval.ToLocal(&jsValue))
+        return false;
 
     /* Undefined implies value not provided or equivalent */
     if (!jsValue->IsUndefined()) {
@@ -473,7 +475,10 @@ bool njsBaton::GetIntFromJSON(Local<Object> obj, const char *key,
 
     if (!error.empty())
         return false;
-    jsValue = obj->Get(Nan::New<v8::String>(key).ToLocalChecked());
+    MaybeLocal<Value> mval = Nan::Get(obj, Nan::New(key).ToLocalChecked());
+    if (!mval.ToLocal(&jsValue))
+        return false;
+
     if (jsValue->IsInt32()) {
         *value = Nan::To<int32_t>(jsValue).FromJust();
         return true;
@@ -528,10 +533,14 @@ bool njsBaton::GetStringFromJSON(Local<Object> obj, const char *key, int index,
 
     if (!error.empty())
         return false;
-    jsValue = obj->Get(Nan::New<v8::String>(key).ToLocalChecked());
+
+    MaybeLocal<Value> mval = Nan::Get(obj, Nan::New(key).ToLocalChecked());
+    if (!mval.ToLocal (&jsValue))
+        return false;
+
     if (jsValue->IsString()) {
         v8::String::Utf8Value utf8str(jsValue->ToString());
-        value = std::string(*utf8str, utf8str.length());
+        value = std::string(*utf8str, static_cast<size_t>(utf8str.length()));
         return true;
     } else if (jsValue->IsUndefined()) {
         return true;
@@ -561,8 +570,9 @@ bool njsBaton::GetUnsignedIntFromJSON(Local<Object> obj, const char *key,
 
     if (!error.empty())
         return false;
-    jsValue = obj->Get(Nan::New<v8::String>(key).ToLocalChecked());
-    if (jsValue.IsEmpty())
+
+    MaybeLocal<Value> mval = Nan::Get(obj, Nan::New(key).ToLocalChecked());
+    if (!mval.ToLocal(&jsValue))
         return false;
     if (jsValue->IsUint32()) {
         *value = Nan::To<uint32_t>(jsValue).FromJust();
@@ -668,7 +678,7 @@ bool njsCommon::GetStringArg(Nan::NAN_METHOD_ARGS_TYPE args,
         return false;
     }
     v8::String::Utf8Value utf8str(args[index]->ToString());
-    value = std::string(*utf8str, utf8str.length());
+    value = std::string(*utf8str, static_cast<size_t>(utf8str.length()));
     return true;
 }
 
@@ -763,7 +773,7 @@ bool njsCommon::SetPropString(Local<Value> value, std::string *valuePtr,
         return false;
     }
     v8::String::Utf8Value utfstr(value->ToString());
-    *valuePtr = std::string(*utfstr, utfstr.length());
+    *valuePtr = std::string(*utfstr, static_cast<size_t>(utfstr.length()));
     return true;
 }
 

@@ -418,4 +418,327 @@ describe('140. v8Getter.js', function() {
     }); // 140.4.2
   }); // 140.4
 
+  describe("140.5 Negative: Bool type", function() {
+
+    var dotest = function(opt, cb) {
+      var sql = "INSERT INTO " + tableName + " VALUES(1405, 'Changjie Lin')";
+      connection.execute(
+        sql,
+        opt,
+        function(err, result) {
+          should.exist(err);
+          should.strictEqual(
+            err.message,
+            "Uncaught Wrong boolean value"
+          );
+          should.not.exist(result);
+          cb();
+        }
+      );
+    };
+
+    it('140.5.1 option - autoCommit', function(done) {
+
+      var options = { autoCommit: true };
+      Object.defineProperty(options, 'autoCommit', {
+        get: function() {
+          throw 'Wrong boolean value';
+        }
+      });
+      dotest(options, done);
+
+    });
+
+    it('140.5.2 option - extendedMetaData', function(done) {
+
+      var options = { extendedMetaData: true };
+      Object.defineProperty(options, 'extendedMetaData', {
+        get: function() {
+          throw 'Wrong boolean value';
+        }
+      });
+      dotest(options, done);
+
+    });
+  }); // 140.5
+
+  describe('140.6 Negative: positive Int type', function() {
+
+    it('140.6.1 option - fetchArraySize', function(done) {
+
+      var options = { fetchArraySize: 200 };
+      Object.defineProperty(options, 'fetchArraySize', {
+        get: function() {
+          throw 'No value';
+        }
+      });
+
+      var sql = "select * from " + tableName;
+      connection.execute(
+        sql,
+        options,
+        function(err, result) {
+          should.exist(err);
+          should.strictEqual(
+            err.message,
+            "Uncaught No value"
+          );
+          should.not.exist(result);
+          done();
+        }
+      );
+    });
+  }); // 140.6
+
+  describe('140.7 Negative: Pool object', function() {
+
+    var dotest = function(opt, cb) {
+      oracledb.createPool(
+        opt,
+        function(err, pool) {
+          should.exist(err);
+          should.not.exist(pool);
+          cb();
+        }
+      );
+    };
+
+    it.skip('140.7.1 String type - user', function(done) {
+
+      var cred = dbConfig;
+      Object.defineProperty(cred, 'user', {
+        get: function() {
+          throw 'Nope';
+        }
+      });
+      dotest(cred, done);
+    });
+
+    it.skip('140.7.2 String type - password', function(done) {
+
+      var cred = dbConfig;
+      Object.defineProperty(cred, 'password', {
+        get: function() {
+          throw 'Nope';
+        }
+      });
+      dotest(cred, done);
+    });
+
+    it.skip('140.7.3 String type - connectString', function(done) {
+
+      var cred = dbConfig;
+      Object.defineProperty(cred, 'connectString', {
+        get: function() {
+          throw 'Nope';
+        }
+      });
+      dotest(cred, done);
+    });
+
+    it.skip('140.7.4 poolMin', function(done) {
+
+      var cred = dbConfig;
+      Object.defineProperty(cred, 'poolMin', {
+        get: function() {
+          throw 'Nope';
+        }
+      });
+      dotest(cred, done);
+    });
+
+    it.skip('140.7.5 poolMax', function(done) {
+
+      var cred = dbConfig;
+      Object.defineProperty(cred, 'poolMax', {
+        get: function() {
+          throw 'Nope';
+        }
+      });
+      dotest(cred, done);
+    });
+
+    it.skip('140.7.6 poolIncrement', function(done) {
+
+      var cred = dbConfig;
+      Object.defineProperty(cred, 'poolIncrement', {
+        get: function() {
+          throw 'Nope';
+        }
+      });
+      dotest(cred, done);
+    });
+
+    it.skip('140.7.7 poolTimeout', function(done) {
+
+      var cred = dbConfig;
+      Object.defineProperty(cred, 'poolTimeout', {
+        get: function() {
+          throw 'Nope';
+        }
+      });
+      dotest(cred, done);
+    });
+
+    it.skip('140.7.8 poolPingInterval', function(done) {
+
+      var cred = dbConfig;
+      Object.defineProperty(cred, 'poolPingInterval', {
+        get: function() {
+          throw 'Nope';
+        }
+      });
+
+      dotest(cred, done);
+    });
+
+    it.skip('140.7.9 queueRequests', function(done) {
+
+      var cred = dbConfig;
+      Object.defineProperty(cred, 'queueRequests', {
+        get: function() {
+          throw 'Nope';
+        }
+      });
+      dotest(cred, done);
+    });
+
+    it.skip('140.7.10 stmtCacheSize', function(done) {
+
+      var cred = dbConfig;
+      Object.defineProperty(cred, 'stmtCacheSize', {
+        get: function() {
+          throw 'Nope';
+        }
+      });
+      dotest(cred, done);
+    });
+
+    it.skip('140.7.11 stmtCacheSize', function(done) {
+
+      var cred = dbConfig;
+      Object.defineProperty(cred, 'stmtCacheSize', {
+        get: function() {
+          throw 'Nope';
+        }
+      });
+      dotest(cred, done);
+    });
+
+    it.skip('140.7.12 poolAlias', function(done) {
+
+      var cred = dbConfig;
+      Object.defineProperty(cred, 'poolAlias', {
+        get: function() {
+          throw 'Nope';
+        }
+      });
+      dotest(cred, done);
+    });
+
+    it.skip('140.7.13 queueTimeout', function(done) {
+
+      var cred = dbConfig;
+      Object.defineProperty(cred, 'queueTimeout', {
+        get: function() {
+          throw 'Nope';
+        }
+      });
+      dotest(cred, done);
+    });
+
+    it.skip('140.7.14 connecionsOpen', function(done) {
+
+      oracledb.createPool(
+        dbConfig,
+        function(err, pool) {
+          should.not.exist(err);
+
+          Object.defineProperty(pool, 'connecionsOpen', {
+            get: function() {
+              throw 'Nope';
+            }
+          });
+          console.log(pool.connecionsOpen);
+
+          pool.Close(function(err) {
+            should.not.exist(err);
+            done();
+          });
+        }
+      );
+    });
+
+    it.skip('140.7.15 connecionsInUse', function(done) {
+
+      oracledb.createPool(
+        dbConfig,
+        function(err, pool) {
+          should.not.exist(err);
+
+          Object.defineProperty(pool, 'connecionsInUse', {
+            get: function() {
+              throw 'Nope';
+            }
+          });
+          console.log(pool.connecionsInUse);
+
+          pool.Close(function(err) {
+            should.not.exist(err);
+            done();
+          });
+        }
+      );
+    });
+
+  }); // 140.7
+
+  describe ('140.8 Negative Connection object', function ()  {
+    it.skip ( '140.8.1 String type: user', function(done) {
+      var cred = dbConfig;
+      Object.defineProperty ( cred, 'user', {
+        get : function () {  throw 'Nope';  } } );
+
+      oracledb.getConnection (
+        cred,
+        function ( err, connection ) {
+          should.exist ( err ) ;
+          should.not.exist ( connection ) ;
+        }
+      );
+      done ();
+    });
+
+    it.skip ( '140.8.2 String type: password', function(done) {
+      var cred = dbConfig;
+      Object.defineProperty ( cred, 'password', {
+        get : function () {  throw 'Nope';  } } );
+
+      oracledb.getConnection (
+        cred,
+        function ( err, connection ) {
+          should.exist ( err ) ;
+          should.not.exist ( connection ) ;
+        }
+      );
+      done ();
+    });
+
+    it.skip ( '140.8.3 String type: connectionString', function(done) {
+      var cred = dbConfig;
+      Object.defineProperty ( cred, 'connectionString', {
+        get : function () {  throw 'Nope';  } } );
+
+      oracledb.getConnection (
+        cred,
+        function ( err, connection ) {
+          should.exist ( err ) ;
+          should.not.exist ( connection ) ;
+        }
+      );
+      done ();
+    });
+
+  });
+
 });
