@@ -130,10 +130,18 @@ version 2.0.
   Database 10.2 or greater. Version 11.2 client libraries can connect
   to Oracle Database 9.2 or greater.
 
-See [Troubleshooting Node-oracledb Installation Problems](#troubleshooting) if you have issues.
+- Your Node.js applications can now connect to your database.  The
+  database can be on the same machine as Node.js, or on a remote
+  machine.  Node-oracledb does not install or create a database.
+
+  You will need to know [database credentials][45] and the [connection
+  string][7] for the database.
 
 After installation, learn how to use node-oracledb from the
 [examples][19] and the [documentation][44].
+
+See [Troubleshooting Node-oracledb Installation
+Problems](#troubleshooting) if you have installation issues.
 
 ## <a name="instructions"></a> 3. Node-oracledb Installation Instructions
 
@@ -185,7 +193,7 @@ All installations need:
   same machine as Node.js, or on a remote machine.  Node-oracledb does
   not install or create a database.
 
-  You will need to know user credentials and the [connection
+  You will need to know [database credentials][45] and the [connection
   string][7] for the database.
 
 If pre-built binaries are not available or desired, you need these
