@@ -525,8 +525,8 @@ oracledb.BIND_OUT               // (3003) Direction for OUT binds
 Constants for [`getConnection()`](#getconnectiondb) `privilege`
 properties.
 
-These specify what privileges should be used by the connection that is being
-established.
+These specify what [privilege](#getconnectiondbattrsprivilege) should
+be used by the connection that is being established.
 
 ```
 oracledb.SYSDBA                 // (2) SYSDBA privileges
