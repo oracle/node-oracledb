@@ -19,7 +19,10 @@
  *   demo.sql
  *
  * DESCRIPTION
- *   Create database objects for the examples
+ *   Create database objects for the examples in your database user account.
+ *
+ *   The video https://www.youtube.com/watch?v=WDJacg0NuLo
+ *   shows how to create a new database user.
  *
  *   Scripts to create Oracle Database's traditional sample schemas can
  *   be found at: https://github.com/oracle/db-sample-schemas

@@ -331,7 +331,7 @@ variable `TNS_ADMIN` to that directory name.
 
 Download the [example programs][19] from GitHub.
 
-Edit `dbconfig.js` and set the database credentials to your
+Edit `dbconfig.js` and set the [database credentials][45] to your
 environment, for example:
 
 ```
@@ -469,7 +469,7 @@ variable `TNS_ADMIN` to that directory name.
 
 Download the [example programs][19] from GitHub.
 
-Edit `dbconfig.js` and set the database credentials to your
+Edit `dbconfig.js` and set the [database credentials][45] to your
 environment, for example:
 
 ```
@@ -587,7 +587,7 @@ relaxed.
 
 Download the [example programs][19] from GitHub.
 
-Edit `dbconfig.js` and set the database credentials to your
+Edit `dbconfig.js` and set the [database credentials][45] to your
 environment, for example:
 
 ```
@@ -708,7 +708,7 @@ variable `TNS_ADMIN` to that directory name.
 
 Download the [example programs][19] from GitHub.
 
-Edit `dbconfig.js` and set the database credentials to your
+Edit `dbconfig.js` and set the [database credentials][45] to your
 environment, for example:
 
 ```
@@ -833,7 +833,7 @@ If you see `MSVCR80.dll` then you need the VS 2005 Redistributable.
 
 Download the [example programs][19] from GitHub.
 
-Edit `dbconfig.js` and set the database credentials to your
+Edit `dbconfig.js` and set the [database credentials][45] to your
 environment, for example:
 
 ```
@@ -925,7 +925,7 @@ variable `TNS_ADMIN` to that directory name.
 
 Download the [example programs][19] from GitHub.
 
-Edit `dbconfig.js` and set the database credentials to your
+Edit `dbconfig.js` and set the [database credentials][45] to your
 environment, for example:
 
 ```
@@ -1083,7 +1083,7 @@ variable `TNS_ADMIN` to that directory name.
 
 Download the [example programs][19] from GitHub.
 
-Edit `dbconfig.js` and set the database credentials to your
+Edit `dbconfig.js` and set the [database credentials][45] to your
 environment, for example:
 
 ```
@@ -1205,7 +1205,7 @@ variable `TNS_ADMIN` to that directory name.
 
 Download the [example programs][19] from GitHub.
 
-Edit `dbconfig.js` and set the database credentials to your
+Edit `dbconfig.js` and set the [database credentials][45] to your
 environment, for example:
 
 ```
@@ -1607,3 +1607,4 @@ Questions and issues can be posted as [GitHub Issues][10].
 [42]: https://github.com/oracle/node-oracledb/blob/master/doc/api.md#migratev1v2
 [43]: https://github.com/oracle/node-oracledb/blob/master/CHANGELOG.md
 [44]: https://github.com/oracle/node-oracledb/blob/master/doc/api.md
+[45]: https://www.youtube.com/watch?v=WDJacg0NuLo

@@ -261,7 +261,7 @@ below.  As well as callbacks, node-oracledb can also use
 [Promises](#promiseoverview) and [Async/Await](#asyncawaitoverview)
 functions.
 
-Locate your Oracle Database username and password, and the database
+Locate your Oracle Database [username and password][91], and the database
 [connection string](#connectionstrings).  The connection string is
 commonly of the format `hostname/servicename`, using the hostname
 where the database is running and the Oracle Database service name of
@@ -6852,3 +6852,4 @@ When upgrading from node-oracledb version 1.13 to version 2.0:
 [88]: https://nodejs.org/en/download/
 [89]: https://github.com/oracle/node-oracledb/tree/master/examples/dbconfig.js
 [90]: https://docs.oracle.com/en/database/oracle/oracle-database/12.2/admin/getting-started-with-database-administration.html#GUID-5F1E393E-97B8-43BC-BD68-3595251A6F7C
+[91]: https://www.youtube.com/watch?v=WDJacg0NuLo
