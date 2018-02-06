@@ -1,37 +1,30 @@
 Overview of node-oracledb functional tests
 
-1. connection.js
+  1. connection.js
     1.1 can run SQL query with different output formats
-        1.1.1 ARRAY format by defaul
+        1.1.1 ARRAY format by default
         1.1.2 ARRAY format explicitly
         1.1.3 OBJECT format
         1.1.4 Negative test - invalid outFormat value
-    1.2 'maxRows' property limits the number of fetched rows
-        1.2.1 Default maxRows == 0, which means unlimited
-        1.2.2 can be specified for at execution
-        1.2.3 maxRows == amount of rows) means unlimited
-        1.2.4 cannot set maxRows to be a negative number
-        1.2.5 sets maxRows to be large value
-        1.2.6 shows 12c new way to limit the number of records fetched by queries
-    1.3 can call PL/SQL procedures
-        1.3.1 bind parameters in various ways
-    1.4 statementCacheSize controls statement caching
-        1.4.1 stmtCacheSize = 0, which disable statement caching
-        1.4.2 works well when statement cache enabled (stmtCacheSize > 0)
-    1.5 Testing commit() & rollback() functions
-        1.5.1 commit() function works well
-        1.5.2 rollback() function works well
-    1.6 Testing parameter assertions
-        1.6.1 too few params should throw an error
-        1.6.2 too many params should throw error
-        1.6.3 wrong type for param 1 should throw an error
-        1.6.4 wrong type for param 2 should throw an error
-        1.6.5 wrong type for param 3 should throw an error
-        1.6.6 wrong type for param 4 should throw an error
-    1.7 Close method
-        1.7.1 close can be used as an alternative to release
-    1.8 invalid credentials
-        1.8.1 cannot get connections with invalid credentials
+    1.2 can call PL/SQL procedures
+        1.2.1 bind parameters in various ways
+    1.3 statementCacheSize controls statement caching
+        1.3.1 stmtCacheSize = 0, which disable statement caching
+        1.3.2 works well when statement cache enabled (stmtCacheSize > 0)
+    1.4 Testing commit() & rollback() functions
+        1.4.1 commit() function works well
+        1.4.2 rollback() function works well
+    1.5 Testing parameter assertions
+        1.5.1 too few params should throw an error
+        1.5.2 too many params should throw error
+        1.5.3 wrong type for param 1 should throw an error
+        1.5.4 wrong type for param 2 should throw an error
+        1.5.5 wrong type for param 3 should throw an error
+        1.5.6 wrong type for param 4 should throw an error
+    1.6 Close method
+        1.6.1 close can be used as an alternative to release
+    1.7 invalid credentials
+        1.7.1 cannot get connections with invalid credentials
 
 2. pool.js
     2.1 default values
@@ -4004,3 +3997,13 @@ Overview of node-oracledb functional tests
         156.2.11 maxRows = 0, fetchArraySize = table size
         156.2.12 maxRows = (table size - 1), fetchArraySize = table size
         156.2.13 fetchArraySize = (table size - 1), maxRows = table size
+
+157. maxRows.js
+    157.1 Default maxRows == 0, which means unlimited
+    157.2 specify the value at execution
+    157.3 equals to the total amount of rows
+    157.4 cannot set it to be a negative number
+    157.5 sets it to be large value
+    157.6 shows 12c new way to limit the number of records fetched by queries
+    157.7 oracledb.maxRows > 0 && oracledb.maxRows < totalAmount
+    157.8 oracledb.maxRows > 0, execute() with maxRows=0

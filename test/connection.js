@@ -160,203 +160,7 @@ describe('1. connection.js', function(){
     });
   });
 
-  describe("1.2 'maxRows' property limits the number of fetched rows", function(){
-    var connection = null;
-    var totalAmount = 107;
-
-    before(function(done) {
-      async.series([
-        function getConn(cb) {
-          oracledb.getConnection(dbConfig, function(err, conn) {
-            should.not.exist(err);
-            connection = conn;
-            cb();
-          });
-        },
-        function createTab(cb) {
-          var proc = "BEGIN \n" +
-                     "    DECLARE \n" +
-                     "        e_table_missing EXCEPTION; \n" +
-                     "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
-                     "    BEGIN \n" +
-                     "        EXECUTE IMMEDIATE('DROP TABLE nodb_tab_conn_emp2 PURGE'); \n" +
-                     "    EXCEPTION \n" +
-                     "        WHEN e_table_missing \n" +
-                     "        THEN NULL; \n" +
-                     "    END; \n" +
-                     "    EXECUTE IMMEDIATE (' \n" +
-                     "        CREATE TABLE nodb_tab_conn_emp2 ( \n" +
-                     "            id       NUMBER NOT NULL, \n" +
-                     "            name     VARCHAR2(20) \n" +
-                     "        ) \n" +
-                     "    '); \n" +
-                     "END; ";
-
-          connection.execute(
-            proc,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        },
-        function insertData(cb) {
-          var proc = "DECLARE \n" +
-                     "    x NUMBER := 0; \n" +
-                     "    n VARCHAR2(20); \n" +
-                     "BEGIN \n" +
-                     "    FOR i IN 1..107 LOOP \n" +
-                     "        x := x + 1; \n" +
-                     "        n := 'staff ' || x; \n" +
-                     "        INSERT INTO nodb_tab_conn_emp2 VALUES (x, n); \n" +
-                     "    END LOOP; \n" +
-                     "END; ";
-
-          connection.execute(
-            proc,
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        }
-      ], done);
-    }); // before()
-
-    after(function(done) {
-      async.series([
-        function(cb) {
-          connection.execute(
-            "DROP TABLE nodb_tab_conn_emp2 PURGE",
-            function(err) {
-              should.not.exist(err);
-              cb();
-            }
-          );
-        },
-        function(cb) {
-          connection.close(function(err) {
-            should.not.exist(err);
-            cb();
-          });
-        }
-      ], done);
-    }); // after()
-
-    var verifyRows = function(rows, amount) {
-      for (var i = 0; i < amount; i++) {
-        should.strictEqual(rows[i][0], (i + 1));
-        should.strictEqual(rows[i][1], ("staff " + String(i + 1)) );
-      }
-    };
-
-    var sqlQuery = "SELECT * FROM nodb_tab_conn_emp2 ORDER BY id";
-
-    it('1.2.1 Default maxRows == 0, which means unlimited', function(done){
-      should.strictEqual(oracledb.maxRows, 0);
-
-      connection.execute(
-        sqlQuery,
-        function(err, result){
-          should.not.exist(err);
-          should.exist(result);
-          should.strictEqual(result.rows.length, totalAmount);
-          verifyRows(result.rows, totalAmount);
-          done();
-        }
-      );
-    });
-
-    it('1.2.2 can be specified for at execution', function(done){
-      var fetchAmount = 25;
-      connection.execute(
-        sqlQuery,
-        {},
-        { maxRows: fetchAmount },
-        function(err, result){
-          should.not.exist(err);
-          should.exist(result);
-          should.strictEqual(result.rows.length, fetchAmount);
-          verifyRows(result.rows, fetchAmount);
-          done();
-        }
-      );
-    });
-
-    it('1.2.3 maxRows == amount of rows) means unlimited', function(done){
-      connection.execute(
-        sqlQuery,
-        {},
-        { maxRows: totalAmount },
-        function(err, result){
-          should.not.exist(err);
-          should.exist(result);
-          should.strictEqual(result.rows.length, totalAmount);
-          verifyRows(result.rows, totalAmount);
-          done();
-        }
-      );
-    });
-
-    it('1.2.4 cannot set maxRows to be a negative number', function(done){
-      connection.execute(
-        sqlQuery,
-        {},
-        { maxRows: -5 },
-        function(err, result){
-          should.exist(err);
-          (err.message).should.startWith('NJS-007:');
-          should.not.exist(result);
-          done();
-        }
-      );
-    });
-
-    it('1.2.5 sets maxRows to be large value', function(done) {
-      connection.execute(
-        sqlQuery,
-        {},
-        { maxRows: 500000 },
-        function(err, result){
-          should.not.exist(err);
-          should.exist(result);
-          verifyRows(result.rows, totalAmount);
-          done();
-        }
-      );
-    });
-
-    it('1.2.6 shows 12c new way to limit the number of records fetched by queries', function(done) {
-      connection.should.be.ok();
-
-      var myoffset     = 2;  // number of rows to skip
-      var mymaxnumrows = 6;  // number of rows to fetch
-      var sql = "SELECT * FROM nodb_tab_conn_emp2 ORDER BY id";
-
-      if (connection.oracleServerVersion >= 1201000000) {
-        // 12c row-limiting syntax
-        sql += " OFFSET :offset ROWS FETCH NEXT :maxnumrows ROWS ONLY";
-      } else {
-        // Pre-12c syntax [could also customize the original query and use row_number()]
-        sql = "SELECT * FROM (SELECT A.*, ROWNUM AS MY_RNUM FROM"
-            + "(" + sql + ") A "
-            + "WHERE ROWNUM <= :maxnumrows + :offset) WHERE MY_RNUM > :offset";
-      }
-
-      connection.execute(
-        sql,
-        { offset: myoffset, maxnumrows: mymaxnumrows },
-        { maxRows: 150 },
-        function(err, result) {
-          should.not.exist(err);
-          (result.rows.length).should.eql(mymaxnumrows);
-          done();
-        }
-      );
-    });
-  });
-
-  describe('1.3 can call PL/SQL procedures', function(){
+  describe('1.2 can call PL/SQL procedures', function(){
     var connection = false;
 
     var proc = "CREATE OR REPLACE PROCEDURE nodb_bindingtest (p_in IN VARCHAR2, p_inout IN OUT VARCHAR2, p_out OUT VARCHAR2) "
@@ -389,7 +193,7 @@ describe('1. connection.js', function(){
       );
     });
 
-    it('1.3.1 bind parameters in various ways', function(done){
+    it('1.2.1 bind parameters in various ways', function(done){
       var bindValues = {
         i: 'Alan', // default is type STRING and direction Infinity
         io: { val: 'Turing', type: oracledb.STRING, dir: oracledb.BIND_INOUT },
@@ -409,7 +213,7 @@ describe('1. connection.js', function(){
     });
   });
 
-  describe('1.4 statementCacheSize controls statement caching', function() {
+  describe('1.3 statementCacheSize controls statement caching', function() {
     var makeTable =
         "BEGIN \
             DECLARE \
@@ -475,7 +279,7 @@ describe('1. connection.js', function(){
       );
     });
 
-    it('1.4.1 stmtCacheSize = 0, which disable statement caching', function(done) {
+    it('1.3.1 stmtCacheSize = 0, which disable statement caching', function(done) {
       connection.should.be.ok();
       oracledb.stmtCacheSize = 0;
 
@@ -516,7 +320,7 @@ describe('1. connection.js', function(){
       ], done);
     });
 
-    it('1.4.2 works well when statement cache enabled (stmtCacheSize > 0) ', function(done) {
+    it('1.3.2 works well when statement cache enabled (stmtCacheSize > 0) ', function(done) {
       connection.should.be.ok();
       oracledb.stmtCacheSize = 100;
 
@@ -559,7 +363,7 @@ describe('1. connection.js', function(){
 
   });
 
-  describe('1.5 Testing commit() & rollback() functions', function() {
+  describe('1.4 Testing commit() & rollback() functions', function() {
     var makeTable =
         "BEGIN \
             DECLARE \
@@ -651,7 +455,7 @@ describe('1. connection.js', function(){
     });
 
 
-    it('1.5.1 commit() function works well', function(done) {
+    it('1.4.1 commit() function works well', function(done) {
       async.series([
         function(callback) {
           conn2.execute(
@@ -703,7 +507,7 @@ describe('1. connection.js', function(){
 
     });
 
-    it('1.5.2 rollback() function works well', function(done) {
+    it('1.4.2 rollback() function works well', function(done) {
       async.series([
         function(callback) {
           conn2.execute(
@@ -755,7 +559,7 @@ describe('1. connection.js', function(){
     });
   });
 
-  describe('1.6 Testing parameter assertions', function() {
+  describe('1.5 Testing parameter assertions', function() {
     var conn1;
 
     beforeEach('get connection ready', function(done) {
@@ -773,7 +577,7 @@ describe('1. connection.js', function(){
       });
     });
 
-    it('1.6.1 too few params should throw an error', function(done) {
+    it('1.5.1 too few params should throw an error', function(done) {
       // This test returns a promise because the last parameter to execute is not
       // a function. Normally, errors thrown in a promise would be directed to
       // to a catch handler. In the case of an "accidental promise" the error
@@ -814,7 +618,7 @@ describe('1. connection.js', function(){
       }
     });
 
-    it('1.6.2 too many params should throw error', function(done) {
+    it('1.5.2 too many params should throw error', function(done) {
       // This test returns a promise because the last parameter to execute is not
       // a function. Normally, errors thrown in a promise would be directed to
       // to a catch handler. In the case of an "accidental promise" the error
@@ -854,7 +658,7 @@ describe('1. connection.js', function(){
       }
     });
 
-    it('1.6.3 wrong type for param 1 should throw an error', function(done) {
+    it('1.5.3 wrong type for param 1 should throw an error', function(done) {
       // Don't need to listen for unhandledRejection because a promise will not
       // be returned as the last param is a function.
       try {
@@ -865,7 +669,7 @@ describe('1. connection.js', function(){
       }
     });
 
-    it('1.6.4 wrong type for param 2 should throw an error', function(done) {
+    it('1.5.4 wrong type for param 2 should throw an error', function(done) {
       // This test returns a promise because the last parameter to execute is not
       // a function. Normally, errors thrown in a promise would be directed to
       // to a catch handler. In the case of an "accidental promise" the error
@@ -906,7 +710,7 @@ describe('1. connection.js', function(){
       }
     });
 
-    it('1.6.5 wrong type for param 3 should throw an error', function(done) {
+    it('1.5.5 wrong type for param 3 should throw an error', function(done) {
       // Don't need to listen for unhandledRejection because a promise will not
       // be returned as the last param is a function.
       try {
@@ -917,7 +721,7 @@ describe('1. connection.js', function(){
       }
     });
 
-    it('1.6.6 wrong type for param 4 should throw an error', function(done) {
+    it('1.5.6 wrong type for param 4 should throw an error', function(done) {
       // Don't need to listen for unhandledRejection because a promise will not
       // be returned as the last param is a function.
       try {
@@ -929,8 +733,8 @@ describe('1. connection.js', function(){
     });
   });
 
-  describe('1.7 Close method', function() {
-    it('1.7.1 close can be used as an alternative to release', function(done) {
+  describe('1.6 Close method', function() {
+    it('1.6.1 close can be used as an alternative to release', function(done) {
       oracledb.getConnection(credentials, function(err, conn) {
         should.not.exist(err);
 
@@ -942,9 +746,9 @@ describe('1. connection.js', function(){
     });
   }); // 1.7
 
-  describe('1.8 invalid credentials', function() {
+  describe('1.7 invalid credentials', function() {
 
-    it('1.8.1 cannot get connections with invalid credentials', function(done) {
+    it('1.7.1 cannot get connections with invalid credentials', function(done) {
 
       oracledb.getConnection(
         {
