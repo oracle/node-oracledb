@@ -275,76 +275,91 @@ NAN_METHOD(njsResultSet::GetRows)
 
 
 //-----------------------------------------------------------------------------
-// njsResultSet::Async_GetRows()
-//   Worker function for njsResultSet::GetRowsCommon() method.
+// njsResultSet::GetRowsHelper()
+//   Get rows from the result set and return a boolean indicating if the
+// fetch was successful or not.
 //-----------------------------------------------------------------------------
-void njsResultSet::Async_GetRows(njsBaton *baton)
+bool njsResultSet::GetRowsHelper(njsBaton *baton, int *moreRows)
 {
-    njsResultSet *resultSet = (njsResultSet*) baton->callingObj;
     uint32_t i, numRowsToFetch;
     njsVariable *var;
-    int moreRows;
 
     // determine how many rows to fetch; use fetchArraySize unless it is less
     // than maxRows (no need to waste memory!)
     numRowsToFetch = baton->fetchArraySize;
-    if (resultSet->maxRows > 0 && resultSet->maxRows < numRowsToFetch)
-        numRowsToFetch = resultSet->maxRows;
+    if (this->maxRows > 0 && this->maxRows < numRowsToFetch)
+        numRowsToFetch = this->maxRows;
 
     // create ODPI-C variables and define them, if necessary
-    for (i = 0; i < resultSet->numQueryVars; i++) {
-        var = &resultSet->queryVars[i];
+    for (i = 0; i < this->numQueryVars; i++) {
+        var = &this->queryVars[i];
         if (var->dpiVarHandle && var->maxArraySize >= numRowsToFetch)
             continue;
         if (var->dpiVarHandle) {
             if (dpiVar_release(var->dpiVarHandle) < 0) {
                 baton->GetDPIError();
-                return;
+                return false;
             }
             var->dpiVarHandle = NULL;
         }
-        if (dpiConn_newVar(resultSet->dpiConnHandle, var->varTypeNum,
+        if (dpiConn_newVar(this->dpiConnHandle, var->varTypeNum,
                 var->nativeTypeNum, numRowsToFetch, var->maxSize, 1, 0, NULL,
                 &var->dpiVarHandle, &var->dpiVarData) < 0) {
             baton->GetDPIError();
-            return;
+            return false;
         }
         var->maxArraySize = numRowsToFetch;
-        if (dpiStmt_define(resultSet->dpiStmtHandle, i + 1,
+        if (dpiStmt_define(this->dpiStmtHandle, i + 1,
                 var->dpiVarHandle) < 0) {
             baton->GetDPIError();
-            return;
+            return false;
         }
     }
 
     // set fetch array size as requested
-    if (dpiStmt_setFetchArraySize(resultSet->dpiStmtHandle,
+    if (dpiStmt_setFetchArraySize(this->dpiStmtHandle,
             numRowsToFetch) < 0) {
         baton->GetDPIError();
-        return;
+        return false;
     }
 
     // perform fetch
-    if (dpiStmt_fetchRows(resultSet->dpiStmtHandle, numRowsToFetch,
-            &baton->bufferRowIndex, &baton->rowsFetched, &moreRows) < 0) {
+    if (dpiStmt_fetchRows(this->dpiStmtHandle, numRowsToFetch,
+            &baton->bufferRowIndex, &baton->rowsFetched, moreRows) < 0) {
         baton->GetDPIError();
-        return;
+        return false;
     }
 
     // result sets that should be auto closed are closed if the result set
     // is exhaused or the maximum number of rows has been fetched
-    if (moreRows && resultSet->maxRows > 0) {
-        if (baton->rowsFetched == resultSet->maxRows)
-            moreRows = 0;
-        else resultSet->maxRows -= baton->rowsFetched;
+    if (*moreRows && this->maxRows > 0) {
+        if (baton->rowsFetched == this->maxRows)
+            *moreRows = 0;
+        else this->maxRows -= baton->rowsFetched;
     }
-    if (!moreRows && resultSet->autoClose) {
+    return njsConnection::ProcessVars(baton, this->queryVars,
+            this->numQueryVars, baton->rowsFetched);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsResultSet::Async_GetRows()
+//   Worker function for njsResultSet::GetRows() method.
+//-----------------------------------------------------------------------------
+void njsResultSet::Async_GetRows(njsBaton *baton)
+{
+    njsResultSet *resultSet = (njsResultSet*) baton->callingObj;
+    int moreRows;
+    bool success;
+
+    // result sets that should be auto closed are closed if the result set
+    // is exhaused or the maximum number of rows has been fetched or an error
+    // has taken place
+    success = resultSet->GetRowsHelper(baton, &moreRows);
+    if ((!success || !moreRows) && resultSet->autoClose) {
         dpiStmt_release(resultSet->dpiStmtHandle);
         resultSet->dpiStmtHandle = NULL;
     }
-
-    njsConnection::ProcessVars(baton, resultSet->queryVars,
-            resultSet->numQueryVars, baton->rowsFetched);
 }
 
 

@@ -83,6 +83,8 @@ private:
             extendedMetaData(false), autoClose(false) {}
     ~njsResultSet();
 
+    bool GetRowsHelper(njsBaton *baton, int *moreRows);
+
     static NAN_METHOD(New);
 
     // Get Rows Methods
