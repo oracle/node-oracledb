@@ -3423,7 +3423,7 @@ this.  In this file you can configure settings like
 [`SQLNET.OUTBOUND_CONNECT_TIMEOUT`][33], [`SQLNET.RECV_TIMEOUT`][34]
 and [`SQLNET.SEND_TIMEOUT`][35].  You may also want to use a
 [`tnsnames.ora`](#tnsnames) file to configure the database service
-setting ['ENABLE=BROKEN'][36].
+setting [`ENABLE=BROKEN`][36].
 
 Other [Oracle Network Services][37] options may also be useful for
 high availability and performance tuning.
