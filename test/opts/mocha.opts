@@ -59,125 +59,126 @@ test/poolClose.js
 test/connClose.js
 
 test/resultSetClose.js
+test/lobClose.js
 test/resultSet2.js
 test/fetchAs.js
 test/nestedCursor.js
-test/properties.js
 
+test/properties.js
 test/lobResultSet.js
 test/clobPlsqlString.js
 test/checkClassesTypes.js
 test/lobProperties1.js
-test/autoCommit4nestedExecutes.js
 
+test/autoCommit4nestedExecutes.js
 test/sqlWithWarnings.js
 test/uninitializedLob.js
 test/writableProperties.js
 test/poolCache.js
-test/multipleLobInsertion.js
 
+test/multipleLobInsertion.js
 test/driverName.js
 test/plsqlBindScalar.js
 test/lobBind1.js
 test/lobBind2.js
-test/poolPing.js
 
+test/poolPing.js
 test/clobPlsqlBindAsString_bindin.js
 test/clobPlsqlBindAsString_bindout.js
 test/clobPlsqlBindAsString_bindinout.js
 test/blobPlsqlBindAsBuffer_bindin.js
-test/blobPlsqlBindAsBuffer_bindout.js
 
+test/blobPlsqlBindAsBuffer_bindout.js
 test/blobPlsqlBindAsBuffer_bindinout.js
 test/lobBindAsStringBuffer.js
 test/clobDMLBindAsString.js
 test/blobDMLBindAsBuffer.js
-test/lobProperties2.js
 
+test/lobProperties2.js
 test/fetchClobAsString1.js
 test/fetchClobAsString2.js
 test/fetchClobAsString3.js
 test/fetchBlobAsBuffer1.js
-test/fetchBlobAsBuffer2.js
 
+test/fetchBlobAsBuffer2.js
 test/fetchBlobAsBuffer3.js
 test/fetchClobAsString4.js
 test/fetchBlobAsBuffer4.js
 test/binding_DMLInsert.js
-test/binding_procedureBindIn.js
 
+test/binding_procedureBindIn.js
 test/binding_procedureBindInout.js
 test/binding_functionBindInout.js
 test/binding_procedureBindOut.js
 test/binding_functionBindOut.js
-test/binding_DMLReturningInto.js
 
+test/binding_DMLReturningInto.js
 test/binding_functionBindIn.js
 test/binding_defaultBindIn.js
 test/binding_defaultBindInout.js
 test/bindTimestamp.js
-test/dataTypeLong.js
 
+test/dataTypeLong.js
 test/dataTypeLongRaw.js
 test/streamErrorEvent.js
 test/fetchRowidAsString.js
 test/rowidDMLBindAsString.js
-test/rowidProcedureBindAsString_bindin.js
 
+test/rowidProcedureBindAsString_bindin.js
 test/rowidFunctionBindAsString_bind.js
 test/rowidProcedureBindAsString_bindout.js
 test/rowidProcedureBindAsString_bindinout.js
 test/rowidFunctionBindAsString_bindinout.js
-test/dataTypeUrowid.js
 
+test/dataTypeUrowid.js
 test/urowidDMLBindAsString1.js
 test/urowidDMLBindAsString2.js
 test/fetchUrowidAsString.js
 test/urowidProcedureBindAsString1.js
-test/urowidProcedureBindAsString2.js
 
+test/urowidProcedureBindAsString2.js
 test/urowidProcedureBindAsString3.js
 test/urowidFunctionBindAsString1.js
 test/urowidFunctionBindAsString2.js
 test/dataTypeNclob.js
-test/nclobDMLBindAsString.js
 
+test/nclobDMLBindAsString.js
 test/longDMLBind.js
 test/longrawDMLBind.js
 test/blobStream.js
 test/clobStream.js
-test/longProcedureBind_inout.js
 
+test/longProcedureBind_inout.js
 test/longProcedureBind_out.js
 test/longProcedureBind_in.js
 test/longrawProcedureBind_in.js
 test/longrawProcedureBind_inout.js
-test/longrawProcedureBind_out.js
 
+test/longrawProcedureBind_out.js
 test/clobDMLReturningMultipleRowsAsStream.js
 test/clobDMLReturningMultipleRowsAsString.js
 test/blobDMLReturningMultipleRowsAsBuffer.js
 test/blobDMLReturningMultipleRowsAsStream.js
-test/fetchAsStringWithRefCursor.js
 
+test/fetchAsStringWithRefCursor.js
 test/v8Getter.js
 test/insertNaNToNumber.js
 test/urowidFunctionBindAsString3.js
 test/urowidFunctionBindAsString4.js
-test/urowidProcedureBindAsString4.js
 
+test/urowidProcedureBindAsString4.js
 test/urowidProcedureBindAsString5.js
 test/urowidProcedureBindAsString6.js
 test/prefetchRows.js
 test/fetchArraySize1.js
-test/fetchArraySize2.js
 
+test/fetchArraySize2.js
 test/fetchArraySize3.js
 test/fetchArraySize4.js
 test/fetchArraySize5.js
 test/fetchArraySize6.js
-test/fetchArraySize7.js
 
+test/fetchArraySize7.js
 test/fetchArraySize8.js
 test/fetchArraySize9.js
 test/maxRows.js

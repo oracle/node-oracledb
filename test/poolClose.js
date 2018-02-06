@@ -40,53 +40,7 @@ var dbConfig = require('./dbconfig.js');
 
 describe('51. poolClose.js', function(){
 
-  it('51.1 can not get/set the attributes of terminated pool', function(done) {
-    var pMin = 2;
-    var pMax = 10;
-
-    oracledb.createPool(
-      {
-        user            : dbConfig.user,
-        password        : dbConfig.password,
-        connectString   : dbConfig.connectString,
-        poolMin         : pMin,
-        poolMax         : pMax
-      },
-      function(err, pool) {
-        should.not.exist(err);
-        pool.should.be.ok();
-        should.strictEqual(pool.connectionsOpen, pool.poolMin);
-        should.strictEqual(pool.poolMin, pMin);
-        should.strictEqual(pool.poolMax, pMax);
-
-        pool.terminate(function(err) {
-          should.not.exist(err);
-
-          // getter
-          should.strictEqual(pool.poolMin, pMin);
-
-          // setter
-          should.throws(
-            function() {
-              pool.poolMin = 20;
-            },
-            /NJS-014: poolMin is a read-only property/
-          );
-
-          var inUse;
-          pool.terminate(function(err) {
-            should.exist(err);
-            should.strictEqual(err.message, "NJS-002: invalid pool");
-          });
-          should.not.exist(inUse);
-
-          done();
-        }); // terminate()
-      }
-    ); // createPool()
-  }); // 51.1
-
-  it('51.2 can not get connections from the terminated pool', function(done) {
+  it('51.1 can not get connections from the terminated pool', function(done) {
     oracledb.createPool(
       dbConfig,
       function(err, pool) {
@@ -105,9 +59,9 @@ describe('51. poolClose.js', function(){
         }); // terminate()
       }
     ); // createPool()
-  }); // 51.2
+  }); // 51.1
 
-  it('51.3 can not terminate the same pool multiple times', function(done) {
+  it('51.2 can not terminate the same pool multiple times', function(done) {
     oracledb.createPool(
       dbConfig,
       function(err, pool) {
@@ -126,9 +80,9 @@ describe('51. poolClose.js', function(){
         }); // terminate()
       }
     ); // createPool()
-  }); // 51.3
+  }); // 51.2
 
-  it('51.4 can not close the same pool multiple times', function(done) {
+  it('51.3 can not close the same pool multiple times', function(done) {
     oracledb.createPool(
       dbConfig,
       function(err, pool) {
@@ -147,9 +101,9 @@ describe('51. poolClose.js', function(){
         }); // terminate()
       }
     ); // createPool()
-  }); // 51.4
+  }); // 51.3
 
-  it('51.5 pool is still available after the failing close', function(done) {
+  it('51.4 pool is still available after the failing close', function(done) {
     oracledb.createPool(
       dbConfig,
       function(err, pool) {
@@ -176,9 +130,9 @@ describe('51. poolClose.js', function(){
         }); // getConnection()
       }
     ); // createPool()
-  }); // 51.5
+  }); // 51.4
 
-  it('51.6 can not close the same connection multiple times', function(done) {
+  it('51.5 can not close the same connection multiple times', function(done) {
     var pool = null;
     var conn = null;
 
@@ -222,9 +176,9 @@ describe('51. poolClose.js', function(){
         });
       }
     ], done);
-  }); // 51.6
+  }); // 51.5
 
-  it('51.7 can not get connection in promise version from the terminated pool', function(done) {
+  it('51.6 can not get connection in promise version from the terminated pool', function(done) {
     oracledb.createPool(
       dbConfig,
       function(err, pool) {
@@ -250,6 +204,99 @@ describe('51. poolClose.js', function(){
         }); // terminate()
       }
     ); // createPool()
+  }); // 51.6
+
+  it('51.7 can not set the attributes after pool created', function(done) {
+    var pMin = 2;
+    var pMax = 10;
+
+    oracledb.createPool(
+      {
+        user            : dbConfig.user,
+        password        : dbConfig.password,
+        connectString   : dbConfig.connectString,
+        poolMin         : pMin,
+        poolMax         : pMax
+      },
+      function(err, pool) {
+        should.not.exist(err);
+        pool.should.be.ok();
+
+        // setter
+        should.throws(
+          function() {
+            pool.poolMin = 20;
+          },
+          /NJS-014: poolMin is a read-only property/
+        );
+
+        pool.terminate(function(err) {
+          should.not.exist(err);
+
+          // setter
+          should.throws(
+            function() {
+              pool.poolMin = 20;
+            },
+            /NJS-014: poolMin is a read-only property/
+          );
+
+          pool.terminate(function(err) {
+            should.exist(err);
+            should.strictEqual(err.message, "NJS-002: invalid pool");
+          });
+
+          done();
+        }); // terminate()
+      }
+    ); // createPool()
   }); // 51.7
+
+  it('51.8 can access the attributes of closed pool without error', function(done) {
+    var pMin = 2;
+    var pMax = 10;
+    var pAlias = "foobar";
+    var pIncr = 2;
+
+    oracledb.createPool(
+      {
+        user            : dbConfig.user,
+        password        : dbConfig.password,
+        connectString   : dbConfig.connectString,
+        poolMin         : pMin,
+        poolMax         : pMax,
+        poolAlias       : pAlias,
+        poolIncrement   : pIncr
+      },
+      function(err, pool) {
+        should.not.exist(err);
+        pool.should.be.ok();
+
+        pool.terminate(function(err) {
+          should.not.exist(err);
+
+          // getter
+          should.strictEqual(pool.poolMin, pMin);
+          should.strictEqual(pool.poolMax, pMax);
+
+          // values vary with different databases
+          // (pool.connectionsInUse).should.be.a.Number();
+          // (pool.connectionsOpen).should.be.a.Number();
+
+          should.strictEqual(pool.poolAlias, pAlias);
+          should.strictEqual(pool.poolIncrement, pIncr);
+
+          // Default values
+          should.strictEqual(pool.poolPingInterval, 60);
+          should.strictEqual(pool.poolTimeout, 60);
+          should.strictEqual(pool.queueRequests, true);
+          should.strictEqual(pool.queueTimeout, 60000);
+          should.strictEqual(pool.stmtCacheSize, 30);
+
+          done();
+        }); // terminate()
+      }
+    ); // createPool()
+  }); // 51.8
 
 });

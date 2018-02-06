@@ -35,13 +35,11 @@
 
 var oracledb = require('oracledb');
 var should   = require('should');
-var async    = require('async');
 var dbConfig = require('./dbconfig.js');
-var assist   = require('./dataTypeAssist.js');
 
 describe('52. connClose.js', function() {
 
-  it('52.1 can not set property value after connection closes', function(done) {
+  it('52.1 can not set property, stmtCacheSize, after connection closes', function(done) {
     oracledb.getConnection(
       dbConfig,
       function(err, connection) {
@@ -63,22 +61,7 @@ describe('52. connClose.js', function() {
     );
   }); // 52.1
 
-  it('52.2 can not get property value after connection closes', function(done) {
-    oracledb.getConnection(
-      dbConfig,
-      function(err, connection) {
-        should.not.exist(err);
-
-        connection.release(function(err) {
-          should.not.exist(err);
-          should.strictEqual(connection.stmtCacheSize, undefined);
-          done();
-        });
-      }
-    );
-  }); // 52.2
-
-  it('52.3 can not set clientId property value', function(done) {
+  it('52.2 can not set property, clientId, after connection closes', function(done) {
     oracledb.getConnection(
       dbConfig,
       function(err, connection) {
@@ -96,9 +79,9 @@ describe('52. connClose.js', function() {
         });
       }
     );
-  }); // 52.3
+  }); // 52.2
 
-  it('52.4 can not set module property value', function(done) {
+  it('52.3 can not set property, module', function(done) {
     oracledb.getConnection(
       dbConfig,
       function(err, connection) {
@@ -116,9 +99,9 @@ describe('52. connClose.js', function() {
         });
       }
     );
-  }); // 52.4
+  }); // 52.3
 
-  it('52.5 can not set action property value', function(done) {
+  it('52.4 can not set property, action', function(done) {
     oracledb.getConnection(
       dbConfig,
       function(err, connection) {
@@ -136,24 +119,9 @@ describe('52. connClose.js', function() {
         });
       }
     );
-  }); // 52.5
+  }); // 52.4
 
-  it('52.6 can not get oracleServerVersion property value', function(done) {
-    oracledb.getConnection(
-      dbConfig,
-      function(err, connection) {
-        should.not.exist(err);
-
-        connection.release(function(err) {
-          should.not.exist(err);
-          should.strictEqual(connection.oracleServerVersion, undefined);
-          done();
-        });
-      }
-    );
-  }); // 52.6
-
-  it('52.7 can not call execute() method', function(done) {
+  it('52.5 can not call method, execute()', function(done) {
     oracledb.getConnection(
       dbConfig,
       function(err, connection) {
@@ -176,82 +144,170 @@ describe('52. connClose.js', function() {
         });
       }
     );
+  }); // 52.5
+
+  it('52.6 can not call method, break()', function(done) {
+    oracledb.getConnection(
+      dbConfig,
+      function(err, connection) {
+        should.not.exist(err);
+
+        connection.release(function(err) {
+          should.not.exist(err);
+
+          connection.break(function(err) {
+            should.exist(err);
+            should.strictEqual(
+              err.message,
+              "NJS-003: invalid connection"
+            );
+            done();
+          });
+        });
+      }
+    );
+  }); // 52.6
+
+  it('52.7 can not call method, commit()', function(done) {
+    oracledb.getConnection(
+      dbConfig,
+      function(err, connection) {
+        should.not.exist(err);
+
+        connection.release(function(err) {
+          should.not.exist(err);
+
+          connection.commit(function(err) {
+            should.exist(err);
+            should.strictEqual(
+              err.message,
+              "NJS-003: invalid connection"
+            );
+            done();
+          });
+        });
+      }
+    );
   }); // 52.7
 
-  it('52.8 can not get metaData property after connection closes', function(done) {
-    var tableName = "nodb_number";
-    var numbers = assist.data.numbers;
-    var connection = null;
-    var resultSet = null;
+  it('52.8 can not call method, createLob()', function(done) {
+    oracledb.getConnection(
+      dbConfig,
+      function(err, connection) {
+        should.not.exist(err);
 
-    async.series([
-      function getConn(callback) {
-        oracledb.getConnection(
-          dbConfig,
-          function(err, conn) {
-            should.not.exist(err);
-            connection = conn;
-            callback();
-          }
-        );
-      },
-      function(callback) {
-        assist.setUp(connection, tableName, numbers, callback);
-      },
-      function getResultSet(callback) {
-        connection.execute(
-          "SELECT * FROM " + tableName + " ORDER BY num",
-          [],
-          { resultSet: true, outFormat: oracledb.OBJECT },
-          function(err, result) {
-            should.not.exist(err);
-            resultSet = result.resultSet;
-            callback();
-          }
-        );
-      },
-      function verifyMetaData(callback) {
-        should.exist(resultSet.metaData);
-        var t = resultSet.metaData;
-        t.should.eql( [ { name: 'NUM' }, { name: 'CONTENT' } ] );
-        resultSet.close(callback);
-      },
-      function closeConn(callback) {
         connection.release(function(err) {
           should.not.exist(err);
-          callback();
+
+          connection.createLob(oracledb.CLOB, function(err, lob) {
+            should.exist(err);
+            should.not.exist(lob);
+            should.strictEqual(
+              err.message,
+              "NJS-003: invalid connection"
+            );
+            done();
+          });
         });
-      },
-      function getMetaData(callback) {
-        should.strictEqual(resultSet.metaData, undefined);
-        callback();
-      },
-      function getConn(callback) {
-        oracledb.getConnection(
-          dbConfig,
-          function(err, conn) {
-            should.not.exist(err);
-            connection = conn;
-            callback();
-          }
-        );
-      },
-      function dropTable(callback) {
-        connection.execute(
-          "DROP TABLE " + tableName + " PURGE",
-          function(err) {
-            should.not.exist(err);
-            callback();
-          }
-        );
-      },
-      function closeConn(callback) {
+      }
+    );
+  }); // 52.8
+
+  it('52.9 can not call method, queryStream()', function(done) {
+    oracledb.getConnection(
+      dbConfig,
+      function(err, connection) {
+        should.not.exist(err);
+
         connection.release(function(err) {
           should.not.exist(err);
-          callback();
+
+          var stream = connection.queryStream("select sysdate from dual");
+          should.exist(stream);
+
+          stream.on("data", function(data) {
+            should.not.exist(data);
+          });
+
+          stream.on("end", function() {
+            done(new Error("should not emit 'end' event!"));
+          });
+
+          stream.on("error", function(err) {
+            should.exist(err);
+            should.strictEqual(
+              err.message,
+              "NJS-003: invalid connection"
+            );
+            done();
+          });
         });
-      },
-    ], done);
-  });
+      }
+    );
+  }); // 52.9
+
+  it('52.10 can not call release() multiple times', function(done) {
+    oracledb.getConnection(
+      dbConfig,
+      function(err, connection) {
+        should.not.exist(err);
+
+        connection.release(function(err) {
+          should.not.exist(err);
+
+          connection.release(function(err) {
+            should.exist(err);
+            should.strictEqual(
+              err.message,
+              "NJS-003: invalid connection"
+            );
+            done();
+          });
+        });
+      }
+    );
+  }); // 52.10
+
+  it('52.11 can not call method, rollback()', function(done) {
+    oracledb.getConnection(
+      dbConfig,
+      function(err, connection) {
+        should.not.exist(err);
+
+        connection.release(function(err) {
+          should.not.exist(err);
+
+          connection.rollback(function(err) {
+            should.exist(err);
+            should.strictEqual(
+              err.message,
+              "NJS-003: invalid connection"
+            );
+            done();
+          });
+        });
+      }
+    );
+  }); // 52.11
+
+  it("52.12 can access properties of closed connection without error", function(done) {
+    oracledb.getConnection(
+      dbConfig,
+      function(err, connection) {
+        should.not.exist(err);
+
+        connection.release(function(err) {
+          should.not.exist(err);
+
+          should.strictEqual(connection.stmtCacheSize, undefined);
+          should.strictEqual(connection.oracleServerVersion, undefined);
+          should.strictEqual(connection.action, null);
+          should.strictEqual(connection.clientId, null);
+          should.strictEqual(connection.module, null);
+          done();
+        });
+      }
+    );
+  }); // 52.12
 
 });

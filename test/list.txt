@@ -775,23 +775,28 @@ Overview of node-oracledb functional tests
     45.5 instanceof works for lob instances
 
 51. poolClose.js
-    51.1 can not get/set the attributes of terminated pool
-    51.2 can not get connections from the terminated pool
-    51.3 can not terminate the same pool multiple times
-    51.4 can not close the same pool multiple times
-    51.5 pool is still available after the failing close
-    51.6 can not close the same connection multiple times
-    51.7 can not get connection in promise version from the terminated pool
+    51.1 can not get connections from the terminated pool
+    51.2 can not terminate the same pool multiple times
+    51.3 can not close the same pool multiple times
+    51.4 pool is still available after the failing close
+    51.5 can not close the same connection multiple times
+    51.6 can not get connection in promise version from the terminated pool
+    51.7 can not set the attributes after pool created
+    51.8 can access the attributes of closed pool without error
 
 52. connClose.js
-    52.1 can not set property value after connection closes
-    52.2 can not get property value after connection closes
-    52.3 can not set clientId property value
-    52.4 can not set module property value
-    52.5 can not set action property value
-    52.6 can not get oracleServerVersion property value
-    52.7 can not call execute() method
-    52.8 can not get metaData property after connection closes
+    52.1 can not set property, stmtCacheSize, after connection closes
+    52.2 can not set property, clientId, after connection closes
+    52.3 can not set property, module
+    52.4 can not set property, action
+    52.5 can not call method, execute()
+    52.6 can not call method, break()
+    52.7 can not call method, commit()
+    52.8 can not call method, createLob()
+    52.9 can not call method, queryStream()
+    52.10 can not call release() multiple times
+    52.11 can not call method, rollback
+    52.12 can access properties of closed connection without error
 
 53. resultSetClose.js
     53.1 can not get metaData property
@@ -800,6 +805,11 @@ Overview of node-oracledb functional tests
     53.4 can not call getRows()
     53.5 can not call toQueryStream()
     53.6 can call getRow() again in the callback of getRow()
+
+54. lobClose.js
+    54.1 can access properties of closed LOB without error
+    54.2 can not call close() multiple times
+    54.3 verify closed LOB
 
 55. resultSet2.js
     55.1 query a RDBMS function
