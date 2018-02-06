@@ -734,6 +734,24 @@ describe('140. v8Getter.js', function() {
       done();
     });
 
+    it('140.8.4 Constant type: privilege', function(done) {
+
+      var cred = JSON.parse(JSON.stringify(dbConfig));
+      Object.defineProperty (cred, 'privilege', {
+        get : function () {
+          throw 'Nope';
+        }
+      });
+
+      should.throws(
+        function() {
+          oracledb.getConnection(cred, function(){ });
+        },
+        /Nope/
+      );
+      done();
+    });
+
   }); // 140.8
 
 });

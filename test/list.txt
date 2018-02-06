@@ -28,6 +28,12 @@ Overview of node-oracledb functional tests
     1.8 connectionString alias
         1.8.1 allows connectionString to be used as an alias for connectString
         1.8.2 favors connectString if both connectString and connectionString are passed
+    1.9 privileged connnections
+        1.9.1 Negative value - null
+        1.9.2 Negative - invalid type, a String
+        1.9.3 Negative value - random constants
+        1.9.4 Negative value - NaN
+        1.9.5 gets ignored when acquiring a connection from Pool
 
 2. pool.js
     2.1 default values
@@ -3653,6 +3659,7 @@ Overview of node-oracledb functional tests
         140.8.1 String type: user
         140.8.2 String type: password
         140.8.3 String type: connectionString
+        140.8.4 Constant type: privilege
 
 141. insertNaNToNumber.js
     141.1 SQL, stores NaN

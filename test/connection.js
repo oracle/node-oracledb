@@ -827,4 +827,119 @@ describe('1. connection.js', function(){
     });
   }); // 1.8
 
+  describe('1.9 privileged connnections', function() {
+
+    it('1.9.1 Negative value - null', function(done) {
+
+      oracledb.getConnection(
+        {
+          user: dbConfig.user,
+          password: dbConfig.password,
+          connectString: dbConfig.connectString,
+          privilege: null
+        },
+        function(err, connection) {
+          should.exist(err);
+          should.strictEqual(
+            err.message,
+            'NJS-007: invalid value for "privilege" in parameter 1'
+          );
+          should.not.exist(connection);
+          done();
+        }
+      );
+    }); // 1.9.1
+
+    it('1.9.2 Negative - invalid type, a String', function(done) {
+
+      oracledb.getConnection(
+        {
+          user: dbConfig.user,
+          password: dbConfig.password,
+          connectString: dbConfig.connectString,
+          privilege: 'sysdba'
+        },
+        function(err, connection) {
+          should.exist(err);
+          should.not.exist(connection);
+          should.strictEqual(
+            err.message,
+            'NJS-008: invalid type for "privilege" in parameter 1'
+          );
+          done();
+        }
+      );
+    }); // 1.9.2
+
+    it('1.9.3 Negative value - random constants', function(done) {
+
+      oracledb.getConnection(
+        {
+          user: dbConfig.user,
+          password: dbConfig.password,
+          connectString: dbConfig.connectString,
+          privilege: 23
+        },
+        function(err, connection) {
+          should.exist(err);
+          (err.message).should.startWith('ORA-24300');
+          // ORA-24300: bad value for mode
+          should.not.exist(connection);
+          done();
+        }
+      );
+    }); // 1.9.3
+
+    it('1.9.4 Negative value - NaN', function(done) {
+
+      oracledb.getConnection(
+        {
+          user: dbConfig.user,
+          password: dbConfig.password,
+          connectString: dbConfig.connectString,
+          privilege: NaN
+        },
+        function(err, connection) {
+          should.exist(err);
+          should.strictEqual(
+            err.message,
+            'NJS-007: invalid value for "privilege" in parameter 1'
+          );
+          should.not.exist(connection);
+          done();
+        }
+      );
+    }); // 1.9.4
+
+    it('1.9.5 gets ignored when acquiring a connection from Pool', function(done) {
+
+      oracledb.createPool(
+        {
+          user: dbConfig.user,
+          password: dbConfig.password,
+          connectString: dbConfig.connectString,
+          privilege: null,
+          poolMin: 1
+        },
+        function(err, pool) {
+          should.not.exist(err);
+
+          pool.getConnection(function(err, conn) {
+            should.not.exist(err);
+
+            conn.close(function(err) {
+              should.not.exist(err);
+
+              pool.close(function(err) {
+                should.not.exist(err);
+                done();
+              });
+            });
+          });
+        }
+      );
+    }); // 1.9.5
+
+  }); // 1.9
+
 });
