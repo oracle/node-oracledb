@@ -216,8 +216,7 @@ NAN_GETTER(njsPool::GetConnectionsOpen)
     }
     uint32_t value;
     if (dpiPool_getOpenCount(pool->dpiPoolHandle, &value) < 0) {
-        std::string errMsg = njsOracledb::GetDPIError();
-        Nan::ThrowError(errMsg.c_str());
+        njsOracledb::ThrowDPIError();
         return;
     }
     info.GetReturnValue().Set(value);
@@ -239,8 +238,7 @@ NAN_GETTER(njsPool::GetConnectionsInUse)
     }
     uint32_t value;
     if (dpiPool_getBusyCount(pool->dpiPoolHandle, &value) < 0) {
-        std::string errMsg = njsOracledb::GetDPIError();
-        Nan::ThrowError(errMsg.c_str());
+        njsOracledb::ThrowDPIError();
         return;
     }
     info.GetReturnValue().Set(value);

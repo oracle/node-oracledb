@@ -1290,10 +1290,8 @@ void njsConnection::SetTextAttribute(Nan::NAN_SETTER_ARGS_TYPE args,
         return;
     }
     v8::String::Utf8Value utfstr(value->ToString());
-    if ((*setter)(connection->dpiConnHandle, *utfstr, utfstr.length()) < 0) {
-        std::string errMsg = njsOracledb::GetDPIError();
-        Nan::ThrowError(errMsg.c_str());
-    }
+    if ((*setter)(connection->dpiConnHandle, *utfstr, utfstr.length()) < 0)
+        njsOracledb::ThrowDPIError();
 }
 
 
@@ -1705,8 +1703,7 @@ NAN_GETTER(njsConnection::GetStmtCacheSize)
     }
     uint32_t cacheSize;
     if (dpiConn_getStmtCacheSize(connection->dpiConnHandle, &cacheSize) < 0) {
-        std::string errMsg = njsOracledb::GetDPIError();
-        Nan::ThrowError(errMsg.c_str());
+        njsOracledb::ThrowDPIError();
         return;
     }
     info.GetReturnValue().Set(cacheSize);
@@ -1804,8 +1801,7 @@ NAN_GETTER(njsConnection::GetOracleServerVersion)
     const char *releaseString;
     if (dpiConn_getServerVersion(connection->dpiConnHandle, &releaseString,
             &releaseStringLength, &versionInfo) < 0) {
-        std::string errMsg = njsOracledb::GetDPIError();
-        Nan::ThrowError(errMsg.c_str());
+        njsOracledb::ThrowDPIError();
         return;
     }
     uint32_t oracleServerVersion =

@@ -288,6 +288,8 @@ public:
     char *bufferPtr;
     uint64_t lobOffset;
     uint64_t lobAmount;
+    dpiErrorInfo errorInfo;
+    bool dpiError;
     njsCommon *callingObj;
     Nan::Persistent<Object> jsCallingObj;
     Nan::Persistent<Object> jsOracledb;
@@ -306,7 +308,7 @@ public:
             fetchAsBufferTypes(NULL), protoILob(NULL), externalAuth(false),
             getRS(false), autoCommit(false), extendedMetaData(false),
             isReturning(false), isPLSQL(false), bufferSize(0), bufferPtr(NULL),
-            lobOffset(0), lobAmount(0) {
+            lobOffset(0), lobAmount(0), dpiError(false) {
         this->jsCallback.Reset(callback);
         this->jsCallingObj.Reset(callingObj);
         this->callingObj = Nan::ObjectWrap::Unwrap<njsCommon>(callingObj);

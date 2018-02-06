@@ -300,6 +300,7 @@ void njsBaton::AsyncAfterWorkCallback(uv_work_t *req, int status)
     Nan::TryCatch tc;
     Local<Value> *callbackArgs = new Local<Value>[baton->numCallbackArgs];
     unsigned int i, numCallbackArgs = baton->numCallbackArgs;
+    Local<Object> errorObj;
 
     // set all parameters but the first as undefined; the first parameter is
     // always expected to be the error and should be null
@@ -316,6 +317,14 @@ void njsBaton::AsyncAfterWorkCallback(uv_work_t *req, int status)
     if (!baton->error.empty()) {
         callbackArgs[0] = v8::Exception::Error(Nan::New<v8::String>(
                 baton->error).ToLocalChecked());
+        if (baton->dpiError) {
+            errorObj = callbackArgs[0]->ToObject();
+            Nan::Set(errorObj,
+                    Nan::New<v8::String>("errorNum").ToLocalChecked(),
+                    Nan::New<v8::Number>(baton->errorInfo.code));
+            Nan::Set(errorObj, Nan::New<v8::String>("offset").ToLocalChecked(),
+                    Nan::New<v8::Number>(baton->errorInfo.offset));
+        }
         for (i = 1; i < numCallbackArgs; i++)
             callbackArgs[i] = Nan::Undefined();
     }
@@ -350,7 +359,13 @@ void njsBaton::AsyncAfterWorkCallback(uv_work_t *req, int status)
 //-----------------------------------------------------------------------------
 void njsBaton::GetDPIError(void)
 {
-    error = njsOracledb::GetDPIError();
+    dpiContext_getError(njsOracledb::GetDPIContext(), &errorInfo);
+    if (errorInfo.code == 1406)
+        error = njsMessages::Get(errInsufficientBufferForBinds);
+    else {
+        error = std::string(errorInfo.message, errorInfo.messageLength);
+        dpiError = true;
+    }
     ClearAsyncData();
 }
 

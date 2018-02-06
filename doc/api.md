@@ -21,6 +21,9 @@ limitations under the License.
   - 1.1 [Getting Started with Node-oracledb](#getstarted)
 2. [Errors](#errorobj)
   - 2.1 [Error Properties](#properror)
+     - 2.1.1 [`errorNum`](#properrerrornum)
+     - 2.1.2 [`message`](#properrmessage)
+     - 2.1.3 [`offset`](#properroffset)
 3. [Oracledb Class](#oracledbclass)
   - 3.1 [Oracledb Constants](#oracledbconstants)
      - 3.1.1 [Query `outFormat` Constants](#oracledbconstantsoutformat)
@@ -316,7 +319,18 @@ ignored.
 
 ### <a name="properror"></a> 2.1 Error Properties
 
-The *Error* object contains a message property.
+The *Error* object contains `errorNum`, `message` and `offset` properties.
+
+#### <a name="properrerrornum"></a> 2.1.1 `errorNum`
+
+```
+Number errorNum
+```
+
+The Oracle error number.  If the error is not from Oracle, this value
+is undefined.
+
+#### <a name="properrmessage"></a> 2.1.2 `message`
 
 ```
 String message
@@ -343,6 +357,15 @@ ORA-06550: line 1, column 7:
 PL/SQL: Statement ignored
 ```
 
+#### <a name="properroffset"></a> 2.1.3 `offset`
+
+```
+Number offset
+```
+
+The character offset into the SQL text that resulted in the Oracle
+error.  The value may be `0` in non-SQL contexts.  If the error is not
+from Oracle, this value is undefined.
 
 ## <a name="oracledbclass"></a> 3. Oracledb Class
 

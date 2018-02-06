@@ -208,8 +208,7 @@ NAN_METHOD(njsOracledb::New)
     dpiVersionInfo versionInfo;
 
     if (dpiContext_getClientVersion(globalDPIContext, &versionInfo) < 0) {
-        std::string errMsg = GetDPIError();
-        Nan::ThrowError(errMsg.c_str());
+        ThrowDPIError();
         return;
     }
     njsOracledb *oracledb = new njsOracledb();
@@ -762,8 +761,7 @@ NAN_GETTER(njsOracledb::GetOracleClientVersion)
         return;
 
     if (dpiContext_getClientVersion(globalDPIContext, &versionInfo) < 0) {
-        std::string errMsg = GetDPIError();
-        Nan::ThrowError(errMsg.c_str());
+        ThrowDPIError();
         return;
     }
 
@@ -1012,17 +1010,25 @@ void njsOracledb::SetFetchAsBufferTypesOnBaton(njsBaton *baton) const
 
 
 //-----------------------------------------------------------------------------
-// njsOracledb::GetDPIError()
-//   Gets the error information from DPI and returns it.
+// njsOracledb::ThrowDPIError()
+//   Gets the error information from ODPI-C and throws an exception.
 //-----------------------------------------------------------------------------
-std::string njsOracledb::GetDPIError(void)
+void njsOracledb::ThrowDPIError(void)
 {
     dpiErrorInfo errorInfo;
+    Local<Value> exception;
+    Local<Object> errorObj;
+    std::string errMsg;
 
     dpiContext_getError(globalDPIContext, &errorInfo);
-    if (errorInfo.code == 1406)
-        return njsMessages::Get(errInsufficientBufferForBinds);
-    return std::string(errorInfo.message, errorInfo.messageLength);
+    errMsg = std::string(errorInfo.message, errorInfo.messageLength);
+    exception = Nan::Error(errMsg.c_str());
+    errorObj = exception->ToObject();
+    Nan::Set(errorObj, Nan::New<v8::String>("errorNum").ToLocalChecked(),
+            Nan::New<v8::Number>(errorInfo.code));
+    Nan::Set(errorObj, Nan::New<v8::String>("offset").ToLocalChecked(),
+            Nan::New<v8::Number>(errorInfo.offset));
+    Nan::ThrowError(exception);
 }
 
 
