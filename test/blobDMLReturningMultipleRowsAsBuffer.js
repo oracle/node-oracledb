@@ -37,14 +37,12 @@ var oracledb = require('oracledb');
 var should   = require('should');
 var async    = require('async');
 var dbConfig = require('./dbconfig.js');
-var random   = require('./random.js');
 var sql      = require('./sql.js');
 
 describe('137. blobDMLReturningMultipleRowsAsBuffer.js', function() {
 
   var connection = null;
   var tableName = "nodb_dml_blob_137";
-  var node6plus = false; // assume node runtime version is lower than 6
 
   var blob_table_create = "BEGIN \n" +
                           "    DECLARE \n" +
@@ -69,8 +67,6 @@ describe('137. blobDMLReturningMultipleRowsAsBuffer.js', function() {
     oracledb.getConnection(dbConfig, function(err, conn) {
       should.not.exist(err);
       connection = conn;
-      if ( process.versions["node"].substring (0, 1) >= "6")
-        node6plus = true;
       done();
     });
   });
@@ -89,7 +85,7 @@ describe('137. blobDMLReturningMultipleRowsAsBuffer.js', function() {
           sql.executeSql(connection, blob_table_create, {}, {}, cb);
         },
         function(cb) {
-          async.times(10, insertData, cb);
+          insertData(10, cb);
         }
       ], done);
     });
@@ -103,21 +99,39 @@ describe('137. blobDMLReturningMultipleRowsAsBuffer.js', function() {
 
   });
 
-  var insertData = function(i, cb) {
-    var str = random.getRandomLengthString(i+10);
-    var blob = node6plus ? Buffer.from(str, "utf-8") : new Buffer(str, "utf-8");
-    connection.execute(
-      "insert into " + tableName + " values (:id, :b)",
-      {
-        id: {val: i, dir: oracledb.BIND_IN, type: oracledb.NUMBER},
-        b: {val: blob, dir: oracledb.BIND_IN, type: oracledb.BUFFER}
+  var insertData = function(tableSize, cb) {
+    var insert_data = "DECLARE \n" +
+                      "    tmpchar VARCHAR2(2000); \n" +
+                      "    tmplob BLOB; \n" +
+                      "BEGIN \n" +
+                      "    FOR i IN 1.." + tableSize + " LOOP \n" +
+                      "         select to_char(i) into tmpchar from dual; \n"+
+                      "         select utl_raw.cast_to_raw(tmpchar) into tmplob from dual; \n"+
+                      "         insert into " + tableName + " values (i, tmplob); \n" +
+                      "    END LOOP; \n" +
+                      "    commit; \n" +
+                      "END; ";
+    async.series([
+      function(callback) {
+        connection.execute(
+          insert_data,
+          function(err) {
+            should.not.exist(err);
+            callback();
+          }
+        );
       },
-      function(err, result) {
-        should.not.exist(err);
-        (result.rowsAffected).should.be.exactly(1);
-        cb(err);
+      function(callback) {
+        connection.execute(
+          "select num from " + tableName,
+          function(err, result) {
+            should.not.exist(err);
+            should.strictEqual(result.rows.length, tableSize);
+            callback();
+          }
+        );
       }
-    );
+    ], cb);
   };
 
   var updateReturning_buffer = function(callback) {

@@ -107,7 +107,7 @@ describe("156. fetchArraySize9.js", function() {
           );
         },
         function(callback) {
-          async.times(tableSize, insertData, callback);
+          insertData(tableSize, callback);
         },
         function(callback) {
           oracledb.fetchArraySize = fetchArraySizeVal;
@@ -259,7 +259,7 @@ describe("156. fetchArraySize9.js", function() {
           );
         },
         function(callback) {
-          async.times(tableSize, insertData, callback);
+          insertData(tableSize, callback);
         },
         function(callback) {
           oracledb.maxRows = maxRowsVal;
@@ -395,20 +395,39 @@ describe("156. fetchArraySize9.js", function() {
     });
   });
 
-  var insertData = function(i, cb) {
-    var blob = node6plus ? Buffer.from(("BLOB"+String(i+1)), "utf-8") : new Buffer(("BLOB"+String(i+1)), "utf-8");
-    connection.execute(
-      "insert into " + tableName + " values (:id, :b)",
-      {
-        id: {val: i+1, dir: oracledb.BIND_IN, type: oracledb.NUMBER},
-        b: {val: blob, dir: oracledb.BIND_IN, type: oracledb.BUFFER}
+  var insertData = function(tableSize, cb) {
+    var insert_data = "DECLARE \n" +
+                      "    tmpchar VARCHAR2(2000); \n" +
+                      "    tmplob BLOB; \n" +
+                      "BEGIN \n" +
+                      "    FOR i IN 1.." + tableSize + " LOOP \n" +
+                      "         select to_char(i) into tmpchar from dual; \n"+
+                      "         select utl_raw.cast_to_raw(tmpchar) into tmplob from dual; \n"+
+                      "         insert into " + tableName + " values (i, tmplob); \n" +
+                      "    END LOOP; \n" +
+                      "    commit; \n" +
+                      "END; ";
+    async.series([
+      function(callback) {
+        connection.execute(
+          insert_data,
+          function(err) {
+            should.not.exist(err);
+            callback();
+          }
+        );
       },
-      function(err, result) {
-        should.not.exist(err);
-        (result.rowsAffected).should.be.exactly(1);
-        cb(err);
+      function(callback) {
+        connection.execute(
+          "select id from " + tableName,
+          function(err, result) {
+            should.not.exist(err);
+            should.strictEqual(result.rows.length, tableSize);
+            callback();
+          }
+        );
       }
-    );
+    ], cb);
   };
 
   var verifyResult = function(rows, cb) {
@@ -441,7 +460,7 @@ describe("156. fetchArraySize9.js", function() {
 
     lob.on('end', function(err) {
       should.not.exist(err);
-      var expected = node6plus ? Buffer.from(("BLOB"+String(id)), "utf-8") : new Buffer(("BLOB"+String(id)), "utf-8");
+      var expected = node6plus ? Buffer.from((String(id)), "utf-8") : new Buffer((String(id)), "utf-8");
       should.strictEqual(assist.compare2Buffers(blobData, expected), true);
       cb(err);
     });
