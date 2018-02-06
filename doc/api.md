@@ -4021,6 +4021,7 @@ Type Notes](#binddatatypenotes).
 ##### <a name="numberhandling"></a> 9.1.6.2 Fetching Numbers
 
 By default all numeric columns are mapped to JavaScript numbers.
+Node.js uses double floating point numbers as its native number type.
 
 When numbers are fetched from the database, conversion to JavaScript's
 less precise binary number format can result in "unexpected"
@@ -4044,12 +4045,18 @@ purely in Node.js, for example:
 console.log(0.2 + 0.7); // gives 0.8999999999999999
 ```
 
+Node.js can also only represent numbers up to 2 ^ 53
+which is 9007199254740992.  Numbers larger than this will be truncated.
+
 The primary recommendation for number handling is to use Oracle SQL or
 PL/SQL for mathematical operations, particularly for currency
-calculations.  Alternatively you can use `fetchAsString` or
+calculations.
+
+To reliably work with numbers in Node.js, use `fetchAsString` or
 `fetchInfo` (see [below](#fetchasstringhandling)) to fetch numbers in
 string format, and then use one of the available third-party
-JavaScript number libraries that handles more precision.
+JavaScript number libraries that handles large values and more
+precision.
 
 ##### <a name="datehandling"></a> 9.1.6.3 Fetching Dates and Timestamps
 
