@@ -5,6 +5,9 @@
 core
 *.tgz
 
+# macOS Ignores
+.DS_Store
+
 # Node Ignores
 npm-debug.log
 node_modules
