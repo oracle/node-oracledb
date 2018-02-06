@@ -282,7 +282,6 @@ public:
     bool getRS;
     bool autoCommit;
     bool extendedMetaData;
-    bool keepQueryInfo;
     bool isReturning;
     bool isPLSQL;
     uint64_t bufferSize;
@@ -293,7 +292,6 @@ public:
     Nan::Persistent<Object> jsCallingObj;
     Nan::Persistent<Object> jsOracledb;
     Nan::Persistent<Object> jsBuffer;
-    Nan::Persistent<Object> jsRows;
     Nan::Persistent<Function> jsCallback;
 
     njsBaton(Local<Function> callback, Local<Object> callingObj) :
@@ -307,8 +305,8 @@ public:
             fetchAsStringTypes(NULL), numFetchAsBufferTypes(0),
             fetchAsBufferTypes(NULL), protoILob(NULL), externalAuth(false),
             getRS(false), autoCommit(false), extendedMetaData(false),
-            keepQueryInfo(false), isReturning(false), isPLSQL(false),
-            bufferSize(0), bufferPtr(NULL), lobOffset(0), lobAmount(0) {
+            isReturning(false), isPLSQL(false), bufferSize(0), bufferPtr(NULL),
+            lobOffset(0), lobAmount(0) {
         this->jsCallback.Reset(callback);
         this->jsCallingObj.Reset(callingObj);
         this->callingObj = Nan::ObjectWrap::Unwrap<njsCommon>(callingObj);

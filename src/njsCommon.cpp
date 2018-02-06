@@ -181,7 +181,6 @@ njsBaton::~njsBaton()
     jsCallingObj.Reset();
     jsOracledb.Reset();
     jsBuffer.Reset();
-    jsRows.Reset();
     ClearAsyncData();
 }
 
@@ -236,27 +235,25 @@ void njsBaton::ClearAsyncData()
         delete protoILob;
         protoILob = NULL;
     }
-    if (!keepQueryInfo) {
-        if (queryVars) {
-            delete [] queryVars;
-            queryVars = NULL;
-            numQueryVars = 0;
-        }
-        if (fetchInfo) {
-            delete [] fetchInfo;
-            fetchInfo = NULL;
-            numFetchInfo = 0;
-        }
-        if (fetchAsStringTypes) {
-            delete [] fetchAsStringTypes;
-            fetchAsStringTypes = NULL;
-            numFetchAsStringTypes = 0;
-        }
-        if (fetchAsBufferTypes) {
-            delete [] fetchAsBufferTypes;
-            fetchAsBufferTypes = NULL;
-            numFetchAsBufferTypes = 0;
-        }
+    if (queryVars) {
+        delete [] queryVars;
+        queryVars = NULL;
+        numQueryVars = 0;
+    }
+    if (fetchInfo) {
+        delete [] fetchInfo;
+        fetchInfo = NULL;
+        numFetchInfo = 0;
+    }
+    if (fetchAsStringTypes) {
+        delete [] fetchAsStringTypes;
+        fetchAsStringTypes = NULL;
+        numFetchAsStringTypes = 0;
+    }
+    if (fetchAsBufferTypes) {
+        delete [] fetchAsBufferTypes;
+        fetchAsBufferTypes = NULL;
+        numFetchAsBufferTypes = 0;
     }
 }
 
@@ -323,26 +320,18 @@ void njsBaton::AsyncAfterWorkCallback(uv_work_t *req, int status)
             callbackArgs[i] = Nan::Undefined();
     }
 
-    // if no JS callback available, just delete the baton
-    if (baton->jsCallback.IsEmpty())
-        delete baton;
+    // if this baton is considered the active baton, clear it
+    if (baton->callingObj && baton == baton->callingObj->activeBaton)
+        baton->callingObj->activeBaton = NULL;
 
-    // otherwise, call the JS callback
-    else {
-        Local<Function> callback = Nan::New<Function>(baton->jsCallback);
+    // delete the baton before the callback is made so any unnecessary
+    // ODPI-C handles are released as soon as possible
+    Local<Function> callback = Nan::New<Function>(baton->jsCallback);
+    delete baton;
 
-        // if this baton is considered the active baton, clear it
-        if (baton->callingObj && baton == baton->callingObj->activeBaton)
-            baton->callingObj->activeBaton = NULL;
-
-        // delete the baton before the callback is made so any unnecessary
-        // ODPI-C handles are released as soon as possible
-        delete baton;
-
-        // make JS callback
-        Nan::MakeCallback(Nan::GetCurrentContext()->Global(), callback,
-                numCallbackArgs, callbackArgs);
-    }
+    // make JS callback
+    Nan::MakeCallback(Nan::GetCurrentContext()->Global(), callback,
+            numCallbackArgs, callbackArgs);
 
     // we no longer need the callback args
     delete [] callbackArgs;

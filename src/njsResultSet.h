@@ -79,7 +79,8 @@ public:
 private:
 
     njsResultSet() : dpiStmtHandle(NULL), dpiConnHandle(NULL), numQueryVars(0),
-            queryVars(NULL), outFormat(0), extendedMetaData(false) {}
+            queryVars(NULL), outFormat(0), maxRows(0),
+            extendedMetaData(false), autoClose(false) {}
     ~njsResultSet();
 
     static NAN_METHOD(New);
@@ -105,7 +106,9 @@ private:
     uint32_t numQueryVars;
     njsVariable *queryVars;
     uint32_t outFormat;
+    uint32_t maxRows;
     bool extendedMetaData;
+    bool autoClose;
     Nan::Persistent<Object> jsOracledb;
     Nan::Persistent<Object> jsConnection;
 

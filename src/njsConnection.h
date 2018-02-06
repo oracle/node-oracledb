@@ -71,10 +71,12 @@ public:
     static Local<Object> CreateFromBaton(njsBaton *baton);
     static Local<Value> GetMetaData(njsVariable *vars, uint32_t numVars,
             bool extendedMetaData);
-    static bool GetRows(njsBaton* baton, Local<Object> &rows);
-    static bool ProcessFetch(njsBaton* baton);
+    static bool GetScalarValueFromVar(njsBaton *baton, njsVariable *var,
+            uint32_t pos, Local<Value> &value);
     static bool ProcessQueryVars(njsBaton* baton, dpiStmt *dpiStmtHandle,
             njsVariable *vars, uint32_t numVars);
+    static bool ProcessVars(njsBaton *baton, njsVariable *vars,
+            uint32_t numVars, uint32_t numElements);
     static void Init(Handle<Object> target);
     bool IsValid() const { return (dpiConnHandle) ? true : false; }
     njsErrorType GetInvalidErrorType() const { return errInvalidConnection; }
@@ -95,7 +97,6 @@ private:
     static NAN_METHOD(Execute);
     static void Async_Execute(njsBaton *baton);
     static void Async_AfterExecute(njsBaton *baton, Local<Value> argv[]);
-    static void Async_ExecuteGetMoreRows(njsBaton *baton);
 
     // Release Method on Connection class
     static NAN_METHOD(Release);
@@ -138,8 +139,6 @@ private:
             Local<Value> value, uint32_t *bindType, uint32_t *maxSize,
             njsBaton *baton, bool scalarOnly = false);
     static Local<Value> GetOutBinds(njsBaton *baton);
-    static bool GetScalarValueFromVar(njsBaton *baton, njsVariable *var,
-            uint32_t pos, Local<Value> &value);
     static bool GetValueFromVar(njsBaton *baton, njsVariable *var,
             Local<Value> &value);
     static bool MapByName(njsBaton *baton, dpiQueryInfo *queryInfo,
@@ -157,8 +156,6 @@ private:
             njsBaton *baton);
     static bool ProcessScalarBindValue(Local<Value> bindValue,
             njsVariable *var, uint32_t pos, njsBaton *baton);
-    static bool ProcessVars(njsBaton *baton, njsVariable *vars,
-            uint32_t numVars, uint32_t numElements);
     static bool ProcessOptions(Nan::NAN_METHOD_ARGS_TYPE args,
             unsigned int index, njsBaton *baton);
     static void SetTextAttribute(Nan::NAN_SETTER_ARGS_TYPE args,

@@ -108,7 +108,7 @@ void njsResultSet::Init(Handle<Object> target)
 
 //-----------------------------------------------------------------------------
 // njsResultSet::CreateFromBaton()
-//   Create a new result set from the baton (
+//   Create a new result set from the baton.
 //-----------------------------------------------------------------------------
 Local<Object> njsResultSet::CreateFromBaton(njsBaton *baton)
 {
@@ -128,6 +128,10 @@ Local<Object> njsResultSet::CreateFromBaton(njsBaton *baton)
     resultSet->outFormat = baton->outFormat;
     resultSet->numQueryVars = baton->numQueryVars;
     resultSet->queryVars = baton->queryVars;
+    if (!baton->getRS) {
+        resultSet->autoClose = true;
+        resultSet->maxRows = baton->maxRows;
+    }
     baton->queryVars = NULL;
     resultSet->activeBaton = NULL;
     resultSet->jsConnection.Reset(baton->jsCallingObj);
@@ -163,6 +167,7 @@ bool njsResultSet::CreateFromRefCursor(njsBaton *baton, dpiStmt *dpiStmtHandle,
     resultSet->activeBaton = NULL;
     resultSet->queryVars = queryVars;
     resultSet->numQueryVars = numQueryVars;
+    baton->queryVars = NULL;
     value = scope.Escape(obj);
     return true;
 }
@@ -257,17 +262,11 @@ NAN_METHOD(njsResultSet::GetRows)
         baton->error = njsMessages::Get(errBusyResultSet);
     else if (baton->error.empty()) {
         resultSet->activeBaton = baton;
-        baton->SetDPIStmtHandle(resultSet->dpiStmtHandle);
-        baton->SetDPIConnHandle(resultSet->dpiConnHandle);
         baton->outFormat = resultSet->outFormat;
-        baton->queryVars = resultSet->queryVars;
-        baton->numQueryVars = resultSet->numQueryVars;
-        baton->keepQueryInfo = true;
         baton->jsOracledb.Reset(resultSet->jsOracledb);
-        baton->maxRows = maxRows;
         baton->fetchArraySize = maxRows;
     }
-    baton->QueueWork("GetRowsCommon", Async_GetRows, Async_AfterGetRows, 2);
+    baton->QueueWork("GetRows", Async_GetRows, Async_AfterGetRows, 2);
 }
 
 
@@ -277,7 +276,71 @@ NAN_METHOD(njsResultSet::GetRows)
 //-----------------------------------------------------------------------------
 void njsResultSet::Async_GetRows(njsBaton *baton)
 {
-    njsConnection::ProcessFetch(baton);
+    njsResultSet *resultSet = (njsResultSet*) baton->callingObj;
+    uint32_t i, numRowsToFetch;
+    njsVariable *var;
+    int moreRows;
+
+    // determine how many rows to fetch; use fetchArraySize unless it is less
+    // than maxRows (no need to waste memory!)
+    numRowsToFetch = baton->fetchArraySize;
+    if (resultSet->maxRows > 0 && resultSet->maxRows < numRowsToFetch)
+        numRowsToFetch = resultSet->maxRows;
+
+    // create ODPI-C variables and define them, if necessary
+    for (i = 0; i < resultSet->numQueryVars; i++) {
+        var = &resultSet->queryVars[i];
+        if (var->dpiVarHandle && var->maxArraySize >= numRowsToFetch)
+            continue;
+        if (var->dpiVarHandle) {
+            if (dpiVar_release(var->dpiVarHandle) < 0) {
+                baton->GetDPIError();
+                return;
+            }
+            var->dpiVarHandle = NULL;
+        }
+        if (dpiConn_newVar(resultSet->dpiConnHandle, var->varTypeNum,
+                var->nativeTypeNum, numRowsToFetch, var->maxSize, 1, 0, NULL,
+                &var->dpiVarHandle, &var->dpiVarData) < 0) {
+            baton->GetDPIError();
+            return;
+        }
+        var->maxArraySize = numRowsToFetch;
+        if (dpiStmt_define(resultSet->dpiStmtHandle, i + 1,
+                var->dpiVarHandle) < 0) {
+            baton->GetDPIError();
+            return;
+        }
+    }
+
+    // set fetch array size as requested
+    if (dpiStmt_setFetchArraySize(resultSet->dpiStmtHandle,
+            numRowsToFetch) < 0) {
+        baton->GetDPIError();
+        return;
+    }
+
+    // perform fetch
+    if (dpiStmt_fetchRows(resultSet->dpiStmtHandle, numRowsToFetch,
+            &baton->bufferRowIndex, &baton->rowsFetched, &moreRows) < 0) {
+        baton->GetDPIError();
+        return;
+    }
+
+    // result sets that should be auto closed are closed if the result set
+    // is exhaused or the maximum number of rows has been fetched
+    if (moreRows && resultSet->maxRows > 0) {
+        if (baton->rowsFetched == resultSet->maxRows)
+            moreRows = 0;
+        else resultSet->maxRows -= baton->rowsFetched;
+    }
+    if (!moreRows && resultSet->autoClose) {
+        dpiStmt_release(resultSet->dpiStmtHandle);
+        resultSet->dpiStmtHandle = NULL;
+    }
+
+    njsConnection::ProcessVars(baton, resultSet->queryVars,
+            resultSet->numQueryVars, baton->rowsFetched);
 }
 
 
@@ -288,10 +351,37 @@ void njsResultSet::Async_GetRows(njsBaton *baton)
 void njsResultSet::Async_AfterGetRows(njsBaton *baton, Local<Value> argv[])
 {
     Nan::EscapableHandleScope scope;
+    Local<Object> rowAsObj, rows;
+    Local<Value> val, keyVal;
+    Local<Array> rowAsArray;
+    njsResultSet *resultSet;
+    njsVariable *var;
 
-    Local<Object> rows;
-    if (!njsConnection::GetRows(baton, rows))
-        return;
+    rows = Nan::New<Array>(baton->rowsFetched);
+    resultSet = (njsResultSet*) baton->callingObj;
+    for (uint32_t row = 0; row < baton->rowsFetched; row++) {
+        if (baton->outFormat == NJS_ROWS_ARRAY)
+            rowAsArray = Nan::New<Array>(resultSet->numQueryVars);
+        else rowAsObj = Nan::New<Object>();
+        for (uint32_t col = 0; col < resultSet->numQueryVars; col++) {
+            var = &resultSet->queryVars[col];
+            if (!njsConnection::GetScalarValueFromVar(baton, var, row, val))
+                return;
+            if (baton->outFormat == NJS_ROWS_ARRAY)
+                Nan::Set(rowAsArray, col, val);
+            else {
+                keyVal = Nan::New<String>(var->name).ToLocalChecked();
+                Nan::Set(rowAsObj, keyVal, val);
+            }
+        }
+        if (baton->outFormat == NJS_ROWS_ARRAY)
+            Nan::Set(rows, row, rowAsArray);
+        else Nan::Set(rows, row, rowAsObj);
+    }
+    if (!resultSet->dpiStmtHandle) {
+        delete [] resultSet->queryVars;
+        resultSet->queryVars = NULL;
+    }
     argv[1] = scope.Escape(rows);
 }
 
@@ -354,7 +444,6 @@ void njsResultSet::Async_AfterClose(njsBaton *baton, Local<Value> argv[])
 
     resultSet->jsConnection.Reset();
     resultSet->jsOracledb.Reset();
-    baton->keepQueryInfo = false;
     baton->queryVars = resultSet->queryVars;
     baton->numQueryVars = resultSet->numQueryVars;
     resultSet->queryVars = NULL;
