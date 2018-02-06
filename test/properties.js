@@ -54,7 +54,6 @@ describe('58. properties.js', function() {
       defaultValues.maxRows          = oracledb.maxRows;
       defaultValues.fetchArraySize   = oracledb.fetchArraySize;
       defaultValues.autoCommit       = oracledb.autoCommit;
-      defaultValues.version          = oracledb.version;
       defaultValues.connectionClass  = oracledb.connectionClass;
       defaultValues.externalAuth     = oracledb.externalAuth;
       defaultValues.fetchAsString    = oracledb.fetchAsString;
@@ -75,7 +74,6 @@ describe('58. properties.js', function() {
       oracledb.maxRows          = defaultValues.maxRows;
       oracledb.fetchArraySize   = defaultValues.fetchArraySize;
       oracledb.autoCommit       = defaultValues.autoCommit;
-      // oracledb.version          = defaultValues.version;         // version is a read-only property. it needn't to restore.
       oracledb.connectionClass  = defaultValues.connectionClass;
       oracledb.externalAuth     = defaultValues.externalAuth;
       oracledb.fetchAsString    = defaultValues.fetchAsString;
@@ -197,7 +195,7 @@ describe('58. properties.js', function() {
     });
 
     it('58.1.14 oracleClientVersion (read-only)', function () {
-      var t = oracledb.oracleClientVersion ;
+      var t = oracledb.oracleClientVersion;
       t.should.be.a.Number();
 
       should.throws(
@@ -281,6 +279,32 @@ describe('58. properties.js', function() {
           oracledb.externalAuth = 2017;
         },
         /NJS-004: invalid value for property [\w]/
+      );
+    });
+
+    it('58.1.24 versionString (read-only)', function() {
+      var t = oracledb.versionString;
+      t.should.be.a.String();
+
+      should.throws(
+        function() {
+          oracledb.versionString = t + "foobar";
+        },
+        /NJS-014: [\w]+ is a read-only property/
+      );
+    });
+
+    it('58.1.25 versionSuffix (read-only)', function() {
+      var t = oracledb.versionSuffix;
+
+      if (t) // it could be a String, or undefined
+        t.should.be.a.String();
+
+      should.throws(
+        function() {
+          oracledb.versionSuffix = t + "foobar";
+        },
+        /NJS-014: [\w]+ is a read-only property/
       );
     });
 

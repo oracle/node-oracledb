@@ -46,15 +46,6 @@ var dbConfig = require('./dbconfig.js');
 
 describe('69. driverName.js', function() {
 
-  var getAddonVer = function() {
-    var addonVer = oracledb.version;
-    var major    = Math.floor (addonVer / 10000);
-    var minor    = Math.floor(addonVer / 100) % 100;
-    var update   = addonVer % 100;
-
-    return (major + '.' + minor + '.' + update);
-  };
-
   it("69.1 checks the driver name", function(done) {
 
     async.waterfall([
@@ -79,8 +70,7 @@ describe('69. driverName.js', function() {
             // Since 12.1.0.2, OCI_ATTR_DRIVER_NAME with 30 characters has been supported
             // Database server can then return the full driver name, e.g. 'node-oracledb 1.11'
             if(serverVer >= 1201000200) {
-              var addonVer = getAddonVer();
-              (result.rows[0][0].trim()).should.equal("node-oracledb : " + addonVer);
+              (result.rows[0][0].trim()).should.equal("node-oracledb : " + oracledb.versionString);
             }
             // previous databases only returns the first 8 characters of the driver name
             else {

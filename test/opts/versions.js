@@ -29,13 +29,12 @@ var dbConfig = require('../dbconfig.js');
 var addonVer, clientVer, serverVer;
 var major, minor, update, port, portUpdate;
 
-console.log("Node.js: " + process.version);
+console.log("Run at: " + new Date());
+console.log("Node.js version: " + process.version + " (" + process.platform, process.arch + ")");
 
-addonVer = oracledb.version;
-major  = Math.floor(addonVer / 10000);
-minor  = Math.floor(addonVer / 100) % 100;
-update = addonVer % 100;
-console.log("Node-oracledb: " + major + "." + minor + "." + update);
+// console.log("Node-oracledb version:", oracledb.version); // numeric version format
+// console.log("Node-oracledb version suffix:", oracledb.versionSuffix); // e.g. "-beta.1". May be undefined
+console.log("Node-oracledb text format:", oracledb.versionString);
 
 clientVer = oracledb.oracleClientVersion;
 major      = Math.floor (clientVer / 100000000);
