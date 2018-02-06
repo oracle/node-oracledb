@@ -635,43 +635,22 @@ describe('71. lobBind1.js', function() {
 
                   var lobout = result2.outBinds.io;
 
-                  async.parallel([
-                    function verifyOUT(callback) {
-                      lobout.setEncoding("utf8");
-                      var clobData = "";
+                  lobout.setEncoding("utf8");
+                  var clobData = "";
 
-                      lobout.on("data", function(chunk) {
-                        clobData += chunk;
-                      });
-
-                      lobout.on("error", function(err) {
-                        should.not.exist(err, "lob.on 'error' event.");
-                      });
-
-                      lobout.on("end", function() {
-                        should.strictEqual(clobData, outStr);
-
-                        return callback();
-                      });
-                    },
-                    function verifyIN(callback) {
-
-                      try {
-                        lobin.length;
-                      } catch (err) {
-                        should.exist(err);
-                        (err.message).should.startWith('NJS-022:');
-                        // Error: NJS-022: invalid Lob
-
-                        return callback();
-                      }
-
-                    }
-                  ], function(err) {
-                    should.not.exist(err);
-                    return cb();
+                  lobout.on("data", function(chunk) {
+                    clobData += chunk;
                   });
 
+                  lobout.on("error", function(err) {
+                    should.not.exist(err, "lob.on 'error' event.");
+                  });
+
+                  lobout.on("end", function() {
+                    should.strictEqual(clobData, outStr);
+
+                    return cb();
+                  });
                 }
               );
             }

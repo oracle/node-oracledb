@@ -63,14 +63,7 @@ describe('51. poolClose.js', function(){
           should.not.exist(err);
 
           // getter
-          var min;
-          should.throws(
-            function() {
-              min = pool.poolMin;
-            },
-            /NJS-002: invalid pool/
-          );
-          should.not.exist(min);
+          should.strictEqual(pool.poolMin, pMin);
 
           // setter
           should.throws(

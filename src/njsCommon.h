@@ -206,7 +206,7 @@ protected:
     virtual njsErrorType GetInvalidErrorType() const = 0;
     virtual bool IsValid() const = 0;
 
-    static bool Validate(njsCommon *obj);
+    static bool Validate(njsCommon *obj, bool checkValid);
     static njsCommon *ValidateGetter(Nan::NAN_GETTER_ARGS_TYPE args);
     static njsCommon *ValidateSetter(Nan::NAN_SETTER_ARGS_TYPE args);
     static njsCommon *ValidateArgs(Nan::NAN_METHOD_ARGS_TYPE args,

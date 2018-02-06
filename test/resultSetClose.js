@@ -109,14 +109,7 @@ describe('53. resultSetClose.js', function() {
   }); // after
 
   it('53.1 can not get metaData property', function() {
-    should.throws(
-      function() {
-        var mdata;
-        mdata = resultSet.metaData;
-        should.not.exist(mdata);
-      },
-      /NJS-018: invalid ResultSet/
-    );
+    should.strictEqual(resultSet.metaData, undefined);
   }); // 53.1
 
   it('53.2 can not call close() again', function(done) {

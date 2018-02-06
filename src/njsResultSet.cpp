@@ -215,6 +215,10 @@ NAN_GETTER(njsResultSet::GetMetaData)
     njsResultSet *resultSet = (njsResultSet*) ValidateGetter(info);
     if (!resultSet)
         return;
+    if (!resultSet->IsValid()) {
+        info.GetReturnValue().Set(Nan::Undefined());
+        return;
+    }
     Local<Value> meta = njsConnection::GetMetaData(resultSet->queryVars,
             resultSet->numQueryVars, resultSet->extendedMetaData);
     info.GetReturnValue().Set(meta);

@@ -210,6 +210,10 @@ NAN_GETTER(njsPool::GetConnectionsOpen)
     njsPool *pool = (njsPool*) ValidateGetter(info);
     if (!pool)
         return;
+    if (!pool->IsValid()) {
+        info.GetReturnValue().Set(Nan::Undefined());
+        return;
+    }
     uint32_t value;
     if (dpiPool_getOpenCount(pool->dpiPoolHandle, &value) < 0) {
         std::string errMsg = njsOracledb::GetDPIError();
@@ -229,6 +233,10 @@ NAN_GETTER(njsPool::GetConnectionsInUse)
     njsPool *pool = (njsPool*) ValidateGetter(info);
     if (!pool)
         return;
+    if (!pool->IsValid()) {
+        info.GetReturnValue().Set(Nan::Undefined());
+        return;
+    }
     uint32_t value;
     if (dpiPool_getBusyCount(pool->dpiPoolHandle, &value) < 0) {
         std::string errMsg = njsOracledb::GetDPIError();

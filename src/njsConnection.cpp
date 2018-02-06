@@ -1699,6 +1699,10 @@ NAN_GETTER(njsConnection::GetStmtCacheSize)
     njsConnection *connection = (njsConnection*) ValidateGetter(info);
     if (!connection)
         return;
+    if (!connection->IsValid()) {
+        info.GetReturnValue().Set(Nan::Undefined());
+        return;
+    }
     uint32_t cacheSize;
     if (dpiConn_getStmtCacheSize(connection->dpiConnHandle, &cacheSize) < 0) {
         std::string errMsg = njsOracledb::GetDPIError();
@@ -1791,6 +1795,10 @@ NAN_GETTER(njsConnection::GetOracleServerVersion)
     njsConnection *connection = (njsConnection*) ValidateGetter(info);
     if (!connection)
         return;
+    if (!connection->IsValid()) {
+        info.GetReturnValue().Set(Nan::Undefined());
+        return;
+    }
     dpiVersionInfo versionInfo;
     uint32_t releaseStringLength;
     const char *releaseString;

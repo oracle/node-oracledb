@@ -71,14 +71,7 @@ describe('52. connClose.js', function() {
 
         connection.release(function(err) {
           should.not.exist(err);
-          should.throws(
-            function() {
-              var newSize;
-              newSize = connection.stmtCacheSize;
-              should.not.exist(newSize);
-            },
-            /NJS-003: invalid connection/
-          );
+          should.strictEqual(connection.stmtCacheSize, undefined);
           done();
         });
       }
@@ -153,14 +146,7 @@ describe('52. connClose.js', function() {
 
         connection.release(function(err) {
           should.not.exist(err);
-          should.throws(
-            function() {
-              var serverVer;
-              serverVer = connection.oracleServerVersion;
-              should.not.exist(serverVer);
-            },
-            /NJS-003: invalid connection/
-          );
+          should.strictEqual(connection.oracleServerVersion, undefined);
           done();
         });
       }
@@ -237,14 +223,7 @@ describe('52. connClose.js', function() {
         });
       },
       function getMetaData(callback) {
-        should.throws(
-          function() {
-            var mdata;
-            mdata = resultSet.metaData;
-            should.not.exist(mdata);
-          },
-          /NJS-018: invalid ResultSet/
-        );
+        should.strictEqual(resultSet.metaData, undefined);
         callback();
       },
       function getConn(callback) {

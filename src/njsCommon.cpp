@@ -776,7 +776,7 @@ bool njsCommon::SetPropUnsignedInt(Local<Value> value, uint32_t *valuePtr,
 //   Validates the pointer is not NULL and that it refers to a valid object.
 // If not, an exception is raised in JS.
 //-----------------------------------------------------------------------------
-bool njsCommon::Validate(njsCommon *obj)
+bool njsCommon::Validate(njsCommon *obj, bool checkValid)
 {
     string errMsg;
 
@@ -785,7 +785,7 @@ bool njsCommon::Validate(njsCommon *obj)
         Nan::ThrowError(errMsg.c_str());
         return false;
     }
-    if (!obj->IsValid()) {
+    if (checkValid && !obj->IsValid()) {
         njsErrorType errNum = obj->GetInvalidErrorType();
         errMsg = njsMessages::Get(errNum);
         Nan::ThrowError(errMsg.c_str());
@@ -805,7 +805,7 @@ njsCommon *njsCommon::ValidateGetter(Nan::NAN_GETTER_ARGS_TYPE args)
     njsCommon *obj;
 
     obj = Nan::ObjectWrap::Unwrap<njsCommon>(args.Holder());
-    if (!Validate(obj))
+    if (!Validate(obj, false))      // no exception for invalid object
         return NULL;
     return obj;
 }
@@ -821,7 +821,7 @@ njsCommon *njsCommon::ValidateSetter(Nan::NAN_SETTER_ARGS_TYPE args)
     njsCommon *obj;
 
     obj = Nan::ObjectWrap::Unwrap<njsCommon>(args.Holder());
-    if (!Validate(obj))
+    if (!Validate(obj, true))       // raise exception for invalid object
         return NULL;
     return obj;
 }
