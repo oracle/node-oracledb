@@ -1469,12 +1469,14 @@ promise = getConnection([String poolAlias | Object connAttrs]);
 
 ##### Description
 
-Obtains a connection from a pool in the [connection pool cache](#connpoolcache) or creates a new,
-non-pooled connection.
+Obtains a connection from a pool in the [connection pool
+cache](#connpoolcache) or creates a new, standalone, non-pooled
+connection.
 
-For situations where connections are used infrequently, creating a new connection
-may be more efficient than creating and managing a connection pool. However, in
-most cases, Oracle recommends getting connections from a [connection pool](#createpool).
+For situations where connections are used infrequently, creating a
+standalone connection may be more efficient than creating and managing
+a connection pool. However, in most cases, Oracle recommends getting
+connections from a [connection pool](#createpool).
 
 The following table shows the various signatures that can be used when invoking
 `getConnection` and describes how the function will behave as a result.
@@ -1503,8 +1505,8 @@ See [Connections and Number of Threads](#numberofthreads).
 String poolAlias
 ```
 
-The `poolAlias` parameter is used to specify which pool in the connection pool
-cache to use to obtain the connection.
+The `poolAlias` parameter is used to specify which pool in the [connection pool
+cache](#connpoolcache) to use to obtain the connection.
 
 ###### <a name="getconnectiondbattrsconnattrs"></a> 3.3.2.1.2 Connection Attributes
 
