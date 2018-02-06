@@ -54,6 +54,8 @@ limitations under the License.
      - 3.2.20 [`queueTimeout`](#propdbqueuetimeout)
      - 3.2.21 [`stmtCacheSize`](#propdbstmtcachesize)
      - 3.2.22 [`version`](#propdbversion)
+     - 3.2.23 [`versionString`](#propdbversionstring)
+     - 3.2.24 [`versionSuffix`](#propdbversionsuffix)
   - 3.3 [Oracledb Methods](#oracledbmethods)
      - 3.3.1 [`createPool()`](#createpool)
      - 3.3.2 [`getConnection()`](#getconnectiondb)
@@ -1090,6 +1092,34 @@ For version *x.y.z*, this property gives the number: `(10000 * x) + (100 * y) + 
 ```javascript
 var oracledb = require('oracledb');
 console.log("Driver version number is " + oracledb.version);
+```
+
+#### <a name="propdbversionstring"></a> 3.2.23 `oracledb.versionString`
+```
+readonly String versionString
+```
+
+This readonly property gives a string representation of the node-oracledb version, including the version suffix if one is present.
+
+##### Example
+
+```javascript
+var oracledb = require('oracledb');
+console.log("Driver version is " + oracledb.versionString);
+```
+
+#### <a name="propdbversionsuffix"></a> 3.2.24 `oracledb.versionSuffix`
+```
+readonly String versionSuffix
+```
+
+This readonly property gives a string representing the version suffix (e.g. "-dev" or "-beta") or the value undefined if no version suffix is present.
+
+##### Example
+
+```javascript
+var oracledb = require('oracledb');
+console.log("Driver version suffix is " + oracledb.versionSuffix);
 ```
 
 ### <a name="oracledbmethods"></a> 3.3 Oracledb Methods

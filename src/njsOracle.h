@@ -67,9 +67,11 @@ using namespace v8;
 
 
 // Keep the version in sync with package.json
+// suffix should be something like "-dev" or "-beta.1"
 #define NJS_NODE_ORACLEDB_MAJOR       2
 #define NJS_NODE_ORACLEDB_MINOR       1
 #define NJS_NODE_ORACLEDB_PATCH       0
+#define NJS_NODE_ORACLEDB_SUFFIX      "-dev"
 
 // define stringified version and driver name
 #define NJS_STR_HELPER(x)       #x
@@ -77,7 +79,8 @@ using namespace v8;
 #define NJS_VERSION_STRING  \
         NJS_STR(NJS_NODE_ORACLEDB_MAJOR) "." \
         NJS_STR(NJS_NODE_ORACLEDB_MINOR) "." \
-        NJS_STR(NJS_NODE_ORACLEDB_PATCH)
+        NJS_STR(NJS_NODE_ORACLEDB_PATCH) \
+        NJS_NODE_ORACLEDB_SUFFIX
 #define NJS_DRIVER_NAME "node-oracledb : " NJS_VERSION_STRING
 
 // Used for Oracledb.version
@@ -149,6 +152,8 @@ private:
     static NAN_GETTER(GetMaxRows);
     static NAN_GETTER(GetOutFormat);
     static NAN_GETTER(GetVersion);
+    static NAN_GETTER(GetVersionString);
+    static NAN_GETTER(GetVersionSuffix);
     static NAN_GETTER(GetConnectionClass);
     static NAN_GETTER(GetExternalAuth);
     static NAN_GETTER(GetFetchArraySize);
@@ -169,6 +174,8 @@ private:
     static NAN_SETTER(SetMaxRows);
     static NAN_SETTER(SetOutFormat);
     static NAN_SETTER(SetVersion);
+    static NAN_SETTER(SetVersionString);
+    static NAN_SETTER(SetVersionSuffix);
     static NAN_SETTER(SetConnectionClass);
     static NAN_SETTER(SetExternalAuth);
     static NAN_SETTER(SetFetchArraySize);

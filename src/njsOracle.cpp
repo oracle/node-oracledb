@@ -164,6 +164,12 @@ void njsOracledb::Init(Handle<Object> target)
             Nan::New<v8::String>("version").ToLocalChecked(),
             njsOracledb::GetVersion, njsOracledb::SetVersion);
     Nan::SetAccessor(temp->InstanceTemplate(),
+            Nan::New<v8::String>("versionString").ToLocalChecked(),
+            njsOracledb::GetVersionString, njsOracledb::SetVersionString);
+    Nan::SetAccessor(temp->InstanceTemplate(),
+            Nan::New<v8::String>("versionSuffix").ToLocalChecked(),
+            njsOracledb::GetVersionSuffix, njsOracledb::SetVersionSuffix);
+    Nan::SetAccessor(temp->InstanceTemplate(),
             Nan::New<v8::String>("connectionClass").ToLocalChecked(),
             njsOracledb::GetConnectionClass, njsOracledb::SetConnectionClass);
     Nan::SetAccessor(temp->InstanceTemplate(),
@@ -505,6 +511,54 @@ NAN_GETTER(njsOracledb::GetVersion)
 NAN_SETTER(njsOracledb::SetVersion)
 {
     PropertyIsReadOnly("version");
+}
+
+
+//-----------------------------------------------------------------------------
+// njsOracledb::GetVersionString()
+//   Get accessor of "versionString" property.
+//-----------------------------------------------------------------------------
+NAN_GETTER(njsOracledb::GetVersionString)
+{
+    Local<String> value =
+            Nan::New<v8::String>(NJS_VERSION_STRING).ToLocalChecked();
+    info.GetReturnValue().Set(value);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsOracledb::SetVersionString()
+//   Set accessor of "versionString" property.
+//-----------------------------------------------------------------------------
+NAN_SETTER(njsOracledb::SetVersionString)
+{
+    PropertyIsReadOnly("versionString");
+}
+
+
+//-----------------------------------------------------------------------------
+// njsOracledb::GetVersionSuffix()
+//   Get accessor of "versionSuffix" property.
+//-----------------------------------------------------------------------------
+NAN_GETTER(njsOracledb::GetVersionSuffix)
+{
+    Local<String> value =
+#ifdef NJS_NODE_ORACLEDB_SUFFIX
+            Nan::New<v8::String>(NJS_NODE_ORACLEDB_SUFFIX).ToLocalChecked();
+#else
+            Nan::Undefined();
+#endif
+    info.GetReturnValue().Set(value);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsOracledb::SetVersionSuffix()
+//   Set accessor of "versionSuffix" property.
+//-----------------------------------------------------------------------------
+NAN_SETTER(njsOracledb::SetVersionSuffix)
+{
+    PropertyIsReadOnly("versionSuffix");
 }
 
 

@@ -19,7 +19,6 @@ CD=cd
 ECHO=echo
 DATE=date -u
 SED=sed
-GREP=grep
 RMDIR=rm -rf
 RMALL=rm -f
 GIT=git
@@ -36,10 +35,7 @@ BINARY_PATH_LOCAL=../build/Release/oracledb.node
 LICENSE_PATH_LOCAL=../LICENSE.md
 
 # Find the node-oracledb version number
-MAJ=$(shell $(GREP) '\#define \+NJS_NODE_ORACLEDB_MAJOR' ../src/njsOracle.h | $(SED) -e 's/[^0-9]*//')
-MIN=$(shell $(GREP) '\#define \+NJS_NODE_ORACLEDB_MINOR' ../src/njsOracle.h | $(SED) -e 's/[^0-9]*//')
-PAT=$(shell $(GREP) '\#define \+NJS_NODE_ORACLEDB_PATCH' ../src/njsOracle.h | $(SED) -e 's/[^0-9]*//')
-VER=$(MAJ).$(MIN).$(PAT)
+VER=$(shell $(NODE) getversion.js)
 
 # The staging-oracledb-X.Y.Z.tgz package will try to download binaries from
 # https://$NODE_ORACLEDB_PACKAGE_HOSTNAME/$NODE_ORACLEDB_PACKAGE_URL_PATH/vX.Y.Z/
