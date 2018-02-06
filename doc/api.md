@@ -327,8 +327,8 @@ The *Error* object contains `errorNum`, `message` and `offset` properties.
 Number errorNum
 ```
 
-The Oracle error number.  If the error is not from Oracle, this value
-is undefined.
+The Oracle error number.  This value is undefined for non-Oracle
+errors and for messages prefixed with NJS or DPI.
 
 #### <a name="properrmessage"></a> 2.1.2 `message`
 
@@ -364,8 +364,9 @@ Number offset
 ```
 
 The character offset into the SQL text that resulted in the Oracle
-error.  The value may be `0` in non-SQL contexts.  If the error is not
-from Oracle, this value is undefined.
+error.  The value may be `0` in non-SQL contexts.  This value is
+undefined for non-Oracle errors and for messages prefixed with NJS or
+DPI.
 
 ## <a name="oracledbclass"></a> 3. Oracledb Class
 
