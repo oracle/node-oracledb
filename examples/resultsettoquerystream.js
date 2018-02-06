@@ -64,7 +64,7 @@ oracledb.getConnection(
           doRelease(connection);
         });
 
-        queryStream.on('end', function() {
+        queryStream.on('close', function() {
           doRelease(connection);
         });
       }
