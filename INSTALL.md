@@ -182,7 +182,8 @@ All installations need:
 
   After installation of node-oracledb, your Node.js applications will
   be able to connect to your database.  The database can be on the
-  same machine as Node.js, or on a remote machine.
+  same machine as Node.js, or on a remote machine.  Node-oracledb does
+  not install or create a database.
 
   You will need to know user credentials and the [connection
   string][7] for the database.
