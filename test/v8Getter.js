@@ -493,19 +493,30 @@ describe('140. v8Getter.js', function() {
   describe('140.7 Negative: Pool object', function() {
 
     var dotest = function(opt, cb) {
-      oracledb.createPool(
-        opt,
-        function(err, pool) {
-          should.exist(err);
-          should.not.exist(pool);
-          cb();
-        }
+
+      should.throws(
+        function() {
+          oracledb.createPool(
+            opt,
+            function(err, pool) {
+              should.not.exist(err);
+              should.exist(pool);
+
+              pool.close(function(err) {
+
+                should.not.exist(err);
+                cb();
+              });
+            }
+          );
+        },
+        /Nope/
       );
     };
 
-    it.skip('140.7.1 String type - user', function(done) {
+    it('140.7.1 String type - user', function(done) {
 
-      var cred = dbConfig;
+      var cred = JSON.parse(JSON.stringify(dbConfig));
       Object.defineProperty(cred, 'user', {
         get: function() {
           throw 'Nope';
@@ -514,9 +525,9 @@ describe('140. v8Getter.js', function() {
       dotest(cred, done);
     });
 
-    it.skip('140.7.2 String type - password', function(done) {
+    it('140.7.2 String type - password', function(done) {
 
-      var cred = dbConfig;
+      var cred = JSON.parse(JSON.stringify(dbConfig));
       Object.defineProperty(cred, 'password', {
         get: function() {
           throw 'Nope';
@@ -525,9 +536,9 @@ describe('140. v8Getter.js', function() {
       dotest(cred, done);
     });
 
-    it.skip('140.7.3 String type - connectString', function(done) {
+    it('140.7.3 String type - connectString', function(done) {
 
-      var cred = dbConfig;
+      var cred = JSON.parse(JSON.stringify(dbConfig));
       Object.defineProperty(cred, 'connectString', {
         get: function() {
           throw 'Nope';
@@ -536,9 +547,9 @@ describe('140. v8Getter.js', function() {
       dotest(cred, done);
     });
 
-    it.skip('140.7.4 poolMin', function(done) {
+    it('140.7.4 poolMin', function(done) {
 
-      var cred = dbConfig;
+      var cred = JSON.parse(JSON.stringify(dbConfig));
       Object.defineProperty(cred, 'poolMin', {
         get: function() {
           throw 'Nope';
@@ -547,9 +558,9 @@ describe('140. v8Getter.js', function() {
       dotest(cred, done);
     });
 
-    it.skip('140.7.5 poolMax', function(done) {
+    it('140.7.5 poolMax', function(done) {
 
-      var cred = dbConfig;
+      var cred = JSON.parse(JSON.stringify(dbConfig));
       Object.defineProperty(cred, 'poolMax', {
         get: function() {
           throw 'Nope';
@@ -558,9 +569,9 @@ describe('140. v8Getter.js', function() {
       dotest(cred, done);
     });
 
-    it.skip('140.7.6 poolIncrement', function(done) {
+    it('140.7.6 poolIncrement', function(done) {
 
-      var cred = dbConfig;
+      var cred = JSON.parse(JSON.stringify(dbConfig));
       Object.defineProperty(cred, 'poolIncrement', {
         get: function() {
           throw 'Nope';
@@ -569,9 +580,9 @@ describe('140. v8Getter.js', function() {
       dotest(cred, done);
     });
 
-    it.skip('140.7.7 poolTimeout', function(done) {
+    it('140.7.7 poolTimeout', function(done) {
 
-      var cred = dbConfig;
+      var cred = JSON.parse(JSON.stringify(dbConfig));
       Object.defineProperty(cred, 'poolTimeout', {
         get: function() {
           throw 'Nope';
@@ -580,9 +591,9 @@ describe('140. v8Getter.js', function() {
       dotest(cred, done);
     });
 
-    it.skip('140.7.8 poolPingInterval', function(done) {
+    it('140.7.8 poolPingInterval', function(done) {
 
-      var cred = dbConfig;
+      var cred = JSON.parse(JSON.stringify(dbConfig));
       Object.defineProperty(cred, 'poolPingInterval', {
         get: function() {
           throw 'Nope';
@@ -592,20 +603,9 @@ describe('140. v8Getter.js', function() {
       dotest(cred, done);
     });
 
-    it.skip('140.7.9 queueRequests', function(done) {
+    it('140.7.9 stmtCacheSize', function(done) {
 
-      var cred = dbConfig;
-      Object.defineProperty(cred, 'queueRequests', {
-        get: function() {
-          throw 'Nope';
-        }
-      });
-      dotest(cred, done);
-    });
-
-    it.skip('140.7.10 stmtCacheSize', function(done) {
-
-      var cred = dbConfig;
+      var cred = JSON.parse(JSON.stringify(dbConfig));
       Object.defineProperty(cred, 'stmtCacheSize', {
         get: function() {
           throw 'Nope';
@@ -614,40 +614,7 @@ describe('140. v8Getter.js', function() {
       dotest(cred, done);
     });
 
-    it.skip('140.7.11 stmtCacheSize', function(done) {
-
-      var cred = dbConfig;
-      Object.defineProperty(cred, 'stmtCacheSize', {
-        get: function() {
-          throw 'Nope';
-        }
-      });
-      dotest(cred, done);
-    });
-
-    it.skip('140.7.12 poolAlias', function(done) {
-
-      var cred = dbConfig;
-      Object.defineProperty(cred, 'poolAlias', {
-        get: function() {
-          throw 'Nope';
-        }
-      });
-      dotest(cred, done);
-    });
-
-    it.skip('140.7.13 queueTimeout', function(done) {
-
-      var cred = dbConfig;
-      Object.defineProperty(cred, 'queueTimeout', {
-        get: function() {
-          throw 'Nope';
-        }
-      });
-      dotest(cred, done);
-    });
-
-    it.skip('140.7.14 connecionsOpen', function(done) {
+    it('140.7.10 connecionsOpen', function(done) {
 
       oracledb.createPool(
         dbConfig,
@@ -656,12 +623,18 @@ describe('140. v8Getter.js', function() {
 
           Object.defineProperty(pool, 'connecionsOpen', {
             get: function() {
-              throw 'Nope';
+              throw 'Property Wrong';
             }
           });
-          console.log(pool.connecionsOpen);
 
-          pool.Close(function(err) {
+          should.throws(
+            function() {
+              console.log(pool.connecionsOpen);
+            },
+            /Property Wrong/
+          );
+
+          pool.close(function(err) {
             should.not.exist(err);
             done();
           });
@@ -669,7 +642,7 @@ describe('140. v8Getter.js', function() {
       );
     });
 
-    it.skip('140.7.15 connecionsInUse', function(done) {
+    it('140.7.11 connecionsInUse', function(done) {
 
       oracledb.createPool(
         dbConfig,
@@ -678,12 +651,17 @@ describe('140. v8Getter.js', function() {
 
           Object.defineProperty(pool, 'connecionsInUse', {
             get: function() {
-              throw 'Nope';
+              throw 'Property Wrong';
             }
           });
-          console.log(pool.connecionsInUse);
+          should.throws(
+            function() {
+              console.log(pool.connecionsInUse);
+            },
+            /Property Wrong/
+          );
 
-          pool.Close(function(err) {
+          pool.close(function(err) {
             should.not.exist(err);
             done();
           });
@@ -693,52 +671,62 @@ describe('140. v8Getter.js', function() {
 
   }); // 140.7
 
-  describe ('140.8 Negative Connection object', function ()  {
-    it.skip ( '140.8.1 String type: user', function(done) {
-      var cred = dbConfig;
-      Object.defineProperty ( cred, 'user', {
-        get : function () {  throw 'Nope';  } } );
+  describe('140.8 Negative: Get Connection', function ()  {
 
-      oracledb.getConnection (
-        cred,
-        function ( err, connection ) {
-          should.exist ( err ) ;
-          should.not.exist ( connection ) ;
+    it('140.8.1 String type: user', function(done) {
+
+      var cred = JSON.parse(JSON.stringify(dbConfig));
+      Object.defineProperty (cred, 'user', {
+        get : function () {
+          throw 'Nope';
         }
+      });
+
+      should.throws(
+        function() {
+          oracledb.getConnection(cred, function(){ });
+        },
+        /Nope/
       );
-      done ();
+      done();
     });
 
-    it.skip ( '140.8.2 String type: password', function(done) {
-      var cred = dbConfig;
-      Object.defineProperty ( cred, 'password', {
-        get : function () {  throw 'Nope';  } } );
+    it('140.8.2 String type: password', function(done) {
 
-      oracledb.getConnection (
-        cred,
-        function ( err, connection ) {
-          should.exist ( err ) ;
-          should.not.exist ( connection ) ;
+      var cred = JSON.parse(JSON.stringify(dbConfig));
+      Object.defineProperty (cred, 'password', {
+        get : function () {
+          throw 'Nope';
         }
+      });
+
+      should.throws(
+        function() {
+          oracledb.getConnection(cred, function(){ });
+        },
+        /Nope/
       );
-      done ();
+      done();
     });
 
-    it.skip ( '140.8.3 String type: connectionString', function(done) {
-      var cred = dbConfig;
-      Object.defineProperty ( cred, 'connectionString', {
-        get : function () {  throw 'Nope';  } } );
+    it('140.8.3 String type: connectionString', function(done) {
 
-      oracledb.getConnection (
-        cred,
-        function ( err, connection ) {
-          should.exist ( err ) ;
-          should.not.exist ( connection ) ;
+      var cred = JSON.parse(JSON.stringify(dbConfig));
+      Object.defineProperty (cred, 'connectString', {
+        get : function () {
+          throw 'Nope';
         }
+      });
+
+      should.throws(
+        function() {
+          oracledb.getConnection(cred, function(){ });
+        },
+        /Nope/
       );
-      done ();
+      done();
     });
 
-  });
+  }); // 140.8
 
 });

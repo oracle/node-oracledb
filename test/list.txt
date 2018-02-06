@@ -3619,7 +3619,7 @@ Overview of node-oracledb functional tests
     139.1 columns fetched from REF CURSORS can be mapped by fetchInfo settings
     139.2 fetchAsString takes effect as well
 
-140. v8Getter.js
+  140. v8Getter.js
     140.1 Negative: overwrite the getter() function of bind in objects
         140.1.1 ProcessBindsByName()
         140.1.2 ProcessBindsByPos()
@@ -3631,6 +3631,27 @@ Overview of node-oracledb functional tests
     140.4 Negative: fetchInfo
         140.4.1 changes getter() of fetchInfo itself
         140.4.2 changes getter() of the value of fetchInfo object
+    140.5 Negative: Bool type
+        140.5.1 option - autoCommit
+        140.5.2 option - extendedMetaData
+    140.6 Negative: positive Int type
+        140.6.1 option - fetchArraySize
+    140.7 Negative: Pool object
+        140.7.1 String type - user
+        140.7.2 String type - password
+        140.7.3 String type - connectString
+        140.7.4 poolMin
+        140.7.5 poolMax
+        140.7.6 poolIncrement
+        140.7.7 poolTimeout
+        140.7.8 poolPingInterval
+        140.7.9 stmtCacheSize
+        140.7.10 connecionsOpen
+        140.7.11 connecionsInUse
+    140.8 Negative: Get Connection
+        140.8.1 String type: user
+        140.8.2 String type: password
+        140.8.3 String type: connectionString
 
 141. insertNaNToNumber.js
     141.1 SQL, stores NaN
