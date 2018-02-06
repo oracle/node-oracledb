@@ -230,8 +230,9 @@ limitations under the License.
   - 20.1 [Custom Promise Libraries](#custompromises)
 21. [Async/Await and node-oracledb](#asyncawaitoverview)
 22. [Tracing SQL and PL/SQL Statements](#tracingsql)
-23. [Migrating from node-oracledb 1.13 to node-oracledb 2.0](#migratev1v2)
-24. [Migrating from node-oracledb 2.0 to node-oracledb 2.1](#migratev20v21)
+23. [Migrating from Previous node-oracledb Releases](#migrate)
+  - 23.1 [Migrating from node-oracledb 1.13 to node-oracledb 2.0](#migratev1v2)
+  - 23.2 [Migrating from node-oracledb 2.0 to node-oracledb 2.1](#migratev20v21)
 
 ## <a name="intro"></a> 1. Introduction
 
@@ -6672,7 +6673,9 @@ parameters.
 
 PL/SQL users may be interested in using [PL/Scope][78].
 
-## <a name="migratev1v2"></a> 23. Migrating from node-oracledb 1.13 to node-oracledb 2.0
+## <a name="migrate"></a> 23. Migrating from Previous node-oracledb Releases
+
+### <a name="migratev1v2"></a> 23.1 Migrating from node-oracledb 1.13 to node-oracledb 2.0
 
 When upgrading from node-oracledb version 1.13 to version 2.0:
 
@@ -6726,7 +6729,7 @@ When upgrading from node-oracledb version 1.13 to version 2.0:
 - Test applications to check if changes such as the improved property
   validation uncover latent problems in your code.
 
-## <a name="migratev20v21"></a> 24. Migrating from node-oracledb 2.0 to node-oracledb 2.1
+### <a name="migratev20v21"></a> 23.2 Migrating from node-oracledb 2.0 to node-oracledb 2.1
 
 When upgrading from node-oracledb version 2.0 to version 2.1:
 
@@ -6736,6 +6739,7 @@ When upgrading from node-oracledb version 2.0 to version 2.1:
   - Change the method name from `_close()` to [`destroy()`][92].
   - Stop passing a callback.
   - Optionally pass an error.
+
 
 [1]: https://www.npmjs.com/package/oracledb
 [2]: https://github.com/oracle/node-oracledb/blob/master/INSTALL.md
