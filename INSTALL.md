@@ -1515,6 +1515,9 @@ If `npm install oracledb` fails:
 
 - Use `npm install --verbose oracledb`.  Review your output and logs.
   Try to install in a different way.  Try some potential solutions.
+  Before installing on Windows also do `set
+  NODE_ORACLEDB_TRACE_INSTALL=TRUE`.  On Linux and macOS use `export
+  NODE_ORACLEDB_TRACE_INSTALL=TRUE`.
 
 - Was there a network connection error?  Do you need to set
   `http_proxy` and/or `https_proxy`?
