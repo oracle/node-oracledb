@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -744,7 +744,7 @@ describe('1. connection.js', function(){
         });
       });
     });
-  }); // 1.7
+  }); // 1.6
 
   describe('1.7 invalid credentials', function() {
 
@@ -766,6 +766,63 @@ describe('1. connection.js', function(){
 
     });
 
-  });
+  }); // 1.7
+
+  describe('1.8 connectionString alias', function() {
+    it('1.8.1 allows connectionString to be used as an alias for connectString', function(done) {
+      oracledb.getConnection(
+        {
+          user: dbConfig.user,
+          password: dbConfig.password,
+          connectionString: dbConfig.connectString
+        },
+        function(err, connection) {
+          should.not.exist(err);
+
+          connection.should.be.ok();
+
+          connection.close(function(err) {
+            should.not.exist(err);
+
+            done();
+          });
+        }
+      );
+    });
+
+    it('1.8.2 favors connectString if both connectString and connectionString are passed', function(done) {
+      oracledb.getConnection(
+        {
+          user: dbConfig.user,
+          password: dbConfig.password,
+          connectString: 'this is wrong',
+          connectionString: dbConfig.connectString
+        },
+        function(err, connection) {
+          should.exist(err);
+
+          oracledb.getConnection(
+            {
+              user: dbConfig.user,
+              password: dbConfig.password,
+              connectString: dbConfig.connectString,
+              connectionString: 'this is wrong'
+            },
+            function(err, connection) {
+              should.not.exist(err);
+
+              connection.should.be.ok();
+
+              connection.close(function(err) {
+                should.not.exist(err);
+
+                done();
+              });
+            }
+          );
+        }
+      );
+    });
+  }); // 1.8
 
 });

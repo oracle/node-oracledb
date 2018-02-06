@@ -66,7 +66,7 @@ limitations under the License.
          - 3.3.1.1 [`createPool()`: Parameters and Attributes](#createpoolpoolattrs)
              - 3.3.1.1.1 [`user`](#createpoolpoolattrsuser)
              - 3.3.1.1.2 [`password`](#createpoolpoolattrspassword)
-             - 3.3.1.1.3 [`connectString`](#createpoolpoolattrsconnectstring)
+             - 3.3.1.1.3 [`connectString`](#createpoolpoolattrsconnectstring), [`connectionString`](#createpoolpoolattrsconnectstring)
              - 3.3.1.1.4 [`externalAuth`](#createpoolpoolattrsexternalauth)
              - 3.3.1.1.5 [`stmtCacheSize`](#createpoolpoolattrsstmtcachesize)
              - 3.3.1.1.6 [`poolAlias`](#createpoolpoolattrspoolalias)
@@ -84,7 +84,7 @@ limitations under the License.
              - 3.3.2.1.2 [Connection Attributes](#getconnectiondbattrsconnattrs)
                  - 3.3.2.1.2.1 [`user`](#getconnectiondbattrsuser)
                  - 3.3.2.1.2.2 [`password`](#getconnectiondbattrspassword)
-                 - 3.3.2.1.2.3 [`connectString`](#getconnectiondbattrsconnectstring)
+                 - 3.3.2.1.2.3 [`connectString`](#getconnectiondbattrsconnectstring), [`connectionString`](#getconnectiondbattrsconnectstring)
                  - 3.3.2.1.2.4 [`privilege`](#getconnectiondbattrsprivilege)
                  - 3.3.2.1.2.5 [`externalAuth`](#getconnectiondbattrsexternalauth)
                  - 3.3.2.1.2.6 [`stmtCacheSize`](#getconnectiondbattrsstmtcachesize)
@@ -1235,6 +1235,8 @@ See [Connection Pool Cache](#connpoolcache) for more details.
 A pool should be terminated with the [`pool.close()`](#poolclose)
 call, but only after all connections have been released.
 
+See [Connection Pooling](#connpooling) for more information about pooling.
+
 ###### <a name="createpoolpoolattrs"></a> 3.3.1.1 `createPool()`: Parameters and Attributes
 
 ```
@@ -1277,11 +1279,14 @@ String password
 The password of the database user. A password is also necessary if a
 proxy user is specified.
 
-###### <a name="createpoolpoolattrsconnectstring"></a> 3.3.1.1.3 `connectString`
+###### <a name="createpoolpoolattrsconnectstring"></a> 3.3.1.1.3 `connectString`, `connectionString`
 
 ```
 String connectString
+String connectionString
 ```
+
+The two properties are aliases for each other.  Use only one of the properties.
 
 The Oracle database instance to connect to.  The string can be an Easy
 Connect string, or a Net Service Name from a `tnsnames.ora` file, or the
@@ -1361,6 +1366,13 @@ The default value is 4.
 
 This optional property overrides the
 [`oracledb.poolMax`](#propdbpoolmax) property.
+
+See [Connections and Number of Threads](#numberofthreads) for why you
+should not increase this value beyond 128.  Importantly, if you
+increase `poolMax` you should also increase the number of threads
+available to node-oracledb.
+
+See [Connection Pooling](#connpooling) for other pool sizing guidelines.
 
 ###### <a name="createpoolpoolattrspoolmin"></a> 3.3.1.1.9 `poolMin`
 
@@ -1545,11 +1557,14 @@ String password
 The password of the database user. A password is also necessary if a
 proxy user is specified.
 
-###### <a name="getconnectiondbattrsconnectstring"></a> 3.3.2.1.2.3 `connectString`
+###### <a name="getconnectiondbattrsconnectstring"></a> 3.3.2.1.2.3 `connectString`, `connectionString`
 
 ```
 String connectString
+String connectionString
 ```
+
+The two properties are aliases for each other.  Use only one of the properties.
 
 The Oracle database instance to connect to.  The string can be an Easy Connect string, or a
 Net Service Name from a `tnsnames.ora` file, or the name of a local
@@ -2798,8 +2813,11 @@ Connect](#easyconnect) string, or a Net Service Name from a local
 [`tnsnames.ora`](#tnsnames) file or external naming service, or it can
 be the SID of a local Oracle database instance.
 
-If `connectString` is not specified, the empty string "" is used which
-indicates to connect to the local, default database.
+The `connectionString` property is an aliases for `connectString`.
+Use only one of the properties.
+
+If a connect string is not specified, the empty string "" is used
+which indicates to connect to the local, default database.
 
 #### <a name="easyconnect"></a> 8.1.1 Easy Connect Syntax for Connection Strings
 
@@ -3408,7 +3426,7 @@ To use DRCP in node-oracledb:
 
 1. The DRCP pool must be started in the database: `SQL> execute dbms_connection_pool.start_pool();`
 2. The [`connectionClass`](#propdbconclass) should be set by the node-oracledb application.  If it is not set, the pooled server session memory will not be reused optimally, and the statistic views will record large values for `NUM_MISSES`.
-3. The `getConnection()` property `connectString` must specify to use a pooled server, either by the Easy Connect syntax like [`myhost/sales:POOLED`](#easyconnect), or by using a [`tnsnames.ora`](#tnsnames) alias for a connection that contains `(SERVER=POOLED)`.
+3. The `pool.createPool()` or `oracledb.getConnection()` property `connectString` (or its alias `connectionString`) must specify to use a pooled server, either by the Easy Connect syntax like [`myhost/sales:POOLED`](#easyconnect), or by using a [`tnsnames.ora`](#tnsnames) alias for a connection that contains `(SERVER=POOLED)`.
 
 For efficiency, it is recommended that DRCP connections should be used
 with node-oracledb's local [connection pool](#poolclass).

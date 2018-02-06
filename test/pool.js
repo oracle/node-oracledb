@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -1036,5 +1036,71 @@ describe('2. pool.js', function() {
     }); // 2.11.2
 
   }); // 2.11
+
+  describe('2.12 connectionString alias', function() {
+    it('2.12.1 allows connectionString to be used as an alias for connectString', function(done) {
+      oracledb.createPool(
+        {
+          user: dbConfig.user,
+          password: dbConfig.password,
+          connectionString: dbConfig.connectString,
+          poolMin: 1,
+          poolMax: 1,
+          poolIncrement: 0
+        },
+        function(err, pool) {
+          should.not.exist(err);
+
+          pool.should.be.ok();
+
+          pool.close(function(err) {
+            should.not.exist(err);
+
+            done();
+          });
+        }
+      );
+    });
+
+    it('2.12.2 favors connectString if both connectString and connectionString are passed', function(done) {
+      oracledb.createPool(
+        {
+          user: dbConfig.user,
+          password: dbConfig.password,
+          connectString: 'this is wrong',
+          connectionString: dbConfig.connectString,
+          poolMin: 1,
+          poolMax: 1,
+          poolIncrement: 0
+        },
+        function(err, pool) {
+          should.exist(err);
+
+          oracledb.createPool(
+            {
+              user: dbConfig.user,
+              password: dbConfig.password,
+              connectString: dbConfig.connectString,
+              connectionString: 'this is wrong',
+              poolMin: 1,
+              poolMax: 1,
+              poolIncrement: 0
+            },
+            function(err, pool) {
+              should.not.exist(err);
+
+              pool.should.be.ok();
+
+              pool.close(function(err) {
+                should.not.exist(err);
+
+                done();
+              });
+            }
+          );
+        }
+      );
+    });
+  }); // 2.12
 
 });
