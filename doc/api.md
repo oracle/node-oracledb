@@ -262,10 +262,10 @@ oracledb.getConnection(
       return;
     }
     connection.execute(
-      `SELECT department_id, department_name
+      `SELECT manager_id, department_id, department_name
        FROM departments
-       WHERE manager_id < :id`,
-      [110],  // bind value for :id
+       WHERE manager_id = :id`,
+      [103],  // bind value for :id
       function(err, result)
       {
         if (err) {
@@ -291,7 +291,7 @@ function doRelease(connection)
 With Oracle's sample HR schema, the output is:
 
 ```
-[ [ 60, 'IT' ], [ 90, 'Executive' ], [ 100, 'Finance' ] ]
+[ [ 103, 60, 'IT' ] ]
 ```
 
 Scripts to create Oracle's sample schemas can be found at
