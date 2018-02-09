@@ -36,8 +36,7 @@
   "scripts": {
     "install": "node package/oracledbinstall.js",
     "test": "mocha --opts test/opts/mocha.opts",
-    "posttest": "node test/opts/versions.js",
-    "testwindows": "mocha --opts test\\opts\\mocha.opts && npm run posttest"
+    "posttest": "node examples/version.js"
   },
   "engines": {
     "node": ">=4"

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -25,12 +25,6 @@
  *   Testing to make sure OCI_SUCCESS_WITH_INFO is treated as OCI_SUCCESS
  *   Creating a PLSQL procedure with a SELECT query from a non-existing
  *   table will result in warnings (OCI_SUCCESS_WITH_INFO).
- *
- * NUMBERING RULE
- *   Test numbers follow this numbering rule:
- *     1  - 20  are reserved for basic functional tests
- *     21 - 50  are reserved for data type supporting tests
- *     51 onwards are for other tests
  *
  *****************************************************************************/
 "use strict";

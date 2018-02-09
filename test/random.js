@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2017, 2018, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -24,6 +24,7 @@
  * DESCRIPTION
  *   generate a random string which length is 'length', with specialStr
  *   in it's head and tail
+ *
  *****************************************************************************/
 'use strict';
 

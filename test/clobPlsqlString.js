@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -28,12 +28,6 @@
  *
  *   When the types of bind out variables are not STRING or BUFFER,
  *   maxSize option will not take effect.
- *
- * NUMBERING RULE
- *   Test numbers follow this numbering rule:
- *     1  - 20  are reserved for basic functional tests
- *     21 - 50  are reserved for data type supporting tests
- *     51 onwards are for other tests
  *
  *****************************************************************************/
 'use strict';

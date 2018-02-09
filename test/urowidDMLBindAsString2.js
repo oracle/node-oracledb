@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2017, 2018, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -25,12 +25,6 @@
  *   Testing urowid binding as String with DML.
  *   The Universal ROWID (UROWID) is a datatype that can store both logical and physical rowids of Oracle tables. Logical rowids are primary key-based logical identifiers for the rows of Index-Organized Tables (IOTs).
  *   To use columns of the UROWID datatype, the value of the COMPATIBLE initialization parameter must be set to 8.1 or higher.
- *
- * NUMBERING RULE
- *   Test numbers follow this numbering rule:
- *     1  - 20  are reserved for basic functional tests
- *     21 - 50  are reserved for data type supporting tests
- *     51 onwards are for other tests
  *
  *****************************************************************************/
 'use strict';

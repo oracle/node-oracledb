@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2017, 2018, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -24,12 +24,6 @@
  * DESCRIPTION
  *    Test LONG RAW type DML support.
  *    Long column restrictions: http://docs.oracle.com/cd/B19306_01/server.102/b14200/sql_elements001.htm#SQLRF00201
- *
- * NUMBERING RULE
- *   Test numbers follow this numbering rule:
- *     1  - 20  are reserved for basic functional tests
- *     21 - 50  are reserved for data type supporting tests
- *     51 onwards are for other tests
  *
  *****************************************************************************/
 'use strict';

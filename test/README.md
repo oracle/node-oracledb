@@ -1,6 +1,6 @@
 # Test node-oracledb
 
-*Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved.*
+*Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved.*
 
 You may not use the identified files except in compliance with the Apache
 License, Version 2.0 (the "License.")
@@ -19,7 +19,7 @@ The node-oracledb test suite uses 'mocha', 'should' and 'async'.  See
 [LICENSE](https://github.com/oracle/node-oracledb/blob/master/LICENSE.md)
 for relevant licenses.
 
-## 1. Preparations for running tests
+## 1. Preparations
 
 See [INSTALL](https://github.com/oracle/node-oracledb/blob/master/INSTALL.md)
 for installation requirements and more details.
@@ -36,7 +36,7 @@ mkdir <some-directory>
 cd <some-directory>
 ```
 
-### 1.2 Get node-oracledb from GitHub
+### 1.2 Clone node-oracledb from GitHub
 
 Clone the project repository:
 
@@ -85,13 +85,8 @@ and the authentication service have been appropriately configured.  See
 for more details. And then, set the environment variable `NODE_ORACLEDB_EXTERNALAUTH`
 to be `true`.
 
-Note: the test suite requires a schema with these privileges:
-
-- CREATE TABLE
-- CREATE SESSION
-- CREATE PROCEDURE
-- CREATE SEQUENCE
-- CREATE TRIGGER
+Note: the test suite requires a schema with privileges CREATE TABLE, CREATE SESSION,
+CREATE PROCEDURE, CREATE SEQUENCE, CREATE TRIGGER.
 
 ### 1.5 Set NODE_PATH
 
@@ -103,32 +98,16 @@ export NODE_PATH=<some-directory>/node-oracledb/lib
 
 ### 2.1 Run the complete test suite
 
-#### 2.1.1 On Unix-like systems
-
 ```
-cd <some-directory>/node-oracledb
+cd node-oracledb
 npm test
 ```
-
-This calls the `test` script defined in `oracledb/package.json`.
-
-#### 2.1.2 On Windows
-
-```
-cd <some-directory>/node_oracledb
-npm run testwindows
-```
-
-This calls the `testwindows` script defined in `oracledb/package.json`.
-
-See [npm scripts](https://docs.npmjs.com/misc/scripts) for more information
-about how npm handles the "scripts" field of `package.json`.
 
 ### 2.2 Run specified test(s)
 
 ```
-cd <some-directory>/node_oracledb
-<mocha-executable-file-directory>/mocha test/<test-names>
+cd node_oracledb
+./node_modules/.bin/mocha test/<test-names>
 ```
 
 See [mochajs.org](http://mochajs.org/) for more information on running tests with mocha.
@@ -139,41 +118,28 @@ See [CONTRIBUTING](https://github.com/oracle/node-oracledb/blob/master/CONTRIBUT
 for general information on contribution requirements.
 
 For easy correlation between results and test code, each test is
-assigned a number. The following number ranges have been chosen:
-
-- 1  - 20  are reserved for basic functional tests
-- 21 - 50  are reserved for data type supporting tests
-- 51 onwards are for other tests
+assigned a number. The [Test List](https://github.com/oracle/node-oracledb/blob/master/test/list.txt)
+shows the numbering of tests.
 
 In order to include your tests in the suite, add each new test file
 name to [`test/opts/mocha.opts`](https://github.com/oracle/node-oracledb/blob/master/test/opts/mocha.opts).
 
-Please also add a description of each individual test to the Test
-List.
+## 4. Compatibility
 
-## 4. Test List
+We basically test with the following environment options:
 
-See [`test/list.txt`](https://github.com/oracle/node-oracledb/blob/master/test/list.txt)
-for the list of existing tests.
+- Oracle Instant Clients: 11.2.0.4, 12.1.0.2, 12.2.0.1
+- Operating Systems (X64): macOS, Linux, Windows
+- Node.js LTS versions
 
-## 5. Tests Compatibility
-
-- We conduct base testing with Instant Client 11.2.0.4 and 12.1.0.2 on Linux X64
-and Windows 7.
-
-- Users of 11.2.0.1 and 11.2.0.2 clients may see failures with poolTimeout.js
-and dataTypeDouble.js.
-
-- Slow networks may cause some tests to timeout.
-
-## 6. Troubleshooting
+## 5. Troubleshooting
 
 You may encounter some troubles when running the test suite. These troubles
 might be caused by the concurrency issue of Mocha framework, network latencies,
 or database server issues. This section gives some issues that we ever saw
 and our solutions.
 
-### 6.1 ORA-00054: resource busy and acquire with NOWAIT specified or timeout expired
+### 5.1 ORA-00054: resource busy and acquire with NOWAIT specified or timeout expired
 
 This error occurs when Node.js programs try to change database objects which
 hold locks. The workaround would be:
@@ -183,7 +149,7 @@ test files.
 (2) Try not to use 'beforeEach' blocks for object operations to avoid
 the interference between cases.
 
-### 6.2 ORA-00018: maximum number of sessions exceeded
+### 5.2 ORA-00018: maximum number of sessions exceeded
 
 This error occurs when the test suite takes up more sessions than the
 configured limit. You can alter the session limit on the database server side.
@@ -200,7 +166,7 @@ do
 done
 ```
 
-### 6.3 ORA-28865: SSL connection closed
+### 5.3 ORA-28865: SSL connection closed
 
 You may encounter this error when the test suite sends more connection
 requests per second than the database is configured to handle.
