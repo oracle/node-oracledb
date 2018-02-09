@@ -1577,7 +1577,7 @@ Questions and issues can be posted as [GitHub Issues][10].
 
 [1]: https://github.com/oracle/node-oracledb
 [2]: https://www.python.org/downloads/
-[3]: http://www.oracle.com/technetwork/database/features/instant-client/index-097480.html
+[3]: http://www.oracle.com/technetwork/database/database-technologies/instant-client/overview/index.html
 [4]: https://www.npmjs.com/package/oracledb
 [5]: https://blogs.oracle.com/opal/getting-a-c11-compiler-for-node-4,-5-and-6-on-oracle-linux-6
 [6]: https://support.oracle.com/epmos/faces/DocumentDisplay?id=207303.1

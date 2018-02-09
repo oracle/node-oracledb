@@ -400,7 +400,7 @@ function done(err, alreadyInstalled) {
       packageUtil.log('** - A Microsoft Visual Studio Redistributable suitable for your Oracle client library version must be available');
       packageUtil.log('**   Check ' + installUrl + ' for details');
     } else {
-      clientUrl = 'http://www.oracle.com/technetwork/database/features/instant-client/index-100365.html';
+      clientUrl = 'http://www.oracle.com/technetwork/database/database-technologies/instant-client/overview/index.html';
 
       packageUtil.log('** - You must have ' + arch + ' Oracle client libraries in your operating system library search path');
       packageUtil.log('** - If you do not already have libraries, install an Instant Client Basic or Basic Light package from: ');
