@@ -1432,8 +1432,26 @@ Some companies block access to github.com so `npm install oracledb`
 will fail to download binaries, as will installing source code from
 GitHub with `npm install oracle/node-oracledb.git#v2.1.0`.
 
-To install node-oracledb in this case, compile the source code
-included in the npm package:
+There are two suggested methods for installation.
+
+##### 3.12.3.1 Use the oracle.com GitHub mirror
+
+Oracle has a mirror of the GitHub repository source code that can be
+cloned with:
+
+```
+git clone git://oss.oracle.com/git/oracle/node-oracledb.git/
+```
+
+Binaries are not cloned.  Follow the general instructions in
+[Node-oracledb Installation from Source Code](#github) but install by
+running `npm install path-to-your-clone-directory` from outside the
+clone directory.
+
+##### 3.12.3.2 Use the source code in the npm package
+
+Alternatively you can compile the source code that is included in the
+npm package:
 
 - Download the node-oracledb package from npm, for example
   `https://registry.npmjs.com/oracledb/-/oracledb-2.1.0.tgz`
@@ -1465,14 +1483,12 @@ included in the npm package:
   npm install nan
   ```
 
-- Install the build prerequisites for compilation, following the
-  [Node-oracledb Installation Instructions](#instructions).
-
-- Build node-oracledb from outside the directory:
-
+- Follow the general instructions in [Node-oracledb Installation from
+  Source Code](#github) but install by running
   ```
   npm install ./oracledb_build
   ```
+  from outside the directory.
 
 ## <a name="installingv1"></a> 4. Installing Node-oracledb 1.x
 
