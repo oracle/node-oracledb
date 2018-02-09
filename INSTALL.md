@@ -32,6 +32,7 @@ limitations under the License.
   - 3.10 [Node-oracledb Installation on Oracle Solaris x86-64 (64-Bit) with Instant Client ZIP files](#instsolarisx8664)
   - 3.11 [Node-oracledb Installation from Source Code](#github)
   - 3.12 [Node-oracledb Installation Without Internet Access](#offline)
+  - 3.13 [Installing Node.js and Node-oracledb RPMs from yum.oracle.com](#instnoderpms)
 4. [Installing Node-oracledb 1.x](#installingv1)
 5. [Useful Resources for Node-oracledb](#otherresources)
 6. [Troubleshooting Node-oracledb Installation Problems](#troubleshooting)
@@ -157,6 +158,7 @@ Apple macOS | [Node-oracledb Installation on macOS](#instosx)
 Linux.  My database is on another machine | [Node-oracledb Installation on Linux with Instant Client RPMs](#instrpm) or [Node-oracledb Installation on Linux with Instant Client ZIP files](#instzip)
 Linux.  My database is on the same machine as Node.js | [Node-oracledb Installation on Linux with a Local Database or Full Client](#instoh)
 Linux. I have the full Oracle client (installed via `runInstaller`) on the same machine as Node.js | [Node-oracledb Installation on Linux with a Local Database or Full Client](#instoh)
+Linux.  I want to install Node.js and node-oracledb RPM packages | [Installing Node.js and Node-oracledb RPMs from yum.oracle.com](#instnoderpms)
 AIX on Power Systems | [Node-oracledb Installation on AIX on Power Systems with Instant Client ZIP files](#instaix)
 Solaris x86-64 (64-Bit) | [Node-oracledb Installation on Oracle Solaris x86-64 (64-Bit) with Instant Client ZIP files](#instsolarisx8664)
 Another OS with Oracle Database 11.2 or 12c, or client libraries available | Update binding.gyp and make any code changes required, sign the [OCA][8], and submit a pull request with your patch.
@@ -1490,6 +1492,46 @@ npm package:
   ```
   from outside the directory.
 
+### <a name="instnoderpms"></a> 3.13 Installing Node.js and Node-oracledb RPMs from yum.oracle.com
+
+Node.js Linux RPM packages are available on [yum.oracle.com][46].
+
+As an example, to install Node 8 on Oracle Linux 7, run these commands
+as the root user:
+
+```
+cd /etc/yum.repos.d
+mv public-yum-ol7.repo public-yum-ol7.repo.bak
+wget http://yum.oracle.com/public-yum-ol7.repo
+yum install yum-utils
+yum-config-manager --enable ol7_developer_nodejs8
+yum install nodejs
+```
+
+Download the Oracle Instant Client Basic package from [Instant Client
+Downloads for Linux x86-64 (64-bit)][12] and install it:
+
+```
+yum install oracle-instantclient12.2-basic-12.2.0.1.0-1.x86_64.rpm
+echo /usr/lib/oracle/12.2/client64/lib > /etc/ld.so.conf.d/oracle-instantclient.conf
+sudo ldconfig
+```
+
+Install the node-oracledb package:
+
+```
+yum install node-oracledb-12c-node8-2.1.0
+```
+
+Since node-oracledb is installed globally, set `NODE_PATH` before
+running applications.  You can find the global module directory by
+running `npm root -g`.
+
+```
+export NODE_PATH=$(npm root -g)
+node myapp.js
+```
+
 ## <a name="installingv1"></a> 4. Installing Node-oracledb 1.x
 
 If you need to install the previous node-oracledb 1.x add-on, refer to
@@ -1635,3 +1677,4 @@ Questions and issues can be posted as [GitHub Issues][10].
 [43]: https://github.com/oracle/node-oracledb/blob/master/CHANGELOG.md
 [44]: https://github.com/oracle/node-oracledb/blob/master/doc/api.md
 [45]: https://www.youtube.com/watch?v=WDJacg0NuLo
+[46]: http://yum.oracle.com/oracle-linux-nodejs.html
