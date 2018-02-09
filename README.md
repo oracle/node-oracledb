@@ -78,7 +78,7 @@ have been made by the community.
 
 ## <a name="license"></a> License
 
-Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved.
+Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved.
 
 You may not use the identified files except in compliance with the Apache
 License, Version 2.0 (the "License.")
@@ -118,11 +118,6 @@ limitations under the License.
 [22]: https://docs.oracle.com/database/122/ADFNS/connection_strategies.htm#ADFNS515
 [23]: https://docs.oracle.com/database/122/ADFNS/high-availability.htm#ADFNS-GUID-96599425-9BDA-483C-9BA2-4A4D13013A37
 [24]: https://github.com/oracle/node-oracledb/issues
-[25]: https://www.npmjs.com/package/oracledb
-[26]: http://www.oracle.com/technetwork/database/features/instant-client/index-100365.html
-[27]: https://github.com/oracle/node-oracledb/blob/master/INSTALL.md#winredists
-[28]: http://www.oracle.com/technetwork/database/database-technologies/express-edition/overview/index.html
-[29]: https://github.com/oracle/node-oracledb/blob/master/INSTALL.md
 [30]: https://github.com/oracle/node-oracledb/blob/master/examples
 [31]: https://github.com/oracle/node-oracledb/blob/master/examples/select1.js#L35
 [32]: https://github.com/oracle/node-oracledb/blob/master/doc/api.md
