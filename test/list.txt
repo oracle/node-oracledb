@@ -4071,3 +4071,8 @@ Overview of node-oracledb functional tests
     157.6 shows 12c new way to limit the number of records fetched by queries
     157.7 oracledb.maxRows > 0 && oracledb.maxRows < totalAmount
     157.8 oracledb.maxRows > 0, execute() with maxRows=0
+
+158. insertAll.js
+    158.1 original case from the issue
+    158.2 inserts into one table
+    158.3 inserts into multiple tables

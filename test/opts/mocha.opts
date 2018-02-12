@@ -182,3 +182,4 @@ test/fetchArraySize7.js
 test/fetchArraySize8.js
 test/fetchArraySize9.js
 test/maxRows.js
+test/insertAll.js
