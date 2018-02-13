@@ -2816,7 +2816,7 @@ Connect](#easyconnect) string, or a Net Service Name from a local
 [`tnsnames.ora`](#tnsnames) file or external naming service, or it can
 be the SID of a local Oracle database instance.
 
-The `connectionString` property is an aliases for `connectString`.
+The `connectionString` property is an alias for `connectString`.
 Use only one of the properties.
 
 If a connect string is not specified, the empty string "" is used
