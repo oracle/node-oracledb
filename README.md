@@ -24,6 +24,7 @@ The node-oracledb project is open source and maintained by Oracle Corp.
 - [Transaction Management][13]
 - [Inbuilt Connection Pool with Queuing, Aliasing and Liveness checking][14]
 - [Database Resident Connection Pooling (DRCP)][15]
+- [Privileged Connections][38]
 - [External Authentication][16]
 - [Array Fetches][17]
 - [Statement Caching][18]
@@ -126,3 +127,4 @@ limitations under the License.
 [35]: https://github.com/oracle/node-oracledb/blob/master/CONTRIBUTING.md
 [36]: http://www.apache.org/licenses/LICENSE-2.0
 [37]: https://github.com/oracle/node-oracledb/blob/master/INSTALL.md#quickstart
+[38]: https://github.com/oracle/node-oracledb/blob/master/doc/api.md#getconnectiondbattrsprivilege
