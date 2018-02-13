@@ -174,9 +174,10 @@ limitations under the License.
      - 8.3.4 [Connection Pool Pinging](#connpoolpinging)
   - 8.4 [Database Resident Connection Pooling (DRCP)](#drcp)
   - 8.5 [External Authentication](#extauth)
-  - 8.6 [Securely Encrypting Network Traffic to Oracle Database](#securenetwork)
-  - 8.7 [Connections and High Availability](#connectionha)
-  - 8.8 [Optional Client Configuration Files](#tnsadmin)
+  - 8.6 [Privileged Connections](#privconn)
+  - 8.7 [Securely Encrypting Network Traffic to Oracle Database](#securenetwork)
+  - 8.8 [Connections and High Availability](#connectionha)
+  - 8.9 [Optional Client Configuration Files](#tnsadmin)
 9. [SQL Execution](#sqlexecution)
   - 9.1 [SELECT Statements](#select)
      - 9.1.1 [Fetching Rows with Direct Fetches](#fetchingrows)
@@ -524,10 +525,10 @@ oracledb.BIND_OUT               // (3003) Direction for OUT binds
 
 #### <a name="oracledbconstantsprivilege"></a> 3.1.5 Privileged Connection Constants
 
-Constants for [`getConnection()`](#getconnectiondb) `privilege`
-properties.
+Constants for [`getConnection()`](#getconnectiondb)
+[`privilege`](#getconnectiondbattrsprivilege) properties.
 
-These specify what [privilege](#getconnectiondbattrsprivilege) should
+These specify what privilege should
 be used by the connection that is being established.
 
 ```
@@ -1192,7 +1193,7 @@ console.log("Driver version is " + oracledb.versionString);
 readonly String versionSuffix
 ```
 
-This readonly property gives a string representing the version suffix (e.g. "-dev" or "-beta") or the value undefined if no version suffix is present.
+This readonly property gives a string representing the version suffix (e.g. "-dev" or "-beta") or an empty string if no version suffix is present.
 
 ##### Example
 
@@ -1580,6 +1581,8 @@ Number privilege
 The privilege to use when establishing connection to the database. This
 optional property should be one of the
 [privileged connection constants](#oracledbconstantsprivilege).
+
+See [Privileged Connections](#privconn) for more information.
 
 Note only non-pooled connections can be privileged.
 
@@ -3490,7 +3493,37 @@ of open connections exceeds `poolMin` and connections are idle for
 more than the [`poolTimeout`](#propdbpooltimeout) seconds, then the
 number of open connections does not fall below `poolMin`.
 
-### <a name="securenetwork"></a> 8.6 Securely Encrypting Network Traffic to Oracle Database
+### <a name="privconn"></a> 8.6 Privileged Connections
+
+Database privileges such as `SYSDBA` can be obtained when using
+standalone connections.  Use one of the [Privileged Connection
+Constants](#oracledbconstantsprivilege) with the connection
+[`privilege`](#getconnectiondbattrsprivilege) property, for example:
+
+```
+oracledb.getConnection(
+  {
+    user          : 'sys',
+    password      : 'secret',
+    connectString : 'localhost/orclpdb',
+    privilege     : oracledb.SYSDBA
+  },
+  function(err, connection) {
+    if (err)
+      console.error(err);
+    else
+      console.log('I have power');
+  }
+);
+```
+
+Administrative privileges can allow access to a database instance even
+when the database is not open.  Control of these privileges is totally
+outside of the database itself.  Care must be taken with
+authentication to ensure security.  See the [Database Administrators
+Guide][90] for information.
+
+### <a name="securenetwork"></a> 8.7 Securely Encrypting Network Traffic to Oracle Database
 
 Data transferred between Oracle Database and the Oracle client
 libraries used by node-oracledb can be [encrypted][30] so that
@@ -3556,7 +3589,7 @@ manual also contains information about other important security
 features that Oracle Database provides, such Transparent Data
 Encryption of data-at-rest in the database.
 
-### <a name="connectionha"></a> 8.7 Connections and High Availability
+### <a name="connectionha"></a> 8.8 Connections and High Availability
 
 For applications that need to be highly available, you may want to
 configure your OS network settings and Oracle Net (which handles
@@ -3573,7 +3606,7 @@ setting [`ENABLE=BROKEN`][36].
 Other [Oracle Network Services][37] options may also be useful for
 high availability and performance tuning.
 
-### <a name="tnsadmin"></a> 8.8 Optional Client Configuration Files
+### <a name="tnsadmin"></a> 8.9 Optional Client Configuration Files
 
 Optional Oracle Client configuration files are read when node-oracledb
 is loaded.  These files affect connections and applications.  Common
