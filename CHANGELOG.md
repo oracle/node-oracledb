@@ -1,6 +1,60 @@
 # Change Log
 
-## node-oracledb v2.1.0 (DD Mon YYYY)
+## node-oracledb v2.1.0 (15 Feb 2018)
+
+- Added support for privileged standalone connections: SYSDBA,
+  SYSOPER, SYSASM, SYSBACKUP, SYSDG, SYSKM, and SYSRAC
+
+- Improved the Error object with new `errorNum` and `offset`
+  properties for Oracle errors.
+
+- Added new `versionString` and `versionSuffix` attributes to aid
+  showing node-oracledb version and release status.
+
+- Added `connectionString` as an alias for `connectString` in
+  `oracledb.createPool()` and `oracledb.getConnection()` (Sagie
+  Gur-Ari).
+
+- Updated the ODPI-C layer:
+    - Eliminate DPI-1054 errors, allowing connections to be closed when ResultSets and Lobs are open.
+    - Avoid unnecessary roundtrips for rollbacks at connection close.
+
+- Replaced obsolete [NAN](https://github.com/nodejs/nan) API calls in
+  internal implementation and fixed other static analysis warnings.
+  This means node-oracledb 2.1 no longer builds with Node.js 0.10 or
+  Node.js 0.12.
+
+- Improved `queryStream()` streaming:
+
+    - Add support for the Stream `destroy()` method available with Node 8.
+
+    - Simplified the internal implementation by reusing `ResultSet.getRow()`.
+
+    - Fixed some timing and race issues.
+
+    - Made sure the 'close' event is emitted after the 'end' event.
+
+- Simplified query direct fetch implementation and improved
+  performance by reusing ResultSet code.
+
+- Exceptions are no longer raised when accessing attributes on closed
+  Connections, Pools, Lobs or ResultSets.
+
+- ResultSets are now closed on error to free resources earlier.
+
+- Improved NJS-010 message content by adding the position and invalid
+  data type number.
+
+- Fixed support for integers that are larger than Node.js's 32-bit
+  integer is capable of handling.
+
+- Updated
+  [INSTALL.md](https://github.com/oracle/node-oracledb/blob/master/INSTALL.md)
+  to mention:
+    - The [yum.oracle.com](http://yum.oracle.com/oracle-linux-nodejs.html) Node.js RPM Packages for Oracle Linux
+    - The [Oracle mirror](oss.oracle.com/git/oracle) of [github.com/oracle](https://github.com/oracle).
+
+- Correct the error message text when attempting to set `oracledb.oracleClientVersion`.
 
 ## node-oracledb v2.0.15 (15 Dec 2017) changes since node-oracledb version 1
 
