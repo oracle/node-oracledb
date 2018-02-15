@@ -71,7 +71,7 @@ using namespace v8;
 // For production, leave NJS_NODE_ORACLEDB_SUFFIX undefined (not "")
 #define NJS_NODE_ORACLEDB_MAJOR       2
 #define NJS_NODE_ORACLEDB_MINOR       1
-#define NJS_NODE_ORACLEDB_PATCH       0
+#define NJS_NODE_ORACLEDB_PATCH       1
 #define NJS_NODE_ORACLEDB_SUFFIX
 
 // define stringified version and driver name

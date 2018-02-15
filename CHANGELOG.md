@@ -1,5 +1,7 @@
 # Change Log
 
+## node-oracledb v2.1.1 (DD Mon YYYY)
+
 ## node-oracledb v2.1.0 (15 Feb 2018)
 
 - Added support for privileged standalone connections: SYSDBA,
