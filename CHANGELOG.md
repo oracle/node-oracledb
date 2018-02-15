@@ -1,6 +1,8 @@
 # Change Log
 
-## node-oracledb v2.1.1 (DD Mon YYYY)
+## node-oracledb v2.1.1 (16 Feb 2018)
+
+Fixed regression with querystream() in Node 4 & 6.
 
 ## node-oracledb v2.1.0 (15 Feb 2018)
 
