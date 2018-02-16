@@ -6852,7 +6852,7 @@ When upgrading from node-oracledb version 2.0 to version 2.1:
 
 
 [1]: https://www.npmjs.com/package/oracledb
-[2]: https://oracle.github.io/node-oracledb/INSTALL.md
+[2]: https://oracle.github.io/node-oracledb/INSTALL.html
 [3]: https://github.com/oracle/node-oracledb/tree/master/examples
 [4]: https://github.com/oracle/db-sample-schemas
 [5]: https://docs.oracle.com/database/122/SQLRF/SELECT.htm#GUID-CFA006CA-6FF1-4972-821E-6996142A51C6__BABEAACC
@@ -6930,14 +6930,14 @@ When upgrading from node-oracledb version 2.0 to version 2.1:
 [77]: https://docs.oracle.com/database/122/ARPLS/DBMS_MONITOR.htm#ARPLS67178
 [78]: https://docs.oracle.com/database/122/ADFNS/plscope.htm
 [79]: https://docs.oracle.com/database/122/LNOCI/using-sql_statements-in-oci.htm#GUID-7AE9DBE2-5316-4802-99D1-969B72823F02
-[80]: https://oracle.github.io/node-oracledb/INSTALL.md#github
-[81]: https://oracle.github.io/node-oracledb/INSTALL.md#instrpm
-[82]: https://oracle.github.io/node-oracledb/INSTALL.md#instosx
+[80]: https://oracle.github.io/node-oracledb/INSTALL.html#github
+[81]: https://oracle.github.io/node-oracledb/INSTALL.html#instrpm
+[82]: https://oracle.github.io/node-oracledb/INSTALL.html#instosx
 [83]: https://github.com/oracle/node-oracledb/blob/master/CHANGELOG.md
 [84]: https://github.com/oracle/node-oracledb/tree/master/examples/rowlimit.js
 [85]: http://www.oracle.com/technetwork/issue-archive/2007/07-jan/o17asktom-093877.html
 [86]: http://docs.oracle.com/database/121/SQLRF/statements_7002.htm#CJAHCAFF
-[87]: https://oracle.github.io/node-oracledb/INSTALL.md#quickstart
+[87]: https://oracle.github.io/node-oracledb/INSTALL.html#quickstart
 [88]: https://nodejs.org/en/download/
 [89]: https://github.com/oracle/node-oracledb/tree/master/examples/dbconfig.js
 [90]: https://docs.oracle.com/en/database/oracle/oracle-database/12.2/admin/getting-started-with-database-administration.html#GUID-5F1E393E-97B8-43BC-BD68-3595251A6F7C
