@@ -83,7 +83,7 @@ function getProxyConfig(hostname) {
     }
 
     const parsedUrl = url.parse(proxy);
-
+    proxyConfig.auth = parsedUrl.auth;
     proxyConfig.hostname = parsedUrl.hostname;
     proxyConfig.port = parsedUrl.port;
   } else {
@@ -181,7 +181,7 @@ function getRemoteFileReadStream(hostname, path) {
   const proxyConfig = getProxyConfig(hostname);
 
   if (proxyConfig.useProxy) {
-    return getFileReadStreamByProxy(hostname, path, proxyConfig.hostname, proxyConfig.port)
+    return getFileReadStreamByProxy(hostname, path, proxyConfig.hostname, proxyConfig.port, proxyConfig.auth)
   } else {
     return getFileReadStreamBase(hostname, path);
   }
@@ -189,10 +189,13 @@ function getRemoteFileReadStream(hostname, path) {
 
 // getFileReadStreamByProxy connects to a proxy server before calling getFileReadStreamBase
 // to retrieve a remote file read stream.
-function getFileReadStreamByProxy(hostname, path, proxyHostname, proxyPort) {
+function getFileReadStreamByProxy(hostname, path, proxyHostname, proxyPort, auth) {
   return new Promise((resolve, reject) => {
     packageUtil.trace('In getFileReadStreamByProxy', hostname, path, proxyHostname, proxyPort);
-
+  var authHeader = undefined;
+    if(auth){
+      authHeader= 'Basic ' + new Buffer(auth).toString('base64');
+    }
     // Open a proxy tunnel
     const req = http.request({
       host: proxyHostname,
@@ -201,6 +204,7 @@ function getFileReadStreamByProxy(hostname, path, proxyHostname, proxyPort) {
       path: hostname + ':' + PORT,
       headers: {
         'host': hostname + PORT,
+        'Proxy-Authorization': authHeader
       }
     });
 
