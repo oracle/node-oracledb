@@ -20,19 +20,19 @@ limitations under the License.
 1. [Node-oracledb Overview](#overview)
 2. [Quick Start Node-oracledb Installation](#quickstart)
 3. [Node-oracledb Installation Instructions](#instructions)
-  - 3.1 [Prerequisites](#prerequisites)
-  - 3.2 [Node-oracledb Installation on Linux with Instant Client RPMs](#instrpm)
-  - 3.3 [Node-oracledb Installation on Linux with Instant Client ZIP files](#instzip)
-  - 3.4 [Node-oracledb Installation on Linux with a Local Database or Full Client](#instoh)
-  - 3.5 [Node-oracledb Installation on macOS](#instosx)
-  - 3.6 [Node-oracledb Installation on Windows with Instant Client ZIP files](#instwin)
-  - 3.7 [Node-oracledb Installation on Windows with a Local Database or Full Client](#instwinoh)
-  - 3.8 [Copying node-oracledb Binaries on Windows](#winbins)
-  - 3.9 [Node-oracledb Installation on AIX on Power Systems with Instant Client ZIP files](#instaix)
-  - 3.10 [Node-oracledb Installation on Oracle Solaris x86-64 (64-Bit) with Instant Client ZIP files](#instsolarisx8664)
-  - 3.11 [Node-oracledb Installation from Source Code](#github)
-  - 3.12 [Node-oracledb Installation Without Internet Access](#offline)
-  - 3.13 [Installing Node.js and Node-oracledb RPMs from yum.oracle.com](#instnoderpms)
+    - 3.1 [Prerequisites](#prerequisites)
+    - 3.2 [Node-oracledb Installation on Linux with Instant Client RPMs](#instrpm)
+    - 3.3 [Node-oracledb Installation on Linux with Instant Client ZIP files](#instzip)
+    - 3.4 [Node-oracledb Installation on Linux with a Local Database or Full Client](#instoh)
+    - 3.5 [Node-oracledb Installation on macOS](#instosx)
+    - 3.6 [Node-oracledb Installation on Windows with Instant Client ZIP files](#instwin)
+    - 3.7 [Node-oracledb Installation on Windows with a Local Database or Full Client](#instwinoh)
+    - 3.8 [Copying node-oracledb Binaries on Windows](#winbins)
+    - 3.9 [Node-oracledb Installation on AIX on Power Systems with Instant Client ZIP files](#instaix)
+    - 3.10 [Node-oracledb Installation on Oracle Solaris x86-64 (64-Bit) with Instant Client ZIP files](#instsolarisx8664)
+    - 3.11 [Node-oracledb Installation from Source Code](#github)
+    - 3.12 [Node-oracledb Installation Without Internet Access](#offline)
+    - 3.13 [Installing Node.js and Node-oracledb RPMs from yum.oracle.com](#instnoderpms)
 4. [Installing Node-oracledb 1.x](#installingv1)
 5. [Useful Resources for Node-oracledb](#otherresources)
 6. [Troubleshooting Node-oracledb Installation Problems](#troubleshooting)
@@ -236,18 +236,18 @@ compatible glibc.
 #### 3.2.2 Install Node.js
 
 Download and extract the [Node.js "Linux Binaries"][11] package.  For
-example, if you downloaded version 6.9.4 for 64-bit you could install
+example, if you downloaded version 8.9.4 for 64-bit you could install
 Node.js into `/opt`:
 
 ```
 cd /opt
-tar -Jxf node-v6.9.4-linux-x64.tar.xz
+tar -Jxf node-v8.9.4-linux-x64.tar.xz
 ```
 
 Set `PATH` to include Node.js:
 
 ```
-export PATH=/opt/node-v6.9.4-linux-x64/bin:$PATH
+export PATH=/opt/node-v8.9.4-linux-x64/bin:$PATH
 ```
 
 #### 3.2.3 Install the add-on
@@ -377,18 +377,18 @@ compatible glibc.
 #### 3.3.2 Install Node.js
 
 Download and extract the [Node.js "Linux Binaries"][11] package.  For
-example, if you downloaded version 6.9.4 for 64-bit you could install
+example, if you downloaded version 8.9.4 for 64-bit you could install
 Node.js into `/opt`:
 
 ```
 cd /opt
-tar -Jxf node-v6.9.4-linux-x64.tar.xz
+tar -Jxf node-v8.9.4-linux-x64.tar.xz
 ```
 
 Set `PATH` to include Node.js:
 
 ```
-export PATH=/opt/node-v6.9.4-linux-x64/bin:$PATH
+export PATH=/opt/node-v8.9.4-linux-x64/bin:$PATH
 ```
 
 #### 3.3.3 Install the add-on
@@ -516,18 +516,18 @@ immediately used with other editions of the Oracle Database.
 #### 3.4.2 Install Node.js
 
 Download and extract the [Node.js "Linux Binaries"][11] package.  For
-example, if you downloaded version 6.9.4 for 64-bit you could install
+example, if you downloaded version 8.9.4 for 64-bit you could install
 Node.js into `/opt`:
 
 ```
 cd /opt
-tar -zxf node-v6.9.4-linux-x64.tar.gz
+tar -zxf node-v8.9.4-linux-x64.tar.gz
 ```
 
 Set `PATH` to include Node.js:
 
 ```
-export PATH=/opt/node-v6.9.4-linux-x64/bin:$PATH
+export PATH=/opt/node-v8.9.4-linux-x64/bin:$PATH
 ```
 
 #### 3.4.3 Install the add-on
@@ -1571,21 +1571,26 @@ about SQL or PL/SQL can be asked at
 
 If `npm install oracledb` fails:
 
+- Did you get an HTTPS 404 failure?  A pre-built node-oracledb binary
+  package is probably not available on
+  https://github.com/oracle/node-oracledb/releases for your Node.js
+  version or operatiing system.  Change your Node.js version or
+  compile node-oracledb from source code.
+
+- Was there a network connection error?  Do you need to set
+  `http_proxy` and/or `https_proxy`?
+
 - Use `npm install --verbose oracledb`.  Review your output and logs.
   Try to install in a different way.  Try some potential solutions.
   Before installing on Windows also do `set
   NODE_ORACLEDB_TRACE_INSTALL=TRUE`.  On Linux and macOS use `export
   NODE_ORACLEDB_TRACE_INSTALL=TRUE`.
 
-- Was there a network connection error?  Do you need to set
-  `http_proxy` and/or `https_proxy`?
+- When compiling node-oracledb from source, does your compiler have
+  C++11 support, e.g. use VS 2015 or GCC 4.8.
 
-- Was a pre-built node-oracledb binary available?  If not, you will need
-  to compile one from source code.
-
-- Does your compiler have C++11 support, e.g. use VS 2015 or GCC 4.8.
-
-- Do you have Python 2.7?  Run `python --version`.
+- When compiling node-oracledb from source, do you have Python 2.7?
+  Run `python --version`.
 
 - Do you have an old version of `node-gyp` installed?  Try updating
   it.  Also try deleting `$HOME/.node-gyp` or equivalent.
@@ -1633,13 +1638,13 @@ Questions and issues can be posted as [GitHub Issues][10].
 
 
 
-[1]: https://github.com/oracle/node-oracledb
+[1]: http://oracle.github.io/node-oracledb/
 [2]: https://www.python.org/downloads/
 [3]: http://www.oracle.com/technetwork/database/database-technologies/instant-client/overview/index.html
 [4]: https://www.npmjs.com/package/oracledb
 [5]: https://blogs.oracle.com/opal/getting-a-c11-compiler-for-node-4,-5-and-6-on-oracle-linux-6
 [6]: https://support.oracle.com/epmos/faces/DocumentDisplay?id=207303.1
-[7]: https://github.com/oracle/node-oracledb/blob/master/doc/api.md#connectionstrings
+[7]: https://oracle.github.io/node-oracledb/doc/api.html#connectionstrings
 [8]: https://www.oracle.com/technetwork/community/oca-486395.html
 [9]: https://www.github.com/oracle/odpi
 [10]: https://github.com/oracle/node-oracledb/issues
@@ -1673,8 +1678,8 @@ Questions and issues can be posted as [GitHub Issues][10].
 [39]: https://asktom.oracle.com/
 [40]: https://github.com/oracle/node-oracledb/tags
 [41]: https://github.com/oracle/node-oracledb/releases
-[42]: https://github.com/oracle/node-oracledb/blob/master/doc/api.md#migratev1v2
+[42]: https://oracle.github.io/node-oracledb/doc/api.html#migratev1v2
 [43]: https://github.com/oracle/node-oracledb/blob/master/CHANGELOG.md
-[44]: https://github.com/oracle/node-oracledb/blob/master/doc/api.md
+[44]: https://oracle.github.io/node-oracledb/doc/api.html
 [45]: https://www.youtube.com/watch?v=WDJacg0NuLo
 [46]: http://yum.oracle.com/oracle-linux-nodejs.html
