@@ -1310,8 +1310,8 @@ void njsConnection::SetTextAttribute(Nan::NAN_SETTER_ARGS_TYPE args,
         return;
     }
     v8::String::Utf8Value utfstr(value->ToString());
-    if ((*setter)(connection->dpiConnHandle, *utfstr,
-                  static_cast<int32_t> (utfstr.length()) < 0))
+    uint32_t valueLength = static_cast<uint32_t>(utfstr.length());
+    if ((*setter)(connection->dpiConnHandle, *utfstr, valueLength) < 0)
         njsOracledb::ThrowDPIError();
 }
 

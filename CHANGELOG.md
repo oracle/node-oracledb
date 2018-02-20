@@ -1,8 +1,12 @@
 # Change Log
 
+## node-oracledb v2.1.2 (21 Feb 2018)
+
+- Fixed regression with end-to-end tracing attributes not being set.
+
 ## node-oracledb v2.1.1 (16 Feb 2018)
 
-Fixed regression with querystream() in Node 4 & 6.
+- Fixed regression with querystream() in Node 4 & 6.
 
 ## node-oracledb v2.1.0 (15 Feb 2018)
 
