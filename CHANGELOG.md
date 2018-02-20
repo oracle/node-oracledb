@@ -4,6 +4,8 @@
 
 - Fixed regression with end-to-end tracing attributes not being set.
 
+- Fix binary installer proxy 403 (Bruno Jouhier)
+
 ## node-oracledb v2.1.1 (16 Feb 2018)
 
 - Fixed regression with querystream() in Node 4 & 6.
