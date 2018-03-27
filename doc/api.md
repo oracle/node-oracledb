@@ -3950,7 +3950,8 @@ used to terminate a stream early.  For older Node.js versions use a
 query before retrieving all data.  Note the previous, experimental
 `_close()` method no longer emits a 'close' event.
 
-The connection must remain open until the stream is completely read.
+The connection must remain open until the stream is completely read
+and any returned [Lob](#lobclass) objects have been processed.
 
 The query stream implementation is a wrapper over the [ResultSet
 Class](#resultsetclass).  In particular, successive calls to
