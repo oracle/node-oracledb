@@ -651,6 +651,8 @@ Events mode is required for [Fast Application Notification
 (FAN)](#connectionfan) and [Runtime Load Balancing
 (RLB)](#connectionrlb).
 
+This property was added in node-oracledb 2.2.
+
 #### <a name="propdbextendedmetadata"></a> 3.2.4 `oracledb.extendedMetaData`
 
 ```
@@ -670,6 +672,8 @@ additional attributes.  These are listed in
 [Result Object Properties](#execmetadata).
 
 This property may be overridden in an [`execute()`](#executeoptions) call.
+
+This property was added in node-oracledb 1.10.
 
 #### <a name="propdbisexternalauth"></a> 3.2.5 `oracledb.externalAuth`
 
@@ -732,7 +736,7 @@ For direct fetches (those using `execute()` option [`resultSet:
 false`](#propexecresultset)), the internal buffer size will be based
 on the lesser of [`maxRows`](#propdbmaxrows) and `fetchArraySize`.
 
-The property was introduced in node-oracledb version 2.  It replaces
+The property was introduced in node-oracledb version 2.0.  It replaces
 [`prefetchRows`](#propdbprefetchrows).
 
 ##### Example
@@ -768,6 +772,8 @@ using [`fetchInfo`](#executeoptions).
 var oracledb = require('oracledb');
 oracledb.fetchAsBuffer = [ oracledb.BLOB ];
 ```
+
+This property was added in node-oracledb 1.13.
 
 #### <a name="propdbfetchasstring"></a> 3.2.8 `oracledb.fetchAsString`
 
@@ -881,6 +887,8 @@ readonly Number oracleClientVersion
 This readonly property gives a numeric representation of the Oracle client library version which is useful in comparisons.
 For version *a.b.c.d.e*, this property gives the number: `(100000000 * a) + (1000000 * b) + (10000 * c) + (100 * d) + e`
 
+This property was added in node-oracledb 1.3.
+
 ##### Example
 
 ```javascript
@@ -902,6 +910,8 @@ This readonly property gives a string representation of the Oracle client librar
 var oracledb = require('oracledb');
 console.log("Oracle client library version is " + oracledb.oracleClientVersionString);
 ```
+
+This property was added in node-oracledb 2.2.
 
 #### <a name="propdboutformat"></a> 3.2.13 `oracledb.outFormat`
 
@@ -1052,6 +1062,8 @@ var oracledb = require('oracledb');
 oracledb.poolPingInterval = 60;     // seconds
 ```
 
+This property was added in node-oracledb 1.12.
+
 #### <a name="propdbpooltimeout"></a> 3.2.18 `oracledb.poolTimeout`
 
 ```
@@ -1148,6 +1160,8 @@ oracledb.queueRequests = false;
 
 See [Connection Pool Queue](#connpoolqueue) for more information.
 
+This property was added in node-oracledb 1.7.
+
 #### <a name="propdbqueuetimeout"></a> 3.2.22 `oracledb.queueTimeout`
 
 ```
@@ -1170,6 +1184,8 @@ oracledb.queueTimeout = 3000; // 3 seconds
 ```
 
 See [Connection Pool Queue](#connpoolqueue) for more information.
+
+This property was added in node-oracledb 1.7.
 
 #### <a name="propdbstmtcachesize"></a> 3.2.23 `oracledb.stmtCacheSize`
 
@@ -1227,6 +1243,8 @@ var oracledb = require('oracledb');
 console.log("Driver version is " + oracledb.versionString);
 ```
 
+This property was added in node-oracledb 2.1.
+
 #### <a name="propdbversionsuffix"></a> 3.2.26 `oracledb.versionSuffix`
 ```
 readonly String versionSuffix
@@ -1240,6 +1258,8 @@ This readonly property gives a string representing the version suffix (e.g. "-de
 var oracledb = require('oracledb');
 console.log("Driver version suffix is " + oracledb.versionSuffix);
 ```
+
+This property was added in node-oracledb 2.1.
 
 ### <a name="oracledbmethods"></a> 3.3 Oracledb Methods
 
@@ -1313,6 +1333,8 @@ Connect string, or a Net Service Name from a `tnsnames.ora` file, or the
 name of a local Oracle database instance.  See
 [Connection Strings](#connectionstrings) for examples.
 
+The `connectionString` alias was added in node-oracledb 2.1.
+
 ###### <a name="createpoolpoolattrsevents"></a> 3.3.1.1.2 `events`
 
 ```
@@ -1355,7 +1377,6 @@ proxy user is specified.
 
 ###### <a name="createpoolpoolattrspoolalias"></a> 3.3.1.1.5 `poolAlias`
 
-<a name="createpoolpoolattrspoolalias"></a>
 ```
 String poolAlias
 ```
@@ -1367,6 +1388,8 @@ that utilize the connection pool cache, such as [`oracledb.getPool()`](#getpool)
 [`oracledb.getConnection()`](#getconnectiondb).
 
 See [Connection Pool Cache](#connpoolcache) for details and examples.
+
+This property was added in node-oracledb 1.11.
 
 ###### <a name="createpoolpoolattrspoolincrement"></a> 3.3.1.1.6 `poolIncrement`
 
@@ -1670,6 +1693,8 @@ See [Privileged Connections](#privconn) for more information.
 
 Note only non-pooled connections can be privileged.
 
+This property was added in node-oracledb 2.1.
+
 ###### <a name="getconnectiondbattrsstmtcachesize"></a> 3.3.2.1.2.7 `stmtCacheSize`
 
 ```
@@ -1789,6 +1814,7 @@ readonly Number oracleServerVersion
 This readonly property gives a numeric representation of the Oracle database version which is useful in comparisons.
 For version *a.b.c.d.e*, this property gives the number: `(100000000 * a) + (1000000 * b) + (10000 * c) + (100 * d) + e`
 
+This property was added in node-oracledb 1.3.
 
 #### <a name="propconnoracleserverversionstring"></a> 4.1.5 `connection.oracleServerVersionString`
 
@@ -1797,6 +1823,8 @@ readonly String oracleServerVersionString
 ```
 
 This readonly property gives a string representation of the Oracle database version which is useful for display.
+
+This property was added in node-oracledb 2.2.
 
 #### <a name="propconnstmtcachesize"></a> 4.1.6 `connection.stmtCacheSize`
 
@@ -1868,6 +1896,8 @@ users.
 
 See [Changing Passwords and Connecting with an Expired Password](#changingpassword).
 
+This method was added in node-oracledb 2.2.
+
 ##### Parameters
 
 ```
@@ -1937,6 +1967,9 @@ If an error occurs on a pooled connection and that error is known to
 make the connection unusable, then `close()` will drop that connection
 from the connection pool.  So a future pooled `getConnection()` call
 that grows the pool will create a new, valid connection.
+
+This method was added to node-oracledb 1.9, replacing the equivalent
+alias `connection.release()`.
 
 ##### Parameters
 
@@ -2391,8 +2424,6 @@ Each row is returned as a `data` event.  Query metadata is available
 via a `metadata` event.  The `end` event indicates the end of the
 query results.
 
-Query results must be fetched to completion to avoid resource leaks.
-
 The connection must remain open until the stream is completely read.
 
 For tuning, adjust the value of
@@ -2400,6 +2431,11 @@ For tuning, adjust the value of
 option [`fetchArraySize`](#propexecfetcharraysize).
 
 See [Query Streaming](#streamingresults) for more information.
+
+Support for Node.js version 8 Stream `destroy()` method was added in
+node-oracledb 2.1.
+
+This method was added in node-oracledb 1.8.
 
 ##### Parameters
 
@@ -2715,6 +2751,9 @@ before `pool.close()` is called.
 
 If the pool is in the [connection pool cache](#connpoolcache) it will be removed from the cache.
 
+This method was added to node-oracledb 1.9, replacing the equivalent
+alias `pool.terminate()`.
+
 ##### Parameters
 
 ```
@@ -2912,6 +2951,9 @@ for performance, adjust global attributes such as
 [`execute()`](#execute).
 
 See [Query Streaming](#streamingresults) for more information.
+
+The `toQueryStream()` method was added in node-oracledb 1.9.  Support
+for Node.js version 8 Stream `destroy()` method was added in node-oracledb 2.1.
 
 ## <a name="connectionhandling"></a> 8. Connection Handling
 
@@ -4775,14 +4817,14 @@ Here are things to do when you see an *ORA-1000*:
 
 - Avoid having too many incompletely processed statements open at one time:
 
-   - Make sure your application is handling connections and statements
-     in the order you expect.
+    - Make sure your application is handling connections and statements
+      in the order you expect.
 
-   - [Close ResultSets](#close) before releasing the connection.
+    - [Close ResultSets](#close) before releasing the connection.
 
-   - If cursors are opened with `DBMS_SQL.OPEN_CURSOR()` in a PL/SQL
-     block, close them before the block returns - except for REF
-     CURSORs being passed back to node-oracledb.
+    - If cursors are opened with `DBMS_SQL.OPEN_CURSOR()` in a PL/SQL
+      block, close them before the block returns - except for REF
+      CURSORs being passed back to node-oracledb.
 
 - Choose the appropriate Statement Cache size.  Node-oracledb has a
   statement cache per connection.  When node-oracledb internally
@@ -5542,9 +5584,9 @@ Persistent or temporary Lobs returned from the database should be
 closed with `lob.close()` unless they have been automatically closed.
 Automatic closing of returned Lobs occurs when:
 
-  - streaming has completed
-  - a stream error occurs
-  - the Lob was used as the source for an IN OUT bind
+- streaming has completed
+- a stream error occurs
+- the Lob was used as the source for an IN OUT bind
 
 If you try to close a Lob being used for streaming you will get the
 error *NJS-023: concurrent operations on a Lob are not allowed*.
@@ -6982,17 +7024,17 @@ When upgrading from node-oracledb version 1.13 to version 2.0:
   also replaces the overloaded use of `maxRows` for
   [`queryStream()`](#querystream).  To upgrade scripts:
 
-  - Replace the property `prefetchRows` with `fetchArraySize` and make
-    sure all values are greater than 0.
+    - Replace the property `prefetchRows` with `fetchArraySize` and make
+      sure all values are greater than 0.
 
-  - Tune `fetchArraySize` instead of `maxRows` for `queryStream()`.
+    - Tune `fetchArraySize` instead of `maxRows` for `queryStream()`.
 
-  - For [direct fetches](#fetchingrows), optionally tune
-    `fetchArraySize`.
+    - For [direct fetches](#fetchingrows), optionally tune
+      `fetchArraySize`.
 
-  - For [direct fetches](#fetchingrows), optionally replace enormously
-    over-sized `maxRows` values with 0, meaning an unlimited number of
-    rows can be returned.
+    - For [direct fetches](#fetchingrows), optionally replace enormously
+      over-sized `maxRows` values with 0, meaning an unlimited number of
+      rows can be returned.
 
 - For [direct fetches](#fetchingrows) that relied on the version 1
   default value of [`maxRows`](#propdbmaxrows) to limit the number of
@@ -7019,9 +7061,9 @@ When upgrading from node-oracledb version 2.0 to version 2.1:
 - If using the experimental `_close` method with [Query
   Streaming](#streamingresults) in Node 8 or later:
 
-  - Change the method name from `_close()` to [`destroy()`][92].
-  - Stop passing a callback.
-  - Optionally pass an error.
+    - Change the method name from `_close()` to [`destroy()`][92].
+    - Stop passing a callback.
+    - Optionally pass an error.
 
 
 [1]: https://www.npmjs.com/package/oracledb
