@@ -1023,10 +1023,10 @@ the chance a pooled connection is valid when it is used because
 identified un-unusable connections will not be returned to the
 application by `getConnection()`.
 
-Note when node-oracledb is built with version 12.2 of the Oracle
-client library, the value of `poolPingInterval` is ignored.  Oracle
-client 12.2 has a lightweight, always-enabled connection check that
-replaces explicit pinging.
+Note when node-oracledb is using version 12.2 of the Oracle client
+library, the value of `poolPingInterval` is ignored.  Oracle client
+12.2 has a lightweight, always-enabled connection check that replaces
+explicit pinging.
 
 With Oracle client 12.1 or earlier, unless `poolPingInterval` is `0`,
 it is possible for un-usable connections to be returned by a pool
@@ -1427,9 +1427,9 @@ connection has been idle in the pool for at least `poolPingInterval`
 seconds, an internal "ping" will be performed first to check the
 aliveness of the connection.
 
-Note this attribute is ignored when node-oracledb is built with Oracle
-client 12.2, since this has its own lightweight, always-enabled
-connection check.
+Note this attribute is ignored when node-oracledb is using version
+12.2 of the Oracle client library, since this has its own lightweight,
+always-enabled connection check.
 
 The default value is 60.
 
@@ -3501,11 +3501,11 @@ return a connection from the pool but an error will occur when the
 application later uses the connection.
 
 Note that explicit pinging is unnecessary and is not performed when
-node-oracledb is built with version 12.2 of the underlying Oracle
-client library.  This has its own lightweight, always-enabled
-connection check.  It will return a valid connection to the
-node-oracledb driver, which in turn returns it via `getConnection()`.
-The value of `poolPingInterval` is ignored.
+node-oracledb is using version 12.2 of the Oracle client library.
+This has its own lightweight, always-enabled connection check.  It
+will return a valid connection to the node-oracledb driver, which in
+turn returns it via `getConnection()`.  The value of
+`poolPingInterval` is ignored.
 
 With Oracle client 12.1 and earlier, when a
 pool [`getConnection()`](#getconnectionpool) is called and the
