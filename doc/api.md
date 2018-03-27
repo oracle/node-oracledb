@@ -1099,8 +1099,7 @@ Promise Promise
 ```
 
 Node-oracledb supports Promises on all methods.  The standard Promise
-library is used in Node.js 0.12 and greater.  Promise support is not
-enabled by default in Node.js 0.10.
+library is used.
 
 See [Promises and node-oracledb](#promiseoverview) for a discussion of
 using Promises.
@@ -6609,8 +6608,7 @@ that connection.
 ## <a name="promiseoverview"></a> 20. Promises and node-oracledb
 
 Node-oracledb supports Promises with all asynchronous methods.  The native Promise
-implementation is used in Node.js 0.12 and greater.  Promise support is not
-enabled by default in Node.js 0.10.
+implementation is used.
 
 If an asynchronous method is invoked without a callback, it returns a
 Promise:
@@ -6706,8 +6704,7 @@ using promises][73].
 ### <a name="custompromises"></a> 20.1 Custom Promise Libraries
 
 The Promise implementation is designed to be overridden, allowing a
-custom Promise library to be used.  An external library can also be
-used to add Promise support to Node.js 0.10.
+custom Promise library to be used.
 
 ```javascript
 var mylib = require('myfavpromiseimplementation');
@@ -6719,34 +6716,6 @@ Promises can be completely disabled by setting
 ```javascript
 oracledb.Promise = null;
 ```
-
-If your code uses the promise style in Node.js 0.10 but you have not
-installed your own promise library then you will get an error like:
-
-```
-$ node mypromiseapp.js
-
-node_modules/oracledb/lib/util.js:53
-    throw new Error(getErrorMessage(errorCode, messageArg1));
-          ^
-Error: NJS-009: invalid number of parameters
-    at Object.assert (node_modules/oracledb/lib/util.js:53:11)
-    at Oracledb.getConnection (node_modules/oracledb/lib/oracledb.js:71:12)
-    at Oracledb.getConnection (node_modules/oracledb/lib/util.js:72:19)
-    at Object.<anonymous> (mypromiseapp.js:8:10)
-    at Module._compile (module.js:456:26)
-    at Object.Module._extensions..js (module.js:474:10)
-    at Module.load (module.js:356:32)
-    at Function.Module._load (module.js:312:12)
-    at Function.Module.runMain (module.js:497:10)
-    at startup (node.js:119:16)
-```
-
-Because node-oracledb Promises support is not enabled by default when
-using Node.js 0.10, the callback API is expected.  The error stack trace
-indicates that line 10 of `mypromiseapp.js` forgot to pass the
-callback.  Either install your own Promise library or use the callback
-programming style.
 
 ## <a name="asyncawaitoverview"></a> 21. Async/Await and node-oracledb
 
