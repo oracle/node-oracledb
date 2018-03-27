@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2017, 2018, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -38,8 +38,6 @@ const http = require('http'); // Fails in old Node.js. Use Node 4+
 const https = require('https');
 const fs = require('fs');
 const url = require('url');
-const stream = require('stream');
-const zlib = require('zlib');
 const packageUtil = require('./util.js');
 
 packageUtil.initDynamicProps();
@@ -124,8 +122,6 @@ function verifyBinary() {
     packageUtil.log('Verifying installation');
 
     if (!fs.existsSync(packageUtil.BINARY_PATH_LOCAL)) {
-      packageUtil.log('Binary not found');
-
       resolve(false);
       return;
     }
@@ -181,7 +177,7 @@ function getRemoteFileReadStream(hostname, path) {
   const proxyConfig = getProxyConfig(hostname);
 
   if (proxyConfig.useProxy) {
-    return getFileReadStreamByProxy(hostname, path, proxyConfig.hostname, proxyConfig.port)
+    return getFileReadStreamByProxy(hostname, path, proxyConfig.hostname, proxyConfig.port);
   } else {
     return getFileReadStreamBase(hostname, path);
   }
@@ -211,12 +207,12 @@ function getFileReadStreamByProxy(hostname, path, proxyHostname, proxyPort) {
 
     req.on('connect', function(res, socket) {
       if (res.statusCode >= 300 && res.statusCode < 400) {  // warning: proxy redirection code is untested
-       const redirectUrl = url.parse(res.headers.location);
+        const redirectUrl = url.parse(res.headers.location);
 
-       proxyHostname = redirectUrl.hostname;
-       proxyPort  = redirectUrl.port;
+        proxyHostname = redirectUrl.hostname;
+        proxyPort  = redirectUrl.port;
 
-       return getFileReadStreamByProxy(hostname, path, proxyHostname, proxyPort);
+        return getFileReadStreamByProxy(hostname, path, proxyHostname, proxyPort);
       } else if (res.statusCode !== 200) {
         reject(new Error('Error: HTTP proxy request for ' + hostname + path + ' failed with code ' + res.statusCode));
         return;
@@ -342,13 +338,10 @@ function done(err, alreadyInstalled) {
   const installUrl = 'https://oracle.github.io/node-oracledb/INSTALL.html';
 
   if (err) {
-    packageUtil.error('NJS-054: Binary build/Release/oracledb.node was not installed from ' + packageUtil.dynamicProps.PACKAGE_FILE_NAME);
     packageUtil.error(err.message);
-    packageUtil.error('If the error is not network or filesystem related, then review ');
-    packageUtil.error('the Python 2.7 and compiler prerequisites in the installation instructions and');
-    packageUtil.error('then install from source code with: npm install oracle/node-oracledb.git#' + packageUtil.dynamicProps.GITHUB_TAG);
-    packageUtil.error('See ' + installUrl, '\n');
-
+    packageUtil.error('NJS-054: Binary build/Release/oracledb.node was not installed.');
+    packageUtil.error('Looked for pre-built binary package ' + packageUtil.dynamicProps.PACKAGE_FILE_NAME);
+    packageUtil.error('See Troubleshooting Node-oracledb Installation Problems at ' + installUrl + '#troubleshooting\n');
     process.exit(87);
   } else {
     let arch;
