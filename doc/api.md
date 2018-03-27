@@ -754,7 +754,7 @@ fetches](#fetchingrows), during ResultSet [`getRow()`](#getrow) calls,
 and for [`queryStream()`](#querystream).  It is not used for
 [`getRows()`](#getrows).
 
-Increasing this value reduces the number of round trips to the
+Increasing this value reduces the number of round-trips to the
 database but increases memory usage for each data fetch.  For queries
 that return a large number of rows, higher values of `fetchArraySize`
 may give better performance.  For queries that only return a few rows,
@@ -2493,7 +2493,7 @@ Pinging doesn't replace error checking during statement execution,
 since network or database failure may occur in the time between
 `ping()` and `execute()` calls.
 
-Pinging requires a 'round trip' to the database so unnecessary ping
+Pinging requires a round-trip to the database so unnecessary ping
 calls should be avoided.
 
 If `ping()` returns an error, the application should close the
@@ -4529,7 +4529,7 @@ connection.execute(
 );
 ```
 
-To do this without requiring the overhead of a 'round trip' to execute
+To do this without requiring the overhead of a round-trip to execute
 the `ALTER` statement, you could use a PL/SQL trigger:
 
 ```sql
@@ -6947,7 +6947,7 @@ to identify and resolve unnecessary database resource usage, or
 improper access.
 
 The attributes are set on a [connection](#propdbconclass) object and
-sent to the database on the next 'round-trip' from node-oracledb, for
+sent to the database on the next round-trip from node-oracledb, for
 example, with `execute()`:
 
 ```javascript
