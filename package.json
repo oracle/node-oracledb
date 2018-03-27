@@ -3,7 +3,7 @@
   "version": "2.2.0-dev",
   "description": "Oracle Database driver by Oracle Corp.",
   "license": "Apache-2.0",
-  "homepage": "http://www.oracle.com/technetwork/database/database-technologies/scripting-languages/node_js/",
+  "homepage": "http://oracle.github.io/node-oracledb/",
   "keywords": [
     "Oracle",
     "Database",
