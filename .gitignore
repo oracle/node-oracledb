@@ -4,6 +4,9 @@
 \#*#
 core
 *.tgz
+GPATH
+GRTAGS
+GTAGS
 
 # macOS Ignores
 .DS_Store
