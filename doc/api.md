@@ -3894,6 +3894,9 @@ connections affected by a database machine or instance failure so
 future connect calls will establish a fresh connection without the
 application being aware of any service disruption.
 
+For a more information on FAN see the [whitepaper on Fast Application
+Notification][97].
+
 #### <a name="connectionrlb"></a> 8.9.2 Runtime Load Balancing (RLB)
 
 [Oracle Database RAC][93] users with [Oracle Database (RLB)][65]
@@ -3904,6 +3907,9 @@ Configuration](#oraaccess).
 
 RLB allows optimal use of database resources by balancing database
 requests across RAC instances.
+
+For a more information on RLB, see the [whitepaper on Fast Application
+Notification][97].
 
 ### <a name="tnsadmin"></a> 8.10 Optional Client Configuration Files
 
@@ -7165,3 +7171,4 @@ When upgrading from node-oracledb version 2.0 to version 2.1:
 [94]: https://github.com/oracle/node-oracledb/blob/node-oracledb-v1/doc/api.md
 [95]: https://docs.oracle.com/en/database/oracle/oracle-database/12.2/tgsql/toc.htm
 [96]: https://docs.oracle.com/en/database/oracle/oracle-database/12.2/ladbi/standard-oracle-database-groups-for-database-administrators.html#GUID-0A789F28-169A-43D6-9E48-AAE20D7B0C44
+[97]: http://www.oracle.com/technetwork/database/options/clustering/applicationcontinuity/learnmore/fastapplicationnotification12c-2538999.pdf
