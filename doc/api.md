@@ -298,8 +298,7 @@ oracledb.getConnection(
     password      : "welcome",
     connectString : "localhost/XE"
   },
-  function(err, connection)
-  {
+  function(err, connection) {
     if (err) {
       console.error(err.message);
       return;
@@ -309,8 +308,7 @@ oracledb.getConnection(
        FROM departments
        WHERE manager_id = :id`,
       [103],  // bind value for :id
-      function(err, result)
-      {
+      function(err, result) {
         if (err) {
           console.error(err.message);
           doRelease(connection);
@@ -321,8 +319,7 @@ oracledb.getConnection(
       });
   });
 
-function doRelease(connection)
-{
+function doRelease(connection) {
   connection.close(
     function(err) {
       if (err)
@@ -2857,15 +2854,13 @@ oracledb.getConnection(
     password      : "welcome",
     connectString : "localhost/XE"
   },
-  function(err, connection)
-  {
+  function(err, connection) {
     if (err) { console.error(err.message); return; }
 
     . . .  // use connection
 
     connection.close(
-      function(err)
-      {
+      function(err) {
         if (err) { console.error(err.message); }
       });
   });
@@ -3124,11 +3119,9 @@ oracledb.createPool (
     password      : "welcome"
     connectString : "localhost/XE"
   },
-  function(err, pool)
-  {
+  function(err, pool) {
     pool.getConnection (
-      function(err, connection)
-      {
+      function(err, connection) {
       . . .  // use connection
       });
   });
@@ -3139,8 +3132,7 @@ longer needed:
 
 ```javascript
     connection.close(
-      function(err)
-      {
+      function(err) {
         if (err) { console.error(err.message); }
       });
 ```
@@ -3355,8 +3347,7 @@ oracledb.createPool (
     password      : "welcome",
     connectString : "localhost/XE"
   },
-  function(err, pool)
-  {
+  function(err, pool) {
   . . .
 ```
 
@@ -3786,8 +3777,7 @@ property:
        WHERE department_id = :did`,
       [180],
       { maxRows: 10 },  // a maximum of 10 rows will be returned
-      function(err, result)
-      {
+      function(err, result) {
         if (err) { console.error(err.message); return; }
         console.log(result.rows);  // print all returned rows
       });
@@ -3864,18 +3854,15 @@ connection.execute(
   "SELECT employee_id, last_name FROM employees ORDER BY employee_id",
   [], // no bind variables
   { resultSet: true }, // return a Result Set.  Default is false
-  function(err, result)
-  {
+  function(err, result) {
     if (err) { . . . }
     fetchOneRowFromRS(connection, result.resultSet);
   });
 });
 
-function fetchOneRowFromRS(connection, resultSet)
-{
+function fetchOneRowFromRS(connection, resultSet) {
   resultSet.getRow( // get one row
-    function (err, row)
-    {
+    function (err, row) {
       if (err) {
          . . .           // close the Result Set and release the connection
       } else if (!row) { // no rows, or no more rows
@@ -3898,19 +3885,16 @@ connection.execute(
   "SELECT employee_id, last_name FROM employees ORDER BY employee_id",
   [], // no bind variables
   { resultSet: true }, // return a ResultSet.  Default is false
-  function(err, result)
-  {
+  function(err, result) {
     if (err) { . . . }
     fetchRowsFromRS(connection, result.resultSet, numRows);
   });
 });
 
-function fetchRowsFromRS(connection, resultSet, numRows)
-{
+function fetchRowsFromRS(connection, resultSet, numRows) {
   resultSet.getRows( // get numRows rows
     numRows,
-    function (err, rows)
-    {
+    function (err, rows) {
       if (err) {
          . . .                        // close the ResultSet and release the connection
       } else if (rows.length > 0) {   // got some rows
@@ -4007,8 +3991,7 @@ connection.execute(
    FROM departments
    WHERE manager_id < :id`,
   [110],  // bind value for :id
-  function(err, result)
-  {
+  function(err, result) {
     if (err) { console.error(err.message); return; }
     console.log(result.rows);
   });
@@ -4038,8 +4021,7 @@ connection.execute(
    WHERE manager_id < :id`,
   [110],  // bind value for :id
   { outFormat: oracledb.OBJECT },
-  function(err, result)
-  {
+  function(err, result) {
     if (err) { console.error(err.message); return; }
     console.log(result.rows);
   });
@@ -4070,8 +4052,7 @@ connection.execute(
    FROM departments
    WHERE manager_id < :id`,
   [110],  // bind value for :id
-  function(err, result)
-  {
+  function(err, result) {
     if (err) { console.error(err.message); return; }
     console.log(result.metaData);  // show the metadata
   });
@@ -4107,8 +4088,7 @@ connection.execute(
     "WHERE manager_id < :id",
   [110],  // bind value for :id
   { extendedMetaData: true },
-  function(err, result)
-  {
+  function(err, result) {
     if (err) { console.error(err.message); return; }
     console.log(result.metaData);  // show the extended metadata
   });
@@ -4285,8 +4265,7 @@ oracledb.getConnection(
     password      : "welcome",
     connectString : "localhost/XE"
   },
-  function(err, connection)
-  {
+  function(err, connection) {
     if (err) { console.error(err.message); return; }
     connection.execute(
       "SELECT last_name, hire_date, salary, commission_pct FROM employees WHERE employee_id = :id",
@@ -4298,8 +4277,7 @@ oracledb.getConnection(
           "COMMISSION_PCT": { type : oracledb.DEFAULT }  // override oracledb.fetchAsString and fetch as native type
         }
       },
-      function(err, result)
-      {
+      function(err, result) {
         if (err) { console.error(err.message); return; }
         console.log(result.rows);
       });
@@ -4623,8 +4601,7 @@ To get the automatically inserted identifier in node-oracledb, use a
 connection.execute(
   "INSERT INTO mytable (mydata) VALUES ('Hello') RETURN myid INTO :id",
   {id : {type: oracledb.NUMEBR, dir: oracledb.BIND_OUT } },
-  function (err, result)
-  {
+  function (err, result) {
     if (err) { console.error(err.message); return; }
     console.log(result.outBinds.id);  // print the ID of the inserted row
   });
@@ -4731,8 +4708,7 @@ connection.execute(
     id:   159,
     name: { dir: oracledb.BIND_OUT, type: oracledb.STRING, maxSize: 40 },
   },
-  function (err, result)
-  {
+  function (err, result) {
     if (err) { console.error(err.message); return; }
     console.log(result.outBinds);
   });
@@ -4766,8 +4742,7 @@ can be called by using an OUT bind variable for the function return value:
 connection.execute(
   "BEGIN :ret := myfunc(); END;",
   { ret: { dir: oracledb.BIND_OUT, type: oracledb.STRING, maxSize: 40 } },
-  function (err, result)
-  {
+  function (err, result) {
     if (err) { console.error(err.message); return; }
     console.log(result.outBinds);
   });
@@ -4793,8 +4768,7 @@ connection.execute(
     id:   134,
     name: { dir: oracledb.BIND_OUT, type: oracledb.STRING, maxSize: 40 },
   },
-  function (err, result)
-  {
+  function (err, result) {
     if (err) { console.error(err.message); return; }
     console.log(result.outBinds);
   });
@@ -4922,8 +4896,7 @@ conn.execute(
   "INSERT INTO mylobs (id, myclobcol) VALUES (:idbv, :cbv)",
   { idbv: 1,
     cbv: str },  // type and direction are optional for IN binds
-  function(err, result)
-  {
+  function(err, result) {
     if (err)
       console.error(err.message);
     else
@@ -4959,8 +4932,7 @@ conn.execute(
   { id: 20,
     c: bigStr,    // type and direction are optional for IN binds
     b: bigBuf } },
-  function (err)
-  {
+  function (err) {
     if (err) { return cb(err, conn); }
     console.log("Completed");
     return cb(null, conn);
@@ -5005,8 +4977,7 @@ conn.execute(
   "SELECT c FROM mylobs WHERE id = 1",
   [ ], // no binds
   { fetchInfo: {"C": {type: oracledb.STRING}} },
-  function(err, result)
-  {
+  function(err, result) {
     if (err) { console.error(err.message); return; }
     if (result.rows.length === 0) {
       console.error("No results");
@@ -5044,13 +5015,11 @@ conn.execute(
   "SELECT b FROM mylobs WHERE id = 2",
   [ ], // no binds
   { fetchInfo: {"B": {type: oracledb.BUFFER}} },
-  function(err, result)
-  {
+  function(err, result) {
     if (err) { console.error(err.message); return; }
     if (result.rows.length === 0) {
       console.error("No results");
-    }
-    else {
+    } else {
       var blob = result.rows[0][0];
       console.log(blob.toString());  // assuming printable characters
     }
@@ -5069,8 +5038,7 @@ conn.execute(
   { id: 20,
     c: {type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 50000},
     b: {type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: 50000} },
-  function (err, result)
-  {
+  function (err, result) {
     if (err) { return cb(err, conn); }
 
     var str = result.outBinds.c;  // a String
@@ -5234,8 +5202,7 @@ can be called to get a Lob `clob` like:
 ```javascript
 conn.execute(
   "SELECT c FROM mylobs WHERE id = 1",
-  function(err, result)
-  {
+  function(err, result) {
     if (err) {
       return cb(err);
     }
@@ -5264,8 +5231,7 @@ conn.execute(
   { id: 1,
     c: {type: oracledb.CLOB, dir: oracledb.BIND_OUT},
     b: {type: oracledb.BLOB, dir: oracledb.BIND_OUT} },
-  function(err, result)
-  {
+  function(err, result) {
     if (err) {
       return cb(err, conn);
     }
@@ -5390,8 +5356,7 @@ conn.execute(
   "BEGIN lobs_in(:id, :c, null); END;",
   { id: 3,
     c: templob }, // type and direction are optional for IN binds
-  function(err)
-  {
+  function(err) {
     if (err) { return cb(err); }
     console.log("Call completed");
     return cb(null, conn, templob);
@@ -5486,8 +5451,7 @@ This example looks for JSON entries that have a `quantity` field:
 ```JavaScript
 conn.execute(
   "SELECT po_document FROM po WHERE JSON_EXISTS (po_document, '$.quantity')",
-  function(err, result)
-  {
+  function(err, result) {
     if (err) {
       . . .
     } else {
@@ -5512,8 +5476,7 @@ conn.execute(
   FROM departments d
   WHERE department_id < :did`,
   [50],
-  function(err, result)
-  {
+  function(err, result) {
     if (err) { console.error(err.message); return; }
     for (var i = 0; i < result.rows.length; i++)
       console.log(result.rows[i][0]);
@@ -5631,8 +5594,7 @@ connection.execute(
     country_id: { dir: oracledb.BIND_IN, val: 90, type: oracledb.NUMBER },
     country_name: { dir: oracledb.BIND_IN, val: "Tonga", type:oracledb.STRING }
   },
-  function(err, result)
-  {
+  function(err, result) {
     if (err)
       console.error(err.message);
     else
@@ -5662,8 +5624,7 @@ omitted for IN binds.  Binds can be like:
 connection.execute(
   "INSERT INTO countries VALUES (:country_id, :country_name)",
   {country_id: 90, country_name: "Tonga"},
-  function(err, result)
-  {
+  function(err, result) {
     if (err)
       console.error(err.message);
     else
@@ -5818,8 +5779,7 @@ var bindVars = {
 connection.execute(
   "BEGIN testproc(:i, :io, :o); END;",
   bindVars,
-  function (err, result)
-  {
+  function (err, result) {
     if (err) { console.error(err.message); return; }
     console.log(result.outBinds);
   });
@@ -5914,8 +5874,7 @@ connection.execute(
     ids:   { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
     rids:  { type: oracledb.STRING, dir: oracledb.BIND_OUT }
   },
-  function(err, result)
-  {
+  function(err, result) {
     if (err) { console.error(err); return; }
     console.log(result.outBinds);
   });
@@ -5987,18 +5946,15 @@ var bindvars = {
 connection.execute(
   plsql,
   bindvars,
-  function(err, result)
-  {
+  function(err, result) {
     if (err) { . . . }
     fetchRowsFromRS(connection, result.outBinds.cursor, numRows);
   });
 
-function fetchRowsFromRS(connection, resultSet, numRows)
-{
+function fetchRowsFromRS(connection, resultSet, numRows) {
   resultSet.getRows( // get numRows rows
     numRows,
-    function (err, rows)
-    {
+    function (err, rows) {
       if (err) {
          . . .                        // close the ResultSet and release the connection
       } else if (rows.length > 0) {   // got some rows
@@ -6024,14 +5980,12 @@ from the previous examples, the code would become:
 connection.execute(
   plsql,
   bindvars,
-  function(err, result)
-  {
+  function(err, result) {
     if (err) { . . . }
     fetchRCFromStream(connection, result.outBinds.cursor);
   });
 
-function fetchRCFromStream(connection, cursor)
-{
+function fetchRCFromStream(connection, cursor) {
   var stream = cursor.toQueryStream();
 
   stream.on('error', function (error) {
@@ -6410,8 +6364,7 @@ oracledb.getConnection(
     connectString : "localhost/XE",
     stmtCacheSize : 40
   },
-  function(err, connection)
-  {
+  function(err, connection) {
     . . .
   });
 ```
@@ -6525,8 +6478,7 @@ oracledb.getConnection(
     password      : "welcome",
     connectString : "localhost/orclpdb"
   },
-  function(err, connection)
-  {
+  function(err, connection) {
     if (err) { console.error(err.message); return;    }
 
     connection.clientId = "Chris";
@@ -6534,8 +6486,7 @@ oracledb.getConnection(
     connection.action = "Query departments";
 
     connection.execute("SELECT . . .",
-      function(err, result)
-      {
+      function(err, result) {
         . . .
 ```
 

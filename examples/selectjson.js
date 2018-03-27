@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -77,8 +77,7 @@ var dojsonquery = function (conn, cb) {
   console.log('1. Selecting JSON stored in a VARCHAR2 column');
   conn.execute(
     "SELECT po_document FROM j_purchaseorder WHERE JSON_EXISTS (po_document, '$.location')",
-    function(err, result)
-    {
+    function(err, result) {
       if (err) {
         return cb(err, conn);
       } else {
@@ -94,8 +93,7 @@ var dorelationalquery = function (conn, cb) {
   console.log('2. Using JSON_VALUE to extract a value from a JSON column');
   conn.execute(
     "SELECT JSON_VALUE(po_document, '$.location') FROM j_purchaseorder",
-    function(err, result)
-    {
+    function(err, result) {
       if (err) {
         return cb(err, conn);
       } else {
@@ -117,8 +115,7 @@ var dojsonfromrelational = function (conn, cb) {
        FROM departments d
        WHERE department_id < :did`,
       [50],
-      function(err, result)
-      {
+      function(err, result) {
         if (err) {
           return cb(err, conn);
         } else {

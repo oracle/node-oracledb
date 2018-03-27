@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -42,8 +42,7 @@ oracledb.getConnection(
     password      : dbConfig.password,
     connectString : dbConfig.connectString
   },
-  function(err, connection)
-  {
+  function(err, connection) {
     if (err) {
       console.error(err.message);
       return;
@@ -68,8 +67,7 @@ oracledb.getConnection(
       },
 
       // The callback function handles the SQL execution results
-      function(err, result)
-      {
+      function(err, result) {
         if (err) {
           console.error(err.message);
           doRelease(connection);
@@ -82,8 +80,7 @@ oracledb.getConnection(
   });
 
 // Note: connections should always be released when not needed
-function doRelease(connection)
-{
+function doRelease(connection) {
   connection.close(
     function(err) {
       if (err) {

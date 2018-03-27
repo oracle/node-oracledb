@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, 2018, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -35,8 +35,7 @@ var dbConfig = require('./dbconfig.js');
 
 oracledb.getConnection(
   dbConfig,
-  function(err, connection)
-  {
+  function(err, connection) {
     if (err) { console.error(err.message); return; }
     var sql = "SELECT employee_id, last_name FROM employees WHERE ROWNUM < 25 ORDER BY employee_id";
     connection.execute(
@@ -45,10 +44,8 @@ oracledb.getConnection(
       {
         resultSet: true
       },
-      function(err, result)
-      {
-        if (err)
-        {
+      function(err, result) {
+        if (err) {
           console.error(err.message);
           doRelease(connection);
           return;
@@ -72,11 +69,9 @@ oracledb.getConnection(
   }
 );
 
-function doRelease(connection)
-{
+function doRelease(connection) {
   connection.close(
-    function(err)
-    {
+    function(err) {
       if (err) { console.error(err.message); }
     });
 }

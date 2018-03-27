@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -75,8 +75,7 @@ var doclobinsert = function(conn, cb) {
   conn.execute(
     "INSERT INTO mylobs (id, c) VALUES (:id, :c)",
     { id: 1, c: str },
-    function(err, result)
-    {
+    function(err, result) {
       if (err) {
         return cb(err, conn);
       }
@@ -93,8 +92,7 @@ var doblobinsert = function(conn, cb) {
   conn.execute(
     "INSERT INTO mylobs (id, b) VALUES (:id, :b)",
     { id: 2, b: buf },
-    function(err, result)
-    {
+    function(err, result) {
       if (err) {
         return cb(err, conn);
       }

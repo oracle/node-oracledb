@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -58,8 +58,7 @@ var dodrop = function (conn, cb) {
          RAISE;
        END IF;
      END;`,
-    function(err)
-    {
+    function(err) {
       if (err) {
         return cb(err, conn);
       } else {
@@ -72,8 +71,7 @@ var dodrop = function (conn, cb) {
 var docreate = function (conn, cb) {
   conn.execute(
     "CREATE TABLE test (id NUMBER, name VARCHAR2(20))",
-    function(err)
-    {
+    function(err) {
       if (err) {
         return cb(err, conn);
       } else {
@@ -89,8 +87,7 @@ var doinsert_autocommit = function (conn, cb) {
     "INSERT INTO test VALUES (:id, :nm)",
     [1, 'Chris'],  // Bind values
     { autoCommit: true},  // Override the default non-autocommit behavior
-    function(err, result)
-    {
+    function(err, result) {
       if (err) {
         return cb(err, conn);
       } else {
@@ -106,8 +103,7 @@ var doinsert_nocommit = function (conn, cb) {
     "INSERT INTO test VALUES (:id, :nm)",
     [2, 'Alison'],  // Bind values
     // { autoCommit: true},  // Since this isn't set, operations using a second connection won't see this row
-    function(err, result)
-    {
+    function(err, result) {
       if (err) {
         return cb(err, conn);
       } else {
@@ -125,16 +121,14 @@ var doquery = function (conn, cb) {
       password      : dbConfig.password,
       connectString : dbConfig.connectString
     },
-    function(err, connection2)
-    {
+    function(err, connection2) {
       if (err) {
         console.error(err.message);
         return cb(err, conn);
       }
       connection2.execute(
         "SELECT * FROM test",
-        function(err, result)
-        {
+        function(err, result) {
           if (err) {
             console.error(err.message);
             return cb(err, conn);
@@ -145,8 +139,7 @@ var doquery = function (conn, cb) {
           console.log(result.rows);
 
           connection2.close(
-            function(err)
-            {
+            function(err) {
               if (err) {
                 console.error(err.message);
                 return cb(err, conn);

@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, 2018, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -52,8 +52,7 @@ var dorelease = function(conn) {
 var basic = function (conn, cb) {
   conn.execute(
     "SELECT location_id, city FROM locations",
-    function(err, result)
-    {
+    function(err, result) {
       if (err) {
         return cb(err, conn);
       } else {
@@ -69,8 +68,7 @@ var extended = function (conn, cb) {
     "SELECT location_id, city FROM locations",
     {},  // no binds
     { extendedMetaData: true },  // enable the extra metadata
-    function(err, result)
-    {
+    function(err, result) {
       if (err) {
         return cb(err, conn);
       } else {

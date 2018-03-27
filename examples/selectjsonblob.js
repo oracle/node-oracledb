@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -60,8 +60,7 @@ var doinsert = function (conn, cb) {
     "INSERT INTO j_purchaseorder_b (po_document) VALUES (:lobbv)",
     { lobbv: b },
     // { autoCommit: true }, // uncomment if you want data to persist
-    function(err)
-    {
+    function(err) {
       if (err) {
         return cb(err, conn);
       } else {
@@ -79,8 +78,7 @@ var dojsonquery = function (conn, cb) {
     "SELECT po_document FROM j_purchaseorder_b WHERE JSON_EXISTS (po_document, '$.location')",
     [],
     { fetchInfo: { "PO_DOCUMENT": { type: oracledb.BUFFER } } },  // Fetch as a Buffer instead of a Stream
-    function(err, result)
-    {
+    function(err, result) {
       if (err)
         return cb(err, conn);
       if (result.rows.length === 0)

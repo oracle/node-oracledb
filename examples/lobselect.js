@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2017 Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, 2018 Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -72,8 +72,7 @@ var doclobquery = function(conn, cb) {
     [1],
     // An alternative to oracledb.fetchAsString is to use fetchInfo on the column:
     // { fetchInfo: {"C": {type: oracledb.STRING}} },
-    function(err, result)
-    {
+    function(err, result) {
       if (err) {
         return cb(err, conn);
       }
@@ -93,8 +92,7 @@ var doblobquery = function(conn, cb) {
     [2],
     // An alternative to oracledb.fetchAsBuffer is to use fetchInfo on the column:
     // { fetchInfo: {"B": {type: oracledb.BUFFER}} },
-    function(err, result)
-    {
+    function(err, result) {
       if (err) {
         return cb(err, conn);
       }

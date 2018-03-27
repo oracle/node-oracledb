@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -35,8 +35,7 @@ oracledb.getConnection(
     password      : dbConfig.password,
     connectString : dbConfig.connectString
   },
-  function(err, connection)
-  {
+  function(err, connection) {
     if (err) { console.error(err.message); return;    }
 
     // These end-to-end tracing attributes are sent to the database on
@@ -46,8 +45,7 @@ oracledb.getConnection(
     connection.action = "Query departments";
 
     connection.execute("SELECT * FROM dual",
-      function(err, result)
-      {
+      function(err, result) {
         if (err) { doRelease(connection); console.error(err.message); return; }
         console.log(result.rows);
         // Sleep 10 seconds to keep the connection open.  This allows
@@ -62,8 +60,7 @@ oracledb.getConnection(
   });
 
 // Release the connection
-function doRelease(connection)
-{
+function doRelease(connection) {
   connection.close(
     function(err) {
       if (err) {

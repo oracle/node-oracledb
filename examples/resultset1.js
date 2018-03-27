@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -47,8 +47,7 @@ oracledb.getConnection(
     password      : dbConfig.password,
     connectString : dbConfig.connectString
   },
-  function(err, connection)
-  {
+  function(err, connection) {
     if (err) { console.error(err.message); return; }
     connection.execute(
       `SELECT employee_id, last_name
@@ -57,8 +56,7 @@ oracledb.getConnection(
        ORDER BY employee_id`,
       [], // no bind variables
       { resultSet: true }, // return a ResultSet.  Default is false
-      function(err, result)
-      {
+      function(err, result) {
         if (err) {
           console.error(err.message);
           doRelease(connection);
@@ -69,11 +67,9 @@ oracledb.getConnection(
       });
   });
 
-function fetchOneRowFromRS(connection, resultSet)
-{
+function fetchOneRowFromRS(connection, resultSet) {
   resultSet.getRow( // get one row
-    function (err, row)
-    {
+    function (err, row) {
       if (err) {
         console.error(err.message);
         doClose(connection, resultSet); // always close the ResultSet
@@ -88,20 +84,16 @@ function fetchOneRowFromRS(connection, resultSet)
     });
 }
 
-function doRelease(connection)
-{
+function doRelease(connection) {
   connection.close(
-    function(err)
-    {
+    function(err) {
       if (err) { console.error(err.message); }
     });
 }
 
-function doClose(connection, resultSet)
-{
+function doClose(connection, resultSet) {
   resultSet.close(
-    function(err)
-    {
+    function(err) {
       if (err) { console.error(err.message); }
       doRelease(connection);
     });

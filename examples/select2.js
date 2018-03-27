@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -69,8 +69,7 @@ var dorelease = function(conn) {
 var doquery_array = function (conn, cb) {
   conn.execute(
     "SELECT location_id, city FROM locations WHERE city LIKE 'S%' ORDER BY city",
-    function(err, result)
-    {
+    function(err, result) {
       if (err) {
         return cb(err, conn);
       } else {
@@ -88,8 +87,7 @@ var doquery_object = function (conn, cb) {
     {}, // A bind variable parameter is needed to disambiguate the following options parameter
     // otherwise you will get Error: ORA-01036: illegal variable name/number
     { outFormat: oracledb.OBJECT }, // outFormat can be OBJECT or ARRAY.  The default is ARRAY
-    function(err, result)
-    {
+    function(err, result) {
       if (err) {
         return cb(err, conn);
       } else {

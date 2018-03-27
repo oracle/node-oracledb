@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -40,8 +40,7 @@ oracledb.getConnection(
     password      : dbConfig.password,
     connectString : dbConfig.connectString
   },
-  function(err, connection)
-  {
+  function(err, connection) {
     if (err) {
       console.error(err.message);
       return;
@@ -56,8 +55,7 @@ oracledb.getConnection(
           "COMMISSION_PCT": { type : oracledb.DEFAULT }  // override oracledb.fetchAsString
         }
       },
-      function(err, result)
-      {
+      function(err, result) {
         if (err) {
           console.error(err.message);
           doRelease(connection);
@@ -68,8 +66,7 @@ oracledb.getConnection(
       });
   });
 
-function doRelease(connection)
-{
+function doRelease(connection) {
   connection.close(
     function(err) {
       if (err) {

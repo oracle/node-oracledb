@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2017, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, 2018, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -80,15 +80,13 @@ var doloadtemplob = function (conn, templob, cb) {
 
   templob.on(
     'close',
-    function()
-    {
+    function() {
       console.log("templob.on 'close' event");
     });
 
   templob.on(
     'error',
-    function(err)
-    {
+    function(err) {
       console.log("templob.on 'error' event");
       if (!errorHandled) {
         errorHandled = true;
@@ -98,8 +96,7 @@ var doloadtemplob = function (conn, templob, cb) {
 
   templob.on(
     'finish',
-    function()
-    {
+    function() {
       console.log("templob.on 'finish' event");
       // The data was loaded into the temporary LOB
       if (!errorHandled) {
@@ -111,8 +108,7 @@ var doloadtemplob = function (conn, templob, cb) {
   var inStream = fs.createReadStream(inFileName);
   inStream.on(
     'error',
-    function(err)
-    {
+    function(err) {
       console.log("inStream.on 'error' event");
       if (!errorHandled) {
         errorHandled = true;
@@ -130,8 +126,7 @@ var doinsert = function (conn, templob, cb) {
     { idbv: 3,
       lobbv: templob }, // type and direction are optional for IN binds
     { autoCommit: true },
-    function(err, result)
-    {
+    function(err, result) {
       if (err) {
         return cb(err);
       }

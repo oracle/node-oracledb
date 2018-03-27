@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -74,8 +74,7 @@ function handleRequest(request, response) {
 
   if (action == '/getimage') {
     oracledb.getConnection(  // gets a connection from the 'default' connection pool
-      function(err, connection)
-      {
+      function(err, connection) {
         if (err) {
           console.error(err.message);
           return;
@@ -84,8 +83,7 @@ function handleRequest(request, response) {
         connection.execute(
           "SELECT b FROM mylobs WHERE id = :id",  // get the image
           { id: 2 },
-          function(err, result)
-          {
+          function(err, result) {
             if (err) {
               console.error(err.message);
               return;
@@ -104,15 +102,13 @@ function handleRequest(request, response) {
 
             lob.on(
               'end',
-              function()
-              {
+              function() {
                 console.log("lob.on 'end' event");
                 response.end();
               });
             lob.on(
               'close',
-              function()
-              {
+              function() {
                 console.log("lob.on 'close' event");
                 connection.close(function(err) {
                   if (err) console.error(err);
@@ -120,8 +116,7 @@ function handleRequest(request, response) {
               });
             lob.on(
               'error',
-              function(err)
-              {
+              function(err) {
                 console.log("lob.on 'error' event");
                 console.error(err);
                 connection.close(function(err) {

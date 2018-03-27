@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -33,8 +33,7 @@ oracledb.getConnection(
     password      : dbConfig.password,
     connectString : dbConfig.connectString
   },
-  function(err, connection)
-  {
+  function(err, connection) {
     if (err) {
       console.error(err.message);
       return;
@@ -42,8 +41,7 @@ oracledb.getConnection(
     console.log('Connection was successful!');
 
     connection.close(
-      function(err)
-      {
+      function(err) {
         if (err) {
           console.error(err.message);
           return;

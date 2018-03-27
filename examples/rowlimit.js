@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -51,8 +51,7 @@ oracledb.getConnection(
     password      : dbConfig.password,
     connectString : dbConfig.connectString
   },
-  function (err, connection)
-  {
+  function (err, connection) {
     if (err) {
       console.error(err.message);
       return;
@@ -71,8 +70,8 @@ oracledb.getConnection(
 
     connection.execute(
       sql,
-      {offset: myoffset, maxnumrows: mymaxnumrows},
-      {maxRows: 150},
+      { offset: myoffset, maxnumrows: mymaxnumrows },
+      { maxRows: 150 },
       function(err, result) {
         if (err) {
           console.error(err.message);

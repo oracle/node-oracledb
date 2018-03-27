@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -42,10 +42,8 @@ oracledb.getConnection(
     password      : dbConfig.password,
     connectString : dbConfig.connectString
   },
-  function(err, connection)
-  {
-    if (err)
-    {
+  function(err, connection) {
+    if (err) {
       console.error(err);
       return;
     }
@@ -60,10 +58,8 @@ oracledb.getConnection(
         rids:  { type: oracledb.STRING, dir: oracledb.BIND_OUT }
       },
       { autoCommit: true },
-      function(err, result)
-      {
-        if (err)
-        {
+      function(err, result) {
+        if (err) {
           console.error(err);
           return;
         }

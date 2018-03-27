@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -53,8 +53,7 @@ var dodrop = function (conn, cb) {
          RAISE;
        END IF;
      END;`,
-    function(err)
-    {
+    function(err) {
       if (err) {
         return cb(err, conn);
       } else {
@@ -67,8 +66,7 @@ var dodrop = function (conn, cb) {
 var docreate = function (conn, cb) {
   conn.execute(
     "CREATE TABLE test (id NUMBER, name VARCHAR2(20))",
-    function(err)
-    {
+    function(err) {
       if (err) {
         return cb(err, conn);
       } else {
@@ -82,8 +80,7 @@ var doinsert1 = function (conn, cb) {
   conn.execute(
     "INSERT INTO test VALUES (:id, :nm)",
     { id : {val: 1 }, nm : {val: 'Chris'} },  // 'bind by name' syntax
-    function(err, result)
-    {
+    function(err, result) {
       if (err) {
         return cb(err, conn);
       } else {
@@ -97,8 +94,7 @@ var doinsert2 = function (conn, cb) {
   conn.execute(
     "INSERT INTO test VALUES (:id, :nm)",
     [2, 'Alison'],  // 'bind by position' syntax
-    function(err, result)
-    {
+    function(err, result) {
       if (err) {
         return cb(err, conn);
       } else {
@@ -113,8 +109,7 @@ var doupdate = function (conn, cb) {
     "UPDATE test SET name = :nm",
     ['Bambi'],
     { autoCommit: true },  // commit once for all DML in the script
-    function(err, result)
-    {
+    function(err, result) {
       if (err) {
         return cb(err, conn);
       } else {

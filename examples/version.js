@@ -26,9 +26,6 @@
 var oracledb = require('oracledb');
 var dbConfig = require('./dbconfig.js');
 
-var clientVer, serverVer;
-var major, minor, update, port, portUpdate;
-
 console.log("Run at: " + new Date());
 console.log("Node.js version: " + process.version + " (" + process.platform, process.arch + ")");
 
@@ -45,8 +42,7 @@ oracledb.getConnection(
     password      : dbConfig.password,
     connectString : dbConfig.connectString
   },
-  function(err, connection)
-  {
+  function(err, connection) {
     if (err) {
       console.error(err.message);
       return;

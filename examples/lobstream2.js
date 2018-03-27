@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2017, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, 2018, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -41,9 +41,9 @@ var doconnect = function(cb) {
       connectString : dbConfig.connectString
     },
     function(err, conn) {
-      if (err)
+      if (err) {
         return cb(err);
-      else {
+      } else {
         return cb(null, conn);
       }
     });
@@ -59,8 +59,7 @@ var dorelease = function(conn) {
 var doquery = function(conn, cb) {
   conn.execute(
     "SELECT c FROM mylobs WHERE id = 1",
-    function(err, result)
-    {
+    function(err, result) {
       if (err) {
         return cb(err, conn);
       }
@@ -88,8 +87,7 @@ var  dostream = function(conn, clob, cb) {
   clob.setEncoding('utf8');  // set the encoding so we get a 'string' not a 'buffer'
   clob.on(
     'error',
-    function(err)
-    {
+    function(err) {
       console.log("clob.on 'error' event");
       if (!errorHandled) {
         errorHandled = true;
@@ -100,23 +98,20 @@ var  dostream = function(conn, clob, cb) {
     });
   clob.on(
     'data',
-    function(chunk)
-    {
+    function(chunk) {
       console.log("clob.on 'data' event.  Got %d bytes of data", chunk.length);
       // Build up the string.  For larger LOBs you might want to print or use each chunk separately
       myclob += chunk; // or use Buffer.concat() for BLOBS
     });
   clob.on(
     'end',
-    function()
-    {
+    function() {
       console.log("clob.on 'end' event");
       console.log(myclob);
     });
   clob.on(
     'close',
-    function()
-    {
+    function() {
       console.log("clob.on 'close' event");
       if (!errorHandled) {
         return cb(null, conn);
