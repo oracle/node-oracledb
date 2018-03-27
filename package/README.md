@@ -4,7 +4,7 @@ This directory contains scripts for building, extracting and
 installing binary packages of node-oracledb.  Most users do not need
 to use anything in this directory (the exception is when doing a
 [manual
-install](https://github.com/oracle/node-oracledb/blob/master/INSTALL.md#offline)
+install](https://oracle.github.io/node-oracledb/INSTALL.html#offline)
 instead of using `npm`).
 
 The binary install process requires two kinds of package:
@@ -35,7 +35,7 @@ binary.
 If a suitable binary package is not available, users must compile
 source code by installing from GitHub.
 
-Installation is described in [INSTALL](../INSTALL.md).
+Installation is described in [INSTALL](https://oracle.github.io/node-oracledb/INSTALL.html).
 
 # Maintainers
 

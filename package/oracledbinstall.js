@@ -339,7 +339,7 @@ function installBinary() {
 
 // The done function is used to print concluding messages and quit.
 function done(err, alreadyInstalled) {
-  const installUrl = 'https://github.com/oracle/node-oracledb/blob/master/INSTALL.md';
+  const installUrl = 'https://oracle.github.io/node-oracledb/INSTALL.html';
 
   if (err) {
     packageUtil.error('NJS-054: Binary build/Release/oracledb.node was not installed from ' + packageUtil.dynamicProps.PACKAGE_FILE_NAME);

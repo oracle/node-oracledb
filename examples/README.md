@@ -4,7 +4,7 @@ This directory contains [node-oracledb](https://www.npmjs.com/package/oracledb) 
 
 To run the examples:
 
-- [Install node-oracledb](https://github.com/oracle/node-oracledb/blob/master/INSTALL.md).
+- [Install node-oracledb](https://oracle.github.io/node-oracledb/INSTALL.html).
 
 
 - Use `demo.sql` to create schema objects used by the samples.  For

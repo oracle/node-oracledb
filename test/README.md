@@ -21,7 +21,7 @@ for relevant licenses.
 
 ## 1. Preparations
 
-See [INSTALL](https://github.com/oracle/node-oracledb/blob/master/INSTALL.md)
+See [INSTALL](https://oracle.github.io/node-oracledb/INSTALL.html)
 for installation requirements and more details.
 
 Note: the
@@ -81,7 +81,7 @@ module.exports = {
 
 To enable external authentication tests, please make sure Oracle Database
 and the authentication service have been appropriately configured.  See
-[Documentation for External Authentication](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#extauth)
+[Documentation for External Authentication](https://oracle.github.io/node-oracledb/doc/api.html#extauth)
 for more details. And then, set the environment variable `NODE_ORACLEDB_EXTERNALAUTH`
 to be `true`.
 

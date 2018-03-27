@@ -20,7 +20,8 @@
  *
  * DESCRIPTION
  *   This script is a command-line interface to extract node-oracledb
- *   binaries from an available binary package, see INSTALL.md.
+ *   binaries from an available binary package, see
+ *   https://oracle.github.io/node-oracledb/INSTALL.html
  *
  * USAGE
  *   Run this script like:

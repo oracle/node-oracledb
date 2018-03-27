@@ -77,10 +77,10 @@ module.exports = {
   password      : process.env.NODE_ORACLEDB_PASSWORD || "welcome",
 
   // For information on connection strings see:
-  // https://github.com/oracle/node-oracledb/blob/master/doc/api.md#connectionstrings
+  // https://oracle.github.io/node-oracledb/doc/api.html#connectionstrings
   connectString : process.env.NODE_ORACLEDB_CONNECTIONSTRING || "localhost/orclpdb",
 
   // Setting externalAuth is optional.  It defaults to false.  See:
-  // https://github.com/oracle/node-oracledb/blob/master/doc/api.md#extauth
+  // https://oracle.github.io/node-oracledb/doc/api.html#extauth
   externalAuth  : process.env.NODE_ORACLEDB_EXTERNALAUTH ? true : false
 };

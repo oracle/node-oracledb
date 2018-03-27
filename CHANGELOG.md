@@ -61,7 +61,7 @@
   integer is capable of handling.
 
 - Updated
-  [INSTALL.md](https://github.com/oracle/node-oracledb/blob/master/INSTALL.md)
+  INSTALL](https://oracle.github.io/node-oracledb/INSTALL.html)
   to mention:
     - The [yum.oracle.com](http://yum.oracle.com/oracle-linux-nodejs.html) Node.js RPM Packages for Oracle Linux
     - The [Oracle mirror](oss.oracle.com/git/oracle) of [github.com/oracle](https://github.com/oracle).
@@ -80,7 +80,7 @@
 - Installation has significantly improved.  Some pre-built binaries
   are available for convenience, or the add-on can be continue to built
   from source code.  Refer to
-  [INSTALL.md](https://github.com/oracle/node-oracledb/blob/master/INSTALL.md).
+  [INSTALL](https://oracle.github.io/node-oracledb/INSTALL.html).
 
     - Added utilities to /package for building binaries for
       distribution, and for installing them.
@@ -108,7 +108,7 @@
       libraries in `$ORACLE_HOME/lib`.
 
     - A new [Troubleshooting
-      section](https://github.com/oracle/node-oracledb/blob/master/INSTALL.md#troubleshooting)
+      section](https://oracle.github.io/node-oracledb/INSTALL.html#troubleshooting)
       was add to INSTALL.
 
     - Improvements were made to `require('oracledb')` failure messages
@@ -356,7 +356,7 @@
   database abstraction library.
 
 - Installation instructions have changed.  Refer to
-  [INSTALL.md](https://github.com/oracle/node-oracledb/blob/master/INSTALL.md).
+  [INSTALL](https://oracle.github.io/node-oracledb/INSTALL.html).
   Distribution is still via source code.
 
   Oracle header files are no longer needed.  The `OCI_LIB_DIR` and
