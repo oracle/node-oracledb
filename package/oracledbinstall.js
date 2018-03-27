@@ -338,10 +338,17 @@ function done(err, alreadyInstalled) {
   const installUrl = 'https://oracle.github.io/node-oracledb/INSTALL.html';
 
   if (err) {
-    packageUtil.error(err.message);
     packageUtil.error('NJS-054: Binary build/Release/oracledb.node was not installed.');
-    packageUtil.error('Looked for pre-built binary package ' + packageUtil.dynamicProps.PACKAGE_FILE_NAME);
-    packageUtil.error('See Troubleshooting Node-oracledb Installation Problems at ' + installUrl + '#troubleshooting\n');
+    if (['darwin', 'win32', 'linux'].indexOf(process.platform) < 0) {
+      packageUtil.error('Pre-built binary packages are not available for platform="' + process.platform + '"');
+    } else if (process.arch !== 'x64') {
+      packageUtil.error('Pre-built binary packages are not available for architecture="' + process.arch + '"');
+    } else if (['46', '48', '57', '59'].indexOf(process.versions.modules) < 0) {
+      packageUtil.error('Pre-built binary packages are not available for this version of Node.js (NODE_MODULE_VERSION="' + process.versions.modules + '")');
+    }
+    packageUtil.error('Failed to install binary package ' + packageUtil.dynamicProps.PACKAGE_FILE_NAME);
+    packageUtil.error(err.message);
+    packageUtil.error('For help see ' + installUrl + '#troubleshooting\n');
     process.exit(87);
   } else {
     let arch;
