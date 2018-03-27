@@ -81,9 +81,9 @@ private:
     static void Async_GetConnection(njsBaton *baton);
     static void Async_AfterGetConnection(njsBaton *baton, Local<Value> argv[]);
 
-    // Terminate Methods
-    static NAN_METHOD(Terminate);
-    static void Async_Terminate(njsBaton *baton);
+    // Close Methods
+    static NAN_METHOD(Close);
+    static void Async_Close(njsBaton *baton);
 
     // Define Getter Accessors to properties
     static NAN_GETTER(GetPoolMax);

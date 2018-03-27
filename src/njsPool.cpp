@@ -77,7 +77,7 @@ void njsPool::Init(Handle<Object> target)
     temp->InstanceTemplate()->SetInternalFieldCount(1);
     temp->SetClassName(Nan::New<v8::String>("Pool").ToLocalChecked());
 
-    Nan::SetPrototypeMethod(temp, "terminate", Terminate);
+    Nan::SetPrototypeMethod(temp, "close", Close);
     Nan::SetPrototypeMethod(temp, "getConnection", GetConnection);
 
     Nan::SetAccessor(temp->InstanceTemplate(),
@@ -416,15 +416,15 @@ void njsPool::Async_AfterGetConnection(njsBaton *baton, Local<Value> argv[])
 
 
 //-----------------------------------------------------------------------------
-// njsPool::Terminate()
-//   Terminate the pool. The reference to the DPI handle is transferred to the
+// njsPool::Close()
+//   Close the pool. The reference to the DPI handle is transferred to the
 // baton so that it will cleared automatically upon success and so that the
 // pool is marked as invalid immediately.
 //
 // PARAMETERS
 //   - JS callback which will receive (error)
 //-----------------------------------------------------------------------------
-NAN_METHOD(njsPool::Terminate)
+NAN_METHOD(njsPool::Close)
 {
     njsBaton *baton;
     njsPool *pool;
@@ -437,17 +437,17 @@ NAN_METHOD(njsPool::Terminate)
         return;
     baton->dpiPoolHandle = pool->dpiPoolHandle;
     pool->dpiPoolHandle = NULL;
-    baton->QueueWork("Terminate", Async_Terminate, NULL, 1);
+    baton->QueueWork("Close", Async_Close, NULL, 1);
 }
 
 
 //-----------------------------------------------------------------------------
-// njsPool::Async_Terminate()
-//   Worker function for njsPool::Terminate() method. If the attempt to
-// terminate the pool fails, the reference to the DPI handle is transferred
-// back from the baton to the pool.
+// njsPool::Async_Close()
+//   Worker function for njsPool::Close() method. If the attempt to
+// close the pool fails, the reference to the DPI handle is transferred back
+// from the baton to the pool.
 //-----------------------------------------------------------------------------
-void njsPool::Async_Terminate(njsBaton *baton)
+void njsPool::Async_Close(njsBaton *baton)
 {
     if (dpiPool_close(baton->dpiPoolHandle, DPI_MODE_POOL_CLOSE_DEFAULT) < 0) {
         njsPool *pool = (njsPool*) baton->callingObj;
