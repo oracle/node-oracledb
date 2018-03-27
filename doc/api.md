@@ -3650,6 +3650,13 @@ oracledb.getConnection(
 );
 ```
 
+Note that if node-oracledb is using the Oracle client libraries
+located in the Oracle Database installation, i.e. is on the same
+machine as the database and is not using Oracle Instant Client, then
+operating system privileges may be used for authentication.  In this
+case the password value is ignored.  For example on Linux, membership
+of the operating system [`dba`][96] group allows `SYSDBA` connections.
+
 Administrative privileges can allow access to a database instance even
 when the database is not open.  Control of these privileges is totally
 outside of the database itself.  Care must be taken with
@@ -7093,3 +7100,4 @@ When upgrading from node-oracledb version 2.0 to version 2.1:
 [93]: https://docs.oracle.com/en/database/oracle/oracle-database/12.2/racad/introduction-to-oracle-rac.html#GUID-D04AA2A7-2E68-4C5C-BD6E-36C62427B98E
 [94]: https://github.com/oracle/node-oracledb/blob/node-oracledb-v1/doc/api.md
 [95]: https://docs.oracle.com/en/database/oracle/oracle-database/12.2/tgsql/toc.htm
+[96]: https://docs.oracle.com/en/database/oracle/oracle-database/12.2/ladbi/standard-oracle-database-groups-for-database-administrators.html#GUID-0A789F28-169A-43D6-9E48-AAE20D7B0C44
