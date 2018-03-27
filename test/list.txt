@@ -3249,7 +3249,7 @@ Overview of node-oracledb functional tests
         118.1.4 works with NaN
         118.1.5 works with extended ROWID
         118.1.6 works with restricted ROWID
-      - 118.1.7 works with string 0
+        118.1.7 works with string 0
         118.1.8 works with number 0
         118.1.9 works with default bind type/dir - extended ROWID
         118.1.10 works with default bind type/dir - null value
@@ -3276,7 +3276,7 @@ Overview of node-oracledb functional tests
         118.3.1 update null with UROWID
         118.3.2 update empty string with UROWID
         118.3.3 update undefined with UROWID
-      - 118.3.4 works with default bind type/dir
+        118.3.4 works with default bind type/dir
         118.3.5 works with default bind type/dir - null value
         118.3.6 works with default bind type/dir - empty string
         118.3.7 works with default bind type/dir - undefined
@@ -3289,7 +3289,7 @@ Overview of node-oracledb functional tests
         119.1.4 works with NaN
         119.1.5 works with extended ROWID
         119.1.6 works with restricted ROWID
-      - 119.1.7 works with string 0
+        119.1.7 works with string 0
         119.1.8 works with number 0
         119.1.9 works with default bind type/dir - extended ROWID
         119.1.10 works with default bind type/dir - null value
@@ -3304,7 +3304,7 @@ Overview of node-oracledb functional tests
         119.2.4 works with NaN
         119.2.5 works with extended ROWID
         119.2.6 works with restricted ROWID
-      - 119.2.7 works with string 0
+        119.2.7 works with string 0
         119.2.8 works with number 0
         119.2.9 works with default bind type/dir - extended ROWID
         119.2.10 works with default bind type/dir - null value
@@ -3316,7 +3316,7 @@ Overview of node-oracledb functional tests
         119.3.1 update null with UROWID
         119.3.2 update empty string with UROWID
         119.3.3 update undefined with UROWID
-      - 119.3.4 works with default bind type/dir
+        119.3.4 works with default bind type/dir
         119.3.5 works with default bind type/dir - null value
         119.3.6 works with default bind type/dir - empty string
         119.3.7 works with default bind type/dir - undefined
@@ -3329,7 +3329,7 @@ Overview of node-oracledb functional tests
         120.1.4 works with NaN
         120.1.5 works with extended ROWID
         120.1.6 works with restricted ROWID
-      - 120.1.7 works with string 0
+        120.1.7 works with string 0
         120.1.8 works with number 0
         120.1.9 works with default bind type/dir - extended ROWID
         120.1.10 works with default bind type/dir - null value
@@ -3356,7 +3356,7 @@ Overview of node-oracledb functional tests
         120.3.1 update null with UROWID
         120.3.2 update empty string with UROWID
         120.3.3 update undefined with UROWID
-      - 120.3.4 works with default bind type/dir
+        120.3.4 works with default bind type/dir
         120.3.5 works with default bind type/dir - null value
         120.3.6 works with default bind type/dir - empty string
         120.3.7 works with default bind type/dir - undefined
@@ -3369,7 +3369,7 @@ Overview of node-oracledb functional tests
         121.1.4 works with NaN
         121.1.5 works with extended ROWID
         121.1.6 works with restricted ROWID
-      - 121.1.7 works with string 0
+        121.1.7 works with string 0
         121.1.8 works with number 0
         121.1.9 works with default bind type/dir - extended ROWID
         121.1.10 works with default bind type/dir - null value
@@ -3384,7 +3384,7 @@ Overview of node-oracledb functional tests
         121.2.4 works with NaN
         121.2.5 works with extended ROWID
         121.2.6 works with restricted ROWID
-      - 121.2.7 works with string 0
+        121.2.7 works with string 0
         121.2.8 works with number 0
         121.2.9 works with default bind type/dir - extended ROWID
         121.2.10 works with default bind type/dir - null value
@@ -3396,7 +3396,7 @@ Overview of node-oracledb functional tests
         121.3.1 update null with UROWID
         121.3.2 update empty string with UROWID
         121.3.3 update undefined with UROWID
-      - 121.3.4 works with default bind type/dir
+        121.3.4 works with default bind type/dir
         121.3.5 works with default bind type/dir - null value
         121.3.6 works with default bind type/dir - empty string
         121.3.7 works with default bind type/dir - undefined
@@ -3409,7 +3409,7 @@ Overview of node-oracledb functional tests
         122.1.4 works with NaN
         122.1.5 works with extended ROWID
         122.1.6 works with restricted ROWID
-      - 122.1.7 works with string 0
+        122.1.7 works with string 0
         122.1.8 works with number 0
         122.1.9 works with default bind type/dir - extended ROWID
         122.1.10 works with default bind type/dir - null value
@@ -3436,7 +3436,7 @@ Overview of node-oracledb functional tests
         122.3.1 update null with UROWID
         122.3.2 update empty string with UROWID
         122.3.3 update undefined with UROWID
-      - 122.3.4 works with default bind type/dir
+        122.3.4 works with default bind type/dir
         122.3.5 works with default bind type/dir - null value
         122.3.6 works with default bind type/dir - empty string
         122.3.7 works with default bind type/dir - undefined

@@ -145,9 +145,17 @@ describe('118. urowidProcedureBindAsString1.js', function() {
       procedureBindIn(proc_execute, content, content, done);
     });
 
-    it.skip('118.1.7 works with string 0', function(done) {
+    it('118.1.7 works with string 0', function(done) {
       var content = "0";
-      procedureBindIn(proc_execute, content, "00000000.0000.0000", done);
+      var bindVar = {
+        i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+        c: { val: content, type: oracledb.STRING, dir: oracledb.BIND_IN }
+      };
+      sql.executeSqlWithErr(connection, proc_execute, bindVar, {}, function(err) {
+        (err.message).should.startWith("ORA-01410:");
+        // ORA-01410: invalid ROWID
+        done();
+      });
     });
 
     it('118.1.8 works with number 0', function(done) {
@@ -350,10 +358,19 @@ describe('118. urowidProcedureBindAsString1.js', function() {
       procedureBindIn_update(proc_execute, content_1, content_2, content_2, done);
     });
 
-    it.skip('118.3.4 works with default bind type/dir', function(done) {
+    it('118.3.4 works with default bind type/dir', function(done) {
       var content_1 = "AAAB1+AADAAAAwPAAA";
       var content_2 = "0";
-      procedureBindIn_update(proc_execute, content_1, content_2, "00000000.0000.0000", done);
+      var bindVar = {
+        i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+        c1: { val: content_1, type: oracledb.STRING, dir: oracledb.BIND_IN },
+        c2: { val: content_2, type: oracledb.STRING, dir: oracledb.BIND_IN }
+      };
+      sql.executeSqlWithErr(connection, proc_execute, bindVar, {}, function(err) {
+        (err.message).should.startWith("ORA-01410:");
+        // ORA-01410: invalid ROWID
+        done();
+      });
     });
 
     it('118.3.5 works with default bind type/dir - null value', function(done) {
