@@ -6191,7 +6191,7 @@ and [`maxSize`](#executebindParams) properties is used:
   explicitly set to `oracledb.STRING`, `oracledb.NUMBER`,
   `oracledb.DATE`, `oracledb.BLOB`, `oracledb.CLOB` or
   `oracledb.BUFFER`, matching the data type of the Node.js value or
-  variable.  The output data type will always be the same as the the
+  variable.  The output data type will always be the same as the
   input data type.
 
   For `oracledb.BIND_OUT` parameters the `type` attribute will be the
@@ -6201,7 +6201,15 @@ and [`maxSize`](#executebindParams) properties is used:
   `oracledb.CLOB`.  If `type` is not specified for OUT binds then
   `oracledb.STRING` is assumed.
 
-  Oracle Database RAW, LONG RAW or BLOB data can be bound with a
+  Oracle Database CLOB data can be bound with a `type` of
+  `oracledb.STRING` to return a Node.js String, or as `type` of
+  `oracledb.CLOB` to return a [Lob instance](#lobclass).
+
+  Oracle Database BLOB data can be bound with a `type` of
+  `oracledb.BUFFER` to return a Node.js Buffer, or as `type` of
+  `oracledb.BLOB` to return a [Lob instance](#lobclass).
+
+  Oracle Database RAW and LONG RAW data can be bound with a
   `type` of `oracledb.BUFFER` to return a Node.js Buffer.
 
   Oracle Database LONG, ROWID and UROWID data can be bound with a
