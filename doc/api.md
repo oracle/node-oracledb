@@ -6728,10 +6728,25 @@ using async functions][74].
 
 ## <a name="bindtrace"></a> <a name="tracingsql"></a> 22. Tracing SQL and PL/SQL Statements
 
+####  End-to-End Tracing
+
 Applications that have implemented [End-to-end Tracing](#endtoend)
 calls such as [action](#propconnaction) and [module](#propconnmodule),
 will make it easier in database monitoring tools to identify SQL
 statement execution.
+
+#### Tracing Executed Statements
+
+Database statement tracing is commonly used to identify performance
+issues.  Oracle Database trace files can be analyzed after statements
+are executed.  Tracing can be enabled in various ways at a database
+system or individal session level.  Refer to [Oracle Database Tuning
+documentation][95].  Setting a customer identifier is recommended to
+make searching for relevant log files easier:
+
+```
+ALTER SESSION SET tracefile_identifier='My-identifier' SQL_TRACE=TRUE
+```
 
 In node-oracledb itself, the [ODPI-C tracing capability][75] can be
 used to log executed statements to the standard error stream.  Before
@@ -6752,6 +6767,8 @@ identifier, a timestamp, and the SQL statement executed:
 ODPI [6905309] 2017-09-13 09:02:46.140: SQL select sysdate from dual where :b = 1
 ```
 
+#### Tracing Bind Values
+
 Sometimes it is useful to trace the bind data values that have been
 used when executing statements.  Several methods are available.
 
@@ -6761,6 +6778,8 @@ capture bind information.  Tracing with Oracle Database's
 
 You can also write your own wrapper around `execute()` and log any
 parameters.
+
+#### Other Tracing Utilities
 
 PL/SQL users may be interested in using [PL/Scope][78].
 
@@ -6926,3 +6945,4 @@ When upgrading from node-oracledb version 2.0 to version 2.1:
 [92]: https://nodejs.org/api/stream.html#stream_readable_destroy_error
 [93]: https://docs.oracle.com/en/database/oracle/oracle-database/12.2/racad/introduction-to-oracle-rac.html#GUID-D04AA2A7-2E68-4C5C-BD6E-36C62427B98E
 [94]: https://github.com/oracle/node-oracledb/blob/node-oracledb-v1/doc/api.md
+[95]: https://docs.oracle.com/en/database/oracle/oracle-database/12.2/tgsql/toc.htm
