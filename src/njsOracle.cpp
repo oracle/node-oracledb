@@ -173,6 +173,10 @@ void njsOracledb::Init(Handle<Object> target)
             njsOracledb::GetOracleClientVersion,
             njsOracledb::SetOracleClientVersion);
     Nan::SetAccessor(temp->InstanceTemplate (),
+            Nan::New<v8::String>("oracleClientVersionString").ToLocalChecked(),
+            njsOracledb::GetOracleClientVersionString,
+            njsOracledb::SetOracleClientVersionString);
+    Nan::SetAccessor(temp->InstanceTemplate (),
             Nan::New<v8::String>("poolPingInterval").ToLocalChecked(),
             njsOracledb::GetPoolPingInterval,
             njsOracledb::SetPoolPingInterval);
@@ -804,6 +808,42 @@ NAN_SETTER(njsOracledb::SetOracleClientVersion)
 
 
 //-----------------------------------------------------------------------------
+// njsOracledb::GetOracleClientVersionString()
+//   Get accessor of "oracleClientVersionString" property.
+//-----------------------------------------------------------------------------
+NAN_GETTER(njsOracledb::GetOracleClientVersionString)
+{
+    dpiVersionInfo versionInfo;
+    char versionString[40];
+    Local<String> value;
+
+    njsOracledb *oracledb = (njsOracledb*) ValidateGetter(info);
+    if (!oracledb)
+        return;
+
+    if (dpiContext_getClientVersion(globalDPIContext, &versionInfo) < 0) {
+        ThrowDPIError();
+        return;
+    }
+
+    (void) sprintf(versionString, "%d.%d.%d.%d.%d", versionInfo.versionNum,
+            versionInfo.releaseNum, versionInfo.updateNum,
+            versionInfo.portReleaseNum, versionInfo.portUpdateNum);
+    value = Nan::New<v8::String>(versionString).ToLocalChecked();
+    info.GetReturnValue().Set(value);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsOracledb::SetOracleClientVersionString()
+//   Set accessor of "oracleClientVersionString" property.
+//-----------------------------------------------------------------------------
+NAN_SETTER(njsOracledb::SetOracleClientVersionString)
+{
+    PropertyIsReadOnly("oracleClientVersionString");
+}
+
+
 // njsOracledb::GetEvents()
 //   Get accessor of "events" property.
 //-----------------------------------------------------------------------------
@@ -815,7 +855,6 @@ NAN_GETTER(njsOracledb::GetEvents)
 }
 
 
-//-----------------------------------------------------------------------------
 // njsOracledb::SetEvents()
 //   Set accessor of "events" property.
 //-----------------------------------------------------------------------------

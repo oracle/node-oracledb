@@ -927,6 +927,7 @@ Overview of node-oracledb functional tests
         58.1.23 Negative - externalAuth
         58.1.24 versionString (read-only)
         58.1.25 versionSuffix (read-only)
+        58.1.26 oracleClientVersionString (read-only)
     58.2 Pool Class
         58.2.1 poolMin
         58.2.2 poolMax
@@ -945,6 +946,7 @@ Overview of node-oracledb functional tests
         58.3.4 action (write-only)
         58.3.5 module (write-only)
         58.3.6 oracleServerVersion (read-only)
+        58.3.7 oracleServerVersionString (read-only)
     58.4 ResultSet Class
         58.4.1 metaData (read-only)
 

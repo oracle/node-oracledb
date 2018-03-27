@@ -47,21 +47,22 @@ limitations under the License.
      - 3.2.8 [`fetchAsString`](#propdbfetchasstring)
      - 3.2.9 [`lobPrefetchSize`](#propdblobprefetchsize)
      - 3.2.10 [`maxRows`](#propdbmaxrows)
-     - 3.2.11 [`oracleClientVersion`](#propdboracleClientVersion)
-     - 3.2.12 [`outFormat`](#propdboutformat)
-     - 3.2.13 [`poolIncrement`](#propdbpoolincrement)
-     - 3.2.14 [`poolMax`](#propdbpoolmax)
-     - 3.2.15 [`poolMin`](#propdbpoolmin)
-     - 3.2.16 [`poolPingInterval`](#propdbpoolpinginterval)
-     - 3.2.17 [`poolTimeout`](#propdbpooltimeout)
-     - 3.2.18 [`prefetchRows`](#propdbprefetchrows)
-     - 3.2.19 [`Promise`](#propdbpromise)
+     - 3.2.11 [`oracleClientVersion`](#propdboracleclientversion)
+     - 3.2.12 [`oracleClientVersionString`](#propdboracleclientversionstring)
+     - 3.2.13 [`outFormat`](#propdboutformat)
+     - 3.2.14 [`poolIncrement`](#propdbpoolincrement)
+     - 3.2.15 [`poolMax`](#propdbpoolmax)
+     - 3.2.16 [`poolMin`](#propdbpoolmin)
+     - 3.2.17 [`poolPingInterval`](#propdbpoolpinginterval)
+     - 3.2.18 [`poolTimeout`](#propdbpooltimeout)
+     - 3.2.19 [`prefetchRows`](#propdbprefetchrows)
+     - 3.2.20 [`Promise`](#propdbpromise)
      - 3.2.21 [`queueRequests`](#propdbqueuerequests)
      - 3.2.22 [`queueTimeout`](#propdbqueuetimeout)
      - 3.2.23 [`stmtCacheSize`](#propdbstmtcachesize)
      - 3.2.24 [`version`](#propdbversion)
      - 3.2.25 [`versionString`](#propdbversionstring)
-     - 3.2.25 [`versionSuffix`](#propdbversionsuffix)
+     - 3.2.26 [`versionSuffix`](#propdbversionsuffix)
   - 3.3 [Oracledb Methods](#oracledbmethods)
      - 3.3.1 [`createPool()`](#createpool)
          - 3.3.1.1 [`createPool()`: Parameters and Attributes](#createpoolpoolattrs)
@@ -101,7 +102,8 @@ limitations under the License.
      - 4.1.2 [`clientId`](#propconnclientid)
      - 4.1.3 [`module`](#propconnmodule)
      - 4.1.4 [`oracleServerVersion`](#propconnoracleserverversion)
-     - 4.1.5 [`stmtCacheSize`](#propconnstmtcachesize)
+     - 4.1.5 [`oracleServerVersionString`](#propconnoracleserverversionstring)
+     - 4.1.6 [`stmtCacheSize`](#propconnstmtcachesize)
   - 4.2 [Connection Methods](#connectionmethods)
      - 4.2.1 [`break()`](#break)
      - 4.2.2 [`close()`](#connectionclose)
@@ -871,13 +873,13 @@ var oracledb = require('oracledb');
 oracledb.maxRows = 0;
 ```
 
-#### <a name="propdboracleClientVersion"></a> 3.2.11 `oracledb.oracleClientVersion`
+#### <a name="propdboracleclientversion"></a> 3.2.11 `oracledb.oracleClientVersion`
 
 ```
 readonly Number oracleClientVersion
 ```
 
-This readonly property gives a numeric representation of the Oracle client library version.
+This readonly property gives a numeric representation of the Oracle client library version which is useful in comparisons.
 For version *a.b.c.d.e*, this property gives the number: `(100000000 * a) + (1000000 * b) + (10000 * c) + (100 * d) + e`
 
 ##### Example
@@ -887,7 +889,22 @@ var oracledb = require('oracledb');
 console.log("Oracle client library version number is " + oracledb.oracleClientVersion);
 ```
 
-#### <a name="propdboutformat"></a> 3.2.12 `oracledb.outFormat`
+#### <a name="propdboracleclientversionstring"></a> 3.2.12 `oracledb.oracleClientVersionString`
+
+```
+readonly String oracleClientVersionString
+```
+
+This readonly property gives a string representation of the Oracle client library version which is useful for display.
+
+##### Example
+
+```javascript
+var oracledb = require('oracledb');
+console.log("Oracle client library version is " + oracledb.oracleClientVersionString);
+```
+
+#### <a name="propdboutformat"></a> 3.2.13 `oracledb.outFormat`
 
 ```
 Number outFormat
@@ -926,7 +943,7 @@ oracledb.outFormat = oracledb.ARRAY;
 
 See [Query Output Formats](#queryoutputformats) for more examples.
 
-#### <a name="propdbpoolincrement"></a> 3.2.13 `oracledb.poolIncrement`
+#### <a name="propdbpoolincrement"></a> 3.2.14 `oracledb.poolIncrement`
 
 ```
 Number poolIncrement
@@ -946,7 +963,7 @@ var oracledb = require('oracledb');
 oracledb.poolIncrement = 1;
 ```
 
-#### <a name="propdbpoolmax"></a> 3.2.14 `oracledb.poolMax`
+#### <a name="propdbpoolmax"></a> 3.2.15 `oracledb.poolMax`
 
 ```
 Number poolMax
@@ -972,7 +989,7 @@ var oracledb = require('oracledb');
 oracledb.poolMax = 4;
 ```
 
-#### <a name="propdbpoolmin"></a> 3.2.15 `oracledb.poolMin`
+#### <a name="propdbpoolmin"></a> 3.2.16 `oracledb.poolMin`
 
 ```
 Number poolMin
@@ -992,7 +1009,7 @@ var oracledb = require('oracledb');
 oracledb.poolMin = 0;
 ```
 
-#### <a name="propdbpoolpinginterval"></a> 3.2.16 `oracledb.poolPingInterval`
+#### <a name="propdbpoolpinginterval"></a> 3.2.17 `oracledb.poolPingInterval`
 
 ```
 Number poolPingInterval
@@ -1036,7 +1053,7 @@ var oracledb = require('oracledb');
 oracledb.poolPingInterval = 60;     // seconds
 ```
 
-#### <a name="propdbpooltimeout"></a> 3.2.17 `oracledb.poolTimeout`
+#### <a name="propdbpooltimeout"></a> 3.2.18 `oracledb.poolTimeout`
 
 ```
 Number poolTimeout
@@ -1058,7 +1075,7 @@ var oracledb = require('oracledb');
 oracledb.poolTimeout = 60;
 ```
 
-#### <a name="propdbprefetchrows"></a> 3.2.18 `oracledb.prefetchRows`
+#### <a name="propdbprefetchrows"></a> 3.2.19 `oracledb.prefetchRows`
 
 ```
 Number prefetchRows
@@ -1075,7 +1092,7 @@ var oracledb = require('oracledb');
 oracledb.prefetchRows = 100;
 ```
 
-#### <a name="propdbpromise"></a> 3.2.19 `oracledb.Promise`
+#### <a name="propdbpromise"></a> 3.2.20 `oracledb.Promise`
 
 ```
 Promise Promise
@@ -1104,7 +1121,7 @@ Promises can be completely disabled by setting
 oracledb.Promise = null;
 ```
 
-#### <a name="propdbqueuerequests"></a> 3.2.20 `oracledb.queueRequests`
+#### <a name="propdbqueuerequests"></a> 3.2.21 `oracledb.queueRequests`
 
 ```
 Boolean queueRequests
@@ -1133,7 +1150,7 @@ oracledb.queueRequests = false;
 
 See [Connection Pool Queue](#connpoolqueue) for more information.
 
-#### <a name="propdbqueuetimeout"></a> 3.2.21 `oracledb.queueTimeout`
+#### <a name="propdbqueuetimeout"></a> 3.2.22 `oracledb.queueTimeout`
 
 ```
 Number queueTimeout
@@ -1156,7 +1173,7 @@ oracledb.queueTimeout = 3000; // 3 seconds
 
 See [Connection Pool Queue](#connpoolqueue) for more information.
 
-#### <a name="propdbstmtcachesize"></a> 3.2.22 `oracledb.stmtCacheSize`
+#### <a name="propdbstmtcachesize"></a> 3.2.23 `oracledb.stmtCacheSize`
 
 ```
 Number stmtCacheSize
@@ -1183,7 +1200,7 @@ var oracledb = require('oracledb');
 oracledb.stmtCacheSize = 30;
 ```
 
-#### <a name="propdbversion"></a> 3.2.23 `oracledb.version`
+#### <a name="propdbversion"></a> 3.2.24 `oracledb.version`
 ```
 readonly Number version
 ```
@@ -1198,7 +1215,7 @@ var oracledb = require('oracledb');
 console.log("Driver version number is " + oracledb.version);
 ```
 
-#### <a name="propdbversionstring"></a> 3.2.24 `oracledb.versionString`
+#### <a name="propdbversionstring"></a> 3.2.25 `oracledb.versionString`
 ```
 readonly String versionString
 ```
@@ -1212,7 +1229,7 @@ var oracledb = require('oracledb');
 console.log("Driver version is " + oracledb.versionString);
 ```
 
-#### <a name="propdbversionsuffix"></a> 3.2.25 `oracledb.versionSuffix`
+#### <a name="propdbversionsuffix"></a> 3.2.26 `oracledb.versionSuffix`
 ```
 readonly String versionSuffix
 ```
@@ -1755,10 +1772,19 @@ show a value of `null` for this attribute.  See
 readonly Number oracleServerVersion
 ```
 
-This readonly property gives a numeric representation of the Oracle database version.
+This readonly property gives a numeric representation of the Oracle database version which is useful in comparisons.
 For version *a.b.c.d.e*, this property gives the number: `(100000000 * a) + (1000000 * b) + (10000 * c) + (100 * d) + e`
 
-#### <a name="propconnstmtcachesize"></a> 4.1.5 `connection.stmtCacheSize`
+
+#### <a name="propconnoracleserverversionstring"></a> 4.1.5 `connection.oracleServerVersionString`
+
+```
+readonly String oracleServerVersionString
+```
+
+This readonly property gives a string representation of the Oracle database version which is useful for display.
+
+#### <a name="propconnstmtcachesize"></a> 4.1.6 `connection.stmtCacheSize`
 
 ```
 readonly Number stmtCacheSize

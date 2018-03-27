@@ -126,6 +126,7 @@ private:
     static NAN_GETTER(GetModule);
     static NAN_GETTER(GetAction);
     static NAN_GETTER(GetOracleServerVersion);
+    static NAN_GETTER(GetOracleServerVersionString);
 
     // Define Setter Accessors to properties
     static NAN_SETTER(SetStmtCacheSize);
@@ -133,6 +134,7 @@ private:
     static NAN_SETTER(SetModule);
     static NAN_SETTER(SetAction);
     static NAN_SETTER(SetOracleServerVersion);
+    static NAN_SETTER(SetOracleServerVersionString);
 
     // internal methods
     static bool GetBindTypeAndSizeFromValue(njsVariable *var,

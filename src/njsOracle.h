@@ -165,6 +165,7 @@ private:
     static NAN_GETTER(GetFetchAsBuffer);
     static NAN_GETTER(GetLobPrefetchSize);
     static NAN_GETTER(GetOracleClientVersion);
+    static NAN_GETTER(GetOracleClientVersionString);
     static NAN_GETTER(GetPoolPingInterval);
     static NAN_GETTER(GetEvents);
 
@@ -188,6 +189,7 @@ private:
     static NAN_SETTER(SetFetchAsBuffer);
     static NAN_SETTER(SetLobPrefetchSize);
     static NAN_SETTER(SetOracleClientVersion);
+    static NAN_SETTER(SetOracleClientVersionString);
     static NAN_SETTER(SetPoolPingInterval);
     static NAN_SETTER(SetEvents);
 

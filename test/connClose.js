@@ -295,6 +295,7 @@ describe('52. connClose.js', function() {
 
           should.strictEqual(connection.stmtCacheSize, undefined);
           should.strictEqual(connection.oracleServerVersion, undefined);
+          should.strictEqual(connection.oracleServerVersionString, undefined);
           should.strictEqual(connection.action, null);
           should.strictEqual(connection.clientId, null);
           should.strictEqual(connection.module, null);

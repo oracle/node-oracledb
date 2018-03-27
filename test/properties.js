@@ -302,6 +302,18 @@ describe('58. properties.js', function() {
       );
     });
 
+    it('58.1.26 oracleClientVersionString (read-only)', function () {
+      var t = oracledb.oracleClientVersionString;
+      t.should.be.a.String();
+
+      should.throws(
+        function() {
+          oracledb.oracleClientVersion = t + "foobar";
+        },
+        /NJS-014: [\w]+ is a read-only property/
+      );
+    });
+
   }); // 58.1
 
   describe('58.2 Pool Class', function() {
@@ -560,6 +572,18 @@ describe('58. properties.js', function() {
       should.throws(
         function() {
           connection.oracleServerVersion = t + 1;
+        },
+        /NJS-014: [\w]+ is a read-only property/
+      );
+    });
+
+    it('58.3.7 oracleServerVersionString (read-only)', function () {
+      var t = connection.oracleServerVersionString;
+      t.should.be.a.String();
+
+      should.throws(
+        function() {
+          connection.oracleServerVersion = t + "foobar";
         },
         /NJS-014: [\w]+ is a read-only property/
       );

@@ -102,6 +102,10 @@ void njsConnection::Init(Handle<Object> target)
             Nan::New<v8::String>("oracleServerVersion").ToLocalChecked(),
             njsConnection::GetOracleServerVersion,
             njsConnection::SetOracleServerVersion);
+    Nan::SetAccessor(tpl->InstanceTemplate(),
+            Nan::New<v8::String>("oracleServerVersionString").ToLocalChecked(),
+            njsConnection::GetOracleServerVersionString,
+            njsConnection::SetOracleServerVersionString);
 
     connectionTemplate_s.Reset(tpl);
     Nan::Set(target, Nan::New<v8::String>("Connection").ToLocalChecked(),
@@ -1841,5 +1845,45 @@ NAN_GETTER(njsConnection::GetOracleServerVersion)
 NAN_SETTER(njsConnection::SetOracleServerVersion)
 {
     PropertyIsReadOnly("oracleServerVersion");
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection::GetOracleServerVersionString()
+//   Get accessor of "oracleServerVersionString" property.
+//-----------------------------------------------------------------------------
+NAN_GETTER(njsConnection::GetOracleServerVersionString)
+{
+    njsConnection *connection = (njsConnection*) ValidateGetter(info);
+    if (!connection)
+        return;
+    if (!connection->IsValid()) {
+        info.GetReturnValue().Set(Nan::Undefined());
+        return;
+    }
+    dpiVersionInfo versionInfo;
+    uint32_t releaseStringLength;
+    const char *releaseString;
+    if (dpiConn_getServerVersion(connection->dpiConnHandle, &releaseString,
+            &releaseStringLength, &versionInfo) < 0) {
+        njsOracledb::ThrowDPIError();
+        return;
+    }
+    char versionString[40];
+    (void) sprintf(versionString, "%d.%d.%d.%d.%d", versionInfo.versionNum,
+            versionInfo.releaseNum, versionInfo.updateNum,
+            versionInfo.portReleaseNum, versionInfo.portUpdateNum);
+    Local<String> value = Nan::New<v8::String>(versionString).ToLocalChecked();
+    info.GetReturnValue().Set(value);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection::SetOracleServerVersionString()
+//   Set accessor of "oracleServerVersionString" property.
+//-----------------------------------------------------------------------------
+NAN_SETTER(njsConnection::SetOracleServerVersionString)
+{
+    PropertyIsReadOnly("oracleServerVersionString");
 }
 

@@ -36,14 +36,8 @@ console.log("Node.js version: " + process.version + " (" + process.platform, pro
 // console.log("Node-oracledb version suffix:", oracledb.versionSuffix); // e.g. "-beta.1", or empty for production releases
 console.log("Node-oracledb version:", oracledb.versionString); // version (including the suffix)
 
-clientVer = oracledb.oracleClientVersion;
-major      = Math.floor (clientVer / 100000000);
-minor      = Math.floor (clientVer / 1000000) % 100;
-update     = Math.floor (clientVer / 10000) % 100;
-port       = Math.floor (clientVer / 100) % 100;
-portUpdate = clientVer % 100;
-//console.log("Oracle Client library version: " + clientVer);
-console.log("Oracle Client library version: " + major + "." + minor + "." + update + "." + port + "." + portUpdate);
+//console.log("Oracle Client library version:", oracledb.oracleClientVersion); // numeric version format
+console.log("Oracle Client library version:", oracledb.oracleClientVersionString);
 
 oracledb.getConnection(
   {
@@ -58,12 +52,6 @@ oracledb.getConnection(
       return;
     }
 
-    serverVer = connection.oracleServerVersion;
-    major      = Math.floor (serverVer / 100000000);
-    minor      = Math.floor (serverVer / 1000000) % 100 ;
-    update     = Math.floor (serverVer / 10000) % 100 ;
-    port       = Math.floor (serverVer / 100) % 100 ;
-    portUpdate = serverVer % 100 ;
-    // console.log("Oracle Database version: " + serverVer);  // numeric version format is useful for comparisons
-    console.log("Oracle Database version: " + major + "." + minor + "." + update + "." + port + "." + portUpdate);
+    // console.log("Oracle Database version:", connection.oracleServerVersion); // numeric version format
+    console.log("Oracle Database version:", connection.oracleServerVersionString);
   });
