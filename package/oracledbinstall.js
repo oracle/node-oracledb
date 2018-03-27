@@ -429,7 +429,7 @@ function install() {
         return new Promise((resolve, reject) => {
           installBinary()
             .then(() => {
-              packageUtil.log('Oracledb installed');
+              packageUtil.log('Oracledb downloaded');
 
               return verifyBinary();
             })
