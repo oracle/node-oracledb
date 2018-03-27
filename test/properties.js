@@ -59,6 +59,7 @@ describe('58. properties.js', function() {
       defaultValues.poolPingInterval = oracledb.poolPingInterval;
       defaultValues.fetchAsBuffer    = oracledb.fetchAsBuffer;
       defaultValues.edition          = oracledb.edition;
+      defaultValues.events           = oracledb.events;
     });
 
     after('restore the values', function() {
@@ -80,6 +81,7 @@ describe('58. properties.js', function() {
       oracledb.poolPingInterval = defaultValues.poolPingInterval;
       oracledb.fetchAsBuffer    = defaultValues.fetchAsBuffer;
       oracledb.edition          = defaultValues.edition;
+      oracledb.events           = defaultValues.events;
     });
 
     it('58.1.1 poolMin', function() {
@@ -331,6 +333,23 @@ describe('58. properties.js', function() {
           oracledb.edition = 123;
         },
         /NJS-004: invalid value for property edition/
+      );
+    });
+
+    it('58.1.29 events', function() {
+      var t = oracledb.events;
+      oracledb.events = true;
+
+      should.strictEqual(t, false);
+      should.strictEqual(oracledb.events, true);
+    });
+
+    it('58.1.30 Negative - events', function() {
+      should.throws(
+        function() {
+          oracledb.events = 'hello';
+        },
+        /NJS-004: invalid value for property events/
       );
     });
 
