@@ -1,6 +1,6 @@
 {
   "name": "oracledb",
-  "version": "2.2.0-dev",
+  "version": "2.2.0",
   "description": "Oracle Database driver by Oracle Corp.",
   "license": "Apache-2.0",
   "homepage": "http://oracle.github.io/node-oracledb/",

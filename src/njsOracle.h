@@ -72,7 +72,7 @@ using namespace v8;
 #define NJS_NODE_ORACLEDB_MAJOR       2
 #define NJS_NODE_ORACLEDB_MINOR       1
 #define NJS_NODE_ORACLEDB_PATCH       2
-#define NJS_NODE_ORACLEDB_SUFFIX      "-dev"
+#define NJS_NODE_ORACLEDB_SUFFIX
 
 // define stringified version and driver name
 #define NJS_STR_HELPER(x)       #x
