@@ -80,6 +80,7 @@ void njsConnection::Init(Local<Object> target)
     tpl->SetClassName(Nan::New<v8::String>("Connection").ToLocalChecked());
 
     Nan::SetPrototypeMethod(tpl, "execute", Execute);
+    Nan::SetPrototypeMethod(tpl, "getStatementInfo", GetStatementInfo);
     Nan::SetPrototypeMethod(tpl, "close", Close);
     Nan::SetPrototypeMethod(tpl, "commit", Commit);
     Nan::SetPrototypeMethod(tpl, "rollback", Rollback);
@@ -1468,6 +1469,135 @@ void njsConnection::Async_AfterExecute(njsBaton *baton, Local<Value> argv[])
         Nan::Set(result, Nan::New<v8::String>("metaData").ToLocalChecked(),
                 Nan::Undefined());
     }
+    argv[1] = scope.Escape(result);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection::GetStatementInfo()
+//   Parses a statement on the connection and returns information about the
+// statement.
+//
+// PARAMETERS
+//   - SQL Statement
+//   - JS callback which will receive (error, result)
+//-----------------------------------------------------------------------------
+NAN_METHOD(njsConnection::GetStatementInfo)
+{
+    njsConnection *connection;
+    std::string sql;
+    njsBaton *baton;
+
+    connection = (njsConnection*) ValidateArgs(info, 2, 2);
+    if (!connection)
+        return;
+    if (!connection->GetStringArg(info, 0, sql))
+        return;
+    baton = connection->CreateBaton(info);
+    if (!baton)
+        return;
+    if (baton->error.empty()) {
+        baton->sql = sql;
+        baton->extendedMetaData = true;
+        baton->SetDPIConnHandle(connection->dpiConnHandle);
+        baton->jsOracledb.Reset(connection->jsOracledb);
+    }
+    baton->QueueWork("GetStatementInfo", Async_GetStatementInfo,
+            Async_AfterGetStatementInfo, 2);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection::Async_GetStatementInfo()
+//   Worker function for njsConnection::GetStatementInfo() method.
+//-----------------------------------------------------------------------------
+void njsConnection::Async_GetStatementInfo(njsBaton *baton)
+{
+    dpiExecMode mode;
+
+    // prepare DPI statement for use
+    if (dpiConn_prepareStmt(baton->dpiConnHandle, 0, baton->sql.c_str(),
+            (uint32_t) baton->sql.length(), NULL, 0,
+            &baton->dpiStmtHandle) < 0) {
+        baton->GetDPIError();
+        return;
+    }
+
+    // parse the statement
+    if (dpiStmt_getInfo(baton->dpiStmtHandle, &baton->stmtInfo) < 0) {
+        baton->GetDPIError();
+        return;
+    }
+    if (!baton->stmtInfo.isDDL) {
+        if (baton->stmtInfo.isQuery)
+            mode = DPI_MODE_EXEC_DESCRIBE_ONLY;
+        else mode = DPI_MODE_EXEC_PARSE_ONLY;
+        if (dpiStmt_execute(baton->dpiStmtHandle, mode,
+                &baton->numQueryVars) < 0) {
+            baton->GetDPIError();
+            return;
+        }
+    }
+
+    // for queries, process query variables to get metadata
+    if (baton->numQueryVars > 0) {
+        baton->queryVars = new njsVariable[baton->numQueryVars];
+        if (!ProcessQueryVars(baton, baton->dpiStmtHandle, baton->queryVars,
+                baton->numQueryVars))
+            return;
+    }
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection::Async_AfterGetStatementInfo()
+//   Returns result to JS by invoking JS callback.
+//-----------------------------------------------------------------------------
+void njsConnection::Async_AfterGetStatementInfo(njsBaton *baton,
+        Local<Value> argv[])
+{
+    Nan::EscapableHandleScope scope;
+    Local<Object> result = Nan::New<v8::Object>();
+    Local<Object> callingObj, rows;
+    Local<Function> callback;
+    uint32_t numBinds;
+
+    // add metadata (queries only)
+    if (baton->queryVars) {
+        Nan::Set(result, Nan::New<v8::String>("metaData").ToLocalChecked(),
+                GetMetaData(baton->queryVars, baton->numQueryVars,
+                        baton->extendedMetaData));
+    }
+
+    // add list of bind variable names
+    if (dpiStmt_getBindCount(baton->dpiStmtHandle, &numBinds) < 0) {
+        baton->GetDPIError();
+        return;
+    }
+    uint32_t *bindNameLengths = new uint32_t[numBinds];
+    const char **bindNames = new const char *[numBinds];
+    if (dpiStmt_getBindNames(baton->dpiStmtHandle, &numBinds, bindNames,
+            bindNameLengths) < 0) {
+        baton->GetDPIError();
+        delete [] bindNames;
+        delete [] bindNameLengths;
+        return;
+    }
+    Local<Array> bindNamesArray = Nan::New<Array>(numBinds);
+    for (uint32_t i = 0; i < numBinds; i++) {
+        Local<String> bindName = Nan::New<String>(bindNames[i],
+                (int) bindNameLengths[i]).ToLocalChecked();
+        Nan::Set(bindNamesArray, i, bindName);
+    }
+    delete [] bindNames;
+    delete [] bindNameLengths;
+    Nan::Set(result, Nan::New<v8::String>("bindNames").ToLocalChecked(),
+            bindNamesArray);
+
+    // add statement type
+    Nan::Set(result, Nan::New<v8::String>("statementType").ToLocalChecked(),
+            Nan::New(static_cast<int>(baton->stmtInfo.statementType)));
+
     argv[1] = scope.Escape(result);
 }
 

@@ -261,6 +261,7 @@ public:
     dpiConn *dpiConnHandle;
     dpiStmt *dpiStmtHandle;
     dpiLob *dpiLobHandle;
+    dpiStmtInfo stmtInfo;
     uint32_t stmtCacheSize;
     uint32_t lobPrefetchSize;
     uint32_t maxRows;

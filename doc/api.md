@@ -36,6 +36,9 @@ limitations under the License.
             - [`BIND_IN`](#oracledbconstantsbinddir), [`BIND_INOUT`](#oracledbconstantsbinddir), [`BIND_OUT`](#oracledbconstantsbinddir)
         - 3.1.5 [Privileged Connection Constants](#oracledbconstantsprivilege)
             - [`SYSDBA`](#oracledbconstantsprivilege), [`SYSOPER`](#oracledbconstantsprivilege), [`SYSASM`](#oracledbconstantsprivilege), [`SYSBACKUP`](#oracledbconstantsprivilege), [`SYSDG`](#oracledbconstantsprivilege), [`SYSKM`](#oracledbconstantsprivilege), [`SYSRAC`](#oracledbconstantsprivilege)
+        - 3.1.6 [SQL Statement Type Constants](#oracledbconstantsstmttype)
+            - [`STMT_TYPE_UNKNOWN`](#oracledbconstantsstmttype), [`STMT_TYPE_SELECT`](#oracledbconstantsstmttype), [`STMT_TYPE_UPDATE`](#oracledbconstantsstmttype), [`STMT_TYPE_DELETE`](#oracledbconstantsstmttype), [`STMT_TYPE_INSERT`](#oracledbconstantsstmttype), [`STMT_TYPE_CREATE`](#oracledbconstantsstmttype), [`STMT_TYPE_DROP`](#oracledbconstantsstmttype), [`STMT_TYPE_ALTER`](#oracledbconstantsstmttype), [`STMT_TYPE_BEGIN`](#oracledbconstantsstmttype), [`STMT_TYPE_DECLARE`](#oracledbconstantsstmttype), [`STMT_TYPE_CALL`](#oracledbconstantsstmttype), [`STMT_TYPE_EXPLAIN_PLAN`](#oracledbconstantsstmttype), [`STMT_TYPE_MERGE`](#oracledbconstantsstmttype), [`STMT_TYPE_ROLLBACK`](#oracledbconstantsstmttype), [`STMT_TYPE_COMMIT`](#oracledbconstantsstmttype)
+
     - 3.2 [Oracledb Properties](#oracledbproperties)
         - 3.2.1 [`autoCommit`](#propdbisautocommit)
         - 3.2.2 [`connectionClass`](#propdbconclass)
@@ -134,10 +137,11 @@ limitations under the License.
                 - 4.2.6.4.3 [`resultSet`](#execresultset)
                 - 4.2.6.4.4 [`rows`](#execrows)
                 - 4.2.6.4.5 [`rowsAffected`](#execrowsaffected)
-        - 4.2.7 [`ping()`](#connectionping)
-        - 4.2.8 [`queryStream()`](#querystream)
-        - 4.2.9 [`release()`](#release)
-        - 4.2.10 [`rollback()`](#rollback)
+        - 4.2.7 [`getStatementInfo()`](#getstmtinfo)
+        - 4.2.8 [`ping()`](#connectionping)
+        - 4.2.9 [`queryStream()`](#querystream)
+        - 4.2.10 [`release()`](#release)
+        - 4.2.11 [`rollback()`](#rollback)
 5. [Lob Class](#lobclass)
     - 5.1 [Lob Properties](#lobproperties)
         - 5.1.1 [`chunkSize`](#proplobchunksize)
@@ -556,6 +560,44 @@ oracledb.SYSDG                  // (262144) SYSDG privileges
 oracledb.SYSKM                  // (524288) SYSKM privileges
 
 oracledb.SYSRAC                 // (1048576) SYSRAC privileges
+```
+
+#### <a name="oracledbconstantsstmttype"></a> 3.1.6 SQL Statement Type Constants
+
+Constants for [`connection.getStatementInfo()`](#getstmtinfo)
+properties.
+
+
+```
+oracledb.STMT_TYPE_UNKNOWN      // (0) Unknown statement type
+
+oracledb.STMT_TYPE_SELECT       // (1) SELECT
+
+oracledb.STMT_TYPE_UPDATE       // (2) UPDATE
+
+oracledb.STMT_TYPE_DELETE       // (3) DELETE
+
+oracledb.STMT_TYPE_INSERT       // (4) INSERT
+
+oracledb.STMT_TYPE_CREATE       // (5) CREATE
+
+oracledb.STMT_TYPE_DROP         // (6) DROP
+
+oracledb.STMT_TYPE_ALTER        // (7) ALTER
+
+oracledb.STMT_TYPE_BEGIN        // (8) BEGIN
+
+oracledb.STMT_TYPE_DECLARE      // (9) DECLARE
+
+oracledb.STMT_TYPE_CALL         // (10) CALL
+
+oracledb.STMT_TYPE_EXPLAIN_PLAN // (15) EXPLAIN PLAN
+
+oracledb.STMT_TYPE_MERGE        // (16) MERGE
+
+oracledb.STMT_TYPE_ROLLBACK     // (17) ROLLBACK
+
+oracledb.STMT_TYPE_COMMIT       // (21) COMMIT
 ```
 
 ### <a name="oracledbproperties"></a> 3.2 Oracledb Properties
@@ -2164,7 +2206,7 @@ variables, and the number of rows affected by the execution of
 
 Parameter | Description
 ----------|------------
-[`String sql`](#executesqlparam) | The SQL string that is executed. The SQL string may contain bind parameters.
+[`String sql`](#executesqlparam) | The SQL statement that is executed. The statement may contain bind parameters.
 [`Object bindParams`](#executebindParams) | This function parameter is needed if there are bind parameters in the SQL statement.
 [`Object options`](#executeoptions) | This is an optional parameter to `execute()` that may be used to control statement execution.
 [`function(Error error, [Object result])`](#executecallback) | Callback function with the execution results.
@@ -2469,7 +2511,69 @@ the number of rows affected, for example the number of rows
 inserted. For non-DML statements such as queries, or if no rows are
 affected, then `rowsAffected` will appear as undefined.
 
-#### <a name="connectionping"></a> 4.2.7 `connection.ping()`
+#### <a name="getstmtinfo"></a> 4.2.7 `connection.getStatementInfo()`
+
+##### Prototype
+
+Callback:
+```
+getStatementInfo(String sql, function(Error error, [Object information]){});
+```
+Promise:
+```
+promise = getStatementInfo(String sql);
+```
+
+##### Description
+
+Parses a SQL statement and returns information about it.  This is most
+useful for finding column names of queries, and for finding the names
+of bind variables used.
+
+This method performs a round-trip to the database, so unnecessary
+calls should be avoided.
+
+The information is provided by lower level APIs that have some
+limitations.  Some uncommon statements will return the statement type
+as `oracledb.STMT_TYPE_UNKNOWN`.  DDL statements are not parsed, so
+syntax errors in them will not be reported.  The direction and types
+of bind variables cannot be determined.
+
+This method was added in node-oracledb 2.2.
+
+##### Parameters
+
+```
+String sql
+```
+
+The SQL statement to parse.
+
+```
+function(Error error, [Object information])
+```
+
+The parameters of the callback function are:
+
+Callback function parameter | Description
+----------------------------|-------------
+*Error error* | If `getStatementInfo()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+*Object information* | The `information` object, described below.
+
+Depending on the statement type, the `information` object may contain:
+
+- `bindNames`: an array of strings corresponding to the unique names
+  of the bind variables used in the SQL statement.
+
+- `metaData`: containing properties equivalent to those given by
+  `execute()` [extendedMetaData](#execmetadata).  This property exists
+  only for queries.
+
+- `statementType`: an integer corresponding to one of the [SQL
+  Statement Type Constants](#oracledbconstantsstmttype).
+
+
+#### <a name="connectionping"></a> 4.2.8 `connection.ping()`
 
 ##### Prototype
 
@@ -2490,7 +2594,7 @@ health checks.  A ping only confirms that a single connection is
 usable at the time of the ping.
 
 Pinging doesn't replace error checking during statement execution,
-since network or database failure may occur in the time between
+since network or database failure may occur in the interval between
 `ping()` and `execute()` calls.
 
 Pinging requires a round-trip to the database so unnecessary ping
@@ -2513,7 +2617,7 @@ Callback function parameter | Description
 ----------------------------|-------------
 *Error error* | If `ping()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
-#### <a name="querystream"></a> 4.2.8 `connection.queryStream()`
+#### <a name="querystream"></a> 4.2.9 `connection.queryStream()`
 
 ##### Prototype
 
@@ -2552,11 +2656,11 @@ This method was added in node-oracledb 1.8.
 
 See [execute()](#execute).
 
-#### <a name="release"></a> 4.2.9 `connection.release()`
+#### <a name="release"></a> 4.2.10 `connection.release()`
 
 An alias for [connection.close()](#connectionclose).
 
-#### <a name="rollback"></a> 4.2.10 `connection.rollback()`
+#### <a name="rollback"></a> 4.2.11 `connection.rollback()`
 
 ##### Prototype
 

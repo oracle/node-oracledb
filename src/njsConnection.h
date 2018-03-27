@@ -98,6 +98,12 @@ private:
     static void Async_Execute(njsBaton *baton);
     static void Async_AfterExecute(njsBaton *baton, Local<Value> argv[]);
 
+    // GetStatementInfo Method on Connection class
+    static NAN_METHOD(GetStatementInfo);
+    static void Async_GetStatementInfo(njsBaton *baton);
+    static void Async_AfterGetStatementInfo(njsBaton *baton,
+            Local<Value> argv[]);
+
     // Close Method on Connection class
     static NAN_METHOD(Close);
     static void Async_Close(njsBaton *baton);
