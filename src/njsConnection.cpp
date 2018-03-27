@@ -1573,7 +1573,7 @@ void njsConnection::Async_Commit(njsBaton *baton)
 
 
 //-----------------------------------------------------------------------------
-// njsConnection::Commit()
+// njsConnection::Rollback()
 //   Rolls back the active transaction.
 //
 // PARAMETERS
