@@ -39,55 +39,58 @@ limitations under the License.
   - 3.2 [Oracledb Properties](#oracledbproperties)
      - 3.2.1 [`autoCommit`](#propdbisautocommit)
      - 3.2.2 [`connectionClass`](#propdbconclass)
-     - 3.2.3 [`extendedMetaData`](#propdbextendedmetadata)
-     - 3.2.4 [`externalAuth`](#propdbisexternalauth)
-     - 3.2.5 [`fetchArraySize`](#propdbfetcharraysize)
-     - 3.2.6 [`fetchAsBuffer`](#propdbfetchasbuffer)
-     - 3.2.7 [`fetchAsString`](#propdbfetchasstring)
-     - 3.2.8 [`lobPrefetchSize`](#propdblobprefetchsize)
-     - 3.2.9 [`maxRows`](#propdbmaxrows)
-     - 3.2.10 [`oracleClientVersion`](#propdboracleClientVersion)
-     - 3.2.11 [`outFormat`](#propdboutformat)
-     - 3.2.12 [`poolIncrement`](#propdbpoolincrement)
-     - 3.2.13 [`poolMax`](#propdbpoolmax)
-     - 3.2.14 [`poolMin`](#propdbpoolmin)
-     - 3.2.15 [`poolPingInterval`](#propdbpoolpinginterval)
-     - 3.2.16 [`poolTimeout`](#propdbpooltimeout)
-     - 3.2.17 [`prefetchRows`](#propdbprefetchrows)
-     - 3.2.18 [`Promise`](#propdbpromise)
-     - 3.2.19 [`queueRequests`](#propdbqueuerequests)
-     - 3.2.20 [`queueTimeout`](#propdbqueuetimeout)
-     - 3.2.21 [`stmtCacheSize`](#propdbstmtcachesize)
-     - 3.2.22 [`version`](#propdbversion)
-     - 3.2.23 [`versionString`](#propdbversionstring)
-     - 3.2.24 [`versionSuffix`](#propdbversionsuffix)
+     - 3.2.3 [`events`](#propdbevents)
+     - 3.2.4 [`extendedMetaData`](#propdbextendedmetadata)
+     - 3.2.5 [`externalAuth`](#propdbisexternalauth)
+     - 3.2.6 [`fetchArraySize`](#propdbfetcharraysize)
+     - 3.2.7 [`fetchAsBuffer`](#propdbfetchasbuffer)
+     - 3.2.8 [`fetchAsString`](#propdbfetchasstring)
+     - 3.2.9 [`lobPrefetchSize`](#propdblobprefetchsize)
+     - 3.2.10 [`maxRows`](#propdbmaxrows)
+     - 3.2.11 [`oracleClientVersion`](#propdboracleClientVersion)
+     - 3.2.12 [`outFormat`](#propdboutformat)
+     - 3.2.13 [`poolIncrement`](#propdbpoolincrement)
+     - 3.2.14 [`poolMax`](#propdbpoolmax)
+     - 3.2.15 [`poolMin`](#propdbpoolmin)
+     - 3.2.16 [`poolPingInterval`](#propdbpoolpinginterval)
+     - 3.2.17 [`poolTimeout`](#propdbpooltimeout)
+     - 3.2.18 [`prefetchRows`](#propdbprefetchrows)
+     - 3.2.19 [`Promise`](#propdbpromise)
+     - 3.2.21 [`queueRequests`](#propdbqueuerequests)
+     - 3.2.22 [`queueTimeout`](#propdbqueuetimeout)
+     - 3.2.23 [`stmtCacheSize`](#propdbstmtcachesize)
+     - 3.2.24 [`version`](#propdbversion)
+     - 3.2.25 [`versionString`](#propdbversionstring)
+     - 3.2.25 [`versionSuffix`](#propdbversionsuffix)
   - 3.3 [Oracledb Methods](#oracledbmethods)
      - 3.3.1 [`createPool()`](#createpool)
          - 3.3.1.1 [`createPool()`: Parameters and Attributes](#createpoolpoolattrs)
-             - 3.3.1.1.1 [`user`](#createpoolpoolattrsuser)
-             - 3.3.1.1.2 [`password`](#createpoolpoolattrspassword)
-             - 3.3.1.1.3 [`connectString`](#createpoolpoolattrsconnectstring), [`connectionString`](#createpoolpoolattrsconnectstring)
-             - 3.3.1.1.4 [`externalAuth`](#createpoolpoolattrsexternalauth)
-             - 3.3.1.1.5 [`stmtCacheSize`](#createpoolpoolattrsstmtcachesize)
-             - 3.3.1.1.6 [`poolAlias`](#createpoolpoolattrspoolalias)
-             - 3.3.1.1.7 [`poolIncrement`](#createpoolpoolattrspoolincrement)
-             - 3.3.1.1.8 [`poolMax`](#createpoolpoolattrspoolmax)
-             - 3.3.1.1.9 [`poolMin`](#createpoolpoolattrspoolmin)
-             - 3.3.1.1.10 [`poolPingInterval`](#createpoolpoolattrspoolpinginterval)
-             - 3.3.1.1.11 [`poolTimeout`](#createpoolpoolattrspooltimeout)
-             - 3.3.1.1.12 [`queueRequests`](#createpoolpoolattrsqueuerequests)
-             - 3.3.1.1.13 [`queueTimeout`](#createpoolpoolattrsqueuetimeout)
+             - 3.3.1.1.1 [`connectString`](#createpoolpoolattrsconnectstring), [`connectionString`](#createpoolpoolattrsconnectstring)
+             - 3.3.1.1.2 [`events`](#createpoolpoolattrsevents)
+             - 3.3.1.1.3 [`externalAuth`](#createpoolpoolattrsexternalauth)
+             - 3.3.1.1.4 [`password`](#createpoolpoolattrspassword)
+             - 3.3.1.1.5 [`poolAlias`](#createpoolpoolattrspoolalias)
+             - 3.3.1.1.6 [`poolIncrement`](#createpoolpoolattrspoolincrement)
+             - 3.3.1.1.7 [`poolMax`](#createpoolpoolattrspoolmax)
+             - 3.3.1.1.8 [`poolMin`](#createpoolpoolattrspoolmin)
+             - 3.3.1.1.9 [`poolPingInterval`](#createpoolpoolattrspoolpinginterval)
+             - 3.3.1.1.10 [`poolTimeout`](#createpoolpoolattrspooltimeout)
+             - 3.3.1.1.11 [`queueRequests`](#createpoolpoolattrsqueuerequests)
+             - 3.3.1.1.12 [`queueTimeout`](#createpoolpoolattrsqueuetimeout)
+             - 3.3.1.1.13 [`stmtCacheSize`](#createpoolpoolattrsstmtcachesize)
+             - 3.3.1.1.14[`user`](#createpoolpoolattrsuser)
          - 3.3.1.2 [`createPool()`: Callback Function](#createpoolpoolcallback)
      - 3.3.2 [`getConnection()`](#getconnectiondb)
          - 3.3.2.1 [`getConnection()`: Parameters](#getconnectiondbattrs)
              - 3.3.2.1.1 [Pool Alias](#getconnectiondbattrspoolalias)
              - 3.3.2.1.2 [Connection Attributes](#getconnectiondbattrsconnattrs)
-                 - 3.3.2.1.2.1 [`user`](#getconnectiondbattrsuser)
-                 - 3.3.2.1.2.2 [`password`](#getconnectiondbattrspassword)
-                 - 3.3.2.1.2.3 [`connectString`](#getconnectiondbattrsconnectstring), [`connectionString`](#getconnectiondbattrsconnectstring)
-                 - 3.3.2.1.2.4 [`privilege`](#getconnectiondbattrsprivilege)
-                 - 3.3.2.1.2.5 [`externalAuth`](#getconnectiondbattrsexternalauth)
+                 - 3.3.2.1.2.1 [`connectString`](#getconnectiondbattrsconnectstring), [`connectionString`](#getconnectiondbattrsconnectstring)
+                 - 3.3.2.1.2.2 [`events`](#getconnectiondbattrsevents)
+                 - 3.3.2.1.2.3 [`externalAuth`](#getconnectiondbattrsexternalauth)
+                 - 3.3.2.1.2.4 [`password`](#getconnectiondbattrspassword)
+                 - 3.3.2.1.2.5 [`privilege`](#getconnectiondbattrsprivilege)
                  - 3.3.2.1.2.6 [`stmtCacheSize`](#getconnectiondbattrsstmtcachesize)
+                 - 3.3.2.1.2.7 [`user`](#getconnectiondbattrsuser)
          - 3.3.2.2 [`getConnection()`: Callback Function](#getconnectiondbcallback)
      - 3.3.3 [`getPool()`](#getpool)
          - 3.3.3.1 [`getPool()`: Parameters](#getpoolattrs)
@@ -177,6 +180,8 @@ limitations under the License.
   - 8.6 [Privileged Connections](#privconn)
   - 8.7 [Securely Encrypting Network Traffic to Oracle Database](#securenetwork)
   - 8.8 [Connections and High Availability](#connectionha)
+     - 8.8.1 [Fast Application Notification (FAN)](#connectionfan)
+     - 8.8.2 [Runtime Load Balancing (RLB)](#connectionrlb)
   - 8.9 [Optional Client Configuration Files](#tnsadmin)
 9. [SQL Execution](#sqlexecution)
   - 9.1 [SELECT Statements](#select)
@@ -626,7 +631,26 @@ var oracledb = require('oracledb');
 oracledb.connectionClass = 'HRPOOL';
 ```
 
-#### <a name="propdbextendedmetadata"></a> 3.2.3 `oracledb.extendedMetaData`
+#### <a name="propdbevents"></a> 3.2.3 `oracledb.events`
+
+```
+Boolean events
+```
+
+Determines whether Oracle Client events mode should be enabled.
+
+The default value for `events` is *false*.
+
+This property can be overridden in the
+[`oracledb.createPool()`](#createpoolpoolattrsevents) call and when
+getting a standalone connection from
+[`oracledb.getConnection()`](#getconnectiondbattrsevents).
+
+Events mode is required for [Fast Application Notification
+(FAN)](#connectionfan) and [Runtime Load Balancing
+(RLB)](#connectionrlb).
+
+#### <a name="propdbextendedmetadata"></a> 3.2.4 `oracledb.extendedMetaData`
 
 ```
 Boolean extendedMetaData
@@ -646,7 +670,7 @@ additional attributes.  These are listed in
 
 This property may be overridden in an [`execute()`](#executeoptions) call.
 
-#### <a name="propdbisexternalauth"></a> 3.2.4 `oracledb.externalAuth`
+#### <a name="propdbisexternalauth"></a> 3.2.5 `oracledb.externalAuth`
 
 ```
 Boolean externalAuth
@@ -676,7 +700,7 @@ var oracledb = require('oracledb');
 oracledb.externalAuth = false;
 ```
 
-#### <a name="propdbfetcharraysize"></a> 3.2.5 `oracledb.fetchArraySize`
+#### <a name="propdbfetcharraysize"></a> 3.2.6 `oracledb.fetchArraySize`
 
 ```
 Number fetchArraySize
@@ -717,7 +741,7 @@ var oracledb = require('oracledb');
 oracledb.fetchArraySize = 100;
 ```
 
-#### <a name="propdbfetchasbuffer"></a> 3.2.6 `oracledb.fetchAsBuffer`
+#### <a name="propdbfetchasbuffer"></a> 3.2.7 `oracledb.fetchAsBuffer`
 
 ```
 Array fetchAsBuffer
@@ -744,7 +768,7 @@ var oracledb = require('oracledb');
 oracledb.fetchAsBuffer = [ oracledb.BLOB ];
 ```
 
-#### <a name="propdbfetchasstring"></a> 3.2.7 `oracledb.fetchAsString`
+#### <a name="propdbfetchasstring"></a> 3.2.8 `oracledb.fetchAsString`
 
 ```
 Array fetchAsString
@@ -784,7 +808,7 @@ var oracledb = require('oracledb');
 oracledb.fetchAsString = [ oracledb.DATE, oracledb.NUMBER ];
 ```
 
-#### <a name="propdblobprefetchsize"></a> 3.2.8 `oracledb.lobPrefetchSize`
+#### <a name="propdblobprefetchsize"></a> 3.2.9 `oracledb.lobPrefetchSize`
 
 ```
 Number lobPrefetchSize
@@ -810,7 +834,7 @@ var oracledb = require('oracledb');
 oracledb.lobPrefetchSize = 16384;
 ```
 
-#### <a name="propdbmaxrows"></a> 3.2.9 `oracledb.maxRows`
+#### <a name="propdbmaxrows"></a> 3.2.10 `oracledb.maxRows`
 
 ```
 Number maxRows
@@ -847,7 +871,7 @@ var oracledb = require('oracledb');
 oracledb.maxRows = 0;
 ```
 
-#### <a name="propdboracleClientVersion"></a> 3.2.10 `oracledb.oracleClientVersion`
+#### <a name="propdboracleClientVersion"></a> 3.2.11 `oracledb.oracleClientVersion`
 
 ```
 readonly Number oracleClientVersion
@@ -863,7 +887,7 @@ var oracledb = require('oracledb');
 console.log("Oracle client library version number is " + oracledb.oracleClientVersion);
 ```
 
-#### <a name="propdboutformat"></a> 3.2.11 `oracledb.outFormat`
+#### <a name="propdboutformat"></a> 3.2.12 `oracledb.outFormat`
 
 ```
 Number outFormat
@@ -902,7 +926,7 @@ oracledb.outFormat = oracledb.ARRAY;
 
 See [Query Output Formats](#queryoutputformats) for more examples.
 
-#### <a name="propdbpoolincrement"></a> 3.2.12 `oracledb.poolIncrement`
+#### <a name="propdbpoolincrement"></a> 3.2.13 `oracledb.poolIncrement`
 
 ```
 Number poolIncrement
@@ -922,7 +946,7 @@ var oracledb = require('oracledb');
 oracledb.poolIncrement = 1;
 ```
 
-#### <a name="propdbpoolmax"></a> 3.2.13 `oracledb.poolMax`
+#### <a name="propdbpoolmax"></a> 3.2.14 `oracledb.poolMax`
 
 ```
 Number poolMax
@@ -948,7 +972,7 @@ var oracledb = require('oracledb');
 oracledb.poolMax = 4;
 ```
 
-#### <a name="propdbpoolmin"></a> 3.2.14 `oracledb.poolMin`
+#### <a name="propdbpoolmin"></a> 3.2.15 `oracledb.poolMin`
 
 ```
 Number poolMin
@@ -968,7 +992,7 @@ var oracledb = require('oracledb');
 oracledb.poolMin = 0;
 ```
 
-#### <a name="propdbpoolpinginterval"></a> 3.2.15 `oracledb.poolPingInterval`
+#### <a name="propdbpoolpinginterval"></a> 3.2.16 `oracledb.poolPingInterval`
 
 ```
 Number poolPingInterval
@@ -1012,7 +1036,7 @@ var oracledb = require('oracledb');
 oracledb.poolPingInterval = 60;     // seconds
 ```
 
-#### <a name="propdbpooltimeout"></a> 3.2.16 `oracledb.poolTimeout`
+#### <a name="propdbpooltimeout"></a> 3.2.17 `oracledb.poolTimeout`
 
 ```
 Number poolTimeout
@@ -1034,7 +1058,7 @@ var oracledb = require('oracledb');
 oracledb.poolTimeout = 60;
 ```
 
-#### <a name="propdbprefetchrows"></a> 3.2.17 `oracledb.prefetchRows`
+#### <a name="propdbprefetchrows"></a> 3.2.18 `oracledb.prefetchRows`
 
 ```
 Number prefetchRows
@@ -1051,7 +1075,7 @@ var oracledb = require('oracledb');
 oracledb.prefetchRows = 100;
 ```
 
-#### <a name="propdbpromise"></a> 3.2.18 `oracledb.Promise`
+#### <a name="propdbpromise"></a> 3.2.19 `oracledb.Promise`
 
 ```
 Promise Promise
@@ -1080,7 +1104,7 @@ Promises can be completely disabled by setting
 oracledb.Promise = null;
 ```
 
-#### <a name="propdbqueuerequests"></a> 3.2.19 `oracledb.queueRequests`
+#### <a name="propdbqueuerequests"></a> 3.2.20 `oracledb.queueRequests`
 
 ```
 Boolean queueRequests
@@ -1109,7 +1133,7 @@ oracledb.queueRequests = false;
 
 See [Connection Pool Queue](#connpoolqueue) for more information.
 
-#### <a name="propdbqueuetimeout"></a> 3.2.20 `oracledb.queueTimeout`
+#### <a name="propdbqueuetimeout"></a> 3.2.21 `oracledb.queueTimeout`
 
 ```
 Number queueTimeout
@@ -1132,7 +1156,7 @@ oracledb.queueTimeout = 3000; // 3 seconds
 
 See [Connection Pool Queue](#connpoolqueue) for more information.
 
-#### <a name="propdbstmtcachesize"></a> 3.2.21 `oracledb.stmtCacheSize`
+#### <a name="propdbstmtcachesize"></a> 3.2.22 `oracledb.stmtCacheSize`
 
 ```
 Number stmtCacheSize
@@ -1159,7 +1183,7 @@ var oracledb = require('oracledb');
 oracledb.stmtCacheSize = 30;
 ```
 
-#### <a name="propdbversion"></a> 3.2.22 `oracledb.version`
+#### <a name="propdbversion"></a> 3.2.23 `oracledb.version`
 ```
 readonly Number version
 ```
@@ -1174,7 +1198,7 @@ var oracledb = require('oracledb');
 console.log("Driver version number is " + oracledb.version);
 ```
 
-#### <a name="propdbversionstring"></a> 3.2.23 `oracledb.versionString`
+#### <a name="propdbversionstring"></a> 3.2.24 `oracledb.versionString`
 ```
 readonly String versionString
 ```
@@ -1188,7 +1212,7 @@ var oracledb = require('oracledb');
 console.log("Driver version is " + oracledb.versionString);
 ```
 
-#### <a name="propdbversionsuffix"></a> 3.2.24 `oracledb.versionSuffix`
+#### <a name="propdbversionsuffix"></a> 3.2.25 `oracledb.versionSuffix`
 ```
 readonly String versionSuffix
 ```
@@ -1260,27 +1284,7 @@ ignored.
 
 The properties of `poolAttrs` are described below.
 
-###### <a name="createpoolpoolattrsuser"></a> 3.3.1.1.1 `user`
-
-```
-String user
-```
-
-The database user name.  Can be a simple user name or a proxy of the
-form *alison[fred]*. See the [Client Access Through a Proxy][7]
-section in the Oracle Call Interface manual for more details about
-proxy authentication.
-
-###### <a name="createpoolpoolattrspassword"></a> 3.3.1.1.2 `password`
-
-```
-String password
-```
-
-The password of the database user. A password is also necessary if a
-proxy user is specified.
-
-###### <a name="createpoolpoolattrsconnectstring"></a> 3.3.1.1.3 `connectString`, `connectionString`
+###### <a name="createpoolpoolattrsconnectstring"></a> 3.3.1.1.1 `connectString`, `connectionString`
 
 ```
 String connectString
@@ -1294,7 +1298,18 @@ Connect string, or a Net Service Name from a `tnsnames.ora` file, or the
 name of a local Oracle database instance.  See
 [Connection Strings](#connectionstrings) for examples.
 
-###### <a name="createpoolpoolattrsexternalauth"></a> 3.3.1.1.4 `externalAuth`
+###### <a name="createpoolpoolattrsevents"></a> 3.3.1.1.2 `events`
+
+```
+Boolean events
+```
+
+Indicate whether Oracle Call Interface events mode should be enabled.
+
+This optional property overrides the
+[`oracledb.events`](#propdbevents) property.
+
+###### <a name="createpoolpoolattrsexternalauth"></a> 3.3.1.1.3 `externalAuth`
 
 ```
 Boolean externalAuth
@@ -1314,19 +1329,16 @@ The `user` and `password` properties should not be set when
 Note prior to node-oracledb 0.5 this property was called
 `isExternalAuth`.
 
-###### <a name="createpoolpoolattrsstmtcachesize"></a> 3.3.1.1.5 `stmtCacheSize`
+###### <a name="createpoolpoolattrspassword"></a> 3.3.1.1.4 `password`
 
 ```
-Number stmtCacheSize
+String password
 ```
 
-The number of statements to be cached in the
-[statement cache](#stmtcache) of each connection.
+The password of the database user. A password is also necessary if a
+proxy user is specified.
 
-This optional property overrides the
-[`oracledb.stmtCacheSize`](#propdbstmtcachesize) property.
-
-###### <a name="createpoolpoolattrspoolalias"></a> 3.3.1.1.6 `poolAlias`
+###### <a name="createpoolpoolattrspoolalias"></a> 3.3.1.1.5 `poolAlias`
 
 <a name="createpoolpoolattrspoolalias"></a>
 ```
@@ -1341,7 +1353,7 @@ that utilize the connection pool cache, such as [`oracledb.getPool()`](#getpool)
 
 See [Connection Pool Cache](#connpoolcache) for details and examples.
 
-###### <a name="createpoolpoolattrspoolincrement"></a> 3.3.1.1.7 `poolIncrement`
+###### <a name="createpoolpoolattrspoolincrement"></a> 3.3.1.1.6 `poolIncrement`
 
 ```
 Number poolIncrement
@@ -1355,7 +1367,7 @@ The default value is 1.
 This optional property overrides the
 [`oracledb.poolIncrement`](#propdbpoolincrement) property.
 
-###### <a name="createpoolpoolattrspoolmax"></a> 3.3.1.1.8 `poolMax`
+###### <a name="createpoolpoolattrspoolmax"></a> 3.3.1.1.7 `poolMax`
 
 ```
 Number poolMax
@@ -1375,7 +1387,7 @@ available to node-oracledb.
 
 See [Connection Pooling](#connpooling) for other pool sizing guidelines.
 
-###### <a name="createpoolpoolattrspoolmin"></a> 3.3.1.1.9 `poolMin`
+###### <a name="createpoolpoolattrspoolmin"></a> 3.3.1.1.8 `poolMin`
 
 ```
 Number poolMin
@@ -1389,7 +1401,7 @@ The default value is 0.
 This optional property overrides the
 [`oracledb.poolMin`](#propdbpoolmin) property.
 
-###### <a name="createpoolpoolattrspoolpinginterval"></a> 3.3.1.1.10 `poolPingInterval`
+###### <a name="createpoolpoolattrspoolpinginterval"></a> 3.3.1.1.9 `poolPingInterval`
 
 ```
 Number poolPingInterval
@@ -1411,7 +1423,7 @@ This optional property overrides the
 
 See [Connection Pool Pinging](#connpoolpinging) for more discussion.
 
-###### <a name="createpoolpoolattrspooltimeout"></a> 3.3.1.1.11 `poolTimeout`
+###### <a name="createpoolpoolattrspooltimeout"></a> 3.3.1.1.10 `poolTimeout`
 
 ```
 Number poolTimeout
@@ -1426,7 +1438,7 @@ The default value is 60.
 This optional property overrides the
 [`oracledb.poolTimeout`](#propdbpooltimeout) property.
 
-###### <a name="createpoolpoolattrsqueuerequests"></a> 3.3.1.1.12 `queueRequests`
+###### <a name="createpoolpoolattrsqueuerequests"></a> 3.3.1.1.11 `queueRequests`
 
 ```
 Boolean queueRequests
@@ -1441,7 +1453,7 @@ The default value is *true*.
 This optional property overrides the
 [`oracledb.queueRequests`](#propdbqueuerequests) property.
 
-###### <a name="createpoolpoolattrsqueuetimeout"></a> 3.3.1.1.13 `queueTimeout`
+###### <a name="createpoolpoolattrsqueuetimeout"></a> 3.3.1.1.12 `queueTimeout`
 
 ```
 Number queueTimeout
@@ -1455,6 +1467,29 @@ The default value is 60000.
 
 This optional property overrides the
 [`oracledb.queueTimeout`](#propdbqueuetimeout) property.
+
+###### <a name="createpoolpoolattrsstmtcachesize"></a> 3.3.1.1.13 `stmtCacheSize`
+
+```
+Number stmtCacheSize
+```
+
+The number of statements to be cached in the
+[statement cache](#stmtcache) of each connection.
+
+This optional property overrides the
+[`oracledb.stmtCacheSize`](#propdbstmtcachesize) property.
+
+###### <a name="createpoolpoolattrsuser"></a> 3.3.1.1.14 `user`
+
+```
+String user
+```
+
+The database user name.  Can be a simple user name or a proxy of the
+form *alison[fred]*. See the [Client Access Through a Proxy][7]
+section in the Oracle Call Interface manual for more details about
+proxy authentication.
 
 #### <a name="createpoolpoolcallback"></a> 3.3.1.2 `createPool()`: Callback Function
 
@@ -1538,27 +1573,7 @@ method are ignored.
 
 The properties of the `connAttrs` object are described below.
 
-###### <a name="getconnectiondbattrsuser"></a> 3.3.2.1.2.1 `user`
-
-```
-String user
-```
-
-The database user name.  Can be a simple user name or a proxy of the
-form *alison[fred]*. See the [Client Access Through a Proxy][7]
-section in the Oracle Call Interface manual for more details about
-proxy authentication.
-
-###### <a name="getconnectiondbattrspassword"></a> 3.3.2.1.2.2 `password`
-
-```
-String password
-```
-
-The password of the database user. A password is also necessary if a
-proxy user is specified.
-
-###### <a name="getconnectiondbattrsconnectstring"></a> 3.3.2.1.2.3 `connectString`, `connectionString`
+###### <a name="getconnectiondbattrsconnectstring"></a> 3.3.2.1.2.1 `connectString`, `connectionString`
 
 ```
 String connectString
@@ -1572,24 +1587,18 @@ Net Service Name from a `tnsnames.ora` file, or the name of a local
 Oracle database instance.  See
 [Connection Strings](#connectionstrings) for examples.
 
-###### <a name="getconnectiondbattrsprivilege"></a> 3.3.2.1.2.4 `privilege`
+###### <a name="getconnectiondbattrsevents"></a> 3.3.2.1.2.2 `events`
 
 ```
-Number privilege
+Boolean events
 ```
 
-The privilege to use when establishing connection to the database. This
-optional property should be one of the
-[privileged connection constants](#oracledbconstantsprivilege).
+Determines if the standalone connection is created using Oracle Call Interface events mode.
 
-See [Privileged Connections](#privconn) for more information.
+This optional property overrides the
+[`oracledb.events`](#propdbisevents) property.
 
-Note only non-pooled connections can be privileged.
-
-See the [Database Administrators Guide][90] for information on
-administrative privileges.
-
-###### <a name="getconnectiondbattrsexternalauth"></a> 3.3.2.1.2.5 `externalAuth`
+###### <a name="getconnectiondbattrsexternalauth"></a> 3.3.2.1.2.3 `externalAuth`
 
 ```
 Boolean externalAuth
@@ -1607,6 +1616,29 @@ The `user` and `password` properties should not be set when
 Note prior to node-oracledb 0.5 this property was called
 `isExternalAuth`.
 
+###### <a name="getconnectiondbattrspassword"></a> 3.3.2.1.2.4 `password`
+
+```
+String password
+```
+
+The password of the database user. A password is also necessary if a
+proxy user is specified.
+
+###### <a name="getconnectiondbattrsprivilege"></a> 3.3.2.1.2.5 `privilege`
+
+```
+Number privilege
+```
+
+The privilege to use when establishing connection to the database. This
+optional property should be one of the
+[privileged connection constants](#oracledbconstantsprivilege).
+
+See [Privileged Connections](#privconn) for more information.
+
+Note only non-pooled connections can be privileged.
+
 ###### <a name="getconnectiondbattrsstmtcachesize"></a> 3.3.2.1.2.6 `stmtCacheSize`
 
 ```
@@ -1617,6 +1649,17 @@ The number of statements to be cached in the
 [statement cache](#stmtcache) of each connection.  This optional
 property may be used to override the
 [`oracledb.stmtCacheSize`](#propdbstmtcachesize) property.
+
+###### <a name="getconnectiondbattrsuser"></a> 3.3.2.1.2.7 `user`
+
+```
+String user
+```
+
+The database user name.  Can be a simple user name or a proxy of the
+form *alison[fred]*. See the [Client Access Through a Proxy][7]
+section in the Oracle Call Interface manual for more details about
+proxy authentication.
 
 ##### <a name="getconnectiondbcallback"></a> 3.3.2.2 `getConnection()`: Callback Function
 
@@ -3282,7 +3325,7 @@ To enable recording of queue statistics:
 ```javascript
 oracledb.createPool (
   {
-    queueRequests : true,  // default is true
+    queueRequests : true,   // default is true
     _enableStats  : true,   // default is false
     user          : "hr",
     password      : "welcome",
@@ -3606,12 +3649,54 @@ setting [`ENABLE=BROKEN`][36].
 Other [Oracle Network Services][37] options may also be useful for
 high availability and performance tuning.
 
+#### <a name="connectionfan"></a> 8.8.1 Fast Application Notification (FAN)
+
+Users of [Oracle Database FAN][64] should set
+[`oracledb.events`](#propdbevents) to *true*.  This can also be
+enabled via [External Configuration](#oraaccess).
+
+FAN support gives fast connection failover, an Oracle Database high
+availability feature.  This allows applications to be notified when a
+database machine becomes unavailable.  Without FAN, node-oracledb can
+hang until a TCP timeout occurs and an error is returned, which might
+be several minutes.  Enabling FAN in node-oracledb can allow
+applications to detect errors, re-connect to an available database
+instance, and replay application logic without the application user
+being aware of an outage.  It is up to the application to handle
+errors and take desired action.
+
+FAN benefits users of Oracle Database's clustering technology ([Oracle
+RAC][93]) because connections to surviving database instances can be
+immediately made.  Users of Oracle's Data Guard with a broker will see
+the FAN events generated when the standby database goes online.
+Standalone databases will send FAN events when the database restarts.
+
+For active connections, when a machine or database instance becomes
+unavailable, a connection failure error will be returned by the
+node-oracledb method currently being called.  On a subsequent
+re-connect, a connection to a surviving database instance will be
+established.  Node-oracledb also transparently cleans up any idle
+connections affected by a database machine or instance failure so
+future connect calls will establish a fresh connection without the
+application being aware of any service disruption.
+
+#### <a name="connectionrlb"></a> 8.8.2 Runtime Load Balancing (RLB)
+
+[Oracle Database RAC][93] users with [Oracle Database (RLB)][65]
+advisory events configured should use node-oracledb [Connection
+Pooling](#connpooling) and set [`oracledb.events`](#propdbevents) to
+*true*.  The events mode can also be enabled via [External
+Configuration](#oraaccess).
+
+RLB allows optimal use of database resources by balancing database
+requests across RAC instances.
+
 ### <a name="tnsadmin"></a> 8.9 Optional Client Configuration Files
 
 Optional Oracle Client configuration files are read when node-oracledb
 is loaded.  These files affect connections and applications.  Common
 files include `tnsnames.ora`, `sqlnet.ora`, `ldap.ora`, and
-`oraaccess.xml`.
+[`oraaccess.xml`](#oraaccess).
 
 Default locations for these files include:
 
@@ -6322,7 +6407,8 @@ satisfaction.
 
 The optional Oracle client-side configuration file [oraaccess.xml][63]
 can be used to configure some behaviors of node-oracledb.  See
-[Optional Client Configuration Files](#tnsadmin).
+[Optional Client Configuration Files](#tnsadmin) for information about
+file creation..
 
 An oraaccess.xml file is only used when node-oracledb is linked with
 Oracle Database 12c client libraries.
@@ -6359,7 +6445,7 @@ application is not feasible.
 
 The oraaccess.xml file has other uses including:
 
-- Turning on [Fast Application Notification][64] (FAN) events to enable FAN notifications and [Runtime Load Balancing][65] (RLB)
+- Turning on [Fast Application Notification (FAN)](#connectionfan) events to enable FAN notifications and [Runtime Load Balancing (RLB)](#connectionrlb).
 - Configuring [Client Result Caching][66] parameters
 - Turning on [Client Statement Cache Auto-tuning][67]
 
@@ -6892,3 +6978,4 @@ When upgrading from node-oracledb version 2.0 to version 2.1:
 [90]: https://docs.oracle.com/en/database/oracle/oracle-database/12.2/admin/getting-started-with-database-administration.html#GUID-5F1E393E-97B8-43BC-BD68-3595251A6F7C
 [91]: https://www.youtube.com/watch?v=WDJacg0NuLo
 [92]: https://nodejs.org/api/stream.html#stream_readable_destroy_error
+[93]: https://docs.oracle.com/en/database/oracle/oracle-database/12.2/racad/introduction-to-oracle-rac.html#GUID-D04AA2A7-2E68-4C5C-BD6E-36C62427B98E

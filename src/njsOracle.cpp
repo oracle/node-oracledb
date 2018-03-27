@@ -64,9 +64,6 @@ Nan::Persistent<FunctionTemplate> njsOracledb::oracledbTemplate_s;
 // DPI context
 dpiContext *njsOracledb::globalDPIContext = NULL;
 
-// common pool/standalone connection creation parameters (fixed)
-dpiCommonCreateParams njsCommonCreateParams;
-
 
 //-----------------------------------------------------------------------------
 // njsOracledb::njsOracledb()
@@ -89,6 +86,7 @@ njsOracledb::njsOracledb()
     lobPrefetchSize         = NJS_LOB_PREFETCH_SIZE;
     poolPingInterval        = NJS_POOL_DEFAULT_PING_INTERVAL;
     oraClientVer            = 0;
+    events                  = false;
 }
 
 
@@ -107,20 +105,6 @@ void njsOracledb::Init(Handle<Object> target)
         Nan::ThrowError(errorInfo.message);
         return;
     }
-
-    // initialize common creation parameters for pools/standalone connections
-    if (dpiContext_initCommonCreateParams(globalDPIContext,
-            &njsCommonCreateParams) < 0) {
-        dpiContext_getError(globalDPIContext, &errorInfo);
-        Nan::ThrowError(errorInfo.message);
-        return;
-    }
-    njsCommonCreateParams.createMode = DPI_MODE_CREATE_THREADED;
-    njsCommonCreateParams.encoding = "UTF-8";
-    njsCommonCreateParams.nencoding = "UTF-8";
-    njsCommonCreateParams.driverName = NJS_DRIVER_NAME;
-    njsCommonCreateParams.driverNameLength =
-            (uint32_t) strlen(njsCommonCreateParams.driverName);
 
     Local<FunctionTemplate> temp = Nan::New<FunctionTemplate>(New);
     temp->InstanceTemplate()->SetInternalFieldCount(1);
@@ -192,6 +176,9 @@ void njsOracledb::Init(Handle<Object> target)
             Nan::New<v8::String>("poolPingInterval").ToLocalChecked(),
             njsOracledb::GetPoolPingInterval,
             njsOracledb::SetPoolPingInterval);
+    Nan::SetAccessor(temp->InstanceTemplate (),
+            Nan::New<v8::String>("events").ToLocalChecked(),
+            njsOracledb::GetEvents, njsOracledb::SetEvents);
 
     oracledbTemplate_s.Reset(temp);
     Nan::Set(target, Nan::New<v8::String>("Oracledb").ToLocalChecked(),
@@ -220,6 +207,30 @@ NAN_METHOD(njsOracledb::New)
                                          versionInfo.portUpdateNum  );
     oracledb->Wrap(info.Holder());
     info.GetReturnValue().Set(info.Holder());
+}
+
+
+//-----------------------------------------------------------------------------
+// njsOracledb::InitCommonCreateParams()
+//   Initialize common creation parameters for pools and standalone
+// connection creation.
+//-----------------------------------------------------------------------------
+bool njsOracledb::InitCommonCreateParams(njsBaton *baton,
+        dpiCommonCreateParams *params)
+{
+    if (dpiContext_initCommonCreateParams(globalDPIContext, params) < 0) {
+        baton->GetDPIError();
+        return false;
+    }
+    params->createMode = DPI_MODE_CREATE_THREADED;
+    if (baton->events)
+        params->createMode = (dpiCreateMode)
+                ((int) params->createMode | DPI_MODE_CREATE_EVENTS);
+    params->encoding = "UTF-8";
+    params->nencoding = "UTF-8";
+    params->driverName = NJS_DRIVER_NAME;
+    params->driverNameLength = (uint32_t) strlen(params->driverName);
+    return true;
 }
 
 
@@ -793,6 +804,30 @@ NAN_SETTER(njsOracledb::SetOracleClientVersion)
 
 
 //-----------------------------------------------------------------------------
+// njsOracledb::GetEvents()
+//   Get accessor of "events" property.
+//-----------------------------------------------------------------------------
+NAN_GETTER(njsOracledb::GetEvents)
+{
+    njsOracledb *oracledb = (njsOracledb*) ValidateGetter(info);
+    if (oracledb)
+        info.GetReturnValue().Set(oracledb->events);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsOracledb::SetEvents()
+//   Set accessor of "events" property.
+//-----------------------------------------------------------------------------
+NAN_SETTER(njsOracledb::SetEvents)
+{
+    njsOracledb *oracledb = (njsOracledb*) ValidateSetter(info);
+    if (oracledb)
+        oracledb->SetPropBool(value, &oracledb->events, "events");
+}
+
+
+//-----------------------------------------------------------------------------
 // njsOracledb::GetConnection()
 //   Establishes a standalone connection to the database using the parameters
 // specified in an asynchronous fashion, calling the JS callback when complete.
@@ -824,11 +859,13 @@ NAN_METHOD(njsOracledb::GetConnection)
     baton->connClass = oracledb->connClass;
     baton->stmtCacheSize  = oracledb->stmtCacheSize;
     baton->externalAuth = oracledb->externalAuth;
+    baton->events = oracledb->events;
     baton->GetUnsignedIntFromJSON(connProps, "stmtCacheSize", 0,
             &baton->stmtCacheSize);
     baton->GetUnsignedIntFromJSON(connProps, "privilege", 0,
             &baton->privilege);
     baton->GetBoolFromJSON(connProps, "externalAuth", 0, &baton->externalAuth);
+    baton->GetBoolFromJSON(connProps, "events", 0, &baton->events);
     baton->lobPrefetchSize = oracledb->lobPrefetchSize;
 
     baton->QueueWork("GetConnection", Async_GetConnection,
@@ -843,6 +880,7 @@ NAN_METHOD(njsOracledb::GetConnection)
 //-----------------------------------------------------------------------------
 void njsOracledb::Async_GetConnection(njsBaton *baton)
 {
+    dpiCommonCreateParams commonParams;
     dpiConnCreateParams params;
 
     if (dpiContext_initConnCreateParams(globalDPIContext, &params) < 0) {
@@ -856,11 +894,13 @@ void njsOracledb::Async_GetConnection(njsBaton *baton)
         params.connectionClass = baton->connClass.c_str();
         params.connectionClassLength = baton->connClass.length();
     }
+    if (!InitCommonCreateParams(baton, &commonParams))
+        return;
     if (dpiConn_create(globalDPIContext, baton->user.c_str(),
             (uint32_t) baton->user.length(), baton->password.c_str(),
             (uint32_t) baton->password.length(), baton->connectString.c_str(),
-            (uint32_t) baton->connectString.length(), &njsCommonCreateParams,
-            &params, &baton->dpiConnHandle) < 0)
+            (uint32_t) baton->connectString.length(), &commonParams, &params,
+            &baton->dpiConnHandle) < 0)
         baton->GetDPIError();
     else if (dpiConn_setStmtCacheSize(baton->dpiConnHandle,
             baton->stmtCacheSize) < 0)
@@ -916,6 +956,7 @@ NAN_METHOD(njsOracledb::CreatePool)
     baton->poolPingInterval = oracledb->poolPingInterval;
     baton->stmtCacheSize = oracledb->stmtCacheSize;
     baton->externalAuth = oracledb->externalAuth;
+    baton->events = oracledb->events;
     baton->GetUnsignedIntFromJSON(poolProps, "poolMax", 0, &baton->poolMax);
     baton->GetUnsignedIntFromJSON(poolProps, "poolMin", 0, &baton->poolMin);
     baton->GetUnsignedIntFromJSON(poolProps, "poolIncrement", 0,
@@ -927,6 +968,7 @@ NAN_METHOD(njsOracledb::CreatePool)
     baton->GetIntFromJSON(poolProps, "poolPingInterval", 0,
             &baton->poolPingInterval);
     baton->GetBoolFromJSON(poolProps, "externalAuth", 0, &baton->externalAuth);
+    baton->GetBoolFromJSON(poolProps, "events", 0, &baton->events);
     baton->lobPrefetchSize = oracledb->lobPrefetchSize;
     baton->jsOracledb.Reset(info.Holder());
 
@@ -941,6 +983,7 @@ NAN_METHOD(njsOracledb::CreatePool)
 //-----------------------------------------------------------------------------
 void njsOracledb::Async_CreatePool(njsBaton *baton)
 {
+    dpiCommonCreateParams commonParams;
     dpiPoolCreateParams params;
 
     if (dpiContext_initPoolCreateParams(globalDPIContext, &params) < 0) {
@@ -954,11 +997,13 @@ void njsOracledb::Async_CreatePool(njsBaton *baton)
     if (params.externalAuth)
         params.homogeneous = 0;
     params.pingInterval = baton->poolPingInterval;
+    if (!InitCommonCreateParams(baton, &commonParams))
+        return;
     if (dpiPool_create(globalDPIContext, baton->user.c_str(),
             (uint32_t) baton->user.length(), baton->password.c_str(),
             (uint32_t) baton->password.length(), baton->connectString.c_str(),
-            (uint32_t) baton->connectString.length(), &njsCommonCreateParams,
-            &params, &baton->dpiPoolHandle) < 0)
+            (uint32_t) baton->connectString.length(), &commonParams, &params,
+            &baton->dpiPoolHandle) < 0)
         baton->GetDPIError();
     else if (dpiPool_setTimeout(baton->dpiPoolHandle, baton->poolTimeout) < 0)
         baton->GetDPIError();

@@ -130,6 +130,9 @@ public:
 
 private:
 
+    static bool InitCommonCreateParams(njsBaton *baton,
+            dpiCommonCreateParams *params);
+
     static NAN_METHOD(New);
 
     // Get Connection Methods
@@ -163,6 +166,7 @@ private:
     static NAN_GETTER(GetLobPrefetchSize);
     static NAN_GETTER(GetOracleClientVersion);
     static NAN_GETTER(GetPoolPingInterval);
+    static NAN_GETTER(GetEvents);
 
     // Define Setter Accessors to Properties
     static NAN_SETTER(SetPoolMin);
@@ -185,6 +189,7 @@ private:
     static NAN_SETTER(SetLobPrefetchSize);
     static NAN_SETTER(SetOracleClientVersion);
     static NAN_SETTER(SetPoolPingInterval);
+    static NAN_SETTER(SetEvents);
 
     njsOracledb();
     ~njsOracledb() {
@@ -194,6 +199,7 @@ private:
     uint32_t outFormat;
     bool autoCommit;
     bool extendedMetaData;
+    bool events;
     uint32_t maxRows;
 
     uint32_t stmtCacheSize;

@@ -285,6 +285,7 @@ public:
     bool extendedMetaData;
     bool isReturning;
     bool isPLSQL;
+    bool events;
     uint64_t bufferSize;
     char *bufferPtr;
     uint64_t lobOffset;
@@ -308,8 +309,8 @@ public:
             fetchAsStringTypes(NULL), numFetchAsBufferTypes(0),
             fetchAsBufferTypes(NULL), protoILob(NULL), externalAuth(false),
             getRS(false), autoCommit(false), extendedMetaData(false),
-            isReturning(false), isPLSQL(false), bufferSize(0), bufferPtr(NULL),
-            lobOffset(0), lobAmount(0), dpiError(false) {
+            isReturning(false), isPLSQL(false), events(false), bufferSize(0),
+            bufferPtr(NULL), lobOffset(0), lobAmount(0), dpiError(false) {
         this->jsCallback.Reset(callback);
         this->jsCallingObj.Reset(callingObj);
         this->callingObj = Nan::ObjectWrap::Unwrap<njsCommon>(callingObj);
