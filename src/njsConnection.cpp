@@ -437,12 +437,6 @@ bool njsConnection::PrepareAndBind(njsBaton *baton)
     for (uint32_t i = 0; i < baton->numBindVars; i++) {
         int status;
         njsVariable *var = &baton->bindVars[i];
-        if (stmtInfo.isReturning && var->bindDir == NJS_BIND_OUT &&
-                var->varTypeNum == DPI_ORACLE_TYPE_RAW) {
-            baton->error = njsMessages::Get(errBufferReturningInvalid);
-            baton->ClearAsyncData();
-            return false;
-        }
         if (var->name.empty())
             status = dpiStmt_bindByPos(baton->dpiStmtHandle, var->pos,
                     var->dpiVarHandle);

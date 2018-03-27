@@ -365,25 +365,6 @@ describe('6. dmlReturning.js', function(){
       );
     });
 
-    it('6.1.12 Negative test - data type is not supported with DML Returning statments', function(done) {
-      var sql = "UPDATE nodb_dmlreturn SET name = 'Leslie Lin' WHERE id = :id RETURNING name INTO :rn ";
-      var bindVar =
-        {
-          id: 1002,
-          rn: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT }
-        };
-
-      connection.execute(sql, bindVar, function(err, result) {
-        should.exist(err);
-        // NJS-028: raw database type is not supported with DML Returning statements
-        (err.message).should.startWith('NJS-028:');
-
-        should.not.exist(result);
-        done();
-      });
-
-    });
-
   }); // 6.1
 
   describe('6.2 DATE and TIMESTAMP data', function() {

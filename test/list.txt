@@ -177,7 +177,6 @@ Overview of node-oracledb functional tests
         6.1.9 DELETE statement with Array binding
         6.1.10 Stress test - support 4k varchars
         6.1.11 Negative test - throws correct error message
-        6.1.12 Negative test - data type is not supported with DML Returning statments
     6.2 DATE and TIMESTAMP data
         6.2.1 INSERT statement, single row matched, Object binding, no bind in data
         6.2.2 INSERT statement with JavaScript date bind in
@@ -733,8 +732,8 @@ Overview of node-oracledb functional tests
         42.3.2 INSERT statement with ARRAY binding
         42.3.3 INSERT statement with exact maxSize restriction
         42.3.4 UPDATE statement
-        42.3.6 DELETE statement with single row matching
-        42.3.7 DELETE statement with multiple rows matching
+        42.3.5 DELETE statement with single row matching
+        42.3.6 DELETE statement with multiple rows matching
     42.4 in PL/SQL, the maximum size is 32767
         42.4.1 works well when the length of data is less than maxSize
         42.4.2 works well when the length of data is exactly 32767
@@ -1717,7 +1716,7 @@ Overview of node-oracledb functional tests
         82.1.15 bind value and type mismatch
         82.1.16 mixing named with positional binding
         82.1.17 bind with invalid BLOB
-        82.1.18 Negative: RETURNING INTO with bind type BUFFER
+        82.1.18 RETURNING INTO with bind type BUFFER
         82.1.19 Negative: RETURNING INTO with autocommit on
         82.1.20 works with bind in maxSize smaller than buffer size
     82.2 BLOB, UPDATE

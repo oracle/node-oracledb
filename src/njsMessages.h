@@ -65,7 +65,6 @@ typedef enum {
     errResultsTooLarge,
     errInvalidmaxRows,
     errSQLSyntaxError,
-    errBufferReturningInvalid,
     errInvalidJSObject,
     errBusyConnLOB,
     errBusyConnRS,

@@ -525,7 +525,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
       );
     }); // 82.1.17
 
-    it('82.1.18 Negative: RETURNING INTO with bind type BUFFER', function(done) {
+    it('82.1.18 RETURNING INTO with bind type BUFFER', function(done) {
       var id = insertID++;
       var contentLength = 400;
       var specialStr = "82.1.18";
@@ -533,20 +533,27 @@ describe('82.blobDMLBindAsBuffer.js', function() {
       var content = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
       var sql = "INSERT INTO nodb_dml_blob_1 (id, blob) VALUES (:i, :c) RETURNING blob INTO :lobbv";
 
-      connection.execute(
-        sql,
-        {
-          i: id,
-          c: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN },
-          lobbv: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: contentLength }
+      async.series([
+        function(cb) {
+          connection.execute(
+            sql,
+            {
+              i: id,
+              c: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN },
+              lobbv: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: contentLength }
+            },
+            function(err, result) {
+              should.not.exist(err);
+              should.strictEqual(result.rowsAffected, 1);
+              cb();
+            }
+          );
         },
-        function(err) {
-          should.exist(err);
-          // NJS-028: RAW database type is not supported with DML Returning statements
-          (err.message).should.startWith('NJS-028:');
-          done();
+        function(cb) {
+          checkInsertResult(id, content, specialStr, cb);
         }
-      );
+      ], done);
+
     }); // 82.1.18
 
     it('82.1.19 Negative: RETURNING INTO with autocommit on', function(done) {

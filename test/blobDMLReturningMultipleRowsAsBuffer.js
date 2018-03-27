@@ -73,13 +73,16 @@ describe('137. blobDMLReturningMultipleRowsAsBuffer.js', function() {
   });
 
   describe('137.1 BLOB DML returning multiple rows as buffer', function() {
+
+    var tabsize = 10;
+
     before(function(done) {
       async.series([
         function(cb) {
           sql.executeSql(connection, blob_table_create, {}, {}, cb);
         },
         function(cb) {
-          insertData(10, cb);
+          insertData(tabsize, cb);
         }
       ], done);
     });
@@ -88,7 +91,7 @@ describe('137. blobDMLReturningMultipleRowsAsBuffer.js', function() {
     });
 
     it('137.1.1 BLOB DML returning multiple rows as buffer', function(done) {
-      updateReturning_buffer(done);
+      updateReturning_buffer(tabsize, done);
     });
 
   });
@@ -128,7 +131,7 @@ describe('137. blobDMLReturningMultipleRowsAsBuffer.js', function() {
     ], cb);
   };
 
-  var updateReturning_buffer = function(callback) {
+  var updateReturning_buffer = function(tabsize, callback) {
     var sql_update = "UPDATE " + tableName + " set num = num+10 RETURNING num, blob into :num, :lobou";
     connection.execute(
       sql_update,
@@ -136,9 +139,14 @@ describe('137. blobDMLReturningMultipleRowsAsBuffer.js', function() {
         num: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
         lobou: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT }
       },
-      function(err) {
-        should.exist(err);
-        should.strictEqual((err.message), "NJS-028: raw database type is not supported with DML Returning statements");
+      function(err, result) {
+        should.not.exist(err);
+        for (var i = 0; i < tabsize; i++) {
+          var outnum = result.outBinds.num[i];
+          var outbuf = Number( result.outBinds.lobou[i] );
+          should.strictEqual(outbuf, i+1);
+          should.strictEqual(outnum, i+11);
+        }
         callback();
       }
     );

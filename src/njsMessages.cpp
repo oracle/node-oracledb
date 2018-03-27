@@ -62,7 +62,6 @@ static const char *errMsg[] = {
     "NJS-025: overflow when calculating results area size", // errResultsTooLarge
     "NJS-026: maxRows must be greater than zero",   // errInvalidmaxRows
     "NJS-027: unexpected SQL parsing error",        // errSQLSyntaxError
-    "NJS-028: raw database type is not supported with DML Returning statements", // errBufferReturningInvalid
     "NJS-029: invalid object from JavaScript",      // errInvalidJSObject
     "NJS-030: connection cannot be released because Lob operations are in progress",  // errBusyConnLOB
     "NJS-031: connection cannot be released because ResultSet operations are in progress", // errBusyConnRS

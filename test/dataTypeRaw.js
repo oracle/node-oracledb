@@ -150,7 +150,7 @@ describe('42. dataTypeRaw.js', function() {
     });
   });
 
-  describe('42.3 DML Returning - Currently not support RAW', function() {
+  describe('42.3 DML Returning', function() {
 
     before('create table', function(done) {
       assist.createTable(connection, tableName, done);
@@ -181,10 +181,9 @@ describe('42. dataTypeRaw.js', function() {
         },
         { autoCommit: true },
         function(err, result) {
-          should.exist(err);
-          (err.message).should.startWith('NJS-028:');
-          // NJS-028: raw database type is not supported with DML Returning statements
-          should.not.exist(result);
+          should.not.exist(err);
+          should.strictEqual(result.outBinds.rid[0], seq);
+          should.deepEqual(result.outBinds.rc[0], bindValue);
           done();
         }
       );
@@ -205,9 +204,9 @@ describe('42. dataTypeRaw.js', function() {
         ],
         { autoCommit: true },
         function(err, result) {
-          should.exist(err);
-          (err.message).should.startWith('NJS-028:');
-          should.not.exist(result);
+          should.not.exist(err);
+          should.strictEqual(result.outBinds[0][0], seq);
+          should.deepEqual(result.outBinds[1][0], bindValue);
           done();
         }
       );
@@ -224,13 +223,13 @@ describe('42. dataTypeRaw.js', function() {
           n   : seq,
           c   : { type: oracledb.BUFFER, val: bindValue, dir: oracledb.BIND_IN },
           rid : { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
-          rc  : { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: size * 2 }  // should be size
+          rc  : { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: size}
         },
         { autoCommit: true },
         function(err, result) {
-          should.exist(err);
-          (err.message).should.startWith('NJS-028:');
-          should.not.exist(result);
+          should.not.exist(err);
+          should.strictEqual(result.outBinds.rid[0], seq);
+          should.deepEqual(result.outBinds.rc[0], bindValue);
           done();
         }
       );
@@ -251,15 +250,15 @@ describe('42. dataTypeRaw.js', function() {
         },
         { autoCommit: true },
         function(err, result) {
-          should.exist(err);
-          (err.message).should.startWith('NJS-028:');
-          should.not.exist(result);
+          should.not.exist(err);
+          should.strictEqual(result.outBinds.rid[0], seq);
+          should.deepEqual(result.outBinds.rc[0], bindValue);
           done();
         }
       );
     }); // 42.3.4
 
-    it('42.3.6 DELETE statement with single row matching', function(done) {
+    it('42.3.5 DELETE statement with single row matching', function(done) {
       var seq = 1;
 
       connection.execute(
@@ -271,15 +270,14 @@ describe('42. dataTypeRaw.js', function() {
         ],
         { autoCommit: true },
         function(err, result) {
-          should.exist(err);
-          (err.message).should.startWith('NJS-028:');
-          should.not.exist(result);
+          should.not.exist(err);
+          should.strictEqual(result.outBinds[0][0], seq);
           done();
         }
       );
     });
 
-    it('42.3.7 DELETE statement with multiple rows matching', function(done) {
+    it('42.3.6 DELETE statement with multiple rows matching', function(done) {
       var seq = 1;
 
       connection.execute(
@@ -291,9 +289,8 @@ describe('42. dataTypeRaw.js', function() {
         },
         { autoCommit: true },
         function(err, result) {
-          should.exist(err);
-          (err.message).should.startWith('NJS-028:');
-          should.not.exist(result);
+          should.not.exist(err);
+          should.deepEqual(result.outBinds.rid, [2, 3]);
           done();
         }
       );

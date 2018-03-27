@@ -204,9 +204,9 @@ describe('126. longrawDMLBind.js', function() {
 
   }); // 126.2
 
-  describe('126.3 RETURNING INTO', function() {
+  describe.skip('126.3 RETURNING INTO', function() {
 
-    it('126.3.1 do not support in returning into', function(done) {
+    it('126.3.1 works with data size 64K - 1', function(done) {
       var insertedStr = random.getRandomLengthString(100);
       var updateStr = random.getRandomLengthString(65535);
       var insertedBuf = node6plus ? Buffer.from(insertedStr) : new Buffer(insertedStr);
@@ -297,8 +297,7 @@ describe('126. longrawDMLBind.js', function() {
       sql,
       bindVar,
       function(err) {
-        should.exist(err);
-        should.strictEqual(err.message, "NJS-028: raw database type is not supported with DML Returning statements");
+        should.not.exist(err);
         callback();
       }
     );
