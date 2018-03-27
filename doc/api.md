@@ -4799,7 +4799,7 @@ To get the automatically inserted identifier in node-oracledb, use a
 . . .
 connection.execute(
   "INSERT INTO mytable (mydata) VALUES ('Hello') RETURN myid INTO :id",
-  {id : {type: oracledb.NUMEBR, dir: oracledb.BIND_OUT } },
+  {id : {type: oracledb.NUMBER, dir: oracledb.BIND_OUT } },
   function (err, result) {
     if (err) { console.error(err.message); return; }
     console.log(result.outBinds.id);  // print the ID of the inserted row
