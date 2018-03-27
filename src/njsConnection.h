@@ -98,10 +98,10 @@ private:
     static void Async_Execute(njsBaton *baton);
     static void Async_AfterExecute(njsBaton *baton, Local<Value> argv[]);
 
-    // Release Method on Connection class
-    static NAN_METHOD(Release);
-    static void Async_Release(njsBaton *baton);
-    static void Async_AfterRelease(njsBaton *baton, Local<Value> argv[]);
+    // Close Method on Connection class
+    static NAN_METHOD(Close);
+    static void Async_Close(njsBaton *baton);
+    static void Async_AfterClose(njsBaton *baton, Local<Value> argv[]);
 
     // Commit Method on Connection class
     static NAN_METHOD(Commit);

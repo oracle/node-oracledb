@@ -80,7 +80,7 @@ void njsConnection::Init(Handle<Object> target)
     tpl->SetClassName(Nan::New<v8::String>("Connection").ToLocalChecked());
 
     Nan::SetPrototypeMethod(tpl, "execute", Execute);
-    Nan::SetPrototypeMethod(tpl, "release", Release);
+    Nan::SetPrototypeMethod(tpl, "close", Close);
     Nan::SetPrototypeMethod(tpl, "commit", Commit);
     Nan::SetPrototypeMethod(tpl, "rollback", Rollback);
     Nan::SetPrototypeMethod(tpl, "break", Break);
@@ -1481,7 +1481,7 @@ void njsConnection::Async_AfterExecute(njsBaton *baton, Local<Value> argv[])
 
 
 //-----------------------------------------------------------------------------
-// njsConnection::Release()
+// njsConnection::Close()
 //   Releases the connection from use by JS. This releases the connection back
 // to the pool or closes the standalone connection so further use is not
 // possible. The reference to the DPI handle is transferred to the baton so
@@ -1491,7 +1491,7 @@ void njsConnection::Async_AfterExecute(njsBaton *baton, Local<Value> argv[])
 // PARAMETERS
 //   - JS callback which will receive (error)
 //-----------------------------------------------------------------------------
-NAN_METHOD(njsConnection::Release)
+NAN_METHOD(njsConnection::Close)
 {
     njsConnection *connection;
     njsBaton *baton;
@@ -1504,17 +1504,17 @@ NAN_METHOD(njsConnection::Release)
         return;
     baton->dpiConnHandle = connection->dpiConnHandle;
     connection->dpiConnHandle = NULL;
-    baton->QueueWork("Release", Async_Release, NULL, 1);
+    baton->QueueWork("Close", Async_Close, NULL, 1);
 }
 
 
 //-----------------------------------------------------------------------------
-// njsConnection::Async_Release()
-//   Worker function for njsConnection::Release() method. If the attempt to
+// njsConnection::Async_Close()
+//   Worker function for njsConnection::Close() method. If the attempt to
 // close fails, the reference to the DPI handle is transferred back from the
 // baton to the connection.
 //-----------------------------------------------------------------------------
-void njsConnection::Async_Release(njsBaton *baton)
+void njsConnection::Async_Close(njsBaton *baton)
 {
     if (dpiConn_close(baton->dpiConnHandle, DPI_MODE_CONN_CLOSE_DEFAULT, NULL,
             0) < 0) {
@@ -1527,10 +1527,10 @@ void njsConnection::Async_Release(njsBaton *baton)
 
 
 //-----------------------------------------------------------------------------
-// njsConnection::Async_AfterRelease()
-//   Finishes release by cleaning up references.
+// njsConnection::Async_AfterClose()
+//   Finishes close by cleaning up references.
 //-----------------------------------------------------------------------------
-void njsConnection::Async_AfterRelease(njsBaton *baton, Local<Value> argv[])
+void njsConnection::Async_AfterClose(njsBaton *baton, Local<Value> argv[])
 {
     njsConnection *connection = (njsConnection*) baton->callingObj;
     connection->jsOracledb.Reset();
