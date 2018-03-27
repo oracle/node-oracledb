@@ -2,9 +2,9 @@
 
 This directory contains scripts for building, extracting and
 installing binary packages of node-oracledb.  Most users do not need
-to use anything in this directory (the exception is when doing a
-[manual
-install](https://oracle.github.io/node-oracledb/INSTALL.html#offline)
+to use anything in this directory (the exceptions are when building
+packages for self-hosting, or when doing a [manual
+install](https://oracle.github.io/node-oracledb/INSTALL.html#manualextraction)
 instead of using `npm`).
 
 The binary install process requires two kinds of package:
