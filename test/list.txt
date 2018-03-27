@@ -79,7 +79,6 @@ Overview of node-oracledb functional tests
         2.11.2 error occurs at getConnection() when poolMin is the default value 0
     2.12 connectionString alias
         2.12.1 allows connectionString to be used as an alias for connectString
-        2.12.2 favors connectString if both connectString and connectionString are passed
 
   3. examples.js
     3.1 connect.js
@@ -4086,3 +4085,42 @@ Overview of node-oracledb functional tests
     159.1 set the end-to-end tracing attribute - module
     159.2 set the tracing attribute - action
     159.3 set the tracing attribure - clientId
+
+160. editionTest.js
+    160.1 Default. No edition. Direct connection.
+    160.2 Default. No edition. Pooled connection.
+    160.3 Direct connection. Set edition at getting connection.
+    160.4 Pooled connection. Set edition at creating pool.
+    160.5 Direct connection. Change session edition.
+    160.6 Pooled connection. Change session edition.
+    160.7 sets edition globally. Direct connection.
+    160.8 sets edition globally. Pooled connection.
+    160.9 Negative - sets nonexistent edition globally
+    160.10 Direct connection. Set nonexistent edition.
+    160.11 Pooled connection. Set nonexistent edition.
+    160.12 sets to ora$base with direct connection
+    160.13 resets to ora$base in direct connection
+    160.14 sets to ora$base with pooled connection
+    160.15 sets to ora$base globally
+    160.16 overrides the global setting. Direct connection
+    160.17 sets to empty string. Direct connection.
+    160.18 Negative - invalid type. Direct connection.
+    160.19 Negative - invalid type. Pooled connection.
+    160.20 sets ORA_EDITION. Direct connection.
+    160.21 sets ORA_EDITION. Pooled connection.
+    160.22 sets ORA_EDITION. Direct connection. Set edition at getting connection.
+    160.23 sets ORA_EDITION. Pooled connection. Set edition at creating pool.
+    160.24 Negative - Sets ORA_EDITION with nonexistent value. Direct connection.
+    160.25 Negative - Sets ORA_EDITION with nonexistent value. Pooled connection.
+
+161. changePassword.js
+    161.1 basic case
+    161.2 pooled connection
+    161.3 DBA changes password
+    161.4 connects with an expired password
+    161.5 for DBA, the original password is ignored
+    161.6 Negative: basic case, wrong original password
+    161.7 Negative: basic case. invalid parameter
+    161.8 Negative: non-DBA tries to change the password
+    161.9 Negative: invalid type of 'newPassword'
+    161.10 sets "newPassword" to be an empty string. password unchanged

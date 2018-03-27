@@ -1056,46 +1056,6 @@ describe('2. pool.js', function() {
       );
     });
 
-    it('2.12.2 favors connectString if both connectString and connectionString are passed', function(done) {
-      oracledb.createPool(
-        {
-          user: dbConfig.user,
-          password: dbConfig.password,
-          connectString: 'this is wrong',
-          connectionString: dbConfig.connectString,
-          poolMin: 1,
-          poolMax: 1,
-          poolIncrement: 0
-        },
-        function(err, pool) {
-          should.exist(err);
-          should.not.exist(pool);
-
-          oracledb.createPool(
-            {
-              user: dbConfig.user,
-              password: dbConfig.password,
-              connectString: dbConfig.connectString,
-              connectionString: 'this is wrong',
-              poolMin: 1,
-              poolMax: 1,
-              poolIncrement: 0
-            },
-            function(err, pool) {
-              should.not.exist(err);
-
-              pool.should.be.ok();
-
-              pool.close(function(err) {
-                should.not.exist(err);
-
-                done();
-              });
-            }
-          );
-        }
-      );
-    });
   }); // 2.12
 
 });

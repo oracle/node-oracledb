@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -30,8 +30,19 @@
  *
  *****************************************************************************/
 
-module.exports = {
-  user          : process.env.NODE_ORACLEDB_USER || "hr",
-  password      : process.env.NODE_ORACLEDB_PASSWORD || "welcome",
-  connectString : process.env.NODE_ORACLEDB_CONNECTIONSTRING || "localhost/orcl"
-};
+var config = {};
+
+config.user = process.env.NODE_ORACLEDB_USER || 'hr';
+config.password  = process.env.NODE_ORACLEDB_PASSWORD || 'hr';
+config.connectString = process.env.NODE_ORACLEDB_CONNECTIONSTRING || 'localhost/orcl';
+
+// Has external authentication set up? Negative by default.
+config.externalAuth = process.env.NODE_ORACLEDB_EXTERNALAUTH || false;
+
+// Have you got DBA privilege? Positive by default.
+config.DBA_PRIVILEGE = process.env.NODE_DBA_PRIVILEGE || true;
+
+config.DBA_user = process.env.NODE_ORACLEDB_DBA_USER || 'sys';
+config.DBA_password = process.env.NODE_ORACLEDB_DBA_PASSWORD || 'oracle';
+
+module.exports = config;
