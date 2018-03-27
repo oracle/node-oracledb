@@ -131,10 +131,22 @@ describe('98.binding_DMLReturningInto.js', function() {
   };
 
   var compareBufErrMsg = function(element, err) {
-    if (element === "RAW" || element === "BLOB")  {
-      should.not.exist(err);
-    } else {
-      (err.message).should.startWith('ORA-00932:');
+
+    switch (element) {
+      case "RAW":
+      case "BLOB":
+        should.not.exist(err);
+        break;
+      case "CHAR":
+      case "NCHAR":
+      case "VARCHAR2":
+        if (err) {
+          // ORA-01465: invalid hex number
+          (err.message).should.startWith('ORA-01465:');
+        }
+        break;
+      default:
+        (err.message).should.startWith('ORA-00932:');
     }
   };
 
@@ -281,7 +293,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       doTest(table_name, dbColType, content, bindType, nullBind, done);
     });
 
-    it.skip('98.1.14 oracledb.BUFFER <--> DB: CHAR', function(done) {
+    it('98.1.14 oracledb.BUFFER <--> DB: CHAR', function(done) {
       index++;
       var table_name = tableNamePre + index;
       var content = assist.createBuffer(100);
@@ -291,7 +303,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       doTest(table_name, dbColType, content, bindType, nullBind, done);
     });
 
-    it.skip('98.1.15 oracledb.BUFFER <--> DB: NCHAR', function(done) {
+    it('98.1.15 oracledb.BUFFER <--> DB: NCHAR', function(done) {
       index++;
       var table_name = tableNamePre + index;
       var content = assist.createBuffer(100);
@@ -301,7 +313,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       doTest(table_name, dbColType, content, bindType, nullBind, done);
     });
 
-    it.skip('98.1.16 oracledb.BUFFER <--> DB: VARCHAR2', function(done) {
+    it('98.1.16 oracledb.BUFFER <--> DB: VARCHAR2', function(done) {
       index++;
       var table_name = tableNamePre + index;
       var content = assist.createBuffer(100);
@@ -523,7 +535,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       doTest(table_name, dbColType, content, bindType, nullBind, done);
     });
 
-    it.skip('98.2.14 oracledb.BUFFER <--> DB: CHAR', function(done) {
+    it('98.2.14 oracledb.BUFFER <--> DB: CHAR', function(done) {
       index++;
       var table_name = tableNamePre + index;
       var content = null;
@@ -533,7 +545,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       doTest(table_name, dbColType, content, bindType, nullBind, done);
     });
 
-    it.skip('98.2.15 oracledb.BUFFER <--> DB: NCHAR', function(done) {
+    it('98.2.15 oracledb.BUFFER <--> DB: NCHAR', function(done) {
       index++;
       var table_name = tableNamePre + index;
       var content = null;
@@ -543,7 +555,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       doTest(table_name, dbColType, content, bindType, nullBind, done);
     });
 
-    it.skip('98.2.16 oracledb.BUFFER <--> DB: VARCHAR2', function(done) {
+    it('98.2.16 oracledb.BUFFER <--> DB: VARCHAR2', function(done) {
       index++;
       var table_name = tableNamePre + index;
       var content = null;
