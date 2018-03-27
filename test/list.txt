@@ -31,6 +31,9 @@ Overview of node-oracledb functional tests
         1.8.3 Negative value - random constants
         1.8.4 Negative value - NaN
         1.8.5 gets ignored when acquiring a connection from Pool
+    1.9 Ping method
+        1.9.1 ping() checks the connection is usable
+        1.9.2 closed connection
 
 2. pool.js
     2.1 default values

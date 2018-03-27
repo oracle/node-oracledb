@@ -879,4 +879,66 @@ describe('1. connection.js', function(){
 
   }); // 1.8
 
+  describe('1.9 Ping method', function() {
+
+    it('1.9.1 ping() checks the connection is usable', function(done) {
+      var conn;
+      async.series([
+        function(cb) {
+          oracledb.getConnection(
+            dbConfig,
+            function(err, connection) {
+              should.not.exist(err);
+              conn = connection;
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          conn.ping(function(err) {
+            should.not.exist(err);
+            cb();
+          });
+        },
+        function(cb) {
+          conn.close(function(err) {
+            should.not.exist(err);
+            cb();
+          });
+        }
+      ], done);
+    }); // 1.9.1
+
+    it('1.9.2 closed connection', function(done) {
+      var conn;
+      async.series([
+        function(cb) {
+          oracledb.getConnection(
+            dbConfig,
+            function(err, connection) {
+              should.not.exist(err);
+              conn = connection;
+              cb();
+            }
+          );
+        },function(cb) {
+          conn.close(function(err) {
+            should.not.exist(err);
+            cb();
+          });
+        },
+        function(cb) {
+          conn.ping(function(err) {
+            should.exist(err);
+            should.strictEqual(
+              err.message,
+              "NJS-003: invalid connection"
+            );
+            cb();
+          });
+        },
+      ], done);
+    }); // 1.9.2
+  }); // 1.9
+
 });
