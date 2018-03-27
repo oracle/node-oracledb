@@ -88,10 +88,11 @@ limitations under the License.
                     - 3.3.2.1.2.1 [`connectString`](#getconnectiondbattrsconnectstring), [`connectionString`](#getconnectiondbattrsconnectstring)
                     - 3.3.2.1.2.2 [`events`](#getconnectiondbattrsevents)
                     - 3.3.2.1.2.3 [`externalAuth`](#getconnectiondbattrsexternalauth)
-                    - 3.3.2.1.2.4 [`password`](#getconnectiondbattrspassword)
-                    - 3.3.2.1.2.5 [`privilege`](#getconnectiondbattrsprivilege)
-                    - 3.3.2.1.2.6 [`stmtCacheSize`](#getconnectiondbattrsstmtcachesize)
-                    - 3.3.2.1.2.7 [`user`](#getconnectiondbattrsuser)
+                    - 3.3.2.1.2.4 [`newPassword`](#getconnectiondbattrsnewpassword)
+                    - 3.3.2.1.2.5 [`password`](#getconnectiondbattrspassword)
+                    - 3.3.2.1.2.6 [`privilege`](#getconnectiondbattrsprivilege)
+                    - 3.3.2.1.2.7 [`stmtCacheSize`](#getconnectiondbattrsstmtcachesize)
+                    - 3.3.2.1.2.8 [`user`](#getconnectiondbattrsuser)
             - 3.3.2.2 [`getConnection()`: Callback Function](#getconnectiondbcallback)
         - 3.3.3 [`getPool()`](#getpool)
             - 3.3.3.1 [`getPool()`: Parameters](#getpoolattrs)
@@ -106,32 +107,33 @@ limitations under the License.
         - 4.1.6 [`stmtCacheSize`](#propconnstmtcachesize)
     - 4.2 [Connection Methods](#connectionmethods)
         - 4.2.1 [`break()`](#break)
-        - 4.2.2 [`close()`](#connectionclose)
-        - 4.2.3 [`commit()`](#commit)
-        - 4.2.4 [`createLob()`](#connectioncreatelob)
-        - 4.2.5 [`execute()`](#execute)
-            - 4.2.5.1 [`execute()`: SQL Statement](#executesqlparam)
-            - 4.2.5.2 [`execute()`: Bind Parameters](#executebindParams)
+        - 4.2.2 [`changePassword()`](#changepassword)
+        - 4.2.3 [`close()`](#connectionclose)
+        - 4.2.4 [`commit()`](#commit)
+        - 4.2.5 [`createLob()`](#connectioncreatelob)
+        - 4.2.6 [`execute()`](#execute)
+            - 4.2.6.1 [`execute()`: SQL Statement](#executesqlparam)
+            - 4.2.6.2 [`execute()`: Bind Parameters](#executebindParams)
                 - [`dir`](#executebindParams), [`maxArraySize`](#executebindParams), [`maxSize`](#executebindParams), [`type`](#executebindParams), [`val`](#executebindParams)
-            - 4.2.5.3 [`execute()`: Options](#executeoptions)
-                - 4.2.5.3.1 [`autoCommit`](#propexecautocommit)
-                - 4.2.5.3.2 [`extendedMetaData`](#propexecextendedmetadata)
-                - 4.2.5.3.3 [`fetchArraySize`](#propexecfetcharraysize)
-                - 4.2.5.3.4 [`fetchInfo`](#propexecfetchinfo)
-                - 4.2.5.3.5 [`maxRows`](#propexecmaxrows)
-                - 4.2.5.3.6 [`outFormat`](#propexecoutformat)
-                - 4.2.5.3.7 [`prefetchRows`](#propexecprefetchrows)
-                - 4.2.5.3.8 [`resultSet`](#propexecresultset)
-            - 4.2.5.4 [`execute()`: Callback Function](#executecallback)
-                - 4.2.5.4.1 [`metaData`](#execmetadata)
+            - 4.2.6.3 [`execute()`: Options](#executeoptions)
+                - 4.2.6.3.1 [`autoCommit`](#propexecautocommit)
+                - 4.2.6.3.2 [`extendedMetaData`](#propexecextendedmetadata)
+                - 4.2.6.3.3 [`fetchArraySize`](#propexecfetcharraysize)
+                - 4.2.6.3.4 [`fetchInfo`](#propexecfetchinfo)
+                - 4.2.6.3.5 [`maxRows`](#propexecmaxrows)
+                - 4.2.6.3.6 [`outFormat`](#propexecoutformat)
+                - 4.2.6.3.7 [`prefetchRows`](#propexecprefetchrows)
+                - 4.2.6.3.8 [`resultSet`](#propexecresultset)
+            - 4.2.6.4 [`execute()`: Callback Function](#executecallback)
+                - 4.2.6.4.1 [`metaData`](#execmetadata)
                     - [`name`](#execmetadata), [`fetchType`](#execmetadata), [`dbType`](#execmetadata), [`byteSize`](#execmetadata), [`precision`](#execmetadata), [`scale`](#execmetadata), [`nullable`](#execmetadata)
-                - 4.2.5.4.2 [`outBinds`](#execoutbinds)
-                - 4.2.5.4.3 [`resultSet`](#execresultset)
-                - 4.2.5.4.4 [`rows`](#execrows)
-                - 4.2.5.4.5 [`rowsAffected`](#execrowsaffected)
-        - 4.2.6 [`queryStream()`](#querystream)
-        - 4.2.7 [`release()`](#release)
-        - 4.2.8 [`rollback()`](#rollback)
+                - 4.2.6.4.2 [`outBinds`](#execoutbinds)
+                - 4.2.6.4.3 [`resultSet`](#execresultset)
+                - 4.2.6.4.4 [`rows`](#execrows)
+                - 4.2.6.4.5 [`rowsAffected`](#execrowsaffected)
+        - 4.2.7 [`queryStream()`](#querystream)
+        - 4.2.8 [`release()`](#release)
+        - 4.2.9 [`rollback()`](#rollback)
 5. [Lob Class](#lobclass)
     - 5.1 [Lob Properties](#lobproperties)
         - 5.1.1 [`chunkSize`](#proplobchunksize)
@@ -181,10 +183,11 @@ limitations under the License.
     - 8.5 [External Authentication](#extauth)
     - 8.6 [Privileged Connections](#privconn)
     - 8.7 [Securely Encrypting Network Traffic to Oracle Database](#securenetwork)
-    - 8.8 [Connections and High Availability](#connectionha)
-        - 8.8.1 [Fast Application Notification (FAN)](#connectionfan)
-        - 8.8.2 [Runtime Load Balancing (RLB)](#connectionrlb)
-    - 8.9 [Optional Client Configuration Files](#tnsadmin)
+    - 8.8 [Changing Passwords and Connecting with an Expired Password](#changingpassword)
+    - 8.9 [Connections and High Availability](#connectionha)
+        - 8.9.1 [Fast Application Notification (FAN)](#connectionfan)
+        - 8.9.2 [Runtime Load Balancing (RLB)](#connectionrlb)
+    - 8.10 [Optional Client Configuration Files](#tnsadmin)
 9. [SQL Execution](#sqlexecution)
     - 9.1 [SELECT Statements](#select)
         - 9.1.1 [Fetching Rows with Direct Fetches](#fetchingrows)
@@ -1628,7 +1631,23 @@ The `user` and `password` properties should not be set when
 Note prior to node-oracledb 0.5 this property was called
 `isExternalAuth`.
 
-###### <a name="getconnectiondbattrspassword"></a> 3.3.2.1.2.4 `password`
+###### <a name="getconnectiondbattrsnewpassword"></a> 3.3.2.1.2.4 `newPassword`
+
+```
+String newPassword
+```
+
+The new password to use for the database user.  When using
+`newPassword`, the [`password`](#getconnectiondbattrspassword)
+property should be set to the current password.
+
+This allows passwords to be changed at the time of connection, in
+particular it can be used to connect when the old password has
+expired.
+
+See [Changing Passwords and Connecting with an Expired Password](#changingpassword).
+
+###### <a name="getconnectiondbattrspassword"></a> 3.3.2.1.2.5 `password`
 
 ```
 String password
@@ -1637,7 +1656,7 @@ String password
 The password of the database user. A password is also necessary if a
 proxy user is specified.
 
-###### <a name="getconnectiondbattrsprivilege"></a> 3.3.2.1.2.5 `privilege`
+###### <a name="getconnectiondbattrsprivilege"></a> 3.3.2.1.2.6 `privilege`
 
 ```
 Number privilege
@@ -1651,7 +1670,7 @@ See [Privileged Connections](#privconn) for more information.
 
 Note only non-pooled connections can be privileged.
 
-###### <a name="getconnectiondbattrsstmtcachesize"></a> 3.3.2.1.2.6 `stmtCacheSize`
+###### <a name="getconnectiondbattrsstmtcachesize"></a> 3.3.2.1.2.7 `stmtCacheSize`
 
 ```
 Number stmtCacheSize
@@ -1662,7 +1681,7 @@ The number of statements to be cached in the
 property may be used to override the
 [`oracledb.stmtCacheSize`](#propdbstmtcachesize) property.
 
-###### <a name="getconnectiondbattrsuser"></a> 3.3.2.1.2.7 `user`
+###### <a name="getconnectiondbattrsuser"></a> 3.3.2.1.2.8 `user`
 
 ```
 String user
@@ -1827,7 +1846,63 @@ Callback function parameter | Description
 ----------------------------|-------------
 *Error error* | If `break()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
-####  <a name="connectionclose"></a> 4.2.2 `connection.close()`
+####  <a name="changepassword"></a> 4.2.2 `connection.changePassword()`
+
+##### Prototype
+
+Callback:
+```
+changePassword(user, oldPassword, newPassword, function(Error error){});
+```
+Promise:
+```
+promise = changePassword(user, oldPassword, newPassword);
+```
+
+##### Description
+
+Changes the password of the specified user.
+
+Only users with the ALTER USER privilege can change passwords of other
+users.
+
+See [Changing Passwords and Connecting with an Expired Password](#changingpassword).
+
+##### Parameters
+
+```
+String user
+```
+
+The name of the user whose password is to be changed.
+
+```
+String oldPassword
+```
+
+The current password of the currently connected user.
+
+If `changePassword()` is being used by a DBA to change the password of
+another user, the value of `oldPassword` is ignored and can be an
+empty string.
+
+```
+String newPassword
+```
+
+The new password of the user whose password is to be changed.
+
+```
+function(Error error)
+```
+
+The parameters of the callback function are:
+
+Callback function parameter | Description
+----------------------------|-------------
+*Error error* | If `changePassword()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+
+####  <a name="connectionclose"></a> 4.2.3 `connection.close()`
 
 ##### Prototype
 
@@ -1875,7 +1950,7 @@ Callback function parameter | Description
 ----------------------------|-------------
 *Error error* | If `close()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
-####  <a name="commit"></a> 4.2.3 `connection.commit()`
+####  <a name="commit"></a> 4.2.4 `connection.commit()`
 
 ##### Prototype
 
@@ -1904,7 +1979,7 @@ Callback function parameter | Description
 ----------------------------|-------------
 *Error error* | If `commit()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
-#### <a name="connectioncreatelob"></a> 4.2.4 `connection.createLob()`
+#### <a name="connectioncreatelob"></a> 4.2.5 `connection.createLob()`
 
 ##### Prototype
 
@@ -1955,7 +2030,7 @@ Callback function parameter | Description
 *Error error* | If `createLob()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
 
-#### <a name="execute"></a> 4.2.5 `connection.execute()`
+#### <a name="execute"></a> 4.2.6 `connection.execute()`
 
 ##### Prototype
 
@@ -1996,7 +2071,7 @@ Parameter | Description
 
 The parameters are discussed in the next sections.
 
-##### <a name="executesqlparam"></a> 4.2.5.1 `execute()`: SQL Statement
+##### <a name="executesqlparam"></a> 4.2.6.1 `execute()`: SQL Statement
 
 ```
 String sql
@@ -2005,7 +2080,7 @@ String sql
 The SQL or PL/SQL statement that `execute()` executes. The statement
 may contain bind variables.
 
-##### <a name="executebindParams"></a> 4.2.5.2 `execute()`: Bind Parameters
+##### <a name="executebindParams"></a> 4.2.6.2 `execute()`: Bind Parameters
 ```
 Object bindParams
 ```
@@ -2045,7 +2120,7 @@ UROWIDs can take up to 5267 bytes when fetched from the database so
 
 Note `oracledb.CURSOR` bind variables can be used only for PL/SQL OUT binds.
 
-##### <a name="executeoptions"></a> 4.2.5.3 `execute()`: Options
+##### <a name="executeoptions"></a> 4.2.6.3 `execute()`: Options
 
 ```
 Object options
@@ -2062,7 +2137,7 @@ name/number* or *NJS-012: encountered invalid bind data type in parameter*.
 The following properties can be set or overridden for the execution of
 a statement.
 
-###### <a name="propexecautocommit"></a> 4.2.5.3.1 `autoCommit`
+###### <a name="propexecautocommit"></a> 4.2.6.3.1 `autoCommit`
 
 ```
 Boolean autoCommit
@@ -2070,7 +2145,7 @@ Boolean autoCommit
 
 Overrides [`oracledb.autoCommit`](#propdbisautocommit).
 
-###### <a name="propexecextendedmetadata"></a> 4.2.5.3.2 `extendedMetaData`
+###### <a name="propexecextendedmetadata"></a> 4.2.6.3.2 `extendedMetaData`
 
 ```
 Boolean extendedMetaData
@@ -2078,7 +2153,7 @@ Boolean extendedMetaData
 
 Overrides [`oracledb.extendedMetaData`](#propdbextendedmetadata).
 
-###### <a name="propexecfetcharraysize"></a> 4.2.5.3.3 `fetchArraySize`
+###### <a name="propexecfetcharraysize"></a> 4.2.6.3.3 `fetchArraySize`
 
 ```
 Number fetchArraySize
@@ -2086,7 +2161,7 @@ Number fetchArraySize
 
 Overrides [`oracledb.fetchArraySize`](#propdbfetcharraysize).
 
-###### <a name="propfetchinfo"></a> <a name="propexecfetchinfo"></a> 4.2.5.3.4 `fetchInfo`
+###### <a name="propfetchinfo"></a> <a name="propexecfetchinfo"></a> 4.2.6.3.4 `fetchInfo`
 
 ```
 Object fetchInfo
@@ -2144,7 +2219,7 @@ or [`fetchAsBuffer`](#propdbfetchasbuffer) settings instead.
 See [Query Result Type Mapping](#typemap) for more information on query type
 mapping.
 
-###### <a name="propexecmaxrows"></a> 4.2.5.3.5 `maxRows`
+###### <a name="propexecmaxrows"></a> 4.2.6.3.5 `maxRows`
 
 ```
 Number maxRows
@@ -2152,7 +2227,7 @@ Number maxRows
 
 Overrides [`oracledb.maxRows`](#propdbmaxrows).
 
-###### <a name="propexecoutformat"></a> 4.2.5.3.6 `outFormat`
+###### <a name="propexecoutformat"></a> 4.2.6.3.6 `outFormat`
 
 ```
 String outFormat
@@ -2160,7 +2235,7 @@ String outFormat
 
 Overrides [`oracledb.outFormat`](#propdboutformat).
 
-###### <a name="propexecprefetchrows"></a> 4.2.5.3.7 `prefetchRows`
+###### <a name="propexecprefetchrows"></a> 4.2.6.3.7 `prefetchRows`
 
 ```
 Number prefetchRows
@@ -2170,7 +2245,7 @@ This attribute is no longer supported in node-oracledb version 2 and
 has no effect on applications.  Use
 [`fetchArraySize`](#propexecfetcharraysize) instead.
 
-###### <a name="propexecresultset"></a> 4.2.5.3.8 `resultSet`
+###### <a name="propexecresultset"></a> 4.2.6.3.8 `resultSet`
 
 ```
 Boolean resultSet
@@ -2180,7 +2255,7 @@ Determines whether query results should be returned as a
 [ResultSet](#resultsetclass) object or directly.  The default is
 *false*.
 
-##### <a name="executecallback"></a> 4.2.5.4 `execute()`: Callback Function
+##### <a name="executecallback"></a> 4.2.6.4 `execute()`: Callback Function
 
 ```
 function(Error error, [Object result])
@@ -2197,7 +2272,7 @@ Callback function parameter | Description
 
 The properties of `result` object from the `execute()` callback are described below.
 
-###### <a name="execmetadata"></a> 4.2.5.4.1 `metaData`
+###### <a name="execmetadata"></a> 4.2.6.4.1 `metaData`
 
 ```
 readonly Array metaData
@@ -2237,7 +2312,7 @@ such as `WHERE 1 = 0` so the database does minimal work.
 
 See [Query Column Metadata](#querymeta) for examples.
 
-###### <a name="execoutbinds"></a> 4.2.5.4.2 `outBinds`
+###### <a name="execoutbinds"></a> 4.2.6.4.2 `outBinds`
 
 ```
 Array/object outBinds
@@ -2248,7 +2323,7 @@ If [`bindParams`](#executebindParams) is passed as an array, then
 `outBinds` is returned as an array.  If `bindParams` is passed as an
 object, then `outBinds` is returned as an object.
 
-###### <a name="execresultset"></a> 4.2.5.4.3 `resultSet`
+###### <a name="execresultset"></a> 4.2.6.4.3 `resultSet`
 
 ```
 Object resultSet
@@ -2263,7 +2338,7 @@ When using this option, [`resultSet.close()`](#close) must be called
 when the ResultSet is no longer needed.  This is true whether or not
 rows have been fetched from the ResultSet.
 
-###### <a name="execrows"></a> 4.2.5.4.4 `rows`
+###### <a name="execrows"></a> 4.2.6.4.4 `rows`
 
 ```
 Array rows
@@ -2283,7 +2358,7 @@ The number of rows returned is limited by
 `maxRows` is 0, then the number of rows is limited by Node.js memory
 constraints.
 
-###### <a name="execrowsaffected"></a> 4.2.5.4.5 `rowsAffected`
+###### <a name="execrowsaffected"></a> 4.2.6.4.5 `rowsAffected`
 
 ```
 Number rowsAffected
@@ -2294,7 +2369,7 @@ the number of rows affected, for example the number of rows
 inserted. For non-DML statements such as queries, or if no rows are
 affected, then `rowsAffected` will appear as undefined.
 
-#### <a name="querystream"></a> 4.2.6 `connection.queryStream()`
+#### <a name="querystream"></a> 4.2.7 `connection.queryStream()`
 
 ##### Prototype
 
@@ -2330,11 +2405,11 @@ See [Query Streaming](#streamingresults) for more information.
 
 See [execute()](#execute).
 
-#### <a name="release"></a> 4.2.7 `connection.release()`
+#### <a name="release"></a> 4.2.8 `connection.release()`
 
 An alias for [connection.close()](#connectionclose).
 
-#### <a name="rollback"></a> 4.2.8 `connection.rollback()`
+#### <a name="rollback"></a> 4.2.9 `connection.rollback()`
 
 ##### Prototype
 
@@ -3647,7 +3722,79 @@ manual also contains information about other important security
 features that Oracle Database provides, such Transparent Data
 Encryption of data-at-rest in the database.
 
-### <a name="connectionha"></a> 8.8 Connections and High Availability
+### <a name="changingpassword"></a> 8.8 Changing Passwords and Connecting with an Expired Password
+
+#### Changing Passwords
+
+Database passwords can be changed with
+[`connection.changePassword()`](#changepassword).  For example, to
+change HR's password from 'welcome' to 'streamboat':
+
+```javascript
+oracledb.getConnection(
+  {
+    user          : "hr",
+    password      : "welcome",
+    connectString : "localhost/orclpdb"
+  },
+  function(err, connection) {
+    if (err) { console.error(err.message); return; }
+
+    connection.changePassword(
+        'hr', 'welcome', 'steamboat',
+        function(err) {
+        . . .
+        });
+    . . .
+```
+
+Only DBAs, or users with the ALTER USER privilege, can change the
+password of another user.  In this case, the old password value is
+ignored and can be an empty string:
+
+```javascript
+oracledb.getConnection(
+  {
+    user          : "system",
+    password      : "secret",
+    connectString : "localhost/orclpdb"
+  },
+  function(err, connection) {
+    if (err) { console.error(err.message); return; }
+
+    connection.changePassword(
+        'hr', '', 'steamboat',
+        function(err) {
+        . . .
+        });
+    . . .
+```
+
+#### Connecting with an Expired Password
+
+When creating a standalone, non-pooled connection the user's password
+can be changed at time of connection.  This is most useful when the
+user's password has expired, because it allows a user to connect
+without requiring a DBA to reset their password.
+
+Both the current and new passwords must be given when connecting.  For
+example, if HR's password is 'welcome', it can be changed to
+'steamboat' like:
+
+```javascript
+oracledb.getConnection(
+  {
+    user          : "hr",
+    password      : "welcome",
+    newPassword   : "steamboat",
+    connectString : "localhost/orclpdb"
+  },
+  function(err, connection) {
+    if (err) { console.error(err.message); return; }
+  . . .
+```
+
+### <a name="connectionha"></a> 8.9 Connections and High Availability
 
 For applications that need to be highly available, you may want to
 configure your OS network settings and Oracle Net (which handles
@@ -3664,7 +3811,7 @@ setting [`ENABLE=BROKEN`][36].
 Other [Oracle Network Services][37] options may also be useful for
 high availability and performance tuning.
 
-#### <a name="connectionfan"></a> 8.8.1 Fast Application Notification (FAN)
+#### <a name="connectionfan"></a> 8.9.1 Fast Application Notification (FAN)
 
 Users of [Oracle Database FAN][64] should set
 [`oracledb.events`](#propdbevents) to *true*.  This can also be
@@ -3695,7 +3842,7 @@ connections affected by a database machine or instance failure so
 future connect calls will establish a fresh connection without the
 application being aware of any service disruption.
 
-#### <a name="connectionrlb"></a> 8.8.2 Runtime Load Balancing (RLB)
+#### <a name="connectionrlb"></a> 8.9.2 Runtime Load Balancing (RLB)
 
 [Oracle Database RAC][93] users with [Oracle Database (RLB)][65]
 advisory events configured should use node-oracledb [Connection
@@ -3706,7 +3853,7 @@ Configuration](#oraaccess).
 RLB allows optimal use of database resources by balancing database
 requests across RAC instances.
 
-### <a name="tnsadmin"></a> 8.9 Optional Client Configuration Files
+### <a name="tnsadmin"></a> 8.10 Optional Client Configuration Files
 
 Optional Oracle Client configuration files are read when node-oracledb
 is loaded.  These files affect connections and applications.  Common

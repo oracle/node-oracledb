@@ -85,6 +85,7 @@ void njsConnection::Init(Handle<Object> target)
     Nan::SetPrototypeMethod(tpl, "rollback", Rollback);
     Nan::SetPrototypeMethod(tpl, "break", Break);
     Nan::SetPrototypeMethod(tpl, "createLob", CreateLob);
+    Nan::SetPrototypeMethod(tpl, "changePassword", ChangePassword);
 
     Nan::SetAccessor(tpl->InstanceTemplate(),
             Nan::New<v8::String>("stmtCacheSize").ToLocalChecked(),
@@ -1711,6 +1712,55 @@ void njsConnection::Async_AfterCreateLob(njsBaton *baton, Local<Value> argv[])
                                                        key).ToLocalChecked());
     Local<Value> temp = fn->Call(jsOracledb, 1, tempArgv);
     argv[1] = scope.Escape(temp);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection::ChangePassword()
+//   Change the password on the connection.
+//
+// PARAMETERS
+//   - JS callback which will receive (error)
+//-----------------------------------------------------------------------------
+NAN_METHOD(njsConnection::ChangePassword)
+{
+    std::string user, password, newPassword;
+    njsConnection *connection;
+    njsBaton *baton;
+
+    connection = (njsConnection*) ValidateArgs(info, 4, 4);
+    if (!connection)
+        return;
+    if (!connection->GetStringArg(info, 0, user))
+        return;
+    if (!connection->GetStringArg(info, 1, password))
+        return;
+    if (!connection->GetStringArg(info, 2, newPassword))
+        return;
+    baton = connection->CreateBaton(info);
+    if (!baton)
+        return;
+    if (baton->error.empty()) {
+        baton->SetDPIConnHandle(connection->dpiConnHandle);
+        baton->user = user;
+        baton->password = password;
+        baton->newPassword = newPassword;
+    }
+    baton->QueueWork("ChangePassword", Async_ChangePassword, NULL, 1);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection::Async_ChangePassword()
+//   Worker function for njsConnection::ChangePassword() method.
+//-----------------------------------------------------------------------------
+void njsConnection::Async_ChangePassword(njsBaton *baton)
+{
+    if (dpiConn_changePassword(baton->dpiConnHandle, baton->user.c_str(),
+            (uint32_t) baton->user.length(), baton->password.c_str(),
+            (uint32_t) baton->password.length(), baton->newPassword.c_str(),
+            (uint32_t) baton->newPassword.length()) < 0)
+        baton->GetDPIError();
 }
 
 

@@ -120,6 +120,10 @@ private:
     static void Async_CreateLob(njsBaton *baton);
     static void Async_AfterCreateLob(njsBaton *baton, Local<Value> argv[]);
 
+    // ChangePassword Method on Connection class
+    static NAN_METHOD(ChangePassword);
+    static void Async_ChangePassword(njsBaton *baton);
+
     // Define Getter Accessors to properties
     static NAN_GETTER(GetStmtCacheSize);
     static NAN_GETTER(GetClientId);

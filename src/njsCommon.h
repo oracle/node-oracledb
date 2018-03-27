@@ -248,6 +248,7 @@ public:
     std::string sql;
     std::string user;
     std::string password;
+    std::string newPassword;
     std::string connectString;
     std::string connClass;
     uint32_t poolMin;

@@ -896,6 +896,7 @@ NAN_METHOD(njsOracledb::GetConnection)
     baton->GetStringFromJSON(connProps, "password", 0, baton->password);
     baton->GetStringFromJSON(connProps, "connectString", 0,
             baton->connectString);
+    baton->GetStringFromJSON(connProps, "newPassword", 0, baton->newPassword);
     baton->connClass = oracledb->connClass;
     baton->stmtCacheSize  = oracledb->stmtCacheSize;
     baton->externalAuth = oracledb->externalAuth;
@@ -933,6 +934,10 @@ void njsOracledb::Async_GetConnection(njsBaton *baton)
     if (!baton->connClass.empty()) {
         params.connectionClass = baton->connClass.c_str();
         params.connectionClassLength = baton->connClass.length();
+    }
+    if(!baton->newPassword.empty()) {
+        params.newPassword = baton->newPassword.c_str();
+        params.newPasswordLength = baton->newPassword.length();
     }
     if (!InitCommonCreateParams(baton, &commonParams))
         return;
