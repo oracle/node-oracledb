@@ -1,4 +1,4 @@
-# node-oracledb 2.1 Documentation for the Oracle Database Node.js Add-on
+# node-oracledb 2.2 Documentation for the Oracle Database Node.js Add-on
 
 *Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved.*
 
@@ -6486,8 +6486,8 @@ SQL> SELECT UNIQUE sid, client_driver
 
        SID CLIENT_DRIVER
 ---------- ------------------------------
-        16 node-oracledb : 2.1.0
-        33 node-oracledb : 2.1.0
+        16 node-oracledb : 2.2.0
+        33 node-oracledb : 2.2.0
 ```
 
 Note if [`oracledb.connectionClass`](#propdbconclass) is set for a

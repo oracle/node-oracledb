@@ -1,5 +1,7 @@
 # Change Log
 
+## node-oracledb v2.2.0 (DD Mon YYYY)
+
 ## node-oracledb v2.1.2 (21 Feb 2018)
 
 - Fixed regression with end-to-end tracing attributes not being set.
