@@ -2,6 +2,62 @@
 
 ## node-oracledb v2.2.0 (DD Mon YYYY)
 
+- Added
+  [`oracledb.oracleClientVersionString`](https://oracle.github.io/node-oracledb/doc/api.html#propdboracleclientversionstring)
+  and
+  [`connection.oracleServerVersionString`](https://oracle.github.io/node-oracledb/doc/api.html#propconnoracleserverversionstring)
+  to complement the existing numeric properties.
+
+- Added
+  [`oracledb.edition`](https://oracle.github.io/node-oracledb/doc/api.html#propdbedition)
+  to support Edition-Based Redefinition.  This removes the need to use
+  an `ALTER SESSION` command or `ORA_EDITION` environment variable.
+
+- Added
+  [`oracledb.events`](https://oracle.github.io/node-oracledb/doc/api.html#propdbevents)
+  to allow the Oracle client library to receive Oracle Database
+  service events, such as FAN and RLB events.  This removes the need
+  to use an `oraaccess.xml` file to enable event handling.
+
+- Added
+  [`connection.changePassword()`](https://oracle.github.io/node-oracledb/doc/api.html#changingpassword)
+  for changing passwords, and also added support for changing the
+  password during `oracledb.getConnection()`.
+
+- Added
+  [`connection.executeMany()`](https://oracle.github.io/node-oracledb/doc/api.html#executemany)
+  for efficient batch DML (e.g. INSERT, UPDATE and DELETE) and PL/SQL
+  execution with multiple records.
+
+- Added
+  [`connection.getStatementInfo()`](https://oracle.github.io/node-oracledb/doc/api.html#getstmtinfo)
+  to find information about a SQL statement without executing it.
+
+- Added
+  [`connection.ping()`](https://oracle.github.io/node-oracledb/doc/api.html#connectionping)
+  to support system health checks.
+
+- Added support for binding RAW types into Buffers in DML RETURNING statements.
+
+- Created GitHub 'pages' for hosting documentation.  See:
+    - https://oracle.github.io/node-oracledb
+    - https://oracle.github.io/node-oracledb/INSTALL.html
+    - https://oracle.github.io/node-oracledb/doc/api.html
+
+- Simplified the binary installer messages to reduce user uncertainty.
+
+- Improved the text for the NJS-045 runtime loader failure error.
+
+- Made the implementations of `connection.close()` and `pool.close()`
+  the primary code paths in place of their respective aliases
+  `connection.release()` and `pool.terminate()`.
+
+- An empty object for `fetchInfo` no longer produces an error.
+
+- Fixed compilation warnings on Windows.
+
+- Updated the node-oracledb implementation to replace V8 deprecations.
+
 ## node-oracledb v2.1.2 (21 Feb 2018)
 
 - Fixed regression with end-to-end tracing attributes not being set.
@@ -11,21 +67,29 @@
 ## node-oracledb v2.1.1 (16 Feb 2018)
 
 - Fixed regression with querystream() in Node 4 & 6.
+  https://github.com/oracle/node-oracledb/issues/847
 
 ## node-oracledb v2.1.0 (15 Feb 2018)
 
-- Added support for privileged standalone connections: SYSDBA,
-  SYSOPER, SYSASM, SYSBACKUP, SYSDG, SYSKM, and SYSRAC
+- Added support for [privileged standalone
+  connections](https://oracle.github.io/node-oracledb/doc/api.html#privconn):
+  SYSDBA, SYSOPER, SYSASM, SYSBACKUP, SYSDG, SYSKM, and SYSRAC
 
-- Improved the Error object with new `errorNum` and `offset`
-  properties for Oracle errors.
+- Improved the
+  [Error](https://oracle.github.io/node-oracledb/doc/api.html#properror)
+  object with new `errorNum` and `offset` properties for Oracle
+  errors.
 
-- Added new `versionString` and `versionSuffix` attributes to aid
-  showing node-oracledb version and release status.
+- Added new
+  [`versionString`](https://oracle.github.io/node-oracledb/doc/api.html#propdbversionstring)
+  and
+  [`versionSuffix`](https://oracle.github.io/node-oracledb/doc/api.html#propdbversionsuffix)
+  attributes to aid showing node-oracledb version and release status.
 
-- Added `connectionString` as an alias for `connectString` in
-  `oracledb.createPool()` and `oracledb.getConnection()` (Sagie
-  Gur-Ari).
+- Added
+  [`connectionString`](https://oracle.github.io/node-oracledb/doc/api.html#createpoolpoolattrsconnectstring)
+  as an alias for `connectString` in `oracledb.createPool()` and
+  `oracledb.getConnection()` (Sagie Gur-Ari).
 
 - Updated the ODPI-C layer:
     - Eliminate DPI-1054 errors, allowing connections to be closed when ResultSets and Lobs are open.
@@ -36,7 +100,7 @@
   This means node-oracledb 2.1 no longer builds with Node.js 0.10 or
   Node.js 0.12.
 
-- Improved `queryStream()` streaming:
+- Improved [`queryStream()`](https://oracle.github.io/node-oracledb/doc/api.html#querystream) streaming:
 
     - Add support for the Stream `destroy()` method available with Node 8.
 
@@ -60,8 +124,7 @@
 - Fixed support for integers that are larger than Node.js's 32-bit
   integer is capable of handling.
 
-- Updated
-  INSTALL](https://oracle.github.io/node-oracledb/INSTALL.html)
+- Updated [INSTALL](https://oracle.github.io/node-oracledb/INSTALL.html)
   to mention:
     - The [yum.oracle.com](http://yum.oracle.com/oracle-linux-nodejs.html) Node.js RPM Packages for Oracle Linux
     - The [Oracle mirror](oss.oracle.com/git/oracle) of [github.com/oracle](https://github.com/oracle).
@@ -226,23 +289,23 @@
 
 - Improved query handling:
 
-  - Enhanced direct fetches to allow an unlimited number of rows to be
-    fetched.  This occurs when `oracledb.maxRows = 0`
+    - Enhanced direct fetches to allow an unlimited number of rows to be
+      fetched.  This occurs when `oracledb.maxRows = 0`
 
-  - Changed the default value of `oracledb.maxRows` to 0, meaning
-    unlimited.
+    - Changed the default value of `oracledb.maxRows` to 0, meaning
+      unlimited.
 
-  - Replaced `prefetchRows` (used for internal fetch buffering and
-    tuning) with a new property `fetchArraySize`.  This affects direct
-    fetches, ResultSet `getRow()` and `queryStream()`.
+    - Replaced `prefetchRows` (used for internal fetch buffering and
+      tuning) with a new property `fetchArraySize`.  This affects direct
+      fetches, ResultSet `getRow()` and `queryStream()`.
 
-  - `getRows(numRows,...)` internal fetch buffering is now only tuned
-    by the `numRows` value.
+    - `getRows(numRows,...)` internal fetch buffering is now only tuned
+      by the `numRows` value.
 
-  - Implemented `getRow()` in JavaScript for better performance.
+    - Implemented `getRow()` in JavaScript for better performance.
 
-  - Moved operations on REF CURSORS out of the main thread in order to
-    improve performance and memory usage.
+    - Moved operations on REF CURSORS out of the main thread in order to
+      improve performance and memory usage.
 
 - Fixed proxy support in the binary installer.
 
@@ -277,15 +340,15 @@
 - Upgraded NAN dependency from 2.5 to 2.8.
 
 - Updated ODPI-C submodule:
-  - Reinstate safe size limit for LOB bind to PL/SQL (node-oracledb regression from v1).
-  - Fix valgrind byte overrun when loading `libclntsh` from `$ORACLE_HOME`.
-  - Do not prevent connections from being explicitly closed when a fatal error has taken place.
-  - Eliminate race condition on initialization.  Add finalization code.
-  - Eliminate use of OCI wrappers for use of mutexes, which improves performance (now uses native threading, e.g. pthreads).
-  - Prevent use of NaN with Oracle numbers to avoid data corruption.
-  - Prevent ORA-1010 during connection ping to pre 10g Oracle Database.
-  - Improve debug trace output format.
-  - Prevent crash for DML RETURNING of variables that require dynamic binding.
+    - Reinstate safe size limit for LOB bind to PL/SQL (node-oracledb regression from v1).
+    - Fix valgrind byte overrun when loading `libclntsh` from `$ORACLE_HOME`.
+    - Do not prevent connections from being explicitly closed when a fatal error has taken place.
+    - Eliminate race condition on initialization.  Add finalization code.
+    - Eliminate use of OCI wrappers for use of mutexes, which improves performance (now uses native threading, e.g. pthreads).
+    - Prevent use of NaN with Oracle numbers to avoid data corruption.
+    - Prevent ORA-1010 during connection ping to pre 10g Oracle Database.
+    - Improve debug trace output format.
+    - Prevent crash for DML RETURNING of variables that require dynamic binding.
 
 - Updated examples to avoid "DPI-1054: connection cannot be closed
   when open statements or LOBs exist" and to avoid duplicate callbacks
@@ -466,21 +529,20 @@
 ## node-oracledb v1.12.0 Development (3 Dec 2016)
 
 - Significantly enhanced LOB support:
-   - Added `BIND_IN` support for DML
-   - Added `BIND_IN`, `BIND_OUT`, `BIND_INOUT` support for PL/SQL
-   - Added a `connection.createLob()` method to create temporary LOBs
-   - Added a `lob.close()` method
-   - Made enhancements to allow binding String or Buffer data as `STRING` or `BUFFER` to LOB database types
-   - Writeable LOB Streams now conclude with a 'close' event
+    - Added `BIND_IN` support for DML
+    - Added `BIND_IN`, `BIND_OUT`, `BIND_INOUT` support for PL/SQL
+    - Added a `connection.createLob()` method to create temporary LOBs
+    - Added a `lob.close()` method
+    - Made enhancements to allow binding String or Buffer data as `STRING` or `BUFFER` to LOB database types
+    - Writeable LOB Streams now conclude with a 'close' event
 
 - Added a connection pool 'ping' feature controlled with
   `oracledb.poolPingInterval` and a corresponding `createPool()`
   option. This validates pooled connections when they are returned
-  from a `getConnection()` call.  Values are
-
-     - zero: always ping for every pooled `getConnection()`
-     - negative: never ping
-     - positive: time in seconds the connection must be idle in the pool before `getConnection()` does a ping.  Default is 60 seconds
+  from a `getConnection()` call.  Values are:
+    - zero: always ping for every pooled `getConnection()`
+    - negative: never ping
+    - positive: time in seconds the connection must be idle in the pool before `getConnection()` does a ping.  Default is 60 seconds
 
   The setting is a no-op when node-oracledb is built with Oracle
   Database 12.2 client libraries, where a new, lower-level OCI feature
@@ -578,10 +640,10 @@
 - Some enhancements were made to the underlying DPI data access layer.
   **These are not exposed to node-oracledb users.**
 
-   - Allow <code>SYSDBA</code> connections
-   - Allow session tagging
-   - Allow the character set and national character set to be specified via parameters to the DPI layer.
-   - Support heterogeneous pools (in addition to existing homogeneous pools)
+    - Allow <code>SYSDBA</code> connections
+    - Allow session tagging
+    - Allow the character set and national character set to be specified via parameters to the DPI layer.
+    - Support heterogeneous pools (in addition to existing homogeneous pools)
 
 ## node-oracledb v1.9.3 (24 May 2016)
 
@@ -954,8 +1016,8 @@
 
 - High Availability Features
 
-  - Fast Application Notification (FAN)
+    - Fast Application Notification (FAN)
 
-  - Runtime Load Balancing (RLB)
+    - Runtime Load Balancing (RLB)
 
-  - Transparent Application Failover (TAF)
+    - Transparent Application Failover (TAF)
