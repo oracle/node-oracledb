@@ -250,8 +250,7 @@ This document shows how to use node-oracledb version 2.  The API
 reference is in sections 2 - 7 and the user guide in subsequent
 sections.
 
-Documentation about node-oracledb version 1 is
-[here](https://github.com/oracle/node-oracledb/blob/node-oracledb-v1/doc/api.md).
+Documentation about node-oracledb version 1 is [here][94].
 
 The node-oracledb API is a generic Oracle Database access layer.
 Almost all the functionality described here is common across all
@@ -6975,3 +6974,4 @@ When upgrading from node-oracledb version 2.0 to version 2.1:
 [91]: https://www.youtube.com/watch?v=WDJacg0NuLo
 [92]: https://nodejs.org/api/stream.html#stream_readable_destroy_error
 [93]: https://docs.oracle.com/en/database/oracle/oracle-database/12.2/racad/introduction-to-oracle-rac.html#GUID-D04AA2A7-2E68-4C5C-BD6E-36C62427B98E
+[94]: https://github.com/oracle/node-oracledb/blob/node-oracledb-v1/doc/api.md
