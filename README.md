@@ -1,69 +1,34 @@
 # node-oracledb version 2.2
 
-## <a name="about"></a> About node-oracledb
-
 The node-oracledb add-on for Node.js powers high performance Oracle
 Database applications.
 
 Use node-oracledb to connect Node.js 4, 6, 8 and 9 to Oracle Database.
 
-The add-on is stable, well documented, and has a comprehensive test suite.
+Node-oracledb supports basic and advanced features of Oracle Database
+and Oracle Client.  See the
+[homepage](https://oracle.github.io/node-oracledb/) for a list.
 
-The node-oracledb project is open source and maintained by Oracle Corp.
-
-### Node-oracledb supports:
-
-- [Async/Await][2], [Promises][3], [Callbacks][4] and [Streams][5]
-- [SQL and PL/SQL execution][6]
-- [REF CURSORs][7]
-- [Large Objects: CLOBs and BLOBs as Streams or Strings and Buffers][8]
-- [Oracle Database 12c JSON datatype][9]
-- [Query results as JavaScript objects or arrays][10]
-- [Smart mapping between JavaScript and Oracle types with manual override available][11]
-- [Data binding using JavaScript types, objects or arrays][12]
-- [Transaction Management][13]
-- [Inbuilt Connection Pool with Queuing, Aliasing and Liveness checking][14]
-- [Database Resident Connection Pooling (DRCP)][15]
-- [Privileged Connections][38]
-- [External Authentication][16]
-- [Array Fetches][17]
-- [Statement Caching][18]
-- [Client Result Caching][19]
-- [End-to-end Tracing, Mid-tier Authentication, and Auditing][20]
-- Oracle High Availability Features
-  - [Fast Application Notification (FAN)][21]
-  - [Runtime Load Balancing (RLB)][22]
-  - [Transparent Application Failover (TAF)][23]
-
-We are actively working on supporting the best Oracle Database
-features, and on functionality requests from [users involved in the
-project][24].
-
-## <a name="start"></a> Getting Started
-
-See [Getting Started with Node-oracledb][1].
+The node-oracledb module is open source and maintained by Oracle Corp.
+It is stable, well documented, and has a comprehensive test suite.
 
 ## <a name="installation"></a> Installation
 
-See [Quick Start Node-oracledb Installation][37].
+See [Getting Started with Node-oracledb][1] and [Quick Start Node-oracledb Installation][37].
+
+## <a name="doc"></a> Documentation
+
+See [Documentation for the Oracle Database Node.js Add-on][32] and the [CHANGELOG][33].
 
 ## <a name="examples"></a> Examples
 
 See the [examples][30] directory.  Start with
 [examples/select1.js][31].
 
-## <a name="doc"></a> Documentation
-
-See [Documentation for the Oracle Database Node.js Add-on][32].
-
 ## <a name="help"></a> Help
 
 Issues and questions can be raised with the node-oracledb community on
 [GitHub][24].
-
-## <a name="changes"></a> Changes
-
-See [CHANGELOG][33].
 
 ## <a name="testing"></a> Tests
 
