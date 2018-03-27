@@ -19,7 +19,7 @@
  *   selectjsonblob.js
  *
  * DESCRIPTION
- *   Executes sample insert and query using a JSON column with BLOB storage.
+ *   Executes sample insert and query statements using a JSON column with BLOB storage.
  *   Requires Oracle Database 12.1.0.2, which has extensive JSON datatype support.
  *   See https://docs.oracle.com/database/122/ADJSN/toc.htm
  *
@@ -70,10 +70,10 @@ var doinsert = function (conn, cb) {
     });
 };
 
-// Select JSON stored in a BLOB column
+// Select JSON with JSON_EXISTS
 
 var dojsonquery = function (conn, cb) {
-  console.log('Selecting JSON stored in a BLOB column');
+  console.log('Selecting JSON stored in a BLOB column:');
   conn.execute(
     "SELECT po_document FROM j_purchaseorder_b WHERE JSON_EXISTS (po_document, '$.location')",
     [],
@@ -84,8 +84,24 @@ var dojsonquery = function (conn, cb) {
       if (result.rows.length === 0)
         return cb(new Error('No results'), conn);
 
-      console.log('Query results:');
       console.log(result.rows[0][0].toString('utf8'));
+      return cb(null, conn);
+    });
+};
+
+// Select a JSON value using dot-notation.  This syntax requires Oracle Database 12.2
+
+var dojsonquerydot = function (conn, cb) {
+  console.log('Selecting a JSON value:');
+  conn.execute(
+    "SELECT pob.po_document.location FROM j_purchaseorder_b pob",
+    function(err, result) {
+      if (err)
+        return cb(err, conn);
+      if (result.rows.length === 0)
+        return cb(new Error('No results'), conn);
+
+      console.log(result.rows[0][0]);
       return cb(null, conn);
     });
 };
@@ -95,7 +111,8 @@ async.waterfall(
     doconnect,
     checkver,
     doinsert,
-    dojsonquery
+    dojsonquery,
+    dojsonquerydot
   ],
   function (err, conn) {
     if (err) { console.error("In waterfall error cb: ==>", err, "<=="); }

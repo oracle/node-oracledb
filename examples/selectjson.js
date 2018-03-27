@@ -88,9 +88,24 @@ var dojsonquery = function (conn, cb) {
     });
 };
 
-// 2. Using JSON_VALUE to extract a value from a JSON column
+// 2. Extract a value from a JSON column.  This syntax requires Oracle Database 12.2
+var dorelationalquerydot = function (conn, cb) {
+  console.log('2. Using dot-notation to extract a value from a JSON column');
+  conn.execute(
+    "SELECT po.po_document.location FROM j_purchaseorder po",
+    function(err, result) {
+      if (err) {
+        return cb(err, conn);
+      } else {
+        console.log('Query results: ', result.rows[0][0]);  // just show first record
+        return cb(null, conn);
+      }
+    });
+};
+
+// 3. Using JSON_VALUE to extract a value from a JSON column
 var dorelationalquery = function (conn, cb) {
-  console.log('2. Using JSON_VALUE to extract a value from a JSON column');
+  console.log('3. Using JSON_VALUE to extract a value from a JSON column');
   conn.execute(
     "SELECT JSON_VALUE(po_document, '$.location') FROM j_purchaseorder",
     function(err, result) {
@@ -103,9 +118,9 @@ var dorelationalquery = function (conn, cb) {
     });
 };
 
-// 3. Using JSON_OBJECT to extract relational data as JSON
+// 4. Using JSON_OBJECT to extract relational data as JSON
 var dojsonfromrelational = function (conn, cb) {
-  console.log('3. Using JSON_OBJECT to extract relational data as JSON');
+  console.log('4. Using JSON_OBJECT to extract relational data as JSON');
   if (conn.oracleServerVersion < 1202000000) { // JSON_OBJECT is new in Oracle Database 12.2
     console.log('The JSON_OBJECT example only works with Oracle Database 12.2 or greater');
     return cb(null, conn);
@@ -133,6 +148,7 @@ async.waterfall(
     checkver,
     doinsert,
     dojsonquery,
+    dorelationalquerydot,
     dorelationalquery,
     dojsonfromrelational
   ],

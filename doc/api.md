@@ -5570,17 +5570,17 @@ As an example, the following table has a `PO_DOCUMENT` column that is
 enforced to be JSON:
 
 ```sql
-CREATE TABLE po (po_document VARCHAR2(4000) CHECK (po_document IS JSON));
+CREATE TABLE j_purchaseorder (po_document VARCHAR2(4000) CHECK (po_document IS JSON));
 ```
 
 To insert data using node-oracledb:
 
 ```javascript
-var data = { customerId: 100, item: 1234, quantity: 2 };
+var data = { "userId": 1, "userName": "Chris", "location": "Australia" };
 var s = JSON.stringify(data);  // change JavaScript value to a JSON string
 
 connection.execute(
-  "INSERT INTO po (po_document) VALUES (:bv)",
+  "INSERT INTO j_purchaseorder (po_document) VALUES (:bv)",
   [s]  // bind the JSON string
   function (err) {
   . . .
@@ -5594,17 +5594,24 @@ and array ranges.  An example is `$.friends` which is the value of
 JSON field `friends`.
 
 Oracle provides SQL functions and conditions to create, query, and
-operate on JSON data stored in the database.  An example is the Oracle
-SQL Function `JSON_TABLE` which projects JSON data to a relational
-format effectively making it usable like an inline relational view.
-Another example is `JSON_EXISTS` which tests for the existence of a
-particular value within some JSON data:
+operate on JSON data stored in the database.
 
-This example looks for JSON entries that have a `quantity` field:
+For example, `j_purchaseorder` can be queried with:
+
+```
+"SELECT po.po_document.location FROM j_purchaseorder po"
+```
+
+With the earlier JSON inserted into the table, the queried value would
+be `Australia`.
+
+The `JSON_EXISTS` tests for the existence of a particular value within
+some JSON data.  To look for JSON entries that have a `quantity`
+field:
 
 ```JavaScript
 conn.execute(
-  "SELECT po_document FROM po WHERE JSON_EXISTS (po_document, '$.quantity')",
+  "SELECT po_document FROM j_purchaseorder WHERE JSON_EXISTS (po_document, '$.location')",
   function(err, result) {
     if (err) {
       . . .
@@ -5615,10 +5622,10 @@ conn.execute(
   });
 ```
 
-After the previous `INSERT` example, this query would display:
+This query would display:
 
 ```
-{ customerId: 100, item: 1234, quantity: 2 }
+{ userId: 1, userName: 'Chris', location: 'Australia' }
 ```
 
 In Oracle Database 12.2 the [`JSON_OBJECT` ][54] function is a great
