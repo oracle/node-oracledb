@@ -85,7 +85,7 @@ njsResultSet::~njsResultSet()
 //   Initialization function of ResultSet class. Maps functions and properties
 // from JS to C++.
 //-----------------------------------------------------------------------------
-void njsResultSet::Init(Handle<Object> target)
+void njsResultSet::Init(Local<Object> target)
 {
     Nan::HandleScope scope;
     Local<FunctionTemplate> temp = Nan::New<FunctionTemplate>(New);

@@ -102,7 +102,7 @@ protected:
 //-----------------------------------------------------------------------------
 class njsILob : public njsCommon {
 public:
-    static void Init(Handle<Object> target);
+    static void Init(Local<Object> target);
     static Local<Object> CreateFromProtoLob(njsProtoILob *protoLob);
     bool IsValid() const { return (dpiLobHandle) ? true : false; }
     njsErrorType GetInvalidErrorType() const { return errInvalidLob; }

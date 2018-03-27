@@ -67,7 +67,7 @@ using namespace node;
 class njsPool: public njsCommon {
 public:
 
-    static void Init(Handle<Object> target);
+    static void Init(Local<Object> target);
     static Local<Object> CreateFromBaton(njsBaton *baton);
     bool IsValid() const { return (dpiPoolHandle) ? true : false; }
     njsErrorType GetInvalidErrorType() const { return errInvalidPool; }

@@ -68,7 +68,7 @@ using namespace node;
 class njsResultSet: public njsCommon {
 public:
 
-    static void Init(Handle<Object> target);
+    static void Init(Local<Object> target);
     bool IsValid() const;
     njsErrorType GetInvalidErrorType() const { return errInvalidResultSet; }
     static Local<Object> CreateFromBaton(njsBaton *baton);

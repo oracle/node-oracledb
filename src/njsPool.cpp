@@ -69,7 +69,7 @@ Nan::Persistent<FunctionTemplate> njsPool::poolTemplate_s;
 //   Initialization function of Pool class. Maps functions and properties
 // from JS to C++.
 //-----------------------------------------------------------------------------
-void njsPool::Init(Handle<Object> target)
+void njsPool::Init(Local<Object> target)
 {
     Nan::HandleScope scope;
 

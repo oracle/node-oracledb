@@ -95,7 +95,7 @@ njsOracledb::njsOracledb()
 // njsOracledb::Init()
 //   Initialization function. Maps functions and properties from JS to C++.
 //-----------------------------------------------------------------------------
-void njsOracledb::Init(Handle<Object> target)
+void njsOracledb::Init(Local<Object> target)
 {
     Nan::HandleScope scope;
     dpiErrorInfo errorInfo;
@@ -1189,7 +1189,7 @@ void njsOracledb::ThrowDPIError(void)
 //-----------------------------------------------------------------------------
 extern "C"
 {
-    static void init(Handle<Object> target)
+    static void init(Local<Object> target)
     {
         njsOracledb::Init(target);
         njsConnection::Init(target);

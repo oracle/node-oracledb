@@ -108,7 +108,7 @@ class njsOracledb: public njsCommon
 {
 public:
 
-    static void Init(Handle<Object> target);
+    static void Init(Local<Object> target);
 
     bool               getAutoCommit() const       { return autoCommit; }
     unsigned int       getOutFormat() const        { return outFormat; }

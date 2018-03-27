@@ -70,7 +70,7 @@ Nan::Persistent<FunctionTemplate> njsILob::iLobTemplate_s;
 //   Initialization function of ILob class. Maps functions and properties from
 // JS to C++.
 //-----------------------------------------------------------------------------
-void njsILob::Init(Handle<Object> target)
+void njsILob::Init(Local<Object> target)
 {
     Nan::HandleScope scope;
 

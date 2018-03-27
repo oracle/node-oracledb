@@ -77,7 +77,7 @@ public:
             njsVariable *vars, uint32_t numVars);
     static bool ProcessVars(njsBaton *baton, njsVariable *vars,
             uint32_t numVars, uint32_t numElements);
-    static void Init(Handle<Object> target);
+    static void Init(Local<Object> target);
     bool IsValid() const { return (dpiConnHandle) ? true : false; }
     njsErrorType GetInvalidErrorType() const { return errInvalidConnection; }
 
@@ -158,8 +158,8 @@ private:
     static bool PrepareAndBind(njsBaton* baton);
     static bool ProcessBinds(Nan::NAN_METHOD_ARGS_TYPE args,
             unsigned int index, njsBaton *baton);
-    static bool ProcessBindsByName(Handle<Object> bindObj, njsBaton *baton);
-    static bool ProcessBindsByPos(Handle<Array> bindarray, njsBaton *baton);
+    static bool ProcessBindsByName(Local<Object> bindObj, njsBaton *baton);
+    static bool ProcessBindsByPos(Local<Array> bindarray, njsBaton *baton);
     static bool ProcessBind(Local<Value> bindTypes, njsVariable *var,
             bool byPosition, njsBaton *baton);
     static bool ProcessBindValue(Local<Value> bindValue, njsVariable *var,

@@ -71,7 +71,7 @@ Nan::Persistent<FunctionTemplate> njsConnection::connectionTemplate_s;
 //   Initialization function of Connection class. Maps functions and properties
 // from JS to C++.
 //-----------------------------------------------------------------------------
-void njsConnection::Init(Handle<Object> target)
+void njsConnection::Init(Local<Object> target)
 {
     Nan::HandleScope scope;
     Local<FunctionTemplate> tpl = Nan::New<FunctionTemplate>(New);
@@ -549,7 +549,7 @@ bool njsConnection::ProcessBinds(Nan::NAN_METHOD_ARGS_TYPE args,
 // njsConnection::ProcessBindsByName()
 //   Get bind variables from JS (by name).
 //-----------------------------------------------------------------------------
-bool njsConnection::ProcessBindsByName(Handle<Object> bindObj, njsBaton *baton)
+bool njsConnection::ProcessBindsByName(Local<Object> bindObj, njsBaton *baton)
 {
     Nan::HandleScope scope;
     Local<Array> array = bindObj->GetOwnPropertyNames();
@@ -582,7 +582,7 @@ bool njsConnection::ProcessBindsByName(Handle<Object> bindObj, njsBaton *baton)
 // njsConnection::ProcessBindsByPos()
 //   Get bind variables from JS (by position).
 //-----------------------------------------------------------------------------
-bool njsConnection::ProcessBindsByPos(Handle<Array> binds, njsBaton *baton)
+bool njsConnection::ProcessBindsByPos(Local<Array> binds, njsBaton *baton)
 {
     Nan::HandleScope scope;
 
