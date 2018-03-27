@@ -5922,31 +5922,8 @@ a [`maxArraySize`](#executebindParams) property is also required
 The [`results`](#executecallback) parameter of the `execute()`
 callback contains an [`outBinds`](#execoutbinds) property with the
 returned OUT and IN OUT bind values.
-If [`bindParams`](#executebindParams) was passed as an array, then
-`outBinds` is returned as an array, with the same order as the binds
-in the statement.  If `bindParams` was passed as an object, then
-`outBinds` is returned as an object.
 
-Here is an example program showing the use of binds:
-
-```javascript
-var oracledb = require('oracledb');
-. . .
-var bindVars = {
-  i:  'Chris', // default direction is BIND_IN. Data type is inferred from the data
-  io: { val: 'Jones', dir: oracledb.BIND_INOUT },
-  o:  { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
-}
-connection.execute(
-  "BEGIN testproc(:i, :io, :o); END;",
-  bindVars,
-  function (err, result) {
-    if (err) { console.error(err.message); return; }
-    console.log(result.outBinds);
-  });
-```
-
-Given the creation of `TESTPROC` using:
+Given the creation of the PL/SQL procedure `TESTPROC`:
 
 ```sql
 CREATE OR REPLACE PROCEDURE testproc (
@@ -5960,13 +5937,40 @@ END;
 show errors
 ```
 
-The Node.js output would be:
+The procedure `TESTPROC` can be called with:
+
+```javascript
+var oracledb = require('oracledb');
+. . .
+var bindVars = {
+  i:  'Chris', // default direction is BIND_IN. Data type is inferred from the data
+  io: { val: 'Jones', dir: oracledb.BIND_INOUT },
+  o:  { dir: oracledb.BIND_OUT, type: oracledb.NUMBER },
+}
+connection.execute(
+  "BEGIN testproc(:i, :io, :o); END;",
+  bindVars,
+  function (err, result) {
+    if (err) { console.error(err.message); return; }
+    console.log(result.outBinds);
+  });
+```
+
+Since `bindParams` is passed as an object, the `outBinds` property is
+also an object.  The Node.js output is:
 
 ```
 { io: 'ChrisJones', o: 101 }
 ```
 
-An alternative to the 'bind by name' syntax is 'bind by array' syntax:
+PL/SQL allows named parameters in procedure and function calls.  This
+can be used in `execute()` like:
+
+```
+  "BEGIN testproc(p_in => :i, p_inout => :io, p_out => :o); END;",
+```
+
+An alternative to node-oracledb's 'bind by name' syntax is 'bind by array' syntax:
 
 ```javascript
 var bindVars = [
@@ -5974,6 +5978,14 @@ var bindVars = [
   { val: 'Jones', dir: oracledb.BIND_INOUT },
   { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
 ];
+```
+
+When [`bindParams`](#executebindParams) is passed as an array, then
+`outBinds` is returned as an array, with the same order as the OUT
+binds in the statement:
+
+```
+[ 'ChrisJones', 101 ]
 ```
 
 Mixing positional and named syntax is not supported.  The following

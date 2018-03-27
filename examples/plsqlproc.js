@@ -51,6 +51,8 @@ oracledb.getConnection(
     };
     connection.execute(
       "BEGIN testproc(:i, :io, :o); END;",
+      // The equivalent call with PL/SQL named parameter syntax is:
+      // "BEGIN testproc(p_in => :i, p_inout => :io, p_out => :o); END;",
       bindvars,
       function (err, result) {
         if (err) {

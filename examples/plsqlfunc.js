@@ -50,6 +50,8 @@ oracledb.getConnection(
     };
     connection.execute(
       "BEGIN :ret := testfunc(:p1, :p2); END;",
+      // The equivalent call with PL/SQL named parameter syntax is:
+      // "BEGIN :ret := testfunc(p1_in => :p1, p2_in => :p2); END;",
       bindvars,
       function (err, result) {
         if (err) {
