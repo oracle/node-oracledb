@@ -32,6 +32,10 @@ limitations under the License.
     - 3.10 [Node-oracledb Installation on Oracle Solaris x86-64 (64-Bit) with Instant Client ZIP files](#instsolarisx8664)
     - 3.11 [Node-oracledb Installation from Source Code](#github)
     - 3.12 [Node-oracledb Installation Without Internet Access](#offline)
+        - 3.12.1 [Installing on an Intermediary Machine](#intermediateinstall)
+        - 3.12.2 [Manually Extracting Pre-built Binaries](#manualextraction)
+        - 3.12.3 [Installing node-oracledb without GitHub Access](#nogithubaccess)
+        - 3.12.4 [Hosting Your Own Binary Packages](#selfhost)
     - 3.13 [Installing Node.js and Node-oracledb RPMs from yum.oracle.com](#instnoderpms)
 4. [Installing Node-oracledb 1.x](#installingv1)
 5. [Useful Resources for Node-oracledb](#otherresources)
@@ -1334,7 +1338,7 @@ There are several ways to install node-oracledb on computers that do
 not have internet access, or have no access to either the [npm
 registry][4] or [github.com][1].
 
-#### 3.12.1 Installing on an Intermediary Machine
+#### <a name="intermediateinstall"></a> 3.12.1 Installing on an Intermediary Machine
 
 On an identical machine that has access to the internet, install
 node-oracle following the [Node-oracledb Installation
@@ -1345,7 +1349,7 @@ offline computer.  Windows users should see [Copying node-oracledb
 Binaries on Windows](#winbins) and make sure the correct Visual Studio
 Redistributable is also installed.
 
-#### 3.12.2 Manually Extracting Pre-built Binaries
+#### <a name="manualextraction"></a> 3.12.2 Manually Extracting Pre-built Binaries
 
 If pre-built node-oracledb binaries are available for your version
 of Node.js and operating system, you can install manually:
@@ -1428,13 +1432,15 @@ of Node.js and operating system, you can install manually:
   Binaries on Windows](#winbins) and make sure the correct Visual
   Studio Redistributable is also installed.
 
-#### 3.12.3 Installing node-oracledb without GitHub Access
+#### <a name="nogithubaccess"></a> 3.12.3 Installing node-oracledb without GitHub Access
 
 Some companies block access to github.com so `npm install oracledb`
 will fail to download binaries, as will installing source code from
 GitHub with `npm install oracle/node-oracledb.git#v2.2.0`.
 
-There are two suggested methods for installation.
+There are two suggested methods for generic installation.  Oracle
+Linux users can also [install Node.js and Node-oracledb
+RPMs](#instnoderpms).
 
 ##### 3.12.3.1 Use the oracle.com GitHub mirror
 
@@ -1491,6 +1497,18 @@ npm package:
   npm install ./oracledb_build
   ```
   from outside the directory.
+
+#### <a name="selfhost"></a> 3.12.4 Hosting Your Own Binary Packages
+
+You can create your own node-oracledb packages and host them on your
+web server for any architecture and version that node-oracledb will
+build with.
+
+The maintainer scripts in
+[/package](https://github.com/oracle/node-oracledb/tree/master/package)
+can be used to build desired packages.  See
+[package/README](https://github.com/oracle/node-oracledb/blob/master/package/README.md)
+for details.
 
 ### <a name="instnoderpms"></a> 3.13 Installing Node.js and Node-oracledb RPMs from yum.oracle.com
 
