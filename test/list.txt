@@ -4078,3 +4078,8 @@ Overview of node-oracledb functional tests
     158.1 original case from the issue
     158.2 inserts into one table
     158.3 inserts into multiple tables
+
+159. end2endTracing.js
+    159.1 set the end-to-end tracing attribute - module
+    159.2 set the tracing attribute - action
+    159.3 set the tracing attribure - clientId

@@ -183,3 +183,5 @@ test/fetchArraySize8.js
 test/fetchArraySize9.js
 test/maxRows.js
 test/insertAll.js
+
+test/end2endTracing.js
