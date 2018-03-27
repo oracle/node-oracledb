@@ -115,8 +115,8 @@ limitations under the License.
 [18]: https://oracle.github.io/node-oracledb/doc/api.html#stmtcache
 [19]: https://docs.oracle.com/database/122/ADFNS/performance-and-scalability.htm#ADFNS464
 [20]: https://oracle.github.io/node-oracledb/doc/api.html#endtoend
-[21]: https://docs.oracle.com/database/122/ADFNS/high-availability.htm#ADFNS538
-[22]: https://docs.oracle.com/database/122/ADFNS/connection_strategies.htm#ADFNS515
+[21]: https://oracle.github.io/node-oracledb/doc/api.html#connectionfan
+[22]: https://oracle.github.io/node-oracledb/doc/api.html#connectionrlb
 [23]: https://docs.oracle.com/database/122/ADFNS/high-availability.htm#ADFNS-GUID-96599425-9BDA-483C-9BA2-4A4D13013A37
 [24]: https://github.com/oracle/node-oracledb/issues
 [30]: https://github.com/oracle/node-oracledb/blob/master/examples
