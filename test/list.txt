@@ -23,17 +23,14 @@ Overview of node-oracledb functional tests
         1.5.6 wrong type for param 4 should throw an error
     1.6 Close method
         1.6.1 close can be used as an alternative to release
-    1.7 invalid credentials
-        1.7.1 cannot get connections with invalid credentials
-    1.8 connectionString alias
-        1.8.1 allows connectionString to be used as an alias for connectString
-        1.8.2 favors connectString if both connectString and connectionString are passed
-    1.9 privileged connnections
-        1.9.1 Negative value - null
-        1.9.2 Negative - invalid type, a String
-        1.9.3 Negative value - random constants
-        1.9.4 Negative value - NaN
-        1.9.5 gets ignored when acquiring a connection from Pool
+    1.7 connectionString alias
+        1.7.1 allows connectionString to be used as an alias for connectString
+    1.8 privileged connnections
+        1.8.1 Negative value - null
+        1.8.2 Negative - invalid type, a String
+        1.8.3 Negative value - random constants
+        1.8.4 Negative value - NaN
+        1.8.5 gets ignored when acquiring a connection from Pool
 
 2. pool.js
     2.1 default values

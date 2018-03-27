@@ -740,30 +740,8 @@ describe('1. connection.js', function(){
     });
   }); // 1.6
 
-  describe('1.7 invalid credentials', function() {
-
-    it('1.7.1 cannot get connections with invalid credentials', function(done) {
-
-      oracledb.getConnection(
-        {
-          user: 'notexist',
-          password: 'nopass',
-          connectString: dbConfig.connectString
-        },
-        function(err, connection) {
-          should.exist(err);
-          (err.message).should.startWith('ORA-01017:');
-          should.not.exist(connection);
-          done();
-        }
-      );
-
-    });
-
-  }); // 1.7
-
-  describe('1.8 connectionString alias', function() {
-    it('1.8.1 allows connectionString to be used as an alias for connectString', function(done) {
+  describe('1.7 connectionString alias', function() {
+    it('1.7.1 allows connectionString to be used as an alias for connectString', function(done) {
       oracledb.getConnection(
         {
           user: dbConfig.user,
@@ -784,46 +762,11 @@ describe('1. connection.js', function(){
       );
     });
 
-    it('1.8.2 favors connectString if both connectString and connectionString are passed', function(done) {
-      oracledb.getConnection(
-        {
-          user: dbConfig.user,
-          password: dbConfig.password,
-          connectString: 'this is wrong',
-          connectionString: dbConfig.connectString
-        },
-        function(err, conn) {
-          should.exist(err);
-          // ORA-12154: TNS:could not resolve the connect identifier specified
-          should.not.exist(conn);
+  }); // 1.7
 
-          oracledb.getConnection(
-            {
-              user: dbConfig.user,
-              password: dbConfig.password,
-              connectString: dbConfig.connectString,
-              connectionString: 'this is wrong'
-            },
-            function(err, connection) {
-              should.not.exist(err);
+  describe('1.8 privileged connnections', function() {
 
-              connection.should.be.ok();
-
-              connection.close(function(err) {
-                should.not.exist(err);
-
-                done();
-              });
-            }
-          );
-        }
-      );
-    });
-  }); // 1.8
-
-  describe('1.9 privileged connnections', function() {
-
-    it('1.9.1 Negative value - null', function(done) {
+    it('1.8.1 Negative value - null', function(done) {
 
       oracledb.getConnection(
         {
@@ -842,9 +785,9 @@ describe('1. connection.js', function(){
           done();
         }
       );
-    }); // 1.9.1
+    }); // 1.8.1
 
-    it('1.9.2 Negative - invalid type, a String', function(done) {
+    it('1.8.2 Negative - invalid type, a String', function(done) {
 
       oracledb.getConnection(
         {
@@ -863,9 +806,9 @@ describe('1. connection.js', function(){
           done();
         }
       );
-    }); // 1.9.2
+    }); // 1.8.2
 
-    it('1.9.3 Negative value - random constants', function(done) {
+    it('1.8.3 Negative value - random constants', function(done) {
 
       oracledb.getConnection(
         {
@@ -882,9 +825,9 @@ describe('1. connection.js', function(){
           done();
         }
       );
-    }); // 1.9.3
+    }); // 1.8.3
 
-    it('1.9.4 Negative value - NaN', function(done) {
+    it('1.8.4 Negative value - NaN', function(done) {
 
       oracledb.getConnection(
         {
@@ -903,9 +846,9 @@ describe('1. connection.js', function(){
           done();
         }
       );
-    }); // 1.9.4
+    }); // 1.8.4
 
-    it('1.9.5 gets ignored when acquiring a connection from Pool', function(done) {
+    it('1.8.5 gets ignored when acquiring a connection from Pool', function(done) {
 
       oracledb.createPool(
         {
@@ -932,8 +875,8 @@ describe('1. connection.js', function(){
           });
         }
       );
-    }); // 1.9.5
+    }); // 1.8.5
 
-  }); // 1.9
+  }); // 1.8
 
 });
