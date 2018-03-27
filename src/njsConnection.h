@@ -72,7 +72,7 @@ public:
     static Local<Value> GetMetaData(njsVariable *vars, uint32_t numVars,
             bool extendedMetaData);
     static bool GetScalarValueFromVar(njsBaton *baton, njsVariable *var,
-            uint32_t pos, Local<Value> &value);
+            njsVariableBuffer *buffer, uint32_t pos, Local<Value> &value);
     static bool ProcessQueryVars(njsBaton* baton, dpiStmt *dpiStmtHandle,
             njsVariable *vars, uint32_t numVars);
     static bool ProcessVars(njsBaton *baton, njsVariable *vars,
@@ -97,6 +97,11 @@ private:
     static NAN_METHOD(Execute);
     static void Async_Execute(njsBaton *baton);
     static void Async_AfterExecute(njsBaton *baton, Local<Value> argv[]);
+
+    // ExecuteMany Method on Connection class
+    static NAN_METHOD(ExecuteMany);
+    static void Async_ExecuteMany(njsBaton *baton);
+    static void Async_AfterExecuteMany(njsBaton *baton, Local<Value> argv[]);
 
     // GetStatementInfo Method on Connection class
     static NAN_METHOD(GetStatementInfo);
@@ -151,32 +156,49 @@ private:
     static NAN_SETTER(SetOracleServerVersionString);
 
     // internal methods
+    static bool CreateVarBuffer(njsVariable *var, njsBaton *baton);
     static bool GetBindTypeAndSizeFromValue(njsVariable *var,
-            Local<Value> value, uint32_t *bindType, uint32_t *maxSize,
+            Local<Value> value, njsDataType *bindType, uint32_t *maxSize,
             njsBaton *baton, bool scalarOnly = false);
-    static Local<Value> GetOutBinds(njsBaton *baton);
-    static bool GetValueFromVar(njsBaton *baton, njsVariable *var,
-            Local<Value> &value);
+    static bool GetExecuteOutBinds(Local<Value> &outBinds, njsBaton *baton);
+    static bool GetExecuteManyOutBinds(Local<Value> &outBinds,
+            uint32_t numOutBinds, njsBaton *baton);
+    static bool GetOutBinds(Local<Value> &outBinds, uint32_t numOutBinds,
+            uint32_t pos, njsBaton *baton);
+    static bool GetArrayValueFromVar(njsBaton *baton, njsVariable *var,
+            uint32_t pos, Local<Value> &value);
+    static bool InitBindVars(Local<Object> bindObj, Local<Array> bindNames,
+            njsBaton *baton);
     static bool MapByName(njsBaton *baton, dpiQueryInfo *queryInfo,
             dpiOracleTypeNum &targetType);
     static bool MapByType(njsBaton *baton, dpiQueryInfo *queryInfo,
             dpiOracleTypeNum &targetType);
     static bool PrepareAndBind(njsBaton* baton);
-    static bool ProcessBinds(Nan::NAN_METHOD_ARGS_TYPE args,
-            unsigned int index, njsBaton *baton);
-    static bool ProcessBindsByName(Local<Object> bindObj, njsBaton *baton);
-    static bool ProcessBindsByPos(Local<Array> bindarray, njsBaton *baton);
-    static bool ProcessBind(Local<Value> bindTypes, njsVariable *var,
-            bool byPosition, njsBaton *baton);
     static bool ProcessBindValue(Local<Value> bindValue, njsVariable *var,
             njsBaton *baton);
+    static bool ProcessExecuteBinds(Local<Object> binds, njsBaton *baton);
+    static bool ProcessExecuteManyBinds(Local<Array> binds,
+            Local<Object> options, njsBaton *baton);
+    static bool ProcessExecuteOptions(Local<Object> options, njsBaton *baton);
+    static bool ProcessExecuteManyOptions(Local<Object> options,
+            njsBaton *baton);
     static bool ProcessScalarBindValue(Local<Value> bindValue,
-            njsVariable *var, uint32_t pos, njsBaton *baton);
-    static bool ProcessOptions(Nan::NAN_METHOD_ARGS_TYPE args,
-            unsigned int index, njsBaton *baton);
+            njsVariable *var, uint32_t pos, bool inExecuteMany,
+            njsBaton *baton);
+    static bool ProcessVarBuffer(njsBaton *baton, njsVariable *var,
+            njsVariableBuffer *buffer);
+    static bool ScanExecuteBinds(Local<Object> binds, Local<Array> bindNames,
+            njsBaton *baton);
+    static bool ScanExecuteBindUnit(Local<Object> bindUnit, njsVariable *var,
+            bool inExecuteMany, njsBaton *baton);
+    static bool ScanExecuteManyBinds(Local<Array> binds,
+            Local<Array> bindNames, njsBaton *baton);
     static void SetTextAttribute(Nan::NAN_SETTER_ARGS_TYPE args,
             const char *attributeName, Local<Value> value,
             int (*setter)(dpiConn*, const char*, uint32_t));
+    static bool TransferExecuteManyBinds(Local<Array> binds,
+            Local<Array> bindNames, njsBaton *baton);
+
     static Nan::Persistent<FunctionTemplate> connectionTemplate_s;
 
     dpiConn *dpiConnHandle;

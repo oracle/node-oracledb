@@ -74,15 +74,14 @@ class njsOracledb;
 class njsProtoILob;
 
 //-----------------------------------------------------------------------------
-// njsBindType
-//   User defined bind types.
+// njsBindDir
+//   User defined bind directions.
 //-----------------------------------------------------------------------------
 typedef enum {
-    NJS_BIND_UNKNOWN  = -1,
     NJS_BIND_IN       = 3001,
     NJS_BIND_INOUT    = 3002,
     NJS_BIND_OUT      = 3003
-} njsBindType;
+} njsBindDir;
 
 
 //-----------------------------------------------------------------------------
@@ -90,7 +89,6 @@ typedef enum {
 //   Values used for "outFormat".
 //-----------------------------------------------------------------------------
 typedef enum {
-    NJS_ROWS_UNKNOWN  = -1,
     NJS_ROWS_ARRAY    = 4001,
     NJS_ROWS_OBJECT   = 4002
 } njsRowsType;
@@ -145,8 +143,23 @@ typedef enum {
 
 
 //-----------------------------------------------------------------------------
+// njsVariableBuffer
+//   Class used for keeping track of ODPI-C buffers and proto ILob objects.
+//-----------------------------------------------------------------------------
+class njsVariableBuffer {
+public:
+    uint32_t numElements;
+    dpiData *dpiVarData;
+    njsProtoILob *lobs;
+
+    njsVariableBuffer() : numElements(0), dpiVarData(NULL), lobs(NULL) {}
+    ~njsVariableBuffer();
+};
+
+
+//-----------------------------------------------------------------------------
 // njsVariable
-//   Class used for keeping track of variables used for fetching data.
+//   Class used for keeping track of variables used for binding/fetching data.
 //-----------------------------------------------------------------------------
 class njsVariable {
 public:
@@ -156,8 +169,8 @@ public:
     dpiOracleTypeNum varTypeNum;
     dpiNativeTypeNum nativeTypeNum;
     dpiVar *dpiVarHandle;
-    dpiData *dpiVarData;
-    uint32_t bindDir;
+    njsBindDir bindDir;
+    njsDataType bindDataType;
     uint32_t maxArraySize;
     uint32_t maxSize;
     uint32_t dbSizeInBytes;
@@ -165,16 +178,18 @@ public:
     int8_t scale;
     bool isArray;
     bool isNullable;
-    njsProtoILob *lobs;
+    njsVariableBuffer buffer;
+    njsVariableBuffer* dmlReturningBuffers;
     uint32_t numQueryVars;
     njsVariable *queryVars;
 
     njsVariable() : pos(0), dbTypeNum(DPI_ORACLE_TYPE_VARCHAR),
             varTypeNum(DPI_ORACLE_TYPE_VARCHAR),
             nativeTypeNum(DPI_NATIVE_TYPE_BYTES), dpiVarHandle(NULL),
-            dpiVarData(NULL), bindDir(0), maxArraySize(0), maxSize(0),
-            dbSizeInBytes(0), precision(0), scale(0), isArray(false),
-            isNullable(false), lobs(NULL), numQueryVars(0), queryVars(NULL) {}
+            bindDir(NJS_BIND_IN), bindDataType(NJS_DATATYPE_DEFAULT),
+            maxArraySize(0), maxSize(0), dbSizeInBytes(0), precision(0),
+            scale(0), isArray(false), isNullable(false),
+            dmlReturningBuffers(NULL), numQueryVars(0), queryVars(NULL) {}
     ~njsVariable();
     njsDataType DataType();
     njsDBType DBType();
@@ -265,6 +280,7 @@ public:
     uint32_t stmtCacheSize;
     uint32_t lobPrefetchSize;
     uint32_t maxRows;
+    uint32_t bindArraySize;
     uint32_t fetchArraySize;
     uint32_t privilege;
     uint32_t rowsFetched;
@@ -289,10 +305,16 @@ public:
     bool isReturning;
     bool isPLSQL;
     bool events;
+    bool batchErrors;
+    bool dmlRowCounts;
     uint64_t bufferSize;
     char *bufferPtr;
     uint64_t lobOffset;
     uint64_t lobAmount;
+    uint32_t numRowCounts;
+    uint64_t *rowCounts;
+    uint32_t numBatchErrorInfos;
+    dpiErrorInfo *batchErrorInfos;
     dpiErrorInfo errorInfo;
     bool dpiError;
     njsCommon *callingObj;
@@ -305,15 +327,18 @@ public:
             poolMin(0), poolMax(0), poolIncrement(0), poolTimeout(0),
             poolPingInterval(0), dpiPoolHandle(NULL), dpiConnHandle(NULL),
             dpiStmtHandle(NULL), dpiLobHandle(NULL), stmtCacheSize(0),
-            lobPrefetchSize(0), maxRows(0), fetchArraySize(0), privilege(0),
-            rowsFetched(0), bufferRowIndex(0), rowsAffected(0), outFormat(0),
-            numQueryVars(0), queryVars(NULL), numBindVars(0), bindVars(NULL),
-            numFetchInfo(0), fetchInfo(NULL), numFetchAsStringTypes(0),
-            fetchAsStringTypes(NULL), numFetchAsBufferTypes(0),
-            fetchAsBufferTypes(NULL), protoILob(NULL), externalAuth(false),
-            getRS(false), autoCommit(false), extendedMetaData(false),
-            isReturning(false), isPLSQL(false), events(false), bufferSize(0),
-            bufferPtr(NULL), lobOffset(0), lobAmount(0), dpiError(false) {
+            lobPrefetchSize(0), maxRows(0), bindArraySize(1),
+            fetchArraySize(0), privilege(0), rowsFetched(0), bufferRowIndex(0),
+            rowsAffected(0), outFormat(0), numQueryVars(0), queryVars(NULL),
+            numBindVars(0), bindVars(NULL), numFetchInfo(0), fetchInfo(NULL),
+            numFetchAsStringTypes(0), fetchAsStringTypes(NULL),
+            numFetchAsBufferTypes(0), fetchAsBufferTypes(NULL),
+            protoILob(NULL), externalAuth(false), getRS(false),
+            autoCommit(false), extendedMetaData(false), isReturning(false),
+            isPLSQL(false), events(false), batchErrors(false),
+            dmlRowCounts(false), bufferSize(0), bufferPtr(NULL), lobOffset(0),
+            lobAmount(0), numRowCounts(0), rowCounts(NULL),
+            numBatchErrorInfos(0), batchErrorInfos(NULL), dpiError(false) {
         this->jsCallback.Reset(callback);
         this->jsCallingObj.Reset(callingObj);
         this->callingObj = Nan::ObjectWrap::Unwrap<njsCommon>(callingObj);
@@ -350,6 +375,9 @@ public:
             int32_t *value);
     bool GetUnsignedIntFromJSON(Local<Object> obj, const char *key, int index,
             uint32_t *value);
+
+    // convenience methods
+    uint32_t GetNumOutBinds();
 
     // methods for queuing work on the thread queue
     void QueueWork(const char *methodName, void (*workCallback)(njsBaton*),

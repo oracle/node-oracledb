@@ -86,6 +86,12 @@ typedef enum {
     errIncompatibleTypeArrayIndexBind,
     errNonArrayProvided,
     errNoBinaryInstalled,
+    errMixedBind,
+    errMissingMaxSizeByPos,
+    errMissingMaxSizeByName,
+    errMaxSizeTooSmall,
+    errMissingTypeByPos,
+    errMissingTypeByName,
 
     // New ones should be added here
 

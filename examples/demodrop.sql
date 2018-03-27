@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -54,3 +54,11 @@ DROP PROCEDURE lob_in_out;
 DROP PROCEDURE lobs_in;
 
 DROP PROCEDURE lobs_out;
+
+DROP TABLE em_tab;
+
+DROP TABLE em_childtab;
+
+DROP TABLE em_parenttab;
+
+DROP PROCEDURE em_testproc;

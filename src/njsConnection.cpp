@@ -80,6 +80,7 @@ void njsConnection::Init(Local<Object> target)
     tpl->SetClassName(Nan::New<v8::String>("Connection").ToLocalChecked());
 
     Nan::SetPrototypeMethod(tpl, "execute", Execute);
+    Nan::SetPrototypeMethod(tpl, "executeMany", ExecuteMany);
     Nan::SetPrototypeMethod(tpl, "getStatementInfo", GetStatementInfo);
     Nan::SetPrototypeMethod(tpl, "close", Close);
     Nan::SetPrototypeMethod(tpl, "commit", Commit);
@@ -246,77 +247,97 @@ bool njsConnection::ProcessQueryVars(njsBaton *baton, dpiStmt *dpiStmtHandle,
 // round trips.
 //-----------------------------------------------------------------------------
 bool njsConnection::ProcessVars(njsBaton *baton, njsVariable *vars,
-        uint32_t numVars, uint32_t baseNumElements)
+        uint32_t numVars, uint32_t numRows)
 {
-    uint32_t numElements;
-    dpiStmt *stmt;
-
     for (uint32_t col = 0; col < numVars; col++) {
         njsVariable *var = &vars[col];
+        var->buffer.numElements = numRows;
         if (var->bindDir == NJS_BIND_IN)
             continue;
-        njsDataType dataType;
-        switch (var->varTypeNum) {
-            case DPI_ORACLE_TYPE_CLOB:
-            case DPI_ORACLE_TYPE_NCLOB:
-                dataType = NJS_DATATYPE_CLOB;
-                break;
-            case DPI_ORACLE_TYPE_BLOB:
-                dataType = NJS_DATATYPE_BLOB;
-                break;
-            case DPI_ORACLE_TYPE_STMT:
-                stmt = var->dpiVarData->value.asStmt;
-                if (dpiStmt_getNumQueryColumns(stmt, &var->numQueryVars) < 0) {
+        if (var->dmlReturningBuffers) {
+            delete [] var->dmlReturningBuffers;
+            var->dmlReturningBuffers = NULL;
+        }
+
+        // for arrays, determine the number of elements in the array
+        if (var->isArray) {
+            if (dpiVar_getNumElementsInArray(var->dpiVarHandle,
+                    &var->buffer.numElements) < 0) {
+                baton->GetDPIError();
+                return false;
+            }
+
+        // for DML returning statements, each row has its own set of rows, so
+        // acquire those from ODPI-C and store them in variable buffers for
+        // later processing
+        } else if (baton->isReturning && var->bindDir == NJS_BIND_OUT) {
+            var->dmlReturningBuffers = new njsVariableBuffer[numRows];
+            for (uint32_t row = 0; row < numRows; row++) {
+                njsVariableBuffer *buffer = &var->dmlReturningBuffers[row];
+                if (dpiVar_getReturnedData(var->dpiVarHandle, row,
+                        &buffer->numElements, &buffer->dpiVarData) < 0) {
                     baton->GetDPIError();
                     return false;
                 }
-                var->queryVars = new njsVariable[var->numQueryVars];
-                if (!ProcessQueryVars(baton, stmt, var->queryVars,
-                        var->numQueryVars))
+                if (!ProcessVarBuffer(baton, var, buffer))
                     return false;
-                continue;
-            default:
-                continue;
-        }
-
-        // for DML returning statements, the number of rows returned may have
-        // exceeded the maxArraySize of the variable, requiring ODPI-C to
-        // free the original buffers and allocate new ones; this call gets the
-        // buffers and maxArraySize value for the variable just in case that
-        // has taken place
-        if (baton->isReturning && var->bindDir == NJS_BIND_OUT) {
-            if (dpiVar_getData(var->dpiVarHandle, &var->maxArraySize,
-                    &var->dpiVarData) < 0) {
-                baton->GetDPIError();
-                return false;
-            }
-            numElements = (uint32_t) baton->rowsAffected;
-
-        } else if (!var->isArray) {
-            numElements = baseNumElements;
-        } else {
-            if (dpiVar_getNumElementsInArray(var->dpiVarHandle,
-                    &numElements) < 0) {
-                baton->GetDPIError();
-                return false;
             }
         }
-        if (var->lobs)
-            delete [] var->lobs;
-        var->lobs = new njsProtoILob[numElements];
-        for (uint32_t row = 0; row < numElements; row++) {
-            njsProtoILob *lob = &var->lobs[row];
-            lob->dataType = dataType;
-            lob->isAutoClose = true;
-            uint32_t elementIndex = baton->bufferRowIndex + row;
-            dpiData *data = &var->dpiVarData[elementIndex];
-            if (data->isNull)
-                continue;
-            if (!lob->PopulateFromDPI(baton, data->value.asLOB, true))
-                return false;
-        }
+
+        // process the main buffer if DML returning is not in effect
+        if (!var->dmlReturningBuffers &&
+                !ProcessVarBuffer(baton, var, &var->buffer))
+            return false;
+
     }
 
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection::ProcessVarBuffer()
+//   Process a variable buffer. REF cursors must have their query variables
+// defined and LOBs must be initially processed in order to have as much work
+// as possible done in the worker thread and avoid any round trips.
+//-----------------------------------------------------------------------------
+bool njsConnection::ProcessVarBuffer(njsBaton *baton, njsVariable *var,
+        njsVariableBuffer *buffer)
+{
+    dpiStmt *stmt;
+
+    switch (var->varTypeNum) {
+        case DPI_ORACLE_TYPE_CLOB:
+        case DPI_ORACLE_TYPE_NCLOB:
+        case DPI_ORACLE_TYPE_BLOB:
+            buffer->lobs = new njsProtoILob[buffer->numElements];
+            for (uint32_t i = 0; i < buffer->numElements; i++) {
+                njsProtoILob *lob = &buffer->lobs[i];
+                lob->dataType = (var->varTypeNum == DPI_ORACLE_TYPE_BLOB) ?
+                        NJS_DATATYPE_BLOB : NJS_DATATYPE_CLOB;
+                lob->isAutoClose = true;
+                uint32_t elementIndex = baton->bufferRowIndex + i;
+                dpiData *data = &buffer->dpiVarData[elementIndex];
+                if (data->isNull)
+                    continue;
+                if (!lob->PopulateFromDPI(baton, data->value.asLOB, true))
+                    return false;
+            }
+            break;
+        case DPI_ORACLE_TYPE_STMT:
+            stmt = buffer->dpiVarData->value.asStmt;
+            if (dpiStmt_getNumQueryColumns(stmt, &var->numQueryVars) < 0) {
+                baton->GetDPIError();
+                return false;
+            }
+            var->queryVars = new njsVariable[var->numQueryVars];
+            if (!ProcessQueryVars(baton, stmt, var->queryVars,
+                    var->numQueryVars))
+                return false;
+            break;
+        default:
+            break;
+    }
     return true;
 }
 
@@ -516,166 +537,24 @@ Local<Value> njsConnection::GetMetaData(njsVariable *vars, uint32_t numVars,
 
 
 //-----------------------------------------------------------------------------
-// njsConnection::ProcessBinds()
-//   Process binds passed through to execute call. A variable is created for
-// each one and added to the binds array for processing during the actual
-// execution.
+// njsConnection::CreateVarBuffer()
+//   Create ODPI-C variables used to hold the bind data.
 //-----------------------------------------------------------------------------
-bool njsConnection::ProcessBinds(Nan::NAN_METHOD_ARGS_TYPE args,
-        unsigned int index, njsBaton *baton)
+bool njsConnection::CreateVarBuffer(njsVariable *var, njsBaton *baton)
 {
-    Nan::HandleScope scope;
-    if (args[static_cast<int>(index)]->IsArray()) {
-      Local<Array> bindsArray = Local<Array>::Cast(
-                                       args[static_cast<int>(index)]);
-        return ProcessBindsByPos(bindsArray, baton);
-    }
-    if (args[static_cast<int>(index)]->IsObject() &&
-        !args[static_cast<int>(index)]->IsFunction()) {
-        Local<Object> bindsObject = args[static_cast<int>(index)]->ToObject();
-        return ProcessBindsByName(bindsObject, baton);
-    }
-    baton->error = njsMessages::Get(errInvalidParameterType, index);
-    return false;
-}
+    // if the variable is not an array use the bind array size
+    if (!var->isArray)
+        var->maxArraySize = baton->bindArraySize;
 
-
-//-----------------------------------------------------------------------------
-// njsConnection::ProcessBindsByName()
-//   Get bind variables from JS (by name).
-//-----------------------------------------------------------------------------
-bool njsConnection::ProcessBindsByName(Local<Object> bindObj, njsBaton *baton)
-{
-    Nan::HandleScope scope;
-    Local<Array> array = bindObj->GetOwnPropertyNames();
-
-    baton->numBindVars = array->Length();
-    baton->bindVars = new njsVariable[baton->numBindVars];
-    for (uint32_t i = 0; i < baton->numBindVars; i++) {
-        njsVariable *var = &baton->bindVars[i];
-        Local<Value> temp = Nan::Get(array, i).ToLocalChecked();
-        v8::String::Utf8Value v8str(temp->ToString());
-        std::string str = std::string(*v8str,
-                                      static_cast<size_t>(v8str.length()));
-        var->name = ":" + str;
-        var->pos = i + 1;
-        MaybeLocal<Value> mval = Nan::Get (bindObj,
-                                           Nan::New(str).ToLocalChecked());
-        Local<Value> val;
-        if (!mval.ToLocal (&val))
-            return false;
-
-        if (!ProcessBind(val, var, false, baton))
-            return false;
-    }
-
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsConnection::ProcessBindsByPos()
-//   Get bind variables from JS (by position).
-//-----------------------------------------------------------------------------
-bool njsConnection::ProcessBindsByPos(Local<Array> binds, njsBaton *baton)
-{
-    Nan::HandleScope scope;
-
-    baton->numBindVars = binds->Length();
-    baton->bindVars = new njsVariable[baton->numBindVars];
-    for (uint32_t i = 0; i < baton->numBindVars; i++) {
-        njsVariable *var = &baton->bindVars[i];
-        var->pos = i + 1;
-        Local<Value> val = Nan::Get(binds,i).ToLocalChecked ();
-        if (!ProcessBind(val, var, true, baton))
-            return false;
-    }
-
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsConnection::ProcessBind()
-//   Process bind variable from JS.
-//-----------------------------------------------------------------------------
-bool njsConnection::ProcessBind(Local<Value> val, njsVariable *var,
-        bool byPosition, njsBaton *baton)
-{
-    Nan::HandleScope scope;
-    Local<Value> bindValue;
-    uint32_t bindType;
-
-    // default values
-    var->bindDir = NJS_BIND_IN;
-    var->maxSize = 0;
-    var->maxArraySize = 0;
-    var->isArray = false;
-    bindType = 0;
-
-    // value is an object, get information on the bind variable from it
-    if (val->IsObject() && !val->IsDate() && !Buffer::HasInstance(val) &&
-            !njsILob::HasInstance(val)) {
-        Local<Object> bindUnit = val->ToObject();
-
-        // In case of bind-by-position, JSON objects are expected to be
-        // unnamed. If JSON object is provided, we look for "dir", "type",
-        // "maxSize" and "val" key names. If not found, an error is reported.
-        // Array (positional) binds syntax
-        //    [ id, name, {type : oracledb.STRING, dir : oracledb.BIND_OUT}]
-        // the 3rd parameter is unnamed JSON object.
-        // [ id, n, { a: { type : oracledb.STRING, dir : oracledb.BIND_OUT} }]
-        // will fail now. In this example the third parameter JSON object has
-        // a key name "a" and value as another JSON. This is incorrect syntax.
-        if (byPosition) {
-            Local<Array> keys = bindUnit->GetOwnPropertyNames();
-            bool valid = false;
-            for (uint32_t i = 0; i < keys->Length(); i++) {
-                Local<String> temp = Nan::Get(keys,
-                                              i).ToLocalChecked().As<String>();
-
-                v8::String::Utf8Value utf8str(temp->ToString());
-                std::string key = std::string(*utf8str,
-                                     static_cast<size_t>(utf8str.length()));
-                if (key.compare("dir") == 0 ||
-                        key.compare("type") == 0 ||
-                        key.compare("maxSize") == 0 ||
-                        key.compare("val") == 0) {
-                    valid = true;
-                    break;
-                }
-            }
-            if (!valid) {
-                baton->error = njsMessages::Get(errNamedJSON);
-                return false;
-            }
-        }
-
-        if (!baton->GetUnsignedIntFromJSON(bindUnit, "dir", 1, &var->bindDir))
-            return false;
-        if (!baton->GetUnsignedIntFromJSON(bindUnit, "type", 1, &bindType))
-            return false;
-        if (var->bindDir != NJS_BIND_IN) {
-            var->maxSize = NJS_MAX_OUT_BIND_SIZE;
-            if (!baton->GetUnsignedIntFromJSON(bindUnit, "maxSize", 1,
-                    &var->maxSize))
-                return false;
-        }
-        if (!baton->GetUnsignedIntFromJSON(bindUnit, "maxArraySize", 1,
-                &var->maxArraySize))
-            return false;
-        if (var->maxArraySize > 0)
-            var->isArray = true;
-        bindValue = Nan::Get(bindUnit,
-              Nan::New<v8::String>("val").ToLocalChecked()).ToLocalChecked ();
-
-    // otherwise, bind value is directly passed and other values are defaults
-    } else {
-        bindValue = val;
+    // if the variable has no data type assume string of size 1
+    if (var->bindDataType == NJS_DATATYPE_DEFAULT) {
+        var->bindDataType = NJS_DATATYPE_STR;
+        var->maxSize = 1;
     }
 
     // REF cursors are only supported as out binds currently
-    if (bindType == NJS_DATATYPE_CURSOR && var->bindDir != NJS_BIND_OUT) {
+    if (var->bindDataType == NJS_DATATYPE_CURSOR &&
+            var->bindDir != NJS_BIND_OUT) {
         baton->error = njsMessages::Get(errInvalidPropertyValueInParam,
                 "type", 1);
         return false;
@@ -688,42 +567,8 @@ bool njsConnection::ProcessBind(Local<Value> val, njsVariable *var,
         return false;
     }
 
-    // validate bind type
-    if (!bindType || !var->maxSize || var->maxSize == NJS_MAX_OUT_BIND_SIZE) {
-        uint32_t defaultMaxSize = 0, defaultBindType = 0;
-        if (!GetBindTypeAndSizeFromValue(var, bindValue, &defaultBindType,
-                &defaultMaxSize, baton))
-            return false;
-        if (!bindType)
-            bindType = defaultBindType;
-        if (defaultMaxSize > var->maxSize)
-            var->maxSize = defaultMaxSize;
-    }
-
-    // for IN binds, maxArraySize is ignored and obtained from the actual
-    // array size; for INOUT binds, maxArraySize does need to be specified
-    // by the application; for OUT binds, the value from the application
-    // must be accepted as is as there is no way to validate it
-    if (bindValue->IsArray()) {
-        var->isArray = true;
-        Local<Array> arrayVal = Local<Array>::Cast(bindValue);
-        if (var->bindDir == NJS_BIND_IN) {
-            var->maxArraySize = arrayVal->Length();
-            if (var->maxArraySize == 0)
-                var->maxArraySize = 1;
-        } else if (!var->maxArraySize) {
-            baton->error = njsMessages::Get(errReqdMaxArraySize);
-            return false;
-        }
-        if (var->bindDir == NJS_BIND_INOUT &&
-                arrayVal->Length() > var->maxArraySize) {
-            baton->error = njsMessages::Get(errInvalidArraySize);
-            return false;
-        }
-    }
-
-    // validate bind type and determine variable type
-    switch (bindType) {
+    // determine ODPI-C Oracle type and native type to use
+    switch (var->bindDataType) {
         case NJS_DATATYPE_STR:
             var->varTypeNum = DPI_ORACLE_TYPE_VARCHAR;
             var->nativeTypeNum = DPI_NATIVE_TYPE_BYTES;
@@ -761,28 +606,443 @@ bool njsConnection::ProcessBind(Local<Value> val, njsVariable *var,
             return false;
     }
 
-    // create DPI variable to hold data
-    if (!var->isArray)
-        var->maxArraySize = 1;
+    // create ODPI-C variable
     if (dpiConn_newVar(baton->dpiConnHandle, var->varTypeNum,
             var->nativeTypeNum, var->maxArraySize, var->maxSize, 1,
-            var->isArray, NULL, &var->dpiVarHandle, &var->dpiVarData) < 0) {
+            var->isArray, NULL, &var->dpiVarHandle,
+            &var->buffer.dpiVarData) < 0) {
         baton->GetDPIError();
         return false;
     }
 
-    // for in and in/out binds, copy value into buffers
-    switch (var->bindDir) {
-        case NJS_BIND_OUT:
-            break;
-        case NJS_BIND_IN:
-        case NJS_BIND_INOUT:
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection::ProcessExecuteBinds()
+//   Process binds passed through to Execute() call.
+//-----------------------------------------------------------------------------
+bool njsConnection::ProcessExecuteBinds(Local<Object> binds, njsBaton *baton)
+{
+    Nan::HandleScope scope;
+    Local<Array> bindNames;
+
+    // determine bind names (if binding by name)
+    baton->bindArraySize = 1;
+    if (!binds->IsArray())
+        bindNames = binds->GetOwnPropertyNames();
+
+    // initialize variables; if there are no variables, nothing further to do!
+    if (!InitBindVars(binds, bindNames, baton))
+        return false;
+    if (baton->numBindVars == 0)
+        return true;
+
+    // scan the execute binds and populate the bind variables
+    return ScanExecuteBinds(binds, bindNames, baton);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection::ScanExecuteBinds()
+//   Scan the binds passed through to Execute() and determine the bind
+// type and maximum size (for strings/buffers).
+//-----------------------------------------------------------------------------
+bool njsConnection::ScanExecuteBinds(Local<Object> binds,
+        Local<Array> bindNames, njsBaton *baton)
+{
+    Nan::HandleScope scope;
+    Local<Value> bindName, bindUnit, bindValue;
+    Local<Array> byPositionValues;
+    njsVariable *var;
+    bool byPosition;
+
+    // determine if binding is by position or by name
+    byPosition = (baton->bindVars[0].pos > 0);
+    if (byPosition)
+        byPositionValues = binds.As<Array>();
+
+    // scan each column
+    for (uint32_t i = 0; i < baton->numBindVars; i++) {
+        var = &baton->bindVars[i];
+
+        // determine bind information and value
+        if (byPosition)
+            bindUnit = Nan::Get(byPositionValues, i).ToLocalChecked();
+        else {
+            bindName = Nan::Get(bindNames, i).ToLocalChecked();
+            if (!Nan::Get(binds, bindName).ToLocal(&bindUnit))
+                return false;
+        }
+        if (bindUnit->IsObject() && !bindUnit->IsDate() &&
+                !Buffer::HasInstance(bindUnit) &&
+                !njsILob::HasInstance(bindUnit)) {
+            if (!ScanExecuteBindUnit(bindUnit.As<Object>(), var, false, baton))
+                return false;
+            Local<String> key = Nan::New<String>("val").ToLocalChecked();
+            bindValue = Nan::Get(bindUnit.As<Object>(), key).ToLocalChecked();
+        } else bindValue = bindUnit;
+
+        // get bind information from value if it has not already been specified
+        if (var->bindDataType == NJS_DATATYPE_DEFAULT || !var->maxSize ||
+                var->maxSize == NJS_MAX_OUT_BIND_SIZE) {
+            njsDataType defaultBindType = NJS_DATATYPE_DEFAULT;
+            uint32_t defaultMaxSize = 0;
+            if (!GetBindTypeAndSizeFromValue(var, bindValue, &defaultBindType,
+                    &defaultMaxSize, baton))
+                return false;
+            if (var->bindDataType == NJS_DATATYPE_DEFAULT)
+                var->bindDataType = defaultBindType;
+            if (defaultMaxSize > var->maxSize)
+                var->maxSize = defaultMaxSize;
+        }
+
+        // for IN binds, maxArraySize is ignored and obtained from the actual
+        // array size; for INOUT binds, maxArraySize does need to be specified
+        // by the application; for OUT binds, the value from the application
+        // must be accepted as is as there is no way to validate it
+        if (bindValue->IsArray()) {
+            var->isArray = true;
+            Local<Array> arrayVal = Local<Array>::Cast(bindValue);
+            if (var->bindDir == NJS_BIND_IN) {
+                var->maxArraySize = arrayVal->Length();
+                if (var->maxArraySize == 0)
+                    var->maxArraySize = 1;
+            } else if (var->maxArraySize == 0) {
+                baton->error = njsMessages::Get(errReqdMaxArraySize);
+                return false;
+            }
+            if (var->bindDir == NJS_BIND_INOUT &&
+                    arrayVal->Length() > var->maxArraySize) {
+                baton->error = njsMessages::Get(errInvalidArraySize);
+                return false;
+            }
+        }
+
+        // create buffer for variable
+        if (!CreateVarBuffer(var, baton))
+            return false;
+
+        // process bind value (for all except OUT)
+        if (var->bindDir != NJS_BIND_OUT) {
             if (!ProcessBindValue(bindValue, var, baton))
                 return false;
+        }
+
+    }
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection::ScanExecuteBindUnit()
+//   Scan the execute bind unit for bind information.
+//-----------------------------------------------------------------------------
+bool njsConnection::ScanExecuteBindUnit(Local<Object> bindUnit,
+        njsVariable *var, bool inExecuteMany, njsBaton *baton)
+{
+    Nan::HandleScope scope;
+
+    // scan all keys and verify that one of "dir", "type", "maxSize" or "val"
+    // is found; if not, the bind information is considered invalid
+    Local<Array> keys = bindUnit->GetOwnPropertyNames();
+    bool valid = false;
+    for (uint32_t i = 0; i < keys->Length(); i++) {
+        Local<String> temp =
+                Nan::Get(keys, i).ToLocalChecked().As<String>();
+        v8::String::Utf8Value utf8str(temp);
+        std::string key =
+                std::string(*utf8str, static_cast<size_t>(utf8str.length()));
+        if (key.compare("dir") == 0 || key.compare("type") == 0 ||
+                key.compare("maxSize") == 0 || key.compare("val") == 0) {
+            valid = true;
+            break;
+        }
+    }
+    if (!valid) {
+        baton->error = njsMessages::Get(errNamedJSON);
+        return false;
+    }
+
+    // get and validate bind direction
+    uint32_t temp = (uint32_t) var->bindDir;
+    if (!baton->GetUnsignedIntFromJSON(bindUnit, "dir", 1, &temp))
+        return false;
+    var->bindDir = (njsBindDir) temp;
+    switch (var->bindDir) {
+        case NJS_BIND_OUT:
+        case NJS_BIND_IN:
+        case NJS_BIND_INOUT:
             break;
         default:
             baton->error = njsMessages::Get(errInvalidBindDirection);
             return false;
+    }
+
+    // get data type
+    temp = (uint32_t) var->bindDataType;
+    if (!baton->GetUnsignedIntFromJSON(bindUnit, "type", 1, &temp))
+        return false;
+    if (!temp && inExecuteMany) {
+        if (var->pos > 0)
+            baton->error = njsMessages::Get(errMissingTypeByPos, var->pos);
+        else baton->error = njsMessages::Get(errMissingTypeByName,
+                var->name.c_str());
+    }
+    var->bindDataType = (njsDataType) temp;
+
+    // get maximum size for strings/buffers; this value is only used for
+    // IN/OUT and OUT binds in execute() and at all times for executeMany()
+    if (var->bindDir != NJS_BIND_IN || inExecuteMany) {
+        if (var->bindDir != NJS_BIND_IN)
+            var->maxSize = NJS_MAX_OUT_BIND_SIZE;
+        if (!baton->GetUnsignedIntFromJSON(bindUnit, "maxSize", 1,
+                &var->maxSize))
+            return false;
+        if (inExecuteMany && var->maxSize == 0) {
+            if (var->bindDataType == NJS_DATATYPE_STR ||
+                    var->bindDataType == NJS_DATATYPE_BUFFER) {
+                if (var->pos > 0)
+                    baton->error = njsMessages::Get(errMissingMaxSizeByPos,
+                            var->pos);
+                else baton->error = njsMessages::Get(errMissingMaxSizeByName,
+                        var->name.c_str());
+                return false;
+            }
+        }
+    }
+
+    // get max array size (for array binds)
+    if (!inExecuteMany) {
+        if (!baton->GetUnsignedIntFromJSON(bindUnit, "maxArraySize", 1,
+                &var->maxArraySize))
+            return false;
+        if (var->maxArraySize > 0)
+            var->isArray = true;
+    }
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection::ProcessExecuteManyBinds()
+//   Process binds passed through to ExecuteMany() call.
+//-----------------------------------------------------------------------------
+bool njsConnection::ProcessExecuteManyBinds(Local<Array> binds,
+        Local<Object> options, njsBaton *baton)
+{
+    Nan::HandleScope scope;
+    Local<Value> bindDefs, bindName, bindUnit;
+    Local<Array> bindNames;
+    bool scanRequired;
+
+    // all rows are bound at one time
+    baton->bindArraySize = binds->Length();
+
+    // determine if bind definitions have been specified
+    Local<String> key = Nan::New<v8::String>("bindDefs").ToLocalChecked();
+    if (!Nan::Get(options, key).ToLocal(&bindDefs))
+        return false;
+    scanRequired = bindDefs->IsUndefined();
+
+    // if no bind definitions are specified, the first row is used to determine
+    // the number of bind variables and types
+    if (scanRequired)
+        bindDefs = Nan::Get(binds, 0).ToLocalChecked();
+    if (!bindDefs->IsArray())
+        bindNames = bindDefs.As<Object>()->GetOwnPropertyNames();
+
+    // initialize variables; if there are no variables, nothing further to do!
+    if (!InitBindVars(bindDefs.As<Object>(), bindNames, baton))
+        return false;
+    if (baton->numBindVars == 0)
+        return true;
+
+    // if no bind definitions are specified, scan the binds to determine type
+    // and size
+    if (scanRequired) {
+        if (!ScanExecuteManyBinds(binds, bindNames, baton))
+            return false;
+
+    // otherwise, use the bind definitions to determine type and size
+    } else {
+        bool byPosition = (baton->bindVars[0].pos > 0);
+        Local<Array> byPositionValues;
+        if (byPosition)
+            byPositionValues = bindDefs.As<Array>();
+        for (uint32_t i = 0; i < baton->numBindVars; i++) {
+            njsVariable *var = &baton->bindVars[i];
+            if (byPosition)
+                bindUnit = Nan::Get(byPositionValues, i).ToLocalChecked();
+            else {
+                bindName = Nan::Get(bindNames, i).ToLocalChecked();
+                if (!Nan::Get(bindDefs.As<Object>(),
+                        bindName).ToLocal(&bindUnit))
+                    return false;
+            }
+            if (!ScanExecuteBindUnit(bindUnit.As<Object>(), var, true, baton))
+                return false;
+        }
+    }
+
+    // create the ODPI-C variables used to hold the data
+    for (uint32_t i = 0; i < baton->numBindVars; i++) {
+        if (!CreateVarBuffer(&baton->bindVars[i], baton))
+            return false;
+    }
+
+    // populate the ODPI-C variables with the data from JavaScript binds
+    if (!TransferExecuteManyBinds(binds, bindNames, baton))
+        return false;
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection::ScanExecuteManyBinds()
+//   Scan the binds passed through to ExecuteMany() and determine the bind
+// type and maximum size (for strings/buffers).
+//-----------------------------------------------------------------------------
+bool njsConnection::ScanExecuteManyBinds(Local<Array> binds,
+        Local<Array> bindNames, njsBaton *baton)
+{
+    njsDataType defaultBindType;
+    uint32_t defaultMaxSize;
+    bool byPosition;
+    Nan::HandleScope scope;
+    Local<Array> byPositionValues;
+    Local<Value> bindName, val;
+    Local<Object> row;
+    njsVariable *var;
+
+    byPosition = (baton->bindVars[0].pos > 0);
+    for (uint32_t i = 0; i < baton->bindArraySize; i++) {
+        row = Nan::Get(binds, i).ToLocalChecked().As<Object>();
+
+        // verify that all rows are by position (array) or by name (object)
+        if ((byPosition && !row->IsArray()) ||
+                (!byPosition && row->IsArray())) {
+            baton->error = njsMessages::Get(errMixedBind);
+            return false;
+        }
+
+        // scan each of the columns in the row and determine the bind type and
+        // maximum size of the input data
+        if (byPosition)
+            byPositionValues = row.As<Array>();
+        for (uint32_t j = 0; j < baton->numBindVars; j++) {
+            var = &baton->bindVars[j];
+            if (byPosition)
+                val = Nan::Get(byPositionValues, j).ToLocalChecked();
+            else {
+                bindName = Nan::Get(bindNames, j).ToLocalChecked();
+                if (!Nan::Get(row, bindName).ToLocal(&val))
+                    return false;
+            }
+            if (val->IsUndefined() || val->IsNull())
+                continue;
+            if (!GetBindTypeAndSizeFromValue(var, val, &defaultBindType,
+                    &defaultMaxSize, baton, true))
+                return false;
+            if (var->bindDataType == 0)
+                var->bindDataType = defaultBindType;
+            if (defaultMaxSize > var->maxSize)
+                var->maxSize = defaultMaxSize;
+        }
+
+    }
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection::TransferExecuteManyBinds()
+//   Transfer the binds from JavaScript to the ODPI-C variable buffers already
+// created.
+//-----------------------------------------------------------------------------
+bool njsConnection::TransferExecuteManyBinds(Local<Array> binds,
+        Local<Array> bindNames, njsBaton *baton)
+{
+    bool byPosition;
+    Nan::HandleScope scope;
+    Local<Array> byPositionValues;
+    Local<Value> bindName, val;
+    Local<Object> row;
+    njsVariable *var;
+
+    // determine if we are binding by position or by name
+    byPosition = (baton->bindVars[0].pos > 0);
+
+    // process each row
+    for (uint32_t i = 0; i < baton->bindArraySize; i++) {
+        row = Nan::Get(binds, i).ToLocalChecked().As<Object>();
+
+        // verify that all rows are by position (array) or by name (object)
+        if ((byPosition && !row->IsArray()) ||
+                (!byPosition && row->IsArray())) {
+            baton->error = njsMessages::Get(errMixedBind);
+            return false;
+        }
+
+        // process each column
+        if (byPosition)
+            byPositionValues = row.As<Array>();
+        for (uint32_t j = 0; j < baton->numBindVars; j++) {
+            var = &baton->bindVars[j];
+            if (byPosition)
+                val = Nan::Get(byPositionValues, j).ToLocalChecked();
+            else {
+                bindName = Nan::Get(bindNames, j).ToLocalChecked();
+                if (!Nan::Get(row, bindName).ToLocal(&val))
+                    return false;
+            }
+            if (!ProcessScalarBindValue(val, var, i, true, baton))
+                return false;
+        }
+
+    }
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection::InitBindVars()
+//   Initialize bind variables using the given bind objectd/array as a
+// template. For binds performed by name, return the bind names as an array.
+//-----------------------------------------------------------------------------
+bool njsConnection::InitBindVars(Local<Object> bindObj,
+        Local<Array> bindNames, njsBaton *baton)
+{
+    bool byPosition = bindObj->IsArray();
+
+    // create bind variables (one for each element of the bind array or each
+    // property of the bind object)
+    if (byPosition)
+        baton->numBindVars = bindObj.As<Array>()->Length();
+    else {
+        bindNames = bindObj->GetOwnPropertyNames();
+        baton->numBindVars = bindNames->Length();
+    }
+    baton->bindVars = new njsVariable[baton->numBindVars];
+
+    // initialize bind variables (set position or name)
+    for (uint32_t i = 0; i < baton->numBindVars; i++) {
+        njsVariable *var = &baton->bindVars[i];
+        if (byPosition)
+            var->pos = i + 1;
+        else {
+            Local<Value> temp = Nan::Get(bindNames, i).ToLocalChecked();
+            v8::String::Utf8Value v8str(temp->ToString());
+            std::string str = std::string(*v8str,
+                    static_cast<size_t>(v8str.length()));
+            var->name = ":" + str;
+        }
     }
 
     return true;
@@ -798,7 +1058,7 @@ bool njsConnection::ProcessBindValue(Local<Value> value, njsVariable *var,
 {
     // scalar values can be handled directly
     if (!var->isArray)
-        return ProcessScalarBindValue(value, var, 0, baton);
+        return ProcessScalarBindValue(value, var, 0, false, baton);
 
     // only strings and numbers are currently allowed
     if (var->varTypeNum != DPI_ORACLE_TYPE_VARCHAR &&
@@ -826,7 +1086,7 @@ bool njsConnection::ProcessBindValue(Local<Value> value, njsVariable *var,
     // process each element in the array
     for (uint32_t i = 0; i < arrayVal->Length(); i++) {
         Local<Value> elementValue = Nan::Get (arrayVal, i).ToLocalChecked ();
-        if (!ProcessScalarBindValue(elementValue, var, i, baton))
+        if (!ProcessScalarBindValue(elementValue, var, i, false, baton))
             return false;
     }
 
@@ -840,14 +1100,14 @@ bool njsConnection::ProcessBindValue(Local<Value> value, njsVariable *var,
 // position.
 //-----------------------------------------------------------------------------
 bool njsConnection::ProcessScalarBindValue(Local<Value> value,
-        njsVariable *var, uint32_t pos, njsBaton *baton)
+        njsVariable *var, uint32_t pos, bool inExecuteMany, njsBaton *baton)
 {
     Nan::HandleScope scope;
     bool bindOk = false;
     dpiData *data;
 
     // initialization
-    data = &var->dpiVarData[pos];
+    data = &var->buffer.dpiVarData[pos];
     data->isNull = 0;
 
     // nulls and undefined in JS are mapped to NULL in Oracle; no checks needed
@@ -863,7 +1123,12 @@ bool njsConnection::ProcessScalarBindValue(Local<Value> value,
             v8::String::Utf8Value utf8str(value);
             if (utf8str.length() == 0)
                 data->isNull = 1;
-            else if (dpiVar_setFromBytes(var->dpiVarHandle, pos, *utf8str,
+            else if (inExecuteMany &&
+                    (uint32_t) utf8str.length() > var->maxSize) {
+                baton->error = njsMessages::Get(errMaxSizeTooSmall,
+                        var->maxSize, utf8str.length(), pos);
+                return false;
+            } else if (dpiVar_setFromBytes(var->dpiVarHandle, pos, *utf8str,
                              static_cast<uint32_t>( utf8str.length())) < 0) {
                 baton->GetDPIError();
                 return false;
@@ -906,8 +1171,12 @@ bool njsConnection::ProcessScalarBindValue(Local<Value> value,
                 var->varTypeNum == DPI_ORACLE_TYPE_BLOB);
         if (bindOk) {
             Local<Object> obj = value->ToObject();
-            if (dpiVar_setFromBytes(var->dpiVarHandle, pos, Buffer::Data(obj),
-                    (uint32_t) Buffer::Length(obj)) < 0) {
+            if (inExecuteMany && Buffer::Length(obj) > var->maxSize) {
+                baton->error = njsMessages::Get(errMaxSizeTooSmall,
+                        var->maxSize, Buffer::Length(obj), pos);
+                return false;
+            } else if (dpiVar_setFromBytes(var->dpiVarHandle, pos,
+                    Buffer::Data(obj), (uint32_t) Buffer::Length(obj)) < 0) {
                 baton->GetDPIError();
                 return false;
             }
@@ -968,7 +1237,7 @@ bool njsConnection::ProcessScalarBindValue(Local<Value> value,
 // is supported at this point, 0 is returned.
 //-----------------------------------------------------------------------------
 bool njsConnection::GetBindTypeAndSizeFromValue(njsVariable *var,
-        Local<Value> value, uint32_t *bindType, uint32_t *maxSize,
+        Local<Value> value, njsDataType *bindType, uint32_t *maxSize,
         njsBaton *baton, bool scalarOnly)
 {
     if (value->IsUndefined() || value->IsNull()) {
@@ -988,7 +1257,8 @@ bool njsConnection::GetBindTypeAndSizeFromValue(njsVariable *var,
         Nan::HandleScope scope;
         Local<Array> arrayVal = Local<Array>::Cast(value);
         Local<Value> element;
-        uint32_t elementBindType, elementMaxSize;
+        njsDataType elementBindType;
+        uint32_t elementMaxSize;
         for (uint32_t i = 0; i < arrayVal->Length(); i++) {
             element = Nan::Get (arrayVal, i).ToLocalChecked ();
             if (element->IsUndefined() || element->IsNull())
@@ -1008,7 +1278,7 @@ bool njsConnection::GetBindTypeAndSizeFromValue(njsVariable *var,
                                       Buffer::Length(value->ToObject()));
         } else if (njsILob::HasInstance(value)) {
             njsILob *lob = njsILob::GetInstance(value);
-            *bindType = static_cast<uint32_t>(lob->GetDataType());
+            *bindType = lob->GetDataType();
         }
     } else {
         baton->error= njsMessages::Get(errInvalidBindDataType, 2);
@@ -1019,24 +1289,16 @@ bool njsConnection::GetBindTypeAndSizeFromValue(njsVariable *var,
 
 
 //-----------------------------------------------------------------------------
-// njsConnection::ProcessOptions()
-//   Processing of options. If an error is detected, the baton error is
-// populated and false is returned.
+// njsConnection::ProcessExecuteOptions()
+//   Processing of options for connection.execute(). If an error is detected,
+// the baton error is populated and false is returned.
 //-----------------------------------------------------------------------------
-bool njsConnection::ProcessOptions(Nan::NAN_METHOD_ARGS_TYPE args,
-        unsigned int index, njsBaton *baton)
+bool njsConnection::ProcessExecuteOptions(Local<Object> options,
+        njsBaton *baton)
 {
     Nan::HandleScope scope;
 
-    // an object is expected, not an array
-    if (!args[static_cast<int>(index)]->IsObject() ||
-        args[static_cast<int>(index)]->IsArray()) {
-        baton->error = njsMessages::Get(errInvalidParameterType, index);
-        return false;
-    }
-
     // process the basic options
-    Local<Object> options = args[static_cast<int>(index)]->ToObject();
     if (!baton->GetUnsignedIntFromJSON(options, "maxRows", 2, &baton->maxRows))
         return false;
     if (!baton->GetPositiveIntFromJSON(options, "fetchArraySize", 2,
@@ -1060,12 +1322,9 @@ bool njsConnection::ProcessOptions(Nan::NAN_METHOD_ARGS_TYPE args,
 
     // process the fetchAs specifications, if applicable
     Local<Value> key = Nan::New<v8::String>("fetchInfo").ToLocalChecked();
-    MaybeLocal<Value> mval = Nan::Get(options, key);
     Local<Value> val;
-
-    if (!mval.ToLocal(&val))
+    if (!Nan::Get(options, key).ToLocal(&val))
         return false;
-
     if (!val->IsUndefined() && !val->IsNull()) {
         Local<Object> jsFetchInfo = val->ToObject();
         Local<Array> keys = jsFetchInfo->GetOwnPropertyNames();
@@ -1073,17 +1332,12 @@ bool njsConnection::ProcessOptions(Nan::NAN_METHOD_ARGS_TYPE args,
         if (baton->numFetchInfo > 0)
             baton->fetchInfo = new njsFetchInfo[baton->numFetchInfo];
         for (uint32_t i = 0; i < baton->numFetchInfo; i++) {
-            Local<String> temp =
-                    Nan::Get(keys, i).ToLocalChecked().As<String>();
-
+            Local<Value> temp = Nan::Get(keys, i).ToLocalChecked();
             v8::String::Utf8Value utf8str(temp->ToString());
             baton->fetchInfo[i].name = std::string(*utf8str,
-                                    static_cast<size_t>(utf8str.length()));
-            v8::String::Utf8Value v8str(temp->ToString());
-            std::string str = std::string(*v8str,
-                             static_cast<size_t>(v8str.length()));
-            Local<Object> colInfo = Nan::Get(jsFetchInfo,
-                 Nan::New(str).ToLocalChecked()).ToLocalChecked()->ToObject();
+                    static_cast<size_t>(utf8str.length()));
+            Local<Object> colInfo =
+                    Nan::Get(jsFetchInfo, temp).ToLocalChecked()->ToObject();
             uint32_t tempType = static_cast<uint32_t>(NJS_DATATYPE_UNKNOWN);
             if (!baton->GetUnsignedIntFromJSON(colInfo, "type", 2, &tempType))
                 return false;
@@ -1105,20 +1359,41 @@ bool njsConnection::ProcessOptions(Nan::NAN_METHOD_ARGS_TYPE args,
 
 
 //-----------------------------------------------------------------------------
+// njsConnection::ProcessExecuteManyOptions()
+//   Processing of options for connection.executeMany(). If an error is
+// detected, the baton error is populated and false is returned.
+//-----------------------------------------------------------------------------
+bool njsConnection::ProcessExecuteManyOptions(Local<Object> options,
+        njsBaton *baton)
+{
+    if (!baton->GetBoolFromJSON(options, "autoCommit", 2, &baton->autoCommit))
+        return false;
+    if (!baton->GetBoolFromJSON(options, "batchErrors", 2,
+            &baton->batchErrors))
+        return false;
+    if (!baton->GetBoolFromJSON(options, "dmlRowCounts", 2,
+            &baton->dmlRowCounts))
+        return false;
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
 // njsConnection::GetScalarValueFromVar()
 //   Get the value from the DPI variable of the specified type at the specified
 // position in the variable. Return true if the get was successful; if not, the
 // baton error has been populated with the error that was received from DPI.
 //-----------------------------------------------------------------------------
 bool njsConnection::GetScalarValueFromVar(njsBaton *baton, njsVariable *var,
-        uint32_t pos, Local<Value> &value)
+        njsVariableBuffer *buffer, uint32_t pos, Local<Value> &value)
 {
     Nan::EscapableHandleScope scope;
     Local<Value> temp;
 
     // LOBs make use of the njsProtoILob objects created in the worker thread
-    if (var->lobs) {
-        njsProtoILob *protoLob = &var->lobs[pos];
+    if (buffer->lobs) {
+        njsProtoILob *protoLob = &buffer->lobs[pos];
         if (!protoLob->dpiLobHandle)
             temp = Nan::Null();
         else {
@@ -1134,9 +1409,9 @@ bool njsConnection::GetScalarValueFromVar(njsBaton *baton, njsVariable *var,
         return true;
     }
 
-    // get the value from DPI
+    // get the value from ODPI-C
     uint32_t bufferRowIndex = baton->bufferRowIndex + pos;
-    dpiData *data = &var->dpiVarData[bufferRowIndex];
+    dpiData *data = &buffer->dpiVarData[bufferRowIndex];
 
     // transform it to a JS value
     if (data->isNull) {
@@ -1196,39 +1471,21 @@ bool njsConnection::GetScalarValueFromVar(njsBaton *baton, njsVariable *var,
 
 
 //-----------------------------------------------------------------------------
-// njsConnection::GetValueFromVar()
-//   Get the value from the DPI variable of the specified type.
+// njsConnection::GetArrayValueFromVar()
+//   Get the value from the DPI variable of the specified type as an array.
 //-----------------------------------------------------------------------------
-bool njsConnection::GetValueFromVar(njsBaton *baton, njsVariable *var,
-        Local<Value> &value)
+bool njsConnection::GetArrayValueFromVar(njsBaton *baton, njsVariable *var,
+        uint32_t pos, Local<Value> &value)
 {
-    // scalar values can be handled directly
-    if (!var->isArray && !baton->isReturning)
-        return GetScalarValueFromVar(baton, var, 0, value);
+    njsVariableBuffer *buffer = &var->buffer;
 
-    // determine number of elements in output array
-    uint32_t numElements;
-    if (baton->isReturning) {
-        if (dpiVar_getData(var->dpiVarHandle, &var->maxArraySize,
-                &var->dpiVarData) < 0) {
-            baton->GetDPIError();
-            return false;
-        }
-        numElements = (uint32_t) baton->rowsAffected;
-    } else {
-        if (dpiVar_getNumElementsInArray(var->dpiVarHandle,
-                &numElements) < 0) {
-            baton->GetDPIError();
-            return false;
-        }
-    }
-
-    // process each element in the array
+    if (var->dmlReturningBuffers)
+        buffer = &var->dmlReturningBuffers[pos];
     Nan::EscapableHandleScope scope;
-    Local<Array> arrayVal = Nan::New<Array>(numElements);
-    for (uint32_t i = 0; i < numElements; i++) {
+    Local<Array> arrayVal = Nan::New<Array>(buffer->numElements);
+    for (uint32_t i = 0; i < buffer->numElements; i++) {
         Local<Value> elementValue;
-        if (!GetScalarValueFromVar(baton, var, i, elementValue))
+        if (!GetScalarValueFromVar(baton, var, buffer, i, elementValue))
             return false;
         Nan::Set(arrayVal, i, elementValue);
     }
@@ -1238,54 +1495,81 @@ bool njsConnection::GetValueFromVar(njsBaton *baton, njsVariable *var,
 
 
 //-----------------------------------------------------------------------------
+// njsConnection::GetExecuteOutBinds()
+//   Get the out binds as an object/array.
+//-----------------------------------------------------------------------------
+bool njsConnection::GetExecuteOutBinds(Local<Value> &outBinds, njsBaton *baton)
+{
+    uint32_t numOutBinds = baton->GetNumOutBinds();
+
+    if (numOutBinds > 0)
+        return GetOutBinds(outBinds, numOutBinds, 0, baton);
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection::GetExecuteManyOutBinds()
+//   Get the out binds as an object/array.
+//-----------------------------------------------------------------------------
+bool njsConnection::GetExecuteManyOutBinds(Local<Value> &outBinds,
+        uint32_t numOutBinds, njsBaton *baton)
+{
+    Nan::EscapableHandleScope scope;
+    Local<Array> rows = Nan::New<Array>(baton->bindArraySize);
+    Local<Value> row;
+
+    for (uint32_t i = 0; i < baton->bindArraySize; i++) {
+        if (!GetOutBinds(row, numOutBinds, i, baton))
+            return false;
+        Nan::Set(rows, i, row);
+    }
+    outBinds = scope.Escape(rows);
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
 // njsConnection::GetOutBinds()
 //   Get the out binds as an object/array.
 //-----------------------------------------------------------------------------
-Local<Value> njsConnection::GetOutBinds(njsBaton *baton)
+bool njsConnection::GetOutBinds(Local<Value> &outBinds, uint32_t numOutBinds,
+        uint32_t pos, njsBaton *baton)
 {
     Nan::EscapableHandleScope scope;
-    uint32_t numOutBinds;
-
-    // determine the number of out bind variables
-    numOutBinds = 0;
-    for (uint32_t i = 0; i < baton->numBindVars; i++) {
-        if (baton->bindVars[i].bindDir != NJS_BIND_IN)
-            numOutBinds++;
-    }
-
-    // for 0 we return undefined
-    if (numOutBinds == 0)
-        return scope.Escape(Nan::Undefined());
-
-    // process each of the out bind variables
-    bool bindByPos = baton->bindVars[0].name.empty();
     Local<Array> bindArray;
     Local<Object> bindObj;
     Local<Value> val;
+    bool bindByPos, ok;
+    njsVariable *var;
+
+    bindByPos = baton->bindVars[0].name.empty();
     if (bindByPos)
         bindArray = Nan::New<Array>(numOutBinds);
     else bindObj = Nan::New<Object>();
-    njsVariable *var;
     uint32_t arrayPos = 0;
     for (uint32_t i = 0; i < baton->numBindVars; i++) {
         var = &baton->bindVars[i];
         if (var->bindDir == NJS_BIND_IN)
             continue;
-        if (!GetValueFromVar(baton, var, val))
-            return scope.Escape(Nan::Undefined());
+        if (var->isArray || baton->isReturning)
+            ok = GetArrayValueFromVar(baton, var, pos, val);
+        else ok = GetScalarValueFromVar(baton, var, &var->buffer, pos, val);
+        if (!ok)
+            return false;
         if (bindByPos)
-            Nan::Set(bindArray, arrayPos, val);
+            Nan::Set(bindArray, arrayPos++, val);
         else {
             Local<String> key = Nan::New<String>(var->name.c_str() + 1,
                     (int) var->name.length() - 1).ToLocalChecked();
             Nan::Set(bindObj, key, val);
         }
-        arrayPos++;
     }
-
     if (bindByPos)
-        return scope.Escape(bindArray);
-    return scope.Escape(bindObj);
+        outBinds = scope.Escape(bindArray);
+    else outBinds = scope.Escape(bindObj);
+
+    return true;
 }
 
 
@@ -1368,9 +1652,9 @@ NAN_METHOD(njsConnection::Execute)
         baton->extendedMetaData = oracledb->getExtendedMetaData();
     }
     if (ok)
-        ok = ProcessBinds(info, 1, baton);
+        ok = ProcessExecuteBinds(info[1].As<Object>(), baton);
     if (ok)
-        ProcessOptions(info, 2, baton);
+        ProcessExecuteOptions(info[2].As<Object>(), baton);
     baton->CheckJSException(&tryCatch);
     baton->QueueWork("Execute", Async_Execute, Async_AfterExecute, 2);
 }
@@ -1452,9 +1736,10 @@ void njsConnection::Async_AfterExecute(njsBaton *baton, Local<Value> argv[])
                 resultSet);
 
     } else {
-        Nan::DefineOwnProperty (result,
-                Nan::New<v8::String>("outBinds").ToLocalChecked(),
-                GetOutBinds(baton), v8::ReadOnly);
+        Local<Value> outBinds = Nan::Undefined();
+        GetExecuteOutBinds(outBinds, baton);
+        Local<String> key = Nan::New<v8::String>("outBinds").ToLocalChecked();
+        Nan::DefineOwnProperty(result, key, outBinds);
         if (baton->isPLSQL)
             Nan::Set(result,
                     Nan::New<v8::String>("rowsAffected").ToLocalChecked(),
@@ -1469,6 +1754,187 @@ void njsConnection::Async_AfterExecute(njsBaton *baton, Local<Value> argv[])
         Nan::Set(result, Nan::New<v8::String>("metaData").ToLocalChecked(),
                 Nan::Undefined());
     }
+    argv[1] = scope.Escape(result);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection::ExecuteMany()
+//   Executes a statement on the connection multiple times, once for each row
+// of data that is passed.
+//
+// PARAMETERS
+//   - SQL Statement
+//   - Array of Binds
+//   - Options Object (Optional)
+//   - JS callback which will receive (error, result)
+//-----------------------------------------------------------------------------
+NAN_METHOD(njsConnection::ExecuteMany)
+{
+    njsConnection *connection;
+    njsOracledb *oracledb;
+    std::string sql;
+    njsBaton *baton;
+
+    connection = (njsConnection*) ValidateArgs(info, 4, 4);
+    if (!connection)
+        return;
+    if (!connection->GetStringArg(info, 0, sql))
+        return;
+    baton = connection->CreateBaton(info);
+    if (!baton)
+        return;
+    Nan::TryCatch tryCatch;
+    bool ok = baton->error.empty();
+    if (ok) {
+        baton->sql = sql;
+        baton->SetDPIConnHandle(connection->dpiConnHandle);
+        baton->jsOracledb.Reset(connection->jsOracledb);
+        oracledb = baton->GetOracledb();
+        baton->autoCommit = oracledb->getAutoCommit();
+    }
+    if (ok)
+        ok = ProcessExecuteManyOptions(info[2].As<Object>(), baton);
+    if (ok)
+        ProcessExecuteManyBinds(info[1].As<Array>(), info[2].As<Object>(),
+                baton);
+    baton->CheckJSException(&tryCatch);
+    baton->QueueWork("ExecuteMany", Async_ExecuteMany,
+            Async_AfterExecuteMany, 2);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection::Async_ExecuteMany()
+//   Worker function for njsConnection::ExecuteMany() method.
+//-----------------------------------------------------------------------------
+void njsConnection::Async_ExecuteMany(njsBaton *baton)
+{
+    uint32_t mode;
+
+    // prepare statement and perform any binds that are needed
+    if (!PrepareAndBind(baton))
+        return;
+
+    // execute statement
+    mode = (baton->autoCommit) ? DPI_MODE_EXEC_COMMIT_ON_SUCCESS :
+            DPI_MODE_EXEC_DEFAULT;
+    if (baton->batchErrors)
+        mode |= DPI_MODE_EXEC_BATCH_ERRORS;
+    if (baton->dmlRowCounts)
+        mode |= DPI_MODE_EXEC_ARRAY_DML_ROWCOUNTS;
+    if (dpiStmt_executeMany(baton->dpiStmtHandle, (dpiExecMode) mode,
+            baton->bindArraySize) < 0) {
+        baton->GetDPIError();
+        return;
+    }
+
+    // process any LOBS for out binds, as needed
+    if (dpiStmt_getRowCount(baton->dpiStmtHandle,
+            &baton->rowsAffected) < 0) {
+        baton->GetDPIError();
+        return;
+    }
+    baton->bufferRowIndex = 0;
+    if (!ProcessVars(baton, baton->bindVars, baton->numBindVars,
+            baton->bindArraySize))
+        return;
+
+    // get DML row counts if option was enabled
+    if (baton->dmlRowCounts) {
+        if (dpiStmt_getRowCounts(baton->dpiStmtHandle, &baton->numRowCounts,
+                &baton->rowCounts) < 0) {
+            baton->GetDPIError();
+            return;
+        }
+    }
+
+    // get batch errors, if option was enabled
+    if (baton->batchErrors) {
+        if (dpiStmt_getBatchErrorCount(baton->dpiStmtHandle,
+                &baton->numBatchErrorInfos) < 0) {
+            baton->GetDPIError();
+            return;
+        }
+        if (baton->numBatchErrorInfos > 0) {
+            baton->batchErrorInfos =
+                    new dpiErrorInfo[baton->numBatchErrorInfos];
+            if (dpiStmt_getBatchErrors(baton->dpiStmtHandle,
+                    baton->numBatchErrorInfos, baton->batchErrorInfos) < 0) {
+                baton->GetDPIError();
+                return;
+            }
+        }
+    }
+
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection::Async_AfterExecuteMany()
+//   Returns result to JS by invoking JS callback.
+//-----------------------------------------------------------------------------
+void njsConnection::Async_AfterExecuteMany(njsBaton *baton,
+        Local<Value> argv[])
+{
+    Nan::EscapableHandleScope scope;
+    Local<Object> result = Nan::New<v8::Object>();
+
+    // get out binds
+    uint32_t numOutBinds = baton->GetNumOutBinds();
+    Local<Value> outBinds;
+    if (numOutBinds > 0) {
+        if (GetExecuteManyOutBinds(outBinds, numOutBinds, baton)) {
+            Local<String> key = Nan::New<String>("outBinds").ToLocalChecked();
+            Nan::DefineOwnProperty(result, key, outBinds, v8::ReadOnly);
+        }
+    }
+
+    // get total number of rows affected
+    if (!baton->isPLSQL)
+        Nan::DefineOwnProperty(result,
+                Nan::New<v8::String>("rowsAffected").ToLocalChecked(),
+                Nan::New<v8::Integer>( (unsigned int) baton->rowsAffected),
+                v8::ReadOnly);
+
+    // get DML row counts if option was enabled
+    if (baton->dmlRowCounts && baton->numRowCounts > 0) {
+        Local<Array> rowCountsObj = Nan::New<Array>(baton->numRowCounts);
+        for (uint32_t i = 0; i < baton->numRowCounts; i++) {
+            Local<Value> rowCountObj =
+                    Nan::New<Integer>((unsigned int) baton->rowCounts[i]);
+            Nan::Set(rowCountsObj, i, rowCountObj);
+        }
+        Nan::DefineOwnProperty(result,
+                Nan::New<v8::String>("dmlRowCounts").ToLocalChecked(),
+                rowCountsObj, v8::ReadOnly);
+    }
+
+    // get batch errors, if option was enabled
+    if (baton->batchErrors && baton->numBatchErrorInfos > 0) {
+        Local<Array> batchErrorsObj =
+                Nan::New<Array>(baton->numBatchErrorInfos);
+        for (uint32_t i = 0; i < baton->numBatchErrorInfos; i++) {
+            dpiErrorInfo *info = &baton->batchErrorInfos[i];
+            std::string errorStr =
+                    std::string(info->message, info->messageLength);
+            Local<String> errorStrObj =
+                    Nan::New<String>(errorStr).ToLocalChecked();
+            Local<Object> errorObj =
+                    v8::Exception::Error(errorStrObj).As<Object>();
+            Nan::Set(errorObj,
+                    Nan::New<v8::String>("errorNum").ToLocalChecked(),
+                    Nan::New<v8::Number>(info->code));
+            Nan::Set(errorObj,
+                    Nan::New<v8::String>("offset").ToLocalChecked(),
+                    Nan::New<v8::Number>(info->offset));
+            Nan::Set(batchErrorsObj, i, errorObj);
+        }
+        Nan::DefineOwnProperty(result,
+                Nan::New<v8::String>("batchErrors").ToLocalChecked(),
+                batchErrorsObj, v8::ReadOnly);
+    }
+
     argv[1] = scope.Escape(result);
 }
 

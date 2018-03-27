@@ -17,6 +17,8 @@ limitations under the License.
 
 ##  <a name="contents"></a> Contents
 
+### [NODE-ORACLEDB API MANUAL](#apimanual)
+
 1. [Introduction](#intro)
     - 1.1 [Getting Started with Node-oracledb](#getstarted)
 2. [Errors](#errorobj)
@@ -137,11 +139,25 @@ limitations under the License.
                 - 4.2.6.4.3 [`resultSet`](#execresultset)
                 - 4.2.6.4.4 [`rows`](#execrows)
                 - 4.2.6.4.5 [`rowsAffected`](#execrowsaffected)
-        - 4.2.7 [`getStatementInfo()`](#getstmtinfo)
-        - 4.2.8 [`ping()`](#connectionping)
-        - 4.2.9 [`queryStream()`](#querystream)
-        - 4.2.10 [`release()`](#release)
-        - 4.2.11 [`rollback()`](#rollback)
+        - 4.2.7 [`executeMany()`](#executemany)
+            - 4.2.7.1 [`executeMany()`: SQL Statement](#executemanysqlparam)
+            - 4.2.7.2 [`executeMany()`: Binds](#executemanybinds)
+            - 4.2.7.3 [`executeMany()`: Options](#executemanyoptions)
+                - 4.2.7.3.1 [`autoCommit`](#executemanyoptautocommit)
+                - 4.2.7.3.2 [`batchErrors`](#executemanyoptbatcherrors)
+                - 4.2.7.3.3 [`bindDefs`](#executemanyoptbinddefs)
+                    - [`dir`](#executemanyoptbinddefs), [`maxSize`](#executemanyoptbinddefs), [`type`](#executemanyoptbinddefs)
+                - 4.2.7.3.4 [`dmlRowCounts`](#executemanyoptdmlrowcounts)
+            - 4.2.7.4 [`executeMany()`: Callback Function](#executemanycallback)
+                - 4.2.7.4.1 [`batchErrors`](#execmanybatcherrors)
+                - 4.2.7.4.2 [`dmlRowCounts`](#execmanydmlrowscounts)
+                - 4.2.7.4.3 [`outBinds`](#execmanyoutbinds)
+                - 4.2.7.4.4 [`rowsAffected`](#execmanyrowsaffected)
+        - 4.2.8 [`getStatementInfo()`](#getstmtinfo)
+        - 4.2.9 [`ping()`](#connectionping)
+        - 4.2.10 [`queryStream()`](#querystream)
+        - 4.2.11 [`release()`](#release)
+        - 4.2.12 [`rollback()`](#rollback)
 5. [Lob Class](#lobclass)
     - 5.1 [Lob Properties](#lobproperties)
         - 5.1.1 [`chunkSize`](#proplobchunksize)
@@ -175,6 +191,9 @@ limitations under the License.
         - 7.2.2 [`getRow()`](#getrow)
         - 7.2.3 [`getRows()`](#getrows)
         - 7.2.4 [`toQueryStream()`](#toquerystream)
+
+### [NODE-ORACLEDB USER MANUAL](#usermanual)
+
 8. [Connection Handling](#connectionhandling)
     - 8.1 [Connection Strings](#connectionstrings)
         - 8.1.1 [Easy Connect Syntax for Connection Strings](#easyconnect)
@@ -241,18 +260,21 @@ limitations under the License.
     - 14.5 [LOB Bind Parameters](#lobbinds)
     - 14.6 [PL/SQL Collection Associative Array (Index-by) Bind Parameters](#plsqlindexbybinds)
     - 14.7 [Binding Multiple Values to a SQL `WHERE IN` Clause](#sqlwherein)
-15. [Transaction Management](#transactionmgt)
-16. [Statement Caching](#stmtcache)
-17. [External Configuration](#oraaccess)
-18. [Globalization and National Language Support (NLS)](#nls)
-19. [End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend)
-20. [Promises and node-oracledb](#promiseoverview)
-    - 20.1 [Custom Promise Libraries](#custompromises)
-21. [Async/Await and node-oracledb](#asyncawaitoverview)
-22. [Tracing SQL and PL/SQL Statements](#tracingsql)
-23. [Migrating from Previous node-oracledb Releases](#migrate)
-    - 23.1 [Migrating from node-oracledb 1.13 to node-oracledb 2.0](#migratev1v2)
-    - 23.2 [Migrating from node-oracledb 2.0 to node-oracledb 2.1](#migratev20v21)
+15. [Batch Statement Execution](#batchexecution)
+16. [Transaction Management](#transactionmgt)
+17. [Statement Caching](#stmtcache)
+18. [External Configuration](#oraaccess)
+19. [Globalization and National Language Support (NLS)](#nls)
+20. [End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend)
+21. [Promises and node-oracledb](#promiseoverview)
+    - 21.1 [Custom Promise Libraries](#custompromises)
+22. [Async/Await and node-oracledb](#asyncawaitoverview)
+23. [Tracing SQL and PL/SQL Statements](#tracingsql)
+24. [Migrating from Previous node-oracledb Releases](#migrate)
+    - 24.1 [Migrating from node-oracledb 1.13 to node-oracledb 2.0](#migratev1v2)
+    - 24.2 [Migrating from node-oracledb 2.0 to node-oracledb 2.1](#migratev20v21)
+
+## <a name="apimanual"></a> NODE-ORACLEDB API MANUAL
 
 ## <a name="intro"></a> 1. Introduction
 
@@ -524,8 +546,9 @@ oracledb.DB_TYPE_VARCHAR        // (1) VARCHAR2
 
 #### <a name="oracledbconstantsbinddir"></a> 3.1.4 Execute Bind Direction Constants
 
-Constants for `execute()` [bind parameter](#executebindParams) `dir`
-properties.
+Constants for the `dir` property of `execute()`
+[bindParams](#executebindParams), [`queryStream()`](#querystream) and
+`executeMany()` [`bindDefs`](#executemanyoptbinddefs).
 
 These specify whether data values bound to SQL or PL/SQL bind
 parameters are passed into, or out from, the database:
@@ -2223,6 +2246,7 @@ The SQL or PL/SQL statement that `execute()` executes. The statement
 may contain bind variables.
 
 ##### <a name="executebindParams"></a> 4.2.6.2 `execute()`: Bind Parameters
+
 ```
 Object bindParams
 ```
@@ -2240,10 +2264,10 @@ If a bind value is an object it may have the following properties:
 
 Bind Property | Description
 ---------------|------------
-`dir` | The direction of the bind.  One of the [Oracledb Constants](#oracledbconstantsbinddir) `oracledb.BIND_IN`, `oracledb.BIND_INOUT`, or `oracledb.BIND_OUT`. The default is `oracledb.BIND_IN`.
+`dir` | The direction of the bind.  One of the [Execute Bind Direction Constants](#oracledbconstantsbinddir) `oracledb.BIND_IN`, `oracledb.BIND_INOUT`, or `oracledb.BIND_OUT`. The default is `oracledb.BIND_IN`.
 `maxArraySize` | The number of array elements to be allocated for a PL/SQL Collection INDEX BY associative array OUT or IN OUT array bind variable.  For IN binds, the value of `maxArraySize` is ignored.  See [PL/SQL Collection Associative Array (Index-by) Bind Parameters](plsqlindexbybinds).
 `maxSize` | The maximum number of bytes that an OUT or IN OUT bind variable of type `oracledb.STRING` or `oracledb.BUFFER` can use to get data. The default value is 200. The maximum limit depends on the database type, see below.  When binding IN OUT, then `maxSize` refers to the size of the returned  value: the input value can be smaller or bigger.  For IN binds, `maxSize` is ignored.
-`type` | The node-oracledb or JavaScript data type to be bound.  One of the [Oracledb Constants](#oracledbconstantsbinddir) `oracledb.BLOB`, `oracledb.BUFFER`, `oracledb.CLOB`, `oracledb.CURSOR`, `oracledb.DATE`, `oracledb.NUMBER`, or `oracledb.STRING`.  With IN or IN OUT binds the type can be explicitly set with `type` or it will default to the type of the input data value.  With OUT binds, the type defaults to `oracledb.STRING` whenever `type` is not specified.
+`type` | The node-oracledb or JavaScript data type to be bound.  One of the [Node-oracledb Type Constants](#oracledbconstantsnodbtype) `oracledb.BLOB`, `oracledb.BUFFER`, `oracledb.CLOB`, `oracledb.CURSOR`, `oracledb.DATE`, `oracledb.NUMBER`, or `oracledb.STRING`.  With IN or IN OUT binds the type can be explicitly set with `type` or it will default to the type of the input data value.  With OUT binds, the type defaults to `oracledb.STRING` whenever `type` is not specified.
 `val` | The input value or variable to be used for an IN or IN OUT bind variable.
 
 The limit for `maxSize` when binding as `oracledb.BUFFER` is 2000
@@ -2511,7 +2535,210 @@ the number of rows affected, for example the number of rows
 inserted. For non-DML statements such as queries, or if no rows are
 affected, then `rowsAffected` will appear as undefined.
 
-#### <a name="getstmtinfo"></a> 4.2.7 `connection.getStatementInfo()`
+#### <a name="executemany"></a> 4.2.7 `connection.executeMany()`
+
+##### Prototype
+
+Callback:
+```
+executeMany(String sql, Array binds, [Object options], function(Error error, [Object result]) {});
+```
+Promise:
+```
+promise = executeMany(String sql, Array binds, [Object options]);
+```
+
+##### Description
+
+This method allows sets of data values to be bound to one DML or
+PL/SQL statement for execution.  It is like calling
+[`connection.execute()`](#execute) multiple times but requires fewer
+round-trips.  This is an efficient way to handle batch changes, for
+example when inserting or updating multiple rows.  The method cannot
+be used for queries.
+
+The `executeMany()` method supports IN, IN OUT and OUT binds for most
+data types except [PL/SQL Collection Associative
+Arrays](#plsqlindexbybinds).
+
+See [Batch Statement Execution](#batchexecution) for more information.
+
+This method was added in node-oracledb 2.2.
+
+##### <a name="executemanysqlparam"></a> 4.2.6.1 `executeMany()`: SQL Statement
+
+```
+String sql
+```
+
+The SQL or PL/SQL statement that `executeMany()` executes.  The
+statement should contain bind variable names.
+
+##### <a name="executemanybinds"></a> 4.2.7.2 `executeMany()`: Binds
+
+The `binds` parameter contains the values or variables to be bound to
+the executed statement.  It must be an array of arrays (for 'bind by
+position') or an array of objects whose keys match the bind variable
+names in the SQL statement (for 'bind by name').  Each sub-array or
+sub-object should contain values for the bind variables used in the
+SQL statement.  At least one such record must be specified.
+
+If a record contains fewer values then expected, NULL values will be
+used.  For bind by position, empty values can be specified using
+syntax like `[a,,c,d]`.
+
+By default, the direction of binds is `oracledb.BIND_IN`.  The first
+data record determines the number of bind variables, each bind
+variable's data type, and its name (when binding by name).  If a
+variable in the first record contains a null, this value is ignored
+and a subsequent record is used to determine that variable's
+characteristics.  If all values in all records for a particular bind
+variable are null, the type of that bind is `oracledb.STRING` with a
+maximum size of 1.
+
+The maximum sizes of strings and buffers are determined by scanning
+all records in the bind data.
+
+If a [`bindDefs`](#executemanyoptbinddefs) property is used, no data
+scanning occurs.  This property explicitly specifies the
+characteristics of each bind variable.
+
+##### <a name="executemanyoptions"></a> 4.2.7.3 `executeMany()`: Options
+
+The `options` parameter is optional.  It can contain the following
+properties.
+
+###### <a name="executemanyoptautocommit"></a> 4.2.7.3.1 `autoCommit`
+
+```
+Boolean autoCommit
+```
+
+This optional property overrides
+[`oracledb.autoCommit`](#propdbisautocommit).
+
+Note [`batchErrors`](#executemanyoptbatcherrors) can affect autocommit
+mode.
+
+###### <a name="executemanyoptbatcherrors"></a> 4.2.7.3.2 `batchErrors`
+
+```
+Boolean batchErrors
+```
+
+This optional property allows invalid data records to be rejected
+while still letting valid data be processed.
+
+When *false*, the `executeMany()` call will stop when the first error
+occurs.  The callback [error object](#errorobj) will be set.
+
+When `batchErrors` is *true*, processing will continue even if there
+are data errors.  The `executeMany()` callback error parameter is not
+set.  Instead, an array containing each error will be returned in the
+callback `result` parameter.  All valid data records will be processed
+and a transaction will be started but not committed, even if
+`autoCommit` is *true*.  The application can examine the errors, take
+action, and explicitly commit or rollback as desired.
+
+Note that some classes of error will always return via the
+`executeMany()` callback error object, not as batch errors.  No
+transaction is created in this case.
+
+The default value is *false*.
+
+###### <a name="executemanyoptbinddefs"></a> 4.2.7.3.3 `bindDefs`
+
+```
+Object bindDefs
+```
+
+The `bindDefs` object defines the bind variable types, sizes and
+directions.  This object is optional in some cases but it is more
+efficient to set it.
+
+It should be an array or an object, depending on the structure of the
+[`binds parameter`](#executemanybinds).
+
+Each value in the `bindDefs` array or object should be an object
+containing the keys `dir`, `maxSize`, and `type` for each bind
+variable, similar to how [`execute() bind
+parameters`](#executebindParams) are identified.
+
+BindDef Property | Description
+---------------|------------
+`dir` | The direction of the bind.  One of the [Execute Bind Direction Constants](#oracledbconstantsbinddir) `oracledb.BIND_IN`, `oracledb.BIND_INOUT`  or `oracledb.BIND_OUT`.  The default is `oracledb.BIND_IN`.
+`maxSize` | Required for Strings and Buffers.  Ignored for other types.  Specifies the maximum number of bytes allocated when processing each value of this bind variable.  When data is being passed into the database, `maxSize` should be at least the size of the longest value.  When data is being returned from the database, `maxSize` should be the size of the longest value.  If `maxSize` is too small, `executeMany()` will throw an error that is not handled by [`batchErrors`](#executemanyoptbatcherrors).
+`type` | The node-oracledb or JavaScript data type to be bound.  One of the [Node-oracledb Type Constants](#oracledbconstantsnodbtype) `oracledb.BLOB`, `oracledb.BUFFER`, `oracledb.CLOB`, `oracledb.CURSOR`, `oracledb.DATE`, `oracledb.NUMBER`, or `oracledb.STRING`.
+
+###### <a name="executemanyoptdmlrowcounts"></a> 4.2.7.3.4 `dmlRowCounts`
+
+```
+Boolean dmlRowCounts
+```
+
+When *true*, this optional property enables output of the number of
+rows affected by each input data record.  It can only be set *true*
+for DML.
+
+The default value is *false*.
+
+##### <a name="executemanycallback"></a> 4.2.7.4 `executeMany()`: Callback Function
+
+###### <a name="execmanybatcherrors"></a> 4.2.7.4.1 `batchErrors`
+
+```
+Array batchErrors
+```
+
+This property is an array of [error objects](#errorobj) that were
+reported during execution.  The `offset` property of each error object
+corresponds to the 0-based index of the `executeMany()` [binds
+parameter](#executemanybinds) array, indicating which record could not
+be processed.
+
+It will be present only if [`batchErrors`](#executemanyoptbatcherrors)
+was *true* in the [`executeMany()` options](#executemanyoptions)
+parameter and there are data errors to report.  Some classes of
+execution error will always return via the `executeMany()` callback
+error object, not in `batchErrors`.
+
+###### <a name="execmanydmlrowscounts"></a> 4.2.7.4.2 `dmlRowCounts`
+
+```
+Array dmlRowCounts
+```
+
+This is an array of integers identifying the number of rows affected
+by each record of the [binds parameter](#executemanybinds). It is
+present only if [`dmlRowCounts`](#executemanyoptdmlrowcounts) was
+*true* in the [`executeMany()` options](#executemanyoptions) parameter
+and a DML statement was executed.
+
+###### <a name="execmanyoutbinds"></a> 4.2.7.4.3 `outBinds`
+
+```
+Object outBinds
+```
+
+This contains the value of any returned IN OUT or OUT binds.  It is an
+array of arrays, or an array of objects, depending on the [`binds
+parameters`](#executemanybinds) structure.  The length of the array
+will correspond to the length of the array passed as the [binds
+parameter](#executemanybinds).  It will be present only if there is at
+least one OUT bind variable identified.
+
+###### <a name="execmanyrowsaffected"></a> 4.2.7.4.4 `rowsAffected`
+
+```
+Number rowsAffected
+```
+
+This is an integer identifying the total number of database rows
+affected by the processing of all records of the [binds
+parameter](#executemanybinds).  It is only present if a DML statement
+was executed.
+
+#### <a name="getstmtinfo"></a> 4.2.8 `connection.getStatementInfo()`
 
 ##### Prototype
 
@@ -2573,7 +2800,7 @@ Depending on the statement type, the `information` object may contain:
   Statement Type Constants](#oracledbconstantsstmttype).
 
 
-#### <a name="connectionping"></a> 4.2.8 `connection.ping()`
+#### <a name="connectionping"></a> 4.2.9 `connection.ping()`
 
 ##### Prototype
 
@@ -2617,7 +2844,7 @@ Callback function parameter | Description
 ----------------------------|-------------
 *Error error* | If `ping()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
-#### <a name="querystream"></a> 4.2.9 `connection.queryStream()`
+#### <a name="querystream"></a> 4.2.10 `connection.queryStream()`
 
 ##### Prototype
 
@@ -2656,11 +2883,11 @@ This method was added in node-oracledb 1.8.
 
 See [execute()](#execute).
 
-#### <a name="release"></a> 4.2.10 `connection.release()`
+#### <a name="release"></a> 4.2.11 `connection.release()`
 
 An alias for [connection.close()](#connectionclose).
 
-#### <a name="rollback"></a> 4.2.11 `connection.rollback()`
+#### <a name="rollback"></a> 4.2.12 `connection.rollback()`
 
 ##### Prototype
 
@@ -3161,7 +3388,7 @@ method may be easier to use.
 To change the behavior of `toQueryStream()`, such as setting the
 [query output Format](#queryoutputformats) or the internal buffer size
 for performance, adjust global attributes such as
-[oracledb.outFormat](#propdboutformat) and
+[`oracledb.outFormat`](#propdboutformat) and
 [`oracledb.fetchArraySize`](#propdbfetcharraysize) before calling
 [`execute()`](#execute).
 
@@ -3169,6 +3396,8 @@ See [Query Streaming](#streamingresults) for more information.
 
 The `toQueryStream()` method was added in node-oracledb 1.9.  Support
 for Node.js version 8 Stream `destroy()` method was added in node-oracledb 2.1.
+
+## <a name="usermanual"></a> NODE-ORACLEDB USER MANUAL
 
 ## <a name="connectionhandling"></a> 8. Connection Handling
 
@@ -6141,6 +6370,10 @@ statement.
 Bind variables cannot be used in [DDL][15] statements, for example
 `CREATE TABLE` or `ALTER` commands.
 
+Sets of values can bound for use in
+[`connection.executeMany()`](#executemany), see [Batch Statement
+Execution](#batchexecution).
+
 ### <a name="inbind"></a> 14.1 IN Bind Parameters
 
 For IN binds, a data value is passed into the database and substituted
@@ -6665,9 +6898,9 @@ handled automatically.  For SQL calls no temporary LOBs are used.
 Arrays of strings and numbers can be bound to PL/SQL IN, IN OUT, and
 OUT parameters of PL/SQL INDEX BY associative array type.  This type
 was formerly called PL/SQL tables or index-by tables.  This method of
-binding can be a very efficient way of transferring small data sets.
-Note PL/SQL's VARRAY and nested table collection types cannot be
-bound.
+binding can be a very efficient way of transferring small data sets to
+PL/SQL.  Note PL/SQL's VARRAY and nested table collection types cannot
+be bound.
 
 Given this table and PL/SQL package:
 
@@ -6882,7 +7115,263 @@ for really large numbers of items, you might prefer to use a global
 temporary table.  Some solutions are given in [On Cursors, SQL, and
 Analytics][59] and in [this StackOverflow answer][60].
 
-## <a name="transactionmgt"></a> 15. Transaction Management
+## <a name="batchexecution"></a> 15. Batch Statement Execution
+
+The [`connection.executeMany()`](#executemany) method allows many sets
+of data values to be bound to one DML or PL/SQL statement for
+execution.  It is like calling [`connection.execute()`](#execute)
+multiple times but requires fewer round-trips.  This is an efficient
+way to handle batch changes, for example when inserting or updating
+multiple rows.  The method cannot be used for queries.
+
+The `executeMany()` method supports IN, IN OUT and OUT binds for most
+data types except [PL/SQL Collection Associative
+Arrays](#plsqlindexbybinds).
+
+There are runnable examples in the GitHub [examples][3] directory.
+
+For example, to insert three records into the database:
+
+```javascript
+var sql = "INSERT INTO mytab VALUES (:a, :b)";
+
+var binds = [
+  { a: 1, b: "One" },
+  { a: 2, b: "Two" },
+  { a: 3, b: "Three" }
+];
+
+var options = {
+  autoCommit: true,
+  bindDefs: {
+    a: { type: oracledb.NUMBER },
+    b: { type: oracledb.STRING, maxSize: 5 }
+  } };
+
+connection.executeMany(sql, binds, options, function (err, result) {
+  if (err) {
+    console.error(err)
+  } else {
+    console.log(result);  // { rowsAffected: 3 }
+  }
+});
+```
+
+Strings and Buffers require a `maxSize` value in `bindDefs`.  It must
+be the length (or greater) of the longest data value.  For efficiency,
+keep the size as small as possible.
+
+The [`options`](#executemanyoptions) parameter is optional.
+
+If [`bindDefs`](#executemanyoptbinddefs) is not set, then the bind
+direction is assumed to be IN, and the [bind data](#executemanybinds)
+are used to determine the bind variable types, names and maximum
+sizes.  Using `bindDefs` is generally recommended because it removes
+the overhead of scanning all records.
+
+The bind definitions `bindDefs` can also use "bind by position"
+syntax, see the next examples.
+
+#### Identifying Affected Rows
+
+When executing a DML statement the number of database rows affected
+for each input record can be shown by setting
+[`dmlRowCounts`](#execmanydmlrowscounts).  For example when deleting
+rows:
+
+```javascript
+const sql = "DELETE FROM tab WHERE id = :1";
+
+const binds = [
+  [20],
+  [30],
+  [40]
+];
+
+const options = { dmlRowCounts: true };
+
+connection.executeMany(sql, binds, options, function (err, result) {
+  if (err) {
+    console.error(err)
+  } else {
+    console.log(result.dmlRowCounts);
+  }
+});
+```
+
+If the table originally contained three rows with id of 20, five rows
+with id of 30 and six rows with id of 40, then the output would be:
+
+```
+[ 3, 5, 6 ]
+```
+
+
+#### Handling Data Errors
+
+With large sets of data, it can be helpful not to abort processing on
+the first data error, but to continue processing and resolve the
+errors later.
+
+When [`batchErrors`](#executemanyoptbatcherrors) is *true*, processing
+will continue even if there are data errors in some records.  The
+`executeMany()` callback error parameter is not set.  Instead, an
+array containing each error will be returned in the callback `result`
+parameter.  All valid data records will be processed and a transaction
+will be started but not committed, even if `autoCommit` is *true*.
+The application can examine the errors, take action, and explicitly
+commit or rollback, as desired.
+
+For example:
+
+```
+var sql = "INSERT INTO childtab VALUES (:1, :2, :3)";
+
+var binds = [
+  [1016, 10, "Child 2 of Parent A"],
+  [1017, 10, "Child 3 of Parent A"],
+  [1018, 20, "Child 4 of Parent B"],
+  [1018, 20, "Child 4 of Parent B"],   // duplicate key
+  [1019, 30, "Child 3 of Parent C"],
+  [1020, 40, "Child 4 of Parent D"],
+  [1021, 75, "Child 1 of Parent F"],   // parent does not exist
+  [1022, 40, "Child 6 of Parent D"]
+];
+
+var options = {
+  autoCommit: true,
+  batchErrors: true,
+  bindDefs: [
+    { type: oracledb.NUMBER },
+    { type: oracledb.NUMBER },
+    { type: oracledb.STRING, maxSize: 20 }
+  ]
+};
+
+connection.executeMany(sql, binds, options, function (err, result) {
+  if (err) {
+    console.error(err)
+  } else {
+    console.log(result.batchErrors);
+  }
+});
+```
+
+The output is an array of [error objects](#errorobj) that were
+reported during execution.  The `offset` property corresponds to the
+0-based index of the `executeMany()` [binds
+parameter](#executemanybinds) array, indicating which record could
+not be processed:
+
+```
+   [ { Error: ORA-00001: unique constraint (CJ.CHILDTAB_PK) violated errorNum: 1, offset: 3 },
+     { Error: ORA-02291: integrity constraint (CJ.CHILDTAB_FK) violated - parent key not found errorNum: 2291, offset: 6 } ]
+```
+
+Note that some classes of error will always return via the
+`executeMany()` callback error object, not as batch errors.  No
+transaction is created in this case.  This includes errors where
+string or buffer data is larger than the specified
+[`maxSize`](#executemanyoptbinddefs) value.
+
+#### DML RETURNING
+
+Values can be returned with DML RETURNING syntax:
+
+```
+var sql = "INSERT INTO tab VALUES (:1) RETURNING ROWID INTO :2";
+
+var binds = [
+  ["One"],
+  ["Two"],
+  ["Three"]
+];
+
+var options = {
+  bindDefs: [
+    { type: oracledb.STRING, maxSize: 5 },
+    { type: oracledb.STRING, maxSize: 18, dir: oracledb.BIND_OUT  },
+  ]
+};
+
+connection.executeMany(sql, binds, options, function (err, result) {
+  if (err) {
+    console.error(err)
+  } else {
+    console.log(result.outBinds);
+  }
+});
+```
+
+Output is:
+
+```
+[ [ [ 'AAAmI9AAMAAAAnVAAA' ] ],
+  [ [ 'AAAmI9AAMAAAAnVAAB' ] ],
+  [ [ 'AAAmI9AAMAAAAnVAAC' ] ] ]
+```
+
+#### Calling PL/SQL
+
+The `executeMany()` method can be used to execute a PL/SQL statement
+multiple times with different input values.  For example, the
+following PL/SQL procedure:
+
+```sql
+CREATE PROCEDURE testproc (
+  a_num IN NUMBER,
+  a_outnum OUT NUMBER,
+  a_outstr OUT VARCHAR2)
+AS
+BEGIN
+  a_outnum := a_num * 2;
+  FOR i IN 1..a_num LOOP
+    a_outstr := a_outstr || 'X';
+  END LOOP;
+END;
+/
+```
+
+can be called like:
+
+```javascript
+var sql = "BEGIN testproc(:1, :2, :3); END;";
+
+// IN binds
+var binds = [
+  [1],
+  [2],
+  [3],
+  [4]
+];
+
+var options = {
+  bindDefs: [
+    { type: oracledb.NUMBER },
+    { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+    { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 20 }
+  ]
+};
+
+connection.executeMany(sql, binds, options, function (err, result) {
+  if (err) {
+    console.error(err)
+  } else {
+    console.log(result.outBinds);
+  }
+});
+```
+
+The returned bind values are:
+
+```
+[ [ 2, 'X' ],
+  [ 4, 'XX' ],
+  [ 6, 'XXX' ],
+  [ 8, 'XXXX' ] ]
+```
+
+## <a name="transactionmgt"></a> 16. Transaction Management
 
 By default, [DML][14] statements are not committed in node-oracledb.
 
@@ -6893,7 +7382,7 @@ control transactions.
 If the [`autoCommit`](#propdbisautocommit) flag is set to *true*,
 then a commit occurs at the end of each `execute()` call.  Unlike an
 explicit `commit()`, this does not require a round-trip to the
-database.  For maximum efficiency, set `autoCommit` to true for the
+database.  For maximum efficiency, set `autoCommit` to *true* for the
 last `execute()` call of a transaction in preference to using an
 additional, explicit `commit()` call.
 
@@ -6910,7 +7399,7 @@ will be rolled back.
 Note: Oracle Database will implicitly commit when a [DDL][15]
 statement is executed irrespective of the value of `autoCommit`.
 
-## <a name="stmtcache"></a> 16. Statement Caching
+## <a name="stmtcache"></a> 17. Statement Caching
 
 Node-oracledb's [`execute()`](#execute) and
 [`queryStream()`](#querystream) methods use the [Oracle Call Interface
@@ -6972,7 +7461,7 @@ latter statistic should benefit from not shipping statement metadata
 to node-oracledb.  Adjust the statement cache size to your
 satisfaction.
 
-## <a name="oraaccess"></a> 17. External Configuration
+## <a name="oraaccess"></a> 18. External Configuration
 
 The optional Oracle client-side configuration file [oraaccess.xml][63]
 can be used to configure some behaviors of node-oracledb.  See
@@ -7020,7 +7509,7 @@ The oraaccess.xml file has other uses including:
 
 Refer to the [oraaccess.xml documentation][63].
 
-## <a name="nls"></a> 18. Globalization and National Language Support (NLS)
+## <a name="nls"></a> 19. Globalization and National Language Support (NLS)
 
 Node-oracledb can use Oracle's [National Language Support (NLS)][68]
 to assist in globalizing applications.
@@ -7038,7 +7527,7 @@ globalization. Examples are `NLS_NUMERIC_CHARACTERS` (discussed in
 in [Fetching Numbers and Dates as String](#fetchasstringhandling)).
 Refer to [NLS Documentation][69] for others.
 
-## <a name="endtoend"></a> 19. End-to-end Tracing, Mid-tier Authentication, and Auditing
+## <a name="endtoend"></a> 20. End-to-end Tracing, Mid-tier Authentication, and Auditing
 
 The Connection properties [action](#propconnaction),
 [module](#propconnmodule), and [clientId](#propconnclientid) set
@@ -7147,7 +7636,7 @@ Note if [`oracledb.connectionClass`](#propdbconclass) is set for a
 non-pooled connection, the `CLIENT_DRIVER` value will not be set for
 that connection.
 
-## <a name="promiseoverview"></a> 20. Promises and node-oracledb
+## <a name="promiseoverview"></a> 21. Promises and node-oracledb
 
 Node-oracledb supports Promises with all asynchronous methods.  The native Promise
 implementation is used.
@@ -7243,7 +7732,7 @@ Unhandled Rejection at:  Promise {
 For more information, see [How to get, use, and close a DB connection
 using promises][73].
 
-### <a name="custompromises"></a> 20.1 Custom Promise Libraries
+### <a name="custompromises"></a> 21.1 Custom Promise Libraries
 
 The Promise implementation is designed to be overridden, allowing a
 custom Promise library to be used.
@@ -7259,7 +7748,7 @@ Promises can be completely disabled by setting
 oracledb.Promise = null;
 ```
 
-## <a name="asyncawaitoverview"></a> 21. Async/Await and node-oracledb
+## <a name="asyncawaitoverview"></a> 22. Async/Await and node-oracledb
 
 Node.js 7.6 supports async functions, also known as Async/Await.  These
 can be used with node-oracledb.  For example:
@@ -7317,7 +7806,7 @@ must be streamed since there is no Promisified interface for them.
 For more information, see [How to get, use, and close a DB connection
 using async functions][74].
 
-## <a name="bindtrace"></a> <a name="tracingsql"></a> 22. Tracing SQL and PL/SQL Statements
+## <a name="bindtrace"></a> <a name="tracingsql"></a> 23. Tracing SQL and PL/SQL Statements
 
 ####  End-to-End Tracing
 
@@ -7374,9 +7863,9 @@ parameters.
 
 PL/SQL users may be interested in using [PL/Scope][78].
 
-## <a name="migrate"></a> 23. Migrating from Previous node-oracledb Releases
+## <a name="migrate"></a> 24. Migrating from Previous node-oracledb Releases
 
-### <a name="migratev1v2"></a> 23.1 Migrating from node-oracledb 1.13 to node-oracledb 2.0
+### <a name="migratev1v2"></a> 24.1 Migrating from node-oracledb 1.13 to node-oracledb 2.0
 
 When upgrading from node-oracledb version 1.13 to version 2.0:
 
@@ -7430,7 +7919,7 @@ When upgrading from node-oracledb version 1.13 to version 2.0:
 - Test applications to check if changes such as the improved property
   validation uncover latent problems in your code.
 
-### <a name="migratev20v21"></a> 23.2 Migrating from node-oracledb 2.0 to node-oracledb 2.1
+### <a name="migratev20v21"></a> 24.2 Migrating from node-oracledb 2.0 to node-oracledb 2.1
 
 When upgrading from node-oracledb version 2.0 to version 2.1:
 

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -130,7 +130,6 @@ BEGIN EXECUTE IMMEDIATE 'DROP TABLE dmlrupdtab'; EXCEPTION WHEN OTHERS THEN IF S
 CREATE TABLE dmlrupdtab (id NUMBER, name VARCHAR2(40));
 INSERT INTO dmlrupdtab VALUES (1001, 'Venkat');
 INSERT INTO dmlrupdtab VALUES (1002, 'Neeharika');
-COMMIT;
 
 -- For LOB examples
 BEGIN EXECUTE IMMEDIATE 'DROP TABLE mylobs'; EXCEPTION WHEN OTHERS THEN IF SQLCODE <> -942 THEN RAISE; END IF; END;
@@ -186,3 +185,68 @@ SHOW ERRORS
 BEGIN EXECUTE IMMEDIATE 'DROP TABLE myraw'; EXCEPTION WHEN OTHERS THEN IF SQLCODE <> -942 THEN RAISE; END IF; END;
 /
 CREATE TABLE myraw (r RAW(64));
+
+-- For the executemany*.js examples
+
+BEGIN EXECUTE IMMEDIATE 'DROP TABLE em_tab'; EXCEPTION WHEN OTHERS THEN IF SQLCODE <> -942 THEN RAISE; END IF; END;
+/
+BEGIN EXECUTE IMMEDIATE 'DROP TABLE em_childtab'; EXCEPTION WHEN OTHERS THEN IF SQLCODE <> -942 THEN RAISE; END IF; END;
+/
+BEGIN EXECUTE IMMEDIATE 'DROP TABLE em_parenttab'; EXCEPTION WHEN OTHERS THEN IF SQLCODE <> -942 THEN RAISE; END IF; END;
+/
+
+CREATE TABLE em_tab (
+    id  NUMBER NOT NULL,
+    val VARCHAR2(20)
+);
+
+CREATE TABLE em_parenttab (
+    parentid    NUMBER NOT NULL,
+    description VARCHAR2(60) NOT NULL,
+    CONSTRAINT parenttab_pk PRIMARY KEY (parentid)
+);
+
+CREATE TABLE em_childtab (
+    childid     NUMBER NOT NULL,
+    parentid    NUMBER NOT NULL,
+    description VARCHAR2(30) NOT NULL,
+    CONSTRAINT em_childtab_pk PRIMARY KEY (childid),
+    CONSTRAINT em_childtab_fk FOREIGN KEY (parentid) REFERENCES em_parenttab
+);
+
+INSERT INTO em_parenttab VALUES (10, 'Parent 10');
+INSERT INTO em_parenttab VALUES (20, 'Parent 20');
+INSERT INTO em_parenttab VALUES (30, 'Parent 30');
+INSERT INTO em_parenttab VALUES (40, 'Parent 40');
+INSERT INTO em_parenttab VALUES (50, 'Parent 50');
+
+INSERT INTO em_childtab VALUES (1001, 10, 'Child 1001 of Parent 10');
+INSERT INTO em_childtab VALUES (1002, 20, 'Child 1002 of Parent 20');
+INSERT INTO em_childtab VALUES (1003, 20, 'Child 1003 of Parent 20');
+INSERT INTO em_childtab VALUES (1004, 20, 'Child 1004 of Parent 20');
+INSERT INTO em_childtab VALUES (1005, 30, 'Child 1005 of Parent 30');
+INSERT INTO em_childtab VALUES (1006, 30, 'Child 1006 of Parent 30');
+INSERT INTO em_childtab VALUES (1007, 40, 'Child 1007 of Parent 40');
+INSERT INTO em_childtab VALUES (1008, 40, 'Child 1008 of Parent 40');
+INSERT INTO em_childtab VALUES (1009, 40, 'Child 1009 of Parent 40');
+INSERT INTO em_childtab VALUES (1010, 40, 'Child 1010 of Parent 40');
+INSERT INTO em_childtab VALUES (1011, 40, 'Child 1011 of Parent 40');
+INSERT INTO em_childtab VALUES (1012, 50, 'Child 1012 of Parent 50');
+INSERT INTO em_childtab VALUES (1013, 50, 'Child 1013 of Parent 50');
+INSERT INTO em_childtab VALUES (1014, 50, 'Child 1014 of Parent 50');
+INSERT INTO em_childtab VALUES (1015, 50, 'Child 1015 of Parent 50');
+
+CREATE OR REPLACE PROCEDURE em_testproc (
+  a_num IN NUMBER,
+  a_outnum OUT NUMBER,
+  a_outstr OUT VARCHAR2)
+AS
+BEGIN
+  a_outnum := a_num * 2;
+  FOR i IN 1..a_num LOOP
+    a_outstr := a_outstr || 'X';
+  END LOOP;
+END;
+/
+
+COMMIT;

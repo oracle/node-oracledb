@@ -83,6 +83,12 @@ static const char *errMsg[] = {
     "NJS-052: invalid data type at array index %d for bind position %d", // errIncompatibleTypeArrayIndexBind
     "NJS-053: array value expected, a non-array value provided", //errNonArrayProvided
     "NJS-054: Binary build/Release/oracledb.node was not installed from %s", // errNoBinaryInstalled
+    "NJS-055: Binding by position and name cannot be mixed", // errMixedBind
+    "NJS-056: maxSize must be specified and not zero for bind position %u", // errMissingMaxSizeByPos
+    "NJS-057: maxSize must be specified and not zero for bind \"%s\"", // errMissingMaxSizeByName
+    "NJS-058: maxSize of %u is too small for value of length %u in row %u", // errMaxSizeTooSmall
+    "NJS-059: type must be specified for bind position %u", // errMissingTypeByPos
+    "NJS-060: type must be specified for bind \"%s\"", // errMissingTypeByName
 };
 
 

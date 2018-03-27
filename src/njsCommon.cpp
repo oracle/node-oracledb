@@ -58,6 +58,20 @@ using namespace std;
 using namespace v8;
 
 //-----------------------------------------------------------------------------
+// njsVariableBuffer::~njsVariableBuffer()
+//   Destructor.
+//-----------------------------------------------------------------------------
+njsVariableBuffer::~njsVariableBuffer()
+{
+    if (lobs) {
+        delete [] lobs;
+        lobs = NULL;
+    }
+    dpiVarData = NULL;
+}
+
+
+//-----------------------------------------------------------------------------
 // njsVariable::~njsVariable()
 //   Destructor.
 //-----------------------------------------------------------------------------
@@ -66,11 +80,10 @@ njsVariable::~njsVariable()
     if (dpiVarHandle) {
         dpiVar_release(dpiVarHandle);
         dpiVarHandle = NULL;
-        dpiVarData = NULL;
     }
-    if (lobs) {
-        delete [] lobs;
-        lobs = NULL;
+    if (dmlReturningBuffers) {
+        delete [] dmlReturningBuffers;
+        dmlReturningBuffers = NULL;
     }
     if (queryVars) {
         delete [] queryVars;
@@ -254,6 +267,11 @@ void njsBaton::ClearAsyncData()
         delete [] fetchAsBufferTypes;
         fetchAsBufferTypes = NULL;
         numFetchAsBufferTypes = 0;
+    }
+    if (batchErrorInfos) {
+        delete [] batchErrorInfos;
+        batchErrorInfos = NULL;
+        numBatchErrorInfos = 0;
     }
 }
 
@@ -588,6 +606,22 @@ bool njsBaton::GetUnsignedIntFromJSON(Local<Object> obj, const char *key,
                                  index + 1);
         return false;
     }
+}
+
+
+//-----------------------------------------------------------------------------
+// njsBaton::GetNumOutBinds()
+//   Return the number of in/out and out binds created by the baton.
+//-----------------------------------------------------------------------------
+uint32_t njsBaton::GetNumOutBinds()
+{
+    uint32_t numOutBinds = 0;
+
+    for (uint32_t i = 0; i < numBindVars; i++) {
+        if (bindVars[i].bindDir != NJS_BIND_IN)
+            numOutBinds++;
+    }
+    return numOutBinds;
 }
 
 

@@ -304,7 +304,7 @@ bool njsResultSet::GetRowsHelper(njsBaton *baton, int *moreRows)
         }
         if (dpiConn_newVar(this->dpiConnHandle, var->varTypeNum,
                 var->nativeTypeNum, numRowsToFetch, var->maxSize, 1, 0, NULL,
-                &var->dpiVarHandle, &var->dpiVarData) < 0) {
+                &var->dpiVarHandle, &var->buffer.dpiVarData) < 0) {
             baton->GetDPIError();
             return false;
         }
@@ -384,7 +384,8 @@ void njsResultSet::Async_AfterGetRows(njsBaton *baton, Local<Value> argv[])
         else rowAsObj = Nan::New<Object>();
         for (uint32_t col = 0; col < resultSet->numQueryVars; col++) {
             var = &resultSet->queryVars[col];
-            if (!njsConnection::GetScalarValueFromVar(baton, var, row, val))
+            if (!njsConnection::GetScalarValueFromVar(baton, var, &var->buffer,
+                    row, val))
                 return;
             if (baton->outFormat == NJS_ROWS_ARRAY)
                 Nan::Set(rowAsArray, col, val);
