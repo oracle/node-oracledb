@@ -766,14 +766,14 @@ or [`queryStream()`](#querystream) calls can override the
 `fetchAsBuffer` global setting by
 using [`fetchInfo`](#executeoptions).
 
+This property was added in node-oracledb 1.13.
+
 ##### Example
 
 ```javascript
 var oracledb = require('oracledb');
 oracledb.fetchAsBuffer = [ oracledb.BLOB ];
 ```
-
-This property was added in node-oracledb 1.13.
 
 #### <a name="propdbfetchasstring"></a> 3.2.8 `oracledb.fetchAsString`
 
@@ -904,14 +904,14 @@ readonly String oracleClientVersionString
 
 This readonly property gives a string representation of the Oracle client library version which is useful for display.
 
+This property was added in node-oracledb 2.2.
+
 ##### Example
 
 ```javascript
 var oracledb = require('oracledb');
 console.log("Oracle client library version is " + oracledb.oracleClientVersionString);
 ```
-
-This property was added in node-oracledb 2.2.
 
 #### <a name="propdboutformat"></a> 3.2.13 `oracledb.outFormat`
 
@@ -943,14 +943,14 @@ This property may be overridden in
 an [`execute()`](#executeoptions)
 or [`queryStream()`](#querystream) call.
 
+See [Query Output Formats](#queryoutputformats) for more information.
+
 ##### Example
 
 ```javascript
 var oracledb = require('oracledb');
 oracledb.outFormat = oracledb.ARRAY;
 ```
-
-See [Query Output Formats](#queryoutputformats) for more examples.
 
 #### <a name="propdbpoolincrement"></a> 3.2.14 `oracledb.poolIncrement`
 
@@ -1056,13 +1056,14 @@ This property may be overridden when [creating a connection pool](#createpool).
 
 See [Connection Pool Pinging](#connpoolpinging) for more discussion.
 
+This property was added in node-oracledb 1.12.
+
 ##### Example
+
 ```javascript
 var oracledb = require('oracledb');
 oracledb.poolPingInterval = 60;     // seconds
 ```
-
-This property was added in node-oracledb 1.12.
 
 #### <a name="propdbpooltimeout"></a> 3.2.18 `oracledb.poolTimeout`
 
@@ -1151,16 +1152,16 @@ The default value is *true*.
 
 This property may be overridden when [creating a connection pool](#createpool).
 
+See [Connection Pool Queue](#connpoolqueue) for more information.
+
+This property was added in node-oracledb 1.7.
+
 ##### Example
 
 ```javascript
 var oracledb = require('oracledb');
 oracledb.queueRequests = false;
 ```
-
-See [Connection Pool Queue](#connpoolqueue) for more information.
-
-This property was added in node-oracledb 1.7.
 
 #### <a name="propdbqueuetimeout"></a> 3.2.22 `oracledb.queueTimeout`
 
@@ -1176,16 +1177,16 @@ The default value is 60000.
 
 This property may be overridden when [creating a connection pool](#createpool).
 
+See [Connection Pool Queue](#connpoolqueue) for more information.
+
+This property was added in node-oracledb 1.7.
+
 ##### Example
 
 ```javascript
 var oracledb = require('oracledb');
 oracledb.queueTimeout = 3000; // 3 seconds
 ```
-
-See [Connection Pool Queue](#connpoolqueue) for more information.
-
-This property was added in node-oracledb 1.7.
 
 #### <a name="propdbstmtcachesize"></a> 3.2.23 `oracledb.stmtCacheSize`
 
@@ -1236,14 +1237,14 @@ readonly String versionString
 
 This readonly property gives a string representation of the node-oracledb version, including the version suffix if one is present.
 
+This property was added in node-oracledb 2.1.
+
 ##### Example
 
 ```javascript
 var oracledb = require('oracledb');
 console.log("Driver version is " + oracledb.versionString);
 ```
-
-This property was added in node-oracledb 2.1.
 
 #### <a name="propdbversionsuffix"></a> 3.2.26 `oracledb.versionSuffix`
 ```
@@ -1252,14 +1253,14 @@ readonly String versionSuffix
 
 This readonly property gives a string representing the version suffix (e.g. "-dev" or "-beta") or an empty string if no version suffix is present.
 
+This property was added in node-oracledb 2.1.
+
 ##### Example
 
 ```javascript
 var oracledb = require('oracledb');
 console.log("Driver version suffix is " + oracledb.versionSuffix);
 ```
-
-This property was added in node-oracledb 2.1.
 
 ### <a name="oracledbmethods"></a> 3.3 Oracledb Methods
 
@@ -1669,6 +1670,8 @@ particular it can be used to connect when the old password has
 expired.
 
 See [Changing Passwords and Connecting with an Expired Password](#changingpassword).
+
+This property was added in node-oracledb 2.2.
 
 ###### <a name="getconnectiondbattrspassword"></a> 3.3.2.1.2.5 `password`
 
