@@ -251,6 +251,7 @@ public:
     std::string newPassword;
     std::string connectString;
     std::string connClass;
+    std::string edition;
     uint32_t poolMin;
     uint32_t poolMax;
     uint32_t poolIncrement;

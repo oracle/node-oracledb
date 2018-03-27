@@ -58,6 +58,7 @@ describe('58. properties.js', function() {
       defaultValues.stmtCacheSize    = oracledb.stmtCacheSize;
       defaultValues.poolPingInterval = oracledb.poolPingInterval;
       defaultValues.fetchAsBuffer    = oracledb.fetchAsBuffer;
+      defaultValues.edition          = oracledb.edition;
     });
 
     after('restore the values', function() {
@@ -78,6 +79,7 @@ describe('58. properties.js', function() {
       oracledb.stmtCacheSize    = defaultValues.stmtCacheSize;
       oracledb.poolPingInterval = defaultValues.poolPingInterval;
       oracledb.fetchAsBuffer    = defaultValues.fetchAsBuffer;
+      oracledb.edition          = defaultValues.edition;
     });
 
     it('58.1.1 poolMin', function() {
@@ -311,6 +313,24 @@ describe('58. properties.js', function() {
           oracledb.oracleClientVersion = t + "foobar";
         },
         /NJS-014: [\w]+ is a read-only property/
+      );
+    });
+
+    it('58.1.27 edition', function() {
+      var t = oracledb.edition;
+      oracledb.edition = 'foobar';
+      var e = oracledb.edition;
+
+      should.equal(t, '');
+      should.strictEqual(e, 'foobar');
+    });
+
+    it('58.1.28 Negative - edition', function() {
+      should.throws(
+        function() {
+          oracledb.edition = 123;
+        },
+        /NJS-004: invalid value for property edition/
       );
     });
 

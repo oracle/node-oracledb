@@ -159,6 +159,7 @@ private:
     static NAN_GETTER(GetVersionString);
     static NAN_GETTER(GetVersionSuffix);
     static NAN_GETTER(GetConnectionClass);
+    static NAN_GETTER(GetEdition);
     static NAN_GETTER(GetExternalAuth);
     static NAN_GETTER(GetFetchArraySize);
     static NAN_GETTER(GetFetchAsString);
@@ -183,6 +184,7 @@ private:
     static NAN_SETTER(SetVersionString);
     static NAN_SETTER(SetVersionSuffix);
     static NAN_SETTER(SetConnectionClass);
+    static NAN_SETTER(SetEdition);
     static NAN_SETTER(SetExternalAuth);
     static NAN_SETTER(SetFetchArraySize);
     static NAN_SETTER(SetFetchAsString);
@@ -213,6 +215,7 @@ private:
     uint32_t poolTimeout;
 
     std::string connClass;
+    std::string edition;
     bool externalAuth;
     Nan::Persistent<Array> jsFetchAsStringTypes;
     Nan::Persistent<Array> jsFetchAsBufferTypes;

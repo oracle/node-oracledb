@@ -82,6 +82,7 @@ njsOracledb::njsOracledb()
     poolTimeout             = NJS_POOL_TIMEOUT;
     fetchArraySize          = DPI_DEFAULT_FETCH_ARRAY_SIZE;
     connClass               = "";
+    edition                 = "";
     externalAuth            = false;
     lobPrefetchSize         = NJS_LOB_PREFETCH_SIZE;
     poolPingInterval        = NJS_POOL_DEFAULT_PING_INTERVAL;
@@ -156,6 +157,9 @@ void njsOracledb::Init(Handle<Object> target)
     Nan::SetAccessor(temp->InstanceTemplate(),
             Nan::New<v8::String>("connectionClass").ToLocalChecked(),
             njsOracledb::GetConnectionClass, njsOracledb::SetConnectionClass);
+    Nan::SetAccessor(temp->InstanceTemplate(),
+            Nan::New<v8::String>("edition").ToLocalChecked(),
+            njsOracledb::GetEdition, njsOracledb::SetEdition);
     Nan::SetAccessor(temp->InstanceTemplate(),
             Nan::New<v8::String>("externalAuth").ToLocalChecked(),
             njsOracledb::GetExternalAuth, njsOracledb::SetExternalAuth);
@@ -604,6 +608,32 @@ NAN_SETTER(njsOracledb::SetConnectionClass)
                 "connectionClass");
 }
 
+//-----------------------------------------------------------------------------
+// njsOracledb::GetEdition()
+//   Get accessor of "edition" property.
+//-----------------------------------------------------------------------------
+NAN_GETTER(njsOracledb::GetEdition)
+{
+    njsOracledb *oracledb = (njsOracledb*) ValidateGetter(info);
+    if (!oracledb)
+        return;
+    Local<String> value =
+            Nan::New<v8::String>(oracledb->edition).ToLocalChecked();
+    info.GetReturnValue().Set(value);
+}
+
+//-----------------------------------------------------------------------------
+// njsOracledb::SetEdition()
+//   Set accessor of "edition" property.
+//-----------------------------------------------------------------------------
+NAN_SETTER(njsOracledb::SetEdition)
+{
+    njsOracledb *oracledb = (njsOracledb*) ValidateSetter(info);
+    if (oracledb)
+        oracledb->SetPropString(value, &oracledb->edition,
+                "edition");
+}
+
 
 //-----------------------------------------------------------------------------
 // njsOracledb::GetExternalAuth()
@@ -898,9 +928,11 @@ NAN_METHOD(njsOracledb::GetConnection)
             baton->connectString);
     baton->GetStringFromJSON(connProps, "newPassword", 0, baton->newPassword);
     baton->connClass = oracledb->connClass;
+    baton->edition = oracledb->edition;
     baton->stmtCacheSize  = oracledb->stmtCacheSize;
     baton->externalAuth = oracledb->externalAuth;
     baton->events = oracledb->events;
+    baton->GetStringFromJSON(connProps, "edition", 0, baton->edition);
     baton->GetUnsignedIntFromJSON(connProps, "stmtCacheSize", 0,
             &baton->stmtCacheSize);
     baton->GetUnsignedIntFromJSON(connProps, "privilege", 0,
@@ -935,12 +967,18 @@ void njsOracledb::Async_GetConnection(njsBaton *baton)
         params.connectionClass = baton->connClass.c_str();
         params.connectionClassLength = baton->connClass.length();
     }
+
     if(!baton->newPassword.empty()) {
         params.newPassword = baton->newPassword.c_str();
         params.newPasswordLength = baton->newPassword.length();
     }
     if (!InitCommonCreateParams(baton, &commonParams))
         return;
+    if (!baton->edition.empty()) {
+        commonParams.edition = baton->edition.c_str();
+        commonParams.editionLength = baton->edition.length();
+    }
+
     if (dpiConn_create(globalDPIContext, baton->user.c_str(),
             (uint32_t) baton->user.length(), baton->password.c_str(),
             (uint32_t) baton->password.length(), baton->connectString.c_str(),
@@ -1001,6 +1039,7 @@ NAN_METHOD(njsOracledb::CreatePool)
     baton->poolPingInterval = oracledb->poolPingInterval;
     baton->stmtCacheSize = oracledb->stmtCacheSize;
     baton->externalAuth = oracledb->externalAuth;
+    baton->edition = oracledb->edition;
     baton->events = oracledb->events;
     baton->GetUnsignedIntFromJSON(poolProps, "poolMax", 0, &baton->poolMax);
     baton->GetUnsignedIntFromJSON(poolProps, "poolMin", 0, &baton->poolMin);
@@ -1014,6 +1053,7 @@ NAN_METHOD(njsOracledb::CreatePool)
             &baton->poolPingInterval);
     baton->GetBoolFromJSON(poolProps, "externalAuth", 0, &baton->externalAuth);
     baton->GetBoolFromJSON(poolProps, "events", 0, &baton->events);
+    baton->GetStringFromJSON(poolProps, "edition", 0, baton->edition);
     baton->lobPrefetchSize = oracledb->lobPrefetchSize;
     baton->jsOracledb.Reset(info.Holder());
 
@@ -1044,6 +1084,10 @@ void njsOracledb::Async_CreatePool(njsBaton *baton)
     params.pingInterval = baton->poolPingInterval;
     if (!InitCommonCreateParams(baton, &commonParams))
         return;
+    if (!baton->edition.empty()) {
+        commonParams.edition = baton->edition.c_str();
+        commonParams.editionLength = baton->edition.length();
+    }
     if (dpiPool_create(globalDPIContext, baton->user.c_str(),
             (uint32_t) baton->user.length(), baton->password.c_str(),
             (uint32_t) baton->password.length(), baton->connectString.c_str(),

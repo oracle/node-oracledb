@@ -928,6 +928,8 @@ Overview of node-oracledb functional tests
         58.1.24 versionString (read-only)
         58.1.25 versionSuffix (read-only)
         58.1.26 oracleClientVersionString (read-only)
+        58.1.27 edition
+        58.1.28 Negative - edition
     58.2 Pool Class
         58.2.1 poolMin
         58.2.2 poolMax
