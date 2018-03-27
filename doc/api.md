@@ -3779,8 +3779,8 @@ Encryption of data-at-rest in the database.
 #### Changing Passwords
 
 Database passwords can be changed with
-[`connection.changePassword()`](#changepassword).  For example, to
-change HR's password from 'welcome' to 'streamboat':
+[`connection.changePassword()`](#changepassword).  For example, the HR
+user can change their password from 'welcome' to 'steamboat':
 
 ```javascript
 oracledb.getConnection(
@@ -3807,7 +3807,7 @@ ignored and can be an empty string:
 ```javascript
 oracledb.getConnection(
   {
-    user          : "system",
+    user          : "system",   // a privileged user
     password      : "secret",
     connectString : "localhost/orclpdb"
   },
@@ -3815,7 +3815,7 @@ oracledb.getConnection(
     if (err) { console.error(err.message); return; }
 
     connection.changePassword(
-        'hr', '', 'steamboat',
+        'hr', '', 'steamboat',  // change HR's password to 'steamboat'
         function(err) {
         . . .
         });
