@@ -372,15 +372,12 @@ describe('56. fetchAs.js', function() {
       "select sysdate as ts_date from dual",
       { },
       {
-        fetchInfo: { }
+        fetchInfo: {}
       },
       function(err, result) {
-        should.exist(err);
-        should.strictEqual(
-          err.message,
-          'NJS-020: empty array was specified to fetch values as string'
-        );
-        should.not.exist(result);
+        should.not.exist(err);
+        should.exist(result);
+        (result.rows[0][0]).should.be.a.Date();
         done();
       }
     );

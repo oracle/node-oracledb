@@ -55,7 +55,6 @@ static const char *errMsg[] = {
     "NJS-017: concurrent operations on ResultSet are not allowed", // errBusyResultSet
     "NJS-018: invalid ResultSet",                   // errInvalidResultSet
     "NJS-019: ResultSet cannot be returned for non-query statements", // errInvalidNonQueryExecution
-    "NJS-020: empty array was specified to fetch values as string", // errEmptyArrayForFetchAs
     "NJS-021: invalid type for conversion specified", // errInvalidTypeForConversion
     "NJS-022: invalid Lob",                           // errInvalidLob
     "NJS-023: concurrent operations on LOB are not allowed",  // errBusyLob

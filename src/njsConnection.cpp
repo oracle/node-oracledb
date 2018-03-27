@@ -1074,15 +1074,12 @@ bool njsConnection::ProcessOptions(Nan::NAN_METHOD_ARGS_TYPE args,
     if (!val->IsUndefined() && !val->IsNull()) {
         Local<Object> jsFetchInfo = val->ToObject();
         Local<Array> keys = jsFetchInfo->GetOwnPropertyNames();
-        if (keys->Length() == 0) {
-            baton->error = njsMessages::Get(errEmptyArrayForFetchAs, index);
-            return false;
-        }
         baton->numFetchInfo = keys->Length();
-        baton->fetchInfo = new njsFetchInfo[baton->numFetchInfo];
+        if (baton->numFetchInfo > 0)
+            baton->fetchInfo = new njsFetchInfo[baton->numFetchInfo];
         for (uint32_t i = 0; i < baton->numFetchInfo; i++) {
-          Local<String> temp = Nan::Get (keys,
-                                         i).ToLocalChecked ().As<String>();
+            Local<String> temp =
+                    Nan::Get(keys, i).ToLocalChecked().As<String>();
 
             v8::String::Utf8Value utf8str(temp->ToString());
             baton->fetchInfo[i].name = std::string(*utf8str,

@@ -58,7 +58,6 @@ typedef enum {
     errBusyResultSet,
     errInvalidResultSet,
     errInvalidNonQueryExecution,
-    errEmptyArrayForFetchAs,
     errInvalidTypeForConversion,
     errInvalidLob,
     errBusyLob,
