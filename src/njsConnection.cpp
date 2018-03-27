@@ -1151,7 +1151,7 @@ bool njsConnection::GetScalarValueFromVar(njsBaton *baton, njsVariable *var,
     }
     switch (var->nativeTypeNum) {
         case DPI_NATIVE_TYPE_INT64:
-            temp = Nan::New<Number>(data->value.asInt64);
+            temp = Nan::New<Number>((double) data->value.asInt64);
             break;
         case DPI_NATIVE_TYPE_FLOAT:
             temp = Nan::New<Number>(data->value.asFloat);
