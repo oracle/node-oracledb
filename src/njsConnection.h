@@ -124,6 +124,10 @@ private:
     static NAN_METHOD(ChangePassword);
     static void Async_ChangePassword(njsBaton *baton);
 
+    // Ping Method on Connection class
+    static NAN_METHOD(Ping);
+    static void Async_Ping(njsBaton *baton);
+
     // Define Getter Accessors to properties
     static NAN_GETTER(GetStmtCacheSize);
     static NAN_GETTER(GetClientId);

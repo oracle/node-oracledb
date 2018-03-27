@@ -131,9 +131,10 @@ limitations under the License.
                 - 4.2.6.4.3 [`resultSet`](#execresultset)
                 - 4.2.6.4.4 [`rows`](#execrows)
                 - 4.2.6.4.5 [`rowsAffected`](#execrowsaffected)
-        - 4.2.7 [`queryStream()`](#querystream)
-        - 4.2.8 [`release()`](#release)
-        - 4.2.9 [`rollback()`](#rollback)
+        - 4.2.7 [`ping()`](#connectionping)
+        - 4.2.8 [`queryStream()`](#querystream)
+        - 4.2.9 [`release()`](#release)
+        - 4.2.10 [`rollback()`](#rollback)
 5. [Lob Class](#lobclass)
     - 5.1 [Lob Properties](#lobproperties)
         - 5.1.1 [`chunkSize`](#proplobchunksize)
@@ -2405,7 +2406,51 @@ the number of rows affected, for example the number of rows
 inserted. For non-DML statements such as queries, or if no rows are
 affected, then `rowsAffected` will appear as undefined.
 
-#### <a name="querystream"></a> 4.2.7 `connection.queryStream()`
+#### <a name="connectionping"></a> 4.2.7 `connection.ping()`
+
+##### Prototype
+
+Callback:
+```
+ping(function(Error error){});
+```
+Promise:
+```
+promise = ping();
+```
+
+##### Description
+
+This method checks that a connection is currently usable and the
+network to the database is valid.  This call can be useful for system
+health checks.  A ping only confirms that a single connection is
+usable at the time of the ping.
+
+Pinging doesn't replace error checking during statement execution,
+since network or database failure may occur in the time between
+`ping()` and `execute()` calls.
+
+Pinging requires a 'round trip' to the database so unnecessary ping
+calls should be avoided.
+
+If `ping()` returns an error, the application should close the
+connection.
+
+This method was added in node-oracledb 2.2.
+
+##### Parameters
+
+```
+function(Error error)
+```
+
+The parameters of the callback function are:
+
+Callback function parameter | Description
+----------------------------|-------------
+*Error error* | If `ping()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+
+#### <a name="querystream"></a> 4.2.8 `connection.queryStream()`
 
 ##### Prototype
 
@@ -2444,11 +2489,11 @@ This method was added in node-oracledb 1.8.
 
 See [execute()](#execute).
 
-#### <a name="release"></a> 4.2.8 `connection.release()`
+#### <a name="release"></a> 4.2.9 `connection.release()`
 
 An alias for [connection.close()](#connectionclose).
 
-#### <a name="rollback"></a> 4.2.9 `connection.rollback()`
+#### <a name="rollback"></a> 4.2.10 `connection.rollback()`
 
 ##### Prototype
 
@@ -3591,6 +3636,9 @@ allows a valid connection to be opened by some subsequent
 You can tune `poolPingInterval` to meet your quality of service
 requirements.
 
+Explicit pings on any connection can be performed at any time with
+[`connection.ping()`](#connectionping).
+
 ### <a name="drcp"></a> 8.4 Database Resident Connection Pooling (DRCP)
 
 [Database Resident Connection Pooling][24] (DRCP) enables database
@@ -3896,6 +3944,7 @@ application being aware of any service disruption.
 
 For a more information on FAN see the [whitepaper on Fast Application
 Notification][97].
+
 
 #### <a name="connectionrlb"></a> 8.9.2 Runtime Load Balancing (RLB)
 

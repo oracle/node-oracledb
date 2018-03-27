@@ -86,6 +86,7 @@ void njsConnection::Init(Handle<Object> target)
     Nan::SetPrototypeMethod(tpl, "break", Break);
     Nan::SetPrototypeMethod(tpl, "createLob", CreateLob);
     Nan::SetPrototypeMethod(tpl, "changePassword", ChangePassword);
+    Nan::SetPrototypeMethod(tpl, "ping", Ping);
 
     Nan::SetAccessor(tpl->InstanceTemplate(),
             Nan::New<v8::String>("stmtCacheSize").ToLocalChecked(),
@@ -1760,6 +1761,41 @@ void njsConnection::Async_ChangePassword(njsBaton *baton)
             (uint32_t) baton->user.length(), baton->password.c_str(),
             (uint32_t) baton->password.length(), baton->newPassword.c_str(),
             (uint32_t) baton->newPassword.length()) < 0)
+        baton->GetDPIError();
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection::Ping()
+//   Ping the database to see if it is "alive".
+//
+// PARAMETERS
+//   - JS callback which will receive (error)
+//-----------------------------------------------------------------------------
+NAN_METHOD(njsConnection::Ping)
+{
+    njsConnection *connection;
+    njsBaton *baton;
+
+    connection = (njsConnection*) ValidateArgs(info, 1, 1);
+    if (!connection)
+        return;
+    baton = connection->CreateBaton(info);
+    if (!baton)
+        return;
+    if (baton->error.empty())
+        baton->SetDPIConnHandle(connection->dpiConnHandle);
+    baton->QueueWork("Ping", Async_Ping, NULL, 1);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection::Async_Ping()
+//   Worker function for njsConnection::Ping() method.
+//-----------------------------------------------------------------------------
+void njsConnection::Async_Ping(njsBaton *baton)
+{
+    if (dpiConn_ping(baton->dpiConnHandle) < 0)
         baton->GetDPIError();
 }
 
