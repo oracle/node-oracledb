@@ -38,7 +38,14 @@ describe('161. changePassword.js', function() {
   var myUser = "nodb_schema_changepw";
 
   before(function(done) {
+
+    if (!dbConfig.DBA_PRIVILEGE) { this.skip(); }
+
     async.series([
+      function(cb) {
+        if (!dbConfig.DBA_PRIVILEGE) { done(); }
+        else { cb(); }
+      },
       // SYSDBA connection
       function(cb) {
         var credential = {
@@ -83,6 +90,10 @@ describe('161. changePassword.js', function() {
 
   after(function(done) {
     async.series([
+      function(cb) {
+        if (!dbConfig.DBA_PRIVILEGE) { done(); }
+        else { cb(); }
+      },
       function(cb) {
         var sql = "DROP USER " + myUser +" CASCADE";
         dbaConn.execute(

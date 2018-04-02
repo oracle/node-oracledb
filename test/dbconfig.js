@@ -39,8 +39,8 @@ config.connectString = process.env.NODE_ORACLEDB_CONNECTIONSTRING || 'localhost/
 // Has external authentication set up? Negative by default.
 config.externalAuth = process.env.NODE_ORACLEDB_EXTERNALAUTH || false;
 
-// Have you got DBA privilege? Positive by default.
-config.DBA_PRIVILEGE = process.env.NODE_DBA_PRIVILEGE || true;
+// Have you got DBA privilege? Negative by default.
+config.DBA_PRIVILEGE = process.env.NODE_DBA_PRIVILEGE || false;
 
 config.DBA_user = process.env.NODE_ORACLEDB_DBA_USER || 'sys';
 config.DBA_password = process.env.NODE_ORACLEDB_DBA_PASSWORD || 'oracle';
