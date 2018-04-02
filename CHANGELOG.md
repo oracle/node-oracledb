@@ -1,6 +1,6 @@
 # Change Log
 
-## node-oracledb v2.2.0 (DD Mon YYYY)
+## node-oracledb v2.2.0 (3 Apr 2018)
 
 - Added
   [`oracledb.oracleClientVersionString`](https://oracle.github.io/node-oracledb/doc/api.html#propdboracleclientversionstring)
