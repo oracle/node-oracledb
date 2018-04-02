@@ -4124,3 +4124,31 @@ Overview of node-oracledb functional tests
     161.8 Negative: non-DBA tries to change the password
     161.9 Negative: invalid type of 'newPassword'
     161.10 sets "newPassword" to be an empty string. password unchanged
+
+162. getStmtInfo.js
+    162.1 SELECT
+    162.2 SELECT with data bind
+    162.3 unknown statement
+    162.4 Negative - unknown statement, invalid SQL
+    162.5 UPDATE with data bind
+    162.6 UPDATE and verify changes do not happen
+    162.7 DELETE with data bind
+    162.8 DELETE and verify changes do not happen
+    162.9 DELETE with subquery
+    162.10 INSERT with data bind
+    162.11 INSERT and verify
+    162.12 Negative - insert nonexistent table
+    162.13 Negative - INSERT with invalid SQL
+    162.14 CREATE and verify the data does not get created
+    162.15 CREATE procedure
+    162.16 CREATE, DDL statements are not parsed, so syntax errors in them will not be ported.
+    162.17 DROP
+    162.18 ALTER
+    162.19 ALTER with data bind
+    162.20 ALTER, invaid statement
+    162.21 BEGIN
+    162.22 BEGIN with data bind
+    162.23 DECLARE
+    162.24 COMMIT
+    162.25 ROLLBACK
+    162.26 TRUNCATE

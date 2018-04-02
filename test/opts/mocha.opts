@@ -187,3 +187,4 @@ test/insertAll.js
 test/end2endTracing.js
 test/editionTest.js
 test/changePassword.js
+test/getStmtInfo.js

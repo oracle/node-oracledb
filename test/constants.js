@@ -74,4 +74,24 @@ describe('18. constants.js', function() {
 
   });
 
+  it('18.4 SQL Statement Type Constants', function() {
+
+    should.strictEqual(oracledb.STMT_TYPE_UNKNOWN, 0);
+    should.strictEqual(oracledb.STMT_TYPE_SELECT, 1);
+    should.strictEqual(oracledb.STMT_TYPE_UPDATE, 2);
+    should.strictEqual(oracledb.STMT_TYPE_DELETE, 3);
+    should.strictEqual(oracledb.STMT_TYPE_INSERT, 4);
+    should.strictEqual(oracledb.STMT_TYPE_CREATE, 5);
+    should.strictEqual(oracledb.STMT_TYPE_DROP, 6);
+    should.strictEqual(oracledb.STMT_TYPE_ALTER, 7);
+    should.strictEqual(oracledb.STMT_TYPE_BEGIN, 8);
+    should.strictEqual(oracledb.STMT_TYPE_DECLARE, 9);
+    should.strictEqual(oracledb.STMT_TYPE_CALL, 10);
+    should.strictEqual(oracledb.STMT_TYPE_EXPLAIN_PLAN, 15);
+    should.strictEqual(oracledb.STMT_TYPE_MERGE, 16);
+    should.strictEqual(oracledb.STMT_TYPE_ROLLBACK, 17);
+    should.strictEqual(oracledb.STMT_TYPE_COMMIT, 21);
+
+  });
+
 });
