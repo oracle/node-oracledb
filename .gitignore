@@ -1,0 +1,36 @@
+# General Ignores
+*~
+*.o
+\#*#
+core
+*.tgz
+GPATH
+GRTAGS
+GTAGS
+
+# macOS Ignores
+.DS_Store
+
+# Node Ignores
+npm-debug.log
+node_modules
+/build/*
+/examples/clobstream1out.txt
+/examples/blobstream1out.jpg
+/examples/lobselectout.jpg
+/examples/lobbindsout1.txt
+/examples/lobbindsout2.txt
+/package/SHASUMS256.txt
+/package/*.gz
+package-lock.json
+/odpi
+
+# Oracle Ignores
+sqlnet.log
+sqlnet.ora
+tnsnames.ora
+oraaccess.xml
+instantclient
+instantclient_11_2
+instantclient_12_1
+instantclient_12_2
