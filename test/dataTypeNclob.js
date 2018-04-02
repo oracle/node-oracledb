@@ -35,7 +35,6 @@ var assist   = require('./dataTypeAssist.js');
 var random   = require('./random.js');
 
 describe('123. dataTypeNclob.js', function() {
-  this.timeout(10000);
 
   var connection = null;
   var tableName = "nodb_nclob";

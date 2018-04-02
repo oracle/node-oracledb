@@ -35,7 +35,6 @@ var dbConfig = require('./dbconfig.js');
 var random   = require('./random.js');
 
 describe('81. clobDMLBindAsString.js', function() {
-  this.timeout(100000);
 
   var connection = null;
   var insertID = 1; // assume id for insert into db starts from 1

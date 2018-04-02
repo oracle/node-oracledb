@@ -37,7 +37,7 @@ var sql      = require('./sql.js');
 var assist   = require('./dataTypeAssist.js');
 
 describe('134. longrawProcedureBind_out.js', function() {
-  this.timeout(100000);
+
   var connection = null;
   var tableName = "nodb_longraw_134";
   var insertID = 0;

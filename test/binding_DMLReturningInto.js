@@ -37,7 +37,6 @@ var dbConfig = require('./dbconfig.js');
 var assist   = require('./dataTypeAssist.js');
 
 describe('98.binding_DMLReturningInto.js', function() {
-  this.timeout(5000);
   var connection = null;
   var executeSql = function(sql, callback) {
     connection.execute(

@@ -374,7 +374,6 @@ describe('114. urowidDMLBindAsString1.js', function() {
 
   describe('107.4 WHERE', function() {
     it('107.4.1 can bind in WHERE clause', function(done) {
-      this.timeout(10000);
       where_select(done);
     });
   });

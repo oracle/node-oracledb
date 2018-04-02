@@ -37,7 +37,7 @@ var sql      = require('./sql.js');
 var dbConfig = require('./dbconfig.js');
 
 describe('101.binding_defaultBindInout.js', function() {
-  this.timeout(5000);
+
   var connection = null;
   var executeSql = function(sql, callback) {
     connection.execute(

@@ -663,7 +663,6 @@ describe('2. pool.js', function() {
   });
 
   describe('2.8 connection request queue (basic functionality)', function(){
-    this.timeout(0);
 
     function getBlockingSql(secondsToBlock) {
       var blockingSql = '' +

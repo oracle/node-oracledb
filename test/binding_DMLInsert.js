@@ -38,7 +38,7 @@ var assist   = require('./dataTypeAssist.js');
 var random   = require('./random.js');
 
 describe('92.binding_DMLInsert.js', function() {
-  this.timeout(5000);
+
   var connection = null;
   var executeSql = function(sql, callback) {
     connection.execute(

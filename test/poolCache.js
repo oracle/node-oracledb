@@ -361,7 +361,7 @@ describe('67. poolCache.js', function() {
     });
 
     it('67.1.13 Negative: callback is called with function(err)', function(done) {
-      this.timeout(10000);
+
       oracledb.createPool({ // this becomes the default pool
         user          : dbConfig.user,
         password      : 'wrongpassword',

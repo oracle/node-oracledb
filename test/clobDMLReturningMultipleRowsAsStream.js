@@ -34,7 +34,6 @@ var dbConfig = require('./dbconfig.js');
 var sql      = require('./sql.js');
 
 describe('135. clobDMLReturningMultipleRowsAsStream.js', function() {
-  this.timeout(10000);
 
   var connection = null;
   var tableName = "nodb_dml_clob_135";

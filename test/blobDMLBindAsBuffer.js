@@ -36,7 +36,6 @@ var fs       = require('fs');
 var assist   = require('./dataTypeAssist.js');
 
 describe('82.blobDMLBindAsBuffer.js', function() {
-  this.timeout(100000);
 
   var connection = null;
   var node6plus = false; // assume node runtime version is lower than 6

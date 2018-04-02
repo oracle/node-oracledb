@@ -43,7 +43,6 @@ var inFileName = './test/fuzzydinosaur.jpg';  // contains the image to be insert
 var outFileName = './test/blobstreamout.jpg';
 
 describe('41. dataTypeBlob.js', function() {
-  this.timeout(20000);
 
   var connection = null;
   var nodever6   = false;

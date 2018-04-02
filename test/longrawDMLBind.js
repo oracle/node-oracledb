@@ -37,7 +37,7 @@ var sql      = require('./sql.js');
 var assist   = require('./dataTypeAssist.js');
 
 describe('126. longrawDMLBind.js', function() {
-  this.timeout(100000);
+
   var connection = null;
   var tableName = "nodb_longraw";
   var node6plus = false; // assume node runtime version is lower than 6

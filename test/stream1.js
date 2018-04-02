@@ -37,8 +37,6 @@ var nodeMajorVersion = Number(process.versions.node.split('.')[0]);
 
 describe('13. stream1.js', function () {
 
-  this.timeout(100000);
-
   var connection = null;
   var rowsAmount = 217;
 

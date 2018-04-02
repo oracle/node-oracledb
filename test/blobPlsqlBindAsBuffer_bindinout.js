@@ -36,7 +36,7 @@ var random   = require('./random.js');
 var assist   = require('./dataTypeAssist.js');
 
 describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
-  this.timeout(100000);
+
   var connection = null;
   var node6plus = false; // assume node runtime version is lower than 6
   var insertID = 1; // assume id for insert into db starts from 1

@@ -37,7 +37,7 @@ var dbConfig = require('./dbconfig.js');
 var assist   = require('./dataTypeAssist.js');
 
 describe('99.binding_functionBindIn.js', function() {
-  this.timeout(5000);
+
   var connection = null;
   var executeSql = function(sql, callback) {
     connection.execute(

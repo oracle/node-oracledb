@@ -1045,7 +1045,6 @@ describe('12. resultSet1.js', function() {
   });
 
   describe('12.6 Testing metaData', function() {
-    this.timeout(0);
 
     it('12.6.1 the amount and value of metaData should be correct', function(done) {
       connection.should.be.ok();

@@ -35,7 +35,6 @@ var random   = require('./random.js');
 var assist   = require('./dataTypeAssist.js');
 
 describe('91. fetchBlobAsBuffer4.js', function() {
-  this.timeout(100000);
 
   var connection = null;
   var insertID = 1; // assume id for insert into db starts from 1

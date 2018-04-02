@@ -36,7 +36,7 @@ var random   = require('./random.js');
 var sql      = require('./sql.js');
 
 describe('130. longProcedureBind_out.js', function() {
-  this.timeout(100000);
+
   var connection = null;
   var tableName = "nodb_long_130";
   var insertID = 0;
