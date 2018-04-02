@@ -39,18 +39,18 @@ describe('161. changePassword.js', function() {
 
   before(function(done) {
 
-    if (!dbConfig.DBA_PRIVILEGE) { this.skip(); }
+    if (!dbConfig.test.DBA_PRIVILEGE) { this.skip(); }
 
     async.series([
       function(cb) {
-        if (!dbConfig.DBA_PRIVILEGE) { done(); }
+        if (!dbConfig.test.DBA_PRIVILEGE) { done(); }
         else { cb(); }
       },
       // SYSDBA connection
       function(cb) {
         var credential = {
-          user:             dbConfig.DBA_user,
-          password:         dbConfig.DBA_password,
+          user:             dbConfig.test.DBA_user,
+          password:         dbConfig.test.DBA_password,
           connectionString: dbConfig.connectString,
           privilege:        oracledb.SYSDBA
         };
@@ -91,7 +91,7 @@ describe('161. changePassword.js', function() {
   after(function(done) {
     async.series([
       function(cb) {
-        if (!dbConfig.DBA_PRIVILEGE) { done(); }
+        if (!dbConfig.test.DBA_PRIVILEGE) { done(); }
         else { cb(); }
       },
       function(cb) {

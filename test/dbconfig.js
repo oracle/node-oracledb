@@ -22,27 +22,81 @@
  *   dbConfig.js
  *
  * DESCRIPTION
- *   Holds the dbConfigs used by node-oracledb tests to connect to
- *   the database.  The user requires privileges to connect and create
- *   tables.
+ *   This file conduct the configuration work for all the tests.
+ *   There are TWO options for users to choose:
  *
- *   See examples/dbconfig.js for details about connection dbConfigs.
+ *   1. Edit the credential section of this file.
+ *   2. Set these environment variables:
+ *      NODE_ORACLEDB_USER, NODE_ORACLEDB_PASSWORD, NODE_ORACLEDB_CONNECTIONSTRING,
+ *      NODE_ORACLEDB_EXTERNALAUTH,
+ *      NODE_ORACLEDB_DBA_PRIVILEGE,
+ *      NODE_ORACLEDB_DBA_USER, NODE_ORACLEDB_DBA_PASSWORD
  *
  *****************************************************************************/
 
 var config = {};
 
-config.user = process.env.NODE_ORACLEDB_USER || 'hr';
-config.password  = process.env.NODE_ORACLEDB_PASSWORD || 'hr';
-config.connectString = process.env.NODE_ORACLEDB_CONNECTIONSTRING || 'localhost/orcl';
+/***************** OPTION 1 - Edit credentials at this section ******************/
+config.user          = 'hr';
+config.password      = 'hr';
+config.connectString = 'localhost/orcl';
 
-// Has external authentication set up? Negative by default.
-config.externalAuth = process.env.NODE_ORACLEDB_EXTERNALAUTH || false;
+config.test = {};
 
-// Have you got DBA privilege? Negative by default.
-config.DBA_PRIVILEGE = process.env.NODE_DBA_PRIVILEGE || false;
+// Have you set up the External Authentication? Negative by default.
+config.test.externalAuth  = false;
 
-config.DBA_user = process.env.NODE_ORACLEDB_DBA_USER || 'sys';
-config.DBA_password = process.env.NODE_ORACLEDB_DBA_PASSWORD || 'oracle';
+// Do you have DBA privilege? Negative by default.
+config.test.DBA_PRIVILEGE = false;
+config.test.DBA_user      = 'sys';
+config.test.DBA_password  = 'oracle';
+
+
+/****************** OPTION 2 - Set environment variables **********************/
+if (process.env.NODE_ORACLEDB_USER) {
+  config.user = process.env.NODE_ORACLEDB_USER;
+}
+
+if (process.env.NODE_ORACLEDB_PASSWORD) {
+  config.password = process.env.NODE_ORACLEDB_PASSWORD;
+}
+
+if (process.env.NODE_ORACLEDB_CONNECTIONSTRING) {
+  config.connectString = process.env.NODE_ORACLEDB_CONNECTIONSTRING;
+}
+
+if (process.env.NODE_ORACLEDB_EXTERNALAUTH) {
+  var eauth = process.env.NODE_ORACLEDB_EXTERNALAUTH;
+  eauth = String(eauth);
+  eauth = eauth.toLowerCase();
+
+  if (eauth == 'true') {
+    config.test.externalAuth = true;
+  } else {
+    config.test.externalAuth = false;
+  }
+
+}
+
+if (process.env.NODE_ORACLEDB_DBA_PRIVILEGE) {
+  var priv = process.env.NODE_ORACLEDB_DBA_PRIVILEGE;
+  priv = String(priv);
+  priv = priv.toLowerCase();
+
+  if (priv == 'true') {
+    config.test.DBA_PRIVILEGE = true;
+  } else {
+    config.test.DBA_PRIVILEGE = false;
+  }
+
+}
+
+if (process.env.NODE_ORACLEDB_DBA_USER) {
+  config.test.DBA_user = process.env.NODE_ORACLEDB_DBA_USER;
+}
+
+if (process.env.NODE_ORACLEDB_DBA_PASSWORD) {
+  config.test.DBA_password = process.env.NODE_ORACLEDB_DBA_PASSWORD;
+}
 
 module.exports = config;

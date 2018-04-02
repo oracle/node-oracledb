@@ -22,12 +22,11 @@ for relevant licenses.
 ## 1. Preparations
 
 See [INSTALL](https://oracle.github.io/node-oracledb/INSTALL.html)
-for installation requirements and more details.
+for installation details.
 
 Note: the
 [test suite](https://github.com/oracle/node-oracledb/tree/master/test)
-is in GitHub.  From node-oracledb 1.9.1 it is not included when
-installing from npmjs.com with `npm install oracledb`.
+is on GitHub. NPM module has not contained the tests since node-oracledb 1.9.1.
 
 ### 1.1 Create a working directory
 
@@ -63,27 +62,10 @@ The test suite uses [mocha](https://www.npmjs.com/package/mocha),
 
 ### 1.4 Configure Database credentials
 
-The database credentials for node-oracledb test suite are defined in `dbconfig.js`.
-They can also be set via environment variables shown in that file.
+The file `test\dbconfig.js` contains the configuration. Change the credential information to yours.
 
-
-```
-vi <some-directory>/node-oracledb/test/dbconfig.js
-```
-
-```javascript
-module.exports = {
-  user          : process.env.NODE_ORACLEDB_USER || "hr",
-  password      : process.env.NODE_ORACLEDB_PASSWORD || "welcome",
-  connectString : process.env.NODE_ORACLEDB_CONNECTIONSTRING || "localhost/orcl"
-};
-```
-
-To enable external authentication tests, please make sure Oracle Database
-and the authentication service have been appropriately configured.  See
-[Documentation for External Authentication](https://oracle.github.io/node-oracledb/doc/api.html#extauth)
-for more details. And then, set the environment variable `NODE_ORACLEDB_EXTERNALAUTH`
-to be `true`.
+To enable external authentication tests, firstly make sure the Oracle external authentication service is correctly configured.
+See [Documentation for External Authentication](https://oracle.github.io/node-oracledb/doc/api.html#extauth) for details.
 
 Note: the test suite requires a schema with privileges CREATE TABLE, CREATE SESSION,
 CREATE PROCEDURE, CREATE SEQUENCE, CREATE TRIGGER.
@@ -124,22 +106,14 @@ shows the numbering of tests.
 In order to include your tests in the suite, add each new test file
 name to [`test/opts/mocha.opts`](https://github.com/oracle/node-oracledb/blob/master/test/opts/mocha.opts).
 
-## 4. Compatibility
-
-We basically test with the following environment options:
-
-- Oracle Instant Clients: 11.2.0.4, 12.1.0.2, 12.2.0.1
-- Operating Systems (X64): macOS, Linux, Windows
-- Node.js LTS versions
-
-## 5. Troubleshooting
+## 4. Troubleshooting
 
 You may encounter some troubles when running the test suite. These troubles
 might be caused by the concurrency issue of Mocha framework, network latencies,
 or database server issues. This section gives some issues that we ever saw
 and our solutions.
 
-### 5.1 ORA-00054: resource busy and acquire with NOWAIT specified or timeout expired
+### 4.1 ORA-00054: resource busy and acquire with NOWAIT specified or timeout expired
 
 This error occurs when Node.js programs try to change database objects which
 hold locks. The workaround would be:
@@ -149,7 +123,7 @@ test files.
 (2) Try not to use 'beforeEach' blocks for object operations to avoid
 the interference between cases.
 
-### 5.2 ORA-00018: maximum number of sessions exceeded
+### 4.2 ORA-00018: maximum number of sessions exceeded
 
 This error occurs when the test suite takes up more sessions than the
 configured limit. You can alter the session limit on the database server side.
@@ -166,7 +140,7 @@ do
 done
 ```
 
-### 5.3 ORA-28865: SSL connection closed
+### 4.3 ORA-28865: SSL connection closed
 
 You may encounter this error when the test suite sends more connection
 requests per second than the database is configured to handle.

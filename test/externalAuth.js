@@ -239,7 +239,7 @@ describe('5. externalAuth.js', function() {
   describe('5.2 tests only work when externalAuth is configured on DB', function() {
 
     before(function() {
-      if ( !(process.env.NODE_ORACLEDB_EXTERNALAUTH) ) this.skip();
+      if ( !dbConfig.test.externalAuth ) this.skip();
     });
 
     it("5.2.1 can get connection from oracledb with external authentication", function(done) {

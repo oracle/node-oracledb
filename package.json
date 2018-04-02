@@ -38,7 +38,7 @@
   },
   "scripts": {
     "test": "mocha --opts test/opts/mocha.opts",
-    "posttest": "node examples/version.js"
+    "posttest": "node test/opts/version.js"
   },
   "engines": {
     "node": ">=4"
