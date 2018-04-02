@@ -54,6 +54,8 @@
 
 - An empty object for `fetchInfo` no longer produces an error.
 
+- Updated database abstraction layer to ODPI-C 2.3
+
 - Fixed compilation warnings on Windows.
 
 - Updated the node-oracledb implementation to replace V8 deprecations.
