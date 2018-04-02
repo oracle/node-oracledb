@@ -1,4 +1,4 @@
-# node-oracledb 2.1 Documentation for the Oracle Database Node.js Add-on
+# node-oracledb 2.2 Documentation for the Oracle Database Node.js Add-on
 
 *Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved.*
 
@@ -16,6 +16,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 ##  <a name="contents"></a> Contents
+
+### [NODE-ORACLEDB API MANUAL](#apimanual)
 
 1. [Introduction](#intro)
     - 1.1 [Getting Started with Node-oracledb](#getstarted)
@@ -36,39 +38,45 @@ limitations under the License.
             - [`BIND_IN`](#oracledbconstantsbinddir), [`BIND_INOUT`](#oracledbconstantsbinddir), [`BIND_OUT`](#oracledbconstantsbinddir)
         - 3.1.5 [Privileged Connection Constants](#oracledbconstantsprivilege)
             - [`SYSDBA`](#oracledbconstantsprivilege), [`SYSOPER`](#oracledbconstantsprivilege), [`SYSASM`](#oracledbconstantsprivilege), [`SYSBACKUP`](#oracledbconstantsprivilege), [`SYSDG`](#oracledbconstantsprivilege), [`SYSKM`](#oracledbconstantsprivilege), [`SYSRAC`](#oracledbconstantsprivilege)
+        - 3.1.6 [SQL Statement Type Constants](#oracledbconstantsstmttype)
+            - [`STMT_TYPE_UNKNOWN`](#oracledbconstantsstmttype), [`STMT_TYPE_SELECT`](#oracledbconstantsstmttype), [`STMT_TYPE_UPDATE`](#oracledbconstantsstmttype), [`STMT_TYPE_DELETE`](#oracledbconstantsstmttype), [`STMT_TYPE_INSERT`](#oracledbconstantsstmttype), [`STMT_TYPE_CREATE`](#oracledbconstantsstmttype), [`STMT_TYPE_DROP`](#oracledbconstantsstmttype), [`STMT_TYPE_ALTER`](#oracledbconstantsstmttype), [`STMT_TYPE_BEGIN`](#oracledbconstantsstmttype), [`STMT_TYPE_DECLARE`](#oracledbconstantsstmttype), [`STMT_TYPE_CALL`](#oracledbconstantsstmttype), [`STMT_TYPE_EXPLAIN_PLAN`](#oracledbconstantsstmttype), [`STMT_TYPE_MERGE`](#oracledbconstantsstmttype), [`STMT_TYPE_ROLLBACK`](#oracledbconstantsstmttype), [`STMT_TYPE_COMMIT`](#oracledbconstantsstmttype)
+
     - 3.2 [Oracledb Properties](#oracledbproperties)
         - 3.2.1 [`autoCommit`](#propdbisautocommit)
         - 3.2.2 [`connectionClass`](#propdbconclass)
-        - 3.2.3 [`extendedMetaData`](#propdbextendedmetadata)
-        - 3.2.4 [`externalAuth`](#propdbisexternalauth)
-        - 3.2.5 [`fetchArraySize`](#propdbfetcharraysize)
-        - 3.2.6 [`fetchAsBuffer`](#propdbfetchasbuffer)
-        - 3.2.7 [`fetchAsString`](#propdbfetchasstring)
-        - 3.2.8 [`lobPrefetchSize`](#propdblobprefetchsize)
-        - 3.2.9 [`maxRows`](#propdbmaxrows)
-        - 3.2.10 [`oracleClientVersion`](#propdboracleClientVersion)
-        - 3.2.11 [`outFormat`](#propdboutformat)
-        - 3.2.12 [`poolIncrement`](#propdbpoolincrement)
-        - 3.2.13 [`poolMax`](#propdbpoolmax)
-        - 3.2.14 [`poolMin`](#propdbpoolmin)
-        - 3.2.15 [`poolPingInterval`](#propdbpoolpinginterval)
-        - 3.2.16 [`poolTimeout`](#propdbpooltimeout)
-        - 3.2.17 [`prefetchRows`](#propdbprefetchrows)
-        - 3.2.18 [`Promise`](#propdbpromise)
-        - 3.2.19 [`queueRequests`](#propdbqueuerequests)
-        - 3.2.20 [`queueTimeout`](#propdbqueuetimeout)
-        - 3.2.21 [`stmtCacheSize`](#propdbstmtcachesize)
-        - 3.2.22 [`version`](#propdbversion)
-        - 3.2.23 [`versionString`](#propdbversionstring)
-        - 3.2.24 [`versionSuffix`](#propdbversionsuffix)
+        - 3.2.3 [`edition`](#propdbedition)
+        - 3.2.4 [`events`](#propdbevents)
+        - 3.2.5 [`extendedMetaData`](#propdbextendedmetadata)
+        - 3.2.6 [`externalAuth`](#propdbisexternalauth)
+        - 3.2.7 [`fetchArraySize`](#propdbfetcharraysize)
+        - 3.2.8 [`fetchAsBuffer`](#propdbfetchasbuffer)
+        - 3.2.9 [`fetchAsString`](#propdbfetchasstring)
+        - 3.2.10 [`lobPrefetchSize`](#propdblobprefetchsize)
+        - 3.2.11 [`maxRows`](#propdbmaxrows)
+        - 3.2.12 [`oracleClientVersion`](#propdboracleclientversion)
+        - 3.2.13 [`oracleClientVersionString`](#propdboracleclientversionstring)
+        - 3.2.14 [`outFormat`](#propdboutformat)
+        - 3.2.15 [`poolIncrement`](#propdbpoolincrement)
+        - 3.2.16 [`poolMax`](#propdbpoolmax)
+        - 3.2.17 [`poolMin`](#propdbpoolmin)
+        - 3.2.18 [`poolPingInterval`](#propdbpoolpinginterval)
+        - 3.2.19 [`poolTimeout`](#propdbpooltimeout)
+        - 3.2.20 [`prefetchRows`](#propdbprefetchrows)
+        - 3.2.21 [`Promise`](#propdbpromise)
+        - 3.2.22 [`queueRequests`](#propdbqueuerequests)
+        - 3.2.23 [`queueTimeout`](#propdbqueuetimeout)
+        - 3.2.24 [`stmtCacheSize`](#propdbstmtcachesize)
+        - 3.2.25 [`version`](#propdbversion)
+        - 3.2.26 [`versionString`](#propdbversionstring)
+        - 3.2.27 [`versionSuffix`](#propdbversionsuffix)
     - 3.3 [Oracledb Methods](#oracledbmethods)
         - 3.3.1 [`createPool()`](#createpool)
             - 3.3.1.1 [`createPool()`: Parameters and Attributes](#createpoolpoolattrs)
-                - 3.3.1.1.1 [`user`](#createpoolpoolattrsuser)
-                - 3.3.1.1.2 [`password`](#createpoolpoolattrspassword)
-                - 3.3.1.1.3 [`connectString`](#createpoolpoolattrsconnectstring), [`connectionString`](#createpoolpoolattrsconnectstring)
+                - 3.3.1.1.1 [`connectString`](#createpoolpoolattrsconnectstring), [`connectionString`](#createpoolpoolattrsconnectstring)
+                - 3.3.1.1.2 [`edition`](#createpoolpoolattrsedition)
+                - 3.3.1.1.3 [`events`](#createpoolpoolattrsevents)
                 - 3.3.1.1.4 [`externalAuth`](#createpoolpoolattrsexternalauth)
-                - 3.3.1.1.5 [`stmtCacheSize`](#createpoolpoolattrsstmtcachesize)
+                - 3.3.1.1.5 [`password`](#createpoolpoolattrspassword)
                 - 3.3.1.1.6 [`poolAlias`](#createpoolpoolattrspoolalias)
                 - 3.3.1.1.7 [`poolIncrement`](#createpoolpoolattrspoolincrement)
                 - 3.3.1.1.8 [`poolMax`](#createpoolpoolattrspoolmax)
@@ -77,17 +85,22 @@ limitations under the License.
                 - 3.3.1.1.11 [`poolTimeout`](#createpoolpoolattrspooltimeout)
                 - 3.3.1.1.12 [`queueRequests`](#createpoolpoolattrsqueuerequests)
                 - 3.3.1.1.13 [`queueTimeout`](#createpoolpoolattrsqueuetimeout)
+                - 3.3.1.1.14 [`stmtCacheSize`](#createpoolpoolattrsstmtcachesize)
+                - 3.3.1.1.15 [`user`](#createpoolpoolattrsuser)
             - 3.3.1.2 [`createPool()`: Callback Function](#createpoolpoolcallback)
         - 3.3.2 [`getConnection()`](#getconnectiondb)
             - 3.3.2.1 [`getConnection()`: Parameters](#getconnectiondbattrs)
                 - 3.3.2.1.1 [Pool Alias](#getconnectiondbattrspoolalias)
                 - 3.3.2.1.2 [Connection Attributes](#getconnectiondbattrsconnattrs)
-                    - 3.3.2.1.2.1 [`user`](#getconnectiondbattrsuser)
-                    - 3.3.2.1.2.2 [`password`](#getconnectiondbattrspassword)
-                    - 3.3.2.1.2.3 [`connectString`](#getconnectiondbattrsconnectstring), [`connectionString`](#getconnectiondbattrsconnectstring)
-                    - 3.3.2.1.2.4 [`privilege`](#getconnectiondbattrsprivilege)
-                    - 3.3.2.1.2.5 [`externalAuth`](#getconnectiondbattrsexternalauth)
-                    - 3.3.2.1.2.6 [`stmtCacheSize`](#getconnectiondbattrsstmtcachesize)
+                    - 3.3.2.1.2.1 [`connectString`](#getconnectiondbattrsconnectstring), [`connectionString`](#getconnectiondbattrsconnectstring)
+                    - 3.3.2.1.2.2 [`edition`](#getconnectiondbattrsedition)
+                    - 3.3.2.1.2.3 [`events`](#getconnectiondbattrsevents)
+                    - 3.3.2.1.2.4 [`externalAuth`](#getconnectiondbattrsexternalauth)
+                    - 3.3.2.1.2.5 [`newPassword`](#getconnectiondbattrsnewpassword)
+                    - 3.3.2.1.2.6 [`password`](#getconnectiondbattrspassword)
+                    - 3.3.2.1.2.7 [`privilege`](#getconnectiondbattrsprivilege)
+                    - 3.3.2.1.2.8 [`stmtCacheSize`](#getconnectiondbattrsstmtcachesize)
+                    - 3.3.2.1.2.9 [`user`](#getconnectiondbattrsuser)
             - 3.3.2.2 [`getConnection()`: Callback Function](#getconnectiondbcallback)
         - 3.3.3 [`getPool()`](#getpool)
             - 3.3.3.1 [`getPool()`: Parameters](#getpoolattrs)
@@ -98,35 +111,53 @@ limitations under the License.
         - 4.1.2 [`clientId`](#propconnclientid)
         - 4.1.3 [`module`](#propconnmodule)
         - 4.1.4 [`oracleServerVersion`](#propconnoracleserverversion)
-        - 4.1.5 [`stmtCacheSize`](#propconnstmtcachesize)
+        - 4.1.5 [`oracleServerVersionString`](#propconnoracleserverversionstring)
+        - 4.1.6 [`stmtCacheSize`](#propconnstmtcachesize)
     - 4.2 [Connection Methods](#connectionmethods)
         - 4.2.1 [`break()`](#break)
-        - 4.2.2 [`close()`](#connectionclose)
-        - 4.2.3 [`commit()`](#commit)
-        - 4.2.4 [`createLob()`](#connectioncreatelob)
-        - 4.2.5 [`execute()`](#execute)
-            - 4.2.5.1 [`execute()`: SQL Statement](#executesqlparam)
-            - 4.2.5.2 [`execute()`: Bind Parameters](#executebindParams)
+        - 4.2.2 [`changePassword()`](#changepassword)
+        - 4.2.3 [`close()`](#connectionclose)
+        - 4.2.4 [`commit()`](#commit)
+        - 4.2.5 [`createLob()`](#connectioncreatelob)
+        - 4.2.6 [`execute()`](#execute)
+            - 4.2.6.1 [`execute()`: SQL Statement](#executesqlparam)
+            - 4.2.6.2 [`execute()`: Bind Parameters](#executebindParams)
                 - [`dir`](#executebindParams), [`maxArraySize`](#executebindParams), [`maxSize`](#executebindParams), [`type`](#executebindParams), [`val`](#executebindParams)
-            - 4.2.5.3 [`execute()`: Options](#executeoptions)
-                - 4.2.5.3.1 [`autoCommit`](#propexecautocommit)
-                - 4.2.5.3.2 [`extendedMetaData`](#propexecextendedmetadata)
-                - 4.2.5.3.3 [`fetchArraySize`](#propexecfetcharraysize)
-                - 4.2.5.3.4 [`fetchInfo`](#propexecfetchinfo)
-                - 4.2.5.3.5 [`maxRows`](#propexecmaxrows)
-                - 4.2.5.3.6 [`outFormat`](#propexecoutformat)
-                - 4.2.5.3.7 [`prefetchRows`](#propexecprefetchrows)
-                - 4.2.5.3.8 [`resultSet`](#propexecresultset)
-            - 4.2.5.4 [`execute()`: Callback Function](#executecallback)
-                - 4.2.5.4.1 [`metaData`](#execmetadata)
+            - 4.2.6.3 [`execute()`: Options](#executeoptions)
+                - 4.2.6.3.1 [`autoCommit`](#propexecautocommit)
+                - 4.2.6.3.2 [`extendedMetaData`](#propexecextendedmetadata)
+                - 4.2.6.3.3 [`fetchArraySize`](#propexecfetcharraysize)
+                - 4.2.6.3.4 [`fetchInfo`](#propexecfetchinfo)
+                - 4.2.6.3.5 [`maxRows`](#propexecmaxrows)
+                - 4.2.6.3.6 [`outFormat`](#propexecoutformat)
+                - 4.2.6.3.7 [`prefetchRows`](#propexecprefetchrows)
+                - 4.2.6.3.8 [`resultSet`](#propexecresultset)
+            - 4.2.6.4 [`execute()`: Callback Function](#executecallback)
+                - 4.2.6.4.1 [`metaData`](#execmetadata)
                     - [`name`](#execmetadata), [`fetchType`](#execmetadata), [`dbType`](#execmetadata), [`byteSize`](#execmetadata), [`precision`](#execmetadata), [`scale`](#execmetadata), [`nullable`](#execmetadata)
-                - 4.2.5.4.2 [`outBinds`](#execoutbinds)
-                - 4.2.5.4.3 [`resultSet`](#execresultset)
-                - 4.2.5.4.4 [`rows`](#execrows)
-                - 4.2.5.4.5 [`rowsAffected`](#execrowsaffected)
-        - 4.2.6 [`queryStream()`](#querystream)
-        - 4.2.7 [`release()`](#release)
-        - 4.2.8 [`rollback()`](#rollback)
+                - 4.2.6.4.2 [`outBinds`](#execoutbinds)
+                - 4.2.6.4.3 [`resultSet`](#execresultset)
+                - 4.2.6.4.4 [`rows`](#execrows)
+                - 4.2.6.4.5 [`rowsAffected`](#execrowsaffected)
+        - 4.2.7 [`executeMany()`](#executemany)
+            - 4.2.7.1 [`executeMany()`: SQL Statement](#executemanysqlparam)
+            - 4.2.7.2 [`executeMany()`: Binds](#executemanybinds)
+            - 4.2.7.3 [`executeMany()`: Options](#executemanyoptions)
+                - 4.2.7.3.1 [`autoCommit`](#executemanyoptautocommit)
+                - 4.2.7.3.2 [`batchErrors`](#executemanyoptbatcherrors)
+                - 4.2.7.3.3 [`bindDefs`](#executemanyoptbinddefs)
+                    - [`dir`](#executemanyoptbinddefs), [`maxSize`](#executemanyoptbinddefs), [`type`](#executemanyoptbinddefs)
+                - 4.2.7.3.4 [`dmlRowCounts`](#executemanyoptdmlrowcounts)
+            - 4.2.7.4 [`executeMany()`: Callback Function](#executemanycallback)
+                - 4.2.7.4.1 [`batchErrors`](#execmanybatcherrors)
+                - 4.2.7.4.2 [`dmlRowCounts`](#execmanydmlrowscounts)
+                - 4.2.7.4.3 [`outBinds`](#execmanyoutbinds)
+                - 4.2.7.4.4 [`rowsAffected`](#execmanyrowsaffected)
+        - 4.2.8 [`getStatementInfo()`](#getstmtinfo)
+        - 4.2.9 [`ping()`](#connectionping)
+        - 4.2.10 [`queryStream()`](#querystream)
+        - 4.2.11 [`release()`](#release)
+        - 4.2.12 [`rollback()`](#rollback)
 5. [Lob Class](#lobclass)
     - 5.1 [Lob Properties](#lobproperties)
         - 5.1.1 [`chunkSize`](#proplobchunksize)
@@ -160,6 +191,9 @@ limitations under the License.
         - 7.2.2 [`getRow()`](#getrow)
         - 7.2.3 [`getRows()`](#getrows)
         - 7.2.4 [`toQueryStream()`](#toquerystream)
+
+### [NODE-ORACLEDB USER MANUAL](#usermanual)
+
 8. [Connection Handling](#connectionhandling)
     - 8.1 [Connection Strings](#connectionstrings)
         - 8.1.1 [Easy Connect Syntax for Connection Strings](#easyconnect)
@@ -176,8 +210,11 @@ limitations under the License.
     - 8.5 [External Authentication](#extauth)
     - 8.6 [Privileged Connections](#privconn)
     - 8.7 [Securely Encrypting Network Traffic to Oracle Database](#securenetwork)
-    - 8.8 [Connections and High Availability](#connectionha)
-    - 8.9 [Optional Client Configuration Files](#tnsadmin)
+    - 8.8 [Changing Passwords and Connecting with an Expired Password](#changingpassword)
+    - 8.9 [Connections and High Availability](#connectionha)
+        - 8.9.1 [Fast Application Notification (FAN)](#connectionfan)
+        - 8.9.2 [Runtime Load Balancing (RLB)](#connectionrlb)
+    - 8.10 [Optional Client Configuration Files](#tnsadmin)
 9. [SQL Execution](#sqlexecution)
     - 9.1 [SELECT Statements](#select)
         - 9.1.1 [Fetching Rows with Direct Fetches](#fetchingrows)
@@ -204,6 +241,7 @@ limitations under the License.
     - 10.2 [PL/SQL Stored Functions](#plsqlfunc)
     - 10.3 [Anonymous PL/SQL blocks](#plsqlanon)
     - 10.4 [Using DBMS_OUTPUT](#dbmsoutput)
+    - 10.5 [Edition-Based Redefinition](#ebr)
 11. [Working with CLOB and BLOB Data](#lobhandling)
     - 11.1 [Simple Insertion of LOBs](#basiclobinsert)
     - 11.2 [Simple LOB Queries and PL/SQL OUT Binds](#queryinglobs)
@@ -222,18 +260,21 @@ limitations under the License.
     - 14.5 [LOB Bind Parameters](#lobbinds)
     - 14.6 [PL/SQL Collection Associative Array (Index-by) Bind Parameters](#plsqlindexbybinds)
     - 14.7 [Binding Multiple Values to a SQL `WHERE IN` Clause](#sqlwherein)
-15. [Transaction Management](#transactionmgt)
-16. [Statement Caching](#stmtcache)
-17. [External Configuration](#oraaccess)
-18. [Globalization and National Language Support (NLS)](#nls)
-19. [End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend)
-20. [Promises and node-oracledb](#promiseoverview)
-    - 20.1 [Custom Promise Libraries](#custompromises)
-21. [Async/Await and node-oracledb](#asyncawaitoverview)
-22. [Tracing SQL and PL/SQL Statements](#tracingsql)
-23. [Migrating from Previous node-oracledb Releases](#migrate)
-    - 23.1 [Migrating from node-oracledb 1.13 to node-oracledb 2.0](#migratev1v2)
-    - 23.2 [Migrating from node-oracledb 2.0 to node-oracledb 2.1](#migratev20v21)
+15. [Batch Statement Execution](#batchexecution)
+16. [Transaction Management](#transactionmgt)
+17. [Statement Caching](#stmtcache)
+18. [External Configuration](#oraaccess)
+19. [Globalization and National Language Support (NLS)](#nls)
+20. [End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend)
+21. [Promises and node-oracledb](#promiseoverview)
+    - 21.1 [Custom Promise Libraries](#custompromises)
+22. [Async/Await and node-oracledb](#asyncawaitoverview)
+23. [Tracing SQL and PL/SQL Statements](#tracingsql)
+24. [Migrating from Previous node-oracledb Releases](#migrate)
+    - 24.1 [Migrating from node-oracledb 1.13 to node-oracledb 2.0](#migratev1v2)
+    - 24.2 [Migrating from node-oracledb 2.0 to node-oracledb 2.1](#migratev20v21)
+
+## <a name="apimanual"></a> NODE-ORACLEDB API MANUAL
 
 ## <a name="intro"></a> 1. Introduction
 
@@ -243,8 +284,7 @@ This document shows how to use node-oracledb version 2.  The API
 reference is in sections 2 - 7 and the user guide in subsequent
 sections.
 
-Documentation about node-oracledb version 1 is
-[here](https://github.com/oracle/node-oracledb/blob/node-oracledb-v1/doc/api.md).
+Documentation about node-oracledb version 1 is [here][94].
 
 The node-oracledb API is a generic Oracle Database access layer.
 Almost all the functionality described here is common across all
@@ -292,8 +332,7 @@ oracledb.getConnection(
     password      : "welcome",
     connectString : "localhost/XE"
   },
-  function(err, connection)
-  {
+  function(err, connection) {
     if (err) {
       console.error(err.message);
       return;
@@ -303,8 +342,7 @@ oracledb.getConnection(
        FROM departments
        WHERE manager_id = :id`,
       [103],  // bind value for :id
-      function(err, result)
-      {
+      function(err, result) {
         if (err) {
           console.error(err.message);
           doRelease(connection);
@@ -315,8 +353,7 @@ oracledb.getConnection(
       });
   });
 
-function doRelease(connection)
-{
+function doRelease(connection) {
   connection.close(
     function(err) {
       if (err)
@@ -509,8 +546,9 @@ oracledb.DB_TYPE_VARCHAR        // (1) VARCHAR2
 
 #### <a name="oracledbconstantsbinddir"></a> 3.1.4 Execute Bind Direction Constants
 
-Constants for `execute()` [bind parameter](#executebindParams) `dir`
-properties.
+Constants for the `dir` property of `execute()`
+[bindParams](#executebindParams), [`queryStream()`](#querystream) and
+`executeMany()` [`bindDefs`](#executemanyoptbinddefs).
 
 These specify whether data values bound to SQL or PL/SQL bind
 parameters are passed into, or out from, the database:
@@ -545,6 +583,44 @@ oracledb.SYSDG                  // (262144) SYSDG privileges
 oracledb.SYSKM                  // (524288) SYSKM privileges
 
 oracledb.SYSRAC                 // (1048576) SYSRAC privileges
+```
+
+#### <a name="oracledbconstantsstmttype"></a> 3.1.6 SQL Statement Type Constants
+
+Constants for [`connection.getStatementInfo()`](#getstmtinfo)
+properties.
+
+
+```
+oracledb.STMT_TYPE_UNKNOWN      // (0) Unknown statement type
+
+oracledb.STMT_TYPE_SELECT       // (1) SELECT
+
+oracledb.STMT_TYPE_UPDATE       // (2) UPDATE
+
+oracledb.STMT_TYPE_DELETE       // (3) DELETE
+
+oracledb.STMT_TYPE_INSERT       // (4) INSERT
+
+oracledb.STMT_TYPE_CREATE       // (5) CREATE
+
+oracledb.STMT_TYPE_DROP         // (6) DROP
+
+oracledb.STMT_TYPE_ALTER        // (7) ALTER
+
+oracledb.STMT_TYPE_BEGIN        // (8) BEGIN
+
+oracledb.STMT_TYPE_DECLARE      // (9) DECLARE
+
+oracledb.STMT_TYPE_CALL         // (10) CALL
+
+oracledb.STMT_TYPE_EXPLAIN_PLAN // (15) EXPLAIN PLAN
+
+oracledb.STMT_TYPE_MERGE        // (16) MERGE
+
+oracledb.STMT_TYPE_ROLLBACK     // (17) ROLLBACK
+
+oracledb.STMT_TYPE_COMMIT       // (21) COMMIT
 ```
 
 ### <a name="oracledbproperties"></a> 3.2 Oracledb Properties
@@ -626,7 +702,54 @@ var oracledb = require('oracledb');
 oracledb.connectionClass = 'HRPOOL';
 ```
 
-#### <a name="propdbextendedmetadata"></a> 3.2.3 `oracledb.extendedMetaData`
+#### <a name="propdbedition"></a> 3.2.3 `oracledb.edition`
+
+```
+String edition
+```
+
+Sets the name used for Edition-Based Redefinition by connections.
+
+See [Edition-Based Redefinition](#ebr) for more information.
+
+This property was added in node-oracledb 2.2.
+
+##### Example
+
+```javascript
+var oracledb = require('oracledb');
+oracledb.edition = 'ed_2';
+```
+
+#### <a name="propdbevents"></a> 3.2.4 `oracledb.events`
+
+```
+Boolean events
+```
+
+Determines whether Oracle Client events mode should be enabled.
+
+The default value for `events` is *false*.
+
+This property can be overridden in the
+[`oracledb.createPool()`](#createpoolpoolattrsevents) call and when
+getting a standalone connection from
+[`oracledb.getConnection()`](#getconnectiondbattrsevents).
+
+Events mode is required for [Fast Application Notification
+(FAN)](#connectionfan) and [Runtime Load Balancing
+(RLB)](#connectionrlb).
+
+This property was added in node-oracledb 2.2.
+
+##### Example
+
+```javascript
+var oracledb = require('oracledb');
+oracledb.events = true;
+```
+
+#### <a name="propdbextendedmetadata"></a> 3.2.5 `oracledb.extendedMetaData`
 
 ```
 Boolean extendedMetaData
@@ -646,7 +769,9 @@ additional attributes.  These are listed in
 
 This property may be overridden in an [`execute()`](#executeoptions) call.
 
-#### <a name="propdbisexternalauth"></a> 3.2.4 `oracledb.externalAuth`
+This property was added in node-oracledb 1.10.
+
+#### <a name="propdbisexternalauth"></a> 3.2.6 `oracledb.externalAuth`
 
 ```
 Boolean externalAuth
@@ -676,7 +801,7 @@ var oracledb = require('oracledb');
 oracledb.externalAuth = false;
 ```
 
-#### <a name="propdbfetcharraysize"></a> 3.2.5 `oracledb.fetchArraySize`
+#### <a name="propdbfetcharraysize"></a> 3.2.7 `oracledb.fetchArraySize`
 
 ```
 Number fetchArraySize
@@ -694,7 +819,7 @@ fetches](#fetchingrows), during ResultSet [`getRow()`](#getrow) calls,
 and for [`queryStream()`](#querystream).  It is not used for
 [`getRows()`](#getrows).
 
-Increasing this value reduces the number of round trips to the
+Increasing this value reduces the number of round-trips to the
 database but increases memory usage for each data fetch.  For queries
 that return a large number of rows, higher values of `fetchArraySize`
 may give better performance.  For queries that only return a few rows,
@@ -707,7 +832,7 @@ For direct fetches (those using `execute()` option [`resultSet:
 false`](#propexecresultset)), the internal buffer size will be based
 on the lesser of [`maxRows`](#propdbmaxrows) and `fetchArraySize`.
 
-The property was introduced in node-oracledb version 2.  It replaces
+The property was introduced in node-oracledb version 2.0.  It replaces
 [`prefetchRows`](#propdbprefetchrows).
 
 ##### Example
@@ -717,7 +842,7 @@ var oracledb = require('oracledb');
 oracledb.fetchArraySize = 100;
 ```
 
-#### <a name="propdbfetchasbuffer"></a> 3.2.6 `oracledb.fetchAsBuffer`
+#### <a name="propdbfetchasbuffer"></a> 3.2.8 `oracledb.fetchAsBuffer`
 
 ```
 Array fetchAsBuffer
@@ -737,6 +862,8 @@ or [`queryStream()`](#querystream) calls can override the
 `fetchAsBuffer` global setting by
 using [`fetchInfo`](#executeoptions).
 
+This property was added in node-oracledb 1.13.
+
 ##### Example
 
 ```javascript
@@ -744,7 +871,7 @@ var oracledb = require('oracledb');
 oracledb.fetchAsBuffer = [ oracledb.BLOB ];
 ```
 
-#### <a name="propdbfetchasstring"></a> 3.2.7 `oracledb.fetchAsString`
+#### <a name="propdbfetchasstring"></a> 3.2.9 `oracledb.fetchAsString`
 
 ```
 Array fetchAsString
@@ -784,7 +911,7 @@ var oracledb = require('oracledb');
 oracledb.fetchAsString = [ oracledb.DATE, oracledb.NUMBER ];
 ```
 
-#### <a name="propdblobprefetchsize"></a> 3.2.8 `oracledb.lobPrefetchSize`
+#### <a name="propdblobprefetchsize"></a> 3.2.10 `oracledb.lobPrefetchSize`
 
 ```
 Number lobPrefetchSize
@@ -810,7 +937,7 @@ var oracledb = require('oracledb');
 oracledb.lobPrefetchSize = 16384;
 ```
 
-#### <a name="propdbmaxrows"></a> 3.2.9 `oracledb.maxRows`
+#### <a name="propdbmaxrows"></a> 3.2.11 `oracledb.maxRows`
 
 ```
 Number maxRows
@@ -847,14 +974,16 @@ var oracledb = require('oracledb');
 oracledb.maxRows = 0;
 ```
 
-#### <a name="propdboracleClientVersion"></a> 3.2.10 `oracledb.oracleClientVersion`
+#### <a name="propdboracleclientversion"></a> 3.2.12 `oracledb.oracleClientVersion`
 
 ```
 readonly Number oracleClientVersion
 ```
 
-This readonly property gives a numeric representation of the Oracle client library version.
+This readonly property gives a numeric representation of the Oracle client library version which is useful in comparisons.
 For version *a.b.c.d.e*, this property gives the number: `(100000000 * a) + (1000000 * b) + (10000 * c) + (100 * d) + e`
+
+This property was added in node-oracledb 1.3.
 
 ##### Example
 
@@ -863,7 +992,24 @@ var oracledb = require('oracledb');
 console.log("Oracle client library version number is " + oracledb.oracleClientVersion);
 ```
 
-#### <a name="propdboutformat"></a> 3.2.11 `oracledb.outFormat`
+#### <a name="propdboracleclientversionstring"></a> 3.2.13 `oracledb.oracleClientVersionString`
+
+```
+readonly String oracleClientVersionString
+```
+
+This readonly property gives a string representation of the Oracle client library version which is useful for display.
+
+This property was added in node-oracledb 2.2.
+
+##### Example
+
+```javascript
+var oracledb = require('oracledb');
+console.log("Oracle client library version is " + oracledb.oracleClientVersionString);
+```
+
+#### <a name="propdboutformat"></a> 3.2.14 `oracledb.outFormat`
 
 ```
 Number outFormat
@@ -893,6 +1039,8 @@ This property may be overridden in
 an [`execute()`](#executeoptions)
 or [`queryStream()`](#querystream) call.
 
+See [Query Output Formats](#queryoutputformats) for more information.
+
 ##### Example
 
 ```javascript
@@ -900,9 +1048,7 @@ var oracledb = require('oracledb');
 oracledb.outFormat = oracledb.ARRAY;
 ```
 
-See [Query Output Formats](#queryoutputformats) for more examples.
-
-#### <a name="propdbpoolincrement"></a> 3.2.12 `oracledb.poolIncrement`
+#### <a name="propdbpoolincrement"></a> 3.2.15 `oracledb.poolIncrement`
 
 ```
 Number poolIncrement
@@ -922,7 +1068,7 @@ var oracledb = require('oracledb');
 oracledb.poolIncrement = 1;
 ```
 
-#### <a name="propdbpoolmax"></a> 3.2.13 `oracledb.poolMax`
+#### <a name="propdbpoolmax"></a> 3.2.16 `oracledb.poolMax`
 
 ```
 Number poolMax
@@ -948,7 +1094,7 @@ var oracledb = require('oracledb');
 oracledb.poolMax = 4;
 ```
 
-#### <a name="propdbpoolmin"></a> 3.2.14 `oracledb.poolMin`
+#### <a name="propdbpoolmin"></a> 3.2.17 `oracledb.poolMin`
 
 ```
 Number poolMin
@@ -968,7 +1114,7 @@ var oracledb = require('oracledb');
 oracledb.poolMin = 0;
 ```
 
-#### <a name="propdbpoolpinginterval"></a> 3.2.15 `oracledb.poolPingInterval`
+#### <a name="propdbpoolpinginterval"></a> 3.2.18 `oracledb.poolPingInterval`
 
 ```
 Number poolPingInterval
@@ -983,10 +1129,10 @@ the chance a pooled connection is valid when it is used because
 identified un-unusable connections will not be returned to the
 application by `getConnection()`.
 
-Note when node-oracledb is built with version 12.2 of the Oracle
-client library, the value of `poolPingInterval` is ignored.  Oracle
-client 12.2 has a lightweight, always-enabled connection check that
-replaces explicit pinging.
+Note when node-oracledb is using version 12.2 of the Oracle client
+library, the value of `poolPingInterval` is ignored.  Oracle client
+12.2 has a lightweight, always-enabled connection check that replaces
+explicit pinging.
 
 With Oracle client 12.1 or earlier, unless `poolPingInterval` is `0`,
 it is possible for un-usable connections to be returned by a pool
@@ -1006,13 +1152,16 @@ This property may be overridden when [creating a connection pool](#createpool).
 
 See [Connection Pool Pinging](#connpoolpinging) for more discussion.
 
+This property was added in node-oracledb 1.12.
+
 ##### Example
+
 ```javascript
 var oracledb = require('oracledb');
 oracledb.poolPingInterval = 60;     // seconds
 ```
 
-#### <a name="propdbpooltimeout"></a> 3.2.16 `oracledb.poolTimeout`
+#### <a name="propdbpooltimeout"></a> 3.2.19 `oracledb.poolTimeout`
 
 ```
 Number poolTimeout
@@ -1034,7 +1183,7 @@ var oracledb = require('oracledb');
 oracledb.poolTimeout = 60;
 ```
 
-#### <a name="propdbprefetchrows"></a> 3.2.17 `oracledb.prefetchRows`
+#### <a name="propdbprefetchrows"></a> 3.2.20 `oracledb.prefetchRows`
 
 ```
 Number prefetchRows
@@ -1051,15 +1200,14 @@ var oracledb = require('oracledb');
 oracledb.prefetchRows = 100;
 ```
 
-#### <a name="propdbpromise"></a> 3.2.18 `oracledb.Promise`
+#### <a name="propdbpromise"></a> 3.2.21 `oracledb.Promise`
 
 ```
 Promise Promise
 ```
 
 Node-oracledb supports Promises on all methods.  The standard Promise
-library is used in Node.js 0.12 and greater.  Promise support is not
-enabled by default in Node.js 0.10.
+library is used.
 
 See [Promises and node-oracledb](#promiseoverview) for a discussion of
 using Promises.
@@ -1080,7 +1228,7 @@ Promises can be completely disabled by setting
 oracledb.Promise = null;
 ```
 
-#### <a name="propdbqueuerequests"></a> 3.2.19 `oracledb.queueRequests`
+#### <a name="propdbqueuerequests"></a> 3.2.22 `oracledb.queueRequests`
 
 ```
 Boolean queueRequests
@@ -1100,6 +1248,10 @@ The default value is *true*.
 
 This property may be overridden when [creating a connection pool](#createpool).
 
+See [Connection Pool Queue](#connpoolqueue) for more information.
+
+This property was added in node-oracledb 1.7.
+
 ##### Example
 
 ```javascript
@@ -1107,9 +1259,7 @@ var oracledb = require('oracledb');
 oracledb.queueRequests = false;
 ```
 
-See [Connection Pool Queue](#connpoolqueue) for more information.
-
-#### <a name="propdbqueuetimeout"></a> 3.2.20 `oracledb.queueTimeout`
+#### <a name="propdbqueuetimeout"></a> 3.2.23 `oracledb.queueTimeout`
 
 ```
 Number queueTimeout
@@ -1123,6 +1273,10 @@ The default value is 60000.
 
 This property may be overridden when [creating a connection pool](#createpool).
 
+See [Connection Pool Queue](#connpoolqueue) for more information.
+
+This property was added in node-oracledb 1.7.
+
 ##### Example
 
 ```javascript
@@ -1130,9 +1284,7 @@ var oracledb = require('oracledb');
 oracledb.queueTimeout = 3000; // 3 seconds
 ```
 
-See [Connection Pool Queue](#connpoolqueue) for more information.
-
-#### <a name="propdbstmtcachesize"></a> 3.2.21 `oracledb.stmtCacheSize`
+#### <a name="propdbstmtcachesize"></a> 3.2.24 `oracledb.stmtCacheSize`
 
 ```
 Number stmtCacheSize
@@ -1159,7 +1311,7 @@ var oracledb = require('oracledb');
 oracledb.stmtCacheSize = 30;
 ```
 
-#### <a name="propdbversion"></a> 3.2.22 `oracledb.version`
+#### <a name="propdbversion"></a> 3.2.25 `oracledb.version`
 ```
 readonly Number version
 ```
@@ -1174,12 +1326,14 @@ var oracledb = require('oracledb');
 console.log("Driver version number is " + oracledb.version);
 ```
 
-#### <a name="propdbversionstring"></a> 3.2.23 `oracledb.versionString`
+#### <a name="propdbversionstring"></a> 3.2.26 `oracledb.versionString`
 ```
 readonly String versionString
 ```
 
 This readonly property gives a string representation of the node-oracledb version, including the version suffix if one is present.
+
+This property was added in node-oracledb 2.1.
 
 ##### Example
 
@@ -1188,12 +1342,14 @@ var oracledb = require('oracledb');
 console.log("Driver version is " + oracledb.versionString);
 ```
 
-#### <a name="propdbversionsuffix"></a> 3.2.24 `oracledb.versionSuffix`
+#### <a name="propdbversionsuffix"></a> 3.2.27 `oracledb.versionSuffix`
 ```
 readonly String versionSuffix
 ```
 
 This readonly property gives a string representing the version suffix (e.g. "-dev" or "-beta") or an empty string if no version suffix is present.
+
+This property was added in node-oracledb 2.1.
 
 ##### Example
 
@@ -1260,27 +1416,7 @@ ignored.
 
 The properties of `poolAttrs` are described below.
 
-###### <a name="createpoolpoolattrsuser"></a> 3.3.1.1.1 `user`
-
-```
-String user
-```
-
-The database user name.  Can be a simple user name or a proxy of the
-form *alison[fred]*. See the [Client Access Through a Proxy][7]
-section in the Oracle Call Interface manual for more details about
-proxy authentication.
-
-###### <a name="createpoolpoolattrspassword"></a> 3.3.1.1.2 `password`
-
-```
-String password
-```
-
-The password of the database user. A password is also necessary if a
-proxy user is specified.
-
-###### <a name="createpoolpoolattrsconnectstring"></a> 3.3.1.1.3 `connectString`, `connectionString`
+###### <a name="createpoolpoolattrsconnectstring"></a> 3.3.1.1.1 `connectString`, `connectionString`
 
 ```
 String connectString
@@ -1289,10 +1425,39 @@ String connectionString
 
 The two properties are aliases for each other.  Use only one of the properties.
 
-The Oracle database instance to connect to.  The string can be an Easy
-Connect string, or a Net Service Name from a `tnsnames.ora` file, or the
-name of a local Oracle database instance.  See
-[Connection Strings](#connectionstrings) for examples.
+The Oracle database instance used by connections in the pool.  The
+string can be an Easy Connect string, or a Net Service Name from a
+`tnsnames.ora` file, or the name of a local Oracle database instance.
+See [Connection Strings](#connectionstrings) for examples.
+
+The alias `connectionString` was added in node-oracledb 2.1.
+
+###### <a name="createpoolpoolattrsedition"></a> 3.3.1.1.2 `edition`
+
+```
+String edition
+```
+
+Sets the name used for [Edition-Based Redefinition](#ebr) by
+connections in the pool.
+
+This optional property overrides the
+[`oracledb.edition`](#propdbedition) property.
+
+This property was added in node-oracledb 2.2.
+
+###### <a name="createpoolpoolattrsevents"></a> 3.3.1.1.3 `events`
+
+```
+Boolean events
+```
+
+Indicate whether Oracle Call Interface events mode should be enabled for this pool.
+
+This optional property overrides the
+[`oracledb.events`](#propdbevents) property.
+
+This property was added in node-oracledb 2.2.
 
 ###### <a name="createpoolpoolattrsexternalauth"></a> 3.3.1.1.4 `externalAuth`
 
@@ -1300,7 +1465,7 @@ name of a local Oracle database instance.  See
 Boolean externalAuth
 ```
 
-Indicate whether connections should be established using
+Indicate whether pooled connections should be established using
 [External Authentication](#extauth).
 
 The default is *false*.
@@ -1314,21 +1479,17 @@ The `user` and `password` properties should not be set when
 Note prior to node-oracledb 0.5 this property was called
 `isExternalAuth`.
 
-###### <a name="createpoolpoolattrsstmtcachesize"></a> 3.3.1.1.5 `stmtCacheSize`
+###### <a name="createpoolpoolattrspassword"></a> 3.3.1.1.5 `password`
 
 ```
-Number stmtCacheSize
+String password
 ```
 
-The number of statements to be cached in the
-[statement cache](#stmtcache) of each connection.
-
-This optional property overrides the
-[`oracledb.stmtCacheSize`](#propdbstmtcachesize) property.
+The password of the database user used by connections in the pool.  A
+password is also necessary if a proxy user is specified.
 
 ###### <a name="createpoolpoolattrspoolalias"></a> 3.3.1.1.6 `poolAlias`
 
-<a name="createpoolpoolattrspoolalias"></a>
 ```
 String poolAlias
 ```
@@ -1340,6 +1501,8 @@ that utilize the connection pool cache, such as [`oracledb.getPool()`](#getpool)
 [`oracledb.getConnection()`](#getconnectiondb).
 
 See [Connection Pool Cache](#connpoolcache) for details and examples.
+
+This property was added in node-oracledb 1.11.
 
 ###### <a name="createpoolpoolattrspoolincrement"></a> 3.3.1.1.7 `poolIncrement`
 
@@ -1400,9 +1563,9 @@ connection has been idle in the pool for at least `poolPingInterval`
 seconds, an internal "ping" will be performed first to check the
 aliveness of the connection.
 
-Note this attribute is ignored when node-oracledb is built with Oracle
-client 12.2, since this has its own lightweight, always-enabled
-connection check.
+Note this attribute is ignored when node-oracledb is using version
+12.2 of the Oracle client library, since this has its own lightweight,
+always-enabled connection check.
 
 The default value is 60.
 
@@ -1455,6 +1618,29 @@ The default value is 60000.
 
 This optional property overrides the
 [`oracledb.queueTimeout`](#propdbqueuetimeout) property.
+
+###### <a name="createpoolpoolattrsstmtcachesize"></a> 3.3.1.1.14 `stmtCacheSize`
+
+```
+Number stmtCacheSize
+```
+
+The number of statements to be cached in the
+[statement cache](#stmtcache) of each connection in the pool.
+
+This optional property overrides the
+[`oracledb.stmtCacheSize`](#propdbstmtcachesize) property.
+
+###### <a name="createpoolpoolattrsuser"></a> 3.3.1.1.15 `user`
+
+```
+String user
+```
+
+The database user name for connections in the pool.  Can be a simple
+user name or a proxy of the form *alison[fred]*. See the [Client
+Access Through a Proxy][7] section in the Oracle Call Interface manual
+for more details about proxy authentication.
 
 #### <a name="createpoolpoolcallback"></a> 3.3.1.2 `createPool()`: Callback Function
 
@@ -1538,27 +1724,7 @@ method are ignored.
 
 The properties of the `connAttrs` object are described below.
 
-###### <a name="getconnectiondbattrsuser"></a> 3.3.2.1.2.1 `user`
-
-```
-String user
-```
-
-The database user name.  Can be a simple user name or a proxy of the
-form *alison[fred]*. See the [Client Access Through a Proxy][7]
-section in the Oracle Call Interface manual for more details about
-proxy authentication.
-
-###### <a name="getconnectiondbattrspassword"></a> 3.3.2.1.2.2 `password`
-
-```
-String password
-```
-
-The password of the database user. A password is also necessary if a
-proxy user is specified.
-
-###### <a name="getconnectiondbattrsconnectstring"></a> 3.3.2.1.2.3 `connectString`, `connectionString`
+###### <a name="getconnectiondbattrsconnectstring"></a> 3.3.2.1.2.1 `connectString`, `connectionString`
 
 ```
 String connectString
@@ -1572,24 +1738,35 @@ Net Service Name from a `tnsnames.ora` file, or the name of a local
 Oracle database instance.  See
 [Connection Strings](#connectionstrings) for examples.
 
-###### <a name="getconnectiondbattrsprivilege"></a> 3.3.2.1.2.4 `privilege`
+The alias `connectionString` was added in node-oracledb 2.1.
+
+###### <a name="getconnectiondbattrsedition"></a> 3.3.2.1.2.2 `edition`
 
 ```
-Number privilege
+String edition
 ```
 
-The privilege to use when establishing connection to the database. This
-optional property should be one of the
-[privileged connection constants](#oracledbconstantsprivilege).
+Sets the name used for [Edition-Based Redefinition](#ebr) by this connection.
 
-See [Privileged Connections](#privconn) for more information.
+This optional property overrides the
+[`oracledb.edition`](#propdbedition) property.
 
-Note only non-pooled connections can be privileged.
+This property was added in node-oracledb 2.2.
 
-See the [Database Administrators Guide][90] for information on
-administrative privileges.
+###### <a name="getconnectiondbattrsevents"></a> 3.3.2.1.2.3 `events`
 
-###### <a name="getconnectiondbattrsexternalauth"></a> 3.3.2.1.2.5 `externalAuth`
+```
+Boolean events
+```
+
+Determines if the standalone connection is created using Oracle Call Interface events mode.
+
+This optional property overrides the
+[`oracledb.events`](#propdbisevents) property.
+
+This property was added in node-oracledb 2.2.
+
+###### <a name="getconnectiondbattrsexternalauth"></a> 3.3.2.1.2.4 `externalAuth`
 
 ```
 Boolean externalAuth
@@ -1607,7 +1784,50 @@ The `user` and `password` properties should not be set when
 Note prior to node-oracledb 0.5 this property was called
 `isExternalAuth`.
 
-###### <a name="getconnectiondbattrsstmtcachesize"></a> 3.3.2.1.2.6 `stmtCacheSize`
+###### <a name="getconnectiondbattrsnewpassword"></a> 3.3.2.1.2.5 `newPassword`
+
+```
+String newPassword
+```
+
+The new password to use for the database user.  When using
+`newPassword`, the [`password`](#getconnectiondbattrspassword)
+property should be set to the current password.
+
+This allows passwords to be changed at the time of connection, in
+particular it can be used to connect when the old password has
+expired.
+
+See [Changing Passwords and Connecting with an Expired Password](#changingpassword).
+
+This property was added in node-oracledb 2.2.
+
+###### <a name="getconnectiondbattrspassword"></a> 3.3.2.1.2.6 `password`
+
+```
+String password
+```
+
+The password of the database user. A password is also necessary if a
+proxy user is specified.
+
+###### <a name="getconnectiondbattrsprivilege"></a> 3.3.2.1.2.7 `privilege`
+
+```
+Number privilege
+```
+
+The privilege to use when establishing connection to the database. This
+optional property should be one of the
+[privileged connection constants](#oracledbconstantsprivilege).
+
+See [Privileged Connections](#privconn) for more information.
+
+Note only non-pooled connections can be privileged.
+
+This property was added in node-oracledb 2.1.
+
+###### <a name="getconnectiondbattrsstmtcachesize"></a> 3.3.2.1.2.8 `stmtCacheSize`
 
 ```
 Number stmtCacheSize
@@ -1617,6 +1837,17 @@ The number of statements to be cached in the
 [statement cache](#stmtcache) of each connection.  This optional
 property may be used to override the
 [`oracledb.stmtCacheSize`](#propdbstmtcachesize) property.
+
+###### <a name="getconnectiondbattrsuser"></a> 3.3.2.1.2.9 `user`
+
+```
+String user
+```
+
+The database user name.  Can be a simple user name or a proxy of the
+form *alison[fred]*. See the [Client Access Through a Proxy][7]
+section in the Oracle Call Interface manual for more details about
+proxy authentication.
 
 ##### <a name="getconnectiondbcallback"></a> 3.3.2.2 `getConnection()`: Callback Function
 
@@ -1712,10 +1943,22 @@ show a value of `null` for this attribute.  See
 readonly Number oracleServerVersion
 ```
 
-This readonly property gives a numeric representation of the Oracle database version.
+This readonly property gives a numeric representation of the Oracle database version which is useful in comparisons.
 For version *a.b.c.d.e*, this property gives the number: `(100000000 * a) + (1000000 * b) + (10000 * c) + (100 * d) + e`
 
-#### <a name="propconnstmtcachesize"></a> 4.1.5 `connection.stmtCacheSize`
+This property was added in node-oracledb 1.3.
+
+#### <a name="propconnoracleserverversionstring"></a> 4.1.5 `connection.oracleServerVersionString`
+
+```
+readonly String oracleServerVersionString
+```
+
+This readonly property gives a string representation of the Oracle database version which is useful for display.
+
+This property was added in node-oracledb 2.2.
+
+#### <a name="propconnstmtcachesize"></a> 4.1.6 `connection.stmtCacheSize`
 
 ```
 readonly Number stmtCacheSize
@@ -1763,7 +2006,65 @@ Callback function parameter | Description
 ----------------------------|-------------
 *Error error* | If `break()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
-####  <a name="connectionclose"></a> 4.2.2 `connection.close()`
+####  <a name="changepassword"></a> 4.2.2 `connection.changePassword()`
+
+##### Prototype
+
+Callback:
+```
+changePassword(user, oldPassword, newPassword, function(Error error){});
+```
+Promise:
+```
+promise = changePassword(user, oldPassword, newPassword);
+```
+
+##### Description
+
+Changes the password of the specified user.
+
+Only users with the ALTER USER privilege can change passwords of other
+users.
+
+See [Changing Passwords and Connecting with an Expired Password](#changingpassword).
+
+This method was added in node-oracledb 2.2.
+
+##### Parameters
+
+```
+String user
+```
+
+The name of the user whose password is to be changed.
+
+```
+String oldPassword
+```
+
+The current password of the currently connected user.
+
+If `changePassword()` is being used by a DBA to change the password of
+another user, the value of `oldPassword` is ignored and can be an
+empty string.
+
+```
+String newPassword
+```
+
+The new password of the user whose password is to be changed.
+
+```
+function(Error error)
+```
+
+The parameters of the callback function are:
+
+Callback function parameter | Description
+----------------------------|-------------
+*Error error* | If `changePassword()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+
+####  <a name="connectionclose"></a> 4.2.3 `connection.close()`
 
 ##### Prototype
 
@@ -1799,6 +2100,9 @@ make the connection unusable, then `close()` will drop that connection
 from the connection pool.  So a future pooled `getConnection()` call
 that grows the pool will create a new, valid connection.
 
+This method was added to node-oracledb 1.9, replacing the equivalent
+alias `connection.release()`.
+
 ##### Parameters
 
 ```
@@ -1811,7 +2115,7 @@ Callback function parameter | Description
 ----------------------------|-------------
 *Error error* | If `close()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
-####  <a name="commit"></a> 4.2.3 `connection.commit()`
+####  <a name="commit"></a> 4.2.4 `connection.commit()`
 
 ##### Prototype
 
@@ -1840,7 +2144,7 @@ Callback function parameter | Description
 ----------------------------|-------------
 *Error error* | If `commit()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
-#### <a name="connectioncreatelob"></a> 4.2.4 `connection.createLob()`
+#### <a name="connectioncreatelob"></a> 4.2.5 `connection.createLob()`
 
 ##### Prototype
 
@@ -1891,7 +2195,7 @@ Callback function parameter | Description
 *Error error* | If `createLob()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
 
-#### <a name="execute"></a> 4.2.5 `connection.execute()`
+#### <a name="execute"></a> 4.2.6 `connection.execute()`
 
 ##### Prototype
 
@@ -1925,14 +2229,14 @@ variables, and the number of rows affected by the execution of
 
 Parameter | Description
 ----------|------------
-[`String sql`](#executesqlparam) | The SQL string that is executed. The SQL string may contain bind parameters.
+[`String sql`](#executesqlparam) | The SQL statement that is executed. The statement may contain bind parameters.
 [`Object bindParams`](#executebindParams) | This function parameter is needed if there are bind parameters in the SQL statement.
 [`Object options`](#executeoptions) | This is an optional parameter to `execute()` that may be used to control statement execution.
 [`function(Error error, [Object result])`](#executecallback) | Callback function with the execution results.
 
 The parameters are discussed in the next sections.
 
-##### <a name="executesqlparam"></a> 4.2.5.1 `execute()`: SQL Statement
+##### <a name="executesqlparam"></a> 4.2.6.1 `execute()`: SQL Statement
 
 ```
 String sql
@@ -1941,7 +2245,8 @@ String sql
 The SQL or PL/SQL statement that `execute()` executes. The statement
 may contain bind variables.
 
-##### <a name="executebindParams"></a> 4.2.5.2 `execute()`: Bind Parameters
+##### <a name="executebindParams"></a> 4.2.6.2 `execute()`: Bind Parameters
+
 ```
 Object bindParams
 ```
@@ -1959,10 +2264,10 @@ If a bind value is an object it may have the following properties:
 
 Bind Property | Description
 ---------------|------------
-`dir` | The direction of the bind.  One of the [Oracledb Constants](#oracledbconstantsbinddir) `oracledb.BIND_IN`, `oracledb.BIND_INOUT`, or `oracledb.BIND_OUT`. The default is `oracledb.BIND_IN`.
+`dir` | The direction of the bind.  One of the [Execute Bind Direction Constants](#oracledbconstantsbinddir) `oracledb.BIND_IN`, `oracledb.BIND_INOUT`, or `oracledb.BIND_OUT`. The default is `oracledb.BIND_IN`.
 `maxArraySize` | The number of array elements to be allocated for a PL/SQL Collection INDEX BY associative array OUT or IN OUT array bind variable.  For IN binds, the value of `maxArraySize` is ignored.  See [PL/SQL Collection Associative Array (Index-by) Bind Parameters](plsqlindexbybinds).
 `maxSize` | The maximum number of bytes that an OUT or IN OUT bind variable of type `oracledb.STRING` or `oracledb.BUFFER` can use to get data. The default value is 200. The maximum limit depends on the database type, see below.  When binding IN OUT, then `maxSize` refers to the size of the returned  value: the input value can be smaller or bigger.  For IN binds, `maxSize` is ignored.
-`type` | The node-oracledb or JavaScript data type to be bound.  One of the [Oracledb Constants](#oracledbconstantsbinddir) `oracledb.BLOB`, `oracledb.BUFFER`, `oracledb.CLOB`, `oracledb.CURSOR`, `oracledb.DATE`, `oracledb.NUMBER`, or `oracledb.STRING`.  With IN or IN OUT binds the type can be explicitly set with `type` or it will default to the type of the input data value.  With OUT binds, the type defaults to `oracledb.STRING` whenever `type` is not specified.
+`type` | The node-oracledb or JavaScript data type to be bound.  One of the [Node-oracledb Type Constants](#oracledbconstantsnodbtype) `oracledb.BLOB`, `oracledb.BUFFER`, `oracledb.CLOB`, `oracledb.CURSOR`, `oracledb.DATE`, `oracledb.NUMBER`, or `oracledb.STRING`.  With IN or IN OUT binds the type can be explicitly set with `type` or it will default to the type of the input data value.  With OUT binds, the type defaults to `oracledb.STRING` whenever `type` is not specified.
 `val` | The input value or variable to be used for an IN or IN OUT bind variable.
 
 The limit for `maxSize` when binding as `oracledb.BUFFER` is 2000
@@ -1981,7 +2286,7 @@ UROWIDs can take up to 5267 bytes when fetched from the database so
 
 Note `oracledb.CURSOR` bind variables can be used only for PL/SQL OUT binds.
 
-##### <a name="executeoptions"></a> 4.2.5.3 `execute()`: Options
+##### <a name="executeoptions"></a> 4.2.6.3 `execute()`: Options
 
 ```
 Object options
@@ -1998,7 +2303,7 @@ name/number* or *NJS-012: encountered invalid bind data type in parameter*.
 The following properties can be set or overridden for the execution of
 a statement.
 
-###### <a name="propexecautocommit"></a> 4.2.5.3.1 `autoCommit`
+###### <a name="propexecautocommit"></a> 4.2.6.3.1 `autoCommit`
 
 ```
 Boolean autoCommit
@@ -2006,7 +2311,7 @@ Boolean autoCommit
 
 Overrides [`oracledb.autoCommit`](#propdbisautocommit).
 
-###### <a name="propexecextendedmetadata"></a> 4.2.5.3.2 `extendedMetaData`
+###### <a name="propexecextendedmetadata"></a> 4.2.6.3.2 `extendedMetaData`
 
 ```
 Boolean extendedMetaData
@@ -2014,7 +2319,7 @@ Boolean extendedMetaData
 
 Overrides [`oracledb.extendedMetaData`](#propdbextendedmetadata).
 
-###### <a name="propexecfetcharraysize"></a> 4.2.5.3.3 `fetchArraySize`
+###### <a name="propexecfetcharraysize"></a> 4.2.6.3.3 `fetchArraySize`
 
 ```
 Number fetchArraySize
@@ -2022,7 +2327,7 @@ Number fetchArraySize
 
 Overrides [`oracledb.fetchArraySize`](#propdbfetcharraysize).
 
-###### <a name="propfetchinfo"></a> <a name="propexecfetchinfo"></a> 4.2.5.3.4 `fetchInfo`
+###### <a name="propfetchinfo"></a> <a name="propexecfetchinfo"></a> 4.2.6.3.4 `fetchInfo`
 
 ```
 Object fetchInfo
@@ -2080,7 +2385,7 @@ or [`fetchAsBuffer`](#propdbfetchasbuffer) settings instead.
 See [Query Result Type Mapping](#typemap) for more information on query type
 mapping.
 
-###### <a name="propexecmaxrows"></a> 4.2.5.3.5 `maxRows`
+###### <a name="propexecmaxrows"></a> 4.2.6.3.5 `maxRows`
 
 ```
 Number maxRows
@@ -2088,7 +2393,7 @@ Number maxRows
 
 Overrides [`oracledb.maxRows`](#propdbmaxrows).
 
-###### <a name="propexecoutformat"></a> 4.2.5.3.6 `outFormat`
+###### <a name="propexecoutformat"></a> 4.2.6.3.6 `outFormat`
 
 ```
 String outFormat
@@ -2096,7 +2401,7 @@ String outFormat
 
 Overrides [`oracledb.outFormat`](#propdboutformat).
 
-###### <a name="propexecprefetchrows"></a> 4.2.5.3.7 `prefetchRows`
+###### <a name="propexecprefetchrows"></a> 4.2.6.3.7 `prefetchRows`
 
 ```
 Number prefetchRows
@@ -2106,7 +2411,7 @@ This attribute is no longer supported in node-oracledb version 2 and
 has no effect on applications.  Use
 [`fetchArraySize`](#propexecfetcharraysize) instead.
 
-###### <a name="propexecresultset"></a> 4.2.5.3.8 `resultSet`
+###### <a name="propexecresultset"></a> 4.2.6.3.8 `resultSet`
 
 ```
 Boolean resultSet
@@ -2116,7 +2421,7 @@ Determines whether query results should be returned as a
 [ResultSet](#resultsetclass) object or directly.  The default is
 *false*.
 
-##### <a name="executecallback"></a> 4.2.5.4 `execute()`: Callback Function
+##### <a name="executecallback"></a> 4.2.6.4 `execute()`: Callback Function
 
 ```
 function(Error error, [Object result])
@@ -2133,7 +2438,7 @@ Callback function parameter | Description
 
 The properties of `result` object from the `execute()` callback are described below.
 
-###### <a name="execmetadata"></a> 4.2.5.4.1 `metaData`
+###### <a name="execmetadata"></a> 4.2.6.4.1 `metaData`
 
 ```
 readonly Array metaData
@@ -2173,7 +2478,7 @@ such as `WHERE 1 = 0` so the database does minimal work.
 
 See [Query Column Metadata](#querymeta) for examples.
 
-###### <a name="execoutbinds"></a> 4.2.5.4.2 `outBinds`
+###### <a name="execoutbinds"></a> 4.2.6.4.2 `outBinds`
 
 ```
 Array/object outBinds
@@ -2184,7 +2489,7 @@ If [`bindParams`](#executebindParams) is passed as an array, then
 `outBinds` is returned as an array.  If `bindParams` is passed as an
 object, then `outBinds` is returned as an object.
 
-###### <a name="execresultset"></a> 4.2.5.4.3 `resultSet`
+###### <a name="execresultset"></a> 4.2.6.4.3 `resultSet`
 
 ```
 Object resultSet
@@ -2199,7 +2504,7 @@ When using this option, [`resultSet.close()`](#close) must be called
 when the ResultSet is no longer needed.  This is true whether or not
 rows have been fetched from the ResultSet.
 
-###### <a name="execrows"></a> 4.2.5.4.4 `rows`
+###### <a name="execrows"></a> 4.2.6.4.4 `rows`
 
 ```
 Array rows
@@ -2219,7 +2524,7 @@ The number of rows returned is limited by
 `maxRows` is 0, then the number of rows is limited by Node.js memory
 constraints.
 
-###### <a name="execrowsaffected"></a> 4.2.5.4.5 `rowsAffected`
+###### <a name="execrowsaffected"></a> 4.2.6.4.5 `rowsAffected`
 
 ```
 Number rowsAffected
@@ -2230,7 +2535,320 @@ the number of rows affected, for example the number of rows
 inserted. For non-DML statements such as queries, or if no rows are
 affected, then `rowsAffected` will appear as undefined.
 
-#### <a name="querystream"></a> 4.2.6 `connection.queryStream()`
+#### <a name="executemany"></a> 4.2.7 `connection.executeMany()`
+
+##### Prototype
+
+Callback:
+```
+executeMany(String sql, Array binds, [Object options], function(Error error, [Object result]) {});
+```
+Promise:
+```
+promise = executeMany(String sql, Array binds, [Object options]);
+```
+
+##### Description
+
+This method allows sets of data values to be bound to one DML or
+PL/SQL statement for execution.  It is like calling
+[`connection.execute()`](#execute) multiple times but requires fewer
+round-trips.  This is an efficient way to handle batch changes, for
+example when inserting or updating multiple rows.  The method cannot
+be used for queries.
+
+The `executeMany()` method supports IN, IN OUT and OUT binds for most
+data types except [PL/SQL Collection Associative
+Arrays](#plsqlindexbybinds).
+
+See [Batch Statement Execution](#batchexecution) for more information.
+
+This method was added in node-oracledb 2.2.
+
+##### <a name="executemanysqlparam"></a> 4.2.6.1 `executeMany()`: SQL Statement
+
+```
+String sql
+```
+
+The SQL or PL/SQL statement that `executeMany()` executes.  The
+statement should contain bind variable names.
+
+##### <a name="executemanybinds"></a> 4.2.7.2 `executeMany()`: Binds
+
+The `binds` parameter contains the values or variables to be bound to
+the executed statement.  It must be an array of arrays (for 'bind by
+position') or an array of objects whose keys match the bind variable
+names in the SQL statement (for 'bind by name').  Each sub-array or
+sub-object should contain values for the bind variables used in the
+SQL statement.  At least one such record must be specified.
+
+If a record contains fewer values than expected, NULL values will be
+used.  For bind by position, empty values can be specified using
+syntax like `[a,,c,d]`.
+
+By default, the direction of binds is `oracledb.BIND_IN`.  The first
+data record determines the number of bind variables, each bind
+variable's data type, and its name (when binding by name).  If a
+variable in the first record contains a null, this value is ignored
+and a subsequent record is used to determine that variable's
+characteristics.  If all values in all records for a particular bind
+variable are null, the type of that bind is `oracledb.STRING` with a
+maximum size of 1.
+
+The maximum sizes of strings and buffers are determined by scanning
+all records in the bind data.
+
+If a [`bindDefs`](#executemanyoptbinddefs) property is used, no data
+scanning occurs.  This property explicitly specifies the
+characteristics of each bind variable.
+
+##### <a name="executemanyoptions"></a> 4.2.7.3 `executeMany()`: Options
+
+The `options` parameter is optional.  It can contain the following
+properties.
+
+###### <a name="executemanyoptautocommit"></a> 4.2.7.3.1 `autoCommit`
+
+```
+Boolean autoCommit
+```
+
+This optional property overrides
+[`oracledb.autoCommit`](#propdbisautocommit).
+
+Note [`batchErrors`](#executemanyoptbatcherrors) can affect autocommit
+mode.
+
+###### <a name="executemanyoptbatcherrors"></a> 4.2.7.3.2 `batchErrors`
+
+```
+Boolean batchErrors
+```
+
+This optional property allows invalid data records to be rejected
+while still letting valid data be processed.  It can only be set
+*true* for INSERT, UPDATE, DELETE or MERGE statements.
+
+When *false*, the `executeMany()` call will stop when the first error
+occurs.  The callback [error object](#errorobj) will be set.
+
+When `batchErrors` is *true*, processing will continue even if there
+are data errors.  The `executeMany()` callback error parameter is not
+set.  Instead, an array containing each error will be returned in the
+callback `result` parameter.  All valid data records will be processed
+and a transaction will be started but not committed, even if
+`autoCommit` is *true*.  The application can examine the errors, take
+action, and explicitly commit or rollback as desired.
+
+Note that some classes of error will always return via the
+`executeMany()` callback error object, not as batch errors.  No
+transaction is created in this case.
+
+The default value is *false*.
+
+###### <a name="executemanyoptbinddefs"></a> 4.2.7.3.3 `bindDefs`
+
+```
+Object bindDefs
+```
+
+The `bindDefs` object defines the bind variable types, sizes and
+directions.  This object is optional in some cases but it is more
+efficient to set it.
+
+It should be an array or an object, depending on the structure of the
+[`binds parameter`](#executemanybinds).
+
+Each value in the `bindDefs` array or object should be an object
+containing the keys `dir`, `maxSize`, and `type` for each bind
+variable, similar to how [`execute() bind
+parameters`](#executebindParams) are identified.
+
+BindDef Property | Description
+---------------|------------
+`dir` | The direction of the bind.  One of the [Execute Bind Direction Constants](#oracledbconstantsbinddir) `oracledb.BIND_IN`, `oracledb.BIND_INOUT`  or `oracledb.BIND_OUT`.  The default is `oracledb.BIND_IN`.
+`maxSize` | Required for Strings and Buffers.  Ignored for other types.  Specifies the maximum number of bytes allocated when processing each value of this bind variable.  When data is being passed into the database, `maxSize` should be at least the size of the longest value.  When data is being returned from the database, `maxSize` should be the size of the longest value.  If `maxSize` is too small, `executeMany()` will throw an error that is not handled by [`batchErrors`](#executemanyoptbatcherrors).
+`type` | The node-oracledb or JavaScript data type to be bound.  One of the [Node-oracledb Type Constants](#oracledbconstantsnodbtype) `oracledb.BLOB`, `oracledb.BUFFER`, `oracledb.CLOB`, `oracledb.CURSOR`, `oracledb.DATE`, `oracledb.NUMBER`, or `oracledb.STRING`.
+
+###### <a name="executemanyoptdmlrowcounts"></a> 4.2.7.3.4 `dmlRowCounts`
+
+```
+Boolean dmlRowCounts
+```
+
+When *true*, this optional property enables output of the number of
+rows affected by each input data record.  It can only be set *true*
+for INSERT, UPDATE, DELETE or MERGE statements.
+
+The default value is *false*.
+
+This feature works when node-oracledb is using version 12, or later,
+of the Oracle client library.
+
+##### <a name="executemanycallback"></a> 4.2.7.4 `executeMany()`: Callback Function
+
+###### <a name="execmanybatcherrors"></a> 4.2.7.4.1 `batchErrors`
+
+```
+Array batchErrors
+```
+
+This property is an array of [error objects](#errorobj) that were
+reported during execution.  The `offset` property of each error object
+corresponds to the 0-based index of the `executeMany()` [binds
+parameter](#executemanybinds) array, indicating which record could not
+be processed.
+
+It will be present only if [`batchErrors`](#executemanyoptbatcherrors)
+was *true* in the [`executeMany()` options](#executemanyoptions)
+parameter and there are data errors to report.  Some classes of
+execution error will always return via the `executeMany()` callback
+error object, not in `batchErrors`.
+
+###### <a name="execmanydmlrowscounts"></a> 4.2.7.4.2 `dmlRowCounts`
+
+```
+Array dmlRowCounts
+```
+
+This is an array of integers identifying the number of rows affected
+by each record of the [binds parameter](#executemanybinds). It is
+present only if [`dmlRowCounts`](#executemanyoptdmlrowcounts) was
+*true* in the [`executeMany()` options](#executemanyoptions) parameter
+and a DML statement was executed.
+
+###### <a name="execmanyoutbinds"></a> 4.2.7.4.3 `outBinds`
+
+```
+Object outBinds
+```
+
+This contains the value of any returned IN OUT or OUT binds.  It is an
+array of arrays, or an array of objects, depending on the [`binds
+parameters`](#executemanybinds) structure.  The length of the array
+will correspond to the length of the array passed as the [binds
+parameter](#executemanybinds).  It will be present only if there is at
+least one OUT bind variable identified.
+
+###### <a name="execmanyrowsaffected"></a> 4.2.7.4.4 `rowsAffected`
+
+```
+Number rowsAffected
+```
+
+This is an integer identifying the total number of database rows
+affected by the processing of all records of the [binds
+parameter](#executemanybinds).  It is only present if a DML statement
+was executed.
+
+#### <a name="getstmtinfo"></a> 4.2.8 `connection.getStatementInfo()`
+
+##### Prototype
+
+Callback:
+```
+getStatementInfo(String sql, function(Error error, [Object information]){});
+```
+Promise:
+```
+promise = getStatementInfo(String sql);
+```
+
+##### Description
+
+Parses a SQL statement and returns information about it.  This is most
+useful for finding column names of queries, and for finding the names
+of bind variables used.
+
+This method performs a round-trip to the database, so unnecessary
+calls should be avoided.
+
+The information is provided by lower level APIs that have some
+limitations.  Some uncommon statements will return the statement type
+as `oracledb.STMT_TYPE_UNKNOWN`.  DDL statements are not parsed, so
+syntax errors in them will not be reported.  The direction and types
+of bind variables cannot be determined.
+
+This method was added in node-oracledb 2.2.
+
+##### Parameters
+
+```
+String sql
+```
+
+The SQL statement to parse.
+
+```
+function(Error error, [Object information])
+```
+
+The parameters of the callback function are:
+
+Callback function parameter | Description
+----------------------------|-------------
+*Error error* | If `getStatementInfo()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+*Object information* | The `information` object, described below.
+
+Depending on the statement type, the `information` object may contain:
+
+- `bindNames`: an array of strings corresponding to the unique names
+  of the bind variables used in the SQL statement.
+
+- `metaData`: containing properties equivalent to those given by
+  `execute()` [extendedMetaData](#execmetadata).  This property exists
+  only for queries.
+
+- `statementType`: an integer corresponding to one of the [SQL
+  Statement Type Constants](#oracledbconstantsstmttype).
+
+
+#### <a name="connectionping"></a> 4.2.9 `connection.ping()`
+
+##### Prototype
+
+Callback:
+```
+ping(function(Error error){});
+```
+Promise:
+```
+promise = ping();
+```
+
+##### Description
+
+This method checks that a connection is currently usable and the
+network to the database is valid.  This call can be useful for system
+health checks.  A ping only confirms that a single connection is
+usable at the time of the ping.
+
+Pinging doesn't replace error checking during statement execution,
+since network or database failure may occur in the interval between
+`ping()` and `execute()` calls.
+
+Pinging requires a round-trip to the database so unnecessary ping
+calls should be avoided.
+
+If `ping()` returns an error, the application should close the
+connection.
+
+This method was added in node-oracledb 2.2.
+
+##### Parameters
+
+```
+function(Error error)
+```
+
+The parameters of the callback function are:
+
+Callback function parameter | Description
+----------------------------|-------------
+*Error error* | If `ping()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+
+#### <a name="querystream"></a> 4.2.10 `connection.queryStream()`
 
 ##### Prototype
 
@@ -2252,8 +2870,6 @@ Each row is returned as a `data` event.  Query metadata is available
 via a `metadata` event.  The `end` event indicates the end of the
 query results.
 
-Query results must be fetched to completion to avoid resource leaks.
-
 The connection must remain open until the stream is completely read.
 
 For tuning, adjust the value of
@@ -2262,15 +2878,20 @@ option [`fetchArraySize`](#propexecfetcharraysize).
 
 See [Query Streaming](#streamingresults) for more information.
 
+Support for Node.js version 8 Stream `destroy()` method was added in
+node-oracledb 2.1.
+
+This method was added in node-oracledb 1.8.
+
 ##### Parameters
 
 See [execute()](#execute).
 
-#### <a name="release"></a> 4.2.7 `connection.release()`
+#### <a name="release"></a> 4.2.11 `connection.release()`
 
 An alias for [connection.close()](#connectionclose).
 
-#### <a name="rollback"></a> 4.2.8 `connection.rollback()`
+#### <a name="rollback"></a> 4.2.12 `connection.rollback()`
 
 ##### Prototype
 
@@ -2576,6 +3197,9 @@ before `pool.close()` is called.
 
 If the pool is in the [connection pool cache](#connpoolcache) it will be removed from the cache.
 
+This method was added to node-oracledb 1.9, replacing the equivalent
+alias `pool.terminate()`.
+
 ##### Parameters
 
 ```
@@ -2768,11 +3392,16 @@ method may be easier to use.
 To change the behavior of `toQueryStream()`, such as setting the
 [query output Format](#queryoutputformats) or the internal buffer size
 for performance, adjust global attributes such as
-[oracledb.outFormat](#propdboutformat) and
+[`oracledb.outFormat`](#propdboutformat) and
 [`oracledb.fetchArraySize`](#propdbfetcharraysize) before calling
 [`execute()`](#execute).
 
 See [Query Streaming](#streamingresults) for more information.
+
+The `toQueryStream()` method was added in node-oracledb 1.9.  Support
+for Node.js version 8 Stream `destroy()` method was added in node-oracledb 2.1.
+
+## <a name="usermanual"></a> NODE-ORACLEDB USER MANUAL
 
 ## <a name="connectionhandling"></a> 8. Connection Handling
 
@@ -2790,15 +3419,13 @@ oracledb.getConnection(
     password      : "welcome",
     connectString : "localhost/XE"
   },
-  function(err, connection)
-  {
+  function(err, connection) {
     if (err) { console.error(err.message); return; }
 
     . . .  // use connection
 
     connection.close(
-      function(err)
-      {
+      function(err) {
         if (err) { console.error(err.message); }
       });
   });
@@ -3057,11 +3684,9 @@ oracledb.createPool (
     password      : "welcome"
     connectString : "localhost/XE"
   },
-  function(err, pool)
-  {
+  function(err, pool) {
     pool.getConnection (
-      function(err, connection)
-      {
+      function(err, connection) {
       . . .  // use connection
       });
   });
@@ -3072,8 +3697,7 @@ longer needed:
 
 ```javascript
     connection.close(
-      function(err)
-      {
+      function(err) {
         if (err) { console.error(err.message); }
       });
 ```
@@ -3282,14 +3906,13 @@ To enable recording of queue statistics:
 ```javascript
 oracledb.createPool (
   {
-    queueRequests : true,  // default is true
+    queueRequests : true,   // default is true
     _enableStats  : true,   // default is false
     user          : "hr",
     password      : "welcome",
     connectString : "localhost/XE"
   },
-  function(err, pool)
-  {
+  function(err, pool) {
   . . .
 ```
 
@@ -3368,11 +3991,11 @@ return a connection from the pool but an error will occur when the
 application later uses the connection.
 
 Note that explicit pinging is unnecessary and is not performed when
-node-oracledb is built with version 12.2 of the underlying Oracle
-client library.  This has its own lightweight, always-enabled
-connection check.  It will return a valid connection to the
-node-oracledb driver, which in turn returns it via `getConnection()`.
-The value of `poolPingInterval` is ignored.
+node-oracledb is using version 12.2 of the Oracle client library.
+This has its own lightweight, always-enabled connection check.  It
+will return a valid connection to the node-oracledb driver, which in
+turn returns it via `getConnection()`.  The value of
+`poolPingInterval` is ignored.
 
 With Oracle client 12.1 and earlier, when a
 pool [`getConnection()`](#getconnectionpool) is called and the
@@ -3412,6 +4035,9 @@ allows a valid connection to be opened by some subsequent
 
 You can tune `poolPingInterval` to meet your quality of service
 requirements.
+
+Explicit pings on any connection can be performed at any time with
+[`connection.ping()`](#connectionping).
 
 ### <a name="drcp"></a> 8.4 Database Resident Connection Pooling (DRCP)
 
@@ -3517,6 +4143,13 @@ oracledb.getConnection(
 );
 ```
 
+Note that if node-oracledb is using the Oracle client libraries
+located in the Oracle Database installation, i.e. is on the same
+machine as the database and is not using Oracle Instant Client, then
+operating system privileges may be used for authentication.  In this
+case the password value is ignored.  For example on Linux, membership
+of the operating system [`dba`][96] group allows `SYSDBA` connections.
+
 Administrative privileges can allow access to a database instance even
 when the database is not open.  Control of these privileges is totally
 outside of the database itself.  Care must be taken with
@@ -3589,7 +4222,79 @@ manual also contains information about other important security
 features that Oracle Database provides, such Transparent Data
 Encryption of data-at-rest in the database.
 
-### <a name="connectionha"></a> 8.8 Connections and High Availability
+### <a name="changingpassword"></a> 8.8 Changing Passwords and Connecting with an Expired Password
+
+#### Changing Passwords
+
+Database passwords can be changed with
+[`connection.changePassword()`](#changepassword).  For example, the HR
+user can change their password from 'welcome' to 'steamboat':
+
+```javascript
+oracledb.getConnection(
+  {
+    user          : "hr",
+    password      : "welcome",
+    connectString : "localhost/orclpdb"
+  },
+  function(err, connection) {
+    if (err) { console.error(err.message); return; }
+
+    connection.changePassword(
+        'hr', 'welcome', 'steamboat',
+        function(err) {
+        . . .
+        });
+    . . .
+```
+
+Only DBAs, or users with the ALTER USER privilege, can change the
+password of another user.  In this case, the old password value is
+ignored and can be an empty string:
+
+```javascript
+oracledb.getConnection(
+  {
+    user          : "system",   // a privileged user
+    password      : "secret",
+    connectString : "localhost/orclpdb"
+  },
+  function(err, connection) {
+    if (err) { console.error(err.message); return; }
+
+    connection.changePassword(
+        'hr', '', 'steamboat',  // change HR's password to 'steamboat'
+        function(err) {
+        . . .
+        });
+    . . .
+```
+
+#### Connecting with an Expired Password
+
+When creating a standalone, non-pooled connection the user's password
+can be changed at time of connection.  This is most useful when the
+user's password has expired, because it allows a user to connect
+without requiring a DBA to reset their password.
+
+Both the current and new passwords must be given when connecting.  For
+example, if HR's password is 'welcome', it can be changed to
+'steamboat' like:
+
+```javascript
+oracledb.getConnection(
+  {
+    user          : "hr",
+    password      : "welcome",
+    newPassword   : "steamboat",
+    connectString : "localhost/orclpdb"
+  },
+  function(err, connection) {
+    if (err) { console.error(err.message); return; }
+  . . .
+```
+
+### <a name="connectionha"></a> 8.9 Connections and High Availability
 
 For applications that need to be highly available, you may want to
 configure your OS network settings and Oracle Net (which handles
@@ -3606,12 +4311,61 @@ setting [`ENABLE=BROKEN`][36].
 Other [Oracle Network Services][37] options may also be useful for
 high availability and performance tuning.
 
-### <a name="tnsadmin"></a> 8.9 Optional Client Configuration Files
+#### <a name="connectionfan"></a> 8.9.1 Fast Application Notification (FAN)
+
+Users of [Oracle Database FAN][64] should set
+[`oracledb.events`](#propdbevents) to *true*.  This can also be
+enabled via [External Configuration](#oraaccess).
+
+FAN support gives fast connection failover, an Oracle Database high
+availability feature.  This allows applications to be notified when a
+database machine becomes unavailable.  Without FAN, node-oracledb can
+hang until a TCP timeout occurs and an error is returned, which might
+be several minutes.  Enabling FAN in node-oracledb can allow
+applications to detect errors, re-connect to an available database
+instance, and replay application logic without the application user
+being aware of an outage.  It is up to the application to handle
+errors and take desired action.
+
+FAN benefits users of Oracle Database's clustering technology ([Oracle
+RAC][93]) because connections to surviving database instances can be
+immediately made.  Users of Oracle's Data Guard with a broker will see
+the FAN events generated when the standby database goes online.
+Standalone databases will send FAN events when the database restarts.
+
+For active connections, when a machine or database instance becomes
+unavailable, a connection failure error will be returned by the
+node-oracledb method currently being called.  On a subsequent
+re-connect, a connection to a surviving database instance will be
+established.  Node-oracledb also transparently cleans up any idle
+connections affected by a database machine or instance failure so
+future connect calls will establish a fresh connection without the
+application being aware of any service disruption.
+
+For a more information on FAN see the [whitepaper on Fast Application
+Notification][97].
+
+
+#### <a name="connectionrlb"></a> 8.9.2 Runtime Load Balancing (RLB)
+
+[Oracle Database RAC][93] users with [Oracle Database (RLB)][65]
+advisory events configured should use node-oracledb [Connection
+Pooling](#connpooling) and set [`oracledb.events`](#propdbevents) to
+*true*.  The events mode can also be enabled via [External
+Configuration](#oraaccess).
+
+RLB allows optimal use of database resources by balancing database
+requests across RAC instances.
+
+For a more information on RLB, see the [whitepaper on Fast Application
+Notification][97].
+
+### <a name="tnsadmin"></a> 8.10 Optional Client Configuration Files
 
 Optional Oracle Client configuration files are read when node-oracledb
 is loaded.  These files affect connections and applications.  Common
 files include `tnsnames.ora`, `sqlnet.ora`, `ldap.ora`, and
-`oraaccess.xml`.
+[`oraaccess.xml`](#oraaccess).
 
 Default locations for these files include:
 
@@ -3677,8 +4431,7 @@ property:
        WHERE department_id = :did`,
       [180],
       { maxRows: 10 },  // a maximum of 10 rows will be returned
-      function(err, result)
-      {
+      function(err, result) {
         if (err) { console.error(err.message); return; }
         console.log(result.rows);  // print all returned rows
       });
@@ -3755,18 +4508,15 @@ connection.execute(
   "SELECT employee_id, last_name FROM employees ORDER BY employee_id",
   [], // no bind variables
   { resultSet: true }, // return a Result Set.  Default is false
-  function(err, result)
-  {
+  function(err, result) {
     if (err) { . . . }
     fetchOneRowFromRS(connection, result.resultSet);
   });
 });
 
-function fetchOneRowFromRS(connection, resultSet)
-{
+function fetchOneRowFromRS(connection, resultSet) {
   resultSet.getRow( // get one row
-    function (err, row)
-    {
+    function (err, row) {
       if (err) {
          . . .           // close the Result Set and release the connection
       } else if (!row) { // no rows, or no more rows
@@ -3789,19 +4539,16 @@ connection.execute(
   "SELECT employee_id, last_name FROM employees ORDER BY employee_id",
   [], // no bind variables
   { resultSet: true }, // return a ResultSet.  Default is false
-  function(err, result)
-  {
+  function(err, result) {
     if (err) { . . . }
     fetchRowsFromRS(connection, result.resultSet, numRows);
   });
 });
 
-function fetchRowsFromRS(connection, resultSet, numRows)
-{
+function fetchRowsFromRS(connection, resultSet, numRows) {
   resultSet.getRows( // get numRows rows
     numRows,
-    function (err, rows)
-    {
+    function (err, rows) {
       if (err) {
          . . .                        // close the ResultSet and release the connection
       } else if (rows.length > 0) {   // got some rows
@@ -3840,7 +4587,8 @@ used to terminate a stream early.  For older Node.js versions use a
 query before retrieving all data.  Note the previous, experimental
 `_close()` method no longer emits a 'close' event.
 
-The connection must remain open until the stream is completely read.
+The connection must remain open until the stream is completely read
+and any returned [Lob](#lobclass) objects have been processed.
 
 The query stream implementation is a wrapper over the [ResultSet
 Class](#resultsetclass).  In particular, successive calls to
@@ -3897,8 +4645,7 @@ connection.execute(
    FROM departments
    WHERE manager_id < :id`,
   [110],  // bind value for :id
-  function(err, result)
-  {
+  function(err, result) {
     if (err) { console.error(err.message); return; }
     console.log(result.rows);
   });
@@ -3928,8 +4675,7 @@ connection.execute(
    WHERE manager_id < :id`,
   [110],  // bind value for :id
   { outFormat: oracledb.OBJECT },
-  function(err, result)
-  {
+  function(err, result) {
     if (err) { console.error(err.message); return; }
     console.log(result.rows);
   });
@@ -3960,8 +4706,7 @@ connection.execute(
    FROM departments
    WHERE manager_id < :id`,
   [110],  // bind value for :id
-  function(err, result)
-  {
+  function(err, result) {
     if (err) { console.error(err.message); return; }
     console.log(result.metaData);  // show the metadata
   });
@@ -3997,8 +4742,7 @@ connection.execute(
     "WHERE manager_id < :id",
   [110],  // bind value for :id
   { extendedMetaData: true },
-  function(err, result)
-  {
+  function(err, result) {
     if (err) { console.error(err.message); return; }
     console.log(result.metaData);  // show the extended metadata
   });
@@ -4122,7 +4866,7 @@ connection.execute(
 );
 ```
 
-To do this without requiring the overhead of a 'round trip' to execute
+To do this without requiring the overhead of a round-trip to execute
 the `ALTER` statement, you could use a PL/SQL trigger:
 
 ```sql
@@ -4175,8 +4919,7 @@ oracledb.getConnection(
     password      : "welcome",
     connectString : "localhost/XE"
   },
-  function(err, connection)
-  {
+  function(err, connection) {
     if (err) { console.error(err.message); return; }
     connection.execute(
       "SELECT last_name, hire_date, salary, commission_pct FROM employees WHERE employee_id = :id",
@@ -4188,8 +4931,7 @@ oracledb.getConnection(
           "COMMISSION_PCT": { type : oracledb.DEFAULT }  // override oracledb.fetchAsString and fetch as native type
         }
       },
-      function(err, result)
-      {
+      function(err, result) {
         if (err) { console.error(err.message); return; }
         console.log(result.rows);
       });
@@ -4512,9 +5254,8 @@ To get the automatically inserted identifier in node-oracledb, use a
 . . .
 connection.execute(
   "INSERT INTO mytable (mydata) VALUES ('Hello') RETURN myid INTO :id",
-  {id : {type: oracledb.NUMEBR, dir: oracledb.BIND_OUT } },
-  function (err, result)
-  {
+  {id : {type: oracledb.NUMBER, dir: oracledb.BIND_OUT } },
+  function (err, result) {
     if (err) { console.error(err.message); return; }
     console.log(result.outBinds.id);  // print the ID of the inserted row
   });
@@ -4534,14 +5275,14 @@ Here are things to do when you see an *ORA-1000*:
 
 - Avoid having too many incompletely processed statements open at one time:
 
-   - Make sure your application is handling connections and statements
-     in the order you expect.
+    - Make sure your application is handling connections and statements
+      in the order you expect.
 
-   - [Close ResultSets](#close) before releasing the connection.
+    - [Close ResultSets](#close) before releasing the connection.
 
-   - If cursors are opened with `DBMS_SQL.OPEN_CURSOR()` in a PL/SQL
-     block, close them before the block returns - except for REF
-     CURSORs being passed back to node-oracledb.
+    - If cursors are opened with `DBMS_SQL.OPEN_CURSOR()` in a PL/SQL
+      block, close them before the block returns - except for REF
+      CURSORs being passed back to node-oracledb.
 
 - Choose the appropriate Statement Cache size.  Node-oracledb has a
   statement cache per connection.  When node-oracledb internally
@@ -4621,8 +5362,7 @@ connection.execute(
     id:   159,
     name: { dir: oracledb.BIND_OUT, type: oracledb.STRING, maxSize: 40 },
   },
-  function (err, result)
-  {
+  function (err, result) {
     if (err) { console.error(err.message); return; }
     console.log(result.outBinds);
   });
@@ -4656,8 +5396,7 @@ can be called by using an OUT bind variable for the function return value:
 connection.execute(
   "BEGIN :ret := myfunc(); END;",
   { ret: { dir: oracledb.BIND_OUT, type: oracledb.STRING, maxSize: 40 } },
-  function (err, result)
-  {
+  function (err, result) {
     if (err) { console.error(err.message); return; }
     console.log(result.outBinds);
   });
@@ -4683,8 +5422,7 @@ connection.execute(
     id:   134,
     name: { dir: oracledb.BIND_OUT, type: oracledb.STRING, maxSize: 40 },
   },
-  function (err, result)
-  {
+  function (err, result) {
     if (err) { console.error(err.message); return; }
     console.log(result.outBinds);
   });
@@ -4774,6 +5512,149 @@ The query rows can be handled using a [ResultSet](#resultsethandling).
 
 Remember to first enable output using `DBMS_OUTPUT.ENABLE(NULL)`.
 
+### <a name="ebr"></a> 10.5 Edition-Based Redefinition
+
+The [Edition-Based Redefinition][98] (EBR) feature of Oracle Database allows
+multiple versions of views, synonyms, PL/SQL objects and SQL
+Translation profiles to be used concurrently.  Each items version is
+associated with an 'edition' which can be nominated at runtime by
+applications.  This lets database logic be updated and tested while
+production users are still accessing the original version.  Once every
+user has begun using the objects in the new edition, the old objects
+can be dropped.
+
+To choose the edition, node-oracledb applications can set
+[`oracledb.edition`](#propdbedition) globally, or specify a value
+when [`creating a pool`](#createpoolpoolattrsedition) or a
+[`standalone connection`](#getconnectiondbattrsedition).
+
+The example below shows how a PL/SQL function `DISCOUNT` can be
+created with two different implementations.  The initial procedure is
+created as normal in the SQL*Plus command line:
+
+```sql
+CONNECT nodedemo/welcome
+
+-- The default edition's DISCOUNT procedure
+
+CREATE OR REPLACE FUNCTION discount(price IN NUMBER) RETURN NUMBER
+AS
+ newprice NUMBER;
+BEGIN
+  newprice := price - 4;
+  IF (newprice < 1) THEN
+    newprice := 1;
+  END IF;
+  RETURN newprice;
+END;
+/
+```
+
+This initial implementation is in the default 'edition' `ora$base`, which
+is pre-created in new and upgraded databases.
+
+The user `nodedemo` can be given permission to create new 'editions':
+
+```sql
+CONNECT system/welcome
+
+GRANT CREATE ANY EDITION TO nodedemo;
+ALTER USER nodedemo ENABLE EDITIONS FORCE;
+```
+
+The next SQL*Plus script creates a new edition `e2`, and changes the
+current session to use it.  A new version of `DISCOUNT` is created
+under that edition:
+
+```sql
+CONNECT nodedemo/welcome
+
+CREATE EDITION e2;
+ALTER SESSION SET EDITION = e2;
+
+-- E2 edition's discount
+
+CREATE OR REPLACE FUNCTION discount(price IN NUMBER) RETURN NUMBER
+AS
+ newprice NUMBER;
+BEGIN
+  newprice := 0.75 * price;
+  RETURN newprice;
+END;
+/
+```
+
+There are now two implementations of the PL/SQL procedure `DISCOUNT`
+with the same prototype.  Applications can choose at runtime which
+implementation to use.  Here is a script that calls `DISCOUNT`:
+
+```javascript
+var oracledb = require('oracledb');
+
+oracledb.getConnection(
+  {
+    user: 'nodedemo',
+    password: 'welcome',
+    connectString: 'localhost/orclpdb'
+  },
+  function (err, connection) {
+    if (err) {
+      console.error(err.message);
+      return;
+    }
+    connection.execute(
+      `SELECT name, price, DISCOUNT(price) AS discountprice
+       FROM parts
+       ORDER BY id`,
+      [],
+      { outFormat: oracledb.OBJECT },
+      function(err, result) {
+        if (err) {
+          console.error(err.message);
+        } else {
+          console.log(result.rows);
+        }
+      });
+  }
+);
+```
+
+Since the code doesn't explicitly set `oracledb.edition` (or
+equivalent), then the first implementation of `DISCOUNT` in the
+default edition is used.  The output might be like:
+
+```
+[ { NAME: 'lamp', PRICE: 40, DISCOUNTPRICE: 36 },
+  { NAME: 'wire', PRICE: 10, DISCOUNTPRICE: 6 },
+  { NAME: 'switch', PRICE: 4, DISCOUNTPRICE: 1 } ]
+```
+
+If the connection uses edition `e2`, then the second implementation of
+`DISCOUNT` will be used:
+
+```javascript
+oracledb.getConnection(
+  {
+    user: 'nodedemo',
+    password: 'welcome',
+    connectString: 'localhost/orclpdb',
+    edition: 'e2'
+  },
+  . . . // same code as before
+```
+
+The output might be like:
+
+```
+[ { NAME: 'lamp', PRICE: 40, DISCOUNTPRICE: 30 },
+  { NAME: 'wire', PRICE: 10, DISCOUNTPRICE: 7.5 },
+  { NAME: 'switch', PRICE: 4, DISCOUNTPRICE: 3 } ]
+
+```
+
+See the Database Development Guide chapter [Using Edition-Based
+Redefinition][98] for more information about EBR.
+
 ## <a name="lobhandling"></a> 11. Working with CLOB and BLOB Data
 
 Oracle Database uses LOB data types to store long objects. The CLOB
@@ -4812,8 +5693,7 @@ conn.execute(
   "INSERT INTO mylobs (id, myclobcol) VALUES (:idbv, :cbv)",
   { idbv: 1,
     cbv: str },  // type and direction are optional for IN binds
-  function(err, result)
-  {
+  function(err, result) {
     if (err)
       console.error(err.message);
     else
@@ -4849,8 +5729,7 @@ conn.execute(
   { id: 20,
     c: bigStr,    // type and direction are optional for IN binds
     b: bigBuf } },
-  function (err)
-  {
+  function (err) {
     if (err) { return cb(err, conn); }
     console.log("Completed");
     return cb(null, conn);
@@ -4895,8 +5774,7 @@ conn.execute(
   "SELECT c FROM mylobs WHERE id = 1",
   [ ], // no binds
   { fetchInfo: {"C": {type: oracledb.STRING}} },
-  function(err, result)
-  {
+  function(err, result) {
     if (err) { console.error(err.message); return; }
     if (result.rows.length === 0) {
       console.error("No results");
@@ -4934,13 +5812,11 @@ conn.execute(
   "SELECT b FROM mylobs WHERE id = 2",
   [ ], // no binds
   { fetchInfo: {"B": {type: oracledb.BUFFER}} },
-  function(err, result)
-  {
+  function(err, result) {
     if (err) { console.error(err.message); return; }
     if (result.rows.length === 0) {
       console.error("No results");
-    }
-    else {
+    } else {
       var blob = result.rows[0][0];
       console.log(blob.toString());  // assuming printable characters
     }
@@ -4959,8 +5835,7 @@ conn.execute(
   { id: 20,
     c: {type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 50000},
     b: {type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: 50000} },
-  function (err, result)
-  {
+  function (err, result) {
     if (err) { return cb(err, conn); }
 
     var str = result.outBinds.c;  // a String
@@ -5124,8 +5999,7 @@ can be called to get a Lob `clob` like:
 ```javascript
 conn.execute(
   "SELECT c FROM mylobs WHERE id = 1",
-  function(err, result)
-  {
+  function(err, result) {
     if (err) {
       return cb(err);
     }
@@ -5154,8 +6028,7 @@ conn.execute(
   { id: 1,
     c: {type: oracledb.CLOB, dir: oracledb.BIND_OUT},
     b: {type: oracledb.BLOB, dir: oracledb.BIND_OUT} },
-  function(err, result)
-  {
+  function(err, result) {
     if (err) {
       return cb(err, conn);
     }
@@ -5280,8 +6153,7 @@ conn.execute(
   "BEGIN lobs_in(:id, :c, null); END;",
   { id: 3,
     c: templob }, // type and direction are optional for IN binds
-  function(err)
-  {
+  function(err) {
     if (err) { return cb(err); }
     console.log("Call completed");
     return cb(null, conn, templob);
@@ -5313,9 +6185,9 @@ Persistent or temporary Lobs returned from the database should be
 closed with `lob.close()` unless they have been automatically closed.
 Automatic closing of returned Lobs occurs when:
 
-  - streaming has completed
-  - a stream error occurs
-  - the Lob was used as the source for an IN OUT bind
+- streaming has completed
+- a stream error occurs
+- the Lob was used as the source for an IN OUT bind
 
 If you try to close a Lob being used for streaming you will get the
 error *NJS-023: concurrent operations on a Lob are not allowed*.
@@ -5341,17 +6213,17 @@ As an example, the following table has a `PO_DOCUMENT` column that is
 enforced to be JSON:
 
 ```sql
-CREATE TABLE po (po_document VARCHAR2(4000) CHECK (po_document IS JSON));
+CREATE TABLE j_purchaseorder (po_document VARCHAR2(4000) CHECK (po_document IS JSON));
 ```
 
 To insert data using node-oracledb:
 
 ```javascript
-var data = { customerId: 100, item: 1234, quantity: 2 };
+var data = { "userId": 1, "userName": "Chris", "location": "Australia" };
 var s = JSON.stringify(data);  // change JavaScript value to a JSON string
 
 connection.execute(
-  "INSERT INTO po (po_document) VALUES (:bv)",
+  "INSERT INTO j_purchaseorder (po_document) VALUES (:bv)",
   [s]  // bind the JSON string
   function (err) {
   . . .
@@ -5365,19 +6237,25 @@ and array ranges.  An example is `$.friends` which is the value of
 JSON field `friends`.
 
 Oracle provides SQL functions and conditions to create, query, and
-operate on JSON data stored in the database.  An example is the Oracle
-SQL Function `JSON_TABLE` which projects JSON data to a relational
-format effectively making it usable like an inline relational view.
-Another example is `JSON_EXISTS` which tests for the existence of a
-particular value within some JSON data:
+operate on JSON data stored in the database.
 
-This example looks for JSON entries that have a `quantity` field:
+For example, `j_purchaseorder` can be queried with:
+
+```
+"SELECT po.po_document.location FROM j_purchaseorder po"
+```
+
+With the earlier JSON inserted into the table, the queried value would
+be `Australia`.
+
+The `JSON_EXISTS` tests for the existence of a particular value within
+some JSON data.  To look for JSON entries that have a `quantity`
+field:
 
 ```JavaScript
 conn.execute(
-  "SELECT po_document FROM po WHERE JSON_EXISTS (po_document, '$.quantity')",
-  function(err, result)
-  {
+  "SELECT po_document FROM j_purchaseorder WHERE JSON_EXISTS (po_document, '$.location')",
+  function(err, result) {
     if (err) {
       . . .
     } else {
@@ -5387,10 +6265,10 @@ conn.execute(
   });
 ```
 
-After the previous `INSERT` example, this query would display:
+This query would display:
 
 ```
-{ customerId: 100, item: 1234, quantity: 2 }
+{ userId: 1, userName: 'Chris', location: 'Australia' }
 ```
 
 In Oracle Database 12.2 the [`JSON_OBJECT` ][54] function is a great
@@ -5402,8 +6280,7 @@ conn.execute(
   FROM departments d
   WHERE department_id < :did`,
   [50],
-  function(err, result)
-  {
+  function(err, result) {
     if (err) { console.error(err.message); return; }
     for (var i = 0; i < result.rows.length; i++)
       console.log(result.rows[i][0]);
@@ -5497,6 +6374,10 @@ statement.
 Bind variables cannot be used in [DDL][15] statements, for example
 `CREATE TABLE` or `ALTER` commands.
 
+Sets of values can bound for use in
+[`connection.executeMany()`](#executemany), see [Batch Statement
+Execution](#batchexecution).
+
 ### <a name="inbind"></a> 14.1 IN Bind Parameters
 
 For IN binds, a data value is passed into the database and substituted
@@ -5521,8 +6402,7 @@ connection.execute(
     country_id: { dir: oracledb.BIND_IN, val: 90, type: oracledb.NUMBER },
     country_name: { dir: oracledb.BIND_IN, val: "Tonga", type:oracledb.STRING }
   },
-  function(err, result)
-  {
+  function(err, result) {
     if (err)
       console.error(err.message);
     else
@@ -5552,8 +6432,7 @@ omitted for IN binds.  Binds can be like:
 connection.execute(
   "INSERT INTO countries VALUES (:country_id, :country_name)",
   {country_id: 90, country_name: "Tonga"},
-  function(err, result)
-  {
+  function(err, result) {
     if (err)
       console.error(err.message);
     else
@@ -5653,7 +6532,7 @@ and [`maxSize`](#executebindParams) properties is used:
   explicitly set to `oracledb.STRING`, `oracledb.NUMBER`,
   `oracledb.DATE`, `oracledb.BLOB`, `oracledb.CLOB` or
   `oracledb.BUFFER`, matching the data type of the Node.js value or
-  variable.  The output data type will always be the same as the the
+  variable.  The output data type will always be the same as the
   input data type.
 
   For `oracledb.BIND_OUT` parameters the `type` attribute will be the
@@ -5663,7 +6542,15 @@ and [`maxSize`](#executebindParams) properties is used:
   `oracledb.CLOB`.  If `type` is not specified for OUT binds then
   `oracledb.STRING` is assumed.
 
-  Oracle Database RAW, LONG RAW or BLOB data can be bound with a
+  Oracle Database CLOB data can be bound with a `type` of
+  `oracledb.STRING` to return a Node.js String, or as `type` of
+  `oracledb.CLOB` to return a [Lob instance](#lobclass).
+
+  Oracle Database BLOB data can be bound with a `type` of
+  `oracledb.BUFFER` to return a Node.js Buffer, or as `type` of
+  `oracledb.BLOB` to return a [Lob instance](#lobclass).
+
+  Oracle Database RAW and LONG RAW data can be bound with a
   `type` of `oracledb.BUFFER` to return a Node.js Buffer.
 
   Oracle Database LONG, ROWID and UROWID data can be bound with a
@@ -5690,32 +6577,8 @@ a [`maxArraySize`](#executebindParams) property is also required
 The [`results`](#executecallback) parameter of the `execute()`
 callback contains an [`outBinds`](#execoutbinds) property with the
 returned OUT and IN OUT bind values.
-If [`bindParams`](#executebindParams) was passed as an array, then
-`outBinds` is returned as an array, with the same order as the binds
-in the statement.  If `bindParams` was passed as an object, then
-`outBinds` is returned as an object.
 
-Here is an example program showing the use of binds:
-
-```javascript
-var oracledb = require('oracledb');
-. . .
-var bindVars = {
-  i:  'Chris', // default direction is BIND_IN. Data type is inferred from the data
-  io: { val: 'Jones', dir: oracledb.BIND_INOUT },
-  o:  { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
-}
-connection.execute(
-  "BEGIN testproc(:i, :io, :o); END;",
-  bindVars,
-  function (err, result)
-  {
-    if (err) { console.error(err.message); return; }
-    console.log(result.outBinds);
-  });
-```
-
-Given the creation of `TESTPROC` using:
+Given the creation of the PL/SQL procedure `TESTPROC`:
 
 ```sql
 CREATE OR REPLACE PROCEDURE testproc (
@@ -5729,13 +6592,40 @@ END;
 show errors
 ```
 
-The Node.js output would be:
+The procedure `TESTPROC` can be called with:
+
+```javascript
+var oracledb = require('oracledb');
+. . .
+var bindVars = {
+  i:  'Chris', // default direction is BIND_IN. Data type is inferred from the data
+  io: { val: 'Jones', dir: oracledb.BIND_INOUT },
+  o:  { dir: oracledb.BIND_OUT, type: oracledb.NUMBER },
+}
+connection.execute(
+  "BEGIN testproc(:i, :io, :o); END;",
+  bindVars,
+  function (err, result) {
+    if (err) { console.error(err.message); return; }
+    console.log(result.outBinds);
+  });
+```
+
+Since `bindParams` is passed as an object, the `outBinds` property is
+also an object.  The Node.js output is:
 
 ```
 { io: 'ChrisJones', o: 101 }
 ```
 
-An alternative to the 'bind by name' syntax is 'bind by array' syntax:
+PL/SQL allows named parameters in procedure and function calls.  This
+can be used in `execute()` like:
+
+```
+  "BEGIN testproc(p_in => :i, p_inout => :io, p_out => :o); END;",
+```
+
+An alternative to node-oracledb's 'bind by name' syntax is 'bind by array' syntax:
 
 ```javascript
 var bindVars = [
@@ -5743,6 +6633,14 @@ var bindVars = [
   { val: 'Jones', dir: oracledb.BIND_INOUT },
   { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
 ];
+```
+
+When [`bindParams`](#executebindParams) is passed as an array, then
+`outBinds` is returned as an array, with the same order as the OUT
+binds in the statement:
+
+```
+[ 'ChrisJones', 101 ]
 ```
 
 Mixing positional and named syntax is not supported.  The following
@@ -5804,8 +6702,7 @@ connection.execute(
     ids:   { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
     rids:  { type: oracledb.STRING, dir: oracledb.BIND_OUT }
   },
-  function(err, result)
-  {
+  function(err, result) {
     if (err) { console.error(err); return; }
     console.log(result.outBinds);
   });
@@ -5877,18 +6774,15 @@ var bindvars = {
 connection.execute(
   plsql,
   bindvars,
-  function(err, result)
-  {
+  function(err, result) {
     if (err) { . . . }
     fetchRowsFromRS(connection, result.outBinds.cursor, numRows);
   });
 
-function fetchRowsFromRS(connection, resultSet, numRows)
-{
+function fetchRowsFromRS(connection, resultSet, numRows) {
   resultSet.getRows( // get numRows rows
     numRows,
-    function (err, rows)
-    {
+    function (err, rows) {
       if (err) {
          . . .                        // close the ResultSet and release the connection
       } else if (rows.length > 0) {   // got some rows
@@ -5914,14 +6808,12 @@ from the previous examples, the code would become:
 connection.execute(
   plsql,
   bindvars,
-  function(err, result)
-  {
+  function(err, result) {
     if (err) { . . . }
     fetchRCFromStream(connection, result.outBinds.cursor);
   });
 
-function fetchRCFromStream(connection, cursor)
-{
+function fetchRCFromStream(connection, cursor) {
   var stream = cursor.toQueryStream();
 
   stream.on('error', function (error) {
@@ -6010,9 +6902,9 @@ handled automatically.  For SQL calls no temporary LOBs are used.
 Arrays of strings and numbers can be bound to PL/SQL IN, IN OUT, and
 OUT parameters of PL/SQL INDEX BY associative array type.  This type
 was formerly called PL/SQL tables or index-by tables.  This method of
-binding can be a very efficient way of transferring small data sets.
-Note PL/SQL's VARRAY and nested table collection types cannot be
-bound.
+binding can be a very efficient way of transferring small data sets to
+PL/SQL.  Note PL/SQL's VARRAY and nested table collection types cannot
+be bound.
 
 Given this table and PL/SQL package:
 
@@ -6227,7 +7119,263 @@ for really large numbers of items, you might prefer to use a global
 temporary table.  Some solutions are given in [On Cursors, SQL, and
 Analytics][59] and in [this StackOverflow answer][60].
 
-## <a name="transactionmgt"></a> 15. Transaction Management
+## <a name="batchexecution"></a> 15. Batch Statement Execution
+
+The [`connection.executeMany()`](#executemany) method allows many sets
+of data values to be bound to one DML or PL/SQL statement for
+execution.  It is like calling [`connection.execute()`](#execute)
+multiple times but requires fewer round-trips.  This is an efficient
+way to handle batch changes, for example when inserting or updating
+multiple rows.  The method cannot be used for queries.
+
+The `executeMany()` method supports IN, IN OUT and OUT binds for most
+data types except [PL/SQL Collection Associative
+Arrays](#plsqlindexbybinds).
+
+There are runnable examples in the GitHub [examples][3] directory.
+
+For example, to insert three records into the database:
+
+```javascript
+var sql = "INSERT INTO mytab VALUES (:a, :b)";
+
+var binds = [
+  { a: 1, b: "One" },
+  { a: 2, b: "Two" },
+  { a: 3, b: "Three" }
+];
+
+var options = {
+  autoCommit: true,
+  bindDefs: {
+    a: { type: oracledb.NUMBER },
+    b: { type: oracledb.STRING, maxSize: 5 }
+  } };
+
+connection.executeMany(sql, binds, options, function (err, result) {
+  if (err) {
+    console.error(err)
+  } else {
+    console.log(result);  // { rowsAffected: 3 }
+  }
+});
+```
+
+Strings and Buffers require a `maxSize` value in `bindDefs`.  It must
+be the length (or greater) of the longest data value.  For efficiency,
+keep the size as small as possible.
+
+The [`options`](#executemanyoptions) parameter is optional.
+
+If [`bindDefs`](#executemanyoptbinddefs) is not set, then the bind
+direction is assumed to be IN, and the [bind data](#executemanybinds)
+are used to determine the bind variable types, names and maximum
+sizes.  Using `bindDefs` is generally recommended because it removes
+the overhead of scanning all records.
+
+The bind definitions `bindDefs` can also use "bind by position"
+syntax, see the next examples.
+
+#### Identifying Affected Rows
+
+When executing a DML statement the number of database rows affected
+for each input record can be shown by setting
+[`dmlRowCounts`](#execmanydmlrowscounts).  For example when deleting
+rows:
+
+```javascript
+const sql = "DELETE FROM tab WHERE id = :1";
+
+const binds = [
+  [20],
+  [30],
+  [40]
+];
+
+const options = { dmlRowCounts: true };
+
+connection.executeMany(sql, binds, options, function (err, result) {
+  if (err) {
+    console.error(err)
+  } else {
+    console.log(result.dmlRowCounts);
+  }
+});
+```
+
+If the table originally contained three rows with id of 20, five rows
+with id of 30 and six rows with id of 40, then the output would be:
+
+```
+[ 3, 5, 6 ]
+```
+
+
+#### Handling Data Errors
+
+With large sets of data, it can be helpful not to abort processing on
+the first data error, but to continue processing and resolve the
+errors later.
+
+When [`batchErrors`](#executemanyoptbatcherrors) is *true*, processing
+will continue even if there are data errors in some records.  The
+`executeMany()` callback error parameter is not set.  Instead, an
+array containing each error will be returned in the callback `result`
+parameter.  All valid data records will be processed and a transaction
+will be started but not committed, even if `autoCommit` is *true*.
+The application can examine the errors, take action, and explicitly
+commit or rollback, as desired.
+
+For example:
+
+```
+var sql = "INSERT INTO childtab VALUES (:1, :2, :3)";
+
+var binds = [
+  [1016, 10, "Child 2 of Parent A"],
+  [1017, 10, "Child 3 of Parent A"],
+  [1018, 20, "Child 4 of Parent B"],
+  [1018, 20, "Child 4 of Parent B"],   // duplicate key
+  [1019, 30, "Child 3 of Parent C"],
+  [1020, 40, "Child 4 of Parent D"],
+  [1021, 75, "Child 1 of Parent F"],   // parent does not exist
+  [1022, 40, "Child 6 of Parent D"]
+];
+
+var options = {
+  autoCommit: true,
+  batchErrors: true,
+  bindDefs: [
+    { type: oracledb.NUMBER },
+    { type: oracledb.NUMBER },
+    { type: oracledb.STRING, maxSize: 20 }
+  ]
+};
+
+connection.executeMany(sql, binds, options, function (err, result) {
+  if (err) {
+    console.error(err)
+  } else {
+    console.log(result.batchErrors);
+  }
+});
+```
+
+The output is an array of [error objects](#errorobj) that were
+reported during execution.  The `offset` property corresponds to the
+0-based index of the `executeMany()` [binds
+parameter](#executemanybinds) array, indicating which record could
+not be processed:
+
+```
+   [ { Error: ORA-00001: unique constraint (CJ.CHILDTAB_PK) violated errorNum: 1, offset: 3 },
+     { Error: ORA-02291: integrity constraint (CJ.CHILDTAB_FK) violated - parent key not found errorNum: 2291, offset: 6 } ]
+```
+
+Note that some classes of error will always return via the
+`executeMany()` callback error object, not as batch errors.  No
+transaction is created in this case.  This includes errors where
+string or buffer data is larger than the specified
+[`maxSize`](#executemanyoptbinddefs) value.
+
+#### DML RETURNING
+
+Values can be returned with DML RETURNING syntax:
+
+```
+var sql = "INSERT INTO tab VALUES (:1) RETURNING ROWID INTO :2";
+
+var binds = [
+  ["One"],
+  ["Two"],
+  ["Three"]
+];
+
+var options = {
+  bindDefs: [
+    { type: oracledb.STRING, maxSize: 5 },
+    { type: oracledb.STRING, maxSize: 18, dir: oracledb.BIND_OUT  },
+  ]
+};
+
+connection.executeMany(sql, binds, options, function (err, result) {
+  if (err) {
+    console.error(err)
+  } else {
+    console.log(result.outBinds);
+  }
+});
+```
+
+Output is:
+
+```
+[ [ [ 'AAAmI9AAMAAAAnVAAA' ] ],
+  [ [ 'AAAmI9AAMAAAAnVAAB' ] ],
+  [ [ 'AAAmI9AAMAAAAnVAAC' ] ] ]
+```
+
+#### Calling PL/SQL
+
+The `executeMany()` method can be used to execute a PL/SQL statement
+multiple times with different input values.  For example, the
+following PL/SQL procedure:
+
+```sql
+CREATE PROCEDURE testproc (
+  a_num IN NUMBER,
+  a_outnum OUT NUMBER,
+  a_outstr OUT VARCHAR2)
+AS
+BEGIN
+  a_outnum := a_num * 2;
+  FOR i IN 1..a_num LOOP
+    a_outstr := a_outstr || 'X';
+  END LOOP;
+END;
+/
+```
+
+can be called like:
+
+```javascript
+var sql = "BEGIN testproc(:1, :2, :3); END;";
+
+// IN binds
+var binds = [
+  [1],
+  [2],
+  [3],
+  [4]
+];
+
+var options = {
+  bindDefs: [
+    { type: oracledb.NUMBER },
+    { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+    { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 20 }
+  ]
+};
+
+connection.executeMany(sql, binds, options, function (err, result) {
+  if (err) {
+    console.error(err)
+  } else {
+    console.log(result.outBinds);
+  }
+});
+```
+
+The returned bind values are:
+
+```
+[ [ 2, 'X' ],
+  [ 4, 'XX' ],
+  [ 6, 'XXX' ],
+  [ 8, 'XXXX' ] ]
+```
+
+## <a name="transactionmgt"></a> 16. Transaction Management
 
 By default, [DML][14] statements are not committed in node-oracledb.
 
@@ -6238,7 +7386,7 @@ control transactions.
 If the [`autoCommit`](#propdbisautocommit) flag is set to *true*,
 then a commit occurs at the end of each `execute()` call.  Unlike an
 explicit `commit()`, this does not require a round-trip to the
-database.  For maximum efficiency, set `autoCommit` to true for the
+database.  For maximum efficiency, set `autoCommit` to *true* for the
 last `execute()` call of a transaction in preference to using an
 additional, explicit `commit()` call.
 
@@ -6255,7 +7403,7 @@ will be rolled back.
 Note: Oracle Database will implicitly commit when a [DDL][15]
 statement is executed irrespective of the value of `autoCommit`.
 
-## <a name="stmtcache"></a> 16. Statement Caching
+## <a name="stmtcache"></a> 17. Statement Caching
 
 Node-oracledb's [`execute()`](#execute) and
 [`queryStream()`](#querystream) methods use the [Oracle Call Interface
@@ -6300,8 +7448,7 @@ oracledb.getConnection(
     connectString : "localhost/XE",
     stmtCacheSize : 40
   },
-  function(err, connection)
-  {
+  function(err, connection) {
     . . .
   });
 ```
@@ -6318,11 +7465,12 @@ latter statistic should benefit from not shipping statement metadata
 to node-oracledb.  Adjust the statement cache size to your
 satisfaction.
 
-## <a name="oraaccess"></a> 17. External Configuration
+## <a name="oraaccess"></a> 18. External Configuration
 
 The optional Oracle client-side configuration file [oraaccess.xml][63]
 can be used to configure some behaviors of node-oracledb.  See
-[Optional Client Configuration Files](#tnsadmin).
+[Optional Client Configuration Files](#tnsadmin) for information about
+file creation..
 
 An oraaccess.xml file is only used when node-oracledb is linked with
 Oracle Database 12c client libraries.
@@ -6359,13 +7507,13 @@ application is not feasible.
 
 The oraaccess.xml file has other uses including:
 
-- Turning on [Fast Application Notification][64] (FAN) events to enable FAN notifications and [Runtime Load Balancing][65] (RLB)
+- Turning on [Fast Application Notification (FAN)](#connectionfan) events to enable FAN notifications and [Runtime Load Balancing (RLB)](#connectionrlb).
 - Configuring [Client Result Caching][66] parameters
 - Turning on [Client Statement Cache Auto-tuning][67]
 
 Refer to the [oraaccess.xml documentation][63].
 
-## <a name="nls"></a> 18. Globalization and National Language Support (NLS)
+## <a name="nls"></a> 19. Globalization and National Language Support (NLS)
 
 Node-oracledb can use Oracle's [National Language Support (NLS)][68]
 to assist in globalizing applications.
@@ -6383,7 +7531,7 @@ globalization. Examples are `NLS_NUMERIC_CHARACTERS` (discussed in
 in [Fetching Numbers and Dates as String](#fetchasstringhandling)).
 Refer to [NLS Documentation][69] for others.
 
-## <a name="endtoend"></a> 19. End-to-end Tracing, Mid-tier Authentication, and Auditing
+## <a name="endtoend"></a> 20. End-to-end Tracing, Mid-tier Authentication, and Auditing
 
 The Connection properties [action](#propconnaction),
 [module](#propconnmodule), and [clientId](#propconnclientid) set
@@ -6404,7 +7552,7 @@ to identify and resolve unnecessary database resource usage, or
 improper access.
 
 The attributes are set on a [connection](#propdbconclass) object and
-sent to the database on the next 'round-trip' from node-oracledb, for
+sent to the database on the next round-trip from node-oracledb, for
 example, with `execute()`:
 
 ```javascript
@@ -6414,8 +7562,7 @@ oracledb.getConnection(
     password      : "welcome",
     connectString : "localhost/orclpdb"
   },
-  function(err, connection)
-  {
+  function(err, connection) {
     if (err) { console.error(err.message); return;    }
 
     connection.clientId = "Chris";
@@ -6423,8 +7570,7 @@ oracledb.getConnection(
     connection.action = "Query departments";
 
     connection.execute("SELECT . . .",
-      function(err, result)
-      {
+      function(err, result) {
         . . .
 ```
 
@@ -6486,19 +7632,18 @@ SQL> SELECT UNIQUE sid, client_driver
 
        SID CLIENT_DRIVER
 ---------- ------------------------------
-        16 node-oracledb : 2.1.0
-        33 node-oracledb : 2.1.0
+        16 node-oracledb : 2.2.0
+        33 node-oracledb : 2.2.0
 ```
 
 Note if [`oracledb.connectionClass`](#propdbconclass) is set for a
 non-pooled connection, the `CLIENT_DRIVER` value will not be set for
 that connection.
 
-## <a name="promiseoverview"></a> 20. Promises and node-oracledb
+## <a name="promiseoverview"></a> 21. Promises and node-oracledb
 
 Node-oracledb supports Promises with all asynchronous methods.  The native Promise
-implementation is used in Node.js 0.12 and greater.  Promise support is not
-enabled by default in Node.js 0.10.
+implementation is used.
 
 If an asynchronous method is invoked without a callback, it returns a
 Promise:
@@ -6591,11 +7736,10 @@ Unhandled Rejection at:  Promise {
 For more information, see [How to get, use, and close a DB connection
 using promises][73].
 
-### <a name="custompromises"></a> 20.1 Custom Promise Libraries
+### <a name="custompromises"></a> 21.1 Custom Promise Libraries
 
 The Promise implementation is designed to be overridden, allowing a
-custom Promise library to be used.  An external library can also be
-used to add Promise support to Node.js 0.10.
+custom Promise library to be used.
 
 ```javascript
 var mylib = require('myfavpromiseimplementation');
@@ -6608,35 +7752,7 @@ Promises can be completely disabled by setting
 oracledb.Promise = null;
 ```
 
-If your code uses the promise style in Node.js 0.10 but you have not
-installed your own promise library then you will get an error like:
-
-```
-$ node mypromiseapp.js
-
-node_modules/oracledb/lib/util.js:53
-    throw new Error(getErrorMessage(errorCode, messageArg1));
-          ^
-Error: NJS-009: invalid number of parameters
-    at Object.assert (node_modules/oracledb/lib/util.js:53:11)
-    at Oracledb.getConnection (node_modules/oracledb/lib/oracledb.js:71:12)
-    at Oracledb.getConnection (node_modules/oracledb/lib/util.js:72:19)
-    at Object.<anonymous> (mypromiseapp.js:8:10)
-    at Module._compile (module.js:456:26)
-    at Object.Module._extensions..js (module.js:474:10)
-    at Module.load (module.js:356:32)
-    at Function.Module._load (module.js:312:12)
-    at Function.Module.runMain (module.js:497:10)
-    at startup (node.js:119:16)
-```
-
-Because node-oracledb Promises support is not enabled by default when
-using Node.js 0.10, the callback API is expected.  The error stack trace
-indicates that line 10 of `mypromiseapp.js` forgot to pass the
-callback.  Either install your own Promise library or use the callback
-programming style.
-
-## <a name="asyncawaitoverview"></a> 21. Async/Await and node-oracledb
+## <a name="asyncawaitoverview"></a> 22. Async/Await and node-oracledb
 
 Node.js 7.6 supports async functions, also known as Async/Await.  These
 can be used with node-oracledb.  For example:
@@ -6694,12 +7810,27 @@ must be streamed since there is no Promisified interface for them.
 For more information, see [How to get, use, and close a DB connection
 using async functions][74].
 
-## <a name="bindtrace"></a> <a name="tracingsql"></a> 22. Tracing SQL and PL/SQL Statements
+## <a name="bindtrace"></a> <a name="tracingsql"></a> 23. Tracing SQL and PL/SQL Statements
+
+####  End-to-End Tracing
 
 Applications that have implemented [End-to-end Tracing](#endtoend)
 calls such as [action](#propconnaction) and [module](#propconnmodule),
 will make it easier in database monitoring tools to identify SQL
 statement execution.
+
+#### Tracing Executed Statements
+
+Database statement tracing is commonly used to identify performance
+issues.  Oracle Database trace files can be analyzed after statements
+are executed.  Tracing can be enabled in various ways at a database
+system or individal session level.  Refer to [Oracle Database Tuning
+documentation][95].  Setting a customer identifier is recommended to
+make searching for relevant log files easier:
+
+```
+ALTER SESSION SET tracefile_identifier='My-identifier' SQL_TRACE=TRUE
+```
 
 In node-oracledb itself, the [ODPI-C tracing capability][75] can be
 used to log executed statements to the standard error stream.  Before
@@ -6720,6 +7851,8 @@ identifier, a timestamp, and the SQL statement executed:
 ODPI [6905309] 2017-09-13 09:02:46.140: SQL select sysdate from dual where :b = 1
 ```
 
+#### Tracing Bind Values
+
 Sometimes it is useful to trace the bind data values that have been
 used when executing statements.  Several methods are available.
 
@@ -6730,11 +7863,13 @@ capture bind information.  Tracing with Oracle Database's
 You can also write your own wrapper around `execute()` and log any
 parameters.
 
+#### Other Tracing Utilities
+
 PL/SQL users may be interested in using [PL/Scope][78].
 
-## <a name="migrate"></a> 23. Migrating from Previous node-oracledb Releases
+## <a name="migrate"></a> 24. Migrating from Previous node-oracledb Releases
 
-### <a name="migratev1v2"></a> 23.1 Migrating from node-oracledb 1.13 to node-oracledb 2.0
+### <a name="migratev1v2"></a> 24.1 Migrating from node-oracledb 1.13 to node-oracledb 2.0
 
 When upgrading from node-oracledb version 1.13 to version 2.0:
 
@@ -6758,17 +7893,17 @@ When upgrading from node-oracledb version 1.13 to version 2.0:
   also replaces the overloaded use of `maxRows` for
   [`queryStream()`](#querystream).  To upgrade scripts:
 
-  - Replace the property `prefetchRows` with `fetchArraySize` and make
-    sure all values are greater than 0.
+    - Replace the property `prefetchRows` with `fetchArraySize` and make
+      sure all values are greater than 0.
 
-  - Tune `fetchArraySize` instead of `maxRows` for `queryStream()`.
+    - Tune `fetchArraySize` instead of `maxRows` for `queryStream()`.
 
-  - For [direct fetches](#fetchingrows), optionally tune
-    `fetchArraySize`.
+    - For [direct fetches](#fetchingrows), optionally tune
+      `fetchArraySize`.
 
-  - For [direct fetches](#fetchingrows), optionally replace enormously
-    over-sized `maxRows` values with 0, meaning an unlimited number of
-    rows can be returned.
+    - For [direct fetches](#fetchingrows), optionally replace enormously
+      over-sized `maxRows` values with 0, meaning an unlimited number of
+      rows can be returned.
 
 - For [direct fetches](#fetchingrows) that relied on the version 1
   default value of [`maxRows`](#propdbmaxrows) to limit the number of
@@ -6788,16 +7923,16 @@ When upgrading from node-oracledb version 1.13 to version 2.0:
 - Test applications to check if changes such as the improved property
   validation uncover latent problems in your code.
 
-### <a name="migratev20v21"></a> 23.2 Migrating from node-oracledb 2.0 to node-oracledb 2.1
+### <a name="migratev20v21"></a> 24.2 Migrating from node-oracledb 2.0 to node-oracledb 2.1
 
 When upgrading from node-oracledb version 2.0 to version 2.1:
 
 - If using the experimental `_close` method with [Query
   Streaming](#streamingresults) in Node 8 or later:
 
-  - Change the method name from `_close()` to [`destroy()`][92].
-  - Stop passing a callback.
-  - Optionally pass an error.
+    - Change the method name from `_close()` to [`destroy()`][92].
+    - Stop passing a callback.
+    - Optionally pass an error.
 
 
 [1]: https://www.npmjs.com/package/oracledb
@@ -6892,3 +8027,9 @@ When upgrading from node-oracledb version 2.0 to version 2.1:
 [90]: https://docs.oracle.com/en/database/oracle/oracle-database/12.2/admin/getting-started-with-database-administration.html#GUID-5F1E393E-97B8-43BC-BD68-3595251A6F7C
 [91]: https://www.youtube.com/watch?v=WDJacg0NuLo
 [92]: https://nodejs.org/api/stream.html#stream_readable_destroy_error
+[93]: https://docs.oracle.com/en/database/oracle/oracle-database/12.2/racad/introduction-to-oracle-rac.html#GUID-D04AA2A7-2E68-4C5C-BD6E-36C62427B98E
+[94]: https://github.com/oracle/node-oracledb/blob/node-oracledb-v1/doc/api.md
+[95]: https://docs.oracle.com/en/database/oracle/oracle-database/12.2/tgsql/toc.htm
+[96]: https://docs.oracle.com/en/database/oracle/oracle-database/12.2/ladbi/standard-oracle-database-groups-for-database-administrators.html#GUID-0A789F28-169A-43D6-9E48-AAE20D7B0C44
+[97]: http://www.oracle.com/technetwork/database/options/clustering/applicationcontinuity/learnmore/fastapplicationnotification12c-2538999.pdf
+[98]: https://docs.oracle.com/en/database/oracle/oracle-database/18/adfns/editions.html#GUID-58DE05A0-5DEF-4791-8FA8-F04D11964906

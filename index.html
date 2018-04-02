@@ -11,7 +11,7 @@
 <body>
 <div id="container">
 <div id="header">
-      <h1>node-oracledb: Node.js module for accessing Oracle Database</h1>
+      <h1>node-oracledb version 2.2</h1>
 </div>
 <div id="menu">
     <a href="https://oracle.github.io/node-oracledb/doc/api.html">Documentation</a> ·
@@ -28,14 +28,16 @@
 <a name="about"></a>
 <h2>About node-oracledb</h2>
 
-The node-oracledb add-on for Node.js powers high performance Oracle
-Database applications.
+<p>The node-oracledb add-on for Node.js powers high performance Oracle
+Database applications.</p>
 
-Use node-oracledb to connect Node.js 4, 6, 8 and 9 to Oracle Database.
+<p>Use node-oracledb to connect Node.js 4, 6, 8 and 9 to Oracle Database.</p>
 
-The add-on is stable, well documented, and has a comprehensive test suite.
+<p>Node-oracledb supports <a href="#features" >basic and advanced features</a> of Oracle Database
+and Oracle Client.</p>
 
-The node-oracledb project is open source and maintained by Oracle Corp.
+<p>The node-oracledb module is open source and maintained by Oracle Corp.
+It is stable, well documented, and has a comprehensive test suite.</p>
 
 <a name="start"></a>
 <h2>Getting Started</h2>
@@ -90,34 +92,46 @@ have been made by the community.</p>
 <h2>Node-oracledb Features:</h2>
 
 <ul>
-<li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#asyncawaitoverview" >Async/Await</a>, <a href="https://oracle.github.io/node-oracledb/doc/api.html#promiseoverview" >Promises</a>, <a href="https://oracle.github.io/node-oracledb/doc/api.html#intro" >Callbacks</a> and <a href="https://oracle.github.io/node-oracledb/doc/api.html#querystream" >Streams</a></p></li>
-<li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#sqlexecution" >SQL and PL/SQL execution</a></p></li>
-<li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#refcursors" >REF CURSORS</a></p></li>
-<li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#lobhandling" >Large Objects: CLOBs and BLOBs as Streams or Strings and Buffers</a></p></li>
-<li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#jsondatatype" >Oracle Database 12c JSON datatype</a></p></li>
-<li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#queryoutputformats" >Query results as JavaScript objects or arrays</a></p></li>
-<li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#typemap" >Smart mapping between JavaScript and Oracle types with manual override available</a></p></li>
-<li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#bind" >Data binding using JavaScript types, objects or arrays</a></p></li>
-<li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#transactionmgt" >Transaction Management</a></p></li>
-<li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#connpooling" >Inbuilt Connection Pool with Queuing, Aliasing and Liveness checking</a></p></li>
-<li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#drcp" >Database Resident Connection Pooling (DRCP)</a></p></li>
-<li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#getconnectiondbattrsprivilege" >Privileged Connections</a></p></li>
-<li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#extauth" >External Authentication</a></p></li>
-<li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#propdbfetcharraysize" >Array Fetches</a></p></li>
-<li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#stmtcache" >Statement Caching</a></p></li>
-<li><p><a href="https://docs.oracle.com/database/122/ADFNS/performance-and-scalability.htm#ADFNS464" >Client Result Caching</a></p></li>
-<li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#endtoend" >End-to-end Tracing, Mid-tier Authentication, and Auditing</a></p></li>
-<li><p>Oracle High Availability Features</p></li>
-<ul>
-<li><p><a href="https://docs.oracle.com/database/122/ADFNS/high-availability.htm#ADFNS538" >Fast Application Notification (FAN)</a></p></li>
-<li><p><a href="https://docs.oracle.com/database/122/ADFNS/connection_strategies.htm#ADFNS515" >Runtime Load Balancing (RLB)</a></p></li>
-<li><p><a href="https://docs.oracle.com/database/122/ADFNS/high-availability.htm#ADFNS-GUID-96599425-9BDA-483C-9BA2-4A4D13013A37" >Transparent Application Failover (TAF)</a></p></li>
-</ul>
+    <li><p><a href="https://www.npmjs.com/package/oracledb" >Install with standard npm infrastructure</a></p></li>
+    <li><p><a href="https://github.com/oracle/node-oracledb/blob/master/LICENSE.md" >Open Source under the Apache 2 license</a></p></li>
+    <li><p><a href="http://www.oracle.com/technetwork/database/database-technologies/scripting-languages/node_js/overview/index.html" >Maintained by Oracle</a></p></li>
+    <li><p><a href="https://github.com/oracle/node-oracledb" >Hosted on GitHub</a></p></li>
+    <li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#asyncawaitoverview" >Async/Await</a>, <a href="https://oracle.github.io/node-oracledb/doc/api.html#promiseoverview" >Promises</a>, <a href="https://oracle.github.io/node-oracledb/doc/api.html#intro" >Callbacks</a> and <a href="https://oracle.github.io/node-oracledb/doc/api.html#querystream" >Streams</a></p></li>
+    <li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#sqlexecution" >SQL and PL/SQL Execution</a></p></li>
+    <li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#batchexecution" >Batch Statement Execution</a></p></li>
+    <li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#getstmtinfo" >Statement Metadata</a></p></li>
+    <li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#ebr" >Edition-Based Redefinition</a></p></li>
+    <li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#refcursors" >REF CURSORS</a></p></li>
+    <li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#lobhandling" >Large Objects: CLOBs and BLOBs as Streams or Strings and Buffers</a></p></li>
+    <li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#jsondatatype" >Oracle Database JSON datatype</a></p></li>
+    <li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#queryoutputformats" >Query results as JavaScript objects or arrays</a></p></li>
+    <li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#typemap" >Smart mapping between JavaScript and Oracle types with manual override</a></p></li>
+    <li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#bind" >Data binding using JavaScript types, objects or arrays</a></p></li>
+    <li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#transactionmgt" >Transaction Management</a></p></li>
+    <li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#connpooling" >Inbuilt Connection Pool with Queuing, Aliasing and Liveness checking</a></p></li>
+    <li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#drcp" >Database Resident Connection Pooling (DRCP)</a></p></li>
+    <li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#getconnectiondbattrsprivilege" >Privileged Connections</a></p></li>
+    <li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#extauth" >External Authentication</a></p></li>
+    <li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#connectionping" >Connection Health Checking</a></p></li>
+    <li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#changingpassword" >Password Changing</a></p></li>
+    <li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#propdbfetcharraysize" >Array Fetches</a></p></li>
+    <li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#stmtcache" >Statement Caching</a></p></li>
+    <li><p><a href="https://docs.oracle.com/database/122/ADFNS/performance-and-scalability.htm#ADFNS464" >Client Result Caching</a></p></li>
+    <li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#endtoend" >End-to-end Tracing, Mid-tier Authentication, and Auditing</a></p></li>
+    <li><p>Oracle High Availability Features</p></li>
+    <ul>
+        <li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#connectionfan" >Fast Application Notification (FAN)</a></p></li>
+        <li><p><a href="https://oracle.github.io/node-oracledb/doc/api.html#connectionrlb" >Runtime Load Balancing (RLB)</a></p></li>
+        <li><p><a href="https://docs.oracle.com/database/122/ADFNS/high-availability.htm#ADFNS-GUID-96599425-9BDA-483C-9BA2-4A4D13013A37" >Transparent Application Failover (TAF)</a></p></li>
+    </ul>
+    <li><p>Full use of Oracle Network Service infrastructure, including encrypted network traffic and security features.</p></li>
+    <li><p>Oracle's standard cross-version interoperability, allows easy upgrades and connectivity to different Oracle Database versions.</p>
+    </li>
 </ul>
 
 <p>We are actively working on supporting the best Oracle Database
 features, and on functionality requests from <a
-href="https://github.com/oracle/node-oracledb/issues" >users involved
+href="https://github.com/oracle/node-oracledb/issues?q=is%3Aopen+is%3Aissue+label%3Aenhancement" >users involved
 in the project</a>.</p>
 
 <a name="license"></a>
