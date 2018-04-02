@@ -2583,7 +2583,7 @@ names in the SQL statement (for 'bind by name').  Each sub-array or
 sub-object should contain values for the bind variables used in the
 SQL statement.  At least one such record must be specified.
 
-If a record contains fewer values then expected, NULL values will be
+If a record contains fewer values than expected, NULL values will be
 used.  For bind by position, empty values can be specified using
 syntax like `[a,,c,d]`.
 
@@ -2627,7 +2627,8 @@ Boolean batchErrors
 ```
 
 This optional property allows invalid data records to be rejected
-while still letting valid data be processed.
+while still letting valid data be processed.  It can only be set
+*true* for INSERT, UPDATE, DELETE or MERGE statements.
 
 When *false*, the `executeMany()` call will stop when the first error
 occurs.  The callback [error object](#errorobj) will be set.
@@ -2678,9 +2679,12 @@ Boolean dmlRowCounts
 
 When *true*, this optional property enables output of the number of
 rows affected by each input data record.  It can only be set *true*
-for DML.
+for INSERT, UPDATE, DELETE or MERGE statements.
 
 The default value is *false*.
+
+This feature works when node-oracledb is using version 12, or later,
+of the Oracle client library.
 
 ##### <a name="executemanycallback"></a> 4.2.7.4 `executeMany()`: Callback Function
 
