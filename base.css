@@ -9,12 +9,12 @@ body {
 }
 
 #container {
-    border: 2px solid #ff0000;
+    border: 2px solid #c6051f;
     min-height: 103%;
 }
 
 h1 {
-    background-color: #ff0000;
+    background-color: #c6051f;
     color: white;
     font-size: 2.45em;
     margin: 0;
@@ -26,18 +26,18 @@ h2 {
 }
 
 hr {
-    color: #ff0000;
+    color: #c6051f;
 }
 
 #menu {
-    background-color: #FF6262;
+    background-color: #d11b33;
     padding: .5em;
     margin-bottom: .5em;
 }
 
 #menu a {
     text-decoration: none;
-    color: blue
+    color: white
 }
 
 #menu a:hover {
@@ -45,7 +45,7 @@ hr {
 }
 
 #menu a:visited {
-    color: blue
+    color: white
 }
 
 #content {
