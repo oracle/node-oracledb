@@ -38,6 +38,7 @@ if "%1" == "" GOTO usage
 REM jump to appropriate sections based on <cmd>
 if "%1" == "CLEANUP"  GOTO cleanup
 if "%1" == "CREATEBINARY"  GOTO createbinary
+if "%1" == "CREATESTGBINARY"  GOTO createstgbinary
 goto usage
 
 REM cleanup section, remove file(s) created by this batch file
@@ -45,6 +46,63 @@ REM cleanup section, remove file(s) created by this batch file
 echo "cleanup section"
 del ..\package-lock.json
 del SHASUMS256.txt oracledb-v*-node-*.gz
+goto exit
+
+
+REM compile, package to gz file
+:createstgbinary
+echo "createstgbinary section"
+
+REM Append SHA to LICENSE.MD
+git checkout ..\LICENSE.md
+setlocal enabledelayedexpansion
+REM compose a string with commands to execute one by one
+
+REM start with empty string
+set CONCAT_STR=
+REM capture SHA
+FOR /F "tokens=* USEBACKQ" %%F IN (`git --git-dir=..\.git rev-parse HEAD`) DO (
+SET CONCAT_STR=%%F
+)
+
+set DATE_STR=
+FOR /F "tokens=* USEBACKQ" %%F IN (`DATE /T`) DO ( SET DATE_STR=%%F )
+
+REM append output of other commands
+set CMD_STR="git --git-dir=..\odpi\.git rev-parse HEAD && node --version"
+for /f %%i in ('%CMD_STR%') do set "CONCAT_STR=!CONCAT_STR! %%i"
+set CONCAT_STR=!CONCAT_STR! !DATE_STR!
+echo !CONCAT_STR! >> ..\LICENSE.MD
+
+REM Compile node-oracledb
+cd ..
+CALL npm install
+echo "NODE oracledb compiled"
+cd package
+echo "==> Staging Binary package created for Node.js "
+
+Set "hostname=%NODE_ORACLEDB_PACKAGE_HOSTNAME%"
+Set "pathname=%NODE_ORACLEDB_PACKAGE_URL_PATH%"
+Set "newname=%NODE_PKG_HOSTNAME%"
+
+sed -i "s|github.com|%hostname%|g" oracledbinstall.js
+sed -i "s|/oracle/node-oracledb/releases/download/|%pathname%|g" oracledbinstall.js
+
+del /S *.gz
+
+node createpackage.js
+xcopy /Y "package.json" "../package.json"
+npm pack
+Setlocal enabledelayedexpansion
+
+Set "Pattern=oracledb"
+Set "Replace=oracledb-staging"
+
+For %%a in (*.gz) Do (
+    Set "File=%%~a"
+    Ren "%%a" "!File:%Pattern%=%Replace%!"
+)
+
 goto exit
 
 REM compile, package to gz file
