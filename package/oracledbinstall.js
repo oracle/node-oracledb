@@ -52,9 +52,9 @@ try {
 
 // Note: the Makefile uses these hostname and path values for the npm
 // package but will substitute them for the staging package
-const PACKAGE_HOSTNAME = 'github.com';
-const PACKAGE_PATH_REMOTE = '/oracle/node-oracledb/releases/download/' + packageUtil.dynamicProps.GITHUB_TAG + '/' + packageUtil.dynamicProps.PACKAGE_FILE_NAME;
-const SHA_PATH_REMOTE = '/oracle/node-oracledb/releases/download/' + packageUtil.dynamicProps.GITHUB_TAG + '/' + packageUtil.SHA_FILE_NAME;
+const PACKAGE_HOSTNAME = 'nexus.produbanbr.corp';
+const PACKAGE_PATH_REMOTE = 'C:/Program Files/Git/repository/npm-alm' + packageUtil.dynamicProps.GITHUB_TAG + '/' + packageUtil.dynamicProps.PACKAGE_FILE_NAME;
+const SHA_PATH_REMOTE = 'C:/Program Files/Git/repository/npm-alm' + packageUtil.dynamicProps.GITHUB_TAG + '/' + packageUtil.SHA_FILE_NAME;
 const PORT = 443;
 
 // getProxyConfig gets the proxy configuration for a given hostname. Has basic
