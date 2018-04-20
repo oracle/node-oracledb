@@ -1,7 +1,7 @@
 {
   "name": "oracledb",
-  "version": "2.2.9",
-  "description": "Oracle Database driver by Oracle Corp. Points to nexus",
+  "version": "2.2.0",
+  "description": "Oracle Database driver by Oracle Corp.",
   "license": "Apache-2.0",
   "homepage": "http://oracle.github.io/node-oracledb/",
   "keywords": [
