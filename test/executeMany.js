@@ -286,23 +286,8 @@ describe('163. executeMany.js', function() {
 
   it('163.5 calls PL/SQL', function(done) {
     async.series([
-      function doCreateProc(cb) {
-        var proc = "CREATE OR REPLACE PROCEDURE nodb_proc_em (a_num IN NUMBER, " +
-                   "    a_outnum OUT NUMBER, a_outstr OUT VARCHAR2) \n" +
-                   "AS \n" +
-                   "BEGIN \n" +
-                   "  a_outnum := a_num * 2; \n" +
-                   "  FOR i IN 1..a_num LOOP \n" +
-                   "    a_outstr := a_outstr || 'X'; \n" +
-                   "  END LOOP; \n" +
-                   "END nodb_proc_em;";
-        conn.execute(
-          proc,
-          function(err) {
-            should.not.exist(err);
-            cb();
-          }
-        );
+      function(cb) {
+        doCreateProc(cb);
       },
       function(cb) {
         var plsql = "BEGIN nodb_proc_em(:1, :2, :3); END;";
@@ -324,15 +309,8 @@ describe('163. executeMany.js', function() {
           cb();
         });
       },
-      function doDropProc(cb) {
-        var sql = "DROP PROCEDURE nodb_proc_em";
-        conn.execute(
-          sql,
-          function(err) {
-            should.not.exist(err);
-            cb();
-          }
-        );
+      function(cb) {
+        doDropProc(cb);
       }
     ], done);
   }); // 163.5
@@ -408,6 +386,155 @@ describe('163. executeMany.js', function() {
       }
     ], done);
   }); // 163.7
+
+  it('163.8 Negative - batchErrors with non-DML statement', function(done) {
+
+    if (oracledb.oracleClientVersion < 1201000200) { this.skip(); }
+
+    async.series([
+      function(cb) {
+        doCreateProc(cb);
+      },
+      function(cb) {
+        var plsql = "BEGIN nodb_proc_em(:1, :2, :3); END;";
+        var binds = [ [1], [2], [3], [4], [6] ];
+        var options = {
+          batchErrors: true,
+          bindDefs: [
+            { type: oracledb.NUMBER },
+            { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+            { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 20 }
+          ]
+        };
+
+        conn.executeMany(plsql, binds, options, function(err, result) {
+          should.exist(err);
+          should.strictEqual(
+            err.message,
+            "DPI-1063: modes DPI_MODE_EXEC_BATCH_ERRORS and DPI_MODE_EXEC_ARRAY_DML_ROWCOUNTS" +
+            " can only be used with insert, update, delete and merge statements"
+          );
+          should.not.exist(result);
+          cb();
+        });
+      },
+      function(cb) {
+        doDropProc(cb);
+      }
+    ], done);
+  }); // 163.8
+
+  it('163.9 if batchErrors is disabled', function(done) {
+
+    if (oracledb.oracleClientVersion < 1201000200) { this.skip(); }
+
+    async.series([
+      function(cb) {
+        makeParentChildTables(cb);
+      },
+      function(cb) {
+        var sql = "INSERT INTO nodb_tab_child VALUES (:1, :2, :3)";
+        var binds = [
+          [1016, 10, "Child 2 of Parent A"],
+          [1017, 10, "Child 3 of Parent A"],
+          [1018, 20, "Child 4 of Parent B"],
+          [1018, 20, "Child 4 of Parent B"],   // duplicate key
+          [1019, 30, "Child 3 of Parent C"],
+          [1020, 40, "Child 4 of Parent D"],
+          [1021, 75, "Child 1 of Parent F"],   // parent does not exist
+          [1022, 40, "Child 6 of Parent D"]
+        ];
+        var options = {
+          autoCommit: true,
+          batchErrors: false,
+          dmlRowCounts: true,
+          bindDefs: [
+            { type: oracledb.NUMBER },
+            { type: oracledb.NUMBER },
+            { type: oracledb.STRING, maxSize: 20 }
+          ]
+        };
+        conn.executeMany(sql, binds, options, function(err, result) {
+          should.exist(err);
+          (err.message).should.startWith('ORA-00001: ');
+          // ORA-00001: unique constraint (HR.CHILDTAB_PK) violated
+          should.not.exist(result);
+          cb();
+        });
+      },
+      function(cb) {
+        dropParentChildTables(cb);
+      }
+    ], done);
+  }); // 163.9
+
+  it('163.10 Negative -  dmlRowCounts with non-DML statement', function(done) {
+
+    if (oracledb.oracleClientVersion < 1201000200) { this.skip(); }
+
+    async.series([
+      function(cb) {
+        doCreateProc(cb);
+      },
+      function(cb) {
+        var plsql = "BEGIN nodb_proc_em(:1, :2, :3); END;";
+        var binds = [ [1], [2], [3], [4], [6] ];
+        var options = {
+          dmlRowCounts: true,
+          bindDefs: [
+            { type: oracledb.NUMBER },
+            { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+            { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 20 }
+          ]
+        };
+
+        conn.executeMany(plsql, binds, options, function(err, result) {
+          should.exist(err);
+          should.strictEqual(
+            err.message,
+            "DPI-1063: modes DPI_MODE_EXEC_BATCH_ERRORS and DPI_MODE_EXEC_ARRAY_DML_ROWCOUNTS" +
+            " can only be used with insert, update, delete and merge statements"
+          );
+          should.not.exist(result);
+          cb();
+        });
+      },
+      function(cb) {
+        doDropProc(cb);
+      }
+    ], done);
+
+  }); // 163.10
+
+  var doCreateProc = function(cb) {
+    var proc = "CREATE OR REPLACE PROCEDURE nodb_proc_em (a_num IN NUMBER, " +
+               "    a_outnum OUT NUMBER, a_outstr OUT VARCHAR2) \n" +
+               "AS \n" +
+               "BEGIN \n" +
+               "  a_outnum := a_num * 2; \n" +
+               "  FOR i IN 1..a_num LOOP \n" +
+               "    a_outstr := a_outstr || 'X'; \n" +
+               "  END LOOP; \n" +
+               "END nodb_proc_em;";
+    conn.execute(
+      proc,
+      function(err) {
+        should.not.exist(err);
+        cb();
+      }
+    );
+  }; // doCreateProc()
+
+  var doDropProc = function(cb) {
+    var sql = "DROP PROCEDURE nodb_proc_em";
+    conn.execute(
+      sql,
+      function(err) {
+        should.not.exist(err);
+        cb();
+      }
+    );
+  }; // doDropProc()
 
   var dotruncate = function(cb) {
     conn.execute(

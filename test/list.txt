@@ -4161,3 +4161,6 @@ Overview of node-oracledb functional tests
     163.5 calls PL/SQL
     163.6 shows dmlRowCounts
     163.7 shows batchErrors behavior
+    163.8 Negative - batchErrors with non-DML statement
+    163.9 if batchErrors is disabled
+    163.10 Negative -  dmlRowCounts with non-DML statement
