@@ -209,7 +209,7 @@ void njsBaton::CheckJSException(Nan::TryCatch *tryCatch)
 {
     if (tryCatch->HasCaught()) {
         Local<String> message = tryCatch->Message()->Get();
-        v8::String::Utf8Value v8str(message->ToString());
+        Nan::Utf8String v8str(message->ToString());
         error = std::string(*v8str, static_cast<size_t>(v8str.length()));
         tryCatch->Reset();
     }
@@ -560,7 +560,7 @@ bool njsBaton::GetStringFromJSON(Local<Object> obj, const char *key, int index,
         return false;
 
     if (jsValue->IsString()) {
-        v8::String::Utf8Value utf8str(jsValue->ToString());
+        Nan::Utf8String utf8str(jsValue->ToString());
         value = std::string(*utf8str, static_cast<size_t>(utf8str.length()));
         return true;
     } else if (jsValue->IsUndefined()) {
@@ -714,7 +714,7 @@ bool njsCommon::GetStringArg(Nan::NAN_METHOD_ARGS_TYPE args,
         Nan::ThrowError(errMsg.c_str());
         return false;
     }
-    v8::String::Utf8Value utf8str(args[index]->ToString());
+    Nan::Utf8String utf8str(args[index]->ToString());
     value = std::string(*utf8str, static_cast<size_t>(utf8str.length()));
     return true;
 }
@@ -809,7 +809,7 @@ bool njsCommon::SetPropString(Local<Value> value, std::string *valuePtr,
         Nan::ThrowError(errMsg.c_str());
         return false;
     }
-    v8::String::Utf8Value utfstr(value->ToString());
+    Nan::Utf8String utfstr(value->ToString());
     *valuePtr = std::string(*utfstr, static_cast<size_t>(utfstr.length()));
     return true;
 }

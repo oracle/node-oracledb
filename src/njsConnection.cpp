@@ -760,7 +760,7 @@ bool njsConnection::ScanExecuteBindUnit(Local<Object> bindUnit,
     for (uint32_t i = 0; i < keys->Length(); i++) {
         Local<String> temp =
                 Nan::Get(keys, i).ToLocalChecked().As<String>();
-        v8::String::Utf8Value utf8str(temp);
+        Nan::Utf8String utf8str(temp);
         std::string key =
                 std::string(*utf8str, static_cast<size_t>(utf8str.length()));
         if (key.compare("dir") == 0 || key.compare("type") == 0 ||
@@ -1046,7 +1046,7 @@ bool njsConnection::InitBindVars(Local<Object> bindObj,
             var->pos = i + 1;
         else {
             Local<Value> temp = Nan::Get(bindNames, i).ToLocalChecked();
-            v8::String::Utf8Value v8str(temp->ToString());
+            Nan::Utf8String v8str(temp->ToString());
             std::string str = std::string(*v8str,
                     static_cast<size_t>(v8str.length()));
             var->name = ":" + str;
@@ -1128,7 +1128,7 @@ bool njsConnection::ProcessScalarBindValue(Local<Value> value,
         bindOk = (var->varTypeNum == DPI_ORACLE_TYPE_VARCHAR ||
                 var->varTypeNum == DPI_ORACLE_TYPE_CLOB);
         if (bindOk) {
-            v8::String::Utf8Value utf8str(value);
+            Nan::Utf8String utf8str(value);
             if (utf8str.length() == 0)
                 data->isNull = 1;
             else if (inExecuteMany &&
@@ -1253,7 +1253,7 @@ bool njsConnection::GetBindTypeAndSizeFromValue(njsVariable *var,
         *maxSize = 1;
     } else if (value->IsString()) {
         *bindType = NJS_DATATYPE_STR;
-        v8::String::Utf8Value utf8str(value->ToString());
+        Nan::Utf8String utf8str(value->ToString());
         *maxSize = static_cast<uint32_t>(utf8str.length());
     } else if (value->IsInt32() || value->IsUint32()) {
         *bindType = NJS_DATATYPE_INT;
@@ -1341,7 +1341,7 @@ bool njsConnection::ProcessExecuteOptions(Local<Object> options,
             baton->fetchInfo = new njsFetchInfo[baton->numFetchInfo];
         for (uint32_t i = 0; i < baton->numFetchInfo; i++) {
             Local<Value> temp = Nan::Get(keys, i).ToLocalChecked();
-            v8::String::Utf8Value utf8str(temp->ToString());
+            Nan::Utf8String utf8str(temp->ToString());
             baton->fetchInfo[i].name = std::string(*utf8str,
                     static_cast<size_t>(utf8str.length()));
             Local<Object> colInfo =
@@ -1599,7 +1599,7 @@ void njsConnection::SetTextAttribute(Nan::NAN_SETTER_ARGS_TYPE args,
         Nan::ThrowError(errMsg.c_str());
         return;
     }
-    v8::String::Utf8Value utfstr(value->ToString());
+    Nan::Utf8String utfstr(value->ToString());
     uint32_t valueLength = static_cast<uint32_t>(utfstr.length());
     if ((*setter)(connection->dpiConnHandle, *utfstr, valueLength) < 0)
         njsOracledb::ThrowDPIError();
