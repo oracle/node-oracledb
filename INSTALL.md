@@ -15,7 +15,9 @@ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-## Contents
+##  <a name="contents"></a> Contents
+
+## ===> *** Note: Go to [https://oracle.github.io/node-oracledb/INSTALL.html](https://oracle.github.io/node-oracledb/INSTALL.html) for production documentation ***
 
 1. [Node-oracledb Overview](#overview)
 2. [Quick Start Node-oracledb Installation](#quickstart)
