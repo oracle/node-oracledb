@@ -1,6 +1,38 @@
 # Change Log
 
-## node-oracledb v2.3.0 (DD Mon YYYY)
+## node-oracledb v2.3.0-dev (DD Mon YYYY)
+
+- The stated compatibility is now for Node.js 6, 8, and 10 due to EOL
+  of Node.js 4, and the release of Node 10.
+
+- Added support for heterogeneous connection pooling and for proxy
+  support in connection pools.  This allows each connection in the
+  pool to use different database credentials.
+
+- Added support to `fetchAsString` and `fetchInfo` for fetching RAW
+  columns as STRING (hex-encoded).
+
+- Eliminated a memory leak when binding LOBs as `oracledb.BIND_INOUT`.
+
+- Added an error message indicating that `batchErrors` and
+  `dmlRowCounts` can only be used with INSERT, UPDATE, DELETE and
+  MERGE statements.
+
+- Fixed a bug that caused `queryStream()` to emit multiple close
+  events in Node.js 10.
+
+- Remove deprecated `Buffer()` function in tests in order to eliminate
+  a deprecation warning with Node.js 10.
+
+- Upgraded NAN dependency from 2.8 to 2.10.
+
+- Made some internal changes to fix NAN 2.10 deprecations: Replaced
+  `v8::String::Utf8Value` with `Nan::Uft8String`.  Replaced
+  `MakeCallback()` with `runInAsyncScope()`.
+
+- Mention that `queueRequests` is deprecated and will be removed in a
+  future version; connection pool queuing will always be enabled in
+  that future version.
 
 ## node-oracledb v2.2.0 (3 Apr 2018)
 
