@@ -729,6 +729,7 @@ NAN_SETTER(njsOracledb::SetFetchAsString)
         switch (type) {
             case NJS_DATATYPE_NUM:
             case NJS_DATATYPE_DATE:
+            case NJS_DATATYPE_BUFFER:
             case NJS_DATATYPE_CLOB:
                 break;
             default:

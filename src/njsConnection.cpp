@@ -197,6 +197,9 @@ bool njsConnection::ProcessQueryVars(njsBaton *baton, dpiStmt *dpiStmtHandle,
             case DPI_ORACLE_TYPE_NCHAR:
             case DPI_ORACLE_TYPE_RAW:
                 vars[i].maxSize = queryInfo.typeInfo.clientSizeInBytes;
+                if (queryInfo.typeInfo.oracleTypeNum == DPI_ORACLE_TYPE_RAW &&
+                        vars[i].varTypeNum == DPI_ORACLE_TYPE_VARCHAR)
+                    vars[i].maxSize *= 2;
                 break;
             case DPI_ORACLE_TYPE_DATE:
             case DPI_ORACLE_TYPE_TIMESTAMP:
@@ -376,51 +379,56 @@ bool njsConnection::MapByName(njsBaton *baton, dpiQueryInfo *queryInfo,
 bool njsConnection::MapByType(njsBaton *baton, dpiQueryInfo *queryInfo,
         dpiOracleTypeNum &targetType)
 {
-    if (baton->fetchAsStringTypes || baton->fetchAsBufferTypes) {
+    uint32_t i;
+
+    // handle fetchAsString
+    for (i = 0; i < baton->numFetchAsStringTypes; i++) {
         switch (queryInfo->typeInfo.oracleTypeNum) {
             case DPI_ORACLE_TYPE_NUMBER:
             case DPI_ORACLE_TYPE_NATIVE_FLOAT:
             case DPI_ORACLE_TYPE_NATIVE_DOUBLE:
             case DPI_ORACLE_TYPE_NATIVE_INT:
-                for (uint32_t i = 0; i < baton->numFetchAsStringTypes; i++) {
-                    if (baton->fetchAsStringTypes[i] == NJS_DATATYPE_NUM) {
-                        targetType = DPI_ORACLE_TYPE_VARCHAR;
-                        return true;
-                    }
+                if (baton->fetchAsStringTypes[i] == NJS_DATATYPE_NUM) {
+                    targetType = DPI_ORACLE_TYPE_VARCHAR;
+                    return true;
                 }
                 break;
             case DPI_ORACLE_TYPE_DATE:
             case DPI_ORACLE_TYPE_TIMESTAMP:
             case DPI_ORACLE_TYPE_TIMESTAMP_TZ:
             case DPI_ORACLE_TYPE_TIMESTAMP_LTZ:
-                for (uint32_t i = 0; i < baton->numFetchAsStringTypes; i++) {
-                    if (baton->fetchAsStringTypes[i] == NJS_DATATYPE_DATE) {
-                        targetType = DPI_ORACLE_TYPE_VARCHAR;
-                        return true;
-                    }
+                if (baton->fetchAsStringTypes[i] == NJS_DATATYPE_DATE) {
+                    targetType = DPI_ORACLE_TYPE_VARCHAR;
+                    return true;
                 }
                 break;
             case DPI_ORACLE_TYPE_CLOB:
             case DPI_ORACLE_TYPE_NCLOB:
-                for (uint32_t i = 0; i < baton->numFetchAsStringTypes; i++) {
-                    if (baton->fetchAsStringTypes[i] == NJS_DATATYPE_CLOB) {
-                        targetType = DPI_ORACLE_TYPE_VARCHAR;
-                        return true;
-                    }
+                if (baton->fetchAsStringTypes[i] == NJS_DATATYPE_CLOB) {
+                    targetType = DPI_ORACLE_TYPE_VARCHAR;
+                    return true;
                 }
                 break;
-            case DPI_ORACLE_TYPE_BLOB:
-                for (uint32_t i = 0; i < baton->numFetchAsBufferTypes; i++) {
-                    if (baton->fetchAsBufferTypes[i] == NJS_DATATYPE_BLOB) {
-                        targetType = DPI_ORACLE_TYPE_RAW;
-                        return true;
-                    }
+            case DPI_ORACLE_TYPE_RAW:
+                if (baton->fetchAsStringTypes[i] == NJS_DATATYPE_BUFFER) {
+                    targetType = DPI_ORACLE_TYPE_VARCHAR;
+                    return true;
                 }
                 break;
             default:
                 break;
         }
     }
+
+    // handle fetchAsBuffer
+    for (i = 0; i < baton->numFetchAsBufferTypes; i++) {
+        if (queryInfo->typeInfo.oracleTypeNum == DPI_ORACLE_TYPE_BLOB &&
+                baton->fetchAsBufferTypes[i] == NJS_DATATYPE_BLOB) {
+            targetType = DPI_ORACLE_TYPE_RAW;
+            return true;
+        }
+    }
+
     return false;
 }
 

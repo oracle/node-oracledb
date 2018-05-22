@@ -873,7 +873,9 @@ Array fetchAsString
 ```
 
 An array of node-oracledb types.  The valid types are
-[`oracledb.DATE`](#oracledbconstantsnodbtype), [`oracledb.NUMBER`](#oracledbconstantsnodbtype)
+[`oracledb.DATE`](#oracledbconstantsnodbtype),
+[`oracledb.NUMBER`](#oracledbconstantsnodbtype),
+[`oracledb.BUFFER`](#oracledbconstantsnodbtype),
 and [`oracledb.CLOB`](#oracledbconstantsnodbtype).  When any column having one
 of the specified types is queried with [`execute()`](#execute)
 or [`queryStream()`](#querystream), the column data is returned as a
@@ -886,9 +888,10 @@ This property helps avoid situations where using JavaScript types can
 lead to numeric precision loss, or where date conversion is unwanted.
 See [Query Result Type Mapping](#typemap) for more discussion.
 
-For non-CLOB types, the maximum length of a string created by this
-mapping is 200 bytes.  Strings created for CLOB columns will generally
-be limited by Node.js and V8 memory restrictions.
+For raw data returned as a string, Oracle returns the data as a hex-encoded
+string.  For dates and numbers returned as a string, the maximum length of a
+string created by this mapping is 200 bytes.  Strings created for CLOB columns
+will generally be limited by Node.js and V8 memory restrictions.
 
 Individual query columns in [`execute()`](#execute)
 or [`queryStream()`](#querystream) calls can override the
@@ -2338,8 +2341,8 @@ The valid values for `type` are
 [`oracledb.BUFFER`](#oracledbconstantsnodbtype)
 and [`oracledb.DEFAULT`](#oracledbconstantsnodbtype).
 
-The `fetchInfo` property `type` can be set to `oracledb.STRING` for number and
-date columns in a query to indicate they should be returned as Strings
+The `fetchInfo` property `type` can be set to `oracledb.STRING` for number,
+date and raw columns in a query to indicate they should be returned as Strings
 instead of their native format.  CLOB column data can also be returned
 as Strings instead of [Lob](#lobclass) instances.
 
@@ -2364,9 +2367,10 @@ fetchInfo:
 Each column is specified by name, using Oracle's standard naming
 convention.
 
-The maximum length of a string created by type mapping non-CLOB
-columns is 200 bytes.  If a database column that is already being
-fetched as type `oracledb.STRING` is specified in `fetchInfo`, then the actual
+Raw columns returned as strings will be returned as hex-encoded strings. The
+maximum length of a string created by type mapping number and date columns is
+200 bytes.  If a database column that is already being fetched as type
+`oracledb.STRING` is specified in `fetchInfo`, then the actual
 database metadata will be used to determine the maximum length.
 
 Strings and Buffers created for LOB columns will generally be limited
