@@ -7126,8 +7126,8 @@ The [`connection.executeMany()`](#executemany) method allows many sets
 of data values to be bound to one DML or PL/SQL statement for
 execution.  It is like calling [`connection.execute()`](#execute)
 multiple times but requires fewer round-trips.  This is an efficient
-way to handle batch changes, for example when inserting or updating
-multiple rows.  The method cannot be used for queries.
+way to handle batch changes, for example when doing bulk inserts, or
+for updating multiple rows.  The method cannot be used for queries.
 
 The `executeMany()` method supports IN, IN OUT and OUT binds for most
 data types except [PL/SQL Collection Associative
