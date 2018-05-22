@@ -76,17 +76,18 @@ limitations under the License.
                 - 3.3.1.1.2 [`edition`](#createpoolpoolattrsedition)
                 - 3.3.1.1.3 [`events`](#createpoolpoolattrsevents)
                 - 3.3.1.1.4 [`externalAuth`](#createpoolpoolattrsexternalauth)
-                - 3.3.1.1.5 [`password`](#createpoolpoolattrspassword)
-                - 3.3.1.1.6 [`poolAlias`](#createpoolpoolattrspoolalias)
-                - 3.3.1.1.7 [`poolIncrement`](#createpoolpoolattrspoolincrement)
-                - 3.3.1.1.8 [`poolMax`](#createpoolpoolattrspoolmax)
-                - 3.3.1.1.9 [`poolMin`](#createpoolpoolattrspoolmin)
-                - 3.3.1.1.10 [`poolPingInterval`](#createpoolpoolattrspoolpinginterval)
-                - 3.3.1.1.11 [`poolTimeout`](#createpoolpoolattrspooltimeout)
-                - 3.3.1.1.12 [`queueRequests`](#createpoolpoolattrsqueuerequests)
-                - 3.3.1.1.13 [`queueTimeout`](#createpoolpoolattrsqueuetimeout)
-                - 3.3.1.1.14 [`stmtCacheSize`](#createpoolpoolattrsstmtcachesize)
-                - 3.3.1.1.15 [`user`](#createpoolpoolattrsuser)
+                - 3.3.1.1.5 [`homogeneous`](#createpoolpoolattrshomogeneous)
+                - 3.3.1.1.6 [`password`](#createpoolpoolattrspassword)
+                - 3.3.1.1.7 [`poolAlias`](#createpoolpoolattrspoolalias)
+                - 3.3.1.1.8 [`poolIncrement`](#createpoolpoolattrspoolincrement)
+                - 3.3.1.1.9 [`poolMax`](#createpoolpoolattrspoolmax)
+                - 3.3.1.1.10 [`poolMin`](#createpoolpoolattrspoolmin)
+                - 3.3.1.1.11 [`poolPingInterval`](#createpoolpoolattrspoolpinginterval)
+                - 3.3.1.1.12 [`poolTimeout`](#createpoolpoolattrspooltimeout)
+                - 3.3.1.1.13 [`queueRequests`](#createpoolpoolattrsqueuerequests)
+                - 3.3.1.1.14 [`queueTimeout`](#createpoolpoolattrsqueuetimeout)
+                - 3.3.1.1.15 [`stmtCacheSize`](#createpoolpoolattrsstmtcachesize)
+                - 3.3.1.1.16 [`user`](#createpoolpoolattrsuser)
             - 3.3.1.2 [`createPool()`: Callback Function](#createpoolpoolcallback)
         - 3.3.2 [`getConnection()`](#getconnectiondb)
             - 3.3.2.1 [`getConnection()`: Parameters](#getconnectiondbattrs)
@@ -203,6 +204,7 @@ limitations under the License.
         - 8.3.2 [Connection Pool Queue](#connpoolqueue)
         - 8.3.3 [Connection Pool Monitoring and Throughput](#connpoolmonitor)
         - 8.3.4 [Connection Pool Pinging](#connpoolpinging)
+        - 8.3.5 [Heterogeneous Connection Pools and Pool Proxy Authentication](#connpoolproxy)
     - 8.4 [Database Resident Connection Pooling (DRCP)](#drcp)
     - 8.5 [External Authentication](#extauth)
     - 8.6 [Privileged Connections](#privconn)
@@ -301,13 +303,13 @@ below.  As well as callbacks, node-oracledb can also use
 [Promises](#promiseoverview) and [Async/Await](#asyncawaitoverview)
 functions.
 
-Locate your Oracle Database [username and password][91], and the database
+Locate your Oracle Database [user name and password][91], and the database
 [connection string](#connectionstrings).  The connection string is
-commonly of the format `hostname/servicename`, using the hostname
+commonly of the format `hostname/servicename`, using the host name
 where the database is running and the Oracle Database service name of
 the database instance.
 
-Substitute your username, password and connection string in the code.
+Substitute your user name, password and connection string in the code.
 For downloaded examples, put these in [`dbconfig.js`][89].
 
 Run the script, for example:
@@ -1107,6 +1109,16 @@ The default value is 0.
 
 This property may be overridden when [creating a connection pool](#createpool).
 
+For pools created with [External Authentication](#extauth) or with
+[`homogeneous`](#createpoolpoolattrshomogeneous) set to *false*, the
+number of connections initially created is zero even if a larger value
+is specified for `poolMin`.  The pool increment is always 1,
+regardless of the value of
+[`poolIncrement`](#createpoolpoolattrspoolincrement).  Once the number
+of open connections exceeds `poolMin` and connections are idle for
+more than the [`poolTimeout`](#propdbpooltimeout) seconds, then the
+number of open connections does not fall below `poolMin`.
+
 ##### Example
 
 ```javascript
@@ -1378,7 +1390,7 @@ promise = createPool(Object poolAttrs);
 
 ##### Description
 
-This method creates a pool of connections with the specified username,
+This method creates a pool of connections with the specified user name,
 password and connection string.
 
 Internally, `createPool()` creates an [Oracle Call Interface Session
@@ -1482,16 +1494,49 @@ The `user` and `password` properties should not be set when
 Note prior to node-oracledb 0.5 this property was called
 `isExternalAuth`.
 
-###### <a name="createpoolpoolattrspassword"></a> 3.3.1.1.5 `password`
+###### <a name="createpoolpoolattrshomogeneous"></a> 3.3.1.1.5 `homogeneous`
+
+```
+Boolean homogeneous
+```
+
+Indicate whether connections in the pool all have the same credentials
+(a 'homogeneous' pool), or whether different credentials can be used
+(a 'heterogeneous' pool).
+
+The default is *true*.
+
+When set to *false*, the user name and password can be omitted from
+the `connection.createPool()` call, but will need to be given for
+subsequent `pool.getConnection()` calls.  Different
+`pool.getConnection()` calls can provide different user credentials.
+Alternatively, when `homogeneous` is *false*, the user name (the
+'proxy' user name) and password can be given, but subsequent
+`pool.getConnection()` calls can specify a different user name to
+access that user's schema.
+
+Heterogeneous pools cannot be used with the [connection pool
+cache](#connpoolcache).  It is recommended to create a homogeneous
+pool and make use of [`connection.clientId`](#propconnclientid).
+
+See [Heterogeneous Connection Pools and Pool Proxy
+Authentication](#connpoolproxy) for details and examples.
+
+This property was added in node-oracledb 2.3.
+
+###### <a name="createpoolpoolattrspassword"></a> 3.3.1.1.6 `password`
 
 ```
 String password
 ```
 
 The password of the database user used by connections in the pool.  A
-password is also necessary if a proxy user is specified.
+password is also necessary if a proxy user is specified at pool creation.
 
-###### <a name="createpoolpoolattrspoolalias"></a> 3.3.1.1.6 `poolAlias`
+If `homogeneous` is *false*, then the password may be omitted at pool
+creation but given in subsequent `pool.getConnection()` calls.
+
+###### <a name="createpoolpoolattrspoolalias"></a> 3.3.1.1.7 `poolAlias`
 
 ```
 String poolAlias
@@ -1507,7 +1552,7 @@ See [Connection Pool Cache](#connpoolcache) for details and examples.
 
 This property was added in node-oracledb 1.11.
 
-###### <a name="createpoolpoolattrspoolincrement"></a> 3.3.1.1.7 `poolIncrement`
+###### <a name="createpoolpoolattrspoolincrement"></a> 3.3.1.1.8 `poolIncrement`
 
 ```
 Number poolIncrement
@@ -1521,7 +1566,7 @@ The default value is 1.
 This optional property overrides the
 [`oracledb.poolIncrement`](#propdbpoolincrement) property.
 
-###### <a name="createpoolpoolattrspoolmax"></a> 3.3.1.1.8 `poolMax`
+###### <a name="createpoolpoolattrspoolmax"></a> 3.3.1.1.9 `poolMax`
 
 ```
 Number poolMax
@@ -1541,7 +1586,7 @@ available to node-oracledb.
 
 See [Connection Pooling](#connpooling) for other pool sizing guidelines.
 
-###### <a name="createpoolpoolattrspoolmin"></a> 3.3.1.1.9 `poolMin`
+###### <a name="createpoolpoolattrspoolmin"></a> 3.3.1.1.10 `poolMin`
 
 ```
 Number poolMin
@@ -1555,7 +1600,7 @@ The default value is 0.
 This optional property overrides the
 [`oracledb.poolMin`](#propdbpoolmin) property.
 
-###### <a name="createpoolpoolattrspoolpinginterval"></a> 3.3.1.1.10 `poolPingInterval`
+###### <a name="createpoolpoolattrspoolpinginterval"></a> 3.3.1.1.11 `poolPingInterval`
 
 ```
 Number poolPingInterval
@@ -1577,7 +1622,7 @@ This optional property overrides the
 
 See [Connection Pool Pinging](#connpoolpinging) for more discussion.
 
-###### <a name="createpoolpoolattrspooltimeout"></a> 3.3.1.1.11 `poolTimeout`
+###### <a name="createpoolpoolattrspooltimeout"></a> 3.3.1.1.12 `poolTimeout`
 
 ```
 Number poolTimeout
@@ -1592,7 +1637,7 @@ The default value is 60.
 This optional property overrides the
 [`oracledb.poolTimeout`](#propdbpooltimeout) property.
 
-###### <a name="createpoolpoolattrsqueuerequests"></a> 3.3.1.1.12 `queueRequests`
+###### <a name="createpoolpoolattrsqueuerequests"></a> 3.3.1.1.13 `queueRequests`
 
 ```
 Boolean queueRequests
@@ -1610,7 +1655,7 @@ This optional property overrides the
 This property is deprecated and will be removed in a future release:
 queuing will always be enabled.
 
-###### <a name="createpoolpoolattrsqueuetimeout"></a> 3.3.1.1.13 `queueTimeout`
+###### <a name="createpoolpoolattrsqueuetimeout"></a> 3.3.1.1.14 `queueTimeout`
 
 ```
 Number queueTimeout
@@ -1625,7 +1670,7 @@ The default value is 60000.
 This optional property overrides the
 [`oracledb.queueTimeout`](#propdbqueuetimeout) property.
 
-###### <a name="createpoolpoolattrsstmtcachesize"></a> 3.3.1.1.14 `stmtCacheSize`
+###### <a name="createpoolpoolattrsstmtcachesize"></a> 3.3.1.1.15 `stmtCacheSize`
 
 ```
 Number stmtCacheSize
@@ -1637,7 +1682,7 @@ The number of statements to be cached in the
 This optional property overrides the
 [`oracledb.stmtCacheSize`](#propdbstmtcachesize) property.
 
-###### <a name="createpoolpoolattrsuser"></a> 3.3.1.1.15 `user`
+###### <a name="createpoolpoolattrsuser"></a> 3.3.1.1.16 `user`
 
 ```
 String user
@@ -1647,6 +1692,10 @@ The database user name for connections in the pool.  Can be a simple
 user name or a proxy of the form *alison[fred]*. See the [Client
 Access Through a Proxy][7] section in the Oracle Call Interface manual
 for more details about proxy authentication.
+
+If `homogeneous` is *false*, then the pool user name and password need
+to be specified only if the application wants that user to proxy the
+users supplied in subsequent `pool.getConnection()` calls.
 
 #### <a name="createpoolpoolcallback"></a> 3.3.1.2 `createPool()`: Callback Function
 
@@ -3229,11 +3278,11 @@ Callback function parameter | Description
 
 Callback:
 ```
-getConnection(function(Error error, Connection conn){});
+getConnection([Object poolAttrs,] function(Error error, Connection conn){});
 ```
 Promise:
 ```
-promise = getConnection();
+promise = getConnection([Object poolAttrs]);
 ```
 
 ##### Description
@@ -3247,10 +3296,53 @@ number of connections does not exceed the specified maximum for the
 pool. If the pool is at its maximum limit, the `getConnection()` call
 results in an error, such as *ORA-24418: Cannot open further sessions*.
 
+By default pools are created with
+[`homogeneous`](#createpoolpoolattrshomogeneous) set to *true*.  The
+user name and password are supplied when the pool is created.  Each
+time `pool.getConnection()` is called, a connection for that user is
+returned:
+
+```javascript
+  pool.getConnection(
+    function (err, conn) { ... }
+  );
+```
+
+If a heterogeneous pool was created by setting
+[`homogeneous`](#createpoolpoolattrshomogeneous) to *false* during
+creation and credentials were omitted, then the user name and password
+may be used in `pool.getConnection()` like:
+
+```javascript
+  pool.getConnection(
+    {
+      user     : 'hr',
+      password : 'welcome'
+    },
+    function (err, conn) { ... }
+  );
+```
+
+In this case, different user names may be used each time
+`pool.getConnection()` is called.  Proxy users may also be specified.
+
 See [Connection Handling](#connectionhandling) for more information on
 connections.
 
+See [Heterogeneous Connection Pools and Pool Proxy
+Authentication](#connpoolproxy) for more information on heterogeneous
+pools.
+
 ##### Parameters
+
+```
+Object poolAttrs
+```
+
+This optional parameter is used when getting connections from
+heterogeneous pools.  It can contain `user` and `password` properties
+for true heterogeneous pool usage, or it can contain a `user` property
+when a pool proxy user is desired.
 
 ```
 function(Error error, Connection conn)
@@ -4048,6 +4140,166 @@ requirements.
 
 Explicit pings on any connection can be performed at any time with
 [`connection.ping()`](#connectionping).
+
+#### <a name="connpoolproxy"></a> 8.3.5 Heterogeneous Connection Pools and Pool Proxy Authentication
+
+By default, connection pools are 'homogeneous' meaning that all
+connections use the same database credentials.  However, if the pool
+option [`homogeneous`](#createpoolpoolattrshomogeneous) is *false* at
+pool creation, then a 'heterogeneous' pool will be created.  This
+allows different credentials to be used each time a connection is
+acquired from the pool with
+[`pool.getConnection()`](#getconnectionpool).
+
+##### Heterogeneous Pools
+
+When a heterogeneous pool is created by setting
+[`homogeneous`](#createpoolpoolattrshomogeneous) to *false* and no
+credentials supplied during pool creation, then a user name and
+password may be passed to `pool.getConnection()`:
+
+```javascript
+oracledb.createPool(
+  {
+    connectString : "localhost/XE",  // no user name or password
+    homogeneous   : false,
+    . . .  // other pool options such as poolMax can be used
+  },
+  function(err, pool) {
+    pool.getConnection(
+      {
+        user     : 'hr',
+        password : 'welcome'
+      },
+      function (err, conn) {
+
+      . . . // use connection
+
+        conn.close(
+          function(err) {
+            if (err) { console.error(err.message); }
+          });
+      });
+  });
+```
+
+The `connectString` is required during pool creation since the pool is
+created for one database instance.
+
+Different user names may be used each time `pool.getConnection()` is
+called.
+
+When applications want to use connection pools but are not able to use
+[`connection.clientId`](#propconnclientid) to distinguish application
+users from database schema owners, a 'heterogeneous' connection pool
+might be an option.
+
+For heterogeneous pools, the number of connections initially created
+is zero even if a larger value is specified for
+[`poolMin`](#propdbpoolmin).  The pool increment is always 1,
+regardless of the value of
+[`poolIncrement`](#createpoolpoolattrspoolincrement).  Once the number
+of open connections exceeds `poolMin` and connections are idle for
+more than the [`poolTimeout`](#propdbpooltimeout) seconds, then the
+number of open connections does not fall below `poolMin`.
+
+##### Pool Proxy Authentication
+
+Pool proxy authentication requires a heterogeneous pool.
+
+The idea of a proxy is to create a schema in one database user name.
+Privilege is granted on that schema to other database users so they
+can access the schema and manipulate its data.  This aids three-tier
+applications where one user owns the schema while multiple end-users
+access the data.
+
+To grant access, typically a DBA would execute:
+
+```sql
+ALTER USER sessionuser GRANT CONNECT THROUGH proxyuser;
+```
+
+For example, to allow a user called `MYPROXYUSER` to access the schema
+of `HR`:
+
+```
+SQL> CONNECT system/welcome
+
+SQL> ALTER USER hr GRANT CONNECT THROUGH myproxyuser;
+
+SQL> CONNECT myproxyuser[hr]/myproxyuserpassword
+
+SQL> SELECT SYS_CONTEXT('USERENV', 'SESSION_USER') AS SESSION_USER,
+  2         SYS_CONTEXT('USERENV', 'PROXY_USER')   AS PROXY_USER
+  3  FROM DUAL;
+
+SESSION_USER         PROXY_USER
+-------------------- --------------------
+HR                   MYPROXYUSER
+```
+
+See the [Client Access Through a Proxy][7] section in the Oracle Call
+Interface manual for more details about proxy authentication.
+
+To use the proxy user with a node-oracledb heterogeneous connection
+pool you could do:
+
+```javascript
+oracledb.createPool(
+  {
+    connectString : "localhost/XE",  // no user name or password
+    homogeneous   : false,
+    . . .  // other pool options such as poolMax can be used
+  },
+  function(err, pool) {
+    pool.getConnection(
+      {
+        user     : 'myproxyuser[hr]',
+        password : 'myproxyuserpassword'
+      },
+      function (err, conn) {
+
+        . . . // connection has access to the HR schema objects
+
+        conn.close(
+          function(err) {
+            if (err) { console.error(err.message); }
+          });
+      });
+  });
+```
+
+Other proxy cases are supported such as:
+
+```javascript
+oracledb.createPool(
+  {
+    user          : 'myproxyuser',
+    password      : 'myproxyuserpassword'
+    connectString : "localhost/XE",
+    homogeneous   : false,
+    . . .  // other pool options such as poolMax can be used
+  },
+  function(err, pool) {
+    pool.getConnection(
+      {
+        user : 'hr'  // the session user
+      },
+      function (err, conn) {
+
+        . . . // connection has access to the HR schema objects
+
+        conn.close(
+          function(err) {
+            if (err) { console.error(err.message); }
+          });
+      });
+  });
+```
+
+Heterogeneous pools cannot be used with the [connection pool
+cache](#connpoolcache).  It is recommended to create a homogeneous
+pool and make use of [`connection.clientId`](#propconnclientid).
 
 ### <a name="drcp"></a> 8.4 Database Resident Connection Pooling (DRCP)
 
@@ -7278,8 +7530,8 @@ parameter](#executemanybinds) array, indicating which record could
 not be processed:
 
 ```
-   [ { Error: ORA-00001: unique constraint (CJ.CHILDTAB_PK) violated errorNum: 1, offset: 3 },
-     { Error: ORA-02291: integrity constraint (CJ.CHILDTAB_FK) violated - parent key not found errorNum: 2291, offset: 6 } ]
+   [ { Error: ORA-00001: unique constraint (HR.CHILDTAB_PK) violated errorNum: 1, offset: 3 },
+     { Error: ORA-02291: integrity constraint (HR.CHILDTAB_FK) violated - parent key not found errorNum: 2291, offset: 6 } ]
 ```
 
 Note that some classes of error will always return via the
@@ -7552,7 +7804,7 @@ Enterprise Manager.
 The `clientId` property can also be used by applications that do their
 own mid-tier authentication but connect to the database using the one
 database schema.  By setting `clientId` to the application's
-authenticated username, the database is aware of who the actual end
+authenticated user name, the database is aware of who the actual end
 user is.  This can, for example, be used by Oracle [Virtual Private
 Database][11] policies to automatically restrict data access by that
 user.
