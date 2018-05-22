@@ -76,7 +76,7 @@ Installation is described in [INSTALL](https://oracle.github.io/node-oracledb/IN
     before running `make`.
 
   - `oracledb-src-X.Y.Z.tgz` which is the complete source code, mainly
-    created because older npm's (e.g. with Node 4) do not download the
+    created because older npm's (e.g. with Node.js 4) do not download the
     opdi submodule code when installing from a GitHub tag or branch.
 
 - The`staging-oracledb-X.Y.Z.tgz` package can be used to host binaries

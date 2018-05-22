@@ -50,7 +50,7 @@ The [*node-oracledb*][1] add-on for Node.js powers high performance Oracle Datab
 The steps below create a Node.js installation for testing.  Adjust the
 steps for your environment.
 
-This node-oracledb release has been tested with Node 4, 6, 8 and 9 on
+This node-oracledb release has been tested with Node.js 6, 8 and 10 on
 64-bit Oracle Linux, Windows and macOS.  The add-on can also build on
 some 32-bit Linux, 32-bit Windows, Solaris and AIX environments, but
 these architectures have not been fully tested.
@@ -210,7 +210,7 @@ additional tools to build from source code:
 - A compiler.
 
   Use Visual Studio on Windows, GCC on Linux or Xcode on macOS.
-  **When building with Node 4 onward, the compiler must support
+  **When building with Node.js 6 onward, the compiler must support
   C++11.** Note the default compiler on Oracle Linux 6 and RHEL 6 does
   not have the required support.  Install [GCC 4.8 or later][5] or
   upgrade to Oracle Linux 7.
@@ -1000,7 +1000,7 @@ Questions and issues can be posted as [GitHub Issues][10].
 Review the generic [prerequisites](#prerequisites).
 
 The GCC compiler is needed.  GCC 4.8 (or later) is needed to install
-because compiling for Node 4 (or later) requires a C++11 compatible
+because compiling for Node.js 6 (or later) requires a C++11 compatible
 compiler.
 
 Use GNU Make 4.1-1 or above.
@@ -1255,7 +1255,7 @@ Install [Python 2.7][2], which is required for the node-gyp utility:
 
 Install a C++11 compatible compiler:
 
-- On Linux you need GCC 4.8 (or later) because compiling for Node 4
+- On Linux you need GCC 4.8 (or later) because compiling for Node.js 6
   (or later) requires a C++11 compatible compiler.  The default
   compiler on Oracle Linux 6 and RHEL 6 does not have the required
   C++11 support. Install [GCC 4.8 or later][5] or upgrade to Oracle
@@ -1302,7 +1302,7 @@ set up Oracle client libraries, create client configuration
 directories, and run the samples.
 
 Users without `git`, or with older versions of `npm` such as included in
-Node 4, may alternatively need to use pre-bundled source code:
+Node.js 6, may alternatively need to use pre-bundled source code:
 
 ```
 npm install https://github.com/oracle/node-oracledb/releases/download/v2.3.0/oracledb-src-2.3.0.tgz
