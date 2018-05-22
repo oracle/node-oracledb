@@ -1052,6 +1052,7 @@ NAN_METHOD(njsOracledb::CreatePool)
     baton->GetIntFromJSON(poolProps, "poolPingInterval", 0,
             &baton->poolPingInterval);
     baton->GetBoolFromJSON(poolProps, "externalAuth", 0, &baton->externalAuth);
+    baton->GetBoolFromJSON(poolProps, "homogeneous", 0, &baton->homogeneous);
     baton->GetBoolFromJSON(poolProps, "events", 0, &baton->events);
     baton->GetStringFromJSON(poolProps, "edition", 0, baton->edition);
     baton->lobPrefetchSize = oracledb->lobPrefetchSize;
@@ -1079,6 +1080,8 @@ void njsOracledb::Async_CreatePool(njsBaton *baton)
     params.maxSessions = baton->poolMax;
     params.sessionIncrement = baton->poolIncrement;
     params.externalAuth = baton->externalAuth;
+    params.homogeneous = baton->homogeneous;
+
     if (params.externalAuth)
         params.homogeneous = 0;
     params.pingInterval = baton->poolPingInterval;

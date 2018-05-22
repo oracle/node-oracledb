@@ -299,6 +299,7 @@ public:
     njsDataType *fetchAsBufferTypes;
     njsProtoILob *protoILob;
     bool externalAuth;
+    bool homogeneous;                 // True: one user, false: multiple user
     bool getRS;
     bool autoCommit;
     bool extendedMetaData;
@@ -333,12 +334,13 @@ public:
             numBindVars(0), bindVars(NULL), numFetchInfo(0), fetchInfo(NULL),
             numFetchAsStringTypes(0), fetchAsStringTypes(NULL),
             numFetchAsBufferTypes(0), fetchAsBufferTypes(NULL),
-            protoILob(NULL), externalAuth(false), getRS(false),
-            autoCommit(false), extendedMetaData(false), isReturning(false),
-            isPLSQL(false), events(false), batchErrors(false),
-            dmlRowCounts(false), bufferSize(0), bufferPtr(NULL), lobOffset(0),
-            lobAmount(0), numRowCounts(0), rowCounts(NULL),
-            numBatchErrorInfos(0), batchErrorInfos(NULL), dpiError(false) {
+            protoILob(NULL), externalAuth(false), homogeneous(true),
+            getRS(false), autoCommit(false), extendedMetaData(false),
+            isReturning(false), isPLSQL(false), events(false),
+            batchErrors(false), dmlRowCounts(false), bufferSize(0),
+            bufferPtr(NULL), lobOffset(0), lobAmount(0), numRowCounts(0),
+            rowCounts(NULL), numBatchErrorInfos(0), batchErrorInfos(NULL),
+            dpiError(false) {
         this->jsCallback.Reset(callback);
         this->jsCallingObj.Reset(callingObj);
         this->callingObj = Nan::ObjectWrap::Unwrap<njsCommon>(callingObj);

@@ -360,14 +360,24 @@ NAN_METHOD(njsPool::GetConnection)
 {
     njsBaton *baton;
     njsPool *pool;
+    Local<Object> connProps;
 
-    pool = (njsPool*) ValidateArgs(info, 1, 1);
+    pool = (njsPool*) ValidateArgs(info, 2, 2);
     if (!pool)
         return;
+
+    /* Get optional connection properties: argument may have empty json */
+    if (!pool->GetObjectArg(info, 0, connProps))
+        return;
+
     baton = pool->CreateBaton(info);
     if (!baton)
         return;
     if (baton->error.empty()) {
+        /* Connection Properties: If empty json, values will be empty */
+        baton->GetStringFromJSON(connProps, "user", 0, baton->user);
+        baton->GetStringFromJSON(connProps, "password", 0, baton->password);
+
         baton->jsOracledb.Reset(pool->jsOracledb);
         njsOracledb *oracledb = baton->GetOracledb();
         baton->connClass = oracledb->getConnectionClass();
@@ -397,8 +407,16 @@ void njsPool::Async_GetConnection(njsBaton *baton)
         params.connectionClass = baton->connClass.c_str();
         params.connectionClassLength = baton->connClass.length();
     }
-    if (dpiPool_acquireConnection(baton->dpiPoolHandle, NULL, 0, NULL, 0,
-            &params, &baton->dpiConnHandle) < 0)
+    if (dpiPool_acquireConnection(baton->dpiPoolHandle,
+                                  baton->user.empty() ?
+                                      NULL : baton->user.c_str(),
+                                  baton->user.empty() ?
+                                      0 : baton->user.length(),
+                                  baton->password.empty () ?
+                                      NULL : baton->password.c_str(),
+                                  baton->password.empty () ?
+                                      0 : baton->password.length(),
+                                  &params, &baton->dpiConnHandle) < 0)
         baton->GetDPIError();
 }
 
