@@ -1,5 +1,7 @@
 # Change Log
 
+## node-oracledb v2.3.0 (DD Mon YYYY)
+
 ## node-oracledb v2.2.0 (3 Apr 2018)
 
 - Added
