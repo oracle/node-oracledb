@@ -1,7 +1,7 @@
 {
   "name": "oracledb",
   "version": "2.3.0-dev",
-  "description": "Oracle Database driver by Oracle Corp.",
+  "description": "A Node.js module for Oracle Database access",
   "license": "Apache-2.0",
   "homepage": "http://oracle.github.io/node-oracledb/",
   "keywords": [
