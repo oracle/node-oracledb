@@ -39,7 +39,6 @@ var assist   = require('./dataTypeAssist.js');
 describe('88. fetchBlobAsBuffer2.js', function() {
 
   var connection = null;
-  var node6plus = false;  // assume node runtime version is lower than 6
   var insertID = 1; // assume id for insert into db starts from 1
   var inFileName = './test/blobTmpFile.txt';
 
@@ -70,8 +69,6 @@ describe('88. fetchBlobAsBuffer2.js', function() {
         oracledb.getConnection(dbConfig, function(err, conn) {
           should.not.exist(err);
           connection = conn;
-          if(process.versions["node"].substring(0,1) >= "6")
-            node6plus = true;
           cb();
         });
       },
@@ -210,7 +207,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
 
     it('88.1.2 works with empty Buffer', function(done) {
       var id = insertID++;
-      var content = node6plus ? Buffer.from("", "utf-8") : new Buffer("", "utf-8");
+      var content = Buffer.from("", "utf-8");
 
       insertAndFetch(id, null, content, null, done);
     }); // 88.1.2
@@ -220,7 +217,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var specialStr = '88.1.3';
       var contentLength = 20;
       var strBuf = random.getRandomString(contentLength, specialStr);
-      var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
+      var content = Buffer.from(strBuf, "utf-8");
 
       insertAndFetch(id, specialStr, content, contentLength, done);
     }); // 88.1.3
@@ -230,7 +227,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var specialStr = '88.1.4';
       var contentLength = 65535;
       var strBuf = random.getRandomString(contentLength, specialStr);
-      var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
+      var content = Buffer.from(strBuf, "utf-8");
 
       insertAndFetch(id, specialStr, content, contentLength, done);
     }); // 88.1.4
@@ -240,7 +237,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var specialStr = '88.1.5';
       var contentLength = 65537;
       var strBuf = random.getRandomString(contentLength, specialStr);
-      var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
+      var content = Buffer.from(strBuf, "utf-8");
 
       insertAndFetch(id, specialStr, content, contentLength, done);
     }); // 88.1.5
@@ -250,7 +247,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var specialStr = '88.1.6';
       var contentLength = 1048577; // 1MB + 1
       var strBuf = random.getRandomString(contentLength, specialStr);
-      var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
+      var content = Buffer.from(strBuf, "utf-8");
 
       insertAndFetch(id, specialStr, content, contentLength, done);
     }); // 88.1.6
@@ -261,7 +258,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var contentLength = 200;
       var specialStrLength = specialStr.length;
       var strBuf = random.getRandomString(contentLength, specialStr);
-      var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
+      var content = Buffer.from(strBuf, "utf-8");
 
       async.series([
         function(cb) {
@@ -278,7 +275,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
               should.not.exist(err);
               // console.log(result);
               var resultVal = result.rows[0][0];
-              var buffer2Compare = node6plus ? Buffer.from(specialStr, "utf-8") : new Buffer(specialStr, "utf-8");
+              var buffer2Compare = Buffer.from(specialStr, "utf-8");
               compareClientFetchResult(err, resultVal, specialStr, buffer2Compare, specialStrLength);
               cb();
             }
@@ -299,12 +296,12 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var specialStr_1 = '88.1.9_1';
       var contentLength_1 = 200;
       var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
-      var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
+      var content_1 = Buffer.from(strBuf_1, "utf-8");
       var id_2 = insertID++;
       var specialStr_2 = '88.1.9_2';
       var contentLength_2 = 100;
       var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
-      var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
+      var content_2 = Buffer.from(strBuf_2, "utf-8");
 
       async.series([
         function(cb) {
@@ -338,7 +335,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var specialStr = '88.1.10';
       var contentLength = 200;
       var strBuf = random.getRandomString(contentLength, specialStr);
-      var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
+      var content = Buffer.from(strBuf, "utf-8");
 
       async.series([
         function(cb) {
@@ -371,11 +368,11 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var specialStr_1 = '88.1.11_1';
       var contentLength_1 = 200;
       var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
-      var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
+      var content_1 = Buffer.from(strBuf_1, "utf-8");
       var specialStr_2 = '88.1.11_2';
       var contentLength_2 = 208;
       var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
-      var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
+      var content_2 = Buffer.from(strBuf_2, "utf-8");
 
       async.series([
         function(cb) {
@@ -407,12 +404,12 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var specialStr_1 = '88.1.12_1';
       var contentLength_1 = 200;
       var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
-      var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
+      var content_1 = Buffer.from(strBuf_1, "utf-8");
       var id_2 = insertID++;
       var specialStr_2 = '88.1.12_2';
       var contentLength_2 = 100;
       var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
-      var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
+      var content_2 = Buffer.from(strBuf_2, "utf-8");
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 1;
 
@@ -448,12 +445,12 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var specialStr_1 = '88.1.13_1';
       var contentLength_1 = 200;
       var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
-      var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
+      var content_1 = Buffer.from(strBuf_1, "utf-8");
       var id_2 = insertID++;
       var specialStr_2 = '88.1.13_2';
       var contentLength_2 = 100;
       var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
-      var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
+      var content_2 = Buffer.from(strBuf_2, "utf-8");
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 10;
 
@@ -491,7 +488,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var specialStr = '88.1.14';
       var contentLength = 200;
       var strBuf = random.getRandomString(contentLength, specialStr);
-      var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
+      var content = Buffer.from(strBuf, "utf-8");
 
       async.series([
         function(cb) {
@@ -525,12 +522,12 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var specialStr_1 = '88.1.15_1';
       var contentLength_1 = 26;
       var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
-      var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
+      var content_1 = Buffer.from(strBuf_1, "utf-8");
       var id_2 = insertID++;
       var specialStr_2 = '88.1.15_2';
       var contentLength_2 = 30;
       var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
-      var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
+      var content_2 = Buffer.from(strBuf_2, "utf-8");
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 20;
 
@@ -574,12 +571,12 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var specialStr_1 = '88.1.16_1';
       var contentLength_1 = 26;
       var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
-      var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
+      var content_1 = Buffer.from(strBuf_1, "utf-8");
       var id_2 = insertID++;
       var specialStr_2 = '88.1.16_2';
       var contentLength_2 = 30;
       var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
-      var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
+      var content_2 = Buffer.from(strBuf_2, "utf-8");
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 2;
 
@@ -623,12 +620,12 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var specialStr_1 = '88.1.17_1';
       var contentLength_1 = 26;
       var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
-      var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
+      var content_1 = Buffer.from(strBuf_1, "utf-8");
       var id_2 = insertID++;
       var specialStr_2 = '88.1.17_2';
       var contentLength_2 = 30;
       var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
-      var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
+      var content_2 = Buffer.from(strBuf_2, "utf-8");
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 1;
 
@@ -730,7 +727,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
 
     it('88.2.2 works with empty buffer', function(done) {
       var id = insertID++;
-      var content = node6plus ? Buffer.from("", "utf-8") : new Buffer("", "utf-8");
+      var content = Buffer.from("", "utf-8");
 
       insertAndFetch(id, null, content, null, done);
     }); // 88.2.2
@@ -740,7 +737,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var specialStr = '88.2.3';
       var contentLength = 20;
       var strBuf = random.getRandomString(contentLength, specialStr);
-      var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
+      var content = Buffer.from(strBuf, "utf-8");
 
       insertAndFetch(id, specialStr, content, contentLength, done);
     }); // 88.2.3
@@ -750,7 +747,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var specialStr = '88.2.4';
       var contentLength = 65535;
       var strBuf = random.getRandomString(contentLength, specialStr);
-      var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
+      var content = Buffer.from(strBuf, "utf-8");
 
       insertAndFetch(id, specialStr, content, contentLength, done);
     }); // 88.2.4
@@ -760,7 +757,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var specialStr = '88.2.5';
       var contentLength = 65537;
       var strBuf = random.getRandomString(contentLength, specialStr);
-      var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
+      var content = Buffer.from(strBuf, "utf-8");
 
       insertAndFetch(id, specialStr, content, contentLength, done);
     }); // 88.2.5
@@ -770,7 +767,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var specialStr = '88.2.6';
       var contentLength = 1048577; // 1MB + 1
       var strBuf = random.getRandomString(contentLength, specialStr);
-      var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
+      var content = Buffer.from(strBuf, "utf-8");
 
       insertAndFetch(id, specialStr, content, contentLength, done);
     }); // 88.2.6
@@ -781,7 +778,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var contentLength = 200;
       var specialStrLength = specialStr.length;
       var strBuf = random.getRandomString(contentLength, specialStr);
-      var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
+      var content = Buffer.from(strBuf, "utf-8");
 
       async.series([
         function(cb) {
@@ -798,7 +795,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
             function(err, result) {
               should.not.exist(err);
               var resultVal = result.rows[0].B1;
-              var buffer2Compare = node6plus ? Buffer.from(specialStr, "utf-8") : new Buffer(specialStr, "utf-8");
+              var buffer2Compare = Buffer.from(specialStr, "utf-8");
               compareClientFetchResult(err, resultVal, specialStr, buffer2Compare, specialStrLength);
               cb();
             }
@@ -819,12 +816,12 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var specialStr_1 = '88.2.9_1';
       var contentLength_1 = 200;
       var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
-      var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
+      var content_1 = Buffer.from(strBuf_1, "utf-8");
       var id_2 = insertID++;
       var specialStr_2 = '88.2.9_2';
       var contentLength_2 = 100;
       var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
-      var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
+      var content_2 = Buffer.from(strBuf_2, "utf-8");
 
       async.series([
         function(cb) {
@@ -859,7 +856,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var specialStr = '88.2.10';
       var contentLength = 200;
       var strBuf = random.getRandomString(contentLength, specialStr);
-      var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
+      var content = Buffer.from(strBuf, "utf-8");
 
       async.series([
         function(cb) {
@@ -893,11 +890,11 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var specialStr_1 = '88.2.11_1';
       var contentLength_1 = 200;
       var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
-      var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
+      var content_1 = Buffer.from(strBuf_1, "utf-8");
       var specialStr_2 = '88.2.11_2';
       var contentLength_2 = 202;
       var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
-      var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
+      var content_2 = Buffer.from(strBuf_2, "utf-8");
 
       async.series([
         function(cb) {
@@ -930,12 +927,12 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var specialStr_1 = '88.2.12_1';
       var contentLength_1 = 200;
       var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
-      var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
+      var content_1 = Buffer.from(strBuf_1, "utf-8");
       var id_2 = insertID++;
       var specialStr_2 = '88.2.12_2';
       var contentLength_2 = 100;
       var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
-      var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
+      var content_2 = Buffer.from(strBuf_2, "utf-8");
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 1;
 
@@ -972,12 +969,12 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var specialStr_1 = '88.2.13_1';
       var contentLength_1 = 200;
       var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
-      var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
+      var content_1 = Buffer.from(strBuf_1, "utf-8");
       var id_2 = insertID++;
       var specialStr_2 = '88.2.13_2';
       var contentLength_2 = 100;
       var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
-      var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
+      var content_2 = Buffer.from(strBuf_2, "utf-8");
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 10;
 
@@ -1083,7 +1080,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
 
     it('88.3.2 works with empty buffer', function(done) {
       var id = insertID++;
-      var content = node6plus ? Buffer.from("", "utf-8") : new Buffer("", "utf-8");
+      var content = Buffer.from("", "utf-8");
 
       insertAndFetch(id, null, content, null, done);
     }); // 88.3.2
@@ -1093,7 +1090,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var specialStr = '88.3.3';
       var contentLength = 20;
       var strBuf = random.getRandomString(contentLength, specialStr);
-      var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
+      var content = Buffer.from(strBuf, "utf-8");
 
       insertAndFetch(id, specialStr, content, contentLength, done);
     }); // 88.3.3
@@ -1103,7 +1100,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var specialStr = '88.3.4';
       var contentLength = 65535;
       var strBuf = random.getRandomString(contentLength, specialStr);
-      var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
+      var content = Buffer.from(strBuf, "utf-8");
 
       insertAndFetch(id, specialStr, content, contentLength, done);
     }); // 88.3.4
@@ -1113,7 +1110,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var specialStr = '88.3.4';
       var contentLength = 65537;
       var strBuf = random.getRandomString(contentLength, specialStr);
-      var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
+      var content = Buffer.from(strBuf, "utf-8");
 
       insertAndFetch(id, specialStr, content, contentLength, done);
     }); // 88.3.5
@@ -1123,7 +1120,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var specialStr = '88.3.6';
       var contentLength = 1048577; // 1MB + 1
       var strBuf = random.getRandomString(contentLength, specialStr);
-      var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
+      var content = Buffer.from(strBuf, "utf-8");
 
       insertAndFetch(id, specialStr, content, contentLength, done);
     }); // 88.3.6
@@ -1134,7 +1131,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var contentLength = 200;
       var specialStrLength = specialStr.length;
       var strBuf = random.getRandomString(contentLength, specialStr);
-      var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
+      var content = Buffer.from(strBuf, "utf-8");
 
       async.series([
         function(cb) {
@@ -1155,7 +1152,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
                 function(err, row) {
                   should.not.exist(err);
                   var resultVal = row.B1;
-                  var buffer2Compare = node6plus ? Buffer.from(specialStr, "utf-8") : new Buffer(specialStr, "utf-8");
+                  var buffer2Compare = Buffer.from(specialStr, "utf-8");
                   compareClientFetchResult(err, resultVal, specialStr, buffer2Compare, specialStrLength);
                   result.resultSet.close(function(err) {
                     should.not.exist(err);
@@ -1181,12 +1178,12 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var specialStr_1 = '88.3.9_1';
       var contentLength_1 = 200;
       var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
-      var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
+      var content_1 = Buffer.from(strBuf_1, "utf-8");
       var id_2 = insertID++;
       var specialStr_2 = '88.3.9_2';
       var contentLength_2 = 100;
       var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
-      var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
+      var content_2 = Buffer.from(strBuf_2, "utf-8");
 
       async.series([
         function(cb) {
@@ -1232,7 +1229,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var specialStr = '88.3.10';
       var contentLength = 200;
       var strBuf = random.getRandomString(contentLength, specialStr);
-      var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
+      var content = Buffer.from(strBuf, "utf-8");
 
       async.series([
         function(cb) {
@@ -1275,11 +1272,11 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var specialStr_1 = '88.3.11_1';
       var contentLength_1 = 200;
       var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
-      var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
+      var content_1 = Buffer.from(strBuf_1, "utf-8");
       var specialStr_2 = '88.3.11_2';
       var contentLength_2 = 202;
       var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
-      var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
+      var content_2 = Buffer.from(strBuf_2, "utf-8");
 
       async.series([
         function(cb) {
@@ -1321,12 +1318,12 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var specialStr_1 = '88.3.12_1';
       var contentLength_1 = 200;
       var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
-      var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
+      var content_1 = Buffer.from(strBuf_1, "utf-8");
       var id_2 = insertID++;
       var specialStr_2 = '88.3.12_2';
       var contentLength_2 = 100;
       var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
-      var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
+      var content_2 = Buffer.from(strBuf_2, "utf-8");
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 1;
 
@@ -1376,12 +1373,12 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var specialStr_1 = '88.3.13_1';
       var contentLength_1 = 200;
       var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
-      var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
+      var content_1 = Buffer.from(strBuf_1, "utf-8");
       var id_2 = insertID++;
       var specialStr_2 = '88.3.13_2';
       var contentLength_2 = 100;
       var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
-      var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
+      var content_2 = Buffer.from(strBuf_2, "utf-8");
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 10;
 
@@ -1489,7 +1486,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
 
     it('88.4.2 works with empty Buffer', function(done) {
       var id = insertID++;
-      var content = node6plus ? Buffer.from("", "utf-8") : new Buffer("", "utf-8");
+      var content = Buffer.from("", "utf-8");
 
       insertAndFetch(id, null, content, null, done);
     }); // 88.4.2
@@ -1499,7 +1496,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var specialStr = '88.4.3';
       var contentLength = 20;
       var strBuf = random.getRandomString(contentLength, specialStr);
-      var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
+      var content = Buffer.from(strBuf, "utf-8");
 
       insertAndFetch(id, specialStr, content, contentLength, done);
     }); // 88.4.3
@@ -1509,7 +1506,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var specialStr = '88.4.4';
       var contentLength = 65535;
       var strBuf = random.getRandomString(contentLength, specialStr);
-      var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
+      var content = Buffer.from(strBuf, "utf-8");
 
       insertAndFetch(id, specialStr, content, contentLength, done);
     }); // 88.4.4
@@ -1519,7 +1516,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var specialStr = '88.4.5';
       var contentLength = 65537;
       var strBuf = random.getRandomString(contentLength, specialStr);
-      var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
+      var content = Buffer.from(strBuf, "utf-8");
 
       insertAndFetch(id, specialStr, content, contentLength, done);
     }); // 88.4.5
@@ -1529,7 +1526,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var specialStr = '88.4.6';
       var contentLength = 1048577; // 1MB + 1
       var strBuf = random.getRandomString(contentLength, specialStr);
-      var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
+      var content = Buffer.from(strBuf, "utf-8");
 
       insertAndFetch(id, specialStr, content, contentLength, done);
     }); // 88.4.6
@@ -1540,7 +1537,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var contentLength = 200;
       var specialStrLength = specialStr.length;
       var strBuf = random.getRandomString(contentLength, specialStr);
-      var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
+      var content = Buffer.from(strBuf, "utf-8");
 
       async.series([
         function(cb) {
@@ -1557,7 +1554,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
               should.not.exist(err);
               // console.log(result);
               var resultVal = result.rows[0][0];
-              var buffer2Compare = node6plus ? Buffer.from(specialStr, "utf-8") : new Buffer(specialStr, "utf-8");
+              var buffer2Compare = Buffer.from(specialStr, "utf-8");
               compareClientFetchResult(err, resultVal, specialStr, buffer2Compare, specialStrLength);
               cb();
             }
@@ -1578,12 +1575,12 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var specialStr_1 = '88.4.9_1';
       var contentLength_1 = 200;
       var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
-      var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
+      var content_1 = Buffer.from(strBuf_1, "utf-8");
       var id_2 = insertID++;
       var specialStr_2 = '88.4.9_2';
       var contentLength_2 = 100;
       var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
-      var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
+      var content_2 = Buffer.from(strBuf_2, "utf-8");
 
       async.series([
         function(cb) {
@@ -1618,7 +1615,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var specialStr = '88.4.10';
       var contentLength = 200;
       var strBuf = random.getRandomString(contentLength, specialStr);
-      var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
+      var content = Buffer.from(strBuf, "utf-8");
 
       async.series([
         function(cb) {
@@ -1651,11 +1648,11 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var specialStr_1 = '88.4.11_1';
       var contentLength_1 = 200;
       var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
-      var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
+      var content_1 = Buffer.from(strBuf_1, "utf-8");
       var specialStr_2 = '88.4.11_2';
       var contentLength_2 = 208;
       var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
-      var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
+      var content_2 = Buffer.from(strBuf_2, "utf-8");
 
       async.series([
         function(cb) {
@@ -1688,12 +1685,12 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var specialStr_1 = '88.4.12_1';
       var contentLength_1 = 200;
       var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
-      var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
+      var content_1 = Buffer.from(strBuf_1, "utf-8");
       var id_2 = insertID++;
       var specialStr_2 = '88.4.12_2';
       var contentLength_2 = 100;
       var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
-      var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
+      var content_2 = Buffer.from(strBuf_2, "utf-8");
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 1;
 
@@ -1730,12 +1727,12 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var specialStr_1 = '88.4.13_1';
       var contentLength_1 = 200;
       var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
-      var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
+      var content_1 = Buffer.from(strBuf_1, "utf-8");
       var id_2 = insertID++;
       var specialStr_2 = '88.4.13_2';
       var contentLength_2 = 100;
       var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
-      var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
+      var content_2 = Buffer.from(strBuf_2, "utf-8");
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 10;
 
@@ -1841,7 +1838,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
 
     it('88.5.2 works with empty Buffer', function(done) {
       var id = insertID++;
-      var content = node6plus ? Buffer.from("", "utf-8") : new Buffer("", "utf-8");
+      var content = Buffer.from("", "utf-8");
 
       insertAndFetch(id, null, content, null, done);
     }); // 88.5.2
@@ -1851,7 +1848,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var specialStr = '88.5.3';
       var contentLength = 20;
       var strBuf = random.getRandomString(contentLength, specialStr);
-      var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
+      var content = Buffer.from(strBuf, "utf-8");
 
       insertAndFetch(id, specialStr, content, contentLength, done);
     }); // 88.5.3
@@ -1861,7 +1858,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var specialStr = '88.5.4';
       var contentLength = 65535;
       var strBuf = random.getRandomString(contentLength, specialStr);
-      var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
+      var content = Buffer.from(strBuf, "utf-8");
 
       insertAndFetch(id, specialStr, content, contentLength, done);
     }); // 88.5.4
@@ -1871,7 +1868,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var specialStr = '88.5.5';
       var contentLength = 65537;
       var strBuf = random.getRandomString(contentLength, specialStr);
-      var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
+      var content = Buffer.from(strBuf, "utf-8");
 
       insertAndFetch(id, specialStr, content, contentLength, done);
     }); // 88.5.5
@@ -1881,7 +1878,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var specialStr = '88.5.6';
       var contentLength = 1048577; // 1MB + 1
       var strBuf = random.getRandomString(contentLength, specialStr);
-      var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
+      var content = Buffer.from(strBuf, "utf-8");
 
       insertAndFetch(id, specialStr, content, contentLength, done);
     }); // 88.5.6
@@ -1892,7 +1889,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var contentLength = 200;
       var specialStrLength = specialStr.length;
       var strBuf = random.getRandomString(contentLength, specialStr);
-      var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
+      var content = Buffer.from(strBuf, "utf-8");
 
       async.series([
         function(cb) {
@@ -1913,7 +1910,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
                 function(err, row) {
                   should.not.exist(err);
                   var resultVal = row[0];
-                  var buffer2Compare = node6plus ? Buffer.from(specialStr, "utf-8") : new Buffer(specialStr, "utf-8");
+                  var buffer2Compare = Buffer.from(specialStr, "utf-8");
                   compareClientFetchResult(err, resultVal, specialStr, buffer2Compare, specialStrLength);
                   result.resultSet.close(function(err) {
                     should.not.exist(err);
@@ -1939,12 +1936,12 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var specialStr_1 = '88.5.9_1';
       var contentLength_1 = 200;
       var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
-      var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
+      var content_1 = Buffer.from(strBuf_1, "utf-8");
       var id_2 = insertID++;
       var specialStr_2 = '88.5.9_2';
       var contentLength_2 = 100;
       var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
-      var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
+      var content_2 = Buffer.from(strBuf_2, "utf-8");
 
       async.series([
         function(cb) {
@@ -1991,7 +1988,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var specialStr = '88.5.10';
       var contentLength = 200;
       var strBuf = random.getRandomString(contentLength, specialStr);
-      var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
+      var content = Buffer.from(strBuf, "utf-8");
 
       async.series([
         function(cb) {
@@ -2034,11 +2031,11 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var specialStr_1 = '88.5.11_1';
       var contentLength_1 = 200;
       var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
-      var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
+      var content_1 = Buffer.from(strBuf_1, "utf-8");
       var specialStr_2 = '88.5.11_2';
       var contentLength_2 = 208;
       var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
-      var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
+      var content_2 = Buffer.from(strBuf_2, "utf-8");
 
       async.series([
         function(cb) {
@@ -2080,12 +2077,12 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var specialStr_1 = '88.5.12_1';
       var contentLength_1 = 200;
       var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
-      var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
+      var content_1 = Buffer.from(strBuf_1, "utf-8");
       var id_2 = insertID++;
       var specialStr_2 = '88.5.12_2';
       var contentLength_2 = 100;
       var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
-      var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
+      var content_2 = Buffer.from(strBuf_2, "utf-8");
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 1;
 
@@ -2135,12 +2132,12 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       var specialStr_1 = '88.5.13_1';
       var contentLength_1 = 200;
       var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
-      var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
+      var content_1 = Buffer.from(strBuf_1, "utf-8");
       var id_2 = insertID++;
       var specialStr_2 = '88.5.13_2';
       var contentLength_2 = 100;
       var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
-      var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
+      var content_2 = Buffer.from(strBuf_2, "utf-8");
       var maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 10;
 

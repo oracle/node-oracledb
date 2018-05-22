@@ -41,7 +41,6 @@ describe('132. longrawProcedureBind_in.js', function() {
   var connection = null;
   var tableName = "nodb_longraw_132";
   var insertID = 0;
-  var node6plus = false; // assume node runtime version is lower than 6
   var table_create = "BEGIN \n" +
                      "    DECLARE \n" +
                      "        e_table_missing EXCEPTION; \n" +
@@ -67,9 +66,6 @@ describe('132. longrawProcedureBind_in.js', function() {
         oracledb.getConnection(dbConfig, function(err, conn) {
           should.not.exist(err);
           connection = conn;
-          if (process.versions["node"].substring (0, 1) >= "6") {
-            node6plus = true;
-          }
           cb();
         });
       },
@@ -127,7 +123,7 @@ describe('132. longrawProcedureBind_in.js', function() {
     });
 
     it('132.1.3 works with empty buffer', function(done) {
-      var insertedBuf = node6plus ? Buffer.from("") : new Buffer("");
+      var insertedBuf = Buffer.from("");
       longraw_bindin(insertedBuf, proc_bindin_exec, done);
     });
 
@@ -183,7 +179,7 @@ describe('132. longrawProcedureBind_in.js', function() {
     });
 
     it('132.2.3 works with empty buffer', function(done) {
-      var insertedStr = node6plus ? Buffer.from("") : new Buffer("");
+      var insertedStr = Buffer.from("");
       longraw_bindin(insertedStr, proc_bindin_exec, done);
     });
 
@@ -216,7 +212,7 @@ describe('132. longrawProcedureBind_in.js', function() {
       insertBuf = insertContent;
       expectedBuf = null;
     } else {
-      insertBuf = node6plus ? Buffer.from(insertContent) : new Buffer(insertContent);
+      insertBuf = Buffer.from(insertContent);
       expectedBuf = insertBuf;
     }
     async.series([
@@ -246,7 +242,7 @@ describe('132. longrawProcedureBind_in.js', function() {
       insertBuf = insertContent;
       expectedBuf = null;
     } else {
-      insertBuf = node6plus ? Buffer.from(insertContent) : new Buffer(insertContent);
+      insertBuf = Buffer.from(insertContent);
       expectedBuf = insertBuf;
     }
     async.series([

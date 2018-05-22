@@ -530,7 +530,7 @@ assist.createBuffer = function(size) {
     var b = Math.floor(Math.random() * 256); // generate a random integer among 0-255
     array.push(b);
   }
-  return new Buffer(array);
+  return Buffer.from(array, "utf-8");
 };
 
 assist.compare2Buffers = function(originalBuf, compareBuf) {

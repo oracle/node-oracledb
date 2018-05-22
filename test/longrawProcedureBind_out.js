@@ -41,7 +41,6 @@ describe('134. longrawProcedureBind_out.js', function() {
   var connection = null;
   var tableName = "nodb_longraw_134";
   var insertID = 0;
-  var node6plus = false; // assume node runtime version is lower than 6
   var table_create = "BEGIN \n" +
                      "    DECLARE \n" +
                      "        e_table_missing EXCEPTION; \n" +
@@ -67,9 +66,6 @@ describe('134. longrawProcedureBind_out.js', function() {
         oracledb.getConnection(dbConfig, function(err, conn) {
           should.not.exist(err);
           connection = conn;
-          if (process.versions["node"].substring (0, 1) >= "6") {
-            node6plus = true;
-          }
           cb();
         });
       },
@@ -129,7 +125,7 @@ describe('134. longrawProcedureBind_out.js', function() {
     });
 
     it('134.1.3 works with empty buffer', function(done) {
-      var insertedBuf = node6plus ? Buffer.from("") : new Buffer("");
+      var insertedBuf = Buffer.from("");
       var maxsize = 10;
       longraw_bindout(insertedBuf, proc_bindout_exec, maxsize, done);
     });
@@ -190,7 +186,7 @@ describe('134. longrawProcedureBind_out.js', function() {
     });
 
     it('134.2.3 works with empty buffer', function(done) {
-      var insertedStr = node6plus ? Buffer.from("") : new Buffer("");
+      var insertedStr = Buffer.from("");
       var maxsize = 10;
       longraw_bindout(insertedStr, proc_bindout_exec, maxsize, done);
     });
@@ -226,7 +222,7 @@ describe('134. longrawProcedureBind_out.js', function() {
       insertBuf = insertContent;
       expectedBuf = null;
     } else {
-      insertBuf = node6plus ? Buffer.from(insertContent) : new Buffer(insertContent);
+      insertBuf = Buffer.from(insertContent);
       expectedBuf = insertBuf;
     }
     async.series([

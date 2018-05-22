@@ -38,7 +38,6 @@ describe('138. blobDMLReturningMultipleRowsAsStream.js', function() {
 
   var connection = null;
   var tableName = "nodb_dml_blob_138";
-  var node6plus = false; // assume node runtime version is lower than 6
 
   var blob_table_create = "BEGIN \n" +
                           "    DECLARE \n" +
@@ -63,8 +62,6 @@ describe('138. blobDMLReturningMultipleRowsAsStream.js', function() {
     oracledb.getConnection(dbConfig, function(err, conn) {
       should.not.exist(err);
       connection = conn;
-      if ( process.versions["node"].substring (0, 1) >= "6")
-        node6plus = true;
       done();
     });
   });
@@ -161,7 +158,7 @@ describe('138. blobDMLReturningMultipleRowsAsStream.js', function() {
     should.exist(lob);
     var blobData = 0;
     var totalLength = 0;
-    blobData = node6plus ? Buffer.alloc(0) : new Buffer(0);
+    blobData = Buffer.alloc(0);
 
     lob.on('data', function(chunk) {
       totalLength = totalLength + chunk.length;
@@ -174,7 +171,7 @@ describe('138. blobDMLReturningMultipleRowsAsStream.js', function() {
 
     lob.on('end', function(err) {
       should.not.exist(err);
-      var expected = node6plus ? Buffer.from(String(id-10), "utf-8") : new Buffer(String(id-10), "utf-8");
+      var expected = Buffer.from(String(id-10), "utf-8");
       should.strictEqual(assist.compare2Buffers(blobData, expected), true);
       cb(err, result);
     });

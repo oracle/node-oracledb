@@ -38,7 +38,6 @@ describe('42. dataTypeRaw.js', function() {
 
   var connection = null;
   var tableName = "nodb_raw";
-  var node6plus = false; // assume node runtime version is lower than 6
   var insertID = 1;
 
   var bufLen = [10 ,100, 1000, 2000]; // buffer length
@@ -56,9 +55,6 @@ describe('42. dataTypeRaw.js', function() {
       function(err, conn) {
         should.not.exist(err);
         connection = conn;
-        if (process.versions["node"].substring (0, 1) >= "6") {
-          node6plus = true;
-        }
         done();
       }
     );
@@ -428,19 +424,19 @@ describe('42. dataTypeRaw.js', function() {
 
     it('42.5.1 works with data size 100', function(done) {
       var insertedStr = random.getRandomLengthString(100);
-      var insertedBuf = node6plus ? Buffer.from(insertedStr) : new Buffer(insertedStr);
+      var insertedBuf = Buffer.from(insertedStr);
       test1(insertedBuf, done);
     });
 
     it('42.5.2 works with data size 2000', function(done) {
       var insertedStr = random.getRandomLengthString(2000);
-      var insertedBuf = node6plus ? Buffer.from(insertedStr) : new Buffer(insertedStr);
+      var insertedBuf = Buffer.from(insertedStr);
       test1(insertedBuf, done);
     });
 
     it('42.5.3 works with default type/dir', function(done) {
       var insertedStr = random.getRandomLengthString(2000);
-      var insertedBuf = node6plus ? Buffer.from(insertedStr) : new Buffer(insertedStr);
+      var insertedBuf = Buffer.from(insertedStr);
       test1_default(insertedBuf, done);
     });
 
@@ -469,24 +465,24 @@ describe('42. dataTypeRaw.js', function() {
     it('42.6.1 works with data size 100', function(done) {
       var insertedStr = random.getRandomLengthString(20);
       var updateStr = random.getRandomLengthString(100);
-      var insertedBuf = node6plus ? Buffer.from(insertedStr) : new Buffer(insertedStr);
-      var updateBuf = node6plus ? Buffer.from(updateStr) : new Buffer(updateStr);
+      var insertedBuf = Buffer.from(insertedStr);
+      var updateBuf = Buffer.from(updateStr);
       test2(insertedBuf, updateBuf, done);
     });
 
     it('42.6.2 works with data size 2000', function(done) {
       var insertedStr = random.getRandomLengthString(30);
       var updateStr = random.getRandomLengthString(2000);
-      var insertedBuf = node6plus ? Buffer.from(insertedStr) : new Buffer(insertedStr);
-      var updateBuf = node6plus ? Buffer.from(updateStr) : new Buffer(updateStr);
+      var insertedBuf = Buffer.from(insertedStr);
+      var updateBuf = Buffer.from(updateStr);
       test2(insertedBuf, updateBuf, done);
     });
 
     it('42.6.3 works with default type/dir', function(done) {
       var insertedStr = random.getRandomLengthString(30);
       var updateStr = random.getRandomLengthString(2000);
-      var insertedBuf = node6plus ? Buffer.from(insertedStr) : new Buffer(insertedStr);
-      var updateBuf = node6plus ? Buffer.from(updateStr) : new Buffer(updateStr);
+      var insertedBuf = Buffer.from(insertedStr);
+      var updateBuf = Buffer.from(updateStr);
       test2_default(insertedBuf, updateBuf, done);
     });
 

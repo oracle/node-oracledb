@@ -38,7 +38,6 @@ var assist   = require('./dataTypeAssist.js');
 describe('89. fetchBlobAsBuffer3.js', function() {
 
   var connection = null;
-  var node6plus = false;  // assume node runtime version is lower than 6
   var insertID = 1; // assume id for insert into db starts from 1
 
   var proc_create_table2 = "BEGIN \n" +
@@ -67,9 +66,6 @@ describe('89. fetchBlobAsBuffer3.js', function() {
     oracledb.getConnection(dbConfig, function(err, conn) {
       should.not.exist(err);
       connection = conn;
-      if(process.versions["node"].substring(0,1) >= "6")
-        node6plus = true;
-
       done();
     });
 
@@ -145,11 +141,11 @@ describe('89. fetchBlobAsBuffer3.js', function() {
       var specialStr_1 = '89.1.1_1';
       var contentLength_1 = 26;
       var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
-      var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
+      var content_1 = Buffer.from(strBuf_1, "utf-8");
       var specialStr_2 = '89.1.1_2';
       var contentLength_2 = 100;
       var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
-      var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
+      var content_2 = Buffer.from(strBuf_2, "utf-8");
 
       async.series([
         function(cb) {
@@ -177,11 +173,11 @@ describe('89. fetchBlobAsBuffer3.js', function() {
       var specialStr_1 = '89.1.2_1';
       var contentLength_1 = 30;
       var strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
-      var content_1 = node6plus ? Buffer.from(strBuf_1, "utf-8") : new Buffer(strBuf_1, "utf-8");
+      var content_1 = Buffer.from(strBuf_1, "utf-8");
       var specialStr_2 = '89.1.2_2';
       var contentLength_2 = 50;
       var strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
-      var content_2 = node6plus ? Buffer.from(strBuf_2, "utf-8") : new Buffer(strBuf_2, "utf-8");
+      var content_2 = Buffer.from(strBuf_2, "utf-8");
 
       async.series([
         function(cb) {

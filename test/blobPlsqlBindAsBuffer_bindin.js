@@ -38,7 +38,6 @@ var assist   = require('./dataTypeAssist.js');
 describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
 
   var connection = null;
-  var node6plus = false; // assume node runtime version is lower than 6
   var insertID = 1; // assume id for insert into db starts from 1
 
   var proc_blob_in_tab = "BEGIN \n" +
@@ -84,10 +83,6 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
         oracledb.getConnection(dbConfig, function(err, conn) {
           should.not.exist(err);
           connection = conn;
-
-          // Check whether node runtime version is >= 6 or not
-          if ( process.versions["node"].substring (0, 1) >= "6")
-            node6plus = true;
           cb();
         });
       },
@@ -211,7 +206,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
 
         var blobData = 0;
         var totalLength = 0;
-        blobData = node6plus ? Buffer.alloc(0) : new Buffer(0);
+        blobData = Buffer.alloc(0);
 
         lob.on('data', function(chunk) {
           totalLength = totalLength + chunk.length;
@@ -244,7 +239,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
           return callback();
         } else {
           should.exist(lob);
-          var blobData = node6plus ? Buffer.alloc(0) : new Buffer(0);
+          var blobData =  Buffer.alloc(0);
           var totalLength = 0;
 
           lob.on('data', function(chunk) {
@@ -331,7 +326,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
         },
         function(cb) {
           var sql = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
-          var emptyBuffer = node6plus ? Buffer.from("", "utf-8") : new Buffer("", "utf-8");
+          var emptyBuffer =  Buffer.from("", "utf-8");
           verifyBlobValueWithBuffer(sql, emptyBuffer, null, cb);
         },
         function(cb) {
@@ -357,7 +352,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
         },
         function(cb) {
           var sql = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
-          var emptyBuffer = node6plus ? Buffer.from("", "utf-8") : new Buffer("", "utf-8");
+          var emptyBuffer =  Buffer.from("", "utf-8");
           verifyBlobValueWithBuffer(sql, emptyBuffer, null, cb);
         },
         function(cb) {
@@ -383,7 +378,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
         },
         function(cb) {
           var sql = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
-          var emptyBuffer = node6plus ? Buffer.from("", "utf-8") : new Buffer("", "utf-8");
+          var emptyBuffer =  Buffer.from("", "utf-8");
           verifyBlobValueWithBuffer(sql, emptyBuffer, null, cb);
         },
         function(cb) {
@@ -451,7 +446,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
 
     it('77.1.7 works with empty buffer', function(done) {
       var sequence = insertID++;
-      var bufferStr = node6plus ? Buffer.from('', "utf-8") : new Buffer('', "utf-8");
+      var bufferStr =  Buffer.from('', "utf-8");
       var bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         b: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_IN }
@@ -471,7 +466,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
 
     it('77.1.8 works with empty buffer and bind in maxSize set to 1', function(done) {
       var sequence = insertID++;
-      var bufferStr = node6plus ? Buffer.from('', "utf-8") : new Buffer('', "utf-8");
+      var bufferStr = Buffer.from('', "utf-8");
       var bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         b: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: 1 }
@@ -491,7 +486,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
 
     it('77.1.9 works with empty buffer and bind in maxSize set to (64K - 1)', function(done) {
       var sequence = insertID++;
-      var bufferStr = node6plus ? Buffer.from('', "utf-8") : new Buffer('', "utf-8");
+      var bufferStr = Buffer.from('', "utf-8");
       var bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         b: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: 65535 }
@@ -613,7 +608,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
       var size = 32768;
       var specialStr = "77.1.15";
       var bigStr = random.getRandomString(size, specialStr);
-      var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
+      var bufferStr = Buffer.from(bigStr, "utf-8");
       var bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         b: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: size }
@@ -636,7 +631,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
       var sequence = insertID++;
       var specialStr = "77.1.16";
       var bigStr = random.getRandomString(size, specialStr);
-      var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
+      var bufferStr = Buffer.from(bigStr, "utf-8");
       var bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         b: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: size }
@@ -659,7 +654,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
       var sequence = insertID++;
       var specialStr = "77.1.17";
       var bigStr = random.getRandomString(size, specialStr);
-      var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
+      var bufferStr = Buffer.from(bigStr, "utf-8");
       var bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         b: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: size }
@@ -682,7 +677,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
       var sequence = insertID++;
       var specialStr = "77.1.18";
       var bigStr = random.getRandomString(size, specialStr);
-      var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
+      var bufferStr = Buffer.from(bigStr, "utf-8");
       var bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         b: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: size }
@@ -725,7 +720,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
       var sequence = insertID++;
       var specialStr = "77.1.20";
       var bigStr = random.getRandomString(size, specialStr);
-      var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
+      var bufferStr = Buffer.from(bigStr, "utf-8");
       var bindVar = [ sequence, { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: size } ];
       var option = { autoCommit: true };
 
@@ -766,7 +761,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
       var sequence = insertID++;
       var specialStr = "77.1.22";
       var bigStr = random.getRandomString(size, specialStr);
-      var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
+      var bufferStr = Buffer.from(bigStr, "utf-8");
       var bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         b: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_IN }
@@ -789,7 +784,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
       var sequence = insertID++;
       var specialStr = "77.1.23";
       var bigStr = random.getRandomString(size, specialStr);
-      var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
+      var bufferStr = Buffer.from(bigStr, "utf-8");
       var bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         b: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: size - 1 }
@@ -820,11 +815,11 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
       var size_1 = 65535;
       var specialStr_1 = "77.1.24_1";
       var bigStr_1 = random.getRandomString(size_1, specialStr_1);
-      var bufferStr_1 = node6plus ? Buffer.from(bigStr_1, "utf-8") : new Buffer(bigStr_1, "utf-8");
+      var bufferStr_1 = Buffer.from(bigStr_1, "utf-8");
       var size_2 = 30000;
       var specialStr_2 = "77.1.24_2";
       var bigStr_2 = random.getRandomString(size_2, specialStr_2);
-      var bufferStr_2 = node6plus ? Buffer.from(bigStr_2, "utf-8") : new Buffer(bigStr_2, "utf-8");
+      var bufferStr_2 = Buffer.from(bigStr_2, "utf-8");
       var bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         b1: { val: bufferStr_1, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: size_1 },
@@ -900,7 +895,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
         },
         function(cb) {
           var sql = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
-          var emptyBuffer = node6plus ? Buffer.from("", "utf-8") : new Buffer("", "utf-8");
+          var emptyBuffer = Buffer.from("", "utf-8");
           verifyBlobValueWithBuffer(sql, emptyBuffer, null, cb);
         },
         function(cb) {
@@ -926,7 +921,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
         },
         function(cb) {
           var sql = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
-          var emptyBuffer = node6plus ? Buffer.from("", "utf-8") : new Buffer("", "utf-8");
+          var emptyBuffer = Buffer.from("", "utf-8");
           verifyBlobValueWithBuffer(sql, emptyBuffer, null, cb);
         },
         function(cb) {
@@ -952,7 +947,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
         },
         function(cb) {
           var sql = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
-          var emptyBuffer = node6plus ? Buffer.from("", "utf-8") : new Buffer("", "utf-8");
+          var emptyBuffer = Buffer.from("", "utf-8");
           verifyBlobValueWithBuffer(sql, emptyBuffer, null, cb);
         },
         function(cb) {
@@ -1020,7 +1015,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
 
     it('77.2.7 works with empty buffer', function(done) {
       var sequence = insertID++;
-      var bufferStr = node6plus ? Buffer.from('', "utf-8") : new Buffer('', "utf-8");
+      var bufferStr = Buffer.from('', "utf-8");
       var bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         b: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_IN }
@@ -1040,7 +1035,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
 
     it('77.2.8 works with empty buffer and bind in maxSize set to 1', function(done) {
       var sequence = insertID++;
-      var bufferStr = node6plus ? Buffer.from('', "utf-8") : new Buffer('', "utf-8");
+      var bufferStr = Buffer.from('', "utf-8");
       var bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         b: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: 1 }
@@ -1060,7 +1055,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
 
     it('77.2.9 works with empty buffer and bind in maxSize set to (64K - 1)', function(done) {
       var sequence = insertID++;
-      var bufferStr = node6plus ? Buffer.from('', "utf-8") : new Buffer('', "utf-8");
+      var bufferStr = Buffer.from('', "utf-8");
       var bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         b: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: 65535 }
@@ -1180,7 +1175,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
       var size = 32767;
       var specialStr = "77.2.15";
       var bigStr = random.getRandomString(size, specialStr);
-      var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
+      var bufferStr = Buffer.from(bigStr, "utf-8");
       var bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         b: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: size }
@@ -1203,7 +1198,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
       var sequence = insertID++;
       var specialStr = "77.2.16";
       var bigStr = random.getRandomString(size, specialStr);
-      var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
+      var bufferStr = Buffer.from(bigStr, "utf-8");
       var bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         b: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: size }
@@ -1246,7 +1241,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
       var sequence = insertID++;
       var specialStr = "77.2.18";
       var bigStr = random.getRandomString(size, specialStr);
-      var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
+      var bufferStr = Buffer.from(bigStr, "utf-8");
       var bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         b: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_IN }
@@ -1269,7 +1264,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
       var sequence = insertID++;
       var specialStr = "77.2.19";
       var bigStr = random.getRandomString(size, specialStr);
-      var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
+      var bufferStr = Buffer.from(bigStr, "utf-8");
       var bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         b: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: size - 1 }
@@ -1300,11 +1295,11 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
       var size_1 = 3000;
       var specialStr_1 = "77.2.20_1";
       var bigStr_1 = random.getRandomString(size_1, specialStr_1);
-      var bufferStr_1 = node6plus ? Buffer.from(bigStr_1, "utf-8") : new Buffer(bigStr_1, "utf-8");
+      var bufferStr_1 = Buffer.from(bigStr_1, "utf-8");
       var size_2 = 2000;
       var specialStr_2 = "77.2.20_2";
       var bigStr_2 = random.getRandomString(size_2, specialStr_2);
-      var bufferStr_2 = node6plus ? Buffer.from(bigStr_2, "utf-8") : new Buffer(bigStr_2, "utf-8");
+      var bufferStr_2 = Buffer.from(bigStr_2, "utf-8");
       var bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         b1: { val: bufferStr_1, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: size_1 },
@@ -1362,8 +1357,8 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
       var specialStr_2 = "77.3.1_2";
       var bigStr_1 = random.getRandomString(size_1, specialStr_1);
       var bigStr_2 = random.getRandomString(size_2, specialStr_2);
-      var bufferStr_1 = node6plus ? Buffer.from(bigStr_1, "utf-8") : new Buffer(bigStr_1, "utf-8");
-      var bufferStr_2 = node6plus ? Buffer.from(bigStr_2, "utf-8") : new Buffer(bigStr_2, "utf-8");
+      var bufferStr_1 = Buffer.from(bigStr_1, "utf-8");
+      var bufferStr_2 = Buffer.from(bigStr_2, "utf-8");
       var sequence = insertID++;
       var bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -1393,7 +1388,7 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
       var sequence = insertID++;
       var size_1 = 32768;
       var bigStr_1 = random.getRandomString(size_1, specialStr);
-      var bufferStr_1 = node6plus ? Buffer.from(bigStr_1, "utf-8") : new Buffer(bigStr_1, "utf-8");
+      var bufferStr_1 = Buffer.from(bigStr_1, "utf-8");
 
       async.series([
         function(cb) {
@@ -1443,8 +1438,8 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
       var specialStr_2 = "77.3.3_2";
       var bigStr_1 = random.getRandomString(size_1, specialStr_1);
       var bigStr_2 = random.getRandomString(size_2, specialStr_2);
-      var bufferStr_1 = node6plus ? Buffer.from(bigStr_1, "utf-8") : new Buffer(bigStr_1, "utf-8");
-      var bufferStr_2 = node6plus ? Buffer.from(bigStr_2, "utf-8") : new Buffer(bigStr_2, "utf-8");
+      var bufferStr_1 = Buffer.from(bigStr_1, "utf-8");
+      var bufferStr_2 = Buffer.from(bigStr_2, "utf-8");
       var sequence = insertID++;
       var bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },

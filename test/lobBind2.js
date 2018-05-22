@@ -36,17 +36,11 @@ var dbConfig = require('./dbconfig.js');
 describe("72. lobBind2.js", function() {
 
   var connection = null;
-  var node6plus  = false; // assume node runtime version is lower than 6
 
   before(function(done) {
     oracledb.getConnection(dbConfig, function(err, conn) {
       should.not.exist(err);
       connection = conn;
-
-      // Check whether node runtime version is >= 6 or not
-      if ( process.versions["node"].substring (0, 1) >= "6")
-        node6plus = true;
-
       done();
     });
   }); // before
@@ -564,7 +558,7 @@ describe("72. lobBind2.js", function() {
           var blobData,
             totalLength = 0;
 
-          blobData = node6plus ? Buffer.alloc(0) : new Buffer(0);
+          blobData = Buffer.alloc(0);
 
           lob.on("data", function(chunk) {
             totalLength = totalLength + chunk.length;

@@ -36,7 +36,6 @@ var assist   = require('./dataTypeAssist.js');
 describe('70. plsqlBindScalar.js', function() {
 
   var connection = null;
-  var node6plus   = false;  // assume node runtime version is lower than 6
 
   before(function(done) {
     async.series([
@@ -44,10 +43,6 @@ describe('70. plsqlBindScalar.js', function() {
         oracledb.getConnection(dbConfig, function(err, conn) {
           should.not.exist(err);
           connection = conn;
-          // Note down whether node runtime version is >= 6 or not
-          if ( process.versions["node"].substring ( 0, 1 ) >= "6" )
-            node6plus = true;
-
           cb();
         });
       },
@@ -1938,10 +1933,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.8.3 val: null', function(done) {
       var emptybuf;
-      if ( node6plus )
-        emptybuf = Buffer.alloc ( 0 ) ;
-      else
-        emptybuf = new Buffer ( 0 );
+      emptybuf = Buffer.alloc ( 0 ) ;
 
       var bindVar = {
         p_inout : {
@@ -1966,11 +1958,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.8.4 val: empty string', function(done) {
       var emptybuf;
-
-      if ( node6plus )
-        emptybuf = Buffer.from ("", "utf-8" );
-      else
-        emptybuf = new Buffer ( "", "utf-8" ) ;
+      emptybuf = Buffer.from ("", "utf-8" );
 
       var bindVar = {
         p_inout : {
@@ -2218,11 +2206,7 @@ describe('70. plsqlBindScalar.js', function() {
 
       var rowid = 2;
       var emptybuf;
-
-      if ( node6plus )
-        emptybuf = Buffer.alloc ( 0 ) ;
-      else
-        emptybuf = new Buffer ( 0 )  ;
+      emptybuf = Buffer.alloc ( 0 ) ;
 
       var bindVar = {
         p_in: rowid,
@@ -2289,11 +2273,7 @@ describe('70. plsqlBindScalar.js', function() {
 
       var rowid = 3;
       var emptybuf;
-
-      if ( node6plus )
-        emptybuf = Buffer.alloc ( 0 ) ;
-      else
-        emptybuf = new Buffer ( 0 ) ;
+      emptybuf = Buffer.alloc ( 0 ) ;
 
       var bindVar = {
         p_in: rowid,
@@ -2354,11 +2334,7 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.9.4 dir: BIND_INOUT, val: undefined', function(done) {
       var rowid = 4;
       var emptybuf;
-
-      if ( node6plus )
-        emptybuf = Buffer.alloc ( 0 ) ;
-      else
-        emptybuf = new Buffer ( 0 ) ;
+      emptybuf = Buffer.alloc ( 0 ) ;
 
       var bindVar = {
         p_in: rowid,
@@ -2424,11 +2400,7 @@ describe('70. plsqlBindScalar.js', function() {
 
       var rowid = 5;
       var emptybuf;
-
-      if ( node6plus )
-        emptybuf = Buffer.alloc ( 0 ) ;
-      else
-        emptybuf = new Buffer ( 0 ) ;
+      emptybuf = Buffer.alloc ( 0 ) ;
 
       var bindVar = {
         p_in: rowid,
@@ -2883,7 +2855,7 @@ describe('70. plsqlBindScalar.js', function() {
         function correct(cb) {
           var bindVar = {
             output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
-            p_in: {type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, val: new Buffer('')}
+            p_in: {type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, val: Buffer.from('')}
           };
           connection.execute(
             "begin :output := nodb_checkplsqlvalue5 (:p_in); end;",

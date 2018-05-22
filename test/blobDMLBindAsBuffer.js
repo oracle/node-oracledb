@@ -38,7 +38,6 @@ var assist   = require('./dataTypeAssist.js');
 describe('82.blobDMLBindAsBuffer.js', function() {
 
   var connection = null;
-  var node6plus = false; // assume node runtime version is lower than 6
   var insertID = 1; // assume id for insert into db starts from 1
 
   var proc_blob_1 = "BEGIN \n" +
@@ -64,10 +63,6 @@ describe('82.blobDMLBindAsBuffer.js', function() {
     oracledb.getConnection(dbConfig, function(err, conn) {
       should.not.exist(err);
       connection = conn;
-      // Check whether node runtime version is >= 6 or not
-      if ( process.versions["node"].substring (0, 1) >= "6")
-        node6plus = true;
-
       done();
     });
   }); // before
@@ -152,7 +147,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
           return callback();
         } else {
           should.exist(lob);
-          var blobData = node6plus ? Buffer.alloc(0) : new Buffer(0);
+          var blobData = Buffer.alloc(0);
           var totalLength = 0;
 
           lob.on('data', function(chunk) {
@@ -166,7 +161,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
 
           lob.on('end', function() {
             if(originalBuffer == "EMPTY_BLOB") {
-              var nullBuffer = node6plus ? Buffer.from('', "utf-8") : new Buffer('', "utf-8");
+              var nullBuffer = Buffer.from('', "utf-8");
               should.strictEqual(assist.compare2Buffers(blobData, nullBuffer), true);
             } else {
               should.strictEqual(totalLength, originalBuffer.length);
@@ -213,7 +208,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
     it('82.1.2 works with empty buffer', function(done) {
       var id = insertID++;
       var bigStr = '';
-      var content = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
+      var content = Buffer.from(bigStr, "utf-8");
 
       async.series([
         function(cb) {
@@ -228,7 +223,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
     it('82.1.3 works with empty buffer and bind in maxSize set to 32767', function(done) {
       var id = insertID++;
       var bigStr = '';
-      var content = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
+      var content = Buffer.from(bigStr, "utf-8");
 
       async.series([
         function(cb) {
@@ -254,7 +249,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
     it('82.1.4 works with empty buffer and bind in maxSize set to 50000', function(done) {
       var id = insertID++;
       var bigStr = '';
-      var content = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
+      var content = Buffer.from(bigStr, "utf-8");
 
       async.series([
         function(cb) {
@@ -398,7 +393,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
       var contentLength = 32768;
       var specialStr = "82.1.11";
       var bigStr = random.getRandomString(contentLength, specialStr);
-      var content = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
+      var content = Buffer.from(bigStr, "utf-8");
 
       async.series([
         function(cb) {
@@ -415,7 +410,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
       var contentLength = 65535;
       var specialStr = "82.1.12";
       var bigStr = random.getRandomString(contentLength, specialStr);
-      var content = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
+      var content = Buffer.from(bigStr, "utf-8");
 
       async.series([
         function(cb) {
@@ -432,7 +427,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
       var contentLength = 65537;
       var specialStr = "82.1.13";
       var bigStr = random.getRandomString(contentLength, specialStr);
-      var content = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
+      var content = Buffer.from(bigStr, "utf-8");
 
       async.series([
         function(cb) {
@@ -449,7 +444,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
       var contentLength = 1048577; // 1 * 1024 * 1024 + 1;
       var specialStr = "82.1.14";
       var bigStr = random.getRandomString(contentLength, specialStr);
-      var content = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
+      var content = Buffer.from(bigStr, "utf-8");
 
       async.series([
         function(cb) {
@@ -485,7 +480,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
       var contentLength = 40000;
       var specialStr = "82.1.16";
       var bigStr = random.getRandomString(contentLength, specialStr);
-      var content = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
+      var content = Buffer.from(bigStr, "utf-8");
 
       async.series([
         function(cb) {
@@ -529,7 +524,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
       var contentLength = 400;
       var specialStr = "82.1.18";
       var bigStr = random.getRandomString(contentLength, specialStr);
-      var content = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
+      var content = Buffer.from(bigStr, "utf-8");
       var sql = "INSERT INTO nodb_dml_blob_1 (id, blob) VALUES (:i, :c) RETURNING blob INTO :lobbv";
 
       async.series([
@@ -597,7 +592,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
       var contentLength = 32768;
       var specialStr = "82.1.20";
       var bigStr = random.getRandomString(contentLength, specialStr);
-      var content = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
+      var content = Buffer.from(bigStr, "utf-8");
 
       async.series([
         function(cb) {
@@ -639,7 +634,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
       var contentLength_2 = 32768;
       var specialStr_2 = "82.2.1";
       var bigStr_2 = random.getRandomString(contentLength_2, specialStr_2);
-      var content_2 = node6plus ? Buffer.from(bigStr_2, "utf-8") : new Buffer(bigStr_2, "utf-8");
+      var content_2 = Buffer.from(bigStr_2, "utf-8");
 
       async.series([
         function(cb) {
@@ -662,7 +657,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
       var contentLength_1 = 50000;
       var specialStr_1 = "82.2.2";
       var bigStr_1 = random.getRandomString(contentLength_1, specialStr_1);
-      var content_1 = node6plus ? Buffer.from(bigStr_1, "utf-8") : new Buffer(bigStr_1, "utf-8");
+      var content_1 = Buffer.from(bigStr_1, "utf-8");
       var content_2 = "EMPTY_BLOB";
 
       async.series([
@@ -705,11 +700,11 @@ describe('82.blobDMLBindAsBuffer.js', function() {
     it('82.2.4 update empty buffer column', function(done) {
       var id = insertID++;
       var bigStr_1 = "";
-      var content_1 = node6plus ? Buffer.from(bigStr_1, "utf-8") : new Buffer(bigStr_1, "utf-8");
+      var content_1 = Buffer.from(bigStr_1, "utf-8");
       var contentLength_2 = 54321;
       var specialStr_2 = "82.2.4";
       var bigStr_2 = random.getRandomString(contentLength_2, specialStr_2);
-      var content_2 = node6plus ? Buffer.from(bigStr_2, "utf-8") : new Buffer(bigStr_2, "utf-8");
+      var content_2 = Buffer.from(bigStr_2, "utf-8");
 
       async.series([
         function(cb) {
@@ -732,7 +727,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
       var contentLength_1 = 50000;
       var specialStr_1 = "82.2.2";
       var bigStr_1 = random.getRandomString(contentLength_1, specialStr_1);
-      var content_1 = node6plus ? Buffer.from(bigStr_1, "utf-8") : new Buffer(bigStr_1, "utf-8");
+      var content_1 = Buffer.from(bigStr_1, "utf-8");
       var content_2 = "";
 
       async.series([

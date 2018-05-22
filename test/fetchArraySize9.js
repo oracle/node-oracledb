@@ -40,7 +40,6 @@ describe("156. fetchArraySize9.js", function() {
   var default_fetcArraySize = oracledb.fetchArraySize;
   var default_maxRows = oracledb.maxRows;
   var tableName = "nodb_fetchArraySize_156";
-  var node6plus = false; // assume node runtime version is lower than 6
 
   var create_table = "BEGIN \n" +
                      "    DECLARE \n" +
@@ -68,8 +67,6 @@ describe("156. fetchArraySize9.js", function() {
       should.strictEqual(default_maxRows, 0);
       should.not.exist(err);
       connection = conn;
-      if ( process.versions["node"].substring (0, 1) >= "6")
-        node6plus = true;
       done();
     });
   });
@@ -441,7 +438,7 @@ describe("156. fetchArraySize9.js", function() {
     should.exist(lob);
     var blobData = 0;
     var totalLength = 0;
-    blobData = node6plus ? Buffer.alloc(0) : new Buffer(0);
+    blobData = Buffer.alloc(0);
 
     lob.on('data', function(chunk) {
       totalLength = totalLength + chunk.length;
@@ -454,7 +451,7 @@ describe("156. fetchArraySize9.js", function() {
 
     lob.on('end', function(err) {
       should.not.exist(err);
-      var expected = node6plus ? Buffer.from((String(id)), "utf-8") : new Buffer((String(id)), "utf-8");
+      var expected = Buffer.from((String(id)), "utf-8");
       should.strictEqual(assist.compare2Buffers(blobData, expected), true);
       cb(err);
     });

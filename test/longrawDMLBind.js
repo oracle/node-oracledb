@@ -40,7 +40,6 @@ describe('126. longrawDMLBind.js', function() {
 
   var connection = null;
   var tableName = "nodb_longraw";
-  var node6plus = false; // assume node runtime version is lower than 6
   var insertID = 0;
   var table_create = "BEGIN \n" +
                      "    DECLARE \n" +
@@ -67,9 +66,6 @@ describe('126. longrawDMLBind.js', function() {
         oracledb.getConnection(dbConfig, function(err, conn) {
           should.not.exist(err);
           connection = conn;
-          if (process.versions["node"].substring (0, 1) >= "6") {
-            node6plus = true;
-          }
           cb();
         });
       },
@@ -102,21 +98,21 @@ describe('126. longrawDMLBind.js', function() {
 
     it('126.1.1 works with data size 64K - 1', function(done) {
       var insertedStr = random.getRandomLengthString(65535);
-      var insertedBuf = node6plus ? Buffer.from(insertedStr) : new Buffer(insertedStr);
+      var insertedBuf = Buffer.from(insertedStr);
       var maxsize = 65535;
       test1(insertedBuf, maxsize, done);
     });
 
     it('126.1.2 works with data size 64K', function(done) {
       var insertedStr = random.getRandomLengthString(65536);
-      var insertedBuf = node6plus ? Buffer.from(insertedStr) : new Buffer(insertedStr);
+      var insertedBuf = Buffer.from(insertedStr);
       var maxsize = 65536;
       test1(insertedBuf, maxsize, done);
     });
 
     it('126.1.3 works with data size 64K + 1', function(done) {
       var insertedStr = random.getRandomLengthString(65537);
-      var insertedBuf = node6plus ? Buffer.from(insertedStr) : new Buffer(insertedStr);
+      var insertedBuf = Buffer.from(insertedStr);
       var maxsize = 65537;
       test1(insertedBuf, maxsize, done);
     });
@@ -124,26 +120,26 @@ describe('126. longrawDMLBind.js', function() {
     it('126.1.4 works with data size 1MB + 1', function(done) {
       var size = 1 * 1024 * 1024 + 1;
       var insertedStr = random.getRandomLengthString(size);
-      var insertedBuf = node6plus ? Buffer.from(insertedStr) : new Buffer(insertedStr);
+      var insertedBuf = Buffer.from(insertedStr);
       test1(insertedBuf, size, done);
     });
 
     it('126.1.5 works with data size 100', function(done) {
       var insertedStr = random.getRandomLengthString(100);
-      var insertedBuf = node6plus ? Buffer.from(insertedStr) : new Buffer(insertedStr);
+      var insertedBuf = Buffer.from(insertedStr);
       test1(insertedBuf, 100, done);
     });
 
     it('126.1.6 set maxSize to 2000', function(done) {
       var insertedStr = random.getRandomLengthString(100);
-      var insertedBuf = node6plus ? Buffer.from(insertedStr) : new Buffer(insertedStr);
+      var insertedBuf = Buffer.from(insertedStr);
       var maxsize = 2000;
       test1(insertedBuf, maxsize, done);
     });
 
     it('126.1.7 set maxSize to 4GB', function(done) {
       var insertedStr = random.getRandomLengthString(100);
-      var insertedBuf = node6plus ? Buffer.from(insertedStr) : new Buffer(insertedStr);
+      var insertedBuf = Buffer.from(insertedStr);
       var maxsize = 4 * 1024 * 1024 * 1024;
       test1(insertedBuf, maxsize, done);
     });
@@ -155,24 +151,24 @@ describe('126. longrawDMLBind.js', function() {
     it('126.2.1 works with data size 64K - 1', function(done) {
       var insertedStr = random.getRandomLengthString(100);
       var updateStr = random.getRandomLengthString(65535);
-      var insertedBuf = node6plus ? Buffer.from(insertedStr) : new Buffer(insertedStr);
-      var updateBuf = node6plus ? Buffer.from(updateStr) : new Buffer(updateStr);
+      var insertedBuf = Buffer.from(insertedStr);
+      var updateBuf = Buffer.from(updateStr);
       test2(insertedBuf, updateBuf, 65535, done);
     });
 
     it('126.2.2 works with data size 64K', function(done) {
       var insertedStr = random.getRandomLengthString(200);
       var updateStr = random.getRandomLengthString(65536);
-      var insertedBuf = node6plus ? Buffer.from(insertedStr) : new Buffer(insertedStr);
-      var updateBuf = node6plus ? Buffer.from(updateStr) : new Buffer(updateStr);
+      var insertedBuf = Buffer.from(insertedStr);
+      var updateBuf = Buffer.from(updateStr);
       test2(insertedBuf, updateBuf, 65536, done);
     });
 
     it('126.2.3 works with data size 64K + 1', function(done) {
       var insertedStr = random.getRandomLengthString(10);
       var updateStr = random.getRandomLengthString(65537);
-      var insertedBuf = node6plus ? Buffer.from(insertedStr) : new Buffer(insertedStr);
-      var updateBuf = node6plus ? Buffer.from(updateStr) : new Buffer(updateStr);
+      var insertedBuf = Buffer.from(insertedStr);
+      var updateBuf = Buffer.from(updateStr);
       test2(insertedBuf, updateBuf, 65537, done);
     });
 
@@ -180,24 +176,24 @@ describe('126. longrawDMLBind.js', function() {
       var size = 1 * 1024 * 1024 + 1;
       var insertedStr = random.getRandomLengthString(65536);
       var updateStr = random.getRandomLengthString(size);
-      var insertedBuf = node6plus ? Buffer.from(insertedStr) : new Buffer(insertedStr);
-      var updateBuf = node6plus ? Buffer.from(updateStr) : new Buffer(updateStr);
+      var insertedBuf = Buffer.from(insertedStr);
+      var updateBuf = Buffer.from(updateStr);
       test2(insertedBuf, updateBuf, size, done);
     });
 
     it('126.2.5 set maxSize to 2000', function(done) {
       var insertedStr = random.getRandomLengthString(100);
       var updateStr = random.getRandomLengthString(500);
-      var insertedBuf = node6plus ? Buffer.from(insertedStr) : new Buffer(insertedStr);
-      var updateBuf = node6plus ? Buffer.from(updateStr) : new Buffer(updateStr);
+      var insertedBuf = Buffer.from(insertedStr);
+      var updateBuf = Buffer.from(updateStr);
       test2(insertedBuf, updateBuf, 2000, done);
     });
 
     it('126.2.6 set maxSize to 4GB', function(done) {
       var insertedStr = random.getRandomLengthString(100);
       var updateStr = random.getRandomLengthString(500);
-      var insertedBuf = node6plus ? Buffer.from(insertedStr) : new Buffer(insertedStr);
-      var updateBuf = node6plus ? Buffer.from(updateStr) : new Buffer(updateStr);
+      var insertedBuf = Buffer.from(insertedStr);
+      var updateBuf = Buffer.from(updateStr);
       var maxsize = 4 * 1024 * 1024 * 1024;
       test2(insertedBuf, updateBuf, maxsize, done);
     });
@@ -209,8 +205,8 @@ describe('126. longrawDMLBind.js', function() {
     it('126.3.1 works with data size 64K - 1', function(done) {
       var insertedStr = random.getRandomLengthString(100);
       var updateStr = random.getRandomLengthString(65535);
-      var insertedBuf = node6plus ? Buffer.from(insertedStr) : new Buffer(insertedStr);
-      var updateBuf = node6plus ? Buffer.from(updateStr) : new Buffer(updateStr);
+      var insertedBuf = Buffer.from(insertedStr);
+      var updateBuf = Buffer.from(updateStr);
       test3(insertedBuf, updateBuf, done);
     });
 

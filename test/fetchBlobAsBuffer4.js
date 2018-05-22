@@ -38,7 +38,6 @@ describe('91. fetchBlobAsBuffer4.js', function() {
 
   var connection = null;
   var insertID = 1; // assume id for insert into db starts from 1
-  var node6plus = false;  // assume node runtime version is lower than 6
   var proc_blob_in_tab = "BEGIN \n" +
                            "    DECLARE \n" +
                            "        e_table_missing EXCEPTION; \n" +
@@ -65,8 +64,6 @@ describe('91. fetchBlobAsBuffer4.js', function() {
         oracledb.getConnection(dbConfig, function(err, conn) {
           should.not.exist(err);
           connection = conn;
-          if(process.versions["node"].substring(0,1) >= "6")
-            node6plus = true;
           cb();
         });
       },
@@ -152,7 +149,7 @@ describe('91. fetchBlobAsBuffer4.js', function() {
       var sequence = insertID++;
       var specialStr = "91.1.1";
       var strBuf = random.getRandomString(len, specialStr);
-      var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
+      var content = Buffer.from(strBuf, "utf-8");
 
       async.series([
         function(cb) {
@@ -202,7 +199,7 @@ describe('91. fetchBlobAsBuffer4.js', function() {
       var sequence = insertID++;
       var specialStr = "91.1.2";
       var strBuf = random.getRandomString(len, specialStr);
-      var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
+      var content = Buffer.from(strBuf, "utf-8");
 
       async.series([
         function(cb) {
@@ -257,7 +254,7 @@ describe('91. fetchBlobAsBuffer4.js', function() {
       var sequence = insertID++;
       var specialStr = "91.1.3";
       var strBuf = random.getRandomString(len, specialStr);
-      var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
+      var content = Buffer.from(strBuf, "utf-8");
 
       async.series([
         function(cb) {
@@ -307,7 +304,7 @@ describe('91. fetchBlobAsBuffer4.js', function() {
       var sequence = insertID++;
       var specialStr = "91.1.4";
       var strBuf = random.getRandomString(len, specialStr);
-      var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
+      var content = Buffer.from(strBuf, "utf-8");
 
       async.series([
         function(cb) {
@@ -373,7 +370,7 @@ describe('91. fetchBlobAsBuffer4.js', function() {
       var sequence = insertID++;
       var specialStr = "91.2.1";
       var strBuf = random.getRandomString(len, specialStr);
-      var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
+      var content = Buffer.from(strBuf, "utf-8");
 
       async.series([
         function(cb) {
@@ -413,7 +410,7 @@ describe('91. fetchBlobAsBuffer4.js', function() {
       var sequence = insertID++;
       var specialStr = "91.2.2";
       var strBuf = random.getRandomString(len, specialStr);
-      var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
+      var content = Buffer.from(strBuf, "utf-8");
 
       async.series([
         function(cb) {
@@ -458,7 +455,7 @@ describe('91. fetchBlobAsBuffer4.js', function() {
       var sequence = insertID++;
       var specialStr = "91.2.3";
       var strBuf = random.getRandomString(len, specialStr);
-      var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
+      var content = Buffer.from(strBuf, "utf-8");
 
       async.series([
         function(cb) {
@@ -498,7 +495,7 @@ describe('91. fetchBlobAsBuffer4.js', function() {
       var sequence = insertID++;
       var specialStr = "91.2.4";
       var strBuf = random.getRandomString(len, specialStr);
-      var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
+      var content = Buffer.from(strBuf, "utf-8");
 
       async.series([
         function(cb) {
@@ -574,7 +571,7 @@ describe('91. fetchBlobAsBuffer4.js', function() {
       var sequence = insertID++;
       var specialStr = "91.3.1";
       var strBuf = random.getRandomString(len, specialStr);
-      var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
+      var content = Buffer.from(strBuf, "utf-8");
 
       async.series([
         function(cb) {
@@ -613,7 +610,7 @@ describe('91. fetchBlobAsBuffer4.js', function() {
       var sequence = insertID++;
       var specialStr = "91.3.2";
       var strBuf = random.getRandomString(len, specialStr);
-      var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
+      var content = Buffer.from(strBuf, "utf-8");
 
       async.series([
         function(cb) {
@@ -649,7 +646,7 @@ describe('91. fetchBlobAsBuffer4.js', function() {
       var sequence = insertID++;
       var specialStr = "91.3.3";
       var strBuf = random.getRandomString(len, specialStr);
-      var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
+      var content = Buffer.from(strBuf, "utf-8");
 
       async.series([
         function(cb) {
@@ -688,7 +685,7 @@ describe('91. fetchBlobAsBuffer4.js', function() {
       var sequence = insertID++;
       var specialStr = "91.3.4";
       var strBuf = random.getRandomString(len, specialStr);
-      var content = node6plus ? Buffer.from(strBuf, "utf-8") : new Buffer(strBuf, "utf-8");
+      var content = Buffer.from(strBuf, "utf-8");
 
       async.series([
         function(cb) {

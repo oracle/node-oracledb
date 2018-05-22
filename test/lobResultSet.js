@@ -41,14 +41,10 @@ var assist   = require('./dataTypeAssist.js');
 describe('59. lobResultSet.js', function() {
 
   var connection = null;
-  var node6plus = false; // assume node runtime version is lower than 6
+
   before('get one connection', function(done) {
     oracledb.getConnection(dbConfig, function(err, conn) {
       should.not.exist(err);
-      // Check whether node runtime version is >= 6 or not
-      if ( process.versions["node"].substring (0, 1) >= "6")
-        node6plus = true;
-
       connection = conn;
       done();
     });
@@ -314,7 +310,7 @@ describe('59. lobResultSet.js', function() {
           var lob = row[1];
           var blobData = 0;
           var totalLength = 0;
-          blobData = node6plus ? Buffer.alloc(0) : new Buffer(0);
+          blobData = Buffer.alloc(0);
 
           lob.on('data', function(chunk) {
             totalLength = totalLength + chunk.length;

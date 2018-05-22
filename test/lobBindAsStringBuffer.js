@@ -36,7 +36,6 @@ var random = require('./random.js');
 
 describe('80. lobBindAsStringBuffer.js', function() {
   var connection = null;
-  var node6plus = false; // assume node runtime version is lower than 6
 
   var proc_lobs_in_tab = "BEGIN \n" +
                          "    DECLARE \n" +
@@ -63,11 +62,6 @@ describe('80. lobBindAsStringBuffer.js', function() {
         oracledb.getConnection(dbConfig, function(err, conn) {
           should.not.exist(err);
           connection = conn;
-
-          // Check whether node runtime version is >= 6 or not
-          if ( process.versions["node"].substring (0, 1) >= "6")
-            node6plus = true;
-
           cb();
         });
       },
@@ -273,7 +267,7 @@ describe('80. lobBindAsStringBuffer.js', function() {
 
         var blobData = 0;
         var totalLength = 0;
-        blobData = node6plus ? Buffer.alloc(0) : new Buffer(0);
+        blobData = Buffer.alloc(0);
 
         lob.on('data', function(chunk) {
           totalLength = totalLength + chunk.length;
@@ -306,7 +300,7 @@ describe('80. lobBindAsStringBuffer.js', function() {
           return callback();
         } else {
           should.exist(lob);
-          var blobData = node6plus ? Buffer.alloc(0) : new Buffer(0);
+          var blobData = Buffer.alloc(0);
           var totalLength = 0;
 
           lob.on('data', function(chunk) {
@@ -351,7 +345,7 @@ describe('80. lobBindAsStringBuffer.js', function() {
       var specialStr = "80.1.1";
       var length = 50000;
       var bigStr = random.getRandomString(length, specialStr);
-      var bigBuffer = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
+      var bigBuffer = Buffer.from(bigStr, "utf-8");
       var sequence = 700;
       var bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -434,7 +428,7 @@ describe('80. lobBindAsStringBuffer.js', function() {
       var size = 40000;
       var specialStr = "80.1.3";
       var bigStr = random.getRandomString(size, specialStr);
-      var bigBuffer = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
+      var bigBuffer = Buffer.from(bigStr, "utf-8");
 
       async.series([
         function(cb) {
@@ -520,7 +514,7 @@ describe('80. lobBindAsStringBuffer.js', function() {
       var specialStr = "80.2.1";
       var sequence = 311;
       var bigStr = random.getRandomString(length, specialStr);
-      var bigBuffer = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
+      var bigBuffer = Buffer.from(bigStr, "utf-8");
       var bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: length },
@@ -613,7 +607,7 @@ describe('80. lobBindAsStringBuffer.js', function() {
               should.strictEqual(result.outBinds.c.substring(resultLength - specStrLength, resultLength), specialStr);
 
               var lob = result.outBinds.b;
-              var blobData = node6plus ? Buffer.alloc(0) : new Buffer(0);
+              var blobData = Buffer.alloc(0);
               var totalLength = 0;
 
               lob.on('data', function(chunk) {
@@ -644,7 +638,7 @@ describe('80. lobBindAsStringBuffer.js', function() {
       var size = 40000;
       var specialStr = "80.2.3";
       var bigStr = random.getRandomString(size, specialStr);
-      var bigBuffer = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
+      var bigBuffer = Buffer.from(bigStr, "utf-8");
       var sequence = 313;
       var bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -739,7 +733,7 @@ describe('80. lobBindAsStringBuffer.js', function() {
       var specialStr = "80.3.1";
       var size = 32768;
       var bigStr = random.getRandomString(size, specialStr);
-      var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
+      var bufferStr = Buffer.from(bigStr, "utf-8");
       var bindVar = {
         clob: { dir: oracledb.BIND_INOUT, type: oracledb.STRING, val: bigStr, maxSize: size },
         blob: { dir: oracledb.BIND_INOUT, type: oracledb.BUFFER, val: bufferStr, maxSize: size }
@@ -772,7 +766,7 @@ describe('80. lobBindAsStringBuffer.js', function() {
       var specialStr = "80.3.2";
       var size = 65535;
       var bigStr = random.getRandomString(size, specialStr);
-      var bufferStr = node6plus ? Buffer.from(bigStr, "utf-8") : new Buffer(bigStr, "utf-8");
+      var bufferStr = Buffer.from(bigStr, "utf-8");
       var bindVar = {
         clob: { dir: oracledb.BIND_INOUT, type: oracledb.STRING, val: bigStr, maxSize: size },
         blob: { dir: oracledb.BIND_INOUT, type: oracledb.BUFFER, val: bufferStr, maxSize: size }
