@@ -357,8 +357,11 @@ void njsBaton::AsyncAfterWorkCallback(uv_work_t *req, int status)
     delete baton;
 
     // make JS callback
-    Nan::MakeCallback(Nan::GetCurrentContext()->Global(), callback,
-                      static_cast<int>(numCallbackArgs), callbackArgs);
+    Nan::AsyncResource *asyncResource =
+            new Nan::AsyncResource("node-oracledb");
+    asyncResource->runInAsyncScope(Nan::GetCurrentContext()->Global(),
+            callback, static_cast<int>(numCallbackArgs), callbackArgs);
+    delete asyncResource;
 
     // we no longer need the callback args
     delete [] callbackArgs;
