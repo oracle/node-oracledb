@@ -577,7 +577,7 @@ describe('163. executeMany.js', function() {
         var sql = "CREATE TABLE " + pTab + " ( \n" +
                   "     parentid    NUMBER NOT NULL, \n" +
                   "     description VARCHAR2(60) NOT NULL, \n" +
-                  "     CONSTRAINT parenttab_pk PRIMARY KEY (parentid) \n" +
+                  "     CONSTRAINT " + pTab + "_pk PRIMARY KEY (parentid) \n" +
                   ") ";
         conn.execute(sql, function(err) {
           should.not.exist(err);
@@ -589,8 +589,8 @@ describe('163. executeMany.js', function() {
                   "    childid     NUMBER NOT NULL, \n" +
                   "    parentid    NUMBER NOT NULL, \n" +
                   "    description VARCHAR2(30) NOT NULL, \n" +
-                  "    CONSTRAINT childtab_pk PRIMARY KEY (childid), \n" +
-                  "    CONSTRAINT childtab_fk FOREIGN KEY (parentid) REFERENCES " + pTab + " \n" +
+                  "    CONSTRAINT " + cTab + "_pk PRIMARY KEY (childid), \n" +
+                  "    CONSTRAINT " + cTab + "_fk FOREIGN KEY (parentid) REFERENCES " + pTab + " \n" +
                   ") ";
         conn.execute(sql, function(err) {
           should.not.exist(err);
