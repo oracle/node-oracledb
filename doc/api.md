@@ -1252,6 +1252,9 @@ See [Connection Pool Queue](#connpoolqueue) for more information.
 
 This property was added in node-oracledb 1.7.
 
+This property is deprecated and will be removed in a future release:
+queuing will always be enabled.
+
 ##### Example
 
 ```javascript
@@ -1603,6 +1606,9 @@ The default value is *true*.
 
 This optional property overrides the
 [`oracledb.queueRequests`](#propdbqueuerequests) property.
+
+This property is deprecated and will be removed in a future release:
+queuing will always be enabled.
 
 ###### <a name="createpoolpoolattrsqueuetimeout"></a> 3.3.1.1.13 `queueTimeout`
 
@@ -3149,6 +3155,9 @@ readonly Boolean queueRequests
 Determines whether requests for connections from the pool are queued
 when the number of connections "checked out" from the pool has reached
 the maximum number specified by [`poolMax`](#propdbpoolmax).
+
+This property is deprecated and will be removed in a future release:
+queuing will always be enabled.
 
 See [`oracledb.queueRequests`](#propdbqueuerequests).
 
