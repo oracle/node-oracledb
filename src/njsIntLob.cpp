@@ -189,6 +189,10 @@ bool njsILob::ClearDPILobHandle(njsBaton *baton)
         baton->GetDPIError();
         return false;
     }
+    if (dpiLob_release(dpiLobHandle) < 0) {
+        baton->GetDPIError();
+        return false;
+    }
     dpiLobHandle = NULL;
     return true;
 }
