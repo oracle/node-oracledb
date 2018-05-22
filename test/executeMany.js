@@ -319,12 +319,15 @@ describe('163. executeMany.js', function() {
 
     if (oracledb.oracleClientVersion < 1201000200) { this.skip(); }
 
+    var childTable = "nodb_tab_child_one";
+    var parentTable = "nodb_tab_parent_one";
+
     async.series([
       function(cb) {
-        makeParentChildTables(cb);
+        makeParentChildTables(childTable, parentTable, cb);
       },
       function(cb) {
-        var sql = "DELETE FROM nodb_tab_child WHERE parentid = :1";
+        var sql = "DELETE FROM " + childTable + " WHERE parentid = :1";
         var binds = [ [20], [30], [50] ];
         var options = { dmlRowCounts: true };
         conn.executeMany(sql, binds, options, function(err, result) {
@@ -335,7 +338,7 @@ describe('163. executeMany.js', function() {
         });
       },
       function(cb) {
-        dropParentChildTables(cb);
+        dropParentChildTables(childTable, parentTable, cb);
       }
     ], done);
   }); // 163.6
@@ -344,12 +347,15 @@ describe('163. executeMany.js', function() {
 
     if (oracledb.oracleClientVersion < 1201000200) { this.skip(); }
 
+    var childTable = "nodb_tab_child_two";
+    var parentTable = "nodb_tab_parent_two";
+
     async.series([
       function(cb) {
-        makeParentChildTables(cb);
+        makeParentChildTables(childTable, parentTable, cb);
       },
       function(cb) {
-        var sql = "INSERT INTO nodb_tab_child VALUES (:1, :2, :3)";
+        var sql = "INSERT INTO " + childTable + " VALUES (:1, :2, :3)";
         var binds = [
           [1016, 10, "Child 2 of Parent A"],
           [1017, 10, "Child 3 of Parent A"],
@@ -382,7 +388,7 @@ describe('163. executeMany.js', function() {
         });
       },
       function(cb) {
-        dropParentChildTables(cb);
+        dropParentChildTables(childTable, parentTable, cb);
       }
     ], done);
   }); // 163.7
@@ -428,12 +434,15 @@ describe('163. executeMany.js', function() {
 
     if (oracledb.oracleClientVersion < 1201000200) { this.skip(); }
 
+    var childTable = "nodb_tab_child_three";
+    var parentTable = "nodb_tab_parent_three";
+
     async.series([
       function(cb) {
-        makeParentChildTables(cb);
+        makeParentChildTables(childTable, parentTable, cb);
       },
       function(cb) {
-        var sql = "INSERT INTO nodb_tab_child VALUES (:1, :2, :3)";
+        var sql = "INSERT INTO " + childTable + " VALUES (:1, :2, :3)";
         var binds = [
           [1016, 10, "Child 2 of Parent A"],
           [1017, 10, "Child 3 of Parent A"],
@@ -463,7 +472,7 @@ describe('163. executeMany.js', function() {
         });
       },
       function(cb) {
-        dropParentChildTables(cb);
+        dropParentChildTables(childTable, parentTable, cb);
       }
     ], done);
   }); // 163.9
@@ -546,10 +555,10 @@ describe('163. executeMany.js', function() {
     );
   }; // dotruncate()
 
-  var makeParentChildTables = function(callback) {
+  var makeParentChildTables = function(cTab, pTab, callback) {
     async.series([
       function(cb) {
-        var proc = "BEGIN EXECUTE IMMEDIATE 'DROP TABLE nodb_tab_child'; " +
+        var proc = "BEGIN EXECUTE IMMEDIATE 'DROP TABLE " + cTab + "'; " +
                    "EXCEPTION WHEN OTHERS THEN IF SQLCODE <> -942 THEN RAISE; END IF; END;";
         conn.execute(proc, function(err) {
           should.not.exist(err);
@@ -557,7 +566,7 @@ describe('163. executeMany.js', function() {
         });
       },
       function(cb) {
-        var proc = "BEGIN EXECUTE IMMEDIATE 'DROP TABLE nodb_tab_parent'; " +
+        var proc = "BEGIN EXECUTE IMMEDIATE 'DROP TABLE " + pTab + "'; " +
                    "EXCEPTION WHEN OTHERS THEN IF SQLCODE <> -942 THEN RAISE; END IF; END;";
         conn.execute(proc, function(err) {
           should.not.exist(err);
@@ -565,31 +574,31 @@ describe('163. executeMany.js', function() {
         });
       },
       function(cb) {
-        var sql = "CREATE TABLE nodb_tab_parent ( \
-                       parentid    NUMBER NOT NULL, \
-                       description VARCHAR2(60) NOT NULL, \
-                       CONSTRAINT parenttab_pk PRIMARY KEY (parentid) \
-                   )";
+        var sql = "CREATE TABLE " + pTab + " ( \n" +
+                  "     parentid    NUMBER NOT NULL, \n" +
+                  "     description VARCHAR2(60) NOT NULL, \n" +
+                  "     CONSTRAINT parenttab_pk PRIMARY KEY (parentid) \n" +
+                  ") ";
         conn.execute(sql, function(err) {
           should.not.exist(err);
           cb();
         });
       },
       function(cb) {
-        var sql = "CREATE TABLE nodb_tab_child ( \
-                       childid     NUMBER NOT NULL, \
-                       parentid    NUMBER NOT NULL, \
-                       description VARCHAR2(30) NOT NULL, \
-                       CONSTRAINT childtab_pk PRIMARY KEY (childid), \
-                       CONSTRAINT childtab_fk FOREIGN KEY (parentid) REFERENCES nodb_tab_parent \
-                   )";
+        var sql = "CREATE TABLE " + cTab +" ( \n" +
+                  "    childid     NUMBER NOT NULL, \n" +
+                  "    parentid    NUMBER NOT NULL, \n" +
+                  "    description VARCHAR2(30) NOT NULL, \n" +
+                  "    CONSTRAINT childtab_pk PRIMARY KEY (childid), \n" +
+                  "    CONSTRAINT childtab_fk FOREIGN KEY (parentid) REFERENCES " + pTab + " \n" +
+                  ") ";
         conn.execute(sql, function(err) {
           should.not.exist(err);
           cb();
         });
       },
       function(cb) {
-        var sql = "INSERT INTO nodb_tab_parent VALUES (:1, :2)";
+        var sql = "INSERT INTO " + pTab + " VALUES (:1, :2)";
         var binds = [
           [10, "Parent 10"],
           [20, "Parent 20"],
@@ -611,7 +620,7 @@ describe('163. executeMany.js', function() {
         });
       },
       function(cb) {
-        var sql = "INSERT INTO nodb_tab_child VALUES (:1, :2, :3)";
+        var sql = "INSERT INTO " + cTab + " VALUES (:1, :2, :3)";
         var binds = [
           [1001, 10, "Child 1001 of Parent 10"],
           [1002, 20, "Child 1001 of Parent 20"],
@@ -646,17 +655,17 @@ describe('163. executeMany.js', function() {
     ], callback);
   }; // makeParentChildTables()
 
-  var dropParentChildTables = function(callback) {
+  var dropParentChildTables = function(cTab, pTab, callback) {
     async.series([
       function(cb) {
-        var sql = "drop table nodb_tab_child purge";
+        var sql = "drop table " + cTab + " purge";
         conn.execute(sql, function(err) {
           should.not.exist(err);
           cb();
         });
       },
       function(cb) {
-        var sql = "drop table nodb_tab_parent purge";
+        var sql = "drop table " + pTab + " purge";
         conn.execute(sql, function(err) {
           should.not.exist(err);
           cb();
