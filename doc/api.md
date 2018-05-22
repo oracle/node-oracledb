@@ -17,8 +17,6 @@ limitations under the License.
 
 ##  <a name="contents"></a> Contents
 
-### [NODE-ORACLEDB API MANUAL](#apimanual)
-
 1. [Introduction](#intro)
     - 1.1 [Getting Started with Node-oracledb](#getstarted)
 2. [Errors](#errorobj)
@@ -191,9 +189,6 @@ limitations under the License.
         - 7.2.2 [`getRow()`](#getrow)
         - 7.2.3 [`getRows()`](#getrows)
         - 7.2.4 [`toQueryStream()`](#toquerystream)
-
-### [NODE-ORACLEDB USER MANUAL](#usermanual)
-
 8. [Connection Handling](#connectionhandling)
     - 8.1 [Connection Strings](#connectionstrings)
         - 8.1.1 [Easy Connect Syntax for Connection Strings](#easyconnect)
