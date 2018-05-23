@@ -343,7 +343,7 @@ function done(err, alreadyInstalled) {
       packageUtil.error('Pre-built binary packages are not available for platform="' + process.platform + '"');
     } else if (process.arch !== 'x64') {
       packageUtil.error('Pre-built binary packages are not available for architecture="' + process.arch + '"');
-    } else if (['46', '48', '57', '59'].indexOf(process.versions.modules) < 0) {
+    } else if (['48', '57', '64'].indexOf(process.versions.modules) < 0) {
       packageUtil.error('Pre-built binary packages are not available for this version of Node.js (NODE_MODULE_VERSION="' + process.versions.modules + '")');
     }
     packageUtil.error('Failed to install binary package ' + packageUtil.dynamicProps.PACKAGE_FILE_NAME);
