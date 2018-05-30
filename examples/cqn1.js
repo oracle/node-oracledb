@@ -74,11 +74,11 @@ function myCallback(message)
 
 const options = {
   callback : myCallback,
-  sql: "SELECT * FROM cqntable WHERE k > 100",
-  // Stop after 60 seconds
-  timeout : 60,
-  // Only generate notifications when rows with k > 100 are changed.
-  // Return ROWIDs in the notification message
+  sql: "SELECT * FROM cqntable WHERE k > :bv",
+  binds: { bv : 100 },
+  timeout : 60, // Stop after 60 seconds
+  // SUBSCR_QOS_QUERY: generate notifications when rows with k > 100 are changed
+  // SUBSCR_QOS_ROWIDS: Return ROWIDs in the notification message
   qos : oracledb.SUBSCR_QOS_QUERY | oracledb.SUBSCR_QOS_ROWIDS
 };
 
