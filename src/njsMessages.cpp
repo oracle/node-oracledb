@@ -89,6 +89,7 @@ static const char *errMsg[] = {
     "NJS-058: maxSize of %u is too small for value of length %u in row %u", // errMaxSizeTooSmall
     "NJS-059: type must be specified for bind position %u", // errMissingTypeByPos
     "NJS-060: type must be specified for bind \"%s\"", // errMissingTypeByName
+    "NJS-061: invalid subscription", // errInvalidSubscription
 };
 
 

@@ -51,6 +51,7 @@
 
 #include "njsConnection.h"
 #include "njsResultSet.h"
+#include "njsSubscription.h"
 #include "njsIntLob.h"
 #include <stdlib.h>
 #include <limits>
@@ -89,6 +90,8 @@ void njsConnection::Init(Local<Object> target)
     Nan::SetPrototypeMethod(tpl, "createLob", CreateLob);
     Nan::SetPrototypeMethod(tpl, "changePassword", ChangePassword);
     Nan::SetPrototypeMethod(tpl, "ping", Ping);
+    Nan::SetPrototypeMethod(tpl, "subscribe", Subscribe);
+    Nan::SetPrototypeMethod(tpl, "unsubscribe", Unsubscribe);
 
     Nan::SetAccessor(tpl->InstanceTemplate(),
             Nan::New<v8::String>("stmtCacheSize").ToLocalChecked(),
@@ -1388,6 +1391,68 @@ bool njsConnection::ProcessExecuteManyOptions(Local<Object> options,
 
 
 //-----------------------------------------------------------------------------
+// njsConnection::ProcessSubscriptionOptions()
+//   Processing of options for connection.subscribe(). If an error is detected,
+// the baton error is populated and false is returned.
+//-----------------------------------------------------------------------------
+bool njsConnection::ProcessSubscriptionOptions(Local<Object> options,
+        njsBaton *baton)
+{
+    Nan::HandleScope scope;
+    uint32_t temp;
+
+    // if subscription doesn't exist, get options for creating subscription
+    if (!baton->dpiSubscrHandle) {
+        temp = DPI_SUBSCR_NAMESPACE_DBCHANGE;
+        if (!baton->GetUnsignedIntFromJSON(options, "namespace", 1,
+                &temp))
+            return false;
+        baton->subscrNamespace = (dpiSubscrNamespace) temp;
+        if (!baton->GetStringFromJSON(options, "ipAddress", 1,
+                baton->ipAddress))
+            return false;
+        if (!baton->GetUnsignedIntFromJSON(options, "port", 1,
+                &baton->portNumber))
+            return false;
+        if (!baton->GetUnsignedIntFromJSON(options, "timeout", 1,
+                &baton->timeout))
+            return false;
+        if (!baton->GetUnsignedIntFromJSON(options, "operations", 1,
+                &baton->operations))
+            return false;
+        if (!baton->GetUnsignedIntFromJSON(options, "qos", 1, &baton->qos))
+            return false;
+        if (!baton->GetUnsignedIntFromJSON(options, "groupingClass", 1,
+                &baton->subscrGroupingClass))
+            return false;
+        if (!baton->GetUnsignedIntFromJSON(options, "groupingValue", 1,
+                &baton->subscrGroupingValue))
+            return false;
+        if (!baton->GetUnsignedIntFromJSON(options, "groupingType", 1,
+                &baton->subscrGroupingType))
+            return false;
+        Local<Function> callback;
+        if (!baton->GetFunctionFromJSON(options, "callback", 1, &callback))
+            return false;
+        if (!callback.IsEmpty())
+            baton->subscription->SetCallback(callback);
+    }
+
+    // get options that are used for registering queries
+    if (!baton->GetStringFromJSON(options, "sql", 1, baton->sql))
+        return false;
+    Local<Value> binds;
+    Local<String> key = Nan::New("binds").ToLocalChecked();
+    if (!Nan::Get(options, key).ToLocal(&binds))
+        return false;
+    if (!ProcessExecuteBinds(binds.As<Object>(), baton))
+        return false;
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
 // njsConnection::GetScalarValueFromVar()
 //   Get the value from the DPI variable of the specified type at the specified
 // position in the variable. Return true if the get was successful; if not, the
@@ -2392,6 +2457,177 @@ void njsConnection::Async_Ping(njsBaton *baton)
 {
     if (dpiConn_ping(baton->dpiConnHandle) < 0)
         baton->GetDPIError();
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection::Subscribe()
+//   Subscribe to events from the database. The provided callback will be
+// invoked each time a notification is received. The name is used to uniquely
+// identify a subscription and a reference is stored on the oracledb instance
+// for use by subsequent calls to subscribe() or unsubscribe().
+//
+// PARAMETERS
+//   - JS callback which will receive (error)
+//-----------------------------------------------------------------------------
+NAN_METHOD(njsConnection::Subscribe)
+{
+    njsConnection *connection;
+    std::string name;
+    njsBaton *baton;
+
+    connection = (njsConnection*) ValidateArgs(info, 3, 3);
+    if (!connection)
+        return;
+    if (!connection->GetStringArg(info, 0, name))
+        return;
+    baton = connection->CreateBaton(info);
+    if (!baton)
+        return;
+    baton->name = name;
+    baton->SetDPIConnHandle(connection->dpiConnHandle);
+    baton->subscription = njsOracledb::GetSubscription(name);
+    if (baton->subscription)
+        baton->subscription->SetDPISubscrHandle(baton);
+    else {
+        Local<Object> obj = njsSubscription::Create();
+        baton->subscription = Nan::ObjectWrap::Unwrap<njsSubscription>(obj);
+        baton->jsSubscription.Reset(obj);
+    }
+    Local<Object> options = info[1].As<Object>();
+    ProcessSubscriptionOptions(options, baton);
+    baton->QueueWork("Subscribe", Async_Subscribe, Async_AfterSubscribe, 1);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection::Async_Subscribe()
+//   Worker function for njsConnection::Subscribe() method.
+//-----------------------------------------------------------------------------
+void njsConnection::Async_Subscribe(njsBaton *baton)
+{
+    // create subscription, if necessary
+    if (!baton->dpiSubscrHandle) {
+        dpiSubscrCreateParams params;
+        dpiContext *context = njsOracledb::GetDPIContext();
+        if (dpiContext_initSubscrCreateParams(context, &params) < 0) {
+            baton->GetDPIError();
+            return;
+        }
+        params.subscrNamespace = baton->subscrNamespace;
+        params.name = baton->name.c_str();
+        params.nameLength = baton->name.length();
+        params.protocol = DPI_SUBSCR_PROTO_CALLBACK;
+        params.callback = (dpiSubscrCallback) njsSubscription::EventHandler;
+        params.callbackContext = baton->subscription;
+        params.ipAddress = baton->ipAddress.c_str();
+        params.ipAddressLength = baton->ipAddress.length();
+        params.portNumber = baton->portNumber;
+        params.timeout = baton->timeout;
+        params.qos = (dpiSubscrQOS) baton->qos;
+        params.operations = (dpiOpCode) baton->operations;
+        params.groupingClass = (uint8_t) baton->subscrGroupingClass;
+        params.groupingValue = baton->subscrGroupingValue;
+        params.groupingType = (uint8_t) baton->subscrGroupingType;
+        if (dpiConn_newSubscription(baton->dpiConnHandle, &params,
+                &baton->dpiSubscrHandle, NULL) < 0) {
+            baton->GetDPIError();
+            return;
+        }
+    }
+
+    // register query if applicable
+    if (!baton->sql.empty()) {
+
+        // prepare statement for registration
+        if (dpiSubscr_prepareStmt(baton->dpiSubscrHandle, baton->sql.c_str(),
+                (uint32_t) baton->sql.length(), &baton->dpiStmtHandle) < 0) {
+            baton->GetDPIError();
+            return;
+        }
+
+        // perform any binds necessary
+        for (uint32_t i = 0; i < baton->numBindVars; i++) {
+            int status;
+            njsVariable *var = &baton->bindVars[i];
+            if (var->name.empty())
+                status = dpiStmt_bindByPos(baton->dpiStmtHandle, var->pos,
+                        var->dpiVarHandle);
+            else status = dpiStmt_bindByName(baton->dpiStmtHandle,
+                    var->name.c_str(), (uint32_t) var->name.length(),
+                    var->dpiVarHandle);
+            if (status < 0) {
+                baton->GetDPIError();
+                return;
+            }
+        }
+
+        // perform execute (which registers the query)
+        if (dpiStmt_execute(baton->dpiStmtHandle, DPI_MODE_EXEC_DEFAULT,
+                NULL) < 0)
+            baton->GetDPIError();
+
+    }
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection::Async_AfterSubscribe()
+//   Returns result to JS by invoking JS callback.
+//-----------------------------------------------------------------------------
+void njsConnection::Async_AfterSubscribe(njsBaton *baton, Local<Value> argv[])
+{
+    baton->subscription->StartNotifications(baton);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection::Unsubscribe()
+//   Unsubscribe from events in the database that were originally subscribed
+// with a call to connection.subscribe().
+//
+// PARAMETERS
+//   - JS callback which will receive (error)
+//-----------------------------------------------------------------------------
+NAN_METHOD(njsConnection::Unsubscribe)
+{
+    njsConnection *connection;
+    std::string name;
+    njsBaton *baton;
+
+    connection = (njsConnection*) ValidateArgs(info, 2, 2);
+    if (!connection)
+        return;
+    if (!connection->GetStringArg(info, 0, name))
+        return;
+    baton = connection->CreateBaton(info);
+    if (!baton)
+        return;
+    baton->name = name;
+    baton->subscription = njsOracledb::GetSubscription(name);
+    if (baton->subscription) {
+        baton->subscription->SetDPISubscrHandle(baton);
+        baton->SetDPIConnHandle(connection->dpiConnHandle);
+    } else {
+        baton->error = njsMessages::Get(errInvalidSubscription);
+    }
+    baton->QueueWork("Unsubscribe", Async_Unsubscribe, NULL, 1);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection::Async_Unsubscribe()
+//   Worker function for njsConnection::Unsubscribe() method.
+//-----------------------------------------------------------------------------
+void njsConnection::Async_Unsubscribe(njsBaton *baton)
+{
+    if (dpiConn_unsubscribe(baton->dpiConnHandle, baton->dpiSubscrHandle) < 0)
+        baton->GetDPIError();
+    else {
+        baton->dpiSubscrHandle = NULL;
+        baton->subscription->StopNotifications();
+    }
+    baton->subscription = NULL;
 }
 
 

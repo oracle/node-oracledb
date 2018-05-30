@@ -92,6 +92,7 @@ typedef enum {
     errMaxSizeTooSmall,
     errMissingTypeByPos,
     errMissingTypeByName,
+    errInvalidSubscription,
 
     // New ones should be added here
 

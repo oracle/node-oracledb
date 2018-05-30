@@ -9,6 +9,10 @@
   support in connection pools.  This allows each connection in the
   pool to use different database credentials.
 
+- Added support for Oracle Database Continuous Query Notifications,
+  allowing JavaScript methods to be called when database changes are
+  committed.
+
 - Added support to `fetchAsString` and `fetchInfo` for fetching RAW
   columns as STRING (hex-encoded).
 

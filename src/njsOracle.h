@@ -104,6 +104,7 @@ using namespace v8;
 // njsOracledb
 //   Class exposed to JS for the main module.
 //-----------------------------------------------------------------------------
+class njsSubscription;
 class njsOracledb: public njsCommon
 {
 public:
@@ -127,6 +128,9 @@ public:
     void SetFetchAsBufferTypesOnBaton(njsBaton *baton) const;
     static dpiContext *GetDPIContext()             { return globalDPIContext; }
     static void ThrowDPIError(void);
+    static njsSubscription *GetSubscription(std::string &name);
+    static void SetSubscription(std::string &name, Local<Value> subscription);
+    static void ClearSubscription(std::string &name);
 
 private:
 
@@ -224,6 +228,7 @@ private:
     int32_t poolPingInterval;
 
     static Nan::Persistent<FunctionTemplate> oracledbTemplate_s;
+    static Nan::Persistent<Object> subscriptions;
     static dpiContext *globalDPIContext;
 
 };

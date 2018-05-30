@@ -52,6 +52,7 @@
 #include "njsCommon.h"
 #include "njsOracle.h"
 #include "njsIntLob.h"
+#include "njsSubscription.h"
 
 using namespace node;
 using namespace std;
@@ -193,6 +194,7 @@ njsBaton::~njsBaton()
     jsCallback.Reset();
     jsCallingObj.Reset();
     jsOracledb.Reset();
+    jsSubscription.Reset();
     jsBuffer.Reset();
     ClearAsyncData();
 }
@@ -238,6 +240,10 @@ void njsBaton::ClearAsyncData()
     if (dpiLobHandle) {
         dpiLob_release(dpiLobHandle);
         dpiLobHandle = NULL;
+    }
+    if (dpiSubscrHandle) {
+        dpiSubscr_release(dpiSubscrHandle);
+        dpiSubscrHandle = NULL;
     }
     if (bindVars) {
         delete [] bindVars;
@@ -444,6 +450,19 @@ void njsBaton::SetDPILobHandle(dpiLob *handle)
 
 
 //-----------------------------------------------------------------------------
+// njsBaton::SetDPISubscrHandle()
+//   Set the DPI subscription handle. This adds a reference to the DPI
+// subscription which will be released in the destructor.
+//-----------------------------------------------------------------------------
+void njsBaton::SetDPISubscrHandle(dpiSubscr *handle)
+{
+    if (dpiSubscr_addRef(handle) < 0)
+        GetDPIError();
+    else dpiSubscrHandle = handle;
+}
+
+
+//-----------------------------------------------------------------------------
 // njsBaton::GetBoolFromJSON()
 //   Gets a boolean value from the JSON object for the given key, if possible.
 // If undefined, leave value alone. Index is the argument index in the caller.
@@ -479,6 +498,34 @@ bool njsBaton::GetBoolFromJSON(Local<Object> obj, const char *key, int index,
     }
 
     return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsBaton::GetFunctionFromJSON()
+//   Gets a function from the JSON object for the given key, if possible. If
+// undefined, leave value alone and do not set error; otherwise, set error.
+// Index is the argument index in the caller.
+//-----------------------------------------------------------------------------
+bool njsBaton::GetFunctionFromJSON(Local<Object> obj, const char *key,
+        int index, Local<Function> *value)
+{
+    Nan::EscapableHandleScope scope;
+    Local<Value> jsValue;
+
+    if (!error.empty())
+        return false;
+    MaybeLocal<Value> mval = Nan::Get(obj, Nan::New(key).ToLocalChecked());
+    if (!mval.ToLocal(&jsValue))
+        return false;
+    if (jsValue->IsFunction()) {
+        *value = scope.Escape(jsValue.As<Function>());
+        return true;
+    } else if (jsValue->IsUndefined()) {
+        return true;
+    }
+    error = njsMessages::Get(errInvalidPropertyTypeInParam, key, index + 1);
+    return false;
 }
 
 

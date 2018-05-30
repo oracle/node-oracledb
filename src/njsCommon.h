@@ -72,6 +72,7 @@ using namespace node;
 class njsBaton;
 class njsOracledb;
 class njsProtoILob;
+class njsSubscription;
 
 //-----------------------------------------------------------------------------
 // njsBindDir
@@ -267,6 +268,8 @@ public:
     std::string connectString;
     std::string connClass;
     std::string edition;
+    std::string ipAddress;
+    std::string name;
     uint32_t poolMin;
     uint32_t poolMax;
     uint32_t poolIncrement;
@@ -276,6 +279,7 @@ public:
     dpiConn *dpiConnHandle;
     dpiStmt *dpiStmtHandle;
     dpiLob *dpiLobHandle;
+    dpiSubscr *dpiSubscrHandle;
     dpiStmtInfo stmtInfo;
     uint32_t stmtCacheSize;
     uint32_t lobPrefetchSize;
@@ -314,21 +318,31 @@ public:
     uint64_t lobAmount;
     uint32_t numRowCounts;
     uint64_t *rowCounts;
+    uint32_t timeout;
+    uint32_t qos;
+    uint32_t operations;
     uint32_t numBatchErrorInfos;
     dpiErrorInfo *batchErrorInfos;
     dpiErrorInfo errorInfo;
     bool dpiError;
+    uint32_t portNumber;
+    uint32_t subscrGroupingClass;
+    uint32_t subscrGroupingValue;
+    uint32_t subscrGroupingType;
+    dpiSubscrNamespace subscrNamespace;
+    njsSubscription *subscription;
     njsCommon *callingObj;
     Nan::Persistent<Object> jsCallingObj;
     Nan::Persistent<Object> jsOracledb;
     Nan::Persistent<Object> jsBuffer;
+    Nan::Persistent<Object> jsSubscription;
     Nan::Persistent<Function> jsCallback;
 
     njsBaton(Local<Function> callback, Local<Object> callingObj) :
             poolMin(0), poolMax(0), poolIncrement(0), poolTimeout(0),
             poolPingInterval(0), dpiPoolHandle(NULL), dpiConnHandle(NULL),
-            dpiStmtHandle(NULL), dpiLobHandle(NULL), stmtCacheSize(0),
-            lobPrefetchSize(0), maxRows(0), bindArraySize(1),
+            dpiStmtHandle(NULL), dpiLobHandle(NULL), dpiSubscrHandle(NULL),
+            stmtCacheSize(0), lobPrefetchSize(0), maxRows(0), bindArraySize(1),
             fetchArraySize(0), privilege(0), rowsFetched(0), bufferRowIndex(0),
             rowsAffected(0), outFormat(0), numQueryVars(0), queryVars(NULL),
             numBindVars(0), bindVars(NULL), numFetchInfo(0), fetchInfo(NULL),
@@ -339,8 +353,12 @@ public:
             isReturning(false), isPLSQL(false), events(false),
             batchErrors(false), dmlRowCounts(false), bufferSize(0),
             bufferPtr(NULL), lobOffset(0), lobAmount(0), numRowCounts(0),
-            rowCounts(NULL), numBatchErrorInfos(0), batchErrorInfos(NULL),
-            dpiError(false) {
+            rowCounts(NULL), timeout(0), qos(0), operations(0),
+            numBatchErrorInfos(0), batchErrorInfos(NULL), dpiError(false),
+            portNumber(0), subscrGroupingClass(0), subscrGroupingValue(0),
+            subscrGroupingType(0),
+            subscrNamespace(DPI_SUBSCR_NAMESPACE_DBCHANGE),
+            subscription(NULL) {
         this->jsCallback.Reset(callback);
         this->jsCallingObj.Reset(callingObj);
         this->callingObj = Nan::ObjectWrap::Unwrap<njsCommon>(callingObj);
@@ -365,10 +383,13 @@ public:
     void SetDPIPoolHandle(dpiPool *handle);
     void SetDPIStmtHandle(dpiStmt *handle);
     void SetDPILobHandle(dpiLob *handle);
+    void SetDPISubscrHandle(dpiSubscr *handle);
 
     // methods for getting values from JSON
     bool GetBoolFromJSON(Local<Object> obj, const char *key, int index,
             bool *value);
+    bool GetFunctionFromJSON(Local<Object> obj, const char *key, int index,
+            Local<Function> *value);
     bool GetStringFromJSON(Local<Object> obj, const char *key, int index,
             string &value);
     bool GetPositiveIntFromJSON(Local<Object> obj, const char *key, int index,

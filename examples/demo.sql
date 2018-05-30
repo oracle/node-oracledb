@@ -250,3 +250,11 @@ END;
 /
 
 COMMIT;
+
+
+-- For the cqn*.js examples
+
+-- The DBA must grant access:
+-- GRANT CHANGE NOTIFICATION TO myuser;
+
+create table cqntable (k number);

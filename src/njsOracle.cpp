@@ -56,10 +56,14 @@
 #include "njsResultSet.h"
 #include "njsMessages.h"
 #include "njsIntLob.h"
+#include "njsSubscription.h"
 #include <sstream>
 
 // peristent Oracledb class handle
 Nan::Persistent<FunctionTemplate> njsOracledb::oracledbTemplate_s;
+
+// persistent handle for subscriptions
+Nan::Persistent<Object> njsOracledb::subscriptions;
 
 // DPI context
 dpiContext *njsOracledb::globalDPIContext = NULL;
@@ -191,6 +195,9 @@ void njsOracledb::Init(Local<Object> target)
     oracledbTemplate_s.Reset(temp);
     Nan::Set(target, Nan::New<v8::String>("Oracledb").ToLocalChecked(),
             temp->GetFunction());
+
+    Local<Object> obj = Nan::New<v8::Object>();
+    subscriptions.Reset(obj);
 }
 
 
@@ -1188,6 +1195,50 @@ void njsOracledb::ThrowDPIError(void)
 
 
 //-----------------------------------------------------------------------------
+// njsOracledb::GetSubscription()
+//   Gets the subscription with the give name if it exists, or returns NULL if
+// it does not exist in the subscriptions object.
+//-----------------------------------------------------------------------------
+njsSubscription *njsOracledb::GetSubscription(std::string &name)
+{
+    Nan::HandleScope scope;
+    Local<String> nameObj = Nan::New<String>(name).ToLocalChecked();
+    Local<Object> allSubscriptions = Nan::New(subscriptions);
+    Local<Value> value = Nan::Get(allSubscriptions, nameObj).ToLocalChecked();
+    if (value->IsUndefined())
+        return NULL;
+    return Nan::ObjectWrap::Unwrap<njsSubscription>(value.As<Object>());
+}
+
+
+//-----------------------------------------------------------------------------
+// njsOracledb::SetSubscription()
+//   Sets the subscription in the subscriptions object for later recovery,
+// either to subscribe another query or to unsubscribe.
+//-----------------------------------------------------------------------------
+void njsOracledb::SetSubscription(std::string &name, Local<Value> subscription)
+{
+    Nan::HandleScope scope;
+    Local<String> nameObj = Nan::New<String>(name).ToLocalChecked();
+    Local<Object> allSubscriptions = Nan::New(subscriptions);
+    Nan::Set(allSubscriptions, nameObj, subscription);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsOracledb::ClearSubscription()
+//   Clears the subscription from the subscriptions object.
+//-----------------------------------------------------------------------------
+void njsOracledb::ClearSubscription(std::string &name)
+{
+    Nan::HandleScope scope;
+    Local<String> nameObj = Nan::New<String>(name).ToLocalChecked();
+    Local<Object> allSubscriptions = Nan::New(subscriptions);
+    Nan::Delete(allSubscriptions, nameObj);
+}
+
+
+//-----------------------------------------------------------------------------
 // init()
 //   Invoked when require on oracledb is called.
 //-----------------------------------------------------------------------------
@@ -1200,6 +1251,7 @@ extern "C"
         njsPool::Init(target);
         njsResultSet::Init(target);
         njsILob::Init(target);
+        njsSubscription::Init(target);
     }
 
     NODE_MODULE(oracledb, init)

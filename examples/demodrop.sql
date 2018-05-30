@@ -62,3 +62,5 @@ DROP TABLE em_childtab;
 DROP TABLE em_parenttab;
 
 DROP PROCEDURE em_testproc;
+
+DROP TABLE cqntable;

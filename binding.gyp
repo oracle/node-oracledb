@@ -8,6 +8,7 @@
              "src/njsPool.cpp",
              "src/njsConnection.cpp",
              "src/njsResultSet.cpp",
+             "src/njsSubscription.cpp",
              "src/njsMessages.cpp",
              "src/njsIntLob.cpp",
              "odpi/src/dpiConn.c",

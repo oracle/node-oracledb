@@ -73,6 +73,7 @@ public:
             bool extendedMetaData);
     static bool GetScalarValueFromVar(njsBaton *baton, njsVariable *var,
             njsVariableBuffer *buffer, uint32_t pos, Local<Value> &value);
+    static bool ProcessExecuteBinds(Local<Object> binds, njsBaton *baton);
     static bool ProcessQueryVars(njsBaton* baton, dpiStmt *dpiStmtHandle,
             njsVariable *vars, uint32_t numVars);
     static bool ProcessVars(njsBaton *baton, njsVariable *vars,
@@ -139,6 +140,15 @@ private:
     static NAN_METHOD(Ping);
     static void Async_Ping(njsBaton *baton);
 
+    // Subscribe Method on Connection class
+    static NAN_METHOD(Subscribe);
+    static void Async_Subscribe(njsBaton *baton);
+    static void Async_AfterSubscribe(njsBaton *baton, Local<Value> argv[]);
+
+    // Unsubscribe Method on Connection class
+    static NAN_METHOD(Unsubscribe);
+    static void Async_Unsubscribe(njsBaton *baton);
+
     // Define Getter Accessors to properties
     static NAN_GETTER(GetStmtCacheSize);
     static NAN_GETTER(GetClientId);
@@ -176,7 +186,6 @@ private:
     static bool PrepareAndBind(njsBaton* baton);
     static bool ProcessBindValue(Local<Value> bindValue, njsVariable *var,
             njsBaton *baton);
-    static bool ProcessExecuteBinds(Local<Object> binds, njsBaton *baton);
     static bool ProcessExecuteManyBinds(Local<Array> binds,
             Local<Object> options, njsBaton *baton);
     static bool ProcessExecuteOptions(Local<Object> options, njsBaton *baton);
@@ -184,6 +193,8 @@ private:
             njsBaton *baton);
     static bool ProcessScalarBindValue(Local<Value> bindValue,
             njsVariable *var, uint32_t pos, bool inExecuteMany,
+            njsBaton *baton);
+    static bool ProcessSubscriptionOptions(Local<Object> options,
             njsBaton *baton);
     static bool ProcessVarBuffer(njsBaton *baton, njsVariable *var,
             njsVariableBuffer *buffer);
