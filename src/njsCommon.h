@@ -329,7 +329,6 @@ public:
     uint32_t subscrGroupingClass;
     uint32_t subscrGroupingValue;
     uint32_t subscrGroupingType;
-    dpiSubscrNamespace subscrNamespace;
     njsSubscription *subscription;
     njsCommon *callingObj;
     Nan::Persistent<Object> jsCallingObj;
@@ -356,9 +355,7 @@ public:
             rowCounts(NULL), timeout(0), qos(0), operations(0),
             numBatchErrorInfos(0), batchErrorInfos(NULL), dpiError(false),
             portNumber(0), subscrGroupingClass(0), subscrGroupingValue(0),
-            subscrGroupingType(0),
-            subscrNamespace(DPI_SUBSCR_NAMESPACE_DBCHANGE),
-            subscription(NULL) {
+            subscrGroupingType(0), subscription(NULL) {
         this->jsCallback.Reset(callback);
         this->jsCallingObj.Reset(callingObj);
         this->callingObj = Nan::ObjectWrap::Unwrap<njsCommon>(callingObj);

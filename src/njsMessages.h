@@ -94,6 +94,7 @@ typedef enum {
     errMissingTypeByName,
     errInvalidSubscription,
     errMissingSubscrCallback,
+    errMissingSubscrSql,
 
     // New ones should be added here
 

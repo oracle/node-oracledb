@@ -91,6 +91,7 @@ static const char *errMsg[] = {
     "NJS-060: type must be specified for bind \"%s\"", // errMissingTypeByName
     "NJS-061: invalid subscription", // errInvalidSubscription
     "NJS-062: subscription notification callback missing", // errMissingSubscrCallback
+    "NJS-063: subscription notification SQL missing", // errMissingSubscrSql
 };
 
 

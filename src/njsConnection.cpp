@@ -1406,7 +1406,7 @@ bool njsConnection::ProcessSubscriptionOptions(Local<Object> options,
         if (!baton->GetUnsignedIntFromJSON(options, "namespace", 1,
                 &temp))
             return false;
-        baton->subscrNamespace = (dpiSubscrNamespace) temp;
+        baton->subscription->SetNamespace((dpiSubscrNamespace) temp);
         if (!baton->GetStringFromJSON(options, "ipAddress", 1,
                 baton->ipAddress))
             return false;
@@ -1439,14 +1439,20 @@ bool njsConnection::ProcessSubscriptionOptions(Local<Object> options,
     }
 
     // get options that are used for registering queries
-    if (!baton->GetStringFromJSON(options, "sql", 1, baton->sql))
-        return false;
-    Local<Value> binds;
-    Local<String> key = Nan::New("binds").ToLocalChecked();
-    if (!Nan::Get(options, key).ToLocal(&binds))
-        return false;
-    if (!ProcessExecuteBinds(binds.As<Object>(), baton))
-        return false;
+    if (baton->subscription->GetNamespace() == DPI_SUBSCR_NAMESPACE_DBCHANGE) {
+        if (!baton->GetStringFromJSON(options, "sql", 1, baton->sql))
+            return false;
+        if (baton->sql.empty()) {
+            baton->error = njsMessages::Get(errMissingSubscrSql);
+            return false;
+        }
+        Local<Value> binds;
+        Local<String> key = Nan::New("binds").ToLocalChecked();
+        if (!Nan::Get(options, key).ToLocal(&binds))
+            return false;
+        if (!ProcessExecuteBinds(binds.As<Object>(), baton))
+            return false;
+    }
 
     return true;
 }
@@ -2514,7 +2520,7 @@ void njsConnection::Async_Subscribe(njsBaton *baton)
             baton->GetDPIError();
             return;
         }
-        params.subscrNamespace = baton->subscrNamespace;
+        params.subscrNamespace = baton->subscription->GetNamespace();
         params.name = baton->name.c_str();
         params.nameLength = baton->name.length();
         params.protocol = DPI_SUBSCR_PROTO_CALLBACK;

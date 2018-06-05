@@ -67,6 +67,8 @@ public:
     bool IsValid() const { return true; };
     njsErrorType GetInvalidErrorType() const { return errInvalidSubscription; }
     static Local<Object> Create();
+    dpiSubscrNamespace GetNamespace() const { return subscrNamespace; }
+    void SetNamespace(dpiSubscrNamespace ns) { subscrNamespace = ns; }
     void SetCallback(Local<Function> callback) { jsCallback.Reset(callback); }
     void SetDPISubscrHandle(njsBaton *baton)
             { baton->SetDPISubscrHandle(dpiSubscrHandle); }
@@ -99,6 +101,7 @@ private:
     uv_barrier_t barrier;
     dpiSubscrMessage *message;
     Nan::Persistent<Function> jsCallback;
+    dpiSubscrNamespace subscrNamespace;
     std::string name;
 
     static Nan::Persistent<FunctionTemplate> subscriptionTemplate_s;
