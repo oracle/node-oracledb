@@ -25,6 +25,9 @@
 - Fixed a bug that caused `queryStream()` to emit multiple close
   events in Node.js 10.
 
+- Fixed a crash when getting the list of names for an undefined object
+  with Node.js 6.
+
 - Remove deprecated `Buffer()` function in tests in order to eliminate
   a deprecation warning with Node.js 10.
 
