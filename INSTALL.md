@@ -628,7 +628,7 @@ Questions and issues can be posted as [GitHub Issues][10].
 
 Review the generic [prerequisites](#prerequisites).
 
-The pre-built binaries were built on macOS Sierra, 10.12.6.
+The pre-built binaries were built on macOS High Sierra, 10.13.3
 
 Oracle Instant Client libraries are required on macOS.  There is no
 native Oracle Database for macOS but one can easily be run in a Linux
