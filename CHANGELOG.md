@@ -16,6 +16,9 @@
 - Added support to `fetchAsString` and `fetchInfo` for fetching RAW
   columns as STRING (hex-encoded).
 
+- Added Windows support for building binary packages for self-hosting
+  on internal networks. PR #891 (Danilo Silva).
+
 - Eliminated a memory leak when binding LOBs as `oracledb.BIND_INOUT`.
 
 - Added an error message indicating that `batchErrors` and

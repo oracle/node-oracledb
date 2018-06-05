@@ -98,6 +98,9 @@ Installation is described in [INSTALL](https://oracle.github.io/node-oracledb/IN
   Remember to do `npm config delete strict-ssl` and unset the
   environment variable when not testing.
 
+- On Windows, MAKEPKG.BAT has command options to create binaries, and
+  also to create staged binaries and the main packages.
+
 - At install time, setting the environment variable
   `NODE_ORACLEDB_TRACE_INSTALL` to `TRUE` will cause `npm install` to
   display more tracing information.
@@ -108,4 +111,5 @@ Installation is described in [INSTALL](https://oracle.github.io/node-oracledb/IN
 - TODO
 
   - oracledbinstall.js should cache SHASUMS256.txt so it doesn't have to be fetched twice.
+  - Add support for proxies that require authentication
   - Improve oracledbinstall.js `no_proxy` support for domain names and wildcards.
