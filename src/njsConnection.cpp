@@ -2535,8 +2535,8 @@ void njsConnection::Async_Subscribe(njsBaton *baton)
         params.groupingClass = (uint8_t) baton->subscrGroupingClass;
         params.groupingValue = baton->subscrGroupingValue;
         params.groupingType = (uint8_t) baton->subscrGroupingType;
-        if (dpiConn_newSubscription(baton->dpiConnHandle, &params,
-                &baton->dpiSubscrHandle, NULL) < 0) {
+        if (dpiConn_subscribe(baton->dpiConnHandle, &params,
+                &baton->dpiSubscrHandle) < 0) {
             baton->GetDPIError();
             return;
         }
