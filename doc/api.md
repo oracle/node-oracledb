@@ -3110,7 +3110,7 @@ The `message` parameter in the notification callback is an object containing the
         - `rowid` - a string containing the ROWID of the row that was affected
 - `txId` - a buffer containing the identifier of the transaction which spawned the notification.
 - `type` - the type of notification sent. This will be the value of one of the following constants:
-    - [`oracledb.SUBSCR_EVENT_TYPE_AQ`](#oracledbconstantssubscription) - One or more Advanced Queuing messages are available for to be dequeued (Note AQ enqueue and dequeue methods are not supported)
+    - [`oracledb.SUBSCR_EVENT_TYPE_AQ`](#oracledbconstantssubscription) - One or more Advanced Queuing messages are available to be dequeued (Note AQ enqueue and dequeue methods are not supported)
     - [`oracledb.SUBSCR_EVENT_TYPE_DEREG`](#oracledbconstantssubscription) - the subscription has been closed or the timeout value has been reached.
     - [`oracledb.SUBSCR_EVENT_TYPE_OBJ_CHANGE`](#oracledbconstantssubscription) - object-level notications are being used (Database Change Notification).
     - [`oracledb.SUBSCR_EVENT_TYPE_QUERY_CHANGE`](#oracledbconstantssubscription) - query-level notifications are being used (Continuous Query Notification).
@@ -7957,10 +7957,11 @@ The connection must be created with [`events`](#propdbevents) mode
 
 The database must be able to connect to the node-oracledb machine for
 notifications to be received.  Typically this means that the machine
-running node-oracledb needs a fixed IP address.  If there is any
-problem sending a notification, then the callback method will not be
-invoked.  The configuration options can include an
-[`ipAddress`](#consubscribeoptipaddress) and
+running node-oracledb needs a fixed IP address.  Note
+`connection.subscribe()` does not verify that this reverse connection
+is possible.  If there is any problem sending a notification, then the
+callback method will not be invoked.  The configuration options can
+include an [`ipAddress`](#consubscribeoptipaddress) and
 [`port`](#consubscribeoptport) on which to listen for notifications,
 otherwise the database chooses values.
 
@@ -7986,9 +7987,14 @@ connection.subscribe('mysub', options, function(err) { ... } );
 In this example, whenever a change to `mytable` is committed then
 `myCallback()` is invoked.  The callback
 [`message`](#consubscribeoptcallback) parameter contains information
-about the notification.  The information and notification behavior is
-widely configurable by the subscription
-[`options`](#consubscribeoptions).
+about the notification.
+
+CQN notification behavior is widely configurable by the subscription
+[`options`](#consubscribeoptions).  Choices include specifying what
+types of SQL should trigger a notification, whether notifications
+should survive database loss, and control over unsubscription.  You
+can also choose whether notification messages will include ROWIDs of
+affected rows.
 
 The `connection.subscribe()` method may be called multiple times with
 the same `name`.  In this case, the second and subsequent invocations
@@ -7998,6 +8004,9 @@ Instead, the new SQL statement is registered to the same subscription,
 and the same JavaScript notification callback is used.  For
 performance reasons this can be preferable to creating a new
 subscription for each query.
+
+You can view information about registrations by querying
+`USER_CHANGE_NOTIFICATION_REGS` table.
 
 When notifications are no longer required, the subscription name can
 be passed to [`connection.unsubscribe()`](#conunsubscribe).
@@ -8782,4 +8791,4 @@ When upgrading from node-oracledb version 2.0 to version 2.1:
 [96]: https://docs.oracle.com/en/database/oracle/oracle-database/12.2/ladbi/standard-oracle-database-groups-for-database-administrators.html#GUID-0A789F28-169A-43D6-9E48-AAE20D7B0C44
 [97]: http://www.oracle.com/technetwork/database/options/clustering/applicationcontinuity/learnmore/fastapplicationnotification12c-2538999.pdf
 [98]: https://docs.oracle.com/en/database/oracle/oracle-database/18/adfns/editions.html#GUID-58DE05A0-5DEF-4791-8FA8-F04D11964906
-[99]: https://docs.oracle.com/en/database/oracle/oracle-database/12.2/adfns/cqn.html#GUID-373BAF72-3E63-42FE-8BEA-8A2AEFBF1C35
+[99]: https://docs.oracle.com/en/database/oracle/oracle-database/18/adfns/cqn.html#GUID-373BAF72-3E63-42FE-8BEA-8A2AEFBF1C35
