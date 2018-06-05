@@ -641,7 +641,7 @@ bool njsConnection::ProcessExecuteBinds(Local<Object> binds, njsBaton *baton)
 
     // determine bind names (if binding by name)
     baton->bindArraySize = 1;
-    if (!binds->IsArray())
+    if (!binds->IsUndefined() && !binds->IsArray())
         bindNames = binds->GetOwnPropertyNames();
 
     // initialize variables; if there are no variables, nothing further to do!
@@ -863,7 +863,7 @@ bool njsConnection::ProcessExecuteManyBinds(Local<Array> binds,
     // the number of bind variables and types
     if (scanRequired)
         bindDefs = Nan::Get(binds, 0).ToLocalChecked();
-    if (!bindDefs->IsArray())
+    if (!bindDefs->IsUndefined() && !bindDefs->IsArray())
         bindNames = bindDefs.As<Object>()->GetOwnPropertyNames();
 
     // initialize variables; if there are no variables, nothing further to do!
@@ -1034,12 +1034,11 @@ bool njsConnection::InitBindVars(Local<Object> bindObj,
 
     // create bind variables (one for each element of the bind array or each
     // property of the bind object)
-    if (byPosition)
+    if (bindObj->IsUndefined())
+        baton->numBindVars = 0;
+    else if (byPosition)
         baton->numBindVars = bindObj.As<Array>()->Length();
-    else {
-        bindNames = bindObj->GetOwnPropertyNames();
-        baton->numBindVars = bindNames->Length();
-    }
+    else baton->numBindVars = bindNames->Length();
     baton->bindVars = new njsVariable[baton->numBindVars];
 
     // initialize bind variables (set position or name)
