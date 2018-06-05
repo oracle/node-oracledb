@@ -1,4 +1,4 @@
-# node-oracledb 2.2 Documentation for the Oracle Database Node.js Add-on
+# node-oracledb 2.3 Documentation for the Oracle Database Node.js Add-on
 
 *Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved.*
 
@@ -32,13 +32,15 @@ limitations under the License.
             - [`BLOB`](#oracledbconstantsnodbtype), [`BUFFER`](#oracledbconstantsnodbtype), [`CLOB`](#oracledbconstantsnodbtype), [`CURSOR`](#oracledbconstantsnodbtype), [`DATE`](#oracledbconstantsnodbtype), [`DEFAULT`](#oracledbconstantsnodbtype), [`NUMBER`](#oracledbconstantsnodbtype), [`STRING`](#oracledbconstantsnodbtype)
         - 3.1.3 [Oracle Database Type Constants](#oracledbconstantsdbtype)
             - [`DB_TYPE_BINARY_DOUBLE`](#oracledbconstantsdbtype), [`DB_TYPE_BINARY_FLOAT`](#oracledbconstantsdbtype), [`DB_TYPE_BLOB`](#oracledbconstantsdbtype), [`DB_TYPE_CHAR`](#oracledbconstantsdbtype), [`DB_TYPE_CLOB`](#oracledbconstantsdbtype), [`DB_TYPE_DATE`](#oracledbconstantsdbtype), [`DB_TYPE_LONG`](#oracledbconstantsdbtype), [`DB_TYPE_LONG_RAW`](#oracledbconstantsdbtype), [`DB_TYPE_NCHAR`](#oracledbconstantsdbtype), [`DB_TYPE_NCLOB`](#oracledbconstantsdbtype), [`DB_TYPE_NUMBER`](#oracledbconstantsdbtype), [`DB_TYPE_NVARCHAR`](#oracledbconstantsdbtype), [`DB_TYPE_RAW`](#oracledbconstantsdbtype), [`DB_TYPE_ROWID`](#oracledbconstantsdbtype), [`DB_TYPE_TIMESTAMP`](#oracledbconstantsdbtype), [`DB_TYPE_TIMESTAMP_LTZ`](#oracledbconstantsdbtype), [`DB_TYPE_TIMESTAMP_TZ`](#oracledbconstantsdbtype), [`DB_TYPE_VARCHAR`](#oracledbconstantsdbtype)
-        - 3.1.4 [Execute Bind Direction Constants](#oracledbconstantsbinddir)
             - [`BIND_IN`](#oracledbconstantsbinddir), [`BIND_INOUT`](#oracledbconstantsbinddir), [`BIND_OUT`](#oracledbconstantsbinddir)
         - 3.1.5 [Privileged Connection Constants](#oracledbconstantsprivilege)
             - [`SYSDBA`](#oracledbconstantsprivilege), [`SYSOPER`](#oracledbconstantsprivilege), [`SYSASM`](#oracledbconstantsprivilege), [`SYSBACKUP`](#oracledbconstantsprivilege), [`SYSDG`](#oracledbconstantsprivilege), [`SYSKM`](#oracledbconstantsprivilege), [`SYSRAC`](#oracledbconstantsprivilege)
         - 3.1.6 [SQL Statement Type Constants](#oracledbconstantsstmttype)
             - [`STMT_TYPE_UNKNOWN`](#oracledbconstantsstmttype), [`STMT_TYPE_SELECT`](#oracledbconstantsstmttype), [`STMT_TYPE_UPDATE`](#oracledbconstantsstmttype), [`STMT_TYPE_DELETE`](#oracledbconstantsstmttype), [`STMT_TYPE_INSERT`](#oracledbconstantsstmttype), [`STMT_TYPE_CREATE`](#oracledbconstantsstmttype), [`STMT_TYPE_DROP`](#oracledbconstantsstmttype), [`STMT_TYPE_ALTER`](#oracledbconstantsstmttype), [`STMT_TYPE_BEGIN`](#oracledbconstantsstmttype), [`STMT_TYPE_DECLARE`](#oracledbconstantsstmttype), [`STMT_TYPE_CALL`](#oracledbconstantsstmttype), [`STMT_TYPE_EXPLAIN_PLAN`](#oracledbconstantsstmttype), [`STMT_TYPE_MERGE`](#oracledbconstantsstmttype), [`STMT_TYPE_ROLLBACK`](#oracledbconstantsstmttype), [`STMT_TYPE_COMMIT`](#oracledbconstantsstmttype)
-
+        - 3.1.7 [Subscription Constants](#oracledbconstantssubscription)
+            - [`SUBSCR_EVENT_TYPE_DEREG`](#oracledbconstantssubscription), [`SUBSCR_EVENT_TYPE_OBJ_CHANGE`](#oracledbconstantssubscription), [`SUBSCR_EVENT_TYPE_QUERY_CHANGE`](#oracledbconstantssubscription), [`SUBSCR_EVENT_TYPE_AQ`](#oracledbconstantssubscription), [`SUBSCR_GROUPING_CLASS_TIME`](#oracledbconstantssubscription), [`SUBSCR_GROUPING_TYPE_SUMMARY`](#oracledbconstantssubscription), [`SUBSCR_GROUPING_TYPE_LAST`](#oracledbconstantssubscription), [`SUBSCR_QOS_BEST_EFFORT`](#oracledbconstantssubscription), [`SUBSCR_QOS_DEREG_NFY`](#oracledbconstantssubscription), [`SUBSCR_QOS_QUERY`](#oracledbconstantssubscription), [`SUBSCR_QOS_RELIABLE`](#oracledbconstantssubscription), [`SUBSCR_QOS_ROWIDS`](#oracledbconstantssubscription)
+        - 3.1.8 [Continuous Query Notification Constants](#oracledbconstantscqn)
+            - [`CQN_OPCODE_ALL_OPS`](#oracledbconstantscqn), [`CQN_OPCODE_ALL_ROWS`](#oracledbconstantscqn), [`CQN_OPCODE_ALTER`](#oracledbconstantscqn), [`CQN_OPCODE_DELETE`](#oracledbconstantscqn), [`CQN_OPCODE_DROP`](#oracledbconstantscqn), [`CQN_OPCODE_INSERT`](#oracledbconstantscqn), [`CQN_OPCODE_UPDATE`](#oracledbconstantscqn)
     - 3.2 [Oracledb Properties](#oracledbproperties)
         - 3.2.1 [`autoCommit`](#propdbisautocommit)
         - 3.2.2 [`connectionClass`](#propdbconclass)
@@ -74,17 +76,18 @@ limitations under the License.
                 - 3.3.1.1.2 [`edition`](#createpoolpoolattrsedition)
                 - 3.3.1.1.3 [`events`](#createpoolpoolattrsevents)
                 - 3.3.1.1.4 [`externalAuth`](#createpoolpoolattrsexternalauth)
-                - 3.3.1.1.5 [`password`](#createpoolpoolattrspassword)
-                - 3.3.1.1.6 [`poolAlias`](#createpoolpoolattrspoolalias)
-                - 3.3.1.1.7 [`poolIncrement`](#createpoolpoolattrspoolincrement)
-                - 3.3.1.1.8 [`poolMax`](#createpoolpoolattrspoolmax)
-                - 3.3.1.1.9 [`poolMin`](#createpoolpoolattrspoolmin)
-                - 3.3.1.1.10 [`poolPingInterval`](#createpoolpoolattrspoolpinginterval)
-                - 3.3.1.1.11 [`poolTimeout`](#createpoolpoolattrspooltimeout)
-                - 3.3.1.1.12 [`queueRequests`](#createpoolpoolattrsqueuerequests)
-                - 3.3.1.1.13 [`queueTimeout`](#createpoolpoolattrsqueuetimeout)
-                - 3.3.1.1.14 [`stmtCacheSize`](#createpoolpoolattrsstmtcachesize)
-                - 3.3.1.1.15 [`user`](#createpoolpoolattrsuser)
+                - 3.3.1.1.5 [`homogeneous`](#createpoolpoolattrshomogeneous)
+                - 3.3.1.1.6 [`password`](#createpoolpoolattrspassword)
+                - 3.3.1.1.7 [`poolAlias`](#createpoolpoolattrspoolalias)
+                - 3.3.1.1.8 [`poolIncrement`](#createpoolpoolattrspoolincrement)
+                - 3.3.1.1.9 [`poolMax`](#createpoolpoolattrspoolmax)
+                - 3.3.1.1.10 [`poolMin`](#createpoolpoolattrspoolmin)
+                - 3.3.1.1.11 [`poolPingInterval`](#createpoolpoolattrspoolpinginterval)
+                - 3.3.1.1.12 [`poolTimeout`](#createpoolpoolattrspooltimeout)
+                - 3.3.1.1.13 [`queueRequests`](#createpoolpoolattrsqueuerequests)
+                - 3.3.1.1.14 [`queueTimeout`](#createpoolpoolattrsqueuetimeout)
+                - 3.3.1.1.15 [`stmtCacheSize`](#createpoolpoolattrsstmtcachesize)
+                - 3.3.1.1.16 [`user`](#createpoolpoolattrsuser)
             - 3.3.1.2 [`createPool()`: Callback Function](#createpoolpoolcallback)
         - 3.3.2 [`getConnection()`](#getconnectiondb)
             - 3.3.2.1 [`getConnection()`: Parameters](#getconnectiondbattrs)
@@ -156,6 +159,23 @@ limitations under the License.
         - 4.2.10 [`queryStream()`](#querystream)
         - 4.2.11 [`release()`](#release)
         - 4.2.12 [`rollback()`](#rollback)
+        - 4.2.13 [`subscribe()`](#consubscribe)
+            - 4.2.13.1 [`subscribe()`: Name](#consubscribename)
+            - 4.2.13.2 [`subscribe()`: Options](#consubscribeoptions)
+                - 4.2.13.2.1 [`binds`](#consubscribeoptbinds)
+                - 4.2.13.2.2 [`callback`](#consubscribeoptcallback)
+                - 4.2.13.2.3 [`groupingClass`](#consubscribeoptgroupingclass)
+                - 4.2.13.2.4 [`groupingType`](#consubscribeoptgroupingtype)
+                - 4.2.13.2.5 [`groupingValue`](#consubscribeoptgroupingvalue)
+                - 4.2.13.2.6 [`ipAddress`](#consubscribeoptipaddress)
+                - 4.2.13.2.7 [`namespace`](#consubscribeoptnamespace)
+                - 4.2.13.2.8 [`operations`](#consubscribeoptoperations)
+                - 4.2.13.2.9 [`port`](#consubscribeoptport)
+                - 4.2.13.2.10 [`qos`](#consubscribeoptqos)
+                - 4.2.13.2.11 [`sql`](#consubscribeoptsql)
+                - 4.2.13.2.12 [`timeout`](#consubscribeopttimeout)
+            - 4.2.13.3 [`subscribe()`: Callback Function](#consubscribecallback)
+        - 4.2.14 [`unsubscribe()`](#conunsubscribe)
 5. [Lob Class](#lobclass)
     - 5.1 [Lob Properties](#lobproperties)
         - 5.1.1 [`chunkSize`](#proplobchunksize)
@@ -201,6 +221,7 @@ limitations under the License.
         - 8.3.2 [Connection Pool Queue](#connpoolqueue)
         - 8.3.3 [Connection Pool Monitoring and Throughput](#connpoolmonitor)
         - 8.3.4 [Connection Pool Pinging](#connpoolpinging)
+        - 8.3.5 [Heterogeneous Connection Pools and Pool Proxy Authentication](#connpoolproxy)
     - 8.4 [Database Resident Connection Pooling (DRCP)](#drcp)
     - 8.5 [External Authentication](#extauth)
     - 8.6 [Privileged Connections](#privconn)
@@ -256,18 +277,19 @@ limitations under the License.
     - 14.6 [PL/SQL Collection Associative Array (Index-by) Bind Parameters](#plsqlindexbybinds)
     - 14.7 [Binding Multiple Values to a SQL `WHERE IN` Clause](#sqlwherein)
 15. [Batch Statement Execution](#batchexecution)
-16. [Transaction Management](#transactionmgt)
-17. [Statement Caching](#stmtcache)
-18. [External Configuration](#oraaccess)
-19. [Globalization and National Language Support (NLS)](#nls)
-20. [End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend)
-21. [Promises and node-oracledb](#promiseoverview)
-    - 21.1 [Custom Promise Libraries](#custompromises)
-22. [Async/Await and node-oracledb](#asyncawaitoverview)
-23. [Tracing SQL and PL/SQL Statements](#tracingsql)
-24. [Migrating from Previous node-oracledb Releases](#migrate)
-    - 24.1 [Migrating from node-oracledb 1.13 to node-oracledb 2.0](#migratev1v2)
-    - 24.2 [Migrating from node-oracledb 2.0 to node-oracledb 2.1](#migratev20v21)
+16. [Continuous Query Notification (CQN)](#cqn)
+17. [Transaction Management](#transactionmgt)
+18. [Statement Caching](#stmtcache)
+19. [External Configuration](#oraaccess)
+20. [Globalization and National Language Support (NLS)](#nls)
+21. [End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend)
+22. [Promises and node-oracledb](#promiseoverview)
+    - 22.1 [Custom Promise Libraries](#custompromises)
+23. [Async/Await and node-oracledb](#asyncawaitoverview)
+24. [Tracing SQL and PL/SQL Statements](#tracingsql)
+25. [Migrating from Previous node-oracledb Releases](#migrate)
+    - 25.1 [Migrating from node-oracledb 1.13 to node-oracledb 2.0](#migratev1v2)
+    - 25.2 [Migrating from node-oracledb 2.0 to node-oracledb 2.1](#migratev20v21)
 
 ## <a name="apimanual"></a> NODE-ORACLEDB API MANUAL
 
@@ -299,13 +321,13 @@ below.  As well as callbacks, node-oracledb can also use
 [Promises](#promiseoverview) and [Async/Await](#asyncawaitoverview)
 functions.
 
-Locate your Oracle Database [username and password][91], and the database
+Locate your Oracle Database [user name and password][91], and the database
 [connection string](#connectionstrings).  The connection string is
-commonly of the format `hostname/servicename`, using the hostname
+commonly of the format `hostname/servicename`, using the host name
 where the database is running and the Oracle Database service name of
 the database instance.
 
-Substitute your username, password and connection string in the code.
+Substitute your user name, password and connection string in the code.
 For downloaded examples, put these in [`dbconfig.js`][89].
 
 Run the script, for example:
@@ -459,11 +481,10 @@ may change in future, so use the constant names in applications.
 
 Constants for the query result [outFormat](#propdboutformat) option:
 
-```
-oracledb.ARRAY                  // (4001) Fetch each row as array of column values
-
-oracledb.OBJECT                 // (4002) Fetch each row as an object
-```
+Constant Name                        | Value |Description
+-------------------------------------|-------|-----------------------------------------------
+`oracledb.ARRAY`                     | 4001  | Fetch each row as array of column values
+`oracledb.OBJECT`                    | 4002  | Fetch each row as an object
 
 #### <a name="oracledbconstantsnodbtype"></a> 3.1.2 Node-oracledb Type Constants
 
@@ -477,23 +498,16 @@ for [extended metadata](#propdbextendedmetadata).
 
 Not all constants can be used in all places.
 
-```
-oracledb.BLOB                   // (2007) Bind a BLOB to a Node.js Stream or create a temporary BLOB, or for fetchAsBuffer and fetchInfo
-
-oracledb.BUFFER                 // (2005) Bind a RAW, LONG RAW or BLOB to a Node.js Buffer
-
-oracledb.CLOB                   // (2006) Bind a CLOB to a Node.js Stream, create a temporary CLOB, or for fetchAsString and fetchInfo
-
-oracledb.CURSOR                 // (2004) Bind a REF CURSOR to a node-oracledb ResultSet class
-
-oracledb.DATE                   // (2003) Bind as JavaScript date type.  Can also be used for fetchAsString and fetchInfo
-
-oracledb.DEFAULT                // (0) Used with fetchInfo to reset the fetch type to the database type
-
-oracledb.NUMBER                 // (2002) Bind as JavaScript number type.  Can also be used for fetchAsString and fetchInfo
-
-oracledb.STRING                 // (2001) Bind as JavaScript String type.  Can be used for most database types.
-```
+Constant Name                        | Value |Description
+-------------------------------------|-------|-----------------------------------------------
+`oracledb.BLOB`                      | 2007  | Bind a BLOB to a Node.js Stream or create a temporary BLOB, or for fetchAsBuffer and fetchInfo
+`oracledb.BUFFER`                    | 2005  | Bind a RAW, LONG RAW or BLOB to a Node.js Buffer
+`oracledb.CLOB`                      | 2006  | Bind a CLOB to a Node.js Stream, create a temporary CLOB, or for fetchAsString and fetchInfo
+`oracledb.CURSOR`                    | 2004  | Bind a REF CURSOR to a node-oracledb ResultSet class
+`oracledb.DATE`                      | 2003  | Bind as JavaScript date type.  Can also be used for fetchAsString and fetchInfo
+`oracledb.DEFAULT`                   |    0  | Used with fetchInfo to reset the fetch type to the database type
+`oracledb.NUMBER`                    | 2002  | Bind as JavaScript number type.  Can also be used for fetchAsString and fetchInfo
+`oracledb.STRING`                    | 2001  | Bind as JavaScript String type.  Can be used for most database types.
 
 #### <a name="oracledbconstantsdbtype"></a> 3.1.3 Oracle Database Type Constants
 
@@ -501,43 +515,26 @@ The values of these types are shown
 in [extended metadata](#propdbextendedmetadata) for queries and REF
 CURSORS.  They indicate the Oracle Database type.
 
-```
-oracledb.DB_TYPE_BINARY_DOUBLE  // (101) BINARY_DOUBLE
-
-oracledb.DB_TYPE_BINARY_FLOAT   // (100) BINARY_FLOAT
-
-oracledb.DB_TYPE_BLOB           // (113) BLOB
-
-oracledb.DB_TYPE_CHAR           // (96) CHAR
-
-oracledb.DB_TYPE_CLOB           // (112) CLOB
-
-oracledb.DB_TYPE_DATE           // (12) DATE
-
-oracledb.DB_TYPE_LONG           // (8) LONG
-
-oracledb.DB_TYPE_LONG_RAW       // (24) LONG RAW
-
-oracledb.DB_TYPE_NCHAR          // (1096) NCHAR
-
-oracledb.DB_TYPE_NCLOB          // (1112) NCLOB
-
-oracledb.DB_TYPE_NUMBER         // (2) NUMBER or FLOAT
-
-oracledb.DB_TYPE_NVARCHAR       // (1001) NVARCHAR
-
-oracledb.DB_TYPE_RAW            // (23) RAW
-
-oracledb.DB_TYPE_ROWID          // (104) ROWID
-
-oracledb.DB_TYPE_TIMESTAMP      // (187) TIMESTAMP
-
-oracledb.DB_TYPE_TIMESTAMP_LTZ  // (232) TIMESTAMP WITH LOCAL TIME ZONE
-
-oracledb.DB_TYPE_TIMESTAMP_TZ   // (188) TIMESTAMP WITH TIME ZONE
-
-oracledb.DB_TYPE_VARCHAR        // (1) VARCHAR2
-```
+Constant Name                        | Value |Description
+-------------------------------------|-------|-----------------------------------------------
+`oracledb.DB_TYPE_BINARY_DOUBLE`     |  101  | BINARY_DOUBLE
+`oracledb.DB_TYPE_BINARY_FLOAT`      |  100  | BINARY_FLOAT
+`oracledb.DB_TYPE_BLOB`              |  113  | BLOB
+`oracledb.DB_TYPE_CHAR`              |   96  | CHAR
+`oracledb.DB_TYPE_CLOB`              |  112  | CLOB
+`oracledb.DB_TYPE_DATE`              |   12  | DATE
+`oracledb.DB_TYPE_LONG`              |    8  | LONG
+`oracledb.DB_TYPE_LONG_RAW`          |   24  | LONG RAW
+`oracledb.DB_TYPE_NCHAR`             | 1096  | NCHAR
+`oracledb.DB_TYPE_NCLOB`             | 1112  | NCLOB
+`oracledb.DB_TYPE_NUMBER`            |    2  | NUMBER or FLOAT
+`oracledb.DB_TYPE_NVARCHAR`          | 1001  | NVARCHAR
+`oracledb.DB_TYPE_RAW`               |   23  | RAW
+`oracledb.DB_TYPE_ROWID`             |  104  | ROWID
+`oracledb.DB_TYPE_TIMESTAMP`         |  187  | TIMESTAMP
+`oracledb.DB_TYPE_TIMESTAMP_LTZ`     |  232  | TIMESTAMP WITH LOCAL TIME ZONE
+`oracledb.DB_TYPE_TIMESTAMP_TZ`      |  188  | TIMESTAMP WITH TIME ZONE
+`oracledb.DB_TYPE_VARCHAR`           |    1  | VARCHAR2
 
 #### <a name="oracledbconstantsbinddir"></a> 3.1.4 Execute Bind Direction Constants
 
@@ -548,13 +545,11 @@ Constants for the `dir` property of `execute()`
 These specify whether data values bound to SQL or PL/SQL bind
 parameters are passed into, or out from, the database:
 
-```
-oracledb.BIND_IN                // (3001) Direction for IN binds
-
-oracledb.BIND_INOUT             // (3002) Direction for IN OUT binds
-
-oracledb.BIND_OUT               // (3003) Direction for OUT binds
-```
+Constant Name                        | Value |Description
+-------------------------------------|-------|-----------------------------------------------
+`oracledb.BIND_IN`                   |  3001 | Direction for IN binds
+`oracledb.BIND_INOUT`                |  3002 | Direction for IN OUT binds
+`oracledb.BIND_OUT`                  |  3003 | Direction for OUT binds
 
 #### <a name="oracledbconstantsprivilege"></a> 3.1.5 Privileged Connection Constants
 
@@ -564,21 +559,15 @@ Constants for [`getConnection()`](#getconnectiondb)
 These specify what privilege should
 be used by the connection that is being established.
 
-```
-oracledb.SYSDBA                 // (2) SYSDBA privileges
-
-oracledb.SYSOPER                // (4) SYSOPER privileges
-
-oracledb.SYSASM                 // (32768) SYSASM privileges
-
-oracledb.SYSBACKUP              // (131072) SYSBACKUP privileges
-
-oracledb.SYSDG                  // (262144) SYSDG privileges
-
-oracledb.SYSKM                  // (524288) SYSKM privileges
-
-oracledb.SYSRAC                 // (1048576) SYSRAC privileges
-```
+Constant Name                        | Value |Description
+-------------------------------------|---------|-----------------------------------------------
+`oracledb.SYSDBA`                    |       2 | SYSDBA privileges
+`oracledb.SYSOPER`                   |       4 | SYSOPER privileges
+`oracledb.SYSASM`                    |   32768 | SYSASM privileges
+`oracledb.SYSBACKUP`                 |  131072 | SYSBACKUP privileges
+`oracledb.SYSDG`                     |  262144 | SYSDG privileges
+`oracledb.SYSKM`                     |  524288 | SYSKM privileges
+`oracledb.SYSRAC`                    | 1048576 | SYSRAC privileges
 
 #### <a name="oracledbconstantsstmttype"></a> 3.1.6 SQL Statement Type Constants
 
@@ -586,37 +575,80 @@ Constants for [`connection.getStatementInfo()`](#getstmtinfo)
 properties.
 
 
-```
-oracledb.STMT_TYPE_UNKNOWN      // (0) Unknown statement type
+Constant Name                        | Value |Description
+-------------------------------------|-------|-----------------------------------------------
+`oracledb.STMT_TYPE_UNKNOWN`         |     0 | Unknown statement type
+`oracledb.STMT_TYPE_SELECT`          |     1 | SELECT
+`oracledb.STMT_TYPE_UPDATE`          |     2 | UPDATE
+`oracledb.STMT_TYPE_DELETE`          |     3 | DELETE
+`oracledb.STMT_TYPE_INSERT`          |     4 | INSERT
+`oracledb.STMT_TYPE_CREATE`          |     5 | CREATE
+`oracledb.STMT_TYPE_DROP`            |     6 | DROP
+`oracledb.STMT_TYPE_ALTER`           |     7 | ALTER
+`oracledb.STMT_TYPE_BEGIN`           |     8 | BEGIN
+`oracledb.STMT_TYPE_DECLARE`         |     9 | DECLARE
+`oracledb.STMT_TYPE_CALL`            |    10 | CALL
+`oracledb.STMT_TYPE_EXPLAIN_PLAN`    |    15 | EXPLAIN PLAN
+`oracledb.STMT_TYPE_MERGE`           |    16 | MERGE
+`oracledb.STMT_TYPE_ROLLBACK`        |    17 | ROLLBACK
+`oracledb.STMT_TYPE_COMMIT`          |    21 | COMMIT
 
-oracledb.STMT_TYPE_SELECT       // (1) SELECT
+#### <a name="oracledbconstantssubscription"></a> 3.1.7 Subscription Constants
 
-oracledb.STMT_TYPE_UPDATE       // (2) UPDATE
+Constants for the Continuous Query Notification [`message.type`](#consubscribeoptcallback).
 
-oracledb.STMT_TYPE_DELETE       // (3) DELETE
+Constant Name                               | Value |Description
+--------------------------------------------|-------|-----------------------------------------------
+`oracledb.SUBSCR_EVENT_TYPE_AQ`             | 100   | Advanced Queuing notifications are being used
+`oracledb.SUBSCR_EVENT_TYPE_DEREG`          | 5     | A subscription has been closed or the timeout value has been reached
+`oracledb.SUBSCR_EVENT_TYPE_OBJ_CHANGE`     | 6     | Object-level notications are being used (Database Change Notification)
+`oracledb.SUBSCR_EVENT_TYPE_QUERY_CHANGE`   | 7     | Query-level notifications are being used (Continuous Query Notification)
 
-oracledb.STMT_TYPE_INSERT       // (4) INSERT
+Constant for the Continuous Query Notification [`groupingClass`](#consubscribeoptgroupingclass).
 
-oracledb.STMT_TYPE_CREATE       // (5) CREATE
+Constant Name                           | Value |Description
+----------------------------------------|-------|-----------------------------------------------
+`oracledb.SUBSCR_GROUPING_CLASS_TIME`   | 1     | Group notifications by time into a single notification
 
-oracledb.STMT_TYPE_DROP         // (6) DROP
+Constants for the Continuous Query Notification [`groupingType`](#consubscribeoptgroupingtype).
 
-oracledb.STMT_TYPE_ALTER        // (7) ALTER
+Constant Name                           | Value |Description
+----------------------------------------|-------|-----------------------------------------------
+`oracledb.SUBSCR_GROUPING_TYPE_SUMMARY` | 1     | A summary of the grouped notifications is sent
+`oracledb.SUBSCR_GROUPING_TYPE_LAST`    | 2     | The last notification in the group is sent
 
-oracledb.STMT_TYPE_BEGIN        // (8) BEGIN
+Constants for the Continuous Query Notification [`qos`](#consubscribeoptqos) Quality of Service.
 
-oracledb.STMT_TYPE_DECLARE      // (9) DECLARE
+Constant Name                      | Value |Description
+-----------------------------------|-------|---------------------------------------------------
+`oracledb.SUBSCR_QOS_BEST_EFFORT`  | 16    | When best effort filtering for query result set changes is acceptable. False positive notifications may be received. This behavior may be suitable for caching applications.
+`oracledb.SUBSCR_QOS_DEREG_NFY`    |  2    | The subscription will be automatically unregistered as soon as the first notification is received.
+`oracledb.SUBSCR_QOS_QUERY`        |  8    | Continuous Query Notification will be used instead of Database Change Notification.  This means that notifications are only sent if the result set of the registered query changes. By default no false positive notifications are generated. Use `oracledb.SUBSCR_QOS_BEST_EFFORT` if this is not needed.
+`oracledb.SUBSCR_QOS_RELIABLE`     |  1    | Notifications are not lost in the event of database failure.
+`oracledb.SUBSCR_QOS_ROWIDS`       |  4    | Notifications include the ROWIDs of the rows that were affected
 
-oracledb.STMT_TYPE_CALL         // (10) CALL
+Constants for the Continuous Query Notification [`namespace`](#consubscribeoptnamespace).
 
-oracledb.STMT_TYPE_EXPLAIN_PLAN // (15) EXPLAIN PLAN
+Constant Name                        | Value |Description
+-------------------------------------|-------|---------------------------------------------------
+`oracledb.SUBSCR_NAMESPACE_AQ`       | 1     | For Advanced Queuing notifications.  Note AQ enqueue and dequeue methods are not supported in node-oracledb.
+`oracledb.SUBSCR_NAMESPACE_DBCHANGE` | 2     | For Continuous Query Notifications.
 
-oracledb.STMT_TYPE_MERGE        // (16) MERGE
+#### <a name="oracledbconstantscqn"></a> 3.1.8 Continuous Query Notification Constants
 
-oracledb.STMT_TYPE_ROLLBACK     // (17) ROLLBACK
+Constants for the Continuous Query Notification
+`connection.subscribe()` option [`operations`](#consubscribeoptoperations), and for the
+notification message [`operation`](#consubscribeoptcallback) properties.
 
-oracledb.STMT_TYPE_COMMIT       // (21) COMMIT
-```
+Constant Name                   | Value |Description
+--------------------------------|-------|---------------------------------------------------
+`oracledb.CQN_OPCODE_ALL_OPS`   |  0    | Default.  Used to request notification of all operations.
+`oracledb.CQN_OPCODE_ALL_ROWS`  |  1    | Indicates that row information is not available. This occurs if the `qos` quality of service flags do not specify the desire for ROWIDs, or if grouping has taken place and summary notifications are being sent.
+`oracledb.CQN_OPCODE_ALTER`     | 16    | Set if the table was altered in the notifying transaction
+`oracledb.CQN_OPCODE_DELETE`    |  8    | Set if the notifying transaction included deletes on the table
+`oracledb.CQN_OPCODE_DROP`      | 32    | Set if the table was dropped in the notifying transaction
+`oracledb.CQN_OPCODE_INSERT`    |  2    | Set if the notifying transaction included inserts on the table
+`oracledb.CQN_OPCODE_UPDATE`    |  4    | Set if the notifying transaction included updates on the table
 
 ### <a name="oracledbproperties"></a> 3.2 Oracledb Properties
 
@@ -731,7 +763,8 @@ This property can be overridden in the
 getting a standalone connection from
 [`oracledb.getConnection()`](#getconnectiondbattrsevents).
 
-Events mode is required for [Fast Application Notification
+Events mode is required for [Continuous Query
+Notification](#consubscribe), [Fast Application Notification
 (FAN)](#connectionfan) and [Runtime Load Balancing
 (RLB)](#connectionrlb).
 
@@ -873,7 +906,9 @@ Array fetchAsString
 ```
 
 An array of node-oracledb types.  The valid types are
-[`oracledb.DATE`](#oracledbconstantsnodbtype), [`oracledb.NUMBER`](#oracledbconstantsnodbtype)
+[`oracledb.DATE`](#oracledbconstantsnodbtype),
+[`oracledb.NUMBER`](#oracledbconstantsnodbtype),
+[`oracledb.BUFFER`](#oracledbconstantsnodbtype),
 and [`oracledb.CLOB`](#oracledbconstantsnodbtype).  When any column having one
 of the specified types is queried with [`execute()`](#execute)
 or [`queryStream()`](#querystream), the column data is returned as a
@@ -886,9 +921,10 @@ This property helps avoid situations where using JavaScript types can
 lead to numeric precision loss, or where date conversion is unwanted.
 See [Query Result Type Mapping](#typemap) for more discussion.
 
-For non-CLOB types, the maximum length of a string created by this
-mapping is 200 bytes.  Strings created for CLOB columns will generally
-be limited by Node.js and V8 memory restrictions.
+For raw data returned as a string, Oracle returns the data as a hex-encoded
+string.  For dates and numbers returned as a string, the maximum length of a
+string created by this mapping is 200 bytes.  Strings created for CLOB columns
+will generally be limited by Node.js and V8 memory restrictions.
 
 Individual query columns in [`execute()`](#execute)
 or [`queryStream()`](#querystream) calls can override the
@@ -1102,6 +1138,16 @@ The default value is 0.
 
 This property may be overridden when [creating a connection pool](#createpool).
 
+For pools created with [External Authentication](#extauth) or with
+[`homogeneous`](#createpoolpoolattrshomogeneous) set to *false*, the
+number of connections initially created is zero even if a larger value
+is specified for `poolMin`.  The pool increment is always 1,
+regardless of the value of
+[`poolIncrement`](#createpoolpoolattrspoolincrement).  Once the number
+of open connections exceeds `poolMin` and connections are idle for
+more than the [`poolTimeout`](#propdbpooltimeout) seconds, then the
+number of open connections does not fall below `poolMin`.
+
 ##### Example
 
 ```javascript
@@ -1247,6 +1293,9 @@ See [Connection Pool Queue](#connpoolqueue) for more information.
 
 This property was added in node-oracledb 1.7.
 
+This property is deprecated and will be removed in a future release:
+queuing will always be enabled.
+
 ##### Example
 
 ```javascript
@@ -1370,7 +1419,7 @@ promise = createPool(Object poolAttrs);
 
 ##### Description
 
-This method creates a pool of connections with the specified username,
+This method creates a pool of connections with the specified user name,
 password and connection string.
 
 Internally, `createPool()` creates an [Oracle Call Interface Session
@@ -1474,16 +1523,50 @@ The `user` and `password` properties should not be set when
 Note prior to node-oracledb 0.5 this property was called
 `isExternalAuth`.
 
-###### <a name="createpoolpoolattrspassword"></a> 3.3.1.1.5 `password`
+###### <a name="createpoolpoolattrshomogeneous"></a> 3.3.1.1.5 `homogeneous`
+
+```
+Boolean homogeneous
+```
+
+Indicate whether connections in the pool all have the same credentials
+(a 'homogeneous' pool), or whether different credentials can be used
+(a 'heterogeneous' pool).
+
+The default is *true*.
+
+When set to *false*, the user name and password can be omitted from
+the `connection.createPool()` call, but will need to be given for
+subsequent `pool.getConnection()` calls.  Different
+`pool.getConnection()` calls can provide different user credentials.
+Alternatively, when `homogeneous` is *false*, the user name (the
+'proxy' user name) and password can be given, but subsequent
+`pool.getConnection()` calls can specify a different user name to
+access that user's schema.
+
+Heterogeneous pools cannot be used with the [connection pool
+cache](#connpoolcache).  Applications should ensure the pool object is
+explicitly passed between code modules, or use a homogeneous pool and
+make use of [`connection.clientId`](#propconnclientid).
+
+See [Heterogeneous Connection Pools and Pool Proxy
+Authentication](#connpoolproxy) for details and examples.
+
+This property was added in node-oracledb 2.3.
+
+###### <a name="createpoolpoolattrspassword"></a> 3.3.1.1.6 `password`
 
 ```
 String password
 ```
 
 The password of the database user used by connections in the pool.  A
-password is also necessary if a proxy user is specified.
+password is also necessary if a proxy user is specified at pool creation.
 
-###### <a name="createpoolpoolattrspoolalias"></a> 3.3.1.1.6 `poolAlias`
+If `homogeneous` is *false*, then the password may be omitted at pool
+creation but given in subsequent `pool.getConnection()` calls.
+
+###### <a name="createpoolpoolattrspoolalias"></a> 3.3.1.1.7 `poolAlias`
 
 ```
 String poolAlias
@@ -1499,7 +1582,7 @@ See [Connection Pool Cache](#connpoolcache) for details and examples.
 
 This property was added in node-oracledb 1.11.
 
-###### <a name="createpoolpoolattrspoolincrement"></a> 3.3.1.1.7 `poolIncrement`
+###### <a name="createpoolpoolattrspoolincrement"></a> 3.3.1.1.8 `poolIncrement`
 
 ```
 Number poolIncrement
@@ -1513,7 +1596,7 @@ The default value is 1.
 This optional property overrides the
 [`oracledb.poolIncrement`](#propdbpoolincrement) property.
 
-###### <a name="createpoolpoolattrspoolmax"></a> 3.3.1.1.8 `poolMax`
+###### <a name="createpoolpoolattrspoolmax"></a> 3.3.1.1.9 `poolMax`
 
 ```
 Number poolMax
@@ -1533,7 +1616,7 @@ available to node-oracledb.
 
 See [Connection Pooling](#connpooling) for other pool sizing guidelines.
 
-###### <a name="createpoolpoolattrspoolmin"></a> 3.3.1.1.9 `poolMin`
+###### <a name="createpoolpoolattrspoolmin"></a> 3.3.1.1.10 `poolMin`
 
 ```
 Number poolMin
@@ -1547,7 +1630,7 @@ The default value is 0.
 This optional property overrides the
 [`oracledb.poolMin`](#propdbpoolmin) property.
 
-###### <a name="createpoolpoolattrspoolpinginterval"></a> 3.3.1.1.10 `poolPingInterval`
+###### <a name="createpoolpoolattrspoolpinginterval"></a> 3.3.1.1.11 `poolPingInterval`
 
 ```
 Number poolPingInterval
@@ -1569,7 +1652,7 @@ This optional property overrides the
 
 See [Connection Pool Pinging](#connpoolpinging) for more discussion.
 
-###### <a name="createpoolpoolattrspooltimeout"></a> 3.3.1.1.11 `poolTimeout`
+###### <a name="createpoolpoolattrspooltimeout"></a> 3.3.1.1.12 `poolTimeout`
 
 ```
 Number poolTimeout
@@ -1584,7 +1667,7 @@ The default value is 60.
 This optional property overrides the
 [`oracledb.poolTimeout`](#propdbpooltimeout) property.
 
-###### <a name="createpoolpoolattrsqueuerequests"></a> 3.3.1.1.12 `queueRequests`
+###### <a name="createpoolpoolattrsqueuerequests"></a> 3.3.1.1.13 `queueRequests`
 
 ```
 Boolean queueRequests
@@ -1599,7 +1682,10 @@ The default value is *true*.
 This optional property overrides the
 [`oracledb.queueRequests`](#propdbqueuerequests) property.
 
-###### <a name="createpoolpoolattrsqueuetimeout"></a> 3.3.1.1.13 `queueTimeout`
+This property is deprecated and will be removed in a future release:
+queuing will always be enabled.
+
+###### <a name="createpoolpoolattrsqueuetimeout"></a> 3.3.1.1.14 `queueTimeout`
 
 ```
 Number queueTimeout
@@ -1614,7 +1700,7 @@ The default value is 60000.
 This optional property overrides the
 [`oracledb.queueTimeout`](#propdbqueuetimeout) property.
 
-###### <a name="createpoolpoolattrsstmtcachesize"></a> 3.3.1.1.14 `stmtCacheSize`
+###### <a name="createpoolpoolattrsstmtcachesize"></a> 3.3.1.1.15 `stmtCacheSize`
 
 ```
 Number stmtCacheSize
@@ -1626,7 +1712,7 @@ The number of statements to be cached in the
 This optional property overrides the
 [`oracledb.stmtCacheSize`](#propdbstmtcachesize) property.
 
-###### <a name="createpoolpoolattrsuser"></a> 3.3.1.1.15 `user`
+###### <a name="createpoolpoolattrsuser"></a> 3.3.1.1.16 `user`
 
 ```
 String user
@@ -1636,6 +1722,10 @@ The database user name for connections in the pool.  Can be a simple
 user name or a proxy of the form *alison[fred]*. See the [Client
 Access Through a Proxy][7] section in the Oracle Call Interface manual
 for more details about proxy authentication.
+
+If `homogeneous` is *false*, then the pool user name and password need
+to be specified only if the application wants that user to proxy the
+users supplied in subsequent `pool.getConnection()` calls.
 
 #### <a name="createpoolpoolcallback"></a> 3.3.1.2 `createPool()`: Callback Function
 
@@ -2338,8 +2428,8 @@ The valid values for `type` are
 [`oracledb.BUFFER`](#oracledbconstantsnodbtype)
 and [`oracledb.DEFAULT`](#oracledbconstantsnodbtype).
 
-The `fetchInfo` property `type` can be set to `oracledb.STRING` for number and
-date columns in a query to indicate they should be returned as Strings
+The `fetchInfo` property `type` can be set to `oracledb.STRING` for number,
+date and raw columns in a query to indicate they should be returned as Strings
 instead of their native format.  CLOB column data can also be returned
 as Strings instead of [Lob](#lobclass) instances.
 
@@ -2364,9 +2454,10 @@ fetchInfo:
 Each column is specified by name, using Oracle's standard naming
 convention.
 
-The maximum length of a string created by type mapping non-CLOB
-columns is 200 bytes.  If a database column that is already being
-fetched as type `oracledb.STRING` is specified in `fetchInfo`, then the actual
+Raw columns returned as strings will be returned as hex-encoded strings. The
+maximum length of a string created by type mapping number and date columns is
+200 bytes.  If a database column that is already being fetched as type
+`oracledb.STRING` is specified in `fetchInfo`, then the actual
 database metadata will be used to determine the maximum length.
 
 Strings and Buffers created for LOB columns will generally be limited
@@ -2916,6 +3007,276 @@ Callback function parameter | Description
 ----------------------------|-------------
 *Error error* | If `rollback()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
+#### <a name="consubscribe"></a> 4.2.13 `connection.subscribe()`
+
+##### Prototype
+
+Callback:
+```
+subscribe(String name, Object options, function(Error error){});
+```
+Promise:
+```
+promise = subscribe(String name, Object options);
+```
+
+##### Description
+
+Register a JavaScript callback method to be invoked when data is
+changed in the database by any committed transaction.
+
+For notification to work, the connection must be created with
+[`events`](#propdbevents) mode *true*.
+
+The database must be able to connect to the node-oracledb machine for
+notifications to be received.  Typically this means that the machine
+running node-oracledb needs a fixed IP address.  If there is any
+problem sending a notification, then the callback method will not be
+invoked.
+
+The `connection.subscribe()` method may be called multiple times with
+the same `name`.  In this case, the second and subsequent invocations
+ignore all `options` properties other than
+[`sql`](#consubscribeoptsql) and [`binds`](#consubscribeoptbinds).
+Instead, the new SQL statement is registered to the same subscription,
+and the same JavaScript notification callback is used.  For
+performance reasons this can be preferable to creating a new
+subscription for each query.
+
+See [Continuous Query Notification (CQN)](#cqn) for more information.
+
+This method was added in node-oracledb 2.3.
+
+##### <a name="consubscribename"></a> 4.2.13.1 `subscribe()`: Name
+
+```
+String name
+```
+
+For Continuous Query Notification this is an arbitrary name given to
+the subscription.  For Advanced Queue notifications this must be the
+queue name.
+
+##### <a name="consubscribeoptions"></a> 4.2.13.2 `subscribe()`: Options
+
+```
+Object options
+```
+
+The options that control the subscription.  The following properties can be set.
+
+###### <a name="consubscribeoptbinds"></a> 4.2.13.2.1 `binds`
+
+```
+Object binds
+```
+
+An array (bind by position) or object (bind by name) containing the
+bind values to use in the [`sql`](#consubscribeoptsql) property.
+
+###### <a name="consubscribeoptcallback"></a> 4.2.13.2.2 `callback`
+
+```
+function callback(message);
+```
+
+The notification callback that will be called whenever notifications
+are sent by the database.  It accepts one parameter which contains
+details of the notification.
+
+Callback function parameter | Description
+----------------------------|-------------
+*Object message*            | Information about the notification.  Described below.
+
+The `message` parameter in the notification callback is an object containing the following properties:
+
+- `dbName` - the name of the database which sent a notification. This property is only defined for CQN. It is not defined when `type` is [`oracledb.SUBSCR_EVENT_TYPE_DEREG`](#oracledbconstantssubscription).
+- `queries` - an array of objects specifying the queries which were affected by the Query Change notification. This is only defined if the `type` key is the value [`oracledb.SUBSCR_EVENT_TYPE_QUERY_CHANGE`](#oracledbconstantssubscription). It contains the following key:
+    - `tables` - an array of objects identical to the objects created for Database Change Notification (see the `tables` property below).
+- `registered` - a boolean indicating whether the subscription is registerd with the database.  Will be *false* if `type` is [`oracledb.SUBSCR_EVENT_TYPE_DEREG`](#oracledbconstantssubscription) or if the subscription was created with the [`qos`](#consubscribeoptqos) property set to [`oracledb.SUBSCR_QOS_DEREG_NFY`](#oracledbconstantssubscription).
+- `tables` - an array of objects specifying the tables which were affected by the notification. This is only defined if `type` is [`oracledb.SUBSCR_EVENT_TYPE_OBJ_CHANGE`](#oracledbconstantssubscription). It contains the following properties:
+    - `name` - the name of the table which was modified in some way.
+    - `operation` - an integer mask composed of one or more values of the following constants:
+        - [`oracledb.CQN_OPCODE_ALL_ROWS`](#oracledbconstantscqn) - if row information is not available. This occurs if the [`qos`](#consubscribeoptqos) quality of service flags do not specify the desire for ROWIDs or if grouping has taken place and summary notifications are being sent.  This may also be set when too many rows are returned.
+        - [`oracledb.CQN_OPCODE_ALTER`](#oracledbconstantscqn) - if the table was altered in the notifying transaction.
+        - [`oracledb.CQN_OPCODE_DELETE`](#oracledbconstantscqn) - if the notifying transaction included deletes on the table.
+        - [`oracledb.CQN_OPCODE_DROP`](#oracledbconstantscqn) - if the table was dropped in the notifying transaction.
+        - [`oracledb.CQN_OPCODE_INSERT`](#oracledbconstantscqn) - if the notifying transaction included inserts on the table.
+        - [`oracledb.CQN_OPCODE_UPDATE`](#oracledbconstantscqn) - if the notifying transaction included updates on the table.
+    - `rows` - an array of objects specifying the rows which were changed. This will only be defined if the [`qos`](#consubscribeoptqos) quality of service used when creating the subscription indicated the desire for ROWIDs and no summary grouping took place. It contains the following properties:
+        - `operation` - an integer which is one of [`oracledb.CQN_OPCODE_INSERT`](#oracledbconstantscqn), [`oracledb.CQN_OPCODE_UPDATE`](#oracledbconstantscqn), [`oracledb.CQN_OPCODE_DELETE`](#oracledbconstantscqn) as described earlier
+        - `rowid` - a string containing the ROWID of the row that was affected
+- `txId` - a buffer containing the identifier of the transaction which spawned the notification.
+- `type` - the type of notification sent. This will be the value of one of the following constants:
+    - [`oracledb.SUBSCR_EVENT_TYPE_AQ`](#oracledbconstantssubscription) - One or more Advanced Queuing messages are available to be dequeued (Note AQ enqueue and dequeue methods are not supported)
+    - [`oracledb.SUBSCR_EVENT_TYPE_DEREG`](#oracledbconstantssubscription) - the subscription has been closed or the timeout value has been reached.
+    - [`oracledb.SUBSCR_EVENT_TYPE_OBJ_CHANGE`](#oracledbconstantssubscription) - object-level notications are being used (Database Change Notification).
+    - [`oracledb.SUBSCR_EVENT_TYPE_QUERY_CHANGE`](#oracledbconstantssubscription) - query-level notifications are being used (Continuous Query Notification).
+
+###### <a name="consubscribeoptgroupingclass"></a> 4.2.13.2.3 `groupingClass`
+
+```
+Number groupingClass
+```
+
+An integer mask which currently, if set, can only contain the value
+[`oracledb.SUBSCR_GROUPING_CLASS_TIME`](#oracledbconstantssubscription). If
+this value is set then notifications are grouped by time into a single
+notification.
+
+###### <a name="consubscribeoptgroupingtype"></a> 4.2.13.2.4 `groupingType`
+
+```
+Number groupingType
+```
+
+Either
+[`oracledb.SUBSCR_GROUPING_TYPE_SUMMARY`](#oracledbconstantssubscription)
+(the default) indicating notifications should be grouped in a summary,
+or
+[`oracledb.SUBSCR_GROUPING_TYPE_LAST`](#oracledbconstantssubscription)
+indicating the last notification in the group should be sent.
+
+###### <a name="consubscribeoptgroupingvalue"></a> 4.2.13.2.5 `groupingValue`
+
+```
+Number groupingValue
+```
+
+If `groupingClass` contains
+[`oracledb.SUBSCR_GROUPING_CLASS_TIME`](#oracledbconstantssubscription)
+then `groupingValue` can be used to set the number of seconds over
+which notifications will be grouped together, invoking `callback`
+once.  If `groupingClass` is not set, then `groupingValue` is ignored.
+
+###### <a name="consubscribeoptipaddress"></a> 4.2.13.2.6 `ipAddress`
+
+```
+String ipAddress
+```
+
+A string containing an IPv4 or IPv6 address on which the subscription
+should listen to receive notifications.  If not specified, then the
+Oracle Client library will select an IP address.
+
+###### <a name="consubscribeoptnamespace"></a> 4.2.13.2.7 `namespace`
+
+```
+Number namespace
+```
+
+One of the
+[`oracledb.SUBSCR_NAMESPACE_AQ`](#oracledbconstantssubscription) or
+[`oracledb.SUBSCR_NAMESPACE_DBCHANGE`](#oracledbconstantssubscription)
+(the default) constants.
+
+You can use `oracledb.SUBSCR_NAMESPACE_AQ` to get notifications that
+Advanced Queuing messages are available to be dequeued.  Note Advanced
+Queuing enqueue and dequeue methods are not supported yet.
+
+###### <a name="consubscribeoptoperations"></a> 4.2.13.2.8 `operations`
+
+```
+Number operations
+```
+
+An integer mask containing one or more of the operation type
+[`oracledb.CQN_OPCODE_*`](#oracledbconstantscqn) constants to indicate
+what types of database change should generation notifications.
+
+###### <a name="consubscribeoptport"></a> 4.2.13.2.9 `port`
+
+```
+Number port
+```
+
+The port number on which the subscription should listen to receive
+notifications.  If not specified, then the Oracle Client library will
+select a port number.
+
+###### <a name="consubscribeoptqos"></a> 4.2.13.2.10 `qos`
+
+```
+Number qos
+```
+
+An integer mask containing one or more of the quality of service
+[`oracledb.CQN_QOS_*`](#oracledbconstantssubscription) constants.
+
+###### <a name="consubscribeoptsql"></a> 4.2.13.2.11 `sql`
+
+```
+String sql
+```
+
+The SQL query string to use for notifications.
+
+###### <a name="consubscribeopttimeout"></a> 4.2.13.2.12 `timeout`
+
+The number of seconds the subscription should remain active.  Once
+this length of time has been reached, the subscription is
+automatically unregistered and a deregistration notification is sent.
+
+##### <a name="consubscribecallback"></a> 4.2.13.3 `subscribe()`: Callback Function
+
+```
+function(Error error)
+```
+
+The parameters of the callback function are:
+
+Callback function parameter | Description
+----------------------------|-------------
+*Error error*               | If `subscribe()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+
+#### <a name="conunsubscribe"></a> 4.2.14 `connection.unsubscribe()`
+
+##### Prototype
+
+Callback:
+```
+unsubscribe(String name, function(Error error){});
+```
+
+Promise:
+```
+promise = unsubscribe(String name);
+```
+
+##### Description
+
+Unregister a [Continuous Query Notification (CQN)](#cqn) subscription
+previously created with [`connection.subscribe()`](#consubscribe).  No
+further notifications will be sent.  The notification callback does
+not receive a notification of the deregistration event.
+
+A subscription can be unregistered using a different connection to the
+initial subscription, as long as the credentials are the same.
+
+If the subscription [`timeout`](#consubscribeoptions) was reached and
+the subscription was automatically unregistered, you will get an error
+if you call `connection.unsubscribe()`.
+
+This method was added in node-oracledb 2.3.
+
+##### Parameters
+
+```
+String name
+```
+
+The name of the subscription used in [`connection.subscribe()`](#consubscribe).
+
+```
+function(Error error)
+```
+
+The parameters of the callback function are:
+
+Callback function parameter | Description
+----------------------------|-------------
+*Error error*               | If `unsubscribe()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+
 ## <a name="lobclass"></a> 5. Lob Class
 
 Lob objects can be used to access Oracle Database CLOB and BLOB data.
@@ -3144,6 +3505,9 @@ Determines whether requests for connections from the pool are queued
 when the number of connections "checked out" from the pool has reached
 the maximum number specified by [`poolMax`](#propdbpoolmax).
 
+This property is deprecated and will be removed in a future release:
+queuing will always be enabled.
+
 See [`oracledb.queueRequests`](#propdbqueuerequests).
 
 #### <a name="proppoolqueueTimeout"></a> 6.1.10 `pool.queueTimeout`
@@ -3214,11 +3578,11 @@ Callback function parameter | Description
 
 Callback:
 ```
-getConnection(function(Error error, Connection conn){});
+getConnection([Object poolAttrs,] function(Error error, Connection conn){});
 ```
 Promise:
 ```
-promise = getConnection();
+promise = getConnection([Object poolAttrs]);
 ```
 
 ##### Description
@@ -3232,10 +3596,53 @@ number of connections does not exceed the specified maximum for the
 pool. If the pool is at its maximum limit, the `getConnection()` call
 results in an error, such as *ORA-24418: Cannot open further sessions*.
 
+By default pools are created with
+[`homogeneous`](#createpoolpoolattrshomogeneous) set to *true*.  The
+user name and password are supplied when the pool is created.  Each
+time `pool.getConnection()` is called, a connection for that user is
+returned:
+
+```javascript
+  pool.getConnection(
+    function (err, conn) { ... }
+  );
+```
+
+If a heterogeneous pool was created by setting
+[`homogeneous`](#createpoolpoolattrshomogeneous) to *false* during
+creation and credentials were omitted, then the user name and password
+may be used in `pool.getConnection()` like:
+
+```javascript
+  pool.getConnection(
+    {
+      user     : 'hr',
+      password : 'welcome'
+    },
+    function (err, conn) { ... }
+  );
+```
+
+In this case, different user names may be used each time
+`pool.getConnection()` is called.  Proxy users may also be specified.
+
 See [Connection Handling](#connectionhandling) for more information on
 connections.
 
+See [Heterogeneous Connection Pools and Pool Proxy
+Authentication](#connpoolproxy) for more information on heterogeneous
+pools.
+
 ##### Parameters
+
+```
+Object poolAttrs
+```
+
+This optional parameter is used when getting connections from
+heterogeneous pools.  It can contain `user` and `password` properties
+for true heterogeneous pool usage, or it can contain a `user` property
+when a pool proxy user is desired.
 
 ```
 function(Error error, Connection conn)
@@ -4033,6 +4440,167 @@ requirements.
 
 Explicit pings on any connection can be performed at any time with
 [`connection.ping()`](#connectionping).
+
+#### <a name="connpoolproxy"></a> 8.3.5 Heterogeneous Connection Pools and Pool Proxy Authentication
+
+By default, connection pools are 'homogeneous' meaning that all
+connections use the same database credentials.  However, if the pool
+option [`homogeneous`](#createpoolpoolattrshomogeneous) is *false* at
+pool creation, then a 'heterogeneous' pool will be created.  This
+allows different credentials to be used each time a connection is
+acquired from the pool with
+[`pool.getConnection()`](#getconnectionpool).
+
+##### Heterogeneous Pools
+
+When a heterogeneous pool is created by setting
+[`homogeneous`](#createpoolpoolattrshomogeneous) to *false* and no
+credentials supplied during pool creation, then a user name and
+password may be passed to `pool.getConnection()`:
+
+```javascript
+oracledb.createPool(
+  {
+    connectString : "localhost/XE",  // no user name or password
+    homogeneous   : false,
+    . . .  // other pool options such as poolMax can be used
+  },
+  function(err, pool) {
+    pool.getConnection(
+      {
+        user     : 'hr',
+        password : 'welcome'
+      },
+      function (err, conn) {
+
+      . . . // use connection
+
+        conn.close(
+          function(err) {
+            if (err) { console.error(err.message); }
+          });
+      });
+  });
+```
+
+The `connectString` is required during pool creation since the pool is
+created for one database instance.
+
+Different user names may be used each time `pool.getConnection()` is
+called.
+
+When applications want to use connection pools but are not able to use
+[`connection.clientId`](#propconnclientid) to distinguish application
+users from database schema owners, a 'heterogeneous' connection pool
+might be an option.
+
+Note heterogeneous pools cannot be used with the [connection pool
+cache](#connpoolcache).  Applications should ensure the pool object is
+explicitly passed between code modules, or use a homogeneous pool and
+make use of [`connection.clientId`](#propconnclientid).
+
+For heterogeneous pools, the number of connections initially created
+is zero even if a larger value is specified for
+[`poolMin`](#propdbpoolmin).  The pool increment is always 1,
+regardless of the value of
+[`poolIncrement`](#createpoolpoolattrspoolincrement).  Once the number
+of open connections exceeds `poolMin` and connections are idle for
+more than the [`poolTimeout`](#propdbpooltimeout) seconds, then the
+number of open connections does not fall below `poolMin`.
+
+##### Pool Proxy Authentication
+
+Pool proxy authentication requires a heterogeneous pool.
+
+The idea of a proxy is to create a schema in one database user name.
+Privilege is granted on that schema to other database users so they
+can access the schema and manipulate its data.  This aids three-tier
+applications where one user owns the schema while multiple end-users
+access the data.
+
+To grant access, typically a DBA would execute:
+
+```sql
+ALTER USER sessionuser GRANT CONNECT THROUGH proxyuser;
+```
+
+For example, to allow a user called `MYPROXYUSER` to access the schema
+of `HR`:
+
+```
+SQL> CONNECT system/welcome
+
+SQL> ALTER USER hr GRANT CONNECT THROUGH myproxyuser;
+
+SQL> CONNECT myproxyuser[hr]/myproxyuserpassword
+
+SQL> SELECT SYS_CONTEXT('USERENV', 'SESSION_USER') AS SESSION_USER,
+  2         SYS_CONTEXT('USERENV', 'PROXY_USER')   AS PROXY_USER
+  3  FROM DUAL;
+
+SESSION_USER         PROXY_USER
+-------------------- --------------------
+HR                   MYPROXYUSER
+```
+
+See the [Client Access Through a Proxy][7] section in the Oracle Call
+Interface manual for more details about proxy authentication.
+
+To use the proxy user with a node-oracledb heterogeneous connection
+pool you could do:
+
+```javascript
+oracledb.createPool(
+  {
+    connectString : "localhost/XE",  // no user name or password
+    homogeneous   : false,
+    . . .  // other pool options such as poolMax can be used
+  },
+  function(err, pool) {
+    pool.getConnection(
+      {
+        user     : 'myproxyuser[hr]',
+        password : 'myproxyuserpassword'
+      },
+      function (err, conn) {
+
+        . . . // connection has access to the HR schema objects
+
+        conn.close(
+          function(err) {
+            if (err) { console.error(err.message); }
+          });
+      });
+  });
+```
+
+Other proxy cases are supported such as:
+
+```javascript
+oracledb.createPool(
+  {
+    user          : 'myproxyuser',
+    password      : 'myproxyuserpassword'
+    connectString : "localhost/XE",
+    homogeneous   : false,
+    . . .  // other pool options such as poolMax can be used
+  },
+  function(err, pool) {
+    pool.getConnection(
+      {
+        user : 'hr'  // the session user
+      },
+      function (err, conn) {
+
+        . . . // connection has access to the HR schema objects
+
+        conn.close(
+          function(err) {
+            if (err) { console.error(err.message); }
+          });
+      });
+  });
+```
 
 ### <a name="drcp"></a> 8.4 Database Resident Connection Pooling (DRCP)
 
@@ -7120,8 +7688,8 @@ The [`connection.executeMany()`](#executemany) method allows many sets
 of data values to be bound to one DML or PL/SQL statement for
 execution.  It is like calling [`connection.execute()`](#execute)
 multiple times but requires fewer round-trips.  This is an efficient
-way to handle batch changes, for example when inserting or updating
-multiple rows.  The method cannot be used for queries.
+way to handle batch changes, for example when doing bulk inserts, or
+for updating multiple rows.  The method cannot be used for queries.
 
 The `executeMany()` method supports IN, IN OUT and OUT binds for most
 data types except [PL/SQL Collection Associative
@@ -7263,8 +7831,8 @@ parameter](#executemanybinds) array, indicating which record could
 not be processed:
 
 ```
-   [ { Error: ORA-00001: unique constraint (CJ.CHILDTAB_PK) violated errorNum: 1, offset: 3 },
-     { Error: ORA-02291: integrity constraint (CJ.CHILDTAB_FK) violated - parent key not found errorNum: 2291, offset: 6 } ]
+   [ { Error: ORA-00001: unique constraint (HR.CHILDTAB_PK) violated errorNum: 1, offset: 3 },
+     { Error: ORA-02291: integrity constraint (HR.CHILDTAB_FK) violated - parent key not found errorNum: 2291, offset: 6 } ]
 ```
 
 Note that some classes of error will always return via the
@@ -7370,7 +7938,200 @@ The returned bind values are:
   [ 8, 'XXXX' ] ]
 ```
 
-## <a name="transactionmgt"></a> 16. Transaction Management
+## <a name="cqn"></a> 16. Continuous Query Notification (CQN)
+
+[Continuous Query Notification (CQN)][99] lets node-oracledb
+applications register a JavaScript method that is invoked when changed
+data is committed to the database, regardless of the user or the
+application that made the change.  For example your application may be
+interested in knowing if a table used for lookup data has changed so
+the application can update a local cache of that table.
+
+CQN is suitable for infrequently modified tables.  It is recommended
+to avoid frequent subscription and unsubscription.
+
+The connection must be created with [`events`](#propdbevents) mode
+*true*.
+
+The database must be able to connect to the node-oracledb machine for
+notifications to be received.  Typically this means that the machine
+running node-oracledb needs a fixed IP address.  Note
+`connection.subscribe()` does not verify that this reverse connection
+is possible.  If there is any problem sending a notification, then the
+callback method will not be invoked.  The configuration options can
+include an [`ipAddress`](#consubscribeoptipaddress) and
+[`port`](#consubscribeoptport) on which to listen for notifications,
+otherwise the database chooses values.
+
+To register interest in database changes, the
+[`connection.subscribe()`](#consubscribe) method is passed an
+arbitrary name and an [`options`](#consubscribeoptions) object that
+controls notification.  In particular `options` contains a valid SQL
+query and a JavaScript callback:
+
+```javascript
+function myCallback(message) {
+    console.log(message);
+}
+
+options = {
+    sql      : "select * from mytable",  // query of interest
+    callback : myCallback                // method called by notifications
+};
+
+connection.subscribe('mysub', options, function(err) { ... } );
+```
+
+In this example, whenever a change to `mytable` is committed then
+`myCallback()` is invoked.  The callback
+[`message`](#consubscribeoptcallback) parameter contains information
+about the notification.
+
+CQN notification behavior is widely configurable by the subscription
+[`options`](#consubscribeoptions).  Choices include specifying what
+types of SQL should trigger a notification, whether notifications
+should survive database loss, and control over unsubscription.  You
+can also choose whether notification messages will include ROWIDs of
+affected rows.
+
+The `connection.subscribe()` method may be called multiple times with
+the same `name`.  In this case, the second and subsequent invocations
+ignore all `options` properties other than
+[`sql`](#consubscribeoptsql) and [`binds`](#consubscribeoptbinds).
+Instead, the new SQL statement is registered to the same subscription,
+and the same JavaScript notification callback is used.  For
+performance reasons this can be preferable to creating a new
+subscription for each query.
+
+You can view information about registrations by querying
+`USER_CHANGE_NOTIFICATION_REGS` table.
+
+When notifications are no longer required, the subscription name can
+be passed to [`connection.unsubscribe()`](#conunsubscribe).
+
+By default, object-level (previously known as Database Change
+Notification) occurs and the JavaScript notification method is invoked
+whenever a database transaction is committed that changes an object
+the query references, regardless of whether the actual query result
+changed.  However if the subscription option
+[`qos`](#consubscribeoptqos) is
+[`oracledb.SUBSCR_QOS_QUERY`](#oracledbconstantssubscription) then
+query-level notification occurs.  In this mode, the database notifies
+the application whenever a transaction changes the result of the
+registered query and commits.  For example:
+
+```javascript
+options = {
+    sql      : "select * from mytable where key > 100",  // query of interest
+    callback : myCallback,                               // method called by notifications
+    qos      : oracledb.SUBSCR_QOS_QUERY                 // CQN
+};
+```
+
+In this example, if a new `key` of 10 was inserted then no
+notification would be generated.  If a key wth `200` was inserted, then
+a notification would occur.
+
+Before using CQN, users must have appropriate permissions, for
+example:
+
+```sql
+SQL> CONNECT system/welcome
+
+SQL> GRANT CHANGE NOTIFICATION TO hr;
+```
+
+Below is an example of CQN that uses object-level notification and
+grouped notifications in batches at 10 second intervals.  After 60
+seconds, the notification callback is unregisted and no more
+notifications will occur.  The quality of service flags indicate
+ROWIDs should be returned in the callback:
+
+```javascript
+let interval = setInterval(function() {
+    console.log("waiting...");
+}, 5000);
+
+function myCallback(message)
+{
+    console.log("Message type:", message.type);
+    if (message.type == oracledb.SUBSCR_EVENT_TYPE_DEREG) {
+        clearInterval(interval);
+        console.log("Deregistration has taken place...");
+        return;
+    }
+    console.log("Message database name:", message.dbName);
+    console.log("Message transaction id:", message.txId);
+    for (let i = 0; i < message.tables.length; i++) {
+        let table = message.tables[i];
+        console.log("--> Table Name:", table.name);
+        console.log("--> Table Operation:", table.operation);
+        if (table.rows) {
+            for (j = 0; j < table.rows.length; j++) {
+                let row = table.rows[j];
+                console.log("--> --> Row Rowid:", row.rowid);
+                console.log("--> --> Row Operation:", row.operation);
+                console.log(Array(61).join("-"));
+            }
+        }
+        console.log(Array(61).join("="));
+    }
+}
+
+const options = {
+    sql           : "SELECT * FROM MY mytable",
+    callback      : myCallback,
+    timeout       : 60,
+    qos           : oracledb.SUBSCR_QOS_ROWIDS,
+    groupingClass : oracledb.SUBSCR_GROUPING_CLASS_TIME,
+    groupingValue : 10,
+    groupingType  : oracledb.SUBSCR_GROUPING_TYPE_SUMMARY
+};
+
+try {
+    // This is Node 8 syntax, but can be changed to callbacks
+
+    let conn = await oracledb.getConnection({
+      user          : "hr",
+      password      : "welcome",
+      connectString : "localhost/XE",
+      events        :  true
+    });
+
+    await connection.subscribe('mysub', options);
+    console.log("Subscription created...");
+
+} catch (err) {
+    console.error(err);
+    clearInterval(interval);
+}
+```
+
+If two new rows were inserted into the table and then committed,
+output might be like:
+
+```
+Message type: 6
+Message database name: orcl
+Message transaction id: <Buffer 06 00 21 00 f5 0a 00 00>
+--> Table Name: CJ.MYTABLE
+--> Table Operation: 2
+--> --> Row Rowid: AAAVH6AAMAAAAHjAAW
+--> --> Row Operation: 2
+------------------------------------------------------------
+--> --> Row Rowid: AAAVH6AAMAAAAHjAAX
+--> --> Row Operation: 2
+------------------------------------------------------------
+```
+
+Here, the message type 6 corresponds to
+[`oracledb.SUBSCR_EVENT_TYPE_OBJ_CHANGE`](#oracledbconstantssubscription)
+and the row operations of 2 correspond to
+[`oracledb.CQN_OPCODE_INSERT`](#oracledbconstantscqn).
+
+There are runnable examples in the GitHub [examples][3] directory.
+
+## <a name="transactionmgt"></a> 17. Transaction Management
 
 By default, [DML][14] statements are not committed in node-oracledb.
 
@@ -7398,7 +8159,7 @@ will be rolled back.
 Note: Oracle Database will implicitly commit when a [DDL][15]
 statement is executed irrespective of the value of `autoCommit`.
 
-## <a name="stmtcache"></a> 17. Statement Caching
+## <a name="stmtcache"></a> 18. Statement Caching
 
 Node-oracledb's [`execute()`](#execute) and
 [`queryStream()`](#querystream) methods use the [Oracle Call Interface
@@ -7460,7 +8221,7 @@ latter statistic should benefit from not shipping statement metadata
 to node-oracledb.  Adjust the statement cache size to your
 satisfaction.
 
-## <a name="oraaccess"></a> 18. External Configuration
+## <a name="oraaccess"></a> 19. External Configuration
 
 The optional Oracle client-side configuration file [oraaccess.xml][63]
 can be used to configure some behaviors of node-oracledb.  See
@@ -7508,7 +8269,7 @@ The oraaccess.xml file has other uses including:
 
 Refer to the [oraaccess.xml documentation][63].
 
-## <a name="nls"></a> 19. Globalization and National Language Support (NLS)
+## <a name="nls"></a> 20. Globalization and National Language Support (NLS)
 
 Node-oracledb can use Oracle's [National Language Support (NLS)][68]
 to assist in globalizing applications.
@@ -7526,7 +8287,7 @@ globalization. Examples are `NLS_NUMERIC_CHARACTERS` (discussed in
 in [Fetching Numbers and Dates as String](#fetchasstringhandling)).
 Refer to [NLS Documentation][69] for others.
 
-## <a name="endtoend"></a> 20. End-to-end Tracing, Mid-tier Authentication, and Auditing
+## <a name="endtoend"></a> 21. End-to-end Tracing, Mid-tier Authentication, and Auditing
 
 The Connection properties [action](#propconnaction),
 [module](#propconnmodule), and [clientId](#propconnclientid) set
@@ -7537,7 +8298,7 @@ Enterprise Manager.
 The `clientId` property can also be used by applications that do their
 own mid-tier authentication but connect to the database using the one
 database schema.  By setting `clientId` to the application's
-authenticated username, the database is aware of who the actual end
+authenticated user name, the database is aware of who the actual end
 user is.  This can, for example, be used by Oracle [Virtual Private
 Database][11] policies to automatically restrict data access by that
 user.
@@ -7635,7 +8396,7 @@ Note if [`oracledb.connectionClass`](#propdbconclass) is set for a
 non-pooled connection, the `CLIENT_DRIVER` value will not be set for
 that connection.
 
-## <a name="promiseoverview"></a> 21. Promises and node-oracledb
+## <a name="promiseoverview"></a> 22. Promises and node-oracledb
 
 Node-oracledb supports Promises with all asynchronous methods.  The native Promise
 implementation is used.
@@ -7731,7 +8492,7 @@ Unhandled Rejection at:  Promise {
 For more information, see [How to get, use, and close a DB connection
 using promises][73].
 
-### <a name="custompromises"></a> 21.1 Custom Promise Libraries
+### <a name="custompromises"></a> 22.1 Custom Promise Libraries
 
 The Promise implementation is designed to be overridden, allowing a
 custom Promise library to be used.
@@ -7747,7 +8508,7 @@ Promises can be completely disabled by setting
 oracledb.Promise = null;
 ```
 
-## <a name="asyncawaitoverview"></a> 22. Async/Await and node-oracledb
+## <a name="asyncawaitoverview"></a> 23. Async/Await and node-oracledb
 
 Node.js 7.6 supports async functions, also known as Async/Await.  These
 can be used with node-oracledb.  For example:
@@ -7805,7 +8566,7 @@ must be streamed since there is no Promisified interface for them.
 For more information, see [How to get, use, and close a DB connection
 using async functions][74].
 
-## <a name="bindtrace"></a> <a name="tracingsql"></a> 23. Tracing SQL and PL/SQL Statements
+## <a name="bindtrace"></a> <a name="tracingsql"></a> 24. Tracing SQL and PL/SQL Statements
 
 ####  End-to-End Tracing
 
@@ -7862,9 +8623,9 @@ parameters.
 
 PL/SQL users may be interested in using [PL/Scope][78].
 
-## <a name="migrate"></a> 24. Migrating from Previous node-oracledb Releases
+## <a name="migrate"></a> 25. Migrating from Previous node-oracledb Releases
 
-### <a name="migratev1v2"></a> 24.1 Migrating from node-oracledb 1.13 to node-oracledb 2.0
+### <a name="migratev1v2"></a> 25.1 Migrating from node-oracledb 1.13 to node-oracledb 2.0
 
 When upgrading from node-oracledb version 1.13 to version 2.0:
 
@@ -7918,7 +8679,7 @@ When upgrading from node-oracledb version 1.13 to version 2.0:
 - Test applications to check if changes such as the improved property
   validation uncover latent problems in your code.
 
-### <a name="migratev20v21"></a> 24.2 Migrating from node-oracledb 2.0 to node-oracledb 2.1
+### <a name="migratev20v21"></a> 25.2 Migrating from node-oracledb 2.0 to node-oracledb 2.1
 
 When upgrading from node-oracledb version 2.0 to version 2.1:
 
@@ -8028,3 +8789,4 @@ When upgrading from node-oracledb version 2.0 to version 2.1:
 [96]: https://docs.oracle.com/en/database/oracle/oracle-database/12.2/ladbi/standard-oracle-database-groups-for-database-administrators.html#GUID-0A789F28-169A-43D6-9E48-AAE20D7B0C44
 [97]: http://www.oracle.com/technetwork/database/options/clustering/applicationcontinuity/learnmore/fastapplicationnotification12c-2538999.pdf
 [98]: https://docs.oracle.com/en/database/oracle/oracle-database/18/adfns/editions.html#GUID-58DE05A0-5DEF-4791-8FA8-F04D11964906
+[99]: https://docs.oracle.com/en/database/oracle/oracle-database/18/adfns/cqn.html#GUID-373BAF72-3E63-42FE-8BEA-8A2AEFBF1C35

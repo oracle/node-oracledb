@@ -23,7 +23,6 @@ node_modules
 /package/SHASUMS256.txt
 /package/*.gz
 package-lock.json
-/odpi
 
 # Oracle Ignores
 sqlnet.log
