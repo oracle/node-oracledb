@@ -8035,7 +8035,7 @@ SQL> GRANT CHANGE NOTIFICATION TO hr;
 ```
 
 Below is an example of CQN that uses object-level notification and
-groupd notifications in batches at 10 second intervals.  After 60
+grouped notifications in batches at 10 second intervals.  After 60
 seconds, the notification callback is unregisted and no more
 notifications will occur.  The quality of service flags indicate
 ROWIDs should be returned in the callback:
