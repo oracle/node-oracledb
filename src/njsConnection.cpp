@@ -1433,8 +1433,9 @@ bool njsConnection::ProcessSubscriptionOptions(Local<Object> options,
         Local<Function> callback;
         if (!baton->GetFunctionFromJSON(options, "callback", 1, &callback))
             return false;
-        if (!callback.IsEmpty())
-            baton->subscription->SetCallback(callback);
+        if (callback.IsEmpty())
+            baton->error = njsMessages::Get(errMissingSubscrCallback);
+        else baton->subscription->SetCallback(callback);
     }
 
     // get options that are used for registering queries

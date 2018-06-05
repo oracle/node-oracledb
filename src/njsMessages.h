@@ -93,6 +93,7 @@ typedef enum {
     errMissingTypeByPos,
     errMissingTypeByName,
     errInvalidSubscription,
+    errMissingSubscrCallback,
 
     // New ones should be added here
 
