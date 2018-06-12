@@ -39,6 +39,7 @@ const https = require('https');
 const fs = require('fs');
 const url = require('url');
 const packageUtil = require('./util.js');
+const execSync = require('child_process').execSync;
 
 packageUtil.initDynamicProps();
 
@@ -57,6 +58,19 @@ const PACKAGE_PATH_REMOTE = '/oracle/node-oracledb/releases/download/' + package
 const SHA_PATH_REMOTE = '/oracle/node-oracledb/releases/download/' + packageUtil.dynamicProps.GITHUB_TAG + '/' + packageUtil.SHA_FILE_NAME;
 const PORT = 443;
 
+function readProxyUrl(){
+  const httpsProxy = execSync('npm config get https-proxy').toString().trim();
+  const httpProxy = execSync('npm config get proxy').toString().trim();
+
+  const candidates = {
+    httpsProxy: httpsProxy === 'null' ? undefined : httpsProxy,
+    httpProxy: httpProxy === 'null' ? undefined : httpProxy
+  }
+
+  // favor https proxy
+  return candidates.httpsProxy || candidates.httpProxy;
+}
+
 // getProxyConfig gets the proxy configuration for a given hostname. Has basic
 // no_proxy support.
 function getProxyConfig(hostname) {
@@ -66,12 +80,7 @@ function getProxyConfig(hostname) {
     useProxy: undefined
   };
 
-  let proxy = process.env.https_proxy ||
-    process.env.HTTPS_PROXY ||
-    process.env.http_proxy ||
-    process.env.HTTP_PROXY ||
-    process.env.all_proxy ||
-    process.env.ALL_PROXY;
+  let proxy = readProxyUrl();
 
   if (proxy) {
     proxyConfig.useProxy = true;
