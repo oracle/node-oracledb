@@ -190,9 +190,11 @@ function getFileReadStreamByProxy(hostname, path, proxyHostname, proxyPort, auth
   return new Promise((resolve, reject) => {
     packageUtil.trace('In getFileReadStreamByProxy', hostname, path, proxyHostname, proxyPort);
 
-    var authHeader = undefined;
-    if(auth){
-      authHeader= 'Basic ' + new Buffer(auth).toString('base64');
+    let headers = {
+      'host': hostname + ':' + PORT
+    }
+    if (auth) {
+      headers['Proxy-Authorization'] = 'Basic ' + new Buffer(auth).toString('base64');
     }
 
     // Open a proxy tunnel
@@ -201,10 +203,7 @@ function getFileReadStreamByProxy(hostname, path, proxyHostname, proxyPort, auth
       port: proxyPort,
       method: 'CONNECT',
       path: hostname + ':' + PORT,
-      headers: {
-        'host': hostname + ':' + PORT,
-        'Proxy-Authorization': authHeader
-      }
+      headers: headers
     });
 
     req.on('error', reject);
@@ -219,7 +218,7 @@ function getFileReadStreamByProxy(hostname, path, proxyHostname, proxyPort, auth
         proxyHostname = redirectUrl.hostname;
         proxyPort  = redirectUrl.port;
 
-        return getFileReadStreamByProxy(hostname, path, proxyHostname, proxyPort);
+        return getFileReadStreamByProxy(hostname, path, proxyHostname, proxyPort, auth);
       } else if (res.statusCode !== 200) {
         reject(new Error('Error: HTTP proxy request for ' + hostname + path + ' failed with code ' + res.statusCode));
         return;
