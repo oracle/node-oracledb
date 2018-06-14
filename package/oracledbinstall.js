@@ -59,6 +59,12 @@ const SHA_PATH_REMOTE = '/oracle/node-oracledb/releases/download/' + packageUtil
 const PORT = 443;
 
 function readProxyUrl(){
+  // Getting npm config values can be very slow on some environments
+  // Use this env variable as a fallback/workaround solution
+  if(process.env.NODE_ORA_PROXY){
+    return process.env.NODE_ORA_PROXY
+  }
+
   const httpsProxy = execSync('npm config get https-proxy').toString().trim();
   const httpProxy = execSync('npm config get proxy').toString().trim();
 
