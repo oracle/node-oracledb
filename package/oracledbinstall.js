@@ -59,22 +59,33 @@ const SHA_PATH_REMOTE = '/oracle/node-oracledb/releases/download/' + packageUtil
 const PORT = 443;
 
 function readProxyUrl(){
-  // Getting npm config values can be very slow on some environments
-  // Use this env variable as a fallback/workaround solution
-  if(process.env.NODE_ORA_PROXY){
-    return process.env.NODE_ORA_PROXY
+  // Prefer env variable if exists
+  // This also serves as a fallback/workaround solution since
+  // getting npm config can be slow on some environments
+  const envProxy = process.env.https_proxy ||
+    process.env.HTTPS_PROXY ||
+    process.env.http_proxy ||
+    process.env.HTTP_PROXY ||
+    process.env.all_proxy ||
+    process.env.ALL_PROXY;
+
+  if(envProxy){
+    return envProxy;
   }
 
   const httpsProxy = execSync('npm config get https-proxy').toString().trim();
-  const httpProxy = execSync('npm config get proxy').toString().trim();
 
-  const candidates = {
-    httpsProxy: httpsProxy === 'null' ? undefined : httpsProxy,
-    httpProxy: httpProxy === 'null' ? undefined : httpProxy
+  if(httpsProxy !== 'null'){
+    return httpsProxy;
   }
 
-  // favor https proxy
-  return candidates.httpsProxy || candidates.httpProxy;
+  const httpProxy = execSync('npm config get proxy').toString().trim();
+
+  if(httpProxy !== 'null'){
+    return httpProxy;
+  }
+
+  return undefined;
 }
 
 // getProxyConfig gets the proxy configuration for a given hostname. Has basic
