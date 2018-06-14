@@ -39,6 +39,7 @@ const https = require('https');
 const fs = require('fs');
 const url = require('url');
 const packageUtil = require('./util.js');
+const execSync = require('child_process').execSync;
 
 packageUtil.initDynamicProps();
 
@@ -57,6 +58,36 @@ const PACKAGE_PATH_REMOTE = '/oracle/node-oracledb/releases/download/' + package
 const SHA_PATH_REMOTE = '/oracle/node-oracledb/releases/download/' + packageUtil.dynamicProps.GITHUB_TAG + '/' + packageUtil.SHA_FILE_NAME;
 const PORT = 443;
 
+function readProxyUrl(){
+  // Prefer env variable if exists
+  // This also serves as a fallback/workaround solution since
+  // getting npm config can be slow on some environments
+  const envProxy = process.env.https_proxy ||
+    process.env.HTTPS_PROXY ||
+    process.env.http_proxy ||
+    process.env.HTTP_PROXY ||
+    process.env.all_proxy ||
+    process.env.ALL_PROXY;
+
+  if(envProxy){
+    return envProxy;
+  }
+
+  const httpsProxy = execSync('npm config get https-proxy').toString().trim();
+
+  if(httpsProxy !== 'null'){
+    return httpsProxy;
+  }
+
+  const httpProxy = execSync('npm config get proxy').toString().trim();
+
+  if(httpProxy !== 'null'){
+    return httpProxy;
+  }
+
+  return undefined;
+}
+
 // getProxyConfig gets the proxy configuration for a given hostname. Has basic
 // no_proxy support.
 function getProxyConfig(hostname) {
@@ -66,12 +97,7 @@ function getProxyConfig(hostname) {
     useProxy: undefined
   };
 
-  let proxy = process.env.https_proxy ||
-    process.env.HTTPS_PROXY ||
-    process.env.http_proxy ||
-    process.env.HTTP_PROXY ||
-    process.env.all_proxy ||
-    process.env.ALL_PROXY;
+  let proxy = readProxyUrl();
 
   if (proxy) {
     proxyConfig.useProxy = true;
@@ -82,6 +108,7 @@ function getProxyConfig(hostname) {
 
     const parsedUrl = url.parse(proxy);
 
+    proxyConfig.auth = parsedUrl.auth;
     proxyConfig.hostname = parsedUrl.hostname;
     proxyConfig.port = parsedUrl.port;
   } else {
@@ -177,7 +204,7 @@ function getRemoteFileReadStream(hostname, path) {
   const proxyConfig = getProxyConfig(hostname);
 
   if (proxyConfig.useProxy) {
-    return getFileReadStreamByProxy(hostname, path, proxyConfig.hostname, proxyConfig.port);
+    return getFileReadStreamByProxy(hostname, path, proxyConfig.hostname, proxyConfig.port, proxyConfig.auth)
   } else {
     return getFileReadStreamBase(hostname, path);
   }
@@ -185,9 +212,16 @@ function getRemoteFileReadStream(hostname, path) {
 
 // getFileReadStreamByProxy connects to a proxy server before calling getFileReadStreamBase
 // to retrieve a remote file read stream.
-function getFileReadStreamByProxy(hostname, path, proxyHostname, proxyPort) {
+function getFileReadStreamByProxy(hostname, path, proxyHostname, proxyPort, auth) {
   return new Promise((resolve, reject) => {
     packageUtil.trace('In getFileReadStreamByProxy', hostname, path, proxyHostname, proxyPort);
+
+    let headers = {
+      'host': hostname + ':' + PORT
+    }
+    if (auth) {
+      headers['Proxy-Authorization'] = 'Basic ' + new Buffer(auth).toString('base64');
+    }
 
     // Open a proxy tunnel
     const req = http.request({
@@ -195,9 +229,7 @@ function getFileReadStreamByProxy(hostname, path, proxyHostname, proxyPort) {
       port: proxyPort,
       method: 'CONNECT',
       path: hostname + ':' + PORT,
-      headers: {
-        'host': hostname + ':' + PORT,
-      }
+      headers: headers
     });
 
     req.on('error', reject);
@@ -212,7 +244,7 @@ function getFileReadStreamByProxy(hostname, path, proxyHostname, proxyPort) {
         proxyHostname = redirectUrl.hostname;
         proxyPort  = redirectUrl.port;
 
-        return getFileReadStreamByProxy(hostname, path, proxyHostname, proxyPort);
+        return getFileReadStreamByProxy(hostname, path, proxyHostname, proxyPort, auth);
       } else if (res.statusCode !== 200) {
         reject(new Error('Error: HTTP proxy request for ' + hostname + path + ' failed with code ' + res.statusCode));
         return;
