@@ -7890,6 +7890,42 @@ The returned bind values are:
   [ 8, 'XXXX' ] ]
 ```
 
+The variant of `executeMany()` that accepts a number of iterations is
+useful when there no bind values, or only OUT bind values.  This
+example calls a PL/SQL block eight times:
+
+```javascript
+var sql = `DECLARE
+             t_id NUMBER;
+           BEGIN
+             SELECT NVL(COUNT(*), 0) + 1 INTO t_id FROM testtable;
+             INSERT INTO testtable VALUES (t_id, 'Test String ' || t_id);
+             SELECT SUM(id) INTO :1 FROM testtable;
+           END;`
+
+var options = {
+  bindDefs: [
+    { type : oracledb.NUMBER, dir : oracledb.BIND_OUT }
+  ]
+};
+
+var numIterations = 8;
+
+connection.executeMany(sql, numIterations, options, function (err, result) {
+  if (err) {
+    console.error(err)
+  } else {
+    console.log(result.outBinds);
+  }
+});
+```
+
+Output would be an array of eight values such as:
+
+```
+[ [ 6 ], [ 10 ], [ 15 ], [ 21 ], [ 28 ], [ 36 ], [ 45 ], [ 55 ] ]
+```
+
 ## <a name="cqn"></a> 16. Continuous Query Notification (CQN)
 
 [Continuous Query Notification (CQN)][99] lets node-oracledb
