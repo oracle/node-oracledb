@@ -852,9 +852,6 @@ bool njsConnection::ProcessExecuteManyBinds(Local<Array> binds,
     Local<Array> bindNames;
     bool scanRequired;
 
-    // all rows are bound at one time
-    baton->bindArraySize = binds->Length();
-
     // determine if bind definitions have been specified
     Local<String> key = Nan::New<v8::String>("bindDefs").ToLocalChecked();
     if (!Nan::Get(options, key).ToLocal(&bindDefs))
@@ -863,7 +860,7 @@ bool njsConnection::ProcessExecuteManyBinds(Local<Array> binds,
 
     // if no bind definitions are specified, the first row is used to determine
     // the number of bind variables and types
-    if (scanRequired)
+    if (scanRequired && !binds.IsEmpty())
         bindDefs = Nan::Get(binds, 0).ToLocalChecked();
     if (!bindDefs->IsUndefined() && !bindDefs->IsArray())
         bindNames = bindDefs.As<Object>()->GetOwnPropertyNames();
@@ -908,7 +905,7 @@ bool njsConnection::ProcessExecuteManyBinds(Local<Array> binds,
     }
 
     // populate the ODPI-C variables with the data from JavaScript binds
-    if (!TransferExecuteManyBinds(binds, bindNames, baton))
+    if (!binds.IsEmpty() && !TransferExecuteManyBinds(binds, bindNames, baton))
         return false;
 
     return true;
@@ -1863,9 +1860,16 @@ NAN_METHOD(njsConnection::ExecuteMany)
     }
     if (ok)
         ok = ProcessExecuteManyOptions(info[2].As<Object>(), baton);
-    if (ok)
-        ProcessExecuteManyBinds(info[1].As<Array>(), info[2].As<Object>(),
-                baton);
+    if (ok) {
+        Local<Array> binds;
+        if (info[1]->IsUint32())
+            baton->bindArraySize = Nan::To<uint32_t>(info[1]).FromJust();
+        else {
+            binds = info[1].As<Array>();
+            baton->bindArraySize = binds->Length();
+        }
+        ProcessExecuteManyBinds(binds, info[2].As<Object>(), baton);
+    }
     baton->CheckJSException(&tryCatch);
     baton->QueueWork("ExecuteMany", Async_ExecuteMany,
             Async_AfterExecuteMany, 2);

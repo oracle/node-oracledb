@@ -2631,10 +2631,12 @@ inserted. For non-DML statements such as queries and PL/SQL statements,
 Callback:
 ```
 executeMany(String sql, Array binds, [Object options], function(Error error, [Object result]) {});
+executeMany(String sql, Number numIterations, [Object options], function(Error error, [Object result]) {});
 ```
 Promise:
 ```
 promise = executeMany(String sql, Array binds, [Object options]);
+promise = executeMany(String sql, Number numIterations, [Object options]);
 ```
 
 ##### Description
@@ -2649,6 +2651,10 @@ be used for queries.
 The `executeMany()` method supports IN, IN OUT and OUT binds for most
 data types except [PL/SQL Collection Associative
 Arrays](#plsqlindexbybinds).
+
+The version of this function which accepts a number of iterations should be
+used when no bind parameters are required or when all bind parameters are OUT
+binds.
 
 See [Batch Statement Execution](#batchexecution) for more information.
 
