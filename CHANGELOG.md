@@ -2,6 +2,10 @@
 
 ## node-oracledb v3.0.0-dev (DD Mon YYYY)
 
+- Added support for specifying the number of iterations to
+  `executeMany()` instead of always requiring an input binds array.
+  This is useful when there are no binds, or only OUT binds.
+
 - Eliminated a memory leak when fetching LOBs and more than one
   internal fetch occurs.
 
