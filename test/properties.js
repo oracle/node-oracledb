@@ -53,7 +53,6 @@ describe('58. properties.js', function() {
       defaultValues.fetchAsString    = oracledb.fetchAsString;
       defaultValues.outFormat        = oracledb.outFormat;
       defaultValues.lobPrefetchSize  = oracledb.lobPrefetchSize;
-      defaultValues.queueRequests    = oracledb.queueRequests;
       defaultValues.queueTimeout     = oracledb.queueTimeout;
       defaultValues.stmtCacheSize    = oracledb.stmtCacheSize;
       defaultValues.poolPingInterval = oracledb.poolPingInterval;
@@ -75,7 +74,6 @@ describe('58. properties.js', function() {
       oracledb.fetchAsString    = defaultValues.fetchAsString;
       oracledb.outFormat        = defaultValues.outFormat;
       oracledb.lobPrefetchSize  = defaultValues.lobPrefetchSize;
-      oracledb.queueRequests    = defaultValues.queueRequests;
       oracledb.queueTimeout     = defaultValues.queueTimeout;
       oracledb.stmtCacheSize    = defaultValues.stmtCacheSize;
       oracledb.poolPingInterval = defaultValues.poolPingInterval;
@@ -204,7 +202,7 @@ describe('58. properties.js', function() {
       );
     });
 
-    it('58.1.15 queueRequests', function() {
+    it.skip('58.1.15 queueRequests', function() {
       var t = oracledb.queueRequests;
       oracledb.queueRequests = false;
 
@@ -464,7 +462,7 @@ describe('58. properties.js', function() {
       );
     });
 
-    it('58.2.8 queueRequests', function() {
+    it.skip('58.2.8 queueRequests', function() {
       var t = pool.queueRequests;
       t.should.be.a.Boolean;
 

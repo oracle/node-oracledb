@@ -1087,6 +1087,7 @@ void njsOracledb::Async_CreatePool(njsBaton *baton)
     params.minSessions = baton->poolMin;
     params.maxSessions = baton->poolMax;
     params.sessionIncrement = baton->poolIncrement;
+    params.getMode = DPI_MODE_POOL_GET_WAIT;
     params.externalAuth = baton->externalAuth;
     params.homogeneous = baton->homogeneous;
 

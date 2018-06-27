@@ -239,7 +239,7 @@ describe('2. pool.js', function() {
       );
     });
 
-    it('2.3.4 poolMax limits the pool capacity', function(done){
+    it.skip('2.3.4 poolMax limits the pool capacity', function(done){
       oracledb.createPool(
         {
           user              : dbConfig.user,
@@ -613,7 +613,7 @@ describe('2. pool.js', function() {
       return blockingSql;
     }
 
-    it('2.8.1 generates ORA-24418 when calling getConnection if queueing is disabled', function(done) {
+    it.skip('2.8.1 generates ORA-24418 when calling getConnection if queueing is disabled', function(done) {
       oracledb.createPool(
         {
           user              : dbConfig.user,
@@ -670,7 +670,7 @@ describe('2. pool.js', function() {
       );
     });
 
-    it('2.8.2 does not generate ORA-24418 when calling getConnection if queueing is enabled', function(done) {
+    it('2.8.2 does not generate ORA-24418 when calling getConnection', function(done) {
       oracledb.createPool(
         {
           user              : dbConfig.user,
@@ -679,8 +679,7 @@ describe('2. pool.js', function() {
           poolMin           : 0,
           poolMax           : 1,
           poolIncrement     : 1,
-          poolTimeout       : 1,
-          queueRequests     : true //default
+          poolTimeout       : 1
         },
         function(err, pool){
           should.not.exist(err);
@@ -738,7 +737,6 @@ describe('2. pool.js', function() {
           poolMax           : 1,
           poolIncrement     : 1,
           poolTimeout       : 1,
-          queueRequests     : true, //default
           queueTimeout      : 2000 //2 seconds
         },
         function(err, pool){
@@ -795,7 +793,6 @@ describe('2. pool.js', function() {
           poolMax           : 1,
           poolIncrement     : 1,
           poolTimeout       : 1,
-          queueRequests     : true, //default
           queueTimeout      : 10000 //10 seconds
         },
         function(err, pool){
@@ -855,7 +852,6 @@ describe('2. pool.js', function() {
           poolMax           : 1,
           poolIncrement     : 1,
           poolTimeout       : 1,
-          queueRequests     : true, //default
           _enableStats      : true
         },
         function(err, pool){
