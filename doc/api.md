@@ -2575,7 +2575,8 @@ Array/object outBinds
 This contains the output values of OUT and IN OUT binds.
 If [`bindParams`](#executebindParams) is passed as an array, then
 `outBinds` is returned as an array.  If `bindParams` is passed as an
-object, then `outBinds` is returned as an object.
+object, then `outBinds` is returned as an object. If there are no OUT
+or IN OUT binds, the value is undefined.
 
 ###### <a name="execresultset"></a> 4.2.6.4.3 `resultSet`
 
@@ -2620,8 +2621,8 @@ Number rowsAffected
 
 For [DML][14] statements (including SELECT FOR UPDATE) this contains
 the number of rows affected, for example the number of rows
-inserted. For non-DML statements such as queries, or if no rows are
-affected, then `rowsAffected` will appear as undefined.
+inserted. For non-DML statements such as queries and PL/SQL statements,
+`rowsAffected` is undefined.
 
 #### <a name="executemany"></a> 4.2.7 `connection.executeMany()`
 

@@ -1796,22 +1796,13 @@ void njsConnection::Async_AfterExecute(njsBaton *baton, Local<Value> argv[])
     Local<Object> result = Nan::New<v8::Object>();
     Local<Object> callingObj, rows;
     Local<Function> callback;
+    Local<Value> outBinds;
 
     // handle queries
     if (baton->queryVars) {
-
-        // queries do not have out binds or any rows affected
-        Nan::Set(result, Nan::New<v8::String>("outBinds").ToLocalChecked(),
-                Nan::Undefined());
-        Nan::Set(result, Nan::New<v8::String>("rowsAffected").ToLocalChecked(),
-                Nan::Undefined());
-
-        // assign metadata
         Nan::Set(result, Nan::New<v8::String>("metaData").ToLocalChecked(),
                 GetMetaData(baton->queryVars, baton->numQueryVars,
                         baton->extendedMetaData));
-
-        // assign result set
         Local<Object> resultSet = njsResultSet::CreateFromBaton(baton);
         Nan::Set(result, Nan::New<String>("resultSet").ToLocalChecked(),
                 resultSet);
@@ -1819,21 +1810,17 @@ void njsConnection::Async_AfterExecute(njsBaton *baton, Local<Value> argv[])
     } else {
         Local<Value> outBinds = Nan::Undefined();
         GetExecuteOutBinds(outBinds, baton);
-        Local<String> key = Nan::New<v8::String>("outBinds").ToLocalChecked();
-        Nan::DefineOwnProperty(result, key, outBinds);
-        if (baton->isPLSQL)
-            Nan::Set(result,
+        if (!outBinds->IsUndefined()) {
+            Nan::DefineOwnProperty(result,
+                    Nan::New<v8::String>("outBinds").ToLocalChecked(),
+                    outBinds, v8::ReadOnly);
+        }
+        if (!baton->isPLSQL) {
+            Nan::DefineOwnProperty(result,
                     Nan::New<v8::String>("rowsAffected").ToLocalChecked(),
-                    Nan::Undefined());
-        else Nan::DefineOwnProperty(result,
-                Nan::New<v8::String>("rowsAffected").ToLocalChecked(),
-                Nan::New<v8::Integer>( (unsigned int) baton->rowsAffected),
-                v8::ReadOnly);
-
-        Nan::Set(result, Nan::New<v8::String>("rows").ToLocalChecked(),
-                Nan::Undefined());
-        Nan::Set(result, Nan::New<v8::String>("metaData").ToLocalChecked(),
-                Nan::Undefined());
+                    Nan::New<v8::Integer>( (unsigned int) baton->rowsAffected),
+                    v8::ReadOnly);
+        }
     }
     argv[1] = scope.Escape(result);
 }

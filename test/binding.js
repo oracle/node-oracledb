@@ -765,12 +765,7 @@ describe('4. binding.js', function() {
             function(err, result)
             {
               should.not.exist(err);
-              result.should.eql(
-                { rowsAffected: undefined,
-                  outBinds: undefined,
-                  rows: undefined,
-                  metaData: undefined }
-              );
+              result.should.eql({});
               done();
             }
           );
