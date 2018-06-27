@@ -316,6 +316,8 @@ bool njsConnection::ProcessVarBuffer(njsBaton *baton, njsVariable *var,
         case DPI_ORACLE_TYPE_CLOB:
         case DPI_ORACLE_TYPE_NCLOB:
         case DPI_ORACLE_TYPE_BLOB:
+            if (buffer->lobs)
+                delete [] buffer->lobs;
             buffer->lobs = new njsProtoILob[buffer->numElements];
             for (uint32_t i = 0; i < buffer->numElements; i++) {
                 njsProtoILob *lob = &buffer->lobs[i];
