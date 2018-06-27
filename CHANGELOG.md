@@ -1,5 +1,7 @@
 # Change Log
 
+## node-oracledb v3.0.0 (DD Mon YYYY)
+
 ## node-oracledb v2.3.0 (7 Jun 2018)
 
 - The stated compatibility is now for Node.js 6, 8, and 10 due to EOL
