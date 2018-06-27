@@ -35,16 +35,14 @@ Overview of node-oracledb functional tests
         1.9.1 ping() checks the connection is usable
         1.9.2 closed connection
 
-2. pool.js
-    2.1 default values
-        2.1.1 set properties to default values if not explicitly specified
+  2. pool.js
+    2.1 default settting
+        2.1.1 testing default values of pool properties
     2.2 poolMin
         2.2.1 poolMin cannot be a negative number
         2.2.2 poolMin must be a Number
-        2.2.3 poolMin cannot equal to poolMax
-        2.2.4 poolMin cannot greater than poolMax
-        2.2.5 (poolMin + poolIncrement) cannot greater than poolMax
-        2.2.6 (poolMin + poolIncrement) can equal to poolMax
+        2.2.3 poolMin cannot greater than poolMax
+        2.2.4 (poolMin + poolIncrement) can equal to poolMax
     2.3 poolMax
         2.3.1 poolMax cannot be a negative value
         2.3.2 poolMax cannot be 0
@@ -52,9 +50,8 @@ Overview of node-oracledb functional tests
         2.3.4 poolMax limits the pool capacity
     2.4 poolIncrement
         2.4.1 poolIncrement cannot be a negative value
-        2.4.2 poolIncrement cannot be 0
-        2.4.3 poolIncrement must be a Number
-        2.4.4 the amount of open connections equals to poolMax when (connectionsOpen + poolIncrement) > poolMax
+        2.4.2 poolIncrement must be a Number
+        2.4.3 the amount of open connections equals to poolMax when (connectionsOpen + poolIncrement) > poolMax
     2.5 poolTimeout
         2.5.1 poolTimeout cannot be a negative number
         2.5.2 poolTimeout can be 0, which disables timeout feature
@@ -70,8 +67,8 @@ Overview of node-oracledb functional tests
         2.8.2 does not generate ORA-24418 when calling getConnection if queueing is enabled
         2.8.3 generates NJS-040 if request is queued and queueTimeout expires
         2.8.4 does not generate NJS-040 if request is queued for less time than queueTimeout
-    2.9 connection request queue (_enableStats & _logStats functionality)_logStats must be called prior to terminating pool.
-        2.9.1 does not work after the pool as been terminated
+    2.9 connection request queue (_enableStats & _logStats functionality)
+        2.9.1 does not works after the pool has been terminated
     2.10 Close method
         2.10.1 close can be used as an alternative to release
     2.11 Invalid Credential

@@ -120,29 +120,7 @@ describe('2. pool.js', function() {
       );
     });
 
-    it('2.2.3 poolMin cannot equal to poolMax', function(done){
-      oracledb.createPool(
-        {
-          user              : dbConfig.user,
-          password          : dbConfig.password,
-          connectString     : dbConfig.connectString,
-          poolMin           : 5,
-          poolMax           : 5,
-          poolIncrement     : 1,
-          poolTimeout       : 28,
-          stmtCacheSize     : 23
-        },
-        function(err, pool){
-          should.exist(err);
-          (err.message).should.startWith('ORA-24413:');
-
-          should.not.exist(pool);
-          done();
-        }
-      );
-    });
-
-    it('2.2.4 poolMin cannot greater than poolMax', function(done){
+    it('2.2.3 poolMin cannot greater than poolMax', function(done){
       oracledb.createPool(
         {
           user              : dbConfig.user,
@@ -164,29 +142,7 @@ describe('2. pool.js', function() {
       );
     });
 
-    it('2.2.5 (poolMin + poolIncrement) cannot greater than poolMax', function(done){
-      oracledb.createPool(
-        {
-          user              : dbConfig.user,
-          password          : dbConfig.password,
-          connectString     : dbConfig.connectString,
-          poolMin           : 1,
-          poolMax           : 4,
-          poolIncrement     : 4,
-          poolTimeout       : 28,
-          stmtCacheSize     : 23
-        },
-        function(err, pool){
-          should.exist(err);
-          (err.message).should.startWith('ORA-24413:');
-
-          should.not.exist(pool);
-          done();
-        }
-      );
-    });
-
-    it('2.2.6 (poolMin + poolIncrement) can equal to poolMax', function(done) {
+    it('2.2.4 (poolMin + poolIncrement) can equal to poolMax', function(done) {
 
       oracledb.createPool(
         {
@@ -202,8 +158,7 @@ describe('2. pool.js', function() {
         function(err, pool){
           should.not.exist(err);
           pool.should.be.ok();
-          pool.connectionsOpen.should.be.exactly(pool.poolMin);
-          pool.connectionsInUse.should.be.exactly(0);
+          should.strictEqual(pool.connectionsInUse, 0);
 
           pool.terminate(function(err){
             should.not.exist(err);
@@ -300,7 +255,6 @@ describe('2. pool.js', function() {
         function(err, pool) {
           should.not.exist(err);
           pool.should.be.ok();
-          pool.connectionsOpen.should.be.exactly(1);
           pool.connectionsInUse.should.be.exactly(0);
 
           pool.getConnection( function(err, conn1){
@@ -366,29 +320,7 @@ describe('2. pool.js', function() {
       );
     });
 
-    it('2.4.2 poolIncrement cannot be 0', function(done){
-      oracledb.createPool(
-        {
-          user              : dbConfig.user,
-          password          : dbConfig.password,
-          connectString     : dbConfig.connectString,
-          poolMin           : 1,
-          poolMax           : 10,
-          poolIncrement     : 0,
-          poolTimeout       : 28,
-          stmtCacheSize     : 23
-        },
-        function(err, pool){
-          should.exist(err);
-          (err.message).should.startWith('ORA-24413:');
-
-          should.not.exist(pool);
-          done();
-        }
-      );
-    });
-
-    it('2.4.3 poolIncrement must be a Number', function(done){
+    it('2.4.2 poolIncrement must be a Number', function(done){
       oracledb.createPool(
         {
           user              : dbConfig.user,
@@ -410,7 +342,7 @@ describe('2. pool.js', function() {
       );
     });
 
-    it('2.4.4 the amount of open connections equals to poolMax when (connectionsOpen + poolIncrement) > poolMax', function(done){
+    it('2.4.3 the amount of open connections equals to poolMax when (connectionsOpen + poolIncrement) > poolMax', function(done){
       oracledb.createPool(
         {
           user              : dbConfig.user,
@@ -435,7 +367,7 @@ describe('2. pool.js', function() {
             pool.getConnection( function(err, conn2){
               should.not.exist(err);
               conn2.should.be.ok();
-              pool.connectionsOpen.should.be.exactly(3);
+
               pool.connectionsInUse.should.be.exactly(2);
 
               pool.getConnection( function(err, conn3){
