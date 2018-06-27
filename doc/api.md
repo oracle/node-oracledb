@@ -1273,37 +1273,9 @@ oracledb.Promise = null;
 
 #### <a name="propdbqueuerequests"></a> 3.2.22 `oracledb.queueRequests`
 
-```
-Boolean queueRequests
-```
-
-If this property is *true* and the number of connections "checked out"
-from the pool has reached the number specified by
-[`poolMax`](#propdbpoolmax), then new requests for connections are
-queued until in-use connections are released.
-
-If this property is *false* and a request for a connection is made
-from a pool where the number of "checked out" connections has reached
-`poolMax`, then an *ORA-24418* error indicating that further sessions
-cannot be opened will be returned.
-
-The default value is *true*.
-
-This property may be overridden when [creating a connection pool](#createpool).
-
-See [Connection Pool Queue](#connpoolqueue) for more information.
-
-This property was added in node-oracledb 1.7.
-
-This property is deprecated and will be removed in a future release:
-queuing will always be enabled.
-
-##### Example
-
-```javascript
-var oracledb = require('oracledb');
-oracledb.queueRequests = false;
-```
+This property was removed in node-oracledb 3.0.  Queuing is now always
+enabled.  See [Connection Pool Queue](#connpoolqueue) for more
+information.
 
 #### <a name="propdbqueuetimeout"></a> 3.2.23 `oracledb.queueTimeout`
 
@@ -1671,21 +1643,9 @@ This optional property overrides the
 
 ###### <a name="createpoolpoolattrsqueuerequests"></a> 3.3.1.1.13 `queueRequests`
 
-```
-Boolean queueRequests
-```
-
-Indicates whether [`pool.getConnection()`](#getconnectionpool)
-(or [`oracledb.getConnection()`](#getconnectiondb) calls that use a pool)
-should be queued when all available connections in the pool are currently in use.
-
-The default value is *true*.
-
-This optional property overrides the
-[`oracledb.queueRequests`](#propdbqueuerequests) property.
-
-This property is deprecated and will be removed in a future release:
-queuing will always be enabled.
+This property was removed in node-oracledb 3.0.  Queuing is now always
+enabled.  See [Connection Pool Queue](#connpoolqueue) for more
+information.
 
 ###### <a name="createpoolpoolattrsqueuetimeout"></a> 3.3.1.1.14 `queueTimeout`
 
@@ -3506,18 +3466,9 @@ See [`oracledb.poolTimeout`](#propdbpooltimeout).
 
 #### <a name="proppoolqueuerequests"></a> 6.1.9 `pool.queueRequests`
 
-```
-readonly Boolean queueRequests
-```
-
-Determines whether requests for connections from the pool are queued
-when the number of connections "checked out" from the pool has reached
-the maximum number specified by [`poolMax`](#propdbpoolmax).
-
-This property is deprecated and will be removed in a future release:
-queuing will always be enabled.
-
-See [`oracledb.queueRequests`](#propdbqueuerequests).
+This property was removed in node-oracledb 3.0.  Queuing is now always
+enabled.  See [Connection Pool Queue](#connpoolqueue) for more
+information.
 
 #### <a name="proppoolqueueTimeout"></a> 6.1.10 `pool.queueTimeout`
 
@@ -4278,11 +4229,6 @@ connection is released back to the pool
 with [`connection.close()`](#connectionclose).  If `poolMax` has not
 been reached, then connections can be satisfied and are not queued.
 
-The pool queue can be disabled by setting the pool property
-[`queueRequests`](#propdbqueuerequests) to *false*.  When the queue is
-disabled, `getConnection()` requests to a pool that cannot immediately be
-satisfied will return an error.
-
 The amount of time that a queued request will wait for a free
 connection can be configured with [queueTimeout](#propdbqueuetimeout).
 When connections are timed out of the queue, they will return the
@@ -4304,20 +4250,18 @@ The Pool attributes [`connectionsInUse`](#proppoolconnectionsinuse)
 and [`connectionsOpen`](#proppoolconnectionsopen) provide basic
 information about an active pool.
 
-When using a [pool queue](#propdbqueuerequests), further statistics
-can be enabled by setting the [`createPool()`](#createpool)
-`poolAttrs` parameter `_enableStats` to *true*.  Statistics
-can be output to the console by calling the `pool._logStats()`
-method.  The underscore prefixes indicate that these are private
-attributes and methods.  **This interface may be altered or
-enhanced in the future**.
+Further statistics can be enabled by setting the
+[`createPool()`](#createpool) `poolAttrs` parameter `_enableStats` to
+*true*.  Statistics can be output to the console by calling the
+`pool._logStats()` method.  The underscore prefixes indicate that
+these are private attributes and methods.  **This interface may be
+altered or enhanced in the future**.
 
 To enable recording of queue statistics:
 
 ```javascript
 oracledb.createPool (
   {
-    queueRequests : true,   // default is true
     _enableStats  : true,   // default is false
     user          : "hr",
     password      : "welcome",
@@ -4369,7 +4313,6 @@ The `_logStats()` method also shows attribute values in effect for the pool:
 Attribute                                   |
 --------------------------------------------|
 [`poolAlias`](#createpoolpoolattrspoolalias)|
-[`queueRequests`](#propdbqueuerequests)     |
 [`queueTimeout`](#propdbqueuetimeout)       |
 [`poolMin`](#propdbpoolmin)                 |
 [`poolMax`](#propdbpoolmax)                 |

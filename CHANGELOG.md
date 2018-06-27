@@ -5,6 +5,11 @@
 - Eliminated a memory leak when fetching LOBs and more than one
   internal fetch occurs.
 
+- Removed the `queueRequests` property and altered the internal pool
+  connection acquisition logic to work better with Oracle 18c pool
+  changes.  Now `pool.getConnection()` calls are always queued if the
+  pool is fully in use.
+
 ## node-oracledb v2.3.0 (7 Jun 2018)
 
 - The stated compatibility is now for Node.js 6, 8, and 10 due to EOL
