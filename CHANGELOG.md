@@ -14,6 +14,9 @@
   changes.  Now `pool.getConnection()` calls are always queued if the
   pool is fully in use.
 
+- Unused properties in objects such as the `execute()` result are no
+  longer set.  Previously some were set to `undefined`.
+
 ## node-oracledb v2.3.0 (7 Jun 2018)
 
 - The stated compatibility is now for Node.js 6, 8, and 10 due to EOL
