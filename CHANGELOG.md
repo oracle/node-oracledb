@@ -20,6 +20,9 @@
 - Change the binary package filename format from '...-node-vXX...' to
   to '...-node-abiXX...' to reduce Node version and ABI confusion.
 
+- Added binary installer proxy authentication support.  Reuse `npm
+  config` proxy.  PR #919 (Cemre Mengu)
+
 ## node-oracledb v2.3.0 (7 Jun 2018)
 
 - The stated compatibility is now for Node.js 6, 8, and 10 due to EOL
