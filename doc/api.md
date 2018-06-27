@@ -2059,11 +2059,11 @@ Callback function parameter | Description
 
 Callback:
 ```
-changePassword(user, oldPassword, newPassword, function(Error error){});
+changePassword(String user, String oldPassword, String newPassword, function(Error error){});
 ```
 Promise:
 ```
-promise = changePassword(user, oldPassword, newPassword);
+promise = changePassword(String user, String oldPassword, String newPassword);
 ```
 
 ##### Description
