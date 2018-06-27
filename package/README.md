@@ -13,7 +13,7 @@ The binary install process requires two kinds of package:
   and ancillary files suitable for npm to install.  This is a generic
   file used on all platforms.
 
-- a gzipped package like `oracledb-vZ.Y.Z-node-v57-darwin-x64.gz`
+- a gzipped package like `oracledb-vZ.Y.Z-node-abi57-darwin-x64.gz`
   containing the binary add-on.  The package uses a custom format with
   three components: length bytes (giving the length of the license
   file), the license file, and then the node-oracledb binary.  Each

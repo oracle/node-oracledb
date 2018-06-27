@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2017, 2018, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -83,7 +83,7 @@ function initDynamicProps() {
   const GITHUB_TAG = ght;
   dynamicProps.GITHUB_TAG = GITHUB_TAG;
 
-  const BASE_BUILD_NAME = 'oracledb-'+ GITHUB_TAG + '-node-v' + process.versions.modules + '-' + process.platform + '-' + process.arch;
+  const BASE_BUILD_NAME = 'oracledb-'+ GITHUB_TAG + '-node-abi' + process.versions.modules + '-' + process.platform + '-' + process.arch;
 
   const BINARY_BUILD_NAME = BASE_BUILD_NAME + '-' + BINARY_FILE_NAME;
   dynamicProps.BINARY_BUILD_NAME = BINARY_BUILD_NAME;
