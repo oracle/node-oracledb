@@ -257,4 +257,6 @@ COMMIT;
 -- The DBA must grant access:
 -- GRANT CHANGE NOTIFICATION TO myuser;
 
-create table cqntable (k number);
+BEGIN EXECUTE IMMEDIATE 'DROP TABLE cqntable'; EXCEPTION WHEN OTHERS THEN IF SQLCODE <> -942 THEN RAISE; END IF; END;
+/
+CREATE TABLE cqntable (k NUMBER);
