@@ -1,6 +1,6 @@
 # Change Log
 
-## node-oracledb v3.0.0 (DD Mon YYYY)
+## node-oracledb v3.0.0-dev (DD Mon YYYY)
 
 - Eliminated a memory leak when fetching LOBs and more than one
   internal fetch occurs.
