@@ -51,9 +51,15 @@ try {
   return;
 }
 
+// Note: if you are behine a corporate firewall, and your proxy blocks github releases, 
+// please use the mirror option, by passing in an environment variable denoting your 
+// internal mirror host.
+const { GITHUB_MIRROR, POST_INSTALL_MIRROR, NEXUS_MIRROR, ARTIFACTORY_MIRROR, RELEASES_MIRROR } = process.env;
+const mirror = GITHUB_MIRROR || POST_INSTALL_MIRROR || NEXUS_MIRROR || ARTIFACTORY_MIRROR || RELEASES_MIRROR;
+
 // Note: the Makefile uses these hostname and path values for the npm
 // package but will substitute them for the staging package
-const PACKAGE_HOSTNAME = 'github.com';
+const PACKAGE_HOSTNAME = mirror || 'github.com';
 const PACKAGE_PATH_REMOTE = '/oracle/node-oracledb/releases/download/' + packageUtil.dynamicProps.GITHUB_TAG + '/' + packageUtil.dynamicProps.PACKAGE_FILE_NAME;
 const SHA_PATH_REMOTE = '/oracle/node-oracledb/releases/download/' + packageUtil.dynamicProps.GITHUB_TAG + '/' + packageUtil.SHA_FILE_NAME;
 const PORT = 443;
