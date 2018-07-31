@@ -932,7 +932,7 @@ describe('2. pool.js', function() {
           pool.getConnection(function (err) {
             should.exist(err);
             (err.message).should.startWith('NJS-064:');
-          })
+          });
         }
       );
     });
