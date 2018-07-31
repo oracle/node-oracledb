@@ -909,6 +909,33 @@ describe('2. pool.js', function() {
         }
       );
     });
+
+    it('2.10.2 close pool with force flag, and prevent new connections', function(done) {
+      oracledb.createPool(
+        {
+          user              : dbConfig.user,
+          password          : dbConfig.password,
+          connectString     : dbConfig.connectString,
+          poolMin           : 0,
+          poolMax           : 1,
+          poolIncrement     : 1,
+          poolTimeout       : 1
+        },
+        function(err, pool){
+          should.not.exist(err);
+
+          pool.close(true, function(err) {
+            should.not.exist(err);
+            done();
+          });
+
+          pool.getConnection(function (err) {
+            should.exist(err);
+            (err.message).should.startWith('NJS-064:');
+          })
+        }
+      );
+    });
   }); // 2.10
 
   describe('2.11 Invalid Credential', function() {
