@@ -909,33 +909,6 @@ describe('2. pool.js', function() {
         }
       );
     });
-
-    it('2.10.2 close pool with force flag, and prevent new connections', function(done) {
-      oracledb.createPool(
-        {
-          user              : dbConfig.user,
-          password          : dbConfig.password,
-          connectString     : dbConfig.connectString,
-          poolMin           : 0,
-          poolMax           : 1,
-          poolIncrement     : 1,
-          poolTimeout       : 1
-        },
-        function(err, pool){
-          should.not.exist(err);
-
-          pool.close(true, function(err) {
-            should.not.exist(err);
-            done();
-          });
-
-          pool.getConnection(function (err) {
-            should.exist(err);
-            (err.message).should.startWith('NJS-064:');
-          });
-        }
-      );
-    });
   }); // 2.10
 
   describe('2.11 Invalid Credential', function() {
@@ -1011,5 +984,44 @@ describe('2. pool.js', function() {
     });
 
   }); // 2.12
+
+  describe('2.13 closeMode Validation to pool object', function(){
+    it('2.13.1 close pool with force flag, and prevent new connections', function(done) {
+      oracledb.createPool(
+        {
+          user              : dbConfig.user,
+          password          : dbConfig.password,
+          connectString     : dbConfig.connectString,
+          poolMin           : 0,
+          poolMax           : 1,
+          poolIncrement     : 1,
+          poolTimeout       : 1
+        }
+        ,
+        function(err, pool) {
+          should.not.exist(err);
+
+          pool.should.be.ok();
+
+          pool.getConnection( function(err, conn1){
+            conn1.should.be.ok();
+            conn1.execute("BEGIN dbms_lock.sleep(11); END;");
+          });
+
+          pool.close(10000,function(err) {
+            should.exist(err);
+            (err.message).should.startWith('ORA-24422');
+          });
+
+          pool.getConnection()
+          .catch((err) => {
+            should.exist(err);
+            (err.message).should.startWith('NJS-064:');
+            done()
+          });
+        }
+      );
+    })
+  });
 
 });
