@@ -985,43 +985,109 @@ describe('2. pool.js', function() {
 
   }); // 2.12
 
-  describe('2.13 closeMode Validation to pool object', function(){
-    it('2.13.1 close pool with force flag, and prevent new connections', function(done) {
+  describe('2.13 closeMode Validation to pool object', function () {
+    it('2.13.1 close pool with force flag, and prevent new connections', function (done) {
       oracledb.createPool(
         {
-          user              : dbConfig.user,
-          password          : dbConfig.password,
-          connectString     : dbConfig.connectString,
-          poolMin           : 0,
-          poolMax           : 1,
-          poolIncrement     : 1,
-          poolTimeout       : 1
+          user: dbConfig.user,
+          password: dbConfig.password,
+          connectString: dbConfig.connectString,
+          poolMin: 0,
+          poolMax: 1,
+          poolIncrement: 1,
+          poolTimeout: 1
         }
         ,
-        function(err, pool) {
+        function (err, pool) {
           should.not.exist(err);
 
           pool.should.be.ok();
 
-          pool.getConnection( function(err, conn1){
+          pool.getConnection(function (err, conn1) {
             conn1.should.be.ok();
-            conn1.execute("BEGIN dbms_lock.sleep(11); END;");
           });
 
-          pool.close(10000,function(err) {
-            should.exist(err);
-            (err.message).should.startWith('ORA-24422');
+          pool.close(25, function (err) {
+            console.log(pool);
+            should.not.exist(pool.connectionsInUse);
+            // done();
           });
 
           pool.getConnection()
-          .catch((err) => {
+            .catch((err) => {
+              should.exist(err);
+              (err.message).should.startWith('NJS-064:');
+              done();
+            });
+        }
+      );
+    });
+
+    it('2.13.2 close pool without force flag (will give out an error ), and prevent new connections', function (done) {
+      oracledb.createPool(
+        {
+          user: dbConfig.user,
+          password: dbConfig.password,
+          connectString: dbConfig.connectString,
+          poolMin: 0,
+          poolMax: 1,
+          poolIncrement: 1,
+          poolTimeout: 1
+        }
+        ,
+        function (err, pool) {
+          should.not.exist(err);
+
+          pool.should.be.ok();
+
+          pool.getConnection(function (err, conn1) {
+            conn1.should.be.ok();
+          });
+
+          pool.close(function (err) {
             should.exist(err);
-            (err.message).should.startWith('NJS-064:');
-            done()
+            (err.message).should.startWith('ORA-24422:');
+            done();
           });
         }
       );
-    })
-  });
+    });
+
+    it('2.13.3 close pool with force flag and a running long session will prevent new connections', function (done) {
+      oracledb.createPool(
+        {
+          user: dbConfig.user,
+          password: dbConfig.password,
+          connectString: dbConfig.connectString,
+          poolMin: 0,
+          poolMax: 1,
+          poolIncrement: 1,
+          poolTimeout: 1
+        }
+        ,
+        function (err, pool) {
+          should.not.exist(err);
+
+          pool.should.be.ok();
+
+          pool.getConnection(function (err, conn1) {
+            conn1.should.be.ok();
+            conn1.execute("BEGIN dbms_lock.sleep(1000); END;");
+          });
+
+          pool.close(100, function (err) {
+            should.not.exist(err);
+          });
+
+          pool.getConnection()
+            .catch((err) => {
+              should.exist(err);
+              (err.message).should.startWith('NJS-064:');
+              done();
+            });
+        }
+      );
+    });
+  }); //2.13
 
 });
