@@ -448,18 +448,14 @@ NAN_METHOD(njsPool::Close)
     njsPool *pool;
     bool forceClose;
 
-    pool = (njsPool*) ValidateArgs(info, 1, 1);
+    pool = (njsPool*) ValidateArgs(info, 2, 2);
     if (!pool)
         return;
     baton = pool->CreateBaton(info);
     if (!baton)
         return;
     
-    if (!baton->GetBoolFromJSON(info[0].As<Object>(), "forceClose", 0, &forceClose)){
-        baton->forceClose = false;
-    }else{
-        baton->forceClose = forceClose;
-    }
+    baton->GetBoolFromJSON(info[0].As(), "forceClose", 0, &baton->forceClose);
     
     baton->dpiPoolHandle = pool->dpiPoolHandle;
     pool->dpiPoolHandle = NULL;
