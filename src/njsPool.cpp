@@ -455,7 +455,7 @@ NAN_METHOD(njsPool::Close)
     if (!baton)
         return;
     
-    baton->GetBoolFromJSON(info[0].As(), "forceClose", 0, &baton->forceClose);
+    baton->GetBoolFromJSON(info[0].As<Object>(), "forceClose", 0, &baton->forceClose);
     
     baton->dpiPoolHandle = pool->dpiPoolHandle;
     pool->dpiPoolHandle = NULL;
