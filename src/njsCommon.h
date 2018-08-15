@@ -336,6 +336,7 @@ public:
     Nan::Persistent<Object> jsBuffer;
     Nan::Persistent<Object> jsSubscription;
     Nan::Persistent<Function> jsCallback;
+    bool forceClose;
 
     njsBaton(Local<Function> callback, Local<Object> callingObj) :
             poolMin(0), poolMax(0), poolIncrement(0), poolTimeout(0),
@@ -355,7 +356,7 @@ public:
             rowCounts(NULL), timeout(0), qos(0), operations(0),
             numBatchErrorInfos(0), batchErrorInfos(NULL), dpiError(false),
             portNumber(0), subscrGroupingClass(0), subscrGroupingValue(0),
-            subscrGroupingType(0), subscription(NULL) {
+            subscrGroupingType(0), subscription(NULL), forceClose(false) {
         this->jsCallback.Reset(callback);
         this->jsCallingObj.Reset(callingObj);
         this->callingObj = Nan::ObjectWrap::Unwrap<njsCommon>(callingObj);
