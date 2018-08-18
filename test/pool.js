@@ -1073,7 +1073,7 @@ describe('2. pool.js', function() {
             conn1.execute("BEGIN dbms_lock.sleep(1000); END;");
           });
 
-          pool.close(100, function (err) {
+          pool.close(10, function (err) {
             should.not.exist(err);
           });
 
