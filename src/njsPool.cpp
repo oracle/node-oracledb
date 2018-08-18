@@ -446,7 +446,6 @@ NAN_METHOD(njsPool::Close)
 {
     njsBaton *baton;
     njsPool *pool;
-    bool forceClose;
 
     pool = (njsPool*) ValidateArgs(info, 2, 2);
     if (!pool)

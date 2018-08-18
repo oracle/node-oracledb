@@ -1008,9 +1008,7 @@ describe('2. pool.js', function() {
           });
 
           pool.close(25, function (err) {
-            console.log(pool);
             should.not.exist(pool.connectionsInUse);
-            // done();
           });
 
           pool.getConnection()
