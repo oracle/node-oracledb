@@ -266,9 +266,6 @@ export http_proxy=http://my-proxy.example.com:80/
 export https_proxy=http://my-proxy.example.com:80/
 ```
 
-The node-oracledb binary installer cannot use the `npm config set
-https-proxy` value.
-
 ##### To install a pre-built binary:
 
 Install node-oracledb using the `npm` package manager, which is
@@ -407,9 +404,6 @@ export http_proxy=http://my-proxy.example.com:80/
 export https_proxy=http://my-proxy.example.com:80/
 ```
 
-The node-oracledb binary installer cannot use the `npm config set
-https-proxy` value.
-
 ##### To install a pre-built binary:
 
 Install node-oracledb using the `npm` package manager, which is
@@ -546,9 +540,6 @@ export http_proxy=http://my-proxy.example.com:80/
 export https_proxy=http://my-proxy.example.com:80/
 ```
 
-The node-oracledb binary installer cannot use the `npm config set
-https-proxy` value.
-
 ##### To install a pre-built binary:
 
 Install node-oracledb using the `npm` package manager, which is
@@ -648,9 +639,6 @@ example:
 export http_proxy=http://my-proxy.example.com:80/
 export https_proxy=http://my-proxy.example.com:80/
 ```
-
-The node-oracledb binary installer cannot use the `npm config set
-https-proxy` value.
 
 ##### To install a pre-built binary:
 
@@ -774,9 +762,6 @@ example:
 set http_proxy=http://my-proxy.example.com:80/
 set https_proxy=http://my-proxy.example.com:80/
 ```
-
-The node-oracledb binary installer cannot use the `npm config set
-https-proxy` value.
 
 ##### To install a pre-built binary:
 
@@ -906,9 +891,6 @@ set http_proxy=http://my-proxy.example.com:80/
 set https_proxy=http://my-proxy.example.com:80/
 ```
 
-The node-oracledb binary installer cannot use the `npm config set
-https-proxy` value.
-
 ##### To install a pre-built binary:
 
 Install node-oracledb using the `npm` package manager, which is
@@ -1034,9 +1016,6 @@ export http_proxy=http://my-proxy.example.com:80/
 export https_proxy=http://my-proxy.example.com:80/
 ```
 
-The node-oracledb binary installer cannot use the `npm config set
-https-proxy` value.
-
 Set the compiler to GCC:
 
 ```
@@ -1156,9 +1135,6 @@ example:
 export http_proxy=http://my-proxy.example.com:80/
 export https_proxy=http://my-proxy.example.com:80/
 ```
-
-The node-oracledb binary installer cannot use the `npm config set
-https-proxy` value.
 
 Use the GNU `gmake` utility:
 
