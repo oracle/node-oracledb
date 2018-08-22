@@ -515,7 +515,7 @@ describe('163. executeMany.js', function() {
 
   }); // 163.10
 
-  it('164.11 numIterations - only OUT parameters', function(done) {
+  it('163.11 numIterations - only OUT parameters', function(done) {
     async.series([
       function(cb) {
         var sql =
@@ -554,9 +554,9 @@ describe('163. executeMany.js', function() {
         dotruncate(cb);
       }
     ], done);
-  }); // 164.11
+  }); // 163.11
 
-  it('164.12 numIterations - No parameters', function(done) {
+  it('163.12 numIterations - No parameters', function(done) {
     async.series([
       function(cb) {
         var sql = `
@@ -585,9 +585,9 @@ describe('163. executeMany.js', function() {
         dotruncate(cb);
       }
     ], done);
-  }); // 164.12
+  }); // 163.12
 
-  it('164.13 numIterations - DML RETURNING', function(done) {
+  it('163.13 numIterations - DML RETURNING', function(done) {
     async.series([
       function(cb) {
         var sql = `
@@ -620,7 +620,7 @@ describe('163. executeMany.js', function() {
     ], done);
   }); // 164.13
 
-  it('164.14 Negative - set numIterations to be string', function(done) {
+  it('163.14 Negative - set numIterations to be string', function(done) {
     async.series([
       function(cb) {
         var sql = `
@@ -648,9 +648,9 @@ describe('163. executeMany.js', function() {
         dotruncate(cb);
       }
     ], done);
-  }); // 164.14
+  }); // 163.14
 
-  it('164.15 Negative - set numIterations to be negative value', function(done) {
+  it('163.15 Negative - set numIterations to be negative value', function(done) {
     async.series([
       function(cb) {
         var sql = `
@@ -682,7 +682,7 @@ describe('163. executeMany.js', function() {
         dotruncate(cb);
       }
     ], done);
-  }); // 164.15
+  }); // 163.15
 
   var doCreateProc = function(cb) {
     var proc = "CREATE OR REPLACE PROCEDURE nodb_proc_em (a_num IN NUMBER, " +
