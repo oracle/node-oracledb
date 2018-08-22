@@ -1981,6 +1981,11 @@ readonly Number oracleServerVersion
 This readonly property gives a numeric representation of the Oracle database version which is useful in comparisons.
 For version *a.b.c.d.e*, this property gives the number: `(100000000 * a) + (1000000 * b) + (10000 * c) + (100 * d) + e`
 
+Note if you connect to Oracle Database 18, the version will only be
+accurate if node-oracledb is also using Oracle Database 18 client
+libraries.  Otherwise it will show the base release such as 1800000000
+instead of 1803000000.
+
 This property was added in node-oracledb 1.3.
 
 #### <a name="propconnoracleserverversionstring"></a> 4.1.5 `connection.oracleServerVersionString`
@@ -1990,6 +1995,11 @@ readonly String oracleServerVersionString
 ```
 
 This readonly property gives a string representation of the Oracle database version which is useful for display.
+
+Note if you connect to Oracle Database 18, the version will only be
+accurate if node-oracledb is also using Oracle Database 18 client
+libraries.  Otherwise it will show the base release such as
+"18.0.0.0.0" instead of "18.3.0.0.0".
 
 This property was added in node-oracledb 2.2.
 
