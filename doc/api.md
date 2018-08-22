@@ -8318,7 +8318,7 @@ Node-oracledb always uses Oracle's AL32UTF8 character set internally.
 Data will be converted between AL32UTF8 and the
 database character set when it is inserted into, or queried from, the
 database.  The environment variable `NLS_LANG` can be used to
-configure the Oracle client language and territory only.
+configure the Oracle 'client' (i.e. node-oracledb) language and territory only.
 
 Oracle NLS environment variables, or statements like `ALTER SESSION`,
 can be used to configure further aspects of node-oracledb data access
@@ -8326,6 +8326,24 @@ globalization. Examples are `NLS_NUMERIC_CHARACTERS` (discussed in
 [Fetching Numbers](#numberhandling)), and `NLS_DATE_FORMAT` (discussed
 in [Fetching Numbers and Dates as String](#fetchasstringhandling)).
 Refer to [NLS Documentation][69] for others.
+
+To find the database character set, execute the query:
+
+```sql
+SELECT value AS db_charset
+FROM nls_database_parameters
+WHERE parameter = 'NLS_CHARACTERSET'
+```
+
+The general Oracle statement  to find the 'client' character set is:
+
+```sql
+SELECT DISTINCT client_charset AS client_charset
+FROM v$session_connect_info
+WHERE sid = SYS_CONTEXT('USERENV', 'SID');
+```
+
+In node-oracledb this will always show AL32UTF8.
 
 ## <a name="endtoend"></a> 21. End-to-end Tracing, Mid-tier Authentication, and Auditing
 
