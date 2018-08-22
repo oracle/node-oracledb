@@ -78,7 +78,7 @@ dynamically loaded during execution. 'Rpath' linking is no longer
 performed on Linux or macOS.
 
 Any node-oracledb version 2.0 binary will run with any of the Oracle
-client 11.2, 12.1 or 12.2 libraries without needing recompilation.
+client version 11.2, 12, or 18 libraries without needing recompilation.
 Note the available Oracle functionality will vary with different
 Oracle Client and Database versions.
 
@@ -114,7 +114,7 @@ version 2.0.
           `oracle/node-oracledb.git#v3.0.0` to your `package.json`
           dependencies.  Substitute your desired [GitHub tag][40].
 
-- Add Oracle 12.2, 12.1 or 11.2 client libraries to your operating
+- Add Oracle 12.2, 12.1, 11.2 or 18 client libraries to your operating
   system library search path such as `PATH` on Windows or
   `LD_LIBRARY_PATH` on Linux.  On macOS move the libraries to `~/lib`
   or `/usr/local/lib`.
@@ -132,7 +132,7 @@ version 2.0.
       in `$ORACLE_HOME/lib` from a locally installed database such as
       the free [Oracle XE][20] release.
 
-  Oracle Client libraries 12.2 can connect to Oracle Database 11.2 or
+  Oracle Client libraries 18 and 12.2 can connect to Oracle Database 11.2 or
   greater. Version 12.1 client libraries can connect to Oracle
   Database 10.2 or greater. Version 11.2 client libraries can connect
   to Oracle Database 9.2 or greater.
@@ -167,7 +167,7 @@ Linux. I have the full Oracle client (installed via `runInstaller`) on the same 
 Linux.  I want to install Node.js and node-oracledb RPM packages | [Installing Node.js and Node-oracledb RPMs from yum.oracle.com](#instnoderpms)
 AIX on Power Systems | [Node-oracledb Installation on AIX on Power Systems with Instant Client ZIP files](#instaix)
 Solaris x86-64 (64-Bit) | [Node-oracledb Installation on Oracle Solaris x86-64 (64-Bit) with Instant Client ZIP files](#instsolarisx8664)
-Another OS with Oracle Database 11.2 or 12c, or client libraries available | Update binding.gyp and make any code changes required, sign the [OCA][8], and submit a pull request with your patch.
+Another OS with Oracle Database 11.2, 12, or 18 client libraries available | Update binding.gyp and make any code changes required, sign the [OCA][8], and submit a pull request with your patch.
 Source code from GitHub | [Node-oracledb Installation from Source Code](#github)
 I don't have internet access | [Node-oracledb Installation Without Internet Access](#offline)
 
@@ -175,7 +175,7 @@ I don't have internet access | [Node-oracledb Installation Without Internet Acce
 
 All installations need:
 
-- Oracle 12.2, 12.1 or 11.2 client libraries on the machine Node.js is installed on.
+- Oracle 18, 12.2, 12.1 or 11.2 client libraries on the machine Node.js is installed on.
 
   Run `node -p "process.arch"` and make sure to use 64-bit or 32-bit
   Oracle client libraries to match the Node.js architecture.
@@ -187,7 +187,7 @@ All installations need:
   Oracle's standard client-server network interoperability allows
   connections between different versions of Oracle Client and Oracle
   Database.  For certified configurations see Oracle Support's [Doc ID
-  207303.1][6].  In summary, Oracle Client 12.2 can connect to Oracle
+  207303.1][6].  In summary, Oracle Client 18 and 12.2 can connect to Oracle
   Database 11.2 or greater. Oracle Client 12.1 can connect to Oracle
   Database 10.2 or greater. Oracle Client 11.2 can connect to Oracle
   Database 9.2 or greater.  The technical restrictions on creating
@@ -815,7 +815,7 @@ variable `TNS_ADMIN` to that directory name.
 #### <a name="winredists"> </a> 3.6.6 Install the Visual Studio Redistributables
 
 The `PATH` variable needs to include the appropriate VS Redistributable:
-- Oracle client 12.2 requires the [Visual Studio 2013 Redistributable][27].
+- Oracle client 18 and 12.2 require the [Visual Studio 2013 Redistributable][27].
 - Oracle client 12.1 requires the [Visual Studio 2010 Redistributable][27].
 - Oracle client 11.2 requires the [Visual Studio 2005 Redistributable][29].
 
@@ -957,7 +957,7 @@ versions do not have to be the same on different computers, but
 node-oracledb behavior and features may then differ.
 
 The destination computer's `PATH` needs to include Visual Studio
-Redistributables.  If you have Oracle client 12.2, install the Visual
+Redistributables.  If you have Oracle client 18 or 12.2, install the Visual
 Studio 2013 Redistributable.  For Oracle client 12.1 install the Visual
 Studio 2010 Redistributable.  For Oracle client 11.2 install the Visual
 Studio 2005 Redistributable.
@@ -1242,7 +1242,7 @@ Install a C++11 compatible compiler:
 - On Windows, install a C/C++ build environment such as Microsoft
   Visual Studio 2015.  Compilers supported by Oracle libraries are
   found in [Oracle documentation][23] for each version, for example
-  [Oracle Database Client Installation Guide 12c Release 2 (12.2) for
+  [Oracle Database Client Installation Guide for
   Microsoft Windows][24].  Some users report that the npm
   `windows-build-tools` package has the necessary tools to build
   node-oracledb from source code.
@@ -1648,16 +1648,16 @@ Questions and issues can be posted as [GitHub Issues][10].
 [12]: http://www.oracle.com/technetwork/topics/linuxx86-64soft-092277.html
 [13]: http://www.oracle.com/technetwork/topics/linuxx86-64soft-092277.html#ic_x64_inst
 [14]: https://linux.oracle.com
-[15]: https://docs.oracle.com/en/database/oracle/oracle-database/18/netrf/local-naming-parameters-in-tnsnames-ora-file.html
-[16]: https://docs.oracle.com/en/database/oracle/oracle-database/18/netrf/parameters-for-the-sqlnet-ora-file.html
-[17]: https://docs.oracle.com/en/database/oracle/oracle-database/18/netrf/directory-usage-parameters-in-ldap-ora-file.html
-[18]: https://docs.oracle.com/en/database/oracle/oracle-database/18/lnoci/build-and-configure-oci-applications.html#GUID-9D12F489-EC02-46BE-8CD4-5AECED0E2BA2
+[15]: http://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-A3F9D023-9CC4-445D-8921-6E40BD900EAD
+[16]: http://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-28040885-6832-4FFC-9258-0EF19FE9A3AC
+[17]: http://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-E72B32D3-4343-475F-9CB4-CE28FF8EFD29
+[18]: http://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-9D12F489-EC02-46BE-8CD4-5AECED0E2BA2
 [19]: https://github.com/oracle/node-oracledb/tree/master/examples
 [20]: http://www.oracle.com/technetwork/database/database-technologies/express-edition/overview/index.html
 [21]: https://blogs.oracle.com/opal/the-easiest-way-to-install-oracle-database-on-apple-mac-os-x
 [22]: http://www.oracle.com/technetwork/topics/intel-macsoft-096467.html
 [23]: https://docs.oracle.com/database/
-[24]: https://docs.oracle.com/en/database/oracle/oracle-database/18/ntcli/toc.htm
+[24]: http://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=NTCLI
 [25]: http://www.oracle.com/technetwork/topics/winx64soft-089540.html
 [26]: http://www.oracle.com/technetwork/topics/winsoft-085727.html
 [27]: https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads
