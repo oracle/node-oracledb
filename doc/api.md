@@ -1165,37 +1165,28 @@ Number poolPingInterval
 
 When a pool [`getConnection()`](#getconnectionpool) is called and the
 connection has been idle in the pool for at least `poolPingInterval`
-seconds, an internal "ping" will be performed first to check the
-aliveness of the connection.  At the cost of some overhead for
-infrequently accessed connection pools, connection pinging improves
-the chance a pooled connection is valid when it is used because
-identified un-unusable connections will not be returned to the
-application by `getConnection()`.
+seconds, node-oracledb internally "pings" the database to check the
+connection is alive.  After a ping, an unusable connection is
+destroyed and a usable one is returned by `getConnection()`.
+Connection pinging improves the chance a pooled connection is valid
+when it is first used because identified unusable connections will not
+be returned to the application.
 
-Note when node-oracledb is using version 12.2 of the Oracle client
-library, the value of `poolPingInterval` is ignored.  Oracle client
-12.2 has a lightweight, always-enabled connection check that replaces
-explicit pinging.
-
-With Oracle client 12.1 or earlier, unless `poolPingInterval` is `0`,
-it is possible for un-usable connections to be returned by a pool
-`getConnection()` call.  Since it is also possible for network outages
-to occur after `getConnection()` is called, applications should
-implement appropriate statement execution error checking.
-
-The default value is 60 seconds.  Possible values for `poolPingInterval` are:
+The default `poolPingInterval` value is 60 seconds.  Possible values
+are:
 
 `poolPingInterval` Value     | Behavior of a Pool `getConnection()` Call
 ----------|------------------------------------------
 `n` < `0` | Never checks for connection aliveness
-`n` = `0` | Always checks for connection aliveness. There is some overhead in performing a ping so non-zero values are recommended for most applications
+`n` = `0` | Always checks for connection aliveness. This value is not recommended for most applications because of the overhead in performing each ping
 `n` > `0` | Checks aliveness if the connection has been idle in the pool (not "checked out" to the application by `getConnection()`) for at least `n` seconds
 
 This property may be overridden when [creating a connection pool](#createpool).
 
 See [Connection Pool Pinging](#connpoolpinging) for more discussion.
 
-This property was added in node-oracledb 1.12.
+This property was added in node-oracledb 1.12.  It was disabled when
+using Oracle Client 12.2+ until node-oracledb 3.0.
 
 ##### Example
 
@@ -1614,10 +1605,6 @@ When a pool [`getConnection()`](#getconnectionpool) is called and the
 connection has been idle in the pool for at least `poolPingInterval`
 seconds, an internal "ping" will be performed first to check the
 aliveness of the connection.
-
-Note this attribute is ignored when node-oracledb is using version
-12.2 of the Oracle client library, since this has its own lightweight,
-always-enabled connection check.
 
 The default value is 60.
 
@@ -4079,8 +4066,10 @@ Authentication is used, the pool behavior is different, see
 [External Authentication](#extauth).
 
 The Oracle Real-World Performance Group's general recommendation for
-client connection pools is for the minimum and maximum number of
-connections to be the same.  This avoids connection storms which can
+client connection pools is for the pool to have a fixed sized.  The
+values of `poolMin` and `poolMax` should be the same, and the
+[resource manager][101] or user profile [`IDLE_TIME`][100] should not
+expire idle sessions.  This avoids connection storms which can
 decrease throughput.  They also recommend sizing connection pools so
 that the sum of all connections from all applications accessing a
 database gives 1-10 connections per database server CPU core.  See
@@ -4331,66 +4320,77 @@ Environment Variable                                 | Description
 
 #### <a name="connpoolpinging"></a> 8.3.4 Connection Pool Pinging
 
-Node-oracledb can 'ping' connections returned from pooled
-`getConnection()` calls to check for their aliveness.  The frequency
-of pinging can be controlled with
-the [`oracledb.poolPingInterval`](#propdbpoolpinginterval) property or
-during [pool creation](#createpool).  The default ping interval is
-`60` seconds.
+Connection pool pinging is a way for node-oracledb to identify
+unusable pooled connections and replace them with usable ones before
+returning them to the application.  Database connections may become
+unusable due to network dropouts, database instance failures,
+exceeding user profile resource limits, or by explicit session closure
+from a DBA.  By default, idle connections in the pool are unaware of
+these events so the pool could return unusable connections to the
+application and errors would only occur when they are later used.
+Pinging helps provide tolerance against this situation.
 
-Without pinging, when connections are idle in a connection pool, there
-is the possibility that a network or database instance failure makes
-those connections unusable.  A `getConnection()` call will happily
-return a connection from the pool but an error will occur when the
-application later uses the connection.
+The frequency of pinging can be controlled with the
+[`oracledb.poolPingInterval`](#propdbpoolpinginterval) property or
+during [pool creation](#createpoolpoolattrspoolpinginterval) to meet
+your quality of service requirements.
 
-Note that explicit pinging is unnecessary and is not performed when
-node-oracledb is using version 12.2 of the Oracle client library.
-This has its own lightweight, always-enabled connection check.  It
-will return a valid connection to the node-oracledb driver, which in
-turn returns it via `getConnection()`.  The value of
-`poolPingInterval` is ignored.
+The default [`poolPingInterval`](#propdbpoolpinginterval) value is 60
+seconds.  Possible values are:
 
-With Oracle client 12.1 and earlier, when a
-pool [`getConnection()`](#getconnectionpool) is called and the
-connection has been idle in the pool (not "checked out" to the
+`poolPingInterval` Value     | Behavior of a Pool `getConnection()` Call
+----------|------------------------------------------
+`n` < `0` | Never checks for connection aliveness
+`n` = `0` | Always checks for connection aliveness
+`n` > `0` | Checks aliveness if the connection has been idle in the pool (not "checked out" to the application by `getConnection()`) for at least `n` seconds
+
+
+A ping has the cost of a round-trip to the database so always pinging
+after each `getConnection()` is not recommended for most applications.
+
+When `getConnection()` is called to return a pooled connection, and
+the connection has been idle in the pool (not "checked out" to the
 application by `getConnection()`) for the specified `poolPingInterval`
-then an internal "ping" will be performed first.  At the cost of some
-overhead for infrequently accessed connection pools, connection
-pinging improves the chance a pooled connection is valid when it is
-first used because identified un-unusable connections will not be
-returned to the application by `getConnection()`.  For active
-applications that are getting and releasing connections rapidly, the
-connections will generally not have been idle longer than
-`poolPingInterval` so no pings will be performed and there will be no
-overhead.
+time, then an internal "ping" will be performed first.  If the ping
+detects the connection is invalid then node-oracledb internally drops
+the unusable connection and obtains another from the pool.  This
+second connection may also need a ping.  This ping-and-release process
+may be repeated until:
 
-If a ping detects the connection is invalid, for example if the
-network had disconnected, then node-oracledb internally drops the
-unusable connection and obtains another from the pool.  This second
-connection may also need a ping.  This ping-and-release process may be
-repeated until:
-
-- an existing connection that doesn't qualify for pinging is obtained. The `getConnection()` call returns this to the application.  Note it is not guaranteed to  be usable
+- an existing connection that doesn't qualify for pinging is obtained.  The `getConnection()` call returns this to the application.  Note that since a ping may not have been performed, the connection is not guaranteed to be usable
 - a new, usable connection is opened. This is returned to the application
 - a number of unsuccessful attempts to find a valid connection have been made, after which an error is returned to the application
 
-Applications should continue to do appropriate error checking when
-using connections in case they have become invalid in the time since
-`getConnection()` was called.  This error checking will also protect
-against cases where there was a network outage but a connection was
-idle in the pool for less than `poolPingInterval` seconds and so
-`getConnection()` did not ping.
+Pools in active use may never have connections idle longer than
+`poolPingInterval`, so pinging often only occurs for infrequently
+accessed connection pools.
 
-In all cases, when a bad connection is [released](#connectionclose)
-back to the pool, the connection is automatically destroyed.  This
-allows a valid connection to be opened by some subsequent
-`getConnection()` call.
+Because a ping may not occur every time a connection is returned from
+[`getConnection()`](#getconnectionpool), and also it is possible for
+network outages to occur after `getConnection()` is called,
+applications should continue to use appropriate statement execution
+error checking.
 
-You can tune `poolPingInterval` to meet your quality of service
-requirements.
+When node-oracledb is using the Oracle client library version 12.2 or
+later, then a lightweight connection check always occurs in the client
+library.  While this check prevents some unusable connections from
+being returned by `getConnection()`, it does not identify errors such
+as session termination from the database [resource manager][101] or
+user resource profile [`IDLE_TIME`][100], or from an `ALTER SYSTEM
+KILL SESSION` command.  The explicit ping initiated by
+`poolPingInterval` will detect these problems.
 
-Explicit pings on any connection can be performed at any time with
+For ultimate scalability, use Oracle client 12.2 libraries, disable
+explicit pool pinging by setting `poolPingInterval` to a negative
+value, and make sure the database resource manager or user profile is
+not expiring idle sessions.
+
+In all cases, when a bad connection is released back to the pool with
+[connection.close()](#connectionclose), the connection is
+automatically destroyed.  This allows a valid connection to be opened
+by some subsequent `getConnection()` call.
+
+Explicit pings can be performed at any time with
 [`connection.ping()`](#connectionping).
 
 #### <a name="connpoolproxy"></a> 8.3.5 Heterogeneous Connection Pools and Pool Proxy Authentication
@@ -8778,3 +8778,5 @@ When upgrading from node-oracledb version 2.0 to version 2.1:
 [97]: http://www.oracle.com/technetwork/database/options/clustering/applicationcontinuity/learnmore/fastapplicationnotification12c-2538999.pdf
 [98]: https://docs.oracle.com/en/database/oracle/oracle-database/18/adfns/editions.html#GUID-58DE05A0-5DEF-4791-8FA8-F04D11964906
 [99]: https://docs.oracle.com/en/database/oracle/oracle-database/18/adfns/cqn.html#GUID-373BAF72-3E63-42FE-8BEA-8A2AEFBF1C35
+[100]: https://docs.oracle.com/en/database/oracle/oracle-database/12.2/sqlrf/CREATE-PROFILE.html
+[101]: https://docs.oracle.com/en/database/oracle/oracle-database/12.2/admin/managing-resources-with-oracle-database-resource-manager.html
