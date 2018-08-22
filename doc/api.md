@@ -278,6 +278,7 @@ limitations under the License.
     - 14.5 [LOB Bind Parameters](#lobbinds)
     - 14.6 [PL/SQL Collection Associative Array (Index-by) Bind Parameters](#plsqlindexbybinds)
     - 14.7 [Binding Multiple Values to a SQL `WHERE IN` Clause](#sqlwherein)
+    - 14.8 [Binding Column and Table Names in Queries](#sqlbindtablename)
 15. [Batch Statement Execution](#batchexecution)
 16. [Continuous Query Notification (CQN)](#cqn)
 17. [Transaction Management](#transactionmgt)
@@ -7634,6 +7635,56 @@ items.  You might look at using `CONNECT BY` or nested tables.  Or,
 for really large numbers of items, you might prefer to use a global
 temporary table.  Some solutions are given in [On Cursors, SQL, and
 Analytics][59] and in [this StackOverflow answer][60].
+
+### <a name="sqlbindtablename"></a> 14.8 Binding Column and Table Names in Queries
+
+It is not possible to bind table names in queries.  Instead use a
+hardcoded whitelist of names to build the final SQL statement, for
+example:
+
+```javascript
+const validTables = ['LOCATIONS', 'DEPARTMENTS'];
+
+const tableName = getTableNameFromEndUser();
+
+if (!validTables.includes(tableName)) {
+  throw new Error('Invalid table name');
+}
+
+query = 'SELECT * FROM ' + tableName;
+```
+
+The same technique can be used to construct the list of selected
+column names.  Make sure to use a whitelist of names to avoid SQL
+Injection security risks.
+
+Each final SQL statement will obviously be distinct, and will use a
+slot in the [statement cache](#stmtcache).
+
+It is possible to bind column names used in an ORDER BY:
+
+```javascript
+const sql = `SELECT first_name, last_name
+             FROM employees
+             ORDER BY
+               CASE :ob
+                 WHEN 'FIRST_NAME' THEN first_name
+                 ELSE last_name
+               END`;
+
+const columnName = getColumnNameFromEndUser();
+const binds = [columnName];
+
+let result = await conn.execute(sql, binds);
+```
+
+In this example, when `columnName` is 'FIRST_NAME' then the result set
+will be ordered by first name, otherwise the order will be by last
+name.
+
+You should analyze the statement usage patterns and optimizer query
+plan before deciding whether to using binds like this, or to use
+multiple hard-coded SQL statements, each with a different ORDER BY.
 
 ## <a name="batchexecution"></a> 15. Batch Statement Execution
 
