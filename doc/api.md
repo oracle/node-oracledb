@@ -3917,7 +3917,7 @@ oracledb.getConnection(
 ```
 
 Alternatively, if a JDBC connection string uses an old-style
-[SID][19], and there is no service name available:
+Oracle system identifier [SID][19], and there is no service name available:
 
 ```
 jdbc:oracle:thin:@hostname:port:sid
@@ -4591,7 +4591,7 @@ This paper also gives more detail on configuring DRCP.
 ### <a name="extauth"></a> 8.5 External Authentication
 
 External Authentication allows applications to use an external
-password store (such as [Oracle Wallet][27]), the [Secure Socket
+password store (such as an [Oracle Wallet][27]), the [Secure Socket
 Layer][28] (SSL), or the [operating system][29] to validate user
 access.  One of the benefits is that database credentials do not need
 to be hard coded in the application.
@@ -4823,7 +4823,7 @@ and [`SQLNET.SEND_TIMEOUT`][35].  You may also want to use a
 [`tnsnames.ora`](#tnsnames) file to configure the database service
 setting [`ENABLE=BROKEN`][36].
 
-Other [Oracle Network Services][37] options may also be useful for
+Other [Oracle Net Services][37] options may also be useful for
 high availability and performance tuning.
 
 #### <a name="connectionfan"></a> 8.9.1 Fast Application Notification (FAN)
@@ -5624,8 +5624,9 @@ How to do 'web pagination' is discussed in this section.  For each
 of rows from a table.  Since the query will be executed more than
 once, make sure to use bind variables for row numbers and row limits.
 
-Oracle Database 12c SQL has an [OFFSET / FETCH][5] clause, which is
-similar to the LIMIT keyword of MySQL.
+Oracle Database 12c SQL has an `OFFSET` / `FETCH` clause (See [Row
+Limiting: Examples][5], which is similar to the LIMIT keyword of
+MySQL.
 
 ```javascript
 var myoffset = 0;       // don't skip any rows (start at row 1)
@@ -8204,7 +8205,7 @@ With Oracle Database 12c, the statement cache size can be automatically tuned wi
 [External Configuration](#oraaccess) *oraaccess.xml* file.
 
 To manually tune the statement cache size, monitor general application
-load and the [AWR][62] "bytes sent via SQL*Net to client" values.  The
+load and the [Automatic Workload Repository][62] (AWR) "bytes sent via SQL*Net to client" values.  The
 latter statistic should benefit from not shipping statement metadata
 to node-oracledb.  Adjust the statement cache size to your
 satisfaction.
@@ -8602,7 +8603,7 @@ used when executing statements.  Several methods are available.
 
 In the Oracle Database, the view [`V$SQL_BIND_CAPTURE`][76] can
 capture bind information.  Tracing with Oracle Database's
-[`dbms_monitor.session_trace_enable()`][77] may also be useful.
+[`DBMS_MONITOR.SESSION_TRACE_ENABLE()`][77] may also be useful.
 
 You can also write your own wrapper around `execute()` and log any
 parameters.
@@ -8683,100 +8684,99 @@ When upgrading from node-oracledb version 2.0 to version 2.1:
 [2]: https://oracle.github.io/node-oracledb/INSTALL.html
 [3]: https://github.com/oracle/node-oracledb/tree/master/examples
 [4]: https://github.com/oracle/db-sample-schemas
-[5]: https://docs.oracle.com/database/122/SQLRF/SELECT.htm#GUID-CFA006CA-6FF1-4972-821E-6996142A51C6__BABEAACC
-[6]: https://docs.oracle.com/database/122/LNOCI/oci-programming-advanced-topics.htm#LNOCI16617
-[7]: https://docs.oracle.com/database/122/LNOCI/oci-programming-basics.htm#GUID-D77D0D4A-7483-423A-9767-CBB5854A15CC
-[8]: https://docs.oracle.com/database/122/NETRF/local-naming-parameters-in-tnsnames-ora-file.htm#NETRF260
-[9]: https://docs.oracle.com/database/122/LNOCI/managing-scalable-platforms.htm#LNOCI-GUID-624A4771-58C5-4E2B-8131-E3389F58A0D6
-[10]: https://docs.oracle.com/database/122/LNOCI/managing-scalable-platforms.htm#LNOCI-GUID-8A9F1295-4360-4AC6-99A4-050C5C82E0B0
-[11]: https://docs.oracle.com/database/122/CNCPT/topics-for-database-administrators-and-developers.htm#GUID-89DB0C3C-A36F-4254-8C82-020F5F6DE31F
-[12]: https://docs.oracle.com/database/122/ADLOB/introduction-to-large-objects.htm#ADLOB45120
-[13]: https://docs.oracle.com/database/122/ADLOB/managing-LOBs.htm#ADLOB45157
-[14]: https://docs.oracle.com/database/122/CNCPT/sql.htm#CNCPT516
-[15]: https://docs.oracle.com/database/122/CNCPT/sql.htm#CNCPT1732
+[5]: https://docs.oracle.com/en/database/oracle/oracle-database/18/sqlrf/SELECT.html#GUID-CFA006CA-6FF1-4972-821E-6996142A51C6
+[6]: https://docs.oracle.com/en/database/oracle/oracle-database/18/lnoci/session-and-connection-pooling.html#GUID-F9662FFB-EAEF-495C-96FC-49C6D1D9625C
+[7]: https://docs.oracle.com/en/database/oracle/oracle-database/18/lnoci/oci-programming-basics.html#GUID-D77D0D4A-7483-423A-9767-CBB5854A15CC
+[8]: https://docs.oracle.com/en/database/oracle/oracle-database/18/netrf/local-naming-parameters-in-tnsnames-ora-file.html#GUID-12C94B15-2CE1-4B98-9D0C-8226A9DDF4CB
+[9]: https://docs.oracle.com/en/database/oracle/oracle-database/18/lnoci/managing-scalable-platforms.html#GUID-624A4771-58C5-4E2B-8131-E3389F58A0D6
+[10]: https://docs.oracle.com/en/database/oracle/oracle-database/18/lnoci/managing-scalable-platforms.html#GUID-8A9F1295-4360-4AC6-99A4-050C5C82E0B0
+[11]: https://docs.oracle.com/en/database/oracle/oracle-database/18/cncpt/topics-for-database-administrators-and-developers.html#GUID-89DB0C3C-A36F-4254-8C82-020F5F6DE31F
+[12]: https://docs.oracle.com/en/database/oracle/oracle-database/18/adlob/introduction-to-large-objects.html#GUID-8E91CBE9-6CE1-4482-A694-04444C22B288
+[13]: https://docs.oracle.com/en/database/oracle/oracle-database/18/adlob/managing-LOBs.html#GUID-D3873ED4-5FAD-479F-85F9-EE56D4B18ED5
+[14]: https://docs.oracle.com/en/database/oracle/oracle-database/18/sqlrf/Types-of-SQL-Statements.html#GUID-2E008D4A-F6FD-4F34-9071-7E10419CA24D
+[15]: https://docs.oracle.com/en/database/oracle/oracle-database/18/sqlrf/Types-of-SQL-Statements.html#GUID-FD9A8CB4-6B9A-44E5-B114-EFB8DA76FC88
 [16]: https://nodejs.org/api/stream.html
-[17]: https://docs.oracle.com/database/122/NETAG/configuring-naming-methods.htm#NETAG255
-[18]: https://docs.oracle.com/database/122/NETRF/local-naming-parameters-in-tnsnames-ora-file.htm#NETRF1361
-[19]: https://docs.oracle.com/database/122/NETRF/glossary.htm#GUID-145065A5-C9C7-4E77-9BBB-8028960D005E
+[17]: https://docs.oracle.com/en/database/oracle/oracle-database/18/netag/configuring-naming-methods.html#GUID-B0437826-43C1-49EC-A94D-B650B6A4A6EE
+[18]: https://docs.oracle.com/en/database/oracle/oracle-database/18/netrf/local-naming-parameters-in-tnsnames-ora-file.html#GUID-47DAB4DF-1D35-46E5-B227-339FF912E058
+[19]: https://docs.oracle.com/en/database/oracle/oracle-database/18/netrf/glossary.html#GUID-BADFDC72-0F1D-47FA-8857-EC15DC8ACFBB
 [20]: http://docs.libuv.org/en/v1.x/threadpool.html
 [21]: https://github.com/libuv/libuv
 [22]: https://github.com/oracle/node-oracledb/issues/603#issuecomment-277017313
-[23]: https://docs.oracle.com/database/122/JJUCP/optimizing-real-world-performance.htm#GUID-BC09F045-5D80-4AF5-93F5-FEF0531E0E1D
-[24]: https://docs.oracle.com/database/122/ADFNS/performance-and-scalability.htm#ADFNS228
-[25]: https://docs.oracle.com/database/122/ADFNS/performance-and-scalability.htm#ADFNS1428
+[23]: https://docs.oracle.com/en/database/oracle/oracle-database/18/jjucp/optimizing-real-world-performance.html#GUID-BC09F045-5D80-4AF5-93F5-FEF0531E0E1D
+[24]: https://docs.oracle.com/en/database/oracle/oracle-database/18/adfns/performance-and-scalability.html#GUID-015CA8C1-2386-4626-855D-CC546DDC1086
+[25]: https://docs.oracle.com/en/database/oracle/oracle-database/18/adfns/performance-and-scalability.html#GUID-661BB906-74D2-4C5D-9C7E-2798F76501B3
 [26]: http://www.oracle.com/technetwork/topics/php/php-scalability-ha-twp-128842.pdf
-[27]: https://docs.oracle.com/database/122/DBIMI/using-oracle-wallet-manager.htm#DBIMI162
-[28]: https://docs.oracle.com/database/122/DBSEG/configuring-secure-sockets-layer-authentication.htm#DBSEG070
-[29]: https://docs.oracle.com/database/122/DBSEG/configuring-authentication.htm#DBSEG30035
-[30]: https://docs.oracle.com/database/122/DBSEG/configuring-network-data-encryption-and-integrity.htm#DBSEG020
-[31]: https://docs.oracle.com/database/122/REFRN/V-SESSION_CONNECT_INFO.htm#REFRN30224
-[32]: https://docs.oracle.com/database/122/DBSEG/toc.htm
-[33]: https://docs.oracle.com/database/122/NETRF/parameters-for-the-sqlnet-ora-file.htm#NETRF427
-[34]: https://docs.oracle.com/database/122/NETRF/parameters-for-the-sqlnet-ora-file.htm#NETRF227
-[35]: https://docs.oracle.com/database/122/NETRF/parameters-for-the-sqlnet-ora-file.htm#NETRF228
-[36]: https://docs.oracle.com/database/122/NETRF/local-naming-parameters-in-tnsnames-ora-file.htm#NETRF431
-[37]: https://docs.oracle.com/database/122/NETRF/toc.htm
+[27]: https://docs.oracle.com/en/database/oracle/oracle-database/18/dbimi/using-oracle-wallet-manager.html#GUID-E3E16C82-E174-4814-98D5-EADF1BCB3C37
+[28]: https://docs.oracle.com/en/database/oracle/oracle-database/18/dbseg/configuring-secure-sockets-layer-authentication.html#GUID-6AD89576-526F-4D6B-A539-ADF4B840819F
+[29]: https://docs.oracle.com/en/database/oracle/oracle-database/18/dbseg/configuring-authentication.html#GUID-37BECE32-58D5-43BF-A098-97936D66968F
+[30]: https://docs.oracle.com/en/database/oracle/oracle-database/18/dbseg/configuring-network-data-encryption-and-integrity.html#GUID-7F12066A-2BA1-476C-809B-BB95A3F727CF
+[31]: https://docs.oracle.com/en/database/oracle/oracle-database/18/refrn/V-SESSION_CONNECT_INFO.html#GUID-9F0DCAEA-A67E-4183-89E7-B1555DC591CE
+[32]: https://docs.oracle.com/en/database/oracle/oracle-database/18/dbseg/index.html
+[33]: https://docs.oracle.com/en/database/oracle/oracle-database/18/netrf/parameters-for-the-sqlnet-ora-file.html#GUID-0857C817-675F-4CF0-BFBB-C3667F119176
+[34]: https://docs.oracle.com/en/database/oracle/oracle-database/18/netrf/parameters-for-the-sqlnet-ora-file.html#GUID-4A19D81A-75F0-448E-B271-24E5187B5909
+[35]: https://docs.oracle.com/en/database/oracle/oracle-database/18/netrf/parameters-for-the-sqlnet-ora-file.html#GUID-48547756-9C0B-4D14-BE85-E7ADDD1A3A66
+[36]: https://docs.oracle.com/en/database/oracle/oracle-database/18/netrf/local-naming-parameters-in-tnsnames-ora-file.html#GUID-7A18022A-E40D-4880-B3CE-7EE9864756CA
+[37]: https://docs.oracle.com/en/database/oracle/oracle-database/18/netrf/index.html
 [38]: https://github.com/oracle/node-oracledb/tree/master/examples/resultset1.js
 [39]: https://github.com/oracle/node-oracledb/tree/master/examples/resultset2.js
 [40]: https://github.com/oracle/node-oracledb/tree/master/examples/refcursor.js
 [41]: https://github.com/oracle/node-oracledb/tree/master/examples/selectstream.js
-[42]: https://docs.oracle.com/database/122/NLSPG/datetime-data-types-and-time-zone-support.htm#NLSPG263
+[42]: https://docs.oracle.com/en/database/oracle/oracle-database/18/nlspg/datetime-data-types-and-time-zone-support.html#GUID-578B5988-31E2-4D0F-ACEA-95C827F6012B
 [43]: https://jsao.io/2016/09/working-with-dates-using-the-nodejs-driver/
-[44]: https://docs.oracle.com/database/122/SQLRF/TO_LOB.htm
+[44]: https://docs.oracle.com/en/database/oracle/oracle-database/18/sqlrf/TO_LOB.html#GUID-35810313-029E-4CB8-8C27-DF432FA3C253
 [45]: https://docs.oracle.com/cd/E17781_01/appdev.112/e18750/xe_locator.htm#XELOC560
-[46]: https://docs.oracle.com/database/122/LNOCI/using-sql_statements-in-oci.htm#LNOCI16355g
-[47]: https://docs.oracle.com/database/122/REFRN/OPEN_CURSORS.htm#REFRN10137
-[48]: https://docs.oracle.com/database/122/ARPLS/DBMS_OUTPUT.htm#ARPLS67300
+[47]: https://docs.oracle.com/en/database/oracle/oracle-database/18/refrn/OPEN_CURSORS.html#GUID-FAFD1247-06E5-4E64-917F-AEBD4703CF40
+[48]: https://docs.oracle.com/en/database/oracle/oracle-database/18/arpls/DBMS_OUTPUT.html#GUID-C1400094-18D5-4F36-A2C9-D28B0E12FD8C
 [49]: https://github.com/oracle/node-oracledb/tree/master/examples/dbmsoutputgetline.js
 [50]: https://github.com/oracle/node-oracledb/tree/master/examples/dbmsoutputpipe.js
 [51]: https://github.com/oracle/node-oracledb/tree/master/examples/lobinsert2.js
 [52]: https://github.com/oracle/node-oracledb/tree/master/examples/lobbinds.js
 [53]: https://github.com/oracle/node-oracledb/tree/master/examples/lobplsqltemp.js
-[54]: https://docs.oracle.com/cloud/latest/db122/ADJSN/generation.htm#ADJSN-GUID-1084A518-A44A-4654-A796-C1DD4D8EC2AA
+[54]: https://docs.oracle.com/en/database/oracle/oracle-database/18/sqlrf/JSON_OBJECT.html#GUID-1EF347AE-7FDA-4B41-AFE0-DD5A49E8B370
 [55]: https://github.com/oracle/node-oracledb/tree/master/examples/selectjson.js
 [56]: https://github.com/oracle/node-oracledb/tree/master/examples/selectjsonblob.js
-[57]: https://docs.oracle.com/database/122/ADJSN/toc.htm
+[57]: https://docs.oracle.com/en/database/oracle/oracle-database/18/adjsn/toc.htm
 [58]: https://github.com/oracle/node-oracledb/tree/master/examples/plsqlarray.js
 [59]: http://www.oracle.com/technetwork/issue-archive/2007/07-mar/o27asktom-084983.html
 [60]: http://stackoverflow.com/a/43330282/4799035
-[61]: https://docs.oracle.com/database/122/LNOCI/oci-programming-advanced-topics.htm#LNOCI16655
-[62]: https://docs.oracle.com/database/122/TGDBA/gathering-database-statistics.htm#TGDBA168
-[63]: https://docs.oracle.com/database/122/LNOCI/more-oci-advanced-topics.htm#LNOCI-GUID-CD599644-135A-4116-8B3B-40A9BA172E5C
-[64]: https://docs.oracle.com/database/122/ADFNS/high-availability.htm#ADFNS538
-[65]: https://docs.oracle.com/database/122/ADFNS/connection_strategies.htm#ADFNS515
-[66]: https://docs.oracle.com/database/122/ADFNS/performance-and-scalability.htm#ADFNS464
-[67]: https://docs.oracle.com/database/122/LNOCI/more-oci-advanced-topics.htm#LNOCI73051
-[68]: https://docs.oracle.com/database/122/NLSPG/toc.htm
-[69]: https://docs.oracle.com/database/122/NLSPG/setting-up-globalization-support-environment.htm#NLSPG003
-[70]: https://docs.oracle.com/database/122/TGSQL/performing-application-tracing.htm#TGSQL792
-[71]: https://docs.oracle.com/database/122/ARPLS/DBMS_APPLICATION_INFO.htm#ARPLS003
-[72]: https://docs.oracle.com/database/122/ARPLS/DBMS_SESSION.htm#ARPLS68063
+[61]: https://docs.oracle.com/en/database/oracle/oracle-database/18/lnoci/performance-topics.html#GUID-4947CAE8-1F00-4897-BB2B-7F921E495175
+[62]: https://docs.oracle.com/en/database/oracle/oracle-database/18/tgdba/gathering-database-statistics.html#GUID-56AEF38E-9400-427B-A818-EDEC145F7ACD
+[63]: https://docs.oracle.com/en/database/oracle/oracle-database/18/lnoci/build-and-configure-oci-applications.html#GUID-9D12F489-EC02-46BE-8CD4-5AECED0E2BA2
+[64]: https://docs.oracle.com/en/database/oracle/oracle-database/18/adfns/high-availability.html#GUID-F3FBE48B-468B-4393-8B0C-D5C8E0E4374D
+[65]: https://docs.oracle.com/en/database/oracle/oracle-database/18/adfns/connection_strategies.html#GUID-25F85237-702B-4609-ACE2-1454EBC8284B
+[66]: https://docs.oracle.com/en/database/oracle/oracle-database/18/tgdba/tuning-result-cache.html#GUID-D2FA7B29-301B-4AB8-8294-2B1B015899F9
+[67]: https://docs.oracle.com/en/database/oracle/oracle-database/18/lnoci/performance-topics.html#GUID-6E21AA56-5BBE-422A-802C-197CAC8AAEA4
+[68]: https://docs.oracle.com/en/database/oracle/oracle-database/18/nlspg/index.html
+[69]: https://docs.oracle.com/en/database/oracle/oracle-database/18/nlspg/setting-up-globalization-support-environment.html#GUID-D5C74C82-8622-46F4-8760-0F8ABA28A816
+[70]: https://docs.oracle.com/en/database/oracle/oracle-database/18/tgsql/performing-application-tracing.html#GUID-246A5A52-E666-4DBC-BDF6-98B83260A7AD
+[71]: https://docs.oracle.com/en/database/oracle/oracle-database/18/arpls/DBMS_APPLICATION_INFO.html#GUID-14484F86-44F2-4B34-B34E-0C873D323EAD
+[72]: https://docs.oracle.com/en/database/oracle/oracle-database/18/arpls/DBMS_SESSION.html#GUID-988EA930-BDFE-4205-A806-E54F05333562
 [73]: https://jsao.io/2017/06/how-to-get-use-and-close-a-db-connection-using-promises/
 [74]: https://jsao.io/2017/07/how-to-get-use-and-close-a-db-connection-using-async-functions/
 [75]: https://oracle.github.io/odpi/doc/user_guide/debugging.html
-[76]: https://docs.oracle.com/database/122/REFRN/V-SQL_BIND_CAPTURE.htm#REFRN30310
-[77]: https://docs.oracle.com/database/122/ARPLS/DBMS_MONITOR.htm#ARPLS67178
-[78]: https://docs.oracle.com/database/122/ADFNS/plscope.htm
-[79]: https://docs.oracle.com/database/122/LNOCI/using-sql_statements-in-oci.htm#GUID-7AE9DBE2-5316-4802-99D1-969B72823F02
+[76]: https://docs.oracle.com/en/database/oracle/oracle-database/18/refrn/V-SQL_BIND_CAPTURE.html#GUID-D353F4BE-5943-4F5B-A99B-BC9505E9579C
+[77]: https://docs.oracle.com/en/database/oracle/oracle-database/18/arpls/DBMS_MONITOR.html#GUID-C9054D20-3A70-484F-B11B-CC591A10D609
+[78]: https://docs.oracle.com/en/database/oracle/oracle-database/18/adfns/plscope.html#GUID-24109CB5-7BB9-48B2-AD7A-39458AA13C0C
+[79]: https://docs.oracle.com/en/database/oracle/oracle-database/18/lnoci/using-sql_statements-in-oci.html#GUID-7AE9DBE2-5316-4802-99D1-969B72823F02
 [80]: https://oracle.github.io/node-oracledb/INSTALL.html#github
 [81]: https://oracle.github.io/node-oracledb/INSTALL.html#instrpm
 [82]: https://oracle.github.io/node-oracledb/INSTALL.html#instosx
 [83]: https://github.com/oracle/node-oracledb/blob/master/CHANGELOG.md
 [84]: https://github.com/oracle/node-oracledb/tree/master/examples/rowlimit.js
 [85]: http://www.oracle.com/technetwork/issue-archive/2007/07-jan/o17asktom-093877.html
-[86]: http://docs.oracle.com/database/121/SQLRF/statements_7002.htm#CJAHCAFF
+[86]: https://docs.oracle.com/en/database/oracle/oracle-database/18/sqlrf/CREATE-TABLE.html#GUID-F9CE0CC3-13AE-4744-A43C-EAC7A71AAAB6__CJAHCAFF
 [87]: https://oracle.github.io/node-oracledb/INSTALL.html#quickstart
 [88]: https://nodejs.org/en/download/
 [89]: https://github.com/oracle/node-oracledb/tree/master/examples/dbconfig.js
-[90]: https://docs.oracle.com/en/database/oracle/oracle-database/12.2/admin/getting-started-with-database-administration.html#GUID-5F1E393E-97B8-43BC-BD68-3595251A6F7C
+[90]: https://docs.oracle.com/en/database/oracle/oracle-database/18/dbseg/configuring-privilege-and-role-authorization.html#GUID-C48021EF-6AEA-427F-95B2-37EFCFEA2400
 [91]: https://www.youtube.com/watch?v=WDJacg0NuLo
 [92]: https://nodejs.org/api/stream.html#stream_readable_destroy_error
-[93]: https://docs.oracle.com/en/database/oracle/oracle-database/12.2/racad/introduction-to-oracle-rac.html#GUID-D04AA2A7-2E68-4C5C-BD6E-36C62427B98E
+[93]: https://docs.oracle.com/en/database/oracle/oracle-database/18/racad/introduction-to-oracle-rac.html#GUID-D04AA2A7-2E68-4C5C-BD6E-36C62427B98E
 [94]: https://github.com/oracle/node-oracledb/blob/node-oracledb-v1/doc/api.md
-[95]: https://docs.oracle.com/en/database/oracle/oracle-database/12.2/tgsql/toc.htm
-[96]: https://docs.oracle.com/en/database/oracle/oracle-database/12.2/ladbi/standard-oracle-database-groups-for-database-administrators.html#GUID-0A789F28-169A-43D6-9E48-AAE20D7B0C44
+[95]: https://docs.oracle.com/en/database/oracle/oracle-database/18/tgsql/index.html
+[96]: https://docs.oracle.com/en/database/oracle/oracle-database/18/ladbi/standard-oracle-database-groups-for-database-administrators.html#GUID-0A789F28-169A-43D6-9E48-AAE20D7B0C44
 [97]: http://www.oracle.com/technetwork/database/options/clustering/applicationcontinuity/learnmore/fastapplicationnotification12c-2538999.pdf
 [98]: https://docs.oracle.com/en/database/oracle/oracle-database/18/adfns/editions.html#GUID-58DE05A0-5DEF-4791-8FA8-F04D11964906
 [99]: https://docs.oracle.com/en/database/oracle/oracle-database/18/adfns/cqn.html#GUID-373BAF72-3E63-42FE-8BEA-8A2AEFBF1C35
-[100]: https://docs.oracle.com/en/database/oracle/oracle-database/12.2/sqlrf/CREATE-PROFILE.html
-[101]: https://docs.oracle.com/en/database/oracle/oracle-database/12.2/admin/managing-resources-with-oracle-database-resource-manager.html
+[100]: https://docs.oracle.com/en/database/oracle/oracle-database/18/sqlrf/CREATE-PROFILE.html
+[101]: https://docs.oracle.com/en/database/oracle/oracle-database/18/admin/managing-resources-with-oracle-database-resource-manager.html

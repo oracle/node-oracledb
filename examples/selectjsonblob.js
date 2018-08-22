@@ -21,7 +21,7 @@
  * DESCRIPTION
  *   Executes sample insert and query statements using a JSON column with BLOB storage.
  *   Requires Oracle Database 12.1.0.2, which has extensive JSON datatype support.
- *   See https://docs.oracle.com/database/122/ADJSN/toc.htm
+ *   See https://docs.oracle.com/en/database/oracle/oracle-database/18/adjsn/toc.htm
  *
  *   Use demo.sql to create the required table.
  *

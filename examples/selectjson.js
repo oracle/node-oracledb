@@ -21,7 +21,7 @@
  * DESCRIPTION
  *   Shows some JSON features of Oracle Database 12c.
  *   Requires Oracle Database 12.1.0.2, which has extensive JSON datatype support.
- *   See http://docs.oracle.com/database/122/ADJSN/toc.htm
+ *   See https://docs.oracle.com/en/database/oracle/oracle-database/18/adjsn/toc.htm
  *
  *   Uses Oracle's sample HR schema.
  *   Also run demo.sql to create the required extra table or do:

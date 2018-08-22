@@ -7,14 +7,14 @@ Use node-oracledb to connect Node.js 6, 8 and 10 to Oracle Database.
 
 Node-oracledb supports basic and advanced features of Oracle Database
 and Oracle Client.  See the
-[homepage](https://oracle.github.io/node-oracledb/) for a list.
+[homepage][4] for a list.
 
 The node-oracledb module is open source and maintained by Oracle Corp.
 It is stable, well documented, and has a comprehensive test suite.
 
 ## <a name="installation"></a> Installation
 
-See [Getting Started with Node-oracledb][1] and [Quick Start Node-oracledb Installation][37].
+See [Getting Started with Node-oracledb][1] and [Quick Start Node-oracledb Installation][2].
 
 ## <a name="doc"></a> Documentation
 
@@ -28,7 +28,7 @@ See the [examples][30] directory.  Start with
 ## <a name="help"></a> Help
 
 Issues and questions can be raised with the node-oracledb community on
-[GitHub][24].
+[GitHub][3].
 
 ## <a name="testing"></a> Tests
 
@@ -61,29 +61,9 @@ limitations under the License.
 
 
 [1]: https://oracle.github.io/node-oracledb/doc/api.html#getstarted
-[2]: https://oracle.github.io/node-oracledb/doc/api.html#asyncawaitoverview
-[3]: https://oracle.github.io/node-oracledb/doc/api.html#promiseoverview
-[4]: https://oracle.github.io/node-oracledb/doc/api.html#intro
-[5]: https://oracle.github.io/node-oracledb/doc/api.html#querystream
-[6]: https://oracle.github.io/node-oracledb/doc/api.html#sqlexecution
-[7]: https://oracle.github.io/node-oracledb/doc/api.html#refcursors
-[8]: https://oracle.github.io/node-oracledb/doc/api.html#lobhandling
-[9]: https://oracle.github.io/node-oracledb/doc/api.html#jsondatatype
-[10]: https://oracle.github.io/node-oracledb/doc/api.html#queryoutputformats
-[11]: https://oracle.github.io/node-oracledb/doc/api.html#typemap
-[12]: https://oracle.github.io/node-oracledb/doc/api.html#bind
-[13]: https://oracle.github.io/node-oracledb/doc/api.html#transactionmgt
-[14]: https://oracle.github.io/node-oracledb/doc/api.html#connpooling
-[15]: https://oracle.github.io/node-oracledb/doc/api.html#drcp
-[16]: https://oracle.github.io/node-oracledb/doc/api.html#extauth
-[17]: https://oracle.github.io/node-oracledb/doc/api.html#propdbfetcharraysize
-[18]: https://oracle.github.io/node-oracledb/doc/api.html#stmtcache
-[19]: https://docs.oracle.com/database/122/ADFNS/performance-and-scalability.htm#ADFNS464
-[20]: https://oracle.github.io/node-oracledb/doc/api.html#endtoend
-[21]: https://oracle.github.io/node-oracledb/doc/api.html#connectionfan
-[22]: https://oracle.github.io/node-oracledb/doc/api.html#connectionrlb
-[23]: https://docs.oracle.com/database/122/ADFNS/high-availability.htm#ADFNS-GUID-96599425-9BDA-483C-9BA2-4A4D13013A37
-[24]: https://github.com/oracle/node-oracledb/issues
+[2]: https://oracle.github.io/node-oracledb/INSTALL.html#quickstart
+[3]: https://github.com/oracle/node-oracledb/issues
+[4]: https://oracle.github.io/node-oracledb
 [30]: https://github.com/oracle/node-oracledb/blob/master/examples
 [31]: https://github.com/oracle/node-oracledb/blob/master/examples/select1.js#L35
 [32]: https://oracle.github.io/node-oracledb/doc/api.html
@@ -91,5 +71,3 @@ limitations under the License.
 [34]: https://github.com/oracle/node-oracledb/blob/master/test/README.md
 [35]: https://github.com/oracle/node-oracledb/blob/master/CONTRIBUTING.md
 [36]: http://www.apache.org/licenses/LICENSE-2.0
-[37]: https://oracle.github.io/node-oracledb/INSTALL.html#quickstart
-[38]: https://oracle.github.io/node-oracledb/doc/api.html#getconnectiondbattrsprivilege
