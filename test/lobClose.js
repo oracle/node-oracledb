@@ -81,7 +81,7 @@ describe('54. lobClose.js', function() {
 
   }); // 54.1
 
-  it.skip('54.2 can not call close() multiple times', function(done) {
+  it('54.2 can not call close() multiple times', function(done) {
 
     conn.createLob(
       oracledb.CLOB,
@@ -92,7 +92,7 @@ describe('54. lobClose.js', function() {
           should.not.exist(err);
 
           lob.close(function(err) {
-            should.exist(err);
+            should.not.exist(err);
             done();
           });
         }); // first close();
@@ -179,10 +179,6 @@ describe('54. lobClose.js', function() {
             "DPI-1040: LOB was already closed"
           );
           cb();
-        });
-
-        lob2.on('finish', function() {
-          cb(new Error("LOB emits 'finish' event!"));
         });
       },
       function(cb) {
