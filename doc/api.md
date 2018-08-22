@@ -7663,7 +7663,7 @@ if (!validTables.includes(tableName)) {
   throw new Error('Invalid table name');
 }
 
-query = 'SELECT * FROM ' + tableName;
+const query = 'SELECT * FROM ' + tableName;
 ```
 
 The same technique can be used to construct the list of selected
