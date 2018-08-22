@@ -650,12 +650,12 @@ describe('163. executeMany.js', function() {
     ], done);
   }); // 164.14
 
-  it.skip('164.15 Negative - set numIterations to be negative value', function(done) {
+  it('164.15 Negative - set numIterations to be negative value', function(done) {
     async.series([
       function(cb) {
         var sql = `
         declare
-            t_Id          number;
+            t_Id number;
         begin
             select nvl(count(*), 0) + 1 into t_Id
             from nodb_tab_xmany;
@@ -666,14 +666,17 @@ describe('163. executeMany.js', function() {
 
         var numIterations = -8;
 
-        conn.executeMany(
-          sql,
-          numIterations,
-          function(err) {
-            should.not.exist(err);
-            cb();
-          }
+        should.throws(
+          function() {
+            conn.executeMany(
+              sql,
+              numIterations,
+              function() { }
+            );
+          },
+          /NJS-005: invalid value for parameter 2/
         );
+        cb();
       },
       function(cb) {
         dotruncate(cb);
