@@ -21,6 +21,8 @@
  * DESCRIPTION
  *   Creates a table and inserts data.  Shows DDL and DML
  *
+ *   (To insert many records at a time see em_insert1.js)
+ *
  *****************************************************************************/
 
 var async = require('async');
