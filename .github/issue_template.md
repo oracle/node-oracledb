@@ -25,18 +25,18 @@ See https://www.oracle.com/support/assurance/vulnerability-remediation/reporting
 
 2. What is your node-oracledb version?
 
-3. What is your Oracle client (e.g. Instant Client) version?  Is it 64-bit or 32-bit?  How was it installed?  Where is it installed?
+3. What *exact* command caused the problem (e.g. what command did you try to install with)?  Who were you logged in as?
 
-4. What is your Oracle Database version?
+4. What error(s) you are seeing?
 
-5. What is your OS and version?
+5. What OS (and version) is Node.js executing on?
 
-6. What is your compiler version?  For example, with GCC, run `gcc --version`
+6. What is your Oracle client (e.g. Instant Client) version?  Is it 64-bit or 32-bit?  How was it installed?  Where is it installed?
 
-7. What Oracle environment variables did you set?  How *exactly* did you set them?
+7. What is your Oracle Database version?
 
 8. What is the `PATH` environment variable (on Windows) or `LD_LIBRARY_PATH` (on Linux) set to?  On macOS, what is in `~/lib`?
 
-9. What *exact* command caused the problem (e.g. what command did you try to install with)?  Who were you logged in as?
+9. What Oracle environment variables did you set?  How *exactly* did you set them?
 
-10. What error(s) you are seeing?
+10. Do you have a small, single Node.js script that immediately runs to show us the problem?
