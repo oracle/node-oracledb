@@ -239,61 +239,6 @@ describe('2. pool.js', function() {
       );
     });
 
-    it.skip('2.3.4 poolMax limits the pool capacity', function(done){
-      oracledb.createPool(
-        {
-          user              : dbConfig.user,
-          password          : dbConfig.password,
-          connectString     : dbConfig.connectString,
-          poolMin           : 1,
-          poolMax           : 2,
-          poolIncrement     : 1,
-          poolTimeout       : 28,
-          stmtCacheSize     : 23,
-          queueRequests     : false
-        },
-        function(err, pool) {
-          should.not.exist(err);
-          pool.should.be.ok();
-          pool.connectionsInUse.should.be.exactly(0);
-
-          pool.getConnection( function(err, conn1){
-            should.not.exist(err);
-            conn1.should.be.ok();
-            pool.connectionsOpen.should.be.exactly(1);
-            pool.connectionsInUse.should.be.exactly(1);
-
-            pool.getConnection( function(err, conn2){
-              should.not.exist(err);
-              conn2.should.be.ok();
-              pool.connectionsOpen.should.be.exactly(2);
-              pool.connectionsInUse.should.be.exactly(2);
-
-              // Error occurs
-              pool.getConnection( function(err, conn3){
-                should.exist(err);
-                (err.message).should.startWith('ORA-24418:');
-
-                should.not.exist(conn3);
-
-                conn2.release( function(err){
-                  should.not.exist(err);
-                  conn1.release( function(err){
-                    should.not.exist(err);
-                    pool.terminate( function(err){
-                      should.not.exist(err);
-                      done();
-                    });
-                  });
-                });
-              });
-            });
-          });
-
-        }
-      );
-    });
-
   }); // 2.3
 
   describe('2.4 poolIncrement', function(){
@@ -594,7 +539,7 @@ describe('2. pool.js', function() {
 
   });
 
-  describe('2.8 connection request queue (basic functionality)', function(){
+  describe('2.8 connection queueing', function(){
 
     function getBlockingSql(secondsToBlock) {
       var blockingSql = '' +
@@ -613,64 +558,7 @@ describe('2. pool.js', function() {
       return blockingSql;
     }
 
-    it.skip('2.8.1 generates ORA-24418 when calling getConnection if queueing is disabled', function(done) {
-      oracledb.createPool(
-        {
-          user              : dbConfig.user,
-          password          : dbConfig.password,
-          connectString     : dbConfig.connectString,
-          poolMin           : 0,
-          poolMax           : 1,
-          poolIncrement     : 1,
-          poolTimeout       : 1,
-          queueRequests     : false
-        },
-        function(err, pool){
-          should.not.exist(err);
-
-          async.parallel(
-            [
-              function(cb) {
-                pool.getConnection(function(err, conn) {
-                  should.not.exist(err);
-
-                  conn.execute(getBlockingSql(3), function(err) {
-                    should.not.exist(err);
-
-                    conn.release(function(err) {
-                      should.not.exist(err);
-                      cb();
-                    });
-                  });
-                });
-              },
-              function(cb) {
-                //using setTimeout to help ensure this gets to the db last
-                setTimeout(function() {
-                  pool.getConnection(function(err, conn) {
-                    should.exist(err);
-                    // ORA-24418: Cannot open further sessions
-                    (err.message).should.startWith('ORA-24418:');
-                    should.not.exist(conn);
-                    cb();
-                  });
-                }, 200);
-              }
-            ],
-            function(err){
-              should.not.exist(err);
-
-              pool.terminate(function(err) {
-                should.not.exist(err);
-                done();
-              });
-            }
-          );
-        }
-      );
-    });
-
-    it('2.8.2 does not generate ORA-24418 when calling getConnection', function(done) {
+    it('2.8.1 basic case', function(done) {
       oracledb.createPool(
         {
           user              : dbConfig.user,
@@ -701,7 +589,7 @@ describe('2. pool.js', function() {
                 });
               },
               function(cb) {
-                //using setTimeout to help ensure this gets to the db last
+                //using setTimeout to help ensure this connection requests reaches DB later
                 setTimeout(function() {
                   pool.getConnection(function(err, conn) {
                     should.not.exist(err);
@@ -727,7 +615,7 @@ describe('2. pool.js', function() {
       );
     });
 
-    it('2.8.3 generates NJS-040 if request is queued and queueTimeout expires', function(done) {
+    it('2.8.2 generates NJS-040 if request is queued and queueTimeout expires', function(done) {
       oracledb.createPool(
         {
           user              : dbConfig.user,
@@ -783,7 +671,7 @@ describe('2. pool.js', function() {
       );
     });
 
-    it('2.8.4 does not generate NJS-040 if request is queued for less time than queueTimeout', function(done) {
+    it('2.8.3 does not generate NJS-040 if request is queued for less time than queueTimeout', function(done) {
       oracledb.createPool(
         {
           user              : dbConfig.user,
@@ -841,8 +729,8 @@ describe('2. pool.js', function() {
     });
   });
 
-  describe('2.9 connection request queue (_enableStats & _logStats functionality)', function(){
-    it('2.9.1 does not works after the pool has been terminated', function(done) {
+  describe('2.9 _enableStats & _logStats functionality', function(){
+    it('2.9.1 does not work after the pool has been terminated', function(done) {
       oracledb.createPool(
         {
           user              : dbConfig.user,

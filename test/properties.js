@@ -202,15 +202,7 @@ describe('58. properties.js', function() {
       );
     });
 
-    it.skip('58.1.15 queueRequests', function() {
-      var t = oracledb.queueRequests;
-      oracledb.queueRequests = false;
-
-      should.equal(t, true);
-      should.notEqual(t, oracledb.queueRequests);
-    });
-
-    it('58.1.16 queueTimeout', function() {
+    it('58.1.15 queueTimeout', function() {
       var t = oracledb.queueTimeout;
       oracledb.queueTimeout = t + 1000;
 
@@ -218,7 +210,7 @@ describe('58. properties.js', function() {
       should.notEqual(oracledb.queueTimeout, defaultValues.queueTimeout);
     });
 
-    it('58.1.17 stmtCacheSize', function() {
+    it('58.1.16 stmtCacheSize', function() {
       var t = oracledb.stmtCacheSize;
       oracledb.stmtCacheSize = t + 5;
 
@@ -226,7 +218,7 @@ describe('58. properties.js', function() {
       should.notEqual(oracledb.stmtCacheSize, defaultValues.stmtCacheSize);
     });
 
-    it('58.1.18 poolPingInterval', function() {
+    it('58.1.17 poolPingInterval', function() {
       var t = oracledb.poolPingInterval;
       oracledb.poolPingInterval = t + 100;
 
@@ -234,7 +226,7 @@ describe('58. properties.js', function() {
       should.notEqual(oracledb.poolPingInterval, defaultValues.poolPingInterval);
     });
 
-    it('58.1.19 fetchAsBuffer', function() {
+    it('58.1.18 fetchAsBuffer', function() {
       var t = oracledb.fetchAsBuffer;
       oracledb.fetchAsBuffer = [ oracledb.BLOB ];
 
@@ -242,7 +234,7 @@ describe('58. properties.js', function() {
       (oracledb.fetchAsBuffer).should.not.eql(defaultValues.fetchAsBuffer);
     });
 
-    it('58.1.20 Negative - connectionClass ', function() {
+    it('58.1.19 Negative - connectionClass ', function() {
       should.throws(
         function() {
           oracledb.connectionClass = NaN;
@@ -251,7 +243,7 @@ describe('58. properties.js', function() {
       );
     });
 
-    it('58.1.21 Negative - autoCommit', function() {
+    it('58.1.20 Negative - autoCommit', function() {
       should.throws(
         function() {
           oracledb.autoCommit = 2017;
@@ -260,7 +252,7 @@ describe('58. properties.js', function() {
       );
     });
 
-    it('58.1.22 Negative - outFormat', function() {
+    it('58.1.21 Negative - outFormat', function() {
       should.throws(
         function() {
           oracledb.outFormat = 'abc';
@@ -269,7 +261,7 @@ describe('58. properties.js', function() {
       );
     });
 
-    it('58.1.23 Negative - externalAuth', function() {
+    it('58.1.22 Negative - externalAuth', function() {
       should.throws(
         function() {
           oracledb.externalAuth = 2017;
@@ -278,7 +270,7 @@ describe('58. properties.js', function() {
       );
     });
 
-    it('58.1.24 versionString (read-only)', function() {
+    it('58.1.23 versionString (read-only)', function() {
       var t = oracledb.versionString;
       t.should.be.a.String();
 
@@ -290,7 +282,7 @@ describe('58. properties.js', function() {
       );
     });
 
-    it('58.1.25 versionSuffix (read-only)', function() {
+    it('58.1.24 versionSuffix (read-only)', function() {
       var t = oracledb.versionSuffix;
 
       if (t) // it could be a String, or undefined
@@ -304,7 +296,7 @@ describe('58. properties.js', function() {
       );
     });
 
-    it('58.1.26 oracleClientVersionString (read-only)', function () {
+    it('58.1.25 oracleClientVersionString (read-only)', function () {
       var t = oracledb.oracleClientVersionString;
       t.should.be.a.String();
 
@@ -316,7 +308,7 @@ describe('58. properties.js', function() {
       );
     });
 
-    it('58.1.27 edition', function() {
+    it('58.1.26 edition', function() {
       var t = oracledb.edition;
       oracledb.edition = 'foobar';
       var e = oracledb.edition;
@@ -325,7 +317,7 @@ describe('58. properties.js', function() {
       should.strictEqual(e, 'foobar');
     });
 
-    it('58.1.28 Negative - edition', function() {
+    it('58.1.27 Negative - edition', function() {
       should.throws(
         function() {
           oracledb.edition = 123;
@@ -334,7 +326,7 @@ describe('58. properties.js', function() {
       );
     });
 
-    it('58.1.29 events', function() {
+    it('58.1.28 events', function() {
       var t = oracledb.events;
       oracledb.events = true;
 
@@ -342,7 +334,7 @@ describe('58. properties.js', function() {
       should.strictEqual(oracledb.events, true);
     });
 
-    it('58.1.30 Negative - events', function() {
+    it('58.1.29 Negative - events', function() {
       should.throws(
         function() {
           oracledb.events = 'hello';
@@ -462,19 +454,7 @@ describe('58. properties.js', function() {
       );
     });
 
-    it.skip('58.2.8 queueRequests', function() {
-      var t = pool.queueRequests;
-      t.should.be.a.Boolean;
-
-      should.throws(
-        function() {
-          pool.queueRequests = !t;
-        },
-        /NJS-014: [\w]+ is a read-only property/
-      );
-    });
-
-    it('58.2.9 queueTimeout', function() {
+    it('58.2.8 queueTimeout', function() {
       var t = pool.queueTimeout;
       t.should.be.a.Number();
 
@@ -486,7 +466,7 @@ describe('58. properties.js', function() {
       );
     });
 
-    it('58.2.10 poolPingInterval', function() {
+    it('58.2.9 poolPingInterval', function() {
       var t = pool.poolPingInterval;
       t.should.be.a.Number();
 
