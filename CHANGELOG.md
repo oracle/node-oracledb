@@ -2,12 +2,23 @@
 
 ## node-oracledb v3.0.0-dev (DD Mon YYYY)
 
+- Added a
+  [`connection.callTimeout`](https://oracle.github.io/node-oracledb/doc/api.html#propconncalltimeout)
+  property to interrupt long running database calls, available when
+  using Oracle client libraries version 18.1, or later.
+
 - Added support for specifying the number of iterations to
   `executeMany()` instead of always requiring an input binds array.
   This is useful when there are no binds, or only OUT binds.
 
-- Eliminated a memory leak when fetching LOBs and more than one
-  internal fetch occurs.
+- Added binary installer proxy authentication support.  Reuse `npm
+  config` proxy.  PR #919 (Cemre Mengu).
+
+- Additionally enable `poolPingInterval` functionality when using
+  Oracle client libraries 12.2, or later, to aid silent pool
+  connection re-establishment after connections exceed database
+  session resource limits (e.g. ORA-02396), or are explicitly closed
+  by DBAs (e.g. ORA-00028).  (ODPI-C change).
 
 - Removed the `queueRequests` property and altered the internal pool
   connection acquisition logic to work better with Oracle 18c pool
@@ -17,11 +28,16 @@
 - Unused properties in objects such as the `execute()` result are no
   longer set.  Previously some were set to `undefined`.
 
+- On Windows, Oracle Client libraries in
+  `node_modules\oracledb\build\Release` adjacent to the oracledb.node
+  binary will now be used in preference to those in PATH. (ODPI-C
+  change).
+
 - Change the binary package filename format from '...-node-vXX...' to
   to '...-node-abiXX...' to reduce Node version and ABI confusion.
 
-- Added binary installer proxy authentication support.  Reuse `npm
-  config` proxy.  PR #919 (Cemre Mengu)
+- Eliminated a memory leak when fetching LOBs and more than one
+  internal fetch occurs.
 
 ## node-oracledb v2.3.0 (7 Jun 2018)
 
