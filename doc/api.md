@@ -7089,6 +7089,10 @@ and [`maxSize`](#executebindParams) properties is used:
 For [PL/SQL Associative Array binds](#plsqlindexbybinds)
 a [`maxArraySize`](#executebindParams) property is also required
 
+Note that before a PL/SQL block returns, all OUT binds should be set
+to NULL or, for REF CURSORS, to an empty result set.  See this [GitHub
+Issue][102].
+
 #### <a name="outbinds"></a> Accessing OUT Bind Values
 
 The [`results`](#executecallback) parameter of the `execute()`
@@ -8849,3 +8853,4 @@ When upgrading from node-oracledb version 2.0 to version 2.1:
 [99]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-373BAF72-3E63-42FE-8BEA-8A2AEFBF1C35
 [100]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-ABC7AE4D-64A8-4EA9-857D-BEF7300B64C3
 [101]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-2BEF5482-CF97-4A85-BD90-9195E41E74EF
+[102]: https://github.com/oracle/node-oracledb/issues/886
