@@ -4009,21 +4009,17 @@ When applications use a lot of connections for short periods, Oracle
 recommends using a connection pool for efficiency.  Each pool can
 contain one or more connections.  A pool can grow or shrink, as
 needed.  Each node-oracledb process can use one or more local pools of
-connections.
-
-Pool expansion happens when the following are all true:
-(i) [`getConnection()`](#getconnectionpool) is called and (ii) all the
-currently established connections in the pool are "checked out" by
-previous `getConnection()` calls and are in-use by the application,
-and (iii) the number of those connections is less than the pool's
-`poolMax` setting.
+connections.  In addition to providing an immediately available set of
+connections, pools provide database load balancing capabilities and
+transparently handles Oracle Database High Availability events,
+shielding applications from errors during planned maintenance.
 
 A pool is created by calling the
 [`oracledb.createPool()`](#createpool) method. Internally [Oracle Call
 Interface Session Pooling][6] is used.
 
-A connection is returned with the
-[`pool.getConnection()`](#getconnectionpool) function:
+A connection from the pool is obtained with the
+[`pool.getConnection()`](#getconnectionpool) method:
 
 ```javascript
 var oracledb = require('oracledb');
@@ -4042,6 +4038,11 @@ oracledb.createPool (
   });
 ```
 
+Each connection should be used for a given unit of work, such as a
+transaction or a set of sequentially executed statements.  Remember,
+statements should be [executed sequentially, not in
+parallel](#numberofthreads) on each connection.
+
 Connections should be released with [`connection.close()`](#connectionclose) when no
 longer needed:
 
@@ -4058,6 +4059,13 @@ handlers.
 After an application finishes using a connection pool, it should
 release all connections and terminate the connection pool by calling
 the [`pool.close()`](#poolclose) method.
+
+Pool expansion happens when the following are all true:
+(i) [`getConnection()`](#getconnectionpool) is called and (ii) all the
+currently established connections in the pool are "checked out" by
+previous `getConnection()` calls and are in-use by the application,
+and (iii) the number of those connections is less than the pool's
+`poolMax` setting.
 
 The growth characteristics of a connection pool are determined by the
 Pool attributes [`poolIncrement`](#proppoolpoolincrement),
