@@ -4161,3 +4161,8 @@ Overview of node-oracledb functional tests
     163.8 Negative - batchErrors with non-DML statement
     163.9 if batchErrors is disabled
     163.10 Negative -  dmlRowCounts with non-DML statement
+    164.11 numIterations - only OUT parameters
+    164.12 numIterations - No parameters
+    164.13 numIterations - DML RETURNING
+    164.14 Negative - set numIterations to be string
+    164.15 Negative - set numIterations to be negative value

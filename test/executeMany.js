@@ -515,6 +515,172 @@ describe('163. executeMany.js', function() {
 
   }); // 163.10
 
+  it('164.11 numIterations - only OUT parameters', function(done) {
+    async.series([
+      function(cb) {
+        var sql =
+        `declare
+             t_Id          number;
+         begin
+             select nvl(count(*), 0) + 1 into t_Id
+             from nodb_tab_xmany;
+
+             insert into nodb_tab_xmany
+             values (t_Id, 'Test String ' || t_Id);
+
+             select sum(Id) into :1
+             from nodb_tab_xmany;
+        end;`;
+        var bindDefs = [
+          { type : oracledb.NUMBER, dir : oracledb.BIND_OUT }
+        ];
+        var options = { bindDefs: bindDefs };
+        var numIterations = 8;
+        conn.executeMany(
+          sql,
+          numIterations,
+          options,
+          function(err, result) {
+            should.not.exist(err);
+            should.deepEqual(
+              result.outBinds,
+              [ [ 1 ], [ 3 ], [ 6 ], [ 10 ], [ 15 ], [ 21 ], [ 28 ], [ 36 ] ]
+            );
+            cb();
+          }
+        );
+      },
+      function(cb) {
+        dotruncate(cb);
+      }
+    ], done);
+  }); // 164.11
+
+  it('164.12 numIterations - No parameters', function(done) {
+    async.series([
+      function(cb) {
+        var sql = `
+        declare
+            t_Id          number;
+        begin
+            select nvl(count(*), 0) + 1 into t_Id
+            from nodb_tab_xmany;
+
+            insert into nodb_tab_xmany
+            values (t_Id, 'Test String ' || t_Id);
+        end;`;
+
+        var numIterations = 8;
+
+        conn.executeMany(
+          sql,
+          numIterations,
+          function(err) {
+            should.not.exist(err);
+            cb();
+          }
+        );
+      },
+      function(cb) {
+        dotruncate(cb);
+      }
+    ], done);
+  }); // 164.12
+
+  it('164.13 numIterations - DML RETURNING', function(done) {
+    async.series([
+      function(cb) {
+        var sql = `
+        insert into nodb_tab_xmany (val)
+        values (to_char(systimestamp, 'YYYY-MM-DD HH24:MI:SS.FF'))
+        returning id, val into :1, :2`;
+
+        var bindDefs = [
+          { type : oracledb.NUMBER, dir : oracledb.BIND_OUT },
+          { type : oracledb.STRING, dir : oracledb.BIND_OUT, maxSize : 30 }
+        ];
+
+        var options = { bindDefs : bindDefs };
+        var numIterations = 8;
+
+        conn.executeMany(
+          sql,
+          numIterations,
+          options,
+          function(err, result) {
+            should.not.exist(err);
+            should.strictEqual(result.outBinds.length, numIterations);
+            cb();
+          }
+        );
+      },
+      function(cb) {
+        dotruncate(cb);
+      }
+    ], done);
+  }); // 164.13
+
+  it('164.14 Negative - set numIterations to be string', function(done) {
+    async.series([
+      function(cb) {
+        var sql = `
+        declare
+            t_Id          number;
+        begin
+            select nvl(count(*), 0) + 1 into t_Id
+            from nodb_tab_xmany;
+
+            insert into nodb_tab_xmany
+            values (t_Id, 'Test String ' || t_Id);
+        end;`;
+
+        var numIterations = "foobar";
+
+        should.throws(
+          function() {
+            conn.executeMany(sql, numIterations, function() {} );
+          },
+          /NJS-006: invalid type for parameter 2/
+        );
+        cb();
+      },
+      function(cb) {
+        dotruncate(cb);
+      }
+    ], done);
+  }); // 164.14
+
+  it.skip('164.15 Negative - set numIterations to be negative value', function(done) {
+    async.series([
+      function(cb) {
+        var sql = `
+        declare
+            t_Id          number;
+        begin
+            select nvl(count(*), 0) + 1 into t_Id
+            from nodb_tab_xmany;
+
+            insert into nodb_tab_xmany
+            values (t_Id, 'Test String ' || t_Id);
+        end;`;
+
+        var numIterations = -8;
+
+        conn.executeMany(
+          sql,
+          numIterations,
+          function(err) {
+            should.not.exist(err);
+            cb();
+          }
+        );
+      },
+      function(cb) {
+        dotruncate(cb);
+      }
+    ], done);
+  }); // 164.15
+
   var doCreateProc = function(cb) {
     var proc = "CREATE OR REPLACE PROCEDURE nodb_proc_em (a_num IN NUMBER, " +
                "    a_outnum OUT NUMBER, a_outstr OUT VARCHAR2) \n" +
