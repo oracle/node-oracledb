@@ -95,6 +95,7 @@ typedef enum {
     errInvalidSubscription,
     errMissingSubscrCallback,
     errMissingSubscrSql,
+    errPoolClosing,
 
     // New ones should be added here
 

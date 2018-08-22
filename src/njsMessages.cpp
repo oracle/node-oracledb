@@ -92,6 +92,7 @@ static const char *errMsg[] = {
     "NJS-061: invalid subscription", // errInvalidSubscription
     "NJS-062: subscription notification callback missing", // errMissingSubscrCallback
     "NJS-063: subscription notification SQL missing", // errMissingSubscrSql
+    "NJS-064: Connection cannot be created because the connection pool \"%s\" is closing", // errPoolClosing
 };
 
 
