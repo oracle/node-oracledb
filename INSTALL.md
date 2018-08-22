@@ -334,7 +334,7 @@ sudo mkdir -p /usr/lib/oracle/12.2/client64/lib/network/admin
 ```
 
 This is the default Oracle configuration directory for applications
-linked with this Instant Client.
+using this Instant Client.
 
 Alternatively, if you use Oracle client configuration files, they can
 be put in another, accessible directory.  Then set the environment
@@ -469,7 +469,7 @@ sudo mkdir -p /opt/oracle/instantclient_12_2/network/admin
 ```
 
 This is the default Oracle configuration directory for applications
-linked with this Instant Client.
+using this Instant Client.
 
 Alternatively, if you use Oracle client configuration files, they can
 be put in another, accessible directory.  Then set the environment
@@ -702,7 +702,7 @@ sudo mkdir -p /opt/oracle/instantclient_12_2/network/admin
 ```
 
 This is the default Oracle configuration directory for applications
-linked with this Instant Client.
+using this Instant Client.
 
 Alternatively, if you use Oracle client configuration files, they can
 be put in another, accessible directory.  Then set the environment
@@ -789,13 +789,19 @@ Download the free 64-bit Instant Client **Basic** ZIP file from
 
 - Extract `instantclient-basic-windows.x64-12.2.0.1.0.zip`
 
-- Add its directory to `PATH`.  For example on Windows 7, update `PATH`
-in Control Panel -> System -> Advanced System Settings -> Advanced ->
-Environment Variables -> System variables -> `PATH` and add your path,
-such as `C:\oracle\instantclient_12_2`.
+- Add its directory to `PATH`.  For example on Windows 7, update
+  `PATH` in Control Panel -> System -> Advanced System Settings ->
+  Advanced -> Environment Variables -> System variables -> `PATH` and
+  add your path, such as `C:\oracle\instantclient_12_2`.
 
-If you have multiple versions of Oracle libraries installed, make sure
-the desired version occurs first in the path before you run Node.js.
+  If you have multiple versions of Oracle libraries installed, make
+  sure the desired version occurs first in `PATH` before you run
+  Node.js.
+
+  Alternatively move the unzipped Instant Client files to
+  `node_modules\oracledb\build\Release` so the DLLs and other files
+  are in the same directory as the `node.oracledb` binary.  If you do
+  this, then `PATH` does not need to be set.
 
 #### 3.6.5 Optionally create the default Oracle Client configuration directory
 
@@ -806,11 +812,10 @@ If you intend to co-locate optional Oracle configuration files such as
 this if needed.
 
 This is the default Oracle configuration directory for applications
-linked with this Instant Client.
+using this Instant Client.
 
-Alternatively, if you use Oracle client configuration files, they can
-be put in another, accessible directory.  Then set the environment
-variable `TNS_ADMIN` to that directory name.
+Alternatively, configuration files can be put in another directory.
+Then set the environment variable `TNS_ADMIN` to that directory name.
 
 #### <a name="winredists"> </a> 3.6.6 Install the Visual Studio Redistributables
 
@@ -1068,7 +1073,7 @@ sudo mkdir -p /opt/oracle/instantclient_12_2/network/admin
 ```
 
 This is the default Oracle configuration directory for applications
-linked with this Instant Client.
+using this Instant Client.
 
 Alternatively, if you use Oracle client configuration files, they can
 be put in another, accessible directory.  Then set the environment
@@ -1187,7 +1192,7 @@ mkdir -p /opt/oracle/instantclient_12_2/network/admin
 ```
 
 This is the default Oracle configuration directory for applications
-linked with this Instant Client.
+using this Instant Client.
 
 Alternatively, if you use Oracle client configuration files, they can
 be put in another, accessible directory.  Then set the environment
