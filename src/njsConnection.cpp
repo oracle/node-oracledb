@@ -113,6 +113,9 @@ void njsConnection::Init(Local<Object> target)
             Nan::New<v8::String>("oracleServerVersionString").ToLocalChecked(),
             njsConnection::GetOracleServerVersionString,
             njsConnection::SetOracleServerVersionString);
+    Nan::SetAccessor(tpl->InstanceTemplate(),
+            Nan::New<v8::String>("callTimeout").ToLocalChecked(),
+            njsConnection::GetCallTimeout, njsConnection::SetCallTimeout);
 
     connectionTemplate_s.Reset(tpl);
     Nan::Set(target, Nan::New<v8::String>("Connection").ToLocalChecked(),
@@ -2801,5 +2804,51 @@ NAN_GETTER(njsConnection::GetOracleServerVersionString)
 NAN_SETTER(njsConnection::SetOracleServerVersionString)
 {
     PropertyIsReadOnly("oracleServerVersionString");
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection::GetCallTimeout()
+//   Get accessor of "callTimeout" property.
+//-----------------------------------------------------------------------------
+NAN_GETTER(njsConnection::GetCallTimeout)
+{
+    uint32_t callTimeout;
+
+    njsConnection *connection = (njsConnection*) ValidateGetter(info);
+    if (!connection)
+        return;
+    if (!connection->IsValid()) {
+        info.GetReturnValue().Set(Nan::Undefined());
+        return;
+    }
+    if (dpiConn_getCallTimeout(connection->dpiConnHandle, &callTimeout) < 0) {
+        njsOracledb::ThrowDPIError();
+        return;
+    }
+    info.GetReturnValue().Set(callTimeout);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection::SetCallTimeout()
+//   Set accessor of "callTimeout" property.
+//-----------------------------------------------------------------------------
+NAN_SETTER(njsConnection::SetCallTimeout)
+{
+    uint32_t callTimeout;
+
+    njsConnection *connection = (njsConnection*) ValidateSetter(info);
+    if (!connection)
+        return;
+    if (!value->IsUint32()) {
+        string errMsg = njsMessages::Get(errInvalidPropertyValue,
+                "callTimeout");
+        Nan::ThrowError(errMsg.c_str());
+        return;
+    }
+    callTimeout = Nan::To<uint32_t>(value).FromJust();
+    if (dpiConn_setCallTimeout(connection->dpiConnHandle, callTimeout) < 0)
+        njsOracledb::ThrowDPIError();
 }
 

@@ -111,11 +111,12 @@ limitations under the License.
 4. [Connection Class](#connectionclass)
     - 4.1 [Connection Properties](#connectionproperties)
         - 4.1.1 [`action`](#propconnaction)
-        - 4.1.2 [`clientId`](#propconnclientid)
-        - 4.1.3 [`module`](#propconnmodule)
-        - 4.1.4 [`oracleServerVersion`](#propconnoracleserverversion)
-        - 4.1.5 [`oracleServerVersionString`](#propconnoracleserverversionstring)
-        - 4.1.6 [`stmtCacheSize`](#propconnstmtcachesize)
+        - 4.1.2 [`callTimeout`](#propconncalltimeout)
+        - 4.1.3 [`clientId`](#propconnclientid)
+        - 4.1.4 [`module`](#propconnmodule)
+        - 4.1.5 [`oracleServerVersion`](#propconnoracleserverversion)
+        - 4.1.6 [`oracleServerVersionString`](#propconnoracleserverversionstring)
+        - 4.1.7 [`stmtCacheSize`](#propconnstmtcachesize)
     - 4.2 [Connection Methods](#connectionmethods)
         - 4.2.1 [`break()`](#break)
         - 4.2.2 [`changePassword()`](#changepassword)
@@ -232,6 +233,7 @@ limitations under the License.
     - 8.9 [Connections and High Availability](#connectionha)
         - 8.9.1 [Fast Application Notification (FAN)](#connectionfan)
         - 8.9.2 [Runtime Load Balancing (RLB)](#connectionrlb)
+        - 8.9.3 [Database Call Timeouts](#dbcalltimeouts)
     - 8.10 [Optional Client Configuration Files](#tnsadmin)
 9. [SQL Execution](#sqlexecution)
     - 9.1 [SELECT Statements](#select)
@@ -1187,7 +1189,7 @@ This property may be overridden when [creating a connection pool](#createpool).
 See [Connection Pool Pinging](#connpoolpinging) for more discussion.
 
 This property was added in node-oracledb 1.12.  It was disabled when
-using Oracle Client 12.2+ until node-oracledb 3.0.
+using Oracle Client 12.2 (and later) until node-oracledb 3.0.
 
 ##### Example
 
@@ -1946,7 +1948,26 @@ This is a write-only property.  Displaying a Connection object will
 show a value of `null` for this attribute.  See
 [End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend).
 
-#### <a name="propconnclientid"></a> 4.1.2 `connection.clientId`
+#### <a name="propconncalltimeout"></a> 4.1.2 `connection.callTimeout`
+
+```
+Number callTimeout
+```
+
+Sets the maximum number of milliseconds that each underlying
+round-trip between node-oracledb and Oracle Database may take.  Each
+node-oracledb method or operation may make zero or more round-trips.
+The `callTimeout` value applies to each round-trip individually, not
+to the sum of all round-trips.  Time spent processing in node-oracledb
+before or after the completion of each round-trip is not counted.
+
+See [Database Call Timeouts](#dbcalltimeouts) for more information.
+
+This property was added in node-oracledb 3.0.  An exception will occur
+if node-oracledb is not using Oracle client library version 18.1 or
+later.
+
+#### <a name="propconnclientid"></a> 4.1.3 `connection.clientId`
 
 ```
 writeonly String clientId
@@ -1960,7 +1981,7 @@ This is a write-only property.  Displaying a Connection object will
 show a value of `null` for this attribute.  See
 [End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend).
 
-#### <a name="propconnmodule"></a> 4.1.3 `connection.module`
+#### <a name="propconnmodule"></a> 4.1.4 `connection.module`
 
 ```
 writeonly String module
@@ -1972,7 +1993,7 @@ This is a write-only property.  Displaying a Connection object will
 show a value of `null` for this attribute.  See
 [End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend).
 
-#### <a name="propconnoracleserverversion"></a> 4.1.4 `connection.oracleServerVersion`
+#### <a name="propconnoracleserverversion"></a> 4.1.5 `connection.oracleServerVersion`
 
 ```
 readonly Number oracleServerVersion
@@ -1988,7 +2009,7 @@ instead of 1803000000.
 
 This property was added in node-oracledb 1.3.
 
-#### <a name="propconnoracleserverversionstring"></a> 4.1.5 `connection.oracleServerVersionString`
+#### <a name="propconnoracleserverversionstring"></a> 4.1.6 `connection.oracleServerVersionString`
 
 ```
 readonly String oracleServerVersionString
@@ -2003,7 +2024,7 @@ libraries.  Otherwise it will show the base release such as
 
 This property was added in node-oracledb 2.2.
 
-#### <a name="propconnstmtcachesize"></a> 4.1.6 `connection.stmtCacheSize`
+#### <a name="propconnstmtcachesize"></a> 4.1.7 `connection.stmtCacheSize`
 
 ```
 readonly Number stmtCacheSize
@@ -4879,7 +4900,6 @@ application being aware of any service disruption.
 For a more information on FAN see the [whitepaper on Fast Application
 Notification][97].
 
-
 #### <a name="connectionrlb"></a> 8.9.2 Runtime Load Balancing (RLB)
 
 [Oracle Database RAC][93] users with [Oracle Database (RLB)][65]
@@ -4893,6 +4913,44 @@ requests across RAC instances.
 
 For a more information on RLB, see the [whitepaper on Fast Application
 Notification][97].
+
+#### <a name="dbcalltimeouts"></a> 8.9.3 Database Call Timeouts
+
+When node-oracledb is using Oracle client 18 libraries, a millisecond
+timeout for database calls can be set with
+[`connection.callTimeout`](#propconncalltimeout).
+
+The call timeout is on each individual round-trip between
+node-oracledb and Oracle Database.  Each node-oracledb method or
+operation may require zero or more round-trips to Oracle Database.
+The `callTimeout` value applies to each round-trip individually, not
+to the sum of all round-trips.  Time spent processing in node-oracledb
+before or after the completion of each round-trip is not counted.
+
+- If the time from the start of any one round-trip to the completion
+  of that same round-trip exceeds `callTimeout` milliseconds, then the
+  operation is halted and error "DPI-1067: call timeout of N ms exceeded
+  with ORA-XXX" is returned.
+
+- In the case where a node-oracledb operation requires more than one
+  round-trip and each round-trip takes less than `callTimeout`
+  milliseconds, then no timeout will occur, even if the sum of all
+  round-trip calls exceeds `callTimeout`.
+
+- If no round-trip is required, the operation will never be
+  interrupted.
+
+After a timeout occurs, node-oracledb attempts to clean up the
+internal connection state.  The cleanup is allowed to take another
+`callTimeout` milliseconds.
+
+If the cleanup was successful, an *DPI-1067* error will be returned and the
+application can continue to use the connection.
+
+For small values of `callTimeout`, the connection cleanup may not
+complete successfully within the additional `callTimeout` period.  In
+this case an *ORA-3114* is returned and the connection will no longer
+be usable.  It should be closed.
 
 ### <a name="tnsadmin"></a> 8.10 Optional Client Configuration Files
 

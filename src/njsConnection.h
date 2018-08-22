@@ -156,6 +156,7 @@ private:
     static NAN_GETTER(GetAction);
     static NAN_GETTER(GetOracleServerVersion);
     static NAN_GETTER(GetOracleServerVersionString);
+    static NAN_GETTER(GetCallTimeout);
 
     // Define Setter Accessors to properties
     static NAN_SETTER(SetStmtCacheSize);
@@ -164,6 +165,7 @@ private:
     static NAN_SETTER(SetAction);
     static NAN_SETTER(SetOracleServerVersion);
     static NAN_SETTER(SetOracleServerVersionString);
+    static NAN_SETTER(SetCallTimeout);
 
     // internal methods
     static bool CreateVarBuffer(njsVariable *var, njsBaton *baton);
