@@ -673,7 +673,7 @@ default library path such as in `~/lib` or `/usr/local/lib`.  For example:
 
 ```
 mkdir ~/lib
-ln -s instantclient_12_2/libclntsh.dylib.12.1 ~/lib/
+ln -s instantclient_12_2/libclntsh.dylib ~/lib/
 ```
 
 Alternatively, copy the required OCI libraries, for example:
