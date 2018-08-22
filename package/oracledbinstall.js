@@ -326,7 +326,7 @@ function getFileReadStreamBase(hostname, path, socket) {
 // file, and then extracts the license and the binary.
 function installBinary() {
   return new Promise((resolve, reject) => {
-    packageUtil.trace('In installBinary');
+    packageUtil.trace('In installBinary at: "' + process.cwd() + '" mode: ' + fs.statSync(process.cwd()).mode);
 
     // Directories to be created for the binary
     const dirs = [
