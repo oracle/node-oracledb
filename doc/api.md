@@ -2463,7 +2463,7 @@ Overrides [`oracledb.maxRows`](#propdbmaxrows).
 ###### <a name="propexecoutformat"></a> 4.2.6.3.6 `outFormat`
 
 ```
-String outFormat
+Number outFormat
 ```
 
 Overrides [`oracledb.outFormat`](#propdboutformat).
