@@ -1,6 +1,6 @@
 --require should
 --require async
---reporter dot
+--reporter spec
 --ui bdd
 --timeout 1000000
 
@@ -189,3 +189,5 @@ test/editionTest.js
 test/changePassword.js
 test/getStmtInfo.js
 test/executeMany.js
+
+test/poolDrain.js

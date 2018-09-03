@@ -4163,3 +4163,20 @@ Overview of node-oracledb functional tests
     163.13 numIterations - DML RETURNING
     163.14 Negative - set numIterations to be string
     163.15 Negative - set numIterations to be negative value
+
+170. poolDrain.js
+    170.1 close pool with force flag, and prevent new connection
+    170.2 close pool without force flag (will give out an error ), and prevent new connections
+    170.3 pool.status OPEN and DRAINING
+    170.4 pool.status CLOSED
+    170.5 basic case - iterate open connections and close them
+    170.6 pool is closed after drainTime
+    170.7 closes pool if no connection
+    170.8 works with poolAlias
+    170.9 works with and without poolAlias
+    170.10 Negative - try to modify read-only property pool.status
+    171.11 drainTime = 0
+    171.12 drainTime = -3
+    171.13 drainTime = NaN
+    171.14 draining a pool will not block the other pool
+    171.15 draining a pool will not block another aliased pool

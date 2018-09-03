@@ -43,6 +43,8 @@ limitations under the License.
             - [`SUBSCR_EVENT_TYPE_DEREG`](#oracledbconstantssubscription), [`SUBSCR_EVENT_TYPE_OBJ_CHANGE`](#oracledbconstantssubscription), [`SUBSCR_EVENT_TYPE_QUERY_CHANGE`](#oracledbconstantssubscription), [`SUBSCR_EVENT_TYPE_AQ`](#oracledbconstantssubscription), [`SUBSCR_GROUPING_CLASS_TIME`](#oracledbconstantssubscription), [`SUBSCR_GROUPING_TYPE_SUMMARY`](#oracledbconstantssubscription), [`SUBSCR_GROUPING_TYPE_LAST`](#oracledbconstantssubscription), [`SUBSCR_QOS_BEST_EFFORT`](#oracledbconstantssubscription), [`SUBSCR_QOS_DEREG_NFY`](#oracledbconstantssubscription), [`SUBSCR_QOS_QUERY`](#oracledbconstantssubscription), [`SUBSCR_QOS_RELIABLE`](#oracledbconstantssubscription), [`SUBSCR_QOS_ROWIDS`](#oracledbconstantssubscription)
         - 3.1.8 [Continuous Query Notification Constants](#oracledbconstantscqn)
             - [`CQN_OPCODE_ALL_OPS`](#oracledbconstantscqn), [`CQN_OPCODE_ALL_ROWS`](#oracledbconstantscqn), [`CQN_OPCODE_ALTER`](#oracledbconstantscqn), [`CQN_OPCODE_DELETE`](#oracledbconstantscqn), [`CQN_OPCODE_DROP`](#oracledbconstantscqn), [`CQN_OPCODE_INSERT`](#oracledbconstantscqn), [`CQN_OPCODE_UPDATE`](#oracledbconstantscqn)
+        - 3.1.9 [Pool Status Constants](#oracledbconstantspool)
+            - [`POOL_STATUS_OPEN`](#oracledbconstantspool), [`POOL_STATUS_DRAINING`](#oracledbconstantspool), [`POOL_STATUS_CLOSED`](#oracledbconstantspool)
     - 3.2 [Oracledb Properties](#oracledbproperties)
         - 3.2.1 [`autoCommit`](#propdbisautocommit)
         - 3.2.2 [`connectionClass`](#propdbconclass)
@@ -199,7 +201,8 @@ limitations under the License.
         - 6.1.8 [`poolTimeout`](#proppoolpooltimeout)
         - 6.1.9 [`queueRequests`](#proppoolqueuerequests)
         - 6.1.10 [`queueTimeout`](#proppoolqueueTimeout)
-        - 6.1.11 [`stmtCacheSize`](#proppoolstmtcachesize)
+        - 6.1.11 [`status`](#proppoolstatus)
+        - 6.1.12 [`stmtCacheSize`](#proppoolstmtcachesize)
     - 6.2 [Pool Methods](#poolmethods)
         - 6.2.1 [`close()`](#poolclose)
         - 6.2.2 [`getConnection()`](#getconnectionpool)
@@ -654,6 +657,16 @@ Constant Name                   | Value |Description
 `oracledb.CQN_OPCODE_DROP`      | 32    | Set if the table was dropped in the notifying transaction
 `oracledb.CQN_OPCODE_INSERT`    |  2    | Set if the notifying transaction included inserts on the table
 `oracledb.CQN_OPCODE_UPDATE`    |  4    | Set if the notifying transaction included updates on the table
+
+#### <a name="oracledbconstantspool"></a> 3.1.9 Pool Status Constants
+
+Constants for the connection [`pool.status`](#proppoolstatus) readonly attribute.
+
+Constant Name                   | Value |Description
+--------------------------------|-------|---------------------------------------------------
+`oracledb.POOL_STATUS_OPEN`     | 6000  | The connection pool is open.
+`oracledb.POOL_STATUS_DRAINING` | 6001  | The connection pool is being drained of in-use connections and will be force closed soon.
+`oracledb.POOL_STATUS_CLOSED`   | 6002  | The connection pool has been closed.
 
 ### <a name="oracledbproperties"></a> 3.2 Oracledb Properties
 
@@ -1402,7 +1415,7 @@ pass the pool object through code.
 See [Connection Pool Cache](#connpoolcache) for more details.
 
 A pool should be terminated with the [`pool.close()`](#poolclose)
-call, but only after all connections have been released.
+call.
 
 See [Connection Pooling](#connpooling) for more information about pooling.
 
@@ -3500,7 +3513,17 @@ the queue before the request is terminated.
 
 See [`oracledb.queueTimeout`](#propdbqueuetimeout).
 
-#### <a name="proppoolstmtcachesize"></a> 6.1.11 `pool.stmtCacheSize`
+#### <a name="proppoolstatus"></a> 6.1.11 `pool.status`
+
+```
+readonly Number status
+```
+
+One of the [Pool Status Constants](#oracledbconstantspool) indicating
+whether the pool is open, being drained of in-use connections, or has
+been closed.
+
+#### <a name="proppoolstmtcachesize"></a> 6.1.12 `pool.stmtCacheSize`
 
 ```
 readonly Number stmtCacheSize
@@ -3519,26 +3542,57 @@ See [`oracledb.stmtCacheSize`](#propdbstmtcachesize).
 
 Callback:
 ```
-close(function(Error error){});
+close([Number drainTime,] function(Error error){});
 ```
 Promise:
 ```
-promise = close();
+promise = close([Number drainTime]);
 ```
 
 ##### Description
 
-This call terminates the connection pool.
+This call closes connections in the pool and terminates the connection
+pool.
 
-Any open connections should be released with [`connection.close()`](#connectionclose)
-before `pool.close()` is called.
+If a `drainTime` is not given, then any open connections should be
+released with [`connection.close()`](#connectionclose) before
+`pool.close()` is called, otherwise the pool close will fail and the
+pool will remain open.
 
-If the pool is in the [connection pool cache](#connpoolcache) it will be removed from the cache.
+If a `drainTime` is specified, then any new `pool.getConnection()`
+calls will fail.  If connections are in use by the application, they
+can continue to be used for the specified number of seconds, after
+which the pool and all open connections are forcibly closed.  Prior to
+this time limit, if there are no connections currently "checked out"
+from the pool with `getConnection()`, then the pool and any
+connections that are idle in the pool are immediately closed.
+Non-zero `drainTime` values are strongly recommended so applications
+have the opportunity to gracefully finish database operations.  A
+`drainTime` of 0 may be used to close a pool and its connections
+immediately.
+
+In network configurations that drop (or in-line) out-of-band breaks,
+forced pool termination may hang unless you have
+[`DISABLE_OOB=ON`][301] in a `sqlnet.ora` file, see [Optional Client
+Configuration Files](#tnsadmin).
+
+When the pool is closed, it will be removed from the [connection pool
+cache](#connpoolcache).
 
 This method was added to node-oracledb 1.9, replacing the equivalent
 alias `pool.terminate()`.
 
+The `drainTime` parameter was added in node-oracledb 3.0.
+
 ##### Parameters
+
+```
+Number drainTime
+```
+
+The number of seconds before the pool and connections are force closed.
+
+If `drainTime` is 0, the pool and its connections are closed immediately.
 
 ```
 function(Error error)
@@ -4337,7 +4391,7 @@ still waiting in the queue.
 
 ##### Attribute Values
 
-The `_logStats()` method also shows attribute values in effect for the pool:
+The `_logStats()` method also shows attribute values of the pool:
 
 Attribute                                   |
 --------------------------------------------|
@@ -4349,6 +4403,14 @@ Attribute                                   |
 [`poolTimeout`](#propdbpooltimeout)         |
 [`poolPingInterval`](#propdbpoolpinginterval) |
 [`stmtCacheSize`](#propdbstmtcachesize)     |
+
+##### Pool Status
+
+The `_logStats()` method also shows the pool status:
+
+Attribute                   |
+----------------------------|
+[`status`](#proppoolstatus) |
 
 ##### Related Environment Variables
 
@@ -8930,3 +8992,5 @@ When upgrading from node-oracledb version 2.0 to version 2.1:
 [100]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-ABC7AE4D-64A8-4EA9-857D-BEF7300B64C3
 [101]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-2BEF5482-CF97-4A85-BD90-9195E41E74EF
 [102]: https://github.com/oracle/node-oracledb/issues/886
+
+[301]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-4DD81A76-8D7D-4DEF-9DC1-77212C657AAF

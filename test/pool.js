@@ -528,8 +528,8 @@ describe('2. pool.js', function() {
 
         pool1.getConnection(function(err, conn) {
           should.exist(err);
-          (err.message).should.startWith('NJS-002:');
-          // NJS-002: invalid pool
+          (err.message).should.startWith('NJS-065:');
+          // NJS-065: pool closed
 
           should.not.exist(conn);
           done();
@@ -539,7 +539,7 @@ describe('2. pool.js', function() {
 
   });
 
-  describe('2.8 connection queueing', function(){
+  describe('2.8 connection request queue', function(){
 
     function getBlockingSql(secondsToBlock) {
       var blockingSql = '' +
@@ -761,7 +761,7 @@ describe('2. pool.js', function() {
                     pool._logStats();
                   } catch (err) {
                     should.exist(err);
-                    (err.message).should.startWith("NJS-002:"); // NJS-002: invalid pool
+                    (err.message).should.startWith("NJS-065:"); // NJS-065: pool closed
                   }
 
                   done();

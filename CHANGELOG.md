@@ -2,6 +2,11 @@
 
 ## node-oracledb v3.0.0-dev (DD Mon YYYY)
 
+- Added a `drainTime` argument to
+  [`pool.close()`](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#poolclose),
+  allowing pools to be force-closed after a specified number of
+  seconds.  PR #950 (Danilo Silva).
+
 - Added a
   [`connection.callTimeout`](https://oracle.github.io/node-oracledb/doc/api.html#propconncalltimeout)
   property to interrupt long running database calls, available when

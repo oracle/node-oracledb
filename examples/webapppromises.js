@@ -28,6 +28,10 @@
  *   accepts a URL parameter for the department ID, for example:
  *   http://localhost:7000/90
  *
+ *   In some networks, pool termination may hang unless you have
+ *   'disable_oob=on' in sqlnet.ora, see
+ *   https://oracle.github.io/node-oracledb/doc/api.html#tnsadmin
+ *
  *   Uses Oracle's sample HR schema.  Scripts to create the HR schema
  *   can be found at: https://github.com/oracle/db-sample-schemas
  *
@@ -194,14 +198,32 @@ function htmlFooter(response) {
   response.end();
 }
 
+function closePoolAndExit() {
+  console.log("\nTerminating");
+  try {
+    // get the pool from the pool cache and close it when no
+    // connections are in use, or force it closed after 10 seconds
+    var pool = oracledb.getPool();
+    pool.close(10, function(err) {
+      if (err)
+        console.error(err);
+      else
+        console.log("Pool closed");
+      process.exit(0);
+    });
+  } catch(err) {
+    // Ignore getPool() error, which may occur if multiple signals
+    // sent and the pool has already been removed from the cache.
+    process.exit(0);
+  }
+}
+
 process
   .on('SIGTERM', function() {
-    console.log("\nTerminating");
-    process.exit(0);
+    closePoolAndExit();
   })
   .on('SIGINT', function() {
-    console.log("\nTerminating");
-    process.exit(0);
+    closePoolAndExit();
   });
 
 init();

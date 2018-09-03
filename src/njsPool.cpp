@@ -447,12 +447,15 @@ NAN_METHOD(njsPool::Close)
     njsBaton *baton;
     njsPool *pool;
 
-    pool = (njsPool*) ValidateArgs(info, 1, 1);
+    pool = (njsPool*) ValidateArgs(info, 2, 2);
     if (!pool)
         return;
     baton = pool->CreateBaton(info);
     if (!baton)
         return;
+    baton->GetBoolFromJSON(info[0].As<Object>(), "forceClose", 0,
+            &baton->forceClose);
+
     baton->dpiPoolHandle = pool->dpiPoolHandle;
     pool->dpiPoolHandle = NULL;
     baton->QueueWork("Close", Async_Close, NULL, 1);
@@ -467,7 +470,9 @@ NAN_METHOD(njsPool::Close)
 //-----------------------------------------------------------------------------
 void njsPool::Async_Close(njsBaton *baton)
 {
-    if (dpiPool_close(baton->dpiPoolHandle, DPI_MODE_POOL_CLOSE_DEFAULT) < 0) {
+    dpiPoolCloseMode mode = (baton->forceClose) ? DPI_MODE_POOL_CLOSE_FORCE :
+            DPI_MODE_POOL_CLOSE_DEFAULT;
+    if (dpiPool_close(baton->dpiPoolHandle, mode) < 0) {
         njsPool *pool = (njsPool*) baton->callingObj;
         pool->dpiPoolHandle = baton->dpiPoolHandle;
         baton->dpiPoolHandle = NULL;
