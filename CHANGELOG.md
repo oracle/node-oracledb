@@ -50,6 +50,11 @@
 - Eliminated a memory leak when fetching LOBs and more than one
   internal fetch occurs.
 
+- Test updates.
+
+- Documentation updates, including an attribute type correction from
+  PR #970 (Cemre Mengu)
+
 ## node-oracledb v2.3.0 (7 Jun 2018)
 
 - The stated compatibility is now for Node.js 6, 8, and 10 due to EOL
