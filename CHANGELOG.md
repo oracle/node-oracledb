@@ -20,10 +20,16 @@
   session resource limits (e.g. ORA-02396), or are explicitly closed
   by DBAs (e.g. ORA-00028).  (ODPI-C change).
 
-- Removed the `queueRequests` property and altered the internal pool
-  connection acquisition logic to work better with Oracle 18c pool
-  changes.  Now `pool.getConnection()` calls are always queued if the
+- Removed the connection pool
+  [`queueRequests`](https://oracle.github.io/node-oracledb/doc/api.html#propdbqueuerequests)
+  property.  Now `pool.getConnection()` calls are always queued if the
   pool is fully in use.
+
+- Altered the internal `pool.getConnection()` logic to work better
+  with Oracle client 18 library pool changes and retain backward
+  compatibility with older Oracle clients.  This prevents
+  `pool.getConnection()` returning ORA-24418 when the connection pool
+  needs to grow and Oracle client 18 libraries are being used.
 
 - Unused properties in objects such as the `execute()` result are no
   longer set.  Previously some were set to `undefined`.
