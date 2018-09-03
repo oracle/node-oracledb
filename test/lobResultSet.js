@@ -121,7 +121,7 @@ describe('59. lobResultSet.js', function() {
 
           inStream.pipe(lob);
 
-          inStream.on('end', function() {
+          lob.on('close', function() {
             connection.commit( function(err) {
               should.not.exist(err);
               cb(); // insertion done
@@ -345,7 +345,7 @@ describe('59. lobResultSet.js', function() {
 
           inStream.pipe(lob);
 
-          inStream.on('end', function() {
+          lob.on('close', function() {
             connection.commit( function(err) {
               should.not.exist(err);
               cb(); // insertion done
