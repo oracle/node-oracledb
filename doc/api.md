@@ -5006,7 +5006,7 @@ After a timeout occurs, node-oracledb attempts to clean up the
 internal connection state.  The cleanup is allowed to take another
 `callTimeout` milliseconds.
 
-If the cleanup was successful, an *DPI-1067* error will be returned and the
+If the cleanup was successful, a *DPI-1067* error will be returned and the
 application can continue to use the connection.
 
 For small values of `callTimeout`, the connection cleanup may not
