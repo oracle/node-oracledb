@@ -410,63 +410,7 @@ describe('13. stream1.js', function () {
       });
     });
 
-    it('13.1.11 stream stress test', function (done) {
-
-      var stream = connection.queryStream('SELECT employee_name FROM nodb_stream1 ORDER BY employee_name');
-
-      stream.on('error', function (error) {
-        should.fail(error, null, 'Error event should not be triggered');
-      });
-
-      var counter = 0;
-      var allData = [];
-      stream.on('data', function (data) {
-        should.exist(data);
-        allData.push(data);
-        counter++;
-      });
-
-      stream.on('end', function () {
-        should.equal(counter, rowsAmount);
-
-        var testDone = 0;
-        var subTest = function (callback) {
-          var query = connection.queryStream('SELECT employee_name FROM nodb_stream1 ORDER BY employee_name');
-
-          query.on('error', function (error) {
-            should.fail(error, null, 'Error event should not be triggered');
-          });
-
-          var testCounter = 0;
-          var testData = [];
-          query.on('data', function (data) {
-            should.exist(data);
-            testData.push(data);
-            testCounter++;
-          });
-
-          query.on('end', function () {
-            should.equal(testCounter, rowsAmount);
-            should.deepEqual(testData, allData);
-
-            testDone++;
-            callback();
-          });
-        };
-        var tests = [];
-        var i;
-        for (i = 0; i < 50; i++) {  // larger values can cause 'ORA-01000: maximum open cursors exceeded'
-          tests.push(subTest);
-        }
-        async.parallel(tests, function () {
-          should.equal(testDone, tests.length);
-
-          done();
-        });
-      });
-    });
-
-    it('13.1.12 should emit events in the correct order', function (done) {
+    it('13.1.11 should emit events in the correct order', function (done) {
       var stream = connection.queryStream('SELECT employee_name FROM nodb_stream1 WHERE rownum = 1');
       var events = [];
 
