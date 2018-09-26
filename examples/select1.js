@@ -25,6 +25,7 @@
  *   Scripts to create the HR schema can be found at:
  *   https://github.com/oracle/db-sample-schemas
  *
+ *   For an async/await example see selectawait.js
  *   For a connection pool example see webapp.js
  *   For a ResultSet example see resultset2.js
  *   For a query stream example see selectstream.js

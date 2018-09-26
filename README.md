@@ -23,7 +23,7 @@ See [Documentation for the Oracle Database Node.js Add-on][32] and the [CHANGELO
 ## <a name="examples"></a> Examples
 
 See the [examples][30] directory.  Start with
-[examples/select1.js][31].
+[examples/example.js][31].
 
 ## <a name="help"></a> Help
 
@@ -65,7 +65,7 @@ limitations under the License.
 [3]: https://github.com/oracle/node-oracledb/issues
 [4]: https://oracle.github.io/node-oracledb
 [30]: https://github.com/oracle/node-oracledb/blob/master/examples
-[31]: https://github.com/oracle/node-oracledb/blob/master/examples/select1.js#L35
+[31]: https://github.com/oracle/node-oracledb/blob/master/examples/example.js#L32
 [32]: https://oracle.github.io/node-oracledb/doc/api.html
 [33]: https://github.com/oracle/node-oracledb/blob/master/CHANGELOG.md
 [34]: https://github.com/oracle/node-oracledb/blob/master/test/README.md

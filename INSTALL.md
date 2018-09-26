@@ -358,7 +358,7 @@ module.exports = {
 Run one of the examples:
 
 ```
-node select1.js
+node example.js
 ```
 
 *Note:* Remember to set `LD_LIBRARY_PATH` or equivalent first.
@@ -493,7 +493,7 @@ module.exports = {
 Run one of the examples:
 
 ```
-node select1.js
+node example.js
 ```
 
 *Note:* Remember to set `LD_LIBRARY_PATH` or equivalent first.
@@ -608,7 +608,7 @@ module.exports = {
 Run one of the examples:
 
 ```
-node select1.js
+node example.js
 ```
 
 ### <a name="instosx"></a> 3.5 Node-oracledb Installation on macOS
@@ -726,7 +726,7 @@ module.exports = {
 Run one of the examples:
 
 ```
-node select1.js
+node example.js
 ```
 
 ### <a name="instwin"></a> 3.6 Node-oracledb Installation on Windows with Instant Client ZIP files
@@ -853,7 +853,7 @@ module.exports = {
 Run one of the examples:
 
 ```
-node select1.js
+node example.js
 ```
 
 ### <a name="instwinoh"></a> 3.7 Node-oracledb Installation on Windows with a Local Database or Full Client
@@ -942,7 +942,7 @@ module.exports = {
 Run one of the examples:
 
 ```
-node select1.js
+node example.js
 ```
 
 ### <a name="winbins"></a> 3.8 Copying node-oracledb Binaries on Windows
@@ -1097,7 +1097,7 @@ module.exports = {
 Run one of the examples:
 
 ```
-node select1.js
+node example.js
 ```
 
 ### <a name="instsolarisx8664"></a> 3.10 Node-oracledb Installation on Oracle Solaris x86-64 (64-Bit) with Instant Client ZIP files
@@ -1216,7 +1216,7 @@ module.exports = {
 Run one of the examples:
 
 ```
-node select1.js
+node example.js
 ```
 
 ### <a name="github"></a> 3.11 Node-oracledb Installation from Source Code
