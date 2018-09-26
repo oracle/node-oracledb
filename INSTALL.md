@@ -74,8 +74,14 @@ configuration.
 
 The node-oracledb installer now supports basic proxy authentication.
 
+On Windows, node-oracledb will now attempt to load the Oracle Client
+libraries from the `node_modules\oracledb\build\Release` directory
+before doing the standard Windows library directory search i.e. of the
+`PATH` directories.
+
 See the [CHANGELOG][43] and [Migrating from Previous node-oracledb
 Releases][47] for more information about node-oracledb 3.0.
+
 #### <a name="mig20"></a> 1.2 Changes in node-oracledb version 2.0
 
 In node-oracledb version 2.0, pre-built binaries are now available for
