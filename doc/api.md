@@ -5021,7 +5021,8 @@ is loaded.  These files affect connections and applications.  Common
 files include `tnsnames.ora`, `sqlnet.ora`, `ldap.ora`, and
 [`oraaccess.xml`](#oraaccess).
 
-Default locations for these files include:
+The files should be accessible to the node-oracledb binary, not the
+database server.  Default locations include:
 
 - `/opt/oracle/instantclient_12_2/network/admin` if Instant Client is in `/opt/oracle/instantclient_12_2`.
 - `/usr/lib/oracle/12.2/client64/lib/network/admin` if Oracle 12.2 Instant Client RPMs are used on Linux.
