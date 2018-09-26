@@ -46,7 +46,7 @@ describe('51. poolClose.js', function(){
 
           pool.getConnection(function(err) {
             should.exist(err);
-            (err.message).should.startWith("NJS-065:"); // NJS-065: pool closed
+            should.strictEqual(err.message, "NJS-065: connection pool was closed");
           });
 
           done();
@@ -55,7 +55,7 @@ describe('51. poolClose.js', function(){
     ); // createPool()
   }); // 51.1
 
-  it.skip('51.2 can not terminate the same pool multiple times', function(done) {
+  it('51.2 can not terminate the same pool multiple times', function(done) {
     oracledb.createPool(
       dbConfig,
       function(err, pool) {
@@ -67,7 +67,7 @@ describe('51. poolClose.js', function(){
 
           pool.terminate(function(err) {
             should.exist(err);
-            should.strictEqual(err.message, "NJS-002: invalid pool");
+            should.strictEqual(err.message, "NJS-065: connection pool was closed");
           });
 
           done();
@@ -76,7 +76,7 @@ describe('51. poolClose.js', function(){
     ); // createPool()
   }); // 51.2
 
-  it.skip('51.3 can not close the same pool multiple times', function(done) {
+  it('51.3 can not close the same pool multiple times', function(done) {
     oracledb.createPool(
       dbConfig,
       function(err, pool) {
@@ -88,7 +88,7 @@ describe('51. poolClose.js', function(){
 
           pool.close(function(err) {
             should.exist(err);
-            should.strictEqual(err.message, "NJS-002: invalid pool");
+            should.strictEqual(err.message, "NJS-065: connection pool was closed");
           });
 
           done();
@@ -190,7 +190,7 @@ describe('51. poolClose.js', function(){
             })
             .catch(function(err) {
               should.exist(err);
-              (err.message).should.startWith("NJS-065:"); // NJS-065: pool closed
+              should.strictEqual(err.message, "NJS-065: connection pool was closed");
             })
             .then(function() {
               done();
@@ -200,7 +200,7 @@ describe('51. poolClose.js', function(){
     ); // createPool()
   }); // 51.6
 
-  it.skip('51.7 can not set the attributes after pool created', function(done) {
+  it('51.7 can not set the attributes after pool created', function(done) {
     var pMin = 2;
     var pMax = 10;
 
@@ -237,7 +237,7 @@ describe('51. poolClose.js', function(){
 
           pool.terminate(function(err) {
             should.exist(err);
-            should.strictEqual(err.message, "NJS-002: invalid pool");
+            should.strictEqual(err.message, "NJS-065: connection pool was closed");
           });
 
           done();
