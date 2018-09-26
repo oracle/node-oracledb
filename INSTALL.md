@@ -314,7 +314,7 @@ Download the free **Basic** RPM from [Oracle Technology Network][12] and
 [install it][13] with sudo or as the root user:
 
 ```
-sudo yum install oracle-instantclient12.2-basic-12.2.0.1.0-1.x86_64.rpm
+sudo yum install oracle-instantclient18.3-basic-18.3.0.0.0-1.x86_64.rpm
 ```
 
 This will install the required `libaio` package, if it is not already
@@ -330,7 +330,7 @@ that will be impacted, then permanently add Instant Client to the
 run-time link path.  For example, with sudo or as the root user:
 
 ```
-sudo sh -c "echo /usr/lib/oracle/12.2/client64/lib > /etc/ld.so.conf.d/oracle-instantclient.conf"
+sudo sh -c "echo /usr/lib/oracle/18.3/client64/lib > /etc/ld.so.conf.d/oracle-instantclient.conf"
 sudo ldconfig
 ```
 
@@ -338,7 +338,7 @@ Alternatively, every shell running Node.js will need to have the link
 path set:
 
 ```
-export LD_LIBRARY_PATH=/usr/lib/oracle/12.2/client64/lib
+export LD_LIBRARY_PATH=/usr/lib/oracle/18.3/client64/lib
 ```
 
 #### 3.2.5 Optionally create the default Oracle Client configuration directory
@@ -346,8 +346,8 @@ export LD_LIBRARY_PATH=/usr/lib/oracle/12.2/client64/lib
 If you intend to co-locate optional Oracle configuration files such as
 [`tnsnames.ora`][15], [`sqlnet.ora`][16], [`ldap.ora`][17], or
 [`oraaccess.xml`][18] with Instant Client, they can be put in a
-`network/admin` subdirectory under `lib/`.  Create this if needed.
-For example:
+`network/admin` subdirectory under `lib/`.  With Instant Client 12.2
+or earlier, create this:
 
 ```
 sudo mkdir -p /usr/lib/oracle/12.2/client64/lib/network/admin
@@ -453,9 +453,9 @@ and [unzip it][13] into a directory accessible to your application,
 for example:
 
 ```
-unzip instantclient-basic-linux.x64-12.2.0.1.0.zip
+unzip instantclient-basic-linux.x64-18.3.0.0.0dbru.zip
 mkdir -p /opt/oracle
-mv instantclient_12_2 /opt/oracle
+mv instantclient_18_3 /opt/oracle
 ```
 
 You will need the operating system `libaio` package installed.  On
@@ -466,7 +466,7 @@ that will be impacted, then permanently add Instant Client to the
 run-time link path.  For example, with sudo or as the root user:
 
 ```
-sudo sh -c "echo /opt/oracle/instantclient_12_2 > /etc/ld.so.conf.d/oracle-instantclient.conf"
+sudo sh -c "echo /opt/oracle/instantclient_18_3 > /etc/ld.so.conf.d/oracle-instantclient.conf"
 sudo ldconfig
 ```
 
@@ -474,7 +474,7 @@ Alternatively, every shell running Node.js will need to have the link
 path set:
 
 ```
-export LD_LIBRARY_PATH=/opt/oracle/instantclient_12_2:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=/opt/oracle/instantclient_18_3:$LD_LIBRARY_PATH
 ```
 
 #### 3.2.5 Optionally create the default Oracle Client configuration directory
@@ -482,7 +482,8 @@ export LD_LIBRARY_PATH=/opt/oracle/instantclient_12_2:$LD_LIBRARY_PATH
 If you intend to co-locate optional Oracle configuration files such as
 [`tnsnames.ora`][15], [`sqlnet.ora`][16], [`ldap.ora`][17], or
 [`oraaccess.xml`][18] with Instant Client, they can be put in a
-`network/admin` subdirectory.  Create this if needed.  For example:
+`network/admin` subdirectory.  With Instant Client 12.2 or earlier,
+create this:
 
 ```
 sudo mkdir -p /opt/oracle/instantclient_12_2/network/admin
@@ -715,7 +716,8 @@ cp /opt/oracle/instantclient_11_2/{libclntsh.dylib.11.1,libnnz11.dylib,libociei.
 If you intend to co-locate optional Oracle configuration files such as
 [`tnsnames.ora`][15], [`sqlnet.ora`][16], [`ldap.ora`][17], or
 [`oraaccess.xml`][18] with Instant Client, they can be put in a
-`network/admin` subdirectory.  Create this if needed.  For example:
+`network/admin` subdirectory.  With Instant Client 12.2 or earlier,
+create this:
 
 ```
 sudo mkdir -p /opt/oracle/instantclient_12_2/network/admin
@@ -807,12 +809,12 @@ Download the free 64-bit Instant Client **Basic** ZIP file from
 [Oracle Technology Network][25].  (The 32-bit Instant Client is
 [here][26]).
 
-- Extract `instantclient-basic-windows.x64-12.2.0.1.0.zip`
+- Extract `instantclient-basic-windows.x64-18.3.0.0.0dbru.zip`
 
 - Add its directory to `PATH`.  For example on Windows 7, update
   `PATH` in Control Panel -> System -> Advanced System Settings ->
   Advanced -> Environment Variables -> System variables -> `PATH` and
-  add your path, such as `C:\oracle\instantclient_12_2`.
+  add your path, such as `C:\oracle\instantclient_18_3`.
 
   If you have multiple versions of Oracle libraries installed, make
   sure the desired version occurs first in `PATH` before you run
@@ -828,7 +830,7 @@ Download the free 64-bit Instant Client **Basic** ZIP file from
 If you intend to co-locate optional Oracle configuration files such as
 [`tnsnames.ora`][15], [`sqlnet.ora`][16], [`ldap.ora`][17], or
 [`oraaccess.xml`][18] with Instant Client, they can be put in a
-`C:\oracle\instantclient_12_2\network\admin` subdirectory.  Create
+`C:\oracle\instantclient_18_3\network\admin` subdirectory.  Create
 this if needed.
 
 This is the default Oracle configuration directory for applications
@@ -1533,15 +1535,15 @@ Download the Oracle Instant Client Basic package from [Instant Client
 Downloads for Linux x86-64 (64-bit)][12] and install it:
 
 ```
-yum install oracle-instantclient12.2-basic-12.2.0.1.0-1.x86_64.rpm
-echo /usr/lib/oracle/12.2/client64/lib > /etc/ld.so.conf.d/oracle-instantclient.conf
+yum install oracle-instantclient18.3-basic-18.3.0.0.0-1.x86_64.rpm
+echo /usr/lib/oracle/18.3/client64/lib > /etc/ld.so.conf.d/oracle-instantclient.conf
 sudo ldconfig
 ```
 
-Install the node-oracledb package:
+Install the node-oracledb package, for example:
 
 ```
-yum install node-oracledb-12c-node8-3.0.0
+yum install node-oracledb-18c-node10-3.0.0
 ```
 
 Since node-oracledb is installed globally, set `NODE_PATH` before
