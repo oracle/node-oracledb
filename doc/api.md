@@ -4992,8 +4992,7 @@ before or after the completion of each round-trip is not counted.
 
 - If the time from the start of any one round-trip to the completion
   of that same round-trip exceeds `callTimeout` milliseconds, then the
-  operation is halted and error "DPI-1067: call timeout of N ms exceeded
-  with ORA-XXX" is returned.
+  operation is halted and an error is returned.
 
 - In the case where a node-oracledb operation requires more than one
   round-trip and each round-trip takes less than `callTimeout`
