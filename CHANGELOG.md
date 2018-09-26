@@ -55,6 +55,8 @@
 - Documentation updates, including an attribute type correction from
   PR #970 (Cemre Mengu)
 
+- Examples were added and updated.
+
 ## node-oracledb v2.3.0 (7 Jun 2018)
 
 - The stated compatibility is now for Node.js 6, 8, and 10 due to EOL
