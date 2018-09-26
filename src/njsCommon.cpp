@@ -387,9 +387,9 @@ void njsBaton::AsyncAfterWorkCallback(uv_work_t *req, int status)
 void njsBaton::GetDPIError(void)
 {
     dpiContext_getError(njsOracledb::GetDPIContext(), &errorInfo);
-    if (errorInfo.code == 1406)
+    if (errorInfo.code == 1406) {
         error = njsMessages::Get(errInsufficientBufferForBinds);
-    else {
+    } else {
         error = std::string(errorInfo.message, errorInfo.messageLength);
         dpiError = true;
     }
@@ -404,9 +404,11 @@ void njsBaton::GetDPIError(void)
 //-----------------------------------------------------------------------------
 void njsBaton::SetDPIConnHandle(dpiConn *handle)
 {
-    if (dpiConn_addRef(handle) < 0)
+    if (dpiConn_addRef(handle) < 0) {
         GetDPIError();
-    else dpiConnHandle = handle;
+    } else {
+        dpiConnHandle = handle;
+    }
 }
 
 
@@ -417,9 +419,11 @@ void njsBaton::SetDPIConnHandle(dpiConn *handle)
 //-----------------------------------------------------------------------------
 void njsBaton::SetDPIPoolHandle(dpiPool *handle)
 {
-    if (dpiPool_addRef(handle) < 0)
+    if (dpiPool_addRef(handle) < 0) {
         GetDPIError();
-    else dpiPoolHandle = handle;
+    } else {
+        dpiPoolHandle = handle;
+    }
 }
 
 
@@ -430,9 +434,11 @@ void njsBaton::SetDPIPoolHandle(dpiPool *handle)
 //-----------------------------------------------------------------------------
 void njsBaton::SetDPIStmtHandle(dpiStmt *handle)
 {
-    if (dpiStmt_addRef(handle) < 0)
+    if (dpiStmt_addRef(handle) < 0) {
         GetDPIError();
-    else dpiStmtHandle = handle;
+    } else {
+        dpiStmtHandle = handle;
+    }
 }
 
 
@@ -443,9 +449,11 @@ void njsBaton::SetDPIStmtHandle(dpiStmt *handle)
 //-----------------------------------------------------------------------------
 void njsBaton::SetDPILobHandle(dpiLob *handle)
 {
-    if (dpiLob_addRef(handle) < 0)
+    if (dpiLob_addRef(handle) < 0) {
         GetDPIError();
-    else dpiLobHandle = handle;
+    } else {
+        dpiLobHandle = handle;
+    }
 }
 
 
@@ -456,9 +464,11 @@ void njsBaton::SetDPILobHandle(dpiLob *handle)
 //-----------------------------------------------------------------------------
 void njsBaton::SetDPISubscrHandle(dpiSubscr *handle)
 {
-    if (dpiSubscr_addRef(handle) < 0)
+    if (dpiSubscr_addRef(handle) < 0) {
         GetDPIError();
-    else dpiSubscrHandle = handle;
+    } else {
+        dpiSubscrHandle = handle;
+    }
 }
 
 
@@ -486,13 +496,10 @@ bool njsBaton::GetBoolFromJSON(Local<Object> obj, const char *key, int index,
     /* Undefined implies value not provided or equivalent */
     if (!jsValue->IsUndefined()) {
         if(jsValue->IsBoolean()) {
-            // Get the boolean value
             *value = jsValue->ToBoolean()->Value();
-        }
-        else {
-            // Non-Boolean value provided, report error
-            error = njsMessages::Get ( errInvalidPropertyValueInParam, key,
-                                       index + 1 ) ;
+        } else {
+            error = njsMessages::Get(errInvalidPropertyValueInParam, key,
+                    index + 1);
             return false;
         }
     }

@@ -262,9 +262,9 @@ NAN_METHOD(njsResultSet::GetRows)
     baton = resultSet->CreateBaton(info);
     if (!baton)
         return;
-    if (resultSet->activeBaton)
+    if (resultSet->activeBaton) {
         baton->error = njsMessages::Get(errBusyResultSet);
-    else if (baton->error.empty()) {
+    } else if (baton->error.empty()) {
         resultSet->activeBaton = baton;
         baton->outFormat = resultSet->outFormat;
         baton->jsOracledb.Reset(resultSet->jsOracledb);
@@ -333,9 +333,11 @@ bool njsResultSet::GetRowsHelper(njsBaton *baton, int *moreRows)
     // result sets that should be auto closed are closed if the result set
     // is exhaused or the maximum number of rows has been fetched
     if (*moreRows && this->maxRows > 0) {
-        if (baton->rowsFetched == this->maxRows)
+        if (baton->rowsFetched == this->maxRows) {
             *moreRows = 0;
-        else this->maxRows -= baton->rowsFetched;
+        } else {
+            this->maxRows -= baton->rowsFetched;
+        }
     }
     return njsConnection::ProcessVars(baton, this->queryVars,
             this->numQueryVars, baton->rowsFetched);
@@ -379,24 +381,28 @@ void njsResultSet::Async_AfterGetRows(njsBaton *baton, Local<Value> argv[])
     rows = Nan::New<Array>(baton->rowsFetched);
     resultSet = (njsResultSet*) baton->callingObj;
     for (uint32_t row = 0; row < baton->rowsFetched; row++) {
-        if (baton->outFormat == NJS_ROWS_ARRAY)
+        if (baton->outFormat == NJS_ROWS_ARRAY) {
             rowAsArray = Nan::New<Array>(resultSet->numQueryVars);
-        else rowAsObj = Nan::New<Object>();
+        } else {
+            rowAsObj = Nan::New<Object>();
+        }
         for (uint32_t col = 0; col < resultSet->numQueryVars; col++) {
             var = &resultSet->queryVars[col];
             if (!njsConnection::GetScalarValueFromVar(baton, var, &var->buffer,
                     row, val))
                 return;
-            if (baton->outFormat == NJS_ROWS_ARRAY)
+            if (baton->outFormat == NJS_ROWS_ARRAY) {
                 Nan::Set(rowAsArray, col, val);
-            else {
+            } else {
                 keyVal = Nan::New<String>(var->name).ToLocalChecked();
                 Nan::Set(rowAsObj, keyVal, val);
             }
         }
-        if (baton->outFormat == NJS_ROWS_ARRAY)
+        if (baton->outFormat == NJS_ROWS_ARRAY) {
             Nan::Set(rows, row, rowAsArray);
-        else Nan::Set(rows, row, rowAsObj);
+        } else {
+            Nan::Set(rows, row, rowAsObj);
+        }
     }
     if (!resultSet->dpiStmtHandle) {
         delete [] resultSet->queryVars;
@@ -426,9 +432,9 @@ NAN_METHOD(njsResultSet::Close)
     baton = resultSet->CreateBaton(info);
     if (!baton)
         return;
-    if (resultSet->activeBaton)
+    if (resultSet->activeBaton) {
         baton->error = njsMessages::Get(errBusyResultSet);
-    else {
+    } else {
         baton->dpiStmtHandle = resultSet->dpiStmtHandle;
         resultSet->dpiStmtHandle = NULL;
     }

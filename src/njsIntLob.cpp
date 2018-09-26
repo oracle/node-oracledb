@@ -402,15 +402,16 @@ NAN_METHOD(njsILob::Read)
     baton = lob->CreateBaton(info);
     if (!baton)
         return;
-    if (lob->activeBaton)
+    if (lob->activeBaton) {
         baton->error = njsMessages::Get(errBusyLob);
-    else if (baton->error.empty()) {
+    } else if (baton->error.empty()) {
         lob->activeBaton = baton;
-        if (lob->dataType == NJS_DATATYPE_BLOB)
+        if (lob->dataType == NJS_DATATYPE_BLOB) {
             baton->bufferSize = lob->pieceSize;
-        else if (dpiLob_getBufferSize(lob->dpiLobHandle, lob->pieceSize,
-                &baton->bufferSize) < 0)
+        } else if (dpiLob_getBufferSize(lob->dpiLobHandle, lob->pieceSize,
+                &baton->bufferSize) < 0) {
             baton->GetDPIError();
+        }
         if (baton->error.empty()) {
             if (!lob->bufferPtr)
                 lob->bufferPtr = new char[baton->bufferSize];
@@ -466,9 +467,9 @@ NAN_METHOD(njsILob::Close)
     baton = lob->CreateBaton(info);
     if (!baton)
         return;
-    if (lob->activeBaton)
+    if (lob->activeBaton) {
         baton->error = njsMessages::Get(errBusyLob);
-    else {
+    } else {
         baton->dpiLobHandle = lob->dpiLobHandle;
         lob->dpiLobHandle = NULL;
     }
@@ -502,9 +503,9 @@ void njsILob::Async_AfterRead(njsBaton *baton, Local<Value> argv[])
     Nan::EscapableHandleScope scope;
     njsILob *lob = (njsILob*) baton->callingObj;
 
-    if (!baton->bufferSize)
+    if (!baton->bufferSize) {
         argv[1] = scope.Escape(Nan::Null());
-    else if (lob->dataType == NJS_DATATYPE_CLOB) {
+    } else if (lob->dataType == NJS_DATATYPE_CLOB) {
         Local<String> strValue = Nan::New<String>(baton->bufferPtr,
                 (int) baton->bufferSize).ToLocalChecked();
         lob->offset += strValue->ToString()->Length();
@@ -539,15 +540,17 @@ NAN_METHOD(njsILob::Write)
     baton = lob->CreateBaton(info);
     if (!baton)
         return;
-    if (lob->activeBaton)
+    if (lob->activeBaton) {
         baton->error = njsMessages::Get(errBusyLob);
-    else if (baton->error.empty()) {
+    } else if (baton->error.empty()) {
         baton->jsBuffer.Reset(jsBuffer);
         baton->bufferPtr = Buffer::Data(jsBuffer);
         baton->bufferSize = Buffer::Length(jsBuffer);
-        if (jsBuffer->IsString())
+        if (jsBuffer->IsString()) {
             baton->lobAmount += jsBuffer.As<String>()->Length();
-        else baton->lobAmount += baton->bufferSize;
+        } else {
+            baton->lobAmount += baton->bufferSize;
+        }
         baton->lobOffset = lob->offset;
         lob->activeBaton = baton;
         baton->SetDPILobHandle(lob->dpiLobHandle);

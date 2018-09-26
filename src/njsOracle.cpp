@@ -991,11 +991,12 @@ void njsOracledb::Async_GetConnection(njsBaton *baton)
             (uint32_t) baton->user.length(), baton->password.c_str(),
             (uint32_t) baton->password.length(), baton->connectString.c_str(),
             (uint32_t) baton->connectString.length(), &commonParams, &params,
-            &baton->dpiConnHandle) < 0)
+            &baton->dpiConnHandle) < 0) {
         baton->GetDPIError();
-    else if (dpiConn_setStmtCacheSize(baton->dpiConnHandle,
-            baton->stmtCacheSize) < 0)
+    } else if (dpiConn_setStmtCacheSize(baton->dpiConnHandle,
+            baton->stmtCacheSize) < 0) {
         baton->GetDPIError();
+    }
 }
 
 
@@ -1104,13 +1105,15 @@ void njsOracledb::Async_CreatePool(njsBaton *baton)
             (uint32_t) baton->user.length(), baton->password.c_str(),
             (uint32_t) baton->password.length(), baton->connectString.c_str(),
             (uint32_t) baton->connectString.length(), &commonParams, &params,
-            &baton->dpiPoolHandle) < 0)
+            &baton->dpiPoolHandle) < 0) {
         baton->GetDPIError();
-    else if (dpiPool_setTimeout(baton->dpiPoolHandle, baton->poolTimeout) < 0)
+    } else if (dpiPool_setTimeout(baton->dpiPoolHandle,
+            baton->poolTimeout) < 0) {
         baton->GetDPIError();
-    else if (dpiPool_setStmtCacheSize(baton->dpiPoolHandle,
-            baton->stmtCacheSize) < 0)
+    } else if (dpiPool_setStmtCacheSize(baton->dpiPoolHandle,
+            baton->stmtCacheSize) < 0) {
         baton->GetDPIError();
+    }
 }
 
 
