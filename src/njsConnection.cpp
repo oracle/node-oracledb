@@ -972,7 +972,7 @@ bool njsConnection::ScanExecuteManyBinds(Local<Array> binds,
             if (!GetBindTypeAndSizeFromValue(var, val, &defaultBindType,
                     &defaultMaxSize, baton, true))
                 return false;
-            if (var->bindDataType == 0)
+            if (var->bindDataType == NJS_DATATYPE_DEFAULT)
                 var->bindDataType = defaultBindType;
             if (defaultMaxSize > var->maxSize)
                 var->maxSize = defaultMaxSize;
@@ -1296,7 +1296,7 @@ bool njsConnection::GetBindTypeAndSizeFromValue(njsVariable *var,
             if (!GetBindTypeAndSizeFromValue(var, element, &elementBindType,
                     &elementMaxSize, baton, true))
                 return false;
-            if (*bindType == 0)
+            if (*bindType == NJS_DATATYPE_DEFAULT)
                 *bindType = elementBindType;
             if (elementMaxSize > *maxSize)
                 *maxSize = elementMaxSize;
