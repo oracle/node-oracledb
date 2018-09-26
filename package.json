@@ -37,6 +37,7 @@
     "async": "^1.5.0"
   },
   "scripts": {
+    "testv6": "mocha --opts test/opts/mochaNodeV6.opts",
     "test": "mocha --opts test/opts/mocha.opts",
     "posttest": "node test/opts/version.js"
   },

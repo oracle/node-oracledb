@@ -35,6 +35,7 @@
   },
   "scripts": {
     "install": "node package/oracledbinstall.js",
+    "testv6": "mocha --opts test/opts/mochaNodeV6.opts",
     "test": "mocha --opts test/opts/mocha.opts",
     "posttest": "node test/opts/version.js"
   },

@@ -4,7 +4,6 @@
 --ui bdd
 --timeout 1000000
 
-test/notes.js
 test/connection.js
 test/pool.js
 test/examples.js
@@ -190,5 +189,3 @@ test/editionTest.js
 test/changePassword.js
 test/getStmtInfo.js
 test/executeMany.js
-
-test/poolDrain.js
