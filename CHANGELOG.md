@@ -16,8 +16,8 @@
   `executeMany()` instead of always requiring an input binds array.
   This is useful when there are no binds, or only OUT binds.
 
-- Added binary installer proxy authentication support.  Reuse `npm
-  config` proxy.  PR #919 (Cemre Mengu).
+- Added binary installer basic proxy authentication support.  Reuse
+  `npm config` proxy.  PR #919 (Cemre Mengu).
 
 - Additionally enable `poolPingInterval` functionality when using
   Oracle client libraries 12.2, or later, to aid silent pool
