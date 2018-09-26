@@ -2822,6 +2822,19 @@ NAN_GETTER(njsConnection::GetCallTimeout)
         info.GetReturnValue().Set(Nan::Undefined());
         return;
     }
+
+    // if an Oracle Client less than 18.1 is being used, return undefined
+    dpiVersionInfo versionInfo;
+    dpiContext *context = njsOracledb::GetDPIContext();
+    if (dpiContext_getClientVersion(context, &versionInfo) < 0) {
+        njsOracledb::ThrowDPIError();
+        return;
+    }
+    if (versionInfo.versionNum < 18) {
+        info.GetReturnValue().Set(Nan::Undefined());
+        return;
+    }
+
     if (dpiConn_getCallTimeout(connection->dpiConnHandle, &callTimeout) < 0) {
         njsOracledb::ThrowDPIError();
         return;
