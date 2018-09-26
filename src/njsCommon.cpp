@@ -52,7 +52,9 @@
 #include "njsCommon.h"
 #include "njsOracle.h"
 #include "njsIntLob.h"
+#include "njsSodaDocument.h"
 #include "njsSubscription.h"
+#include "njsUtils.h"
 
 using namespace node;
 using namespace std;
@@ -245,6 +247,27 @@ void njsBaton::ClearAsyncData()
         dpiSubscr_release(dpiSubscrHandle);
         dpiSubscrHandle = NULL;
     }
+    if (sodaCollNames) {
+        dpiSodaDb_freeCollectionNames(dpiSodaDbHandle, sodaCollNames);
+        delete sodaCollNames;
+        sodaCollNames = NULL;
+    }
+    if (dpiSodaDbHandle) {
+        dpiSodaDb_release(dpiSodaDbHandle);
+        dpiSodaDbHandle = NULL;
+    }
+    if (dpiSodaCollHandle) {
+        dpiSodaColl_release(dpiSodaCollHandle);
+        dpiSodaCollHandle = NULL;
+    }
+    if (dpiSodaDocHandle)  {
+        dpiSodaDoc_release(dpiSodaDocHandle);
+        dpiSodaDocHandle = NULL;
+    }
+    if (dpiSodaDocCursorHandle)  {
+        dpiSodaDocCursor_release(dpiSodaDocCursorHandle);
+        dpiSodaDocCursorHandle = NULL;
+    }
     if (bindVars) {
         delete [] bindVars;
         bindVars = NULL;
@@ -278,6 +301,18 @@ void njsBaton::ClearAsyncData()
         delete [] batchErrorInfos;
         batchErrorInfos = NULL;
         numBatchErrorInfos = 0;
+    }
+    if (sodaOperOptions) {
+        if (sodaOperOptions->keys) {
+            delete sodaOperOptions->keys;
+            sodaOperOptions->keys = NULL;
+        }
+        if (sodaOperOptions->keyLengths) {
+            delete sodaOperOptions->keyLengths;
+            sodaOperOptions->keyLengths = NULL;
+        }
+        delete sodaOperOptions;
+        sodaOperOptions = NULL;
     }
 }
 
@@ -473,6 +508,66 @@ void njsBaton::SetDPISubscrHandle(dpiSubscr *handle)
 
 
 //-----------------------------------------------------------------------------
+// njsBaton::SetDPISodaDbHandle()
+//   Set the DPI SODA database handle. This adds a reference to the DPI SODA
+// database which will be released in the destructor.
+//-----------------------------------------------------------------------------
+void njsBaton::SetDPISodaDbHandle(dpiSodaDb *handle)
+{
+    if (dpiSodaDb_addRef(handle) < 0) {
+        GetDPIError();
+    } else {
+        dpiSodaDbHandle = handle;
+    }
+}
+
+
+//-----------------------------------------------------------------------------
+// njsBaton::SetDPISodaCollHandle()
+//   Set the DPI SODA collection handle. This adds a reference to the DPI
+// SODA collection which will be released in the destructor.
+//-----------------------------------------------------------------------------
+void njsBaton::SetDPISodaCollHandle(dpiSodaColl *handle)
+{
+    if (dpiSodaColl_addRef(handle) < 0) {
+        GetDPIError();
+    } else {
+        dpiSodaCollHandle = handle;
+    }
+}
+
+
+//-----------------------------------------------------------------------------
+// njsBaotn::SetDPISodaDocHandle()
+//   Set the DPI SODA document handle. This adds a reference to the DPI SODA
+//  document, which will be released in the destructor.
+//-----------------------------------------------------------------------------
+void njsBaton::SetDPISodaDocHandle(dpiSodaDoc *handle)
+{
+    if (dpiSodaDoc_addRef(handle) < 0) {
+        GetDPIError();
+    } else {
+        dpiSodaDocHandle = handle;
+    }
+}
+
+
+//-----------------------------------------------------------------------------
+// njsBaton::SetDPISodaDocCursorHandle()
+//   Set the DPI SODA document cursor handle. This adds a reference to the DPI
+// SODA document cursor, which will be released in the destructor.
+//-----------------------------------------------------------------------------
+void njsBaton::SetDPISodaDocCursorHandle(dpiSodaDocCursor *handle)
+{
+    if (dpiSodaDocCursor_addRef(handle) < 0) {
+        GetDPIError();
+    } else {
+        dpiSodaDocCursorHandle = handle;
+    }
+}
+
+
+//-----------------------------------------------------------------------------
 // njsBaton::GetBoolFromJSON()
 //   Gets a boolean value from the JSON object for the given key, if possible.
 // If undefined, leave value alone. Index is the argument index in the caller.
@@ -545,29 +640,7 @@ bool njsBaton::GetFunctionFromJSON(Local<Object> obj, const char *key,
 bool njsBaton::GetIntFromJSON(Local<Object> obj, const char *key,
         int index, int32_t *value)
 {
-    Nan::HandleScope scope;
-    Local<Value> jsValue;
-
-    if (!error.empty())
-        return false;
-    MaybeLocal<Value> mval = Nan::Get(obj, Nan::New(key).ToLocalChecked());
-    if (!mval.ToLocal(&jsValue))
-        return false;
-
-    if (jsValue->IsInt32()) {
-        *value = Nan::To<int32_t>(jsValue).FromJust();
-        return true;
-    } else if (jsValue->IsUndefined()) {
-        return true;
-    } else if (jsValue->IsNumber() || jsValue->IsNull()) {
-        error = njsMessages::Get(errInvalidPropertyValueInParam, key,
-                index + 1);
-        return false;
-    } else {
-        error = njsMessages::Get(errInvalidPropertyTypeInParam, key,
-                                 index + 1);
-        return false;
-    }
+    return njsUtils::GetIntFromJSON(obj, key, index, value, error);
 }
 
 
@@ -603,31 +676,7 @@ bool njsBaton::GetPositiveIntFromJSON(Local<Object> obj, const char *key,
 bool njsBaton::GetStringFromJSON(Local<Object> obj, const char *key, int index,
         string &value)
 {
-    Nan::HandleScope scope;
-    Local<Value> jsValue;
-
-    if (!error.empty())
-        return false;
-
-    MaybeLocal<Value> mval = Nan::Get(obj, Nan::New(key).ToLocalChecked());
-    if (!mval.ToLocal (&jsValue))
-        return false;
-
-    if (jsValue->IsString()) {
-        Nan::Utf8String utf8str(jsValue->ToString());
-        value = std::string(*utf8str, static_cast<size_t>(utf8str.length()));
-        return true;
-    } else if (jsValue->IsUndefined()) {
-        return true;
-    } else if ( jsValue->IsNull()) {
-        error = njsMessages::Get(errInvalidPropertyValueInParam, key,
-                               index + 1 );
-        return false;
-    } else  {
-        error = njsMessages::Get(errInvalidPropertyTypeInParam, key,
-                                 index + 1);
-        return false;
-    }
+    return njsUtils::GetStringFromJSON(obj, key, index, value, error);
 }
 
 
@@ -663,6 +712,29 @@ bool njsBaton::GetUnsignedIntFromJSON(Local<Object> obj, const char *key,
                                  index + 1);
         return false;
     }
+}
+
+
+//-----------------------------------------------------------------------------
+// njsBaton::GetSodaDocument()
+//   Examines the passed object. If it is a buffer object, a new SODA document
+// is created; otherwise, it is an existing SODA document object and the
+// reference to it is retained on the baton (this is checked in Javascript).
+//-----------------------------------------------------------------------------
+bool njsBaton::GetSodaDocument(Local<Object> obj, dpiSodaDb *db)
+{
+    if (Buffer::HasInstance(obj)) {
+        if (dpiSodaDb_createDocument(db, NULL, 0,
+                Buffer::Data(obj), Buffer::Length(obj), NULL, 0,
+                DPI_SODA_FLAGS_DEFAULT, &dpiSodaDocHandle) < 0) {
+            GetDPIError();
+            return false;
+        }
+    } else {
+        njsSodaDocument *doc = Nan::ObjectWrap::Unwrap<njsSodaDocument>(obj);
+        SetDPISodaDocHandle(doc->GetDPISodaDocHandle());
+    }
+    return true;
 }
 
 

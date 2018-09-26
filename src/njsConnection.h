@@ -81,6 +81,7 @@ public:
     static void Init(Local<Object> target);
     bool IsValid() const { return (dpiConnHandle) ? true : false; }
     njsErrorType GetInvalidErrorType() const { return errInvalidConnection; }
+    dpiConn* GetDPIConnHandle ()  { return dpiConnHandle ; }
 
 private:
     njsConnection() : dpiConnHandle(NULL) {}
@@ -149,6 +150,9 @@ private:
     static NAN_METHOD(Unsubscribe);
     static void Async_Unsubscribe(njsBaton *baton);
 
+    // GetSodaDatabase Method on Connection class
+    static NAN_METHOD(GetSodaDatabase);
+
     // Define Getter Accessors to properties
     static NAN_GETTER(GetStmtCacheSize);
     static NAN_GETTER(GetClientId);
@@ -216,7 +220,6 @@ private:
 
     dpiConn *dpiConnHandle;
     Nan::Persistent<Object> jsOracledb;
-
 };
 
 

@@ -57,6 +57,12 @@
 #include "njsMessages.h"
 #include "njsIntLob.h"
 #include "njsSubscription.h"
+#include "njsSodaDatabase.h"
+#include "njsSodaCollection.h"
+#include "njsSodaDocument.h"
+#include "njsSodaOperation.h"
+#include "njsSodaDocCursor.h"
+
 #include <sstream>
 
 // peristent Oracledb class handle
@@ -1256,6 +1262,11 @@ extern "C"
         njsResultSet::Init(target);
         njsILob::Init(target);
         njsSubscription::Init(target);
+        njsSodaDatabase::Init(target);
+        njsSodaCollection::Init(target);
+        njsSodaDocument::Init(target);
+        njsSodaOperation::Init(target);
+        njsSodaDocCursor::Init(target);
     }
 
     NODE_MODULE(oracledb, init)

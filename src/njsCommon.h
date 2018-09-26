@@ -57,6 +57,7 @@
 #include "nan.h"
 #include <string>
 #include <cstring>
+#include <vector>
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -141,6 +142,16 @@ typedef enum {
     NJS_DB_TYPE_NVARCHAR       = 1001,
     NJS_DB_TYPE_NCLOB          = 1112,
 } njsDBType;
+
+
+//-----------------------------------------------------------------------------
+// njsSodaMapMode
+//   Soda-Collection creation Map mode
+//-----------------------------------------------------------------------------
+typedef enum {
+    NJS_SODA_COLL_CREATE_MODE_DEFAULT = 0,
+    NJS_SODA_COLL_CREATE_MODE_MAP = 5001
+} njsSodaMapMode;
 
 
 //-----------------------------------------------------------------------------
@@ -331,12 +342,51 @@ public:
     uint32_t subscrGroupingType;
     njsSubscription *subscription;
     njsCommon *callingObj;
+
+    std::string sodaCollName;
+    std::string sodaMetaData;
+    dpiSodaDb *dpiSodaDbHandle;
+    dpiSodaColl *dpiSodaCollHandle;
+
+    // getCollectionNames
+    int32_t limit;
+    std::string startsWith;
+    dpiSodaCollNames *sodaCollNames;
+    uint32_t  createCollectionMode;
+    int32_t   isDropped;
+
+    dpiSodaDoc *dpiSodaDocHandle;
+
+    // index
+    std::string indexSpec;
+    std::string indexName;
+    int32_t     replaced;
+
+    // createDocument
+    std::string content;
+    std::string key;
+    std::string mediaType;
+
+    // findOne
+    uint64_t    docCount;
+    std::string filter;
+    std::string version;
+    uint64_t    docsDeleted;
+    dpiSodaDocCursor *dpiSodaDocCursorHandle;
+    std::vector<dpiSodaDoc*> dpiSodaDocsVec;
+    std::vector<std::string> keysVec;
+
+    dpiSodaOperOptions *sodaOperOptions;
+
+    uint32_t callTimeout;
+    int setCallTimeout;
+
     Nan::Persistent<Object> jsCallingObj;
     Nan::Persistent<Object> jsOracledb;
     Nan::Persistent<Object> jsBuffer;
     Nan::Persistent<Object> jsSubscription;
     Nan::Persistent<Function> jsCallback;
-    bool forceClose;
+    bool force;
 
     njsBaton(Local<Function> callback, Local<Object> callingObj) :
             poolMin(0), poolMax(0), poolIncrement(0), poolTimeout(0),
@@ -354,9 +404,16 @@ public:
             batchErrors(false), dmlRowCounts(false), bufferSize(0),
             bufferPtr(NULL), lobOffset(0), lobAmount(0), numRowCounts(0),
             rowCounts(NULL), timeout(0), qos(0), operations(0),
-            numBatchErrorInfos(0), batchErrorInfos(NULL), dpiError(false),
-            portNumber(0), subscrGroupingClass(0), subscrGroupingValue(0),
-            subscrGroupingType(0), subscription(NULL), forceClose(false) {
+            numBatchErrorInfos(0), batchErrorInfos(NULL),
+            dpiError(false), portNumber(0), subscrGroupingClass(0),
+            subscrGroupingValue(0), subscrGroupingType(0),
+            subscription(NULL), dpiSodaDbHandle(NULL), dpiSodaCollHandle(NULL),
+            limit(0), sodaCollNames(NULL),
+            createCollectionMode(NJS_SODA_COLL_CREATE_MODE_DEFAULT),
+            isDropped(0), dpiSodaDocHandle(NULL), docCount(0),
+            docsDeleted(0), dpiSodaDocCursorHandle(NULL),
+            sodaOperOptions(NULL), callTimeout(0), setCallTimeout(0),
+            force(false) {
         this->jsCallback.Reset(callback);
         this->jsCallingObj.Reset(callingObj);
         this->callingObj = Nan::ObjectWrap::Unwrap<njsCommon>(callingObj);
@@ -382,6 +439,10 @@ public:
     void SetDPIStmtHandle(dpiStmt *handle);
     void SetDPILobHandle(dpiLob *handle);
     void SetDPISubscrHandle(dpiSubscr *handle);
+    void SetDPISodaDbHandle(dpiSodaDb *handle);
+    void SetDPISodaCollHandle(dpiSodaColl *handle);
+    void SetDPISodaDocHandle(dpiSodaDoc *handle);
+    void SetDPISodaDocCursorHandle(dpiSodaDocCursor *handle);
 
     // methods for getting values from JSON
     bool GetBoolFromJSON(Local<Object> obj, const char *key, int index,
@@ -396,6 +457,9 @@ public:
             int32_t *value);
     bool GetUnsignedIntFromJSON(Local<Object> obj, const char *key, int index,
             uint32_t *value);
+
+    // method for handling SODA document or buffer
+    bool GetSodaDocument(Local<Object> obj, dpiSodaDb *db);
 
     // convenience methods
     uint32_t GetNumOutBinds();

@@ -53,6 +53,7 @@
 #include "njsResultSet.h"
 #include "njsSubscription.h"
 #include "njsIntLob.h"
+#include "njsSodaDatabase.h"
 #include <stdlib.h>
 #include <limits>
 
@@ -92,6 +93,7 @@ void njsConnection::Init(Local<Object> target)
     Nan::SetPrototypeMethod(tpl, "ping", Ping);
     Nan::SetPrototypeMethod(tpl, "subscribe", Subscribe);
     Nan::SetPrototypeMethod(tpl, "unsubscribe", Unsubscribe);
+    Nan::SetPrototypeMethod(tpl, "getSodaDatabase", GetSodaDatabase);
 
     Nan::SetAccessor(tpl->InstanceTemplate(),
             Nan::New<v8::String>("stmtCacheSize").ToLocalChecked(),
@@ -2662,6 +2664,31 @@ void njsConnection::Async_Unsubscribe(njsBaton *baton)
         baton->subscription->StopNotifications();
     }
     baton->subscription = NULL;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection::GetSodaDatabase()
+//   Creates a top-level soda obect (pseudo) associated with the connection.
+//-----------------------------------------------------------------------------
+NAN_METHOD(njsConnection::GetSodaDatabase)
+{
+    njsConnection *connection;
+    dpiSodaDb *dbHandle;
+
+    connection = (njsConnection *) ValidateArgs(info, 0, 0);
+    if (!connection)
+        return;
+
+    if (dpiConn_getSodaDb(connection->dpiConnHandle, &dbHandle) < 0) {
+        njsOracledb::ThrowDPIError();
+        return;
+    }
+
+    Local<Object> jsOracledb = Nan::New(connection->jsOracledb);
+    Local<Object> dbObj = njsSodaDatabase::CreateFromHandle(jsOracledb,
+            dbHandle);
+    info.GetReturnValue().Set(dbObj);
 }
 
 

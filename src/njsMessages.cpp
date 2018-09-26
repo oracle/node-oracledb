@@ -94,6 +94,7 @@ static const char *errMsg[] = {
     "NJS-063: subscription notification SQL missing", // errMissingSubscrSql
     "NJS-064: connection pool is closing", // errPoolClosing
     "NJS-065: connection pool was closed", // errPoolClosed
+    "NJS-066: invalid SODA document cursor", // errInvalidSodaDocCursor
 };
 
 

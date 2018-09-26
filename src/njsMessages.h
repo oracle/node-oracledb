@@ -97,6 +97,7 @@ typedef enum {
     errMissingSubscrSql,
     errPoolClosing,
     errPoolClosed,
+    errInvalidSodaDocCursor,
 
     // New ones should be added here
 
