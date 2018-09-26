@@ -298,6 +298,7 @@ limitations under the License.
 25. [Migrating from Previous node-oracledb Releases](#migrate)
     - 25.1 [Migrating from node-oracledb 1.13 to node-oracledb 2.0](#migratev1v2)
     - 25.2 [Migrating from node-oracledb 2.0 to node-oracledb 2.1](#migratev20v21)
+    - 25.3 [Migrating from node-oracledb 2.3 to node-oracledb 3.0](#migratev23v30)
 
 ## <a name="apimanual"></a> NODE-ORACLEDB API MANUAL
 
@@ -8891,6 +8892,26 @@ When upgrading from node-oracledb version 2.0 to version 2.1:
     - Stop passing a callback.
     - Optionally pass an error.
 
+### <a name="migratev23v30"></a> 25.3 Migrating from node-oracledb 2.3 to node-oracledb 3.0
+
+When upgrading from node-oracledb version 2.3 to version 3.0:
+
+- Review the [CHANGELOG][83].  Implement new features such as the
+[`pool.close()`](#poolclose) `drainTime` parameter.
+
+- If using a connection pool and Oracle Client libraries 12.2 or
+  later, tune [`oracledb.poolPingInterval`](#propdbpoolpinginterval),
+  since this property is now additionally used with these versions of
+  Oracle Client.
+
+- Before migrating, ensure your application works with the [Connection
+  Pool Queue](#connpoolqueue), since this mode is always enabled in
+  node-oracledb 3.0 and the value of
+  [`oracledb.queueRequests`](#propdbqueuerequests) is ignored.
+
+- Change code that relied on unused properties in objects such as the
+  `execute()` result being set to `undefined`.  These properties are
+  no longer set in node-oracledb 3.
 
 [1]: https://www.npmjs.com/package/oracledb
 [2]: https://oracle.github.io/node-oracledb/INSTALL.html

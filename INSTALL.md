@@ -20,6 +20,8 @@ limitations under the License.
 ## ===> *** Note: Go to [https://oracle.github.io/node-oracledb/INSTALL.html](https://oracle.github.io/node-oracledb/INSTALL.html) for production documentation ***
 
 1. [Node-oracledb Overview](#overview)
+    - 1.1 [Changes in node-oracledb version 3.0](#mig30)
+    - 1.2 [Changes in node-oracledb version 2.0](#mig20)
 2. [Quick Start Node-oracledb Installation](#quickstart)
 3. [Node-oracledb Installation Instructions](#instructions)
     - 3.1 [Prerequisites](#prerequisites)
@@ -62,7 +64,19 @@ and versions of Node.js that the pre-built binaries are compatible
 with will change as the Node.js project evolves.  The binaries are not
 guaranteed to be available or usable in your environment.
 
-#### Changes in node-oracledb version 2.0
+#### <a name="mig30"></a> 1.1 Changes in node-oracledb version 3.0
+
+Installation of node-oracledb binaries will now use the `npm config`
+proxy if it is set.  However, due to known npm performance issues, it
+is recommended to use environment variables like `https_proxy`
+instead, since these will be used in preference to the npm
+configuration.
+
+The node-oracledb installer now supports basic proxy authentication.
+
+See the [CHANGELOG][43] and [Migrating from Previous node-oracledb
+Releases][47] for more information about node-oracledb 3.0.
+#### <a name="mig20"></a> 1.2 Changes in node-oracledb version 2.0
 
 In node-oracledb version 2.0, pre-built binaries are now available for
 some environments.
@@ -1684,3 +1698,4 @@ Questions and issues can be posted as [GitHub Issues][10].
 [44]: https://oracle.github.io/node-oracledb/doc/api.html
 [45]: https://www.youtube.com/watch?v=WDJacg0NuLo
 [46]: http://yum.oracle.com/oracle-linux-nodejs.html
+[47]: https://oracle.github.io/node-oracledb/doc/api.html#migrate
