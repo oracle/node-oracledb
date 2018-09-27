@@ -84,7 +84,7 @@ private:
     static NAN_METHOD(CreateDocument);
 
     bool IsValid() const { return ( true ); } // sodaDB never closes.
-    njsErrorType GetInvalidErrorType () const { return errInvalidConnection ; }
+    njsErrorType GetInvalidErrorType() const { return errSuccess; }
 
     // Constructor
     njsSodaDatabase() : dpiSodaDbHandle(NULL) {}
@@ -95,6 +95,7 @@ private:
             dpiSodaDb_release(dpiSodaDbHandle);
             dpiSodaDbHandle = NULL;
         }
+        jsOracledb.Reset();
     }
 
     // Member variables

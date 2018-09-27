@@ -104,7 +104,7 @@ void njsSodaCollection::Init(Local<Object> target)
 NAN_METHOD(njsSodaCollection::New)
 {
     njsSodaCollection *coll = new njsSodaCollection();
-    coll->Wrap (info.Holder());
+    coll->Wrap(info.Holder());
     info.GetReturnValue().Set(info.Holder());
 }
 
@@ -130,7 +130,6 @@ Local<Object> njsSodaCollection::CreateFromBaton(njsBaton *baton)
     coll->dpiSodaDbHandle = baton->dpiSodaDbHandle;
     coll->jsOracledb.Reset(baton->jsOracledb);
     baton->dpiSodaCollHandle = NULL;
-    baton->dpiSodaDbHandle = NULL;
     return scope.Escape(obj);
 }
 
