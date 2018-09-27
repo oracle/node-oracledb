@@ -10352,8 +10352,7 @@ Node-oracledb uses the following objects for SODA:
 ### <a name="sodarequirements"></a> 26.1 Node-oracledb SODA Requirements
 
 SODA is available to Node.js applications when the node-oracledb
-driver uses Oracle Database client 18.3 libraries and connects to Oracle
-Database 18.1 or higher.
+driver uses Oracle Database and Client 18.3, or higher.
 
 To execute SODA operations, Oracle Database users require the SODA_APP
 role granted to them by a DBA:
