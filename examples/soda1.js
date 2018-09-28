@@ -22,7 +22,7 @@
  *   Basic Simple Oracle Document Access (SODA) example.
  *
  *   Creates and uses a SODA collection.
- *   Requires Oracle client 18.3 and Oracle Database 18.1, or higher.
+ *   Requires Oracle Database and Client 18.3, or higher.
  *   The user must have been granted the SODA_APP privilege.
  *   See https://oracle.github.io/node-oracledb/doc/api.html#sodaoverview
  *
