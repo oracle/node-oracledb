@@ -317,7 +317,10 @@ describe('163. executeMany.js', function() {
 
   it('163.6 shows dmlRowCounts', function(done) {
 
-    if (oracledb.oracleClientVersion < 1201000200) { this.skip(); }
+    if ( (oracledb.oracleClientVersion < 1201000200)
+      || (conn.oracleServerVersion < 1201000200) ) {
+      this.skip();
+    }
 
     var childTable = "nodb_tab_child_one";
     var parentTable = "nodb_tab_parent_one";
@@ -345,7 +348,10 @@ describe('163. executeMany.js', function() {
 
   it('163.7 shows batchErrors behavior', function(done) {
 
-    if (oracledb.oracleClientVersion < 1201000200) { this.skip(); }
+    if ( (oracledb.oracleClientVersion < 1201000200)
+      || (conn.oracleServerVersion < 1201000200) ) {
+      this.skip();
+    }
 
     var childTable = "nodb_tab_child_two";
     var parentTable = "nodb_tab_parent_two";
