@@ -4163,6 +4163,55 @@ Overview of node-oracledb functional tests
     163.14 Negative - set numIterations to be string
     163.15 Negative - set numIterations to be negative value
 
+164. soda1.js
+    164.1 getSodaDatabase() creates a sodaDatabase Object
+    164.2 createCollection() creates a collection
+    164.3 openCollection() opens an existing colleciton
+    164.4 getCollectionNames() gets an array of collection names
+    164.5 create collection with metadata
+    164.6 the operation status of collection.drop()
+    164.7 Negative: the operation status of collection.drop()
+    164.8 get one document
+    164.9 get multiple documents
+    164.10 create index
+    164.11 the examples/soda1.js case
+
+165. soda2.js
+    165.1 create two sodaDatabase objects which point to the same instance
+    165.2 create two sodaDatabase objects from two connections
+    165.3 creating a collection with the existing name will open this collection
+    165.4 create collection with metadata
+    165.5 Negative - create collection with an invalid metadata
+    165.6 throw error when creating collection with the existing name and different metadata
+    165.7 Negative - createCollection() when collection name is empty string
+
+166. sodaCallback.js
+    166.1 create a collection, then drop it
+    166.2 the callback version of "examples/soda1.js" case
+
+167 soda3.js
+    167.1 get collection names
+    167.2 getCollectionNames() - limit option
+    167.3 getCollectionNames() - limit is "undefined"
+    167.4 getCollectionNames() - limit is 0
+    167.5 getCollectionNames() - limit is null
+    167.6 getCollectionNames() - limit is an empty string
+    167.7 getCollectionNames() - limit is a negative number
+    167.8 starsWith option - basic test
+    167.9 starsWith is case sensitive
+    167.10 starsWith is an empyt string
+    167.11 starsWith is null
+    167.12 Negative - starsWith is invalid type, a Number
+    167.13 openCollection() basic case 1
+    167.14 openCollection() basic case 2
+    167.15 the returned value is null if the requested collection does not exist
+    167.16 the requested collection name is case sensitive
+
+168. soda4.js
+    168.1 insertOneAndGet() method
+    168.2 customize the key value
+    168.3 content is null
+
 170. poolDrain.js
     170.1 close pool with force flag, and prevent new connection
     170.2 close pool without force flag (will give out an error ), and prevent new connections

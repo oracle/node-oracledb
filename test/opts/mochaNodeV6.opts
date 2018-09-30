@@ -189,3 +189,5 @@ test/editionTest.js
 test/changePassword.js
 test/getStmtInfo.js
 test/executeMany.js
+
+test/sodaCallback.js

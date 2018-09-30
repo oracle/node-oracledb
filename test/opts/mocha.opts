@@ -192,3 +192,9 @@ test/getStmtInfo.js
 test/executeMany.js
 
 test/poolDrain.js
+test/soda1.js
+test/soda2.js
+test/soda3.js
+test/sodaCallback.js
+
+test/soda4.js
