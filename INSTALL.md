@@ -640,7 +640,7 @@ Questions and issues can be posted as [GitHub Issues][10].
 
 Review the generic [prerequisites](#prerequisites).
 
-The pre-built binaries were built on macOS High Sierra, 10.13.3
+The pre-built binaries were built on macOS High Sierra, 10.13.6
 
 Oracle Instant Client libraries are required on macOS.  There is no
 native Oracle Database for macOS but one can easily be run in a Linux
@@ -822,7 +822,7 @@ Download the free 64-bit Instant Client **Basic** ZIP file from
 
   Alternatively move the unzipped Instant Client files to
   `node_modules\oracledb\build\Release` so the DLLs and other files
-  are in the same directory as the `node.oracledb` binary.  If you do
+  are in the same directory as the `oracledb.node` binary.  If you do
   this, then `PATH` does not need to be set.
 
 #### 3.6.5 Optionally create the default Oracle Client configuration directory
@@ -971,15 +971,17 @@ node example.js
 
 Node-oracledb binaries can be copied between compatible Windows systems.
 
-After node-oracledb has been built on the source computer, copy the
-`node_modules\oracledb` directory to the destination computer's
-`node_module` directory.
+After node-oracledb has been built or installed on the source
+computer, copy the `node_modules\oracledb` directory to the
+destination computer's `node_module` directory.
 
 Both computers must have the same version and architecture (32-bit or
 64-bit) of Node.js.
 
 Oracle client libraries of the same architecture as Node.js should be
-in the destination computer's `PATH`.  Note the Oracle client library
+in the destination computer's `PATH`.  They may alternatively be in
+the directory `node_modules\oracledb\build\Release` where the
+`oracledb.node` binary is located.  Note the Oracle client library
 versions do not have to be the same on different computers, but
 node-oracledb behavior and features may then differ.
 
