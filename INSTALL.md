@@ -1,4 +1,4 @@
-# Installing node-oracledb Version 2
+# Installing node-oracledb Version 3
 
 *Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved.*
 
@@ -17,7 +17,11 @@ limitations under the License.
 
 ##  <a name="contents"></a> Contents
 
+## ===> *** Note: Go to [https://oracle.github.io/node-oracledb/INSTALL.html](https://oracle.github.io/node-oracledb/INSTALL.html) for production documentation ***
+
 1. [Node-oracledb Overview](#overview)
+    - 1.1 [Changes in node-oracledb version 3.0](#mig30)
+    - 1.2 [Changes in node-oracledb version 2.0](#mig20)
 2. [Quick Start Node-oracledb Installation](#quickstart)
 3. [Node-oracledb Installation Instructions](#instructions)
     - 3.1 [Prerequisites](#prerequisites)
@@ -60,7 +64,25 @@ and versions of Node.js that the pre-built binaries are compatible
 with will change as the Node.js project evolves.  The binaries are not
 guaranteed to be available or usable in your environment.
 
-#### Changes in node-oracledb version 2.0
+#### <a name="mig30"></a> 1.1 Changes in node-oracledb version 3.0
+
+Installation of node-oracledb binaries will now use the `npm config`
+proxy if it is set.  However, due to known npm performance issues, it
+is recommended to use environment variables like `https_proxy`
+instead, since these will be used in preference to the npm
+configuration.
+
+The node-oracledb installer now supports basic proxy authentication.
+
+On Windows, node-oracledb will now attempt to load the Oracle Client
+libraries from the `node_modules\oracledb\build\Release` directory
+before doing the standard Windows library directory search i.e. of the
+`PATH` directories.
+
+See the [CHANGELOG][43] and [Migrating from Previous node-oracledb
+Releases][47] for more information about node-oracledb 3.0.
+
+#### <a name="mig20"></a> 1.2 Changes in node-oracledb version 2.0
 
 In node-oracledb version 2.0, pre-built binaries are now available for
 some environments.
@@ -76,7 +98,7 @@ dynamically loaded during execution. 'Rpath' linking is no longer
 performed on Linux or macOS.
 
 Any node-oracledb version 2.0 binary will run with any of the Oracle
-client 11.2, 12.1 or 12.2 libraries without needing recompilation.
+client version 11.2, 12, or 18 libraries without needing recompilation.
 Note the available Oracle functionality will vary with different
 Oracle Client and Database versions.
 
@@ -108,11 +130,11 @@ version 2.0.
         - Install a C Compiler with support for C++ 11 (such as Xcode,
           GCC 4.8, Visual Studio 2015, or similar)
 
-        - Run `npm install oracle/node-oracledb.git#v2.3.0`, or add
-          `oracle/node-oracledb.git#v2.3.0` to your `package.json`
+        - Run `npm install oracle/node-oracledb.git#v3.0.0`, or add
+          `oracle/node-oracledb.git#v3.0.0` to your `package.json`
           dependencies.  Substitute your desired [GitHub tag][40].
 
-- Add Oracle 12.2, 12.1 or 11.2 client libraries to your operating
+- Add Oracle 12.2, 12.1, 11.2 or 18 client libraries to your operating
   system library search path such as `PATH` on Windows or
   `LD_LIBRARY_PATH` on Linux.  On macOS move the libraries to `~/lib`
   or `/usr/local/lib`.
@@ -130,7 +152,7 @@ version 2.0.
       in `$ORACLE_HOME/lib` from a locally installed database such as
       the free [Oracle XE][20] release.
 
-  Oracle Client libraries 12.2 can connect to Oracle Database 11.2 or
+  Oracle Client libraries 18 and 12.2 can connect to Oracle Database 11.2 or
   greater. Version 12.1 client libraries can connect to Oracle
   Database 10.2 or greater. Version 11.2 client libraries can connect
   to Oracle Database 9.2 or greater.
@@ -165,7 +187,7 @@ Linux. I have the full Oracle client (installed via `runInstaller`) on the same 
 Linux.  I want to install Node.js and node-oracledb RPM packages | [Installing Node.js and Node-oracledb RPMs from yum.oracle.com](#instnoderpms)
 AIX on Power Systems | [Node-oracledb Installation on AIX on Power Systems with Instant Client ZIP files](#instaix)
 Solaris x86-64 (64-Bit) | [Node-oracledb Installation on Oracle Solaris x86-64 (64-Bit) with Instant Client ZIP files](#instsolarisx8664)
-Another OS with Oracle Database 11.2 or 12c, or client libraries available | Update binding.gyp and make any code changes required, sign the [OCA][8], and submit a pull request with your patch.
+Another OS with Oracle Database 11.2, 12, or 18 client libraries available | Update binding.gyp and make any code changes required, sign the [OCA][8], and submit a pull request with your patch.
 Source code from GitHub | [Node-oracledb Installation from Source Code](#github)
 I don't have internet access | [Node-oracledb Installation Without Internet Access](#offline)
 
@@ -173,7 +195,7 @@ I don't have internet access | [Node-oracledb Installation Without Internet Acce
 
 All installations need:
 
-- Oracle 12.2, 12.1 or 11.2 client libraries on the machine Node.js is installed on.
+- Oracle 18, 12.2, 12.1 or 11.2 client libraries on the machine Node.js is installed on.
 
   Run `node -p "process.arch"` and make sure to use 64-bit or 32-bit
   Oracle client libraries to match the Node.js architecture.
@@ -185,7 +207,7 @@ All installations need:
   Oracle's standard client-server network interoperability allows
   connections between different versions of Oracle Client and Oracle
   Database.  For certified configurations see Oracle Support's [Doc ID
-  207303.1][6].  In summary, Oracle Client 12.2 can connect to Oracle
+  207303.1][6].  In summary, Oracle Client 18 and 12.2 can connect to Oracle
   Database 11.2 or greater. Oracle Client 12.1 can connect to Oracle
   Database 10.2 or greater. Oracle Client 11.2 can connect to Oracle
   Database 9.2 or greater.  The technical restrictions on creating
@@ -264,9 +286,6 @@ export http_proxy=http://my-proxy.example.com:80/
 export https_proxy=http://my-proxy.example.com:80/
 ```
 
-The node-oracledb binary installer cannot use the `npm config set
-https-proxy` value.
-
 ##### To install a pre-built binary:
 
 Install node-oracledb using the `npm` package manager, which is
@@ -295,7 +314,7 @@ Download the free **Basic** RPM from [Oracle Technology Network][12] and
 [install it][13] with sudo or as the root user:
 
 ```
-sudo yum install oracle-instantclient12.2-basic-12.2.0.1.0-1.x86_64.rpm
+sudo yum install oracle-instantclient18.3-basic-18.3.0.0.0-1.x86_64.rpm
 ```
 
 This will install the required `libaio` package, if it is not already
@@ -311,7 +330,7 @@ that will be impacted, then permanently add Instant Client to the
 run-time link path.  For example, with sudo or as the root user:
 
 ```
-sudo sh -c "echo /usr/lib/oracle/12.2/client64/lib > /etc/ld.so.conf.d/oracle-instantclient.conf"
+sudo sh -c "echo /usr/lib/oracle/18.3/client64/lib > /etc/ld.so.conf.d/oracle-instantclient.conf"
 sudo ldconfig
 ```
 
@@ -319,7 +338,7 @@ Alternatively, every shell running Node.js will need to have the link
 path set:
 
 ```
-export LD_LIBRARY_PATH=/usr/lib/oracle/12.2/client64/lib
+export LD_LIBRARY_PATH=/usr/lib/oracle/18.3/client64/lib
 ```
 
 #### 3.2.5 Optionally create the default Oracle Client configuration directory
@@ -327,15 +346,15 @@ export LD_LIBRARY_PATH=/usr/lib/oracle/12.2/client64/lib
 If you intend to co-locate optional Oracle configuration files such as
 [`tnsnames.ora`][15], [`sqlnet.ora`][16], [`ldap.ora`][17], or
 [`oraaccess.xml`][18] with Instant Client, they can be put in a
-`network/admin` subdirectory under `lib/`.  Create this if needed.
-For example:
+`network/admin` subdirectory under `lib/`.  With Instant Client 12.2
+or earlier, create this:
 
 ```
 sudo mkdir -p /usr/lib/oracle/12.2/client64/lib/network/admin
 ```
 
 This is the default Oracle configuration directory for applications
-linked with this Instant Client.
+using this Instant Client.
 
 Alternatively, if you use Oracle client configuration files, they can
 be put in another, accessible directory.  Then set the environment
@@ -359,7 +378,7 @@ module.exports = {
 Run one of the examples:
 
 ```
-node select1.js
+node example.js
 ```
 
 *Note:* Remember to set `LD_LIBRARY_PATH` or equivalent first.
@@ -405,9 +424,6 @@ export http_proxy=http://my-proxy.example.com:80/
 export https_proxy=http://my-proxy.example.com:80/
 ```
 
-The node-oracledb binary installer cannot use the `npm config set
-https-proxy` value.
-
 ##### To install a pre-built binary:
 
 Install node-oracledb using the `npm` package manager, which is
@@ -437,9 +453,9 @@ and [unzip it][13] into a directory accessible to your application,
 for example:
 
 ```
-unzip instantclient-basic-linux.x64-12.2.0.1.0.zip
+unzip instantclient-basic-linux.x64-18.3.0.0.0dbru.zip
 mkdir -p /opt/oracle
-mv instantclient_12_2 /opt/oracle
+mv instantclient_18_3 /opt/oracle
 ```
 
 You will need the operating system `libaio` package installed.  On
@@ -450,7 +466,7 @@ that will be impacted, then permanently add Instant Client to the
 run-time link path.  For example, with sudo or as the root user:
 
 ```
-sudo sh -c "echo /opt/oracle/instantclient_12_2 > /etc/ld.so.conf.d/oracle-instantclient.conf"
+sudo sh -c "echo /opt/oracle/instantclient_18_3 > /etc/ld.so.conf.d/oracle-instantclient.conf"
 sudo ldconfig
 ```
 
@@ -458,7 +474,7 @@ Alternatively, every shell running Node.js will need to have the link
 path set:
 
 ```
-export LD_LIBRARY_PATH=/opt/oracle/instantclient_12_2:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=/opt/oracle/instantclient_18_3:$LD_LIBRARY_PATH
 ```
 
 #### 3.2.5 Optionally create the default Oracle Client configuration directory
@@ -466,14 +482,15 @@ export LD_LIBRARY_PATH=/opt/oracle/instantclient_12_2:$LD_LIBRARY_PATH
 If you intend to co-locate optional Oracle configuration files such as
 [`tnsnames.ora`][15], [`sqlnet.ora`][16], [`ldap.ora`][17], or
 [`oraaccess.xml`][18] with Instant Client, they can be put in a
-`network/admin` subdirectory.  Create this if needed.  For example:
+`network/admin` subdirectory.  With Instant Client 12.2 or earlier,
+create this:
 
 ```
 sudo mkdir -p /opt/oracle/instantclient_12_2/network/admin
 ```
 
 This is the default Oracle configuration directory for applications
-linked with this Instant Client.
+using this Instant Client.
 
 Alternatively, if you use Oracle client configuration files, they can
 be put in another, accessible directory.  Then set the environment
@@ -497,7 +514,7 @@ module.exports = {
 Run one of the examples:
 
 ```
-node select1.js
+node example.js
 ```
 
 *Note:* Remember to set `LD_LIBRARY_PATH` or equivalent first.
@@ -543,9 +560,6 @@ example:
 export http_proxy=http://my-proxy.example.com:80/
 export https_proxy=http://my-proxy.example.com:80/
 ```
-
-The node-oracledb binary installer cannot use the `npm config set
-https-proxy` value.
 
 ##### To install a pre-built binary:
 
@@ -615,7 +629,7 @@ module.exports = {
 Run one of the examples:
 
 ```
-node select1.js
+node example.js
 ```
 
 ### <a name="instosx"></a> 3.5 Node-oracledb Installation on macOS
@@ -626,7 +640,7 @@ Questions and issues can be posted as [GitHub Issues][10].
 
 Review the generic [prerequisites](#prerequisites).
 
-The pre-built binaries were built on macOS High Sierra, 10.13.3
+The pre-built binaries were built on macOS High Sierra, 10.13.6
 
 Oracle Instant Client libraries are required on macOS.  There is no
 native Oracle Database for macOS but one can easily be run in a Linux
@@ -646,9 +660,6 @@ example:
 export http_proxy=http://my-proxy.example.com:80/
 export https_proxy=http://my-proxy.example.com:80/
 ```
-
-The node-oracledb binary installer cannot use the `npm config set
-https-proxy` value.
 
 ##### To install a pre-built binary:
 
@@ -683,7 +694,7 @@ default library path such as in `~/lib` or `/usr/local/lib`.  For example:
 
 ```
 mkdir ~/lib
-ln -s instantclient_12_2/libclntsh.dylib.12.1 ~/lib/
+ln -s instantclient_12_2/libclntsh.dylib ~/lib/
 ```
 
 Alternatively, copy the required OCI libraries, for example:
@@ -705,14 +716,15 @@ cp /opt/oracle/instantclient_11_2/{libclntsh.dylib.11.1,libnnz11.dylib,libociei.
 If you intend to co-locate optional Oracle configuration files such as
 [`tnsnames.ora`][15], [`sqlnet.ora`][16], [`ldap.ora`][17], or
 [`oraaccess.xml`][18] with Instant Client, they can be put in a
-`network/admin` subdirectory.  Create this if needed.  For example:
+`network/admin` subdirectory.  With Instant Client 12.2 or earlier,
+create this:
 
 ```
 sudo mkdir -p /opt/oracle/instantclient_12_2/network/admin
 ```
 
 This is the default Oracle configuration directory for applications
-linked with this Instant Client.
+using this Instant Client.
 
 Alternatively, if you use Oracle client configuration files, they can
 be put in another, accessible directory.  Then set the environment
@@ -736,7 +748,7 @@ module.exports = {
 Run one of the examples:
 
 ```
-node select1.js
+node example.js
 ```
 
 ### <a name="instwin"></a> 3.6 Node-oracledb Installation on Windows with Instant Client ZIP files
@@ -773,9 +785,6 @@ set http_proxy=http://my-proxy.example.com:80/
 set https_proxy=http://my-proxy.example.com:80/
 ```
 
-The node-oracledb binary installer cannot use the `npm config set
-https-proxy` value.
-
 ##### To install a pre-built binary:
 
 Install node-oracledb using the `npm` package manager, which is
@@ -800,35 +809,40 @@ Download the free 64-bit Instant Client **Basic** ZIP file from
 [Oracle Technology Network][25].  (The 32-bit Instant Client is
 [here][26]).
 
-- Extract `instantclient-basic-windows.x64-12.2.0.1.0.zip`
+- Extract `instantclient-basic-windows.x64-18.3.0.0.0dbru.zip`
 
-- Add its directory to `PATH`.  For example on Windows 7, update `PATH`
-in Control Panel -> System -> Advanced System Settings -> Advanced ->
-Environment Variables -> System variables -> `PATH` and add your path,
-such as `C:\oracle\instantclient_12_2`.
+- Add its directory to `PATH`.  For example on Windows 7, update
+  `PATH` in Control Panel -> System -> Advanced System Settings ->
+  Advanced -> Environment Variables -> System variables -> `PATH` and
+  add your path, such as `C:\oracle\instantclient_18_3`.
 
-If you have multiple versions of Oracle libraries installed, make sure
-the desired version occurs first in the path before you run Node.js.
+  If you have multiple versions of Oracle libraries installed, make
+  sure the desired version occurs first in `PATH` before you run
+  Node.js.
+
+  Alternatively move the unzipped Instant Client files to
+  `node_modules\oracledb\build\Release` so the DLLs and other files
+  are in the same directory as the `oracledb.node` binary.  If you do
+  this, then `PATH` does not need to be set.
 
 #### 3.6.5 Optionally create the default Oracle Client configuration directory
 
 If you intend to co-locate optional Oracle configuration files such as
 [`tnsnames.ora`][15], [`sqlnet.ora`][16], [`ldap.ora`][17], or
 [`oraaccess.xml`][18] with Instant Client, they can be put in a
-`C:\oracle\instantclient_12_2\network\admin` subdirectory.  Create
+`C:\oracle\instantclient_18_3\network\admin` subdirectory.  Create
 this if needed.
 
 This is the default Oracle configuration directory for applications
-linked with this Instant Client.
+using this Instant Client.
 
-Alternatively, if you use Oracle client configuration files, they can
-be put in another, accessible directory.  Then set the environment
-variable `TNS_ADMIN` to that directory name.
+Alternatively, configuration files can be put in another directory.
+Then set the environment variable `TNS_ADMIN` to that directory name.
 
 #### <a name="winredists"> </a> 3.6.6 Install the Visual Studio Redistributables
 
 The `PATH` variable needs to include the appropriate VS Redistributable:
-- Oracle client 12.2 requires the [Visual Studio 2013 Redistributable][27].
+- Oracle client 18 and 12.2 require the [Visual Studio 2013 Redistributable][27].
 - Oracle client 12.1 requires the [Visual Studio 2010 Redistributable][27].
 - Oracle client 11.2 requires the [Visual Studio 2005 Redistributable][29].
 
@@ -861,7 +875,7 @@ module.exports = {
 Run one of the examples:
 
 ```
-node select1.js
+node example.js
 ```
 
 ### <a name="instwinoh"></a> 3.7 Node-oracledb Installation on Windows with a Local Database or Full Client
@@ -903,9 +917,6 @@ example:
 set http_proxy=http://my-proxy.example.com:80/
 set https_proxy=http://my-proxy.example.com:80/
 ```
-
-The node-oracledb binary installer cannot use the `npm config set
-https-proxy` value.
 
 ##### To install a pre-built binary:
 
@@ -953,27 +964,29 @@ module.exports = {
 Run one of the examples:
 
 ```
-node select1.js
+node example.js
 ```
 
 ### <a name="winbins"></a> 3.8 Copying node-oracledb Binaries on Windows
 
 Node-oracledb binaries can be copied between compatible Windows systems.
 
-After node-oracledb has been built on the source computer, copy the
-`node_modules\oracledb` directory to the destination computer's
-`node_module` directory.
+After node-oracledb has been built or installed on the source
+computer, copy the `node_modules\oracledb` directory to the
+destination computer's `node_module` directory.
 
 Both computers must have the same version and architecture (32-bit or
 64-bit) of Node.js.
 
 Oracle client libraries of the same architecture as Node.js should be
-in the destination computer's `PATH`.  Note the Oracle client library
+in the destination computer's `PATH`.  They may alternatively be in
+the directory `node_modules\oracledb\build\Release` where the
+`oracledb.node` binary is located.  Note the Oracle client library
 versions do not have to be the same on different computers, but
 node-oracledb behavior and features may then differ.
 
 The destination computer's `PATH` needs to include Visual Studio
-Redistributables.  If you have Oracle client 12.2, install the Visual
+Redistributables.  If you have Oracle client 18 or 12.2, install the Visual
 Studio 2013 Redistributable.  For Oracle client 12.1 install the Visual
 Studio 2010 Redistributable.  For Oracle client 11.2 install the Visual
 Studio 2005 Redistributable.
@@ -1032,9 +1045,6 @@ export http_proxy=http://my-proxy.example.com:80/
 export https_proxy=http://my-proxy.example.com:80/
 ```
 
-The node-oracledb binary installer cannot use the `npm config set
-https-proxy` value.
-
 Set the compiler to GCC:
 
 ```
@@ -1042,19 +1052,19 @@ export CC=gcc
 ```
 
 Locate the [GitHub tag][40] of the desired node-oracledb version, for
-example `v2.3.0`, and use the `npm` package manager (which is
+example `v3.0.0`, and use the `npm` package manager (which is
 included in Node.js) to install it.
 
 If you have the `git` utility, you can install with:
 
 ```
-npm install oracle/node-oracledb.git#v2.3.0
+npm install oracle/node-oracledb.git#v3.0.0
 ```
 
 Otherwise install using:
 
 ```
-npm install https://github.com/oracle/node-oracledb/releases/download/v2.3.0/oracledb-src-2.3.0.tgz
+npm install https://github.com/oracle/node-oracledb/releases/download/v3.0.0/oracledb-src-3.0.0.tgz
 ```
 
 #### 3.9.4 Install the free Oracle Instant Client 'Basic' ZIP file
@@ -1087,7 +1097,7 @@ sudo mkdir -p /opt/oracle/instantclient_12_2/network/admin
 ```
 
 This is the default Oracle configuration directory for applications
-linked with this Instant Client.
+using this Instant Client.
 
 Alternatively, if you use Oracle client configuration files, they can
 be put in another, accessible directory.  Then set the environment
@@ -1111,7 +1121,7 @@ module.exports = {
 Run one of the examples:
 
 ```
-node select1.js
+node example.js
 ```
 
 ### <a name="instsolarisx8664"></a> 3.10 Node-oracledb Installation on Oracle Solaris x86-64 (64-Bit) with Instant Client ZIP files
@@ -1155,9 +1165,6 @@ export http_proxy=http://my-proxy.example.com:80/
 export https_proxy=http://my-proxy.example.com:80/
 ```
 
-The node-oracledb binary installer cannot use the `npm config set
-https-proxy` value.
-
 Use the GNU `gmake` utility:
 
 ```
@@ -1165,19 +1172,19 @@ export MAKE=gmake
 ```
 
 Locate the [GitHub tag][40] of the desired node-oracledb version, for
-example `v2.3.0`, and use the `npm` package manager (which is
+example `v3.0.0`, and use the `npm` package manager (which is
 included in Node.js) to install it.
 
 If you have the `git` utility, you can install with:
 
 ```
-npm install oracle/node-oracledb.git#v2.3.0
+npm install oracle/node-oracledb.git#v3.0.0
 ```
 
 Otherwise install using:
 
 ```
-npm install https://github.com/oracle/node-oracledb/releases/download/v2.3.0/oracledb-src-2.3.0.tgz
+npm install https://github.com/oracle/node-oracledb/releases/download/v3.0.0/oracledb-src-3.0.0.tgz
 ```
 
 #### 3.10.4 Install the free Oracle Instant Client 'Basic' ZIP file
@@ -1209,7 +1216,7 @@ mkdir -p /opt/oracle/instantclient_12_2/network/admin
 ```
 
 This is the default Oracle configuration directory for applications
-linked with this Instant Client.
+using this Instant Client.
 
 Alternatively, if you use Oracle client configuration files, they can
 be put in another, accessible directory.  Then set the environment
@@ -1233,7 +1240,7 @@ module.exports = {
 Run one of the examples:
 
 ```
-node select1.js
+node example.js
 ```
 
 ### <a name="github"></a> 3.11 Node-oracledb Installation from Source Code
@@ -1264,7 +1271,7 @@ Install a C++11 compatible compiler:
 - On Windows, install a C/C++ build environment such as Microsoft
   Visual Studio 2015.  Compilers supported by Oracle libraries are
   found in [Oracle documentation][23] for each version, for example
-  [Oracle Database Client Installation Guide 12c Release 2 (12.2) for
+  [Oracle Database Client Installation Guide for
   Microsoft Windows][24].  Some users report that the npm
   `windows-build-tools` package has the necessary tools to build
   node-oracledb from source code.
@@ -1284,12 +1291,12 @@ The `git` utility is required for this method.
 
 Build node-oracledb from source code by changing the package specifier
 so that `npm` downloads from GitHub instead of from npmjs.com.  For
-example, to install the code from the GitHub tag 'v2.3.0', add
-`oracle/node-oracledb#v2.3.0` to your `package.json` dependencies, or
+example, to install the code from the GitHub tag 'v3.0.0', add
+`oracle/node-oracledb#v3.0.0` to your `package.json` dependencies, or
 use the command:
 
 ```
-npm install oracle/node-oracledb#v2.3.0
+npm install oracle/node-oracledb#v3.0.0
 ```
 
 This will download, compile and install node-oracledb.
@@ -1303,7 +1310,7 @@ Users without `git`, or with older versions of `npm` such as included in
 Node.js 6, may alternatively need to use pre-bundled source code:
 
 ```
-npm install https://github.com/oracle/node-oracledb/releases/download/v2.3.0/oracledb-src-2.3.0.tgz
+npm install https://github.com/oracle/node-oracledb/releases/download/v3.0.0/oracledb-src-3.0.0.tgz
 ```
 
 Note it may take some time before compilation begins due to the slow
@@ -1358,10 +1365,10 @@ of Node.js and operating system, you can install manually:
   on the [GitHub Release][41] page.
 
   Download the release's main node-oracledb package, for example
-  `oracledb-2.3.0.tgz`.
+  `oracledb-3.0.0.tgz`.
 
   Also download the appropriate binary package, for example
-  `oracledb-v2.3.0-node-v57-darwin-x64.gz`. To determine the correct
+  `oracledb-v3.0.0-node-v57-darwin-x64.gz`. To determine the correct
   binary package, find your Node.js module version, platform and
   architecture using:
 
@@ -1369,10 +1376,10 @@ of Node.js and operating system, you can install manually:
   - `node -p 'process.platform'`
   - `node -p 'process.arch'`
 
-  For example, when installing node-oracledb 2.3.0 on macOS with
+  For example, when installing node-oracledb 3.0.0 on macOS with
   Node.js 8, these commands will show the module version is '57', the
   platform is 'darwin' and the architecture is 'x64'.  The package to
-  download is `oracledb-v2.3.0-node-v57-darwin-x64.gz`
+  download is `oracledb-v3.0.0-node-v57-darwin-x64.gz`
 
   If an appropriate package is not available, follow the
   [Node-oracledb Installation Instructions](#instructions) for your
@@ -1384,7 +1391,7 @@ of Node.js and operating system, you can install manually:
   ```
   mkdir node_modules/oracledb
   cd node_modules/oracledb
-  tar -xzf oracledb-2.3.0.tgz
+  tar -xzf oracledb-3.0.0.tgz
   ```
 
   The node_modules directory will contain:
@@ -1420,7 +1427,7 @@ of Node.js and operating system, you can install manually:
   to unarchive the binary package, for example:
 
   ```
-  node extractpackage.js path=oracledb-v2.3.0-node-v57-darwin-x64.gz
+  node extractpackage.js path=oracledb-v3.0.0-node-v57-darwin-x64.gz
   ```
 
 - Create the subdirectory `node_modules/oracledb/build/Release` and
@@ -1436,7 +1443,7 @@ of Node.js and operating system, you can install manually:
 
 Some companies block access to github.com so `npm install oracledb`
 will fail to download binaries, as will installing source code from
-GitHub with `npm install oracle/node-oracledb.git#v2.3.0`.
+GitHub with `npm install oracle/node-oracledb.git#v3.0.0`.
 
 There are two suggested methods for generic installation.  Oracle
 Linux users can also [install Node.js and Node-oracledb
@@ -1462,16 +1469,16 @@ Alternatively you can compile the source code that is included in the
 npm package:
 
 - Download the node-oracledb package from npm, for example
-  `https://registry.npmjs.com/oracledb/-/oracledb-2.3.0.tgz`
+  `https://registry.npmjs.com/oracledb/-/oracledb-3.0.0.tgz`
 
 - Create a directory such as `oracledb_build` and extract the package
   inside it:
 
   ```
   mkdir oracledb_build
-  mv oracledb-2.3.0.tgz oracledb_build
+  mv oracledb-3.0.0.tgz oracledb_build
   cd oracledb_build
-  tar -xzf oracledb-2.3.0.tgz
+  tar -xzf oracledb-3.0.0.tgz
   ```
 
   The directory contents will be the same as shown in the previous
@@ -1530,15 +1537,15 @@ Download the Oracle Instant Client Basic package from [Instant Client
 Downloads for Linux x86-64 (64-bit)][12] and install it:
 
 ```
-yum install oracle-instantclient12.2-basic-12.2.0.1.0-1.x86_64.rpm
-echo /usr/lib/oracle/12.2/client64/lib > /etc/ld.so.conf.d/oracle-instantclient.conf
+yum install oracle-instantclient18.3-basic-18.3.0.0.0-1.x86_64.rpm
+echo /usr/lib/oracle/18.3/client64/lib > /etc/ld.so.conf.d/oracle-instantclient.conf
 sudo ldconfig
 ```
 
-Install the node-oracledb package:
+Install the node-oracledb package, for example:
 
 ```
-yum install node-oracledb-12c-node8-2.3.0
+yum install node-oracledb-18c-node10-3.0.0
 ```
 
 Since node-oracledb is installed globally, set `NODE_PATH` before
@@ -1670,16 +1677,16 @@ Questions and issues can be posted as [GitHub Issues][10].
 [12]: http://www.oracle.com/technetwork/topics/linuxx86-64soft-092277.html
 [13]: http://www.oracle.com/technetwork/topics/linuxx86-64soft-092277.html#ic_x64_inst
 [14]: https://linux.oracle.com
-[15]: https://docs.oracle.com/database/122/NETRF/local-naming-parameters-in-tnsnames-ora-file.htm#NETRF007
-[16]: https://docs.oracle.com/database/122/NETRF/parameters-for-the-sqlnet-ora-file.htm#NETRF006
-[17]: https://docs.oracle.com/database/122/NETRF/directory-usage-parameters-in-ldap-ora-file.htm#NETRF011
-[18]: https://docs.oracle.com/database/122/LNOCI/more-oci-advanced-topics.htm#LNOCI-GUID-CD599644-135A-4116-8B3B-40A9BA172E5C
+[15]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-A3F9D023-9CC4-445D-8921-6E40BD900EAD
+[16]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-28040885-6832-4FFC-9258-0EF19FE9A3AC
+[17]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-E72B32D3-4343-475F-9CB4-CE28FF8EFD29
+[18]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-9D12F489-EC02-46BE-8CD4-5AECED0E2BA2
 [19]: https://github.com/oracle/node-oracledb/tree/master/examples
 [20]: http://www.oracle.com/technetwork/database/database-technologies/express-edition/overview/index.html
 [21]: https://blogs.oracle.com/opal/the-easiest-way-to-install-oracle-database-on-apple-mac-os-x
 [22]: http://www.oracle.com/technetwork/topics/intel-macsoft-096467.html
 [23]: https://docs.oracle.com/database/
-[24]: https://docs.oracle.com/database/122/NTCLI/toc.htm
+[24]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=NTCLI
 [25]: http://www.oracle.com/technetwork/topics/winx64soft-089540.html
 [26]: http://www.oracle.com/technetwork/topics/winsoft-085727.html
 [27]: https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads
@@ -1701,3 +1708,4 @@ Questions and issues can be posted as [GitHub Issues][10].
 [44]: https://oracle.github.io/node-oracledb/doc/api.html
 [45]: https://www.youtube.com/watch?v=WDJacg0NuLo
 [46]: http://yum.oracle.com/oracle-linux-nodejs.html
+[47]: https://oracle.github.io/node-oracledb/doc/api.html#migrate
