@@ -1069,7 +1069,7 @@ describe('12. resultSet1.js', function() {
 
       var createTab = function(size) {
         var buffer = new StringBuffer();
-        buffer.append("CREATE TABLE nodb_manycolumns( ");
+        buffer.append("CREATE TABLE nodb_tab_manycolumns( ");
 
         for(var i = 0; i < size-1; i++) {
           buffer.append("c" + i + " NUMBER, ");
@@ -1095,7 +1095,7 @@ describe('12. resultSet1.js', function() {
         },
         function(callback){
           connection.execute(
-            "SELECT * FROM nodb_manycolumns",
+            "SELECT * FROM nodb_tab_manycolumns",
             [],
             { resultSet: true},
             function(err, result){
@@ -1110,7 +1110,7 @@ describe('12. resultSet1.js', function() {
         },
         function(callback) {
           connection.execute(
-            "DROP TABLE nodb_manycolumns PURGE",
+            "DROP TABLE nodb_tab_manycolumns PURGE",
             function(err) {
               should.not.exist(err);
               callback();
