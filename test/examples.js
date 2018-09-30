@@ -606,40 +606,31 @@ describe('3. examples.js', function() {
         var myoffset     = 2;  // number of rows to skip
         var mymaxnumrows = 6;  // number of rows to fetch
 
-        var sql = "SELECT id, name FROM nodb_eg_emp6 ORDER BY id";
-        if (conn.oracleServerVersion >= 1201000000) {
-          // 12c row-limiting syntax
-          sql += " OFFSET :offset ROWS FETCH NEXT :maxnumrows ROWS ONLY";
+        var sql = "SELECT id, name FROM nodb_eg_emp6 ORDER BY id " +
+          " OFFSET :offset ROWS FETCH NEXT :maxnumrows ROWS ONLY";
+        if (conn.oracleServerVersion < 1202000100) {
+          cb();
         } else {
-          // Pre-12c syntax [could also customize the original query and use row_number()]
-          sql = "SELECT * FROM (SELECT A.*, ROWNUM AS MY_RNUM FROM"
-              + "(" + sql + ") A "
-              + "WHERE ROWNUM <= :maxnumrows + :offset) WHERE MY_RNUM > :offset";
+          conn.execute(
+            sql,
+            { offset: myoffset, maxnumrows: mymaxnumrows },
+            { maxRows: 25 },
+            function(err, result) {
+              should.not.exist(err);
+              should.strictEqual(result.rows.length, 6);
+              should.deepEqual(
+                result.rows,
+                [ [ 3, 'staff 3' ],
+                  [ 4, 'staff 4' ],
+                  [ 5, 'staff 5' ],
+                  [ 6, 'staff 6' ],
+                  [ 7, 'staff 7' ],
+                  [ 8, 'staff 8' ] ]
+              );
+              cb();
+            }
+          );
         }
-
-        conn.execute(
-          sql,
-          { offset: myoffset, maxnumrows: mymaxnumrows },
-          { maxRows: 25 },
-          function(err, result) {
-            should.not.exist(err);
-            //console.log("Executed: " + sql);
-            //console.log("Number of rows returned: " + result.rows.length);
-            //console.log(result.rows);
-
-            should.strictEqual(result.rows.length, 6);
-            should.deepEqual(
-              result.rows,
-              [ [ 3, 'staff 3' ],
-                [ 4, 'staff 4' ],
-                [ 5, 'staff 5' ],
-                [ 6, 'staff 6' ],
-                [ 7, 'staff 7' ],
-                [ 8, 'staff 8' ] ]
-            );
-            cb();
-          }
-        );
 
       };
 

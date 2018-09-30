@@ -30,33 +30,31 @@
 var oracledb = require('oracledb');
 var should   = require('should');
 var async    = require('async');
-var dbConfig = require('./dbconfig.js');
+var dbconfig = require('./dbconfig.js');
 
 describe('161. changePassword.js', function() {
 
-  var dbaConn;
+  var DBA_config;
   var myUser = "nodb_schema_changepw";
+  if (dbconfig.test.DBA_PRIVILEGE == true) {
+    DBA_config = {
+      user:          dbconfig.test.DBA_user,
+      password:      dbconfig.test.DBA_password,
+      connectString: dbconfig.connectString,
+      privilege:     oracledb.SYSDBA
+    };
+  }
 
   before(function(done) {
 
-    if (!dbConfig.test.DBA_PRIVILEGE) { this.skip(); }
+    if (!dbconfig.test.DBA_PRIVILEGE) this.skip();
 
+    var dbaConn;
     async.series([
+      // create schema for test
       function(cb) {
-        if (!dbConfig.test.DBA_PRIVILEGE) { done(); }
-        else { cb(); }
-      },
-      // SYSDBA connection
-      function(cb) {
-        var credential = {
-          user:             dbConfig.test.DBA_user,
-          password:         dbConfig.test.DBA_password,
-          connectionString: dbConfig.connectString,
-          privilege:        oracledb.SYSDBA
-        };
-
         oracledb.getConnection(
-          credential,
+          DBA_config,
           function(err, connection) {
             should.not.exist(err);
             dbaConn = connection;
@@ -64,7 +62,6 @@ describe('161. changePassword.js', function() {
           }
         );
       },
-      // Create user
       function(cb) {
         var sql = "CREATE USER " + myUser + " IDENTIFIED BY " + myUser;
         dbaConn.execute(
@@ -85,32 +82,49 @@ describe('161. changePassword.js', function() {
           }
         );
       },
-    ], done);
-  }); // before
-
-  after(function(done) {
-    async.series([
-      function(cb) {
-        if (!dbConfig.test.DBA_PRIVILEGE) { done(); }
-        else { cb(); }
-      },
-      function(cb) {
-        var sql = "DROP USER " + myUser +" CASCADE";
-        dbaConn.execute(
-          sql,
-          function(err) {
-            should.not.exist(err);
-            cb();
-          }
-        );
-      },
       function(cb) {
         dbaConn.close(function(err) {
           should.not.exist(err);
           cb();
         });
-      },
+      }
     ], done);
+  }); // before
+
+  after(function(done) {
+    if (!dbconfig.test.DBA_PRIVILEGE) {
+      done();
+    } else {
+      var dbaConn;
+      async.series([
+        function(cb) {
+          oracledb.getConnection(
+            DBA_config,
+            function(err, connection) {
+              should.not.exist(err);
+              dbaConn = connection;
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          var sql = "DROP USER " + myUser +" CASCADE";
+          dbaConn.execute(
+            sql,
+            function(err) {
+              should.not.exist(err);
+              cb();
+            }
+          );
+        },
+        function(cb) {
+          dbaConn.close(function(err) {
+            should.not.exist(err);
+            cb();
+          });
+        },
+      ], done);
+    }
   }); // after
 
   it('161.1 basic case', function(done) {
@@ -123,7 +137,7 @@ describe('161. changePassword.js', function() {
         var credential = {
           user:             myUser,
           password:         myUser,
-          connectionString: dbConfig.connectString
+          connectionString: dbconfig.connectString
         };
 
         oracledb.getConnection(
@@ -151,7 +165,7 @@ describe('161. changePassword.js', function() {
         var credential = {
           user:             myUser,
           password:         tpass,
-          connectionString: dbConfig.connectString
+          connectionString: dbconfig.connectString
         };
         oracledb.getConnection(
           credential,
@@ -187,7 +201,7 @@ describe('161. changePassword.js', function() {
         var credential = {
           user:             myUser,
           password:         myUser,
-          connectionString: dbConfig.connectString
+          connectionString: dbconfig.connectString
         };
         oracledb.createPool(
           credential,
@@ -241,7 +255,7 @@ describe('161. changePassword.js', function() {
         var credential = {
           user:             myUser,
           password:         myUser,
-          connectionString: dbConfig.connectString
+          connectionString: dbconfig.connectString
         };
         oracledb.createPool(
           credential,
@@ -271,7 +285,7 @@ describe('161. changePassword.js', function() {
         var credential = {
           user:             myUser,
           password:         tpass,
-          connectionString: dbConfig.connectString
+          connectionString: dbconfig.connectString
         };
         oracledb.createPool(
           credential,
@@ -306,10 +320,20 @@ describe('161. changePassword.js', function() {
 
   it('161.3 DBA changes password', function(done) {
 
-    var conn;
+    var dbaConn, conn;
     var tpass = 'secret';
 
     async.series([
+      function(cb) {
+        oracledb.getConnection(
+          DBA_config,
+          function(err, connection) {
+            should.not.exist(err);
+            dbaConn = connection;
+            cb();
+          }
+        );
+      },
       function(cb) {
         dbaConn.changePassword(myUser, '', tpass, function(err) {
           should.not.exist(err);
@@ -320,7 +344,7 @@ describe('161. changePassword.js', function() {
         var credential = {
           user:             myUser,
           password:         myUser,
-          connectionString: dbConfig.connectString
+          connectionString: dbconfig.connectString
         };
 
         oracledb.getConnection(
@@ -338,7 +362,7 @@ describe('161. changePassword.js', function() {
         var credential = {
           user:             myUser,
           password:         tpass,
-          connectionString: dbConfig.connectString
+          connectionString: dbconfig.connectString
         };
         oracledb.getConnection(
           credential,
@@ -360,16 +384,32 @@ describe('161. changePassword.js', function() {
           should.not.exist(err);
           cb();
         });
+      },
+      function(cb) {
+        dbaConn.close(function(err) {
+          should.not.exist(err);
+          cb();
+        });
       }
     ], done);
   }); // 161.3
 
   it('161.4 connects with an expired password', function(done) {
 
-    var conn;
+    var dbaConn, conn;
     var tpass = 'secret';
 
     async.series([
+      function(cb) {
+        oracledb.getConnection(
+          DBA_config,
+          function(err, connection) {
+            should.not.exist(err);
+            dbaConn = connection;
+            cb();
+          }
+        );
+      },
       function doexpire(cb) {
         var sql = "alter user " + myUser + " password expire";
         dbaConn.execute(
@@ -384,7 +424,7 @@ describe('161. changePassword.js', function() {
         var credential = {
           user:             myUser,
           password:         myUser,
-          connectionString: dbConfig.connectString
+          connectionString: dbconfig.connectString
         };
 
         oracledb.getConnection(
@@ -403,7 +443,7 @@ describe('161. changePassword.js', function() {
           user:             myUser,
           password:         myUser,
           newPassword:      tpass,
-          connectionString: dbConfig.connectString
+          connectionString: dbconfig.connectString
         };
 
         oracledb.getConnection(
@@ -431,7 +471,7 @@ describe('161. changePassword.js', function() {
         var credential = {
           user:             myUser,
           password:         myUser,
-          connectionString: dbConfig.connectString
+          connectionString: dbconfig.connectString
         };
 
         oracledb.getConnection(
@@ -449,15 +489,31 @@ describe('161. changePassword.js', function() {
           cb();
         });
       },
+      function(cb) {
+        dbaConn.close(function(err) {
+          should.not.exist(err);
+          cb();
+        });
+      }
     ], done);
   }); // 161.4
 
   it('161.5 for DBA, the original password is ignored', function(done) {
 
-    var conn;
+    var dbaConn, conn;
     var tpass = 'secret';
 
     async.series([
+      function(cb) {
+        oracledb.getConnection(
+          DBA_config,
+          function(err, connection) {
+            should.not.exist(err);
+            dbaConn = connection;
+            cb();
+          }
+        );
+      },
       function(cb) {
         dbaConn.changePassword(myUser, 'foobar', tpass, function(err) {
           should.not.exist(err);
@@ -468,7 +524,7 @@ describe('161. changePassword.js', function() {
         var credential = {
           user:             myUser,
           password:         myUser,
-          connectionString: dbConfig.connectString
+          connectionString: dbconfig.connectString
         };
 
         oracledb.getConnection(
@@ -486,7 +542,7 @@ describe('161. changePassword.js', function() {
         var credential = {
           user:             myUser,
           password:         tpass,
-          connectionString: dbConfig.connectString
+          connectionString: dbconfig.connectString
         };
         oracledb.getConnection(
           credential,
@@ -508,6 +564,12 @@ describe('161. changePassword.js', function() {
           should.not.exist(err);
           cb();
         });
+      },
+      function(cb) {
+        dbaConn.close(function(err) {
+          should.not.exist(err);
+          cb();
+        });
       }
     ], done);
   }); // 161.5
@@ -522,7 +584,7 @@ describe('161. changePassword.js', function() {
         var credential = {
           user:             myUser,
           password:         myUser,
-          connectionString: dbConfig.connectString
+          connectionString: dbconfig.connectString
         };
 
         oracledb.getConnection(
@@ -554,7 +616,7 @@ describe('161. changePassword.js', function() {
         var credential = {
           user:             myUser,
           password:         tpass,
-          connectionString: dbConfig.connectString
+          connectionString: dbconfig.connectString
         };
         oracledb.getConnection(
           credential,
@@ -578,7 +640,7 @@ describe('161. changePassword.js', function() {
         var credential = {
           user:             myUser,
           password:         myUser,
-          connectionString: dbConfig.connectString
+          connectionString: dbconfig.connectString
         };
 
         oracledb.getConnection(
@@ -614,10 +676,20 @@ describe('161. changePassword.js', function() {
   it('161.8 Negative: non-DBA tries to change the password', function(done) {
 
     var tUser = "nodb_schema_temp";
-    var tConn;
+    var dbaConn, tConn;
     var tpass = 'secret';
 
     async.series([
+      function(cb) {
+        oracledb.getConnection(
+          DBA_config,
+          function(err, connection) {
+            should.not.exist(err);
+            dbaConn = connection;
+            cb();
+          }
+        );
+      },
       // Create user
       function(cb) {
         var sql = "CREATE USER " + tUser + " IDENTIFIED BY " + tUser;
@@ -643,7 +715,7 @@ describe('161. changePassword.js', function() {
         var credential = {
           user:             tUser,
           password:         tUser,
-          connectionString: dbConfig.connectString
+          connectionString: dbconfig.connectString
         };
 
         oracledb.getConnection(
@@ -667,7 +739,7 @@ describe('161. changePassword.js', function() {
         var credential = {
           user:             myUser,
           password:         tpass,
-          connectionString: dbConfig.connectString
+          connectionString: dbconfig.connectString
         };
         oracledb.getConnection(
           credential,
@@ -695,6 +767,12 @@ describe('161. changePassword.js', function() {
           }
         );
       },
+      function(cb) {
+        dbaConn.close(function(err) {
+          should.not.exist(err);
+          cb();
+        });
+      }
     ], done);
 
   }); // 161.8
@@ -706,7 +784,7 @@ describe('161. changePassword.js', function() {
       user:             myUser,
       password:         myUser,
       newPassword:      wrongOne,
-      connectionString: dbConfig.connectString
+      connectionString: dbconfig.connectString
     };
 
     oracledb.getConnection(
@@ -724,8 +802,18 @@ describe('161. changePassword.js', function() {
   }); // 161.9
 
   it('161.10 sets "newPassword" to be an empty string. password unchanged', function(done) {
-
+    var dbaConn;
     async.series([
+      function(cb) {
+        oracledb.getConnection(
+          DBA_config,
+          function(err, connection) {
+            should.not.exist(err);
+            dbaConn = connection;
+            cb();
+          }
+        );
+      },
       function doexpire(cb) {
         var sql = "alter user " + myUser + " password expire";
         dbaConn.execute(
@@ -742,7 +830,7 @@ describe('161. changePassword.js', function() {
           user:             myUser,
           password:         myUser,
           newPassword:      '',
-          connectionString: dbConfig.connectString
+          connectionString: dbconfig.connectString
         };
 
         oracledb.getConnection(
@@ -760,7 +848,7 @@ describe('161. changePassword.js', function() {
         var credential = {
           user:             myUser,
           password:         myUser,
-          connectionString: dbConfig.connectString
+          connectionString: dbconfig.connectString
         };
 
         oracledb.getConnection(
@@ -774,6 +862,12 @@ describe('161. changePassword.js', function() {
           }
         );
       },
+      function(cb) {
+        dbaConn.close(function(err) {
+          should.not.exist(err);
+          cb();
+        });
+      }
     ], done);
   }); // 161.10
 
