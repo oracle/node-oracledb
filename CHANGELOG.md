@@ -1,6 +1,6 @@
 # Change Log
 
-## node-oracledb v3.0.0 (DD Mon YYYY)
+## node-oracledb v3.0.0 (1 Oct 2018)
 
 - Added new APIs for Simple Oracle Document Access ([SODA](https://github.com/oracle/node-oracledb/blob/master/doc/api.md#sodaoverview)), available when using Oracle Database 18.1 and Oracle client libraries version 18.3, or later.
 
