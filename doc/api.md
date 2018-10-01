@@ -17,8 +17,6 @@ limitations under the License.
 
 ##  <a name="contents"></a> Contents
 
-## ===> *** Note: Go to [https://oracle.github.io/node-oracledb/doc/api.html](https://oracle.github.io/node-oracledb/doc/api.html) for production documentation ***
-
 1. [Introduction](#intro)
     - 1.1 [Getting Started with Node-oracledb](#getstarted)
         - 1.1.1 [Example: Simple SQL SELECT statement in Node.js with Callbacks](#examplequerycb)

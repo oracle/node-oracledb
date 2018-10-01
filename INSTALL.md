@@ -17,8 +17,6 @@ limitations under the License.
 
 ##  <a name="contents"></a> Contents
 
-## ===> *** Note: Go to [https://oracle.github.io/node-oracledb/INSTALL.html](https://oracle.github.io/node-oracledb/INSTALL.html) for production documentation ***
-
 1. [Node-oracledb Overview](#overview)
     - 1.1 [Changes in node-oracledb version 3.0](#mig30)
     - 1.2 [Changes in node-oracledb version 2.0](#mig20)
