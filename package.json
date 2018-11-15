@@ -42,7 +42,7 @@
     "posttest": "node test/opts/version.js"
   },
   "engines": {
-    "node": ">=4"
+    "node": ">=6"
   },
   "maintainers": [
     {
