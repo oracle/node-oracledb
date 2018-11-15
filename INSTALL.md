@@ -1710,4 +1710,4 @@ Issues and questions about node-oracledb can be posted on [GitHub][10] or
 [46]: http://yum.oracle.com/oracle-linux-nodejs.html
 [47]: https://oracle.github.io/node-oracledb/doc/api.html#migrate
 [48]: https://node-oracledb.slack.com/
-[49]: https://join.slack.com/t/node-oracledb/shared_invite/enQtNDI4NTUyNjMzMDA5LWRiZWRkZjQ3NjBhNDUwOGJlNDFiZWJhZTIzYTJkMWQ5N2UwNTg5NzNmNmY1YmZjZGYxNmRhOTkyOTlhMmViNjY
+[49]: https://node-oracledb.slack.com/join/shared_invite/enQtNDU4Mjc2NzM5OTA2LTdkMzczODY3OGY3MGI0Yjk3NmQ4NDU4MTI2OGVjNTYzMjE5OGY5YzVkNDY4MWNkNjFiMDM2ZDMwOWRjNWVhNTg

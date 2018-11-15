@@ -65,7 +65,7 @@ limitations under the License.
 [3]: https://github.com/oracle/node-oracledb/issues
 [4]: https://oracle.github.io/node-oracledb
 [5]: https://node-oracledb.slack.com/
-[6]: https://join.slack.com/t/node-oracledb/shared_invite/enQtNDI4NTUyNjMzMDA5LWRiZWRkZjQ3NjBhNDUwOGJlNDFiZWJhZTIzYTJkMWQ5N2UwNTg5NzNmNmY1YmZjZGYxNmRhOTkyOTlhMmViNjY
+[6]: https://node-oracledb.slack.com/join/shared_invite/enQtNDU4Mjc2NzM5OTA2LTdkMzczODY3OGY3MGI0Yjk3NmQ4NDU4MTI2OGVjNTYzMjE5OGY5YzVkNDY4MWNkNjFiMDM2ZDMwOWRjNWVhNTg
 [30]: https://github.com/oracle/node-oracledb/blob/master/examples
 [31]: https://github.com/oracle/node-oracledb/blob/master/examples/example.js#L32
 [32]: https://oracle.github.io/node-oracledb/doc/api.html
