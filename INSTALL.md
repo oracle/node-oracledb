@@ -477,7 +477,7 @@ path set:
 export LD_LIBRARY_PATH=/opt/oracle/instantclient_18_3:$LD_LIBRARY_PATH
 ```
 
-#### 3.2.5 Optionally create the default Oracle Client configuration directory
+#### 3.3.5 Optionally create the default Oracle Client configuration directory
 
 If you intend to co-locate optional Oracle configuration files such as
 [`tnsnames.ora`][15], [`sqlnet.ora`][16], [`ldap.ora`][17], or
@@ -583,7 +583,7 @@ If a pre-built node-oracledb binary is not installable, the binary can
 be built from source code, see [Node-oracledb Installation from
 Source Code](#github).
 
-#### 3.2.4 The default Oracle Client configuration directory
+#### 3.4.4 The default Oracle Client configuration directory
 
 Optional Oracle client configuration files such as [`tnsnames.ora`][15],
 [`sqlnet.ora`][16], [`ldap.ora`][17], or [`oraaccess.xml`][18] can be
