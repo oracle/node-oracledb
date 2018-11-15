@@ -35,12 +35,11 @@ var dbConfig = require('./dbconfig.js');
 describe('160. editionTest.js', function() {
 
   var dbaConn;
-  var conn;
   var isRunnable;
 
   before(function(done) {
+    var conn;
 
-    //if (!dbConfig.test.DBA_PRIVILEGE) this.skip();
     function checkRunnable(callback) {
       if (!dbConfig.test.DBA_PRIVILEGE) {
         isRunnable = false;
@@ -62,6 +61,7 @@ describe('160. editionTest.js', function() {
       });
     } // checkRunnable()
 
+    // Call isRunnable check. Take actions in its callback.
     checkRunnable(function(err) {
       should.not.exist(err);
       if (!isRunnable) {
@@ -86,9 +86,34 @@ describe('160. editionTest.js', function() {
               }
             );
           },
-          // Create edition nodb_e1
           function(cb) {
-            var sql = "CREATE EDITION nodb_e1";
+            var sql = "DROP EDITION nodb_edition_two CASCADE";
+            dbaConn.execute(
+              sql,
+              function(err) {
+                if (err) {
+                  (err.message).should.startWith('ORA-38802:');
+                  // ORA-38802: edition does not exist
+                }
+                cb();
+              }
+            );
+          },
+          function(cb) {
+            var sql = "DROP EDITION nodb_edition_one CASCADE";
+            dbaConn.execute(
+              sql,
+              function(err) {
+                if (err) {
+                  (err.message).should.startWith('ORA-38802:');
+                }
+                cb();
+              }
+            );
+          },
+          // Create edition nodb_edition_one
+          function(cb) {
+            var sql = "CREATE EDITION nodb_edition_one";
             dbaConn.execute(
               sql,
               function(err) {
@@ -97,9 +122,9 @@ describe('160. editionTest.js', function() {
               }
             );
           },
-          // Create edition nodb_e2
+          // Create edition nodb_edition_two
           function(cb) {
-            var sql = "CREATE EDITION nodb_e2";
+            var sql = "CREATE EDITION nodb_edition_two";
             dbaConn.execute(
               sql,
               function(err) {
@@ -142,7 +167,7 @@ describe('160. editionTest.js', function() {
             );
           },
           function(cb) {
-            var sql = "grant use on edition nodb_e1 to nodb_schema_edition";
+            var sql = "grant use on edition nodb_edition_one to nodb_schema_edition";
             dbaConn.execute(
               sql,
               function(err) {
@@ -152,7 +177,7 @@ describe('160. editionTest.js', function() {
             );
           },
           function(cb) {
-            var sql = "grant use on edition nodb_e2 to nodb_schema_edition";
+            var sql = "grant use on edition nodb_edition_two to nodb_schema_edition";
             dbaConn.execute(
               sql,
               function(err) {
@@ -194,7 +219,7 @@ describe('160. editionTest.js', function() {
           },
           // Change to Edition e1
           function(cb) {
-            var sql = "alter session set edition = nodb_e1";
+            var sql = "alter session set edition = nodb_edition_one";
             conn.execute(
               sql,
               function(err) {
@@ -219,7 +244,7 @@ describe('160. editionTest.js', function() {
             );
           },
           function(cb) {
-            var sql = "alter session set edition = nodb_e2";
+            var sql = "alter session set edition = nodb_edition_two";
             conn.execute(
               sql,
               function(err) {
@@ -267,7 +292,7 @@ describe('160. editionTest.js', function() {
           else { cb(); }
         },
         function(cb) {
-          var sql = "DROP EDITION nodb_e2 CASCADE";
+          var sql = "DROP EDITION nodb_edition_two CASCADE";
           dbaConn.execute(
             sql,
             function(err) {
@@ -277,7 +302,7 @@ describe('160. editionTest.js', function() {
           );
         },
         function(cb) {
-          var sql = "DROP EDITION nodb_e1 CASCADE";
+          var sql = "DROP EDITION nodb_edition_one CASCADE";
           dbaConn.execute(
             sql,
             function(err) {
@@ -429,7 +454,7 @@ describe('160. editionTest.js', function() {
             user:             "nodb_schema_edition",
             password:         "nodb_schema_edition",
             connectionString: dbConfig.connectString,
-            edition:          "nodb_e2"
+            edition:          "nodb_edition_two"
           };
           oracledb.getConnection(
             credential,
@@ -478,7 +503,7 @@ describe('160. editionTest.js', function() {
             user:             "nodb_schema_edition",
             password:         "nodb_schema_edition",
             connectionString: dbConfig.connectString,
-            edition:          "nodb_e1"
+            edition:          "nodb_edition_one"
           };
           oracledb.createPool(
             credential,
@@ -542,7 +567,7 @@ describe('160. editionTest.js', function() {
             user:             "nodb_schema_edition",
             password:         "nodb_schema_edition",
             connectionString: dbConfig.connectString,
-            edition:          "nodb_e2"
+            edition:          "nodb_edition_two"
           };
           oracledb.getConnection(
             credential,
@@ -555,7 +580,7 @@ describe('160. editionTest.js', function() {
         },
         // Change to Edition e1
         function(cb) {
-          var sql = "alter session set edition = nodb_e1";
+          var sql = "alter session set edition = nodb_edition_one";
           connInst.execute(
             sql,
             function(err) {
@@ -602,7 +627,7 @@ describe('160. editionTest.js', function() {
             user:             "nodb_schema_edition",
             password:         "nodb_schema_edition",
             connectionString: dbConfig.connectString,
-            edition          : "nodb_e1"
+            edition          : "nodb_edition_one"
           };
           oracledb.createPool(
             credential,
@@ -672,7 +697,7 @@ describe('160. editionTest.js', function() {
       var connInst;
       async.series([
         function(cb) {
-          oracledb.edition = 'nodb_e2';
+          oracledb.edition = 'nodb_edition_two';
           cb();
         },
         function(cb) {
@@ -743,7 +768,7 @@ describe('160. editionTest.js', function() {
       var poolInst, connInst, conn2;
       async.series([
         function(cb) {
-          oracledb.edition = 'nodb_e2';
+          oracledb.edition = 'nodb_edition_two';
           cb();
         },
         function(cb) {
@@ -1014,7 +1039,7 @@ describe('160. editionTest.js', function() {
             user:             "nodb_schema_edition",
             password:         "nodb_schema_edition",
             connectionString: dbConfig.connectString,
-            edition:          "nodb_e2"
+            edition:          "nodb_edition_two"
           };
           oracledb.getConnection(
             credential,
@@ -1166,7 +1191,7 @@ describe('160. editionTest.js', function() {
           );
         },
         function(cb) {
-          oracledb.edition = 'nodb_e2';
+          oracledb.edition = 'nodb_edition_two';
           cb();
         },
         // This global property only takes effect at connection creation.
@@ -1203,7 +1228,7 @@ describe('160. editionTest.js', function() {
       var connInst;
       async.series([
         function(cb) {
-          oracledb.edition = 'nodb_e1';
+          oracledb.edition = 'nodb_edition_one';
           cb();
         },
         function(cb) {
@@ -1211,7 +1236,7 @@ describe('160. editionTest.js', function() {
             user:             "nodb_schema_edition",
             password:         "nodb_schema_edition",
             connectionString: dbConfig.connectString,
-            edition:          "nodb_e2"
+            edition:          "nodb_edition_two"
           };
           oracledb.getConnection(
             credential,
@@ -1360,7 +1385,7 @@ describe('160. editionTest.js', function() {
       var connInst;
       async.series([
         function(cb) {
-          process.env.ORA_EDITION = 'nodb_e1';
+          process.env.ORA_EDITION = 'nodb_edition_one';
           cb();
         },
         function(cb) {
@@ -1416,7 +1441,7 @@ describe('160. editionTest.js', function() {
       var poolInst, connInst;
       async.series([
         function(cb) {
-          process.env.ORA_EDITION = 'nodb_e2';
+          process.env.ORA_EDITION = 'nodb_edition_two';
           cb();
         },
         function(cb) {
@@ -1488,7 +1513,7 @@ describe('160. editionTest.js', function() {
 
       async.series([
         function(cb) {
-          process.env.ORA_EDITION = 'nodb_e1';
+          process.env.ORA_EDITION = 'nodb_edition_one';
           cb();
         },
         function(cb) {
@@ -1496,7 +1521,7 @@ describe('160. editionTest.js', function() {
             user:             "nodb_schema_edition",
             password:         "nodb_schema_edition",
             connectionString: dbConfig.connectString,
-            edition:          'nodb_e2'
+            edition:          'nodb_edition_two'
           };
           oracledb.getConnection(
             credential,
@@ -1546,7 +1571,7 @@ describe('160. editionTest.js', function() {
 
       async.series([
         function(cb) {
-          process.env.ORA_EDITION = 'nodb_e2';
+          process.env.ORA_EDITION = 'nodb_edition_two';
           cb();
         },
         function(cb) {
@@ -1554,7 +1579,7 @@ describe('160. editionTest.js', function() {
             user:             "nodb_schema_edition",
             password:         "nodb_schema_edition",
             connectionString: dbConfig.connectString,
-            edition:          'nodb_e1'
+            edition:          'nodb_edition_one'
           };
           oracledb.createPool(
             credential,
