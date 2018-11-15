@@ -32,17 +32,17 @@ const should   = require('should');
 const dbconfig = require('./dbconfig.js');
 const sodaUtil = require('./sodaUtil.js');
 
+const t_contents = [
+  { id: 1001, name: "Gillian",  office: "Shenzhen" },
+  { id: 1002, name: "Chris",    office: "Melbourne" },
+  { id: 1003, name: "Changjie", office: "Shenzhen" },
+  { id: 1004, name: "Venkat",   office: "Bangalore" },
+  { id: 1005, name: "May",      office: "London" },
+  { id: 1006, name: "Joe",      office: "San Francisco" },
+  { id: 1007, name: "Gavin",    office: "New York" }
+];
+
 describe('173. soda5.js', () => {
-  
-  const t_contents = [
-    { id: 1001, name: "Gillian",  office: "Shenzhen" },
-    { id: 1002, name: "Chris",    office: "Melbourne" },
-    { id: 1003, name: "Changjie", office: "Shenzhen" },
-    { id: 1004, name: "Venkat",   office: "Bangalore" },
-    { id: 1005, name: "May",      office: "London" },
-    { id: 1006, name: "Joe",      office: "San Francisco" },
-    { id: 1007, name: "Gavin",    office: "New York" }
-  ];
 
   before(async function() {
     const runnable = await sodaUtil.checkPrerequisites();
@@ -76,7 +76,7 @@ describe('173. soda5.js', () => {
           return collection.insertOne(content);
         })
       );
-      
+
       // Fetch back
       let empInShenzhen = await collection.find()
         .filter({ "office": {"$like": "Shenzhen"} })
@@ -141,13 +141,13 @@ describe('173. soda5.js', () => {
     } catch(err) {
       should.not.exist(err);
     }
-    
+
     try {
       await conn.commit();
-    } 
+    }
     catch(err) {
       should.not.exist(err);
-    } 
+    }
 
     if (collection) {
       let res = await collection.drop();
@@ -169,7 +169,7 @@ describe('173. soda5.js', () => {
 
       let soda = conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_173_3");
-      
+
     } catch(err) {
       should.not.exist(err);
     }
@@ -204,7 +204,7 @@ describe('173. soda5.js', () => {
 
       let soda = conn.getSodaDatabase();
       collection = await soda.createCollection("soda_test_173_4");
-      
+
     } catch(err) {
       should.not.exist(err);
     }
@@ -312,7 +312,7 @@ describe('173. soda5.js', () => {
           return collection.insertOne(content);
         })
       );
-      
+
       // Fetch back
       let empInShenzhen = await collection.find()
         .filter({ "office": {"$like": "Shenzhen"} })
@@ -371,7 +371,7 @@ describe('173. soda5.js', () => {
       // drop index
       let indexName = indexSpec.name;
       await collection.dropIndex(indexName);
-    
+
       // Fetch back
       let empInShenzhen = await collection.find()
         .filter({ "office": {"$like": "Shenzhen"} })
@@ -422,7 +422,7 @@ describe('173. soda5.js', () => {
           return collection.insertOne(content);
         })
       );
-      
+
       // Fetch back
       let empInShenzhen = await collection.find()
         .filter({ "office": {"$like": "Shenzhen"} })
@@ -478,7 +478,7 @@ describe('173. soda5.js', () => {
           return collection.insertOne(content);
         })
       );
-      
+
       // Fetch back
       let empInShenzhen = await collection.find()
         .filter({ "office": {"$like": "Shenzhen"} })
@@ -510,4 +510,70 @@ describe('173. soda5.js', () => {
       }
     }
   }); // 173.10
+
+  it('173.11 option object of dropIndex(), basic case', async () => {
+    let options = { "force" : true };
+    await dropIdxOpt(options);
+  }); // 173.11
+
+  it('173.12 option object of dropIndex(), boolean value is false', async () => {
+    let options = { "force" : false };
+    await dropIdxOpt(options);
+  }); // 173.12
+
 });
+
+const dropIdxOpt = async function(opts) {
+  let conn, collection;
+  try {
+    conn = await oracledb.getConnection(dbconfig);
+
+    let soda = conn.getSodaDatabase();
+    collection = await soda.createCollection("soda_test_173_7");
+
+    let indexSpec = {
+      "name": "OFFICE_IDX",
+      "fields": [
+        {
+          "path": "office",
+          "datatype": "string",
+          "order": "asc"
+        }
+      ]
+    };
+    await collection.createIndex(indexSpec);
+
+    await Promise.all(
+      t_contents.map(function(content) {
+        return collection.insertOne(content);
+      })
+    );
+
+    // Fetch back
+    let empInShenzhen = await collection.find()
+      .filter({ "office": {"$like": "Shenzhen"} })
+      .count();
+    should.strictEqual(empInShenzhen.count, 2);
+
+    // drop index
+    let indexName = indexSpec.name;
+    await collection.dropIndex(indexName, opts);
+
+    await conn.commit();
+
+  } catch(err) {
+    should.noConflict.exist(err);
+  } finally {
+    if (collection) {
+      let res = await collection.drop();
+      should.strictEqual(res.dropped, true);
+    }
+    if (conn) {
+      try {
+        await conn.close();
+      } catch(err) {
+        should.not.exist(err);
+      }
+    }
+  }
+};
