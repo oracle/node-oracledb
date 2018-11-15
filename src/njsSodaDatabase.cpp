@@ -314,8 +314,15 @@ NAN_METHOD(njsSodaDatabase::CreateDocument)
     Local<Object> options;
     std::string key, mediaType, error;
     if (db->GetObjectArg(info, 1, options)) {
-        njsUtils::GetStringFromJSON(options, "key", 1, key, error);
-        njsUtils::GetStringFromJSON(options, "mediaType", 1, mediaType, error);
+        if (!njsUtils::GetStringFromJSON(options, "key", 1, key, error)) {
+            Nan::ThrowError(error.c_str());
+            return;
+        }
+        if (!njsUtils::GetStringFromJSON(options, "mediaType", 1, mediaType,
+                                        error)) {
+            Nan::ThrowError(error.c_str());
+            return;
+        }
     }
 
     // create ODPI-C document
