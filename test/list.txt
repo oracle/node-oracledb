@@ -4175,6 +4175,7 @@ Overview of node-oracledb functional tests
     164.9 get multiple documents
     164.10 create index
     164.11 the examples/soda1.js case
+    164.12 Negative: create collection with invalid metaData value
 
 165. soda2.js
     165.1 create two sodaDatabase objects which point to the same instance

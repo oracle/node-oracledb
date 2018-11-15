@@ -476,4 +476,32 @@ describe('164. soda1.js', () => {
     }
   }); // 164.11
 
+  it('164.12 Negative: create collection with invalid metaData value', async () => {
+    let conn;
+    try {
+      conn = await oracledb.getConnection(dbconfig);
+      let sd = conn.getSodaDatabase();
+
+      let t_collname = "soda_test_164_5";
+      let options = { metaData: "metaData" };
+      let coll = await sd.createCollection(t_collname, options);
+      should.not.exist(coll);
+
+    } catch(err) {
+      should.exist(err);
+      should.strictEqual(
+        err.message,
+        'NJS-006: invalid type for parameter 3'
+      );
+    } finally {
+      if (conn) {
+        try {
+          await conn.close();
+        } catch(err) {
+          should.not.exist(err);
+        }
+      }
+    }
+  }); // 164.12
+
 });
