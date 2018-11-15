@@ -19,11 +19,11 @@
  * See LICENSE.md for relevant licenses.
  *
  * NAME
- *   140. v8Getter.js
+ *   140. jsObjectGetter1.js
  *
  * DESCRIPTION
- *   Test v8 object getter functions. These cases overwrite the getter()
- *   functions.
+ *   These tests overwrite the getter methods of node-oracledb javaScript
+ *   objects.
  *
  *****************************************************************************/
 'use strict';
@@ -33,7 +33,7 @@ var should   = require('should');
 var async    = require('async');
 var dbConfig = require('./dbconfig.js');
 
-describe('140. v8Getter.js', function() {
+describe('140. jsObjectGetter1.js', function() {
 
   var connection = null;
   var tableName = "nodb_tab_v8getter";

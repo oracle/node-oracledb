@@ -3631,7 +3631,7 @@ Overview of node-oracledb functional tests
     139.1 columns fetched from REF CURSORS can be mapped by fetchInfo settings
     139.2 fetchAsString takes effect as well
 
-  140. v8Getter.js
+140. jsObjectGetter1.js
     140.1 Negative: overwrite the getter() function of bind in objects
         140.1.1 ProcessBindsByName()
         140.1.2 ProcessBindsByPos()
@@ -4224,8 +4224,13 @@ Overview of node-oracledb functional tests
     170.8 works with poolAlias
     170.9 works with and without poolAlias
     170.10 Negative - try to modify read-only property pool.status
-    171.11 drainTime = 0
-    171.12 drainTime = -3
-    171.13 drainTime = NaN
-    171.14 draining a pool will not block the other pool
-    171.15 draining a pool will not block another aliased pool
+    170.11 drainTime = 0
+    170.12 drainTime = -3
+    170.13 drainTime = NaN
+    170.14 draining a pool will not block the other pool
+    170.15 draining a pool will not block another aliased pool
+
+171. jsObjectGetter2.js
+    171.1 oracledb.fetchAsBuffer
+    171.2 oracledb.fetchAsString
+    171.3 data bind

@@ -196,3 +196,4 @@ test/soda3.js
 test/sodaCallback.js
 
 test/soda4.js
+test/jsObjectGetter2.js

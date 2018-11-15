@@ -198,7 +198,7 @@ describe('170. poolDrain.js', () => {
     }
   }); // 170.10
 
-  it('171.11 drainTime = 0', async () => {
+  it('170.11 drainTime = 0', async () => {
     try {
       let pool = await oracledb.createPool(settings);
 
@@ -214,7 +214,7 @@ describe('170. poolDrain.js', () => {
     }
   });
 
-  it('171.12 drainTime = -3', async () => {
+  it('170.12 drainTime = -3', async () => {
     try {
       let pool = await oracledb.createPool(settings);
 
@@ -231,7 +231,7 @@ describe('170. poolDrain.js', () => {
     }
   });
 
-  it('171.13 drainTime = NaN', async () => {
+  it('170.13 drainTime = NaN', async () => {
     try {
       let pool = await oracledb.createPool(settings);
 
@@ -248,7 +248,7 @@ describe('170. poolDrain.js', () => {
     }
   });
 
-  it('171.14 draining a pool will not block the other pool', async () => {
+  it('170.14 draining a pool will not block the other pool', async () => {
     try {
       let pool_1 = await oracledb.createPool(settings);
       let pool_2 = await oracledb.createPool(settings);
@@ -271,7 +271,7 @@ describe('170. poolDrain.js', () => {
     }
   });
 
-  it('171.15 draining a pool will not block another aliased pool', async () => {
+  it('170.15 draining a pool will not block another aliased pool', async () => {
     try {
       let pool_1 = await oracledb.createPool(settings);
       let cred = {
