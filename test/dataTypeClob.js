@@ -43,7 +43,7 @@ var assist   = require('./dataTypeAssist.js');
 var inFileName = './test/clobexample.txt';  // the file with text to be inserted into the database
 var outFileName = './test/clobstreamout.txt';
 
-describe('40. dataTypeClob.js', function() {
+describe.skip('40. dataTypeClob.js', function() {
 
   var connection = null;
   var tableName = "nodb_myclobs";

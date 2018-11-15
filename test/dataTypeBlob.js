@@ -42,7 +42,7 @@ var assist   = require('./dataTypeAssist.js');
 var inFileName = './test/fuzzydinosaur.jpg';  // contains the image to be inserted
 var outFileName = './test/blobstreamout.jpg';
 
-describe('41. dataTypeBlob.js', function() {
+describe.skip('41. dataTypeBlob.js', function() {
 
   var connection = null;
   var tableName = "nodb_myblobs";
