@@ -151,7 +151,6 @@ function verifyBinary() {
   return new Promise((resolve, reject) => {
     packageUtil.trace('In verifyBinary');
     packageUtil.trace('Checking for binary at', packageUtil.BINARY_PATH_LOCAL);
-    packageUtil.log('Verifying installation');
 
     if (!fs.existsSync(packageUtil.BINARY_PATH_LOCAL)) {
       resolve(false);
@@ -191,8 +190,6 @@ function verifyBinary() {
 
           resolve(false);
         } else {
-          packageUtil.log('Binary SHA matches SHA in SHASUMS256.txt');
-
           resolve(true);
         }
       })
@@ -407,7 +404,7 @@ function done(err, alreadyInstalled) {
     }
 
     packageUtil.log('**');
-    packageUtil.log('** To use the installed node-oracledb:');
+    packageUtil.log('** To use node-oracledb:');
 
     if (process.platform === 'linux') {
       if (process.arch === 'x64') {
@@ -445,8 +442,9 @@ function done(err, alreadyInstalled) {
     }
 
     packageUtil.log('**');
-    packageUtil.log('** Node-oracledb installation instructions: ' + installUrl);
+    packageUtil.log('** Installation instructions: ' + installUrl);
     packageUtil.log('********************************************************************************\n');
+    packageUtil.log('');
   }
 }
 
@@ -468,8 +466,6 @@ function install() {
       if (valid) {
         done(null, true);
       } else {
-        packageUtil.log('Continuing installation');
-
         return new Promise((resolve, reject) => {
           installBinary()
             .then(() => {
