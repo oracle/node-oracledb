@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2017, 2018, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -25,11 +25,12 @@
  *
  * USAGE
  *   Run this script like:
- *     node extractpackage.js path=oracledb-vX.Y.Z-node-vNN-platform-architecture.gz
+ *     node extractpackage.js path=oracledb-vX.Y.Z-node-abiNN-platform-architecture.gz
  *   For example:
- *     node extractpackage.js path=oracledb-v2.0.14-node-v57-darwin-x64.gz
+ *     node extractpackage.js path=oracledb-v3.0.0-node-abi64-darwin-x64.gz
  *
- *   The extracted binary can be manually moved to the correct directory.
+ *   The extracted binary can be manually moved to the correct directory such
+ *   as node_modules/oracledb/build/Release
  *
  *****************************************************************************/
 
