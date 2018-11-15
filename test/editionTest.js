@@ -90,8 +90,7 @@ describe('160. editionTest.js', function() {
             );
           },
           function(cb) {
-            //var sql = "DROP EDITION nodb_edition_one CASCADE";
-            let sql = "BEGIN \n" +
+            var sql = "BEGIN \n" +
                        "    DECLARE \n" +
                        "        e_edition_missing EXCEPTION; \n" +
                        "        PRAGMA EXCEPTION_INIT(e_edition_missing, -38802); \n" +
@@ -114,7 +113,7 @@ describe('160. editionTest.js', function() {
             );
           },
           function(cb) {
-            let sql = "BEGIN \n" +
+            var sql = "BEGIN \n" +
                        "    DECLARE \n" +
                        "        e_edition_missing EXCEPTION; \n" +
                        "        PRAGMA EXCEPTION_INIT(e_edition_missing, -38802); \n" +
@@ -138,7 +137,7 @@ describe('160. editionTest.js', function() {
           },
           // Create user
           function(cb) {
-            let sql = "BEGIN \n" +
+            var sql = "BEGIN \n" +
                       "    DECLARE \n" +
                       "        e_user_missing EXCEPTION; \n" +
                       "        PRAGMA EXCEPTION_INIT(e_user_missing, -01918); \n" +

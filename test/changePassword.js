@@ -63,7 +63,20 @@ describe('161. changePassword.js', function() {
         );
       },
       function(cb) {
-        var sql = "CREATE USER " + myUser + " IDENTIFIED BY " + myUser;
+        var sql = "BEGIN \n" +
+                      "    DECLARE \n" +
+                      "        e_user_missing EXCEPTION; \n" +
+                      "        PRAGMA EXCEPTION_INIT(e_user_missing, -01918); \n" +
+                      "    BEGIN \n" +
+                      "        EXECUTE IMMEDIATE('DROP USER " + myUser + " CASCADE'); \n" +
+                      "    EXCEPTION \n" +
+                      "        WHEN e_user_missing \n" +
+                      "        THEN NULL; \n" +
+                      "    END; \n" +
+                      "    EXECUTE IMMEDIATE (' \n" +
+                      "        CREATE USER " + myUser + " IDENTIFIED BY " + myUser + "\n" +
+                      "    '); \n" +
+                      "END; ";
         dbaConn.execute(
           sql,
           function(err) {
