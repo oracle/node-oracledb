@@ -26,7 +26,7 @@
  * 
  *   The executeMany(): Binds section of the doc says:
  *   The first data record determines the number of bind variables, 
- *   each bind variable’s data type, and its name (when binding by name).
+ *   each bind variable's data type, and its name (when binding by name).
  *
  *****************************************************************************/
 'use strict';
