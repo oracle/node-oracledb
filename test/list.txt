@@ -4208,9 +4208,10 @@ Overview of node-oracledb functional tests
     167.16 the requested collection name is case sensitive
 
 168. soda4.js
-    168.1 insertOneAndGet() method
-    168.2 customize the key value
+    168.1 insertOneAndGet() fetches attributes without content
+    168.2 cannot customize the key value without metadata setting
     168.3 content is null
+    168.4 customize the key value
 
 170. poolDrain.js
     170.1 close pool with force flag, and prevent new connection
