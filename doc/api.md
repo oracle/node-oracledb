@@ -3384,7 +3384,7 @@ Number qos
 ```
 
 An integer mask containing one or more of the quality of service
-[`oracledb.CQN_QOS_*`](#oracledbconstantssubscription) constants.
+[`oracledb.SUBSCR_QOS_*`](#oracledbconstantssubscription) constants.
 
 ###### <a name="consubscribeoptsql"></a> 4.2.14.2.11 `sql`
 
