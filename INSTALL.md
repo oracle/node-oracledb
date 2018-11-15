@@ -1368,7 +1368,7 @@ of Node.js and operating system, you can install manually:
   `oracledb-3.0.0.tgz`.
 
   Also download the appropriate binary package, for example
-  `oracledb-v3.0.0-node-v57-darwin-x64.gz`. To determine the correct
+  `oracledb-v3.0.0-node-abi57-darwin-x64.gz`. To determine the correct
   binary package, find your Node.js module version, platform and
   architecture using:
 
@@ -1379,7 +1379,7 @@ of Node.js and operating system, you can install manually:
   For example, when installing node-oracledb 3.0.0 on macOS with
   Node.js 8, these commands will show the module version is '57', the
   platform is 'darwin' and the architecture is 'x64'.  The package to
-  download is `oracledb-v3.0.0-node-v57-darwin-x64.gz`
+  download is `oracledb-v3.0.0-node-abi57-darwin-x64.gz`
 
   If an appropriate package is not available, follow the
   [Node-oracledb Installation Instructions](#instructions) for your
@@ -1427,7 +1427,7 @@ of Node.js and operating system, you can install manually:
   to unarchive the binary package, for example:
 
   ```
-  node extractpackage.js path=oracledb-v3.0.0-node-v57-darwin-x64.gz
+  node extractpackage.js path=oracledb-v3.0.0-node-abi57-darwin-x64.gz
   ```
 
 - Create the subdirectory `node_modules/oracledb/build/Release` and
