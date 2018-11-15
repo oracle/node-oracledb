@@ -187,7 +187,7 @@ test/end2endTracing.js
 test/editionTest.js
 test/changePassword.js
 test/getStmtInfo.js
-test/executeMany.js
+test/executeMany1.js
 
 test/poolDrain.js
 test/soda1.js
