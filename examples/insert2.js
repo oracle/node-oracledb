@@ -24,7 +24,8 @@
  *   By default, node-oracledb does not commit on execute.
  *   The driver also has commit() and rollback() methods to explicitly control transactions.
  *
- *   Note: when a connection is closed, any open transaction will be rolled back.
+ *   Note: regardless of the auto commit mode, any open transaction
+ *   will be rolled back when a connection is closed.
  *
  *****************************************************************************/
 
