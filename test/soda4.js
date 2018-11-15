@@ -173,7 +173,7 @@ describe('168. soda4.js', () => {
     }
   }); // 168.3
 
-  it('168.4 customize the key value', async () => {
+  it('168.4 customize the key value, String value', async () => {
     let conn;
     try {
       conn = await oracledb.getConnection(dbconfig);
@@ -253,5 +253,298 @@ describe('168. soda4.js', () => {
       }
     }
   }); // 168.4
+
+  // A variation of 168.4
+  it('168.5 Negative - customize the key value, numeric value', async () => {
+    let conn, coll;
+    try {
+      conn = await oracledb.getConnection(dbconfig);
+      let sd = conn.getSodaDatabase();
+      let collectionName = 'soda_test_168_5';
+      let testMetaData = {
+        "schemaName" : dbconfig.user.toUpperCase(),
+        "tableName" : collectionName,
+        "keyColumn" :
+                       {
+                         "name" : "ID",
+                         "sqlType" : "NUMBER",
+                         "assignmentMethod" : "CLIENT"
+                       },
+        "contentColumn" :
+                       {
+                         "name" : "JSON_DOCUMENTS",
+                         "sqlType" : "BLOB",
+                         "compress" : "NONE",
+                         "cache" : true,
+                         "encrypt" : "NONE",
+                         "validation" : "STRICT"
+                       },
+        "versionColumn" :
+                       {
+                         "name" : "VERSION",
+                         "type":"String",
+                         "method":"SHA256"
+                       },
+        "lastModifiedColumn" :
+                       {
+                         "name":"LAST_MODIFIED"
+                       },
+        "creationTimeColumn":
+                       {
+                         "name":"CREATED_ON"
+                       },
+        "readOnly": false
+      };
+
+      coll = await sd.createCollection(collectionName, { metaData: testMetaData});
+
+      let testContent = {
+        name:    "Shelly",
+        address: {city: "Shenzhen", country: "China"}
+      };
+      
+      /* The key must always be a string and is always returned a string as 
+         well -- even if the "type" in the database is numeric. */
+      let testKey = 86755;
+      sd.createDocument(testContent, { key: testKey } );
+
+    } catch(err) {
+      should.exist(err);
+      should.strictEqual(
+        err.message,
+        'NJS-008: invalid type for "key" in parameter 2'
+      );
+    } finally {
+      if (coll) {
+        try {
+          let res = await coll.drop();
+          should.strictEqual(res.dropped, true);
+        } catch(err) {
+          should.not.exist(err);
+        }
+      }
+
+      if (conn) {
+        try {
+          await conn.close();
+        } catch(err) {
+          should.not.exist(err);
+        }
+      }
+    }
+  }); // 168.5
+
+  it('168.6 get mediaType', async () => {
+    let conn;
+    try {
+      conn = await oracledb.getConnection(dbconfig);
+      let sd = conn.getSodaDatabase();
+      let collectionName = 'soda_test_168_6';
+      let coll = await sd.createCollection(collectionName);
+
+      // Insert a new document
+      // Content is empty
+      let testContent = {};
+
+      let myDoc = await coll.insertOneAndGet(testContent);
+      let myMediaType = myDoc.mediaType;
+      should.exist(myMediaType);
+      should.strictEqual(myMediaType, 'application/json');
+      let myKey = myDoc.key;
+
+      // Fetch it back
+      let doc2 = await coll.find().key(myKey).getOne();
+      should.strictEqual(doc2.mediaType, 'application/json');
+
+      await conn.commit();
+      let res = await coll.drop();
+      should.strictEqual(res.dropped, true);
+
+    } catch(err) {
+      should.not.exist(err);
+    } finally {
+      if (conn) {
+        try {
+          await conn.close();
+        } catch(err) {
+          should.not.exist(err);
+        }
+      }
+    }
+  }); // 168.6
+
+  it('168.7 customize the value of mediaType', async () => {
+    let conn, coll;
+    try {
+      conn = await oracledb.getConnection(dbconfig);
+      let sd = conn.getSodaDatabase();
+      let collectionName = 'soda_test_168_7';
+      let testMetaData = {
+        "schemaName" : dbconfig.user.toUpperCase(),
+        "tableName" : collectionName,
+        "keyColumn" :
+                     {
+                       "name" : "ID",
+                       "sqlType" : "NUMBER",
+                       "assignmentMethod" : "CLIENT"
+                     },
+        "mediaTypeColumn":
+                         {
+                           "name": "MediaType"
+                         },
+        "contentColumn" :
+                       {
+                         "name" : "DOCUMENT",
+                         "sqlType" : "BLOB",
+                         "compress" : "NONE",
+                         "cache" : true,
+                         "encrypt" : "NONE",
+                         "validation" : "STRICT"
+                       },
+        "versionColumn" :
+                       {
+                         "name" : "VERSION",
+                         "type":"String",
+                         "method":"SHA256"
+                       },
+        "lastModifiedColumn" :
+                       {
+                         "name":"LAST_MODIFIED"
+                       },
+        "creationTimeColumn":
+                       {
+                         "name":"CREATED_ON"
+                       },
+        "readOnly": false
+      };
+
+      coll = await sd.createCollection(collectionName, { metaData: testMetaData});
+
+      // Insert a new document
+      let testContent = {};
+      let testMediaType = 'image/png';
+      let testKey = '86755';
+      let testDoc = sd.createDocument(
+        testContent, 
+        { mediaType: testMediaType, key: testKey } 
+      );
+      should.strictEqual(testDoc.mediaType, testMediaType);
+
+      let myKey = testDoc.key;
+
+      await coll.insertOne(testDoc);
+
+      // Fetch the document back
+      let myDoc = await coll.find().key(myKey).getOne();
+
+      should.strictEqual(myDoc.mediaType, testMediaType);
+
+    } catch(err) {
+      should.not.exist(err);
+    } finally {
+      await conn.commit();
+      if (coll) {
+        try {
+          let res = await coll.drop();
+          should.strictEqual(res.dropped, true);
+        } catch(err) {
+          should.not.exist(err);
+        }
+      }
+
+      if (conn) {
+        try {
+          await conn.close();
+        } catch(err) {
+          should.not.exist(err);
+        }
+      }
+    }
+  }); // 168.7
+
+  it('168.8 Negative - customize mediaType, invalide type, numeric value', async () => {
+    let conn, coll;
+    try {
+      conn = await oracledb.getConnection(dbconfig);
+      let sd = conn.getSodaDatabase();
+      let collectionName = 'soda_test_168_7';
+      let testMetaData = {
+        "schemaName" : dbconfig.user.toUpperCase(),
+        "tableName" : collectionName,
+        "keyColumn" :
+                     {
+                       "name" : "ID",
+                       "sqlType" : "NUMBER",
+                       "assignmentMethod" : "CLIENT"
+                     },
+        "mediaTypeColumn":
+                         {
+                           "name": "MediaType"
+                         },
+        "contentColumn" :
+                       {
+                         "name" : "DOCUMENT",
+                         "sqlType" : "BLOB",
+                         "compress" : "NONE",
+                         "cache" : true,
+                         "encrypt" : "NONE",
+                         "validation" : "STRICT"
+                       },
+        "versionColumn" :
+                       {
+                         "name" : "VERSION",
+                         "type":"String",
+                         "method":"SHA256"
+                       },
+        "lastModifiedColumn" :
+                       {
+                         "name":"LAST_MODIFIED"
+                       },
+        "creationTimeColumn":
+                       {
+                         "name":"CREATED_ON"
+                       },
+        "readOnly": false
+      };
+
+      coll = await sd.createCollection(collectionName, { metaData: testMetaData});
+
+      // Insert a new document
+      let testContent = {};
+      
+      /* Negative value */
+      let testMediaType = 65432;
+      let testKey = '86755';
+      sd.createDocument(
+        testContent, 
+        { mediaType: testMediaType, key: testKey } 
+      );
+
+    } catch(err) {
+      should.exist(err);
+      should.strictEqual(
+        err.message,
+        'NJS-008: invalid type for "mediaType" in parameter 2'
+      );
+    } finally {
+      await conn.commit();
+      if (coll) {
+        try {
+          let res = await coll.drop();
+          should.strictEqual(res.dropped, true);
+        } catch(err) {
+          should.not.exist(err);
+        }
+      }
+
+      if (conn) {
+        try {
+          await conn.close();
+        } catch(err) {
+          should.not.exist(err);
+        }
+      }
+    }
+  }); // 168.8
 
 });
