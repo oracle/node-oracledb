@@ -160,7 +160,7 @@ test/blobDMLReturningMultipleRowsAsBuffer.js
 test/blobDMLReturningMultipleRowsAsStream.js
 
 test/fetchAsStringWithRefCursor.js
-test/v8Getter.js
+test/jsObjectGetter1.js
 test/insertNaNToNumber.js
 test/urowidFunctionBindAsString3.js
 test/urowidFunctionBindAsString4.js

@@ -84,7 +84,7 @@ describe('164. soda1.js', () => {
 
   });// 164.2
 
-  it('164.3 openCollection() opens an existing colleciton', async () => {
+  it('164.3 openCollection() opens an existing collection', async () => {
     let conn;
     try {
       conn = await oracledb.getConnection(dbconfig);

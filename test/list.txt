@@ -4166,7 +4166,7 @@ Overview of node-oracledb functional tests
 164. soda1.js
     164.1 getSodaDatabase() creates a sodaDatabase Object
     164.2 createCollection() creates a collection
-    164.3 openCollection() opens an existing colleciton
+    164.3 openCollection() opens an existing collection
     164.4 getCollectionNames() gets an array of collection names
     164.5 create collection with metadata
     164.6 the operation status of collection.drop()
