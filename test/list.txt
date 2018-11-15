@@ -4180,7 +4180,7 @@ Overview of node-oracledb functional tests
 165. soda2.js
     165.1 create two sodaDatabase objects which point to the same instance
     165.2 create two sodaDatabase objects from two connections
-    165.3 creating a collection with the existing name will open this collection
+    165.3 will open this collection when creating a collection with the existing name
     165.4 create collection with metadata
     165.5 Negative - create collection with an invalid metadata
     165.6 throw error when creating collection with the existing name and different metadata
@@ -4242,3 +4242,15 @@ Overview of node-oracledb functional tests
 
 172. executeMany2.js
     172.1 Negative - incorrect parameters
+
+173. soda5.js
+    173.1 create index, basic case
+    173.2 query row not via indexSpec
+    173.3 Negative - invalid indexSpec, invalid index property
+    173.4 Negative - createIndex() without parameter
+    173.5 collection.drop(), basic case
+    173.6 drop multiple times, no error thrown
+    173.7 dropIndex(), basic case
+    173.8 dropping index does not impact query
+    173.9 The index is dropped regardless of the auto commit mode
+    173.10 Negative - dropIndex() no parameter

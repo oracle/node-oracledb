@@ -103,7 +103,7 @@ describe('165. soda2.js', () => {
     }
   }); // 165.2
 
-  it('165.3 creating a collection with the existing name will open this collection', async () => {
+  it('165.3 will open this collection when creating a collection with the existing name', async () => {
     let conn;
     try {
       conn = await oracledb.getConnection(dbconfig);
