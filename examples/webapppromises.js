@@ -219,11 +219,7 @@ function closePoolAndExit() {
 }
 
 process
-  .on('SIGTERM', function() {
-    closePoolAndExit();
-  })
-  .on('SIGINT', function() {
-    closePoolAndExit();
-  });
+  .on('SIGTERM', closePoolAndExit)
+  .on('SIGINT',  closePoolAndExit);
 
 init();
