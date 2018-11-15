@@ -40,10 +40,10 @@ var should   = require('should');
 var dbConfig = require('./dbconfig.js');
 var assist   = require('./dataTypeAssist.js');
 
-var inFileName = './test/clobexample.txt';  // the file with text to be inserted into the database
-var outFileName = './test/clobstreamout.txt';
+var inFileName = 'test/clobexample.txt';  // the file with text to be inserted into the database
+var outFileName = 'test/clobstreamout.txt';
 
-describe.skip('40. dataTypeClob.js', function() {
+describe('40. dataTypeClob.js', function() {
 
   var connection = null;
   var tableName = "nodb_myclobs";
@@ -90,12 +90,6 @@ describe.skip('40. dataTypeClob.js', function() {
       async.series([
         function clobinsert1(callback) {
 
-          var lobFinishEventFired = false;
-          setTimeout( function() {
-            lobFinishEventFired.should.equal(true, "lob does not fire 'finish' event!");
-            callback();
-          }, 2000);
-
           connection.execute(
             "INSERT INTO nodb_myclobs (num, content) VALUES (:n, EMPTY_CLOB()) RETURNING content INTO :lobbv",
             { n: 1, lobbv: {type: oracledb.CLOB, dir: oracledb.BIND_OUT} },
@@ -116,11 +110,11 @@ describe.skip('40. dataTypeClob.js', function() {
                 should.not.exist(err, "inStream.on 'error' event");
               });
 
-              lob.on('finish', function() {
-                lobFinishEventFired = true;
+              lob.on('close', function() {
                 // now commit updates
                 connection.commit( function(err) {
                   should.not.exist(err);
+                  callback();
                 });
               });
 
@@ -129,12 +123,6 @@ describe.skip('40. dataTypeClob.js', function() {
           );
         },
         function clobstream1(callback) {
-          var streamFinishEventFired = false;
-          setTimeout( function() {
-            streamFinishEventFired.should.equal(true, "stream does not call 'Finish' Event!");
-            callback();
-          }, 2000);
-
           connection.execute(
             "SELECT content FROM nodb_myclobs WHERE num = :n",
             { n: 1 },
@@ -156,7 +144,7 @@ describe.skip('40. dataTypeClob.js', function() {
 
               lob.pipe(outStream);
 
-              outStream.on('finish', function() {
+              outStream.on('close', function() {
 
                 fs.readFile( inFileName, { encoding: 'utf8' }, function(err, originalData) {
                   should.not.exist(err);
@@ -165,22 +153,15 @@ describe.skip('40. dataTypeClob.js', function() {
                     should.not.exist(err);
                     originalData.should.equal(generatedData);
 
-                    streamFinishEventFired = true;
+                    callback();
                   });
                 });
               });
+
             }
           );
         },
         function clobstream2(callback) {
-          var lobEndEventFired = false;
-          var lobDataEventFired = false;
-          setTimeout( function(){
-            lobDataEventFired.should.equal(true, "lob does not call 'data' event!");
-            lobEndEventFired.should.equal(true, "lob does not call 'end' event!");
-            callback();
-          }, 2000);
-
           connection.execute(
             "SELECT content FROM nodb_myclobs WHERE num = :n",
             { n: 1 },
@@ -193,19 +174,15 @@ describe.skip('40. dataTypeClob.js', function() {
               lob.setEncoding('utf8'); // set the encoding so we get a 'string' not a 'buffer'
 
               lob.on('data', function(chunk) {
-                // console.log("lob.on 'data' event");
-                // console.log('  - got %d bytes of data', chunk.length);
-                lobDataEventFired = true;
                 clob += chunk;
               });
 
-              lob.on('end', function() {
+              lob.on('close', function() {
                 fs.readFile( inFileName, { encoding: 'utf8' }, function(err, data) {
                   should.not.exist(err);
-                  lobEndEventFired = true;
-
                   data.length.should.be.exactly(clob.length);
                   data.should.equal(clob);
+                  callback();
                 });
               });
 
@@ -216,14 +193,6 @@ describe.skip('40. dataTypeClob.js', function() {
           );
         },
         function objectOutFormat(callback) {
-          var lobEndEventFired = false;
-          var lobDataEventFired = false;
-          setTimeout( function(){
-            lobDataEventFired.should.equal(true, "lob does not call 'data' event!");
-            lobEndEventFired.should.equal(true, "lob does not call 'end' event!");
-            callback();
-          }, 2000);
-
           connection.execute(
             "SELECT content FROM nodb_myclobs WHERE num = :n",
             { n: 1 },
@@ -238,12 +207,11 @@ describe.skip('40. dataTypeClob.js', function() {
               lob.setEncoding('utf8');
 
               lob.on('data', function(chunk) {
-                lobDataEventFired = true;
                 clob = clob + chunk;
               });
 
-              lob.on('end', function() {
-                lobEndEventFired = true;
+              lob.on('close', function() {
+                callback();
               });
 
               lob.on('error', function(err) {

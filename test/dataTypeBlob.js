@@ -39,10 +39,10 @@ var should   = require('should');
 var dbConfig = require('./dbconfig.js');
 var assist   = require('./dataTypeAssist.js');
 
-var inFileName = './test/fuzzydinosaur.jpg';  // contains the image to be inserted
-var outFileName = './test/blobstreamout.jpg';
+var inFileName = 'test/fuzzydinosaur.jpg';  // contains the image to be inserted
+var outFileName = 'test/blobstreamout.jpg';
 
-describe.skip('41. dataTypeBlob.js', function() {
+describe('41. dataTypeBlob.js', function() {
 
   var connection = null;
   var tableName = "nodb_myblobs";
@@ -89,12 +89,6 @@ describe.skip('41. dataTypeBlob.js', function() {
       async.series([
         function blobinsert1(callback) {
 
-          var lobFinishEventFired = false;
-          setTimeout( function() {
-            lobFinishEventFired.should.equal(true, "lob does not call 'finish' event!");
-            callback();
-          }, 2000);
-
           connection.execute(
             "INSERT INTO nodb_myblobs (num, content) VALUES (:n, EMPTY_BLOB()) RETURNING content INTO :lobbv",
             { n: 2, lobbv: {type: oracledb.BLOB, dir: oracledb.BIND_OUT} },
@@ -117,11 +111,10 @@ describe.skip('41. dataTypeBlob.js', function() {
 
               inStream.pipe(lob);  // pipes the data to the BLOB
 
-              lob.on('finish', function() {
-                lobFinishEventFired = true;
-                // now commit updates
+              lob.on('close', function() {
                 connection.commit(function(err) {
                   should.not.exist(err);
+                  callback();
                 });
               });
 
@@ -129,12 +122,6 @@ describe.skip('41. dataTypeBlob.js', function() {
           );
         },
         function blobstream1(callback) {
-          var streamFinishEventFired = false;
-          setTimeout( function() {
-            streamFinishEventFired.should.equal(true, "stream does not call 'finish' Event!");
-            callback();
-          }, 2000);
-
           connection.execute(
             "SELECT content FROM nodb_myblobs WHERE num = :n",
             { n: 2 },
@@ -155,30 +142,23 @@ describe.skip('41. dataTypeBlob.js', function() {
               });
 
               lob.pipe(outStream);
-              outStream.on('finish', function() {
+
+              outStream.on('close', function() {
                 fs.readFile( inFileName, function(err, originalData) {
                   should.not.exist(err);
 
                   fs.readFile( outFileName, function(err, generatedData) {
                     should.not.exist(err);
                     originalData.should.eql(generatedData);
-
-                    streamFinishEventFired = true;
+                    callback();
                   });
                 });
 
-              }); // finish event
+              }); // close event
             }
           );
         },
         function blobstream2(callback) {
-          var lobEndEventFired = false;
-          var lobDataEventFired = false;
-          setTimeout( function(){
-            lobDataEventFired.should.equal(true, "lob does not call 'data' event!");
-            lobEndEventFired.should.equal(true, "lob does not call 'end' event!");
-            callback();
-          }, 2000);
 
           connection.execute(
             "SELECT content FROM nodb_myblobs WHERE num = :n",
@@ -197,22 +177,18 @@ describe.skip('41. dataTypeBlob.js', function() {
               });
 
               lob.on('data', function(chunk) {
-                // console.log("lob.on 'data' event");
-                // console.log('  - got %d bytes of data', chunk.length);
-                lobDataEventFired = true;
                 blobLength = blobLength + chunk.length;
                 blob = Buffer.concat([blob, chunk], blobLength);
               });
 
-              lob.on('end', function() {
+              lob.on('close', function() {
                 fs.readFile( inFileName, function(err, data) {
                   should.not.exist(err);
-                  lobEndEventFired = true;
-
                   data.length.should.be.exactly(blob.length);
                   data.should.eql(blob);
+                  callback();
                 });
-              });  // end event
+              });  // close event
 
             }
           );
