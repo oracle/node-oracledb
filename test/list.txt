@@ -4146,7 +4146,7 @@ Overview of node-oracledb functional tests
     162.25 ROLLBACK
     162.26 TRUNCATE
 
-163. executeMany.js
+163. executeMany1.js
     163.1 inserts many rows with bind by name
     163.2 inserts rows with bind by position
     163.3 DML RETURNING that returns single value
@@ -4235,3 +4235,6 @@ Overview of node-oracledb functional tests
     171.1 oracledb.fetchAsBuffer
     171.2 oracledb.fetchAsString
     171.3 data bind
+
+172. executeMany2.js
+    172.1 Negative - incorrect parameters

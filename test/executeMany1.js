@@ -19,7 +19,7 @@
  * See LICENSE.md for relevant licenses.
  *
  * NAME
- *   163. executeMany.js
+ *   163. executeMany1.js
  *
  * DESCRIPTION
  *   Test connection.executeMany() method.
@@ -32,7 +32,7 @@ var should   = require('should');
 var async    = require('async');
 var dbConfig = require('./dbconfig.js');
 
-describe('163. executeMany.js', function() {
+describe('163. executeMany1.js', function() {
 
   var conn;
 
