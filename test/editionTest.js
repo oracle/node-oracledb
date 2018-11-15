@@ -44,11 +44,14 @@ describe('160. editionTest.js', function() {
       if (!dbConfig.test.DBA_PRIVILEGE) {
         isRunnable = false;
         callback(null);
+        return;
       }
 
       oracledb.getConnection(dbConfig, function(err, connection) {
-        if (err) callback(err);
-
+        if (err) {
+          callback(err);
+          return;
+        }
         if (connection.oracleServerVersion < 1202000100) {
           isRunnable = false;
         } else {
@@ -87,33 +90,21 @@ describe('160. editionTest.js', function() {
             );
           },
           function(cb) {
-            var sql = "DROP EDITION nodb_edition_two CASCADE";
-            dbaConn.execute(
-              sql,
-              function(err) {
-                if (err) {
-                  (err.message).should.startWith('ORA-38802:');
-                  // ORA-38802: edition does not exist
-                }
-                cb();
-              }
-            );
-          },
-          function(cb) {
-            var sql = "DROP EDITION nodb_edition_one CASCADE";
-            dbaConn.execute(
-              sql,
-              function(err) {
-                if (err) {
-                  (err.message).should.startWith('ORA-38802:');
-                }
-                cb();
-              }
-            );
-          },
-          // Create edition nodb_edition_one
-          function(cb) {
-            var sql = "CREATE EDITION nodb_edition_one";
+            //var sql = "DROP EDITION nodb_edition_one CASCADE";
+            let sql = "BEGIN \n" +
+                       "    DECLARE \n" +
+                       "        e_edition_missing EXCEPTION; \n" +
+                       "        PRAGMA EXCEPTION_INIT(e_edition_missing, -38802); \n" +
+                       "    BEGIN \n" +
+                       "        EXECUTE IMMEDIATE('DROP EDITION nodb_edition_one CASCADE'); \n" +
+                       "    EXCEPTION \n" +
+                       "        WHEN e_edition_missing \n" +
+                       "        THEN NULL; \n" +
+                       "    END; \n" +
+                       "    EXECUTE IMMEDIATE (' \n" +
+                       "        CREATE EDITION nodb_edition_one\n" +
+                       "    '); \n" +
+                       "END; ";
             dbaConn.execute(
               sql,
               function(err) {
@@ -122,9 +113,21 @@ describe('160. editionTest.js', function() {
               }
             );
           },
-          // Create edition nodb_edition_two
           function(cb) {
-            var sql = "CREATE EDITION nodb_edition_two";
+            let sql = "BEGIN \n" +
+                       "    DECLARE \n" +
+                       "        e_edition_missing EXCEPTION; \n" +
+                       "        PRAGMA EXCEPTION_INIT(e_edition_missing, -38802); \n" +
+                       "    BEGIN \n" +
+                       "        EXECUTE IMMEDIATE('DROP EDITION nodb_edition_two CASCADE'); \n" +
+                       "    EXCEPTION \n" +
+                       "        WHEN e_edition_missing \n" +
+                       "        THEN NULL; \n" +
+                       "    END; \n" +
+                       "    EXECUTE IMMEDIATE (' \n" +
+                       "        CREATE EDITION nodb_edition_two\n" +
+                       "    '); \n" +
+                       "END; ";
             dbaConn.execute(
               sql,
               function(err) {
@@ -135,7 +138,20 @@ describe('160. editionTest.js', function() {
           },
           // Create user
           function(cb) {
-            var sql = "CREATE USER nodb_schema_edition IDENTIFIED BY nodb_schema_edition";
+            let sql = "BEGIN \n" +
+                      "    DECLARE \n" +
+                      "        e_user_missing EXCEPTION; \n" +
+                      "        PRAGMA EXCEPTION_INIT(e_user_missing, -01918); \n" +
+                      "    BEGIN \n" +
+                      "        EXECUTE IMMEDIATE('DROP USER nodb_schema_edition CASCADE'); \n" +
+                      "    EXCEPTION \n" +
+                      "        WHEN e_user_missing \n" +
+                      "        THEN NULL; \n" +
+                      "    END; \n" +
+                      "    EXECUTE IMMEDIATE (' \n" +
+                      "        CREATE USER nodb_schema_edition IDENTIFIED BY nodb_schema_edition\n" +
+                      "    '); \n" +
+                      "END; ";
             dbaConn.execute(
               sql,
               function(err) {
