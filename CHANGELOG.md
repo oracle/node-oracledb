@@ -1,5 +1,7 @@
 # Change Log
 
+## node-oracledb v3.0.1 (DD Mon YYYY)
+
 ## node-oracledb v3.0.0 (1 Oct 2018)
 
 - Added new APIs for Simple Oracle Document Access
