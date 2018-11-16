@@ -203,6 +203,11 @@ function verifyBinary() {
 function getRemoteFileReadStream(hostname, path) {
   packageUtil.trace('In getRemoteFileReadStream', hostname, path);
 
+  const agent = process.env.NODE_ORACLEDB_DL_AGENT;
+  if(agent) {
+    return getFileReadStreamByAgent(hostname, path, agent);
+  }
+
   const proxyConfig = getProxyConfig(hostname);
 
   if (proxyConfig.useProxy) {
@@ -317,6 +322,28 @@ function getFileReadStreamBase(hostname, path, socket) {
       }
     });
   });
+}
+
+function getFileReadStreamByAgent(hostname, path, agent) {
+
+  const uri = `https://${hostname}/${path}`;
+  packageUtil.trace('In getFileReadStreamByAgent', uri, agent);
+
+  const stream = new (require('events'));
+  stream.setEncoding = () => null;
+  const { spawn } = require('child_process');
+
+  const proc = spawn(agent, [uri]);
+  proc.on('error', error => stream.emit('error', error));
+  proc.on('exit', error => stream.emit('close'));
+  proc.stdout.on('error', error => stream.emit('error', error));
+  proc.stdout.on('data', data => stream.emit('data', data));
+  proc.stdout.on('end', () => stream.emit('end'));
+  proc.stderr.on('data', data => packageUtil.error(data.toString()));
+
+  stream.pipe = (...args) => proc.stdout.pipe(...args);
+    
+  return Promise.resolve(stream);
 }
 
 // installBinary creates the directories for the binary, downloads the custom
