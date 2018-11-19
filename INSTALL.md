@@ -1657,8 +1657,8 @@ If `require('oracledb')` fails:
   did not self-register*?  You must rebuild node-oracledb when you
   upgrade Node.js.
 
-Questions and issues can be posted as [GitHub Issues][10].
-
+Issues and questions about node-oracledb can be posted on [GitHub][10] or
+[Slack][48] ([link to join Slack][49]).
 
 
 [1]: http://oracle.github.io/node-oracledb/
@@ -1707,3 +1707,5 @@ Questions and issues can be posted as [GitHub Issues][10].
 [45]: https://www.youtube.com/watch?v=WDJacg0NuLo
 [46]: http://yum.oracle.com/oracle-linux-nodejs.html
 [47]: https://oracle.github.io/node-oracledb/doc/api.html#migrate
+[48]: https://node-oracledb.slack.com/
+[49]: https://node-oracledb.slack.com/join/shared_invite/enQtNDU4Mjc2NzM5OTA2LTdkMzczODY3OGY3MGI0Yjk3NmQ4NDU4MTI2OGVjNTYzMjE5OGY5YzVkNDY4MWNkNjFiMDM2ZDMwOWRjNWVhNTg
