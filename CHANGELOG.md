@@ -9,7 +9,7 @@ This release is currently under development.
 
 ## node-oracledb v3.0.1 (15 Nov 2018)
 
-- Improve validatation for SODA `createDocument()` arguments.
+- Improve validation for SODA `createDocument()` arguments.
 
 - Stated compatibility is now for Node.js 6, 8, 10, and 11.
 
