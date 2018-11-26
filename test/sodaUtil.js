@@ -29,6 +29,7 @@
 
 const oracledb = require('oracledb');
 const dbconfig = require('./dbconfig.js');
+const assert   = require('assert');
 
 let sodaUtil = exports;
 module.exports = sodaUtil;
@@ -82,5 +83,16 @@ sodaUtil.checkPrerequisites = async function() {
     return true;
   } catch(err) {
     console.log('Error in checking prerequistes:\n', err);
+  }
+};
+
+sodaUtil.assertThrowsAsync = async function(fn, regExp) {
+  let f = () => {};
+  try {
+    await fn();
+  } catch(e) {
+    f = () => { throw e; };
+  } finally {
+    assert.throws(f, regExp);
   }
 };

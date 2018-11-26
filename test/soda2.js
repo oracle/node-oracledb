@@ -339,14 +339,20 @@ describe('165. soda2.js', () => {
       };
 
       let options2 = { metaData: t_metadata2 };
-      collection2 = await sd.createCollection(t_collname, options2); // should error out
+
+      await sodaUtil.assertThrowsAsync(
+        async () => await sd.createCollection(t_collname, options2),
+        {
+          errorNum: 40669,
+          offset: 0,
+          message: /^ORA-40669/
+        }
+      );
+      // ORA-40669: Collection create failed: collection with same name but different metadata exists.
 
     } catch(err) {
-      should.exist(err);
-      (err.message).should.startWith('ORA-40669:');
-      // ORA-40669: Collection create failed: collection with same name but different metadata exists.
+      should.not.exist(err);
     } finally {
-      should.not.exist(collection2);
       if (collection1) {
         try {
           await collection1.drop();
@@ -365,20 +371,33 @@ describe('165. soda2.js', () => {
   }); // 165.6
 
   it('165.7 Negative - createCollection() when collection name is empty string', async () => {
-    let conn;
+    let conn, coll;
     try {
       conn = await oracledb.getConnection(dbconfig);
       let sd = conn.getSodaDatabase();
 
       let collName = "";
-      let coll = await sd.createCollection(collName);
-      await coll.drop();
+      await sodaUtil.assertThrowsAsync(
+        async () => await sd.createCollection(collName),
+        {
+          errorNum: 40658,
+          offset: 0,
+          message: /^ORA-40658/
+        }
+      );
+      // ORA-40658: Collection name cannot be null for this operation.
 
     } catch(err) {
-      should.exist(err);
-      // ORA-40658: Collection name cannot be null for this operation.
-      (err.message).should.startWith("ORA-40658:");
+      should.not.exist(err);
     } finally {
+      if (coll) {
+        try {
+          await coll.drop();
+        } catch(err) {
+          should.not.exist(err);
+        }
+      }
+
       if (conn) {
         try {
           await conn.close();

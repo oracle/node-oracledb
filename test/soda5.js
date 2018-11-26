@@ -86,7 +86,7 @@ describe('173. soda5.js', () => {
       await conn.commit();
 
     } catch(err) {
-      should.noConflict.exist(err);
+      should.not.exist(err);
     } finally {
       if (collection) {
         let res = await collection.drop();
@@ -173,16 +173,17 @@ describe('173. soda5.js', () => {
     } catch(err) {
       should.not.exist(err);
     }
-
-    try {
-      let indexSpec = { "foo": "bar" };
-      await collection.createIndex(indexSpec);
-
-    } catch(err) {
-      should.exist(err);
-      // ORA-40719: invalid index property foo
-      (err.message).should.startWith('ORA-40719:');
-    }
+    
+    let indexSpec = { "foo": "bar" };
+    await sodaUtil.assertThrowsAsync(
+      async () => await collection.createIndex(indexSpec),
+      {
+        errorNum: 40719,
+        offset: 0,
+        message: /^ORA-40719/
+      }
+    );
+    // ORA-40719: invalid index property foo
 
     if (collection) {
       let res = await collection.drop();
@@ -293,7 +294,7 @@ describe('173. soda5.js', () => {
       await conn.commit();
 
     } catch(err) {
-      should.noConflict.exist(err);
+      should.not.exist(err);
     } finally {
       if (collection) {
         let res = await collection.drop();
@@ -348,7 +349,7 @@ describe('173. soda5.js', () => {
       await conn.commit();
 
     } catch(err) {
-      should.noConflict.exist(err);
+      should.not.exist(err);
     } finally {
       if (collection) {
         let res = await collection.drop();
@@ -404,7 +405,7 @@ describe('173. soda5.js', () => {
       // await conn.commit();
 
     } catch(err) {
-      should.noConflict.exist(err);
+      should.not.exist(err);
     } finally {
       if (collection) {
         let res = await collection.drop();
@@ -462,7 +463,7 @@ describe('173. soda5.js', () => {
       await conn.commit();
 
     } catch(err) {
-      should.noConflict.exist(err);
+      should.not.exist(err);
     } finally {
       if (collection) {
         let res = await collection.drop();
@@ -529,7 +530,7 @@ const dropIdxOpt = async function(opts) {
     await conn.commit();
 
   } catch(err) {
-    should.noConflict.exist(err);
+    should.not.exist(err);
   } finally {
     if (collection) {
       let res = await collection.drop();

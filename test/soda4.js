@@ -264,14 +264,13 @@ describe('168. soda4.js', () => {
       /* The key must always be a string and is always returned a string as 
          well -- even if the "type" in the database is numeric. */
       let testKey = 86755;
-      sd.createDocument(testContent, { key: testKey } );
+      await sodaUtil.assertThrowsAsync(
+        async () => await sd.createDocument(testContent, { key: testKey } ),
+        /NJS-008: invalid type for "key" in parameter 2/
+      );
 
     } catch(err) {
-      should.exist(err);
-      should.strictEqual(
-        err.message,
-        'NJS-008: invalid type for "key" in parameter 2'
-      );
+      should.not.exist(err);
     } finally {
       if (coll) {
         try {
@@ -473,17 +472,16 @@ describe('168. soda4.js', () => {
       /* Negative value */
       let testMediaType = 65432;
       let testKey = '86755';
-      sd.createDocument(
-        testContent, 
-        { mediaType: testMediaType, key: testKey } 
+      await sodaUtil.assertThrowsAsync(
+        async () => await sd.createDocument(
+          testContent, 
+          { mediaType: testMediaType, key: testKey }
+        ),
+        /NJS-008: invalid type for "mediaType" in parameter 2/
       );
 
     } catch(err) {
-      should.exist(err);
-      should.strictEqual(
-        err.message,
-        'NJS-008: invalid type for "mediaType" in parameter 2'
-      );
+      should.not.exist(err);
     } finally {
       await conn.commit();
       if (coll) {

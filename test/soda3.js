@@ -121,24 +121,24 @@ describe('167. soda3.js', () => {
   it('167.5 getCollectionNames() - limit is null', async () => {
     try {
       let options = { limit: null };
-      let cNames = await sd.getCollectionNames(options);
-      should.strictEqual(cNames.length, t_collectionNames.length);
-      should.deepEqual(cNames, t_collectionNames.sort());
+      await sodaUtil.assertThrowsAsync(
+        async () => await sd.getCollectionNames(options),
+        /NJS-007: invalid value for "limit" in parameter 2/
+      );
     } catch(err) {
-      should.exist(err);
-      should.strictEqual(err.message, 'NJS-007: invalid value for "limit" in parameter 2');
+      should.not.exist(err);
     }
   });
 
   it('167.6 getCollectionNames() - limit is an empty string', async () => {
     try {
       let options = { limit: '' };
-      let cNames = await sd.getCollectionNames(options);
-      should.strictEqual(cNames.length, t_collectionNames.length);
-      should.deepEqual(cNames, t_collectionNames.sort());
+      await sodaUtil.assertThrowsAsync(
+        async () => await sd.getCollectionNames(options),
+        /NJS-008: invalid type for "limit" in parameter 2/
+      );
     } catch(err) {
-      should.exist(err);
-      should.strictEqual(err.message, 'NJS-008: invalid type for "limit" in parameter 2');
+      should.not.exist(err);
     }
   });
 
@@ -188,24 +188,24 @@ describe('167. soda3.js', () => {
   it('167.11 starsWith is null', async () => {
     try {
       let options = { startsWith: null };
-      let cNames = await sd.getCollectionNames(options);
-      should.strictEqual(cNames.length, t_collectionNames.length);
-      should.deepEqual(cNames, t_collectionNames.sort());
+      await sodaUtil.assertThrowsAsync(
+        async () => await sd.getCollectionNames(options),
+        /NJS-007: invalid value for "startsWith" in parameter 2/
+      );
     } catch(err) {
-      should.exist(err);
-      should.strictEqual(err.message, 'NJS-007: invalid value for "startsWith" in parameter 2');
+      should.not.exist(err);
     }
   });
 
   it('167.12 Negative - starsWith is invalid type, a Number', async () => {
     try {
       let options = { startsWith: 7 };
-      let cNames = await sd.getCollectionNames(options);
-      should.strictEqual(cNames.length, t_collectionNames.length);
-      should.deepEqual(cNames, t_collectionNames.sort());
+      await sodaUtil.assertThrowsAsync(
+        async () => await sd.getCollectionNames(options),
+        /NJS-008: invalid type for "startsWith" in parameter 2/
+      );
     } catch(err) {
-      should.exist(err);
-      should.strictEqual(err.message, 'NJS-008: invalid type for "startsWith" in parameter 2');
+      should.not.exist(err);
     }
   });
 
