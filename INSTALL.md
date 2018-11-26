@@ -1683,7 +1683,7 @@ Issues and questions about node-oracledb can be posted on [GitHub][10] or
 [17]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-E72B32D3-4343-475F-9CB4-CE28FF8EFD29
 [18]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-9D12F489-EC02-46BE-8CD4-5AECED0E2BA2
 [19]: https://github.com/oracle/node-oracledb/tree/master/examples
-[20]: http://www.oracle.com/technetwork/database/database-technologies/express-edition/overview/index.html
+[20]: https://www.oracle.com/database/technologies/appdev/xe.html
 [21]: https://blogs.oracle.com/opal/the-easiest-way-to-install-oracle-database-on-apple-mac-os-x
 [22]: http://www.oracle.com/technetwork/topics/intel-macsoft-096467.html
 [23]: https://docs.oracle.com/database/
