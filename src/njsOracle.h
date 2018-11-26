@@ -70,9 +70,9 @@ using namespace v8;
 // The suffix should be something like "-dev" or "-beta.1".
 // For production, leave NJS_NODE_ORACLEDB_SUFFIX undefined (not "")
 #define NJS_NODE_ORACLEDB_MAJOR       3
-#define NJS_NODE_ORACLEDB_MINOR       0
-#define NJS_NODE_ORACLEDB_PATCH       1
-#define NJS_NODE_ORACLEDB_SUFFIX
+#define NJS_NODE_ORACLEDB_MINOR       1
+#define NJS_NODE_ORACLEDB_PATCH       0
+#define NJS_NODE_ORACLEDB_SUFFIX      "-dev"
 
 // define stringified version and driver name
 #define NJS_STR_HELPER(x)       #x
