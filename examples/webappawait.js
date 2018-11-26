@@ -28,7 +28,7 @@
  *   accepts a URL parameter for the department ID, for example:
  *   http://localhost:7000/90
  *
- *   In some networks, pool termination may hang unless you have
+ *   In some networks forced pool termination may hang unless you have
  *   'disable_oob=on' in sqlnet.ora, see
  *   https://oracle.github.io/node-oracledb/doc/api.html#tnsadmin
  *

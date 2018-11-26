@@ -22,6 +22,8 @@
  *   Tests a basic connection to the database.
  *   See dbconfig.js for information on connectString formats.
  *
+ *   For a connection pool example see connectionpool.js
+ *
  *****************************************************************************/
 
 var oracledb = require('oracledb');
