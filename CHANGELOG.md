@@ -1,5 +1,12 @@
 # Change Log
 
+## node-oracledb v3.1.0 (DD Mon YYYY)
+
+This release is currently under development.
+
+- Display correct error message for SODA `createIndex()` when no
+  parameter is passed.
+
 ## node-oracledb v3.0.1 (15 Nov 2018)
 
 - Improve validatation for SODA `createDocument()` arguments.
