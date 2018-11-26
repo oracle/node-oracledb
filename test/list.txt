@@ -4254,3 +4254,27 @@ Overview of node-oracledb functional tests
     173.9 Negative - dropIndex() no parameter
     173.10 option object of dropIndex(), basic case
     173.11 option object of dropIndex(), boolean value is false
+
+174. soda6.js
+    174.1 filter() basic case
+    174.2 Negative - fiter(filterSpec) when filterSpec is null
+    174.3 filterSpec is OK to be an empty object
+    174.4 Key(), basic case
+    174.5 Key(), no matched key
+    174.6 Negative - Key(null)
+    174.7 Key(), invalid type
+    174.8 Keys(), basic case
+    174.9 Keys([]) empty array, it selects all documents
+    174.10 Negative - keys() no parameter
+    174.11 Negative - keys(null)
+    174.12 try to query documents with nonexistent keys
+
+  175. soda7.js
+    175.1 count(), basic case
+    175.2 Negative - skip().count()
+    175.3 Negative - limit().count()
+    175.4 keys().count()
+    175.5 getCursor(), basic case
+    175.6 skip().getCursor()
+    175.7 getCursor(), empty document matched
+    175.8 Negative - close document cursor two times

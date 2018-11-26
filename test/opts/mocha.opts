@@ -199,3 +199,5 @@ test/soda4.js
 test/jsObjectGetter2.js
 test/executeMany2.js
 test/soda5.js
+test/soda6.js
+test/soda7.js

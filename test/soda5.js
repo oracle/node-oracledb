@@ -177,12 +177,14 @@ describe('173. soda5.js', () => {
     let indexSpec = { "foo": "bar" };
     await sodaUtil.assertThrowsAsync(
       async () => await collection.createIndex(indexSpec),
-      {
-        errorNum: 40719,
-        offset: 0,
-        message: /^ORA-40719/
-      }
+      // {
+      //   errorNum: 40719,
+      //   offset: 0,
+      //   message: /^ORA-40719/
+      // }
+      /ORA-40719:/
     );
+
     // ORA-40719: invalid index property foo
 
     if (collection) {

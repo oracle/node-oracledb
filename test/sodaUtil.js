@@ -86,13 +86,13 @@ sodaUtil.checkPrerequisites = async function() {
   }
 };
 
-sodaUtil.assertThrowsAsync = async function(fn, regExp) {
+sodaUtil.assertThrowsAsync = async function(fn, RegExp) {
   let f = () => {};
   try {
     await fn();
   } catch(e) {
     f = () => { throw e; };
   } finally {
-    assert.throws(f, regExp);
+    assert.throws(f, RegExp);
   }
 };

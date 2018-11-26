@@ -258,7 +258,7 @@ describe('165. soda2.js', () => {
 
   it('165.6 throw error when creating collection with the existing name and different metadata', async () => {
     let conn;
-    let collection1, collection2;
+    let collection1;
     try {
       conn = await oracledb.getConnection(dbconfig);
       let sd = conn.getSodaDatabase();
@@ -342,11 +342,7 @@ describe('165. soda2.js', () => {
 
       await sodaUtil.assertThrowsAsync(
         async () => await sd.createCollection(t_collname, options2),
-        {
-          errorNum: 40669,
-          offset: 0,
-          message: /^ORA-40669/
-        }
+        /ORA-40669:/
       );
       // ORA-40669: Collection create failed: collection with same name but different metadata exists.
 
@@ -379,11 +375,7 @@ describe('165. soda2.js', () => {
       let collName = "";
       await sodaUtil.assertThrowsAsync(
         async () => await sd.createCollection(collName),
-        {
-          errorNum: 40658,
-          offset: 0,
-          message: /^ORA-40658/
-        }
+        /ORA-40658:/
       );
       // ORA-40658: Collection name cannot be null for this operation.
 
