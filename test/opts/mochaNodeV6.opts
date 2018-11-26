@@ -1,7 +1,5 @@
 --require should
 --require async
---reporter dot
---ui bdd
 --timeout 1000000
 
 test/connection.js
