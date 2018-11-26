@@ -4,8 +4,16 @@
 
 This release is currently under development.
 
+- Support proxies and external authentication with standalone
+  connections (ODPI-C change).
+
 - Display correct error message for SODA `createIndex()` when no
   parameter is passed.
+
+- Fix some SODA stability issues (ODPI-C change).
+
+- Improved the statement error whitelist to avoid unnecessarily
+  dropping statements from the statement cache (ODPI-C change).
 
 ## node-oracledb v3.0.1 (15 Nov 2018)
 
