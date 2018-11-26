@@ -454,7 +454,7 @@ function install() {
 
   const nodeMajorVersion = Number(process.version.split('.')[0].replace(/^v/, ''));
 
-  if (!nodeMajorVersion >= 6) {
+  if (nodeMajorVersion < 6) {
     done(new Error('Node.js v6.0.0 or higher is required to install pre-built binaries'));
     return;
   }
