@@ -56,6 +56,7 @@ This node-oracledb release has been tested with Node.js 6, 8, 10 and
 11 on 64-bit Oracle Linux, Windows and macOS.  The add-on can also
 build on some 32-bit Linux, 32-bit Windows, Solaris and AIX
 environments, but these architectures have not been fully tested.
+Older versions of node-oracledb may work with older versions of Node.js.
 
 Node-oracledb is an [add-on](https://nodejs.org/api/addons.html)
 available as C++ and C source code.  Pre-built binaries are available
