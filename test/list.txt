@@ -4210,13 +4210,12 @@ Overview of node-oracledb functional tests
 
 168. soda4.js
     168.1 insertOneAndGet() fetches attributes without content
-    168.2 cannot customize the key value without metadata setting
-    168.3 content is null
-    168.4 customize the key value, String value
-    168.5 Negative - customize the key value, numeric value
-    168.6 get mediaType
-    168.7 customize the value of mediaType
-    168.8 Negative - customize mediaType, invalide type, numeric value
+    168.2 content is null
+    168.3 customize the key value, String value
+    168.4 Negative - customize the key value, numeric value
+    168.5 get mediaType
+    168.6 customize the value of mediaType
+    168.7 Negative - customize mediaType, invalide type, numeric value
 
 170. poolDrain.js
     170.1 close pool with force flag, and prevent new connection

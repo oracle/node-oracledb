@@ -91,54 +91,12 @@ describe('168. soda4.js', () => {
     }
   }); // 168.1
 
-  it('168.2 cannot customize the key value without metadata setting', async () => {
-    let conn, coll;
-    try {
-      conn = await oracledb.getConnection(dbconfig);
-      let sd = conn.getSodaDatabase();
-      let collectionName = 'soda_test_168_2';
-      coll = await sd.createCollection(collectionName);
-
-      // Insert a new document
-      let testContent = {
-        name:    "Shelly",
-        address: {city: "Shenzhen", country: "China"}
-      };
-      let testKey = "86755";
-      let testDoc = sd.createDocument(testContent, { key: testKey} );
-      should.exist(testDoc);
-      await coll.insertOne(testDoc);
-
-    } catch(err) {
-      should.exist(err);
-      (err.message).should.startWith('ORA-40665:');
-      // ORA-40665: A client-assigned key cannot be used for this operation.
-    } finally {
-      if (coll) {
-        try {
-          let res = await coll.drop();
-          should.strictEqual(res.dropped, true);
-        } catch(err) {
-          should.not.exist(err);
-        }
-      }
-
-      if (conn) {
-        try {
-          await conn.close();
-        } catch(err) {
-          should.not.exist(err);
-        }
-      }
-    }
-  }); // 168.2
-
-  it('168.3 content is null', async () => {
+  it('168.2 content is null', async () => {
     let conn;
     try {
       conn = await oracledb.getConnection(dbconfig);
       let sd = conn.getSodaDatabase();
-      let collectionName = 'soda_test_168_3';
+      let collectionName = 'soda_test_168_2';
       let coll = await sd.createCollection(collectionName);
 
       // Insert a new document
@@ -171,14 +129,14 @@ describe('168. soda4.js', () => {
         }
       }
     }
-  }); // 168.3
+  }); // 168.2
 
-  it('168.4 customize the key value, String value', async () => {
+  it('168.3 customize the key value, String value', async () => {
     let conn;
     try {
       conn = await oracledb.getConnection(dbconfig);
       let sd = conn.getSodaDatabase();
-      let collectionName = 'soda_test_168_4';
+      let collectionName = 'soda_test_168_3';
       let testMetaData = {
         "schemaName" : dbconfig.user.toUpperCase(),
         "tableName" : collectionName,
@@ -252,10 +210,10 @@ describe('168. soda4.js', () => {
         }
       }
     }
-  }); // 168.4
+  }); // 168.3
 
-  // A variation of 168.4
-  it('168.5 Negative - customize the key value, numeric value', async () => {
+  // A variation of 168.3
+  it('168.4 Negative - customize the key value, numeric value', async () => {
     let conn, coll;
     try {
       conn = await oracledb.getConnection(dbconfig);
@@ -332,14 +290,14 @@ describe('168. soda4.js', () => {
         }
       }
     }
-  }); // 168.5
+  }); // 168.4
 
-  it('168.6 get mediaType', async () => {
+  it('168.5 get mediaType', async () => {
     let conn;
     try {
       conn = await oracledb.getConnection(dbconfig);
       let sd = conn.getSodaDatabase();
-      let collectionName = 'soda_test_168_6';
+      let collectionName = 'soda_test_168_5';
       let coll = await sd.createCollection(collectionName);
 
       // Insert a new document
@@ -371,14 +329,14 @@ describe('168. soda4.js', () => {
         }
       }
     }
-  }); // 168.6
+  }); // 168.5
 
-  it('168.7 customize the value of mediaType', async () => {
+  it('168.6 customize the value of mediaType', async () => {
     let conn, coll;
     try {
       conn = await oracledb.getConnection(dbconfig);
       let sd = conn.getSodaDatabase();
-      let collectionName = 'soda_test_168_7';
+      let collectionName = 'soda_test_168_6';
       let testMetaData = {
         "schemaName" : dbconfig.user.toUpperCase(),
         "tableName" : collectionName,
@@ -460,9 +418,9 @@ describe('168. soda4.js', () => {
         }
       }
     }
-  }); // 168.7
+  }); // 168.6
 
-  it('168.8 Negative - customize mediaType, invalide type, numeric value', async () => {
+  it('168.7 Negative - customize mediaType, invalide type, numeric value', async () => {
     let conn, coll;
     try {
       conn = await oracledb.getConnection(dbconfig);
@@ -545,6 +503,6 @@ describe('168. soda4.js', () => {
         }
       }
     }
-  }); // 168.8
+  }); // 168.7
 
 });
