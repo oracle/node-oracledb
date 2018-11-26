@@ -819,7 +819,6 @@ NAN_SETTER(njsOracledb::SetFetchAsBuffer)
 NAN_GETTER(njsOracledb::GetOracleClientVersion)
 {
     dpiVersionInfo versionInfo;
-    unsigned int version;
 
     njsOracledb *oracledb = (njsOracledb*) ValidateGetter(info);
     if (!oracledb)
@@ -830,14 +829,7 @@ NAN_GETTER(njsOracledb::GetOracleClientVersion)
         return;
     }
 
-    version = static_cast <unsigned int> (
-              100000000 * versionInfo.versionNum     +
-                1000000 * versionInfo.releaseNum     +
-                  10000 * versionInfo.updateNum      +
-                    100 * versionInfo.portReleaseNum +
-                          versionInfo.portUpdateNum );
-
-    info.GetReturnValue().Set(version);
+    info.GetReturnValue().Set(versionInfo.fullVersionNum);
 }
 
 

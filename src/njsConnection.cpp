@@ -2808,11 +2808,7 @@ NAN_GETTER(njsConnection::GetOracleServerVersion)
         njsOracledb::ThrowDPIError();
         return;
     }
-    uint32_t oracleServerVersion = static_cast<uint32_t> (
-            100000000 * versionInfo.versionNum +
-            1000000 * versionInfo.releaseNum + 10000 * versionInfo.updateNum +
-            100 * versionInfo.portReleaseNum + versionInfo.portUpdateNum);
-    info.GetReturnValue().Set(oracleServerVersion);
+    info.GetReturnValue().Set(versionInfo.fullVersionNum);
 }
 
 
