@@ -4247,12 +4247,11 @@ Overview of node-oracledb functional tests
     173.1 create index, basic case
     173.2 query row not via indexSpec
     173.3 Negative - invalid indexSpec, invalid index property
-    173.4 Negative - createIndex() without parameter
-    173.5 collection.drop(), basic case
-    173.6 drop multiple times, no error thrown
-    173.7 dropIndex(), basic case
-    173.8 dropping index does not impact query
-    173.9 The index is dropped regardless of the auto commit mode
-    173.10 Negative - dropIndex() no parameter
-    173.11 option object of dropIndex(), basic case
-    173.12 option object of dropIndex(), boolean value is false
+    173.4 collection.drop(), basic case
+    173.5 drop multiple times, no error thrown
+    173.6 dropIndex(), basic case
+    173.7 dropping index does not impact query
+    173.8 The index is dropped regardless of the auto commit mode
+    173.9 Negative - dropIndex() no parameter
+    173.10 option object of dropIndex(), basic case
+    173.11 option object of dropIndex(), boolean value is false
