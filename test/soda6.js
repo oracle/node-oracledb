@@ -181,7 +181,7 @@ describe('174. soda6.js', () => {
       );
 
       // Insert another document
-      let content1 = { id: 1008, name: "Justin",    office: "Shenzhen" };
+      let content1 = { id: 1008, name: "Justin", office: "Shenzhen" };
       let doc1 = await collection.insertOneAndGet(content1);
       let key1 = doc1.key;
       (key1).should.be.a.String();
@@ -354,7 +354,6 @@ describe('174. soda6.js', () => {
         myContents[i] = await documents[i].getContent();
         (myContents[i]).should.be.oneOf(t_contents);
       }
-      
 
     } catch(err) {
       should.not.exist(err);

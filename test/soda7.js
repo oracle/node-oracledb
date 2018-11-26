@@ -413,4 +413,284 @@ describe('175. soda7.js', () => {
     }
   }); // 175.8
 
+  it('175.9 getDocuments(), basic case', async () => {
+    let conn, collection;
+
+    try {
+      conn = await oracledb.getConnection(dbconfig);
+      let soda = conn.getSodaDatabase();
+      collection = await soda.createCollection("soda_test_175_9");
+
+      await Promise.all(
+        t_contents.map(function(content) {
+          return collection.insertOne(content);
+        })
+      );
+
+      // Fetch back
+      let documents = await collection.find().getDocuments();
+      
+      // Get contents
+      let myContents = [];
+      for (let i = 0; i < documents.length; i++ ) {
+        myContents[i] = await documents[i].getContent();
+        (myContents[i]).should.be.oneOf(t_contents);
+      }
+
+    } catch(err) {
+      should.not.exist(err);
+    } finally {
+      await conn.commit();
+
+      if (collection) {
+        let res = await collection.drop();
+        should.strictEqual(res.dropped, true);
+      }
+      if (conn) {
+        try {
+          await conn.close();
+        } catch(err) {
+          should.not.exist(err);
+        }
+      }
+    }
+  }); // 175.9
+
+  it('175.10 getDocuments(), no documents matched', async () => {
+    let conn, collection;
+
+    try {
+      conn = await oracledb.getConnection(dbconfig);
+      let soda = conn.getSodaDatabase();
+      collection = await soda.createCollection("soda_test_175_10");
+
+      // Fetch back
+      let documents = await collection.find().getDocuments();
+      should.deepEqual(documents, []);
+
+    } catch(err) {
+      should.not.exist(err);
+    } finally {
+      await conn.commit();
+
+      if (collection) {
+        let res = await collection.drop();
+        should.strictEqual(res.dropped, true);
+      }
+      if (conn) {
+        try {
+          await conn.close();
+        } catch(err) {
+          should.not.exist(err);
+        }
+      }
+    }
+  }); // 175.10
+
+  it('175.11 getOne(), basic case', async () => {
+    let conn, collection;
+
+    try {
+      conn = await oracledb.getConnection(dbconfig);
+      let soda = conn.getSodaDatabase();
+      collection = await soda.createCollection("soda_test_175_11");
+
+      let myKeys = [];
+      for (let i = 0; i < t_contents.length; i++) {
+        let content = t_contents[i];
+        let doc = await collection.insertOneAndGet(content);
+        myKeys[i] = doc.key;
+      }
+
+      // Fetch back
+      let document = await collection.find().key(myKeys[1]).getOne();
+      let content = await document.getContent();
+      content.should.be.oneOf(t_contents);
+
+    } catch(err) {
+      should.not.exist(err);
+    } finally {
+      await conn.commit();
+
+      if (collection) {
+        let res = await collection.drop();
+        should.strictEqual(res.dropped, true);
+      }
+      if (conn) {
+        try {
+          await conn.close();
+        } catch(err) {
+          should.not.exist(err);
+        }
+      }
+    }
+  }); // 175.11
+
+  it('175.12 getOne(), the filter matches multiple documents', async () => {
+    let conn, collection;
+
+    try {
+      conn = await oracledb.getConnection(dbconfig);
+      let soda = conn.getSodaDatabase();
+      collection = await soda.createCollection("soda_test_175_12");
+
+      await Promise.all(
+        t_contents.map(function(content) {
+          return collection.insertOne(content);
+        })
+      );
+
+      // Fetch back
+      let document = await collection.find().getOne();
+      let content = await document.getContent();
+      content.should.be.oneOf(t_contents);
+
+    } catch(err) {
+      should.not.exist(err);
+    } finally {
+      await conn.commit();
+
+      if (collection) {
+        let res = await collection.drop();
+        should.strictEqual(res.dropped, true);
+      }
+      if (conn) {
+        try {
+          await conn.close();
+        } catch(err) {
+          should.not.exist(err);
+        }
+      }
+    }
+  }); // 175.12
+
+  it('175.13 remove(), basic case', async () => {
+    let conn, collection;
+
+    try {
+      conn = await oracledb.getConnection(dbconfig);
+      let soda = conn.getSodaDatabase();
+      collection = await soda.createCollection("soda_test_175_13");
+
+      await Promise.all(
+        t_contents.map(function(content) {
+          return collection.insertOne(content);
+        })
+      );
+
+      // Fetch back
+      let result = await collection
+        .find()
+        .filter({ "office": {"$like": "Shenzhen"} })
+        .remove();
+
+      should.strictEqual(result.count, 2);
+
+      let remainingLength = await collection.find().count();
+      should.strictEqual( remainingLength.count, (t_contents.length - result.count) );
+
+    } catch(err) {
+      should.not.exist(err);
+    } finally {
+      await conn.commit();
+
+      if (collection) {
+        let res = await collection.drop();
+        should.strictEqual(res.dropped, true);
+      }
+      if (conn) {
+        try {
+          await conn.close();
+        } catch(err) {
+          should.not.exist(err);
+        }
+      }
+    }
+  }); // 175.13
+
+  it('175.14 remove(), remove zero document', async () => {
+    let conn, collection;
+
+    try {
+      conn = await oracledb.getConnection(dbconfig);
+      let soda = conn.getSodaDatabase();
+      collection = await soda.createCollection("soda_test_175_14");
+
+      await Promise.all(
+        t_contents.map(function(content) {
+          return collection.insertOne(content);
+        })
+      );
+
+      // Fetch back
+      let result = await collection
+        .find()
+        .key('4A5AF2AAEB124FD4BFF80BC3630CB048')
+        .remove();
+
+      should.strictEqual(result.count, 0);
+
+      let remainingLength = await collection.find().count();
+      should.strictEqual( remainingLength.count, (t_contents.length - result.count) );
+
+    } catch(err) {
+      should.not.exist(err);
+    } finally {
+      await conn.commit();
+
+      if (collection) {
+        let res = await collection.drop();
+        should.strictEqual(res.dropped, true);
+      }
+      if (conn) {
+        try {
+          await conn.close();
+        } catch(err) {
+          should.not.exist(err);
+        }
+      }
+    }
+  }); // 175.14
+
+  it('175.15 remove(), remove multiple times', async () => {
+    let conn, collection;
+
+    try {
+      conn = await oracledb.getConnection(dbconfig);
+      let soda = conn.getSodaDatabase();
+      collection = await soda.createCollection("soda_test_175_13");
+
+      await Promise.all(
+        t_contents.map(function(content) {
+          return collection.insertOne(content);
+        })
+      );
+
+      // Fetch back
+      let result = await collection.find().remove();
+      result = await collection.find().remove();
+
+      should.strictEqual(result.count, 0);
+
+      let remainingLength = await collection.find().count();
+      should.strictEqual(remainingLength.count, 0);
+
+    } catch(err) {
+      should.not.exist(err);
+    } finally {
+      await conn.commit();
+
+      if (collection) {
+        let res = await collection.drop();
+        should.strictEqual(res.dropped, true);
+      }
+      if (conn) {
+        try {
+          await conn.close();
+        } catch(err) {
+          should.not.exist(err);
+        }
+      }
+    }
+  }); // 175.15
 });
