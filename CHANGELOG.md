@@ -4,7 +4,7 @@
 
 This release is currently under development.
 
-- Support proxies and external authentication with standalone
+- Support user proxies and external authentication with standalone
   connections (ODPI-C change).
 
 - Display correct error message for SODA `createIndex()` when no
