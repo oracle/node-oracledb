@@ -134,6 +134,7 @@ public:
 
 private:
 
+    static bool InitDPI(njsBaton *baton);
     static bool InitCommonCreateParams(njsBaton *baton,
             dpiCommonCreateParams *params);
 
@@ -224,7 +225,6 @@ private:
     Nan::Persistent<Array> jsFetchAsStringTypes;
     Nan::Persistent<Array> jsFetchAsBufferTypes;
     uint32_t lobPrefetchSize;
-    unsigned int oraClientVer;
     int32_t poolPingInterval;
 
     static Nan::Persistent<FunctionTemplate> oracledbTemplate_s;

@@ -1626,8 +1626,16 @@ If `npm install oracledb` fails:
 
 If `require('oracledb')` fails:
 
-- If you got *NJS-045: cannot load the oracledb add-on binary for
-  Node.js* or *DPI-1047: Oracle Client library cannot be loaded*,
+- Do you have multiple copies of Node.js installed?  Did the correct
+  `npm` and `node-gyp` get invoked?
+
+- Did you get *Error: Module version mismatch* or *Error: Module
+  did not self-register*?  You must rebuild node-oracledb when you
+  upgrade Node.js.
+
+If creating a connection fails:
+
+- If you got *DPI-1047: Oracle Client library cannot be loaded*,
   then review any messages and the installation instructions.
 
 - Does your Node.js architecture (32-bit or 64-bit) match the Oracle
@@ -1652,13 +1660,6 @@ If `require('oracledb')` fails:
 
 - On macOS, did you install Oracle Instant Client in `~/lib` or
   `/usr/local/lib`?
-
-- Do you have multiple copies of Node.js installed?  Did the correct
-  `npm` and `node-gyp` get invoked?
-
-- Did you get *Error: Module version mismatch* or *Error: Module
-  did not self-register*?  You must rebuild node-oracledb when you
-  upgrade Node.js.
 
 Issues and questions about node-oracledb can be posted on [GitHub][10] or
 [Slack][48] ([link to join Slack][49]).

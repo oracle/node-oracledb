@@ -96,7 +96,6 @@ njsOracledb::njsOracledb()
     externalAuth            = false;
     lobPrefetchSize         = NJS_LOB_PREFETCH_SIZE;
     poolPingInterval        = NJS_POOL_DEFAULT_PING_INTERVAL;
-    oraClientVer            = 0;
     events                  = false;
 }
 
@@ -108,14 +107,6 @@ njsOracledb::njsOracledb()
 void njsOracledb::Init(Local<Object> target)
 {
     Nan::HandleScope scope;
-    dpiErrorInfo errorInfo;
-
-    // create DPI context
-    if (dpiContext_create(DPI_MAJOR_VERSION, DPI_MINOR_VERSION,
-            &globalDPIContext, &errorInfo) < 0) {
-        Nan::ThrowError(errorInfo.message);
-        return;
-    }
 
     Local<FunctionTemplate> temp = Nan::New<FunctionTemplate>(New);
     temp->InstanceTemplate()->SetInternalFieldCount(1);
@@ -213,21 +204,41 @@ void njsOracledb::Init(Local<Object> target)
 //-----------------------------------------------------------------------------
 NAN_METHOD(njsOracledb::New)
 {
-    dpiVersionInfo versionInfo;
-
-    if (dpiContext_getClientVersion(globalDPIContext, &versionInfo) < 0) {
-        ThrowDPIError();
-        return;
-    }
     njsOracledb *oracledb = new njsOracledb();
-    oracledb->oraClientVer = static_cast<unsigned int> (
-                             100000000 * versionInfo.versionNum     +
-                               1000000 * versionInfo.releaseNum     +
-                                 10000 * versionInfo.updateNum      +
-                                   100 * versionInfo.portReleaseNum +
-                                         versionInfo.portUpdateNum  );
     oracledb->Wrap(info.Holder());
     info.GetReturnValue().Set(info.Holder());
+}
+
+
+//-----------------------------------------------------------------------------
+// njsOracledb::InitDPI()
+//   Initialize the ODPI-C library. This is done when the first standalone
+// connection or session pool is created, rather than when the module is first
+// imported so that manipulating Oracle environment variables will work as
+// expected. It also has the additional benefit of reducing the number of
+// errors that can take place when the module is imported.
+//-----------------------------------------------------------------------------
+bool njsOracledb::InitDPI(njsBaton *baton)
+{
+    dpiErrorInfo errorInfo;
+
+    // if already initialized, nothing needs to be done
+    if (globalDPIContext)
+        return true;
+
+    // create global DPI context
+    if (dpiContext_create(DPI_MAJOR_VERSION, DPI_MINOR_VERSION,
+            &globalDPIContext, &errorInfo) < 0) {
+        if (baton) {
+            baton->error = std::string(errorInfo.message,
+                    errorInfo.messageLength);
+        } else {
+            Nan::ThrowError(errorInfo.message);
+        }
+        return false;
+    }
+
+    return true;
 }
 
 
@@ -824,6 +835,9 @@ NAN_GETTER(njsOracledb::GetOracleClientVersion)
     if (!oracledb)
         return;
 
+    if (!oracledb->InitDPI(NULL))
+        return;
+
     if (dpiContext_getClientVersion(globalDPIContext, &versionInfo) < 0) {
         ThrowDPIError();
         return;
@@ -855,6 +869,9 @@ NAN_GETTER(njsOracledb::GetOracleClientVersionString)
 
     njsOracledb *oracledb = (njsOracledb*) ValidateGetter(info);
     if (!oracledb)
+        return;
+
+    if (!oracledb->InitDPI(NULL))
         return;
 
     if (dpiContext_getClientVersion(globalDPIContext, &versionInfo) < 0) {
@@ -928,24 +945,28 @@ NAN_METHOD(njsOracledb::GetConnection)
         return;
     baton->jsOracledb.Reset(info.Holder());
 
-    baton->GetStringFromJSON(connProps, "user", 0, baton->user);
-    baton->GetStringFromJSON(connProps, "password", 0, baton->password);
-    baton->GetStringFromJSON(connProps, "connectString", 0,
-            baton->connectString);
-    baton->GetStringFromJSON(connProps, "newPassword", 0, baton->newPassword);
-    baton->connClass = oracledb->connClass;
-    baton->edition = oracledb->edition;
-    baton->stmtCacheSize  = oracledb->stmtCacheSize;
-    baton->externalAuth = oracledb->externalAuth;
-    baton->events = oracledb->events;
-    baton->GetStringFromJSON(connProps, "edition", 0, baton->edition);
-    baton->GetUnsignedIntFromJSON(connProps, "stmtCacheSize", 0,
-            &baton->stmtCacheSize);
-    baton->GetUnsignedIntFromJSON(connProps, "privilege", 0,
-            &baton->privilege);
-    baton->GetBoolFromJSON(connProps, "externalAuth", 0, &baton->externalAuth);
-    baton->GetBoolFromJSON(connProps, "events", 0, &baton->events);
-    baton->lobPrefetchSize = oracledb->lobPrefetchSize;
+    if (oracledb->InitDPI(baton)) {
+        baton->GetStringFromJSON(connProps, "user", 0, baton->user);
+        baton->GetStringFromJSON(connProps, "password", 0, baton->password);
+        baton->GetStringFromJSON(connProps, "connectString", 0,
+                baton->connectString);
+        baton->GetStringFromJSON(connProps, "newPassword", 0,
+                baton->newPassword);
+        baton->connClass = oracledb->connClass;
+        baton->edition = oracledb->edition;
+        baton->stmtCacheSize  = oracledb->stmtCacheSize;
+        baton->externalAuth = oracledb->externalAuth;
+        baton->events = oracledb->events;
+        baton->GetStringFromJSON(connProps, "edition", 0, baton->edition);
+        baton->GetUnsignedIntFromJSON(connProps, "stmtCacheSize", 0,
+                &baton->stmtCacheSize);
+        baton->GetUnsignedIntFromJSON(connProps, "privilege", 0,
+                &baton->privilege);
+        baton->GetBoolFromJSON(connProps, "externalAuth", 0,
+                &baton->externalAuth);
+        baton->GetBoolFromJSON(connProps, "events", 0, &baton->events);
+        baton->lobPrefetchSize = oracledb->lobPrefetchSize;
+    }
 
     baton->QueueWork("GetConnection", Async_GetConnection,
             Async_AfterGetConnection, 2);
@@ -1035,35 +1056,41 @@ NAN_METHOD(njsOracledb::CreatePool)
     if (!baton)
         return;
 
-    baton->GetStringFromJSON(poolProps, "user", 0, baton->user);
-    baton->GetStringFromJSON(poolProps, "password", 0, baton->password);
-    baton->GetStringFromJSON(poolProps, "connectString", 0,
-            baton->connectString);
-    baton->poolMax =  oracledb->poolMax;
-    baton->poolMin =  oracledb->poolMin;
-    baton->poolIncrement = oracledb->poolIncrement;
-    baton->poolTimeout = oracledb->poolTimeout;
-    baton->poolPingInterval = oracledb->poolPingInterval;
-    baton->stmtCacheSize = oracledb->stmtCacheSize;
-    baton->externalAuth = oracledb->externalAuth;
-    baton->edition = oracledb->edition;
-    baton->events = oracledb->events;
-    baton->GetUnsignedIntFromJSON(poolProps, "poolMax", 0, &baton->poolMax);
-    baton->GetUnsignedIntFromJSON(poolProps, "poolMin", 0, &baton->poolMin);
-    baton->GetUnsignedIntFromJSON(poolProps, "poolIncrement", 0,
-            &baton->poolIncrement);
-    baton->GetUnsignedIntFromJSON(poolProps, "poolTimeout", 0,
-            &baton->poolTimeout);
-    baton->GetUnsignedIntFromJSON(poolProps, "stmtCacheSize", 0,
-            &baton->stmtCacheSize);
-    baton->GetIntFromJSON(poolProps, "poolPingInterval", 0,
-            &baton->poolPingInterval);
-    baton->GetBoolFromJSON(poolProps, "externalAuth", 0, &baton->externalAuth);
-    baton->GetBoolFromJSON(poolProps, "homogeneous", 0, &baton->homogeneous);
-    baton->GetBoolFromJSON(poolProps, "events", 0, &baton->events);
-    baton->GetStringFromJSON(poolProps, "edition", 0, baton->edition);
-    baton->lobPrefetchSize = oracledb->lobPrefetchSize;
-    baton->jsOracledb.Reset(info.Holder());
+    if (oracledb->InitDPI(baton)) {
+        baton->GetStringFromJSON(poolProps, "user", 0, baton->user);
+        baton->GetStringFromJSON(poolProps, "password", 0, baton->password);
+        baton->GetStringFromJSON(poolProps, "connectString", 0,
+                baton->connectString);
+        baton->poolMax =  oracledb->poolMax;
+        baton->poolMin =  oracledb->poolMin;
+        baton->poolIncrement = oracledb->poolIncrement;
+        baton->poolTimeout = oracledb->poolTimeout;
+        baton->poolPingInterval = oracledb->poolPingInterval;
+        baton->stmtCacheSize = oracledb->stmtCacheSize;
+        baton->externalAuth = oracledb->externalAuth;
+        baton->edition = oracledb->edition;
+        baton->events = oracledb->events;
+        baton->GetUnsignedIntFromJSON(poolProps, "poolMax", 0,
+                &baton->poolMax);
+        baton->GetUnsignedIntFromJSON(poolProps, "poolMin", 0,
+                &baton->poolMin);
+        baton->GetUnsignedIntFromJSON(poolProps, "poolIncrement", 0,
+                &baton->poolIncrement);
+        baton->GetUnsignedIntFromJSON(poolProps, "poolTimeout", 0,
+                &baton->poolTimeout);
+        baton->GetUnsignedIntFromJSON(poolProps, "stmtCacheSize", 0,
+                &baton->stmtCacheSize);
+        baton->GetIntFromJSON(poolProps, "poolPingInterval", 0,
+                &baton->poolPingInterval);
+        baton->GetBoolFromJSON(poolProps, "externalAuth", 0,
+                &baton->externalAuth);
+        baton->GetBoolFromJSON(poolProps, "homogeneous", 0,
+                &baton->homogeneous);
+        baton->GetBoolFromJSON(poolProps, "events", 0, &baton->events);
+        baton->GetStringFromJSON(poolProps, "edition", 0, baton->edition);
+        baton->lobPrefetchSize = oracledb->lobPrefetchSize;
+        baton->jsOracledb.Reset(info.Holder());
+    }
 
     baton->QueueWork("CreatePool", Async_CreatePool, Async_AfterCreatePool, 2);
 }

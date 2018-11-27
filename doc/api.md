@@ -1180,6 +1180,11 @@ For version *a.b.c.d.e*, this property gives the number: `(100000000 * a) + (100
 
 This property was added in node-oracledb 1.3.
 
+From node-oracledb 3.1.0, using `oracledb.oracleClientVersion` will
+throw a *DPI-1047* error if node-oracledb cannot load Oracle Client
+libraries.  Previous versions threw this error from
+`require('oracledb')`.
+
 ##### Example
 
 ```javascript
@@ -1196,6 +1201,11 @@ readonly String oracleClientVersionString
 This readonly property gives a string representation of the Oracle client library version which is useful for display.
 
 This property was added in node-oracledb 2.2.
+
+From node-oracledb 3.1.0, using `oracledb.oracleClientVersionString`
+will throw a *DPI-1047* error if node-oracledb cannot load Oracle
+Client libraries.  Previous versions threw this error from
+`require('oracledb')`.
 
 ##### Example
 
@@ -1563,6 +1573,11 @@ See [Connection Pool Cache](#connpoolcache) for more details.
 A pool should be terminated with the [`pool.close()`](#poolclose)
 call.
 
+From node-oracledb 3.1.0, the `createPool()` error callback will
+return a *DPI-1047* error if node-oracledb cannot load Oracle Client
+libraries.  Previous versions threw this error from
+`require('oracledb')`.
+
 See [Connection Pooling](#connpooling) for more information about pooling.
 
 ###### <a name="createpoolpoolattrs"></a> 3.3.1.1 `createPool()`: Parameters and Attributes
@@ -1887,12 +1902,17 @@ Signature | Description
 `oracledb.getConnection(connAttrs)` | Creates a standalone, non-pooled connection. Returns a promise.
 `oracledb.getConnection(connAttrs, callback)` | Creates a standalone, non-pooled connection.  Invokes the callback.
 
-See [Connection Handling](#connectionhandling) for more information on
-connections.
-
 Note if the application opens a number of connections, you should
 increase the number of threads available to node-oracledb.
 See [Connections and Number of Threads](#numberofthreads).
+
+From node-oracledb 3.1.0, a non-pooled `oracledb.getConnection()` call
+will return a *DPI-1047* error if node-oracledb cannot load Oracle
+Client libraries.  Previous versions threw this error from
+`require('oracledb')`.
+
+See [Connection Handling](#connectionhandling) for more information on
+connections.
 
 ##### <a name="getconnectiondbattrs"></a> 3.3.2.1 `getConnection()`: Parameters
 

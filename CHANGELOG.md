@@ -7,6 +7,32 @@ This release is currently under development.
 - Support user proxies and external authentication with standalone
   connections (ODPI-C change).
 
+- Defer initialization of the Oracle Client libraries until the first
+  use of `oracledb.getConnection()`, `oracledb.createPool()`,
+  `oracledb.oracleClientVersion`, or
+  `oracledb.oracleClientVersionString`.
+
+  If the Oracle Client cannot be loaded, `getConnection()` and
+  `createPool()` will return an error via the callback.  Accessing
+  `oracledb.oracleClientVersion` or
+  `oracledb.oracleClientVersionString` with throw an error.
+
+  This change allows `require('oracledb')` to always succeed, allowing
+  node-oracledb constants and other attributes to be accessed even if
+  the Oracle Client is not installed.
+
+  This makes it easier to include node-oracledb in multi-database
+  applications where not all users will be accessing Oracle Database.
+
+  It allows code generation tools to access node-oracledb constants
+  without needing Oracle Client installed (See #983).
+
+  Applications now have more scope to alter Oracle environment
+  variables referenced by the Oracle Client layer. Note it is still
+  recommended that the environment be set before Node.js is executed
+  due to potential for confusion or unexpected behavior due to
+  order-of-execution issues.
+
 - Display correct error message for SODA `createIndex()` when no
   parameter is passed.
 
