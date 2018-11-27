@@ -96,18 +96,18 @@ describe('5. externalAuth.js', function() {
 
     }); // 5.1.2
 
-    it("5.1.3 throws error when gettting connection from oracledb given only 'user' when externalAuth is enabled", function(done) {
+    it("5.1.3 throws error when gettting connection from oracledb given only invalid 'user' when externalAuth is enabled", function(done) {
 
       oracledb.getConnection(
         {
           externalAuth:  true,
-          user:          dbConfig.user,
+          user:          "[ invalid_user ]",
           connectString: dbConfig.connectString
         },
         function(err, conn){
           should.exist(err);
-          (err.message).should.startWith("DPI-1032:");
-          // DPI-1032: user and password should not be set when using external authentication
+          (err.message).should.startWith("ORA-01017:");
+          // ORA-01017: invalid username/password; logon denied
           should.not.exist(conn);
           done();
         }
@@ -239,7 +239,7 @@ describe('5. externalAuth.js', function() {
   describe('5.2 tests only work when externalAuth is configured on DB', function() {
 
     before(function() {
-      if ( !dbConfig.test.externalAuth ) this.skip();
+      if ( dbConfig.test.externalAuth !== true) this.skip();
     });
 
     it("5.2.1 can get connection from oracledb with external authentication", function(done) {
