@@ -4254,6 +4254,7 @@ Overview of node-oracledb functional tests
     173.9 Negative - dropIndex() no parameter
     173.10 option object of dropIndex(), basic case
     173.11 option object of dropIndex(), boolean value is false
+    173.12 getDataGiuide(), basic case
 
 174. soda6.js
     174.1 filter() basic case

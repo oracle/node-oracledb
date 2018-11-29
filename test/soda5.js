@@ -483,10 +483,8 @@ describe('173. soda5.js', () => {
     await dropIdxOpt(options);
   }); // 173.11
 
-  it.skip('173.12 getDataGiuide(), basic case', async () => {
-    
-    /* Uncomment this statement to resolve the issue */
-    //oracledb.autoCommit = true;
+  it('173.12 getDataGiuide(), basic case', async () => {
+  
     let conn, collection;
 
     try {
@@ -504,8 +502,10 @@ describe('173. soda5.js', () => {
       myContent = { name: "May", address: {city: "London"} };
       await collection.insertOne(myContent);
 
+      await conn.commit();
+
     } catch(err) {
-      console.log('Error in preparing:\n', err);
+      should.not.exist(err);
     }
 
     try {
@@ -517,20 +517,20 @@ describe('173. soda5.js', () => {
       await collection.createIndex(indexSpec);
 
       let outDocument = await collection.getDataGuide();
-      console.log(outDocument);
+      should.exist(outDocument);
     
     } catch(err) {
-      console.log('Error in creating index:\n', err);
+      should.not.exist(err);
     }
 
     try {
       let result = await collection.dropIndex('TEST_IDX');
-      console.log(result);
-
+      should.strictEqual(result.dropped, true);
+      await conn.commit();
       await collection.drop();
       await conn.close();
     } catch(err) {
-      console.log('Error in closing up:\n', err);
+      should.not.exist(err);
     }
 
   }); // 173.12
