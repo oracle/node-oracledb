@@ -4278,3 +4278,20 @@ Overview of node-oracledb functional tests
     175.6 skip().getCursor()
     175.7 getCursor(), empty document matched
     175.8 Negative - close document cursor two times
+    175.9 getDocuments(), basic case
+    175.10 getDocuments(), no documents matched
+    175.11 getOne(), basic case
+    175.12 getOne(), the filter matches multiple documents
+    175.13 remove(), basic case
+    175.14 remove(), remove zero document
+    175.15 remove(), remove multiple times
+
+  176. soda8.js
+    176.1 replaceOne(), basic case with document content
+    176.2 replaceOne(), basic case with document object
+    175.3 replaceOne(), no error is reported if the query criteria do not match any document
+    175.4 Negative - replaceOne(), the key() method must be used
+    175.5 replaceOneAndGet(), basic case with document content
+    175.6 replaceOneAndGet(), basic case with document object
+    175.7 replaceOneAndGet(), updatedDocument does not have document content
+    175.8 replaceOneAndGet(), no error is reported if it does not match any document

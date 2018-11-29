@@ -419,7 +419,7 @@ describe('168. soda4.js', () => {
     }
   }); // 168.6
 
-  it('168.7 Negative - customize mediaType, invalide type, numeric value', async () => {
+  it('168.7 Negative - customize mediaType, invalid type, numeric value', async () => {
     let conn, coll;
     try {
       conn = await oracledb.getConnection(dbconfig);
