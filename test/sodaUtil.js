@@ -96,3 +96,13 @@ sodaUtil.assertThrowsAsync = async function(fn, RegExp) {
     assert.throws(f, RegExp);
   }
 };
+
+sodaUtil.t_contents = [
+  { id: 1001, name: "Gillian",  office: "Shenzhen" },
+  { id: 1002, name: "Chris",    office: "Melbourne" },
+  { id: 1003, name: "Changjie", office: "Shenzhen" },
+  { id: 1004, name: "Venkat",   office: "Bangalore" },
+  { id: 1005, name: "May",      office: "London" },
+  { id: 1006, name: "Joe",      office: "San Francisco" },
+  { id: 1007, name: "Gavin",    office: "New York" }
+];

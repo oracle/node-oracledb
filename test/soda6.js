@@ -32,15 +32,7 @@ const should   = require('should');
 const dbconfig = require('./dbconfig.js');
 const sodaUtil = require('./sodaUtil.js');
 
-const t_contents = [
-  { id: 1001, name: "Gillian",  office: "Shenzhen" },
-  { id: 1002, name: "Chris",    office: "Melbourne" },
-  { id: 1003, name: "Changjie", office: "Shenzhen" },
-  { id: 1004, name: "Venkat",   office: "Bangalore" },
-  { id: 1005, name: "May",      office: "London" },
-  { id: 1006, name: "Joe",      office: "San Francisco" },
-  { id: 1007, name: "Gavin",    office: "New York" }
-];
+const t_contents = sodaUtil.t_contents;
 
 describe('174. soda6.js', () => {
   

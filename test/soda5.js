@@ -32,15 +32,7 @@ const should   = require('should');
 const dbconfig = require('./dbconfig.js');
 const sodaUtil = require('./sodaUtil.js');
 
-const t_contents = [
-  { id: 1001, name: "Gillian",  office: "Shenzhen" },
-  { id: 1002, name: "Chris",    office: "Melbourne" },
-  { id: 1003, name: "Changjie", office: "Shenzhen" },
-  { id: 1004, name: "Venkat",   office: "Bangalore" },
-  { id: 1005, name: "May",      office: "London" },
-  { id: 1006, name: "Joe",      office: "San Francisco" },
-  { id: 1007, name: "Gavin",    office: "New York" }
-];
+const t_contents = sodaUtil.t_contents;
 
 describe('173. soda5.js', () => {
 
@@ -491,6 +483,58 @@ describe('173. soda5.js', () => {
     await dropIdxOpt(options);
   }); // 173.11
 
+  it.skip('173.12 getDataGiuide(), basic case', async () => {
+    
+    /* Uncomment this statement to resolve the issue */
+    //oracledb.autoCommit = true;
+    let conn, collection;
+
+    try {
+
+      conn = await oracledb.getConnection(dbconfig);
+      let soda = conn.getSodaDatabase();
+      collection = await soda.createCollection('soda_test_173_12');
+
+      let myContent = { name: "Sally", address: {city: "Melbourne"} };
+      await collection.insertOne(myContent);
+
+      myContent = { name: "Matilda", address: {city: "Sydney"} };
+      await collection.insertOne(myContent);
+
+      myContent = { name: "May", address: {city: "London"} };
+      await collection.insertOne(myContent);
+
+    } catch(err) {
+      console.log('Error in preparing:\n', err);
+    }
+
+    try {
+      let indexSpec = {
+        "name": "TEST_IDX",
+        "search_on": "none",
+        "dataguide": "on"
+      };
+      await collection.createIndex(indexSpec);
+
+      let outDocument = await collection.getDataGuide();
+      console.log(outDocument);
+    
+    } catch(err) {
+      console.log('Error in creating index:\n', err);
+    }
+
+    try {
+      let result = await collection.dropIndex('TEST_IDX');
+      console.log(result);
+
+      await collection.drop();
+      await conn.close();
+    } catch(err) {
+      console.log('Error in closing up:\n', err);
+    }
+
+  }); // 173.12
+
 });
 
 const dropIdxOpt = async function(opts) {
@@ -499,7 +543,7 @@ const dropIdxOpt = async function(opts) {
     conn = await oracledb.getConnection(dbconfig);
 
     let soda = conn.getSodaDatabase();
-    collection = await soda.createCollection("soda_test_173_7");
+    collection = await soda.createCollection("soda_test_173_10");
 
     let indexSpec = {
       "name": "OFFICE_IDX",
