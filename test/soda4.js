@@ -503,4 +503,80 @@ describe('168. soda4.js', () => {
     }
   }); // 168.7
 
+  it('168.8 insert an empty document with customized metadata', async () => {
+    let conn, coll;
+    try {
+      conn = await oracledb.getConnection(dbconfig);
+      let sd = conn.getSodaDatabase();
+      let collectionName = 'soda_test_168_8';
+      let testMetaData = {
+        "schemaName" : dbconfig.user.toUpperCase(),
+        "tableName" : collectionName,
+        "keyColumn" :
+                     {
+                       "name" : "ID",
+                       "sqlType" : "NUMBER",
+                       "assignmentMethod" : "CLIENT"
+                     },
+        "mediaTypeColumn":
+                         {
+                           "name": "MediaType"
+                         },
+        "contentColumn" :
+                       {
+                         "name" : "DOCUMENT",
+                         "sqlType" : "BLOB",
+                         "compress" : "NONE",
+                         "cache" : true,
+                         "encrypt" : "NONE",
+                         "validation" : "STRICT"
+                       },
+        "versionColumn" :
+                       {
+                         "name" : "VERSION",
+                         "type":"String",
+                         "method":"SHA256"
+                       },
+        "lastModifiedColumn" :
+                       {
+                         "name":"LAST_MODIFIED"
+                       },
+        "creationTimeColumn":
+                       {
+                         "name":"CREATED_ON"
+                       },
+        "readOnly": false
+      };
+
+      coll = await sd.createCollection(collectionName, { metaData: testMetaData });
+
+      let testContent = {};
+      let testKey = '86755';
+      let testDoc = sd.createDocument(testContent, { key: testKey } );
+
+      let outDocument = await coll.insertOneAndGet(testDoc);
+      should.exist(outDocument);
+
+    } catch(err) {
+      should.not.exist(err);
+    } finally {
+      await conn.commit();
+      if (coll) {
+        try {
+          let res = await coll.drop();
+          should.strictEqual(res.dropped, true);
+        } catch(err) {
+          should.not.exist(err);
+        }
+      }
+
+      if (conn) {
+        try {
+          await conn.close();
+        } catch(err) {
+          should.not.exist(err);
+        }
+      }
+    }
+  }); // 168.8
 });

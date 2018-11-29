@@ -4216,6 +4216,7 @@ Overview of node-oracledb functional tests
     168.5 get mediaType
     168.6 customize the value of mediaType
     168.7 Negative - customize mediaType, invalide type, numeric value
+    168.8 insert an empty document with customized metadata
 
 170. poolDrain.js
     170.1 close pool with force flag, and prevent new connection
