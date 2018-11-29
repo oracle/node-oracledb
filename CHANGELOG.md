@@ -36,7 +36,7 @@ This release is currently under development.
 - Display correct error message for SODA `createIndex()` when no
   parameter is passed.
 
-- Fix some SODA stability issues (ODPI-C change).
+- Fix some SODA stability issues (node-oracledb and ODPI-C changes).
 
 - Improved the statement error whitelist to avoid unnecessarily
   dropping statements from the statement cache (ODPI-C change).

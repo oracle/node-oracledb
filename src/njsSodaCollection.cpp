@@ -264,10 +264,12 @@ void njsSodaCollection::Async_InsertOneAndGet(njsBaton *baton)
     if (baton->autoCommit)
         flags |= DPI_SODA_FLAGS_ATOMIC_COMMIT;
     if (dpiSodaColl_insertOne(baton->dpiSodaCollHandle,
-            baton->dpiSodaDocHandle, flags, &resultDoc) < 0)
+            baton->dpiSodaDocHandle, flags, &resultDoc) < 0) {
         baton->GetDPIError();
-    dpiSodaDoc_release(baton->dpiSodaDocHandle);
-    baton->dpiSodaDocHandle = resultDoc;
+    } else {
+        dpiSodaDoc_release(baton->dpiSodaDocHandle);
+        baton->dpiSodaDocHandle = resultDoc;
+    }
 }
 
 

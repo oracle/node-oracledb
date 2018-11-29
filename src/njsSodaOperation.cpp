@@ -379,10 +379,12 @@ void njsSodaOperation::Async_ReplaceOneAndGet(njsBaton *baton)
         flags |= DPI_SODA_FLAGS_ATOMIC_COMMIT;
     if (dpiSodaColl_replaceOne(baton->dpiSodaCollHandle,
             baton->sodaOperOptions, baton->dpiSodaDocHandle, flags,
-            &baton->replaced, &resultDoc) < 0)
+            &baton->replaced, &resultDoc) < 0) {
         baton->GetDPIError();
-    dpiSodaDoc_release(baton->dpiSodaDocHandle);
-    baton->dpiSodaDocHandle = resultDoc;
+    } else {
+        dpiSodaDoc_release(baton->dpiSodaDocHandle);
+        baton->dpiSodaDocHandle = resultDoc;
+    }
 }
 
 
