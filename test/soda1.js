@@ -353,23 +353,26 @@ describe('164. soda1.js', () => {
   }); // 164.9
 
   it('164.10 create index', async () => {
-    let conn;
+    let conn, coll;
+    const indexName = "soda_index_164_10";
     try {
       conn = await oracledb.getConnection(dbconfig);
       let sd = conn.getSodaDatabase();
       let collectionName = 'soda_test_164_10';
-      let coll = await sd.createCollection(collectionName);
+      coll = await sd.createCollection(collectionName);
 
       var index =
         {
-          name :  "nameIndex",
+          name :  indexName,
           fields : [ { path: "name" }]
         };
 
       await coll.createIndex(index);
 
-      await conn.commit();
+      await coll.dropIndex(indexName);
       await coll.drop();
+      await conn.commit();
+
     } catch(err) {
       should.not.exist(err);
     } finally {
@@ -454,6 +457,8 @@ describe('164. soda1.js', () => {
       // Count all documents
       let res3 = await collection.find().count();
       should.strictEqual(res3.count, 2);
+
+      await collection.dropIndex("CITY_IDX");
 
       // Commit changes
       await conn.commit();
