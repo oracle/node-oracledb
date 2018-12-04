@@ -4168,23 +4168,19 @@ Overview of node-oracledb functional tests
     164.2 createCollection() creates a collection
     164.3 openCollection() opens an existing collection
     164.4 getCollectionNames() gets an array of collection names
-    164.5 create collection with metadata
-    164.6 the operation status of collection.drop()
-    164.7 Negative: the operation status of collection.drop()
-    164.8 get one document
-    164.9 get multiple documents
-    164.10 create index
-    164.11 the examples/soda1.js case
-    164.12 Negative: create collection with invalid metaData value
+    164.5 the operation status of collection.drop()
+    164.6 Negative: the operation status of collection.drop()
+    164.7 get one document
+    164.8 get multiple documents
+    164.9 create index
+    164.10 the examples/soda1.js case
+    164.11 Negative: create collection with invalid metaData value
 
 165. soda2.js
     165.1 create two sodaDatabase objects which point to the same instance
     165.2 create two sodaDatabase objects from two connections
     165.3 will open this collection when creating a collection with the existing name
-    165.4 create collection with metadata
-    165.5 Negative - create collection with an invalid metadata
-    165.6 throw error when creating collection with the existing name and different metadata
-    165.7 Negative - createCollection() when collection name is empty string
+    165.4 Negative - createCollection() when collection name is empty string
 
 166. sodaCallback.js
     166.1 create a collection, then drop it
@@ -4211,12 +4207,7 @@ Overview of node-oracledb functional tests
 168. soda4.js
     168.1 insertOneAndGet() fetches attributes without content
     168.2 content is null
-    168.3 customize the key value, String value
-    168.4 Negative - customize the key value, numeric value
     168.5 get mediaType
-    168.6 customize the value of mediaType
-    168.7 Negative - customize mediaType, invalide type, numeric value
-    168.8 insert an empty document with customized metadata
 
 170. poolDrain.js
     170.1 close pool with force flag, and prevent new connection

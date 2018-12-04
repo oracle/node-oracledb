@@ -154,75 +154,13 @@ describe('164. soda1.js', () => {
     }
   }); // 164.4
 
-  it('164.5 create collection with metadata', async () => {
-    let conn;
-    try {
-      conn = await oracledb.getConnection(dbconfig);
-      let sd = conn.getSodaDatabase();
-
-      let metadata = {
-        "schemaName" : dbconfig.user.toUpperCase(),
-        "tableName" : "nodb_tab_164_5",
-        "keyColumn" :
-                       {
-                         "name" : "ID",
-                         "sqlType" : "VARCHAR2",
-                         "maxLength" : 255,
-                         "assignmentMethod" : "UUID"
-                       },
-        "contentColumn" :
-                       {
-                         "name" : "JSON_DOCUMENTS",
-                         "sqlType" : "BLOB",
-                         "compress" : "NONE",
-                         "cache" : true,
-                         "encrypt" : "NONE",
-                         "validation" : "STRICT"
-                       },
-        "versionColumn" :
-                       {
-                         "name" : "VERSION",
-                         "type":"String",
-                         "method":"SHA256"
-                       },
-        "lastModifiedColumn" :
-                       {
-                         "name":"LAST_MODIFIED"
-                       },
-        "creationTimeColumn":
-                       {
-                         "name":"CREATED_ON"
-                       },
-        "readOnly": false
-      };
-      let t_collname = "soda_test_164_5";
-      let options = { metaData: metadata };
-      let coll = await sd.createCollection(t_collname, options);
-
-      await conn.commit();
-      should.strictEqual(coll.name, t_collname);
-
-      await coll.drop();
-    } catch(err) {
-      should.not.exist(err);
-    } finally {
-      if (conn) {
-        try {
-          await conn.close();
-        } catch(err) {
-          should.not.exist(err);
-        }
-      }
-    }
-  }); // 164.5
-
-  it('164.6 the operation status of collection.drop()', async () => {
+  it('164.5 the operation status of collection.drop()', async () => {
     let conn, coll;
     try {
       conn = await oracledb.getConnection(dbconfig);
       let sd = conn.getSodaDatabase();
 
-      let collName = "soda_test_164_6";
+      let collName = "soda_test_164_5";
       coll = await sd.createCollection(collName);
 
     } catch(err) {
@@ -240,15 +178,15 @@ describe('164. soda1.js', () => {
         }
       }
     }
-  }); // 164.6
+  }); // 164.5
 
-  it('164.7 Negative: the operation status of collection.drop()', async () => {
+  it('164.6 Negative: the operation status of collection.drop()', async () => {
     let conn;
     try {
       conn = await oracledb.getConnection(dbconfig);
       let sd = conn.getSodaDatabase();
 
-      let collName = "soda_test_164_7";
+      let collName = "soda_test_164_6";
       let coll = await sd.createCollection(collName);
 
       await coll.drop();
@@ -266,14 +204,14 @@ describe('164. soda1.js', () => {
         }
       }
     }
-  }); // 164.7
+  }); // 164.6
 
-  it('164.8 get one document', async () => {
+  it('164.7 get one document', async () => {
     let conn;
     try {
       conn = await oracledb.getConnection(dbconfig);
       let sd = conn.getSodaDatabase();
-      let collectionName = 'soda_test_164_8';
+      let collectionName = 'soda_test_164_7';
       let coll = await sd.createCollection(collectionName);
       await coll.find().remove();
 
@@ -306,14 +244,14 @@ describe('164. soda1.js', () => {
         }
       }
     }
-  }); // 164.8
+  }); // 164.7
 
-  it('164.9 get multiple documents', async () => {
+  it('164.8 get multiple documents', async () => {
     let conn;
     try {
       conn = await oracledb.getConnection(dbconfig);
       let sd = conn.getSodaDatabase();
-      let collectionName = 'soda_test_164_9';
+      let collectionName = 'soda_test_164_8';
       let coll = await sd.createCollection(collectionName);
 
       let myContents = [
@@ -350,15 +288,15 @@ describe('164. soda1.js', () => {
         }
       }
     }
-  }); // 164.9
+  }); // 164.8
 
-  it('164.10 create index', async () => {
+  it('164.9 create index', async () => {
     let conn, coll;
-    const indexName = "soda_index_164_10";
+    const indexName = "soda_index_164_9";
     try {
       conn = await oracledb.getConnection(dbconfig);
       let sd = conn.getSodaDatabase();
-      let collectionName = 'soda_test_164_10';
+      let collectionName = 'soda_test_164_9';
       coll = await sd.createCollection(collectionName);
 
       var index =
@@ -384,9 +322,9 @@ describe('164. soda1.js', () => {
         }
       }
     }
-  }); // 164.10
+  }); // 164.9
 
-  it('164.11 the "examples/soda1.js" case', async () => {
+  it('164.10 the "examples/soda1.js" case', async () => {
     let conn, collection;
     try {
       conn = await oracledb.getConnection(dbconfig);
@@ -394,7 +332,7 @@ describe('164. soda1.js', () => {
       let soda = conn.getSodaDatabase();
 
       // Create a new SODA collection and index
-      collection = await soda.createCollection("soda_test_164_11");
+      collection = await soda.createCollection("soda_test_164_10");
       let indexSpec = {
         "name": "CITY_IDX",
         "fields": [
@@ -479,16 +417,16 @@ describe('164. soda1.js', () => {
         }
       }
     }
-  }); // 164.11
+  }); // 164.10
 
-  it('164.12 Negative: create collection with invalid metaData value', async () => {
+  it('164.11 Negative: create collection with invalid metaData value', async () => {
     
     let conn;
     try {
       conn = await oracledb.getConnection(dbconfig);
       let sd = conn.getSodaDatabase();
 
-      let t_collname = "soda_test_164_5";
+      let t_collname = "soda_test_164_11";
       let options = { metaData: "metaData" };
 
       await sodaUtil.assertThrowsAsync(
@@ -507,6 +445,6 @@ describe('164. soda1.js', () => {
         }
       }
     }
-  }); // 164.12
+  }); // 164.11
 
 });
