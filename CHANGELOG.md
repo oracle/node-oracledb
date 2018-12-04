@@ -4,8 +4,8 @@
 
 This release is currently under development.
 
-- Support user proxies and external authentication with standalone
-  connections (ODPI-C change).
+- Support the combination of a user proxy and external authentication
+  with standalone connections (ODPI-C change).
 
 - Defer initialization of the Oracle Client libraries until the first
   use of `oracledb.getConnection()`, `oracledb.createPool()`,
@@ -32,6 +32,9 @@ This release is currently under development.
   recommended that the environment be set before Node.js is executed
   due to potential for confusion or unexpected behavior due to
   order-of-execution issues.
+
+- Support fetching XMLTYPE columns in queries.  They will return as
+  String.
 
 - Display correct error message for SODA `createIndex()` when no
   parameter is passed.

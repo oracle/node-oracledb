@@ -7369,8 +7369,8 @@ Queries will return ROWID and UROWID columns as Strings.
 
 ##### <a name="fetchxml"></a> 13.1.6.8 Fetching XMLType
 
-`XMLType` columns cannot be queried directly.  Instead handle them as
-CLOBs, see [Working with XMLType](#xmltype).
+`XMLType` columns queried will returns as Strings.  They can also be
+handled as CLOBs, see [Working with XMLType](#xmltype).
 
 ##### <a name="fetchraw"></a> 13.1.6.9 Fetching RAW
 
@@ -8656,8 +8656,10 @@ For more information about using JSON in Oracle Database see the
 
 ## <a name="xmltype"></a> 17. Working with XMLType
 
-`XMLType` columns cannot be queried directly.  Instead, change the SQL
-query to return a CLOB, for example
+`XMLType` columns queried will returns as Strings by default.
+
+However, if desired, the SQL query could be changed to return a CLOB,
+for example:
 
 ```sql
 var sql = 'SELECT XMLTYPE.GETCLOBVAL(res) FROM resource_view';
