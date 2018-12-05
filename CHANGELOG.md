@@ -25,7 +25,8 @@ This release is currently under development.
   applications where not all users will be accessing Oracle Database.
 
   It allows code generation tools to access node-oracledb constants
-  without needing Oracle Client installed (See #983).
+  without needing Oracle Client installed (see
+  [#983](https://github.com/oracle/node-oracledb/issues/983)).
 
   Applications now have more scope to alter Oracle environment
   variables referenced by the Oracle Client layer. Note it is still
@@ -36,10 +37,13 @@ This release is currently under development.
 - Support fetching XMLTYPE columns in queries.  They will return as
   String.
 
+- Fixed a crash with high frequency notifications from CQN
+  ([#1009](https://github.com/oracle/node-oracledb/issues/1009)).
+
 - Display correct error message for SODA `createIndex()` when no
   parameter is passed.
 
-- Fix some SODA stability issues (node-oracledb and ODPI-C changes).
+- Fixed some SODA stability issues (node-oracledb and ODPI-C changes).
 
 - Improved the statement error whitelist to avoid unnecessarily
   dropping statements from the statement cache (ODPI-C change).
@@ -226,8 +230,8 @@ This release is currently under development.
 
 ## node-oracledb v2.1.1 (16 Feb 2018)
 
-- Fixed regression with querystream() in Node 4 & 6.
-  https://github.com/oracle/node-oracledb/issues/847
+- Fixed regression with `queryStream()` in Node 4 & 6
+  ([#847](https://github.com/oracle/node-oracledb/issues/847)).
 
 ## node-oracledb v2.1.0 (15 Feb 2018)
 

@@ -81,6 +81,7 @@ void njsSubscription::ProcessNotification(uv_async_t *handle)
     njsSubscription *subscription = (njsSubscription*) handle->data;
     Nan::HandleScope scope;
 
+    uv_mutex_lock(&subscription->mutex);
     Local<Function> callback = Nan::New<Function>(subscription->jsCallback);
     Local<Value> callbackArgs[1];
     callbackArgs[0] = subscription->CreateMessage(subscription->message);
@@ -92,6 +93,7 @@ void njsSubscription::ProcessNotification(uv_async_t *handle)
     if (!subscription->message->registered)
         subscription->StopNotifications();
     subscription->WaitOnBarrier();
+    uv_mutex_unlock(&subscription->mutex);
 }
 
 
@@ -367,9 +369,9 @@ void njsSubscription::EventHandler(njsSubscription *subscription,
         uv_mutex_lock(&subscription->mutex);
         uv_barrier_init(&subscription->barrier, 2);
         subscription->message = incomingMessage;
+        uv_mutex_unlock(&subscription->mutex);
         uv_async_send(&subscription->async);
         subscription->WaitOnBarrier();
-        uv_mutex_unlock(&subscription->mutex);
     }
 }
 
