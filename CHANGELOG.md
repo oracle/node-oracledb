@@ -37,6 +37,11 @@ This release is currently under development.
 - Support fetching XMLTYPE columns in queries.  They will return as
   String.
 
+- Update install processes by bundling all pre-built binaries into the
+  package uploaded to https://www.npmjs.com/package/oracledb.  This
+  removes the need for the installer to download a binary package from
+  GitHub.  Also, source code is no longer included in the npm package.
+
 - Fixed a crash with high frequency notifications from CQN
   ([#1009](https://github.com/oracle/node-oracledb/issues/1009)).
 

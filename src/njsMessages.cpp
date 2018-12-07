@@ -82,7 +82,7 @@ static const char *errMsg[] = {
     "NJS-047: pool alias \"%s\" not found in connection pool cache", // errPoolWithAliasNotFound
     "NJS-052: invalid data type at array index %d for bind position %d", // errIncompatibleTypeArrayIndexBind
     "NJS-053: array value expected, a non-array value provided", //errNonArrayProvided
-    "NJS-054: Binary build/Release/oracledb.node was not installed from %s", // errNoBinaryInstalled
+    "NJS-054: binary build/Release/oracledb.node was not installed", // errNoBinaryInstalled
     "NJS-055: Binding by position and name cannot be mixed", // errMixedBind
     "NJS-056: maxSize must be specified and not zero for bind position %u", // errMissingMaxSizeByPos
     "NJS-057: maxSize must be specified and not zero for bind \"%s\"", // errMissingMaxSizeByName
@@ -95,6 +95,7 @@ static const char *errMsg[] = {
     "NJS-064: connection pool is closing", // errPoolClosing
     "NJS-065: connection pool was closed", // errPoolClosed
     "NJS-066: invalid SODA document cursor", // errInvalidSodaDocCursor
+    "NJS-067: a pre-built node-oracledb binary was not found for Node.js %s", // errNoBinaryAvailable
 };
 
 

@@ -1,115 +1,34 @@
 # Overview
 
-This directory contains scripts for building, extracting and
-installing binary packages of node-oracledb.  Most users do not need
-to use anything in this directory (the exceptions are when building
-packages for self-hosting, or when doing a [manual
-install](https://oracle.github.io/node-oracledb/INSTALL.html#manualextraction)
-instead of using `npm`).
-
-The binary install process requires two kinds of package:
-
-- a gzipped tar file like `oracledb-X.Y.Z.tgz` containing JavaScript
-  and ancillary files suitable for npm to install.  This is a generic
-  file used on all platforms.
-
-- a gzipped package like `oracledb-vZ.Y.Z-node-abi57-darwin-x64.gz`
-  containing the binary add-on.  The package uses a custom format with
-  three components: length bytes (giving the length of the license
-  file), the license file, and then the node-oracledb binary.  Each
-  Node.js version/architecture needs a unique binary package.
-
-  A custom package format is used due to business and technical requirements:
-
-  - the license text needs to be included with any binary download.
-
-  - Node.js doesn't have a native archive module, and the installer
-    should be lightweight and not have 3rd party dependencies.
-
-When `npm install oracledb` is executed, the JavaScript package is
-first installed by npm.  An 'install' script in its `package.json`
-invokes `oracledbinstall.js`.  This downloads the appropriate
-node-oracledb binary package, and then extracts and installs the
-binary.
-
-If a suitable binary package is not available, users must compile
-source code by installing from GitHub.
-
-Installation is described in [INSTALL](https://oracle.github.io/node-oracledb/INSTALL.html).
+This directory is used for building the node-oracledb npm package.
+Most users do not need to use anything in this directory.
 
 # Maintainers
 
-- The Makefile is used by node-oracledb maintainers to create the
-  packages to be uploaded to
-  [GitHub](https://github.com/oracle/node-oracledb) and
+- The file `build.js` is used by node-oracledb maintainers to create
+  node-oracledb binaries and the package to be uploaded to
   [npm](https://www.npmjs.com/package/oracledb).
 
-    - `make npmpackage` makes the main node-oracledb package
-      containing the general node-oracledb JavaScript files and the
-      package.json in this directory.  This is the package that an
-      `npm install oracledb` will initially install.
+- `node build.js binary` creates a binary for the current Node.js /
+  node-oracledb / platform combination.  The command `node
+  buildv6binary.js` can be used with Node 6.
 
-    - `make binarypackage` makes a binary package for the current
-      Node.js / node-oracledb / platform combination and generates a
-      SHA256 for the binary.  A Windows batch file does the same for
-      Windows.
+- `node build.js package` makes the node-oracledb package containing
+  the node-oracledb JavaScript files, the binaries, and a package.json
+  that has an "install" script.
 
-- As part of `npm install`, the `package.json` in this directory
-  invokes `oracledbinstall.js` that downloads the appropriate binary
-  package from GitHub.  This variant of `package.json` is the copy
-  bundled for the npm release.
+  Before running this, all binaries and related build metadata
+  information files from all Node.js / node-oracledb / platform
+  combinations should be placed in the `package/Staging` directory.
 
-  The parent file `../package.json` doesn't have the install target
-  meaning that node-gyp will be invoked to compile node-oracledb.  This
-  allows installation from source code (via GitHub) when no suitable
-  pre-built binary is available.
+- As part of `npm install oracledb`, the `package.json` install script
+  invokes `package/install.js` to move the appropriate binary module
+  to the correct directory.
 
-- The `make npmpackage` command creates three variants of the JavaScript bundle:
+  If a suitable binary is not available, installation will fail.
+  Users must then compile node-oracledb using source code from GitHub.
 
-  - `oracledb-X.Y.Z.tgz` which downloads binaries from the
-    node-oracledb GitHub release page.
-
-  - `staging-oracledb-X.Y.Z.tgz` which downloads binaries from a
-    server of your choice, specified by the environment variables
-    `NODE_ORACLEDB_PACKAGE_HOSTNAME` (e.g. "your.example.com") and
-    `NODE_ORACLEDB_PACKAGE_URL_PATH` (e.g. "/yourpath/") which must be set
-    before running `make`.
-
-  - `oracledb-src-X.Y.Z.tgz` which is the complete source code, mainly
-    created because older npm's (e.g. with Node.js 4) do not download the
-    opdi submodule code when installing from a GitHub tag or branch.
-
-- The`staging-oracledb-X.Y.Z.tgz` package can be used to host binaries
-  on internal networks.  Copy `staging-oracledb-X.Y.Z.tgz`, the binary
-  packages for each desired architectures, and a single SHASUMS256.txt
-  file (with one line per available binary package) to an
-  HTTPS-enabled web server to the directory that
-  https://your.example.com/yourpath/vX.Y.Z/ resolves to.  Note if the
-  web server has a self-signed certificate, then you may need to
-  bypass some npm checks:
-
-  ```
-  export NODE_TLS_REJECT_UNAUTHORIZED=0
-  npm config set strict-ssl false
-
-  npm install https://your.example.com/yourpath/vX.Y.Z/staging-oracledb-X.Y.X.tgz
-  ```
-
-  Remember to do `npm config delete strict-ssl` and unset the
-  environment variable when not testing.
-
-- On Windows, MAKEPKG.BAT has command options to create binaries, and
-  also to create staged binaries and the main packages.
-
-- At install time, setting the environment variable
-  `NODE_ORACLEDB_TRACE_INSTALL` to `TRUE` will cause `npm install` to
-  display more tracing information.
-
--  The installer scripts assume GitHub tags have the format "vX.Y.Z".
-   Other assumptions about GitHub paths are also made in the scripts.
-
-- TODO
-
-  - oracledbinstall.js should cache SHASUMS256.txt so it doesn't have to be fetched twice.
-  - Add support for proxies that require authentication
-  - Improve oracledbinstall.js `no_proxy` support for domain names and wildcards.
+- By default `../package.json` doesn't have an install script target.
+  This means that node-gyp will be invoked to compile node-oracledb.
+  This allows installation from source code (via GitHub) when no
+  suitable pre-built binary is available.

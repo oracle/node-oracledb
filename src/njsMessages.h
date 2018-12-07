@@ -98,6 +98,7 @@ typedef enum {
     errPoolClosing,
     errPoolClosed,
     errInvalidSodaDocCursor,
+    errNoBinaryAvailable,
 
     // New ones should be added here
 
