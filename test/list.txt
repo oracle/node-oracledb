@@ -4181,6 +4181,7 @@ Overview of node-oracledb functional tests
     165.2 create two sodaDatabase objects from two connections
     165.3 will open this collection when creating a collection with the existing name
     165.4 Negative - createCollection() when collection name is empty string
+    165.5 connections from a pool concurrently insert documents into the same collection
 
 166. sodaCallback.js
     166.1 create a collection, then drop it
@@ -4194,11 +4195,11 @@ Overview of node-oracledb functional tests
     167.5 getCollectionNames() - limit is null
     167.6 getCollectionNames() - limit is an empty string
     167.7 getCollectionNames() - limit is a negative number
-    167.8 starsWith option - basic test
-    167.9 starsWith is case sensitive
-    167.10 starsWith is an empyt string
-    167.11 starsWith is null
-    167.12 Negative - starsWith is invalid type, a Number
+    167.8 startsWith option - basic test
+    167.9 startsWith is case sensitive
+    167.10 startsWith is an empty string
+    167.11 startsWith is null
+    167.12 Negative - startsWith has invalid type, a Number
     167.13 openCollection() basic case 1
     167.14 openCollection() basic case 2
     167.15 the returned value is null if the requested collection does not exist
@@ -4207,8 +4208,7 @@ Overview of node-oracledb functional tests
 168. soda4.js
     168.1 insertOneAndGet() fetches attributes without content
     168.2 content is null
-    168.5 get mediaType
-    165.5 connections from a pool concurrently insert documents into the same collection 
+    168.3 get mediaType 
 
 170. poolDrain.js
     170.1 close pool with force flag, and prevent new connection
@@ -4289,3 +4289,20 @@ Overview of node-oracledb functional tests
     175.6 replaceOneAndGet(), basic case with document object
     175.7 replaceOneAndGet(), updatedDocument does not have document content
     175.8 replaceOneAndGet(), no error is reported if it does not match any document
+
+177. soda9.js
+    177.1 insertOne() with a document content
+    177.2 insertOne() with a document
+    177.3 insertOneAndGet() with a document content
+    177.4 insertOneAndGet() with a document
+    177.5 createDocument() followd by getContent() i.e. without being inserted
+
+179. soda11.js
+   179.1 create collection with metadata
+   179.2 Negative - create collection with an invalid metadata
+   179.3 throw error when creating collection with the existing name and different metadata
+   179.4 customize the key value, String value
+   179.5 Negative - customize the key value, numeric value
+   179.6 customize the value of mediaType
+   179.7 Negative - customize mediaType, invalid type, numeric value
+   179.8 insert an empty document with customized metadata

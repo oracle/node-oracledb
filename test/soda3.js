@@ -153,7 +153,7 @@ describe('167. soda3.js', () => {
     }
   });
 
-  it('167.8 starsWith option - basic test', async () => {
+  it('167.8 startsWith option - basic test', async () => {
     try {
       let options = { startsWith: "changjie" };
       let cNames = await sd.getCollectionNames(options);
@@ -163,7 +163,7 @@ describe('167. soda3.js', () => {
     }
   });
 
-  it('167.9 starsWith is case sensitive', async () => {
+  it('167.9 startsWith is case sensitive', async () => {
     try {
       let options = { startsWith: "Changjie" };
       let cNames = await sd.getCollectionNames(options);
@@ -174,7 +174,7 @@ describe('167. soda3.js', () => {
     }
   });
 
-  it('167.10 starsWith is an empyt string', async () => {
+  it('167.10 startsWith is an empty string', async () => {
     try {
       let options = { startsWith: "" };
       let cNames = await sd.getCollectionNames(options);
@@ -185,7 +185,7 @@ describe('167. soda3.js', () => {
     }
   });
 
-  it('167.11 starsWith is null', async () => {
+  it('167.11 startsWith is null', async () => {
     try {
       let options = { startsWith: null };
       await sodaUtil.assertThrowsAsync(
@@ -197,7 +197,7 @@ describe('167. soda3.js', () => {
     }
   });
 
-  it('167.12 Negative - starsWith is invalid type, a Number', async () => {
+  it('167.12 Negative - startsWith has invalid type, a Number', async () => {
     try {
       let options = { startsWith: 7 };
       await sodaUtil.assertThrowsAsync(

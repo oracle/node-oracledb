@@ -140,7 +140,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       case "NCHAR":
       case "VARCHAR2":
         if (err) {
-          // ORA-01465: invalid hex number
+        // ORA-01465: invalid hex number
           (err.message).should.startWith('ORA-01465:');
         }
         break;
