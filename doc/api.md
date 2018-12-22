@@ -4317,7 +4317,17 @@ See [Simple Oracle Document Access (SODA)](#sodaoverview) for more examples.
 
 ##### <a name="sodaoperationclass"></a> 8.2.4.1 SodaOperation Class
 
-A SodaOperation object is an internal object. You should not directly modify its properties.
+You can chain together SodaOperation methods, to specify read or write
+operations against a collection.
+
+Non-terminal SodaOperation methods return the same object on which
+they are invoked, allowing them to be chained together.
+
+A terminal SodaOperation method always appears at the end of a method
+chain to execute the operation.
+
+A SodaOperation object is an internal object. You should not directly
+modify its properties.
 
 ##### <a name="sodaoperationclassnonterm"></a> 8.2.4.1.1 Non-terminal SodaOperation Methods
 
@@ -4463,7 +4473,7 @@ This method was added in node-oracledb 3.0.
 
 ##### <a name="sodaoperationclassterm"></a> 8.2.4.1.2 Terminal SodaOperation Methods
 
-Terminal SodaOperation methods operate on the set of documents that
+A terminal SodaOperation method operates on the set of documents that
 satisfy the criteria specified by previous non-terminal methods in the
 method chain.  Only one terminal method can be used in each chain.
 
@@ -5441,7 +5451,7 @@ getContentAsString()
 
 ##### Description
 
-A synchronous method that returns the document content as a String.
+A synchronous method that returns JSON document content as a String.
 
 An exception will occur if the document content cannot be converted to
 a string.
@@ -10382,6 +10392,10 @@ role granted to them by a DBA:
 ```sql
 GRANT SODA_APP TO hr;
 ```
+
+The `CREATE TABLE` system privilege is also need.  Advanced users who
+are using Oracle sequences for keys will also need the `CREATE
+SEQUENCE` privilege.
 
 The general recommendation for SODA applications is to turn on
 [`autoCommit`](#propdbisautocommit) globally:
