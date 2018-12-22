@@ -164,4 +164,99 @@ describe('165. soda2.js', () => {
     }
   }); // 165.4
 
+  // This is a variation of 173.1
+  it('165.5 connections from a pool concurrently insert documents into the same collection', async () => {
+    
+    const collectionName = "soda_test_165.5";
+
+    try {
+      await prepareCollection(collectionName);
+    } catch(err) {
+      should.not.exist(err);
+    }
+
+    try {
+      let pool = await oracledb.createPool(dbconfig);
+
+      const t_contents = sodaUtil.t_contents;
+      await Promise.all(
+        t_contents.map(function(content) {
+          return insertDocument(pool, collectionName, content);
+        })
+      );
+
+      await pool.close();
+
+    } catch(err) {
+      should.not.exist(err);
+    }
+
+    try {
+      await dropCollection(collectionName);
+    } catch(err) {
+      should.not.exist(err);
+    }
+
+    async function prepareCollection(collName) {
+
+      try {
+        let conn = await oracledb.getConnection(dbconfig);
+        let soda = conn.getSodaDatabase();
+        let collection = await soda.createCollection(collName);
+        let indexSpec = {
+          "name": "OFFICE_IDX",
+          "fields": [
+            {
+              "path": "office",
+              "datatype": "string",
+              "order": "asc"
+            }
+          ]
+        };
+        await collection.createIndex(indexSpec);
+        await conn.commit();
+        await conn.close();
+
+      } catch(err) {
+        should.not.exist(err);
+      }
+      
+    } // prepareCollection()
+
+    async function insertDocument(pool, collName, content) {
+
+      try {
+        let conn = await pool.getConnection();
+        let soda = conn.getSodaDatabase();
+        let collection = await soda.openCollection(collName);
+
+        await collection.insertOne(content);
+
+        await conn.commit();
+        await conn.close();
+      } catch(err) {
+        should.not.exist(err);
+      }
+    } // insertDocument()
+
+    async function dropCollection(collName) {
+
+      try {
+        let conn = await oracledb.getConnection(dbconfig);
+        let soda = conn.getSodaDatabase();
+        let collection = await soda.openCollection(collName);
+
+        let result = await collection.drop();
+        should.strictEqual(result.dropped, true);
+
+        await conn.commit();
+        await conn.close();
+
+      } catch(err) {
+        should.not.exist(err);
+      }
+    } // dropCollection()
+
+  }); // 165.5
+
 });
