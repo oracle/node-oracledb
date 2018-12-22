@@ -4306,3 +4306,9 @@ Overview of node-oracledb functional tests
    179.6 customize the value of mediaType
    179.7 Negative - customize mediaType, invalid type, numeric value
    179.8 insert an empty document with customized metadata
+
+181. dataTypeXML.js
+    181.1 basic case, insert XML data and query back
+    181.2 query XML data as CLOB
+    181.3 another query as CLOB syntax
+    181.4 Negative - try to insert Null
