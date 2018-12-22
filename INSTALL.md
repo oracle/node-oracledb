@@ -266,7 +266,9 @@ additional tools to build from source code:
 
 ### <a name="instrpm"></a> 3.2 Node-oracledb Installation on Linux with Instant Client RPMs
 
-Follow these steps if your database is on a remote machine.
+Follow these steps if your database is on a remote machine.  Also see
+[Installing Node.js and Node-oracledb RPMs from
+yum.oracle.com](#instnoderpms).
 
 Questions and issues can be posted as [GitHub Issues][10].
 
@@ -328,11 +330,16 @@ Source Code](#github).
 
 #### 3.2.4 Install the free Oracle Instant Client 'Basic' RPM
 
-Download the free **Basic** RPM from [Oracle Technology Network][12] and
-[install it][13] with sudo or as the root user:
+Download the free **Basic** RPM from yum.oracle.com.  There are
+channels for [Oracle Linux 6][50] and [Oracle Linux 7][51].  The
+package contents are identical in both channels.  Alternatively,
+multiple versions of Instant Client RPMs are available from [Oracle
+Technology Network][12].
+
+[Install Instant Client Basic][13] with sudo or as the root user:
 
 ```
-sudo yum install oracle-instantclient18.3-basic-18.3.0.0.0-1.x86_64.rpm
+sudo yum install oracle-instantclient18.3-basic-18.3.0.0.0-2.x86_64.rpm
 ```
 
 This will install the required `libaio` package, if it is not already
@@ -1387,9 +1394,12 @@ If you see `MSVCR80.dll` then you need the VS 2005 Redistributable.
 
 ### <a name="instnoderpms"></a> 3.12 Installing Node.js and Node-oracledb RPMs from yum.oracle.com
 
-Node.js Linux RPM packages are available on [yum.oracle.com][46].
+Node.js and node-oracledb Linux RPM packages are available on
+[yum.oracle.com][46].  Oracle Instant Client is also available in
+[Oracle Linux 6][50] and [Oracle Linux 7][51] channels.  This means
+installation is simple, and can be automated.
 
-As an example, to install Node 8 on Oracle Linux 7, run these commands
+As an example, to install Node 10 on Oracle Linux 7, run these commands
 as the root user:
 
 ```
@@ -1397,23 +1407,15 @@ cd /etc/yum.repos.d
 mv public-yum-ol7.repo public-yum-ol7.repo.bak
 wget http://yum.oracle.com/public-yum-ol7.repo
 yum install yum-utils
-yum-config-manager --enable ol7_developer_nodejs8
-yum install nodejs
+yum-config-manager --enable ol7_developer_nodejs10 ol7_oracle_instantclient
+yum install nodejs node-oracledb-node10 oracle-instantclient18.3-basic
 ```
 
-Download the Oracle Instant Client Basic package from [Instant Client
-Downloads for Linux x86-64 (64-bit)][12] and install it:
+As the root user, add Instant Client to the library search path:
 
 ```
-yum install oracle-instantclient18.3-basic-18.3.0.0.0-1.x86_64.rpm
 echo /usr/lib/oracle/18.3/client64/lib > /etc/ld.so.conf.d/oracle-instantclient.conf
-sudo ldconfig
-```
-
-Install the node-oracledb package, for example:
-
-```
-yum install node-oracledb-18c-node10-3.1.0
+ldconfig
 ```
 
 Since node-oracledb is installed globally, set `NODE_PATH` before
@@ -1609,3 +1611,5 @@ Issues and questions about node-oracledb can be posted on [GitHub][10] or
 [47]: https://oracle.github.io/node-oracledb/doc/api.html#migrate
 [48]: https://node-oracledb.slack.com/
 [49]: https://node-oracledb.slack.com/join/shared_invite/enQtNDU4Mjc2NzM5OTA2LTdkMzczODY3OGY3MGI0Yjk3NmQ4NDU4MTI2OGVjNTYzMjE5OGY5YzVkNDY4MWNkNjFiMDM2ZDMwOWRjNWVhNTg
+[50]: http://yum.oracle.com/repo/OracleLinux/OL6/oracle/instantclient/x86_64/index.html
+[51]: http://yum.oracle.com/repo/OracleLinux/OL7/oracle/instantclient/x86_64/index.html
