@@ -42,7 +42,7 @@ limitations under the License.
         - 3.11.1 [Copying node-oracledb Binaries on Windows](#winbins)
     - 3.12 [Installing Node.js and Node-oracledb RPMs from yum.oracle.com](#instnoderpms)
     - 3.13 [Hosting your own node-oracledb Packages](#selfhost)
-4. [Installing Node-oracledb 1.x](#installingv1)
+4. [Installing Node-oracledb 1.x or 2.x](#installingoldvers)
 5. [Useful Resources for Node-oracledb](#otherresources)
 6. [Troubleshooting Node-oracledb Installation Problems](#troubleshooting)
 
@@ -1459,17 +1459,49 @@ or your `package.json` would contain:
 ```
 
 
-## <a name="installingv1"></a> 4. Installing Node-oracledb 1.x
+## <a name="installingoldvers"></a> <a name="installingv1"></a> 4. Installing Node-oracledb 1.x or 2.x
 
-If you need to install the previous node-oracledb 1.x add-on, refer to
-the steps in the [version 1.x INSTALL guide][32].  To get an old
-add-on you must explicitly use its version when installing:
+### Installing Node-oracledb 1.x
+
+The node-oracledb 1.x installation steps are in the [version 1.x
+INSTALL guide][32].  This version always requires compilation.  To get
+an old add-on you must explicitly use its version when installing:
 
 ```
 npm install oracledb@1.13.1
 ```
 
-This version always requires compilation.
+or your `package.json` could contain:
+
+```
+. . .
+   "dependencies": {
+      "oracledb": "1.13.1"
+   },
+. . .
+```
+
+### Installing Node-oracledb 2.x
+
+The node-oracledb 2.x installation steps are in the [version 2.x
+INSTALL guide][52].  Pre-built binaries are available for some
+platforms and Node.js versions. You can compile the add-on for other
+versions.  To get an old add-on you must explicitly use its version
+when installing:
+
+```
+npm install oracledb@2.3.0
+```
+
+or your `package.json` could contain:
+
+```
+. . .
+   "dependencies": {
+      "oracledb": "2.3.0"
+   },
+. . .
+```
 
 ## <a name="otherresources"></a> 5. Useful Resources for Node-oracledb
 
@@ -1613,3 +1645,4 @@ Issues and questions about node-oracledb can be posted on [GitHub][10] or
 [49]: https://node-oracledb.slack.com/join/shared_invite/enQtNDU4Mjc2NzM5OTA2LTdkMzczODY3OGY3MGI0Yjk3NmQ4NDU4MTI2OGVjNTYzMjE5OGY5YzVkNDY4MWNkNjFiMDM2ZDMwOWRjNWVhNTg
 [50]: http://yum.oracle.com/repo/OracleLinux/OL6/oracle/instantclient/x86_64/index.html
 [51]: http://yum.oracle.com/repo/OracleLinux/OL7/oracle/instantclient/x86_64/index.html
+[52]: https://github.com/oracle/node-oracledb/blob/v2.3.0/INSTALL.md
