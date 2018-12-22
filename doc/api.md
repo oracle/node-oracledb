@@ -306,8 +306,8 @@ limitations under the License.
         - 12.3.3 [Connection Pool Monitoring and Throughput](#connpoolmonitor)
         - 12.3.4 [Connection Pool Pinging](#connpoolpinging)
         - 12.3.5 [Heterogeneous Connection Pools and Pool Proxy Authentication](#connpoolproxy)
-    - 12.4 [Database Resident Connection Pooling (DRCP)](#drcp)
-    - 12.5 [External Authentication](#extauth)
+    - 12.4 [External Authentication](#extauth)
+    - 12.5 [Database Resident Connection Pooling (DRCP)](#drcp)
     - 12.6 [Privileged Connections](#privconn)
     - 12.7 [Securely Encrypting Network Traffic to Oracle Database](#securenetwork)
     - 12.8 [Changing Passwords and Connecting with an Expired Password](#changingpassword)
@@ -975,8 +975,8 @@ more information.
 
 The default value is *false*.
 
-The `user` and `password` properties for connecting or creating a pool
-should not be set when `externalAuth` is *true*.
+The `user` and `password` properties should not be set when
+`externalAuth` is *true*.
 
 This property can be overridden in the
 [`oracledb.createPool()`](#createpool) call and when getting a
@@ -6309,59 +6309,122 @@ To use the proxy user with a node-oracledb heterogeneous connection
 pool you could do:
 
 ```javascript
-oracledb.createPool(
-  {
-    connectString : "localhost/XE",  // no user name or password
-    homogeneous   : false,
-    . . .  // other pool options such as poolMax can be used
-  },
-  function(err, pool) {
-    pool.getConnection(
-      {
-        user     : 'myproxyuser[hr]',
-        password : 'myproxyuserpassword'
-      },
-      function (err, conn) {
+let pool = await oracledb.createPool({ connectString: "localhost/orclpdb", homogeneous: false });
+let conn = await pool.getConnection({ user: 'myproxyuser[hr]', password: 'myproxyuserpassword'});
 
-        . . . // connection has access to the HR schema objects
+. . . // connection has access to the HR schema objects
 
-        conn.close(
-          function(err) {
-            if (err) { console.error(err.message); }
-          });
-      });
-  });
+await conn.close();
 ```
 
 Other proxy cases are supported such as:
 
 ```javascript
-oracledb.createPool(
+let pool = await oracledb.createPool(
   {
     user          : 'myproxyuser',
     password      : 'myproxyuserpassword'
     connectString : "localhost/XE",
     homogeneous   : false,
     . . .  // other pool options such as poolMax can be used
-  },
-  function(err, pool) {
-    pool.getConnection(
-      {
-        user : 'hr'  // the session user
-      },
-      function (err, conn) {
-
-        . . . // connection has access to the HR schema objects
-
-        conn.close(
-          function(err) {
-            if (err) { console.error(err.message); }
-          });
-      });
   });
+
+let conn = pool.getConnection({ user : 'hr' });  // the session user
+
+. . . // connection has access to the HR schema objects
+
+await conn.close();
 ```
 
-### <a name="drcp"></a> 12.4 Database Resident Connection Pooling (DRCP)
+### <a name="extauth"></a> 12.4 External Authentication
+
+External Authentication allows applications to use an external
+password store (such as an [Oracle Wallet][27]), the [Secure Socket
+Layer][28] (SSL), or the [operating system][29] to validate user
+access.  One of the benefits is that database credentials do not need
+to be hard coded in the application.
+
+To use external authentication, set the
+[`oracledb.externalAuth`](#propdbisexternalauth) property to *true*.  This property can
+also be set in the `connAttrs` or `poolAttrs` parameters of the
+[`oracledb.getConnection()`](#getconnectiondb) or
+[`oracledb.createPool()`](#createpool) calls, respectively.
+
+When `externalAuth` is set, any subsequent connections obtained using
+the [`oracledb.getConnection()`](#getconnectiondb) or
+[`pool.getConnection()`](#getconnectionpool) calls will use external
+authentication.  Setting this property does not affect the operation
+of existing connections or pools.
+
+For a standalone connection:
+
+```javascript
+let config = { connectString: "localhost/orclpdb", externalAuth: true };
+let conn = await oracledb.getConnection(config);
+
+. . . // connection has access to the schema objects of the externally identified user
+```
+
+If a user `HR` has been given the `CONNECT THROUGH` grant from the
+externally identified user `MYPROXYUSER`:
+
+```sql
+ALTER USER hr GRANT CONNECT THROUGH myproxyuser;
+```
+
+then to specify that the session user of the connection should be
+`HR`, use:
+
+```javascript
+let config = { connectString: "localhost/orclpdb", user: "[hr]", externalAuth: true };
+let conn = await oracledb.getConnection(config);
+
+. . . // connection has access to the HR schema objects
+```
+
+For a *Pool*, you can authenticate as an externally identified user like:
+
+```javascript
+let config = { connectString: "localhost/orclpdb", externalAuth: true };
+let pool = await oracledb.createPool(config);
+let conn = await pool.getConnection();
+
+. . . // connection has access to the schema objects of the externally identified user
+
+await conn.close();
+```
+
+If a user `HR` has been given the `CONNECT THROUGH` grant from the
+externally identified user, then to specify that the session user of
+the connection should be `HR`, use:
+
+```javascript
+let config = { connectString: "localhost/orclpdb", externalAuth: true };
+let pool = await oracledb.createPool(config);
+let conn = await pool.getConnection({ user: "[hr]" });
+
+. . . // connection has access to the HR schema objects
+
+await conn.close();
+```
+
+Note this last case needs Oracle Client libraries version 18 or later.
+
+Using `externalAuth` in the `connAttrs` parameter of a
+`pool.getConnection()` call is not possible.  The connections from a *Pool*
+object are always obtained in the manner in which the pool was
+initially created.
+
+For pools created with external authentication, the number of
+connections initially created is zero even if a larger value is
+specified for [`poolMin`](#propdbpoolmin).  The pool increment is
+always 1, regardless of the value of
+[`poolIncrement`](#proppoolpoolincrement).  Once the number
+of open connections exceeds `poolMin` and connections are idle for
+more than the [`poolTimeout`](#propdbpooltimeout) seconds, then the
+number of open connections does not fall below `poolMin`.
+
+### <a name="drcp"></a> 12.5 Database Resident Connection Pooling (DRCP)
 
 [Database Resident Connection Pooling][24] (DRCP) enables database
 resource sharing for applications that run in multiple client
@@ -6394,52 +6457,6 @@ There are a number of Oracle Database `V$` views that can be used to
 monitor DRCP.  These are discussed in the Oracle documentation and in
 the Oracle white paper [PHP Scalability and High Availability][26].
 This paper also gives more detail on configuring DRCP.
-
-### <a name="extauth"></a> 12.5 External Authentication
-
-External Authentication allows applications to use an external
-password store (such as an [Oracle Wallet][27]), the [Secure Socket
-Layer][28] (SSL), or the [operating system][29] to validate user
-access.  One of the benefits is that database credentials do not need
-to be hard coded in the application.
-
-To use external authentication, set the
-[`oracledb.externalAuth`](#propdbisexternalauth) property to *true*.  This property can
-also be set in the `connAttrs` or `poolAttrs` parameters of the
-[`oracledb.getConnection()`](#getconnectiondb) or
-[`oracledb.createPool()`](#createpool) calls, respectively.  The `user` and
-`password` properties should not be set, or should be empty strings:
-
-```javascript
-var oracledb = require('oracledb');
-
-oracledb.getConnection(
-  {
-    externalAuth: true,
-    connectString: "localhost/orclpdb"
-  },
-  . . .
-```
-
-When `externalAuth` is set, any subsequent connections obtained using
-the [`oracledb.getConnection()`](#getconnectiondb) or
-[`pool.getConnection()`](#getconnectionpool) calls will use external
-authentication.  Setting this property does not affect the operation
-of existing connections or pools.
-
-Using `externalAuth` in the `connAttrs` parameter of a
-`pool.getConnection()` call is not possible.  The connections from a *Pool*
-object are always obtained in the manner in which the pool was
-initially created.
-
-For pools created with external authentication, the number of
-connections initially created is zero even if a larger value is
-specified for [`poolMin`](#propdbpoolmin).  The pool increment is
-always 1, regardless of the value of
-[`poolIncrement`](#proppoolpoolincrement).  Once the number
-of open connections exceeds `poolMin` and connections are idle for
-more than the [`poolTimeout`](#propdbpooltimeout) seconds, then the
-number of open connections does not fall below `poolMin`.
 
 ### <a name="privconn"></a> 12.6 Privileged Connections
 
