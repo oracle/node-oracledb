@@ -4312,3 +4312,8 @@ Overview of node-oracledb functional tests
     181.2 query XML data as CLOB
     181.3 another query as CLOB syntax
     181.4 Negative - try to insert Null
+
+182. deferLibInit.js
+    182.1 defers initializatiion of ODPI-C
+    182.2 Negative: throws error when asking for ODPI-C attributes
+    183.3 Negative: call oracledb method

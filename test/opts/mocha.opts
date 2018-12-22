@@ -207,3 +207,4 @@ test/soda9.js
 test/soda11.js
 
 test/dataTypeXML.js
+test/deferLibInit.js
