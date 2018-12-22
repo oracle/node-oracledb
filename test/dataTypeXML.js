@@ -193,5 +193,34 @@ describe('181. dataTypeXML.js', () => {
     }
 
   }); // 181.4
+
+  // ORA-19011: Character string buffer too small
+  it.skip('181.5 inserts data that larger than 4K', async () => {
+    
+    let ID = 50;
+    let str = 'a'.repeat(31*1024);
+    let head = '<data>', tail = '</data>\n';
+    let xml = head.concat(str).concat(tail);
+
+    try {
+      const conn = await oracledb.getConnection(dbconfig);
+
+      let sql = "insert into " + tableName + " ( num, content ) values ( :id, XMLType(:bv) )";
+      let bindValues = { id: ID, bv: xml };
+      let result = await conn.execute(sql, bindValues);
+      should.strictEqual(result.rowsAffected, 1);
+
+      sql = "select content from " + tableName + " where num = :id";
+      let bindVar = { id: ID };
+      let options = { outFormat: oracledb.OBJECT };
+      result = await conn.execute(sql, bindVar, options);
+      should.strictEqual(result.rows[0].CONTENT, xml);
+      await conn.commit();
+      await conn.close();
+
+    } catch(err) {
+      should.not.exist(err);
+    }
+  }); // 181.5
   
 });
