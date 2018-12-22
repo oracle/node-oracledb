@@ -45,6 +45,9 @@ This release is currently under development.
 - Fixed a crash with high frequency notifications from CQN
   ([#1009](https://github.com/oracle/node-oracledb/issues/1009)).
 
+- Fixed `poolPingInterval` with Oracle client libraries 12.2 or later
+  (ODPI-C change).
+
 - Display correct error message for SODA `createIndex()` when no
   parameter is passed.
 
