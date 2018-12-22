@@ -200,7 +200,10 @@ test/jsObjectGetter2.js
 test/executeMany2.js
 test/soda5.js
 test/soda6.js
+
 test/soda7.js
 test/soda8.js
 test/soda9.js
 test/soda11.js
+
+test/dataTypeXML.js
