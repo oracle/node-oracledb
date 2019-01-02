@@ -48,6 +48,10 @@ This release is currently under development.
 - Fixed `poolPingInterval` with Oracle client libraries 12.2 or later
   (ODPI-C change).
 
+- Fixed an issue with `poolPingInterval` that could cause usable
+  pooled connections to be unnecessarily dropped by
+  `connection.close()`.  (ODPI-C change).
+
 - Display correct error message for SODA `createIndex()` when no
   parameter is passed.
 
