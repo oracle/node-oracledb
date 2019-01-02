@@ -206,5 +206,7 @@ test/soda8.js
 test/soda9.js
 test/soda11.js
 
+test/externalProxyAuth.js
+
 test/dataTypeXML.js
 test/deferLibInit.js

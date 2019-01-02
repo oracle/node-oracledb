@@ -99,4 +99,8 @@ if (process.env.NODE_ORACLEDB_DBA_PASSWORD) {
   config.test.DBA_password = process.env.NODE_ORACLEDB_DBA_PASSWORD;
 }
 
+if (process.env.NODE_ORACLEDB_PROXY_SESSION_USER) {
+  config.test.proxySessionUser = process.env.NODE_ORACLEDB_PROXY_SESSION_USER;
+}
+
 module.exports = config;
