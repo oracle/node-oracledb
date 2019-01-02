@@ -41,7 +41,7 @@ describe('182. deferLibInit.js', () => {
   it('182.1 defers initializatiion of ODPI-C', async () => {
     try {
       delete process.env.LD_LIBRARY_PATH;
-      await postiveCase();
+      await positiveCase();
     } catch(err) {
       should.not.exist(err);
     }
@@ -67,7 +67,7 @@ describe('182. deferLibInit.js', () => {
   
 });
 
-async function postiveCase() {
+async function positiveCase() {
   const { stdout } = await execFile('mocha', ['test/deferLibInit1.js']);
   should.exist(stdout);
 }
