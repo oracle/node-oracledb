@@ -4,6 +4,24 @@
 
 This release is currently under development.
 
+- Support tagging of pooled connections when releasing them to the
+  connection pool.  When using Oracle Client libraries 12.2 or later,
+  Oracle's multi-property tagging is used, and a PL/SQL "session"
+  state fix-up procedure can be called when a requested connection tag
+  does not match the actual tag.  This removes the need to reset
+  connection session state after every `pool.getConnection()` call.
+
+- Support a Node.js callback function for connection pools.  It is
+  called when a connection is newly created and has never been
+  acquired from the pool before, or when a requested connection tag
+  does not match the actual tag.
+
+- Support explicit dropping of connections from connection pools.
+
+- Support passing parameters in `oracledb.getConnection()` (such as
+  `poolAlias`, `tag` and proxy authentication credentials) for use
+  with the pool cache.
+
 - Support the combination of a user proxy and external authentication
   with standalone connections (ODPI-C change).
 

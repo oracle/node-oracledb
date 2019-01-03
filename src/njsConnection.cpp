@@ -2190,12 +2190,17 @@ NAN_METHOD(njsConnection::Close)
     njsConnection *connection;
     njsBaton *baton;
 
-    connection = (njsConnection*) ValidateArgs(info, 1, 1);
+    connection = (njsConnection*) ValidateArgs(info, 2, 2);
     if (!connection)
         return;
     baton = connection->CreateBaton(info);
     if (!baton)
         return;
+
+    Local<Object> options = info[0].As<Object>();
+    baton->GetStringFromJSON(options, "tag", 0, baton->tag);
+    baton->GetBoolFromJSON(options, "drop", 0, &baton->dropSession);
+
     baton->dpiConnHandle = connection->dpiConnHandle;
     connection->dpiConnHandle = NULL;
     baton->QueueWork("Close", Async_Close, NULL, 1);
@@ -2210,8 +2215,18 @@ NAN_METHOD(njsConnection::Close)
 //-----------------------------------------------------------------------------
 void njsConnection::Async_Close(njsBaton *baton)
 {
-    if (dpiConn_close(baton->dpiConnHandle, DPI_MODE_CONN_CLOSE_DEFAULT, NULL,
-            0) < 0) {
+    uint32_t mode = DPI_MODE_CONN_CLOSE_DEFAULT, tagLength = 0;
+    const char *tag = NULL;
+
+    if (baton->dropSession) {
+        mode = DPI_MODE_CONN_CLOSE_DROP;
+    } else if (!baton->tag.empty()) {
+        mode = DPI_MODE_CONN_CLOSE_RETAG;
+        tag = baton->tag.c_str();
+        tagLength = baton->tag.length();
+    }
+
+    if (dpiConn_close(baton->dpiConnHandle, mode, tag, tagLength) < 0) {
         njsConnection *connection = (njsConnection*) baton->callingObj;
         connection->dpiConnHandle = baton->dpiConnHandle;
         baton->dpiConnHandle = NULL;

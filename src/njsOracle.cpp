@@ -1088,6 +1088,8 @@ NAN_METHOD(njsOracledb::CreatePool)
                 &baton->homogeneous);
         baton->GetBoolFromJSON(poolProps, "events", 0, &baton->events);
         baton->GetStringFromJSON(poolProps, "edition", 0, baton->edition);
+        baton->GetStringFromJSON(poolProps, "sessionCallback", 0,
+                baton->plsqlFixupCallback);
         baton->lobPrefetchSize = oracledb->lobPrefetchSize;
         baton->jsOracledb.Reset(info.Holder());
     }
@@ -1116,6 +1118,10 @@ void njsOracledb::Async_CreatePool(njsBaton *baton)
     params.getMode = DPI_MODE_POOL_GET_WAIT;
     params.externalAuth = baton->externalAuth;
     params.homogeneous = baton->homogeneous;
+    if (!baton->plsqlFixupCallback.empty()) {
+        params.plsqlFixupCallback = baton->plsqlFixupCallback.c_str();
+        params.plsqlFixupCallbackLength = baton->plsqlFixupCallback.length();
+    }
 
     if (params.externalAuth)
         params.homogeneous = 0;

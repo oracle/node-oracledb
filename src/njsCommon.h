@@ -281,6 +281,8 @@ public:
     std::string edition;
     std::string ipAddress;
     std::string name;
+    std::string plsqlFixupCallback;
+    std::string tag;
     uint32_t poolMin;
     uint32_t poolMax;
     uint32_t poolIncrement;
@@ -323,6 +325,9 @@ public:
     bool events;
     bool batchErrors;
     bool dmlRowCounts;
+    bool matchAnyTag;
+    bool dropSession;
+    bool newSession;
     uint64_t bufferSize;
     char *bufferPtr;
     uint64_t lobOffset;
@@ -401,14 +406,14 @@ public:
             protoILob(NULL), externalAuth(false), homogeneous(true),
             getRS(false), autoCommit(false), extendedMetaData(false),
             isReturning(false), isPLSQL(false), events(false),
-            batchErrors(false), dmlRowCounts(false), bufferSize(0),
+            batchErrors(false), dmlRowCounts(false), matchAnyTag(false),
+            dropSession(false), newSession(false), bufferSize(0),
             bufferPtr(NULL), lobOffset(0), lobAmount(0), numRowCounts(0),
             rowCounts(NULL), timeout(0), qos(0), operations(0),
-            numBatchErrorInfos(0), batchErrorInfos(NULL),
-            dpiError(false), portNumber(0), subscrGroupingClass(0),
-            subscrGroupingValue(0), subscrGroupingType(0),
-            subscription(NULL), dpiSodaDbHandle(NULL), dpiSodaCollHandle(NULL),
-            limit(0), sodaCollNames(NULL),
+            numBatchErrorInfos(0), batchErrorInfos(NULL), dpiError(false),
+            portNumber(0), subscrGroupingClass(0), subscrGroupingValue(0),
+            subscrGroupingType(0), subscription(NULL), dpiSodaDbHandle(NULL),
+            dpiSodaCollHandle(NULL), limit(0), sodaCollNames(NULL),
             createCollectionMode(NJS_SODA_COLL_CREATE_MODE_DEFAULT),
             isDropped(0), dpiSodaDocHandle(NULL), docCount(0),
             docsDeleted(0), dpiSodaDocCursorHandle(NULL),

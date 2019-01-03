@@ -51,12 +51,12 @@ async function init() {
       user: dbConfig.user,
       password: dbConfig.password,
       connectString: dbConfig.connectString
-      // Default values shown below
+      // sessionCallback: myFunction, // function invoked for brand new connections or by a connection tag mismatch
       // edition: 'ORA$BASE', // used for Edition Based Redefintion
       // events: false, // whether to handle Oracle Database FAN and RLB events or support CQN
       // externalAuth: false, // whether connections should be established using External Authentication
       // homogeneous: true, // all connections in the pool have the same credentials
-      // poolAlias: 'myalias', // set an alias to allow access to the pool via a name.
+      // poolAlias: 'default', // set an alias to allow access to the pool via a name.
       // poolIncrement: 1, // only grow the pool by one connection at a time
       // poolMax: 4, // maximum size of the pool. Increase UV_THREADPOOL_SIZE if you increase poolMax
       // poolMin: 0, // start with no connections; let the pool shrink completely

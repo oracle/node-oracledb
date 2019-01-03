@@ -377,6 +377,9 @@ NAN_METHOD(njsPool::GetConnection)
         /* Connection Properties: If empty json, values will be empty */
         baton->GetStringFromJSON(connProps, "user", 0, baton->user);
         baton->GetStringFromJSON(connProps, "password", 0, baton->password);
+        baton->GetStringFromJSON(connProps, "tag", 0, baton->tag);
+        baton->GetBoolFromJSON(connProps, "matchAnyTag", 0,
+                &baton->matchAnyTag);
 
         baton->jsOracledb.Reset(pool->jsOracledb);
         njsOracledb *oracledb = baton->GetOracledb();
@@ -385,7 +388,7 @@ NAN_METHOD(njsPool::GetConnection)
         baton->SetDPIPoolHandle(pool->dpiPoolHandle);
     }
     baton->QueueWork("GetConnection", Async_GetConnection,
-            Async_AfterGetConnection, 2);
+            Async_AfterGetConnection, 4);
 }
 
 
@@ -403,9 +406,14 @@ void njsPool::Async_GetConnection(njsBaton *baton)
         baton->GetDPIError();
         return;
     }
+    params.matchAnyTag = baton->matchAnyTag;
     if (!baton->connClass.empty()) {
         params.connectionClass = baton->connClass.c_str();
         params.connectionClassLength = baton->connClass.length();
+    }
+    if (!baton->tag.empty()) {
+        params.tag = baton->tag.c_str();
+        params.tagLength = baton->tag.length();
     }
     if (dpiPool_acquireConnection(baton->dpiPoolHandle,
                                   baton->user.empty() ?
@@ -418,18 +426,26 @@ void njsPool::Async_GetConnection(njsBaton *baton)
                                       0 : baton->password.length(),
                                   &params, &baton->dpiConnHandle) < 0)
         baton->GetDPIError();
+    baton->tag = std::string(params.outTag, params.outTagLength);
+    baton->newSession = params.outNewSession;
 }
 
 
 //-----------------------------------------------------------------------------
 // njsPool::Async_AfterGetConnection()
 //   Sets up the arguments for the callback to JS. The connection object is
-// created and passed as the second argument. The first argument is the error
-// and at this point it is known that no error has taken place.
+// created and passed as the second argument. The actual tag found is passed as
+// the third argument. The first argument is the error and at this point it is
+// known that no error has taken place.
 //-----------------------------------------------------------------------------
 void njsPool::Async_AfterGetConnection(njsBaton *baton, Local<Value> argv[])
 {
     argv[1] = njsConnection::CreateFromBaton(baton);
+    if (!baton->tag.empty()) {
+        argv[2] = Nan::New<v8::String>(baton->tag.c_str(),
+                baton->tag.length()).ToLocalChecked();
+    }
+    argv[3] = Nan::New<v8::Number>(baton->newSession);
 }
 
 
