@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2019, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -40,7 +40,6 @@ const packageJSON = require("../package.json");
 
 // Files etc relative to the top level directory
 const releaseDir = "build/Release";
-const relStagingDir = releaseDir + "/Staging";  // a subdir of Release so 'npm install' creates Release
 const buildStagingDir = "package/Staging";
 const moduleBinaryFile = releaseDir + "/oracledb.node";
 const binaryStagingFileBase = "oracledb.node-abi" + process.versions.modules + "-" + process.platform + "-" + process.arch;

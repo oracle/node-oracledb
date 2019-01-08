@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2019, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -133,7 +133,7 @@ if (process.argv.length != 3 ) {
   usage();
 } else {
   let command = process.argv[2];
-    if (command == 'binary')
+  if (command == 'binary')
     buildBinary();
   else if (command == 'package')
     packageUp();
