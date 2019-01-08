@@ -1563,8 +1563,9 @@ promise = createPool(Object poolAttrs);
 
 ##### Description
 
-This method creates a pool of connections with the specified user name,
-password and connection string.
+This method creates a pool of connections with the specified user
+name, password and connection string.  A pool is typically created
+once during application initialization.
 
 Internally, `createPool()` creates an [Oracle Call Interface Session
 Pool][6] for each Pool object.
@@ -2330,6 +2331,16 @@ the time the break is issued, the `break()` is effectively a no-op.
 
 If the running asynchronous operation is interrupted, its callback
 will return an error.
+
+In network configurations that drop (or in-line) out-of-band breaks,
+`break()` may hang unless you have [`DISABLE_OOB=ON`][122] in a
+`sqlnet.ora` file, see [Optional Client Configuration
+Files](#tnsadmin).
+
+If you use use `break()` with [DRCP connections](#drcp), it is
+currently recommended to drop the connection when releasing it back to
+the pool: `await connection.close({drop: true})`.  See Oracle bug
+29116892.
 
 ##### Parameters
 
@@ -3834,9 +3845,11 @@ See [`oracledb.queueTimeout`](#propdbqueuetimeout).
 readonly Number status
 ```
 
-One of the [Pool Status Constants](#oracledbconstantspool) indicating
+One of the [`oracledb.POOL_STATUS_*`](#oracledbconstantspool) constants indicating
 whether the pool is open, being drained of in-use connections, or has
 been closed.
+
+See [Connection Pool Closing and Draining](#conpooldraining).
 
 #### <a name="proppoolstmtcachesize"></a> 6.1.12 `pool.stmtCacheSize`
 
@@ -6009,10 +6022,14 @@ see [Statement Caching](#stmtcache).
 
 #### <a name="conpooldraining"></a> 12.3.2 Connection Pool Closing and Draining
 
-When [`pool.close()`](#poolclose) is called, the pool will be closed
-only if all connections have been released to the pool with
-`connection.close()`.  Otherwise an error is returned and the pool
-will not be closed.
+Closing a connection pool allows database resources to be freed.  If
+Node.js is killed without [`pool.close()`](#poolclose) being called,
+it may be some time before the unused database-side of connections are
+automatically cleaned up in the database.
+
+When `pool.close()` is called, the pool will be closed only if all
+connections have been released to the pool with `connection.close()`.
+Otherwise an error is returned and the pool will not be closed.
 
 An optional `drainTime` parameter can be used to force the pool closed
 even if connections are in use.  This lets the pool be 'drained' of
@@ -6021,7 +6038,7 @@ allowed to remain active before it and its connections are terminated.
 For example, to give active connections 10 seconds to complete their
 work before being terminated:
 
-```
+```javascript
 await pool.close(10);
 ```
 
@@ -6032,18 +6049,47 @@ specified number of seconds, after which the pool and all open
 connections are forcibly closed.  Prior to this time limit, if there
 are no connections currently "checked out" from the pool with
 `getConnection()`, then the pool and its connections are immediately
-closed.  Non-zero `drainTime` values are recommended so applications
-have the opportunity to gracefully finish database operations, however
-pools can be forcibly closed by specifying a zero drain time:
-
-```
-await pool.close(0);
-```
+closed.
 
 In network configurations that drop (or in-line) out-of-band breaks,
 forced pool termination may hang unless you have
 [`DISABLE_OOB=ON`][122] in a `sqlnet.ora` file, see [Optional Client
 Configuration Files](#tnsadmin).
+
+Non-zero `drainTime` values are recommended so applications
+have the opportunity to gracefully finish database operations, however
+pools can be forcibly closed by specifying a zero drain time:
+
+```javascript
+await pool.close(0);
+```
+
+Closing the pool would commonly be one of the last stages of a Node.js
+application.  A typical closing routine look likes:
+
+```javascript
+// Close the default connection pool with 10 seconds draining, and exit
+async function closePoolAndExit() {
+  console.log("\nTerminating");
+  try {
+    await oracledb.getPool().close(10);
+    process.exit(0);
+  } catch(err) {
+    console.error(err.message);
+    process.exit(1);
+  }
+}
+```
+
+It is helpful to invoke `closePoolAndExit()` if Node.js is
+sent a signal or interrupted:
+
+```javascript
+// Close the pool cleanly if Node.js is interrupted
+process
+  .once('SIGTERM', closePoolAndExit)
+  .once('SIGINT',  closePoolAndExit);
+```
 
 #### <a name="connpoolcache"></a> 12.3.3 Connection Pool Cache
 
@@ -6419,7 +6465,7 @@ The [`oracledb.createPool()`](#createpool) option attribute
 to set session state efficiently so that connections have a known
 session state.  The attribute can be a Node.js function that will be
 called whenever `pool.getConnection()` will return a newly created
-database connection that has not be used before.  It is also called
+database connection that has not been used before.  It is also called
 when connections are tagged and the requested tag does not match the
 actual tag in a previously used connection.  It is called before
 `pool.getConnection()` returns in these two cases.  It will not be
