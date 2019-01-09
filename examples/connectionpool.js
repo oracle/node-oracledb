@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2019, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -46,7 +46,6 @@ async function init() {
       user: dbConfig.user,
       password: dbConfig.password,
       connectString: dbConfig.connectString
-      // sessionCallback: myFunction, // function invoked for brand new connections or by a connection tag mismatch
       // edition: 'ORA$BASE', // used for Edition Based Redefintion
       // events: false, // whether to handle Oracle Database FAN and RLB events or support CQN
       // externalAuth: false, // whether connections should be established using External Authentication
@@ -58,6 +57,7 @@ async function init() {
       // poolPingInterval: 60, // check aliveness of connection if idle in the pool for 60 seconds
       // poolTimeout: 60, // terminate connections that are idle in the pool for 60 seconds
       // queueTimeout: 60000, // terminate getConnection() calls in the queue longer than 60000 milliseconds
+      // sessionCallback: myFunction, // function invoked for brand new connections or by a connection tag mismatch
       // stmtCacheSize: 30 // number of statements that are cached in the statement cache of each connection
     });
     console.log('Connection pool started');
@@ -99,21 +99,20 @@ async function dostuff() {
 async function closePoolAndExit() {
   console.log('\nTerminating');
   try {
-    // get the pool from the pool cache and close it when no
+    // Get the pool from the pool cache and close it when no
     // connections are in use, or force it closed after 10 seconds
-    let pool = oracledb.getPool();
-    await pool.close(10);
+    // If this hangs, you may need DISABLE_OOB=ON in a sqlnet.ora file
+    await oracledb.getPool().close(10);
     console.log('Pool closed');
     process.exit(0);
   } catch(err) {
-    // Ignore getPool() error, which may occur if multiple signals
-    // sent and the pool has already been removed from the cache.
-    process.exit(0);
+    console.error(err.message);
+    process.exit(1);
   }
 }
 
 process
-  .on('SIGTERM', closePoolAndExit)
-  .on('SIGINT',  closePoolAndExit);
+  .once('SIGTERM', closePoolAndExit)
+  .once('SIGINT',  closePoolAndExit);
 
 init();
