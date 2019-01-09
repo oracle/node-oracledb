@@ -454,7 +454,7 @@ This release is currently under development.
   the asynchronous portion of the `close()` method, so that all other
   attempts are no-ops.
 
-- Relaxed the restriction preventing `oracledb.connnectionClass` being
+- Relaxed the restriction preventing `oracledb.connectionClass` being
   used with dedicated connections; it previously gave ORA-56609.  Now
   DRCP can now be used with dedicated connections but the
   `CLIENT_DRIVER` value in `V$SESSION_CONNECT_INFO` will not be set in
@@ -570,7 +570,7 @@ This release is currently under development.
 - Move operations on REF CURSORS out of the main thread in order to
   improve performance and memory usage.
 
-- Relaxed the restriction preventing `oracledb.connnectionClass` being
+- Relaxed the restriction preventing `oracledb.connectionClass` being
   used with dedicated connections; it previously gave ORA-56609.  Now
   DRCP can now be used with dedicated connections but the
   `CLIENT_DRIVER` value in `V$SESSION_CONNECT_INFO` will not be set in

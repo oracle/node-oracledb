@@ -1714,7 +1714,7 @@ void njsConnection::SetTextAttribute(Nan::NAN_SETTER_ARGS_TYPE args,
 //-----------------------------------------------------------------------------
 // njsConnection::New()
 //   Create new object accesible from JS. This is always called from within
-// Connnection::CreateFromBaton() and never from any external JS.
+// Connection::CreateFromBaton() and never from any external JS.
 //-----------------------------------------------------------------------------
 NAN_METHOD(njsConnection::New)
 {

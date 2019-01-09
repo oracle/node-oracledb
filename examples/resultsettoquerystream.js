@@ -21,7 +21,7 @@
  * DESCRIPTION
  *   Converts a ResultSet returned from execute() into a Readable Stream.
  *   This is an alternative instead of using resultset.getRows().
- *   Note: using connnection.queryStream() is recommended for top level
+ *   Note: using connection.queryStream() is recommended for top level
  *   queries because it avoids having to duplicate error handling in the
  *   callback and event.
  *

@@ -764,7 +764,7 @@ describe('1. connection.js', function(){
 
   }); // 1.7
 
-  describe('1.8 privileged connnections', function() {
+  describe('1.8 privileged connections', function() {
 
     it('1.8.1 Negative value - null', function(done) {
 
