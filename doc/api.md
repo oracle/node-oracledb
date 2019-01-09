@@ -100,15 +100,15 @@ limitations under the License.
             - 3.3.1.2 [`createPool()`: Callback Function](#createpoolpoolcallback)
         - 3.3.2 [`getConnection()`](#getconnectiondb)
             - 3.3.2.1 [`getConnection()`: Parameters](#getconnectiondbattrs)
-                - 3.3.2.1.1 [Pool Alias](#getconnectiondbattrspoolalias)
-                - 3.3.2.1.2 [Connection Attributes](#getconnectiondbattrsconnattrs)
+                - 3.3.2.1.1 [Pool Alias](#getconnectionpoolalias)
+                - 3.3.2.1.2 [`getConnection()` Attributes](#getconnectiondbattrsconnattrs)
                     - 3.3.2.1.2.1 [`connectString`](#getconnectiondbattrsconnectstring), [`connectionString`](#getconnectiondbattrsconnectstring)
                     - 3.3.2.1.2.2 [`edition`](#getconnectiondbattrsedition)
                     - 3.3.2.1.2.3 [`events`](#getconnectiondbattrsevents)
                     - 3.3.2.1.2.4 [`externalAuth`](#getconnectiondbattrsexternalauth)
                     - 3.3.2.1.2.5 [`matchAny`](#getconnectiondbattrsmatchany)
                     - 3.3.2.1.2.6 [`newPassword`](#getconnectiondbattrsnewpassword)
-                    - 3.3.2.1.2.7 [`poolAlias`](#getconnectiondbattrpoolalias)
+                    - 3.3.2.1.2.7 [`poolAlias`](#getconnectiondbattrspoolalias)
                     - 3.3.2.1.2.8 [`password`](#getconnectiondbattrspassword)
                     - 3.3.2.1.2.9 [`privilege`](#getconnectiondbattrsprivilege)
                     - 3.3.2.1.2.10 [`stmtCacheSize`](#getconnectiondbattrsstmtcachesize)
@@ -127,6 +127,7 @@ limitations under the License.
         - 4.1.5 [`oracleServerVersion`](#propconnoracleserverversion)
         - 4.1.6 [`oracleServerVersionString`](#propconnoracleserverversionstring)
         - 4.1.7 [`stmtCacheSize`](#propconnstmtcachesize)
+        - 4.1.8 [`tag`](#propconntag)
     - 4.2 [Connection Methods](#connectionmethods)
         - 4.2.1 [`break()`](#break)
         - 4.2.2 [`changePassword()`](#changepassword)
@@ -1837,33 +1838,39 @@ This optional property overrides the
 ###### <a name="createpoolpoolattrssessioncallback"></a> 3.3.1.1.15 `sessionCallback`
 
 ```
-String sessionCallback | function sessionCallback(Connection connection, String requestedTag, String actualTag, function callback)
+String sessionCallback | function sessionCallback(Connection connection, String requestedTag, function callback)
 ```
 
-When `sessionCallback` is a Node.js function, it will be invoked
-for each `pool.getConnection()` call that will return a brand new
+When `sessionCallback` is a Node.js function, it will be invoked for
+each `pool.getConnection()` call that will return a brand new
 connection in the pool.  It will also be called if
 `pool.getConnection()` requests a connection from the pool with a
-given [`tag`](#getconnectiondbattrstag), and that tag does not match
-the connection's current actual tag.  It will not be invoked for other
-`getConnection()` calls.
+given [`tag`](#getconnectiondbattrstag), and that tag value does not
+match the connection's current actual tag.  It will not be invoked for
+other `getConnection()` calls.  The tag requested by
+`pool.getConnection()` is passed as the `requestedTag` parameter and
+the actual tag is available in [`connection.tag`](#propconntag).
 
 The session callback is called before `getConnection()` returns so it
 can be used to do logging, or efficiently set session state such as
-with ALTER SESSION statements.  Make sure any session state is set in
-the `sessionCallback` function prior to it calling its own `callback`
-function otherwise the session will not be correctly set when
-`getConnection()` returns.
+with ALTER SESSION statements.  Make sure any session state is set and
+`connection.tag` is updated in the `sessionCallback` function prior to
+it calling its own `callback` function otherwise the session will not
+be correctly set when `getConnection()` returns.
 
-When node-oracledb is using Oracle Client libraries 12.2 or later,
-`sessionCallback` can alternatively be a string containing the name
-of a PL/SQL procedure to be called when `getConnection()` requests a
+When node-oracledb is using Oracle Client libraries 12.2 or later, the
+tag must be a [multi-property tag][125] with name=value pairs like
+"k1=v1;k2=v2".
+
+When using Oracle Client libraries 12.2 or later, `sessionCallback`
+can be a string containing the name of a PL/SQL procedure to be called
+when `pool.getConnection()` requests a
 [`tag`](#getconnectiondbattrstag), and that tag does not match the
-connection's actual tag.  The tag must be a [multi-property tag][125].
-When the application uses [DRCP connections](#drcp), a PL/SQL callback
-can avoid the [round-trip][124] calls that a Node.js function would
-require to set session state.  For non-DRCP connections, the PL/SQL
-callback will require a round-trip from the application.
+connection's actual tag.  When the application uses [DRCP
+connections](#drcp), a PL/SQL callback can avoid the [round-trip][124]
+calls that a Node.js function would require to set session state.  For
+non-DRCP connections, the PL/SQL callback will require a round-trip
+from the application.
 
 The PL/SQL procedure declaration is:
 
@@ -1969,17 +1976,17 @@ connections.
 
 ##### <a name="getconnectiondbattrs"></a> 3.3.2.1 `getConnection()`: Parameters
 
-###### <a name="getconnectiondbattrspoolalias"></a> 3.3.2.1.1 Pool Alias
+###### <a name="getconnectionpoolalias"></a> 3.3.2.1.1 Pool Alias
 
 ```
 String poolAlias
 ```
 
-The `poolAlias` parameter is used to specify which pool in the [connection pool
-cache](#connpoolcache) to use to obtain the connection.
+The `poolAlias` parameter specifies which previously created pool in
+the [connection pool cache](#connpoolcache) to use to obtain the
+connection.
 
-###### <a name="getconnectiondbattrsconnattrs"></a> 3.3.2.1.2 Connection Attributes
-
+###### <a name="getconnectiondbattrsconnattrs"></a> 3.3.2.1.2 `getConnection()` Attributes
 
 ```
 Object connAttrs
@@ -2093,8 +2100,11 @@ This property was added in node-oracledb 2.2.
 String poolAlias
 ```
 
+Specifies which previously created pool in the [connection pool
+cache](#connpoolcache) to use to obtain the connection.
+
 Indicates the connection should be obtained from a previously created
-pool.  See [Pool Alias](#getconnectiondbattrspoolalias).
+pool.  See [Pool Alias](#getconnectionpoolalias).
 
 ###### <a name="getconnectiondbattrspassword"></a> 3.3.2.1.2.8 `password`
 
@@ -2140,9 +2150,10 @@ String tag
 
 Used when getting a connection from a [connection pool](#poolclass).
 
-Indicates the tag that a connection returned from a connection pool should have.
-
-See [Connection Tagging and Session State](#connpooltagging).
+Indicates the tag that a connection returned from a connection pool
+should have.  Various heuristics determine the tag that is actually
+returned, see [Connection Tagging and Session
+State](#connpooltagging).
 
 This property was added in node-oracledb 3.1.
 
@@ -2307,6 +2318,50 @@ The number of statements to be cached in the
 the `stmtCacheSize` property in effect in the *Pool* object when the
 connection is created in the pool.
 
+#### <a name="propconntag"></a> 4.1.8 `connection.tag`
+
+```
+String tag
+```
+
+Applications can set the tag property on pooled connections to
+indicate the 'session state' that a connection has.  The tag will be
+retained when the connection is released to the pool.  A subsequent
+`pool.getConnection()` can request a connection that has a given
+[`tag`](#getconnectiondbattrstag).  It is up to the application to set
+any desired session state and set `connection.tag` prior to closing
+the connection.
+
+The tag property is not used for standalone connections.
+
+When node-oracledb is using Oracle Client libraries 12.2 or later, the
+tag must be a [multi-property tag][125] with name=value pairs like
+"k1=v1;k2=v2".
+
+After a `pool.getConnection()` requests a [tagged
+connection](#getconnectiondbattrstag):
+
+- When no [`sessionCallback`](#createpoolpoolattrssessioncallback) is
+  in use, then `connection.tag` will contain the actual tag of the
+  connection.
+
+- When a Node.js `sessionCallback` function is used, then
+`connection.tag` will be set to the value of the connection's actual
+tag prior to invoking the callback.  The callback can then set the
+connection state and alter `connection.tag` as desired.
+
+- When a PL/SQL `sessionCallback` is used, then `connection.tag`
+contains the value of the tag that was requested by
+`pool.getConnection()`.  The PL/SQL callback is expected to set the
+state to match.
+
+An empty string represents no tag.  To clear a connection's tag, set
+`connection.tag = ""` prior to closing the connection.
+
+See [Connection Tagging and Session State](#connpooltagging).
+
+This property was added in node-oracledb 3.1.
+
 ### <a name="connectionmethods"></a> 4.2 Connection Methods
 
 #### <a name="break"></a> 4.2.1 `connection.break()`
@@ -2453,7 +2508,7 @@ alias `connection.release()`.
 
     This parameter only affects pooled connections.
 
-    Valid option attributes are `drop` and `tag`.
+    The only valid option attribute is `drop`.
 
     For pooled connections, if `drop` is *false*, then the
     connection is returned to the pool for reuse.  If `drop` is *true*,
@@ -2464,16 +2519,6 @@ alias `connection.release()`.
     ```
 
     The default is *false*.
-
-    The `tag` attribute is a string used to annotate pooled
-    connections so subsequent reuse can determine what the session
-    state is, for example:
-
-    ```javascript
-    await connections.close({tag: 'locale=uk;lang=cy'});
-    ```
-
-    See [Connection Tagging and Session State](#connpooltagging) for more information.
 
 -   ```
     function(Error error)
@@ -6463,24 +6508,24 @@ database connection that has any particular state.
 The [`oracledb.createPool()`](#createpool) option attribute
 [`sessionCallback`](#createpoolpoolattrssessioncallback) can be used
 to set session state efficiently so that connections have a known
-session state.  The attribute can be a Node.js function that will be
-called whenever `pool.getConnection()` will return a newly created
-database connection that has not been used before.  It is also called
-when connections are tagged and the requested tag does not match the
-actual tag in a previously used connection.  It is called before
-`pool.getConnection()` returns in these two cases.  It will not be
-called in other cases.  The advantages are that it saves the cost of
-setting session state if a previous user of the connection has already
-set it, and that the current caller of `pool.getConnection()` can
-always assume the correct state is set.
+session state.  The `sessionCallback` can be a Node.js function that
+will be called whenever `pool.getConnection()` will return a newly
+created database connection that has not been used before.  It is also
+called when connection tagging is being used and the requested tag is
+not identical to the tag in the connection returned by the pool.  It
+is called before `pool.getConnection()` returns in these two cases.
+It will not be called in other cases.  Using a callback saves the cost
+of setting session state if a previous user of a connection has
+already set it.  The caller of `pool.getConnection()` can always
+assume the correct state is set.
 
 This example sets two NLS settings in each pooled connection.  They
-are only set the very first time the connections are established to the
-database.  The `requestedTag` and `actualTag` parameters are ignored
-because they are only valid when tagging is being used:
+are only set the very first time connections are established to the
+database.  The `requestedTag` parameter is ignored because it is only
+valid when tagging is being used:
 
 ```javascript
-function mySetState(connection, requestedTag, actualTag, cb) {
+function mySetState(connection, requestedTag, cb) {
   connection.execute(
     `alter session set nls_date_format = 'YYYY-MM-DD' nls_language = AMERICAN`,
     cb);
@@ -6518,39 +6563,54 @@ node-oracledb 3.1.
 
 ##### Connection Tagging
 
-Connections can be tagged to record their session state when they are
-released to the pool, for example with `connection.close({tag:
-'mytag'})`.  A `pool.getConnection({tag: 'mytag'})` call can request a
-connection be returned that had a particular tag previously set.  If
-none are available and the pool cannot grow, a connection with a new
+Pooled connections can be tagged to record their session state by
+setting the property [`connection.tag`](#propconntag) to a string.  A
+`pool.getConnection({tag: 'mytag'})` call can request a connection
+that has the specified tag.  If no available connections with that tag
+exist in the pool, an untagged connection or a connection with a new
 session will be returned.  If the optional `getConnection()` attribute
 `matchAnyTag` is *true*, then a connection that has a different tag
 may be returned.
 
-The `sessionCallback` function is invoked if the requested tag is not
-identical to the actual tag of the returned connection.
+The `sessionCallback` function is invoked before
+`pool.getConnection()` returns if the requested tag is not identical
+to the actual tag of the pooled connection.
 
 When node-oracledb is using Oracle Client libraries 12.2 or later,
-then node-oracledb uses [multi-property tags][125] and the tag string
-must be of the form of one or more "name=value" pairs, separated by a
-semi-colon, for example `"loc=uk;lang=cy"`.
+then node-oracledb uses 'multi-property tags' and the tag string must
+be of the form of one or more "name=value" pairs separated by a
+semi-colon, for example `"loc=uk;lang=cy"`.  Oracle's underlying
+'session pool' uses various heuristics to determine which connection
+is returned to the application.  Refer to the [multi-property tags
+documentation][125].
 
-The callback function can parse this string and determine what state
-to set.  This example ensures the connection contains valid settings
-for an application-specific "location=USA" property and ignores any
-other properties that may be set:
+The callback function can parse the requested multi-property tag and
+compare it with the connection's actual properties in
+[`connection.tag`](#propconntag) to determine what exact state to set.
+The callback can set this state and update `connection.tag` as
+required.  To clear a connection's tag set `connection.tag` to an
+empty string.
+
+This example ensures the connection contains valid settings for an
+application-specific "location=USA" property and ignores any other
+properties that may be set:
 
 ```javascript
 const sessionTag = "location=USA";
 
-function mySetState(connection, requestedTag, actualTag, cb) {
-  let seen = actualTag ? actualTag.split(";").includes(sessionTag) : false;
+function mySetState(connection, requestedTag, cb) {
+  let seen = connection.tag ? connection.tag.split(";").includes(requestedTag) : false;
   if (seen) {
     cb()
   } else {
     connection.execute(
       `alter session set nls_date_format = 'MM/DD/YY' nls_language = AMERICAN`,
-      cb);
+      (err) => {
+        connection.tag = requestedTag;  // Save the connection's new state.
+                                        // In a real app this should merge connection.tag and
+                                        // requestedTag to record all properties of the connection
+        cb);
+      }
   }
 }
 
@@ -6561,22 +6621,21 @@ try {
                connectString: 'localhost/XE',
                sessionCallback: mySetState
              });
-  . . .
 
-  // Request a connection from the pool cache with a given tag, but accept any tag being returned.
+  // Request a connection with a given tag from the pool cache, but accept any tag being returned.
   let connection = await oracledb.getConnection({poolAlias: 'default', tag: sessionTag, matchAnyTag: true});
 
   . . . // Use the connection
 
-  // Close the connection with the state matching that set by mySetState
-  await connection.close({ tag: sessionTag });
+  // The connection will be returned to the pool with the tag value of connection.tag
+  await connection.close();
 
   . . .
 ```
 
-See [`sessiontagging.js`][127] for a runnable example.
+For runnable examples, see [`sessiontagging1.js`][127] and [`sessiontagging2.js`][128].
 
-##### PL/SQL Callback
+##### <a name="sessionfixupplsql"></a> PL/SQL Callback
 
 When node-oracledb is using Oracle Client libraries 12.2 or later,
 `sessionCallback` can be a string containing the name of a PL/SQL
@@ -6586,6 +6645,10 @@ connections](#drcp), a PL/SQL callback can avoid the [round-trip][124]
 calls that a Node.js function would require to set session state.  For
 non-DRCP connections, the PL/SQL callback will require a round-trip
 from the application.
+
+After a PL/SQL callback completes and `pool.getConnection()` returns,
+[`connection.tag`](#propconntag) will have the value of the requested
+tag, so ensure the PL/SQL callback sets all necessary state.
 
 A sample PL/SQL callback procedure looks like:
 
@@ -6680,9 +6743,10 @@ try {
 
   let conn = await pool.getConnection({tag: sessionTag});
 
-  . . . // Use connection
+  . . . // Use connection.
+        // The value of connection.tag will be sessionTag
 
-  await conn.close({tag: sessionTag});
+  await conn.close();
 }
 ```
 
@@ -11844,4 +11908,5 @@ When upgrading from node-oracledb version 2.3 to version 3.0:
 [124]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-9B2F05F9-D841-4493-A42D-A7D89694A2D1
 [125]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-DFA21225-E83C-4177-A79A-B8BA29DC662C
 [126]: https://github.com/oracle/node-oracledb/tree/master/examples/sessionfixup.js
-[127]: https://github.com/oracle/node-oracledb/tree/master/examples/sessiontagging.js
+[127]: https://github.com/oracle/node-oracledb/tree/master/examples/sessiontagging1.js
+[127]: https://github.com/oracle/node-oracledb/tree/master/examples/sessiontagging2.js

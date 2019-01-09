@@ -388,7 +388,7 @@ NAN_METHOD(njsPool::GetConnection)
         baton->SetDPIPoolHandle(pool->dpiPoolHandle);
     }
     baton->QueueWork("GetConnection", Async_GetConnection,
-            Async_AfterGetConnection, 4);
+            Async_AfterGetConnection, 3);
 }
 
 
@@ -441,11 +441,7 @@ void njsPool::Async_GetConnection(njsBaton *baton)
 void njsPool::Async_AfterGetConnection(njsBaton *baton, Local<Value> argv[])
 {
     argv[1] = njsConnection::CreateFromBaton(baton);
-    if (!baton->tag.empty()) {
-        argv[2] = Nan::New<v8::String>(baton->tag.c_str(),
-                baton->tag.length()).ToLocalChecked();
-    }
-    argv[3] = Nan::New<v8::Number>(baton->newSession);
+    argv[2] = Nan::New<v8::Number>(baton->newSession);
 }
 
 

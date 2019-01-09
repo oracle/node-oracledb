@@ -118,10 +118,34 @@ void njsConnection::Init(Local<Object> target)
     Nan::SetAccessor(tpl->InstanceTemplate(),
             Nan::New<v8::String>("callTimeout").ToLocalChecked(),
             njsConnection::GetCallTimeout, njsConnection::SetCallTimeout);
+    Nan::SetAccessor(tpl->InstanceTemplate(),
+            Nan::New<v8::String>("tag").ToLocalChecked(),
+            njsConnection::GetTag, njsConnection::SetTag);
 
     connectionTemplate_s.Reset(tpl);
     Nan::Set(target, Nan::New<v8::String>("Connection").ToLocalChecked(),
             tpl->GetFunction());
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection::~njsConnection()
+//   Destructor.
+//-----------------------------------------------------------------------------
+njsConnection::~njsConnection() {
+    uint32_t mode = DPI_MODE_CONN_CLOSE_DEFAULT, tagLength = 0;
+    const char *tag = NULL;
+
+    jsOracledb.Reset();
+    if (this->dpiConnHandle) {
+        if (!this->retag) {
+            mode = DPI_MODE_CONN_CLOSE_RETAG;
+            tag = this->tag.c_str();
+            tagLength = this->tag.length();
+        }
+        dpiConn_close(dpiConnHandle, mode, tag, tagLength);
+        this->dpiConnHandle = NULL;
+    }
 }
 
 
@@ -143,6 +167,11 @@ Local<Object> njsConnection::CreateFromBaton(njsBaton *baton)
     connection->dpiConnHandle = baton->dpiConnHandle;
     baton->dpiConnHandle = NULL;
     connection->jsOracledb.Reset(baton->jsOracledb);
+    if (!baton->tag.empty()) {
+        connection->tag = baton->tag;
+        connection->retag = true;
+    }
+
     return scope.Escape(obj);
 }
 
@@ -2198,9 +2227,9 @@ NAN_METHOD(njsConnection::Close)
         return;
 
     Local<Object> options = info[0].As<Object>();
-    baton->GetStringFromJSON(options, "tag", 0, baton->tag);
     baton->GetBoolFromJSON(options, "drop", 0, &baton->dropSession);
-
+    baton->retag = connection->retag;
+    baton->tag = connection->tag;
     baton->dpiConnHandle = connection->dpiConnHandle;
     connection->dpiConnHandle = NULL;
     baton->QueueWork("Close", Async_Close, NULL, 1);
@@ -2220,7 +2249,7 @@ void njsConnection::Async_Close(njsBaton *baton)
 
     if (baton->dropSession) {
         mode = DPI_MODE_CONN_CLOSE_DROP;
-    } else if (!baton->tag.empty()) {
+    } else if (baton->retag) {
         mode = DPI_MODE_CONN_CLOSE_RETAG;
         tag = baton->tag.c_str();
         tagLength = baton->tag.length();
@@ -2933,5 +2962,35 @@ NAN_SETTER(njsConnection::SetCallTimeout)
     callTimeout = Nan::To<uint32_t>(value).FromJust();
     if (dpiConn_setCallTimeout(connection->dpiConnHandle, callTimeout) < 0)
         njsOracledb::ThrowDPIError();
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection::GetTag()
+//   Get accessor of "tag" property.
+//-----------------------------------------------------------------------------
+NAN_GETTER(njsConnection::GetTag)
+{
+    njsConnection *connection = (njsConnection*) ValidateGetter(info);
+    if (!connection)
+        return;
+    Local<String> value =
+            Nan::New<v8::String>(connection->tag).ToLocalChecked();
+    info.GetReturnValue().Set(value);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection::SetTag()
+//   Set accessor of "tag" property.
+//-----------------------------------------------------------------------------
+NAN_SETTER(njsConnection::SetTag)
+{
+    njsConnection *connection = (njsConnection*) ValidateSetter(info);
+    if (!connection)
+        return;
+
+    connection->SetPropString(value, &connection->tag, "tag");
+    connection->retag = true;
 }
 

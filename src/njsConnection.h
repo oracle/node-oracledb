@@ -84,14 +84,8 @@ public:
     dpiConn* GetDPIConnHandle ()  { return dpiConnHandle ; }
 
 private:
-    njsConnection() : dpiConnHandle(NULL) {}
-    ~njsConnection() {
-        jsOracledb.Reset();
-        if (dpiConnHandle) {
-            dpiConn_release(dpiConnHandle);
-            dpiConnHandle = NULL;
-        }
-    }
+    njsConnection() : dpiConnHandle(NULL), retag(false) {}
+    ~njsConnection();
 
     static NAN_METHOD(New);
 
@@ -161,6 +155,7 @@ private:
     static NAN_GETTER(GetOracleServerVersion);
     static NAN_GETTER(GetOracleServerVersionString);
     static NAN_GETTER(GetCallTimeout);
+    static NAN_GETTER(GetTag);
 
     // Define Setter Accessors to properties
     static NAN_SETTER(SetStmtCacheSize);
@@ -170,6 +165,7 @@ private:
     static NAN_SETTER(SetOracleServerVersion);
     static NAN_SETTER(SetOracleServerVersionString);
     static NAN_SETTER(SetCallTimeout);
+    static NAN_SETTER(SetTag);
 
     // internal methods
     static bool CreateVarBuffer(njsVariable *var, njsBaton *baton);
@@ -219,6 +215,8 @@ private:
     static Nan::Persistent<FunctionTemplate> connectionTemplate_s;
 
     dpiConn *dpiConnHandle;
+    std::string tag;
+    bool retag;
     Nan::Persistent<Object> jsOracledb;
 };
 

@@ -328,6 +328,7 @@ public:
     bool matchAnyTag;
     bool dropSession;
     bool newSession;
+    bool retag;
     uint64_t bufferSize;
     char *bufferPtr;
     uint64_t lobOffset;
@@ -407,7 +408,7 @@ public:
             getRS(false), autoCommit(false), extendedMetaData(false),
             isReturning(false), isPLSQL(false), events(false),
             batchErrors(false), dmlRowCounts(false), matchAnyTag(false),
-            dropSession(false), newSession(false), bufferSize(0),
+            dropSession(false), newSession(false), retag(false), bufferSize(0),
             bufferPtr(NULL), lobOffset(0), lobAmount(0), numRowCounts(0),
             rowCounts(NULL), timeout(0), qos(0), operations(0),
             numBatchErrorInfos(0), batchErrorInfos(NULL), dpiError(false),
