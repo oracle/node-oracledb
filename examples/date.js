@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -27,9 +27,14 @@
  *
  *****************************************************************************///
 
+// Using a fixed Oracle time zone helps avoid machine and deployment differences
+process.env.ORA_SDTZ = 'UTC';
+
 var async = require('async');
 var oracledb = require('oracledb');
 var dbConfig = require('./dbconfig.js');
+
+oracledb.outFormat = oracledb.OBJECT;
 
 var doconnect = function(cb) {
   oracledb.getConnection(
@@ -68,18 +73,20 @@ var docleanup = function (conn, cb) {
 
 var docreate = function(conn, cb) {
   conn.execute(
-    "CREATE TABLE datetest(timestampcol TIMESTAMP, datecol DATE)",
+    `CREATE TABLE datetest(
+       timestampcol TIMESTAMP,
+       timestamptz TIMESTAMP WITH TIME ZONE,
+       timestampltz TIMESTAMP WITH LOCAL TIME ZONE,
+       datecol DATE)`,
     function(err) {
       return cb(err, conn);
     });
 };
 
-// Setting a local timezone in applications is recommended.
-// Note setting the environment variable ORA_SDTZ is an efficient alternative.
 var doalter = function(conn, cb) {
   console.log('Altering session time zone');
   conn.execute(
-    "ALTER SESSION SET TIME_ZONE='UTC'",
+    "ALTER SESSION SET TIME_ZONE='+5:00'",  // resets ORA_SDTZ value
     function(err) {
       return cb(err, conn);
     });
@@ -92,9 +99,9 @@ var doinsert = function(conn, cb) {
   console.log("Inserting JavaScript date: " + date);
 
   conn.execute(
-    "INSERT INTO datetest (timestampcol, datecol) VALUES (:ts, :td)",
-    { ts: date,
-      td: date },
+    `INSERT INTO datetest (timestampcol, timestamptz, timestampltz, datecol)
+     VALUES (:ts, :tstz, :tsltz, :td)`,
+    { ts: date, tstz: date, tsltz: date, td: date },
     function(err, result) {
       if (err)
         return cb(err, conn);
@@ -108,24 +115,21 @@ var doinsert = function(conn, cb) {
 // Fetch the dates
 var doselect = function(conn, cb) {
   conn.execute(
-    "SELECT timestampcol, datecol FROM datetest",
+    `SELECT timestampcol, timestamptz, timestampltz, datecol,
+            TO_CHAR(CURRENT_DATE, 'DD-Mon-YYYY HH24:MI') AS CD
+     FROM datetest`,
     function(err, result) {
       if (err) {
         return cb(err, conn);
       }
 
       console.log("Query Results:");
-      console.log(result.rows);
+      console.log(result.rows[0]);
 
       // Show the queried dates are of type Date
-      console.log("Result Manipulation in JavaScript:");
-      var ts = result.rows[0][0];
+      var ts = result.rows[0]['TIMESTAMPCOL'];
       ts.setDate(ts.getDate() + 5);
-      console.log(ts);
-
-      var d = result.rows[0][1];
-      d.setDate(d.getDate() - 5);
-      console.log(d);
+      console.log("TIMESTAMP manipulation in JavaScript:", ts);
 
       return cb(null, conn);
     });

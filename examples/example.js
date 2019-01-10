@@ -31,6 +31,9 @@
  *
  *****************************************************************************/
 
+// Using a fixed Oracle time zone helps avoid machine and deployment differences
+process.env.ORA_SDTZ = 'UTC';
+
 var oracledb = require('oracledb');
 var dbConfig = require('./dbconfig.js');
 
@@ -100,6 +103,13 @@ async function run() {
     console.log("Column metadata: ", result.metaData);
     console.log("Query results: ");
     console.log(result.rows);
+
+    // Show the date.  The value of ORA_SDTZ affects the output
+
+    sql = `SELECT TO_CHAR(CURRENT_DATE, 'DD-Mon-YYYY HH24:MI') AS CD FROM DUAL`;
+    result = await connection.execute(sql, binds, options);
+    console.log("Current date query results: ");
+    console.log(result.rows[0]['CD']);
 
   } catch (err) {
     console.error(err);
