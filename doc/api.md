@@ -453,7 +453,7 @@ oracledb.getConnection(
   {
     user          : "hr",
     password      : "welcome",
-    connectString : "localhost/XE"
+    connectString : "localhost/XEPDB1"
   },
   function(err, connection) {
     if (err) {
@@ -5727,7 +5727,7 @@ oracledb.getConnection(
   {
     user          : "hr",
     password      : "welcome",
-    connectString : "localhost/XE"
+    connectString : "localhost/XEPDB1"
   },
   function(err, connection) {
     if (err) { console.error(err.message); return; }
@@ -5770,7 +5770,7 @@ the syntax is:
 
 Note that old-school connection SIDs are not supported: only service names can be used.
 
-For example, use *"localhost/XE"* to connect to the database *XE* on the local machine:
+For example, use *"localhost/XEPDB1"* to connect to the database *XE* on the local machine:
 
 ```javascript
 var oracledb = require('oracledb');
@@ -5779,7 +5779,7 @@ oracledb.getConnection(
   {
     user          : "hr",
     password      : "welcome",
-    connectString : "localhost/XE"
+    connectString : "localhost/XEPDB1"
   },
   . . .
 ```
@@ -6007,7 +6007,7 @@ try {
   pool = await oracledb.createPool({
     user          : "hr"
     password      : "welcome"
-    connectString : "localhost/XE"
+    connectString : "localhost/XEPDB1"
   });
 
   let connection = await pool.getConnection();
@@ -6152,7 +6152,7 @@ oracledb.createPool (
   {
     user: 'hr',
     password: 'welcome',
-    connectString: 'localhost/XE',
+    connectString: 'localhost/XEPDB1',
     poolAlias: 'hrpool'
   },
   function(err) {  // callback 'pool' parameter can be omitted
@@ -6187,7 +6187,7 @@ oracledb.createPool (
   {
     user: 'hr',
     password: 'welcome',
-    connectString: 'localhost/XE'
+    connectString: 'localhost/XEPDB1'
   },
   function(err, pool) {
     console.log(pool.poolAlias); // 'default'
@@ -6231,14 +6231,14 @@ var hrPoolPromise = oracledb.createPool({
   poolAlias: 'hrpool',
   users: 'hr',
   password: 'welcome',
-  connectString: 'localhost/XE'
+  connectString: 'localhost/XEPDB1'
 });
 
 var shPoolPromise = oracledb.createPool({
   poolAlias: 'shpool',
   user: 'sh',
   password: 'welcome',
-  connectString: 'localhost/XE'
+  connectString: 'localhost/XEPDB1'
 });
 
 Promise.all([hrPoolPromise, shPoolPromise])
@@ -6348,7 +6348,7 @@ oracledb.createPool (
     _enableStats  : true,   // default is false
     user          : "hr",
     password      : "welcome",
-    connectString : "localhost/XE"
+    connectString : "localhost/XEPDB1"
   },
   function(err, pool) {
   . . .
@@ -6535,7 +6535,7 @@ try {
   let pool = await oracledb.createPool({
                user: 'hr',
                password: 'welcome',
-               connectString: 'localhost/XE',
+               connectString: 'localhost/XEPDB1',
                sessionCallback: mySetState
              });
   . . .
@@ -6618,7 +6618,7 @@ try {
   await oracledb.createPool({
                user: 'hr',
                password: 'welcome',
-               connectString: 'localhost/XE',
+               connectString: 'localhost/XEPDB1',
                sessionCallback: mySetState
              });
 
@@ -6736,7 +6736,7 @@ try {
   let pool = await oracledb.createPool({
                user: 'hr',
                password: 'welcome',
-               connectString: 'localhost/XE',
+               connectString: 'localhost/XEPDB1',
                sessionCallback: "myPackage.myPlsqlCallback"
              });
   . . .
@@ -6770,7 +6770,7 @@ password may be passed to `pool.getConnection()`:
 ```javascript
 oracledb.createPool(
   {
-    connectString : "localhost/XE",  // no user name or password
+    connectString : "localhost/XEPDB1",  // no user name or password
     homogeneous   : false,
     . . .  // other pool options such as poolMax can be used
   },
@@ -6874,7 +6874,7 @@ let pool = await oracledb.createPool(
   {
     user          : 'myproxyuser',
     password      : 'myproxyuserpassword'
-    connectString : "localhost/XE",
+    connectString : "localhost/XEPDB1",
     homogeneous   : false,
     . . .  // other pool options such as poolMax can be used
   });
@@ -7850,7 +7850,7 @@ oracledb.getConnection(
   {
     user          : "hr",
     password      : "welcome",
-    connectString : "localhost/XE"
+    connectString : "localhost/XEPDB1"
   },
   function(err, connection) {
     if (err) { console.error(err.message); return; }
@@ -10557,7 +10557,7 @@ try {
     let conn = await oracledb.getConnection({
       user          : "hr",
       password      : "welcome",
-      connectString : "localhost/XE",
+      connectString : "localhost/XEPDB1",
       events        :  true
     });
 
@@ -10664,7 +10664,7 @@ oracledb.getConnection(
   {
     user          : "hr",
     password      : "welcome",
-    connectString : "localhost/XE",
+    connectString : "localhost/XEPDB1",
     stmtCacheSize : 40
   },
   function(err, connection) {
@@ -11483,7 +11483,7 @@ oracledb.getConnection(
   {
     user          : "hr",
     password      : "welcome",
-    connectString : "localhost/XE"
+    connectString : "localhost/XEPDB1"
   })
   .then(function(conn) {
     return conn.execute(
@@ -11596,7 +11596,7 @@ function getEmployee(empid) {
       conn = await oracledb.getConnection({
         user          : "hr",
         password      : "welcome",
-        connectString : "localhost/XE"
+        connectString : "localhost/XEPDB1"
       });
 
       let result = await conn.execute(

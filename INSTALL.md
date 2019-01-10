@@ -1,6 +1,6 @@
 # Installing node-oracledb Version 3.1
 
-*Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved.*
+*Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved.*
 
 You may not use the identified files except in compliance with the Apache
 License, Version 2.0 (the "License.")
@@ -396,7 +396,7 @@ environment, for example:
 module.exports = {
   user          : "hr",
   password      : "welcome",
-  connectString : "localhost/XE"
+  connectString : "localhost/XEPDB1"
 };
 ```
 
@@ -532,7 +532,7 @@ environment, for example:
 module.exports = {
   user          : "hr",
   password      : "welcome",
-  connectString : "localhost/XE"
+  connectString : "localhost/XEPDB1"
 };
 ```
 
@@ -647,7 +647,7 @@ environment, for example:
 module.exports = {
   user          : "hr",
   password      : "welcome",
-  connectString : "localhost/XE"
+  connectString : "localhost/XEPDB1"
 };
 ```
 
@@ -766,7 +766,7 @@ environment, for example:
 module.exports = {
   user          : "hr",
   password      : "welcome",
-  connectString : "localhost/XE"
+  connectString : "localhost/XEPDB1"
 };
 ```
 
@@ -893,7 +893,7 @@ environment, for example:
 module.exports = {
   user          : "hr",
   password      : "welcome",
-  connectString : "localhost/XE"
+  connectString : "localhost/XEPDB1"
 };
 ```
 
@@ -982,7 +982,7 @@ environment, for example:
 module.exports = {
   user          : "hr",
   password      : "welcome",
-  connectString : "localhost/XE"
+  connectString : "localhost/XEPDB1"
 };
 ```
 
@@ -1104,7 +1104,7 @@ environment, for example:
 module.exports = {
   user          : "hr",
   password      : "welcome",
-  connectString : "localhost/XE"
+  connectString : "localhost/XEPDB1"
 };
 ```
 
@@ -1223,7 +1223,7 @@ environment, for example:
 module.exports = {
   user          : "hr",
   password      : "welcome",
-  connectString : "localhost/XE"
+  connectString : "localhost/XEPDB1"
 };
 ```
 
