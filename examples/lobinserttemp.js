@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, 2019, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -27,6 +27,8 @@
  *
  *   Create clobexample.txt before running this example.
  *   Use demo.sql to create the required schema.
+ *
+ *   This example requires node-oracledb 1.12 or later.
  *
  *****************************************************************************/
 

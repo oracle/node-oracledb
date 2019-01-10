@@ -41,6 +41,8 @@
  *   This file uses Node 8's async/await syntax but could be rewritten
  *   to use callbacks.
  *
+ *   This example requires node-oracledb 3.1 or later.
+ *
  *   Also see sessionfixup.js and sessiontagging1.js
  *
  *****************************************************************************/

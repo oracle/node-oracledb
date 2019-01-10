@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2019, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -27,6 +27,8 @@
  *   The node-oracledb host must be resolvable by the database host.
  *
  *   This example uses Node 8 syntax, but could be written to use callbacks.
+ *
+ *   This example requires node-oracledb 2.3 or later.
  *
  *****************************************************************************/
 

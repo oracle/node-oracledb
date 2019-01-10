@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -27,6 +27,8 @@
  *   Use demo.sql to create the required table or do:
  *     DROP TABLE mylobs;
  *     CREATE TABLE mylobs (id NUMBER, c CLOB, b BLOB);
+ *
+ *   This example requires node-oracledb 1.12 or later.
  *
  *****************************************************************************/
 

@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, 2019, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -26,6 +26,8 @@
  *     CREATE TABLE mylobs (id NUMBER, c CLOB, b BLOB);
  *
  *   Run lobinsert1.js to load data before running this example.
+ *
+ *   This example requires node-oracledb 1.12 or later.
  *
  *****************************************************************************/
 

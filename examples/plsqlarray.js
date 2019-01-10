@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, 2019, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -26,6 +26,8 @@
  *   arrays, and returns the values sorted by the beach name.
  *
  *   Use demo.sql to create the required tables and package.
+ *
+ *   This example requires node-oracledb 1.6 or later.
  *
  *****************************************************************************/
 

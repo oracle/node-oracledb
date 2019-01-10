@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -24,6 +24,8 @@
  *
  *   DROP TABLE myraw;
  *   CREATE TABLE myraw (r RAW(64));
+ *
+ *   This example requires node-oracledb 1.2 or later.
  *
  *****************************************************************************/
 

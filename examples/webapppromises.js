@@ -35,6 +35,8 @@
  *   Uses Oracle's sample HR schema.  Scripts to create the HR schema
  *   can be found at: https://github.com/oracle/db-sample-schemas
  *
+ *   This example requires node-oracledb 3 or later.
+ *
  *****************************************************************************/
 
 var http = require('http');

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -20,6 +20,8 @@
  *
  * DESCRIPTION
  *   Shows the node-oracledb version attributes
+ *
+ *   This example requires node-oracledb 2.2 or later.
  *
  *****************************************************************************/
 

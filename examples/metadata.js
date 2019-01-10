@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2016, 2019, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -24,6 +24,8 @@
  *
  *   Scripts to create the HR schema can be found at:
  *   https://github.com/oracle/db-sample-schemas
+ *
+ *   This example requires node-oracledb 1.10 or later.
  *
  *  *****************************************************************************/
 

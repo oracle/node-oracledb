@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2019, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -21,6 +21,8 @@
  * DESCRIPTION
  *   Array DML example using executeMany() with bind-by-position syntax.
  *   Use demo.sql to create the required schema.
+ *
+ *   This example requires node-oracledb 2.2 or later.
  *
  *****************************************************************************/
 

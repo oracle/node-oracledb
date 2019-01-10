@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2019, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -21,9 +21,11 @@
  * DESCRIPTION
  *   Shows how to time out long running database calls.
  *   See https://oracle.github.io/node-oracledb/doc/api.html#dbcalltimeouts
- *   Node-oracledb must be using Oracle Client 18c libraries, or greater.
  *
  *   This example uses Async/Await of Node 8.
+ *
+ *   This example requires node-oracledb 3 or later.
+ *   Node-oracledb must be using Oracle Client 18c libraries, or greater.
  *
  *****************************************************************************/
 

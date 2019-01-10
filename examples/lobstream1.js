@@ -27,6 +27,8 @@
  *
  *   Run lobinsert1.js to load data before running this example.
  *
+ *   This example requires node-oracledb 1.12 or later.
+ *
  *****************************************************************************/
 
 var fs = require('fs');

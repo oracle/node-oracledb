@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2019, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -26,6 +26,8 @@
  *   For a query stream example see selectstream.js
  *   For a Promise example see promises.js
  *   For a callback example see select1.js
+ *
+ *   This example requires node-oracledb 2.2 or later.
  *
  *****************************************************************************/
 

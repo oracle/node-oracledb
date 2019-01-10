@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -24,6 +24,8 @@
  *   See https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=ADJSN
  *
  *   Use demo.sql to create the required table.
+ *
+ *   This example requires node-oracledb 1.13 or later.
  *
  *****************************************************************************/
 

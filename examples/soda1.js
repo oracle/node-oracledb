@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2019, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -28,6 +28,8 @@
  *
  *   This uses Node 8's async/await syntax but could be rewritten to
  *   use callbacks.
+ *
+ *   This example requires node-oracledb 3.0 or later.
  *
  *****************************************************************************/
 
