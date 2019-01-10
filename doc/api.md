@@ -1842,7 +1842,7 @@ String sessionCallback | function sessionCallback(Connection connection, String 
 ```
 
 When `sessionCallback` is a Node.js function, it will be invoked for
-each `pool.getConnection()` call that will return a brand new
+each `pool.getConnection()` call that will return a newly created
 connection in the pool.  It will also be called if
 `pool.getConnection()` requests a connection from the pool with a
 given [`tag`](#getconnectiondbattrstag), and that tag value does not
@@ -1852,7 +1852,7 @@ other `getConnection()` calls.  The tag requested by
 the actual tag is available in [`connection.tag`](#propconntag).
 
 The session callback is called before `getConnection()` returns so it
-can be used to do logging, or efficiently set session state such as
+can be used to do logging or efficiently set session state such as
 with ALTER SESSION statements.  Make sure any session state is set and
 `connection.tag` is updated in the `sessionCallback` function prior to
 it calling its own `callback` function otherwise the session will not
@@ -2338,6 +2338,14 @@ When node-oracledb is using Oracle Client libraries 12.2 or later, the
 tag must be a [multi-property tag][125] with name=value pairs like
 "k1=v1;k2=v2".
 
+An empty string represents not having a tag set.
+
+See [Connection Tagging and Session State](#connpooltagging).
+
+This property was added in node-oracledb 3.1.
+
+##### Getting the tag
+
 After a `pool.getConnection()` requests a [tagged
 connection](#getconnectiondbattrstag):
 
@@ -2346,21 +2354,22 @@ connection](#getconnectiondbattrstag):
   connection.
 
 - When a Node.js `sessionCallback` function is used, then
-`connection.tag` will be set to the value of the connection's actual
-tag prior to invoking the callback.  The callback can then set the
-connection state and alter `connection.tag` as desired.
+  `connection.tag` will be set to the value of the connection's actual
+  tag prior to invoking the callback.  The callback can then set
+  connection state and alter `connection.tag` as desired.
 
 - When a PL/SQL `sessionCallback` is used, then `connection.tag`
-contains the value of the tag that was requested by
-`pool.getConnection()`.  The PL/SQL callback is expected to set the
-state to match.
+  contains the value of the tag that was requested by
+  `pool.getConnection()`.  The PL/SQL callback is expected to set the
+  state to match.
 
-An empty string represents no tag.  To clear a connection's tag, set
-`connection.tag = ""` prior to closing the connection.
+##### Setting the tag
 
-See [Connection Tagging and Session State](#connpooltagging).
+A tag can be set anytime prior to closing the connection.  If a
+Node.js `sessionCallback` function is being used, the best practice
+recommendation is to set the tag in the callback function.
 
-This property was added in node-oracledb 3.1.
+To clear a connection's tag, set `connection.tag = ""`.
 
 ### <a name="connectionmethods"></a> 4.2 Connection Methods
 
@@ -6525,7 +6534,7 @@ database.  The `requestedTag` parameter is ignored because it is only
 valid when tagging is being used:
 
 ```javascript
-function mySetState(connection, requestedTag, cb) {
+function initSession(connection, requestedTag, cb) {
   connection.execute(
     `alter session set nls_date_format = 'YYYY-MM-DD' nls_language = AMERICAN`,
     cb);
@@ -6536,7 +6545,7 @@ try {
                user: 'hr',
                password: 'welcome',
                connectString: 'localhost/XEPDB1',
-               sessionCallback: mySetState
+               sessionCallback: initSession
              });
   . . .
 }
@@ -6598,7 +6607,7 @@ properties that may be set:
 ```javascript
 const sessionTag = "location=USA";
 
-function mySetState(connection, requestedTag, cb) {
+function initSession(connection, requestedTag, cb) {
   let seen = connection.tag ? connection.tag.split(";").includes(requestedTag) : false;
   if (seen) {
     cb()
@@ -6619,7 +6628,7 @@ try {
                user: 'hr',
                password: 'welcome',
                connectString: 'localhost/XEPDB1',
-               sessionCallback: mySetState
+               sessionCallback: initSession
              });
 
   // Request a connection with a given tag from the pool cache, but accept any tag being returned.
