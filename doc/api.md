@@ -11909,4 +11909,4 @@ When upgrading from node-oracledb version 2.3 to version 3.0:
 [125]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-DFA21225-E83C-4177-A79A-B8BA29DC662C
 [126]: https://github.com/oracle/node-oracledb/tree/master/examples/sessionfixup.js
 [127]: https://github.com/oracle/node-oracledb/tree/master/examples/sessiontagging1.js
-[127]: https://github.com/oracle/node-oracledb/tree/master/examples/sessiontagging2.js
+[128]: https://github.com/oracle/node-oracledb/tree/master/examples/sessiontagging2.js
