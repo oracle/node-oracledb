@@ -53,7 +53,7 @@ This release is currently under development.
   order-of-execution issues.
 
 - Support fetching XMLTYPE columns in queries.  They will return as
-  String.
+  String limited to the VARCHAR2 length.
 
 - Update install processes by bundling all pre-built binaries into the
   package uploaded to https://www.npmjs.com/package/oracledb.  This
@@ -75,7 +75,7 @@ This release is currently under development.
 
 - Fixed some SODA stability issues (node-oracledb and ODPI-C changes).
 
-- Improved the statement error whitelist to avoid unnecessarily
+- Improved the statement error white list to avoid unnecessarily
   dropping statements from the statement cache (ODPI-C change).
 
 ## node-oracledb v3.0.1 (15 Nov 2018)
