@@ -56,7 +56,7 @@ const httpPort = 7000;
 // ignored.  They would be valid if connection tagging was being used.
 // If you have multiple SQL statements to execute, put them in a
 // single, anonymous PL/SQL block for efficiency.
-function initSession(connection, requestedTag, actualTag, cb) {
+function initSession(connection, requestedTag, cb) {
   console.log('In initSession');
   connection.execute(`ALTER SESSION SET TIME_ZONE = 'UTC'`, cb);
 }
