@@ -15,9 +15,10 @@ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-##  <a name="contents"></a> Contents
-
+##
 ## ===> *** Note: Go to [https://oracle.github.io/node-oracledb/doc/api.html](https://oracle.github.io/node-oracledb/doc/api.html) for production documentation ***
+
+##  <a name="contents"></a> Contents
 
 1. [Introduction](#intro)
     - 1.1 [Getting Started with Node-oracledb](#getstarted)
@@ -101,7 +102,7 @@ limitations under the License.
         - 3.3.2 [`getConnection()`](#getconnectiondb)
             - 3.3.2.1 [`getConnection()`: Parameters](#getconnectiondbattrs)
                 - 3.3.2.1.1 [Pool Alias](#getconnectionpoolalias)
-                - 3.3.2.1.2 [`getConnection()` Attributes](#getconnectiondbattrsconnattrs)
+                - 3.3.2.1.2 [`getConnection()`: Attributes](#getconnectiondbattrsconnattrs)
                     - 3.3.2.1.2.1 [`connectString`](#getconnectiondbattrsconnectstring), [`connectionString`](#getconnectiondbattrsconnectstring)
                     - 3.3.2.1.2.2 [`edition`](#getconnectiondbattrsedition)
                     - 3.3.2.1.2.3 [`events`](#getconnectiondbattrsevents)
@@ -392,6 +393,7 @@ limitations under the License.
     - 30.1 [Migrating from node-oracledb 1.13 to node-oracledb 2.0](#migratev1v2)
     - 30.2 [Migrating from node-oracledb 2.0 to node-oracledb 2.1](#migratev20v21)
     - 30.3 [Migrating from node-oracledb 2.3 to node-oracledb 3.0](#migratev23v30)
+    - 30.3 [Migrating from node-oracledb 3.0 to node-oracledb 3.1](#migratev30v31)
 
 ## <a name="apimanual"></a> NODE-ORACLEDB API MANUAL
 
@@ -1915,11 +1917,13 @@ users supplied in subsequent `pool.getConnection()` calls.
 
 #### <a name="createpoolpoolcallback"></a> 3.3.1.2 `createPool()`: Callback Function
 
+##### Prototype
+
 ```
 function(Error error [, Pool pool])
 ```
 
-The parameters of the callback function are:
+##### Parameters
 
 Callback function parameter | Description
 ----------------------------|-------------
@@ -1986,7 +1990,7 @@ The `poolAlias` parameter specifies which previously created pool in
 the [connection pool cache](#connpoolcache) to use to obtain the
 connection.
 
-###### <a name="getconnectiondbattrsconnattrs"></a> 3.3.2.1.2 `getConnection()` Attributes
+###### <a name="getconnectiondbattrsconnattrs"></a> 3.3.2.1.2 `getConnection()`: Attributes
 
 ```
 Object connAttrs
@@ -2101,10 +2105,8 @@ String poolAlias
 ```
 
 Specifies which previously created pool in the [connection pool
-cache](#connpoolcache) to use to obtain the connection.
-
-Indicates the connection should be obtained from a previously created
-pool.  See [Pool Alias](#getconnectionpoolalias).
+cache](#connpoolcache) to obtain the connection from.  See [Pool
+Alias](#getconnectionpoolalias).
 
 ###### <a name="getconnectiondbattrspassword"></a> 3.3.2.1.2.8 `password`
 
@@ -2170,11 +2172,13 @@ proxy authentication.
 
 ##### <a name="getconnectiondbcallback"></a> 3.3.2.2 `getConnection()`: Callback Function
 
+##### Prototype
+
 ```
 function(Error error, Connection conn)
 ```
 
-The parameters of the callback function are:
+##### Parameters
 
 Callback function parameter | Description
 ----------------------------|-------------
@@ -2762,42 +2766,40 @@ JavaScript.  It can be used in conjunction with, or instead of, the
 global settings [`fetchAsString`](#propdbfetchasstring)
 and [`fetchAsBuffer`](#propdbfetchasbuffer).
 
-The valid values for `type` are
-[`oracledb.STRING`](#oracledbconstantsnodbtype),
-[`oracledb.BUFFER`](#oracledbconstantsnodbtype)
-and [`oracledb.DEFAULT`](#oracledbconstantsnodbtype).
-
-The `fetchInfo` property `type` can be set to `oracledb.STRING` for number,
-date and raw columns in a query to indicate they should be returned as Strings
-instead of their native format.  CLOB column data can also be returned
-as Strings instead of [Lob](#lobclass) instances.
-
-When `fetchInfo` is set to `oracledb.BUFFER` for a BLOB column, each BLOB item
-will be returned as a Buffer instead of a [Lob](#lobclass) instance.
-
-Using `oracledb.DEFAULT` overrides any global mapping given
-by [`fetchAsString`](#propdbfetchasstring)
-or [`fetchAsBuffer`](#propdbfetchasbuffer).  The column data is
-returned in native format.
-
 For example:
 
 ```
-fetchInfo:
-{
-  "HIRE_DATE":    { type : oracledb.STRING },  // return the date as a string
-  "HIRE_DETAILS": { type : oracledb.DEFAULT }  // override fetchAsString or fetchAsBuffer
+fetchInfo: {
+  "HIRE_DATE":    { type: oracledb.STRING },  // return the date as a string
+  "HIRE_DETAILS": { type: oracledb.DEFAULT }  // override fetchAsString or fetchAsBuffer
 }
 ```
 
 Each column is specified by name, using Oracle's standard naming
 convention.
 
-Raw columns returned as strings will be returned as hex-encoded strings. The
-maximum length of a string created by type mapping number and date columns is
-200 bytes.  If a database column that is already being fetched as type
-`oracledb.STRING` is specified in `fetchInfo`, then the actual
-database metadata will be used to determine the maximum length.
+The `type` property can be set to one of:
+
+- [`oracledb.STRING`](#oracledbconstantsnodbtype) for number, date and
+  raw columns in a query to indicate they should be returned as
+  Strings instead of their native format.  CLOB column data can also
+  be returned as Strings instead of [Lob](#lobclass) instances.
+
+  Raw columns returned as strings will be returned as hex-encoded
+  strings.  The maximum length of a string created by type mapping
+  number and date columns is 200 bytes.  If a database column that is
+  already being fetched as type `oracledb.STRING` is specified in
+  `fetchInfo`, then the actual database metadata will be used to
+  determine the maximum length.
+
+- [`oracledb.BUFFER`](#oracledbconstantsnodbtype) for a BLOB column,
+  each BLOB item will be returned as a Buffer instead of a
+  [Lob](#lobclass) instance.
+
+- [`oracledb.DEFAULT`](#oracledbconstantsnodbtype) overrides any
+  global mapping given by [`fetchAsString`](#propdbfetchasstring) or
+  [`fetchAsBuffer`](#propdbfetchasbuffer).  The column data is
+  returned in native format.
 
 Strings and Buffers created for LOB columns will generally be limited
 by Node.js and V8 memory restrictions.
@@ -3067,11 +3069,12 @@ occurs.  The callback [error object](#errorobj) will be set.
 
 When `batchErrors` is *true*, processing will continue even if there
 are data errors.  The `executeMany()` callback error parameter is not
-set.  Instead, an array containing each error will be returned in the
-callback `result` parameter.  All valid data records will be processed
-and a transaction will be started but not committed, even if
-`autoCommit` is *true*.  The application can examine the errors, take
-action, and explicitly commit or rollback as desired.
+set.  Instead, an array containing an error per input data record will
+be returned in the callback `result` parameter.  All valid data
+records will be processed and a transaction will be started but not
+committed, even if `autoCommit` is *true*.  The application can
+examine the errors, take action, and explicitly commit or rollback as
+desired.
 
 Note that some classes of error will always return via the
 `executeMany()` callback error object, not as batch errors.  No
@@ -3340,8 +3343,8 @@ query results.
 The connection must remain open until the stream is completely read.
 
 For tuning, adjust the value of
-[`oracledb.fetchArraySize`](#propdbfetcharraysize) or the `execute()`
-option [`fetchArraySize`](#propexecfetcharraysize).
+[`oracledb.fetchArraySize`](#propdbfetcharraysize) or the
+option [`fetchArraySize`](#propexecfetcharraysize) (see `execute()`).
 
 See [Query Streaming](#streamingresults) for more information.
 
@@ -3600,11 +3603,13 @@ automatically unregistered and a deregistration notification is sent.
 
 ##### <a name="consubscribecallback"></a> 4.2.14.3 `subscribe()`: Callback Function
 
+##### Prototype
+
 ```
 function(Error error)
 ```
 
-The parameters of the callback function are:
+##### Parameters
 
 Callback function parameter | Description
 ----------------------------|-------------
@@ -4383,7 +4388,7 @@ DBMS_SODA.DROP_COLLECTION('myCollection') FROM DUAL;`.
 
 This method was added in node-oracledb 3.0.
 
-##### <a name="sodacolldropcallback"></a> 8.2.2.1 `drop()` Callback Function
+##### <a name="sodacolldropcallback"></a> 8.2.2.1 `drop()`: Callback Function
 
 ```
 function(Error error, Object result)
@@ -4429,7 +4434,7 @@ way that SQL always does for DDL statements.
 
 This method was added in node-oracledb 3.0.
 
-##### <a name="sodacolldropindexparams"></a> 8.2.3.1 `dropIndex()` Parameters
+##### <a name="sodacolldropindexparams"></a> 8.2.3.1 `dropIndex()`: Parameters
 
 ###### <a name="sodacolldropindexindexname"></a> 8.2.3.1.1 `indexName`
 
@@ -4457,11 +4462,13 @@ permit normal dropping.  See [DROP INDEX][120].
 
 ##### <a name="sodacolldropindexcb"></a> 8.2.3.2 `dropIndex()` Callback Function
 
+##### Prototype
+
 ```
 function(Error error, Object result)
 ```
 
-The parameters of the callback function are:
+##### Parameters
 
 Callback function parameter | Description
 ----------------------------|-------------
@@ -5115,7 +5122,7 @@ doc = sodaDatabase.createDocument(newDocumentContent);
 await sodaCollection.insertOne(doc);
 ```
 
-##### <a name="sodacollinsertoneparams"></a> 8.2.6.1 `insertOne()` Parameters
+##### <a name="sodacollinsertoneparams"></a> 8.2.6.1 `insertOne()`: Parameters
 
 ###### <a name="sodacollinsertoneparamsdoc"></a> 8.2.6.1.1 `newDocumentContent`,  `newDocument`
 
@@ -5140,11 +5147,13 @@ values will be used instead.
 
 ##### <a name="sodacollinsertonecb"></a> 8.2.6.2 `insertOne()` Callback Function
 
+##### Prototype
+
 ```
 function(Error error)
 ```
 
-The parameters of the callback function are:
+##### Parameters
 
 Callback function parameter | Description
 ----------------------------|-------------
@@ -5190,7 +5199,7 @@ connection is committed.
 
 This method was added in node-oracledb 3.0.
 
-##### <a name="sodacollinsertoneandgetparams"></a> 8.2.7.1 `insertOneAndGet()` Parameters
+##### <a name="sodacollinsertoneandgetparams"></a> 8.2.7.1 `insertOneAndGet()`: Parameters
 
 ###### <a name="sodacollinsertoneandgetparamsdoc"></a> 8.2.7.1.1 `newDocumentContent`,  `newDocument`
 
@@ -5205,11 +5214,13 @@ For related documentation, see [`sodaCollection.insertOne()`](#sodacollinsertone
 
 ##### <a name="sodacollinsertoneandgetcb"></a> 8.2.7.2 `insertOneAndGet()` Callback Function
 
+##### Prototype
+
 ```
 function(Error error, SodaDocument document)
 ```
 
-The parameters of the callback function are:
+##### Parameters
 
 Callback function parameter | Description
 ----------------------------|-------------
@@ -5329,11 +5340,13 @@ Most users will leave `mode` undefined.
 
 ##### <a name="sodadbcreatecollectioncb"></a> 9.1.1.3 `createCollection()`: Callback Function
 
+##### Prototype
+
 ```
 function(Error error, SodaCollection collection)
 ```
 
-The parameters of the callback function are:
+##### Parameters
 
 Callback function parameter | Description
 ----------------------------|-------------
@@ -5458,11 +5471,13 @@ Attribute           | Description
 
 ##### <a name="sodadbgetcollectionnamescb"></a> 9.1.3.2 `getCollectionNames()`: Callback Function
 
+##### Prototype
+
 ```
 function(Error error, Array collectionNames)
 ```
 
-The parameters of the callback function are:
+##### Parameters
 
 Callback function parameter | Description
 ----------------------------|-------------
@@ -5509,11 +5524,13 @@ Name of the collection to open.
 
 ##### <a name="sodadbopencollectioncb"></a> 9.1.4.2 `openCollection()`: Callback Function
 
+##### Prototype
+
 ```
 function(Error error, SodaCollection collection)
 ```
 
-The parameters of the callback function are:
+##### Parameters
 
 Callback function parameter | Description
 ----------------------------|-------------
@@ -6587,7 +6604,11 @@ may be returned.
 
 The `sessionCallback` function is invoked before
 `pool.getConnection()` returns if the requested tag is not identical
-to the actual tag of the pooled connection.
+to the actual tag of the pooled connection.  The best practice
+recommendation is to set the tag in the callback function where the
+callback changes session state.  If required, a tag can be set anytime
+prior to closing the connection.  To clear a connection's tag set
+`connection.tag` to an empty string.
 
 When node-oracledb is using Oracle Client libraries 12.2 or later,
 then node-oracledb uses 'multi-property tags' and the tag string must
@@ -6595,18 +6616,17 @@ be of the form of one or more "name=value" pairs separated by a
 semi-colon, for example `"loc=uk;lang=cy"`.  Oracle's underlying
 'session pool' uses various heuristics to determine which connection
 is returned to the application.  Refer to the [multi-property tags
-documentation][125].
+documentation][125].  The callback function can parse the requested
+multi-property tag and compare it with the connection's actual
+properties in [`connection.tag`](#propconntag) to determine what exact
+state to set.  The callback can set this state and update
+`connection.tag` as required.
 
-The callback function can parse the requested multi-property tag and
-compare it with the connection's actual properties in
-[`connection.tag`](#propconntag) to determine what exact state to set.
-The callback can set this state and update `connection.tag` as
-required.  To clear a connection's tag set `connection.tag` to an
-empty string.
+###### <a name="sessionfixupnode"></a> Node.js Callback
 
-This example ensures the connection contains valid settings for an
-application-specific "location=USA" property and ignores any other
-properties that may be set:
+This example Node.js callback function ensures the connection contains
+valid settings for an application-specific "location=USA" property and
+ignores any other properties that may be set:
 
 ```javascript
 const sessionTag = "location=USA";
@@ -6648,7 +6668,7 @@ try {
 
 For runnable examples, see [`sessiontagging1.js`][127] and [`sessiontagging2.js`][128].
 
-##### <a name="sessionfixupplsql"></a> PL/SQL Callback
+###### <a name="sessionfixupplsql"></a> PL/SQL Callback
 
 When node-oracledb is using Oracle Client libraries 12.2 or later,
 `sessionCallback` can be a string containing the name of a PL/SQL
@@ -10978,8 +10998,8 @@ role granted to them by a DBA:
 GRANT SODA_APP TO hr;
 ```
 
-The `CREATE TABLE` system privilege is also need.  Advanced users who
-are using Oracle sequences for keys will also need the `CREATE
+The `CREATE TABLE` system privilege is also needed.  Advanced users
+who are using Oracle sequences for keys will also need the `CREATE
 SEQUENCE` privilege.
 
 The general recommendation for SODA applications is to turn on
@@ -11644,9 +11664,10 @@ async function run() {
 run();
 ```
 
-If you are using [Lob instances](#lobclass) for LOB data instead of
-working with the data directly as Strings or Buffers, then the Lobs
-must be streamed since there is no Promisified interface for them.
+If you are using [Lob instances](#lobclass) for LOB data, then the
+Lobs must be streamed since there is no Promisified interface for
+them.  Alternatively you can work with the data directly as Strings or
+Buffers.
 
 For more information, see [How to get, use, and close a DB connection
 using async functions][74].
@@ -11795,6 +11816,25 @@ When upgrading from node-oracledb version 2.3 to version 3.0:
 - Change code that relied on unused properties in objects such as the
   `execute()` result being set to `undefined`.  These properties are
   no longer set in node-oracledb 3.
+
+### <a name="migratev30v31"></a> 30.4 Migrating from node-oracledb 3.0 to node-oracledb 3.1
+
+When upgrading from node-oracledb version 3.0 to version 3.1:
+
+- Review the [CHANGELOG][83].  Implement new features such as the
+  Connection Pool
+  [`sessionCallback`](#createpoolpoolattrssessioncallback) to
+  efficiently set session state.
+
+- Code that catches `require('oracledb')` errors to check
+  node-oracledb and the Oracle Client libraries are installed
+  correctly will need to be changed.  In node-oracledb 3.1,
+  `require()` will always succeed if node-oracledb is installed even
+  if Oracle Client is not configured.  To confirm that node-oracle
+  will be usable, access
+  [`oracledb.oracleClientVersion`]((#propdboracleclientversion)) or
+  [`oracledb.oracleClientVersionString`](#propdboracleclientversionstring),
+  or try opening a connection.
 
 [1]: https://www.npmjs.com/package/oracledb
 [2]: https://oracle.github.io/node-oracledb/INSTALL.html
