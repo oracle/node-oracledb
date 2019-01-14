@@ -372,28 +372,29 @@ limitations under the License.
     - 18.7 [Binding Multiple Values to a SQL `WHERE IN` Clause](#sqlwherein)
     - 18.8 [Binding Column and Table Names in Queries](#sqlbindtablename)
 19. [Batch Statement Execution](#batchexecution)
-20. [Continuous Query Notification (CQN)](#cqn)
-21. [Transaction Management](#transactionmgt)
-22. [Statement Caching](#stmtcache)
-23. [External Configuration](#oraaccess)
-24. [Globalization and National Language Support (NLS)](#nls)
-25. [End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend)
-26. [Simple Oracle Document Access (SODA)](#sodaoverview)
-    - 26.1 [Node-oracledb SODA Requirements](#sodarequirements)
-    - 26.2 [Creating SODA Collections](#creatingsodacollections)
-    - 26.3 [Creating and Accessing SODA documents](#accessingsodadocuments)
-    - 26.4 [SODA Query-by-Example Searches for JSON Documents](#sodaqbesearches)
-    - 26.5 [SODA Client-Assigned Keys and Collection Metadata](#sodaclientkeys)
-    - 26.6 [JSON Data Guides in SODA](#sodajsondataguide)
-27. [Promises and node-oracledb](#promiseoverview)
-    - 27.1 [Custom Promise Libraries](#custompromises)
-28. [Async/Await and node-oracledb](#asyncawaitoverview)
-29. [Tracing SQL and PL/SQL Statements](#tracingsql)
-30. [Migrating from Previous node-oracledb Releases](#migrate)
-    - 30.1 [Migrating from node-oracledb 1.13 to node-oracledb 2.0](#migratev1v2)
-    - 30.2 [Migrating from node-oracledb 2.0 to node-oracledb 2.1](#migratev20v21)
-    - 30.3 [Migrating from node-oracledb 2.3 to node-oracledb 3.0](#migratev23v30)
-    - 30.3 [Migrating from node-oracledb 3.0 to node-oracledb 3.1](#migratev30v31)
+20. [Transaction Management](#transactionmgt)
+21. [Statement Caching](#stmtcache)
+22. [Continuous Query Notification (CQN)](#cqn)
+23. [Advanced Queuing (AQ)](#aq)
+24. [External Configuration](#oraaccess)
+25. [Globalization and National Language Support (NLS)](#nls)
+26. [End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend)
+27. [Simple Oracle Document Access (SODA)](#sodaoverview)
+    - 27.1 [Node-oracledb SODA Requirements](#sodarequirements)
+    - 27.2 [Creating SODA Collections](#creatingsodacollections)
+    - 27.3 [Creating and Accessing SODA documents](#accessingsodadocuments)
+    - 27.4 [SODA Query-by-Example Searches for JSON Documents](#sodaqbesearches)
+    - 27.5 [SODA Client-Assigned Keys and Collection Metadata](#sodaclientkeys)
+    - 27.6 [JSON Data Guides in SODA](#sodajsondataguide)
+28. [Promises and node-oracledb](#promiseoverview)
+    - 28.1 [Custom Promise Libraries](#custompromises)
+29. [Async/Await and node-oracledb](#asyncawaitoverview)
+30. [Tracing SQL and PL/SQL Statements](#tracingsql)
+31. [Migrating from Previous node-oracledb Releases](#migrate)
+    - 31.1 [Migrating from node-oracledb 1.13 to node-oracledb 2.0](#migratev1v2)
+    - 31.2 [Migrating from node-oracledb 2.0 to node-oracledb 2.1](#migratev20v21)
+    - 31.3 [Migrating from node-oracledb 2.3 to node-oracledb 3.0](#migratev23v30)
+    - 31.3 [Migrating from node-oracledb 3.0 to node-oracledb 3.1](#migratev30v31)
 
 ## <a name="apimanual"></a> NODE-ORACLEDB API MANUAL
 
@@ -5285,7 +5286,7 @@ collection.
 If the optional `mode` parameter is
 [`oracledb.SODA_COLL_MAP_MODE`](#oracledbconstantssoda), SODA will
 attempt to use a pre-existing table as the table underlying the
-collection..
+collection.
 
 If [`oracledb.autoCommit`](#propdbisautocommit) is *true*, and
 `createCollection()` succeeds, then any open transaction on the
@@ -10434,7 +10435,97 @@ Output would be an array of eight values such as:
 [ [ 6 ], [ 10 ], [ 15 ], [ 21 ], [ 28 ], [ 36 ], [ 45 ], [ 55 ] ]
 ```
 
-## <a name="cqn"></a> 20. Continuous Query Notification (CQN)
+## <a name="transactionmgt"></a> 20. Transaction Management
+
+By default, [DML][14] statements are not committed in node-oracledb.
+
+The node-oracledb add-on implements [`commit()`](#commit) and
+[`rollback()`](#rollback) methods that can be used to explicitly
+control transactions.
+
+If the [`autoCommit`](#propdbisautocommit) flag is set to *true*,
+then a commit occurs at the end of each `execute()` call.  Unlike an
+explicit `commit()`, this does not require a [round-trip][124] to the
+database.  For maximum efficiency, set `autoCommit` to *true* for the
+last `execute()` call of a transaction in preference to using an
+additional, explicit `commit()` call.
+
+When a connection is released, any ongoing transaction will be rolled
+back.  Therefore if a released, pooled connection is re-used by a
+subsequent [`pool.getConnection()`](#getconnectionpool) call
+(or [`oracledb.getConnection()`](#getconnectiondb) call that uses a
+pool), then any DML statements performed on the obtained connection are
+always in a new transaction.
+
+When an application ends, any uncommitted transaction on a connection
+will be rolled back.
+
+Note: Oracle Database will implicitly commit when a [DDL][15]
+statement is executed irrespective of the value of `autoCommit`.
+
+## <a name="stmtcache"></a> 21. Statement Caching
+
+Node-oracledb's [`execute()`](#execute) and
+[`queryStream()`](#querystream) methods use the [Oracle Call Interface
+statement cache][61] to make re-execution of statements efficient.
+This cache removes the need for the separate 'prepare' or 'parse'
+method which is sometimes seen in other Oracle APIs: there is no
+separate method in node-oracledb.
+
+Each non-pooled connection and each session in the connection pool has
+its own cache of statements with a default size of 30.  Statement
+caching lets cursors be used without re-parsing the statement.
+Statement caching also reduces meta data transfer costs between the
+node-oracledb and the database.  Performance and scalability are
+improved.
+
+In general, set the statement cache to the size of the working set of
+statements being executed by the application.
+
+Statement caching can be disabled by setting the size to 0.  Disabling
+the cache may be beneficial when the quantity or order of statements
+causes cache entries to be flushed before they get a chance to be
+reused.  For example if there are more distinct statements than cache
+slots, and the order of statement execution causes older statements to
+be flushed from the cache before the statements are re-executed.
+
+The statement cache size can be set globally with [stmtCacheSize](#propdbstmtcachesize):
+
+```javascript
+var oracledb = require('oracledb');
+oracledb.stmtCacheSize = 40;
+```
+
+The value can be overridden in an `oracledb.getConnection()` call:
+
+```javascript
+var oracledb = require('oracledb');
+
+oracledb.getConnection(
+  {
+    user          : "hr",
+    password      : "welcome",
+    connectString : "localhost/XEPDB1",
+    stmtCacheSize : 40
+  },
+  function(err, connection) {
+    . . .
+  });
+```
+
+The value can also be overridden in the `poolAttrs` parameter to
+the [`createPool()`](#createpool) method.
+
+With Oracle Database 12c, or later, the statement cache size can be automatically tuned with the
+[External Configuration](#oraaccess) *oraaccess.xml* file.
+
+To manually tune the statement cache size, monitor general application
+load and the [Automatic Workload Repository][62] (AWR) "bytes sent via SQL*Net to client" values.  The
+latter statistic should benefit from not shipping statement metadata
+to node-oracledb.  Adjust the statement cache size to your
+satisfaction.
+
+## <a name="cqn"></a> 22. Continuous Query Notification (CQN)
 
 [Continuous Query Notification (CQN)][99] lets node-oracledb
 applications register a JavaScript method that is invoked when changed
@@ -10627,97 +10718,146 @@ and the row operations of 2 correspond to
 
 There are runnable examples in the GitHub [examples][3] directory.
 
-## <a name="transactionmgt"></a> 21. Transaction Management
+## <a name="aq"></a> 23. Advanced Queuing (AQ)
 
-By default, [DML][14] statements are not committed in node-oracledb.
+[Oracle Advanced Queuing][129] allows applications to use
+producer-consumer message passing.  Oracle AQ is highly configurable.
+Messages can queued by multiple producers.  Different consumers can
+filter messages for them.  Messages can also be propagated to queues
+in other databases.  Oracle AQ has PL/SQL, Java, C and HTTPS
+interfaces, allowing many applications to communicate via messages.
+From node-oracledb, the PL/SQL interface is currently used via
+explicit calls.
 
-The node-oracledb add-on implements [`commit()`](#commit) and
-[`rollback()`](#rollback) methods that can be used to explicitly
-control transactions.
+The following example shows how to enqueue and dequeue a simple
+message.
 
-If the [`autoCommit`](#propdbisautocommit) flag is set to *true*,
-then a commit occurs at the end of each `execute()` call.  Unlike an
-explicit `commit()`, this does not require a [round-trip][124] to the
-database.  For maximum efficiency, set `autoCommit` to *true* for the
-last `execute()` call of a transaction in preference to using an
-additional, explicit `commit()` call.
+First, create a new Oracle user `demoqueue` with permission to create
+and use queues.  Connect as SYSDBA and run:
 
-When a connection is released, any ongoing transaction will be rolled
-back.  Therefore if a released, pooled connection is re-used by a
-subsequent [`pool.getConnection()`](#getconnectionpool) call
-(or [`oracledb.getConnection()`](#getconnectiondb) call that uses a
-pool), then any DML statements performed on the obtained connection are
-always in a new transaction.
-
-When an application ends, any uncommitted transaction on a connection
-will be rolled back.
-
-Note: Oracle Database will implicitly commit when a [DDL][15]
-statement is executed irrespective of the value of `autoCommit`.
-
-## <a name="stmtcache"></a> 22. Statement Caching
-
-Node-oracledb's [`execute()`](#execute) and
-[`queryStream()`](#querystream) methods use the [Oracle Call Interface
-statement cache][61] to make re-execution of statements efficient.
-This cache removes the need for the separate 'prepare' or 'parse'
-method which is sometimes seen in other Oracle APIs: there is no
-separate method in node-oracledb.
-
-Each non-pooled connection and each session in the connection pool has
-its own cache of statements with a default size of 30.  Statement
-caching lets cursors be used without re-parsing the statement.
-Statement caching also reduces meta data transfer costs between the
-node-oracledb and the database.  Performance and scalability are
-improved.
-
-In general, set the statement cache to the size of the working set of
-statements being executed by the application.
-
-Statement caching can be disabled by setting the size to 0.  Disabling
-the cache may be beneficial when the quantity or order of statements
-causes cache entries to be flushed before they get a chance to be
-reused.  For example if there are more distinct statements than cache
-slots, and the order of statement execution causes older statements to
-be flushed from the cache before the statements are re-executed.
-
-The statement cache size can be set globally with [stmtCacheSize](#propdbstmtcachesize):
-
-```javascript
-var oracledb = require('oracledb');
-oracledb.stmtCacheSize = 40;
+```sql
+CREATE USER demoqueue IDENTIFIED BY welcome;
+ALTER USER demoqueue DEFAULT TABLESPACE USERS QUOTA UNLIMITED ON USERS;
+GRANT CONNECT, RESOURCE TO DEMOQUEUE;
+GRANT AQ_ADMINISTRATOR_ROLE, AQ_USER_ROLE TO demoqueue;
+GRANT EXECUTE ON DBMS_AQ TO demoqueue;
+GRANT CREATE TYPE TO demoqueue;
 ```
 
-The value can be overridden in an `oracledb.getConnection()` call:
+The message in this example contains a name and address.  To create a
+payload type for this, and to start a queue for this payload, connect
+as the new `demoqueue` user and run:
 
-```javascript
-var oracledb = require('oracledb');
+```
+-- For the data we want to queue
+CREATE OR REPLACE TYPE USER_ADDRESS_TYPE AS OBJECT (
+   NAME        VARCHAR2(10),
+   ADDRESS     VARCHAR2(50)
+);
+/
 
-oracledb.getConnection(
-  {
-    user          : "hr",
-    password      : "welcome",
-    connectString : "localhost/XEPDB1",
-    stmtCacheSize : 40
-  },
-  function(err, connection) {
-    . . .
-  });
+-- Create and start a queue
+BEGIN
+ DBMS_AQADM.CREATE_QUEUE_TABLE(
+   QUEUE_TABLE        =>  'DEMOQUEUE.ADDR_QUEUE_TAB',
+   QUEUE_PAYLOAD_TYPE =>  'DEMOQUEUE.USER_ADDRESS_TYPE');
+END;
+/
+
+BEGIN
+ DBMS_AQADM.CREATE_QUEUE(
+   QUEUE_NAME         =>  'DEMOQUEUE.ADDR_QUEUE',
+   QUEUE_TABLE        =>  'DEMOQUEUE.ADDR_QUEUE_TAB');
+END;
+/
+
+BEGIN
+ DBMS_AQADM.START_QUEUE(
+   QUEUE_NAME         => 'DEMOQUEUE.ADDR_QUEUE',
+   ENQUEUE            => TRUE);
+END;
+/
 ```
 
-The value can also be overridden in the `poolAttrs` parameter to
-the [`createPool()`](#createpool) method.
+Two helper functions to enqueue and dequeue messages will make calling
+the queue easier.  As the `demoqueue` user run:
 
-With Oracle Database 12c, or later, the statement cache size can be automatically tuned with the
-[External Configuration](#oraaccess) *oraaccess.xml* file.
+```sql
+CREATE OR REPLACE PROCEDURE my_enq(
+       user_addr_p IN user_address_type) AS
+  ENQUEUE_OPTIONS    DBMS_AQ.ENQUEUE_OPTIONS_T;
+  MESSAGE_PROPERTIES DBMS_AQ.MESSAGE_PROPERTIES_T;
+  ENQ_ID             RAW(16);
+BEGIN
+  DBMS_AQ.ENQUEUE(QUEUE_NAME            => 'DEMOQUEUE.ADDR_QUEUE',
+                  ENQUEUE_OPTIONS       => ENQUEUE_OPTIONS,
+                  MESSAGE_PROPERTIES    => MESSAGE_PROPERTIES,
+                  PAYLOAD               => user_addr_p,
+                  MSGID                 => ENQ_ID);
+  COMMIT;
+END;
+/
+SHOW ERRORS
 
-To manually tune the statement cache size, monitor general application
-load and the [Automatic Workload Repository][62] (AWR) "bytes sent via SQL*Net to client" values.  The
-latter statistic should benefit from not shipping statement metadata
-to node-oracledb.  Adjust the statement cache size to your
-satisfaction.
+CREATE OR REPLACE PROCEDURE MY_DEQ(
+       user_addr_p OUT USER_ADDRESS_TYPE) AS
+  DEQUEUE_OPTIONS    DBMS_AQ.DEQUEUE_OPTIONS_T;
+  MESSAGE_PROPERTIES DBMS_AQ.MESSAGE_PROPERTIES_T;
+  ENQ_ID             RAW(16);
+BEGIN
+  DBMS_AQ.DEQUEUE(QUEUE_NAME            => 'DEMOQUEUE.ADDR_QUEUE',
+                  DEQUEUE_OPTIONS       => DEQUEUE_OPTIONS,
+                  MESSAGE_PROPERTIES    => MESSAGE_PROPERTIES,
+                  PAYLOAD               => user_addr_p,
+                  MSGID                 => ENQ_ID);
+  COMMIT;
+END;
+/
+SHOW ERRORS
+```
 
-## <a name="oraaccess"></a> 23. External Configuration
+With this basic queue configuration, if a dequeue operation is called
+without a message being present in the queue, then the call will block
+waiting for one to be enqueued or until the queue wait time expires.
+This behavior can be configured.
+
+The helper procedures can be called from node-oracledb in anonymous
+blocks to enqueue and dequeue messages:
+
+```javascript
+// Enqueue a message
+username = 'scott';
+address  = 'The Kennel';
+sql = `BEGIN
+         my_enq(user_address_type(:un, :ad));
+       END;`;
+binds = {un: username, ad: address};
+await connection.execute(sql, binds);
+
+// Dequeue a message
+sql = `DECLARE
+         ua user_address_type;
+       BEGIN
+         my_deq(ua);
+         :un := ua.name;
+         :ad := ua.address;
+       END;`;
+binds = {un: {dir: oracledb.BIND_OUT}, ad: {dir: oracledb.BIND_OUT}};
+result = await connection.execute(sql, binds);
+console.log(result.outBinds);
+```
+
+The output is:
+
+```
+{ un: 'scotty', ad: 'The Kennel' }
+```
+
+Queuing is highly configurable and scalable, providing a great way to
+distribute workload for a web application.  Oracle AQ is available in
+all editions of the database.
+
+## <a name="oraaccess"></a> 24. External Configuration
 
 The optional Oracle client-side configuration file [oraaccess.xml][63]
 can be used to configure some behaviors of node-oracledb.  See
@@ -10765,7 +10905,7 @@ The oraaccess.xml file has other uses including:
 
 Refer to the [oraaccess.xml documentation][63].
 
-## <a name="nls"></a> 24. Globalization and National Language Support (NLS)
+## <a name="nls"></a> 25. Globalization and National Language Support (NLS)
 
 Node-oracledb can use Oracle's [National Language Support (NLS)][68]
 to assist in globalizing applications.
@@ -10801,7 +10941,7 @@ WHERE sid = SYS_CONTEXT('USERENV', 'SID');
 
 In node-oracledb this will always show AL32UTF8.
 
-## <a name="endtoend"></a> 25. End-to-end Tracing, Mid-tier Authentication, and Auditing
+## <a name="endtoend"></a> 26. End-to-end Tracing, Mid-tier Authentication, and Auditing
 
 The Connection properties [action](#propconnaction),
 [module](#propconnmodule), and [clientId](#propconnclientid) set
@@ -10910,7 +11050,7 @@ Note if [`oracledb.connectionClass`](#propdbconclass) is set for a
 non-pooled connection, the `CLIENT_DRIVER` value will not be set for
 that connection.
 
-## <a name="sodaoverview"></a> 26. Simple Oracle Document Access (SODA)
+## <a name="sodaoverview"></a> 27. Simple Oracle Document Access (SODA)
 
 Oracle Database Simple Oracle Document Access (SODA) access is
 available in node-oracledb version 3 through a set of NoSQL-style
@@ -10986,7 +11126,7 @@ Node-oracledb uses the following objects for SODA:
   remove documents.  This is an internal object that should not be
   directly accessed.
 
-### <a name="sodarequirements"></a> 26.1 Node-oracledb SODA Requirements
+### <a name="sodarequirements"></a> 27.1 Node-oracledb SODA Requirements
 
 SODA is available to Node.js applications when the node-oracledb
 driver uses Oracle Database and Client 18.3, or higher.
@@ -11029,7 +11169,7 @@ Note:
 - When [`oracledb.autoCommit`](#propdbisautocommit) is *true*, most SODA methods will issue a commit before successful return.
 - SODA provide optimistic locking, see [`sodaOperation.version()`](#sodaoperationclassversion).
 
-### <a name="creatingsodacollections"></a> 26.2 Creating SODA Collections
+### <a name="creatingsodacollections"></a> 27.2 Creating SODA Collections
 
 The following examples use Node.js 8's
 [async/await](#asyncawaitoverview) syntax, however callbacks can also
@@ -11077,7 +11217,7 @@ See [SODA Client-Assigned Keys and Collection
 Metadata](#sodaclientkeys) for how to create a collection with custom
 metadata.
 
-### <a name="accessingsodadocuments"></a> 26.3 Creating and Accessing SODA documents
+### <a name="accessingsodadocuments"></a> 27.3 Creating and Accessing SODA documents
 
 To insert a document into an opened collection, a JavaScript object
 that is the document content can be used directly.  In the following
@@ -11230,7 +11370,7 @@ However note that for efficiency the SodaDocuments returned from
 do not contain document content.  These SodaDocuments are useful for
 getting other document components such as the key and version.
 
-### <a name="sodaqbesearches"></a> 26.4 SODA Query-by-Example Searches for JSON Documents
+### <a name="sodaqbesearches"></a> 27.4 SODA Query-by-Example Searches for JSON Documents
 
 JSON documents stored in SODA can easily be searched using
 query-by-example (QBE) syntax with
@@ -11322,7 +11462,7 @@ Some QBE examples are:
 
     See [Overview of QBE Spatial Operators][111].
 
-### <a name="sodaclientkeys"></a> 26.5 SODA Client-Assigned Keys and Collection Metadata
+### <a name="sodaclientkeys"></a> 27.5 SODA Client-Assigned Keys and Collection Metadata
 
 Default collections support JSON documents and use system generated
 document keys. Various storage options are also configured which
@@ -11449,7 +11589,7 @@ try {
 }
 ```
 
-### <a name="sodajsondataguide"></a> 26.6 JSON Data Guides in SODA
+### <a name="sodajsondataguide"></a> 27.6 JSON Data Guides in SODA
 
 SODA exposes Oracle Database's [JSON data guide][116] feature.  This
 lets you discover information about the structure and content of JSON
@@ -11501,7 +11641,7 @@ this case) and lengths of the values of these fields are listed.  The
 want to define SQL views over JSON data. They suggest how to name the
 columns of a view.
 
-## <a name="promiseoverview"></a> 27. Promises and node-oracledb
+## <a name="promiseoverview"></a> 28. Promises and node-oracledb
 
 Node-oracledb supports Promises with all asynchronous methods.  The native Promise
 implementation is used.
@@ -11597,7 +11737,7 @@ Unhandled Rejection at:  Promise {
 For more information, see [How to get, use, and close a DB connection
 using promises][73].
 
-### <a name="custompromises"></a> 27.1 Custom Promise Libraries
+### <a name="custompromises"></a> 28.1 Custom Promise Libraries
 
 The Promise implementation is designed to be overridden, allowing a
 custom Promise library to be used.
@@ -11613,7 +11753,7 @@ Promises can be completely disabled by setting
 oracledb.Promise = null;
 ```
 
-## <a name="asyncawaitoverview"></a> 28. Async/Await and node-oracledb
+## <a name="asyncawaitoverview"></a> 29. Async/Await and node-oracledb
 
 Node.js 7.6 supports async functions, also known as Async/Await.  These
 can be used with node-oracledb.  For example:
@@ -11672,7 +11812,7 @@ Buffers.
 For more information, see [How to get, use, and close a DB connection
 using async functions][74].
 
-## <a name="bindtrace"></a> <a name="tracingsql"></a> 29. Tracing SQL and PL/SQL Statements
+## <a name="bindtrace"></a> <a name="tracingsql"></a> 30. Tracing SQL and PL/SQL Statements
 
 ####  End-to-End Tracing
 
@@ -11729,9 +11869,9 @@ parameters.
 
 PL/SQL users may be interested in using [PL/Scope][78].
 
-## <a name="migrate"></a> 30. Migrating from Previous node-oracledb Releases
+## <a name="migrate"></a> 31. Migrating from Previous node-oracledb Releases
 
-### <a name="migratev1v2"></a> 30.1 Migrating from node-oracledb 1.13 to node-oracledb 2.0
+### <a name="migratev1v2"></a> 31.1 Migrating from node-oracledb 1.13 to node-oracledb 2.0
 
 When upgrading from node-oracledb version 1.13 to version 2.0:
 
@@ -11785,7 +11925,7 @@ When upgrading from node-oracledb version 1.13 to version 2.0:
 - Test applications to check if changes such as the improved property
   validation uncover latent problems in your code.
 
-### <a name="migratev20v21"></a> 30.2 Migrating from node-oracledb 2.0 to node-oracledb 2.1
+### <a name="migratev20v21"></a> 31.2 Migrating from node-oracledb 2.0 to node-oracledb 2.1
 
 When upgrading from node-oracledb version 2.0 to version 2.1:
 
@@ -11796,7 +11936,7 @@ When upgrading from node-oracledb version 2.0 to version 2.1:
     - Stop passing a callback.
     - Optionally pass an error.
 
-### <a name="migratev23v30"></a> 30.3 Migrating from node-oracledb 2.3 to node-oracledb 3.0
+### <a name="migratev23v30"></a> 31.3 Migrating from node-oracledb 2.3 to node-oracledb 3.0
 
 When upgrading from node-oracledb version 2.3 to version 3.0:
 
@@ -11817,7 +11957,7 @@ When upgrading from node-oracledb version 2.3 to version 3.0:
   `execute()` result being set to `undefined`.  These properties are
   no longer set in node-oracledb 3.
 
-### <a name="migratev30v31"></a> 30.4 Migrating from node-oracledb 3.0 to node-oracledb 3.1
+### <a name="migratev30v31"></a> 31.4 Migrating from node-oracledb 3.0 to node-oracledb 3.1
 
 When upgrading from node-oracledb version 3.0 to version 3.1:
 
@@ -11963,3 +12103,4 @@ When upgrading from node-oracledb version 3.0 to version 3.1:
 [126]: https://github.com/oracle/node-oracledb/tree/master/examples/sessionfixup.js
 [127]: https://github.com/oracle/node-oracledb/tree/master/examples/sessiontagging1.js
 [128]: https://github.com/oracle/node-oracledb/tree/master/examples/sessiontagging2.js
+[129]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=ADQUE
