@@ -6,7 +6,7 @@ INSTALL.md
 CONTRIBUTING.md
 Makefile
 binding.gyp
-oracledb-*.tgz
+*.tgz
 /doc
 /examples
 /test
@@ -26,8 +26,8 @@ oracledb-*.tgz
 /build/gyp-mac-tool
 /node_modules
 /oracle_private
-/package/build.js
-/package/buildv6binary.js
+/package/buildbinary.js
+/package/buildpackage.js
 /package/Staging
 /odpi
 /src

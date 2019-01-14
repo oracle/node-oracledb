@@ -56,9 +56,12 @@ This release is currently under development.
   String limited to the VARCHAR2 length.
 
 - Update install processes by bundling all pre-built binaries into the
-  package uploaded to https://www.npmjs.com/package/oracledb.  This
-  removes the need for the installer to download a binary package from
-  GitHub.  Also, source code is no longer included in the npm package.
+  https://www.npmjs.com/package/oracledb package, removing the need
+  for a separate binary package download from GitHub.  At runtime an
+  appropriate binary is loaded by `require()`, if it exists, allowing
+  one `node_modules/oracledb` install to be usable in different
+  environments.  Also, source code is no longer included in the npm
+  package.
 
 - Fixed a crash with high frequency notifications from CQN
   ([#1009](https://github.com/oracle/node-oracledb/issues/1009)).

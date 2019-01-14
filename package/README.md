@@ -1,34 +1,46 @@
 # Overview
 
-This directory is used for building the node-oracledb npm package.
+This directory is used for building the [node-oracledb npm
+package](https://www.npmjs.com/package/oracledb).  The scripts can
+also be used to create custom packages for hosting on a local server.
+
 Most users do not need to use anything in this directory.
 
 # Maintainers
 
-- The file `build.js` is used by node-oracledb maintainers to create
-  node-oracledb binaries and the package to be uploaded to
-  [npm](https://www.npmjs.com/package/oracledb).
+In a clone or copy of the repository:
 
-- `node build.js binary` creates a binary for the current Node.js /
-  node-oracledb / platform combination.  The command `node
-  buildv6binary.js` can be used with Node 6.
+- `npm run buildbinary` calls `buildbinary.js` to create a binary for
+  the current node-oracledb / Node.js / platform combination.
 
-- `node build.js package` makes the node-oracledb package containing
-  the node-oracledb JavaScript files, the binaries, and a package.json
-  that has an "install" script.
+- `npm run buildpackage` calls `buildpackage.js` to make the
+  node-oracledb package containing the node-oracledb JavaScript files,
+  the available binaries, and a package.json that has an "install"
+  script and a "prune" script.  The package will be created in the top
+  level directory.
 
-  Before running this, all binaries and related build metadata
-  information files from all Node.js / node-oracledb / platform
-  combinations should be placed in the `package/Staging` directory.
+  Before executing `npm run buildpackage`, all binaries and related
+  build metadata information files from all node-oracledb / Node.js /
+  platform combinations should be placed in the `package/Staging`
+  directory.
 
-- As part of `npm install oracledb`, the `package.json` install script
-  invokes `package/install.js` to move the appropriate binary module
-  to the correct directory.
+Package installation:
+
+- As part of an `npm install` that uses the created package, the
+  `package.json` install script runs `package/install.js` to check a
+  binary module for the current Node.js and platform is available.
 
   If a suitable binary is not available, installation will fail.
-  Users must then compile node-oracledb using source code from GitHub.
+  Users must then compile node-oracledb using source code from GitHub,
+  or choose an alternative Node.js / platform that has a pre-built
+  binary module.
 
-- By default `../package.json` doesn't have an install script target.
-  This means that node-gyp will be invoked to compile node-oracledb.
-  This allows installation from source code (via GitHub) when no
-  suitable pre-built binary is available.
+- After install, space conscious users can run `npm run prune` which
+  removes pre-built binaries for all other Node.js releases and
+  architectures.
+
+By default the top level `package.json` doesn't have an install script
+target.  This means that node-gyp will be invoked to compile
+node-oracledb.  This allows installation from [source
+code](https://oracle.github.io/node-oracledb/INSTALL.html#github) (via
+GitHub) when no suitable pre-built binary is available.

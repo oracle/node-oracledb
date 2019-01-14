@@ -41,7 +41,7 @@ limitations under the License.
     - 3.11 [Node-oracledb Installation Without Internet Access](#offline)
         - 3.11.1 [Copying node-oracledb Binaries on Windows](#winbins)
     - 3.12 [Installing Node.js and Node-oracledb RPMs from yum.oracle.com](#instnoderpms)
-    - 3.13 [Hosting your own node-oracledb Packages](#selfhost)
+    - 3.13 [Building and Hosting your own node-oracledb Packages](#selfhost)
 4. [Installing Node-oracledb 1.x or 2.x](#installingoldvers)
 5. [Useful Resources for Node-oracledb](#otherresources)
 6. [Troubleshooting Node-oracledb Installation Problems](#troubleshooting)
@@ -69,8 +69,10 @@ guaranteed to be available or usable in your environment.
 #### <a name="mig31"></a> 1.1 Changes in node-oracledb version 3.1
 
 Pre-built binaries are now contained in the package downloaded from
-npm.  This removes the internally executed step of downloading a
-binary package from GitHub.
+npm.  This removes the previous internally executed step of
+downloading a suitable binary package from GitHub.  If install size is
+an issue, all binaries except those for the current Node.js version
+can be deleted with `npm run prune`.
 
 Source code is no longer included in the package available from npm.
 To compile from source code, you need access to GitHub or its [Oracle
@@ -315,8 +317,7 @@ included in Node.js:
 npm install oracledb
 ```
 
-Available pre-built node-oracledb binaries can been seen on the
-[releases][41] page.  They were built on Oracle Linux 6.
+The pre-built binaries were built on Oracle Linux 6.
 
 If a pre-built binary is successfully installed but isn't usable
 because it depends on a different glibc version, uninstall
@@ -458,8 +459,7 @@ included in Node.js:
 npm install oracledb
 ```
 
-Available pre-built node-oracledb binaries can been seen on the
-[releases][41] page.  They were built on Oracle Linux 6.
+The pre-built binaries were built on Oracle Linux 6.
 
 If a pre-built binary is successfully installed but isn't usable
 because it depends on a different glibc version, uninstall
@@ -595,9 +595,6 @@ included in Node.js:
 npm install oracledb
 ```
 
-Available pre-built node-oracledb binaries can been seen on the
-[releases][41] page.
-
 If a pre-built binary is successfully installed but isn't usable
 because it depends on a different glibc version, uninstall
 node-oracledb and install again from source code.
@@ -694,9 +691,6 @@ included in Node.js:
 ```
 npm install oracledb
 ```
-
-Available pre-built node-oracledb binaries can been seen on the
-[releases][41] page.
 
 ##### To install from source code:
 
@@ -819,9 +813,6 @@ included in Node.js:
 npm install oracledb
 ```
 
-Available pre-built node-oracledb binaries can been seen on the
-[releases][41] page.
-
 ##### To install from source code:
 
 If a pre-built node-oracledb binary is not installable, the binary can
@@ -919,7 +910,7 @@ client installation.  Make sure that `PATH` contains the correct
 binary directory, for example `C:\oracle\product\12.2.0\dbhome_1\bin`.
 
 For easy development, the free [Oracle XE][20] version of the database
-is available on Linux.  Applications developed with XE may be
+is available on Windows.  Applications developed with XE may be
 immediately used with other editions of the Oracle Database.
 
 You may need Administrator privileges to set environment variables or
@@ -951,9 +942,6 @@ included in Node.js:
 ```
 npm install oracledb
 ```
-
-Available pre-built node-oracledb binaries can been seen on the
-[releases][41] page.
 
 ##### To install from source code:
 
@@ -1427,7 +1415,7 @@ export NODE_PATH=$(npm root -g)
 node myapp.js
 ```
 
-### <a name="selfhost"></a> 3.13 Hosting your own node-oracledb Packages
+### <a name="selfhost"></a> 3.13 Building and Hosting your own node-oracledb Packages
 
 You can host node-oracledb packages locally.
 
@@ -1440,9 +1428,9 @@ can be used.  See
 [package/README](https://github.com/oracle/node-oracledb/blob/master/package/README.md)
 for details.
 
-If you make the package accessible on your local machine, for example
-at https://www.example.com/oracledb-3.1.0.tgz, then your install
-command would be:
+If you make the package accessible on your local web server, for
+example at https://www.example.com/oracledb-3.1.0.tgz, then your
+install command would be:
 
 ```
 npm install https://www.example.com/oracledb-3.1.0.tgz

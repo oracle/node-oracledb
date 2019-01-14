@@ -39,7 +39,9 @@
   "scripts": {
     "testv6": "mocha --opts test/opts/mochaNodeV6.opts",
     "test": "mocha --opts test/opts/mocha.opts",
-    "posttest": "node test/opts/version.js"
+    "posttest": "node test/opts/version.js",
+    "buildbinary": "node package/buildbinary.js",
+    "buildpackage": "node package/buildpackage.js"
   },
   "engines": {
     "node": ">=6"
