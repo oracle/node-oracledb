@@ -2408,15 +2408,15 @@ the pool: `await connection.close({drop: true})`.  See Oracle bug
 
 ##### Parameters
 
-```
-function(Error error)
-```
+-   ```
+    function(Error error)
+    ```
 
-The parameters of the callback function are:
+    The parameters of the callback function are:
 
-Callback function parameter | Description
-----------------------------|-------------
-*Error error* | If `break()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+    Callback function parameter | Description
+    ----------------------------|-------------
+    *Error error* | If `break()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
 ####  <a name="changepassword"></a> 4.2.2 `connection.changePassword()`
 
@@ -2444,37 +2444,37 @@ This method was added in node-oracledb 2.2.
 
 ##### Parameters
 
-```
-String user
-```
+-   ```
+    String user
+    ```
 
-The name of the user whose password is to be changed.
+    The name of the user whose password is to be changed.
 
-```
-String oldPassword
-```
+-   ```
+    String oldPassword
+    ```
 
-The current password of the currently connected user.
+    The current password of the currently connected user.
 
-If `changePassword()` is being used by a DBA to change the password of
-another user, the value of `oldPassword` is ignored and can be an
-empty string.
+    If `changePassword()` is being used by a DBA to change the password of
+    another user, the value of `oldPassword` is ignored and can be an
+    empty string.
 
-```
-String newPassword
-```
+-   ```
+    String newPassword
+    ```
 
-The new password of the user whose password is to be changed.
+    The new password of the user whose password is to be changed.
 
-```
-function(Error error)
-```
+-   ```
+    function(Error error)
+    ```
 
-The parameters of the callback function are:
+    The parameters of the callback function are:
 
-Callback function parameter | Description
-----------------------------|-------------
-*Error error* | If `changePassword()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+    Callback function parameter | Description
+    ----------------------------|-------------
+    *Error error* | If `changePassword()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
 ####  <a name="connectionclose"></a> 4.2.3 `connection.close()`
 
@@ -2558,15 +2558,15 @@ This call commits the current transaction in progress on the connection.
 
 ##### Parameters
 
-```
-function(Error error)
-```
+-   ```
+    function(Error error)
+    ```
 
-The parameters of the callback function are:
+    The parameters of the callback function are:
 
-Callback function parameter | Description
-----------------------------|-------------
-*Error error* | If `commit()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+    Callback function parameter | Description
+    ----------------------------|-------------
+    *Error error* | If `commit()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
 #### <a name="connectioncreatelob"></a> 4.2.5 `connection.createLob()`
 
@@ -2601,22 +2601,22 @@ See [Working with CLOB and BLOB Data](#lobhandling) and [LOB Bind Parameters](#l
 
 ##### Parameters
 
-```
-Number type
-```
+-   ```
+    Number type
+    ```
 
-One of the constants [`oracledb.CLOB`](#oracledbconstantsnodbtype)
-or [`oracledb.BLOB`](#oracledbconstantsnodbtype).
+    One of the constants [`oracledb.CLOB`](#oracledbconstantsnodbtype)
+    or [`oracledb.BLOB`](#oracledbconstantsnodbtype).
 
-```
-function(Error error)
-```
+-   ```
+    function(Error error)
+    ```
 
-The parameters of the callback function are:
+    The parameters of the callback function are:
 
-Callback function parameter | Description
-----------------------------|-------------
-*Error error* | If `createLob()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+    Callback function parameter | Description
+    ----------------------------|-------------
+    *Error error* | If `createLob()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
 
 #### <a name="execute"></a> 4.2.6 `connection.execute()`
@@ -3241,37 +3241,37 @@ This method was added in node-oracledb 2.2.
 
 ##### Parameters
 
-```
-String sql
-```
+-   ```
+    String sql
+    ```
 
-The SQL statement to parse.
+    The SQL statement to parse.
 
-```
-function(Error error, [Object information])
-```
+-   ```
+    function(Error error, [Object information])
+    ```
 
-The parameters of the callback function are:
+    The parameters of the callback function are:
 
-Callback function parameter | Description
-----------------------------|-------------
-*Error error* | If `getStatementInfo()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
-*Object information* | The `information` object, described below.
+    Callback function parameter | Description
+    ----------------------------|-------------
+    *Error error* | If `getStatementInfo()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+    *Object information* | The `information` object, described below.
 
-Depending on the statement type, the `information` object may contain:
+    Depending on the statement type, the `information` object may contain:
 
-- `bindNames`: an array of strings corresponding to the unique names
-  of the bind variables used in the SQL statement.
+    - `bindNames`: an array of strings corresponding to the unique names
+      of the bind variables used in the SQL statement.
 
-- `metaData`: containing properties equivalent to those given by
-  `execute()` [extendedMetaData](#execmetadata).  This property exists
-  only for queries.
+    - `metaData`: containing properties equivalent to those given by
+      `execute()` [extendedMetaData](#execmetadata).  This property exists
+      only for queries.
 
-- `statementType`: an integer corresponding to one of the [SQL
-  Statement Type Constants](#oracledbconstantsstmttype).
+    - `statementType`: an integer corresponding to one of the [SQL
+      Statement Type Constants](#oracledbconstantsstmttype).
 
 
-#### <a name="connectionping"></a> 4.2.9 `connection.ping()`
+#### <a name="connectionping"></a> 4.2.10 `connection.ping()`
 
 ##### Prototype
 
@@ -3305,15 +3305,15 @@ This method was added in node-oracledb 2.2.
 
 ##### Parameters
 
-```
-function(Error error)
-```
+-   ```
+    function(Error error)
+    ```
 
-The parameters of the callback function are:
+    The parameters of the callback function are:
 
-Callback function parameter | Description
-----------------------------|-------------
-*Error error* | If `ping()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+    Callback function parameter | Description
+    ----------------------------|-------------
+    *Error error* | If `ping()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
 #### <a name="querystream"></a> 4.2.11 `connection.queryStream()`
 
@@ -3378,15 +3378,15 @@ connection.
 
 ##### Parameters
 
-```
-function(Error error)
-```
+-   ```
+    function(Error error)
+    ```
 
-The parameters of the callback function are:
+    The parameters of the callback function are:
 
-Callback function parameter | Description
-----------------------------|-------------
-*Error error* | If `rollback()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+    Callback function parameter | Description
+    ----------------------------|-------------
+    *Error error* | If `rollback()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
 #### <a name="consubscribe"></a> 4.2.14 `connection.subscribe()`
 
@@ -3642,21 +3642,21 @@ This method was added in node-oracledb 2.3.
 
 ##### Parameters
 
-```
-String name
-```
+-   ```
+    String name
+    ```
 
-The name of the subscription used in [`connection.subscribe()`](#consubscribe).
+    The name of the subscription used in [`connection.subscribe()`](#consubscribe).
 
-```
-function(Error error)
-```
+-   ```
+    function(Error error)
+    ```
 
-The parameters of the callback function are:
+    The parameters of the callback function are:
 
-Callback function parameter | Description
-----------------------------|-------------
-*Error error*               | If `unsubscribe()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+    Callback function parameter | Description
+    ----------------------------|-------------
+    *Error error*               | If `unsubscribe()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
 ## <a name="lobclass"></a> 5. Lob Class
 
@@ -3761,15 +3761,15 @@ See [Closing Lobs](#closinglobs) for more discussion.
 
 ##### Parameters
 
-```
-function(Error error)
-```
+-   ```
+    function(Error error)
+    ```
 
-The parameters of the callback function are:
+    The parameters of the callback function are:
 
-Callback function parameter | Description
-----------------------------|-------------
-*Error error* | If `close()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+    Callback function parameter | Description
+    ----------------------------|-------------
+    *Error error* | If `close()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
 ## <a name="poolclass"></a> 6. Pool Class
 
@@ -3968,23 +3968,23 @@ The `drainTime` parameter was added in node-oracledb 3.0.
 
 ##### Parameters
 
-```
-Number drainTime
-```
+-   ```
+    Number drainTime
+    ```
 
-The number of seconds before the pool and connections are force closed.
+    The number of seconds before the pool and connections are force closed.
 
-If `drainTime` is 0, the pool and its connections are closed immediately.
+    If `drainTime` is 0, the pool and its connections are closed immediately.
 
-```
-function(Error error)
-```
+-   ```
+    function(Error error)
+    ```
 
-The parameters of the callback function are:
+    The parameters of the callback function are:
 
-Callback function parameter | Description
-----------------------------|-------------
-*Error error* | If `close()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+    Callback function parameter | Description
+    ----------------------------|-------------
+    *Error error* | If `close()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
 
 #### <a name="getconnectionpool"></a> 6.2.2 `pool.getConnection()`
@@ -4689,24 +4689,24 @@ This method was added in node-oracledb 3.0.
 
 ##### Parameters
 
-```
-function(Error error, Object result)
-```
+-   ```
+    function(Error error, Object result)
+    ```
 
-The parameters of the callback function are:
+    The parameters of the callback function are:
 
-Callback function parameter | Description
-----------------------------|-------------
-*Error error* | If `count()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the error message.
-*Object result* | See below.
+    Callback function parameter | Description
+    ----------------------------|-------------
+    *Error error* | If `count()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the error message.
+    *Object result* | See below.
 
-The `result` object contains one attribute:
+    The `result` object contains one attribute:
 
-```
-Number count
-```
+    ```
+    Number count
+    ```
 
-The number of documents matching the SodaOperation criteria.
+    The number of documents matching the SodaOperation criteria.
 
 ###### <a name="sodaoperationclassgetcursor"></a> 8.2.4.1.2.2 `sodaOperation.getCursor()`
 
@@ -4745,16 +4745,16 @@ This method was added in node-oracledb 3.0.
 
 ##### Parameters
 
-```
-function(Error error, SodaDocumentCursor cursor)
-```
+-   ```
+    function(Error error, SodaDocumentCursor cursor)
+    ```
 
-The parameters of the callback function are:
+    The parameters of the callback function are:
 
-Callback function parameter | Description
-----------------------------|-------------
-*Error error*  | If `getCursor()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the error message.
-*SodaDocumentCursor cursor* | A cursor that can be iterated over to access SodaDocument objects matching the SodaOperation search criteria.
+    Callback function parameter | Description
+    ----------------------------|-------------
+    *Error error*  | If `getCursor()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the error message.
+    *SodaDocumentCursor cursor* | A cursor that can be iterated over to access SodaDocument objects matching the SodaOperation search criteria.
 
 ###### <a name="sodaoperationclassgetdocuments"></a> 8.2.4.1.2.3 `sodaOperation.getDocuments()`
 
@@ -4788,16 +4788,16 @@ This method was added in node-oracledb 3.0.
 
 ##### Parameters
 
-```
-function(Error error, Array documents)
-```
+-   ```
+    function(Error error, Array documents)
+    ```
 
-The parameters of the callback function are:
+    The parameters of the callback function are:
 
-Callback function parameter | Description
-----------------------------|-------------
-*Error error* | If `getDocuments()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the error message.
-*Array documents* | An array of SodaDocuments that match the SodaOperation query criteria.
+    Callback function parameter | Description
+    ----------------------------|-------------
+    *Error error* | If `getDocuments()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the error message.
+    *Array documents* | An array of SodaDocuments that match the SodaOperation query criteria.
 
 ###### <a name="sodaoperationclassgetone"></a> 8.2.4.1.2.4 `sodaOperation.getOne()`
 
@@ -4830,16 +4830,16 @@ This method was added in node-oracledb 3.0.
 
 ##### Parameters
 
-```
-function(Error error, SodaDocument document)
-```
+-   ```
+    function(Error error, SodaDocument document)
+    ```
 
-The parameters of the callback function are:
+    The parameters of the callback function are:
 
-Callback function parameter | Description
-----------------------------|-------------
-*Error error* | If `getOne()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the error message.
-*SodaDocument document* | One SodaDocument that matches the sodaOperation query criteria.  If no document is found, then `document` will be undefined.
+    Callback function parameter | Description
+    ----------------------------|-------------
+    *Error error* | If `getOne()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the error message.
+    *SodaDocument document* | One SodaDocument that matches the sodaOperation query criteria.  If no document is found, then `document` will be undefined.
 
 ###### <a name="sodaoperationclassremove"></a> 8.2.4.1.2.5 `sodaOperation.remove()`
 
@@ -4869,24 +4869,24 @@ This method was added in node-oracledb 3.0.
 
 ##### Parameters
 
-```
-function(Error error, Object result)
-```
+-   ```
+    function(Error error, Object result)
+    ```
 
-The parameters of the callback function are:
+    The parameters of the callback function are:
 
-Callback function parameter | Description
-----------------------------|-------------
-*Error error* | If `remove()` succeeds, error is NULL.  If an error occurs, then error contains the error message.
-*Object result* | See below.
+    Callback function parameter | Description
+    ----------------------------|-------------
+    *Error error* | If `remove()` succeeds, error is NULL.  If an error occurs, then error contains the error message.
+    *Object result* | See below.
 
-The `result` object contains one attribute:
+    The `result` object contains one attribute:
 
-```
-result.count
-```
+    ```
+    result.count
+    ```
 
-The number of documents removed from the collection.
+    The number of documents removed from the collection.
 
 ###### <a name="sodaoperationclassreplaceone"></a> 8.2.4.1.2.6 `sodaOperation.replaceOne()`
 
@@ -4933,31 +4933,31 @@ This method was added in node-oracledb 3.0.
 
 ##### Parameters
 
-```
-Object newDocumentContent
-SodaDocument newSodaDocument
-```
+-   ```
+    Object newDocumentContent
+    SodaDocument newSodaDocument
+    ```
 
-The new document.  See
-[sodaCollection.insertOne()](#sodacollinsertone), which has the same
-semantics for the document.
+    The new document.  See
+    [sodaCollection.insertOne()](#sodacollinsertone), which has the same
+    semantics for the document.
 
-```
-function(Error error, Object result)
-```
+-   ```
+    function(Error error, Object result)
+    ```
 
-Callback function parameter | Description
-----------------------------|-------------
-*Error error* | If `replaceOne()` succeeds, `error` is NULL.  It is not an error if no document is replaced. If an error occurs, then `error` contains the error message.
-*Object result* | See below.
+    Callback function parameter | Description
+    ----------------------------|-------------
+    *Error error* | If `replaceOne()` succeeds, `error` is NULL.  It is not an error if no document is replaced. If an error occurs, then `error` contains the error message.
+    *Object result* | See below.
 
-The `result` object contains one attribute:
+    The `result` object contains one attribute:
 
-```
-result.replaced
-```
+    ```
+    result.replaced
+    ```
 
-This attribute will be *true* if the document was successfully replaced, *false* otherwise.
+    This attribute will be *true* if the document was successfully replaced, *false* otherwise.
 
 ###### <a name="sodaoperationclassreplaceoneandget"></a> 8.2.4.1.2.7 `sodaOperation.replaceOneAndGet()`
 
@@ -4993,23 +4993,23 @@ This method was added in node-oracledb 3.0.
 
 ##### Parameters
 
-```
-Object newDocumentContent
-SodaDocument newSodaDocument
-```
+-   ```
+    Object newDocumentContent
+    SodaDocument newSodaDocument
+    ```
 
-The new document.  See
-[sodaCollection.insertOne()](#sodacollinsertone), which has the same
-semantics for the document.
+    The new document.  See
+    [sodaCollection.insertOne()](#sodacollinsertone), which has the same
+    semantics for the document.
 
-```
-function(Error error, SodaDocument updatedDocument)
-```
+-   ```
+    function(Error error, SodaDocument updatedDocument)
+    ```
 
-Callback function parameter | Description
-----------------------------|-------------
-*Error error* | If `replaceOneAndGet()` succeeds, `error` is NULL.  It is not an error if no document is replaced.  If an error occurs, then `error` contains the error message.
-*SodaDocument updatedDocument* | The updated [SodaDocument](#sodadocumentclass) if replacement was successful, otherwise `updatedDocument` will be undefined.  The `lastModified` and `version` attributes of the stored SodaDocument will be updated.  The `mediaType` attribute and the content will be replaced.  Other attributes of `newDocument` are ignored.  Note for performance reasons, `updatedDocument` will not have document content and cannot itself be passed directly to SODA insert or replace methods.
+    Callback function parameter | Description
+    ----------------------------|-------------
+    *Error error* | If `replaceOneAndGet()` succeeds, `error` is NULL.  It is not an error if no document is replaced.  If an error occurs, then `error` contains the error message.
+    *SodaDocument updatedDocument* | The updated [SodaDocument](#sodadocumentclass) if replacement was successful, otherwise `updatedDocument` will be undefined.  The `lastModified` and `version` attributes of the stored SodaDocument will be updated.  The `mediaType` attribute and the content will be replaced.  Other attributes of `newDocument` are ignored.  Note for performance reasons, `updatedDocument` will not have document content and cannot itself be passed directly to SODA insert or replace methods.
 
 #### <a name="sodacollgetdataguide"></a> 8.2.5 `sodaCollection.getDataGuide()`
 
@@ -5051,16 +5051,16 @@ This method was added in node-oracledb 3.0.
 
 ##### Parameters
 
-```
-function(Error error, SodaDocument document)
-```
+-   ```
+    function(Error error, SodaDocument document)
+    ```
 
-The parameters of the callback function are:
+    The parameters of the callback function are:
 
-Callback function parameter | Description
-----------------------------|-------------
-*Error error* | If `getDataGuide()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the error message.
-*SodaDocument document* | The SodaDocument containining JSON content which can be accessed from the document as normal with [`sodaDocument.getContent()`](#sodadocgetcontent), [`sodaDocument.getContentAsString()`](#sodadocgetcontentasstring) or [`sodaDocument.getContentAsBuffer()`](#sodadocgetcontentasbuffer).
+    Callback function parameter | Description
+    ----------------------------|-------------
+    *Error error* | If `getDataGuide()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the error message.
+    *SodaDocument document* | The SodaDocument containining JSON content which can be accessed from the document as normal with [`sodaDocument.getContent()`](#sodadocgetcontent), [`sodaDocument.getContentAsString()`](#sodadocgetcontentasstring) or [`sodaDocument.getContentAsBuffer()`](#sodadocgetcontentasbuffer).
 
 #### <a name="sodacollinsertone"></a> 8.2.6 `sodaCollection.insertOne()`
 
@@ -5676,11 +5676,15 @@ This method was added in node-oracledb 3.0.
 
 ##### Parameters
 
-The parameters of the callback function are:
+-   ```
+    function(Error error)
+    ```
 
-Callback function parameter | Description
-----------------------------|-------------
-*Error error* | If `close()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the error message.
+    The parameters of the callback function are:
+
+    Callback function parameter | Description
+    ----------------------------|-------------
+    *Error error* | If `close()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the error message.
 
 #### <a name="sodadoccursorgetnext"></a> 11.1.2 `sodaDocumentCursor.getNext()`
 
@@ -5709,16 +5713,16 @@ This method was added in node-oracledb 3.0.
 
 ##### Parameters
 
-```
-function(Error error, SodaDocument document)
-```
+-   ```
+    function(Error error, SodaDocument document)
+    ```
 
-The parameters of the callback function are:
+    The parameters of the callback function are:
 
-Callback function parameter | Description
-----------------------------|-------------
-*Error error* | If `getNext()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the error message.
-*SodaDocument document* | The next document in the cursor.  If there are no more documents, then `document` will be undefined.
+    Callback function parameter | Description
+    ----------------------------|-------------
+    *Error error* | If `getNext()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the error message.
+    *SodaDocument document* | The next document in the cursor.  If there are no more documents, then `document` will be undefined.
 
 ## <a name="usermanual"></a> NODE-ORACLEDB USER MANUAL
 
