@@ -42,7 +42,7 @@ let re = new RegExp(nodbUtil.BINARY_FILE);
 try {
   let f = fs.readdirSync(dir);
   for (let i = 0; i < f.length; i++) {
-    if (!f[i].match(re)) {
+    if (!f[i].match(re) && (f[i].match(/oracledb.*\.node(-buildinfo.txt)*/))) {
       fs.unlinkSync(dir + '/' + f[i]);
     }
   }
