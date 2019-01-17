@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, Oracle and/or its affiliates.  All rights reserved. */
+/* Copyright (c) 2018, 2019, Oracle and/or its affiliates.  All rights reserved. */
 
 /******************************************************************************
  *
@@ -290,10 +290,10 @@ void njsSodaDatabase::Async_AfterGetCollectionNames(njsBaton* baton,
     Nan::EscapableHandleScope scope;
 
     dpiSodaCollNames *names = baton->sodaCollNames;
-    Local<Array> arrayVal = Nan::New<Array>(names->numNames);
+    Local<Array> arrayVal = Nan::New<Array>((int)names->numNames);
     for (uint32_t coll = 0; coll < names->numNames; coll++) {
         Local<String> name = Nan::New<String>(names->names[coll],
-                names->nameLengths[coll]).ToLocalChecked();
+            (int)names->nameLengths[coll]).ToLocalChecked();
         Nan::Set(arrayVal, coll, name);
     }
     argv[1] = scope.Escape(arrayVal);

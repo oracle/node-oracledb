@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates.
+/* Copyright (c) 2015, 2019, Oracle and/or its affiliates.
    All rights reserved. */
 
 /******************************************************************************
@@ -213,9 +213,11 @@ void njsBaton::CheckJSException(Nan::TryCatch *tryCatch)
 {
     if (tryCatch->HasCaught()) {
         Local<String> message = tryCatch->Message()->Get();
-        Nan::Utf8String v8str(message->ToString());
-        error = std::string(*v8str, static_cast<size_t>(v8str.length()));
-        tryCatch->Reset();
+        Nan::Utf8String v8str(message);
+        if (v8str.length () > 0) {
+            error = std::string(*v8str, static_cast<size_t>(v8str.length()));
+            tryCatch->Reset();
+        }
     }
 }
 
@@ -377,7 +379,7 @@ void njsBaton::AsyncAfterWorkCallback(uv_work_t *req, int status)
         callbackArgs[0] = v8::Exception::Error(Nan::New<v8::String>(
                 baton->error).ToLocalChecked());
         if (baton->dpiError) {
-            errorObj = callbackArgs[0]->ToObject();
+            errorObj = callbackArgs[0].As<Object>();
             Nan::Set(errorObj,
                     Nan::New<v8::String>("errorNum").ToLocalChecked(),
                     Nan::New<v8::Number>(baton->errorInfo.code));
@@ -590,8 +592,8 @@ bool njsBaton::GetBoolFromJSON(Local<Object> obj, const char *key, int index,
 
     /* Undefined implies value not provided or equivalent */
     if (!jsValue->IsUndefined()) {
-        if(jsValue->IsBoolean()) {
-            *value = jsValue->ToBoolean()->Value();
+        if (jsValue->IsBoolean()) {
+            *value = jsValue.As<Boolean>()->Value();
         } else {
             error = njsMessages::Get(errInvalidPropertyValueInParam, key,
                     index + 1);
@@ -821,7 +823,7 @@ bool njsCommon::GetObjectArg(Nan::NAN_METHOD_ARGS_TYPE args,
         Nan::ThrowError(errMsg.c_str());
         return false;
     }
-    value = scope.Escape(args[index]->ToObject());
+    value = scope.Escape(args[index].As<Object>());
     return true;
 }
 
@@ -840,7 +842,7 @@ bool njsCommon::GetStringArg(Nan::NAN_METHOD_ARGS_TYPE args,
         Nan::ThrowError(errMsg.c_str());
         return false;
     }
-    Nan::Utf8String utf8str(args[index]->ToString());
+    Nan::Utf8String utf8str(args[index].As<String>());
     value = std::string(*utf8str, static_cast<size_t>(utf8str.length()));
     return true;
 }
@@ -877,7 +879,7 @@ bool njsCommon::SetPropBool(Local<Value> value, bool *valuePtr,
         Nan::ThrowError(errMsg.c_str());
         return false;
     }
-    *valuePtr = value->ToBoolean()->Value();
+    *valuePtr = value.As<v8::Boolean>()->Value();
     return true;
 }
 
@@ -935,7 +937,7 @@ bool njsCommon::SetPropString(Local<Value> value, std::string *valuePtr,
         Nan::ThrowError(errMsg.c_str());
         return false;
     }
-    Nan::Utf8String utfstr(value->ToString());
+    Nan::Utf8String utfstr(value.As<String>());
     *valuePtr = std::string(*utfstr, static_cast<size_t>(utfstr.length()));
     return true;
 }

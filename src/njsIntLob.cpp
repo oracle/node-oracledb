@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -153,12 +153,16 @@ Local<Object> njsILob::CreateFromProtoLob(njsProtoILob *protoLob)
 njsILob *njsILob::GetInstance(Local<Value> val)
 {
     Nan::HandleScope scope;
-    Local<Object> obj = val->ToObject();
+    Local<Object> obj = val.As<Object>();
     Local <String> key = Nan::New<v8::String>("iLob").ToLocalChecked();
-    Local<Value> v8Value = Nan::Get(obj, key).ToLocalChecked();
+    MaybeLocal<Value> mval = Nan::Get(obj, key);
+    Local<Value> v8Value;
+
+    if (!mval.ToLocal(&v8Value))
+        return NULL;
 
     if (v8Value->IsObject()) {
-        Local<Object> obj = v8Value->ToObject();
+        Local<Object> obj = v8Value.As<Object>();
         if (Nan::New(iLobTemplate_s)->HasInstance(obj))
             return Nan::ObjectWrap::Unwrap<njsILob>(obj);
     }
@@ -508,7 +512,7 @@ void njsILob::Async_AfterRead(njsBaton *baton, Local<Value> argv[])
     } else if (lob->dataType == NJS_DATATYPE_CLOB) {
         Local<String> strValue = Nan::New<String>(baton->bufferPtr,
                 (int) baton->bufferSize).ToLocalChecked();
-        lob->offset += strValue->ToString()->Length();
+        lob->offset += strValue.As<String>()->Length();
         argv[1] = scope.Escape(strValue);
     } else {
         Local<Value> bufferValue = Nan::CopyBuffer(baton->bufferPtr,

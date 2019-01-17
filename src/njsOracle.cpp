@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -746,9 +746,12 @@ NAN_SETTER(njsOracledb::SetFetchAsString)
     // validate values in array
     Local<Array> array = value.As<Array>();
     for (uint32_t i = 0; i < array->Length(); i++) {
+        MaybeLocal<Value> mval = Nan::Get(array, i);
+        Local<Value> temp;
+        if(!mval.ToLocal(&temp))
+            return;
         int32_t dataType = Nan::To<int32_t>
-                           (Nan::Get(array,
-                             i).ToLocalChecked().As<Integer>()).FromJust();
+                           (temp.As<Integer>()).FromJust();
         njsDataType type = static_cast<njsDataType>(dataType);
         switch (type) {
             case NJS_DATATYPE_NUM:
@@ -806,9 +809,11 @@ NAN_SETTER(njsOracledb::SetFetchAsBuffer)
     // validate values in array
     Local<Array> array = value.As<Array>();
     for (uint32_t i = 0; i < array->Length(); i++) {
-        int32_t dataType = Nan::To<int32_t>(
-                             Nan::Get(array, i).
-                               ToLocalChecked().As<v8::Integer>()).FromJust();
+        MaybeLocal<Value> mval = Nan::Get(array, i);
+        Local<Value> temp;
+        if(!mval.ToLocal(&temp))
+            return;
+        int32_t dataType = Nan::To<int32_t>(temp.As<v8::Integer>()).FromJust();
         njsDataType type = static_cast<njsDataType>(dataType);
 
         if (type != NJS_DATATYPE_BLOB) {
@@ -1176,9 +1181,12 @@ void njsOracledb::SetFetchAsStringTypesOnBaton(njsBaton *baton) const
     baton->numFetchAsStringTypes = array->Length();
     baton->fetchAsStringTypes = new njsDataType[baton->numFetchAsStringTypes];
     for (uint32_t i = 0; i < baton->numFetchAsStringTypes; i++) {
-      int32_t dataType = Nan::To<int32_t>(Nan::Get(array, i).
-                           ToLocalChecked().As<v8::Integer>()).FromJust();
-      baton->fetchAsStringTypes[i] = static_cast<njsDataType>(dataType);
+        MaybeLocal<Value> mval = Nan::Get(array, i);
+        Local<Value> temp;
+        if(!mval.ToLocal(&temp))
+            return;
+        int32_t dataType = Nan::To<int32_t>(temp.As<v8::Integer>()).FromJust();
+        baton->fetchAsStringTypes[i] = static_cast<njsDataType>(dataType);
     }
 }
 
@@ -1199,9 +1207,12 @@ void njsOracledb::SetFetchAsBufferTypesOnBaton(njsBaton *baton) const
     baton->numFetchAsBufferTypes = array->Length();
     baton->fetchAsBufferTypes = new njsDataType[baton->numFetchAsBufferTypes];
     for (uint32_t i = 0; i < baton->numFetchAsBufferTypes; i++) {
-    int32_t dataType = Nan::To<int32_t>(Nan::Get (array, i).
-                         ToLocalChecked().As<v8::Integer>()).FromJust();
-    baton->fetchAsBufferTypes[i] = static_cast<njsDataType>(dataType);
+        MaybeLocal<Value> mval = Nan::Get(array, i);
+        Local<Value> temp;
+        if(!mval.ToLocal(&temp))
+            return;
+        int32_t dataType = Nan::To<int32_t>(temp.As<v8::Integer>()).FromJust();
+        baton->fetchAsBufferTypes[i] = static_cast<njsDataType>(dataType);
     }
 }
 
@@ -1220,7 +1231,7 @@ void njsOracledb::ThrowDPIError(void)
     dpiContext_getError(globalDPIContext, &errorInfo);
     errMsg = std::string(errorInfo.message, errorInfo.messageLength);
     exception = Nan::Error(errMsg.c_str());
-    errorObj = exception->ToObject();
+    errorObj = exception.As<Object>();
     Nan::Set(errorObj, Nan::New<v8::String>("errorNum").ToLocalChecked(),
             Nan::New<v8::Number>(errorInfo.code));
     Nan::Set(errorObj, Nan::New<v8::String>("offset").ToLocalChecked(),
@@ -1239,8 +1250,9 @@ njsSubscription *njsOracledb::GetSubscription(std::string &name)
     Nan::HandleScope scope;
     Local<String> nameObj = Nan::New<String>(name).ToLocalChecked();
     Local<Object> allSubscriptions = Nan::New(subscriptions);
-    Local<Value> value = Nan::Get(allSubscriptions, nameObj).ToLocalChecked();
-    if (value->IsUndefined())
+    MaybeLocal<Value> mval = Nan::Get(allSubscriptions, nameObj);
+    Local<Value> value;
+    if(!mval.ToLocal(&value))
         return NULL;
     return Nan::ObjectWrap::Unwrap<njsSubscription>(value.As<Object>());
 }

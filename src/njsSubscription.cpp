@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2019 Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -145,7 +145,7 @@ Local<Object> njsSubscription::CreateMessage(dpiSubscrMessage *message)
             Nan::New<Integer>(message->eventType));
     if (message->dbNameLength > 0) {
         temp = Nan::New<String>(message->dbName,
-                message->dbNameLength).ToLocalChecked();
+                                (int)message->dbNameLength).ToLocalChecked();
         Nan::Set(messageObj, Nan::New<String>("dbName").ToLocalChecked(),
                 temp);
     }
@@ -159,7 +159,7 @@ Local<Object> njsSubscription::CreateMessage(dpiSubscrMessage *message)
 
     // set tables, if applicable
     if (message->numTables > 0) {
-        Local<Array> arr = Nan::New<Array>(message->numTables);
+      Local<Array> arr = Nan::New<Array>((int)message->numTables);
         Local<Object> element;
         for (uint32_t i = 0; i < message->numTables; i++) {
             element = CreateMessageTable(&message->tables[i]);
@@ -170,7 +170,7 @@ Local<Object> njsSubscription::CreateMessage(dpiSubscrMessage *message)
 
     // set queries, if applicable
     if (message->numQueries > 0) {
-        Local<Array> arr = Nan::New<Array>(message->numQueries);
+        Local<Array> arr = Nan::New<Array>((int)message->numQueries);
         Local<Object> element;
         for (uint32_t i = 0; i < message->numQueries; i++) {
             element = CreateMessageQuery(&message->queries[i]);
@@ -183,7 +183,7 @@ Local<Object> njsSubscription::CreateMessage(dpiSubscrMessage *message)
     // set queue name, if applicable
     if (message->queueNameLength > 0) {
         temp = Nan::New<String>(message->queueName,
-                message->queueNameLength).ToLocalChecked();
+                             (int)message->queueNameLength).ToLocalChecked();
         Nan::Set(messageObj, Nan::New<String>("queueName").ToLocalChecked(),
                 temp);
     }
@@ -191,7 +191,7 @@ Local<Object> njsSubscription::CreateMessage(dpiSubscrMessage *message)
     // set consumer name, if applicable
     if (message->consumerNameLength > 0) {
         temp = Nan::New<String>(message->consumerName,
-                message->consumerNameLength).ToLocalChecked();
+                   (int)message->consumerNameLength).ToLocalChecked();
         Nan::Set(messageObj, Nan::New<String>("consumerName").ToLocalChecked(),
                 temp);
     }
@@ -212,7 +212,7 @@ Local<Object> njsSubscription::CreateMessageQuery(
 
     // set tables, if applicable
     if (query->numTables > 0) {
-        Local<Array> arr = Nan::New<Array>(query->numTables);
+        Local<Array> arr = Nan::New<Array>((int)query->numTables);
         Local<Object> element;
         for (uint32_t i = 0; i < query->numTables; i++) {
             element = CreateMessageTable(&query->tables[i]);
@@ -238,7 +238,8 @@ Local<Object> njsSubscription::CreateMessageRow( dpiSubscrMessageRow *row)
     // set operation and rowid
     Nan::Set(rowObj, Nan::New<String>("operation").ToLocalChecked(),
             Nan::New<Integer>(row->operation));
-    temp = Nan::New<String>(row->rowid, row->rowidLength).ToLocalChecked();
+    temp = Nan::New<String>(row->rowid,
+                            (int)row->rowidLength).ToLocalChecked();
     Nan::Set(rowObj, Nan::New<String>("rowid").ToLocalChecked(), temp);
 
     return scope.Escape(rowObj);
@@ -259,12 +260,13 @@ Local<Object> njsSubscription::CreateMessageTable(
     // set operation and name
     Nan::Set(tableObj, Nan::New<String>("operation").ToLocalChecked(),
             Nan::New<Integer>(table->operation));
-    temp = Nan::New<String>(table->name, table->nameLength).ToLocalChecked();
+    temp = Nan::New<String>(table->name,
+                            (int)table->nameLength).ToLocalChecked();
     Nan::Set(tableObj, Nan::New<String>("name").ToLocalChecked(), temp);
 
     // set rows, if applicable
     if (table->numRows > 0) {
-        Local<Array> arr = Nan::New<Array>(table->numRows);
+      Local<Array> arr = Nan::New<Array>((int)table->numRows);
         Local<Object> element;
         for (uint32_t i = 0; i < table->numRows; i++) {
             element = CreateMessageRow(&table->rows[i]);

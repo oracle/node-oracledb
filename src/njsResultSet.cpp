@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -378,11 +378,11 @@ void njsResultSet::Async_AfterGetRows(njsBaton *baton, Local<Value> argv[])
     njsResultSet *resultSet;
     njsVariable *var;
 
-    rows = Nan::New<Array>(baton->rowsFetched);
+    rows = Nan::New<Array>((int)baton->rowsFetched);
     resultSet = (njsResultSet*) baton->callingObj;
     for (uint32_t row = 0; row < baton->rowsFetched; row++) {
         if (baton->outFormat == NJS_ROWS_ARRAY) {
-            rowAsArray = Nan::New<Array>(resultSet->numQueryVars);
+            rowAsArray = Nan::New<Array>((int)resultSet->numQueryVars);
         } else {
             rowAsObj = Nan::New<Object>();
         }

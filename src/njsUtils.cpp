@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2019 Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -106,7 +106,7 @@ bool njsUtils::GetStringFromJSON(Local<Object> obj, const char *key, int index,
         return false;
 
     if (jsValue->IsString()) {
-        Nan::Utf8String utf8str(jsValue->ToString());
+        Nan::Utf8String utf8str(jsValue.As<String>());
         value = std::string(*utf8str, static_cast<size_t>(utf8str.length()));
         return true;
     } else if (jsValue->IsUndefined()) {
@@ -142,8 +142,11 @@ bool njsUtils::GetStringArrayFromJSON(Local<Object> obj, const char *key,
         // validated in js layer
         Local<Array> array = jsValue.As<Array>();
         for (uint32_t i = 0; i < array->Length(); i++) {
-            Nan::Utf8String utf8str(Nan::Get(array,
-                    i).ToLocalChecked()->ToString());
+            MaybeLocal<Value> mval = Nan::Get(array, i);
+            Local<Value> temp;
+            if(!mval.ToLocal(&temp))
+                return false;
+            Nan::Utf8String utf8str(temp.As<String>());
             vec.push_back(std::string(*utf8str,
                     static_cast<size_t>(utf8str.length())));
         }

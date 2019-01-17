@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, Oracle and/or its affiliates.  All rights reserved. */
+/* Copyright (c) 2019, Oracle and/or its affiliates.  All rights reserved. */
 
 /******************************************************************************
  *
@@ -461,7 +461,8 @@ NAN_GETTER(njsSodaCollection::GetCollectionName)
         njsOracledb::ThrowDPIError();
         return;
     }
-    Local<String> value = Nan::New<v8::String>(name, nameLen).ToLocalChecked();
+    Local<String> value = Nan::New<v8::String>(name,
+                                               (int)nameLen).ToLocalChecked();
     info.GetReturnValue().Set(value);
 }
 
@@ -494,7 +495,7 @@ NAN_GETTER(njsSodaCollection::GetCollectionMetaData)
         return;
     }
     Local<String> value =
-            Nan::New<v8::String>(metadata, metadataLen).ToLocalChecked();
+        Nan::New<v8::String>(metadata, (int)metadataLen).ToLocalChecked();
     info.GetReturnValue().Set(value);
 }
 

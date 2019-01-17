@@ -81,6 +81,9 @@ This release is currently under development.
 - Improved the statement error white list to avoid unnecessarily
   dropping statements from the statement cache (ODPI-C change).
 
+- Made internal changes to fix V8 deprecation compilation warnings
+  with Node.js 10.12, and fixed other static analysis warnings.
+
 ## node-oracledb v3.0.1 (15 Nov 2018)
 
 - Improve validation for SODA `createDocument()` arguments.

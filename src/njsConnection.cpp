@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates.
+/* Copyright (c) 2015, 2019, Oracle and/or its affiliates.
    All rights reserved. */
 
 /******************************************************************************
@@ -535,7 +535,7 @@ Local<Value> njsConnection::GetMetaData(njsVariable *vars, uint32_t numVars,
         bool extendedMetaData)
 {
     Nan::EscapableHandleScope scope;
-    Local<Array> metaArray = Nan::New<Array>(numVars);
+    Local<Array> metaArray = Nan::New<Array>((int)numVars);
 
     for (uint32_t i = 0; i < numVars; i++) {
         njsVariable *var = &vars[i];
@@ -721,10 +721,15 @@ bool njsConnection::ScanExecuteBinds(Local<Object> binds,
 
         // determine bind information and value
         if (byPosition) {
-            bindUnit = Nan::Get(byPositionValues, i).ToLocalChecked();
+            MaybeLocal<Value> mval = Nan::Get(byPositionValues, i);
+            if (!mval.ToLocal(&bindUnit))
+                return false;
         } else {
-            bindName = Nan::Get(bindNames, i).ToLocalChecked();
-            if (!Nan::Get(binds, bindName).ToLocal(&bindUnit))
+            MaybeLocal<Value> mval = Nan::Get(bindNames, i);
+            if (!mval.ToLocal(&bindName))
+                return false;
+            mval = Nan::Get(binds, bindName);
+            if(!mval.ToLocal(&bindUnit))
                 return false;
         }
         if (bindUnit->IsObject() && !bindUnit->IsDate() &&
@@ -733,7 +738,9 @@ bool njsConnection::ScanExecuteBinds(Local<Object> binds,
             if (!ScanExecuteBindUnit(bindUnit.As<Object>(), var, false, baton))
                 return false;
             Local<String> key = Nan::New<String>("val").ToLocalChecked();
-            bindValue = Nan::Get(bindUnit.As<Object>(), key).ToLocalChecked();
+            MaybeLocal<Value> mval = Nan::Get(bindUnit.As<Object>(), key);
+            if (!mval.ToLocal(&bindValue))
+                return false;
         } else {
             bindValue = bindUnit;
         }
@@ -804,8 +811,11 @@ bool njsConnection::ScanExecuteBindUnit(Local<Object> bindUnit,
     Local<Array> keys = bindUnit->GetOwnPropertyNames();
     bool valid = false;
     for (uint32_t i = 0; i < keys->Length(); i++) {
-        Local<String> temp =
-                Nan::Get(keys, i).ToLocalChecked().As<String>();
+        MaybeLocal<Value> mval = Nan::Get(keys, i );
+        Local<Value> tempVal;
+        if (!mval.ToLocal(&tempVal))
+            return false;
+        Local<String> temp = tempVal.As<String>();
         Nan::Utf8String utf8str(temp);
         std::string key =
                 std::string(*utf8str, static_cast<size_t>(utf8str.length()));
@@ -905,8 +915,11 @@ bool njsConnection::ProcessExecuteManyBinds(Local<Array> binds,
 
     // if no bind definitions are specified, the first row is used to determine
     // the number of bind variables and types
-    if (scanRequired && !binds.IsEmpty())
-        bindDefs = Nan::Get(binds, 0).ToLocalChecked();
+    if (scanRequired && !binds.IsEmpty()) {
+        MaybeLocal<Value> mval = Nan::Get(binds, 0);
+        if (!mval.ToLocal (&bindDefs))
+            return false;
+    }
     if (!bindDefs->IsUndefined() && !bindDefs->IsArray())
         bindNames = bindDefs.As<Object>()->GetOwnPropertyNames();
 
@@ -931,9 +944,14 @@ bool njsConnection::ProcessExecuteManyBinds(Local<Array> binds,
         for (uint32_t i = 0; i < baton->numBindVars; i++) {
             njsVariable *var = &baton->bindVars[i];
             if (byPosition) {
-                bindUnit = Nan::Get(byPositionValues, i).ToLocalChecked();
+                MaybeLocal<Value> mval = Nan::Get(byPositionValues, i);
+                if(!mval.ToLocal(&bindUnit))
+                    return false;
             } else {
-                bindName = Nan::Get(bindNames, i).ToLocalChecked();
+                MaybeLocal<Value> mval = Nan::Get(bindNames, i);
+                if(!mval.ToLocal(&bindName))
+                    return false;
+
                 if (!Nan::Get(bindDefs.As<Object>(),
                         bindName).ToLocal(&bindUnit))
                     return false;
@@ -976,7 +994,11 @@ bool njsConnection::ScanExecuteManyBinds(Local<Array> binds,
 
     byPosition = (baton->bindVars[0].pos > 0);
     for (uint32_t i = 0; i < baton->bindArraySize; i++) {
-        row = Nan::Get(binds, i).ToLocalChecked().As<Object>();
+        MaybeLocal<Value> mval = Nan::Get(binds, i);
+        Local<Value> tempVal;
+        if(!mval.ToLocal(&tempVal))
+            return false;
+        row = tempVal.As<Object>();
 
         // verify that all rows are by position (array) or by name (object)
         if ((byPosition && !row->IsArray()) ||
@@ -992,9 +1014,13 @@ bool njsConnection::ScanExecuteManyBinds(Local<Array> binds,
         for (uint32_t j = 0; j < baton->numBindVars; j++) {
             var = &baton->bindVars[j];
             if (byPosition) {
-                val = Nan::Get(byPositionValues, j).ToLocalChecked();
+                MaybeLocal<Value> mval = Nan::Get(byPositionValues, j);
+                if(!mval.ToLocal(&val))
+                     return false;
             } else {
-                bindName = Nan::Get(bindNames, j).ToLocalChecked();
+                  MaybeLocal<Value> mval = Nan::Get(bindNames, j);
+                  if(!mval.ToLocal(&bindName))
+                      return false;
                 if (!Nan::Get(row, bindName).ToLocal(&val))
                     return false;
             }
@@ -1035,7 +1061,12 @@ bool njsConnection::TransferExecuteManyBinds(Local<Array> binds,
 
     // process each row
     for (uint32_t i = 0; i < baton->bindArraySize; i++) {
-        row = Nan::Get(binds, i).ToLocalChecked().As<Object>();
+        MaybeLocal<Value> mval = Nan::Get(binds, i);
+        Local<Value> tempVal;
+
+        if(!mval.ToLocal(&tempVal))
+            return false;
+        row = tempVal.As<Object>();
 
         // verify that all rows are by position (array) or by name (object)
         if ((byPosition && !row->IsArray()) ||
@@ -1050,9 +1081,13 @@ bool njsConnection::TransferExecuteManyBinds(Local<Array> binds,
         for (uint32_t j = 0; j < baton->numBindVars; j++) {
             var = &baton->bindVars[j];
             if (byPosition) {
-                val = Nan::Get(byPositionValues, j).ToLocalChecked();
+                MaybeLocal<Value> mval = Nan::Get(byPositionValues, j);
+                if(!mval.ToLocal(&val))
+                    return false;
             } else {
-                bindName = Nan::Get(bindNames, j).ToLocalChecked();
+                MaybeLocal<Value> mval = Nan::Get(bindNames, j);
+                if(!mval.ToLocal(&bindName))
+                    return false;
                 if (!Nan::Get(row, bindName).ToLocal(&val))
                     return false;
             }
@@ -1093,8 +1128,11 @@ bool njsConnection::InitBindVars(Local<Object> bindObj,
         if (byPosition) {
             var->pos = i + 1;
         } else {
-            Local<Value> temp = Nan::Get(bindNames, i).ToLocalChecked();
-            Nan::Utf8String v8str(temp->ToString());
+            MaybeLocal<Value> mval = Nan::Get(bindNames, i);
+            Local<Value> temp ;
+            if(!mval.ToLocal(&temp))
+                return false;
+            Nan::Utf8String v8str(temp.As<String>());
             std::string str = std::string(*v8str,
                     static_cast<size_t>(v8str.length()));
             var->name = ":" + str;
@@ -1141,7 +1179,10 @@ bool njsConnection::ProcessBindValue(Local<Value> value, njsVariable *var,
 
     // process each element in the array
     for (uint32_t i = 0; i < arrayVal->Length(); i++) {
-        Local<Value> elementValue = Nan::Get (arrayVal, i).ToLocalChecked ();
+        MaybeLocal<Value> mval = Nan::Get(arrayVal, i);
+        Local<Value> elementValue;
+        if(!mval.ToLocal(&elementValue))
+            return false;
         if (!ProcessScalarBindValue(elementValue, var, i, false, baton))
             return false;
     }
@@ -1214,14 +1255,16 @@ bool njsConnection::ProcessScalarBindValue(Local<Value> value,
     } else if (value->IsNumber()) {
         bindOk = (var->varTypeNum == DPI_ORACLE_TYPE_NUMBER);
         if (bindOk)
-            data->value.asDouble = value->NumberValue();
+            data->value.asDouble = value.As<Number>()->Value();
 
     // value is a date
     } else if (value->IsDate()) {
         bindOk = (var->varTypeNum == DPI_ORACLE_TYPE_TIMESTAMP_LTZ);
         if (bindOk) {
             Local<Date> date = value.As<Date>();
-            data->value.asDouble = date->NumberValue();
+            data->value.asDouble = date->ToNumber(
+                              v8::Isolate::GetCurrent()->GetCurrentContext()).
+                              FromMaybe(v8::Local<v8::Number>())->Value();
         }
 
     // value is a buffer
@@ -1229,7 +1272,7 @@ bool njsConnection::ProcessScalarBindValue(Local<Value> value,
         bindOk = (var->varTypeNum == DPI_ORACLE_TYPE_RAW ||
                 var->varTypeNum == DPI_ORACLE_TYPE_BLOB);
         if (bindOk) {
-            Local<Object> obj = value->ToObject();
+            Local<Object> obj = value.As<Object>();
             if (inExecuteMany && Buffer::Length(obj) > var->maxSize) {
                 baton->error = njsMessages::Get(errMaxSizeTooSmall,
                         var->maxSize, Buffer::Length(obj), pos);
@@ -1306,7 +1349,7 @@ bool njsConnection::GetBindTypeAndSizeFromValue(njsVariable *var,
         *maxSize = 1;
     } else if (value->IsString()) {
         *bindType = NJS_DATATYPE_STR;
-        Nan::Utf8String utf8str(value->ToString());
+        Nan::Utf8String utf8str(value.As<String>());
         *maxSize = static_cast<uint32_t>(utf8str.length());
     } else if (value->IsInt32() || value->IsUint32()) {
         *bindType = NJS_DATATYPE_INT;
@@ -1321,7 +1364,9 @@ bool njsConnection::GetBindTypeAndSizeFromValue(njsVariable *var,
         njsDataType elementBindType;
         uint32_t elementMaxSize;
         for (uint32_t i = 0; i < arrayVal->Length(); i++) {
-            element = Nan::Get (arrayVal, i).ToLocalChecked ();
+            MaybeLocal<Value> mval = Nan::Get(arrayVal, i);
+            if(!mval.ToLocal(&element))
+                return false;
             if (element->IsUndefined() || element->IsNull())
                 continue;
             if (!GetBindTypeAndSizeFromValue(var, element, &elementBindType,
@@ -1336,7 +1381,7 @@ bool njsConnection::GetBindTypeAndSizeFromValue(njsVariable *var,
         if (Buffer::HasInstance(value)) {
             *bindType = NJS_DATATYPE_BUFFER;
             *maxSize = static_cast<uint32_t>(
-                                      Buffer::Length(value->ToObject()));
+                    Buffer::Length(value.As<Object>()));
         } else if (njsILob::HasInstance(value)) {
             njsILob *lob = njsILob::GetInstance(value);
             *bindType = lob->GetDataType();
@@ -1387,18 +1432,24 @@ bool njsConnection::ProcessExecuteOptions(Local<Object> options,
     if (!Nan::Get(options, key).ToLocal(&val))
         return false;
     if (!val->IsUndefined() && !val->IsNull()) {
-        Local<Object> jsFetchInfo = val->ToObject();
+        Local<Object> jsFetchInfo = val.As<Object>();
         Local<Array> keys = jsFetchInfo->GetOwnPropertyNames();
         baton->numFetchInfo = keys->Length();
         if (baton->numFetchInfo > 0)
             baton->fetchInfo = new njsFetchInfo[baton->numFetchInfo];
         for (uint32_t i = 0; i < baton->numFetchInfo; i++) {
-            Local<Value> temp = Nan::Get(keys, i).ToLocalChecked();
-            Nan::Utf8String utf8str(temp->ToString());
+            MaybeLocal<Value> mval = Nan::Get(keys, i);
+            Local<Value> temp;
+            if(!mval.ToLocal(&temp))
+                return false;
+
+            Nan::Utf8String utf8str(temp.As<String>());
             baton->fetchInfo[i].name = std::string(*utf8str,
                     static_cast<size_t>(utf8str.length()));
-            Local<Object> colInfo =
-                    Nan::Get(jsFetchInfo, temp).ToLocalChecked()->ToObject();
+            mval = Nan::Get(jsFetchInfo, temp);
+            if(!mval.ToLocal(&temp))
+                return false;
+            Local<Object> colInfo = temp.As<Object>();
             uint32_t tempType = static_cast<uint32_t>(NJS_DATATYPE_UNKNOWN);
             if (!baton->GetUnsignedIntFromJSON(colInfo, "type", 2, &tempType))
                 return false;
@@ -1533,8 +1584,9 @@ bool njsConnection::GetScalarValueFromVar(njsBaton *baton, njsVariable *var,
             argv[0] = njsILob::CreateFromProtoLob(protoLob);
             Local<Value> key = Nan::New<String>("newLob").ToLocalChecked();
             Local<Object> jsOracledb = Nan::New(baton->jsOracledb);
-            Local<Function> fn = Local<Function>::Cast(Nan::Get( jsOracledb,
-                                             key).ToLocalChecked());
+            if (!Nan::Get(jsOracledb, key).ToLocal(&temp))
+                return false;
+            Local<Function> fn = Local<Function>::Cast(temp);
             temp = fn->Call(jsOracledb, 1, argv);
         }
         value = scope.Escape(temp);
@@ -1577,7 +1629,7 @@ bool njsConnection::GetScalarValueFromVar(njsBaton *baton, njsVariable *var,
                         data->value.asBytes.length).ToLocalChecked();
             } else {
                 temp = Nan::New<v8::String>(data->value.asBytes.ptr,
-                        data->value.asBytes.length).ToLocalChecked();
+                          (int) data->value.asBytes.length).ToLocalChecked();
             }
             break;
         case DPI_NATIVE_TYPE_STMT:
@@ -1596,7 +1648,7 @@ bool njsConnection::GetScalarValueFromVar(njsBaton *baton, njsVariable *var,
                 return false;
             }
             temp = Nan::New<v8::String>(rowidValue,
-                    rowidValueLength).ToLocalChecked();
+                      (int)rowidValueLength).ToLocalChecked();
             break;
         default:
             break;
@@ -1618,7 +1670,7 @@ bool njsConnection::GetArrayValueFromVar(njsBaton *baton, njsVariable *var,
     if (var->dmlReturningBuffers)
         buffer = &var->dmlReturningBuffers[pos];
     Nan::EscapableHandleScope scope;
-    Local<Array> arrayVal = Nan::New<Array>(buffer->numElements);
+    Local<Array> arrayVal = Nan::New<Array>((int)buffer->numElements);
     for (uint32_t i = 0; i < buffer->numElements; i++) {
         Local<Value> elementValue;
         if (!GetScalarValueFromVar(baton, var, buffer, i, elementValue))
@@ -1652,7 +1704,7 @@ bool njsConnection::GetExecuteManyOutBinds(Local<Value> &outBinds,
         uint32_t numOutBinds, njsBaton *baton)
 {
     Nan::EscapableHandleScope scope;
-    Local<Array> rows = Nan::New<Array>(baton->bindArraySize);
+    Local<Array> rows = Nan::New<Array>((int)baton->bindArraySize);
     Local<Value> row;
 
     for (uint32_t i = 0; i < baton->bindArraySize; i++) {
@@ -1681,7 +1733,7 @@ bool njsConnection::GetOutBinds(Local<Value> &outBinds, uint32_t numOutBinds,
 
     bindByPos = baton->bindVars[0].name.empty();
     if (bindByPos) {
-        bindArray = Nan::New<Array>(numOutBinds);
+        bindArray = Nan::New<Array>((int)numOutBinds);
     } else {
         bindObj = Nan::New<Object>();
     }
@@ -1733,7 +1785,7 @@ void njsConnection::SetTextAttribute(Nan::NAN_SETTER_ARGS_TYPE args,
         Nan::ThrowError(errMsg.c_str());
         return;
     }
-    Nan::Utf8String utfstr(value->ToString());
+    Nan::Utf8String utfstr(value.As<String>());
     uint32_t valueLength = static_cast<uint32_t>(utfstr.length());
     if ((*setter)(connection->dpiConnHandle, *utfstr, valueLength) < 0)
         njsOracledb::ThrowDPIError();
@@ -2032,7 +2084,7 @@ void njsConnection::Async_AfterExecuteMany(njsBaton *baton,
 
     // get DML row counts if option was enabled
     if (baton->dmlRowCounts && baton->numRowCounts > 0) {
-        Local<Array> rowCountsObj = Nan::New<Array>(baton->numRowCounts);
+        Local<Array> rowCountsObj = Nan::New<Array>((int)baton->numRowCounts);
         for (uint32_t i = 0; i < baton->numRowCounts; i++) {
             Local<Value> rowCountObj =
                     Nan::New<Integer>((unsigned int) baton->rowCounts[i]);
@@ -2046,7 +2098,7 @@ void njsConnection::Async_AfterExecuteMany(njsBaton *baton,
     // get batch errors, if option was enabled
     if (baton->batchErrors && baton->numBatchErrorInfos > 0) {
         Local<Array> batchErrorsObj =
-                Nan::New<Array>(baton->numBatchErrorInfos);
+            Nan::New<Array>((int)baton->numBatchErrorInfos);
         for (uint32_t i = 0; i < baton->numBatchErrorInfos; i++) {
             dpiErrorInfo *info = &baton->batchErrorInfos[i];
             std::string errorStr =
@@ -2184,7 +2236,7 @@ void njsConnection::Async_AfterGetStatementInfo(njsBaton *baton,
         delete [] bindNameLengths;
         return;
     }
-    Local<Array> bindNamesArray = Nan::New<Array>(numBinds);
+    Local<Array> bindNamesArray = Nan::New<Array>((int)numBinds);
     for (uint32_t i = 0; i < numBinds; i++) {
         Local<String> bindName = Nan::New<String>(bindNames[i],
                 (int) bindNameLengths[i]).ToLocalChecked();
@@ -2446,9 +2498,12 @@ void njsConnection::Async_AfterCreateLob(njsBaton *baton, Local<Value> argv[])
     tempArgv[0] = njsILob::CreateFromProtoLob(baton->protoILob);
     Local<Value> key = Nan::New<String>("newLob").ToLocalChecked();
     Local<Object> jsOracledb = Nan::New(baton->jsOracledb);
-    Local<Function> fn = Local<Function>::Cast(Nan::Get(jsOracledb,
-                                                       key).ToLocalChecked());
-    Local<Value> temp = fn->Call(jsOracledb, 1, tempArgv);
+    MaybeLocal<Value> mval = Nan::Get(jsOracledb, key);
+    Local<Value> temp;
+    if(!mval.ToLocal(&temp))
+        return;
+    Local<Function> fn = Local<Function>::Cast(temp);
+    temp = fn->Call(jsOracledb, 1, tempArgv);
     argv[1] = scope.Escape(temp);
 }
 

@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, Oracle and/or its affiliates.  All rights reserved. */
+/* Copyright (c) 2018,2019 Oracle and/or its affiliates.  All rights reserved. */
 
 /******************************************************************************
  *
@@ -192,7 +192,7 @@ NAN_METHOD(njsSodaDocument::GetContentAsString)
     if (valueLength == 0) {
         jsValue = Nan::Null();
     } else if (!encoding || strcmp(encoding, "UTF-8") == 0) {
-        jsValue = Nan::New<String>(value, valueLength).ToLocalChecked();
+        jsValue = Nan::New<String>(value, (int)valueLength).ToLocalChecked();
     } else {
         uint16_t *utf16Value = (uint16_t*) value;
         int utf16ValueLength = valueLength / 2;
@@ -247,7 +247,8 @@ NAN_GETTER(njsSodaDocument::GetCreatedOn)
 
     Local<Value> value;
     if (createdOnLen > 0) {
-        value = Nan::New<v8::String>(createdOn, createdOnLen).ToLocalChecked();
+        value = Nan::New<v8::String>(createdOn,
+                                     (int)createdOnLen).ToLocalChecked();
     } else {
         value = Nan::Null();
     }
@@ -282,7 +283,7 @@ NAN_GETTER(njsSodaDocument::GetKey)
 
     Local<Value> value;
     if (keyLen > 0) {
-        value = Nan::New<v8::String>(key, keyLen).ToLocalChecked();
+        value = Nan::New<v8::String>(key, (int)keyLen).ToLocalChecked();
     } else {
         value = Nan::Null();
     }
@@ -319,7 +320,7 @@ NAN_GETTER(njsSodaDocument::GetLastModified)
     Local<Value> value;
     if (lastModifiedLen > 0) {
         value = Nan::New<v8::String>(lastModified,
-                lastModifiedLen).ToLocalChecked();
+                                     (int)lastModifiedLen).ToLocalChecked();
     } else {
         value = Nan::Null();
     }
@@ -357,7 +358,8 @@ NAN_GETTER(njsSodaDocument::GetMediaType)
 
     Local<Value> value;
     if (mediaTypeLen > 0) {
-        value = Nan::New<v8::String>(mediaType, mediaTypeLen).ToLocalChecked();
+        value = Nan::New<v8::String>(mediaType,
+                                     (int)mediaTypeLen).ToLocalChecked();
     } else {
         value = Nan::Null();
     }
@@ -394,7 +396,8 @@ NAN_GETTER(njsSodaDocument::GetVersion)
 
     Local<Value> value;
     if (versionLen > 0) {
-        value = Nan::New<v8::String>(version, versionLen).ToLocalChecked();
+        value = Nan::New<v8::String>(version,
+                                     (int)versionLen).ToLocalChecked();
     } else {
         value = Nan::Null();
     }
