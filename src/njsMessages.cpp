@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2018, Oracle and/or its affiliates.
+/* Copyright (c) 2015, 2019, Oracle and/or its affiliates.
    All rights reserved. */
 
 /******************************************************************************
@@ -83,7 +83,7 @@ static const char *errMsg[] = {
     "NJS-052: invalid data type at array index %d for bind position %d", // errIncompatibleTypeArrayIndexBind
     "NJS-053: array value expected, a non-array value provided", //errNonArrayProvided
     "NJS-054: binary build/Release/oracledb.node was not installed", // errNoBinaryInstalled
-    "NJS-055: Binding by position and name cannot be mixed", // errMixedBind
+    "NJS-055: binding by position and name cannot be mixed", // errMixedBind
     "NJS-056: maxSize must be specified and not zero for bind position %u", // errMissingMaxSizeByPos
     "NJS-057: maxSize must be specified and not zero for bind \"%s\"", // errMissingMaxSizeByName
     "NJS-058: maxSize of %u is too small for value of length %u in row %u", // errMaxSizeTooSmall
@@ -120,4 +120,3 @@ string njsMessages::Get(int err, ...)
     }
     return str;
 }
-
