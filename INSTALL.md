@@ -1387,33 +1387,31 @@ Node.js and node-oracledb Linux RPM packages are available on
 [Oracle Linux 6][50] and [Oracle Linux 7][51] channels.  This means
 installation is simple, and can be automated.
 
-As an example, to install Node 10 on Oracle Linux 7, run these commands
-as the root user:
+As an example, to install Node 10 on Oracle Linux 7, run these commands:
 
 ```
-cd /etc/yum.repos.d
-mv public-yum-ol7.repo public-yum-ol7.repo.bak
-wget http://yum.oracle.com/public-yum-ol7.repo
-yum install yum-utils
-yum-config-manager --enable ol7_developer_nodejs10 ol7_oracle_instantclient
-yum install nodejs node-oracledb-node10 oracle-instantclient18.3-basic
+sudo yum install -y oracle-nodejs-release-el7 oracle-release-el7
+sudo yum install nodejs node-oracledb-node10
 ```
 
-As the root user, add Instant Client to the library search path:
+This will also install Oracle Instant Client, which needs to be
+configures.  As the root user, add Instant Client to the library
+search path:
 
 ```
-echo /usr/lib/oracle/18.3/client64/lib > /etc/ld.so.conf.d/oracle-instantclient.conf
-ldconfig
+sudo sh -c "echo /usr/lib/oracle/18.3/client64/lib > /etc/ld.so.conf.d/oracle-instantclient.conf"
+sudo ldconfig
 ```
 
 Since node-oracledb is installed globally, set `NODE_PATH` before
-running applications.  You can find the global module directory by
-running `npm root -g`.
+running applications:
 
 ```
 export NODE_PATH=$(npm root -g)
 node myapp.js
 ```
+
+See [Node.js for Oracle Linux][46] for details.
 
 ### <a name="selfhost"></a> 3.13 Building and Hosting your own node-oracledb Packages
 
