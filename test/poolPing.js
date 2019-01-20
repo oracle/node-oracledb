@@ -387,7 +387,7 @@ describe("73. poolPing.js", function() {
         );
       },
       function(cb) {
-        if(userSetInterval != null) {
+        if(userSetInterval !== null) {
           pool.close(function(err) {
             should.not.exist(err);
           });

@@ -32,6 +32,10 @@ const oracledb = require('oracledb');
 const should   = require('should');
 const dbconfig = require('./dbconfig.js');
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 describe('170. poolDrain.js', () => {
   before(function() {
     if (process.versions.modules < 57) this.skip();
@@ -59,17 +63,22 @@ describe('170. poolDrain.js', () => {
         err.message,
         "NJS-064: connection pool is closing"
       );
+    } finally {
+      await sleep(6000);
     }
   }); // 170.1
 
   it('170.2 close pool without force flag (will give out an error ), and prevent new connections', async () => {
+    let pool;
     try {
-      let pool = await oracledb.createPool(settings);
+      pool = await oracledb.createPool(settings);
       await pool.getConnection();
       await pool.close();
     } catch(err) {
       should.exist(err);
       (err.message).should.startWith('ORA-24422:');
+    } finally {
+      await pool.close(0);
     }
   }); // 170.2
 
@@ -83,6 +92,8 @@ describe('170. poolDrain.js', () => {
       should.strictEqual(pool.status, oracledb.POOL_STATUS_DRAINING);
     } catch(err) {
       should.not.exist(err);
+    } finally {
+      await sleep(3000);
     }
   }); // 170.3
 
@@ -178,6 +189,8 @@ describe('170. poolDrain.js', () => {
       pool_2.close(drainTime);
     } catch(err) {
       should.not.exist(err);
+    } finally {
+      await sleep(3000);
     }
   }); // 170.9
 
@@ -215,8 +228,9 @@ describe('170. poolDrain.js', () => {
   });
 
   it('170.12 drainTime = -3', async () => {
+    let pool;
     try {
-      let pool = await oracledb.createPool(settings);
+      pool = await oracledb.createPool(settings);
 
       await pool.getConnection();
       await pool.getConnection();
@@ -228,12 +242,15 @@ describe('170. poolDrain.js', () => {
     } catch(err) {
       should.exist(err);
       should.strictEqual(err.message, "NJS-005: invalid value for parameter 1");
+    } finally {
+      await pool.close(0);
     }
   });
 
   it('170.13 drainTime = NaN', async () => {
+    let pool;
     try {
-      let pool = await oracledb.createPool(settings);
+      pool = await oracledb.createPool(settings);
 
       await pool.getConnection();
       await pool.getConnection();
@@ -245,6 +262,8 @@ describe('170. poolDrain.js', () => {
     } catch(err) {
       should.exist(err);
       should.strictEqual(err.message, "NJS-005: invalid value for parameter 1");
+    } finally {
+      await pool.close(0);
     }
   });
 
@@ -268,6 +287,8 @@ describe('170. poolDrain.js', () => {
       pool_2.close(1);
     } catch(err) {
       should.not.exist(err);
+    } finally {
+      await sleep(4000);
     }
   });
 
@@ -297,6 +318,8 @@ describe('170. poolDrain.js', () => {
       pool_2.close(1);
     } catch(err) {
       should.not.exist(err);
+    } finally {
+      await sleep(4000);
     }
   });
 
