@@ -210,3 +210,5 @@ test/externalProxyAuth.js
 
 test/dataTypeXML.js
 test/deferLibInit.js
+
+test/sessionTag.js

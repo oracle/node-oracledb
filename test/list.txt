@@ -4309,21 +4309,21 @@ Overview of node-oracledb functional tests
 
 180. externalProxyAuth.js
    180.1 Non-Pool Connect
-      180.1.1 Non-Pool Connect: Basic Auth
-      180.1.2 Non-Pool Connect: External Auth
-      180.1.3 Non-Pool Connect: Basic Auth with proxy
-      180.1.4 Non-Pool Connect: External Auth with proxy
-      180.1.5 Non-Pool Connect: External Auth with proxy no brackets
+        180.1.1 Non-Pool Connect: Basic Auth
+        180.1.2 Non-Pool Connect: External Auth
+        180.1.3 Non-Pool Connect: Basic Auth with proxy
+        180.1.4 Non-Pool Connect: External Auth with proxy
+        180.1.5 Non-Pool Connect: External Auth with proxy no brackets
    180.2 Pooled Connect
-      180.2.1 Pooled Connect: Basic Auth
-      180.2.2 Pooled Connect: External Auth
-      180.2.3 Pooled Connect: Basic Auth with proxy when create pool
-      180.2.4 Pooled Connect: Basic Auth with proxy when acquire connection
-      180.2.5 Pooled Connect: Basic Auth with proxy when acquire connection
-      180.2.6 Pooled Connect: External Auth with proxy when create pool
-      180.2.7 Pooled Connect: External Auth with proxy no brackets when create pool
-      180.2.8 Pooled Connect: External Auth with proxy when acquire connection
-      180.2.9 Pooled Connect: External Auth with proxy no brackets when acquire connection
+        180.2.1 Pooled Connect: Basic Auth
+        180.2.2 Pooled Connect: External Auth
+        180.2.3 Pooled Connect: Basic Auth with proxy when create pool
+        180.2.4 Pooled Connect: Basic Auth with proxy when acquire connection
+        180.2.5 Pooled Connect: Basic Auth with proxy when acquire connection
+        180.2.6 Pooled Connect: External Auth with proxy when create pool
+        180.2.7 Pooled Connect: External Auth with proxy no brackets when create pool
+        180.2.8 Pooled Connect: External Auth with proxy when acquire connection
+        180.2.9 Pooled Connect: External Auth with proxy no brackets when acquire connection
 
 181. dataTypeXML.js
     181.1 basic case, insert XML data and query back
@@ -4335,3 +4335,48 @@ Overview of node-oracledb functional tests
     182.1 defers initializatiion of ODPI-C
     182.2 Negative: throws error when asking for ODPI-C attributes
     183.3 Negative: call oracledb method
+
+184. sessionTag.js
+    184.1 Remote PL/SQL Callback
+        184.1.1 Acquire connection without tag
+        184.1.2 Acquire connection from pool without tag
+        184.1.3 Acquire connection from pool with empty string tag
+        184.1.4 Acquire connection from pool with valid tag
+        184.1.5 Acquire connection from pool with error in callback
+        184.1.6 Acquire connection from pool twice with same tag
+        184.1.7 Acquire connection from pool twice with different tag
+        184.1.8 Acquire connection from pool twice with different tag using matchAnyTag
+        184.1.9 Acquire connection from pool twice with different multi-tag using matchAnyTag
+        184.1.10 Acquire connection from pool twice with empty string tag using matchAnyTag
+        184.1.11 Acquire connection from pool twice with first connection's tag set to ""
+        184.1.12 Acquire connection from pool twice with different tag after setting first connection's tag
+    184.2 Local Javascript Callback
+        184.2.1 Acquire connection without tag
+        184.2.2 Acquire connection from pool without tag
+        184.2.3 Acquire connection from pool with empty string tag
+        184.2.4 Acquire connection from default pool with valid tag
+        184.2.5 Acquire connection from pool with valid tag
+        184.2.6 Acquire connection from pool with bad tag using async session callback
+        184.2.7 Acquire connection from pool with bad tag using sync session callback
+        184.2.8 Acquire connection from pool twice with same tag
+        184.2.9 Acquire connection from pool twice with different tag
+        184.2.10 Acquire connection from pool twice with different tag using matchAnyTag
+        184.2.11 Acquire connection from pool twice with different multi-tag using matchAnyTag
+        184.2.12 Acquire connection from pool twice with first connection's tag set to ""
+        184.2.13 Acquire connection from pool twice with different tag after setting first connection's tag
+    184.3 Change connection's tag before the connection is closed
+        184.3.1 Setting connection's tag to undefined triggers error NJS-004
+        184.3.2 Setting connection's tag to random object triggers error NJS-004
+        184.3.3 Closing randomly tagged connection triggers error ORA-24488
+    184.4 Dropping Session From Pool
+        184.4.1 Acquire connection from pool, close with tag
+        184.4.2 Acquire connection from pool, drop session
+        184.4.3 Acquire connection from pool, drop session with tag
+        184.4.4 Acquire connection from pool, wait for pool ping to call session fixup
+        184.4.5 Acquire connection from pool, wait for pool timeout to drop
+        184.4.6 Drop connection from pool with poolMin=0
+        184.4.7 Close connection from pool with {drop: false}
+        184.4.8 Close connection from pool with {drop: randomObject}
+        184.4.9 Close connection from pool with {drop: 0}
+        184.4.10 Close connection from pool with empty dict
+        184.4.11 Close connection from pool with {drop: random string}
