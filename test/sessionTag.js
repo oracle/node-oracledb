@@ -95,10 +95,21 @@ async function getSysTime(conn) {
 describe('184. sessionTag.js', function () {
 
   before(async function() {
-    let conn = await oracledb.getConnection(dbconfig);
-    const serverVersion = conn.oracleServerVersion;
-    conn.close();
-    if (serverVersion < 1202000100) this.skip();
+    let isRunnable = true;
+
+    if (oracledb.oracleClientVersion < 1202000100) isRunnable = false;
+
+    try {
+      const connection = await oracledb.getConnection(dbconfig);
+      const serverVersion = connection.oracleServerVersion;
+      if (serverVersion < 1202000100) isRunnable = false;
+
+      await connection.close();
+    } catch(err) {
+      should.not.exist(err);
+    }
+
+    if (!isRunnable) this.skip();
   });
 
   describe('184.1 Remote PL/SQL Callback', function () {
