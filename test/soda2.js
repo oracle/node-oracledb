@@ -36,7 +36,10 @@ describe('165. soda2.js', () => {
 
   before(async function() {
     const runnable = await sodaUtil.checkPrerequisites();
-    if (!runnable) this.skip();
+    if (!runnable) {
+      this.skip();
+      return;
+    }
 
     await sodaUtil.cleanup();
   });

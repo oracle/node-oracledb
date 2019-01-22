@@ -33,6 +33,8 @@ const dbconfig = require('./dbconfig.js');
 const sodaUtil = require('./sodaUtil.js');
 
 describe('167. soda3.js', () => {
+
+  let isRunnable;
   let conn, sd, t_collections;
   let t_collectionNames = [
     "chris_1", "chris_2", "chris_3", "chris_4",
@@ -41,8 +43,11 @@ describe('167. soda3.js', () => {
   ];
 
   before('create collections', async function() {
-    const runnable = await sodaUtil.checkPrerequisites();
-    if (!runnable) this.skip();
+    isRunnable = await sodaUtil.checkPrerequisites();
+    if (!isRunnable) {
+      this.skip();
+      return;
+    }
 
     await sodaUtil.cleanup();
 
@@ -61,6 +66,8 @@ describe('167. soda3.js', () => {
   }); // before
 
   after('drop collections, close connection', async () => {
+    if (!isRunnable) return;
+
     try {
       if (t_collections) {
         await Promise.all(
