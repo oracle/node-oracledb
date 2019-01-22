@@ -1250,9 +1250,10 @@ njsSubscription *njsOracledb::GetSubscription(std::string &name)
     Nan::HandleScope scope;
     Local<String> nameObj = Nan::New<String>(name).ToLocalChecked();
     Local<Object> allSubscriptions = Nan::New(subscriptions);
-    MaybeLocal<Value> mval = Nan::Get(allSubscriptions, nameObj);
     Local<Value> value;
-    if(!mval.ToLocal(&value))
+    if (!Nan::Get(allSubscriptions, nameObj).ToLocal(&value))
+        return NULL;
+    if (value->IsUndefined())
         return NULL;
     return Nan::ObjectWrap::Unwrap<njsSubscription>(value.As<Object>());
 }
