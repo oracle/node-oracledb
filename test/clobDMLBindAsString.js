@@ -561,7 +561,14 @@ describe('81. clobDMLBindAsString.js', function() {
           lob.on('error', function(err) {
             should.exist(err);
             // ORA-22990: LOB locators cannot span transactions
-            (err.message).should.startWith('ORA-22990:');
+            // ORA-22920: row containing the LOB value is not locked
+            var isExpectedError;
+            if ( (err.message).startsWith('ORA-22990') || (err.message).startsWith('ORA-22920') ) {
+              isExpectedError = true;
+            } else {
+              isExpectedError = false;
+            }
+            isExpectedError.should.be.true();
           });
 
           inStream.on('error', function(err) {
