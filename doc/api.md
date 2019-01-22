@@ -12012,7 +12012,7 @@ When upgrading from node-oracledb version 3.0 to version 3.1:
   `require()` will always succeed if node-oracledb is installed even
   if Oracle Client is not configured.  To confirm that node-oracle
   will be usable, access
-  [`oracledb.oracleClientVersion`]((#propdboracleclientversion)) or
+  [`oracledb.oracleClientVersion`](#propdboracleclientversion) or
   [`oracledb.oracleClientVersionString`](#propdboracleclientversionstring),
   or try opening a connection.
 
