@@ -53,13 +53,18 @@
 - Support fetching XMLTYPE columns in queries.  They will return as
   String limited to the VARCHAR2 length.
 
-- Update install processes by bundling all pre-built binaries into the
-  https://www.npmjs.com/package/oracledb package, removing the need
-  for a separate binary package download from GitHub.  At runtime an
-  appropriate binary is loaded by `require()`, if it exists, allowing
-  one `node_modules/oracledb` install to be usable in different
-  environments.  Also, source code is no longer included in the npm
-  package.
+- Updated install processes by bundling all pre-built binaries into
+  the https://www.npmjs.com/package/oracledb package, removing the
+  need for a separate binary package download from GitHub.  At runtime
+  an appropriate binary is loaded by `require()`, if it exists,
+  allowing one `node_modules/oracledb` install to be usable in
+  different environments.
+
+  Source code is no longer included in the npm package.  It is still
+  available from GitHub and oss.oracle.com.
+
+  The steps for self-hosting a node-oracledb package have changed, see
+  [INSTALL](https://github.com/oracle/node-oracledb/blob/master/INSTALL.md#selfhost).
 
 - Fixed a crash with high frequency notifications from CQN
   ([#1009](https://github.com/oracle/node-oracledb/issues/1009)).
