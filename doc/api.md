@@ -1,6 +1,6 @@
-# node-oracledb 3.0 Documentation for the Oracle Database Node.js Add-on
+# node-oracledb 3.1 Documentation for the Oracle Database Node.js Add-on
 
-*Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved.*
+*Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved.*
 
 You may not use the identified files except in compliance with the Apache
 License, Version 2.0 (the "License.")
@@ -92,22 +92,26 @@ limitations under the License.
                 - 3.3.1.1.12 [`poolTimeout`](#createpoolpoolattrspooltimeout)
                 - 3.3.1.1.13 [`queueRequests`](#createpoolpoolattrsqueuerequests)
                 - 3.3.1.1.14 [`queueTimeout`](#createpoolpoolattrsqueuetimeout)
-                - 3.3.1.1.15 [`stmtCacheSize`](#createpoolpoolattrsstmtcachesize)
-                - 3.3.1.1.16 [`user`](#createpoolpoolattrsuser)
+                - 3.3.1.1.15 [`sessionCallback`](#createpoolpoolattrssessioncallback)
+                - 3.3.1.1.16 [`stmtCacheSize`](#createpoolpoolattrsstmtcachesize)
+                - 3.3.1.1.17 [`user`](#createpoolpoolattrsuser)
             - 3.3.1.2 [`createPool()`: Callback Function](#createpoolpoolcallback)
         - 3.3.2 [`getConnection()`](#getconnectiondb)
             - 3.3.2.1 [`getConnection()`: Parameters](#getconnectiondbattrs)
-                - 3.3.2.1.1 [Pool Alias](#getconnectiondbattrspoolalias)
-                - 3.3.2.1.2 [Connection Attributes](#getconnectiondbattrsconnattrs)
+                - 3.3.2.1.1 [Pool Alias](#getconnectionpoolalias)
+                - 3.3.2.1.2 [`getConnection()`: Attributes](#getconnectiondbattrsconnattrs)
                     - 3.3.2.1.2.1 [`connectString`](#getconnectiondbattrsconnectstring), [`connectionString`](#getconnectiondbattrsconnectstring)
                     - 3.3.2.1.2.2 [`edition`](#getconnectiondbattrsedition)
                     - 3.3.2.1.2.3 [`events`](#getconnectiondbattrsevents)
                     - 3.3.2.1.2.4 [`externalAuth`](#getconnectiondbattrsexternalauth)
-                    - 3.3.2.1.2.5 [`newPassword`](#getconnectiondbattrsnewpassword)
-                    - 3.3.2.1.2.6 [`password`](#getconnectiondbattrspassword)
-                    - 3.3.2.1.2.7 [`privilege`](#getconnectiondbattrsprivilege)
-                    - 3.3.2.1.2.8 [`stmtCacheSize`](#getconnectiondbattrsstmtcachesize)
-                    - 3.3.2.1.2.9 [`user`](#getconnectiondbattrsuser)
+                    - 3.3.2.1.2.5 [`matchAny`](#getconnectiondbattrsmatchany)
+                    - 3.3.2.1.2.6 [`newPassword`](#getconnectiondbattrsnewpassword)
+                    - 3.3.2.1.2.7 [`poolAlias`](#getconnectiondbattrspoolalias)
+                    - 3.3.2.1.2.8 [`password`](#getconnectiondbattrspassword)
+                    - 3.3.2.1.2.9 [`privilege`](#getconnectiondbattrsprivilege)
+                    - 3.3.2.1.2.10 [`stmtCacheSize`](#getconnectiondbattrsstmtcachesize)
+                    - 3.3.2.1.2.11 [`tag`](#getconnectiondbattrstag)
+                    - 3.3.2.1.2.12 [`user`](#getconnectiondbattrsuser)
             - 3.3.2.2 [`getConnection()`: Callback Function](#getconnectiondbcallback)
         - 3.3.3 [`getPool()`](#getpool)
             - 3.3.3.1 [`getPool()`: Parameters](#getpoolattrs)
@@ -121,6 +125,7 @@ limitations under the License.
         - 4.1.5 [`oracleServerVersion`](#propconnoracleserverversion)
         - 4.1.6 [`oracleServerVersionString`](#propconnoracleserverversionstring)
         - 4.1.7 [`stmtCacheSize`](#propconnstmtcachesize)
+        - 4.1.8 [`tag`](#propconntag)
     - 4.2 [Connection Methods](#connectionmethods)
         - 4.2.1 [`break()`](#break)
         - 4.2.2 [`changePassword()`](#changepassword)
@@ -299,13 +304,16 @@ limitations under the License.
         - 12.1.4 [JDBC and Node-oracledb Connection Strings Compared](#notjdbc)
     - 12.2 [Connections and Number of Threads](#numberofthreads)
     - 12.3 [Connection Pooling](#connpooling)
-        - 12.3.1 [Connection Pool Cache](#connpoolcache)
-        - 12.3.2 [Connection Pool Queue](#connpoolqueue)
-        - 12.3.3 [Connection Pool Monitoring and Throughput](#connpoolmonitor)
-        - 12.3.4 [Connection Pool Pinging](#connpoolpinging)
-        - 12.3.5 [Heterogeneous Connection Pools and Pool Proxy Authentication](#connpoolproxy)
-    - 12.4 [Database Resident Connection Pooling (DRCP)](#drcp)
-    - 12.5 [External Authentication](#extauth)
+        - 12.3.1 [Connection Pool Sizing](#conpoolsizing)
+        - 12.3.2 [Connection Pool Closing and Draining](#conpooldraining)
+        - 12.3.3 [Connection Pool Cache](#connpoolcache)
+        - 12.3.4 [Connection Pool Queue](#connpoolqueue)
+        - 12.3.5 [Connection Pool Monitoring and Throughput](#connpoolmonitor)
+        - 12.3.6 [Connection Pool Pinging](#connpoolpinging)
+        - 12.3.7 [Connection Tagging and Session State](#connpooltagging)
+        - 12.3.8 [Heterogeneous Connection Pools and Pool Proxy Authentication](#connpoolproxy)
+    - 12.4 [External Authentication](#extauth)
+    - 12.5 [Database Resident Connection Pooling (DRCP)](#drcp)
     - 12.6 [Privileged Connections](#privconn)
     - 12.7 [Securely Encrypting Network Traffic to Oracle Database](#securenetwork)
     - 12.8 [Changing Passwords and Connecting with an Expired Password](#changingpassword)
@@ -361,27 +369,29 @@ limitations under the License.
     - 18.7 [Binding Multiple Values to a SQL `WHERE IN` Clause](#sqlwherein)
     - 18.8 [Binding Column and Table Names in Queries](#sqlbindtablename)
 19. [Batch Statement Execution](#batchexecution)
-20. [Continuous Query Notification (CQN)](#cqn)
-21. [Transaction Management](#transactionmgt)
-22. [Statement Caching](#stmtcache)
-23. [External Configuration](#oraaccess)
-24. [Globalization and National Language Support (NLS)](#nls)
-25. [End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend)
-26. [Simple Oracle Document Access (SODA)](#sodaoverview)
-    - 26.1 [Node-oracledb SODA Requirements](#sodarequirements)
-    - 26.2 [Creating SODA Collections](#creatingsodacollections)
-    - 26.3 [Creating and Accessing SODA documents](#accessingsodadocuments)
-    - 26.4 [SODA Query-by-Example Searches for JSON Documents](#sodaqbesearches)
-    - 26.5 [SODA Client-Assigned Keys and Collection Metadata](#sodaclientkeys)
-    - 26.6 [JSON Data Guides in SODA](#sodajsondataguide)
-27. [Promises and node-oracledb](#promiseoverview)
-    - 27.1 [Custom Promise Libraries](#custompromises)
-28. [Async/Await and node-oracledb](#asyncawaitoverview)
-29. [Tracing SQL and PL/SQL Statements](#tracingsql)
-30. [Migrating from Previous node-oracledb Releases](#migrate)
-    - 30.1 [Migrating from node-oracledb 1.13 to node-oracledb 2.0](#migratev1v2)
-    - 30.2 [Migrating from node-oracledb 2.0 to node-oracledb 2.1](#migratev20v21)
-    - 30.3 [Migrating from node-oracledb 2.3 to node-oracledb 3.0](#migratev23v30)
+20. [Transaction Management](#transactionmgt)
+21. [Statement Caching](#stmtcache)
+22. [Continuous Query Notification (CQN)](#cqn)
+23. [Advanced Queuing (AQ)](#aq)
+24. [External Configuration](#oraaccess)
+25. [Globalization and National Language Support (NLS)](#nls)
+26. [End-to-end Tracing, Mid-tier Authentication, and Auditing](#endtoend)
+27. [Simple Oracle Document Access (SODA)](#sodaoverview)
+    - 27.1 [Node-oracledb SODA Requirements](#sodarequirements)
+    - 27.2 [Creating SODA Collections](#creatingsodacollections)
+    - 27.3 [Creating and Accessing SODA documents](#accessingsodadocuments)
+    - 27.4 [SODA Query-by-Example Searches for JSON Documents](#sodaqbesearches)
+    - 27.5 [SODA Client-Assigned Keys and Collection Metadata](#sodaclientkeys)
+    - 27.6 [JSON Data Guides in SODA](#sodajsondataguide)
+28. [Promises and node-oracledb](#promiseoverview)
+    - 28.1 [Custom Promise Libraries](#custompromises)
+29. [Async/Await and node-oracledb](#asyncawaitoverview)
+30. [Tracing SQL and PL/SQL Statements](#tracingsql)
+31. [Migrating from Previous node-oracledb Releases](#migrate)
+    - 31.1 [Migrating from node-oracledb 1.13 to node-oracledb 2.0](#migratev1v2)
+    - 31.2 [Migrating from node-oracledb 2.0 to node-oracledb 2.1](#migratev20v21)
+    - 31.3 [Migrating from node-oracledb 2.3 to node-oracledb 3.0](#migratev23v30)
+    - 31.3 [Migrating from node-oracledb 3.0 to node-oracledb 3.1](#migratev30v31)
 
 ## <a name="apimanual"></a> NODE-ORACLEDB API MANUAL
 
@@ -443,7 +453,7 @@ oracledb.getConnection(
   {
     user          : "hr",
     password      : "welcome",
-    connectString : "localhost/XE"
+    connectString : "localhost/XEPDB1"
   },
   function(err, connection) {
     if (err) {
@@ -973,8 +983,8 @@ more information.
 
 The default value is *false*.
 
-The `user` and `password` properties for connecting or creating a pool
-should not be set when `externalAuth` is *true*.
+The `user` and `password` properties should not be set when
+`externalAuth` is *true*.
 
 This property can be overridden in the
 [`oracledb.createPool()`](#createpool) call and when getting a
@@ -1178,6 +1188,11 @@ For version *a.b.c.d.e*, this property gives the number: `(100000000 * a) + (100
 
 This property was added in node-oracledb 1.3.
 
+From node-oracledb 3.1.0, using `oracledb.oracleClientVersion` will
+throw a *DPI-1047* error if node-oracledb cannot load Oracle Client
+libraries.  Previous versions threw this error from
+`require('oracledb')`.
+
 ##### Example
 
 ```javascript
@@ -1194,6 +1209,11 @@ readonly String oracleClientVersionString
 This readonly property gives a string representation of the Oracle client library version which is useful for display.
 
 This property was added in node-oracledb 2.2.
+
+From node-oracledb 3.1.0, using `oracledb.oracleClientVersionString`
+will throw a *DPI-1047* error if node-oracledb cannot load Oracle
+Client libraries.  Previous versions threw this error from
+`require('oracledb')`.
 
 ##### Example
 
@@ -1544,8 +1564,9 @@ promise = createPool(Object poolAttrs);
 
 ##### Description
 
-This method creates a pool of connections with the specified user name,
-password and connection string.
+This method creates a pool of connections with the specified user
+name, password and connection string.  A pool is typically created
+once during application initialization.
 
 Internally, `createPool()` creates an [Oracle Call Interface Session
 Pool][6] for each Pool object.
@@ -1560,6 +1581,11 @@ See [Connection Pool Cache](#connpoolcache) for more details.
 
 A pool should be terminated with the [`pool.close()`](#poolclose)
 call.
+
+From node-oracledb 3.1.0, the `createPool()` error callback will
+return a *DPI-1047* error if node-oracledb cannot load Oracle Client
+libraries.  Previous versions threw this error from
+`require('oracledb')`.
 
 See [Connection Pooling](#connpooling) for more information about pooling.
 
@@ -1809,7 +1835,58 @@ The default value is 60000.
 This optional property overrides the
 [`oracledb.queueTimeout`](#propdbqueuetimeout) property.
 
-###### <a name="createpoolpoolattrsstmtcachesize"></a> 3.3.1.1.15 `stmtCacheSize`
+###### <a name="createpoolpoolattrssessioncallback"></a> 3.3.1.1.15 `sessionCallback`
+
+```
+String sessionCallback | function sessionCallback(Connection connection, String requestedTag, function callback)
+```
+
+When `sessionCallback` is a Node.js function, it will be invoked for
+each `pool.getConnection()` call that will return a newly created
+connection in the pool.  It will also be called if
+`pool.getConnection()` requests a connection from the pool with a
+given [`tag`](#getconnectiondbattrstag), and that tag value does not
+match the connection's current actual tag.  It will not be invoked for
+other `getConnection()` calls.  The tag requested by
+`pool.getConnection()` is passed as the `requestedTag` parameter and
+the actual tag is available in [`connection.tag`](#propconntag).
+
+The session callback is called before `getConnection()` returns so it
+can be used to do logging or efficiently set session state such as
+with ALTER SESSION statements.  Make sure any session state is set and
+`connection.tag` is updated in the `sessionCallback` function prior to
+it calling its own `callback` function otherwise the session will not
+be correctly set when `getConnection()` returns.
+
+When node-oracledb is using Oracle Client libraries 12.2 or later, the
+tag must be a [multi-property tag][125] with name=value pairs like
+"k1=v1;k2=v2".
+
+When using Oracle Client libraries 12.2 or later, `sessionCallback`
+can be a string containing the name of a PL/SQL procedure to be called
+when `pool.getConnection()` requests a
+[`tag`](#getconnectiondbattrstag), and that tag does not match the
+connection's actual tag.  When the application uses [DRCP
+connections](#drcp), a PL/SQL callback can avoid the [round-trip][124]
+calls that a Node.js function would require to set session state.  For
+non-DRCP connections, the PL/SQL callback will require a round-trip
+from the application.
+
+The PL/SQL procedure declaration is:
+
+```sql
+PROCEDURE mycallback (
+  desired_props IN  VARCHAR2,
+  actual_props  IN  VARCHAR2
+);
+```
+
+See [Connection Tagging and Session State](#connpooltagging) for more
+information.
+
+This property was added in node-oracledb 3.1.
+
+###### <a name="createpoolpoolattrsstmtcachesize"></a> 3.3.1.1.16 `stmtCacheSize`
 
 ```
 Number stmtCacheSize
@@ -1821,7 +1898,7 @@ The number of statements to be cached in the
 This optional property overrides the
 [`oracledb.stmtCacheSize`](#propdbstmtcachesize) property.
 
-###### <a name="createpoolpoolattrsuser"></a> 3.3.1.1.16 `user`
+###### <a name="createpoolpoolattrsuser"></a> 3.3.1.1.17 `user`
 
 ```
 String user
@@ -1838,11 +1915,13 @@ users supplied in subsequent `pool.getConnection()` calls.
 
 #### <a name="createpoolpoolcallback"></a> 3.3.1.2 `createPool()`: Callback Function
 
+##### Prototype
+
 ```
 function(Error error [, Pool pool])
 ```
 
-The parameters of the callback function are:
+##### Parameters
 
 Callback function parameter | Description
 ----------------------------|-------------
@@ -1885,26 +1964,31 @@ Signature | Description
 `oracledb.getConnection(connAttrs)` | Creates a standalone, non-pooled connection. Returns a promise.
 `oracledb.getConnection(connAttrs, callback)` | Creates a standalone, non-pooled connection.  Invokes the callback.
 
-See [Connection Handling](#connectionhandling) for more information on
-connections.
-
 Note if the application opens a number of connections, you should
 increase the number of threads available to node-oracledb.
 See [Connections and Number of Threads](#numberofthreads).
 
+From node-oracledb 3.1.0, a non-pooled `oracledb.getConnection()` call
+will return a *DPI-1047* error if node-oracledb cannot load Oracle
+Client libraries.  Previous versions threw this error from
+`require('oracledb')`.
+
+See [Connection Handling](#connectionhandling) for more information on
+connections.
+
 ##### <a name="getconnectiondbattrs"></a> 3.3.2.1 `getConnection()`: Parameters
 
-###### <a name="getconnectiondbattrspoolalias"></a> 3.3.2.1.1 Pool Alias
+###### <a name="getconnectionpoolalias"></a> 3.3.2.1.1 Pool Alias
 
 ```
 String poolAlias
 ```
 
-The `poolAlias` parameter is used to specify which pool in the [connection pool
-cache](#connpoolcache) to use to obtain the connection.
+The `poolAlias` parameter specifies which previously created pool in
+the [connection pool cache](#connpoolcache) to use to obtain the
+connection.
 
-###### <a name="getconnectiondbattrsconnattrs"></a> 3.3.2.1.2 Connection Attributes
-
+###### <a name="getconnectiondbattrsconnattrs"></a> 3.3.2.1.2 `getConnection()`: Attributes
 
 ```
 Object connAttrs
@@ -1978,7 +2062,23 @@ The `user` and `password` properties should not be set when
 Note prior to node-oracledb 0.5 this property was called
 `isExternalAuth`.
 
-###### <a name="getconnectiondbattrsnewpassword"></a> 3.3.2.1.2.5 `newPassword`
+###### <a name="getconnectiondbattrsmatchany"></a> 3.3.2.1.2.5 `matchAny`
+
+```
+Boolean matchAny
+```
+
+Used in conjunction with [`tag`](#getconnectiondbattrstag) when
+getting a connection from a [connection pool](#poolclass).
+
+Indicates that the tag in a connection returned from a connection pool
+may not match the requested tag.
+
+See [Connection Tagging and Session State](#connpooltagging).
+
+This property was added in node-oracledb 3.1.
+
+###### <a name="getconnectiondbattrsnewpassword"></a> 3.3.2.1.2.6 `newPassword`
 
 ```
 String newPassword
@@ -1996,7 +2096,17 @@ See [Changing Passwords and Connecting with an Expired Password](#changingpasswo
 
 This property was added in node-oracledb 2.2.
 
-###### <a name="getconnectiondbattrspassword"></a> 3.3.2.1.2.6 `password`
+###### <a name="getconnectiondbattrspoolalias"></a> 3.3.2.1.2.7 `poolAlias`
+
+```
+String poolAlias
+```
+
+Specifies which previously created pool in the [connection pool
+cache](#connpoolcache) to obtain the connection from.  See [Pool
+Alias](#getconnectionpoolalias).
+
+###### <a name="getconnectiondbattrspassword"></a> 3.3.2.1.2.8 `password`
 
 ```
 String password
@@ -2005,7 +2115,7 @@ String password
 The password of the database user. A password is also necessary if a
 proxy user is specified.
 
-###### <a name="getconnectiondbattrsprivilege"></a> 3.3.2.1.2.7 `privilege`
+###### <a name="getconnectiondbattrsprivilege"></a> 3.3.2.1.2.9 `privilege`
 
 ```
 Number privilege
@@ -2021,7 +2131,7 @@ Note only non-pooled connections can be privileged.
 
 This property was added in node-oracledb 2.1.
 
-###### <a name="getconnectiondbattrsstmtcachesize"></a> 3.3.2.1.2.8 `stmtCacheSize`
+###### <a name="getconnectiondbattrsstmtcachesize"></a> 3.3.2.1.2.10 `stmtCacheSize`
 
 ```
 Number stmtCacheSize
@@ -2032,7 +2142,22 @@ The number of statements to be cached in the
 property may be used to override the
 [`oracledb.stmtCacheSize`](#propdbstmtcachesize) property.
 
-###### <a name="getconnectiondbattrsuser"></a> 3.3.2.1.2.9 `user`
+###### <a name="getconnectiondbattrstag"></a> 3.3.2.1.2.11 `tag`
+
+```
+String tag
+```
+
+Used when getting a connection from a [connection pool](#poolclass).
+
+Indicates the tag that a connection returned from a connection pool
+should have.  Various heuristics determine the tag that is actually
+returned, see [Connection Tagging and Session
+State](#connpooltagging).
+
+This property was added in node-oracledb 3.1.
+
+###### <a name="getconnectiondbattrsuser"></a> 3.3.2.1.2.12 `user`
 
 ```
 String user
@@ -2045,11 +2170,13 @@ proxy authentication.
 
 ##### <a name="getconnectiondbcallback"></a> 3.3.2.2 `getConnection()`: Callback Function
 
+##### Prototype
+
 ```
 function(Error error, Connection conn)
 ```
 
-The parameters of the callback function are:
+##### Parameters
 
 Callback function parameter | Description
 ----------------------------|-------------
@@ -2193,6 +2320,65 @@ The number of statements to be cached in the
 the `stmtCacheSize` property in effect in the *Pool* object when the
 connection is created in the pool.
 
+#### <a name="propconntag"></a> 4.1.8 `connection.tag`
+
+```
+String tag
+```
+
+Applications can set the tag property on pooled connections to
+indicate the 'session state' that a connection has.  The tag will be
+retained when the connection is released to the pool.  A subsequent
+`pool.getConnection()` can request a connection that has a given
+[`tag`](#getconnectiondbattrstag).  It is up to the application to set
+any desired session state and set `connection.tag` prior to closing
+the connection.
+
+The tag property is not used for standalone connections.
+
+When node-oracledb is using Oracle Client libraries 12.2 or later, the
+tag must be a [multi-property tag][125] with name=value pairs like
+"k1=v1;k2=v2".
+
+An empty string represents not having a tag set.
+
+See [Connection Tagging and Session State](#connpooltagging).
+
+This property was added in node-oracledb 3.1.
+
+##### Getting the tag
+
+After a `pool.getConnection()` requests a [tagged
+connection](#getconnectiondbattrstag):
+
+- When no [`sessionCallback`](#createpoolpoolattrssessioncallback) is
+  in use, then `connection.tag` will contain the actual tag of the
+  connection.
+
+- When a Node.js `sessionCallback` function is used, then
+  `connection.tag` will be set to the value of the connection's actual
+  tag prior to invoking the callback.  The callback can then set
+  connection state and alter `connection.tag`, as desired, before the
+  connection is returned from `pool.getConnection()`.
+
+- When a PL/SQL `sessionCallback` procedure is used, then after
+  `pool.getConnection()` returns, `connection.tag` contains a tag with
+  the same property values as the tag that was requested.  The
+  properties may be in a different order.  If `matchAnyTag` is *true*,
+  then `connection.tag` may contain other properties in addition to
+  the requested properties.  Code after each `pool.getConnection()`
+  call mirroring the PL/SQL code may be needed so `connection.tag` can
+  be set to a value representing the session state changed in the
+  PL/SQL procedure.
+
+##### Setting the tag
+
+A tag can be set anytime prior to closing the connection.  If a
+Node.js `sessionCallback` function is being used, the best practice
+recommendation is to set the tag in the callback function.
+
+To clear a connection's tag, set `connection.tag = ""`.
+
 ### <a name="connectionmethods"></a> 4.2 Connection Methods
 
 #### <a name="break"></a> 4.2.1 `connection.break()`
@@ -2218,17 +2404,27 @@ the time the break is issued, the `break()` is effectively a no-op.
 If the running asynchronous operation is interrupted, its callback
 will return an error.
 
+In network configurations that drop (or in-line) out-of-band breaks,
+`break()` may hang unless you have [`DISABLE_OOB=ON`][122] in a
+`sqlnet.ora` file, see [Optional Client Configuration
+Files](#tnsadmin).
+
+If you use use `break()` with [DRCP connections](#drcp), it is
+currently recommended to drop the connection when releasing it back to
+the pool: `await connection.close({drop: true})`.  See Oracle bug
+29116892.
+
 ##### Parameters
 
-```
-function(Error error)
-```
+-   ```
+    function(Error error)
+    ```
 
-The parameters of the callback function are:
+    The parameters of the callback function are:
 
-Callback function parameter | Description
-----------------------------|-------------
-*Error error* | If `break()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+    Callback function parameter | Description
+    ----------------------------|-------------
+    *Error error* | If `break()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
 ####  <a name="changepassword"></a> 4.2.2 `connection.changePassword()`
 
@@ -2256,37 +2452,37 @@ This method was added in node-oracledb 2.2.
 
 ##### Parameters
 
-```
-String user
-```
+-   ```
+    String user
+    ```
 
-The name of the user whose password is to be changed.
+    The name of the user whose password is to be changed.
 
-```
-String oldPassword
-```
+-   ```
+    String oldPassword
+    ```
 
-The current password of the currently connected user.
+    The current password of the currently connected user.
 
-If `changePassword()` is being used by a DBA to change the password of
-another user, the value of `oldPassword` is ignored and can be an
-empty string.
+    If `changePassword()` is being used by a DBA to change the password of
+    another user, the value of `oldPassword` is ignored and can be an
+    empty string.
 
-```
-String newPassword
-```
+-   ```
+    String newPassword
+    ```
 
-The new password of the user whose password is to be changed.
+    The new password of the user whose password is to be changed.
 
-```
-function(Error error)
-```
+-   ```
+    function(Error error)
+    ```
 
-The parameters of the callback function are:
+    The parameters of the callback function are:
 
-Callback function parameter | Description
-----------------------------|-------------
-*Error error* | If `changePassword()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+    Callback function parameter | Description
+    ----------------------------|-------------
+    *Error error* | If `changePassword()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
 ####  <a name="connectionclose"></a> 4.2.3 `connection.close()`
 
@@ -2294,34 +2490,28 @@ Callback function parameter | Description
 
 Callback:
 ```
-close(function(Error error){});
+close([Object options, ] function(Error error){});
 ```
 Promise:
 ```
-promise = close();
+promise = close([Object options]);
 ```
 
 ##### Description
 
-Releases a connection.  If the connection was obtained from the pool,
-the connection is returned to the pool and is available for reuse.
+Releases a connection.
 
 Calling `close()` as soon as a connection is no longer required is
-strongly encouraged.  Releasing early can improve system efficiency.
-Calling `close()` for pooled connections is required to prevent the
-pool running out of connections.
+strongly encouraged for system efficiency.  Calling `close()` for
+pooled connections is required to prevent the pool running out of
+connections.
 
 When a connection is released, any ongoing transaction on the
 connection is rolled back.
 
-After releasing a connection to a pool, there is no
-guarantee a subsequent `getConnection()` call gets back the same
-database connection.  The application must redo any ALTER SESSION
-statements on the new connection object, as required.
-
 If an error occurs on a pooled connection and that error is known to
 make the connection unusable, then `close()` will drop that connection
-from the connection pool.  So a future pooled `getConnection()` call
+from the connection pool so a future pooled `getConnection()` call
 that grows the pool will create a new, valid connection.
 
 This method was added to node-oracledb 1.9, replacing the equivalent
@@ -2329,15 +2519,33 @@ alias `connection.release()`.
 
 ##### Parameters
 
-```
-function(Error error)
-```
+-   ```
+    Object options
+    ```
 
-The parameters of the callback function are:
+    This parameter only affects pooled connections.
 
-Callback function parameter | Description
-----------------------------|-------------
-*Error error* | If `close()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+    The only valid option attribute is `drop`.
+
+    For pooled connections, if `drop` is *false*, then the
+    connection is returned to the pool for reuse.  If `drop` is *true*,
+    the connection will be completely dropped from the connection pool, for example:
+
+    ```javascript
+    await connection.close({drop: true});
+    ```
+
+    The default is *false*.
+
+-   ```
+    function(Error error)
+    ```
+
+    The parameters of the callback function are:
+
+    Callback function parameter | Description
+    ----------------------------|-------------
+    *Error error* | If `close()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
 ####  <a name="commit"></a> 4.2.4 `connection.commit()`
 
@@ -2358,15 +2566,15 @@ This call commits the current transaction in progress on the connection.
 
 ##### Parameters
 
-```
-function(Error error)
-```
+-   ```
+    function(Error error)
+    ```
 
-The parameters of the callback function are:
+    The parameters of the callback function are:
 
-Callback function parameter | Description
-----------------------------|-------------
-*Error error* | If `commit()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+    Callback function parameter | Description
+    ----------------------------|-------------
+    *Error error* | If `commit()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
 #### <a name="connectioncreatelob"></a> 4.2.5 `connection.createLob()`
 
@@ -2401,22 +2609,22 @@ See [Working with CLOB and BLOB Data](#lobhandling) and [LOB Bind Parameters](#l
 
 ##### Parameters
 
-```
-Number type
-```
+-   ```
+    Number type
+    ```
 
-One of the constants [`oracledb.CLOB`](#oracledbconstantsnodbtype)
-or [`oracledb.BLOB`](#oracledbconstantsnodbtype).
+    One of the constants [`oracledb.CLOB`](#oracledbconstantsnodbtype)
+    or [`oracledb.BLOB`](#oracledbconstantsnodbtype).
 
-```
-function(Error error)
-```
+-   ```
+    function(Error error)
+    ```
 
-The parameters of the callback function are:
+    The parameters of the callback function are:
 
-Callback function parameter | Description
-----------------------------|-------------
-*Error error* | If `createLob()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+    Callback function parameter | Description
+    ----------------------------|-------------
+    *Error error* | If `createLob()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
 
 #### <a name="execute"></a> 4.2.6 `connection.execute()`
@@ -2562,42 +2770,40 @@ JavaScript.  It can be used in conjunction with, or instead of, the
 global settings [`fetchAsString`](#propdbfetchasstring)
 and [`fetchAsBuffer`](#propdbfetchasbuffer).
 
-The valid values for `type` are
-[`oracledb.STRING`](#oracledbconstantsnodbtype),
-[`oracledb.BUFFER`](#oracledbconstantsnodbtype)
-and [`oracledb.DEFAULT`](#oracledbconstantsnodbtype).
-
-The `fetchInfo` property `type` can be set to `oracledb.STRING` for number,
-date and raw columns in a query to indicate they should be returned as Strings
-instead of their native format.  CLOB column data can also be returned
-as Strings instead of [Lob](#lobclass) instances.
-
-When `fetchInfo` is set to `oracledb.BUFFER` for a BLOB column, each BLOB item
-will be returned as a Buffer instead of a [Lob](#lobclass) instance.
-
-Using `oracledb.DEFAULT` overrides any global mapping given
-by [`fetchAsString`](#propdbfetchasstring)
-or [`fetchAsBuffer`](#propdbfetchasbuffer).  The column data is
-returned in native format.
-
 For example:
 
 ```
-fetchInfo:
-{
-  "HIRE_DATE":    { type : oracledb.STRING },  // return the date as a string
-  "HIRE_DETAILS": { type : oracledb.DEFAULT }  // override fetchAsString or fetchAsBuffer
+fetchInfo: {
+  "HIRE_DATE":    { type: oracledb.STRING },  // return the date as a string
+  "HIRE_DETAILS": { type: oracledb.DEFAULT }  // override fetchAsString or fetchAsBuffer
 }
 ```
 
 Each column is specified by name, using Oracle's standard naming
 convention.
 
-Raw columns returned as strings will be returned as hex-encoded strings. The
-maximum length of a string created by type mapping number and date columns is
-200 bytes.  If a database column that is already being fetched as type
-`oracledb.STRING` is specified in `fetchInfo`, then the actual
-database metadata will be used to determine the maximum length.
+The `type` property can be set to one of:
+
+- [`oracledb.STRING`](#oracledbconstantsnodbtype) for number, date and
+  raw columns in a query to indicate they should be returned as
+  Strings instead of their native format.  CLOB column data can also
+  be returned as Strings instead of [Lob](#lobclass) instances.
+
+  Raw columns returned as strings will be returned as hex-encoded
+  strings.  The maximum length of a string created by type mapping
+  number and date columns is 200 bytes.  If a database column that is
+  already being fetched as type `oracledb.STRING` is specified in
+  `fetchInfo`, then the actual database metadata will be used to
+  determine the maximum length.
+
+- [`oracledb.BUFFER`](#oracledbconstantsnodbtype) for a BLOB column,
+  each BLOB item will be returned as a Buffer instead of a
+  [Lob](#lobclass) instance.
+
+- [`oracledb.DEFAULT`](#oracledbconstantsnodbtype) overrides any
+  global mapping given by [`fetchAsString`](#propdbfetchasstring) or
+  [`fetchAsBuffer`](#propdbfetchasbuffer).  The column data is
+  returned in native format.
 
 Strings and Buffers created for LOB columns will generally be limited
 by Node.js and V8 memory restrictions.
@@ -2867,11 +3073,12 @@ occurs.  The callback [error object](#errorobj) will be set.
 
 When `batchErrors` is *true*, processing will continue even if there
 are data errors.  The `executeMany()` callback error parameter is not
-set.  Instead, an array containing each error will be returned in the
-callback `result` parameter.  All valid data records will be processed
-and a transaction will be started but not committed, even if
-`autoCommit` is *true*.  The application can examine the errors, take
-action, and explicitly commit or rollback as desired.
+set.  Instead, an array containing an error per input data record will
+be returned in the callback `result` parameter.  All valid data
+records will be processed and a transaction will be started but not
+committed, even if `autoCommit` is *true*.  The application can
+examine the errors, take action, and explicitly commit or rollback as
+desired.
 
 Note that some classes of error will always return via the
 `executeMany()` callback error object, not as batch errors.  No
@@ -3041,37 +3248,37 @@ This method was added in node-oracledb 2.2.
 
 ##### Parameters
 
-```
-String sql
-```
+-   ```
+    String sql
+    ```
 
-The SQL statement to parse.
+    The SQL statement to parse.
 
-```
-function(Error error, [Object information])
-```
+-   ```
+    function(Error error, [Object information])
+    ```
 
-The parameters of the callback function are:
+    The parameters of the callback function are:
 
-Callback function parameter | Description
-----------------------------|-------------
-*Error error* | If `getStatementInfo()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
-*Object information* | The `information` object, described below.
+    Callback function parameter | Description
+    ----------------------------|-------------
+    *Error error* | If `getStatementInfo()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+    *Object information* | The `information` object, described below.
 
-Depending on the statement type, the `information` object may contain:
+    Depending on the statement type, the `information` object may contain:
 
-- `bindNames`: an array of strings corresponding to the unique names
-  of the bind variables used in the SQL statement.
+    - `bindNames`: an array of strings corresponding to the unique names
+      of the bind variables used in the SQL statement.
 
-- `metaData`: containing properties equivalent to those given by
-  `execute()` [extendedMetaData](#execmetadata).  This property exists
-  only for queries.
+    - `metaData`: containing properties equivalent to those given by
+      `execute()` [extendedMetaData](#execmetadata).  This property exists
+      only for queries.
 
-- `statementType`: an integer corresponding to one of the [SQL
-  Statement Type Constants](#oracledbconstantsstmttype).
+    - `statementType`: an integer corresponding to one of the [SQL
+      Statement Type Constants](#oracledbconstantsstmttype).
 
 
-#### <a name="connectionping"></a> 4.2.9 `connection.ping()`
+#### <a name="connectionping"></a> 4.2.10 `connection.ping()`
 
 ##### Prototype
 
@@ -3105,15 +3312,15 @@ This method was added in node-oracledb 2.2.
 
 ##### Parameters
 
-```
-function(Error error)
-```
+-   ```
+    function(Error error)
+    ```
 
-The parameters of the callback function are:
+    The parameters of the callback function are:
 
-Callback function parameter | Description
-----------------------------|-------------
-*Error error* | If `ping()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+    Callback function parameter | Description
+    ----------------------------|-------------
+    *Error error* | If `ping()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
 #### <a name="querystream"></a> 4.2.11 `connection.queryStream()`
 
@@ -3140,8 +3347,8 @@ query results.
 The connection must remain open until the stream is completely read.
 
 For tuning, adjust the value of
-[`oracledb.fetchArraySize`](#propdbfetcharraysize) or the `execute()`
-option [`fetchArraySize`](#propexecfetcharraysize).
+[`oracledb.fetchArraySize`](#propdbfetcharraysize) or the
+option [`fetchArraySize`](#propexecfetcharraysize) (see `execute()`).
 
 See [Query Streaming](#streamingresults) for more information.
 
@@ -3178,15 +3385,15 @@ connection.
 
 ##### Parameters
 
-```
-function(Error error)
-```
+-   ```
+    function(Error error)
+    ```
 
-The parameters of the callback function are:
+    The parameters of the callback function are:
 
-Callback function parameter | Description
-----------------------------|-------------
-*Error error* | If `rollback()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+    Callback function parameter | Description
+    ----------------------------|-------------
+    *Error error* | If `rollback()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
 #### <a name="consubscribe"></a> 4.2.14 `connection.subscribe()`
 
@@ -3382,7 +3589,7 @@ Number qos
 ```
 
 An integer mask containing one or more of the quality of service
-[`oracledb.CQN_QOS_*`](#oracledbconstantssubscription) constants.
+[`oracledb.SUBSCR_QOS_*`](#oracledbconstantssubscription) constants.
 
 ###### <a name="consubscribeoptsql"></a> 4.2.14.2.11 `sql`
 
@@ -3400,11 +3607,13 @@ automatically unregistered and a deregistration notification is sent.
 
 ##### <a name="consubscribecallback"></a> 4.2.14.3 `subscribe()`: Callback Function
 
+##### Prototype
+
 ```
 function(Error error)
 ```
 
-The parameters of the callback function are:
+##### Parameters
 
 Callback function parameter | Description
 ----------------------------|-------------
@@ -3442,21 +3651,21 @@ This method was added in node-oracledb 2.3.
 
 ##### Parameters
 
-```
-String name
-```
+-   ```
+    String name
+    ```
 
-The name of the subscription used in [`connection.subscribe()`](#consubscribe).
+    The name of the subscription used in [`connection.subscribe()`](#consubscribe).
 
-```
-function(Error error)
-```
+-   ```
+    function(Error error)
+    ```
 
-The parameters of the callback function are:
+    The parameters of the callback function are:
 
-Callback function parameter | Description
-----------------------------|-------------
-*Error error*               | If `unsubscribe()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+    Callback function parameter | Description
+    ----------------------------|-------------
+    *Error error*               | If `unsubscribe()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
 ## <a name="lobclass"></a> 5. Lob Class
 
@@ -3561,15 +3770,15 @@ See [Closing Lobs](#closinglobs) for more discussion.
 
 ##### Parameters
 
-```
-function(Error error)
-```
+-   ```
+    function(Error error)
+    ```
 
-The parameters of the callback function are:
+    The parameters of the callback function are:
 
-Callback function parameter | Description
-----------------------------|-------------
-*Error error* | If `close()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+    Callback function parameter | Description
+    ----------------------------|-------------
+    *Error error* | If `close()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
 ## <a name="poolclass"></a> 6. Pool Class
 
@@ -3699,9 +3908,11 @@ See [`oracledb.queueTimeout`](#propdbqueuetimeout).
 readonly Number status
 ```
 
-One of the [Pool Status Constants](#oracledbconstantspool) indicating
+One of the [`oracledb.POOL_STATUS_*`](#oracledbconstantspool) constants indicating
 whether the pool is open, being drained of in-use connections, or has
 been closed.
+
+See [Connection Pool Closing and Draining](#conpooldraining).
 
 #### <a name="proppoolstmtcachesize"></a> 6.1.12 `pool.stmtCacheSize`
 
@@ -3766,23 +3977,23 @@ The `drainTime` parameter was added in node-oracledb 3.0.
 
 ##### Parameters
 
-```
-Number drainTime
-```
+-   ```
+    Number drainTime
+    ```
 
-The number of seconds before the pool and connections are force closed.
+    The number of seconds before the pool and connections are force closed.
 
-If `drainTime` is 0, the pool and its connections are closed immediately.
+    If `drainTime` is 0, the pool and its connections are closed immediately.
 
-```
-function(Error error)
-```
+-   ```
+    function(Error error)
+    ```
 
-The parameters of the callback function are:
+    The parameters of the callback function are:
 
-Callback function parameter | Description
-----------------------------|-------------
-*Error error* | If `close()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+    Callback function parameter | Description
+    ----------------------------|-------------
+    *Error error* | If `close()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
 
 
 #### <a name="getconnectionpool"></a> 6.2.2 `pool.getConnection()`
@@ -3848,25 +4059,29 @@ pools.
 
 ##### Parameters
 
-```
-Object poolAttrs
-```
+-   ```
+    Object poolAttrs
+    ```
 
-This optional parameter is used when getting connections from
-heterogeneous pools.  It can contain `user` and `password` properties
-for true heterogeneous pool usage, or it can contain a `user` property
-when a pool proxy user is desired.
+    This optional parameter is used when getting connections from
+    heterogeneous pools.  It can contain `user` and `password` properties
+    for true heterogeneous pool usage, or it can contain a `user` property
+    when a pool proxy user is desired.  It can contain `tag` when
+    [connection tagging](#connpooltagging) is in use.
 
-```
-function(Error error, Connection conn)
-```
+    See [Connection Attributes](#getconnectiondbattrsconnattrs) for
+    discussion of these attributes.
 
-The parameters of the callback function are:
+-   ```
+    function(Error error, Connection conn)
+    ```
 
-Callback function parameter | Description
-----------------------------|-------------
-*Error error* | If `getConnection()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
-*Connection connection* | The newly created connection.   If `getConnection()` fails, `connection` will be NULL.  See [Connection class](#connectionclass) for more details.
+    The parameters of the callback function are:
+
+    Callback function parameter | Description
+    ----------------------------|-------------
+    *Error error* | If `getConnection()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the [error message](#errorobj).
+    *Connection connection* | The newly created connection.   If `getConnection()` fails, `connection` will be NULL.  See [Connection class](#connectionclass) for more details.
 
 #### <a name="terminate"></a> 6.2.3 `pool.terminate()`
 
@@ -4177,7 +4392,7 @@ DBMS_SODA.DROP_COLLECTION('myCollection') FROM DUAL;`.
 
 This method was added in node-oracledb 3.0.
 
-##### <a name="sodacolldropcallback"></a> 8.2.2.1 `drop()` Callback Function
+##### <a name="sodacolldropcallback"></a> 8.2.2.1 `drop()`: Callback Function
 
 ```
 function(Error error, Object result)
@@ -4223,7 +4438,7 @@ way that SQL always does for DDL statements.
 
 This method was added in node-oracledb 3.0.
 
-##### <a name="sodacolldropindexparams"></a> 8.2.3.1 `dropIndex()` Parameters
+##### <a name="sodacolldropindexparams"></a> 8.2.3.1 `dropIndex()`: Parameters
 
 ###### <a name="sodacolldropindexindexname"></a> 8.2.3.1.1 `indexName`
 
@@ -4251,11 +4466,13 @@ permit normal dropping.  See [DROP INDEX][120].
 
 ##### <a name="sodacolldropindexcb"></a> 8.2.3.2 `dropIndex()` Callback Function
 
+##### Prototype
+
 ```
 function(Error error, Object result)
 ```
 
-The parameters of the callback function are:
+##### Parameters
 
 Callback function parameter | Description
 ----------------------------|-------------
@@ -4295,7 +4512,17 @@ See [Simple Oracle Document Access (SODA)](#sodaoverview) for more examples.
 
 ##### <a name="sodaoperationclass"></a> 8.2.4.1 SodaOperation Class
 
-A SodaOperation object is an internal object. You should not directly modify its properties.
+You can chain together SodaOperation methods, to specify read or write
+operations against a collection.
+
+Non-terminal SodaOperation methods return the same object on which
+they are invoked, allowing them to be chained together.
+
+A terminal SodaOperation method always appears at the end of a method
+chain to execute the operation.
+
+A SodaOperation object is an internal object. You should not directly
+modify its properties.
 
 ##### <a name="sodaoperationclassnonterm"></a> 8.2.4.1.1 Non-terminal SodaOperation Methods
 
@@ -4441,7 +4668,7 @@ This method was added in node-oracledb 3.0.
 
 ##### <a name="sodaoperationclassterm"></a> 8.2.4.1.2 Terminal SodaOperation Methods
 
-Terminal SodaOperation methods operate on the set of documents that
+A terminal SodaOperation method operates on the set of documents that
 satisfy the criteria specified by previous non-terminal methods in the
 method chain.  Only one terminal method can be used in each chain.
 
@@ -4473,24 +4700,24 @@ This method was added in node-oracledb 3.0.
 
 ##### Parameters
 
-```
-function(Error error, Object result)
-```
+-   ```
+    function(Error error, Object result)
+    ```
 
-The parameters of the callback function are:
+    The parameters of the callback function are:
 
-Callback function parameter | Description
-----------------------------|-------------
-*Error error* | If `count()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the error message.
-*Object result* | See below.
+    Callback function parameter | Description
+    ----------------------------|-------------
+    *Error error* | If `count()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the error message.
+    *Object result* | See below.
 
-The `result` object contains one attribute:
+    The `result` object contains one attribute:
 
-```
-Number count
-```
+    ```
+    Number count
+    ```
 
-The number of documents matching the SodaOperation criteria.
+    The number of documents matching the SodaOperation criteria.
 
 ###### <a name="sodaoperationclassgetcursor"></a> 8.2.4.1.2.2 `sodaOperation.getCursor()`
 
@@ -4529,16 +4756,16 @@ This method was added in node-oracledb 3.0.
 
 ##### Parameters
 
-```
-function(Error error, SodaDocumentCursor cursor)
-```
+-   ```
+    function(Error error, SodaDocumentCursor cursor)
+    ```
 
-The parameters of the callback function are:
+    The parameters of the callback function are:
 
-Callback function parameter | Description
-----------------------------|-------------
-*Error error*  | If `getCursor()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the error message.
-*SodaDocumentCursor cursor* | A cursor that can be iterated over to access SodaDocument objects matching the SodaOperation search criteria.
+    Callback function parameter | Description
+    ----------------------------|-------------
+    *Error error*  | If `getCursor()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the error message.
+    *SodaDocumentCursor cursor* | A cursor that can be iterated over to access SodaDocument objects matching the SodaOperation search criteria.
 
 ###### <a name="sodaoperationclassgetdocuments"></a> 8.2.4.1.2.3 `sodaOperation.getDocuments()`
 
@@ -4572,16 +4799,16 @@ This method was added in node-oracledb 3.0.
 
 ##### Parameters
 
-```
-function(Error error, Array documents)
-```
+-   ```
+    function(Error error, Array documents)
+    ```
 
-The parameters of the callback function are:
+    The parameters of the callback function are:
 
-Callback function parameter | Description
-----------------------------|-------------
-*Error error* | If `getDocuments()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the error message.
-*Array documents* | An array of SodaDocuments that match the SodaOperation query criteria.
+    Callback function parameter | Description
+    ----------------------------|-------------
+    *Error error* | If `getDocuments()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the error message.
+    *Array documents* | An array of SodaDocuments that match the SodaOperation query criteria.
 
 ###### <a name="sodaoperationclassgetone"></a> 8.2.4.1.2.4 `sodaOperation.getOne()`
 
@@ -4614,16 +4841,16 @@ This method was added in node-oracledb 3.0.
 
 ##### Parameters
 
-```
-function(Error error, SodaDocument document)
-```
+-   ```
+    function(Error error, SodaDocument document)
+    ```
 
-The parameters of the callback function are:
+    The parameters of the callback function are:
 
-Callback function parameter | Description
-----------------------------|-------------
-*Error error* | If `getOne()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the error message.
-*SodaDocument document* | One SodaDocument that matches the sodaOperation query criteria.  If no document is found, then `document` will be undefined.
+    Callback function parameter | Description
+    ----------------------------|-------------
+    *Error error* | If `getOne()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the error message.
+    *SodaDocument document* | One SodaDocument that matches the sodaOperation query criteria.  If no document is found, then `document` will be undefined.
 
 ###### <a name="sodaoperationclassremove"></a> 8.2.4.1.2.5 `sodaOperation.remove()`
 
@@ -4653,24 +4880,24 @@ This method was added in node-oracledb 3.0.
 
 ##### Parameters
 
-```
-function(Error error, Object result)
-```
+-   ```
+    function(Error error, Object result)
+    ```
 
-The parameters of the callback function are:
+    The parameters of the callback function are:
 
-Callback function parameter | Description
-----------------------------|-------------
-*Error error* | If `remove()` succeeds, error is NULL.  If an error occurs, then error contains the error message.
-*Object result* | See below.
+    Callback function parameter | Description
+    ----------------------------|-------------
+    *Error error* | If `remove()` succeeds, error is NULL.  If an error occurs, then error contains the error message.
+    *Object result* | See below.
 
-The `result` object contains one attribute:
+    The `result` object contains one attribute:
 
-```
-result.count
-```
+    ```
+    result.count
+    ```
 
-The number of documents removed from the collection.
+    The number of documents removed from the collection.
 
 ###### <a name="sodaoperationclassreplaceone"></a> 8.2.4.1.2.6 `sodaOperation.replaceOne()`
 
@@ -4717,31 +4944,31 @@ This method was added in node-oracledb 3.0.
 
 ##### Parameters
 
-```
-Object newDocumentContent
-SodaDocument newSodaDocument
-```
+-   ```
+    Object newDocumentContent
+    SodaDocument newSodaDocument
+    ```
 
-The new document.  See
-[sodaCollection.insertOne()](#sodacollinsertone), which has the same
-semantics for the document.
+    The new document.  See
+    [sodaCollection.insertOne()](#sodacollinsertone), which has the same
+    semantics for the document.
 
-```
-function(Error error, Object result)
-```
+-   ```
+    function(Error error, Object result)
+    ```
 
-Callback function parameter | Description
-----------------------------|-------------
-*Error error* | If `replaceOne()` succeeds, `error` is NULL.  It is not an error if no document is replaced. If an error occurs, then `error` contains the error message.
-*Object result* | See below.
+    Callback function parameter | Description
+    ----------------------------|-------------
+    *Error error* | If `replaceOne()` succeeds, `error` is NULL.  It is not an error if no document is replaced. If an error occurs, then `error` contains the error message.
+    *Object result* | See below.
 
-The `result` object contains one attribute:
+    The `result` object contains one attribute:
 
-```
-result.replaced
-```
+    ```
+    result.replaced
+    ```
 
-This attribute will be *true* if the document was successfully replaced, *false* otherwise.
+    This attribute will be *true* if the document was successfully replaced, *false* otherwise.
 
 ###### <a name="sodaoperationclassreplaceoneandget"></a> 8.2.4.1.2.7 `sodaOperation.replaceOneAndGet()`
 
@@ -4777,23 +5004,23 @@ This method was added in node-oracledb 3.0.
 
 ##### Parameters
 
-```
-Object newDocumentContent
-SodaDocument newSodaDocument
-```
+-   ```
+    Object newDocumentContent
+    SodaDocument newSodaDocument
+    ```
 
-The new document.  See
-[sodaCollection.insertOne()](#sodacollinsertone), which has the same
-semantics for the document.
+    The new document.  See
+    [sodaCollection.insertOne()](#sodacollinsertone), which has the same
+    semantics for the document.
 
-```
-function(Error error, SodaDocument updatedDocument)
-```
+-   ```
+    function(Error error, SodaDocument updatedDocument)
+    ```
 
-Callback function parameter | Description
-----------------------------|-------------
-*Error error* | If `replaceOneAndGet()` succeeds, `error` is NULL.  It is not an error if no document is replaced.  If an error occurs, then `error` contains the error message.
-*SodaDocument updatedDocument* | The updated [SodaDocument](#sodadocumentclass) if replacement was successful, otherwise `updatedDocument` will be undefined.  The `lastModified` and `version` attributes of the stored SodaDocument will be updated.  The `mediaType` attribute and the content will be replaced.  Other attributes of `newDocument` are ignored.  Note for performance reasons, `updatedDocument` will not have document content and cannot itself be passed directly to SODA insert or replace methods.
+    Callback function parameter | Description
+    ----------------------------|-------------
+    *Error error* | If `replaceOneAndGet()` succeeds, `error` is NULL.  It is not an error if no document is replaced.  If an error occurs, then `error` contains the error message.
+    *SodaDocument updatedDocument* | The updated [SodaDocument](#sodadocumentclass) if replacement was successful, otherwise `updatedDocument` will be undefined.  The `lastModified` and `version` attributes of the stored SodaDocument will be updated.  The `mediaType` attribute and the content will be replaced.  Other attributes of `newDocument` are ignored.  Note for performance reasons, `updatedDocument` will not have document content and cannot itself be passed directly to SODA insert or replace methods.
 
 #### <a name="sodacollgetdataguide"></a> 8.2.5 `sodaCollection.getDataGuide()`
 
@@ -4835,16 +5062,16 @@ This method was added in node-oracledb 3.0.
 
 ##### Parameters
 
-```
-function(Error error, SodaDocument document)
-```
+-   ```
+    function(Error error, SodaDocument document)
+    ```
 
-The parameters of the callback function are:
+    The parameters of the callback function are:
 
-Callback function parameter | Description
-----------------------------|-------------
-*Error error* | If `getDataGuide()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the error message.
-*SodaDocument document* | The SodaDocument containining JSON content which can be accessed from the document as normal with [`sodaDocument.getContent()`](#sodadocgetcontent), [`sodaDocument.getContentAsString()`](#sodadocgetcontentasstring) or [`sodaDocument.getContentAsBuffer()`](#sodadocgetcontentasbuffer).
+    Callback function parameter | Description
+    ----------------------------|-------------
+    *Error error* | If `getDataGuide()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the error message.
+    *SodaDocument document* | The SodaDocument containining JSON content which can be accessed from the document as normal with [`sodaDocument.getContent()`](#sodadocgetcontent), [`sodaDocument.getContentAsString()`](#sodadocgetcontentasstring) or [`sodaDocument.getContentAsBuffer()`](#sodadocgetcontentasbuffer).
 
 #### <a name="sodacollinsertone"></a> 8.2.6 `sodaCollection.insertOne()`
 
@@ -4899,7 +5126,7 @@ doc = sodaDatabase.createDocument(newDocumentContent);
 await sodaCollection.insertOne(doc);
 ```
 
-##### <a name="sodacollinsertoneparams"></a> 8.2.6.1 `insertOne()` Parameters
+##### <a name="sodacollinsertoneparams"></a> 8.2.6.1 `insertOne()`: Parameters
 
 ###### <a name="sodacollinsertoneparamsdoc"></a> 8.2.6.1.1 `newDocumentContent`,  `newDocument`
 
@@ -4924,11 +5151,13 @@ values will be used instead.
 
 ##### <a name="sodacollinsertonecb"></a> 8.2.6.2 `insertOne()` Callback Function
 
+##### Prototype
+
 ```
 function(Error error)
 ```
 
-The parameters of the callback function are:
+##### Parameters
 
 Callback function parameter | Description
 ----------------------------|-------------
@@ -4974,7 +5203,7 @@ connection is committed.
 
 This method was added in node-oracledb 3.0.
 
-##### <a name="sodacollinsertoneandgetparams"></a> 8.2.7.1 `insertOneAndGet()` Parameters
+##### <a name="sodacollinsertoneandgetparams"></a> 8.2.7.1 `insertOneAndGet()`: Parameters
 
 ###### <a name="sodacollinsertoneandgetparamsdoc"></a> 8.2.7.1.1 `newDocumentContent`,  `newDocument`
 
@@ -4989,11 +5218,13 @@ For related documentation, see [`sodaCollection.insertOne()`](#sodacollinsertone
 
 ##### <a name="sodacollinsertoneandgetcb"></a> 8.2.7.2 `insertOneAndGet()` Callback Function
 
+##### Prototype
+
 ```
 function(Error error, SodaDocument document)
 ```
 
-The parameters of the callback function are:
+##### Parameters
 
 Callback function parameter | Description
 ----------------------------|-------------
@@ -5058,7 +5289,7 @@ collection.
 If the optional `mode` parameter is
 [`oracledb.SODA_COLL_MAP_MODE`](#oracledbconstantssoda), SODA will
 attempt to use a pre-existing table as the table underlying the
-collection..
+collection.
 
 If [`oracledb.autoCommit`](#propdbisautocommit) is *true*, and
 `createCollection()` succeeds, then any open transaction on the
@@ -5113,11 +5344,13 @@ Most users will leave `mode` undefined.
 
 ##### <a name="sodadbcreatecollectioncb"></a> 9.1.1.3 `createCollection()`: Callback Function
 
+##### Prototype
+
 ```
 function(Error error, SodaCollection collection)
 ```
 
-The parameters of the callback function are:
+##### Parameters
 
 Callback function parameter | Description
 ----------------------------|-------------
@@ -5242,11 +5475,13 @@ Attribute           | Description
 
 ##### <a name="sodadbgetcollectionnamescb"></a> 9.1.3.2 `getCollectionNames()`: Callback Function
 
+##### Prototype
+
 ```
 function(Error error, Array collectionNames)
 ```
 
-The parameters of the callback function are:
+##### Parameters
 
 Callback function parameter | Description
 ----------------------------|-------------
@@ -5293,11 +5528,13 @@ Name of the collection to open.
 
 ##### <a name="sodadbopencollectioncb"></a> 9.1.4.2 `openCollection()`: Callback Function
 
+##### Prototype
+
 ```
 function(Error error, SodaCollection collection)
 ```
 
-The parameters of the callback function are:
+##### Parameters
 
 Callback function parameter | Description
 ----------------------------|-------------
@@ -5419,7 +5656,7 @@ getContentAsString()
 
 ##### Description
 
-A synchronous method that returns the document content as a String.
+A synchronous method that returns JSON document content as a String.
 
 An exception will occur if the document content cannot be converted to
 a string.
@@ -5460,11 +5697,15 @@ This method was added in node-oracledb 3.0.
 
 ##### Parameters
 
-The parameters of the callback function are:
+-   ```
+    function(Error error)
+    ```
 
-Callback function parameter | Description
-----------------------------|-------------
-*Error error* | If `close()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the error message.
+    The parameters of the callback function are:
+
+    Callback function parameter | Description
+    ----------------------------|-------------
+    *Error error* | If `close()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the error message.
 
 #### <a name="sodadoccursorgetnext"></a> 11.1.2 `sodaDocumentCursor.getNext()`
 
@@ -5493,16 +5734,16 @@ This method was added in node-oracledb 3.0.
 
 ##### Parameters
 
-```
-function(Error error, SodaDocument document)
-```
+-   ```
+    function(Error error, SodaDocument document)
+    ```
 
-The parameters of the callback function are:
+    The parameters of the callback function are:
 
-Callback function parameter | Description
-----------------------------|-------------
-*Error error* | If `getNext()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the error message.
-*SodaDocument document* | The next document in the cursor.  If there are no more documents, then `document` will be undefined.
+    Callback function parameter | Description
+    ----------------------------|-------------
+    *Error error* | If `getNext()` succeeds, `error` is NULL.  If an error occurs, then `error` contains the error message.
+    *SodaDocument document* | The next document in the cursor.  If there are no more documents, then `document` will be undefined.
 
 ## <a name="usermanual"></a> NODE-ORACLEDB USER MANUAL
 
@@ -5520,7 +5761,7 @@ oracledb.getConnection(
   {
     user          : "hr",
     password      : "welcome",
-    connectString : "localhost/XE"
+    connectString : "localhost/XEPDB1"
   },
   function(err, connection) {
     if (err) { console.error(err.message); return; }
@@ -5563,7 +5804,7 @@ the syntax is:
 
 Note that old-school connection SIDs are not supported: only service names can be used.
 
-For example, use *"localhost/XE"* to connect to the database *XE* on the local machine:
+For example, use *"localhost/XEPDB1"* to connect to the database *XE* on the local machine:
 
 ```javascript
 var oracledb = require('oracledb');
@@ -5572,7 +5813,7 @@ oracledb.getConnection(
   {
     user          : "hr",
     password      : "welcome",
-    connectString : "localhost/XE"
+    connectString : "localhost/XEPDB1"
   },
   . . .
 ```
@@ -5759,72 +6000,75 @@ JavaScript thread.
 ### <a name="connpooling"></a> 12.3 Connection Pooling
 
 When applications use a lot of connections for short periods, Oracle
-recommends using a connection pool for efficiency.  Each pool can
-contain one or more connections.  A pool can grow or shrink, as
-needed.  Each node-oracledb process can use one or more local pools of
-connections.  In addition to providing an immediately available set of
-connections, pools provide database load balancing capabilities and
-transparently handles Oracle Database High Availability events,
-shielding applications from errors during planned maintenance.
+recommends using a connection pool for efficiency.  Each node-oracledb
+process can use one or more connection pools.  Each pool can contain
+one or more connections.  A pool can grow or shrink, as needed.  In
+addition to providing an immediately available set of connections,
+pools provide [dead connection detection](#connpoolpinging) and
+transparently handle Oracle Database [High Availability
+events](#connectionha).  This helps shield applications during planned
+maintenance and from unplanned failures.  Internally [Oracle Call
+Interface Session Pooling][6] is used, which provides many of these
+features.
 
-A pool is created by calling the
-[`oracledb.createPool()`](#createpool) method. Internally [Oracle Call
-Interface Session Pooling][6] is used.
+Pools are created by calling [`oracledb.createPool()`](#createpool).
+Generally applications will create a pool once as part of
+initialization.  After an application finishes using a connection
+pool, it should release all connections and terminate the connection
+pool by calling the [`pool.close()`](#poolclose) method.
 
-A connection from the pool is obtained with the
-[`pool.getConnection()`](#getconnectionpool) method:
+Connections from the pool are obtained with
+[`pool.getConnection()`](#getconnectionpool).  If all connections in a
+pool are being used, then subsequent `getConnection()` calls will be
+put in a [queue](#connpoolqueue).  Connections must be released with
+[`connection.close()`](#connectionclose) when no longer needed so they
+are available for reuse.  Make sure to release connections in all
+codes paths, include error handlers.
+
+When a connection is released back to its pool, any ongoing
+transaction will be [rolled back](#transactionmgt) however it will
+retain session state, such as [NLS](#nls) settings from ALTER SESSION
+statements. See [Connection Tagging and Session
+State](#connpooltagging) for more information.
+
+Connections can also be [dropped from the pool](#connectionclose).
+
+In the async/await style:
 
 ```javascript
-var oracledb = require('oracledb');
-
-oracledb.createPool (
-  {
+let pool;
+try {
+  pool = await oracledb.createPool({
     user          : "hr"
     password      : "welcome"
-    connectString : "localhost/XE"
-  },
-  function(err, pool) {
-    pool.getConnection (
-      function(err, connection) {
-      . . .  // use connection
-      });
+    connectString : "localhost/XEPDB1"
   });
+
+  let connection = await pool.getConnection();
+  . . .  // use connection
+  await connection.close();  // return connection to the pool
+
+} catch (err) {
+  console.error(err.message);
+} finally {
+  await pool.close();
+}
 ```
+
+#### <a name="conpoolsizing"></a> 12.3.1 Connection Pool Sizing
+
+The [`poolMax`](#propdbpoolmax), [`poolMin`](#propdbpoolmin) and
+[`poolPingInterval`](#propdbpoolpinginterval) attributes should be
+adjusted to handle the desired workload within the bounds of available
+resources in Node.js and the database.
 
 Each connection should be used for a given unit of work, such as a
-transaction or a set of sequentially executed statements.  Remember,
-statements should be [executed sequentially, not in
-parallel](#numberofthreads) on each connection.
+transaction or a set of sequentially executed statements.  Statements
+should be [executed sequentially, not in parallel](#numberofthreads)
+on each connection.
 
-Connections should be released with [`connection.close()`](#connectionclose) when no
-longer needed:
-
-```javascript
-    connection.close(
-      function(err) {
-        if (err) { console.error(err.message); }
-      });
-```
-
-Make sure to release connections in all codes paths, include error
-handlers.
-
-Connections returned to a pool will retain session state, such as NLS
-settings.  When getting a connection from the pool, reset any state,
-if necessary.
-
-After an application finishes using a connection pool, it should
-release all connections and terminate the connection pool by calling
-the [`pool.close()`](#poolclose) method.  Pools can forcibly closed,
-or optionally be 'drained' of active connections before being
-terminated.
-
-Pool expansion happens when the following are all true:
-(i) [`getConnection()`](#getconnectionpool) is called and (ii) all the
-currently established connections in the pool are "checked out" by
-previous `getConnection()` calls and are in-use by the application,
-and (iii) the number of those connections is less than the pool's
-`poolMax` setting.
+If you increase the size of the pool, you must [increase the number of
+threads](#numberofthreads) used by Node.js.
 
 The growth characteristics of a connection pool are determined by the
 Pool attributes [`poolIncrement`](#proppoolpoolincrement),
@@ -5833,6 +6077,13 @@ Pool attributes [`poolIncrement`](#proppoolpoolincrement),
 Authentication is used, the pool behavior is different, see
 [External Authentication](#extauth).
 
+Pool expansion happens when the following are all true: (i)
+[`getConnection()`](#getconnectionpool) is called and (ii) all the
+currently established connections in the pool are "checked out" by
+previous `getConnection()` calls and are in-use by the application,
+and (iii) the number of those connections is less than the pool's
+`poolMax` setting.
+l
 The Oracle Real-World Performance Group's general recommendation for
 client connection pools is for the pool to have a fixed sized.  The
 values of `poolMin` and `poolMax` should be the same (and
@@ -5848,25 +6099,104 @@ The Pool attribute [`stmtCacheSize`](#propconnstmtcachesize) can be
 used to set the statement cache size used by connections in the pool,
 see [Statement Caching](#stmtcache).
 
-#### <a name="connpoolcache"></a> 12.3.1 Connection Pool Cache
+#### <a name="conpooldraining"></a> 12.3.2 Connection Pool Closing and Draining
 
-Node-oracledb has an internal connection pool cache which can be used
-to facilitate sharing pools across modules and simplify getting
-connections.  At creation time, a pool can be given a named alias.
-The alias can later be used to retrieve the related pool object for
-use.
+Closing a connection pool allows database resources to be freed.  If
+Node.js is killed without [`pool.close()`](#poolclose) being called,
+it may be some time before the unused database-side of connections are
+automatically cleaned up in the database.
 
-Methods that can affect or use the connection pool cache include:
-- [oracledb.createPool()](#createpool) - can add a pool to the cache
-- [oracledb.getPool()](#getpool) - retrieves a pool from the cache (synchronous)
-- [oracledb.getConnection()](#getconnectiondb) - can use a pool in the cache to retrieve connections
-- [pool.close()](#poolclose) - automatically removes the pool from the cache if needed
+When `pool.close()` is called, the pool will be closed only if all
+connections have been released to the pool with `connection.close()`.
+Otherwise an error is returned and the pool will not be closed.
 
-Pools are added to the cache if
-a [`poolAlias`](#createpoolpoolattrspoolalias) property is provided in
-the [`poolAttrs`](#createpoolpoolattrs) object when invoking
-`oracledb.createPool()`.  There can be multiple pools in the cache if
-each pool is created with a unique alias.
+An optional `drainTime` parameter can be used to force the pool closed
+even if connections are in use.  This lets the pool be 'drained' of
+connections.  The `drainTime` indicates how many seconds the pool is
+allowed to remain active before it and its connections are terminated.
+For example, to give active connections 10 seconds to complete their
+work before being terminated:
+
+```javascript
+await pool.close(10);
+```
+
+When a pool has been closed with a specified `drainTime`, then any new
+`pool.getConnection()` calls will fail.  If connections are currently
+in use by the application, they can continue to be used for the
+specified number of seconds, after which the pool and all open
+connections are forcibly closed.  Prior to this time limit, if there
+are no connections currently "checked out" from the pool with
+`getConnection()`, then the pool and its connections are immediately
+closed.
+
+In network configurations that drop (or in-line) out-of-band breaks,
+forced pool termination may hang unless you have
+[`DISABLE_OOB=ON`][122] in a `sqlnet.ora` file, see [Optional Client
+Configuration Files](#tnsadmin).
+
+Non-zero `drainTime` values are recommended so applications
+have the opportunity to gracefully finish database operations, however
+pools can be forcibly closed by specifying a zero drain time:
+
+```javascript
+await pool.close(0);
+```
+
+Closing the pool would commonly be one of the last stages of a Node.js
+application.  A typical closing routine look likes:
+
+```javascript
+// Close the default connection pool with 10 seconds draining, and exit
+async function closePoolAndExit() {
+  console.log("\nTerminating");
+  try {
+    await oracledb.getPool().close(10);
+    process.exit(0);
+  } catch(err) {
+    console.error(err.message);
+    process.exit(1);
+  }
+}
+```
+
+It is helpful to invoke `closePoolAndExit()` if Node.js is
+sent a signal or interrupted:
+
+```javascript
+// Close the pool cleanly if Node.js is interrupted
+process
+  .once('SIGTERM', closePoolAndExit)
+  .once('SIGINT',  closePoolAndExit);
+```
+
+#### <a name="connpoolcache"></a> 12.3.3 Connection Pool Cache
+
+When pools are created, they can be given a named alias.  The alias
+can later be used to retrieve the related pool object for use.  This
+facilitates sharing pools across modules and simplifies getting
+connections.
+
+Pools are added to the cache by using a
+[`poolAlias`](#createpoolpoolattrspoolalias) property in the
+[`poolAttrs`](#createpoolpoolattrs) object::
+
+```javascript
+oracledb.createPool (
+  {
+    user: 'hr',
+    password: 'welcome',
+    connectString: 'localhost/XEPDB1',
+    poolAlias: 'hrpool'
+  },
+  function(err) {  // callback 'pool' parameter can be omitted
+    . . . // get the pool from the cache and use it
+  }
+);
+```
+
+There can be multiple pools in the cache if each pool is created with
+a unique alias.
 
 If a pool is created without providing a pool alias, and a pool with
 an alias of 'default' is not in the cache already, this pool will be
@@ -5875,22 +6205,27 @@ methods that utilize the connection pool cache.  If subsequent pools
 are created without explicit aliases, they will be not stored in the
 pool cache.
 
-##### Examples using the default pool
+Methods that can affect or use the connection pool cache include:
+- [oracledb.createPool()](#createpool) - can add a pool to the cache
+- [oracledb.getPool()](#getpool) - retrieves a pool from the cache
+- [oracledb.getConnection()](#getconnectiondb) - can use a pool in the cache to retrieve connections
+- [pool.close()](#poolclose) - automatically removes a pool from the cache
+
+##### Using the Default Pool
 
 Assuming the connection pool cache is empty, the following will create a new pool
 and cache it using the pool alias 'default':
-```javascript
-var oracledb = require('oracledb');
 
+```javascript
 oracledb.createPool (
   {
     user: 'hr',
     password: 'welcome',
-    connectString: 'localhost/XE'
+    connectString: 'localhost/XEPDB1'
   },
   function(err, pool) {
     console.log(pool.poolAlias); // 'default'
-    . . . // use pool
+    . . . // Use pool
   }
 );
 ```
@@ -5901,7 +6236,6 @@ Once cached, the default pool can be retrieved using [oracledb.getPool()](#getpo
 passing the `poolAlias` parameter:
 
 ```javascript
-var oracledb = require('oracledb');
 var pool = oracledb.getPool();
 
 pool.getConnection(function(err, conn) {
@@ -5914,14 +6248,12 @@ This specific sequence can be simplified by using the shortcut to
 from a pool:
 
 ```javascript
-var oracledb = require('oracledb');
-
 oracledb.getConnection(function(err, conn) {
   . . . // Use connection from the previously created 'default' pool and then release it
 });
 ```
 
-##### Examples using multiple pools
+##### Using Multiple Pools
 
 If the application needs to use more than one pool at a time, unique pool aliases
 can be used when creating the pools:
@@ -5933,14 +6265,14 @@ var hrPoolPromise = oracledb.createPool({
   poolAlias: 'hrpool',
   users: 'hr',
   password: 'welcome',
-  connectString: 'localhost/XE'
+  connectString: 'localhost/XEPDB1'
 });
 
 var shPoolPromise = oracledb.createPool({
   poolAlias: 'shpool',
   user: 'sh',
   password: 'welcome',
-  connectString: 'localhost/XE'
+  connectString: 'localhost/XEPDB1'
 });
 
 Promise.all([hrPoolPromise, shPoolPromise])
@@ -5957,7 +6289,6 @@ To use the methods or attributes of a pool in the cache, a pool can be retrieved
 from the cache by passing its pool alias to [oracledb.getPool()](#getpool):
 
 ```javascript
-var oracledb = require('oracledb');
 var pool = oracledb.getPool('hrpool'); // or 'shpool'
 
 pool.getConnection(function(err, conn) {
@@ -5968,14 +6299,43 @@ pool.getConnection(function(err, conn) {
 The [oracledb.getConnection()](#getconnectiondb) shortcut can also be used with a pool alias:
 
 ```javascript
-var oracledb = require('oracledb');
-
 oracledb.getConnection('hrpool', function(err, conn) { // or 'shpool'
   . . . // Use connection from the pool and then release it
 });
 ```
 
-#### <a name="connpoolqueue"></a> 12.3.2 Connection Pool Queue
+From node-oracledb 3.1.0 you can pass the alias as an attribute of the
+options:
+
+```javascript
+oracledb.getConnection({ poolAlias: 'hrpool' }, function(err, conn) {
+  . . . // Use connection from the pool and then release it
+});
+```
+
+The presence of the `poolAlias` attribute indicates the previously
+created connection pool should be used instead of creating a
+standalone connection.  This syntax is useful when you want to pass
+other attributes to a pooled `getConnection()` call, such as for
+[proxy connections](#connpoolproxy) or with [connection
+tagging](#connpooltagging):
+
+```javascript
+oracledb.getConnection({ poolAlias: 'hrpool', tag: 'loc=au' }, function(err, conn) {
+  . . . // Use connection from the pool and then release it
+});
+```
+
+To use the default pool in this way you must explicitly pass the alias
+`default`:
+
+```javascript
+oracledb.getConnection({ poolAlias: 'default' tag: 'loc=cn;p=1' }, function(err, conn) {
+  . . . // Use connection from the pool and then release it
+});
+```
+
+#### <a name="connpoolqueue"></a> 12.3.4 Connection Pool Queue
 
 If the application has called `getConnection()` so that all
 connections in the pool are in use, and
@@ -5998,7 +6358,7 @@ connection is [released](#connectionclose), and the number of
 connections in use drops below the value of
 [`poolMax`](#proppoolpoolmax).
 
-#### <a name="connpoolmonitor"></a> 12.3.3 Connection Pool Monitoring and Throughput
+#### <a name="connpoolmonitor"></a> 12.3.5 Connection Pool Monitoring and Throughput
 
 Connection pool usage should be monitored to choose the appropriate
 connection pool settings for your workload.
@@ -6022,7 +6382,7 @@ oracledb.createPool (
     _enableStats  : true,   // default is false
     user          : "hr",
     password      : "welcome",
-    connectString : "localhost/XE"
+    connectString : "localhost/XEPDB1"
   },
   function(err, pool) {
   . . .
@@ -6076,6 +6436,7 @@ Attribute                                   |
 [`poolIncrement`](#propdbpoolincrement)     |
 [`poolTimeout`](#propdbpooltimeout)         |
 [`poolPingInterval`](#propdbpoolpinginterval) |
+[`sessionCallback`](#createpoolpoolattrscallback)|
 [`stmtCacheSize`](#propdbstmtcachesize)     |
 
 ##### Pool Status
@@ -6094,7 +6455,7 @@ Environment Variable                                 | Description
 -----------------------------------------------------|-------------
 [`process.env.UV_THREADPOOL_SIZE`](#numberofthreads) | The number of worker threads for this process.  Note this shows the value of the variable, however if this variable was set after the thread pool starts, the thread pool will actually be the default size of 4.
 
-#### <a name="connpoolpinging"></a> 12.3.4 Connection Pool Pinging
+#### <a name="connpoolpinging"></a> 12.3.6 Connection Pool Pinging
 
 Connection pool pinging is a way for node-oracledb to identify
 unusable pooled connections and replace them with usable ones before
@@ -6155,20 +6516,315 @@ user resource profile [`IDLE_TIME`][100], or from an `ALTER SYSTEM
 KILL SESSION` command.  The explicit ping initiated by
 `poolPingInterval` will detect these problems.
 
-For ultimate scalability, use Oracle client 12.2 (or later) libraries, disable
-explicit pool pinging by setting `poolPingInterval` to a negative
-value, and make sure the database resource manager or user profile is
-not expiring idle sessions.
+For ultimate scalability, use Oracle client 12.2 (or later) libraries,
+disable explicit pool pinging by setting `poolPingInterval` to a
+negative value, and make sure the firewall, database resource manager,
+or user profile is not expiring idle sessions.
 
 In all cases, when a bad connection is released back to the pool with
 [connection.close()](#connectionclose), the connection is
-automatically destroyed.  This allows a valid connection to be opened
-by some subsequent `getConnection()` call.
+automatically destroyed.  This allows a valid connection to the
+database to be opened by some subsequent `getConnection()` call.
 
 Explicit pings can be performed at any time with
 [`connection.ping()`](#connectionping).
 
-#### <a name="connpoolproxy"></a> 12.3.5 Heterogeneous Connection Pools and Pool Proxy Authentication
+#### <a name="connpooltagging"></a> 12.3.7 Connection Tagging and Session State
+
+Applications can set "session" state in each connection, such as
+[NLS](#nls) settings from ALTER SESSION statements.  Pooled
+connections will retain this session state after they have been
+released back to the pool with `connection.close()`.  However, because
+pools can grow, or connections in the pool can be recreated, there is
+no guarantee a subsequent `pool.getConnection()` call will return a
+database connection that has any particular state.
+
+The [`oracledb.createPool()`](#createpool) option attribute
+[`sessionCallback`](#createpoolpoolattrssessioncallback) can be used
+to set session state efficiently so that connections have a known
+session state.  The `sessionCallback` can be a Node.js function that
+will be called whenever `pool.getConnection()` will return a newly
+created database connection that has not been used before.  It is also
+called when connection tagging is being used and the requested tag is
+not identical to the tag in the connection returned by the pool.  It
+is called before `pool.getConnection()` returns in these two cases.
+It will not be called in other cases.  Using a callback saves the cost
+of setting session state if a previous user of a connection has
+already set it.  The caller of `pool.getConnection()` can always
+assume the correct state is set.
+
+###### <a name="sessionfixupnode"></a> Node.js Callback
+
+This example sets two NLS settings in each pooled connection.  They
+are only set the very first time connections are established to the
+database.  The `requestedTag` parameter is ignored because it is only
+valid when tagging is being used:
+
+```javascript
+function initSession(connection, requestedTag, cb) {
+  connection.execute(
+    `alter session set nls_date_format = 'YYYY-MM-DD' nls_language = AMERICAN`,
+    cb);
+}
+
+try {
+  let pool = await oracledb.createPool({
+               user: 'hr',
+               password: 'welcome',
+               connectString: 'localhost/XEPDB1',
+               sessionCallback: initSession
+             });
+  . . .
+}
+```
+
+If you need to execute multiple SQL statements in the callback, use an
+anonymous PL/SQL block to save [round-trips][124] of repeated
+`execute()` calls:
+
+```javascript
+connection.execute(
+  `begin
+     execute immediate
+       'alter session set nls_date_format = ''YYYY-MM-DD'' nls_language = AMERICAN';
+     -- other SQL statements could be put here
+   end;`,
+  cb);
+```
+
+See [`sessionfixup.js`][126] for a runnable example.
+
+Connection tagging and `sessionCallback` are new features in
+node-oracledb 3.1.
+
+##### Connection Tagging
+
+Pooled connections can be tagged to record their session state by
+setting the property [`connection.tag`](#propconntag) to a string.  A
+`pool.getConnection({tag: 'mytag'})` call can request a connection
+that has the specified tag.  If no available connections with that tag
+exist in the pool, an untagged connection or a connection with a new
+session will be returned.  If the optional `getConnection()` attribute
+`matchAnyTag` is *true*, then a connection that has a different tag
+may be returned.
+
+The [`sessionCallback`](#createpoolpoolattrssessioncallback) function
+is invoked before `pool.getConnection()` returns if the requested tag
+is not identical to the actual tag of the pooled connection.  The
+callback can compare the requested tag with the current actual tag in
+`connection.tag`.  Any desired state change can be made to the
+connection and `connection.tag` can be updated to record the change.
+The best practice recommendation is to set the tag in the callback
+function but, if required, a tag can be set anytime prior to closing
+the connection.  To clear a connection's tag set `connection.tag` to
+an empty string.
+
+You would use tagging where you want `pool.getConnection()` to return
+a connection which has one of several different states.  If all
+connections should have the same state then you can simply set
+`sessionCallback`, as shown [earlier](#sessionfixupnode), and not use
+tagging.  Also, it may not be worthwhile using huge numbers of
+different tags or using tagging where connections are being
+[dropped](#connectionclose) or recreated frequently since the chance
+of `pool.getConnection()` returning an already initialized connection
+with the requested tag could be low, so most `pool.getConnection()`
+calls would return a connection needing its session reset, and tag
+management will just add overhead.
+
+When node-oracledb is using Oracle Client libraries 12.2 or later,
+then node-oracledb uses 'multi-property tags' and the tag string must
+be of the form of one or more "name=value" pairs separated by a
+semi-colon, for example `"loc=uk;lang=cy"`.  The Oracle [session
+pool][6] used by node-oracledb has various heuristics to determine
+which connection is returned to the application.  Refer to the
+[multi-property tags documentation][125].  The callback function can
+parse the requested multi-property tag and compare it with the
+connection's actual properties in [`connection.tag`](#propconntag) to
+determine what exact state to set and what value to update
+`connection.tag` to.
+
+###### <a name="sessiontaggingnode"></a> Node.js Session Tagging Callback
+
+This example Node.js callback function ensures the connection contains
+valid settings for an application-specific "location=USA" property and
+ignores any other properties in the tag that represent session state
+set by other parts of the application (not shown) that are using the
+same pool:
+
+```javascript
+const sessionTag = "location=USA";
+
+function initSession(connection, requestedTag, cb) {
+  connection.tag = "LOCATION=GB";
+  let seen = connection.tag ? connection.tag.split(";").includes(requestedTag) : false;
+  if (seen) {
+    cb()
+  } else {
+    connection.execute(
+      `ALTER SESSION SET NLS_DATE_FORMAT = 'MM/DD/YY' NLS_LANGUAGE = AMERICAN`,
+      (err) => {
+        // Update the tag the record the connection's new state
+        let k = requestedTag.substr(0, requestedTag.indexOf('=')+1);
+        if (connection.tag.indexOf(k) >= 0) {
+          // Update value of an existing, matching property in the tag
+          let re = new RegExp(k + "[^;]*");
+          connection.tag = connection.tag.replace(re, requestedTag);
+        } else {
+          // the requested property was not previously set in the tag
+          connection.tag = requestedTag + ';' + connection.tag;
+        }
+        cb();
+     });
+  }
+}
+
+try {
+  await oracledb.createPool({
+               user: 'hr',
+               password: 'welcome',
+               connectString: 'localhost/XEPDB1',
+               sessionCallback: initSession
+             });
+
+  // Request a connection with a given tag from the pool cache, but accept any tag being returned.
+  let connection = await oracledb.getConnection({poolAlias: 'default', tag: sessionTag, matchAnyTag: true});
+
+  . . . // Use the connection
+
+  // The connection will be returned to the pool with the tag value of connection.tag
+  await connection.close();
+
+  . . .
+```
+
+For runnable examples, see [`sessiontagging1.js`][127] and [`sessiontagging2.js`][128].
+
+###### <a name="sessiontaggingplsql"></a> PL/SQL Session Tagging Callback
+
+When node-oracledb is using Oracle Client libraries 12.2 or later,
+`sessionCallback` can be a string containing the name of a PL/SQL
+procedure that is called when the requested tag does not match the
+actual tag in the connection.  When the application uses [DRCP
+connections](#drcp), a PL/SQL callback can avoid the [round-trip][124]
+calls that a Node.js function would require to set session state.  For
+non-DRCP connections, the PL/SQL callback will require a round-trip
+from the application.
+
+After a PL/SQL callback completes and `pool.getConnection()` returns,
+[`connection.tag`](#propconntag) will have the same property values as
+the requested tag.  The property order may be different.  For example
+you may request "USER_TZ=UTC;LANGUAGE=FRENCH" but `connection.tag` may
+be "LANGUAGE=FRENCH;USER_TZ=UTC".  When `matchAnyTag` is *true*, then
+various heuristics are used to determine which connection in the pool
+to use.  See the [multi-property tags documentation][125].  Additional
+properties may be present in `connection.tag`.
+
+There is no direct way for Node.js to know if the PL/SQL procedure was
+called or what session state it changed.  After `pool.getConnection()`
+returns, care must be taken to set `connection.tag` to an appropriate
+value.
+
+A sample PL/SQL callback procedure looks like:
+
+```sql
+CREATE OR REPLACE PACKAGE myPackage AS
+  TYPE property_t IS TABLE OF VARCHAR2(64) INDEX BY VARCHAR2(64);
+  PROCEDURE buildTab(
+    tag          IN  VARCHAR2,
+    propertyTab  OUT property_t
+  );
+  PROCEDURE myPlsqlCallback (
+    requestedTag IN  VARCHAR2,
+    actualTag    IN  VARCHAR2
+  );
+END;
+/
+
+CREATE OR REPLACE PACKAGE BODY myPackage AS
+
+  -- Parse the "property=value" pairs in the tag
+  PROCEDURE buildTab(tag IN VARCHAR2, propertyTab OUT property_t) IS
+    property  VARCHAR2(64);
+    propertyName  VARCHAR2(64);
+    propertyValue VARCHAR2(64);
+    propertyEndPos NUMBER := 1;
+    propertyStartPos NUMBER := 1;
+    propertyNameEndPos NUMBER := 1;
+  begin
+    WHILE (LENGTH(tag) > propertyEndPos)
+    LOOP
+      propertyEndPos := INSTR(tag, ';', propertyStartPos);
+      IF (propertyEndPos = 0) THEN
+        propertyEndPos := LENGTH(tag) + 1;
+      END IF;
+      propertyNameEndPos := INSTR(tag, '=', propertyStartPos);
+      propertyName := SUBSTR(tag, propertyStartPos,
+                   propertyNameEndPos - propertyStartPos);
+      propertyValue := SUBSTR(tag, propertyNameEndPos + 1,
+                    propertyEndPos - propertyNameEndPos - 1);
+      propertyTab(propertyName) := propertyValue;
+      propertyStartPos := propertyEndPos + 1;
+    END LOOP;
+  END;
+
+  PROCEDURE myPlsqlCallback (
+    requestedTag IN VARCHAR2,
+    actualTag IN VARCHAR2
+  ) IS
+    reqPropTab property_t;
+    actPropTab property_t;
+    propertyName VARCHAR2(64);
+  BEGIN
+    buildTab(requestedTag, reqPropTab);
+    buildTab(actualTag, actPropTab);
+
+    -- Iterate over requested properties to set state when it's not
+    -- currently set, or not set to the desired value
+    propertyName := reqPropTab.FIRST;
+    WHILE (propertyName IS NOT NULL)
+    LOOP
+      IF ((NOT actPropTab.exists(propertyName)) OR
+         (actPropTab(propertyName) != reqPropTab(propertyName))) THEN
+        IF (propertyName = 'SDTZ') THEN
+          EXECUTE IMMEDIATE
+            'ALTER SESSION SET TIME_ZONE=''' || reqPropTab(propertyName) || '''';
+        ELSE
+          RAISE_APPLICATION_ERROR(-20001,'Unexpected session setting requested');
+        END IF;
+      END IF;
+      propertyName := reqPropTab.NEXT(propertyName);
+    END LOOP;
+    -- Could iterate over other actual properties to set any to a default state
+  END;
+
+END myPackage;
+/
+```
+
+This could be used in your application like:
+
+```javascript
+const sessionTag = "SDTZ=UTC";
+
+try {
+  let pool = await oracledb.createPool({
+               user: 'hr',
+               password: 'welcome',
+               connectString: 'localhost/XEPDB1',
+               sessionCallback: "myPackage.myPlsqlCallback"
+             });
+  . . .
+
+  let connection = await pool.getConnection({tag: sessionTag});
+
+  . . . // The value of connection.tag will be sessionTag
+        // Use connection.
+
+  await connection.close();
+}
+```
+
+#### <a name="connpoolproxy"></a> 12.3.8 Heterogeneous Connection Pools and Pool Proxy Authentication
 
 By default, connection pools are 'homogeneous' meaning that all
 connections use the same database credentials.  However, if the pool
@@ -6188,7 +6844,7 @@ password may be passed to `pool.getConnection()`:
 ```javascript
 oracledb.createPool(
   {
-    connectString : "localhost/XE",  // no user name or password
+    connectString : "localhost/XEPDB1",  // no user name or password
     homogeneous   : false,
     . . .  // other pool options such as poolMax can be used
   },
@@ -6277,59 +6933,122 @@ To use the proxy user with a node-oracledb heterogeneous connection
 pool you could do:
 
 ```javascript
-oracledb.createPool(
-  {
-    connectString : "localhost/XE",  // no user name or password
-    homogeneous   : false,
-    . . .  // other pool options such as poolMax can be used
-  },
-  function(err, pool) {
-    pool.getConnection(
-      {
-        user     : 'myproxyuser[hr]',
-        password : 'myproxyuserpassword'
-      },
-      function (err, conn) {
+let pool = await oracledb.createPool({ connectString: "localhost/orclpdb", homogeneous: false });
+let conn = await pool.getConnection({ user: 'myproxyuser[hr]', password: 'myproxyuserpassword'});
 
-        . . . // connection has access to the HR schema objects
+. . . // connection has access to the HR schema objects
 
-        conn.close(
-          function(err) {
-            if (err) { console.error(err.message); }
-          });
-      });
-  });
+await conn.close();
 ```
 
 Other proxy cases are supported such as:
 
 ```javascript
-oracledb.createPool(
+let pool = await oracledb.createPool(
   {
     user          : 'myproxyuser',
     password      : 'myproxyuserpassword'
-    connectString : "localhost/XE",
+    connectString : "localhost/XEPDB1",
     homogeneous   : false,
     . . .  // other pool options such as poolMax can be used
-  },
-  function(err, pool) {
-    pool.getConnection(
-      {
-        user : 'hr'  // the session user
-      },
-      function (err, conn) {
-
-        . . . // connection has access to the HR schema objects
-
-        conn.close(
-          function(err) {
-            if (err) { console.error(err.message); }
-          });
-      });
   });
+
+let conn = pool.getConnection({ user : 'hr' });  // the session user
+
+. . . // connection has access to the HR schema objects
+
+await conn.close();
 ```
 
-### <a name="drcp"></a> 12.4 Database Resident Connection Pooling (DRCP)
+### <a name="extauth"></a> 12.4 External Authentication
+
+External Authentication allows applications to use an external
+password store (such as an [Oracle Wallet][27]), the [Secure Socket
+Layer][28] (SSL), or the [operating system][29] to validate user
+access.  One of the benefits is that database credentials do not need
+to be hard coded in the application.
+
+To use external authentication, set the
+[`oracledb.externalAuth`](#propdbisexternalauth) property to *true*.  This property can
+also be set in the `connAttrs` or `poolAttrs` parameters of the
+[`oracledb.getConnection()`](#getconnectiondb) or
+[`oracledb.createPool()`](#createpool) calls, respectively.
+
+When `externalAuth` is set, any subsequent connections obtained using
+the [`oracledb.getConnection()`](#getconnectiondb) or
+[`pool.getConnection()`](#getconnectionpool) calls will use external
+authentication.  Setting this property does not affect the operation
+of existing connections or pools.
+
+For a standalone connection:
+
+```javascript
+let config = { connectString: "localhost/orclpdb", externalAuth: true };
+let conn = await oracledb.getConnection(config);
+
+. . . // connection has access to the schema objects of the externally identified user
+```
+
+If a user `HR` has been given the `CONNECT THROUGH` grant from the
+externally identified user `MYPROXYUSER`:
+
+```sql
+ALTER USER hr GRANT CONNECT THROUGH myproxyuser;
+```
+
+then to specify that the session user of the connection should be
+`HR`, use:
+
+```javascript
+let config = { connectString: "localhost/orclpdb", user: "[hr]", externalAuth: true };
+let conn = await oracledb.getConnection(config);
+
+. . . // connection has access to the HR schema objects
+```
+
+For a *Pool*, you can authenticate as an externally identified user like:
+
+```javascript
+let config = { connectString: "localhost/orclpdb", externalAuth: true };
+let pool = await oracledb.createPool(config);
+let conn = await pool.getConnection();
+
+. . . // connection has access to the schema objects of the externally identified user
+
+await conn.close();
+```
+
+If a user `HR` has been given the `CONNECT THROUGH` grant from the
+externally identified user, then to specify that the session user of
+the connection should be `HR`, use:
+
+```javascript
+let config = { connectString: "localhost/orclpdb", externalAuth: true };
+let pool = await oracledb.createPool(config);
+let conn = await pool.getConnection({ user: "[hr]" });
+
+. . . // connection has access to the HR schema objects
+
+await conn.close();
+```
+
+Note this last case needs Oracle Client libraries version 18 or later.
+
+Using `externalAuth` in the `connAttrs` parameter of a
+`pool.getConnection()` call is not possible.  The connections from a *Pool*
+object are always obtained in the manner in which the pool was
+initially created.
+
+For pools created with external authentication, the number of
+connections initially created is zero even if a larger value is
+specified for [`poolMin`](#propdbpoolmin).  The pool increment is
+always 1, regardless of the value of
+[`poolIncrement`](#proppoolpoolincrement).  Once the number
+of open connections exceeds `poolMin` and connections are idle for
+more than the [`poolTimeout`](#propdbpooltimeout) seconds, then the
+number of open connections does not fall below `poolMin`.
+
+### <a name="drcp"></a> 12.5 Database Resident Connection Pooling (DRCP)
 
 [Database Resident Connection Pooling][24] (DRCP) enables database
 resource sharing for applications that run in multiple client
@@ -6362,52 +7081,6 @@ There are a number of Oracle Database `V$` views that can be used to
 monitor DRCP.  These are discussed in the Oracle documentation and in
 the Oracle white paper [PHP Scalability and High Availability][26].
 This paper also gives more detail on configuring DRCP.
-
-### <a name="extauth"></a> 12.5 External Authentication
-
-External Authentication allows applications to use an external
-password store (such as an [Oracle Wallet][27]), the [Secure Socket
-Layer][28] (SSL), or the [operating system][29] to validate user
-access.  One of the benefits is that database credentials do not need
-to be hard coded in the application.
-
-To use external authentication, set the
-[`oracledb.externalAuth`](#propdbisexternalauth) property to *true*.  This property can
-also be set in the `connAttrs` or `poolAttrs` parameters of the
-[`oracledb.getConnection()`](#getconnectiondb) or
-[`oracledb.createPool()`](#createpool) calls, respectively.  The `user` and
-`password` properties should not be set, or should be empty strings:
-
-```javascript
-var oracledb = require('oracledb');
-
-oracledb.getConnection(
-  {
-    externalAuth: true,
-    connectString: "localhost/orclpdb"
-  },
-  . . .
-```
-
-When `externalAuth` is set, any subsequent connections obtained using
-the [`oracledb.getConnection()`](#getconnectiondb) or
-[`pool.getConnection()`](#getconnectionpool) calls will use external
-authentication.  Setting this property does not affect the operation
-of existing connections or pools.
-
-Using `externalAuth` in the `connAttrs` parameter of a
-`pool.getConnection()` call is not possible.  The connections from a *Pool*
-object are always obtained in the manner in which the pool was
-initially created.
-
-For pools created with external authentication, the number of
-connections initially created is zero even if a larger value is
-specified for [`poolMin`](#propdbpoolmin).  The pool increment is
-always 1, regardless of the value of
-[`poolIncrement`](#proppoolpoolincrement).  Once the number
-of open connections exceeds `poolMin` and connections are idle for
-more than the [`poolTimeout`](#propdbpooltimeout) seconds, then the
-number of open connections does not fall below `poolMin`.
 
 ### <a name="privconn"></a> 12.6 Privileged Connections
 
@@ -7195,8 +7868,13 @@ connection.execute(
 );
 ```
 
-To do this without requiring the overhead of a [round-trip][124] to execute
-the `ALTER` statement, you could use a PL/SQL trigger:
+With pooled connections, you could make use of a
+[`sessionCallback`](#createpoolpoolattrssessioncallback) function to
+minimize the number of times the ALTER SESSION needs to be executed.
+
+To set the time zone without requiring the overhead of a
+[round-trip][124] to execute the `ALTER` statement, you could use a
+PL/SQL trigger:
 
 ```sql
 CREATE OR REPLACE TRIGGER my_logon_trigger
@@ -7246,7 +7924,7 @@ oracledb.getConnection(
   {
     user          : "hr",
     password      : "welcome",
-    connectString : "localhost/XE"
+    connectString : "localhost/XEPDB1"
   },
   function(err, connection) {
     if (err) { console.error(err.message); return; }
@@ -7347,8 +8025,8 @@ Queries will return ROWID and UROWID columns as Strings.
 
 ##### <a name="fetchxml"></a> 13.1.6.8 Fetching XMLType
 
-`XMLType` columns cannot be queried directly.  Instead handle them as
-CLOBs, see [Working with XMLType](#xmltype).
+`XMLType` columns queried will returns as Strings.  They can also be
+handled as CLOBs, see [Working with XMLType](#xmltype).
 
 ##### <a name="fetchraw"></a> 13.1.6.9 Fetching RAW
 
@@ -8634,8 +9312,10 @@ For more information about using JSON in Oracle Database see the
 
 ## <a name="xmltype"></a> 17. Working with XMLType
 
-`XMLType` columns cannot be queried directly.  Instead, change the SQL
-query to return a CLOB, for example
+`XMLType` columns queried will returns as Strings by default.
+
+However, if desired, the SQL query could be changed to return a CLOB,
+for example:
 
 ```sql
 var sql = 'SELECT XMLTYPE.GETCLOBVAL(res) FROM resource_view';
@@ -9795,7 +10475,97 @@ Output would be an array of eight values such as:
 [ [ 6 ], [ 10 ], [ 15 ], [ 21 ], [ 28 ], [ 36 ], [ 45 ], [ 55 ] ]
 ```
 
-## <a name="cqn"></a> 20. Continuous Query Notification (CQN)
+## <a name="transactionmgt"></a> 20. Transaction Management
+
+By default, [DML][14] statements are not committed in node-oracledb.
+
+The node-oracledb add-on implements [`commit()`](#commit) and
+[`rollback()`](#rollback) methods that can be used to explicitly
+control transactions.
+
+If the [`autoCommit`](#propdbisautocommit) flag is set to *true*,
+then a commit occurs at the end of each `execute()` call.  Unlike an
+explicit `commit()`, this does not require a [round-trip][124] to the
+database.  For maximum efficiency, set `autoCommit` to *true* for the
+last `execute()` call of a transaction in preference to using an
+additional, explicit `commit()` call.
+
+When a connection is released, any ongoing transaction will be rolled
+back.  Therefore if a released, pooled connection is re-used by a
+subsequent [`pool.getConnection()`](#getconnectionpool) call
+(or [`oracledb.getConnection()`](#getconnectiondb) call that uses a
+pool), then any DML statements performed on the obtained connection are
+always in a new transaction.
+
+When an application ends, any uncommitted transaction on a connection
+will be rolled back.
+
+Note: Oracle Database will implicitly commit when a [DDL][15]
+statement is executed irrespective of the value of `autoCommit`.
+
+## <a name="stmtcache"></a> 21. Statement Caching
+
+Node-oracledb's [`execute()`](#execute) and
+[`queryStream()`](#querystream) methods use the [Oracle Call Interface
+statement cache][61] to make re-execution of statements efficient.
+This cache removes the need for the separate 'prepare' or 'parse'
+method which is sometimes seen in other Oracle APIs: there is no
+separate method in node-oracledb.
+
+Each non-pooled connection and each session in the connection pool has
+its own cache of statements with a default size of 30.  Statement
+caching lets cursors be used without re-parsing the statement.
+Statement caching also reduces meta data transfer costs between the
+node-oracledb and the database.  Performance and scalability are
+improved.
+
+In general, set the statement cache to the size of the working set of
+statements being executed by the application.
+
+Statement caching can be disabled by setting the size to 0.  Disabling
+the cache may be beneficial when the quantity or order of statements
+causes cache entries to be flushed before they get a chance to be
+reused.  For example if there are more distinct statements than cache
+slots, and the order of statement execution causes older statements to
+be flushed from the cache before the statements are re-executed.
+
+The statement cache size can be set globally with [stmtCacheSize](#propdbstmtcachesize):
+
+```javascript
+var oracledb = require('oracledb');
+oracledb.stmtCacheSize = 40;
+```
+
+The value can be overridden in an `oracledb.getConnection()` call:
+
+```javascript
+var oracledb = require('oracledb');
+
+oracledb.getConnection(
+  {
+    user          : "hr",
+    password      : "welcome",
+    connectString : "localhost/XEPDB1",
+    stmtCacheSize : 40
+  },
+  function(err, connection) {
+    . . .
+  });
+```
+
+The value can also be overridden in the `poolAttrs` parameter to
+the [`createPool()`](#createpool) method.
+
+With Oracle Database 12c, or later, the statement cache size can be automatically tuned with the
+[External Configuration](#oraaccess) *oraaccess.xml* file.
+
+To manually tune the statement cache size, monitor general application
+load and the [Automatic Workload Repository][62] (AWR) "bytes sent via SQL*Net to client" values.  The
+latter statistic should benefit from not shipping statement metadata
+to node-oracledb.  Adjust the statement cache size to your
+satisfaction.
+
+## <a name="cqn"></a> 22. Continuous Query Notification (CQN)
 
 [Continuous Query Notification (CQN)][99] lets node-oracledb
 applications register a JavaScript method that is invoked when changed
@@ -9951,7 +10721,7 @@ try {
     let conn = await oracledb.getConnection({
       user          : "hr",
       password      : "welcome",
-      connectString : "localhost/XE",
+      connectString : "localhost/XEPDB1",
       events        :  true
     });
 
@@ -9988,97 +10758,146 @@ and the row operations of 2 correspond to
 
 There are runnable examples in the GitHub [examples][3] directory.
 
-## <a name="transactionmgt"></a> 21. Transaction Management
+## <a name="aq"></a> 23. Advanced Queuing (AQ)
 
-By default, [DML][14] statements are not committed in node-oracledb.
+[Oracle Advanced Queuing][129] allows applications to use
+producer-consumer message passing.  Oracle AQ is highly configurable.
+Messages can queued by multiple producers.  Different consumers can
+filter messages for them.  Messages can also be propagated to queues
+in other databases.  Oracle AQ has PL/SQL, Java, C and HTTPS
+interfaces, allowing many applications to communicate via messages.
+From node-oracledb, the PL/SQL interface is currently used via
+explicit calls.
 
-The node-oracledb add-on implements [`commit()`](#commit) and
-[`rollback()`](#rollback) methods that can be used to explicitly
-control transactions.
+The following example shows how to enqueue and dequeue a simple
+message.
 
-If the [`autoCommit`](#propdbisautocommit) flag is set to *true*,
-then a commit occurs at the end of each `execute()` call.  Unlike an
-explicit `commit()`, this does not require a [round-trip][124] to the
-database.  For maximum efficiency, set `autoCommit` to *true* for the
-last `execute()` call of a transaction in preference to using an
-additional, explicit `commit()` call.
+First, create a new Oracle user `demoqueue` with permission to create
+and use queues.  Connect as SYSDBA and run:
 
-When a connection is released, any ongoing transaction will be rolled
-back.  Therefore if a released, pooled connection is re-used by a
-subsequent [`pool.getConnection()`](#getconnectionpool) call
-(or [`oracledb.getConnection()`](#getconnectiondb) call that uses a
-pool), then any DML statements performed on the obtained connection are
-always in a new transaction.
-
-When an application ends, any uncommitted transaction on a connection
-will be rolled back.
-
-Note: Oracle Database will implicitly commit when a [DDL][15]
-statement is executed irrespective of the value of `autoCommit`.
-
-## <a name="stmtcache"></a> 22. Statement Caching
-
-Node-oracledb's [`execute()`](#execute) and
-[`queryStream()`](#querystream) methods use the [Oracle Call Interface
-statement cache][61] to make re-execution of statements efficient.
-This cache removes the need for the separate 'prepare' or 'parse'
-method which is sometimes seen in other Oracle APIs: there is no
-separate method in node-oracledb.
-
-Each non-pooled connection and each session in the connection pool has
-its own cache of statements with a default size of 30.  Statement
-caching lets cursors be used without re-parsing the statement.
-Statement caching also reduces meta data transfer costs between the
-node-oracledb and the database.  Performance and scalability are
-improved.
-
-In general, set the statement cache to the size of the working set of
-statements being executed by the application.
-
-Statement caching can be disabled by setting the size to 0.  Disabling
-the cache may be beneficial when the quantity or order of statements
-causes cache entries to be flushed before they get a chance to be
-reused.  For example if there are more distinct statements than cache
-slots, and the order of statement execution causes older statements to
-be flushed from the cache before the statements are re-executed.
-
-The statement cache size can be set globally with [stmtCacheSize](#propdbstmtcachesize):
-
-```javascript
-var oracledb = require('oracledb');
-oracledb.stmtCacheSize = 40;
+```sql
+CREATE USER demoqueue IDENTIFIED BY welcome;
+ALTER USER demoqueue DEFAULT TABLESPACE USERS QUOTA UNLIMITED ON USERS;
+GRANT CONNECT, RESOURCE TO DEMOQUEUE;
+GRANT AQ_ADMINISTRATOR_ROLE, AQ_USER_ROLE TO demoqueue;
+GRANT EXECUTE ON DBMS_AQ TO demoqueue;
+GRANT CREATE TYPE TO demoqueue;
 ```
 
-The value can be overridden in an `oracledb.getConnection()` call:
+The message in this example contains a name and address.  To create a
+payload type for this, and to start a queue for this payload, connect
+as the new `demoqueue` user and run:
 
-```javascript
-var oracledb = require('oracledb');
+```
+-- For the data we want to queue
+CREATE OR REPLACE TYPE USER_ADDRESS_TYPE AS OBJECT (
+   NAME        VARCHAR2(10),
+   ADDRESS     VARCHAR2(50)
+);
+/
 
-oracledb.getConnection(
-  {
-    user          : "hr",
-    password      : "welcome",
-    connectString : "localhost/XE",
-    stmtCacheSize : 40
-  },
-  function(err, connection) {
-    . . .
-  });
+-- Create and start a queue
+BEGIN
+ DBMS_AQADM.CREATE_QUEUE_TABLE(
+   QUEUE_TABLE        =>  'DEMOQUEUE.ADDR_QUEUE_TAB',
+   QUEUE_PAYLOAD_TYPE =>  'DEMOQUEUE.USER_ADDRESS_TYPE');
+END;
+/
+
+BEGIN
+ DBMS_AQADM.CREATE_QUEUE(
+   QUEUE_NAME         =>  'DEMOQUEUE.ADDR_QUEUE',
+   QUEUE_TABLE        =>  'DEMOQUEUE.ADDR_QUEUE_TAB');
+END;
+/
+
+BEGIN
+ DBMS_AQADM.START_QUEUE(
+   QUEUE_NAME         => 'DEMOQUEUE.ADDR_QUEUE',
+   ENQUEUE            => TRUE);
+END;
+/
 ```
 
-The value can also be overridden in the `poolAttrs` parameter to
-the [`createPool()`](#createpool) method.
+Two helper functions to enqueue and dequeue messages will make calling
+the queue easier.  As the `demoqueue` user run:
 
-With Oracle Database 12c, or later, the statement cache size can be automatically tuned with the
-[External Configuration](#oraaccess) *oraaccess.xml* file.
+```sql
+CREATE OR REPLACE PROCEDURE my_enq(
+       user_addr_p IN user_address_type) AS
+  ENQUEUE_OPTIONS    DBMS_AQ.ENQUEUE_OPTIONS_T;
+  MESSAGE_PROPERTIES DBMS_AQ.MESSAGE_PROPERTIES_T;
+  ENQ_ID             RAW(16);
+BEGIN
+  DBMS_AQ.ENQUEUE(QUEUE_NAME            => 'DEMOQUEUE.ADDR_QUEUE',
+                  ENQUEUE_OPTIONS       => ENQUEUE_OPTIONS,
+                  MESSAGE_PROPERTIES    => MESSAGE_PROPERTIES,
+                  PAYLOAD               => user_addr_p,
+                  MSGID                 => ENQ_ID);
+  COMMIT;
+END;
+/
+SHOW ERRORS
 
-To manually tune the statement cache size, monitor general application
-load and the [Automatic Workload Repository][62] (AWR) "bytes sent via SQL*Net to client" values.  The
-latter statistic should benefit from not shipping statement metadata
-to node-oracledb.  Adjust the statement cache size to your
-satisfaction.
+CREATE OR REPLACE PROCEDURE MY_DEQ(
+       user_addr_p OUT USER_ADDRESS_TYPE) AS
+  DEQUEUE_OPTIONS    DBMS_AQ.DEQUEUE_OPTIONS_T;
+  MESSAGE_PROPERTIES DBMS_AQ.MESSAGE_PROPERTIES_T;
+  ENQ_ID             RAW(16);
+BEGIN
+  DBMS_AQ.DEQUEUE(QUEUE_NAME            => 'DEMOQUEUE.ADDR_QUEUE',
+                  DEQUEUE_OPTIONS       => DEQUEUE_OPTIONS,
+                  MESSAGE_PROPERTIES    => MESSAGE_PROPERTIES,
+                  PAYLOAD               => user_addr_p,
+                  MSGID                 => ENQ_ID);
+  COMMIT;
+END;
+/
+SHOW ERRORS
+```
 
-## <a name="oraaccess"></a> 23. External Configuration
+With this basic queue configuration, if a dequeue operation is called
+without a message being present in the queue, then the call will block
+waiting for one to be enqueued or until the queue wait time expires.
+This behavior can be configured.
+
+The helper procedures can be called from node-oracledb in anonymous
+blocks to enqueue and dequeue messages:
+
+```javascript
+// Enqueue a message
+username = 'scott';
+address  = 'The Kennel';
+sql = `BEGIN
+         my_enq(user_address_type(:un, :ad));
+       END;`;
+binds = {un: username, ad: address};
+await connection.execute(sql, binds);
+
+// Dequeue a message
+sql = `DECLARE
+         ua user_address_type;
+       BEGIN
+         my_deq(ua);
+         :un := ua.name;
+         :ad := ua.address;
+       END;`;
+binds = {un: {dir: oracledb.BIND_OUT}, ad: {dir: oracledb.BIND_OUT}};
+result = await connection.execute(sql, binds);
+console.log(result.outBinds);
+```
+
+The output is:
+
+```
+{ un: 'scotty', ad: 'The Kennel' }
+```
+
+Queuing is highly configurable and scalable, providing a great way to
+distribute workload for a web application.  Oracle AQ is available in
+all editions of the database.
+
+## <a name="oraaccess"></a> 24. External Configuration
 
 The optional Oracle client-side configuration file [oraaccess.xml][63]
 can be used to configure some behaviors of node-oracledb.  See
@@ -10126,7 +10945,7 @@ The oraaccess.xml file has other uses including:
 
 Refer to the [oraaccess.xml documentation][63].
 
-## <a name="nls"></a> 24. Globalization and National Language Support (NLS)
+## <a name="nls"></a> 25. Globalization and National Language Support (NLS)
 
 Node-oracledb can use Oracle's [National Language Support (NLS)][68]
 to assist in globalizing applications.
@@ -10162,7 +10981,7 @@ WHERE sid = SYS_CONTEXT('USERENV', 'SID');
 
 In node-oracledb this will always show AL32UTF8.
 
-## <a name="endtoend"></a> 25. End-to-end Tracing, Mid-tier Authentication, and Auditing
+## <a name="endtoend"></a> 26. End-to-end Tracing, Mid-tier Authentication, and Auditing
 
 The Connection properties [action](#propconnaction),
 [module](#propconnmodule), and [clientId](#propconnclientid) set
@@ -10271,7 +11090,7 @@ Note if [`oracledb.connectionClass`](#propdbconclass) is set for a
 non-pooled connection, the `CLIENT_DRIVER` value will not be set for
 that connection.
 
-## <a name="sodaoverview"></a> 26. Simple Oracle Document Access (SODA)
+## <a name="sodaoverview"></a> 27. Simple Oracle Document Access (SODA)
 
 Oracle Database Simple Oracle Document Access (SODA) access is
 available in node-oracledb version 3 through a set of NoSQL-style
@@ -10347,7 +11166,7 @@ Node-oracledb uses the following objects for SODA:
   remove documents.  This is an internal object that should not be
   directly accessed.
 
-### <a name="sodarequirements"></a> 26.1 Node-oracledb SODA Requirements
+### <a name="sodarequirements"></a> 27.1 Node-oracledb SODA Requirements
 
 SODA is available to Node.js applications when the node-oracledb
 driver uses Oracle Database and Client 18.3, or higher.
@@ -10358,6 +11177,10 @@ role granted to them by a DBA:
 ```sql
 GRANT SODA_APP TO hr;
 ```
+
+The `CREATE TABLE` system privilege is also needed.  Advanced users
+who are using Oracle sequences for keys will also need the `CREATE
+SEQUENCE` privilege.
 
 The general recommendation for SODA applications is to turn on
 [`autoCommit`](#propdbisautocommit) globally:
@@ -10386,7 +11209,7 @@ Note:
 - When [`oracledb.autoCommit`](#propdbisautocommit) is *true*, most SODA methods will issue a commit before successful return.
 - SODA provide optimistic locking, see [`sodaOperation.version()`](#sodaoperationclassversion).
 
-### <a name="creatingsodacollections"></a> 26.2 Creating SODA Collections
+### <a name="creatingsodacollections"></a> 27.2 Creating SODA Collections
 
 The following examples use Node.js 8's
 [async/await](#asyncawaitoverview) syntax, however callbacks can also
@@ -10434,7 +11257,7 @@ See [SODA Client-Assigned Keys and Collection
 Metadata](#sodaclientkeys) for how to create a collection with custom
 metadata.
 
-### <a name="accessingsodadocuments"></a> 26.3 Creating and Accessing SODA documents
+### <a name="accessingsodadocuments"></a> 27.3 Creating and Accessing SODA documents
 
 To insert a document into an opened collection, a JavaScript object
 that is the document content can be used directly.  In the following
@@ -10587,7 +11410,7 @@ However note that for efficiency the SodaDocuments returned from
 do not contain document content.  These SodaDocuments are useful for
 getting other document components such as the key and version.
 
-### <a name="sodaqbesearches"></a> 26.4 SODA Query-by-Example Searches for JSON Documents
+### <a name="sodaqbesearches"></a> 27.4 SODA Query-by-Example Searches for JSON Documents
 
 JSON documents stored in SODA can easily be searched using
 query-by-example (QBE) syntax with
@@ -10679,7 +11502,7 @@ Some QBE examples are:
 
     See [Overview of QBE Spatial Operators][111].
 
-### <a name="sodaclientkeys"></a> 26.5 SODA Client-Assigned Keys and Collection Metadata
+### <a name="sodaclientkeys"></a> 27.5 SODA Client-Assigned Keys and Collection Metadata
 
 Default collections support JSON documents and use system generated
 document keys. Various storage options are also configured which
@@ -10806,7 +11629,7 @@ try {
 }
 ```
 
-### <a name="sodajsondataguide"></a> 26.6 JSON Data Guides in SODA
+### <a name="sodajsondataguide"></a> 27.6 JSON Data Guides in SODA
 
 SODA exposes Oracle Database's [JSON data guide][116] feature.  This
 lets you discover information about the structure and content of JSON
@@ -10858,7 +11681,7 @@ this case) and lengths of the values of these fields are listed.  The
 want to define SQL views over JSON data. They suggest how to name the
 columns of a view.
 
-## <a name="promiseoverview"></a> 27. Promises and node-oracledb
+## <a name="promiseoverview"></a> 28. Promises and node-oracledb
 
 Node-oracledb supports Promises with all asynchronous methods.  The native Promise
 implementation is used.
@@ -10873,7 +11696,7 @@ oracledb.getConnection(
   {
     user          : "hr",
     password      : "welcome",
-    connectString : "localhost/XE"
+    connectString : "localhost/XEPDB1"
   })
   .then(function(conn) {
     return conn.execute(
@@ -10954,7 +11777,7 @@ Unhandled Rejection at:  Promise {
 For more information, see [How to get, use, and close a DB connection
 using promises][73].
 
-### <a name="custompromises"></a> 27.1 Custom Promise Libraries
+### <a name="custompromises"></a> 28.1 Custom Promise Libraries
 
 The Promise implementation is designed to be overridden, allowing a
 custom Promise library to be used.
@@ -10970,7 +11793,7 @@ Promises can be completely disabled by setting
 oracledb.Promise = null;
 ```
 
-## <a name="asyncawaitoverview"></a> 28. Async/Await and node-oracledb
+## <a name="asyncawaitoverview"></a> 29. Async/Await and node-oracledb
 
 Node.js 7.6 supports async functions, also known as Async/Await.  These
 can be used with node-oracledb.  For example:
@@ -10986,7 +11809,7 @@ function getEmployee(empid) {
       conn = await oracledb.getConnection({
         user          : "hr",
         password      : "welcome",
-        connectString : "localhost/XE"
+        connectString : "localhost/XEPDB1"
       });
 
       let result = await conn.execute(
@@ -11021,14 +11844,15 @@ async function run() {
 run();
 ```
 
-If you are using [Lob instances](#lobclass) for LOB data instead of
-working with the data directly as Strings or Buffers, then the Lobs
-must be streamed since there is no Promisified interface for them.
+If you are using [Lob instances](#lobclass) for LOB data, then the
+Lobs must be streamed since there is no Promisified interface for
+them.  Alternatively you can work with the data directly as Strings or
+Buffers.
 
 For more information, see [How to get, use, and close a DB connection
 using async functions][74].
 
-## <a name="bindtrace"></a> <a name="tracingsql"></a> 29. Tracing SQL and PL/SQL Statements
+## <a name="bindtrace"></a> <a name="tracingsql"></a> 30. Tracing SQL and PL/SQL Statements
 
 ####  End-to-End Tracing
 
@@ -11085,9 +11909,9 @@ parameters.
 
 PL/SQL users may be interested in using [PL/Scope][78].
 
-## <a name="migrate"></a> 30. Migrating from Previous node-oracledb Releases
+## <a name="migrate"></a> 31. Migrating from Previous node-oracledb Releases
 
-### <a name="migratev1v2"></a> 30.1 Migrating from node-oracledb 1.13 to node-oracledb 2.0
+### <a name="migratev1v2"></a> 31.1 Migrating from node-oracledb 1.13 to node-oracledb 2.0
 
 When upgrading from node-oracledb version 1.13 to version 2.0:
 
@@ -11141,7 +11965,7 @@ When upgrading from node-oracledb version 1.13 to version 2.0:
 - Test applications to check if changes such as the improved property
   validation uncover latent problems in your code.
 
-### <a name="migratev20v21"></a> 30.2 Migrating from node-oracledb 2.0 to node-oracledb 2.1
+### <a name="migratev20v21"></a> 31.2 Migrating from node-oracledb 2.0 to node-oracledb 2.1
 
 When upgrading from node-oracledb version 2.0 to version 2.1:
 
@@ -11152,7 +11976,7 @@ When upgrading from node-oracledb version 2.0 to version 2.1:
     - Stop passing a callback.
     - Optionally pass an error.
 
-### <a name="migratev23v30"></a> 30.3 Migrating from node-oracledb 2.3 to node-oracledb 3.0
+### <a name="migratev23v30"></a> 31.3 Migrating from node-oracledb 2.3 to node-oracledb 3.0
 
 When upgrading from node-oracledb version 2.3 to version 3.0:
 
@@ -11172,6 +11996,25 @@ When upgrading from node-oracledb version 2.3 to version 3.0:
 - Change code that relied on unused properties in objects such as the
   `execute()` result being set to `undefined`.  These properties are
   no longer set in node-oracledb 3.
+
+### <a name="migratev30v31"></a> 31.4 Migrating from node-oracledb 3.0 to node-oracledb 3.1
+
+When upgrading from node-oracledb version 3.0 to version 3.1:
+
+- Review the [CHANGELOG][83].  Implement new features such as the
+  Connection Pool
+  [`sessionCallback`](#createpoolpoolattrssessioncallback) to
+  efficiently set session state.
+
+- Code that catches `require('oracledb')` errors to check
+  node-oracledb and the Oracle Client libraries are installed
+  correctly will need to be changed.  In node-oracledb 3.1,
+  `require()` will always succeed if node-oracledb is installed even
+  if Oracle Client is not configured.  To confirm that node-oracle
+  will be usable, access
+  [`oracledb.oracleClientVersion`]((#propdboracleclientversion)) or
+  [`oracledb.oracleClientVersionString`](#propdboracleclientversionstring),
+  or try opening a connection.
 
 [1]: https://www.npmjs.com/package/oracledb
 [2]: https://oracle.github.io/node-oracledb/INSTALL.html
@@ -11296,3 +12139,8 @@ When upgrading from node-oracledb version 2.3 to version 3.0:
 [122]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-4DD81A76-8D7D-4DEF-9DC1-77212C657AAF
 [123]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-8DDB51EB-D80F-4476-9ABF-D6860C6214D1
 [124]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-9B2F05F9-D841-4493-A42D-A7D89694A2D1
+[125]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-DFA21225-E83C-4177-A79A-B8BA29DC662C
+[126]: https://github.com/oracle/node-oracledb/tree/master/examples/sessionfixup.js
+[127]: https://github.com/oracle/node-oracledb/tree/master/examples/sessiontagging1.js
+[128]: https://github.com/oracle/node-oracledb/tree/master/examples/sessiontagging2.js
+[129]: https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=ADQUE
