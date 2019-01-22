@@ -1,8 +1,6 @@
 # Change Log
 
-## node-oracledb v3.1.0 (DD Mon YYYY)
-
-This release is currently under development.
+## node-oracledb v3.1.0 (22 Jan 2019)
 
 - Support tagging of pooled connections when releasing them to the
   connection pool.  When using Oracle Client libraries 12.2 or later,
@@ -72,6 +70,9 @@ This release is currently under development.
 - Fixed an issue with `poolPingInterval` that could cause usable
   pooled connections to be unnecessarily dropped by
   `connection.close()`.  (ODPI-C change).
+
+- Fixed a memory leak under certain cirumstances when pooled
+  connections are released back to the pool. (ODPI-C change)
 
 - Display correct error message for SODA `createIndex()` when no
   parameter is passed.
