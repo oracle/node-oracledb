@@ -1,5 +1,9 @@
 # Change Log
 
+## node-oracledb v3.1.1 (25 Jan 2019)
+
+- Rebuild npm package to resolve Linux binary build issue.
+
 ## node-oracledb v3.1.0 (22 Jan 2019)
 
 - Support tagging of pooled connections when releasing them to the
