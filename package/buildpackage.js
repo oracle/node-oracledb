@@ -54,13 +54,20 @@ async function packageUp() {
     fs.mkdirSync(nodbUtil.RELEASE_DIR, { recursive: true, mode: 0o755 });
     await copyDir(nodbUtil.STAGING_DIR, nodbUtil.RELEASE_DIR);
 
+    // Don't include source code etc. in the npm package.  This is
+    // done dynamically because .npmignore cannot exclude source code
+    // by default otherwise compiling from a GitHub tag or branch
+    // won't work.
+    fs.appendFileSync('.npmignore', '\n/odpi\n/src\nbinding.gyp\n/package/buildbinary.js\n/package/buildpackage.js\n');
+
     // Build the package
     execSync('npm pack');
+
   } catch(err) {
     console.error(err);
   } finally {
-    // Undo changes to package.json
-    execSync('git checkout package.json');
+    // Undo changes to the repo
+    execSync('git checkout package.json .npmignore');
   }
 }
 
