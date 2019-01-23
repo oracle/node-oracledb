@@ -24,7 +24,7 @@
  *
  *   This example uses Node 8's async/await syntax.
  *
- *   Other connection pool examples are in webapp.js,
+ *   Other connection pool examples are in sessionfixup.js, webapp.js,
  *   webapppromises.js and webappawait.js
  *
  *   For a standalone connection example, see connect.js
