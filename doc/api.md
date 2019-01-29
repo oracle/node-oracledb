@@ -6083,7 +6083,7 @@ currently established connections in the pool are "checked out" by
 previous `getConnection()` calls and are in-use by the application,
 and (iii) the number of those connections is less than the pool's
 `poolMax` setting.
-l
+
 The Oracle Real-World Performance Group's general recommendation for
 client connection pools is for the pool to have a fixed sized.  The
 values of `poolMin` and `poolMax` should be the same (and
