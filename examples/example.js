@@ -98,7 +98,8 @@ async function run() {
       // fetchArraySize: 100       // internal buffer allocation size for tuning
     };
 
-    result = await connection.execute(sql, binds, options);
+    // You can also use a query config object to query the data
+    result = await connection.execute({ sql, binds }, options);
 
     console.log("Column metadata: ", result.metaData);
     console.log("Query results: ");
