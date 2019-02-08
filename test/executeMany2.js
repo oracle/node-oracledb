@@ -34,7 +34,7 @@
 const oracledb = require('oracledb');
 const should   = require('should');
 const dbconfig = require('./dbconfig.js');
-const sodaUtil = require('./sodaUtil.js');
+const testsUtil = require('./testsUtil.js');
 
 describe('172. executeMany2.js', function() {
   
@@ -56,7 +56,7 @@ describe('172. executeMany2.js', function() {
       should.not.exist(err);
     } 
 
-    await sodaUtil.assertThrowsAsync(
+    await testsUtil.assertThrowsAsync(
       async () => {
         await conn.executeMany(
           `insert into "${schema}"."NODB_TAB_SALES" ("AMOUNT_SOLD") values (:1)`,
@@ -98,7 +98,7 @@ describe('172. executeMany2.js', function() {
         [1, "John Smith"],
         { a: 2, b: "Changjie" },
       ];
-      await sodaUtil.assertThrowsAsync(
+      await testsUtil.assertThrowsAsync(
         async () => {
           await conn.executeMany(
             `insert into nodb_tab_emp values (:a, :b)`,
