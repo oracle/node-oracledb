@@ -71,6 +71,7 @@ describe('172. executeMany2.js', function() {
       await conn.execute(
         `BEGIN EXECUTE IMMEDIATE 'DROP TABLE "${schema}"."NODB_TAB_SALES"'; EXCEPTION WHEN OTHERS THEN IF SQLCODE <> -942 THEN RAISE; END IF; END; `
       );
+      await conn.commit();
       await conn.close();
     } catch(err) {
       should.not.exist(err);
