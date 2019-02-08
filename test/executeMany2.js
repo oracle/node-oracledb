@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2018, 2019, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -31,58 +31,95 @@
  *****************************************************************************/
 'use strict';
 
-var oracledb = require('oracledb');
-var should   = require('should');
-var dbconfig = require('./dbconfig.js');
+const oracledb = require('oracledb');
+const should   = require('should');
+const dbconfig = require('./dbconfig.js');
+const sodaUtil = require('./sodaUtil.js');
 
 describe('172. executeMany2.js', function() {
   
-  before(function() {
-    if (!dbconfig.test.DBA_PRIVILEGE) this.skip();
-  });
-  
-  // Currently skipped for
-  // Segmentation fault: 11
-  it.skip('172.1 Negative - incorrect parameters', async () => {
+  it('172.1 Negative - incorrect parameters', async () => {
     
     let conn;
+    let schema = dbconfig.user.toUpperCase();
+
     try {
-      const connectionDetails = {
-        user          : dbconfig.test.DBA_user,
-        password      : dbconfig.test.DBA_password,
-        connectString : dbconfig.connectString,
-        privilege     : oracledb.SYSDBA
-      };
-      const schema   = 'T_APPDEV4DB';
-      const password = 'oracle';
-
-      conn = await oracledb.getConnection(connectionDetails);
-
+      conn = await oracledb.getConnection(dbconfig);
       await conn.execute(
-        `DROP USER ${schema} CASCADE`
+        `BEGIN EXECUTE IMMEDIATE 'DROP TABLE "${schema}"."NODB_TAB_SALES"'; EXCEPTION WHEN OTHERS THEN IF SQLCODE <> -942 THEN RAISE; END IF; END; `
       );
       await conn.execute(
-        `GRANT CONNECT, RESOURCE, UNLIMITED TABLESPACE TO ${schema} identified by ${password}`
-      );
-      await conn.execute(
-        `create table "${schema}"."SALES" ("AMOUNT_SOLD" NUMBER(10,2))`
-      );
-      
-      await conn.executeMany(
-        `insert into "${schema}"."SALES" ("AMOUNT_SOLD") values (:1)`, 
-        [ 48, 33, 3, 999, 1, 13.13 ] 
+        `create table "${schema}"."NODB_TAB_SALES" ("AMOUNT_SOLD" NUMBER(10,2))`
       );
 
     } catch(err) {
       should.not.exist(err);
-    } finally {
-      if (conn) {
-        try {
-          await conn.close();
-        } catch(err) {
-          should.not.exist(err);
-        }
-      }
+    } 
+
+    await sodaUtil.assertThrowsAsync(
+      async () => {
+        await conn.executeMany(
+          `insert into "${schema}"."NODB_TAB_SALES" ("AMOUNT_SOLD") values (:1)`,
+          [ 48, 33, 3, 999, 1, 13.13 ]
+        );
+      },
+      /NJS-005:/
+    );
+    // NJS-005: invalid value for parameter %d
+
+    try {
+      await conn.execute(
+        `BEGIN EXECUTE IMMEDIATE 'DROP TABLE "${schema}"."NODB_TAB_SALES"'; EXCEPTION WHEN OTHERS THEN IF SQLCODE <> -942 THEN RAISE; END IF; END; `
+      );
+      await conn.close();
+    } catch(err) {
+      should.not.exist(err);
     }
   }); // 172.1
+
+  it('172.2 binding by position and by name cannot be mixed', async () => {
+    let conn;
+    try {
+      conn = await oracledb.getConnection(dbconfig);
+
+      await conn.execute(
+        `BEGIN EXECUTE IMMEDIATE 'DROP TABLE nodb_tab_emp'; EXCEPTION WHEN OTHERS THEN IF SQLCODE <> -942 THEN RAISE; END IF; END; `
+      );
+      await conn.execute(
+        `create table nodb_tab_emp (id NUMBER, name VARCHAR2(100))`
+      );
+
+    } catch(err) {
+      should.not.exist(err);
+    }
+
+    try {
+      const bindVars = [
+        [1, "John Smith"],
+        { a: 2, b: "Changjie" },
+      ];
+      await sodaUtil.assertThrowsAsync(
+        async () => {
+          await conn.executeMany(
+            `insert into nodb_tab_emp values (:a, :b)`,
+            bindVars
+          );
+        },
+        /NJS-055:/
+      );
+      // NJS-055: binding by position and name cannot be mixed
+    } catch(err) {
+      should.not.exist(err);
+    }
+
+    try {
+      await conn.execute(
+        `BEGIN EXECUTE IMMEDIATE 'DROP TABLE nodb_tab_emp'; EXCEPTION WHEN OTHERS THEN IF SQLCODE <> -942 THEN RAISE; END IF; END; `
+      );
+      await conn.commit();
+      await conn.close();
+    } catch(err) {
+      should.not.exist(err);
+    }
+  }); // 172.2
 });

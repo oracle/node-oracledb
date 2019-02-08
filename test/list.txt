@@ -4234,6 +4234,7 @@ Overview of node-oracledb functional tests
 
 172. executeMany2.js
     172.1 Negative - incorrect parameters
+    172.2 binding by position and by name cannot be mixed
 
 173. soda5.js
     173.1 create index, basic case

@@ -920,8 +920,15 @@ bool njsConnection::ProcessExecuteManyBinds(Local<Array> binds,
         if (!mval.ToLocal (&bindDefs))
             return false;
     }
-    if (!bindDefs->IsUndefined() && !bindDefs->IsArray())
+
+    // bindDefs must be an array or object
+    if (!bindDefs->IsUndefined() && !bindDefs->IsArray()) {
+        if (!bindDefs->IsObject()) {
+            baton->error = njsMessages::Get(errInvalidParameterValue, 2);
+            return false;
+        }
         bindNames = bindDefs.As<Object>()->GetOwnPropertyNames();
+    }
 
     // initialize variables; if there are no variables, nothing further to do!
     if (!InitBindVars(bindDefs.As<Object>(), bindNames, baton))
