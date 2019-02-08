@@ -62,10 +62,23 @@ The test suite uses [mocha](https://www.npmjs.com/package/mocha),
 
 ### 1.4 Configure Database credentials
 
-The file `test\dbconfig.js` contains the configuration. Change the credential information to yours.
+Set the following environment variables to provide credentials for the test suite.
 
-To enable external authentication tests, firstly make sure the Oracle external authentication service is correctly configured.
-See [Documentation for External Authentication](https://oracle.github.io/node-oracledb/doc/api.html#extauth) for details.
+* `NODE_ORACLEDB_USER` provides the username of the schema user which you used for testing.
+
+* `NODE_ORACLEDB_PASSWORD` provides the password of the schema user which you used for testing.
+
+* `NODE_ORACLEDB_CONNECTIONSTRING` provides the connection string that points to your database's location.
+
+* `NODE_ORACLEDB_EXTERNALAUTH` provides the options for external authentication tests. Setting this environment variable to "true" will enable the tests that require external authentication. To ensure external authentication tests works, firstly make sure the Oracle external authentication service is correctly configured. See [Documentation for External Authentication](https://oracle.github.io/node-oracledb/doc/api.html#extauth) for details.
+
+* `NODE_ORACLEDB_DBA_PRIVILEGE` provides the options for DBA privilege. Setting this environment variable to "true" will enable the tests and utilities that require DBA privilege.
+
+* `NODE_ORACLEDB_DBA_USER` provides the username of the DBA user which you used for testing, disabled if `NODE_ORACLEDB_DBA_PRIVILEGE` is not `true`.
+
+* `NODE_ORACLEDB_DBA_PASSWORD` provides the password of the DBA user which you used for testing, disabled if `NODE_ORACLEDB_DBA_PRIVILEGE` is not `true`.
+
+* `NODE_ORACLEDB_PROXY_SESSION_USER` provides the username of a schema user that can connect through the schema user which you used for testing using proxy authentication. Setting this environment variable will enable the tests that require proxy authentication.
 
 Note: the test suite requires a schema with privileges CREATE TABLE, CREATE SESSION,
 CREATE PROCEDURE, CREATE SEQUENCE, CREATE TRIGGER.
@@ -75,27 +88,6 @@ CREATE PROCEDURE, CREATE SEQUENCE, CREATE TRIGGER.
 ```bash
 export NODE_PATH=<some-directory>/node-oracledb/lib
 ```
-
-### 1.6 Available Environment Variables
-
-Setting the following environment variables will override the default values defined in test/dbconfig.js.
-
-* `NODE_ORACLEDB_USER` overrides the username of the schema user which you used for testing.
-
-* `NODE_ORACLEDB_PASSWORD` overrides the password of the schema user which you used for testing.
-
-* `NODE_ORACLEDB_CONNECTIONSTRING` overrides the connection string that points to your database's location.
-
-* `NODE_ORACLEDB_EXTERNALAUTH` overrides the options for external authentication tests. Setting this environment variable to "true" will enable the tests that require external authentication.
-
-* `NODE_ORACLEDB_DBA_PRIVILEGE` overrides the options for DBA privilege. Setting this environment variable to "true" will enable the tests and utilities that require DBA privilege.
-
-* `NODE_ORACLEDB_DBA_USER` overrides the username of the DBA user which you used for testing, disabled if `NODE_ORACLEDB_DBA_PRIVILEGE` is not `true`.
-
-* `NODE_ORACLEDB_DBA_PASSWORD` overrides the password of the DBA user which you used for testing, disabled if `NODE_ORACLEDB_DBA_PRIVILEGE` is not `true`.
-
-* `NODE_ORACLEDB_PROXY_SESSION_USER` provides the username of a schema user that can connect through the schema user which you used for testing using proxy authentication. Setting this environment variable will enable the tests that require proxy authentication.
-
 
 ## 2. Run tests
 

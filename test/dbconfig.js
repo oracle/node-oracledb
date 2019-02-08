@@ -34,69 +34,59 @@
  *
  *****************************************************************************/
 
-var config = {};
+var config = {
+  test: {
+    externalAuth: false,
+    DBA_PRIVILEGE: false,
+  }
+};
 
-/***************** OPTION 1 - Edit credentials at this section ******************/
-config.user          = 'hr';
-config.password      = 'hr';
-config.connectString = 'localhost/orcl';
-
-config.test = {};
-
-// Have you set up the External Authentication? Negative by default.
-config.test.externalAuth  = false;
-
-// Do you have DBA privilege? Negative by default.
-config.test.DBA_PRIVILEGE = false;
-config.test.DBA_user      = 'sys';
-config.test.DBA_password  = 'oracle';
-
-
-/****************** OPTION 2 - Set environment variables **********************/
 if (process.env.NODE_ORACLEDB_USER) {
   config.user = process.env.NODE_ORACLEDB_USER;
+} else {
+  throw new Error("Schema User name is not Set! Try Set Environment Variable NODE_ORACLEDB_USER.");
 }
 
 if (process.env.NODE_ORACLEDB_PASSWORD) {
   config.password = process.env.NODE_ORACLEDB_PASSWORD;
+} else {
+  throw new Error("Schema User Password is not Set! Try Set Environment Variable NODE_ORACLEDB_PASSWORD.");
 }
 
 if (process.env.NODE_ORACLEDB_CONNECTIONSTRING) {
   config.connectString = process.env.NODE_ORACLEDB_CONNECTIONSTRING;
+} else {
+  throw new Error("Database Connect String is not Set! Try Set Environment Variable NODE_ORACLEDB_CONNECTIONSTRING.");
 }
 
 if (process.env.NODE_ORACLEDB_EXTERNALAUTH) {
   var eauth = process.env.NODE_ORACLEDB_EXTERNALAUTH;
   eauth = String(eauth);
   eauth = eauth.toLowerCase();
-
   if (eauth == 'true') {
     config.test.externalAuth = true;
-  } else {
-    config.test.externalAuth = false;
   }
-
 }
 
 if (process.env.NODE_ORACLEDB_DBA_PRIVILEGE) {
   var priv = process.env.NODE_ORACLEDB_DBA_PRIVILEGE;
   priv = String(priv);
   priv = priv.toLowerCase();
-
   if (priv == 'true') {
     config.test.DBA_PRIVILEGE = true;
-  } else {
-    config.test.DBA_PRIVILEGE = false;
   }
-
 }
 
 if (process.env.NODE_ORACLEDB_DBA_USER) {
   config.test.DBA_user = process.env.NODE_ORACLEDB_DBA_USER;
+} else if (config.test.DBA_PRIVILEGE) {
+  throw new Error("DBA Privilege is set to True but DBA username is not Set! Try Set Environment Variable NODE_ORACLEDB_DBA_USER.");
 }
 
 if (process.env.NODE_ORACLEDB_DBA_PASSWORD) {
   config.test.DBA_password = process.env.NODE_ORACLEDB_DBA_PASSWORD;
+} else if (config.test.DBA_PRIVILEGE) {
+  throw new Error("DBA Privilege is set to True but DBA Password is not Set! Try Set Environment Variable NODE_ORACLEDB_DBA_PASSWORD.");
 }
 
 if (process.env.NODE_ORACLEDB_PROXY_SESSION_USER) {

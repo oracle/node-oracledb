@@ -27,7 +27,7 @@
  *****************************************************************************/
 'use strict';
 
-const oracledb  = require('oracledb');
+const oracledb = require('oracledb');
 const dbconfig = require('./dbconfig.js');
 const assert = require('assert');
 
@@ -55,4 +55,13 @@ testsUtil.checkPrerequisites = async function(clientVersion=1803000000, serverVe
   } catch(err) {
     console.log('Error in checking prerequistes:\n', err);
   }
+};
+
+testsUtil.generateRandomPassword = function(length=6) {
+  let result = "";
+  const choices = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+  for (let i = 0; i < length; i++) {
+    result += choices.charAt(Math.floor(Math.random() * choices.length));
+  }
+  return result;
 };

@@ -13,7 +13,7 @@ connection string:
   ```
   module.exports = {
       user: "hr",
-      password: "welcome",
+      password: process.env.NODE_ORACLEDB_PASSWORD,
       connectString:"localhost/orclpdb"
   };
 

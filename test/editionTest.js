@@ -31,11 +31,13 @@ var oracledb = require('oracledb');
 var should   = require('should');
 var async    = require('async');
 var dbConfig = require('./dbconfig.js');
+var testsUtil = require('./testsUtil.js');
 
 describe('160. editionTest.js', function() {
 
   var dbaConn;
   var isRunnable;
+  var nodbSchemaEditionPassword = testsUtil.generateRandomPassword();
 
   before(function(done) {
     var conn;
@@ -148,7 +150,7 @@ describe('160. editionTest.js', function() {
                       "        THEN NULL; \n" +
                       "    END; \n" +
                       "    EXECUTE IMMEDIATE (' \n" +
-                      "        CREATE USER nodb_schema_edition IDENTIFIED BY nodb_schema_edition\n" +
+                      `        CREATE USER nodb_schema_edition IDENTIFIED BY ${nodbSchemaEditionPassword}\n` +
                       "    '); \n" +
                       "END; ";
             dbaConn.execute(
@@ -205,7 +207,7 @@ describe('160. editionTest.js', function() {
           function(cb) {
             var credential = {
               user:             "nodb_schema_edition",
-              password:         "nodb_schema_edition",
+              password:         nodbSchemaEditionPassword,
               connectionString: dbConfig.connectString
             };
             oracledb.getConnection(
@@ -356,7 +358,7 @@ describe('160. editionTest.js', function() {
         function(cb) {
           var credential = {
             user:             "nodb_schema_edition",
-            password:         "nodb_schema_edition",
+            password:         nodbSchemaEditionPassword,
             connectionString: dbConfig.connectString
           };
           oracledb.getConnection(
@@ -404,7 +406,7 @@ describe('160. editionTest.js', function() {
         function(cb) {
           var credential = {
             user:             "nodb_schema_edition",
-            password:         "nodb_schema_edition",
+            password:         nodbSchemaEditionPassword,
             connectionString: dbConfig.connectString
           };
           oracledb.createPool(
@@ -467,7 +469,7 @@ describe('160. editionTest.js', function() {
         function(cb) {
           var credential = {
             user:             "nodb_schema_edition",
-            password:         "nodb_schema_edition",
+            password:         nodbSchemaEditionPassword,
             connectionString: dbConfig.connectString,
             edition:          "nodb_edition_two"
           };
@@ -516,7 +518,7 @@ describe('160. editionTest.js', function() {
         function(cb) {
           var credential = {
             user:             "nodb_schema_edition",
-            password:         "nodb_schema_edition",
+            password:         nodbSchemaEditionPassword,
             connectionString: dbConfig.connectString,
             edition:          "nodb_edition_one"
           };
@@ -580,7 +582,7 @@ describe('160. editionTest.js', function() {
         function(cb) {
           var credential = {
             user:             "nodb_schema_edition",
-            password:         "nodb_schema_edition",
+            password:         nodbSchemaEditionPassword,
             connectionString: dbConfig.connectString,
             edition:          "nodb_edition_two"
           };
@@ -640,7 +642,7 @@ describe('160. editionTest.js', function() {
         function(cb) {
           var credential = {
             user:             "nodb_schema_edition",
-            password:         "nodb_schema_edition",
+            password:         nodbSchemaEditionPassword,
             connectionString: dbConfig.connectString,
             edition          : "nodb_edition_one"
           };
@@ -718,7 +720,7 @@ describe('160. editionTest.js', function() {
         function(cb) {
           var credential = {
             user:             "nodb_schema_edition",
-            password:         "nodb_schema_edition",
+            password:         nodbSchemaEditionPassword,
             connectionString: dbConfig.connectString
           };
           oracledb.getConnection(
@@ -789,7 +791,7 @@ describe('160. editionTest.js', function() {
         function(cb) {
           var credential = {
             user:             "nodb_schema_edition",
-            password:         "nodb_schema_edition",
+            password:         nodbSchemaEditionPassword,
             connectionString: dbConfig.connectString
           };
           oracledb.createPool(
@@ -905,7 +907,7 @@ describe('160. editionTest.js', function() {
         function(cb) {
           var credential = {
             user:             "nodb_schema_edition",
-            password:         "nodb_schema_edition",
+            password:         nodbSchemaEditionPassword,
             connectionString: dbConfig.connectString
           };
           oracledb.getConnection(
@@ -935,7 +937,7 @@ describe('160. editionTest.js', function() {
     } else {
       var credential = {
         user:             "nodb_schema_edition",
-        password:         "nodb_schema_edition",
+        password:         nodbSchemaEditionPassword,
         connectionString: dbConfig.connectString,
         edition:          "nonexistence"
       };
@@ -961,7 +963,7 @@ describe('160. editionTest.js', function() {
         function(cb) {
           var credential = {
             user:             "nodb_schema_edition",
-            password:         "nodb_schema_edition",
+            password:         nodbSchemaEditionPassword,
             connectionString: dbConfig.connectString,
             edition:          "nonexistence"
           };
@@ -1004,7 +1006,7 @@ describe('160. editionTest.js', function() {
         function(cb) {
           var credential = {
             user:             "nodb_schema_edition",
-            password:         "nodb_schema_edition",
+            password:         nodbSchemaEditionPassword,
             connectionString: dbConfig.connectString,
             edition:          "ora$base"
           };
@@ -1052,7 +1054,7 @@ describe('160. editionTest.js', function() {
         function(cb) {
           var credential = {
             user:             "nodb_schema_edition",
-            password:         "nodb_schema_edition",
+            password:         nodbSchemaEditionPassword,
             connectionString: dbConfig.connectString,
             edition:          "nodb_edition_two"
           };
@@ -1111,7 +1113,7 @@ describe('160. editionTest.js', function() {
         function(cb) {
           var credential = {
             user:             "nodb_schema_edition",
-            password:         "nodb_schema_edition",
+            password:         nodbSchemaEditionPassword,
             connectionString: dbConfig.connectString,
             edition:          "ora$base"
           };
@@ -1178,7 +1180,7 @@ describe('160. editionTest.js', function() {
         function(cb) {
           var credential = {
             user:             "nodb_schema_edition",
-            password:         "nodb_schema_edition",
+            password:         nodbSchemaEditionPassword,
             connectionString: dbConfig.connectString
           };
           oracledb.getConnection(
@@ -1249,7 +1251,7 @@ describe('160. editionTest.js', function() {
         function(cb) {
           var credential = {
             user:             "nodb_schema_edition",
-            password:         "nodb_schema_edition",
+            password:         nodbSchemaEditionPassword,
             connectionString: dbConfig.connectString,
             edition:          "nodb_edition_two"
           };
@@ -1301,7 +1303,7 @@ describe('160. editionTest.js', function() {
         function(cb) {
           var credential = {
             user:             "nodb_schema_edition",
-            password:         "nodb_schema_edition",
+            password:         nodbSchemaEditionPassword,
             connectionString: dbConfig.connectString,
             edition:          ""
           };
@@ -1346,7 +1348,7 @@ describe('160. editionTest.js', function() {
     } else {
       var credential = {
         user:             "nodb_schema_edition",
-        password:         "nodb_schema_edition",
+        password:         nodbSchemaEditionPassword,
         connectionString: dbConfig.connectString,
         edition:          123
       };
@@ -1372,7 +1374,7 @@ describe('160. editionTest.js', function() {
     } else {
       var credential = {
         user:             "nodb_schema_edition",
-        password:         "nodb_schema_edition",
+        password:         nodbSchemaEditionPassword,
         connectionString: dbConfig.connectString,
         edition:          123
       };
@@ -1406,7 +1408,7 @@ describe('160. editionTest.js', function() {
         function(cb) {
           var credential = {
             user:             "nodb_schema_edition",
-            password:         "nodb_schema_edition",
+            password:         nodbSchemaEditionPassword,
             connectionString: dbConfig.connectString
           };
           oracledb.getConnection(
@@ -1462,7 +1464,7 @@ describe('160. editionTest.js', function() {
         function(cb) {
           var credential = {
             user:             "nodb_schema_edition",
-            password:         "nodb_schema_edition",
+            password:         nodbSchemaEditionPassword,
             connectionString: dbConfig.connectString
           };
           oracledb.createPool(
@@ -1534,7 +1536,7 @@ describe('160. editionTest.js', function() {
         function(cb) {
           var credential = {
             user:             "nodb_schema_edition",
-            password:         "nodb_schema_edition",
+            password:         nodbSchemaEditionPassword,
             connectionString: dbConfig.connectString,
             edition:          'nodb_edition_two'
           };
@@ -1592,7 +1594,7 @@ describe('160. editionTest.js', function() {
         function(cb) {
           var credential = {
             user:             "nodb_schema_edition",
-            password:         "nodb_schema_edition",
+            password:         nodbSchemaEditionPassword,
             connectionString: dbConfig.connectString,
             edition:          'nodb_edition_one'
           };
@@ -1663,7 +1665,7 @@ describe('160. editionTest.js', function() {
         function(cb) {
           var credential = {
             user:             "nodb_schema_edition",
-            password:         "nodb_schema_edition",
+            password:         nodbSchemaEditionPassword,
             connectionString: dbConfig.connectString
           };
           oracledb.getConnection(
@@ -1700,7 +1702,7 @@ describe('160. editionTest.js', function() {
         function(cb) {
           var credential = {
             user:             "nodb_schema_edition",
-            password:         "nodb_schema_edition",
+            password:         nodbSchemaEditionPassword,
             connectionString: dbConfig.connectString
           };
           oracledb.createPool(

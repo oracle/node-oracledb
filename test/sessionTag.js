@@ -1419,6 +1419,7 @@ describe('184. sessionTag.js', function () {
     });
 
     it('184.4.4 Acquire connection from pool, wait for pool ping to call session fixup', async function () {
+      if (!dbconfig.test.DBA_PRIVILEGE) this.skip();
       let conn, pool;
       try {
         pool = await oracledb.createPool({

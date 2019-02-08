@@ -452,10 +452,12 @@ node myscript.js
 
 var oracledb = require('oracledb');
 
+var mypw = ...  // set mypw to the hr schema password
+
 oracledb.getConnection(
   {
     user          : "hr",
-    password      : "welcome",
+    password      : mypw
     connectString : "localhost/XEPDB1"
   },
   function(err, connection) {
@@ -506,7 +508,10 @@ version of Oracle Client libraries.
 // mysoda.js
 
 const oracledb = require('oracledb');
-const dbconfig = { user: 'hr', password: 'welcome', connectString:'localhost/orclpdb' };
+
+let  mypw = ...  // set mypw to the hr schema password
+
+const dbconfig = { user: 'hr', password: mypw, connectString: 'localhost/orclpdb' };
 
 oracledb.autoCommit = true;
 
@@ -4044,7 +4049,7 @@ may be used in `pool.getConnection()` like:
   pool.getConnection(
     {
       user     : 'hr',
-      password : 'welcome'
+      password : mypw,  // mypw contains the hr schema password
     },
     function (err, conn) { ... }
   );
@@ -5760,10 +5765,12 @@ Connections should be released with
 ```javascript
 var oracledb = require('oracledb');
 
+var mypw = ...  // set mypw to the hr schema password
+
 oracledb.getConnection(
   {
     user          : "hr",
-    password      : "welcome",
+    password      : mypw,
     connectString : "localhost/XEPDB1"
   },
   function(err, connection) {
@@ -5815,7 +5822,7 @@ var oracledb = require('oracledb');
 oracledb.getConnection(
   {
     user          : "hr",
-    password      : "welcome",
+    password      : mypw,  // mypw contains the hr schema password
     connectString : "localhost/XEPDB1"
   },
   . . .
@@ -5835,7 +5842,7 @@ var oracledb = require('oracledb');
 oracledb.getConnection(
   {
     user          : "hr",
-    password      : "welcome",
+    password      : mypw,  // mypw contains the hr schema password
     connectString : "sales"
   },
   . . .
@@ -5885,7 +5892,7 @@ var oracledb = require('oracledb');
 oracledb.getConnection(
   {
     user          : "hr",
-    password      : "welcome",
+    password      : mypw,  // mypw contains the hr schema password
     connectString : "(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=mymachine.example.com)(PORT=1521))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=orcl)))"
   },
   . . .
@@ -5908,7 +5915,7 @@ var oracledb = require('oracledb');
 oracledb.getConnection(
   {
     user          : "hr",
-    password      : "welcome",
+    password      : mypw,  // mypw contains the hr schema password
     connectString : "hostname:port/service_name"
   },
   . . .
@@ -5941,7 +5948,7 @@ var oracledb = require('oracledb');
 oracledb.getConnection(
   {
     user          : "hr",
-    password      : "welcome",
+    password      : mypw,  // mypw contains the hr schema password
     connectString : "finance"
   },
   . . .
@@ -6043,7 +6050,7 @@ let pool;
 try {
   pool = await oracledb.createPool({
     user          : "hr"
-    password      : "welcome"
+    password      : mypw,  // mypw contains the hr schema password
     connectString : "localhost/XEPDB1"
   });
 
@@ -6188,7 +6195,7 @@ Pools are added to the cache by using a
 oracledb.createPool (
   {
     user: 'hr',
-    password: 'welcome',
+    password: mypw,  // mypw contains the hr schema password
     connectString: 'localhost/XEPDB1',
     poolAlias: 'hrpool'
   },
@@ -6223,7 +6230,7 @@ and cache it using the pool alias 'default':
 oracledb.createPool (
   {
     user: 'hr',
-    password: 'welcome',
+    password: mypw,  // mypw contains the hr schema password
     connectString: 'localhost/XEPDB1'
   },
   function(err, pool) {
@@ -6267,14 +6274,14 @@ var oracledb = require('oracledb');
 var hrPoolPromise = oracledb.createPool({
   poolAlias: 'hrpool',
   users: 'hr',
-  password: 'welcome',
+  password: mypw,  // mypw contains the hr schema password
   connectString: 'localhost/XEPDB1'
 });
 
 var shPoolPromise = oracledb.createPool({
   poolAlias: 'shpool',
   user: 'sh',
-  password: 'welcome',
+  password: mypw,  // mypw contains the sh schema password
   connectString: 'localhost/XEPDB1'
 });
 
@@ -6384,7 +6391,7 @@ oracledb.createPool (
   {
     _enableStats  : true,   // default is false
     user          : "hr",
-    password      : "welcome",
+    password      : mypw,   // mypw contains the hr schema password
     connectString : "localhost/XEPDB1"
   },
   function(err, pool) {
@@ -6573,7 +6580,7 @@ function initSession(connection, requestedTag, cb) {
 try {
   let pool = await oracledb.createPool({
                user: 'hr',
-               password: 'welcome',
+               password: mypw,  // mypw contains the hr schema password
                connectString: 'localhost/XEPDB1',
                sessionCallback: initSession
              });
@@ -6684,7 +6691,7 @@ function initSession(connection, requestedTag, cb) {
 try {
   await oracledb.createPool({
                user: 'hr',
-               password: 'welcome',
+               password: mypw,  // mypw contains the hr schema password
                connectString: 'localhost/XEPDB1',
                sessionCallback: initSession
              });
@@ -6812,7 +6819,7 @@ const sessionTag = "SDTZ=UTC";
 try {
   let pool = await oracledb.createPool({
                user: 'hr',
-               password: 'welcome',
+               password: mypw,  // mypw contains the hr schema password
                connectString: 'localhost/XEPDB1',
                sessionCallback: "myPackage.myPlsqlCallback"
              });
@@ -6855,7 +6862,7 @@ oracledb.createPool(
     pool.getConnection(
       {
         user     : 'hr',
-        password : 'welcome'
+        password : mypw,  // mypw contains the hr schema password
       },
       function (err, conn) {
 
@@ -6914,7 +6921,7 @@ For example, to allow a user called `MYPROXYUSER` to access the schema
 of `HR`:
 
 ```
-SQL> CONNECT system/welcome
+SQL> CONNECT system
 
 SQL> ALTER USER hr GRANT CONNECT THROUGH myproxyuser;
 
@@ -6936,8 +6943,10 @@ To use the proxy user with a node-oracledb heterogeneous connection
 pool you could do:
 
 ```javascript
+let myproxyuserpw = ... // the password of the 'myproxyuser' proxy user
+
 let pool = await oracledb.createPool({ connectString: "localhost/orclpdb", homogeneous: false });
-let conn = await pool.getConnection({ user: 'myproxyuser[hr]', password: 'myproxyuserpassword'});
+let conn = await pool.getConnection({ user: 'myproxyuser[hr]', password: myproxyuserpw});
 
 . . . // connection has access to the HR schema objects
 
@@ -6947,10 +6956,12 @@ await conn.close();
 Other proxy cases are supported such as:
 
 ```javascript
+let myproxyuserpw = ... // the password of the 'myproxyuser' proxy user
+
 let pool = await oracledb.createPool(
   {
     user          : 'myproxyuser',
-    password      : 'myproxyuserpassword'
+    password      : myproxyuserpw,
     connectString : "localhost/XEPDB1",
     homogeneous   : false,
     . . .  // other pool options such as poolMax can be used
@@ -7193,21 +7204,23 @@ Encryption of data-at-rest in the database.
 #### Changing Passwords
 
 Database passwords can be changed with
-[`connection.changePassword()`](#changepassword).  For example, the HR
-user can change their password from 'welcome' to 'steamboat':
+[`connection.changePassword()`](#changepassword).  For example:
 
 ```javascript
+let currentpw = ...  // the current password for the hr schema
+let newpw = ...      // the new hr schema password
+
 oracledb.getConnection(
   {
     user          : "hr",
-    password      : "welcome",
+    password      : currentpw,
     connectString : "localhost/orclpdb"
   },
   function(err, connection) {
     if (err) { console.error(err.message); return; }
 
     connection.changePassword(
-        'hr', 'welcome', 'steamboat',
+        'hr', currentpw, newpw,
         function(err) {
         . . .
         });
@@ -7222,14 +7235,16 @@ ignored and can be an empty string:
 oracledb.getConnection(
   {
     user          : "system",   // a privileged user
-    password      : "secret",
+    password      : mypw,  // mypw contains the hr schema password
     connectString : "localhost/orclpdb"
   },
   function(err, connection) {
     if (err) { console.error(err.message); return; }
 
+    let newpw = ... // the new password
+
     connection.changePassword(
-        'hr', '', 'steamboat',  // change HR's password to 'steamboat'
+        'hr', '', newpw,
         function(err) {
         . . .
         });
@@ -7244,15 +7259,17 @@ user's password has expired, because it allows a user to connect
 without requiring a DBA to reset their password.
 
 Both the current and new passwords must be given when connecting.  For
-example, if HR's password is 'welcome', it can be changed to
-'steamboat' like:
+example:
 
 ```javascript
+var oldpw = ...  // the hr schema's old password
+var newpw = ...  // the new password
+
 oracledb.getConnection(
   {
     user          : "hr",
-    password      : "welcome",
-    newPassword   : "steamboat",
+    password      : oldpw,
+    newPassword   : newpw,
     connectString : "localhost/orclpdb"
   },
   function(err, connection) {
@@ -7921,12 +7938,14 @@ columns to have data returned in native format:
 ```javascript
 var oracledb = require('oracledb');
 
+var mypw = ...  // set mypw to the hr schema password
+
 oracledb.fetchAsString = [ oracledb.NUMBER ];  // any number queried will be returned as a string
 
 oracledb.getConnection(
   {
     user          : "hr",
-    password      : "welcome",
+    password      : mypw,
     connectString : "localhost/XEPDB1"
   },
   function(err, connection) {
@@ -8567,7 +8586,7 @@ is pre-created in new and upgraded databases.
 The user `nodedemo` can be given permission to create new 'editions':
 
 ```sql
-CONNECT system/welcome
+CONNECT system
 
 GRANT CREATE ANY EDITION TO nodedemo;
 ALTER USER nodedemo ENABLE EDITIONS FORCE;
@@ -8602,10 +8621,12 @@ implementation to use.  Here is a script that calls `DISCOUNT`:
 ```javascript
 var oracledb = require('oracledb');
 
+var mypw = ...  // set mypw to the nodedemo schema password
+
 oracledb.getConnection(
   {
     user: 'nodedemo',
-    password: 'welcome',
+    password: mypw,
     connectString: 'localhost/orclpdb'
   },
   function (err, connection) {
@@ -8647,7 +8668,7 @@ If the connection uses edition `e2`, then the second implementation of
 oracledb.getConnection(
   {
     user: 'nodedemo',
-    password: 'welcome',
+    password: mypw,  // mypw contains the nodedemo schema password
     connectString: 'localhost/orclpdb',
     edition: 'e2'
   },
@@ -10544,10 +10565,12 @@ The value can be overridden in an `oracledb.getConnection()` call:
 ```javascript
 var oracledb = require('oracledb');
 
+var mypw = ... // the hr schema password
+
 oracledb.getConnection(
   {
     user          : "hr",
-    password      : "welcome",
+    password      : mypw,
     connectString : "localhost/XEPDB1",
     stmtCacheSize : 40
   },
@@ -10666,7 +10689,7 @@ Before using CQN, users must have appropriate permissions, for
 example:
 
 ```sql
-SQL> CONNECT system/welcome
+SQL> CONNECT system
 
 SQL> GRANT CHANGE NOTIFICATION TO hr;
 ```
@@ -10723,7 +10746,7 @@ try {
 
     let conn = await oracledb.getConnection({
       user          : "hr",
-      password      : "welcome",
+      password      : mypw,  // mypw contains the hr schema password
       connectString : "localhost/XEPDB1",
       events        :  true
     });
@@ -11012,7 +11035,7 @@ example, with `execute()`:
 oracledb.getConnection(
   {
     user          : "hr",
-    password      : "welcome",
+    password      : mypw,  // mypw contains the hr schema password
     connectString : "localhost/orclpdb"
   },
   function(err, connection) {
@@ -11695,10 +11718,12 @@ Promise:
 ```javascript
 var oracledb = require('oracledb');
 
+var mypw = ... // the user password
+
 oracledb.getConnection(
   {
     user          : "hr",
-    password      : "welcome",
+    password      : mypw,
     connectString : "localhost/XEPDB1"
   })
   .then(function(conn) {
@@ -11739,7 +11764,7 @@ get a Promise by forgetting to pass a callback function:
 oracledb.getConnection(
   {
     user          : "hr",
-    password      : "welcome",
+    password      : mypw,
     connectString : "localhost/WRONG_SERVICE_NAME"
   });
   . . .
@@ -11760,7 +11785,7 @@ process.on('unhandledRejection', (reason, p) => {
 oracledb.getConnection(
   {
     user          : "hr",
-    password      : "welcome",
+    password      : mypw,
     connectString : "localhost/WRONG_SERVICE_NAME"
   });
   . . .
@@ -11804,6 +11829,8 @@ can be used with node-oracledb.  For example:
 ```javascript
 const oracledb = require('oracledb');
 
+let mypw = ... // the hr schema password
+
 function getEmployee(empid) {
   return new Promise(async function(resolve, reject) {
     let conn;
@@ -11811,7 +11838,7 @@ function getEmployee(empid) {
     try {
       conn = await oracledb.getConnection({
         user          : "hr",
-        password      : "welcome",
+        password      : mypw,
         connectString : "localhost/XEPDB1"
       });
 
