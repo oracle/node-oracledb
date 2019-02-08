@@ -68,16 +68,16 @@ describe('182. deferLibInit.js', () => {
 });
 
 async function positiveCase() {
-  const { stdout } = await execFile('mocha', ['test/deferLibInit1.js']);
+  const { stdout } = await execFile('node_modules/.bin/mocha', ['test/deferLibInit1.js']);
   should.exist(stdout);
 }
 
 async function negativeCase() {
-  const { stdout } = await execFile('mocha', ['test/deferLibInit2.js']);
+  const { stdout } = await execFile('node_modules/.bin/mocha', ['test/deferLibInit2.js']);
   should.exist(stdout);
 }
 
 async function callMethodCase() {
-  const { stdout } = await execFile('mocha', ['test/deferLibInit3.js']);
+  const { stdout } = await execFile('node_modules/.bin/mocha', ['test/deferLibInit3.js']);
   should.exist(stdout);
 }
