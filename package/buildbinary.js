@@ -41,8 +41,21 @@ const binaryStagingInfoFile = binaryStagingFile + '-buildinfo.txt';
 // Build Metadata
 const buildDate = new Date();
 const nodeVersion = process.version;
-const njsGitSha = execSync('git --git-dir=./.git rev-parse --verify HEAD').toString().replace(/[\n\r]/, '');
-const odpiGitSha = execSync('git --git-dir=./odpi/.git rev-parse --verify HEAD').toString().replace(/[\n\r]/, '');
+
+let njsGitSha;
+try {
+  njsGitSha = execSync('git --git-dir=./.git rev-parse --verify HEAD').toString().replace(/[\n\r]/, '');
+} catch(e) {
+  njsGitSha = 'unknown NJS SHA';
+}
+
+let odpiGitSha;
+try {
+  odpiGitSha = execSync('git --git-dir=./odpi/.git rev-parse --verify HEAD').toString().replace(/[\n\r]/, '');
+} catch(er) {
+  odpiGitSha = 'unknown ODPI-C SHA';
+}
+
 const buildInfo = nodbUtil.BINARY_FILE + ' ' + nodeVersion + ' ' + njsGitSha + ' ' + odpiGitSha + ' ' + buildDate.toUTCString();
 
 // Build a binary for the current version of Node.js and move it to the Staging directory
